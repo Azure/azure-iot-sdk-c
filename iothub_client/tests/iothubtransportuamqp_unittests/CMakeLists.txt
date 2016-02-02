@@ -1,23 +1,22 @@
 #Copyright (c) Microsoft. All rights reserved.
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#this is CMakeLists.txt for mqttapi_paho_unittests
-cmake_minimum_required(VERSION 2.8.11)
+#this is CMakeLists.txt for iothubtransportamqp_unittests
+cmake_minimum_required(VERSION 3.0)
 
-if(NOT ${use_mqtt})
-	message(FATAL_ERROR "mqttapi_paho_unittests being generated without mqtt support")
+if(NOT ${use_uamqp})
+	message(FATAL_ERROR "iothubtransportuamqp_unittests being generated without uAMQP support")
 endif()
 
-
 compileAsC99()
-set(theseTestsName mqttapi_paho_unittests)
+set(theseTestsName iothubtransportuamqp_unittests)
 
 set(${theseTestsName}_cpp_files
 ${theseTestsName}.cpp
 )
 
 set(${theseTestsName}_c_files
-../../adapters/mqttapi_paho.c
+../../src/iothubtransportuamqp.c
 )
 
 set(${theseTestsName}_h_files
