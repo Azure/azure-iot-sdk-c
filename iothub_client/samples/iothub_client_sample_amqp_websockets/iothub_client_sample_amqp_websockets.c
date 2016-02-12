@@ -9,13 +9,11 @@
 #include "iothub_message.h"
 #include "threadapi.h"
 #include "crt_abstractions.h"
-#include "iothubtransportamqp.h"
+#include "iothubtransportamqp_websockets.h"
 
-#ifdef MBED_BUILD_TIMESTAMP
-#include "certs.h"
-#endif // MBED_BUILD_TIMESTAMP
+#include "..\..\..\certs\certs.h"
 
-static const char* connectionString = "[device connection string]";
+static const char* connectionString = "[IoT Hub Device Connection String]";
 static int callbackCounter;
 
 DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_CONFIRMATION_RESULT, IOTHUB_CLIENT_CONFIRMATION_RESULT_VALUES);
@@ -28,39 +26,49 @@ typedef struct EVENT_INSTANCE_TAG
 
 static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback)
 {
-    int* counter = (int*)userContextCallback;
-    const unsigned char* buffer = NULL;
-    size_t size = 0;
-    
-    IOTHUBMESSAGE_CONTENT_TYPE contentType = IoTHubMessage_GetContentType(message);
+	const char* buffer = NULL;
+	size_t size = 0;
+	
+	if (userContextCallback == NULL)
+	{
+		(void)printf("Failed getting the context of the message received.\r\n");
+	}
+	else
+	{
+		int* counter = (int*)userContextCallback;
+			
+		IOTHUBMESSAGE_CONTENT_TYPE contentType = IoTHubMessage_GetContentType(message);
 
-    if (contentType == IOTHUBMESSAGE_BYTEARRAY)
-    {
-        if (IoTHubMessage_GetByteArray(message, &buffer, &size) == IOTHUB_MESSAGE_OK)
-        {
-            (void)printf("Received Message [%d] with BINARY Data: <<<%.*s>>> & Size=%d\r\n", *counter, (int)size, buffer, (int)size);
-        }
-        else
-        {
-            (void)printf("Failed getting the BINARY body of the message received.\r\n");
-        }
-    }
-    else if (contentType == IOTHUBMESSAGE_STRING)
-    {
-        if ((buffer = IoTHubMessage_GetString(message)) != NULL && (size = strlen(buffer)) > 0)
-        {
-            (void)printf("Received Message [%d] with STRING Data: <<<%.*s>>> & Size=%d\r\n", *counter, (int)size, buffer, (int)size);
-        }
-        else
-        {
-            (void)printf("Failed getting the STRING body of the message received.\r\n");
-        }
-    }
-    else
-    {
-        (void)printf("Failed getting the body of the message received (type %i).\r\n", contentType);
-    }
+		if (contentType == IOTHUBMESSAGE_BYTEARRAY)
+		{
+			if (IoTHubMessage_GetByteArray(message, &buffer, &size) == IOTHUB_MESSAGE_OK)
+			{
+				(void)printf("Received Message [%d] with BINARY Data: <<<%.*s>>> & Size=%d\r\n", *counter, (int)size, buffer, (int)size);
+			}
+			else
+			{
+				(void)printf("Failed getting the BINARY body of the message received.\r\n");
+			}
+		}
+		else if (contentType == IOTHUBMESSAGE_STRING)
+		{
+			if ((buffer = IoTHubMessage_GetString(message)) != NULL && (size = strlen(buffer)) > 0)
+			{
+				(void)printf("Received Message [%d] with STRING Data: <<<%.*s>>> & Size=%d\r\n", *counter, (int)size, buffer, (int)size);
+			}
+			else
+			{
+				(void)printf("Failed getting the STRING body of the message received.\r\n");
+			}
+		}
+		else
+		{
+			(void)printf("Failed getting the body of the message received (type %i).\r\n", contentType);
+		}
 
+		(*counter)++;
+	}
+	
     // Retrieve properties from the message
     MAP_HANDLE mapProperties = IoTHubMessage_Properties(message);
     if (mapProperties != NULL)
@@ -72,7 +80,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
         {
             if (propertyCount > 0)
             {
-                size_t index;
+				size_t index;
 
                 printf("Message Properties:\r\n");
                 for (index = 0; index < propertyCount; index++)
@@ -85,7 +93,6 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
     }
 
     /* Some device specific action code goes here... */
-    (*counter)++;
     return IOTHUBMESSAGE_ACCEPTED;
 }
 
@@ -102,7 +109,7 @@ static char msgText[1024];
 static char propText[1024];
 #define MESSAGE_COUNT 5
 
-void iothub_client_sample_amqp_run(void)
+void iothub_client_sample_amqp_websockets_run(void)
 {
     IOTHUB_CLIENT_HANDLE iotHubClientHandle;
 
@@ -114,21 +121,22 @@ void iothub_client_sample_amqp_run(void)
     callbackCounter = 0;
     int receiveContext = 0;
 
-    (void)printf("Starting the IoTHub client sample AMQP...\r\n");
-    
-    if ((iotHubClientHandle = IoTHubClient_CreateFromConnectionString(connectionString, AMQP_Protocol)) == NULL)
+    (void)printf("Starting the IoTHub client sample AMQP over WebSockets...\r\n");
+	
+	if (platform_init() != 0)
+	{
+		(void)printf("ERROR: failed initializing the platform.\r\n");
+	}
+    else if ((iotHubClientHandle = IoTHubClient_CreateFromConnectionString(connectionString, AMQP_Protocol_over_WebSocketsTls)) == NULL)
     {
         (void)printf("ERROR: iotHubClientHandle is NULL!\r\n");
     }
     else
     {
-#ifdef MBED_BUILD_TIMESTAMP
-        // For mbed add the certificate information
-        if (IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
+        if (IoTHubClient_SetOption(iotHubClientHandle, "trusted_certificates", certificates) != IOTHUB_CLIENT_OK)
         {
-            printf("failure to set option \"TrustedCerts\"\r\n");
+            printf("failure to set option \"trusted_certificates\"\r\n");
         }
-#endif // MBED_BUILD_TIMESTAMP
 
         /* Setting Message call back, so we can receive Commands. */
         if (IoTHubClient_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, &receiveContext) != IOTHUB_CLIENT_OK)

@@ -1,11 +1,10 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include "testrunnerswitcher.h"
+#include "iothub_client_sample_amqp_websockets.h"
 
 int main(void)
 {
-    size_t failedTestCount = 0;
-    RUN_TEST_SUITE(iothubtransportamqp_unittests, failedTestCount);
-    return failedTestCount;
+    iothub_client_sample_amqp_websockets_run();
+    return 0;
 }
