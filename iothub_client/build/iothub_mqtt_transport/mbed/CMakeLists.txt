@@ -4,5 +4,5 @@
 cmake_minimum_required(VERSION 2.8.11)
 
 set(sdk_base_path ../../../../..)
-set(mbed_project_base "temp_sensor_anomaly" CACHE STRING "The item being built")
+set(mbed_project_base "iothub_mqtt_transport" CACHE STRING "The item being built")
 include (${sdk_base_path}/c/tools/mbed_build/mbedbldtemplate.txt)
