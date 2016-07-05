@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include "remote_monitoring.h"
+#include "iothub_messaging_ll_sample.h"
 
 int main(void)
 {
-    remote_monitoring_run();
-    return 0;
+	iothub_messaging_ll_sample_run();
+	return 0;
 }
