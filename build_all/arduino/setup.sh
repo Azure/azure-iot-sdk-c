@@ -8,8 +8,8 @@ openwrt_sdk_folder="sdk"
 working_dir=$PWD
 package_dir="package"
 
-iot_dir="azure-iot-sdks"
-iot_repo="https://github.com/Azure/azure-iot-sdks.git"
+iot_dir="azure-iot-sdk-c"
+iot_repo="https://github.com/Azure/azure-iot-sdk-c.git"
 iot_makefile="Makefile.iot"
 
 usage ()

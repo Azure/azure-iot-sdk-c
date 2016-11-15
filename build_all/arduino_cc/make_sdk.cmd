@@ -8,7 +8,7 @@ REM It removes some files we do not need.  It currently targets the develop bran
 REM merged into master.
 
 if "%1" equ "" (
-    set Work_path=%~dp0..\..\..\..\Work
+    set Work_path=%~dp0..\..\..\Work
 ) else (
     set Work_path=%1
 )
@@ -20,7 +20,7 @@ set AzureIoTHub_path=%Libraries_path%AzureIoTHub\
 set SharedUtility_path=%AzureIoTHub_path%src\azure_c_shared_utility\
 set Adapters_path=%AzureIoTHub_path%src\adapters\
 set sdk_path=%AzureIoTHub_path%src\sdk\
-set AzureIoTSDKs_path=%~dp0..\..\..\
+set AzureIoTSDKs_path=%~dp0..\..\
 rem // resolve to fully qualified path
 for %%i in ("%AzureIoTSDKs_path%") do set AzureIoTSDKs_path=%%~fi
 
@@ -39,22 +39,22 @@ git rev-parse HEAD >> %sdk_path%metadata.txt
 
 copy %AzureIoTSDKs_path%LICENSE %AzureIoTHub_path%LICENSE
 
-copy %AzureIoTSDKs_path%c\iothub_client\src\ %sdk_path%
-copy %AzureIoTSDKs_path%c\iothub_client\inc\ %sdk_path%
-copy %AzureIoTSDKs_path%c\serializer\src\ %sdk_path%
-copy %AzureIoTSDKs_path%c\serializer\inc\ %sdk_path%
-copy %AzureIoTSDKs_path%c\parson\parson.* %sdk_path%
-copy %AzureIoTSDKs_path%c\serializer\samples\simplesample_http\simplesample_http.* %AzureIoTHub_path%examples\simplesample_http
+copy %AzureIoTSDKs_path%iothub_client\src\ %sdk_path%
+copy %AzureIoTSDKs_path%iothub_client\inc\ %sdk_path%
+copy %AzureIoTSDKs_path%serializer\src\ %sdk_path%
+copy %AzureIoTSDKs_path%serializer\inc\ %sdk_path%
+copy %AzureIoTSDKs_path%parson\parson.* %sdk_path%
+copy %AzureIoTSDKs_path%serializer\samples\simplesample_http\simplesample_http.* %AzureIoTHub_path%examples\simplesample_http
 
 mkdir %SharedUtility_path%
 mkdir %Adapters_path%
-copy %AzureIoTSDKs_path%c\c-utility\inc\azure_c_shared_utility %SharedUtility_path%
-copy %AzureIoTSDKs_path%c\c-utility\src\ %SharedUtility_path%
+copy %AzureIoTSDKs_path%c-utility\inc\azure_c_shared_utility %SharedUtility_path%
+copy %AzureIoTSDKs_path%c-utility\src\ %SharedUtility_path%
 
-copy %AzureIoTSDKs_path%c\c-utility\adapters\agenttime.c %Adapters_path%
-copy %AzureIoTSDKs_path%c\c-utility\adapters\tickcounter_tirtos.c %Adapters_path%
-copy %AzureIoTSDKs_path%c\c-utility\adapters\*arduino.* %Adapters_path%
-copy %AzureIoTSDKs_path%c\c-utility\adapters\httpapi_compact.c %Adapters_path%
+copy %AzureIoTSDKs_path%c-utility\adapters\agenttime.c %Adapters_path%
+copy %AzureIoTSDKs_path%c-utility\adapters\tickcounter_tirtos.c %Adapters_path%
+copy %AzureIoTSDKs_path%c-utility\adapters\*arduino.* %Adapters_path%
+copy %AzureIoTSDKs_path%c-utility\adapters\httpapi_compact.c %Adapters_path%
 
 del %sdk_path%*amqp*.*
 del %sdk_path%*mqtt*.*
