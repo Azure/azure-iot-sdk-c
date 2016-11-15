@@ -3,7 +3,7 @@
 #
 
 azureiot_folder="azure-iot-sdk"
-azureiot_repo="https://github.com/Azure/azure-iot-sdks"
+azureiot_repo="https://github.com/Azure/azure-iot-sdk-c"
 azureiot_c_folder="azure-iot-sdk-c-0.1.0"
 azureiot_c_zip_folder="azure-iot-sdk-c-0.1.0.tar.gz"
 azureiot_c_change_file="azure-iot-sdk-c_0.1.0-1_source.changes"

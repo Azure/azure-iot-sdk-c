@@ -8,7 +8,7 @@ set current_path=%~dp0
 rem // remove trailing slash
 set current_path=%current_path:~0,-1%
 
-set build_root=%current_path%\..\..\..\..
+set build_root=%current_path%\..\..\..
 rem // resolve to fully qualified path
 for %%i in ("%build_root%") do set build_root=%%~fi
 

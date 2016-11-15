@@ -6,7 +6,7 @@ sdk_root="$HOME"
 openwrt_folder="openwrt"
 openwrt_sdk_folder="sdk"
 working_dir=$PWD
-iot_dir="azure-iot-sdks"
+iot_dir="azure-iot-sdk-c"
 
 usage ()
 {

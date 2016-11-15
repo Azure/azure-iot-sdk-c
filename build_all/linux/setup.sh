@@ -10,7 +10,7 @@ repo_name_from_uri()
 
 scriptdir=$(cd "$(dirname "$0")" && pwd)
 deps="curl build-essential libcurl4-openssl-dev git cmake libssl-dev uuid-dev valgrind"
-repo="https://github.com/Azure/azure-iot-sdks.git"
+repo="https://github.com/Azure/azure-iot-sdk-c.git"
 repo_name=$(repo_name_from_uri $repo)
 
 push_dir () { pushd $1 > /dev/null; }
