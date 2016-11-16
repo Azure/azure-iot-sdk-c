@@ -190,7 +190,7 @@ if(NOT "${build_python}" STREQUAL "OFF")
 endif()
 
 if("${build_javawrapper}" STREQUAL "ON")
-     add_subdirectory(../javawrapper/device/iothub_client_javawrapper javawrapper)
+     add_subdirectory(../device/iothub_client_javawrapper javawrapper)
 endif()
 
 
