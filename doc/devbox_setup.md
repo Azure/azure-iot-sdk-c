@@ -191,7 +191,10 @@ You can use one of the sample applications as a template to get started when you
 <a name="samplecode"><a/>
 ## Sample applications
 
-This repository contains various C sample applications that illustrate how to use the Azure IoT device SDK for C. For more information, see the [Read Me][readme].
+This repository contains various C sample applications that illustrate how to use the Azure IoT device SDK for C:
+* [Simple samples for the device SDK][simple_samples]
+* [Samples using the serializer library][serializer_samples]
+
 
 [visual-studio]: https://www.visualstudio.com/downloads/
 [device-explorer]: https://github.com/Azure/azure-iot-sdks/tree/master/tools/DeviceExplorer
@@ -212,3 +215,5 @@ This repository contains various C sample applications that illustrate how to us
 [Ubuntu]:http://www.ubuntu.com/desktop
 [gcc]:https://gcc.gnu.org/
 [make]:https://www.gnu.org/software/make/
+[simple_samples]: ../iothub_client/samples/
+[serializer_samples]: ../serializer/samples/

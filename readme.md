@@ -1,9 +1,9 @@
 # Microsoft Azure IoT SDKs and libraries for C
 
 This repository contains the following:
-* Microsoft Azure IoT Hub device SDK for C to connect devices running C code to Azure IoT Hub
-* Microsoft Azure IoT Hub service SDK for C to interface with an Azure IoT Hub service instance from a back-end C application
-* Serializer library for C to help serialize and deserialize data on your device.
+* **Microsoft Azure IoT Hub device SDK for C** to connect devices running C code to Azure IoT Hub
+* **Microsoft Azure IoT Hub service SDK for C** to interface with an Azure IoT Hub service instance from a back-end C application
+* **Serializer library for C** to help serialize and deserialize data on your device.
 
 The SDKs and library code:
 * Is written in ANSI C (C99) to maximize code portability and broad platform compatibility.
@@ -12,11 +12,11 @@ The SDKs and library code:
 
 ## Developing applications for Azure IoT
 
-Visit [Azure IoT Dev Center][iot-dev-center] to learn more about developing applications for Azure IoT.
+Visit [Azure IoT Dev Center][iot-dev-center]{target="_blank"} to learn more about developing applications for Azure IoT.
 
 ## How to clone the repository
 
-The repository is using [GitHub Submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules) for its dependencies. In order to automatically clone these submodules, you need to use the --recursive options as described here:
+The repository is using [GitHub Submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules){target="_blank"} for its dependencies. In order to automatically clone these submodules, you need to use the --recursive option as described here:
 
 ```
 git clone --recursive https://github.com/Azure/azure-iot-sdk-c.git 
@@ -24,19 +24,14 @@ git clone --recursive https://github.com/Azure/azure-iot-sdk-c.git
 
 ## How to use the Azure IoT SDKs for C
 
-* **Using packages**: the simplest way to use the IoT our SDKs is to use the packages when available. The following packages are available:
-  * On Linux (Ubuntu 14.04, 15.04, 15.10, 16.04):
-    * [Device SDK on apt-get](./iothub_client/readme.md#aptgetpackage)
-  * On mbed:
-    * [Device SDK library on MBED](./iothub_client/readme.md#mbed)
-  * On Arduino:
-    * [Device SDK library in the Arduino IDE](./iothub_client/readme.md#arduino)
-  * On Windows:
-    * [Device SDK on NuGet](./iothub_client/readme.md#nugetpackage)
-* **Compiling the source**: when no package is available for your platform or if you want to modify the SDKs code, or port the SDKs to a new platform, then you can leverage the build environement provided in the repository.
-    * [Device SDK](./iothub_client/readme.md#compile)
-    * [Service SDK](./iothub_service_client/readme.md#compile)
-
+* **Using packages and libraries**: the simplest way to use the Azure IoT SDKs is to use packages and libraries when available. The following are available:
+  * On Linux (Ubuntu 14.04, 15.04, 15.10, 16.04): [Device SDK on apt-get](./iothub_client/readme.md#aptgetpackage)
+  * On mbed:                                      [Device SDK library on MBED](./iothub_client/readme.md#mbed)
+  * On Arduino:                                   [Device SDK library in the Arduino IDE](./iothub_client/readme.md#arduino)
+  * On Windows:                                   [Device SDK on NuGet](./iothub_client/readme.md#nugetpackage)
+* **Compiling the source code**: when no package or library is available for your platform or if you want to modify the SDKs code, or port the SDKs to a new platform, then you can leverage the build environement provided in the repository.
+  * [Device SDK](./iothub_client/readme.md#compile)
+  * [Service SDK](./iothub_service_client/readme.md#compile)
 
 ## OS platforms and hardware compatibility
 
@@ -45,7 +40,7 @@ The minimum requirements are for the device platform to support the following:
 
 - **Being capable of establishing an IP connection**: only IP-capable devices can communicate directly with Azure IoT Hub.
 - **Support TLS**: required to establish a secure communication channel with Azure IoT Hub.
-- **Support SHA-256**: necessary to generate the secure token for authenticating the device with the service.
+- **Support SHA-256** (optional): necessary to generate the secure token for authenticating the device with the service. Different authentication methods are available and not all require SHA-256.
 - **Have a Real Time Clock or implement code to connect to an NTP server**: necessary for both establishing the TLS connection and generating the secure token for authentication.
 - **Having at least 64KB of RAM**: the memory footprint of the SDK depends on the SDK and protocol used as well as the platform targeted. The smallest footprint is achieved targeting microcontrollers.
 
@@ -53,7 +48,7 @@ The minimum requirements are for the device platform to support the following:
 
 The C SDK is written in ANSI C (C99) to allow for it to run on a wide range of platforms.
 In the repository you will find instructions and build tools to compile and run the device client SDK for C on Linux, Windows and microcontroller platforms (refer to the links above for more information on compiling the device client for C).
-If you are considering porting the device client SDK for C to a new platform, follow our [porting guide][c-porting-guide] document.
+If you are considering porting the device client SDK for C to a new platform, check out the [porting guide][c-porting-guide] document.
 
 ## Contribution, feedback and issues
 
@@ -84,9 +79,7 @@ Here is what you can expect Microsoft Support to be able to help with:
 
 ## SDK folder structure
 
-All C specific resources are located in the **azure-iot-sdks\c** folder. A description of the key directories follows:
-
-### /c-utility, /uamqp, and /umqtt
+### /c-utility, /uamqp, /umqtt, /parson
 
 These are git submodules that contain code, such as adapters and protocol implementations, shared with other projects. Note that some of them contain nested submodules.
 
@@ -114,7 +107,7 @@ Contains Azure IoT Hub client components that provide the raw messaging capabili
    * devdoc: contains requirements, designs notes, manuals.
    * inc: public include files.
    * src: client libraries source files.
-   * samples: contains the send event and receive message samples (with ports for the supported platforms).
+   * samples: contains simple samples.
    * tests: unit and end-to-end tests for source code.
 
 ### /serializer
@@ -125,7 +118,7 @@ Contains libraries that provide modeling and JSON serialization capabilities on 
    * devdoc: contains requirements, designs notes, manuals.
    * inc: public include files.
    * src: client libraries source files.
-   * samples: contains the send event and receive message samples (with ports for the supported platforms).
+   * samples: contains simple samples.
    * tests: unit tests and end-to-end tests for source code.
 
 ### /iothub_service_client
