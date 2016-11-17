@@ -190,9 +190,9 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     bool device_twin_get_sent;
     bool isRecoverableError;
     uint16_t keepAliveValue;
-    uint64_t mqtt_connect_time;
+    tickcounter_ms_t mqtt_connect_time;
     size_t connectFailCount;
-    uint64_t connectTick;
+    tickcounter_ms_t connectTick;
     bool log_trace;
     bool raw_trace;
 
@@ -212,7 +212,7 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
 
 typedef struct MQTT_DEVICE_TWIN_ITEM_TAG
 {
-    uint64_t msgPublishTime;
+    tickcounter_ms_t msgPublishTime;
     size_t retryCount;
     IOTHUB_IDENTITY_TYPE iothub_type;
     uint16_t packet_id;
@@ -224,7 +224,7 @@ typedef struct MQTT_DEVICE_TWIN_ITEM_TAG
 
 typedef struct MQTT_MESSAGE_DETAILS_LIST_TAG
 {
-    uint64_t msgPublishTime;
+    tickcounter_ms_t msgPublishTime;
     size_t retryCount;
     IOTHUB_MESSAGE_LIST* iotHubMessageEntry;
     void* context;
@@ -1608,7 +1608,7 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
         if (transport_data->isConnected)
         {
             // We are isConnected and not being closed, so does SAS need to reconnect?
-            uint64_t current_time;
+            tickcounter_ms_t current_time;
             if (tickcounter_get_current_ms(g_msgTickCounter, &current_time) != 0)
             {
                 transport_data->connectFailCount++;
@@ -2321,7 +2321,7 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIEN
                     DLIST_ENTRY nextListEntry;
                     nextListEntry.Flink = currentListEntry->Flink;
 
-                    uint64_t current_ms;
+                    tickcounter_ms_t current_ms;
                     (void)tickcounter_get_current_ms(g_msgTickCounter, &current_ms);
                     /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_033: [IoTHubTransport_MQTT_Common_DoWork shall iterate through the Waiting Acknowledge messages looking for any message that has been waiting longer than 2 min.]*/
                     if (((current_ms - mqttMsgEntry->msgPublishTime) / 1000) > RESEND_TIMEOUT_VALUE_MIN)

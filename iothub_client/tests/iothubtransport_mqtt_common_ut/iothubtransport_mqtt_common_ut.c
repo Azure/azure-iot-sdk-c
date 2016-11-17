@@ -146,7 +146,7 @@ static const size_t appMsgSize = sizeof(appMessage) / sizeof(appMessage[0]);
 static IOTHUB_CLIENT_CONFIG g_iothubClientConfig = { 0 };
 static DLIST_ENTRY g_waitingToSend;
 
-static uint64_t g_current_ms = 0;
+static tickcounter_ms_t g_current_ms = 0;
 static size_t g_tokenizerIndex;
 
 #define TEST_TIME_T ((time_t)-1)
@@ -397,7 +397,7 @@ static TICK_COUNTER_HANDLE my_tickcounter_create(void)
     return (TICK_COUNTER_HANDLE)my_gballoc_malloc(1);
 }
 
-static int my_tickcounter_get_current_ms(TICK_COUNTER_HANDLE tick_counter, uint64_t* current_ms)
+static int my_tickcounter_get_current_ms(TICK_COUNTER_HANDLE tick_counter, tickcounter_ms_t * current_ms)
 {
     (void)tick_counter;
     g_current_ms += 1000;
@@ -3304,7 +3304,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_resend_max_recount_reached_mess
     for (size_t index = 0; index < 3; index++)
     {
         IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
-        g_current_ms = 3 * index * 60 * 1000;
+        g_current_ms = (tickcounter_ms_t)(3 * index * 60 * 1000);
     }
     umock_c_reset_all_calls();
 
