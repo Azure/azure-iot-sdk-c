@@ -1,43 +1,86 @@
-# Microsoft Azure IoT device SDK for C
+# Microsoft Azure IoT SDKs and libraries for C
 
-The Microsoft Azure IoT device libraries for C contain code that facilitates building devices and applications that connect to and are managed by Azure IoT Hub services.
+This repository contains the following:
+* Microsoft Azure IoT Hub device SDK for C to connect devices running C code to Azure IoT Hub
+* Microsoft Azure IoT Hub service SDK for C to interface with an Azure IoT Hub service instance from a back-end C application
+* Serializer library for C to help serialize and deserialize data on your device.
 
-The device library consists of a set of reusable components with abstract interfaces that enable pluggability between stock and custom modules.
-
-To meet the wide range of device requirements in the Internet of Things space, the C libraries are provided in source code form to support multiple form factors, operating systems, tools sets, protocols and communications patterns widely in use today.
-
-
-## Features
-
- * Sends event data to Azure IoT based services.
- * Maps server commands to device functions.
- * Buffers data when the network connection is down.
- * Batches messages to improve communication efficiency.
- * Supports pluggable transport protocols. HTTPS, AMQP and MQTT are the protocols currently available now.
- * Supports pluggable serialization methods. JSON serialization is available now.
-
-
-The library code:
-
+The SDKs and library code:
 * Is written in ANSI C (C99) to maximize code portability and broad platform compatibility.
 * Avoids compiler extensions.
-* Exposes a platform abstraction layer to isolate OS dependencies (threading and mutual exclusion mechanisms, communications protocol e.g. HTTP). Refer to [porting guide](doc/porting_guide.md) for more information.
+* In the device client SDK, the library exposes a platform abstraction layer to isolate OS dependencies (threading and mutual exclusion mechanisms, communications protocol e.g. HTTP). Refer to our [porting guide][c-porting-guide] for more information.
 
-Azure IoT device SDK for C can be used with a broad range of OS platforms and devices. For a list of tested configurations [click here](https://catalog.azureiotsuite.com/).
+## Developing applications for Azure IoT
 
-## Application development guides
-For information on how to use this library refer to the documents below:
+Visit [Azure IoT Dev Center][iot-dev-center] to learn more about developing applications for Azure IoT.
 
-- [Prepare your development environment to use the Azure IoT device SDK for C](doc/devbox_setup.md)
-- [Setup IoT Hub](../doc/setup_iothub.md)
-- [Provision and manage devices](../doc/manage_iot_hub.md)
-- [Azure IoT device SDK for C  tutorial](https://azure.microsoft.com/documentation/articles/iot-hub-device-sdk-c-intro/)
-- [Setup a Protocol Gateway - (i.e. MQTT)](https://github.com/Azure/azure-iot-protocol-gateway/blob/master/README.md)
-- [How to port the C libraries to other OS platforms](doc/porting_guide.md)
-- [Cross compilation example](doc/SDK_cross_compile_example.md)
-- [C API reference](http://azure.github.io/azure-iot-sdks/c/api_reference/index.html)
+## How to clone the repository
 
-For guides on how to run the sample applications on supported platforms, check out in this [folder](../doc/get_started/).
+The repository is using [GitHub Submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules) for its dependencies. In order to automatically clone these submodules, you need to use the --recursive options as described here:
+
+```
+git clone --recursive https://github.com/Azure/azure-iot-sdks.git 
+```
+
+## How to use the Azure IoT SDKs for C
+
+* **Using packages**: the simplest way to use the IoT our SDKs is to use the packages when available. The following packages are available:
+  * On Linux (Ubuntu 14.04, 15.04, 15.10, 16.04):
+    * [Device SDK on apt-get](./iothub_client/readme.md#aptgetpackage)
+  * On mbed:
+    * [Device SDK library on MBED](./iothub_client/readme.md#mbed)
+  * On Arduino:
+    * [Device SDK library in the Arduino IDE](./iothub_client/readme.md#arduino)
+  * On Windows:
+    * [Device SDK on NuGet](./iothub_client/readme.md#nugetpackage)
+* **Compiling the source**: when no package is available for your platform or if you want to modify the SDKs code, or port the SDKs to a new platform, then you can leverage the build environement provided in the repository.
+    * [Device SDK](./iothub_client/readme.md#compile)
+    * [Service SDK](./iothub_service_client/readme.md#compile)
+
+
+## OS platforms and hardware compatibility
+
+The IoT Hub device SDK for C can be used with a broad range of OS platforms and devices.
+The minimum requirements are for the device platform to support the following:
+
+- **Being capable of establishing an IP connection**: only IP-capable devices can communicate directly with Azure IoT Hub.
+- **Support TLS**: required to establish a secure communication channel with Azure IoT Hub.
+- **Support SHA-256**: necessary to generate the secure token for authenticating the device with the service.
+- **Have a Real Time Clock or implement code to connect to an NTP server**: necessary for both establishing the TLS connection and generating the secure token for authentication.
+- **Having at least 64KB of RAM**: the memory footprint of the SDK depends on the SDK and protocol used as well as the platform targeted. The smallest footprint is achieved targeting microcontrollers.
+
+## Porting the Azure IoT device client SDK for C to new platforms
+
+The C SDK is written in ANSI C (C99) to allow for it to run on a wide range of platforms.
+In the repository you will find instructions and build tools to compile and run the device client SDK for C on Linux, Windows and microcontroller platforms (refer to the links above for more information on compiling the device client for C).
+If you are considering porting the device client SDK for C to a new platform, follow our [porting guide][c-porting-guide] document.
+
+## Contribution, feedback and issues
+
+If you encounter any bugs, have suggestions for new features or if you would like to become an active contributor to this project please follow the instructions provided in the [contribution guidelines](CONTRIBUTING.md).
+
+## Support
+
+If you are having issues using one of the packages or using the Azure IoT Hub service that go beyond simple bug fixes or help requests that would be dealt within the issues section of this project, the Microsoft Customer Support team will try and help out on a best effort basis.
+To engage Microsoft support, you can create a support ticket directly from the [Azure portal](https://ms.portal.azure.com/#blade/Microsoft_Azure_Support/HelpAndSupportBlade).
+Escalated support requests for Azure IoT Hub SDKs development questions will only be available Monday thru Friday during normal coverage hours of 6 a.m. to 6 p.m. PST.
+Here is what you can expect Microsoft Support to be able to help with:
+- **SDKs issues**: If you are trying to compile and run the libraries on a supported platform, the Support team will be able to assist with troubleshooting or questions related to compiler issues and communications to and from the IoT Hub.  They will also try to assist with questions related to porting to an unsupported platform, but will be limited in how much assistance can be provided.  The team will be limited with trouble-shooting the hardware device itself or drivers and or specific properties on that device. 
+- **IoT Hub / Connectivity Issues**: Communication from the device client to the Azure IoT Hub service and communication from the Azure IoT Hub service to the client.  Or any other issues specifically related to the Azure IoT Hub.
+- **Portal Issues**: Issues related to the portal, that includes access, security, dashboard, devices, Alarms, Usage, Settings and Actions.
+- **REST/API Issues**: Using the IoT Hub REST/APIs that are documented in the [documentation](https://docs.microsoft.com/en-us/rest/api/iothub/).
+
+## Read more
+
+* [Azure IoT Hub documentation][iot-hub-documentation]
+* [Prepare your development environment to use the Azure IoT device SDK for C][devbox-setup]
+* [Setup IoT Hub][setup-iothub]
+* [Azure IoT device SDK for C tutorial][c-sdk-intro]
+* [How to port the C libraries to other OS platforms][c-porting-guide]
+* [Cross compilation example][c-cross-compile]
+* [C SDKs API reference][c-api-reference]
+
+--- 
 
 ## SDK folder structure
 
@@ -96,3 +139,16 @@ Contains tools that are currently used in testing the client libraries: Mocking 
 ### /tools
 
 Miscellaneous tools: compilembed, mbed_build, traceabilitytool (checks spec requirements vs code implementation).
+
+---
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
+
+[iot-dev-center]: http://azure.com/iotdev
+[iot-hub-documentation]: https://docs.microsoft.com/en-us/azure/iot-hub/
+[devbox-setup]: doc/devbox_setup.md
+[setup-iothub]: https://aka.ms/howtocreateazureiothub
+[c-sdk-intro]: https://azure.microsoft.com/documentation/articles/iot-hub-device-sdk-c-intro/
+[c-porting-guide]: doc/porting_guide.md
+[c-cross-compile]: doc/SDK_cross_compile_example.md
+[c-api-reference]: http://azure.github.io/azure-iot-sdks/c/api_reference/index.html

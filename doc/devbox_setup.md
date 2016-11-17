@@ -7,7 +7,7 @@ This document describes how to prepare your development environment to use the *
 - [Setting up a Windows Embedded Compact 2013 development environment](#windowsce)
 - [Sample applications](#samplecode)
 
-<a name="windows"/>
+<a name="windows"><a/>
 ## Setting up a Windows development environment
 
 - Install [Visual Studio 2015][visual-studio]. You can use the **Visual Studio Community** Free download if you meet the licensing requirements.
@@ -17,17 +17,15 @@ Be sure to include Visual C++ and NuGet Package Manager.
 
 - Clone the **latest** available version of this repository (**master** branch) to your local machine with the **recursive** parameter to include submodules.
 ```
-git clone --recursive https://github.com/Azure/azure-iot-sdks.git
+git clone --recursive https://github.com/Azure/azure-iot-sdk-c.git
 ```
-**recursive** parameter will include other projects (**submodules**) [azure-shared-c-utility], [azure-uamqp-c], [azure-umqtt-c] that **azure-iot-sdks** project has dependence on.
+**recursive** parameter will include other projects (**submodules**) [azure-shared-c-utility], [azure-uamqp-c], [azure-umqtt-c] that **azure-iot-sdk-c** project has dependencies on.
 
-C SDK source is located under **c** folder **azure-iot-sdks\\c**
-
-[Releases of azure-iot-sdks] has list of available **releases**.
+[Releases of azure-iot-sdk-c] has list of available **releases**.
 
 ### Building the sample applications only
 For **quickly** testing the sample application of your choice open the corresponding [solution (.sln) file] in VS 2015 IDE.
-For example, to build **MQTT sample**, go to c\iothub_client\samples\iothub_client_sample_mqtt\windows and open **iothub_client_sample_mqtt.sln** file in VS 2015.
+For example, to build **MQTT sample**, go to iothub_client\samples\iothub_client_sample_mqtt\windows and open **iothub_client_sample_mqtt.sln** file in VS 2015.
 
 Build and run the application after replacing `connectionString = "[device connection string]"` with the actual valid device connection string.
 
@@ -39,7 +37,7 @@ For example, you may want to build the latest code available on the **develop** 
 
 To pull latest code on **develop** branch you can use following command
 
-`git clone -b develop --recursive https://github.com/Azure/azure-iot-sdks.git azure-iot-develop`
+`git clone -b develop --recursive https://github.com/Azure/azure-iot-sdk-c.git azure-iot-develop`
 
 The following instructions outline how you can build the C SDK (along with samples):
 
@@ -47,10 +45,10 @@ The following instructions outline how you can build the C SDK (along with sampl
 
 2. Open a Developer Command Prompt for VS2015.
 
-4. Go to scripts folder located at **c\\build_all\\windows**. Run the build script **build_client.cmd** or **build.cmd** which will invoke cmake to create solution files which will then be used by msbuild to build the projects
+4. Go to scripts folder located at **build_all\\windows**. Run the build script **build_client.cmd** or **build.cmd** which will invoke cmake to create solution files which will then be used by msbuild to build the projects
 
 After successful running of the script, you should see cmake folder created under c folder.
-For Win32 (default configuration) you should see **c\\cmake\\iotsdk_win32**. For x64, you should see c\cmake\iotsdk_x64.
+For Win32 (default configuration) you should see **cmake\\iotsdk_win32**. For x64, you should see cmake\iotsdk_x64.
 
 **azure_iot_sdks.sln** created under cmake folder will contain all sub-projects that you can directly open in VS 2015 IDE to build libraries or samples in IDE.
 
@@ -88,7 +86,7 @@ Below are steps to build and install OpenSSL libraries and corresponding DLL's. 
 
 After completing the above steps make sure OpenSSL libraries and DLL's are in your OpenSSL install location. Now follow below steps to build library and sample using WebSocket
 
-1. Open VS 2015 Developer Command Prompt and go to **\\c\\build_all\\windows**
+1. Open VS 2015 Developer Command Prompt and go to **\\build_all\\windows**
 
 2. Set OpenSSLDir and OPENSSL_ROOT_DIR **environment variables** to OpenSSL install location. For example, if your OpenSSL install location is **C:\usr\\local\\ssl**, you will set following
 
@@ -101,7 +99,7 @@ Now enter following command to build sample using websocket
 
 This will build C SDK libraries along with **iothub_client_sample_amqp_websockets** sample.
 
-<a name="linux"/>
+<a name="linux"><a/>
 ## Set up a Linux development environment
 
 This section shows you how to set up a development environment for the Azure IoT device SDK for C on [Ubuntu]. [CMake] will create makefiles and [make] tool will use these makefiles to compile the C SDK source code using [gcc] compiler.
@@ -116,10 +114,10 @@ Older **gcc** version **4.4.7** support has also been added and tested on 14.04.
 
 Clone the latest version of this repository to your Ubuntu machine with the recursive parameter to fetch latest code from **master** branch
 
-`git clone --recursive https://github.com/Azure/azure-iot-sdks.git`
+`git clone --recursive https://github.com/Azure/azure-iot-sdk-c.git`
 
 > In case, you want to pull latest code on **develop** branch you can use following command
-`git clone -b develop --recursive https://github.com/Azure/azure-iot-sdks.git azure-iot-develop`
+`git clone -b develop --recursive https://github.com/Azure/azure-iot-sdk-c.git azure-iot-develop`
 
 1. Open a shell and navigate to the folder **c/build_all/linux** in your local copy of the repository.
 
@@ -142,7 +140,7 @@ Below are some of the build **options** you can use
  `./build.sh -cl -g`: Build **debug** build
 
 > Tip: After running `./build.sh` if you want to just build a **particular sample** or library after making changes, you can directly go the corresponding cmake directory and run the [make] command.
-For example, to build **mqtt** sample after making changes in it you can directly go to c/cmake/iotsdk_linux/iothub_client/samples/iothub_client_sample_mqtt directory and run `make` command from that directory.
+For example, to build **mqtt** sample after making changes in it you can directly go to cmake/iotsdk_linux/iothub_client/samples/iothub_client_sample_mqtt directory and run `make` command from that directory.
 
 
 > Note: Every time you run `build.sh`, it deletes and then recreates the "cmake" folder under c folder.
@@ -150,7 +148,7 @@ For example, to build **mqtt** sample after making changes in it you can directl
 > Note: You will not be able to run the samples until you configure them with a valid IoT Hub device connection string. For more information, see [Run sample on Linux](../../doc/get_started/linux-desktop-c.md).
 
 
-<a name="windowsce"/>
+<a name="windowsce"><a/>
 ## Set up a Windows Embedded Compact 2013 development environment
 
 - Install [Visual Studio 2015][visual-studio]. You can use the free Community Edition if you meet the licensing requirements.
@@ -161,7 +159,7 @@ Be sure to include Visual C++ and NuGet Package Manager.
 
 - Clone the latest version of this repository to your local machine. Use the **master** branch to ensure you fetch the latest release version.
 
-If you installed a different SDK please check azure-iot-sdks\\c\\build_all\\windowsce\\build.cmd and replace:
+If you installed a different SDK please check azure-iot-sdk-c\\build_all\\windowsce\\build.cmd and replace:
 ```
 set SDKNAME=TORADEX_CE800
 set PROCESSOR=arm
@@ -174,7 +172,7 @@ You can build the Windows samples to verify that your environment is set up corr
 
 1. Open a Visual Studio 2015 Developer command prompt.
 
-2. Navigate to the **c\\build_all\\windowsce** folder in your local copy of the repository.
+2. Navigate to the **build_all\\windowsce** folder in your local copy of the repository.
 
 3. Run the following command:
 
@@ -190,20 +188,19 @@ To view the projects and examine the source code, open the **azure_iot_sdks.sln*
 
 You can use one of the sample applications as a template to get started when you are creating your own client applications.
 
-<a name="samplecode"/>
+<a name="samplecode"><a/>
 ## Sample applications
 
 This repository contains various C sample applications that illustrate how to use the Azure IoT device SDK for C. For more information, see the [Read Me][readme].
 
 [visual-studio]: https://www.visualstudio.com/downloads/
-[readme]: ../readme.md
-[device-explorer]: ../../tools/DeviceExplorer/readme.md
+[device-explorer]: https://github.com/Azure/azure-iot-sdks/tree/master/tools/DeviceExplorer
 [toradex-CE8-sdk]:http://docs.toradex.com/102578
 [application-builder]:http://www.microsoft.com/download/details.aspx?id=38819
 [azure-shared-c-utility]:https://github.com/Azure/azure-c-shared-utility
 [azure-uamqp-c]:https://github.com/Azure/azure-uamqp-c
 [azure-umqtt-c]:https://github.com/Azure/azure-umqtt-c
-[Releases of azure-iot-sdks]:https://github.com/Azure/azure-iot-sdks/releases
+[Releases of azure-iot-sdk-c]:https://github.com/Azure/azure-iot-sdk-c/releases
 [solution(.sln) file]:https://msdn.microsoft.com/en-us/library/bb165951.aspx
 [NuGet]:https://www.nuget.org/
 [CMake]:https://cmake.org/
