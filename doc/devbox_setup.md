@@ -88,7 +88,7 @@ After completing the above steps make sure OpenSSL libraries and DLL's are in yo
 
 1. Open VS 2015 Developer Command Prompt and go to **\\build_all\\windows**
 
-2. Set OpenSSLDir and OPENSSL_ROOT_DIR **environment variables** to OpenSSL install location. For example, if your OpenSSL install location is **C:\usr\\local\\ssl**, you will set following
+2. Set OpenSSLDir and OPENSSL_ROOT_DIR **environment variables** to OpenSSL install location. For example, if your OpenSSL install location is **C:\\usr\\local\\ssl**, you will set following
 
 - set OpenSSLDir=C:\usr\local\ssl
 - set OPENSSL_ROOT_DIR=C:\usr\local\ssl
