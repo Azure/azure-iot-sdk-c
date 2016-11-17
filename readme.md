@@ -12,11 +12,11 @@ The SDKs and library code:
 
 ## Developing applications for Azure IoT
 
-Visit [Azure IoT Dev Center][iot-dev-center]{target="_blank"} to learn more about developing applications for Azure IoT.
+Visit [Azure IoT Dev Center][iot-dev-center] to learn more about developing applications for Azure IoT.
 
 ## How to clone the repository
 
-The repository is using [GitHub Submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules){target="_blank"} for its dependencies. In order to automatically clone these submodules, you need to use the --recursive option as described here:
+The repository is using [GitHub Submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules) for its dependencies. In order to automatically clone these submodules, you need to use the --recursive option as described here:
 
 ```
 git clone --recursive https://github.com/Azure/azure-iot-sdk-c.git 
