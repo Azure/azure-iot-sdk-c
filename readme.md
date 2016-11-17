@@ -19,7 +19,7 @@ Visit [Azure IoT Dev Center][iot-dev-center] to learn more about developing appl
 The repository is using [GitHub Submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules) for its dependencies. In order to automatically clone these submodules, you need to use the --recursive options as described here:
 
 ```
-git clone --recursive https://github.com/Azure/azure-iot-sdks.git 
+git clone --recursive https://github.com/Azure/azure-iot-sdk-c.git 
 ```
 
 ## How to use the Azure IoT SDKs for C
