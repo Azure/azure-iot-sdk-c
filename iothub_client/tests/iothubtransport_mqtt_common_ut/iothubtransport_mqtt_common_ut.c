@@ -710,9 +710,9 @@ static void SetupIothubTransportConfigWithKeyAndSasToken(IOTHUBTRANSPORT_CONFIG*
 
 static void setup_IoTHubTransport_MQTT_Common_Create_mocks(bool use_gateway)
 {
+    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(tickcounter_create());
 
-    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(STRING_construct(TEST_DEVICE_ID));
     STRICT_EXPECTED_CALL(STRING_construct(TEST_DEVICE_KEY));
 
