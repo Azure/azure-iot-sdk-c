@@ -505,7 +505,8 @@ static void setup_iothubclient_uploadtoblobasync()
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is creating a UPLOADTOBLOB_SAVED_DATA*/
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "someFileName.txt")) /*this is making a copy of the filename*/
-        .IgnoreArgument(1);
+        .IgnoreArgument_destination()
+        .IgnoreArgument_source();
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is creating a UPLOADTOBLOB_SAVED_DATA*/
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
