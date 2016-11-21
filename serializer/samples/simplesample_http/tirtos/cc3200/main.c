@@ -108,7 +108,7 @@ static void setTime(void)
     startTime.tm_min  = MINUTE;
     startTime.tm_sec  = SECOND;
     ts = mktime(&startTime);
-    Seconds_set(ts - (unsigned int) TIMEDIFF);
+ //  Seconds_set(ts - (unsigned int) TIMEDIFF); This hangs  Task_sleep call. GitHub issue #909
 }
 
 /*
