@@ -5,10 +5,12 @@ This repository contains the following:
 * **Microsoft Azure IoT Hub service SDK for C** to interface with an Azure IoT Hub service instance from a back-end C application
 * **Serializer library for C** to help serialize and deserialize data on your device.
 
-The SDKs and library code:
+The C SDKs and library code:
 * Is written in ANSI C (C99) to maximize code portability and broad platform compatibility.
 * Avoids compiler extensions.
 * In the device client SDK, the library exposes a platform abstraction layer to isolate OS dependencies (threading and mutual exclusion mechanisms, communications protocol e.g. HTTP). Refer to our [porting guide][c-porting-guide] for more information.
+
+To find SDKs in other languages for Azure IoT, please refer to the [azure-iot-sdks][azure-iot-sdks] repository.
 
 ## Developing applications for Azure IoT
 
@@ -32,6 +34,15 @@ git clone --recursive https://github.com/Azure/azure-iot-sdk-c.git
 * **Compiling the source code**: when no package or library is available for your platform or if you want to modify the SDKs code, or port the SDKs to a new platform, then you can leverage the build environement provided in the repository.
   * [Device SDK](./iothub_client/readme.md#compile)
   * [Service SDK](./iothub_service_client/readme.md#compile)
+
+The API reference documentation for the C SDKs is [here][c-api-reference].
+
+## samples
+
+In the repository, you will find a set of simple samples that will help you get started:
+* [Device SDK samples](./iothub_client/samples/)
+* [Service SDK samples](./iothub_service_client/samples/)
+* [Serializer library samples](./serializer/samples/)
 
 ## OS platforms and hardware compatibility
 
