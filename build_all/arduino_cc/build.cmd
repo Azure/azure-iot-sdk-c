@@ -24,7 +24,7 @@ set compiler_libraries_path=%compiler_path%\libraries
 
 set user_hardware_path=%work_root%\arduino\hardware
 set user_libraries_path=%work_root%\arduino\libraries
-set user_packages_path=%build_root%\arduino15\packages
+set user_packages_path=%build_root%\arduino15-2.3.0\packages
 
 rem -----------------------------------------------------------------------------
 rem -- parse script arguments
@@ -47,7 +47,14 @@ if "%1" equ "-r" goto arg_run_only
 if "%1" equ "--run-only" goto arg_run_only
 if "%1" equ "-e2e" goto arg_run_e2e_tests
 if "%1" equ "--run-e2e-tests" goto arg_run_e2e_tests
+if "%1" equ "-d" goto arg_delete
+if "%1" equ "--delete" goto arg_delete
 call :usage && exit /b 1
+
+:arg_delete
+set delete_%2=%2
+shift
+goto args_continue
 
 :arg_build_clean
 set build_clean=ON
@@ -107,6 +114,10 @@ echo   user_hardware_path  = %user_hardware_path%
 echo   user_libraries_path = %user_libraries_path%
 echo   user_packages_path  = %user_packages_path%
 echo.
+for /F "tokens=2* delims=_=" %%A in ('set delete_') do (
+    echo   delete = %build_root%\%%B
+)
+echo.
 echo.
 
 rem -----------------------------------------------------------------------------
@@ -115,6 +126,10 @@ rem ----------------------------------------------------------------------------
 
 if %build_clean%==ON (
     rmdir /S /Q %work_root%
+)
+
+for /F "tokens=2* delims=_=" %%A in ('set delete_') do (
+    rmdir /S /Q %build_root%\%%B
 )
 
 rem -----------------------------------------------------------------------------
@@ -208,11 +223,13 @@ rem ----------------------------------------------------------------------------
 :usage
 echo build.cmd [options]
 echo options:
-echo  -c, --clean             delete artifacts from previous build before building
-echo  -b, --build-only        only build the project (default)
-echo  -r, --run-only          only run the test
-echo  -e2e, --run-e2e-tests   run end-to-end test
-echo  --root <test_path>      determine the root of the test tree
+echo  -c, --clean               delete artifacts from previous build before building
+echo  -b, --build-only          only build the project (default)
+echo  -r, --run-only            only run the test
+echo  -e2e, --run-e2e-tests     run end-to-end test
+echo  --root <test_path>        determine the root of the test tree
+echo  -t, --tests <test_list>   determine the file with the test list
+echo  -d, --delete <directory>  provide a directory to delete before start the test (can be more than one)
 goto :eof
 
 
@@ -374,7 +391,7 @@ if not "!projectName!"=="" (
         goto :eof
     )
     
-    call powershell.exe -NoProfile -NonInteractive -ExecutionPolicy unrestricted -Command .\execute.ps1 -binaryPath:%build_root%!RelativeWorkingDir!\!Target!.bin -serialPort:!SerialPort! -esptool:%build_root%\arduino15\packages\esp8266\tools\esptool\0.4.9\esptool.exe -logLines:!LogLines! -minimumHeap:!MinimumHeap!
+    call powershell.exe -NoProfile -NonInteractive -ExecutionPolicy unrestricted -Command .\execute.ps1 -binaryPath:%build_root%!RelativeWorkingDir!\!Target!.bin -serialPort:!SerialPort! -esptool:%user_packages_path%\esp8266\tools\esptool\0.4.9\esptool.exe -logLines:!LogLines! -minimumHeap:!MinimumHeap!
 
     if "!errorlevel!"=="0" (
         set __errolevel_run.!projectName!=SUCCEED
