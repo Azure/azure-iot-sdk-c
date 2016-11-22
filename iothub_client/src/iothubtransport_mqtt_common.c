@@ -95,8 +95,6 @@ static SYSTEM_PROPERTY_INFO sysPropList[] = {
     { "iothub-ack", 10 }
 };
 
-static TICK_COUNTER_HANDLE g_msgTickCounter;
-
 typedef enum DEVICE_TWIN_MSG_TYPE_TAG
 {
     REPORTED_STATE,
@@ -195,6 +193,7 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     tickcounter_ms_t connectTick;
     bool log_trace;
     bool raw_trace;
+    TICK_COUNTER_HANDLE msgTickCounter;
 
     // Internal lists for message tracking
     PDLIST_ENTRY waitingToSend;
@@ -812,7 +811,7 @@ static int publish_mqtt_telemetry_msg(PMQTTTRANSPORT_HANDLE_DATA transport_data,
         }
         else
         {
-            if (tickcounter_get_current_ms(g_msgTickCounter, &mqttMsgEntry->msgPublishTime) != 0)
+            if (tickcounter_get_current_ms(transport_data->msgTickCounter, &mqttMsgEntry->msgPublishTime) != 0)
             {
                 LogError("Failed retrieving tickcounter info");
                 result = __LINE__;
@@ -950,7 +949,7 @@ static int publish_device_twin_message(MQTTTRANSPORT_HANDLE_DATA* transport_data
         }
         else
         {
-            if (tickcounter_get_current_ms(g_msgTickCounter, &mqtt_info->msgPublishTime) != 0)
+            if (tickcounter_get_current_ms(transport_data->msgTickCounter, &mqtt_info->msgPublishTime) != 0)
             {
                 LogError("Failed retrieving tickcounter info");
                 result = __LINE__;
@@ -1341,24 +1340,24 @@ static void mqtt_error_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_ERR
         }
         transport_data->isConnected = false;
         transport_data->currPacketState = PACKET_TYPE_ERROR;
-                transport_data->device_twin_get_sent = false;
+        transport_data->device_twin_get_sent = false;
         if (transport_data->topic_MqttMessage != NULL)
         {
-                transport_data->topics_ToSubscribe |= SUBSCRIBE_TELEMETRY_TOPIC;
-                }
-                if (transport_data->topic_GetState != NULL)
-                {
-                    transport_data->topics_ToSubscribe |= SUBSCRIBE_GET_REPORTED_STATE_TOPIC;
-                }
-                if (transport_data->topic_NotifyState != NULL)
-                {
-                    transport_data->topics_ToSubscribe |= SUBSCRIBE_NOTIFICATION_STATE_TOPIC;
-                }
-                if (transport_data->topic_DeviceMethods != NULL)
-                {
-                    transport_data->topics_ToSubscribe |= SUBSCRIBE_DEVICE_METHOD_TOPIC;
+            transport_data->topics_ToSubscribe |= SUBSCRIBE_TELEMETRY_TOPIC;
         }
-     }
+        if (transport_data->topic_GetState != NULL)
+        {
+            transport_data->topics_ToSubscribe |= SUBSCRIBE_GET_REPORTED_STATE_TOPIC;
+        }
+        if (transport_data->topic_NotifyState != NULL)
+        {
+            transport_data->topics_ToSubscribe |= SUBSCRIBE_NOTIFICATION_STATE_TOPIC;
+        }
+        if (transport_data->topic_DeviceMethods != NULL)
+        {
+            transport_data->topics_ToSubscribe |= SUBSCRIBE_DEVICE_METHOD_TOPIC;
+        }
+    }
     else
     {
         LogError("Failure: mqtt called back with null context.");
@@ -1557,7 +1556,7 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 }
                 else
                 {
-                    (void)tickcounter_get_current_ms(g_msgTickCounter, &transport_data->mqtt_connect_time);
+                    (void)tickcounter_get_current_ms(transport_data->msgTickCounter, &transport_data->mqtt_connect_time);
                     result = 0;
                 }
             }
@@ -1584,7 +1583,7 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
         // to back off the connecting to the server
         if (!transport_data->isConnected && transport_data->isRecoverableError && CanRetry(transport_data->retryLogic))
         {
-            if (tickcounter_get_current_ms(g_msgTickCounter, &transport_data->connectTick) != 0)
+            if (tickcounter_get_current_ms(transport_data->msgTickCounter, &transport_data->connectTick) != 0)
             {
                 transport_data->connectFailCount++;
                 result = __LINE__;
@@ -1609,7 +1608,7 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
         {
             // We are isConnected and not being closed, so does SAS need to reconnect?
             tickcounter_ms_t current_time;
-            if (tickcounter_get_current_ms(g_msgTickCounter, &current_time) != 0)
+            if (tickcounter_get_current_ms(transport_data->msgTickCounter, &current_time) != 0)
             {
                 transport_data->connectFailCount++;
                 result = __LINE__;
@@ -1705,9 +1704,16 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
     {
         LogError("Could not create MQTT transport state. Memory allocation failed.");
     }
+    else if ((state->msgTickCounter = tickcounter_create()) == NULL)
+    {
+        LogError("Invalid Argument: iotHubName is empty");
+        free(state);
+        state = NULL;
+    }
     else if ((state->device_id = STRING_construct(upperConfig->deviceId)) == NULL)
     {
         LogError("failure constructing device_id.");
+        tickcounter_destroy(state->msgTickCounter);
         free(state);
         state = NULL;
     }
@@ -1716,6 +1722,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
         if (construct_credential_information(upperConfig, state) != 0)
         {
             STRING_delete(state->device_id);
+            tickcounter_destroy(state->msgTickCounter);
             free(state);
             state = NULL;
         }
@@ -1732,6 +1739,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                 STRING_delete(state->transport_creds.CREDENTIAL_VALUE.deviceSasToken);
             }
             STRING_delete(state->device_id);
+            tickcounter_destroy(state->msgTickCounter);
             free(state);
             state = NULL;
         }
@@ -1752,6 +1760,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                 }
                 STRING_delete(state->topic_MqttEvent);
                 STRING_delete(state->device_id);
+                tickcounter_destroy(state->msgTickCounter);
                 free(state);
                 state = NULL;
             }
@@ -1782,6 +1791,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                     mqtt_client_deinit(state->mqttClient);
                     STRING_delete(state->topic_MqttEvent);
                     STRING_delete(state->device_id);
+                    tickcounter_destroy(state->msgTickCounter);
                     free(state);
                     state = NULL;
                 }
@@ -1800,6 +1810,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                     STRING_delete(state->hostAddress);
                     STRING_delete(state->topic_MqttEvent);
                     STRING_delete(state->device_id);
+                    tickcounter_destroy(state->msgTickCounter);
                     free(state);
                     state = NULL;
                 }
@@ -1892,19 +1903,10 @@ TRANSPORT_LL_HANDLE IoTHubTransport_MQTT_Common_Create(const IOTHUBTRANSPORT_CON
         LogError("Invalid Argument: iotHubName is empty");
         result = NULL;
     }
-    else if ((g_msgTickCounter = tickcounter_create()) == NULL)
-    {
-        LogError("Invalid Argument: iotHubName is empty");
-        result = NULL;
-    }
     else
     {
         result = InitializeTransportHandleData(config->upperConfig, config->waitingToSend);
-        if (result == NULL)
-        {
-            tickcounter_destroy(g_msgTickCounter);
-        }
-        else
+        if (result != NULL)
         {
             result->get_io_transport = get_io_transport;
         }
@@ -1975,7 +1977,7 @@ void IoTHubTransport_MQTT_Common_Destroy(TRANSPORT_LL_HANDLE handle)
         STRING_delete(transport_data->topic_NotifyState);
         STRING_delete(transport_data->topic_DeviceMethods);
 
-        tickcounter_destroy(g_msgTickCounter);
+        tickcounter_destroy(transport_data->msgTickCounter);
         DestroyRetryLogic(transport_data->retryLogic);
         free(transport_data);
     }
@@ -2322,7 +2324,7 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIEN
                     nextListEntry.Flink = currentListEntry->Flink;
 
                     tickcounter_ms_t current_ms;
-                    (void)tickcounter_get_current_ms(g_msgTickCounter, &current_ms);
+                    (void)tickcounter_get_current_ms(transport_data->msgTickCounter, &current_ms);
                     /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_033: [IoTHubTransport_MQTT_Common_DoWork shall iterate through the Waiting Acknowledge messages looking for any message that has been waiting longer than 2 min.]*/
                     if (((current_ms - mqttMsgEntry->msgPublishTime) / 1000) > RESEND_TIMEOUT_VALUE_MIN)
                     {

@@ -67,10 +67,11 @@ copy %AzureIoTSDKs_path%c-utility\adapters\httpapi_compact.c %AzureIoTProtocolHT
 
 mkdir %AzureIoTProtocolMQTT_path%
 copy %AzureIoTSDKs_path%umqtt\src %AzureIoTProtocolMQTT_path%
-copy %AzureIoTSDKs_path%umqtt\inc\azure_umqtt_c %AzureIoTProtocolMQTT_path%
+mkdir %AzureIoTHub_path%src\azure_umqtt_c\
+copy %AzureIoTSDKs_path%umqtt\inc\azure_umqtt_c %AzureIoTHub_path%src\azure_umqtt_c\
 
 del %sdk_path%*amqp*.*
-del %sdk_path%*mqtt*.*
+del %sdk_path%iothubtransportmqtt_websockets.*
 
 del %SharedUtility_path%tlsio_*.*
 del %SharedUtility_path%wsio*.*

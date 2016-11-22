@@ -86,7 +86,7 @@ set compiler_fullZipName=%directory%\%zip_file_name%.zip
 
 if "%check_path%"=="" goto :download
 
-if exist %directory%\%zip_file_name%\%check_path% (
+if exist %directory%\%check_path% (
     echo ***do not download %zip_file_name% because %check_path% already exist.***
     goto :eof
 )

@@ -9,5 +9,12 @@ extern "C" {
     {
         return (double)_time2 - (double)_time1;
     }
+    
+    size_t strftime(char *s, size_t maxsize, const char* format, const struct tm *timeptr)
+    {
+        /*For now esp8266 will not report time.*/
+        (void)(s, maxsize, format, timeptr);        
+        return 0;
+    }
 }
 #endif
