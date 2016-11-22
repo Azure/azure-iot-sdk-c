@@ -624,6 +624,191 @@ EXECUTE_COMMAND_RESULT A2(totallyNotUnique_model8* m8, totallyNotUnique tnu)
     return EXECUTE_COMMAND_SUCCESS;
 }
 
+BEGIN_NAMESPACE(basic18)
+
+DECLARE_MODEL(model_WithMethod18,
+    WITH_METHOD(method18,
+        double, double18,
+        int, int18,
+        float, float18,
+        long, long18,
+        int8_t, sint8_t18,
+        uint8_t, uint8_t18,
+        int16_t, int16_t18,
+        int32_t, int32_t18,
+        int64_t, int64_t18,
+        bool, bool18,
+        ascii_char_ptr, ascii_char_ptr18,
+        ascii_char_ptr_no_quotes, ascii_char_ptr_no_quotes18,
+        EDM_DATE_TIME_OFFSET, EdmDateTimeOffset18,
+        EDM_GUID, EdmGuid18,
+        EDM_BINARY, EdmBinary18)
+    )
+
+END_NAMESPACE(basic18)
+
+METHODRETURN_HANDLE method18(model_WithMethod18* model,
+    double double18,
+    int int18,
+    float float18,
+    long long18,
+    int8_t sint8_t18,
+    uint8_t uint8_t18,
+    int16_t int16_t18,
+    int32_t int32_t18,
+    int64_t int64_t18,
+    bool bool18,
+    ascii_char_ptr ascii_char_ptr18,
+    ascii_char_ptr_no_quotes ascii_char_ptr_no_quotes18,
+    EDM_DATE_TIME_OFFSET EdmDateTimeOffset18,
+    EDM_GUID EdmGuid18,
+    EDM_BINARY EdmBinary18
+)
+{
+    (void)(model);
+    ASSERT_ARE_EQUAL(double,    1.0,           double18);
+    ASSERT_ARE_EQUAL(int,       2,             int18);
+    ASSERT_ARE_EQUAL(float,     3.0,           float18);
+    ASSERT_ARE_EQUAL(long,      4,             long18);
+    ASSERT_ARE_EQUAL(int8_t,    5,             sint8_t18);
+    ASSERT_ARE_EQUAL(uint8_t,   6,             uint8_t18);
+    ASSERT_ARE_EQUAL(int16_t,   7,             int16_t18);
+    ASSERT_ARE_EQUAL(int32_t,   8,             int32_t18);
+    ASSERT_ARE_EQUAL(int64_t,   9,             int64_t18);
+    ASSERT_IS_TRUE(bool18);
+    ASSERT_ARE_EQUAL(char_ptr,  "eleven",       ascii_char_ptr18);
+    ASSERT_ARE_EQUAL(char_ptr,  "\"twelve\"",   ascii_char_ptr_no_quotes18);
+    ASSERT_ARE_EQUAL(int,       114,            EdmDateTimeOffset18.dateTime.tm_year);
+    ASSERT_ARE_EQUAL(int,       6-1,            EdmDateTimeOffset18.dateTime.tm_mon);
+    ASSERT_ARE_EQUAL(int,       17,             EdmDateTimeOffset18.dateTime.tm_mday);
+    ASSERT_ARE_EQUAL(int,       8,              EdmDateTimeOffset18.dateTime.tm_hour);
+    ASSERT_ARE_EQUAL(int,       51,             EdmDateTimeOffset18.dateTime.tm_min);
+    ASSERT_ARE_EQUAL(int,       23,             EdmDateTimeOffset18.dateTime.tm_sec);
+    ASSERT_ARE_EQUAL(uint8_t,   1,              EdmDateTimeOffset18.hasFractionalSecond);
+    ASSERT_ARE_EQUAL(uint64_t,  5,              EdmDateTimeOffset18.fractionalSecond);
+    ASSERT_ARE_EQUAL(uint8_t,   1,              EdmDateTimeOffset18.hasTimeZone);
+    ASSERT_ARE_EQUAL(int8_t,    -8,             EdmDateTimeOffset18.timeZoneHour);
+    ASSERT_ARE_EQUAL(uint8_t,   1,              EdmDateTimeOffset18.timeZoneMinute);
+    ASSERT_ARE_EQUAL(uint8_t,   0x00,           EdmGuid18.GUID[0]);
+    ASSERT_ARE_EQUAL(uint8_t,   0x11,           EdmGuid18.GUID[1]);
+    ASSERT_ARE_EQUAL(uint8_t,   0x22,           EdmGuid18.GUID[2]);
+    ASSERT_ARE_EQUAL(uint8_t,   0x33,           EdmGuid18.GUID[3]);
+    ASSERT_ARE_EQUAL(uint8_t,   0x44,           EdmGuid18.GUID[4]);
+    ASSERT_ARE_EQUAL(uint8_t,   0x55,           EdmGuid18.GUID[5]);
+    ASSERT_ARE_EQUAL(uint8_t,   0x66,           EdmGuid18.GUID[6]);
+    ASSERT_ARE_EQUAL(uint8_t,   0x77,           EdmGuid18.GUID[7]);
+    ASSERT_ARE_EQUAL(uint8_t,   0x88,           EdmGuid18.GUID[8]);
+    ASSERT_ARE_EQUAL(uint8_t,   0x99,           EdmGuid18.GUID[9]);
+    ASSERT_ARE_EQUAL(uint8_t,   0xAA,           EdmGuid18.GUID[10]);
+    ASSERT_ARE_EQUAL(uint8_t,   0xBB,           EdmGuid18.GUID[11]);
+    ASSERT_ARE_EQUAL(uint8_t,   0xCC,           EdmGuid18.GUID[12]);
+    ASSERT_ARE_EQUAL(uint8_t,   0xDD,           EdmGuid18.GUID[13]);
+    ASSERT_ARE_EQUAL(uint8_t,   0xEE,           EdmGuid18.GUID[14]);
+    ASSERT_ARE_EQUAL(uint8_t,   0xFF,           EdmGuid18.GUID[15]);
+
+    ASSERT_ARE_EQUAL(size_t,     3,             EdmBinary18.size);
+    ASSERT_ARE_EQUAL(uint8_t,   '3',            EdmBinary18.data[0]);
+    ASSERT_ARE_EQUAL(uint8_t,   '4',            EdmBinary18.data[1]);
+    ASSERT_ARE_EQUAL(uint8_t,   '5',            EdmBinary18.data[2]);
+
+    METHODRETURN_HANDLE result = MethodReturn_Create(18, "\"18\""); /*the statusCode is 18, the JSON value is "18"*/
+    return result;
+}
+
+BEGIN_NAMESPACE(basic19)
+
+DECLARE_MODEL(model_WithMethod19,
+    WITH_METHOD(method19,
+        double, double19,
+        int, int19,
+        float, float19,
+        long, long19,
+        int8_t, sint8_t19,
+        uint8_t, uint8_t19,
+        int16_t, int16_t19,
+        int32_t, int32_t19,
+        int64_t, int64_t19,
+        bool, bool19,
+        ascii_char_ptr, ascii_char_ptr19,
+        ascii_char_ptr_no_quotes, ascii_char_ptr_no_quotes19,
+        EDM_DATE_TIME_OFFSET, EdmDateTimeOffset19,
+        EDM_GUID, EdmGuid19,
+        EDM_BINARY, EdmBinary19)
+    );
+
+    DECLARE_MODEL(outerModel19,
+        WITH_DATA(model_WithMethod19, modelMethod19)
+    );
+END_NAMESPACE(basic19)
+
+METHODRETURN_HANDLE method19(model_WithMethod19* model,
+    double double19,
+    int int19,
+    float float19,
+    long long19,
+    int8_t sint8_t19,
+    uint8_t uint8_t19,
+    int16_t int16_t19,
+    int32_t int32_t19,
+    int64_t int64_t19,
+    bool bool19,
+    ascii_char_ptr ascii_char_ptr19,
+    ascii_char_ptr_no_quotes ascii_char_ptr_no_quotes19,
+    EDM_DATE_TIME_OFFSET EdmDateTimeOffset19,
+    EDM_GUID EdmGuid19,
+    EDM_BINARY EdmBinary19
+)
+{
+    (void)(model);
+    ASSERT_ARE_EQUAL(double,    1.0,           double19);
+    ASSERT_ARE_EQUAL(int,       2,             int19);
+    ASSERT_ARE_EQUAL(float,     3.0,           float19);
+    ASSERT_ARE_EQUAL(long,      4,             long19);
+    ASSERT_ARE_EQUAL(int8_t,    5,             sint8_t19);
+    ASSERT_ARE_EQUAL(uint8_t,   6,             uint8_t19);
+    ASSERT_ARE_EQUAL(int16_t,   7,             int16_t19);
+    ASSERT_ARE_EQUAL(int32_t,   8,             int32_t19);
+    ASSERT_ARE_EQUAL(int64_t,   9,             int64_t19);
+    ASSERT_IS_TRUE(bool19);
+    ASSERT_ARE_EQUAL(char_ptr,  "eleven",       ascii_char_ptr19);
+    ASSERT_ARE_EQUAL(char_ptr,  "\"twelve\"",   ascii_char_ptr_no_quotes19);
+    ASSERT_ARE_EQUAL(int,       119,            EdmDateTimeOffset19.dateTime.tm_year);
+    ASSERT_ARE_EQUAL(int,       6-1,            EdmDateTimeOffset19.dateTime.tm_mon);
+    ASSERT_ARE_EQUAL(int,       17,             EdmDateTimeOffset19.dateTime.tm_mday);
+    ASSERT_ARE_EQUAL(int,       8,              EdmDateTimeOffset19.dateTime.tm_hour);
+    ASSERT_ARE_EQUAL(int,       51,             EdmDateTimeOffset19.dateTime.tm_min);
+    ASSERT_ARE_EQUAL(int,       23,             EdmDateTimeOffset19.dateTime.tm_sec);
+    ASSERT_ARE_EQUAL(uint8_t,   1,              EdmDateTimeOffset19.hasFractionalSecond);
+    ASSERT_ARE_EQUAL(uint64_t,  5,              EdmDateTimeOffset19.fractionalSecond);
+    ASSERT_ARE_EQUAL(uint8_t,   1,              EdmDateTimeOffset19.hasTimeZone);
+    ASSERT_ARE_EQUAL(int8_t,    -8,             EdmDateTimeOffset19.timeZoneHour);
+    ASSERT_ARE_EQUAL(uint8_t,   1,              EdmDateTimeOffset19.timeZoneMinute);
+    ASSERT_ARE_EQUAL(uint8_t,   0x00,           EdmGuid19.GUID[0]);
+    ASSERT_ARE_EQUAL(uint8_t,   0x11,           EdmGuid19.GUID[1]);
+    ASSERT_ARE_EQUAL(uint8_t,   0x22,           EdmGuid19.GUID[2]);
+    ASSERT_ARE_EQUAL(uint8_t,   0x33,           EdmGuid19.GUID[3]);
+    ASSERT_ARE_EQUAL(uint8_t,   0x44,           EdmGuid19.GUID[4]);
+    ASSERT_ARE_EQUAL(uint8_t,   0x55,           EdmGuid19.GUID[5]);
+    ASSERT_ARE_EQUAL(uint8_t,   0x66,           EdmGuid19.GUID[6]);
+    ASSERT_ARE_EQUAL(uint8_t,   0x77,           EdmGuid19.GUID[7]);
+    ASSERT_ARE_EQUAL(uint8_t,   0x88,           EdmGuid19.GUID[8]);
+    ASSERT_ARE_EQUAL(uint8_t,   0x99,           EdmGuid19.GUID[9]);
+    ASSERT_ARE_EQUAL(uint8_t,   0xAA,           EdmGuid19.GUID[10]);
+    ASSERT_ARE_EQUAL(uint8_t,   0xBB,           EdmGuid19.GUID[11]);
+    ASSERT_ARE_EQUAL(uint8_t,   0xCC,           EdmGuid19.GUID[12]);
+    ASSERT_ARE_EQUAL(uint8_t,   0xDD,           EdmGuid19.GUID[13]);
+    ASSERT_ARE_EQUAL(uint8_t,   0xEE,           EdmGuid19.GUID[14]);
+    ASSERT_ARE_EQUAL(uint8_t,   0xFF,           EdmGuid19.GUID[15]);
+
+    ASSERT_ARE_EQUAL(size_t,     3,             EdmBinary19.size);
+    ASSERT_ARE_EQUAL(uint8_t,   '3',            EdmBinary19.data[0]);
+    ASSERT_ARE_EQUAL(uint8_t,   '4',            EdmBinary19.data[1]);
+    ASSERT_ARE_EQUAL(uint8_t,   '5',            EdmBinary19.data[2]);
+
+    METHODRETURN_HANDLE result = MethodReturn_Create(19, "{\"result\": \"nineteen\"}");
+    return result;
+}
+
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/umock_c_prod.h"
     MOCKABLE_FUNCTION(, void, on_structure16, void*, v);
@@ -2109,6 +2294,83 @@ BEGIN_TEST_SUITE(serializer_int)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         ///clean
+        DESTROY_MODEL_INSTANCE(modelWithData);
+    }
+
+    TEST_FUNCTION(WITH_METHOD_IN_ROOT_MODEL)
+    {
+        ///arrange
+        model_WithMethod18 *modelWithData = CREATE_MODEL_INSTANCE(basic18, model_WithMethod18, true);
+
+        const char* inputJsonAsString =
+        "{                                                                                   \
+            \"double18\" : 1.0,                                                              \
+            \"int18\" : 2,                                                                   \
+            \"float18\" : 3.000000,                                                          \
+            \"long18\" : 4,                                                                  \
+            \"sint8_t18\" : 5,                                                               \
+            \"uint8_t18\" : 6,                                                               \
+            \"int16_t18\" : 7,                                                               \
+            \"int32_t18\" : 8,                                                               \
+            \"int64_t18\" : 9,                                                               \
+            \"bool18\" : true,                                                               \
+            \"ascii_char_ptr18\" : \"eleven\",                                               \
+            \"ascii_char_ptr_no_quotes18\" : \"twelve\",                                     \
+            \"EdmDateTimeOffset18\" : \"2014-06-17T08:51:23.000000000005-08:01\",            \
+            \"EdmGuid18\" : \"00112233-4455-6677-8899-AABBCCDDEEFF\",                        \
+            \"EdmBinary18\": \"MzQ1\"                                                        \
+        }";
+
+        ///act
+        METHODRETURN_HANDLE result = EXECUTE_METHOD(modelWithData,"method18", inputJsonAsString);
+
+        ///assert (rest of asserts are in the action)
+        ASSERT_IS_NOT_NULL(result);
+        const METHODRETURN_DATA* r2 = MethodReturn_GetReturn(result);
+        ASSERT_ARE_EQUAL(int, 18, r2->statusCode);
+        ASSERT_ARE_EQUAL(char_ptr, "\"18\"", r2->jsonValue);
+
+        ///clean
+        MethodReturn_Destroy(result);
+        DESTROY_MODEL_INSTANCE(modelWithData);
+    }
+
+    TEST_FUNCTION(WITH_METHOD_IN_MODEL_IN_MODEL)
+    {
+        ///arrange
+        outerModel19 *modelWithData = CREATE_MODEL_INSTANCE(basic19, outerModel19, true);
+
+        const char* inputJsonAsString =
+        "{                                                                                   \
+            \"double19\" : 1.0,                                                              \
+            \"int19\" : 2,                                                                   \
+            \"float19\" : 3.000000,                                                          \
+            \"long19\" : 4,                                                                  \
+            \"sint8_t19\" : 5,                                                               \
+            \"uint8_t19\" : 6,                                                               \
+            \"int16_t19\" : 7,                                                               \
+            \"int32_t19\" : 8,                                                               \
+            \"int64_t19\" : 9,                                                               \
+            \"bool19\" : true,                                                               \
+            \"ascii_char_ptr19\" : \"eleven\",                                               \
+            \"ascii_char_ptr_no_quotes19\" : \"twelve\",                                     \
+            \"EdmDateTimeOffset19\" : \"2019-06-17T08:51:23.000000000005-08:01\",            \
+            \"EdmGuid19\" : \"00112233-4455-6677-8899-AABBCCDDEEFF\",                        \
+            \"EdmBinary19\": \"MzQ1\"                                                        \
+        }";
+
+        ///act
+        METHODRETURN_HANDLE result = EXECUTE_METHOD(modelWithData, "modelMethod19/method19", inputJsonAsString);
+
+        ///assert (rest of asserts are in the action)
+        ASSERT_IS_NOT_NULL(result);
+        const METHODRETURN_DATA * data = MethodReturn_GetReturn(result);
+
+        ASSERT_ARE_EQUAL(int, 19, data->statusCode);
+        ASSERT_ARE_EQUAL(char_ptr, "{\"result\": \"nineteen\"}", data->jsonValue);
+
+        ///clean
+        MethodReturn_Destroy(result);
         DESTROY_MODEL_INSTANCE(modelWithData);
     }
 

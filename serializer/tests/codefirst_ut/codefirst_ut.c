@@ -157,6 +157,11 @@ WITH_ACTION(reset),
 WITH_ACTION(setSpeed, double, theSpeed),
 WITH_ACTION(test1, double, P1, int, P2, float, P3, long, P4, int8_t, P5, uint8_t, P6, int16_t, P7, int32_t, P8, int64_t, P9, bool, P10, ascii_char_ptr, P11, EDM_DATE_TIME_OFFSET, P12, EDM_GUID, P13, EDM_BINARY, P14, ascii_char_ptr_no_quotes, P15),
 
+WITH_METHOD(resetMethod),
+WITH_METHOD(setSpeedMethod, double, theSpeed),
+WITH_METHOD(test1Method, double, P1, int, P2, float, P3, long, P4, int8_t, P5, uint8_t, P6, int16_t, P7, int32_t, P8, int64_t, P9, bool, P10, ascii_char_ptr, P11, EDM_DATE_TIME_OFFSET, P12, EDM_GUID, P13, EDM_BINARY, P14, ascii_char_ptr_no_quotes, P15),
+
+
 WITH_REPORTED_PROPERTY(double, reported_this_is_double),
 WITH_REPORTED_PROPERTY(int, reported_this_is_int),
 WITH_REPORTED_PROPERTY(float, reported_this_is_float),
@@ -253,6 +258,69 @@ EXECUTE_COMMAND_RESULT test1(TruckType* device, double P1, int P2, float P3, lon
     memcpy(DummyDataProvider_test1_P14.data, P14.data, P14.size);
     strcpy(DummyDataProvider_test1_P15, P15);
     return EXECUTE_COMMAND_SUCCESS;
+}
+
+static METHODRETURN_HANDLE g_MethodReturn = (METHODRETURN_HANDLE)0x33;
+
+bool DummyDataProvider_resetMethod_wasCalled;
+METHODRETURN_HANDLE resetMethod(TruckType* device)
+{
+    (void)device;
+    DummyDataProvider_resetMethod_wasCalled = true;
+    return g_MethodReturn;
+}
+
+bool DummyDataProvider_setSpeedMethod_wasCalled;
+double DummyDataProvider_setSpeedMethod_theSpeed;
+METHODRETURN_HANDLE setSpeedMethod(TruckType* device, double theSpeed)
+{
+    (void)device;
+    DummyDataProvider_setSpeedMethod_wasCalled = true;
+    DummyDataProvider_setSpeedMethod_theSpeed = theSpeed;
+    return g_MethodReturn;
+}
+
+bool                    DummyDataProvider_test1Method_wasCalled;
+double                  DummyDataProvider_test1Method_P1;
+int                     DummyDataProvider_test1Method_P2;
+float                   DummyDataProvider_test1Method_P3;
+long                    DummyDataProvider_test1Method_P4;
+int8_t                  DummyDataProvider_test1Method_P5;
+uint8_t                 DummyDataProvider_test1Method_P6;
+int16_t                 DummyDataProvider_test1Method_P7;
+int32_t                 DummyDataProvider_test1Method_P8;
+int64_t                 DummyDataProvider_test1Method_P9;
+bool                    DummyDataProvider_test1Method_P10;
+#define                 P11_MAX_SIZE 100
+char                    DummyDataProvider_test1Method_P11[P11_MAX_SIZE];
+EDM_DATE_TIME_OFFSET    DummyDataProvider_test1Method_P12;
+EDM_GUID                DummyDataProvider_test1Method_P13;
+EDM_BINARY              DummyDataProvider_test1Method_P14 = { 0, NULL };
+#define                 P15_MAX_SIZE 100
+char                    DummyDataProvider_test1Method_P15[P15_MAX_SIZE];
+
+METHODRETURN_HANDLE test1Method(TruckType* device, double P1, int P2, float P3, long P4, int8_t P5, uint8_t P6, int16_t P7, int32_t P8, int64_t P9, bool P10, ascii_char_ptr P11, EDM_DATE_TIME_OFFSET P12, EDM_GUID P13, EDM_BINARY P14, ascii_char_ptr_no_quotes P15)
+{
+    (void)device;
+    DummyDataProvider_test1Method_wasCalled = true;
+    DummyDataProvider_test1Method_P1 = P1;
+    DummyDataProvider_test1Method_P2 = P2;
+    DummyDataProvider_test1Method_P3 = P3;
+    DummyDataProvider_test1Method_P4 = P4;
+    DummyDataProvider_test1Method_P5 = P5;
+    DummyDataProvider_test1Method_P6 = P6;
+    DummyDataProvider_test1Method_P7 = P7;
+    DummyDataProvider_test1Method_P8 = P8;
+    DummyDataProvider_test1Method_P9 = P9;
+    DummyDataProvider_test1Method_P10 = P10;
+    strcpy(DummyDataProvider_test1Method_P11, P11);
+    DummyDataProvider_test1Method_P12 = P12;
+    DummyDataProvider_test1Method_P13 = P13;
+    DummyDataProvider_test1Method_P14.size = P14.size;
+    DummyDataProvider_test1Method_P14.data = (unsigned char*)malloc(P14.size);
+    memcpy(DummyDataProvider_test1Method_P14.data, P14.data, P14.size);
+    strcpy(DummyDataProvider_test1Method_P15, P15);
+    return g_MethodReturn;
 }
 
 #define TEST_DEFAULT_SCHEMA_NAMESPACE   ("Test.TruckDemo")
@@ -646,11 +714,11 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
     ASSERT_FAIL(temp_str);
 }
 
-static DEVICE_RESULT my_Device_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, pfDeviceActionCallback deviceActionCallback, void* callbackUserContext, bool includePropertyPath, DEVICE_HANDLE* deviceHandle)
+static DEVICE_RESULT my_Device_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, pfDeviceActionCallback deviceActionCallback, void* actionCallbackUserContext, pfDeviceMethodCallback deviceMethodCallback, void* methodCallbackUserContext, bool includePropertyPath, DEVICE_HANDLE* deviceHandle)
 {
-    (void)(includePropertyPath, deviceActionCallback, modelHandle);
+    (void)(deviceActionCallback, deviceMethodCallback, methodCallbackUserContext, includePropertyPath, modelHandle);
     *deviceHandle = TEST_DEVICE_HANDLE;
-    g_InvokeActionCallbackArgument = callbackUserContext;
+    g_InvokeActionCallbackArgument = actionCallbackUserContext;
     return DEVICE_OK;
 }
 
@@ -716,6 +784,9 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         REGISTER_UMOCK_ALIAS_TYPE(pfDesiredPropertyFromAGENT_DATA_TYPE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(pfDesiredPropertyDeinitialize, void*);
         REGISTER_UMOCK_ALIAS_TYPE(pfOnDesiredProperty, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(pfDeviceMethodCallback, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(METHODRETURN_HANDLE, void*);
+        
         
         REGISTER_GLOBAL_MOCK_RETURN(Schema_GetModelName, TEST_MODEL_NAME);
         REGISTER_GLOBAL_MOCK_HOOK(Create_AGENT_DATA_TYPE_from_DOUBLE, my_Create_AGENT_DATA_TYPE_from_DOUBLE);
@@ -786,6 +857,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         REGISTER_GLOBAL_MOCK_RETURNS(Device_PublishTransacted_ReportedProperty,DEVICE_OK, DEVICE_ERROR);
 
         REGISTER_GLOBAL_MOCK_RETURNS(Device_CommitTransaction_ReportedProperties, DEVICE_OK, DEVICE_ERROR);
+        REGISTER_GLOBAL_MOCK_RETURNS(Device_ExecuteMethod, g_MethodReturn, NULL);
 
         REGISTER_GLOBAL_MOCK_HOOK(Device_DestroyTransaction_ReportedProperties, my_Device_DestroyTransaction_ReportedProperties);
         
@@ -895,6 +967,9 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         arrayOfAgentDataType[14].type = EDM_STRING_NO_QUOTES_TYPE;
         arrayOfAgentDataType[14].value.edmStringNoQuotes.chars = someMoreChars;
         arrayOfAgentDataType[14].value.edmStringNoQuotes.length = strlen(someMoreChars);
+
+        DummyDataProvider_resetMethod_wasCalled = false;
+        DummyDataProvider_setSpeedMethod_wasCalled = false;
 
         toBeCleaned = NULL;
     }
@@ -1781,7 +1856,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
     /* Tests_SRS_CODEFIRST_99_079:[CodeFirst_CreateDevice shall create a device and allocate a memory block that should hold the device data.] */
     /* Tests_SRS_CODEFIRST_99_081:[CodeFirst_CreateDevice shall use Device_Create to create a device handle.] */
-    /* Tests_SRS_CODEFIRST_99_082:[CodeFirst_CreateDevice shall pass to Device_Create the function CodeFirst_InvokeAction as action callback argument.] */
+    /* Tests_SRS_CODEFIRST_99_082: [ CodeFirst_CreateDevice shall pass to Device_Create the function CodeFirst_InvokeAction, action callback argument and the CodeFirst_InvokeMethod ]*/
     /* Tests_SRS_CODEFIRST_99_101:[On success, CodeFirst_CreateDevice shall return a non NULL pointer to the device data.] */
     /* Tests_SRS_CODEFIRST_01_001: [CodeFirst_CreateDevice shall pass the includePropertyPath argument to Device_Create.] */
     TEST_FUNCTION(CodeFirst_CreateDevice_With_Valid_Arguments_and_includePropertyPath_false_Succeeds_1)
@@ -1793,8 +1868,12 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
             .CopyOutArgumentBuffer_desiredPropertyCount(&zero, sizeof(zero));
         STRICT_EXPECTED_CALL(Schema_GetModelModelCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer_modelCount(&zero, sizeof(zero));
-        STRICT_EXPECTED_CALL(Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, false, IGNORED_PTR_ARG))
-            .IgnoreArgument(3).IgnoreArgument(5);
+        STRICT_EXPECTED_CALL(Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, CodeFirst_InvokeMethod, TEST_CALLBACK_CONTEXT, false, IGNORED_PTR_ARG))
+            .IgnoreArgument_deviceHandle()
+            .IgnoreArgument_methodCallbackContext()
+            .IgnoreArgument_callbackUserContext();
+
+        
         STRICT_EXPECTED_CALL(Schema_AddDeviceRef(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -1820,8 +1899,10 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Schema_GetModelModelCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer_modelCount(&zero, sizeof(zero));
 
-        STRICT_EXPECTED_CALL(Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, false, IGNORED_PTR_ARG))
-            .IgnoreArgument(3).IgnoreArgument(5);
+        STRICT_EXPECTED_CALL(Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, CodeFirst_InvokeMethod, TEST_CALLBACK_CONTEXT, false, IGNORED_PTR_ARG))
+            .IgnoreArgument_deviceHandle()
+            .IgnoreArgument_methodCallbackContext()
+            .IgnoreArgument_callbackUserContext();
         STRICT_EXPECTED_CALL(Schema_AddDeviceRef(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -1848,8 +1929,10 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Schema_GetModelModelCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer_modelCount(&zero, sizeof(zero));
 
-        STRICT_EXPECTED_CALL(Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, true, IGNORED_PTR_ARG))
-            .IgnoreArgument(3).IgnoreArgument(5);
+        STRICT_EXPECTED_CALL(Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, CodeFirst_InvokeMethod, TEST_CALLBACK_CONTEXT, true, IGNORED_PTR_ARG))
+            .IgnoreArgument_deviceHandle()
+            .IgnoreArgument_methodCallbackContext()
+            .IgnoreArgument_callbackUserContext();
         STRICT_EXPECTED_CALL(Schema_AddDeviceRef(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -1870,8 +1953,11 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     {
         // arrange
         (void)CodeFirst_Init(NULL);
-        STRICT_EXPECTED_CALL(Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, false, IGNORED_PTR_ARG))
-            .IgnoreArgument(3).IgnoreArgument(5).SetReturn(DEVICE_ERROR);
+        STRICT_EXPECTED_CALL(Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, CodeFirst_InvokeMethod, TEST_CALLBACK_CONTEXT, false, IGNORED_PTR_ARG))
+            .IgnoreArgument_deviceHandle()
+            .IgnoreArgument_methodCallbackContext()
+            .IgnoreArgument_callbackUserContext()
+            .SetReturn(DEVICE_ERROR);
 
         // act
         void* result = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, 1, false);
@@ -3992,8 +4078,10 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
             .CopyOutArgumentBuffer_desiredPropertyCount(&zero, sizeof(zero));
         STRICT_EXPECTED_CALL(Schema_GetModelModelCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer_modelCount(&zero, sizeof(zero));
-        STRICT_EXPECTED_CALL(Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, false, IGNORED_PTR_ARG))
-            .IgnoreArgument(3).IgnoreArgument(5);
+        STRICT_EXPECTED_CALL(Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, CodeFirst_InvokeMethod, TEST_CALLBACK_CONTEXT, false, IGNORED_PTR_ARG))
+            .IgnoreArgument_deviceHandle()
+            .IgnoreArgument_methodCallbackContext()
+            .IgnoreArgument_callbackUserContext();
         STRICT_EXPECTED_CALL(Schema_AddDeviceRef(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -4100,6 +4188,314 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         /// cleanup
         CodeFirst_DestroyDevice(device);
         my_gballoc_free(destination);
+    }
+
+    /*Tests_SRS_CODEFIRST_02_050: [ If CodeFirst was not init before, CodeFirst_InvokeMethod shall fail and return NULL. ]*/
+    TEST_FUNCTION(CodeFirst_InvokeMethod_when_CodeFirst_is_not_init_fails)
+    {
+        ///arrange
+        
+        ///act
+        METHODRETURN_HANDLE result = CodeFirst_InvokeMethod(TEST_DEVICE_HANDLE, NULL, "", "methodA", 0, NULL);
+
+        ///assert
+        ASSERT_IS_NULL(result);
+
+        ///cleanup
+    }
+
+    /*Tests_SRS_CODEFIRST_02_051: [ If deviceHandle is NULL then CodeFirst_InvokeMethod shall fail and return NULL. ]*/
+    TEST_FUNCTION(CodeFirst_InvokeMethod_with_NULL_deviceHandle_fails)
+    {
+        ///arrange
+        (void)CodeFirst_Init(NULL);
+
+        ///act
+        METHODRETURN_HANDLE result = CodeFirst_InvokeMethod(NULL, NULL, "", "methodA", 0, NULL);
+
+        ///assert
+        ASSERT_IS_NULL(result);
+
+        ///cleanup
+        CodeFirst_Deinit();
+    }
+
+    /*Tests_SRS_CODEFIRST_02_052: [ If relativeMethodPath is NULL then CodeFirst_InvokeMethod shall fail and return NULL. ]*/
+    TEST_FUNCTION(CodeFirst_InvokeMethod_with_NULL_relativeMethodPath_fails)
+    {
+        ///arrange
+        (void)CodeFirst_Init(NULL);
+
+        ///act
+        METHODRETURN_HANDLE result = CodeFirst_InvokeMethod(TEST_DEVICE_HANDLE, NULL, NULL, "methodA", 0, NULL);
+
+        ///assert
+        ASSERT_IS_NULL(result);
+
+        ///cleanup
+        CodeFirst_Deinit();
+    }
+    
+    /*Tests_SRS_CODEFIRST_02_053: [ If methodName is NULL then CodeFirst_InvokeMethod shall fail and return NULL. ]*/
+    TEST_FUNCTION(CodeFirst_InvokeMethod_with_NULL_methodName_fails)
+    {
+        ///arrange
+        (void)CodeFirst_Init(NULL);
+
+        ///act
+        METHODRETURN_HANDLE result = CodeFirst_InvokeMethod(TEST_DEVICE_HANDLE, NULL, "", NULL, 0, NULL);
+
+        ///assert
+        ASSERT_IS_NULL(result);
+
+        ///cleanup
+        CodeFirst_Deinit();
+    }
+
+    /*Tests_SRS_CODEFIRST_02_054: [ If parameterCount is greater than 0 and parameterValues is NULL then then CodeFirst_InvokeMethod shall fail and return NULL. ]*/
+    TEST_FUNCTION(CodeFirst_InvokeMethod_with_parameterCount_1_and_parameterValues_NULL_fails)
+    {
+        ///arrange
+        (void)CodeFirst_Init(NULL);
+
+        ///act
+        METHODRETURN_HANDLE result = CodeFirst_InvokeMethod(TEST_DEVICE_HANDLE, NULL, "", "methodA", 1, NULL);
+
+        ///assert
+        ASSERT_IS_NULL(result);
+
+        ///cleanup
+        CodeFirst_Deinit();
+    }
+
+    /*Tests_SRS_CODEFIRST_02_059: [ If any of the above fails then CodeFirst_InvokeMethod shall fail and return NULL. ]*/
+    TEST_FUNCTION(CodeFirst_InvokeMethod_happy_path)
+    {
+        ///arrange
+        (void)CodeFirst_Init(NULL);
+        void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
+        (void)device;
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE))
+            .SetReturn("TruckType");
+
+        ///act
+        METHODRETURN_HANDLE result = CodeFirst_InvokeMethod(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "resetMethod", 0, NULL);
+
+        ///assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+        ASSERT_IS_TRUE(DummyDataProvider_resetMethod_wasCalled);
+        ASSERT_IS_NOT_NULL(result);
+        
+
+        ///cleanup
+        
+        CodeFirst_Deinit();
+    }
+
+    /*Tests_SRS_CODEFIRST_02_059: [ If any of the above fails then CodeFirst_InvokeMethod shall fail and return NULL. ]*/
+    TEST_FUNCTION(CodeFirst_InvokeMethod_fails_when_Schema_GetModelName_fails)
+    {
+        ///arrange
+        (void)CodeFirst_Init(NULL);
+        void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
+        (void)device;
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE))
+            .SetReturn("NULL");
+
+        ///act
+        METHODRETURN_HANDLE result = CodeFirst_InvokeMethod(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "resetMethod", 0, NULL);
+
+        ///assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+        ASSERT_IS_FALSE(DummyDataProvider_resetMethod_wasCalled);
+        ASSERT_IS_NULL(result);
+
+
+        ///cleanup
+
+        CodeFirst_Deinit();
+    }
+
+    /*Tests_SRS_CODEFIRST_02_059: [ If any of the above fails then CodeFirst_InvokeMethod shall fail and return NULL. ]*/
+    TEST_FUNCTION(CodeFirst_InvokeMethod_fails_when_relativePath_does_not_exist_fails)
+    {
+        ///arrange
+        (void)CodeFirst_Init(NULL);
+        void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
+        (void)device;
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE))
+            .SetReturn("TruckType");
+
+        ///act
+        METHODRETURN_HANDLE result = CodeFirst_InvokeMethod(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "someInexistingRelativePath", "resetMethod", 0, NULL);
+
+        ///assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+        ASSERT_IS_FALSE(DummyDataProvider_resetMethod_wasCalled);
+        ASSERT_IS_NULL(result);
+
+
+        ///cleanup
+
+        CodeFirst_Deinit();
+    }
+
+    /*Tests_SRS_CODEFIRST_02_059: [ If any of the above fails then CodeFirst_InvokeMethod shall fail and return NULL. ]*/
+    TEST_FUNCTION(CodeFirst_InvokeMethod_fails_when_method_does_not_exist_fails)
+    {
+        ///arrange
+        (void)CodeFirst_Init(NULL);
+        void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
+        (void)device;
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE))
+            .SetReturn("TruckType");
+
+        ///act
+        METHODRETURN_HANDLE result = CodeFirst_InvokeMethod(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "resetMethod_which_does_not_exist", 0, NULL);
+
+        ///assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+        ASSERT_IS_FALSE(DummyDataProvider_resetMethod_wasCalled);
+        ASSERT_IS_NULL(result);
+
+
+        ///cleanup
+
+        CodeFirst_Deinit();
+    }
+
+    /*Tests_SRS_CODEFIRST_02_059: [ If any of the above fails then CodeFirst_InvokeMethod shall fail and return NULL. ]*/
+    TEST_FUNCTION(CodeFirst_InvokeMethod_fails_when_model_does_not_exist_fails)
+    {
+        ///arrange
+        (void)CodeFirst_Init(NULL);
+        void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
+        (void)device;
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE))
+            .SetReturn("TruckType_which_does_not_exist");
+
+        ///act
+        METHODRETURN_HANDLE result = CodeFirst_InvokeMethod(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "resetMethod", 0, NULL);
+
+        ///assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+        ASSERT_IS_FALSE(DummyDataProvider_resetMethod_wasCalled);
+        ASSERT_IS_NULL(result);
+
+
+        ///cleanup
+
+        CodeFirst_Deinit();
+    }
+
+    /*Tests_SRS_CODEFIRST_02_060: [ If device is NULL then CodeFirst_ExecuteMethod shall fail and return NULL. ]*/
+    TEST_FUNCTION(CodeFirst_ExecuteMethod_with_NULL_device_fails)
+    {
+        ///arrange
+        (void)CodeFirst_Init(NULL);
+
+        ///act
+        METHODRETURN_HANDLE result = CodeFirst_ExecuteMethod(NULL, "resetMethod", NULL);
+
+        ///assert
+        ASSERT_IS_NULL(result);
+
+        ///cleanup
+        CodeFirst_Deinit();
+    }
+
+    /*Tests_SRS_CODEFIRST_02_061: [ If methodName is NULL then CodeFirst_ExecuteMethod shall fail and return NULL. ]*/
+    TEST_FUNCTION(CodeFirst_ExecuteMethod_with_NULL_methodName_fails)
+    {
+        ///arrange
+        (void)CodeFirst_Init(NULL);
+        void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
+        umock_c_reset_all_calls();
+
+        ///act
+        METHODRETURN_HANDLE result = CodeFirst_ExecuteMethod(device, NULL, NULL);
+
+        ///assert
+        ASSERT_IS_NULL(result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///cleanup
+        CodeFirst_Deinit();
+    }
+
+    /*Tests_SRS_CODEFIRST_02_062: [ CodeFirst_ExecuteMethod shall find the device data. ]*/
+    /*Tests_SRS_CODEFIRST_02_063: [ CodeFirst_ExecuteMethod shall call Device_ExecuteMethod and return what Device_ExecuteMethod returns. ]*/
+    TEST_FUNCTION(CodeFirst_ExecuteMethod_happy_path)
+    {
+        ///arrange
+        (void)CodeFirst_Init(NULL);
+        void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(Device_ExecuteMethod(TEST_DEVICE_HANDLE, "reset", NULL));
+
+        ///act
+        METHODRETURN_HANDLE result = CodeFirst_ExecuteMethod(device, "reset", NULL);
+
+        ///assert
+        ASSERT_IS_NOT_NULL(result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///cleanup
+        CodeFirst_Deinit();
+    }
+
+    /*Tests_SRS_CODEFIRST_02_062: [ CodeFirst_ExecuteMethod shall find the device data. ]*/
+    /*Tests_SRS_CODEFIRST_02_063: [ CodeFirst_ExecuteMethod shall call Device_ExecuteMethod and return what Device_ExecuteMethod returns. ]*/
+    TEST_FUNCTION(CodeFirst_ExecuteMethod_unhappy_path_1)
+    {
+        ///arrange
+        (void)CodeFirst_Init(NULL);
+        void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(Device_ExecuteMethod(TEST_DEVICE_HANDLE, "reset", NULL))
+            .SetReturn(NULL);
+
+        ///act
+        METHODRETURN_HANDLE result = CodeFirst_ExecuteMethod(device, "reset", NULL);
+
+        ///assert
+        ASSERT_IS_NULL(result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///cleanup
+        CodeFirst_Deinit();
+    }
+
+    /*Tests_SRS_CODEFIRST_02_062: [ CodeFirst_ExecuteMethod shall find the device data. ]*/
+    /*Tests_SRS_CODEFIRST_02_063: [ CodeFirst_ExecuteMethod shall call Device_ExecuteMethod and return what Device_ExecuteMethod returns. ]*/
+    TEST_FUNCTION(CodeFirst_ExecuteMethod_unhappy_path_2)
+    {
+        ///arrange
+        (void)CodeFirst_Init(NULL);
+        void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
+        umock_c_reset_all_calls();
+
+        ///act
+        METHODRETURN_HANDLE result = CodeFirst_ExecuteMethod((char*)device-1, "reset", NULL); /*device-1 is not a valid Device*/
+
+        ///assert
+        ASSERT_IS_NULL(result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///cleanup
+        CodeFirst_Deinit();
     }
 
 END_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider);

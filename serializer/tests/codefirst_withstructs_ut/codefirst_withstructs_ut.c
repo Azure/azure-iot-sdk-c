@@ -183,11 +183,11 @@ TEST_DEFINE_ENUM_TYPE(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_RESULT_VALUES);
 
 
-static DEVICE_RESULT my_Device_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, pfDeviceActionCallback deviceActionCallback, void* callbackUserContext, bool includePropertyPath, DEVICE_HANDLE* deviceHandle)
+static DEVICE_RESULT my_Device_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, pfDeviceActionCallback deviceActionCallback, void* actionCallbackUserContext, pfDeviceMethodCallback deviceMethodCallback, void* methodCallbackUserContext, bool includePropertyPath, DEVICE_HANDLE* deviceHandle)
 {
-    (void)(modelHandle, deviceActionCallback, includePropertyPath);
+    (void)(modelHandle, deviceActionCallback, includePropertyPath, deviceMethodCallback, methodCallbackUserContext);
     *deviceHandle = TEST_DEVICE_HANDLE;
-    g_InvokeActionCallbackArgument = callbackUserContext;
+    g_InvokeActionCallbackArgument = actionCallbackUserContext;
     return DEVICE_OK;
 }
 
@@ -231,6 +231,8 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_UMOCK_ALIAS_TYPE(pfDeviceActionCallback, void*);
     REGISTER_UMOCK_ALIAS_TYPE(DEVICE_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(pfDeviceMethodCallback, void*);
+    
     
     REGISTER_GLOBAL_MOCK_HOOK(Schema_GetModelDesiredPropertyCount, my_Schema_GetModelDesiredPropertyCount);
     REGISTER_GLOBAL_MOCK_HOOK(Schema_GetModelModelCount, my_Schema_GetModelModelCount);

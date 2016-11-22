@@ -59,6 +59,8 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_RESULT_VALUES)
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/umock_c_prod.h"
 MOCKABLE_FUNCTION(, EXECUTE_COMMAND_RESULT, DeviceActionCallback, DEVICE_HANDLE, deviceHandle, void*, callbackUserContext, const char*, relativeActionPath, const char*, actionName, size_t, argCount, const AGENT_DATA_TYPE*, arguments);
+MOCKABLE_FUNCTION(, METHODRETURN_HANDLE, deviceMethodCallback, DEVICE_HANDLE, deviceHandle, void*, callbackUserContext, const char*, relativeMethodPath, const char*, methodName, size_t, argCount, const AGENT_DATA_TYPE*, arguments);
+MOCKABLE_FUNCTION(, METHODRETURN_HANDLE, commandDecoderArgument, void*, methodCallbackContext, const char*, relativeMethodPath, const char*, methodName, size_t, argCount, const AGENT_DATA_TYPE*, args);
 #undef ENABLE_MOCKS
 
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
@@ -89,9 +91,9 @@ static void my_DataPublisher_Destroy(DATA_PUBLISHER_HANDLE dataPublisherHandle)
     my_gballoc_free(dataPublisherHandle);
 }
 
-static COMMAND_DECODER_HANDLE my_CommandDecoder_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, ACTION_CALLBACK_FUNC actionCallback, void* actionCallbackContext)
+static COMMAND_DECODER_HANDLE my_CommandDecoder_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, ACTION_CALLBACK_FUNC actionCallback, void* actionCallbackContext, METHOD_CALLBACK_FUNC deviceMethodCallback, void* methodCallbackContext)
 {
-    (void)(modelHandle, actionCallbackContext);
+    (void)(modelHandle, actionCallbackContext, deviceMethodCallback, methodCallbackContext);
     ActionCallbackCalledByCommandDecoder = actionCallback;
     return (COMMAND_DECODER_HANDLE)my_gballoc_malloc(1);
 }
@@ -154,6 +156,10 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         REGISTER_UMOCK_ALIAS_TYPE(TRANSACTION_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(DEVICE_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(REPORTED_PROPERTIES_TRANSACTION_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(METHODRETURN_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(METHOD_CALLBACK_FUNC, void*);
+        
+        
         
         REGISTER_UMOCK_ALIAS_TYPE(EXECUTE_COMMAND_RESULT, int);
         REGISTER_UMOCK_ALIAS_TYPE(DATA_PUBLISHER_RESULT, int);
@@ -215,7 +221,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         DEVICE_HANDLE h;
 
         // act
-        DEVICE_RESULT res = Device_Create(NULL, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        DEVICE_RESULT res = Device_Create(NULL, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
 
         // assert
         ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_INVALID_ARG, res);
@@ -228,7 +234,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         DEVICE_HANDLE h;
 
         // act
-        DEVICE_RESULT res = Device_Create(irrelevantModel, NULL, TEST_CALLBACK_CONTEXT, false, &h);
+        DEVICE_RESULT res = Device_Create(irrelevantModel, NULL, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
 
         // assert
         ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_INVALID_ARG, res);
@@ -240,7 +246,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         // arrange
 
         // act
-        DEVICE_RESULT res = Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, NULL);
+        DEVICE_RESULT res = Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, NULL);
 
         // assert
         ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_INVALID_ARG, res);
@@ -259,11 +265,14 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         DEVICE_HANDLE h = NULL;
 
         STRICT_EXPECTED_CALL(DataPublisher_Create(irrelevantModel, true));
-        STRICT_EXPECTED_CALL(CommandDecoder_Create(irrelevantModel, NULL, NULL))
-            .IgnoreArgument(2).IgnoreArgument(3);
+        STRICT_EXPECTED_CALL(CommandDecoder_Create(irrelevantModel, NULL, NULL, commandDecoderArgument, TEST_CALLBACK_CONTEXT))
+            .IgnoreArgument_actionCallback()
+            .IgnoreArgument_actionCallbackContext()
+            .IgnoreArgument_methodCallback()
+            .IgnoreArgument_methodCallbackContext();
 
         // act
-        DEVICE_RESULT res = Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, true, &h);
+        DEVICE_RESULT res = Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, true, &h);
 
         // assert
         ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_OK, res);
@@ -282,11 +291,14 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         DEVICE_HANDLE h = NULL;
 
         STRICT_EXPECTED_CALL(DataPublisher_Create(irrelevantModel, false));
-        STRICT_EXPECTED_CALL(CommandDecoder_Create(irrelevantModel, NULL, NULL))
-            .IgnoreArgument(2).IgnoreArgument(3);
+        STRICT_EXPECTED_CALL(CommandDecoder_Create(irrelevantModel, NULL, NULL, commandDecoderArgument, TEST_CALLBACK_CONTEXT))
+            .IgnoreArgument_actionCallback()
+            .IgnoreArgument_actionCallbackContext()
+            .IgnoreArgument_methodCallback()
+            .IgnoreArgument_methodCallbackContext();
 
         // act
-        DEVICE_RESULT res = Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        DEVICE_RESULT res = Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
 
         // assert
         ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_OK, res);
@@ -307,7 +319,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
             .SetReturn((DATA_PUBLISHER_HANDLE)NULL);
 
         // act
-        DEVICE_RESULT res = Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, true, &h);
+        DEVICE_RESULT res = Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, true, &h);
 
         // assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -322,14 +334,18 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         DEVICE_HANDLE h = NULL;
 
         STRICT_EXPECTED_CALL(DataPublisher_Create(irrelevantModel, true));
-        STRICT_EXPECTED_CALL(CommandDecoder_Create(irrelevantModel, NULL, NULL))
-            .IgnoreArgument(2).IgnoreArgument(3).SetReturn((COMMAND_DECODER_HANDLE)NULL);
+        STRICT_EXPECTED_CALL(CommandDecoder_Create(irrelevantModel, NULL, NULL, commandDecoderArgument, TEST_CALLBACK_CONTEXT))
+            .IgnoreArgument_actionCallback()
+            .IgnoreArgument_actionCallbackContext()
+            .IgnoreArgument_methodCallback()
+            .IgnoreArgument_methodCallbackContext()
+            .SetReturn((COMMAND_DECODER_HANDLE)NULL);
 
         STRICT_EXPECTED_CALL(DataPublisher_Destroy(IGNORED_PTR_ARG))
             .IgnoreArgument_dataPublisherHandle();
 
         // act
-        DEVICE_RESULT res = Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, true, &h);
+        DEVICE_RESULT res = Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, true, &h);
 
         // assert
         ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_COMMAND_DECODER_FAILED, res);
@@ -357,7 +373,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     {
         // arrange
         DEVICE_HANDLE h = NULL;
-        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(DataPublisher_Destroy(IGNORED_PTR_ARG))
@@ -380,7 +396,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     {
         // arrange
         DEVICE_HANDLE deviceHandle;
-        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(DataPublisher_StartTransaction(IGNORED_PTR_ARG))
@@ -417,7 +433,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     {
         // arrange
         DEVICE_HANDLE deviceHandle;
-        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(DataPublisher_StartTransaction(IGNORED_PTR_ARG))
@@ -444,7 +460,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         // arrange
         AGENT_DATA_TYPE ag;
         DEVICE_HANDLE deviceHandle;
-        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
         TRANSACTION_HANDLE transaction = Device_StartTransaction(deviceHandle);
         umock_c_reset_all_calls();
 
@@ -482,7 +498,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         // arrange
         AGENT_DATA_TYPE ag;
         DEVICE_HANDLE deviceHandle;
-        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
         TRANSACTION_HANDLE transaction = Device_StartTransaction(deviceHandle);
         umock_c_reset_all_calls();
 
@@ -503,7 +519,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     {
         // arrange
         DEVICE_HANDLE deviceHandle;
-        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
         TRANSACTION_HANDLE transaction = Device_StartTransaction(deviceHandle);
         umock_c_reset_all_calls();
 
@@ -525,7 +541,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         // arrange
         AGENT_DATA_TYPE ag;
         DEVICE_HANDLE deviceHandle;
-        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
         TRANSACTION_HANDLE transaction = Device_StartTransaction(deviceHandle);
         umock_c_reset_all_calls();
 
@@ -554,7 +570,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         unsigned char* destination;
         size_t destinationSize;
         DEVICE_HANDLE deviceHandle;
-        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
         TRANSACTION_HANDLE transaction = Device_StartTransaction(deviceHandle);
         umock_c_reset_all_calls();
 
@@ -589,7 +605,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     {
         // arrange
         DEVICE_HANDLE deviceHandle;
-        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
         TRANSACTION_HANDLE transaction = Device_StartTransaction(deviceHandle);
         unsigned char* destination;
         size_t destinationSize;
@@ -615,7 +631,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     {
         // arrange
         DEVICE_HANDLE deviceHandle;
-        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
         TRANSACTION_HANDLE transaction = Device_StartTransaction(deviceHandle);
         unsigned char* destination;
         size_t destinationSize;
@@ -639,7 +655,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     {
         // arrange
         DEVICE_HANDLE deviceHandle;
-        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
         TRANSACTION_HANDLE transaction = Device_StartTransaction(deviceHandle);
         unsigned char* destination;
         size_t destinationSize;
@@ -666,7 +682,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     {
         // arrange
         DEVICE_HANDLE deviceHandle;
-        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
         TRANSACTION_HANDLE transaction = Device_StartTransaction(deviceHandle);
         umock_c_reset_all_calls();
 
@@ -703,7 +719,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     {
         // arrange
         DEVICE_HANDLE deviceHandle;
-        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
         TRANSACTION_HANDLE transaction = Device_StartTransaction(deviceHandle);
         umock_c_reset_all_calls();
 
@@ -729,7 +745,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     {
         /// arrange
         DEVICE_HANDLE deviceHandle;
-        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
         umock_c_reset_all_calls();
 
         /// act
@@ -750,7 +766,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     {
         // arrange
         DEVICE_HANDLE deviceHandle;
-        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(DeviceActionCallback(deviceHandle, TEST_CALLBACK_CONTEXT, "", "testAction", 0, NULL));
@@ -774,7 +790,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         // arrange
         AGENT_DATA_TYPE ag;
         DEVICE_HANDLE deviceHandle;
-        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(DeviceActionCallback(deviceHandle, TEST_CALLBACK_CONTEXT, "", "testAction", 1, &ag));
@@ -796,7 +812,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         // arrange
         AGENT_DATA_TYPE ag;
         DEVICE_HANDLE deviceHandle;
-        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(DeviceActionCallback(deviceHandle, TEST_CALLBACK_CONTEXT, "", "testAction", 1, &ag))
@@ -833,7 +849,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     {
         ///arrange
         DEVICE_HANDLE h;
-        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
         umock_c_reset_all_calls();
 
         ///act
@@ -852,7 +868,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     {
         ///arrange
         DEVICE_HANDLE h;
-        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(CommandDecoder_ExecuteCommand(IGNORED_PTR_ARG, "some command"))
@@ -874,7 +890,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     {
         ///arrange
         DEVICE_HANDLE h;
-        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(CommandDecoder_ExecuteCommand(IGNORED_PTR_ARG, "some command"))
@@ -897,7 +913,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     {
         ///arrange
         DEVICE_HANDLE h;
-        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(CommandDecoder_ExecuteCommand(IGNORED_PTR_ARG, "some command"))
@@ -936,7 +952,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     {
         ///arrange
         DEVICE_HANDLE h;
-        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(DataPublisher_CreateTransaction_ReportedProperties(IGNORED_PTR_ARG))
@@ -959,7 +975,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     {
         ///arrange
         DEVICE_HANDLE h;
-        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(DataPublisher_CreateTransaction_ReportedProperties(IGNORED_PTR_ARG))
@@ -999,7 +1015,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         ///arrange
         AGENT_DATA_TYPE ag;
         DEVICE_HANDLE h;
-        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
         REPORTED_PROPERTIES_TRANSACTION_HANDLE reportedPropertiesTransactionHandle = Device_CreateTransaction_ReportedProperties(h);
         umock_c_reset_all_calls();
 
@@ -1020,7 +1036,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     {
         ///arrange
         DEVICE_HANDLE h;
-        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
         REPORTED_PROPERTIES_TRANSACTION_HANDLE reportedPropertiesTransactionHandle = Device_CreateTransaction_ReportedProperties(h);
         umock_c_reset_all_calls();
 
@@ -1043,7 +1059,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         ///arrange
         AGENT_DATA_TYPE ag;
         DEVICE_HANDLE h;
-        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
         REPORTED_PROPERTIES_TRANSACTION_HANDLE reportedPropertiesTransactionHandle = Device_CreateTransaction_ReportedProperties(h);
         umock_c_reset_all_calls();
 
@@ -1068,7 +1084,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         ///arrange
         AGENT_DATA_TYPE ag;
         DEVICE_HANDLE h;
-        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
         REPORTED_PROPERTIES_TRANSACTION_HANDLE reportedPropertiesTransactionHandle = Device_CreateTransaction_ReportedProperties(h);
         umock_c_reset_all_calls();
 
@@ -1109,7 +1125,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         ///arrange
         DEVICE_HANDLE h;
         size_t destinationSize;
-        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
         REPORTED_PROPERTIES_TRANSACTION_HANDLE reportedPropertiesTransactionHandle = Device_CreateTransaction_ReportedProperties(h);
         umock_c_reset_all_calls();
 
@@ -1132,7 +1148,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         ///arrange
         DEVICE_HANDLE h;
         unsigned char* destination;
-        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
         REPORTED_PROPERTIES_TRANSACTION_HANDLE reportedPropertiesTransactionHandle = Device_CreateTransaction_ReportedProperties(h);
         umock_c_reset_all_calls();
 
@@ -1156,7 +1172,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         DEVICE_HANDLE h;
         unsigned char* destination;
         size_t destinationSize;
-        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
         REPORTED_PROPERTIES_TRANSACTION_HANDLE reportedPropertiesTransactionHandle = Device_CreateTransaction_ReportedProperties(h);
         umock_c_reset_all_calls();
 
@@ -1182,7 +1198,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         DEVICE_HANDLE h;
         unsigned char* destination;
         size_t destinationSize;
-        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
         REPORTED_PROPERTIES_TRANSACTION_HANDLE reportedPropertiesTransactionHandle = Device_CreateTransaction_ReportedProperties(h);
         umock_c_reset_all_calls();
 
@@ -1221,7 +1237,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     {
         ///arrange
         DEVICE_HANDLE h;
-        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
         REPORTED_PROPERTIES_TRANSACTION_HANDLE reportedPropertiesTransactionHandle = Device_CreateTransaction_ReportedProperties(h);
         umock_c_reset_all_calls();
 
@@ -1244,7 +1260,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         ///arrange
         AGENT_DATA_TYPE ag;
         DEVICE_HANDLE h;
-        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
         REPORTED_PROPERTIES_TRANSACTION_HANDLE reportedPropertiesTransactionHandle = Device_CreateTransaction_ReportedProperties(h);
         (void)Device_PublishTransacted_ReportedProperty(reportedPropertiesTransactionHandle, "a", &ag);
         umock_c_reset_all_calls();
@@ -1270,7 +1286,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         DEVICE_HANDLE h;
         unsigned char* destination;
         size_t destinationSize;
-        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
         REPORTED_PROPERTIES_TRANSACTION_HANDLE reportedPropertiesTransactionHandle = Device_CreateTransaction_ReportedProperties(h);
         (void)Device_PublishTransacted_ReportedProperty(reportedPropertiesTransactionHandle, "a", &ag);
         (void)Device_CommitTransaction_ReportedProperties(reportedPropertiesTransactionHandle, &destination, &destinationSize);
@@ -1309,7 +1325,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     {        
         ///arrange
         DEVICE_HANDLE h;
-        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
         umock_c_reset_all_calls();
 
         ///act
@@ -1328,7 +1344,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     {
         ///arrange
         DEVICE_HANDLE h;
-        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
         umock_c_reset_all_calls();
 
         ///act
@@ -1347,7 +1363,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     {
         ///arrange
         DEVICE_HANDLE h;
-        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false,  &h);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(CommandDecoder_IngestDesiredProperties(FAKE_DEVICE_START_ADDRESS, IGNORED_PTR_ARG, "{}"))
@@ -1369,7 +1385,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     {
         ///arrange
         DEVICE_HANDLE h;
-        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(CommandDecoder_IngestDesiredProperties(FAKE_DEVICE_START_ADDRESS, IGNORED_PTR_ARG, "{}"))
@@ -1382,6 +1398,58 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         ///assert
         ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_ERROR, result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Device_Destroy(h);
+    }
+
+    /*Tests_SRS_DEVICE_02_038: [ If deviceHandle is NULL then Device_ExecuteMethod shall fail and return NULL. ]*/
+    TEST_FUNCTION(Device_ExecuteMethod_with_NULL_deviceHandle_fails)
+    {
+        ///arrange
+
+        ///act
+        METHODRETURN_HANDLE result = Device_ExecuteMethod(NULL, "reset", NULL);
+
+        ///assert
+        ASSERT_IS_NULL(result);
+
+        ///clean
+    }
+
+    /*Tests_SRS_DEVICE_02_039: [ If methodName is NULL then Device_ExecuteMethod shall fail and return NULL. ]*/
+    TEST_FUNCTION(Device_ExecuteMethod_with_NULL_methodName_fails)
+    {
+        ///arrange
+        DEVICE_HANDLE h;
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
+
+        ///act
+        METHODRETURN_HANDLE result = Device_ExecuteMethod(h, NULL, NULL);
+
+        ///assert
+        ASSERT_IS_NULL(result);
+
+        ///clean
+        Device_Destroy(h);
+    }
+
+    /*Tests_SRS_DEVICE_02_040: [ Device_ExecuteMethod shall call CommandDecoder_ExecuteMethod and shall return what CommandDecoder_ExecuteMethod returns. ]*/
+    TEST_FUNCTION(Device_ExecuteMethod_happy_path)
+    {
+        ///arrange
+        DEVICE_HANDLE h;
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(CommandDecoder_ExecuteMethod(IGNORED_PTR_ARG, "theMethod", NULL))
+            .IgnoreArgument_handle();
+
+        ///act
+        METHODRETURN_HANDLE result = Device_ExecuteMethod(h, "theMethod", NULL);
+
+        ///assert
+        ASSERT_IS_NULL(result);
 
         ///clean
         Device_Destroy(h);

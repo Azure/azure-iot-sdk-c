@@ -34,6 +34,10 @@ extern SCHEMA_HANDLE CodeFirst_RegisterSchema(const char* schemaNamespace, const
 extern IOTHUBMESSAGE_DISPOSITION_RESULT CodeFirst_InvokeAction(void* deviceHandle, void* callbackUserContext, const char* relativeActionPath, const char* actionName, size_t parameterCount, const AGENT_DATA_TYPE* parameterValues);
  extern EXECUTE_COMMAND_RESULT CodeFirst_ExecuteCommand(void* device, const char* command);
 
+extern METHODRETURN_HANDLE CodeFirst_InvokeMethod(DEVICE_HANDLE deviceHandle, void* callbackUserContext, const char* relativeMethodPath, const char* methodName, size_t parameterCount, const AGENT_DATA_TYPE* parameterValues);
+
+extern METHODRETURN_HANDLE CodeFirst_ExecuteMethod(void* device, const char* methodName, const char* methodPayload);
+
 extern void* CodeFirst_CreateDevice(SCHEMA_MODEL_TYPE_HANDLE model, const REFLECTED_DATA_FROM_DATAPROVIDER* metadata, size_t dataSize, bool includePropertyPath);
  
 extern CODEFIRST_RESULT CodeFirst_SendAsync(unsigned char** destination, size_t* destinationSize, size_t numProperties, ...);
@@ -107,7 +111,8 @@ extern void* CodeFirst_CreateDevice(SCHEMA_MODEL_TYPE_HANDLE model, const REFLEC
 
 **SRS_CODEFIRST_01_001: [** CodeFirst_CreateDevice shall pass the includePropertyPath argument to Device_Create. **]**
 
-**SRS_CODEFIRST_99_082: [** CodeFirst_CreateDevice shall pass to Device_Create the function CodeFirst_InvokeAction as action callback argument. **]**
+**SRS_CODEFIRST_99_082: [** CodeFirst_CreateDevice shall pass to Device_Create the function CodeFirst_InvokeAction, action callback argument and 
+the CodeFirst_InvokeMethod **]**
 
 **SRS_CODEFIRST_99_084: [** If Device_Create fails, CodeFirst_CreateDevice shall return NULL. **]**
 
@@ -293,3 +298,49 @@ extern CODEFIRST_RESULT CodeFirst_IngestDesiredProperties(void* device, const ch
 **SRS_CODEFIRST_02_034: [** If there is any failure, then `CodeFirst_IngestDesiredProperties` shall fail and return `CODEFIRST_ERROR`. **]**
 
 **SRS_CODEFIRST_02_035: [** Otherwise, `CodeFirst_IngestDesiredProperties` shall return `CODEFIRST_OK`. **]**
+
+### CodeFirst_InvokeMethod
+```c
+METHODRETURN_HANDLE CodeFirst_InvokeMethod(DEVICE_HANDLE deviceHandle, void* callbackUserContext, const char* relativeMethodPath, const char* methodName, size_t parameterCount, const AGENT_DATA_TYPE* parameterValues)
+```
+
+`CodeFirst_InvokeMethod` invokes a method call.
+
+**SRS_CODEFIRST_02_050: [** If CodeFirst was not init before, `CodeFirst_InvokeMethod` shall fail and return `NULL`. **]**
+
+**SRS_CODEFIRST_02_051: [** If `deviceHandle` is `NULL` then `CodeFirst_InvokeMethod` shall fail and return `NULL`. **]**
+
+**SRS_CODEFIRST_02_052: [** If `relativeMethodPath` is `NULL` then `CodeFirst_InvokeMethod` shall fail and return `NULL`. **]**
+
+**SRS_CODEFIRST_02_053: [** If `methodName` is `NULL` then `CodeFirst_InvokeMethod` shall fail and return `NULL`. **]**
+
+**SRS_CODEFIRST_02_054: [** If `parameterCount` is greater than 0 and `parameterValues` is `NULL` then then `CodeFirst_InvokeMethod` shall fail and return `NULL`. **]**
+
+**SRS_CODEFIRST_02_055: [** `CodeFirst_InvokeMethod` shall get the model name of the device. **]**
+
+**SRS_CODEFIRST_02_056: [** `CodeFirst_InvokeMethod` shall locate the model in the codefirst data. **]**
+
+**SRS_CODEFIRST_02_057: [** `CodeFirst_InvokeMethod` shall locate the method in the model data. **]**
+
+**SRS_CODEFIRST_02_058: [** `CodeFirst_InvokeMethod` shall call the methodCallback and return what the methodCallback returns. **]**
+
+**SRS_CODEFIRST_02_059: [** If any of the above fails then `CodeFirst_InvokeMethod` shall fail and return `NULL`. **]**
+
+
+
+### CodeFirst_ExecuteMethod
+```c
+METHODRETURN_HANDLE CodeFirst_ExecuteMethod(void* device, const char* methodName, const char* methodPayload)
+```
+
+`CodeFirst_ExecuteMethod` calls `Device_ExecuteMethod`.
+
+**SRS_CODEFIRST_02_060: [** If `device` is `NULL` then `CodeFirst_ExecuteMethod` shall fail and return `NULL`. **]**
+
+**SRS_CODEFIRST_02_061: [** If `methodName` is `NULL` then `CodeFirst_ExecuteMethod` shall fail and return `NULL`. **]**
+
+**SRS_CODEFIRST_02_062: [** `CodeFirst_ExecuteMethod` shall find the device data. **]**
+
+**SRS_CODEFIRST_02_063: [** `CodeFirst_ExecuteMethod` shall call `Device_ExecuteMethod` and return what `Device_ExecuteMethod` returns. **]**
+
+**SRS_CODEFIRST_02_064: [** If any of the above operation fails then `CodeFirst_ExecuteMethod` shall fail and return `NULL`. **]** 

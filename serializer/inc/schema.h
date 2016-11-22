@@ -147,7 +147,7 @@ MOCKABLE_FUNCTION(, SCHEMA_METHOD_HANDLE, Schema_GetModelMethodByName, SCHEMA_MO
 MOCKABLE_FUNCTION(, SCHEMA_ACTION_HANDLE, Schema_GetModelActionByIndex, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, size_t, index);
 
 MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_GetModelActionArgumentCount, SCHEMA_ACTION_HANDLE, actionHandle, size_t*, argumentCount);
-MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_GetModelMethodArgumentCount, SCHEMA_METHOD_HANDLE, actionHandle, size_t*, argumentCount);
+MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_GetModelMethodArgumentCount, SCHEMA_METHOD_HANDLE, methodHandle, size_t*, argumentCount);
 MOCKABLE_FUNCTION(, const char*, Schema_GetModelActionName, SCHEMA_ACTION_HANDLE, actionHandle);
 
 MOCKABLE_FUNCTION(, SCHEMA_ACTION_ARGUMENT_HANDLE, Schema_GetModelActionArgumentByName, SCHEMA_ACTION_HANDLE, actionHandle, const char*, actionArgumentName);
