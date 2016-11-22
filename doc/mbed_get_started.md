@@ -24,7 +24,7 @@ This document describes the steps for connecting an [mbed-enabled Freescale FRDM
 
 You should have the following items ready before beginning the process:
 -   Computer with Git client installed and access to the
-    [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks) GitHub public repository.
+    [azure-iot-sdk-c](https://github.com/Azure/azure-iot-sdk-c) GitHub public repository.
 -   SSH client on your desktop computer, such as [PuTTY](http://www.putty.org/), so you can remotely access the command line on the Freescale FRDM-K64F.
 -   Required hardware: [mbed-enabled Freescale K64F](http://developer.mbed.org/platforms/IBMEthernetKit).
 -   [Setup your IoT hub][lnk-setup-iot-hub]
