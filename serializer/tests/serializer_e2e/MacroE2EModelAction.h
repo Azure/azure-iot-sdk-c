@@ -15,7 +15,8 @@ BEGIN_NAMESPACE(MacroE2EModelAction)
 DECLARE_MODEL(deviceModel,
     WITH_DATA(ascii_char_ptr, property1),
     WITH_DATA(int, UniqueId),
-    WITH_ACTION(dataMacroCallback, ascii_char_ptr, property1, int, UniqueId)
+    WITH_ACTION(dataMacroCallback, ascii_char_ptr, property1, int, UniqueId),
+    WITH_METHOD(theSumOfThings, int, a, int, b)
 )
 
 END_NAMESPACE(MacroE2EModelAction);

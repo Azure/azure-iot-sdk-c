@@ -40,6 +40,7 @@ if(WIN32)
 			iothub_client
 			iothub_client_amqp_transport
 			iothub_client_http_transport
+            iothub_client_mqtt_transport
 			iothub_service_client
 			aziotsharedutil
 			iothub_client_http_transport
@@ -57,6 +58,7 @@ if(WIN32)
 			iothub_client
 			iothub_client_amqp_transport
 			iothub_client_http_transport
+            iothub_client_mqtt_transport
 			iothub_service_client
 			aziotsharedutil
 			iothub_client_http_transport
@@ -83,6 +85,7 @@ else()
 				iothub_client
 				iothub_client_amqp_transport
 				iothub_client_http_transport
+                iothub_client_mqtt_transport
 				iothub_service_client
 				aziotsharedutil
 				iothub_client_http_transport
