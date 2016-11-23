@@ -11,6 +11,7 @@ DECLARE_DEVICETWIN_MODEL(modelName, ... );
 and several static functions:
 
 static void serializer_ingest(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback)
+static int deviceMethodCallback(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* resp_size, void* userContextCallback)
 static void* IoTHubDeviceTwinCreate_Impl(const char* name, size_t sizeOfName, SERIALIZER_DEVICETWIN_PROTOHANDLE* protoHandle)
 static void IoTHubDeviceTwin_Destroy_Impl(void* model)
 ```
@@ -52,6 +53,8 @@ static void* IoTHubDeviceTwinCreate_Impl(const char* name, size_t sizeOfName, SE
 
 **SRS_SERIALIZERDEVICETWIN_02_011: [** `IoTHubDeviceTwinCreate_Impl` shall set the device twin callback. **]**
 
+**SRS_SERIALIZERDEVICETWIN_02_027: [** `IoTHubDeviceTwinCreate_Impl` shall set the device method callback **]**
+
 **SRS_SERIALIZERDEVICETWIN_02_012: [** `IoTHubDeviceTwinCreate_Impl` shall record the pair of (device, IoTHubClient(_LL)). **]**
 
 **SRS_SERIALIZERDEVICETWIN_02_013: [** If all operations complete successfully then `IoTHubDeviceTwinCreate_Impl` shall succeeds and return a non-`NULL` value. **]**
@@ -76,6 +79,31 @@ static void IoTHubDeviceTwin_Destroy_Impl(void* model)
 **SRS_SERIALIZERDEVICETWIN_02_018: [** `IoTHubDeviceTwin_Destroy_Impl` shall remove the IoTHubClient_Handle and the device handle from the recorded set. **]**
 
 **SRS_SERIALIZERDEVICETWIN_02_019: [** If the recorded set of IoTHubClient handles is zero size, then the set shall be destroyed. **]**
+
+### deviceMethodCallback
+```c
+static int deviceMethodCallback(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* resp_size, void* userContextCallback)
+```
+
+`deviceMethodCallback` translates the method payload received from IoTHubClient(_LL) to the format required by `EXECUTE_METHOD`. 
+
+`deviceMethodCallback` translates from the result provided by `EXECUTE_METHOD` back into the method response for IoTHubClient(_LL).
+
+**SRS_SERIALIZERDEVICETWIN_02_021: [** `deviceMethodCallback` shall transform `payload` and `size` into a null terminated string. **]**
+
+**SRS_SERIALIZERDEVICETWIN_02_022: [** `deviceMethodCallback` shall call `EXECUTE_METHOD` passing the `userContextCallback`, `method_name` and the null terminated string build before. **]**
+
+**SRS_SERIALIZERDEVICETWIN_02_023: [** `deviceMethodCallback` shall get the `MethodReturn_Data` and shall copy the response JSON value into a new byte array. **]**
+
+**SRS_SERIALIZERDEVICETWIN_02_024: [** `deviceMethodCallback` shall set `*response` to this new byte array, `*resp_size` to the size of the array. **]**
+
+**SRS_SERIALIZERDEVICETWIN_02_025: [** `deviceMethodCallback` returns the statusCode from the user. **]**
+
+**SRS_SERIALIZERDEVICETWIN_02_026: [** If any failure occurs in the above operations, then `deviceMethodCallback` shall fail, return 500, set `*response` to `NULL` and '*resp_size` to 0. **]** 
+
+
+
+
 
 
 
