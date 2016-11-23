@@ -46,12 +46,21 @@ DECLARE_DEVICETWIN_MODEL(Car,
     
     WITH_REPORTED_PROPERTY(Maker, maker), /*this is a structured reported property*/
     WITH_REPORTED_PROPERTY(CarState, state), /*this is a model in model*/
-    WITH_DESIRED_PROPERTY(CarSettings, settings) /*this is a model in model*/
+    WITH_DESIRED_PROPERTY(CarSettings, settings), /*this is a model in model*/
+    WITH_METHOD(getCarVIN)
 );
 
 END_NAMESPACE(Contoso);
 
 DEFINE_ENUM_STRINGS(DEVICE_TWIN_UPDATE_STATE, DEVICE_TWIN_UPDATE_STATE_VALUES);
+
+METHODRETURN_HANDLE getCarVIN(Car* car)
+{
+    (void)(car);
+    /*Car VINs are JSON strings, for example: 1HGCM82633A004352*/
+    METHODRETURN_HANDLE result = MethodReturn_Create(201, "\"1HGCM82633A004352\"");
+    return result;
+}
 
 void deviceTwinCallback(int status_code, void* userContextCallback)
 {

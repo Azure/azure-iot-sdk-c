@@ -74,6 +74,8 @@ static void IoTHubDeviceTwin_Destroy_Impl(void* model)
 
 **SRS_SERIALIZERDEVICETWIN_02_016: [** `IoTHubDeviceTwin_Destroy_Impl` shall set the devicetwin callback to `NULL`. **]**
 
+**SRS_SERIALIZERDEVICETWIN_02_028: [** `IoTHubDeviceTwin_Destroy_Impl` shall set the method callback to `NULL`. **]**
+
 **SRS_SERIALIZERDEVICETWIN_02_017: [** `IoTHubDeviceTwin_Destroy_Impl` shall call `CodeFirst_DestroyDevice`. **]**
 
 **SRS_SERIALIZERDEVICETWIN_02_018: [** `IoTHubDeviceTwin_Destroy_Impl` shall remove the IoTHubClient_Handle and the device handle from the recorded set. **]**

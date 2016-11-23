@@ -15,6 +15,7 @@ ${theseTestsName}.c
 
 set(${theseTestsName}_c_files
     ../../../parson/parson.c
+    ../../src/methodreturn.c
 )
 
 if(MSVC)
@@ -24,6 +25,7 @@ endif()
 
 set(${theseTestsName}_h_files
     ../../../parson/parson.h
+    ../../inc/methodreturn.h
 )
 
 build_c_test_artifacts(${theseTestsName} ON "tests/UnitTests" ADDITIONAL_LIBS serializer aziotsharedutil)

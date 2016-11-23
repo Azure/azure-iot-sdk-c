@@ -11,6 +11,7 @@
 #include "iothub_client_ll.h"
 #include "parson.h"
 #include "vector.h"
+#include "methodreturn.h"
 
 static void serializer_ingest(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback)
 {
@@ -126,6 +127,74 @@ static void serializer_ingest(DEVICE_TWIN_UPDATE_STATE update_state, const unsig
     }
 }
 
+/*both LL and convenience layer can be served by the same callback*/
+static int deviceMethodCallback(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* resp_size, void* userContextCallback)
+{
+    int result;
+    /*Codes_SRS_SERIALIZERDEVICETWIN_02_021: [ deviceMethodCallback shall transform payload and size into a null terminated string. ]*/
+    char* payloadZeroTerminated = (char*)malloc(size + 1);
+    if (payloadZeroTerminated == NULL)
+    {
+        LogError("failure in malloc");
+        /*Codes_SRS_SERIALIZERDEVICETWIN_02_026: [ If any failure occurs in the above operations, then deviceMethodCallback shall fail, return 500, set *response to NULL and '*resp_size` to 0. ]*/
+        *response = NULL;
+        *resp_size = 0;
+        result = 500;
+    }
+    else
+    {
+        memcpy(payloadZeroTerminated, payload, size);
+        payloadZeroTerminated[size] = '\0';
+
+        /*Codes_SRS_SERIALIZERDEVICETWIN_02_022: [ deviceMethodCallback shall call EXECUTE_METHOD passing the userContextCallback, method_name and the null terminated string build before. ]*/
+        METHODRETURN_HANDLE mr = EXECUTE_METHOD(userContextCallback, method_name, payloadZeroTerminated);
+        
+        if (mr == NULL)
+        {
+            LogError("failure in EXECUTE_METHOD");
+            /*Codes_SRS_SERIALIZERDEVICETWIN_02_026: [ If any failure occurs in the above operations, then deviceMethodCallback shall fail, return 500, set *response to NULL and '*resp_size` to 0. ]*/
+            *response = NULL;
+            *resp_size = 0;
+            result = 500;
+        }
+        else
+        {
+            /*Codes_SRS_SERIALIZERDEVICETWIN_02_023: [ deviceMethodCallback shall get the MethodReturn_Data and shall copy the response JSON value into a new byte array. ]*/
+            const METHODRETURN_DATA* data = MethodReturn_GetReturn(mr);
+
+            /*Codes_SRS_SERIALIZERDEVICETWIN_02_025: [ deviceMethodCallback returns the statusCode from the user. ]*/
+            result = data->statusCode;
+
+            if (data->jsonValue == NULL)
+            {
+                *resp_size = 0;
+                *response = NULL;
+            }
+            else
+            {
+                *resp_size = strlen(data->jsonValue);
+                *response = (unsigned char*)malloc(*resp_size);
+                if (*response == NULL)
+                {
+                    LogError("failure in malloc");
+                    /*Codes_SRS_SERIALIZERDEVICETWIN_02_026: [ If any failure occurs in the above operations, then deviceMethodCallback shall fail, return 500, set *response to NULL and '*resp_size` to 0. ]*/
+                    *response = NULL;
+                    *resp_size = 0;
+                    result = 500;
+                }
+                else
+                {
+                    /*Codes_SRS_SERIALIZERDEVICETWIN_02_024: [ deviceMethodCallback shall set *response to this new byte array, *resp_size to the size of the array. ]*/
+                    memcpy(*response, data->jsonValue, *resp_size);
+                }
+            }
+            MethodReturn_Destroy(mr);
+        }
+        free(payloadZeroTerminated);
+    }
+    return result;
+}
+
 /*an enum that sets the type of the handle used to record IoTHubDeviceTwin_Create was called*/
 #define IOTHUB_CLIENT_HANDLE_TYPE_VALUES \
     IOTHUB_CLIENT_CONVENIENCE_HANDLE_TYPE, \
@@ -184,7 +253,7 @@ static int lazilyAddProtohandle(const SERIALIZER_DEVICETWIN_PROTOHANDLE* protoHa
     return result;
 }
 
-static IOTHUB_CLIENT_RESULT Generic_IoTHubClient_SetDeviceTwinCallback(const SERIALIZER_DEVICETWIN_PROTOHANDLE* protoHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback, void* userContextCallback)
+static IOTHUB_CLIENT_RESULT Generic_IoTHubClient_SetCallbacks(const SERIALIZER_DEVICETWIN_PROTOHANDLE* protoHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback, void* userContextCallback)
 {
     IOTHUB_CLIENT_RESULT result;
     /*Codes_SRS_SERIALIZERDEVICETWIN_02_011: [ IoTHubDeviceTwinCreate_Impl shall set the device twin callback. ]*/
@@ -196,6 +265,15 @@ static IOTHUB_CLIENT_RESULT Generic_IoTHubClient_SetDeviceTwinCallback(const SER
         {
             LogError("failure in IoTHubClient_SetDeviceTwinCallback");
         }
+        else
+        {
+            /*Codes_SRS_SERIALIZERDEVICETWIN_02_027: [ IoTHubDeviceTwinCreate_Impl shall set the device method callback ]*/
+            if ((result = IoTHubClient_SetDeviceMethodCallback(protoHandle->iothubClientHandleVariant.iothubClientHandleValue.iothubClientHandle, deviceMethodCallback, userContextCallback)) != IOTHUB_CLIENT_OK)
+            {
+                (void)IoTHubClient_SetDeviceTwinCallback(protoHandle->iothubClientHandleVariant.iothubClientHandleValue.iothubClientHandle, NULL, NULL);
+                LogError("failure in IoTHubClient_SetDeviceMethodCallback");
+            }
+        }
         break;
     }
     case IOTHUB_CLIENT_LL_HANDLE_TYPE:
@@ -203,6 +281,15 @@ static IOTHUB_CLIENT_RESULT Generic_IoTHubClient_SetDeviceTwinCallback(const SER
         if ((result =IoTHubClient_LL_SetDeviceTwinCallback(protoHandle->iothubClientHandleVariant.iothubClientHandleValue.iothubClientLLHandle, deviceTwinCallback, userContextCallback)) != IOTHUB_CLIENT_OK)
         {
             LogError("failure in IoTHubClient_LL_SetDeviceTwinCallback");
+        }
+        else
+        {
+            /*Codes_SRS_SERIALIZERDEVICETWIN_02_027: [ IoTHubDeviceTwinCreate_Impl shall set the device method callback ]*/
+            if ((result = IoTHubClient_LL_SetDeviceMethodCallback(protoHandle->iothubClientHandleVariant.iothubClientHandleValue.iothubClientLLHandle, deviceMethodCallback, userContextCallback)) != IOTHUB_CLIENT_OK)
+            {
+                (void)IoTHubClient_LL_SetDeviceTwinCallback(protoHandle->iothubClientHandleVariant.iothubClientHandleValue.iothubClientLLHandle, NULL, NULL);
+                LogError("failure in IoTHubClient_SetDeviceMethodCallback");
+            }
         }
         break;
     }
@@ -249,10 +336,10 @@ static void* IoTHubDeviceTwinCreate_Impl(const char* name, size_t sizeOfName, SE
             else
             {
                 protoHandle->deviceAssigned = result;
-                if (Generic_IoTHubClient_SetDeviceTwinCallback(protoHandle, serializer_ingest, result) != IOTHUB_CLIENT_OK)
+                if (Generic_IoTHubClient_SetCallbacks(protoHandle, serializer_ingest, result) != IOTHUB_CLIENT_OK)
                 {
                     /*Codes_SRS_SERIALIZERDEVICETWIN_02_014: [ Otherwise, IoTHubDeviceTwinCreate_Impl shall fail and return NULL. ]*/
-                    LogError("failure in Generic_IoTHubClient_SetDeviceTwinCallback");
+                    LogError("failure in Generic_IoTHubClient_SetCallbacks");
                     CodeFirst_DestroyDevice(result);
                     result = NULL;
                 }
@@ -266,10 +353,10 @@ static void* IoTHubDeviceTwinCreate_Impl(const char* name, size_t sizeOfName, SE
                         /*Codes_SRS_SERIALIZERDEVICETWIN_02_014: [ Otherwise, IoTHubDeviceTwinCreate_Impl shall fail and return NULL. ]*/
                         LogError("unable to add the protohandle to the collection of handles");
                         /*unsubscribe*/
-                        if (Generic_IoTHubClient_SetDeviceTwinCallback(protoHandle, NULL, NULL) != IOTHUB_CLIENT_OK)
+                        if (Generic_IoTHubClient_SetCallbacks(protoHandle, NULL, NULL) != IOTHUB_CLIENT_OK)
                         {
                             /*just log the error*/
-                            LogError("failure in Generic_IoTHubClient_SetDeviceTwinCallback");
+                            LogError("failure in Generic_IoTHubClient_SetCallbacks");
                         }
                         CodeFirst_DestroyDevice(result);
                         result = NULL;
@@ -318,6 +405,11 @@ static void IoTHubDeviceTwin_Destroy_Impl(void* model)
                 {
                     LogError("failure in IoTHubClient_SetDeviceTwinCallback");
                 }
+                /*Codes_SRS_SERIALIZERDEVICETWIN_02_028: [ IoTHubDeviceTwin_Destroy_Impl shall set the method callback to NULL. ]*/
+                if (IoTHubClient_SetDeviceMethodCallback(protoHandle->iothubClientHandleVariant.iothubClientHandleValue.iothubClientHandle, NULL, NULL) != IOTHUB_CLIENT_OK)
+                {
+                    LogError("failure in IoTHubClient_SetDeviceMethodCallback");
+                }
                 break;
             }
             case IOTHUB_CLIENT_LL_HANDLE_TYPE:
@@ -325,6 +417,11 @@ static void IoTHubDeviceTwin_Destroy_Impl(void* model)
                 if (IoTHubClient_LL_SetDeviceTwinCallback(protoHandle->iothubClientHandleVariant.iothubClientHandleValue.iothubClientLLHandle, NULL, NULL) != IOTHUB_CLIENT_OK)
                 {
                     LogError("failure in IoTHubClient_LL_SetDeviceTwinCallback");
+                }
+                /*Codes_SRS_SERIALIZERDEVICETWIN_02_028: [ IoTHubDeviceTwin_Destroy_Impl shall set the method callback to NULL. ]*/
+                if (IoTHubClient_LL_SetDeviceMethodCallback(protoHandle->iothubClientHandleVariant.iothubClientHandleValue.iothubClientLLHandle, NULL, NULL) != IOTHUB_CLIENT_OK)
+                {
+                    LogError("failure in IoTHubClient_LL_SetDeviceMethodCallback");
                 }
                 break;
             }
