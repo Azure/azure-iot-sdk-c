@@ -106,4 +106,5 @@ function PublishDirectory($workPath, $relativeLibPath, $gitName)
 PublishDirectory -workPath "$workPath" -relativeLibPath "arduino\libraries\AzureIoTHub" -gitName "azure-iot-arduino"
 PublishDirectory -workPath "$workPath" -relativeLibPath "arduino\libraries\AzureIoTUtility" -gitName "azure-iot-arduino-utility"
 PublishDirectory -workPath "$workPath" -relativeLibPath "arduino\libraries\AzureIoTProtocol_HTTP" -gitName "azure-iot-arduino-protocol-http"
+PublishDirectory -workPath "$workPath" -relativeLibPath "arduino\libraries\AzureIoTProtocol_MQTT" -gitName "azure-iot-arduino-protocol-mqtt"
 
