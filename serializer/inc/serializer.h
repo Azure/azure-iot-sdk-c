@@ -312,6 +312,10 @@ extern "C"
 
 #define SERIALIZE_REPORTED_PROPERTIES(destination, destinationSize,...) CodeFirst_SendAsyncReported(destination, destinationSize, COUNT_ARG(__VA_ARGS__) FOR_EACH_1(ADDRESS_MACRO, __VA_ARGS__))
 
+
+#define IDENTITY_MACRO(x) ,x
+#define SERIALIZE_REPORTED_PROPERTIES_FROM_POINTERS(destination, destinationSize, ...) CodeFirst_SendAsyncReported(destination, destinationSize, COUNT_ARG(__VA_ARGS__) FOR_EACH_1(IDENTITY_MACRO, __VA_ARGS__))
+
 /**
  * @def   EXECUTE_COMMAND(device, command)
  * Any action that is declared in a model must also have an implementation as
