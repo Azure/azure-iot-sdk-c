@@ -13,7 +13,7 @@
 
 /*String containing Hostname, Device Id & Device Key in the format:             */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"    */
-static const char* connectionString = "HostName=....";
+static const char* connectionString = "HostName=...";
 
 // Define the Model - it is a car.
 BEGIN_NAMESPACE(Contoso);
@@ -113,9 +113,6 @@ void device_twin_simple_sample_run(void)
                 }
                 else
                 {
-                    unsigned char*buffer;
-                    size_t bufferSize;
-
                     /*setting values for reported properties*/
                     car->lastOilChangeDate = "2016";
                     car->maker.makerName = "Fabrikam";
@@ -125,34 +122,26 @@ void device_twin_simple_sample_run(void)
                     car->state.softwareVersion = 1;
                     car->state.vanityPlate = "1I1";
 
-                    /*getting the serialized form*/
-                    if (SERIALIZE_REPORTED_PROPERTIES(&buffer, &bufferSize, *car) != CODEFIRST_OK)
+                    /*sending the values to IoTHub*/
+                    if (IoTHubDeviceTwin_SendReportedStateCar(car, deviceTwinCallback, NULL) != IOTHUB_CLIENT_OK)
                     {
-                        (void)printf("Failed serializing reported state\n");
+                        (void)printf("Failed sending serialized reported state\n");
                     }
                     else
                     {
-                        /*sending the serialized reported properties to IoTHub*/
-                        if (IoTHubClient_SendReportedState(iotHubClientHandle, buffer, bufferSize, deviceTwinCallback, NULL) != IOTHUB_CLIENT_OK)
-                        {
-                            printf("Failure sending data\n");
-                        }
-                        else
-                        {
-                            printf("reported state has been delivered to IoTHub\n");
-                        }
-                        free(buffer);
-
-                        printf("press ENTER to end the sample\n");
-                        (void)getchar();
+                        printf("Reported state will be send to IoTHub\n");
                     }
-                    IoTHubDeviceTwin_DestroyCar(car);
+
+                    printf("press ENTER to end the sample\n");
+                    (void)getchar();
+
                 }
-                IoTHubClient_Destroy(iotHubClientHandle);
+                IoTHubDeviceTwin_DestroyCar(car);
             }
+            IoTHubClient_Destroy(iotHubClientHandle);
         }
-        platform_deinit();
     }
+    platform_deinit();
 }
 
 int main(void)
