@@ -17,10 +17,13 @@ for %%i in ("%Work_path%") do set Work_path=%%~fi
 
 set Libraries_path=%Work_path%\arduino\libraries\
 set AzureIoTHub_path=%Libraries_path%AzureIoTHub\
+set AzureIoTProtocolHTTP_path=%Libraries_path%AzureIoTProtocol_HTTP\
+set AzureIoTProtocolMQTT_path=%Libraries_path%AzureIoTProtocol_MQTT\
+set AzureIoTProtocolAMQP_path=%Libraries_path%AzureIoTProtocol_AMQP\
 set AzureIoTUtility_path=%Libraries_path%AzureIoTUtility\
-set AzureIoTProtocolHTTP_path=%Libraries_path%AzureIoTProtocol_HTTP\src\azure_uhttp_c\
-set AzureIoTProtocolMQTT_path=%Libraries_path%AzureIoTProtocol_MQTT\src\azure_umqtt_c\
-set AzureIoTProtocolAMQP_path=%Libraries_path%AzureIoTProtocol_AMQP\src\azure_uamqp_c\
+set AzureUHTTP_path=%AzureIoTProtocolHTTP_path%src\azure_uhttp_c\
+set AzureUMQTT_path=%AzureIoTProtocolMQTT_path%src\azure_umqtt_c\
+set AzureUAMQP_path=%AzureIoTProtocolAMQP_path%src\azure_uamqp_c\
 set SharedUtility_path=%AzureIoTUtility_path%src\azure_c_shared_utility\
 set Adapters_path=%AzureIoTUtility_path%src\adapters\
 set sdk_path=%AzureIoTHub_path%src\sdk\
@@ -35,8 +38,8 @@ if exist "%AzureIoTHub_path%" rd /s /q %AzureIoTHub_path%
 
 robocopy %~dp0\base-libraries\AzureIoTHub %AzureIoTHub_path% -MIR
 robocopy %~dp0\base-libraries\AzureIoTUtility %AzureIoTUtility_path% -MIR
-robocopy %~dp0\base-libraries\AzureIoTProtocol_HTTP %Libraries_path%AzureIoTProtocol_HTTP\ -MIR
-robocopy %~dp0\base-libraries\AzureIoTProtocol_MQTT %Libraries_path%AzureIoTProtocol_MQTT\ -MIR
+robocopy %~dp0\base-libraries\AzureIoTProtocol_HTTP %AzureIoTProtocolHTTP_path% -MIR
+robocopy %~dp0\base-libraries\AzureIoTProtocol_MQTT %AzureIoTProtocolMQTT_path% -MIR
 
 mkdir %sdk_path%
 
@@ -52,6 +55,8 @@ copy %AzureIoTSDKs_path%serializer\src\ %sdk_path%
 copy %AzureIoTSDKs_path%serializer\inc\ %sdk_path%
 copy %AzureIoTSDKs_path%parson\parson.* %sdk_path%
 copy %AzureIoTSDKs_path%serializer\samples\simplesample_http\simplesample_http.* %AzureIoTHub_path%examples\simplesample_http
+copy %AzureIoTSDKs_path%serializer\samples\simplesample_http\simplesample_http.* %AzureIoTProtocolHTTP_path%examples\simplesample_http
+copy %AzureIoTSDKs_path%serializer\samples\simplesample_mqtt\simplesample_mqtt.* %AzureIoTProtocolMQTT_path%examples\simplesample_mqtt
 
 mkdir %SharedUtility_path%
 mkdir %Adapters_path%
@@ -62,11 +67,11 @@ copy %AzureIoTSDKs_path%c-utility\adapters\agenttime.c %Adapters_path%
 copy %AzureIoTSDKs_path%c-utility\adapters\tickcounter_tirtos.c %Adapters_path%
 copy %AzureIoTSDKs_path%c-utility\adapters\*arduino.* %Adapters_path%
 
-mkdir %AzureIoTProtocolHTTP_path%
-copy %AzureIoTSDKs_path%c-utility\adapters\httpapi_compact.c %AzureIoTProtocolHTTP_path%
+mkdir %AzureUHTTP_path%
+copy %AzureIoTSDKs_path%c-utility\adapters\httpapi_compact.c %AzureUHTTP_path%
 
-mkdir %AzureIoTProtocolMQTT_path%
-copy %AzureIoTSDKs_path%umqtt\src %AzureIoTProtocolMQTT_path%
+mkdir %AzureUMQTT_path%
+copy %AzureIoTSDKs_path%umqtt\src %AzureUMQTT_path%
 mkdir %AzureIoTHub_path%src\azure_umqtt_c\
 copy %AzureIoTSDKs_path%umqtt\inc\azure_umqtt_c %AzureIoTHub_path%src\azure_umqtt_c\
 
