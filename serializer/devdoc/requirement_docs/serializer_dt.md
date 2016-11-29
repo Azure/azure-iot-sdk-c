@@ -103,14 +103,22 @@ static int deviceMethodCallback(const char* method_name, const unsigned char* pa
 
 **SRS_SERIALIZERDEVICETWIN_02_026: [** If any failure occurs in the above operations, then `deviceMethodCallback` shall fail, return 500, set `*response` to `NULL` and '*resp_size` to 0. **]** 
 
+### IoTHubDeviceTwin_SendReportedState_Impl
+```c
+static IOTHUB_CLIENT_RESULT IoTHubDeviceTwin_SendReportedState_Impl(void* model, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK deviceTwinCallback, void* context)
+```
 
+`IoTHubDeviceTwin_SendReportedState_Impl` send the complete reported state for `model`. 
 
+**SRS_SERIALIZERDEVICETWIN_02_029: [** `IoTHubDeviceTwin_SendReportedState_Impl` shall call `CodeFirst_SendAsyncReported`. **]** (which serializes the complete reported state to a byte buffer).
 
+**SRS_SERIALIZERDEVICETWIN_02_030: [** `IoTHubDeviceTwin_SendReportedState_Impl` shall find `model` in the list of devices. **]**
 
+**SRS_SERIALIZERDEVICETWIN_02_031: [** `IoTHubDeviceTwin_SendReportedState_Impl` shall use IoTHubClient_SendReportedState/IoTHubClient_LL_SendReportedState to send the serialized reported state. **]**
 
+**SRS_SERIALIZERDEVICETWIN_02_032: [** `IoTHubDeviceTwin_SendReportedState_Impl` shall succeed and return `IOTHUB_CLIENT_OK` when all operations complete successfully. **]**
 
-
-
+**SRS_SERIALIZERDEVICETWIN_02_033: [** Otherwise, `IoTHubDeviceTwin_SendReportedState_Impl` shall fail and return `IOTHUB_CLIENT_ERROR`. **]**
 
 
 

@@ -447,6 +447,71 @@ static void IoTHubDeviceTwin_Destroy_Impl(void* model)
     }
 }
 
+/*the below function sends the reported state of a model previously created by IoTHubDeviceTwin_Create*/
+/*this function serves both the _LL and the convenience layer because of protohandles*/
+static IOTHUB_CLIENT_RESULT IoTHubDeviceTwin_SendReportedState_Impl(void* model, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK deviceTwinCallback, void* context)
+{
+    unsigned char*buffer;
+    size_t bufferSize;
+
+    IOTHUB_CLIENT_RESULT result;
+
+    if (SERIALIZE_REPORTED_PROPERTIES_FROM_POINTERS(&buffer, &bufferSize, model) != CODEFIRST_OK)
+    {
+        LogError("Failed serializing reported state");
+        result = IOTHUB_CLIENT_ERROR;
+    }
+    else
+    {
+        SERIALIZER_DEVICETWIN_PROTOHANDLE* protoHandle = (SERIALIZER_DEVICETWIN_PROTOHANDLE*)VECTOR_find_if(g_allProtoHandles, protoHandleHasDeviceStartAddress, model);
+        if (protoHandle == NULL)
+        {
+            LogError("failure in VECTOR_find_if [not found]");
+            result = IOTHUB_CLIENT_ERROR;
+        }
+        else
+        {
+            switch (protoHandle->iothubClientHandleVariant.iothubClientHandleType)
+            {
+                case IOTHUB_CLIENT_CONVENIENCE_HANDLE_TYPE:
+                {
+                    if (IoTHubClient_SendReportedState(protoHandle->iothubClientHandleVariant.iothubClientHandleValue.iothubClientHandle, buffer, bufferSize, deviceTwinCallback, context) != IOTHUB_CLIENT_OK)
+                    {
+                        LogError("Failure sending data");
+                        result = IOTHUB_CLIENT_ERROR;
+                    }
+                    else
+                    {
+                        result = IOTHUB_CLIENT_OK;
+                    }
+                    break;
+                }
+                case IOTHUB_CLIENT_LL_HANDLE_TYPE:
+                {
+                    if (IoTHubClient_LL_SendReportedState(protoHandle->iothubClientHandleVariant.iothubClientHandleValue.iothubClientLLHandle, buffer, bufferSize, deviceTwinCallback, context) != IOTHUB_CLIENT_OK)
+                    {
+                        LogError("Failure sending data");
+                        result = IOTHUB_CLIENT_ERROR;
+                    }
+                    else
+                    {
+                        result = IOTHUB_CLIENT_OK;
+                    }
+                    break;
+                }
+                default:
+                {
+                    LogError("INTERNAL ERROR: unexpected value for enum (%d)", (int)protoHandle->iothubClientHandleVariant.iothubClientHandleType);
+                    result = IOTHUB_CLIENT_ERROR;
+                    break;
+                }
+            }
+        }
+        free(buffer);
+    }
+    return result;
+}
+
 #define DECLARE_DEVICETWIN_MODEL(name, ...)    \
     DECLARE_MODEL(name, __VA_ARGS__)           \
     static name* C2(IoTHubDeviceTwin_Create, name)(IOTHUB_CLIENT_HANDLE iotHubClientHandle)                                                                                         \
@@ -473,6 +538,14 @@ static void IoTHubDeviceTwin_Destroy_Impl(void* model)
     static void C2(IoTHubDeviceTwin_LL_Destroy, name) (name* model)                                                                                                                 \
     {                                                                                                                                                                               \
         IoTHubDeviceTwin_Destroy_Impl(model);                                                                                                                                       \
+    }                                                                                                                                                                               \
+    static IOTHUB_CLIENT_RESULT C2(IoTHubDeviceTwin_LL_SendReportedState, name) (name* model, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK deviceTwinCallback, void* context)              \
+    {                                                                                                                                                                               \
+        return IoTHubDeviceTwin_SendReportedState_Impl(model, deviceTwinCallback, context);                                                                                         \
+    }                                                                                                                                                                               \
+    static IOTHUB_CLIENT_RESULT C2(IoTHubDeviceTwin_SendReportedState, name) (name* model, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK deviceTwinCallback, void* context)                 \
+    {                                                                                                                                                                               \
+        return IoTHubDeviceTwin_SendReportedState_Impl(model, deviceTwinCallback, context);                                                                                         \
     }                                                                                                                                                                               \
 
 #endif /*SERIALIZER_DEVICE_TWIN_H*/
