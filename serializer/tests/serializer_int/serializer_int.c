@@ -809,6 +809,25 @@ METHODRETURN_HANDLE method19(model_WithMethod19* model,
     return result;
 }
 
+BEGIN_NAMESPACE(basic20)
+
+DECLARE_MODEL(model_WithMethod20,
+    WITH_METHOD(method20)
+    );
+
+    DECLARE_MODEL(outerModel20,
+        WITH_DATA(model_WithMethod20, modelMethod20)
+    );
+END_NAMESPACE(basic20)
+
+METHODRETURN_HANDLE method20(model_WithMethod20* model
+)
+{
+    (void)(model);
+    METHODRETURN_HANDLE result = MethodReturn_Create(20, "{\"result\": \"twenty\"}");
+    return result;
+}
+
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/umock_c_prod.h"
     MOCKABLE_FUNCTION(, void, on_structure16, void*, v);
@@ -2373,5 +2392,32 @@ BEGIN_TEST_SUITE(serializer_int)
         MethodReturn_Destroy(result);
         DESTROY_MODEL_INSTANCE(modelWithData);
     }
+
+    /*the following function wants to test that a method taking NO parameters can be called*/
+    /*note: serializer takes a {} in this case*/
+    TEST_FUNCTION(WITH_METHOD_IN_MODEL_IN_MODEL_VOID_METHOD)
+    {
+        ///arrange
+        outerModel20 *modelWithData = CREATE_MODEL_INSTANCE(basic20, outerModel20, true);
+
+        const char* inputJsonAsString =
+            "{                                                                                   \
+            }";
+
+        ///act
+        METHODRETURN_HANDLE result = EXECUTE_METHOD(modelWithData, "modelMethod20/method20", inputJsonAsString);
+
+        ///assert (rest of asserts are in the action)
+        ASSERT_IS_NOT_NULL(result);
+        const METHODRETURN_DATA * data = MethodReturn_GetReturn(result);
+
+        ASSERT_ARE_EQUAL(int, 20, data->statusCode);
+        ASSERT_ARE_EQUAL(char_ptr, "{\"result\": \"twenty\"}", data->jsonValue);
+
+        ///clean
+        MethodReturn_Destroy(result);
+        DESTROY_MODEL_INSTANCE(modelWithData);
+    }
+
 
 END_TEST_SUITE(serializer_int)
