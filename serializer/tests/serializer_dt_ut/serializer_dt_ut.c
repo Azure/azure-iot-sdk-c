@@ -265,6 +265,7 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         REGISTER_GLOBAL_MOCK_RETURNS(CodeFirst_IngestDesiredProperties, CODEFIRST_OK, CODEFIRST_ERROR);
         REGISTER_GLOBAL_MOCK_RETURNS(CodeFirst_ExecuteMethod, TEST_METHODRETURN_HANDLE, NULL);
         REGISTER_GLOBAL_MOCK_RETURNS(IoTHubClient_SendReportedState, IOTHUB_CLIENT_OK, IOTHUB_CLIENT_ERROR);
+        REGISTER_GLOBAL_MOCK_RETURNS(IoTHubClient_LL_SendReportedState, IOTHUB_CLIENT_OK, IOTHUB_CLIENT_ERROR);
         
         
         REGISTER_GLOBAL_MOCK_RETURNS(IoTHubClient_SetDeviceTwinCallback, IOTHUB_CLIENT_OK, IOTHUB_CLIENT_ERROR);
@@ -715,7 +716,7 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         STRICT_EXPECTED_CALL(VECTOR_destroy(g_allProtoHandles));
 
         ///act
-        IoTHubDeviceTwin_LL_DestroybasicModel_WithData15(model);
+        IoTHubDeviceTwin_DestroybasicModel_WithData15(model);
 
         ///assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -846,7 +847,7 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, r);
 
         ///clean
-        IoTHubDeviceTwin_LL_DestroybasicModel_WithData15(model);
+        IoTHubDeviceTwin_DestroybasicModel_WithData15(model);
     }
 
     /*Tests_SRS_SERIALIZERDEVICETWIN_02_033: [ Otherwise, IoTHubDeviceTwin_SendReportedState_Impl shall fail and return IOTHUB_CLIENT_ERROR. ]*/
@@ -886,7 +887,7 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         
 
         ///clean
-        IoTHubDeviceTwin_LL_DestroybasicModel_WithData15(model);
+        IoTHubDeviceTwin_DestroybasicModel_WithData15(model);
         umock_c_negative_tests_deinit();
     }
 
@@ -899,6 +900,109 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         basicModel_WithData15* model = IoTHubDeviceTwin_CreatebasicModel_WithData15(TEST_IOTHUB_CLIENT_HANDLE);
 
         IoTHubDeviceTwin_SendReportedState_Impl_inert_path(model);
+        g_CodeFirst_SendAsyncReported_shall_return = CODEFIRST_ERROR;
+
+        ///act
+        IOTHUB_CLIENT_RESULT r = IoTHubDeviceTwin_SendReportedState_Impl(model, reportedStateCallback, (void*)1);
+
+        ///assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, r);
+
+
+        ///clean
+        IoTHubDeviceTwin_DestroybasicModel_WithData15(model);
+        umock_c_negative_tests_deinit();
+    }
+
+    static void IoTHubDeviceTwin_LL_SendReportedState_Impl_inert_path(void* model)
+    {
+        //STRICT_EXPECTED_CALL(CodeFirst_SendAsyncReported) - this function cannot be mocked because it has ... arguments, therefore the poor version mock is used
+
+        STRICT_EXPECTED_CALL(gballoc_malloc(2));
+        STRICT_EXPECTED_CALL(VECTOR_find_if(g_allProtoHandles, protoHandleHasDeviceStartAddress, model));
+        STRICT_EXPECTED_CALL(IoTHubClient_LL_SendReportedState(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_PTR_ARG, 2, reportedStateCallback, (void*)1))
+            .IgnoreArgument_reportedState();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+    }
+
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_029: [ IoTHubDeviceTwin_SendReportedState_Impl shall call CodeFirst_SendAsyncReported. ]*/
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_030: [ IoTHubDeviceTwin_SendReportedState_Impl shall find model in the list of devices. ]*/
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_031: [ IoTHubDeviceTwin_SendReportedState_Impl shall use IoTHubClient_SendReportedState/IoTHubClient_LL_SendReportedState to send the serialized reported state. ]*/
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_032: [ IoTHubDeviceTwin_SendReportedState_Impl shall succeed and return IOTHUB_CLIENT_OK when all operations complete successfully. ]*/
+    TEST_FUNCTION(IoTHubDeviceTwin_LL_SendReportedState_Impl_happy_path)
+    {
+        ///arrange
+        (void)SERIALIZER_REGISTER_NAMESPACE(basic15);
+        IoTHubDeviceTwin_CreatebasicModel_WithData15_inertPath();
+        basicModel_WithData15* model = IoTHubDeviceTwin_LL_CreatebasicModel_WithData15(TEST_IOTHUB_CLIENT_LL_HANDLE);
+        umock_c_reset_all_calls();
+
+        g_CodeFirst_SendAsyncReported_shall_return = CODEFIRST_OK;
+
+        IoTHubDeviceTwin_LL_SendReportedState_Impl_inert_path(model);
+
+        ///act
+        IOTHUB_CLIENT_RESULT r = IoTHubDeviceTwin_SendReportedState_Impl(model, reportedStateCallback, (void*)1);
+
+        ///assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, r);
+
+        ///clean
+        IoTHubDeviceTwin_LL_DestroybasicModel_WithData15(model);
+    }
+
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_033: [ Otherwise, IoTHubDeviceTwin_SendReportedState_Impl shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+    TEST_FUNCTION(IoTHubDeviceTwin_LL_SendReportedState_Impl_unhappy_paths_1)
+    {
+        ///arrange
+        (void)SERIALIZER_REGISTER_NAMESPACE(basic15);
+        IoTHubDeviceTwin_CreatebasicModel_WithData15_inertPath();
+        basicModel_WithData15* model = IoTHubDeviceTwin_LL_CreatebasicModel_WithData15(TEST_IOTHUB_CLIENT_LL_HANDLE);
+        umock_c_reset_all_calls();
+        umock_c_negative_tests_init();
+
+        g_CodeFirst_SendAsyncReported_shall_return = CODEFIRST_OK;
+
+        IoTHubDeviceTwin_LL_SendReportedState_Impl_inert_path(model);
+
+        umock_c_negative_tests_snapshot();
+
+        umock_c_negative_tests_snapshot();
+
+        for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
+        {
+            umock_c_negative_tests_reset();
+            umock_c_negative_tests_fail_call(i);
+
+            if (
+                (i != 3) /*gballoc_free*/
+                )
+            {
+                ///act
+                IOTHUB_CLIENT_RESULT r = IoTHubDeviceTwin_SendReportedState_Impl(model, reportedStateCallback, (void*)1);
+
+                ///assert
+                ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, r);
+            }
+        }
+
+
+        ///clean
+        IoTHubDeviceTwin_LL_DestroybasicModel_WithData15(model);
+        umock_c_negative_tests_deinit();
+    }
+
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_033: [ Otherwise, IoTHubDeviceTwin_SendReportedState_Impl shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+    TEST_FUNCTION(IoTHubDeviceTwin_LL_SendReportedState_Impl_unhappy_paths_2) /*this test only exists because CodeFirst_SendAsyncReported does not have a mock from umock_c*/
+    {
+        ///arrange
+        (void)SERIALIZER_REGISTER_NAMESPACE(basic15);
+        IoTHubDeviceTwin_CreatebasicModel_WithData15_inertPath();
+        basicModel_WithData15* model = IoTHubDeviceTwin_LL_CreatebasicModel_WithData15(TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+        IoTHubDeviceTwin_LL_SendReportedState_Impl_inert_path(model);
         g_CodeFirst_SendAsyncReported_shall_return = CODEFIRST_ERROR;
 
         ///act
