@@ -24,7 +24,7 @@ set compiler_libraries_path=%compiler_path%\libraries
 
 set user_hardware_path=%work_root%\arduino\hardware
 set user_libraries_path=%work_root%\arduino\libraries
-set user_packages_path=%build_root%\arduino15\packages
+set user_packages_path=%build_root%\arduino15-2.3.0\packages
 
 rem -----------------------------------------------------------------------------
 rem -- parse script arguments
@@ -47,7 +47,14 @@ if "%1" equ "-r" goto arg_run_only
 if "%1" equ "--run-only" goto arg_run_only
 if "%1" equ "-e2e" goto arg_run_e2e_tests
 if "%1" equ "--run-e2e-tests" goto arg_run_e2e_tests
+if "%1" equ "-d" goto arg_delete
+if "%1" equ "--delete" goto arg_delete
 call :usage && exit /b 1
+
+:arg_delete
+set delete_%2=%2
+shift
+goto args_continue
 
 :arg_build_clean
 set build_clean=ON
@@ -107,6 +114,10 @@ echo   user_hardware_path  = %user_hardware_path%
 echo   user_libraries_path = %user_libraries_path%
 echo   user_packages_path  = %user_packages_path%
 echo.
+for /F "tokens=2* delims=_=" %%A in ('set delete_') do (
+    echo   delete = %build_root%\%%B
+)
+echo.
 echo.
 
 rem -----------------------------------------------------------------------------
@@ -117,10 +128,14 @@ if %build_clean%==ON (
     rmdir /S /Q %work_root%
 )
 
+for /F "tokens=2* delims=_=" %%A in ('set delete_') do (
+    rmdir /S /Q %build_root%\%%B
+)
+
 rem -----------------------------------------------------------------------------
 rem -- download arduino compiler
 rem -----------------------------------------------------------------------------
-call download_blob.cmd -directory %build_root% -file %IOTHUB_ARDUINO_VERSION% -check arduino-builder.exe
+call download_blob.cmd -directory %build_root% -file %IOTHUB_ARDUINO_VERSION% -check %IOTHUB_ARDUINO_VERSION%\arduino-builder.exe
 
 rem -----------------------------------------------------------------------------
 rem -- create test directories
@@ -153,9 +168,9 @@ git clone https://github.com/esp8266/Arduino
 rename %hardware_path%\Arduino esp8266
 popd
 
-call download_blob.cmd -directory %user_packages_path% -file esp8266 -check hardware\esp8266\2.2.0\libraries
-call download_blob.cmd -directory %user_packages_path% -file adafruit -check hardware\samd\1.0.9\libraries
-call download_blob.cmd -directory %user_packages_path% -file arduino -check hardware\samd\1.6.6\libraries
+call download_blob.cmd -directory %user_packages_path% -file Arduino15-packages-esp8266-2.3.0 -check esp8266\hardware\esp8266\2.3.0\libraries
+call download_blob.cmd -directory %user_packages_path% -file Arduino15-packages-adafruit-1.0.9 -check adafruit\hardware\samd\1.0.9\libraries
+call download_blob.cmd -directory %user_packages_path% -file Arduino15-packages-arduino-1.6.8 -check arduino\hardware\samd\1.6.8\libraries
 
 rem -----------------------------------------------------------------------------
 rem -- Execute all tests
@@ -208,11 +223,13 @@ rem ----------------------------------------------------------------------------
 :usage
 echo build.cmd [options]
 echo options:
-echo  -c, --clean             delete artifacts from previous build before building
-echo  -b, --build-only        only build the project (default)
-echo  -r, --run-only          only run the test
-echo  -e2e, --run-e2e-tests   run end-to-end test
-echo  --root <test_path>      determine the root of the test tree
+echo  -c, --clean               delete artifacts from previous build before building
+echo  -b, --build-only          only build the project (default)
+echo  -r, --run-only            only run the test
+echo  -e2e, --run-e2e-tests     run end-to-end test
+echo  --root <test_path>        determine the root of the test tree
+echo  -t, --tests <test_list>   determine the file with the test list
+echo  -d, --delete <directory>  provide a directory to delete before start the test (can be more than one)
 goto :eof
 
 
@@ -335,7 +352,7 @@ rem                     "F:\Azure\IoT\SDKs\iot-hub-c-huzzah-getstartedkit-master
 
     set compiler_name=%compiler_path%\arduino-builder.exe
 
-    set hardware_parameters=-hardware "%compiler_hardware_path%" -hardware "%user_hardware_path%" -hardware "%user_packages_path%" -hardware "%user_libraries_path%"
+    set hardware_parameters=-hardware "%compiler_hardware_path%" -hardware "%user_hardware_path%" -hardware "%user_packages_path%"
     set tools_parameters=-tools "%compiler_tools_builder_path%" -tools "%compiler_tools_processor_path%" -tools "%user_packages_path%"
     set libraries_parameters=-built-in-libraries "%compiler_libraries_path%" -libraries "%user_libraries_path%"
     set parameters=-logger=machine !hardware_parameters! !tools_parameters! !libraries_parameters! !CPUParameters! -build-path "%build_root%!RelativeWorkingDir!" -warnings=none -prefs=build.warn_data_percentage=75 -verbose !final_test_root!!RelativePath!\!Target!
@@ -374,7 +391,7 @@ if not "!projectName!"=="" (
         goto :eof
     )
     
-    call powershell.exe -NoProfile -NonInteractive -ExecutionPolicy unrestricted -Command .\execute.ps1 -binaryPath:%build_root%!RelativeWorkingDir!\!Target!.bin -serialPort:!SerialPort! -esptool:%build_root%\arduino15\packages\esp8266\tools\esptool\0.4.8\esptool.exe -logLines:!LogLines! -minimumHeap:!MinimumHeap!
+    call powershell.exe -NoProfile -NonInteractive -ExecutionPolicy unrestricted -Command .\execute.ps1 -binaryPath:%build_root%!RelativeWorkingDir!\!Target!.bin -serialPort:!SerialPort! -esptool:%user_packages_path%\esp8266\tools\esptool\0.4.9\esptool.exe -logLines:!LogLines! -minimumHeap:!MinimumHeap!
 
     if "!errorlevel!"=="0" (
         set __errolevel_run.!projectName!=SUCCEED

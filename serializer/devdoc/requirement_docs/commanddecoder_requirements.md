@@ -22,11 +22,13 @@ extern "C" {
  
 typedef void* COMMAND_DECODER_HANDLE;
 typedef int(*ACTION_CALLBACK_FUNC)(void* actionCallbackContext, const char* relativeActionPath, const char* actionName, size_t argCount, const AGENT_DATA_TYPE* args);
- 
-extern COMMAND_DECODER_HANDLE CommandDecoder_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, ACTION_CALLBACK_FUNC actionCallback, void* actionCallbackContext);
+typedef METHODRETURN_HANDLE(*METHOD_CALLBACK_FUNC)(void* methodCallbackContext, const char* relativeMethodPath, const char* methodName, size_t argCount, const AGENT_DATA_TYPE* args);
+
+extern COMMAND_DECODER_HANDLE CommandDecoder_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, ACTION_CALLBACK_FUNC actionCallback, void* actionCallbackContext, METHOD_CALLBACK_FUNC, methodCallback, void*, methodCallbackContext);
 
 
 extern EXECUTE_COMMAND_RESULT CommandDecoder_ExecuteCommand(COMMAND_DECODER_HANDLE handle, const char* command);
+extern METHODRETURN_HANDLE CommandDecoder_ExecuteMethod(COMMAND_DECODER_HANDLE handle, const char* fullMethodName, const char* methodPayload);
 
 extern void CommandDecoder_Destroy(COMMAND_DECODER_HANDLE commandDecoderHandle);
  
@@ -44,7 +46,7 @@ extern COMMAND_DECODER_HANDLE CommandDecoder_Create(SCHEMA_MODEL_TYPE_HANDLE mod
 
 **SRS_COMMAND_DECODER_01_001: [** CommandDecoder_Create shall create a new instance of a CommandDecoder. **]**
 
-**SRS_COMMAND_DECODER_01_003: [** If any of the arguments modelHandle is NULL, CommandDecoder_Create shall return NULL. **]**
+**SRS_COMMAND_DECODER_01_003: [** If `modelHandle` is NULL, CommandDecoder_Create shall return NULL. **]**
 
 **SRS_COMMAND_DECODER_01_004: [** If any error is encountered during CommandDecoder_Create CommandDecoder_Create shall return NULL. **]**
 
@@ -170,3 +172,34 @@ extern EXECUTE_COMMAND_RESULT CommandDecoder_IngestDesiredProperties( void* star
 
 **SRS_COMMAND_DECODER_02_011: [** Otherwise `CommandDecoder_IngestDesiredProperties` shall fail and return `EXECUTE_COMMAND_FAILED`. **]**
 
+### CommandDecoder_ExecuteMethod
+```c 
+METHODRETURN_HANDLE CommandDecoder_ExecuteMethod(COMMAND_DECODER_HANDLE handle, const char* fullMethodName, const char* methodPayload)
+```
+
+`CommandDecoder_ExecuteMethod` calls the method callback passing the decoded arguments from `fullMethodPayload`. A `fullMethodName` includes
+several segments as in `model1/model2/model3/methodName`. A segment is a model_in_model name.
+
+**SRS_COMMAND_DECODER_02_014: [** If `handle` is `NULL` then `CommandDecoder_ExecuteMethod` shall fail and return `NULL`. **]**
+
+**SRS_COMMAND_DECODER_02_015: [** If `fullMethodName` is `NULL` then `CommandDecoder_ExecuteMethod` shall fail and return `NULL`. **]**
+
+**SRS_COMMAND_DECODER_02_025: [** If `methodCallback` is `NULL` then `CommandDecoder_ExecuteMethod` shall fail and return `NULL`. **]** 
+
+**SRS_COMMAND_DECODER_02_016: [** If `methodPayload` is not `NULL` then `CommandDecoder_ExecuteMethod` shall build a `MULTITREE_HANDLE` out of `methodPayload`. **]**
+
+**SRS_COMMAND_DECODER_02_017: [** `CommandDecoder_ExecuteMethod` shall get the `SCHEMA_HANDLE` associated with the modelHandle passed at `CommandDecoder_Create`. **]**
+
+**SRS_COMMAND_DECODER_02_018: [** `CommandDecoder_ExecuteMethod` shall validate that consecutive segments of the `fullMethodName` exist in the model. **]**
+
+**SRS_COMMAND_DECODER_02_019: [** `CommandDecoder_ExecuteMethod` shall locate the final model to which the `methodName` applies. **]**
+
+**SRS_COMMAND_DECODER_02_020: [** `CommandDecoder_ExecuteMethod` shall verify that the model has a method called `methodName`. **]**
+
+**SRS_COMMAND_DECODER_02_021: [** For every argument of `methodName`, `CommandDecoder_ExecuteMethod` shall build an `AGENT_DATA_TYPE` from the node with the same name from the `MULTITREE_HANDLE`. **]**  
+
+**SRS_COMMAND_DECODER_02_022: [** `CommandDecoder_ExecuteMethod` shall call `methodCallback` passing the context, the `methodName`, number of arguments and the `AGENT_DATA_TYPE`. **]**
+
+**SRS_COMMAND_DECODER_02_023: [** If any of the previous operations fail, then `CommandDecoder_ExecuteMethod` shall return `NULL`. **]**
+
+**SRS_COMMAND_DECODER_02_024: [** Otherwise, `CommandDecoder_ExecuteMethod` shall return what `methodCallback` returns. **]**

@@ -522,13 +522,26 @@ a IoTHubClient_LL handle for the purpose of receiving desired properties.
 ```c
 IoTHubDeviceTwin_LL_DestroyModelName(ModelName* model);
 ```
+
 `IoTHubDeviceTwin_LL_DestroyModelName` frees all used resources by a model instance of type `ModelName`. It also unregisters the DeviceTwin callback.
 
 
+### IoTHubDeviceTwin_LL_SendReportedState*ModelName*
+```c
+IoTHubDeviceTwin_LL_SendReportedState*ModelName*(name* model, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK deviceTwinCallback, void* context)
+```
 
+`IoTHubDeviceTwin_LL_SendReportedState*ModelName*` sends the complee reported state for a model instance. The model instance needs to have been
+created by `IoTHubDeviceTwin_LL_Create*ModelName*`.
     
     
+### IoTHubDeviceTwin_SendReportedState*ModelName*
+```c
+IoTHubDeviceTwin_SendReportedState*ModelName*(name* model, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK deviceTwinCallback, void* context)
+```
 
+`IoTHubDeviceTwin_SendReportedState*ModelName*` sends the complee reported state for a model instance. The model instance needs to have been
+created by `IoTHubDeviceTwin_Create*ModelName*`.
 
 
 

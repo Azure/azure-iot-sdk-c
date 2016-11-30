@@ -11,6 +11,7 @@
 #include "sdk/iothub_client_ll.h"
 #include "sdk/iothub_message.h"
 #include "sdk/iothubtransporthttp.h"
+#include "sdk/iothubtransportmqtt.h"
 
 #include "AzureIoTHubClient.h"
 

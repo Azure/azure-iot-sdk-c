@@ -25,6 +25,9 @@ typedef struct DEVICE_HANDLE_DATA_TAG
     DATA_PUBLISHER_HANDLE dataPublisherHandle;
     pfDeviceActionCallback deviceActionCallback;
     void* callbackUserContext;
+    pfDeviceMethodCallback deviceMethodCallback;
+    void* methodCallbackUserContext;
+
     COMMAND_DECODER_HANDLE commandDecoderHandle;
 } DEVICE_HANDLE_DATA;
 
@@ -52,12 +55,31 @@ static EXECUTE_COMMAND_RESULT DeviceInvokeAction(void* actionCallbackContext, co
     return result;
 }
 
-DEVICE_RESULT Device_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, pfDeviceActionCallback deviceActionCallback, void* callbackUserContext, bool includePropertyPath, DEVICE_HANDLE* deviceHandle)
+static METHODRETURN_HANDLE DeviceInvokeMethod(void* methodCallbackContext, const char* relativeMethodPath, const char* methodName, size_t argCount, const AGENT_DATA_TYPE* args)
+{
+    METHODRETURN_HANDLE result;
+
+    if (methodCallbackContext == NULL)
+    {
+        result = NULL;
+        LogError("(Error code = %s)", ENUM_TO_STRING(DEVICE_RESULT, DEVICE_INVALID_ARG));
+    }
+    else
+    {
+        DEVICE_HANDLE_DATA* device = (DEVICE_HANDLE_DATA*)methodCallbackContext;
+
+        result = device->deviceMethodCallback((DEVICE_HANDLE)device, device->methodCallbackUserContext, relativeMethodPath, methodName, argCount, args);
+    }
+
+    return result;
+}
+
+DEVICE_RESULT Device_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, pfDeviceActionCallback deviceActionCallback, void* callbackUserContext, pfDeviceMethodCallback methodCallback, void* methodCallbackContext, bool includePropertyPath, DEVICE_HANDLE* deviceHandle)
 {
     DEVICE_RESULT result;
 
     /* Codes_SRS_DEVICE_05_014: [If any of the modelHandle, deviceHandle or deviceActionCallback arguments are NULL, Device_Create shall return DEVICE_INVALID_ARG.]*/
-    if (modelHandle == NULL || deviceHandle == NULL || deviceActionCallback == NULL )
+    if (modelHandle == NULL || deviceHandle == NULL || deviceActionCallback == NULL || methodCallback == NULL || methodCallbackContext == NULL)
     {
         result = DEVICE_INVALID_ARG;
         LOG_DEVICE_ERROR;
@@ -89,10 +111,12 @@ DEVICE_RESULT Device_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, pfDeviceAction
                 device->model = modelHandle;
                 device->deviceActionCallback = deviceActionCallback;
                 device->callbackUserContext = callbackUserContext;
+                device->deviceMethodCallback = methodCallback;
+                device->methodCallbackUserContext = methodCallbackContext;
 
                 /* Codes_SRS_DEVICE_01_001: [Device_Create shall create a CommandDecoder instance by calling CommandDecoder_Create and passing to it the model handle.] */
                 /* Codes_SRS_DEVICE_01_002: [Device_Create shall also pass to CommandDecoder_Create a callback to be invoked when a command is received and a context that shall be the device handle.] */
-                if ((device->commandDecoderHandle = CommandDecoder_Create(modelHandle, DeviceInvokeAction, device)) == NULL)
+                if ((device->commandDecoderHandle = CommandDecoder_Create(modelHandle, DeviceInvokeAction, device, DeviceInvokeMethod, device)) == NULL)
                 {
                     DataPublisher_Destroy(device->dataPublisherHandle);
                     free(device);
@@ -256,6 +280,25 @@ EXECUTE_COMMAND_RESULT Device_ExecuteCommand(DEVICE_HANDLE deviceHandle, const c
         /*Codes_SRS_DEVICE_02_013: [Otherwise, Device_ExecuteCommand shall call CommandDecoder_ExecuteCommand and return what CommandDecoder_ExecuteCommand is returning.] */
         DEVICE_HANDLE_DATA* device = (DEVICE_HANDLE_DATA*)deviceHandle;
         result = CommandDecoder_ExecuteCommand(device->commandDecoderHandle, command);
+    }
+    return result;
+}
+
+METHODRETURN_HANDLE Device_ExecuteMethod(DEVICE_HANDLE deviceHandle, const char* methodName, const char* methodPayload)
+{
+    METHODRETURN_HANDLE result;
+    if (
+        (deviceHandle == NULL) ||
+        (methodName == NULL) /*methodPayload can be NULL*/
+        )
+    {
+        result = NULL;
+        LogError("invalid parameter (NULL passed to Device_ExecuteMethod DEVICE_HANDLE deviceHandle=%p, const char* methodPayload=%p", deviceHandle, methodPayload);
+    }
+    else
+    {
+        DEVICE_HANDLE_DATA* device = (DEVICE_HANDLE_DATA*)deviceHandle;
+        result = CommandDecoder_ExecuteMethod(device->commandDecoderHandle, methodName, methodPayload);
     }
     return result;
 }

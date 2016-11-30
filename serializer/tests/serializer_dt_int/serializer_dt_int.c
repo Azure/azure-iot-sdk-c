@@ -13,7 +13,7 @@
 
 #include "parson.h"
 
-/*don't want any of the below mocks, so preemtpively #include the header will prohibit the mocks from being created*/
+/*don't want any of the below mocks, so preemptively #include the header will prohibit the mocks from being created*/
 #include "crt_abstractions.h"
 #include "commanddecoder.h"
 
@@ -92,9 +92,18 @@ DECLARE_DEVICETWIN_MODEL(basicModel_WithData15,
     WITH_DESIRED_PROPERTY(ascii_char_ptr_no_quotes, with_desired_property_ascii_char_ptr_no_quotes15, on_desired_property_ascii_char_ptr_no_quotes15),
     WITH_DESIRED_PROPERTY(EDM_DATE_TIME_OFFSET, with_desired_property_EdmDateTimeOffset15, on_desired_property_EdmDateTimeOffset15),
     WITH_DESIRED_PROPERTY(EDM_GUID, with_desired_property_EdmGuid15, on_desired_property_EdmGuid15),
-    WITH_DESIRED_PROPERTY(EDM_BINARY, with_desired_property_EdmBinary15, on_desired_property_EdmBinary15)
+    WITH_DESIRED_PROPERTY(EDM_BINARY, with_desired_property_EdmBinary15, on_desired_property_EdmBinary15),
+    WITH_METHOD(methodA, int, a, int, b),
+    WITH_REPORTED_PROPERTY(int, with_reported_property_int15)
 )
 END_NAMESPACE(basic15)
+
+METHODRETURN_HANDLE my_methodA(basicModel_WithData15 *model, int a, int b)
+{
+    (void)model;
+    METHODRETURN_HANDLE result = MethodReturn_Create(a + b, "\"ANSWER\"");
+    return result;
+}
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/umock_c_prod.h"
@@ -113,6 +122,8 @@ MOCKABLE_FUNCTION(, void, on_desired_property_double15, void*, v);
     MOCKABLE_FUNCTION(, void, on_desired_property_EdmDateTimeOffset15, void*, v);
     MOCKABLE_FUNCTION(, void, on_desired_property_EdmGuid15, void*, v);
     MOCKABLE_FUNCTION(, void, on_desired_property_EdmBinary15, void*, v);
+    MOCKABLE_FUNCTION(, METHODRETURN_HANDLE, methodA, basicModel_WithData15 *, model, int, a, int, b);
+    MOCKABLE_FUNCTION(, void, sendReportedStateCallback, int, status_code, void*, userContextCallback);
 #undef ENABLE_MOCKS
 
 #define TEST_IOTHUB_CLIENT_HANDLE ((IOTHUB_CLIENT_HANDLE)0x42)
@@ -120,6 +131,10 @@ MOCKABLE_FUNCTION(, void, on_desired_property_double15, void*, v);
 
 static IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK g_SerializerIngest_fp = NULL;
 static void* g_SerializerIngest_userContextCallback = NULL;
+
+static IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC g_deviceMethodCallback_fp = NULL;
+static void* g_deviceMethodCallback_userContextCallback = NULL;
+
 
 static IOTHUB_CLIENT_RESULT my_IoTHubClient_SetDeviceTwinCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback, void* userContextCallback)
 {
@@ -137,6 +152,53 @@ static IOTHUB_CLIENT_RESULT my_IoTHubClient_LL_SetDeviceTwinCallback(IOTHUB_CLIE
     return IOTHUB_CLIENT_OK;
 }
 
+static IOTHUB_CLIENT_RESULT my_IoTHubClient_SetDeviceMethodCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC deviceMethodCallback, void* userContextCallback)
+{
+    (void)(iotHubClientHandle);
+    g_deviceMethodCallback_fp = deviceMethodCallback;
+    g_deviceMethodCallback_userContextCallback = userContextCallback;
+    return IOTHUB_CLIENT_OK;
+}
+
+static IOTHUB_CLIENT_RESULT my_IoTHubClient_LL_SetDeviceMethodCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC deviceMethodCallback, void* userContextCallback)
+{
+    (void)(iotHubClientHandle);
+    g_deviceMethodCallback_fp = deviceMethodCallback;
+    g_deviceMethodCallback_userContextCallback = userContextCallback;
+    return IOTHUB_CLIENT_OK;
+}
+
+static char* g_IoTHubClient_SendReportedState_reportedState = NULL;
+static size_t g_IoTHubClient_SendReportedState_size = 0;
+static IOTHUB_CLIENT_RESULT my_IoTHubClient_SendReportedState(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const unsigned char* reportedState, size_t size, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reportedStateCallback, void* userContextCallback)
+{
+    (void)(iotHubClientHandle);
+    
+    g_IoTHubClient_SendReportedState_reportedState = (char*)malloc(size+1);
+    ASSERT_IS_NOT_NULL(g_IoTHubClient_SendReportedState_reportedState);
+    memcpy(g_IoTHubClient_SendReportedState_reportedState, reportedState, size);
+    g_IoTHubClient_SendReportedState_reportedState[size] = '\0';
+
+    reportedStateCallback(201, userContextCallback);
+    return IOTHUB_CLIENT_OK;
+}
+
+static char* g_IoTHubClient_LL_SendReportedState_reportedState = NULL;
+static size_t g_IoTHubClient_LL_SendReportedState_size = 0;
+static IOTHUB_CLIENT_RESULT my_IoTHubClient_LL_SendReportedState(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const unsigned char* reportedState, size_t size, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reportedStateCallback, void* userContextCallback)
+{
+    (void)(iotHubClientHandle, reportedState, size);
+    g_IoTHubClient_LL_SendReportedState_reportedState = (char*)malloc(size+1);
+    ASSERT_IS_NOT_NULL(g_IoTHubClient_LL_SendReportedState_reportedState);
+    memcpy(g_IoTHubClient_LL_SendReportedState_reportedState, reportedState, size);
+    g_IoTHubClient_LL_SendReportedState_reportedState[size] = '\0';
+
+    reportedStateCallback(201, userContextCallback);
+    return IOTHUB_CLIENT_OK;
+}
+
+TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 
 BEGIN_TEST_SUITE(serializer_dt_int)
 
@@ -155,9 +217,21 @@ BEGIN_TEST_SUITE(serializer_dt_int)
         REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_LL_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(basicModel_WithData15, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_REPORTED_STATE_CALLBACK, void*);
         
+
         REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_SetDeviceTwinCallback, my_IoTHubClient_SetDeviceTwinCallback);
         REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_SetDeviceTwinCallback, my_IoTHubClient_LL_SetDeviceTwinCallback);
+
+        REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_SetDeviceMethodCallback, my_IoTHubClient_SetDeviceMethodCallback);
+        REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_SetDeviceMethodCallback, my_IoTHubClient_LL_SetDeviceMethodCallback);
+
+        REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_SendReportedState, my_IoTHubClient_LL_SendReportedState);
+        REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_SendReportedState, my_IoTHubClient_SendReportedState);
+
+        REGISTER_GLOBAL_MOCK_HOOK(methodA, my_methodA);
     }
 
     TEST_SUITE_CLEANUP(TestClassCleanup)
@@ -179,21 +253,40 @@ BEGIN_TEST_SUITE(serializer_dt_int)
         g_SerializerIngest_fp = NULL;
         g_SerializerIngest_userContextCallback = NULL;
 
+        g_IoTHubClient_SendReportedState_reportedState = NULL;
+        g_IoTHubClient_LL_SendReportedState_reportedState = NULL;
+
+        g_IoTHubClient_SendReportedState_size = 0;
+        g_IoTHubClient_LL_SendReportedState_size = 0;
+
     }
 
     TEST_FUNCTION_CLEANUP(TestMethodCleanup)
     {
+        if (g_IoTHubClient_SendReportedState_reportedState != NULL)
+        {
+            free(g_IoTHubClient_SendReportedState_reportedState);
+        }
+
+        if (g_IoTHubClient_LL_SendReportedState_reportedState != NULL)
+        {
+            free(g_IoTHubClient_LL_SendReportedState_reportedState);
+        }
         TEST_MUTEX_RELEASE(g_testByTest);
     }
    
     /*this test wants to see that IoTHubDeviceTwin_CreatebasicModel_WithData15 doesn't fail*/
-    TEST_FUNCTION(SERIALIZER_DT_AUTOMATICALLY_SUBSCRIBED_TO_DEVICETWIN_AND_SUCCEEDS)
+    TEST_FUNCTION(SERIALIZER_DT_AUTOMATICALLY_SUBSCRIBED_TO_DEVICETWIN_AND_METHODS_SUCCEEDS)
     {
         ///arrange
         (void)SERIALIZER_REGISTER_NAMESPACE(basic15);
 
         STRICT_EXPECTED_CALL(IoTHubClient_SetDeviceTwinCallback(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument_deviceTwinCallback()
+            .IgnoreArgument_userContextCallback();
+
+        STRICT_EXPECTED_CALL(IoTHubClient_SetDeviceMethodCallback(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument_deviceMethodCallback()
             .IgnoreArgument_userContextCallback();
             
         ///act
@@ -209,13 +302,17 @@ BEGIN_TEST_SUITE(serializer_dt_int)
     }
 
     /*this test wants to see that IoTHubDeviceTwin_CreatebasicModel_WithData15 doesn't fail*/
-    TEST_FUNCTION(SERIALIZER_DT_AUTOMATICALLY_SUBSCRIBED_TO_DEVICETWIN_AND_LL_SUCCEEDS)
+    TEST_FUNCTION(SERIALIZER_DT_AUTOMATICALLY_SUBSCRIBED_TO_DEVICETWIN_AND_METHODS_LL_SUCCEEDS)
     {
         ///arrange
         (void)SERIALIZER_REGISTER_NAMESPACE(basic15);
 
         STRICT_EXPECTED_CALL(IoTHubClient_LL_SetDeviceTwinCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument_deviceTwinCallback()
+            .IgnoreArgument_userContextCallback();
+
+        STRICT_EXPECTED_CALL(IoTHubClient_LL_SetDeviceMethodCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument_deviceMethodCallback()
             .IgnoreArgument_userContextCallback();
 
         ///act
@@ -258,6 +355,10 @@ BEGIN_TEST_SUITE(serializer_dt_int)
 
         STRICT_EXPECTED_CALL(IoTHubClient_SetDeviceTwinCallback(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument_deviceTwinCallback()
+            .IgnoreArgument_userContextCallback();
+
+        STRICT_EXPECTED_CALL(IoTHubClient_SetDeviceMethodCallback(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument_deviceMethodCallback()
             .IgnoreArgument_userContextCallback();
 
         basicModel_WithData15* modelWithData = IoTHubDeviceTwin_CreatebasicModel_WithData15(TEST_IOTHUB_CLIENT_HANDLE);
@@ -365,6 +466,10 @@ BEGIN_TEST_SUITE(serializer_dt_int)
             .IgnoreArgument_deviceTwinCallback()
             .IgnoreArgument_userContextCallback();
 
+        STRICT_EXPECTED_CALL(IoTHubClient_LL_SetDeviceMethodCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument_deviceMethodCallback()
+            .IgnoreArgument_userContextCallback();
+
         basicModel_WithData15* modelWithData = IoTHubDeviceTwin_LL_CreatebasicModel_WithData15(TEST_IOTHUB_CLIENT_LL_HANDLE);
 
         STRICT_EXPECTED_CALL(on_desired_property_double15(modelWithData));
@@ -456,6 +561,10 @@ BEGIN_TEST_SUITE(serializer_dt_int)
             .IgnoreArgument_deviceTwinCallback()
             .IgnoreArgument_userContextCallback();
 
+        STRICT_EXPECTED_CALL(IoTHubClient_SetDeviceMethodCallback(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument_deviceMethodCallback()
+            .IgnoreArgument_userContextCallback();
+
         basicModel_WithData15* modelWithData = IoTHubDeviceTwin_CreatebasicModel_WithData15(TEST_IOTHUB_CLIENT_HANDLE);
 
         STRICT_EXPECTED_CALL(on_desired_property_double15(modelWithData));
@@ -490,6 +599,10 @@ BEGIN_TEST_SUITE(serializer_dt_int)
             .IgnoreArgument_deviceTwinCallback()
             .IgnoreArgument_userContextCallback();
 
+        STRICT_EXPECTED_CALL(IoTHubClient_LL_SetDeviceMethodCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument_deviceMethodCallback()
+            .IgnoreArgument_userContextCallback();
+
         basicModel_WithData15* modelWithData = IoTHubDeviceTwin_LL_CreatebasicModel_WithData15(TEST_IOTHUB_CLIENT_LL_HANDLE);
 
         STRICT_EXPECTED_CALL(on_desired_property_double15(modelWithData));
@@ -507,5 +620,121 @@ BEGIN_TEST_SUITE(serializer_dt_int)
         IoTHubDeviceTwin_LL_DestroybasicModel_WithData15(modelWithData);
 
     }
+
+    /*this test verifies that a method is executed when a device is created from serializer_devicetwin*/
+    TEST_FUNCTION(SERIALIZER_DT_RECEIVES_AND_EXECUTES_A_METHOD)
+    {
+        ///arrange
+
+        const char* inputJsonAsString =
+            "{                                                          \
+                \"a\" : 1,                                              \
+                \"b\" : 2                                               \
+            }";
+
+        (void)SERIALIZER_REGISTER_NAMESPACE(basic15);
+        basicModel_WithData15* modelWithData = IoTHubDeviceTwin_LL_CreatebasicModel_WithData15(TEST_IOTHUB_CLIENT_LL_HANDLE);
+        umock_c_reset_all_calls();
+
+        unsigned char* result;
+        size_t result_size;
+
+        STRICT_EXPECTED_CALL(methodA(modelWithData, 1, 2));
+
+        ///act
+        int r = g_deviceMethodCallback_fp("methodA", (const unsigned char*)inputJsonAsString, strlen(inputJsonAsString), &result, &result_size, g_deviceMethodCallback_userContextCallback);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, 3, r);
+        ASSERT_ARE_EQUAL(size_t, 8, result_size);
+        ASSERT_IS_NOT_NULL(result);
+        ASSERT_ARE_EQUAL(int, 0, memcmp("\"ANSWER\"", result, result_size));
+
+        ///clean
+        IoTHubDeviceTwin_LL_DestroybasicModel_WithData15(modelWithData);
+        free(result);
+    }
     
+    /*this test verifies that SendReportedState works for a device*/
+    TEST_FUNCTION(SERIALIZER_DT_SENDREPORTEDSTATE_SUCCEEDS_CONVENIENCE)
+    {
+        ///arrange
+
+        const char* expectedOutputJsonAsString =
+            "{                                                          \
+            \"with_reported_property_int15\" : 15                       \
+        }";
+
+        (void)SERIALIZER_REGISTER_NAMESPACE(basic15);
+        basicModel_WithData15* modelWithData = IoTHubDeviceTwin_CreatebasicModel_WithData15(TEST_IOTHUB_CLIENT_HANDLE);
+        umock_c_reset_all_calls();
+
+        modelWithData->with_reported_property_int15 = 15;
+
+        STRICT_EXPECTED_CALL(IoTHubClient_SendReportedState(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_PTR_ARG, IGNORED_NUM_ARG, sendReportedStateCallback, (void*)0x44))
+            .IgnoreArgument_reportedState()
+            .IgnoreArgument_size();
+        STRICT_EXPECTED_CALL(sendReportedStateCallback(201, (void*)0x44));
+
+        ///act
+        IOTHUB_CLIENT_RESULT r = IoTHubDeviceTwin_SendReportedStatebasicModel_WithData15(modelWithData, sendReportedStateCallback, (void*)0x44);
+
+        ///assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, r);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+        /*compare 2 jsons*/
+        JSON_Value* expectedJson = json_parse_string(expectedOutputJsonAsString);
+        ASSERT_IS_NOT_NULL(expectedJson);
+        JSON_Value* actualJson = json_parse_string(g_IoTHubClient_SendReportedState_reportedState);
+        ASSERT_IS_NOT_NULL(actualJson);
+
+        ASSERT_ARE_EQUAL(int, 0, !json_value_equals(expectedJson, actualJson));
+
+        ///clean
+        IoTHubDeviceTwin_DestroybasicModel_WithData15(modelWithData);
+        json_value_free(expectedJson);
+        json_value_free(actualJson);
+    }
+
+    /*this test verifies that SendReportedState works for a device*/
+    TEST_FUNCTION(SERIALIZER_DT_SENDREPORTEDSTATE_SUCCEEDS_LL)
+    {
+        ///arrange
+
+        const char* expectedOutputJsonAsString =
+            "{                                                          \
+            \"with_reported_property_int15\" : 15                       \
+        }";
+
+        (void)SERIALIZER_REGISTER_NAMESPACE(basic15);
+        basicModel_WithData15* modelWithData = IoTHubDeviceTwin_LL_CreatebasicModel_WithData15(TEST_IOTHUB_CLIENT_LL_HANDLE);
+        umock_c_reset_all_calls();
+
+        modelWithData->with_reported_property_int15 = 15;
+
+        STRICT_EXPECTED_CALL(IoTHubClient_LL_SendReportedState(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_NUM_ARG, sendReportedStateCallback, (void*)0x44))
+            .IgnoreArgument_reportedState()
+            .IgnoreArgument_size();
+        STRICT_EXPECTED_CALL(sendReportedStateCallback(201, (void*)0x44));
+
+        ///act
+        IOTHUB_CLIENT_RESULT r = IoTHubDeviceTwin_LL_SendReportedStatebasicModel_WithData15(modelWithData, sendReportedStateCallback, (void*)0x44);
+
+        ///assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, r);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+        /*compare 2 jsons*/
+        JSON_Value* expectedJson = json_parse_string(expectedOutputJsonAsString);
+        ASSERT_IS_NOT_NULL(expectedJson);
+        JSON_Value* actualJson = json_parse_string(g_IoTHubClient_LL_SendReportedState_reportedState);
+        ASSERT_IS_NOT_NULL(actualJson);
+
+        ASSERT_ARE_EQUAL(int, 0, !json_value_equals(expectedJson, actualJson));
+
+        ///clean
+        IoTHubDeviceTwin_LL_DestroybasicModel_WithData15(modelWithData);
+        json_value_free(expectedJson);
+        json_value_free(actualJson);
+    }
+
 END_TEST_SUITE(serializer_dt_int)

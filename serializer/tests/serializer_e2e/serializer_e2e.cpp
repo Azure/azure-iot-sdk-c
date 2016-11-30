@@ -22,8 +22,11 @@
 #include "azure_c_shared_utility/threadapi.h"
 #include "iothubtransportamqp.h"
 #include "iothubtransporthttp.h"
+#include "iothubtransportmqtt.h"
 #include "MacroE2EModelAction.h"
 #include "iothub_client.h"
+#include "iothub_devicemethod.h"
+#include "parson.h"
 
 #include "azure_c_shared_utility/platform.h"
 
@@ -41,6 +44,9 @@ DEFINE_MICROMOCK_ENUM_TO_STRING(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RE
 DEFINE_MICROMOCK_ENUM_TO_STRING(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES);
 DEFINE_MICROMOCK_ENUM_TO_STRING(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 DEFINE_MICROMOCK_ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_RESULT_VALUES);
+DEFINE_MICROMOCK_ENUM_TO_STRING(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_RESULT_VALUES);
+
+
 
 static const char* TEST_SEND_DATA_FMT = "{\"ExampleData\": { \"SendDate\": \"%.24s\", \"UniqueId\":%d} }";
 static const char* TEST_RECV_DATA_FMT = "{\\\"Name\\\": \\\"testaction\\\", \\\"Parameters\\\": { \\\"property1\\\": \\\"%.24s\\\", \\\"UniqueId\\\":%d}}";
@@ -121,6 +127,20 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT IoTHubMessage(IOTHUB_MESSAGE_HANDLE mess
         free(buffer_string);
     }
     return IOTHUBMESSAGE_ACCEPTED;
+}
+
+METHODRETURN_HANDLE theSumOfThings(deviceModel* device, int a, int b)
+{
+    (void)(device);
+    int a_plus_b = a + b;
+    size_t needed = snprintf(NULL, 0, "%u", a_plus_b);
+    char* jsonValue = (char*)malloc(needed + 1);
+    ASSERT_IS_NOT_NULL(jsonValue);
+    (void)snprintf(jsonValue, needed + 1, "%u", a_plus_b);
+    METHODRETURN_HANDLE result = MethodReturn_Create(10, jsonValue);
+    ASSERT_IS_NOT_NULL(result);
+    free(jsonValue);
+    return result;
 }
 
 /*AT NO TIME, CAN THERE BE 2 TRANSPORTS OVER OPENSSL IN THE SAME TIME.*/
@@ -405,6 +425,9 @@ BEGIN_TEST_SUITE(serializer_e2e)
             free(data);
         }
     }
+
+    
+   
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
@@ -786,6 +809,126 @@ BEGIN_TEST_SUITE(serializer_e2e)
         DESTROY_MODEL_INSTANCE(devModel);
         IoTHubClient_LL_Destroy(iotHubClientHandle);
         SendTestData_Destroy(expectedData); //cleanup*/
+    }
+
+    
+    static int DeviceMethodCallback(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* resp_size, void* userContextCallback)
+    {
+        /*userContextCallback is of type deviceModel*/
+        (void)(method_name, payload, size, response, resp_size, userContextCallback);
+
+        /*this is step  3: receive the method and push that payload into serializer (from below)*/
+        char* payloadZeroTerminated = (char*)malloc(size + 1);
+        ASSERT_IS_NOT_NULL(payloadZeroTerminated);
+        memcpy(payloadZeroTerminated, payload, size);
+        payloadZeroTerminated[size] = '\0';
+
+        METHODRETURN_HANDLE result = EXECUTE_METHOD(userContextCallback, method_name, payloadZeroTerminated);
+        free(payloadZeroTerminated);
+        ASSERT_IS_NOT_NULL(result);
+        
+        /*step 4: get the serializer answer and push it in the networking stack*/
+        const METHODRETURN_DATA* data = MethodReturn_GetReturn(result);
+        
+        int statusCode = data->statusCode;
+
+        ASSERT_IS_NOT_NULL(data->jsonValue);
+
+        *resp_size = strlen(data->jsonValue);
+
+        *response = (unsigned char*)malloc(*resp_size);
+        ASSERT_IS_NOT_NULL(*response);
+        memcpy(*response, data->jsonValue, *resp_size);
+        
+        MethodReturn_Destroy(result);
+        return statusCode;
+    }
+
+
+    /*the following test shall perform the following
+    1: create a model instance that has a method
+    2: create/start the device + start listening on method
+    3: receive the method and push that payload into serializer
+    4: get the serializer answer and push it in the networking stack
+    5: verify on the service side that the answer matches the expectations
+    6: destroy all things*/
+
+    /*
+    by convention, it shall call a function that receives 2 ints and produces the sum of the ints in the answer.
+    by convention, the request JSON looks like
+    {
+        "a": 3,
+        "b": 33
+    }
+
+    by convention, the answer shall have "36" (or whatever the function computes) as only payload, status will be set to 10.
+
+    */
+
+    TEST_FUNCTION(IoTClient_MQTT_can_receive_a_method)
+    {
+
+        /*step 1: create a model instance that has a method*/
+        IOTHUB_CLIENT_RESULT result;
+        IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
+
+        iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName(g_iothubAcctInfo);
+        iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix(g_iothubAcctInfo);
+        iotHubConfig.deviceId = IoTHubAccount_GetDeviceId(g_iothubAcctInfo);
+        iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey(g_iothubAcctInfo);
+        iotHubConfig.protocol = MQTT_Protocol;
+
+        deviceModel* device = CREATE_MODEL_INSTANCE(MacroE2EModelAction, deviceModel);
+        ASSERT_IS_NOT_NULL(device);
+
+        /*step 2: create/start the device + start listening on method*/
+        IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_Create(&iotHubConfig);
+        ASSERT_IS_NOT_NULL_WITH_MSG(iotHubClientHandle, "Could not create IoTHubClient");
+
+        result = IoTHubClient_SetDeviceMethodCallback(iotHubClientHandle, DeviceMethodCallback, device);
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device method callback");
+
+        // Wait for the method subscription to go through
+        ThreadAPI_Sleep(3 * 1000);
+
+        IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo));
+        ASSERT_IS_NOT_NULL_WITH_MSG(iotHubServiceClientHandle, "Could not create service client handle");
+
+        IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE serviceClientDeviceMethodHandle = IoTHubDeviceMethod_Create(iotHubServiceClientHandle);
+        ASSERT_IS_NOT_NULL_WITH_MSG(serviceClientDeviceMethodHandle, "Could not create device method handle");
+
+        /*step 5: verify on the service side that the answer matches the expectations*/
+        int responseStatus;
+        unsigned char* responsePayload;
+        size_t responsePayloadSize;
+        IOTHUB_DEVICE_METHOD_RESULT invokeResult = IoTHubDeviceMethod_Invoke(serviceClientDeviceMethodHandle, iotHubConfig.deviceId, "theSumOfThings", "{\"a\":3, \"b\":33}", 120, &responseStatus, &responsePayload, &responsePayloadSize);
+
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_OK, invokeResult, "IoTHubDeviceMethod_Invoke failed");
+        ASSERT_ARE_EQUAL_WITH_MSG(int, 10, responseStatus, "response status is incorrect");
+
+        /*make sure the response is null terminated*/
+
+        char* responseAsString = (char*)malloc(responsePayloadSize + 1);
+        ASSERT_IS_NOT_NULL(responseAsString);
+        memcpy(responseAsString, responsePayload, responsePayloadSize);
+        responseAsString[responsePayloadSize] = '\0';
+
+        /*parse the response*/
+        JSON_Value *jsonValue = json_parse_string(responseAsString);
+        free(responseAsString);
+        ASSERT_IS_NOT_NULL(jsonValue);
+
+        double d = json_value_get_number(jsonValue);
+        json_value_free(jsonValue);
+        ASSERT_ARE_EQUAL(int, 36, (int)d);
+        
+        /*cleanup*/
+        /*step 6: destroy all things*/
+        free(responsePayload);
+        IoTHubDeviceMethod_Destroy(serviceClientDeviceMethodHandle);
+        IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
+        IoTHubClient_Destroy(iotHubClientHandle);
+        DESTROY_MODEL_INSTANCE(device);
     }
 
 END_TEST_SUITE(serializer_e2e)

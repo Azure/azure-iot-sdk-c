@@ -21,6 +21,8 @@ DEFINE_ENUM_STRINGS(COMMANDDECODER_RESULT, COMMANDDECODER_RESULT_VALUES);
 
 typedef struct COMMAND_DECODER_HANDLE_DATA_TAG
 {
+    METHOD_CALLBACK_FUNC methodCallback;
+    void* methodCallbackContext;
     SCHEMA_MODEL_TYPE_HANDLE ModelHandle;
     ACTION_CALLBACK_FUNC ActionCallback;
     void* ActionCallbackContext;
@@ -292,6 +294,113 @@ static EXECUTE_COMMAND_RESULT DecodeAndExecuteModelAction(COMMAND_DECODER_HANDLE
     return result;
 }
 
+static METHODRETURN_HANDLE DecodeAndExecuteModelMethod(COMMAND_DECODER_HANDLE_DATA* commandDecoderInstance, SCHEMA_HANDLE schemaHandle, SCHEMA_MODEL_TYPE_HANDLE modelHandle, const char* relativeMethodPath, const char* methodName, MULTITREE_HANDLE methodTree)
+{
+    METHODRETURN_HANDLE result;
+    size_t strLength = strlen(methodName);
+
+    if (strLength == 0)
+    {
+        /*Codes_SRS_COMMAND_DECODER_02_023: [ If any of the previous operations fail, then CommandDecoder_ExecuteMethod shall return NULL. ]*/
+        LogError("Invalid method name");
+        result = NULL;
+    }
+    else
+    {
+        SCHEMA_METHOD_HANDLE modelMethodHandle;
+        size_t argCount;
+
+#ifdef _MSC_VER
+#pragma warning(suppress: 6324) /* We intentionally use here strncpy */ 
+#endif
+        
+        /*Codes_SRS_COMMAND_DECODER_02_020: [ CommandDecoder_ExecuteMethod shall verify that the model has a method called methodName. ]*/
+        if (((modelMethodHandle = Schema_GetModelMethodByName(modelHandle, methodName)) == NULL) ||
+            (Schema_GetModelMethodArgumentCount(modelMethodHandle, &argCount) != SCHEMA_OK))
+        {
+            /*Codes_SRS_COMMAND_DECODER_02_023: [ If any of the previous operations fail, then CommandDecoder_ExecuteMethod shall return NULL. ]*/
+            LogError("Failed reading method %s from the schema", methodName);
+            result = NULL;
+        }
+        else
+        {
+            /*Codes_SRS_COMMAND_DECODER_02_021: [ For every argument of methodName, CommandDecoder_ExecuteMethod shall build an AGENT_DATA_TYPE from the node with the same name from the MULTITREE_HANDLE. ]*/
+            
+            if (argCount == 0)
+            {
+                /*no need for any parameters*/
+                result = commandDecoderInstance->methodCallback(commandDecoderInstance->methodCallbackContext, relativeMethodPath, methodName, 0, NULL);
+            }
+            else
+            {
+                AGENT_DATA_TYPE* arguments;
+                arguments = (AGENT_DATA_TYPE*)malloc(sizeof(AGENT_DATA_TYPE)* argCount);
+                if (arguments == NULL)
+                {
+                    LogError("Failed allocating arguments array");
+                    result = NULL;
+                }
+                else
+                {
+                    size_t i;
+                    size_t j;
+                    result = NULL;
+
+                    for (i = 0; i < argCount; i++)
+                    {
+                        SCHEMA_METHOD_ARGUMENT_HANDLE methodArgumentHandle;
+                        MULTITREE_HANDLE argumentNode;
+                        const char* argName;
+                        const char* argType;
+
+                        if (((methodArgumentHandle = Schema_GetModelMethodArgumentByIndex(modelMethodHandle, i)) == NULL) ||
+                            ((argName = Schema_GetMethodArgumentName(methodArgumentHandle)) == NULL) ||
+                            ((argType = Schema_GetMethodArgumentType(methodArgumentHandle)) == NULL))
+                        {
+                            /*Codes_SRS_COMMAND_DECODER_02_023: [ If any of the previous operations fail, then CommandDecoder_ExecuteMethod shall return NULL. ]*/
+                            LogError("Failed getting the argument information from the schema");
+                            result = NULL;
+                            break;
+                        }
+                        else if (MultiTree_GetChildByName(methodTree, argName, &argumentNode) != MULTITREE_OK)
+                        {
+                            /*Codes_SRS_COMMAND_DECODER_02_023: [ If any of the previous operations fail, then CommandDecoder_ExecuteMethod shall return NULL. ]*/
+                            LogError("Missing argument %s", argName);
+                            result = NULL;
+                            break;
+                        }
+                        else if (DecodeValueFromNode(schemaHandle, &arguments[i], argumentNode, argType) != 0)
+                        {
+                            /*Codes_SRS_COMMAND_DECODER_02_023: [ If any of the previous operations fail, then CommandDecoder_ExecuteMethod shall return NULL. ]*/
+                            LogError("failure in DecodeValueFromNode");
+                            result = NULL;
+                            break;
+                        }
+                    }
+
+                    if (i == argCount)
+                    {
+                        /*Codes_SRS_COMMAND_DECODER_02_022: [ CommandDecoder_ExecuteMethod shall call methodCallback passing the context, the methodName, number of arguments and the AGENT_DATA_TYPE. ]*/
+                        /*Codes_SRS_COMMAND_DECODER_02_024: [ Otherwise, CommandDecoder_ExecuteMethod shall return what methodCallback returns. ]*/
+                        result = commandDecoderInstance->methodCallback(commandDecoderInstance->methodCallbackContext, relativeMethodPath, methodName, argCount, arguments);
+                    }
+
+                    for (j = 0; j < i; j++)
+                    {
+                        Destroy_AGENT_DATA_TYPE(&arguments[j]);
+                    }
+
+                    free(arguments);
+                }
+
+            }
+        }
+        
+    }
+    return result;
+}
+
+
 static EXECUTE_COMMAND_RESULT ScanActionPathAndExecuteAction(COMMAND_DECODER_HANDLE_DATA* commandDecoderInstance, SCHEMA_HANDLE schemaHandle, const char* actionPath, MULTITREE_HANDLE commandNode)
 {
     EXECUTE_COMMAND_RESULT result;
@@ -377,6 +486,91 @@ static EXECUTE_COMMAND_RESULT ScanActionPathAndExecuteAction(COMMAND_DECODER_HAN
     return result;
 }
 
+static METHODRETURN_HANDLE ScanMethodPathAndExecuteMethod(COMMAND_DECODER_HANDLE_DATA* commandDecoderInstance, SCHEMA_HANDLE schemaHandle, const char* fullMethodName, MULTITREE_HANDLE methodTree)
+{
+    METHODRETURN_HANDLE result;
+    char* relativeMethodPath;
+    const char* methodName = fullMethodName;
+    SCHEMA_MODEL_TYPE_HANDLE modelHandle = commandDecoderInstance->ModelHandle;
+
+    /*Codes_SRS_COMMAND_DECODER_02_018: [ CommandDecoder_ExecuteMethod shall validate that consecutive segments of the fullMethodName exist in the model. ]*/
+    /*Codes_SRS_COMMAND_DECODER_02_019: [ CommandDecoder_ExecuteMethod shall locate the final model to which the methodName applies. ]*/
+    do
+    {
+        /* find the slash */
+        const char* slashPos = strchr(methodName, '/');
+        if (slashPos == NULL)
+        {
+            size_t relativeMethodPathLength;
+
+            if (methodName == fullMethodName)
+            {
+                relativeMethodPathLength = 0;
+            }
+            else
+            {
+                relativeMethodPathLength = methodName - fullMethodName - 1;
+            }
+
+            relativeMethodPath = (char*)malloc(relativeMethodPathLength + 1);
+            if (relativeMethodPath == NULL)
+            {
+                /*Codes_SRS_COMMAND_DECODER_02_023: [ If any of the previous operations fail, then CommandDecoder_ExecuteMethod shall return NULL. ]*/
+                LogError("Failed allocating relative method path");
+                result = NULL;
+            }
+            else
+            {
+                strncpy(relativeMethodPath, fullMethodName, relativeMethodPathLength);
+                relativeMethodPath[relativeMethodPathLength] = 0;
+
+                /* no slash found, this must be an method */
+                result = DecodeAndExecuteModelMethod(commandDecoderInstance, schemaHandle, modelHandle, relativeMethodPath, methodName, methodTree);
+
+                free(relativeMethodPath);
+                methodName = NULL;
+            }
+            break;
+        }
+        else
+        {
+            /* found a slash, get the child model name */
+            size_t modelLength = slashPos - methodName;
+            char* childModelName = (char*)malloc(modelLength + 1);
+            if (childModelName == NULL)
+            {
+                /*Codes_SRS_COMMAND_DECODER_02_023: [ If any of the previous operations fail, then CommandDecoder_ExecuteMethod shall return NULL. ]*/
+                LogError("Failed allocating child model name");
+                result = NULL;
+                break;
+            }
+            else
+            {
+                strncpy(childModelName, methodName, modelLength);
+                childModelName[modelLength] = 0;
+
+                /* find the model */
+                modelHandle = Schema_GetModelModelByName(modelHandle, childModelName);
+                if (modelHandle == NULL)
+                {
+                    /*Codes_SRS_COMMAND_DECODER_02_023: [ If any of the previous operations fail, then CommandDecoder_ExecuteMethod shall return NULL. ]*/
+                    LogError("Getting the model %s failed", childModelName);
+                    free(childModelName);
+                    result = NULL;
+                    break;
+                }
+                else
+                {
+                    free(childModelName);
+                    methodName = slashPos + 1;
+                    result = NULL; /*this only exists to quench a compiler warning about returning an uninitialized variable, which is not possible by design*/
+                }
+            }
+        }
+    } while (methodName != NULL);
+    return result;
+}
+
 static EXECUTE_COMMAND_RESULT DecodeCommand(COMMAND_DECODER_HANDLE_DATA* commandDecoderInstance, MULTITREE_HANDLE commandNode)
 {
     EXECUTE_COMMAND_RESULT result;
@@ -414,6 +608,25 @@ static EXECUTE_COMMAND_RESULT DecodeCommand(COMMAND_DECODER_HANDLE_DATA* command
             actionName++;
             result = ScanActionPathAndExecuteAction(commandDecoderInstance, schemaHandle, actionName, commandNode);
         }
+    }
+    return result;
+}
+
+static METHODRETURN_HANDLE DecodeMethod(COMMAND_DECODER_HANDLE_DATA* commandDecoderInstance, const char* fullMethodName, MULTITREE_HANDLE methodTree)
+{
+    METHODRETURN_HANDLE result;
+    SCHEMA_HANDLE schemaHandle;
+
+    /*Codes_SRS_COMMAND_DECODER_02_017: [ CommandDecoder_ExecuteMethod shall get the SCHEMA_HANDLE associated with the modelHandle passed at CommandDecoder_Create. ]*/
+    if ((schemaHandle = Schema_GetSchemaForModelType(commandDecoderInstance->ModelHandle)) == NULL)
+    {
+        LogError("Getting schema information failed");
+        result = NULL;
+    }
+    else
+    {
+        result = ScanMethodPathAndExecuteMethod(commandDecoderInstance, schemaHandle, fullMethodName, methodTree);
+        
     }
     return result;
 }
@@ -479,17 +692,77 @@ EXECUTE_COMMAND_RESULT CommandDecoder_ExecuteCommand(COMMAND_DECODER_HANDLE hand
     return result;
 }
 
-COMMAND_DECODER_HANDLE CommandDecoder_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, ACTION_CALLBACK_FUNC actionCallback, void* actionCallbackContext)
+METHODRETURN_HANDLE CommandDecoder_ExecuteMethod(COMMAND_DECODER_HANDLE handle, const char* fullMethodName, const char* methodPayload)
+{
+    METHODRETURN_HANDLE result;
+    /*Codes_SRS_COMMAND_DECODER_02_014: [ If handle is NULL then CommandDecoder_ExecuteMethod shall fail and return NULL. ]*/
+    /*Codes_SRS_COMMAND_DECODER_02_015: [ If fulMethodName is NULL then CommandDecoder_ExecuteMethod shall fail and return NULL. ]*/
+    if (
+        (handle == NULL) ||
+        (fullMethodName == NULL) /*methodPayload can be NULL*/
+        )
+    {
+        LogError("Invalid argument, COMMAND_DECODER_HANDLE handle=%p, const char* fullMethodName=%p", handle, fullMethodName);
+        result = NULL;
+    }
+    else
+    {
+        COMMAND_DECODER_HANDLE_DATA* commandDecoderInstance = (COMMAND_DECODER_HANDLE_DATA*)handle;
+        /*Codes_SRS_COMMAND_DECODER_02_025: [ If methodCallback is NULL then CommandDecoder_ExecuteMethod shall fail and return NULL. ]*/
+        if (commandDecoderInstance->methodCallback == NULL)
+        {
+            LogError("unable to execute a method when the methodCallback passed in CommandDecoder_Create is NULL");
+            result = NULL;
+        }
+        else
+        {
+            /*Codes_SRS_COMMAND_DECODER_02_016: [ If methodPayload is not NULL then CommandDecoder_ExecuteMethod shall build a MULTITREE_HANDLE out of methodPayload. ]*/
+            if (methodPayload == NULL)
+            {
+                result = DecodeMethod(commandDecoderInstance, fullMethodName, NULL);
+            }
+            else
+            {
+                char* methodJSON;
+
+                if (mallocAndStrcpy_s(&methodJSON, methodPayload) != 0)
+                {
+                    LogError("Failed to allocate temporary storage for the method JSON");
+                    result = NULL;
+                }
+                else
+                {
+                    MULTITREE_HANDLE methodTree;
+                    if (JSONDecoder_JSON_To_MultiTree(methodJSON, &methodTree) != JSON_DECODER_OK)
+                    {
+                        LogError("Decoding JSON to a multi tree failed");
+                        result = NULL;
+                    }
+                    else
+                    {
+                        result = DecodeMethod(commandDecoderInstance, fullMethodName, methodTree);
+                        MultiTree_Destroy(methodTree);
+                    }
+                    free(methodJSON);
+                }
+            }
+        }
+    }
+    return result;
+}
+
+
+COMMAND_DECODER_HANDLE CommandDecoder_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, ACTION_CALLBACK_FUNC actionCallback, void* actionCallbackContext, METHOD_CALLBACK_FUNC methodCallback, void* methodCallbackContext)
 {
     COMMAND_DECODER_HANDLE_DATA* result;
     /* Codes_SRS_COMMAND_DECODER_99_019:[ For all exposed APIs argument validity checks shall precede other checks.] */
-    /* Codes_SRS_COMMAND_DECODER_01_003: [If any of the arguments modelHandle is NULL, CommandDecoder_Create shall return NULL.]*/
+    /* Codes_SRS_COMMAND_DECODER_01_003: [ If modelHandle is NULL, CommandDecoder_Create shall return NULL. ]*/
     if (
         (modelHandle == NULL)
         )
     {
-        LogError("Invalid arguments modelHandle=%p, actionCallback=%p, actionCallbackContext=%p",
-            modelHandle, actionCallback, actionCallbackContext);
+        LogError("Invalid arguments: SCHEMA_MODEL_TYPE_HANDLE modelHandle=%p, ACTION_CALLBACK_FUNC actionCallback=%p, void* actionCallbackContext=%p, METHOD_CALLBACK_FUNC methodCallback=%p, void* methodCallbackContext=%p",
+            modelHandle, actionCallback, actionCallbackContext, methodCallback, methodCallbackContext);
         result = NULL;
     }
     else
@@ -506,6 +779,8 @@ COMMAND_DECODER_HANDLE CommandDecoder_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandl
             result->ModelHandle = modelHandle;
             result->ActionCallback = actionCallback;
             result->ActionCallbackContext = actionCallbackContext;
+            result->methodCallback = methodCallback;
+            result->methodCallbackContext = methodCallbackContext;
         }
     }
 

@@ -13,7 +13,7 @@
 
 /*String containing Hostname, Device Id & Device Key in the format:             */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"    */
-static const char* connectionString = "HostName=....";
+static const char* connectionString = "HostName=...";
 
 // Define the Model - it is a car.
 BEGIN_NAMESPACE(Contoso);
@@ -46,12 +46,21 @@ DECLARE_DEVICETWIN_MODEL(Car,
     
     WITH_REPORTED_PROPERTY(Maker, maker), /*this is a structured reported property*/
     WITH_REPORTED_PROPERTY(CarState, state), /*this is a model in model*/
-    WITH_DESIRED_PROPERTY(CarSettings, settings) /*this is a model in model*/
+    WITH_DESIRED_PROPERTY(CarSettings, settings), /*this is a model in model*/
+    WITH_METHOD(getCarVIN)
 );
 
 END_NAMESPACE(Contoso);
 
 DEFINE_ENUM_STRINGS(DEVICE_TWIN_UPDATE_STATE, DEVICE_TWIN_UPDATE_STATE_VALUES);
+
+METHODRETURN_HANDLE getCarVIN(Car* car)
+{
+    (void)(car);
+    /*Car VINs are JSON strings, for example: 1HGCM82633A004352*/
+    METHODRETURN_HANDLE result = MethodReturn_Create(201, "\"1HGCM82633A004352\"");
+    return result;
+}
 
 void deviceTwinCallback(int status_code, void* userContextCallback)
 {
@@ -104,9 +113,6 @@ void device_twin_simple_sample_run(void)
                 }
                 else
                 {
-                    unsigned char*buffer;
-                    size_t bufferSize;
-
                     /*setting values for reported properties*/
                     car->lastOilChangeDate = "2016";
                     car->maker.makerName = "Fabrikam";
@@ -116,34 +122,26 @@ void device_twin_simple_sample_run(void)
                     car->state.softwareVersion = 1;
                     car->state.vanityPlate = "1I1";
 
-                    /*getting the serialized form*/
-                    if (SERIALIZE_REPORTED_PROPERTIES(&buffer, &bufferSize, *car) != CODEFIRST_OK)
+                    /*sending the values to IoTHub*/
+                    if (IoTHubDeviceTwin_SendReportedStateCar(car, deviceTwinCallback, NULL) != IOTHUB_CLIENT_OK)
                     {
-                        (void)printf("Failed serializing reported state\n");
+                        (void)printf("Failed sending serialized reported state\n");
                     }
                     else
                     {
-                        /*sending the serialized reported properties to IoTHub*/
-                        if (IoTHubClient_SendReportedState(iotHubClientHandle, buffer, bufferSize, deviceTwinCallback, NULL) != IOTHUB_CLIENT_OK)
-                        {
-                            printf("Failure sending data\n");
-                        }
-                        else
-                        {
-                            printf("reported state has been delivered to IoTHub\n");
-                        }
-                        free(buffer);
-
-                        printf("press ENTER to end the sample\n");
-                        (void)getchar();
+                        printf("Reported state will be send to IoTHub\n");
                     }
-                    IoTHubDeviceTwin_DestroyCar(car);
+
+                    printf("press ENTER to end the sample\n");
+                    (void)getchar();
+
                 }
-                IoTHubClient_Destroy(iotHubClientHandle);
+                IoTHubDeviceTwin_DestroyCar(car);
             }
+            IoTHubClient_Destroy(iotHubClientHandle);
         }
-        platform_deinit();
     }
+    platform_deinit();
 }
 
 int main(void)

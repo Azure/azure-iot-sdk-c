@@ -33,8 +33,23 @@ Execution=Disable
 
 [huzzah_simplesample_http]
 Target=simplesample_http.ino
-RelativePath=\arduino\libraries\AzureIoTHub\examples\simplesample_http
+RelativePath=\arduino\libraries\AzureIoTProtocol_HTTP\examples\simplesample_http
 RelativeWorkingDir=\arduino_cc_Work\Results\huzzah_simplesample_http
+CloneURL=""
+MaxAllowedDurationSeconds=100
+LogLines=300
+MinimumHeap=7000
+Categories=IoTHub
+Hardware=Adafruit_Huzzah
+SerialPort=COM4
+CPUParameters=-fqbn=esp8266:esp8266:huzzah:CpuFrequency=80,UploadSpeed=115200,FlashSize=4M3M -ide-version=10609
+Build=Enable
+Execution=Disable
+
+[huzzah_simplesample_mqtt]
+Target=simplesample_mqtt.ino
+RelativePath=\arduino\libraries\AzureIoTProtocol_MQTT\examples\simplesample_mqtt
+RelativeWorkingDir=\arduino_cc_Work\Results\huzzah_simplesample_mqtt
 CloneURL=""
 MaxAllowedDurationSeconds=100
 LogLines=300
