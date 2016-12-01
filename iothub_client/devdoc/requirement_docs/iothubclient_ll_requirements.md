@@ -66,6 +66,11 @@ typedef void(*IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK)(IOTHUB_CLIENT_CONFIRMAT
 typedef void(*IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK)(IOTHUB_CLIENT_CONNECTION_STATUS result, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason, void* userContextCallback);
 typedef int(*IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC)(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE message, void* userContextCallback);
 typedef void*(*IOTHUB_CLIENT_TRANSPORT_PROVIDER)(void);
+
+typedef void(*IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback);
+typedef void(*IOTHUB_CLIENT_REPORTED_STATE_CALLBACK)(int status_code, void* userContextCallback);
+typedef int(*IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC)(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* resp_size, void* userContextCallback);
+typedef int(*IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK)(const char* method_name, const unsigned char* payload, size_t size, METHOD_ID_HANDLE method_id, void* userContextCallback);
  
 typedef struct IOTHUB_CLIENT_CONFIG_TAG
 {
@@ -109,6 +114,11 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob(IOTHUB_CLIENT_LL_HANDLE
 ## DeviceTwin
 extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetDeviceTwinCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback, void* userContextCallback);
 extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendReportedState(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const unsigned char* reportedState, size_t size, uint32_t reportedVersion, uint32_t lastSeenDesiredVersion, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reportedStateCallback, void* userContextCallback);
+
+## DeviceMethod
+extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetDeviceMethodCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC deviceMethodCallback, void* userContextCallback);
+extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetIncomingDeviceMethodCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK inboundDeviceMethodCallback, void* userContextCallback);
+extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_DeviceMethodResponse(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, uint32_t methodId, unsigned char* response, size_t responeSize);
 ```
 
 ## IoTHubClient_LL_CreateFromConnectionString
@@ -714,3 +724,27 @@ int IoTHubClient_LL_DeviceMethodComplete(IOTHUB_CLIENT_LL_HANDLE handle, const u
 **SRS_IOTHUBCLIENT_LL_07_019: [** If `deviceMethodCallback` is NULL `IoTHubClient_LL_DeviceMethodComplete` shall return 404. **]**
 
 **SRS_IOTHUBCLIENT_LL_07_020: [** `deviceMethodCallback` shall buil the BUFFER_HANDLE with the response payload from the `IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC` callback. **]**
+
+```c
+extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetIncomingDeviceMethodCallback(IOTHUB_CLIENT_LL_HANDLE handle, IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK inboundDeviceMethodCallback, void* userContextCallback);
+```
+
+**SRS_IOTHUBCLIENT_LL_07_021: [** If `handle` is `NULL` then `IoTHubClient_LL_SetIncomingDeviceMethodCallback` shall return `IOTHUB_CLIENT_INVALID_ARG`. **]**
+
+**SRS_IOTHUBCLIENT_LL_07_022: [** If `inboundDeviceMethodCallback` is NULL then `IoTHubClient_LL_SetIncomingDeviceMethodCallback` shall call the underlying layer's `IoTHubTransport_Unsubscribe_DeviceMethod` function and return IOTHUB_CLIENT_OK. **]**
+
+**SRS_IOTHUBCLIENT_LL_07_023: [** If `inboundDeviceMethodCallback` is non-NULL then `IoTHubClient_LL_SetIncomingDeviceMethodCallback` shall call the underlying layer's `IoTHubTransport_Subscribe_DeviceMethod` function. **]**
+
+**SRS_IOTHUBCLIENT_LL_07_024: [** If `inboundDeviceMethodCallback` is non-NULL then `IoTHubClient_LL_SetIncomingDeviceMethodCallback` shall set the inboundDeviceMethodCallback to NULL. **]**
+
+**SRS_IOTHUBCLIENT_LL_07_025: [** If any error is encountered then `IoTHubClient_LL_SetIncomingDeviceMethodCallback` shall return `IOTHUB_CLIENT_ERROR`. **]**
+
+```c
+extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_DeviceMethodResponse(IOTHUB_CLIENT_LL_HANDLE handle, METHOD_ID_HANDLE methodId, unsigned char* response, size_t resp_size, int status_response);
+```
+
+**SRS_IOTHUBCLIENT_LL_07_026: [** If `handle` or methodId is `NULL` then `IoTHubClient_LL_DeviceMethodResponse` shall return `IOTHUB_CLIENT_INVALID_ARG`. **]**
+
+**SRS_IOTHUBCLIENT_LL_07_027: [** `IoTHubClient_LL_DeviceMethodResponse` shall call the `IoTHubTransport_DeviceMethod_Response` transport function. **]**
+
+**SRS_IOTHUBCLIENT_LL_07_028: [** If the transport `IoTHubTransport_DeviceMethod_Response` succeed then, `IoTHubClient_LL_DeviceMethodResponse` shall return `IOTHUB_CLIENT_OK` Otherwise it shall return `IOTHUB_CLIENT_ERROR`. **]** 

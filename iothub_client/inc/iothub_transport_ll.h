@@ -14,6 +14,8 @@ typedef struct TRANSPORT_PROVIDER_TAG TRANSPORT_PROVIDER;
 union IOTHUB_IDENTITY_INFO_TAG;
 typedef union IOTHUB_IDENTITY_INFO_TAG IOTHUB_IDENTITY_INFO;
 
+typedef void* METHOD_ID;
+
 #include "azure_c_shared_utility/doublylinkedlist.h"
 #include "azure_c_shared_utility/strings.h"
 #include "iothub_message.h"

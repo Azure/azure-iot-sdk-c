@@ -168,6 +168,7 @@ extern "C"
     typedef void(*IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback);
     typedef void(*IOTHUB_CLIENT_REPORTED_STATE_CALLBACK)(int status_code, void* userContextCallback);
     typedef int(*IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC)(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* resp_size, void* userContextCallback);
+    typedef int(*IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK)(const char* method_name, const unsigned char* payload, size_t size, METHOD_ID method_id, void* userContextCallback);
 
     /** @brief	This struct captures IoTHub client configuration. */
     typedef struct IOTHUB_CLIENT_CONFIG_TAG
@@ -503,6 +504,32 @@ extern "C"
      * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
      */
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SetDeviceMethodCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC, deviceMethodCallback, void*, userContextCallback);
+
+     /**
+     * @brief	This API sets callback for async cloud to device method call.
+     *
+     * @param	iotHubClientHandle		        The handle created by a call to the create function.
+     * @param	inboundDeviceMethodCallback     The callback which will be called by IoTHub.
+     * @param	userContextCallback		        User specified context that will be provided to the
+     * 									        callback. This can be @c NULL.
+     *
+     * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
+     */
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SetIncomingDeviceMethodCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK, inboundDeviceMethodCallback, void*, userContextCallback);
+
+
+     /**
+     * @brief	This API responses to a asnyc method callback identified the methodId.
+     *
+     * @param	iotHubClientHandle      The handle created by a call to the create function.
+     * @param	methodId                The methodId of the Device Method callback.
+     * @param	response                The response data for the method callback.
+     * @param	resp_size               The size of the response data buffer.
+     * @param	status_response         The status response of the method callback.
+     *
+     * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
+     */
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_DeviceMethodResponse, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, METHOD_ID, methodId, const unsigned char*, response, size_t, respSize, int, statusCode);
 
 #ifndef DONT_USE_UPLOADTOBLOB
     /**
