@@ -1,15 +1,14 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include <cstdlib>
+#include <stdlib.h>
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
 
 #include "macro_utils.h"
 #include "testrunnerswitcher.h"
-#include "micromock.h"
-#include "micromockcharstararenullterminatedstrings.h"
+#include "umock_c.h"
 
 #include "iothub_account.h"
 #include "iothubtest.h"
@@ -30,7 +29,8 @@
 
 #include "azure_c_shared_utility/platform.h"
 
-static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
+static TEST_MUTEX_HANDLE g_testByTest;
+static TEST_MUTEX_HANDLE g_dllByDll;
 static IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo = NULL;
 
 /*the following time expressed in seconds denotes the maximum time to read all the events available in an event hub*/
@@ -38,14 +38,23 @@ static IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo = NULL;
 
 /*the following time expressed in seconds denotes the maximum "cloud" travel time - the time from a moment some data reaches the cloud until that data is available for a consumer*/
 #define MAX_CLOUD_TRAVEL_TIME 60.0
+
 #define TIME_DATA_LENGTH    32
 
-DEFINE_MICROMOCK_ENUM_TO_STRING(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
-DEFINE_MICROMOCK_ENUM_TO_STRING(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES);
-DEFINE_MICROMOCK_ENUM_TO_STRING(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
-DEFINE_MICROMOCK_ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_RESULT_VALUES);
-DEFINE_MICROMOCK_ENUM_TO_STRING(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_RESULT_VALUES);
+TEST_DEFINE_ENUM_TYPE(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
 
+TEST_DEFINE_ENUM_TYPE(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES);
+
+TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
+
+TEST_DEFINE_ENUM_TYPE(CODEFIRST_RESULT, CODEFIRST_RESULT_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(CODEFIRST_RESULT, CODEFIRST_RESULT_VALUES);
+
+TEST_DEFINE_ENUM_TYPE(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_RESULT_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_RESULT_VALUES);
 
 
 static const char* TEST_SEND_DATA_FMT = "{\"ExampleData\": { \"SendDate\": \"%.24s\", \"UniqueId\":%d} }";
@@ -53,8 +62,6 @@ static const char* TEST_RECV_DATA_FMT = "{\\\"Name\\\": \\\"testaction\\\", \\\"
 static const char* TEST_CMP_DATA_FMT = "{\"Name\": \"testaction\", \"Parameters\": { \"property1\": \"%.24s\", \"UniqueId\":%d} }";
 static const char* TEST_MACRO_CMP_DATA_FMT = "{\"UniqueId\":%d, \"property1\":\"%.24s\"}";
 static const char* TEST_MACRO_RECV_DATA_FMT = "{\"Name\":\"dataMacroCallback\", \"Parameters\":{\"property1\":\"%.24s\", \"UniqueId\": %d}}";
-
-static MICROMOCK_MUTEX_HANDLE g_testByTest = NULL;
 
 static size_t g_uniqueTestId = 0;
 
@@ -75,6 +82,7 @@ typedef struct _tagEXPECTED_RECEIVE_DATA
     bool wasFound;
     LOCK_HANDLE lock; /*needed to protect this structure*/
 } EXPECTED_RECEIVE_DATA;
+
 
 static EXPECTED_RECEIVE_DATA* g_recvMacroData;
 
@@ -204,81 +212,6 @@ BEGIN_TEST_SUITE(serializer_e2e)
         return result;
     }
 
-    /*by code convention, context for this function is dereferenceable to EXPECTED_DATA*/
-    static void RecvCallback(const void* buffer, size_t size, void* receiveCallbackContext)
-    {
-        EXPECTED_RECEIVE_DATA* expectedData = (EXPECTED_RECEIVE_DATA*)receiveCallbackContext;
-        if (expectedData != NULL)
-        {
-            if (Lock(expectedData->lock) != LOCK_OK)
-            {
-
-            }
-            else
-            {
-                if (size == expectedData->compareDataSize)
-                {
-                    if (memcmp(buffer, expectedData->compareData, size) == 0)
-                    {
-                        expectedData->wasFound = true;
-                    }
-                }
-                (void)Unlock(expectedData->lock);
-            }
-        }
-    }
-
-    static EXPECTED_RECEIVE_DATA* RecvTestData_Create(void)
-    {
-        EXPECTED_RECEIVE_DATA* result;
-        result = (EXPECTED_RECEIVE_DATA*)malloc(sizeof(EXPECTED_RECEIVE_DATA));
-        if (result != NULL)
-        {
-            if ((result->lock = Lock_Init()) == NULL)
-            {
-                free(result);
-                result = NULL;
-            }
-            else
-            {
-                char temp[1000];
-                char* tempString;
-                result->wasFound = false;
-                time_t t = time(NULL);
-                (void)sprintf_s(temp, sizeof(temp), TEST_CMP_DATA_FMT, ctime(&t), g_uniqueTestId);
-                result->compareDataSize = strlen(temp);
-                tempString = (char*)malloc(result->compareDataSize+1);
-                if (tempString == NULL)
-                {
-                    (void)Lock_Deinit(result->lock);
-                    free(result);
-                    result = NULL;
-                }
-                else
-                {
-                    strcpy(tempString, temp);
-                    result->compareData = tempString;
-                    (void)sprintf_s(temp, sizeof(temp), TEST_RECV_DATA_FMT, ctime(&t), g_uniqueTestId);
-                    tempString = (char*)malloc(strlen(temp) + 1);
-                    if (tempString == NULL)
-                    {
-                        (void)Lock_Deinit(result->lock);
-                        free((void*)result->compareData);
-                        free(result);
-                        result = NULL;
-                    }
-                    else
-                    {
-                        strcpy(tempString, temp);
-                        result->toBeSendSize = strlen(tempString);
-                        result->toBeSend = tempString;
-                    }
-                }
-            }
-        }
-        return result;
-    }
-
     static EXPECTED_RECEIVE_DATA* RecvMacroTestData_Create(void)
     {
         EXPECTED_RECEIVE_DATA* result;
@@ -346,40 +279,6 @@ BEGIN_TEST_SUITE(serializer_e2e)
         }
     }
 
-    static EXPECTED_SEND_DATA* SendTestData_Create(void)
-    {
-        EXPECTED_SEND_DATA* result = (EXPECTED_SEND_DATA*)malloc(sizeof(EXPECTED_SEND_DATA));
-        if (result != NULL)
-        {
-            if ((result->lock = Lock_Init()) == NULL)
-            {
-                free(result);
-                result = NULL;
-            }
-            else
-            {
-                char temp[1000];
-                char* tempString;
-                time_t t = time(NULL);
-                sprintf(temp, TEST_SEND_DATA_FMT, ctime(&t), g_uniqueTestId);
-                if ((tempString = (char*)malloc(strlen(temp) + 1)) == NULL)
-                {
-                    Lock_Deinit(result->lock);
-                    free(result);
-                    result = NULL;
-                }
-                else
-                {
-                    strcpy(tempString, temp);
-                    result->expectedString = tempString;
-                    result->wasFound = false;
-                    result->dataWasSent = false;
-                }
-            }
-        }
-        return result;
-    }
-
     static EXPECTED_SEND_DATA* SendMacroTestData_Create(const char* pszTime)
     {
         EXPECTED_SEND_DATA* result = (EXPECTED_SEND_DATA*)malloc(sizeof(EXPECTED_SEND_DATA));
@@ -426,14 +325,12 @@ BEGIN_TEST_SUITE(serializer_e2e)
         }
     }
 
-    
-   
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
         TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
 
-        g_testByTest = MicroMockCreateMutex();
+        g_testByTest = TEST_MUTEX_CREATE();
         ASSERT_IS_NOT_NULL(g_testByTest);
 
         ASSERT_ARE_EQUAL(int, 0, platform_init() );
@@ -452,26 +349,22 @@ BEGIN_TEST_SUITE(serializer_e2e)
         platform_deinit();
         serializer_deinit();
 
-        MicroMockDestroyMutex(g_testByTest);
+        TEST_MUTEX_DESTROY(g_testByTest);
         TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
     }
 
     TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
     {
-        if (!MicroMockAcquireMutex(g_testByTest))
+        if (TEST_MUTEX_ACQUIRE(g_testByTest))
         {
             ASSERT_FAIL("our mutex is ABANDONED. Failure in test framework");
         }
-
         g_uniqueTestId++;
     }
 
     TEST_FUNCTION_CLEANUP(TestMethodCleanup)
     {
-        if (!MicroMockReleaseMutex(g_testByTest))
-        {
-            ASSERT_FAIL("failure in test framework at ReleaseMutex");
-        }
+        TEST_MUTEX_RELEASE(g_testByTest);
     }
 
     TEST_FUNCTION(IoTClient_AMQP_MacroRecv_e2e)
@@ -510,7 +403,7 @@ BEGIN_TEST_SUITE(serializer_e2e)
         deviceModel* devModel = CREATE_MODEL_INSTANCE(MacroE2EModelAction, deviceModel);
         ASSERT_IS_NOT_NULL(devModel);
 
-        auto setMessageResult = IoTHubClient_SetMessageCallback(iotHubClientHandle, IoTHubMessage, devModel);
+        IOTHUB_CLIENT_RESULT setMessageResult = IoTHubClient_SetMessageCallback(iotHubClientHandle, IoTHubMessage, devModel);
         ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, setMessageResult);
 
         beginOperation = time(NULL);
@@ -581,12 +474,12 @@ BEGIN_TEST_SUITE(serializer_e2e)
             size_t destinationSize;
             CODEFIRST_RESULT nResult = SERIALIZE(&destination, &destinationSize, *devModel);
             ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, nResult);
-            auto iothubMessageHandle = IoTHubMessage_CreateFromByteArray(destination, destinationSize);
+            IOTHUB_MESSAGE_HANDLE iothubMessageHandle = IoTHubMessage_CreateFromByteArray(destination, destinationSize);
             ASSERT_IS_NOT_NULL(iothubMessageHandle);
             free(destination);
 
-            auto iothubClientResult = IoTHubClient_SendEventAsync(iotHubClientHandle, iothubMessageHandle, iotHubMacroCallBack, expectedData);
-            ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, iothubClientResult);
+            IOTHUB_CLIENT_RESULT iothubClientResult = IoTHubClient_SendEventAsync(iotHubClientHandle, iothubMessageHandle, iotHubMacroCallBack, expectedData);
+            ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, iothubClientResult);
 
             IoTHubMessage_Destroy(iothubMessageHandle);
             // Wait til the data gets sent to the callback
@@ -701,7 +594,7 @@ BEGIN_TEST_SUITE(serializer_e2e)
             devModel = CREATE_MODEL_INSTANCE(MacroE2EModelAction, deviceModel);
             ASSERT_IS_NOT_NULL(devModel);
 
-            auto setMessageResult = IoTHubClient_LL_SetMessageCallback(iotHubClientHandle, IoTHubMessage, devModel);
+            IOTHUB_CLIENT_RESULT setMessageResult = IoTHubClient_LL_SetMessageCallback(iotHubClientHandle, IoTHubMessage, devModel);
             ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, setMessageResult);
 
             beginOperation = time(NULL);
@@ -765,12 +658,12 @@ BEGIN_TEST_SUITE(serializer_e2e)
             size_t destinationSize;
             CODEFIRST_RESULT nResult = SERIALIZE(&destination, &destinationSize, *devModel);
             ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, nResult);
-            auto iothubMessageHandle = IoTHubMessage_CreateFromByteArray(destination, destinationSize);
+            IOTHUB_MESSAGE_HANDLE iothubMessageHandle = IoTHubMessage_CreateFromByteArray(destination, destinationSize);
             ASSERT_IS_NOT_NULL(iothubMessageHandle);
             free(destination);
 
-            auto iothubClientResult = IoTHubClient_LL_SendEventAsync(iotHubClientHandle, iothubMessageHandle, iotHubMacroCallBack, expectedData);
-            ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, iothubClientResult);
+            IOTHUB_CLIENT_RESULT iothubClientResult = IoTHubClient_LL_SendEventAsync(iotHubClientHandle, iothubMessageHandle, iotHubMacroCallBack, expectedData);
+            ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, iothubClientResult);
 
             IoTHubMessage_Destroy(iothubMessageHandle);
 
