@@ -17,9 +17,9 @@
 #include "azure_c_shared_utility/httpapiexsas.h"
 #include "azure_c_shared_utility/base64.h"
 #include "azure_c_shared_utility/uniqueid.h"
+#include "azure_c_shared_utility/connection_string_parser.h"
 
 #include "parson.h"
-#include "connection_string_parser.h"
 #include "iothub_devicemethod.h"
 #include "iothub_sc_version.h"
 
