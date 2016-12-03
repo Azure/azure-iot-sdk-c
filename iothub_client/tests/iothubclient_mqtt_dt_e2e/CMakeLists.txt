@@ -20,6 +20,11 @@ set(${theseTestsName}_cpp_files
     ../common_dt_e2e/iothubclient_common_dt_e2e.cpp
 )
 
+set(${theseTestsName}_nuget_cpp_files
+    ${theseTestsName}.cpp
+    ../common_dt_e2e/iothubclient_common_dt_e2e.cpp
+)
+
 set(${theseTestsName}_c_files
     ../../../certs/certs.c
     ../../../parson/parson.c

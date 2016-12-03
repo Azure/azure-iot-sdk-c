@@ -12,12 +12,12 @@ compileAsC99()
 set(theseTestsName serializer_e2e)
 
 set(${theseTestsName}_test_files
-	${theseTestsName}.c
+    ${theseTestsName}.c
 )
 
-#set(${theseTestsName}_nuget_cpp_files
-#	${theseTestsName}.cpp
-#)
+set(${theseTestsName}_nuget_c_files
+    ${theseTestsName}.c
+)
 
 set(${theseTestsName}_c_files
 )
@@ -30,7 +30,7 @@ include_directories(${IOTHUB_TEST_INC_FOLDER} ${IOTHUB_CLIENT_INC_FOLDER} ${SERI
 include_directories(${IOTHUB_SERVICE_CLIENT_INC_FOLDER})
 
 file(COPY suppressions.supp DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-build_c_test_artifacts(${theseTestsName} ON "tests/UnitTests" VALGRIND_SUPPRESSIONS_FILE suppressions.supp)
+build_c_test_artifacts(${theseTestsName} ON "tests/E2ETests" VALGRIND_SUPPRESSIONS_FILE suppressions.supp)
 
 if(WIN32)
 	if(TARGET ${theseTestsName}_dll)

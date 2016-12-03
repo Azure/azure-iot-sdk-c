@@ -16,6 +16,11 @@ set(${theseTestsName}_test_files
 	../common_device_method_e2e/iothubclient_common_device_method_e2e.c
 )
 
+set(${theseTestsName}_nuget_c_files
+        ${theseTestsName}.c
+        ../common_device_method_e2e/iothubclient_common_device_method_e2e.c
+)
+
 set(${theseTestsName}_c_files
         ../../../certs/certs.c
 )
