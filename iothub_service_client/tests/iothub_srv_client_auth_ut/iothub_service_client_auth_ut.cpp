@@ -19,8 +19,8 @@
 #include "azure_c_shared_utility/lock.h"
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/string_tokenizer.h"
+#include "azure_c_shared_utility/connection_string_parser.h"
 
-#include "connection_string_parser.h"
 #include "iothub_service_client_auth.h"
 
 extern "C" int gballoc_init(void);

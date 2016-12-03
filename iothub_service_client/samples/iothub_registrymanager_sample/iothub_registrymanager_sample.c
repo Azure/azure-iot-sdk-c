@@ -14,10 +14,10 @@
 #include "azure_c_shared_utility/string_tokenizer.h"
 #include "azure_c_shared_utility/consolelogger.h"
 #include "azure_c_shared_utility/xlogging.h"
+#include "azure_c_shared_utility/connection_string_parser.h"
 
 #include "iothub_registrymanager_sample.h"
 
-#include "connection_string_parser.h"
 #include "iothub_service_client_auth.h"
 #include "iothub_registrymanager.h"
 
