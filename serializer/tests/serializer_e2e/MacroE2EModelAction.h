@@ -4,7 +4,7 @@
 #ifndef MACROE2EMODELACTION_H
 #define MACROE2EMODELACTION_H
 
-#include "serializer.h"
+#include "serializer_devicetwin.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -12,11 +12,12 @@ extern "C" {
 
 BEGIN_NAMESPACE(MacroE2EModelAction)
 
-DECLARE_MODEL(deviceModel,
+DECLARE_DEVICETWIN_MODEL(deviceModel,
     WITH_DATA(ascii_char_ptr, property1),
     WITH_DATA(int, UniqueId),
     WITH_ACTION(dataMacroCallback, ascii_char_ptr, property1, int, UniqueId),
-    WITH_METHOD(theSumOfThings, int, a, int, b)
+    WITH_METHOD(theSumOfThings, int, a, int, b),
+    WITH_REPORTED_PROPERTY(int, reported_int)
 )
 
 END_NAMESPACE(MacroE2EModelAction);

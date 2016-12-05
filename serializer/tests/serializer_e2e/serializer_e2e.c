@@ -26,8 +26,11 @@
 #include "iothub_client.h"
 #include "iothub_devicemethod.h"
 #include "parson.h"
+#include "methodreturn.h"
 
 #include "azure_c_shared_utility/platform.h"
+#include "iothub_service_client_auth.h"
+#include "iothub_devicetwin.h"
 
 static TEST_MUTEX_HANDLE g_testByTest;
 static TEST_MUTEX_HANDLE g_dllByDll;
@@ -85,6 +88,18 @@ typedef struct _tagEXPECTED_RECEIVE_DATA
 
 
 static EXPECTED_RECEIVE_DATA* g_recvMacroData;
+
+static LOCK_HANDLE lock; /*this protects the data written in the below callback from the main thread that is polling it*/
+static int was_my_IOTHUB_CLIENT_REPORTED_STATE_CALLBACK_called;
+void my_IOTHUB_CLIENT_REPORTED_STATE_CALLBACK(int status_code, void* userContextCallback)
+{
+    (void)(userContextCallback);
+    ASSERT_ARE_EQUAL(int, status_code, 204);
+    (void)Lock(lock);
+    was_my_IOTHUB_CLIENT_REPORTED_STATE_CALLBACK_called = 1;
+    Unlock(lock);
+
+}
 
 // This is a Static function called from the macro
 EXECUTE_COMMAND_RESULT dataMacroCallback(deviceModel* device, ascii_char_ptr property1, int UniqueId)
@@ -360,10 +375,14 @@ BEGIN_TEST_SUITE(serializer_e2e)
             ASSERT_FAIL("our mutex is ABANDONED. Failure in test framework");
         }
         g_uniqueTestId++;
+        was_my_IOTHUB_CLIENT_REPORTED_STATE_CALLBACK_called = 0;
+        lock = Lock_Init();
+        ASSERT_IS_NOT_NULL(lock);
     }
 
     TEST_FUNCTION_CLEANUP(TestMethodCleanup)
     {
+        Lock_Deinit(lock);
         TEST_MUTEX_RELEASE(g_testByTest);
     }
 
@@ -822,6 +841,78 @@ BEGIN_TEST_SUITE(serializer_e2e)
         IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
         IoTHubClient_Destroy(iotHubClientHandle);
         DESTROY_MODEL_INSTANCE(device);
+    }
+
+    /*the following tests IotHubDeviceTwin_SendReportedState*/
+    /*these are steps the test will make*/
+    /*step 1: import the schema; create an IoTHubClient handle
+      step 2: create an instance of the model
+      step 3: set the model instance's value to something; send it!
+      step 4: wait for the callback to be called (it needs to indicate success)
+      step 5: use the C service SDK to pick up the reported properties from the service(they need to indicate the same value)
+      step 6: succeed
+   */
+    TEST_FUNCTION(IotHubDeviceTwin_SendReportedState_succeeds)
+    {
+        /*step 1: import the schema; create an IoTHubClient handle*/
+        SERIALIZER_REGISTER_NAMESPACE(MacroE2EModelAction);
+
+        IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
+
+        iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName(g_iothubAcctInfo);
+        iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix(g_iothubAcctInfo);
+        iotHubConfig.deviceId = IoTHubAccount_GetDeviceId(g_iothubAcctInfo);
+        iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey(g_iothubAcctInfo);
+        iotHubConfig.protocol = MQTT_Protocol;
+
+        IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_Create(&iotHubConfig);
+        ASSERT_IS_NOT_NULL(iotHubClientHandle);
+
+        /*step 2: create an instance of the model*/
+        deviceModel* model = IoTHubDeviceTwin_CreatedeviceModel(iotHubClientHandle);
+
+        /* step 3: set the model instance's value to something; send it!*/
+        model->reported_int = 199;
+        IOTHUB_CLIENT_RESULT res = IoTHubDeviceTwin_SendReportedStatedeviceModel(model, my_IOTHUB_CLIENT_REPORTED_STATE_CALLBACK, NULL);
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, res);
+
+        /*step 4: wait for the callback to be called (it needs to indicate success)*/
+        /*time bound it to 1 minute*/
+        time_t begin = time(NULL);
+        while (difftime(time(NULL), begin)<60.0)
+        {
+            (void)Lock(lock);
+            if (was_my_IOTHUB_CLIENT_REPORTED_STATE_CALLBACK_called)
+            {
+                (void)Unlock(lock);
+                /*can proceed to next step, callback was called*/
+                break;
+            }
+            (void)Unlock(lock);
+        }
+
+        ASSERT_ARE_EQUAL(int, was_my_IOTHUB_CLIENT_REPORTED_STATE_CALLBACK_called, 1);
+
+        /*step 5: use the C service SDK to pick up the reported properties from the service(they need to indicate the same value)*/
+        IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo));
+        ASSERT_IS_NOT_NULL(iotHubServiceClientHandle);
+
+        IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceClientDeviceTwinHandle = IoTHubDeviceTwin_Create(iotHubServiceClientHandle);
+        ASSERT_IS_NOT_NULL(serviceClientDeviceTwinHandle);
+
+        char* theTwin = IoTHubDeviceTwin_GetTwin(serviceClientDeviceTwinHandle, IoTHubAccount_GetDeviceId(g_iothubAcctInfo));
+
+        JSON_Value* twinJson = json_parse_string(theTwin);
+        JSON_Object* twinJsonObject = json_value_get_object(twinJson);
+        double reported_by_the_service = json_object_dotget_number(twinJsonObject, "properties.reported.reported_int");
+        ASSERT_ARE_EQUAL(double, reported_by_the_service, 199); /*same like model->reported_int = 199;*/
+
+        ///cleanup
+        json_value_free(twinJson);
+        free(theTwin);
+        IoTHubDeviceTwin_Destroy(serviceClientDeviceTwinHandle);
+        IoTHubDeviceTwin_DestroydeviceModel(model);
+        IoTHubClient_Destroy(iotHubClientHandle);
     }
 
 END_TEST_SUITE(serializer_e2e)
