@@ -911,6 +911,7 @@ BEGIN_TEST_SUITE(serializer_e2e)
         json_value_free(twinJson);
         free(theTwin);
         IoTHubDeviceTwin_Destroy(serviceClientDeviceTwinHandle);
+        IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
         IoTHubDeviceTwin_DestroydeviceModel(model);
         IoTHubClient_Destroy(iotHubClientHandle);
     }
