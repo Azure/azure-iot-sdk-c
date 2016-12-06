@@ -99,7 +99,6 @@ goto args-continue
 shift
 if "%1" equ "" call :usage && exit /b 1
 set MAKE_NUGET_PKG=%1
-set CMAKE_run_unittests=ON
 set build-samples=no
 goto args-continue
 
@@ -127,7 +126,6 @@ if %make% == no (
 	rem No point running tests if we are not building the code
 	set CMAKE_run_e2e_tests=OFF
 	set CMAKE_run_longhaul_tests=OFF
-	set CMAKE_run_unittests=ON
 	set build-samples=no
 )
 
