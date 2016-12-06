@@ -97,14 +97,23 @@ Contains tools that are currently used in testing the client libraries: Mocking 
 
 Miscellaneous tools: compilembed, mbed_build, traceabilitytool (checks spec requirements vs code implementation).
 
-## Installation and Use
+## Build
+
 - Clone azure-iot-sdks by:
+
 ```
 git clone --recursive https://github.com/Azure/azure-iot-sdks.git
 ```
-- Create a folder build under azure-iot-sdks
-- Switch to the build folder and run
-   cmake ..
+
+- Create a folder cmake under azure-iot-sdks
+
+- Switch to the cmake folder and run
+
+```
+cmake ..
+```
+
+## Installation and Use
 
 Optionally, you may choose to install azure-iot-sdks on your machine:
 
@@ -137,3 +146,26 @@ Optionally, you may choose to install azure-iot-sdks on your machine:
 _This requires that azure-c-shared-utility, azure-uamqp-c, and azure-umqtt-c are installed (through CMake) on your machine._
 
 _If running tests, this requires that umock-c, azure-ctest, and azure-c-testrunnerswitcher are installed (through CMake) on your machine._
+
+## Building the tests
+
+In order to build the tests, use the *run_unittests* cmake option:
+
+```
+cmake .. -Drun_unittests:bool=ON
+```
+
+In order to build the end to end tests, use the *run_e2e_tests* cmake option:
+
+```
+cmake .. -run_e2e_tests:bool=ON
+```
+
+In order to be able to run the end to end tests, you will need to setup the following environment variables:
+
+```
+IOTHUB_CONNECTION_STRING=HostName=...;SharedAccessKeyName=iothubowner;SharedAccessKey=...
+IOTHUB_EVENTHUB_CONNECTION_STRING=Endpoint=...;SharedAccessKeyName=iothubowner;SharedAccessKey=...
+```
+
+The connection strings for IoT Hub and the Event Hub compatible endpoint can be obtained from the Azure portal. 

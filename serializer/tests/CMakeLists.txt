@@ -4,6 +4,7 @@
 cmake_minimum_required(VERSION 2.8.11)
 
 #this is CMakeLists for serializer e2e folder
+if(${run_unittests})
 add_subdirectory(agentmacros_ut)
 add_subdirectory(agenttypesystem_ut)
 add_subdirectory(codefirst_cpp_ut)
@@ -23,7 +24,6 @@ add_subdirectory(schemalib_ut)
 add_subdirectory(schemalib_without_init_ut)
 add_subdirectory(schemaserializer_ut)
 add_subdirectory(methodreturn_ut)
-if(NOT ${skip_unittests})
 add_subdirectory(serializer_int)
 add_subdirectory(serializer_dt_int)
 add_subdirectory(serializer_dt_ut)
