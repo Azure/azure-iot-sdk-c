@@ -868,6 +868,9 @@ BEGIN_TEST_SUITE(serializer_e2e)
         IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_Create(&iotHubConfig);
         ASSERT_IS_NOT_NULL(iotHubClientHandle);
 
+        bool traceOn = true;
+        IoTHubClient_SetOption(iotHubClientHandle, "logtrace", &traceOn);
+
         /*step 2: create an instance of the model*/
         deviceModel* model = IoTHubDeviceTwin_CreatedeviceModel(iotHubClientHandle);
 
@@ -889,6 +892,7 @@ BEGIN_TEST_SUITE(serializer_e2e)
                 break;
             }
             (void)Unlock(lock);
+            ThreadAPI_Sleep(1);
         }
 
         ASSERT_ARE_EQUAL(int, was_my_IOTHUB_CLIENT_REPORTED_STATE_CALLBACK_called, 1);
