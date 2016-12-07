@@ -10,6 +10,7 @@ add_subdirectory(iothub_devicetwin_ut)
 add_subdirectory(iothub_msging_ll_ut)
 add_subdirectory(iothub_msging_ut)
 add_subdirectory(iothub_rm_ut)
+add_subdirectory(iothub_sc_version_ut)
 add_subdirectory(iothub_srv_client_auth_ut)
 
 if (${run_e2e_tests})
