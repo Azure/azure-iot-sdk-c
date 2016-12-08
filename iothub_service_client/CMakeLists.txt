@@ -53,7 +53,13 @@ IF(WIN32)
 	add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
 ENDIF(WIN32)
 
-add_library(iothub_service_client ${iothub_service_client_c_files} ${iothub_service_client_h_files})
+if (${build_as_shared})
+    add_library(iothub_service_client SHARED ${iothub_service_client_c_files} ${iothub_service_client_h_files} ./src/iothub_service_client.def)
+    linkSharedUtil(iothub_service_client)
+
+else()
+    add_library(iothub_service_client ${iothub_service_client_c_files} ${iothub_service_client_h_files})
+endif()
 
 if(NOT ${nuget_e2e_tests})
     target_link_libraries(iothub_service_client uamqp)
