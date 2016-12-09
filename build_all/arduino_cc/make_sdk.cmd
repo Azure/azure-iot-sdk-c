@@ -8,7 +8,7 @@ REM It removes some files we do not need.  It currently targets the develop bran
 REM merged into master.
 
 if "%1" equ "" (
-    set Work_path=%~dp0..\..\..\..\Work
+    set Work_path=%~dp0..\..\..\Work
 ) else (
     set Work_path=%1
 )

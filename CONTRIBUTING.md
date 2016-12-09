@@ -12,12 +12,12 @@ We monitor the Github issues section specifically for bugs found with our SDK, h
 
 # File a bug (code or documentation)
 That is definitely something we want to hear about. Please open an issue on github, we'll address it as fast as possible. Typically here's the information we're going to ask for to get started:
-- What SDK are you using (Node, C, C#, Python, Java?)
-- What version of the SDK?
+
+- What version of the SDK you are using?
 - Do you have a snippet of code that would help us reproduce the bug?
 - Do you have logs showing what's happening?
 
-Our SDK is entirely open-source and we do accept pull-requests if you feel like taking a stab at fixing the bug and maybe adding your name to our commit history :) Please mention
+Our SDKs are entirely open-source and we do accept pull-requests if you feel like taking a stab at fixing the bug and maybe adding your name to our commit history :) Please mention
 any relevant issue number in the pull request description.
 
 # Contribute documentation
@@ -43,19 +43,19 @@ The following steps describe adding a new requirement in a Word document:
 
 * Add the requirement text and select it
 
-![](media/add_requirement/add_requirement_step1.png)
+![](https://github.com/azure/azure-iot-sdks/raw/master/media/add_requirement/add_requirement_step1.png)
 
 * Invoke the macro with the selected text
 
-![](media/add_requirement/add_requirement_step2.png)
+![](https://github.com/azure/azure-iot-sdks/raw/master/media/add_requirement/add_requirement_step2.png)
 
 * Select developer id 99
 
-![](media/add_requirement/add_requirement_step3.png)
+![](https://github.com/azure/azure-iot-sdks/raw/master/media/add_requirement/add_requirement_step3.png)
 
 * Done!
 
-![](media/add_requirement/add_requirement_step4.png)
+![](https://github.com/azure/azure-iot-sdks/raw/master/media/add_requirement/add_requirement_step4.png)
 
 When contributing to markdown requirement docs, you can also use `99` for a developer id, and just increment the last number of the requirement to be unique.
 
