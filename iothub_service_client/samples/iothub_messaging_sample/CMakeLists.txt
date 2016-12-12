@@ -12,7 +12,7 @@ iothub_messaging_sample.c
 if(WIN32)
 	set(iothub_messaging_sample_c_files ${iothub_messaging_sample_c_files} ./windows/main.c)
 endif()
-if(LINUX)
+if(LINUX OR OSX)
 	set(iothub_messaging_sample_c_files ${iothub_messaging_sample_c_files} ./linux/main.c)
 endif()
 
