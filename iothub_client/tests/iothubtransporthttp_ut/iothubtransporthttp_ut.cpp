@@ -255,22 +255,22 @@ static IOTHUBTRANSPORT_CONFIG TEST_CONFIG_NULL_IOTHUB_SUFFIX =
     (PDLIST_ENTRY)0x1
 };
 
-#define TEST_IOTHUB_MESSAGE_HANDLE_1 ((IOTHUB_MESSAGE_HANDLE)0x01d1)
-#define TEST_IOTHUB_MESSAGE_HANDLE_2 ((IOTHUB_MESSAGE_HANDLE)0x01d2)
-#define TEST_IOTHUB_MESSAGE_HANDLE_3 ((IOTHUB_MESSAGE_HANDLE)0x01d3)
-#define TEST_IOTHUB_MESSAGE_HANDLE_4 ((IOTHUB_MESSAGE_HANDLE)0x01d4)
-#define TEST_IOTHUB_MESSAGE_HANDLE_5 ((IOTHUB_MESSAGE_HANDLE)0x01d5)
-#define TEST_IOTHUB_MESSAGE_HANDLE_6 ((IOTHUB_MESSAGE_HANDLE)0x01d6)
-#define TEST_IOTHUB_MESSAGE_HANDLE_7 ((IOTHUB_MESSAGE_HANDLE)0x01d7)
-#define TEST_IOTHUB_MESSAGE_HANDLE_8 ((IOTHUB_MESSAGE_HANDLE)0x01d8)
-#define TEST_IOTHUB_MESSAGE_HANDLE_9 ((IOTHUB_MESSAGE_HANDLE)0x01d9)
-#define TEST_IOTHUB_MESSAGE_HANDLE_10 ((IOTHUB_MESSAGE_HANDLE)0x01da)
-#define TEST_IOTHUB_MESSAGE_HANDLE_11 ((IOTHUB_MESSAGE_HANDLE)0x01db)
-#define TEST_IOTHUB_MESSAGE_HANDLE_12 ((IOTHUB_MESSAGE_HANDLE)0x01dc)
+#define TEST_IOTHUB_MESSAGE_HANDLE_1 0x01d1
+#define TEST_IOTHUB_MESSAGE_HANDLE_2 0x01d2
+#define TEST_IOTHUB_MESSAGE_HANDLE_3 0x01d3
+#define TEST_IOTHUB_MESSAGE_HANDLE_4 0x01d4
+#define TEST_IOTHUB_MESSAGE_HANDLE_5 0x01d5
+#define TEST_IOTHUB_MESSAGE_HANDLE_6 0x01d6
+#define TEST_IOTHUB_MESSAGE_HANDLE_7 0x01d7
+#define TEST_IOTHUB_MESSAGE_HANDLE_8 0x01d8
+#define TEST_IOTHUB_MESSAGE_HANDLE_9 0x01d9
+#define TEST_IOTHUB_MESSAGE_HANDLE_10 0x01da
+#define TEST_IOTHUB_MESSAGE_HANDLE_11 0x01db
+#define TEST_IOTHUB_MESSAGE_HANDLE_12 0x01dc
 
 static IOTHUB_MESSAGE_LIST message1 =  /*this is the oldest message, always the first to be processed, send etc*/
 {
-    TEST_IOTHUB_MESSAGE_HANDLE_1,                    /*IOTHUB_MESSAGE_HANDLE messageHandle;                        */
+    (IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_1,                    /*IOTHUB_MESSAGE_HANDLE messageHandle;                        */
     NULL,                                           /*IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK callback;     */
     NULL,                                           /*void* context;                                              */
     { NULL, NULL }                                  /*DLIST_ENTRY entry;                                          */
@@ -278,7 +278,7 @@ static IOTHUB_MESSAGE_LIST message1 =  /*this is the oldest message, always the 
 
 static IOTHUB_MESSAGE_LIST message2 = /*this is the message next to the oldest message, it is processed after the oldest message*/
 {
-    TEST_IOTHUB_MESSAGE_HANDLE_2,                  /*IOTHUB_MESSAGE_HANDLE messageHandle;                        */
+    (IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_2,                  /*IOTHUB_MESSAGE_HANDLE messageHandle;                        */
     NULL,                                           /*IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK callback;     */
     NULL,                                           /*void* context;                                              */
     { NULL, NULL }                                  /*DLIST_ENTRY entry;                                          */
@@ -286,7 +286,7 @@ static IOTHUB_MESSAGE_LIST message2 = /*this is the message next to the oldest m
 
 static IOTHUB_MESSAGE_LIST message3 = /*this is the newest message, always last to be processed*/
 {
-    TEST_IOTHUB_MESSAGE_HANDLE_3,                  /*IOTHUB_MESSAGE_HANDLE messageHandle;                        */
+    (IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_3,                  /*IOTHUB_MESSAGE_HANDLE messageHandle;                        */
     NULL,                                           /*IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK callback;     */
     NULL,                                           /*void* context;                                              */
     { NULL, NULL }                                  /*DLIST_ENTRY entry;                                          */
@@ -294,7 +294,7 @@ static IOTHUB_MESSAGE_LIST message3 = /*this is the newest message, always last 
 
 static IOTHUB_MESSAGE_LIST message4 = /*this is outof bounds message (>256K)*/
 {
-    TEST_IOTHUB_MESSAGE_HANDLE_4,                  /*IOTHUB_MESSAGE_HANDLE messageHandle;                        */
+    (IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_4,                  /*IOTHUB_MESSAGE_HANDLE messageHandle;                        */
     NULL,                                           /*IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK callback;     */
     NULL,                                           /*void* context;                                              */
     { NULL, NULL }                                  /*DLIST_ENTRY entry;                                          */
@@ -302,7 +302,7 @@ static IOTHUB_MESSAGE_LIST message4 = /*this is outof bounds message (>256K)*/
 
 static IOTHUB_MESSAGE_LIST message5 = /*this is almost out of bounds message (<256K)*/
 {
-    TEST_IOTHUB_MESSAGE_HANDLE_5,                  /*IOTHUB_MESSAGE_HANDLE messageHandle;                        */
+    (IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_5,                  /*IOTHUB_MESSAGE_HANDLE messageHandle;                        */
     NULL,                                           /*IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK callback;     */
     NULL,                                           /*void* context;                                              */
     { NULL, NULL }                                  /*DLIST_ENTRY entry;                                          */
@@ -310,7 +310,7 @@ static IOTHUB_MESSAGE_LIST message5 = /*this is almost out of bounds message (<2
 
 static IOTHUB_MESSAGE_LIST message6 = /*this has properties (1)*/
 {
-    TEST_IOTHUB_MESSAGE_HANDLE_6,                  /*IOTHUB_MESSAGE_HANDLE messageHandle;                        */
+    (IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6,                  /*IOTHUB_MESSAGE_HANDLE messageHandle;                        */
     NULL,                                           /*IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK callback;     */
     NULL,                                           /*void* context;                                              */
     { NULL, NULL }                                  /*DLIST_ENTRY entry;                                          */
@@ -318,7 +318,7 @@ static IOTHUB_MESSAGE_LIST message6 = /*this has properties (1)*/
 
 static IOTHUB_MESSAGE_LIST message7 = /*this has properties (2)*/
 {
-    TEST_IOTHUB_MESSAGE_HANDLE_7,                  /*IOTHUB_MESSAGE_HANDLE messageHandle;                        */
+    (IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_7,                  /*IOTHUB_MESSAGE_HANDLE messageHandle;                        */
     NULL,                                           /*IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK callback;     */
     NULL,                                           /*void* context;                                              */
     { NULL, NULL }                                  /*DLIST_ENTRY entry;                                          */
@@ -326,7 +326,7 @@ static IOTHUB_MESSAGE_LIST message7 = /*this has properties (2)*/
 
 static IOTHUB_MESSAGE_LIST message9 = /*this has 256*1024 bytes - must fail @ send unbatched*/
 {
-    TEST_IOTHUB_MESSAGE_HANDLE_9,                  /*IOTHUB_MESSAGE_HANDLE messageHandle;                        */
+    (IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_9,                  /*IOTHUB_MESSAGE_HANDLE messageHandle;                        */
     NULL,                                           /*IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK callback;     */
     NULL,                                           /*void* context;                                              */
     { NULL, NULL }                                  /*DLIST_ENTRY entry;                                          */
@@ -334,7 +334,7 @@ static IOTHUB_MESSAGE_LIST message9 = /*this has 256*1024 bytes - must fail @ se
 
 static IOTHUB_MESSAGE_LIST message10 = /*this is a simple string message*/
 {
-    TEST_IOTHUB_MESSAGE_HANDLE_10,                  /*IOTHUB_MESSAGE_HANDLE messageHandle;                        */
+    (IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_10,                  /*IOTHUB_MESSAGE_HANDLE messageHandle;                        */
     NULL,                                           /*IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK callback;     */
     NULL,                                           /*void* context;                                              */
     { NULL, NULL }                                  /*DLIST_ENTRY entry;                                          */
@@ -342,7 +342,7 @@ static IOTHUB_MESSAGE_LIST message10 = /*this is a simple string message*/
 
 static IOTHUB_MESSAGE_LIST message11 = /*this is message of 255*1024 bytes - 384 - 16 -2 bytes length, so that adding a property "a":"b" brings it to the maximum size*/
 {
-    TEST_IOTHUB_MESSAGE_HANDLE_11,                  /*IOTHUB_MESSAGE_HANDLE messageHandle;                        */
+    (IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_11,                  /*IOTHUB_MESSAGE_HANDLE messageHandle;                        */
     NULL,                                           /*IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK callback;     */
     NULL,                                           /*void* context;                                              */
     { NULL, NULL }                                  /*DLIST_ENTRY entry;                                          */
@@ -350,18 +350,18 @@ static IOTHUB_MESSAGE_LIST message11 = /*this is message of 255*1024 bytes - 384
 
 static IOTHUB_MESSAGE_LIST message12 = /*this is message of 255*1024 bytes - 384 - 16 - 2 bytes length, so that adding a property "aa":"b" brings it over the maximum size*/
 {
-    TEST_IOTHUB_MESSAGE_HANDLE_12,                  /*IOTHUB_MESSAGE_HANDLE messageHandle;                        */
+    (IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_12,                  /*IOTHUB_MESSAGE_HANDLE messageHandle;                        */
     NULL,                                           /*IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK callback;     */
     NULL,                                           /*void* context;                                              */
     { NULL, NULL }                                  /*DLIST_ENTRY entry;                                          */
 };
 
-#define TEST_MAP_EMPTY (MAP_HANDLE) 0xe0
-#define TEST_MAP_1_PROPERTY (MAP_HANDLE) 0xe1
-#define TEST_MAP_2_PROPERTY (MAP_HANDLE) 0xe2
-#define TEST_MAP_3_PROPERTY (MAP_HANDLE) 0xe3
-#define TEST_MAP_1_PROPERTY_A_B (MAP_HANDLE) 0xe4
-#define TEST_MAP_1_PROPERTY_AA_B (MAP_HANDLE) 0xe5
+#define TEST_MAP_EMPTY  0xe0
+#define TEST_MAP_1_PROPERTY  0xe1
+#define TEST_MAP_2_PROPERTY 0xe2
+#define TEST_MAP_3_PROPERTY  0xe3
+#define TEST_MAP_1_PROPERTY_A_B  0xe4
+#define TEST_MAP_1_PROPERTY_AA_B  0xe5
 
 #define TEST_RED_KEY "redkey"
 #define TEST_RED_KEY_STRING TEST_RED_KEY
@@ -877,62 +877,62 @@ public:
     {
     case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_1) :
     {
-        result2 = TEST_MAP_EMPTY;
+        result2 = (MAP_HANDLE)TEST_MAP_EMPTY;
         break;
     }
     case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_2) :
     {
-        result2 = TEST_MAP_EMPTY;
+        result2 = (MAP_HANDLE)TEST_MAP_EMPTY;
         break;
     }
     case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_3) :
     {
-        result2 = TEST_MAP_EMPTY;
+        result2 = (MAP_HANDLE)TEST_MAP_EMPTY;
         break;
     }
     case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_4) : /*this is out of bounds message (>256K)*/
     {
-        result2 = TEST_MAP_EMPTY;
+        result2 = (MAP_HANDLE)TEST_MAP_EMPTY;
         break;
     }
     case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_5) : /*this is a message that just fits*/
     {
-        result2 = TEST_MAP_EMPTY;
+        result2 = (MAP_HANDLE)TEST_MAP_EMPTY;
         break;
     }
     case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_6) :
     {
-        result2 = TEST_MAP_1_PROPERTY;
+        result2 = (MAP_HANDLE)TEST_MAP_1_PROPERTY;
         break;
     }
     case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_7) :
     {
-        result2 = TEST_MAP_2_PROPERTY;
+        result2 = (MAP_HANDLE)TEST_MAP_2_PROPERTY;
         break;
     }
     case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_8) :
     {
-        result2 = TEST_MAP_3_PROPERTY;
+        result2 = (MAP_HANDLE)TEST_MAP_3_PROPERTY;
         break;
     }
     case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_9) :
     {
-        result2 = TEST_MAP_EMPTY;
+        result2 = (MAP_HANDLE)TEST_MAP_EMPTY;
         break;
     }
     case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_10) :
     {
-        result2 = TEST_MAP_EMPTY;
+        result2 = (MAP_HANDLE)TEST_MAP_EMPTY;
         break;
     }
     case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_11) :
     {
-        result2 = TEST_MAP_1_PROPERTY_A_B;
+        result2 = (MAP_HANDLE)TEST_MAP_1_PROPERTY_A_B;
         break;
     }
     case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_12) :
     {
-        result2 = TEST_MAP_1_PROPERTY_AA_B;
+        result2 = (MAP_HANDLE)TEST_MAP_1_PROPERTY_AA_B;
         break;
     }
     default:
@@ -4798,7 +4798,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_2devices_2nd_has_1_event_item_as_string
         STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, ",\"base64Encoded\":false")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(message10.messageHandle));
-        STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
@@ -8333,7 +8333,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_happy_path_succeeds)
         STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(message1.messageHandle));
-        STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
@@ -8460,7 +8460,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_ht
         STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(message1.messageHandle));
-        STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
@@ -8586,7 +8586,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_HT
         STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(message1.messageHandle));
-        STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
@@ -8713,7 +8713,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_BU
         STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(message1.messageHandle));
-        STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
@@ -8821,7 +8821,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_BU
         STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(message1.messageHandle));
-        STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
@@ -8917,7 +8917,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_concat_wi
         STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(message1.messageHandle));
-        STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
@@ -8993,7 +8993,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_concat_it
         STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(message1.messageHandle));
-        STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
@@ -9390,7 +9390,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_bigger_than_256K_path
         STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(message4.messageHandle));
-        STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
@@ -9471,7 +9471,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_almost255_happy_path_
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(message5.messageHandle));
-        STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
@@ -9600,7 +9600,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_makes_1_batch_succee
         STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(message1.messageHandle));
-        STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
@@ -9637,7 +9637,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_makes_1_batch_succee
         STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(message2.messageHandle));
-        STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
@@ -9770,7 +9770,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_when_the_second_item
         STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(message1.messageHandle));
-        STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
@@ -9807,7 +9807,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_when_the_second_item
         STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(message2.messageHandle));
-        STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
@@ -9931,7 +9931,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_when_the_second_item
         STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(message1.messageHandle));
-        STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
@@ -9967,7 +9967,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_when_the_second_item
         STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(message2.messageHandle));
-        STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
@@ -10098,7 +10098,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_the_second_one_does_
         STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(message1.messageHandle));
-        STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
@@ -10135,7 +10135,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_the_second_one_does_
         STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(message5.messageHandle));
-        STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
@@ -10513,7 +10513,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_with_properties_succ
     setupIrrelevantMocksForProperties(&mocks, message6.messageHandle);
 
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(message6.messageHandle));
-    STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
@@ -10568,7 +10568,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_with_1_properties_at
     setupIrrelevantMocksForProperties(&mocks, message11.messageHandle);
 
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(message11.messageHandle));
-    STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_1_PROPERTY_A_B, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_1_PROPERTY_A_B, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
@@ -10649,7 +10649,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_fails_when_Map_GetIn
 
     setupDoWorkLoopOnceForOneDevice(mocks);
 
-    STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4)
@@ -10824,7 +10824,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_with_properties_succ
     setupIrrelevantMocksForProperties2(&mocks, message6.messageHandle, message7.messageHandle);
 
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(message6.messageHandle));
-    STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
@@ -10852,7 +10852,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_with_properties_succ
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(message7.messageHandle));
-    STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_2_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_2_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
@@ -11370,7 +11370,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
-        .SetReturn(TEST_IOTHUB_MESSAGE_HANDLE_8);
+        .SetReturn((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_8);
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(mocks, BUFFER_u_char(IGNORED_PTR_ARG))
@@ -11385,14 +11385,14 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
             .IgnoreArgument(1)
             .CopyOutArgumentBuffer(2, &nHeaders, sizeof(nHeaders));
 
-        STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_8));
+        STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_8));
 
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(3);
         STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME1", "VALUE1"));
+        STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate((MAP_HANDLE)TEST_MAP_3_PROPERTY, "NAME1", "VALUE1"));
     }
 
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
@@ -11511,7 +11511,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
-        .SetReturn(TEST_IOTHUB_MESSAGE_HANDLE_8);
+        .SetReturn((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_8);
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(mocks, BUFFER_u_char(IGNORED_PTR_ARG))
@@ -11526,14 +11526,14 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
             .IgnoreArgument(1)
             .CopyOutArgumentBuffer(2, &nHeaders, sizeof(nHeaders));
 
-        STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_8));
+        STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_8));
 
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(3);
         STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME1", "VALUE1"));
+        STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate((MAP_HANDLE)TEST_MAP_3_PROPERTY, "NAME1", "VALUE1"));
 
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 1, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
@@ -11546,7 +11546,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
             .IgnoreArgument(3);
         STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME2", "VALUE2"));
+        STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate((MAP_HANDLE)TEST_MAP_3_PROPERTY, "NAME2", "VALUE2"));
     }
 
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
@@ -11666,7 +11666,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
-        .SetReturn(TEST_IOTHUB_MESSAGE_HANDLE_8);
+        .SetReturn((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_8);
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(mocks, BUFFER_u_char(IGNORED_PTR_ARG))
@@ -11681,14 +11681,14 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
             .IgnoreArgument(1)
             .CopyOutArgumentBuffer(2, &nHeaders, sizeof(nHeaders));
 
-        STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_8));
+        STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_8));
 
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(3);
         STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME1", "VALUE1"));
+        STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate((MAP_HANDLE)TEST_MAP_3_PROPERTY, "NAME1", "VALUE1"));
 
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 1, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
@@ -11701,7 +11701,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
             .IgnoreArgument(3);
         STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME2", "VALUE2"))
+        STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate((MAP_HANDLE)TEST_MAP_3_PROPERTY, "NAME2", "VALUE2"))
             .SetReturn(MAP_ERROR);
     }
 
@@ -11817,7 +11817,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
-        .SetReturn(TEST_IOTHUB_MESSAGE_HANDLE_8);
+        .SetReturn((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_8);
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(mocks, BUFFER_u_char(IGNORED_PTR_ARG))
@@ -11832,14 +11832,14 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
             .IgnoreArgument(1)
             .CopyOutArgumentBuffer(2, &nHeaders, sizeof(nHeaders));
 
-        STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_8));
+        STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_8));
 
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(3);
         STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME1", "VALUE1"));
+        STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate((MAP_HANDLE)TEST_MAP_3_PROPERTY, "NAME1", "VALUE1"));
 
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 1, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
@@ -11964,7 +11964,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
-        .SetReturn(TEST_IOTHUB_MESSAGE_HANDLE_8);
+        .SetReturn((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_8);
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(mocks, BUFFER_u_char(IGNORED_PTR_ARG))
@@ -11979,14 +11979,14 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
             .IgnoreArgument(1)
             .CopyOutArgumentBuffer(2, &nHeaders, sizeof(nHeaders));
 
-        STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_8));
+        STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_8));
 
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(3);
         STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME1", "VALUE1"));
+        STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate((MAP_HANDLE)TEST_MAP_3_PROPERTY, "NAME1", "VALUE1"));
 
         whenShallHTTPHeaders_GetHeader_fail = currentHTTPHeaders_GetHeader_call + 2;
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 1, IGNORED_PTR_ARG))
@@ -12105,7 +12105,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
-        .SetReturn(TEST_IOTHUB_MESSAGE_HANDLE_8);
+        .SetReturn((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_8);
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(mocks, BUFFER_u_char(IGNORED_PTR_ARG))
@@ -12120,14 +12120,14 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
             .IgnoreArgument(1)
             .CopyOutArgumentBuffer(2, &nHeaders, sizeof(nHeaders));
 
-        STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_8));
+        STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_8));
 
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(3);
         STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME1", "VALUE1"))
+        STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate((MAP_HANDLE)TEST_MAP_3_PROPERTY, "NAME1", "VALUE1"))
             .SetReturn(MAP_ERROR);
     }
 
@@ -12242,7 +12242,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
-        .SetReturn(TEST_IOTHUB_MESSAGE_HANDLE_8);
+        .SetReturn((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_8);
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(mocks, BUFFER_u_char(IGNORED_PTR_ARG))
@@ -12336,8 +12336,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_unbatch
 
     STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_1));
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_1, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_1));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_1, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
@@ -12350,8 +12350,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_unbatch
         .IgnoreArgument(1);
 
     /*no properties, so no more headers*/
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_1));
-    STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_1));
+    STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
@@ -12432,8 +12432,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_string_
 
     STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_10));
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetString(TEST_IOTHUB_MESSAGE_HANDLE_10));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_10));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetString((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_10));
 
     STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Clone(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
@@ -12444,8 +12444,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_string_
         .IgnoreArgument(1);
 
     /*no properties, so no more headers*/
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_10));
-    STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_10));
+    STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
@@ -12519,8 +12519,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_unbatched_happy_path_at_th
 
     STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_11));
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_11, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_11));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_11, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
@@ -12533,8 +12533,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_unbatched_happy_path_at_th
         .IgnoreArgument(1);
 
     /*1 property*/
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_11));
-    STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_1_PROPERTY_A_B, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_11));
+    STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_1_PROPERTY_A_B, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
@@ -12658,8 +12658,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_string_
 
     STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_10));
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetString(TEST_IOTHUB_MESSAGE_HANDLE_10))
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_10));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetString((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_10))
         .SetReturn((const char*)NULL);
 
     DISABLE_BATCHING();
@@ -12695,8 +12695,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
 
     STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
@@ -12709,8 +12709,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
         .IgnoreArgument(1);
 
     /*no properties, so no more headers*/
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6));
+    STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
@@ -12796,8 +12796,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
 
     STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
@@ -12810,8 +12810,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
         .IgnoreArgument(1);
 
     /*no properties, so no more headers*/
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6));
+    STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
@@ -12886,8 +12886,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
 
     STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
@@ -12900,8 +12900,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
         .IgnoreArgument(1);
 
     /*no properties, so no more headers*/
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6));
+    STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
@@ -12976,8 +12976,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
 
     STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
@@ -12990,8 +12990,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
         .IgnoreArgument(1);
 
     /*no properties, so no more headers*/
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6));
+    STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
@@ -13047,8 +13047,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
 
     STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
@@ -13061,8 +13061,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
         .IgnoreArgument(1);
 
     /*no properties, so no more headers*/
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6));
+    STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
@@ -13111,8 +13111,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
 
     STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
@@ -13125,8 +13125,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
         .IgnoreArgument(1);
 
     /*no properties, so no more headers*/
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6));
+    STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
@@ -13173,8 +13173,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
 
     STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
@@ -13187,8 +13187,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
         .IgnoreArgument(1);
 
     /*no properties, so no more headers*/
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6));
+    STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
@@ -13231,8 +13231,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
 
     STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
@@ -13245,8 +13245,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
         .IgnoreArgument(1);
 
     /*no properties, so no more headers*/
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6));
+    STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
@@ -13285,8 +13285,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
 
     STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
@@ -13299,8 +13299,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
         .IgnoreArgument(1);
 
     /*no properties, so no more headers*/
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6));
+    STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4)
@@ -13333,8 +13333,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
 
     STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
@@ -13374,8 +13374,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
 
     STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
@@ -13410,8 +13410,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
 
     STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .SetReturn(IOTHUB_MESSAGE_ERROR);
@@ -13444,8 +13444,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
 
     STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_9));
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_9, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_9));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_9, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
@@ -13513,7 +13513,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_happy_path_
         STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, ",\"base64Encoded\":false")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(message10.messageHandle));
-        STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
@@ -13636,7 +13636,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_string
         STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, ",\"base64Encoded\":false")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(message10.messageHandle));
-        STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
@@ -13700,7 +13700,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_Map_Ge
         STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, ",\"base64Encoded\":false")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(message10.messageHandle));
-        STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4)
@@ -14025,7 +14025,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetMessageId_SUCCEED)
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
-        .SetReturn(TEST_IOTHUB_MESSAGE_HANDLE_8);
+        .SetReturn((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_8);
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(mocks, BUFFER_u_char(IGNORED_PTR_ARG))
@@ -14040,14 +14040,14 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetMessageId_SUCCEED)
             .IgnoreArgument(1)
             .CopyOutArgumentBuffer(2, &nHeaders, sizeof(nHeaders));
 
-        STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_8));
+        STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_8));
 
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(3);
         STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME1", "VALUE1"));
+        STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate((MAP_HANDLE)TEST_MAP_3_PROPERTY, "NAME1", "VALUE1"));
 
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 1, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
@@ -14060,7 +14060,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetMessageId_SUCCEED)
             .IgnoreArgument(3);
         STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME2", "VALUE2"));
+        STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate((MAP_HANDLE)TEST_MAP_3_PROPERTY, "NAME2", "VALUE2"));
 
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 3, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
@@ -14184,7 +14184,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetMessageId_FAILED)
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
-        .SetReturn(TEST_IOTHUB_MESSAGE_HANDLE_8);
+        .SetReturn((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_8);
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(mocks, BUFFER_u_char(IGNORED_PTR_ARG))
@@ -14199,14 +14199,14 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetMessageId_FAILED)
             .IgnoreArgument(1)
             .CopyOutArgumentBuffer(2, &nHeaders, sizeof(nHeaders));
 
-        STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_8));
+        STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_8));
 
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(3);
         STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME1", "VALUE1"));
+        STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate((MAP_HANDLE)TEST_MAP_3_PROPERTY, "NAME1", "VALUE1"));
 
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 1, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
@@ -14219,7 +14219,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetMessageId_FAILED)
             .IgnoreArgument(3);
         STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME2", "VALUE2"));
+        STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate((MAP_HANDLE)TEST_MAP_3_PROPERTY, "NAME2", "VALUE2"));
 
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 3, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
@@ -14300,8 +14300,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetMessageId_succeeds)
 
     STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
@@ -14314,8 +14314,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetMessageId_succeeds)
         .IgnoreArgument(1);
 
     /*no properties, so no more headers*/
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6));
+    STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
@@ -14402,8 +14402,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetCorrelationId_succeeds)
 
     STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
@@ -14416,8 +14416,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetCorrelationId_succeeds)
         .IgnoreArgument(1);
 
     /*no properties, so no more headers*/
-    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties((IOTHUB_MESSAGE_HANDLE)TEST_IOTHUB_MESSAGE_HANDLE_6));
+    STRICT_EXPECTED_CALL(mocks, Map_GetInternals((MAP_HANDLE)TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
