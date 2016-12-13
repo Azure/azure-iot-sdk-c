@@ -11,7 +11,7 @@ iothub_devicemethod_sample.c
 
 if(WIN32)
 	set(iothub_devicemethod_sample_c_files ${iothub_devicemethod_sample_c_files} ./windows/main.c)
-elseif(LINUX)
+elseif(LINUX OR OSX)
 	set(iothub_devicemethod_sample_c_files ${iothub_devicemethod_sample_c_files} ./linux/main.c)
 endif()
 
