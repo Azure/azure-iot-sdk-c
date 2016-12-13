@@ -49,6 +49,8 @@
 #define ERROR_TIME_FOR_RETRY_SECS   5
 #define WAIT_TIME_SECS              (ERROR_TIME_FOR_RETRY_SECS - 1)
 
+#define TOUPPER(c)      (((c>='a') && (c<='z'))?c-'a'+'A':c)
+
 static const char TOPIC_DEVICE_TWIN_PREFIX[] = "$iothub/twin";
 static const char TOPIC_DEVICE_METHOD_PREFIX[] = "$iothub/methods";
 
@@ -710,7 +712,7 @@ static IOTHUB_IDENTITY_TYPE retrieve_topic_type(const char* topic_resp)
                     {
                         break;
                     }
-                    else if (toupper(TOPIC_DEVICE_TWIN_PREFIX[index]) != toupper(topic_resp[index]))
+                    else if (TOUPPER(TOPIC_DEVICE_TWIN_PREFIX[index]) != TOUPPER(topic_resp[index]))
                     {
                         search_device_twin = false;
                     }
@@ -728,7 +730,7 @@ static IOTHUB_IDENTITY_TYPE retrieve_topic_type(const char* topic_resp)
                     {
                         break;
                     }
-                    else if (toupper(TOPIC_DEVICE_METHOD_PREFIX[index]) != toupper(topic_resp[index]))
+                    else if (TOUPPER(TOPIC_DEVICE_METHOD_PREFIX[index]) != TOUPPER(topic_resp[index]))
                     {
                         search_device_method = false;
                     }
