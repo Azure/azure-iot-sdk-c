@@ -90,8 +90,10 @@ else()
 endif()
 
 if(NOT IN_OPENWRT)
-    # Disable tests and samples for OpenWRT
-    add_subdirectory(tests)
+    # Disable tests for OpenWRT
+    if(${run_unittests})
+        add_subdirectory(tests)
+    endif()
 endif()
 
 if(${use_installed_dependencies})
