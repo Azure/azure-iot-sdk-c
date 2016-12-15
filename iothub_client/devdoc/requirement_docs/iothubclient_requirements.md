@@ -40,6 +40,8 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_SendReportedState(IOTHUB_CLIENT_HANDLE 
 ## IoTHub Methods
 extern IOTHUB_CLIENT_RESULT IoTHubClient_SetDeviceMethodCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_METHOD_CALLBACK_ASYNC deviceMethodCallback, void* userContextCallback);
 unsigned char* payload, IOTHUB_CLIENT_IOTHUB_METHOD_EXECUTE_CALLBACK iotHubExecuteCallback, void* userContextCallback);
+extern IOTHUB_CLIENT_RESULT IoTHubClient_SetDeviceMethodCallback_Ex(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK inboundDeviceMethodCallback, void* userContextCallback);
+
 ```
 
 ## IoTHubClient_GetVersionString
@@ -136,8 +138,6 @@ Create an IoTHubClient using an existing connection.
 
 **SRS_IOTHUBCLIENT_17_009: [** If `IoTHubClient_LL_CreateWithTransport` fails, all resources allocated by it shall be freed. **]**
 
-
-
 ## IoTHubClient_Destroy
 
 ```c
@@ -159,8 +159,6 @@ extern void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle);
 **SRS_IOTHUBCLIENT_01_032: [** If the lock was allocated in `IoTHubClient_Create`, it shall be also freed. **]**
 
 **SRS_IOTHUBCLIENT_01_008: [** `IoTHubClient_Destroy` shall do nothing if parameter `iotHubClientHandle` is `NULL`. **]**
-
-
 
 ## IoTHubClient_SendEventAsync
 
@@ -186,7 +184,6 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_SendEventAsync(IOTHUB_CLIENT_HANDLE iot
 
 **SRS_IOTHUBCLIENT_07_001: [** `IoTHubClient_SendEventAsync` shall allocate a IOTHUB_QUEUE_CONTEXT object to be sent to the `IoTHubClient_LL_SendEventAsync` function as a user context. **]**
 
-
 ## IoTHubClient_SetMessageCallback
 
 ```c
@@ -210,9 +207,11 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_SetMessageCallback(IOTHUB_CLIENT_HANDLE
 **SRS_IOTHUBCLIENT_01_028: [** If acquiring the lock fails, `IoTHubClient_SetMessageCallback` shall return `IOTHUB_CLIENT_ERROR`. **]**
 
 ###IoTHubClient_SetConnectionStatusCallback
+
 ```c
 extern IOTHUB_CLIENT_RESULT IoTHubClient_SetConnectionStatusCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK connectionStatusCallback, void* userContextCallback);
 ```
+
 **SRS_IOTHUBCLIENT_25_081: [** `IoTHubClient_SetConnectionStatusCallback` shall start the worker thread if it was not previously started. **]**
 
 **SRS_IOTHUBCLIENT_25_082: [** If the transport connection is shared, the thread shall be started by calling `IoTHubTransport_StartWorkerThread`. **]**
@@ -230,9 +229,11 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_SetConnectionStatusCallback(IOTHUB_CLIE
 **SRS_IOTHUBCLIENT_25_088: [** If acquiring the lock fails, `IoTHubClient_SetConnectionStatusCallback` shall return `IOTHUB_CLIENT_ERROR`. **]**
 
 ###IoTHubClient_SetRetryPolicy
+
 ```c
 extern IOTHUB_CLIENT_RESULT IoTHubClient_SetRetryPolicy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitinSeconds);
 ```
+
 **SRS_IOTHUBCLIENT_25_073: [** `IoTHubClient_SetRetryPolicy` shall start the worker thread if it was not previously started. **]**
 
 **SRS_IOTHUBCLIENT_25_074: [** If the transport connection is shared, the thread shall be started by calling `IoTHubTransport_StartWorkerThread`. **]**
@@ -250,9 +251,11 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_SetRetryPolicy(IOTHUB_CLIENT_LL_HANDLE 
 **SRS_IOTHUBCLIENT_25_080: [** If acquiring the lock fails, `IoTHubClient_SetRetryPolicy` shall return `IOTHUB_CLIENT_ERROR`. **]**
 
 ###IoTHubClient_GetRetryPolicy
+
 ```c
 extern IOTHUB_CLIENT_RESULT IoTHubClient_GetRetryPolicy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY* retryPolicy, size_t* retryTimeoutLimitinSeconds);
 ```
+
 **SRS_IOTHUBCLIENT_25_089: [** `IoTHubClient_GetRetryPolicy` shall start the worker thread if it was not previously started. **]**
 
 **SRS_IOTHUBCLIENT_25_090: [** If the transport connection is shared, the thread shall be started by calling `IoTHubTransport_StartWorkerThread`. **]**
@@ -407,7 +410,43 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_SetDeviceMethodCallback(IOTHUB_CLIENT_H
 
 **SRS_IOTHUBCLIENT_12_018: [** `IoTHubClient_SetDeviceMethodCallback` shall be made thread-safe by using the lock created in IoTHubClient_Create. **]**
 
+## IoTHubClient_SetDeviceMethodCallback_Ex
 
+```c
+extern IOTHUB_CLIENT_RESULT IoTHubClient_SetDeviceMethodCallback_Ex(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK inboundDeviceMethodCallback, void* userContextCallback);
+```
+
+`IoTHubClient_SetDeviceMethodCallback_Ex` sets up the callback for a method which will be called by IoTHub.
+
+**SRS_IOTHUBCLIENT_07_001: [** If `iotHubClientHandle` is `NULL`, `IoTHubClient_SetDeviceMethodCallback_Ex` shall return `IOTHUB_CLIENT_INVALID_ARG`. **]**
+
+**SRS_IOTHUBCLIENT_07_002: [** If acquiring the lock fails, `IoTHubClient_SetDeviceMethodCallback_Ex` shall return `IOTHUB_CLIENT_ERROR`. **]**
+
+**SRS_IOTHUBCLIENT_07_003: [** If the transport handle is `NULL` and the worker thread is not initialized, the thread shall be started by calling `IoTHubTransport_StartWorkerThread`. **]**
+
+**SRS_IOTHUBCLIENT_07_004: [** If starting the thread fails, `IoTHubClient_SetDeviceMethodCallback_Ex` shall return `IOTHUB_CLIENT_ERROR`. **]**
+
+**SRS_IOTHUBCLIENT_07_005: [** `IoTHubClient_SetDeviceMethodCallback_Ex` shall call `IoTHubClient_LL_SetDeviceMethodCallback_Ex`, while passing the `IoTHubClient_LL_handle` created by `IoTHubClient_LL_Create` along with the parameters `iothub_ll_inbound_device_method_callback` and `IOTHUB_QUEUE_CONTEXT`. **]**
+
+**SRS_IOTHUBCLIENT_07_008: [** If inboundDeviceMethodCallback is NULL, `IoTHubClient_SetDeviceMethodCallback_Ex` shall call `IoTHubClient_LL_SetDeviceMethodCallback_Ex`, passing NULL for the `iothub_ll_inbound_device_method_callback`. **]**
+
+**SRS_IOTHUBCLIENT_07_006: [** When `IoTHubClient_LL_SetDeviceMethodCallback_Ex` is called, `IoTHubClient_SetDeviceMethodCallback_Ex` shall return the result of `IoTHubClient_LL_SetDeviceMethodCallback_Ex`. **]**
+
+**SRS_IOTHUBCLIENT_07_007: [** `IoTHubClient_SetDeviceMethodCallback_Ex` shall be made thread-safe by using the lock created in IoTHubClient_Create. **]**
+
+## IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK
+
+```c
+int(*IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK)(const char* method_name, const unsigned char* payload, size_t size, METHOD_ID_HANDLE method_id, void* userContextCallback);
+```
+
+**SRS_IOTHUB_MQTT_TRANSPORT_07_001: [** if userContextCallback is NULL, IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK shall return a nonNULL value. **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_07_002: [** IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK shall copy the method_name and payload. **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_07_003: [** If a failure is encountered IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK shall return a non-NULL value. **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_07_004: [** On success IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK shall return a 0 value. **]**
 
 ## IoTHubClient_UploadToBlobAsync
 

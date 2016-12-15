@@ -16,6 +16,7 @@ extern const TRANSPORT_PROVIDER* MQTT_Protocol(void);
 
     - IoTHubTransportMqtt_Subscribe_DeviceMethod,
     - IoTHubTransportMqtt_Unsubscribe_DeviceMethod,
+    - IoTHubTransportMqtt_DeviceMethod_Response,
     - IoTHubTransportMqtt_Subscribe_DeviceTwin,
     - IoTHubTransportMqtt_Unsubscribe_DeviceTwin,
     - IoTHubTransportMqtt_ProcessItem,
@@ -120,14 +121,51 @@ void IoTHubTransportMqtt_Unsubscribe(TRANSPORT_LL_HANDLE handle)
 
 **SRS_IOTHUB_MQTT_TRANSPORT_07_006: [** IoTHubTransportMqtt_Unsubscribe shall unsubscribe the TRANSPORT_LL_HANDLE by calling into the IoTHubMqttAbstract_Unsubscribe function. **]**
 
-
 ### IoTHubTransportMqtt_ProcessItem
 
 ```c
 IOTHUB_PROCESS_ITEM_RESULT IoTHubTransportMqtt_ProcessItem(TRANSPORT_LL_HANDLE handle, IOTHUB_IDENTITY_TYPE item_type, IOTHUB_IDENTITY_INFO* iothub_item)
 ```
 
+### IoTHubTransportMqtt_Subscribe_DeviceMethod
 
+```c
+static int IoTHubTransportMqtt_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
+```
+
+**SRS_IOTHUB_MQTT_TRANSPORT_07_026: [** IoTHubTransportMqtt_Subscribe_DeviceMethod shall subscribe the TRANSPORT_LL_HANDLE by calling into the IoTHubMqttAbstract_Subscribe_DeviceMethod function. **]**
+
+### IoTHubTransportMqtt_Unsubscribe_DeviceMethod
+
+```c
+static void IoTHubTransportMqtt_Unsubscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
+```
+
+**SRS_IOTHUB_MQTT_TRANSPORT_07_027: [** IoTHubTransportMqtt_Unsubscribe_DeviceMethod shall call into the IoTHubMqttAbstract_Unsubscribe_DeviceMethod function. **]**
+
+### IoTHubTransportMqtt_Subscribe_DeviceTwin
+
+```c
+static int IoTHubTransportMqtt_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle)
+```
+
+**SRS_IOTHUB_MQTT_TRANSPORT_07_025: [** IoTHubTransportMqtt_Subscribe_DeviceTwin shall call into the IoTHubMqttAbstract_Subscribe_DeviceTwin function. **]**
+
+### IoTHubTransportMqtt_Unsubscribe_DeviceTwin
+
+```c
+static void IoTHubTransportMqtt_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle)
+```
+
+**SRS_IOTHUB_MQTT_TRANSPORT_07_024: [** IoTHubTransportMqtt_Unsubscribe_DeviceTwin shall shall call into the IoTHubMqttAbstract_Unsubscribe_DeviceTwin function. **]**
+
+### IoTHubTransportMqtt_DeviceMethod_Response
+
+```c
+static int IoTHubTransportMqtt_DeviceMethod_Response(IOTHUB_DEVICE_HANDLE handle, METHOD_ID_HANDLE methodId, const unsigned char* response, size_t response_size, int status_response)
+```
+
+**SRS_IOTHUB_MQTT_TRANSPORT_07_023: [** IoTHubTransportMqtt_DeviceMethod_Response shall call into the IoTHubMqttAbstract_DeviceMethod_Response function. **]**
 
 ### IoTHubTransportMqtt_DoWork
 

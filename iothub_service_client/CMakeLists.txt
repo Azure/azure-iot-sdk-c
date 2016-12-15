@@ -18,8 +18,8 @@ set(iothub_service_client_c_files
 ./src/iothub_devicetwin.c
 ./src/iothub_devicemethod.c
 ./src/iothub_service_client_auth.c
+./src/iothub_sc_version.c
 ../iothub_client/src/iothub_message.c
-
 )
 
 set(iothub_service_client_h_files
@@ -53,7 +53,13 @@ IF(WIN32)
 	add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
 ENDIF(WIN32)
 
-add_library(iothub_service_client ${iothub_service_client_c_files} ${iothub_service_client_h_files})
+if (${build_as_shared})
+    add_library(iothub_service_client SHARED ${iothub_service_client_c_files} ${iothub_service_client_h_files} ./src/iothub_service_client.def)
+    linkSharedUtil(iothub_service_client)
+
+else()
+    add_library(iothub_service_client ${iothub_service_client_c_files} ${iothub_service_client_h_files})
+endif()
 
 if(NOT ${nuget_e2e_tests})
     target_link_libraries(iothub_service_client uamqp)
@@ -86,7 +92,7 @@ if(${use_installed_dependencies})
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/../bin
-        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot 
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
     )
     install(FILES ${iothub_service_client_h_files} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
 endif()

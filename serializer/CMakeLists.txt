@@ -68,9 +68,16 @@ IF(WIN32)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 ENDIF(WIN32)
 
-add_library(
-serializer ${serializer_c_files} ${serializer_h_files}
-)
+if (${build_as_shared})
+    add_library(
+    serializer SHARED ${serializer_c_files} ${serializer_h_files} ./src/serializer.def
+    )
+    linkSharedUtil(serializer)
+else()
+    add_library(
+    serializer ${serializer_c_files} ${serializer_h_files} 
+    )
+endif()
 
 if (NOT ${skip_samples})
 if(WIN32)
@@ -83,8 +90,10 @@ else()
 endif()
 
 if(NOT IN_OPENWRT)
-    # Disable tests and samples for OpenWRT
-    add_subdirectory(tests)
+    # Disable tests for OpenWRT
+    if(${run_unittests})
+        add_subdirectory(tests)
+    endif()
 endif()
 
 if(${use_installed_dependencies})

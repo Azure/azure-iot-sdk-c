@@ -61,9 +61,7 @@ set(iothub_client_h_install_files
     ${iothub_client_h_files}
 )
 
-set(iothub_client_libs
-iothub_client
-)
+set(iothub_client_libs)
 
 if(${use_http})
     set(iothub_client_http_transport_c_files
@@ -227,7 +225,6 @@ if(${use_http})
         ${iothub_client_http_transport_h_files}
     )
     linkSharedUtil(iothub_client_http_transport)
-    target_link_libraries(iothub_client_http_transport)
     set(iothub_client_libs
         ${iothub_client_libs}
         iothub_client_http_transport
@@ -242,7 +239,6 @@ if(${use_amqp})
         ${iothub_client_amqp_transport_h_files}
     )
     linkSharedUtil(iothub_client_amqp_transport)
-    target_link_libraries(iothub_client_amqp_transport)
     set(iothub_client_libs
         ${iothub_client_libs}
         iothub_client_amqp_transport
@@ -256,7 +252,6 @@ if(${use_amqp})
 		)
 		linkSharedUtil(iothub_client_amqp_ws_transport)
 		linkWebSockets(iothub_client_amqp_ws_transport)
-		target_link_libraries(iothub_client_amqp_ws_transport)
 		set(iothub_client_libs
 			${iothub_client_libs}
 			iothub_client_amqp_ws_transport
@@ -273,7 +268,6 @@ if(${use_mqtt})
     )
     linkSharedUtil(iothub_client_mqtt_transport)
     linkMqttLibrary(iothub_client_mqtt_transport)
-    target_link_libraries(iothub_client_mqtt_transport)
     set(iothub_client_libs
         ${iothub_client_libs}
         iothub_client_mqtt_transport
@@ -287,7 +281,6 @@ if(${use_mqtt})
         linkSharedUtil(iothub_client_mqtt_ws_transport)
         linkMqttLibrary(iothub_client_mqtt_ws_transport)
         linkWebSockets(iothub_client_mqtt_ws_transport)
-        target_link_libraries(iothub_client_mqtt_ws_transport)
         set(iothub_client_libs
             ${iothub_client_libs}
             iothub_client_mqtt_ws_transport
@@ -304,12 +297,26 @@ IF(WIN32)
     add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
 ENDIF(WIN32)
 
-add_library(iothub_client 
-    ${iothub_client_c_files} 
-    ${iothub_client_h_files}
-)
-linkSharedUtil(iothub_client)
+if(${build_as_shared})
+    add_library(iothub_client SHARED
+        ${iothub_client_c_files} 
+        ${iothub_client_h_files}
+        ./src/iothub_client.def
+    )
+    target_link_libraries(iothub_client ${iothub_client_libs})
 
+else()
+    add_library(iothub_client
+        ${iothub_client_c_files} 
+        ${iothub_client_h_files}
+    )
+endif()
+
+linkSharedUtil(iothub_client)
+set(iothub_client_libs
+    iothub_client 
+    ${iothub_client_libs}
+)
 # Don't build samples under Win32 ARM for now
 if(NOT ${skip_samples})
 if(WIN32)

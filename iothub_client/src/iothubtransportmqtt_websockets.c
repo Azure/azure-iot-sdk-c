@@ -68,19 +68,24 @@ static int IoTHubTransportMqtt_WS_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE ha
 /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_016: [ IoTHubTransportMqtt_WS_Unsubscribe_DeviceMethod shall call into the IoTHubTransport_MQTT_Common_Unsubscribe_DeviceMethod ] */
 static void IoTHubTransportMqtt_WS_Unsubscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
 {
-    IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin(handle);
+    IoTHubTransport_MQTT_Common_Unsubscribe_DeviceMethod(handle);
+}
+
+static int IoTHubTransportMqtt_WS_DeviceMethod_Response(IOTHUB_DEVICE_HANDLE handle, METHOD_HANDLE methodId, const unsigned char* response, size_t response_size, int status_response)
+{
+    return IoTHubTransport_MQTT_Common_DeviceMethod_Response(handle, methodId, response, response_size, status_response);
 }
 
 /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_017: [ IoTHubTransportMqtt_WS_Subscribe_DeviceTwin shall call into the IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin ] */
 static int IoTHubTransportMqtt_WS_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle)
 {
-    return IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod(handle);
+    return IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin(handle);
 }
 
 /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_018: [ IoTHubTransportMqtt_WS_Unsubscribe_DeviceTwin shall call into the IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin ] */
 static void IoTHubTransportMqtt_WS_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle)
 {
-    IoTHubTransport_MQTT_Common_Unsubscribe_DeviceMethod(handle);
+    IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin(handle);
 }
 
 /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_014: [ IoTHubTransportMqtt_WS_ProcessItem shall call into the IoTHubTransport_MQTT_Common_DoWork function ] */
@@ -146,6 +151,7 @@ IoTHubTransport_SetOption = IoTHubTransportMqtt_WS_SetOption ] */
 static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls = {
     IoTHubTransportMqtt_WS_Subscribe_DeviceMethod,
     IoTHubTransportMqtt_WS_Unsubscribe_DeviceMethod,
+    IoTHubTransportMqtt_WS_DeviceMethod_Response,
     IoTHubTransportMqtt_WS_Subscribe_DeviceTwin,
     IoTHubTransportMqtt_WS_Unsubscribe_DeviceTwin,
     IoTHubTransportMqtt_WS_ProcessItem,
