@@ -4,7 +4,7 @@
 #IoTHub client "C" Library
 Revision 1.7
 03/16/2016
- 
+
 #Revisions:
 |Revision	 |Updated By|	Date	      |Major updates                                                             |
 |------------|----------|-----------------|--------------------------------------------------------------------------|
@@ -26,8 +26,8 @@ The IoTHub client "C" library offers developers a means of communication to & fr
 
 
 The library allows a device to achieve the supported communication patterns by a IoT Hub:
--	**Event**. A message sent by a device to a IoT Hub. The device does not expect a response from IoT Hub, but the event message can result in errors (e.g. not being processed …).
--	**Message**. A message sent by IoT Hub to the device. IoT Hub does not expect a response from the device, but the message can result in errors (e.g. failed delivery…)
+-	**Event**. A message sent by a device to a IoT Hub. The device does not expect a response from IoT Hub, but the event message can result in errors (e.g. not being processed...).
+-	**Message**. A message sent by IoT Hub to the device. IoT Hub does not expect a response from the device, but the message can result in errors (e.g. failed delivery...)
 
 
 The library offers the following features:
@@ -39,7 +39,7 @@ The library offers the following features:
 
 The APIs of this library cannot be called from different threads on the same handle without risking data races. Therefore, should more than 1 thread need to access concurrently the APIs of this module on the same handle, there needs to be a user-level synchronization mechanism that guarantees that two APIs are not called at the same time.
 
-#Example1 – SendEventAsync:
+#Example1 - SendEventAsync:
 
 ```c
 #include <stdio.h>
@@ -129,7 +129,7 @@ int main(void)
 ```
 
 
-#Example2 – ReceiveMessage
+#Example2 - ReceiveMessage
 
 ```c
 #include <stdio.h>
@@ -701,7 +701,7 @@ Returns the content type of the message given by the parameter iotHubMessageHand
 
 ##MAP_HANDLE IoTHubMessage_Properties(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle);
 
-Returns a handle to the message’s properties map.
+Returns a handle to the message's properties map.
 
 ###Arguments
 |Name	                |Description
@@ -709,7 +709,7 @@ Returns a handle to the message’s properties map.
 |iotHubMessageHandle	|Handle to the message.
 
 ###Return
-MAP_HANDLE representing the message’s property map.
+MAP_HANDLE representing the message's property map.
 
 ##void IoTHubMessage_Destroy(IOTHUB_MESSAGE_HANDLE ioTHubMessageHandle);
 Disposes of resources allocated by the IoT Hub message.

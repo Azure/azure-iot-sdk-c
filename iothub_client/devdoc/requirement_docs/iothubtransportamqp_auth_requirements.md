@@ -1,7 +1,7 @@
 
 # IoTHubTransportAMQP_Auth Requirements
 
- 
+
 ## Overview
 
 This module provides APIs for authenticating devices registered on the IoT Hub C client AMQP protocol.  

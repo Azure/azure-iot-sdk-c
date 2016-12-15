@@ -320,7 +320,7 @@ This section defines the functionality of the callback function 'on_message_rece
 
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_106: [**The callback 'on_message_received' shall return the result of messaging_delivery_released() if the IoTHubClient_LL_MessageCallback() returns IOTHUBMESSAGE_ABANDONED**]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_107: [**The callback 'on_message_received' shall return the result of messaging_delivery_rejected(“Rejected by application”, “Rejected by application”) if the IoTHubClient_LL_MessageCallback() returns IOTHUBMESSAGE_REJECTED**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_107: [**The callback 'on_message_received' shall return the result of messaging_delivery_rejected("Rejected by application", "Rejected by application") if the IoTHubClient_LL_MessageCallback() returns IOTHUBMESSAGE_REJECTED**]**
   
 
   
@@ -332,7 +332,7 @@ Note:
 SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_245 is specially important for device multiplexing scenarios.
 On a given connection, there must not be messages sent to the Hub before the device has been authenticated, despite if other multiplexed devices have already been authenticated on such connection.
 
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_086: [**IoTHubTransport_AMQP_Common_DoWork shall move queued events to an “in-progress” list right before processing them for sending**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_086: [**IoTHubTransport_AMQP_Common_DoWork shall move queued events to an "in-progress" list right before processing them for sending**]**
 
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_193: [**IoTHubTransport_AMQP_Common_DoWork shall get a MESSAGE_HANDLE instance out of the event's IOTHUB_MESSAGE_HANDLE instance by using message_create_from_iothub_message().**]**
 
@@ -398,7 +398,7 @@ Note: There should be no devices using different authentication modes registered
 
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_228: [**If STRING_construct fails to copy config->deviceId, IoTHubTransport_AMQP_Common_Register shall fail and return NULL.**]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_012: [**IoTHubTransport_AMQP_Common_Register shall create an immutable string, referred to as devicesPath, from the following parts: host_fqdn + “/devices/” + deviceId.**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_012: [**IoTHubTransport_AMQP_Common_Register shall create an immutable string, referred to as devicesPath, from the following parts: host_fqdn + "/devices/" + deviceId.**]**
 
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_013: [**If creating devicesPath fails for any reason then IoTHubTransport_AMQP_Common_Register shall fail and return NULL.**]**
 

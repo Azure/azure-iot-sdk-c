@@ -99,7 +99,7 @@ Remarks:
 **SRS_DATA_MARSHALLER_99_039: [**  If the includePropertyPath argument passed to DataMarshaller_Create was true each property shall be placed in the appropriate position in the JSON according to its path in the model. **]**
 
 
-**SRS_DATA_MARSHALLER_01_001: [** If the includePropertyPath argument passed to DataMarshaller_Create was false and only one struct is being sent, the relative path of the value passed to DataMarshaller_SendData – including property name - shall be ignored and the value shall be placed at JSON root. **]**
+**SRS_DATA_MARSHALLER_01_001: [** If the includePropertyPath argument passed to DataMarshaller_Create was false and only one struct is being sent, the relative path of the value passed to DataMarshaller_SendData - including property name - shall be ignored and the value shall be placed at JSON root. **]**
 
 **SRS_DATA_MARSHALLER_01_004: [** In this case the members of the struct shall be added as leafs into the MultiTree, each leaf having the name of the struct member. **]**
 

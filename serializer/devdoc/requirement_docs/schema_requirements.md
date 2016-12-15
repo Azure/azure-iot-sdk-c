@@ -1,7 +1,6 @@
 # Schema Requirements
 
 
- 
 Overview
 The Schema module provides APIs for describing struct types and model types. A model type can be used to instantiate a specific device.
 Below is a layout if a schema:
@@ -227,7 +226,7 @@ SCHEMA_HANDLE Schema_GetSchemaForModel(const char* modelName)
 
 ### size_t Schema_GetSchemaCount(void);
 
-**SRS_SCHEMA_99_153: [** Schema_GetSchemaCount shall return the number of “active” schemas (all schemas created with Schema_Create in the current process, for which Schema_Destroy has not been called). **]**
+**SRS_SCHEMA_99_153: [** Schema_GetSchemaCount shall return the number of "active" schemas (all schemas created with Schema_Create in the current process, for which Schema_Destroy has not been called). **]**
 
 ### SCHEMA_HANDLE Schema_GetSchemaByNamespace(const char* schemaNamespace);
 

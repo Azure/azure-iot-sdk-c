@@ -1,5 +1,5 @@
 # IoTDevice Requirements
- 
+
 ## Overview
 The IoTDevice module shall create a handle to a device associated with a specified model. It will provide a way for consumers to access properties of the device (e.g., its name), and to free device resources when they're done with it.
 

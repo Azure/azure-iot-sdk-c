@@ -5,9 +5,9 @@
 setlocal EnableDelayedExpansion
 
 REM ===============================================================================================================
-REM == This batch shows how to parser the tests.lst. It will call “ExecuteTest” for each test in the list, the test 
+REM == This batch shows how to parser the tests.lst. It will call "ExecuteTest" for each test in the list, the test 
 REM == name will be in projectName, and each parameter in the list will set as a local variable. It is necessary to 
-REM == use ‘!’ besides ‘%’ in these variables to avoid batch expansion problem. 
+REM == use '!' besides '%' in these variables to avoid batch expansion problem. 
 REM ===============================================================================================================
 
 call :ParserTestLst

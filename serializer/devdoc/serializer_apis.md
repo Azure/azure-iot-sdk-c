@@ -1,5 +1,5 @@
 # SERIALIZER APIs v5
- 
+
 ## Overview
 The SERIALIZER APIs allows developers to quickly and easily define models for their devices directly as code, while supporting the required features for 
 modeling devices (including multiple models and multiple devices within the same application).
@@ -46,8 +46,8 @@ This macro marks the end of a section that declares the model elements.
 This macro allows declaring a struct (complex) type for a model.
 
 Arguments:
-- structTypeName – specifies the struct type name
-- (fieldXType, fieldXName) – The type and the name for the field X of the struct type. A struct type can have any number of fields from 1 to 61 (inclusive). At least one field must be defined. 
+- structTypeName - specifies the struct type name
+- (fieldXType, fieldXName) - The type and the name for the field X of the struct type. A struct type can have any number of fields from 1 to 61 (inclusive). At least one field must be defined. 
 
 __Example__:
 
@@ -62,8 +62,8 @@ __Example__:
 This macro allows declaring a model that can be later used to instantiate a device.
 Arguments:
 
--	`modelName` – specifies the model name
--	`element1`, `element2`, ... – a model element (can be a property and action).
+-	`modelName` - specifies the model name
+-	`element1`, `element2`, ... - a model element (can be a property and action).
 -	A property is described in a model by using the `WITH_DATA`.
 -	An action is described in a model by using the `WITH_ACTION` macro.
 
@@ -79,7 +79,7 @@ DECLARE_MODEL(FunkyTV,
 The `WITH_DATA` macro allows declaring a model property in a model. A property can be serialized by using the SERIALIZE macro.
 
 __Arguments:__
--   propertyType – specifies the property type. Can be any of the following types:
+-   propertyType - specifies the property type. Can be any of the following types:
     -	int
     -	double
     -	float
@@ -95,7 +95,7 @@ __Arguments:__
     -	EDM_GUID
     -	EDM_BINARY
     -	Any struct type previously introduced by another `DECLARE_STRUCT`.
--	propertyName – specifies the property name
+-	propertyName - specifies the property name
 
 ```c
 DECLARE_MODEL(FunkyTV,
@@ -146,8 +146,8 @@ The `WITH_ACTION` macro allows declaring a model action. Once the action is decl
 a C function that defines the action. The C function prototype is the following:
 
 Arguments:
--	`actionName` – specifies the action name.
--	`argXtype`, `argXName` – defines the type and name for the Xth argument of the action. The type can be any of the primitive types or a struct type.
+-	`actionName` - specifies the action name.
+-	`argXtype`, `argXName` - defines the type and name for the Xth argument of the action. The type can be any of the primitive types or a struct type.
 
 ```c
 DECLARE_MODEL(FunkyTV,
@@ -172,8 +172,8 @@ EXECUTE_COMMAND_RESULT actionName(modelName* model, arg1Type arg1Name, arg2Type 
 The main difference is in return value (Methods return a number and a JSON value, Actions return values of an enum).
 
 Arguments:
--	`methodName` – specifies the method name.
--	`argXtype`, `argXName` – defines the type and name for the Xth argument of the method. The type can be any of the primitive types or a struct type.
+-	`methodName` - specifies the method name.
+-	`argXtype`, `argXName` - defines the type and name for the Xth argument of the method. The type can be any of the primitive types or a struct type.
 
 ```c
 DECLARE_MODEL(FunkyTV,
@@ -207,8 +207,8 @@ This macro produces the JSON serialized representation of the properties.
 
 __Arguments:__
 
--	destination – pointer to an unsigned char* that will receive the serialized data. 
--	destinationSize – pointer to a size_t that gets written with the size in bytes of the serialized data 
+-	destination - pointer to an unsigned char* that will receive the serialized data. 
+-	destinationSize - pointer to a size_t that gets written with the size in bytes of the serialized data 
 -	property1, property2, ... -  a list of property values to send. The order in which the properties appear in the list does not matter, all values will be sent together.
 
 __Returns:__
@@ -247,8 +247,8 @@ individual properties or a complete model.
 
 __Arguments:__
 
--	destination – pointer to an unsigned char* that will receive the serialized reported properties. 
--	destinationSize – pointer to a size_t that gets written with the size in bytes of the serialized reported properties. 
+-	destination - pointer to an unsigned char* that will receive the serialized reported properties. 
+-	destinationSize - pointer to a size_t that gets written with the size in bytes of the serialized reported properties. 
 -	property1, property2, ... -  a list of reported properties to send. The order in which the reported properties appear in 
 the list does not matter, all values will be sent together. If the reported property argument is a complete model, then only
 the reported properties in that model will be serialized.
@@ -357,7 +357,7 @@ An optional API used to pass `overrideSchemaNamespace`. If `serializer_init` is 
 shall be assumed to be `NULL`.
 
 __Arguments:__
--	`overrideSchemaNamespace` – An override schema namespace to use for all models. Optional, can be `NULL`. 
+-	`overrideSchemaNamespace` - An override schema namespace to use for all models. Optional, can be `NULL`. 
 If `schemaNamespace` is not `NULL`, its value shall be used instead of the namespace defined for each model 
 by using the DECLARE_XXX macro.
 
@@ -408,7 +408,7 @@ Initializes a model instance that has the model identified by the schema Namespa
 __Arguments:__
 -	`schemaNamespace` - The schema namespace as specified in `BEGIN_NAMESPACE` macro.
 -	`modelName` - The model name, as defined with the `DEFINE_MODEL` macro.
--	`serializerIncludePropertyPath` – an optional bool argument. Default value: `false`. If set to `true` it instructs the serializer to include the full property path (including the property name) in the resulting JSON. If set to `false`, the property path (and name) will not appear in the resulting JSON.
+-	`serializerIncludePropertyPath` - an optional bool argument. Default value: `false`. If set to `true` it instructs the serializer to include the full property path (including the property name) in the resulting JSON. If set to `false`, the property path (and name) will not appear in the resulting JSON.
 
 __Returns:__
 -	A pointer to a structure of type modelName
@@ -442,7 +442,7 @@ DESTROY_MODEL_INSTANCE(instance)
 Frees any resources associated with the model instance.
 
 __Arguments:__
--	instance – A previously created instance with `CREATE_MODEL_INSTANCE`.
+-	instance - A previously created instance with `CREATE_MODEL_INSTANCE`.
 
 
 ## SERIALIZER_DEVICETWIN

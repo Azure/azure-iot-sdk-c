@@ -35,7 +35,7 @@ MOCKABLE_FUNCTION(, STRING_HANDLE, IoTHubTransport_MQTT_Common_GetHostname, TRAN
 TRANSPORT_LL_HANDLE IoTHubTransport_MQTT_Common_Create(const IOTHUBTRANSPORT_CONFIG* config, MQTT_GET_IO_TRANSPORT get_io_transport)
 ```
 
-IoTHubTransport_MQTT_Common_Create shall create a TRANSPORT_LL_HANDLE that can be further used in the calls to this module’s APIS.  
+IoTHubTransport_MQTT_Common_Create shall create a TRANSPORT_LL_HANDLE that can be further used in the calls to this module's APIS.  
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_001: [** If parameter config is NULL then IoTHubTransport_MQTT_Common_Create shall return NULL.**]**
 
@@ -221,7 +221,7 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIEN
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_026: [** IoTHubTransport_MQTT_Common_DoWork shall do nothing if parameter handle and/or iotHubClientHandle is NULL.**]**  
 
-**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_027: [** IoTHubTransport_MQTT_Common_DoWork shall inspect the “waitingToSend” DLIST passed in config structure.**]**  
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_027: [** IoTHubTransport_MQTT_Common_DoWork shall inspect the "waitingToSend" DLIST passed in config structure.**]**  
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_028: [** IoTHubTransport_MQTT_Common_DoWork shall retrieve the payload message from the messageHandle parameter.**]**  
 

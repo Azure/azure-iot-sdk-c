@@ -1,7 +1,6 @@
 # CommandDecoder 
 
 
- 
 ## Overview
 The CommandDecoder module decodes one command extracting the name and arguments and passes the call to the supplied actionCallback.
 
@@ -132,7 +131,7 @@ The below example shows the argument State having the value true. In this case S
 
 **SRS_COMMAND_DECODER_99_036: [**  If a child model cannot be found by using Schema APIs then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR. **]**
 
-**SRS_COMMAND_DECODER_99_037: [**  The relative path passed to the actionCallback shall be in the format "childModel1/childModel2/…/childModelN". **]**
+**SRS_COMMAND_DECODER_99_037: [**  The relative path passed to the actionCallback shall be in the format "childModel1/childModel2/.../childModelN". **]**
 
 Miscellaneous
 **SRS_COMMAND_DECODER_99_019: [**  For all exposed APIs argument validity checks shall precede other checks. **]**

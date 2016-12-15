@@ -53,7 +53,7 @@ function UploadDirectory($gitName, $dst)
     pushd "$dst"
 
     Write-Host ""
-    Write-Host "Comparing the new library with the last version in Github, these are the changes…"
+    Write-Host "Comparing the new library with the last version in Github, these are the changes..."
     Write-Host ""
     git add .
     git status

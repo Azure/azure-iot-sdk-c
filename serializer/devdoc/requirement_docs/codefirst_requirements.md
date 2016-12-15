@@ -1,5 +1,5 @@
 # CodeFirst Requirements
- 
+
 Overview
 CodeFirst is a module responsible with:
 1.	Aggregation of "code first" type of data from data providers
@@ -189,8 +189,8 @@ ParentModel
 
 **SRS_CODEFIRST_99_136: [** CodeFirst_SendAsync shall build the full path for each property and then pass it to Device_PublishTransacted. **]**
 
-For the above example CodeFirst_SendAsync shall pass “ChildModel/InnerProperty" to Device_PublishTransacted.
-**SRS_CODEFIRST_04_001: [** CodeFirst_SendAsync shall pass callback to IoTDevice without validating if it’s NULL. **]**
+For the above example CodeFirst_SendAsync shall pass "ChildModel/InnerProperty" to Device_PublishTransacted.
+**SRS_CODEFIRST_04_001: [** CodeFirst_SendAsync shall pass callback to IoTDevice without validating if it's NULL. **]**
 
 **SRS_CODEFIRST_04_002: [** If CodeFirst_SendAsync receives destination or destinationSize NULL, CodeFirst_SendAsync shall return Invalid Argument. **]**
 
@@ -216,7 +216,7 @@ IOTHUBMESSAGE_DISPOSITION_RESULT CodeFirst_InvokeAction(void* deviceHandle, cons
 
 **SRS_CODEFIRST_99_138: [** The relativeActionPath argument shall be used by CodeFirst_InvokeAction to find the child model where the action is declared. **]**
 
-An example would be relativeActionPath being passed as “ChildModel" and actionName being passed as “reset":
+An example would be relativeActionPath being passed as "ChildModel" and actionName being passed as "reset":
 ```code 
 ParentModel
 	|
@@ -229,7 +229,7 @@ ParentModel
 
 **SRS_CODEFIRST_99_141: [** If a child model specified in the relativeActionPath argument cannot be found by CodeFirst_InvokeAction, it shall return IOTHUBMESSAGE_ABANDONED. **]**
 
-**SRS_CODEFIRST_99_142: [** The relativeActionPath argument shall be in the format “childModel1/childModel2/…/childModelN". **]**
+**SRS_CODEFIRST_99_142: [** The relativeActionPath argument shall be in the format "childModel1/childModel2/.../childModelN". **]**
 
 
 ### CodeFirst_ExecuteCommand
