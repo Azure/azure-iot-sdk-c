@@ -30,6 +30,12 @@ extern "C"
 
 DEFINE_ENUM(IOTHUB_REGISTRYMANAGER_RESULT, IOTHUB_REGISTRYMANAGER_RESULT_VALUES);
 
+#define IOTHUB_REGISTRYMANAGER_AUTH_METHOD_VALUES      \
+    IOTHUB_REGISTRYMANAGER_AUTH_SPK,                   \
+    IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT        \
+
+DEFINE_ENUM(IOTHUB_REGISTRYMANAGER_AUTH_METHOD, IOTHUB_REGISTRYMANAGER_AUTH_METHOD_VALUES);
+
 typedef struct IOTHUB_DEVICE_TAG
 {
     const char* deviceId;
@@ -49,6 +55,7 @@ typedef struct IOTHUB_DEVICE_TAG
     const char* configuration;
     const char* deviceProperties;
     const char* serviceProperties;
+    IOTHUB_REGISTRYMANAGER_AUTH_METHOD authMethod;
 } IOTHUB_DEVICE;
 
 typedef struct IOTHUB_REGISTRY_DEVICE_CREATE_TAG
@@ -56,6 +63,7 @@ typedef struct IOTHUB_REGISTRY_DEVICE_CREATE_TAG
     const char* deviceId;
     const char* primaryKey;
     const char* secondaryKey;
+    IOTHUB_REGISTRYMANAGER_AUTH_METHOD authMethod;
 } IOTHUB_REGISTRY_DEVICE_CREATE;
 
 typedef struct IOTHUB_REGISTRY_DEVICE_UPDATE_TAG
@@ -64,6 +72,7 @@ typedef struct IOTHUB_REGISTRY_DEVICE_UPDATE_TAG
     const char* primaryKey;
     const char* secondaryKey;
     IOTHUB_DEVICE_STATUS status;
+    IOTHUB_REGISTRYMANAGER_AUTH_METHOD authMethod;
 } IOTHUB_REGISTRY_DEVICE_UPDATE;
 
 typedef struct IOTHUB_REGISTRY_STATISTIC_TAG
@@ -112,7 +121,7 @@ extern void IoTHubRegistryManager_Destroy(IOTHUB_REGISTRYMANAGER_HANDLE registry
 * 			in consequent APIs.
 *
 * @param	registryManagerHandle   The handle created by a call to the create function.
-* @param    deviceCreate            IOTHUB_REGISTRY_DEVICE_CREATE structure containing 
+* @param    deviceCreate            IOTHUB_REGISTRY_DEVICE_CREATE structure containing
 *                                   the new device Id, primaryKey (optional) and secondaryKey (optional)
 * @param    device                  Input parameter, if it is not NULL will contain the created device info structure
 *
@@ -137,7 +146,8 @@ extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetDevice(IOTHUB_REGI
 *
 * @param	registryManagerHandle   The handle created by a call to the create function.
 * @param    deviceUpdate            IOTHUB_REGISTRY_DEVICE_UPDATE structure containing
-*                                   the new device Id, primaryKey (optional), secondaryKey (optional) and status
+*                                   the new device Id, primaryKey (optional), secondaryKey (optional),
+*                                   authentication method, and status
 *
 * @return	IOTHUB_REGISTRYMANAGER_RESULT_OK upon success or an error code upon failure.
 */

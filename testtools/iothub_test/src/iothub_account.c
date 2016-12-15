@@ -308,6 +308,7 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init(bool createDevice)
                             deviceCreateInfo.deviceId = iothub_account_info->deviceId;
                             deviceCreateInfo.primaryKey = "";
                             deviceCreateInfo.secondaryKey = "";
+                            deviceCreateInfo.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
 
                             iothub_registrymanager_result = IoTHubRegistryManager_CreateDevice(iothub_account_info->iothub_registrymanager_handle, &deviceCreateInfo, &deviceInfo);
                             if (iothub_registrymanager_result != IOTHUB_REGISTRYMANAGER_OK)
