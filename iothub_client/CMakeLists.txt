@@ -297,7 +297,7 @@ IF(WIN32)
     add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
 ENDIF(WIN32)
 
-if(${build_as_shared})
+if(${build_as_dynamic})
     add_library(iothub_client SHARED
         ${iothub_client_c_files} 
         ${iothub_client_h_files}
