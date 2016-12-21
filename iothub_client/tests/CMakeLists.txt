@@ -41,6 +41,7 @@ if(${use_amqp})
     if(${wip_use_c2d_amqp_methods})
         add_subdirectory(iothubtransportamqp_methods_ut)
     endif()
+    add_subdirectory(iothubtransport_amqp_connection_ut)
     add_subdirectory(iothubtransportamqp_ut)
     
     if(${use_wsio})
