@@ -21,6 +21,8 @@
 #include "azure_c_shared_utility/singlylinkedlist.h"
 #include "azure_c_shared_utility/vector.h"
 
+struct IOTHUB_QUEUE_CONTEXT_TAG;
+
 typedef struct IOTHUB_CLIENT_INSTANCE_TAG
 {
     IOTHUB_CLIENT_LL_HANDLE IoTHubClientLLHandle;
@@ -38,7 +40,8 @@ typedef struct IOTHUB_CLIENT_INSTANCE_TAG
     IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reported_state_callback;
     IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK connection_status_callback;
     IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK device_method_callback;
-    void* devicetwin_user_context;
+    struct IOTHUB_QUEUE_CONTEXT_TAG* devicetwin_user_context;
+    struct IOTHUB_QUEUE_CONTEXT_TAG* connection_status_user_context;
 } IOTHUB_CLIENT_INSTANCE;
 
 #ifndef DONT_USE_UPLOADTOBLOB
@@ -237,7 +240,6 @@ static void iothub_ll_connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS
         {
             LogError("connection status callback vector push failed.");
         }
-        free(queue_context);
     }
 }
 
@@ -620,6 +622,8 @@ static IOTHUB_CLIENT_INSTANCE* create_iothub_instance(const IOTHUB_CLIENT_CONFIG
                     result->event_confirm_callback = NULL;
                     result->reported_state_callback = NULL;
                     result->devicetwin_user_context = NULL;
+                    result->connection_status_callback = NULL;
+                    result->connection_status_user_context = NULL;
                 }
             }
         }
@@ -787,6 +791,10 @@ void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle)
         if (iotHubClientInstance->devicetwin_user_context != NULL)
         {
             free(iotHubClientInstance->devicetwin_user_context);
+        }
+        if (iotHubClientInstance->connection_status_user_context != NULL)
+        {
+            free(iotHubClientInstance->connection_status_user_context);
         }
         free(iotHubClientInstance);
     }
@@ -987,23 +995,27 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetConnectionStatusCallback(IOTHUB_CLIENT_HAND
                 }
                 else
                 {
-                    IOTHUB_QUEUE_CONTEXT* queue_context = (IOTHUB_QUEUE_CONTEXT*)malloc(sizeof(IOTHUB_QUEUE_CONTEXT));
-                    if (queue_context == NULL)
+                    if (iotHubClientInstance->connection_status_user_context != NULL)
+                    {
+                        free(iotHubClientInstance->connection_status_user_context);
+                    }
+                    iotHubClientInstance->connection_status_user_context = (IOTHUB_QUEUE_CONTEXT*)malloc(sizeof(IOTHUB_QUEUE_CONTEXT));
+                    if (iotHubClientInstance->connection_status_user_context == NULL)
                     {
                         result = IOTHUB_CLIENT_ERROR;
                         LogError("Failed allocating QUEUE_CONTEXT");
                     }
                     else
                     {
-                        queue_context->iotHubClientHandle = iotHubClientInstance;
-                        queue_context->userContextCallback = userContextCallback;
+                        iotHubClientInstance->connection_status_user_context->iotHubClientHandle = iotHubClientInstance;
+                        iotHubClientInstance->connection_status_user_context->userContextCallback = userContextCallback;
 
                         /* Codes_SRS_IOTHUBCLIENT_25_085: [ `IoTHubClient_SetConnectionStatusCallback` shall call `IoTHubClient_LL_SetConnectionStatusCallback`, while passing the `IoTHubClient_LL` handle created by `IoTHubClient_Create` and the parameters `connectionStatusCallback` and `userContextCallback`. ]*/
-                        result = IoTHubClient_LL_SetConnectionStatusCallback(iotHubClientInstance->IoTHubClientLLHandle, iothub_ll_connection_status_callback, queue_context);
+                        result = IoTHubClient_LL_SetConnectionStatusCallback(iotHubClientInstance->IoTHubClientLLHandle, iothub_ll_connection_status_callback, iotHubClientInstance->connection_status_user_context);
                         if (result != IOTHUB_CLIENT_OK)
                         {
                             LogError("IoTHubClient_LL_SetConnectionStatusCallback failed");
-                            free(queue_context);
+                            free(iotHubClientInstance->connection_status_user_context);
                         }
                     }
                 }
@@ -1225,7 +1237,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetDeviceTwinCallback(IOTHUB_CLIENT_HANDLE iot
                     }
 
                     /*Codes_SRS_IOTHUBCLIENT_07_002: [ IoTHubClient_SetDeviceTwinCallback shall allocate a IOTHUB_QUEUE_CONTEXT object to be sent to the IoTHubClient_LL_SetDeviceTwinCallback function as a user context. ]*/
-                    iotHubClientInstance->devicetwin_user_context = malloc(sizeof(IOTHUB_QUEUE_CONTEXT));
+                    iotHubClientInstance->devicetwin_user_context = (IOTHUB_QUEUE_CONTEXT*)malloc(sizeof(IOTHUB_QUEUE_CONTEXT));
                     if (iotHubClientInstance->devicetwin_user_context == NULL)
                     {
                         result = IOTHUB_CLIENT_ERROR;
@@ -1233,10 +1245,9 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetDeviceTwinCallback(IOTHUB_CLIENT_HANDLE iot
                     }
                     else
                     {
-                        IOTHUB_QUEUE_CONTEXT* queue_context = (IOTHUB_QUEUE_CONTEXT*)iotHubClientInstance->devicetwin_user_context;
                         /*Codes_SRS_IOTHUBCLIENT_10_005: [** `IoTHubClient_LL_SetDeviceTwinCallback` shall call `IoTHubClient_LL_SetDeviceTwinCallback`, while passing the `IoTHubClient_LL handle` created by `IoTHubClient_LL_Create` along with the parameters `iothub_ll_device_twin_callback` and IOTHUB_QUEUE_CONTEXT variable. ]*/
-                        queue_context->iotHubClientHandle = iotHubClientInstance;
-                        queue_context->userContextCallback = userContextCallback;
+                        iotHubClientInstance->devicetwin_user_context->iotHubClientHandle = iotHubClientInstance;
+                        iotHubClientInstance->devicetwin_user_context->userContextCallback = userContextCallback;
                         result = IoTHubClient_LL_SetDeviceTwinCallback(iotHubClientInstance->IoTHubClientLLHandle, iothub_ll_device_twin_callback, iotHubClientInstance->devicetwin_user_context);
                         if (result != IOTHUB_CLIENT_OK)
                         {

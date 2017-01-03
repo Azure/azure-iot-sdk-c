@@ -1203,7 +1203,6 @@ TEST_FUNCTION(IoTHubClient_SetConnectionStatusCallback_succeed)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     // cleanup
-    my_gballoc_free(g_userContextCallback);
     IoTHubClient_Destroy(iothub_handle);
 }
 

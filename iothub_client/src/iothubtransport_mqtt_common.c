@@ -68,7 +68,7 @@ static const char* IOTHUB_API_VERSION = "2016-11-14";
 static const char* PROPERTY_SEPARATOR = "&";
 static const char* REPORTED_PROPERTIES_TOPIC = "$iothub/twin/PATCH/properties/reported/?$rid=%"PRIu16;
 static const char* GET_PROPERTIES_TOPIC = "$iothub/twin/GET/?$rid=%"PRIu16;
-static const char* DEVICE_METHOD_RESPONSE_TOPIC = "$iothub/methods/res/%d/?$rid=%"PRIu16;
+static const char* DEVICE_METHOD_RESPONSE_TOPIC = "$iothub/methods/res/%d/?$rid=%s";
 
 static const char* REQUEST_ID_PROPERTY = "?$rid=";
 
@@ -235,7 +235,7 @@ typedef struct MQTT_MESSAGE_DETAILS_LIST_TAG
 
 typedef struct DEVICE_METHOD_INFO_TAG
 {
-    uint16_t request_id;
+    STRING_HANDLE request_id;
 } DEVICE_METHOD_INFO;
 
 static int RetryPolicy_Exponential_BackOff_With_Jitter(bool *permit, size_t* delay, void* retryContextCallback)
@@ -565,7 +565,7 @@ static const char* retrieve_mqtt_return_codes(CONNECT_RETURN_CODE rtn_code)
     }
 }
 
-static int retrieve_device_method_rid_info(const char* resp_topic, STRING_HANDLE method_name, uint16_t* request_id)
+static int retrieve_device_method_rid_info(const char* resp_topic, STRING_HANDLE method_name, STRING_HANDLE request_id)
 {
     int result;
     STRING_TOKENIZER_HANDLE token_handle = STRING_TOKENIZER_create_from_char(resp_topic);
@@ -573,7 +573,6 @@ static int retrieve_device_method_rid_info(const char* resp_topic, STRING_HANDLE
     {
         LogError("Failed creating token from device twin topic.");
         result = __LINE__;
-        *request_id = 0;
     }
     else
     {
@@ -582,7 +581,6 @@ static int retrieve_device_method_rid_info(const char* resp_topic, STRING_HANDLE
         {
             LogError("Failed allocating new string .");
             result = __LINE__;
-            *request_id = 0;
         }
         else
         {
@@ -595,8 +593,8 @@ static int retrieve_device_method_rid_info(const char* resp_topic, STRING_HANDLE
                 {
                     if (STRING_concat_with_STRING(method_name, token_value) != 0)
                     {
+                        LogError("Failed STRING_concat_with_STRING.");
                         result = __LINE__;
-                        *request_id = 0;
                         break;
                     }
                 }
@@ -607,8 +605,15 @@ static int retrieve_device_method_rid_info(const char* resp_topic, STRING_HANDLE
                         const char* request_id_value = STRING_c_str(token_value);
                         if (memcmp(request_id_value, REQUEST_ID_PROPERTY, request_id_length) == 0)
                         {
-                            *request_id = (uint16_t)atol(request_id_value+request_id_length);
-                            result = 0;
+                            if (STRING_concat(request_id, request_id_value+request_id_length) != 0)
+                            {
+                                LogError("Failed STRING_concat failed.");
+                                result = __LINE__;
+                            }
+                            else
+                            {
+                                result = 0;
+                            }
                             break;
                         }
                     }
@@ -842,12 +847,12 @@ static int publish_mqtt_telemetry_msg(PMQTTTRANSPORT_HANDLE_DATA transport_data,
     return result;
 }
 
-static int publish_device_method_message(MQTTTRANSPORT_HANDLE_DATA* transport_data, int status_code, uint16_t request_id, const unsigned char* response, size_t response_size)
+static int publish_device_method_message(MQTTTRANSPORT_HANDLE_DATA* transport_data, int status_code, STRING_HANDLE request_id, const unsigned char* response, size_t response_size)
 {
     int result;
     uint16_t packet_id = get_next_packet_id(transport_data);
 
-    STRING_HANDLE msg_topic = STRING_construct_sprintf(DEVICE_METHOD_RESPONSE_TOPIC, status_code, request_id);
+    STRING_HANDLE msg_topic = STRING_construct_sprintf(DEVICE_METHOD_RESPONSE_TOPIC, status_code, STRING_c_str(request_id) );
     if (msg_topic == NULL)
     {
         LogError("Failed constructing message topic.");
@@ -1170,9 +1175,16 @@ static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE msgHandle, void* call
                     }
                     else
                     {
-                        if (retrieve_device_method_rid_info(topic_resp, method_name, &dev_method_info->request_id) != 0)
+                        dev_method_info->request_id = STRING_new();
+                        if (dev_method_info->request_id == NULL)
+                        {
+                            LogError("Failure constructing request_id string");
+                            free(dev_method_info);
+                        }
+                        else if (retrieve_device_method_rid_info(topic_resp, method_name, dev_method_info->request_id) != 0)
                         {
                             LogError("Failure: retrieve device topic info");
+                            STRING_delete(dev_method_info->request_id);
                             free(dev_method_info);
                         }
                         else
@@ -1182,6 +1194,7 @@ static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE msgHandle, void* call
                             if (IoTHubClient_LL_DeviceMethodComplete(transportData->llClientHandle, STRING_c_str(method_name), payload->message, payload->length, (void*)dev_method_info) != 0)
                             {
                                 LogError("Failure: IoTHubClient_LL_DeviceMethodComplete");
+                                STRING_delete(dev_method_info->request_id);
                                 free(dev_method_info);
                             }
                         }
@@ -2196,6 +2209,7 @@ int IoTHubTransport_MQTT_Common_DeviceMethod_Response(IOTHUB_DEVICE_HANDLE handl
             {
                 result = 0;
             }
+            STRING_delete(dev_method_info->request_id);
             free(dev_method_info);
         }
     }
