@@ -133,13 +133,13 @@ cmake $toolchainfile -G "$generator" $cmake_install_prefix -Drun_valgrind:BOOL=$
 if [ "$make" = true ]
 then
   # Set the default cores
-  CORES=$(sysctl hw.ncpu)
+  CORES=$(sysctl -n hw.ncpu)
   
   # Make sure there is enough virtual memory on the device to handle more than one job  
   MINVSPACE="1500000"
   
   # Acquire total memory and total swap space setting them to zero in the event the command fails
-  MEMAR=$(sysctl hw.memsize)
+  MEMAR=$(sysctl -n hw.memsize)
   [ -z "${MEMAR[0]##*[!0-9]*}" ] && MEMAR[0]=0
   [ -z "${MEMAR[1]##*[!0-9]*}" ] && MEMAR[1]=0
   
