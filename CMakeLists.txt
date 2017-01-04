@@ -198,6 +198,7 @@ add_subdirectory(iothub_client)
 add_subdirectory(serializer)
 if(NOT "${build_python}" STREQUAL "OFF")
     add_subdirectory(../device/iothub_client_python python)
+    add_subdirectory(../service python_service_client)
 endif()
 
 if("${build_javawrapper}" STREQUAL "ON")
