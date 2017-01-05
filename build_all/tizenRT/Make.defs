@@ -1,0 +1,47 @@
+-include $(TOPDIR)/.config
+-include $(TOPDIR)/Make.defs
+
+AZURE_CLIENT_DIR = $(AZURE_DIR)/iothub_client
+AZURE_SERIAL_DIR = $(AZURE_DIR)/serializer
+AZURE_UTIL_DIR = $(AZURE_DIR)/c-utility
+
+CSRCS += $(AZURE_DIR)/certs/certs.c
+CSRCS += $(AZURE_DIR)/parson/parson.c
+
+CSRCS += $(AZURE_CLIENT_DIR)/src/blob.c	$(AZURE_CLIENT_DIR)/src/iothub_client.c	\
+$(AZURE_CLIENT_DIR)/src/iothub_message.c $(AZURE_CLIENT_DIR)/src/iothubtransport.c \
+$(AZURE_CLIENT_DIR)/src/iothub_client_ll.c $(AZURE_CLIENT_DIR)/src/iothubtransporthttp.c	\
+$(AZURE_CLIENT_DIR)/src/version.c $(AZURE_CLIENT_DIR)/src/iothub_client_ll_uploadtoblob.c
+
+CSRCS += $(AZURE_UTIL_DIR)/src/base64.c $(AZURE_UTIL_DIR)/src/buffer.c  \
+$(AZURE_UTIL_DIR)/src/connection_string_parser.c $(AZURE_UTIL_DIR)/src/consolelogger.c  \
+$(AZURE_UTIL_DIR)/src/constbuffer.c $(AZURE_UTIL_DIR)/src/constmap.c	\
+$(AZURE_UTIL_DIR)/src/crt_abstractions.c $(AZURE_UTIL_DIR)/src/doublylinkedlist.c	\
+$(AZURE_UTIL_DIR)/src/gballoc.c $(AZURE_UTIL_DIR)/src/gb_stdio.c        \
+$(AZURE_UTIL_DIR)/src/gb_time.c	$(AZURE_UTIL_DIR)/src/hmac.c  \
+$(AZURE_UTIL_DIR)/src/hmacsha256.c $(AZURE_UTIL_DIR)/src/httpapiex.c     \
+$(AZURE_UTIL_DIR)/src/httpapiexsas.c $(AZURE_UTIL_DIR)/src/httpheaders.c	\
+$(AZURE_UTIL_DIR)/src/map.c $(AZURE_UTIL_DIR)/src/optionhandler.c  \
+$(AZURE_UTIL_DIR)/src/sastoken.c $(AZURE_UTIL_DIR)/src/sha1.c	\
+$(AZURE_UTIL_DIR)/src/sha224.c $(AZURE_UTIL_DIR)/src/sha384-512.c    \
+$(AZURE_UTIL_DIR)/src/singlylinkedlist.c $(AZURE_UTIL_DIR)/src/strings.c	\
+$(AZURE_UTIL_DIR)/src/string_tokenizer.c $(AZURE_UTIL_DIR)/src/urlencode.c   \
+$(AZURE_UTIL_DIR)/src/usha.c $(AZURE_UTIL_DIR)/src/vector.c $(AZURE_UTIL_DIR)/src/xlogging.c	\
+$(AZURE_UTIL_DIR)/src/xio.c
+
+CSRCS += $(AZURE_UTIL_DIR)/adapters/agenttime.c	$(AZURE_UTIL_DIR)/adapters/condition_pthreads.c  \
+$(AZURE_UTIL_DIR)/adapters/threadapi_pthreads.c $(AZURE_UTIL_DIR)/adapters/lock_pthreads.c  \
+$(AZURE_UTIL_DIR)/adapters/platform_tizenrt.c $(AZURE_UTIL_DIR)/adapters/uniqueid_linux.c	\
+$(AZURE_UTIL_DIR)/adapters/socketio_berkeley.c $(AZURE_UTIL_DIR)/adapters/tlsio_mbedtls.c	\
+$(AZURE_UTIL_DIR)/adapters/tickcounter_linux.c $(AZURE_UTIL_DIR)/adapters/httpapi_compact.c
+
+CSRCS += $(wildcard $(AZURE_SERIAL_DIR)/src/*.c)
+
+ifeq ($(CONFIG_CLOUD_AZURE_SAMPLES),y)
+CSRCS += $(AZURE_CLIENT_DIR)/samples/iothub_client_sample_http/iothub_client_sample_http.c
+CSRCS += $(AZURE_SERIAL_DIR)/samples/simplesample_http/simplesample_http.c
+endif
+
+CFLAGS += -I$(AZURE_DIR)/c-utility/inc -I$(AZURE_DIR)/serializer/inc	\
+	  -I$(AZURE_DIR)/iothub_client/inc -I$(AZURE_DIR)/parson -I$(AZURE_DIR)/certs
+CFLAGS += -DWITH_POSIX -DTIZENRT -DMBED_BUILD_TIMESTAMP -DUSE_MBED_TLS -std=c99 -w
