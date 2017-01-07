@@ -65,6 +65,14 @@ if(WIN32)
 		linkMqttLibrary(${theseTestsName}_exe)
 	endif()
 
+	if(TARGET ${theseTestsName}_nuget_exe)
+           target_link_libraries(${theseTestsName}_nuget_exe
+                   iothub_test
+                   iothub_service_client
+                   rpcrt4
+           )
+    endif()
+
 else()
 	if(TARGET ${theseTestsName}_exe)
 		target_link_libraries(${theseTestsName}_exe
