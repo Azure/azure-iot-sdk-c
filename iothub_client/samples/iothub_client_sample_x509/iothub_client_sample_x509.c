@@ -143,11 +143,11 @@ int main(void)
 #ifdef USE_HTTP
     protocol = HTTP_Protocol;
 #endif
-#ifdef USE_MQTT
-    protocol = MQTT_Protocol;
-#endif
 #ifdef USE_AMQP
     protocol = AMQP_Protocol;
+#endif
+#ifdef USE_MQTT
+    protocol = MQTT_Protocol;
 #endif
 
     callbackCounter = 0;
