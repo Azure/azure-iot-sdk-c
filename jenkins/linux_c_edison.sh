@@ -40,7 +40,7 @@ fi
 # step 4 cross compile edison c sample code
 cd $edison_csample_root
 
-./.misc/build.sh --toolchain-file $toolchain_file -cl --sysroot=$sysroot --azure-iot-sdk-c $iothub_sdks_build_root
+./.misc/build.sh --toolchain-file $toolchain_file -cl --sysroot=$sysroot --azure-iot-sdk-c $azure_iot_sdk_build_root
 if [ $? -eq 0 ]; then
     echo intel edison c sample code build succeeded!
 else

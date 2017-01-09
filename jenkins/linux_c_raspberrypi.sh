@@ -37,7 +37,7 @@ fi
 # step 4 cross compile raspberrypi c sample code
 cd $rpi_csample_root
 
-./.misc/build.sh --toolchain-file $toolchain_file -cl --sysroot="$RPI_ROOT" --azure-iot-sdk-c $iothub_sdks_build_root
+./.misc/build.sh --toolchain-file $toolchain_file -cl --sysroot="$RPI_ROOT" --azure-iot-sdk-c $azure_iot_sdk_build_root
 if [ $? -eq 0 ]; then
     echo raspberry pi c sample code build succeeded!
 else
