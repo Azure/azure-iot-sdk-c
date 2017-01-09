@@ -15,6 +15,6 @@
 
 #include "AzureIoTHubClient.h"
 
-#define AzureIoTHubVersion "1.1.00"
+#define AzureIoTHubVersion "1.0.21"
 
 #endif
