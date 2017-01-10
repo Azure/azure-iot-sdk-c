@@ -67,6 +67,7 @@ typedef struct UPLOADTOBLOB_SAVED_DATA_TAG
     CALLBACK_TYPE_DEVICE_METHOD
 
 DEFINE_ENUM(USER_CALLBACK_TYPE, USER_CALLBACK_TYPE_VALUES)
+DEFINE_ENUM_STRINGS(USER_CALLBACK_TYPE, USER_CALLBACK_TYPE_VALUES)
 
 typedef struct DEVICE_TWIN_CALLBACK_INFO_TAG
 {
@@ -389,7 +390,7 @@ static void dispatch_user_callbacks(IOTHUB_CLIENT_INSTANCE* iotHubClientInstance
                         }
                         break;
                     case CALLBACK_TYPE_DEVICE_METHOD:
-                        if (iotHubClientInstance->connection_status_callback)
+                        if (iotHubClientInstance->device_method_callback)
                         {
                             (void)Unlock(iotHubClientInstance->LockHandle);
                             const char* method_name = STRING_c_str(queued_cb->iothub_callback.method_cb_info.method_name);
@@ -403,6 +404,9 @@ static void dispatch_user_callbacks(IOTHUB_CLIENT_INSTANCE* iotHubClientInstance
                             BUFFER_delete(queued_cb->iothub_callback.method_cb_info.payload);
                             STRING_delete(queued_cb->iothub_callback.method_cb_info.method_name);
                         }
+                        break;
+                    default:
+                        LogError("Invalid callback type '%s'", ENUM_TO_STRING(USER_CALLBACK_TYPE, queued_cb->type));
                         break;
                 }
             }
