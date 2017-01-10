@@ -3,16 +3,16 @@
 
 cmake_minimum_required(VERSION 2.8.11)
 
-if(NOT (${use_amqp}))
-   message(FATAL_ERROR "iothubclient_amqp_ws_e2e being generated without AMQP support")
+if(NOT (${use_amqp} AND ${use_mqtt}))
+    message(FATAL_ERROR "iothubclient_mqtt_ws_e2e being generated without AMQP and MQTT support")
 endif()
 
 if(NOT (${use_wsio}))
-   message(FATAL_ERROR "iothubclient_amqp_ws_e2e being generated without WebSockets support")
+   message(FATAL_ERROR "iothubclient_mqtt_ws_e2e being generated without WebSockets support")
 endif()
 
 compileAsC11()
-set(theseTestsName iothubclient_amqp_ws_e2e)
+set(theseTestsName iothubclient_mqtt_ws_e2e)
 
 set(${theseTestsName}_test_files
     ${theseTestsName}.c
@@ -41,32 +41,34 @@ file(COPY suppressions.supp DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 build_c_test_artifacts(${theseTestsName} ON "tests/E2ETests" VALGRIND_SUPPRESSIONS_FILE suppressions.supp)
 
 if(WIN32)
-   if(TARGET ${theseTestsName}_dll)
+    if(TARGET ${theseTestsName}_dll)
         target_link_libraries(${theseTestsName}_dll
             iothub_test
             iothub_client
-            iothub_client_amqp_ws_transport
+            iothub_client_mqtt_ws_transport
             iothub_service_client
             aziotsharedutil
-            rpcrt4                  
+            rpcrt4
         )
         linkSharedUtil(${theseTestsName}_dll)
-        linkUAMQP(${theseTestsName}_dll)        
-   endif()
-   
-   if(TARGET ${theseTestsName}_exe)
+        linkUAMQP(${theseTestsName}_dll)
+        linkMqttLibrary(${theseTestsName}_dll)
+    endif()
+    
+    if(TARGET ${theseTestsName}_exe)
         target_link_libraries(${theseTestsName}_exe
             iothub_test
             iothub_client
-            iothub_client_amqp_ws_transport
+            iothub_client_mqtt_ws_transport
             iothub_service_client
             aziotsharedutil
-            rpcrt4                  
+            rpcrt4
         )
-        linkSharedUtil(${theseTestsName}_exe)
-        linkUAMQP(${theseTestsName}_exe)        
-   endif()
-    
+        linkSharedUtil(${theseTestsName}_dll)
+        linkUAMQP(${theseTestsName}_exe)
+        linkMqttLibrary(${theseTestsName}_exe)
+    endif()
+        
     if(TARGET ${theseTestsName}_nuget_exe)
         target_link_libraries(${theseTestsName}_nuget_exe
             iothub_test
@@ -75,17 +77,17 @@ if(WIN32)
         )
     endif()
 else()
-   if(TARGET ${theseTestsName}_exe)
+    if(TARGET ${theseTestsName}_exe)
         target_link_libraries(${theseTestsName}_exe
             iothub_test
             iothub_client
-            iothub_client_amqp_ws_transport
+            iothub_client_mqtt_ws_transport
             iothub_service_client
             aziotsharedutil
         )
         target_link_libraries(${theseTestsName}_exe pthread uuid)
-        linkSharedUtil(${theseTestsName}_exe)
-        linkUAMQP(${theseTestsName}_exe)        
-   endif()
+        linkSharedUtil(${theseTestsName}_dll)
+        linkUAMQP(${theseTestsName}_exe)
+        linkMqttLibrary(${theseTestsName}_exe)
+    endif()
 endif()
-
