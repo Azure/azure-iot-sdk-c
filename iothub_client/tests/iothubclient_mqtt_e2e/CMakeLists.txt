@@ -44,7 +44,6 @@ if(WIN32)
 			iothub_client_mqtt_transport
 			iothub_service_client
 			aziotsharedutil
-			iothub_client_mqtt_transport
 			rpcrt4
 		)
 		linkUAMQP(${theseTestsName}_dll)
@@ -58,7 +57,6 @@ if(WIN32)
 			iothub_client_mqtt_transport
 			iothub_service_client
 			aziotsharedutil
-			iothub_client_mqtt_transport
 			rpcrt4
 		)
 		linkUAMQP(${theseTestsName}_exe)
