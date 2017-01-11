@@ -468,7 +468,7 @@ extern "C" void e2e_recv_message_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     ASSERT_IS_TRUE_WITH_MSG(notifyData->wasFound, "Failure retrieving data from C2D"); // was found is written by the callback...
 
     // cleanup
-    MessageData_Destroy(notifyData);
     IoTHubClient_Destroy(iotHubClientHandle);
+    MessageData_Destroy(notifyData);
 }
 
