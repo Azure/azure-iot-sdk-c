@@ -50,6 +50,8 @@ static void* DEVICE_JSON_DEFAULT_VALUE_NULL = NULL;
 static const char* DEVICE_JSON_KEY_DEVICE_NAME = "deviceId";
 static const char* DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY = "authentication.symmetricKey.primaryKey";
 static const char* DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY = "authentication.symmetricKey.secondaryKey";
+static const char* DEVICE_JSON_KEY_DEVICE_PRIMARY_THUMBPRINT = "authentication.x509Thumbprint.primaryThumbprint";
+static const char* DEVICE_JSON_KEY_DEVICE_SECONDARY_THUMBPRINT = "authentication.x509Thumbprint.secondaryThumbprint";
 
 static const char* DEVICE_JSON_KEY_DEVICE_GENERATION_ID = "generationId";
 static const char* DEVICE_JSON_KEY_DEVICE_ETAG = "etag";
@@ -103,7 +105,6 @@ static BUFFER_HANDLE constructDeviceJson(const IOTHUB_DEVICE* deviceInfo)
     BUFFER_HANDLE result;
 
     /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_010: [ IoTHubRegistryManager_CreateDevice shall create a flat "key1:value2,key2:value2..." JSON representation from the given deviceCreateInfo parameter using the following parson APIs: json_value_init_object, json_value_get_object, json_object_set_string, json_object_dotset_string ] */
-    /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_012: [ IoTHubRegistryManager_CreateDevice shall set the "symmetricKey" value to deviceCreateInfo->primaryKey and deviceCreateInfo->secondaryKey ] */
     JSON_Value* root_value = NULL;
     JSON_Object* root_object = NULL;
     JSON_Status jsonStatus;
@@ -138,16 +139,39 @@ static BUFFER_HANDLE constructDeviceJson(const IOTHUB_DEVICE* deviceInfo)
         LogError("json_object_set_string failed for deviceId");
         result = NULL;
     }
-    else if ((json_object_dotset_string(root_object, DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY, deviceInfo->primaryKey)) != JSONSuccess)
+    //
+    // Static function here.  We make the assumption that the auth method has been validated by the caller of this function.
+    //
+    /*Codes_SRS_IOTHUBREGISTRYMANAGER_06_002: [ IoTHubRegistryManager_CreateDevice shall, if deviceCreateInfo->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_SPK", set "authorization.symmetricKey.primaryKey" to deviceCreateInfo->primaryKey and "authorization.symmetricKey.secondaryKey" to deviceCreateInfo->secondaryKey ] */
+    /*Codes_SRS_IOTHUBREGISTRYMANAGER_06_004: [ IoTHubRegistryManager_UpdateDevice shall, if deviceUpdate->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_SPK", set "authorization.symmetricKey.primaryKey" to deviceCreateInfo->primaryKey and "authorization.symmetricKey.secondaryKey" to deviceCreateInfo->secondaryKey ] */
+    else if ((deviceInfo->authMethod == IOTHUB_REGISTRYMANAGER_AUTH_SPK) && ((json_object_dotset_string(root_object, DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY, deviceInfo->primaryKey)) != JSONSuccess))
     {
         /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
-        LogError("json_object_dotset_string failed for primaryKey");
+        LogError("json_object_dotset_string failed for primarykey");
         result = NULL;
     }
-    else if ((json_object_dotset_string(root_object, DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY, deviceInfo->secondaryKey)) != JSONSuccess)
+    /*Codes_SRS_IOTHUBREGISTRYMANAGER_06_002: [ IoTHubRegistryManager_CreateDevice shall, if deviceCreateInfo->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_SPK", set "authorization.symmetricKey.primaryKey" to deviceCreateInfo->primaryKey and "authorization.symmetricKey.secondaryKey" to deviceCreateInfo->secondaryKey ] */
+    /*Codes_SRS_IOTHUBREGISTRYMANAGER_06_004: [ IoTHubRegistryManager_UpdateDevice shall, if deviceUpdate->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_SPK", set "authorization.symmetricKey.primaryKey" to deviceCreateInfo->primaryKey and "authorization.symmetricKey.secondaryKey" to deviceCreateInfo->secondaryKey ] */
+    else if ((deviceInfo->authMethod == IOTHUB_REGISTRYMANAGER_AUTH_SPK) && ((json_object_dotset_string(root_object, DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY, deviceInfo->secondaryKey)) != JSONSuccess))
     {
         /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
         LogError("json_object_dotset_string failed for secondaryKey");
+        result = NULL;
+    }
+    /*Codes_SRS_IOTHUBREGISTRYMANAGER_06_001: [ IoTHubRegistryManager_CreateDevice shall, if deviceCreateInfo->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT", set "authorization.x509Thumbprint.primaryThumbprint" to deviceCreateInfo->primaryKey and "authorization.x509Thumbprint.secondaryThumbprint" to deviceCreateInfo->secondaryKey ] */
+    /*Codes_SRS_IOTHUBREGISTRYMANAGER_06_003: [ IoTHubRegistryManager_UpdateDevice shall, if deviceUpdate->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT", set "authorization.x509Thumbprint.primaryThumbprint" to deviceCreateInfo->primaryKey and "authorization.x509Thumbprint.secondaryThumbprint" to deviceCreateInfo->secondaryKey ] */
+    else if ((deviceInfo->authMethod == IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT) && ((json_object_dotset_string(root_object, DEVICE_JSON_KEY_DEVICE_PRIMARY_THUMBPRINT, deviceInfo->primaryKey)) != JSONSuccess))
+    {
+        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
+        LogError("json_object_dotset_string failed for primaryThumbprint");
+        result = NULL;
+    }
+    /*Codes_SRS_IOTHUBREGISTRYMANAGER_06_001: [ IoTHubRegistryManager_CreateDevice shall, if deviceCreateInfo->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT", set "authorization.x509Thumbprint.primaryThumbprint" to deviceCreateInfo->primaryKey and "authorization.x509Thumbprint.secondaryThumbprint" to deviceCreateInfo->secondaryKey ] */
+    /*Codes_SRS_IOTHUBREGISTRYMANAGER_06_003: [ IoTHubRegistryManager_UpdateDevice shall, if deviceUpdate->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT", set "authorization.x509Thumbprint.primaryThumbprint" to deviceCreateInfo->primaryKey and "authorization.x509Thumbprint.secondaryThumbprint" to deviceCreateInfo->secondaryKey ] */
+    else if ((deviceInfo->authMethod == IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT) && ((json_object_dotset_string(root_object, DEVICE_JSON_KEY_DEVICE_SECONDARY_THUMBPRINT, deviceInfo->secondaryKey)) != JSONSuccess))
+    {
+        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
+        LogError("json_object_dotset_string failed for secondaryThumbprint");
         result = NULL;
     }
     else
@@ -268,6 +292,42 @@ static IOTHUB_REGISTRYMANAGER_RESULT parseDeviceJson(BUFFER_HANDLE jsonBuffer, I
             const char* configuration = (char*)json_object_get_string(root_object, DEVICE_JSON_KEY_DEVICE_CONFIGURATION);
             const char* deviceProperties = (char*)json_object_get_string(root_object, DEVICE_JSON_KEY_DEVICE_DEVICEROPERTIES);
             const char* serviceProperties = (char*)json_object_get_string(root_object, DEVICE_JSON_KEY_DEVICE_SERVICEPROPERTIES);
+
+            if (primaryKey == NULL)
+            {
+                /*Codes_SRS_IOTHUBREGISTRYMANAGER_06_007: [ IoTHubRegistryManager_GetDevice shall, if no json was found for authorization.symetricKey.primaryKey, parse for authorization.x509Thumbprint.primaryThumbprint ] */
+                primaryKey = (char*)json_object_dotget_string(root_object, DEVICE_JSON_KEY_DEVICE_PRIMARY_THUMBPRINT);
+                if (primaryKey != NULL)
+                {
+                    /*Codes_SRS_IOTHUBREGISTRYMANAGER_06_009: [ IoTHubRegistryManager_GetDevice shall, if json was found for authorization.x509Thumbprint.primaryThumbprint, set the device info authMethod to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT" ] */
+                    deviceInfo->authMethod = IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT;
+                }
+            } 
+            else
+            {
+                /*Codes_SRS_IOTHUBREGISTRYMANAGER_06_008: [ IoTHubRegistryManager_GetDevice shall, if json was found for authorization.symetricKey.primaryKey, set the device info authMethod to "IOTHUB_REGISTRYMANAGER_AUTH_SPK" ] */
+                deviceInfo->authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
+            }
+
+            if (secondaryKey == NULL)
+            {
+                /*Codes_SRS_IOTHUBREGISTRYMANAGER_06_011: [ IoTHubRegistryManager_GetDevice shall, if no json was found for authorization.symetricKey.secondaryKey, parse for authorization.x509Thumbprint.secondaryThumbprint ] */
+                secondaryKey = (char*)json_object_dotget_string(root_object, DEVICE_JSON_KEY_DEVICE_SECONDARY_THUMBPRINT);
+                if (secondaryKey != NULL)
+                {
+                    /*Codes_SRS_IOTHUBREGISTRYMANAGER_06_012: [ IoTHubRegistryManager_GetDevice shall, if json was found for authorization.x509Thumbprint.secondaryThumbprint, set the device info authMethod to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT" ] */
+                    deviceInfo->authMethod = IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT;
+                }
+            }
+            else
+            {
+                //
+                // Yes, this should already be set. If it isn't then code later on will fail.  But I simply
+                // can't leave dangling logic.
+                //
+                /*Codes_SRS_IOTHUBREGISTRYMANAGER_06_010: [ IoTHubRegistryManager_GetDevice shall, if json was found for authorization.symetricKey.secondaryKey, set the device info authMethod to "IOTHUB_REGISTRYMANAGER_AUTH_SPK" ] */
+                deviceInfo->authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
+            }
 
             if ((deviceId != NULL) && (mallocAndStrcpy_s((char**)&(deviceInfo->deviceId), deviceId) != 0))
             {
@@ -549,6 +609,43 @@ static IOTHUB_REGISTRYMANAGER_RESULT parseDeviceListJson(BUFFER_HANDLE jsonBuffe
                     const char* configuration = (char*)json_object_get_string(device_object, DEVICE_JSON_KEY_DEVICE_CONFIGURATION);
                     const char* deviceProperties = (char*)json_object_get_string(device_object, DEVICE_JSON_KEY_DEVICE_DEVICEROPERTIES);
                     const char* serviceProperties = (char*)json_object_get_string(device_object, DEVICE_JSON_KEY_DEVICE_SERVICEPROPERTIES);
+
+                    if (primaryKey == NULL)
+                    {
+                        /*Codes_SRS_IOTHUBREGISTRYMANAGER_06_014: [ IoTHubRegistryManager_GetDeviceList shall, if no json was found for authorization.symetricKey.primaryKey, parse for authorization.x509Thumbprint.primaryThumbprint ] */
+                        primaryKey = (char*)json_object_dotget_string(device_object, DEVICE_JSON_KEY_DEVICE_PRIMARY_THUMBPRINT);
+                        if (primaryKey != NULL)
+                        {
+                            /*Codes_SRS_IOTHUBREGISTRYMANAGER_06_015: [ IoTHubRegistryManager_GetDeviceList shall, if json was found for authorization.x509Thumbprint.primaryThumbprint, set the device info authMethod to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT" ] */
+                            iothubDevice->authMethod = IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT;
+                        }
+                    }
+                    else
+                    {
+                        /*Codes_SRS_IOTHUBREGISTRYMANAGER_06_013: [ IoTHubRegistryManager_GetDeviceList shall, if json was found for authorization.symetricKey.primaryKey, set the device info authMethod to "IOTHUB_REGISTRYMANAGER_AUTH_SPK" ] */
+                        iothubDevice->authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
+                    }
+
+                    if (secondaryKey == NULL)
+                    {
+                        /*Codes_SRS_IOTHUBREGISTRYMANAGER_06_017: [ IoTHubRegistryManager_GetDeviceList shall, if no json was found for authorization.symetricKey.secondaryKey, parse for authorization.x509Thumbprint.secondaryThumbprint ] */
+                        secondaryKey = (char*)json_object_dotget_string(device_object, DEVICE_JSON_KEY_DEVICE_SECONDARY_THUMBPRINT);
+                        if (secondaryKey != NULL)
+                        {
+                            /*Codes_SRS_IOTHUBREGISTRYMANAGER_06_018: [ IoTHubRegistryManager_GetDeviceList shall, if json was found for authorization.x509Thumbprint.secondaryThumbprint, set the device info authMethod to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT" ] */
+                            iothubDevice->authMethod = IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT;
+                        }
+                    }
+                    else
+                    {
+                        //
+                        // Yes, this should already be set. If it isn't then code later on will fail.  But I simply
+                        // can't leave dangling logic.
+                        //
+                        /*Codes_SRS_IOTHUBREGISTRYMANAGER_06_016: [ IoTHubRegistryManager_GetDeviceList shall, if json was found for authorization.symetricKey.secondaryKey, set the device info authMethod to "IOTHUB_REGISTRYMANAGER_AUTH_SPK" ] */
+                        iothubDevice->authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
+                    }
+
 
                     if ((deviceId != NULL) && (mallocAndStrcpy_s((char**)&(iothubDevice->deviceId), deviceId) != 0))
                     {
@@ -1289,13 +1386,19 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_CreateDevice(IOTHUB_REGISTRY
             LogError("deviceId cannot contain spaces");
             result = IOTHUB_REGISTRYMANAGER_INVALID_ARG;
         }
+        else if (!((deviceCreateInfo->authMethod == IOTHUB_REGISTRYMANAGER_AUTH_SPK) ||
+                   (deviceCreateInfo->authMethod == IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT))) {
+            /*Codes_SRS_IOTHUBREGISTRYMANAGER_06_006: [ IoTHubRegistryManager_CreateDevice shall cleanup and return IOTHUB_REGISTRYMANAGER_INVALID_ARG if deviceUpdate->authMethod is not "IOTHUB_REGISTRYMANAGER_AUTH_SPK" or "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT" ] */
+            LogError("Invalid authorization type specified");
+            result = IOTHUB_REGISTRYMANAGER_INVALID_ARG;
+        }
         else
         {
             /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_095: [ IoTHubRegistryManager_CreateDevice shall allocate memory for device info structure by calling malloc ] */
             IOTHUB_DEVICE* tempDeviceInfo;
             if ((tempDeviceInfo = malloc(sizeof(IOTHUB_DEVICE))) == NULL)
             {
-                /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_096 : [ If the malloc fails, IoTHubRegistryManager_Create shall do clean up and return NULL. ] */
+                /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_096 : [ If the malloc fails, IoTHubRegistryManager_Create shall do clean up and return IOTHUB_REGISTRYMANAGER_ERROR. ] */
                 LogError("Malloc failed for tempDeviceInfo");
                 result = IOTHUB_REGISTRYMANAGER_ERROR;
             }
@@ -1305,6 +1408,7 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_CreateDevice(IOTHUB_REGISTRY
                 tempDeviceInfo->deviceId = deviceCreateInfo->deviceId;
                 tempDeviceInfo->primaryKey = deviceCreateInfo->primaryKey;
                 tempDeviceInfo->secondaryKey = deviceCreateInfo->secondaryKey;
+                tempDeviceInfo->authMethod = deviceCreateInfo->authMethod;
 
                 BUFFER_HANDLE deviceJsonBuffer = NULL;
                 BUFFER_HANDLE responseBuffer = NULL;
@@ -1319,7 +1423,7 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_CreateDevice(IOTHUB_REGISTRY
                 /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_097: [ IoTHubRegistryManager_CreateDevice shall allocate memory for response buffer by calling BUFFER_new ] */
                 else if ((responseBuffer = BUFFER_new()) == NULL)
                 {
-                    /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_098 : [ If the BUFFER_new fails, IoTHubRegistryManager_CreateDevice shall do clean up and return NULL. ] */
+                    /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_098 : [ If the BUFFER_new fails, IoTHubRegistryManager_CreateDevice shall do clean up and return IOTHUB_REGISTRYMANAGER_ERROR. ] */
                     LogError("BUFFER_new failed for responseBuffer");
                     result = IOTHUB_REGISTRYMANAGER_ERROR;
                 }
@@ -1355,8 +1459,8 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_CreateDevice(IOTHUB_REGISTRY
                 {
                     BUFFER_delete(deviceJsonBuffer);
                 }
-                free(tempDeviceInfo);
             }
+            free(tempDeviceInfo);
         }
     }
     return result;
@@ -1436,6 +1540,12 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_UpdateDevice(IOTHUB_REGISTRY
             LogError("deviceId cannot be NULL");
             result = IOTHUB_REGISTRYMANAGER_INVALID_ARG;
         }
+        else if (!((deviceUpdate->authMethod == IOTHUB_REGISTRYMANAGER_AUTH_SPK) ||
+                   (deviceUpdate->authMethod == IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT))) {
+            /*Codes_SRS_IOTHUBREGISTRYMANAGER_06_005: [ IoTHubRegistryManager_UpdateDevice shall clean up and return IOTHUB_REGISTRYMANAGER_INVALID_ARG if deviceUpdate->authMethod is not "IOTHUB_REGISTRYMANAGER_AUTH_SPK" or "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT" ] */
+            LogError("Invalid authorization type specified");
+            result = IOTHUB_REGISTRYMANAGER_INVALID_ARG;
+        }
         else
         {
             /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_106: [ IoTHubRegistryManager_UpdateDevice shall allocate memory for device info structure by calling malloc ] */
@@ -1448,11 +1558,11 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_UpdateDevice(IOTHUB_REGISTRY
             }
             else
             {
-                /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_107: [ IoTHubRegistryManager_UpdateDevice shall set the "symmetricKey" value to deviceCreateInfo->primaryKey and deviceCreateInfo->secondaryKey ] */
                 (void)memset(tempDeviceInfo, 0, sizeof(IOTHUB_DEVICE));
                 tempDeviceInfo->deviceId = deviceUpdate->deviceId;
                 tempDeviceInfo->primaryKey = deviceUpdate->primaryKey;
                 tempDeviceInfo->secondaryKey = deviceUpdate->secondaryKey;
+                tempDeviceInfo->authMethod = deviceUpdate->authMethod;
                 tempDeviceInfo->status = deviceUpdate->status;
 
                 BUFFER_HANDLE deviceJsonBuffer = NULL;
@@ -1468,7 +1578,7 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_UpdateDevice(IOTHUB_REGISTRY
                 /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_101: [ IoTHubRegistryManager_UpdateDevice shall allocate memory for response buffer by calling BUFFER_new ] */
                 else if ((responseBuffer = BUFFER_new()) == NULL)
                 {
-                    /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_102: [ If the BUFFER_new fails, IoTHubRegistryManager_UpdateDevice shall do clean up and return NULL. ] */
+                    /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_102: [ If the BUFFER_new fails, IoTHubRegistryManager_UpdateDevice shall do clean up and return IOTHUB_REGISTRYMANAGER_ERROR. ] */
                     LogError("BUFFER_new failed for responseBuffer");
                     result = IOTHUB_REGISTRYMANAGER_ERROR;
                 }
@@ -1493,8 +1603,8 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_UpdateDevice(IOTHUB_REGISTRY
                 {
                     BUFFER_delete(responseBuffer);
                 }
-                free(tempDeviceInfo);
             }
+            free(tempDeviceInfo);
         }
     }
     return result;
