@@ -49,8 +49,6 @@
 #define ERROR_TIME_FOR_RETRY_SECS   5
 #define WAIT_TIME_SECS              (ERROR_TIME_FOR_RETRY_SECS - 1)
 
-#define TOUPPER(c)      (((c>='a') && (c<='z'))?c-'a'+'A':c)
-
 static const char TOPIC_DEVICE_TWIN_PREFIX[] = "$iothub/twin";
 static const char TOPIC_DEVICE_METHOD_PREFIX[] = "$iothub/methods";
 
