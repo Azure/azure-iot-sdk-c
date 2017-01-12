@@ -30,7 +30,7 @@ Prior to running the samples, you will need to have an [instance of Azure IoT Hu
 
 It is recommended to leverage the library packages when available to run the samples, but sometimes you will need to compile the SDK for/on your device in order to be able to run the samples.
 
-[This documents][devbox-setup] describes in details how to prepare you development environment as well as how to run the samples on Linux, Windows or other platforms.
+[This document][devbox-setup] describes in detail how to prepare your development environment as well as how to run the samples on Linux, Windows or other platforms.
 
 
 [devbox-setup]: ../../doc/devbox_setup.md
