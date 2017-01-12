@@ -85,6 +85,7 @@ if(${use_amqp})
     set(iothub_client_amqp_transport_common_c_files
         ${iothub_client_ll_transport_c_files}
         ./src/iothubtransport_amqp_common.c
+#        ./src/iothubtransport_amqp_cbs_auth.c  # Uncomment when AMQP transport is ready to consume this module.
         ./src/iothubtransportamqp_auth.c
 #        ./src/iothubtransport_amqp_connection.c  # Uncomment when AMQP transport is ready to consume this module.
 #        ./src/iothubtransport_amqp_messenger.c   # Uncomment when AMQP transport is ready to consume this module.
@@ -101,6 +102,7 @@ if(${use_amqp})
     set(iothub_client_amqp_transport_common_h_files
         ${iothub_client_ll_transport_h_files}
         ./inc/iothubtransport_amqp_common.h
+#        ./inc/iothubtransport_amqp_cbs_auth.h  # Uncomment when AMQP transport is ready to consume this module.
         ./inc/iothubtransportamqp_auth.h
 #        ./inc/iothubtransport_amqp_connection.h  # Uncomment when AMQP transport is ready to consume this module.
 #        ./inc/iothubtransport_amqp_messenger.h   # Uncomment when AMQP transport is ready to consume this module.
