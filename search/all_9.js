@@ -1,6 +1,4 @@
 var searchData=
 [
-  ['with_5faction',['WITH_ACTION',['../serializer_8h.html#a2b3c020f5a3943e946cc9a01c958af4c',1,'serializer.h']]],
-  ['with_5fdata',['WITH_DATA',['../serializer_8h.html#aebcff311f305eddbad1712b8d7aded85',1,'serializer.h']]],
-  ['with_5fmethod',['WITH_METHOD',['../serializer_8h.html#a2ddcc4190368b3eec66aca20a754ba05',1,'serializer.h']]]
+  ['protocol',['protocol',['../struct_i_o_t_h_u_b___c_l_i_e_n_t___c_o_n_f_i_g___t_a_g.html#aa7753cf96255b57c65c56d8fedd3d7ca',1,'IOTHUB_CLIENT_CONFIG_TAG::protocol()'],['../struct_i_o_t_h_u_b___c_l_i_e_n_t___d_e_v_i_c_e___c_o_n_f_i_g___t_a_g.html#a90dfafc0edcf5c2ca2b8545bae53574a',1,'IOTHUB_CLIENT_DEVICE_CONFIG_TAG::protocol()']]]
 ];

@@ -1,9 +1,6 @@
 var searchData=
 [
-  ['schemalib_2eh',['schemalib.h',['../schemalib_8h.html',1,'']]],
-  ['serialize',['SERIALIZE',['../serializer_8h.html#a18c48c356331a3ff3084ff604da29b91',1,'serializer.h']]],
-  ['serializer_2eh',['serializer.h',['../serializer_8h.html',1,'']]],
-  ['serializer_5fdeinit',['serializer_deinit',['../schemalib_8h.html#a7a6d4835d9608c78de209ca23b9817c2',1,'schemalib.h']]],
-  ['serializer_5finit',['serializer_init',['../schemalib_8h.html#a0efca90998d764b66602d0046333d4bd',1,'schemalib.h']]],
-  ['serializer_5fsetconfig',['serializer_setconfig',['../schemalib_8h.html#aa60c0c7fb365aff62ccdf052dd96a5d7',1,'schemalib.h']]]
+  ['lock_2eh',['lock.h',['../lock_8h.html',1,'']]],
+  ['lock_5fresult',['LOCK_RESULT',['../lock_8h.html#a306e7b44e0dda20d53ed79ff6650b4b9',1,'lock.h']]],
+  ['lock_5fresult_5ftag',['LOCK_RESULT_TAG',['../lock_8h.html#a87aaca66aa3e87418924bd8f8acac6fa',1,'lock.h']]]
 ];
