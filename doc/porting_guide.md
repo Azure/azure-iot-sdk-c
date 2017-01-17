@@ -6,15 +6,14 @@ The purpose of this document is to provide guidance on how to port the C IoTHub 
 - [Overview](#Overview)
 - [PAL Porting](#PAL-porting)
 
-<a name="Overview"/>
+<a name="Overview"></a>
 ## Overview
-</a>
+
 
 The C IoT client library is written in C for the purpose of portability to most platforms (the SDK code is C99).
 The IoTHub C SDK relies on the Platform Abstraction Layer implemented by the azure-c-shared-utility library.
 
-<a name="PAL-porting"/>
+<a name="PAL-porting"></a>
 ## PAL porting
-</a>
 
 In order to port the C IoTHub SDK, one needs to port the PAL following [this](https://www.github.com/Azure/azure-c-shared-utility/blob/master/doc/porting_guide.md) document. 
