@@ -12,6 +12,7 @@ We monitor the Github issues section specifically for bugs found with our SDK, h
 
 # File a bug (code or documentation)
 That is definitely something we want to hear about. Please open an issue on github, we'll address it as fast as possible. Typically here's the information we're going to ask for to get started:
+
 - What version of the SDK you are using?
 - Do you have a snippet of code that would help us reproduce the bug?
 - Do you have logs showing what's happening?

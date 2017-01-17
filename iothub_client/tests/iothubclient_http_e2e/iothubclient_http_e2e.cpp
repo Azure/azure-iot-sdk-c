@@ -732,8 +732,9 @@ TEST_FUNCTION(IoTHub_HTTP_RecvMessage_E2ETest)
     ASSERT_IS_TRUE_WITH_MSG(notifyData->wasFound, "Failure retrieving message that was sent to IotHub."); // was found is written by the callback...
 
                                                                                                           // cleanup
-    MessageData_Destroy(notifyData);
     IoTHubClient_Destroy(iotHubClientHandle);
+    MessageData_Destroy(notifyData);
+
 }
 
 TEST_FUNCTION(IoTHub_HTTP_RecvMessage_shared_E2ETest)
@@ -853,12 +854,11 @@ TEST_FUNCTION(IoTHub_HTTP_RecvMessage_shared_E2ETest)
     ASSERT_IS_TRUE_WITH_MSG(wasFound2, "Failure retrieving message from client 2 that was sent to IotHub.");
 
     // cleanup
-    MessageData_Destroy(notifyData2);
-    MessageData_Destroy(notifyData1);
     IoTHubClient_Destroy(iotHubClientHandle2);
     IoTHubClient_Destroy(iotHubClientHandle1);
     IoTHubTransport_Destroy(transportHandle);
-
+    MessageData_Destroy(notifyData2);
+    MessageData_Destroy(notifyData1);
 }
 
 END_TEST_SUITE(iothubclient_http_e2e)

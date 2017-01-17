@@ -20,6 +20,15 @@ set(${theseTestsName}_cpp_files
     ../common_dt_e2e/iothubclient_common_dt_e2e.cpp
 )
 
+set(${theseTestsName}_nuget_cpp_files
+    ${theseTestsName}.cpp
+    ../common_dt_e2e/iothubclient_common_dt_e2e.cpp
+)
+
+set(${theseTestsName}_nuget_c_files
+    ../../../certs/certs.c
+)
+
 set(${theseTestsName}_c_files
     ../../../certs/certs.c
     ../../../parson/parson.c
@@ -70,6 +79,14 @@ if(WIN32)
             rpcrt4
         )
         linkMqttLibrary(${theseTestsName}_exe)
+    endif()
+
+	if(TARGET ${theseTestsName}_nuget_exe)
+           target_link_libraries(${theseTestsName}_nuget_exe
+                   iothub_test
+                   iothub_service_client
+                   rpcrt4
+           )
     endif()
 else()
     if(TARGET ${theseTestsName}_exe)

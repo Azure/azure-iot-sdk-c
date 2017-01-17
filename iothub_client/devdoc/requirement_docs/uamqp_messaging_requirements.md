@@ -1,6 +1,6 @@
 # uamqp_messaging Requirements
 
- 
+
 ## Overview
 
 This module is a helper to convert message structures supported by IoTHub client (IOTHUB_MESSAGE_HANDLE) to uAMQP (MESSAGE_HANDLE) and vice-versa. 

@@ -57,24 +57,34 @@ static void IoTHubTransportMqtt_Unsubscribe(IOTHUB_DEVICE_HANDLE handle)
     IoTHubTransport_MQTT_Common_Unsubscribe(handle);
 }
 
+/* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_026: [ IoTHubTransportMqtt_Subscribe_DeviceMethod shall subscribe the TRANSPORT_LL_HANDLE by calling into the IoTHubMqttAbstract_Subscribe_DeviceMethod function. ] */
 static int IoTHubTransportMqtt_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
 {
     return IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod(handle);
 }
 
+/* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_027: [ IoTHubTransportMqtt_Unsubscribe_DeviceMethod shall call into the IoTHubMqttAbstract_Unsubscribe_DeviceMethod function. ] */
 static void IoTHubTransportMqtt_Unsubscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
 {
     IoTHubTransport_MQTT_Common_Unsubscribe_DeviceMethod(handle);
 }
 
+/* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_025: [ IoTHubTransportMqtt_Subscribe_DeviceTwin shall call into the IoTHubMqttAbstract_Subscribe_DeviceTwin function. ] */
 static int IoTHubTransportMqtt_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle)
 {
     return IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin(handle);
 }
 
+/* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_024: [ IoTHubTransportMqtt_Unsubscribe_DeviceTwin shall shall call into the IoTHubMqttAbstract_Unsubscribe_DeviceTwin function. ] */
 static void IoTHubTransportMqtt_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle)
 {
     IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin(handle);
+}
+
+/* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_023: [ IoTHubTransportMqtt_DeviceMethod_Response shall call into the IoTHubMqttAbstract_DeviceMethod_Response function. ] */
+static int IoTHubTransportMqtt_DeviceMethod_Response(IOTHUB_DEVICE_HANDLE handle, METHOD_HANDLE methodId, const unsigned char* response, size_t response_size, int status_response)
+{
+    return IoTHubTransport_MQTT_Common_DeviceMethod_Response(handle, methodId, response, response_size, status_response);
 }
 
 static IOTHUB_PROCESS_ITEM_RESULT IoTHubTransportMqtt_ProcessItem(TRANSPORT_LL_HANDLE handle, IOTHUB_IDENTITY_TYPE item_type, IOTHUB_IDENTITY_INFO* iothub_item)
@@ -87,6 +97,12 @@ static void IoTHubTransportMqtt_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT
 {
     /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_007: [ IoTHubTransportMqtt_DoWork shall call into the IoTHubMqttAbstract_DoWork function. ] */
     IoTHubTransport_MQTT_Common_DoWork(handle, iotHubClientHandle);
+}
+
+static int IoTHubTransportMqtt_SetRetryPolicy(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitInSeconds)
+{
+    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_25_012: [** IoTHubTransportMqtt_SetRetryPolicy shall call into the IoTHubMqttAbstract_SetRetryPolicy function. ] */ 
+    return IoTHubTransport_MQTT_Common_SetRetryPolicy(handle, retryPolicy, retryTimeoutLimitInSeconds);
 }
 
 static IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_GetSendStatus(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_STATUS *iotHubClientStatus)
@@ -123,6 +139,7 @@ static TRANSPORT_PROVIDER myfunc =
 {
     IoTHubTransportMqtt_Subscribe_DeviceMethod,     /*pfIoTHubTransport_Subscribe_DeviceMethod IoTHubTransport_Subscribe_DeviceMethod;*/
     IoTHubTransportMqtt_Unsubscribe_DeviceMethod,   /*pfIoTHubTransport_Unsubscribe_DeviceMethod IoTHubTransport_Unsubscribe_DeviceMethod;*/
+    IoTHubTransportMqtt_DeviceMethod_Response,      /*pfIoTHubTransport_DeviceMethod_Response IoTHubTransport_DeviceMethod_Response;*/
     IoTHubTransportMqtt_Subscribe_DeviceTwin,       /*pfIoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_Subscribe_DeviceTwin;*/
     IoTHubTransportMqtt_Unsubscribe_DeviceTwin,     /*pfIoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransport_Unsubscribe_DeviceTwin;*/
     IoTHubTransportMqtt_ProcessItem,                /*pfIoTHubTransport_ProcessItem IoTHubTransport_ProcessItem;*/
@@ -135,6 +152,7 @@ static TRANSPORT_PROVIDER myfunc =
     IoTHubTransportMqtt_Subscribe,                  /*pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;*/
     IoTHubTransportMqtt_Unsubscribe,                /*pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;*/
     IoTHubTransportMqtt_DoWork,                     /*pfIoTHubTransport_DoWork IoTHubTransport_DoWork;*/
+    IoTHubTransportMqtt_SetRetryPolicy,             /*pfIoTHubTransport_DoWork IoTHubTransport_SetRetryPolicy;*/
     IoTHubTransportMqtt_GetSendStatus               /*pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus;*/
 };
 

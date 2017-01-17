@@ -61,9 +61,7 @@ set(iothub_client_h_install_files
     ${iothub_client_h_files}
 )
 
-set(iothub_client_libs
-iothub_client
-)
+set(iothub_client_libs)
 
 if(${use_http})
     set(iothub_client_http_transport_c_files
@@ -84,38 +82,71 @@ if(${use_http})
 endif()
 
 if(${use_amqp})
-    set(iothub_client_amqp_transport_c_files
+    set(iothub_client_amqp_transport_common_c_files
         ${iothub_client_ll_transport_c_files}
-		./src/iothubtransportamqp.c
-		./src/iothubtransportamqp_auth.c
-		./src/iothubtransportamqp_methods.c
+        ./src/iothubtransport_amqp_common.c
+#        ./src/iothubtransport_amqp_cbs_auth.c  # Uncomment when AMQP transport is ready to consume this module.
+        ./src/iothubtransportamqp_auth.c
+#        ./src/iothubtransport_amqp_connection.c  # Uncomment when AMQP transport is ready to consume this module.
+#        ./src/iothubtransport_amqp_messenger.c   # Uncomment when AMQP transport is ready to consume this module.
         ./src/uamqp_messaging.c
     )
 
-    set(iothub_client_amqp_transport_h_files
-        ${iothub_client_ll_transport_h_files}
-		./inc/iothubtransportamqp.h
-		./inc/iothubtransportamqp_auth.h
-		./inc/iothubtransportamqp_methods.h
-        ./inc/uamqp_messaging.h
-    )	
-
-    if (${use_wsio})
-        set(iothub_client_amqp_transport_c_files
-            ${iothub_client_amqp_transport_c_files}
-            ./src/iothubtransportamqp_websockets.c
-        )
-        
-        set(iothub_client_amqp_transport_h_files
-            ${iothub_client_amqp_transport_h_files}
-            ./inc/iothubtransportamqp_websockets.h
+    if(${wip_use_c2d_amqp_methods})
+        set(iothub_client_amqp_transport_common_c_files
+            ${iothub_client_amqp_transport_common_c_files}
+            ./src/iothubtransportamqp_methods.c
         )
     endif()
+
+    set(iothub_client_amqp_transport_common_h_files
+        ${iothub_client_ll_transport_h_files}
+        ./inc/iothubtransport_amqp_common.h
+#        ./inc/iothubtransport_amqp_cbs_auth.h  # Uncomment when AMQP transport is ready to consume this module.
+        ./inc/iothubtransportamqp_auth.h
+#        ./inc/iothubtransport_amqp_connection.h  # Uncomment when AMQP transport is ready to consume this module.
+#        ./inc/iothubtransport_amqp_messenger.h   # Uncomment when AMQP transport is ready to consume this module.
+        ./inc/uamqp_messaging.h
+    )
+
+    if(${wip_use_c2d_amqp_methods})
+        set(iothub_client_amqp_transport_common_h_files
+            ${iothub_client_amqp_transport_common_h_files}
+            ./inc/iothubtransportamqp_methods.h
+        )
+    endif()
+
+    set(iothub_client_amqp_transport_c_files
+        ${iothub_client_amqp_transport_common_c_files}
+        ./src/iothubtransportamqp.c
+    )
+
+    set(iothub_client_amqp_transport_h_files
+        ${iothub_client_amqp_transport_common_h_files}
+        ./inc/iothubtransportamqp.h
+    )    
     
     set(iothub_client_h_install_files
         ${iothub_client_h_install_files}
         ${iothub_client_amqp_transport_h_files}
     )
+
+    if (${use_wsio})
+        set(iothub_client_amqp_ws_transport_c_files
+            ${iothub_client_amqp_transport_common_c_files}
+            ./src/iothubtransportamqp_websockets.c
+        )
+        
+        set(iothub_client_amqp_ws_transport_h_files
+            ${iothub_client_amqp_transport_common_h_files}
+            ./inc/iothubtransportamqp_websockets.h
+        )
+        
+        set(iothub_client_h_install_files
+            ${iothub_client_h_install_files}
+            ./inc/iothubtransportamqp_websockets.h
+        )
+    endif()
 endif()
 
 if(${use_mqtt})
@@ -171,6 +202,7 @@ if(NOT ${dont_use_uploadtoblob})
     include_directories(../parson)
 endif()
 
+include_directories(${AZURE_C_SHARED_UTILITY_INCLUDES})
 include_directories(${SHARED_UTIL_INC_FOLDER})
 
 if (WINCE)
@@ -199,7 +231,6 @@ if(${use_http})
         ${iothub_client_http_transport_h_files}
     )
     linkSharedUtil(iothub_client_http_transport)
-    target_link_libraries(iothub_client_http_transport)
     set(iothub_client_libs
         ${iothub_client_libs}
         iothub_client_http_transport
@@ -207,20 +238,35 @@ if(${use_http})
 endif()
 
 if(${use_amqp})
+    include_directories(${UAMQP_INCLUDES})
     include_directories(${IOTHUB_CLIENT_AMQP_TRANSPORT_INC_FOLDER} ${UAMQP_INC_FOLDER})
     add_library(iothub_client_amqp_transport 
         ${iothub_client_amqp_transport_c_files} 
         ${iothub_client_amqp_transport_h_files}
     )
     linkSharedUtil(iothub_client_amqp_transport)
-    target_link_libraries(iothub_client_amqp_transport)
     set(iothub_client_libs
         ${iothub_client_libs}
         iothub_client_amqp_transport
     )
+	
+	if (${use_wsio})
+	    include_directories(${iothub_client_amqp_ws_transport_INC_FOLDER} ${UAMQP_INC_FOLDER})
+		add_library(iothub_client_amqp_ws_transport 
+			${iothub_client_amqp_ws_transport_c_files} 
+			${iothub_client_amqp_ws_transport_h_files}
+		)
+		linkSharedUtil(iothub_client_amqp_ws_transport)
+		linkWebSockets(iothub_client_amqp_ws_transport)
+		set(iothub_client_libs
+			${iothub_client_libs}
+			iothub_client_amqp_ws_transport
+		)
+	endif()
 endif()
 
 if(${use_mqtt})
+    include_directories(${UMQTT_INCLUDES})
     include_directories(${IOTHUB_CLIENT_MQTT_TRANSPORT_INC_FOLDER} ${MQTT_INC_FOLDER})
     add_library(iothub_client_mqtt_transport 
         ${iothub_client_mqtt_transport_c_files} 
@@ -228,7 +274,6 @@ if(${use_mqtt})
     )
     linkSharedUtil(iothub_client_mqtt_transport)
     linkMqttLibrary(iothub_client_mqtt_transport)
-    target_link_libraries(iothub_client_mqtt_transport)
     set(iothub_client_libs
         ${iothub_client_libs}
         iothub_client_mqtt_transport
@@ -242,7 +287,6 @@ if(${use_mqtt})
         linkSharedUtil(iothub_client_mqtt_ws_transport)
         linkMqttLibrary(iothub_client_mqtt_ws_transport)
         linkWebSockets(iothub_client_mqtt_ws_transport)
-        target_link_libraries(iothub_client_mqtt_ws_transport)
         set(iothub_client_libs
             ${iothub_client_libs}
             iothub_client_mqtt_ws_transport
@@ -259,12 +303,26 @@ IF(WIN32)
     add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
 ENDIF(WIN32)
 
-add_library(iothub_client 
-    ${iothub_client_c_files} 
-    ${iothub_client_h_files}
-)
-linkSharedUtil(iothub_client)
+if(${build_as_dynamic})
+    add_library(iothub_client SHARED
+        ${iothub_client_c_files} 
+        ${iothub_client_h_files}
+        ./src/iothub_client.def
+    )
+    target_link_libraries(iothub_client ${iothub_client_libs})
 
+else()
+    add_library(iothub_client
+        ${iothub_client_c_files} 
+        ${iothub_client_h_files}
+    )
+endif()
+
+linkSharedUtil(iothub_client)
+set(iothub_client_libs
+    iothub_client 
+    ${iothub_client_libs}
+)
 # Don't build samples under Win32 ARM for now
 if(NOT ${skip_samples})
 if(WIN32)
@@ -283,18 +341,25 @@ endif()
 endif()
 
 if(NOT IN_OPENWRT)
-# Disable tests for OpenWRT
-if(NOT ${skip_unittests})
-add_subdirectory(tests)
-endif()
+    # Disable tests for OpenWRT
+    if(${run_unittests})
+        add_subdirectory(tests)
+    endif()
 endif()
 
-if(WIN32)
-else()
-    install (TARGETS 
-        ${iothub_client_libs} 
-        DESTINATION lib)
-    install (FILES 
-        ${iothub_client_h_install_files} 
-        DESTINATION include/azureiot)
-endif (WIN32)
+if(${use_installed_dependencies})
+    #Set CMAKE_INSTALL_LIBDIR if not defined
+    include(GNUInstallDirs)
+
+    if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
+        set(CMAKE_INSTALL_LIBDIR "lib")
+    endif()
+
+    install(TARGETS ${iothub_client_libs} EXPORT azure_iot_sdksTargets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/../bin
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot 
+    )
+    install(FILES ${iothub_client_h_install_files} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
+endif()

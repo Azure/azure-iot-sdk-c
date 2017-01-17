@@ -52,7 +52,7 @@ For Win32 (default configuration) you should see **cmake\\iotsdk_win32**. For x6
 
 **azure_iot_sdks.sln** created under cmake folder will contain all sub-projects that you can directly open in VS 2015 IDE to build libraries or samples in IDE.
 
-You can check various configuration options the script provides by entering `build –options`
+You can check various configuration options the script provides by entering `build -options`
 For example, if you want to build for x64 and skip unit tests, you can run following command
 
 `build --platform x64 --skip-unittests` 

@@ -3,6 +3,8 @@
 
 /* This file contains certs needed to communicate with Azure (IoT) */
 
+#include "certs.h"
+
 const char certificates[] = 
 /* Baltimore */
 "-----BEGIN CERTIFICATE-----\r\n"

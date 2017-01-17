@@ -16,7 +16,7 @@
 struct AGENT_DATA_TYPE_TAG;
 typedef struct AGENT_DATA_TYPE_TAG AGENT_DATA_TYPE;
 
-[…] /*implementation of AGENT_DATA_TYPE */ 
+[...] /*implementation of AGENT_DATA_TYPE */ 
  
 typedef enum AGENT_DATA_TYPES_RESULT_TAG
 {
@@ -118,7 +118,7 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String (const char* source, AGE
 ```
 
 
-AGENT_DATA_TYPE is a Variant-like type that represents all the data types supported by the agent. A client (data provider) typically uses one of the Create… functions, passes the created data to the agent and finally uses Destroy_AGENT_DATA_TYPE on the created data.
+AGENT_DATA_TYPE is a Variant-like type that represents all the data types supported by the agent. A client (data provider) typically uses one of the Create... functions, passes the created data to the agent and finally uses Destroy_AGENT_DATA_TYPE on the created data.
 
 **SRS_AGENT_TYPE_SYSTEM_99_013: [**  All the functions shall check their parameters for validity. When an invalid parameter is detected, the value AGENT_DATA_TYPES_INVALID_ARG shall be returned  **]**
 **SRS_AGENT_TYPE_SYSTEM_99_014: [**  All functions shall return AGENT_DATA_TYPES_OK when the processing is successful. **]**
@@ -167,7 +167,7 @@ SRS_AGENT_TYPE_SYSTEM_99_062:[ If the AGENT_DATA_TYPE represents a "complex type
 {
 	memberName1: memberValue1,
 	memberName2: memberValue2,
-	…
+	...
 	memberNamen: memberValuen
 }, where "n" is the same "n" as in "nMembers" parameter passed to Create_AGENT_DATA_TYPE_from_Members].
 **SRS_AGENT_TYPE_SYSTEM_99_101: [**  EDM_NULL_TYPE shall return the unquoted string null. **]**

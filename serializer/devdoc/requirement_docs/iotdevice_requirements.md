@@ -1,5 +1,5 @@
 # IoTDevice Requirements
- 
+
 ## Overview
 The IoTDevice module shall create a handle to a device associated with a specified model. It will provide a way for consumers to access properties of the device (e.g., its name), and to free device resources when they're done with it.
 
@@ -36,6 +36,7 @@ extern void Device_DestroyTransaction_ReportedProperties(REPORTED_PROPERTIES_TRA
 extern DEVICE_RESULT Device_IngestDesiredProperties(void* startAddress, DEVICE_HANDLE deviceHandle, const char* desiredProperties);
 
 extern EXECUTE_COMMAND_RESULT Device_ExecuteCommand(DEVICE_HANDLE deviceHandle, const char* command);
+extern METHODRETURN_HANDLE Device_ExecuteMethod(DEVICE_HANDLE deviceHandle, const char* methodName, const char* methodPayload);
 ```c
 
 ### Device_Create
@@ -219,3 +220,16 @@ DEVICE_RESULT Device_IngestDesiredProperties(void* startAddress, DEVICE_HANDLE d
 **SRS_DEVICE_02_035: [** If any failure happens then `Device_IngestDesiredProperties` shall fail and return `DEVICE_ERROR`. **]**
 
 **SRS_DEVICE_02_036: [** Otherwise, `Device_IngestDesiredProperties` shall succeed and return `DEVICE_OK`. **]**
+
+### Device_ExecuteMethod
+```c
+METHODRETURN_HANDLE Device_ExecuteMethod(DEVICE_HANDLE deviceHandle, const char* methodName, const char* methodPayload);
+```
+
+`Device_ExecuteMethod` calls `CommandDecoder_ExecuteMethod`.
+
+**SRS_DEVICE_02_038: [** If `deviceHandle` is `NULL` then `Device_ExecuteMethod` shall fail and return `NULL`. **]**
+
+**SRS_DEVICE_02_039: [** If `methodName` is `NULL` then `Device_ExecuteMethod` shall fail and return `NULL`. **]**
+
+**SRS_DEVICE_02_040: [** `Device_ExecuteMethod` shall call `CommandDecoder_ExecuteMethod` and shall return what `CommandDecoder_ExecuteMethod` returns. **]**

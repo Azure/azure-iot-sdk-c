@@ -306,7 +306,7 @@ static int RetrieveEventHubClientInfo(const char* pszconnString, IOTHUB_VALIDATI
 
     if (sscanf(pszconnString, "Endpoint=sb://%n%*[^.]%n.%n%*[^/]%n/;SharedAccessKeyName=owner;SharedAccessKey=%*s", &beginName, &endName, &beginHost, &endHost) != 0)
     {
-        LogError("Failure determinging string sizes in RetrieveEventHubClientInfo.");
+        LogError("Failure determining string sizes in RetrieveEventHubClientInfo.");
         result = __LINE__;
     }
     else

@@ -7,11 +7,11 @@
 rem - Specify the Azure SDK client build root
 set current-path=%~dp0
 set current-path=%current-path:~0,-1%
-set build-root=%current-path%\..\..\..\..
+set build-root=%current-path%\..\..\..
 for %%i in ("%build-root%") do set build-root=%%~fi
 echo Build root is %build-root%
 
-pushd %build-root%\c\build_all\packaging\windows\
+pushd %build-root%\build_all\packaging\windows\
 
 where /q nuget.exe
 if not !errorlevel! == 0 (
@@ -27,7 +27,9 @@ Powershell.exe wget -outf nuget.exe https://nuget.org/nuget.exe
 	)
 )
 
-set build-path=%build-root%\c\cmake
+set build-path=%build-root%\cmake
+
+echo Build path is %build-path%
 
 if exist %build-path%\iot_sdk_output (
 	rmdir /s/q %build-path%\iot_sdk_output
@@ -85,6 +87,6 @@ nuget pack Microsoft.Azure.IoTHub.IoTHubClient.nuspec
 nuget pack Microsoft.Azure.IoTHub.MqttTransport.nuspec
 nuget pack Microsoft.Azure.IoTHub.Serializer.nuspec
 
-rmdir %client-root%\iot_sdk_output /S /Q
+rmdir %build-path%\iot_sdk_output /S /Q
 
 popd

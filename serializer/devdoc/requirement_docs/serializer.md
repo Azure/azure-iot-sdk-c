@@ -11,6 +11,8 @@ These macros are:
 #define WITH_DATA (type, name) /*...*/
 #define WITH_ACTION(name, param1Type, param1Name, ...) /*...*/
 
+#define WITH_METHOD(name, param1Type, param1Name, ...) /*...*/
+
 #define WITH_REPORTED_PROPERTY(type,name)
 
 #define END_NAMESPACE(schemaNamespace) /*...*/
@@ -125,6 +127,30 @@ An action defines a command which the IOT service can invoke on any device that 
 **SRS_SERIALIZER_H_99_045: [** If the number of arguments passed to the conversion function does not match the expected count, the function shall return DATAPROVIDER_INVALID_ARG. **]**
 
 **SRS_SERIALIZER_H_99_046: [**  If an AGENT_DATA_TYPE argument passed to the conversion function does not match the expected type, the function shall return DATAPROVIDER_INVALID_ARG. **]**
+
+### WITH_METHOD(name, param1Type, param1Name, ...)
+
+A method is a C function which the IoT service can invoke on any device that is associated (via device registration) with the model.
+
+**SRS_SERIALIZER_H_02_025: [** The WITH_METHOD declaration shall insert metadata describing a method in the model. **]**
+
+**SRS_SERIALIZER_H_02_026: [** WITH_METHOD's name argument shall uniquely identify the method within the set of all methods in the model. **]**
+
+**SRS_SERIALIZER_H_02_027: [** WITH_METHOD's param<n>Name argument shall uniquely name the nth parameter in the method's function prototype. **]**
+
+**SRS_SERIALIZER_H_02_028: [** WITH_METHOD's field<n>Type argument, which describes the type of the nth parameter in the method's function prototype, shall be one of the data types permitted for model properties. **]**
+
+**SRS_SERIALIZER_H_02_029: [** WITH_METHOD shall declare a function with the signature 'METHODRETURN_HANDLE name(param1Type param1Name, ...)', which the developer can define to receive corresponding commands from the IoT service. **]**
+
+**SRS_SERIALIZER_H_02_030: [** It is valid for a method function not to have any parameters. **]**
+
+**SRS_SERIALIZER_H_02_034: [** WITH_METHOD shall result in the declaration of a conversion function with the prototype METHODRETURN_HANDLE nameWRAPPER(size_t ParameterCount, const AGENT_DATA_TYPE* values)' **]**
+
+**SRS_SERIALIZER_H_02_031: [** The function shall convert the input arguments to the types declared in the method parameter list and then call the user-defined method function. **]**
+
+**SRS_SERIALIZER_H_02_032: [** If the number of arguments passed to the conversion function does not match the expected count, the function shall return DATAPROVIDER_INVALID_ARG. **]**
+
+**SRS_SERIALIZER_H_02_033: [** If an AGENT_DATA_TYPE argument passed to the conversion function does not match the expected type, the function shall return DATAPROVIDER_INVALID_ARG. **]**
 
 ### CREATE_MODEL_INSTANCE(schemaNamespace, modelName) 
 

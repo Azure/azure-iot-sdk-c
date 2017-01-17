@@ -4,16 +4,17 @@
 #ifndef AZUREIOTHUB_H
 #define AZUREIOTHUB_H
 
-#include "azure_c_shared_utility/lock.h"
-#include "azure_c_shared_utility/threadapi.h"
+#include "AzureIoTUtility.h"
+
 #include "sdk/serializer.h"
 
 #include "sdk/iothub_client_ll.h"
 #include "sdk/iothub_message.h"
 #include "sdk/iothubtransporthttp.h"
+#include "sdk/iothubtransportmqtt.h"
 
 #include "AzureIoTHubClient.h"
 
-#define AzureIoTHubVersion "1.0.0"
+#define AzureIoTHubVersion "1.0.21"
 
 #endif

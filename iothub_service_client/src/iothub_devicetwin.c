@@ -17,10 +17,11 @@
 #include "azure_c_shared_utility/httpapiexsas.h"
 #include "azure_c_shared_utility/base64.h"
 #include "azure_c_shared_utility/uniqueid.h"
+#include "azure_c_shared_utility/connection_string_parser.h"
 
 #include "parson.h"
-#include "connection_string_parser.h"
 #include "iothub_devicetwin.h"
+#include "iothub_sc_version.h"
 
 #define IOTHUB_TWIN_REQUEST_MODE_VALUES    \
     IOTHUB_TWIN_REQUEST_GET,               \
@@ -35,7 +36,7 @@ DEFINE_ENUM(IOTHUB_TWIN_REQUEST_MODE, IOTHUB_TWIN_REQUEST_MODE_VALUES);
 #define  HTTP_HEADER_VAL_AUTHORIZATION  " "
 #define  HTTP_HEADER_KEY_REQUEST_ID  "Request-Id"
 #define  HTTP_HEADER_KEY_USER_AGENT  "User-Agent"
-#define  HTTP_HEADER_VAL_USER_AGENT  "Microsoft.Azure.Devices/1.0.0"
+#define  HTTP_HEADER_VAL_USER_AGENT  IOTHUB_SERVICE_CLIENT_TYPE_PREFIX IOTHUB_SERVICE_CLIENT_BACKSLASH IOTHUB_SERVICE_CLIENT_VERSION
 #define  HTTP_HEADER_KEY_ACCEPT  "Accept"
 #define  HTTP_HEADER_VAL_ACCEPT  "application/json"
 #define  HTTP_HEADER_KEY_CONTENT_TYPE  "Content-Type"
@@ -44,7 +45,7 @@ DEFINE_ENUM(IOTHUB_TWIN_REQUEST_MODE, IOTHUB_TWIN_REQUEST_MODE_VALUES);
 #define  HTTP_HEADER_VAL_IFMATCH  "'*'"
 #define UID_LENGTH 37
 
-static const char* URL_API_VERSION = "?api-version=2016-09-30-preview";
+static const char* URL_API_VERSION = "?api-version=2016-11-14";
 
 static const char* RELATIVE_PATH_FMT_TWIN = "/twins/%s%s";
 static const char* RELATIVE_PATH_FMT_TWIN_TAGS = "/twins/%s/tags%s";

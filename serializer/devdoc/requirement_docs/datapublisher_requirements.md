@@ -1,6 +1,6 @@
 # DataPublisher
 
- 
+
 ## Overview
 The DataPublisher module dispatches data to DataMarshaller and provides the capability of grouping several different properties/events into one transaction.
 

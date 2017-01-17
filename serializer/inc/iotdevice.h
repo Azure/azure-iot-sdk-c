@@ -9,6 +9,7 @@
 #include "schema.h"
 #include "datapublisher.h"
 #include "commanddecoder.h"
+#include "methodreturn.h"
 
 #ifdef __cplusplus
 #include <cstddef>
@@ -30,8 +31,9 @@ DEFINE_ENUM(DEVICE_RESULT, DEVICE_RESULT_VALUES)
 
 typedef struct DEVICE_HANDLE_DATA_TAG* DEVICE_HANDLE;
 typedef EXECUTE_COMMAND_RESULT (*pfDeviceActionCallback)(DEVICE_HANDLE deviceHandle, void* callbackUserContext, const char* relativeActionPath, const char* actionName, size_t argCount, const AGENT_DATA_TYPE* args);
+typedef METHODRETURN_HANDLE    (*pfDeviceMethodCallback)(DEVICE_HANDLE deviceHandle, void* callbackUserContext, const char* relativeMethodPath, const char* methodName, size_t argCount, const AGENT_DATA_TYPE* args);
 
-MOCKABLE_FUNCTION(,DEVICE_RESULT, Device_Create, SCHEMA_MODEL_TYPE_HANDLE, modelHandle, pfDeviceActionCallback, deviceActionCallback, void*, callbackUserContext, bool, includePropertyPath, DEVICE_HANDLE*, deviceHandle);
+MOCKABLE_FUNCTION(,DEVICE_RESULT, Device_Create, SCHEMA_MODEL_TYPE_HANDLE, modelHandle, pfDeviceActionCallback, deviceActionCallback, void*, callbackUserContext, pfDeviceMethodCallback, methodCallback, void*, methodCallbackContext, bool, includePropertyPath, DEVICE_HANDLE*, deviceHandle);
 MOCKABLE_FUNCTION(, void, Device_Destroy, DEVICE_HANDLE, deviceHandle);
 
 MOCKABLE_FUNCTION(,TRANSACTION_HANDLE, Device_StartTransaction, DEVICE_HANDLE, deviceHandle);
@@ -45,6 +47,7 @@ MOCKABLE_FUNCTION(, DEVICE_RESULT, Device_CommitTransaction_ReportedProperties, 
 MOCKABLE_FUNCTION(, void, Device_DestroyTransaction_ReportedProperties, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle);
 
 MOCKABLE_FUNCTION(, EXECUTE_COMMAND_RESULT, Device_ExecuteCommand, DEVICE_HANDLE, deviceHandle, const char*, command);
+MOCKABLE_FUNCTION(, METHODRETURN_HANDLE, Device_ExecuteMethod, DEVICE_HANDLE, deviceHandle, const char*, methodName, const char*, methodPayload);
 
 MOCKABLE_FUNCTION(, DEVICE_RESULT, Device_IngestDesiredProperties, void*, startAddress, DEVICE_HANDLE, deviceHandle, const char*, desiredProperties);
 #ifdef __cplusplus

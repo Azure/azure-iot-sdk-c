@@ -1,6 +1,6 @@
-# AzureIoTHub - Azure IoT Hub library for Arduino
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
-[![Build Status](https://travis-ci.org/arduino-libraries/AzureIoTHub.svg?branch=master)](https://travis-ci.org/arduino-libraries/AzureIoTHub)
+# AzureIoTHub - Azure IoT Hub library for Arduino
 
 This library is a port of the [Microsoft Azure IoT device SDK for C](https://github.com/Azure/azure-iot-sdks/blob/master/c/readme.md) to Arduino. It allows you to use several Arduino compatible boards with Azure IoT Hub. Please submit any contribution directly to [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks).
 
@@ -20,6 +20,8 @@ You should have the following ready before beginning with any board:
 -   [Provision your device and get its credentials](https://github.com/Azure/azure-iot-sdks/blob/master/doc/manage_iot_hub.md)
 -   [Arduino IDE 1.6.8](https://www.arduino.cc/en/Main/Software)
 -   Install the `AzureIoTHub` library via the Arduino IDE Library Manager
+-   Install the `AzureIoTUtility` library via the Arduino IDE Library Manager
+-   Install the `AzureIoTProtocol_MQTT` library via the Arduino IDE Library Manager
 
 # Simple Sample Instructions
 

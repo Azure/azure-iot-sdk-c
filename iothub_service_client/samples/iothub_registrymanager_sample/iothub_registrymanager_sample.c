@@ -14,10 +14,10 @@
 #include "azure_c_shared_utility/string_tokenizer.h"
 #include "azure_c_shared_utility/consolelogger.h"
 #include "azure_c_shared_utility/xlogging.h"
+#include "azure_c_shared_utility/connection_string_parser.h"
 
 #include "iothub_registrymanager_sample.h"
 
-#include "connection_string_parser.h"
 #include "iothub_service_client_auth.h"
 #include "iothub_registrymanager.h"
 
@@ -43,6 +43,7 @@ void printDeviceInfo(IOTHUB_DEVICE* device, int orderNum)
         (void)printf("    secondaryKey                : %s\r\n", device->secondaryKey);
         (void)printf("    generationId                : %s\r\n", device->generationId);
         (void)printf("    eTag                        : %s\r\n", device->eTag);
+        (void)printf("    authMethod                  : %d\r\n", device->authMethod);
         if (device->connectionState == IOTHUB_DEVICE_CONNECTION_STATE_CONNECTED)
         {
             (void)printf("    connectionState             : Connected\r\n");
@@ -99,6 +100,7 @@ void iothub_registrymanager_sample_run(void)
         deviceCreateInfo.deviceId = deviceId;
         deviceCreateInfo.primaryKey = "";
         deviceCreateInfo.secondaryKey = "";
+        deviceCreateInfo.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
 
         // Create device
         result = IoTHubRegistryManager_CreateDevice(iotHubRegistryManagerHandle, &deviceCreateInfo, &deviceInfo);
@@ -122,6 +124,7 @@ void iothub_registrymanager_sample_run(void)
         deviceUpdateInfo.deviceId = deviceId;
         deviceUpdateInfo.primaryKey = "aaabbbcccdddeeefffggghhhiiijjjkkklllmmmnnnoo";
         deviceUpdateInfo.secondaryKey = "111222333444555666777888999000aaabbbcccdddee";
+        deviceUpdateInfo.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
         deviceUpdateInfo.status = IOTHUB_DEVICE_STATUS_DISABLED;
         result = IoTHubRegistryManager_UpdateDevice(iotHubRegistryManagerHandle, &deviceUpdateInfo);
         switch (result)

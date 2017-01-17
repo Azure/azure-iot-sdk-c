@@ -4,11 +4,14 @@
 #ifndef CODEFIRST_H
 #define CODEFIRST_H
 
+#include "methodreturn.h"
 #include "agenttypesystem.h"
 #include "schema.h"
 #include "azure_c_shared_utility/macro_utils.h"
 #include "azure_c_shared_utility/strings.h"
 #include "iotdevice.h"
+
+
 
 #ifdef __cplusplus
 #include <cstddef>
@@ -24,6 +27,7 @@ typedef char* ascii_char_ptr_no_quotes;
 
 typedef enum REFLECTION_TYPE_TAG
 {
+    REFLECTION_METHOD_TYPE,
     REFLECTION_DESIRED_PROPERTY_TYPE,
     REFLECTION_REPORTED_PROPERTY_TYPE,
     REFLECTION_STRUCT_TYPE,
@@ -35,6 +39,8 @@ typedef enum REFLECTION_TYPE_TAG
 }REFLECTION_TYPE;
 
 typedef EXECUTE_COMMAND_RESULT (*actionWrapper)(void* device, size_t ParameterCount, const AGENT_DATA_TYPE* values);
+
+typedef METHODRETURN_HANDLE (*methodWrapper)(void* device, size_t ParameterCount, const AGENT_DATA_TYPE* values);
 
 typedef struct REFLECTION_STRUCT_TAG
 {
@@ -55,6 +61,15 @@ typedef struct REFLECTION_ACTION_TAG
     actionWrapper wrapper;
     const char* modelName;
 }REFLECTION_ACTION;
+
+typedef struct REFLECTION_METHOD_TAG
+{
+    const char* name;
+    size_t nArguments;
+    const WRAPPER_ARGUMENT* arguments;
+    methodWrapper wrapper;
+    const char* modelName;
+}REFLECTION_METHOD;
 
 typedef struct REFLECTION_FIELD_TAG
 {
@@ -108,6 +123,7 @@ typedef struct REFLECTED_SOMETHING_TAG
     const struct REFLECTED_SOMETHING_TAG* next;
     struct what
     {
+        REFLECTION_METHOD method;
         REFLECTION_DESIRED_PROPERTY desiredProperty;
         REFLECTION_REPORTED_PROPERTY reportedProperty;
         REFLECTION_STRUCT structure;
@@ -153,7 +169,11 @@ MOCKABLE_FUNCTION(, SCHEMA_HANDLE, CodeFirst_RegisterSchema, const char*, schema
 
 MOCKABLE_FUNCTION(, EXECUTE_COMMAND_RESULT, CodeFirst_InvokeAction, DEVICE_HANDLE, deviceHandle, void*, callbackUserContext, const char*, relativeActionPath, const char*, actionName, size_t, parameterCount, const AGENT_DATA_TYPE*, parameterValues);
 
+MOCKABLE_FUNCTION(, METHODRETURN_HANDLE, CodeFirst_InvokeMethod, DEVICE_HANDLE, deviceHandle, void*, callbackUserContext, const char*, relativeMethodPath, const char*, methodName, size_t, parameterCount, const AGENT_DATA_TYPE*, parameterValues);
+
 MOCKABLE_FUNCTION(, EXECUTE_COMMAND_RESULT, CodeFirst_ExecuteCommand, void*, device, const char*, command);
+
+MOCKABLE_FUNCTION(, METHODRETURN_HANDLE, CodeFirst_ExecuteMethod, void*, device, const char*, methodName, const char*, methodPayload);
 
 MOCKABLE_FUNCTION(, void*, CodeFirst_CreateDevice, SCHEMA_MODEL_TYPE_HANDLE, model, const REFLECTED_DATA_FROM_DATAPROVIDER*, metadata, size_t, dataSize, bool, includePropertyPath);
 MOCKABLE_FUNCTION(, void, CodeFirst_DestroyDevice, void*, device);

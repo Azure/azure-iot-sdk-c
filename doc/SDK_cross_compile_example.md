@@ -43,7 +43,7 @@ mkdir RPiTools
 cd RPiTools
 git clone https://github.com/raspberrypi/tools.git
 ```
-Unfortunately, this does not give us all the files that are required to build the project. At this point you will need to copy some files from a running Raspberry Pi to your host machine. Make sure you can access your Raspberry Pi via SSH (you can enable this using [raspi-config](https://www.raspberrypi.org/documentation/configuration/raspi-config.md) and select “9. Advanced Options”. Further instructions are beyond the scope of this document). On your host’s terminal enter
+Unfortunately, this does not give us all the files that are required to build the project. At this point you will need to copy some files from a running Raspberry Pi to your host machine. Make sure you can access your Raspberry Pi via SSH (you can enable this using [raspi-config](https://www.raspberrypi.org/documentation/configuration/raspi-config.md) and select "9. Advanced Options". Further instructions are beyond the scope of this document). On your host's terminal enter
 ```
 cd ~/RPiTools/tools/arm-bcm2708/\
 gcc-linaro-arm-linux-gnueabihf-raspbian-x64/arm-linux-gnueabihf

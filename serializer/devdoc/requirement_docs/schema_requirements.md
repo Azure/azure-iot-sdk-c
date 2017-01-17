@@ -1,7 +1,6 @@
 # Schema Requirements
 
 
- 
 Overview
 The Schema module provides APIs for describing struct types and model types. A model type can be used to instantiate a specific device.
 Below is a layout if a schema:
@@ -19,6 +18,7 @@ Schema
  |            |--- <0..n ReportedProperty> (Primitive, Structs, User Defined)
  |            |--- <0..n DesiredProperty> (Primitive, Structs, User Defined)
  |            |--- <0..n Actions>
+ |            |--- <0..n Methods>
  |            |--- <0..n Models>
  |--- <0..n Model Type> 
      |--- <Model Name>
@@ -26,6 +26,7 @@ Schema
      |--- <0..n ReportedProperty> (Primitive, Structs, User Defined)
      |--- <0..n DesiredProperty> (Primitive, Structs, User Defined)
      |--- <0..n Actions>
+     |--- <0..n Methods>
      |--- <0..n Models>
 ```
 
@@ -109,7 +110,9 @@ extern SCHEMA_RESULT Schema_AddModelReportedProperty(SCHEMA_MODEL_TYPE_HANDLE mo
 extern SCHEMA_RESULT Schema_AddModelDesiredProperty(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* desiredPropertyName, const char* desiredPropertyType, pfDesiredPropertyFromAGENT_DATA_TYPE desiredPropertyFromAGENT_DATA_TYPE, pfDesiredPropertyInitialize desiredPropertyInitialize, pfDesiredPropertyDeinitialize desiredPropertyDeinitialize, size_t offset, pfOnDesiredProperty onDesiredProperty);
 extern SCHEMA_RESULT Schema_AddModelModel(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* propertyName, SCHEMA_MODEL_TYPE_HANDLE modelType, size_t offset, pfOnDesiredProperty onDesiredProperty);
 extern SCHEMA_ACTION_HANDLE Schema_CreateModelAction(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* actionName);
+extern SCHEMA_METHOD_HANDLE Schema_CreateModelMethod(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* methodName);
 extern SCHEMA_RESULT Schema_AddModelActionArgument(SCHEMA_ACTION_HANDLE actionHandle, const char* argumentName, const char* argumentType);
+extern SCHEMA_RESULT Schema_AddModelMethodArgument(SCHEMA_METHOD_HANDLE methodHandle, const char* argumentName, const char* argumentType);
 extern pfDesiredPropertyFromAGENT_DATA_TYPE Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE(SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle);
 extern pfOnDesiredProperty Schema_GetModelDesiredProperty_pfOnDesiredProperty(SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle);
 extern pfOnDesiredProperty Schema_GetModelModelByName_OnDesiredProperty(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* propertyName);
@@ -153,15 +156,20 @@ extern _Bool Schema_ModelDesiredPropertyByPathExists(SCHEMA_MODEL_TYPE_HANDLE mo
 
 extern SCHEMA_RESULT Schema_GetModelActionCount(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t* actionCount);
 extern SCHEMA_ACTION_HANDLE Schema_GetModelActionByName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* actionName);
+extern SCHEMA_METHOD_HANDLE Schema_GetModelMethodByName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* methodName);
 extern SCHEMA_ACTION_HANDLE Schema_GetModelActionByIndex(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t index);
 
 extern SCHEMA_RESULT Schema_GetModelActionArgumentCount(SCHEMA_ACTION_HANDLE actionHandle, size_t* argumentCount);
+extern SCHEMA_RESULT Schema_GetModelMethodArgumentCount(SCHEMA_METHOD_HANDLE,actionHandle, size_t* argumentCount);
 extern const char* Schema_GetModelActionName(SCHEMA_ACTION_HANDLE actionHandle);
 
 extern SCHEMA_ACTION_ARGUMENT_HANDLE Schema_GetModelActionArgumentByName(SCHEMA_ACTION_HANDLE actionHandle, const char* actionArgumentName);
 extern SCHEMA_ACTION_ARGUMENT_HANDLE Schema_GetModelActionArgumentByIndex(SCHEMA_ACTION_HANDLE actionHandle, size_t argumentIndex);
+extern SCHEMA_METHOD_ARGUMENT_HANDLE Schema_GetModelMethodArgumentByIndex(SCHEMA_METHOD_HANDLE actionHandle, size_t argumentIndex);
 extern const char* Schema_GetActionArgumentName(SCHEMA_ACTION_ARGUMENT_HANDLE actionArgumentHandle);
+extern const char* Schema_GetMethodArgumentName(SCHEMA_METHOD_ARGUMENT_HANDLE methodArgumentHandle);
 extern const char* Schema_GetActionArgumentType(SCHEMA_ACTION_ARGUMENT_HANDLE actionArgumentHandle);
+extern const char* Schema_GetMethodArgumentType(SCHEMA_METHOD_ARGUMENT_HANDLE methodArgumentHandle);
 
 extern SCHEMA_RESULT Schema_GetStructTypeCount(SCHEMA_HANDLE schemaHandle, size_t* structTypeCount);
 extern SCHEMA_STRUCT_TYPE_HANDLE Schema_GetStructTypeByName(SCHEMA_HANDLE schemaHandle, const char* structTypeName);
@@ -218,7 +226,7 @@ SCHEMA_HANDLE Schema_GetSchemaForModel(const char* modelName)
 
 ### size_t Schema_GetSchemaCount(void);
 
-**SRS_SCHEMA_99_153: [** Schema_GetSchemaCount shall return the number of “active” schemas (all schemas created with Schema_Create in the current process, for which Schema_Destroy has not been called). **]**
+**SRS_SCHEMA_99_153: [** Schema_GetSchemaCount shall return the number of "active" schemas (all schemas created with Schema_Create in the current process, for which Schema_Destroy has not been called). **]**
 
 ### SCHEMA_HANDLE Schema_GetSchemaByNamespace(const char* schemaNamespace);
 
@@ -922,3 +930,118 @@ extern pfOnDesiredProperty Schema_GetModelModelByName_OnDesiredProperty(SCHEMA_M
 **SRS_SCHEMA_02_089: [** Otherwise `Schema_GetModelModelByName_OnDesiredProperty` shall return the desired property callback. **]**
 
 
+### Schema_CreateModelMethod
+```c
+extern SCHEMA_METHOD_HANDLE Schema_CreateModelMethod(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* methodName);
+```
+
+`Schema_CreateModelMethod` creates a new method in a model.
+
+**SRS_SCHEMA_02_096: [** If `modelTypeHandle` is `NULL` then `Schema_CreateModelMethod` shall fail and return `NULL`. **]**
+
+**SRS_SCHEMA_02_097: [** If `methodName` is `NULL` then `Schema_CreateModelMethod` shall fail and return `NULL`. **]**
+
+**SRS_SCHEMA_02_103: [** If `methodName` already exists, then `Schema_CreateModelMethod` shall fail and return `NULL`. **]**
+
+**SRS_SCHEMA_02_098: [** `Schema_CreateModelMethod` shall allocate the space for the method. **]**
+
+**SRS_SCHEMA_02_099: [** `Schema_CreateModelMethod` shall create a VECTOR that will hold the method's arguments. **]**
+
+**SRS_SCHEMA_02_100: [** `Schema_CreateModelMethod` shall clone `methodName` **]**
+
+**SRS_SCHEMA_02_101: [** `Schema_CreateModelMethod` shall add the new created method to the model's list of methods. **]**
+
+**SRS_SCHEMA_02_102: [** If any of the above fails, then `Schema_CreateModelMethod` shall fail and return `NULL`. **]**
+
+**SRS_SCHEMA_02_104: [** Otherwise, `Schema_CreateModelMethod` shall succeed and return a non-`NULL` `SCHEMA_METHOD_HANDLE`. **]**
+
+### Schema_AddModelMethodArgument
+```c
+SCHEMA_RESULT Schema_AddModelMethodArgument(SCHEMA_METHOD_HANDLE methodHandle, const char* argumentName, const char* argumentType)
+```
+
+`Schema_AddModelMethodArgument` adds an argument to the argument list of a method.
+
+**SRS_SCHEMA_02_105: [** If `methodHandle` is `NULL` then `Schema_AddModelMethodArgument` shall fail and return `SCHEMA_INVALID_ARG`. **]**
+
+**SRS_SCHEMA_02_106: [** If `argumentName` is `NULL` then `Schema_AddModelMethodArgument` shall fail and return `SCHEMA_INVALID_ARG`. **]**
+
+**SRS_SCHEMA_02_107: [** If `argumentType` is `NULL` then `Schema_AddModelMethodArgument` shall fail and return `SCHEMA_INVALID_ARG`. **]**
+
+**SRS_SCHEMA_02_108: [** If `argumentName` already exists in the list of arguments then then `Schema_AddModelMethodArgument` shall fail and return `SCHEMA_INVALID_ARG`. **]**
+
+**SRS_SCHEMA_02_109: [** `Schema_AddModelMethodArgument` shall allocate memory for the new argument. **]**
+
+**SRS_SCHEMA_02_110: [** `Schema_AddModelMethodArgument` shall clone `methodHandle`. **]**
+
+**SRS_SCHEMA_02_111: [** `Schema_AddModelMethodArgument` shall clone `argumentType`. **]**
+
+**SRS_SCHEMA_02_112: [** `Schema_AddModelMethodArgument` shall add the created argument to the method's list of arguments. **]**
+
+**SRS_SCHEMA_02_113: [** If any of the above operations fails, then `Schema_AddModelMethodArgument` shall fail and return `SCHEMA_ERROR`. **]**
+
+**SRS_SCHEMA_02_114: [** Otherwise, `Schema_AddModelMethodArgument` shall succeed and return `SCHEMA_OK`. **]**
+
+### Schema_GetModelMethodByName
+```c
+SCHEMA_METHOD_HANDLE Schema_GetModelMethodByName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* methodName)
+```
+
+`Schema_GetModelMethodByName` returns a method handle from `modelTypeHandle` indicated by its name.
+
+**SRS_SCHEMA_02_115: [** If `modelTypeHandle` is `NULL` then `Schema_GetModelMethodByName` shall fail and return `NULL`. **]**
+
+**SRS_SCHEMA_02_116: [** If `methodName` is `NULL` then `Schema_GetModelMethodByName` shall fail and return `NULL`. **]**
+
+**SRS_SCHEMA_02_117: [** If a method with the name `methodName` exists then `Schema_GetModelMethodByName` shall succeed and returns its handle. **]**
+
+**SRS_SCHEMA_02_118: [** Otherwise, `Schema_GetModelMethodByName` shall fail and return `NULL`. **]** 
+
+### Schema_GetModelMethodArgumentCount
+```c 
+SCHEMA_RESULT Schema_GetModelMethodArgumentCount(SCHEMA_METHOD_HANDLE methodHandle, size_t* argumentCount)
+```
+
+`Schema_GetModelMethodArgumentCount` returns in `argumentCount` the number of arguments for a method.
+
+**SRS_SCHEMA_02_119: [** If `methodHandle` is `NULL` then `Schema_GetModelMethodArgumentCount` shall fail and return `SCHEMA_INVALID_ARG`. **]**
+
+**SRS_SCHEMA_02_120: [** If `argumentCount` is `NULL` then `Schema_GetModelMethodArgumentCount` shall fail and return `SCHEMA_INVALID_ARG`. **]**
+
+**SRS_SCHEMA_02_121: [** Otherwise, `Schema_GetModelMethodArgumentCount` shall succeed, return in `argumentCount` the number of arguments for the 
+method and return `SCHEMA_OK`. **]** 
+
+### Schema_GetModelMethodArgumentByIndex
+```c
+SCHEMA_METHOD_ARGUMENT_HANDLE Schema_GetModelMethodArgumentByIndex(SCHEMA_METHOD_HANDLE methodHandle, size_t argumentIndex)
+```
+
+`Schema_GetModelMethodArgumentByIndex` returns the `argumentIndex`th argument of  `methodHandle`.
+
+**SRS_SCHEMA_02_122: [** If `methodHandle` is `NULL` then `Schema_GetModelMethodArgumentByIndex` shall fail and return `NULL`. **]**
+
+**SRS_SCHEMA_02_123: [** If `argumentIndex` does not exist then `Schema_GetModelMethodArgumentByIndex` shall fail and return `NULL`. **]**
+
+**SRS_SCHEMA_02_124: [** Otherwise, `Schema_GetModelMethodArgumentByIndex` shall succeed and return a non-`NULL` value. **]**
+
+### Schema_GetMethodArgumentName
+```c
+const char* Schema_GetMethodArgumentName(SCHEMA_METHOD_ARGUMENT_HANDLE methodArgumentHandle)
+```
+
+`Schema_GetMethodArgumentName` returns the name of a method argument.
+
+**SRS_SCHEMA_02_125: [** If `methodArgumentHandle` is `NULL` then `Schema_GetMethodArgumentName` shall fail and return `NULL`. **]**
+
+**SRS_SCHEMA_02_126: [** Otherwise, `Schema_GetMethodArgumentName` shall succeed and return a non-`NULL` value. **]**
+
+### Schema_GetMethodArgumentType
+```c
+const char* Schema_GetMethodArgumentType(SCHEMA_METHOD_ARGUMENT_HANDLE methodArgumentHandle)
+```
+
+`Schema_GetMethodArgumentType` returns the type of a method argument.
+
+**SRS_SCHEMA_02_127: [** If `methodArgumentHandle` is `NULL` then `Schema_GetMethodArgumentType` shall fail and return `NULL`. **]**
+
+**SRS_SCHEMA_02_128: [** Otherwise, `Schema_GetMethodArgumentType` shall succeed and return a non-`NULL` value. **]**

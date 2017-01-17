@@ -14,7 +14,7 @@ build_http=ON
 build_mqtt=ON
 no_blob=OFF
 use_wsio=OFF
-skip_unittests=OFF
+run_unittests=OFF
 build_python=OFF
 build_javawrapper=OFF
 run_valgrind=0
@@ -31,8 +31,8 @@ usage ()
     echo " -cl, --compileoption <value>  specify a compile option to be passed to gcc"
     echo "   Example: -cl -O1 -cl ..."
     echo " --run-e2e-tests               run the end-to-end tests (e2e tests are skipped by default)"
-    echo " --skip-unittests              skip the running of unit tests (unit tests are run by default)"
-	 echo " --run-longhaul-tests          run long haul tests (long haul tests are not run by default)"
+    echo " --run-unittests               run the unit tests"
+	echo " --run-longhaul-tests          run long haul tests (long haul tests are not run by default)"
     echo ""
     echo " --no-amqp                     do no build AMQP transport and samples"
     echo " --no-http                     do no build HTTP transport and samples"
@@ -85,7 +85,7 @@ process_args ()
           case "$arg" in
               "-cl" | "--compileoption" ) save_next_arg=1;;
               "--run-e2e-tests" ) run_e2e_tests=ON;;
-			  "--skip-unittests" ) skip_unittests=ON;;
+			  "--run-unittests" ) run_unittests=ON;;
               "--run-longhaul-tests" ) run_longhaul_tests=ON;;
               "--no-amqp" ) build_amqp=OFF;;
               "--no-http" ) build_http=OFF;;
@@ -121,7 +121,7 @@ process_args $*
 rm -r -f $build_folder
 mkdir -p $build_folder
 pushd $build_folder
-cmake $toolchainfile $cmake_install_prefix -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Ddont_use_uploadtoblob:BOOL=$no_blob -Duse_wsio:BOOL=$use_wsio -Dskip_unittests:BOOL=$skip_unittests -Dbuild_python:STRING=$build_python -Dbuild_javawrapper:BOOL=$build_javawrapper -Dno_logging:BOOL=$no_logging $build_root
+cmake $toolchainfile $cmake_install_prefix -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Ddont_use_uploadtoblob:BOOL=$no_blob -Duse_wsio:BOOL=$use_wsio -Drun_unittests:BOOL=$run_unittests -Dbuild_python:STRING=$build_python -Dbuild_javawrapper:BOOL=$build_javawrapper -Dno_logging:BOOL=$no_logging $build_root
 
 if [ "$make" = true ]
 then

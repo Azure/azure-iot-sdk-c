@@ -492,6 +492,9 @@ BEGIN_TEST_SUITE(Schema_ut)
 
         STRICT_EXPECTED_CALL(VECTOR_create(IGNORED_NUM_ARG)) /*these are desired properties*/
             .IgnoreArgument_elementSize();
+
+        STRICT_EXPECTED_CALL(VECTOR_create(IGNORED_NUM_ARG)) /*these are methods*/
+            .IgnoreArgument_elementSize();
     }
 
     /* Tests_SRS_SCHEMA_99_007:[Schema_CreateModelType shall create a new model type and return a handle to it.] */
@@ -5904,5 +5907,596 @@ BEGIN_TEST_SUITE(Schema_ut)
         // cleanup
         Schema_Destroy(schemaHandle1);
         Schema_Destroy(schemaHandle2);
+    }
+
+    /*Tests_SRS_SCHEMA_02_096: [ If modelTypeHandle is NULL then Schema_CreateModelMethod shall fail and return NULL. ]*/
+    TEST_FUNCTION(Schema_CreateModelMethod_with_NULL_modelTypeHandle_fails)
+    {
+        ///arrange
+
+        ///act
+        SCHEMA_METHOD_HANDLE methodHandle = Schema_CreateModelMethod(NULL, "s");
+
+        ///assert
+        ASSERT_IS_NULL(methodHandle);
+
+        ///cleanup
+    }
+
+    /*Tests_SRS_SCHEMA_02_097: [ If methodName is NULL then Schema_CreateModelMethod shall fail and return NULL. ]*/
+    TEST_FUNCTION(Schema_CreateModelMethod_with_NULL_methodName_fails)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
+        SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "model");
+
+        ///act
+        SCHEMA_METHOD_HANDLE methodHandle = Schema_CreateModelMethod(model, NULL);
+
+        ///assert
+        ASSERT_IS_NULL(methodHandle);
+
+        ///cleanup
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_103: [ If methodName already exists, then Schema_CreateModelMethod shall fail and return NULL. ]*/
+    TEST_FUNCTION(Schema_CreateModelMethod_with_same_methodName_fails)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
+        SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "model");
+        (void)Schema_CreateModelMethod(model, "method");
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument_handle()
+            .IgnoreArgument_pred()
+            .IgnoreArgument_value();
+
+        ///act
+        SCHEMA_METHOD_HANDLE methodHandle = Schema_CreateModelMethod(model, "method");
+
+        ///assert
+        ASSERT_IS_NULL(methodHandle);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///cleanup
+        Schema_Destroy(schemaHandle);
+    }
+
+    static void Schema_CreateModelMethod_inert_path(void)
+    {
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument_handle()
+            .IgnoreArgument_pred()
+            .IgnoreArgument_value();
+
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+            .IgnoreArgument_size();
+
+        STRICT_EXPECTED_CALL(VECTOR_create(IGNORED_NUM_ARG))
+            .IgnoreArgument_elementSize();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "method"))
+            .IgnoreArgument_destination();
+        STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1))
+            .IgnoreArgument_handle()
+            .IgnoreArgument_elements();
+    }
+
+    /*Tests_SRS_SCHEMA_02_098: [ Schema_CreateModelMethod shall allocate the space for the method. ]*/
+    /*Tests_SRS_SCHEMA_02_099: [ Schema_CreateModelMethod shall create a VECTOR that will hold the method's arguments. ]*/
+    /*Tests_SRS_SCHEMA_02_100: [ Schema_CreateModelMethod shall clone methodName ]*/
+    /*Tests_SRS_SCHEMA_02_101: [ Schema_CreateModelMethod shall add the new created method to the model's list of methods. ]*/
+    /*Tests_SRS_SCHEMA_02_104: [ Otherwise, Schema_CreateModelMethod shall succeed and return a non-NULL SCHEMA_METHOD_HANDLE. ]*/
+    TEST_FUNCTION(Schema_CreateModelMethod_happy_path)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
+        SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "model");
+        umock_c_reset_all_calls();
+
+        Schema_CreateModelMethod_inert_path();
+
+        ///act
+        SCHEMA_METHOD_HANDLE methodHandle = Schema_CreateModelMethod(model, "method");
+
+        ///assert
+        ASSERT_IS_NOT_NULL(methodHandle);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///cleanup
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_102: [ If any of the above fails, then Schema_CreateModelMethod shall fail and return NULL. ]*/
+    TEST_FUNCTION(Schema_CreateModelMethod_unhappy_paths)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
+        SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "model");
+        umock_c_reset_all_calls();
+
+        umock_c_negative_tests_init();
+        Schema_CreateModelMethod_inert_path();
+        umock_c_negative_tests_snapshot();
+
+        for (size_t i = 0;i < umock_c_negative_tests_call_count(); i++)
+        {
+            if (
+                (i != 0)
+                )
+            {
+                umock_c_negative_tests_reset();
+                umock_c_negative_tests_fail_call(i);
+
+                ///act
+                SCHEMA_METHOD_HANDLE methodHandle = Schema_CreateModelMethod(model, "method");
+
+                ///assert
+                ASSERT_IS_NULL(methodHandle);
+            }
+        }
+
+        ///cleanup
+        Schema_Destroy(schemaHandle);
+        umock_c_negative_tests_deinit();
+    }
+
+    /*Tests_SRS_SCHEMA_02_105: [ If methodHandle is NULL then Schema_AddModelMethodArgument shall fail and return SCHEMA_INVALID_ARG. ]*/
+    TEST_FUNCTION(Schema_AddModelMethodArgument_with_NULL_methodHandle_fails)
+    {
+        ///arrange
+        
+        ///act
+        SCHEMA_RESULT result = Schema_AddModelMethodArgument(NULL, "a", "int");
+
+        ///assert
+        ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
+
+        ///clean
+    }
+
+    /*Tests_SRS_SCHEMA_02_106: [ If argumentName is NULL then Schema_AddModelMethodArgument shall fail and return SCHEMA_INVALID_ARG. ]*/
+    TEST_FUNCTION(Schema_AddModelMethodArgument_with_NULL_argumentName_fails)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
+        SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "model");
+        SCHEMA_METHOD_HANDLE method = Schema_CreateModelMethod(model, "method");
+
+        ///act
+        SCHEMA_RESULT result = Schema_AddModelMethodArgument(method, NULL, "int");
+
+        ///assert
+        ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_107: [ If argumentType is NULL then Schema_AddModelMethodArgument shall fail and return SCHEMA_INVALID_ARG. ]*/
+    TEST_FUNCTION(Schema_AddModelMethodArgument_with_NULL_argumentType_fails)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
+        SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "model");
+        SCHEMA_METHOD_HANDLE method = Schema_CreateModelMethod(model, "method");
+
+        ///act
+        SCHEMA_RESULT result = Schema_AddModelMethodArgument(method, "a", NULL);
+
+        ///assert
+        ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_108: [ If argumentName already exists in the list of arguments then then Schema_AddModelMethodArgument shall fail and return SCHEMA_INVALID_ARG. ]*/
+    TEST_FUNCTION(Schema_AddModelMethodArgument_with_already_existing_argumentType_fails)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
+        SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "model");
+        SCHEMA_METHOD_HANDLE method = Schema_CreateModelMethod(model, "method");
+        (void)Schema_AddModelMethodArgument(method, "a", "int");
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument_handle()
+            .IgnoreArgument_pred()
+            .IgnoreArgument_value();
+
+        ///act
+        SCHEMA_RESULT result = Schema_AddModelMethodArgument(method, "a", "int");
+
+        ///assert
+        ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    static void Schema_AddModelMethodArgument_inert_path(void)
+    {
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument_handle()
+            .IgnoreArgument_pred()
+            .IgnoreArgument_value();
+
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+            .IgnoreArgument_size();
+
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "a"))
+            .IgnoreArgument_destination();
+
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "int"))
+            .IgnoreArgument_destination();
+
+        STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1))
+            .IgnoreArgument_handle()
+            .IgnoreArgument_elements();
+    }
+
+    /*Tests_SRS_SCHEMA_02_109: [ Schema_AddModelMethodArgument shall allocate memory for the new argument. ]*/
+    /*Tests_SRS_SCHEMA_02_110: [ Schema_AddModelMethodArgument shall clone methodHandle. ]*/
+    /*Tests_SRS_SCHEMA_02_111: [ Schema_AddModelMethodArgument shall clone argumentType. ]*/
+    /*Tests_SRS_SCHEMA_02_112: [ Schema_AddModelMethodArgument shall add the created argument to the method's list of arguments. ]*/
+    /*Tests_SRS_SCHEMA_02_114: [ Otherwise, Schema_AddModelMethodArgument shall succeed and return SCHEMA_OK. ]*/
+    TEST_FUNCTION(Schema_AddModelMethodArgument_happy_path)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
+        SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "model");
+        SCHEMA_METHOD_HANDLE method = Schema_CreateModelMethod(model, "method");
+        
+        umock_c_reset_all_calls();
+
+        Schema_AddModelMethodArgument_inert_path();
+
+        ///act
+        SCHEMA_RESULT result = Schema_AddModelMethodArgument(method, "a", "int");
+
+        ///assert
+        ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_OK, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_113: [ If any of the above operations fails, then Schema_AddModelMethodArgument shall fail and return SCHEMA_ERROR. ]*/
+    TEST_FUNCTION(Schema_AddModelMethodArgument_unhappy_paths)
+    {
+        ///arrange
+        umock_c_negative_tests_init();
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
+        SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "model");
+        SCHEMA_METHOD_HANDLE method = Schema_CreateModelMethod(model, "method");
+
+        umock_c_reset_all_calls();
+
+        Schema_AddModelMethodArgument_inert_path();
+        umock_c_negative_tests_snapshot();
+
+        for (size_t i = 0;i < umock_c_negative_tests_call_count(); i++)
+        {
+            if (
+                (i != 0)
+                )
+            {
+                umock_c_negative_tests_reset();
+                umock_c_negative_tests_fail_call(i);
+
+                ///act
+                SCHEMA_RESULT result = Schema_AddModelMethodArgument(method, "a", "int");
+
+                ///assert
+                ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_ERROR, result);
+            }
+        }
+        
+        ///clean
+        Schema_Destroy(schemaHandle);
+        umock_c_negative_tests_deinit();
+    }
+
+    /*Tests_SRS_SCHEMA_02_115: [ If modelTypeHandle is NULL then Schema_GetModelMethodByName shall fail and return NULL. ]*/
+    TEST_FUNCTION(Schema_GetModelMethodByName_with_NULL_modelTypeHandle_fails)
+    {
+        ///arrange
+        ///act
+        SCHEMA_METHOD_HANDLE methodHandle = Schema_GetModelMethodByName(NULL, "a");
+
+        ///assert
+        ASSERT_IS_NULL(methodHandle);
+
+        ///clean
+    }
+
+    /*Tests_SRS_SCHEMA_02_116: [ If methodName is NULL then Schema_GetModelMethodByName shall fail and return NULL. ]*/
+    TEST_FUNCTION(Schema_GetModelMethodByName_with_NULL_methodName_fails)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
+        SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "model");
+
+        ///act
+        SCHEMA_METHOD_HANDLE methodHandle = Schema_GetModelMethodByName(model, NULL);
+
+        ///assert
+        ASSERT_IS_NULL(methodHandle);
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_117: [ If a method with the name methodName exists then Schema_GetModelMethodByName shall succeed and returns its handle. ]*/
+    TEST_FUNCTION(Schema_GetModelMethodByName_happy_path)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
+        SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "model");
+        (void)Schema_CreateModelMethod(model, "method");
+
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument_handle()
+            .IgnoreArgument_pred()
+            .IgnoreArgument_value();
+
+        ///act
+        SCHEMA_METHOD_HANDLE methodHandle = Schema_GetModelMethodByName(model, "method");
+
+        ///assert
+        ASSERT_IS_NOT_NULL(methodHandle);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_117: [ If a method with the name methodName exists then Schema_GetModelMethodByName shall succeed and returns its handle. ]*/
+    TEST_FUNCTION(Schema_GetModelMethodByName_unhappy_path)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
+        SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "model");
+        (void)Schema_CreateModelMethod(model, "method");
+
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument_handle()
+            .IgnoreArgument_pred()
+            .IgnoreArgument_value();
+
+        ///act
+        SCHEMA_METHOD_HANDLE methodHandle = Schema_GetModelMethodByName(model, "NO WAY THIS EXISTS!");
+
+        ///assert
+        ASSERT_IS_NULL(methodHandle);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_119: [ If methodHandle is NULL then Schema_GetModelMethodArgumentCount shall fail and return SCHEMA_INVALID_ARG. ]*/
+    TEST_FUNCTION(Schema_GetModelMethodArgumentCount_with_NULL_methodHandle_fails)
+    {
+        ///arrange
+        size_t nArguments;
+
+        ///act
+        SCHEMA_RESULT result = Schema_GetModelMethodArgumentCount(NULL, &nArguments);
+
+        ///assert
+        ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
+
+        ///clean
+    }
+
+    /*Tests_SRS_SCHEMA_02_120: [ If argumentCount is NULL then Schema_GetModelMethodArgumentCount shall fail and return SCHEMA_INVALID_ARG. ]*/
+    TEST_FUNCTION(Schema_GetModelMethodArgumentCount_with_NULL_argumentCount_fails)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
+        SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "model");
+        SCHEMA_METHOD_HANDLE method = Schema_CreateModelMethod(model, "method");
+
+        umock_c_reset_all_calls();
+
+        ///act
+        SCHEMA_RESULT result = Schema_GetModelMethodArgumentCount(method, NULL);
+
+        ///assert
+        ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_121: [ Otherwise, Schema_GetModelMethodArgumentCount shall succeed, return in argumentCount the number of arguments for the method and return SCHEMA_OK. ]*/
+    TEST_FUNCTION(Schema_GetModelMethodArgumentCount_succeeds_0)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
+        SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "model");
+        SCHEMA_METHOD_HANDLE method = Schema_CreateModelMethod(model, "method");
+        size_t nArguments;
+        umock_c_reset_all_calls();
+
+        ///act
+        SCHEMA_RESULT result = Schema_GetModelMethodArgumentCount(method, &nArguments);
+
+        ///assert
+        ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_OK, result);
+        ASSERT_ARE_EQUAL(size_t, 0, result);
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_121: [ Otherwise, Schema_GetModelMethodArgumentCount shall succeed, return in argumentCount the number of arguments for the method and return SCHEMA_OK. ]*/
+    TEST_FUNCTION(Schema_GetModelMethodArgumentCount_succeeds_1)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
+        SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "model");
+        SCHEMA_METHOD_HANDLE method = Schema_CreateModelMethod(model, "method");
+        (void)Schema_AddModelMethodArgument(method, "theArg", "int");
+        size_t nArguments;
+
+        umock_c_reset_all_calls();
+
+        ///act
+        SCHEMA_RESULT result = Schema_GetModelMethodArgumentCount(method, &nArguments);
+
+        ///assert
+        ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_OK, result);
+        ASSERT_ARE_EQUAL(size_t, 1, nArguments);
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_122: [ If methodHandle is NULL then Schema_GetModelMethodArgumentByIndex shall fail and return NULL. ]*/
+    TEST_FUNCTION(Schema_GetModelMethodArgumentByIndex_with_NULL_methodHandle_fails)
+    {
+        ///arrange
+
+        ///act
+        SCHEMA_METHOD_ARGUMENT_HANDLE methodArgument = Schema_GetModelMethodArgumentByIndex(NULL, 0);
+
+        ///assert
+        ASSERT_IS_NULL(methodArgument);
+
+        ///clean
+    }
+
+    /*Tests_SRS_SCHEMA_02_123: [ If argumentIndex does not exist then Schema_GetModelMethodArgumentByIndex shall fail and return NULL. ]*/
+    TEST_FUNCTION(Schema_GetModelMethodArgumentByIndex_with_non_existing_argument_index_fails_1)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
+        SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "model");
+        SCHEMA_METHOD_HANDLE method = Schema_CreateModelMethod(model, "method");
+
+        ///act
+        SCHEMA_METHOD_ARGUMENT_HANDLE methodArgument = Schema_GetModelMethodArgumentByIndex(method, 0);
+
+        ///assert
+        ASSERT_IS_NULL(methodArgument);
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_123: [ If argumentIndex does not exist then Schema_GetModelMethodArgumentByIndex shall fail and return NULL. ]*/
+    TEST_FUNCTION(Schema_GetModelMethodArgumentByIndex_with_non_existing_argument_index_fails_2)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
+        SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "model");
+        SCHEMA_METHOD_HANDLE method = Schema_CreateModelMethod(model, "method");
+        (void)Schema_AddModelMethodArgument(method, "theArg", "int");
+
+        ///act
+        SCHEMA_METHOD_ARGUMENT_HANDLE methodArgument = Schema_GetModelMethodArgumentByIndex(method, 1);
+
+        ///assert
+        ASSERT_IS_NULL(methodArgument);
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_124: [ Otherwise, Schema_GetModelMethodArgumentByIndex shall succeed and return a non-NULL value. ]*/
+    TEST_FUNCTION(Schema_GetModelMethodArgumentByIndex_succeeds)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
+        SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "model");
+        SCHEMA_METHOD_HANDLE method = Schema_CreateModelMethod(model, "method");
+        (void)Schema_AddModelMethodArgument(method, "theArg", "int");
+
+        ///act
+        SCHEMA_METHOD_ARGUMENT_HANDLE methodArgument = Schema_GetModelMethodArgumentByIndex(method, 0);
+
+        ///assert
+        ASSERT_IS_NOT_NULL(methodArgument);
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+    
+    /*Tests_SRS_SCHEMA_02_125: [ If methodArgumentHandle is NULL then Schema_GetMethodArgumentName shall fail and return NULL. ]*/
+    TEST_FUNCTION(Schema_GetMethodArgumentName_with_NULL_methodArgumentHandle_fails)
+    {
+        ////arrange
+
+        ///act
+        const char* name = Schema_GetMethodArgumentName(NULL);
+
+        ///assert
+        ASSERT_IS_NULL(name);
+
+        ///cleanup
+    }
+
+    /*Tests_SRS_SCHEMA_02_126: [ Otherwise, Schema_GetMethodArgumentName shall succeed and return a non-NULL value. ]*/
+    TEST_FUNCTION(Schema_GetMethodArgumentName_succeeds)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
+        SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "model");
+        SCHEMA_METHOD_HANDLE method = Schema_CreateModelMethod(model, "method");
+        (void)Schema_AddModelMethodArgument(method, "theArg", "int");
+        SCHEMA_METHOD_ARGUMENT_HANDLE methodArgument = Schema_GetModelMethodArgumentByIndex(method, 0);
+
+        ///act
+        const char* argumentName = Schema_GetMethodArgumentName(methodArgument);
+
+        ///assert
+        ASSERT_ARE_EQUAL(char_ptr, "theArg", argumentName);
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_127: [ If methodArgumentHandle is NULL then Schema_GetMethodArgumentType shall fail and return NULL. ]*/
+    TEST_FUNCTION(Schema_GetMethodArgumentType_with_NULL_methodArgumentHandle_fails)
+    {
+        ///arrange
+
+        ///act
+        const char* argumentType = Schema_GetMethodArgumentType(NULL);
+
+        ///assert
+        ASSERT_IS_NULL(argumentType);
+        ///clean
+    }
+
+    /*Tests_SRS_SCHEMA_02_128: [ Otherwise, Schema_GetMethodArgumentType shall succeed and return a non-NULL value. ]*/
+    TEST_FUNCTION(Schema_GetMethodArgumentType_succeeds)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
+        SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "model");
+        SCHEMA_METHOD_HANDLE method = Schema_CreateModelMethod(model, "method");
+        (void)Schema_AddModelMethodArgument(method, "theArg", "int");
+        SCHEMA_METHOD_ARGUMENT_HANDLE methodArgument = Schema_GetModelMethodArgumentByIndex(method, 0);
+
+        ///act
+        const char* argumentName = Schema_GetMethodArgumentType(methodArgument);
+
+        ///assert
+        ASSERT_ARE_EQUAL(char_ptr, "int", argumentName);
+
+        ///clean
+        Schema_Destroy(schemaHandle);
     }
 END_TEST_SUITE(Schema_ut)

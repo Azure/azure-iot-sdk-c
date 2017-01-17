@@ -360,6 +360,10 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(HTTPAPI_REQUEST_TYPE, HTTPAPI_REQUEST_TYPE_VALUES);
 #include "iothub_registrymanager.h"
 #include "iothub_service_client_auth.h"
 
+TEST_DEFINE_ENUM_TYPE(IOTHUB_REGISTRYMANAGER_AUTH_METHOD, IOTHUB_REGISTRYMANAGER_AUTH_METHOD_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_REGISTRYMANAGER_AUTH_METHOD, IOTHUB_REGISTRYMANAGER_AUTH_METHOD_VALUES);
+
+
 static const char* TEST_DEVICE_ID = "theDeviceId";
 static const char* TEST_PRIMARYKEY = "thePrimaryKey";
 static const char* TEST_SECONDARYKEY = "theSecondaryKey";
@@ -409,6 +413,8 @@ static HTTPAPIEX_RESULT TEST_HTTPAPIEX_RESULT = (HTTPAPIEX_RESULT)0x1;
 static const char* TEST_DEVICE_JSON_KEY_DEVICE_NAME = "deviceId";
 static const char* TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY = "authentication.symmetricKey.primaryKey";
 static const char* TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY = "authentication.symmetricKey.secondaryKey";
+static const char* TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_THUMBPRINT = "authentication.x509Thumbprint.primaryThumbprint";
+static const char* TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_THUMBPRINT = "authentication.x509Thumbprint.secondaryThumbprint";
 static const char* TEST_DEVICE_JSON_KEY_DEVICE_GENERATION_ID = "generationId";
 static const char* TEST_DEVICE_JSON_KEY_DEVICE_ETAG = "etag";
 static const char* TEST_DEVICE_JSON_KEY_DEVICE_CONNECTIONSTATE = "connectionState";
@@ -444,7 +450,7 @@ static const char* TEST_HTTP_HEADER_VAL_AUTHORIZATION = " ";
 static const char* TEST_HTTP_HEADER_KEY_REQUEST_ID = "Request-Id";
 static const char* TEST_HTTP_HEADER_VAL_REQUEST_ID = "1001";
 static const char* TEST_HTTP_HEADER_KEY_USER_AGENT = "User-Agent";
-static const char* TEST_HTTP_HEADER_VAL_USER_AGENT = "Microsoft.Azure.Devices/1.0.0";
+static const char* TEST_HTTP_HEADER_VAL_USER_AGENT = "iothubserviceclient/1.1.0";
 static const char* TEST_HTTP_HEADER_KEY_ACCEPT = "Accept";
 static const char* TEST_HTTP_HEADER_VAL_ACCEPT = "application/json";
 static const char* TEST_HTTP_HEADER_KEY_CONTENT_TYPE = "Content-Type";
@@ -631,10 +637,12 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         TEST_IOTHUB_REGISTRY_DEVICE_CREATE.deviceId = TEST_DEVICE_ID;
         TEST_IOTHUB_REGISTRY_DEVICE_CREATE.primaryKey = TEST_PRIMARYKEY;
         TEST_IOTHUB_REGISTRY_DEVICE_CREATE.secondaryKey = TEST_SECONDARYKEY;
+        TEST_IOTHUB_REGISTRY_DEVICE_CREATE.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
 
         TEST_IOTHUB_REGISTRY_DEVICE_UPDATE.deviceId = TEST_DEVICE_ID;
         TEST_IOTHUB_REGISTRY_DEVICE_UPDATE.primaryKey = TEST_PRIMARYKEY;
         TEST_IOTHUB_REGISTRY_DEVICE_UPDATE.secondaryKey = TEST_SECONDARYKEY;
+        TEST_IOTHUB_REGISTRY_DEVICE_UPDATE.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
         TEST_IOTHUB_REGISTRY_DEVICE_UPDATE.status = IOTHUB_DEVICE_STATUS_DISABLED;
 
         TEST_IOTHUB_DEVICE.deviceId = TEST_DEVICE_ID;
@@ -948,8 +956,28 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_06_006: [ IoTHubRegistryManager_CreateDevice shall cleanup and return IOTHUB_REGISTRYMANAGER_INVALID_ARG if deviceUpdate->authMethod is not "IOTHUB_REGISTRYMANAGER_AUTH_SPK" or "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT" ] */
+    TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceCreateInfo_authMethod_is_invalid)
+    {
+        ///arrange
+
+        ///act
+
+        IOTHUB_DEVICE deviceInfo;
+        (void)memset(&deviceInfo, 0, sizeof(IOTHUB_DEVICE));
+
+        TEST_IOTHUB_REGISTRY_DEVICE_CREATE.authMethod = (IOTHUB_REGISTRYMANAGER_AUTH_METHOD)12345;
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_CreateDevice(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_DEVICE_CREATE, &deviceInfo);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+
+
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_010: [ IoTHubRegistryManager_CreateDevice shall create a flat "key1:value2,key2:value2..." JSON representation from the given deviceCreateInfo parameter using the following parson APIs: json_value_init_object, json_value_get_object, json_object_set_string, json_object_dotset_string ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_012: [ IoTHubRegistryManager_CreateDevice shall set the following key/value pairs to default value: etag:null,connectionState:Disconnected,status:enabled,statusReason:null,connectionStateUpdatedTime:0001-01-01T00:00:00,statusUpdatedTime:0001-01-01T00:00:00,lastActivityTime:0001-01-01T00:00:00,authentication:{symmetricKey:{primaryKey:null,secondaryKey:null}} ]*/
+    /* Tests__SRS_IOTHUBREGISTRYMANAGER_06_002: [ IoTHubRegistryManager_CreateDevice shall, if deviceCreateInfo->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_SPK", set "authorization.symmetricKey.primaryKey" to deviceCreateInfo->primaryKey and "authorization.symmetricKey.secondaryKey" to deviceCreateInfo->secondaryKey ] */
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_024: [ If the deviceInfo out parameter is not NULL IoTHubRegistryManager_CreateDevice shall save the received deviceInfo to the out parameter and return IOTHUB_REGISTRYMANAGER_OK ]*/
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_100: [ IoTHubRegistryManager_CreateDevice shall do clean up before return ] */
     TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_happy_path_status_code_200)
@@ -1132,6 +1160,197 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         free((void*)deviceInfo.deviceProperties);
         free((void*)deviceInfo.serviceProperties);
     }
+
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_010: [ IoTHubRegistryManager_CreateDevice shall create a flat "key1:value2,key2:value2..." JSON representation from the given deviceCreateInfo parameter using the following parson APIs: json_value_init_object, json_value_get_object, json_object_set_string, json_object_dotset_string ]*/
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_06_002: [ IoTHubRegistryManager_CreateDevice shall, if deviceCreateInfo->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_SPK", set "authorization.symmetricKey.primaryKey" to deviceCreateInfo->primaryKey and "authorization.symmetricKey.secondaryKey" to deviceCreateInfo->secondaryKey ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_024: [ If the deviceInfo out parameter is not NULL IoTHubRegistryManager_CreateDevice shall save the received deviceInfo to the out parameter and return IOTHUB_REGISTRYMANAGER_OK ]*/
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_100: [ IoTHubRegistryManager_CreateDevice shall do clean up before return ] */
+    TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_happy_path_status_code_200_with_thumbprint)
+    {
+        // arrange
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(json_value_init_object())
+            .SetReturn(TEST_JSON_VALUE);
+
+        STRICT_EXPECTED_CALL(json_value_get_object(TEST_JSON_VALUE))
+            .SetReturn(TEST_JSON_OBJECT);
+
+        STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME, TEST_DEVICE_ID));
+        STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_THUMBPRINT, TEST_PRIMARYKEY));
+        STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_THUMBPRINT, TEST_SECONDARYKEY));
+        STRICT_EXPECTED_CALL(json_serialize_to_string(TEST_JSON_VALUE))
+            .SetReturn(TEST_CHAR_PTR);
+
+        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+            .IgnoreAllArguments();
+
+        STRICT_EXPECTED_CALL(json_free_serialized_string(TEST_CHAR_PTR));
+        STRICT_EXPECTED_CALL(json_object_clear(TEST_JSON_OBJECT));
+        STRICT_EXPECTED_CALL(json_value_free(TEST_JSON_VALUE));
+
+        STRICT_EXPECTED_CALL(BUFFER_new());
+
+        STRICT_EXPECTED_CALL(STRING_construct(TEST_HOSTNAME));
+        STRICT_EXPECTED_CALL(STRING_construct(TEST_SHAREDACCESSKEY));
+        STRICT_EXPECTED_CALL(STRING_construct(TEST_SHAREDACCESSKEYNAME));
+
+        STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_AUTHORIZATION, TEST_HTTP_HEADER_VAL_AUTHORIZATION))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_REQUEST_ID, TEST_HTTP_HEADER_VAL_REQUEST_ID))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_USER_AGENT, TEST_HTTP_HEADER_VAL_USER_AGENT))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_ACCEPT, TEST_HTTP_HEADER_VAL_ACCEPT))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_CONTENT_TYPE, TEST_HTTP_HEADER_VAL_CONTENT_TYPE))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(HTTPAPIEX_Create(TEST_HOSTNAME));
+
+        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(IGNORED_PTR_ARG, IGNORED_PTR_ARG, HTTPAPI_REQUEST_PUT, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .IgnoreArgument(2)
+            .IgnoreArgument(4)
+            .IgnoreArgument(5)
+            .IgnoreArgument(6)
+            .IgnoreArgument(7)
+            .IgnoreArgument(8)
+            .IgnoreArgument(9)
+            .CopyOutArgumentBuffer_statusCode(&httpStatusCodeOk, sizeof(httpStatusCodeOk))
+            .SetReturn(HTTPAPIEX_OK);
+
+        STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .SetReturn(TEST_UNSIGNED_CHAR_PTR);
+
+        STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .SetReturn(TEST_JSON_VALUE);
+        STRICT_EXPECTED_CALL(json_value_get_object(TEST_JSON_VALUE))
+            .SetReturn(TEST_JSON_OBJECT);
+
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME))
+            .SetReturn(TEST_DEVICE_ID);
+        STRICT_EXPECTED_CALL(json_object_dotget_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY))
+            .SetReturn(TEST_PRIMARYKEY);
+        STRICT_EXPECTED_CALL(json_object_dotget_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY))
+            .SetReturn(TEST_SECONDARYKEY);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_GENERATION_ID))
+            .SetReturn(TEST_GENERATIONID);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_ETAG))
+            .SetReturn(TEST_ETAG);
+
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_CONNECTIONSTATE))
+            .SetReturn(TEST_DEVICE_JSON_DEFAULT_VALUE_CONNECTED);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_CONNECTIONSTATEUPDATEDTIME))
+            .SetReturn(TEST_CONNECTIONSTATEUPDATEDTIME);
+
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_STATUS))
+            .SetReturn(TEST_DEVICE_JSON_DEFAULT_VALUE_ENABLED);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_STATUSREASON))
+            .SetReturn(TEST_STATUSREASON);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_STATUSUPDATEDTIME))
+            .SetReturn(TEST_STATUSUPDATEDTIME);
+
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_LASTACTIVITYTIME))
+            .SetReturn(TEST_LASTACTIVITYTIME);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_CLOUDTODEVICEMESSAGECOUNT))
+            .SetReturn(TEST_CLOUDTODEVICEMESSAGECOUNT);
+
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_ISMANAGED))
+            .SetReturn(TEST_IS_MANAGED);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_CONFIGURATION))
+            .SetReturn(TEST_CONFIGURATION);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_DEVICEROPERTIES))
+            .SetReturn(TEST_DEVICEPROPERTIES);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SERVICEPROPERTIES))
+            .SetReturn(TEST_SERVICEPROPERTIES);
+
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+
+        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        // act
+        IOTHUB_DEVICE deviceInfo;
+        IOTHUB_REGISTRY_DEVICE_CREATE deviceCreate;
+        deviceCreate.deviceId = TEST_DEVICE_ID;
+        deviceCreate.primaryKey = TEST_PRIMARYKEY;
+        deviceCreate.secondaryKey = TEST_SECONDARYKEY;
+        deviceCreate.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT;
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_CreateDevice(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &deviceCreate, &deviceInfo);
+
+        // assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
+
+        // cleanup
+        free((void*)deviceInfo.deviceId);
+        free((void*)deviceInfo.primaryKey);
+        free((void*)deviceInfo.secondaryKey);
+        free((void*)deviceInfo.generationId);
+        free((void*)deviceInfo.eTag);
+        free((void*)deviceInfo.connectionStateUpdatedTime);
+        free((void*)deviceInfo.statusReason);
+        free((void*)deviceInfo.statusUpdatedTime);
+        free((void*)deviceInfo.lastActivityTime);
+        free((void*)deviceInfo.configuration);
+        free((void*)deviceInfo.deviceProperties);
+        free((void*)deviceInfo.serviceProperties);
+    }
+
 
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_020: [ IoTHubRegistryManager_CreateDevice shall verify the received HTTP status code and if it is 409 then return IOTHUB_REGISTRYMANAGER_DEVICE_EXIST ]*/
     TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_happy_path_status_code_409)
@@ -1476,11 +1695,14 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_026: [ IoTHubRegistryManager_GetDevice shall create HTTP GET request URL using the given deviceId using the following format: url/devices/[deviceId]?api-version=2016-02-03  ]*/
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_026: [ IoTHubRegistryManager_GetDevice shall create HTTP GET request URL using the given deviceId using the following format: url/devices/[deviceId]?api-version=2016-11-14  ]*/
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_027: [ IoTHubRegistryManager_GetDevice shall add the following headers to the created HTTP GET request: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 ]*/
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_028: [ IoTHubRegistryManager_GetDevice shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ]*/
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_029: [ IoTHubRegistryManager_GetDevice shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ]*/
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_030: [ IoTHubRegistryManager_GetDevice shall execute the HTTP GET request by calling HTTPAPIEX_ExecuteRequest ]*/
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_06_008: [ IoTHubRegistryManager_GetDevice shall, if json was found for authorization.symetricKey.primaryKey, set the device info authMethod to "IOTHUB_REGISTRYMANAGER_AUTH_SPK" ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_06_012: [ IoTHubRegistryManager_GetDevice shall, if json was found for authorization.x509Thumbprint.secondaryThumbprint, set the device info authMethod to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT" ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_06_010: [ IoTHubRegistryManager_GetDevice shall, if json was found for authorization.symetricKey.secondaryKey, set the device info authMethod to "IOTHUB_REGISTRYMANAGER_AUTH_SPK" ] */
     TEST_FUNCTION(IoTHubRegistryManager_GetDevice_happy_path)
     {
         ///arrange
@@ -1618,6 +1840,169 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetDevice(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, &deviceInfo);
 
         ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_AUTH_SPK, deviceInfo.authMethod);
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///cleanup
+        free((void*)deviceInfo.deviceId);
+        free((void*)deviceInfo.primaryKey);
+        free((void*)deviceInfo.secondaryKey);
+        free((void*)deviceInfo.generationId);
+        free((void*)deviceInfo.eTag);
+        free((void*)deviceInfo.connectionStateUpdatedTime);
+        free((void*)deviceInfo.statusReason);
+        free((void*)deviceInfo.statusUpdatedTime);
+        free((void*)deviceInfo.lastActivityTime);
+        free((void*)deviceInfo.configuration);
+        free((void*)deviceInfo.deviceProperties);
+        free((void*)deviceInfo.serviceProperties);
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_GetDevice_happy_path_with_thumbprint)
+    {
+        ///arrange
+        STRICT_EXPECTED_CALL(BUFFER_new());
+
+        STRICT_EXPECTED_CALL(STRING_construct(TEST_HOSTNAME));
+        STRICT_EXPECTED_CALL(STRING_construct(TEST_SHAREDACCESSKEY));
+        STRICT_EXPECTED_CALL(STRING_construct(TEST_SHAREDACCESSKEYNAME));
+
+        STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_AUTHORIZATION, TEST_HTTP_HEADER_VAL_AUTHORIZATION))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_REQUEST_ID, TEST_HTTP_HEADER_VAL_REQUEST_ID))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_USER_AGENT, TEST_HTTP_HEADER_VAL_USER_AGENT))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_ACCEPT, TEST_HTTP_HEADER_VAL_ACCEPT))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_CONTENT_TYPE, TEST_HTTP_HEADER_VAL_CONTENT_TYPE))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(HTTPAPIEX_Create(TEST_HOSTNAME));
+
+        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(IGNORED_PTR_ARG, IGNORED_PTR_ARG, HTTPAPI_REQUEST_GET, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .IgnoreArgument(2)
+            .IgnoreArgument(4)
+            .IgnoreArgument(5)
+            .IgnoreArgument(6)
+            .IgnoreArgument(7)
+            .IgnoreArgument(8)
+            .IgnoreArgument(9)
+            .CopyOutArgumentBuffer_statusCode(&httpStatusCodeOk, sizeof(httpStatusCodeOk))
+            .SetReturn(HTTPAPIEX_OK);
+
+        STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .SetReturn(TEST_UNSIGNED_CHAR_PTR);
+
+        STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .SetReturn(TEST_JSON_VALUE);
+        STRICT_EXPECTED_CALL(json_value_get_object(TEST_JSON_VALUE))
+            .SetReturn(TEST_JSON_OBJECT);
+
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME))
+            .SetReturn(TEST_DEVICE_ID);
+        STRICT_EXPECTED_CALL(json_object_dotget_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY))
+            .SetReturn(NULL);
+        STRICT_EXPECTED_CALL(json_object_dotget_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY))
+            .SetReturn(NULL);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_GENERATION_ID))
+            .SetReturn(TEST_GENERATIONID);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_ETAG))
+            .SetReturn(TEST_ETAG);
+
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_CONNECTIONSTATE))
+            .SetReturn(TEST_DEVICE_JSON_DEFAULT_VALUE_CONNECTED);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_CONNECTIONSTATEUPDATEDTIME))
+            .SetReturn(TEST_CONNECTIONSTATEUPDATEDTIME);
+
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_STATUS))
+            .SetReturn(TEST_DEVICE_JSON_DEFAULT_VALUE_ENABLED);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_STATUSREASON))
+            .SetReturn(TEST_STATUSREASON);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_STATUSUPDATEDTIME))
+            .SetReturn(TEST_STATUSUPDATEDTIME);
+
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_LASTACTIVITYTIME))
+            .SetReturn(TEST_LASTACTIVITYTIME);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_CLOUDTODEVICEMESSAGECOUNT))
+            .SetReturn(TEST_CLOUDTODEVICEMESSAGECOUNT);
+
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_ISMANAGED))
+            .SetReturn(TEST_IS_MANAGED);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_CONFIGURATION))
+            .SetReturn(TEST_CONFIGURATION);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_DEVICEROPERTIES))
+            .SetReturn(TEST_DEVICEPROPERTIES);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SERVICEPROPERTIES))
+            .SetReturn(TEST_SERVICEPROPERTIES);
+
+        STRICT_EXPECTED_CALL(json_object_dotget_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_THUMBPRINT))
+            .SetReturn(TEST_PRIMARYKEY);
+        STRICT_EXPECTED_CALL(json_object_dotget_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_THUMBPRINT))
+            .SetReturn(TEST_SECONDARYKEY);
+
+
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+
+        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+
+        ///act
+        IOTHUB_DEVICE deviceInfo;
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetDevice(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, &deviceInfo);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT, deviceInfo.authMethod);
         ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
@@ -1866,9 +2251,23 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_06_005: [ IoTHubRegistryManager_UpdateDevice shall clean up and return IOTHUB_REGISTRYMANAGER_INVALID_ARG if deviceUpdate->authMethod is not "IOTHUB_REGISTRYMANAGER_AUTH_SPK" or "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT" ] */
+    TEST_FUNCTION(IoTHubRegistryManager_UpdateDevice_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceUpdate_authMethod_is_invalid)
+    {
+        ///arrange
+
+        ///act
+        TEST_IOTHUB_REGISTRY_DEVICE_UPDATE.authMethod = (IOTHUB_REGISTRYMANAGER_AUTH_METHOD)12345;
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_UpdateDevice(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_DEVICE_UPDATE);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_039: [ IoTHubRegistryManager_UpdateDevice shall verify the deviceCreateInfo->deviceId input parameter and if it is NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_106: [ IoTHubRegistryManager_UpdateDevice shall allocate memory for device info structure by calling malloc ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_107: [ IoTHubRegistryManager_UpdateDevice shall set the "symmetricKey" value to deviceCreateInfo->primaryKey and deviceCreateInfo->secondaryKey ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_06_004: [ IoTHubRegistryManager_UpdateDevice shall, if deviceUpdate->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_SPK", set "authorization.symmetricKey.primaryKey" to deviceCreateInfo->primaryKey and "authorization.symmetricKey.secondaryKey" to deviceCreateInfo->secondaryKey ] */
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_041: [ IoTHubRegistryManager_UpdateDevice shall create a flat "key1:value2,key2:value2..." JSON representation from the given deviceCreateInfo parameter using the following parson APIs : json_value_init_object, json_value_get_object, json_object_set_string, json_object_dotset_string ] */
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_101: [ IoTHubRegistryManager_UpdateDevice shall allocate memory for response buffer by calling BUFFER_new ] */
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_043: [ IoTHubRegistryManager_UpdateDevice shall create an HTTP PUT request using the created JSON ] */
@@ -1970,9 +2369,119 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_039: [ IoTHubRegistryManager_UpdateDevice shall verify the deviceCreateInfo->deviceId input parameter and if it is NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_106: [ IoTHubRegistryManager_UpdateDevice shall allocate memory for device info structure by calling malloc ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_06_003: [ IoTHubRegistryManager_UpdateDevice shall, if deviceUpdate->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT", set "authorization.x509Thumbprint.primaryThumbprint" to deviceCreateInfo->primaryKey and "authorization.x509Thumbprint.secondaryThumbprint" to deviceCreateInfo->secondaryKey ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_041: [ IoTHubRegistryManager_UpdateDevice shall create a flat "key1:value2,key2:value2..." JSON representation from the given deviceCreateInfo parameter using the following parson APIs : json_value_init_object, json_value_get_object, json_object_set_string, json_object_dotset_string ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_101: [ IoTHubRegistryManager_UpdateDevice shall allocate memory for response buffer by calling BUFFER_new ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_043: [ IoTHubRegistryManager_UpdateDevice shall create an HTTP PUT request using the created JSON ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_044: [ IoTHubRegistryManager_UpdateDevice shall create an HTTP PUT request using the createdfollowing HTTP headers : authorization = sasToken, Request - Id = 1001, Accept = application / json, Content - Type = application / json, charset = utf - 8 ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_045: [ IoTHubRegistryManager_UpdateDevice shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_046: [ IoTHubRegistryManager_UpdateDevice shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_047: [ IoTHubRegistryManager_UpdateDevice shall execute the HTTP PUT request by calling HTTPAPIEX_ExecuteRequest ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_105: [ IoTHubRegistryManager_UpdateDevice shall do clean up before return ] */
+    TEST_FUNCTION(IoTHubRegistryManager_UpdateDevice_happy_path_with_thumbprint)
+    {
+        // arrange
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(json_value_init_object())
+            .SetReturn(TEST_JSON_VALUE);
+
+        STRICT_EXPECTED_CALL(json_value_get_object(TEST_JSON_VALUE))
+            .SetReturn(TEST_JSON_OBJECT);
+
+        STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME, TEST_DEVICE_ID));
+        STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_THUMBPRINT, TEST_PRIMARYKEY));
+        STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_THUMBPRINT, TEST_SECONDARYKEY));
+        STRICT_EXPECTED_CALL(json_serialize_to_string(TEST_JSON_VALUE))
+            .SetReturn(TEST_CHAR_PTR);
+
+        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+            .IgnoreAllArguments();
+
+        STRICT_EXPECTED_CALL(json_free_serialized_string(TEST_CHAR_PTR));
+        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(BUFFER_new());
+
+        STRICT_EXPECTED_CALL(STRING_construct(TEST_HOSTNAME));
+        STRICT_EXPECTED_CALL(STRING_construct(TEST_SHAREDACCESSKEY));
+        STRICT_EXPECTED_CALL(STRING_construct(TEST_SHAREDACCESSKEYNAME));
+
+        STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_AUTHORIZATION, TEST_HTTP_HEADER_VAL_AUTHORIZATION))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_REQUEST_ID, TEST_HTTP_HEADER_VAL_REQUEST_ID))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_USER_AGENT, TEST_HTTP_HEADER_VAL_USER_AGENT))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_ACCEPT, TEST_HTTP_HEADER_VAL_ACCEPT))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_CONTENT_TYPE, TEST_HTTP_HEADER_VAL_CONTENT_TYPE))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_IFMATCH, TEST_HTTP_HEADER_VAL_IFMATCH))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(HTTPAPIEX_Create(TEST_HOSTNAME));
+
+        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(IGNORED_PTR_ARG, IGNORED_PTR_ARG, HTTPAPI_REQUEST_PUT, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .IgnoreArgument(2)
+            .IgnoreArgument(4)
+            .IgnoreArgument(5)
+            .IgnoreArgument(6)
+            .IgnoreArgument(7)
+            .IgnoreArgument(8)
+            .IgnoreArgument(9)
+            .CopyOutArgumentBuffer_statusCode(&httpStatusCodeOk, sizeof(httpStatusCodeOk))
+            .SetReturn(HTTPAPIEX_OK);
+
+        STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        // act
+        IOTHUB_REGISTRY_DEVICE_UPDATE deviceUpdate;
+        deviceUpdate.deviceId = TEST_DEVICE_ID;
+        deviceUpdate.primaryKey = TEST_PRIMARYKEY;
+        deviceUpdate.secondaryKey = TEST_SECONDARYKEY;
+        deviceUpdate.status = IOTHUB_DEVICE_STATUS_DISABLED;
+        deviceUpdate.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT;
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_UpdateDevice(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &deviceUpdate);
+
+        // assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_108: [ If the malloc fails, IoTHubRegistryManager_Create shall do clean up and return NULL ] */
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_042: [ IoTHubRegistryManager_UpdateDevice shall return IOTHUB_REGISTRYMANAGER_JSON_ERROR if the JSON creation failed  ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_102: [ If the BUFFER_new fails, IoTHubRegistryManager_UpdateDevice shall do clean up and return NULL. ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_102: [ If the BUFFER_new fails, IoTHubRegistryManager_UpdateDevice shall do clean up and return IOTHUB_REGISTRYMANAGER_ERROR. ] */
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_103: [ If any of the call fails during the HTTP creation IoTHubRegistryManager_UpdateDevice shall fail and return IOTHUB_REGISTRYMANAGER_ERROR ] */
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_104: [ If any of the HTTPAPI call fails IoTHubRegistryManager_UpdateDevice shall fail and return IOTHUB_REGISTRYMANAGER_HTTPAPI_ERROR ] */
     TEST_FUNCTION(IoTHubRegistryManager_UpdateDevice_non_happy_path)
@@ -2363,6 +2872,8 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_072: [ If populating the deviceList parameter fails IoTHubRegistryManager_GetDeviceList shall return IOTHUB_REGISTRYMANAGER_ERROR ]*/
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_073: [ If populating the deviceList parameter successful IoTHubRegistryManager_GetDeviceList shall return IOTHUB_REGISTRYMANAGER_OK ]*/
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_111: [ IoTHubRegistryManager_GetDeviceList shall do clean up before return ]*/
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_06_013: [ IoTHubRegistryManager_GetDeviceList shall, if json was found for authorization.symetricKey.primaryKey, set the device info authMethod to "IOTHUB_REGISTRYMANAGER_AUTH_SPK" ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_06_016: [ IoTHubRegistryManager_GetDeviceList shall, if json was found for authorization.symetricKey.secondaryKey, set the device info authMethod to "IOTHUB_REGISTRYMANAGER_AUTH_SPK" ] */
     TEST_FUNCTION(IoTHubRegistryManager_GetDeviceList_happy_path)
     {
         ///arrange
@@ -2524,6 +3035,8 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
                 IOTHUB_DEVICE* deviceInfo = (IOTHUB_DEVICE*)itemHandle->item;
                 itemHandle = singlylinkedlist_get_next_item(itemHandle);
 
+                ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_AUTH_SPK, deviceInfo->authMethod);
+
                 if (deviceInfo->deviceId != NULL)
                     free((char*)deviceInfo->deviceId);
                 if (deviceInfo->primaryKey != NULL)
@@ -2553,6 +3066,209 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
             singlylinkedlist_destroy(deviceList);
         }
     }
+
+    /*Tests_SRS_IOTHUBREGISTRYMANAGER_06_014: [ IoTHubRegistryManager_GetDeviceList shall, if no json was found for authorization.symetricKey.primaryKey, parse for authorization.x509Thumbprint.primaryThumbprint ] */
+    /*Tests_SRS_IOTHUBREGISTRYMANAGER_06_017: [ IoTHubRegistryManager_GetDeviceList shall, if no json was found for authorization.symetricKey.secondaryKey, parse for authorization.x509Thumbprint.secondaryThumbprint ] */
+
+    TEST_FUNCTION(IoTHubRegistryManager_GetDeviceList_happy_path_with_thumbprint)
+    {
+        ///arrange
+        SINGLYLINKEDLIST_HANDLE deviceList = singlylinkedlist_create();
+        ASSERT_IS_NOT_NULL(deviceList);
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(BUFFER_new());
+
+        STRICT_EXPECTED_CALL(STRING_construct(TEST_HOSTNAME));
+        STRICT_EXPECTED_CALL(STRING_construct(TEST_SHAREDACCESSKEY));
+        STRICT_EXPECTED_CALL(STRING_construct(TEST_SHAREDACCESSKEYNAME));
+
+        STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_AUTHORIZATION, TEST_HTTP_HEADER_VAL_AUTHORIZATION))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_REQUEST_ID, TEST_HTTP_HEADER_VAL_REQUEST_ID))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_USER_AGENT, TEST_HTTP_HEADER_VAL_USER_AGENT))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_ACCEPT, TEST_HTTP_HEADER_VAL_ACCEPT))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_CONTENT_TYPE, TEST_HTTP_HEADER_VAL_CONTENT_TYPE))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(HTTPAPIEX_Create(TEST_HOSTNAME));
+
+        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(IGNORED_PTR_ARG, IGNORED_PTR_ARG, HTTPAPI_REQUEST_GET, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .IgnoreArgument(2)
+            .IgnoreArgument(4)
+            .IgnoreArgument(5)
+            .IgnoreArgument(6)
+            .IgnoreArgument(7)
+            .IgnoreArgument(8)
+            .IgnoreArgument(9)
+            .CopyOutArgumentBuffer_statusCode(&httpStatusCodeOk, sizeof(httpStatusCodeOk))
+            .SetReturn(HTTPAPIEX_OK);
+
+        STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .SetReturn(TEST_UNSIGNED_CHAR_PTR);
+        STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .SetReturn(TEST_JSON_VALUE);
+        STRICT_EXPECTED_CALL(json_value_get_array(TEST_JSON_VALUE))
+            .SetReturn(TEST_JSON_ARRAY);
+
+        STRICT_EXPECTED_CALL(json_array_get_count(TEST_JSON_ARRAY))
+            .SetReturn(1);
+
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(json_array_get_object(TEST_JSON_ARRAY, 0))
+            .SetReturn(TEST_JSON_OBJECT);
+
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME))
+            .SetReturn(TEST_DEVICE_ID);
+        STRICT_EXPECTED_CALL(json_object_dotget_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY))
+            .SetReturn(NULL);
+        STRICT_EXPECTED_CALL(json_object_dotget_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY))
+            .SetReturn(NULL);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_GENERATION_ID))
+            .SetReturn(TEST_GENERATIONID);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_ETAG))
+            .SetReturn(TEST_ETAG);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_CONNECTIONSTATE))
+            .SetReturn(TEST_DEVICE_JSON_DEFAULT_VALUE_CONNECTED);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_CONNECTIONSTATEUPDATEDTIME))
+            .SetReturn(TEST_CONNECTIONSTATEUPDATEDTIME);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_STATUS))
+            .SetReturn(TEST_DEVICE_JSON_DEFAULT_VALUE_ENABLED);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_STATUSREASON))
+            .SetReturn(TEST_STATUSREASON);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_STATUSUPDATEDTIME))
+            .SetReturn(TEST_STATUSUPDATEDTIME);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_LASTACTIVITYTIME))
+            .SetReturn(TEST_LASTACTIVITYTIME);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_CLOUDTODEVICEMESSAGECOUNT))
+            .SetReturn(TEST_CLOUDTODEVICEMESSAGECOUNT);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_ISMANAGED))
+            .SetReturn(TEST_IS_MANAGED);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_CONFIGURATION))
+            .SetReturn(TEST_CONFIGURATION);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_DEVICEROPERTIES))
+            .SetReturn(TEST_DEVICEPROPERTIES);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SERVICEPROPERTIES))
+            .SetReturn(TEST_SERVICEPROPERTIES);
+
+        STRICT_EXPECTED_CALL(json_object_dotget_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_THUMBPRINT))
+            .SetReturn(TEST_PRIMARYKEY);
+        STRICT_EXPECTED_CALL(json_object_dotget_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_THUMBPRINT))
+            .SetReturn(TEST_SECONDARYKEY);
+
+
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+
+        STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+
+        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(json_array_clear(IGNORED_NUM_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        ///act
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetDeviceList(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, 10, deviceList);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///cleanup
+        if (deviceList != NULL)
+        {
+            LIST_ITEM_HANDLE itemHandle = singlylinkedlist_get_head_item(deviceList);
+            while (itemHandle != NULL)
+            {
+                IOTHUB_DEVICE* deviceInfo = (IOTHUB_DEVICE*)itemHandle->item;
+                itemHandle = singlylinkedlist_get_next_item(itemHandle);
+
+                ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT, deviceInfo->authMethod);
+
+                if (deviceInfo->deviceId != NULL)
+                    free((char*)deviceInfo->deviceId);
+                if (deviceInfo->primaryKey != NULL)
+                    free((char*)deviceInfo->primaryKey);
+                if (deviceInfo->secondaryKey != NULL)
+                    free((char*)deviceInfo->secondaryKey);
+                if (deviceInfo->generationId != NULL)
+                    free((char*)deviceInfo->generationId);
+                if (deviceInfo->eTag != NULL)
+                    free((char*)deviceInfo->eTag);
+                if (deviceInfo->connectionStateUpdatedTime != NULL)
+                    free((char*)deviceInfo->connectionStateUpdatedTime);
+                if (deviceInfo->statusReason != NULL)
+                    free((char*)deviceInfo->statusReason);
+                if (deviceInfo->statusUpdatedTime != NULL)
+                    free((char*)deviceInfo->statusUpdatedTime);
+                if (deviceInfo->lastActivityTime != NULL)
+                    free((char*)deviceInfo->lastActivityTime);
+                if (deviceInfo->configuration != NULL)
+                    free((char*)deviceInfo->configuration);
+                if (deviceInfo->deviceProperties != NULL)
+                    free((char*)deviceInfo->deviceProperties);
+                if (deviceInfo->serviceProperties != NULL)
+                    free((char*)deviceInfo->serviceProperties);
+                free(deviceInfo);
+            }
+            singlylinkedlist_destroy(deviceList);
+        }
+    }
+
 
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_110: [ If the BUFFER_new fails, IoTHubRegistryManager_GetDeviceList shall do clean up and return NULL ]*/
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_070: [ If any of the parson API fails, IoTHubRegistryManager_GetDeviceList shall return IOTHUB_REGISTRYMANAGER_JSON_ERROR ]*/

@@ -6,6 +6,9 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#ifdef ARDUINO
+#include "AzureIoTHub.h"
+#else
 #include "serializer.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/sastoken.h"
@@ -13,6 +16,7 @@
 #include "iothub_client.h"
 #include "iothubtransportamqp.h"
 #include "iothub_client_ll.h"
+#endif
 
 #ifdef MBED_BUILD_TIMESTAMP
 #include "certs.h"

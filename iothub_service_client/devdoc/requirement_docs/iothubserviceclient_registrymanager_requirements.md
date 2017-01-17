@@ -21,7 +21,7 @@ DEFINE_ENUM(IOTHUB_DEVICE_STATUS, IOTHUB_DEVICE_STATUS_VALUES);
 
 #define IOTHUB_DEVICE_CONNECTION_STATE_VALUES         \
     IOTHUB_DEVICE_CONNECTION_STATE_CONNECTED,         \
-    IOTHUB_DEVICE_CONNECTION_STATE_NOT_CONNECTED      \
+    IOTHUB_DEVICE_CONNECTION_STATE_DISCONNECTED       \
 
 DEFINE_ENUM(IOTHUB_DEVICE_CONNECTION_STATE, IOTHUB_DEVICE_CONNECTION_STATE_VALUES);
 
@@ -29,12 +29,20 @@ DEFINE_ENUM(IOTHUB_DEVICE_CONNECTION_STATE, IOTHUB_DEVICE_CONNECTION_STATE_VALUE
     IOTHUB_REGISTRYMANAGER_OK,                      \
     IOTHUB_REGISTRYMANAGER_INVALID_ARG,             \
     IOTHUB_REGISTRYMANAGER_ERROR,                   \
-    IOTHUB_REGISTRYMANAGER_JSON_ERROR,            \
+    IOTHUB_REGISTRYMANAGER_JSON_ERROR,              \
+    IOTHUB_REGISTRYMANAGER_HTTPAPI_ERROR,           \
+    IOTHUB_REGISTRYMANAGER_HTTP_STATUS_ERROR,       \
     IOTHUB_REGISTRYMANAGER_DEVICE_EXIST,            \
     IOTHUB_REGISTRYMANAGER_DEVICE_NOT_EXIST,        \
     IOTHUB_REGISTRYMANAGER_CALLBACK_NOT_SET         \
 
 DEFINE_ENUM(IOTHUB_REGISTRYMANAGER_RESULT, IOTHUB_REGISTRYMANAGER_RESULT_VALUES);
+
+#define IOTHUB_REGISTRYMANAGER_AUTH_METHOD_VALUES      \
+    IOTHUB_REGISTRYMANAGER_AUTH_SPK,                   \
+    IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT        \
+
+DEFINE_ENUM(IOTHUB_REGISTRYMANAGER_AUTH_METHOD, IOTHUB_REGISTRYMANAGER_AUTH_METHOD_VALUES);
 
 typedef struct IOTHUB_DEVICE_TAG
 {
@@ -43,17 +51,19 @@ typedef struct IOTHUB_DEVICE_TAG
     const char* secondaryKey;
     const char* generationId;
     const char* eTag;
-    const char* configuration;
-    MAP_HANDLE systemProperties;
-    MAP_HANDLE customProperties;
-    MAP_HANDLE serviceProperties;
     IOTHUB_DEVICE_CONNECTION_STATE connectionState;
-    const char* connectionstateUpdatedTime;
+    const char* connectionStateUpdatedTime;
     IOTHUB_DEVICE_STATUS status;
     const char* statusReason;
-    time_t statusUpdatedTime;
-    time_t lastActivityTime;
+    const char* statusUpdatedTime;
+    const char* lastActivityTime;
     size_t cloudToDeviceMessageCount;
+
+    bool isManaged;
+    const char* configuration;
+    const char* deviceProperties;
+    const char* serviceProperties;
+    IOTHUB_REGISTRYMANAGER_AUTH_METHOD authMethod;
 } IOTHUB_DEVICE;
 
 typedef struct IOTHUB_REGISTRY_DEVICE_CREATE_TAG
@@ -61,13 +71,16 @@ typedef struct IOTHUB_REGISTRY_DEVICE_CREATE_TAG
     const char* deviceId;
     const char* primaryKey;
     const char* secondaryKey;
+    IOTHUB_REGISTRYMANAGER_AUTH_METHOD authMethod;
 } IOTHUB_REGISTRY_DEVICE_CREATE;
 
 typedef struct IOTHUB_REGISTRY_DEVICE_UPDATE_TAG
 {
+    const char* deviceId;
     const char* primaryKey;
     const char* secondaryKey;
     IOTHUB_DEVICE_STATUS status;
+    IOTHUB_REGISTRYMANAGER_AUTH_METHOD authMethod;
 } IOTHUB_REGISTRY_DEVICE_UPDATE;
 
 typedef struct IOTHUB_REGISTRY_STATISTIC_TAG
@@ -76,6 +89,15 @@ typedef struct IOTHUB_REGISTRY_STATISTIC_TAG
     size_t enabledDeviceCount;
     size_t disabledDeviceCount;
 } IOTHUB_REGISTRY_STATISTICS;
+
+typedef struct IOTHUB_REGISTRYMANAGER_TAG
+{
+    char* hostname;
+    char* iothubName;
+    char* iothubSuffix;
+    char* sharedAccessKey;
+    char* keyName;
+} IOTHUB_REGISTRYMANAGER;
 
 typedef struct IOTHUB_REGISTRYMANAGER_TAG* IOTHUB_REGISTRYMANAGER_HANDLE;
 
@@ -148,17 +170,21 @@ extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_CreateDevice(IOTHUB_R
 
 **SRS_IOTHUBREGISTRYMANAGER_12_011: [** IoTHubRegistryManager_CreateDevice shall set the "deviceId" value to the deviceCreateInfo->deviceId **]**
 
-**SRS_IOTHUBREGISTRYMANAGER_12_012: [** IoTHubRegistryManager_CreateDevice shall set the "symmetricKey" value to deviceCreateInfo->primaryKey and deviceCreateInfo->secondaryKey **]**
+**SRS_IOTHUBREGISTRYMANAGER_06_001: [** IoTHubRegistryManager_CreateDevice shall, if deviceCreateInfo->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT", set "authorization.x509Thumbprint.primaryThumbprint" to deviceCreateInfo->primaryKey and "authorization.x509Thumbprint.secondaryThumbprint" to deviceCreateInfo->secondaryKey **]**
+
+**SRS_IOTHUBREGISTRYMANAGER_06_002: [** IoTHubRegistryManager_CreateDevice shall, if deviceCreateInfo->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_SPK", set "authorization.symmetricKey.primaryKey" to deviceCreateInfo->primaryKey and "authorization.symmetricKey.secondaryKey" to deviceCreateInfo->secondaryKey **]**
+
+**SRS_IOTHUBREGISTRYMANAGER_06_006: [** IoTHubRegistryManager_CreateDevice shall cleanup and return IOTHUB_REGISTRYMANAGER_INVALID_ARG if deviceUpdate->authMethod is not "IOTHUB_REGISTRYMANAGER_AUTH_SPK" or "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT" **]**
 
 **SRS_IOTHUBREGISTRYMANAGER_12_013: [** IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_JSON_ERROR if the JSON creation failed  **]**
 
 **SRS_IOTHUBREGISTRYMANAGER_12_095: [** IoTHubRegistryManager_CreateDevice shall allocate memory for device info structure by calling malloc **]**
 
-**SRS_IOTHUBREGISTRYMANAGER_12_096: [** If the malloc fails, IoTHubRegistryManager_Create shall do clean up and return NULL. **]**
+**SRS_IOTHUBREGISTRYMANAGER_12_096: [** If the malloc fails, IoTHubRegistryManager_Create shall do clean up and return IOTHUB_REGISTRYMANAGER_ERROR. **]**
 
 **SRS_IOTHUBREGISTRYMANAGER_12_097: [** IoTHubRegistryManager_CreateDevice shall allocate memory for response buffer by calling BUFFER_new **]**
 
-**SRS_IOTHUBREGISTRYMANAGER_12_098: [** If the BUFFER_new fails, IoTHubRegistryManager_CreateDevice shall do clean up and return NULL. **]**
+**SRS_IOTHUBREGISTRYMANAGER_12_098: [** If the BUFFER_new fails, IoTHubRegistryManager_CreateDevice shall do clean up and return IOTHUB_REGISTRYMANAGER_ERROR. **]**
 
 **SRS_IOTHUBREGISTRYMANAGER_12_014: [** IoTHubRegistryManager_CreateDevice shall create an HTTP PUT request using the created JSON **]**
 
@@ -192,7 +218,7 @@ extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetDevice(IOTHUB_REGI
 ```
 **SRS_IOTHUBREGISTRYMANAGER_12_025: [** IoTHubRegistryManager_GetDevice shall verify the registryManagerHandle and deviceId input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG **]**
 
-**SRS_IOTHUBREGISTRYMANAGER_12_026: [** IoTHubRegistryManager_GetDevice shall create HTTP GET request URL using the given deviceId using the following format: url/devices/[deviceId]?api-version=2016-02-03  **]**
+**SRS_IOTHUBREGISTRYMANAGER_12_026: [** IoTHubRegistryManager_GetDevice shall create HTTP GET request URL using the given deviceId using the following format: url/devices/[deviceId]?api-version=2016-11-14  **]**
 
 **SRS_IOTHUBREGISTRYMANAGER_12_027: [** IoTHubRegistryManager_GetDevice shall add the following headers to the created HTTP GET request: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 **]**
 
@@ -207,6 +233,18 @@ extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetDevice(IOTHUB_REGI
 **SRS_IOTHUBREGISTRYMANAGER_12_032: [** IoTHubRegistryManager_GetDevice shall verify the received HTTP status code and if it is greater than 300 then return IOTHUB_REGISTRYMANAGER_ERROR **]**
 
 **SRS_IOTHUBREGISTRYMANAGER_12_033: [** IoTHubRegistryManager_GetDevice shall verify the received HTTP status code and if it is less or equal than 300 then try to parse the response JSON to deviceInfo for the following properties: deviceId, primaryKey, secondaryKey, generationId, eTag, connectionState, connectionstateUpdatedTime, status, statusReason, statusUpdatedTime, lastActivityTime, cloudToDeviceMessageCount **]**
+
+**SRS_IOTHUBREGISTRYMANAGER_06_008: [** IoTHubRegistryManager_GetDevice shall, if json was found for authorization.symetricKey.primaryKey, set the device info authMethod to "IOTHUB_REGISTRYMANAGER_AUTH_SPK" **]**
+
+**SRS_IOTHUBREGISTRYMANAGER_06_007: [** IoTHubRegistryManager_GetDevice shall, if no json was found for authorization.symetricKey.primaryKey, parse for authorization.x509Thumbprint.primaryThumbprint **]**
+
+**SRS_IOTHUBREGISTRYMANAGER_06_009: [** IoTHubRegistryManager_GetDevice shall, if json was found for authorization.x509Thumbprint.primaryThumbprint, set the device info authMethod to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT" **]**
+
+**SRS_IOTHUBREGISTRYMANAGER_06_010: [** IoTHubRegistryManager_GetDevice shall, if json was found for authorization.symetricKey.secondaryKey, set the device info authMethod to "IOTHUB_REGISTRYMANAGER_AUTH_SPK" **]**
+
+**SRS_IOTHUBREGISTRYMANAGER_06_011: [** IoTHubRegistryManager_GetDevice shall, if no json was found for authorization.symetricKey.secondaryKey, parse for authorization.x509Thumbprint.secondaryThumbprint **]**
+
+**SRS_IOTHUBREGISTRYMANAGER_06_012: [** IoTHubRegistryManager_GetDevice shall, if json was found for authorization.x509Thumbprint.secondaryThumbprint,set the device info authMethod to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT" **]**
 
 **SRS_IOTHUBREGISTRYMANAGER_12_034: [** If any of the property field above missing from the JSON the property value will not be populated **]**
 
@@ -228,17 +266,21 @@ extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_UpdateDevice(IOTHUB_R
 
 **SRS_IOTHUBREGISTRYMANAGER_12_106: [** IoTHubRegistryManager_UpdateDevice shall allocate memory for device info structure by calling malloc **]**
 
-**SRS_IOTHUBREGISTRYMANAGER_12_108: [** If the malloc fails, IoTHubRegistryManager_UpdateDevice shall do clean up and return NULL **]**
-
-**SRS_IOTHUBREGISTRYMANAGER_12_107: [** IoTHubRegistryManager_UpdateDevice shall set the "symmetricKey" value to deviceCreateInfo->primaryKey and deviceCreateInfo->secondaryKey **]**
+**SRS_IOTHUBREGISTRYMANAGER_12_108: [** If the malloc fails, IoTHubRegistryManager_UpdateDevice shall do clean up and return IOTHUB_REGISTRYMANAGER_ERROR **]**
 
 **SRS_IOTHUBREGISTRYMANAGER_12_041: [** IoTHubRegistryManager_UpdateDevice shall create a flat "key1:value2,key2:value2..." JSON representation from the given deviceCreateInfo parameter using the following parson APIs: json_value_init_object, json_value_get_object, json_object_set_string, json_object_dotset_string **]**
+
+**SRS_IOTHUBREGISTRYMANAGER_06_003: [** IoTHubRegistryManager_UpdateDevice shall, if deviceUpdate->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT", set "authorization.x509Thumbprint.primaryThumbprint" to deviceCreateInfo->primaryKey and "authorization.x509Thumbprint.secondaryThumbprint" to deviceCreateInfo->secondaryKey **]**
+
+**SRS_IOTHUBREGISTRYMANAGER_06_004: [** IoTHubRegistryManager_UpdateDevice shall, if deviceUpdate->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_SPK", set "authorization.symmetricKey.primaryKey" to deviceCreateInfo->primaryKey and "authorization.symmetricKey.secondaryKey" to deviceCreateInfo->secondaryKey **]**
+
+**SRS_IOTHUBREGISTRYMANAGER_06_005: [** IoTHubRegistryManager_UpdateDevice shall clean up and return IOTHUB_REGISTRYMANAGER_INVALID_ARG if deviceUpdate->authMethod is not "IOTHUB_REGISTRYMANAGER_AUTH_SPK" or "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT" **]**
 
 **SRS_IOTHUBREGISTRYMANAGER_12_042: [** IoTHubRegistryManager_UpdateDevice shall return IOTHUB_REGISTRYMANAGER_JSON_ERROR if the JSON creation failed  **]**
 
 **SRS_IOTHUBREGISTRYMANAGER_12_101: [** IoTHubRegistryManager_UpdateDevice shall allocate memory for response buffer by calling BUFFER_new **]**
 
-**SRS_IOTHUBREGISTRYMANAGER_12_102: [** If the BUFFER_new fails, IoTHubRegistryManager_UpdateDevice shall do clean up and return NULL. **]**
+**SRS_IOTHUBREGISTRYMANAGER_12_102: [** If the BUFFER_new fails, IoTHubRegistryManager_UpdateDevice shall do clean up and return IOTHUB_REGISTRYMANAGER_ERROR. **]**
 
 **SRS_IOTHUBREGISTRYMANAGER_12_043: [** IoTHubRegistryManager_UpdateDevice shall create an HTTP PUT request using the created JSON **]**
 
@@ -313,6 +355,21 @@ extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetDeviceList(IOTHUB_
 
 **SRS_IOTHUBREGISTRYMANAGER_12_069: [** IoTHubRegistryManager_GetDeviceList shall use the following parson APIs to parse the response JSON: json_parse_string, json_value_get_object, json_object_get_string, json_object_dotget_string  **]**
 
+**SRS_IOTHUBREGISTRYMANAGER_06_013: [** IoTHubRegistryManager_GetDeviceList shall, if json was found for authorization.symetricKey.primaryKey, set the device info authMethod to "IOTHUB_REGISTRYMANAGER_AUTH_SPK" **]**
+
+**SRS_IOTHUBREGISTRYMANAGER_06_014: [** IoTHubRegistryManager_GetDeviceList shall, if no json was found for authorization.symetricKey.primaryKey, parse for authorization.x509Thumbprint.primaryThumbprint **]**
+
+**SRS_IOTHUBREGISTRYMANAGER_06_015: [** IoTHubRegistryManager_GetDeviceList shall, if json was found for authorization.x509Thumbprint.primaryThumbprint, set the device info authMethod to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT" **]**
+
+**SRS_IOTHUBREGISTRYMANAGER_06_016: [** IoTHubRegistryManager_GetDeviceList shall, if json was found for authorization.symetricKey.secondaryKey, set the device info authMethod to "IOTHUB_REGISTRYMANAGER_AUTH_SPK" **]**
+
+**SRS_IOTHUBREGISTRYMANAGER_06_017: [** IoTHubRegistryManager_GetDeviceList shall, if no json was found for authorization.symetricKey.secondaryKey, parse for authorization.x509Thumbprint.secondaryThumbprint **]**
+
+**SRS_IOTHUBREGISTRYMANAGER_06_018: [** IoTHubRegistryManager_GetDeviceList shall, if json was found for authorization.x509Thumbprint.secondaryThumbprint, set the device info authMethod to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT" **]**
+
+
+
+
 **SRS_IOTHUBREGISTRYMANAGER_12_070: [** If any of the parson API fails, IoTHubRegistryManager_GetDeviceList shall return IOTHUB_REGISTRYMANAGER_JSON_ERROR **]**
 
 **SRS_IOTHUBREGISTRYMANAGER_12_071: [** IoTHubRegistryManager_GetDeviceList shall populate the deviceList parameter with structures of type "IOTHUB_DEVICE" **]**
@@ -320,7 +377,7 @@ extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetDeviceList(IOTHUB_
 **SRS_IOTHUBREGISTRYMANAGER_12_072: [** If populating the deviceList parameter fails IoTHubRegistryManager_GetDeviceList shall return IOTHUB_REGISTRYMANAGER_ERROR **]**
 
 **SRS_IOTHUBREGISTRYMANAGER_12_073: [** If populating the deviceList parameter succesful IoTHubRegistryManager_GetDeviceList shall return IOTHUB_REGISTRYMANAGER_OK **]**
- 
+
 **SRS_IOTHUBREGISTRYMANAGER_12_111: [** IoTHubRegistryManager_GetDeviceList shall do clean up before return **]**
 
 

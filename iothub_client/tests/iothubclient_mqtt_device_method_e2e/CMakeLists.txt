@@ -16,6 +16,11 @@ set(${theseTestsName}_test_files
 	../common_device_method_e2e/iothubclient_common_device_method_e2e.c
 )
 
+set(${theseTestsName}_nuget_c_files
+        ${theseTestsName}.c
+        ../common_device_method_e2e/iothubclient_common_device_method_e2e.c
+)
+
 set(${theseTestsName}_c_files
         ../../../certs/certs.c
 )
@@ -59,6 +64,14 @@ if(WIN32)
 		linkUAMQP(${theseTestsName}_exe)	
 		linkMqttLibrary(${theseTestsName}_exe)
 	endif()
+
+	if(TARGET ${theseTestsName}_nuget_exe)
+           target_link_libraries(${theseTestsName}_nuget_exe
+                   iothub_test
+                   iothub_service_client
+                   rpcrt4
+           )
+    endif()
 
 else()
 	if(TARGET ${theseTestsName}_exe)

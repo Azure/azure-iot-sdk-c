@@ -28,7 +28,7 @@
 #define MBED_PARAM_MAX_LENGTH 256
 #endif
 
-static const char* URL_API_VERSION = "api-version=2016-02-03";
+static const char* URL_API_VERSION = "api-version=2016-11-14";
 static const char* DEVICE_JSON_FMT = "{\"deviceId\":\"%s\",\"etag\":null,\"connectionState\":\"Disconnected\",\"status\":\"enabled\",\"statusReason\":null,\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"lastActivityTime\":\"0001-01-01T00:00:00\",\"authentication\":{\"symmetricKey\":{\"primaryKey\":null,\"secondaryKey\":null}}}";
 static const char* DEVICE_PREFIX_FMT = "e2eDevice_%s";
 static const char* RELATIVE_PATH_FMT = "/devices/%s?%s";
@@ -308,6 +308,7 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init(bool createDevice)
                             deviceCreateInfo.deviceId = iothub_account_info->deviceId;
                             deviceCreateInfo.primaryKey = "";
                             deviceCreateInfo.secondaryKey = "";
+                            deviceCreateInfo.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
 
                             iothub_registrymanager_result = IoTHubRegistryManager_CreateDevice(iothub_account_info->iothub_registrymanager_handle, &deviceCreateInfo, &deviceInfo);
                             if (iothub_registrymanager_result != IOTHUB_REGISTRYMANAGER_OK)

@@ -6,7 +6,7 @@ function(add_sample_directory whatIsBuilding)
 
 	set_target_properties(${whatIsBuilding}
 			   PROPERTIES
-			   FOLDER "IoTHub_Samples")
+			   FOLDER "IoTHub_Service_Samples")
 endfunction()
 
 add_sample_directory(iothub_messaging_sample)

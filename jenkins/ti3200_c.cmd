@@ -36,7 +36,7 @@ rem // resolve to fully qualified path
 for %%i in ("%build-root%") do set build-root=%%~fi
 
 REM -- C --
-cd /d %build-root%\c\build_all\tirtos
+cd /d %build-root%\build_all\tirtos
 
 @echo off
 echo ********** UPDATING products.mak **********
@@ -52,14 +52,14 @@ call:DoReplace "CC3200SDK_VERSION = 1.1.0" "CC3200SDK_VERSION = %sdkversion%" pr
 call %install-root%\\xdctools_3_31_01_33_core\\gmake.exe clean
 call %install-root%\\xdctools_3_31_01_33_core\\gmake.exe all
 
-cd /d %build-root%\c\serializer\samples\simplesample_http\tirtos\cc3200	
+cd /d %build-root%\serializer\samples\simplesample_http\tirtos\cc3200	
 
 @echo off
-echo ********** UPDATING %build-root%\c\serializer\samples\simplesample_http\simplesample_http.c **********
-call:DoReplace "[device connection string]" "%DEVICE_CONNECTION_STRING%" %build-root%\c\serializer\samples\simplesample_http\simplesample_http.c
+echo ********** UPDATING %build-root%\serializer\samples\simplesample_http\simplesample_http.c **********
+call:DoReplace "[device connection string]" "%DEVICE_CONNECTION_STRING%" %build-root%\serializer\samples\simplesample_http\simplesample_http.c
 
 @echo off
-echo ********** UPDATING %build-root%\c\serializer\samples\simplesample_http\tirtos\cc3200\main.c **********
+echo ********** UPDATING %build-root%\serializer\samples\simplesample_http\tirtos\cc3200\main.c **********
 for /F "tokens=1-4 delims=/ " %%a in ('echo %DATE%') do (
 set month=%%b
 set day=%%c
@@ -70,16 +70,16 @@ set hour=%%a
 set minute=%%b
 set second=%%c
 )
-call:DoReplace "#define DAY     15" "#define DAY     %day%" %build-root%\c\serializer\samples\simplesample_http\tirtos\cc3200\main.c
-call:DoReplace "#define MONTH   9" "#define MONTH   %month%" %build-root%\c\serializer\samples\simplesample_http\tirtos\cc3200\main.c
-call:DoReplace "#define YEAR    2015" "#define YEAR    %year%" %build-root%\c\serializer\samples\simplesample_http\tirtos\cc3200\main.c
-call:DoReplace "#define HOUR    6" "#define HOUR    %hour%" %build-root%\c\serializer\samples\simplesample_http\tirtos\cc3200\main.c
-call:DoReplace "#define MINUTE  21" "#define MINUTE  %minute%" %build-root%\c\serializer\samples\simplesample_http\tirtos\cc3200\main.c
-call:DoReplace "#define SECOND  0" "#define SECOND  %second%" %build-root%\c\serializer\samples\simplesample_http\tirtos\cc3200\main.c
+call:DoReplace "#define DAY     15" "#define DAY     %day%" %build-root%\serializer\samples\simplesample_http\tirtos\cc3200\main.c
+call:DoReplace "#define MONTH   9" "#define MONTH   %month%" %build-root%\serializer\samples\simplesample_http\tirtos\cc3200\main.c
+call:DoReplace "#define YEAR    2015" "#define YEAR    %year%" %build-root%\serializer\samples\simplesample_http\tirtos\cc3200\main.c
+call:DoReplace "#define HOUR    6" "#define HOUR    %hour%" %build-root%\serializer\samples\simplesample_http\tirtos\cc3200\main.c
+call:DoReplace "#define MINUTE  21" "#define MINUTE  %minute%" %build-root%\serializer\samples\simplesample_http\tirtos\cc3200\main.c
+call:DoReplace "#define SECOND  0" "#define SECOND  %second%" %build-root%\serializer\samples\simplesample_http\tirtos\cc3200\main.c
 
 echo ********** DOWNLOADING elf2cc32.exe **********
-if not exist "%build-root%\c\serializer\samples\simplesample_http\tirtos\cc3200\tools" mkdir %build-root%\c\serializer\samples\simplesample_http\tirtos\cc3200\tools
-powershell.exe -nologo -noprofile -command "& {Add-Type -A 'System.Net'; (new-object System.Net.WebClient).DownloadFile('https://github.com/tisb-vikram/azure-iot-sdks/blob/7da24633b2c4af3bc779998e9950146f061a8a10/c/serializer/samples/simplesample_http/tirtos/cc3200/tools/elf2cc32.exe?raw=true','%build-root%\c\serializer\samples\simplesample_http\tirtos\cc3200\tools\elf2cc32.exe'); }"
+if not exist "%build-root%\serializer\samples\simplesample_http\tirtos\cc3200\tools" mkdir %build-root%\serializer\samples\simplesample_http\tirtos\cc3200\tools
+powershell.exe -nologo -noprofile -command "& {Add-Type -A 'System.Net'; (new-object System.Net.WebClient).DownloadFile('https://github.com/tisb-vikram/azure-iot-sdks/blob/7da24633b2c4af3bc779998e9950146f061a8a10/c/serializer/samples/simplesample_http/tirtos/cc3200/tools/elf2cc32.exe?raw=true','%build-root%\serializer\samples\simplesample_http\tirtos\cc3200\tools\elf2cc32.exe'); }"
 if not exist "%install-root%\ns_1_10_00_00_eng\tools" mkdir %install-root%\ns_1_10_00_00_eng\tools
 powershell.exe -nologo -noprofile -command "& {Add-Type -A 'System.Net'; (new-object System.Net.WebClient).DownloadFile('https://github.com/tisb-vikram/azure-iot-sdks/blob/7da24633b2c4af3bc779998e9950146f061a8a10/c/serializer/samples/simplesample_http/tirtos/cc3200/tools/elf2cc32.exe?raw=true','%install-root%\ns_1_10_00_00_eng\tools\elf2cc32.exe'); }"
 

@@ -29,6 +29,7 @@ set(serializer_c_files
 ./src/schemalib.c
 ./src/schemaserializer.c
 ../parson/parson.c
+./src/methodreturn.c
 )
 
 set(serializer_h_files
@@ -47,6 +48,7 @@ set(serializer_h_files
 ./inc/schemaserializer.h
 ./inc/serializer.h
 ./inc/serializer_devicetwin.h
+./inc/methodreturn.h
 )
 
 if(MSVC)
@@ -59,31 +61,54 @@ set(SERIALIZER_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is 
 
 include_directories(../parson)
 include_directories(${SERIALIZER_INC_FOLDER} ${SHARED_UTIL_INC_FOLDER})
+include_directories(${AZURE_C_SHARED_UTILITY_INCLUDES})
 
 IF(WIN32)
 	#windows needs this define
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 ENDIF(WIN32)
 
-add_library(
-serializer ${serializer_c_files} ${serializer_h_files}
-)
+if (${build_as_dynamic})
+    add_library(
+    serializer SHARED ${serializer_c_files} ${serializer_h_files} ./src/serializer.def
+    )
+    linkSharedUtil(serializer)
+else()
+    add_library(
+    serializer ${serializer_c_files} ${serializer_h_files} 
+    )
+endif()
 
+if (NOT ${skip_samples})
 if(WIN32)
 	if (NOT ${ARCHITECTURE} STREQUAL "ARM")
 		add_subdirectory(samples)
 	endif()
 else()
 	add_subdirectory(samples)
+	endif()
 endif()
 
 if(NOT IN_OPENWRT)
-# Disable tests and samples for OpenWRT
-add_subdirectory(tests)
+    # Disable tests for OpenWRT
+    if(${run_unittests})
+        add_subdirectory(tests)
+    endif()
 endif()
 
-if(WIN32)
-else()
-    install (TARGETS serializer DESTINATION lib)
-    install (FILES ${serializer_h_files} DESTINATION include/azureiot)
-endif (WIN32)
+if(${use_installed_dependencies})
+    include(GNUInstallDirs)
+
+	#Set CMAKE_INSTALL_LIBDIR if not defined
+	if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
+        set(CMAKE_INSTALL_LIBDIR "lib")
+    endif()
+
+    install(TARGETS serializer EXPORT azure_iot_sdksTargets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/../bin
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot 
+    )
+    install(FILES ${serializer_h_files} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
+endif()

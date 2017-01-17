@@ -6,6 +6,6 @@ build_root=$(cd "$(dirname "$0")/.." && pwd)
 cd $build_root
 
 # -- C --
-./build_all/linux/build.sh --skip-unittests --use-websockets "$@"
+./build_all/linux/build.sh --use-websockets "$@"
 [ $? -eq 0 ] || exit $?
 

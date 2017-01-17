@@ -4,6 +4,7 @@
 #ifndef IOTHUB_TRANSPORT_LL_H
 #define IOTHUB_TRANSPORT_LL_H
 
+
 typedef void* TRANSPORT_LL_HANDLE;
 typedef void* IOTHUB_DEVICE_HANDLE;
 
@@ -12,6 +13,8 @@ typedef struct TRANSPORT_PROVIDER_TAG TRANSPORT_PROVIDER;
 
 union IOTHUB_IDENTITY_INFO_TAG;
 typedef union IOTHUB_IDENTITY_INFO_TAG IOTHUB_IDENTITY_INFO;
+
+typedef void* METHOD_HANDLE;
 
 #include "azure_c_shared_utility/doublylinkedlist.h"
 #include "azure_c_shared_utility/strings.h"
@@ -46,16 +49,19 @@ extern "C"
     typedef int (*pfIoTHubTransport_Subscribe)(IOTHUB_DEVICE_HANDLE handle);
     typedef void (*pfIoTHubTransport_Unsubscribe)(IOTHUB_DEVICE_HANDLE handle);
     typedef void (*pfIoTHubTransport_DoWork)(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle);
+    typedef int(*pfIoTHubTransport_SetRetryPolicy)(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitInSeconds);
     typedef IOTHUB_CLIENT_RESULT(*pfIoTHubTransport_GetSendStatus)(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_STATUS *iotHubClientStatus);
     typedef int (*pfIoTHubTransport_Subscribe_DeviceTwin)(IOTHUB_DEVICE_HANDLE handle);
     typedef void (*pfIoTHubTransport_Unsubscribe_DeviceTwin)(IOTHUB_DEVICE_HANDLE handle);
     typedef IOTHUB_PROCESS_ITEM_RESULT(*pfIoTHubTransport_ProcessItem)(TRANSPORT_LL_HANDLE handle, IOTHUB_IDENTITY_TYPE item_type, IOTHUB_IDENTITY_INFO* iothub_item);
     typedef int(*pfIoTHubTransport_Subscribe_DeviceMethod)(IOTHUB_DEVICE_HANDLE handle);
     typedef void(*pfIoTHubTransport_Unsubscribe_DeviceMethod)(IOTHUB_DEVICE_HANDLE handle);
+    typedef int(*pfIoTHubTransport_DeviceMethod_Response)(IOTHUB_DEVICE_HANDLE handle, METHOD_HANDLE methodId, const unsigned char* response, size_t response_size, int status_response);
 
 #define TRANSPORT_PROVIDER_FIELDS                                                   \
 pfIoTHubTransport_Subscribe_DeviceMethod IoTHubTransport_Subscribe_DeviceMethod;    \
 pfIoTHubTransport_Unsubscribe_DeviceMethod IoTHubTransport_Unsubscribe_DeviceMethod;\
+pfIoTHubTransport_DeviceMethod_Response IoTHubTransport_DeviceMethod_Response;      \
 pfIoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_Subscribe_DeviceTwin;        \
 pfIoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransport_Unsubscribe_DeviceTwin;    \
 pfIoTHubTransport_ProcessItem IoTHubTransport_ProcessItem;                          \
@@ -68,6 +74,7 @@ pfIotHubTransport_Unregister IoTHubTransport_Unregister;                        
 pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;                              \
 pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;                          \
 pfIoTHubTransport_DoWork IoTHubTransport_DoWork;                                    \
+pfIoTHubTransport_SetRetryPolicy IoTHubTransport_SetRetryPolicy;                    \
 pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus  /*there's an intentional missing ; on this line*/
 
     struct TRANSPORT_PROVIDER_TAG

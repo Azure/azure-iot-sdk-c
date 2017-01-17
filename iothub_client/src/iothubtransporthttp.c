@@ -943,6 +943,17 @@ static void IoTHubTransportHttp_Unsubscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE ha
     LogError("not implemented (yet)");
 }
 
+static int IoTHubTransportHttp_DeviceMethod_Response(IOTHUB_DEVICE_HANDLE handle, METHOD_HANDLE methodId, const unsigned char* response, size_t response_size, int status_response)
+{
+    (void)handle;
+    (void)methodId;
+    (void)response;
+    (void)response_size;
+    (void)status_response;
+    LogError("not implemented (yet)");
+    return __LINE__;
+}
+
 /*produces a representation of the properties, if they exist*/
 /*if they do not exist, produces ""*/
 static int concat_Properties(STRING_HANDLE existing, MAP_HANDLE map, size_t* propertiesMessageSizeContribution)
@@ -1650,7 +1661,7 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
 {
     /*Codes_SRS_TRANSPORTMULTITHTTP_17_097: [_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest with the following parameters:
     -requestType: POST
-    -relativePath: abandon relative path begin (as created by _Create) + value of ETag + "/abandon?api-version=2016-02-03"
+    -relativePath: abandon relative path begin (as created by _Create) + value of ETag + "/abandon?api-version=2016-11-14"
     - requestHttpHeadersHandle: an HTTP headers instance containing the following
     Authorization: " "
     If-Match: value of ETag
@@ -1660,7 +1671,7 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
     - responseContent: NULL]*/
     /*Codes_SRS_TRANSPORTMULTITHTTP_17_099: [_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest with the following parameters:
     -requestType: DELETE
-    -relativePath: abandon relative path begin + value of ETag + "?api-version=2016-02-03"
+    -relativePath: abandon relative path begin + value of ETag + "?api-version=2016-11-14"
     - requestHttpHeadersHandle: an HTTP headers instance containing the following
     Authorization: " "
     If-Match: value of ETag
@@ -1670,7 +1681,7 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
     - responseContent: NULL]*/
     /*Codes_SRS_TRANSPORTMULTITHTTP_17_101: [_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest with the following parameters:
     -requestType: DELETE
-    -relativePath: abandon relative path begin + value of ETag +"?api-version=2016-02-03" + "&reject"
+    -relativePath: abandon relative path begin + value of ETag +"?api-version=2016-11-14" + "&reject"
     - requestHttpHeadersHandle: an HTTP headers instance containing the following
     Authorization: " "
     If-Match: value of ETag
@@ -1748,7 +1759,7 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
                             else if ((r = HTTPAPIEX_ExecuteRequest(
                                 handleData->httpApiExHandle,
                                 (action == ABANDON) ? HTTPAPI_REQUEST_POST : HTTPAPI_REQUEST_DELETE,                               /*-requestType: POST                                                                                                       */
-                                STRING_c_str(fullAbandonRelativePath),              /*-relativePath: abandon relative path begin (as created by _Create) + value of ETag + "/abandon?api-version=2016-02-03"   */
+                                STRING_c_str(fullAbandonRelativePath),              /*-relativePath: abandon relative path begin (as created by _Create) + value of ETag + "/abandon?api-version=2016-11-14"   */
                                 abandonRequestHttpHeaders,                          /*- requestHttpHeadersHandle: an HTTP headers instance containing the following                                            */
                                 NULL,                                               /*- requestContent: NULL                                                                                                   */
                                 &statusCode,                                         /*- statusCode: a pointer to unsigned int which might be examined for logging                                              */
@@ -1766,7 +1777,7 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
                             deviceData->sasObject,
                             handleData->httpApiExHandle,
                             (action == ABANDON) ? HTTPAPI_REQUEST_POST : HTTPAPI_REQUEST_DELETE,                               /*-requestType: POST                                                                                                       */
-                            STRING_c_str(fullAbandonRelativePath),              /*-relativePath: abandon relative path begin (as created by _Create) + value of ETag + "/abandon?api-version=2016-02-03"   */
+                            STRING_c_str(fullAbandonRelativePath),              /*-relativePath: abandon relative path begin (as created by _Create) + value of ETag + "/abandon?api-version=2016-11-14"   */
                             abandonRequestHttpHeaders,                          /*- requestHttpHeadersHandle: an HTTP headers instance containing the following                                            */
                             NULL,                                               /*- requestContent: NULL                                                                                                   */
                             &statusCode,                                         /*- statusCode: a pointer to unsigned int which might be examined for logging                                              */
@@ -2211,11 +2222,25 @@ static STRING_HANDLE IoTHubTransportHttp_GetHostname(TRANSPORT_LL_HANDLE handle)
     return result;
 }
 
+static int IoTHubTransportHttp_SetRetryPolicy(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitInSeconds)
+{
+    int result;
+    (void)handle;
+    (void)retryPolicy;
+    (void)retryTimeoutLimitInSeconds;
+
+    /* Retry Policy is not currently not available for HTTP */
+
+    result = 0;
+    return result;
+}
+
 /*Codes_SRS_TRANSPORTMULTITHTTP_17_125: [This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for its fields:] */
 static TRANSPORT_PROVIDER thisTransportProvider =
 {
     IoTHubTransportHttp_Subscribe_DeviceMethod,     /*pfIoTHubTransport_Subscribe_DeviceMethod IoTHubTransport_Subscribe_DeviceMethod;*/
     IoTHubTransportHttp_Unsubscribe_DeviceMethod,   /*pfIoTHubTransport_Unsubscribe_DeviceMethod IoTHubTransport_Unsubscribe_DeviceMethod;*/
+    IoTHubTransportHttp_DeviceMethod_Response,      /*pfIoTHubTransport_DeviceMethod_Response IoTHubTransport_DeviceMethod_Response;*/
     IoTHubTransportHttp_Subscribe_DeviceTwin,       /*pfIoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_Subscribe_DeviceTwin;*/
     IoTHubTransportHttp_Unsubscribe_DeviceTwin,     /*pfIoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransport_Unsubscribe_DeviceTwin;*/
     IoTHubTransportHttp_ProcessItem,                /*pfIoTHubTransport_ProcessItem IoTHubTransport_ProcessItem;*/
@@ -2228,6 +2253,7 @@ static TRANSPORT_PROVIDER thisTransportProvider =
     IoTHubTransportHttp_Subscribe,                  /*pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;*/
     IoTHubTransportHttp_Unsubscribe,                /*pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;*/
     IoTHubTransportHttp_DoWork,                     /*pfIoTHubTransport_DoWork IoTHubTransport_DoWork;*/
+    IoTHubTransportHttp_SetRetryPolicy,             /*pfIoTHubTransport_DoWork IoTHubTransport_SetRetryPolicy;*/
     IoTHubTransportHttp_GetSendStatus               /*pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus;*/
 };
 

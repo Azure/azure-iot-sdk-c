@@ -66,6 +66,11 @@ typedef void(*IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK)(IOTHUB_CLIENT_CONFIRMAT
 typedef void(*IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK)(IOTHUB_CLIENT_CONNECTION_STATUS result, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason, void* userContextCallback);
 typedef int(*IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC)(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE message, void* userContextCallback);
 typedef void*(*IOTHUB_CLIENT_TRANSPORT_PROVIDER)(void);
+
+typedef void(*IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback);
+typedef void(*IOTHUB_CLIENT_REPORTED_STATE_CALLBACK)(int status_code, void* userContextCallback);
+typedef int(*IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC)(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* resp_size, void* userContextCallback);
+typedef int(*IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK)(const char* method_name, const unsigned char* payload, size_t size, METHOD_ID_HANDLE method_id, void* userContextCallback);
  
 typedef struct IOTHUB_CLIENT_CONFIG_TAG
 {
@@ -109,6 +114,11 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob(IOTHUB_CLIENT_LL_HANDLE
 ## DeviceTwin
 extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetDeviceTwinCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback, void* userContextCallback);
 extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendReportedState(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const unsigned char* reportedState, size_t size, uint32_t reportedVersion, uint32_t lastSeenDesiredVersion, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reportedStateCallback, void* userContextCallback);
+
+## DeviceMethod
+extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetDeviceMethodCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC deviceMethodCallback, void* userContextCallback);
+extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetDeviceMethodCallback_Ex(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK inboundDeviceMethodCallback, void* userContextCallback);
+extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_DeviceMethodResponse(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, uint32_t methodId, unsigned char* response, size_t responeSize);
 ```
 
 ## IoTHubClient_LL_CreateFromConnectionString
@@ -185,6 +195,8 @@ extern IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_Create(const IOTHUB_CLIENT_CONFIG
 
 **SRS_IOTHUBCLIENT_LL_02_008: [** Otherwise, `IoTHubClient_LL_Create` shall succeed and return a `non-NULL` handle.** ]** 
 
+**SRS_IOTHUBCLIENT_LL_25_124: [** `IoTHubClient_LL_Create` shall set the default retry policy as Exponential backoff with jitter and if succeed and return a `non-NULL` handle.** ]**
+
 
 
 ## IoTHubClient_LL_CreateWithTransport
@@ -216,6 +228,8 @@ extern  IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateWithTransport(IOTHUB_CLIEN
 **SRS_IOTHUBCLIENT_LL_17_006: [** `IoTHubClient_LL_CreateWithTransport` shall call the transport _Register function with the `IOTHUB_DEVICE_CONFIG` populated structure and waitingToSend list.** ]**
 
 **SRS_IOTHUBCLIENT_LL_17_007: [** If the _Register function fails, this function shall fail and return `NULL`.** ]** 
+
+**SRS_IOTHUBCLIENT_LL_25_125: [** `IoTHubClient_LL_CreateWithTransport` shall set the default retry policy as Exponential backoff with jitter and if succeed and return a `non-NULL` handle.** ]**
 
 
 
@@ -342,6 +356,7 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_GetSendStatus(IOTHUB_CLIENT_LL_HANDL
 extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetConnectionStatusCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK connectionStatusCallback, void* userContextCallback);
 ```
 **SRS_IOTHUBCLIENT_LL_25_111: [**IoTHubClient_LL_SetConnectionStatusCallback shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter iotHubClientHandle**]**
+
 **SRS_IOTHUBCLIENT_LL_25_112: [**IoTHubClient_LL_SetConnectionStatusCallback shall return IOTHUB_CLIENT_OK and save the callback and userContext as a member of the handle.**]**
 
 ###IotHubClient_LL_ConnectionStatusCallBack
@@ -359,8 +374,9 @@ IotHubClient_LL_ConnectionStatusCallBack is a function that is only called by th
 extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetRetryPolicy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitinSeconds);
 ```
 **SRS_IOTHUBCLIENT_LL_25_116: [**IoTHubClient_LL_SetRetryPolicy shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL iotHubClientHandle**]**
-**SRS_IOTHUBCLIENT_LL_25_117: [**For any policy other then IOTHUB_CLIENT_RETRY_NONE if retryTimeoutLimitinSeconds is zero then IoTHubClient_LL_SetRetryPolicy shall return IOTHUB_CLIENT_INVALID_ARG**]**
+
 **SRS_IOTHUBCLIENT_LL_25_118: [**IoTHubClient_LL_SetRetryPolicy shall save connection retry policies specified by the user to retryPolicy in struct IOTHUB_CLIENT_LL_HANDLE_DATA**]**
+
 **SRS_IOTHUBCLIENT_LL_25_119: [**IoTHubClient_LL_SetRetryPolicy shall save retryTimeoutLimitinSeconds in seconds to retryTimeout in struct IOTHUB_CLIENT_LL_HANDLE_DATA**]**
 
 ###IoTHubClient_LL_GetRetryPolicy
@@ -368,8 +384,11 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetRetryPolicy(IOTHUB_CLIENT_LL_HAND
 extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_GetRetryPolicy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY* retryPolicy, size_t* retryTimeoutLimitinSeconds);
 ```
 **SRS_IOTHUBCLIENT_LL_25_120: [**IoTHubClient_LL_GetRetryPolicy shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL iotHubClientHandle or retryPolicy or retryTimeoutLimitinSeconds parameters**]**
+
 **SRS_IOTHUBCLIENT_LL_25_121: [**IoTHubClient_LL_GetRetryPolicy shall retrieve connection retry policy from retryPolicy in struct IOTHUB_CLIENT_LL_HANDLE_DATA**]**
+
 **SRS_IOTHUBCLIENT_LL_25_122: [**IoTHubClient_LL_GetRetryPolicy shall retrieve retryTimeoutLimit in seconds from retryTimeoutinSeconds in struct IOTHUB_CLIENT_LL_HANDLE_DATA**]**
+
 **SRS_IOTHUBCLIENT_LL_25_123: [**If user did not set the policy and timeout values by calling IoTHubClient_LL_SetRetryPolicy then IoTHubClient_LL_GetRetryPolicy shall return default values**]**
 
 
@@ -405,7 +424,7 @@ IoTHubClient_LL_SetOption sets the runtime option "optionName" to the value poin
 
 ### Options that shall be handled by IoTHubClient_LL:
 
--**SRS_IOTHUBCLIENT_LL_02_039: [** "messageTimeout" - once `IoTHubClient_LL_SendEventAsync` is called the message shall timeout after `*value` miliseconds. value is a pointer to a uint64.** ]**
+-**SRS_IOTHUBCLIENT_LL_02_039: [** "messageTimeout" - once `IoTHubClient_LL_SendEventAsync` is called the message shall timeout after `*value` miliseconds. value is a pointer to a tickcounter_ms_t.** ]**
 
 -**SRS_IOTHUBCLIENT_LL_02_041: [** If more than \*value miliseconds have passed since the call to `IoTHubClient_LL_SendEventAsync` then the message callback shall be called with a status code of `IOTHUB_CLIENT_CONFIRMATION_TIMEOUT`.** ]**
 
@@ -705,3 +724,27 @@ int IoTHubClient_LL_DeviceMethodComplete(IOTHUB_CLIENT_LL_HANDLE handle, const u
 **SRS_IOTHUBCLIENT_LL_07_019: [** If `deviceMethodCallback` is NULL `IoTHubClient_LL_DeviceMethodComplete` shall return 404. **]**
 
 **SRS_IOTHUBCLIENT_LL_07_020: [** `deviceMethodCallback` shall buil the BUFFER_HANDLE with the response payload from the `IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC` callback. **]**
+
+```c
+extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetDeviceMethodCallback_Ex(IOTHUB_CLIENT_LL_HANDLE handle, IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK inboundDeviceMethodCallback, void* userContextCallback);
+```
+
+**SRS_IOTHUBCLIENT_LL_07_021: [** If `handle` is `NULL` then `IoTHubClient_LL_SetDeviceMethodCallback_Ex` shall return `IOTHUB_CLIENT_INVALID_ARG`. **]**
+
+**SRS_IOTHUBCLIENT_LL_07_022: [** If `inboundDeviceMethodCallback` is NULL then `IoTHubClient_LL_SetDeviceMethodCallback_Ex` shall call the underlying layer's `IoTHubTransport_Unsubscribe_DeviceMethod` function and return IOTHUB_CLIENT_OK. **]**
+
+**SRS_IOTHUBCLIENT_LL_07_023: [** If `inboundDeviceMethodCallback` is non-NULL then `IoTHubClient_LL_SetDeviceMethodCallback_Ex` shall call the underlying layer's `IoTHubTransport_Subscribe_DeviceMethod` function. **]**
+
+**SRS_IOTHUBCLIENT_LL_07_024: [** If `inboundDeviceMethodCallback` is non-NULL then `IoTHubClient_LL_SetDeviceMethodCallback_Ex` shall set the inboundDeviceMethodCallback to NULL. **]**
+
+**SRS_IOTHUBCLIENT_LL_07_025: [** If any error is encountered then `IoTHubClient_LL_SetDeviceMethodCallback_Ex` shall return `IOTHUB_CLIENT_ERROR`. **]**
+
+```c
+extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_DeviceMethodResponse(IOTHUB_CLIENT_LL_HANDLE handle, METHOD_ID_HANDLE methodId, unsigned char* response, size_t resp_size, int status_response);
+```
+
+**SRS_IOTHUBCLIENT_LL_07_026: [** If `handle` or methodId is `NULL` then `IoTHubClient_LL_DeviceMethodResponse` shall return `IOTHUB_CLIENT_INVALID_ARG`. **]**
+
+**SRS_IOTHUBCLIENT_LL_07_027: [** `IoTHubClient_LL_DeviceMethodResponse` shall call the `IoTHubTransport_DeviceMethod_Response` transport function. **]**
+
+**SRS_IOTHUBCLIENT_LL_07_028: [** If the transport `IoTHubTransport_DeviceMethod_Response` succeed then, `IoTHubClient_LL_DeviceMethodResponse` shall return `IOTHUB_CLIENT_OK` Otherwise it shall return `IOTHUB_CLIENT_ERROR`. **]** 

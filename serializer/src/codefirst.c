@@ -346,6 +346,32 @@ static CODEFIRST_RESULT buildModel(SCHEMA_HANDLE schemaHandle, const REFLECTED_D
                 }
             }
         }
+
+        if ((something->type == REFLECTION_METHOD_TYPE) &&
+            (strcmp(something->what.method.modelName, modelReflectedData->what.model.name) == 0))
+        {
+            SCHEMA_METHOD_HANDLE methodHandle;
+            size_t i;
+
+            if ((methodHandle = Schema_CreateModelMethod(modelTypeHandle, something->what.method.name)) == NULL)
+            {
+                /*Codes_SRS_CODEFIRST_99_076: [ If any Schema APIs fail, CodeFirst_RegisterSchema shall return NULL. ]*/
+                result = CODEFIRST_SCHEMA_ERROR;
+                LogError("add model method failed %s", ENUM_TO_STRING(CODEFIRST_RESULT, result));
+                goto out;
+            }
+
+            for (i = 0; i < something->what.method.nArguments; i++)
+            {
+                if (Schema_AddModelMethodArgument(methodHandle, something->what.method.arguments[i].name, something->what.method.arguments[i].type) != SCHEMA_OK)
+                {
+                    /*Codes_SRS_CODEFIRST_99_076: [ If any Schema APIs fail, CodeFirst_RegisterSchema shall return NULL. ]*/
+                    result = CODEFIRST_SCHEMA_ERROR;
+                    LogError("add model method argument failed %s", ENUM_TO_STRING(CODEFIRST_RESULT, result));
+                    goto out;
+                }
+            }
+        }
     }
 
 out:
@@ -584,6 +610,76 @@ EXECUTE_COMMAND_RESULT CodeFirst_InvokeAction(DEVICE_HANDLE deviceHandle, void* 
     return result;
 }
 
+METHODRETURN_HANDLE CodeFirst_InvokeMethod(DEVICE_HANDLE deviceHandle, void* callbackUserContext, const char* relativeMethodPath, const char* methodName, size_t parameterCount, const AGENT_DATA_TYPE* parameterValues)
+{
+    METHODRETURN_HANDLE result;
+    DEVICE_HEADER_DATA* deviceHeader = (DEVICE_HEADER_DATA*)callbackUserContext;
+
+    if (g_state == CODEFIRST_STATE_NOT_INIT)
+    {
+        result = NULL;
+        LogError("CodeFirst_InvokeMethod called before CodeFirst_Init");
+    }
+    else if ((methodName == NULL) ||
+        (deviceHandle == NULL) ||
+        (relativeMethodPath == NULL))
+    {
+        result = NULL;
+        LogError("invalid args: DEVICE_HANDLE deviceHandle=%p, void* callbackUserContext=%p, const char* relativeMethodPath=%p, const char* methodName=%p, size_t parameterCount=%zu, const AGENT_DATA_TYPE* parameterValues=%p",
+            deviceHandle, callbackUserContext, relativeMethodPath, methodName, parameterCount, parameterValues);
+    }
+    else if ((parameterCount > 0) && (parameterValues == NULL))
+    {
+        result = NULL;
+        LogError("parameterValues error ");
+    }
+    else
+    {
+        const REFLECTED_SOMETHING* something;
+        const REFLECTED_SOMETHING* childModel;
+        const char* modelName;
+        size_t offset;
+
+        modelName = Schema_GetModelName(deviceHeader->ModelHandle);
+
+        if (((childModel = FindModelInCodeFirstMetadata(deviceHeader->ReflectedData->reflectedData, modelName)) == NULL) ||
+            ((childModel = FindChildModelInCodeFirstMetadata(deviceHeader->ReflectedData->reflectedData, childModel, relativeMethodPath, &offset)) == NULL))
+        {
+            result = NULL;
+            LogError("method %s was not found", methodName);
+        }
+        else
+        {
+            result = NULL;
+            for (something = deviceHeader->ReflectedData->reflectedData; something != NULL; something = something->next)
+            {
+                if ((something->type == REFLECTION_METHOD_TYPE) &&
+                    (strcmp(methodName, something->what.method.name) == 0) &&
+                    (strcmp(childModel->what.model.name, something->what.method.modelName) == 0))
+                {
+                    break; /*found...*/
+                }
+            }
+
+            if (something == NULL)
+            {
+                LogError("method \"%s\" not found", methodName);
+                result = NULL;
+            }
+            else
+            {
+                result = something->what.method.wrapper(deviceHeader->data + offset, parameterCount, parameterValues);
+                if (result == NULL)
+                {
+                    LogError("method \"%s\" execution error (returned NULL)", methodName);
+                }
+            }
+        }
+    }
+    return result;
+}
+
+
 /* Codes_SRS_CODEFIRST_99_002:[ CodeFirst_RegisterSchema shall create the schema information and give it to the Schema module for one schema, identified by the metadata argument. On success, it shall return a handle to the schema.] */
 SCHEMA_HANDLE CodeFirst_RegisterSchema(const char* schemaNamespace, const REFLECTED_DATA_FROM_DATAPROVIDER* metadata)
 {
@@ -808,7 +904,7 @@ void* CodeFirst_CreateDevice(SCHEMA_MODEL_TYPE_HANDLE model, const REFLECTED_DAT
             LogError(" %s ", ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_ERROR));
         }
         /* Codes_SRS_CODEFIRST_99_081:[CodeFirst_CreateDevice shall use Device_Create to create a device handle.] */
-        /* Codes_SRS_CODEFIRST_99_082:[CodeFirst_CreateDevice shall pass to Device_Create the function CodeFirst_InvokeAction as action callback argument.] */
+        /* Codes_SRS_CODEFIRST_99_082: [ CodeFirst_CreateDevice shall pass to Device_Create the function CodeFirst_InvokeAction, action callback argument and the CodeFirst_InvokeMethod ] */
         else
         {
             if ((deviceHeader->data = malloc(dataSize)) == NULL)
@@ -824,7 +920,7 @@ void* CodeFirst_CreateDevice(SCHEMA_MODEL_TYPE_HANDLE model, const REFLECTED_DAT
 
                 initializeDesiredProperties(model, deviceHeader->data);
 
-                if (Device_Create(model, CodeFirst_InvokeAction, deviceHeader,
+                if (Device_Create(model, CodeFirst_InvokeAction, deviceHeader, CodeFirst_InvokeMethod, deviceHeader, 
                     includePropertyPath, &deviceHeader->DeviceHandle) != DEVICE_OK)
                 {
                     free(deviceHeader->data);
@@ -1457,6 +1553,33 @@ EXECUTE_COMMAND_RESULT CodeFirst_ExecuteCommand(void* device, const char* comman
         {
             /*Codes_SRS_CODEFIRST_02_017: [Otherwise CodeFirst_ExecuteCommand shall call Device_ExecuteCommand and return what Device_ExecuteCommand is returning.] */
             result = Device_ExecuteCommand(deviceHeader->DeviceHandle, command);
+        }
+    }
+    return result;
+}
+
+METHODRETURN_HANDLE CodeFirst_ExecuteMethod(void* device, const char* methodName, const char* methodPayload)
+{
+    METHODRETURN_HANDLE result;
+    if (
+        (device == NULL) ||
+        (methodName== NULL) /*methodPayload can be NULL*/
+        )
+    {
+        result = NULL;
+        LogError("invalid argument (NULL) passed to CodeFirst_ExecuteMethod void* device = %p, const char* methodName = %p", device, methodName);
+    }
+    else
+    {
+        DEVICE_HEADER_DATA* deviceHeader = FindDevice(device);
+        if (deviceHeader == NULL)
+        {
+            result = NULL;
+            LogError("unable to find the device given by address %p", device);
+        }
+        else
+        {
+            result = Device_ExecuteMethod(deviceHeader->DeviceHandle, methodName, methodPayload);
         }
     }
     return result;
