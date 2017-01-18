@@ -706,7 +706,8 @@ static IOTHUB_IDENTITY_TYPE retrieve_topic_type(const char* topic_resp)
     }
     else
     {
-        for (size_t index = 0; index < len_to_use && (search_device_twin || search_device_method); index++)
+        size_t index = 0;
+        for (index = 0; index < len_to_use && (search_device_twin || search_device_method); index++)
         {
             if (search_device_twin)
             {
@@ -790,7 +791,8 @@ static STRING_HANDLE addPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_me
         {
             if (propertyCount != 0)
             {
-                for (size_t index = 0; index < propertyCount && result != NULL; index++)
+                size_t index = 0;
+                for (index = 0; index < propertyCount && result != NULL; index++)
                 {
                     if (STRING_sprintf(result, "%s=%s%s", propertyKeys[index], propertyValues[index], propertyCount - 1 == index ? "" : PROPERTY_SEPARATOR) != 0)
                     {
@@ -988,7 +990,8 @@ static bool isSystemProperty(const char* tokenData)
 {
     bool result = false;
     size_t propCount = sizeof(sysPropList)/sizeof(sysPropList[0]);
-    for (size_t index = 0; index < propCount; index++)
+    size_t index = 0;
+    for (index = 0; index < propCount; index++)
     {
         if (memcmp(tokenData, sysPropList[index].propName, sysPropList[index].propLength) == 0)
         {
@@ -1312,7 +1315,8 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
                 const SUBSCRIBE_ACK* suback = (const SUBSCRIBE_ACK*)msgInfo;
                 if (suback != NULL)
                 {
-                    for (size_t index = 0; index < suback->qosCount; index++)
+                    size_t index = 0;
+                    for (index = 0; index < suback->qosCount; index++)
                     {
                         if (suback->qosReturn[index] == DELIVER_FAILURE)
                         {

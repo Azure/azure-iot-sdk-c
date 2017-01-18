@@ -334,7 +334,8 @@ static void dispatch_user_callbacks(IOTHUB_CLIENT_INSTANCE* iotHubClientInstance
     if (Lock(iotHubClientInstance->LockHandle) == LOCK_OK)
     {
         size_t callbacks_length = VECTOR_size(iotHubClientInstance->saved_user_callback_list);
-        for (size_t index = 0; index < callbacks_length; index++)
+        size_t index = 0;
+        for (index = 0; index < callbacks_length; index++)
         {
             USER_CALLBACK_INFO* queued_cb = (USER_CALLBACK_INFO*)VECTOR_element(iotHubClientInstance->saved_user_callback_list, index);
             if (queued_cb != NULL)
@@ -766,7 +767,8 @@ void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle)
         }
 
         vector_size = VECTOR_size(iotHubClientInstance->saved_user_callback_list);
-        for (size_t index = 0; index < vector_size; index++)
+        size_t index = 0;
+        for (index = 0; index < vector_size; index++)
         {
             USER_CALLBACK_INFO* queue_cb_info = (USER_CALLBACK_INFO*)VECTOR_element(iotHubClientInstance->saved_user_callback_list, index);
             if (queue_cb_info != NULL)
