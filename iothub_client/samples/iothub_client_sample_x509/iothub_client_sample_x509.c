@@ -19,14 +19,14 @@ and removing calls to _DoWork will yield the same results. */
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/platform.h"
 
-#ifdef USE_MQTT
-#include "iothubtransportmqtt.h"
-#endif
 #ifdef USE_HTTP
 #include "iothubtransporthttp.h"
 #endif
 #ifdef USE_AMQP
 #include "iothubtransportamqp.h"
+#endif
+#ifdef USE_MQTT
+#include "iothubtransportmqtt.h"
 #endif
 #endif
 
