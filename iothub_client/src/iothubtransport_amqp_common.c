@@ -1040,7 +1040,7 @@ static void prepareDeviceForConnectionRetry(AMQP_TRANSPORT_DEVICE_STATE* device_
 {
     if (authentication_reset(device_state->authentication) != RESULT_OK)
     {
-        LogError("Failed resetting the authenticatication state of device %s", device_state->deviceId);
+        LogError("Failed resetting the authenticatication state of device %s", STRING_c_str(device_state->deviceId));
     }
 
 #ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
