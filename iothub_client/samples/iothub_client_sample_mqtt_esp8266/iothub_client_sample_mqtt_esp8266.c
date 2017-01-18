@@ -126,10 +126,10 @@ void iothub_client_sample_mqtt_esp8266_run(void)
                 (void)printf("IoTHubClient_LL_SetMessageCallback...successful.\r\n");
 
                 /* Now that we are ready to receive commands, let's send some messages */
-                size_t iterator = 0;
+                int iterator = 0;
                 do
                 {
-                    (void)printf("iterator: [%d], callbackCounter: [%d]. \r\n", (int)iterator, callbackCounter);
+                    (void)printf("iterator: [%d], callbackCounter: [%d]. \r\n", iterator, callbackCounter);
                     
                     if (iterator < MESSAGE_COUNT && (iterator <= callbackCounter))
                     {
