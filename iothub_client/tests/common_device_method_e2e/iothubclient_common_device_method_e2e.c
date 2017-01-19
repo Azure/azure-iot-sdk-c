@@ -48,7 +48,7 @@ void device_method_e2e_init(void)
 {
     ASSERT_ARE_EQUAL(int, 0, platform_init() );
 
-    g_iothubAcctInfo = IoTHubAccount_Init(true);
+    g_iothubAcctInfo = IoTHubAccount_Init();
     ASSERT_IS_NOT_NULL(g_iothubAcctInfo);
 
     // Initialize locking
@@ -139,23 +139,23 @@ static IOTHUB_CLIENT_HANDLE iotHubClientHandle = NULL;
 static IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle = NULL;
 static IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE serviceClientDeviceMethodHandle = NULL;
 
-void test_device_method_with_string(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char *payload)
+void test_device_method_with_string(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char *payload)
 {
     IOTHUB_CLIENT_RESULT result;
-    IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
     time_t beginOperation, nowTime;
     bool trace = true;
-
-    iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName(g_iothubAcctInfo);
-    iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix(g_iothubAcctInfo);
-    iotHubConfig.deviceId = IoTHubAccount_GetDeviceId(g_iothubAcctInfo);
-    iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey(g_iothubAcctInfo);
-    iotHubConfig.protocol = protocol;
     
     g_conn_info.conn_status = IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED;
 
-    iotHubClientHandle = IoTHubClient_Create(&iotHubConfig);
-    ASSERT_IS_NOT_NULL_WITH_MSG(iotHubClientHandle, "Could not create IoTHubClient");
+    iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
+    ASSERT_IS_NOT_NULL_WITH_MSG(iotHubClientHandle, "Could not invoke IoTHubClient_CreateFromConnectionString");
+
+    if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509) {
+        result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
+        result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
+    }
 
     result = IoTHubClient_SetConnectionStatusCallback(iotHubClientHandle, connection_status_callback, &g_conn_info);
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set connection Status Callback");
@@ -204,7 +204,7 @@ void test_device_method_with_string(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, c
     int responseStatus;
     unsigned char* responsePayload;
     size_t responsePayloadSize;
-    IOTHUB_DEVICE_METHOD_RESULT invokeResult = IoTHubDeviceMethod_Invoke(serviceClientDeviceMethodHandle, iotHubConfig.deviceId, METHOD_NAME, payload, TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
+    IOTHUB_DEVICE_METHOD_RESULT invokeResult = IoTHubDeviceMethod_Invoke(serviceClientDeviceMethodHandle, deviceToUse->deviceId, METHOD_NAME, payload, TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
 
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_OK, invokeResult, "Service Client IoTHubDeviceMethod_Invoke failed");
     ASSERT_ARE_EQUAL_WITH_MSG(int, METHOD_RESPONSE_SUCCESS, responseStatus, "response status is incorrect");
@@ -239,35 +239,64 @@ void device_method_function_cleanup()
     }
 }
 
-void device_method_e2e_method_call_with_string(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+void device_method_e2e_method_call_with_string_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
-    test_device_method_with_string(protocol, "\"I'm a happy little string\"");
+    test_device_method_with_string(IoTHubAccount_GetSASDevice(g_iothubAcctInfo), protocol, "\"I'm a happy little string\"");
 }
 
-void device_method_e2e_method_call_with_double_quoted_json(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+void device_method_e2e_method_call_with_double_quoted_json_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
-    test_device_method_with_string(protocol, "{\"foo\":41,\"bar\":42,\"baz\":\"boo\"}");
+    test_device_method_with_string(IoTHubAccount_GetSASDevice(g_iothubAcctInfo), protocol, "{\"foo\":41,\"bar\":42,\"baz\":\"boo\"}");
 }
 
-void device_method_e2e_method_call_with_empty_json_object(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+void device_method_e2e_method_call_with_empty_json_object_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
-    test_device_method_with_string(protocol, "{}");
+    test_device_method_with_string(IoTHubAccount_GetSASDevice(g_iothubAcctInfo), protocol, "{}");
 }
 
-void device_method_e2e_method_call_with_null(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+void device_method_e2e_method_call_with_null_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
-    test_device_method_with_string(protocol, "null");
+    test_device_method_with_string(IoTHubAccount_GetSASDevice(g_iothubAcctInfo), protocol, "null");
 }
 
-extern void device_method_e2e_method_call_with_embedded_double_quote(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+extern void device_method_e2e_method_call_with_embedded_double_quote_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
-    (void)protocol;
-    test_device_method_with_string(protocol, "\"this string has a double quote \\\" in the middle\"");
+    test_device_method_with_string(IoTHubAccount_GetSASDevice(g_iothubAcctInfo), protocol, "\"this string has a double quote \\\" in the middle\"");
 }
 
-extern void device_method_e2e_method_call_with_embedded_single_quote(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+extern void device_method_e2e_method_call_with_embedded_single_quote_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
-    (void)protocol;
-    test_device_method_with_string(protocol, "\"this string has a single quote ' in the middle\"");
+    test_device_method_with_string(IoTHubAccount_GetSASDevice(g_iothubAcctInfo), protocol, "\"this string has a single quote ' in the middle\"");
+}
+
+
+void device_method_e2e_method_call_with_string_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+{
+    test_device_method_with_string(IoTHubAccount_GetX509Device(g_iothubAcctInfo), protocol, "\"I'm a happy little string\"");
+}
+
+void device_method_e2e_method_call_with_double_quoted_json_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+{
+    test_device_method_with_string(IoTHubAccount_GetX509Device(g_iothubAcctInfo), protocol, "{\"foo\":41,\"bar\":42,\"baz\":\"boo\"}");
+}
+
+void device_method_e2e_method_call_with_empty_json_object_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+{
+    test_device_method_with_string(IoTHubAccount_GetX509Device(g_iothubAcctInfo), protocol, "{}");
+}
+
+void device_method_e2e_method_call_with_null_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+{
+    test_device_method_with_string(IoTHubAccount_GetX509Device(g_iothubAcctInfo), protocol, "null");
+}
+
+extern void device_method_e2e_method_call_with_embedded_double_quote_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+{
+    test_device_method_with_string(IoTHubAccount_GetX509Device(g_iothubAcctInfo), protocol, "\"this string has a double quote \\\" in the middle\"");
+}
+
+extern void device_method_e2e_method_call_with_embedded_single_quote_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+{
+    test_device_method_with_string(IoTHubAccount_GetX509Device(g_iothubAcctInfo), protocol, "\"this string has a single quote ' in the middle\"");
 }
 

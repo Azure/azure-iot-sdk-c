@@ -21,14 +21,24 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2e)
         TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
     }
 
-    TEST_FUNCTION(IoTHub_AMQP_SendEvent_e2e)
+    TEST_FUNCTION(IoTHub_AMQP_SendEvent_e2e_sas)
     {
-        e2e_send_event_test(AMQP_Protocol);
+        e2e_send_event_test_sas(AMQP_Protocol);
     }
 
-    TEST_FUNCTION(IoTHub_AMQP_RecvMessage_E2ETest)
+    TEST_FUNCTION(IoTHub_AMQP_RecvMessage_E2ETest_sas)
     {
-        e2e_recv_message_test(AMQP_Protocol);
+        e2e_recv_message_test_sas(AMQP_Protocol);
     }
 
-END_TEST_SUITE(iothubclient_amqp_e2e)
+    TEST_FUNCTION(IoTHub_AMQP_SendEvent_e2e_x509)
+    {
+        e2e_send_event_test_x509(AMQP_Protocol);
+    }
+
+    TEST_FUNCTION(IoTHub_AMQP_RecvMessage_E2ETest_x509)
+    {
+        e2e_recv_message_test_x509(AMQP_Protocol);
+    }
+
+    END_TEST_SUITE(iothubclient_amqp_e2e)

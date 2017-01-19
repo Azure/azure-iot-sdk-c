@@ -301,7 +301,7 @@ extern "C" void e2e_init(void)
 {
     int result = platform_init();
     ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "Platform init failed");
-    g_iothubAcctInfo = IoTHubAccount_Init(true);
+    g_iothubAcctInfo = IoTHubAccount_Init();
     ASSERT_IS_NOT_NULL_WITH_MSG(g_iothubAcctInfo, "Could not initialize IoTHubAccount");
     platform_init();
 }
@@ -314,19 +314,14 @@ extern "C" void e2e_deinit(void)
     platform_deinit();
 }
 
-extern "C" void e2e_send_event_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+
+static void send_event_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
+
     // arrange
-    IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
     IOTHUB_CLIENT_HANDLE iotHubClientHandle;
     IOTHUB_MESSAGE_HANDLE msgHandle;
     time_t beginOperation, nowTime;
-
-    iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName(g_iothubAcctInfo);
-    iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix(g_iothubAcctInfo);
-    iotHubConfig.deviceId = IoTHubAccount_GetDeviceId(g_iothubAcctInfo);
-    iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey(g_iothubAcctInfo);
-    iotHubConfig.protocol = protocol;
 
     EXPECTED_SEND_DATA* sendData = EventData_Create();
     ASSERT_IS_NOT_NULL_WITH_MSG(sendData, "Could not create the EventData associated with the event to be sent");
@@ -335,8 +330,15 @@ extern "C" void e2e_send_event_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     {
         // Create the IoT Hub Data
         IOTHUB_CLIENT_RESULT result;
-        iotHubClientHandle = IoTHubClient_Create(&iotHubConfig);
+        iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
         ASSERT_IS_NOT_NULL_WITH_MSG(iotHubClientHandle, "Could not create IoTHubClient");
+
+        if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509) {
+            result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
+            ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
+            result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
+            ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
+        }
 
         // Turn on Log 
         bool trace = true;
@@ -389,7 +391,7 @@ extern "C" void e2e_send_event_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     (void)platform_init();
 
     {
-        IOTHUB_TEST_HANDLE iotHubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo), IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo), IoTHubAccount_GetDeviceId(g_iothubAcctInfo), IoTHubAccount_GetDeviceKey(g_iothubAcctInfo), IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo), IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo), IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo), IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo));
+        IOTHUB_TEST_HANDLE iotHubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo), IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo), deviceToUse->deviceId, IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo), IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo), IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo), IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo));
         ASSERT_IS_NOT_NULL_WITH_MSG(iotHubTestHandle, "Could not initialize IoTHubTest in order to listen for events");
 
         IOTHUB_TEST_CLIENT_RESULT result = IoTHubTest_ListenForEventForMaxDrainTime(iotHubTestHandle, IoTHubCallback, IoTHubAccount_GetIoTHubPartitionCount(g_iothubAcctInfo), sendData);
@@ -401,15 +403,27 @@ extern "C" void e2e_send_event_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     // assert
     ASSERT_IS_TRUE_WITH_MSG(sendData->wasFound, "Failure retrieving data that was sent to eventhub"); // was found is written by the callback...
 
-    // cleanup
+                                                                                                      // cleanup
     IoTHubMessage_Destroy(msgHandle);
     EventData_Destroy(sendData);
+
+
 }
 
-extern "C" void e2e_recv_message_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+extern "C" void e2e_send_event_test_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+{
+    send_event_test(IoTHubAccount_GetSASDevice(g_iothubAcctInfo), protocol);
+}
+
+extern "C" void e2e_send_event_test_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+{
+    send_event_test(IoTHubAccount_GetX509Device(g_iothubAcctInfo), protocol);
+}
+
+
+static void recv_message_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
     // arrange
-    IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
     IOTHUB_CLIENT_HANDLE iotHubClientHandle;
 
     EXPECTED_RECEIVE_DATA* notifyData = MessageData_Create();
@@ -420,17 +434,18 @@ extern "C" void e2e_recv_message_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 
     ASSERT_IS_NOT_NULL_WITH_MSG(notifyData, "Could not create the C2D message to be sent to the device");
 
-    iotHubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo), IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo), IoTHubAccount_GetDeviceId(g_iothubAcctInfo), IoTHubAccount_GetDeviceKey(g_iothubAcctInfo), IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo), IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo), IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo), IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo));
+    iotHubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo), IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo), deviceToUse->deviceId, IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo), IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo), IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo), IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo));
     ASSERT_IS_NOT_NULL_WITH_MSG(iotHubTestHandle, "Could not initialize IoTHubTest to send C2D messages to the device");
 
-    iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName(g_iothubAcctInfo);
-    iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix(g_iothubAcctInfo);
-    iotHubConfig.deviceId = IoTHubAccount_GetDeviceId(g_iothubAcctInfo);
-    iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey(g_iothubAcctInfo);
-    iotHubConfig.protocol = protocol;
-
-    iotHubClientHandle = IoTHubClient_Create(&iotHubConfig);
+    iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
     ASSERT_IS_NOT_NULL_WITH_MSG(iotHubClientHandle, "Could not create IoTHubClient");
+
+    if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509) {
+        result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
+        result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
+    }
 
     // Turn on Log 
     bool trace = true;
@@ -472,8 +487,18 @@ extern "C" void e2e_recv_message_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     // assert
     ASSERT_IS_TRUE_WITH_MSG(notifyData->wasFound, "Failure retrieving data from C2D"); // was found is written by the callback...
 
-    // cleanup
+                                                                                       // cleanup
     IoTHubClient_Destroy(iotHubClientHandle);
     MessageData_Destroy(notifyData);
+
+}
+extern "C" void e2e_recv_message_test_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+{
+    recv_message_test(IoTHubAccount_GetSASDevice(g_iothubAcctInfo), protocol);
+}
+
+extern "C" void e2e_recv_message_test_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+{
+    recv_message_test(IoTHubAccount_GetX509Device(g_iothubAcctInfo), protocol);
 }
 

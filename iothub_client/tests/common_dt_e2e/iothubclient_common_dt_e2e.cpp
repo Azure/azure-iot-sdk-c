@@ -180,28 +180,30 @@ static char *malloc_and_fill_reported_payload(const char *string, int aint)
 void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
     // arrange
-    IOTHUB_ACCOUNT_INFO_HANDLE iothubAcctInfo = IoTHubAccount_Init(true);
+    IOTHUB_ACCOUNT_INFO_HANDLE iothubAcctInfo = IoTHubAccount_Init();
     ASSERT_IS_NOT_NULL_WITH_MSG(iothubAcctInfo, "IoTHubAccount_Init failed");
 
-    IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
-
-    iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName(iothubAcctInfo);
-    iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix(iothubAcctInfo);
-    iotHubConfig.deviceId = IoTHubAccount_GetDeviceId(iothubAcctInfo);
-    iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey(iothubAcctInfo);
-    iotHubConfig.protocol = protocol;
-
+    IOTHUB_PROVISIONED_DEVICE* deviceToUse = IoTHubAccount_GetSASDevice(iothubAcctInfo);
     DEVICE_REPORTED_DATA *device = device_reported_init();
     ASSERT_IS_NOT_NULL_WITH_MSG(device, "failed to create the device client data");
 
     // Create the IoT Hub Data
-    IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_Create(&iotHubConfig);
+    IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
     ASSERT_IS_NOT_NULL_WITH_MSG(iotHubClientHandle, "IoTHubClient_Create failed");
 
     // Turn on Log
     bool trace = true;
     (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &trace);
     (void)IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates);
+
+    if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509) {
+        IOTHUB_CLIENT_RESULT result;
+        result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
+        result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
+    }
+
 
     // generate the payload
     char *buffer = malloc_and_fill_reported_payload(device->string_property, device->integer_property);
@@ -251,7 +253,7 @@ void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
         IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceClientDeviceTwinHandle = IoTHubDeviceTwin_Create(iotHubServiceClientHandle);
         ASSERT_IS_NOT_NULL_WITH_MSG(serviceClientDeviceTwinHandle, "IoTHubDeviceTwin_Create failed");
 
-        char *deviceTwinData = IoTHubDeviceTwin_GetTwin(serviceClientDeviceTwinHandle, iotHubConfig.deviceId);
+        char *deviceTwinData = IoTHubDeviceTwin_GetTwin(serviceClientDeviceTwinHandle, deviceToUse->deviceId);
         ASSERT_IS_NOT_NULL_WITH_MSG(deviceTwinData, "IoTHubDeviceTwin_GetTwin failed");
 
         JSON_Value *root_value = json_parse_string(deviceTwinData);
@@ -387,22 +389,16 @@ static void device_desired_deinit(DEVICE_DESIRED_DATA *device)
 void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
     // arrange
-    IOTHUB_ACCOUNT_INFO_HANDLE iothubAcctInfo = IoTHubAccount_Init(true);
+    IOTHUB_ACCOUNT_INFO_HANDLE iothubAcctInfo = IoTHubAccount_Init();
     ASSERT_IS_NOT_NULL_WITH_MSG(iothubAcctInfo, "IoTHubAccount_Init failed");
 
-    IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
-
-    iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName(iothubAcctInfo);
-    iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix(iothubAcctInfo);
-    iotHubConfig.deviceId = IoTHubAccount_GetDeviceId(iothubAcctInfo);
-    iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey(iothubAcctInfo);
-    iotHubConfig.protocol = protocol;
+    IOTHUB_PROVISIONED_DEVICE* deviceToUse = IoTHubAccount_GetSASDevice(iothubAcctInfo);
 
     DEVICE_DESIRED_DATA *device = device_desired_init();
     ASSERT_IS_NOT_NULL_WITH_MSG(device, "failed to create the device client data");
 
     // Create the IoT Hub Data
-    IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_Create(&iotHubConfig);
+    IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
     ASSERT_IS_NOT_NULL_WITH_MSG(iotHubClientHandle, "IoTHubClient_Create failed");
 
     // Turn on Log
@@ -410,7 +406,16 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     (void) IoTHubClient_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &trace);
     (void) IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates);
 
-	// subscribe
+    if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509) {
+        IOTHUB_CLIENT_RESULT result;
+        result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
+        result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
+    }
+
+
+    // subscribe
     IOTHUB_CLIENT_RESULT iot_result = IoTHubClient_SetDeviceTwinCallback(iotHubClientHandle, deviceTwinCallback, device);
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, iot_result, "IoTHubClient_SetDeviceTwinCallback failed");
 
@@ -426,7 +431,7 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     char *buffer = malloc_and_fill_desired_payload(expected_desired_string, expected_desired_integer);
     ASSERT_IS_NOT_NULL_WITH_MSG(buffer, "failed to create the payload for IoTHubDeviceTwin_UpdateTwin");
 
-    char *deviceTwinData = IoTHubDeviceTwin_UpdateTwin(serviceClientDeviceTwinHandle, iotHubConfig.deviceId, buffer);
+    char *deviceTwinData = IoTHubDeviceTwin_UpdateTwin(serviceClientDeviceTwinHandle, deviceToUse->deviceId, buffer);
     ASSERT_IS_NOT_NULL_WITH_MSG(deviceTwinData, "IoTHubDeviceTwin_UpdateTwin failed");
 
     JSON_Value *root_value = NULL;
@@ -451,20 +456,20 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
                 root_value = json_parse_string(device->cb_payload);
                 JSON_Object *root_object = json_value_get_object(root_value);
 
-				switch (device->update_state)
-				{
-					case DEVICE_TWIN_UPDATE_COMPLETE:
-						string_property = json_object_dotget_string(root_object, "desired.string_property");
-						integer_property = (int) json_object_dotget_number(root_object, "desired.integer_property");
-						break;
-					case DEVICE_TWIN_UPDATE_PARTIAL:
-						string_property = json_object_get_string(root_object, "string_property");
-						integer_property = (int) json_object_get_number(root_object, "integer_property");
-						break;
-					default: // invalid update state
-						ASSERT_FAIL("Invalid update_state reported");
-						break;
-				}
+                switch (device->update_state)
+                {
+                    case DEVICE_TWIN_UPDATE_COMPLETE:
+                        string_property = json_object_dotget_string(root_object, "desired.string_property");
+                        integer_property = (int) json_object_dotget_number(root_object, "desired.integer_property");
+                        break;
+                    case DEVICE_TWIN_UPDATE_PARTIAL:
+                        string_property = json_object_get_string(root_object, "string_property");
+                        integer_property = (int) json_object_get_number(root_object, "integer_property");
+                        break;
+                    default: // invalid update state
+                        ASSERT_FAIL("Invalid update_state reported");
+                        break;
+                }
                 if ((string_property != NULL) && (integer_property != 0))
                 {
                     Unlock(device->lock);
@@ -476,8 +481,8 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
         ThreadAPI_Sleep(1000);
     }
 
-	// unsibscribe
-	iot_result = IoTHubClient_SetDeviceTwinCallback(iotHubClientHandle, NULL, NULL);
+    // unsubscribe
+    iot_result = IoTHubClient_SetDeviceTwinCallback(iotHubClientHandle, NULL, NULL);
 
     if (Lock(device->lock) != LOCK_OK)
     {
