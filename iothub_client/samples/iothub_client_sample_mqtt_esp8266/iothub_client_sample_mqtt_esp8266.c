@@ -142,7 +142,7 @@ void iothub_client_sample_mqtt_esp8266_run(void)
                         {
                             messages[iterator].messageTrackingId = iterator;
                             MAP_HANDLE propMap = IoTHubMessage_Properties(messages[iterator].messageHandle);
-                            (void)sprintf_s(propText, sizeof(propText), "PropMsg_%zu", iterator);
+                            (void)sprintf_s(propText, sizeof(propText), "PropMsg_%d", iterator);
                             if (Map_AddOrUpdate(propMap, "PropName", propText) != MAP_OK)
                             {
                                 (void)printf("ERROR: Map_AddOrUpdate Failed!\r\n");
