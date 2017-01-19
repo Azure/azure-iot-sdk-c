@@ -626,7 +626,7 @@ int authentication_reset(AUTHENTICATION_STATE_HANDLE authentication_state_handle
 			{
 				STRING_HANDLE devices_path = NULL;
 
-				if (auth_state->status == AUTHENTICATION_STATUS_FAILURE || auth_state->status == AUTHENTICATION_STATUS_REFRESH_REQUIRED)
+				if (auth_state->status == AUTHENTICATION_STATUS_FAILURE || auth_state->status == AUTHENTICATION_STATUS_REFRESH_REQUIRED || auth_state->status == AUTHENTICATION_STATUS_TIMEOUT)
 				{
 					// Codes_IOTHUBTRANSPORTAMQP_AUTH_09_063: [If the authentication_state status is AUTHENTICATION_STATUS_FAILURE or AUTHENTICATION_STATUS_REFRESH_REQUIRED, authentication_reset() shall set the status to AUTHENTICATION_STATUS_IDLE]
 					auth_state->status = AUTHENTICATION_STATUS_IDLE;

@@ -7,7 +7,7 @@ This document describes how to prepare your development environment to use the *
 - [Setting up a Windows Embedded Compact 2013 development environment](#windowsce)
 - [Sample applications](#samplecode)
 
-<a name="windows"><a/>
+<a name="windows"></a>
 ## Setting up a Windows development environment
 
 - Install [Visual Studio 2015][visual-studio]. You can use the **Visual Studio Community** Free download if you meet the licensing requirements.
@@ -53,9 +53,9 @@ For Win32 (default configuration) you should see **cmake\\iotsdk_win32**. For x6
 **azure_iot_sdks.sln** created under cmake folder will contain all sub-projects that you can directly open in VS 2015 IDE to build libraries or samples in IDE.
 
 You can check various configuration options the script provides by entering `build -options`
-For example, if you want to build for x64 and skip unit tests, you can run following command
+For example, if you want to build for x64, you can run following command
 
-`build --platform x64 --skip-unittests` 
+`build --platform x64` 
 
 ### Building sample that uses WebSocket on Windows 
 **iothub_client_sample_amqp_websockets** (AMQP over WebSocket) has dependence on [OpenSSL] libraries **ssleay32** and **libeay32**. So you need to build and install these libraries and DLL's first before you enable building of the sample that uses WebSockets. 
@@ -95,11 +95,11 @@ After completing the above steps make sure OpenSSL libraries and DLL's are in yo
 
 Now enter following command to build sample using websocket
 
-`build --use-websockets`  **OR** `build --skip-unittests --use-websockets` (in case you want to skip unit tests)
+`build --use-websockets`
 
 This will build C SDK libraries along with **iothub_client_sample_amqp_websockets** sample.
 
-<a name="linux"><a/>
+<a name="linux"></a>
 ## Set up a Linux development environment
 
 This section shows you how to set up a development environment for the Azure IoT device SDK for C on [Ubuntu]. [CMake] will create makefiles and [make] tool will use these makefiles to compile the C SDK source code using [gcc] compiler.
@@ -110,7 +110,7 @@ For [CMake], verify the current version installed in your environment using the 
 
 For [gcc], verify the current version installed in your environment using the `gcc --version` command. For information about how to upgrade your version of gcc on Ubuntu 14.04, see http://askubuntu.com/questions/466651/how-do-i-use-the-latest-gcc-4-9-on-ubuntu-14-04.
 
-Older **gcc** version **4.4.7** support has also been added and tested on 14.04.1-Ubuntu SMP. It is tested with `./build.sh --skip-unittests --use-websockets` build option.
+Older **gcc** version **4.4.7** support has also been added and tested on 14.04.1-Ubuntu SMP. It is tested with `./build.sh --use-websockets` build option.
 
 Clone the latest version of this repository to your Ubuntu machine with the recursive parameter to fetch latest code from **master** branch
 
@@ -125,19 +125,11 @@ Clone the latest version of this repository to your Ubuntu machine with the recu
 
 3. Run the `./build.sh` script.
 
-This script uses **cmake** to make a folder called "cmake/iotsdk_linux" under c folder and generates necessary makefiles.The script then builds the solution and runs the unit tests.
+This script uses **cmake** to make a folder called "cmake/iotsdk_linux" under c folder and generates necessary makefiles.The script then builds the solution.
 
-Below are some of the build **options** you can use
+You can find the various **options** for the build script typing
 
 `./build.sh --options` : List available options
-
-`./build.sh --skip-unittests`: Skip unit tests in case you want to just quickly build samples
-
- `./build.sh --use-websockets`:  Enables the support for AMQP over WebSockets
- 
- `./build.sh --use-websockets --skip-unittests` : Skip unit tests and include AMQP over **WebSockets** sample
- 
- `./build.sh -cl -g`: Build **debug** build
 
 > Tip: After running `./build.sh` if you want to just build a **particular sample** or library after making changes, you can directly go the corresponding cmake directory and run the [make] command.
 For example, to build **mqtt** sample after making changes in it you can directly go to cmake/iotsdk_linux/iothub_client/samples/iothub_client_sample_mqtt directory and run `make` command from that directory.
@@ -145,10 +137,10 @@ For example, to build **mqtt** sample after making changes in it you can directl
 
 > Note: Every time you run `build.sh`, it deletes and then recreates the "cmake" folder under c folder.
 
-> Note: You will not be able to run the samples until you configure them with a valid IoT Hub device connection string. For more information, see [Run sample on Linux](../../doc/get_started/linux-desktop-c.md).
+> Note: You will not be able to run the samples until you configure them with a valid IoT Hub device connection string. For more information, see [the samples section below](#samplecode).
 
 
-<a name="windowsce"><a/>
+<a name="windowsce"></a>
 ## Set up a Windows Embedded Compact 2013 development environment
 
 - Install [Visual Studio 2015][visual-studio]. You can use the free Community Edition if you meet the licensing requirements.
@@ -182,13 +174,13 @@ build
 
 This script uses cmake to make a folder called "cmake_ce8" in your home directory and generates in that folder a Visual Studio solution called azure_iot_sdks.sln. The script will then proceed to build the **HTTP** sample.
 
-> Note: you will not be able to run the samples until you configure them with a valid IoT hub device connection string. For more information, see [running a C sample application on Windows Embedded Compact 2013 on a Toradex module](../../doc/get_started/wince2013-toradex-module-c.md).
+> Note: you will not be able to run the samples until you configure them with a valid IoT hub device connection string. For more information, see [running a C sample application on Windows Embedded Compact 2013 on a Toradex module](https://github.com/azure/azure-iot-sdks/tree/master/doc/get_started/wince2013-toradex-module-c.md).
 
 To view the projects and examine the source code, open the **azure_iot_sdks.sln** solution files in Visual Studio.
 
 You can use one of the sample applications as a template to get started when you are creating your own client applications.
 
-<a name="samplecode"><a/>
+<a name="samplecode"></a>
 ## Sample applications
 
 This repository contains various C sample applications that illustrate how to use the Azure IoT device SDK for C:

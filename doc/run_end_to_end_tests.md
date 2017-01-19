@@ -6,7 +6,7 @@ This document describes how to run the end to end tests.
 - [Run end to end tests on a Windows development environment](#windows_client)
 - [Run end to end tests for "iothub_client" on a Linux development environment](#linux_client)
 
-<a name="testparams"/>
+<a name="testparams"></a>
 ## Setup the test parameters
 
 - Open the file "iot_device_params.txt" located under the tools\iot_hub_e2e_tests_params folders in your local copy of the repository.
@@ -36,7 +36,7 @@ This document describes how to run the end to end tests.
 	  
 	  Note: IOTHUB_EVENTHUB_CONSUMER_GROUP is optional. If not provided, the assumed value is "$Default".
 
-<a name="windows_client"/>
+<a name="windows_client"></a>
 ## Run end to end tests on a Windows development environment
 
 - Start the Windows PowerShell in Administrator mode.
@@ -46,7 +46,7 @@ This document describes how to run the end to end tests.
 - Build the solution
 - Run the tests by Test -> Run -> All Tests menu item inside of Visual Studio.
 
-<a name="linux_client"/>
+<a name="linux_client"></a>
 ## Run end to end tests for "iothub_client" on a Linux development environment
 
 - Navigate to the folder c/build_all/linux in your local copy of the repository.
