@@ -165,7 +165,7 @@ static METHOD_HANDLE g_method_handle_value = NULL;
 #define TEST_DIFF_TIME_POSITIVE 12
 #define TEST_DIFF_TIME_NEGATIVE -12
 #define TEST_DIFF_WITHIN_ERROR  5
-#define TEST_DIFF_GREATER_THAN_WAIT  5
+#define TEST_DIFF_GREATER_THAN_WAIT  6
 #define TEST_DIFF_LESS_THAN_WAIT  1
 #define TEST_DIFF_GREATER_THAN_ERROR 10
 #define TEST_BIG_TIME_T (TEST_RETRY_TIMEOUT_SECS - TEST_DIFF_WITHIN_ERROR)
@@ -801,15 +801,8 @@ static void setup_start_retry_timer_mocks()
         .IgnoreArgument(1).SetReturn(TEST_SMALL_TIME_T);
 }
 
-static void setup_stop_retry_timer_mocks()
-{
-    STRICT_EXPECTED_CALL(get_time(IGNORED_PTR_ARG))
-        .IgnoreArgument(1);
-}
-
 static void setup_connection_success_mocks()
 {
-    setup_stop_retry_timer_mocks();
     STRICT_EXPECTED_CALL(IotHubClient_LL_ConnectionStatusCallBack(TEST_IOTHUB_CLIENT_LL_HANDLE, IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK))
         .IgnoreArgument(1);
 }
@@ -2599,6 +2592,10 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_Retry_Policy_Connection_Break_S
     /* Second Retry */
     // setup retry-setup mocks
     EXPECTED_CALL(get_time(IGNORED_PTR_ARG)).SetReturn(TEST_BIG_TIME_T);
+    STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        .SetReturn(TEST_DIFF_GREATER_THAN_WAIT);
     STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
