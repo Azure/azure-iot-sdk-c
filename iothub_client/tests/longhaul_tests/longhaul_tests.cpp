@@ -3,12 +3,9 @@
 
 
 #include <cstdlib>
-#ifdef _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
-#endif
-
+#include <cstddef>
+#include <cstdbool>
 #include <limits.h>
-
 #include "testrunnerswitcher.h"
 #include "micromock.h"
 #include "micromockcharstararenullterminatedstrings.h"

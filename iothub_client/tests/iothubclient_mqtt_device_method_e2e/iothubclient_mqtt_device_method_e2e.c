@@ -1,11 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include <stdlib.h>
-#ifdef _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
-#endif
-
 #include "iothubclient_common_device_method_e2e.h"
 #include "testrunnerswitcher.h"
 #include "iothubtransportmqtt.h"

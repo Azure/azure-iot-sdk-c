@@ -1,12 +1,17 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#ifdef __cplusplus
+#include <cstdio>
+#include <cstdlib>
+#include <cstddef>
+#include <cstdbool>
+#else
+#include <stdio.h>
 #include <stdlib.h>
-#ifdef _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
-#endif
-
 #include <stddef.h>
+#include <stdbool.h>
+#endif
 
 #include "testrunnerswitcher.h"
 #include "umock_c.h"

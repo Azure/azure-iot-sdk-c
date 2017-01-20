@@ -5,9 +5,6 @@
 #define IOTHUBTRANSPORTAMQP_AUTH_H 
 
 #include <stdlib.h>
-#ifdef _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
-#endif
 #include <stdint.h>
 #include "azure_c_shared_utility/strings.h" 
 #include "azure_c_shared_utility/sastoken.h"

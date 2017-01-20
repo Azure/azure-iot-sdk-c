@@ -1,7 +1,19 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#ifdef __cplusplus
+#include <cstdio>
+#include <cstdlib>
+#include <cstddef>
+#include <cstdbool>
+#include <cstdint>
+#else
+#include <stdio.h>
 #include <stdlib.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdint.h>
+#endif
 
 void* real_malloc(size_t size)
 {
@@ -13,18 +25,12 @@ void real_free(void* ptr)
     free(ptr);
 }
 
-
-
-#ifdef _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
-#endif
-
 #include "testrunnerswitcher.h"
 #include "azure_c_shared_utility/macro_utils.h"
 #include "umock_c.h"
 #include "umocktypes_charptr.h"
-#include "umocktypes_stdint.h"
 #include "umocktypes_bool.h"
+#include "umocktypes_stdint.h"
 #include "umock_c_negative_tests.h"
 #include "umocktypes.h"
 #include "umocktypes_c.h"

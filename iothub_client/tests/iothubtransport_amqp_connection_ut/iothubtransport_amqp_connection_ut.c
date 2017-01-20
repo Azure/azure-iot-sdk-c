@@ -1,7 +1,15 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#ifdef __cplusplus
+#include <cstdio>
+#include <cstdlib>
+#include <cstddef>
+#else
+#include <stdio.h>
 #include <stdlib.h>
+#include <stddef.h>
+#endif
 
 void* real_malloc(size_t size)
 {
@@ -12,10 +20,6 @@ void real_free(void* ptr)
 {
 	free(ptr);
 }
-
-#ifdef _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
-#endif
 
 #include "testrunnerswitcher.h"
 #include "umock_c.h"

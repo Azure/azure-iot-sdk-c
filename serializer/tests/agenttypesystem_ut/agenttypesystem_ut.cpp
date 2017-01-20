@@ -2,9 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include <cstdlib>
-#ifdef _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
-#endif
+#include <cstdint>
+#include <cstddef>
+#include <cstdbool>
+#include <climits>
+#include <cfloat>
 
 #define CTEST_USE_STDINT
 
@@ -13,8 +15,6 @@
 #include "micromockcharstararenullterminatedstrings.h"
 
 #include "agenttypesystem.h"
-#include <limits>
-#include <cfloat>
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/strings.h"
 
