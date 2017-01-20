@@ -43,8 +43,7 @@
 #define FAILED_CONN_BACKOFF_VALUE   5
 #define STATUS_CODE_FAILURE_VALUE   500
 #define STATUS_CODE_TIMEOUT_VALUE   408
-#define ERROR_TIME_FOR_RETRY_SECS   5
-#define WAIT_TIME_SECS              (ERROR_TIME_FOR_RETRY_SECS - 1)
+#define ERROR_TIME_FOR_RETRY_SECS   5       // We won't retry more than once every 5 seconds
 
 static const char TOPIC_DEVICE_TWIN_PREFIX[] = "$iothub/twin";
 static const char TOPIC_DEVICE_METHOD_PREFIX[] = "$iothub/methods";
@@ -112,17 +111,16 @@ typedef int(*RETRY_POLICY)(bool *permit, size_t* delay, void* retryContextCallba
 
 typedef struct RETRY_LOGIC_TAG
 {
-    IOTHUB_CLIENT_RETRY_POLICY retryPolicy;
-    size_t retryTimeoutLimitInSeconds;
-    RETRY_POLICY fnRetryPolicy;
-    time_t start;
-    time_t stop;
-    time_t lastConnect;
-    bool retryStarted;
-    bool retryExpired;
-    bool firstAttempt;
-    size_t retrycount;
-    size_t delayFromLastConnectToRetry;
+    IOTHUB_CLIENT_RETRY_POLICY retryPolicy; // Type of policy we're using
+    size_t retryTimeoutLimitInSeconds;      // If we don't connect in this many seconds, give up even trying.
+    RETRY_POLICY fnRetryPolicy;             // Pointer to the policy function
+    time_t start;                           // When did we start retrying?
+    time_t lastConnect;                     // When did we last try to connect?
+    bool retryStarted;                      // true if the retry timer is set and we're trying to retry
+    bool retryExpired;                      // true if we haven't connected in retryTimeoutLimitInSeconds seconds
+    bool firstAttempt;                      // true on init so we can connect the first time without waiting for any timeouts.
+    size_t retrycount;                      // How many times have we tried connecting?
+    size_t delayFromLastConnectToRetry;     // last time delta betweewn retry attempts.
 } RETRY_LOGIC;
 
 typedef struct MQTT_TRANSPORT_CREDENTIALS_TAG
@@ -311,12 +309,11 @@ static RETRY_LOGIC* CreateRetryLogic(IOTHUB_CLIENT_RETRY_POLICY retryPolicy, siz
             break;
         }
         retryLogic->start = EPOCH_TIME_T_VALUE;
-        retryLogic->stop = EPOCH_TIME_T_VALUE;
         retryLogic->delayFromLastConnectToRetry = 0;
         retryLogic->lastConnect = EPOCH_TIME_T_VALUE;
         retryLogic->retryStarted = false;
         retryLogic->retryExpired = false;
-        retryLogic->firstAttempt = false;
+        retryLogic->firstAttempt = true;
         retryLogic->retrycount = 0;
     }
     else
@@ -347,10 +344,8 @@ static void StartRetryTimer(RETRY_LOGIC *retryLogic)
             retryLogic->retryStarted = true;
         }
 
-        if (retryLogic->firstAttempt == false)
-        {
-            retryLogic->firstAttempt = true;
-        }
+        retryLogic->firstAttempt = false
+		;
     }
     else
     {
@@ -365,7 +360,6 @@ static void StopRetryTimer(RETRY_LOGIC *retryLogic)
     {
         if (retryLogic->retryStarted == true)
         {
-            retryLogic->stop = get_time(NULL);
             retryLogic->retryStarted = false;
             retryLogic->delayFromLastConnectToRetry = 0;
             retryLogic->lastConnect = EPOCH_TIME_T_VALUE;
@@ -432,18 +426,19 @@ static bool CanRetry(RETRY_LOGIC *retryLogic)
         LogError("Retry Logic is not created, retrying forever");
         result = true;
     }
-    else if (now < 0 || retryLogic->start < 0 || retryLogic->stop < 0)
+    else if (now < 0 || retryLogic->start < 0)
     {
         LogError("Time could not be retrieved, retrying forever");
         result = true;
     }
     else if (retryLogic->retryExpired)
     {
+        // We've given up trying to retry.  Don't do anything.
         result = false;
     }
-    else if (retryLogic->firstAttempt == false)
+    else if (retryLogic->firstAttempt)
     {
-        // try now
+        // This is the first time ever running through this code.  We need to try connecting no matter what.
         StartRetryTimer(retryLogic);
         retryLogic->lastConnect = now;
         retryLogic->retrycount++;
@@ -451,44 +446,49 @@ static bool CanRetry(RETRY_LOGIC *retryLogic)
     }
     else
     {
+        // Are we trying to retry?
         if (retryLogic->retryStarted)
         {
+            // How long since we last tried to connect?  Store this in difftime.
             double diffTime = get_difftime(now, retryLogic->lastConnect);
+
+            // Has it been less than 5 seconds since we tried last?  If so, we have to
+            // be careful so we don't hit the server too quickly.
             if (diffTime <= ERROR_TIME_FOR_RETRY_SECS)
             {
-                // Just right time to retry
-                if(diffTime > WAIT_TIME_SECS)
-                {
-                    retryLogic->lastConnect = now;
-                    retryLogic->retrycount++;
-                    result = true;
-                }
-                else
-                {
-                    // As do_work can be called within as little as 1 ms, wait to avoid throtling server
-                    result = false;
-                }
+                // As do_work can be called within as little as 1 ms, wait to avoid throtling server
+                result = false;
             }
             else if (diffTime < retryLogic->delayFromLastConnectToRetry)
             {
+                // delayFromLastConnectionToRetry is either 0 (the first time around)
+                // or it's the backoff delta from the last time through the loop.
+                // If we're less than that, don't even bother trying.  It's
                 // Too early to retry
                 result = false;
             }
             else
             {
                 // last retry time evaluated have crossed, determine when to try next
+                // In other words, it migth be time to retry, so we should validate with the retry policy function.
                 bool permit = false;
                 size_t delay;
 
                 if (retryLogic->fnRetryPolicy != NULL && (retryLogic->fnRetryPolicy(&permit, &delay, retryLogic) == 0))
                 {
+                    // Does the policy function want us to retry (permit == true), or are we still allowed to retry?
+                    // (in other words, are we within retryTimeoutLimitInSeconds seconds since starting to retry?)
+					// If so, see if we _really_ want to retry.
                     if ((permit == true) && ((retryLogic->retryTimeoutLimitInSeconds == 0) || retryLogic->retryTimeoutLimitInSeconds >= (delay + get_difftime(now, retryLogic->start))))
                     {
                         retryLogic->delayFromLastConnectToRetry = delay;
 
                         LogInfo("Evaluated delay %d at %d attempt to retry\n", delay, retryLogic->retrycount);
 
-                        if (retryLogic->delayFromLastConnectToRetry <= ERROR_TIME_FOR_RETRY_SECS)
+                        // If the retry policy is telling us to connect right away ( <= ERROR_TIME_FOR_RETRY_SECS),
+                        // or if enough time has elapsed, then we retry.
+                        if ((retryLogic->delayFromLastConnectToRetry <= ERROR_TIME_FOR_RETRY_SECS) ||
+                            (diffTime >= retryLogic->delayFromLastConnectToRetry))
                         {
                             retryLogic->lastConnect = now;
                             retryLogic->retrycount++;
@@ -496,12 +496,13 @@ static bool CanRetry(RETRY_LOGIC *retryLogic)
                         }
                         else
                         {
+                            // To soon to retry according to policy.  
                             result = false;
                         }
                     }
                     else
                     {
-                        // Retry expired
+                        // Retry expired.  Stop trying.
                         LogError("Retry timeout expired after %d attempts", retryLogic->retrycount);
                         retryLogic->retryExpired = true;
                         StopRetryTimer(retryLogic);
@@ -510,6 +511,7 @@ static bool CanRetry(RETRY_LOGIC *retryLogic)
                 }
                 else
                 {
+                    // We don't have a retry policy.  Sorry, can't even guess.  Don't bother even trying to retry.
                     LogError("Cannot evaluate the next best time to retry");
                     result = false;
                 }
@@ -517,7 +519,9 @@ static bool CanRetry(RETRY_LOGIC *retryLogic)
         }
         else
         {
-            // start retry when connection breaks
+            // Since this function is only called when the connection is 
+            // already broken, we can start doing the rety logic.  We'll do the
+            // actual interval checking next time around this loop.
             StartRetryTimer(retryLogic);
             //wait for next do work to evaluate next best attempt
             result = false;
