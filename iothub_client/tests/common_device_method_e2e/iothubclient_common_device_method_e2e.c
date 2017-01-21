@@ -1,12 +1,15 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-#include <stdlib.h>
-#ifdef _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
-#endif
 
+#ifdef __cplusplus
+#include <cstdlib>
+#include <cstddef>
+#include <cstring>
+#else
+#include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
+#endif
 
 #include "iothub_messaging_ll.h"
 

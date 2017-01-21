@@ -1,12 +1,17 @@
-
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #ifdef __cplusplus
 #include <cstdlib>
+#include <cstddef>
+#include <cstdbool>
+#include <cstdint>
 #else
 #include <stdlib.h>
-#endif 
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdint.h>
+#endif
 
 static void* my_gballoc_malloc(size_t size)
 {
@@ -17,10 +22,6 @@ static void my_gballoc_free(void* s)
 {
     free(s);
 }
-
-#ifdef _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
-#endif
 
 #include "real_vector.h"
 #include "real_crt_abstractions.h"

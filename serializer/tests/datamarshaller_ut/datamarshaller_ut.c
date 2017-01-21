@@ -3,9 +3,11 @@
 
 #ifdef __cplusplus
 #include <cstdlib>
+#include <cstddef>
 #else
 #include <stdlib.h>
-#endif 
+#include <stddef.h>
+#endif
 
 static void* my_gballoc_malloc(size_t size)
 {
@@ -16,10 +18,6 @@ static void my_gballoc_free(void* s)
 {
     free(s);
 }
-
-#ifdef _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
-#endif
 
 #include "real_parson.h"
 #include "real_vector.h"

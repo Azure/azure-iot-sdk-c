@@ -5,9 +5,11 @@
 #ifdef DONT_USE_UPLOADTOBLOB
 #error "trying to compile iothub_client_ll_u2b_ut.c while DONT_USE_UPLOADTOBLOB is #define'd"
 #else
+
+#ifdef __cplusplus
+#include <cstdlib>
+#else
 #include <stdlib.h>
-#ifdef _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
 #endif
 
 void* my_gballoc_malloc(size_t size)

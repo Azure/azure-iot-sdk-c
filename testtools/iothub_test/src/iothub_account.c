@@ -1,13 +1,18 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#ifdef __cplusplus
+#include <cstdio>
+#include <cstdlib>
+#include <cstddef>
+#include <cstring>
+#else
+#include <stdio.h>
 #include <stdlib.h>
-#ifdef _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
+#include <stddef.h>
+#include <string.h>
 #endif
 
-#include <stdio.h>
-#include <string.h>
 #include "azure_c_shared_utility/string_tokenizer.h"
 #include "iothub_account.h"
 

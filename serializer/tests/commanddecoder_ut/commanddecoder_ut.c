@@ -3,8 +3,10 @@
 
 #ifdef __cplusplus
 #include <cstdlib>
+#include <cstddef>
 #else
 #include <stdlib.h>
+#include <stddef.h>
 #endif
 
 void* my_gballoc_malloc(size_t t)
@@ -16,10 +18,6 @@ void my_gballoc_free(void * t)
 {
     free(t);
 }
-
-#ifdef _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
-#endif
 
 #define GBALLOC_H
 /*want crt_abstractions to use real malloc*/

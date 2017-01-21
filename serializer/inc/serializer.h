@@ -47,10 +47,6 @@
 #include <stdarg.h>
 #endif
 
-#ifdef _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
-#endif
-
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/macro_utils.h"
 #include "iotdevice.h"

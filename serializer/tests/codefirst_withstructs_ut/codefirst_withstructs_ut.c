@@ -3,8 +3,14 @@
 
 #ifdef __cplusplus
 #include <cstdlib>
+#include <cstddef>
+#include <cstdint>
+#include <cinttypes>
 #else
 #include <stdlib.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <inttypes.h>
 #endif
 
 void* my_gballoc_malloc(size_t t)
@@ -16,10 +22,6 @@ void my_gballoc_free(void * t)
 {
     free(t);
 }
-
-#ifdef _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
-#endif
 
 #include "macro_utils.h"
 #include "umock_c.h"

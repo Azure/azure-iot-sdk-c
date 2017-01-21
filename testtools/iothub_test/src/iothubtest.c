@@ -1,18 +1,29 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include <stdlib.h>
-#ifdef _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
-#endif
-#include "azure_c_shared_utility/gballoc.h"
+#ifdef __cplusplus
+#include <cstdio>
+#include <cstdlib>
+#include <cstddef>
+#include <cstring>
+#include <ctime>
+#include <csignal>
+#include <cctype>
+#include <cmath>
+#include <climits>
+#else
 #include <stdio.h>
+#include <stdlib.h>
+#include <stddef.h>
 #include <string.h>
+#include <time.h>
 #include <signal.h>
 #include <ctype.h>
 #include <math.h>
-#include <time.h>
 #include <limits.h>
+#endif
+
+#include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 
