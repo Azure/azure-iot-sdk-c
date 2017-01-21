@@ -302,7 +302,7 @@ static void on_message_send_complete(void* context, MESSAGE_SEND_RESULT send_res
 {
     IOTHUB_MESSAGE_LIST* message = (IOTHUB_MESSAGE_LIST*)context;
 
-    IOTHUB_CLIENT_RESULT iot_hub_send_result;
+    IOTHUB_CLIENT_CONFIRMATION_RESULT iot_hub_send_result;
 
     // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_142: [The callback 'on_message_send_complete' shall pass to the upper layer callback an IOTHUB_CLIENT_CONFIRMATION_OK if the result received is MESSAGE_SEND_OK] 
     if (send_result == MESSAGE_SEND_OK)
@@ -1287,7 +1287,7 @@ IOTHUB_PROCESS_ITEM_RESULT IoTHubTransport_AMQP_Common_ProcessItem(TRANSPORT_LL_
     (void)item_type;
     (void)iothub_item;
     LogError("Currently Not Supported.");
-    return IOTHUB_CLIENT_ERROR;
+    return IOTHUB_PROCESS_ERROR;
 }
 
 void IoTHubTransport_AMQP_Common_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)

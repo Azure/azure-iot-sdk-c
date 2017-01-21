@@ -115,7 +115,8 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 
 static DATA_MARSHALLER_HANDLE my_DataMarshaller_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, bool includePropertyPath)
 {
-    (void)(modelHandle, includePropertyPath);
+    (void)modelHandle;
+    (void)includePropertyPath;
     return (DATA_MARSHALLER_HANDLE)my_gballoc_malloc(1);
 }
 
@@ -134,7 +135,11 @@ static AGENT_DATA_TYPES_RESULT my_Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(AG
 }
 static DATA_MARSHALLER_RESULT my_DataMarshaller_SendData(DATA_MARSHALLER_HANDLE dataMarshallerHandle, size_t valueCount, const DATA_MARSHALLER_VALUE* values, unsigned char** destination, size_t* destinationSize)
 {
-    (void)(destination, destinationSize, values, valueCount, dataMarshallerHandle);
+    (void)destination;
+    (void)destinationSize;
+    (void)values;
+    (void)valueCount;
+    (void) dataMarshallerHandle;
     return DATA_MARSHALLER_OK;
 }
 

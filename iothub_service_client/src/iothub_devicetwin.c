@@ -238,7 +238,7 @@ static IOTHUB_DEVICE_TWIN_RESULT sendHttpRequestTwin(IOTHUB_SERVICE_CLIENT_DEVIC
         {
             httpApiRequestType = HTTPAPI_REQUEST_PATCH;
         }
-        else if ((iotHubTwinRequestMode == IOTHUB_TWIN_REQUEST_GET))
+        else if (iotHubTwinRequestMode == IOTHUB_TWIN_REQUEST_GET)
         {
             httpApiRequestType = HTTPAPI_REQUEST_GET;
         }

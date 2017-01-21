@@ -727,7 +727,6 @@ BEGIN_TEST_SUITE(serializer_e2e)
     static int DeviceMethodCallback(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* resp_size, void* userContextCallback)
     {
         /*userContextCallback is of type deviceModel*/
-        (void)(method_name, payload, size, response, resp_size, userContextCallback);
 
         /*this is step  3: receive the method and push that payload into serializer (from below)*/
         char* payloadZeroTerminated = (char*)malloc(size + 1);

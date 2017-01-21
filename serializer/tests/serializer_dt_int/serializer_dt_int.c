@@ -187,7 +187,9 @@ static char* g_IoTHubClient_LL_SendReportedState_reportedState = NULL;
 static size_t g_IoTHubClient_LL_SendReportedState_size = 0;
 static IOTHUB_CLIENT_RESULT my_IoTHubClient_LL_SendReportedState(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const unsigned char* reportedState, size_t size, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reportedStateCallback, void* userContextCallback)
 {
-    (void)(iotHubClientHandle, reportedState, size);
+    (void)iotHubClientHandle;
+    (void)reportedState;
+    (void)size;
     g_IoTHubClient_LL_SendReportedState_reportedState = (char*)malloc(size+1);
     ASSERT_IS_NOT_NULL(g_IoTHubClient_LL_SendReportedState_reportedState);
     memcpy(g_IoTHubClient_LL_SendReportedState_reportedState, reportedState, size);

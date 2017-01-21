@@ -281,7 +281,8 @@ static DEVICE_HANDLE g_DeviceHandle = (DEVICE_HANDLE)0x434233;
 
 CODEFIRST_RESULT CodeFirst_SendAsync(unsigned char** destination, size_t* destinationSize, size_t numProperties, ...)
 {
-    (void)(destination, destinationSize);
+    (void)destination;
+    (void)destinationSize;
 
     g_NumProperties = numProperties;
     va_list argptr;

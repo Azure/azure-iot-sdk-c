@@ -554,7 +554,8 @@ static TRANSACTION_HANDLE my_Device_StartTransaction(DEVICE_HANDLE deviceHandle)
 
 static DEVICE_RESULT my_Device_EndTransaction(TRANSACTION_HANDLE transactionHandle, unsigned char** destination, size_t* destinationSize)
 {
-    (void)(destination, destinationSize);
+    (void)destination;
+    (void)destinationSize;
     ASSERT_ARE_EQUAL(void_ptr, transactionHandle, toBeCleaned);
     my_gballoc_free((void*)transactionHandle);
     toBeCleaned = NULL;
@@ -625,7 +626,8 @@ EXECUTE_COMMAND_RESULT reset_Action(truckType_Model* m)
 
 EXECUTE_COMMAND_RESULT setSpeed_Action(truckType_Model* m, double theSpeed)
 {
-    (void)(m, theSpeed);
+    (void)m;
+    (void)theSpeed;
     return EXECUTE_COMMAND_SUCCESS;
 }
 
@@ -716,7 +718,11 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 
 static DEVICE_RESULT my_Device_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, pfDeviceActionCallback deviceActionCallback, void* actionCallbackUserContext, pfDeviceMethodCallback deviceMethodCallback, void* methodCallbackUserContext, bool includePropertyPath, DEVICE_HANDLE* deviceHandle)
 {
-    (void)(deviceActionCallback, deviceMethodCallback, methodCallbackUserContext, includePropertyPath, modelHandle);
+    (void)deviceActionCallback;
+    (void)deviceMethodCallback;
+    (void)methodCallbackUserContext;
+    (void)includePropertyPath;
+    (void)modelHandle;
     *deviceHandle = TEST_DEVICE_HANDLE;
     g_InvokeActionCallbackArgument = actionCallbackUserContext;
     return DEVICE_OK;

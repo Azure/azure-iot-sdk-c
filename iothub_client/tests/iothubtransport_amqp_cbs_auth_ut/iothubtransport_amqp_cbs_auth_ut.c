@@ -1803,7 +1803,7 @@ TEST_FUNCTION(authentication_do_work_first_auth_times_out)
 	time_t current_time = time(NULL);
 	ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != current_time, "current_time = time(NULL) failed");
 	time_t next_time = add_seconds(current_time, 11);
-	ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != next_time, "failed to computer 'next_time'");
+	ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != next_time, "failed to compute 'next_time'");
 
 	AUTHENTICATION_DO_WORK_EXPECTED_STATE *exp_state = get_do_work_expected_state_struct();
 	exp_state->current_state = AUTHENTICATION_STATE_STARTING;

@@ -106,7 +106,8 @@ BUFFER_HANDLE my_BUFFER_new(void)
 
 BUFFER_HANDLE my_BUFFER_create(const unsigned char* source, size_t size)
 {
-    (void)source, size;
+    (void)source;
+    (void)size;
     return (BUFFER_HANDLE)my_gballoc_malloc(1);
 }
 
@@ -128,7 +129,9 @@ void my_HTTPAPIEX_Destroy(HTTPAPIEX_HANDLE handle)
 
 HTTPAPIEX_SAS_HANDLE my_HTTPAPIEX_SAS_Create(STRING_HANDLE key, STRING_HANDLE uriResource, STRING_HANDLE keyName)
 {
-    (void)key, uriResource, keyName;
+    (void)key;
+    (void)uriResource;
+    (void)keyName;
     return (HTTPAPIEX_SAS_HANDLE)my_gballoc_malloc(1);
 }
 

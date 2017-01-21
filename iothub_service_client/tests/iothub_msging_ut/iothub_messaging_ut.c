@@ -100,25 +100,25 @@ static LOCK_HANDLE my_Lock_Init(void)
 
 static LOCK_RESULT my_Lock_Deinit(LOCK_HANDLE handle)
 {
-    (void*)handle;
+    (void)handle;
     return LOCK_OK;
 }
 
 static LOCK_RESULT my_Lock(LOCK_HANDLE handle)
 {
-    (void*)handle;
+    (void)handle;
     return LOCK_OK;
 }
 
 static LOCK_RESULT my_Unlock(LOCK_HANDLE handle)
 {
-    (void*)handle;
+    (void)handle;
     return LOCK_OK;
 }
 
 static THREADAPI_RESULT my_ThreadAPI_Join(THREAD_HANDLE threadHandle, int *res)
 {
-    (void*)threadHandle;
+    (void)threadHandle;
     res = 0;
     return THREADAPI_OK;
 }
@@ -126,18 +126,18 @@ static THREADAPI_RESULT my_ThreadAPI_Join(THREAD_HANDLE threadHandle, int *res)
 static IOTHUB_SERVICE_CLIENT_AUTH_HANDLE TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE = (IOTHUB_SERVICE_CLIENT_AUTH_HANDLE)0x4242;
 static IOTHUB_MESSAGING_HANDLE my_IoTHubMessaging_LL_Create(IOTHUB_SERVICE_CLIENT_AUTH_HANDLE serviceClientHandle)
 {
-    (void*)serviceClientHandle;
+    (void)serviceClientHandle;
     return TEST_IOTHUB_MESSAGING_HANDLE;
 }
 
 static void my_IoTHubMessaging_LL_Destroy(IOTHUB_MESSAGING_HANDLE messagingHandle)
 {
-    (void*)messagingHandle;
+    (void)messagingHandle;
 }
 
 static IOTHUB_MESSAGING_RESULT my_IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagingHandle, IOTHUB_OPEN_COMPLETE_CALLBACK openCompleteCallback, void* userContextCallback)
 {
-    (void*)messagingHandle;
+    (void)messagingHandle;
     (void)openCompleteCallback;
     (void)userContextCallback;
     return IOTHUB_MESSAGING_OK;
@@ -145,12 +145,12 @@ static IOTHUB_MESSAGING_RESULT my_IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDL
 
 static void my_IoTHubMessaging_LL_Close(IOTHUB_MESSAGING_HANDLE messagingHandle)
 {
-    (void*)messagingHandle;
+    (void)messagingHandle;
 }
 
 static IOTHUB_MESSAGING_RESULT my_IoTHubMessaging_LL_SetFeedbackMessageCallback(IOTHUB_MESSAGING_HANDLE messagingHandle, IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK feedbackMessageReceivedCallback, void* userContextCallback)
 {
-    (void*)messagingHandle;
+    (void)messagingHandle;
     (void)feedbackMessageReceivedCallback;
     (void)userContextCallback;
     return IOTHUB_MESSAGING_OK;

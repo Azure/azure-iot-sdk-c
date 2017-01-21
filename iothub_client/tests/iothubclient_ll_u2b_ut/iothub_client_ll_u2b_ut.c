@@ -53,7 +53,8 @@ static STRING_HANDLE my_STRING_construct(const char* psz)
 
 static STRING_HANDLE my_STRING_construct_n(const char* psz, size_t n)
 {
-    (void)psz, n;
+    (void)psz;
+    (void)n;
     return (STRING_HANDLE)malloc(1);
 }
 
@@ -64,7 +65,8 @@ static STRING_HANDLE my_STRING_new(void)
 
 static STRING_HANDLE my_STRING_from_byte_array(const unsigned char* source, size_t size)
 {
-    (void)source, size;
+    (void)source;
+    (void)size;
     return (STRING_HANDLE)malloc(1);
 }
 
@@ -90,7 +92,8 @@ static BUFFER_HANDLE my_BUFFER_new(void)
 
 static BUFFER_HANDLE my_BUFFER_create(const unsigned char* source, size_t size)
 {
-    (void)source, size;
+    (void)source;
+    (void)size;
     return (BUFFER_HANDLE)malloc(1);
 }
 
@@ -112,7 +115,9 @@ static void my_HTTPAPIEX_Destroy(HTTPAPIEX_HANDLE handle)
 
 static HTTPAPIEX_SAS_HANDLE my_HTTPAPIEX_SAS_Create(STRING_HANDLE key, STRING_HANDLE uriResource, STRING_HANDLE keyName)
 {
-    (void)key, uriResource, keyName;
+    (void)key;
+    (void)uriResource;
+    (void)keyName;
     return (HTTPAPIEX_SAS_HANDLE)malloc(1);
 }
 
@@ -136,7 +141,13 @@ static HTTPAPIEX_RESULT my_HTTPAPIEX_ExecuteRequest(HTTPAPIEX_HANDLE handle, HTT
     HTTP_HEADERS_HANDLE requestHttpHeadersHandle, BUFFER_HANDLE requestContent, unsigned int* statusCode,
     HTTP_HEADERS_HANDLE responseHttpHeadersHandle, BUFFER_HANDLE responseContent)
 {
-    (void)handle, requestType, relativePath, requestHttpHeadersHandle, requestContent, responseHttpHeadersHandle, responseContent;
+    (void)handle;
+    (void)requestType; 
+    (void)relativePath;
+    (void)requestHttpHeadersHandle;
+    (void)requestContent;
+    (void)responseHttpHeadersHandle;
+    (void)responseContent;
     if (statusCode != NULL)
     {
         *statusCode = 200; /*success*/
@@ -146,7 +157,14 @@ static HTTPAPIEX_RESULT my_HTTPAPIEX_ExecuteRequest(HTTPAPIEX_HANDLE handle, HTT
 
 static HTTPAPIEX_RESULT my_HTTPAPIEX_SAS_ExecuteRequest(HTTPAPIEX_SAS_HANDLE sasHandle, HTTPAPIEX_HANDLE handle, HTTPAPI_REQUEST_TYPE requestType, const char* relativePath, HTTP_HEADERS_HANDLE requestHttpHeadersHandle, BUFFER_HANDLE requestContent, unsigned int* statusCode, HTTP_HEADERS_HANDLE responseHeadersHandle, BUFFER_HANDLE responseContent)
 {
-    (void)sasHandle, handle, requestType, relativePath, requestHttpHeadersHandle, requestContent, responseHeadersHandle, responseContent;
+    (void)sasHandle;
+    (void)handle;
+    (void)requestType;
+    (void)relativePath;
+    (void)requestHttpHeadersHandle;
+    (void)requestContent;
+    (void)responseHeadersHandle;
+    (void)responseContent;
     if (statusCode != NULL)
     {
         *statusCode = 200;/*success*/

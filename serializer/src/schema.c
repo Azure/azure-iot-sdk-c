@@ -2435,9 +2435,7 @@ size_t Schema_GetModelModelByIndex_Offset(SCHEMA_MODEL_TYPE_HANDLE modelTypeHand
 {
     size_t result;
     /*Codes_SRS_SCHEMA_02_057: [ If modelTypeHandle is NULL then Schema_GetModelModelByIndex_Offset shall fail and return 0. ]*/
-    if (
-        (modelTypeHandle == NULL)
-        )
+    if (modelTypeHandle == NULL)
     {
         result = 0;
         LogError("error SCHEMA_INVALID_ARG");
@@ -2464,9 +2462,7 @@ size_t Schema_GetModelModelByIndex_Offset(SCHEMA_MODEL_TYPE_HANDLE modelTypeHand
 SCHEMA_MODEL_TYPE_HANDLE Schema_GetModelModelyByIndex(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t index)
 {
     SCHEMA_MODEL_TYPE_HANDLE result;
-    if (
-        (modelTypeHandle == NULL) 
-        )
+    if (modelTypeHandle == NULL) 
     {
         /*Codes_SRS_SCHEMA_99_173: [Schema_GetModelModelyByIndex shall return NULL in the cases when it cannot provide the handle.]*/
         result = NULL;

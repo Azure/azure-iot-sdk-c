@@ -107,7 +107,8 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 
 static int g_pfDesiredPropertyFromAGENT_DATA_TYPE(const AGENT_DATA_TYPE* source, void* dest)
 {
-    (void)(source, dest);
+    (void)source;
+    (void)dest;
     return 0;
 }
 

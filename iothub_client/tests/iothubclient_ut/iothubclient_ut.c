@@ -160,7 +160,7 @@ static LOCK_HANDLE my_IoTHubTransport_GetLock(TRANSPORT_HANDLE transportHandle)
 
 static THREADAPI_RESULT my_ThreadAPI_Join(THREAD_HANDLE threadHandle, int *res)
 {
-    (void*)threadHandle;
+    (void)threadHandle;
     res = 0;
     return THREADAPI_OK;
 }

@@ -78,6 +78,8 @@ static const char* REQUEST_ID_PROPERTY = "?$rid=";
 #define SUBSCRIBE_DEVICE_METHOD_TOPIC           0x0010
 #define SUBSCRIBE_TOPIC_COUNT                   4
 
+DEFINE_ENUM_STRINGS(MQTT_CLIENT_EVENT_ERROR, MQTT_CLIENT_EVENT_ERROR_VALUES)
+
 typedef struct SYSTEM_PROPERTY_INFO_TAG
 {
     const char* propName;
@@ -1345,6 +1347,10 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
                 transport_data->currPacketState = DISCONNECT_TYPE;
                 break;
             }
+            case MQTT_CLIENT_ON_UNSUBSCRIBE_ACK:
+            {
+                break;
+            }
         }
     }
 }
@@ -1366,6 +1372,13 @@ static void mqtt_error_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_ERR
             {
                 LogError("Mqtt Ping Response was not encountered.  Reconnecting device...");
                 break;
+            }
+            case MQTT_CLIENT_PARSE_ERROR:
+            case MQTT_CLIENT_MEMORY_ERROR:
+            case MQTT_CLIENT_COMMUNICATION_ERROR:
+            case MQTT_CLIENT_UNKNOWN_ERROR: 
+            {
+                LogError("INTERNAL ERROR: unexpected error value received %s", ENUM_TO_STRING(MQTT_CLIENT_EVENT_ERROR, error));
             }
         }
         transport_data->isConnected = false;
