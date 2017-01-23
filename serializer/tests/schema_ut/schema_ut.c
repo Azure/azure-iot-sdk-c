@@ -38,6 +38,7 @@ void my_gballoc_free(void * t)
 #define VECTOR_back real_VECTOR_back
 #define VECTOR_find_if real_VECTOR_find_if
 #define VECTOR_size real_VECTOR_size
+#define VECTOR_move real_VECTOR_move
 #include "vector.c"
 #undef VECTOR_create
 #undef VECTOR_destroy
@@ -49,6 +50,7 @@ void my_gballoc_free(void * t)
 #undef VECTOR_back
 #undef VECTOR_find_if
 #undef VECTOR_size
+#undef VECTOR_move
 #undef VECTOR_H
 
 /*want crt_abstractions to use real malloc*/

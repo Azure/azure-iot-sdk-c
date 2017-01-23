@@ -15,6 +15,7 @@
 #define VECTOR_find_if          real_VECTOR_find_if
 #define VECTOR_size             real_VECTOR_size
 #define VECTOR_erase            real_VECTOR_erase
+#define VECTOR_move             real_VECTOR_move
 
 #include "vector.h"
 
@@ -30,6 +31,7 @@
 #undef VECTOR_find_if  
 #undef VECTOR_size  
 #undef VECTOR_erase   
+#undef VECTOR_move
 #endif
 
 #undef VECTOR_H
