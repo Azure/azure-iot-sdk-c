@@ -95,7 +95,7 @@ static void my_gballoc_free(void* ptr)
 static int my_mallocAndStrcpy_s(char** destination, const char* source)
 {
     char* p = (char*)malloc(strlen(source)+1);
-    memcpy(p, source, strlen(source) + 1);
+    (void)memcpy(p, source, strlen(source) + 1);
     *destination = p;
     return 0;
 }

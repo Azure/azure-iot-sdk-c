@@ -1110,8 +1110,6 @@ TEST_FUNCTION(messenger_start_failure_checks)
     size_t i;
     for (i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
-        //if (i == 1 || i == 2 || i == 4 || i == 5 || i == 9 || i == 10 || i == 11 ||
-        //    i == 12 || i == 14 || i == 16 || i >= 18 && i <= 25 || i >= 28 && i <= 33)
         if (i == 1 || i == 2 || i == 4 || i == 5 || i == 9 || i == 11 || i == 12 || 
             i == 14 || i == 16 || i == 18 || (i >= 19 && i <= 26) || (i >= 29 && i <= 34) )
         {

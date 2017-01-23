@@ -1613,7 +1613,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_UploadToBlobAsync(IOTHUB_CLIENT_HANDLE iotHubC
 
                     savedData->iotHubClientFileUploadCallback = iotHubClientFileUploadCallback;
                     savedData->context = context;
-                    memcpy(savedData->source, source, size);
+                    (void)memcpy(savedData->source, source, size);
 
                     if (Lock(iotHubClientHandleData->LockHandle) != LOCK_OK) /*locking because the next statement is changing blobThreadsToBeJoined*/
                     {

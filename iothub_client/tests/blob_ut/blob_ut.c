@@ -87,7 +87,7 @@ static STRING_HANDLE my_STRING_construct(const char* psz)
 {
     char* temp = (char*)my_gballoc_malloc(strlen(psz) + 1);
     ASSERT_IS_NOT_NULL(temp);
-    memcpy(temp, psz, strlen(psz) + 1);
+    (void)memcpy(temp, psz, strlen(psz) + 1);
     return (STRING_HANDLE)temp;
 }
 

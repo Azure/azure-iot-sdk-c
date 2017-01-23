@@ -128,7 +128,7 @@ static AGENT_DATA_TYPES_RESULT my_Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(AG
 {
     if (dest != NULL)
     {
-        memcpy(dest, src, sizeof(AGENT_DATA_TYPE));
+        (void)memcpy(dest, src, sizeof(AGENT_DATA_TYPE));
     }
     return AGENT_DATA_TYPES_OK;
 }

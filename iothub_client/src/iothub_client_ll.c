@@ -596,7 +596,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateWithTransport(const IOTHUB_CLIENT_
                 else
                 {
                     const char* IotHubSuffix = whereIsDot + 1;
-                    memcpy(IoTHubName, hostname, whereIsDot - hostname);
+                    (void)memcpy(IoTHubName, hostname, whereIsDot - hostname);
                     IoTHubName[whereIsDot - hostname ] = '\0';
                     
                     IOTHUB_CLIENT_CONFIG temp;

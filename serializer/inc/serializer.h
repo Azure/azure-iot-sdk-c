@@ -1288,7 +1288,7 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, EDM_GUID)(const AGENT_DA
     }
     else
     {
-        memcpy(dest->GUID, agentData->value.edmGuid.GUID, 16);
+        (void)memcpy(dest->GUID, agentData->value.edmGuid.GUID, 16);
         result = AGENT_DATA_TYPES_OK;
     }
     return result;
@@ -1327,7 +1327,7 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, EDM_BINARY)(const AGENT_
         }
         else
         {
-            memcpy(dest->data, agentData->value.edmBinary.data, agentData->value.edmBinary.size);
+            (void)memcpy(dest->data, agentData->value.edmBinary.data, agentData->value.edmBinary.size);
             dest->size = agentData->value.edmBinary.size;
             result = AGENT_DATA_TYPES_OK;
         }

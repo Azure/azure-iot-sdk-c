@@ -50,7 +50,7 @@ static bool areTwoJsonsEqual(const unsigned char* left, size_t leftSize, const c
     char* cloneOfLeft = (char*)malloc(leftSize + 1); /*because of out SERIALIZE... there is a byte array that is NOT '\0' terminated*/
     ASSERT_IS_NOT_NULL(cloneOfLeft);
     
-    memcpy(cloneOfLeft, left, leftSize);
+    (void)memcpy(cloneOfLeft, left, leftSize);
     cloneOfLeft[leftSize] = '\0';
     
     JSON_Value* actualJson = json_parse_string((char*)cloneOfLeft);
@@ -176,7 +176,7 @@ static IOTHUB_CLIENT_RESULT my_IoTHubClient_SendReportedState(IOTHUB_CLIENT_HAND
     
     g_IoTHubClient_SendReportedState_reportedState = (char*)malloc(size+1);
     ASSERT_IS_NOT_NULL(g_IoTHubClient_SendReportedState_reportedState);
-    memcpy(g_IoTHubClient_SendReportedState_reportedState, reportedState, size);
+    (void)memcpy(g_IoTHubClient_SendReportedState_reportedState, reportedState, size);
     g_IoTHubClient_SendReportedState_reportedState[size] = '\0';
 
     reportedStateCallback(201, userContextCallback);
@@ -192,7 +192,7 @@ static IOTHUB_CLIENT_RESULT my_IoTHubClient_LL_SendReportedState(IOTHUB_CLIENT_L
     (void)size;
     g_IoTHubClient_LL_SendReportedState_reportedState = (char*)malloc(size+1);
     ASSERT_IS_NOT_NULL(g_IoTHubClient_LL_SendReportedState_reportedState);
-    memcpy(g_IoTHubClient_LL_SendReportedState_reportedState, reportedState, size);
+    (void)memcpy(g_IoTHubClient_LL_SendReportedState_reportedState, reportedState, size);
     g_IoTHubClient_LL_SendReportedState_reportedState[size] = '\0';
 
     reportedStateCallback(201, userContextCallback);

@@ -15,6 +15,8 @@
 #include "azure_c_shared_utility/doublylinkedlist.h"
 #include "azure_c_shared_utility/vector.h"
 
+/*this is a hack to allow vector.c to be #included in a C++ namespace. C++ is only used for testing purposes*/
+#include "azure_c_shared_utility/vector_types_internal.h"
 
 #include "azure_c_shared_utility/string_tokenizer.h"
 #include "azure_c_shared_utility/strings.h"

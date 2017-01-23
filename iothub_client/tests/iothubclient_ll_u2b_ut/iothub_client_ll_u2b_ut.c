@@ -178,7 +178,7 @@ static int my_mallocAndStrcpy_s(char** destination, const char* source)
 {
     size_t l = strlen(source);
     *destination = (char*)malloc(l + 1);
-    memcpy(*destination, source, l+1);
+    (void)memcpy(*destination, source, l+1);
     return 0;
 }
 

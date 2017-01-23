@@ -848,7 +848,7 @@ static bool areTwoJsonsEqual(const unsigned char* left, size_t leftSize, const c
     char* cloneOfLeft = (char*)malloc(leftSize + 1); /*because of out SERIALIZE... there is a byte array that is NOT '\0' terminated*/
     ASSERT_IS_NOT_NULL(cloneOfLeft);
     
-    memcpy(cloneOfLeft, left, leftSize);
+    (void)memcpy(cloneOfLeft, left, leftSize);
     cloneOfLeft[leftSize] = '\0';
     
     JSON_Value* actualJson = json_parse_string((char*)cloneOfLeft);

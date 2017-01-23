@@ -199,7 +199,7 @@ DATA_MARSHALLER_RESULT DataMarshaller_SendData(DATA_MARSHALLER_HANDLE dataMarsha
                             }
                             else
                             {
-                                memcpy(temp, STRING_c_str(payload), resultSize);
+                                (void)memcpy(temp, STRING_c_str(payload), resultSize);
                                 *destination = temp;
                                 *destinationSize = resultSize;
                                 result = DATA_MARSHALLER_OK;

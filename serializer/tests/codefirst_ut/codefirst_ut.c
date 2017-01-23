@@ -246,7 +246,7 @@ EXECUTE_COMMAND_RESULT test1(TruckType* device, double P1, int P2, float P3, lon
     DummyDataProvider_test1_P13 = P13;
     DummyDataProvider_test1_P14.size = P14.size;
     DummyDataProvider_test1_P14.data = (unsigned char*)malloc(P14.size);
-    memcpy(DummyDataProvider_test1_P14.data, P14.data, P14.size);
+    (void)memcpy(DummyDataProvider_test1_P14.data, P14.data, P14.size);
     strcpy(DummyDataProvider_test1_P15, P15);
     return EXECUTE_COMMAND_SUCCESS;
 }
@@ -309,7 +309,7 @@ METHODRETURN_HANDLE test1Method(TruckType* device, double P1, int P2, float P3, 
     DummyDataProvider_test1Method_P13 = P13;
     DummyDataProvider_test1Method_P14.size = P14.size;
     DummyDataProvider_test1Method_P14.data = (unsigned char*)malloc(P14.size);
-    memcpy(DummyDataProvider_test1Method_P14.data, P14.data, P14.size);
+    (void)memcpy(DummyDataProvider_test1Method_P14.data, P14.data, P14.size);
     strcpy(DummyDataProvider_test1Method_P15, P15);
     return g_MethodReturn;
 }
@@ -399,7 +399,7 @@ static int umockvalue_are_equal_EDM_DATE_TIME_OFFSET(const EDM_DATE_TIME_OFFSET 
 
 static int umockvalue_copy_EDM_DATE_TIME_OFFSET(EDM_DATE_TIME_OFFSET*destination, const EDM_DATE_TIME_OFFSET*source)
 {
-    memcpy(destination, source, sizeof(EDM_DATE_TIME_OFFSET));
+    (void)memcpy(destination, source, sizeof(EDM_DATE_TIME_OFFSET));
     return 0;
 }
 
@@ -896,7 +896,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         someEdmDateTimeOffset.timeZoneMinute = 8;
 
         const EDM_GUID source= { { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 } };
-        memcpy(someEdmGuid.GUID, source.GUID, 16);
+        (void)memcpy(someEdmGuid.GUID, source.GUID, 16);
 
         
         someEdmBinary.size = 5;

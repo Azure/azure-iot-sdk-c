@@ -988,7 +988,7 @@ void CodeFirst_DestroyDevice(void* device)
                 Schema_DestroyIfUnused(g_Devices[i]->ModelHandle);
 
                 DestroyDevice(g_Devices[i]);
-                memcpy(&g_Devices[i], &g_Devices[i + 1], (g_DeviceCount - i - 1) * sizeof(DEVICE_HEADER_DATA*));
+                (void)memcpy(&g_Devices[i], &g_Devices[i + 1], (g_DeviceCount - i - 1) * sizeof(DEVICE_HEADER_DATA*));
                 g_DeviceCount--;
                 break;
             }

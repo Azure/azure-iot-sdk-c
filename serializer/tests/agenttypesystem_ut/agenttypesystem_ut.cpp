@@ -13354,9 +13354,9 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
                     size_t garbageCharacterPosition; /*means "insert garbageCharacter before the character in garbageCharacterPosition index*/
                     for (garbageCharacterPosition = 0; garbageCharacterPosition < strlen(testVector_EDM_BINARY[i].expectedOutput); garbageCharacterPosition++)
                     {
-                        memcpy(bufferTemp, testVector_EDM_BINARY[i].expectedOutput, garbageCharacterPosition);
+                        (void)memcpy(bufferTemp, testVector_EDM_BINARY[i].expectedOutput, garbageCharacterPosition);
                         bufferTemp[garbageCharacterPosition] = (char)garbageCharacter;
-                        memcpy(bufferTemp + garbageCharacterPosition + 1, testVector_EDM_BINARY[i].expectedOutput + garbageCharacterPosition, strlen(testVector_EDM_BINARY[i].expectedOutput) - garbageCharacterPosition + 1);
+                        (void)memcpy(bufferTemp + garbageCharacterPosition + 1, testVector_EDM_BINARY[i].expectedOutput + garbageCharacterPosition, strlen(testVector_EDM_BINARY[i].expectedOutput) - garbageCharacterPosition + 1);
 
                         ///act
                         auto result = CreateAgentDataType_From_String(bufferTemp, EDM_BINARY_TYPE, &ag);
@@ -13400,7 +13400,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
                         continue;
                     }
 
-                    memcpy(bufferTemp, testVector_EDM_BINARY[i].expectedOutput, strlen(testVector_EDM_BINARY[i].expectedOutput));
+                    (void)memcpy(bufferTemp, testVector_EDM_BINARY[i].expectedOutput, strlen(testVector_EDM_BINARY[i].expectedOutput));
                     bufferTemp[strlen(testVector_EDM_BINARY[i].expectedOutput)] = (char)garbageCharacter;
                     bufferTemp[strlen(testVector_EDM_BINARY[i].expectedOutput)+1] = '\0';
 

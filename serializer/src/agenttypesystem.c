@@ -282,7 +282,7 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_EDM_BINARY(AGENT_DATA_TYPE* 
                 }
                 else
                 {
-                    memcpy(agentData->value.edmBinary.data, v.data, v.size);
+                    (void)memcpy(agentData->value.edmBinary.data, v.data, v.size);
                     agentData->type = EDM_BINARY_TYPE;
                     agentData->value.edmBinary.size = v.size;
                     result = AGENT_DATA_TYPES_OK;
@@ -2501,7 +2501,7 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(AGENT_DATA_T
                     else
                     {
                         dest->value.edmBinary.size = src->value.edmBinary.size;
-                        memcpy(dest->value.edmBinary.data, src->value.edmBinary.data, src->value.edmBinary.size);
+                        (void)memcpy(dest->value.edmBinary.data, src->value.edmBinary.data, src->value.edmBinary.size);
                         dest->type = EDM_BINARY_TYPE;
                         result = AGENT_DATA_TYPES_OK;
                     }

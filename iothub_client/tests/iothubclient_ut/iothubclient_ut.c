@@ -268,7 +268,7 @@ static int my_VECTOR_push_back(VECTOR_HANDLE handle, const void* elements, size_
     (void)handle;
     (void)numElements;
     g_queue_element = my_gballoc_malloc(g_queue_element_size);
-    memcpy(g_queue_element, elements, g_queue_element_size);
+    (void)memcpy(g_queue_element, elements, g_queue_element_size);
     g_queue_number_items++;
     return 0;
 }

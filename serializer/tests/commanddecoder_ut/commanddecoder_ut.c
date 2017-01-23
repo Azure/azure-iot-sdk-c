@@ -264,7 +264,7 @@ int umockvalue_are_equal_SCHEMA_MODEL_ELEMENT(const SCHEMA_MODEL_ELEMENT* left, 
 
 int umockvalue_copy_SCHEMA_MODEL_ELEMENT(SCHEMA_MODEL_ELEMENT* destination, const SCHEMA_MODEL_ELEMENT* source)
 {
-    memcpy(destination, source, sizeof(*destination));
+    (void)memcpy(destination, source, sizeof(*destination));
     return 0;
 }
 

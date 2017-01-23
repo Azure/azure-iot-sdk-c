@@ -121,7 +121,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT IoTHubMessage(IOTHUB_MESSAGE_HANDLE mess
         {
             EXECUTE_COMMAND_RESULT executeCommandResult;
         
-            memcpy(temp, buffer, size);
+            (void)memcpy(temp, buffer, size);
             temp[size] = '\0';
             executeCommandResult = EXECUTE_COMMAND(userContextCallback, temp);
             result =
