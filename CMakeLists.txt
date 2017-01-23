@@ -3,6 +3,9 @@
 
 cmake_minimum_required(VERSION 2.8.11)
 project(azure_iot_sdks)
+
+set(IOT_SDK_VERSION 1.1.5)
+
 #
 #making a nice global variable to know if we are on linux or not.
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -214,6 +217,12 @@ if(${use_installed_dependencies})
 
     include(CMakePackageConfigHelpers)
 
+    write_basic_package_version_file(
+        "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}ConfigVersion.cmake"
+        VERSION ${IOT_SDK_VERSION}
+        COMPATIBILITY SameMajorVersion
+    )
+
     configure_file("configs/${PROJECT_NAME}Config.cmake"
         "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}Config.cmake"
         COPYONLY
@@ -230,6 +239,7 @@ if(${use_installed_dependencies})
         FILES
             "configs/${PROJECT_NAME}Config.cmake"
             "configs/${PROJECT_NAME}Functions.cmake"
+            "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}ConfigVersion.cmake"
         DESTINATION
             ${package_location}
     )
