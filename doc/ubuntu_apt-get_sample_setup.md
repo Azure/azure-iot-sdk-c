@@ -34,7 +34,7 @@ The following steps outline how you can use CMake to build an IoT Hub client app
     ```
     cmake_minimum_required(VERSION 2.8.11)
 
-    set(AZUREIOT_INC_FOLDER ".." "/usr/include/azureiot")
+    set(AZUREIOT_INC_FOLDER ".." "/usr/include/azureiot" "/usr/include/azureiot/inc")
 
     include_directories(${AZUREIOT_INC_FOLDER})
 
@@ -59,6 +59,7 @@ The following steps outline how you can use CMake to build an IoT Hub client app
         curl
         ssl
         crypto
+        m
     )
     ```
 
