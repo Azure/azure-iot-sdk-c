@@ -17,6 +17,7 @@
 
 #include "iothub_account.h"
 #include "iothubtest.h"
+#include "iothub_messaging.h"
 
 #include "serializer.h"
 #include "azure_c_shared_utility/buffer_.h"
@@ -64,6 +65,8 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(CODEFIRST_RESULT, CODEFIRST_RESULT_VALUES);
 TEST_DEFINE_ENUM_TYPE(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_RESULT_VALUES);
 
+TEST_DEFINE_ENUM_TYPE(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_RESULT_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_RESULT_VALUES);
 
 static const char* TEST_SEND_DATA_FMT = "{\"ExampleData\": { \"SendDate\": \"%.24s\", \"UniqueId\":%d} }";
 static const char* TEST_RECV_DATA_FMT = "{\\\"Name\\\": \\\"testaction\\\", \\\"Parameters\\\": { \\\"property1\\\": \\\"%.24s\\\", \\\"UniqueId\\\":%d}}";
@@ -104,6 +107,24 @@ void my_IOTHUB_CLIENT_REPORTED_STATE_CALLBACK(int status_code, void* userContext
     was_my_IOTHUB_CLIENT_REPORTED_STATE_CALLBACK_called = 1;
     Unlock(lock);
 
+}
+
+static void openCompleteCallback(void* context)
+{
+    (void)printf("Open completed, context: %s\n", (char*)context);
+}
+
+static void sendCompleteCallback(void* context, IOTHUB_MESSAGING_RESULT messagingResult)
+{
+    (void)context;
+    if (messagingResult == IOTHUB_MESSAGING_OK)
+    {
+        (void)printf("Message has been sent successfully\n");
+    }
+    else
+    {
+        (void)printf("Send failed\n");
+    }
 }
 
 // This is a Static function called from the macro
@@ -398,6 +419,11 @@ BEGIN_TEST_SUITE(serializer_e2e)
         IOTHUB_CLIENT_HANDLE iotHubClientHandle;
         bool continue_run;
 
+        IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientAuthHandle;
+        IOTHUB_MESSAGING_CLIENT_HANDLE iotHubMessagingHandle;
+        IOTHUB_MESSAGING_RESULT iotHubMessagingResult;
+        IOTHUB_MESSAGE_HANDLE messageHandle;
+
         // act
         iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName(g_iothubAcctInfo);
         iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix(g_iothubAcctInfo);
@@ -412,14 +438,21 @@ BEGIN_TEST_SUITE(serializer_e2e)
         g_recvMacroData = RecvMacroTestData_Create();
         ASSERT_IS_NOT_NULL(g_recvMacroData);
 
-        // step 3: data is pushed to the topic/subscription
-        IOTHUB_TEST_HANDLE devhubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo), IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo), IoTHubAccount_GetDeviceId(g_iothubAcctInfo), IoTHubAccount_GetDeviceKey(g_iothubAcctInfo), IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo), IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo), IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo), IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo) );
-        ASSERT_IS_NOT_NULL(devhubTestHandle);
+        // Create message
+        messageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)g_recvMacroData->toBeSend, g_recvMacroData->toBeSendSize);
 
-        IOTHUB_TEST_CLIENT_RESULT dhTestResult = IoTHubTest_SendMessage(devhubTestHandle, (const unsigned char*)g_recvMacroData->toBeSend, g_recvMacroData->toBeSendSize);
-        ASSERT_ARE_EQUAL(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_OK, dhTestResult);
+        // Create Service Client
+        iotHubServiceClientAuthHandle = IoTHubServiceClientAuth_CreateFromConnectionString(IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo));
+        ASSERT_IS_NOT_NULL_WITH_MSG(iotHubServiceClientAuthHandle, "Could not initialize IoTHubServiceClient to send C2D messages to the device");
 
-        IoTHubTest_Deinit(devhubTestHandle);
+        iotHubMessagingHandle = IoTHubMessaging_Create(iotHubServiceClientAuthHandle);
+        ASSERT_IS_NOT_NULL_WITH_MSG(iotHubMessagingHandle, "Could not initialize IoTHubMessaging to send C2D messages to the device");
+
+        iotHubMessagingResult = IoTHubMessaging_Open(iotHubMessagingHandle, openCompleteCallback, "Context string for open");
+        ASSERT_ARE_EQUAL(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_OK, iotHubMessagingResult);
+
+        iotHubMessagingResult = IoTHubMessaging_SendAsync(iotHubMessagingHandle, IoTHubAccount_GetDeviceId(g_iothubAcctInfo), messageHandle, sendCompleteCallback, NULL);
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_OK, iotHubMessagingResult, "IoTHubMessaging_SendAsync failed, could not send C2D message to the device");
 
         iotHubClientHandle = IoTHubClient_Create(&iotHubConfig);
         ASSERT_IS_NOT_NULL(iotHubClientHandle);
@@ -458,6 +491,11 @@ BEGIN_TEST_SUITE(serializer_e2e)
         DESTROY_MODEL_INSTANCE(devModel);
         IoTHubClient_Destroy(iotHubClientHandle);
         RecvTestData_Destroy(g_recvMacroData);
+
+        IoTHubMessage_Destroy(messageHandle);
+        IoTHubMessaging_Close(iotHubMessagingHandle);
+        IoTHubMessaging_Destroy(iotHubMessagingHandle);
+        IoTHubServiceClientAuth_Destroy(iotHubServiceClientAuthHandle);
     }
 
     TEST_FUNCTION(IoTClient_AMQP_MacroSend_e2e)
@@ -579,6 +617,11 @@ BEGIN_TEST_SUITE(serializer_e2e)
         IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle;
         deviceModel* devModel;
 
+        IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientAuthHandle;
+        IOTHUB_MESSAGING_CLIENT_HANDLE iotHubMessagingHandle;
+        IOTHUB_MESSAGING_RESULT iotHubMessagingResult;
+        IOTHUB_MESSAGE_HANDLE messageHandle;
+
         iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName(g_iothubAcctInfo);
         iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix(g_iothubAcctInfo);
         iotHubConfig.deviceId = IoTHubAccount_GetDeviceId(g_iothubAcctInfo);
@@ -589,18 +632,22 @@ BEGIN_TEST_SUITE(serializer_e2e)
         g_recvMacroData = RecvMacroTestData_Create();
         ASSERT_IS_NOT_NULL(g_recvMacroData);
 
-        //step 2: data is pushed to the topic/subscription
-        {
-            IOTHUB_TEST_HANDLE devhubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo), IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo), IoTHubAccount_GetDeviceId(g_iothubAcctInfo), IoTHubAccount_GetDeviceKey(g_iothubAcctInfo), IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo), IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo), IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo), IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo) );
-            ASSERT_IS_NOT_NULL(devhubTestHandle);
+        // Create Service Client
+        iotHubServiceClientAuthHandle = IoTHubServiceClientAuth_CreateFromConnectionString(IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo));
+        ASSERT_IS_NOT_NULL_WITH_MSG(iotHubServiceClientAuthHandle, "Could not initialize IoTHubServiceClient to send C2D messages to the device");
 
-            IOTHUB_TEST_CLIENT_RESULT dhTestResult = IoTHubTest_SendMessage(devhubTestHandle, (const unsigned char*)g_recvMacroData->toBeSend, g_recvMacroData->toBeSendSize);
-            ASSERT_ARE_EQUAL(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_OK, dhTestResult);
+        iotHubMessagingHandle = IoTHubMessaging_Create(iotHubServiceClientAuthHandle);
+        ASSERT_IS_NOT_NULL_WITH_MSG(iotHubMessagingHandle, "Could not initialize IoTHubMessaging to send C2D messages to the device");
 
-            IoTHubTest_Deinit(devhubTestHandle);
-        }
+        iotHubMessagingResult = IoTHubMessaging_Open(iotHubMessagingHandle, openCompleteCallback, "Context string for open");
+        ASSERT_ARE_EQUAL(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_OK, iotHubMessagingResult);
+
+        // Create message
+        messageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)g_recvMacroData->toBeSend, g_recvMacroData->toBeSendSize);
 
         // act
+        iotHubMessagingResult = IoTHubMessaging_SendAsync(iotHubMessagingHandle, IoTHubAccount_GetDeviceId(g_iothubAcctInfo), messageHandle, sendCompleteCallback, NULL);
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_OK, iotHubMessagingResult, "IoTHubMessaging_SendAsync failed, could not send C2D message to the device");
 
         //step 3: data is retrieved by HTTP
         {
@@ -643,6 +690,11 @@ BEGIN_TEST_SUITE(serializer_e2e)
         DESTROY_MODEL_INSTANCE(devModel);
         IoTHubClient_LL_Destroy(iotHubClientHandle);
         RecvTestData_Destroy(g_recvMacroData);
+
+        IoTHubMessage_Destroy(messageHandle);
+        IoTHubMessaging_Close(iotHubMessagingHandle);
+        IoTHubMessaging_Destroy(iotHubMessagingHandle);
+        IoTHubServiceClientAuth_Destroy(iotHubServiceClientAuthHandle);
     }
 
     TEST_FUNCTION(IoTClient_Http_MacroSend_e2e)
