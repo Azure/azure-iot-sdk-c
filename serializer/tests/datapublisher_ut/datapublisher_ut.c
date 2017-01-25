@@ -56,6 +56,7 @@ void my_gballoc_free(void * t)
 #define VECTOR_back real_VECTOR_back 
 #define VECTOR_find_if real_VECTOR_find_if 
 #define VECTOR_size real_VECTOR_size 
+#define VECTOR_move real_VECTOR_move
 #include "../src/vector.c"
 #undef VECTOR_create 
 #undef VECTOR_destroy 
@@ -67,6 +68,7 @@ void my_gballoc_free(void * t)
 #undef VECTOR_back 
 #undef VECTOR_find_if 
 #undef VECTOR_size 
+#undef VECTOR_move
 #undef VECTOR_H
 #undef GBALLOC_H
 #undef CRT_ABSTRACTIONS_H
@@ -114,7 +116,8 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 
 static DATA_MARSHALLER_HANDLE my_DataMarshaller_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, bool includePropertyPath)
 {
-    (void)(modelHandle, includePropertyPath);
+    (void)modelHandle;
+    (void)includePropertyPath;
     return (DATA_MARSHALLER_HANDLE)my_gballoc_malloc(1);
 }
 
@@ -127,13 +130,17 @@ static AGENT_DATA_TYPES_RESULT my_Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(AG
 {
     if (dest != NULL)
     {
-        memcpy(dest, src, sizeof(AGENT_DATA_TYPE));
+        (void)memcpy(dest, src, sizeof(AGENT_DATA_TYPE));
     }
     return AGENT_DATA_TYPES_OK;
 }
 static DATA_MARSHALLER_RESULT my_DataMarshaller_SendData(DATA_MARSHALLER_HANDLE dataMarshallerHandle, size_t valueCount, const DATA_MARSHALLER_VALUE* values, unsigned char** destination, size_t* destinationSize)
 {
-    (void)(destination, destinationSize, values, valueCount, dataMarshallerHandle);
+    (void)destination;
+    (void)destinationSize;
+    (void)values;
+    (void)valueCount;
+    (void) dataMarshallerHandle;
     return DATA_MARSHALLER_OK;
 }
 

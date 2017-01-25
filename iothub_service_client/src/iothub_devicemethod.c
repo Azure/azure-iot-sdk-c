@@ -295,7 +295,7 @@ static IOTHUB_DEVICE_METHOD_RESULT sendHttpRequestDeviceMethod(IOTHUB_SERVICE_CL
         unsigned int statusCode = 0;
         unsigned char is_error = 0;
 
-        if ((iotHubDeviceMethodRequestMode == IOTHUB_DEVICEMETHOD_REQUEST_INVOKE))
+        if (iotHubDeviceMethodRequestMode == IOTHUB_DEVICEMETHOD_REQUEST_INVOKE)
         {
             httpApiRequestType = HTTPAPI_REQUEST_POST;
         }

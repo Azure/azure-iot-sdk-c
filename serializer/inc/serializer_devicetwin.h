@@ -26,7 +26,7 @@ static void serializer_ingest(DEVICE_TWIN_UPDATE_STATE update_state, const unsig
     }
     else
     {
-        memcpy(copyOfPayload, payLoad, size);
+        (void)memcpy(copyOfPayload, payLoad, size);
         copyOfPayload[size] = '\0';
 
         /*Codes_SRS_SERIALIZERDEVICETWIN_02_002: [ serializer_ingest shall parse the null terminated string into parson data types. ]*/
@@ -143,7 +143,7 @@ static int deviceMethodCallback(const char* method_name, const unsigned char* pa
     }
     else
     {
-        memcpy(payloadZeroTerminated, payload, size);
+        (void)memcpy(payloadZeroTerminated, payload, size);
         payloadZeroTerminated[size] = '\0';
 
         /*Codes_SRS_SERIALIZERDEVICETWIN_02_022: [ deviceMethodCallback shall call EXECUTE_METHOD passing the userContextCallback, method_name and the null terminated string build before. ]*/
@@ -185,7 +185,7 @@ static int deviceMethodCallback(const char* method_name, const unsigned char* pa
                 else
                 {
                     /*Codes_SRS_SERIALIZERDEVICETWIN_02_024: [ deviceMethodCallback shall set *response to this new byte array, *resp_size to the size of the array. ]*/
-                    memcpy(*response, data->jsonValue, *resp_size);
+                    (void)memcpy(*response, data->jsonValue, *resp_size);
                 }
             }
             MethodReturn_Destroy(mr);

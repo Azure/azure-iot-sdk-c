@@ -89,7 +89,7 @@ static void wait30seconds(void)
 
 static int IoTHubCallback(void* context, const char* data, size_t size)
 {
-    size;
+    (void)size;
     int result = 0; // 0 means "keep processing"
     EXPECTED_SEND_DATA* expectedData = (EXPECTED_SEND_DATA*)context;
     if (expectedData != NULL)
@@ -116,7 +116,7 @@ static int IoTHubCallback(void* context, const char* data, size_t size)
 
 static void ReceiveConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
 {
-    result;
+    (void)result;
     EXPECTED_SEND_DATA* expectedData = (EXPECTED_SEND_DATA*)userContextCallback;
     if (expectedData != NULL)
     {
@@ -212,7 +212,7 @@ static EXPECTED_RECEIVE_DATA* MessageData_Create(void)
             char temp[1000];
             char* tempString;
             time_t t = time(NULL);
-            size_t string_length;
+            int string_length;
             string_length = sprintf(temp, TEST_MESSAGE_DATA_FMT, ctime(&t), g_iotHubTestId);
             if ((string_length < 0) ||
                 ((tempString = (char*)malloc(string_length + 1)) == NULL))
@@ -263,7 +263,7 @@ static EXPECTED_SEND_DATA* EventData_Create(void)
             char temp[1000];
             char* tempString;
             time_t t = time(NULL);
-            size_t string_length;
+            int string_length;
             string_length = sprintf(temp, TEST_EVENT_DATA_FMT, ctime(&t), g_iotHubTestId);
             if ((string_length < 0) ||
                 ((tempString = (char*)malloc(string_length + 1)) == NULL))

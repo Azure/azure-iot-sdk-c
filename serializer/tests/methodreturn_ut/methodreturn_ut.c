@@ -95,7 +95,7 @@ static void my_json_value_free(JSON_Value* value)
 static int my_mallocAndStrcpy_s(char** destination, const char* source)
 {
     *destination = (char*)my_gballoc_malloc(strlen(source) + 1);
-    memcpy(*destination, source, strlen(source) + 1);
+    (void)memcpy(*destination, source, strlen(source) + 1);
     return 0;
 }
 

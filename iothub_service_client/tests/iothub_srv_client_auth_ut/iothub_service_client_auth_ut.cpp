@@ -185,7 +185,7 @@ TEST_FUNCTION_CLEANUP(TestMethodCleanup)
     }
 }
 
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_001: [/* IoTHubServiceClientAuth_CreateFromConnectionString shall verify the input parameter and if it is NULL then return NULL **]*/
+/* Tests_SRS_IOTHUBSERVICECLIENT_12_001: [ IoTHubServiceClientAuth_CreateFromConnectionString shall verify the input parameter and if it is NULL then return NULL **]*/
 TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_return_null_if_input_parameter_connectionString_is_NULL)
 {
     // arrange

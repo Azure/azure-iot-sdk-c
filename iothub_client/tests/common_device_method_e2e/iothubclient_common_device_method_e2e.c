@@ -127,7 +127,7 @@ static int DeviceMethodCallback(const char* method_name, const unsigned char* pa
             }
             else
             {
-                memcpy(*response, payload, *resp_size);
+                (void)memcpy(*response, payload, *resp_size);
                 responseCode = METHOD_RESPONSE_SUCCESS;
             }
         }

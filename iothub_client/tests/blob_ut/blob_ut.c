@@ -63,7 +63,8 @@ static void my_HTTPAPIEX_Destroy(HTTPAPIEX_HANDLE handle)
 
 static BUFFER_HANDLE my_BUFFER_create(const unsigned char* source, size_t size)
 {
-    (void)source, size;
+    (void)source;
+    (void)size;
     return (BUFFER_HANDLE)my_gballoc_malloc(1);
 }
 
@@ -86,7 +87,7 @@ static STRING_HANDLE my_STRING_construct(const char* psz)
 {
     char* temp = (char*)my_gballoc_malloc(strlen(psz) + 1);
     ASSERT_IS_NOT_NULL(temp);
-    memcpy(temp, psz, strlen(psz) + 1);
+    (void)memcpy(temp, psz, strlen(psz) + 1);
     return (STRING_HANDLE)temp;
 }
 
@@ -97,7 +98,8 @@ static void my_STRING_delete(STRING_HANDLE h)
 
 static STRING_HANDLE my_Base64_Encode_Bytes(const unsigned char* source, size_t size)
 {
-    (void)source, size;
+    (void)source;
+    (void)size;
     return (STRING_HANDLE)my_gballoc_malloc(1);
 }
 

@@ -61,12 +61,17 @@ static STRING_HANDLE create_devices_path(STRING_HANDLE iothub_host_fqdn, STRING_
 	{
 		LogError("Failed creating devices_path (STRING_new failed)");
 	}
-	else if (STRING_sprintf(devices_path, IOTHUB_DEVICES_PATH_FMT, STRING_c_str(iothub_host_fqdn), STRING_c_str(device_id)) != RESULT_OK)
-	{
-		STRING_delete(devices_path);
-		devices_path = NULL;
-		LogError("Failed creating devices_path (STRING_sprintf failed)");
-	}
+    else
+    {
+        const char* device_id_c_str = STRING_c_str(device_id);
+		const char* iothub_host_fqdn_c_str = STRING_c_str(iothub_host_fqdn);
+        if (STRING_sprintf(devices_path, IOTHUB_DEVICES_PATH_FMT, iothub_host_fqdn_c_str, device_id_c_str) != RESULT_OK)
+        {
+            STRING_delete(devices_path);
+            devices_path = NULL;
+            LogError("Failed creating devices_path (STRING_sprintf failed)");
+        }
+    }
 
 	return devices_path;
 }
@@ -639,7 +644,7 @@ static void on_message_send_complete_callback(void* context, MESSAGE_SEND_RESULT
 
 		if (message->callback != NULL)
 		{
-			IOTHUB_CLIENT_RESULT iot_hub_send_result;
+            IOTHUB_CLIENT_CONFIRMATION_RESULT iot_hub_send_result;
 
 			// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_107: [If no failure occurs, `MESSAGE_HANDLE->callback` shall be invoked with result IOTHUB_CLIENT_CONFIRMATION_OK]
 			if (send_result == MESSAGE_SEND_OK)

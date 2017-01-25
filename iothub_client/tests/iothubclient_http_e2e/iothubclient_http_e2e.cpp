@@ -63,7 +63,8 @@ static size_t IoTHub_HTTP_LL_CanSend_2000_smallest_messages_batched_nCalls;
 
 static void IoTHub_HTTP_LL_CanSend_2000_smallest_messages_batched_Message(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
 {
-    (void)(result, userContextCallback);
+    (void)result;
+    (void)userContextCallback;
     IoTHub_HTTP_LL_CanSend_2000_smallest_messages_batched_nCalls++;
 }
 
@@ -71,7 +72,8 @@ static size_t IoTHub_HTTP_LL_CanSend_2000_smallest_messages_batched_with_propert
 
 static void IoTHub_HTTP_LL_CanSend_2000_smallest_messages_batched_with_properties_Message(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
 {
-    (void)(result, userContextCallback);
+    (void)result;
+    (void)userContextCallback;
     IoTHub_HTTP_LL_CanSend_2000_smallest_messages_batched_with_properties_nCalls++;
 }
 

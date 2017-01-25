@@ -52,7 +52,7 @@ static int DeviceMethodCallback(const char* method_name, const unsigned char* pa
     }
     else
     {
-        memcpy(*response, RESPONSE_STRING, *resp_size);
+        (void)memcpy(*response, RESPONSE_STRING, *resp_size);
     }
     g_continueRunning = false;
     return status;

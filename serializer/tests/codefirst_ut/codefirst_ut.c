@@ -246,7 +246,7 @@ EXECUTE_COMMAND_RESULT test1(TruckType* device, double P1, int P2, float P3, lon
     DummyDataProvider_test1_P13 = P13;
     DummyDataProvider_test1_P14.size = P14.size;
     DummyDataProvider_test1_P14.data = (unsigned char*)malloc(P14.size);
-    memcpy(DummyDataProvider_test1_P14.data, P14.data, P14.size);
+    (void)memcpy(DummyDataProvider_test1_P14.data, P14.data, P14.size);
     strcpy(DummyDataProvider_test1_P15, P15);
     return EXECUTE_COMMAND_SUCCESS;
 }
@@ -309,7 +309,7 @@ METHODRETURN_HANDLE test1Method(TruckType* device, double P1, int P2, float P3, 
     DummyDataProvider_test1Method_P13 = P13;
     DummyDataProvider_test1Method_P14.size = P14.size;
     DummyDataProvider_test1Method_P14.data = (unsigned char*)malloc(P14.size);
-    memcpy(DummyDataProvider_test1Method_P14.data, P14.data, P14.size);
+    (void)memcpy(DummyDataProvider_test1Method_P14.data, P14.data, P14.size);
     strcpy(DummyDataProvider_test1Method_P15, P15);
     return g_MethodReturn;
 }
@@ -399,7 +399,7 @@ static int umockvalue_are_equal_EDM_DATE_TIME_OFFSET(const EDM_DATE_TIME_OFFSET 
 
 static int umockvalue_copy_EDM_DATE_TIME_OFFSET(EDM_DATE_TIME_OFFSET*destination, const EDM_DATE_TIME_OFFSET*source)
 {
-    memcpy(destination, source, sizeof(EDM_DATE_TIME_OFFSET));
+    (void)memcpy(destination, source, sizeof(EDM_DATE_TIME_OFFSET));
     return 0;
 }
 
@@ -545,7 +545,8 @@ static TRANSACTION_HANDLE my_Device_StartTransaction(DEVICE_HANDLE deviceHandle)
 
 static DEVICE_RESULT my_Device_EndTransaction(TRANSACTION_HANDLE transactionHandle, unsigned char** destination, size_t* destinationSize)
 {
-    (void)(destination, destinationSize);
+    (void)destination;
+    (void)destinationSize;
     ASSERT_ARE_EQUAL(void_ptr, transactionHandle, toBeCleaned);
     my_gballoc_free((void*)transactionHandle);
     toBeCleaned = NULL;
@@ -616,7 +617,8 @@ EXECUTE_COMMAND_RESULT reset_Action(truckType_Model* m)
 
 EXECUTE_COMMAND_RESULT setSpeed_Action(truckType_Model* m, double theSpeed)
 {
-    (void)(m, theSpeed);
+    (void)m;
+    (void)theSpeed;
     return EXECUTE_COMMAND_SUCCESS;
 }
 
@@ -707,7 +709,11 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 
 static DEVICE_RESULT my_Device_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, pfDeviceActionCallback deviceActionCallback, void* actionCallbackUserContext, pfDeviceMethodCallback deviceMethodCallback, void* methodCallbackUserContext, bool includePropertyPath, DEVICE_HANDLE* deviceHandle)
 {
-    (void)(deviceActionCallback, deviceMethodCallback, methodCallbackUserContext, includePropertyPath, modelHandle);
+    (void)deviceActionCallback;
+    (void)deviceMethodCallback;
+    (void)methodCallbackUserContext;
+    (void)includePropertyPath;
+    (void)modelHandle;
     *deviceHandle = TEST_DEVICE_HANDLE;
     g_InvokeActionCallbackArgument = actionCallbackUserContext;
     return DEVICE_OK;
@@ -890,7 +896,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         someEdmDateTimeOffset.timeZoneMinute = 8;
 
         const EDM_GUID source= { { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 } };
-        memcpy(someEdmGuid.GUID, source.GUID, 16);
+        (void)memcpy(someEdmGuid.GUID, source.GUID, 16);
 
         
         someEdmBinary.size = 5;

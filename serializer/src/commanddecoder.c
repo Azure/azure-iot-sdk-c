@@ -648,9 +648,7 @@ EXECUTE_COMMAND_RESULT CommandDecoder_ExecuteCommand(COMMAND_DECODER_HANDLE hand
         char* commandJSON;
 
         /* Codes_SRS_COMMAND_DECODER_01_011: [If the size of the command is 0 then the processing shall stop and the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.]*/
-        if (
-            (size == 0)
-            )
+        if (size == 0)
         {
             LogError("Failed because command size is zero");
             result = EXECUTE_COMMAND_ERROR;
@@ -754,9 +752,7 @@ COMMAND_DECODER_HANDLE CommandDecoder_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandl
     COMMAND_DECODER_HANDLE_DATA* result;
     /* Codes_SRS_COMMAND_DECODER_99_019:[ For all exposed APIs argument validity checks shall precede other checks.] */
     /* Codes_SRS_COMMAND_DECODER_01_003: [ If modelHandle is NULL, CommandDecoder_Create shall return NULL. ]*/
-    if (
-        (modelHandle == NULL)
-        )
+    if (modelHandle == NULL)
     {
         LogError("Invalid arguments: SCHEMA_MODEL_TYPE_HANDLE modelHandle=%p, ACTION_CALLBACK_FUNC actionCallback=%p, void* actionCallbackContext=%p, METHOD_CALLBACK_FUNC methodCallback=%p, void* methodCallbackContext=%p",
             modelHandle, actionCallback, actionCallbackContext, methodCallback, methodCallbackContext);

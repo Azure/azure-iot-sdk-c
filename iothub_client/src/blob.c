@@ -75,7 +75,7 @@ BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* sourc
                     else
                     {
                         HTTPAPIEX_HANDLE httpApiExHandle;
-                        memcpy(hostname, hostnameBegin, hostnameSize);
+                        (void)memcpy(hostname, hostnameBegin, hostnameSize);
                         hostname[hostnameSize] = '\0';
 
                         /*Codes_SRS_BLOB_02_006: [ Blob_UploadFromSasUri shall create a new HTTPAPI_EX_HANDLE by calling HTTPAPIEX_Create passing the hostname. ]*/

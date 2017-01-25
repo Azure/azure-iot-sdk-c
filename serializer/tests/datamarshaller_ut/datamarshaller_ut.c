@@ -112,7 +112,8 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(JSON_ENCODER_RESULT, JSON_ENCODER_RESULT_VALUES);
 
 static MULTITREE_HANDLE my_MultiTree_Create(MULTITREE_CLONE_FUNCTION cloneFunction, MULTITREE_FREE_FUNCTION freeFunction)
 {
-    (void)(cloneFunction, freeFunction);
+    (void)cloneFunction;
+    (void)freeFunction;
     return (MULTITREE_HANDLE)my_gballoc_malloc(1);
 }
 

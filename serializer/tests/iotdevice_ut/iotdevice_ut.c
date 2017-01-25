@@ -74,7 +74,8 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 
 static DATA_PUBLISHER_HANDLE my_DataPublisher_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, bool includePropertyPath)
 {
-    (void)(modelHandle, includePropertyPath);
+    (void)modelHandle;
+    (void)includePropertyPath;
     return (DATA_PUBLISHER_HANDLE )my_gballoc_malloc(1);
 }
 
@@ -85,7 +86,10 @@ static void my_DataPublisher_Destroy(DATA_PUBLISHER_HANDLE dataPublisherHandle)
 
 static COMMAND_DECODER_HANDLE my_CommandDecoder_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, ACTION_CALLBACK_FUNC actionCallback, void* actionCallbackContext, METHOD_CALLBACK_FUNC deviceMethodCallback, void* methodCallbackContext)
 {
-    (void)(modelHandle, actionCallbackContext, deviceMethodCallback, methodCallbackContext);
+    (void)modelHandle;
+    (void)actionCallbackContext;
+    (void)deviceMethodCallback;
+    (void)methodCallbackContext;
     ActionCallbackCalledByCommandDecoder = actionCallback;
     return (COMMAND_DECODER_HANDLE)my_gballoc_malloc(1);
 }
@@ -103,7 +107,8 @@ static TRANSACTION_HANDLE my_DataPublisher_StartTransaction(DATA_PUBLISHER_HANDL
 
 static DATA_PUBLISHER_RESULT my_DataPublisher_EndTransaction(TRANSACTION_HANDLE transactionHandle, unsigned char** destination, size_t* destinationSize)
 {
-    (void)(destination, destinationSize);
+    (void)destination;
+    (void)destinationSize;
     my_gballoc_free(transactionHandle);
     return DATA_PUBLISHER_OK;
 }

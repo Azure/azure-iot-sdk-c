@@ -883,8 +883,7 @@ void* CodeFirst_CreateDevice(SCHEMA_MODEL_TYPE_HANDLE model, const REFLECTED_DAT
     DEVICE_HEADER_DATA* deviceHeader;
 
     /* Codes_SRS_CODEFIRST_99_080:[If CodeFirst_CreateDevice is invoked with a NULL model, it shall return NULL.]*/
-    if (
-        (model == NULL))
+    if (model == NULL)
     {
         result = NULL;
         LogError(" %s ", ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_INVALID_ARG));
@@ -989,7 +988,7 @@ void CodeFirst_DestroyDevice(void* device)
                 Schema_DestroyIfUnused(g_Devices[i]->ModelHandle);
 
                 DestroyDevice(g_Devices[i]);
-                memcpy(&g_Devices[i], &g_Devices[i + 1], (g_DeviceCount - i - 1) * sizeof(DEVICE_HEADER_DATA*));
+                (void)memcpy(&g_Devices[i], &g_Devices[i + 1], (g_DeviceCount - i - 1) * sizeof(DEVICE_HEADER_DATA*));
                 g_DeviceCount--;
                 break;
             }
@@ -1611,7 +1610,7 @@ CODEFIRST_RESULT CodeFirst_IngestDesiredProperties(void* device, const char* des
             if (Device_IngestDesiredProperties(device, deviceHeader->DeviceHandle, desiredProperties) != DEVICE_OK)
             {
                 LogError("failure in Device_IngestDesiredProperties");
-                result = result = CODEFIRST_ERROR;
+                result = CODEFIRST_ERROR;
             }
             else
             {

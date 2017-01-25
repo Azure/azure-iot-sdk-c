@@ -97,9 +97,9 @@ IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE IoTHubClient_LL_UploadToBlob_Create(const I
             }
             else
             {
-                memcpy((char*)handleData->hostname, config->iotHubName, iotHubNameLength);
+                (void)memcpy((char*)handleData->hostname, config->iotHubName, iotHubNameLength);
                 ((char*)handleData->hostname)[iotHubNameLength] = '.';
-                memcpy((char*)handleData->hostname + iotHubNameLength + 1, config->iotHubSuffix, iotHubSuffixLength + 1); /*+1 will copy the \0 too*/
+                (void)memcpy((char*)handleData->hostname + iotHubNameLength + 1, config->iotHubSuffix, iotHubSuffixLength + 1); /*+1 will copy the \0 too*/
                 if ((config->deviceSasToken != NULL) && (config->deviceKey == NULL))
                 {
                     handleData->authorizationScheme = SAS_TOKEN;

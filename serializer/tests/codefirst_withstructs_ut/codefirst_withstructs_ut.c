@@ -187,7 +187,11 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_RESULT_VALUE
 
 static DEVICE_RESULT my_Device_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, pfDeviceActionCallback deviceActionCallback, void* actionCallbackUserContext, pfDeviceMethodCallback deviceMethodCallback, void* methodCallbackUserContext, bool includePropertyPath, DEVICE_HANDLE* deviceHandle)
 {
-    (void)(modelHandle, deviceActionCallback, includePropertyPath, deviceMethodCallback, methodCallbackUserContext);
+    (void)modelHandle;
+    (void)deviceActionCallback;
+    (void)includePropertyPath;
+    (void)deviceMethodCallback;
+    (void)methodCallbackUserContext;
     *deviceHandle = TEST_DEVICE_HANDLE;
     g_InvokeActionCallbackArgument = actionCallbackUserContext;
     return DEVICE_OK;

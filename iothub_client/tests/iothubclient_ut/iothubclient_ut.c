@@ -161,7 +161,7 @@ static LOCK_HANDLE my_IoTHubTransport_GetLock(TRANSPORT_HANDLE transportHandle)
 
 static THREADAPI_RESULT my_ThreadAPI_Join(THREAD_HANDLE threadHandle, int *res)
 {
-    (void*)threadHandle;
+    (void)threadHandle;
     res = 0;
     return THREADAPI_OK;
 }
@@ -268,7 +268,7 @@ static int my_VECTOR_push_back(VECTOR_HANDLE handle, const void* elements, size_
     (void)handle;
     (void)numElements;
     g_queue_element = my_gballoc_malloc(g_queue_element_size);
-    memcpy(g_queue_element, elements, g_queue_element_size);
+    (void)memcpy(g_queue_element, elements, g_queue_element_size);
     g_queue_number_items++;
     return 0;
 }

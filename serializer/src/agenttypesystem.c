@@ -282,7 +282,7 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_EDM_BINARY(AGENT_DATA_TYPE* 
                 }
                 else
                 {
-                    memcpy(agentData->value.edmBinary.data, v.data, v.size);
+                    (void)memcpy(agentData->value.edmBinary.data, v.data, v.size);
                     agentData->type = EDM_BINARY_TYPE;
                     agentData->value.edmBinary.size = v.size;
                     result = AGENT_DATA_TYPES_OK;
@@ -2501,7 +2501,7 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(AGENT_DATA_T
                     else
                     {
                         dest->value.edmBinary.size = src->value.edmBinary.size;
-                        memcpy(dest->value.edmBinary.data, src->value.edmBinary.data, src->value.edmBinary.size);
+                        (void)memcpy(dest->value.edmBinary.data, src->value.edmBinary.data, src->value.edmBinary.size);
                         dest->type = EDM_BINARY_TYPE;
                         result = AGENT_DATA_TYPES_OK;
                     }
@@ -3013,13 +3013,19 @@ static int sscanf2d(const char *pos2, int* sec)
 /*this function only exists because of optimizing valgrind time, otherwise sscanf would be just as good*/
 static int sscanfd(const char *src, int* dst)
 {
+    int result;
     char* next;
-    (*dst) = strtol(src, &next, 10);
-    if ((src == next) || ((((*dst) == LONG_MAX) || ((*dst) == LONG_MIN)) && (errno != 0)))
+    long int temp = strtol(src, &next, 10);
+    if ((src == next) || (((temp == LONG_MAX) || (temp == LONG_MIN)) && (errno != 0)))
     {
-        return EOF;
+        result = EOF;
     }
-    return 1;
+    else
+    {
+        (*dst) = temp;
+        result = 1;
+    }
+    return result;
 }
 
 /*the following function does the same as  sscanf(src, "%llu", &dst), but, it changes the src pointer.*/
@@ -3056,16 +3062,21 @@ static int sscanfdotllu(const char*src, unsigned long long* dst)
 }
 
 /*the following function does the same as  sscanf(src, "%u", &dst)*/
-static int sscanfu(const char*src, unsigned int* dst)
+static int sscanfu(const char* src, unsigned int* dst)
 {
+    int result;
     char* next;
-    (*dst) = strtoul(src, &next, 10);
-    int error = errno;
-    if ((src == next) || (((*dst) == ULONG_MAX) && (error != 0)))
+    unsigned long int temp = strtoul(src, &next, 10);
+    if ((src == next) || ((temp == ULONG_MAX) && (errno != 0)))
     {
-        return EOF; 
+        result = EOF;
     }
-    return 1;
+    else
+    {
+        result = 1;
+        (*dst) = temp;
+    }
+    return result;
 }
 
 /*the following function does the same as  sscanf(src, "%f", &dst)*/
@@ -3074,8 +3085,7 @@ static int sscanff(const char*src, float* dst)
     int result = 1;
     char* next;
     (*dst) = strtof(src, &next);
-    errno_t error = errno;
-    if ((src == next) || (((*dst) == HUGE_VALF) && (error != 0)))
+    if ((src == next) || (((*dst) == HUGE_VALF) && (errno != 0)))
     {
         result = EOF;
     }
@@ -3088,8 +3098,7 @@ static int sscanflf(const char*src, double* dst)
     int result = 1;
     char* next;
     (*dst) = strtod(src, &next);
-    errno_t error = errno;
-    if ((src == next) || (((*dst) == HUGE_VALL) && (error != 0)))
+    if ((src == next) || (((*dst) == HUGE_VALL) && (errno != 0)))
     {
         result = EOF;
     }

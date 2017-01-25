@@ -8,7 +8,7 @@ if(WIN32)
     message(FATAL_ERROR "This CMake file is only support Linux builds!")
 endif()
 
-set(AZUREIOT_INC_FOLDER ".." "/usr/include/azureiot")
+set(AZUREIOT_INC_FOLDER ".." "/usr/include/azureiot" "/usr/include/azureiot/inc")
 
 include_directories(${AZUREIOT_INC_FOLDER})
 
@@ -23,4 +23,5 @@ target_link_libraries(iothub_client_sample_mqtt_esp8266
     curl
     ssl
     crypto
+    m
 )

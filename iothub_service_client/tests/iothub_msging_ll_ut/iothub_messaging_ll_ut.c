@@ -95,7 +95,7 @@ static void my_gballoc_free(void* ptr)
 static int my_mallocAndStrcpy_s(char** destination, const char* source)
 {
     char* p = (char*)malloc(strlen(source)+1);
-    memcpy(p, source, strlen(source) + 1);
+    (void)memcpy(p, source, strlen(source) + 1);
     *destination = p;
     return 0;
 }
@@ -236,7 +236,8 @@ static const void* my_list_item_get_value(LIST_ITEM_HANDLE item_handle)
 
 static int my_message_get_body_amqp_data(MESSAGE_HANDLE message, size_t index, BINARY_DATA* binary_data)
 {
-    (void)index, message;
+    (void)index;
+    (void)message;
     binary_data->bytes = NULL;
     binary_data->length = 1;
     return 0;
@@ -244,7 +245,10 @@ static int my_message_get_body_amqp_data(MESSAGE_HANDLE message, size_t index, B
 
 static STRING_HANDLE my_SASToken_Create(STRING_HANDLE key, STRING_HANDLE scope, STRING_HANDLE keyName, size_t expiry)
 {
-    (void)key, scope, keyName, expiry;
+    (void)key;
+    (void)scope;
+    (void)keyName;
+    (void)expiry;
     return my_STRING_construct("sas");
 }
 
@@ -253,11 +257,11 @@ static MESSAGE_SENDER_HANDLE messagesender_create_return = NULL;
 
 MESSAGE_SENDER_HANDLE my_messagesender_create(LINK_HANDLE link, ON_MESSAGE_SENDER_STATE_CHANGED on_message_sender_state_changed, void* context)
 {
-    (void)link, context;
+    (void)link;
+    (void)context;
     onMessageSenderStateChangedCallback = on_message_sender_state_changed;
-    messagesender_create_return = (MESSAGE_SENDER_HANDLE)malloc(sizeof(MESSAGE_SENDER_HANDLE));
-    memset(messagesender_create_return, 0, sizeof(MESSAGE_SENDER_HANDLE));
-    return (MESSAGE_SENDER_HANDLE)messagesender_create_return;
+    messagesender_create_return = (MESSAGE_SENDER_HANDLE)malloc(1);
+    return messagesender_create_return;
 }
 
 void my_messagesender_destroy(MESSAGE_SENDER_HANDLE message_sender)
@@ -274,10 +278,10 @@ static MESSAGE_RECEIVER_HANDLE messagereceiver_create_return = NULL;
 
 MESSAGE_RECEIVER_HANDLE my_messagereceiver_create(LINK_HANDLE link, ON_MESSAGE_RECEIVER_STATE_CHANGED on_message_receiver_state_changed, void* context)
 {
-    (void)link, context;
+    (void)link;
+    (void)context;
     onMessageReceiverStateChangedCallback = on_message_receiver_state_changed;
-    messagereceiver_create_return = (MESSAGE_RECEIVER_HANDLE)malloc(sizeof(MESSAGE_RECEIVER_HANDLE));
-    memset(messagereceiver_create_return, 0, sizeof(MESSAGE_RECEIVER_HANDLE));
+    messagereceiver_create_return = (MESSAGE_RECEIVER_HANDLE)malloc(2);
     return (MESSAGE_RECEIVER_HANDLE)messagereceiver_create_return;
 }
 
@@ -292,7 +296,9 @@ void my_messagereceiver_destroy(MESSAGE_RECEIVER_HANDLE message_receiver)
 static ON_MESSAGE_SEND_COMPLETE onMessageSendCompleteCallback;
 static int my_messagesender_send(MESSAGE_SENDER_HANDLE message_sender, MESSAGE_HANDLE message, ON_MESSAGE_SEND_COMPLETE on_message_send_complete, void* callback_context)
 {
-    (void)message, message_sender, callback_context;
+    (void)message;
+    (void)message_sender;
+    (void)callback_context;
     onMessageSendCompleteCallback = on_message_send_complete;
     return 0;
 }
@@ -300,7 +306,8 @@ static int my_messagesender_send(MESSAGE_SENDER_HANDLE message_sender, MESSAGE_H
 static ON_MESSAGE_RECEIVED onMessageReceivedCallback;
 static int my_messagereceiver_open(MESSAGE_RECEIVER_HANDLE message_receiver, ON_MESSAGE_RECEIVED on_message_received, const void* callback_context)
 {
-    (void)message_receiver, callback_context;
+    (void)message_receiver;
+    (void)callback_context;
     onMessageReceivedCallback = on_message_received;
     return 0;
 }

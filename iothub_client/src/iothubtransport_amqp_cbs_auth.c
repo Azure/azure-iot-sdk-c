@@ -173,12 +173,18 @@ static STRING_HANDLE create_devices_path(STRING_HANDLE iothub_host_fqdn, STRING_
 	{
 		LogError("Failed creating devices_path (STRING_new failed)");
 	}
-	else if (STRING_sprintf(devices_path, IOTHUB_DEVICES_PATH_FMT, STRING_c_str(iothub_host_fqdn), STRING_c_str(device_id)) != RESULT_OK)
-	{
-		STRING_delete(devices_path);
-		devices_path = NULL;
-		LogError("Failed creating devices_path (STRING_sprintf failed)");
-	}
+    else
+    {
+        const char* device_id_c_str = STRING_c_str(device_id);
+        const char* iothub_host_fqdn_c_str = STRING_c_str(iothub_host_fqdn);
+        
+        if (STRING_sprintf(devices_path, IOTHUB_DEVICES_PATH_FMT, iothub_host_fqdn_c_str, device_id_c_str) != RESULT_OK)
+        {
+            STRING_delete(devices_path);
+            devices_path = NULL;
+            LogError("Failed creating devices_path (STRING_sprintf failed)");
+        }
+    }
 
 	return devices_path;
 }
@@ -296,7 +302,9 @@ static int put_SAS_token_to_cbs(AUTHENTICATION_INSTANCE* instance, STRING_HANDLE
 	// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_046: [The SAS token provided shall be sent to CBS using cbs_put_token(), using `servicebus.windows.net:sastoken` as token type, `devices_path` as audience and passing on_cbs_put_token_complete_callback]
 	// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_058: [The SAS token shall be sent to CBS using cbs_put_token(), using `servicebus.windows.net:sastoken` as token type, `devices_path` as audience and passing on_cbs_put_token_complete_callback]
 	// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_076: [The SAS token shall be sent to CBS using cbs_put_token(), using `servicebus.windows.net:sastoken` as token type, `devices_path` as audience and passing on_cbs_put_token_complete_callback]
-	if (cbs_put_token(instance->cbs_handle, SAS_TOKEN_TYPE, STRING_c_str(cbs_audience), STRING_c_str(sas_token), on_cbs_put_token_complete_callback, instance) != RESULT_OK)
+    const char* sas_token_c_str = STRING_c_str(sas_token);
+    const char* cbs_audience_c_str = STRING_c_str(cbs_audience);
+	if (cbs_put_token(instance->cbs_handle, SAS_TOKEN_TYPE, cbs_audience_c_str, sas_token_c_str, on_cbs_put_token_complete_callback, instance) != RESULT_OK)
 	{
 		// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_048: [If cbs_put_token() failed, authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to FALSE, destroy `devices_path` and return]
 		// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_060: [If cbs_put_token() fails, `instance->is_cbs_put_token_in_progress` shall be set to FALSE]

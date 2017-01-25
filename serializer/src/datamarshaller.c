@@ -41,9 +41,7 @@ DATA_MARSHALLER_HANDLE DataMarshaller_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandl
     DATA_MARSHALLER_HANDLE_DATA* result;
 
     /*Codes_SRS_DATA_MARSHALLER_99_019:[ DataMarshaller_Create shall return NULL if any argument is NULL.]*/
-    if (
-        (modelHandle == NULL) 
-        )
+    if (modelHandle == NULL) 
     {
         result = NULL;
         LogError("(result = %s)", ENUM_TO_STRING(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_INVALID_ARG));
@@ -201,7 +199,7 @@ DATA_MARSHALLER_RESULT DataMarshaller_SendData(DATA_MARSHALLER_HANDLE dataMarsha
                             }
                             else
                             {
-                                memcpy(temp, STRING_c_str(payload), resultSize);
+                                (void)memcpy(temp, STRING_c_str(payload), resultSize);
                                 *destination = temp;
                                 *destinationSize = resultSize;
                                 result = DATA_MARSHALLER_OK;

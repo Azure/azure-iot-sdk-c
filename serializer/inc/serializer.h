@@ -177,7 +177,8 @@ extern "C"
     TO_AGENT_DATA_TYPE(name, DROP_FIRST_COMMA_FROM_ARGS(EXPAND_MODEL_ARGS(__VA_ARGS__)))     \
     int FromAGENT_DATA_TYPE_##name(const AGENT_DATA_TYPE* source, void* destination)         \
     {                                                                                        \
-        (void)(source, destination);                                                         \
+        (void)source;                                                                        \
+        (void)destination;                                                                   \
         LogError("SHOULD NOT GET CALLED... EVER");                                           \
         return 0;                                                                            \
     }                                                                                        \
@@ -415,17 +416,19 @@ Actions are discarded, since no marshalling will be done for those when sending 
             DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(phantomName, 2); \
             FOR_EACH_2(FIELD_AS_STRING, EXPAND_TWICE(__VA_ARGS__)) \
             iMember = 0; \
-            INSTRUCTION_THAT_CAN_SUSTAIN_A_COMMA_STEAL; \
-            FOR_EACH_2(CREATE_AGENT_DATA_TYPE, EXPAND_TWICE(__VA_ARGS__)) \
-            INSTRUCTION_THAT_CAN_SUSTAIN_A_COMMA_STEAL; \
-            result = ((result == AGENT_DATA_TYPES_OK) && (Create_AGENT_DATA_TYPE_from_Members(destination, #name, sizeof(memberNames) / sizeof(memberNames[0]), memberNames, members) == AGENT_DATA_TYPES_OK)) \
-                        ? AGENT_DATA_TYPES_OK \
-                        : AGENT_DATA_TYPES_ERROR; \
             { \
-                size_t jMember; \
-                for (jMember = 0; jMember < iMember; jMember++) \
+                DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(phantomName, 3); \
+                FOR_EACH_2(CREATE_AGENT_DATA_TYPE, EXPAND_TWICE(__VA_ARGS__)) \
+                {DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(phantomName, 4); } \
+                result = ((result == AGENT_DATA_TYPES_OK) && (Create_AGENT_DATA_TYPE_from_Members(destination, #name, sizeof(memberNames) / sizeof(memberNames[0]), memberNames, members) == AGENT_DATA_TYPES_OK)) \
+                            ? AGENT_DATA_TYPES_OK \
+                            : AGENT_DATA_TYPES_ERROR; \
                 { \
-                    Destroy_AGENT_DATA_TYPE(&members[jMember]); \
+                    size_t jMember; \
+                    for (jMember = 0; jMember < iMember; jMember++) \
+                    { \
+                        Destroy_AGENT_DATA_TYPE(&members[jMember]); \
+                    } \
                 } \
             } \
         } \
@@ -458,10 +461,10 @@ Actions are discarded, since no marshalling will be done for those when sending 
     )                                                                                                                       \
 
 #define REFLECTED_ACTION(name, argc, argv, fn, modelName) \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_ACTION_TYPE,               &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {0}, {0}, {0}, {0}, {TOSTRING(name), (0 ? (uintptr_t)("", "") : argc), argv, fn, TOSTRING(modelName)}, {0}} };
+    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_ACTION_TYPE,               &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {0}, {0}, {0}, {0}, {TOSTRING(name), argc, argv, fn, TOSTRING(modelName)}, {0}} };
 
 #define REFLECTED_METHOD(name, argc, argv, fn, modelName) \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_METHOD_TYPE,               &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {TOSTRING(name), (0 ? (uintptr_t)("", "") : argc), argv, fn, TOSTRING(modelName)}, {0}, {0}, {0}, {0}, {0}, {0}, {0}} };
+    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_METHOD_TYPE,               &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {TOSTRING(name), argc, argv, fn, TOSTRING(modelName)}, {0}, {0}, {0}, {0}, {0}, {0}, {0}} };
 
 
 #define REFLECTED_END_OF_LIST \
@@ -587,9 +590,13 @@ Actions are discarded, since no marshalling will be done for those when sending 
             FOR_EACH_2(DEFINE_LOCAL_PARAMETER, __VA_ARGS__) \
             DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(actionName, 6); \
             IF(DIV2(COUNT_ARG(__VA_ARGS__)), , (void)values;) \
-            INSTRUCTION_THAT_CAN_SUSTAIN_A_COMMA_STEAL; \
+            { \
+               DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(actionName, 7); \
+            } \
             FOR_EACH_2_KEEP_1(START_BUILD_LOCAL_PARAMETER, EXECUTE_COMMAND_ERROR, __VA_ARGS__) \
-            INSTRUCTION_THAT_CAN_SUSTAIN_A_COMMA_STEAL; \
+            { \
+               DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(actionName, 8); \
+            } \
             result = actionName((modelName*)device FOR_EACH_2(PUSH_LOCAL_PARAMETER, __VA_ARGS__)); \
             FOR_EACH_2_REVERSE(END_BUILD_LOCAL_PARAMETER, __VA_ARGS__) \
         } \
@@ -628,9 +635,13 @@ Actions are discarded, since no marshalling will be done for those when sending 
             FOR_EACH_2(DEFINE_LOCAL_PARAMETER, __VA_ARGS__) \
             DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(methodName, 6); \
             IF(DIV2(COUNT_ARG(__VA_ARGS__)), , (void)values;) \
-            INSTRUCTION_THAT_CAN_SUSTAIN_A_COMMA_STEAL; \
+            { \
+               DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(actionName, 7); \
+            } \
             FOR_EACH_2_KEEP_1(START_BUILD_LOCAL_PARAMETER, NULL,__VA_ARGS__) \
-            INSTRUCTION_THAT_CAN_SUSTAIN_A_COMMA_STEAL; \
+            { \
+               DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(actionName, 8); \
+            } \
             result = methodName((modelName*)device FOR_EACH_2(PUSH_LOCAL_PARAMETER, __VA_ARGS__)); \
             FOR_EACH_2_REVERSE(END_BUILD_LOCAL_PARAMETER, __VA_ARGS__) \
         } \
@@ -794,7 +805,7 @@ Actions are discarded, since no marshalling will be done for those when sending 
 
 /*The following constructs have been devised to work around the precompiler bug of Visual Studio 2005, version 14.00.50727.42*/
 /* The bug is explained in https://connect.microsoft.com/VisualStudio/feedback/details/278752/comma-missing-when-using-va-args */
-/*A short description is: preprocessor is myteriously eating commas ','.
+/*A short description is: preprocessor is mysteriously eating commas ','.
 In order to feed the appetite of the preprocessor, several constructs have
 been devised that can sustain a missing ',' while still compiling and while still doing nothing
 and while hopefully being eliminated from the code based on "doesn't do anything" so no code size penalty
@@ -806,9 +817,8 @@ if two strings separated by a comma will lose the comma (myteriously) then they 
 */
 
 #define LOTS_OF_COMMA_TO_BE_EATEN /*there were witnesses where as many as THREE commas have been eaten!*/ \
-"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
+"0" "1", "2", "3", "4", "5", "6", "7", "8", "9"
 #define DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(name, instance) static const char* eatThese_COMMA_##name##instance[] = {LOTS_OF_COMMA_TO_BE_EATEN}
-#define INSTRUCTION_THAT_CAN_SUSTAIN_A_COMMA_STEAL 0?LOTS_OF_COMMA_TO_BE_EATEN:LOTS_OF_COMMA_TO_BE_EATEN
 
 #define PUSH_LOCAL_PARAMETER(type, name) , C2(name, _local)
 #define DEFINE_FUNCTION_PARAMETER(type, name) , type name
@@ -1278,7 +1288,7 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, EDM_GUID)(const AGENT_DA
     }
     else
     {
-        memcpy(dest->GUID, agentData->value.edmGuid.GUID, 16);
+        (void)memcpy(dest->GUID, agentData->value.edmGuid.GUID, 16);
         result = AGENT_DATA_TYPES_OK;
     }
     return result;
@@ -1317,7 +1327,7 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, EDM_BINARY)(const AGENT_
         }
         else
         {
-            memcpy(dest->data, agentData->value.edmBinary.data, agentData->value.edmBinary.size);
+            (void)memcpy(dest->data, agentData->value.edmBinary.data, agentData->value.edmBinary.size);
             dest->size = agentData->value.edmBinary.size;
             result = AGENT_DATA_TYPES_OK;
         }

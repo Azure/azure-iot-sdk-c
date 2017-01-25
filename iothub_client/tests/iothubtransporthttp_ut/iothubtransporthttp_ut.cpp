@@ -26,6 +26,7 @@
 #include "azure_c_shared_utility/httpapiexsas.h"
 #include "azure_c_shared_utility/base64.h"
 #include "azure_c_shared_utility/vector.h"
+#include "azure_c_shared_utility/vector_types_internal.h"
 #include "azure_c_shared_utility/lock.h"
 
 #define IOTHUB_ACK "iothub-ack"
@@ -761,181 +762,152 @@ public:
 
         MOCK_STATIC_METHOD_3(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_GetByteArray, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const unsigned char**, buffer, size_t*, size)
     {
-        switch ((uintptr_t)iotHubMessageHandle)
-        {
-        case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_1) :
+        if(iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_1)
         {
             *buffer = buffer1;
             *size = buffer1_size;
-            break;
         }
-        case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_2) :
+        else if (iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_2)
         {
             *buffer = buffer2;
             *size = buffer2_size;
-            break;
         }
-        case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_3) :
+        else if(iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_3)
         {
             *buffer = buffer3;
             *size = buffer3_size;
-            break;
         }
-        case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_4) : /*this is out of bounds message (>256K)*/
+        else if (iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_4) /*this is out of bounds message (>256K)*/
         {
             *buffer = bigBufferOverflow;
             *size = TEST_BIG_BUFFER_1_OVERFLOW_SIZE;
-            break;
         }
-        case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_5) : /*this is a message that just fits*/
+        else if (iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_5) /*this is a message that just fits*/
         {
             *buffer = bigBufferFit;
             *size = TEST_BIG_BUFFER_1_FIT_SIZE;
-            break;
         }
-        case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_6) : /*this is a message that just fits*/
+        else if (iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_6) /*this is a message that just fits*/
         {
             *buffer = buffer6;
             *size = buffer6_size;
-            break;
         }
-        case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_7) : /*this is a message that just fits*/
+        else if(iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_7) /*this is a message that just fits*/
         {
             *buffer = buffer7;
             *size = buffer7_size;
-            break;
         }
-        case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_9) : /*this is a message that is +1 byte over the unbtached send limit*/
+        else if (iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_9) /*this is a message that is +1 byte over the unbtached send limit*/
         {
             *buffer = buffer9;
             *size = buffer9_size;
-            break;
         }
-        case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_11) : /*this is a message that has a property and together with that property fit at maximum*/
+        else if(iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_11) /*this is a message that has a property and together with that property fit at maximum*/
         {
             *buffer = buffer11;
             *size = buffer11_size;
-            break;
         }
-        case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_12) : /*this is a message that has a property and together with that property does NOT fit at maximum*/
+        else if(iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_12) /*this is a message that has a property and together with that property does NOT fit at maximum*/
         {
             *buffer = buffer11; /*this is not a copy&paste mistake, it is intended to use the same "to the limit" buffer as 11*/
             *size = buffer11_size;
-            break;
         }
-        default:
+        else
         {
             /*not expected really*/
             *buffer = (const unsigned char*)"333";
             *size = 3;
         }
-        }
     }
     MOCK_METHOD_END(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK)
 
-        MOCK_STATIC_METHOD_1(, const char*, IoTHubMessage_GetString, IOTHUB_MESSAGE_HANDLE, handle)
+    MOCK_STATIC_METHOD_1(, const char*, IoTHubMessage_GetString, IOTHUB_MESSAGE_HANDLE, handle)
 
         const char* result2;
-    switch ((uintptr_t)handle)
-    {
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_1) :
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_2) :
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_3) :
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_4) :
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_5) :
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_6) :
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_7) :
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_8) :
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_9) :
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_11) :
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_12) :
-    {
-        result2 = NULL;
-        break;
-    }
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_10) :
-    {
-        result2 = string10;
-        break;
-    }
-    default:
-    {
-        /*not expected really*/
-        result2 = NULL;
-    }
-    }
+
+        if(
+            (handle == TEST_IOTHUB_MESSAGE_HANDLE_1) ||
+            (handle == TEST_IOTHUB_MESSAGE_HANDLE_2) ||
+            (handle == TEST_IOTHUB_MESSAGE_HANDLE_3) ||
+            (handle == TEST_IOTHUB_MESSAGE_HANDLE_4) ||
+            (handle == TEST_IOTHUB_MESSAGE_HANDLE_5) ||
+            (handle == TEST_IOTHUB_MESSAGE_HANDLE_6) ||
+            (handle == TEST_IOTHUB_MESSAGE_HANDLE_7) ||
+            (handle == TEST_IOTHUB_MESSAGE_HANDLE_8) ||
+            (handle == TEST_IOTHUB_MESSAGE_HANDLE_9) ||
+            (handle == TEST_IOTHUB_MESSAGE_HANDLE_11) ||
+            (handle == TEST_IOTHUB_MESSAGE_HANDLE_12)
+        )
+        {
+            result2 = NULL;
+
+        }
+        else if (handle == TEST_IOTHUB_MESSAGE_HANDLE_10)
+        {
+            result2 = string10;
+        }
+        else
+        {
+            /*not expected really*/
+            result2 = NULL;
+        }
     MOCK_METHOD_END(const char*, result2)
 
     MOCK_STATIC_METHOD_1(, MAP_HANDLE, IoTHubMessage_Properties, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)
         MAP_HANDLE result2;
-    switch ((uintptr_t)iotHubMessageHandle)
-    {
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_1) :
+    if(iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_1)
     {
         result2 = TEST_MAP_EMPTY;
-        break;
     }
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_2) :
+    else if(iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_2)
     {
         result2 = TEST_MAP_EMPTY;
-        break;
     }
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_3) :
+    else if(iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_3)
     {
         result2 = TEST_MAP_EMPTY;
-        break;
     }
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_4) : /*this is out of bounds message (>256K)*/
+    else if(iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_4)  /*this is out of bounds message (>256K)*/
     {
         result2 = TEST_MAP_EMPTY;
-        break;
     }
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_5) : /*this is a message that just fits*/
+    else if(iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_5) /*this is a message that just fits*/
     {
         result2 = TEST_MAP_EMPTY;
-        break;
     }
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_6) :
+    else if (iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_6)
     {
         result2 = TEST_MAP_1_PROPERTY;
-        break;
     }
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_7) :
+    else if(iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_7)
     {
         result2 = TEST_MAP_2_PROPERTY;
-        break;
     }
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_8) :
+    else if(iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_8)
     {
         result2 = TEST_MAP_3_PROPERTY;
-        break;
     }
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_9) :
+    else if(iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_9)
     {
         result2 = TEST_MAP_EMPTY;
-        break;
     }
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_10) :
+    else if(iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_10)
     {
         result2 = TEST_MAP_EMPTY;
-        break;
     }
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_11) :
+    else if(iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_11)
     {
         result2 = TEST_MAP_1_PROPERTY_A_B;
-        break;
     }
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_12) :
+    else if(iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_12)
     {
         result2 = TEST_MAP_1_PROPERTY_AA_B;
-        break;
     }
-    default:
+    else
     {
         /*not expected really*/
         result2 = NULL;
         ASSERT_FAIL("not expected");
-    }
     }
     MOCK_METHOD_END(MAP_HANDLE, result2)
 
@@ -953,32 +925,31 @@ public:
 
         MOCK_STATIC_METHOD_1(, IOTHUBMESSAGE_CONTENT_TYPE, IoTHubMessage_GetContentType, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)
         IOTHUBMESSAGE_CONTENT_TYPE result2;
-    switch ((uintptr_t)iotHubMessageHandle)
-    {
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_1) :
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_2) :
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_3) :
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_4) :
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_5) :
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_6) :
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_7) :
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_8) :
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_9) :
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_11) :
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_12) :
+    if(
+        (iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_1) ||
+        (iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_2) ||
+        (iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_3) ||
+        (iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_4) ||
+        (iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_5) ||
+        (iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_6) ||
+        (iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_7) ||
+        (iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_8) ||
+        (iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_9) ||
+        (iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_11) ||
+        (iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_12)
+    )
     {
         result2 = IOTHUBMESSAGE_BYTEARRAY;
-        break;
     }
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_10) :
+    else if (iotHubMessageHandle == TEST_IOTHUB_MESSAGE_HANDLE_10)
     {
         result2 = IOTHUBMESSAGE_STRING;
-        break;
     }
-    default:
+    else
+    {
         result2 = IOTHUBMESSAGE_STRING;
-        break;
     }
+
     MOCK_METHOD_END(IOTHUBMESSAGE_CONTENT_TYPE, result2)
 
     MOCK_STATIC_METHOD_1(, void, IoTHubMessage_Destroy, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)
@@ -1044,47 +1015,39 @@ public:
     MOCK_METHOD_END(STRING_HANDLE, (((currentBase64_Encode_Bytes_call > 0) && (currentBase64_Encode_Bytes_call == whenShallBase64_Encode_Bytes_fail)) ? ((STRING_HANDLE)NULL) : BASEIMPLEMENTATION::Base64_Encode_Bytes(source, size)));
 
     MOCK_STATIC_METHOD_4(, MAP_RESULT, Map_GetInternals, MAP_HANDLE, handle, const char*const**, keys, const char*const**, values, size_t*, count)
-        switch ((uintptr_t)handle)
-        {
-        case((uintptr_t)TEST_MAP_EMPTY) :
+        if(handle == TEST_MAP_EMPTY)
         {
             *keys = NULL;
             *values = NULL;
             *count = 0;
-            break;
         }
-        case((uintptr_t)TEST_MAP_1_PROPERTY) :
+        else if (handle == TEST_MAP_1_PROPERTY)
         {
             *keys = (const char*const*)TEST_KEYS1;
             *values = (const char*const*)TEST_VALUES1;
             *count = 1;
-            break;
         }
-        case((uintptr_t)TEST_MAP_2_PROPERTY) :
+        else if(handle == TEST_MAP_2_PROPERTY)
         {
             *keys = (const char*const*)TEST_KEYS2;
             *values = (const char*const*)TEST_VALUES2;
             *count = 2;
-            break;
         }
-        case((uintptr_t)TEST_MAP_1_PROPERTY_A_B) :
+        else if (handle == TEST_MAP_1_PROPERTY_A_B)
         {
             *keys = (const char*const*)TEST_KEYS1_A_B;
             *values = (const char*const*)TEST_VALUES1_A_B;
             *count = 1;
-            break;
         }
-        case((uintptr_t)TEST_MAP_1_PROPERTY_AA_B) :
+        else if(handle == TEST_MAP_1_PROPERTY_AA_B)
         {
             *keys = (const char*const*)TEST_KEYS1_AA_B;
             *values = (const char*const*)TEST_VALUES1_AA_B;
             *count = 1;
-            break;
         }
-        default:
+        else
         {
             ASSERT_FAIL("unexpected value");
-        }
         }
     MOCK_METHOD_END(MAP_RESULT, MAP_OK);
 
@@ -10384,19 +10347,14 @@ void setupIrrelevantMocksForProperties(CIoTHubTransportHttpMocks *mocks, IOTHUB_
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
-
-        switch ((uintptr_t)messageHandle)
-        {
-        case((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_11) :
+        if(messageHandle == TEST_IOTHUB_MESSAGE_HANDLE_11)
         {
             STRICT_EXPECTED_CALL((*mocks), Base64_Encode_Bytes(buffer11, buffer11_size));
-            break;
+
         }
-        default:
+        else
         {
             STRICT_EXPECTED_CALL((*mocks), Base64_Encode_Bytes(buffer6, buffer6_size));
-            break;
-        }
         }
 
         STRICT_EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
@@ -10431,21 +10389,15 @@ void setupIrrelevantMocksForProperties(CIoTHubTransportHttpMocks *mocks, IOTHUB_
     STRICT_EXPECTED_CALL((*mocks), DList_RemoveHeadList(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
 
-    switch ((uintptr_t)messageHandle)
-    {
-    case((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_11) :
+    if(messageHandle == TEST_IOTHUB_MESSAGE_HANDLE_11)
     {
         STRICT_EXPECTED_CALL((*mocks), DList_InsertTailList(IGNORED_PTR_ARG, &(message11.entry)))
             .IgnoreArgument(1);
-        break;
     }
-
-    default:
+    else
     {
         STRICT_EXPECTED_CALL((*mocks), DList_InsertTailList(IGNORED_PTR_ARG, &(message6.entry)))
             .IgnoreArgument(1);
-        break;
-    }
     }
 
 

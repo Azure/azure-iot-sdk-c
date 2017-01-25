@@ -11,6 +11,7 @@
 #define VECTOR_clear real_VECTOR_clear
 #define VECTOR_front real_VECTOR_front
 #define VECTOR_back real_VECTOR_back
+#define VECTOR_move real_VECTOR_move
 
 #define GBALLOC_H
 

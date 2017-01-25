@@ -201,7 +201,9 @@ static void my_MultiTree_Destroy(MULTITREE_HANDLE treeHandle)
 
 static AGENT_DATA_TYPES_RESULT my_Create_AGENT_DATA_TYPE_from_Members(AGENT_DATA_TYPE* agentData, const char* typeName, size_t nMembers, const char* const * memberNames, const AGENT_DATA_TYPE* memberValues)
 {
-    (void)(memberValues, typeName, agentData);
+    (void)memberValues;
+    (void)typeName;
+    (void)agentData;
     for (size_t i = 0; i < nMembers; i++)
     {
         strcpy(lastMemberNames[nCall][i], memberNames[i]);
@@ -262,7 +264,7 @@ int umockvalue_are_equal_SCHEMA_MODEL_ELEMENT(const SCHEMA_MODEL_ELEMENT* left, 
 
 int umockvalue_copy_SCHEMA_MODEL_ELEMENT(SCHEMA_MODEL_ELEMENT* destination, const SCHEMA_MODEL_ELEMENT* source)
 {
-    memcpy(destination, source, sizeof(*destination));
+    (void)memcpy(destination, source, sizeof(*destination));
     return 0;
 }
 

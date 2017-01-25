@@ -198,13 +198,17 @@ CODEFIRST_RESULT CodeFirst_SendAsyncReported(unsigned char** destination, size_t
 }
 static IOTHUB_CLIENT_RESULT my_IoTHubClient_SetDeviceTwinCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback, void* userContextCallback)
 {
-    (void)(iotHubClientHandle, deviceTwinCallback, userContextCallback);
+    (void)iotHubClientHandle;
+    (void)deviceTwinCallback;
+    (void)userContextCallback;
     return IOTHUB_CLIENT_OK;
 }
 
 static IOTHUB_CLIENT_RESULT my_IoTHubClient_LL_SetDeviceTwinCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback, void* userContextCallback)
 {
-    (void)(iotHubClientHandle, deviceTwinCallback, userContextCallback);
+    (void)iotHubClientHandle;
+    (void)deviceTwinCallback;
+    (void) userContextCallback;
     return IOTHUB_CLIENT_OK;
 }
 
@@ -220,7 +224,8 @@ static char* my_json_serialize_to_string(const JSON_Value *value)
 /*callback called by the devicet win to indicate a succesful transmission of reported state*/
 static void reportedStateCallback(int status_code, void* userContextCallback)
 {
-    (void)(status_code, userContextCallback);
+    (void)status_code;
+    (void)userContextCallback;
 }
 
 static const METHODRETURN_DATA data1 = { 10, NULL };
