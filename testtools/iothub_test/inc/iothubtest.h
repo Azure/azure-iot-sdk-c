@@ -6,10 +6,12 @@
 
 #ifdef __cplusplus
 #include <cstddef>
+#include <ctime>
 extern "C"
 {
 #else
 #include <stddef.h>
+#include <time.h>
 #endif
 
 #include "azure_c_shared_utility/macro_utils.h"
