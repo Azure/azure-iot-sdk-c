@@ -16,6 +16,11 @@ if(LINUX)
 	set(iothub_messaging_sample_c_files ${iothub_messaging_sample_c_files} ./linux/main.c)
 endif()
 
+if(APPLE)
+    set(iothub_messaging_sample_c_files ${iothub_messaging_sample_c_files} ./linux/main.c)
+endif()
+
+
 set(iothub_messaging_sample_h_files
 iothub_messaging_sample.h
 )

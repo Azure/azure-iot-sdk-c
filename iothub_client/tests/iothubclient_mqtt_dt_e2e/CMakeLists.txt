@@ -89,6 +89,18 @@ if(WIN32)
            )
     endif()
 else()
+    if(UNIX) #LINUX OR APPLE
+        find_package(PkgConfig REQUIRED)
+        pkg_search_module(UUID REQUIRED uuid)
+        link_directories(${UUID_LIBRARY_DIRS})
+    endif()
+
+    if(APPLE)
+        target_link_libraries(${theseTestsName}_exe -L${UUID_LIBRARY_DIRS} pthread ${UUID_LIBRARIES})
+    elseif(LINUX)
+        target_link_libraries(${theseTestsName}_exe pthread ${UUID_LIBRARIES})
+    endif()
+
     if(TARGET ${theseTestsName}_exe)
         target_link_libraries(${theseTestsName}_exe
             aziotsharedutil
@@ -99,7 +111,6 @@ else()
             aziotsharedutil
             iothub_client_mqtt_transport
         )
-        target_link_libraries(${theseTestsName}_exe pthread uuid)
         linkMqttLibrary(${theseTestsName}_exe)
     endif()
 endif()
