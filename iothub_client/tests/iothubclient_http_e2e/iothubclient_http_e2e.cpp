@@ -740,7 +740,7 @@ TEST_FUNCTION(IoTHub_HTTP_RecvMessage_E2ETest)
     iotHubMessagingHandle = IoTHubMessaging_Create(iotHubServiceClientHandle);
     ASSERT_IS_NOT_NULL_WITH_MSG(iotHubMessagingHandle, "Could not initialize IoTHubMessaging to send C2D messages to the device");
 
-    iotHubMessagingResult = IoTHubMessaging_Open(iotHubMessagingHandle, openCompleteCallback, "Context string for open");
+    iotHubMessagingResult = IoTHubMessaging_Open(iotHubMessagingHandle, openCompleteCallback, (void*)"Context string for open");
     ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_OK, iotHubMessagingResult);
 
     // Create user context and message
@@ -911,7 +911,7 @@ TEST_FUNCTION(IoTHub_HTTP_RecvMessage_shared_E2ETest)
     iotHubMessagingHandle2 = IoTHubMessaging_Create(iotHubServiceClientHandle2);
     ASSERT_IS_NOT_NULL_WITH_MSG(iotHubMessagingHandle2, "Could not initialize IoTHubMessaging to send C2D messages to the device");
 
-    iotHubMessagingResult = IoTHubMessaging_Open(iotHubMessagingHandle2, openCompleteCallback, "Context string for open");
+    iotHubMessagingResult = IoTHubMessaging_Open(iotHubMessagingHandle2, openCompleteCallback, (void*)"Context string for open");
     ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_OK, iotHubMessagingResult);
 
     // Create user context and message
