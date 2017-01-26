@@ -17,7 +17,7 @@
 #define VECTOR_erase            real_VECTOR_erase
 #define VECTOR_move             real_VECTOR_move
 
-#include "vector.h"
+#include "azure_c_shared_utility/vector.h"
 
 #ifndef COMPILING_REAL_VECTOR_C
 #undef VECTOR_create   
