@@ -431,7 +431,15 @@ void e2e_send_event_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     (void)platform_init();
 
     {
-        IOTHUB_TEST_HANDLE iotHubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo), IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo), IoTHubAccount_GetDeviceId(g_iothubAcctInfo), IoTHubAccount_GetDeviceKey(g_iothubAcctInfo), IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo), IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo), IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo), IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo));
+        const char* eventHubConnectionString = IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo);
+        const char* iotHubConnectionString = IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo);
+        const char* deviceId = IoTHubAccount_GetDeviceId(g_iothubAcctInfo);
+        const char* deviceKey = IoTHubAccount_GetDeviceKey(g_iothubAcctInfo);
+        const char* eventHubListenName = IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo);
+        const char* eventHubAccessKey = IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo);
+        const char* sharedAccessSignature = IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo);
+        const char* eventHubConsumerHub = IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo);
+        IOTHUB_TEST_HANDLE iotHubTestHandle = IoTHubTest_Initialize(eventHubConnectionString, iotHubConnectionString, deviceId, deviceKey, eventHubListenName, eventHubAccessKey, sharedAccessSignature, eventHubConsumerHub);
         ASSERT_IS_NOT_NULL_WITH_MSG(iotHubTestHandle, "Could not initialize IoTHubTest in order to listen for events");
 
         IOTHUB_TEST_CLIENT_RESULT result = IoTHubTest_ListenForEventForMaxDrainTime(iotHubTestHandle, IoTHubCallback, IoTHubAccount_GetIoTHubPartitionCount(g_iothubAcctInfo), sendData);
