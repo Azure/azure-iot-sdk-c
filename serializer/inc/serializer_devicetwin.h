@@ -10,7 +10,7 @@
 #include "iothub_client.h"
 #include "iothub_client_ll.h"
 #include "parson.h"
-#include "vector.h"
+#include "azure_c_shared_utility/vector.h"
 #include "methodreturn.h"
 
 static void serializer_ingest(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback)
