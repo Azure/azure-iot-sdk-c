@@ -762,7 +762,7 @@ TEST_FUNCTION(IoTHub_HTTP_RecvMessage_E2ETest)
     {
         if (Map_AddOrUpdate(mapHandle, MSG_PROP_KEYS[i], MSG_PROP_VALS[i]) != MAP_OK)
         {
-            (void)printf("ERROR: Map_AddOrUpdate failed for property %d!\r\n", i);
+            (void)printf("ERROR: Map_AddOrUpdate failed for property %zu!\r\n", i);
         }
     }
 
@@ -874,7 +874,7 @@ TEST_FUNCTION(IoTHub_HTTP_RecvMessage_shared_E2ETest)
     iotHubMessagingHandle1 = IoTHubMessaging_Create(iotHubServiceClientHandle1);
     ASSERT_IS_NOT_NULL_WITH_MSG(iotHubMessagingHandle1, "Could not initialize IoTHubMessaging to send C2D messages to the device");
 
-    iotHubMessagingResult = IoTHubMessaging_Open(iotHubMessagingHandle1, openCompleteCallback, "Context string for open");
+    iotHubMessagingResult = IoTHubMessaging_Open(iotHubMessagingHandle1, openCompleteCallback, (void*)"Context string for open");
     ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_OK, iotHubMessagingResult);
 
     // Create user context and message
@@ -896,7 +896,7 @@ TEST_FUNCTION(IoTHub_HTTP_RecvMessage_shared_E2ETest)
     {
         if (Map_AddOrUpdate(mapHandle1, MSG_PROP_KEYS[i], MSG_PROP_VALS[i]) != MAP_OK)
         {
-            (void)printf("ERROR: Map_AddOrUpdate failed for property %d!\r\n", i);
+            (void)printf("ERROR: Map_AddOrUpdate failed for property %zu!\r\n", i);
         }
     }
 
@@ -933,7 +933,7 @@ TEST_FUNCTION(IoTHub_HTTP_RecvMessage_shared_E2ETest)
     {
         if (Map_AddOrUpdate(mapHandle2, MSG_PROP_KEYS[i], MSG_PROP_VALS[i]) != MAP_OK)
         {
-            (void)printf("ERROR: Map_AddOrUpdate failed for property %d!\r\n", i);
+            (void)printf("ERROR: Map_AddOrUpdate failed for property %zu!\r\n", i);
         }
     }
 

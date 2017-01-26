@@ -298,8 +298,7 @@ static EXPECTED_SEND_DATA* EventData_Create(void)
             time_t t = time(NULL);
             size_t string_length;
             string_length = sprintf(temp, TEST_EVENT_DATA_FMT, ctime(&t), g_iotHubTestId);
-            if ((string_length < 0) ||
-                ((tempString = (char*)malloc(string_length + 1)) == NULL))
+            if ((tempString = (char*)malloc(string_length + 1)) == NULL)
             {
                 Lock_Deinit(result->lock);
                 free(result);
@@ -384,7 +383,7 @@ extern "C" void e2e_send_event_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
         {
             if (Map_AddOrUpdate(mapHandle, MSG_PROP_KEYS[i], MSG_PROP_VALS[i]) != MAP_OK)
             {
-                (void)printf("ERROR: Map_AddOrUpdate failed for property %d!\r\n", i);
+                (void)printf("ERROR: Map_AddOrUpdate failed for property %zu!\r\n", i);
             }
         }
 
@@ -473,7 +472,7 @@ extern "C" void e2e_recv_message_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     iotHubMessagingHandle = IoTHubMessaging_Create(iotHubServiceClientHandle);
     ASSERT_IS_NOT_NULL_WITH_MSG(iotHubMessagingHandle, "Could not initialize IoTHubMessaging to send C2D messages to the device");
 
-    iotHubMessagingResult = IoTHubMessaging_Open(iotHubMessagingHandle, openCompleteCallback, "Context string for open");
+    iotHubMessagingResult = IoTHubMessaging_Open(iotHubMessagingHandle, openCompleteCallback, (void*)"Context string for open");
     ASSERT_ARE_EQUAL (int, IOTHUB_MESSAGING_OK, iotHubMessagingResult);
 
     // Create user context and message
@@ -495,7 +494,7 @@ extern "C" void e2e_recv_message_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     {
         if (Map_AddOrUpdate(mapHandle, MSG_PROP_KEYS[i], MSG_PROP_VALS[i]) != MAP_OK)
         {
-            (void)printf("ERROR: Map_AddOrUpdate failed for property %d!\r\n", i);
+            (void)printf("ERROR: Map_AddOrUpdate failed for property %zu!\r\n", i);
         }
     }
 
