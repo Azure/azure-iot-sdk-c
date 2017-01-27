@@ -5,8 +5,6 @@
 #include "iothubclient_common_e2e.h"
 #include "iothubtransportmqtt.h"
 
-static TEST_MUTEX_HANDLE g_dllByDll;
-
 BEGIN_TEST_SUITE(iothubclient_mqtt_e2e)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)

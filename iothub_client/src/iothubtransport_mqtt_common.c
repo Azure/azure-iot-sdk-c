@@ -55,7 +55,6 @@ static const char* TOPIC_DEVICE_MSG = "devices/%s/messages/devicebound/#";
 static const char* TOPIC_DEVICE_DEVICE = "devices/%s/messages/events/";
 
 static const char* TOPIC_DEVICE_METHOD_SUBSCRIBE = "$iothub/methods/POST/#";
-static const char* TOPIC_DEVICE_METHOD_RESPONSE = "$iothub/methods/res";
 
 static const char* IOTHUB_API_VERSION = "2016-11-14";
 

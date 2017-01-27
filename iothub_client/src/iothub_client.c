@@ -167,13 +167,6 @@ static void garbageCollectorImpl(IOTHUB_CLIENT_INSTANCE* iotHubClientInstance)
 }
 #endif
 
-static IOTHUBMESSAGE_DISPOSITION_RESULT iothub_ll_message_callback(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback)
-{
-    (void)message;
-    (void)userContextCallback;
-    return IOTHUBMESSAGE_ABANDONED;
-}
-
 static int iothub_ll_inbound_device_method_callback(const char* method_name, const unsigned char* payload, size_t size, METHOD_HANDLE method_id, void* userContextCallback)
 {
     int result;

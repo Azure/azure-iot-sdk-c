@@ -33,17 +33,11 @@
 #define MBED_PARAM_MAX_LENGTH 256
 #endif
 
-static const char* URL_API_VERSION = "api-version=2016-11-14";
-static const char* DEVICE_JSON_FMT = "{\"deviceId\":\"%s\",\"etag\":null,\"connectionState\":\"Disconnected\",\"status\":\"enabled\",\"statusReason\":null,\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"lastActivityTime\":\"0001-01-01T00:00:00\",\"authentication\":{\"symmetricKey\":{\"primaryKey\":null,\"secondaryKey\":null}}}";
 static const char* DEVICE_PREFIX_FMT = "e2eDevice_%s";
-static const char* RELATIVE_PATH_FMT = "/devices/%s?%s";
-static const char* SHARED_ACCESS_KEY = "SharedAccessSignature sr=%s&sig=%s&se=%s&skn=%s";
 
 static const char *DEFAULT_CONSUMER_GROUP = "$Default";
 static const int DEFAULT_PARTITION_COUNT = 16;
 
-static const char* PRIMARY_KEY_FIELD = "\"primaryKey\":\"";
-static const size_t PRIMARY_KEY_FIELD_LEN = 14;
 
 #define MAX_LENGTH_OF_UNSIGNED_INT  6
 #define MAX_LENGTH_OF_TIME_VALUE    12
@@ -67,36 +61,6 @@ typedef struct IOTHUB_ACCOUNT_INFO_TAG
     IOTHUB_REGISTRYMANAGER_HANDLE iothub_registrymanager_handle;
     IOTHUB_MESSAGING_HANDLE iothub_messaging_handle;
 } IOTHUB_ACCOUNT_INFO;
-
-static HTTP_HEADERS_HANDLE getContentHeaders(bool appendIfMatch)
-{
-    HTTP_HEADERS_HANDLE httpHeader = HTTPHeaders_Alloc();
-    if (httpHeader != NULL)
-    {
-        if (HTTPHeaders_AddHeaderNameValuePair(httpHeader, "Authorization", " ") != HTTP_HEADERS_OK ||
-            HTTPHeaders_AddHeaderNameValuePair(httpHeader, "User-Agent", "Microsoft.Azure.Devices/1.0.0") != HTTP_HEADERS_OK ||
-            HTTPHeaders_AddHeaderNameValuePair(httpHeader, "Accept", "application/json") != HTTP_HEADERS_OK ||
-            HTTPHeaders_AddHeaderNameValuePair(httpHeader, "Content-Type", "application/json; charset=utf-8") != HTTP_HEADERS_OK)
-        {
-            LogError("Failure adding http headers.\r\n");
-            HTTPHeaders_Free(httpHeader);
-            httpHeader = NULL;
-        }
-        else
-        {
-            if (appendIfMatch)
-            {
-                if (HTTPHeaders_AddHeaderNameValuePair(httpHeader, "If-Match", "*") != HTTP_HEADERS_OK)
-                {
-                    LogError("Failure adding if-Match http headers.\r\n");
-                    HTTPHeaders_Free(httpHeader);
-                    httpHeader = NULL;
-                }
-            }
-        }
-    }
-    return httpHeader;
-}
 
 static int generateDeviceName(IOTHUB_ACCOUNT_INFO* accountInfo)
 {

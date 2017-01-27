@@ -28,8 +28,6 @@
 
 #include "iothubclient_common_e2e.h"
 
-static bool g_callbackRecv = false;
-
 const char* TEST_EVENT_DATA_FMT = "{\"data\":\"%.24s\",\"id\":\"%d\"}";
 
 const char* MSG_ID = "MessageIdForE2E";
@@ -213,7 +211,6 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
                 }
                 else
                 {
-                    (void)printf("Received new message from IoT Hub :\r\nMessage-id: %s\r\nCorrelation-id: %s\r\nContent: %s", messageId, correlationId, content);
                     (void)printf("\r\n");
                 }
 
