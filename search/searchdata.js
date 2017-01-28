@@ -7,8 +7,7 @@ var indexSectionsWithContent =
   4: "dipt",
   5: "hilst",
   6: "hilst",
-  7: "bdegisw",
-  8: "m"
+  7: "bdegisw"
 };
 
 var indexSectionNames =
@@ -20,8 +19,7 @@ var indexSectionNames =
   4: "variables",
   5: "typedefs",
   6: "enums",
-  7: "defines",
-  8: "pages"
+  7: "defines"
 };
 
 var indexSectionLabels =
@@ -33,7 +31,6 @@ var indexSectionLabels =
   4: "Variables",
   5: "Typedefs",
   6: "Enumerations",
-  7: "Macros",
-  8: "Pages"
+  7: "Macros"
 };
 
