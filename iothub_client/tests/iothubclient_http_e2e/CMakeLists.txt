@@ -28,7 +28,8 @@ set(${theseTestsName}_h_files
 include_directories(${IOTHUB_TEST_INC_FOLDER})
 include_directories(${IOTHUB_SERVICE_CLIENT_INC_FOLDER})
 
-build_test_artifacts(${theseTestsName} ON "tests/E2ETests" VALGRIND_SUPPRESSIONS_FILE suppressions.supp)
+file(COPY suppressions.supp DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+build_test_artifacts(${theseTestsName} VALGRIND_SUPPRESSIONS_FILE suppressions.supp)
 
 if(WIN32)
 	if(TARGET ${theseTestsName}_dll)
