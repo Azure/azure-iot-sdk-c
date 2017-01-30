@@ -29,7 +29,7 @@ include_directories(${IOTHUB_TEST_INC_FOLDER})
 include_directories(${IOTHUB_SERVICE_CLIENT_INC_FOLDER})
 
 file(COPY suppressions.supp DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-build_test_artifacts(${theseTestsName} VALGRIND_SUPPRESSIONS_FILE suppressions.supp)
+build_test_artifacts(${theseTestsName} ON VALGRIND_SUPPRESSIONS_FILE suppressions.supp)
 
 if(WIN32)
 	if(TARGET ${theseTestsName}_dll)
