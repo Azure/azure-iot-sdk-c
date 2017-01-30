@@ -539,7 +539,12 @@ static void RecvMessage(IOTHUB_PROVISIONED_DEVICE* deviceToUse)
     // assert
     ASSERT_IS_TRUE_WITH_MSG(receiveUserContext->wasFound, "Failure retrieving message that was sent to IotHub."); // was found is written by the callback...
 
-                                                                                                          // cleanup
+    // cleanup
+    IoTHubMessage_Destroy(messageHandle);
+    IoTHubMessaging_Close(iotHubMessagingHandle);
+    IoTHubMessaging_Destroy(iotHubMessagingHandle);
+    IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
+
     IoTHubClient_Destroy(iotHubClientHandle);
     ReceiveUserContext_Destroy(receiveUserContext);
 }
