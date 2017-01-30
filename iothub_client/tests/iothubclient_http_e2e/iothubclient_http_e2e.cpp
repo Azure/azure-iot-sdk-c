@@ -923,21 +923,25 @@ TEST_FUNCTION(IoTHub_HTTP_RecvMessage_shared_E2ETest)
     ASSERT_IS_TRUE_WITH_MSG(wasFound2, "Failure retrieving message from client 2 that was sent to IotHub.");
 
     // cleanup
-    IoTHubMessage_Destroy(messageHandle1);
-    IoTHubMessaging_Close(iotHubMessagingHandle1);
-    IoTHubMessaging_Destroy(iotHubMessagingHandle1);
-    ReceiveUserContext_Destroy(receiveUserContext1);
-    IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle1);
-
-    IoTHubMessage_Destroy(messageHandle2);
-    IoTHubMessaging_Close(iotHubMessagingHandle2);
-    IoTHubMessaging_Destroy(iotHubMessagingHandle2);
-    ReceiveUserContext_Destroy(receiveUserContext2);
-    IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle2);
-
-
     IoTHubClient_Destroy(iotHubClientHandle2);
     IoTHubClient_Destroy(iotHubClientHandle1);
+    
+    IoTHubMessage_Destroy(messageHandle2);
+    ReceiveUserContext_Destroy(receiveUserContext2);
+
+    IoTHubMessaging_Close(iotHubMessagingHandle2); //sync
+    IoTHubMessaging_Destroy(iotHubMessagingHandle2);
+
+    IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle2);
+
+    IoTHubMessage_Destroy(messageHandle1);
+    ReceiveUserContext_Destroy(receiveUserContext1);
+
+    IoTHubMessaging_Close(iotHubMessagingHandle1);
+    IoTHubMessaging_Destroy(iotHubMessagingHandle1);
+
+    IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle1);
+    
     IoTHubTransport_Destroy(transportHandle);
 }
 
