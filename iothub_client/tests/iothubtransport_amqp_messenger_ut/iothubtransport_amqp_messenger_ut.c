@@ -635,8 +635,8 @@ static void set_expected_calls_for_message_receiver_create()
     // create_event_sender()
     // create_devices_path()
     STRICT_EXPECTED_CALL(STRING_new()).SetReturn(TEST_DEVICES_PATH_STRING_HANDLE);
-    STRICT_EXPECTED_CALL(STRING_c_str(TEST_DEVICE_ID_STRING_HANDLE));
-    STRICT_EXPECTED_CALL(STRING_c_str(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE));
+    STRICT_EXPECTED_CALL(STRING_c_str(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE)).SetReturn(TEST_IOTHUB_HOST_FQDN);
+    STRICT_EXPECTED_CALL(STRING_c_str(TEST_DEVICE_ID_STRING_HANDLE)).SetReturn(TEST_DEVICE_ID);
     // EXPECTED: STRING_sprintf
 
     // create_message_receive_address()
@@ -644,7 +644,7 @@ static void set_expected_calls_for_message_receiver_create()
     STRICT_EXPECTED_CALL(STRING_c_str(TEST_DEVICES_PATH_STRING_HANDLE)).SetReturn(TEST_DEVICES_PATH_CHAR_PTR);
     // EXPECTED: STRING_sprintf
 
-    STRICT_EXPECTED_CALL(STRING_c_str(TEST_DEVICE_ID_STRING_HANDLE));
+    STRICT_EXPECTED_CALL(STRING_c_str(TEST_DEVICE_ID_STRING_HANDLE)).SetReturn(TEST_DEVICE_ID);
 
     // create_link_name()
     EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
@@ -655,7 +655,7 @@ static void set_expected_calls_for_message_receiver_create()
 
     // create_message_receiver_target_name()
     STRICT_EXPECTED_CALL(STRING_new()).SetReturn(TEST_MESSAGE_RECEIVER_TARGET_NAME_STRING_HANDLE);
-    STRICT_EXPECTED_CALL(STRING_c_str(TEST_MESSAGE_RECEIVER_LINK_NAME_STRING_HANDLE));
+    STRICT_EXPECTED_CALL(STRING_c_str(TEST_MESSAGE_RECEIVER_LINK_NAME_STRING_HANDLE)).SetReturn(TEST_MESSAGE_RECEIVER_LINK_NAME_CHAR_PTR);
     // EXPECTED: STRING_sprintf
 
     STRICT_EXPECTED_CALL(STRING_c_str(TEST_MESSAGE_RECEIVER_TARGET_NAME_STRING_HANDLE)).SetReturn(TEST_MESSAGE_RECEIVER_TARGET_NAME_CHAR_PTR);
@@ -734,13 +734,13 @@ static void set_expected_calls_for_message_sender_create()
 	// create_event_sender()
 	// create_devices_path()
 	STRICT_EXPECTED_CALL(STRING_new()).SetReturn(TEST_DEVICES_PATH_STRING_HANDLE);
-	STRICT_EXPECTED_CALL(STRING_c_str(TEST_DEVICE_ID_STRING_HANDLE));
-	STRICT_EXPECTED_CALL(STRING_c_str(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE));
+	STRICT_EXPECTED_CALL(STRING_c_str(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE)).SetReturn(TEST_IOTHUB_HOST_FQDN);
+	STRICT_EXPECTED_CALL(STRING_c_str(TEST_DEVICE_ID_STRING_HANDLE)).SetReturn(TEST_DEVICE_ID);
 	// EXPECTED: STRING_sprintf
 
 	// create_event_send_address()
 	STRICT_EXPECTED_CALL(STRING_new()).SetReturn(TEST_EVENT_SEND_ADDRESS_STRING_HANDLE);
-	STRICT_EXPECTED_CALL(STRING_c_str(TEST_DEVICES_PATH_STRING_HANDLE));
+	STRICT_EXPECTED_CALL(STRING_c_str(TEST_DEVICES_PATH_STRING_HANDLE)).SetReturn(TEST_DEVICES_PATH_CHAR_PTR);
 	// EXPECTED: STRING_sprintf
 
 	STRICT_EXPECTED_CALL(STRING_c_str(TEST_DEVICE_ID_STRING_HANDLE));
@@ -754,7 +754,7 @@ static void set_expected_calls_for_message_sender_create()
 
 	// create_event_sender_source_name()
 	STRICT_EXPECTED_CALL(STRING_new()).SetReturn(TEST_EVENT_SENDER_SOURCE_NAME_STRING_HANDLE);
-	STRICT_EXPECTED_CALL(STRING_c_str(TEST_EVENT_SENDER_LINK_NAME_STRING_HANDLE));
+	STRICT_EXPECTED_CALL(STRING_c_str(TEST_EVENT_SENDER_LINK_NAME_STRING_HANDLE)).SetReturn(TEST_EVENT_SENDER_LINK_NAME_CHAR_PTR);
 	// EXPECTED: STRING_sprintf
 
 	STRICT_EXPECTED_CALL(STRING_c_str(TEST_EVENT_SENDER_SOURCE_NAME_STRING_HANDLE)).SetReturn(TEST_EVENT_SENDER_SOURCE_NAME_CHAR_PTR);
@@ -2252,7 +2252,7 @@ TEST_FUNCTION(messenger_unsubscribe_for_messages_success)
     MESSENGER_CONFIG* config = get_messenger_config();
     MESSENGER_HANDLE handle = create_and_start_messenger2(config, true);
 
-	//ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     // act
     int unsubscription_result = messenger_unsubscribe_for_messages(handle);

@@ -70,12 +70,17 @@ static STRING_HANDLE create_devices_path(STRING_HANDLE iothub_host_fqdn, STRING_
 	{
 		LogError("Failed creating devices_path (STRING_new failed)");
 	}
-	else if (STRING_sprintf(devices_path, IOTHUB_DEVICES_PATH_FMT, STRING_c_str(iothub_host_fqdn), STRING_c_str(device_id)) != RESULT_OK)
-	{
-		STRING_delete(devices_path);
-		devices_path = NULL;
-		LogError("Failed creating devices_path (STRING_sprintf failed)");
-	}
+	else
+        {
+		const char* iothub_host_fqdn_char_ptr = STRING_c_str(iothub_host_fqdn);
+		const char* device_id_char_ptr = STRING_c_str(device_id);
+        	if (STRING_sprintf(devices_path, IOTHUB_DEVICES_PATH_FMT, iothub_host_fqdn_char_ptr, device_id_char_ptr) != RESULT_OK)
+		{
+			STRING_delete(devices_path);
+			devices_path = NULL;
+			LogError("Failed creating devices_path (STRING_sprintf failed)");
+		}
+        }
 
 	return devices_path;
 }
@@ -88,11 +93,15 @@ static STRING_HANDLE create_event_send_address(STRING_HANDLE devices_path)
 	{
 		LogError("Failed creating the event_send_address (STRING_new failed)");
 	}
-	else if (STRING_sprintf(event_send_address, IOTHUB_EVENT_SEND_ADDRESS_FMT, STRING_c_str(devices_path)) != RESULT_OK)
+	else
 	{
-		STRING_delete(event_send_address);
-		event_send_address = NULL;
-		LogError("Failed creating the event_send_address (STRING_sprintf failed)");
+		const char* devices_path_char_ptr = STRING_c_str(devices_path);
+		if (STRING_sprintf(event_send_address, IOTHUB_EVENT_SEND_ADDRESS_FMT, devices_path_char_ptr) != RESULT_OK)
+		{
+			STRING_delete(event_send_address);
+			event_send_address = NULL;
+			LogError("Failed creating the event_send_address (STRING_sprintf failed)");
+		}
 	}
 
 	return event_send_address;
@@ -106,11 +115,15 @@ static STRING_HANDLE create_event_sender_source_name(STRING_HANDLE link_name)
 	{
 		LogError("Failed creating the source_name (STRING_new failed)");
 	}
-	else if (STRING_sprintf(source_name, "%s-source", STRING_c_str(link_name)) != RESULT_OK)
+	else
 	{
-		STRING_delete(source_name);
-		source_name = NULL;
-		LogError("Failed creating the source_name (STRING_sprintf failed)");
+		const char* link_name_char_ptr = STRING_c_str(link_name);
+		if (STRING_sprintf(source_name, "%s-source", link_name_char_ptr) != RESULT_OK)
+		{
+			STRING_delete(source_name);
+			source_name = NULL;
+			LogError("Failed creating the source_name (STRING_sprintf failed)");
+		}
 	}
 
 	return source_name;
@@ -124,11 +137,15 @@ static STRING_HANDLE create_message_receive_address(STRING_HANDLE devices_path)
 	{
 		LogError("Failed creating the message_receive_address (STRING_new failed)");
 	}
-	else if (STRING_sprintf(message_receive_address, IOTHUB_MESSAGE_RECEIVE_ADDRESS_FMT, STRING_c_str(devices_path)) != RESULT_OK)
+	else
 	{
-		STRING_delete(message_receive_address);
-		message_receive_address = NULL;
-		LogError("Failed creating the message_receive_address (STRING_sprintf failed)");
+		const char* devices_path_char_ptr = STRING_c_str(devices_path);
+		if (STRING_sprintf(message_receive_address, IOTHUB_MESSAGE_RECEIVE_ADDRESS_FMT, devices_path_char_ptr) != RESULT_OK)
+		{
+			STRING_delete(message_receive_address);
+			message_receive_address = NULL;
+			LogError("Failed creating the message_receive_address (STRING_sprintf failed)");
+		}
 	}
 
 	return message_receive_address;
@@ -142,11 +159,15 @@ static STRING_HANDLE create_message_receiver_target_name(STRING_HANDLE link_name
 	{
 		LogError("Failed creating the target_name (STRING_new failed)");
 	}
-	else if (STRING_sprintf(target_name, "%s-target", STRING_c_str(link_name)) != RESULT_OK)
+	else
 	{
-		STRING_delete(target_name);
-		target_name = NULL;
-		LogError("Failed creating the target_name (STRING_sprintf failed)");
+		const char* link_name_char_ptr = STRING_c_str(link_name);
+		if (STRING_sprintf(target_name, "%s-target", link_name_char_ptr) != RESULT_OK)
+		{
+			STRING_delete(target_name);
+			target_name = NULL;
+			LogError("Failed creating the target_name (STRING_sprintf failed)");
+		}
 	}
 
 	return target_name;
