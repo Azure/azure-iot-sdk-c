@@ -56,78 +56,80 @@ void iothub_client_sample_amqp_shared_ws_methods_run(void)
 
     if (platform_init() != 0)
     {
-		(void)printf("Failed to initialize the platform.\r\n");
+        (void)printf("Failed to initialize the platform.\r\n");
     }
-	else if ((transport_handle = IoTHubTransport_Create(AMQP_Protocol_over_WebSocketsTls, hubName, hubSuffix)) == NULL)
-	{
-		(void)printf("Failed to creating the protocol handle.\r\n");
-	}
-    else
+    else 
     {
-		IOTHUB_CLIENT_CONFIG client_config1;
-		client_config1.deviceId = deviceId1;
-		client_config1.deviceKey = deviceKey1;
-		client_config1.deviceSasToken = NULL;
-		client_config1.iotHubName = hubName;
-		client_config1.iotHubSuffix = hubSuffix;
-		client_config1.protocol = AMQP_Protocol_over_WebSocketsTls;
-		client_config1.protocolGatewayHostName = NULL;
-
-		IOTHUB_CLIENT_CONFIG client_config2;
-		client_config2.deviceId = deviceId2;
-		client_config2.deviceKey = deviceKey2;
-		client_config2.deviceSasToken = NULL;
-		client_config2.iotHubName = hubName;
-		client_config2.iotHubSuffix = hubSuffix;
-		client_config2.protocol = AMQP_Protocol_over_WebSocketsTls;
-		client_config2.protocolGatewayHostName = NULL;
-
-		
-        if ((iotHubClientHandle1 = IoTHubClient_CreateWithTransport(transport_handle, &client_config1)) == NULL)
+        if ((transport_handle = IoTHubTransport_Create(AMQP_Protocol_over_WebSocketsTls, hubName, hubSuffix)) == NULL)
         {
-            (void)printf("ERROR: iotHubClientHandle1 is NULL!\r\n");
+            (void)printf("Failed to creating the protocol handle.\r\n");
         }
-		else if ((iotHubClientHandle2 = IoTHubClient_CreateWithTransport(transport_handle, &client_config2)) == NULL)
-		{
-			(void)printf("ERROR: iotHubClientHandle2 is NULL!\r\n");
-		}
         else
         {
-            bool traceOn = true;
-            IoTHubClient_SetOption(iotHubClientHandle1, "logtrace", &traceOn);
+            IOTHUB_CLIENT_CONFIG client_config1;
+            client_config1.deviceId = deviceId1;
+            client_config1.deviceKey = deviceKey1;
+            client_config1.deviceSasToken = NULL;
+            client_config1.iotHubName = hubName;
+            client_config1.iotHubSuffix = hubSuffix;
+            client_config1.protocol = AMQP_Protocol_over_WebSocketsTls;
+            client_config1.protocolGatewayHostName = NULL;
 
-            // Add certificate information
-            if (IoTHubClient_SetOption(iotHubClientHandle1, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
+            IOTHUB_CLIENT_CONFIG client_config2;
+            client_config2.deviceId = deviceId2;
+            client_config2.deviceKey = deviceKey2;
+            client_config2.deviceSasToken = NULL;
+            client_config2.iotHubName = hubName;
+            client_config2.iotHubSuffix = hubSuffix;
+            client_config2.protocol = AMQP_Protocol_over_WebSocketsTls;
+            client_config2.protocolGatewayHostName = NULL;
+
+            
+            if ((iotHubClientHandle1 = IoTHubClient_CreateWithTransport(transport_handle, &client_config1)) == NULL)
             {
-				(void)printf("failure to set option \"TrustedCerts\"\r\n");
+                (void)printf("ERROR: iotHubClientHandle1 is NULL!\r\n");
             }
+            else if ((iotHubClientHandle2 = IoTHubClient_CreateWithTransport(transport_handle, &client_config2)) == NULL)
+            {
+                (void)printf("ERROR: iotHubClientHandle2 is NULL!\r\n");
+            }
+            else
+            {
+                bool traceOn = true;
+                IoTHubClient_SetOption(iotHubClientHandle1, "logtrace", &traceOn);
 
-            /* Here subscribe for C2D methods */
-			if (IoTHubClient_SetDeviceMethodCallback(iotHubClientHandle1, DeviceMethodCallback, (void*)deviceId1) != IOTHUB_CLIENT_OK)
-			{
-				(void)printf("ERROR: IoTHubClient_SetDeviceMethodCallback for the first device..........FAILED!\r\n");
-			}
-			else if (IoTHubClient_SetDeviceMethodCallback(iotHubClientHandle2, DeviceMethodCallback, (void*)deviceId2) != IOTHUB_CLIENT_OK)
-			{
-				(void)printf("ERROR: IoTHubClient_SetDeviceMethodCallback for the second device..........FAILED!\r\n");
-			}
-			else
-			{
-                (void)printf("IoTHubClient_SetMessageCallback...successful.\r\n");
-				(void)printf("Waiting for C2D methods ...\r\n");
-
-                do
+                // Add certificate information
+                if (IoTHubClient_SetOption(iotHubClientHandle1, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
                 {
-                    ThreadAPI_Sleep(1);
-                } while (1);
+                    (void)printf("failure to set option \"TrustedCerts\"\r\n");
+                }
+
+                /* Here subscribe for C2D methods */
+                if (IoTHubClient_SetDeviceMethodCallback(iotHubClientHandle1, DeviceMethodCallback, (void*)deviceId1) != IOTHUB_CLIENT_OK)
+                {
+                    (void)printf("ERROR: IoTHubClient_SetDeviceMethodCallback for the first device..........FAILED!\r\n");
+                }
+                else if (IoTHubClient_SetDeviceMethodCallback(iotHubClientHandle2, DeviceMethodCallback, (void*)deviceId2) != IOTHUB_CLIENT_OK)
+                {
+                    (void)printf("ERROR: IoTHubClient_SetDeviceMethodCallback for the second device..........FAILED!\r\n");
+                }
+                else
+                {
+                    (void)printf("IoTHubClient_SetMessageCallback...successful.\r\n");
+                    (void)printf("Waiting for C2D methods ...\r\n");
+
+                    do
+                    {
+                        ThreadAPI_Sleep(1);
+                    } while (1);
+                }
+
+                IoTHubClient_Destroy(iotHubClientHandle1);
+                IoTHubClient_Destroy(iotHubClientHandle2);
             }
 
-			IoTHubClient_Destroy(iotHubClientHandle1);
-			IoTHubClient_Destroy(iotHubClientHandle2);
+            IoTHubTransport_Destroy(transport_handle);
         }
-
-		IoTHubTransport_Destroy(transport_handle);
-
         platform_deinit();
     }
 }

@@ -10,6 +10,7 @@
 #include "platform.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "parson.h"
+#include "azure_c_shared_utility/platform.h"
 
 /*String containing Hostname, Device Id & Device Key in the format:             */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"    */
