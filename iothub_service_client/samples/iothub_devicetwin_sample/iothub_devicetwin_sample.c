@@ -12,6 +12,7 @@
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/uniqueid.h"
 #include "azure_c_shared_utility/connection_string_parser.h"
+#include "azure_c_shared_utility/platform.h"
 
 #include "iothub_devicetwin_sample.h"
 
@@ -31,57 +32,65 @@ void iothub_devicetwin_sample_run(void)
     //IOTHUB_TWIN_REQUEST_REPLACE_DESIRED   PUT      {iot hub}/twins/{device id}/properties/desired  // Replace update desired properties
     //IOTHUB_TWIN_REQUEST_UPDATE_DESIRED    PATCH    {iot hub}/twins/{device id}/properties/desired  // Partially update desired properties
 
-    xlogging_set_log_function(consolelogger_log);
-
-    (void)printf("Calling IoTHubServiceClientAuth_CreateFromConnectionString with the connection string\r\n");
-    IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(connectionString);
-    if (iotHubServiceClientHandle == NULL)
+    if (platform_init() != 0)
     {
-        (void)printf("IoTHubServiceClientAuth_CreateFromConnectionString failed\r\n");
+        printf("Failed to initialize the platform.\r\n");
     }
-    else
+	else 
     {
-        (void)printf("iotHubServiceClientHandle has been created successfully\r\n");
+        xlogging_set_log_function(consolelogger_log);
 
-        IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceClientDeviceTwinHandle = IoTHubDeviceTwin_Create(iotHubServiceClientHandle);
-        if (serviceClientDeviceTwinHandle == NULL)
+        (void)printf("Calling IoTHubServiceClientAuth_CreateFromConnectionString with the connection string\r\n");
+        IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(connectionString);
+        if (iotHubServiceClientHandle == NULL)
         {
-            (void)printf("IoTHubDeviceTwin_Create failed\r\n");
+            (void)printf("IoTHubServiceClientAuth_CreateFromConnectionString failed\r\n");
         }
         else
         {
-            (void)printf("Getting DeviceTwin...\r\n");
+            (void)printf("iotHubServiceClientHandle has been created successfully\r\n");
 
-            char* deviceTwinJson;
-
-            if ((deviceTwinJson = IoTHubDeviceTwin_GetTwin(serviceClientDeviceTwinHandle, deviceId)) == NULL)
+            IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceClientDeviceTwinHandle = IoTHubDeviceTwin_Create(iotHubServiceClientHandle);
+            if (serviceClientDeviceTwinHandle == NULL)
             {
-                (void)printf("IoTHubDeviceTwin_GetTwin failed\r\n");
+                (void)printf("IoTHubDeviceTwin_Create failed\r\n");
             }
             else
             {
-                (void)printf("\r\nDeviceTwin:\r\n");
-                printf("%s\r\n", deviceTwinJson);
+                (void)printf("Getting DeviceTwin...\r\n");
 
-                const char* updateJson = "{\"properties\":{\"desired\":{\"telemetryInterval\":30}}}";
-                char* updatedDeviceTwinJson;
+                char* deviceTwinJson;
 
-                if ((updatedDeviceTwinJson = IoTHubDeviceTwin_UpdateTwin(serviceClientDeviceTwinHandle, deviceId, updateJson)) == NULL)
+                if ((deviceTwinJson = IoTHubDeviceTwin_GetTwin(serviceClientDeviceTwinHandle, deviceId)) == NULL)
                 {
-                    (void)printf("IoTHubDeviceTwin_UpdateTwin failed\r\n");
+                    (void)printf("IoTHubDeviceTwin_GetTwin failed\r\n");
                 }
                 else
                 {
-                    (void)printf("\r\nDeviceTwin has been successfully updated (partial update):\r\n");
-                    printf("%s\r\n", updatedDeviceTwinJson);
+                    (void)printf("\r\nDeviceTwin:\r\n");
+                    printf("%s\r\n", deviceTwinJson);
 
-                    free(updatedDeviceTwinJson);
+                    const char* updateJson = "{\"properties\":{\"desired\":{\"telemetryInterval\":30}}}";
+                    char* updatedDeviceTwinJson;
+
+                    if ((updatedDeviceTwinJson = IoTHubDeviceTwin_UpdateTwin(serviceClientDeviceTwinHandle, deviceId, updateJson)) == NULL)
+                    {
+                        (void)printf("IoTHubDeviceTwin_UpdateTwin failed\r\n");
+                    }
+                    else
+                    {
+                        (void)printf("\r\nDeviceTwin has been successfully updated (partial update):\r\n");
+                        printf("%s\r\n", updatedDeviceTwinJson);
+
+                        free(updatedDeviceTwinJson);
+                    }
+
+                    free(deviceTwinJson);
                 }
-
-                free(deviceTwinJson);
+                IoTHubDeviceTwin_Destroy(serviceClientDeviceTwinHandle);
             }
-            IoTHubDeviceTwin_Destroy(serviceClientDeviceTwinHandle);
+            IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
         }
-        IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
+        platform_deinit();
     }
 }

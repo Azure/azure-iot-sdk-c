@@ -11,6 +11,7 @@
 #include "azure_c_shared_utility/consolelogger.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/connection_string_parser.h"
+#include "azure_c_shared_utility/platform.h"
 
 #include "iothub_service_client_auth.h"
 #include "iothub_registrymanager.h"
@@ -65,143 +66,151 @@ void printDeviceInfo(IOTHUB_DEVICE* device, int orderNum)
 
 void iothub_service_client_sample_run(void)
 {
-    IOTHUB_REGISTRYMANAGER_RESULT result;
-
-    IOTHUB_REGISTRY_DEVICE_CREATE deviceCreateInfo;
-    IOTHUB_REGISTRY_DEVICE_UPDATE deviceUpdateInfo;
-
-    (void)printf("Calling IoTHubServiceClientAuth_CreateFromConnectionString with the connection string\n");
-    IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(connectionString);
-    if (iotHubServiceClientHandle == NULL)
+    if (platform_init() != 0)
     {
-        (void)printf("IoTHubServiceClientAuth_CreateFromConnectionString failed\n");
+        (void)printf("Failed to initialize the platform.\r\n");
     }
     else
     {
-        (void)printf("iotHubServiceClientHandle has been created successfully\n");
+        IOTHUB_REGISTRYMANAGER_RESULT result;
 
-        (void)printf("Creating RegistryManager...\n");
-        IOTHUB_REGISTRYMANAGER_HANDLE iotHubRegistryManagerHandle = IoTHubRegistryManager_Create(iotHubServiceClientHandle);
-        (void)printf("RegistryManager has been created successfully\n");
+        IOTHUB_REGISTRY_DEVICE_CREATE deviceCreateInfo;
+        IOTHUB_REGISTRY_DEVICE_UPDATE deviceUpdateInfo;
 
-        deviceCreateInfo.deviceId = deviceId;
-        deviceCreateInfo.primaryKey = "";
-        deviceCreateInfo.secondaryKey = "";
-        deviceCreateInfo.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
+        (void)printf("Calling IoTHubServiceClientAuth_CreateFromConnectionString with the connection string\n");
+        IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(connectionString);
+        if (iotHubServiceClientHandle == NULL)
+        {
+            (void)printf("IoTHubServiceClientAuth_CreateFromConnectionString failed\n");
+        }
+        else
+        {
+            (void)printf("iotHubServiceClientHandle has been created successfully\n");
 
-        IOTHUB_DEVICE deviceInfo;
+            (void)printf("Creating RegistryManager...\n");
+            IOTHUB_REGISTRYMANAGER_HANDLE iotHubRegistryManagerHandle = IoTHubRegistryManager_Create(iotHubServiceClientHandle);
+            (void)printf("RegistryManager has been created successfully\n");
 
-        // Create device
-        result = IoTHubRegistryManager_CreateDevice(iotHubRegistryManagerHandle, &deviceCreateInfo, &deviceInfo);
-        if (result == IOTHUB_REGISTRYMANAGER_OK)
-        {
-            (void)printf("IoTHubRegistryManager_CreateDevice: Device has been created successfully: deviceId=%s\n", deviceInfo.deviceId);
-        }
-        else if (result == IOTHUB_REGISTRYMANAGER_DEVICE_EXIST)
-        {
-            (void)printf("IoTHubRegistryManager_CreateDevice: Device already exists\n");
-        }
-        else if (result == IOTHUB_REGISTRYMANAGER_ERROR)
-        {
-            (void)printf("IoTHubRegistryManager_CreateDevice failed\n");
-        }
+            deviceCreateInfo.deviceId = deviceId;
+            deviceCreateInfo.primaryKey = "";
+            deviceCreateInfo.secondaryKey = "";
+            deviceCreateInfo.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
 
-        // Update device
-        deviceUpdateInfo.deviceId = deviceId;
-        deviceUpdateInfo.primaryKey = "aaabbbcccdddeeefffggghhhiiijjjkkklllmmmnnnoo";
-        deviceUpdateInfo.secondaryKey = "111222333444555666777888999000aaabbbcccdddee";
-        deviceUpdateInfo.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
-        deviceUpdateInfo.status = IOTHUB_DEVICE_STATUS_DISABLED;
-        result = IoTHubRegistryManager_UpdateDevice(iotHubRegistryManagerHandle, &deviceUpdateInfo);
-        if (result == IOTHUB_REGISTRYMANAGER_OK)
-        {
-            (void)printf("IoTHubRegistryManager_UpdateDevice: Device has been updated successfully: deviceId=%s\n", deviceUpdateInfo.deviceId);
-        }
-        else if (result == IOTHUB_REGISTRYMANAGER_ERROR)
-        {
-            (void)printf("IoTHubRegistryManager_UpdateDevice failed\n");
-        }
+            IOTHUB_DEVICE deviceInfo;
 
-        // Get device
-        (void)memset(&deviceInfo, 0, sizeof(IOTHUB_DEVICE));
-        result = IoTHubRegistryManager_GetDevice(iotHubRegistryManagerHandle, deviceCreateInfo.deviceId, &deviceInfo);
-        if (result == IOTHUB_REGISTRYMANAGER_OK)
-        {
-            (void)printf("IoTHubRegistryManager_GetDevice: Successfully got device info: deviceId=%s\n", deviceInfo.deviceId);
-            printDeviceInfo(&deviceInfo, -1);
-        }
-        else if (result == IOTHUB_REGISTRYMANAGER_ERROR)
-        {
-            (void)printf("IoTHubRegistryManager_GetDevice failed\n");
-        }
-
-        // Delete device
-        result = IoTHubRegistryManager_DeleteDevice(iotHubRegistryManagerHandle, deviceCreateInfo.deviceId);
-        if (result == IOTHUB_REGISTRYMANAGER_OK)
-        {
-            (void)printf("IoTHubRegistryManager_DeleteDevice: Device has been deleted successfully: deviceId=%s\n", deviceCreateInfo.deviceId);
-        }
-        else if (result == IOTHUB_REGISTRYMANAGER_ERROR)
-        {
-            (void)printf("IoTHubRegistryManager_DeleteDevice: Delete device failed\n");
-        }
-
-        // Get device list
-        SINGLYLINKEDLIST_HANDLE deviceList = singlylinkedlist_create();
-
-        result = IoTHubRegistryManager_GetDeviceList(iotHubRegistryManagerHandle, 3, deviceList);
-        if (result == IOTHUB_REGISTRYMANAGER_OK)
-        {
-            (void)printf("IoTHubRegistryManager_GetDeviceList: Successfully got device list\n");
-            LIST_ITEM_HANDLE next_device = singlylinkedlist_get_head_item(deviceList);
-            int i = 0;
-            while (next_device != NULL)
+            // Create device
+            result = IoTHubRegistryManager_CreateDevice(iotHubRegistryManagerHandle, &deviceCreateInfo, &deviceInfo);
+            if (result == IOTHUB_REGISTRYMANAGER_OK)
             {
-                IOTHUB_DEVICE* device = (IOTHUB_DEVICE*)singlylinkedlist_item_get_value(next_device);
-                printDeviceInfo(device, i++);
-                next_device = singlylinkedlist_get_next_item(next_device);
+                (void)printf("IoTHubRegistryManager_CreateDevice: Device has been created successfully: deviceId=%s\n", deviceInfo.deviceId);
             }
+            else if (result == IOTHUB_REGISTRYMANAGER_DEVICE_EXIST)
+            {
+                (void)printf("IoTHubRegistryManager_CreateDevice: Device already exists\n");
+            }
+            else if (result == IOTHUB_REGISTRYMANAGER_ERROR)
+            {
+                (void)printf("IoTHubRegistryManager_CreateDevice failed\n");
+            }
+
+            // Update device
+            deviceUpdateInfo.deviceId = deviceId;
+            deviceUpdateInfo.primaryKey = "aaabbbcccdddeeefffggghhhiiijjjkkklllmmmnnnoo";
+            deviceUpdateInfo.secondaryKey = "111222333444555666777888999000aaabbbcccdddee";
+            deviceUpdateInfo.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
+            deviceUpdateInfo.status = IOTHUB_DEVICE_STATUS_DISABLED;
+            result = IoTHubRegistryManager_UpdateDevice(iotHubRegistryManagerHandle, &deviceUpdateInfo);
+            if (result == IOTHUB_REGISTRYMANAGER_OK)
+            {
+                (void)printf("IoTHubRegistryManager_UpdateDevice: Device has been updated successfully: deviceId=%s\n", deviceUpdateInfo.deviceId);
+            }
+            else if (result == IOTHUB_REGISTRYMANAGER_ERROR)
+            {
+                (void)printf("IoTHubRegistryManager_UpdateDevice failed\n");
+            }
+
+            // Get device
+            (void)memset(&deviceInfo, 0, sizeof(IOTHUB_DEVICE));
+            result = IoTHubRegistryManager_GetDevice(iotHubRegistryManagerHandle, deviceCreateInfo.deviceId, &deviceInfo);
+            if (result == IOTHUB_REGISTRYMANAGER_OK)
+            {
+                (void)printf("IoTHubRegistryManager_GetDevice: Successfully got device info: deviceId=%s\n", deviceInfo.deviceId);
+                printDeviceInfo(&deviceInfo, -1);
+            }
+            else if (result == IOTHUB_REGISTRYMANAGER_ERROR)
+            {
+                (void)printf("IoTHubRegistryManager_GetDevice failed\n");
+            }
+
+            // Delete device
+            result = IoTHubRegistryManager_DeleteDevice(iotHubRegistryManagerHandle, deviceCreateInfo.deviceId);
+            if (result == IOTHUB_REGISTRYMANAGER_OK)
+            {
+                (void)printf("IoTHubRegistryManager_DeleteDevice: Device has been deleted successfully: deviceId=%s\n", deviceCreateInfo.deviceId);
+            }
+            else if (result == IOTHUB_REGISTRYMANAGER_ERROR)
+            {
+                (void)printf("IoTHubRegistryManager_DeleteDevice: Delete device failed\n");
+            }
+
+            // Get device list
+            SINGLYLINKEDLIST_HANDLE deviceList = singlylinkedlist_create();
+
+            result = IoTHubRegistryManager_GetDeviceList(iotHubRegistryManagerHandle, 3, deviceList);
+            if (result == IOTHUB_REGISTRYMANAGER_OK)
+            {
+                (void)printf("IoTHubRegistryManager_GetDeviceList: Successfully got device list\n");
+                LIST_ITEM_HANDLE next_device = singlylinkedlist_get_head_item(deviceList);
+                int i = 0;
+                while (next_device != NULL)
+                {
+                    IOTHUB_DEVICE* device = (IOTHUB_DEVICE*)singlylinkedlist_item_get_value(next_device);
+                    printDeviceInfo(device, i++);
+                    next_device = singlylinkedlist_get_next_item(next_device);
+                }
+            }
+            else if (result == IOTHUB_REGISTRYMANAGER_ERROR)
+            {
+                (void)printf("IoTHubRegistryManager_GetDeviceList failed\n");
+            }
+
+            // Get statistics
+            IOTHUB_REGISTRY_STATISTICS registryStatistics;
+            result = IoTHubRegistryManager_GetStatistics(iotHubRegistryManagerHandle, &registryStatistics);
+            if (result == IOTHUB_REGISTRYMANAGER_OK)
+            {
+                (void)printf("IoTHubRegistryManager_GetStatistics: Successfully got registry statistics\n");
+                (void)printf("Total device count: %zu\n", registryStatistics.totalDeviceCount);
+                (void)printf("Enabled device count: %zu\n", registryStatistics.enabledDeviceCount);
+                (void)printf("Disabled device count: %zu\n", registryStatistics.disabledDeviceCount);
+            }
+            else if (result == IOTHUB_REGISTRYMANAGER_ERROR)
+            {
+                (void)printf("IoTHubRegistryManager_GetStatistics failed\n");
+            }
+
+            singlylinkedlist_destroy(deviceList);
+
+            free((char*)deviceInfo.deviceId);
+            free((char*)deviceInfo.primaryKey);
+            free((char*)deviceInfo.secondaryKey);
+            free((char*)deviceInfo.generationId);
+            free((char*)deviceInfo.eTag);
+            free((char*)deviceInfo.connectionStateUpdatedTime);
+            free((char*)deviceInfo.statusReason);
+            free((char*)deviceInfo.statusUpdatedTime);
+            free((char*)deviceInfo.lastActivityTime);
+            free((char*)deviceInfo.configuration);
+            free((char*)deviceInfo.deviceProperties);
+            free((char*)deviceInfo.serviceProperties);
+
+
+            (void)printf("Calling IoTHubRegistryManager_Destroy...\n");
+            IoTHubRegistryManager_Destroy(iotHubRegistryManagerHandle);
+
+            (void)printf("Calling IoTHubServiceClientAuth_Destroy...\n");
+            IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
         }
-        else if (result == IOTHUB_REGISTRYMANAGER_ERROR)
-        {
-            (void)printf("IoTHubRegistryManager_GetDeviceList failed\n");
-        }
-
-        // Get statistics
-        IOTHUB_REGISTRY_STATISTICS registryStatistics;
-        result = IoTHubRegistryManager_GetStatistics(iotHubRegistryManagerHandle, &registryStatistics);
-        if (result == IOTHUB_REGISTRYMANAGER_OK)
-        {
-            (void)printf("IoTHubRegistryManager_GetStatistics: Successfully got registry statistics\n");
-            (void)printf("Total device count: %zu\n", registryStatistics.totalDeviceCount);
-            (void)printf("Enabled device count: %zu\n", registryStatistics.enabledDeviceCount);
-            (void)printf("Disabled device count: %zu\n", registryStatistics.disabledDeviceCount);
-        }
-        else if (result == IOTHUB_REGISTRYMANAGER_ERROR)
-        {
-            (void)printf("IoTHubRegistryManager_GetStatistics failed\n");
-        }
-
-        singlylinkedlist_destroy(deviceList);
-
-        free((char*)deviceInfo.deviceId);
-        free((char*)deviceInfo.primaryKey);
-        free((char*)deviceInfo.secondaryKey);
-        free((char*)deviceInfo.generationId);
-        free((char*)deviceInfo.eTag);
-        free((char*)deviceInfo.connectionStateUpdatedTime);
-        free((char*)deviceInfo.statusReason);
-        free((char*)deviceInfo.statusUpdatedTime);
-        free((char*)deviceInfo.lastActivityTime);
-        free((char*)deviceInfo.configuration);
-        free((char*)deviceInfo.deviceProperties);
-        free((char*)deviceInfo.serviceProperties);
-
-
-        (void)printf("Calling IoTHubRegistryManager_Destroy...\n");
-        IoTHubRegistryManager_Destroy(iotHubRegistryManagerHandle);
-
-        (void)printf("Calling IoTHubServiceClientAuth_Destroy...\n");
-        IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
+        platform_deinit();
     }
 }
