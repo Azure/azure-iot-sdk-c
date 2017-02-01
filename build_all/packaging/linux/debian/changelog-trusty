@@ -1,5 +1,5 @@
 azure-iot-sdk-c (0.1.0-14trusty) trusty; urgency=low
 
-  * See https://github.com/Azure/azure-iot-sdks/releases for details of the release
+  * See https://github.com/Azure/azure-iot-sdk-c/releases for details of the release
 
  -- AzureIoT User <aziotsdklinux@outlook.com>  Tue, 27 Sep 2016 11:00:00 +0000
