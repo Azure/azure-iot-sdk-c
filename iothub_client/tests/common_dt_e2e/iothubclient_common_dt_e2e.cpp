@@ -480,6 +480,8 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
                         }
                     }
                 }
+                json_value_free(root_value);
+                root_value = NULL;
             }
             Unlock(device->lock);
         }
