@@ -11,7 +11,7 @@
 #include <stdbool.h>
 #endif
 
-#include "macro_utils.h"
+#include "azure_c_shared_utility/macro_utils.h"
 #include "testrunnerswitcher.h"
 #include "umock_c.h"
 

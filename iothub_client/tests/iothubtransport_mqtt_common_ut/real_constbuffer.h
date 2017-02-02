@@ -12,7 +12,7 @@
 #define CONSTBUFFER_GetContent         real_CONSTBUFFER_GetContent
 #define CONSTBUFFER_Destroy            real_CONSTBUFFER_Destroy
 
-#include "constbuffer.h"
+#include "azure_c_shared_utility/constbuffer.h"
 
 #ifndef COMPILING_REAL_CONSTBUFFER_C
 #undef CONSTBUFFER_Create

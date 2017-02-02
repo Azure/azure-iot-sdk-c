@@ -9,7 +9,7 @@
 #define size_tToString          real_size_tToString 
 
 #undef CRT_ABSTRACTIONS_H
-#include "crt_abstractions.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
 
 #ifndef COMPILING_REAL_CRT_ABSTRACTIONS_C
 #undef mallocAndStrcpy_s  

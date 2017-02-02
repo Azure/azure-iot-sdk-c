@@ -68,7 +68,7 @@ void my_gballoc_free(void * t)
 #include "umocktypes_stdint.h"
 #include "umock_c_negative_tests.h"
 
-#include "crt_abstractions.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
 #define ENABLE_MOCKS
 #include "agenttypesystem.h"
 #include "schema.h"
@@ -77,7 +77,7 @@ void my_gballoc_free(void * t)
 #undef ENABLE_MOCKS
 
 #include "serializer.h"
-#include "macro_utils.h"
+#include "azure_c_shared_utility/macro_utils.h"
 
 #include "testrunnerswitcher.h"
 #include "codefirst.h"
