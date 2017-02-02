@@ -204,7 +204,45 @@ extern IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Send(IOTHUB_MESSAGING_HANDLE m
 
 **SRS_IOTHUBMESSAGING_12_040: [** If any of the uAMQP call fails IoTHubMessaging_LL_SendMessage shall return IOTHUB_MESSAGING_ERROR **]**
 
-**SRS_IOTHUBMESSAGING_12_041: [** If all uAMQP call return 0 then IoTHubMessaging_LL_SendMessage shall return IOTHUB_MESSAGING_OK  **]**
+**SRS_IOTHUBMESSAGING_12_041: [** If all uAMQP call return 0 then IoTHubMessaging_LL_SendMessage shall return IOTHUB_MESSAGING_OK **]**
+
+**SRS_IOTHUBMESSAGING_12_079: [** The uAMQP message properties shall be retrieved using message_get_properties **]**
+
+**SRS_IOTHUBMESSAGING_12_080: [** If UAMQP message properties were not present then a new properties container shall be created using properties_create **]**
+
+**SRS_IOTHUBMESSAGING_12_081: [** Message-id from the IOTHUB_MESSAGE shall be read using IoTHubMessage_GetMessageId **]**
+
+**SRS_IOTHUBMESSAGING_12_082: [** As message-id is optional field, if it is not set on the IOTHUB_MESSAGE, message_create_from_iothub_message shall ignore it and continue normally **]**
+
+**SRS_IOTHUBMESSAGING_12_083: [** The message-id AMQP_VALUE shall be set on the uAMQP message using properties_set_message_id **]**
+
+**SRS_IOTHUBMESSAGING_12_084: [** Correlation-id from the IOTHUB_MESSAGE shall be read using IoTHubMessage_GetCorrelationId **]**
+
+**SRS_IOTHUBMESSAGING_12_085: [** As correlation-id is optional field, if it is not set on the IOTHUB_MESSAGE, message_create_from_iothub_message() shall ignore it and continue normally **]**
+
+**SRS_IOTHUBMESSAGING_12_086: [** The correlation-id AMQP_VALUE shall be set on the uAMQP message using properties_set_correlation_id **]**
+
+**SRS_IOTHUBMESSAGING_12_087: [** IoTHubMessaging_LL_SendMessage shall set the uAMQP message TO property to the given message properties by calling properties_set_to **]**
+
+**SRS_IOTHUBMESSAGING_12_088: [** The IOTHUB_MESSAGE_HANDLE properties shall be obtained by calling IoTHubMessage_Properties **]**
+
+**SRS_IOTHUBMESSAGING_12_089: [** The actual keys and values, as well as the number of properties shall be obtained by calling Map_GetInternals on the handle obtained from IoTHubMessage_Properties **]**
+
+**SRS_IOTHUBMESSAGING_12_090: [** If the number of properties is greater than 0, message_create_from_iothub_message() shall iterate through all the properties and add them to the uAMQP message **]**
+
+**SRS_IOTHUBMESSAGING_12_091: [** A uAMQP property map shall be created by calling amqpvalue_create_map **]**
+
+**SRS_IOTHUBMESSAGING_12_092: [** An AMQP_VALUE instance shall be created using amqpvalue_create_string() to hold each uAMQP property name **]**
+
+**SRS_IOTHUBMESSAGING_12_093: [** An AMQP_VALUE instance shall be created using amqpvalue_create_string() to hold each uAMQP property value **]**
+
+**SRS_IOTHUBMESSAGING_12_094: [** The property name and value (AMQP_VALUE instances) shall be added to the uAMQP property map by calling amqpvalue_map_set_value **]**
+
+**SRS_IOTHUBMESSAGING_12_095: [** After adding the property name and value to the uAMQP property map, both AMQP_VALUE instances shall be destroyed using amqpvalue_destroy **]**
+
+**SRS_IOTHUBMESSAGING_12_096: [** If no errors occurred processing the properties, the uAMQP properties map shall be set on the uAMQP message by calling message_set_application_properties **]**
+
+**SRS_IOTHUBMESSAGING_12_097: [** If the number of properties is 0, no application properties shall be set on the uAMQP message and message_create_from_iothub_message() shall return with success **]**
 
 
 
