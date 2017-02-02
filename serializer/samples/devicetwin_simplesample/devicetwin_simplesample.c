@@ -7,7 +7,6 @@
 #include "serializer_devicetwin.h"
 #include "iothub_client.h"
 #include "iothubtransportmqtt.h"
-#include "platform.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "parson.h"
 #include "azure_c_shared_utility/platform.h"
