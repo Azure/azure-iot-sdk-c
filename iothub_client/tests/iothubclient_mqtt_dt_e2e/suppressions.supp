@@ -14,9 +14,15 @@
 	fun:__GI_mempcpy
 	fun:_IO_file_xsputn@@GLIBC_2.2.5
 	fun:vfprintf
-	fun:printf
-	obj:/usr/lib/valgrind/vgpreload_drd-amd64-linux.so
 }
+{
+	DRD Conflicting store by thread in puts
+	drd:ConflictingAccess
+	fun:__GI_mempcpy
+	fun:_IO_file_xsputn@@GLIBC_2.2.5
+	fun:puts
+}
+
 
 
 
