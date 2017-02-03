@@ -61,8 +61,7 @@ static int ValidateAsciiCharactersFilter(const char* mapKey, const char* mapValu
 
 IOTHUB_MESSAGE_HANDLE IoTHubMessage_CreateFromByteArray(const unsigned char* byteArray, size_t size)
 {
-    IOTHUB_MESSAGE_HANDLE_DATA* result;
-    result = malloc(sizeof(IOTHUB_MESSAGE_HANDLE_DATA));
+    IOTHUB_MESSAGE_HANDLE_DATA* result = (IOTHUB_MESSAGE_HANDLE_DATA*)malloc(sizeof(IOTHUB_MESSAGE_HANDLE_DATA));
     if (result == NULL)
     {
         LogError("unable to malloc");
@@ -127,8 +126,7 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_CreateFromByteArray(const unsigned char* byt
 }
 IOTHUB_MESSAGE_HANDLE IoTHubMessage_CreateFromString(const char* source)
 {
-    IOTHUB_MESSAGE_HANDLE_DATA* result;
-    result = malloc(sizeof(IOTHUB_MESSAGE_HANDLE_DATA));
+    IOTHUB_MESSAGE_HANDLE_DATA* result = (IOTHUB_MESSAGE_HANDLE_DATA*)malloc(sizeof(IOTHUB_MESSAGE_HANDLE_DATA));
     if (result == NULL)
     {
         LogError("malloc failed");

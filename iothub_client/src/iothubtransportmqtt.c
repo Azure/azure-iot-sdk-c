@@ -83,6 +83,16 @@ static int IoTHubTransportMqtt_DeviceMethod_Response(IOTHUB_DEVICE_HANDLE handle
     return IoTHubTransport_MQTT_Common_DeviceMethod_Response(handle, methodId, response, response_size, status_response);
 }
 
+static IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_Send_Message_Disposition(const char* messageId, IOTHUBMESSAGE_DISPOSITION_RESULT disposition, void* transportContext)
+{
+    (void)messageId;
+    (void)disposition;
+    (void)transportContext;
+
+    // this function is not honored by MQTT
+    return IOTHUB_CLIENT_ERROR;
+}
+
 static IOTHUB_PROCESS_ITEM_RESULT IoTHubTransportMqtt_ProcessItem(TRANSPORT_LL_HANDLE handle, IOTHUB_IDENTITY_TYPE item_type, IOTHUB_IDENTITY_INFO* iothub_item)
 {
     return IoTHubTransport_MQTT_Common_ProcessItem(handle, item_type, iothub_item);
@@ -133,6 +143,7 @@ static STRING_HANDLE IoTHubTransportMqtt_GetHostname(TRANSPORT_LL_HANDLE handle)
 
 static TRANSPORT_PROVIDER myfunc = 
 {
+    IoTHubTransportMqtt_Send_Message_Disposition,   /*pfIotHubTransport_Send_Message_Disposition IoTHubTransport_Send_Message_Disposition;*/
     IoTHubTransportMqtt_Subscribe_DeviceMethod,     /*pfIoTHubTransport_Subscribe_DeviceMethod IoTHubTransport_Subscribe_DeviceMethod;*/
     IoTHubTransportMqtt_Unsubscribe_DeviceMethod,   /*pfIoTHubTransport_Unsubscribe_DeviceMethod IoTHubTransport_Unsubscribe_DeviceMethod;*/
     IoTHubTransportMqtt_DeviceMethod_Response,      /*pfIoTHubTransport_DeviceMethod_Response IoTHubTransport_DeviceMethod_Response;*/

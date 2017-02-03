@@ -48,6 +48,7 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 
 MOCKABLE_FUNCTION(, void, test_event_confirmation_callback, IOTHUB_CLIENT_CONFIRMATION_RESULT, result, void*, userContextCallback);
 MOCKABLE_FUNCTION(, IOTHUBMESSAGE_DISPOSITION_RESULT, test_message_confirmation_callback, IOTHUB_MESSAGE_HANDLE, message, void*, userContextCallback);
+MOCKABLE_FUNCTION(, IOTHUBMESSAGE_DISPOSITION_RESULT, test_message_confirmation_callback_ex, IOTHUB_MESSAGE_HANDLE, message, void*, userContextCallback, void*, transportContext);
 MOCKABLE_FUNCTION(, void, test_device_twin_callback, DEVICE_TWIN_UPDATE_STATE, update_state, const unsigned char*, payLoad, size_t, size, void*, userContextCallback);
 MOCKABLE_FUNCTION(, void, test_connection_status_callback, IOTHUB_CLIENT_CONNECTION_STATUS, result, IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason, void*, userContextCallback);
 MOCKABLE_FUNCTION(, void, test_report_state_callback, int, status_code, void*, userContextCallback);
@@ -91,6 +92,7 @@ static IOTHUB_CLIENT_REPORTED_STATE_CALLBACK g_reportedStateCallback;
 static IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK g_connectionStatusCallback;
 static IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK g_inboundDeviceCallback;
 static IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC g_messageCallback;
+static IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC_EX g_messageCallback_ex;
 
 static void* g_userContextCallback;
 static size_t g_how_thread_loops = 0;
@@ -258,6 +260,14 @@ static IOTHUB_CLIENT_RESULT my_IoTHubClient_LL_SetMessageCallback(IOTHUB_CLIENT_
     return IOTHUB_CLIENT_OK;
 }
 
+static IOTHUB_CLIENT_RESULT my_IoTHubClient_LL_SetMessageCallback_Ex(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC_EX messageCallback, void* userContextCallback)
+{
+    (void)iotHubClientHandle;
+    g_messageCallback_ex = messageCallback;
+    g_userContextCallback = userContextCallback;
+    return IOTHUB_CLIENT_OK;
+}
+
 static int my_mallocAndStrcpy_s(char** destination, const char* source)
 {
     size_t l = strlen(source);
@@ -369,6 +379,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_UMOCK_ALIAS_TYPE(SINGLYLINKEDLIST_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(LOCK_RESULT, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC_EX, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_REPORTED_STATE_CALLBACK, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC, void*);
@@ -383,6 +394,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_STATUS, int);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_RESULT, int);
+    REGISTER_UMOCK_ALIAS_TYPE(IOTHUBMESSAGE_DISPOSITION_RESULT, int);
     REGISTER_UMOCK_ALIAS_TYPE(METHOD_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(BUFFER_HANDLE, void*);
@@ -407,6 +419,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_LL_SetOption, IOTHUB_CLIENT_ERROR);
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_SetMessageCallback, my_IoTHubClient_LL_SetMessageCallback);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_LL_SetMessageCallback, IOTHUB_CLIENT_ERROR);
+    REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_SetMessageCallback_Ex, my_IoTHubClient_LL_SetMessageCallback_Ex);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_LL_SetMessageCallback_Ex, IOTHUB_CLIENT_ERROR);
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_SetConnectionStatusCallback, my_IoTHubClient_LL_SetConnectionStatusCallback);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_LL_SetConnectionStatusCallback, IOTHUB_CLIENT_ERROR);
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_SetDeviceTwinCallback, my_IoTHubClient_LL_SetDeviceTwinCallback);
@@ -502,6 +516,7 @@ TEST_FUNCTION_INITIALIZE(method_init)
     g_connectionStatusCallback = NULL;
     g_inboundDeviceCallback = NULL;
     g_messageCallback = NULL;
+    g_messageCallback_ex = NULL;
 }
 
 TEST_FUNCTION_CLEANUP(TestMethodCleanup)
@@ -1121,7 +1136,7 @@ TEST_FUNCTION(IoTHubClient_SetMessageCallback_succeed)
     EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument_size();
-    STRICT_EXPECTED_CALL(IoTHubClient_LL_SetMessageCallback(TEST_IOTHUB_CLIENT_HANDLE, test_message_confirmation_callback, NULL))
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_SetMessageCallback_Ex(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument_messageCallback()
         .IgnoreArgument_userContextCallback();
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
@@ -2456,7 +2471,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_message_callback_succeed)
     // arrange
     IOTHUB_CLIENT_HANDLE iothub_handle = IoTHubClient_Create(TEST_CLIENT_CONFIG);
     (void)IoTHubClient_SetMessageCallback(iothub_handle, test_message_confirmation_callback, NULL);
-    g_messageCallback(NULL, g_userContextCallback);
+    g_messageCallback_ex(NULL, g_userContextCallback, NULL);
     umock_c_reset_all_calls();
 
     g_how_thread_loops = 1;
@@ -2474,6 +2489,14 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_message_callback_succeed)
     STRICT_EXPECTED_CALL(VECTOR_element(TEST_VECTOR_HANDLE, 0));
     STRICT_EXPECTED_CALL(test_message_confirmation_callback(NULL, NULL));
 
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_Send_Message_Disposition(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IOTHUBMESSAGE_ACCEPTED, IGNORED_PTR_ARG))
+        .IgnoreArgument_iotHubClientHandle()
+        .IgnoreArgument_message()
+        .IgnoreArgument_transportContext();
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+        .IgnoreArgument_iotHubMessageHandle();
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument_ptr();
     STRICT_EXPECTED_CALL(VECTOR_clear(TEST_VECTOR_HANDLE));
     STRICT_EXPECTED_CALL(ThreadAPI_Sleep(1));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))

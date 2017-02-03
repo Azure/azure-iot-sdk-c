@@ -10,6 +10,7 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "iothub_client.h"
 #include "iothub_client_ll.h"
+#include "iothub_client_private.h"
 #include "iothubtransport.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/lock.h"
@@ -101,6 +102,7 @@ typedef struct METHOD_CALLBACK_INFO_TAG
 typedef struct MESSAGE_CALLBACK_INFO_TAG
 {
     IOTHUB_MESSAGE_HANDLE message;
+    void* transport_context;
 } MESSAGE_CALLBACK_INFO;
 
 typedef struct USER_CALLBACK_INFO_TAG
@@ -176,14 +178,14 @@ static void garbageCollectorImpl(IOTHUB_CLIENT_INSTANCE* iotHubClientInstance)
 }
 #endif
 
-static IOTHUBMESSAGE_DISPOSITION_RESULT iothub_ll_message_callback(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback)
+static IOTHUBMESSAGE_DISPOSITION_RESULT iothub_ll_message_callback(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback, void* transportContext)
 {
     IOTHUBMESSAGE_DISPOSITION_RESULT result;
     IOTHUB_QUEUE_CONTEXT* queue_context = (IOTHUB_QUEUE_CONTEXT*)userContextCallback;
     if (queue_context == NULL)
     {
         LogError("invalid parameter userContextCallback(NULL)");
-        result = IOTHUBMESSAGE_REJECTED;
+        result = IOTHUBMESSAGE_ABANDONED;
     }
     else
     {
@@ -191,6 +193,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT iothub_ll_message_callback(IOTHUB_MESSAG
         queue_cb_info.type = CALLBACK_TYPE_MESSAGE;
         queue_cb_info.userContextCallback = queue_context->userContextCallback;
         queue_cb_info.iothub_callback.message_cb_info.message = message;
+        queue_cb_info.iothub_callback.message_cb_info.transport_context = transportContext;
         if (VECTOR_push_back(queue_context->iotHubClientHandle->saved_user_callback_list, &queue_cb_info, 1) == 0)
         {
             result = IOTHUBMESSAGE_ACCEPTED;
@@ -198,6 +201,11 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT iothub_ll_message_callback(IOTHUB_MESSAG
         else
         {
             LogError("message callback vector push failed.");
+			IoTHubMessage_Destroy(message);
+			free(transportContext);
+	        queue_cb_info.iothub_callback.message_cb_info.message = NULL;
+    	    queue_cb_info.iothub_callback.message_cb_info.transport_context = NULL;
+			
             result = IOTHUBMESSAGE_ABANDONED;
         }
     }
@@ -413,7 +421,18 @@ static void dispatch_user_callbacks(IOTHUB_CLIENT_INSTANCE* iotHubClientInstance
                 case CALLBACK_TYPE_MESSAGE:
                     if (iotHubClientInstance->message_callback)
                     {
-                        iotHubClientInstance->message_callback(queued_cb->iothub_callback.message_cb_info.message, queued_cb->userContextCallback);
+                        IOTHUBMESSAGE_DISPOSITION_RESULT disposition = iotHubClientInstance->message_callback(queued_cb->iothub_callback.message_cb_info.message, queued_cb->userContextCallback);
+                        IOTHUB_CLIENT_LL_HANDLE handle = iotHubClientInstance->message_user_context->iotHubClientHandle->IoTHubClientLLHandle;
+
+                        IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_Send_Message_Disposition(handle, queued_cb->iothub_callback.message_cb_info.message, disposition, queued_cb->iothub_callback.message_cb_info.transport_context);
+                        IoTHubMessage_Destroy(queued_cb->iothub_callback.message_cb_info.message);
+                        queued_cb->iothub_callback.message_cb_info.message = NULL;
+                        free(queued_cb->iothub_callback.message_cb_info.transport_context);
+                        queued_cb->iothub_callback.message_cb_info.transport_context = NULL;
+                        if (result != IOTHUB_CLIENT_OK)
+                        {
+                            LogError("IoTHubClient_LL_Send_Message_Disposition failed for message '%s'", IoTHubMessage_GetMessageId(queued_cb->iothub_callback.message_cb_info.message));
+                        }
                     }
                     break;
                 default:
@@ -481,6 +500,7 @@ static IOTHUB_CLIENT_RESULT StartWorkerThreadIfNeeded(IOTHUB_CLIENT_INSTANCE* io
             iotHubClientInstance->StopThread = 0;
             if (ThreadAPI_Create(&iotHubClientInstance->ThreadHandle, ScheduleWork_Thread, iotHubClientInstance) != THREADAPI_OK)
             {
+                LogError("ThreadAPI_Create failed");
                 iotHubClientInstance->ThreadHandle = NULL;
                 result = IOTHUB_CLIENT_ERROR;
             }
@@ -968,9 +988,9 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetMessageCallback(IOTHUB_CLIENT_HANDLE iotHub
             }
             else
             {
-                if (iotHubClientInstance->created_with_transport_handle != 0 || messageCallback == NULL)
+                if (messageCallback == NULL)
                 {
-                    /* Codes_SRS_IOTHUBCLIENT_01_017: [IoTHubClient_SetMessageCallback shall call IoTHubClient_LL_SetMessageCallback, while passing the IoTHubClient_LL handle created by IoTHubClient_Create and the parameters messageCallback and userContextCallback.] */
+                    /* Codes_**SRS_IOTHUBCLIENT_10_030: [If messageCallback is NULL, IoTHubClient_SetMessageCallback shall call IoTHubClient_LL_SetMessageCallback.]*/
                     result = IoTHubClient_LL_SetMessageCallback(iotHubClientInstance->IoTHubClientLLHandle, messageCallback, userContextCallback);
                 }
                 else
@@ -991,7 +1011,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetMessageCallback(IOTHUB_CLIENT_HANDLE iotHub
                         iotHubClientInstance->message_user_context->userContextCallback = userContextCallback;
 
                         /* Codes_SRS_IOTHUBCLIENT_01_017: [IoTHubClient_SetMessageCallback shall call IoTHubClient_LL_SetMessageCallback, while passing the IoTHubClient_LL handle created by IoTHubClient_Create and the parameters messageCallback and userContextCallback.] */
-                        result = IoTHubClient_LL_SetMessageCallback(iotHubClientInstance->IoTHubClientLLHandle, iothub_ll_message_callback, iotHubClientInstance->message_user_context);
+                        result = IoTHubClient_LL_SetMessageCallback_Ex(iotHubClientInstance->IoTHubClientLLHandle, iothub_ll_message_callback, iotHubClientInstance->message_user_context);
                         if (result != IOTHUB_CLIENT_OK)
                         {
                             LogError("IoTHubClient_LL_SetMessageCallback failed");

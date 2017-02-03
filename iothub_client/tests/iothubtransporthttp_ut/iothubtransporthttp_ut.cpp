@@ -757,6 +757,9 @@ public:
         MOCK_VOID_METHOD_END()
 
         /* IoTHubMessage mocks */
+        MOCK_STATIC_METHOD_1(, IOTHUB_MESSAGE_HANDLE, IoTHubMessage_Clone, IOTHUB_MESSAGE_HANDLE, message)
+        MOCK_METHOD_END(IOTHUB_MESSAGE_HANDLE, (IOTHUB_MESSAGE_HANDLE)0x42)
+
         MOCK_STATIC_METHOD_2(, IOTHUB_MESSAGE_HANDLE, IoTHubMessage_CreateFromByteArray, const unsigned char*, buffer, size_t, size)
         MOCK_METHOD_END(IOTHUB_MESSAGE_HANDLE, (IOTHUB_MESSAGE_HANDLE)0x42)
 
@@ -958,6 +961,12 @@ public:
     MOCK_STATIC_METHOD_2(, IOTHUBMESSAGE_DISPOSITION_RESULT, IoTHubClient_LL_MessageCallback, IOTHUB_CLIENT_LL_HANDLE, handle, IOTHUB_MESSAGE_HANDLE, message)
     MOCK_METHOD_END(IOTHUBMESSAGE_DISPOSITION_RESULT, IOTHUBMESSAGE_ACCEPTED)
 
+    MOCK_STATIC_METHOD_3(, IOTHUBMESSAGE_DISPOSITION_RESULT, IoTHubClient_LL_MessageCallback_Ex, IOTHUB_CLIENT_LL_HANDLE, handle, IOTHUB_MESSAGE_HANDLE, message, void*, transportContext)
+    MOCK_METHOD_END(IOTHUBMESSAGE_DISPOSITION_RESULT, IOTHUBMESSAGE_ACCEPTED)
+
+    MOCK_STATIC_METHOD_1(, bool, IoTHubClient_LL_IsDispositionReportingAsync, IOTHUB_CLIENT_LL_HANDLE, handle)
+    MOCK_METHOD_END(bool, true)
+        
     MOCK_STATIC_METHOD_3(, void, IoTHubClient_LL_SendComplete, IOTHUB_CLIENT_LL_HANDLE, handle, PDLIST_ENTRY, completed, IOTHUB_CLIENT_CONFIRMATION_RESULT, result2)
     MOCK_VOID_METHOD_END()
 
@@ -1245,6 +1254,7 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , HTTPAPIEX_HANDLE, HTTP
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportHttpMocks, , HTTPAPIEX_RESULT, HTTPAPIEX_SetOption, HTTPAPIEX_HANDLE, handle, const char*, optionName, const void*, value);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , void, HTTPAPIEX_Destroy, HTTPAPIEX_HANDLE, handle);
 
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , IOTHUB_MESSAGE_HANDLE, IoTHubMessage_Clone, IOTHUB_MESSAGE_HANDLE, message);
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportHttpMocks, , IOTHUB_MESSAGE_HANDLE, IoTHubMessage_CreateFromByteArray, const unsigned char*, buffer, size_t, size);
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportHttpMocks, , IOTHUB_MESSAGE_RESULT, IoTHubMessage_GetByteArray, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const unsigned char**, buffer, size_t*, size);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , const char*, IoTHubMessage_GetString, IOTHUB_MESSAGE_HANDLE, handle);
@@ -1260,8 +1270,9 @@ DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportHttpMocks, , MAP_RESULT, Map_AddOrU
 DECLARE_GLOBAL_MOCK_METHOD_4(CIoTHubTransportHttpMocks, , MAP_RESULT, Map_GetInternals, MAP_HANDLE, handle, const char*const**, keys, const char*const**, values, size_t*, count);
 
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportHttpMocks, , IOTHUBMESSAGE_DISPOSITION_RESULT, IoTHubClient_LL_MessageCallback, IOTHUB_CLIENT_LL_HANDLE, handle, IOTHUB_MESSAGE_HANDLE, message)
+DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportHttpMocks, , IOTHUBMESSAGE_DISPOSITION_RESULT, IoTHubClient_LL_MessageCallback_Ex, IOTHUB_CLIENT_LL_HANDLE, handle, IOTHUB_MESSAGE_HANDLE, message, void*, transportContext)
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportHttpMocks, , void, IoTHubClient_LL_SendComplete, IOTHUB_CLIENT_LL_HANDLE, handle, PDLIST_ENTRY, completed, IOTHUB_CLIENT_CONFIRMATION_RESULT, result2)
-
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , bool, IoTHubClient_LL_IsDispositionReportingAsync, IOTHUB_CLIENT_LL_HANDLE, handle)
 
 DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubTransportHttpMocks, , BUFFER_HANDLE, BUFFER_new);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , void, BUFFER_delete, BUFFER_HANDLE, handle);
@@ -1745,6 +1756,7 @@ static void setupDoWorkLoopForNextDevice(CIoTHubTransportHttpMocks &mocks, size_
 //}
 //
 
+static pfIotHubTransport_Send_Message_Disposition       IoTHubTransportHttp_Send_Message_Disposition;
 static pfIoTHubTransport_Subscribe_DeviceTwin           IoTHubTransportHttp_Subscribe_DeviceTwin;
 static pfIoTHubTransport_Unsubscribe_DeviceTwin         IoTHubTransportHttp_Unsubscribe_DeviceTwin;
 static pfIoTHubTransport_GetHostname                    IoTHubTransportHttp_GetHostname;
@@ -1783,6 +1795,7 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     memset(temp, '3', buffer11_size);
     buffer11 = temp;
 
+    IoTHubTransportHttp_Send_Message_Disposition = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_Send_Message_Disposition;
     IoTHubTransportHttp_Unsubscribe_DeviceTwin = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_Unsubscribe_DeviceTwin;
     IoTHubTransportHttp_Subscribe_DeviceTwin = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_Subscribe_DeviceTwin;
     IoTHubTransportHttp_GetHostname = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_GetHostname;
@@ -4248,6 +4261,55 @@ TEST_FUNCTION(IoTHubTransportHttp_Unsubscribe_with_device_not_found_does_nothing
     IoTHubTransportHttp_Destroy(handle);
 }
 
+//Tests_SRS_TRANSPORTMULTITHTTP_10_001: [ If transportContext is NULL, IoTHubTransportHttp_Send_Message_Disposition shall fail and return IOTHUB_CLIENT_ERROR.]
+TEST_FUNCTION(IoTHubTransportHttp_Send_Message_Disposition_with_NULL_handle_fails)
+{
+    ///arrange
+    CIoTHubTransportHttpMocks mocks;
+
+    ///act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_Send_Message_Disposition(TEST_ETAG_VALUE_UNQUOTED, IOTHUBMESSAGE_ACCEPTED, NULL);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+    mocks.AssertActualAndExpectedCalls();
+}
+
+typedef struct TRANSPORT_CONTEXT_DATA_TAG
+{
+    void* handleData;
+    void* deviceData;
+} TRANSPORT_CONTEXT_DATA;
+//Tests_SRS_TRANSPORTMULTITHTTP_10_002: [If one or both of transportContext fields are NULL, IoTHubTransportHttp_Send_Message_Disposition shall fail and return IOTHUB_CLIENT_ERROR.]
+TEST_FUNCTION(IoTHubTransportHttp_Send_Message_Disposition_with_NULL_handle_data_fails)
+{
+    ///arrange
+    CIoTHubTransportHttpMocks mocks;
+    TRANSPORT_CONTEXT_DATA data = { NULL, (void*)0x44 };
+
+    ///act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_Send_Message_Disposition(TEST_ETAG_VALUE_UNQUOTED, IOTHUBMESSAGE_ACCEPTED, &data);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+    mocks.AssertActualAndExpectedCalls();
+}
+
+//Tests_SRS_TRANSPORTMULTITHTTP_10_002: [If one or both of transportContext fields are NULL, IoTHubTransportHttp_Send_Message_Disposition shall fail and return IOTHUB_CLIENT_ERROR.]
+TEST_FUNCTION(IoTHubTransportHttp_Send_Message_Disposition_with_NULL_device_data_fails)
+{
+    ///arrange
+    CIoTHubTransportHttpMocks mocks;
+    TRANSPORT_CONTEXT_DATA data = { (void*)0x44 , NULL };
+
+    ///act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_Send_Message_Disposition(TEST_ETAG_VALUE_UNQUOTED, IOTHUBMESSAGE_ACCEPTED, &data);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+    mocks.AssertActualAndExpectedCalls();
+}
+
 //Tests_SRS_TRANSPORTMULTITHTTP_17_049: [ If handle is NULL, then IoTHubTransportHttp_DoWork shall do nothing. ]
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_NULL_handle_does_nothing)
 {
@@ -4495,6 +4557,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(false);
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
@@ -4544,6 +4609,477 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(5)
         .IgnoreArgument(7)
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
+
+    ///act
+    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+    ///assert
+    mocks.AssertActualAndExpectedCalls();
+
+    ///cleanup
+    IoTHubTransportHttp_Destroy(handle);
+}
+
+/**/
+TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_async_and_1_service_malloc_fails)
+{
+    ///arrange
+    CIoTHubTransportHttpMocks mocks;
+    unsigned int statusCode200 = 200;
+    unsigned int statusCode204 = 204;
+    auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+
+    (void)IoTHubTransportHttp_Subscribe(devHandle);
+    mocks.ResetAllCalls();
+
+    setupDoWorkLoopOnceForOneDevice(mocks);
+
+    STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
+
+    STRICT_EXPECTED_CALL(mocks, get_time(NULL));
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
+
+    STRICT_EXPECTED_CALL(mocks, BUFFER_new());
+
+    STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+        .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
+    STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
+        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
+        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
+        "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
+        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        NULL,                                               /*BUFFER_HANDLE requestContent,                                */
+        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+    ))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        .IgnoreArgument(5)
+        .IgnoreArgument(7)
+        .IgnoreArgument(8)
+        .IgnoreArgument(9)
+        .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
+
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+        .IgnoreArgument(1)
+        .SetReturn(TEST_ETAG_VALUE);
+
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        ;
+    STRICT_EXPECTED_CALL(mocks, BUFFER_u_char(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, BUFFER_length(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2);
+
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(true);
+
+    whenShallmalloc_fail = currentmalloc_call + 1;
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
+        .IgnoreArgument(1);
+
+    STRICT_EXPECTED_CALL(mocks, STRING_clone(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
+        .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
+    STRICT_EXPECTED_CALL(mocks, STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2);
+    STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, "/abandon" API_VERSION))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+        .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
+    STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
+        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
+        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        HTTPAPI_REQUEST_POST,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
+        "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP_ETAG TEST_ETAG_VALUE_UNQUOTED "/abandon" API_VERSION,    /*const char* relativePath,                                    */
+        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        NULL,                                               /*BUFFER_HANDLE requestContent,                                */
+        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+        NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        NULL                                                /*BUFFER_HANDLE responseContent))                              */
+    ))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        .IgnoreArgument(5)
+        .IgnoreArgument(7)
+        .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
+
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, BUFFER_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    ///act
+    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+    ///assert
+    mocks.AssertActualAndExpectedCalls();
+
+    ///cleanup
+    IoTHubTransportHttp_Destroy(handle);
+}
+
+/**/
+TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_async_and_1_service_MessageClone_fails)
+{
+    ///arrange
+    CIoTHubTransportHttpMocks mocks;
+    unsigned int statusCode200 = 200;
+    unsigned int statusCode204 = 204;
+    auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+
+    (void)IoTHubTransportHttp_Subscribe(devHandle);
+    mocks.ResetAllCalls();
+
+    setupDoWorkLoopOnceForOneDevice(mocks);
+
+    STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
+
+    STRICT_EXPECTED_CALL(mocks, get_time(NULL));
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
+
+    STRICT_EXPECTED_CALL(mocks, BUFFER_new());
+
+    STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+        .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
+    STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
+        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
+        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
+        "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
+        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        NULL,                                               /*BUFFER_HANDLE requestContent,                                */
+        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+    ))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        .IgnoreArgument(5)
+        .IgnoreArgument(7)
+        .IgnoreArgument(8)
+        .IgnoreArgument(9)
+        .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
+
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+        .IgnoreArgument(1)
+        .SetReturn(TEST_ETAG_VALUE);
+
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        ;
+    STRICT_EXPECTED_CALL(mocks, BUFFER_u_char(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, BUFFER_length(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2);
+
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(true);
+
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Clone(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn((IOTHUB_MESSAGE_HANDLE)NULL);
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreAllArguments();
+
+    STRICT_EXPECTED_CALL(mocks, STRING_clone(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
+        .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
+    STRICT_EXPECTED_CALL(mocks, STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2);
+    STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, "/abandon" API_VERSION))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+        .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
+    STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
+        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
+        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        HTTPAPI_REQUEST_POST,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
+        "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP_ETAG TEST_ETAG_VALUE_UNQUOTED "/abandon" API_VERSION,    /*const char* relativePath,                                    */
+        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        NULL,                                               /*BUFFER_HANDLE requestContent,                                */
+        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+        NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        NULL                                                /*BUFFER_HANDLE responseContent))                              */
+    ))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        .IgnoreArgument(5)
+        .IgnoreArgument(7)
+        .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
+
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, BUFFER_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    ///act
+    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+    ///assert
+    mocks.AssertActualAndExpectedCalls();
+
+    ///cleanup
+    IoTHubTransportHttp_Destroy(handle);
+}
+
+/**/
+TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_async_and_1_service_MessageCallbackEx_fails)
+{
+    ///arrange
+    CIoTHubTransportHttpMocks mocks;
+    unsigned int statusCode200 = 200;
+    unsigned int statusCode204 = 204;
+
+    auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+
+    (void)IoTHubTransportHttp_Subscribe(devHandle);
+    mocks.ResetAllCalls();
+
+    setupDoWorkLoopOnceForOneDevice(mocks);
+
+    STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
+
+    STRICT_EXPECTED_CALL(mocks, get_time(NULL));
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
+
+    STRICT_EXPECTED_CALL(mocks, BUFFER_new());
+
+    STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+        .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
+    STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
+        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
+        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
+        "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
+        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        NULL,                                               /*BUFFER_HANDLE requestContent,                                */
+        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+    ))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        .IgnoreArgument(5)
+        .IgnoreArgument(7)
+        .IgnoreArgument(8)
+        .IgnoreArgument(9)
+        .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
+
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+        .IgnoreArgument(1)
+        .SetReturn(TEST_ETAG_VALUE);
+
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        ;
+    STRICT_EXPECTED_CALL(mocks, BUFFER_u_char(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, BUFFER_length(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2);
+
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(true);
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Clone(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback_Ex(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreAllArguments()
+        .SetReturn(IOTHUBMESSAGE_ABANDONED);
+
+    STRICT_EXPECTED_CALL(mocks, STRING_clone(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
+        .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
+    STRICT_EXPECTED_CALL(mocks, STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2);
+    STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, "/abandon" API_VERSION))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+        .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
+    STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
+        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
+        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        HTTPAPI_REQUEST_POST,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
+        "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP_ETAG TEST_ETAG_VALUE_UNQUOTED "/abandon" API_VERSION,    /*const char* relativePath,                                    */
+        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        NULL,                                               /*BUFFER_HANDLE requestContent,                                */
+        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+        NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        NULL                                                /*BUFFER_HANDLE responseContent))                              */
+    ))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        .IgnoreArgument(5)
+        .IgnoreArgument(7)
+        .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
+
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, BUFFER_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    ///act
+    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+    ///assert
+    mocks.AssertActualAndExpectedCalls();
+
+    ///cleanup
+    IoTHubTransportHttp_Destroy(handle);
+}
+
+/**/
+TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_async_and_1_service_MessageCallbackEx_succeeds)
+{
+    ///arrange
+    CIoTHubTransportHttpMocks mocks;
+    unsigned int statusCode200 = 200;
+    auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+
+    (void)IoTHubTransportHttp_Subscribe(devHandle);
+    mocks.ResetAllCalls();
+
+    setupDoWorkLoopOnceForOneDevice(mocks);
+
+    STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
+
+    STRICT_EXPECTED_CALL(mocks, get_time(NULL));
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
+
+    STRICT_EXPECTED_CALL(mocks, BUFFER_new());
+
+    STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+        .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
+    STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
+        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
+        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
+        "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
+        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        NULL,                                               /*BUFFER_HANDLE requestContent,                                */
+        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+    ))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        .IgnoreArgument(5)
+        .IgnoreArgument(7)
+        .IgnoreArgument(8)
+        .IgnoreArgument(9)
+        .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
+
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+        .IgnoreArgument(1)
+        .SetReturn(TEST_ETAG_VALUE);
+
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        ;
+    STRICT_EXPECTED_CALL(mocks, BUFFER_u_char(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, BUFFER_length(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2);
+
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(true);
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Clone(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback_Ex(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreAllArguments();
+
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, BUFFER_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
 
     ///act
     IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -4651,6 +5187,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_2device_with_2nd_empty_waiti
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(false);
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
@@ -4909,6 +5448,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_2devices_2subscriptions_happy_path_succ
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
+        STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .SetReturn(false);
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
@@ -5012,6 +5554,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_2devices_2subscriptions_happy_path_succ
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
+        STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .SetReturn(false);
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
@@ -5141,6 +5686,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(false);
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
@@ -5270,6 +5818,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
+        STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .SetReturn(false);
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
@@ -5405,6 +5956,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(false);
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
@@ -5568,6 +6122,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(false);
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
@@ -5691,6 +6248,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(false);
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
@@ -5814,6 +6374,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(false);
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
@@ -5937,6 +6500,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(false);
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
@@ -6040,6 +6606,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(false);
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
@@ -6141,6 +6710,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(false);
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
@@ -6237,6 +6809,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(false);
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
@@ -6330,6 +6905,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(false);
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
@@ -6421,6 +6999,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(false);
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
@@ -6507,6 +7088,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(false);
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
@@ -6615,6 +7199,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(false);
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
@@ -6738,6 +7325,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(false);
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
@@ -6861,6 +7451,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(false);
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
@@ -6984,6 +7577,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(false);
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
@@ -7088,6 +7684,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(false);
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
@@ -7190,6 +7789,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(false);
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
@@ -7285,6 +7887,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(false);
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
@@ -7378,6 +7983,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(false);
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
@@ -7469,6 +8077,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(false);
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
@@ -7555,6 +8166,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(false);
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
@@ -11203,6 +11817,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(false);
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
@@ -11342,6 +11959,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME1", "VALUE1"));
     }
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(false);
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
@@ -11496,6 +12116,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME2", "VALUE2"));
     }
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(false);
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
@@ -14018,6 +14641,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetMessageId_SUCCEED)
             .IgnoreArgument(1);
     }
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_IsDispositionReportingAsync(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(false);
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
