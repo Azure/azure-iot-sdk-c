@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <cstddef>
 #include <cstdbool>
-#include "crt_abstractions.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
 #include "testrunnerswitcher.h"
 #include "micromock.h"
 #include "micromockcharstararenullterminatedstrings.h"

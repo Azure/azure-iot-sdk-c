@@ -343,18 +343,12 @@ TEST_FUNCTION(IoTHubMessaging_Destroy_return_if_input_parameter_messagingHandle_
 /*Tests_SRS_IOTHUBMESSAGING_12_012: [ IoTHubMessaging_Destroy shall unlock the serializing lock. ]*/
 /*Tests_SRS_IOTHUBMESSAGING_12_013: [ The thread created as part of executing IoTHubMessaging_SendAsync shall be joined. ]*/
 /*Tests_SRS_IOTHUBMESSAGING_12_014: [ If the lock was allocated in IoTHubMessaging_Create, it shall be also freed. ]*/
-TEST_FUNCTION(IoTHubMessaging_Destroy_happy_path_thread_handle_null)
+TEST_FUNCTION(IoTHubMessaging_Destroy_happy_path)
 {
     // arrange
     IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle = IoTHubMessaging_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
     
     umock_c_reset_all_calls();
-
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
-        .IgnoreArgument(1);
-    
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
-        .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(IoTHubMessaging_LL_Destroy(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
@@ -369,157 +363,6 @@ TEST_FUNCTION(IoTHubMessaging_Destroy_happy_path_thread_handle_null)
     IoTHubMessaging_Destroy(messagingClientHandle);
 
     // assert
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-    // cleanup
-}
-
-/*Tests_SRS_IOTHUBMESSAGING_12_010: [ IoTHubMessaging_Destroy shall lock the serializing lock and signal the worker thread (if any) to end. ]*/
-/*Tests_SRS_IOTHUBMESSAGING_12_011: [ IoTHubMessaging_Destroy shall destroy IoTHubMessagingHandle by call IoTHubMessaging_LL_Destroy. ]*/
-/*Tests_SRS_IOTHUBMESSAGING_12_012: [ IoTHubMessaging_Destroy shall unlock the serializing lock. ]*/
-/*Tests_SRS_IOTHUBMESSAGING_12_013: [ The thread created as part of executing IoTHubMessaging_SendAsync shall be joined. ]*/
-/*Tests_SRS_IOTHUBMESSAGING_12_014: [ If the lock was allocated in IoTHubMessaging_Create, it shall be also freed. ]*/
-TEST_FUNCTION(IoTHubMessaging_Destroy_happy_path_thread_handle_not_null)
-{
-    // arrange
-    IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle = IoTHubMessaging_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
-    TEST_IOTHUB_MESSAGING_CLIENT_INSTANCE* messagingClientInstance = (TEST_IOTHUB_MESSAGING_CLIENT_INSTANCE*)messagingClientHandle;
-    messagingClientInstance->ThreadHandle = (THREAD_HANDLE)0X3333;
-
-    umock_c_reset_all_calls();
-
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
-        .IgnoreArgument(1);
-
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
-        .IgnoreArgument(1);
-
-    STRICT_EXPECTED_CALL(ThreadAPI_Join(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-        .IgnoreAllArguments();
-
-    STRICT_EXPECTED_CALL(IoTHubMessaging_LL_Destroy(IGNORED_PTR_ARG))
-        .IgnoreArgument(1);
-
-    STRICT_EXPECTED_CALL(Lock_Deinit(IGNORED_PTR_ARG))
-        .IgnoreArgument(1);
-
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_NUM_ARG))
-        .IgnoreArgument(1);
-
-    // act
-    IoTHubMessaging_Destroy(messagingClientHandle);
-
-    // assert
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-    // cleanup
-}
-//
-///*Tests_SRS_IOTHUBMESSAGING_12_010: [ IoTHubMessaging_Destroy shall lock the serializing lock and signal the worker thread (if any) to end. ]*/
-///*Tests_SRS_IOTHUBMESSAGING_12_011: [ IoTHubMessaging_Destroy shall destroy IoTHubMessagingHandle by call IoTHubMessaging_LL_Destroy. ]*/
-///*Tests_SRS_IOTHUBMESSAGING_12_012: [ IoTHubMessaging_Destroy shall unlock the serializing lock. ]*/
-///*Tests_SRS_IOTHUBMESSAGING_12_013: [ The thread created as part of executing IoTHubMessaging_SendAsync shall be joined. ]*/
-///*Tests_SRS_IOTHUBMESSAGING_12_014: [ If the lock was allocated in IoTHubMessaging_Create, it shall be also freed. ]*/
-TEST_FUNCTION(IoTHubMessaging_Destroy_Lock_fails)
-{
-    // arrange
-    IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle = IoTHubMessaging_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
-
-    umock_c_reset_all_calls();
-
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .SetReturn(LOCK_ERROR);
-
-    STRICT_EXPECTED_CALL(IoTHubMessaging_LL_Destroy(IGNORED_PTR_ARG))
-        .IgnoreArgument(1);
-
-    STRICT_EXPECTED_CALL(Lock_Deinit(IGNORED_PTR_ARG))
-        .IgnoreArgument(1);
-
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_NUM_ARG))
-        .IgnoreArgument(1);
-
-    // act
-    IoTHubMessaging_Destroy(messagingClientHandle);
-
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-    // cleanup
-}
-
-///*Tests_SRS_IOTHUBMESSAGING_12_010: [ IoTHubMessaging_Destroy shall lock the serializing lock and signal the worker thread (if any) to end. ]*/
-///*Tests_SRS_IOTHUBMESSAGING_12_011: [ IoTHubMessaging_Destroy shall destroy IoTHubMessagingHandle by call IoTHubMessaging_LL_Destroy. ]*/
-///*Tests_SRS_IOTHUBMESSAGING_12_012: [ IoTHubMessaging_Destroy shall unlock the serializing lock. ]*/
-///*Tests_SRS_IOTHUBMESSAGING_12_013: [ The thread created as part of executing IoTHubMessaging_SendAsync shall be joined. ]*/
-///*Tests_SRS_IOTHUBMESSAGING_12_014: [ If the lock was allocated in IoTHubMessaging_Create, it shall be also freed. ]*/
-TEST_FUNCTION(IoTHubMessaging_Destroy_Unlock_fails)
-{
-    // arrange
-    IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle = IoTHubMessaging_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
-
-    umock_c_reset_all_calls();
-
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
-        .IgnoreArgument(1);
-
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .SetReturn(LOCK_ERROR);
-
-    STRICT_EXPECTED_CALL(IoTHubMessaging_LL_Destroy(IGNORED_PTR_ARG))
-        .IgnoreArgument(1);
-
-    STRICT_EXPECTED_CALL(Lock_Deinit(IGNORED_PTR_ARG))
-        .IgnoreArgument(1);
-
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_NUM_ARG))
-        .IgnoreArgument(1);
-
-    // act
-    IoTHubMessaging_Destroy(messagingClientHandle);
-
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-    // cleanup
-}
-
-///*Tests_SRS_IOTHUBMESSAGING_12_010: [ IoTHubMessaging_Destroy shall lock the serializing lock and signal the worker thread (if any) to end. ]*/
-///*Tests_SRS_IOTHUBMESSAGING_12_011: [ IoTHubMessaging_Destroy shall destroy IoTHubMessagingHandle by call IoTHubMessaging_LL_Destroy. ]*/
-///*Tests_SRS_IOTHUBMESSAGING_12_012: [ IoTHubMessaging_Destroy shall unlock the serializing lock. ]*/
-///*Tests_SRS_IOTHUBMESSAGING_12_013: [ The thread created as part of executing IoTHubMessaging_SendAsync shall be joined. ]*/
-///*Tests_SRS_IOTHUBMESSAGING_12_014: [ If the lock was allocated in IoTHubMessaging_Create, it shall be also freed. ]*/
-TEST_FUNCTION(IoTHubMessaging_Destroy_ThreadAPI_Join_fails)
-{
-    // arrange
-    IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle = IoTHubMessaging_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
-    TEST_IOTHUB_MESSAGING_CLIENT_INSTANCE* messagingClientInstance = (TEST_IOTHUB_MESSAGING_CLIENT_INSTANCE*)messagingClientHandle;
-    messagingClientInstance->ThreadHandle = (THREAD_HANDLE)0X3333;
-
-    umock_c_reset_all_calls();
-
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
-        .IgnoreArgument(1);
-
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
-        .IgnoreArgument(1);
-
-    STRICT_EXPECTED_CALL(ThreadAPI_Join(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-        .IgnoreAllArguments()
-        .SetReturn(THREADAPI_ERROR);
-
-    STRICT_EXPECTED_CALL(IoTHubMessaging_LL_Destroy(IGNORED_PTR_ARG))
-        .IgnoreArgument(1);
-
-    STRICT_EXPECTED_CALL(Lock_Deinit(IGNORED_PTR_ARG))
-        .IgnoreArgument(1);
-
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_NUM_ARG))
-        .IgnoreArgument(1);
-
-    // act
-    IoTHubMessaging_Destroy(messagingClientHandle);
-
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     // cleanup
@@ -606,20 +449,55 @@ TEST_FUNCTION(IoTHubMessaging_Close_do_nothing_if_input_parameter_messagingClien
 /*Tests_SRS_IOTHUBMESSAGING_12_024: [ IoTHubMessaging_Close shall call IoTHubMessaging_LL_Close, while passing the IOTHUB_MESSAGING_HANDLE handle created by IoTHubMessaging_Create ]*/
 /*Tests_SRS_IOTHUBMESSAGING_12_025: [ When IoTHubMessaging_LL_Close is called, IoTHubMessaging_Close shall return the result of IoTHubMessaging_LL_Close. ]*/
 /*Tests_SRS_IOTHUBMESSAGING_12_026: [ IoTHubMessaging_Close shall be made thread-safe by using the lock created in IoTHubMessaging_Create. ]*/
-TEST_FUNCTION(IoTHubMessaging_Close_happy_path)
+TEST_FUNCTION(IoTHubMessaging_Close_happy_path_thread_handle_null)
 {
     // arrange
     IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle = IoTHubMessaging_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
     TEST_IOTHUB_MESSAGING_CLIENT_INSTANCE* messagingClientInstance = (TEST_IOTHUB_MESSAGING_CLIENT_INSTANCE*)messagingClientHandle;
     messagingClientInstance->IoTHubMessagingHandle = TEST_IOTHUB_MESSAGING_HANDLE;
+    messagingClientInstance->ThreadHandle = (THREAD_HANDLE)NULL;
 
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubMessaging_LL_Close(TEST_IOTHUB_MESSAGING_HANDLE));
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
+
+    STRICT_EXPECTED_CALL(IoTHubMessaging_LL_Close(TEST_IOTHUB_MESSAGING_HANDLE));
+
+    // act
+    IoTHubMessaging_Close(messagingClientHandle);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    free(messagingClientHandle);
+}
+
+/*Tests_SRS_IOTHUBMESSAGING_12_022: [ IoTHubMessaging_Close shall be made thread-safe by using the lock created in IoTHubMessaging_Create. ]*/
+/*Tests_SRS_IOTHUBMESSAGING_12_024: [ IoTHubMessaging_Close shall call IoTHubMessaging_LL_Close, while passing the IOTHUB_MESSAGING_HANDLE handle created by IoTHubMessaging_Create ]*/
+/*Tests_SRS_IOTHUBMESSAGING_12_025: [ When IoTHubMessaging_LL_Close is called, IoTHubMessaging_Close shall return the result of IoTHubMessaging_LL_Close. ]*/
+/*Tests_SRS_IOTHUBMESSAGING_12_026: [ IoTHubMessaging_Close shall be made thread-safe by using the lock created in IoTHubMessaging_Create. ]*/
+TEST_FUNCTION(IoTHubMessaging_Close_happy_path_thread_handle_not_null)
+{
+    // arrange
+    IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle = IoTHubMessaging_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
+    TEST_IOTHUB_MESSAGING_CLIENT_INSTANCE* messagingClientInstance = (TEST_IOTHUB_MESSAGING_CLIENT_INSTANCE*)messagingClientHandle;
+    messagingClientInstance->IoTHubMessagingHandle = TEST_IOTHUB_MESSAGING_HANDLE;
+    messagingClientInstance->ThreadHandle = (THREAD_HANDLE)0X3333;
+
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    STRICT_EXPECTED_CALL(ThreadAPI_Join(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(IoTHubMessaging_LL_Close(TEST_IOTHUB_MESSAGING_HANDLE));
 
     // act
     IoTHubMessaging_Close(messagingClientHandle);
@@ -636,12 +514,19 @@ TEST_FUNCTION(IoTHubMessaging_Close_Lock_fails)
 {
     // arrange
     IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle = IoTHubMessaging_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
+    TEST_IOTHUB_MESSAGING_CLIENT_INSTANCE* messagingClientInstance = (TEST_IOTHUB_MESSAGING_CLIENT_INSTANCE*)messagingClientHandle;
+    messagingClientInstance->IoTHubMessagingHandle = TEST_IOTHUB_MESSAGING_HANDLE;
+    messagingClientInstance->ThreadHandle = (THREAD_HANDLE)0X3333;
 
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .SetReturn(LOCK_ERROR);
+
+    STRICT_EXPECTED_CALL(ThreadAPI_Join(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(IoTHubMessaging_LL_Close(TEST_IOTHUB_MESSAGING_HANDLE));
 
     // act
     IoTHubMessaging_Close(messagingClientHandle);

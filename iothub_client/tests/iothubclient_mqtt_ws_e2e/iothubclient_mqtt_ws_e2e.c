@@ -21,14 +21,14 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
-TEST_FUNCTION(IoTHub_MQTT_SendEvent_e2e)
+TEST_FUNCTION(IoTHub_MQTT_SendEvent_e2e_sas)
 {
-    e2e_send_event_test(MQTT_WebSocket_Protocol);
+    e2e_send_event_test_sas(MQTT_WebSocket_Protocol);
 }
 
-TEST_FUNCTION(IoTHub_MQTT_RecvMessage_E2ETest)
+TEST_FUNCTION(IoTHub_MQTT_RecvMessage_E2ETest_sas)
 {
-    e2e_recv_message_test(MQTT_WebSocket_Protocol);
+    e2e_recv_message_test_sas(MQTT_WebSocket_Protocol);
 }
 
 END_TEST_SUITE(iothubclient_mqtt_ws_e2e)

@@ -781,6 +781,13 @@ void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle)
                         free(queue_cb_info->iothub_callback.dev_twin_cb_info.payLoad);
                     }
                 }
+                else if (queue_cb_info->type == CALLBACK_TYPE_EVENT_CONFIRM)
+                {
+                    if (iotHubClientInstance->event_confirm_callback)
+                    {
+                        iotHubClientInstance->event_confirm_callback(queue_cb_info->iothub_callback.event_confirm_cb_info.confirm_result, queue_cb_info->userContextCallback);
+                    }
+                }
             }
         }
         VECTOR_destroy(iotHubClientInstance->saved_user_callback_list);

@@ -25,7 +25,7 @@
 
 
 #undef STRINGS_H
-#include "strings.h"
+#include "azure_c_shared_utility/strings.h"
 
 #ifndef COMPILING_REAL_STRINGS_C
 

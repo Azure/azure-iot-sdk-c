@@ -454,27 +454,34 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
             {
                 LogInfo("device->cb_payload: %s", device->cb_payload);
                 root_value = json_parse_string(device->cb_payload);
-                JSON_Object *root_object = json_value_get_object(root_value);
-
-                switch (device->update_state)
+                if (root_value != NULL)
                 {
-                    case DEVICE_TWIN_UPDATE_COMPLETE:
-                        string_property = json_object_dotget_string(root_object, "desired.string_property");
-                        integer_property = (int) json_object_dotget_number(root_object, "desired.integer_property");
-                        break;
-                    case DEVICE_TWIN_UPDATE_PARTIAL:
-                        string_property = json_object_get_string(root_object, "string_property");
-                        integer_property = (int) json_object_get_number(root_object, "integer_property");
-                        break;
-                    default: // invalid update state
-                        ASSERT_FAIL("Invalid update_state reported");
-                        break;
+                    JSON_Object *root_object = json_value_get_object(root_value);
+                    if (root_object != NULL)
+                    {
+                        switch (device->update_state)
+                        {
+                        case DEVICE_TWIN_UPDATE_COMPLETE:
+                            string_property = json_object_dotget_string(root_object, "desired.string_property");
+                            integer_property = (int)json_object_dotget_number(root_object, "desired.integer_property");
+                            break;
+                        case DEVICE_TWIN_UPDATE_PARTIAL:
+                            string_property = json_object_get_string(root_object, "string_property");
+                            integer_property = (int)json_object_get_number(root_object, "integer_property");
+                            break;
+                        default: // invalid update state
+                            ASSERT_FAIL("Invalid update_state reported");
+                            break;
+                        }
+                        if ((string_property != NULL) && (integer_property != 0))
+                        {
+                            Unlock(device->lock);
+                            break;
+                        }
+                    }
                 }
-                if ((string_property != NULL) && (integer_property != 0))
-                {
-                    Unlock(device->lock);
-                    break;
-                }
+                json_value_free(root_value);
+                root_value = NULL;
             }
             Unlock(device->lock);
         }
