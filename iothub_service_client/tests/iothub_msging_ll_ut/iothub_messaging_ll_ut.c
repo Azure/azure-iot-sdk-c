@@ -24,6 +24,8 @@
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/sastoken.h"
 #include "azure_c_shared_utility/xio.h"
+#include "azure_c_shared_utility/buffer_.h"
+#include "azure_c_shared_utility/map.h"
 
 #include "azure_uamqp_c/connection.h"
 #include "azure_uamqp_c/message_receiver.h"
@@ -351,6 +353,11 @@ static const char* TEST_FEEDBACK_RECORD_KEY_DESCRIPTION = "description";
 static const char* TEST_FEEDBACK_RECORD_KEY_ENQUED_TIME_UTC = "enqueuedTimeUtc";
 static const char* TEST_FEEDBACK_RECORD_KEY_ORIGINAL_MESSAGE_ID = "originalMessageId";
 
+static const char* TEST_MAP_KEYS[] = { "Key1" };
+static const char* TEST_MAP_VALUES[] = { "Val1" };
+const char* const ** pTEST_MAP_KEYS = (const char* const **)&TEST_MAP_KEYS;
+const char* const ** pTEST_MAP_VALUES = (const char* const **)&TEST_MAP_VALUES;
+
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
@@ -412,7 +419,7 @@ static const char* TEST_CONST_CHAR_PTR = "TestConstPtrString";
 static TEST_SASL_PLAIN_CONFIG TEST_SASL_PLAIN_CONFIG_DATA;
 static TEST_CALLBACK TEST_CALLBACK_DATA;
 static TEST_IOTHUB_MESSAGING TEST_IOTHUB_MESSAGING_DATA;
-static IOTHUB_MESSAGE_HANDLE TEST_IOTHUB_MESSAGE_HANDLE = (IOTHUB_MESSAGE_HANDLE)0x5252;
+
 static IOTHUB_MESSAGING_HANDLE TEST_IOTHUB_MESSAGING_HANDLE = (IOTHUB_MESSAGING_HANDLE)&TEST_IOTHUB_MESSAGING_DATA;
 static SASL_MECHANISM_INTERFACE_DESCRIPTION* TEST_SASL_MECHANISM_INTERFACE_DESCRIPTION = (SASL_MECHANISM_INTERFACE_DESCRIPTION*)0x4242;
 static SASL_MECHANISM_HANDLE TEST_SASL_MECHANISM_HANDLE = (SASL_MECHANISM_HANDLE)0x4343;
@@ -426,6 +433,7 @@ static LINK_HANDLE TEST_LINK_HANDLE = (LINK_HANDLE)0x4949;
 static IOTHUB_SEND_COMPLETE_CALLBACK TEST_IOTHUB_SEND_COMPLETE_CALLBACK = (IOTHUB_SEND_COMPLETE_CALLBACK)0x5353;
 static BINARY_DATA TEST_BINARY_DATA_INST;
 static PROPERTIES_HANDLE TEST_PROPERTIES_HANDLE = (PROPERTIES_HANDLE)0x5656;
+static PROPERTIES_HANDLE TEST_PROPERTIES_HANDLE_NULL = (PROPERTIES_HANDLE)NULL;
 static MESSAGE_HANDLE TEST_MESSAGE_HANDLE = (MESSAGE_HANDLE)0x5858;
 static IOTHUB_OPEN_COMPLETE_CALLBACK TEST_IOTHUB_OPEN_COMPLETE_CALLBACK;
 static IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK TEST_IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK = (IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK)0x6060;
@@ -436,6 +444,8 @@ static JSON_Object* TEST_JSON_OBJECT = (JSON_Object*)0x5151;
 static JSON_Array* TEST_JSON_ARRAY = (JSON_Array*)0x5252;
 static JSON_Status TEST_JSON_STATUS = 0;
 static AMQP_VALUE TEST_AMQP_MAP = ((AMQP_VALUE)0x6258);
+static MAP_HANDLE TEST_MAP_HANDLE = (MAP_HANDLE)0x103;
+static IOTHUB_MESSAGE_HANDLE TEST_IOTHUB_MESSAGE_HANDLE = (IOTHUB_MESSAGE_HANDLE)0x4242;
 
 BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
 
@@ -489,6 +499,8 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         REGISTER_UMOCK_ALIAS_TYPE(JSON_Status, int);
         REGISTER_UMOCK_ALIAS_TYPE(SINGLYLINKEDLIST_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(LIST_ITEM_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(MAP_RESULT, int);
+        REGISTER_UMOCK_ALIAS_TYPE(MAP_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(receiver_settle_mode, uint8_t);
         
 
@@ -650,6 +662,21 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
 
         REGISTER_GLOBAL_MOCK_RETURN(STRING_c_str, "");
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_c_str, NULL);
+
+        REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_GetContentType, IOTHUBMESSAGE_BYTEARRAY);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_GetContentType, IOTHUBMESSAGE_UNKNOWN);
+
+        REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_Properties, TEST_MAP_HANDLE);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_Properties, NULL);
+
+        REGISTER_GLOBAL_MOCK_RETURN(Map_GetInternals, MAP_OK);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Map_GetInternals, MAP_ERROR);
+
+        REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_GetMessageId, TEST_CONST_CHAR_PTR);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_GetMessageId, NULL);
+        
+        REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_GetCorrelationId, TEST_CONST_CHAR_PTR);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_GetCorrelationId, NULL);
 }
 
     TEST_SUITE_CLEANUP(TestClassCleanup)
@@ -1357,6 +1384,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         }
         umock_c_negative_tests_deinit();
     }
+
     /*Tests_SRS_IOTHUBMESSAGING_12_034: [ IoTHubMessaging_LL_SendMessage shall verify the messagingHandle, deviceId, message input parameters and if any of them are NULL then return NULL ] */
     TEST_FUNCTION(IoTHubMessaging_LL_Send_return_IOTHUB_MESSAGING_INVALID_ARG_if_input_parameter_messagingHandle_is_NULL)
     {
@@ -1412,38 +1440,115 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
     /*Tests_SRS_IOTHUBMESSAGING_12_038: [ IoTHubMessaging_LL_SendMessage shall set the uAMQP message properties to the given message properties by calling message_set_properties ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_039: [ IoTHubMessaging_LL_SendMessage shall call uAMQP messagesender_send with the created message with IoTHubMessaging_LL_SendMessageComplete callback by which IoTHubMessaging is notified of completition of send ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_041: [ If all uAMQP call return 0 then IoTHubMessaging_LL_SendMessage shall return IOTHUB_MESSAGING_OK  ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_079: [** The uAMQP message properties shall be retrieved using message_get_properties ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_080 : [** If UAMQP message properties were not present then a new properties container shall be created using properties_create ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_081 : [** Message - id from the IOTHUB_MESSAGE shall be read using IoTHubMessage_GetMessageId ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_082 : [** As message - id is optional field, if it is not set on the IOTHUB_MESSAGE, message_create_from_iothub_message shall ignore it and continue normally ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_083 : [** The message - id AMQP_VALUE shall be set on the uAMQP message using properties_set_message_id ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_084 : [** Correlation - id from the IOTHUB_MESSAGE shall be read using IoTHubMessage_GetCorrelationId ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_085 : [** As correlation - id is optional field, if it is not set on the IOTHUB_MESSAGE, message_create_from_iothub_message() shall ignore it and continue normally ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_086 : [** The correlation - id AMQP_VALUE shall be set on the uAMQP message using properties_set_correlation_id ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_087 : [** IoTHubMessaging_LL_SendMessage shall set the uAMQP message TO property to the given message properties by calling properties_set_to ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_088 : [** The IOTHUB_MESSAGE_HANDLE properties shall be obtained by calling IoTHubMessage_Properties ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_089 : [** The actual keys and values, as well as the number of properties shall be obtained by calling Map_GetInternals on the handle obtained from IoTHubMessage_Properties ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_090 : [** If the number of properties is greater than 0, message_create_from_iothub_message() shall iterate through all the properties and add them to the uAMQP message ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_091 : [** A uAMQP property map shall be created by calling amqpvalue_create_map ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_092 : [** An AMQP_VALUE instance shall be created using amqpvalue_create_string() to hold each uAMQP property name ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_093 : [** An AMQP_VALUE instance shall be created using amqpvalue_create_string() to hold each uAMQP property value ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_094 : [** The property name and value(AMQP_VALUE instances) shall be added to the uAMQP property map by calling amqpvalue_map_set_value ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_095 : [** After adding the property name and value to the uAMQP property map, both AMQP_VALUE instances shall be destroyed using amqpvalue_destroy ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_096 : [** If no errors occurred processing the properties, the uAMQP properties map shall be set on the uAMQP message by calling message_set_application_properties ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_097 : [** If the number of properties is 0, no application properties shall be set on the uAMQP message and message_create_from_iothub_message() shall return with success ] */
     TEST_FUNCTION(IoTHubMessaging_LL_Send_happy_path)
     {
         ///arrange
+        size_t number_of_arguments = 1;
         TEST_IOTHUB_MESSAGING_DATA.isOpened = true;
 
+        umock_c_reset_all_calls();
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(properties_create());
-        STRICT_EXPECTED_CALL(properties_set_to(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(message_create());
+        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(message_add_body_amqp_data(IGNORED_PTR_ARG, TEST_BINARY_DATA_INST))
             .IgnoreAllArguments();
 
+        STRICT_EXPECTED_CALL(message_get_properties(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments()
+            .CopyOutArgumentBuffer_properties(&TEST_PROPERTIES_HANDLE_NULL, sizeof(TEST_PROPERTIES_HANDLE_NULL));
+        STRICT_EXPECTED_CALL(properties_create());
 
+        STRICT_EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG))
+            .IgnoreAllArguments()
+            .SetReturn(TEST_CONST_CHAR_PTR);
+        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(properties_set_message_id(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+
+        STRICT_EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_PTR_ARG))
+            .IgnoreAllArguments()
+            .SetReturn(TEST_CONST_CHAR_PTR);
+        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(properties_set_correlation_id(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+
+        STRICT_EXPECTED_CALL(properties_set_to(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(message_set_properties(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(properties_destroy(IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+
+        STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE))
+            .IgnoreAllArguments()
+            .SetReturn(TEST_MAP_HANDLE);
+
+        STRICT_EXPECTED_CALL(Map_GetInternals(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments()
+            .CopyOutArgumentBuffer_keys(&pTEST_MAP_KEYS, sizeof(pTEST_MAP_KEYS))
+            .CopyOutArgumentBuffer_values(&pTEST_MAP_VALUES, sizeof(pTEST_MAP_VALUES))
+            .CopyOutArgumentBuffer_count(&number_of_arguments, sizeof(size_t))
+            .SetReturn(MAP_OK);
+
+        STRICT_EXPECTED_CALL(amqpvalue_create_map());
+
+        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(amqpvalue_set_map_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+
+        STRICT_EXPECTED_CALL(message_set_application_properties(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+
         STRICT_EXPECTED_CALL(messagesender_send(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(message_destroy(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(properties_destroy(IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
+
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -1463,39 +1568,106 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         ASSERT_ARE_EQUAL(int, 0, umockc_result);
 
         size_t doNotFailCalls[] = 
-        { 
-            9,   /*amqpvalue_destroy*/
-            10,  /*properties_destroy*/
-            11   /*gballoc_free*/
+        {
+            6,  /*contentType*/
+            8,  /*contentType*/
+            9,  /*message_get_properties*/
+            10, /*properties_create*/
+            11, /*properties_set_message_id*/
+            12, /*properties_set_correlation_id*/
+            14, /*message_set_application_properties*/
+            15, /*amqpvalue_destroy*/
+            18, /*amqpvalue_destroy*/
+            19, /*amqpvalue_destroy*/
+            25, /*properties_destroy*/
+            26, /*amqpvalue_destroy*/
+            27, /*amqpvalue_destroy*/
+            28, /*amqpvalue_destroy*/
+            30  /*gballoc_free*/
         };
 
+        size_t number_of_arguments = 1;
         TEST_IOTHUB_MESSAGING_DATA.isOpened = true;
 
+        umock_c_reset_all_calls();
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(properties_create());
-        STRICT_EXPECTED_CALL(properties_set_to(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(message_create());
+        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(message_add_body_amqp_data(IGNORED_PTR_ARG, TEST_BINARY_DATA_INST))
             .IgnoreAllArguments();
 
+        STRICT_EXPECTED_CALL(message_get_properties(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments()
+            .CopyOutArgumentBuffer_properties(&TEST_PROPERTIES_HANDLE_NULL, sizeof(TEST_PROPERTIES_HANDLE_NULL));
+        STRICT_EXPECTED_CALL(properties_create());
 
-        STRICT_EXPECTED_CALL(message_set_properties(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG))
+            .IgnoreAllArguments()
+            .SetReturn(TEST_CONST_CHAR_PTR);
+        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(messagesender_send(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-
-        STRICT_EXPECTED_CALL(properties_destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(properties_set_message_id(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
+
+        STRICT_EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_PTR_ARG))
+            .IgnoreAllArguments()
+            .SetReturn(TEST_CONST_CHAR_PTR);
+        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(properties_set_correlation_id(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+
+        STRICT_EXPECTED_CALL(properties_set_to(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(message_set_properties(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(properties_destroy(IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+
+        STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE))
+            .IgnoreAllArguments()
+            .SetReturn(TEST_MAP_HANDLE);
+
+        STRICT_EXPECTED_CALL(Map_GetInternals(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments()
+            .CopyOutArgumentBuffer_keys(&pTEST_MAP_KEYS, sizeof(pTEST_MAP_KEYS))
+            .CopyOutArgumentBuffer_values(&pTEST_MAP_VALUES, sizeof(pTEST_MAP_VALUES))
+            .CopyOutArgumentBuffer_count(&number_of_arguments, sizeof(size_t))
+            .SetReturn(MAP_OK);
+
+        STRICT_EXPECTED_CALL(amqpvalue_create_map());
+
+        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(amqpvalue_set_map_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+
+        STRICT_EXPECTED_CALL(message_set_application_properties(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+
+        STRICT_EXPECTED_CALL(messagesender_send(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 

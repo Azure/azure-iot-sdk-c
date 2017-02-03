@@ -158,28 +158,6 @@ void IoTHubMessaging_Destroy(IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandl
     {
         IOTHUB_MESSAGING_CLIENT_INSTANCE* messagingClientInstance = (IOTHUB_MESSAGING_CLIENT_INSTANCE*)messagingClientHandle;
 
-        /*Codes_SRS_IOTHUBMESSAGING_12_010: [ IoTHubMessaging_Destroy shall lock the serializing lock and signal the worker thread(if any) to end. ]*/
-        if (Lock(messagingClientInstance->LockHandle) != LOCK_OK)
-        {
-            LogError("unable to Lock - - will still proceed to try to end the thread without locking");
-            messagingClientInstance->StopThread = 1; /*setting it even when Lock fails*/
-        }
-        else
-        {
-            messagingClientInstance->StopThread = 1;
-            (void)Unlock(messagingClientInstance->LockHandle);
-        }
-
-        if (messagingClientInstance->ThreadHandle != NULL)
-        {
-            int res;
-            /*Codes_SRS_IOTHUBMESSAGING_12_013: [ The thread created as part of executing IoTHubMessaging_SendAsync shall be joined. ]*/
-            if (ThreadAPI_Join(messagingClientInstance->ThreadHandle, &res) != THREADAPI_OK)
-            {
-                LogError("ThreadAPI_Join failed");
-            }
-        }
-
         /*Codes_SRS_IOTHUBMESSAGING_12_011: [ IoTHubMessaging_Destroy shall destroy IoTHubMessagingHandle by call IoTHubMessaging_LL_Destroy. ]*/
         IoTHubMessaging_LL_Destroy(messagingClientInstance->IoTHubMessagingHandle);
 
@@ -239,18 +217,29 @@ void IoTHubMessaging_Close(IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle)
         /*Codes_SRS_IOTHUBMESSAGING_12_022: [ IoTHubMessaging_Close shall be made thread-safe by using the lock created in IoTHubMessaging_Create. ]*/
         if (Lock(iotHubMessagingClientInstance->LockHandle) != LOCK_OK)
         {
-            /*Codes_SRS_IOTHUBMESSAGING_12_023: [ If acquiring the lock fails, IoTHubMessaging_Close shall return IOTHUB_MESSAGING_ERROR. ]*/
             LogError("Could not acquire lock");
+            iotHubMessagingClientInstance->StopThread = 1; /*setting it even when Lock fails*/
         }
         else
         {
-            /*Codes_SRS_IOTHUBMESSAGING_12_024: [ IoTHubMessaging_Close shall call IoTHubMessaging_LL_Close, while passing the IOTHUB_MESSAGING_HANDLE handle created by IoTHubMessaging_Create ]*/
-            /*Codes_SRS_IOTHUBMESSAGING_12_025: [ When IoTHubMessaging_LL_Close is called, IoTHubMessaging_Close shall return the result of IoTHubMessaging_LL_Close. ]*/
-            IoTHubMessaging_LL_Close(messagingClientHandle->IoTHubMessagingHandle);
+            iotHubMessagingClientInstance->StopThread = 1;
 
-            /*Codes_SRS_IOTHUBMESSAGING_12_026: [ IoTHubMessaging_Close shall be made thread-safe by using the lock created in IoTHubMessaging_Create. ]*/
+            /*Codes_SRS_IOTHUBMESSAGING_12_022: [ IoTHubMessaging_Close shall be made thread-safe by using the lock created in IoTHubMessaging_Create. ]*/
             (void)Unlock(iotHubMessagingClientInstance->LockHandle);
         }
+
+        if (iotHubMessagingClientInstance->ThreadHandle != NULL)
+        {
+            int res;
+            /*Codes_SRS_IOTHUBMESSAGING_12_013: [ The thread created as part of executing IoTHubMessaging_SendAsync shall be joined. ]*/
+            if (ThreadAPI_Join(iotHubMessagingClientInstance->ThreadHandle, &res) != THREADAPI_OK)
+            {
+                LogError("ThreadAPI_Join failed");
+            }
+        }
+
+        /*Codes_SRS_IOTHUBMESSAGING_12_024: [ IoTHubMessaging_Close shall call IoTHubMessaging_LL_Close, while passing the IOTHUB_MESSAGING_HANDLE handle created by IoTHubMessaging_Create ]*/
+        IoTHubMessaging_LL_Close(messagingClientHandle->IoTHubMessagingHandle);
     }
 }
 

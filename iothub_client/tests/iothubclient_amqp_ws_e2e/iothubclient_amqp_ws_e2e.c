@@ -21,14 +21,14 @@ BEGIN_TEST_SUITE(iothubclient_amqp_ws_e2e)
         TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
     }
 
-    TEST_FUNCTION(IoTHub_AMQP_WS_SendEvent_e2e)
+    TEST_FUNCTION(IoTHub_AMQP_SendEvent_e2e_sas)
     {
-        e2e_send_event_test(AMQP_Protocol_over_WebSocketsTls);
+        e2e_send_event_test_sas(AMQP_Protocol_over_WebSocketsTls);
     }
 
-    TEST_FUNCTION(IoTHub_AMQP_WS_RecvMessage_E2ETest)
+    TEST_FUNCTION(IoTHub_AMQP_RecvMessage_E2ETest_sas)
     {
-        e2e_recv_message_test(AMQP_Protocol_over_WebSocketsTls);
+        e2e_recv_message_test_sas(AMQP_Protocol_over_WebSocketsTls);
     }
 
 END_TEST_SUITE(iothubclient_amqp_ws_e2e)
