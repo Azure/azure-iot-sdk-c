@@ -5,7 +5,7 @@ Option(edison "set edison to ON to build the DM edison sample" OFF)
 
 cmake_minimum_required(VERSION 2.8.11)
 
-project(iothub_client_sample_firmware_update)
+project(iothub_client_sample_mqtt_dm)
 
 macro(compileAsC99)
   if (CMAKE_VERSION VERSION_LESS "3.1")
@@ -24,10 +24,10 @@ endmacro(compileAsC99)
 compileAsC99()
 
 if(WIN32)  
-	message(FATAL_ERROR "iothub_client_sample_firmware_update can not be generated on windows")
+	message(FATAL_ERROR "iothub_client_sample_mqtt_dm can not be generated on windows")
 endif()  
 
-set(AZUREIOT_INC_FOLDER "pi_device" "." "/usr/include/azureiot")
+set(AZUREIOT_INC_FOLDER "pi_device" "../../../serializer/inc" "." "/usr/include/azureiot" "/usr/include/azureiot/inc")
 
 include_directories(${AZUREIOT_INC_FOLDER})
 
@@ -39,9 +39,9 @@ set(iothub_client_sample_mqtt_dm_h_files
 	iothub_client_sample_mqtt_dm.h
 )
 
-add_executable(firmware_update ${iothub_client_sample_mqtt_dm_c_files} ${iothub_client_sample_mqtt_dm_h_files})
+add_executable(iothub_client_sample_mqtt_dm ${iothub_client_sample_mqtt_dm_c_files} ${iothub_client_sample_mqtt_dm_h_files})
 
-target_link_libraries(firmware_update
+target_link_libraries(iothub_client_sample_mqtt_dm
 	iothub_client
 	iothub_client_mqtt_transport
 	serializer
@@ -56,6 +56,5 @@ target_link_libraries(firmware_update
 
 set(iothub_install_files pi_device/iothub_client_sample_firmware_update.service .device_connection_string)
 
-install (TARGETS firmware_update DESTINATION "/usr/share/iothub_client_sample")
+install (TARGETS iothub_client_sample_mqtt_dm DESTINATION "/usr/share/iothub_client_sample")
 install (FILES ${iothub_install_files} DESTINATION "/usr/share/iothub_client_sample")
-
