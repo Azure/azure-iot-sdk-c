@@ -3077,7 +3077,7 @@ static int sscanff(const char*src, float* dst)
     int result = 1;
     char* next;
     (*dst) = strtof(src, &next);
-    errno_t error = errno;
+    int error = errno;
     if ((src == next) || (((*dst) == HUGE_VALF) && (error != 0)))
     {
         result = EOF;
@@ -3091,7 +3091,7 @@ static int sscanflf(const char*src, double* dst)
     int result = 1;
     char* next;
     (*dst) = strtod(src, &next);
-    errno_t error = errno;
+    int error = errno;
     if ((src == next) || (((*dst) == HUGE_VALL) && (error != 0)))
     {
         result = EOF;
