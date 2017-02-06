@@ -8,33 +8,29 @@ sudo apt-get install git cmake libcurl4-openssl-dev build-essential
 
 4. Once these packages have been installed, clone the repository by using
 
-git clone https://github.com/Azure/azure-iot-sdks.git
+git clone --recursive https://github.com/Azure/azure-iot-sdk-c.git
 
     It will prompt for a user name and a password. The password needs to be a token from github.com : Personal Settings -> Applications -> Personal access tokens. It cannot be the account password.
 
-5. Switch to directory azure-iot-sdks
+5. Switch to directory azure-iot-sdk-c
 
-cd azure-iot-sdks
+cd azure-iot-sdk-c
 
-6. Once in that directory, checkout branch develop by
-
-git checkout develop
-
-7. go to linux build folder in ./build_all/linux
+6. go to linux build folder in ./build_all/linux
 
 cd build_all/linux
 
-8. switch to the folder of the remote monitoring machine source code:
+7. switch to the folder of the remote monitoring machine source code:
 
 cd ../../serializer/samples/remote_monitoring/
 
-9. edit main.c providing your credentials (nano editor can be used)
+8. edit main.c providing your credentials (nano editor can be used)
 
-10. go back to the build folder (cd -) and build all the software (lib, samples, unittests). This will also run unittests. Might take some minutes.
+9. go back to the build folder (cd -) and build all the software (lib, samples, unittests). This will also run unittests. Might take some minutes.
 
 cd -
 bash ./build.sh
 
-11. at this moment, remote_monitoring executable can be run by
+10. at this moment, remote_monitoring executable can be run by
 
 ../../serializer/samples/remote_monitoring/linux/remote_monitoring

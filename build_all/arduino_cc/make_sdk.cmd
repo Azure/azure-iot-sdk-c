@@ -4,8 +4,7 @@
 @echo off
 
 REM This script creates the SDK folder with the latest bits from the Azure SDK repository.
-REM It removes some files we do not need.  It currently targets the develop branch until fixes are
-REM merged into master.
+REM It removes some files we do not need.
 
 if "%1" equ "" (
     set Work_path=%~dp0..\..\..\Work

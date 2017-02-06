@@ -4,11 +4,9 @@
 [submodule "azure-umqtt-c"]
 	path = umqtt
 	url = https://github.com/Azure/azure-umqtt-c.git
-	branch = develop
 [submodule "azure-uamqp-c"]
 	path = uamqp
 	url = https://github.com/Azure/azure-uamqp-c.git
-	branch = master
 [submodule "parson"]
 	path = parson
 	url = https://github.com/kgabis/parson

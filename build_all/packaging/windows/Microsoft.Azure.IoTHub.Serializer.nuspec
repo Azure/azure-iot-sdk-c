@@ -5,7 +5,7 @@
     <title>Microsoft Azure IoTHub Serializer</title>
     <authors>Microsoft Corp</authors>
     <owners>Azure-IoT</owners>
-    <licenseUrl>https://github.com/Azure/azure-iot-sdk-c/blob/develop/LICENSE</licenseUrl>
+    <licenseUrl>https://github.com/Azure/azure-iot-sdk-c/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/Azure/azure-iot-sdk-c</projectUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>Microsoft Azure IoTHub Serializer</description>
