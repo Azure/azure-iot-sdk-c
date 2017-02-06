@@ -2090,7 +2090,7 @@ static void DoMessages(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERD
                                                 if (IoTHubClient_LL_IsDispositionReportingAsync(iotHubClientHandle))
                                                 {
                                                     bool abandon;
-                                                    /*Codes_SRS_TRANSPORTMULTITHTTP_10_005: [If IoTHubClient_LL_IsDispositionReportingAsync is ture, _DoWork shall call IoTHubClient_LL_MessageCallback_Ex.]*/
+                                                    /*Codes_SRS_TRANSPORTMULTITHTTP_10_005: [If IoTHubClient_LL_IsDispositionReportingAsync is true, _DoWork shall call IoTHubClient_LL_MessageCallback_Ex.]*/
                                                     TRANSPORT_CONTEXT_DATA* tc = (TRANSPORT_CONTEXT_DATA*)malloc(sizeof(TRANSPORT_CONTEXT_DATA));
                                                     if (tc == NULL)
                                                     {

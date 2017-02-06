@@ -142,7 +142,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransportHttp_Send_Message_Disposition(const char* me
 
 **SRS_TRANSPORTMULTITHTTP_10_001: [** If `transportContext` is `NULL`, `IoTHubTransportHttp_Send_Message_Disposition` shall fail and return `IOTHUB_CLIENT_ERROR`. **]**
 **SRS_TRANSPORTMULTITHTTP_10_002: [** If one or both of `transportContext` fields are `NULL`, `IoTHubTransportHttp_Send_Message_Disposition` shall fail and return `IOTHUB_CLIENT_ERROR`. **]**
-**SRS_TRANSPORTMULTITHTTP_10_003: [** If shall fail and return `IOTHUB_CLIENT_ERROR` if the POST message fails, otherwise return `IOTHUB_CLIENT_OK`. **]**
+**SRS_TRANSPORTMULTITHTTP_10_003: [** It shall fail and return `IOTHUB_CLIENT_ERROR` if the POST message fails, otherwise return `IOTHUB_CLIENT_OK`. **]**
 
 
 
@@ -244,7 +244,7 @@ MultiDevTransportHttp shall perform the following actions on each device:
 **SRS_TRANSPORTMULTITHTTP_17_090: [** All the HTTP headers of the form iothub-app-name:somecontent shall be transformed in message properties {name, somecontent}.  **]**   
 **SRS_TRANSPORTMULTITHTTP_17_091: [** The HTTP header value of iothub-messageid shall be set in the `IoTHub_SetMessageId`.  **]**   
 **SRS_TRANSPORTMULTITHTTP_17_092: [** If assembling the message fails in any way, then `_DoWork` shall "abandon" the message. **]**   
-**SRS_TRANSPORTMULTITHTTP_10_005: [** If `IoTHubClient_LL_IsDispositionReportingAsync` is `ture`, `_DoWork` shall call `IoTHubClient_LL_MessageCallback_Ex`.**]**
+**SRS_TRANSPORTMULTITHTTP_10_005: [** If `IoTHubClient_LL_IsDispositionReportingAsync` is `true`, `_DoWork` shall call `IoTHubClient_LL_MessageCallback_Ex`.**]**
 **SRS_TRANSPORTMULTITHTTP_10_006: [** If assembling the transport context fails, `_DoWork` shall "abandon" the message.**]**
 **SRS_TRANSPORTMULTITHTTP_10_007: [** If a message clone fails, `_DoWork` shall "abandon" the message.**]**
 **SRS_TRANSPORTMULTITHTTP_10_010: [** If `IoTHubClient_LL_MessageCallback_Ex` returns `IOTHUBMESSAGE_ABANDONED` then `_DoWork` shall "abandon" the message. **]**   
