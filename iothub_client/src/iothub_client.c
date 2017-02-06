@@ -441,7 +441,7 @@ static void dispatch_user_callbacks(IOTHUB_CLIENT_INSTANCE* iotHubClientInstance
             }
         }
     }
-    VECTOR_clear(call_backs);
+    VECTOR_destroy(call_backs);
 }
 
 static int ScheduleWork_Thread(void* threadArgument)

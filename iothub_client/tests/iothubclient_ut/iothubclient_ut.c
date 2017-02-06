@@ -2318,7 +2318,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_incoming_method_callback_succeed)
         .IgnoreArgument_handle();
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
-    STRICT_EXPECTED_CALL(VECTOR_clear(TEST_VECTOR_HANDLE));
+    STRICT_EXPECTED_CALL(VECTOR_destroy(TEST_VECTOR_HANDLE));
     STRICT_EXPECTED_CALL(ThreadAPI_Sleep(1));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
@@ -2358,7 +2358,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_device_twin_succeed)
     STRICT_EXPECTED_CALL(VECTOR_element(TEST_VECTOR_HANDLE, 0));
     STRICT_EXPECTED_CALL(test_device_twin_callback(DEVICE_TWIN_UPDATE_COMPLETE, NULL, 0, NULL));
 
-    STRICT_EXPECTED_CALL(VECTOR_clear(TEST_VECTOR_HANDLE));
+    STRICT_EXPECTED_CALL(VECTOR_destroy(TEST_VECTOR_HANDLE));
     STRICT_EXPECTED_CALL(ThreadAPI_Sleep(1));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
@@ -2404,7 +2404,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_event_confirm_succeed)
     STRICT_EXPECTED_CALL(VECTOR_element(TEST_VECTOR_HANDLE, 0));
     STRICT_EXPECTED_CALL(test_event_confirmation_callback(IOTHUB_CLIENT_CONFIRMATION_OK, NULL));
 
-    STRICT_EXPECTED_CALL(VECTOR_clear(TEST_VECTOR_HANDLE));
+    STRICT_EXPECTED_CALL(VECTOR_destroy(TEST_VECTOR_HANDLE));
     STRICT_EXPECTED_CALL(ThreadAPI_Sleep(1));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
@@ -2447,7 +2447,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_reported_state_succeed)
     STRICT_EXPECTED_CALL(VECTOR_element(TEST_VECTOR_HANDLE, 0));
     STRICT_EXPECTED_CALL(test_report_state_callback(REPORTED_STATE_STATUS_CODE, NULL));
 
-    STRICT_EXPECTED_CALL(VECTOR_clear(TEST_VECTOR_HANDLE));
+    STRICT_EXPECTED_CALL(VECTOR_destroy(TEST_VECTOR_HANDLE));
     STRICT_EXPECTED_CALL(ThreadAPI_Sleep(1));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
@@ -2497,7 +2497,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_message_callback_succeed)
         .IgnoreArgument_iotHubMessageHandle();
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
         .IgnoreArgument_ptr();
-    STRICT_EXPECTED_CALL(VECTOR_clear(TEST_VECTOR_HANDLE));
+    STRICT_EXPECTED_CALL(VECTOR_destroy(TEST_VECTOR_HANDLE));
     STRICT_EXPECTED_CALL(ThreadAPI_Sleep(1));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
