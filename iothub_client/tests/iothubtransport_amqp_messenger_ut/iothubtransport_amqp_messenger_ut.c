@@ -42,6 +42,7 @@ void real_free(void* ptr)
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/singlylinkedlist.h"
 #include "azure_c_shared_utility/uniqueid.h"
+#include "azure_c_shared_utility/optionhandler.h"
 #include "azure_uamqp_c/session.h"
 #include "azure_uamqp_c/link.h"
 #include "azure_uamqp_c/messaging.h"
@@ -49,7 +50,6 @@ void real_free(void* ptr)
 #include "azure_uamqp_c/message_receiver.h"
 #include "iothub_client_private.h"
 #include "iothub_client_version.h"
-#include "iothub_message.h"
 #include "uamqp_messaging.h"
 
 #undef ENABLE_MOCKS
@@ -78,7 +78,9 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
     ASSERT_FAIL(temp_str);
 }
 
-#define DEFAULT_EVENT_SEND_RETRY_LIMIT                    100
+#define DEFAULT_EVENT_SEND_RETRY_LIMIT                    10
+#define DEFAULT_EVENT_SEND_TIMEOUT_SECS 600
+
 #define UNIQUE_ID_BUFFER_SIZE                             37
 #define TEST_UNIQUE_ID                                    "A1234DE234A1234DE234A1234DE234A1234DEA1234DE234A1234DE234A1234DE234A1234DEA1234DE234A1234DE234A1234DE234A1234DE"
 
@@ -140,6 +142,8 @@ static SINGLYLINKEDLIST_HANDLE TEST_IN_PROGRESS_LIST;
 #define TEST_WAIT_TO_SEND_LIST2                           (SINGLYLINKEDLIST_HANDLE)0x4482
 #define TEST_IN_PROGRESS_LIST1                            (SINGLYLINKEDLIST_HANDLE)0x4483
 #define TEST_IN_PROGRESS_LIST2                            (SINGLYLINKEDLIST_HANDLE)0x4484
+#define TEST_OPTIONHANDLER_HANDLE                         (OPTIONHANDLER_HANDLE)0x4485
+#define INDEFINITE_TIME                                   ((time_t)-1)
 
 // Helpers
 
@@ -306,16 +310,20 @@ typedef struct MESSENGER_DO_WORK_EXP_CALL_PROFILE_STRUCT
 	bool destroy_message_receiver;
 	int wait_to_send_list_length;
 	int in_progress_list_length;
+	size_t send_event_timeout_secs;
+	time_t current_time;
 } MESSENGER_DO_WORK_EXP_CALL_PROFILE;
 
 static MESSENGER_DO_WORK_EXP_CALL_PROFILE g_do_work_profile;
 
-static MESSENGER_DO_WORK_EXP_CALL_PROFILE* get_msgr_do_work_exp_call_profile(MESSENGER_STATE current_state, bool is_subscribed_for_messages, bool is_msg_rcvr_created, int wts_list_length, int ip_list_length)
+static MESSENGER_DO_WORK_EXP_CALL_PROFILE* get_msgr_do_work_exp_call_profile(MESSENGER_STATE current_state, bool is_subscribed_for_messages, bool is_msg_rcvr_created, int wts_list_length, int ip_list_length, time_t current_time, size_t event_send_timeout_secs)
 {
 	memset(&g_do_work_profile, 0, sizeof(MESSENGER_DO_WORK_EXP_CALL_PROFILE));
 	g_do_work_profile.current_state = current_state;
 	g_do_work_profile.wait_to_send_list_length = wts_list_length;
 	g_do_work_profile.in_progress_list_length = ip_list_length;
+	g_do_work_profile.current_time = current_time;
+	g_do_work_profile.send_event_timeout_secs = event_send_timeout_secs;
 
 	if (g_do_work_profile.current_state == MESSENGER_STATE_STARTING)
 	{
@@ -702,9 +710,9 @@ static void set_expected_calls_for_messenger_send_async()
 }
 
 static IOTHUB_MESSAGE_LIST* TEST_on_event_send_complete_message;
-static EVENT_SEND_COMPLETE_RESULT TEST_on_event_send_complete_result;
+static MESSENGER_EVENT_SEND_COMPLETE_RESULT TEST_on_event_send_complete_result;
 static void* TEST_on_event_send_complete_context;
-static void TEST_on_event_send_complete(IOTHUB_MESSAGE_LIST* message, EVENT_SEND_COMPLETE_RESULT result, void* context)
+static void TEST_on_event_send_complete(IOTHUB_MESSAGE_LIST* message, MESSENGER_EVENT_SEND_COMPLETE_RESULT result, void* context)
 {
 	TEST_on_event_send_complete_message = message;
 	TEST_on_event_send_complete_result = result;
@@ -795,10 +803,80 @@ static void set_expected_calls_for_message_sender_destroy()
 	STRICT_EXPECTED_CALL(link_destroy(TEST_EVENT_SENDER_LINK_HANDLE));
 }
 
-static void set_expected_calls_for_messenger_stop(MESSENGER_CONFIG* config, MESSENGER_HANDLE messenger_handle)
+static void set_expected_calls_for_messenger_stop(int wait_to_send_list_length, int in_progress_list_length, bool destroy_message_receiver)
 {
-    (void)config;
-    (void)messenger_handle;
+	set_expected_calls_for_message_sender_destroy();
+
+	if (destroy_message_receiver)
+	{
+		set_expected_calls_for_message_receiver_destroy();
+	}
+
+	// remove timed out events
+	if (in_progress_list_length <= 0)
+	{
+		STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_IN_PROGRESS_LIST)).SetReturn(NULL);
+	}
+	else
+	{
+		STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_IN_PROGRESS_LIST));
+
+		int i;
+		for (i = 0; i < in_progress_list_length; i++)
+		{
+			EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+			// por fazer: adicionar codigo para remover items prescritos.
+
+			if (i < (in_progress_list_length - 1))
+			{
+				EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG));
+			}
+			else
+			{
+				EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG)).SetReturn(NULL);
+			}
+		}
+	}
+
+	// Move events to wts list
+	if (in_progress_list_length <= 0)
+	{
+		STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_IN_PROGRESS_LIST)).SetReturn(NULL);
+	}
+	else
+	{
+		SINGLYLINKEDLIST_HANDLE new_wts_list = (TEST_WAIT_TO_SEND_LIST == TEST_WAIT_TO_SEND_LIST1 ? TEST_WAIT_TO_SEND_LIST2 : TEST_WAIT_TO_SEND_LIST1);
+		SINGLYLINKEDLIST_HANDLE new_ip_list = (TEST_IN_PROGRESS_LIST == TEST_IN_PROGRESS_LIST1 ? TEST_IN_PROGRESS_LIST2 : TEST_IN_PROGRESS_LIST1);
+
+		// rest of function
+		STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_IN_PROGRESS_LIST));
+		STRICT_EXPECTED_CALL(singlylinkedlist_create()).SetReturn(new_wts_list);
+
+		// Moving in_progress_list items to the new wts list.
+		STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_IN_PROGRESS_LIST));
+		int i;
+		for (i = 0; i < in_progress_list_length; i++)
+		{
+			EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+			EXPECTED_CALL(singlylinkedlist_add(new_wts_list, IGNORED_PTR_ARG));
+			EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG));
+		}
+
+		// Moving wts (wait to send) list items to the new wts list.
+		STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_WAIT_TO_SEND_LIST));
+		for (i = 0; i < wait_to_send_list_length; i++)
+		{
+			EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+			EXPECTED_CALL(singlylinkedlist_add(new_wts_list, IGNORED_PTR_ARG));
+			EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG));
+		}
+
+		STRICT_EXPECTED_CALL(singlylinkedlist_create()).SetReturn(new_ip_list);
+		STRICT_EXPECTED_CALL(singlylinkedlist_destroy(TEST_WAIT_TO_SEND_LIST));
+		STRICT_EXPECTED_CALL(singlylinkedlist_destroy(TEST_IN_PROGRESS_LIST));
+		TEST_WAIT_TO_SEND_LIST = new_wts_list;
+		TEST_IN_PROGRESS_LIST = new_ip_list;
+	}
 }
 
 static void set_expected_calls_for_on_message_send_complete()
@@ -810,7 +888,7 @@ static void set_expected_calls_for_on_message_send_complete()
 	EXPECTED_CALL(free(IGNORED_PTR_ARG));
 }
 
-static void set_expected_calls_for_message_do_work_send_pending_events(int number_of_events_pending)
+static void set_expected_calls_for_message_do_work_send_pending_events(int number_of_events_pending, time_t current_time)
 {
 	int i;
 	for (i = 0; i < number_of_events_pending; i++)
@@ -825,6 +903,7 @@ static void set_expected_calls_for_message_do_work_send_pending_events(int numbe
 
         STRICT_EXPECTED_CALL(messagesender_send(TEST_MESSAGE_SENDER_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(2).IgnoreArgument(3).IgnoreArgument(4);
+		STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(current_time);
 
         EXPECTED_CALL(message_destroy(IGNORED_PTR_ARG));
     }
@@ -832,58 +911,53 @@ static void set_expected_calls_for_message_do_work_send_pending_events(int numbe
 	STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_WAIT_TO_SEND_LIST));
 }
 
+static time_t add_seconds(time_t base_time, int seconds)
+{
+	time_t new_time;
+	struct tm *bd_new_time;
+
+	if ((bd_new_time = localtime(&base_time)) == NULL)
+	{
+		new_time = INDEFINITE_TIME;
+	}
+	else
+	{
+		bd_new_time->tm_sec += seconds;
+		new_time = mktime(bd_new_time);
+	}
+
+	return new_time;
+}
+
+static void set_expected_calls_for_process_event_send_timeouts(size_t in_progress_list_length, size_t send_event_timeout_secs, time_t current_time)
+{
+	if (in_progress_list_length <= 0)
+	{
+		STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_IN_PROGRESS_LIST)).SetReturn(NULL);
+	}
+	else
+	{
+		time_t send_time = add_seconds(current_time, -1 * (int)send_event_timeout_secs);
+
+		STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_IN_PROGRESS_LIST));
+		
+		for (; in_progress_list_length > 0; in_progress_list_length--)
+		{
+			EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+			STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(current_time);
+			EXPECTED_CALL(get_difftime(current_time, send_time)).SetReturn(difftime(current_time, send_time));
+			EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG));
+		}
+
+		EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG)).SetReturn(NULL);
+	}
+}
+
 static void set_expected_calls_for_messenger_do_work(MESSENGER_DO_WORK_EXP_CALL_PROFILE *profile)
 {
 	if (profile->current_state == MESSENGER_STATE_STARTING)
 	{
 		set_expected_calls_for_message_sender_create();
-	}
-	else if (profile->current_state == MESSENGER_STATE_STOPPING)
-	{
-		set_expected_calls_for_message_sender_destroy();
-
-		if (profile->destroy_message_receiver)
-		{
-			set_expected_calls_for_message_receiver_destroy();
-		}
-
-		if (profile->in_progress_list_length == 0)
-		{
-			STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_IN_PROGRESS_LIST)).SetReturn(NULL);
-		}
-		else
-		{
-			SINGLYLINKEDLIST_HANDLE new_wts_list = (TEST_WAIT_TO_SEND_LIST == TEST_WAIT_TO_SEND_LIST1 ? TEST_WAIT_TO_SEND_LIST2 : TEST_WAIT_TO_SEND_LIST1);
-			SINGLYLINKEDLIST_HANDLE new_ip_list = (TEST_IN_PROGRESS_LIST == TEST_IN_PROGRESS_LIST1 ? TEST_IN_PROGRESS_LIST2 : TEST_IN_PROGRESS_LIST1);
-
-			STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_IN_PROGRESS_LIST));
-			STRICT_EXPECTED_CALL(singlylinkedlist_create()).SetReturn(new_wts_list);
-	
-			//// Moving in_progress_list items to the new wts list.
-			STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_IN_PROGRESS_LIST));
-			int i;
-			for (i = 0; i < profile->in_progress_list_length; i++)
-			{
-				EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
-				EXPECTED_CALL(singlylinkedlist_add(new_wts_list, IGNORED_PTR_ARG));
-				EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG));
-			}
-
-			// Moving wts (wait to send) list items to the new wts list.
-			STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_WAIT_TO_SEND_LIST));
-			for (i = 0; i < profile->wait_to_send_list_length; i++)
-			{
-				EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
-				EXPECTED_CALL(singlylinkedlist_add(new_wts_list, IGNORED_PTR_ARG));
-				EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG));
-			}
-
-			STRICT_EXPECTED_CALL(singlylinkedlist_create()).SetReturn(new_ip_list);
-			STRICT_EXPECTED_CALL(singlylinkedlist_destroy(TEST_WAIT_TO_SEND_LIST));
-			STRICT_EXPECTED_CALL(singlylinkedlist_destroy(TEST_IN_PROGRESS_LIST));
-			TEST_WAIT_TO_SEND_LIST = new_wts_list;
-			TEST_IN_PROGRESS_LIST = new_ip_list;
-		}
 	}
 	else if (profile->current_state == MESSENGER_STATE_STARTED)
 	{
@@ -896,7 +970,9 @@ static void set_expected_calls_for_messenger_do_work(MESSENGER_DO_WORK_EXP_CALL_
 			set_expected_calls_for_message_receiver_destroy();
 		}
 
-		set_expected_calls_for_message_do_work_send_pending_events(profile->wait_to_send_list_length);
+		set_expected_calls_for_process_event_send_timeouts(profile->in_progress_list_length, profile->send_event_timeout_secs, profile->current_time);
+
+		set_expected_calls_for_message_do_work_send_pending_events(profile->wait_to_send_list_length, profile->current_time);
 	}
 }
 
@@ -904,9 +980,11 @@ static void set_expected_calls_for_messenger_destroy(MESSENGER_CONFIG* config, M
 {
 	(void)config;
 
-	set_expected_calls_for_messenger_stop(config, messenger_handle);
+	set_expected_calls_for_messenger_stop(wait_to_send_list_length, in_progress_list_length, destroy_message_receiver);
 
-	MESSENGER_DO_WORK_EXP_CALL_PROFILE *do_work_profile = get_msgr_do_work_exp_call_profile(MESSENGER_STATE_STOPPING, false, false, wait_to_send_list_length, in_progress_list_length);
+	time_t current_time = time(NULL);
+
+	MESSENGER_DO_WORK_EXP_CALL_PROFILE *do_work_profile = get_msgr_do_work_exp_call_profile(MESSENGER_STATE_STOPPING, false, false, wait_to_send_list_length, in_progress_list_length, current_time, DEFAULT_EVENT_SEND_TIMEOUT_SECS);
 	do_work_profile->destroy_message_sender = destroy_message_sender;
 	do_work_profile->destroy_message_receiver = destroy_message_receiver;
 	set_expected_calls_for_messenger_do_work(do_work_profile);
@@ -976,11 +1054,13 @@ static void crank_messenger_do_work(MESSENGER_HANDLE handle, MESSENGER_DO_WORK_E
 
 	if (profile->create_message_sender && saved_messagesender_create_on_message_sender_state_changed != NULL)
 	{
+		STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(profile->current_time);
 		saved_messagesender_create_on_message_sender_state_changed(saved_messagesender_create_context, MESSAGE_SENDER_STATE_OPEN, MESSAGE_SENDER_STATE_IDLE);
 	}
 
 	if (profile->create_message_receiver && saved_messagereceiver_create_on_message_receiver_state_changed != NULL)
 	{
+		STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(profile->current_time);
 		saved_messagereceiver_create_on_message_receiver_state_changed(saved_messagereceiver_create_context, MESSAGE_RECEIVER_STATE_OPEN, MESSAGE_RECEIVER_STATE_IDLE);
 	}
 }
@@ -989,7 +1069,9 @@ static MESSENGER_HANDLE create_and_start_messenger2(MESSENGER_CONFIG* config, bo
 {
 	MESSENGER_HANDLE handle = create_and_start_messenger(config);
 
-	MESSENGER_DO_WORK_EXP_CALL_PROFILE *do_work_profile = get_msgr_do_work_exp_call_profile(MESSENGER_STATE_STARTING, false, false, 0, 0);
+	time_t current_time = time(NULL);
+
+	MESSENGER_DO_WORK_EXP_CALL_PROFILE *do_work_profile = get_msgr_do_work_exp_call_profile(MESSENGER_STATE_STARTING, false, false, 0, 0, current_time, DEFAULT_EVENT_SEND_TIMEOUT_SECS);
 	do_work_profile->create_message_sender = true;
 	crank_messenger_do_work(handle, do_work_profile);
 
@@ -997,7 +1079,7 @@ static MESSENGER_HANDLE create_and_start_messenger2(MESSENGER_CONFIG* config, bo
 	{
 		(void)messenger_subscribe_for_messages(handle, TEST_on_new_message_received_callback, TEST_ON_NEW_MESSAGE_RECEIVED_CB_CONTEXT);
 
-		do_work_profile = get_msgr_do_work_exp_call_profile(MESSENGER_STATE_STARTED, true, false, 0, 0);
+		do_work_profile = get_msgr_do_work_exp_call_profile(MESSENGER_STATE_STARTED, true, false, 0, 0, current_time, DEFAULT_EVENT_SEND_TIMEOUT_SECS);
 		do_work_profile->create_message_receiver = true;
 		crank_messenger_do_work(handle, do_work_profile);
 	}
@@ -1043,6 +1125,12 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 	REGISTER_UMOCK_ALIAS_TYPE(LIST_ITEM_HANDLE, void*);
 	REGISTER_UMOCK_ALIAS_TYPE(LIST_MATCH_FUNCTION, void*);
 	REGISTER_UMOCK_ALIAS_TYPE(MESSENGER_SEND_STATUS, int);
+	REGISTER_UMOCK_ALIAS_TYPE(OPTIONHANDLER_HANDLE, void*);
+	REGISTER_UMOCK_ALIAS_TYPE(OPTIONHANDLER_RESULT, int);
+	REGISTER_UMOCK_ALIAS_TYPE(pfCloneOption, void*);
+	REGISTER_UMOCK_ALIAS_TYPE(pfDestroyOption, void*);
+	REGISTER_UMOCK_ALIAS_TYPE(pfSetOption, void*);
+	REGISTER_UMOCK_ALIAS_TYPE(time_t, int);
 
     REGISTER_GLOBAL_MOCK_HOOK(malloc, TEST_malloc);
     REGISTER_GLOBAL_MOCK_HOOK(free, TEST_free);
@@ -1203,7 +1291,7 @@ TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
     TEST_link_set_attach_properties_result = 0;
 
 	TEST_on_event_send_complete_message = NULL;
-	TEST_on_event_send_complete_result = EVENT_SEND_COMPLETE_RESULT_OK;
+	TEST_on_event_send_complete_result = MESSENGER_EVENT_SEND_COMPLETE_RESULT_OK;
 	TEST_on_event_send_complete_context = NULL;
 }
 
@@ -1423,7 +1511,9 @@ TEST_FUNCTION(messenger_state_on_event_sender_state_changed_callback_OPEN)
 	MESSENGER_CONFIG* config = get_messenger_config();
 	MESSENGER_HANDLE handle = create_and_start_messenger(config);
 
-	MESSENGER_DO_WORK_EXP_CALL_PROFILE *do_work_profile = get_msgr_do_work_exp_call_profile(MESSENGER_STATE_STARTING, false, false, 0, 0);
+	time_t current_time = time(NULL);
+
+	MESSENGER_DO_WORK_EXP_CALL_PROFILE *do_work_profile = get_msgr_do_work_exp_call_profile(MESSENGER_STATE_STARTING, false, false, 0, 0, current_time, DEFAULT_EVENT_SEND_TIMEOUT_SECS);
 	set_expected_calls_for_messenger_do_work(do_work_profile);
 	messenger_do_work(handle);
     
@@ -1431,6 +1521,7 @@ TEST_FUNCTION(messenger_state_on_event_sender_state_changed_callback_OPEN)
     ASSERT_IS_NOT_NULL(saved_messagesender_create_on_message_sender_state_changed);
 
     saved_messagesender_create_on_message_sender_state_changed((void*)handle, MESSAGE_SENDER_STATE_OPEN, MESSAGE_SENDER_STATE_IDLE);
+	crank_messenger_do_work(handle, do_work_profile);
 
     // assert
     ASSERT_ARE_EQUAL(int, saved_on_state_changed_callback_previous_state, MESSENGER_STATE_STARTING);
@@ -1447,7 +1538,8 @@ TEST_FUNCTION(messenger_state_on_event_sender_state_changed_callback_ERROR)
     MESSENGER_CONFIG* config = get_messenger_config();
     MESSENGER_HANDLE handle = create_and_start_messenger(config);
 
-	MESSENGER_DO_WORK_EXP_CALL_PROFILE *do_work_profile = get_msgr_do_work_exp_call_profile(MESSENGER_STATE_STARTING, false, false, 0, 0);
+	time_t current_time = time(NULL);
+	MESSENGER_DO_WORK_EXP_CALL_PROFILE *do_work_profile = get_msgr_do_work_exp_call_profile(MESSENGER_STATE_STARTING, false, false, 0, 0, current_time, DEFAULT_EVENT_SEND_TIMEOUT_SECS);
 	set_expected_calls_for_messenger_do_work(do_work_profile);
 	messenger_do_work(handle);
 
@@ -1455,6 +1547,7 @@ TEST_FUNCTION(messenger_state_on_event_sender_state_changed_callback_ERROR)
     ASSERT_IS_NOT_NULL(saved_messagesender_create_on_message_sender_state_changed);
 
     saved_messagesender_create_on_message_sender_state_changed((void*)handle, MESSAGE_SENDER_STATE_ERROR, MESSAGE_SENDER_STATE_IDLE);
+	crank_messenger_do_work(handle, do_work_profile);
 
     // assert
     ASSERT_ARE_EQUAL(int, saved_on_state_changed_callback_previous_state, MESSENGER_STATE_STARTING);
@@ -1511,7 +1604,7 @@ TEST_FUNCTION(messenger_stop_succeeds)
     MESSENGER_HANDLE handle = create_and_start_messenger2(config, true);
 
     umock_c_reset_all_calls();
-    set_expected_calls_for_messenger_stop(config, handle);
+    set_expected_calls_for_messenger_stop(0, 0, true);
 
     // act
     int result = messenger_stop(handle);
@@ -1548,7 +1641,7 @@ TEST_FUNCTION(messenger_destroy_NULL_handle)
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_162: [If `instance->state` is MESSENGER_STATE_STOPPING, messenger_do_work() shall move all items from `instance->in_progress_list` to the beginning of `instance->wait_to_send_list`]  
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_164: [If all items get successfuly moved back to `instance->wait_to_send_list`, `instance->state` shall be set to MESSENGER_STATE_STOPPED, and `instance->on_state_changed_callback` invoked]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_110: [If the `instance->state` is not MESSENGER_STATE_STOPPED, messenger_destroy() shall invoke messenger_stop() and messenger_do_work() once]  
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_111: [All elements of `instance->in_progress_list` and `instance->wait_to_send_list` shall be removed, invoking `task->on_event_send_complete_callback` for each with EVENT_SEND_COMPLETE_RESULT_MESSENGER_DESTROYED]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_111: [All elements of `instance->in_progress_list` and `instance->wait_to_send_list` shall be removed, invoking `task->on_event_send_complete_callback` for each with MESSENGER_EVENT_SEND_COMPLETE_RESULT_MESSENGER_DESTROYED]  
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_150: [`instance->in_progress_list` and `instance->wait_to_send_list` shall be destroyed using singlylinkedlist_destroy()]  
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_112: [`instance->iothub_host_fqdn` shall be destroyed using STRING_delete()]  
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_113: [`instance->device_id` shall be destroyed using STRING_delete()]  
@@ -1561,7 +1654,8 @@ TEST_FUNCTION(messenger_destroy_succeeds)
 
 	ASSERT_ARE_EQUAL(int, 1, send_events(handle, 1));
 
-	MESSENGER_DO_WORK_EXP_CALL_PROFILE* mdecp = get_msgr_do_work_exp_call_profile(MESSENGER_STATE_STARTED, true, true, 1, 0);
+	time_t current_time = time(NULL);
+	MESSENGER_DO_WORK_EXP_CALL_PROFILE* mdecp = get_msgr_do_work_exp_call_profile(MESSENGER_STATE_STARTED, true, true, 1, 0, current_time, DEFAULT_EVENT_SEND_TIMEOUT_SECS);
 	crank_messenger_do_work(handle, mdecp);
 
 	ASSERT_ARE_EQUAL(int, 1, send_events(handle, 1));
@@ -1587,7 +1681,8 @@ TEST_FUNCTION(messenger_destroy_FAIL_TO_ROLLBACK_EVENTS)
 
 	ASSERT_ARE_EQUAL(int, 1, send_events(handle, 1));
 
-	MESSENGER_DO_WORK_EXP_CALL_PROFILE* mdecp = get_msgr_do_work_exp_call_profile(MESSENGER_STATE_STARTED, true, true, 1, 0);
+	time_t current_time = time(NULL);
+	MESSENGER_DO_WORK_EXP_CALL_PROFILE* mdecp = get_msgr_do_work_exp_call_profile(MESSENGER_STATE_STARTED, true, true, 1, 0, current_time, DEFAULT_EVENT_SEND_TIMEOUT_SECS);
 	crank_messenger_do_work(handle, mdecp);
 
 	ASSERT_ARE_EQUAL(int, 1, send_events(handle, 1));
@@ -1670,7 +1765,8 @@ TEST_FUNCTION(messenger_do_work_send_events_success)
 	set_expected_calls_for_messenger_send_async();
 	int result = messenger_send_async(handle, TEST_IOTHUB_MESSAGE_LIST_HANDLE, TEST_on_event_send_complete, TEST_IOTHUB_CLIENT_HANDLE);
 
-	MESSENGER_DO_WORK_EXP_CALL_PROFILE *do_work_profile = get_msgr_do_work_exp_call_profile(MESSENGER_STATE_STARTED, false, false, 1, 0);
+	time_t current_time = time(NULL);
+	MESSENGER_DO_WORK_EXP_CALL_PROFILE *do_work_profile = get_msgr_do_work_exp_call_profile(MESSENGER_STATE_STARTED, false, false, 1, 0, current_time, DEFAULT_EVENT_SEND_TIMEOUT_SECS);
 
 	umock_c_reset_all_calls();
 	set_expected_calls_for_messenger_do_work(do_work_profile);
@@ -1706,7 +1802,8 @@ TEST_FUNCTION(messenger_do_work_create_message_receiver)
 
     (void)messenger_subscribe_for_messages(handle, TEST_on_new_message_received_callback, TEST_ON_NEW_MESSAGE_RECEIVED_CB_CONTEXT);
 
-	MESSENGER_DO_WORK_EXP_CALL_PROFILE *do_work_profile = get_msgr_do_work_exp_call_profile(MESSENGER_STATE_STARTED, true, false, 0, 0);
+	time_t current_time = time(NULL);
+	MESSENGER_DO_WORK_EXP_CALL_PROFILE *do_work_profile = get_msgr_do_work_exp_call_profile(MESSENGER_STATE_STARTED, true, false, 0, 0, current_time, DEFAULT_EVENT_SEND_TIMEOUT_SECS);
 	umock_c_reset_all_calls();
 	set_expected_calls_for_messenger_do_work(do_work_profile);
 
@@ -1843,10 +1940,15 @@ TEST_FUNCTION(messenger_state_on_message_receiver_state_changed_callback_ERROR)
     MESSENGER_CONFIG* config = get_messenger_config();
     MESSENGER_HANDLE handle = create_and_start_messenger2(config, true);
 
+	STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(time(NULL));
+
     // act
     ASSERT_IS_NOT_NULL(saved_messagereceiver_create_on_message_receiver_state_changed);
 
     saved_messagereceiver_create_on_message_receiver_state_changed(saved_messagereceiver_create_context, MESSAGE_RECEIVER_STATE_ERROR, MESSAGE_RECEIVER_STATE_OPEN);
+	
+	umock_c_reset_all_calls();
+	messenger_do_work(handle);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -1872,7 +1974,8 @@ TEST_FUNCTION(messenger_do_work_destroy_message_receiver)
 
     (void)messenger_unsubscribe_for_messages(handle);
 
-	MESSENGER_DO_WORK_EXP_CALL_PROFILE *do_work_profile = get_msgr_do_work_exp_call_profile(MESSENGER_STATE_STARTED, false, true, 0, 0);
+	time_t current_time = time(NULL);
+	MESSENGER_DO_WORK_EXP_CALL_PROFILE *do_work_profile = get_msgr_do_work_exp_call_profile(MESSENGER_STATE_STARTED, false, true, 0, 0, current_time, DEFAULT_EVENT_SEND_TIMEOUT_SECS);
 	umock_c_reset_all_calls();
 	set_expected_calls_for_messenger_do_work(do_work_profile);
 
@@ -1897,7 +2000,8 @@ TEST_FUNCTION(messenger_do_work_on_event_send_complete_OK)
 
 	send_events(handle, 1);
 
-	MESSENGER_DO_WORK_EXP_CALL_PROFILE *mdwp = get_msgr_do_work_exp_call_profile(MESSENGER_STATE_STARTED, false, false, 1, 0);
+	time_t current_time = time(NULL);
+	MESSENGER_DO_WORK_EXP_CALL_PROFILE *mdwp = get_msgr_do_work_exp_call_profile(MESSENGER_STATE_STARTED, false, false, 1, 0, current_time, DEFAULT_EVENT_SEND_TIMEOUT_SECS);
 	crank_messenger_do_work(handle, mdwp);
 
 	umock_c_reset_all_calls();
@@ -1911,7 +2015,7 @@ TEST_FUNCTION(messenger_do_work_on_event_send_complete_OK)
     // assert
 	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 	ASSERT_ARE_EQUAL(void_ptr, TEST_IOTHUB_MESSAGE_LIST_HANDLE, TEST_on_event_send_complete_message);
-	ASSERT_ARE_EQUAL(int, EVENT_SEND_COMPLETE_RESULT_OK, TEST_on_event_send_complete_result);
+	ASSERT_ARE_EQUAL(int, MESSENGER_EVENT_SEND_COMPLETE_RESULT_OK, TEST_on_event_send_complete_result);
 	ASSERT_ARE_EQUAL(void_ptr, TEST_IOTHUB_CLIENT_HANDLE, TEST_on_event_send_complete_context);
 
     // cleanup
@@ -1929,7 +2033,8 @@ TEST_FUNCTION(messenger_do_work_on_event_send_complete_ERROR)
 
 	send_events(handle, 1);
 
-	MESSENGER_DO_WORK_EXP_CALL_PROFILE *mdwp = get_msgr_do_work_exp_call_profile(MESSENGER_STATE_STARTED, false, false, 1, 0);
+	time_t current_time = time(NULL);
+	MESSENGER_DO_WORK_EXP_CALL_PROFILE *mdwp = get_msgr_do_work_exp_call_profile(MESSENGER_STATE_STARTED, false, false, 1, 0, current_time, DEFAULT_EVENT_SEND_TIMEOUT_SECS);
 	crank_messenger_do_work(handle, mdwp);
 
     umock_c_reset_all_calls();
@@ -1943,7 +2048,7 @@ TEST_FUNCTION(messenger_do_work_on_event_send_complete_ERROR)
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 	ASSERT_ARE_EQUAL(void_ptr, TEST_IOTHUB_MESSAGE_LIST_HANDLE, TEST_on_event_send_complete_message);
-	ASSERT_ARE_EQUAL(int, EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING, TEST_on_event_send_complete_result);
+	ASSERT_ARE_EQUAL(int, MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING, TEST_on_event_send_complete_result);
     ASSERT_ARE_EQUAL(void_ptr, TEST_IOTHUB_CLIENT_HANDLE, TEST_on_event_send_complete_context);
 
     // cleanup
@@ -1961,6 +2066,7 @@ TEST_FUNCTION(messenger_do_work_send_events_message_create_from_iothub_message_f
 	ASSERT_ARE_EQUAL(int, 1, send_events(handle, 1));
 
 	umock_c_reset_all_calls();
+	STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_IN_PROGRESS_LIST)).SetReturn(NULL);
 	STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_WAIT_TO_SEND_LIST));
 	EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
 	STRICT_EXPECTED_CALL(singlylinkedlist_remove(TEST_WAIT_TO_SEND_LIST, IGNORED_PTR_ARG))
@@ -1983,7 +2089,7 @@ TEST_FUNCTION(messenger_do_work_send_events_message_create_from_iothub_message_f
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 	ASSERT_ARE_EQUAL(void_ptr, TEST_IOTHUB_MESSAGE_LIST_HANDLE, TEST_on_event_send_complete_message);
-	ASSERT_ARE_EQUAL(int, EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE, TEST_on_event_send_complete_result);
+	ASSERT_ARE_EQUAL(int, MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE, TEST_on_event_send_complete_result);
 	ASSERT_ARE_EQUAL(void_ptr, TEST_IOTHUB_CLIENT_HANDLE, TEST_on_event_send_complete_context);
 
     // cleanup
@@ -2008,6 +2114,10 @@ TEST_FUNCTION(messenger_do_work_send_events_messagesender_send_fails)
 		ASSERT_ARE_EQUAL(int, 1, send_events(handle, 1));
 
 		umock_c_reset_all_calls();
+		// timeout checks
+		STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_IN_PROGRESS_LIST)).SetReturn(NULL);
+		
+		// send events
 		STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_WAIT_TO_SEND_LIST));
 		EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
 		STRICT_EXPECTED_CALL(singlylinkedlist_remove(TEST_WAIT_TO_SEND_LIST, IGNORED_PTR_ARG))
@@ -2018,6 +2128,7 @@ TEST_FUNCTION(messenger_do_work_send_events_messagesender_send_fails)
 			.IgnoreArgument(2);
 		STRICT_EXPECTED_CALL(messagesender_send(TEST_MESSAGE_SENDER_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
 			.IgnoreArgument(2).IgnoreArgument(3).IgnoreArgument(4).SetReturn(1);
+		EXPECTED_CALL(get_time(NULL)).SetReturn(INDEFINITE_TIME);
 		EXPECTED_CALL(message_destroy(IGNORED_PTR_ARG));
 		STRICT_EXPECTED_CALL(singlylinkedlist_find(TEST_IN_PROGRESS_LIST, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
 			.IgnoreArgument_match_function()
@@ -2030,7 +2141,7 @@ TEST_FUNCTION(messenger_do_work_send_events_messagesender_send_fails)
 
         // assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-		ASSERT_ARE_EQUAL(int, EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING, TEST_on_event_send_complete_result);
+		ASSERT_ARE_EQUAL(int, MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING, TEST_on_event_send_complete_result);
 
         if (i < (DEFAULT_EVENT_SEND_RETRY_LIMIT - 1))
         {
@@ -2257,7 +2368,8 @@ TEST_FUNCTION(messenger_unsubscribe_for_messages_success)
     // act
     int unsubscription_result = messenger_unsubscribe_for_messages(handle);
 
-	MESSENGER_DO_WORK_EXP_CALL_PROFILE *do_work_profile = get_msgr_do_work_exp_call_profile(MESSENGER_STATE_STARTED, false, true, 0, 0);
+	time_t current_time = time(NULL);
+	MESSENGER_DO_WORK_EXP_CALL_PROFILE *do_work_profile = get_msgr_do_work_exp_call_profile(MESSENGER_STATE_STARTED, false, true, 0, 0, current_time, DEFAULT_EVENT_SEND_TIMEOUT_SECS);
 	crank_messenger_do_work(handle, do_work_profile);
 
     // assert
@@ -2415,8 +2527,11 @@ TEST_FUNCTION(messenger_get_send_status_BUSY_succeeds)
 	MESSENGER_SEND_STATUS send_status_wts;
 	int result_wts = messenger_get_send_status(handle, &send_status_wts);
 
-	MESSENGER_DO_WORK_EXP_CALL_PROFILE *mdwp = get_msgr_do_work_exp_call_profile(MESSENGER_STATE_STARTED, false, false, 1, 0);
+	time_t current_time = time(NULL);
+	MESSENGER_DO_WORK_EXP_CALL_PROFILE *mdwp = get_msgr_do_work_exp_call_profile(MESSENGER_STATE_STARTED, false, false, 1, 0, current_time, DEFAULT_EVENT_SEND_TIMEOUT_SECS);
 	crank_messenger_do_work(handle, mdwp);
+
+	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
 	MESSENGER_SEND_STATUS send_status_ip;
 	int result_ip = messenger_get_send_status(handle, &send_status_ip);
@@ -2430,5 +2545,149 @@ TEST_FUNCTION(messenger_get_send_status_BUSY_succeeds)
 	// cleanup
 	messenger_destroy(handle);
 }
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_167: [If `messenger_handle` or `name` or `value` is NULL, messenger_set_option shall fail and return a non-zero value]
+TEST_FUNCTION(messenger_set_option_NULL_handle)
+{
+	// arrange
+	size_t value = 100;
+
+	// act
+	int result = messenger_set_option(NULL, MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, &value);
+
+	// assert
+	ASSERT_ARE_NOT_EQUAL(int, 0, result);
+
+	// cleanup
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_167: [If `messenger_handle` or `name` or `value` is NULL, messenger_set_option shall fail and return a non-zero value]
+TEST_FUNCTION(messenger_set_option_NULL_name)
+{
+	// arrange
+	MESSENGER_CONFIG* config = get_messenger_config();
+	MESSENGER_HANDLE handle = create_and_start_messenger2(config, false);
+
+	size_t value = 100;
+
+	// act
+	int result = messenger_set_option(handle, NULL, &value);
+
+	// assert
+	ASSERT_ARE_NOT_EQUAL(int, 0, result);
+	ASSERT_IS_NOT_NULL(handle);
+
+	// cleanup
+	messenger_destroy(handle);
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_167: [If `messenger_handle` or `name` or `value` is NULL, messenger_set_option shall fail and return a non-zero value]
+TEST_FUNCTION(messenger_set_option_NULL_value)
+{
+	// arrange
+	MESSENGER_CONFIG* config = get_messenger_config();
+	MESSENGER_HANDLE handle = create_and_start_messenger2(config, false);
+
+	// act
+	int result = messenger_set_option(handle, MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, NULL);
+
+	// assert
+	ASSERT_ARE_NOT_EQUAL(int, 0, result);
+	ASSERT_IS_NOT_NULL(handle);
+
+	// cleanup
+	messenger_destroy(handle);
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_168: [If name matches MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, `value` shall be saved on `instance->event_send_timeout_secs`]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_172: [If no errors occur, messenger_set_option shall return 0]
+TEST_FUNCTION(messenger_set_option_EVENT_SEND_TIMEOUT_SECS)
+{
+	// arrange
+	MESSENGER_CONFIG* config = get_messenger_config();
+	MESSENGER_HANDLE handle = create_and_start_messenger2(config, false);
+
+	size_t value = 100;
+
+	// act
+	int result = messenger_set_option(handle, MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, &value);
+
+	// assert
+	ASSERT_ARE_EQUAL(int, 0, result);
+	ASSERT_IS_NOT_NULL(handle);
+
+	// cleanup
+	messenger_destroy(handle);
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_169: [If name matches MESSENGER_OPTION_SAVED_OPTIONS, `value` shall be applied using OptionHandler_FeedOptions]
+TEST_FUNCTION(messenger_set_option_SAVED_OPTIONS)
+{
+	// arrange
+	MESSENGER_CONFIG* config = get_messenger_config();
+	MESSENGER_HANDLE handle = create_and_start_messenger2(config, false);
+
+	OPTIONHANDLER_HANDLE value = TEST_OPTIONHANDLER_HANDLE;
+	STRICT_EXPECTED_CALL(OptionHandler_FeedOptions(value, handle)).SetReturn(OPTIONHANDLER_OK);
+
+	// act
+	int result = messenger_set_option(handle, MESSENGER_OPTION_SAVED_OPTIONS, value);
+
+	// assert
+	ASSERT_ARE_EQUAL(int, 0, result);
+	ASSERT_IS_NOT_NULL(handle);
+
+	// cleanup
+	messenger_destroy(handle);
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_170: [If OptionHandler_FeedOptions fails, messenger_set_option shall fail and return a non-zero value]
+TEST_FUNCTION(messenger_set_option_OptionHandler_FeedOptions_fails)
+{
+	// arrange
+	MESSENGER_CONFIG* config = get_messenger_config();
+	MESSENGER_HANDLE handle = create_and_start_messenger2(config, false);
+
+	OPTIONHANDLER_HANDLE value = TEST_OPTIONHANDLER_HANDLE;
+	STRICT_EXPECTED_CALL(OptionHandler_FeedOptions(value, handle)).SetReturn(OPTIONHANDLER_ERROR);
+
+	// act
+	int result = messenger_set_option(handle, MESSENGER_OPTION_SAVED_OPTIONS, value);
+
+	// assert
+	ASSERT_ARE_NOT_EQUAL(int, 0, result);
+	ASSERT_IS_NOT_NULL(handle);
+
+	// cleanup
+	messenger_destroy(handle);
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_171: [If name does not match any supported option, authentication_set_option shall fail and return a non-zero value]
+TEST_FUNCTION(messenger_set_option_name_not_supported)
+{
+	// arrange
+	MESSENGER_CONFIG* config = get_messenger_config();
+	MESSENGER_HANDLE handle = create_and_start_messenger2(config, false);
+
+	size_t value = 100;
+
+	// act
+	int result = messenger_set_option(handle, "Bernie Sanders Forever!", &value);
+
+	// assert
+	ASSERT_ARE_NOT_EQUAL(int, 0, result);
+	ASSERT_IS_NOT_NULL(handle);
+
+	// cleanup
+	messenger_destroy(handle);
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_173: [If `messenger_handle` is NULL, messenger_retrieve_options shall fail and return NULL]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_174: [An OPTIONHANDLER_HANDLE instance shall be created using OptionHandler_Create]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_175: [If an OPTIONHANDLER_HANDLE instance fails to be created, messenger_retrieve_options shall fail and return NULL]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_176: [Each option of `instance` shall be added to the OPTIONHANDLER_HANDLE instance using OptionHandler_AddOption]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_177: [If OptionHandler_AddOption fails, messenger_retrieve_options shall fail and return NULL]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_178: [If messenger_retrieve_options fails, any allocated memory shall be freed]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_179: [If no failures occur, messenger_retrieve_options shall return the OPTIONHANDLER_HANDLE instance]
 
 END_TEST_SUITE(iothubtransport_amqp_messenger_ut)
