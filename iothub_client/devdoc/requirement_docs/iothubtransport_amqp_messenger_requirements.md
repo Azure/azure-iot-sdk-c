@@ -16,6 +16,9 @@ azure_uamqp_c
 ## Exposed API
 
 ```c
+	static const char* MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS = "event_send_timeout_secs";
+	static const char* MESSENGER_OPTION_SAVED_OPTIONS = "saved_messenger_options";
+
 	typedef enum MESSENGER_STATE_TAG
 	{
 		MESSENGER_STATE_STARTING,
@@ -71,6 +74,8 @@ azure_uamqp_c
 	extern int messenger_stop(MESSENGER_HANDLE messenger_handle);
 	extern void messenger_do_work(MESSENGER_HANDLE messenger_handle);
 	extern void messenger_destroy(MESSENGER_HANDLE messenger_handle);
+	extern int messenger_set_option(MESSENGER_HANDLE messenger_handle, const char* name, void* value);
+	extern OPTIONHANDLER_HANDLE messenger_retrieve_options(MESSENGER_HANDLE messenger_handle);
 ```
 
 
@@ -355,3 +360,31 @@ In that case, when they are rolled back, they need to go to the beginning of the
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_112: [**`instance->iothub_host_fqdn` shall be destroyed using STRING_delete()**]**  
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_113: [**`instance->device_id` shall be destroyed using STRING_delete()**]**  
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_114: [**messenger_destroy() shall destroy `instance` with free()**]**  
+
+
+## messenger_set_option
+
+```c
+	extern int messenger_set_option(MESSENGER_HANDLE messenger_handle, const char* name, void* value);
+```
+
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_167: [**If `messenger_handle` or `name` or `value` is NULL, messenger_set_option shall fail and return a non-zero value**]**
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_168: [**If name matches MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, `value` shall be saved on `instance->event_send_timeout_secs`**]**
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_169: [**If name matches MESSENGER_OPTION_SAVED_OPTIONS, `value` shall be applied using OptionHandler_FeedOptions**]**
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_170: [**If OptionHandler_FeedOptions fails, messenger_set_option shall fail and return a non-zero value**]**
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_171: [**If no errors occur, messenger_set_option shall return 0**]**
+
+
+## messenger_retrieve_options
+
+```c
+	extern OPTIONHANDLER_HANDLE messenger_retrieve_options(MESSENGER_HANDLE messenger_handle);
+```
+
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_172: [**If `messenger_handle` is NULL, messenger_retrieve_options shall fail and return NULL**]**
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_173: [**An OPTIONHANDLER_HANDLE instance shall be created using OptionHandler_Create**]**
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_174: [**If an OPTIONHANDLER_HANDLE instance fails to be created, messenger_retrieve_options shall fail and return NULL**]**
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_175: [**Each option of `instance` shall be added to the OPTIONHANDLER_HANDLE instance using OptionHandler_AddOption**]**
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_176: [**If OptionHandler_AddOption fails, messenger_retrieve_options shall fail and return NULL**]**
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_177: [**If messenger_retrieve_options fails, any allocated memory shall be freed**]**
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_178: [**If no failures occur, messenger_retrieve_options shall return the OPTIONHANDLER_HANDLE instance**]**
