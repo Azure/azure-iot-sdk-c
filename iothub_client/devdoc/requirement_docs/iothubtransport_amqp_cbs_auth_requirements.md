@@ -10,6 +10,11 @@ To have the actual authentication messages sent/received on the wire, connection
 ## Exposed API
 
 ```c
+#define AUTHENTICATION_OPTION_SAVED_OPTIONS               "saved_authentication_options"
+#define AUTHENTICATION_OPTION_CBS_REQUEST_TIMEOUT_SECS    "cbs_request_timeout_secs"
+#define AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS "sas_token_refresh_time_secs"
+#define AUTHENTICATION_OPTION_SAS_TOKEN_LIFETIME_SECS     "sas_token_lifetime_secs"
+
 typedef enum AUTHENTICATION_STATE_TAG
 {
 	AUTHENTICATION_STATE_STOPPED,
@@ -51,10 +56,8 @@ extern int authentication_start(AUTHENTICATION_HANDLE authentication_handle, con
 extern int authentication_stop(AUTHENTICATION_HANDLE authentication_handle);
 extern void authentication_do_work(AUTHENTICATION_HANDLE authentication_handle);
 extern void authentication_destroy(AUTHENTICATION_HANDLE authentication_handle);
-
-extern int authentication_set_cbs_request_timeout_secs(AUTHENTICATION_HANDLE authentication_handle, uint32_t value);
-extern int authentication_set_sas_token_refresh_time_secs(AUTHENTICATION_HANDLE authentication_handle, uint32_t value);
-extern int authentication_set_sas_token_lifetime_secs(AUTHENTICATION_HANDLE authentication_handle, uint32_t value);
+extern int authentication_set_option(AUTHENTICATION_HANDLE authentication_handle, const char* name, void* value);
+extern OPTIONHANDLER_HANDLE authentication_retrieve_options(AUTHENTICATION_HANDLE authentication_handle);
 ```
 
 
@@ -243,37 +246,37 @@ static void on_cbs_put_token_complete_callback(void* context, CBS_OPERATION_RESU
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_095: [**`instance->is_sas_token_refresh_in_progress` and `instance->is_cbs_put_token_in_progress` shall be set to FALSE**]**
 
 
-### authentication_set_cbs_request_timeout_secs
+
+
+### authentication_set_option
 
 ```c
-int authentication_set_cbs_request_timeout_secs(AUTHENTICATION_HANDLE authentication_handle, uint32 value)
+int authentication_set_option(AUTHENTICATION_HANDLE authentication_handle, const char* name, void* value)
 ```
 
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_097: [**If `authentication_handle` is NULL, authentication_set_cbs_request_timeout_secs() shall fail and return __LINE__**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_098: [**`value` shall be saved on `instance->cbs_request_timeout_secs`**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_099: [**authentication_set_cbs_request_timeout_secs() shall return 0**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_097: [**If `authentication_handle` or `name` or `value` is NULL, authentication_set_option shall fail and return a non-zero value**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_098: [**If name matches AUTHENTICATION_OPTION_CBS_REQUEST_TIMEOUT_SECS, `value` shall be saved on `instance->cbs_request_timeout_secs`**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_124: [**If name matches AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS, `value` shall be saved on `instance->sas_token_refresh_time_secs`**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_125: [**If name matches AUTHENTICATION_OPTION_SAS_TOKEN_LIFETIME_SECS, `value` shall be saved on `instance->sas_token_lifetime_secs`**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_098: [**If name matches AUTHENTICATION_OPTION_SAVED_OPTIONS, `value` shall be applied using OptionHandler_FeedOptions**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_126: [**If OptionHandler_FeedOptions fails, authentication_set_option shall fail and return a non-zero value**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_099: [**If no errors occur, authentication_set_option shall return 0**]**
 
 
-### authentication_set_sas_token_refresh_time_secs
+### authentication_retrieve_options
 
 ```c
-int authentication_set_sas_token_refresh_time_secs(AUTHENTICATION_HANDLE authentication_handle, uint32 value)
+OPTIONHANDLER_HANDLE authentication_retrieve_options(AUTHENTICATION_HANDLE authentication_handle)
 ```
 
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_100: [**If `authentication_handle` is NULL, authentication_set_sas_token_refresh_time_secs() shall fail and return __LINE__**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_101: [**`value` shall be saved on `instance->sas_token_refresh_time_secs`**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_102: [**authentication_set_sas_token_refresh_time_secs() shall return 0**]**
-
-
-### authentication_set_sas_token_lifetime_secs
-
-```c
-int authentication_set_sas_token_lifetime_secs(AUTHENTICATION_HANDLE authentication_handle, uint32 value)
-```
-
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_103: [**If `authentication_handle` is NULL, authentication_set_sas_token_lifetime_secs() shall fail and return __LINE__**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_104: [**`value` shall be saved on `instance->sas_token_lifetime_secs`**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_105: [**authentication_set_sas_token_lifetime_secs() shall return 0**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_100: [**If `authentication_handle` is NULL, authentication_retrieve_options shall fail and return NULL**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_101: [**An OPTIONHANDLER_HANDLE instance shall be created using OptionHandler_Create**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_102: [**If an OPTIONHANDLER_HANDLE instance fails to be created, authentication_retrieve_options shall fail and return NULL**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_103: [**Each option of `instance` shall be added to the OPTIONHANDLER_HANDLE instance using OptionHandler_AddOption**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_104: [**If OptionHandler_AddOption fails, authentication_retrieve_options shall fail and return NULL**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_105: [**If authentication_retrieve_options fails, any allocated memory shall be freed**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_127: [**If no failures occur, authentication_retrieve_options shall return the OPTIONHANDLER_HANDLE instance**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_128: [**If name does not match any supported option, authentication_set_option shall fail and return a non-zero value**]**
 
 
 ### authentication_destroy
