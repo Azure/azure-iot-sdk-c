@@ -28,4 +28,5 @@ Mico-controller based Internet Connectivity Operation System
 6. Copy the "demo" directory to MiCoder IDE workspace project explorer.
    Copy the "libraries" directory to MiCoder IDE workspace project explorer.
 7. Creatting make target "azureIotclient.mqtt@MK3239 total download run JTAG=stlink-v2"
+8. Download the code to board.
 
