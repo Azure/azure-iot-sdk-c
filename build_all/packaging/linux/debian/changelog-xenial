@@ -1,4 +1,4 @@
-azure-iot-sdk-c (0.1.0.0-10xenial) xenial; urgency=low
+azure-iot-sdk-c (0.1.0.0-11xenial) xenial; urgency=low
 
   * See https://github.com/Azure/azure-iot-sdk-c/releases for details of the release
 
