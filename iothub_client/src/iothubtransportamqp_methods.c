@@ -357,10 +357,9 @@ static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE messag
                                                 else
                                                 {
                                                     /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_056: [ On success the `on_message_received` callback shall return a newly constructed delivery state obtained by calling `messaging_delivery_accepted`. ]*/
-                                                    result = messaging_delivery_accepted();
                                                     if (result == NULL)
                                                     {
-                                                        /* Codes_**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_057: [ If `messaging_delivery_accepted` fails the RELEASED outcome with `amqp:decode-error` shall be returned. ]*/
+                                                        /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_057: [ If `messaging_delivery_accepted` fails the RELEASED outcome with `amqp:decode-error` shall be returned. ]*/
                                                         LogError("Cannot allocate memory for delivery state");
                                                         free(method_handle);
                                                         message_outcome = MESSAGE_OUTCOME_RELEASED;
@@ -393,6 +392,7 @@ static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE messag
                                                         else
                                                         {
                                                             message_outcome = MESSAGE_OUTCOME_ACCEPTED;
+                                                            result = messaging_delivery_accepted();
                                                         }
                                                     }
                                                 }

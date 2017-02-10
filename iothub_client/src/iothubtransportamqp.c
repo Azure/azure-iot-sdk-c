@@ -129,18 +129,36 @@ static STRING_HANDLE IoTHubTransportAMQP_GetHostname(TRANSPORT_LL_HANDLE handle)
     return IoTHubTransport_AMQP_Common_GetHostname(handle);
 }
 
-static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_Send_Message_Disposition(const char* messageId, IOTHUBMESSAGE_DISPOSITION_RESULT disposition, void* transportContext)
+static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_SendMessageDisposition(MESSAGE_CALLBACK_INFO* messageData, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
 {
-    (void)messageId;
     (void)disposition;
-    (void)transportContext;
+
+    IOTHUB_CLIENT_RESULT result;
+    if (messageData == NULL)
+    {
+        LogError("invalid argument; messageData is NULL");
+        result = IOTHUB_CLIENT_ERROR;
+    }
+    else
+    {
+        if (messageData->messageHandle || messageData->transportContext == NULL)
+        {
+            LogError("invalid argument; incomplete message data");
+            result = IOTHUB_CLIENT_ERROR;
+        }
+        else
+        {
+            /* TO BE IMPLEMENTED */
+            result = IOTHUB_CLIENT_ERROR;
+        }
+    }
 
     return IOTHUB_CLIENT_ERROR;
 }
 
 static TRANSPORT_PROVIDER thisTransportProvider = 
 {
-    IoTHubTransportAMQP_Send_Message_Disposition,   /*pfIotHubTransport_Send_Message_Disposition IoTHubTransport_Send_Message_Disposition;*/
+    IoTHubTransportAMQP_SendMessageDisposition,   /*pfIotHubTransport_Send_Message_Disposition IoTHubTransport_Send_Message_Disposition;*/
     IoTHubTransportAMQP_Subscribe_DeviceMethod,     /*pfIoTHubTransport_Subscribe_DeviceMethod IoTHubTransport_Subscribe_DeviceMethod;*/
     IoTHubTransportAMQP_Unsubscribe_DeviceMethod,   /*pfIoTHubTransport_Unsubscribe_DeviceMethod IoTHubTransport_Unsubscribe_DeviceMethod;*/
     IoTHubTransportAMQP_DeviceMethod_Response,

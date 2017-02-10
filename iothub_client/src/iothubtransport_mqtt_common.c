@@ -1223,10 +1223,19 @@ static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE msgHandle, void* call
                     }
                     else
                     {
-                        /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_056: [ If type is IOTHUB_TYPE_TELEMETRY, then on success mqtt_notification_callback shall call IoTHubClient_LL_MessageCallback. ] */
-                        if (IoTHubClient_LL_MessageCallback(transportData->llClientHandle, IoTHubMessage) != IOTHUBMESSAGE_ACCEPTED)
+                        MESSAGE_CALLBACK_INFO* messageData = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
+                        if (messageData == NULL)
                         {
-                            LogError("Event not accepted by our client.");
+                            LogError("malloc failed");
+                        }
+                        else
+                        {
+                            messageData->messageHandle = IoTHubMessage;
+                            messageData->transportContext = NULL;
+
+                            /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_056: [ If type is IOTHUB_TYPE_TELEMETRY, then on success mqtt_notification_callback shall call IoTHubClient_LL_MessageCallback. ] */
+                            IoTHubClient_LL_MessageCallback(transportData->llClientHandle, messageData);
+							free(messageData);
                         }
                     }
                     IoTHubMessage_Destroy(IoTHubMessage);

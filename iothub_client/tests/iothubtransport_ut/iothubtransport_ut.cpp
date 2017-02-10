@@ -225,7 +225,7 @@ public:
         MOCK_STATIC_METHOD_1(, void, FAKE_IoTHubTransport_Unsubscribe_DeviceTwin, IOTHUB_DEVICE_HANDLE, handle)
         MOCK_VOID_METHOD_END()
 
-        MOCK_STATIC_METHOD_3(, IOTHUB_CLIENT_RESULT, FAKE_IoTHubTransport_Send_Message_Disposition, const char*, messageId, IOTHUBMESSAGE_DISPOSITION_RESULT, disposition, void*, transportContext)
+        MOCK_STATIC_METHOD_2(, IOTHUB_CLIENT_RESULT, FAKE_IoTHubTransport_SendMessageDisposition, MESSAGE_CALLBACK_INFO*, messageData, IOTHUBMESSAGE_DISPOSITION_RESULT, disposition)
         MOCK_METHOD_END(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK)
 
         MOCK_STATIC_METHOD_3(, IOTHUB_PROCESS_ITEM_RESULT, FAKE_IoTHubTransport_ProcessItem, TRANSPORT_LL_HANDLE, handle, IOTHUB_IDENTITY_TYPE, item_type, IOTHUB_IDENTITY_INFO*, iothub_item)
@@ -394,7 +394,7 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CIotHubTransportMocks, , int, FAKE_IoTHubTransport_
 DECLARE_GLOBAL_MOCK_METHOD_1(CIotHubTransportMocks, , void, FAKE_IoTHubTransport_Unsubscribe_DeviceMethod, IOTHUB_DEVICE_HANDLE, handle);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIotHubTransportMocks, , int, FAKE_IoTHubTransport_Subscribe_DeviceTwin, IOTHUB_DEVICE_HANDLE, handle);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIotHubTransportMocks, , void, FAKE_IoTHubTransport_Unsubscribe_DeviceTwin, IOTHUB_DEVICE_HANDLE, handle);
-DECLARE_GLOBAL_MOCK_METHOD_3(CIotHubTransportMocks, , IOTHUB_CLIENT_RESULT, FAKE_IoTHubTransport_Send_Message_Disposition, const char*, messageId, IOTHUBMESSAGE_DISPOSITION_RESULT, disposition, void*, transportContext);
+DECLARE_GLOBAL_MOCK_METHOD_2(CIotHubTransportMocks, , IOTHUB_CLIENT_RESULT, FAKE_IoTHubTransport_SendMessageDisposition, MESSAGE_CALLBACK_INFO*, messageData, IOTHUBMESSAGE_DISPOSITION_RESULT, disposition);
 DECLARE_GLOBAL_MOCK_METHOD_3(CIotHubTransportMocks, , IOTHUB_PROCESS_ITEM_RESULT, FAKE_IoTHubTransport_ProcessItem, TRANSPORT_LL_HANDLE, handle, IOTHUB_IDENTITY_TYPE, item_type, IOTHUB_IDENTITY_INFO*, iothub_item);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIotHubTransportMocks, , STRING_HANDLE, FAKE_IoTHubTransport_GetHostname, TRANSPORT_LL_HANDLE, handle);
 DECLARE_GLOBAL_MOCK_METHOD_3(CIotHubTransportMocks, , IOTHUB_CLIENT_RESULT, FAKE_IoTHubTransport_SetOption, TRANSPORT_LL_HANDLE, handle, const char*, optionName, const void*, value);
@@ -451,7 +451,7 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CIotHubTransportMocks, , LOCK_RESULT, Lock_Deinit, 
 
 static TRANSPORT_PROVIDER FAKE_transport_provider =
 {
-    FAKE_IoTHubTransport_Send_Message_Disposition,
+    FAKE_IoTHubTransport_SendMessageDisposition,
     FAKE_IoTHubTransport_Subscribe_DeviceMethod,
     FAKE_IoTHubTransport_Unsubscribe_DeviceMethod,
     FAKE_IoTHubTransport_DeviceMethod_Response,

@@ -202,8 +202,6 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_SetMessageCallback(IOTHUB_CLIENT_HANDLE
 
 **SRS_IOTHUBCLIENT_01_018: [** When `IoTHubClient_LL_SetMessageCallback_Ex` is called, `IoTHubClient_SetMessageCallback` shall return the result of `IoTHubClient_LL_SetMessageCallback_Ex`. **]**
 
-**SRS_IOTHUBCLIENT_10_030: [** If `messageCallback` is NULL, `IoTHubClient_SetMessageCallback` shall call `IoTHubClient_LL_SetMessageCallback`.**]*/
-
 **SRS_IOTHUBCLIENT_01_027: [** `IoTHubClient_SetMessageCallback` shall be made thread-safe by using the lock created in `IoTHubClient_Create`. **]**
 
 **SRS_IOTHUBCLIENT_01_028: [** If acquiring the lock fails, `IoTHubClient_SetMessageCallback` shall return `IOTHUB_CLIENT_ERROR`. **]**

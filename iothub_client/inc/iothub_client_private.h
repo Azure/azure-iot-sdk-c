@@ -32,18 +32,16 @@ extern "C"
 #define API_VERSION "?api-version=2016-11-14"
 #define REJECT_QUERY_PARAMETER "&reject"
 
-typedef IOTHUBMESSAGE_DISPOSITION_RESULT(*IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC_EX)(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback, void* transportContext);
+typedef bool(*IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC_EX)(MESSAGE_CALLBACK_INFO* messageData, void* userContextCallback);
 
 MOCKABLE_FUNCTION(, void, IoTHubClient_LL_SendComplete, IOTHUB_CLIENT_LL_HANDLE, handle, PDLIST_ENTRY, completed, IOTHUB_CLIENT_CONFIRMATION_RESULT, result);
 MOCKABLE_FUNCTION(, void, IoTHubClient_LL_ReportedStateComplete, IOTHUB_CLIENT_LL_HANDLE, handle, uint32_t, item_id, int, status_code);
-MOCKABLE_FUNCTION(, bool, IoTHubClient_LL_IsDispositionReportingAsync, IOTHUB_CLIENT_LL_HANDLE, handle);
-MOCKABLE_FUNCTION(, IOTHUBMESSAGE_DISPOSITION_RESULT, IoTHubClient_LL_MessageCallback, IOTHUB_CLIENT_LL_HANDLE, handle, IOTHUB_MESSAGE_HANDLE, message);
-MOCKABLE_FUNCTION(, IOTHUBMESSAGE_DISPOSITION_RESULT, IoTHubClient_LL_MessageCallback_Ex, IOTHUB_CLIENT_LL_HANDLE, handle, IOTHUB_MESSAGE_HANDLE, message, void*, transportContext);
+MOCKABLE_FUNCTION(, bool, IoTHubClient_LL_MessageCallback, IOTHUB_CLIENT_LL_HANDLE, handle, MESSAGE_CALLBACK_INFO*, messageData);
 MOCKABLE_FUNCTION(, void, IoTHubClient_LL_RetrievePropertyComplete, IOTHUB_CLIENT_LL_HANDLE, handle, DEVICE_TWIN_UPDATE_STATE, update_state, const unsigned char*, payLoad, size_t, size);
 MOCKABLE_FUNCTION(, int, IoTHubClient_LL_DeviceMethodComplete, IOTHUB_CLIENT_LL_HANDLE, handle, const char*, method_name, const unsigned char*, payLoad, size_t, size, METHOD_HANDLE, response_id);
 MOCKABLE_FUNCTION(, void, IotHubClient_LL_ConnectionStatusCallBack, IOTHUB_CLIENT_LL_HANDLE, handle, IOTHUB_CLIENT_CONNECTION_STATUS, status, IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason);
-MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SetMessageCallback_Ex, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC_EX, messageCallback, void*, userContextCallback);
-MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_Send_Message_Disposition, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_MESSAGE_HANDLE, message, IOTHUBMESSAGE_DISPOSITION_RESULT, disposition, void*, transportContext);
+MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SetMessageCallbackEx, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC_EX, messageCallback, void*, userContextCallback);
+MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SendMessageDisposition, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, MESSAGE_CALLBACK_INFO*, messageData, IOTHUBMESSAGE_DISPOSITION_RESULT, disposition);
 
 
 typedef struct IOTHUB_MESSAGE_LIST_TAG

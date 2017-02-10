@@ -346,28 +346,22 @@ static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE messag
     }
     else
     {
-        IOTHUBMESSAGE_DISPOSITION_RESULT disposition_result;
-
-        // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_104: [The callback 'on_message_received' shall invoke IoTHubClient_LL_MessageCallback() passing the client and the incoming message handles as parameters] 
-        disposition_result = IoTHubClient_LL_MessageCallback((IOTHUB_CLIENT_LL_HANDLE)context, iothub_message);
-
-        // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_197: [The callback 'on_message_received' shall destroy the IOTHUB_MESSAGE_HANDLE instance after invoking IoTHubClient_LL_MessageCallback().]
-        IoTHubMessage_Destroy(iothub_message);
-
-        // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_105: [The callback 'on_message_received' shall return the result of messaging_delivery_accepted() if the IoTHubClient_LL_MessageCallback() returns IOTHUBMESSAGE_ACCEPTED] 
-        if (disposition_result == IOTHUBMESSAGE_ACCEPTED)
+        MESSAGE_CALLBACK_INFO* messageData = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
+        if (messageData == NULL)
         {
-            result = messaging_delivery_accepted();
-        }
-        // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_106: [The callback 'on_message_received' shall return the result of messaging_delivery_released() if the IoTHubClient_LL_MessageCallback() returns IOTHUBMESSAGE_ABANDONED] 
-        else if (disposition_result == IOTHUBMESSAGE_ABANDONED)
-        {
+            LogError("malloc failed");
             result = messaging_delivery_released();
         }
-        // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_107: [The callback 'on_message_received' shall return the result of messaging_delivery_rejected("Rejected by application", "Rejected by application") if the IoTHubClient_LL_MessageCallback() returns IOTHUBMESSAGE_REJECTED] 
-        else if (disposition_result == IOTHUBMESSAGE_REJECTED)
+        else
         {
-            result = messaging_delivery_rejected("Rejected by application", "Rejected by application");
+            messageData->messageHandle = iothub_message;
+            messageData->transportContext = NULL;
+
+            // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_104: [The callback 'on_message_received' shall invoke IoTHubClient_LL_MessageCallback() passing the client and the incoming message handles as parameters] 
+            if (IoTHubClient_LL_MessageCallback((IOTHUB_CLIENT_LL_HANDLE)context, messageData) == IOTHUBMESSAGE_ABANDONED)
+            {
+                result = messaging_delivery_released();
+            }
         }
     }
 

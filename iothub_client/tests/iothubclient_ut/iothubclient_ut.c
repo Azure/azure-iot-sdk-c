@@ -260,7 +260,7 @@ static IOTHUB_CLIENT_RESULT my_IoTHubClient_LL_SetMessageCallback(IOTHUB_CLIENT_
     return IOTHUB_CLIENT_OK;
 }
 
-static IOTHUB_CLIENT_RESULT my_IoTHubClient_LL_SetMessageCallback_Ex(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC_EX messageCallback, void* userContextCallback)
+static IOTHUB_CLIENT_RESULT my_IoTHubClient_LL_SetMessageCallbackEx(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC_EX messageCallback, void* userContextCallback)
 {
     (void)iotHubClientHandle;
     g_messageCallback_ex = messageCallback;
@@ -419,8 +419,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_LL_SetOption, IOTHUB_CLIENT_ERROR);
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_SetMessageCallback, my_IoTHubClient_LL_SetMessageCallback);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_LL_SetMessageCallback, IOTHUB_CLIENT_ERROR);
-    REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_SetMessageCallback_Ex, my_IoTHubClient_LL_SetMessageCallback_Ex);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_LL_SetMessageCallback_Ex, IOTHUB_CLIENT_ERROR);
+    REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_SetMessageCallbackEx, my_IoTHubClient_LL_SetMessageCallbackEx);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_LL_SetMessageCallbackEx, IOTHUB_CLIENT_ERROR);
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_SetConnectionStatusCallback, my_IoTHubClient_LL_SetConnectionStatusCallback);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_LL_SetConnectionStatusCallback, IOTHUB_CLIENT_ERROR);
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_SetDeviceTwinCallback, my_IoTHubClient_LL_SetDeviceTwinCallback);
@@ -1136,7 +1136,7 @@ TEST_FUNCTION(IoTHubClient_SetMessageCallback_succeed)
     EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument_size();
-    STRICT_EXPECTED_CALL(IoTHubClient_LL_SetMessageCallback_Ex(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_SetMessageCallbackEx(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument_messageCallback()
         .IgnoreArgument_userContextCallback();
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
@@ -2471,7 +2471,9 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_message_callback_succeed)
     // arrange
     IOTHUB_CLIENT_HANDLE iothub_handle = IoTHubClient_Create(TEST_CLIENT_CONFIG);
     (void)IoTHubClient_SetMessageCallback(iothub_handle, test_message_confirmation_callback, NULL);
-    g_messageCallback_ex(NULL, g_userContextCallback, NULL);
+    MESSAGE_CALLBACK_INFO* testMessage = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
+    testMessage->messageHandle = IoTHubMessage_CreateFromString("Hello World");
+    g_messageCallback_ex(testMessage, g_userContextCallback);
     umock_c_reset_all_calls();
 
     g_how_thread_loops = 1;
@@ -2489,14 +2491,9 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_message_callback_succeed)
     STRICT_EXPECTED_CALL(VECTOR_element(TEST_VECTOR_HANDLE, 0));
     STRICT_EXPECTED_CALL(test_message_confirmation_callback(NULL, NULL));
 
-    STRICT_EXPECTED_CALL(IoTHubClient_LL_Send_Message_Disposition(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IOTHUBMESSAGE_ACCEPTED, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_SendMessageDisposition(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IOTHUBMESSAGE_ACCEPTED))
         .IgnoreArgument_iotHubClientHandle()
-        .IgnoreArgument_message()
-        .IgnoreArgument_transportContext();
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
-        .IgnoreArgument_iotHubMessageHandle();
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
-        .IgnoreArgument_ptr();
+        .IgnoreArgument_messageData();
     STRICT_EXPECTED_CALL(VECTOR_destroy(TEST_VECTOR_HANDLE));
     STRICT_EXPECTED_CALL(ThreadAPI_Sleep(1));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
@@ -2512,6 +2509,8 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_message_callback_succeed)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     // cleanup
+    IoTHubMessage_Destroy(testMessage->messageHandle);
+    free(testMessage);
     IoTHubClient_Destroy(iothub_handle);
 }
 

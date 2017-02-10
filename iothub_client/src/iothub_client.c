@@ -99,12 +99,6 @@ typedef struct METHOD_CALLBACK_INFO_TAG
     METHOD_HANDLE method_id;
 } METHOD_CALLBACK_INFO;
 
-typedef struct MESSAGE_CALLBACK_INFO_TAG
-{
-    IOTHUB_MESSAGE_HANDLE message;
-    void* transport_context;
-} MESSAGE_CALLBACK_INFO;
-
 typedef struct USER_CALLBACK_INFO_TAG
 {
     USER_CALLBACK_TYPE type;
@@ -116,7 +110,7 @@ typedef struct USER_CALLBACK_INFO_TAG
         REPORTED_STATE_CALLBACK_INFO reported_state_cb_info;
         CONNECTION_STATUS_CALLBACK_INFO connection_status_cb_info;
         METHOD_CALLBACK_INFO method_cb_info;
-        MESSAGE_CALLBACK_INFO message_cb_info;
+        MESSAGE_CALLBACK_INFO* message_cb_info;
     } iothub_callback;
 } USER_CALLBACK_INFO;
 
@@ -178,35 +172,29 @@ static void garbageCollectorImpl(IOTHUB_CLIENT_INSTANCE* iotHubClientInstance)
 }
 #endif
 
-static IOTHUBMESSAGE_DISPOSITION_RESULT iothub_ll_message_callback(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback, void* transportContext)
+static bool iothub_ll_message_callback(MESSAGE_CALLBACK_INFO* messageData, void* userContextCallback)
 {
-    IOTHUBMESSAGE_DISPOSITION_RESULT result;
+    bool result;
     IOTHUB_QUEUE_CONTEXT* queue_context = (IOTHUB_QUEUE_CONTEXT*)userContextCallback;
     if (queue_context == NULL)
     {
         LogError("invalid parameter userContextCallback(NULL)");
-        result = IOTHUBMESSAGE_ABANDONED;
+        result = false;
     }
     else
     {
         USER_CALLBACK_INFO queue_cb_info;
         queue_cb_info.type = CALLBACK_TYPE_MESSAGE;
         queue_cb_info.userContextCallback = queue_context->userContextCallback;
-        queue_cb_info.iothub_callback.message_cb_info.message = message;
-        queue_cb_info.iothub_callback.message_cb_info.transport_context = transportContext;
+        queue_cb_info.iothub_callback.message_cb_info = messageData;
         if (VECTOR_push_back(queue_context->iotHubClientHandle->saved_user_callback_list, &queue_cb_info, 1) == 0)
         {
-            result = IOTHUBMESSAGE_ACCEPTED;
+            result = true;
         }
         else
         {
             LogError("message callback vector push failed.");
-			IoTHubMessage_Destroy(message);
-			free(transportContext);
-	        queue_cb_info.iothub_callback.message_cb_info.message = NULL;
-    	    queue_cb_info.iothub_callback.message_cb_info.transport_context = NULL;
-			
-            result = IOTHUBMESSAGE_ABANDONED;
+            result = false;
         }
     }
     return result;
@@ -421,17 +409,13 @@ static void dispatch_user_callbacks(IOTHUB_CLIENT_INSTANCE* iotHubClientInstance
                 case CALLBACK_TYPE_MESSAGE:
                     if (iotHubClientInstance->message_callback)
                     {
-                        IOTHUBMESSAGE_DISPOSITION_RESULT disposition = iotHubClientInstance->message_callback(queued_cb->iothub_callback.message_cb_info.message, queued_cb->userContextCallback);
+                        IOTHUBMESSAGE_DISPOSITION_RESULT disposition = iotHubClientInstance->message_callback(queued_cb->iothub_callback.message_cb_info->messageHandle, queued_cb->userContextCallback);
                         IOTHUB_CLIENT_LL_HANDLE handle = iotHubClientInstance->message_user_context->iotHubClientHandle->IoTHubClientLLHandle;
 
-                        IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_Send_Message_Disposition(handle, queued_cb->iothub_callback.message_cb_info.message, disposition, queued_cb->iothub_callback.message_cb_info.transport_context);
-                        IoTHubMessage_Destroy(queued_cb->iothub_callback.message_cb_info.message);
-                        queued_cb->iothub_callback.message_cb_info.message = NULL;
-                        free(queued_cb->iothub_callback.message_cb_info.transport_context);
-                        queued_cb->iothub_callback.message_cb_info.transport_context = NULL;
+                        IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_SendMessageDisposition(handle, queued_cb->iothub_callback.message_cb_info, disposition);
                         if (result != IOTHUB_CLIENT_OK)
                         {
-                            LogError("IoTHubClient_LL_Send_Message_Disposition failed for message '%s'", IoTHubMessage_GetMessageId(queued_cb->iothub_callback.message_cb_info.message));
+                            LogError("IoTHubClient_LL_Send_Message_Disposition failed");
                         }
                     }
                     break;
@@ -988,36 +972,28 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetMessageCallback(IOTHUB_CLIENT_HANDLE iotHub
             }
             else
             {
-                if (messageCallback == NULL)
+                if (iotHubClientInstance->message_user_context != NULL)
                 {
-                    /* Codes_**SRS_IOTHUBCLIENT_10_030: [If messageCallback is NULL, IoTHubClient_SetMessageCallback shall call IoTHubClient_LL_SetMessageCallback.]*/
-                    result = IoTHubClient_LL_SetMessageCallback(iotHubClientInstance->IoTHubClientLLHandle, messageCallback, userContextCallback);
+                    free(iotHubClientInstance->message_user_context);
+                }
+                iotHubClientInstance->message_user_context = (IOTHUB_QUEUE_CONTEXT*)malloc(sizeof(IOTHUB_QUEUE_CONTEXT));
+                if (iotHubClientInstance->message_user_context == NULL)
+                {
+                    result = IOTHUB_CLIENT_ERROR;
+                    LogError("Failed allocating QUEUE_CONTEXT");
                 }
                 else
                 {
-                    if (iotHubClientInstance->message_user_context != NULL)
-                    {
-                        free(iotHubClientInstance->message_user_context);
-                    }
-                    iotHubClientInstance->message_user_context = (IOTHUB_QUEUE_CONTEXT*)malloc(sizeof(IOTHUB_QUEUE_CONTEXT));
-                    if (iotHubClientInstance->message_user_context == NULL)
-                    {
-                        result = IOTHUB_CLIENT_ERROR;
-                        LogError("Failed allocating QUEUE_CONTEXT");
-                    }
-                    else
-                    {
-                        iotHubClientInstance->message_user_context->iotHubClientHandle = iotHubClientHandle;
-                        iotHubClientInstance->message_user_context->userContextCallback = userContextCallback;
+                    iotHubClientInstance->message_user_context->iotHubClientHandle = iotHubClientHandle;
+                    iotHubClientInstance->message_user_context->userContextCallback = userContextCallback;
 
-                        /* Codes_SRS_IOTHUBCLIENT_01_017: [IoTHubClient_SetMessageCallback shall call IoTHubClient_LL_SetMessageCallback, while passing the IoTHubClient_LL handle created by IoTHubClient_Create and the parameters messageCallback and userContextCallback.] */
-                        result = IoTHubClient_LL_SetMessageCallback_Ex(iotHubClientInstance->IoTHubClientLLHandle, iothub_ll_message_callback, iotHubClientInstance->message_user_context);
-                        if (result != IOTHUB_CLIENT_OK)
-                        {
-                            LogError("IoTHubClient_LL_SetMessageCallback failed");
-                            free(iotHubClientInstance->message_user_context);
-                            iotHubClientInstance->message_user_context = NULL;
-                        }
+                    /* Codes_SRS_IOTHUBCLIENT_01_017: [IoTHubClient_SetMessageCallback shall call IoTHubClient_LL_SetMessageCallback, while passing the IoTHubClient_LL handle created by IoTHubClient_Create and the parameters messageCallback and userContextCallback.] */
+                    result = IoTHubClient_LL_SetMessageCallbackEx(iotHubClientInstance->IoTHubClientLLHandle, iothub_ll_message_callback, iotHubClientInstance->message_user_context);
+                    if (result != IOTHUB_CLIENT_OK)
+                    {
+                        LogError("IoTHubClient_LL_SetMessageCallback failed");
+                        free(iotHubClientInstance->message_user_context);
+                        iotHubClientInstance->message_user_context = NULL;
                     }
                 }
             }

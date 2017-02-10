@@ -540,7 +540,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_RETURN(STRING_concat, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat, __LINE__);
 
-    REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_LL_MessageCallback, IOTHUBMESSAGE_ACCEPTED);
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_LL_MessageCallback, true);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat, IOTHUBMESSAGE_REJECTED);
 
     REGISTER_GLOBAL_MOCK_HOOK(IotHubClient_LL_ConnectionStatusCallBack, my_IotHubClient_LL_ConnectionStatusCallBack);
@@ -791,8 +791,14 @@ static void setup_message_recv_with_properties_mocks()
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_LL_MessageCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_IOTHUB_MSG_BYTEARRAY));
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(TEST_IOTHUB_MSG_BYTEARRAY));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        .IgnoreArgument_size();
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_MessageCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_PTR_ARG))
+        .IgnoreArgument_messageData();
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument_ptr();
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+        .IgnoreArgument_iotHubMessageHandle();
 }
 
 static void setup_start_retry_timer_mocks()
@@ -1117,9 +1123,15 @@ static void setup_message_recv_msg_callback_mocks(IOTHUBMESSAGE_DISPOSITION_RESU
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_LL_MessageCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_IOTHUB_MSG_BYTEARRAY))
-        .SetReturn(msg_disposition);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(TEST_IOTHUB_MSG_BYTEARRAY));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        .IgnoreArgument_size();
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_MessageCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_PTR_ARG))
+        .IgnoreArgument_messageData()
+        .SetReturn(msg_disposition != IOTHUBMESSAGE_ABANDONED);
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument_ptr();
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+        .IgnoreArgument_iotHubMessageHandle();
 }
 
 static XIO_HANDLE get_IO_transport(const char* fully_qualified_name)
@@ -3912,8 +3924,14 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_sys_Properties_succee
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_LL_MessageCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_IOTHUB_MSG_BYTEARRAY));
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(TEST_IOTHUB_MSG_BYTEARRAY));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        .IgnoreArgument_size();
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_MessageCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_PTR_ARG))
+        .IgnoreArgument_messageData();
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument_ptr();
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+        .IgnoreArgument_iotHubMessageHandle();
 
     // act
     ASSERT_IS_NOT_NULL(g_fnMqttMsgRecv);
