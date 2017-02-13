@@ -4,6 +4,10 @@
 cmake_minimum_required(VERSION 2.8.11)
 #this is CMakeLists for iothub_client
 
+if(POLICY CMP0042)
+    cmake_policy(SET CMP0042 NEW)
+endif()
+
 compileAsC99()
 
 set(iothub_client_ll_transport_c_files
