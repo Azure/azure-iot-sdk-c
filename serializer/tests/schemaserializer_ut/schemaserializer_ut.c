@@ -39,46 +39,6 @@ static void my_gballoc_free(void * t)
 #include "schemaserializer.h"
 #include "testrunnerswitcher.h"
 
-#if 0
-TYPED_MOCK_CLASS(CSchemaSerializerMocks, CGlobalMock)
-{
-public:
-    /* Schema mocks */
-    MOCK_STATIC_METHOD_2(, SCHEMA_RESULT, Schema_GetModelActionCount, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, size_t*, actionCount)
-    MOCK_METHOD_END(SCHEMA_RESULT, SCHEMA_OK);
-    MOCK_STATIC_METHOD_1(, const char*, Schema_GetModelActionName, SCHEMA_ACTION_HANDLE, actionHandle)
-    MOCK_METHOD_END(const char*, NULL);
-    MOCK_STATIC_METHOD_2(, SCHEMA_ACTION_HANDLE, Schema_GetModelActionByIndex, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, size_t, index)
-    MOCK_METHOD_END(SCHEMA_ACTION_HANDLE, NULL);
-    MOCK_STATIC_METHOD_2(, SCHEMA_RESULT, Schema_GetModelActionArgumentCount, SCHEMA_ACTION_HANDLE, actionHandle, size_t*, argumentCount)
-    MOCK_METHOD_END(SCHEMA_RESULT, SCHEMA_OK);
-    MOCK_STATIC_METHOD_2(, SCHEMA_ACTION_ARGUMENT_HANDLE, Schema_GetModelActionArgumentByIndex, SCHEMA_ACTION_HANDLE, actionHandle, size_t, argumentIndex)
-    MOCK_METHOD_END(SCHEMA_ACTION_ARGUMENT_HANDLE, NULL);
-    MOCK_STATIC_METHOD_1(, const char*, Schema_GetActionArgumentName, SCHEMA_ACTION_ARGUMENT_HANDLE, actionArgumentHandle)
-    MOCK_METHOD_END(const char*, NULL);
-    MOCK_STATIC_METHOD_1(, const char*, Schema_GetActionArgumentType, SCHEMA_ACTION_ARGUMENT_HANDLE, actionArgumentHandle)
-    MOCK_METHOD_END(const char*, NULL);
-
-    /* Strings mocks */
-    MOCK_STATIC_METHOD_2(, int, STRING_concat, STRING_HANDLE, s1, const char*, s2)
-    MOCK_METHOD_END(int, 0);
-};
-
-DECLARE_GLOBAL_MOCK_METHOD_2(CSchemaSerializerMocks, , SCHEMA_RESULT, Schema_GetModelActionCount, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, size_t*, actionCount);
-DECLARE_GLOBAL_MOCK_METHOD_1(CSchemaSerializerMocks, , const char*, Schema_GetModelActionName, SCHEMA_ACTION_HANDLE, actionHandle);
-DECLARE_GLOBAL_MOCK_METHOD_2(CSchemaSerializerMocks, , SCHEMA_ACTION_HANDLE, Schema_GetModelActionByIndex, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, size_t, index);
-DECLARE_GLOBAL_MOCK_METHOD_2(CSchemaSerializerMocks, , SCHEMA_RESULT, Schema_GetModelActionArgumentCount, SCHEMA_ACTION_HANDLE, actionHandle, size_t*, argumentCount);
-DECLARE_GLOBAL_MOCK_METHOD_2(CSchemaSerializerMocks, , SCHEMA_ACTION_ARGUMENT_HANDLE, Schema_GetModelActionArgumentByIndex, SCHEMA_ACTION_HANDLE, actionHandle, size_t, argumentIndex);
-DECLARE_GLOBAL_MOCK_METHOD_1(CSchemaSerializerMocks, , const char*, Schema_GetActionArgumentName, SCHEMA_ACTION_ARGUMENT_HANDLE, actionArgumentHandle);
-DECLARE_GLOBAL_MOCK_METHOD_1(CSchemaSerializerMocks, , const char*, Schema_GetActionArgumentType, SCHEMA_ACTION_ARGUMENT_HANDLE, actionArgumentHandle);
-DECLARE_GLOBAL_MOCK_METHOD_2(CSchemaSerializerMocks, , int, STRING_concat, STRING_HANDLE, s1, const char*, s2);
-
-static MICROMOCK_MUTEX_HANDLE g_testByTest;
-
-DEFINE_MICROMOCK_ENUM_TO_STRING(SCHEMA_SERIALIZER_RESULT, SCHEMA_SERIALIZER_RESULT_VALUES);
-
-static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
-#endif
 
 #define TEST_STRING_HANDLE  (STRING_HANDLE)0x4242
 #define TEST_MODEL_HANDLE   (SCHEMA_MODEL_TYPE_HANDLE)0x4243
@@ -99,66 +59,63 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 }
 
 static TEST_MUTEX_HANDLE g_testByTest;
+static TEST_MUTEX_HANDLE g_dllByDll;
 
 BEGIN_TEST_SUITE(SchemaSerializer_ut)
 
-TEST_SUITE_INITIALIZE(TestClassInitialize)
-{
-    g_testByTest = TEST_MUTEX_CREATE();
-    ASSERT_IS_NOT_NULL(g_testByTest);
-
-    (void)umock_c_init(on_umock_c_error);
-    (void)umocktypes_bool_register_types();
-    (void)umocktypes_charptr_register_types();
-    (void)umocktypes_stdint_register_types();
-
-    REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_MODEL_TYPE_HANDLE, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_ACTION_HANDLE, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_ACTION_ARGUMENT_HANDLE, void*);
-    
-    
-    REGISTER_GLOBAL_MOCK_RETURN(STRING_concat, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat, __LINE__);
-    REGISTER_GLOBAL_MOCK_RETURN(Schema_GetModelActionCount, SCHEMA_OK);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetModelActionCount, SCHEMA_ERROR);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetModelActionByIndex, NULL);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetModelActionName, NULL);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetModelActionArgumentCount, SCHEMA_ERROR);
-    REGISTER_GLOBAL_MOCK_RETURN(Schema_GetModelActionArgumentCount, SCHEMA_OK);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetModelActionArgumentByIndex, NULL);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetActionArgumentName, NULL);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetActionArgumentType, NULL);
-    
-    
-    
-    
-    
-    
-    
-}
-
-TEST_SUITE_CLEANUP(TestClassCleanup)
-{
-    umock_c_deinit();
-
-    TEST_MUTEX_DESTROY(g_testByTest);
-}
-
-TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
-{
-    if (TEST_MUTEX_ACQUIRE(g_testByTest))
+    TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
-        ASSERT_FAIL("our mutex is ABANDONED. Failure in test framework");
+        TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
+        g_testByTest = TEST_MUTEX_CREATE();
+        ASSERT_IS_NOT_NULL(g_testByTest);
+
+        (void)umock_c_init(on_umock_c_error);
+        (void)umocktypes_bool_register_types();
+        (void)umocktypes_charptr_register_types();
+        (void)umocktypes_stdint_register_types();
+
+        REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_MODEL_TYPE_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_ACTION_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_ACTION_ARGUMENT_HANDLE, void*);
+    
+    
+        REGISTER_GLOBAL_MOCK_RETURN(STRING_concat, 0);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat, __LINE__);
+        REGISTER_GLOBAL_MOCK_RETURN(Schema_GetModelActionCount, SCHEMA_OK);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetModelActionCount, SCHEMA_ERROR);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetModelActionByIndex, NULL);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetModelActionName, NULL);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetModelActionArgumentCount, SCHEMA_ERROR);
+        REGISTER_GLOBAL_MOCK_RETURN(Schema_GetModelActionArgumentCount, SCHEMA_OK);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetModelActionArgumentByIndex, NULL);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetActionArgumentName, NULL);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetActionArgumentType, NULL);
+
     }
 
-    umock_c_reset_all_calls();
-}
+    TEST_SUITE_CLEANUP(TestClassCleanup)
+    {
+        umock_c_deinit();
 
-TEST_FUNCTION_CLEANUP(TestMethodCleanup)
-{
-    TEST_MUTEX_RELEASE(g_testByTest);
-}
+        TEST_MUTEX_DESTROY(g_testByTest);
+    }
+
+    TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
+    {
+        if (TEST_MUTEX_ACQUIRE(g_testByTest))
+        {
+            ASSERT_FAIL("our mutex is ABANDONED. Failure in test framework");
+        }
+
+        umock_c_reset_all_calls();
+    }
+
+    TEST_FUNCTION_CLEANUP(TestMethodCleanup)
+    {
+        TEST_MUTEX_RELEASE(g_testByTest);
+        TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
+    }
 
 
     /* SchemaSerializer_SerializeCommandMetadata */
