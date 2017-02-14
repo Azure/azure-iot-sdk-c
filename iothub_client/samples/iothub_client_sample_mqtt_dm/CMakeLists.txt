@@ -23,9 +23,7 @@ endmacro(compileAsC99)
 
 compileAsC99()
 
-if(WIN32)
-    message(STATUS "iothub_client_sample_firmware_update can not be generated on windows")
-else()
+if(UNIX)
 
     set(AZUREIOT_INC_FOLDER "pi_device" "../../../serializer/inc" "." "/usr/include/azureiot" "/usr/include/azureiot/inc")
 
@@ -49,6 +47,7 @@ else()
         umqtt
         pthread
         curl
+        ssl
         crypto
         m
     )
