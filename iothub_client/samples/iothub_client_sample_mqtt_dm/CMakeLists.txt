@@ -23,39 +23,40 @@ endmacro(compileAsC99)
 
 compileAsC99()
 
-if(WIN32)  
-	message(FATAL_ERROR "iothub_client_sample_firmware_update can not be generated on windows")
+if(WIN32)
+    message(STATUS "iothub_client_sample_firmware_update can not be generated on windows")
+else()
+
+    set(AZUREIOT_INC_FOLDER "pi_device" "../../../serializer/inc" "." "/usr/include/azureiot" "/usr/include/azureiot/inc")
+
+    include_directories(${AZUREIOT_INC_FOLDER})
+
+    set(iothub_client_sample_mqtt_dm_c_files
+        iothub_client_sample_mqtt_dm.c
+        pi_device/pi.c
+    )
+    set(iothub_client_sample_mqtt_dm_h_files
+        iothub_client_sample_mqtt_dm.h
+    )
+
+    add_executable(iothub_client_sample_mqtt_dm ${iothub_client_sample_mqtt_dm_c_files} ${iothub_client_sample_mqtt_dm_h_files})
+
+    target_link_libraries(iothub_client_sample_mqtt_dm
+        iothub_client
+        iothub_client_mqtt_transport
+        serializer
+        aziotsharedutil
+        umqtt
+        pthread
+        curl
+        ssl
+        crypto
+        m
+    )
+
+    set(iothub_install_files pi_device/iothub_client_sample_firmware_update.service .device_connection_string)
+
+    install (TARGETS iothub_client_sample_mqtt_dm DESTINATION "/usr/share/iothub_client_sample")
+    install (FILES ${iothub_install_files} DESTINATION "/usr/share/iothub_client_sample")
+
 endif()  
-
-set(AZUREIOT_INC_FOLDER "pi_device" "." "/usr/include/azureiot" "/usr/include/azureiot/inc")
-
-include_directories(${AZUREIOT_INC_FOLDER})
-
-set(iothub_client_sample_mqtt_dm_c_files
-	iothub_client_sample_mqtt_dm.c
-	pi_device/pi.c
-)
-set(iothub_client_sample_mqtt_dm_h_files
-	iothub_client_sample_mqtt_dm.h
-)
-
-add_executable(firmware_update ${iothub_client_sample_mqtt_dm_c_files} ${iothub_client_sample_mqtt_dm_h_files})
-
-target_link_libraries(firmware_update
-	iothub_client
-	iothub_client_mqtt_transport
-	serializer
-	aziotsharedutil
-	umqtt
-	pthread
-	curl
-	ssl
-	crypto
-	m
-)
-
-set(iothub_install_files pi_device/iothub_client_sample_firmware_update.service .device_connection_string)
-
-install (TARGETS firmware_update DESTINATION "/usr/share/iothub_client_sample")
-install (FILES ${iothub_install_files} DESTINATION "/usr/share/iothub_client_sample")
-
