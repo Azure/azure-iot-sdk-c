@@ -47,7 +47,6 @@ if(UNIX)
         umqtt
         pthread
         curl
-        ssl
         crypto
         m
     )
