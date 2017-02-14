@@ -49,7 +49,6 @@ else()
         umqtt
         pthread
         curl
-        ssl
         crypto
         m
     )
