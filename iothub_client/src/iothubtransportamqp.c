@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#include "iothub_client_private.h"
 #include "iothubtransportamqp.h" 
 #include "iothubtransport_amqp_common.h"
 #include "azure_c_shared_utility/tlsio.h"
@@ -129,19 +130,19 @@ static STRING_HANDLE IoTHubTransportAMQP_GetHostname(TRANSPORT_LL_HANDLE handle)
     return IoTHubTransport_AMQP_Common_GetHostname(handle);
 }
 
-static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_SendMessageDisposition(MESSAGE_CALLBACK_INFO* messageData, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
+static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_SendMessageDisposition(MESSAGE_CALLBACK_INFO* message_data, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
 {
     (void)disposition;
 
     IOTHUB_CLIENT_RESULT result;
-    if (messageData == NULL)
+    if (message_data == NULL)
     {
         LogError("invalid argument; messageData is NULL");
         result = IOTHUB_CLIENT_ERROR;
     }
     else
     {
-        if (messageData->messageHandle || messageData->transportContext == NULL)
+        if (message_data->messageHandle || message_data->transportContext == NULL)
         {
             LogError("invalid argument; incomplete message data");
             result = IOTHUB_CLIENT_ERROR;

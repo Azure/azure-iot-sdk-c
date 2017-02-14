@@ -20,10 +20,12 @@ typedef void* METHOD_HANDLE;
 #include "azure_c_shared_utility/strings.h"
 #include "iothub_message.h"
 
+struct TRANSPORT_CONTEXT_DATA_TAG;
+typedef struct TRANSPORT_CONTEXT_DATA_TAG* MESSAGE_TRANSPORT_CONTEXT_HANDLE;
 typedef struct MESSAGE_CALLBACK_INFO_TAG
 {
     IOTHUB_MESSAGE_HANDLE messageHandle;
-    void* transportContext;
+    MESSAGE_TRANSPORT_CONTEXT_HANDLE transportContext;
 }MESSAGE_CALLBACK_INFO;
 
 #include "iothub_client_ll.h"

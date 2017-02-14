@@ -252,14 +252,6 @@ static IOTHUB_CLIENT_RESULT my_IoTHubClient_LL_GetLastMessageReceiveTime(IOTHUB_
     return IOTHUB_CLIENT_OK;
 }
 
-static IOTHUB_CLIENT_RESULT my_IoTHubClient_LL_SetMessageCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC messageCallback, void* userContextCallback)
-{
-    (void)iotHubClientHandle;
-    g_messageCallback = messageCallback;
-    g_userContextCallback = userContextCallback;
-    return IOTHUB_CLIENT_OK;
-}
-
 static IOTHUB_CLIENT_RESULT my_IoTHubClient_LL_SetMessageCallbackEx(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC_EX messageCallback, void* userContextCallback)
 {
     (void)iotHubClientHandle;
@@ -417,8 +409,6 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_LL_GetLastMessageReceiveTime, IOTHUB_CLIENT_ERROR);
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_LL_SetOption, IOTHUB_CLIENT_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_LL_SetOption, IOTHUB_CLIENT_ERROR);
-    REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_SetMessageCallback, my_IoTHubClient_LL_SetMessageCallback);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_LL_SetMessageCallback, IOTHUB_CLIENT_ERROR);
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_SetMessageCallbackEx, my_IoTHubClient_LL_SetMessageCallbackEx);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_LL_SetMessageCallbackEx, IOTHUB_CLIENT_ERROR);
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_SetConnectionStatusCallback, my_IoTHubClient_LL_SetConnectionStatusCallback);
@@ -1153,7 +1143,6 @@ TEST_FUNCTION(IoTHubClient_SetMessageCallback_succeed)
     IoTHubClient_Destroy(iothub_handle);
 }
 
-/* Tests_SRS_IOTHUBCLIENT_25_084: [ If `iotHubClientHandle` is `NULL`, `IoTHubClient_SetConnectionStatusCallback` shall return `IOTHUB_CLIENT_INVALID_ARG`.]*/
 /* Tests_SRS_IOTHUBCLIENT_01_015: [If starting the thread fails, IoTHubClient_SetMessageCallback shall return IOTHUB_CLIENT_ERROR.] */
 /* Tests_SRS_IOTHUBCLIENT_01_016: [If iotHubClientHandle is NULL, IoTHubClient_SetMessageCallback shall return IOTHUB_CLIENT_INVALID_ARG.] */
 /* Tests_SRS_IOTHUBCLIENT_01_028: [If acquiring the lock fails, IoTHubClient_SetMessageCallback shall return IOTHUB_CLIENT_ERROR.] */
@@ -1192,6 +1181,38 @@ TEST_FUNCTION(IoTHubClient_SetMessageCallback_fail)
     // cleanup
     IoTHubClient_Destroy(iothub_handle);
     umock_c_negative_tests_deinit();
+}
+
+/* Tests_SRS_IOTHUBCLIENT_01_018: [When IoTHubClient_LL_SetMessageCallbackEx is called, IoTHubClient_SetMessageCallback shall return the result of IoTHubClient_LL_SetMessageCallbackEx.] */
+TEST_FUNCTION(IoTHubClient_SetMessageCallback_fails_if_SetMessageCallbackEx_fails)
+{
+    // arrange
+    IOTHUB_CLIENT_HANDLE iothub_handle = IoTHubClient_Create(TEST_CLIENT_CONFIG);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
+        .IgnoreArgument_handle();
+    STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        .IgnoreArgument_size();
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_SetMessageCallbackEx(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreAllArguments()
+        .SetReturn(IOTHUB_CLIENT_ERROR);
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument_ptr();
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
+        .IgnoreArgument_handle();
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_SetMessageCallback(iothub_handle, test_message_confirmation_callback, NULL);
+
+    // assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubClient_Destroy(iothub_handle);
 }
 
 TEST_FUNCTION(IoTHubClient_SetConnectionStatusCallback_client_handle_NULL_fail)

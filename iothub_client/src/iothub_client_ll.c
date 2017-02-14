@@ -846,9 +846,9 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendEventAsync(IOTHUB_CLIENT_LL_HANDLE iotH
 IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetMessageCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC messageCallback, void* userContextCallback)
 {
     IOTHUB_CLIENT_RESULT result;
-    /*Codes_SRS_IOTHUBCLIENT_LL_02_016: [IoTHubClient_LL_SetMessageCallback shall fail and return IOTHUB_CLIENT_INVALID_ARG if parameter iotHubClientHandle is NULL.] */
     if (iotHubClientHandle == NULL)
     {
+        /*Codes_SRS_IOTHUBCLIENT_LL_02_016: [IoTHubClient_LL_SetMessageCallback shall fail and return IOTHUB_CLIENT_INVALID_ARG if parameter iotHubClientHandle is NULL.] */
         result = IOTHUB_CLIENT_INVALID_ARG;
         LOG_ERROR_RESULT;
     }
@@ -859,11 +859,13 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetMessageCallback(IOTHUB_CLIENT_LL_HANDLE 
         {
             if (handleData->messageCallbackType == MESSAGE_CALLBACK_NONE)
             {
+                /*Codes_SRS_IOTHUBCLIENT_LL_10_010: [If parameter messageCallback is NULL and the _SetMessageCallback had not been called to subscribe for messages, then IoTHubClient_LL_SetMessageCallback shall fail and return IOTHUB_CLIENT_ERROR.] */
                 LogError("not currently set to accept or process incoming messages.");
                 result = IOTHUB_CLIENT_ERROR;
             }
             else if (handleData->messageCallbackType == MESSAGE_CALLBACK_ASYNC)
             {
+                /*Codes_SRS_IOTHUBCLIENT_LL_10_010: [If parameter messageCallback is NULL and the _SetMessageCallback had not been called to subscribe for messages, then IoTHubClient_LL_SetMessageCallback shall fail and return IOTHUB_CLIENT_ERROR.] */
                 LogError("Invalid workflow sequence. Please unregister using the MessageCallbackEx function.");
                 result = IOTHUB_CLIENT_ERROR;
             }
@@ -880,27 +882,31 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetMessageCallback(IOTHUB_CLIENT_LL_HANDLE 
         }
         else
         {
-            /*Codes_SRS_IOTHUBCLIENT_LL_02_017: [If parameter messageCallback is non-NULL then IoTHubClient_LL_SetMessageCallback shall call the underlying layer's _Subscribe function.]*/
             if (handleData->messageCallbackType == MESSAGE_CALLBACK_ASYNC)
             {
+                /* Codes_SRS_IOTHUBCLIENT_LL_10_011: [If parameter messageCallback is non-NULL and the _SetMessageCallbackEx had been used to susbscribe for messages, then IoTHubClient_LL_SetMessageCallback shall fail and return IOTHUB_CLIENT_ERROR.] */
                 LogError("Invalid workflow sequence. Please unregister using the MessageCallbackEx function before registering with MessageCallback.");
                 result = IOTHUB_CLIENT_ERROR;
             }
-            else if (handleData->IoTHubTransport_Subscribe(handleData->deviceHandle) == 0)
-            {
-                handleData->messageCallbackType = MESSAGE_CALLBACK_LEGACY;
-                handleData->messageCallback = messageCallback;
-                handleData->messageUserContextCallback = userContextCallback;
-                result = IOTHUB_CLIENT_OK;
-            }
             else
             {
-                handleData->messageCallbackType = MESSAGE_CALLBACK_NONE;
-                handleData->messageCallback = NULL;
-                handleData->messageCallbackEx = NULL;
-                handleData->messageUserContextCallback = NULL;
-                /*Codes_SRS_IOTHUBCLIENT_LL_02_018: [If the underlying layer's _Subscribe function fails, then IoTHubClient_LL_SetMessageCallback shall fail and return IOTHUB_CLIENT_ERROR. Otherwise IoTHubClient_LL_SetMessageCallback shall succeed and return IOTHUB_CLIENT_OK.]*/
-                result = IOTHUB_CLIENT_ERROR;
+                if (handleData->IoTHubTransport_Subscribe(handleData->deviceHandle) == 0)
+                {
+                    /*Codes_SRS_IOTHUBCLIENT_LL_02_017: [If parameter messageCallback is non-NULL then IoTHubClient_LL_SetMessageCallback shall call the underlying layer's _Subscribe function.]*/
+                    handleData->messageCallbackType = MESSAGE_CALLBACK_LEGACY;
+                    handleData->messageCallback = messageCallback;
+                    handleData->messageUserContextCallback = userContextCallback;
+                    result = IOTHUB_CLIENT_OK;
+                }
+                else
+                {
+                    /*Codes_SRS_IOTHUBCLIENT_LL_02_018: [If the underlying layer's _Subscribe function fails, then IoTHubClient_LL_SetMessageCallback shall fail and return IOTHUB_CLIENT_ERROR. Otherwise IoTHubClient_LL_SetMessageCallback shall succeed and return IOTHUB_CLIENT_OK.]*/
+                    handleData->messageCallbackType = MESSAGE_CALLBACK_NONE;
+                    handleData->messageCallback = NULL;
+                    handleData->messageCallbackEx = NULL;
+                    handleData->messageUserContextCallback = NULL;
+                    result = IOTHUB_CLIENT_ERROR;
+                }
             }
         }
     }
@@ -919,47 +925,78 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetMessageCallbackEx(IOTHUB_CLIENT_LL_HANDL
     else
     {
         IOTHUB_CLIENT_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LL_HANDLE_DATA*)iotHubClientHandle;
-        if (handleData->messageCallback == NULL)
+        if (messageCallback == NULL)
         {
-            /*Codes_SRS_IOTHUBCLIENT_LL_10_024: [If parameter messageCallback is non-NULL then IoTHubClient_LL_SetMessageCallbackEx shall call the underlying layer's _Subscribe function.]*/
-            if (handleData->IoTHubTransport_Subscribe(handleData->deviceHandle) == 0)
+            if (handleData->messageCallbackType == MESSAGE_CALLBACK_NONE)
             {
-                handleData->messageCallbackEx = messageCallback;
-                handleData->messageUserContextCallback = userContextCallback;
-                result = IOTHUB_CLIENT_OK;
+                /*Codes_SRS_IOTHUBCLIENT_LL_10_018: [If parameter messageCallback is NULL and IoTHubClient_LL_SetMessageCallbackEx had not been used to subscribe for messages, then IoTHubClient_LL_SetMessageCallbackEx shall fail and return IOTHUB_CLIENT_ERROR.] */
+                LogError("not currently set to accept or process incoming messages.");
+                result = IOTHUB_CLIENT_ERROR;
+            }
+            else if (handleData->messageCallbackType == MESSAGE_CALLBACK_LEGACY)
+            {
+                /*Codes_SRS_IOTHUBCLIENT_LL_10_019: [If parameter messageCallback is NULL and IoTHubClient_LL_SetMessageCallback had been used to subscribe for messages, then IoTHubClient_LL_SetMessageCallbackEx shall fail and return IOTHUB_CLIENT_ERROR.] */
+                LogError("Invalid workflow sequence. Please unregister using the MessageCallback function.");
+                result = IOTHUB_CLIENT_ERROR;
             }
             else
             {
-                /*Codes_SRS_IOTHUBCLIENT_LL_10_025: [If the underlying layer's _Subscribe function fails, then IoTHubClient_LL_SetMessageCallbackEx shall fail and return IOTHUB_CLIENT_ERROR. Otherwise IoTHubClient_LL_SetMessageCallback shall succeed and return IOTHUB_CLIENT_OK.]*/
+                /*Codes_SRS_IOTHUBCLIENT_LL_10_023: [If parameter messageCallback is NULL then IoTHubClient_LL_SetMessageCallbackEx shall call the underlying layer's _Unsubscribe function and return IOTHUB_CLIENT_OK.] */ 
+                handleData->IoTHubTransport_Unsubscribe(handleData->deviceHandle);
+                handleData->messageCallbackType = MESSAGE_CALLBACK_NONE;
+                handleData->messageCallback = NULL;
                 handleData->messageCallbackEx = NULL;
                 handleData->messageUserContextCallback = NULL;
-                result = IOTHUB_CLIENT_ERROR;
+                result = IOTHUB_CLIENT_OK;
             }
         }
         else
         {
-            /*Codes_SRS_IOTHUBCLIENT_LL_10_022: [IoTHubClient_LL_SetMessageCallbackEx shall fail and return IOTHUB_CLIENT_ERROR if the client has an active subscription with a call to IoTHubClient_LL_SetMessageCallback.]*/
-            LogError("Invalid workflow sequence. Please unregister the MessageCallback function before registering a MessageCallbackEx");
-            result = IOTHUB_CLIENT_ERROR;
+            if (handleData->messageCallbackType == MESSAGE_CALLBACK_LEGACY)
+            {
+                /*Codes_SRS_IOTHUBCLIENT_LL_10_020: [If parameter messageCallback is non-NULL, and IoTHubClient_LL_SetMessageCallback had been used to subscribe for messages, then IoTHubClient_LL_SetMessageCallbackEx shall fail and return IOTHUB_CLIENT_ERROR.] */
+                LogError("Invalid workflow sequence. Please unregister using the MessageCallbackEx function before registering with MessageCallback.");
+                result = IOTHUB_CLIENT_ERROR;
+            }
+            else
+            {
+                if (handleData->IoTHubTransport_Subscribe(handleData->deviceHandle) == 0)
+                {
+                    /*Codes_SRS_IOTHUBCLIENT_LL_10_024: [If parameter messageCallback is non-NULL then IoTHubClient_LL_SetMessageCallbackEx shall call the underlying layer's _Subscribe function.]*/
+                    handleData->messageCallbackType = MESSAGE_CALLBACK_ASYNC;
+                    handleData->messageCallbackEx = messageCallback;
+                    handleData->messageUserContextCallback = userContextCallback;
+                    result = IOTHUB_CLIENT_OK;
+                }
+                else
+                {
+                    /*Codes_SRS_IOTHUBCLIENT_LL_10_025: [If the underlying layer's _Subscribe function fails, then IoTHubClient_LL_SetMessageCallbackEx shall fail and return IOTHUB_CLIENT_ERROR. Otherwise IoTHubClient_LL_SetMessageCallbackEx shall succeed and return IOTHUB_CLIENT_OK.] */
+                    handleData->messageCallbackType = MESSAGE_CALLBACK_NONE;
+                    handleData->messageCallback = NULL;
+                    handleData->messageCallbackEx = NULL;
+                    handleData->messageUserContextCallback = NULL;
+                    result = IOTHUB_CLIENT_ERROR;
+                }
+            }
         }
     }
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendMessageDisposition(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, MESSAGE_CALLBACK_INFO* messageData, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendMessageDisposition(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, MESSAGE_CALLBACK_INFO* message_data, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
 {
     IOTHUB_CLIENT_RESULT result;
-    if ((iotHubClientHandle == NULL) || (messageData == NULL))
+    if ((iotHubClientHandle == NULL) || (message_data == NULL))
     {
-        /*Codes_SRS_IOTHUBCLIENT_LL_10_006: [IoTHubClient_LL_SendMessageDisposition shall fail and return IOTHUB_CLIENT_INVALID_ARG if parameter iotHubClientHandle is NULL.]*/
-        LogError("Invalid argument handle=%p, message=%p", iotHubClientHandle, messageData);
+        /*Codes_SRS_IOTHUBCLIENT_LL_10_026: [IoTHubClient_LL_SendMessageDisposition shall fail and return IOTHUB_CLIENT_INVALID_ARG if parameter iotHubClientHandle is NULL.]*/
+        LogError("Invalid argument handle=%p, message=%p", iotHubClientHandle, message_data);
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else
     {
         IOTHUB_CLIENT_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LL_HANDLE_DATA*)iotHubClientHandle;
-        /*Codes_SRS_IOTHUBCLIENT_LL_10_007: [IoTHubClient_LL_SendMessageDisposition shall return the result from calling the underlying layer's _Send_Message_Disposition.]*/
-        result = handleData->IoTHubTransport_SendMessageDisposition(messageData, disposition);
+        /*Codes_SRS_IOTHUBCLIENT_LL_10_027: [IoTHubClient_LL_SendMessageDisposition shall return the result from calling the underlying layer's _Send_Message_Disposition.]*/
+        result = handleData->IoTHubTransport_SendMessageDisposition(message_data, disposition);
     }
     return result;
 }

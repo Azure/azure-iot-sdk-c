@@ -987,7 +987,8 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetMessageCallback(IOTHUB_CLIENT_HANDLE iotHub
                     iotHubClientInstance->message_user_context->iotHubClientHandle = iotHubClientHandle;
                     iotHubClientInstance->message_user_context->userContextCallback = userContextCallback;
 
-                    /* Codes_SRS_IOTHUBCLIENT_01_017: [IoTHubClient_SetMessageCallback shall call IoTHubClient_LL_SetMessageCallback, while passing the IoTHubClient_LL handle created by IoTHubClient_Create and the parameters messageCallback and userContextCallback.] */
+                    /* Codes_SRS_IOTHUBCLIENT_01_017: [IoTHubClient_SetMessageCallback shall call IoTHubClient_LL_SetMessageCallbackEx, while passing the IoTHubClient_LL handle created by IoTHubClient_Create and the parameters messageCallback and userContextCallback.] */
+                    /* Codes_SRS_IOTHUBCLIENT_01_018: [When IoTHubClient_LL_SetMessageCallbackEx is called, IoTHubClient_SetMessageCallback shall return the result of IoTHubClient_LL_SetMessageCallbackEx.] */
                     result = IoTHubClient_LL_SetMessageCallbackEx(iotHubClientInstance->IoTHubClientLLHandle, iothub_ll_message_callback, iotHubClientInstance->message_user_context);
                     if (result != IOTHUB_CLIENT_OK)
                     {

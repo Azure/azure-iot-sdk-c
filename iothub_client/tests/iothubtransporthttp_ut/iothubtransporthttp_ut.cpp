@@ -4267,17 +4267,35 @@ TEST_FUNCTION(IoTHubTransportHttp_SendMessageDisposition_with_NULL_handle_fails)
     mocks.AssertActualAndExpectedCalls();
 }
 
-typedef struct TRANSPORT_CONTEXT_DATA_TAG
+typedef struct HTTPTRANSPORT_HANDLE_DATA_TAG
 {
     void* handleData;
     void* deviceData;
-} TRANSPORT_CONTEXT_DATA;
+} HTTPTRANSPORT_HANDLE_DATA;
+
+MESSAGE_CALLBACK_INFO* make_transport_context_data(IOTHUB_MESSAGE_HANDLE message, void* thd, void* dd)
+{
+    MESSAGE_CALLBACK_INFO* result = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
+    result->messageHandle = message;
+    if (thd == NULL && dd == NULL)
+    {
+        result->transportContext = NULL;
+    }
+    else
+    {
+        HTTPTRANSPORT_HANDLE_DATA* tc = (HTTPTRANSPORT_HANDLE_DATA*)malloc(sizeof(HTTPTRANSPORT_HANDLE_DATA));
+        tc->handleData = thd;
+        tc->deviceData = dd;
+        result->transportContext = (MESSAGE_TRANSPORT_CONTEXT_HANDLE)tc;
+    }
+
+    return result;
+}
 //Tests_SRS_TRANSPORTMULTITHTTP_10_002: [If one or both of transportContext fields are NULL, IoTHubTransportHttp_SendMessageDisposition shall fail and return IOTHUB_CLIENT_ERROR.]
 TEST_FUNCTION(IoTHubTransportHttp_SendMessageDisposition_with_NULL_handle_data_fails)
 {
     ///arrange
     CIoTHubTransportHttpMocks mocks;
-    TRANSPORT_CONTEXT_DATA data = { NULL, (void*)0x44 };
 
     ///act
     IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_SendMessageDisposition(NULL, IOTHUBMESSAGE_ACCEPTED);
@@ -4288,14 +4306,83 @@ TEST_FUNCTION(IoTHubTransportHttp_SendMessageDisposition_with_NULL_handle_data_f
 }
 
 //Tests_SRS_TRANSPORTMULTITHTTP_10_002: [If one or both of transportContext fields are NULL, IoTHubTransportHttp_SendMessageDisposition shall fail and return IOTHUB_CLIENT_ERROR.]
+TEST_FUNCTION(IoTHubTransportHttp_SendMessageDisposition_with_NULL_message_data_fails)
+{
+    ///arrange
+    CIoTHubTransportHttpMocks mocks;
+    MESSAGE_CALLBACK_INFO* test_message = make_transport_context_data(NULL, NULL, NULL);
+    mocks.ResetAllCalls();
+
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    ///act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_SendMessageDisposition(test_message, IOTHUBMESSAGE_ACCEPTED);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+    mocks.AssertActualAndExpectedCalls();
+}
+
+//Tests_SRS_TRANSPORTMULTITHTTP_10_002: [If one or both of transportContext fields are NULL, IoTHubTransportHttp_SendMessageDisposition shall fail and return IOTHUB_CLIENT_ERROR.]
+TEST_FUNCTION(IoTHubTransportHttp_SendMessageDisposition_with_NULL_context_data_fails)
+{
+    ///arrange
+    CIoTHubTransportHttpMocks mocks;
+    MESSAGE_CALLBACK_INFO* test_message = make_transport_context_data((IOTHUB_MESSAGE_HANDLE)1, NULL, NULL);
+    mocks.ResetAllCalls();
+
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    ///act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_SendMessageDisposition(test_message, IOTHUBMESSAGE_ACCEPTED);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+    mocks.AssertActualAndExpectedCalls();
+}
+
+TEST_FUNCTION(IoTHubTransportHttp_SendMessageDisposition_with_NULL_TRANSPORT_data_fails)
+{
+    ///arrange
+    CIoTHubTransportHttpMocks mocks;
+    MESSAGE_CALLBACK_INFO* test_message = make_transport_context_data((IOTHUB_MESSAGE_HANDLE)1, NULL, (void*)0x44);
+    mocks.ResetAllCalls();
+
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    ///act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_SendMessageDisposition(test_message, IOTHUBMESSAGE_ACCEPTED);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+    mocks.AssertActualAndExpectedCalls();
+}
+
 TEST_FUNCTION(IoTHubTransportHttp_SendMessageDisposition_with_NULL_device_data_fails)
 {
     ///arrange
     CIoTHubTransportHttpMocks mocks;
-    TRANSPORT_CONTEXT_DATA data = { (void*)0x44 , NULL };
+    MESSAGE_CALLBACK_INFO* test_message = make_transport_context_data((IOTHUB_MESSAGE_HANDLE)1, (void*)0x44, NULL);
+    mocks.ResetAllCalls();
+
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
 
     ///act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_SendMessageDisposition(NULL, IOTHUBMESSAGE_ACCEPTED);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_SendMessageDisposition(test_message, IOTHUBMESSAGE_ACCEPTED);
 
     ///assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);

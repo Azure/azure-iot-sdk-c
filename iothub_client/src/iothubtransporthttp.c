@@ -1837,10 +1837,10 @@ typedef struct TRANSPORT_CONTEXT_DATA_TAG
     HTTPTRANSPORT_PERDEVICE_DATA* deviceData;
 } TRANSPORT_CONTEXT_DATA;
 
-static IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SendMessageDisposition(MESSAGE_CALLBACK_INFO* messageData, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
+static IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SendMessageDisposition(MESSAGE_CALLBACK_INFO* message_data, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
 {
     IOTHUB_CLIENT_RESULT result;
-    if (messageData == NULL)
+    if (message_data == NULL)
     {
         /* Codes_SRS_TRANSPORTMULTITHTTP_10_001: [If messageData is NULL, IoTHubTransportHttp_Send_Message_Disposition shall fail and return IOTHUB_CLIENT_ERROR.] */
         LogError("invalid argument messageData is NULL");
@@ -1848,15 +1848,15 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SendMessageDisposition(MESSAGE_C
     }
     else
     {
-        if (messageData->messageHandle == NULL)
+        if (message_data->messageHandle == NULL)
         {
             /* Codes_SRS_TRANSPORTMULTITHTTP_10_002: [If any of the messageData fields are NULL, IoTHubTransportHttp_Send_Message_Disposition shall fail and return IOTHUB_CLIENT_ERROR.] */
-            result = IOTHUB_CLIENT_ERROR;
             LogError("invalid message handle");
+            result = IOTHUB_CLIENT_ERROR;
         }
         else
         {
-            TRANSPORT_CONTEXT_DATA* tc = (TRANSPORT_CONTEXT_DATA*)(messageData->transportContext);
+            TRANSPORT_CONTEXT_DATA* tc = (TRANSPORT_CONTEXT_DATA*)(message_data->transportContext);
             if (tc == NULL)
             {
                 /* Codes_SRS_TRANSPORTMULTITHTTP_10_002: [If any of the messageData fields are NULL, IoTHubTransportHttp_Send_Message_Disposition shall fail and return IOTHUB_CLIENT_ERROR.] */
@@ -1873,7 +1873,7 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SendMessageDisposition(MESSAGE_C
                 }
                 else
                 {
-                    if (abandonOrAcceptMessage(tc->handleData, tc->deviceData, IoTHubMessage_GetMessageId(messageData->messageHandle), disposition))
+                    if (abandonOrAcceptMessage(tc->handleData, tc->deviceData, IoTHubMessage_GetMessageId(message_data->messageHandle), disposition))
                     {
                         result = IOTHUB_CLIENT_OK;
                     }
@@ -1884,10 +1884,51 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SendMessageDisposition(MESSAGE_C
                         result = IOTHUB_CLIENT_ERROR;
                     }
                 }
+                free(tc);
             }
-            IoTHubMessage_Destroy(messageData->messageHandle);
-            free(tc);
-            free(messageData);
+            IoTHubMessage_Destroy(message_data->messageHandle);
+        }
+        free(message_data);
+    }
+    return result;
+}
+
+static MESSAGE_CALLBACK_INFO* MESSAGE_CALLBACK_INFO_Create(IOTHUB_MESSAGE_HANDLE received_message, HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVICE_DATA* deviceData)
+{
+    MESSAGE_CALLBACK_INFO* result = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
+    if (result == NULL)
+    {
+        /*Codes_SRS_TRANSPORTMULTITHTTP_10_006: [If assembling the transport context fails, _DoWork shall "abandon" the message.] */
+        LogError("malloc failed");
+    }
+    else
+    {
+        TRANSPORT_CONTEXT_DATA* tc = (TRANSPORT_CONTEXT_DATA*)malloc(sizeof(TRANSPORT_CONTEXT_DATA));
+        if (tc == NULL)
+        {
+            /*Codes_SRS_TRANSPORTMULTITHTTP_10_006: [If assembling the transport context fails, _DoWork shall "abandon" the message.] */
+            LogError("malloc failed");
+            free(result);
+            result = NULL;
+        }
+        else
+        {
+            result->messageHandle = IoTHubMessage_Clone(received_message);
+            if (result->messageHandle == NULL)
+            {
+                /*Codes_SRS_TRANSPORTMULTITHTTP_10_007: [If assembling a message clone, _DoWork shall "abandon" the message.]*/
+                LogError("IoTHubMessage_Clone failed");
+                free(tc);
+                free(result);
+                result = NULL;
+            }
+            else
+            {
+                tc->handleData = handleData;
+                tc->deviceData = deviceData;
+
+                result->transportContext = tc;
+            }
         }
     }
     return result;
@@ -2110,45 +2151,17 @@ static void DoMessages(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERD
                                             else
                                             {
                                                 bool abandon;
-                                                MESSAGE_CALLBACK_INFO* messageData = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
+                                                MESSAGE_CALLBACK_INFO* messageData = MESSAGE_CALLBACK_INFO_Create(receivedMessage, handleData, deviceData);
                                                 if (messageData == NULL)
                                                 {
                                                     /*Codes_SRS_TRANSPORTMULTITHTTP_10_006: [If assembling the transport context fails, _DoWork shall "abandon" the message.] */
-                                                    LogError("malloc failed");
+                                                    LogError("failed to assemble callback info");
                                                     abandon = true;
                                                 }
                                                 else
                                                 {
-                                                    TRANSPORT_CONTEXT_DATA* tc = (TRANSPORT_CONTEXT_DATA*)malloc(sizeof(TRANSPORT_CONTEXT_DATA));
-                                                    if (tc == NULL)
-                                                    {
-                                                        /*Codes_SRS_TRANSPORTMULTITHTTP_10_006: [If assembling the transport context fails, _DoWork shall "abandon" the message.] */
-                                                        LogError("malloc failed");
-                                                        free(messageData);
-                                                        abandon = true;
-                                                    }
-                                                    else
-                                                    {
-                                                        messageData->messageHandle = IoTHubMessage_Clone(receivedMessage);
-                                                        if (messageData->messageHandle == NULL)
-                                                        {
-                                                            /*Codes_SRS_TRANSPORTMULTITHTTP_10_007: [If assembling a message clone, _DoWork shall "abandon" the message.]*/
-                                                            LogError("IoTHubMessage_Clone failed");
-                                                            free(tc);
-                                                            free(messageData);
-                                                            abandon = true;
-                                                        }
-                                                        else
-                                                        {
-                                                            tc->handleData = handleData;
-                                                            tc->deviceData = deviceData;
-
-                                                            messageData->transportContext = tc;
-
-                                                            /*Codes_SRS_TRANSPORTMULTITHTTP_17_096: [If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_ABANDONED then _DoWork shall "abandon" the message.] */
-                                                            abandon = IoTHubClient_LL_MessageCallback(iotHubClientHandle, messageData);
-                                                        }
-                                                    }
+                                                    /*Codes_SRS_TRANSPORTMULTITHTTP_17_096: [If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_ABANDONED then _DoWork shall "abandon" the message.] */
+                                                    abandon = IoTHubClient_LL_MessageCallback(iotHubClientHandle, messageData);
                                                 }
                                                 if (abandon)
                                                 {
