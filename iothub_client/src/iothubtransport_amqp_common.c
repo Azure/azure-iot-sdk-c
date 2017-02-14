@@ -132,9 +132,9 @@ typedef struct AMQP_TRANSPORT_DEVICE_STATE_TAG
     // the methods portion
     IOTHUBTRANSPORT_AMQP_METHODS_HANDLE methods_handle;
     // is subscription for methods needed?
-    int subscribe_methods_needed : 1;
+    bool subscribe_methods_needed;
     // is the transport subscribed for methods?
-    int subscribed_for_methods : 1;
+    bool subscribed_for_methods;
 #endif
 } AMQP_TRANSPORT_DEVICE_STATE;
 
@@ -448,6 +448,13 @@ static void on_methods_error(void* context)
     (void)context;
 }
 
+static void on_methods_unsubscribed(void* context)
+{
+    /* Codess_SRS_IOTHUBTRANSPORT_AMQP_METHODS_12_001: [ `on_methods_unsubscribed` calls iothubtransportamqp_methods_unsubscribe. ]*/
+    AMQP_TRANSPORT_DEVICE_STATE* device_state = (AMQP_TRANSPORT_DEVICE_STATE*)context;
+    IoTHubTransport_AMQP_Common_Unsubscribe_DeviceMethod(device_state);
+}
+
 static int on_method_request_received(void* context, const char* method_name, const unsigned char* request, size_t request_size, IOTHUBTRANSPORT_AMQP_METHOD_HANDLE method_handle)
 {
     int result;
@@ -471,7 +478,7 @@ static int subscribe_methods(AMQP_TRANSPORT_DEVICE_STATE* deviceState)
 {
     int result;
 
-    if (deviceState->subscribe_methods_needed == 0)
+    if (deviceState->subscribed_for_methods)
     {
         result = 0;
     }
@@ -479,14 +486,14 @@ static int subscribe_methods(AMQP_TRANSPORT_DEVICE_STATE* deviceState)
     {
         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_024: [ If the device authentication status is AUTHENTICATION_STATUS_OK and `IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod` was called to register for methods, `IoTHubTransport_AMQP_Common_DoWork` shall call `iothubtransportamqp_methods_subscribe`. ]*/
         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_027: [ The current session handle shall be passed to `iothubtransportamqp_methods_subscribe`. ]*/
-        if (iothubtransportamqp_methods_subscribe(deviceState->methods_handle, deviceState->transport_state->session, on_methods_error, deviceState, on_method_request_received, deviceState) != 0)
+        if (iothubtransportamqp_methods_subscribe(deviceState->methods_handle, deviceState->transport_state->session, on_methods_error, deviceState, on_method_request_received, deviceState, on_methods_unsubscribed, deviceState) != 0)
         {
             LogError("Cannot subscribe for methods");
             result = __LINE__;
         }
         else
         {
-            deviceState->subscribed_for_methods = 1;
+            deviceState->subscribed_for_methods = true;
             result = 0;
         }
     }
@@ -1042,7 +1049,7 @@ static void prepareDeviceForConnectionRetry(AMQP_TRANSPORT_DEVICE_STATE* device_
 
 #ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
     iothubtransportamqp_methods_unsubscribe(device_state->methods_handle);
-    device_state->subscribed_for_methods = 0;
+    device_state->subscribed_for_methods = false;
 #endif
 
     destroyMessageReceiver(device_state);
@@ -1221,7 +1228,7 @@ static RESULT device_DoWork(AMQP_TRANSPORT_DEVICE_STATE* device_state)
         case AUTHENTICATION_STATUS_OK:
 #ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
             /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_031: [ `iothubtransportamqp_methods_subscribe` shall only be called once (subsequent DoWork calls shall not call it if already subscribed). ]*/
-            if ((device_state->subscribed_for_methods == 0) &&
+            if ((device_state->subscribe_methods_needed) &&
                 (subscribe_methods(device_state) != 0))
             {
                 LogError("Failed subscribing for methods");
@@ -1415,7 +1422,8 @@ int IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE hand
         AMQP_TRANSPORT_DEVICE_STATE* device_state = (AMQP_TRANSPORT_DEVICE_STATE*)handle;
         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_026: [ `IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod` shall remember that a subscribe is to be performed in the next call to DoWork and on success it shall return 0. ]*/
         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_005: [ If the transport is already subscribed to receive C2D method requests, `IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod` shall perform no additional action and return 0. ]*/
-        device_state->subscribe_methods_needed = 1;
+        device_state->subscribe_methods_needed = true;
+        device_state->subscribed_for_methods = false;
         result = 0;
 #else
         LogError("Not implemented");
@@ -1439,10 +1447,10 @@ void IoTHubTransport_AMQP_Common_Unsubscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE h
         AMQP_TRANSPORT_DEVICE_STATE* device_state = (AMQP_TRANSPORT_DEVICE_STATE*)handle;
 
         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_008: [ If the transport is not subscribed to receive C2D method requests then `IoTHubTransport_AMQP_Common_Unsubscribe_DeviceMethod` shall do nothing. ]*/
-        if (device_state->subscribe_methods_needed != 0)
+        if (device_state->subscribe_methods_needed)
         {
             /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_007: [ `IoTHubTransport_AMQP_Common_Unsubscribe_DeviceMethod` shall unsubscribe from receiving C2D method requests by calling `iothubtransportamqp_methods_unsubscribe`. ]*/
-            device_state->subscribe_methods_needed = 0;
+            device_state->subscribed_for_methods = false;
             iothubtransportamqp_methods_unsubscribe(device_state->methods_handle);
         }
 #else
@@ -1741,8 +1749,8 @@ IOTHUB_DEVICE_HANDLE IoTHubTransport_AMQP_Common_Register(TRANSPORT_LL_HANDLE ha
                 device_state->receiver_link = NULL;
                 device_state->sender_link = NULL;
 #ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
-                device_state->subscribe_methods_needed = 0;
-                device_state->subscribed_for_methods = 0;
+                device_state->subscribe_methods_needed = false;
+                device_state->subscribed_for_methods = false;
 #endif
 
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_227: [IoTHubTransport_AMQP_Common_Register shall store a copy of config->deviceId into device_state->deviceId.]

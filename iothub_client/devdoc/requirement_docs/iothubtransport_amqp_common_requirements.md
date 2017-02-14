@@ -645,3 +645,9 @@ void on_methods_error(void* context)
 ```
 
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_030: [** `on_methods_error` shall do nothing. **]**
+
+```c
+void on_methods_unsubscribed(void* context)
+```
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_12_001: [** `on_methods_unsubscribed` calls iothubtransportamqp_methods_unsubscribe. **]**
