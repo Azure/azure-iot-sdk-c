@@ -23,6 +23,7 @@ make=true
 toolchainfile=" "
 cmake_install_prefix=" "
 no_logging=OFF
+wip_use_c2d_amqp_methods=OFF
 
 usage ()
 {
@@ -32,7 +33,7 @@ usage ()
     echo "   Example: -cl -O1 -cl ..."
     echo " --run-e2e-tests               run the end-to-end tests (e2e tests are skipped by default)"
     echo " --run-unittests               run the unit tests"
-	echo " --run-longhaul-tests          run long haul tests (long haul tests are not run by default)"
+    echo " --run-longhaul-tests          run long haul tests (long haul tests are not run by default)"
     echo ""
     echo " --no-amqp                     do no build AMQP transport and samples"
     echo " --no-http                     do no build HTTP transport and samples"
@@ -46,6 +47,7 @@ usage ()
     echo " --build-javawrapper           build java C wrapper module"
     echo " -rv, --run_valgrind           will execute ctest with valgrind"
     echo " --no-logging                  Disable logging"
+    echo " --wip-use-c2d-amqp-methods    Builds with work in progress feature for amqp methods"
     exit 1
 }
 
@@ -65,7 +67,7 @@ process_args ()
       then
         # save arg to pass as toolchain file
         toolchainfile="$arg"
-		save_next_arg=0
+           save_next_arg=0
       elif [ $save_next_arg == 3 ]
       then
         # save the arg to python version
@@ -85,7 +87,7 @@ process_args ()
           case "$arg" in
               "-cl" | "--compileoption" ) save_next_arg=1;;
               "--run-e2e-tests" ) run_e2e_tests=ON;;
-			  "--run-unittests" ) run_unittests=ON;;
+              "--run-unittests" ) run_unittests=ON;;
               "--run-longhaul-tests" ) run_longhaul_tests=ON;;
               "--no-amqp" ) build_amqp=OFF;;
               "--no-http" ) build_http=OFF;;
@@ -99,6 +101,7 @@ process_args ()
               "-rv" | "--run_valgrind" ) run_valgrind=1;;
               "--no-logging" ) no_logging=ON;;
               "--install-path-prefix" ) save_next_arg=4;;
+              "--wip-use-c2d-amqp-methods" ) wip_use_c2d_amqp_methods=ON;;
               * ) usage;;
           esac
       fi
@@ -109,11 +112,11 @@ process_args ()
       toolchainfile=$(readlink -f $toolchainfile)
       toolchainfile="-DCMAKE_TOOLCHAIN_FILE=$toolchainfile"
     fi
-	
-	if [ "$cmake_install_prefix" != " " ]
-	then
-	  cmake_install_prefix="-DCMAKE_INSTALL_PREFIX=$cmake_install_prefix"
-	fi
+   
+   if [ "$cmake_install_prefix" != " " ]
+   then
+     cmake_install_prefix="-DCMAKE_INSTALL_PREFIX=$cmake_install_prefix"
+   fi
 }
 
 process_args $*
@@ -121,7 +124,7 @@ process_args $*
 rm -r -f $build_folder
 mkdir -p $build_folder
 pushd $build_folder
-cmake $toolchainfile $cmake_install_prefix -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Ddont_use_uploadtoblob:BOOL=$no_blob -Duse_wsio:BOOL=$use_wsio -Drun_unittests:BOOL=$run_unittests -Dbuild_python:STRING=$build_python -Dbuild_javawrapper:BOOL=$build_javawrapper -Dno_logging:BOOL=$no_logging $build_root
+cmake $toolchainfile $cmake_install_prefix -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Ddont_use_uploadtoblob:BOOL=$no_blob -Duse_wsio:BOOL=$use_wsio -Drun_unittests:BOOL=$run_unittests -Dbuild_python:STRING=$build_python -Dbuild_javawrapper:BOOL=$build_javawrapper -Dno_logging:BOOL=$no_logging $build_root -Dwip_use_c2d_amqp_methods:BOOL=$wip_use_c2d_amqp_methods
 
 if [ "$make" = true ]
 then
