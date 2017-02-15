@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <time.h>
 #include <limits.h>
+#include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/agenttime.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
@@ -171,7 +172,7 @@ static int getSecondsSinceEpoch(size_t* seconds)
     if ((current_time = get_time(NULL)) == INDEFINITE_TIME)
     {
         LogError("Failed getting the current local time (get_time() failed)");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else
     {
@@ -465,7 +466,7 @@ static int on_method_request_received(void* context, const char* method_name, co
     if (IoTHubClient_LL_DeviceMethodComplete(device_state->iothub_client_handle, method_name, request, request_size, (void*)method_handle) != 0)
     {
         LogError("Failure: IoTHubClient_LL_DeviceMethodComplete");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else
     {
@@ -489,7 +490,7 @@ static int subscribe_methods(AMQP_TRANSPORT_DEVICE_STATE* deviceState)
         if (iothubtransportamqp_methods_subscribe(deviceState->methods_handle, deviceState->transport_state->session, on_methods_error, deviceState, on_method_request_received, deviceState, on_methods_unsubscribed, deviceState) != 0)
         {
             LogError("Cannot subscribe for methods");
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else
         {
@@ -526,7 +527,7 @@ static int establishConnection(AMQP_TRANSPORT_INSTANCE* transport_state)
         (transport_state->tls_io = transport_state->underlying_io_transport_provider(STRING_c_str(transport_state->iotHubHostFqdn))) == NULL)
     {
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_136: [If transport_state->io_transport_provider_callback fails, IoTHubTransport_AMQP_Common_DoWork shall fail and return immediately]
-        result = __LINE__;
+        result = __FAILURE__;
         LogError("Failed to obtain a TLS I/O transport layer.");
     }
     else
@@ -555,7 +556,7 @@ static int establishConnection(AMQP_TRANSPORT_INSTANCE* transport_state)
                 if ((transport_state->cbs_connection.sasl_mechanism = saslmechanism_create(saslmssbcbs_get_interface(), NULL)) == NULL)
                 {
                     // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_057: [If saslmechanism_create() fails, IoTHubTransport_AMQP_Common_DoWork shall fail and return immediately]
-                    result = __LINE__;
+                    result = __FAILURE__;
                     LogError("Failed to create a SASL mechanism.");
                 }
                 else
@@ -567,21 +568,21 @@ static int establishConnection(AMQP_TRANSPORT_INSTANCE* transport_state)
                     if ((transport_state->cbs_connection.sasl_io = xio_create(saslclientio_get_interface_description(), &sasl_client_config)) == NULL)
                     {
                         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_061: [If xio_create() fails creating the SASL I/O layer, IoTHubTransport_AMQP_Common_DoWork shall fail and return immediately] 
-                        result = __LINE__;
+                        result = __FAILURE__;
                         LogError("Failed to create a SASL I/O layer.");
                     }
                     // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_062: [IoTHubTransport_AMQP_Common_DoWork shall create the connection with the IoT service using connection_create2() AMQP API, passing the SASL I/O layer, IoT Hub FQDN and container ID as parameters (pass NULL for callbacks)] 
                     else if ((transport_state->connection = connection_create2(transport_state->cbs_connection.sasl_io, STRING_c_str(transport_state->iotHubHostFqdn), DEFAULT_CONTAINER_ID, NULL, NULL, NULL, NULL, on_connection_io_error, (void*)transport_state)) == NULL)
                     {
                         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_063: [If connection_create2() fails, IoTHubTransport_AMQP_Common_DoWork shall fail and return immediately.] 
-                        result = __LINE__;
+                        result = __FAILURE__;
                         LogError("Failed to create the AMQP connection.");
                     }
                     // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_137: [IoTHubTransport_AMQP_Common_DoWork shall create the AMQP session session_create() AMQP API, passing the connection instance as parameter]
                     else if ((transport_state->session = session_create(transport_state->connection, NULL, NULL)) == NULL)
                     {
                         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_138 : [If session_create() fails, IoTHubTransport_AMQP_Common_DoWork shall fail and return immediately]
-                        result = __LINE__;
+                        result = __FAILURE__;
                         LogError("Failed to create the AMQP session.");
                     }
                     else
@@ -592,14 +593,14 @@ static int establishConnection(AMQP_TRANSPORT_INSTANCE* transport_state)
                         if ((transport_state->cbs_connection.cbs_handle = cbs_create(transport_state->session, on_amqp_management_state_changed, NULL)) == NULL)
                         {
                             // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_067: [If cbs_create() fails, IoTHubTransport_AMQP_Common_DoWork shall fail and return immediately] 
-                            result = __LINE__;
+                            result = __FAILURE__;
                             LogError("Failed to create the CBS connection.");
                         }
                         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_139: [IoTHubTransport_AMQP_Common_DoWork shall open the CBS connection using the cbs_open() AMQP API] 
                         else if (cbs_open(transport_state->cbs_connection.cbs_handle) != 0)
                         {
                             // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_140: [If cbs_open() fails, IoTHubTransport_AMQP_Common_DoWork shall fail and return immediately]
-                            result = __LINE__;
+                            result = __FAILURE__;
                             LogError("Failed to open the connection with CBS.");
                         }
                         else
@@ -621,7 +622,7 @@ static int establishConnection(AMQP_TRANSPORT_INSTANCE* transport_state)
                 if ((transport_state->connection = connection_create2(transport_state->tls_io, STRING_c_str(transport_state->iotHubHostFqdn), DEFAULT_CONTAINER_ID, NULL, NULL, NULL, NULL, on_connection_io_error, (void*)transport_state)) == NULL)
                 {
                     // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_063: [If connection_create2() fails, IoTHubTransport_AMQP_Common_DoWork shall fail and return immediately.] 
-                    result = __LINE__;
+                    result = __FAILURE__;
                     LogError("Failed to create the AMQP connection.");
                 }
                 else
@@ -630,7 +631,7 @@ static int establishConnection(AMQP_TRANSPORT_INSTANCE* transport_state)
                     if ((transport_state->session = session_create(transport_state->connection, NULL, NULL)) == NULL)
                     {
                         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_138 : [If session_create() fails, IoTHubTransport_AMQP_Common_DoWork shall fail and return immediately]
-                        result = __LINE__;
+                        result = __FAILURE__;
                         LogError("Failed to create the AMQP session.");
                     }
                     else
@@ -649,7 +650,7 @@ static int establishConnection(AMQP_TRANSPORT_INSTANCE* transport_state)
             default:
             {
                 LogError("internal error: unexpected enum value for transport_state->credential.credentialType = %d", transport_state->preferred_credential_type);
-                result = __LINE__;
+                result = __FAILURE__;
                 break;
             }
         }/*switch*/
@@ -761,30 +762,30 @@ static int createEventSender(AMQP_TRANSPORT_DEVICE_STATE* device_state)
     if ((link_name = create_link_name(STRING_c_str(device_state->deviceId), MESSAGE_SENDER_LINK_NAME_TAG, device_state->transport_state->link_count++)) == NULL)
     {
         LogError("Failed creating a name for the AMQP message sender link.");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else if ((source_name = create_link_source_name(link_name)) == NULL)
     {
         LogError("Failed creating a name for the AMQP message sender source.");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else if ((source = messaging_create_source(STRING_c_str(source_name))) == NULL)
     {
         LogError("Failed creating AMQP messaging source attribute.");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_252: [The message_sender AMQP link shall be created using the `target` address created according to SRS_IOTHUBTRANSPORTAMQP_09_014]
     else if ((target = messaging_create_target(STRING_c_str(device_state->targetAddress))) == NULL)
     {
         LogError("Failed creating AMQP messaging target attribute.");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_068: [IoTHubTransport_AMQP_Common_DoWork shall create the AMQP link using link_create(), with role as 'role_sender'] 
     else if ((device_state->sender_link = link_create(device_state->transport_state->session, STRING_c_str(link_name), role_sender, source, target)) == NULL)
     {
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_069: [If IoTHubTransport_AMQP_Common_DoWork fails to create the AMQP link for sending messages, the function shall fail and return immediately, flagging the connection to be re-stablished] 
         LogError("Failed creating AMQP link for message sender.");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else
     {
@@ -804,7 +805,7 @@ static int createEventSender(AMQP_TRANSPORT_DEVICE_STATE* device_state)
         {
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_071: [IoTHubTransport_AMQP_Common_DoWork shall fail and return immediately if the AMQP message sender instance fails to be created, flagging the connection to be re-established] 
             LogError("Could not allocate AMQP message sender");
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else
         {
@@ -813,7 +814,7 @@ static int createEventSender(AMQP_TRANSPORT_DEVICE_STATE* device_state)
             {
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_073: [IoTHubTransport_AMQP_Common_DoWork shall fail and return immediately if the AMQP message sender instance fails to be opened, flagging the connection to be re-established] 
                 LogError("Failed opening the AMQP message sender.");
-                result = __LINE__;
+                result = __FAILURE__;
             }
             else
             {
@@ -847,7 +848,7 @@ static int destroyMessageReceiver(AMQP_TRANSPORT_DEVICE_STATE* device_state)
         if (messagereceiver_close(device_state->message_receiver) != RESULT_OK)
         {
             LogError("Failed closing the AMQP message receiver.");
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else
         {
@@ -900,37 +901,37 @@ static int createMessageReceiver(AMQP_TRANSPORT_DEVICE_STATE* device_state)
     if ((link_name = create_link_name(STRING_c_str(device_state->deviceId), MESSAGE_RECEIVER_LINK_NAME_TAG, device_state->transport_state->link_count++)) == NULL)
     {
         LogError("Failed creating a name for the AMQP message receiver link.");
-                    result = __LINE__;
+                    result = __FAILURE__;
     }
     else if ((target_name = create_link_target_name(link_name)) == NULL)
     {
         LogError("Failed creating a name for the AMQP message receiver target.");
-                    result = __LINE__;
+                    result = __FAILURE__;
     }
     // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_253: [The message_receiver AMQP link shall be created using the `source` address created according to SRS_IOTHUBTRANSPORTAMQP_09_053]
     else if ((source = messaging_create_source(STRING_c_str(device_state->messageReceiveAddress))) == NULL)
     {
         LogError("Failed creating AMQP message receiver source attribute.");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else if ((target = messaging_create_target(STRING_c_str(target_name))) == NULL)
     {
         LogError("Failed creating AMQP message receiver target attribute.");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_074: [IoTHubTransport_AMQP_Common_DoWork shall create the AMQP link using link_create(), with role as 'role_receiver'] 
     else if ((device_state->receiver_link = link_create(device_state->transport_state->session, STRING_c_str(link_name), role_receiver, source, target)) == NULL)
     {
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_075: [If IoTHubTransport_AMQP_Common_DoWork fails to create the AMQP link for receiving messages, the function shall fail and return immediately, flagging the connection to be re-stablished] 
         LogError("Failed creating AMQP link for message receiver.");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_076: [IoTHubTransport_AMQP_Common_DoWork shall set the receiver link settle mode as receiver_settle_mode_first] 
     else if (link_set_rcv_settle_mode(device_state->receiver_link, receiver_settle_mode_first) != RESULT_OK)
     {
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_141: [If IoTHubTransport_AMQP_Common_DoWork fails to set the settle mode on the AMQP link for receiving messages, the function shall fail and return immediately, flagging the connection to be re-stablished]
         LogError("Failed setting AMQP link settle mode for message receiver.");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else
     {
@@ -950,7 +951,7 @@ static int createMessageReceiver(AMQP_TRANSPORT_DEVICE_STATE* device_state)
         {
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_078: [IoTHubTransport_AMQP_Common_DoWork shall fail and return immediately if the AMQP message receiver instance fails to be created, flagging the connection to be re-established] 
             LogError("Could not allocate AMQP message receiver.");
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else
         {
@@ -960,7 +961,7 @@ static int createMessageReceiver(AMQP_TRANSPORT_DEVICE_STATE* device_state)
             {
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_080: [IoTHubTransport_AMQP_Common_DoWork shall fail and return immediately if the AMQP message receiver instance fails to be opened, flagging the connection to be re-established] 
                 LogError("Failed opening the AMQP message receiver.");
-                result = __LINE__;
+                result = __FAILURE__;
             }
             else
             {
@@ -988,7 +989,7 @@ static int sendPendingEvents(AMQP_TRANSPORT_DEVICE_STATE* device_state)
 
     while ((message = getNextEventToSend(device_state)) != NULL)
     {
-        result = __LINE__;
+        result = __FAILURE__;
 
         MESSAGE_HANDLE amqp_message = NULL;
         bool is_message_error = false;
@@ -1000,14 +1001,14 @@ static int sendPendingEvents(AMQP_TRANSPORT_DEVICE_STATE* device_state)
         if ((result = message_create_from_iothub_message(message->messageHandle, &amqp_message)) != RESULT_OK)
         {
             LogError("Failed creating AMQP message (error=%d).", result);
-            result = __LINE__;
+            result = __FAILURE__;
             is_message_error = true;
         }
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_097: [IoTHubTransport_AMQP_Common_DoWork shall pass the MESSAGE_HANDLE intance to uAMQP for sending (along with on_message_send_complete callback) using messagesender_send()] 
         else if (messagesender_send(device_state->message_sender, amqp_message, on_message_send_complete, message) != RESULT_OK)
         {
             LogError("Failed sending the AMQP message.");
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else
         {
@@ -1083,12 +1084,12 @@ static int is_credential_compatible(const IOTHUB_DEVICE_CONFIG* device_config, A
     else if (preferred_authentication_type == X509 && (device_config->deviceKey != NULL || device_config->deviceSasToken != NULL))
     {
         LogError("Incompatible credentials: transport is using X509 certificate authentication, but device config contains deviceKey and/or sasToken");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else if (preferred_authentication_type != X509 && (device_config->deviceKey == NULL && device_config->deviceSasToken == NULL))
     {
         LogError("Incompatible credentials: transport is using CBS authentication, but device config does not contain deviceKey nor sasToken");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else
     {
@@ -1362,7 +1363,7 @@ int IoTHubTransport_AMQP_Common_Subscribe(IOTHUB_DEVICE_HANDLE handle)
     if (handle == NULL)
     {
         LogError("Invalid handle to IoTHubClient AMQP transport device handle.");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else
     {
@@ -1394,7 +1395,7 @@ int IoTHubTransport_AMQP_Common_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle
 {
     (void)handle;
     /*Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_02_009: [ IoTHubTransport_AMQP_Common_Subscribe_DeviceTwin shall return a non-zero value. ]*/
-    int result = __LINE__;
+    int result = __FAILURE__;
     LogError("IoTHubTransport_AMQP_Common_Subscribe_DeviceTwin Not supported");
     return result;
 }
@@ -1414,7 +1415,7 @@ int IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE hand
     {
         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_004: [ If `handle` is NULL, `IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod` shall fail and return a non-zero value. ] */
         LogError("NULL handle");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else
     {
@@ -1427,7 +1428,7 @@ int IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE hand
         result = 0;
 #else
         LogError("Not implemented");
-        result = __LINE__;
+        result = __FAILURE__;
 #endif
     }
 
@@ -1476,7 +1477,7 @@ int IoTHubTransport_AMQP_Common_DeviceMethod_Response(IOTHUB_DEVICE_HANDLE handl
         {
             /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_029: [ If `iothubtransportamqp_methods_respond` fails, `on_methods_request_received` shall return a non-zero value. ]*/
             LogError("iothubtransportamqp_methods_respond failed");
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else
         {
@@ -1489,7 +1490,7 @@ int IoTHubTransport_AMQP_Common_DeviceMethod_Response(IOTHUB_DEVICE_HANDLE handl
     }
     else
     {
-        result = __LINE__;
+        result = __FAILURE__;
     }
     return result;
 }

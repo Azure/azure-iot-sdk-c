@@ -68,6 +68,7 @@ void my_gballoc_free(void * t)
 #include "umocktypes_stdint.h"
 #include "umock_c_negative_tests.h"
 
+#include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #define ENABLE_MOCKS
 #include "agenttypesystem.h"
@@ -837,7 +838,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         REGISTER_GLOBAL_MOCK_HOOK(STRING_from_byte_array, real_STRING_from_byte_array);
         REGISTER_GLOBAL_MOCK_HOOK(STRING_delete, real_STRING_delete);
         REGISTER_GLOBAL_MOCK_HOOK(STRING_concat, real_STRING_concat);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat, __LINE__);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat, __FAILURE__);
 
         REGISTER_GLOBAL_MOCK_HOOK(STRING_concat_with_STRING, real_STRING_concat_with_STRING);
         REGISTER_GLOBAL_MOCK_HOOK(STRING_quote, real_STRING_quote);

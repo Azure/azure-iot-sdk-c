@@ -11,6 +11,7 @@
 #include "iothub_transport_ll.h"
 #include "iothubtransporthttp.h"
 
+#include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/httpapiexsas.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/xlogging.h"
@@ -859,7 +860,7 @@ static int IoTHubTransportHttp_Subscribe(IOTHUB_DEVICE_HANDLE handle)
     {
         /*Codes_SRS_TRANSPORTMULTITHTTP_17_103: [ If parameter deviceHandle is NULL then IoTHubTransportHttp_Subscribe shall fail and return a non-zero value. ]*/
         LogError("invalid arg passed to IoTHubTransportHttp_Subscribe");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else
     {
@@ -870,7 +871,7 @@ static int IoTHubTransportHttp_Subscribe(IOTHUB_DEVICE_HANDLE handle)
         {
             /*Codes_SRS_TRANSPORTMULTITHTTP_17_105: [ If the device structure is not found, then this function shall fail and return a non-zero value. ]*/
             LogError("did not find device in transport handle");
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else
         {
@@ -914,7 +915,7 @@ static int IoTHubTransportHttp_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle)
 {
     /*Codes_SRS_TRANSPORTMULTITHTTP_02_003: [ IoTHubTransportHttp_Subscribe_DeviceTwin shall return a non-zero value. ]*/
     (void)handle;
-    int result = __LINE__;
+    int result = __FAILURE__;
     LogError("IoTHubTransportHttp_Subscribe_DeviceTwin Not supported");
     return result;
 }
@@ -929,7 +930,7 @@ static void IoTHubTransportHttp_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE hand
 static int IoTHubTransportHttp_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
 {
     (void)handle;
-    int result = __LINE__;
+    int result = __FAILURE__;
     LogError("not implemented (yet)");
     return result;
 }
@@ -948,7 +949,7 @@ static int IoTHubTransportHttp_DeviceMethod_Response(IOTHUB_DEVICE_HANDLE handle
     (void)response_size;
     (void)status_response;
     LogError("not implemented (yet)");
-    return __LINE__;
+    return __FAILURE__;
 }
 
 /*produces a representation of the properties, if they exist*/
@@ -961,7 +962,7 @@ static int concat_Properties(STRING_HANDLE existing, MAP_HANDLE map, size_t* pro
     size_t count;
     if (Map_GetInternals(map, &keys, &values, &count) != MAP_OK)
     {
-        result = __LINE__;
+        result = __FAILURE__;
         LogError("error while Map_GetInternals");
     }
     else
@@ -980,12 +981,12 @@ static int concat_Properties(STRING_HANDLE existing, MAP_HANDLE map, size_t* pro
             if (STRING_concat(existing, ",\"properties\":") != 0)
             {
                 /*go ahead and return it*/
-                result = __LINE__;
+                result = __FAILURE__;
                 LogError("failed STRING_concat");
             }
             else if (appendMapToJSON(existing, keys, values, count) != 0)
             {
-                result = __LINE__;
+                result = __FAILURE__;
                 LogError("unable to append the properties");
             }
             else
@@ -1012,8 +1013,8 @@ static int appendMapToJSON(STRING_HANDLE existing, const char* const* keys, cons
     if (STRING_concat(existing, "{") != 0)
     {
         /*go on and return it*/
-        result = __LINE__;
         LogError("STRING_construct failed");
+        result = __FAILURE__;
     }
     else
     {
@@ -1035,13 +1036,13 @@ static int appendMapToJSON(STRING_HANDLE existing, const char* const* keys, cons
 
         if (i < count)
         {
-            result = __LINE__;
+            result = __FAILURE__;
             /*error, let it go through*/
         }
         else if (STRING_concat(existing, "}") != 0)
         {
-            result = __LINE__;
             LogError("unable to STRING_concat");
+            result = __FAILURE__;
         }
         else
         {

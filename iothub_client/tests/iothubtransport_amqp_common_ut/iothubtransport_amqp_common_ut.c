@@ -24,6 +24,7 @@ void real_free(void* ptr)
 }
 
 #include "testrunnerswitcher.h"
+#include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/macro_utils.h"
 #include "umock_c.h"
 #include "umocktypes_charptr.h"
@@ -1253,7 +1254,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_DeviceMethod_Response_fail)
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(iothubtransportamqp_methods_respond(TEST_METHOD_HANDLE, TEST_DEVICE_METHOD_RESPONSE, TEST_DEVICE_RESP_LENGTH, TEST_DEVICE_STATUS_CODE))
-        .SetReturn(__LINE__);
+        .SetReturn(__FAILURE__);
 
     // act
     int result = IoTHubTransport_AMQP_Common_DeviceMethod_Response(handle, TEST_METHOD_HANDLE, TEST_DEVICE_METHOD_RESPONSE, TEST_DEVICE_RESP_LENGTH, TEST_DEVICE_STATUS_CODE);

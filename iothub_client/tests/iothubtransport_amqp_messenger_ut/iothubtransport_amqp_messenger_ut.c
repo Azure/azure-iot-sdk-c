@@ -26,6 +26,7 @@ void real_free(void* ptr)
 }
 
 #include "testrunnerswitcher.h"
+#include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/macro_utils.h"
 #include "umock_c.h"
 #include "umocktypes_charptr.h"
@@ -170,7 +171,7 @@ int STRING_sprintf(STRING_HANDLE handle, const char* format, ...)
 
     if (g_STRING_sprintf_call_count == g_STRING_sprintf_fail_on_count)
     {
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else
     {
@@ -1424,7 +1425,7 @@ TEST_FUNCTION(messenger_create_failure_checks)
     umock_c_negative_tests_deinit();
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_029: [If `messenger_handle` is NULL, messenger_start() shall fail and return __LINE__]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_029: [If `messenger_handle` is NULL, messenger_start() shall fail and return __FAILURE__]  
 TEST_FUNCTION(messenger_start_NULL_messenger_handle)
 {
     // arrange
@@ -1440,7 +1441,7 @@ TEST_FUNCTION(messenger_start_NULL_messenger_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_030: [If `session_handle` is NULL, messenger_start() shall fail and return __LINE__]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_030: [If `session_handle` is NULL, messenger_start() shall fail and return __FAILURE__]  
 TEST_FUNCTION(messenger_start_NULL_session_handle)
 {
     // arrange
@@ -1456,7 +1457,7 @@ TEST_FUNCTION(messenger_start_NULL_session_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_031: [If `instance->state` is not MESSENGER_STATE_STOPPED, messenger_start() shall fail and return __LINE__]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_031: [If `instance->state` is not MESSENGER_STATE_STOPPED, messenger_start() shall fail and return __FAILURE__]  
 TEST_FUNCTION(messenger_start_messenger_not_stopped)
 {
     // arrange
@@ -1557,7 +1558,7 @@ TEST_FUNCTION(messenger_state_on_event_sender_state_changed_callback_ERROR)
     messenger_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_057: [If `messenger_handle` is NULL, messenger_stop() shall fail and return __LINE__]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_057: [If `messenger_handle` is NULL, messenger_stop() shall fail and return __FAILURE__]  
 TEST_FUNCTION(messenger_stop_NULL_handle)
 {
     // arrange
@@ -1573,7 +1574,7 @@ TEST_FUNCTION(messenger_stop_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_058: [If `instance->state` is MESSENGER_STATE_STOPPED, messenger_stop() shall fail and return __LINE__]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_058: [If `instance->state` is MESSENGER_STATE_STOPPED, messenger_stop() shall fail and return __FAILURE__]  
 TEST_FUNCTION(messenger_stop_messenger_not_started)
 {
     // arrange
@@ -2157,7 +2158,7 @@ TEST_FUNCTION(messenger_do_work_send_events_messagesender_send_fails)
     messenger_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_016: [If `messenger_handle` is NULL, messenger_subscribe_for_messages() shall fail and return __LINE__]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_016: [If `messenger_handle` is NULL, messenger_subscribe_for_messages() shall fail and return __FAILURE__]  
 TEST_FUNCTION(messenger_subscribe_for_messages_NULL_handle)
 {
     // arrange
@@ -2173,7 +2174,7 @@ TEST_FUNCTION(messenger_subscribe_for_messages_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_018: [If `on_message_received_callback` is NULL, messenger_subscribe_for_messages() shall fail and return __LINE__] 
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_018: [If `on_message_received_callback` is NULL, messenger_subscribe_for_messages() shall fail and return __FAILURE__] 
 TEST_FUNCTION(messenger_subscribe_for_messages_NULL_callback)
 {
     // arrange
@@ -2193,7 +2194,7 @@ TEST_FUNCTION(messenger_subscribe_for_messages_NULL_callback)
     messenger_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_017: [If `instance->receive_messages` is already true, messenger_subscribe_for_messages() shall fail and return __LINE__]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_017: [If `instance->receive_messages` is already true, messenger_subscribe_for_messages() shall fail and return __FAILURE__]  
 TEST_FUNCTION(messenger_subscribe_for_messages_already_subscribed)
 {
     // arrange
@@ -2214,7 +2215,7 @@ TEST_FUNCTION(messenger_subscribe_for_messages_already_subscribed)
     messenger_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_023: [If `messenger_handle` is NULL, messenger_unsubscribe_for_messages() shall fail and return __LINE__]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_023: [If `messenger_handle` is NULL, messenger_unsubscribe_for_messages() shall fail and return __FAILURE__]
 TEST_FUNCTION(messenger_unsubscribe_for_messages_NULL_handle)
 {
     // arrange
@@ -2230,7 +2231,7 @@ TEST_FUNCTION(messenger_unsubscribe_for_messages_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_024: [If `instance->receive_messages` is already false, messenger_unsubscribe_for_messages() shall fail and return __LINE__]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_024: [If `instance->receive_messages` is already false, messenger_unsubscribe_for_messages() shall fail and return __FAILURE__]
 TEST_FUNCTION(messenger_unsubscribe_for_messages_not_subscribed)
 {
     // arrange

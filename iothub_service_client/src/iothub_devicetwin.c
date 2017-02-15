@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <ctype.h>
+#include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/string_tokenizer.h"
@@ -398,7 +399,7 @@ static int malloc_and_copy_uchar(char** strDestination, BUFFER_HANDLE strSource)
     {
         /* If strDestination or strSource is a NULL pointer[...] function return line number where error is spotted */
         LogError("invalid parameter strDestination or strSource");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else
     {
@@ -407,7 +408,7 @@ static int malloc_and_copy_uchar(char** strDestination, BUFFER_HANDLE strSource)
         if (temp == NULL)
         {
             LogError("failed to malloc");
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else
         {

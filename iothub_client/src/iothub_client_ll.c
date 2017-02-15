@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/string_tokenizer.h"
 #include "azure_c_shared_utility/doublylinkedlist.h"
@@ -759,7 +760,7 @@ static int attach_ms_timesOutAfter(IOTHUB_CLIENT_LL_HANDLE_DATA* handleData, IOT
         /*Codes_SRS_IOTHUBCLIENT_LL_02_039: [ "messageTimeout" - once IoTHubClient_LL_SendEventAsync is called the message shall timeout after value miliseconds. Value is a pointer to a uint64. ]*/
         if (tickcounter_get_current_ms(handleData->tickCounter, &newEntry->ms_timesOutAfter) != 0)
         {
-            result = __LINE__;
+            result = __FAILURE__;
             LogError("unable to get the current relative tickcount");
         }
         else
@@ -1010,7 +1011,7 @@ int IoTHubClient_LL_DeviceMethodComplete(IOTHUB_CLIENT_LL_HANDLE handle, const c
     {
         /* Codes_SRS_IOTHUBCLIENT_LL_07_017: [ If handle or response is NULL then IoTHubClient_LL_DeviceMethodComplete shall return 500. ] */
         LogError("Invalid argument handle=%p", handle);
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else
     {
@@ -1028,7 +1029,7 @@ int IoTHubClient_LL_DeviceMethodComplete(IOTHUB_CLIENT_LL_HANDLE handle, const c
             }
             else
             {
-                result = __LINE__;
+                result = __FAILURE__;
             }
             if (payload_resp != NULL)
             {

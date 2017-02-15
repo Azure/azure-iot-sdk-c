@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "iothubtransportamqp_auth.h"
+#include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/agenttime.h" 
 
 #define RESULT_OK 0
@@ -41,7 +42,7 @@ static int getSecondsSinceEpoch(size_t* seconds)
 	if ((current_time = get_time(NULL)) == INDEFINITE_TIME)
 	{
 		LogError("Failed getting the current local time (get_time() failed)");
-		result = __LINE__;
+		result = __FAILURE__;
 	}
 	else
 	{
@@ -105,7 +106,7 @@ static int handSASTokenToCbs(AUTHENTICATION_STATE* auth_state, STRING_HANDLE cbs
 	if (cbs_put_token(auth_state->cbs_connection->cbs_handle, SAS_TOKEN_TYPE, STRING_c_str(cbs_audience), STRING_c_str(sasToken), on_put_token_complete, auth_state) != RESULT_OK)
 	{
 		LogError("Failed applying new SAS token to CBS.");
-		result = __LINE__;
+		result = __FAILURE__;
 	}
 	else
 	{
@@ -130,7 +131,7 @@ static int verifyAuthenticationTimeout(AUTHENTICATION_STATE* auth_state, bool* t
 	{
 		LogError("Failed getting the current time to verify if the SAS token needs to be refreshed.");
 		*timeout_reached = true;
-		result = __LINE__;
+		result = __FAILURE__;
 	}
 	else
 	{
@@ -355,7 +356,7 @@ int authentication_authenticate(AUTHENTICATION_STATE_HANDLE authentication_state
 	// Codes_SRS_IOTHUBTRANSPORTAMQP_AUTH_09_023: [If authentication_state is NULL, authentication_authenticate() shall fail and return an error code]
 	if (authentication_state_handle == NULL)
 	{
-		result = __LINE__;
+		result = __FAILURE__;
 		LogError("Failed to authenticate device (the authentication_state_handle is NULL)");
 	}
 	else
@@ -372,7 +373,7 @@ int authentication_authenticate(AUTHENTICATION_STATE_HANDLE authentication_state
 				if ((result = getSecondsSinceEpoch(&currentTimeInSeconds)) != RESULT_OK)
 				{
 					LogError("Failed getting current time to compute the SAS token creation time (%d).", result);
-					result = __LINE__;
+					result = __FAILURE__;
 				}
 				else
 				{
@@ -387,14 +388,14 @@ int authentication_authenticate(AUTHENTICATION_STATE_HANDLE authentication_state
 					{
 						// Codes_SRS_IOTHUBTRANSPORTAMQP_AUTH_09_077: [If `devices_path` failed to be created, authentication_authenticate() shall fail and return an error code]
 						LogError("Failed to authenticate device (could not create the devices_path parameter)");
-						result = __LINE__;
+						result = __FAILURE__;
 					}
 					// Codes_IOTHUBTRANSPORTAMQP_AUTH_09_025: [The SAS token shall be created using SASToken_Create(), passing the deviceKey, device_path, sasTokenKeyName and expiration time as arguments]
 					else if ((newSASToken = SASToken_Create(auth_state->credential.data.deviceKey, devices_path, auth_state->cbs_state.sasTokenKeyName, new_expiry_time)) == NULL)
 					{
 						// Codes_IOTHUBTRANSPORTAMQP_AUTH_09_027: [If SASToken_Create() fails, authentication_authenticate() shall fail and return an error code]
 						LogError("Could not generate a new SAS token for the CBS.");
-						result = __LINE__;
+						result = __FAILURE__;
 					}
 					else
 					{
@@ -404,7 +405,7 @@ int authentication_authenticate(AUTHENTICATION_STATE_HANDLE authentication_state
 						{
 							// Codes_IOTHUBTRANSPORTAMQP_AUTH_09_032: [If cbs_put_token() fails, authentication_authenticate() shall fail and return an error code]
 							LogError("unable to send the new SASToken to CBS");
-							result = __LINE__;
+							result = __FAILURE__;
 						}
 						else
 						{
@@ -430,7 +431,7 @@ int authentication_authenticate(AUTHENTICATION_STATE_HANDLE authentication_state
 				if ((result = getSecondsSinceEpoch(&currentTimeInSeconds)) != RESULT_OK)
 				{
 					LogError("Failed getting current time to compute the SAS token creation time (%d).", result);
-					result = __LINE__;
+					result = __FAILURE__;
 				}
 				else
 				{
@@ -441,13 +442,13 @@ int authentication_authenticate(AUTHENTICATION_STATE_HANDLE authentication_state
 					{
 						// Codes_SRS_IOTHUBTRANSPORTAMQP_AUTH_09_079: [If `devices_path` failed to be created, authentication_authenticate() shall fail and return an error code]
 						LogError("Failed to authenticate device (could not create the devices_path parameter)");
-						result = __LINE__;
+						result = __FAILURE__;
 					}
 					else if (handSASTokenToCbs(auth_state, devices_path, auth_state->credential.data.deviceSasToken, currentTimeInSeconds) != 0)
 					{
 						// Codes_IOTHUBTRANSPORTAMQP_AUTH_09_036: [If cbs_put_token() fails, authentication_authenticate() shall fail and return an error code]
 						LogError("unable to send the new SASToken to CBS");
-						result = __LINE__;
+						result = __FAILURE__;
 					}
 					else
 					{
@@ -465,7 +466,7 @@ int authentication_authenticate(AUTHENTICATION_STATE_HANDLE authentication_state
 				if (auth_state->status != AUTHENTICATION_STATUS_IDLE)
 				{
 					LogError("Failed to authenticate device [X509] (authentication status %d is invalid)", auth_state->status);
-					result = __LINE__;
+					result = __FAILURE__;
 				}
 				else
 				{
@@ -474,7 +475,7 @@ int authentication_authenticate(AUTHENTICATION_STATE_HANDLE authentication_state
 				}
 				break;
 			default:
-				result = __LINE__;
+				result = __FAILURE__;
 				LogError("Failed to authenticate the device (unexpected credential type %d)", auth_state->credential.type);
 				break;
 		}
@@ -582,7 +583,7 @@ int authentication_refresh(AUTHENTICATION_STATE_HANDLE authentication_state_hand
 	if (authentication_state_handle == NULL)
 	{
 		LogError("authentication_refresh() failed (authentication_state_handle is NULL)");
-		result = __LINE__;
+		result = __FAILURE__;
 	}
 	else
 	{
@@ -598,7 +599,7 @@ int authentication_refresh(AUTHENTICATION_STATE_HANDLE authentication_state_hand
 		{
 			// Codes_IOTHUBTRANSPORTAMQP_AUTH_09_060: [if authentication_authenticate() fails, authentication_refresh() shall fail and return an error code]
 			LogError("Failed refreshing authentication (%d).", result);
-			result = __LINE__;
+			result = __FAILURE__;
 		}
 	}
 
@@ -613,7 +614,7 @@ int authentication_reset(AUTHENTICATION_STATE_HANDLE authentication_state_handle
 	if (authentication_state_handle == NULL)
 	{
 		LogError("Failed to reset the authentication state (authentication_state is NULL)");
-		result = __LINE__;
+		result = __FAILURE__;
 	}
 	else
 	{
@@ -635,19 +636,19 @@ int authentication_reset(AUTHENTICATION_STATE_HANDLE authentication_state_handle
 				else if (auth_state->status != AUTHENTICATION_STATUS_OK && auth_state->status != AUTHENTICATION_STATUS_IN_PROGRESS)
 				{
 					LogError("Failed to reset the authentication state (authentication status is invalid: %i)", auth_state->status);
-					result = __LINE__;
+					result = __FAILURE__;
 				}
 				// Codes_IOTHUBTRANSPORTAMQP_AUTH_09_064: [If the authentication_state status is AUTHENTICATION_STATUS_OK or AUTHENTICATION_STATUS_IN_PROGRESS, authentication_reset() delete the previous token using cbs_delete_token()]
 				else if ((devices_path = create_devices_path(auth_state->iot_hub_host_fqdn, auth_state->device_id)) == NULL)
 				{
 					LogError("Failed to reset the authenticate state (could not create the devices_path parameter for cbs_delete_token)");
-					result = __LINE__;
+					result = __FAILURE__;
 				}
 				else if (cbs_delete_token(auth_state->cbs_connection->cbs_handle, STRING_c_str(devices_path), SAS_TOKEN_TYPE, on_delete_token_complete, auth_state) != RESULT_OK)
 				{
 					// Codes_IOTHUBTRANSPORTAMQP_AUTH_09_065: [If cbs_delete_token fails, authentication_reset() shall fail and return an error code]
 					LogError("Failed to reset the authentication state (failed deleting the current SAS token from CBS)");
-					result = __LINE__;
+					result = __FAILURE__;
 				}
 				else
 				{
@@ -664,7 +665,7 @@ int authentication_reset(AUTHENTICATION_STATE_HANDLE authentication_state_handle
 				result = RESULT_OK;
 				break;
 			default:
-				result = __LINE__;
+				result = __FAILURE__;
 				LogError("Failed to reset the authentication state (unexpected credential type %d)", auth_state->credential.type);
 				break;
 		}

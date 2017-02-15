@@ -48,6 +48,7 @@ static void my_test_event_confirmation_callback(IOTHUB_CLIENT_CONFIRMATION_RESUL
 }
 
 #define ENABLE_MOCKS
+#include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/singlylinkedlist.h"
@@ -445,7 +446,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubTransport_GetLLTransport, NULL);
 
     REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, my_mallocAndStrcpy_s);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, __LINE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, __FAILURE__);
 
     REGISTER_GLOBAL_MOCK_RETURN(STRING_construct, TEST_STRING_HANDLE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_construct, NULL);
@@ -472,7 +473,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(VECTOR_create, my_VECTOR_create);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(VECTOR_create, NULL);
     REGISTER_GLOBAL_MOCK_HOOK(VECTOR_push_back, my_VECTOR_push_back);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(VECTOR_push_back, __LINE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(VECTOR_push_back, __FAILURE__);
     REGISTER_GLOBAL_MOCK_HOOK(VECTOR_element, my_VECTOR_element);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(VECTOR_element, NULL);
     REGISTER_GLOBAL_MOCK_HOOK(VECTOR_clear, my_VECTOR_clear);
@@ -528,7 +529,7 @@ static int should_skip_index(size_t current_index, const size_t skip_array[], si
     {
         if (current_index == skip_array[index])
         {
-            result = __LINE__;
+            result = __FAILURE__;
             break;
         }
     }

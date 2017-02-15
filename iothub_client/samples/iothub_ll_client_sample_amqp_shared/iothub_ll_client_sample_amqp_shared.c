@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
@@ -141,12 +142,12 @@ static int create_events(EVENT_INSTANCE* events, const char* deviceId)
 		if (sprintf_s(msgText, sizeof(msgText), "{\"deviceId\":\"%s\",\"windSpeed\":%.2f}", deviceId, avgWindSpeed + (rand() % 4 + 2)) == 0)
 		{
 			(void)printf("ERROR: failed creating event message for device %s\r\n", deviceId);
-			result = __LINE__;
+			result = __FAILURE__;
 		}
 		else if ((events[i].messageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText))) == NULL)
 		{
 			(void)printf("ERROR: failed creating the IOTHUB_MESSAGE_HANDLE for device %s\r\n", deviceId);
-			result = __LINE__;
+			result = __FAILURE__;
 		}
 		else
 		{
@@ -155,17 +156,17 @@ static int create_events(EVENT_INSTANCE* events, const char* deviceId)
 			if ((propMap = IoTHubMessage_Properties(events[i].messageHandle)) == NULL) 
 			{
 				(void)printf("ERROR: failed getting device %s's message property map\r\n", deviceId);
-				result = __LINE__;
+				result = __FAILURE__;
 			}
 			else if (sprintf_s(propText, sizeof(propText), "PropMsg_%d", i) == 0) 
 			{
 				(void)printf("ERROR: sprintf_s failed for device %s's message property\r\n", deviceId);
-				result = __LINE__;
+				result = __FAILURE__;
 			}
 			else if (Map_AddOrUpdate(propMap, "PropName", propText) != MAP_OK)
 			{
 				(void)printf("ERROR: Map_AddOrUpdate failed for device %s\r\n", deviceId);
-				result = __LINE__;
+				result = __FAILURE__;
 			}
 			else
 			{

@@ -31,6 +31,7 @@ static int real_strcmp(const char* str1, const char* str2)
 }
 
 #include "testrunnerswitcher.h"
+#include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/macro_utils.h"
 #include "umock_c.h"
 #include "umocktypes_charptr.h"
@@ -170,7 +171,7 @@ int STRING_sprintf(STRING_HANDLE handle, const char* format, ...)
 
 	if (g_STRING_sprintf_call_count == g_STRING_sprintf_fail_on_count)
 	{
-		result = __LINE__;
+		result = __FAILURE__;
 	}
 	else
 	{
@@ -758,7 +759,7 @@ TEST_FUNCTION(authentication_create_SAS_TOKENS_failure_checks)
 	umock_c_reset_all_calls();
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_025: [If authentication_handle is NULL, authentication_start() shall fail and return __LINE__ as error code]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_025: [If authentication_handle is NULL, authentication_start() shall fail and return __FAILURE__ as error code]
 TEST_FUNCTION(authentication_start_NULL_auth_handle)
 {
 	// arrange
@@ -782,7 +783,7 @@ TEST_FUNCTION(authentication_start_NULL_auth_handle)
 	authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_026: [If `cbs_handle` is NULL, authentication_start() shall fail and return __LINE__ as error code]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_026: [If `cbs_handle` is NULL, authentication_start() shall fail and return __FAILURE__ as error code]
 TEST_FUNCTION(authentication_start_NULL_cbs_handle)
 {
 	// arrange
@@ -833,7 +834,7 @@ TEST_FUNCTION(authentication_start_succeeds)
 	authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_027: [If authenticate state has been started already, authentication_start() shall fail and return __LINE__ as error code]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_027: [If authenticate state has been started already, authentication_start() shall fail and return __FAILURE__ as error code]
 TEST_FUNCTION(authentication_start_already_started_fails)
 {
 	// arrange
@@ -855,7 +856,7 @@ TEST_FUNCTION(authentication_start_already_started_fails)
 }
 
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_031: [If `authentication_handle` is NULL, authentication_stop() shall fail and return __LINE__]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_031: [If `authentication_handle` is NULL, authentication_stop() shall fail and return __FAILURE__]
 TEST_FUNCTION(authentication_stop_NULL_handle)
 {
 	// arrange
@@ -876,7 +877,7 @@ TEST_FUNCTION(authentication_stop_NULL_handle)
 	authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_032: [If `instance->state` is AUTHENTICATION_STATE_STOPPED, authentication_stop() shall fail and return __LINE__]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_032: [If `instance->state` is AUTHENTICATION_STATE_STOPPED, authentication_stop() shall fail and return __FAILURE__]
 TEST_FUNCTION(authentication_stop_already_stoppped)
 {
 	// arrange

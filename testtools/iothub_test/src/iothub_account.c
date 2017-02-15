@@ -13,6 +13,7 @@
 #include <string.h>
 #endif
 
+#include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/string_tokenizer.h"
 #include "iothub_account.h"
 
@@ -112,7 +113,7 @@ static int generateDeviceName(const char* prefix, char** deviceName)
     if (UniqueId_Generate(deviceGuid, DEVICE_GUID_SIZE) != UNIQUEID_OK)
     {
         LogError("Unable to generate unique Id.\r\n");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else
     {
@@ -121,7 +122,7 @@ static int generateDeviceName(const char* prefix, char** deviceName)
         if (*deviceName == NULL)
         {
             LogError("Failure allocating device ID.\r\n");
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else
         {
@@ -129,7 +130,7 @@ static int generateDeviceName(const char* prefix, char** deviceName)
             {
                 LogError("Failure constructing device ID.\r\n");
                 free(*deviceName);
-                result = __LINE__;
+                result = __FAILURE__;
             }
             else
             {
@@ -150,27 +151,27 @@ static int retrieveConnStringInfo(IOTHUB_ACCOUNT_INFO* accountInfo)
     if (sscanf(accountInfo->connString, "HostName=%n%*[^.]%n.%n%*[^;];%nSharedAccessKeyName=%n%*[^;];%nSharedAccessKey=%n", &beginHost, &endHost, &beginIothub, &endIothub, &beginName, &endName, &beginKey) != 0)
     {
         LogError("Failure determining the string length parameters.\r\n");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else
     {
         if ((accountInfo->iothubName = (char*)malloc(endHost - beginHost + 1)) == NULL)
         {
             LogError("Failure allocating iothubName.\r\n");
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else if ((accountInfo->hostname = (char*)malloc(endIothub - beginHost + 1)) == NULL)
         {
             LogError("Failure allocating hostname.\r\n");
             free(accountInfo->iothubName);
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else if ((accountInfo->keyName = (char*)malloc(endName - beginName + 1)) == NULL)
         {
             LogError("Failure allocating hostName.\r\n");
             free(accountInfo->iothubName);
             free(accountInfo->hostname);
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else if ((accountInfo->sharedAccessKey = (char*)malloc(totalLen + 1 - beginKey + 1)) == NULL)
         {
@@ -178,7 +179,7 @@ static int retrieveConnStringInfo(IOTHUB_ACCOUNT_INFO* accountInfo)
             free(accountInfo->iothubName);
             free(accountInfo->keyName);
             free(accountInfo->hostname);
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else if (sscanf(accountInfo->connString, "HostName=%[^.].%[^;];SharedAccessKeyName=%[^;];SharedAccessKey=%s", accountInfo->iothubName,
             accountInfo->hostname + endHost - beginHost + 1,
@@ -190,7 +191,7 @@ static int retrieveConnStringInfo(IOTHUB_ACCOUNT_INFO* accountInfo)
             free(accountInfo->hostname);
             free(accountInfo->keyName);
             free(accountInfo->sharedAccessKey);
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else
         {
@@ -203,7 +204,7 @@ static int retrieveConnStringInfo(IOTHUB_ACCOUNT_INFO* accountInfo)
                 free(accountInfo->hostname);
                 free(accountInfo->keyName);
                 free(accountInfo->sharedAccessKey);
-                result = __LINE__;
+                result = __FAILURE__;
             }
             else
             {
@@ -249,12 +250,12 @@ static int createSASConnectionString(IOTHUB_ACCOUNT_INFO* accountInfo, char** co
     conn = (char*)malloc(connectionStringLength);
     if (conn == NULL) {
         LogError("Failed to allocate space for the SAS based connection string\r\n");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else if (sprintf_s(conn, connectionStringLength,"%s%s%s%s%s%s", CONN_HOST_PART, accountInfo->hostname, CONN_DEVICE_PART, (char*)accountInfo->sasDevice.deviceId, CONN_KEY_PART, (char*)accountInfo->sasDevice.primaryAuthentication) <= 0) {
             LogError("Failed to form the connection string for SAS based connection string.\r\n");
-            result = __LINE__;
             free(conn);
+            result = __FAILURE__;
     }
     else
     {
@@ -282,11 +283,11 @@ static int createX509ConnectionString(IOTHUB_ACCOUNT_INFO* accountInfo, char** c
     conn = (char*)malloc(connectionStringLength);
     if (conn == NULL) {
         LogError("Failed to allocate space for the SAS based connection string\r\n");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else if (sprintf_s(conn, connectionStringLength, "%s%s%s%s%s", CONN_HOST_PART, accountInfo->hostname, CONN_DEVICE_PART, (char*)accountInfo->x509Device.deviceId, CONN_X509_PART) <=0) {
         LogError("Failed to form the connection string for x509 based connection string.\r\n");
-        result = __LINE__;
+        result = __FAILURE__;
         free(conn);
     }
     else
@@ -305,7 +306,7 @@ static int provisionDevice(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_ACCOUNT_AUTH
     if (generateDeviceName(method == IOTHUB_ACCOUNT_AUTH_CONNSTRING ?(SAS_DEVICE_PREFIX_FMT):(X509_DEVICE_PREFIX_FMT), &deviceId) != 0)
     {
         LogError("generateDeviceName failed\r\n");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else
     {
@@ -350,7 +351,7 @@ static int provisionDevice(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_ACCOUNT_AUTH
         {
             LogError("IoTHubRegistryManager_CreateDevice failed\r\n");
             free(deviceId);
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else
         {
@@ -360,14 +361,14 @@ static int provisionDevice(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_ACCOUNT_AUTH
                 if (mallocAndStrcpy_s((char**)&deviceToProvision->primaryAuthentication, (char*)deviceInfo.primaryKey) != 0)
                 {
                     LogError("mallocAndStrcpy_s failed for primaryKey\r\n");
-                    result = __LINE__;
+                    result = __FAILURE__;
 
                 }
                 else
                 {
                     if (createSASConnectionString(accountInfo, &deviceToProvision->connectionString) != 0)
                     {
-                        result = __LINE__;
+                        result = __FAILURE__;
                     }
                     else
                     {
@@ -379,7 +380,7 @@ static int provisionDevice(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_ACCOUNT_AUTH
             {
                 if (createX509ConnectionString(accountInfo, &deviceToProvision->connectionString) != 0)
                 {
-                    result = __LINE__;
+                    result = __FAILURE__;
                 }
                 else
                 {

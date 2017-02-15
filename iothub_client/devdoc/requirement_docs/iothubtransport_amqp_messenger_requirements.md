@@ -142,9 +142,9 @@ int messenger_get_send_status(MESSENGER_HANDLE messenger_handle, MESSENGER_SEND_
 
 Summary: informs the messenger instance that a uAMQP messagereceiver shall be created/started (delayed, done on messenger_do_work()), stores the callback information.
 
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_016: [**If `messenger_handle` is NULL, messenger_subscribe_for_messages() shall fail and return __LINE__**]**  
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_017: [**If `instance->receive_messages` is already true, messenger_subscribe_for_messages() shall fail and return __LINE__**]**  
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_018: [**If `on_message_received_callback` is NULL, messenger_subscribe_for_messages() shall fail and return __LINE__**]**  
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_016: [**If `messenger_handle` is NULL, messenger_subscribe_for_messages() shall fail and return __FAILURE__**]**  
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_017: [**If `instance->receive_messages` is already true, messenger_subscribe_for_messages() shall fail and return __FAILURE__**]**  
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_018: [**If `on_message_received_callback` is NULL, messenger_subscribe_for_messages() shall fail and return __FAILURE__**]**  
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_019: [**`on_message_received_callback` shall be saved on `instance->on_message_received_callback`**]**  
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_020: [**`context` shall be saved on `instance->on_message_received_context`**]**  
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_021: [**messenger_subscribe_for_messages() shall set `instance->receive_messages` to true**]**  
@@ -159,8 +159,8 @@ Summary: informs the messenger instance that a uAMQP messagereceiver shall be cr
 
 Summary: informs the messenger instance that an existing uAMQP messagereceiver shall be stopped/destroyed (delayed, done on messenger_do_work()).
 
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_023: [**If `messenger_handle` is NULL, messenger_unsubscribe_for_messages() shall fail and return __LINE__**]**  
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_024: [**If `instance->receive_messages` is already false, messenger_unsubscribe_for_messages() shall fail and return __LINE__**]**  
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_023: [**If `messenger_handle` is NULL, messenger_unsubscribe_for_messages() shall fail and return __FAILURE__**]**  
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_024: [**If `instance->receive_messages` is already false, messenger_unsubscribe_for_messages() shall fail and return __FAILURE__**]**  
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_025: [**messenger_unsubscribe_for_messages() shall set `instance->receive_messages` to false**]**  
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_026: [**messenger_unsubscribe_for_messages() shall set `instance->on_message_received_callback` to NULL**]**  
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_027: [**messenger_unsubscribe_for_messages() shall set `instance->on_message_received_context` to NULL**]**  
@@ -173,9 +173,9 @@ Summary: informs the messenger instance that an existing uAMQP messagereceiver s
 	extern int messenger_start(MESSENGER_HANDLE messenger_handle, SESSION_HANDLE session_handle); 
 ```
 
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_029: [**If `messenger_handle` is NULL, messenger_start() shall fail and return __LINE__**]**  
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_030: [**If `session_handle` is NULL, messenger_start() shall fail and return __LINE__**]**  
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_031: [**If `instance->state` is not MESSENGER_STATE_STOPPED, messenger_start() shall fail and return __LINE__**]**  
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_029: [**If `messenger_handle` is NULL, messenger_start() shall fail and return __FAILURE__**]**  
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_030: [**If `session_handle` is NULL, messenger_start() shall fail and return __FAILURE__**]**  
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_031: [**If `instance->state` is not MESSENGER_STATE_STOPPED, messenger_start() shall fail and return __FAILURE__**]**  
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_032: [**`session_handle` shall be saved on `instance->session_handle`**]**   
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_115: [**If no failures occurr, `instance->state` shall be set to MESSENGER_STATE_STARTING, and `instance->on_state_changed_callback` invoked if provided**]**  
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_056: [**If no failures occurr, messenger_start() shall return 0**]**  
@@ -187,8 +187,8 @@ Summary: informs the messenger instance that an existing uAMQP messagereceiver s
 	extern int messenger_stop(MESSENGER_HANDLE messenger_handle);
 ```
 
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_057: [**If `messenger_handle` is NULL, messenger_stop() shall fail and return __LINE__**]**  
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_058: [**If `instance->state` is MESSENGER_STATE_STOPPED, messenger_stop() shall fail and return __LINE__**]**  
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_057: [**If `messenger_handle` is NULL, messenger_stop() shall fail and return __FAILURE__**]**  
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_058: [**If `instance->state` is MESSENGER_STATE_STOPPED, messenger_stop() shall fail and return __FAILURE__**]**  
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_116: [**`instance->state` shall be set to MESSENGER_STATE_STOPPING, and `instance->on_state_changed_callback` invoked if provided**]**  
 
 
@@ -262,11 +262,11 @@ static void on_event_sender_state_changed_callback(void* context, MESSAGE_SENDER
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_070: [**A variable, named `message_receive_address`, shall be created concatenating "amqps://", `devices_path` and "/messages/devicebound"**]**  
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_071: [**If `message_receive_address` fails to be created, messenger_do_work() shall fail and return**]**  
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_072: [**A `link_name` variable shall be created using an unique string label per AMQP session**]**  
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_073: [**If `link_name` fails to be created, messenger_do_work() shall fail and return __LINE__**]**  
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_073: [**If `link_name` fails to be created, messenger_do_work() shall fail and return __FAILURE__**]**  
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_074: [**A `target` variable shall be created with messaging_create_target() using an unique string label per AMQP session**]**  
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_075: [**If `target` fails to be created, messenger_do_work() shall fail and return __LINE__**]**  
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_075: [**If `target` fails to be created, messenger_do_work() shall fail and return __FAILURE__**]**  
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_076: [**A `source` variable shall be created with messaging_create_source() using `message_receive_address`**]**  
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_077: [**If `source` fails to be created, messenger_do_work() shall fail and return __LINE__**]**  
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_077: [**If `source` fails to be created, messenger_do_work() shall fail and return __FAILURE__**]**  
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_078: [**`instance->receiver_link` shall be set using link_create(), passing `instance->session_handle`, `link_name`, "role_receiver", `source` and `target` as parameters**]**  
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_079: [**If link_create() fails, messenger_do_work() shall fail and return**]**  
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_080: [**`instance->receiver_link` settle mode shall be set to "receiver_settle_mode_first" using link_set_rcv_settle_mode(), **]**  

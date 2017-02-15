@@ -32,6 +32,7 @@ static void my_gballoc_free(void * t)
 
 #define ENABLE_MOCKS
 #include "schema.h"
+#include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/vector.h"
 #include "azure_c_shared_utility/strings.h"
 #undef ENABLE_MOCKS
@@ -81,7 +82,7 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
     
     
         REGISTER_GLOBAL_MOCK_RETURN(STRING_concat, 0);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat, __LINE__);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat, __FAILURE__);
         REGISTER_GLOBAL_MOCK_RETURN(Schema_GetModelActionCount, SCHEMA_OK);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetModelActionCount, SCHEMA_ERROR);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetModelActionByIndex, NULL);

@@ -7,6 +7,7 @@
 
 #include <signal.h>
 #include <stddef.h>
+#include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "iothub_client.h"
 #include "iothub_client_ll.h"
@@ -190,14 +191,14 @@ static int iothub_ll_inbound_device_method_callback(const char* method_name, con
         {
             /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_003: [ If a failure is encountered IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK shall return a non-NULL value. ]*/
             LogError("Failure: STRING_construct");
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else if ((queue_cb_info.iothub_callback.method_cb_info.payload = BUFFER_create(payload, size)) == NULL)
         {
             STRING_delete(queue_cb_info.iothub_callback.method_cb_info.method_name);
             /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_003: [ If a failure is encountered IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK shall return a non-NULL value. ]*/
             LogError("Failure: BUFFER_create");
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else if (VECTOR_push_back(queue_context->iotHubClientHandle->saved_user_callback_list, &queue_cb_info, 1) != 0)
         {
@@ -205,7 +206,7 @@ static int iothub_ll_inbound_device_method_callback(const char* method_name, con
             BUFFER_delete(queue_cb_info.iothub_callback.method_cb_info.payload);
             /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_003: [ If a failure is encountered IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK shall return a non-NULL value. ]*/
             LogError("connection status callback vector push failed.");
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else
         {
@@ -218,7 +219,7 @@ static int iothub_ll_inbound_device_method_callback(const char* method_name, con
     {
         /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_003: [ If a failure is encountered IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK shall return a non-NULL value. ]*/
         LogError("Invalid parameter: userContextCallback NULL");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     return result;
 }
@@ -298,7 +299,7 @@ static void iothub_ll_device_twin_callback(DEVICE_TWIN_UPDATE_STATE update_state
             {
                 LogError("failure allocating payload in device twin callback.");
                 queue_cb_info.iothub_callback.dev_twin_cb_info.size = 0;
-                push_to_vector = __LINE__;
+                push_to_vector = __FAILURE__;
             }
             else
             {

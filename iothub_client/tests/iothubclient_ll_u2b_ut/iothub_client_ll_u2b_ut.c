@@ -24,6 +24,7 @@ void my_gballoc_free(void* ptr)
 }
 
 #include "testrunnerswitcher.h"
+#include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/macro_utils.h"
 #include "umock_c.h"
 #include "umocktypes_charptr.h"
@@ -310,10 +311,10 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_GLOBAL_MOCK_RETURN(STRING_c_str, TEST_DEFAULT_STRING_VALUE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_c_str, TEST_DEFAULT_STRING_VALUE);
     REGISTER_GLOBAL_MOCK_RETURN(STRING_concat, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat, __LINE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat, __FAILURE__);
     REGISTER_GLOBAL_MOCK_RETURN(STRING_concat_with_STRING, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat_with_STRING, __LINE__);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_copy, __LINE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat_with_STRING, __FAILURE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_copy, __FAILURE__);
     REGISTER_GLOBAL_MOCK_HOOK(STRING_delete, my_STRING_delete);
 
     REGISTER_GLOBAL_MOCK_HOOK(HTTPHeaders_Alloc, my_HTTPHeaders_Alloc);
@@ -353,7 +354,7 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(Blob_UploadFromSasUri, BLOB_ERROR);
 
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, __LINE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, __FAILURE__);
     REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, my_mallocAndStrcpy_s);
 
 }
@@ -3880,7 +3881,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_x509certificate_fails_when_
 
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "here be some certificate"))
         .IgnoreArgument_destination()
-        .SetReturn(__LINE__);
+        .SetReturn(__FAILURE__);
 
     ///act
     IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_SetOption(h, OPTION_X509_CERT, "here be some certificate");
@@ -3903,7 +3904,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_x509privatekey_fails_when_s
 
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "here be some priv key"))
         .IgnoreArgument_destination()
-        .SetReturn(__LINE__);
+        .SetReturn(__FAILURE__);
 
     ///act
     IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_SetOption(h, OPTION_X509_PRIVATE_KEY, "here be some priv key");
