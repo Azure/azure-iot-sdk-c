@@ -23,7 +23,7 @@ endmacro(compileAsC99)
 
 compileAsC99()
 
-if(UNIX)
+if(LINUX)
 
     set(AZUREIOT_INC_FOLDER "pi_device" "../../../serializer/inc" "." "/usr/include/azureiot" "/usr/include/azureiot/inc")
 
