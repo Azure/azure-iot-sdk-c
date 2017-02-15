@@ -56,6 +56,7 @@ if "%1" equ "--make_nuget" goto arg-build-nuget
 if "%1" equ "--cmake-root" goto arg-cmake-root
 if "%1" equ "--no-make" goto arg-no-make
 if "%1" equ "--build-traceabilitytool" goto arg-build-traceabilitytool
+if "%1" equ "--wip-use-c2d-amqp-methods" goto arg-wip-use-c2d-amqp-methods
 call :usage && exit /b 1
 
 :arg-build-clean
@@ -114,6 +115,10 @@ goto args-continue
 
 :arg-build-traceabilitytool
 set build_traceabilitytool=1
+goto args-continue
+
+:arg-wip-use-c2d-amqp-methods
+set CMAKE_use_c2d_amqp_methods=ON
 goto args-continue
 
 :args-continue
@@ -252,7 +257,7 @@ pushd %cmake-root%\cmake\%CMAKE_DIR%
 
 if %MAKE_NUGET_PKG% == yes (
     echo ***Running CMAKE for Win32***
-    cmake %build-root% -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio%
+    cmake %build-root% -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods%
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
     popd
 	
@@ -264,7 +269,7 @@ if %MAKE_NUGET_PKG% == yes (
 	rem no error checking
 
 	pushd %cmake-root%\cmake\iotsdk_x64
-	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio% %build-root%  -G "Visual Studio 14 Win64"
+	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods% %build-root%  -G "Visual Studio 14 Win64"
 	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
     popd
 
@@ -276,20 +281,20 @@ if %MAKE_NUGET_PKG% == yes (
 	rem no error checking
 
 	pushd %cmake-root%\cmake\iotsdk_arm
-	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio% %build-root%  -G "Visual Studio 14 ARM"
+	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods% %build-root%  -G "Visual Studio 14 ARM"
 	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 ) else if %build-platform% == x64 (
 	echo ***Running CMAKE for Win64***
-	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio% %build-root%  -G "Visual Studio 14 Win64"
+	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods% %build-root%  -G "Visual Studio 14 Win64"
 	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 ) else if %build-platform% == arm (
 	echo ***Running CMAKE for ARM***
-	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio% %build-root%  -G "Visual Studio 14 ARM"
+	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods% %build-root%  -G "Visual Studio 14 ARM"
 	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 ) else (
 	echo ***Running CMAKE for Win32***
-	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio% %build-root% 
+	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods% %build-root% 
 	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 )
 
@@ -350,18 +355,18 @@ goto :eof
 :usage
 echo build.cmd [options]
 echo options:
-echo  -c, --clean               delete artifacts from previous build before building
-echo  --config ^<value^>        [Debug] build configuration (e.g. Debug, Release)
-echo  --platform ^<value^>      [Win32] build platform (e.g. Win32, x64, arm, ...)
-echo  --make_nuget ^<value^>    [no] generates the binaries to be used for nuget packaging (e.g. yes, no)
-echo  --run-e2e-tests           run end-to-end tests
-echo  --run-longhaul-tests      run long-haul tests
-echo  --use-websockets          Enables the support for AMQP over WebSockets.
-echo  --cmake-root			    Directory to place the cmake files used for building the project
-echo  --no-make                 Surpress building the code
-echo  --build-traceabilitytool  Builds an internal tool (traceabilitytool) to check for requirements/code/test consistency
-echo  --run-unittests           Run unit tests
-
+echo  -c, --clean                   delete artifacts from previous build before building
+echo  --config ^<value^>            [Debug] build configuration (e.g. Debug, Release)
+echo  --platform ^<value^>          [Win32] build platform (e.g. Win32, x64, arm, ...)
+echo  --make_nuget ^<value^>        [no] generates the binaries to be used for nuget packaging (e.g. yes, no)
+echo  --run-e2e-tests               run end-to-end tests
+echo  --run-longhaul-tests          run long-haul tests
+echo  --use-websockets              Enables the support for AMQP over WebSockets.
+echo  --cmake-root		                Directory to place the cmake files used for building the project
+echo  --no-make                     Surpress building the code
+echo  --build-traceabilitytool      Builds an internal tool (traceabilitytool) to check for requirements/code/test consistency
+echo  --run-unittests               Run unit tests
+echo  --wip-use-c2d-amqp-methods    Builds with work in progress feature for amqp methods
 goto :eof
 
 
