@@ -8,7 +8,7 @@ rem // resolve to fully qualified path
 for %%i in ("%build-root%") do set build-root=%%~fi
 
 REM -- C --
-cd %build-root%\build_all\windowswip
+cd %build-root%\build_all\windows
 call build.cmd --run-unittests --wip-use-c2d-amqp-methods
 if errorlevel 1 goto :eof
 cd %build-root%
