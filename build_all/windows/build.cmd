@@ -41,6 +41,7 @@ set CMAKE_DIR=iotsdk_win32
 set build-samples=yes
 set make=yes
 set build_traceabilitytool=0
+set CMAKE_use_c2d_amqp_methods=OFF
 
 :args-loop
 if "%1" equ "" goto args-done
