@@ -67,6 +67,9 @@ static const char* DEVICE_METHOD_RESPONSE_TOPIC = "$iothub/methods/res/%d/?$rid=
 
 static const char* REQUEST_ID_PROPERTY = "?$rid=";
 
+static const char* MESSAGE_ID_PROPERTY = "mid";
+static const char* CORRELATION_ID_PROPERTY = "cid";
+
 #define UNSUBSCRIBE_FROM_TOPIC                  0x0000
 #define SUBSCRIBE_GET_REPORTED_STATE_TOPIC      0x0001
 #define SUBSCRIBE_NOTIFICATION_STATE_TOPIC      0x0002
@@ -1037,6 +1040,7 @@ static int extractMqttProperties(IOTHUB_MESSAGE_HANDLE IoTHubMessage, const char
                 else
                 {
                     result = 0;
+
                     while (STRING_TOKENIZER_get_next_token(token, output, PROPERTY_SEPARATOR) == 0 && result == 0)
                     {
                         const char* tokenData = STRING_c_str(output);
@@ -1047,7 +1051,61 @@ static int extractMqttProperties(IOTHUB_MESSAGE_HANDLE IoTHubMessage, const char
                         }
                         else
                         {
-                            if (!isSystemProperty(tokenData) )
+                            if (isSystemProperty(tokenData))
+                            {
+                                const char* iterator = tokenData;
+                                while (iterator != NULL && *iterator != '\0' && result == 0)
+                                {
+                                    if (*iterator == '=')
+                                    {
+                                        size_t nameLen = iterator - tokenData;
+                                        char* propName = malloc(nameLen + 1);
+
+                                        size_t valLen = tokenLen - (nameLen + 1) + 1;
+                                        char* propValue = malloc(valLen + 1);
+
+                                        if (propName == NULL || propValue == NULL)
+                                        {
+                                            result = __FAILURE__;
+                                        }
+                                        else
+                                        {
+                                            strncpy(propName, tokenData, nameLen);
+                                            propName[nameLen] = '\0';
+
+                                            strncpy(propValue, iterator + 1, valLen);
+                                            propValue[valLen] = '\0';
+
+                                            if (nameLen > 3)
+                                            {
+                                                if (strcmp((const char*)&propName[nameLen - 3], MESSAGE_ID_PROPERTY) == 0)
+                                                {
+                                                    if (IoTHubMessage_SetMessageId(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
+                                                    {
+                                                        LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'messageId' property.");
+                                                        result = __FAILURE__;
+                                                    }
+                                                }
+
+                                                if (strcmp((const char*)&propName[nameLen - 3], CORRELATION_ID_PROPERTY) == 0)
+                                                {
+                                                    if (IoTHubMessage_SetCorrelationId(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
+                                                    {
+                                                        LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'correlationId' property.");
+                                                        result = __FAILURE__;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        free(propName);
+                                        free(propValue);
+
+                                        break;
+                                    }
+                                    iterator++;
+                                }
+                            }
+                            else
                             {
                                 const char* iterator = tokenData;
                                 while (iterator != NULL && *iterator != '\0' && result == 0)

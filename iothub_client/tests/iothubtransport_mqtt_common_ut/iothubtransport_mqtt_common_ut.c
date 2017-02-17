@@ -3899,6 +3899,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_sys_Properties_succee
     EXPECTED_CALL(STRING_TOKENIZER_create(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MSG_BYTEARRAY));
     STRICT_EXPECTED_CALL(STRING_new());
+
     STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&"))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
@@ -3906,6 +3907,16 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_sys_Properties_succee
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .SetReturn("iothub-ack=Full");
+
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
     STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&"))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
