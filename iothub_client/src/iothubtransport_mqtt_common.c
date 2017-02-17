@@ -1076,21 +1076,24 @@ static int extractMqttProperties(IOTHUB_MESSAGE_HANDLE IoTHubMessage, const char
                                             strncpy(propValue, iterator + 1, valLen);
                                             propValue[valLen] = '\0';
 
-                                            if (strcmp((const char*)&propName[nameLen-3], MESSAGE_ID_PROPERTY) == 0)
+                                            if (nameLen > 3)
                                             {
-                                                if (IoTHubMessage_SetMessageId(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
+                                                if (strcmp((const char*)&propName[nameLen - 3], MESSAGE_ID_PROPERTY) == 0)
                                                 {
-                                                    LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'messageId' property.");
-                                                    result = __FAILURE__;
+                                                    if (IoTHubMessage_SetMessageId(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
+                                                    {
+                                                        LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'messageId' property.");
+                                                        result = __FAILURE__;
+                                                    }
                                                 }
-                                            }
 
-                                            if (strcmp((const char*)&propName[nameLen-3], CORRELATION_ID_PROPERTY) == 0)
-                                            {
-                                                if (IoTHubMessage_SetCorrelationId(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
+                                                if (strcmp((const char*)&propName[nameLen - 3], CORRELATION_ID_PROPERTY) == 0)
                                                 {
-                                                    LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'correlationId' property.");
-                                                    result = __FAILURE__;
+                                                    if (IoTHubMessage_SetCorrelationId(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
+                                                    {
+                                                        LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'correlationId' property.");
+                                                        result = __FAILURE__;
+                                                    }
                                                 }
                                             }
                                         }
