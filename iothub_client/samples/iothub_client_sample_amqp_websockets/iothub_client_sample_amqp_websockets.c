@@ -24,47 +24,51 @@ typedef struct EVENT_INSTANCE_TAG
 
 static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback)
 {
-	const unsigned char* buffer = NULL;
+    int* counter = (int*)userContextCallback;
+    const unsigned char* buffer = NULL;
 	size_t size = 0;
-	
-	if (userContextCallback == NULL)
-	{
-		(void)printf("Failed getting the context of the message received.\r\n");
-	}
-	else
-	{
-		int* counter = (int*)userContextCallback;
-			
-		IOTHUBMESSAGE_CONTENT_TYPE contentType = IoTHubMessage_GetContentType(message);
+    const char* messageId;
+    const char* correlationId;
 
-		if (contentType == IOTHUBMESSAGE_BYTEARRAY)
+    // Message properties
+    if ((messageId = IoTHubMessage_GetMessageId(message)) == NULL)
+    {
+        messageId = "<null>";
+    }
+
+    if ((correlationId = IoTHubMessage_GetCorrelationId(message)) == NULL)
+    {
+        correlationId = "<null>";
+    }
+			
+    // Message content
+    IOTHUBMESSAGE_CONTENT_TYPE contentType = IoTHubMessage_GetContentType(message);
+
+	if (contentType == IOTHUBMESSAGE_BYTEARRAY)
+	{
+		if (IoTHubMessage_GetByteArray(message, &buffer, &size) == IOTHUB_MESSAGE_OK)
 		{
-			if (IoTHubMessage_GetByteArray(message, &buffer, &size) == IOTHUB_MESSAGE_OK)
-			{
-				(void)printf("Received Message [%d] with BINARY Data: <<<%.*s>>> & Size=%d\r\n", *counter, (int)size, buffer, (int)size);
-			}
-			else
-			{
-				(void)printf("Failed getting the BINARY body of the message received.\r\n");
-			}
-		}
-		else if (contentType == IOTHUBMESSAGE_STRING)
-		{
-			if ((buffer = (const unsigned char*)IoTHubMessage_GetString(message)) != NULL && (size = strlen((const char*)buffer)) > 0)
-			{
-				(void)printf("Received Message [%d] with STRING Data: <<<%.*s>>> & Size=%d\r\n", *counter, (int)size, buffer, (int)size);
-			}
-			else
-			{
-				(void)printf("Failed getting the STRING body of the message received.\r\n");
-			}
+            (void)printf("Received Message [%d]\r\n Message ID: %s\r\n Correlation ID: %s\r\n BINARY Data: <<<%.*s>>> & Size=%d\r\n", *counter, messageId, correlationId, (int)size, buffer, (int)size);
 		}
 		else
 		{
-			(void)printf("Failed getting the body of the message received (type %i).\r\n", contentType);
+			(void)printf("Failed getting the BINARY body of the message received.\r\n");
 		}
-
-		(*counter)++;
+	}
+	else if (contentType == IOTHUBMESSAGE_STRING)
+	{
+		if ((buffer = (const unsigned char*)IoTHubMessage_GetString(message)) != NULL && (size = strlen((const char*)buffer)) > 0)
+		{
+            (void)printf("Received Message [%d]\r\n Message ID: %s\r\n Correlation ID: %s\r\n STRING Data: <<<%.*s>>> & Size=%d\r\n", *counter, messageId, correlationId, (int)size, buffer, (int)size);
+		}
+		else
+		{
+			(void)printf("Failed getting the STRING body of the message received.\r\n");
+		}
+	}
+	else
+	{
+		(void)printf("Failed getting the body of the message received (type %i).\r\n", contentType);
 	}
 	
     // Retrieve properties from the message
@@ -78,9 +82,9 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
         {
             if (propertyCount > 0)
             {
-				size_t index;
+                size_t index;
 
-                printf("Message Properties:\r\n");
+                printf(" Message Properties:\r\n");
                 for (index = 0; index < propertyCount; index++)
                 {
                     printf("\tKey: %s Value: %s\r\n", keys[index], values[index]);
@@ -89,6 +93,8 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
             }
         }
     }
+
+    (*counter)++;
 
     /* Some device specific action code goes here... */
     return IOTHUBMESSAGE_ACCEPTED;

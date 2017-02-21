@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
@@ -43,7 +44,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
     const char* messageId;
     const char* correlationId;
 
-    // AMQP message properties
+    // Message properties
     if ((messageId = IoTHubMessage_GetMessageId(message)) == NULL)
     {
         messageId = "<null>";
@@ -54,14 +55,14 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
         correlationId = "<null>";
     }
 
-    // AMQP message content.
+    // Message content
     IOTHUBMESSAGE_CONTENT_TYPE contentType = IoTHubMessage_GetContentType(message);
 
     if (contentType == IOTHUBMESSAGE_BYTEARRAY)
     {
         if (IoTHubMessage_GetByteArray(message, &buffer, &size) == IOTHUB_MESSAGE_OK)
         {
-            (void)printf("Received Message [%d] (message-id: %s, correlation-id: %s) with BINARY Data: <<<%.*s>>> & Size=%d\r\n", *counter, messageId, correlationId,(int)size, buffer, (int)size);
+            (void)printf("Received Message [%d]\r\n Message ID: %s\r\n Correlation ID: %s\r\n BINARY Data: <<<%.*s>>> & Size=%d\r\n", *counter, messageId, correlationId, (int)size, buffer, (int)size);
         }
         else
         {
@@ -72,7 +73,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
     {
         if ((buffer = (const unsigned char*)IoTHubMessage_GetString(message)) != NULL && (size = strlen((const char*)buffer)) > 0)
         {
-            (void)printf("Received Message [%d] (message-id: %s, correlation-id: %s) with STRING Data: <<<%.*s>>> & Size=%d\r\n", *counter, messageId, correlationId, (int)size, buffer, (int)size);
+            (void)printf("Received Message [%d]\r\n Message ID: %s\r\n Correlation ID: %s\r\n STRING Data: <<<%.*s>>> & Size=%d\r\n", *counter, messageId, correlationId, (int)size, buffer, (int)size);
 
             // If we receive the work 'quit' then we stop running
         }
@@ -99,7 +100,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
             {
                 size_t index;
 
-                printf("Message Properties:\r\n");
+                printf(" Message Properties:\r\n");
                 for (index = 0; index < propertyCount; index++)
                 {
                     printf("\tKey: %s Value: %s\r\n", keys[index], values[index]);
@@ -139,12 +140,12 @@ static int create_events(EVENT_INSTANCE* events, const char* deviceId)
 		if (sprintf_s(msgText, sizeof(msgText), "{\"deviceId\":\"%s\",\"windSpeed\":%.2f}", deviceId, avgWindSpeed + (rand() % 4 + 2)) == 0)
 		{
 			(void)printf("ERROR: failed creating event message for device %s\r\n", deviceId);
-			result = __LINE__;
+			result = __FAILURE__;
 		}
 		else if ((events[i].messageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText))) == NULL)
 		{
 			(void)printf("ERROR: failed creating the IOTHUB_MESSAGE_HANDLE for device %s\r\n", deviceId);
-			result = __LINE__;
+			result = __FAILURE__;
 		}
 		else
 		{
@@ -153,17 +154,17 @@ static int create_events(EVENT_INSTANCE* events, const char* deviceId)
 			if ((propMap = IoTHubMessage_Properties(events[i].messageHandle)) == NULL) 
 			{
 				(void)printf("ERROR: failed getting device %s's message property map\r\n", deviceId);
-				result = __LINE__;
+				result = __FAILURE__;
 			}
 			else if (sprintf_s(propText, sizeof(propText), "PropMsg_%d", i) == 0) 
 			{
 				(void)printf("ERROR: sprintf_s failed for device %s's message property\r\n", deviceId);
-				result = __LINE__;
+				result = __FAILURE__;
 			}
 			else if (Map_AddOrUpdate(propMap, "PropName", propText) != MAP_OK)
 			{
 				(void)printf("ERROR: Map_AddOrUpdate failed for device %s\r\n", deviceId);
-				result = __LINE__;
+				result = __FAILURE__;
 			}
 			else
 			{

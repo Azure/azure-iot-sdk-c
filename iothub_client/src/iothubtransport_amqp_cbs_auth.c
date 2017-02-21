@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#include <stdlib.h>
 #include "iothubtransport_amqp_cbs_auth.h"
+#include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/agenttime.h" 
 #include "azure_c_shared_utility/xlogging.h"
@@ -38,9 +40,9 @@ typedef struct AUTHENTICATION_INSTANCE_TAG
 	ON_AUTHENTICATION_ERROR_CALLBACK on_error_callback;
 	void* on_error_callback_context;
 	
-	uint32_t cbs_request_timeout_secs;
-	uint32_t sas_token_lifetime_secs;
-	uint32_t sas_token_refresh_time_secs;
+	size_t cbs_request_timeout_secs;
+	size_t sas_token_lifetime_secs;
+	size_t sas_token_refresh_time_secs;
 
 	AUTHENTICATION_STATE state;
 	CBS_HANDLE cbs_handle;
@@ -64,7 +66,7 @@ static int get_seconds_since_epoch(double *seconds)
 	if ((current_time = get_time(NULL)) == INDEFINITE_TIME)
 	{
 		LogError("Failed getting the current local time (get_time() failed)");
-		result = __LINE__;
+		result = __FAILURE__;
 	}
 	else
 	{
@@ -104,7 +106,7 @@ static int verify_cbs_put_token_timeout(AUTHENTICATION_INSTANCE* instance, bool*
 
 	if (instance->current_sas_token_put_time == INDEFINITE_TIME)
 	{
-		result = __LINE__;
+		result = __FAILURE__;
 		LogError("Failed verifying if cbs_put_token has timed out (current_sas_token_put_time is not set)");
 	}
 	else
@@ -113,7 +115,7 @@ static int verify_cbs_put_token_timeout(AUTHENTICATION_INSTANCE* instance, bool*
 
 		if ((current_time = get_time(NULL)) == INDEFINITE_TIME)
 		{
-			result = __LINE__;
+			result = __FAILURE__;
 			LogError("Failed verifying if cbs_put_token has timed out (get_time failed)");
 		}
 		// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_083: [authentication_do_work() shall check for authentication timeout comparing the current time since `instance->current_sas_token_put_time` to `instance->cbs_request_timeout_secs`]
@@ -138,7 +140,7 @@ static int verify_sas_token_refresh_timeout(AUTHENTICATION_INSTANCE* instance, b
 
 	if (instance->current_sas_token_put_time == INDEFINITE_TIME)
 	{
-		result = __LINE__;
+		result = __FAILURE__;
 		LogError("Failed verifying if SAS token refresh timed out (current_sas_token_put_time is not set)");
 	}
 	else
@@ -147,7 +149,7 @@ static int verify_sas_token_refresh_timeout(AUTHENTICATION_INSTANCE* instance, b
 
 		if ((current_time = get_time(NULL)) == INDEFINITE_TIME)
 		{
-			result = __LINE__;
+			result = __FAILURE__;
 			LogError("Failed verifying if SAS token refresh timed out (get_time failed)");
 		}
 		else if ((uint32_t)get_difftime(current_time, instance->current_sas_token_put_time) >= instance->sas_token_refresh_time_secs)
@@ -212,18 +214,18 @@ static int mark_current_device_key_as_invalid(AUTHENTICATION_INSTANCE* instance)
 		{
 			instance->current_credential_in_use = CREDENTIAL_TYPE_NONE;
 			LogError("Primary key of device '%s' was marked as invalid. No other device keys available", STRING_c_str(instance->device_id));
-			result = __LINE__;
+			result = __FAILURE__;
 		}
 	}
 	else if (instance->current_credential_in_use == DEVICE_SECONDARY_KEY)
 	{
 		instance->current_credential_in_use = CREDENTIAL_TYPE_NONE;
 		LogError("Secondary key of device '%s' was marked as invalid. No other device keys available", STRING_c_str(instance->device_id));
-		result = __LINE__;
+		result = __FAILURE__;
 	}
 	else
 	{
-		result = __LINE__;
+		result = __FAILURE__;
 	}
 
 	return result;
@@ -310,7 +312,7 @@ static int put_SAS_token_to_cbs(AUTHENTICATION_INSTANCE* instance, STRING_HANDLE
 		// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_060: [If cbs_put_token() fails, `instance->is_cbs_put_token_in_progress` shall be set to FALSE]
 		// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_078: [If cbs_put_token() fails, `instance->is_cbs_put_token_in_progress` shall be set to FALSE]
 		instance->is_cbs_put_token_in_progress = false;
-		result = __LINE__;
+		result = __FAILURE__;
 		LogError("Failed putting SAS token to CBS for device '%s' (cbs_put_token failed)", STRING_c_str(instance->device_id));
 	}
 	else
@@ -340,7 +342,7 @@ static int create_and_put_SAS_token_to_cbs(AUTHENTICATION_INSTANCE* instance, ST
 
 	if (get_seconds_since_epoch(&seconds_since_epoch) != RESULT_OK)
 	{
-		result = __LINE__;
+		result = __FAILURE__;
 		LogError("Failed creating a SAS token (get_seconds_since_epoch() failed)");
 	}
 	else
@@ -351,7 +353,7 @@ static int create_and_put_SAS_token_to_cbs(AUTHENTICATION_INSTANCE* instance, ST
 
 		// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_052: [The SAS token expiration time shall be calculated adding `instance->sas_token_lifetime_secs` to the current number of seconds since epoch time UTC]
 		// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_070: [The SAS token expiration time shall be calculated adding `instance->sas_token_lifetime_secs` to the current number of seconds since epoch time UTC]
-		uint32_t sas_token_expiration_time_secs = (uint32_t)seconds_since_epoch + instance->sas_token_lifetime_secs;
+		size_t sas_token_expiration_time_secs = (size_t)seconds_since_epoch + instance->sas_token_lifetime_secs;
 
 		// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_053: [A STRING_HANDLE, referred to as `devices_path`, shall be created from the following parts: iothub_host_fqdn + "/devices/" + device_id]
 		// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_071: [A STRING_HANDLE, referred to as `devices_path`, shall be created from the following parts: iothub_host_fqdn + "/devices/" + device_id]
@@ -359,7 +361,7 @@ static int create_and_put_SAS_token_to_cbs(AUTHENTICATION_INSTANCE* instance, ST
 		{
 			// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_054: [If `devices_path` failed to be created, authentication_do_work() shall fail and return]
 			// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_072: [If `devices_path` failed to be created, authentication_do_work() shall fail and return]		
-			result = __LINE__;
+			result = __FAILURE__;
 			LogError("Failed creating a SAS token (create_devices_path() failed)");
 		}
 		// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_115: [An empty STRING_HANDLE, referred to as `sasTokenKeyName`, shall be created using STRING_new()]
@@ -368,7 +370,7 @@ static int create_and_put_SAS_token_to_cbs(AUTHENTICATION_INSTANCE* instance, ST
 		{
 			// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_116: [If `sasTokenKeyName` failed to be created, authentication_do_work() shall fail and return]
 			// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_118: [If `sasTokenKeyName` failed to be created, authentication_do_work() shall fail and return]
-			result = __LINE__;
+			result = __FAILURE__;
 			LogError("Failed creating a SAS token (STRING_new() failed)");
 		}
 		// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_055: [The SAS token shall be created using SASToken_Create(), passing the selected device key, `device_path`, `sasTokenKeyName` and expiration time as arguments]
@@ -377,12 +379,12 @@ static int create_and_put_SAS_token_to_cbs(AUTHENTICATION_INSTANCE* instance, ST
 		{
 			// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_056: [If SASToken_Create() fails, authentication_do_work() shall fail and return]
 			// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_074: [If SASToken_Create() fails, authentication_do_work() shall fail and return]
-			result = __LINE__;
+			result = __FAILURE__;
 			LogError("Failed creating a SAS token (SASToken_Create() failed)");
 		}
 		else if (put_SAS_token_to_cbs(instance, devices_path, sas_token) != RESULT_OK)
 		{
-			result = __LINE__;
+			result = __FAILURE__;
 			LogError("Failed putting SAS token to CBS");
 		}
 		else
@@ -403,6 +405,60 @@ static int create_and_put_SAS_token_to_cbs(AUTHENTICATION_INSTANCE* instance, ST
 }
 
 
+// ---------- Set/Retrieve Options Helpers ----------//
+
+static void* authentication_clone_option(const char* name, const void* value)
+{
+	void* result;
+
+	if (name == NULL)
+	{
+		LogError("Failed to clone authentication option (name is NULL)"); 
+		result = NULL;
+	}
+	else if (value == NULL)
+	{
+		LogError("Failed to clone authentication option (value is NULL)");
+		result = NULL;
+	}
+	else
+	{
+		if (strcmp(AUTHENTICATION_OPTION_CBS_REQUEST_TIMEOUT_SECS, name) == 0 ||
+			strcmp(AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS, name) == 0 ||
+			strcmp(AUTHENTICATION_OPTION_SAS_TOKEN_LIFETIME_SECS, name) == 0 ||
+			strcmp(AUTHENTICATION_OPTION_SAVED_OPTIONS, name) == 0)
+		{
+			result = (void*)value;
+		}
+		else
+		{
+			LogError("Failed to clone authentication option (option with name '%s' is not suppported)", name);
+			result = NULL;
+		}
+	}
+
+	return result;
+}
+
+static void authentication_destroy_option(const char* name, const void* value)
+{
+	if (name == NULL)
+	{
+		LogError("Failed to destroy authentication option (name is NULL)");
+	}
+	else if (value == NULL)
+	{
+		LogError("Failed to destroy authentication option (value is NULL)");
+	}
+	else
+	{
+		if (strcmp(name, AUTHENTICATION_OPTION_SAVED_OPTIONS) == 0)
+		{
+			OptionHandler_Destroy((OPTIONHANDLER_HANDLE)value);
+		}
+	}
+}
+
 
 // Public APIs:
 
@@ -410,26 +466,26 @@ int authentication_start(AUTHENTICATION_HANDLE authentication_handle, const CBS_
 {
 	int result;
 
-	// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_025: [If authentication_handle is NULL, authentication_start() shall fail and return __LINE__ as error code]
+	// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_025: [If authentication_handle is NULL, authentication_start() shall fail and return __FAILURE__ as error code]
 	if (authentication_handle == NULL)
 	{
-		result = __LINE__;
+		result = __FAILURE__;
 		LogError("authentication_start failed (authentication_handle is NULL)");
 	}
-	// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_026: [If `cbs_handle` is NULL, authentication_start() shall fail and return __LINE__ as error code]
+	// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_026: [If `cbs_handle` is NULL, authentication_start() shall fail and return __FAILURE__ as error code]
 	else if (cbs_handle == NULL)
 	{
-		result = __LINE__;
+		result = __FAILURE__;
 		LogError("authentication_start failed (cbs_handle is NULL)");
 	}
 	else
 	{
 		AUTHENTICATION_INSTANCE* instance = (AUTHENTICATION_INSTANCE*)authentication_handle;
 		
-		// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_027: [If authenticate state has been started already, authentication_start() shall fail and return __LINE__ as error code]
+		// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_027: [If authenticate state has been started already, authentication_start() shall fail and return __FAILURE__ as error code]
 		if (instance->state != AUTHENTICATION_STATE_STOPPED)
 		{
-			result = __LINE__;
+			result = __FAILURE__;
 			LogError("authentication_start failed (messenger has already been started; current state: %d)", instance->state);
 		}
 		else
@@ -452,20 +508,20 @@ int authentication_stop(AUTHENTICATION_HANDLE authentication_handle)
 {
 	int result;
 	
-	// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_031: [If `authentication_handle` is NULL, authentication_stop() shall fail and return __LINE__]
+	// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_031: [If `authentication_handle` is NULL, authentication_stop() shall fail and return __FAILURE__]
 	if (authentication_handle == NULL)
 	{
-		result = __LINE__;
+		result = __FAILURE__;
 		LogError("authentication_stop failed (authentication_handle is NULL)");
 	}
 	else
 	{
 		AUTHENTICATION_INSTANCE* instance = (AUTHENTICATION_INSTANCE*)authentication_handle;
 
-		// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_032: [If `instance->state` is AUTHENTICATION_STATE_STOPPED, authentication_stop() shall fail and return __LINE__]
+		// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_032: [If `instance->state` is AUTHENTICATION_STATE_STOPPED, authentication_stop() shall fail and return __FAILURE__]
 		if (instance->state == AUTHENTICATION_STATE_STOPPED)
 		{
-			result = __LINE__;
+			result = __FAILURE__;
 			LogError("authentication_stop failed (messenger is already stopped)");
 		}
 		else
@@ -807,73 +863,119 @@ void authentication_do_work(AUTHENTICATION_HANDLE authentication_handle)
 	}
 }
 
-int authentication_set_cbs_request_timeout_secs(AUTHENTICATION_HANDLE authentication_handle, uint32_t value)
+int authentication_set_option(AUTHENTICATION_HANDLE authentication_handle, const char* name, void* value)
 {
 	int result;
 
-	// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_097: [If `authentication_handle` is NULL, authentication_set_cbs_request_timeout_secs() shall fail and return __LINE__]
-	if (authentication_handle == NULL)
+	// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_097: [If `authentication_handle` or `name` or `value` is NULL, authentication_set_option shall fail and return a non-zero value]
+	if (authentication_handle == NULL || name == NULL || value == NULL)
 	{
-		result = __LINE__;
-		LogError("authentication_set_cbs_request_timeout_secs failed (authentication_handle is NULL)");
+		LogError("authentication_set_option failed (one of the followin are NULL: authentication_handle=%p, name=%p, value=%p)", 
+			authentication_handle, name, value);
+		result = __FAILURE__;
 	}
 	else
 	{
 		AUTHENTICATION_INSTANCE* instance = (AUTHENTICATION_INSTANCE*)authentication_handle;
 
-		// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_098: [`value` shall be saved on `instance->cbs_request_timeout_secs`]
-		instance->cbs_request_timeout_secs = value;
-
-		// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_099: [authentication_set_cbs_request_timeout_secs() shall return 0]
-		result = RESULT_OK;
+		// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_098: [If name matches AUTHENTICATION_OPTION_CBS_REQUEST_TIMEOUT_SECS, `value` shall be saved on `instance->cbs_request_timeout_secs`]
+		if (strcmp(AUTHENTICATION_OPTION_CBS_REQUEST_TIMEOUT_SECS, name) == 0)
+		{
+			instance->cbs_request_timeout_secs = *((size_t*)value);
+			result = RESULT_OK;
+		}
+		// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_124: [If name matches AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS, `value` shall be saved on `instance->sas_token_refresh_time_secs`]
+		else if (strcmp(AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS, name) == 0)
+		{
+			instance->sas_token_refresh_time_secs = *((size_t*)value);
+			result = RESULT_OK;
+		}
+		// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_125: [If name matches AUTHENTICATION_OPTION_SAS_TOKEN_LIFETIME_SECS, `value` shall be saved on `instance->sas_token_lifetime_secs`]
+		else if (strcmp(AUTHENTICATION_OPTION_SAS_TOKEN_LIFETIME_SECS, name) == 0)
+		{
+			instance->sas_token_lifetime_secs = *((size_t*)value);
+			result = RESULT_OK;
+		}
+		else if (strcmp(AUTHENTICATION_OPTION_SAVED_OPTIONS, name) == 0)
+		{
+			// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_098: [If name matches AUTHENTICATION_OPTION_SAVED_OPTIONS, `value` shall be applied using OptionHandler_FeedOptions]
+			if (OptionHandler_FeedOptions((OPTIONHANDLER_HANDLE)value, authentication_handle) != OPTIONHANDLER_OK)
+			{
+				// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_126: [If OptionHandler_FeedOptions fails, authentication_set_option shall fail and return a non-zero value]
+				LogError("authentication_set_option failed (OptionHandler_FeedOptions failed)");
+				result = __FAILURE__;
+			}
+			else
+			{
+				result = RESULT_OK;
+			}
+		}
+		else
+		{
+			// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_128: [If name does not match any supported option, authentication_set_option shall fail and return a non-zero value]
+			LogError("authentication_set_option failed (option with name '%s' is not suppported)", name);
+			result = __FAILURE__;
+		}
 	}
 
-    return result;
-}
-
-int authentication_set_sas_token_refresh_time_secs(AUTHENTICATION_HANDLE authentication_handle, uint32_t value)
-{
-	int result;
-
-	// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_100: [If `authentication_handle` is NULL, authentication_set_sas_token_refresh_time_secs() shall fail and return __LINE__]
-	if (authentication_handle == NULL)
-	{
-		result = __LINE__;
-		LogError("authentication_set_sas_token_refresh_time_secs failed (authentication_handle is NULL)");
-	}
-	else
-	{
-		AUTHENTICATION_INSTANCE* instance = (AUTHENTICATION_INSTANCE*)authentication_handle;
-
-		// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_101: [`value` shall be saved on `instance->sas_token_refresh_time_secs`]
-		instance->sas_token_refresh_time_secs = value;
-
-		// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_102: [authentication_set_sas_token_refresh_time_secs() shall return 0]
-		result = RESULT_OK;
-	}
-
+	// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_099: [If no errors occur, authentication_set_option shall return 0]
 	return result;
 }
 
-int authentication_set_sas_token_lifetime_secs(AUTHENTICATION_HANDLE authentication_handle, uint32_t value)
+OPTIONHANDLER_HANDLE authentication_retrieve_options(AUTHENTICATION_HANDLE authentication_handle)
 {
-	int result;
+	OPTIONHANDLER_HANDLE result;
 
-	// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_103: [If `authentication_handle` is NULL, authentication_set_sas_token_lifetime_secs() shall fail and return __LINE__]
+	// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_100: [If `authentication_handle` is NULL, authentication_retrieve_options shall fail and return NULL]
 	if (authentication_handle == NULL)
 	{
-		result = __LINE__;
-		LogError("authentication_set_sas_token_lifetime_secs failed (authentication_handle is NULL)");
+		LogError("Failed to retrieve options from authentication instance (authentication_handle is NULL)");
+		result = NULL;
 	}
 	else
 	{
-		AUTHENTICATION_INSTANCE* instance = (AUTHENTICATION_INSTANCE*)authentication_handle;
+		// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_101: [An OPTIONHANDLER_HANDLE instance shall be created using OptionHandler_Create]
+		OPTIONHANDLER_HANDLE options = OptionHandler_Create(authentication_clone_option, authentication_destroy_option, (pfSetOption)authentication_set_option);
 
-		// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_104: [`value` shall be saved on `instance->sas_token_lifetime_secs`]
-		instance->sas_token_lifetime_secs = value;
+		if (options == NULL)
+		{
+			// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_102: [If an OPTIONHANDLER_HANDLE instance fails to be created, authentication_retrieve_options shall fail and return NULL]
+			LogError("Failed to retrieve options from authentication instance (OptionHandler_Create failed)");
+			result = NULL;
+		}
+		else
+		{
+			AUTHENTICATION_INSTANCE* instance = (AUTHENTICATION_INSTANCE*)authentication_handle;
 
-		// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_105: [authentication_set_sas_token_lifetime_secs() shall return 0]
-		result = RESULT_OK;
+			// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_103: [Each option of `instance` shall be added to the OPTIONHANDLER_HANDLE instance using OptionHandler_AddOption]
+			// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_104: [If OptionHandler_AddOption fails, authentication_retrieve_options shall fail and return NULL]
+			if (OptionHandler_AddOption(options, AUTHENTICATION_OPTION_CBS_REQUEST_TIMEOUT_SECS, (void*)&instance->cbs_request_timeout_secs) != OPTIONHANDLER_OK)
+			{
+				LogError("Failed to retrieve options from authentication instance (OptionHandler_Create failed for option '%s')", AUTHENTICATION_OPTION_CBS_REQUEST_TIMEOUT_SECS);
+				result = NULL;
+			}
+			else if (OptionHandler_AddOption(options, AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS, (void*)&instance->sas_token_refresh_time_secs) != OPTIONHANDLER_OK)
+			{
+				LogError("Failed to retrieve options from authentication instance (OptionHandler_Create failed for option '%s')", AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS);
+				result = NULL;
+			}
+			else if (OptionHandler_AddOption(options, AUTHENTICATION_OPTION_SAS_TOKEN_LIFETIME_SECS, (void*)&instance->sas_token_lifetime_secs) != OPTIONHANDLER_OK)
+			{
+				LogError("Failed to retrieve options from authentication instance (OptionHandler_Create failed for option '%s')", AUTHENTICATION_OPTION_SAS_TOKEN_LIFETIME_SECS);
+				result = NULL;
+			}
+			else
+			{
+				// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_127: [If no failures occur, authentication_retrieve_options shall return the OPTIONHANDLER_HANDLE instance]
+				result = options;
+			}
+
+			if (result == NULL)
+			{
+				// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_105: [If authentication_retrieve_options fails, any allocated memory shall be freed]
+				OptionHandler_Destroy(options);
+			}
+		}
 	}
 
 	return result;

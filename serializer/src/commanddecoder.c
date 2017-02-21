@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include <stdlib.h>
+#include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/gballoc.h"
 
 #include <stddef.h>
@@ -43,7 +44,7 @@ static int DecodeValueFromNode(SCHEMA_HANDLE schemaHandle, AGENT_DATA_TYPE* agen
             (Schema_GetStructTypePropertyCount(structTypeHandle, &propertyCount) != SCHEMA_OK))
         {
             /* Codes_SRS_COMMAND_DECODER_99_010:[ If any Schema API fails then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.]*/
-            result = __LINE__;
+            result = __FAILURE__;
             LogError("Getting Struct information failed.");
         }
         else
@@ -51,7 +52,7 @@ static int DecodeValueFromNode(SCHEMA_HANDLE schemaHandle, AGENT_DATA_TYPE* agen
             if (propertyCount == 0)
             {
                 /* Codes_SRS_COMMAND_DECODER_99_034:[ If Schema APIs indicate that a complex type has 0 members then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
-                result = __LINE__;
+                result = __FAILURE__;
                 LogError("Struct type with 0 members is not allowed");
             }
             else
@@ -60,7 +61,7 @@ static int DecodeValueFromNode(SCHEMA_HANDLE schemaHandle, AGENT_DATA_TYPE* agen
                 if (memberValues == NULL)
                 {
                     /* Codes_SRS_COMMAND_DECODER_99_021:[ If the parsing of the command fails for any other reason the command shall not be dispatched.] */
-                    result = __LINE__;
+                    result = __FAILURE__;
                     LogError("Failed allocating member values for command argument");
                 }
                 else
@@ -69,7 +70,7 @@ static int DecodeValueFromNode(SCHEMA_HANDLE schemaHandle, AGENT_DATA_TYPE* agen
                     if (memberNames == NULL)
                     {
                         /* Codes_SRS_COMMAND_DECODER_99_021:[ If the parsing of the command fails for any other reason the command shall not be dispatched.] */
-                        result = __LINE__;
+                        result = __FAILURE__;
                         LogError("Failed allocating member names for command argument.");
                     }
                     else
@@ -87,7 +88,7 @@ static int DecodeValueFromNode(SCHEMA_HANDLE schemaHandle, AGENT_DATA_TYPE* agen
                             if ((propertyHandle = Schema_GetStructTypePropertyByIndex(structTypeHandle, j)) == NULL)
                             {
                                 /* Codes_SRS_COMMAND_DECODER_99_010:[ If any Schema API fails then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.]*/
-                                result = __LINE__;
+                                result = __FAILURE__;
                                 LogError("Getting struct member failed.");
                                 break;
                             }
@@ -95,7 +96,7 @@ static int DecodeValueFromNode(SCHEMA_HANDLE schemaHandle, AGENT_DATA_TYPE* agen
                                      ((propertyType = Schema_GetPropertyType(propertyHandle)) == NULL))
                             {
                                 /* Codes_SRS_COMMAND_DECODER_99_010:[ If any Schema API fails then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.]*/
-                                result = __LINE__;
+                                result = __FAILURE__;
                                 LogError("Getting the struct member information failed.");
                                 break;
                             }
@@ -107,7 +108,7 @@ static int DecodeValueFromNode(SCHEMA_HANDLE schemaHandle, AGENT_DATA_TYPE* agen
                                 if (MultiTree_GetChildByName(node, memberNames[j], &memberNode) != MULTITREE_OK)
                                 {
                                     /* Codes_SRS_COMMAND_DECODER_99_028:[ If decoding the argument fails then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
-                                    result = __LINE__;
+                                    result = __FAILURE__;
                                     LogError("Getting child %s failed", propertyName);
                                     break;
                                 }
@@ -125,7 +126,7 @@ static int DecodeValueFromNode(SCHEMA_HANDLE schemaHandle, AGENT_DATA_TYPE* agen
                             if (Create_AGENT_DATA_TYPE_from_Members(agentDataType, edmTypeName, propertyCount, (const char* const*)memberNames, memberValues) != AGENT_DATA_TYPES_OK)
                             {
                                 /* Codes_SRS_COMMAND_DECODER_99_028:[ If decoding the argument fails then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
-                                result = __LINE__;
+                                result = __FAILURE__;
                                 LogError("Creating the agent data type from members failed.");
                             }
                             else
@@ -153,14 +154,14 @@ static int DecodeValueFromNode(SCHEMA_HANDLE schemaHandle, AGENT_DATA_TYPE* agen
         if (MultiTree_GetValue(node, (const void **)&argStringValue) != MULTITREE_OK)
         {
             /* Codes_SRS_COMMAND_DECODER_99_012:[ If any argument is missing in the command text then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
-            result = __LINE__;
+            result = __FAILURE__;
             LogError("Getting the string from the multitree failed.");
         }
         /* Codes_SRS_COMMAND_DECODER_99_027:[ The value for an argument of primitive type shall be decoded by using the CreateAgentDataType_From_String API.] */
         else if (CreateAgentDataType_From_String(argStringValue, primitiveType, agentDataType) != AGENT_DATA_TYPES_OK)
         {
             /* Codes_SRS_COMMAND_DECODER_99_028:[ If decoding the argument fails then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
-            result = __LINE__;
+            result = __FAILURE__;
             LogError("Failed parsing node %s.", argStringValue);
         }
     }

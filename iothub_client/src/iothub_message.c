@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include <stdlib.h>
+#include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/buffer_.h"
@@ -50,7 +51,7 @@ static int ValidateAsciiCharactersFilter(const char* mapKey, const char* mapValu
     int result;
     if (!ContainsOnlyUsAscii(mapKey) || !ContainsOnlyUsAscii(mapValue) )
     {
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else
     {

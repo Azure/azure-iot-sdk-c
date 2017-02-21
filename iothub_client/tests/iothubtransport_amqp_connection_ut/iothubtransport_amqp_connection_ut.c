@@ -789,7 +789,7 @@ TEST_FUNCTION(amqp_connection_do_work_success)
 	amqp_connection_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_043: [If `conn_handle` is NULL, amqp_connection_get_session_handle() shall fail and return __LINE__]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_043: [If `conn_handle` is NULL, amqp_connection_get_session_handle() shall fail and return __FAILURE__]
 TEST_FUNCTION(amqp_connection_get_session_handle_NULL_handle)
 {
 	// arrange
@@ -805,7 +805,7 @@ TEST_FUNCTION(amqp_connection_get_session_handle_NULL_handle)
 	// cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_044: [If `session_handle` is NULL, amqp_connection_get_session_handle() shall fail and return __LINE__]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_044: [If `session_handle` is NULL, amqp_connection_get_session_handle() shall fail and return __FAILURE__]
 TEST_FUNCTION(amqp_connection_get_session_handle_NULL_session_handle)
 {
 	// arrange
@@ -857,7 +857,7 @@ TEST_FUNCTION(amqp_connection_get_session_handle_success)
 	amqp_connection_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_047: [If `conn_handle` is NULL, amqp_connection_get_cbs_handle() shall fail and return __LINE__]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_047: [If `conn_handle` is NULL, amqp_connection_get_cbs_handle() shall fail and return __FAILURE__]
 TEST_FUNCTION(amqp_connection_get_cbs_handle_NULL_handle)
 {
 	// arrange
@@ -873,7 +873,7 @@ TEST_FUNCTION(amqp_connection_get_cbs_handle_NULL_handle)
 	// cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_048: [If `cbs_handle` is NULL, amqp_connection_get_cbs_handle() shall fail and return __LINE__]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_048: [If `cbs_handle` is NULL, amqp_connection_get_cbs_handle() shall fail and return __FAILURE__]
 TEST_FUNCTION(amqp_connection_get_cbs_handle_NULL_cbs_handle)
 {
 	// arrange
@@ -925,7 +925,7 @@ TEST_FUNCTION(amqp_connection_get_cbs_handle_success)
 	amqp_connection_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_049: [If `instance->cbs_handle` is NULL, amqp_connection_get_cbs_handle() shall fail and return __LINE__]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_049: [If `instance->cbs_handle` is NULL, amqp_connection_get_cbs_handle() shall fail and return __FAILURE__]
 TEST_FUNCTION(amqp_connection_get_cbs_handle_no_CBS)
 {
 	// arrange
@@ -954,7 +954,7 @@ TEST_FUNCTION(amqp_connection_get_cbs_handle_no_CBS)
 	amqp_connection_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_052: [If `conn_handle` is NULL, amqp_connection_set_logging() shall fail and return __LINE__]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_052: [If `conn_handle` is NULL, amqp_connection_set_logging() shall fail and return __FAILURE__]
 TEST_FUNCTION(amqp_connection_set_logging_NULL_handle)
 {
 	// act
@@ -996,7 +996,7 @@ TEST_FUNCTION(amqp_connection_set_logging_SASL_and_CBS_success)
 	amqp_connection_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_072: [If xio_setoption() fails, amqp_connection_set_logging() shall fail and return __LINE__]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_072: [If xio_setoption() fails, amqp_connection_set_logging() shall fail and return __FAILURE__]
 TEST_FUNCTION(amqp_connection_set_logging_SASL_and_CBS_xio_setoption_fails)
 {
 	// arrange

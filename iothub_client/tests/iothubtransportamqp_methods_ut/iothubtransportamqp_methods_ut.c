@@ -76,6 +76,8 @@ MOCK_FUNCTION_WITH_CODE(, int, test_on_method_request_received_calling_respond, 
     const unsigned char response_payload[] = { 0x43 };
     g_respond_result = iothubtransportamqp_methods_respond(method_handle, response_payload, sizeof(response_payload), 242);
 MOCK_FUNCTION_END(0)
+MOCK_FUNCTION_WITH_CODE(, void, test_on_methods_unsubscribed, void*, context);
+MOCK_FUNCTION_END()
 
 #define TEST_SESSION_HANDLE         (SESSION_HANDLE)0x4245
 #define TEST_SENDER_LINK            (LINK_HANDLE)0x4246
@@ -707,7 +709,7 @@ TEST_FUNCTION(destroy_after_subscribe_also_destroys_links_and_the_message_receiv
     IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     setup_subscribe_expected_calls();
     umock_c_reset_all_calls();
 
@@ -733,7 +735,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_destroy_frees_tracked_handles)
     IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
     setup_message_received_calls();
     g_on_message_received(amqp_methods_handle, TEST_UAMQP_MESSAGE);
@@ -762,7 +764,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_destroy_frees_2_tracked_handles)
     IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
     setup_message_received_calls();
     g_on_message_received(amqp_methods_handle, TEST_UAMQP_MESSAGE);
@@ -835,7 +837,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_subscribe_creates_links_and_sender_and
     setup_subscribe_expected_calls();
 
     /// act
-    result = iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    result = iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
 
     /// assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -854,11 +856,11 @@ TEST_FUNCTION(iothubtransportamqp_methods_subscribe_after_subscribe_fails)
 
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
 
     /// act
-    result = iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    result = iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
 
     /// assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -868,7 +870,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_subscribe_after_subscribe_fails)
     iothubtransportamqp_methods_destroy(amqp_methods_handle);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_009: [ If any of the argument `iothubtransport_amqp_methods_handle`, `session_handle`, `on_methods_error` or `on_method_request_received` is NULL, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_009: [ If any of the argument `iothubtransport_amqp_methods_handle`, `session_handle`, `on_methods_error`, `on_method_request_received`, `on_methods_unsubscribed` is NULL, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
 TEST_FUNCTION(when_iothubtransport_amqp_methods_handle_is_NULL_iothubtransportamqp_methods_subscribe_fails)
 {
     /// arrange
@@ -877,7 +879,7 @@ TEST_FUNCTION(when_iothubtransport_amqp_methods_handle_is_NULL_iothubtransportam
     umock_c_reset_all_calls();
 
     /// act
-    result = iothubtransportamqp_methods_subscribe(NULL, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    result = iothubtransportamqp_methods_subscribe(NULL, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
 
     /// assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -887,7 +889,7 @@ TEST_FUNCTION(when_iothubtransport_amqp_methods_handle_is_NULL_iothubtransportam
     iothubtransportamqp_methods_destroy(amqp_methods_handle);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_009: [ If any of the argument `iothubtransport_amqp_methods_handle`, `session_handle`, `on_methods_error` or `on_method_request_received` is NULL, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_009: [ If any of the argument `iothubtransport_amqp_methods_handle`, `session_handle`, `on_methods_error`, `on_method_request_received`, `on_methods_unsubscribed` is NULL, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
 TEST_FUNCTION(iothubtransportamqp_methods_subscribe_with_NULL_session_fails)
 {
     /// arrange
@@ -896,7 +898,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_subscribe_with_NULL_session_fails)
     umock_c_reset_all_calls();
 
     /// act
-    result = iothubtransportamqp_methods_subscribe(amqp_methods_handle, NULL, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    result = iothubtransportamqp_methods_subscribe(amqp_methods_handle, NULL, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
 
     /// assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -906,7 +908,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_subscribe_with_NULL_session_fails)
     iothubtransportamqp_methods_destroy(amqp_methods_handle);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_009: [ If any of the argument `iothubtransport_amqp_methods_handle`, `session_handle`, `on_methods_error` or `on_method_request_received` is NULL, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_009: [ If any of the argument `iothubtransport_amqp_methods_handle`, `session_handle`, `on_methods_error`, `on_method_request_received`, `on_methods_unsubscribed` is NULL, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
 TEST_FUNCTION(iothubtransportamqp_methods_subscribe_with_NULL_on_methods_error_callback_fails)
 {
     /// arrange
@@ -915,7 +917,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_subscribe_with_NULL_on_methods_error_c
     umock_c_reset_all_calls();
 
     /// act
-    result = iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, NULL, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    result = iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, NULL, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
 
     /// assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -925,7 +927,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_subscribe_with_NULL_on_methods_error_c
     iothubtransportamqp_methods_destroy(amqp_methods_handle);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_009: [ If any of the argument `iothubtransport_amqp_methods_handle`, `session_handle`, `on_methods_error` or `on_method_request_received` is NULL, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_009: [ If any of the argument `iothubtransport_amqp_methods_handle`, `session_handle`, `on_methods_error`, `on_method_request_received`, `on_methods_unsubscribed` is NULL, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
 TEST_FUNCTION(iothubtransportamqp_methods_subscribe_with_NULL_on_method_request_received_callback_fails)
 {
     /// arrange
@@ -934,7 +936,26 @@ TEST_FUNCTION(iothubtransportamqp_methods_subscribe_with_NULL_on_method_request_
     umock_c_reset_all_calls();
 
     /// act
-    result = iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, NULL, (void*)0x4243);
+    result = iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, NULL, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
+
+    /// assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_NOT_EQUAL(int, 0, result);
+
+    /// cleanup
+    iothubtransportamqp_methods_destroy(amqp_methods_handle);
+}
+
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_009: [ If any of the argument `iothubtransport_amqp_methods_handle`, `session_handle`, `on_methods_error`, `on_method_request_received`, `on_methods_unsubscribed` is NULL, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
+TEST_FUNCTION(iothubtransportamqp_methods_subscribe_with_NULL_on_methods_unsubscribed_callback_fails)
+{
+    /// arrange
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
+    int result;
+    umock_c_reset_all_calls();
+
+    /// act
+    result = iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, NULL, (void*)0x4344);
 
     /// assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -955,7 +976,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_subscribe_with_NULL_error_context_succ
     setup_subscribe_expected_calls();
 
     /// act
-    result = iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, NULL, test_on_method_request_received, (void*)0x4243);
+    result = iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, NULL, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
 
     /// assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -976,7 +997,28 @@ TEST_FUNCTION(iothubtransportamqp_methods_subscribe_with_NULL_methods_receive_ca
     setup_subscribe_expected_calls();
 
     /// act
-    result = iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4243, test_on_method_request_received, NULL);
+    result = iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4243, test_on_method_request_received, NULL, test_on_methods_unsubscribed, (void*)0x4344);
+
+    /// assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, 0, result);
+
+    /// cleanup
+    iothubtransportamqp_methods_destroy(amqp_methods_handle);
+}
+
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_008: [ On success it shall return 0. ]*/
+TEST_FUNCTION(iothubtransportamqp_methods_subscribe_with_NULL_methods_unsubscribed_context)
+{
+    /// arrange
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
+    int result;
+
+    umock_c_reset_all_calls();
+    setup_subscribe_expected_calls();
+
+    /// act
+    result = iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4243, test_on_method_request_received, (void*)0x4344, test_on_methods_unsubscribed, NULL);
 
     /// assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -1007,7 +1049,7 @@ TEST_FUNCTION(when_constructing_the_requests_link_name_fails_iothubtransportamqp
 	STRICT_EXPECTED_CALL(STRING_delete(TEST_STRING_HANDLE));
 
 	/// act
-	result = iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+	result = iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
 
 	/// assert
 	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -1051,7 +1093,7 @@ TEST_FUNCTION(when_constructing_the_responses_link_name_fails_iothubtransportamq
 	STRICT_EXPECTED_CALL(STRING_delete(TEST_STRING_HANDLE));
 
 	/// act
-	result = iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+	result = iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
 
 	/// assert
 	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -1162,7 +1204,7 @@ TEST_FUNCTION(when_a_failure_occurs_iothubtransportamqp_methods_subscribe_fails)
             (void)sprintf(temp_str, "On failed call %zu", i);
 
             ///act
-            result = iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+            result = iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
 
             ///assert
             ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, temp_str);
@@ -1185,7 +1227,7 @@ TEST_FUNCTION(when_STRING_construct_sprintf_fails_iothubtransportamqp_methods_su
     g_when_shall_STRING_construct_sprintf_fail = 1;
 
     /// act
-    result = iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    result = iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
 
     /// assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -1208,7 +1250,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_unsubscribe_frees_the_message_sender_r
     IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(messagereceiver_destroy(TEST_MESSAGE_RECEIVER));
@@ -1262,7 +1304,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_unsubscribe_after_unsubscribe_does_not
     IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     iothubtransportamqp_methods_unsubscribe(amqp_methods_handle);
     umock_c_reset_all_calls();
 
@@ -1304,7 +1346,7 @@ TEST_FUNCTION(when_a_message_is_received_a_new_method_request_is_indicated)
     AMQP_VALUE result;
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
 
     setup_message_received_calls();
@@ -1331,7 +1373,7 @@ TEST_FUNCTION(when_a_message_is_received_and_a_NULL_message_handle_is_passed_the
     AMQP_VALUE result;
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(messaging_delivery_released());
@@ -1356,7 +1398,7 @@ TEST_FUNCTION(when_message_get_properties_fails_the_message_is_rejected)
     AMQP_VALUE result;
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(message_get_properties(TEST_UAMQP_MESSAGE, IGNORED_PTR_ARG))
@@ -1385,7 +1427,7 @@ TEST_FUNCTION(when_properties_get_correlation_id_fails_the_message_is_rejected)
     AMQP_VALUE result;
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(message_get_properties(TEST_UAMQP_MESSAGE, IGNORED_PTR_ARG))
@@ -1417,7 +1459,7 @@ TEST_FUNCTION(when_allocating_memory_for_the_method_handle_fails_the_message_is_
     AMQP_VALUE result;
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(message_get_properties(TEST_UAMQP_MESSAGE, IGNORED_PTR_ARG))
@@ -1450,7 +1492,7 @@ TEST_FUNCTION(when_reallocating_memory_for_tracked_handles_fails_the_message_is_
     AMQP_VALUE result;
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(message_get_properties(TEST_UAMQP_MESSAGE, IGNORED_PTR_ARG))
@@ -1485,7 +1527,7 @@ TEST_FUNCTION(when_amqpvalue_get_uuid_fails_the_message_is_rejected)
     AMQP_VALUE result;
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(message_get_properties(TEST_UAMQP_MESSAGE, IGNORED_PTR_ARG))
@@ -1529,7 +1571,7 @@ TEST_FUNCTION(when_message_get_body_amqp_data_fails_the_message_is_rejected)
 
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(message_get_properties(TEST_UAMQP_MESSAGE, IGNORED_PTR_ARG))
@@ -1576,7 +1618,7 @@ TEST_FUNCTION(when_message_get_application_properties_fails_the_message_is_rejec
 
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(message_get_properties(TEST_UAMQP_MESSAGE, IGNORED_PTR_ARG))
@@ -1625,7 +1667,7 @@ TEST_FUNCTION(when_amqpvalue_get_inplace_described_value_fails_the_message_is_re
 
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(message_get_properties(TEST_UAMQP_MESSAGE, IGNORED_PTR_ARG))
@@ -1677,7 +1719,7 @@ TEST_FUNCTION(when_amqpvalue_create_string_fails_the_message_is_released)
 
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(message_get_properties(TEST_UAMQP_MESSAGE, IGNORED_PTR_ARG))
@@ -1732,7 +1774,7 @@ TEST_FUNCTION(when_amqpvalue_get_map_value_fails_the_message_is_rejected)
 
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(message_get_properties(TEST_UAMQP_MESSAGE, IGNORED_PTR_ARG))
@@ -1791,7 +1833,7 @@ TEST_FUNCTION(when_amqpvalue_get_string_fails_the_message_is_rejected)
 
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(message_get_properties(TEST_UAMQP_MESSAGE, IGNORED_PTR_ARG))
@@ -1855,7 +1897,7 @@ TEST_FUNCTION(when_messaging_delivery_accepted_fails_an_RELEASED_outcome_shall_b
 
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(message_get_properties(TEST_UAMQP_MESSAGE, IGNORED_PTR_ARG))
@@ -1920,7 +1962,7 @@ TEST_FUNCTION(when_creating_the_RELEASED_outcome_fails_an_error_is_triggered)
 
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(message_get_properties(TEST_UAMQP_MESSAGE, IGNORED_PTR_ARG))
@@ -1986,7 +2028,7 @@ TEST_FUNCTION(when_calling_the_method_request_received_callback_fails_then_RELEA
 
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(message_get_properties(TEST_UAMQP_MESSAGE, IGNORED_PTR_ARG))
@@ -2060,7 +2102,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_respond_with_NULL_response_fails)
     const unsigned char response_payload[] = { 0x43 };
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
     setup_message_received_calls();
     g_on_message_received(amqp_methods_handle, TEST_UAMQP_MESSAGE);
@@ -2114,7 +2156,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_respond_sends_the_uAMQP_message)
 
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
     setup_message_received_calls();
     g_on_message_received(amqp_methods_handle, TEST_UAMQP_MESSAGE);
@@ -2171,7 +2213,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_respond_encodes_the_status)
 
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
     setup_message_received_calls();
     g_on_message_received(amqp_methods_handle, TEST_UAMQP_MESSAGE);
@@ -2220,7 +2262,7 @@ TEST_FUNCTION(when_a_failure_occurs_iothubtransportamqp_methods_respond_fails)
 
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
     setup_message_received_calls();
     g_on_message_received(amqp_methods_handle, TEST_UAMQP_MESSAGE);
@@ -2306,7 +2348,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_respond_can_be_called_from_the_method_
 
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received_calling_respond, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received_calling_respond, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(message_get_properties(TEST_UAMQP_MESSAGE, IGNORED_PTR_ARG))
@@ -2403,7 +2445,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_respond_to_the_second_method_succeeds)
 
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
     /* setup first request */
     setup_message_received_calls();
@@ -2467,7 +2509,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_respond_removes_the_handle_from_the_tr
 
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
     /* setup first request */
     setup_message_received_calls();
@@ -2507,7 +2549,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_respond_after_a_handle_has_been_remove
 
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
     /* setup first request */
     setup_message_received_calls();
@@ -2541,7 +2583,7 @@ TEST_FUNCTION(when_on_message_receiver_state_changed_is_called_with_error_the_on
 
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(test_on_methods_error((void*)0x4242));
@@ -2564,7 +2606,7 @@ TEST_FUNCTION(when_on_message_receiver_state_changed_is_called_with_error_as_new
 
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
 
     /// act
@@ -2585,7 +2627,7 @@ TEST_FUNCTION(when_state_changes_from_OPENING_to_OPEN_for_the_message_receiver_n
 
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
 
     /// act
@@ -2598,7 +2640,31 @@ TEST_FUNCTION(when_state_changes_from_OPENING_to_OPEN_for_the_message_receiver_n
     iothubtransportamqp_methods_destroy(amqp_methods_handle);
 }
 
-/* on_message_receiver_state_changed */
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_12_001: [ When `on_message_receiver_state_changed` is called with the `new_state` being `MESSAGE_RECEIVER_STATE_IDLE` and `previous_state` being `MESSAGE_RECEIVER_STATE_OPEN`and the sender link is already diconnected `on_message_receiver_state_changed` calls to `on_methods_unsubscribed`. ]*/
+TEST_FUNCTION(when_state_changes_from_OPEN_to_IDLE_for_the_message_receiver_and_message_sender_is_already_disconnected_than_on_methods_unsubscribed_called)
+{
+    /// arrange
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
+
+    umock_c_reset_all_calls();
+    setup_subscribe_expected_calls();
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
+    g_on_message_sender_state_changed(g_on_message_sender_state_changed_context, MESSAGE_SENDER_STATE_IDLE, MESSAGE_SENDER_STATE_OPEN);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(test_on_methods_unsubscribed((void*)0x4344));
+
+    /// act
+    g_on_message_receiver_state_changed(g_on_message_receiver_state_changed_context, MESSAGE_RECEIVER_STATE_IDLE, MESSAGE_RECEIVER_STATE_OPEN);
+
+    /// assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    /// cleanup
+    iothubtransportamqp_methods_destroy(amqp_methods_handle);
+}
+
+/* on_message_sender_state_changed */
 
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_059: [ When `on_message_sender_state_changed` is called with the `new_state` being `MESSAGE_SENDER_STATE_ERROR`, an error shall be indicated by calling the `on_methods_error` callback passed to `iothubtransportamqp_methods_subscribe`. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_058: [ When an error is indicated by calling the `on_methods_error`, it shall be called with the context being the `on_methods_error_context` argument passed to `iothubtransportamqp_methods_subscribe`. ]*/
@@ -2609,7 +2675,7 @@ TEST_FUNCTION(when_on_message_sender_state_changed_is_called_with_error_the_on_e
 
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(test_on_methods_error((void*)0x4242));
@@ -2632,7 +2698,7 @@ TEST_FUNCTION(when_on_message_sender_state_changed_is_called_with_error_as_new_a
 
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
 
     /// act
@@ -2653,11 +2719,35 @@ TEST_FUNCTION(when_state_changes_from_OPENING_to_OPEN_for_the_message_sender_no_
 
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
 
     /// act
     g_on_message_sender_state_changed(g_on_message_receiver_state_changed_context, MESSAGE_SENDER_STATE_OPENING, MESSAGE_SENDER_STATE_OPEN);
+
+    /// assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    /// cleanup
+    iothubtransportamqp_methods_destroy(amqp_methods_handle);
+}
+
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_12_002: [ When `on_message_sender_state_changed` is called with the `new_state` being `MESSAGE_SENDER_STATE_IDLE` and `previous_state` being `MESSAGE_SENDER_STATE_OPEN`and the receiver link is already diconnected `on_message_sender_state_changed` calls to `on_methods_unsubscribed`. ]*/
+TEST_FUNCTION(when_state_changes_from_OPEN_to_IDLE_for_the_message_sender_and_message_receiver_is_already_disconnected_than_on_methods_unsubscribed_called)
+{
+    /// arrange
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
+
+    umock_c_reset_all_calls();
+    setup_subscribe_expected_calls();
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
+    g_on_message_receiver_state_changed(g_on_message_receiver_state_changed_context, MESSAGE_RECEIVER_STATE_IDLE, MESSAGE_RECEIVER_STATE_OPEN);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(test_on_methods_unsubscribed((void*)0x4344));
+
+    /// act
+    g_on_message_sender_state_changed(g_on_message_sender_state_changed_context, MESSAGE_SENDER_STATE_IDLE, MESSAGE_SENDER_STATE_OPEN);
 
     /// assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -2677,7 +2767,7 @@ TEST_FUNCTION(when_an_error_is_indicated_in_the_send_complete_callback_an_error_
 
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
     setup_message_received_calls();
     g_on_message_received(amqp_methods_handle, TEST_UAMQP_MESSAGE);
@@ -2707,7 +2797,7 @@ TEST_FUNCTION(when_no_error_is_indicated_in_the_send_complete_callback_no_error_
 
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
-    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
     umock_c_reset_all_calls();
     setup_message_received_calls();
     g_on_message_received(amqp_methods_handle, TEST_UAMQP_MESSAGE);

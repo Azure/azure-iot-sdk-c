@@ -11,12 +11,14 @@
 #include <stdbool.h>
 #endif
 #include <time.h>
-#include "macro_utils.h"
+#include "azure_c_shared_utility/macro_utils.h"
+
 #include "testrunnerswitcher.h"
 #include "umock_c.h"
 
 #include "iothub_account.h"
 #include "iothubtest.h"
+#include "iothub_messaging.h"
 
 #include "serializer.h"
 #include "azure_c_shared_utility/buffer_.h"
@@ -29,6 +31,7 @@
 #include "iothubtransportmqtt.h"
 #include "MacroE2EModelAction.h"
 #include "iothub_client.h"
+#include "iothub_client_options.h"
 #include "iothub_devicemethod.h"
 #include "parson.h"
 #include "methodreturn.h"
@@ -64,6 +67,8 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(CODEFIRST_RESULT, CODEFIRST_RESULT_VALUES);
 TEST_DEFINE_ENUM_TYPE(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_RESULT_VALUES);
 
+TEST_DEFINE_ENUM_TYPE(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_RESULT_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_RESULT_VALUES);
 
 static const char* TEST_SEND_DATA_FMT = "{\"ExampleData\": { \"SendDate\": \"%.24s\", \"UniqueId\":%d} }";
 static const char* TEST_RECV_DATA_FMT = "{\\\"Name\\\": \\\"testaction\\\", \\\"Parameters\\\": { \\\"property1\\\": \\\"%.24s\\\", \\\"UniqueId\\\":%d}}";
@@ -104,6 +109,24 @@ void my_IOTHUB_CLIENT_REPORTED_STATE_CALLBACK(int status_code, void* userContext
     was_my_IOTHUB_CLIENT_REPORTED_STATE_CALLBACK_called = 1;
     Unlock(lock);
 
+}
+
+static void openCompleteCallback(void* context)
+{
+    (void)printf("Open completed, context: %s\n", (char*)context);
+}
+
+static void sendCompleteCallback(void* context, IOTHUB_MESSAGING_RESULT messagingResult)
+{
+    (void)context;
+    if (messagingResult == IOTHUB_MESSAGING_OK)
+    {
+        (void)printf("Message has been sent successfully\n");
+    }
+    else
+    {
+        (void)printf("Send failed\n");
+    }
 }
 
 // This is a Static function called from the macro
@@ -356,7 +379,7 @@ BEGIN_TEST_SUITE(serializer_e2e)
         ASSERT_ARE_EQUAL(int, 0, platform_init() );
         ASSERT_ARE_EQUAL(int, 0, serializer_init(NULL));
 
-        g_iothubAcctInfo = IoTHubAccount_Init(true);
+        g_iothubAcctInfo = IoTHubAccount_Init();
         ASSERT_IS_NOT_NULL(g_iothubAcctInfo);
 
         g_uniqueTestId = 0;
@@ -391,19 +414,18 @@ BEGIN_TEST_SUITE(serializer_e2e)
         TEST_MUTEX_RELEASE(g_testByTest);
     }
 
-    TEST_FUNCTION(IoTClient_AMQP_MacroRecv_e2e)
+    static void AMQP_MacroRecv(IOTHUB_PROVISIONED_DEVICE* deviceToUse)
     {
         // arrange
-        IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
         IOTHUB_CLIENT_HANDLE iotHubClientHandle;
         bool continue_run;
 
+        IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientAuthHandle;
+        IOTHUB_MESSAGING_CLIENT_HANDLE iotHubMessagingHandle;
+        IOTHUB_MESSAGING_RESULT iotHubMessagingResult;
+        IOTHUB_MESSAGE_HANDLE messageHandle;
+
         // act
-        iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName(g_iothubAcctInfo);
-        iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix(g_iothubAcctInfo);
-        iotHubConfig.deviceId = IoTHubAccount_GetDeviceId(g_iothubAcctInfo);
-        iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey(g_iothubAcctInfo);
-        iotHubConfig.protocol = AMQP_Protocol;
 
         //step 1: data is retrieved by device using AMQP
         time_t beginOperation, nowTime;
@@ -412,17 +434,32 @@ BEGIN_TEST_SUITE(serializer_e2e)
         g_recvMacroData = RecvMacroTestData_Create();
         ASSERT_IS_NOT_NULL(g_recvMacroData);
 
-        // step 3: data is pushed to the topic/subscription
-        IOTHUB_TEST_HANDLE devhubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo), IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo), IoTHubAccount_GetDeviceId(g_iothubAcctInfo), IoTHubAccount_GetDeviceKey(g_iothubAcctInfo), IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo), IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo), IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo), IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo) );
-        ASSERT_IS_NOT_NULL(devhubTestHandle);
+        // Create message
+        messageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)g_recvMacroData->toBeSend, g_recvMacroData->toBeSendSize);
 
-        IOTHUB_TEST_CLIENT_RESULT dhTestResult = IoTHubTest_SendMessage(devhubTestHandle, (const unsigned char*)g_recvMacroData->toBeSend, g_recvMacroData->toBeSendSize);
-        ASSERT_ARE_EQUAL(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_OK, dhTestResult);
+        // Create Service Client
+        iotHubServiceClientAuthHandle = IoTHubServiceClientAuth_CreateFromConnectionString(IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo));
+        ASSERT_IS_NOT_NULL_WITH_MSG(iotHubServiceClientAuthHandle, "Could not initialize IoTHubServiceClient to send C2D messages to the device");
 
-        IoTHubTest_Deinit(devhubTestHandle);
+        iotHubMessagingHandle = IoTHubMessaging_Create(iotHubServiceClientAuthHandle);
+        ASSERT_IS_NOT_NULL_WITH_MSG(iotHubMessagingHandle, "Could not initialize IoTHubMessaging to send C2D messages to the device");
 
-        iotHubClientHandle = IoTHubClient_Create(&iotHubConfig);
+        iotHubMessagingResult = IoTHubMessaging_Open(iotHubMessagingHandle, openCompleteCallback, "Context string for open");
+        ASSERT_ARE_EQUAL(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_OK, iotHubMessagingResult);
+
+        iotHubMessagingResult = IoTHubMessaging_SendAsync(iotHubMessagingHandle, deviceToUse->deviceId, messageHandle, sendCompleteCallback, NULL);
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_OK, iotHubMessagingResult, "IoTHubMessaging_SendAsync failed, could not send C2D message to the device");
+        
+		iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, AMQP_Protocol);
         ASSERT_IS_NOT_NULL(iotHubClientHandle);
+
+        if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509) {
+            IOTHUB_CLIENT_RESULT result;
+            result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
+            ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
+            result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
+            ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
+        }
 
         deviceModel* devModel = CREATE_MODEL_INSTANCE(MacroE2EModelAction, deviceModel);
         ASSERT_IS_NOT_NULL(devModel);
@@ -433,8 +470,8 @@ BEGIN_TEST_SUITE(serializer_e2e)
         beginOperation = time(NULL);
         continue_run = true;
         while (
-            ( (nowTime = time(NULL)),
-            (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME) ) &&
+            ((nowTime = time(NULL)),
+            (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME)) &&
             continue_run)
         {
             if (Lock(g_recvMacroData->lock) != LOCK_OK)
@@ -458,22 +495,32 @@ BEGIN_TEST_SUITE(serializer_e2e)
         DESTROY_MODEL_INSTANCE(devModel);
         IoTHubClient_Destroy(iotHubClientHandle);
         RecvTestData_Destroy(g_recvMacroData);
+
+        IoTHubMessage_Destroy(messageHandle);
+        IoTHubMessaging_Close(iotHubMessagingHandle);
+        IoTHubMessaging_Destroy(iotHubMessagingHandle);
+        IoTHubServiceClientAuth_Destroy(iotHubServiceClientAuthHandle);
     }
 
-    TEST_FUNCTION(IoTClient_AMQP_MacroSend_e2e)
+    TEST_FUNCTION(IoTClient_AMQP_MacroRecv_e2e_sas)
+    {
+        AMQP_MacroRecv(IoTHubAccount_GetSASDevice(g_iothubAcctInfo));
+    }
+
+#ifndef __APPLE__
+    TEST_FUNCTION(IoTClient_AMQP_MacroRecv_e2e_x509)
+    {
+        AMQP_MacroRecv(IoTHubAccount_GetX509Device(g_iothubAcctInfo));
+    }
+#endif
+
+    static void AMQP_MacroSend(IOTHUB_PROVISIONED_DEVICE* deviceToUse)
     {
         // arrange
-        IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
         IOTHUB_CLIENT_HANDLE iotHubClientHandle;
         deviceModel* devModel;
         time_t beginOperation, nowTime;
         bool continue_run;
-
-        iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName(g_iothubAcctInfo);
-        iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix(g_iothubAcctInfo);
-        iotHubConfig.deviceId = IoTHubAccount_GetDeviceId(g_iothubAcctInfo);
-        iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey(g_iothubAcctInfo);
-        iotHubConfig.protocol = AMQP_Protocol;
 
         // step 1: prepare data
         time_t t = time(NULL);
@@ -486,8 +533,16 @@ BEGIN_TEST_SUITE(serializer_e2e)
         /// act
         // step 2: send data with AMQP
         {
-            iotHubClientHandle = IoTHubClient_Create(&iotHubConfig);
+            iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, AMQP_Protocol);
             ASSERT_IS_NOT_NULL(iotHubClientHandle);
+
+            if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509) {
+                IOTHUB_CLIENT_RESULT result;
+                result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
+                ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
+                result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
+                ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
+            }
 
             devModel = CREATE_MODEL_INSTANCE(MacroE2EModelAction, deviceModel);
             ASSERT_IS_NOT_NULL(devModel);
@@ -510,8 +565,8 @@ BEGIN_TEST_SUITE(serializer_e2e)
             beginOperation = time(NULL);
             continue_run = true;
             while (
-                ( (nowTime = time(NULL)),
-                (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME) ) && //time box
+                ((nowTime = time(NULL)),
+                (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME)) && //time box
                 continue_run)
             {
                 if (Lock(expectedData->lock) != LOCK_OK)
@@ -529,12 +584,12 @@ BEGIN_TEST_SUITE(serializer_e2e)
                 ThreadAPI_Sleep(100);
             }
         }
-        ASSERT_IS_TRUE(expectedData->dataWasSent); 
+        ASSERT_IS_TRUE(expectedData->dataWasSent);
 
         ///assert
         //step3: get the data from the other side
         {
-            IOTHUB_TEST_HANDLE devhubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo), IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo), IoTHubAccount_GetDeviceId(g_iothubAcctInfo), IoTHubAccount_GetDeviceKey(g_iothubAcctInfo), IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo), IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo), IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo), IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo));
+            IOTHUB_TEST_HANDLE devhubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo), IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo), deviceToUse->deviceId, IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo), IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo), IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo), IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo));
             ASSERT_IS_NOT_NULL(devhubTestHandle);
 
             IOTHUB_TEST_CLIENT_RESULT result = IoTHubTest_ListenForEventForMaxDrainTime(devhubTestHandle, IoTHubCallback, IoTHubAccount_GetIoTHubPartitionCount(g_iothubAcctInfo), expectedData);
@@ -547,8 +602,8 @@ BEGIN_TEST_SUITE(serializer_e2e)
         continue_run = true;
         beginOperation = time(NULL);
         while (
-            ( (nowTime = time(NULL)),
-            (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME) ) && //time box
+            ((nowTime = time(NULL)),
+            (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME)) && //time box
             continue_run)
         {
             if (Lock(expectedData->lock) != LOCK_OK)
@@ -567,47 +622,69 @@ BEGIN_TEST_SUITE(serializer_e2e)
         }
         ASSERT_IS_TRUE(expectedData->wasFound); // was found is written by the callback...
 
-        ///cleanup
+                                                ///cleanup
         DESTROY_MODEL_INSTANCE(devModel);
         IoTHubClient_Destroy(iotHubClientHandle);
         SendTestData_Destroy(expectedData); //cleanup
+
     }
 
-    TEST_FUNCTION(IoTClient_Http_MacroRecv_e2e)
+    TEST_FUNCTION(IoTClient_AMQP_MacroSend_e2e_sas)
     {
-        IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
+        AMQP_MacroSend(IoTHubAccount_GetSASDevice(g_iothubAcctInfo));
+    }
+
+#ifndef __APPLE__
+    TEST_FUNCTION(IoTClient_AMQP_MacroSend_e2e_x509)
+    {
+        AMQP_MacroSend(IoTHubAccount_GetX509Device(g_iothubAcctInfo));
+    }
+#endif
+
+    static void Http_MacroRecv(IOTHUB_PROVISIONED_DEVICE* deviceToUse)
+    {
         IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle;
         deviceModel* devModel;
 
-        iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName(g_iothubAcctInfo);
-        iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix(g_iothubAcctInfo);
-        iotHubConfig.deviceId = IoTHubAccount_GetDeviceId(g_iothubAcctInfo);
-        iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey(g_iothubAcctInfo);
-        iotHubConfig.protocol = HTTP_Protocol;
-
+        IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientAuthHandle;
+        IOTHUB_MESSAGING_CLIENT_HANDLE iotHubMessagingHandle;
+        IOTHUB_MESSAGING_RESULT iotHubMessagingResult;
+        IOTHUB_MESSAGE_HANDLE messageHandle;
         //step 1: data is created
         g_recvMacroData = RecvMacroTestData_Create();
         ASSERT_IS_NOT_NULL(g_recvMacroData);
 
-        //step 2: data is pushed to the topic/subscription
-        {
-            IOTHUB_TEST_HANDLE devhubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo), IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo), IoTHubAccount_GetDeviceId(g_iothubAcctInfo), IoTHubAccount_GetDeviceKey(g_iothubAcctInfo), IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo), IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo), IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo), IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo) );
-            ASSERT_IS_NOT_NULL(devhubTestHandle);
+        // Create Service Client
+        iotHubServiceClientAuthHandle = IoTHubServiceClientAuth_CreateFromConnectionString(IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo));
+        ASSERT_IS_NOT_NULL_WITH_MSG(iotHubServiceClientAuthHandle, "Could not initialize IoTHubServiceClient to send C2D messages to the device");
 
-            IOTHUB_TEST_CLIENT_RESULT dhTestResult = IoTHubTest_SendMessage(devhubTestHandle, (const unsigned char*)g_recvMacroData->toBeSend, g_recvMacroData->toBeSendSize);
-            ASSERT_ARE_EQUAL(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_OK, dhTestResult);
+        iotHubMessagingHandle = IoTHubMessaging_Create(iotHubServiceClientAuthHandle);
+        ASSERT_IS_NOT_NULL_WITH_MSG(iotHubMessagingHandle, "Could not initialize IoTHubMessaging to send C2D messages to the device");
 
-            IoTHubTest_Deinit(devhubTestHandle);
-        }
+        iotHubMessagingResult = IoTHubMessaging_Open(iotHubMessagingHandle, openCompleteCallback, "Context string for open");
+        ASSERT_ARE_EQUAL(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_OK, iotHubMessagingResult);
+
+        // Create message
+        messageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)g_recvMacroData->toBeSend, g_recvMacroData->toBeSendSize);
 
         // act
+        iotHubMessagingResult = IoTHubMessaging_SendAsync(iotHubMessagingHandle, deviceToUse->deviceId, messageHandle, sendCompleteCallback, NULL);
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_OK, iotHubMessagingResult, "IoTHubMessaging_SendAsync failed, could not send C2D message to the device");
 
         //step 3: data is retrieved by HTTP
         {
             time_t beginOperation, nowTime;
 
-            iotHubClientHandle = IoTHubClient_LL_Create(&iotHubConfig);
+            iotHubClientHandle = IoTHubClient_LL_CreateFromConnectionString(deviceToUse->connectionString, HTTP_Protocol);
             ASSERT_IS_NOT_NULL(iotHubClientHandle);
+
+            if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509) {
+                IOTHUB_CLIENT_RESULT result;
+                result = IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
+                ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
+                result = IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
+                ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
+            }
 
             unsigned int minimumPollingTime = 0; /*because it should not wait*/
             if (IoTHubClient_LL_SetOption(iotHubClientHandle, "MinimumPollingTime", &minimumPollingTime) != IOTHUB_CLIENT_OK)
@@ -623,12 +700,12 @@ BEGIN_TEST_SUITE(serializer_e2e)
 
             beginOperation = time(NULL);
             while (
-                  (
-                    (nowTime = time(NULL)),
+                (
+                (nowTime = time(NULL)),
                     (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME) //time box
-                  ) &&
+                    ) &&
                     (!g_recvMacroData->wasFound) //condition box
-                  )
+                )
             {
                 //just go on;
                 IoTHubClient_LL_DoWork(iotHubClientHandle);
@@ -643,21 +720,26 @@ BEGIN_TEST_SUITE(serializer_e2e)
         DESTROY_MODEL_INSTANCE(devModel);
         IoTHubClient_LL_Destroy(iotHubClientHandle);
         RecvTestData_Destroy(g_recvMacroData);
+
+        IoTHubMessage_Destroy(messageHandle);
+        IoTHubMessaging_Close(iotHubMessagingHandle);
+        IoTHubMessaging_Destroy(iotHubMessagingHandle);
+        IoTHubServiceClientAuth_Destroy(iotHubServiceClientAuthHandle);
     }
 
-    TEST_FUNCTION(IoTClient_Http_MacroSend_e2e)
+#ifndef __APPLE__
+    TEST_FUNCTION(IoTClient_Http_MacroRecv_e2e_x509)
+    {
+        Http_MacroRecv(IoTHubAccount_GetX509Device(g_iothubAcctInfo));
+    }
+#endif
+
+    static void Http_MacroSend(IOTHUB_PROVISIONED_DEVICE* deviceToUse)
     {
         // arrange
-        IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
         IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle;
         deviceModel* devModel;
         time_t beginOperation, nowTime;
-
-        iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName(g_iothubAcctInfo);
-        iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix(g_iothubAcctInfo);
-        iotHubConfig.deviceId = IoTHubAccount_GetDeviceId(g_iothubAcctInfo);
-        iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey(g_iothubAcctInfo);
-        iotHubConfig.protocol = HTTP_Protocol;
 
         // step 1: prepare data
         time_t t = time(NULL);
@@ -670,8 +752,16 @@ BEGIN_TEST_SUITE(serializer_e2e)
         ///act
         // step 2: send data with HTTP
         {
-            iotHubClientHandle = IoTHubClient_LL_Create(&iotHubConfig);
+            iotHubClientHandle = IoTHubClient_LL_CreateFromConnectionString(deviceToUse->connectionString, HTTP_Protocol);
             ASSERT_IS_NOT_NULL(iotHubClientHandle);
+
+            if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509) {
+                IOTHUB_CLIENT_RESULT result;
+                result = IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
+                ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
+                result = IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
+                ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
+            }
 
             devModel = CREATE_MODEL_INSTANCE(MacroE2EModelAction, deviceModel);
             ASSERT_IS_NOT_NULL(devModel);
@@ -694,24 +784,24 @@ BEGIN_TEST_SUITE(serializer_e2e)
             // Make sure all the Data has been sent
             beginOperation = time(NULL);
             while (
-                  (
-                      (nowTime = time(NULL)),
-                      (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME) //time box
-                  ) &&
-                      (!expectedData->dataWasSent)
-                  ) //condition box
+                (
+                (nowTime = time(NULL)),
+                    (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME) //time box
+                    ) &&
+                    (!expectedData->dataWasSent)
+                ) //condition box
             {
                 //just go on;
                 IoTHubClient_LL_DoWork(iotHubClientHandle);
                 ThreadAPI_Sleep(100);
             }
         }
-        ASSERT_IS_TRUE(expectedData->dataWasSent); 
+        ASSERT_IS_TRUE(expectedData->dataWasSent);
 
         ///assert
         //step3: get the data from the other side
         {
-            IOTHUB_TEST_HANDLE devhubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo), IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo), IoTHubAccount_GetDeviceId(g_iothubAcctInfo), IoTHubAccount_GetDeviceKey(g_iothubAcctInfo), IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo), IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo), IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo), IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo) );
+            IOTHUB_TEST_HANDLE devhubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo), IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo), deviceToUse->deviceId, IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo), IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo), IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo), IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo));
             ASSERT_IS_NOT_NULL(devhubTestHandle);
 
             IOTHUB_TEST_CLIENT_RESULT result = IoTHubTest_ListenForEventForMaxDrainTime(devhubTestHandle, IoTHubCallback, IoTHubAccount_GetIoTHubPartitionCount(g_iothubAcctInfo), expectedData);
@@ -722,11 +812,24 @@ BEGIN_TEST_SUITE(serializer_e2e)
 
         ASSERT_IS_TRUE(expectedData->wasFound); // was found is written by the callback...
 
-        ///cleanup 
+                                                ///cleanup 
         DESTROY_MODEL_INSTANCE(devModel);
         IoTHubClient_LL_Destroy(iotHubClientHandle);
         SendTestData_Destroy(expectedData); //cleanup*/
     }
+
+    TEST_FUNCTION(IoTClient_Http_MacroSend_e2e_sas)
+    {
+        Http_MacroSend(IoTHubAccount_GetSASDevice(g_iothubAcctInfo));
+    }
+
+#ifndef __APPLE__
+    TEST_FUNCTION(IoTClient_Http_MacroSend_e2e_x509)
+    {
+        Http_MacroSend(IoTHubAccount_GetX509Device(g_iothubAcctInfo));
+    }
+#endif
+
 
     
     static int DeviceMethodCallback(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* resp_size, void* userContextCallback)
@@ -781,25 +884,25 @@ BEGIN_TEST_SUITE(serializer_e2e)
 
     */
 
-    TEST_FUNCTION(IoTClient_MQTT_can_receive_a_method)
+    static void MQTT_can_receive_a_method(IOTHUB_PROVISIONED_DEVICE* deviceToUse)
     {
 
         /*step 1: create a model instance that has a method*/
         IOTHUB_CLIENT_RESULT result;
-        IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
-
-        iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName(g_iothubAcctInfo);
-        iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix(g_iothubAcctInfo);
-        iotHubConfig.deviceId = IoTHubAccount_GetDeviceId(g_iothubAcctInfo);
-        iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey(g_iothubAcctInfo);
-        iotHubConfig.protocol = MQTT_Protocol;
 
         deviceModel* device = CREATE_MODEL_INSTANCE(MacroE2EModelAction, deviceModel);
         ASSERT_IS_NOT_NULL(device);
 
         /*step 2: create/start the device + start listening on method*/
-        IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_Create(&iotHubConfig);
+        IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, MQTT_Protocol);
         ASSERT_IS_NOT_NULL_WITH_MSG(iotHubClientHandle, "Could not create IoTHubClient");
+
+        if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509) {
+            result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
+            ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
+            result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
+            ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
+        }
 
         result = IoTHubClient_SetDeviceMethodCallback(iotHubClientHandle, DeviceMethodCallback, device);
         ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device method callback");
@@ -817,7 +920,7 @@ BEGIN_TEST_SUITE(serializer_e2e)
         int responseStatus;
         unsigned char* responsePayload;
         size_t responsePayloadSize;
-        IOTHUB_DEVICE_METHOD_RESULT invokeResult = IoTHubDeviceMethod_Invoke(serviceClientDeviceMethodHandle, iotHubConfig.deviceId, "theSumOfThings", "{\"a\":3, \"b\":33}", 120, &responseStatus, &responsePayload, &responsePayloadSize);
+        IOTHUB_DEVICE_METHOD_RESULT invokeResult = IoTHubDeviceMethod_Invoke(serviceClientDeviceMethodHandle, deviceToUse->deviceId, "theSumOfThings", "{\"a\":3, \"b\":33}", 120, &responseStatus, &responsePayload, &responsePayloadSize);
 
         ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_OK, invokeResult, "IoTHubDeviceMethod_Invoke failed");
         ASSERT_ARE_EQUAL_WITH_MSG(int, 10, responseStatus, "response status is incorrect");
@@ -837,7 +940,7 @@ BEGIN_TEST_SUITE(serializer_e2e)
         double d = json_value_get_number(jsonValue);
         json_value_free(jsonValue);
         ASSERT_ARE_EQUAL(int, 36, (int)d);
-        
+
         /*cleanup*/
         /*step 6: destroy all things*/
         free(responsePayload);
@@ -846,6 +949,19 @@ BEGIN_TEST_SUITE(serializer_e2e)
         IoTHubClient_Destroy(iotHubClientHandle);
         DESTROY_MODEL_INSTANCE(device);
     }
+
+    TEST_FUNCTION(IoTClient_MQTT_can_receive_a_method_sas)
+    {
+        MQTT_can_receive_a_method(IoTHubAccount_GetSASDevice(g_iothubAcctInfo));
+    }
+
+#ifndef __APPLE__
+    TEST_FUNCTION(IoTClient_MQTT_can_receive_a_method_x509)
+    {
+        MQTT_can_receive_a_method(IoTHubAccount_GetX509Device(g_iothubAcctInfo));
+    }
+#endif
+
 
     /*the following tests IotHubDeviceTwin_SendReportedState*/
     /*these are steps the test will make*/
@@ -856,24 +972,26 @@ BEGIN_TEST_SUITE(serializer_e2e)
       step 5: use the C service SDK to pick up the reported properties from the service(they need to indicate the same value)
       step 6: succeed
    */
-    TEST_FUNCTION(IotHubDeviceTwin_SendReportedState_succeeds)
+
+    static void DeviceTwin_SendReportedState_succeeds(IOTHUB_PROVISIONED_DEVICE* deviceToUse)
     {
+
         /*step 1: import the schema; create an IoTHubClient handle*/
         SERIALIZER_REGISTER_NAMESPACE(MacroE2EModelAction);
 
-        IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
-
-        iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName(g_iothubAcctInfo);
-        iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix(g_iothubAcctInfo);
-        iotHubConfig.deviceId = IoTHubAccount_GetDeviceId(g_iothubAcctInfo);
-        iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey(g_iothubAcctInfo);
-        iotHubConfig.protocol = MQTT_Protocol;
-
-        IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_Create(&iotHubConfig);
+        IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, MQTT_Protocol);
         ASSERT_IS_NOT_NULL(iotHubClientHandle);
 
         bool traceOn = true;
         IoTHubClient_SetOption(iotHubClientHandle, "logtrace", &traceOn);
+
+        if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509) {
+            IOTHUB_CLIENT_RESULT result;
+            result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
+            ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
+            result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
+            ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
+        }
 
         /*step 2: create an instance of the model*/
         deviceModel* model = IoTHubDeviceTwin_CreatedeviceModel(iotHubClientHandle);
@@ -908,14 +1026,14 @@ BEGIN_TEST_SUITE(serializer_e2e)
         IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceClientDeviceTwinHandle = IoTHubDeviceTwin_Create(iotHubServiceClientHandle);
         ASSERT_IS_NOT_NULL(serviceClientDeviceTwinHandle);
 
-        char* theTwin = IoTHubDeviceTwin_GetTwin(serviceClientDeviceTwinHandle, IoTHubAccount_GetDeviceId(g_iothubAcctInfo));
+        char* theTwin = IoTHubDeviceTwin_GetTwin(serviceClientDeviceTwinHandle, deviceToUse->deviceId);
 
         JSON_Value* twinJson = json_parse_string(theTwin);
         JSON_Object* twinJsonObject = json_value_get_object(twinJson);
         double reported_by_the_service = json_object_dotget_number(twinJsonObject, "properties.reported.reported_int");
         ASSERT_ARE_EQUAL(double, reported_by_the_service, 199); /*same like model->reported_int = 199;*/
 
-        ///cleanup
+                                                                ///cleanup
         json_value_free(twinJson);
         free(theTwin);
         IoTHubDeviceTwin_Destroy(serviceClientDeviceTwinHandle);
@@ -923,5 +1041,17 @@ BEGIN_TEST_SUITE(serializer_e2e)
         IoTHubDeviceTwin_DestroydeviceModel(model);
         IoTHubClient_Destroy(iotHubClientHandle);
     }
+
+    TEST_FUNCTION(IotHubDeviceTwin_SendReportedState_succeeds_sas)
+    {
+        DeviceTwin_SendReportedState_succeeds(IoTHubAccount_GetSASDevice(g_iothubAcctInfo));
+    }
+
+#ifndef __APPLE__
+    TEST_FUNCTION(IotHubDeviceTwin_SendReportedState_succeeds_x509)
+    {
+        DeviceTwin_SendReportedState_succeeds(IoTHubAccount_GetX509Device(g_iothubAcctInfo));
+    }
+#endif
 
 END_TEST_SUITE(serializer_e2e)

@@ -24,6 +24,7 @@ void real_free(void* ptr)
 }
 
 #include "testrunnerswitcher.h"
+#include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/macro_utils.h"
 #include "umock_c.h"
 #include "umocktypes_charptr.h"
@@ -188,16 +189,21 @@ extern "C"
     static void* g_on_methods_error_context;
     static ON_METHOD_REQUEST_RECEIVED g_on_method_request_received;
     static void* g_on_method_request_received_context;
+    static ON_METHODS_UNSUBSCRIBED g_on_methods_unsubscribed;
+    static void* g_on_methods_unsubscribed_context;
 
     int my_iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE iothubtransport_amqp_methods_handle,
         SESSION_HANDLE session_handle, ON_METHODS_ERROR on_methods_error, void* on_methods_error_context,
-        ON_METHOD_REQUEST_RECEIVED on_method_request_received, void* on_method_request_received_context)
+        ON_METHOD_REQUEST_RECEIVED on_method_request_received, void* on_method_request_received_context,
+        ON_METHODS_UNSUBSCRIBED on_methods_unsubscribed, void* on_methods_unsubscribed_context)
     {
         (void)iothubtransport_amqp_methods_handle, session_handle;
         g_on_methods_error = on_methods_error;
         g_on_methods_error_context = on_methods_error_context;
         g_on_method_request_received = on_method_request_received;
         g_on_method_request_received_context = on_method_request_received_context;
+        g_on_methods_unsubscribed = on_methods_unsubscribed;
+        g_on_methods_unsubscribed_context = on_methods_unsubscribed_context;
         return 0;
     }
 #endif
@@ -347,6 +353,7 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(ON_METHODS_ERROR, void*);
     REGISTER_UMOCK_ALIAS_TYPE(ON_METHOD_REQUEST_RECEIVED, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(ON_METHODS_UNSUBSCRIBED, void*);
 #endif
     REGISTER_UMOCK_ALIAS_TYPE(SESSION_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(XIO_HANDLE, void*);
@@ -957,11 +964,13 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_DoWork_subscribes_for_methods)
     EXPECTED_CALL(authentication_get_status(IGNORED_PTR_ARG));
 
     /* this is the call we're reall interested in */
-    STRICT_EXPECTED_CALL(iothubtransportamqp_methods_subscribe(TEST_IOTHUBTRANSPORTAMQP_METHODS, TEST_SESSION, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(iothubtransportamqp_methods_subscribe(TEST_IOTHUBTRANSPORTAMQP_METHODS, TEST_SESSION, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument_on_methods_error()
         .IgnoreArgument_on_methods_error_context()
         .IgnoreArgument_on_method_request_received()
-        .IgnoreArgument_on_method_request_received_context();
+        .IgnoreArgument_on_method_request_received_context()
+        .IgnoreArgument_on_methods_unsubscribed()
+        .IgnoreArgument_on_methods_unsubscribed_context();
 
     /* more uninteresting calls */
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
@@ -1245,7 +1254,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_DeviceMethod_Response_fail)
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(iothubtransportamqp_methods_respond(TEST_METHOD_HANDLE, TEST_DEVICE_METHOD_RESPONSE, TEST_DEVICE_RESP_LENGTH, TEST_DEVICE_STATUS_CODE))
-        .SetReturn(__LINE__);
+        .SetReturn(__FAILURE__);
 
     // act
     int result = IoTHubTransport_AMQP_Common_DeviceMethod_Response(handle, TEST_METHOD_HANDLE, TEST_DEVICE_METHOD_RESPONSE, TEST_DEVICE_RESP_LENGTH, TEST_DEVICE_STATUS_CODE);
@@ -1294,6 +1303,52 @@ TEST_FUNCTION(on_methods_error_does_nothing)
 
     // act
     g_on_methods_error(g_on_methods_error_context);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubTransport_AMQP_Common_Destroy(handle);
+}
+
+/* on_methods_unsubscribed */
+
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_12_001: [ `on_methods_unsubscribed` calls iothubtransportamqp_methods_unsubscribe. ]*/
+TEST_FUNCTION(on_methods_unsubscribed_calls_iothubtransportamqp_methods_unsubscribe)
+{
+    // arrange
+    IOTHUB_CLIENT_CONFIG client_config;
+    IOTHUBTRANSPORT_CONFIG config;
+    IOTHUB_DEVICE_CONFIG device_config;
+    DLIST_ENTRY waitingToSend;
+    TRANSPORT_LL_HANDLE handle;
+    IOTHUB_DEVICE_HANDLE device_handle;
+
+    client_config.protocol = TEST_get_iothub_client_transport_provider;
+    client_config.deviceId = TEST_DEVICE_ID;
+    client_config.deviceKey = TEST_DEVICE_KEY;
+    client_config.deviceSasToken = TEST_DEVICE_SAS_TOKEN;
+    client_config.iotHubName = TEST_IOT_HUB_NAME;
+    client_config.iotHubSuffix = TEST_IOT_HUB_SUFFIX;
+    client_config.protocolGatewayHostName = TEST_PROT_GW_HOSTNAME;
+
+    config.upperConfig = &client_config;
+    config.waitingToSend = TEST_WAIT_TO_SEND_LIST;
+
+    device_config.deviceId = "blah";
+    device_config.deviceKey = "cucu";
+    device_config.deviceSasToken = NULL;
+
+    handle = IoTHubTransport_AMQP_Common_Create(&config, TEST_amqp_get_io_transport);
+    device_handle = IoTHubTransport_AMQP_Common_Register(handle, &device_config, TEST_IOTHUB_CLIENT_LL_HANDLE, &waitingToSend);
+    (void)IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod(device_handle);
+    (void)IoTHubTransport_AMQP_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(iothubtransportamqp_methods_unsubscribe(TEST_IOTHUBTRANSPORTAMQP_METHODS));
+
+    // act
+    g_on_methods_unsubscribed(g_on_methods_unsubscribed_context);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());

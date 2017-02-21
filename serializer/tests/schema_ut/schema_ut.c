@@ -73,6 +73,7 @@ void my_gballoc_free(void * t)
 
 #undef GBALLOC_H
 #define ENABLE_MOCKS
+#include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/vector.h"
@@ -150,7 +151,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(VECTOR_create, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(VECTOR_destroy, real_VECTOR_destroy);
         REGISTER_GLOBAL_MOCK_HOOK(VECTOR_push_back, real_VECTOR_push_back);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(VECTOR_push_back, __LINE__);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(VECTOR_push_back, __FAILURE__);
         REGISTER_GLOBAL_MOCK_HOOK(VECTOR_erase, real_VECTOR_erase);
         REGISTER_GLOBAL_MOCK_HOOK(VECTOR_clear, real_VECTOR_clear);
         REGISTER_GLOBAL_MOCK_HOOK(VECTOR_element, real_VECTOR_element);
@@ -160,7 +161,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         REGISTER_GLOBAL_MOCK_HOOK(VECTOR_size, real_VECTOR_size);
 
         REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, real_mallocAndStrcpy_s);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, __LINE__);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, __FAILURE__);
         REGISTER_GLOBAL_MOCK_HOOK(unsignedIntToString, real_unsignedIntToString);
         REGISTER_GLOBAL_MOCK_HOOK(size_tToString, real_size_tToString);
 

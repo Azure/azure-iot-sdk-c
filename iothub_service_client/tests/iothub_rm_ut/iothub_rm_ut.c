@@ -15,6 +15,7 @@
 #include "umock_c_negative_tests.h"
 
 #define ENABLE_MOCKS
+#include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/httpheaders.h"
 #include "azure_c_shared_utility/httpapiex.h"
 #include "azure_c_shared_utility/httpapiexsas.h"
@@ -217,7 +218,7 @@ static int my_list_remove(SINGLYLINKEDLIST_HANDLE list, LIST_ITEM_HANDLE item)
     if ((list == NULL) ||
         (item == NULL))
     {
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else
     {
@@ -248,7 +249,7 @@ static int my_list_remove(SINGLYLINKEDLIST_HANDLE list, LIST_ITEM_HANDLE item)
 
         if (current_item == NULL)
         {
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else
         {
@@ -537,7 +538,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(singlylinkedlist_get_head_item, NULL);
 
         REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_remove, my_list_remove);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(singlylinkedlist_remove, __LINE__);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(singlylinkedlist_remove, __FAILURE__);
 
         REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_get_next_item, my_list_get_next_item);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(singlylinkedlist_get_next_item, NULL);

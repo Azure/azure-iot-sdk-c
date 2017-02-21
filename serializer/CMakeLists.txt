@@ -11,6 +11,10 @@ else()
 	add_definitions(-DNO_FLOATS)
 endif()
 
+if(POLICY CMP0042)
+    cmake_policy(SET CMP0042 NEW)
+endif()
+
 compileAsC99()
 
 set(serializer_c_files

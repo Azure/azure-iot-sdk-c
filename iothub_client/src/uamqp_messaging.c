@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #include <stdlib.h>
 #include "uamqp_messaging.h"
+#include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_uamqp_c/message.h"
 #include "azure_uamqp_c/amqpvalue.h"
@@ -23,7 +24,7 @@ static int addPropertiesTouAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_hand
 	{
 		// Codes_SRS_UAMQP_MESSAGING_09_061: [If message_get_properties() fails, message_create_from_iothub_message() shall fail and return immediately.]
 		LogError("Failed to get properties map from uAMQP message (error code %d).", api_call_result);
-		result = __LINE__;
+		result = __FAILURE__;
 	}
 	// Codes_SRS_UAMQP_MESSAGING_09_062: [If UAMQP message properties were not present then a new properties container shall be created using properties_create()]
 	else if (uamqp_message_properties == NULL &&
@@ -31,7 +32,7 @@ static int addPropertiesTouAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_hand
 	{
 		// Codes_SRS_UAMQP_MESSAGING_09_063: [If properties_create() fails, message_create_from_iothub_message() shall fail and return immediately.]
 		LogError("Failed to create properties map for uAMQP message (error code %d).", api_call_result);
-		result = __LINE__;
+		result = __FAILURE__;
 	}
 	else
 	{
@@ -45,7 +46,7 @@ static int addPropertiesTouAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_hand
 			{
 				// Codes_SRS_UAMQP_MESSAGING_09_067: [If amqpvalue_create_string() fails, message_create_from_iothub_message() shall fail and return immediately.]
 				LogError("Failed to create an AMQP_VALUE for the messageId property value.");
-				result = __LINE__;
+				result = __FAILURE__;
 			}
 			else
 			{
@@ -54,7 +55,7 @@ static int addPropertiesTouAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_hand
 				{
 					// Codes_SRS_UAMQP_MESSAGING_09_069: [If properties_set_message_id() fails, message_create_from_iothub_message() shall fail and return immediately.]
 					LogInfo("Failed to set value of uAMQP message 'message-id' property (%d).", api_call_result);
-					result = __LINE__;
+					result = __FAILURE__;
 				}
 				// Codes_SRS_UAMQP_MESSAGING_09_070: [The uAMQP message-id AMQP_VALUE instance shall be destroyed using amqpvalue_destroy().]
 				amqpvalue_destroy(uamqp_message_id);
@@ -71,7 +72,7 @@ static int addPropertiesTouAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_hand
 			{
 				// Codes_SRS_UAMQP_MESSAGING_09_074: [If amqpvalue_create_string() fails, message_create_from_iothub_message() shall fail and return immediately.]
 				LogError("Failed to create an AMQP_VALUE for the messageId property value.");
-				result = __LINE__;
+				result = __FAILURE__;
 			}
 			else
 			{
@@ -80,7 +81,7 @@ static int addPropertiesTouAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_hand
 				{
 					// Codes_SRS_UAMQP_MESSAGING_09_076: [If properties_set_correlation_id() fails, message_create_from_iothub_message() shall fail and return immediately.]
 					LogInfo("Failed to set value of uAMQP message 'message-id' property (%d).", api_call_result);
-					result = __LINE__;
+					result = __FAILURE__;
 				}
 
 				// Codes_SRS_UAMQP_MESSAGING_09_077: [The uAMQP correlation-id AMQP_VALUE instance shall be destroyed using amqpvalue_destroy().]
@@ -92,7 +93,7 @@ static int addPropertiesTouAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_hand
 		{
 			// Codes_SRS_UAMQP_MESSAGING_09_079: [If message_set_properties() fails, message_create_from_iothub_message() shall fail and return immediately.]
 			LogError("Failed to set properties map on uAMQP message (error code %d).", api_call_result);
-			result = __LINE__;
+			result = __FAILURE__;
 		}
 	}
 
@@ -115,14 +116,14 @@ static int addApplicationPropertiesTouAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_m
 	{
 		// Codes_SRS_UAMQP_MESSAGING_09_081: [If IoTHubMessage_Properties() fails, message_create_from_iothub_message() shall fail and return immediately..]
 		LogError("Failed to get property map from IoTHub message.");
-		result = __LINE__;
+		result = __FAILURE__;
 	}
 	// Codes_SRS_UAMQP_MESSAGING_09_082: [The actual keys and values, as well as the number of properties shall be obtained by calling Map_GetInternals on the handle obtained from IoTHubMessage_Properties.]
 	else if (Map_GetInternals(properties_map, &propertyKeys, &propertyValues, &propertyCount) != MAP_OK)
 	{
 		// Codes_SRS_UAMQP_MESSAGING_09_083: [If Map_GetInternals fails, message_create_from_iothub_message() shall fail and return immediately..]
 		LogError("Failed to get the internals of the property map.");
-		result = __LINE__;
+		result = __FAILURE__;
 	}
 	else
 	{
@@ -137,7 +138,7 @@ static int addApplicationPropertiesTouAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_m
 			{
 				// Codes_SRS_UAMQP_MESSAGING_09_087: [If amqpvalue_create_map() fails, message_create_from_iothub_message() shall fail and return immediately.]
 				LogError("Failed to create uAMQP map for the properties.");
-				result = __LINE__;
+				result = __FAILURE__;
 			}
 			else
 			{
@@ -151,21 +152,21 @@ static int addApplicationPropertiesTouAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_m
 					{
 						// Codes_SRS_UAMQP_MESSAGING_09_089: [If amqpvalue_create_string() fails, message_create_from_iothub_message() shall fail and return immediately..]
 						LogError("Failed to create uAMQP property key name.");
-						result = __LINE__;
+						result = __FAILURE__;
 					}
 					// Codes_SRS_UAMQP_MESSAGING_09_090: [An AMQP_VALUE instance shall be created using amqpvalue_create_string() to hold each uAMQP property value.]
 					else if ((map_value_value = amqpvalue_create_string(propertyValues[i])) == NULL)
 					{
 						// Codes_SRS_UAMQP_MESSAGING_09_091: [If amqpvalue_create_string() fails, message_create_from_iothub_message() shall fail and return immediately..]
 						LogError("Failed to create uAMQP property key value.");
-						result = __LINE__;
+						result = __FAILURE__;
 					}
 					// Codes_SRS_UAMQP_MESSAGING_09_092: [The property name and value (AMQP_VALUE instances) shall be added to the uAMQP property map by calling amqpvalue_map_set_value().]
 					else if (amqpvalue_set_map_value(uamqp_map, map_key_value, map_value_value) != 0)
 					{
 						// Codes_SRS_UAMQP_MESSAGING_09_093: [If amqpvalue_map_set_value() fails, message_create_from_iothub_message() shall fail and return immediately..]
 						LogError("Failed to set key/value into the the uAMQP property map.");
-						result = __LINE__;
+						result = __FAILURE__;
 					}
 
 					// Codes_SRS_UAMQP_MESSAGING_09_094: [After adding the property name and value to the uAMQP property map, both AMQP_VALUE instances shall be destroyed using amqpvalue_destroy().]
@@ -183,7 +184,7 @@ static int addApplicationPropertiesTouAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_m
 					{
 						// Codes_SRS_UAMQP_MESSAGING_09_096: [If message_set_application_properties() fails, message_create_from_iothub_message() shall fail and return immediately..]
 						LogError("Failed to transfer the message properties to the uAMQP message.");
-						result = __LINE__;
+						result = __FAILURE__;
 					}
 					else
 					{
@@ -218,7 +219,7 @@ static int readPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_h
 	{
 		// Codes_SRS_UAMQP_MESSAGING_09_009: [If message_get_properties() fails, IoTHubMessage_CreateFromuAMQPMessage shall fail and return immediately.]
 		LogError("Failed to get property properties map from uAMQP message (error code %d).", api_call_result);
-		return_value = __LINE__;
+		return_value = __FAILURE__;
 	}
 	else
 	{
@@ -239,14 +240,14 @@ static int readPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_h
 			{
 				// Codes_SRS_UAMQP_MESSAGING_09_015: [If amqpvalue_get_string fails, IoTHubMessage_CreateFromuAMQPMessage() shall fail and return immediately.]
 				LogError("Failed to get value of uAMQP message 'message-id' property (%d).", api_call_result);
-				return_value = __LINE__;
+				return_value = __FAILURE__;
 			}
 			// Codes_SRS_UAMQP_MESSAGING_09_016: [The message-id property shall be set on the IOTHUB_MESSAGE_HANDLE instance by calling IoTHubMessage_SetMessageId(), passing the value read from the uAMQP message.]
 			else if (IoTHubMessage_SetMessageId(iothub_message_handle, uamqp_message_property_value) != IOTHUB_MESSAGE_OK)
 			{
 				// Codes_SRS_UAMQP_MESSAGING_09_017: [If IoTHubMessage_SetMessageId fails, IoTHubMessage_CreateFromuAMQPMessage() shall fail and return immediately.]
 				LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'message-id' property.");
-				return_value = __LINE__;
+				return_value = __FAILURE__;
 			}
 		}
 
@@ -265,14 +266,14 @@ static int readPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_h
 			{
 				// Codes_SRS_UAMQP_MESSAGING_09_023: [If amqpvalue_get_string fails, IoTHubMessage_CreateFromuAMQPMessage() shall fail and return immediately.]
 				LogError("Failed to get value of uAMQP message 'correlation-id' property (%d).", api_call_result);
-				return_value = __LINE__;
+				return_value = __FAILURE__;
 			}
 			// Codes_SRS_UAMQP_MESSAGING_09_024: [The correlation-id property shall be set on the IOTHUB_MESSAGE_HANDLE by calling IoTHubMessage_SetCorrelationId, passing the value read from the uAMQP message.]
 			else if (IoTHubMessage_SetCorrelationId(iothub_message_handle, uamqp_message_property_value) != IOTHUB_MESSAGE_OK)
 			{
 				// Codes_SRS_UAMQP_MESSAGING_09_025: [If IoTHubMessage_SetCorrelationId fails, IoTHubMessage_CreateFromuAMQPMessage() shall fail and return immediately.]
 				LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'correlation-id' property.");
-				return_value = __LINE__;
+				return_value = __FAILURE__;
 			}
 		}
 		// Codes_SRS_UAMQP_MESSAGING_09_026: [IoTHubMessage_CreateFromuAMQPMessage() shall destroy the uAMQP message properties (obtained with message_get_properties()) by calling properties_destroy().]
@@ -295,14 +296,14 @@ static int readApplicationPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothu
 	{
 		// Codes_SRS_UAMQP_MESSAGING_09_028: [If IoTHubMessage_Properties fails, IoTHubMessage_CreateFromuAMQPMessage() shall fail and return immediately.]
 		LogError("Failed to get property map from IoTHub message.");
-		result = __LINE__;
+		result = __FAILURE__;
 	}
 	// Codes_SRS_UAMQP_MESSAGING_09_029: [The uAMQP message application properties shall be retrieved using message_get_application_properties.]
 	else if ((result = message_get_application_properties(uamqp_message, &uamqp_app_properties)) != 0)
 	{
 		// Codes_SRS_UAMQP_MESSAGING_09_030: [If message_get_application_properties fails, IoTHubMessage_CreateFromuAMQPMessage() shall fail and return immediately.]
 		LogError("Failed reading the incoming uAMQP message properties (return code %d).", result);
-		result = __LINE__;
+		result = __FAILURE__;
 	}
 	else
 	{
@@ -318,14 +319,14 @@ static int readApplicationPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothu
 			{
 				// Codes_SRS_UAMQP_MESSAGING_09_033: [If amqpvalue_get_inplace_described_value fails, IoTHubMessage_CreateFromuAMQPMessage() shall fail and return immediately.]
 				LogError("Failed getting the map of uAMQP message application properties (return code %d).", result);
-				result = __LINE__;
+				result = __FAILURE__;
 			}
 			// Codes_SRS_UAMQP_MESSAGING_09_034: [The number of items in the uAMQP message application properties shall be obtained using amqpvalue_get_map_pair_count.]
 			else if ((result = amqpvalue_get_map_pair_count(uamqp_app_properties_ipdv, &property_count)) != 0)
 			{
 				// Codes_SRS_UAMQP_MESSAGING_09_035: [If amqpvalue_get_map_pair_count fails, IoTHubMessage_CreateFromuAMQPMessage() shall fail and return immediately.]
 				LogError("Failed reading the number of values in the uAMQP property map (return code %d).", result);
-				result = __LINE__;
+				result = __FAILURE__;
 			}
 			else
 			{
@@ -343,7 +344,7 @@ static int readApplicationPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothu
 					{
 						// Codes_SRS_UAMQP_MESSAGING_09_038: [If amqpvalue_get_map_key_value_pair fails, IoTHubMessage_CreateFromuAMQPMessage() shall fail and return immediately.]
 						LogError("Failed reading the key/value pair from the uAMQP property map (return code %d).", result);
-						result = __LINE__;
+						result = __FAILURE__;
 					}
 
 					// Codes_SRS_UAMQP_MESSAGING_09_039: [The uAMQP application property name shall be extracted as string using amqpvalue_get_string.]
@@ -351,21 +352,21 @@ static int readApplicationPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothu
 					{
 						// Codes_SRS_UAMQP_MESSAGING_09_040: [If amqpvalue_get_string fails, IoTHubMessage_CreateFromuAMQPMessage() shall fail and return immediately.]
 						LogError("Failed parsing the uAMQP property name (return code %d).", result);
-						result = __LINE__;
+						result = __FAILURE__;
 					}
 					// Codes_SRS_UAMQP_MESSAGING_09_041: [The uAMQP application property value shall be extracted as string using amqpvalue_get_string.]
 					else if ((result = amqpvalue_get_string(map_key_value, &key_value)) != 0)
 					{
 						// Codes_SRS_UAMQP_MESSAGING_09_042: [If amqpvalue_get_string fails, IoTHubMessage_CreateFromuAMQPMessage() shall fail and return immediately.]
 						LogError("Failed parsing the uAMQP property value (return code %d).", result);
-						result = __LINE__;
+						result = __FAILURE__;
 					}
 					// Codes_SRS_UAMQP_MESSAGING_09_043: [The application property name and value shall be added to IOTHUB_MESSAGE_HANDLE properties using Map_AddOrUpdate.]
 					else if (Map_AddOrUpdate(iothub_message_properties_map, key_name, key_value) != MAP_OK)
 					{
 						// Codes_SRS_UAMQP_MESSAGING_09_044: [If Map_AddOrUpdate fails, IoTHubMessage_CreateFromuAMQPMessage() shall fail and return immediately.]
 						LogError("Failed to add/update IoTHub message property map.");
-						result = __LINE__;
+						result = __FAILURE__;
 					}
 
 					// Codes_SRS_UAMQP_MESSAGING_09_045: [IoTHubMessage_CreateFromuAMQPMessage() shall destroy the uAMQP message property name and value (obtained with amqpvalue_get_string) by calling amqpvalue_destroy().]
@@ -391,7 +392,7 @@ static int readApplicationPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothu
 
 int IoTHubMessage_CreateFromUamqpMessage(MESSAGE_HANDLE uamqp_message, IOTHUB_MESSAGE_HANDLE* iothubclient_message)
 {
-	int result = __LINE__;
+	int result = __FAILURE__;
 
 	IOTHUB_MESSAGE_HANDLE iothub_message = NULL;
 	MESSAGE_BODY_TYPE body_type;
@@ -401,7 +402,7 @@ int IoTHubMessage_CreateFromUamqpMessage(MESSAGE_HANDLE uamqp_message, IOTHUB_ME
 	{
 		// Codes_SRS_UAMQP_MESSAGING_09_002: [If message_get_body_type() fails, IoTHubMessage_CreateFromuAMQPMessage shall fail and return immediately.]
 		LogError("Failed to get the type of the uamqp message.");
-		result = __LINE__;
+		result = __FAILURE__;
 	}
 	else
 	{
@@ -414,14 +415,14 @@ int IoTHubMessage_CreateFromUamqpMessage(MESSAGE_HANDLE uamqp_message, IOTHUB_ME
 			{
 				// Codes_SRS_UAMQP_MESSAGING_09_005: [If message_get_body_amqp_data() fails, IoTHubMessage_CreateFromuAMQPMessage shall fail and return immediately.]
 				LogError("Failed to get the body of the uamqp message.");
-				result = __LINE__;
+				result = __FAILURE__;
 			}
 			// Codes_SRS_UAMQP_MESSAGING_09_006: [The IOTHUB_MESSAGE instance shall be created using IoTHubMessage_CreateFromByteArray(), passing the uAMQP body bytes as parameter.]
 			else if ((iothub_message = IoTHubMessage_CreateFromByteArray(binary_data.bytes, binary_data.length)) == NULL)
 			{
 				// Codes_SRS_UAMQP_MESSAGING_09_007: [If IoTHubMessage_CreateFromByteArray() fails, IoTHubMessage_CreateFromuAMQPMessage shall fail and return immediately.]
 				LogError("Failed creating the IOTHUB_MESSAGE_HANDLE instance (IoTHubMessage_CreateFromByteArray failed).");
-				result = __LINE__;
+				result = __FAILURE__;
 			}
 		}
 	}
@@ -432,13 +433,13 @@ int IoTHubMessage_CreateFromUamqpMessage(MESSAGE_HANDLE uamqp_message, IOTHUB_ME
 		{
 			LogError("Failed reading properties of the uamqp message.");
 			IoTHubMessage_Destroy(iothub_message);
-			result = __LINE__;
+			result = __FAILURE__;
 		}
 		else if (readApplicationPropertiesFromuAMQPMessage(iothub_message, uamqp_message) != RESULT_OK)
 		{
 			LogError("Failed reading application properties of the uamqp message.");
 			IoTHubMessage_Destroy(iothub_message);
-			result = __LINE__;
+			result = __FAILURE__;
 		}
 		else
 		{
@@ -452,7 +453,7 @@ int IoTHubMessage_CreateFromUamqpMessage(MESSAGE_HANDLE uamqp_message, IOTHUB_ME
 
 int message_create_from_iothub_message(IOTHUB_MESSAGE_HANDLE iothub_message, MESSAGE_HANDLE* uamqp_message)
 {
-	int result = __LINE__;
+	int result = __FAILURE__;
 	// Codes_SRS_UAMQP_MESSAGING_09_047: [The content type of the IOTHUB_MESSAGE_HANDLE instance shall be obtained using IoTHubMessage_GetContentType().]
 	IOTHUBMESSAGE_CONTENT_TYPE contentType = IoTHubMessage_GetContentType(iothub_message);
 	const char* messageContent = NULL;
@@ -465,7 +466,7 @@ int message_create_from_iothub_message(IOTHUB_MESSAGE_HANDLE iothub_message, MES
 	{
 		// Codes_SRS_UAMQP_MESSAGING_09_049: [If IoTHubMessage_GetByteArray() fails, message_create_from_iothub_message() shall fail and return.]
 		LogError("Failed getting the BYTE array representation of the IOTHUB_MESSAGE_HANDLE instance.");
-		result = __LINE__;
+		result = __FAILURE__;
 	}
 	// Codes_SRS_UAMQP_MESSAGING_09_050: [If the content type of the IOTHUB_MESSAGE_HANDLE instance is IOTHUBMESSAGE_STRING, the content shall be obtained using IoTHubMessage_GetString().]
 	else if (contentType == IOTHUBMESSAGE_STRING &&
@@ -473,20 +474,20 @@ int message_create_from_iothub_message(IOTHUB_MESSAGE_HANDLE iothub_message, MES
 	{
 		// Codes_SRS_UAMQP_MESSAGING_09_051: [If IoTHubMessage_GetString() fails, message_create_from_iothub_message() shall fail and return.]
 		LogError("Failed getting the STRING representation of the IOTHUB_MESSAGE_HANDLE instance.");
-		result = __LINE__;
+		result = __FAILURE__;
 	}
 	// Codes_SRS_UAMQP_MESSAGING_09_052: [If the content type of the IOTHUB_MESSAGE_HANDLE instance is IOTHUBMESSAGE_UNKNOWN, message_create_from_iothub_message() shall fail and return.]
 	else if (contentType == IOTHUBMESSAGE_UNKNOWN)
 	{
 		LogError("Cannot parse IOTHUB_MESSAGE_HANDLE with content type IOTHUBMESSAGE_UNKNOWN.");
-		result = __LINE__;
+		result = __FAILURE__;
 	}
 	// Codes_SRS_UAMQP_MESSAGING_09_053: [A uAMQP MESSAGE_HANDLE shall be created using message_create().]
 	else if ((uamqp_message_tmp = message_create()) == NULL)
 	{
 		// Codes_SRS_UAMQP_MESSAGING_09_054: [If message_create() fails, message_create_from_iothub_message() shall fail and return.]
 		LogError("Failed allocating the uAMQP message.");
-		result = __LINE__;
+		result = __FAILURE__;
 	}
 	else
 	{
@@ -506,17 +507,17 @@ int message_create_from_iothub_message(IOTHUB_MESSAGE_HANDLE iothub_message, MES
 		{
 			// Codes_SRS_UAMQP_MESSAGING_09_057: [If message_add_body_amqp_data() fails, message_create_from_iothub_message() shall fail and return.]
 			LogError("Failed setting the body of the uAMQP message.");
-			result = __LINE__;
+			result = __FAILURE__;
 		}
 		else if (addPropertiesTouAMQPMessage(iothub_message, uamqp_message_tmp) != RESULT_OK)
 		{
 			LogError("Failed setting properties of the uAMQP message.");
-			result = __LINE__;
+			result = __FAILURE__;
 		}
 		else if (addApplicationPropertiesTouAMQPMessage(iothub_message, uamqp_message_tmp) != RESULT_OK)
 		{
 			LogError("Failed setting application properties of the uAMQP message.");
-			result = __LINE__;
+			result = __FAILURE__;
 		}
 		else
 		{

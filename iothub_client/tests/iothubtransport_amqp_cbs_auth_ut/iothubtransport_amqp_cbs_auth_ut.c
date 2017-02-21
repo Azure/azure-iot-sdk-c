@@ -6,11 +6,13 @@
 #include <cstdlib>
 #include <cstddef>
 #include <ctime>
+#include <cstring>
 #else
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
 #include <time.h>
+#include <string.h>
 #endif
 
 void* real_malloc(size_t size)
@@ -23,7 +25,13 @@ void real_free(void* ptr)
 	free(ptr);
 }
 
+static int real_strcmp(const char* str1, const char* str2)
+{
+	return strcmp(str1, str2);
+}
+
 #include "testrunnerswitcher.h"
+#include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/macro_utils.h"
 #include "umock_c.h"
 #include "umocktypes_charptr.h"
@@ -91,6 +99,7 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 #define TEST_DEVICES_PATH_STRING_HANDLE                   (STRING_HANDLE)0x4453
 #define SAS_TOKEN_TYPE                                    "servicebus.windows.net:sastoken"
 #define TEST_SAS_TOKEN_KEY_NAME_STRING_HANDLE             (STRING_HANDLE)0x4454
+#define TEST_OPTIONHANDLER_HANDLE                         (OPTIONHANDLER_HANDLE)0x4455
 
 
 static AUTHENTICATION_CONFIG global_auth_config;
@@ -122,7 +131,6 @@ static void TEST_free(void* ptr)
 
 	real_free(ptr);
 }
-
 
 static CBS_HANDLE saved_cbs_put_token_cbs;
 static const char* saved_cbs_put_token_type;
@@ -163,7 +171,7 @@ int STRING_sprintf(STRING_HANDLE handle, const char* format, ...)
 
 	if (g_STRING_sprintf_call_count == g_STRING_sprintf_fail_on_count)
 	{
-		result = __LINE__;
+		result = __FAILURE__;
 	}
 	else
 	{
@@ -186,6 +194,11 @@ static void register_umock_alias_types()
 	REGISTER_UMOCK_ALIAS_TYPE(ON_CBS_OPERATION_COMPLETE, void*);
 	REGISTER_UMOCK_ALIAS_TYPE(time_t, long long);
 	REGISTER_UMOCK_ALIAS_TYPE(AUTHENTICATION_ERROR_CODE, int);
+	REGISTER_UMOCK_ALIAS_TYPE(OPTIONHANDLER_HANDLE, void*);
+	REGISTER_UMOCK_ALIAS_TYPE(OPTIONHANDLER_RESULT, int);
+	REGISTER_UMOCK_ALIAS_TYPE(pfCloneOption, void*);
+	REGISTER_UMOCK_ALIAS_TYPE(pfDestroyOption, void*);
+	REGISTER_UMOCK_ALIAS_TYPE(pfSetOption, void*);
 }
 
 static void register_global_mock_hooks()
@@ -208,6 +221,9 @@ static void register_global_mock_returns()
 	REGISTER_GLOBAL_MOCK_FAIL_RETURN(malloc, NULL);
 
 	REGISTER_GLOBAL_MOCK_FAIL_RETURN(get_time, INDEFINITE_TIME);
+
+	REGISTER_GLOBAL_MOCK_FAIL_RETURN(OptionHandler_Create, NULL);
+	REGISTER_GLOBAL_MOCK_FAIL_RETURN(OptionHandler_AddOption, OPTIONHANDLER_ERROR);
 }
 
 
@@ -743,7 +759,7 @@ TEST_FUNCTION(authentication_create_SAS_TOKENS_failure_checks)
 	umock_c_reset_all_calls();
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_025: [If authentication_handle is NULL, authentication_start() shall fail and return __LINE__ as error code]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_025: [If authentication_handle is NULL, authentication_start() shall fail and return __FAILURE__ as error code]
 TEST_FUNCTION(authentication_start_NULL_auth_handle)
 {
 	// arrange
@@ -767,7 +783,7 @@ TEST_FUNCTION(authentication_start_NULL_auth_handle)
 	authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_026: [If `cbs_handle` is NULL, authentication_start() shall fail and return __LINE__ as error code]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_026: [If `cbs_handle` is NULL, authentication_start() shall fail and return __FAILURE__ as error code]
 TEST_FUNCTION(authentication_start_NULL_cbs_handle)
 {
 	// arrange
@@ -818,7 +834,7 @@ TEST_FUNCTION(authentication_start_succeeds)
 	authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_027: [If authenticate state has been started already, authentication_start() shall fail and return __LINE__ as error code]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_027: [If authenticate state has been started already, authentication_start() shall fail and return __FAILURE__ as error code]
 TEST_FUNCTION(authentication_start_already_started_fails)
 {
 	// arrange
@@ -840,7 +856,7 @@ TEST_FUNCTION(authentication_start_already_started_fails)
 }
 
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_031: [If `authentication_handle` is NULL, authentication_stop() shall fail and return __LINE__]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_031: [If `authentication_handle` is NULL, authentication_stop() shall fail and return __FAILURE__]
 TEST_FUNCTION(authentication_stop_NULL_handle)
 {
 	// arrange
@@ -861,7 +877,7 @@ TEST_FUNCTION(authentication_stop_NULL_handle)
 	authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_032: [If `instance->state` is AUTHENTICATION_STATE_STOPPED, authentication_stop() shall fail and return __LINE__]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_032: [If `instance->state` is AUTHENTICATION_STATE_STOPPED, authentication_stop() shall fail and return __FAILURE__]
 TEST_FUNCTION(authentication_stop_already_stoppped)
 {
 	// arrange
@@ -1407,10 +1423,6 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_sas_token_refresh_check)
 	authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_101: [`value` shall be saved on `instance->sas_token_refresh_time_secs`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_102: [authentication_set_sas_token_refresh_time_secs() shall return 0]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_104: [`value` shall be saved on `instance->sas_token_lifetime_secs`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_105: [authentication_set_sas_token_lifetime_secs() shall return 0]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_067: [authentication_do_work() shall create a SAS token using `instance->device_primary_key`, unless it has failed previously]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_070: [The SAS token expiration time shall be calculated adding `instance->sas_token_lifetime_secs` to the current number of seconds since epoch time UTC]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_071: [A STRING_HANDLE, referred to as `devices_path`, shall be created from the following parts: iothub_host_fqdn + "/devices/" + device_id]
@@ -1419,6 +1431,7 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_sas_token_refresh_check)
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_076: [The SAS token shall be sent to CBS using cbs_put_token(), using `servicebus.windows.net:sastoken` as token type, `devices_path` as audience and passing on_cbs_put_token_complete_callback]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_077: [If cbs_put_token() succeeds, authentication_do_work() shall set `instance->current_sas_token_put_time` with the current time]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_081: [authentication_do_work() shall free the memory it allocated for `devices_path`, `sasTokenKeyName` and SAS token]
+// Tests_SRSIOTHUBTRANSPORT_AMQP_AUTH_09_125: [If name matches AUTHENTICATION_OPTION_SAS_TOKEN_LIFETIME_SECS, `value` shall be saved on `instance->sas_token_lifetime_secs`]
 TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_sas_token_refresh)
 {
 	// arrange
@@ -1429,8 +1442,9 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_sas_token_refresh)
 	time_t next_time = add_seconds(current_time, 11);
 	ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != next_time, "failed to computer 'next_time'");
 
-	int result = authentication_set_sas_token_refresh_time_secs(handle, 10);
-	ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "authentication_set_sas_token_refresh_time_secs() failed!");
+	size_t refresh_time_secs = 10;
+	int result = authentication_set_option(handle, AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS, &refresh_time_secs);
+	ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "authentication_set_option(AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS) failed!");
 
 	AUTHENTICATION_DO_WORK_EXPECTED_STATE *exp_state = get_do_work_expected_state_struct();
 	exp_state->current_state = AUTHENTICATION_STATE_STARTING;
@@ -1440,8 +1454,9 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_sas_token_refresh)
 	crank_authentication_do_work(config, handle, current_time, exp_state);
 	saved_cbs_put_token_on_operation_complete(saved_cbs_put_token_context, CBS_OPERATION_RESULT_OK, 0, "all good");
 
-	result = authentication_set_sas_token_lifetime_secs(handle, 123);
-	ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "authentication_set_sas_token_lifetime_secs() failed!");
+	size_t lifetime_secs = 123;
+	result = authentication_set_option(handle, AUTHENTICATION_OPTION_SAS_TOKEN_LIFETIME_SECS, &lifetime_secs);
+	ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "authentication_set_option(AUTHENTICATION_OPTION_SAS_TOKEN_LIFETIME_SECS) failed!");
 
 	exp_state->current_state = AUTHENTICATION_STATE_STARTED;
 	exp_state->current_sas_token_put_time = current_time;
@@ -1472,8 +1487,9 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_sas_token_refresh_key_fallback)
 	time_t next_time = add_seconds(current_time, 11);
 	ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != next_time, "failed to computer 'next_time'");
 
-	int result = authentication_set_sas_token_refresh_time_secs(handle, 10);
-	ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "authentication_set_sas_token_refresh_time_secs() failed!");
+	size_t timeout_secs = 10;
+	int result = authentication_set_option(handle, AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS, &timeout_secs);
+	ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "authentication_set_option(AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS) failed!");
 
 	AUTHENTICATION_DO_WORK_EXPECTED_STATE *exp_state = get_do_work_expected_state_struct();
 	exp_state->current_state = AUTHENTICATION_STATE_STARTING;
@@ -1519,6 +1535,9 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_sas_token_refresh_key_fallback)
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_087: [If `instance->is_sas_token_refresh_in_progress` is TRUE, `instance->on_error_callback` shall be invoked with AUTHENTICATION_ERROR_SAS_REFRESH_TIMEOUT]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_089: [`instance->is_sas_token_refresh_in_progress` shall be set to FALSE]
+// Tests_SRSIOTHUBTRANSPORT_AMQP_AUTH_09_098: [If name matches AUTHENTICATION_OPTION_CBS_REQUEST_TIMEOUT_SECS, `value` shall be saved on `instance->cbs_request_timeout_secs`]
+// Tests_SRSIOTHUBTRANSPORT_AMQP_AUTH_09_124: [If name matches AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS, `value` shall be saved on `instance->sas_token_refresh_time_secs`]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_099: [If no errors occur, authentication_set_option shall return 0]
 TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_sas_token_refresh_timeout_and_fallback_to_secondary_key)
 {
 	// arrange
@@ -1531,8 +1550,9 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_sas_token_refresh_timeout_and_f
 	time_t refresh_timeout_time = add_seconds(current_time, 31);
 	ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != refresh_timeout_time, "failed to computer 'refresh_timeout_time'");
 
-	int result = authentication_set_sas_token_refresh_time_secs(handle, 10);
-	ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "authentication_set_sas_token_refresh_time_secs() failed!");
+	size_t refresh_secs = 10;
+	int result = authentication_set_option(handle, AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS, &refresh_secs);
+	ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "authentication_set_option(AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS) failed!");
 
 	AUTHENTICATION_DO_WORK_EXPECTED_STATE *exp_state = get_do_work_expected_state_struct();
 	exp_state->current_state = AUTHENTICATION_STATE_STARTING;
@@ -1555,8 +1575,9 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_sas_token_refresh_timeout_and_f
 
 	exp_state->current_sas_token_put_time = refresh_time;
 
-	result = authentication_set_cbs_request_timeout_secs(handle, 10);
-	ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "authentication_set_cbs_request_timeout_secs() failed!");
+	size_t timeout_secs = 10;
+	result = authentication_set_option(handle, AUTHENTICATION_OPTION_CBS_REQUEST_TIMEOUT_SECS, &timeout_secs);
+	ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "authentication_set_option(AUTHENTICATION_OPTION_CBS_REQUEST_TIMEOUT_SECS) failed!");
 	STRICT_EXPECTED_CALL(STRING_c_str(TEST_DEVICE_ID_STRING_HANDLE)).SetReturn(TEST_DEVICE_ID);
 
 	// act
@@ -1700,54 +1721,6 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_sas_token_refresh_failure_check
 	}
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_097: [If `authentication_handle` is NULL, authentication_set_cbs_request_timeout_secs() shall fail and return __LINE__]
-TEST_FUNCTION(authentication_set_cbs_request_timeout_secs_NULL_handle)
-{
-	// arrange
-	umock_c_reset_all_calls();
-
-	// act
-	int result = authentication_set_cbs_request_timeout_secs(NULL, 100);
-
-	// assert
-	ASSERT_ARE_NOT_EQUAL(int, 0, result);
-	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-	// cleanup
-}
-
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_100: [If `authentication_handle` is NULL, authentication_set_sas_token_refresh_time_secs() shall fail and return __LINE__]
-TEST_FUNCTION(authentication_set_sas_token_refresh_time_secs_NULL_handle)
-{
-	// arrange
-	umock_c_reset_all_calls();
-
-	// act
-	int result = authentication_set_sas_token_refresh_time_secs(NULL, 100);
-
-	// assert
-	ASSERT_ARE_NOT_EQUAL(int, 0, result);
-	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-	// cleanup
-}
-
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_103: [If `authentication_handle` is NULL, authentication_set_sas_token_lifetime_secs() shall fail and return __LINE__]
-TEST_FUNCTION(authentication_set_sas_token_lifetime_secs_NULL_handle)
-{
-	// arrange
-	umock_c_reset_all_calls();
-
-	// act
-	int result = authentication_set_sas_token_lifetime_secs(NULL, 100);
-
-	// assert
-	ASSERT_ARE_NOT_EQUAL(int, 0, result);
-	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-	// cleanup
-}
-
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_021: [authentication_create() shall set `instance->cbs_request_timeout_secs` with the default value of UINT32_MAX]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_038: [If `instance->is_cbs_put_token_in_progress` is TRUE, authentication_do_work() shall only verify the authentication timeout]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_043: [authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to TRUE]
@@ -1791,8 +1764,6 @@ TEST_FUNCTION(authentication_do_work_first_auth_timeout_check)
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_085: [`instance->is_cbs_put_token_in_progress` shall be set to FALSE]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_086: [`instance->state` shall be updated to AUTHENTICATION_STATE_ERROR and `instance->on_state_changed_callback` invoked]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_098: [`value` shall be saved on `instance->cbs_request_timeout_secs`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_099: [authentication_set_cbs_request_timeout_secs() shall return 0]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_088: [If `instance->is_sas_token_refresh_in_progress` is FALSE, `instance->on_error_callback` shall be invoked with AUTHENTICATION_ERROR_AUTH_TIMEOUT]
 TEST_FUNCTION(authentication_do_work_first_auth_times_out)
 {
@@ -1800,7 +1771,8 @@ TEST_FUNCTION(authentication_do_work_first_auth_times_out)
 	AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_SAS_TOKEN);
 	AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
 
-	int result = authentication_set_cbs_request_timeout_secs(handle, 10);
+	size_t timeout_secs = 10;
+	int result = authentication_set_option(handle, AUTHENTICATION_OPTION_CBS_REQUEST_TIMEOUT_SECS, &timeout_secs);
 	ASSERT_ARE_EQUAL(int, 0, result);
 
 	time_t current_time = time(NULL);
@@ -1831,6 +1803,255 @@ TEST_FUNCTION(authentication_do_work_first_auth_times_out)
 	ASSERT_ARE_EQUAL(int, AUTHENTICATION_ERROR_AUTH_TIMEOUT, saved_on_error_callback_error_code);
 
 	// cleanup
+	authentication_destroy(handle);
+}
+
+// Tests_SRSIOTHUBTRANSPORT_AMQP_AUTH_09_097: [If `authentication_handle` or `name` or `value` is NULL, authentication_set_option shall fail and return a non-zero value]
+TEST_FUNCTION(authentication_set_option_NULL_handle)
+{
+	// arrange
+	umock_c_reset_all_calls();
+
+	size_t value = 10;
+
+	// act
+	int result = authentication_set_option(NULL, AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS, &value);
+
+	// assert
+	ASSERT_ARE_NOT_EQUAL(int, 0, result);
+
+	// cleanup
+}
+
+// Tests_SRSIOTHUBTRANSPORT_AMQP_AUTH_09_097: [If `authentication_handle` or `name` or `value` is NULL, authentication_set_option shall fail and return a non-zero value]
+TEST_FUNCTION(authentication_set_option_NULL_name)
+{
+	// arrange
+	AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_SAS_TOKEN);
+	AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
+
+	umock_c_reset_all_calls();
+
+	size_t value = 10;
+
+	// act
+	int result = authentication_set_option(handle, NULL, &value);
+
+	// assert
+	ASSERT_ARE_NOT_EQUAL(int, 0, result);
+	ASSERT_IS_NOT_NULL(handle);
+
+	// cleanup
+	authentication_destroy(handle);
+}
+
+// Tests_SRSIOTHUBTRANSPORT_AMQP_AUTH_09_097: [If `authentication_handle` or `name` or `value` is NULL, authentication_set_option shall fail and return a non-zero value]
+TEST_FUNCTION(authentication_set_option_NULL_value)
+{
+	// arrange
+	AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_SAS_TOKEN);
+	AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
+
+	umock_c_reset_all_calls();
+
+	// act
+	int result = authentication_set_option(handle, AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS, NULL);
+
+	// assert
+	ASSERT_ARE_NOT_EQUAL(int, 0, result);
+	ASSERT_IS_NOT_NULL(handle);
+
+	// cleanup
+	authentication_destroy(handle);
+}
+
+// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_128: [If name does not match any supported option, authentication_set_option shall fail and return a non-zero value]
+TEST_FUNCTION(authentication_set_option_name_not_supported)
+{
+	// arrange
+	AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_SAS_TOKEN);
+	AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
+
+	umock_c_reset_all_calls();
+
+	size_t value = 10;
+
+	// act
+	int result = authentication_set_option(handle, "!viva el Chapolin Colorado!", &value);
+
+	// assert
+	ASSERT_ARE_NOT_EQUAL(int, 0, result);
+	ASSERT_IS_NOT_NULL(handle);
+
+	// cleanup
+	authentication_destroy(handle);
+}
+
+// Tests_SRSIOTHUBTRANSPORT_AMQP_AUTH_09_098: [If name matches AUTHENTICATION_OPTION_SAVED_OPTIONS, `value` shall be applied using OptionHandler_FeedOptions]
+TEST_FUNCTION(authentication_set_option_saved_options_succeeds)
+{
+	// arrange
+	AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_SAS_TOKEN);
+	AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
+
+	umock_c_reset_all_calls();
+
+	OPTIONHANDLER_HANDLE value = TEST_OPTIONHANDLER_HANDLE;
+	STRICT_EXPECTED_CALL(OptionHandler_FeedOptions(value, handle)).SetReturn(OPTIONHANDLER_OK);
+
+	// act
+	int result = authentication_set_option(handle, AUTHENTICATION_OPTION_SAVED_OPTIONS, &value);
+
+	// assert
+	ASSERT_ARE_EQUAL(int, 0, result);
+	ASSERT_IS_NOT_NULL(handle);
+
+	// cleanup
+	authentication_destroy(handle);
+}
+
+// Tests_SRSIOTHUBTRANSPORT_AMQP_AUTH_09_126: [If OptionHandler_FeedOptions fails, authentication_set_option shall fail and return a non-zero value]
+TEST_FUNCTION(authentication_set_option_OptionHandler_FeedOptions_OPTIONHANDLER_ERROR)
+{
+	// arrange
+	AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_SAS_TOKEN);
+	AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
+
+	umock_c_reset_all_calls();
+
+	OPTIONHANDLER_HANDLE value = TEST_OPTIONHANDLER_HANDLE;
+	STRICT_EXPECTED_CALL(OptionHandler_FeedOptions(value, handle)).SetReturn(OPTIONHANDLER_ERROR);
+
+	// act
+	int result = authentication_set_option(handle, AUTHENTICATION_OPTION_SAVED_OPTIONS, value);
+
+	// assert
+	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+	ASSERT_ARE_NOT_EQUAL(int, 0, result);
+	ASSERT_IS_NOT_NULL(handle);
+
+	// cleanup
+	authentication_destroy(handle);
+}
+
+// Tests_SRSIOTHUBTRANSPORT_AMQP_AUTH_09_126: [If OptionHandler_FeedOptions fails, authentication_set_option shall fail and return a non-zero value]
+TEST_FUNCTION(authentication_set_option_OptionHandler_FeedOptions_OPTIONHANDLER_INVALIDARG)
+{
+	// arrange
+	AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_SAS_TOKEN);
+	AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
+
+	umock_c_reset_all_calls();
+
+	OPTIONHANDLER_HANDLE value = TEST_OPTIONHANDLER_HANDLE;
+	STRICT_EXPECTED_CALL(OptionHandler_FeedOptions(value, handle)).SetReturn(OPTIONHANDLER_INVALIDARG);
+
+	// act
+	int result = authentication_set_option(handle, AUTHENTICATION_OPTION_SAVED_OPTIONS, value);
+
+	// assert
+	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+	ASSERT_ARE_NOT_EQUAL(int, 0, result);
+	ASSERT_IS_NOT_NULL(handle);
+
+	// cleanup
+	authentication_destroy(handle);
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_100: [If `authentication_handle` is NULL, authentication_retrieve_options shall fail and return NULL]
+TEST_FUNCTION(authentication_retrieve_options_NULL_handle)
+{
+	// arrange
+	umock_c_reset_all_calls();
+
+	// act
+	OPTIONHANDLER_HANDLE result = authentication_retrieve_options(NULL);
+
+	// assert
+	ASSERT_ARE_EQUAL(void_ptr, NULL, result);
+
+	// cleanup
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_101: [An OPTIONHANDLER_HANDLE instance shall be created using OptionHandler_Create]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_103: [Each option of `instance` shall be added to the OPTIONHANDLER_HANDLE instance using OptionHandler_AddOption]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_127: [If no failures occur, authentication_retrieve_options shall return the OPTIONHANDLER_HANDLE instance]
+TEST_FUNCTION(authentication_retrieve_options_succeeds)
+{
+	// arrange
+	AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_SAS_TOKEN);
+	AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
+
+	umock_c_reset_all_calls();
+	EXPECTED_CALL(OptionHandler_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(TEST_OPTIONHANDLER_HANDLE);
+	STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, AUTHENTICATION_OPTION_CBS_REQUEST_TIMEOUT_SECS, IGNORED_PTR_ARG))
+		.IgnoreArgument(3)
+		.SetReturn(OPTIONHANDLER_OK);
+	STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS, IGNORED_PTR_ARG))
+		.IgnoreArgument(3)
+		.SetReturn(OPTIONHANDLER_OK);
+	STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, AUTHENTICATION_OPTION_SAS_TOKEN_LIFETIME_SECS, IGNORED_PTR_ARG))
+		.IgnoreArgument(3)
+		.SetReturn(OPTIONHANDLER_OK);
+
+	// act
+	OPTIONHANDLER_HANDLE result = authentication_retrieve_options(handle);
+
+	// assert
+
+	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+	ASSERT_ARE_EQUAL(void_ptr, TEST_OPTIONHANDLER_HANDLE, result);
+	ASSERT_IS_NOT_NULL(handle);
+
+	// cleanup
+	authentication_destroy(handle);
+}
+
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_102: [If an OPTIONHANDLER_HANDLE instance fails to be created, authentication_retrieve_options shall fail and return NULL]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_104: [If OptionHandler_AddOption fails, authentication_retrieve_options shall fail and return NULL]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_105: [If authentication_retrieve_options fails, any allocated memory shall be freed]
+TEST_FUNCTION(authentication_retrieve_options_failure_checks)
+{
+	// arrange
+	ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
+
+	AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_SAS_TOKEN);
+	AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
+	
+	umock_c_reset_all_calls();
+	EXPECTED_CALL(OptionHandler_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(TEST_OPTIONHANDLER_HANDLE);
+	STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, AUTHENTICATION_OPTION_CBS_REQUEST_TIMEOUT_SECS, IGNORED_PTR_ARG))
+		.IgnoreArgument(3)
+		.SetReturn(OPTIONHANDLER_OK);
+	STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS, IGNORED_PTR_ARG))
+		.IgnoreArgument(3)
+		.SetReturn(OPTIONHANDLER_OK);
+	STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, AUTHENTICATION_OPTION_SAS_TOKEN_LIFETIME_SECS, IGNORED_PTR_ARG))
+		.IgnoreArgument(3)
+		.SetReturn(OPTIONHANDLER_OK);
+	umock_c_negative_tests_snapshot();
+
+	// act
+	size_t i;
+	for (i = 0; i < umock_c_negative_tests_call_count(); i++)
+	{
+		// arrange
+		char error_msg[64];
+
+		umock_c_negative_tests_reset();
+		umock_c_negative_tests_fail_call(i);
+
+		OPTIONHANDLER_HANDLE result = authentication_retrieve_options(handle);
+
+		// assert
+		sprintf(error_msg, "On failed call %zu", i);
+		ASSERT_IS_NULL_WITH_MSG(result, error_msg);
+	}
+
+	// cleanup
+	umock_c_negative_tests_deinit();
+	umock_c_reset_all_calls();
 	authentication_destroy(handle);
 }
 

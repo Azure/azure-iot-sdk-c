@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <ctype.h>
+#include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/gballoc.h"
 
 #include "azure_c_shared_utility/xlogging.h"
@@ -65,6 +66,9 @@ static const char* GET_PROPERTIES_TOPIC = "$iothub/twin/GET/?$rid=%"PRIu16;
 static const char* DEVICE_METHOD_RESPONSE_TOPIC = "$iothub/methods/res/%d/?$rid=%s";
 
 static const char* REQUEST_ID_PROPERTY = "?$rid=";
+
+static const char* MESSAGE_ID_PROPERTY = "mid";
+static const char* CORRELATION_ID_PROPERTY = "cid";
 
 #define UNSUBSCRIBE_FROM_TOPIC                  0x0000
 #define SUBSCRIBE_GET_REPORTED_STATE_TOPIC      0x0001
@@ -264,7 +268,7 @@ static int RetryPolicy_Exponential_BackOff_With_Jitter(bool *permit, size_t* del
     }
     else
     {
-        result = __LINE__;
+        result = __FAILURE__;
     }
     return result;
 }
@@ -384,7 +388,7 @@ int IoTHubTransport_MQTT_Common_SetRetryPolicy(TRANSPORT_LL_HANDLE handle, IOTHU
     {
         /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_25_041: [**If any handle is NULL then IoTHubTransport_MQTT_Common_SetRetryPolicy shall return resultant line.] */
         LogError("Invalid handle parameter. NULL.");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else
     {
@@ -409,7 +413,7 @@ int IoTHubTransport_MQTT_Common_SetRetryPolicy(TRANSPORT_LL_HANDLE handle, IOTHU
         {
             /*Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_25_044: [**If retry logic for specified parameters of retry policy and retryTimeoutLimitInSeconds cannot be created then IoTHubTransport_MQTT_Common_SetRetryPolicy shall return resultant line]*/
             LogError("Retry Logic is not created");
-            result = __LINE__;
+            result = __FAILURE__;
         }
     }
     return result;
@@ -573,7 +577,7 @@ static int retrieve_device_method_rid_info(const char* resp_topic, STRING_HANDLE
     if (token_handle == NULL)
     {
         LogError("Failed creating token from device twin topic.");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else
     {
@@ -581,13 +585,13 @@ static int retrieve_device_method_rid_info(const char* resp_topic, STRING_HANDLE
         if ((token_value = STRING_new()) == NULL)
         {
             LogError("Failed allocating new string .");
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else
         {
             size_t token_index = 0;
             size_t request_id_length = strlen(REQUEST_ID_PROPERTY);
-            result = __LINE__;
+            result = __FAILURE__;
             while (STRING_TOKENIZER_get_next_token(token_handle, token_value, "/") == 0)
             {
                 if (token_index == 3)
@@ -595,7 +599,7 @@ static int retrieve_device_method_rid_info(const char* resp_topic, STRING_HANDLE
                     if (STRING_concat_with_STRING(method_name, token_value) != 0)
                     {
                         LogError("Failed STRING_concat_with_STRING.");
-                        result = __LINE__;
+                        result = __FAILURE__;
                         break;
                     }
                 }
@@ -609,7 +613,7 @@ static int retrieve_device_method_rid_info(const char* resp_topic, STRING_HANDLE
                             if (STRING_concat(request_id, request_id_value+request_id_length) != 0)
                             {
                                 LogError("Failed STRING_concat failed.");
-                                result = __LINE__;
+                                result = __FAILURE__;
                             }
                             else
                             {
@@ -635,7 +639,7 @@ static int parse_device_twin_topic_info(const char* resp_topic, bool* patch_msg,
     if (token_handle == NULL)
     {
         LogError("Failed creating token from device twin topic.");
-        result = __LINE__;
+        result = __FAILURE__;
         *status_code = 0;
         *request_id = 0;
         *patch_msg = false;
@@ -646,14 +650,14 @@ static int parse_device_twin_topic_info(const char* resp_topic, bool* patch_msg,
         if ((token_value = STRING_new()) == NULL)
         {
             LogError("Failed allocating new string .");
-            result = __LINE__;
+            result = __FAILURE__;
             *status_code = 0;
             *request_id = 0;
             *patch_msg = false;
         }
         else
         {
-            result = __LINE__;
+            result = __FAILURE__;
             size_t token_count = 0;
             while (STRING_TOKENIZER_get_next_token(token_handle, token_value, "/") == 0)
             {
@@ -815,27 +819,27 @@ static int publish_mqtt_telemetry_msg(PMQTTTRANSPORT_HANDLE_DATA transport_data,
     STRING_HANDLE msgTopic = addPropertiesTouMqttMessage(mqttMsgEntry->iotHubMessageEntry->messageHandle, STRING_c_str(transport_data->topic_MqttEvent));
     if (msgTopic == NULL)
     {
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else
     {
         MQTT_MESSAGE_HANDLE mqttMsg = mqttmessage_create(mqttMsgEntry->packet_id, STRING_c_str(msgTopic), DELIVER_AT_LEAST_ONCE, payload, len);
         if (mqttMsg == NULL)
         {
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else
         {
             if (tickcounter_get_current_ms(transport_data->msgTickCounter, &mqttMsgEntry->msgPublishTime) != 0)
             {
                 LogError("Failed retrieving tickcounter info");
-                result = __LINE__;
+                result = __FAILURE__;
             }
             else
             {
                 if (mqtt_client_publish(transport_data->mqttClient, mqttMsg) != 0)
                 {
-                    result = __LINE__;
+                    result = __FAILURE__;
                 }
                 else
                 {
@@ -859,7 +863,7 @@ static int publish_device_method_message(MQTTTRANSPORT_HANDLE_DATA* transport_da
     if (msg_topic == NULL)
     {
         LogError("Failed constructing message topic.");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else
     {
@@ -867,14 +871,14 @@ static int publish_device_method_message(MQTTTRANSPORT_HANDLE_DATA* transport_da
         if (mqtt_get_msg == NULL)
         {
             LogError("Failed constructing mqtt message.");
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else
         {
             if (mqtt_client_publish(transport_data->mqttClient, mqtt_get_msg) != 0)
             {
                 LogError("Failed publishing to mqtt client.");
-                result = __LINE__;
+                result = __FAILURE__;
             }
             else
             {
@@ -894,7 +898,7 @@ static int publish_device_twin_get_message(MQTTTRANSPORT_HANDLE_DATA* transport_
     if (mqtt_info == NULL)
     {
         LogError("Failed allocating device twin data.");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else
     {
@@ -910,7 +914,7 @@ static int publish_device_twin_get_message(MQTTTRANSPORT_HANDLE_DATA* transport_
         {
             LogError("Failed constructing get Prop topic.");
             free(mqtt_info);
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else
         {
@@ -919,7 +923,7 @@ static int publish_device_twin_get_message(MQTTTRANSPORT_HANDLE_DATA* transport_
             {
                 LogError("Failed constructing mqtt message.");
                 free(mqtt_info);
-                result = __LINE__;
+                result = __FAILURE__;
             }
             else
             {
@@ -927,7 +931,7 @@ static int publish_device_twin_get_message(MQTTTRANSPORT_HANDLE_DATA* transport_
                 {
                     LogError("Failed publishing to mqtt client.");
                     free(mqtt_info);
-                    result = __LINE__;
+                    result = __FAILURE__;
                 }
                 else
                 {
@@ -951,7 +955,7 @@ static int publish_device_twin_message(MQTTTRANSPORT_HANDLE_DATA* transport_data
     if (msgTopic == NULL)
     {
         LogError("Failed constructing reported prop topic.");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else
     {
@@ -960,21 +964,21 @@ static int publish_device_twin_message(MQTTTRANSPORT_HANDLE_DATA* transport_data
         if (mqtt_rpt_msg == NULL)
         {
             LogError("Failed creating mqtt message");
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else
         {
             if (tickcounter_get_current_ms(transport_data->msgTickCounter, &mqtt_info->msgPublishTime) != 0)
             {
                 LogError("Failed retrieving tickcounter info");
-                result = __LINE__;
+                result = __FAILURE__;
             }
             else
             {
                 if (mqtt_client_publish(transport_data->mqttClient, mqtt_rpt_msg) != 0)
                 {
                     LogError("Failed publishing mqtt message");
-                    result = __LINE__;
+                    result = __FAILURE__;
                 }
                 else
                 {
@@ -1012,7 +1016,7 @@ static int extractMqttProperties(IOTHUB_MESSAGE_HANDLE IoTHubMessage, const char
     if (mqttTopic == NULL)
     {
         LogError("Failure constructing string topic name.");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else
     {
@@ -1023,7 +1027,7 @@ static int extractMqttProperties(IOTHUB_MESSAGE_HANDLE IoTHubMessage, const char
             if (propertyMap == NULL)
             {
                 LogError("Failure to retrieve IoTHubMessage_properties.");
-                result = __LINE__;
+                result = __FAILURE__;
             }
             else
             {
@@ -1031,11 +1035,12 @@ static int extractMqttProperties(IOTHUB_MESSAGE_HANDLE IoTHubMessage, const char
                 if (output == NULL)
                 {
                     LogError("Failure to allocate STRING_new.");
-                    result = __LINE__;
+                    result = __FAILURE__;
                 }
                 else
                 {
                     result = 0;
+
                     while (STRING_TOKENIZER_get_next_token(token, output, PROPERTY_SEPARATOR) == 0 && result == 0)
                     {
                         const char* tokenData = STRING_c_str(output);
@@ -1046,7 +1051,7 @@ static int extractMqttProperties(IOTHUB_MESSAGE_HANDLE IoTHubMessage, const char
                         }
                         else
                         {
-                            if (!isSystemProperty(tokenData) )
+                            if (isSystemProperty(tokenData))
                             {
                                 const char* iterator = tokenData;
                                 while (iterator != NULL && *iterator != '\0' && result == 0)
@@ -1061,7 +1066,61 @@ static int extractMqttProperties(IOTHUB_MESSAGE_HANDLE IoTHubMessage, const char
 
                                         if (propName == NULL || propValue == NULL)
                                         {
-                                            result = __LINE__;
+                                            result = __FAILURE__;
+                                        }
+                                        else
+                                        {
+                                            strncpy(propName, tokenData, nameLen);
+                                            propName[nameLen] = '\0';
+
+                                            strncpy(propValue, iterator + 1, valLen);
+                                            propValue[valLen] = '\0';
+
+                                            if (nameLen > 3)
+                                            {
+                                                if (strcmp((const char*)&propName[nameLen - 3], MESSAGE_ID_PROPERTY) == 0)
+                                                {
+                                                    if (IoTHubMessage_SetMessageId(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
+                                                    {
+                                                        LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'messageId' property.");
+                                                        result = __FAILURE__;
+                                                    }
+                                                }
+
+                                                if (strcmp((const char*)&propName[nameLen - 3], CORRELATION_ID_PROPERTY) == 0)
+                                                {
+                                                    if (IoTHubMessage_SetCorrelationId(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
+                                                    {
+                                                        LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'correlationId' property.");
+                                                        result = __FAILURE__;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        free(propName);
+                                        free(propValue);
+
+                                        break;
+                                    }
+                                    iterator++;
+                                }
+                            }
+                            else
+                            {
+                                const char* iterator = tokenData;
+                                while (iterator != NULL && *iterator != '\0' && result == 0)
+                                {
+                                    if (*iterator == '=')
+                                    {
+                                        size_t nameLen = iterator - tokenData;
+                                        char* propName = malloc(nameLen + 1);
+
+                                        size_t valLen = tokenLen - (nameLen + 1) + 1;
+                                        char* propValue = malloc(valLen + 1);
+
+                                        if (propName == NULL || propValue == NULL)
+                                        {
+                                            result = __FAILURE__;
                                         }
                                         else
                                         {
@@ -1074,7 +1133,7 @@ static int extractMqttProperties(IOTHUB_MESSAGE_HANDLE IoTHubMessage, const char
                                             if (Map_AddOrUpdate(propertyMap, propName, propValue) != MAP_OK)
                                             {
                                                 LogError("Map_AddOrUpdate failed.");
-                                                result = __LINE__;
+                                                result = __FAILURE__;
                                             }
                                         }
                                         free(propName);
@@ -1095,7 +1154,7 @@ static int extractMqttProperties(IOTHUB_MESSAGE_HANDLE IoTHubMessage, const char
         else
         {
             LogError("Unable to create Tokenizer object.");
-            result = __LINE__;
+            result = __FAILURE__;
         }
         STRING_delete(mqttTopic);
     }
@@ -1533,7 +1592,7 @@ static int GetTransportProviderIfNecessary(PMQTTTRANSPORT_HANDLE_DATA transport_
         if (transport_data->xioTransport == NULL)
         {
             LogError("Unable to create the lower level TLS layer.");
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else
         {
@@ -1555,7 +1614,7 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
     STRING_HANDLE emptyKeyName = STRING_new();
     if (emptyKeyName == NULL)
     {
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else
     {
@@ -1570,7 +1629,7 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             {
                 IoTHubClient_LL_ConnectionStatusCallBack(transport_data->llClientHandle, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_EXPIRED_SAS_TOKEN);
                 STRING_delete(sasToken);
-                result = __LINE__;
+                result = __FAILURE__;
             }
             break;
         case DEVICE_KEY:
@@ -1609,7 +1668,7 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 if (mqtt_client_connect(transport_data->mqttClient, transport_data->xioTransport, &options) != 0)
                 {
                     LogError("failure connecting to address %s:%d.", STRING_c_str(transport_data->hostAddress), transport_data->portNum);
-                    result = __LINE__;
+                    result = __FAILURE__;
                 }
                 else
                 {
@@ -1619,7 +1678,7 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             }
             else
             {
-                result = __LINE__;
+                result = __FAILURE__;
             }
             
             STRING_delete(sasToken);
@@ -1643,14 +1702,14 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             if (tickcounter_get_current_ms(transport_data->msgTickCounter, &transport_data->connectTick) != 0)
             {
                 transport_data->connectFailCount++;
-                result = __LINE__;
+                result = __FAILURE__;
             }
             else
             {
                 if (SendMqttConnectMsg(transport_data) != 0)
                 {
                     transport_data->connectFailCount++;
-                    result = __LINE__;
+                    result = __FAILURE__;
                 }
                 else
                 {
@@ -1668,7 +1727,7 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             if (tickcounter_get_current_ms(transport_data->msgTickCounter, &current_time) != 0)
             {
                 transport_data->connectFailCount++;
-                result = __LINE__;
+                result = __FAILURE__;
             }
             else
             {
@@ -1717,12 +1776,12 @@ static int construct_credential_information(const IOTHUB_CLIENT_CONFIG* upperCon
         if (transport_data->transport_creds.CREDENTIAL_VALUE.deviceKey == NULL)
         {
             LogError("Could not create device key for MQTT");
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else if ((transport_data->devicesPath = STRING_construct_sprintf("%s.%s/devices/%s", upperConfig->iotHubName, upperConfig->iotHubSuffix, upperConfig->deviceId)) == NULL)
         {
             STRING_delete(transport_data->transport_creds.CREDENTIAL_VALUE.deviceKey);
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else
         {
@@ -1735,7 +1794,7 @@ static int construct_credential_information(const IOTHUB_CLIENT_CONFIG* upperCon
         transport_data->transport_creds.CREDENTIAL_VALUE.deviceSasToken = STRING_construct(upperConfig->deviceSasToken);
         if (transport_data->transport_creds.CREDENTIAL_VALUE.deviceSasToken == NULL)
         {
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else
         {
@@ -2048,7 +2107,7 @@ int IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle
     {
         /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_042: [If the parameter handle is NULL than IoTHubTransport_MQTT_Common_Subscribe shall return a non-zero value.] */
         LogError("Invalid handle parameter. NULL.");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else
     {
@@ -2060,7 +2119,7 @@ int IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle
             {
                 /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_046: [Upon failure IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin shall return a non-zero value.] */
                 LogError("Failure: unable constructing reported state topic");
-                result = __LINE__;
+                result = __FAILURE__;
             }
             else
             {
@@ -2080,7 +2139,7 @@ int IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle
             if (transport_data->topic_NotifyState == NULL)
             {
                 LogError("Failure: unable constructing notify state topic");
-                result = __LINE__;
+                result = __FAILURE__;
             }
             else
             {
@@ -2139,7 +2198,7 @@ int IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE hand
     {
         /*Codes_SRS_IOTHUB_MQTT_TRANSPORT_12_001 : [If the parameter handle is NULL than IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod shall return a non - zero value.]*/
         LogError("Invalid handle parameter. NULL.");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else
     {
@@ -2151,7 +2210,7 @@ int IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE hand
             {
                 /*Codes_SRS_IOTHUB_MQTT_TRANSPORT_12_006 : [Upon failure IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod shall return a non - zero value.]*/
                 LogError("Failure: unable constructing device method subscribe topic");
-                result = __LINE__;
+                result = __FAILURE__;
             }
             else
             {
@@ -2224,7 +2283,7 @@ int IoTHubTransport_MQTT_Common_DeviceMethod_Response(IOTHUB_DEVICE_HANDLE handl
         if (dev_method_info == NULL)
         {
             LogError("Failure: DEVICE_METHOD_INFO was NULL");
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else
         {
@@ -2232,7 +2291,7 @@ int IoTHubTransport_MQTT_Common_DeviceMethod_Response(IOTHUB_DEVICE_HANDLE handl
             {
                 /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_051: [ If any error is encountered, IoTHubTransport_MQTT_Common_DeviceMethod_Response shall return a non-zero value. ] */
                 LogError("Failure: publishing device method response");
-                result = __LINE__;
+                result = __FAILURE__;
             }
             else
             {
@@ -2245,7 +2304,7 @@ int IoTHubTransport_MQTT_Common_DeviceMethod_Response(IOTHUB_DEVICE_HANDLE handl
     else
     {
         /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_041: [ If the parameter handle is NULL than IoTHubTransport_MQTT_Common_DeviceMethod_Response shall return a non-zero value. ] */
-        result = __LINE__;
+        result = __FAILURE__;
         LogError("Failure: invalid IOTHUB_DEVICE_HANDLE parameter specified");
     }
     return result;
@@ -2259,7 +2318,7 @@ int IoTHubTransport_MQTT_Common_Subscribe(IOTHUB_DEVICE_HANDLE handle)
     {
         /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_015: [If parameter handle is NULL than IoTHubTransport_MQTT_Common_Subscribe shall return a non-zero value.] */
         LogError("Invalid handle parameter. NULL.");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else
     {
@@ -2268,7 +2327,7 @@ int IoTHubTransport_MQTT_Common_Subscribe(IOTHUB_DEVICE_HANDLE handle)
         if (transport_data->topic_MqttMessage == NULL)
         {
             LogError("Failure constructing Message Topic");
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else
         {

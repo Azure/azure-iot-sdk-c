@@ -29,6 +29,7 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 }
 
 #include "testrunnerswitcher.h"
+#include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/macro_utils.h"
 #include "umock_c.h"
 #include "umock_c_negative_tests.h"
@@ -375,7 +376,7 @@ int my_STRING_TOKENIZER_get_next_token(STRING_TOKENIZER_HANDLE t, STRING_HANDLE 
     }
     else
     {
-        result = __LINE__;
+        result = __FAILURE__;
     }
     return result;
 }
@@ -527,7 +528,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_realloc, NULL);
 
     REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, my_mallocAndStrcpy_s);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, __LINE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, __FAILURE__);
 
     REGISTER_GLOBAL_MOCK_HOOK(STRING_new, my_STRING_new);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_new, NULL);
@@ -538,7 +539,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(STRING_c_str, my_STRING_c_str);
     
     REGISTER_GLOBAL_MOCK_RETURN(STRING_concat, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat, __LINE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat, __FAILURE__);
 
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_LL_MessageCallback, true);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat, IOTHUBMESSAGE_REJECTED);
@@ -548,7 +549,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_SendComplete, my_IoTHubClient_LL_SendComplete);
 
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_DeviceMethodComplete, my_IoTHubClient_LL_DeviceMethodComplete);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_LL_DeviceMethodComplete, __LINE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_LL_DeviceMethodComplete, __FAILURE__);
 
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubMessage_GetContentType, my_IoTHubMessage_GetContentType);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_GetContentType, IOTHUBMESSAGE_UNKNOWN);
@@ -583,21 +584,21 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_init, NULL);
 
     REGISTER_GLOBAL_MOCK_RETURN(mqtt_client_connect, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_connect, __LINE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_connect, __FAILURE__);
 
     REGISTER_GLOBAL_MOCK_HOOK(mqtt_client_deinit, my_mqtt_client_deinit);
 
     REGISTER_GLOBAL_MOCK_RETURN(mqtt_client_disconnect, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_disconnect, __LINE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_disconnect, __FAILURE__);
 
     REGISTER_GLOBAL_MOCK_RETURN(mqtt_client_subscribe, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_subscribe, __LINE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_subscribe, __FAILURE__);
 
     REGISTER_GLOBAL_MOCK_RETURN(mqtt_client_unsubscribe, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_unsubscribe, __LINE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_unsubscribe, __FAILURE__);
 
     REGISTER_GLOBAL_MOCK_RETURN(mqtt_client_publish, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_publish, __LINE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_publish, __FAILURE__);
 
     REGISTER_GLOBAL_MOCK_HOOK(mqtt_client_dowork, my_mqtt_client_dowork);
 
@@ -617,7 +618,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_TOKENIZER_create_from_char, NULL);
 
     REGISTER_GLOBAL_MOCK_HOOK(STRING_TOKENIZER_get_next_token, my_STRING_TOKENIZER_get_next_token);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_TOKENIZER_get_next_token, __LINE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_TOKENIZER_get_next_token, __FAILURE__);
 
     REGISTER_GLOBAL_MOCK_HOOK(STRING_TOKENIZER_destroy, my_STRING_TOKENIZER_destroy);
     
@@ -631,10 +632,10 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(xio_create, my_xio_create);
 
     REGISTER_GLOBAL_MOCK_RETURN(xio_close, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(xio_close, __LINE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(xio_close, __FAILURE__);
 
     REGISTER_GLOBAL_MOCK_RETURN(xio_setoption, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(xio_setoption, __LINE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(xio_setoption, __FAILURE__);
 
     REGISTER_GLOBAL_MOCK_HOOK(xio_destroy, my_xio_destroy);
 
@@ -644,7 +645,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(tickcounter_destroy, my_tickcounter_destroy);
 
     REGISTER_GLOBAL_MOCK_HOOK(tickcounter_get_current_ms, my_tickcounter_get_current_ms);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(tickcounter_get_current_ms, __LINE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(tickcounter_get_current_ms, __FAILURE__);
 
     REGISTER_GLOBAL_MOCK_HOOK(CONSTBUFFER_Create, real_CONSTBUFFER_Create);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(CONSTBUFFER_Create, NULL);
@@ -699,7 +700,7 @@ static int should_skip_index(size_t current_index, const size_t skip_array[], si
     {
         if (current_index == skip_array[index])
         {
-            result = __LINE__;
+            result = __FAILURE__;
             break;
         }
     }
@@ -2204,7 +2205,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_fails_when_xio_setoption_fai
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
     STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, SOME_OPTION, SOME_VALUE))
         .IgnoreArgument(1)
-        .SetReturn(__LINE__);
+        .SetReturn(__FAILURE__);
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, SOME_OPTION, SOME_VALUE);
@@ -3909,6 +3910,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_sys_Properties_succee
     EXPECTED_CALL(STRING_TOKENIZER_create(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MSG_BYTEARRAY));
     STRICT_EXPECTED_CALL(STRING_new());
+
     STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&"))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
@@ -3916,6 +3918,16 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_sys_Properties_succee
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .SetReturn("iothub-ack=Full");
+
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
     STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&"))
         .IgnoreArgument(1)
         .IgnoreArgument(2)

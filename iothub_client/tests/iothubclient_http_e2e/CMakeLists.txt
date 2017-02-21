@@ -25,10 +25,12 @@ set(${theseTestsName}_c_files
 set(${theseTestsName}_h_files
 )
 
+include_directories(../common_e2e)
 include_directories(${IOTHUB_TEST_INC_FOLDER})
 include_directories(${IOTHUB_SERVICE_CLIENT_INC_FOLDER})
 
-build_test_artifacts(${theseTestsName} ON)
+file(COPY suppressions.supp DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+build_test_artifacts(${theseTestsName} ON VALGRIND_SUPPRESSIONS_FILE suppressions.supp)
 
 if(WIN32)
 	if(TARGET ${theseTestsName}_dll)
@@ -67,7 +69,19 @@ if(WIN32)
         )
 	endif()
 else()
-	if(TARGET ${theseTestsName}_exe)
+    if(UNIX) #LINUX OR APPLE
+        find_package(PkgConfig REQUIRED)
+        pkg_search_module(UUID REQUIRED uuid)
+        link_directories(${UUID_LIBRARY_DIRS})
+    endif()	
+    
+    if(APPLE)
+	target_link_libraries(${theseTestsName}_exe -L${UUID_LIBRARY_DIRS} pthread ${UUID_LIBRARIES})
+    elseif(LINUX)
+        target_link_libraries(${theseTestsName}_exe pthread ${UUID_LIBRARIES})
+    endif()
+
+    if(TARGET ${theseTestsName}_exe)
 		target_link_libraries(${theseTestsName}_exe
 			iothub_test
 			iothub_client
@@ -76,8 +90,7 @@ else()
 			aziotsharedutil
 			iothub_client_http_transport
 		)
-		target_link_libraries(${theseTestsName}_exe pthread uuid)
-		linkUAMQP(${theseTestsName}_exe)	
+		linkUAMQP(${theseTestsName}_exe)
 		linkHttp(${theseTestsName}_exe)
 	endif()
 endif()

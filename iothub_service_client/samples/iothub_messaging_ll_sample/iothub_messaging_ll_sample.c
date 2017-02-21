@@ -139,14 +139,49 @@ void iothub_messaging_ll_sample_run(void)
                             }
                             else
                             {
-                                iotHubMessagingResult = IoTHubMessaging_LL_Send(iotHubMessagingHandle, deviceId, messageHandle, sendCompleteCallback, NULL);
-                                if (iotHubMessagingResult != IOTHUB_MESSAGING_OK)
+                                IOTHUB_MESSAGE_RESULT iotHubMessageResult;
+                                const char* MSG_ID = "Sample_MessageId";
+                                const char* MSG_CORRELATION_ID = "Sample_MessageCorrelationId";
+                                const char* MSG_PROP_KEYS[3] = { "Sample_Key1", "Sample_Key2", "Sample_Key3" };
+                                const char* MSG_PROP_VALS[3] = { "Sample_Val1", "Sample_Val2", "Sample_Val3" };
+
+                                iotHubMessageResult = IoTHubMessage_SetMessageId(messageHandle, MSG_ID);
+                                if (iotHubMessageResult != IOTHUB_MESSAGE_OK)
                                 {
-                                    (void)printf("IoTHubMessaging_LL_Send failed\n");
+                                    (void)printf("IoTHubMessage_SetMessageId failed. Exiting...\n");
+                                    IoTHubMessage_Destroy(messageHandle);
+                                    break;
                                 }
                                 else
                                 {
-                                    (void)printf("IoTHubMessaging_LL_Send accepted data for transmission to IoT Hub.\r\n");
+                                    iotHubMessageResult = IoTHubMessage_SetCorrelationId(messageHandle, MSG_CORRELATION_ID);
+                                    if (iotHubMessageResult != IOTHUB_MESSAGE_OK)
+                                    {
+                                        (void)printf("IoTHubMessage_SetCorrelationId failed. Exiting...\n");
+                                        IoTHubMessage_Destroy(messageHandle);
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        MAP_HANDLE mapHandle = IoTHubMessage_Properties(messageHandle);
+                                        for (size_t j = 0; j < 3; j++)
+                                        {
+                                            if (Map_AddOrUpdate(mapHandle, MSG_PROP_KEYS[j], MSG_PROP_VALS[j]) != MAP_OK)
+                                            {
+                                                (void)printf("ERROR: Map_AddOrUpdate failed for property %zu!\r\n", j);
+                                            }
+                                        }
+
+                                        iotHubMessagingResult = IoTHubMessaging_LL_Send(iotHubMessagingHandle, deviceId, messageHandle, sendCompleteCallback, NULL);
+                                        if (iotHubMessagingResult != IOTHUB_MESSAGING_OK)
+                                        {
+                                            (void)printf("IoTHubMessaging_LL_Send failed\n");
+                                        }
+                                        else
+                                        {
+                                            (void)printf("IoTHubMessaging_LL_Send accepted data for transmission to IoT Hub.\r\n");
+                                        }
+                                    }
                                 }
                             }
                             IoTHubMessage_Destroy(messageHandle);

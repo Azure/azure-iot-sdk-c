@@ -13,6 +13,7 @@
 #include <string.h>
 #endif
 
+#include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/string_tokenizer.h"
 #include "iothub_account.h"
 
@@ -35,7 +36,8 @@
 
 static const char* URL_API_VERSION = "api-version=2016-11-14";
 static const char* DEVICE_JSON_FMT = "{\"deviceId\":\"%s\",\"etag\":null,\"connectionState\":\"Disconnected\",\"status\":\"enabled\",\"statusReason\":null,\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"lastActivityTime\":\"0001-01-01T00:00:00\",\"authentication\":{\"symmetricKey\":{\"primaryKey\":null,\"secondaryKey\":null}}}";
-static const char* DEVICE_PREFIX_FMT = "e2eDevice_%s";
+static const char* SAS_DEVICE_PREFIX_FMT = "csdk_e2eDevice_sas_j_please_delete_%s";
+static const char* X509_DEVICE_PREFIX_FMT = "csdk_e2eDevice_x509_j_please_delete_%s";
 static const char* RELATIVE_PATH_FMT = "/devices/%s?%s";
 static const char* SHARED_ACCESS_KEY = "SharedAccessSignature sr=%s&sig=%s&se=%s&skn=%s";
 
@@ -45,10 +47,13 @@ static const int DEFAULT_PARTITION_COUNT = 16;
 static const char* PRIMARY_KEY_FIELD = "\"primaryKey\":\"";
 static const size_t PRIMARY_KEY_FIELD_LEN = 14;
 
+
+
 #define MAX_LENGTH_OF_UNSIGNED_INT  6
 #define MAX_LENGTH_OF_TIME_VALUE    12
 #define MAX_RAND_VALUE              10000
 #define DEVICE_GUID_SIZE            37
+
 
 typedef struct IOTHUB_ACCOUNT_INFO_TAG
 {
@@ -61,8 +66,11 @@ typedef struct IOTHUB_ACCOUNT_INFO_TAG
     char* sharedAccessToken;
     char* keyName;
     char* eventhubAccessKey;
-    char* deviceId;
-    char* deviceKey;
+    char* x509Certificate;
+    char* x509PrivateKey;
+    char* x509Thumbprint;
+    IOTHUB_PROVISIONED_DEVICE sasDevice;
+    IOTHUB_PROVISIONED_DEVICE x509Device;
     IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iothub_service_client_auth_handle;
     IOTHUB_REGISTRYMANAGER_HANDLE iothub_registrymanager_handle;
     IOTHUB_MESSAGING_HANDLE iothub_messaging_handle;
@@ -98,35 +106,35 @@ static HTTP_HEADERS_HANDLE getContentHeaders(bool appendIfMatch)
     return httpHeader;
 }
 
-static int generateDeviceName(IOTHUB_ACCOUNT_INFO* accountInfo)
+static int generateDeviceName(const char* prefix, char** deviceName)
 {
     int result;
     char deviceGuid[DEVICE_GUID_SIZE];
     if (UniqueId_Generate(deviceGuid, DEVICE_GUID_SIZE) != UNIQUEID_OK)
     {
         LogError("Unable to generate unique Id.\r\n");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else
     {
-        size_t len = strlen(DEVICE_PREFIX_FMT) + DEVICE_GUID_SIZE;
-        accountInfo->deviceId = (char*)malloc(len + 1);
-        if (accountInfo->deviceId == NULL)
+        size_t len = strlen(prefix) + DEVICE_GUID_SIZE;
+        *deviceName = (char*)malloc(len + 1);
+        if (*deviceName == NULL)
         {
             LogError("Failure allocating device ID.\r\n");
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else
         {
-            if (sprintf_s(accountInfo->deviceId, len + 1, DEVICE_PREFIX_FMT, deviceGuid) <= 0)
+            if (sprintf_s(*deviceName, len + 1, prefix, deviceGuid) <= 0)
             {
                 LogError("Failure constructing device ID.\r\n");
-                free(accountInfo->deviceId);
-                result = __LINE__;
+                free(*deviceName);
+                result = __FAILURE__;
             }
             else
             {
-                LogInfo("Created Device %s.", accountInfo->deviceId);
+                LogInfo("Created Device %s.", *deviceName);
                 result = 0;
             }
         }
@@ -143,27 +151,27 @@ static int retrieveConnStringInfo(IOTHUB_ACCOUNT_INFO* accountInfo)
     if (sscanf(accountInfo->connString, "HostName=%n%*[^.]%n.%n%*[^;];%nSharedAccessKeyName=%n%*[^;];%nSharedAccessKey=%n", &beginHost, &endHost, &beginIothub, &endIothub, &beginName, &endName, &beginKey) != 0)
     {
         LogError("Failure determining the string length parameters.\r\n");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else
     {
         if ((accountInfo->iothubName = (char*)malloc(endHost - beginHost + 1)) == NULL)
         {
             LogError("Failure allocating iothubName.\r\n");
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else if ((accountInfo->hostname = (char*)malloc(endIothub - beginHost + 1)) == NULL)
         {
             LogError("Failure allocating hostname.\r\n");
             free(accountInfo->iothubName);
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else if ((accountInfo->keyName = (char*)malloc(endName - beginName + 1)) == NULL)
         {
             LogError("Failure allocating hostName.\r\n");
             free(accountInfo->iothubName);
             free(accountInfo->hostname);
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else if ((accountInfo->sharedAccessKey = (char*)malloc(totalLen + 1 - beginKey + 1)) == NULL)
         {
@@ -171,7 +179,7 @@ static int retrieveConnStringInfo(IOTHUB_ACCOUNT_INFO* accountInfo)
             free(accountInfo->iothubName);
             free(accountInfo->keyName);
             free(accountInfo->hostname);
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else if (sscanf(accountInfo->connString, "HostName=%[^.].%[^;];SharedAccessKeyName=%[^;];SharedAccessKey=%s", accountInfo->iothubName,
             accountInfo->hostname + endHost - beginHost + 1,
@@ -183,7 +191,7 @@ static int retrieveConnStringInfo(IOTHUB_ACCOUNT_INFO* accountInfo)
             free(accountInfo->hostname);
             free(accountInfo->keyName);
             free(accountInfo->sharedAccessKey);
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else
         {
@@ -191,12 +199,12 @@ static int retrieveConnStringInfo(IOTHUB_ACCOUNT_INFO* accountInfo)
             accountInfo->hostname[endHost - beginHost] = '.';
             if (mallocAndStrcpy_s(&accountInfo->iothubSuffix, accountInfo->hostname + endHost - beginHost + 1) != 0)
             {
-				LogError("[IoTHubAccount] Failure constructing the iothubSuffix.");
+                LogError("[IoTHubAccount] Failure constructing the iothubSuffix.");
                 free(accountInfo->iothubName);
                 free(accountInfo->hostname);
                 free(accountInfo->keyName);
                 free(accountInfo->sharedAccessKey);
-                result = __LINE__;
+                result = __FAILURE__;
             }
             else
             {
@@ -210,49 +218,324 @@ static int retrieveConnStringInfo(IOTHUB_ACCOUNT_INFO* accountInfo)
 #ifdef MBED_BUILD_TIMESTAMP
 static const char* getMbedParameter(const char* name)
 {
-	static char value[MBED_PARAM_MAX_LENGTH];
-	(void)printf("%s?\r\n", name);
-	(void)scanf("%s", &value);
-	(void)printf("Received '%s'\r\n", value);				
+    static char value[MBED_PARAM_MAX_LENGTH];
+    (void)printf("%s?\r\n", name);
+    (void)scanf("%s", &value);
+    (void)printf("Received '%s'\r\n", value);
 
-    return value;	
+    return value;
 }
 #endif
+#define CONN_HOST_PART "HostName="
+#define CONN_DEVICE_PART ";DeviceId="
+#define CONN_KEY_PART ";SharedAccessKey="
+#define CONN_X509_PART ";x509=true"
 
-IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init(bool createDevice)
+static int createSASConnectionString(IOTHUB_ACCOUNT_INFO* accountInfo, char** connectionString) {
+
+    int result;
+    char* conn;
+    size_t sizeOfHostPart = strlen(CONN_HOST_PART);
+
+    size_t sizeOfDevicePart = strlen(CONN_DEVICE_PART);
+
+    size_t sizeOfKeyPart = strlen(CONN_KEY_PART);
+
+    size_t sizeOfHostName = strlen(accountInfo->hostname);
+    size_t sizeOfDeviceId = strlen(accountInfo->sasDevice.deviceId);
+    size_t sizeOfDeviceKey = strlen(accountInfo->sasDevice.primaryAuthentication);
+
+    size_t connectionStringLength = sizeOfHostPart + sizeOfDevicePart + sizeOfKeyPart + sizeOfHostName + sizeOfDeviceId + sizeOfDeviceKey + 1;
+
+    conn = (char*)malloc(connectionStringLength);
+    if (conn == NULL) {
+        LogError("Failed to allocate space for the SAS based connection string\r\n");
+        result = __FAILURE__;
+    }
+    else if (sprintf_s(conn, connectionStringLength,"%s%s%s%s%s%s", CONN_HOST_PART, accountInfo->hostname, CONN_DEVICE_PART, (char*)accountInfo->sasDevice.deviceId, CONN_KEY_PART, (char*)accountInfo->sasDevice.primaryAuthentication) <= 0) {
+            LogError("Failed to form the connection string for SAS based connection string.\r\n");
+            free(conn);
+            result = __FAILURE__;
+    }
+    else
+    {
+        *connectionString = conn;
+        result = 0;
+    }
+    return result;
+
+}
+
+static int createX509ConnectionString(IOTHUB_ACCOUNT_INFO* accountInfo, char** connectionString) {
+
+    int result;
+    char* conn;
+
+    size_t sizeOfHostPart = strlen(CONN_HOST_PART);
+    size_t sizeOfDevicePart = strlen(CONN_DEVICE_PART);
+    size_t sizeOfX509Part = strlen(CONN_X509_PART);
+
+    size_t sizeOfHostName = strlen(accountInfo->hostname);
+    size_t sizeOfDeviceId = strlen(accountInfo->x509Device.deviceId);
+
+    size_t connectionStringLength = sizeOfHostPart + sizeOfDevicePart + sizeOfX509Part + sizeOfHostName + sizeOfDeviceId + 1;
+
+    conn = (char*)malloc(connectionStringLength);
+    if (conn == NULL) {
+        LogError("Failed to allocate space for the SAS based connection string\r\n");
+        result = __FAILURE__;
+    }
+    else if (sprintf_s(conn, connectionStringLength, "%s%s%s%s%s", CONN_HOST_PART, accountInfo->hostname, CONN_DEVICE_PART, (char*)accountInfo->x509Device.deviceId, CONN_X509_PART) <=0) {
+        LogError("Failed to form the connection string for x509 based connection string.\r\n");
+        result = __FAILURE__;
+        free(conn);
+    }
+    else
+    {
+        *connectionString = conn;
+        result = 0;
+    }
+    return result;
+}
+
+static int provisionDevice(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_ACCOUNT_AUTH_METTHOD method) {
+
+    int result;
+    char* deviceId = NULL;
+
+    if (generateDeviceName(method == IOTHUB_ACCOUNT_AUTH_CONNSTRING ?(SAS_DEVICE_PREFIX_FMT):(X509_DEVICE_PREFIX_FMT), &deviceId) != 0)
+    {
+        LogError("generateDeviceName failed\r\n");
+        result = __FAILURE__;
+    }
+    else
+    {
+
+        IOTHUB_PROVISIONED_DEVICE* deviceToProvision;
+        IOTHUB_REGISTRYMANAGER_RESULT iothub_registrymanager_result;
+        IOTHUB_REGISTRY_DEVICE_CREATE deviceCreateInfo;
+        IOTHUB_DEVICE deviceInfo;
+        deviceInfo.deviceId = NULL;
+        deviceInfo.primaryKey = NULL;
+        deviceInfo.secondaryKey = NULL;
+        deviceInfo.generationId = NULL;
+        deviceInfo.eTag = NULL;
+        deviceInfo.connectionStateUpdatedTime = NULL;
+        deviceInfo.statusReason = NULL;
+        deviceInfo.statusUpdatedTime = NULL;
+        deviceInfo.lastActivityTime = NULL;
+        deviceInfo.configuration = NULL;
+        deviceInfo.deviceProperties = NULL;
+        deviceInfo.serviceProperties = NULL;
+
+        deviceCreateInfo.deviceId = deviceId;
+        if (method == IOTHUB_ACCOUNT_AUTH_CONNSTRING)
+        {
+            deviceToProvision = &accountInfo->sasDevice;
+            deviceToProvision->howToCreate = IOTHUB_ACCOUNT_AUTH_CONNSTRING;
+            deviceCreateInfo.primaryKey = "";
+            deviceCreateInfo.secondaryKey = "";
+            deviceCreateInfo.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
+        }
+        else
+        {
+            deviceToProvision = &accountInfo->x509Device;
+            deviceToProvision->howToCreate = IOTHUB_ACCOUNT_AUTH_X509;
+            deviceCreateInfo.primaryKey = accountInfo->x509Thumbprint;
+            deviceCreateInfo.secondaryKey = "";
+            deviceCreateInfo.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT;
+        }
+
+        iothub_registrymanager_result = IoTHubRegistryManager_CreateDevice(accountInfo->iothub_registrymanager_handle, &deviceCreateInfo, &deviceInfo);
+        if (iothub_registrymanager_result != IOTHUB_REGISTRYMANAGER_OK)
+        {
+            LogError("IoTHubRegistryManager_CreateDevice failed\r\n");
+            free(deviceId);
+            result = __FAILURE__;
+        }
+        else
+        {
+            deviceToProvision->deviceId = deviceId;
+            if (method == IOTHUB_ACCOUNT_AUTH_CONNSTRING)
+            {
+                if (mallocAndStrcpy_s((char**)&deviceToProvision->primaryAuthentication, (char*)deviceInfo.primaryKey) != 0)
+                {
+                    LogError("mallocAndStrcpy_s failed for primaryKey\r\n");
+                    result = __FAILURE__;
+
+                }
+                else
+                {
+                    if (createSASConnectionString(accountInfo, &deviceToProvision->connectionString) != 0)
+                    {
+                        result = __FAILURE__;
+                    }
+                    else
+                    {
+                        result = 0;
+                    }
+                }
+            }
+            else
+            {
+                if (createX509ConnectionString(accountInfo, &deviceToProvision->connectionString) != 0)
+                {
+                    result = __FAILURE__;
+                }
+                else
+                {
+                    deviceToProvision->certificate = accountInfo->x509Certificate;
+                    deviceToProvision->primaryAuthentication = accountInfo->x509PrivateKey;
+                    result = 0;
+                }
+            }
+        }
+
+        if (deviceInfo.deviceId != NULL)
+            free((char*)deviceInfo.deviceId);
+        if (deviceInfo.primaryKey != NULL)
+            free((char*)deviceInfo.primaryKey);
+        if (deviceInfo.secondaryKey != NULL)
+            free((char*)deviceInfo.secondaryKey);
+        if (deviceInfo.generationId != NULL)
+            free((char*)deviceInfo.generationId);
+        if (deviceInfo.eTag != NULL)
+            free((char*)deviceInfo.eTag);
+        if (deviceInfo.connectionStateUpdatedTime != NULL)
+            free((char*)deviceInfo.connectionStateUpdatedTime);
+        if (deviceInfo.statusReason != NULL)
+            free((char*)deviceInfo.statusReason);
+        if (deviceInfo.statusUpdatedTime != NULL)
+            free((char*)deviceInfo.statusUpdatedTime);
+        if (deviceInfo.lastActivityTime != NULL)
+            free((char*)deviceInfo.lastActivityTime);
+        if (deviceInfo.configuration != NULL)
+            free((char*)deviceInfo.configuration);
+        if (deviceInfo.deviceProperties != NULL)
+            free((char*)deviceInfo.deviceProperties);
+        if (deviceInfo.serviceProperties != NULL)
+            free((char*)deviceInfo.serviceProperties);
+    }
+
+    return result;
+}
+
+static void munge(char* mungee, const char* beginningString, const char* endingString)
+{
+    char* shouldBeSameAsMungee;
+    char* endOfMungee;
+    char* currentChar;
+    shouldBeSameAsMungee = strstr(mungee, beginningString);
+    if (shouldBeSameAsMungee == mungee)
+    {
+        // Yay, starting right.
+        endOfMungee = strstr(mungee, endingString);
+        if (endOfMungee != NULL)
+        {
+            // Yay, ending string found,  wont try to go past.
+            currentChar = mungee + strlen(beginningString);
+            while (currentChar != endOfMungee)
+            {
+                if (*currentChar == ' ') *currentChar = '\n';
+                currentChar++;
+            }
+        }
+    }
+}
+IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init(void)
 {
     IOTHUB_ACCOUNT_INFO* iothub_account_info = malloc(sizeof(IOTHUB_ACCOUNT_INFO));
-	if (iothub_account_info == NULL)
-	{
-		LogError("[IoTHubAccount] Failed allocating IOTHUB_ACCOUNT_INFO.");
-	}
-	else
-	{
+    if (iothub_account_info == NULL)
+    {
+        LogError("[IoTHubAccount] Failed allocating IOTHUB_ACCOUNT_INFO.");
+    }
+    else
+    {
+        char* tempCert;
+        char* tempKey;
+        char* tempThumb;
         memset(iothub_account_info, 0, sizeof(IOTHUB_ACCOUNT_INFO));
-		
+
 #ifdef MBED_BUILD_TIMESTAMP
-		iothub_account_info->connString = getMbedParameter("IOTHUB_CONNECTION_STRING");
-		iothub_account_info->eventhubConnString = getMbedParameter("IOTHUB_EVENTHUB_CONNECTION_STRING");
+        iothub_account_info->connString = getMbedParameter("IOTHUB_CONNECTION_STRING");
+        iothub_account_info->eventhubConnString = getMbedParameter("IOTHUB_EVENTHUB_CONNECTION_STRING");
+        tempCert = getMbedParameter("IOTHUB_E2E_X509_CERT");
+        tempKey = getMbedParameter("IOTHUB_E2E_X509_PRIVATE_KEY");
+        tempThump = getMbedParameter("IOTHUB_E2E_X509_THUMBPRINT");
 #else
         iothub_account_info->connString = getenv("IOTHUB_CONNECTION_STRING");
         iothub_account_info->eventhubConnString = getenv("IOTHUB_EVENTHUB_CONNECTION_STRING");
+        tempCert = getenv("IOTHUB_E2E_X509_CERT");
+        tempKey = getenv("IOTHUB_E2E_X509_PRIVATE_KEY");
+        tempThumb = getenv("IOTHUB_E2E_X509_THUMBPRINT");
 #endif
-		
-        if (iothub_account_info->connString == NULL || iothub_account_info->eventhubConnString == NULL)
+
+        if (iothub_account_info->connString == NULL)
         {
-            LogError("Failure retrieving Connection Strings values.\r\n");
+            LogError("Failure retrieving IoT Hub connection string from the environment.\r\n");
+            free(iothub_account_info);
+            iothub_account_info = NULL;
+        }
+        else if (iothub_account_info->eventhubConnString == NULL)
+        {
+            LogError("Failure retrieving Event Hub connection string from the environment.\r\n");
+            free(iothub_account_info);
+            iothub_account_info = NULL;
+        }
+        else if (tempCert == NULL)
+        {
+            LogError("Failure retrieving x509 certificate from the environment.\r\n");
+            free(iothub_account_info);
+            iothub_account_info = NULL;
+        }
+        else if (tempKey == NULL)
+        {
+            LogError("Failure retrieving x509 private key from the environment.\r\n");
+            free(iothub_account_info);
+            iothub_account_info = NULL;
+        }
+        else if (tempThumb == NULL)
+        {
+            LogError("Failure retrieving x509 certificate thumbprint from the environment.\r\n");
+            free(iothub_account_info);
+            iothub_account_info = NULL;
+        }
+        else if (mallocAndStrcpy_s(&iothub_account_info->x509Certificate, tempCert) != 0)
+        {
+            LogError("Failure allocating x509 certificate from the environment.\r\n");
+            free(iothub_account_info);
+            iothub_account_info = NULL;
+        }
+        else if (mallocAndStrcpy_s(&iothub_account_info->x509PrivateKey, tempKey) != 0)
+        {
+            LogError("Failure allocating x509 key from the environment.\r\n");
+            free(iothub_account_info->x509Certificate);
+            free(iothub_account_info);
+            iothub_account_info = NULL;
+        }
+        else if (mallocAndStrcpy_s(&iothub_account_info->x509Thumbprint, tempThumb) != 0)
+        {
+            LogError("Failure allocating x509 thumb print from the environment.\r\n");
+            free(iothub_account_info->x509Certificate);
+            free(iothub_account_info->x509Thumbprint);
             free(iothub_account_info);
             iothub_account_info = NULL;
         }
         else
         {
+            //
+            // This is a rather large hack to get around Jenkins putting a space into the certs where the lf character should be.
+            // We replace any spaces in the cert (and private key) proper with lf characters.
+            //
+            munge(iothub_account_info->x509Certificate, "-----BEGIN CERTIFICATE-----", "-----END CERTIFICATE-----");
+            munge(iothub_account_info->x509PrivateKey, "-----BEGIN RSA PRIVATE KEY-----", "-----END RSA PRIVATE KEY-----");
             if (retrieveConnStringInfo(iothub_account_info) != 0)
             {
                 LogError("retrieveConnStringInfo failed.\r\n");
                 free(iothub_account_info);
                 iothub_account_info = NULL;
             }
-            else if (createDevice)
+            else
             {
                 iothub_account_info->iothub_service_client_auth_handle = IoTHubServiceClientAuth_CreateFromConnectionString(iothub_account_info->connString);
                 if (iothub_account_info->iothub_service_client_auth_handle == NULL)
@@ -267,8 +550,7 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init(bool createDevice)
                     if (iothub_account_info->iothub_messaging_handle == NULL)
                     {
                         LogError("IoTHubMessaging_LL_Create failed\r\n");
-                        IoTHubServiceClientAuth_Destroy(iothub_account_info->iothub_service_client_auth_handle);
-                        free(iothub_account_info);
+                        IoTHubAccount_deinit(iothub_account_info);
                         iothub_account_info = NULL;
                     }
                     else
@@ -277,86 +559,27 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init(bool createDevice)
                         if (iothub_account_info->iothub_registrymanager_handle == NULL)
                         {
                             LogError("IoTHubRegistryManager_Create failed\r\n");
-                            IoTHubMessaging_LL_Destroy(iothub_account_info->iothub_messaging_handle);
-                            IoTHubServiceClientAuth_Destroy(iothub_account_info->iothub_service_client_auth_handle);
-                            free(iothub_account_info);
+                            IoTHubAccount_deinit(iothub_account_info);
                             iothub_account_info = NULL;
                         }
                         else
                         {
-                            if (generateDeviceName(iothub_account_info) != 0)
+                            if (provisionDevice(iothub_account_info, IOTHUB_ACCOUNT_AUTH_CONNSTRING) != 0)
                             {
-                                LogError("generateDeviceName failed\r\n");
-                                IoTHubMessaging_LL_Destroy(iothub_account_info->iothub_messaging_handle);
-                                IoTHubRegistryManager_Destroy(iothub_account_info->iothub_registrymanager_handle);
-                                IoTHubServiceClientAuth_Destroy(iothub_account_info->iothub_service_client_auth_handle);
-                                free(iothub_account_info);
-                                iothub_account_info = NULL;
-                            }
-
-                            IOTHUB_REGISTRYMANAGER_RESULT iothub_registrymanager_result;
-                            IOTHUB_REGISTRY_DEVICE_CREATE deviceCreateInfo;
-                            IOTHUB_DEVICE deviceInfo;
-							deviceInfo.deviceId = NULL;
-							deviceInfo.primaryKey = NULL;
-							deviceInfo.secondaryKey = NULL;
-							deviceInfo.generationId = NULL;
-							deviceInfo.eTag = NULL;
-							deviceInfo.connectionStateUpdatedTime = NULL;
-							deviceInfo.statusReason = NULL;
-							deviceInfo.statusUpdatedTime = NULL;
-							deviceInfo.lastActivityTime = NULL;
-							deviceInfo.configuration = NULL;
-							deviceInfo.deviceProperties = NULL;
-							deviceInfo.serviceProperties = NULL;
-
-                            deviceCreateInfo.deviceId = iothub_account_info->deviceId;
-                            deviceCreateInfo.primaryKey = "";
-                            deviceCreateInfo.secondaryKey = "";
-                            deviceCreateInfo.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
-
-                            iothub_registrymanager_result = IoTHubRegistryManager_CreateDevice(iothub_account_info->iothub_registrymanager_handle, &deviceCreateInfo, &deviceInfo);
-                            if (iothub_registrymanager_result != IOTHUB_REGISTRYMANAGER_OK)
-                            {
-                                LogError("IoTHubRegistryManager_CreateDevice failed\r\n");
-                                IoTHubRegistryManager_Destroy(iothub_account_info->iothub_registrymanager_handle);
-                                IoTHubServiceClientAuth_Destroy(iothub_account_info->iothub_service_client_auth_handle);
-                                free(iothub_account_info->deviceId);
-                                free(iothub_account_info);
+                                LogError("Failed to create the SAS device\r\n");
+                                IoTHubAccount_deinit(iothub_account_info);
                                 iothub_account_info = NULL;
                             }
                             else
                             {
-                                if (mallocAndStrcpy_s((char**)&iothub_account_info->deviceKey, (char*)deviceInfo.primaryKey) != 0)
+                                if (provisionDevice(iothub_account_info, IOTHUB_ACCOUNT_AUTH_X509) != 0)
                                 {
-                                    LogError("mallocAndStrcpy_s failed for primaryKey\r\n");
+                                    LogError("Failed to create the SAS device\r\n");
+                                    IoTHubAccount_deinit(iothub_account_info);
+                                    iothub_account_info = NULL;
                                 }
                             }
 
-                            if (deviceInfo.deviceId != NULL)
-                                free((char*)deviceInfo.deviceId);
-                            if (deviceInfo.primaryKey != NULL)
-                                free((char*)deviceInfo.primaryKey);
-                            if(deviceInfo.secondaryKey != NULL)
-                                free((char*)deviceInfo.secondaryKey);
-                            if(deviceInfo.generationId != NULL)
-                                free((char*)deviceInfo.generationId);
-                            if(deviceInfo.eTag != NULL)
-                                free((char*)deviceInfo.eTag);
-                            if(deviceInfo.connectionStateUpdatedTime != NULL)
-                                free((char*)deviceInfo.connectionStateUpdatedTime);
-                            if(deviceInfo.statusReason != NULL)
-                                free((char*)deviceInfo.statusReason);
-                            if(deviceInfo.statusUpdatedTime != NULL)
-                                free((char*)deviceInfo.statusUpdatedTime);
-                            if(deviceInfo.lastActivityTime != NULL)
-                                free((char*)deviceInfo.lastActivityTime);
-                            if(deviceInfo.configuration != NULL)
-                                free((char*)deviceInfo.configuration);
-                            if(deviceInfo.deviceProperties != NULL)
-                                free((char*)deviceInfo.deviceProperties);
-                            if(deviceInfo.serviceProperties != NULL)
-                                free((char*)deviceInfo.serviceProperties);
                         }
                     }
                 }
@@ -373,10 +596,22 @@ void IoTHubAccount_deinit(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
         IOTHUB_ACCOUNT_INFO* acctInfo = (IOTHUB_ACCOUNT_INFO*)acctHandle;
 
         IOTHUB_REGISTRYMANAGER_RESULT iothub_registrymanager_result;
-        iothub_registrymanager_result = IoTHubRegistryManager_DeleteDevice(acctInfo->iothub_registrymanager_handle, acctInfo->deviceId);
-        if (iothub_registrymanager_result != IOTHUB_REGISTRYMANAGER_OK)
+        if (acctInfo->sasDevice.deviceId)
         {
-            LogError("IoTHubRegistryManager_DeleteDevice failed\r\n");
+            iothub_registrymanager_result = IoTHubRegistryManager_DeleteDevice(acctInfo->iothub_registrymanager_handle, acctInfo->sasDevice.deviceId);
+            if (iothub_registrymanager_result != IOTHUB_REGISTRYMANAGER_OK)
+            {
+                LogError("IoTHubRegistryManager_DeleteDevice failed for SAS Based Device\r\n");
+            }
+        }
+
+        if (acctInfo->x509Device.deviceId)
+        {
+            iothub_registrymanager_result = IoTHubRegistryManager_DeleteDevice(acctInfo->iothub_registrymanager_handle, acctInfo->x509Device.deviceId);
+            if (iothub_registrymanager_result != IOTHUB_REGISTRYMANAGER_OK)
+            {
+                LogError("IoTHubRegistryManager_DeleteDevice failed for x509 Based Device\r\n");
+            }
         }
 
         IoTHubMessaging_LL_Destroy(acctInfo->iothub_messaging_handle);
@@ -390,8 +625,14 @@ void IoTHubAccount_deinit(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
         free(acctInfo->sharedAccessToken);
         free(acctInfo->keyName);
         free(acctInfo->eventhubAccessKey);
-        free(acctInfo->deviceId);
-        free(acctInfo->deviceKey);
+        free(acctInfo->sasDevice.deviceId);
+        free(acctInfo->sasDevice.primaryAuthentication);
+        free(acctInfo->sasDevice.connectionString);
+        free(acctInfo->x509Device.deviceId);
+        free(acctInfo->x509Device.connectionString);
+        free(acctInfo->x509Certificate);
+        free(acctInfo->x509PrivateKey);
+        free(acctInfo->x509Thumbprint);
         free(acctInfo);
     }
 }
@@ -431,32 +672,33 @@ const char* IoTHubAccount_GetIoTHubSuffix(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
 
 const char* IoTHubAccount_GetEventhubListenName(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
 {
-	static char listenName[64];  
-	const char* value;
-	
+    static char listenName[64];
+    const char* value;
+
 #ifndef MBED_BUILD_TIMESTAMP
-	if ((value = getenv("IOTHUB_EVENTHUB_LISTEN_NAME")) == NULL)
+    if ((value = getenv("IOTHUB_EVENTHUB_LISTEN_NAME")) == NULL)
 #else
-	if ((value = getMbedParameter("IOTHUB_EVENTHUB_LISTEN_NAME")) == NULL)
+    if ((value = getMbedParameter("IOTHUB_EVENTHUB_LISTEN_NAME")) == NULL)
 #endif
-	{
-		value = IoTHubAccount_GetIoTHubName(acctHandle); 
-	}
+    {
+        value = IoTHubAccount_GetIoTHubName(acctHandle);
+    }
 
-	if (value != NULL &&
-		sprintf_s(listenName, 64, "%s", value) <= 0)
-	{
-		LogError("Failed reading IoT Hub Event Hub listen namespace (sprintf_s failed).");
-	}
-    
-	return listenName;
+    if (value != NULL &&
+        sprintf_s(listenName, 64, "%s", value) <= 0)
+    {
+        LogError("Failed reading IoT Hub Event Hub listen namespace (sprintf_s failed).");
+    }
+
+    return listenName;
 }
 
-const char* IoTHubAccount_GetDeviceId(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
+
+IOTHUB_PROVISIONED_DEVICE* IoTHubAccount_GetSASDevice(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
 {
     if (acctHandle != NULL)
     {
-        return ((IOTHUB_ACCOUNT_INFO*)acctHandle)->deviceId;
+        return &acctHandle->sasDevice;
     }
     else
     {
@@ -464,17 +706,18 @@ const char* IoTHubAccount_GetDeviceId(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
     }
 }
 
-const char* IoTHubAccount_GetDeviceKey(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
+IOTHUB_PROVISIONED_DEVICE* IoTHubAccount_GetX509Device(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
 {
     if (acctHandle != NULL)
     {
-        return ((IOTHUB_ACCOUNT_INFO*)acctHandle)->deviceKey;
+        return &acctHandle->x509Device;
     }
     else
     {
         return NULL;
     }
 }
+
 
 const char* IoTHubAccount_GetIoTHubConnString(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
 {
@@ -537,7 +780,7 @@ const char* IoTHubAccount_GetSharedAccessSignature(IOTHUB_ACCOUNT_INFO_HANDLE ac
     {
         result = NULL;
     }
-    return result; 
+    return result;
 }
 
 const char* IoTHubAccount_GetEventhubAccessKey(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
@@ -552,7 +795,7 @@ const char* IoTHubAccount_GetEventhubAccessKey(IOTHUB_ACCOUNT_INFO_HANDLE acctHa
         if ((iothub_connection_string_str = STRING_construct(iothub_connection_string)) != NULL)
         {
             STRING_TOKENIZER_HANDLE tokenizer;
-        
+
             if ((tokenizer = STRING_TOKENIZER_create(iothub_connection_string_str)) != NULL)
             {
                 STRING_HANDLE tokenString;
@@ -579,7 +822,7 @@ const char* IoTHubAccount_GetEventhubAccessKey(IOTHUB_ACCOUNT_INFO_HANDLE acctHa
                                 break;
                             }
                         }
-                    
+
                         STRING_delete(valueString);
                     }
 
@@ -588,10 +831,10 @@ const char* IoTHubAccount_GetEventhubAccessKey(IOTHUB_ACCOUNT_INFO_HANDLE acctHa
 
                 STRING_TOKENIZER_destroy(tokenizer);
             }
-            
+
             STRING_delete(iothub_connection_string_str);
         }
-    } 
+    }
 
     return access_key;
 }
@@ -609,7 +852,7 @@ const char* IoTHubAccount_GetEventhubConsumerGroup(IOTHUB_ACCOUNT_INFO_HANDLE ac
         strcpy(consumerGroup, envVarValue);
     }
     else
-    { 
+    {
         strcpy(consumerGroup, DEFAULT_CONSUMER_GROUP);
     }
     return consumerGroup;
@@ -621,11 +864,11 @@ const size_t IoTHubAccount_GetIoTHubPartitionCount(IOTHUB_ACCOUNT_INFO_HANDLE ac
     int value;
     (void)acctHandle;
 #ifdef MBED_BUILD_TIMESTAMP
-	char* str_value;
-	if ((str_value = getMbedParameter("IOTHUB_PARTITION_COUNT")) != NULL)
-	{
-		sscanf(str_value, "%i", &value);
-	}
+    char* str_value;
+    if ((str_value = getMbedParameter("IOTHUB_PARTITION_COUNT")) != NULL)
+    {
+        sscanf(str_value, "%i", &value);
+    }
 #else
     char *envVarValue = getenv("IOTHUB_PARTITION_COUNT");
     if (envVarValue != NULL)

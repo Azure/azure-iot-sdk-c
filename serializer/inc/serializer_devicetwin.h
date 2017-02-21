@@ -10,7 +10,8 @@
 #include "iothub_client.h"
 #include "iothub_client_ll.h"
 #include "parson.h"
-#include "vector.h"
+#include "azure_c_shared_utility/optimize_size.h"
+#include "azure_c_shared_utility/vector.h"
 #include "methodreturn.h"
 
 static void serializer_ingest(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback)
@@ -228,14 +229,14 @@ static int lazilyAddProtohandle(const SERIALIZER_DEVICETWIN_PROTOHANDLE* protoHa
     if ((g_allProtoHandles == NULL) && ((g_allProtoHandles = VECTOR_create(sizeof(SERIALIZER_DEVICETWIN_PROTOHANDLE))) == NULL))
     {
         LogError("failure in VECTOR_create");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else
     {
         if (VECTOR_push_back(g_allProtoHandles, protoHandle, 1) != 0)
         {
             LogError("failure in VECTOR_push_back");
-            result = __LINE__;
+            result = __FAILURE__;
 
             /*leave it as it was*/
 

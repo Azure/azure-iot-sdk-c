@@ -18,7 +18,8 @@ MOCKABLE_FUNCTION(, IOTHUBTRANSPORT_AMQP_METHODS_HANDLE, iothubtransportamqp_met
 MOCKABLE_FUNCTION(, void, iothubtransportamqp_methods_destroy, IOTHUBTRANSPORT_AMQP_METHODS_HANDLE, iothubtransport_amqp_methods_handle);
 MOCKABLE_FUNCTION(, int, iothubtransportamqp_methods_subscribe, IOTHUBTRANSPORT_AMQP_METHODS_HANDLE, iothubtransport_amqp_methods_handle,
     SESSION_HANDLE, session_handle, ON_METHODS_ERROR, on_methods_error, void*, on_methods_error_context,
-    ON_METHOD_REQUEST_RECEIVED, on_method_request_received, void*, on_method_request_received_context);
+    ON_METHOD_REQUEST_RECEIVED, on_method_request_received, void*, on_method_request_received_context,
+    ON_METHODS_UNSUBSCRIBED, on_methods_unsubscribed, void*, on_methods_unsubscribed_context);
 MOCKABLE_FUNCTION(, int, iothubtransportamqp_methods_respond, IOTHUBTRANSPORT_AMQP_METHOD_HANDLE, method_handle,
         const unsigned char*, response, size_t, response_size, int, status_code);
 MOCKABLE_FUNCTION(, void, iothubtransportamqp_methods_unsubscribe, IOTHUBTRANSPORT_AMQP_METHODS_HANDLE, iothubtransport_amqp_methods_handle);
@@ -63,7 +64,8 @@ void iothubtransportamqp_methods_destroy(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE iot
 ```c
 int iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE iothubtransport_amqp_methods_handle,
     SESSION_HANDLE session_handle, ON_METHODS_ERROR on_methods_error, void* on_methods_error_context,
-    ON_METHOD_REQUEST_RECEIVED on_method_request_received, void* on_method_request_received_context);
+    ON_METHOD_REQUEST_RECEIVED on_method_request_received, void* on_method_request_received_context,
+    ON_METHODS_UNSUBSCRIBED on_methods_unsubscribed, void* on_methods_unsubscribed_context);
 ```
 
 `iothubtransportamqp_methods_subscribe` creates the links needed for the request/response pattern for C2D methods.
@@ -72,7 +74,7 @@ int iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE io
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_137: [** `iothubtransportamqp_methods_subscribe` after another succesfull `iothubtransportamqp_methods_subscribe` without any unsubscribe shall return a non-zero value without performing any subscribe action. **]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_009: [** If any of the argument `iothubtransport_amqp_methods_handle`, `session_handle`, `on_methods_error` or `on_method_request_received` is NULL, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_009: [** If any of the argument `iothubtransport_amqp_methods_handle`, `session_handle`, `on_methods_error`, `on_method_request_received`, `on_methods_unsubscribed` is NULL, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. **]**
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_010: [** `iothubtransportamqp_methods_subscribe` shall create a receiver link by calling `link_create` with the following arguments: **]**
 
@@ -242,6 +244,8 @@ void on_message_sender_state_changed(void* context, MESSAGE_SENDER_STATE new_sta
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_127: [** For the other state changes, on_message_sender_state_changed shall do nothing. **]**
 
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_12_002: [** When `on_message_sender_state_changed` is called with the `new_state` being `MESSAGE_SENDER_STATE_IDLE` and `previous_state` being `MESSAGE_SENDER_STATE_OPEN`and the receiver link is already diconnected `on_message_sender_state_changed` calls to `on_methods_unsubscribed`. **]**
+
 ```c
 void on_message_receiver_state_changed(void* context, MESSAGE_RECEIVER_STATE new_state, MESSAGE_RECEIVER_STATE previous_state)
 ```
@@ -251,6 +255,9 @@ void on_message_receiver_state_changed(void* context, MESSAGE_RECEIVER_STATE new
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_120: [** When an error is indicated by calling the `on_methods_error`, it shall be called with the context being the `on_methods_error_context` argument passed to `iothubtransportamqp_methods_subscribe`. **]**
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_126: [** For the other state changes, on_message_receiver_state_changed shall do nothing. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_12_001: [** When `on_message_receiver_state_changed` is called with the `new_state` being `MESSAGE_RECEIVER_STATE_IDLE` and `previous_state` being `MESSAGE_RECEIVER_STATE_OPEN`and the sender link is already diconnected `on_message_receiver_state_changed` calls to `on_methods_unsubscribed`. **]**
+
 
 ### on_message_send_complete
 

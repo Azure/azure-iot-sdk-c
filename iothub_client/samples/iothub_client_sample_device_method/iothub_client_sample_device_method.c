@@ -10,6 +10,7 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/platform.h"
 #include "iothubtransportmqtt.h"
+#include "iothubtransportamqp.h"
 
 #ifdef MBED_BUILD_TIMESTAMP
 #include "certs.h"

@@ -23,6 +23,7 @@
 #include <limits.h>
 #endif
 
+#include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
@@ -71,7 +72,6 @@ typedef struct IOTHUB_VALIDATION_INFO_TAG
     char* partnerHost;
     STRING_HANDLE consumerGroup;
     STRING_HANDLE deviceId;
-    STRING_HANDLE deviceKey;
     STRING_HANDLE eventhubName;
     STRING_HANDLE iotSharedSig;
     STRING_HANDLE eventhubAccessKey;
@@ -277,27 +277,27 @@ static int RetrieveIotHubClientInfo(const char* pszIotConnString, IOTHUB_VALIDAT
     if (sscanf(pszIotConnString, "HostName=%n%*[^.]%n.%n%*[^;];%nSharedAccessKeyName=*;SharedAccessKey=*", &beginName, &endName, &beginHost, &endHost) != 0)
     {
         LogError("Failure determinging string sizes in RetrieveIotHubClientInfo.");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else
     {
         if ( (dvhInfo->iotHubName = (char*)malloc(endName-beginName+1) ) == NULL)
         {
             LogError("Failure allocating iothubName in RetrieveIotHubClientInfo endName: %d beginName: %d.", endName, beginName);
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else if ( (dvhInfo->hostName = (char*)malloc(endHost-beginName+1) ) == NULL)
         {
             LogError("Failure allocating hostName in RetrieveIotHubClientInfo endHost: %d beginHost: %d.", endHost, beginName);
             free(dvhInfo->iotHubName);
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else if (sscanf(pszIotConnString, "HostName=%[^.].%[^;];SharedAccessKeyName=*;SharedAccessKey=*", dvhInfo->iotHubName, dvhInfo->hostName + endName - beginName + 1) != 2)
         {
             LogError("Failure retrieving string values in RetrieveIotHubClientInfo.");
             free(dvhInfo->iotHubName);
             free(dvhInfo->hostName);
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else
         {
@@ -318,27 +318,27 @@ static int RetrieveEventHubClientInfo(const char* pszconnString, IOTHUB_VALIDATI
     if (sscanf(pszconnString, "Endpoint=sb://%n%*[^.]%n.%n%*[^/]%n/;SharedAccessKeyName=owner;SharedAccessKey=%*s", &beginName, &endName, &beginHost, &endHost) != 0)
     {
         LogError("Failure determining string sizes in RetrieveEventHubClientInfo.");
-        result = __LINE__;
+        result = __FAILURE__;
     }
     else
     {
         if ( (dvhInfo->partnerName = (char*)malloc(endName+beginName+1) ) == NULL)
         {
             LogError("Failure allocating partnerName in RetrieveEventHubClientInfo endName: %d beginName: %d.", endName, beginName);
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else if ( (dvhInfo->partnerHost = (char*)malloc(endHost+beginHost+1) ) == NULL)
         {
             LogError("Failure allocating partnerHost in RetrieveEventHubClientInfo endHost: %d beginHost: %d.", endHost, beginHost);
             free(dvhInfo->partnerName);
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else if (sscanf(pszconnString, "Endpoint=sb://%[^.].%[^/]/;SharedAccessKeyName=owner;SharedAccessKey=%*s", dvhInfo->partnerName, dvhInfo->partnerHost) != 2)
         {
             LogError("Failure retrieving string values in RetrieveEventHubClientInfo.");
             free(dvhInfo->partnerName);
             free(dvhInfo->partnerHost);
-            result = __LINE__;
+            result = __FAILURE__;
         }
         else
         {
@@ -348,14 +348,14 @@ static int RetrieveEventHubClientInfo(const char* pszconnString, IOTHUB_VALIDATI
     return result;
 }
 
-IOTHUB_TEST_HANDLE IoTHubTest_Initialize(const char* eventhubConnString, const char* iothubConnString, const char* deviceId, const char* deviceKey, const char* eventhubName, const char* eventhubAccessKey, const char* sharedSignature, const char* consumerGroup)
+IOTHUB_TEST_HANDLE IoTHubTest_Initialize(const char* eventhubConnString, const char* iothubConnString, const char* deviceId, const char* eventhubName, const char* eventhubAccessKey, const char* sharedSignature, const char* consumerGroup)
 {
     IOTHUB_TEST_HANDLE result;
     IOTHUB_VALIDATION_INFO* devhubValInfo;
 
-    if (eventhubConnString == NULL || iothubConnString == NULL || deviceId == NULL || deviceKey == NULL || eventhubName == NULL || sharedSignature == NULL || eventhubAccessKey == NULL)
+    if (eventhubConnString == NULL || iothubConnString == NULL || deviceId == NULL || eventhubName == NULL || sharedSignature == NULL || eventhubAccessKey == NULL)
     {
-        LogError("Invalid parameter sent to Initialize Eventhub conn string: 0x%p\r\niothub Conn string 0x%p\r\ndeviceId 0x%p\r\n devicekey 0x%p\r\nEventhubName 0x%p\r\nAccessKey 0x%p\r\nSharedSig 0x%p.", eventhubConnString, iothubConnString, deviceId, deviceKey, eventhubName, eventhubAccessKey, sharedSignature);
+        LogError("Invalid parameter sent to Initialize Eventhub conn string: 0x%p\r\niothub Conn string 0x%p\r\ndeviceId 0x%p\r\n EventhubName 0x%p\r\nAccessKey 0x%p\r\nSharedSig 0x%p.", eventhubConnString, iothubConnString, deviceId, eventhubName, eventhubAccessKey, sharedSignature);
         result = NULL;
     }
     else if ( (devhubValInfo = malloc(sizeof(IOTHUB_VALIDATION_INFO) ) ) == NULL)
@@ -384,22 +384,12 @@ IOTHUB_TEST_HANDLE IoTHubTest_Initialize(const char* eventhubConnString, const c
         free(devhubValInfo);
         result = NULL;
     }
-    else if ( (devhubValInfo->deviceKey = URL_EncodeString(deviceKey) ) == NULL)
-    {
-        LogError("Failure allocating deviceKey string.");
-        STRING_delete(devhubValInfo->consumerGroup);
-        STRING_delete(devhubValInfo->eventhubAccessKey);
-        STRING_delete(devhubValInfo->deviceId);
-        free(devhubValInfo);
-        result = NULL;
-    }
     else if ( (devhubValInfo->eventhubName = STRING_construct(eventhubName) ) == NULL)
     {
         LogError("Failure allocating eventhubName string.");
         STRING_delete(devhubValInfo->consumerGroup);
         STRING_delete(devhubValInfo->eventhubAccessKey);
         STRING_delete(devhubValInfo->deviceId);
-        STRING_delete(devhubValInfo->deviceKey);
         free(devhubValInfo);
         result = NULL;
     }
@@ -409,7 +399,6 @@ IOTHUB_TEST_HANDLE IoTHubTest_Initialize(const char* eventhubConnString, const c
         STRING_delete(devhubValInfo->consumerGroup);
         STRING_delete(devhubValInfo->eventhubAccessKey);
         STRING_delete(devhubValInfo->deviceId);
-        STRING_delete(devhubValInfo->deviceKey);
         STRING_delete(devhubValInfo->eventhubName);
         free(devhubValInfo);
         result = NULL;
@@ -419,7 +408,6 @@ IOTHUB_TEST_HANDLE IoTHubTest_Initialize(const char* eventhubConnString, const c
         STRING_delete(devhubValInfo->consumerGroup);
         STRING_delete(devhubValInfo->eventhubAccessKey);
         STRING_delete(devhubValInfo->deviceId);
-        STRING_delete(devhubValInfo->deviceKey);
         STRING_delete(devhubValInfo->eventhubName);
         STRING_delete(devhubValInfo->iotSharedSig);
         free(devhubValInfo);
@@ -430,7 +418,6 @@ IOTHUB_TEST_HANDLE IoTHubTest_Initialize(const char* eventhubConnString, const c
         STRING_delete(devhubValInfo->consumerGroup);
         STRING_delete(devhubValInfo->eventhubAccessKey);
         STRING_delete(devhubValInfo->deviceId);
-        STRING_delete(devhubValInfo->deviceKey);
         STRING_delete(devhubValInfo->eventhubName);
         STRING_delete(devhubValInfo->iotSharedSig);
         free(devhubValInfo->iotHubName);
@@ -454,7 +441,6 @@ void IoTHubTest_Deinit(IOTHUB_TEST_HANDLE devhubHandle)
         STRING_delete(devhubValInfo->eventhubAccessKey);
         STRING_delete(devhubValInfo->deviceId);
         STRING_delete(devhubValInfo->eventhubName);
-        STRING_delete(devhubValInfo->deviceKey);
         STRING_delete(devhubValInfo->iotSharedSig);
         free(devhubValInfo->iotHubName);
         free(devhubValInfo->partnerName);

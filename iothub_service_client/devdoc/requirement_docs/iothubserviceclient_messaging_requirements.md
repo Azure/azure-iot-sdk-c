@@ -40,13 +40,7 @@ extern void IoTHubMessaging_Destroy(IOTHUB_MESSAGING_CLIENT_HANDLE messagingClie
 ```
 **SRS_IOTHUBMESSAGING_12_009: [** `IoTHubMessaging_Destroy` shall do nothing if parameter `messagingClientHandle` is `NULL`. **]**
 
-**SRS_IOTHUBMESSAGING_12_010: [** `IoTHubMessaging_Destroy` shall lock the serializing lock and signal the worker thread (if any) to end. **]**
-
 **SRS_IOTHUBMESSAGING_12_011: [** `IoTHubMessaging_Destroy` shall destroy `IoTHubMessagingHandle` by call `IoTHubMessaging_LL_Destroy`. **]**
-
-**SRS_IOTHUBMESSAGING_12_012: [** `IoTHubMessaging_Destroy` shall unlock the serializing lock. **]**
-
-**SRS_IOTHUBMESSAGING_12_013: [** The thread created as part of executing `IoTHubMessaging_SendAsync` shall be joined. **]**
 
 **SRS_IOTHUBMESSAGING_12_014: [** If the lock was allocated in `IoTHubMessaging_Create`, it shall be also freed. **]**
 
@@ -76,11 +70,9 @@ extern void IoTHubMessaging_Close(IOTHUB_MESSAGING_CLIENT_HANDLE messagingClient
 
 **SRS_IOTHUBMESSAGING_12_022: [** `IoTHubMessaging_Close` shall be made thread-safe by using the lock created in `IoTHubMessaging_Create`. **]**
 
-**SRS_IOTHUBMESSAGING_12_023: [** If acquiring the lock fails, `IoTHubMessaging_Close` shall return `IOTHUB_MESSAGING_ERROR`. **]**
+**SRS_IOTHUBMESSAGING_12_013: [** The thread created as part of executing `IoTHubMessaging_SendAsync` shall be joined. **]**
 
 **SRS_IOTHUBMESSAGING_12_024: [** `IoTHubMessaging_Close` shall call `IoTHubMessaging_LL_Close`, while passing the `IOTHUB_MESSAGING_HANDLE` handle created by `IoTHubMessaging_Create` **]**
-
-**SRS_IOTHUBMESSAGING_12_025: [** When `IoTHubMessaging_LL_Close` is called, `IoTHubMessaging_Close` shall return the result of `IoTHubMessaging_LL_Close`. **]**
 
 **SRS_IOTHUBMESSAGING_12_026: [** `IoTHubMessaging_Close` shall be made thread-safe by using the lock created in `IoTHubMessaging_Create`. **]**
 

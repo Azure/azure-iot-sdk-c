@@ -17,6 +17,7 @@
 #include "iothub_account.h"
 #include "iothubtest.h"
 
+#include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/platform.h"
@@ -471,7 +472,7 @@ static int verifyEventReceivedByHub(const EXPECTED_SEND_DATA* sendData)
 	if (scanf("%d", &response) <= 0)
 	{
 		LogError("Failed reading response from verification of message received.");
-		result = __LINE__;
+		result = __FAILURE__;
 	}
 	else
 	{
@@ -479,7 +480,7 @@ static int verifyEventReceivedByHub(const EXPECTED_SEND_DATA* sendData)
 		{
 			sendData->wasFoundInHub = response;
 			LogError("Event not received by IoT hub within expected time.");
-			result = __LINE__;
+			result = __FAILURE__;
 		}
 		else if (response == 1)
 		{
@@ -489,7 +490,7 @@ static int verifyEventReceivedByHub(const EXPECTED_SEND_DATA* sendData)
 		else
 		{
 			LogError("Failed getting result of verification of Events received by hub.");
-			result = __LINE__;
+			result = __FAILURE__;
 		}
 	}
 
@@ -503,21 +504,21 @@ static int verifyEventReceivedByHub(EXPECTED_SEND_DATA* sendData, IOTHUB_TEST_HA
 	if ((IoTHubTest_ListenForEventForMaxDrainTime(iotHubTestHandle, IoTHubCallback, IoTHubAccount_GetIoTHubPartitionCount(g_iothubAcctInfo), sendData)) != IOTHUB_TEST_CLIENT_OK)
 	{
 		LogError("IoTHubTest_ListenForEventForMaxDrainTime failed.");
-		result = __LINE__;
+		result = __FAILURE__;
 	}
 	else 
 	{
 		if (Lock(sendData->lock) != LOCK_OK)
 		{
 			LogError("Unable to lock on verifyEventReceivedByHub()");
-			result = __LINE__;
+			result = __FAILURE__;
 		}
 		else
 		{
 			if (sendData->wasFoundInHub != true)
 			{
 				LogError("Failure verifying if data was received by Event Hub.");
-				result = __LINE__;
+				result = __FAILURE__;
 			}
 			else
 			{
@@ -626,7 +627,7 @@ static int sendEventLoop(IOTHUB_CLIENT_HANDLE iotHubClientHandle, LONGHAUL_SEND_
 	if ((iotHubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo), IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo), IoTHubAccount_GetDeviceId(g_iothubAcctInfo), IoTHubAccount_GetDeviceKey(g_iothubAcctInfo), IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo), IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo), IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo), IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo))) == NULL)
 	{
 		LogError("Failed initializing the Event Hub test client.");
-		result = __LINE__;
+		result = __FAILURE__;
 	}
 	else
 	{
@@ -637,7 +638,7 @@ static int sendEventLoop(IOTHUB_CLIENT_HANDLE iotHubClientHandle, LONGHAUL_SEND_
 		if ((testInitialTime = time(NULL)) == INDEFINITE_TIME)
 		{
 			LogError("Failed setting the initial time of the test (time(NULL) failed).");
-			result = __LINE__;
+			result = __FAILURE__;
 		}
 		else
 		{
@@ -650,7 +651,7 @@ static int sendEventLoop(IOTHUB_CLIENT_HANDLE iotHubClientHandle, LONGHAUL_SEND_
 				if ((testCurrentTime = time(NULL)) == INDEFINITE_TIME)
 				{
 					LogError("Failed setting the current time of the test (time(NULL) failed)");
-					result = __LINE__;
+					result = __FAILURE__;
 					break;
 				}
 				else if (difftime(testCurrentTime, testInitialTime) > test_state->profile->totalRunTimeInSeconds)
@@ -662,7 +663,7 @@ static int sendEventLoop(IOTHUB_CLIENT_HANDLE iotHubClientHandle, LONGHAUL_SEND_
 				if ((loopIterationStartTimeInSeconds = time(NULL)) == INDEFINITE_TIME)
 				{
 					LogError("Failed setting the initial time of the send/receive loop (time(NULL) failed)");
-					result = __LINE__;
+					result = __FAILURE__;
 					break;
 				}
 
@@ -674,21 +675,21 @@ static int sendEventLoop(IOTHUB_CLIENT_HANDLE iotHubClientHandle, LONGHAUL_SEND_
 					if ((sendData = EventData_Create()) == NULL)
 					{
 						LogError("Failed creating EXPECTED_SEND_DATA.");
-						result = __LINE__;
+						result = __FAILURE__;
 					}
 					else
 					{
 						if ((msgHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)sendData->expectedString, strlen(sendData->expectedString))) == NULL)
 						{
 							LogError("Failed creating IOTHUB_MESSAGE_HANDLE.");
-							result = __LINE__;
+							result = __FAILURE__;
 						}
 						else
 						{
 							if (IoTHubClient_SendEventAsync(iotHubClientHandle, msgHandle, SendConfirmationCallback, sendData) != IOTHUB_CLIENT_OK)
 							{
 								LogError("Call to IoTHubClient_SendEventAsync failed.");
-								result = __LINE__;
+								result = __FAILURE__;
 							}
 							else
 							{
@@ -698,7 +699,7 @@ static int sendEventLoop(IOTHUB_CLIENT_HANDLE iotHubClientHandle, LONGHAUL_SEND_
 								if ((beginOperation = time(NULL)) == INDEFINITE_TIME)
 								{
 									LogError("Failed setting beginOperation (time(NULL) failed).");
-									result = __LINE__;
+									result = __FAILURE__;
 								}
 								else
 								{
@@ -724,7 +725,7 @@ static int sendEventLoop(IOTHUB_CLIENT_HANDLE iotHubClientHandle, LONGHAUL_SEND_
 										if ((nowTime = time(NULL)) == INDEFINITE_TIME)
 										{
 											LogError("Failed setting nowTime (time(NULL) failed).");
-											result = __LINE__;
+											result = __FAILURE__;
 											break;
 										}
 									} while (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME);
@@ -732,21 +733,21 @@ static int sendEventLoop(IOTHUB_CLIENT_HANDLE iotHubClientHandle, LONGHAUL_SEND_
 									if (!dataWasSent)
 									{
 										LogError("Failure sending data to IotHub");
-										result = __LINE__;
+										result = __FAILURE__;
 									}
 									else
 									{
 #ifdef MBED_BUILD_TIMESTAMP
 										if (verifyEventReceivedByHub(sendData) != 0)
 										{
-											result = __LINE__;
+											result = __FAILURE__;
 										}
 										else
 										{
 #else
 										if (verifyEventReceivedByHub(sendData, iotHubTestHandle) != 0)
 										{
-											result = __LINE__;
+											result = __FAILURE__;
 										}
 										else
 										{
@@ -772,7 +773,7 @@ static int sendEventLoop(IOTHUB_CLIENT_HANDLE iotHubClientHandle, LONGHAUL_SEND_
 				if ((loopIterationEndTimeInSeconds = time(NULL)) == INDEFINITE_TIME)
 				{
 					LogError("Failed setting the end time of the send loop iteration (time(NULL) failed)");
-					result = __LINE__;
+					result = __FAILURE__;
 				}
 				else
 				{
@@ -802,7 +803,7 @@ static int receiveMessageLoop(IOTHUB_CLIENT_HANDLE iotHubClientHandle, LONGHAUL_
 	if ((iotHubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo), IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo), IoTHubAccount_GetDeviceId(g_iothubAcctInfo), IoTHubAccount_GetDeviceKey(g_iothubAcctInfo), IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo), IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo), IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo), IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo))) == NULL)
 	{
 		LogError("Failed initializing the Event Hub test client.");
-		result = __LINE__;
+		result = __FAILURE__;
 	}
 	else
 	{
@@ -813,7 +814,7 @@ static int receiveMessageLoop(IOTHUB_CLIENT_HANDLE iotHubClientHandle, LONGHAUL_
 		if ((testInitialTime = time(NULL)) == INDEFINITE_TIME)
 		{
 			LogError("Failed setting the initial time of the test (time(NULL) failed).");
-			result = __LINE__;
+			result = __FAILURE__;
 		}
 		else
 		{
@@ -826,7 +827,7 @@ static int receiveMessageLoop(IOTHUB_CLIENT_HANDLE iotHubClientHandle, LONGHAUL_
 				if ((testCurrentTime = time(NULL)) == INDEFINITE_TIME)
 				{
 					LogError("Failed setting the current time of the test (time(NULL) failed)");
-					result = __LINE__;
+					result = __FAILURE__;
 					break;
 				}
 				else if (difftime(testCurrentTime, testInitialTime) > test_state->profile->totalRunTimeInSeconds)
@@ -838,7 +839,7 @@ static int receiveMessageLoop(IOTHUB_CLIENT_HANDLE iotHubClientHandle, LONGHAUL_
 				if ((loopIterationStartTimeInSeconds = time(NULL)) == INDEFINITE_TIME)
 				{
 					LogError("Failed setting the initial time of the receive loop iteration (time(NULL) failed)");
-					result = __LINE__;
+					result = __FAILURE__;
 					break;
 				}
 
@@ -849,7 +850,7 @@ static int receiveMessageLoop(IOTHUB_CLIENT_HANDLE iotHubClientHandle, LONGHAUL_
 					if ((receiveData = MessageData_Create()) == NULL)
 					{
 						LogError("Failed creating EXPECTED_RECEIVE_DATA.");
-						result = __LINE__;
+						result = __FAILURE__;
 					}
 					else
 					{
@@ -858,12 +859,12 @@ static int receiveMessageLoop(IOTHUB_CLIENT_HANDLE iotHubClientHandle, LONGHAUL_
 						if (IoTHubClient_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, receiveData) != IOTHUB_CLIENT_OK)
 						{
 							LogError("Call to IoTHubClient_SetMessageCallback failed.");
-							result = __LINE__;
+							result = __FAILURE__;
 						}
 						else if ((sendResult = IoTHubTest_SendMessage(iotHubTestHandle, (const unsigned char*)receiveData->data, receiveData->dataSize)) != IOTHUB_TEST_CLIENT_OK)
 						{
 							LogError("Call to IoTHubTest_SendMessage failed (%i).", sendResult);
-							result = __LINE__;
+							result = __FAILURE__;
 						}
 						else
 						{
@@ -877,7 +878,7 @@ static int receiveMessageLoop(IOTHUB_CLIENT_HANDLE iotHubClientHandle, LONGHAUL_
 							if ((beginOperation = time(NULL)) == INDEFINITE_TIME)
 							{
 								LogError("Failed setting beginOperation (time(NULL) failed).");
-								result = __LINE__;
+								result = __FAILURE__;
 							}
 							else
 							{
@@ -886,7 +887,7 @@ static int receiveMessageLoop(IOTHUB_CLIENT_HANDLE iotHubClientHandle, LONGHAUL_
 									if (Lock(receiveData->lock) != LOCK_OK)
 									{
 										LogError("Unable to lock to verify if C2D message has been received.");
-										result = __LINE__;
+										result = __FAILURE__;
 										break;
 									}
 									else
@@ -903,7 +904,7 @@ static int receiveMessageLoop(IOTHUB_CLIENT_HANDLE iotHubClientHandle, LONGHAUL_
 									if ((nowTime = time(NULL)) == INDEFINITE_TIME)
 									{
 										LogError("Failed setting nowTime (time(NULL) failed).");
-										result = __LINE__;
+										result = __FAILURE__;
 										break;
 									}
 								} while (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME);
@@ -913,7 +914,7 @@ static int receiveMessageLoop(IOTHUB_CLIENT_HANDLE iotHubClientHandle, LONGHAUL_
 									if (!receiveData->receivedByClient)
 									{
 										LogError("Failure retrieving data from C2D");
-										result = __LINE__;
+										result = __FAILURE__;
 									}
 									else
 									{
@@ -937,7 +938,7 @@ static int receiveMessageLoop(IOTHUB_CLIENT_HANDLE iotHubClientHandle, LONGHAUL_
 				if ((loopIterationEndTimeInSeconds = time(NULL)) == INDEFINITE_TIME)
 				{
 					LogError("Failed setting the end time of the receive loop iteration (time(NULL) failed)");
-					result = __LINE__;
+					result = __FAILURE__;
 				}
 				else
 				{
@@ -986,13 +987,13 @@ static int runLongHaulSendTest(const LONGHAUL_SEND_TEST_PROFILE* testProfile)
 	if ((iotHubClientHandle = IoTHubClient_Create(&iotHubConfig)) == NULL)
 	{
 		LogError("Failed creating the IoT Hub Client.");
-		result = __LINE__;
+		result = __FAILURE__;
 	}
 #ifdef MBED_BUILD_TIMESTAMP
 	else if ((client_result = IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates)) != IOTHUB_CLIENT_OK)
 	{
 		LogError("Failed setting certificates on IoT Hub client [%i].", client_result);
-		result = __LINE__;
+		result = __FAILURE__;
 	}
 #endif
 	else 
@@ -1038,13 +1039,13 @@ static int runLongHaulReceiveTest(const LONGHAUL_RECEIVE_TEST_PROFILE* testProfi
 	if ((iotHubClientHandle = IoTHubClient_Create(&iotHubConfig)) == NULL)
 	{
 		LogError("Failed creating the IoT Hub Client.");
-		result = __LINE__;
+		result = __FAILURE__;
 	}
 #ifdef MBED_BUILD_TIMESTAMP
 	else if ((client_result = IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates)) != IOTHUB_CLIENT_OK)
 	{
 		LogError("Failed setting certificates on IoT Hub client [%i].", client_result);
-		result = __LINE__;
+		result = __FAILURE__;
 	}
 #endif
 	else

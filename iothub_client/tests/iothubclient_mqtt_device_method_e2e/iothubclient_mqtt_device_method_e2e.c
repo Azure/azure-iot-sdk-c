@@ -28,35 +28,66 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_device_method_e2e)
         device_method_function_cleanup();
     }
 
-    TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_String)
+    TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_String_sas)
     {
-        device_method_e2e_method_call_with_string(MQTT_Protocol);
+        device_method_e2e_method_call_with_string_sas(MQTT_Protocol);
     }
 
-    TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_Double_Quoted_Json)
+    TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_Double_Quoted_Json_sas)
     {
-        device_method_e2e_method_call_with_double_quoted_json(MQTT_Protocol);
+        device_method_e2e_method_call_with_double_quoted_json_sas(MQTT_Protocol);
     }
 
-    TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_Empty_Json_Object)
+    TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_Empty_Json_Object_sas)
     {
-        device_method_e2e_method_call_with_empty_json_object(MQTT_Protocol);
+        device_method_e2e_method_call_with_empty_json_object_sas(MQTT_Protocol);
     }
 
-    TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_Null)
+    TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_Null_sas)
     {
-        device_method_e2e_method_call_with_null(MQTT_Protocol);
+        device_method_e2e_method_call_with_null_sas(MQTT_Protocol);
     }
 
-    TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_Embedded_Double_Quote)
+    TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_Embedded_Double_Quote_sas)
     {
-        device_method_e2e_method_call_with_embedded_double_quote(MQTT_Protocol);
+        device_method_e2e_method_call_with_embedded_double_quote_sas(MQTT_Protocol);
     }
 
-    TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_Embedded_Single_Quote)
+    TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_Embedded_Single_Quote_sas)
     {
-        device_method_e2e_method_call_with_embedded_single_quote(MQTT_Protocol);
+        device_method_e2e_method_call_with_embedded_single_quote_sas(MQTT_Protocol);
     }
+
+    TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_String_x509)
+    {
+        device_method_e2e_method_call_with_string_x509(MQTT_Protocol);
+    }
+
+    TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_Double_Quoted_Json_x509)
+    {
+        device_method_e2e_method_call_with_double_quoted_json_x509(MQTT_Protocol);
+    }
+
+    TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_Empty_Json_Object_x509)
+    {
+        device_method_e2e_method_call_with_empty_json_object_x509(MQTT_Protocol);
+    }
+
+    TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_Null_x509)
+    {
+        device_method_e2e_method_call_with_null_x509(MQTT_Protocol);
+    }
+
+    TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_Embedded_Double_Quote_x509)
+    {
+        device_method_e2e_method_call_with_embedded_double_quote_x509(MQTT_Protocol);
+    }
+
+    TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_Embedded_Single_Quote_x509)
+    {
+        device_method_e2e_method_call_with_embedded_single_quote_x509(MQTT_Protocol);
+    }
+
 
 END_TEST_SUITE(iothubclient_mqtt_device_method_e2e)
 

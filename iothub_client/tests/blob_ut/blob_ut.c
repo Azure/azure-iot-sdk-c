@@ -22,6 +22,7 @@ static void my_gballoc_free(void* s)
 }
 
 #define ENABLE_MOCKS
+#include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/httpapiex.h"
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/strings.h"
@@ -160,8 +161,8 @@ TEST_SUITE_INITIALIZE(TestSuiteInitialize)
     REGISTER_GLOBAL_MOCK_HOOK(Base64_Encode_Bytes, my_Base64_Encode_Bytes);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Encode_Bytes, NULL);
 
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat, __LINE__);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat_with_STRING, __LINE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat, __FAILURE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat_with_STRING, __FAILURE__);
 
     REGISTER_GLOBAL_MOCK_RETURN(STRING_c_str, "a");
     REGISTER_GLOBAL_MOCK_HOOK(STRING_delete, my_STRING_delete);
