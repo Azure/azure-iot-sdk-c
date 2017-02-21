@@ -1234,11 +1234,15 @@ static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE msgHandle, void* call
                             messageData->transportContext = NULL;
 
                             /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_056: [ If type is IOTHUB_TYPE_TELEMETRY, then on success mqtt_notification_callback shall call IoTHubClient_LL_MessageCallback. ] */
-                            IoTHubClient_LL_MessageCallback(transportData->llClientHandle, messageData);
-							free(messageData);
+                            if (!IoTHubClient_LL_MessageCallback(transportData->llClientHandle, messageData))
+                            {
+							    LogError("IoTHubClient_LL_MessageCallback returned false");
+
+                                IoTHubMessage_Destroy(IoTHubMessage);
+                                free(messageData);
+                            }
                         }
                     }
-                    IoTHubMessage_Destroy(IoTHubMessage);
                 }
             }
         }
@@ -1293,18 +1297,18 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
                         transport_data->currPacketState = CONNACK_TYPE;
                         transport_data->isRecoverableError = true;
                         StopRetryTimer(transport_data->retryLogic);
-                        IotHubClient_LL_ConnectionStatusCallBack(transport_data->llClientHandle, IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK);
+                        IoTHubClient_LL_ConnectionStatusCallBack(transport_data->llClientHandle, IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK);
                     }
                     else
                     {
                         if (connack->returnCode == CONN_REFUSED_BAD_USERNAME_PASSWORD)
                         {
                             transport_data->isRecoverableError = false;
-                            IotHubClient_LL_ConnectionStatusCallBack(transport_data->llClientHandle, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL);
+                            IoTHubClient_LL_ConnectionStatusCallBack(transport_data->llClientHandle, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL);
                         }
                         else if (connack->returnCode == CONN_REFUSED_NOT_AUTHORIZED)
                         {
-                            IotHubClient_LL_ConnectionStatusCallBack(transport_data->llClientHandle, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_DEVICE_DISABLED);
+                            IoTHubClient_LL_ConnectionStatusCallBack(transport_data->llClientHandle, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_DEVICE_DISABLED);
                         }
                         else if (connack->returnCode == CONN_REFUSED_UNACCEPTABLE_VERSION)
                         {
@@ -1375,7 +1379,7 @@ static void mqtt_error_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_ERR
         {
             case MQTT_CLIENT_CONNECTION_ERROR:
             {
-                IotHubClient_LL_ConnectionStatusCallBack(transport_data->llClientHandle, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_NO_NETWORK);
+                IoTHubClient_LL_ConnectionStatusCallBack(transport_data->llClientHandle, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_NO_NETWORK);
                 break;
             }
             case MQTT_CLIENT_NO_PING_RESPONSE:
@@ -1564,7 +1568,7 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             sasToken = STRING_clone(transport_data->transport_creds.CREDENTIAL_VALUE.deviceSasToken);
             if (!SASToken_Validate(sasToken))
             {
-                IotHubClient_LL_ConnectionStatusCallBack(transport_data->llClientHandle, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_EXPIRED_SAS_TOKEN);
+                IoTHubClient_LL_ConnectionStatusCallBack(transport_data->llClientHandle, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_EXPIRED_SAS_TOKEN);
                 STRING_delete(sasToken);
                 result = __LINE__;
             }
@@ -1671,7 +1675,7 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 if ((current_time - transport_data->mqtt_connect_time) / 1000 > (SAS_TOKEN_DEFAULT_LIFETIME*SAS_REFRESH_MULTIPLIER))
                 {
                     (void)mqtt_client_disconnect(transport_data->mqttClient);
-                    IotHubClient_LL_ConnectionStatusCallBack(transport_data->llClientHandle, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_EXPIRED_SAS_TOKEN);
+                    IoTHubClient_LL_ConnectionStatusCallBack(transport_data->llClientHandle, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_EXPIRED_SAS_TOKEN);
                     transport_data->isConnected = false;
                     transport_data->currPacketState = UNKNOWN_TYPE;
                     transport_data->device_twin_get_sent = false;
@@ -2694,3 +2698,31 @@ STRING_HANDLE IoTHubTransport_MQTT_Common_GetHostname(TRANSPORT_LL_HANDLE handle
     }
     return result;
 }
+
+IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SendMessageDisposition(MESSAGE_CALLBACK_INFO* message_data, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
+{
+    (void)disposition;
+
+    IOTHUB_CLIENT_RESULT result;
+    if (message_data)
+    {
+        if (message_data->messageHandle)
+        {
+            IoTHubMessage_Destroy(message_data->messageHandle);
+            result = IOTHUB_CLIENT_OK;
+        }
+        else
+        {
+            LogError("message handle is NULL");
+            result = IOTHUB_CLIENT_ERROR;
+        }
+        free(message_data);
+    }
+    else
+    {
+        LogError("message_data is NULL");
+        result = IOTHUB_CLIENT_ERROR;
+    }
+    return result;
+}
+

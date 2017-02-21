@@ -1600,10 +1600,10 @@ TEST_FUNCTION(IoTHubClient_SetOption_succeed)
 }
 
 /* Tests_SRS_IOTHUBCLIENT_02_038: [If optionName doesn't match one of the options handled by this module then IoTHubClient_SetOption shall call IoTHubClient_LL_SetOption passing the same parameters and return what IoTHubClient_LL_SetOption returns.]*/
-/* Tests_SRS_IOTHUBCLIENT_01_042: [ If acquiring the lock fails, IoTHubClient_GetLastMessageReceiveTime shall return IOTHUB_CLIENT_ERROR. ]*/
-/* Tests_SRS_IOTHUBCLIENT_LL_10_007: [** `IoTHubClient_SetDeviceTwinCallback` shall fail and return `IOTHUB_CLIENT_INVALID_ARG` if parameter `iotHubClientHandle` is `NULL`. ]*/
-/* Tests_SRS_IOTHUBCLIENT_10_002: [** If acquiring the lock fails, `IoTHubClient_SetDeviceTwinCallback` shall return `IOTHUB_CLIENT_ERROR`. ]*/
-/* Tests_SRS_IOTHUBCLIENT_10_004: [** If starting the thread fails, `IoTHubClient_SetDeviceTwinCallback` shall return `IOTHUB_CLIENT_ERROR`. ]*/
+/* Tests_SRS_IOTHUBCLIENT_01_042: [If acquiring the lock fails, IoTHubClient_GetLastMessageReceiveTime shall return IOTHUB_CLIENT_ERROR. ]*/
+/* Tests_SRS_IOTHUBCLIENT_10_007: [IoTHubClient_SetDeviceTwinCallback shall fail and return IOTHUB_CLIENT_INVALID_ARG if parameter iotHubClientHandle is NULL. ]*/
+/* Tests_SRS_IOTHUBCLIENT_10_002: [If acquiring the lock fails, IoTHubClient_SetDeviceTwinCallback shall return IOTHUB_CLIENT_ERROR. ]*/
+/* Tests_SRS_IOTHUBCLIENT_10_004: [If starting the thread fails, IoTHubClient_SetDeviceTwinCallback shall return IOTHUB_CLIENT_ERROR. ]*/
 TEST_FUNCTION(IoTHubClient_SetOption_fail)
 {
     // arrange
@@ -2512,9 +2512,13 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_message_callback_succeed)
     STRICT_EXPECTED_CALL(VECTOR_element(TEST_VECTOR_HANDLE, 0));
     STRICT_EXPECTED_CALL(test_message_confirmation_callback(NULL, NULL));
 
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
+        .IgnoreArgument_handle();
     STRICT_EXPECTED_CALL(IoTHubClient_LL_SendMessageDisposition(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IOTHUBMESSAGE_ACCEPTED))
         .IgnoreArgument_iotHubClientHandle()
         .IgnoreArgument_messageData();
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
+        .IgnoreArgument_handle();
     STRICT_EXPECTED_CALL(VECTOR_destroy(TEST_VECTOR_HANDLE));
     STRICT_EXPECTED_CALL(ThreadAPI_Sleep(1));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))

@@ -4,6 +4,7 @@
 #include "iothub_client_private.h"
 #include "iothubtransportamqp.h" 
 #include "iothubtransport_amqp_common.h"
+#include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/tlsio.h"
 #include "azure_c_shared_utility/platform.h"
 
@@ -132,29 +133,7 @@ static STRING_HANDLE IoTHubTransportAMQP_GetHostname(TRANSPORT_LL_HANDLE handle)
 
 static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_SendMessageDisposition(MESSAGE_CALLBACK_INFO* message_data, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
 {
-    (void)disposition;
-
-    IOTHUB_CLIENT_RESULT result;
-    if (message_data == NULL)
-    {
-        LogError("invalid argument; messageData is NULL");
-        result = IOTHUB_CLIENT_ERROR;
-    }
-    else
-    {
-        if (message_data->messageHandle || message_data->transportContext == NULL)
-        {
-            LogError("invalid argument; incomplete message data");
-            result = IOTHUB_CLIENT_ERROR;
-        }
-        else
-        {
-            /* TO BE IMPLEMENTED */
-            result = IOTHUB_CLIENT_ERROR;
-        }
-    }
-
-    return IOTHUB_CLIENT_ERROR;
+    return IoTHubTransport_AMQP_Common_SendMessageDisposition(message_data, disposition);
 }
 
 static TRANSPORT_PROVIDER thisTransportProvider = 

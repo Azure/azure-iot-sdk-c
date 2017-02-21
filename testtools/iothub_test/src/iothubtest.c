@@ -534,8 +534,9 @@ static char* CreateSendAuthCid(IOTHUB_VALIDATION_INFO* devhubValInfo)
     return result;
 }
 
-static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE message)
+static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE message, LINK_HANDLE link)
 {
+    (void)link;
     MESSAGE_RECEIVER_CONTEXT* msg_received_context = (MESSAGE_RECEIVER_CONTEXT*)context;
     BINARY_DATA binary_data;
 

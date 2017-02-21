@@ -331,36 +331,87 @@ static void on_message_send_complete(void* context, MESSAGE_SEND_RESULT send_res
     free(message); 
 }
 
-static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE message)
+typedef struct TRANSPORT_CONTEXT_DATA_TAG
 {
-    AMQP_VALUE result = NULL;
-    int api_call_result;
-    IOTHUB_MESSAGE_HANDLE iothub_message = NULL;
-    // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_195: [The callback 'on_message_received' shall shall get a IOTHUB_MESSAGE_HANDLE instance out of the uamqp's MESSAGE_HANDLE instance by using IoTHubMessage_CreateFromUamqpMessage()]
-    if ((api_call_result = IoTHubMessage_CreateFromUamqpMessage(message, &iothub_message)) != RESULT_OK)
-    {
-        LogError("Transport failed processing the message received (error = %d).", api_call_result);
+    LINK_HANDLE link_handle;
+    delivery_number message_id;
+} TRANSPORT_CONTEXT_DATA;
 
-        // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_196: [If IoTHubMessage_CreateFromUamqpMessage fails, the callback 'on_message_received' shall reject the incoming message by calling messaging_delivery_rejected() and return.]
-        result = messaging_delivery_rejected("Rejected due to failure reading AMQP message", "Failed reading AMQP message");
+
+MESSAGE_CALLBACK_INFO* MESSAGE_CALLBACK_INFO_Create(IOTHUB_MESSAGE_HANDLE message, LINK_HANDLE link_instance)
+{
+    MESSAGE_CALLBACK_INFO* result;
+    delivery_number msg_id;
+    if (link_get_received_message_id(link_instance, &msg_id) == 0)
+    {
+        result = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
+        if (result == NULL)
+        {
+            LogError("malloc failed");
+        }
+        else
+        {
+            TRANSPORT_CONTEXT_DATA* tc = (TRANSPORT_CONTEXT_DATA*)malloc(sizeof(TRANSPORT_CONTEXT_DATA));
+            if (tc == NULL)
+            {
+                LogError("malloc failed");
+                free(result);
+                result = NULL;
+            }
+            else
+            {
+                tc->link_handle = link_instance;
+                tc->message_id = msg_id;
+
+                result->messageHandle = message;
+                result->transportContext = tc;
+            }
+        }
     }
     else
     {
-        MESSAGE_CALLBACK_INFO* messageData = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
+        LogError("link_get_received_delivery_id failed");
+        result = NULL;
+    }
+    return result;
+}
+
+static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE message, LINK_HANDLE link)
+{
+    AMQP_VALUE result;
+    int api_call_result;
+    IOTHUB_MESSAGE_HANDLE iothub_message;
+    // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_195: [The callback 'on_message_received' shall shall get a IOTHUB_MESSAGE_HANDLE instance out of the uamqp's MESSAGE_HANDLE instance by using IoTHubMessage_CreateFromUamqpMessage()]
+    if ((api_call_result = IoTHubMessage_CreateFromUamqpMessage(message, &iothub_message)) != RESULT_OK)
+    {
+        LogError("IoTHubMessage_CreateFromUamqpMessage failed (error = %d).", api_call_result);
+
+        // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_196: [If IoTHubMessage_CreateFromUamqpMessage fails, the callback 'on_message_received' shall reject the incoming message by calling messaging_delivery_rejected() and return.]
+        result = messaging_delivery_rejected("Rejected", "IoTHubMessage_CreateFromUamqpMessage failed");
+    }
+    else
+    {
+        MESSAGE_CALLBACK_INFO* messageData = MESSAGE_CALLBACK_INFO_Create(iothub_message, link);
         if (messageData == NULL)
         {
-            LogError("malloc failed");
+            LogError("failed to assemble callback info");
             result = messaging_delivery_released();
         }
         else
         {
-            messageData->messageHandle = iothub_message;
-            messageData->transportContext = NULL;
-
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_104: [The callback 'on_message_received' shall invoke IoTHubClient_LL_MessageCallback() passing the client and the incoming message handles as parameters] 
-            if (IoTHubClient_LL_MessageCallback((IOTHUB_CLIENT_LL_HANDLE)context, messageData) == IOTHUBMESSAGE_ABANDONED)
+            if (!IoTHubClient_LL_MessageCallback((IOTHUB_CLIENT_LL_HANDLE)context, messageData))
             {
+                LogError("IoTHubClient_LL_MessageCallback failed");
+                IoTHubMessage_Destroy(iothub_message);
+                free(messageData->transportContext);
+                free(messageData);
+
                 result = messaging_delivery_released();
+            }
+            else
+            {
+                result = NULL;
             }
         }
     }
@@ -1967,6 +2018,62 @@ STRING_HANDLE IoTHubTransport_AMQP_Common_GetHostname(TRANSPORT_LL_HANDLE handle
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_02_002: [Otherwise IoTHubTransport_AMQP_Common_GetHostname shall return the target IoT Hub FQDN as a STRING_HANDLE.]
         result = ((AMQP_TRANSPORT_INSTANCE*)(handle))->iotHubHostFqdn;
     }
+    return result;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SendMessageDisposition(MESSAGE_CALLBACK_INFO* message_data, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
+{
+    IOTHUB_CLIENT_RESULT result;
+    if (message_data == NULL)
+    {
+        LogError("invalid argument; messageData is NULL");
+        result = IOTHUB_CLIENT_ERROR;
+    }
+    else
+    {
+        if ((message_data->messageHandle == NULL) || (message_data->transportContext == NULL))
+        {
+            LogError("invalid argument; incomplete message data");
+            result = IOTHUB_CLIENT_ERROR;
+        }
+        else
+        {
+            IoTHubMessage_Destroy(message_data->messageHandle);
+
+            AMQP_VALUE disposition_result;
+            switch (disposition)
+            {
+                case IOTHUBMESSAGE_ACCEPTED:
+                {
+                    disposition_result = messaging_delivery_accepted();
+                    break;
+                }
+                case IOTHUBMESSAGE_ABANDONED:
+                {
+                    disposition_result = messaging_delivery_released();
+                    break;
+                }
+                case IOTHUBMESSAGE_REJECTED:
+                {
+                    disposition_result = messaging_delivery_rejected("Rejected by application", "Rejected by application");
+                    break;
+                }
+                default:
+                {
+                    LogError("invalid state");
+                    disposition_result = NULL;
+                    break;
+                }
+            }
+
+            link_send_disposition(message_data->transportContext->link_handle, message_data->transportContext->message_id, disposition_result);
+            free(message_data->transportContext);
+
+            result = IOTHUB_CLIENT_OK;
+        }
+        free(message_data);
+    }
+
     return result;
 }
 

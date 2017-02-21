@@ -14,6 +14,7 @@ extern const TRANSPORT_PROVIDER* MQTT_Protocol(void);
 ```
   The following static functions are provided in the fields of the TRANSPORT_PROVIDER structure:
 
+    - IoTHubTransportHttp_SendMessageDisposition,
     - IoTHubTransportMqtt_Subscribe_DeviceMethod,
     - IoTHubTransportMqtt_Unsubscribe_DeviceMethod,
     - IoTHubTransportMqtt_DeviceMethod_Response,
@@ -79,6 +80,12 @@ extern void IoTHubTransportMqtt_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle);
 int IoTHubTransportMqtt_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle)
 ```
 
+
+
+## IoTHubTransportHttp_SendMessageDisposition
+```c
+IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SendMessageDisposition(MESSAGE_CALLBACK_INFO* messageData, IOTHUBMESSAGE_DISPOSITION_RESULT disposition);
+```
 
 
 ### IoTHubTransportMqtt_Unsubscribe_DeviceTwin

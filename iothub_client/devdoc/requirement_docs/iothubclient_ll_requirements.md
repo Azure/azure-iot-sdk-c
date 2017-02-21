@@ -334,15 +334,15 @@ extern IOTHUBMESSAGE_DISPOSITION_RESULT IoTHubClient_LL_MessageCallback(IOTHUB_C
 This function is only called by the lower layers upon receiving a message from IoTHub.
 **SRS_IOTHUBCLIENT_LL_02_029: [** If either parameter `handle` or `messageData` is `NULL` then `IoTHubClient_LL_MessageCallback` shall return `false`.** ]**
 
-**SRS_IOTHUBCLIENT_LL_10_004: [** If `messageHandle` field of the `messageData` parameter is `NULL` then `IoTHubClient_LL_MessageCallback` shall return `false`.** ]**
+**SRS_IOTHUBCLIENT_LL_10_004: [** If the client is not subscribed to receive messages then `IoTHubClient_LL_MessageCallback` shall return `false`.** ]**
 
-**SRS_IOTHUBCLIENT_LL_02_030: [** `IoTHubClient_LL_MessageCallback` shall invoke the last callback function (the parameter `messageCallback` to `IoTHubClient_LL_SetMessageCallback`) passing the message and the userContextCallback.** ]**
+**SRS_IOTHUBCLIENT_LL_02_030: [** If `messageCallbackType` is `LEGACY` then `IoTHubClient_LL_MessageCallback` shall invoke the last callback function (the parameter `messageCallback` to `IoTHubClient_LL_SetMessageCallback`) passing the message and the userContextCallback.** ]**
 
-**SRS_IOTHUBCLIENT_LL_10_007: [** `IoTHubClient_LL_MessageCallback` shall send the message disposition as returned by the client to the underlying layer and return `true`.** ]**
+**SRS_IOTHUBCLIENT_LL_10_007: [** If `messageCallbackType` is `LEGACY` then `IoTHubClient_LL_MessageCallback` shall send the message disposition as returned by the client to the underlying layer and return `true`.** ]**
 
-**SRS_IOTHUBCLIENT_LL_02_032: [** If the last callback function was `NULL` (both `messageCallback` and `messageCallbackEx` are `NULL`), then `IoTHubClient_LL_MessageCallback` shall report `false`.** ]**
+**SRS_IOTHUBCLIENT_LL_02_032: [** If `messageCallbackType` is `NONE` then `IoTHubClient_LL_MessageCallback` shall return `false`.** ]**
 
-**SRS_IOTHUBCLIENT_LL_10_009: [** If `messageCallbackEx` returns `false`, `IoTHubClient_LL_MessageCallback` shall report `false`.** ]**
+**SRS_IOTHUBCLIENT_LL_10_009: [** If `messageCallbackType` is `ASYNC` then `IoTHubClient_LL_MessageCallback` shall return what `messageCallbacEx` returns.** ]**
 
 ## IoTHubClient_LL_SetMessageCallbackEx
 
@@ -396,15 +396,15 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetConnectionStatusCallback(IOTHUB_C
 
 **SRS_IOTHUBCLIENT_LL_25_112: [**IoTHubClient_LL_SetConnectionStatusCallback shall return IOTHUB_CLIENT_OK and save the callback and userContext as a member of the handle.**]**
 
-###IotHubClient_LL_ConnectionStatusCallBack
+###IoTHubClient_LL_ConnectionStatusCallBack
 ```c
-extern void IotHubClient_LL_ConnectionStatusCallBack(IOTHUB_CLIENT_LL_HANDLE handle, IOTHUB_CLIENT_CONNECTION_STATUS connectionStatus, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason);
+extern void IoTHubClient_LL_ConnectionStatusCallBack(IOTHUB_CLIENT_LL_HANDLE handle, IOTHUB_CLIENT_CONNECTION_STATUS connectionStatus, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason);
 ```
-**SRS_IOTHUBCLIENT_LL_25_113: [**If parameter connectionStatus is NULL or parameter handle is NULL then IotHubClient_LL_ConnectionStatusCallBack shall return.**]**
+**SRS_IOTHUBCLIENT_LL_25_113: [**If parameter connectionStatus is NULL or parameter handle is NULL then IoTHubClient_LL_ConnectionStatusCallBack shall return.**]**
 
-IotHubClient_LL_ConnectionStatusCallBack is a function that is only called by the lower layers. connectionStatus represents the authentication state of the client to the IOTHUB with reason for change.
+IoTHubClient_LL_ConnectionStatusCallBack is a function that is only called by the lower layers. connectionStatus represents the authentication state of the client to the IOTHUB with reason for change.
 
-**SRS_IOTHUBCLIENT_LL_25_114: [**IotHubClient_LL_ConnectionStatusCallBack shall call non-callback set by the user from IoTHubClient_LL_SetConnectionStatusCallback passing the status, reason and the passed userContextCallback.**]**
+**SRS_IOTHUBCLIENT_LL_25_114: [**IoTHubClient_LL_ConnectionStatusCallBack shall call non-callback set by the user from IoTHubClient_LL_SetConnectionStatusCallback passing the status, reason and the passed userContextCallback.**]**
 
 ###IoTHubClient_LL_SetRetryPolicy
 ```c

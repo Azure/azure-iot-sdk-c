@@ -1848,7 +1848,7 @@ TEST_FUNCTION(IoTHubClient_LL_SendMessageDisposition_with_second_NULL_fails)
     IoTHubClient_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IOTHUBCLIENT_LL_10_007: [IoTHubClient_LL_SendMessageDisposition shall return the result from calling the underlying layer's _Send_Message_Disposition.]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_10_027: [IoTHubClient_LL_SendMessageDisposition shall return the result from calling the underlying layer's Send_MessageDisposition.]*/
 TEST_FUNCTION(IoTHubClient_LL_SendMessageDisposition_Succeeds)
 {
     ///arrange
@@ -2084,7 +2084,7 @@ TEST_FUNCTION(IoTHubClient_LL_SetRetryPolicy_success)
     IoTHubClient_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IOTHUBCLIENT_LL_25_114: [**IotHubClient_LL_ConnectionStatusCallBack shall call non-callback set by the user from IoTHubClient_LL_SetConnectionStatusCallback passing the status, reason and the passed userContextCallback.]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_25_114: [**IoTHubClient_LL_ConnectionStatusCallBack shall call non-callback set by the user from IoTHubClient_LL_SetConnectionStatusCallback passing the status, reason and the passed userContextCallback.]*/
 TEST_FUNCTION(IoTHubClient_LL_ConnectionStatusCallBack_calls_upper_layer_succeeds)
 {
     ///arrange
@@ -2096,7 +2096,7 @@ TEST_FUNCTION(IoTHubClient_LL_ConnectionStatusCallBack_calls_upper_layer_succeed
     STRICT_EXPECTED_CALL(connectionStatusCallback((IOTHUB_CLIENT_CONNECTION_STATUS)IGNORED_NUM_ARG, (IOTHUB_CLIENT_CONNECTION_STATUS_REASON)IGNORED_NUM_ARG, (void*)11)).IgnoreAllArguments();
 
     ///act
-    IotHubClient_LL_ConnectionStatusCallBack(handle, (IOTHUB_CLIENT_CONNECTION_STATUS)IGNORED_NUM_ARG, (IOTHUB_CLIENT_CONNECTION_STATUS_REASON)IGNORED_NUM_ARG);
+    IoTHubClient_LL_ConnectionStatusCallBack(handle, (IOTHUB_CLIENT_CONNECTION_STATUS)IGNORED_NUM_ARG, (IOTHUB_CLIENT_CONNECTION_STATUS_REASON)IGNORED_NUM_ARG);
 
     ///assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -2104,7 +2104,7 @@ TEST_FUNCTION(IoTHubClient_LL_ConnectionStatusCallBack_calls_upper_layer_succeed
     IoTHubClient_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IOTHUBCLIENT_LL_25_113: [If parameter connectionStatus is NULL or parameter handle is NULL then IotHubClient_LL_ConnectionStatusCallBack shall return.] */
+/*Tests_SRS_IOTHUBCLIENT_LL_25_113: [If parameter connectionStatus is NULL or parameter handle is NULL then IoTHubClient_LL_ConnectionStatusCallBack shall return.] */
 TEST_FUNCTION(IoTHubClient_LL_ConnectionStatusCallBack_with_NULL_parameter_fails)
 {
     ///arrange
@@ -2114,7 +2114,7 @@ TEST_FUNCTION(IoTHubClient_LL_ConnectionStatusCallBack_with_NULL_parameter_fails
     umock_c_reset_all_calls();
 
     ///act
-    IotHubClient_LL_ConnectionStatusCallBack(NULL, (IOTHUB_CLIENT_CONNECTION_STATUS)IGNORED_NUM_ARG, (IOTHUB_CLIENT_CONNECTION_STATUS_REASON)IGNORED_NUM_ARG);
+    IoTHubClient_LL_ConnectionStatusCallBack(NULL, (IOTHUB_CLIENT_CONNECTION_STATUS)IGNORED_NUM_ARG, (IOTHUB_CLIENT_CONNECTION_STATUS_REASON)IGNORED_NUM_ARG);
 
     ///assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -2122,7 +2122,7 @@ TEST_FUNCTION(IoTHubClient_LL_ConnectionStatusCallBack_with_NULL_parameter_fails
     IoTHubClient_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IOTHUBCLIENT_LL_25_113: [If parameter connectionStatus is NULL or parameter handle is NULL then IotHubClient_LL_ConnectionStatusCallBack shall return.] */
+/*Tests_SRS_IOTHUBCLIENT_LL_25_113: [If parameter connectionStatus is NULL or parameter handle is NULL then IoTHubClient_LL_ConnectionStatusCallBack shall return.] */
 TEST_FUNCTION(IoTHubClient_LL_ConnectionStatusCallBack_with_NULL_callback_fails)
 {
     ///arrange
@@ -2132,7 +2132,7 @@ TEST_FUNCTION(IoTHubClient_LL_ConnectionStatusCallBack_with_NULL_callback_fails)
     umock_c_reset_all_calls();
 
     ///act
-    IotHubClient_LL_ConnectionStatusCallBack(NULL, (IOTHUB_CLIENT_CONNECTION_STATUS)IGNORED_NUM_ARG, (IOTHUB_CLIENT_CONNECTION_STATUS_REASON)IGNORED_NUM_ARG);
+    IoTHubClient_LL_ConnectionStatusCallBack(NULL, (IOTHUB_CLIENT_CONNECTION_STATUS)IGNORED_NUM_ARG, (IOTHUB_CLIENT_CONNECTION_STATUS_REASON)IGNORED_NUM_ARG);
 
     ///assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -2458,7 +2458,8 @@ TEST_FUNCTION(IoTHubClient_LL_MessageCallback_with_messageData_messageHandle_is_
     IoTHubClient_LL_Destroy(handle);
 }
 
-TEST_FUNCTION(IoTHubClient_LL_MessageCallback_with_unsubscribed_sends_abandoned_succeeds)
+/*Tests_SRS_IOTHUBCLIENT_LL_02_032: [If messageCallbackType is NONE then IoTHubClient_LL_MessageCallback shall report false.] */
+TEST_FUNCTION(IoTHubClient_LL_MessageCallback_with_unsubscribed_returns_false)
 {
     //arrange
     IOTHUB_CLIENT_LL_HANDLE handle = IoTHubClient_LL_Create(&TEST_CONFIG);
@@ -2466,13 +2467,12 @@ TEST_FUNCTION(IoTHubClient_LL_MessageCallback_with_unsubscribed_sends_abandoned_
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(get_time(NULL));
-    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SendMessageDisposition(testMessage, IOTHUBMESSAGE_ABANDONED));
 
     //act
     bool result = IoTHubClient_LL_MessageCallback(handle, testMessage);
 
     //assert
-    ASSERT_IS_TRUE(result);
+    ASSERT_IS_FALSE(result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -2480,31 +2480,8 @@ TEST_FUNCTION(IoTHubClient_LL_MessageCallback_with_unsubscribed_sends_abandoned_
     IoTHubClient_LL_Destroy(handle);
 }
 
-TEST_FUNCTION(IoTHubClient_LL_MessageCallback_with_unsubscribed_sends_abandoned_fails)
-{
-    //arrange
-    IOTHUB_CLIENT_LL_HANDLE handle = IoTHubClient_LL_Create(&TEST_CONFIG);
-    MESSAGE_CALLBACK_INFO* testMessage = make_test_message_info(TEST_MESSAGE_HANDLE);
-    umock_c_reset_all_calls();
-
-    STRICT_EXPECTED_CALL(get_time(NULL));
-    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SendMessageDisposition(testMessage, IOTHUBMESSAGE_ABANDONED))
-        .SetReturn(IOTHUB_CLIENT_ERROR);
-
-    //act
-    bool result = IoTHubClient_LL_MessageCallback(handle, testMessage);
-
-    //assert
-    ASSERT_IS_TRUE(result);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-    //cleanup
-    destroy_test_message_info(testMessage);
-    IoTHubClient_LL_Destroy(handle);
-}
-
-/*Tests_SRS_IOTHUBCLIENT_LL_02_030: [IoTHubClient_LL_MessageCallback shall invoke the last callback function (the parameter messageCallback to IoTHubClient_LL_SetMessageCallback) passing the message and the passed userContextCallback.]*/
-/*Tests_SRS_IOTHUBCLIENT_LL_02_031: [Then IoTHubClient_LL_MessageCallback shall return what the user function returns.]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_030: [If messageCallbackType is LEGACY then IoTHubClient_LL_MessageCallback shall invoke the last callback function (the parameter messageCallback to IoTHubClient_LL_SetMessageCallback) passing the message and the passed userContextCallback.]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_10_007: [If messageCallbackType is LEGACY then IoTHubClient_LL_MessageCallback shall send the message disposition as returned by the client to the underlying layer and return true.]*/
 TEST_FUNCTION(IoTHubClient_LL_MessageCallback_with_messageCallback_calls_client_layer_succeeds)
 {
     //arrange
@@ -2577,8 +2554,32 @@ TEST_FUNCTION(IoTHubClient_LL_MessageCallback_with_messageCallbackEx_calls_clien
     IoTHubClient_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IOTHUBCLIENT_LL_10_009: [If messageCallbackEx returns false, IoTHubClient_LL_MessageCallback shall report false.] */
-TEST_FUNCTION(IoTHubClient_LL_MessageCallback_with_messageCallbackEx_calls_client_layer_fails)
+/*Tests_SRS_IOTHUBCLIENT_LL_10_009: [If messageCallbackType is ASYNC then  IoTHubClient_LL_MessageCallback shall return what messageCallbacEx returns.] */
+TEST_FUNCTION(IoTHubClient_LL_MessageCallback_with_messageCallbackEx_calls_client_layer_reports_true)
+{
+    //arrange
+    IOTHUB_CLIENT_LL_HANDLE handle = IoTHubClient_LL_Create(&TEST_CONFIG);
+    (void)IoTHubClient_LL_SetMessageCallbackEx(handle, messageCallbackEx, (void*)11);
+    MESSAGE_CALLBACK_INFO* testMessage = make_test_message_info(TEST_MESSAGE_HANDLE);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(get_time(NULL));
+    STRICT_EXPECTED_CALL(messageCallbackEx(testMessage, (void*)11));
+
+    //act
+    bool result = IoTHubClient_LL_MessageCallback(handle, testMessage);
+
+    //assert
+    ASSERT_IS_TRUE(result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    destroy_test_message_info(testMessage);
+    IoTHubClient_LL_Destroy(handle);
+}
+
+/*Tests_SRS_IOTHUBCLIENT_LL_10_009: [If messageCallbackType is ASYNC then  IoTHubClient_LL_MessageCallback shall return what messageCallbacEx returns.] */
+TEST_FUNCTION(IoTHubClient_LL_MessageCallback_with_messageCallbackEx_calls_client_layer_reports_false)
 {
     //arrange
     IOTHUB_CLIENT_LL_HANDLE handle = IoTHubClient_LL_Create(&TEST_CONFIG);
@@ -2589,13 +2590,12 @@ TEST_FUNCTION(IoTHubClient_LL_MessageCallback_with_messageCallbackEx_calls_clien
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(messageCallbackEx(testMessage, (void*)11))
         .SetReturn(false);
-    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SendMessageDisposition(testMessage, IOTHUBMESSAGE_ABANDONED));
 
     //act
     bool result = IoTHubClient_LL_MessageCallback(handle, testMessage);
 
     //assert
-    ASSERT_IS_TRUE(result);
+    ASSERT_IS_FALSE(result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -2614,14 +2614,12 @@ TEST_FUNCTION(IoTHubClient_LL_MessageCallback_with_messageCallbackEx_calls_clien
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(messageCallbackEx(testMessage, (void*)11))
         .SetReturn(false);
-    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SendMessageDisposition(testMessage, IOTHUBMESSAGE_ABANDONED))
-        .SetReturn(IOTHUB_CLIENT_ERROR);
 
     //act
     bool result = IoTHubClient_LL_MessageCallback(handle, testMessage);
 
     //assert
-    ASSERT_IS_TRUE(result);
+    ASSERT_IS_FALSE(result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup

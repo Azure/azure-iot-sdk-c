@@ -19,6 +19,7 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 
 #define ENABLE_MOCKS
+#include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/xio.h"
 #include "azure_c_shared_utility/tlsio.h"
 #include "azure_c_shared_utility/platform.h"

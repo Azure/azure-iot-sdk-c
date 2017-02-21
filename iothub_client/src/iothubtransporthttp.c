@@ -1653,6 +1653,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
     REJECT, \
     ABANDON
 DEFINE_ENUM(ACTION, ACTION_VALUES);
+DEFINE_ENUM_STRINGS(ACTION, ACTION_VALUES);
 
 static bool abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVICE_DATA* deviceData, const char* ETag, ACTION action)
 {
@@ -1880,7 +1881,7 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SendMessageDisposition(MESSAGE_C
                     else
                     {
                         /* Codes_SRS_TRANSPORTMULTITHTTP_10_003: [IoTHubTransportHttp_SendMessageDisposition shall fail and return IOTHUB_CLIENT_ERROR if the POST message fails, otherwise return IOTHUB_CLIENT_OK.] */
-                        LogError("HTTP Transport layer failed to report disposition");
+                        LogError("HTTP Transport layer failed to report %s disposition", ENUM_TO_STRING(ACTION, disposition));
                         result = IOTHUB_CLIENT_ERROR;
                     }
                 }
@@ -2150,24 +2151,41 @@ static void DoMessages(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERD
                                             }
                                             else
                                             {
-                                                bool abandon;
                                                 MESSAGE_CALLBACK_INFO* messageData = MESSAGE_CALLBACK_INFO_Create(receivedMessage, handleData, deviceData);
                                                 if (messageData == NULL)
                                                 {
                                                     /*Codes_SRS_TRANSPORTMULTITHTTP_10_006: [If assembling the transport context fails, _DoWork shall "abandon" the message.] */
                                                     LogError("failed to assemble callback info");
-                                                    abandon = true;
-                                                }
-                                                else
-                                                {
-                                                    /*Codes_SRS_TRANSPORTMULTITHTTP_17_096: [If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_ABANDONED then _DoWork shall "abandon" the message.] */
-                                                    abandon = IoTHubClient_LL_MessageCallback(iotHubClientHandle, messageData);
-                                                }
-                                                if (abandon)
-                                                {
                                                     if (!abandonOrAcceptMessage(handleData, deviceData, etagValue, ABANDON))
                                                     {
                                                         LogError("HTTP Transport layer failed to report ABANDON disposition");
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    bool abandon;
+                                                    if (IoTHubMessage_SetMessageId(messageData->messageHandle, etagValue) != IOTHUB_CLIENT_OK)
+                                                    {
+                                                        LogError("failed to set message ID");
+                                                        abandon = true;
+                                                    }
+                                                    else
+                                                    {
+                                                        if (IoTHubClient_LL_MessageCallback(iotHubClientHandle, messageData))
+                                                        {
+                                                            abandon = false;
+                                                        }
+                                                        else
+                                                        {
+                                                            LogError("IoTHubClient_LL_MessageCallback failed");
+                                                            abandon = true;
+                                                        }
+                                                    }
+
+                                                    /*Codes_SRS_TRANSPORTMULTITHTTP_17_096: [If IoTHubClient_LL_MessageCallback returns false then _DoWork shall "abandon" the message.] */
+                                                    if (abandon)
+                                                    {
+                                                        (void)IoTHubTransportHttp_SendMessageDisposition(messageData, ABANDON);
                                                     }
                                                 }
                                             }

@@ -8,6 +8,7 @@
 #include "azure_c_shared_utility/platform.h"
 #include "iothubtransport_mqtt_common.h"
 
+
 static XIO_HANDLE getIoTransportProvider(const char* fqdn)
 {
     XIO_HANDLE result;
@@ -85,12 +86,7 @@ static int IoTHubTransportMqtt_DeviceMethod_Response(IOTHUB_DEVICE_HANDLE handle
 
 static IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_SendMessageDisposition(MESSAGE_CALLBACK_INFO* message_data, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
 {
-    (void)message_data;
-    (void)disposition;
-
-    // this function is not honored by MQTT
-    LogError("Currently Not Supported.");
-    return IOTHUB_PROCESS_ERROR;
+    return IoTHubTransport_MQTT_Common_SendMessageDisposition(message_data, disposition);
 }
 
 static IOTHUB_PROCESS_ITEM_RESULT IoTHubTransportMqtt_ProcessItem(TRANSPORT_LL_HANDLE handle, IOTHUB_IDENTITY_TYPE item_type, IOTHUB_IDENTITY_INFO* iothub_item)

@@ -10,7 +10,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 #endif
-
+#include <time.h>
 #include "macro_utils.h"
 #include "testrunnerswitcher.h"
 #include "umock_c.h"

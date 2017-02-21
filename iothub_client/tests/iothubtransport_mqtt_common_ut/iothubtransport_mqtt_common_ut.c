@@ -288,7 +288,7 @@ static void my_IoTHubClient_LL_SendComplete(IOTHUB_CLIENT_LL_HANDLE handle, PDLI
     (void)result;
 }
 
-static void my_IotHubClient_LL_ConnectionStatusCallBack(IOTHUB_CLIENT_LL_HANDLE handle, IOTHUB_CLIENT_CONNECTION_STATUS status, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason)
+static void my_IoTHubClient_LL_ConnectionStatusCallBack(IOTHUB_CLIENT_LL_HANDLE handle, IOTHUB_CLIENT_CONNECTION_STATUS status, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason)
 {
     (void)handle;
     (void)status;
@@ -543,7 +543,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_LL_MessageCallback, true);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat, IOTHUBMESSAGE_REJECTED);
 
-    REGISTER_GLOBAL_MOCK_HOOK(IotHubClient_LL_ConnectionStatusCallBack, my_IotHubClient_LL_ConnectionStatusCallBack);
+    REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_ConnectionStatusCallBack, my_IoTHubClient_LL_ConnectionStatusCallBack);
 
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_SendComplete, my_IoTHubClient_LL_SendComplete);
 
@@ -795,10 +795,6 @@ static void setup_message_recv_with_properties_mocks()
         .IgnoreArgument_size();
     STRICT_EXPECTED_CALL(IoTHubClient_LL_MessageCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_PTR_ARG))
         .IgnoreArgument_message_data();
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
-        .IgnoreArgument_ptr();
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
-        .IgnoreArgument_iotHubMessageHandle();
 }
 
 static void setup_start_retry_timer_mocks()
@@ -809,7 +805,7 @@ static void setup_start_retry_timer_mocks()
 
 static void setup_connection_success_mocks()
 {
-    STRICT_EXPECTED_CALL(IotHubClient_LL_ConnectionStatusCallBack(TEST_IOTHUB_CLIENT_LL_HANDLE, IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK))
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_ConnectionStatusCallBack(TEST_IOTHUB_CLIENT_LL_HANDLE, IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK))
         .IgnoreArgument(1);
 }
 
@@ -1128,10 +1124,13 @@ static void setup_message_recv_msg_callback_mocks(IOTHUBMESSAGE_DISPOSITION_RESU
     STRICT_EXPECTED_CALL(IoTHubClient_LL_MessageCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_PTR_ARG))
         .IgnoreArgument_message_data()
         .SetReturn(msg_disposition != IOTHUBMESSAGE_ABANDONED);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
-        .IgnoreArgument_ptr();
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
-        .IgnoreArgument_iotHubMessageHandle();
+    if (msg_disposition == IOTHUBMESSAGE_ABANDONED)
+    {
+        STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument_iotHubMessageHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+    }
 }
 
 static XIO_HANDLE get_IO_transport(const char* fully_qualified_name)
@@ -2913,7 +2912,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_SAS_token_from_user_invalid_cal
     STRICT_EXPECTED_CALL(STRING_new());
     EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(SASToken_Validate(IGNORED_PTR_ARG)).SetReturn(false);
-    STRICT_EXPECTED_CALL(IotHubClient_LL_ConnectionStatusCallBack(TEST_IOTHUB_CLIENT_LL_HANDLE, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_EXPIRED_SAS_TOKEN))
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_ConnectionStatusCallBack(TEST_IOTHUB_CLIENT_LL_HANDLE, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_EXPIRED_SAS_TOKEN))
         .IgnoreArgument(1);
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
@@ -3559,7 +3558,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_delivered_MQTT_CLIENT_NO_NETWORK_success)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IotHubClient_LL_ConnectionStatusCallBack(TEST_IOTHUB_CLIENT_LL_HANDLE, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_NO_NETWORK))
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_ConnectionStatusCallBack(TEST_IOTHUB_CLIENT_LL_HANDLE, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_NO_NETWORK))
         .IgnoreArgument(1);
 
     // act
@@ -3604,7 +3603,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MqttOpCompleteCallback_CONN_ACK_NOT_CO
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IotHubClient_LL_ConnectionStatusCallBack(TEST_IOTHUB_CLIENT_LL_HANDLE, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL))
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_ConnectionStatusCallBack(TEST_IOTHUB_CLIENT_LL_HANDLE, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(mqtt_client_disconnect(TEST_MQTT_CLIENT_HANDLE))
         .IgnoreArgument(1);
@@ -3632,7 +3631,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_MqttOpCompleteCallback_CONN_ACK_CONN_REFUSED_N
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IotHubClient_LL_ConnectionStatusCallBack(TEST_IOTHUB_CLIENT_LL_HANDLE, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_DEVICE_DISABLED))
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_ConnectionStatusCallBack(TEST_IOTHUB_CLIENT_LL_HANDLE, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_DEVICE_DISABLED))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(mqtt_client_disconnect(TEST_MQTT_CLIENT_HANDLE))
         .IgnoreArgument(1);
@@ -3928,10 +3927,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_sys_Properties_succee
         .IgnoreArgument_size();
     STRICT_EXPECTED_CALL(IoTHubClient_LL_MessageCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_PTR_ARG))
         .IgnoreArgument_message_data();
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
-        .IgnoreArgument_ptr();
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
-        .IgnoreArgument_iotHubMessageHandle();
 
     // act
     ASSERT_IS_NOT_NULL(g_fnMqttMsgRecv);
@@ -4039,43 +4034,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_messagecallback_ABANDONED_
     umock_c_reset_all_calls();
 
     setup_message_recv_msg_callback_mocks(IOTHUBMESSAGE_ABANDONED);
-
-    // act
-    ASSERT_IS_NOT_NULL(g_fnMqttMsgRecv);
-    g_fnMqttMsgRecv(TEST_MQTT_MESSAGE_HANDLE, g_callbackCtx);
-
-    // assert
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-    //cleanup
-    IoTHubTransport_MQTT_Common_Destroy(handle);
-}
-
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_054: [ If type is IOTHUB_TYPE_DEVICE_TWIN, then on success if msg_type is RETRIEVE_PROPERTIES then mqtt_notification_callback shall call IoTHubClient_LL_RetrievePropertyComplete... ]*/
-TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_messagecallback_REJECTED_fail)
-{
-    // arrange
-    IOTHUBTRANSPORT_CONFIG config = { 0 };
-    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
-
-    QOS_VALUE QosValue[] = { DELIVER_AT_LEAST_ONCE };
-    SUBSCRIBE_ACK suback;
-    suback.packetId = 1234;
-    suback.qosCount = 1;
-    suback.qosReturn = QosValue;
-
-    IOTHUB_MESSAGE_LIST message1;
-    memset(&message1, 0, sizeof(IOTHUB_MESSAGE_LIST));
-    message1.messageHandle = TEST_IOTHUB_MSG_BYTEARRAY;
-
-    DList_InsertTailList(config.waitingToSend, &(message1.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
-    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_SUBSCRIBE_ACK, &suback, g_callbackCtx);
-    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
-    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
-    umock_c_reset_all_calls();
-
-    setup_message_recv_msg_callback_mocks(IOTHUBMESSAGE_REJECTED);
 
     // act
     ASSERT_IS_NOT_NULL(g_fnMqttMsgRecv);

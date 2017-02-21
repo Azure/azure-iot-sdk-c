@@ -136,7 +136,7 @@ The result of the `STRING_construct` shall be known as key.
 
 ## IoTHubTransportHttp_SendMessageDisposition
 ```c
-IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SendMessageDisposition(const char* messageId, IOTHUBMESSAGE_DISPOSITION_RESULT disposition, void* transportContext);
+IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SendMessageDisposition(MESSAGE_CALLBACK_INFO* messageData, IOTHUBMESSAGE_DISPOSITION_RESULT disposition);
 ```
 
 

@@ -437,8 +437,9 @@ static void on_message_receiver_state_changed_callback(const void* context, MESS
 	}
 }
 
-static AMQP_VALUE on_message_received_internal_callback(const void* context, MESSAGE_HANDLE message)
+static AMQP_VALUE on_message_received_internal_callback(const void* context, MESSAGE_HANDLE message, LINK_HANDLE link)
 {
+    (void)link;
 	AMQP_VALUE result = NULL;
 	int api_call_result;
 	IOTHUB_MESSAGE_HANDLE iothub_message = NULL;

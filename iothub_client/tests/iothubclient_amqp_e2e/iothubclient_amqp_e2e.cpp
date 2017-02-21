@@ -31,4 +31,9 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2e)
         e2e_recv_message_test(AMQP_Protocol);
     }
 
+    TEST_FUNCTION(IoTHub_AMQP_RecvMessage_Shared_E2ETest)
+    {
+        e2e_recv_message_shared_test(AMQP_Protocol);
+    }
+
 END_TEST_SUITE(iothubclient_amqp_e2e)

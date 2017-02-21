@@ -11,6 +11,7 @@
 #include <string.h>
 #endif
 
+#include <time.h>
 #include "iothub_messaging_ll.h"
 
 #include "umock_c.h"

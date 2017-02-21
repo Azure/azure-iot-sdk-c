@@ -1831,9 +1831,9 @@ TEST_FUNCTION(messenger_on_message_received_internal_callback_ACCEPTED)
     set_expected_calls_for_on_message_received_internal_callback(MESSENGER_DISPOSITION_RESULT_ACCEPTED);
 
     // act
-        ASSERT_IS_NOT_NULL(saved_messagereceiver_open_on_message_received);
+    ASSERT_IS_NOT_NULL(saved_messagereceiver_open_on_message_received);
 
-    AMQP_VALUE result = saved_messagereceiver_open_on_message_received(saved_messagereceiver_open_callback_context, TEST_MESSAGE_HANDLE);
+    AMQP_VALUE result = saved_messagereceiver_open_on_message_received(saved_messagereceiver_open_callback_context, TEST_MESSAGE_HANDLE, NULL);
 
     // assert
     ASSERT_ARE_EQUAL(int, subscription_result, 0);
@@ -1864,9 +1864,9 @@ TEST_FUNCTION(messenger_on_message_received_internal_callback_ABANDONED)
     set_expected_calls_for_on_message_received_internal_callback(MESSENGER_DISPOSITION_RESULT_ABANDONED);
 
     // act
-        ASSERT_IS_NOT_NULL(saved_messagereceiver_open_on_message_received);
+    ASSERT_IS_NOT_NULL(saved_messagereceiver_open_on_message_received);
 
-    AMQP_VALUE result = saved_messagereceiver_open_on_message_received(saved_messagereceiver_open_callback_context, TEST_MESSAGE_HANDLE);
+    AMQP_VALUE result = saved_messagereceiver_open_on_message_received(saved_messagereceiver_open_callback_context, TEST_MESSAGE_HANDLE, NULL);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -1896,9 +1896,9 @@ TEST_FUNCTION(messenger_on_message_received_internal_callback_REJECTED)
     set_expected_calls_for_on_message_received_internal_callback(MESSENGER_DISPOSITION_RESULT_REJECTED);
 
     // act
-        ASSERT_IS_NOT_NULL(saved_messagereceiver_open_on_message_received);
+    ASSERT_IS_NOT_NULL(saved_messagereceiver_open_on_message_received);
 
-    AMQP_VALUE result = saved_messagereceiver_open_on_message_received(saved_messagereceiver_open_callback_context, TEST_MESSAGE_HANDLE);
+    AMQP_VALUE result = saved_messagereceiver_open_on_message_received(saved_messagereceiver_open_callback_context, TEST_MESSAGE_HANDLE, NULL);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -1929,9 +1929,9 @@ TEST_FUNCTION(messenger_on_message_received_internal_callback_IoTHubMessage_Crea
     STRICT_EXPECTED_CALL(messaging_delivery_rejected("Rejected due to failure reading AMQP message", "Failed reading AMQP message"));
 
     // act
-        ASSERT_IS_NOT_NULL(saved_messagereceiver_open_on_message_received);
+    ASSERT_IS_NOT_NULL(saved_messagereceiver_open_on_message_received);
 
-    AMQP_VALUE result = saved_messagereceiver_open_on_message_received(saved_messagereceiver_open_callback_context, TEST_MESSAGE_HANDLE);
+    AMQP_VALUE result = saved_messagereceiver_open_on_message_received(saved_messagereceiver_open_callback_context, TEST_MESSAGE_HANDLE, NULL);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
