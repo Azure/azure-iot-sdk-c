@@ -614,8 +614,7 @@ extern "C" void e2e_recv_message_test_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER prot
     recv_message_test(IoTHubAccount_GetX509Device(g_iothubAcctInfo), protocol);
 }
 
-
-extern "C" void e2e_recv_message_shared_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+extern "C" void recv_message_shared_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
     // arrange
 
@@ -736,4 +735,14 @@ extern "C" void e2e_recv_message_shared_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER pr
     IoTHubTransport_Destroy(transportHandle);
     ReceiveUserContext_Destroy(notifyData2);
     ReceiveUserContext_Destroy(notifyData1);
+}
+
+extern "C" void e2e_recv_message_shared_test_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+{
+    recv_message_shared_test(IoTHubAccount_GetSASDevice(g_iothubAcctInfo2), IoTHubAccount_GetSASDevice(g_iothubAcctInfo3), protocol);
+}
+
+extern "C" void e2e_recv_message_shared_test_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+{
+    recv_message_shared_test(IoTHubAccount_GetX509Device(g_iothubAcctInfo2), IoTHubAccount_GetX509Device(g_iothubAcctInfo3), protocol);
 }

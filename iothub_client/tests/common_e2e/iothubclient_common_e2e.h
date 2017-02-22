@@ -13,12 +13,12 @@ extern "C" {
 extern void e2e_init(void);
 extern void e2e_deinit(void);
 
-extern void e2e_recv_message_shared_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
-
 extern void e2e_send_event_test_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
 extern void e2e_send_event_test_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
 extern void e2e_recv_message_test_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
 extern void e2e_recv_message_test_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
+extern void e2e_recv_message_shared_test_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
+extern void e2e_recv_message_shared_test_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
 
 #ifdef __cplusplus
 }

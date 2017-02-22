@@ -1654,7 +1654,6 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
     REJECT, \
     ABANDON
 DEFINE_ENUM(ACTION, ACTION_VALUES);
-DEFINE_ENUM_STRINGS(ACTION, ACTION_VALUES);
 
 static bool abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVICE_DATA* deviceData, const char* ETag, ACTION action)
 {
@@ -1839,6 +1838,7 @@ typedef struct TRANSPORT_CONTEXT_DATA_TAG
     HTTPTRANSPORT_PERDEVICE_DATA* deviceData;
 } TRANSPORT_CONTEXT_DATA;
 
+DEFINE_ENUM_STRINGS(IOTHUBMESSAGE_DISPOSITION_RESULT, IOTHUBMESSAGE_DISPOSITION_RESULT_VALUES);
 static IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SendMessageDisposition(MESSAGE_CALLBACK_INFO* message_data, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
 {
     IOTHUB_CLIENT_RESULT result;
@@ -1875,14 +1875,14 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SendMessageDisposition(MESSAGE_C
                 }
                 else
                 {
-                    if (abandonOrAcceptMessage(tc->handleData, tc->deviceData, IoTHubMessage_GetMessageId(message_data->messageHandle), disposition))
+                    if (abandonOrAcceptMessage(tc->handleData, tc->deviceData, IoTHubMessage_GetMessageId(message_data->messageHandle), (ACTION)disposition))
                     {
                         result = IOTHUB_CLIENT_OK;
                     }
                     else
                     {
                         /* Codes_SRS_TRANSPORTMULTITHTTP_10_003: [IoTHubTransportHttp_SendMessageDisposition shall fail and return IOTHUB_CLIENT_ERROR if the POST message fails, otherwise return IOTHUB_CLIENT_OK.] */
-                        LogError("HTTP Transport layer failed to report %s disposition", ENUM_TO_STRING(ACTION, disposition));
+                        LogError("HTTP Transport layer failed to report %s disposition", ENUM_TO_STRING(IOTHUBMESSAGE_DISPOSITION_RESULT, disposition));
                         result = IOTHUB_CLIENT_ERROR;
                     }
                 }
