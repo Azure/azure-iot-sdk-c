@@ -125,8 +125,14 @@ static STRING_HANDLE IoTHubTransportAMQP_WS_GetHostname(TRANSPORT_LL_HANDLE hand
     return IoTHubTransport_AMQP_Common_GetHostname(handle);
 }
 
+static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_WS_SendMessageDisposition(MESSAGE_CALLBACK_INFO* message_data, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
+{
+    return IoTHubTransport_AMQP_Common_SendMessageDisposition(message_data, disposition);
+}
+
 static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls = 
 {
+    IoTHubTransportAMQP_WS_SendMessageDisposition,                        /*pfIotHubTransport_Send_Message_Disposition IoTHubTransport_Send_Message_Disposition;*/
     IoTHubTransportAMQP_WS_Subscribe_DeviceMethod,                     /*pfIoTHubTransport_Subscribe_DeviceMethod IoTHubTransport_Subscribe_DeviceMethod;*/
     IoTHubTransportAMQP_WS_Unsubscribe_DeviceMethod,                   /*pfIoTHubTransport_Unsubscribe_DeviceMethod IoTHubTransport_Unsubscribe_DeviceMethod;*/
     IoTHubTransportAMQP_WS_DeviceMethod_Response,
@@ -147,6 +153,7 @@ static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls =
 };
 
 /* Codes_SRS_IoTHubTransportAMQP_WS_09_019: [This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for it's fields:
+IoTHubTransport_Send_Message_Disposition = IoTHubTransportAMQP_Send_Message_Disposition
 IoTHubTransport_Subscribe_DeviceMethod = IoTHubTransportAMQP_WS_Subscribe_DeviceMethod
 IoTHubTransport_Unsubscribe_DeviceMethod = IoTHubTransportAMQP_WS_Unsubscribe_DeviceMethod
 IoTHubTransport_Subscribe_DeviceTwin = IoTHubTransportAMQP_WS_Subscribe_DeviceTwin

@@ -132,7 +132,13 @@ static int IoTHubTransportMqtt_WS_SetRetryPolicy(TRANSPORT_LL_HANDLE handle, IOT
     return IoTHubTransport_MQTT_Common_SetRetryPolicy(handle, retryPolicy, retryTimeoutLimitinSeconds);
 }
 
+static IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_WS_SendMessageDisposition(MESSAGE_CALLBACK_INFO* message_data, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
+{
+    return IoTHubTransport_MQTT_Common_SendMessageDisposition(message_data, disposition);
+}
+
 /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_011: [ This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for its fields:
+IoTHubTransport_SendMessageDisposition = IoTHubTransport_WS_SendMessageDisposition
 IoTHubTransport_Subscribe_DeviceMethod = IoTHubTransport_WS_Subscribe_DeviceMethod
 IoTHubTransport_Unsubscribe_DeviceMethod IoTHubTransport_WS_Unsubscribe_DeviceMethod
 IoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_WS_Subscribe_DeviceTwin
@@ -145,6 +151,7 @@ IoTHubTransport_Unsubscribe = IoTHubTransportMqtt_WS_Unsubscribe
 IoTHubTransport_DoWork = IoTHubTransportMqtt_WS_DoWork
 IoTHubTransport_SetOption = IoTHubTransportMqtt_WS_SetOption ] */
 static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls = {
+    IoTHubTransportMqtt_WS_SendMessageDisposition,
     IoTHubTransportMqtt_WS_Subscribe_DeviceMethod,
     IoTHubTransportMqtt_WS_Unsubscribe_DeviceMethod,
     IoTHubTransportMqtt_WS_DeviceMethod_Response,
