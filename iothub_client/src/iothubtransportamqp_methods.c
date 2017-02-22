@@ -244,11 +244,12 @@ static void on_message_send_complete(void* context, MESSAGE_SEND_RESULT send_res
     }
 }
 
-static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE message)
+static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE message, LINK_HANDLE link)
 {
+    (void)link;
     PROPERTIES_HANDLE properties;
     /* VS believes this is not initialized, so have to set it to the worse case here */
-    AMQP_VALUE result = NULL;
+    AMQP_VALUE result;
     IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = (IOTHUBTRANSPORT_AMQP_METHODS_HANDLE)context;
     MESSAGE_OUTCOME message_outcome;
 
@@ -392,6 +393,7 @@ static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE messag
                                                 else
                                                 {
                                                     /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_056: [ On success the `on_message_received` callback shall return a newly constructed delivery state obtained by calling `messaging_delivery_accepted`. ]*/
+                                                    result = messaging_delivery_accepted();
                                                     if (result == NULL)
                                                     {
                                                         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_057: [ If `messaging_delivery_accepted` fails the RELEASED outcome with `amqp:decode-error` shall be returned. ]*/
@@ -427,7 +429,6 @@ static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE messag
                                                         else
                                                         {
                                                             message_outcome = MESSAGE_OUTCOME_ACCEPTED;
-                                                            result = messaging_delivery_accepted();
                                                         }
                                                     }
                                                 }
