@@ -408,6 +408,7 @@ static void destroy_test_message_info(MESSAGE_CALLBACK_INFO* oneMessageData)
 {
     IoTHubMessage_Destroy(oneMessageData->messageHandle);
     free(oneMessageData->transportContext);
+    free(oneMessageData);
 }
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)

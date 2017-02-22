@@ -42,8 +42,6 @@ const char* MSG_PROP_VALS[MSG_PROP_COUNT] = { "Val1", "Val2", "Val3" };
 
 static size_t g_iotHubTestId = 0;
 static IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo = NULL;
-static IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo2 = NULL;
-static IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo3 = NULL;
 
 #define IOTHUB_COUNTER_MAX           10
 #define IOTHUB_TIMEOUT_SEC           1000
@@ -62,10 +60,6 @@ typedef struct EXPECTED_SEND_DATA_TAG
 
 typedef struct EXPECTED_RECEIVE_DATA_TAG
 {
-    const unsigned char* toBeSent;
-    size_t toBeSentSize;
-    const char* data;
-    size_t dataSize;
     bool wasFound;
     LOCK_HANDLE lock; /*needed to protect this structure*/
 } EXPECTED_RECEIVE_DATA;
@@ -274,30 +268,6 @@ static EXPECTED_RECEIVE_DATA* ReceiveUserContext_Create(void)
             free(result);
             result = NULL;
         }
-        else
-        {
-            char temp[1000];
-            char* tempString;
-            time_t t = time(NULL);
-            int string_length;
-            string_length = sprintf(temp, TEST_EVENT_DATA_FMT, ctime(&t), g_iotHubTestId);
-            if ((string_length < 0) ||
-                ((tempString = (char*)malloc(string_length + 1)) == NULL))
-            {
-                (void)Lock_Deinit(result->lock);
-                free(result);
-                result = NULL;
-            }
-            else
-            {
-                strcpy(tempString, temp);
-                result->data = tempString;
-                result->dataSize = strlen(result->data);
-                result->wasFound = false;
-                result->toBeSent = (const unsigned char*)tempString;
-                result->toBeSentSize = strlen(tempString);
-            }
-        }
     }
     return result;
 }
@@ -365,18 +335,12 @@ extern "C" void e2e_init(void)
     ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "Platform init failed");
     g_iothubAcctInfo = IoTHubAccount_Init();
     ASSERT_IS_NOT_NULL_WITH_MSG(g_iothubAcctInfo, "Could not initialize IoTHubAccount");
-    g_iothubAcctInfo2 = IoTHubAccount_Init();
-    ASSERT_IS_NOT_NULL_WITH_MSG(g_iothubAcctInfo2, "Could not initialize IoTHubAccount");
-    g_iothubAcctInfo3 = IoTHubAccount_Init();
-    ASSERT_IS_NOT_NULL_WITH_MSG(g_iothubAcctInfo3, "Could not initialize IoTHubAccount");
     platform_init();
 }
 
 extern "C" void e2e_deinit(void)
 {
     IoTHubAccount_deinit(g_iothubAcctInfo);
-    IoTHubAccount_deinit(g_iothubAcctInfo2);
-    IoTHubAccount_deinit(g_iothubAcctInfo3);
     // Need a double deinit
     platform_deinit();
     platform_deinit();
