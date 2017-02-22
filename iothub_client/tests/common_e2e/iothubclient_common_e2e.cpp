@@ -62,8 +62,8 @@ typedef struct EXPECTED_SEND_DATA_TAG
 
 typedef struct EXPECTED_RECEIVE_DATA_TAG
 {
-    const unsigned char* toBeSend;
-    size_t toBeSendSize;
+    const unsigned char* toBeSent;
+    size_t toBeSentSize;
     const char* data;
     size_t dataSize;
     bool wasFound;
@@ -280,7 +280,7 @@ static EXPECTED_RECEIVE_DATA* ReceiveUserContext_Create(void)
             char* tempString;
             time_t t = time(NULL);
             int string_length;
-            string_length = sprintf(temp, TEST_MESSAGE_DATA_FMT, ctime(&t), g_iotHubTestId);
+            string_length = sprintf(temp, TEST_EVENT_DATA_FMT, ctime(&t), g_iotHubTestId);
             if ((string_length < 0) ||
                 ((tempString = (char*)malloc(string_length + 1)) == NULL))
             {
@@ -294,8 +294,8 @@ static EXPECTED_RECEIVE_DATA* ReceiveUserContext_Create(void)
                 result->data = tempString;
                 result->dataSize = strlen(result->data);
                 result->wasFound = false;
-                result->toBeSend = (const unsigned char*)tempString;
-                result->toBeSendSize = strlen(tempString);
+                result->toBeSent = (const unsigned char*)tempString;
+                result->toBeSentSize = strlen(tempString);
             }
         }
     }
@@ -365,9 +365,9 @@ extern "C" void e2e_init(void)
     ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "Platform init failed");
     g_iothubAcctInfo = IoTHubAccount_Init();
     ASSERT_IS_NOT_NULL_WITH_MSG(g_iothubAcctInfo, "Could not initialize IoTHubAccount");
-    g_iothubAcctInfo2 = IoTHubAccount_Init(true);
+    g_iothubAcctInfo2 = IoTHubAccount_Init();
     ASSERT_IS_NOT_NULL_WITH_MSG(g_iothubAcctInfo2, "Could not initialize IoTHubAccount");
-    g_iothubAcctInfo3 = IoTHubAccount_Init(true);
+    g_iothubAcctInfo3 = IoTHubAccount_Init();
     ASSERT_IS_NOT_NULL_WITH_MSG(g_iothubAcctInfo3, "Could not initialize IoTHubAccount");
     platform_init();
 }
@@ -625,22 +625,22 @@ extern "C" void e2e_recv_message_shared_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER pr
     IOTHUB_CLIENT_HANDLE iotHubClientHandle1;
     IOTHUB_CLIENT_HANDLE iotHubClientHandle2;
 
-    EXPECTED_RECEIVE_DATA* notifyData1 = MessageData_Create();
-    EXPECTED_RECEIVE_DATA* notifyData2 = MessageData_Create();
+    EXPECTED_RECEIVE_DATA* notifyData1 = ReceiveUserContext_Create();
+    EXPECTED_RECEIVE_DATA* notifyData2 = ReceiveUserContext_Create();
     ASSERT_IS_NOT_NULL(notifyData1);
     ASSERT_IS_NOT_NULL(notifyData2);
 
     // act
     iotHubConfig1.iotHubName = IoTHubAccount_GetIoTHubName(g_iothubAcctInfo3);
     iotHubConfig1.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix(g_iothubAcctInfo3);
-    iotHubConfig1.deviceId = IoTHubAccount_GetDeviceId(g_iothubAcctInfo3);
-    iotHubConfig1.deviceKey = IoTHubAccount_GetDeviceKey(g_iothubAcctInfo3);
+    iotHubConfig1.deviceId = IoTHubAccount_GetSASDevice(g_iothubAcctInfo2)->deviceId;
+    iotHubConfig1.deviceKey = IoTHubAccount_GetSASDevice(g_iothubAcctInfo2)->primaryAuthentication;
     iotHubConfig1.protocol = protocol;
 
     iotHubConfig2.iotHubName = IoTHubAccount_GetIoTHubName(g_iothubAcctInfo2);
     iotHubConfig2.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix(g_iothubAcctInfo2);
-    iotHubConfig2.deviceId = IoTHubAccount_GetDeviceId(g_iothubAcctInfo2);
-    iotHubConfig2.deviceKey = IoTHubAccount_GetDeviceKey(g_iothubAcctInfo2);
+    iotHubConfig2.deviceId = IoTHubAccount_GetSASDevice(g_iothubAcctInfo2)->deviceId;
+    iotHubConfig2.deviceKey = IoTHubAccount_GetSASDevice(g_iothubAcctInfo2)->primaryAuthentication;
     iotHubConfig2.protocol = protocol;
 
     platform_init();
@@ -651,18 +651,18 @@ extern "C" void e2e_recv_message_shared_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER pr
         ASSERT_IS_NOT_NULL_WITH_MSG(transportHandle, "Failure creating transport handle.");
     }
 
-    IOTHUB_TEST_HANDLE iotHubTestHandle1 = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo3), IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo3), IoTHubAccount_GetDeviceId(g_iothubAcctInfo3), IoTHubAccount_GetDeviceKey(g_iothubAcctInfo3), IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo3), IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo3), IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo3), IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo3));
+    IOTHUB_TEST_HANDLE iotHubTestHandle1 = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo3), IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo3), iotHubConfig1.deviceId, IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo3), IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo3), IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo3), IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo3));
     ASSERT_IS_NOT_NULL_WITH_MSG(iotHubTestHandle1, "IoThubTest Failure Initializing IothubTest Item, device 1");
 
-    IOTHUB_TEST_CLIENT_RESULT testResult1 = IoTHubTest_SendMessage(iotHubTestHandle1, notifyData1->toBeSend, notifyData1->toBeSendSize);
+    IOTHUB_TEST_CLIENT_RESULT testResult1 = IoTHubTest_SendMessage(iotHubTestHandle1, notifyData1->toBeSent, notifyData1->toBeSentSize);
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_OK, testResult1, "IoThubTest Failure sending message, device 1");
 
     IoTHubTest_Deinit(iotHubTestHandle1);
 
-    IOTHUB_TEST_HANDLE iotHubTestHandle2 = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo2), IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo2), IoTHubAccount_GetDeviceId(g_iothubAcctInfo2), IoTHubAccount_GetDeviceKey(g_iothubAcctInfo2), IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo2), IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo2), IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo2), IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo2));
+    IOTHUB_TEST_HANDLE iotHubTestHandle2 = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo2), IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo2), iotHubConfig2.deviceId, IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo2), IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo2), IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo2), IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo2));
     ASSERT_IS_NOT_NULL_WITH_MSG(iotHubTestHandle2, "IoThubTest Failure Initializing IothubTest Item, device 2");
 
-    IOTHUB_TEST_CLIENT_RESULT testResult2 = IoTHubTest_SendMessage(iotHubTestHandle2, notifyData2->toBeSend, notifyData2->toBeSendSize);
+    IOTHUB_TEST_CLIENT_RESULT testResult2 = IoTHubTest_SendMessage(iotHubTestHandle2, notifyData2->toBeSent, notifyData2->toBeSentSize);
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_OK, testResult2, "IoThubTest Failure sending message, device 2");
 
     IoTHubTest_Deinit(iotHubTestHandle2);
@@ -734,6 +734,6 @@ extern "C" void e2e_recv_message_shared_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER pr
     IoTHubClient_Destroy(iotHubClientHandle2);
     IoTHubClient_Destroy(iotHubClientHandle1);
     IoTHubTransport_Destroy(transportHandle);
-    MessageData_Destroy(notifyData2);
-    MessageData_Destroy(notifyData1);
+    ReceiveUserContext_Destroy(notifyData2);
+    ReceiveUserContext_Destroy(notifyData1);
 }
