@@ -1649,13 +1649,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
     }
 }
 
-#define ACTION_VALUES \
-    ACCEPT, \
-    REJECT, \
-    ABANDON
-DEFINE_ENUM(ACTION, ACTION_VALUES);
-
-static bool abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVICE_DATA* deviceData, const char* ETag, ACTION action)
+static bool abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVICE_DATA* deviceData, const char* ETag, IOTHUBMESSAGE_DISPOSITION_RESULT action)
 {
     /*Codes_SRS_TRANSPORTMULTITHTTP_17_097: [_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest with the following parameters:
     -requestType: POST
@@ -1713,7 +1707,7 @@ static bool abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
         {
             if (!(
                 (STRING_concat_with_STRING(fullAbandonRelativePath, ETagUnquoted) == 0) &&
-                (STRING_concat(fullAbandonRelativePath, (action == ABANDON) ? "/abandon" API_VERSION : ((action == REJECT) ? API_VERSION "&reject" : API_VERSION)) == 0)
+                (STRING_concat(fullAbandonRelativePath, (action == IOTHUBMESSAGE_ABANDONED) ? "/abandon" API_VERSION : ((action == IOTHUBMESSAGE_REJECTED) ? API_VERSION "&reject" : API_VERSION)) == 0)
                 ))
             {
                 /*Codes_SRS_TRANSPORTMULTITHTTP_17_098: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
@@ -1763,7 +1757,7 @@ static bool abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
                             }
                             else if ((r = HTTPAPIEX_ExecuteRequest(
                                 handleData->httpApiExHandle,
-                                (action == ABANDON) ? HTTPAPI_REQUEST_POST : HTTPAPI_REQUEST_DELETE,                               /*-requestType: POST                                                                                                       */
+                                (action == IOTHUBMESSAGE_ABANDONED) ? HTTPAPI_REQUEST_POST : HTTPAPI_REQUEST_DELETE,                               /*-requestType: POST                                                                                                       */
                                 STRING_c_str(fullAbandonRelativePath),              /*-relativePath: abandon relative path begin (as created by _Create) + value of ETag + "/abandon?api-version=2016-11-14"   */
                                 abandonRequestHttpHeaders,                          /*- requestHttpHeadersHandle: an HTTP headers instance containing the following                                            */
                                 NULL,                                               /*- requestContent: NULL                                                                                                   */
@@ -1782,7 +1776,7 @@ static bool abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
                         else if ((r = HTTPAPIEX_SAS_ExecuteRequest(
                             deviceData->sasObject,
                             handleData->httpApiExHandle,
-                            (action == ABANDON) ? HTTPAPI_REQUEST_POST : HTTPAPI_REQUEST_DELETE,                               /*-requestType: POST                                                                                                       */
+                            (action == IOTHUBMESSAGE_ABANDONED) ? HTTPAPI_REQUEST_POST : HTTPAPI_REQUEST_DELETE,                               /*-requestType: POST                                                                                                       */
                             STRING_c_str(fullAbandonRelativePath),              /*-relativePath: abandon relative path begin (as created by _Create) + value of ETag + "/abandon?api-version=2016-11-14"   */
                             abandonRequestHttpHeaders,                          /*- requestHttpHeadersHandle: an HTTP headers instance containing the following                                            */
                             NULL,                                               /*- requestContent: NULL                                                                                                   */
@@ -1875,7 +1869,7 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SendMessageDisposition(MESSAGE_C
                 }
                 else
                 {
-                    if (abandonOrAcceptMessage(tc->handleData, tc->deviceData, IoTHubMessage_GetMessageId(message_data->messageHandle), (ACTION)disposition))
+                    if (abandonOrAcceptMessage(tc->handleData, tc->deviceData, IoTHubMessage_GetMessageId(message_data->messageHandle), disposition))
                     {
                         result = IOTHUB_CLIENT_OK;
                     }
@@ -2067,7 +2061,7 @@ static void DoMessages(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERD
                                     {
                                         /*Codes_SRS_TRANSPORTMULTITHTTP_17_092: [If assembling the message fails in any way, then _DoWork shall "abandon" the message.]*/
                                         LogError("unable to IoTHubMessage_CreateFromByteArray, trying to abandon the message... ");
-                                        if (!abandonOrAcceptMessage(handleData, deviceData, etagValue, ABANDON))
+                                        if (!abandonOrAcceptMessage(handleData, deviceData, etagValue, IOTHUBMESSAGE_ABANDONED))
                                         {
                                             LogError("HTTP Transport layer failed to report ABANDON disposition");
                                         }
@@ -2080,7 +2074,7 @@ static void DoMessages(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERD
                                         if (HTTPHeaders_GetHeaderCount(responseHTTPHeaders, &nHeaders) != HTTP_HEADERS_OK)
                                         {
                                             LogError("unable to get the count of HTTP headers");
-                                            if (!abandonOrAcceptMessage(handleData, deviceData, etagValue, ABANDON))
+                                            if (!abandonOrAcceptMessage(handleData, deviceData, etagValue, IOTHUBMESSAGE_ABANDONED))
                                             {
                                                 LogError("HTTP Transport layer failed to report ABANDON disposition");
                                             }
@@ -2145,7 +2139,7 @@ static void DoMessages(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERD
 
                                             if (i < nHeaders)
                                             {
-                                                if (!abandonOrAcceptMessage(handleData, deviceData, etagValue, ABANDON))
+                                                if (!abandonOrAcceptMessage(handleData, deviceData, etagValue, IOTHUBMESSAGE_ABANDONED))
                                                 {
                                                     LogError("HTTP Transport layer failed to report ABANDON disposition");
                                                 }
@@ -2157,7 +2151,7 @@ static void DoMessages(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERD
                                                 {
                                                     /*Codes_SRS_TRANSPORTMULTITHTTP_10_006: [If assembling the transport context fails, _DoWork shall "abandon" the message.] */
                                                     LogError("failed to assemble callback info");
-                                                    if (!abandonOrAcceptMessage(handleData, deviceData, etagValue, ABANDON))
+                                                    if (!abandonOrAcceptMessage(handleData, deviceData, etagValue, IOTHUBMESSAGE_ABANDONED))
                                                     {
                                                         LogError("HTTP Transport layer failed to report ABANDON disposition");
                                                     }
@@ -2186,7 +2180,7 @@ static void DoMessages(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERD
                                                     /*Codes_SRS_TRANSPORTMULTITHTTP_17_096: [If IoTHubClient_LL_MessageCallback returns false then _DoWork shall "abandon" the message.] */
                                                     if (abandon)
                                                     {
-                                                        (void)IoTHubTransportHttp_SendMessageDisposition(messageData, ABANDON);
+                                                        (void)IoTHubTransportHttp_SendMessageDisposition(messageData, IOTHUBMESSAGE_ABANDONED);
                                                     }
                                                 }
                                             }
