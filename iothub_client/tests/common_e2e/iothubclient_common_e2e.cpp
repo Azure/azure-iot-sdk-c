@@ -614,7 +614,7 @@ extern "C" void e2e_recv_message_test_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER prot
     recv_message_test(IoTHubAccount_GetX509Device(g_iothubAcctInfo), protocol);
 }
 
-extern "C" void recv_message_shared_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+extern "C" void recv_message_shared_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse1, IOTHUB_PROVISIONED_DEVICE* deviceToUse2, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
     // arrange
 
@@ -676,6 +676,19 @@ extern "C" void recv_message_shared_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protoc
     IOTHUB_CLIENT_RESULT result2 = IoTHubClient_SetMessageCallback(iotHubClientHandle2, ReceiveMessageCallback, notifyData2);
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result2, "Failure setting message callback device 2");
 
+    if (deviceToUse1->howToCreate == IOTHUB_ACCOUNT_AUTH_X509) {
+        result1 = IoTHubClient_SetOption(iotHubClientHandle1, OPTION_X509_CERT, deviceToUse1->certificate);
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result1, "Could not set the device x509 certificate");
+        result1 = IoTHubClient_SetOption(iotHubClientHandle1, OPTION_X509_PRIVATE_KEY, deviceToUse1->primaryAuthentication);
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result1, "Could not set the device x509 privateKey");
+    }
+
+    if (deviceToUse2->howToCreate == IOTHUB_ACCOUNT_AUTH_X509) {
+        result2 = IoTHubClient_SetOption(iotHubClientHandle2, OPTION_X509_CERT, deviceToUse2->certificate);
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result2, "Could not set the device x509 certificate");
+        result2 = IoTHubClient_SetOption(iotHubClientHandle2, OPTION_X509_PRIVATE_KEY, deviceToUse2->primaryAuthentication);
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result2, "Could not set the device x509 privateKey");
+    }
 
     unsigned int minimumPollingTime = 1; /*because it should not wait*/
     if (IoTHubClient_SetOption(iotHubClientHandle1, OPTION_MIN_POLLING_TIME, &minimumPollingTime) != IOTHUB_CLIENT_OK)

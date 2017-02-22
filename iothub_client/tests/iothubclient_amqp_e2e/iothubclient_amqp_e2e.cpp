@@ -31,9 +31,14 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2e)
         e2e_recv_message_test_sas(AMQP_Protocol);
     }
 
-    TEST_FUNCTION(IoTHub_AMQP_RecvMessage_Shared_E2ETest)
+    TEST_FUNCTION(IoTHub_AMQP_RecvMessage_Shared_E2ETest_sas)
     {
-        e2e_recv_message_shared_test(AMQP_Protocol);
+        e2e_recv_message_shared_test_sas(AMQP_Protocol);
+    }
+
+    TEST_FUNCTION(IoTHub_AMQP_RecvMessage_Shared_E2ETest_x509)
+    {
+        e2e_recv_message_shared_test_x509(AMQP_Protocol);
     }
 
     TEST_FUNCTION(IoTHub_AMQP_SendEvent_e2e_x509)
