@@ -1870,7 +1870,7 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SendMessageDisposition(MESSAGE_C
                 }
                 else
                 {
-                    if (abandonOrAcceptMessage(tc->handleData, tc->deviceData, IoTHubMessage_GetMessageId(message_data->messageHandle), disposition))
+                    if (abandonOrAcceptMessage(tc->handleData, tc->deviceData, tc->etagValue, disposition))
                     {
                         result = IOTHUB_CLIENT_OK;
                     }
