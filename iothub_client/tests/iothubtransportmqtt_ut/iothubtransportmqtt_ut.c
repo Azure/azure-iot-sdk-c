@@ -64,6 +64,7 @@ static const unsigned char* TEST_DEVICE_METHOD_RESPONSE = (const unsigned char*)
 //Callbacks for Testing
 static void* g_callbackCtx;
 
+static pfIotHubTransport_SendMessageDisposition     IoTHubTransportMqtt_SendMessageDisposition;
 static pfIoTHubTransport_GetHostname                IoTHubTransportMqtt_GetHostname;
 static pfIoTHubTransport_SetOption                  IoTHubTransportMqtt_SetOption;
 static pfIoTHubTransport_Create                     IoTHubTransportMqtt_Create;
@@ -122,6 +123,7 @@ TEST_SUITE_INITIALIZE(suite_init)
 
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubTransport_MQTT_Common_Create, my_IoTHubTransport_MQTT_Common_Create);
 
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_MQTT_Common_SendMessageDisposition, IOTHUB_CLIENT_OK);
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_MQTT_Common_Subscribe, 0);
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_MQTT_Common_GetSendStatus, IOTHUB_CLIENT_OK);
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_MQTT_Common_SetOption, IOTHUB_CLIENT_OK);
@@ -137,6 +139,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_RETURN(platform_get_default_tlsio, TEST_IO_INTERFACE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(platform_get_default_tlsio, NULL);
 
+    IoTHubTransportMqtt_SendMessageDisposition = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_SendMessageDisposition;
     IoTHubTransportMqtt_GetHostname = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_GetHostname;
     IoTHubTransportMqtt_SetOption = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_SetOption;
     IoTHubTransportMqtt_Create = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_Create;
@@ -560,6 +563,23 @@ TEST_FUNCTION(IoTHubTransportMqtt_GetHostname_success)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
+}
+
+TEST_FUNCTION(IoTHubTransport_AMQP_SendMessageDisposition_success)
+{
+    // arrange
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_SendMessageDisposition(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        .IgnoreAllArguments();
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransportMqtt_SendMessageDisposition(NULL, 0);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+
+    // cleanup
 }
 
 END_TEST_SUITE(iothubtransportmqtt_ut)
