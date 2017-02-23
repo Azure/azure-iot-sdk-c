@@ -125,6 +125,7 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_CreateFromByteArray(const unsigned char* byt
     }
     return result;
 }
+
 IOTHUB_MESSAGE_HANDLE IoTHubMessage_CreateFromString(const char* source)
 {
     IOTHUB_MESSAGE_HANDLE_DATA* result = (IOTHUB_MESSAGE_HANDLE_DATA*)malloc(sizeof(IOTHUB_MESSAGE_HANDLE_DATA));

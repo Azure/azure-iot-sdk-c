@@ -132,7 +132,7 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_WS_SendMessageDisposition(MESSAG
 
 static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls = 
 {
-    IoTHubTransportAMQP_WS_SendMessageDisposition,                        /*pfIotHubTransport_Send_Message_Disposition IoTHubTransport_Send_Message_Disposition;*/
+    IoTHubTransportAMQP_WS_SendMessageDisposition,                     /*pfIotHubTransport_Send_Message_Disposition IoTHubTransport_Send_Message_Disposition;*/
     IoTHubTransportAMQP_WS_Subscribe_DeviceMethod,                     /*pfIoTHubTransport_Subscribe_DeviceMethod IoTHubTransport_Subscribe_DeviceMethod;*/
     IoTHubTransportAMQP_WS_Unsubscribe_DeviceMethod,                   /*pfIoTHubTransport_Unsubscribe_DeviceMethod IoTHubTransport_Unsubscribe_DeviceMethod;*/
     IoTHubTransportAMQP_WS_DeviceMethod_Response,
