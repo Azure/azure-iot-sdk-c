@@ -5384,7 +5384,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SendMessageDisposition_NULL_fails)
     //arrange
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SendMessageDisposition(NULL, 0);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SendMessageDisposition(NULL, IOTHUBMESSAGE_ACCEPTED);
 
     // assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
@@ -5400,7 +5400,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SendMessageDisposition_Message_NULL_fa
     STRICT_EXPECTED_CALL(gballoc_free(NULL)).IgnoreArgument_ptr();
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SendMessageDisposition(md, 0);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SendMessageDisposition(md, IOTHUBMESSAGE_ACCEPTED);
 
     // assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
@@ -5417,7 +5417,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SendMessageDisposition_succeeds)
     STRICT_EXPECTED_CALL(gballoc_free(NULL)).IgnoreArgument_ptr();
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SendMessageDisposition(md, 0);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SendMessageDisposition(md, IOTHUBMESSAGE_ACCEPTED);
 
     // assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);

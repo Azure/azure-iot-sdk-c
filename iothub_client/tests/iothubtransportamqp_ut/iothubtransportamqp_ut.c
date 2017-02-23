@@ -36,9 +36,6 @@ static TEST_MUTEX_HANDLE g_dllByDll;
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 DEFINE_ENUM_STRINGS(IOTHUB_IDENTITY_TYPE, IOTHUB_IDENTITY_TYPE_VALUE)
 
-TEST_DEFINE_ENUM_TYPE(IOTHUBMESSAGE_DISPOSITION_RESULT, IOTHUBMESSAGE_DISPOSITION_RESULT_VALUES);
-IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUBMESSAGE_DISPOSITION_RESULT, IOTHUBMESSAGE_DISPOSITION_RESULT_VALUES);
-
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];
@@ -467,11 +464,11 @@ TEST_FUNCTION(AMQP_SendMessageDisposition)
     TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_SendMessageDisposition(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_SendMessageDisposition(IGNORED_PTR_ARG, IOTHUBMESSAGE_ACCEPTED))
         .IgnoreAllArguments();
 
     // act
-    provider->IoTHubTransport_SendMessageDisposition(NULL, 0);
+    provider->IoTHubTransport_SendMessageDisposition(NULL, IOTHUBMESSAGE_ACCEPTED);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());

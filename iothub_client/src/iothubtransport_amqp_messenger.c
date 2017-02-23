@@ -530,9 +530,9 @@ static void on_message_receiver_state_changed_callback(const void* context, MESS
 static AMQP_VALUE on_message_received_internal_callback(const void* context, MESSAGE_HANDLE message, LINK_HANDLE link)
 {
     (void)link;
-	AMQP_VALUE result = NULL;
+	AMQP_VALUE result;
 	int api_call_result;
-	IOTHUB_MESSAGE_HANDLE iothub_message = NULL;
+	IOTHUB_MESSAGE_HANDLE iothub_message;
 
 	// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_121: [An IOTHUB_MESSAGE_HANDLE shall be obtained from MESSAGE_HANDLE using IoTHubMessage_CreateFromUamqpMessage()]
 	if ((api_call_result = IoTHubMessage_CreateFromUamqpMessage(message, &iothub_message)) != RESULT_OK)
@@ -567,6 +567,10 @@ static AMQP_VALUE on_message_received_internal_callback(const void* context, MES
 		{
 			result = messaging_delivery_rejected("Rejected by application", "Rejected by application");
 		}
+        else
+        {
+            result = NULL;
+        }
 	}
 
 	return result;
