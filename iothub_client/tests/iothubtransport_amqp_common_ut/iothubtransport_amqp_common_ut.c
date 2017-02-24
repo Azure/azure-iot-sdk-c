@@ -587,6 +587,17 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_Register_creates_a_new_methods_handler
     IoTHubTransport_AMQP_Common_Destroy(handle);
 }
 
+TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_NULL_fails)
+{
+    // arrange
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(NULL, IOTMESSAGEDISPOSITION_ABANDON);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+}
+
 #ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_011: [ If `iothubtransportamqp_methods_create` fails, `IoTHubTransport_AMQP_Common_Register` shall fail and return NULL. ]*/
 TEST_FUNCTION(when_creating_the_methods_handler_fails_then_IoTHubTransport_AMQP_Common_Register_fails)
