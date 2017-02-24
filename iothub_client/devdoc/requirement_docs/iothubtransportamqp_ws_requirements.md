@@ -21,6 +21,7 @@ static const TRANSPORT_PROVIDER* AMQP_Protocol_over_WebSocketsTls(void);
   The following static functions are provided in the fields of the TRANSPORT_PROVIDER structure:
 
     - IoTHubTransportAMQP_WS_Subscribe_DeviceMethod,
+    - IoTHubTransportAMQP_WS_SendMessageDisposition,
     - IoTHubTransportAMQP_WS_Unsubscribe_DeviceMethod,
     - IoTHubTransportAMQP_WS_Subscribe_DeviceTwin,
     - IoTHubTransportAMQP_WS_Unsubscribe_DeviceTwin,
@@ -184,6 +185,16 @@ static STRING_HANDLE IoTHubTransportAMQP_WS_GetHostname(TRANSPORT_LL_HANDLE hand
 **SRS_IoTHubTransportAMQP_WS_09_018: [**IoTHubTransportAMQP_WS_GetHostname shall get the hostname by calling into the IoTHubTransport_AMQP_Common_GetHostname()**]**
 
 
+## IoTHubTransportAMQP_WS_SendMessageDisposition
+
+```c
+static STRING_HANDLE IoTHubTransportAMQP_WS_SendMessageDisposition(TRANSPORT_LL_HANDLE handle)
+```
+
+**SRS_IoTHubTransportAMQP_WS_10_001 [**IoTHubTransportAMQP_WS_SendMessageDisposition shall sned the message disposition by calling into the IoTHubTransport_AMQP_Common_SendMessageDisposition()**]**
+
+
+
 ### AMQP_Protocol_over_WebSocketsTls
 
 ```c
@@ -191,6 +202,7 @@ const TRANSPORT_PROVIDER* AMQP_Protocol_over_WebSocketsTls(void)
 ```
 
 **SRS_IoTHubTransportAMQP_WS_09_019: [**This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for it's fields:
+IoTHubTransport_SendMessageDisposition = IoTHubTransportAMQP_WS_SendMessageDisposition
 IoTHubTransport_Subscribe_DeviceMethod = IoTHubTransportAMQP_WS_Subscribe_DeviceMethod
 IoTHubTransport_Unsubscribe_DeviceMethod = IoTHubTransportAMQP_WS_Unsubscribe_DeviceMethod
 IoTHubTransport_Subscribe_DeviceTwin = IoTHubTransportAMQP_WS_Subscribe_DeviceTwin

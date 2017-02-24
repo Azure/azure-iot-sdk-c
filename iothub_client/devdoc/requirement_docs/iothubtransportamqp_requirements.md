@@ -20,6 +20,7 @@ static const TRANSPORT_PROVIDER* AMQP_Protocol(void);
 ```
   The following static functions are provided in the fields of the TRANSPORT_PROVIDER structure:
 
+    - IoTHubTransportAMQP_SendMessageDisposition,
     - IoTHubTransportAMQP_Subscribe_DeviceMethod,
     - IoTHubTransportAMQP_Unsubscribe_DeviceMethod,
     - IoTHubTransportAMQP_Subscribe_DeviceTwin,
@@ -34,7 +35,7 @@ static const TRANSPORT_PROVIDER* AMQP_Protocol(void);
     - IoTHubTransportAMQP_Subscribe,
     - IoTHubTransportAMQP_Unsubscribe,
     - IoTHubTransportAMQP_DoWork,
-    - IoTHubTransportAMQP_SetRetryLogic,
+    - IoTHubTransportAMQP_SetRetryPolicy,
     - IoTHubTransportAMQP_GetSendStatus
 
 
@@ -184,6 +185,22 @@ static STRING_HANDLE IoTHubTransportAMQP_GetHostname(TRANSPORT_LL_HANDLE handle)
 **SRS_IOTHUBTRANSPORTAMQP_09_018: [**IoTHubTransportAMQP_GetHostname shall get the hostname by calling into the IoTHubTransport_AMQP_Common_GetHostname()**]**
 
 
+## IoTHubTransportAMQP_SetRetryPolicy
+
+```c
+static int IoTHubTransportAMQP_SetRetryPolicy(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitInSeconds)
+```
+
+**SRS_IOTHUBTRANSPORTAMQP_09_020: [**IoTHubTransportAMQP_SetRetryPolicy shall call into the IoTHubTransport_AMQP_Common_SetRetryPolicy()**]**
+
+
+## IoTHubTransportAMQP_SendMessageDisposition
+```c
+IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_SendMessageDisposition(MESSAGE_CALLBACK_INFO* messageData, IOTHUBMESSAGE_DISPOSITION_RESULT disposition);
+```
+
+**SRS_IOTHUBTRANSPORTAMQP_10_001: [**IoTHubTransportAMQP_SendMessageDisposition shall send the message disposition by calling into the IoTHubTransport_AMQP_Common_SendMessageDisposition()**]**
+
 ### AMQP_Protocol
 
 ```c
@@ -191,6 +208,7 @@ const TRANSPORT_PROVIDER* AMQP_Protocol(void)
 ```
 
 **SRS_IOTHUBTRANSPORTAMQP_09_019: [**This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for it's fields:
+IoTHubTransport_SendMessageDisposition = IoTHubTransportAMQP_SendMessageDisposition
 IoTHubTransport_Subscribe_DeviceMethod = IoTHubTransportAMQP_Subscribe_DeviceMethod
 IoTHubTransport_Unsubscribe_DeviceMethod = IoTHubTransportAMQP_Unsubscribe_DeviceMethod
 IoTHubTransport_Subscribe_DeviceTwin = IoTHubTransportAMQP_Subscribe_DeviceTwin
@@ -202,5 +220,5 @@ IoTHubTransport_Destroy = IoTHubTransportAMQP_Destroy
 IoTHubTransport_Subscribe = IoTHubTransportAMQP_Subscribe
 IoTHubTransport_Unsubscribe = IoTHubTransportAMQP_Unsubscribe
 IoTHubTransport_DoWork = IoTHubTransportAMQP_DoWork
-IoTHubTransport_SetRetryLogic = IoTHubTransportAMQP_SetRetryLogic
+IoTHubTransport_SetRetryPolicy = IoTHubTransportAMQP_SetRetryPolicy
 IoTHubTransport_SetOption = IoTHubTransportAMQP_SetOption**]**

@@ -27,6 +27,7 @@ MOCKABLE_FUNCTION(, IOTHUB_DEVICE_HANDLE, IoTHubTransport_MQTT_Common_Register, 
 MOCKABLE_FUNCTION(, void, IoTHubTransport_MQTT_Common_Unregister, IOTHUB_DEVICE_HANDLE, deviceHandle);
 MOCKABLE_FUNCTION(, int, IoTHubTransport_MQTT_Common_SetRetryPolicy, TRANSPORT_LL_HANDLE, handle, IOTHUB_CLIENT_RETRY_POLICY, retryPolicy, size_t, retryTimeoutLimitInSeconds);
 MOCKABLE_FUNCTION(, STRING_HANDLE, IoTHubTransport_MQTT_Common_GetHostname, TRANSPORT_LL_HANDLE, handle);
+MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubTransport_MQTT_Common_SendMessageDisposition, MESSAGE_CALLBACK_INFO*, message_data, IOTHUBMESSAGE_DISPOSITION_RESULT, disposition)
 ```
 
 ## IoTHubTransport_MQTT_Common_Create
@@ -318,3 +319,11 @@ static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE msgHandle, void* call
 **SRS_IOTHUB_MQTT_TRANSPORT_07_053: [** If type is IOTHUB_TYPE_DEVICE_METHODS, then on success `mqtt_notification_callback` shall call IoTHubClient_LL_DeviceMethodComplete. **]** 
 
 **SRS_IOTHUB_MQTT_TRANSPORT_07_056: [** If type is IOTHUB_TYPE_TELEMETRY, then on success `mqtt_notification_callback` shall call IoTHubClient_LL_MessageCallback. **]**
+
+```c
+IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SendMessageDisposition(MESSAGE_CALLBACK_INFO* messageData, IOTHUBMESSAGE_DISPOSITION_RESULT disposition);
+```
+
+**SRS_IOTHUB_MQTT_TRANSPORT_10_001: [** If `messageData` is `NULL`, `IoTHubTransport_MQTT_Common_SendMessageDisposition` shall fail and return `IOTHUB_CLIENT_ERROR`. **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_10_002: [** If any of the `messageData` fields are `NULL`, `IoTHubTransport_MQTT_Common_SendMessageDisposition` shall fail and return `IOTHUB_CLIENT_ERROR`. **]**

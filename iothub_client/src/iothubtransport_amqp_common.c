@@ -363,18 +363,21 @@ static MESSAGE_CALLBACK_INFO* MESSAGE_CALLBACK_INFO_Create(IOTHUB_MESSAGE_HANDLE
                 }
                 else
                 {
-                    if (mallocAndStrcpy_s(&(tc->link_name), my_link_name) != 0)
+                    if (mallocAndStrcpy_s(&(tc->link_name), my_link_name) == 0)
                     {
-                        LogError("mallocAndStrcpy_s failed");
+                        tc->device_state = device_state;
+                        tc->message_id = msg_id;
+
+                        result->messageHandle = message;
+                        result->transportContext = tc;
+                    }
+                    else
+                    {
+                        LogError("mallocAndStrcyp_s failed");
+                        free(tc);
                         free(result);
                         result = NULL;
                     }
-
-                    tc->device_state = device_state;
-                    tc->message_id = msg_id;
-
-                    result->messageHandle = message;
-                    result->transportContext = tc;
                 }
             }
         }
@@ -2047,11 +2050,13 @@ STRING_HANDLE IoTHubTransport_AMQP_Common_GetHostname(TRANSPORT_LL_HANDLE handle
     return result;
 }
 
+
 IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SendMessageDisposition(MESSAGE_CALLBACK_INFO* message_data, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
 {
     IOTHUB_CLIENT_RESULT result;
     if (message_data == NULL)
     {
+        /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_001: [If messageData is NULL, IoTHubTransport_AMQP_Common_SendMessageDisposition shall fail and return IOTHUB_CLIENT_ERROR.] */
         LogError("invalid argument; messageData is NULL");
         result = IOTHUB_CLIENT_ERROR;
     }
@@ -2059,55 +2064,65 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SendMessageDisposition(MESSAGE_
     {
         if (message_data->messageHandle == NULL)
         {
+            /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_002: [If any of the messageData fields are NULL, IoTHubTransport_AMQP_Common_SendMessageDisposition shall fail and return IOTHUB_CLIENT_ERROR.] */
             LogError("invalid argument; incomplete message data");
-            result = IOTHUB_CLIENT_ERROR;
-        }
-        else if (message_data->transportContext == NULL)
-        {
-            LogError("invalid argument; incomplete message data");
-            IoTHubMessage_Destroy(message_data->messageHandle);
             result = IOTHUB_CLIENT_ERROR;
         }
         else
         {
             IoTHubMessage_Destroy(message_data->messageHandle);
-
-            AMQP_VALUE disposition_result;
-            switch (disposition)
+            if (message_data->transportContext == NULL)
             {
-                case IOTHUBMESSAGE_ACCEPTED:
-                {
-                    disposition_result = messaging_delivery_accepted();
-                    break;
-                }
-                case IOTHUBMESSAGE_ABANDONED:
-                {
-                    disposition_result = messaging_delivery_released();
-                    break;
-                }
-                case IOTHUBMESSAGE_REJECTED:
-                {
-                    disposition_result = messaging_delivery_rejected("Rejected by application", "Rejected by application");
-                    break;
-                }
-                default:
-                {
-                    LogError("invalid state");
-                    disposition_result = NULL;
-                    break;
-                }
+                /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_002: [If any of the messageData fields are NULL, IoTHubTransport_AMQP_Common_SendMessageDisposition shall fail and return IOTHUB_CLIENT_ERROR.] */
+                LogError("invalid argument; incomplete message data");
+                result = IOTHUB_CLIENT_ERROR;
             }
-
-            if (disposition_result != NULL)
+            else
             {
-                messagereceiver_send_message_disposition(message_data->transportContext->device_state->message_receiver, message_data->transportContext->link_name, message_data->transportContext->message_id, disposition_result);
-                amqpvalue_destroy(disposition_result);
+                AMQP_VALUE disposition_result;
+                switch (disposition)
+                {
+                    case IOTHUBMESSAGE_ACCEPTED:
+                    {
+                        disposition_result = messaging_delivery_accepted();
+                        break;
+                    }
+                    case IOTHUBMESSAGE_ABANDONED:
+                    {
+                        disposition_result = messaging_delivery_released();
+                        break;
+                    }
+                    case IOTHUBMESSAGE_REJECTED:
+                    {
+                        disposition_result = messaging_delivery_rejected("Rejected by application", "Rejected by application");
+                        break;
+                    }
+                    default:
+                    {
+                        LogError("invalid state");
+                        disposition_result = NULL;
+                        break;
+                    }
+                }
+
+                int send_result;
+                if (disposition_result == NULL)
+                {
+                    LogError("disposition state is invalid");
+                    send_result = __FAILURE__;
+                }
+                else
+                {
+                    send_result = messagereceiver_send_message_disposition(message_data->transportContext->device_state->message_receiver, message_data->transportContext->link_name, message_data->transportContext->message_id, disposition_result);
+                    amqpvalue_destroy(disposition_result);
+                }
+
+                free(message_data->transportContext->link_name);
+                free(message_data->transportContext);
+
+                /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_003: [IoTHubTransport_AMQP_Common_SendMessageDisposition shall fail and return IOTHUB_CLIENT_ERROR if the POST message fails, otherwise return IOTHUB_CLIENT_OK.] */
+                result = (send_result == 0) ? IOTHUB_CLIENT_OK : IOTHUB_CLIENT_ERROR;
             }
-
-            free(message_data->transportContext->link_name);
-            free(message_data->transportContext);
-
-            result = IOTHUB_CLIENT_OK;
         }
         free(message_data);
     }

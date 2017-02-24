@@ -638,6 +638,19 @@ void on_methods_request_received(void* context, const char* method_name, const u
 
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_029: [** If `iothubtransportamqp_methods_respond` fails, `on_methods_request_received` shall return a non-zero value. **]**
 
+
+## IoTHubTransport_AMQP_Common_SendMessageDisposition
+```c
+IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SendMessageDisposition(MESSAGE_CALLBACK_INFO* messageData, IOTHUBMESSAGE_DISPOSITION_RESULT disposition);
+```
+
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_001: [** If `messageData` is `NULL`, `IoTHubTransport_AMQP_Common_SendMessageDisposition` shall fail and return `IOTHUB_CLIENT_ERROR`. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_002: [** If any of the `messageData` fields are `NULL`, `IoTHubTransport_AMQP_Common_SendMessageDisposition` shall fail and return `IOTHUB_CLIENT_ERROR`. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_003: [** `IoTHubTransport_AMQP_Common_SendMessageDisposition` shall fail and return `IOTHUB_CLIENT_ERROR` if the POST message fails, otherwise return `IOTHUB_CLIENT_OK`. **]**
+
+
 ###on_methods_error
 
 ```c

@@ -1839,7 +1839,7 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SendMessageDisposition(MESSAGE_C
     IOTHUB_CLIENT_RESULT result;
     if (message_data == NULL)
     {
-        /* Codes_SRS_TRANSPORTMULTITHTTP_10_001: [If messageData is NULL, IoTHubTransportHttp_Send_Message_Disposition shall fail and return IOTHUB_CLIENT_ERROR.] */
+        /* Codes_SRS_TRANSPORTMULTITHTTP_10_001: [If messageData is NULL, IoTHubTransportHttp_SendMessageDisposition shall fail and return IOTHUB_CLIENT_ERROR.] */
         LogError("invalid argument messageData is NULL");
         result = IOTHUB_CLIENT_ERROR;
     }
@@ -1847,7 +1847,7 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SendMessageDisposition(MESSAGE_C
     {
         if (message_data->messageHandle == NULL)
         {
-            /* Codes_SRS_TRANSPORTMULTITHTTP_10_002: [If any of the messageData fields are NULL, IoTHubTransportHttp_Send_Message_Disposition shall fail and return IOTHUB_CLIENT_ERROR.] */
+            /* Codes_SRS_TRANSPORTMULTITHTTP_10_002: [If any of the messageData fields are NULL, IoTHubTransportHttp_SendMessageDisposition shall fail and return IOTHUB_CLIENT_ERROR.] */
             LogError("invalid message handle");
             result = IOTHUB_CLIENT_ERROR;
         }
@@ -1856,7 +1856,7 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SendMessageDisposition(MESSAGE_C
             TRANSPORT_CONTEXT_DATA* tc = (TRANSPORT_CONTEXT_DATA*)(message_data->transportContext);
             if (tc == NULL)
             {
-                /* Codes_SRS_TRANSPORTMULTITHTTP_10_002: [If any of the messageData fields are NULL, IoTHubTransportHttp_Send_Message_Disposition shall fail and return IOTHUB_CLIENT_ERROR.] */
+                /* Codes_SRS_TRANSPORTMULTITHTTP_10_002: [If any of the messageData fields are NULL, IoTHubTransportHttp_SendMessageDisposition shall fail and return IOTHUB_CLIENT_ERROR.] */
                 LogError("invalid transport context data");
                 result = IOTHUB_CLIENT_ERROR;
             }
@@ -1864,7 +1864,7 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SendMessageDisposition(MESSAGE_C
             {
                 if ((tc->handleData == NULL) || (tc->deviceData == NULL) || (tc->etagValue == NULL))
                 {
-                    /* Codes_SRS_TRANSPORTMULTITHTTP_10_002: [If any of the messageData fields are NULL, IoTHubTransportHttp_Send_Message_Disposition shall fail and return IOTHUB_CLIENT_ERROR.] */
+                    /* Codes_SRS_TRANSPORTMULTITHTTP_10_002: [If any of the messageData fields are NULL, IoTHubTransportHttp_SendMessageDisposition shall fail and return IOTHUB_CLIENT_ERROR.] */
                     LogError("invalid transport context data");
                     result = IOTHUB_CLIENT_ERROR;
                 }

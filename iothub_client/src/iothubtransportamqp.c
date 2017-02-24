@@ -120,6 +120,7 @@ static void IoTHubTransportAMQP_Destroy(TRANSPORT_LL_HANDLE handle)
 
 static int IoTHubTransportAMQP_SetRetryPolicy(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitInSeconds)
 {
+    // Codes_SRS_IOTHUBTRANSPORTAMQP_09_020: [IoTHubTransportAMQP_SetRetryPolicy shall call into the IoTHubTransport_AMQP_Common_SetRetryPolicy().]
     return IoTHubTransport_AMQP_Common_SetRetryPolicy(handle, retryPolicy, retryTimeoutLimitInSeconds);
 }
 
@@ -131,6 +132,7 @@ static STRING_HANDLE IoTHubTransportAMQP_GetHostname(TRANSPORT_LL_HANDLE handle)
 
 static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_SendMessageDisposition(MESSAGE_CALLBACK_INFO* message_data, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
 {
+    // Codes_SRS_IOTHUBTRANSPORTAMQP_10_001: [IoTHubTransportAMQP_SendMessageDisposition shall send the message disposition by calling into the IoTHubTransport_AMQP_Common_SendMessageDispostion().]
     return IoTHubTransport_AMQP_Common_SendMessageDisposition(message_data, disposition);
 }
 
@@ -157,7 +159,7 @@ static TRANSPORT_PROVIDER thisTransportProvider =
 };
 
 /* Codes_SRS_IOTHUBTRANSPORTAMQP_09_019: [This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for it's fields:
-IoTHubTransport_Send_Message_Disposition = IoTHubTransportAMQP_Send_Message_Disposition
+IoTHubTransport_SendMessageDisposition = IoTHubTransportAMQP_SendMessageDisposition
 IoTHubTransport_Subscribe_DeviceMethod = IoTHubTransportAMQP_Subscribe_DeviceMethod
 IoTHubTransport_Unsubscribe_DeviceMethod = IoTHubTransportAMQP_Unsubscribe_DeviceMethod
 IoTHubTransport_Subscribe_DeviceTwin = IoTHubTransportAMQP_Subscribe_DeviceTwin
@@ -169,6 +171,7 @@ IoTHubTransport_Destroy = IoTHubTransportAMQP_Destroy
 IoTHubTransport_Subscribe = IoTHubTransportAMQP_Subscribe
 IoTHubTransport_Unsubscribe = IoTHubTransportAMQP_Unsubscribe
 IoTHubTransport_DoWork = IoTHubTransportAMQP_DoWork
+IoTHubTransport_SetRetryPolicy = IoTHubTransportAMQP_SetRetryPolicy
 IoTHubTransport_SetOption = IoTHubTransportAMQP_SetOption]*/
 extern const TRANSPORT_PROVIDER* AMQP_Protocol(void)
 {

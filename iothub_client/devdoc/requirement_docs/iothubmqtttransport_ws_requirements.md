@@ -12,6 +12,7 @@ extern const TRANSPORT_PROVIDER* MQTT_Protocol(void);
 ```
 
   The following static functions are provided in the fields of the TRANSPORT_PROVIDER structure:
+    - IoTHubTransportMqtt_WS_SendMessageDisposition,  
     - IoTHubTransportMqtt_WS_Subscribe_DeviceMethod,  
     - IoTHubTransportMqtt_WS_Unsubscribe_DeviceMethod,  
     - IoTHubTransportMqtt_WS_Subscribe_DeviceTwin,  
@@ -174,6 +175,16 @@ const TRANSPORT_PROVIDER* MQTT_WebSocket_Protocol(void)
 
 **SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_011: [** This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for its fields:
 
+
+## IoTHubTransportMqtt_WS_SendMessageDisposition
+```c
+IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_WS_SendMessageDisposition(MESSAGE_CALLBACK_INFO* messageData, IOTHUBMESSAGE_DISPOSITION_RESULT disposition);
+```
+
+**SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_10_001: [**`IoTHubTransportMqtt_WS_SendMessageDisposition` shall send the message disposition by calling into the `IoTHubTransport_MQTT_Common_SendMessageDisposition`**]**
+
+
+IoTHubTransport_SendMessageDisposition = IoTHubTransportMqtt_WS_SendMessageDisposition
 IoTHubTransport_Subscribe_DeviceMethod = IoTHubTransportMqtt_WS_Subscribe_DeviceMethod  
 IoTHubTransport_Unsubscribe_DeviceMethod = IoTHubTransportMqtt_WS_Unsubscribe_DeviceMethod  
 IoTHubTransport_Subscribe_DeviceTwin = IoTHubTransportMqtt_WS_Subscribe_DeviceTwin  

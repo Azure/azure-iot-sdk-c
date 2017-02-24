@@ -127,6 +127,7 @@ static STRING_HANDLE IoTHubTransportAMQP_WS_GetHostname(TRANSPORT_LL_HANDLE hand
 
 static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_WS_SendMessageDisposition(MESSAGE_CALLBACK_INFO* message_data, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
 {
+    // Codes_SRS_IoTHubTransportAMQP_WS_10_001[**IoTHubTransportAMQP_WS_SendMessageDisposition shall sned the message disposition by calling into the IoTHubTransport_AMQP_Common_SendMessageDisposition()]
     return IoTHubTransport_AMQP_Common_SendMessageDisposition(message_data, disposition);
 }
 

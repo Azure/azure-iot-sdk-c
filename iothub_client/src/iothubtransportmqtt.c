@@ -84,6 +84,7 @@ static int IoTHubTransportMqtt_DeviceMethod_Response(IOTHUB_DEVICE_HANDLE handle
     return IoTHubTransport_MQTT_Common_DeviceMethod_Response(handle, methodId, response, response_size, status_response);
 }
 
+/* Codes_SRS_IOTHUB_MQTT_TRANSPORT_10_001: [IoTHubTransportMqtt_SendMessageDisposition shall send the message disposition by calling into the IoTHubMqttAbstract_SendMessageDisposition function.] */
 static IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_SendMessageDisposition(MESSAGE_CALLBACK_INFO* message_data, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
 {
     return IoTHubTransport_MQTT_Common_SendMessageDisposition(message_data, disposition);

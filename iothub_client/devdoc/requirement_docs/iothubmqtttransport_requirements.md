@@ -82,10 +82,13 @@ int IoTHubTransportMqtt_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle)
 
 
 
-## IoTHubTransportHttp_SendMessageDisposition
+## IoTHubTransportMqtt_SendMessageDisposition
 ```c
-IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SendMessageDisposition(MESSAGE_CALLBACK_INFO* messageData, IOTHUBMESSAGE_DISPOSITION_RESULT disposition);
+IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_SendMessageDisposition(MESSAGE_CALLBACK_INFO* messageData, IOTHUBMESSAGE_DISPOSITION_RESULT disposition);
 ```
+
+**SRS_IOTHUB_MQTT_TRANSPORT_10_001: [** IoTHubTransportMqtt_SendMessageDisposition shall send the message disposition by calling into the IoTHubMqttAbstract_SendMessageDisposition function. **]**
+
 
 
 ### IoTHubTransportMqtt_Unsubscribe_DeviceTwin

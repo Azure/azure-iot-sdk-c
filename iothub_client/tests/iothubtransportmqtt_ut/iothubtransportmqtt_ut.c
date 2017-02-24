@@ -565,6 +565,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_GetHostname_success)
     //cleanup
 }
 
+/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_10_001: [ IoTHubTransportMqtt_SendMessageDisposition shall send the message disposition by calling into the IoTHubMqttAbstract_SendMessageDisposition function. ] */
 TEST_FUNCTION(IoTHubTransport_AMQP_SendMessageDisposition_success)
 {
     // arrange

@@ -2772,6 +2772,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SendMessageDisposition(MESSAGE_
         }
         else
         {
+            /*Codes_SRS_IOTHUB_MQTT_TRANSPORT_10_002: [If any of the messageData fields are NULL, IoTHubTransport_MQTT_Common_SendMessageDisposition shall fail and return IOTHUB_CLIENT_ERROR. ]*/
             LogError("message handle is NULL");
             result = IOTHUB_CLIENT_ERROR;
         }
@@ -2779,6 +2780,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SendMessageDisposition(MESSAGE_
     }
     else
     {
+        /*Codes_SRS_IOTHUB_MQTT_TRANSPORT_10_001: [If messageData is NULL, IoTHubTransport_MQTT_Common_SendMessageDisposition shall fail and return IOTHUB_CLIENT_ERROR. ]*/
         LogError("message_data is NULL");
         result = IOTHUB_CLIENT_ERROR;
     }

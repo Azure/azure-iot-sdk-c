@@ -134,6 +134,7 @@ static int IoTHubTransportMqtt_WS_SetRetryPolicy(TRANSPORT_LL_HANDLE handle, IOT
 
 static IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_WS_SendMessageDisposition(MESSAGE_CALLBACK_INFO* message_data, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
 {
+    /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_10_001: [IoTHubTransportMqtt_WS_SendMessageDisposition shall send the message disposition by calling into the IoTHubTransport_MQTT_Common_SendMessageDisposition()]*/
     return IoTHubTransport_MQTT_Common_SendMessageDisposition(message_data, disposition);
 }
 
