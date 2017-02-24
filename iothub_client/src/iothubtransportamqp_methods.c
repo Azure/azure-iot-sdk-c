@@ -244,9 +244,8 @@ static void on_message_send_complete(void* context, MESSAGE_SEND_RESULT send_res
     }
 }
 
-static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE message, LINK_HANDLE link)
+static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE message)
 {
-    (void)link;
     PROPERTIES_HANDLE properties;
     /* VS believes this is not initialized, so have to set it to the worse case here */
     AMQP_VALUE result;
