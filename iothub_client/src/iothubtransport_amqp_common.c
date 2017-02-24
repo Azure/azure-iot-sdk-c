@@ -334,50 +334,61 @@ static void on_message_send_complete(void* context, MESSAGE_SEND_RESULT send_res
 
 typedef struct TRANSPORT_CONTEXT_DATA_TAG
 {
-    LINK_HANDLE link_handle;
+    AMQP_TRANSPORT_DEVICE_STATE* device_state;
+    char* link_name;
     delivery_number message_id;
 } TRANSPORT_CONTEXT_DATA;
 
 
-MESSAGE_CALLBACK_INFO* MESSAGE_CALLBACK_INFO_Create(IOTHUB_MESSAGE_HANDLE message, LINK_HANDLE link_instance)
+static MESSAGE_CALLBACK_INFO* MESSAGE_CALLBACK_INFO_Create(IOTHUB_MESSAGE_HANDLE message, AMQP_TRANSPORT_DEVICE_STATE* device_state)
 {
     MESSAGE_CALLBACK_INFO* result;
     delivery_number msg_id;
-    if (link_get_received_message_id(link_instance, &msg_id) == 0)
+    if (messagereceiver_get_received_message_id(device_state->message_receiver, &msg_id) == 0)
     {
-        result = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
-        if (result == NULL)
+        char* my_link_name;
+        if (messagereceiver_get_link_name(device_state->message_receiver, &my_link_name) == 0)
         {
-            LogError("malloc failed");
-        }
-        else
-        {
-            TRANSPORT_CONTEXT_DATA* tc = (TRANSPORT_CONTEXT_DATA*)malloc(sizeof(TRANSPORT_CONTEXT_DATA));
-            if (tc == NULL)
+            result = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
+            if (result == NULL)
             {
                 LogError("malloc failed");
-                free(result);
-                result = NULL;
             }
             else
             {
-                tc->link_handle = link_instance;
-                tc->message_id = msg_id;
+                TRANSPORT_CONTEXT_DATA* tc = (TRANSPORT_CONTEXT_DATA*)malloc(sizeof(TRANSPORT_CONTEXT_DATA));
+                if (tc == NULL)
+                {
+                    LogError("malloc failed");
+                    free(result);
+                    result = NULL;
+                }
+                else
+                {
+                    tc->link_name = my_link_name;
+                    tc->device_state = device_state;
+                    tc->message_id = msg_id;
 
-                result->messageHandle = message;
-                result->transportContext = tc;
+                    result->messageHandle = message;
+                    result->transportContext = tc;
+                }
             }
+        }
+        else
+        {
+            LogError("messagereceiver_get_link_name failed");
+            result = NULL;
         }
     }
     else
     {
-        LogError("link_get_received_delivery_id failed");
+        LogError("messagereceiver_get_received_message_id failed");
         result = NULL;
     }
     return result;
 }
 
-static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE message, LINK_HANDLE link)
+static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE message)
 {
     AMQP_VALUE result;
     int api_call_result;
@@ -392,7 +403,8 @@ static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE messag
     }
     else
     {
-        MESSAGE_CALLBACK_INFO* messageData = MESSAGE_CALLBACK_INFO_Create(iothub_message, link);
+        AMQP_TRANSPORT_DEVICE_STATE* device_state = (AMQP_TRANSPORT_DEVICE_STATE*)context;
+        MESSAGE_CALLBACK_INFO* messageData = MESSAGE_CALLBACK_INFO_Create(iothub_message, device_state);
         if (messageData == NULL)
         {
             LogError("failed to assemble callback info");
@@ -401,7 +413,7 @@ static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE messag
         else
         {
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_104: [The callback 'on_message_received' shall invoke IoTHubClient_LL_MessageCallback() passing the client and the incoming message handles as parameters] 
-            if (!IoTHubClient_LL_MessageCallback((IOTHUB_CLIENT_LL_HANDLE)context, messageData))
+            if (!IoTHubClient_LL_MessageCallback(device_state->iothub_client_handle, messageData))
             {
                 LogError("IoTHubClient_LL_MessageCallback failed");
                 IoTHubMessage_Destroy(iothub_message);
@@ -1002,7 +1014,7 @@ static int createMessageReceiver(AMQP_TRANSPORT_DEVICE_STATE* device_state)
         {
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_079: [IoTHubTransport_AMQP_Common_DoWork shall open the AMQP message receiver using messagereceiver_open() AMQP API, passing a callback function for handling C2D incoming messages] 
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_123: [IoTHubTransport_AMQP_Common_DoWork shall create each AMQP message_receiver passing the 'on_message_received' as the callback function] 
-            if (messagereceiver_open(device_state->message_receiver, on_message_received, (const void*)device_state->iothub_client_handle) != RESULT_OK)
+            if (messagereceiver_open(device_state->message_receiver, on_message_received, (const void*)device_state) != RESULT_OK)
             {
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_080: [IoTHubTransport_AMQP_Common_DoWork shall fail and return immediately if the AMQP message receiver instance fails to be opened, flagging the connection to be re-established] 
                 LogError("Failed opening the AMQP message receiver.");
@@ -2075,7 +2087,13 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SendMessageDisposition(MESSAGE_
                 }
             }
 
-            link_send_disposition(message_data->transportContext->link_handle, message_data->transportContext->message_id, disposition_result);
+            if (disposition_result != NULL)
+            {
+                messagereceiver_send_message_disposition(message_data->transportContext->device_state->message_receiver, message_data->transportContext->link_name, message_data->transportContext->message_id, disposition_result);
+                amqpvalue_destroy(disposition_result);
+            }
+
+            free(message_data->transportContext->link_name);
             free(message_data->transportContext);
 
             result = IOTHUB_CLIENT_OK;
