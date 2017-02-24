@@ -5623,7 +5623,6 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_2devices_2subscriptions_happy_path_succ
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
             .IgnoreArgument(1);
 
-
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
         STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(

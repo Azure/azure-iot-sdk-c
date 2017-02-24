@@ -92,6 +92,9 @@ extern "C"
 
 #include "iothubtransport_amqp_common.h"
 
+TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -215,6 +218,12 @@ extern "C"
 MOCKABLE_FUNCTION(, time_t, get_time, time_t*, currentTime);
 MOCKABLE_FUNCTION(, double, get_difftime, time_t, stopTime, time_t, startTime);
 
+typedef struct TRANSPORT_CONTEXT_DATA_TAG
+{
+    void* device_state;
+    char* link_name;
+    uint32_t message_id;
+} TRANSPORT_CONTEXT_DATA;
 
 static TEST_MUTEX_HANDLE g_testByTest;
 static TEST_MUTEX_HANDLE g_dllByDll;
@@ -372,6 +381,7 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_UMOCK_ALIAS_TYPE(MESSAGE_SENDER_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(fields, void*);
     REGISTER_UMOCK_ALIAS_TYPE(METHOD_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_RESULT, int);
 
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, my_gballoc_free);
@@ -418,6 +428,7 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_GLOBAL_MOCK_HOOK(DList_InsertTailList, my_DList_InsertTailList);
     REGISTER_GLOBAL_MOCK_HOOK(DList_IsListEmpty, my_DList_IsListEmpty);
     REGISTER_GLOBAL_MOCK_HOOK(DList_InitializeListHead, my_DList_InitializeListHead);
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_CreateFromString, (IOTHUB_MESSAGE_HANDLE)0x44);
 }
 
 TEST_SUITE_CLEANUP(TestClassCleanup)
@@ -592,10 +603,54 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_NULL_fails)
     // arrange
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(NULL, IOTMESSAGEDISPOSITION_ABANDON);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(NULL, IOTHUBMESSAGE_ACCEPTED);
 
     //assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+}
+
+TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_NULL_MESSAGE_fails)
+{
+    // arrange
+    MESSAGE_CALLBACK_INFO* data = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
+    data->messageHandle = NULL;
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreAllArguments();
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(data, IOTHUBMESSAGE_ACCEPTED);
+
+    // assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    free(data);
+}
+
+TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_NULL_CONTEXT_fails)
+{
+    // arrange
+    MESSAGE_CALLBACK_INFO* data = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
+    data->messageHandle = IoTHubMessage_CreateFromString("Hello World");
+    data->transportContext = NULL;
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreAllArguments();
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(data, IOTHUBMESSAGE_ACCEPTED);
+
+    // assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    free(data);
 }
 
 #ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
