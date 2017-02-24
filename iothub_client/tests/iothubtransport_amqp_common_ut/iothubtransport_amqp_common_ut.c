@@ -33,7 +33,6 @@ void real_free(void* ptr)
 #include "umock_c_negative_tests.h"
 #include "umocktypes.h"
 #include "umocktypes_c.h"
-#include "azure_c_shared_utility/crt_abstractions.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -70,6 +69,7 @@ extern "C"
 #include "azure_c_shared_utility/tlsio.h"
 #include "azure_c_shared_utility/vector.h"
 #include "azure_c_shared_utility/agenttime.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
 
 #include "azure_uamqp_c/cbs.h"
 #include "azure_uamqp_c/link.h"

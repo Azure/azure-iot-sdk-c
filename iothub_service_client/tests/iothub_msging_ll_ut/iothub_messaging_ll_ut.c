@@ -2024,7 +2024,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         STRICT_EXPECTED_CALL(messaging_delivery_accepted());
 
         ///act
-        void* amqp_result = (void*)onMessageReceivedCallback(NULL, TEST_MESSAGE_HANDLE, NULL);
+        void* amqp_result = (void*)onMessageReceivedCallback(NULL, TEST_MESSAGE_HANDLE);
 
         ///assert
         ASSERT_ARE_NOT_EQUAL(void_ptr, NULL, amqp_result);
@@ -2121,7 +2121,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         test_handle->callback_data->feedbackMessageCallback = on_feedback_message_received;
 
         ///act
-        onMessageReceivedCallback((void*)test_handle, TEST_MESSAGE_HANDLE, NULL);
+        onMessageReceivedCallback((void*)test_handle, TEST_MESSAGE_HANDLE);
 
         ///assert
         ASSERT_ARE_EQUAL(int, IOTHUB_FEEDBACK_STATUS_CODE_SUCCESS, receivedFeedbackStatusCode);
@@ -2218,7 +2218,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         test_handle->callback_data->feedbackMessageCallback = on_feedback_message_received;
 
         ///act
-        onMessageReceivedCallback((void*)test_handle, TEST_MESSAGE_HANDLE, NULL);
+        onMessageReceivedCallback((void*)test_handle, TEST_MESSAGE_HANDLE);
 
         ///assert
         ASSERT_ARE_EQUAL(int, IOTHUB_FEEDBACK_STATUS_CODE_EXPIRED, receivedFeedbackStatusCode);
@@ -2314,7 +2314,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         test_handle->callback_data->feedbackMessageCallback = on_feedback_message_received;
 
         ///act
-        onMessageReceivedCallback((void*)test_handle, TEST_MESSAGE_HANDLE, NULL);
+        onMessageReceivedCallback((void*)test_handle, TEST_MESSAGE_HANDLE);
 
         ///assert
         ASSERT_ARE_EQUAL(int, IOTHUB_FEEDBACK_STATUS_CODE_DELIVER_COUNT_EXCEEDED, receivedFeedbackStatusCode);
@@ -2411,7 +2411,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         test_handle->callback_data->feedbackMessageCallback = on_feedback_message_received;
 
         ///act
-        onMessageReceivedCallback((void*)test_handle, TEST_MESSAGE_HANDLE, NULL);
+        onMessageReceivedCallback((void*)test_handle, TEST_MESSAGE_HANDLE);
 
         ///assert
         ASSERT_ARE_EQUAL(int, IOTHUB_FEEDBACK_STATUS_CODE_REJECTED, receivedFeedbackStatusCode);
@@ -2508,7 +2508,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         test_handle->callback_data->feedbackMessageCallback = on_feedback_message_received;
 
         ///act
-        onMessageReceivedCallback((void*)test_handle, TEST_MESSAGE_HANDLE, NULL);
+        onMessageReceivedCallback((void*)test_handle, TEST_MESSAGE_HANDLE);
 
         ///assert
         ASSERT_ARE_EQUAL(int, IOTHUB_FEEDBACK_STATUS_CODE_UNKNOWN, receivedFeedbackStatusCode);
@@ -2605,7 +2605,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         test_handle->callback_data->feedbackMessageCallback = on_feedback_message_received;
 
         ///act
-        onMessageReceivedCallback((void*)test_handle, TEST_MESSAGE_HANDLE, NULL);
+        onMessageReceivedCallback((void*)test_handle, TEST_MESSAGE_HANDLE);
 
         ///assert
         ASSERT_ARE_EQUAL(int, IOTHUB_FEEDBACK_STATUS_CODE_UNKNOWN, receivedFeedbackStatusCode);
@@ -2687,7 +2687,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
             if (i <= 9)
             {
                 ///act
-                AMQP_VALUE amqp_result = onMessageReceivedCallback((void*)iothub_messaging_handle, TEST_MESSAGE_HANDLE, NULL);
+                AMQP_VALUE amqp_result = onMessageReceivedCallback((void*)iothub_messaging_handle, TEST_MESSAGE_HANDLE);
 
                 ///assert
                 if (i < 7)

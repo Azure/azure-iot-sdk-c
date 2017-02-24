@@ -639,9 +639,8 @@ static void IoTHubMessaging_LL_SendMessageComplete(void* context, IOTHUB_MESSAGI
     }
 }
 
-static AMQP_VALUE IoTHubMessaging_LL_FeedbackMessageReceived(const void* context, MESSAGE_HANDLE message, LINK_HANDLE link)
+static AMQP_VALUE IoTHubMessaging_LL_FeedbackMessageReceived(const void* context, MESSAGE_HANDLE message)
 {
-    (void)link;
     AMQP_VALUE result;
 
     /*Codes_SRS_IOTHUBMESSAGING_12_057: [ If context is NULL IoTHubMessaging_LL_FeedbackMessageReceived shall do nothing and return delivery_accepted ] */

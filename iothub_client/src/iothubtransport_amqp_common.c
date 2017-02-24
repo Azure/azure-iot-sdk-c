@@ -139,6 +139,12 @@ typedef struct AMQP_TRANSPORT_DEVICE_STATE_TAG
 #endif
 } AMQP_TRANSPORT_DEVICE_STATE;
 
+typedef struct TRANSPORT_CONTEXT_DATA_TAG
+{
+    AMQP_TRANSPORT_DEVICE_STATE* device_state;
+    char* link_name;
+    delivery_number message_id;
+} TRANSPORT_CONTEXT_DATA;
 
 // Auxiliary functions
 
@@ -332,21 +338,13 @@ static void on_message_send_complete(void* context, MESSAGE_SEND_RESULT send_res
     free(message); 
 }
 
-typedef struct TRANSPORT_CONTEXT_DATA_TAG
-{
-    AMQP_TRANSPORT_DEVICE_STATE* device_state;
-    char* link_name;
-    delivery_number message_id;
-} TRANSPORT_CONTEXT_DATA;
-
-
 static MESSAGE_CALLBACK_INFO* MESSAGE_CALLBACK_INFO_Create(IOTHUB_MESSAGE_HANDLE message, AMQP_TRANSPORT_DEVICE_STATE* device_state)
 {
     MESSAGE_CALLBACK_INFO* result;
     delivery_number msg_id;
     if (messagereceiver_get_received_message_id(device_state->message_receiver, &msg_id) == 0)
     {
-        char* my_link_name;
+        const char* my_link_name;
         if (messagereceiver_get_link_name(device_state->message_receiver, &my_link_name) == 0)
         {
             result = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
@@ -365,7 +363,13 @@ static MESSAGE_CALLBACK_INFO* MESSAGE_CALLBACK_INFO_Create(IOTHUB_MESSAGE_HANDLE
                 }
                 else
                 {
-                    tc->link_name = my_link_name;
+                    if (mallocAndStrcpy_s(&(tc->link_name), my_link_name) != 0)
+                    {
+                        LogError("mallocAndStrcpy_s failed");
+                        free(result);
+                        result = NULL;
+                    }
+
                     tc->device_state = device_state;
                     tc->message_id = msg_id;
 
@@ -417,6 +421,7 @@ static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE messag
             {
                 LogError("IoTHubClient_LL_MessageCallback failed");
                 IoTHubMessage_Destroy(iothub_message);
+                free(messageData->transportContext->link_name);
                 free(messageData->transportContext);
                 free(messageData);
 
@@ -2052,9 +2057,15 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SendMessageDisposition(MESSAGE_
     }
     else
     {
-        if ((message_data->messageHandle == NULL) || (message_data->transportContext == NULL))
+        if (message_data->messageHandle == NULL)
         {
             LogError("invalid argument; incomplete message data");
+            result = IOTHUB_CLIENT_ERROR;
+        }
+        else if (message_data->transportContext == NULL)
+        {
+            LogError("invalid argument; incomplete message data");
+            IoTHubMessage_Destroy(message_data->messageHandle);
             result = IOTHUB_CLIENT_ERROR;
         }
         else
