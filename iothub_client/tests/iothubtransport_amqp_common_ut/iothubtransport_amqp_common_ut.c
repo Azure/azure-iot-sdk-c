@@ -351,6 +351,7 @@ static TRANSPORT_CONTEXT_DATA* TRANSPORT_CONTEXT_DATA_create()
     TRANSPORT_CONTEXT_DATA* result;
     result = (TRANSPORT_CONTEXT_DATA*)malloc(sizeof(TRANSPORT_CONTEXT_DATA));
     result->link_name = (char*)malloc(12);
+    sprintf(result->link_name, "my_link");
     result->device_state = &g_device_state;
     result->device_state->message_receiver = (void*)0x072;
     return result;
