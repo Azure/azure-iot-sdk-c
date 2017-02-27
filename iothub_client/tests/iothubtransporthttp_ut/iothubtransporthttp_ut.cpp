@@ -4269,12 +4269,12 @@ TEST_FUNCTION(IoTHubTransportHttp_SendMessageDisposition_with_NULL_handle_fails)
     mocks.AssertActualAndExpectedCalls();
 }
 
-typedef struct HTTPTRANSPORT_HANDLE_DATA_TAG
+typedef struct MESSAGE_DISPOSITION_CONTEXT_TAG
 {
     void* handleData;
     void* deviceData;
     char* etagValue;
-} HTTPTRANSPORT_HANDLE_DATA;
+} MESSAGE_DISPOSITION_CONTEXT;
 
 MESSAGE_CALLBACK_INFO* make_transport_context_data(IOTHUB_MESSAGE_HANDLE message, void* thd, void* dd)
 {
@@ -4286,12 +4286,12 @@ MESSAGE_CALLBACK_INFO* make_transport_context_data(IOTHUB_MESSAGE_HANDLE message
     }
     else
     {
-        HTTPTRANSPORT_HANDLE_DATA* tc = (HTTPTRANSPORT_HANDLE_DATA*)malloc(sizeof(HTTPTRANSPORT_HANDLE_DATA));
+        MESSAGE_DISPOSITION_CONTEXT* tc = (MESSAGE_DISPOSITION_CONTEXT*)malloc(sizeof(MESSAGE_DISPOSITION_CONTEXT));
         tc->handleData = thd;
         tc->deviceData = dd;
         tc->etagValue = (char*)malloc(20);
         sprintf(tc->etagValue, "Hello World");
-        result->transportContext = (MESSAGE_TRANSPORT_CONTEXT_HANDLE)tc;
+        result->transportContext = (MESSAGE_DISPOSITION_CONTEXT_HANDLE)tc;
     }
 
     return result;

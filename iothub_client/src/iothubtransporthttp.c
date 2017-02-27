@@ -74,12 +74,12 @@ typedef struct HTTPTRANSPORT_PERDEVICE_DATA_TAG
     DLIST_ENTRY eventConfirmations; /*holds items for event confirmations*/
 } HTTPTRANSPORT_PERDEVICE_DATA;
 
-typedef struct TRANSPORT_CONTEXT_DATA_TAG
+typedef struct MESSAGE_DISPOSITION_CONTEXT_TAG
 {
     HTTPTRANSPORT_HANDLE_DATA* handleData;
     HTTPTRANSPORT_PERDEVICE_DATA* deviceData;
     char* etagValue;
-} TRANSPORT_CONTEXT_DATA;
+} MESSAGE_DISPOSITION_CONTEXT;
 
 DEFINE_ENUM_STRINGS(IOTHUBMESSAGE_DISPOSITION_RESULT, IOTHUBMESSAGE_DISPOSITION_RESULT_VALUES);
 
@@ -1853,7 +1853,7 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SendMessageDisposition(MESSAGE_C
         }
         else
         {
-            TRANSPORT_CONTEXT_DATA* tc = (TRANSPORT_CONTEXT_DATA*)(message_data->transportContext);
+            MESSAGE_DISPOSITION_CONTEXT* tc = (MESSAGE_DISPOSITION_CONTEXT*)(message_data->transportContext);
             if (tc == NULL)
             {
                 /* Codes_SRS_TRANSPORTMULTITHTTP_10_002: [If any of the messageData fields are NULL, IoTHubTransportHttp_SendMessageDisposition shall fail and return IOTHUB_CLIENT_ERROR.] */
@@ -1901,7 +1901,7 @@ static MESSAGE_CALLBACK_INFO* MESSAGE_CALLBACK_INFO_Create(IOTHUB_MESSAGE_HANDLE
     }
     else
     {
-        TRANSPORT_CONTEXT_DATA* tc = (TRANSPORT_CONTEXT_DATA*)malloc(sizeof(TRANSPORT_CONTEXT_DATA));
+        MESSAGE_DISPOSITION_CONTEXT* tc = (MESSAGE_DISPOSITION_CONTEXT*)malloc(sizeof(MESSAGE_DISPOSITION_CONTEXT));
         if (tc == NULL)
         {
             /*Codes_SRS_TRANSPORTMULTITHTTP_10_006: [If assembling the transport context fails, _DoWork shall "abandon" the message.] */

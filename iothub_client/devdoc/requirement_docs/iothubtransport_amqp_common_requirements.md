@@ -650,6 +650,8 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SendMessageDisposition(MESSAGE_
 
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_003: [** `IoTHubTransport_AMQP_Common_SendMessageDisposition` shall fail and return `IOTHUB_CLIENT_ERROR` if the POST message fails, otherwise return `IOTHUB_CLIENT_OK`. **]**
 
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_004: [** `IoTHubTransport_AMQP_Common_SendMessageDisposition` shall convert the given `IOTHUBMESSAGE_DISPOSITION_RESULT` to the equivalent `AMQP_VALUE` and will return the result of calling `messagereceiver_send_message_disposition`. **]**
+
 
 ###on_methods_error
 

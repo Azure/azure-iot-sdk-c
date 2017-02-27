@@ -139,12 +139,12 @@ typedef struct AMQP_TRANSPORT_DEVICE_STATE_TAG
 #endif
 } AMQP_TRANSPORT_DEVICE_STATE;
 
-typedef struct TRANSPORT_CONTEXT_DATA_TAG
+typedef struct MESSAGE_DISPOSITION_CONTEXT_TAG
 {
     AMQP_TRANSPORT_DEVICE_STATE* device_state;
     char* link_name;
     delivery_number message_id;
-} TRANSPORT_CONTEXT_DATA;
+} MESSAGE_DISPOSITION_CONTEXT;
 
 // Auxiliary functions
 
@@ -354,7 +354,7 @@ static MESSAGE_CALLBACK_INFO* MESSAGE_CALLBACK_INFO_Create(IOTHUB_MESSAGE_HANDLE
             }
             else
             {
-                TRANSPORT_CONTEXT_DATA* tc = (TRANSPORT_CONTEXT_DATA*)malloc(sizeof(TRANSPORT_CONTEXT_DATA));
+                MESSAGE_DISPOSITION_CONTEXT* tc = (MESSAGE_DISPOSITION_CONTEXT*)malloc(sizeof(MESSAGE_DISPOSITION_CONTEXT));
                 if (tc == NULL)
                 {
                     LogError("malloc failed");
@@ -2113,6 +2113,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SendMessageDisposition(MESSAGE_
                 }
                 else
                 {
+                    /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_004: [IoTHubTransport_AMQP_Common_SendMessageDisposition shall convert the given IOTHUBMESSAGE_DISPOSITION_RESULT to the equivalent AMQP_VALUE and send it via messagereceiver_send_message_disposition.] */
                     send_result = messagereceiver_send_message_disposition(message_data->transportContext->device_state->message_receiver, message_data->transportContext->link_name, message_data->transportContext->message_id, disposition_result);
                     amqpvalue_destroy(disposition_result);
                 }
