@@ -63,7 +63,7 @@ static int ValidateAsciiCharactersFilter(const char* mapKey, const char* mapValu
 IOTHUB_MESSAGE_HANDLE IoTHubMessage_CreateFromByteArray(const unsigned char* byteArray, size_t size)
 {
     IOTHUB_MESSAGE_HANDLE_DATA* result;
-    if (byteArray == NULL)
+    if ((byteArray == NULL) && (size != 0))
     {
         LogError("Invalid argument - byteArray is NULL");
         result = NULL;

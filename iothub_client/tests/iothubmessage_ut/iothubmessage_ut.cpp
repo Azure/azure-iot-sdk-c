@@ -496,11 +496,6 @@ BEGIN_TEST_SUITE(iothubmessage_ut)
         ///arrange
         CIoTHubMessageMocks mocks;
 
-        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
-
         ///act
         auto h = IoTHubMessage_CreateFromByteArray(NULL, 1);
 
