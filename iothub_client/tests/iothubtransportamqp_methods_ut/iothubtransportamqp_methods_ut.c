@@ -1380,7 +1380,7 @@ TEST_FUNCTION(when_a_message_is_received_and_a_NULL_message_handle_is_passed_the
     STRICT_EXPECTED_CALL(test_on_methods_error((void*)0x4242));
 
     /// act
-    result = g_on_message_received(amqp_methods_handle, NULL, NULL);
+    result = g_on_message_received(amqp_methods_handle, NULL);
 
     /// assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
