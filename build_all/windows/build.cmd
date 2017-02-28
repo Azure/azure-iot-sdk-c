@@ -242,10 +242,6 @@ rem ----------------------------------------------------------------------------
 rem -- build with CMAKE and run tests
 rem -----------------------------------------------------------------------------
 
-if %CMAKE_use_wsio% == ON (
-	echo WebSockets support only available for x86 platform.
-)
-
 if EXIST %cmake-root%\cmake\%CMAKE_DIR% (
     rmdir /s/q %cmake-root%\cmake\%CMAKE_DIR%
     rem no error checking

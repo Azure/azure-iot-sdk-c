@@ -526,10 +526,13 @@ void IoTHubMessage_Destroy(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
         {
             BUFFER_delete(handleData->value.byteArray);
         }
+        else if (handleData->contentType == IOTHUBMESSAGE_STRING)
+        {
+            STRING_delete(handleData->value.string);
+        }
         else
         {
-            /*can only be STRING*/
-            STRING_delete(handleData->value.string);
+            LogError("Unknown contentType in IoTHubMessage");
         }
         Map_Destroy(handleData->properties);
         free(handleData->messageId);

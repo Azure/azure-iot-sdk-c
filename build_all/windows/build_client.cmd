@@ -89,10 +89,6 @@ rem ----------------------------------------------------------------------------
 rem -- build with CMAKE
 rem -----------------------------------------------------------------------------
 
-if %CMAKE_use_wsio% == ON (
-	echo WebSockets support only available for x86 platform.
-)
-
 echo CMAKE Output Path: %USERPROFILE%\%cmake-output%
 
 rmdir /s/q %USERPROFILE%\%cmake-output%
