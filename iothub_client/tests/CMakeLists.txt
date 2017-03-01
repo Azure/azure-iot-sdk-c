@@ -14,6 +14,7 @@ add_subdirectory(iothubclient_ut)
 add_subdirectory(iothubmessage_ut)
 add_subdirectory(iothubtransport_ut)
 add_subdirectory(blob_ut)
+add_subdirectory(iothub_client_retry_control_ut)
 
 if(${use_http})
     add_subdirectory(iothubtransporthttp_ut)
