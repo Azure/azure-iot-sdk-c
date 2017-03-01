@@ -10,6 +10,11 @@
 #include "azure_c_shared_utility/umock_c_prod.h"
 #include "iothub_client_ll.h"
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 static const char* RETRY_CONTROL_OPTION_INITIAL_WAIT_TIME_IN_SECS = "initial_wait_time_in_secs";
 static const char* RETRY_CONTROL_OPTION_MAX_JITTER_PERCENT = "max_jitter_percent";
 static const char* RETRY_CONTROL_OPTION_SAVED_OPTIONS = "retry_control_saved_options";
@@ -32,5 +37,9 @@ MOCKABLE_FUNCTION(, OPTIONHANDLER_HANDLE, retry_control_retrieve_options, RETRY_
 MOCKABLE_FUNCTION(, void, retry_control_destroy, RETRY_CONTROL_HANDLE, retry_control_handle);
 
 MOCKABLE_FUNCTION(, int, is_timeout_reached, time_t, start_time, unsigned int, timeout_in_secs, bool*, is_timed_out);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // IOTHUB_CLIENT_RETRY_CONTROL 

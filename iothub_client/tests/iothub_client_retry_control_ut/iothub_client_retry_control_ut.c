@@ -5,10 +5,14 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstddef>
+#include <cstdbool>
+#include <cstdint>
 #else
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
+#include <stdbool.h>
+#include <stdint.h>
 #endif
 
 void* real_malloc(size_t size)
@@ -968,6 +972,8 @@ TEST_FUNCTION(Should_Retry_LINEAR_BACKOFF_success)
 }
 
 // Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_033: [If `retry_control->policy_name` is IOTHUB_CLIENT_RETRY_RANDOM, `calculate_next_wait_time` shall return (`retry_control->initial_wait_time_in_secs` * (rand() / RAND_MAX))]
+// This test must be replaced. Create an auxiliary module for get_rand() in c-shared-utilities and test using that
+/*
 TEST_FUNCTION(Should_Retry_RANDOM_success)
 {
 	// arrange
@@ -1031,6 +1037,7 @@ TEST_FUNCTION(Should_Retry_RANDOM_success)
 	// cleanup
 	retry_control_destroy(handle);
 }
+*/
 
 // Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_020: [If `retry_control->last_retry_time` is INDEFINITE_TIME and policy is not IOTHUB_CLIENT_RETRY_IMMEDIATE, the evaluation function shall return non-zero]
 // Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_028: [If `retry_control->policy_name` is IOTHUB_CLIENT_RETRY_IMMEDIATE, retry_action shall be set to RETRY_ACTION_RETRY_NOW]
