@@ -33,4 +33,4 @@ MOCKABLE_FUNCTION(, void, retry_control_destroy, RETRY_CONTROL_HANDLE, retry_con
 
 MOCKABLE_FUNCTION(, int, is_timeout_reached, time_t, start_time, unsigned int, timeout_in_secs, bool*, is_timed_out);
 
-#endif IOTHUB_CLIENT_RETRY_CONTROL 
+#endif // IOTHUB_CLIENT_RETRY_CONTROL 

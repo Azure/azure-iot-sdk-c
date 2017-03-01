@@ -84,6 +84,8 @@ int retry_control_should_retry(RETRY_CONTROL_HANDLE retry_control_handle, RETRY_
 
 **SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_018: [**If no errors occur, `retry_control_should_retry` shall return 0**]**
 
+Note: INDEFINITE_TIME is defined as ((time_t)-1)
+
 
 #### evaluate_retry_action
 
@@ -108,6 +110,8 @@ static int evaluate_retry_action(RETRY_CONTROL_INSTANCE* retry_control, RETRY_AC
 **SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_025: [**Otherwise, if (`current_time` - `retry_control->last_retry_time`) is greater or equal to `retry_control->current_wait_time_in_secs`, `retry_action` shall be set to RETRY_ACTION_RETRY_NOW**]**
 
 **SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_026: [**If no errors occur, the evaluation function shall return 0**]**
+
+Note: INDEFINITE_TIME is defined as ((time_t)-1)
 
 
 #### calculate_next_wait_time
@@ -148,6 +152,13 @@ Note: INDEFINITE_TIME is defined as ((time_t)-1)
 int retry_control_set_option(RETRY_CONTROL_HANDLE retry_control_handle, const char* name, const void* value);
 ```
 
+|Option Name|Value Type|Valid Values|Default Value|
+|-----------|-----------|-----------|-----------|
+|initial_wait_time_in_secs|unsigned int|Greater than or equal to 1|1 second for EXPONENTIAL policies, 5 seconds for others|
+|max_jitter_percent|unsigned int|Any|0 to 100|5|
+|retry_control_options|OPTIONHANDLER_HANDLE|Non-NULL|None|
+
+
 **SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_036: [**If `retry_control_handle`, `name` or `value` are NULL, `retry_control_set_option` shall fail and return non-zero**]**
 
 **SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_037: [**If `name` is "initial_wait_time_in_secs" and `value` is less than 1, `retry_control_set_option` shall fail and return non-zero**]**
@@ -166,11 +177,6 @@ int retry_control_set_option(RETRY_CONTROL_HANDLE retry_control_handle, const ch
 
 **SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_044: [**If no errors occur, `retry_control_set_option` shall return 0**]**
 
-|Option Name|Value Type|Valid Values|Default Value|
-|-----------|-----------|-----------|-----------|
-|initial_wait_time_in_secs|unsigned int|Greater than or equal to 1|1 second for EXPONENTIAL policies, 5 seconds for others|
-|max_jitter_percent|unsigned int|Any|0 to 100|5|
-|retry_control_options|OPTIONHANDLER_HANDLE|Non-NULL|None|
 
 
 ### retry_control_retrieve_options
