@@ -24,7 +24,7 @@ typedef enum RETRY_ACTION_TAG
 struct RETRY_CONTROL_INSTANCE_TAG;
 typedef struct RETRY_CONTROL_INSTANCE_TAG* RETRY_CONTROL_HANDLE;
 
-MOCKABLE_FUNCTION(, RETRY_CONTROL_HANDLE, retry_control_create, IOTHUB_CLIENT_RETRY_POLICY, policy_name, unsigned int, max_retry_time_in_secs);
+MOCKABLE_FUNCTION(, RETRY_CONTROL_HANDLE, retry_control_create, IOTHUB_CLIENT_RETRY_POLICY, policy, unsigned int, max_retry_time_in_secs);
 MOCKABLE_FUNCTION(, int, retry_control_should_retry, RETRY_CONTROL_HANDLE, retry_control_handle, RETRY_ACTION*, retry_action);
 MOCKABLE_FUNCTION(, void, retry_control_reset, RETRY_CONTROL_HANDLE, retry_control_handle);
 MOCKABLE_FUNCTION(, int, retry_control_set_option, RETRY_CONTROL_HANDLE, retry_control_handle, const char*, name, const void*, value);
