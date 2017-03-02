@@ -1107,6 +1107,8 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
             {
                 tls_io_config.hostname = messagingHandle->hostname;
                 tls_io_config.port = 5671;
+                tls_io_config.underlying_io_interface = NULL;
+                tls_io_config.underlying_io_parameters = NULL;
 
                 const IO_INTERFACE_DESCRIPTION* tlsio_interface;
 

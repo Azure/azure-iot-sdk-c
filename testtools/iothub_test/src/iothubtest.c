@@ -580,6 +580,8 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                 TLSIO_CONFIG tls_io_config;
                 tls_io_config.hostname = eh_hostname;
                 tls_io_config.port = 5671;
+                tls_io_config.underlying_io_interface = NULL;
+                tls_io_config.underlying_io_parameters = NULL;
                 const IO_INTERFACE_DESCRIPTION* tlsio_interface = NULL;
 
                 if ((sasl_plain_interface_description = saslplain_get_interface()) == NULL)
@@ -864,6 +866,8 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
                         TLSIO_CONFIG tls_io_config;
                         tls_io_config.hostname = devhubValInfo->hostName;
                         tls_io_config.port = 5671;
+						tls_io_config.underlying_io_interface = NULL;
+						tls_io_config.underlying_io_parameters = NULL;
                         const IO_INTERFACE_DESCRIPTION* tlsio_interface;
 
                         if ((tlsio_interface = platform_get_default_tlsio()) == NULL)
