@@ -93,6 +93,7 @@ if(${use_amqp})
         ./src/iothubtransportamqp_auth.c
 #        ./src/iothubtransport_amqp_connection.c  # Uncomment when AMQP transport is ready to consume this module.
 #        ./src/iothubtransport_amqp_messenger.c   # Uncomment when AMQP transport is ready to consume this module.
+        ./src/iothub_client_retry_control.c
         ./src/uamqp_messaging.c
     )
 
@@ -110,6 +111,7 @@ if(${use_amqp})
         ./inc/iothubtransportamqp_auth.h
 #        ./inc/iothubtransport_amqp_connection.h  # Uncomment when AMQP transport is ready to consume this module.
 #        ./inc/iothubtransport_amqp_messenger.h   # Uncomment when AMQP transport is ready to consume this module.
+        ./inc/iothub_client_retry_control.h
         ./inc/uamqp_messaging.h
     )
 
