@@ -24,6 +24,8 @@ static XIO_HANDLE getIoTransportProvider(const char* fqdn)
         TLSIO_CONFIG tls_io_config;
         tls_io_config.hostname = fqdn;
         tls_io_config.port = 8883;
+        tls_io_config.underlying_io_interface = NULL;
+        tls_io_config.underlying_io_parameters = NULL;
         /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_012: [ getIoTransportProvider shall return the XIO_HANDLE returns by xio_create. ] */
         result = xio_create(io_interface_description, &tls_io_config);
     }

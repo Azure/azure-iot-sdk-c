@@ -15,6 +15,9 @@ static XIO_HANDLE getTLSIOTransport(const char* fqdn)
     TLSIO_CONFIG tls_io_config;
     tls_io_config.hostname = fqdn;
     tls_io_config.port = DEFAULT_IOTHUB_AMQP_PORT;
+    tls_io_config.underlying_io_interface = NULL;
+    tls_io_config.underlying_io_parameters = NULL;
+
     // Codes_SRS_IOTHUBTRANSPORTAMQP_09_002: [getTLSIOTransport shall get `io_interface_description` using platform_get_default_tlsio())]
     const IO_INTERFACE_DESCRIPTION* io_interface_description = platform_get_default_tlsio();
 
