@@ -44,6 +44,7 @@
 #define RFC1035_MAX_FQDN_LENGTH 255
 #define DEFAULT_SAS_TOKEN_LIFETIME_MS 3600000
 #define DEFAULT_CBS_REQUEST_TIMEOUT_MS 30000
+#define DEFAULT_CONNECTION_IDLE_TIMEOUT 240000
 #define DEFAULT_CONTAINER_ID "default_container_id"
 #define DEFAULT_INCOMING_WINDOW_SIZE UINT_MAX
 #define DEFAULT_OUTGOING_WINDOW_SIZE 100
@@ -653,9 +654,12 @@ static int establishConnection(AMQP_TRANSPORT_INSTANCE* transport_state)
                     else
                     {
                         set_session_options(transport_state->session);
-
-                        // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_066: [IoTHubTransport_AMQP_Common_DoWork shall establish the CBS connection using the cbs_create() AMQP API] 
-                        if ((transport_state->cbs_connection.cbs_handle = cbs_create(transport_state->session, on_amqp_management_state_changed, NULL)) == NULL)
+                        if (connection_set_idle_timeout(transport_state->connection, DEFAULT_CONNECTION_IDLE_TIMEOUT) != 0)
+                        {
+                            result = __FAILURE__;
+                            LogError("Failed to create the CBS connection.");
+                        }
+                        else if ((transport_state->cbs_connection.cbs_handle = cbs_create(transport_state->session, on_amqp_management_state_changed, NULL)) == NULL)
                         {
                             // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_067: [If cbs_create() fails, IoTHubTransport_AMQP_Common_DoWork shall fail and return immediately] 
                             result = __FAILURE__;
@@ -913,20 +917,17 @@ static int destroyMessageReceiver(AMQP_TRANSPORT_DEVICE_STATE* device_state)
         if (messagereceiver_close(device_state->message_receiver) != RESULT_OK)
         {
             LogError("Failed closing the AMQP message receiver.");
-            result = __FAILURE__;
         }
-        else
-        {
-            messagereceiver_destroy(device_state->message_receiver);
 
-            device_state->message_receiver = NULL;
+        messagereceiver_destroy(device_state->message_receiver);
 
-            link_destroy(device_state->receiver_link);
+        device_state->message_receiver = NULL;
 
-            device_state->receiver_link = NULL;
+        link_destroy(device_state->receiver_link);
 
-            result = RESULT_OK;
-        }
+        device_state->receiver_link = NULL;
+
+        result = RESULT_OK;
     }
 
     return result;

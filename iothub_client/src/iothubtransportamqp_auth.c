@@ -657,6 +657,12 @@ int authentication_reset(AUTHENTICATION_STATE_HANDLE authentication_state_handle
 					auth_state->cbs_state.current_sas_token_create_time = 0;
 					result = RESULT_OK;
 				}
+
+                if (devices_path != NULL)
+                {
+                    STRING_delete(devices_path);
+                }
+
 				break;
 			}
 			case X509:
