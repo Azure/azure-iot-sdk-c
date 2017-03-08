@@ -63,7 +63,7 @@ If you are considering porting the device client SDK for C to a new platform, ch
 
 ## Contribution, feedback and issues
 
-If you encounter any bugs, have suggestions for new features or if you would like to become an active contributor to this project please follow the instructions provided in the [contribution guidelines](CONTRIBUTING.md).
+If you encounter any bugs, have suggestions for new features or if you would like to become an active contributor to this project please follow the instructions provided in the [contribution guidelines](.github/CONTRIBUTING.md).
 
 ## Support
 
