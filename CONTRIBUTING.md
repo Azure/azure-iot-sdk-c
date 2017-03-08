@@ -39,19 +39,19 @@ The following steps describe adding a new requirement in a Word document:
 
 * Add the requirement text and select it
 
-![](https://github.com/azure/azure-iot-sdks/raw/master/media/add_requirement/add_requirement_step1.png)
+![](doc/media/add_requirement/add_requirement_step1.png)
 
 * Invoke the macro with the selected text
 
-![](https://github.com/azure/azure-iot-sdks/raw/master/media/add_requirement/add_requirement_step2.png)
+![](doc/media/add_requirement/add_requirement_step2.png)
 
 * Select developer id 99
 
-![](https://github.com/azure/azure-iot-sdks/raw/master/media/add_requirement/add_requirement_step3.png)
+![](doc/media/add_requirement/add_requirement_step3.png)
 
 * Done!
 
-![](https://github.com/azure/azure-iot-sdks/raw/master/media/add_requirement/add_requirement_step4.png)
+![](doc/media/add_requirement/add_requirement_step4.png)
 
 When contributing to markdown requirement docs, you can also use `99` for a developer id, and just increment the last number of the requirement to be unique.
 
