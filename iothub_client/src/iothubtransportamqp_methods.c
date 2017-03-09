@@ -248,7 +248,7 @@ static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE messag
 {
     PROPERTIES_HANDLE properties;
     /* VS believes this is not initialized, so have to set it to the worse case here */
-    AMQP_VALUE result;
+    AMQP_VALUE result = NULL;
     IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = (IOTHUBTRANSPORT_AMQP_METHODS_HANDLE)context;
     MESSAGE_OUTCOME message_outcome;
 

@@ -19,8 +19,6 @@ set(${theseTestsName}_test_files
 
 set(${theseTestsName}_c_files
 	../../src/iothubtransport_amqp_common.c
-	real_vector.c
-	real_strings.c
 	real_doublylinkedlist.c
 )
 

@@ -116,6 +116,7 @@ static ON_CONNECTION_STATE_CHANGED connection_create2_on_connection_state_change
 static void* connection_create2_on_connection_state_changed_context;
 static ON_IO_ERROR connection_create2_on_io_error;
 static void* connection_create2_on_io_error_context;
+static CONNECTION_HANDLE TEST_connection_create2_result;
 static CONNECTION_HANDLE TEST_connection_create2(XIO_HANDLE xio, const char* hostname, const char* container_id, ON_NEW_ENDPOINT on_new_endpoint, void* callback_context, ON_CONNECTION_STATE_CHANGED on_connection_state_changed, void* on_connection_state_changed_context, ON_IO_ERROR on_io_error, void* on_io_error_context)
 {
 	(void)xio;
@@ -129,7 +130,7 @@ static CONNECTION_HANDLE TEST_connection_create2(XIO_HANDLE xio, const char* hos
 	connection_create2_on_io_error = on_io_error;
 	connection_create2_on_io_error_context = on_io_error_context;
 
-	return TEST_CONNECTION_HANDLE;
+	return TEST_connection_create2_result;
 }
 
 static const void* on_state_changed_callback_context;
@@ -176,7 +177,8 @@ static void set_exp_calls_for_amqp_connection_create(AMQP_CONNECTION_CONFIG* amq
 	}
 
 	// Connection
-	STRICT_EXPECTED_CALL(UniqueId_Generate(IGNORED_PTR_ARG, 16)).IgnoreArgument(1);
+	EXPECTED_CALL(malloc(IGNORED_NUM_ARG)); // UniqueId container.
+	STRICT_EXPECTED_CALL(UniqueId_Generate(IGNORED_PTR_ARG, 40)).IgnoreArgument(1);
 	STRICT_EXPECTED_CALL(STRING_c_str(TEST_STRING_HANDLE)).SetReturn(TEST_IOTHUB_HOST_FQDN);
 
 	if (amqp_connection_config->create_sasl_io || amqp_connection_config->create_cbs_connection)
@@ -195,7 +197,11 @@ static void set_exp_calls_for_amqp_connection_create(AMQP_CONNECTION_CONFIG* amq
 		.IgnoreArgument_on_io_error()
 		.IgnoreArgument_on_io_error_context();
 
+	STRICT_EXPECTED_CALL(connection_set_idle_timeout(TEST_CONNECTION_HANDLE, IGNORED_NUM_ARG))
+		.IgnoreArgument_idle_timeout();
 	STRICT_EXPECTED_CALL(connection_set_trace(TEST_CONNECTION_HANDLE, amqp_connection_config->is_trace_on));
+
+	EXPECTED_CALL(free(IGNORED_PTR_ARG)); // UniqueId container.
 
 	// Session
 	STRICT_EXPECTED_CALL(session_create(TEST_CONNECTION_HANDLE, NULL, NULL));
@@ -259,6 +265,7 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 	REGISTER_UMOCK_ALIAS_TYPE(ON_NEW_ENDPOINT, void*);
 	REGISTER_UMOCK_ALIAS_TYPE(ON_CONNECTION_STATE_CHANGED, void*);
 	REGISTER_UMOCK_ALIAS_TYPE(ON_IO_ERROR, void*);
+	REGISTER_UMOCK_ALIAS_TYPE(milliseconds, void*);
 	REGISTER_UMOCK_ALIAS_TYPE(UNIQUEID_RESULT, int);
 	REGISTER_UMOCK_ALIAS_TYPE(CONNECTION_HANDLE, void*);
 	REGISTER_UMOCK_ALIAS_TYPE(SESSION_HANDLE, void*);
@@ -292,6 +299,9 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 
 	REGISTER_GLOBAL_MOCK_RETURN(connection_create2, TEST_CONNECTION_HANDLE);
 	REGISTER_GLOBAL_MOCK_FAIL_RETURN(connection_create2, NULL);
+
+	REGISTER_GLOBAL_MOCK_RETURN(connection_set_idle_timeout, 0);
+	REGISTER_GLOBAL_MOCK_FAIL_RETURN(connection_set_idle_timeout, 1);
 
 	REGISTER_GLOBAL_MOCK_RETURN(session_create, TEST_SESSION_HANDLE);
 	REGISTER_GLOBAL_MOCK_FAIL_RETURN(session_create, NULL);
@@ -331,6 +341,8 @@ TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
     }
 
     umock_c_reset_all_calls();
+
+	TEST_connection_create2_result = TEST_CONNECTION_HANDLE;
 }
 
 TEST_FUNCTION_CLEANUP(TestMethodCleanup)
@@ -415,7 +427,7 @@ TEST_FUNCTION(amqp_connection_create_NULL_underlying_io_transport)
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_027: [The `instance->session_handle` outgoing window size shall be set as 100 using session_set_outgoing_window()]
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_028: [Only if `config->create_cbs_connection` is true, amqp_connection_create() shall create and open the CBS_HANDLE]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_029: [`instance->cbs_handle` shall be created using cbs_create(), passing `instance->session_handle` and `on_cbs_state_changed` callback]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_029: [`instance->cbs_handle` shall be created using cbs_create(), passing `instance->session_handle`]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_031: [`instance->cbs_handle` shall be opened using cbs_open()]
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_034: [If no failures occur, amqp_connection_create() shall return the handle to the connection state]
@@ -509,15 +521,24 @@ TEST_FUNCTION(amqp_connection_create_SASL_and_CBS_negative_checks)
 		umock_c_negative_tests_reset();
 		umock_c_negative_tests_fail_call(i);
 
-		if (i == 8 || i == 10 || i == 12 || i == 13)
+		TEST_connection_create2_result = TEST_CONNECTION_HANDLE;
+
+		if (i == 2  || // saslmssbcbs_get_interface
+			i == 4  || // saslclientio_get_interface_description
+			i == 9  || // STRING_c_str(instance->iothub_fqdn) for connection_create2
+			i == 12 || // connection_set_trace
+			i == 13 || // free(unique_container_id)
+			i == 15 || // session_set_incoming_window
+			i == 16)   // session_set_outgoing_window
 		{
 			continue; // these lines have functions that do not return anything (void) or do not cause failures.
 		}
+		else if (i == 10) // connection_create2
+		{
+			TEST_connection_create2_result = NULL;
+		}
 
 		AMQP_CONNECTION_HANDLE handle = amqp_connection_create(config);
-
-		// cleanup
-		amqp_connection_destroy(handle);
 
 		// assert
 		sprintf(error_msg, "On failed call %zu", i);
@@ -529,67 +550,7 @@ TEST_FUNCTION(amqp_connection_create_SASL_and_CBS_negative_checks)
 	umock_c_negative_tests_deinit();
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_068: [If `on_cbs_state_changed` is called back, `instance->on_state_changed_callback` shall be invoked, if defined, only if the new state is different than the previous]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_069: [If `on_cbs_state_changed` new state is AMQP_MANAGEMENT_STATE_OPEN, `instance->on_state_changed_callback` shall be invoked with state AMQP_CONNECTION_STATE_OPENED]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_070: [If `on_cbs_state_changed` new state is AMQP_MANAGEMENT_STATE_IDLE, `instance->on_state_changed_callback` shall be invoked with state AMQP_CONNECTION_STATE_CLOSED]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_073: [If `on_cbs_state_changed` new state is AMQP_MANAGEMENT_STATE_ERROR, `instance->on_state_changed_callback` shall be invoked with state AMQP_CONNECTION_STATE_ERROR]
-TEST_FUNCTION(amqp_connection_create_on_cbs_state_changed)
-{
-	// arrange
-	AMQP_MANAGEMENT_STATE previous_cbs_state[4];
-	previous_cbs_state[0] = AMQP_MANAGEMENT_STATE_IDLE;
-	previous_cbs_state[1] = AMQP_MANAGEMENT_STATE_OPEN;
-	previous_cbs_state[2] = AMQP_MANAGEMENT_STATE_ERROR;
-	previous_cbs_state[3] = AMQP_MANAGEMENT_STATE_IDLE;
-
-	AMQP_MANAGEMENT_STATE new_cbs_state[4];
-	new_cbs_state[0] = AMQP_MANAGEMENT_STATE_OPEN;
-	new_cbs_state[1] = AMQP_MANAGEMENT_STATE_ERROR;
-	new_cbs_state[2] = AMQP_MANAGEMENT_STATE_IDLE;
-	new_cbs_state[3] = AMQP_MANAGEMENT_STATE_ERROR;
-
-	AMQP_CONNECTION_STATE previous_amqp_connection_state[4];
-	previous_amqp_connection_state[0] = AMQP_CONNECTION_STATE_CLOSED;
-	previous_amqp_connection_state[1] = AMQP_CONNECTION_STATE_OPENED;
-	previous_amqp_connection_state[2] = AMQP_CONNECTION_STATE_ERROR;
-	previous_amqp_connection_state[3] = AMQP_CONNECTION_STATE_CLOSED;
-
-	AMQP_CONNECTION_STATE new_amqp_connection_state[4];
-	new_amqp_connection_state[0] = AMQP_CONNECTION_STATE_OPENED;
-	new_amqp_connection_state[1] = AMQP_CONNECTION_STATE_ERROR;
-	new_amqp_connection_state[2] = AMQP_CONNECTION_STATE_CLOSED;
-	new_amqp_connection_state[3] = AMQP_CONNECTION_STATE_ERROR;
-
-
-	AMQP_CONNECTION_CONFIG* config = get_amqp_connection_config();
-
-	umock_c_reset_all_calls();
-	set_exp_calls_for_amqp_connection_create(config);
-
-	saved_cbs_create_on_amqp_management_state_changed = NULL;
-	saved_cbs_create_callback_context = NULL;
-
-	AMQP_CONNECTION_HANDLE handle = amqp_connection_create(config);
-
-	ASSERT_IS_NOT_NULL(saved_cbs_create_on_amqp_management_state_changed);
-
-	// act
-	int i;
-	for (i = 0; i < 4; i++)
-	{
-		// act
-		saved_cbs_create_on_amqp_management_state_changed(handle, new_cbs_state[i], previous_cbs_state[i]);
-
-		// assert
-		ASSERT_ARE_EQUAL(int, on_state_changed_callback_previous_state, previous_amqp_connection_state[i]);
-		ASSERT_ARE_EQUAL(int, on_state_changed_callback_new_state, new_amqp_connection_state[i]);
-	}
-
-	// cleanup
-	amqp_connection_destroy(handle);
-}
-
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_063: [If `on_connection_state_changed` is called back, `instance->on_state_changed_callback` shall be invoked, if defined, only if the new state is different than the previous]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_063: [If `on_connection_state_changed` is called back, `instance->on_state_changed_callback` shall be invoked, if defined]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_064: [If `on_connection_state_changed` new state is CONNECTION_STATE_OPENED, `instance->on_state_changed_callback` shall be invoked with state AMQP_CONNECTION_STATE_OPENED]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_065: [If `on_connection_state_changed` new state is CONNECTION_STATE_END or CONNECTION_STATE_ERROR, `instance->on_state_changed_callback` shall be invoked with state AMQP_CONNECTION_STATE_CLOSED]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_071: [If `on_connection_state_changed` new state is CONNECTION_STATE_ERROR, `instance->on_state_changed_callback` shall be invoked with state AMQP_CONNECTION_STATE_ERROR]
