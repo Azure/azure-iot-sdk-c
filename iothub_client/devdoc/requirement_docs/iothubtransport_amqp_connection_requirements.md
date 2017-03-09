@@ -86,6 +86,11 @@ AMQP_CONNECTION_HANDLE amqp_connection_create(AMQP_CONNECTION_CONFIG* config);
 **SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_019: [**amqp_connection_create() shall use the `instance->sasl_io` as the `connection_underlying_io`**]**
 **SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_020: [**connection_create2() shall also receive `on_connection_state_changed` and `on_connection_error` callback functions**]**
 **SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_021: [**If connection_create2() fails, amqp_connection_create() shall fail and return NULL**]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_073: [**The connection idle timeout parameter shall be set to 240000 milliseconds using connection_set_idle_timeout()**]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_074: [**If connection_set_idle_timeout() fails, amqp_connection_create() shall fail and return NULL**]**
+
 **SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_023: [**The connection tracing shall be set using connection_set_trace(), passing `instance->is_trace_on`**]**
 
 **SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_024: [**`instance->session_handle` shall be created using session_create(), passing `instance->connection_handle`**]**

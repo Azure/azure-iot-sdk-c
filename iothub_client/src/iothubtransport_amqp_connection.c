@@ -175,8 +175,10 @@ static int create_connection_handle(AMQP_CONNECTION_INSTANCE* instance)
 			result = __FAILURE__;
 			LogError("Failed creating the AMQP connection (connection_create2 failed)");
 		}
+		// Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_073: [The connection idle timeout parameter shall be set to 240000 milliseconds using connection_set_idle_timeout()]
 		else if (connection_set_idle_timeout(instance->connection_handle, DEFAULT_CONNECTION_IDLE_TIMEOUT) != RESULT_OK)
 		{
+			// Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_074: [If connection_set_idle_timeout() fails, amqp_connection_create() shall fail and return NULL]
 			result = __FAILURE__;
 			LogError("Failed creating the AMQP connection (connection_set_idle_timeout failed)");
 		}
