@@ -6,6 +6,8 @@
 #include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/gballoc.h"
+#include "azure_c_shared_utility/agenttime.h" 
+#include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/uniqueid.h"
 #include "azure_c_shared_utility/singlylinkedlist.h"
 #include "azure_uamqp_c/link.h"
@@ -66,7 +68,7 @@ typedef struct MESSENGER_INSTANCE_TAG
 	time_t last_message_receiver_state_change_time;
 } MESSENGER_INSTANCE;
 
-typedef struct SEND_EVENT_TASK_TAG
+typedef struct MESSENGER_SEND_EVENT_TASK_TAG
 {
 	IOTHUB_MESSAGE_LIST* message;
 	ON_MESSENGER_EVENT_SEND_COMPLETE on_event_send_complete_callback;
@@ -74,7 +76,7 @@ typedef struct SEND_EVENT_TASK_TAG
 	time_t send_time;
 	MESSENGER_INSTANCE *messenger;
 	bool is_timed_out;
-} SEND_EVENT_TASK;
+} MESSENGER_SEND_EVENT_TASK;
 
 // @brief
 //     Evaluates if the ammount of time since start_time is greater or lesser than timeout_in_secs.
@@ -328,8 +330,8 @@ static void destroy_event_sender(MESSENGER_INSTANCE* instance)
 		// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_060: [`instance->message_sender` shall be destroyed using messagesender_destroy()]
 		messagesender_destroy(instance->message_sender);
 		instance->message_sender = NULL;
-		instance->message_receiver_current_state = MESSAGE_RECEIVER_STATE_IDLE;
-		instance->message_receiver_previous_state = MESSAGE_RECEIVER_STATE_IDLE;
+		instance->message_sender_current_state = MESSAGE_SENDER_STATE_IDLE;
+		instance->message_sender_previous_state = MESSAGE_SENDER_STATE_IDLE;
 		instance->last_message_sender_state_change_time = INDEFINITE_TIME;
 	}
 
@@ -527,6 +529,86 @@ static void on_message_receiver_state_changed_callback(const void* context, MESS
 	}
 }
 
+static MESSENGER_MESSAGE_DISPOSITION_INFO* create_message_disposition_info(MESSENGER_INSTANCE* messenger)
+{
+	MESSENGER_MESSAGE_DISPOSITION_INFO* result;
+
+	if ((result = (MESSENGER_MESSAGE_DISPOSITION_INFO*)malloc(sizeof(MESSENGER_MESSAGE_DISPOSITION_INFO))) == NULL)
+	{
+		LogError("Failed creating MESSENGER_MESSAGE_DISPOSITION_INFO container (malloc failed)");
+		result = NULL;
+	}
+	else
+	{
+		delivery_number message_id;
+
+		if (messagereceiver_get_received_message_id(messenger->message_receiver, &message_id) != RESULT_OK)
+		{
+			LogError("Failed creating MESSENGER_MESSAGE_DISPOSITION_INFO container (messagereceiver_get_received_message_id failed)");
+			free(result);
+			result = NULL;
+		}
+		else
+		{
+			const char* link_name;
+
+			if (messagereceiver_get_link_name(messenger->message_receiver, &link_name) != RESULT_OK)
+			{
+				LogError("Failed creating MESSENGER_MESSAGE_DISPOSITION_INFO container (messagereceiver_get_link_name failed)");
+				free(result);
+				result = NULL;
+			}
+			else if (mallocAndStrcpy_s(&result->source, link_name) != RESULT_OK)
+			{
+				LogError("Failed creating MESSENGER_MESSAGE_DISPOSITION_INFO container (failed copying link name)");
+				free(result);
+				result = NULL;
+			}
+			else
+			{
+				result->message_id = message_id;
+			}
+		}
+	}
+
+	return result;
+}
+
+static void destroy_message_disposition_info(MESSENGER_MESSAGE_DISPOSITION_INFO* disposition_info)
+{
+	free(disposition_info->source);
+	free(disposition_info);
+}
+
+static AMQP_VALUE create_uamqp_disposition_result_from(MESSENGER_DISPOSITION_RESULT disposition_result)
+{
+	AMQP_VALUE uamqp_disposition_result;
+
+	if (disposition_result == MESSENGER_DISPOSITION_RESULT_NONE)
+	{
+		uamqp_disposition_result = NULL; // intentionally not sending an answer.
+	}
+	else if (disposition_result == MESSENGER_DISPOSITION_RESULT_ACCEPTED)
+	{
+		uamqp_disposition_result = messaging_delivery_accepted();
+	}
+	else if (disposition_result == MESSENGER_DISPOSITION_RESULT_RELEASED)
+	{
+		uamqp_disposition_result = messaging_delivery_released();
+	}
+	else if (disposition_result == MESSENGER_DISPOSITION_RESULT_REJECTED)
+	{
+		uamqp_disposition_result = messaging_delivery_rejected("Rejected by application", "Rejected by application");
+	}
+	else
+	{
+		LogError("Failed creating a disposition result for messagereceiver (result %d is not supported)", disposition_result);
+		uamqp_disposition_result = NULL;
+	}
+
+	return uamqp_disposition_result;
+}
+
 static AMQP_VALUE on_message_received_internal_callback(const void* context, MESSAGE_HANDLE message)
 {
 	AMQP_VALUE result;
@@ -544,32 +626,28 @@ static AMQP_VALUE on_message_received_internal_callback(const void* context, MES
 	else
 	{
 		MESSENGER_INSTANCE* instance = (MESSENGER_INSTANCE*)context;
+		MESSENGER_MESSAGE_DISPOSITION_INFO* message_disposition_info;
 
-		// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_123: [`instance->on_message_received_callback` shall be invoked passing the IOTHUB_MESSAGE_HANDLE]
-		MESSENGER_DISPOSITION_RESULT disposition_result = instance->on_message_received_callback(iothub_message, instance->on_message_received_context);
-
-		// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_124: [The IOTHUB_MESSAGE_HANDLE instance shall be destroyed using IoTHubMessage_Destroy()]
-		IoTHubMessage_Destroy(iothub_message);
-
-		// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_125: [If `instance->on_message_received_callback` returns MESSENGER_DISPOSITION_RESULT_ACCEPTED, on_message_received_internal_callback shall return the result of messaging_delivery_accepted()]
-		if (disposition_result == MESSENGER_DISPOSITION_RESULT_ACCEPTED)
+		// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_186: [A MESSENGER_MESSAGE_DISPOSITION_INFO instance shall be created containing the source link name and message delivery ID]
+		if ((message_disposition_info = create_message_disposition_info(instance)) == NULL)
 		{
-			result = messaging_delivery_accepted();
-		}
-		// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_126: [If `instance->on_message_received_callback` returns MESSENGER_DISPOSITION_RESULT_ABANDONED, on_message_received_internal_callback shall return the result of messaging_delivery_released()]
-		else if (disposition_result == MESSENGER_DISPOSITION_RESULT_ABANDONED)
-		{
+			// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_187: [**If the MESSENGER_MESSAGE_DISPOSITION_INFO instance fails to be created, on_message_received_internal_callback shall return messaging_delivery_released()]
+			LogError("on_message_received_internal_callback failed (failed creating MESSENGER_MESSAGE_DISPOSITION_INFO).");
 			result = messaging_delivery_released();
 		}
-		// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_127: [If `instance->on_message_received_callback` returns MESSENGER_DISPOSITION_RESULT_REJECTED, on_message_received_internal_callback shall return the result of messaging_delivery_rejected()]
-		else if (disposition_result == MESSENGER_DISPOSITION_RESULT_REJECTED)
+		else
 		{
-			result = messaging_delivery_rejected("Rejected by application", "Rejected by application");
+			// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_123: [`instance->on_message_received_callback` shall be invoked passing the IOTHUB_MESSAGE_HANDLE and MESSENGER_MESSAGE_DISPOSITION_INFO instance]
+			MESSENGER_DISPOSITION_RESULT disposition_result = instance->on_message_received_callback(iothub_message, message_disposition_info, instance->on_message_received_context);
+
+			// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_188: [The memory allocated for the MESSENGER_MESSAGE_DISPOSITION_INFO instance shall be released]
+			destroy_message_disposition_info(message_disposition_info);
+
+			// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_125: [If `instance->on_message_received_callback` returns MESSENGER_DISPOSITION_RESULT_ACCEPTED, on_message_received_internal_callback shall return the result of messaging_delivery_accepted()]
+			// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_126: [If `instance->on_message_received_callback` returns MESSENGER_DISPOSITION_RESULT_RELEASED, on_message_received_internal_callback shall return the result of messaging_delivery_released()]
+			// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_127: [If `instance->on_message_received_callback` returns MESSENGER_DISPOSITION_RESULT_REJECTED, on_message_received_internal_callback shall return the result of messaging_delivery_rejected()]
+			result = create_uamqp_disposition_result_from(disposition_result);
 		}
-        else
-        {
-            result = NULL;
-        }
 	}
 
 	return result;
@@ -695,7 +773,7 @@ static int create_message_receiver(MESSENGER_INSTANCE* instance)
 	return result;
 }
 
-static int move_event_to_in_progress_list(SEND_EVENT_TASK* task)
+static int move_event_to_in_progress_list(MESSENGER_SEND_EVENT_TASK* task)
 {
 	int result; 
 
@@ -712,14 +790,14 @@ static int move_event_to_in_progress_list(SEND_EVENT_TASK* task)
 	return result;
 }
 
-static bool find_send_event_task_on_list(LIST_ITEM_HANDLE list_item, const void* match_context)
+static bool find_MESSENGER_SEND_EVENT_TASK_on_list(LIST_ITEM_HANDLE list_item, const void* match_context)
 {
 	return (list_item != NULL && singlylinkedlist_item_get_value(list_item) == match_context);
 }
 
-static void remove_event_from_in_progress_list(SEND_EVENT_TASK *task)
+static void remove_event_from_in_progress_list(MESSENGER_SEND_EVENT_TASK *task)
 {
-	LIST_ITEM_HANDLE list_item = singlylinkedlist_find(task->messenger->in_progress_list, find_send_event_task_on_list, (void*)task);
+	LIST_ITEM_HANDLE list_item = singlylinkedlist_find(task->messenger->in_progress_list, find_MESSENGER_SEND_EVENT_TASK_on_list, (void*)task);
 
 	if (list_item != NULL)
 	{
@@ -740,7 +818,7 @@ static int copy_events_to_list(SINGLYLINKEDLIST_HANDLE from_list, SINGLYLINKEDLI
 
 	while (list_item != NULL)
 	{
-		SEND_EVENT_TASK *task = (SEND_EVENT_TASK*)singlylinkedlist_item_get_value(list_item);
+		MESSENGER_SEND_EVENT_TASK *task = (MESSENGER_SEND_EVENT_TASK*)singlylinkedlist_item_get_value(list_item);
 
 		if (singlylinkedlist_add(to_list, task) == NULL)
 		{
@@ -835,7 +913,7 @@ static void internal_on_event_send_complete_callback(void* context, MESSAGE_SEND
 { 
 	if (context != NULL)
 	{
-		SEND_EVENT_TASK* task = (SEND_EVENT_TASK*)context;
+		MESSENGER_SEND_EVENT_TASK* task = (MESSENGER_SEND_EVENT_TASK*)context;
 
 		if (task->is_timed_out == false)
 		{
@@ -867,9 +945,9 @@ static void internal_on_event_send_complete_callback(void* context, MESSAGE_SEND
 	}
 }
 
-static SEND_EVENT_TASK* get_next_event_to_send(MESSENGER_INSTANCE* instance)
+static MESSENGER_SEND_EVENT_TASK* get_next_event_to_send(MESSENGER_INSTANCE* instance)
 {
-	SEND_EVENT_TASK* task;
+	MESSENGER_SEND_EVENT_TASK* task;
 	LIST_ITEM_HANDLE list_item;
 
 	if ((list_item = singlylinkedlist_get_head_item(instance->waiting_to_send)) == NULL)
@@ -878,7 +956,7 @@ static SEND_EVENT_TASK* get_next_event_to_send(MESSENGER_INSTANCE* instance)
 	}
 	else
 	{
-		task = (SEND_EVENT_TASK*)singlylinkedlist_item_get_value(list_item);
+		task = (MESSENGER_SEND_EVENT_TASK*)singlylinkedlist_item_get_value(list_item);
 
 		if (singlylinkedlist_remove(instance->waiting_to_send, list_item) != RESULT_OK)
 		{
@@ -893,7 +971,7 @@ static int send_pending_events(MESSENGER_INSTANCE* instance)
 {
 	int result = RESULT_OK;
 
-	SEND_EVENT_TASK* task;
+	MESSENGER_SEND_EVENT_TASK* task;
 
 	while ((task = get_next_event_to_send(instance)) != NULL)
 	{
@@ -970,7 +1048,7 @@ static int process_event_send_timeouts(MESSENGER_INSTANCE* instance)
 
 		while (list_item != NULL)
 		{
-			SEND_EVENT_TASK* task = (SEND_EVENT_TASK*)singlylinkedlist_item_get_value(list_item);
+			MESSENGER_SEND_EVENT_TASK* task = (MESSENGER_SEND_EVENT_TASK*)singlylinkedlist_item_get_value(list_item);
 
 			if (task->is_timed_out == false)
 			{
@@ -1010,7 +1088,7 @@ static void remove_timed_out_events(MESSENGER_INSTANCE* instance)
 
 	while (list_item != NULL)
 	{
-		SEND_EVENT_TASK* task = (SEND_EVENT_TASK*)singlylinkedlist_item_get_value(list_item);
+		MESSENGER_SEND_EVENT_TASK* task = (MESSENGER_SEND_EVENT_TASK*)singlylinkedlist_item_get_value(list_item);
 
 		if (task->is_timed_out == true)
 		{
@@ -1160,6 +1238,66 @@ int messenger_unsubscribe_for_messages(MESSENGER_HANDLE messenger_handle)
 	return result;
 }
 
+int messenger_send_message_disposition(MESSENGER_HANDLE messenger_handle, MESSENGER_MESSAGE_DISPOSITION_INFO* disposition_info, MESSENGER_DISPOSITION_RESULT disposition_result)
+{
+	int result;
+
+	// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_179: [If `messenger_handle` or `disposition_info` are NULL, messenger_send_message_disposition() shall fail and return __FAILURE__]  
+	if (messenger_handle == NULL || disposition_info == NULL)
+	{
+		LogError("Failed sending message disposition (either messenger_handle (%p) or disposition_info (%p) are NULL)", messenger_handle, disposition_info);
+		result = __FAILURE__;
+	}
+	// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_180: [If `disposition_info->source` is NULL, messenger_send_message_disposition() shall fail and return __FAILURE__]  
+	else if (disposition_info->source == NULL)
+	{
+		LogError("Failed sending message disposition (disposition_info->source is NULL)");
+		result = __FAILURE__;
+	}
+	else
+	{
+		MESSENGER_INSTANCE* messenger = (MESSENGER_INSTANCE*)messenger_handle;
+
+		// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_189: [If `messenger_handle->message_receiver` is NULL, messenger_send_message_disposition() shall fail and return __FAILURE__]
+		if (messenger->message_receiver == NULL)
+		{
+			LogError("Failed sending message disposition (message_receiver is not created; check if it is subscribed)");
+			result = __FAILURE__;
+		}
+		else
+		{
+			AMQP_VALUE uamqp_disposition_result;
+
+			// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_181: [An AMQP_VALUE disposition result shall be created corresponding to the `disposition_result` provided]
+			if ((uamqp_disposition_result = create_uamqp_disposition_result_from(disposition_result)) == NULL)
+			{
+				LogError("Failed sending message disposition (disposition result %d is not supported)", disposition_result);
+				result = __FAILURE__;
+			}
+			else
+			{
+				// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_182: [`messagereceiver_send_message_disposition()` shall be invoked passing `disposition_info->source`, `disposition_info->message_id` and the corresponding AMQP_VALUE disposition result]  
+				if (messagereceiver_send_message_disposition(messenger->message_receiver, disposition_info->source, disposition_info->message_id, uamqp_disposition_result) != RESULT_OK)
+				{
+					// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_183: [If `messagereceiver_send_message_disposition()` fails, messenger_send_message_disposition() shall fail and return __FAILURE__]  
+					LogError("Failed sending message disposition (messagereceiver_send_message_disposition failed)");
+					result = __FAILURE__;
+				}
+				else
+				{
+					// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_185: [If no failures occurr, messenger_send_message_disposition() shall return 0]  
+					result = RESULT_OK;
+				}
+
+				// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_184: [messenger_send_message_disposition() shall destroy the AMQP_VALUE disposition result]
+				amqpvalue_destroy(uamqp_disposition_result);
+			}
+		}
+	}
+
+	return result;
+}
+
 int messenger_send_async(MESSENGER_HANDLE messenger_handle, IOTHUB_MESSAGE_LIST* message, ON_MESSENGER_EVENT_SEND_COMPLETE on_messenger_event_send_complete_callback, void* context)
 {
 	int result;
@@ -1184,11 +1322,11 @@ int messenger_send_async(MESSENGER_HANDLE messenger_handle, IOTHUB_MESSAGE_LIST*
 	}
 	else
 	{
-		SEND_EVENT_TASK *task;
+		MESSENGER_SEND_EVENT_TASK *task;
 		MESSENGER_INSTANCE *instance = (MESSENGER_INSTANCE*)messenger_handle;
 
-		// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_137: [messenger_send_async() shall allocate memory for a SEND_EVENT_TASK structure (aka `task`)]  
-		if ((task = (SEND_EVENT_TASK*)malloc(sizeof(SEND_EVENT_TASK))) == NULL)
+		// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_137: [messenger_send_async() shall allocate memory for a MESSENGER_SEND_EVENT_TASK structure (aka `task`)]  
+		if ((task = (MESSENGER_SEND_EVENT_TASK*)malloc(sizeof(MESSENGER_SEND_EVENT_TASK))) == NULL)
 		{
 			// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_138: [If malloc() fails, messenger_send_async() shall fail and return a non-zero value]
 			LogError("Failed sending event (failed to create struct for task; malloc failed)");
@@ -1207,7 +1345,7 @@ int messenger_send_async(MESSENGER_HANDLE messenger_handle, IOTHUB_MESSAGE_LIST*
 		}
 		else
 		{
-			memset(task, 0, sizeof(SEND_EVENT_TASK));
+			memset(task, 0, sizeof(MESSENGER_SEND_EVENT_TASK));
 			task->message = message;
 			task->on_event_send_complete_callback = on_messenger_event_send_complete_callback;
 			task->context = context;
@@ -1517,7 +1655,7 @@ void messenger_destroy(MESSENGER_HANDLE messenger_handle)
 		//       but we need to iterate through in case any events failed to be moved.
 		while ((list_node = singlylinkedlist_get_head_item(instance->in_progress_list)) != NULL)
 		{
-			SEND_EVENT_TASK* task = (SEND_EVENT_TASK*)singlylinkedlist_item_get_value(list_node);
+			MESSENGER_SEND_EVENT_TASK* task = (MESSENGER_SEND_EVENT_TASK*)singlylinkedlist_item_get_value(list_node);
 
 			(void)singlylinkedlist_remove(instance->in_progress_list, list_node);
 
@@ -1530,7 +1668,7 @@ void messenger_destroy(MESSENGER_HANDLE messenger_handle)
 
 		while ((list_node = singlylinkedlist_get_head_item(instance->waiting_to_send)) != NULL)
 		{
-			SEND_EVENT_TASK* task = (SEND_EVENT_TASK*)singlylinkedlist_item_get_value(list_node);
+			MESSENGER_SEND_EVENT_TASK* task = (MESSENGER_SEND_EVENT_TASK*)singlylinkedlist_item_get_value(list_node);
 
 			(void)singlylinkedlist_remove(instance->waiting_to_send, list_node);
 

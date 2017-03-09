@@ -19,24 +19,49 @@ azure_uamqp_c
 	static const char* MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS = "event_send_timeout_secs";
 	static const char* MESSENGER_OPTION_SAVED_OPTIONS = "saved_messenger_options";
 
+	typedef struct MESSENGER_INSTANCE* MESSENGER_HANDLE;
+
+	typedef enum MESSENGER_SEND_STATUS_TAG
+	{
+		MESSENGER_SEND_STATUS_IDLE,
+		MESSENGER_SEND_STATUS_BUSY
+	} MESSENGER_SEND_STATUS;
+
+	typedef enum MESSENGER_EVENT_SEND_COMPLETE_RESULT_TAG
+	{
+		MESSENGER_EVENT_SEND_COMPLETE_RESULT_OK,
+		MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE,
+		MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING,
+		MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_TIMEOUT,
+		MESSENGER_EVENT_SEND_COMPLETE_RESULT_MESSENGER_DESTROYED
+	} MESSENGER_EVENT_SEND_COMPLETE_RESULT;
+
+	typedef enum MESSENGER_DISPOSITION_RESULT_TAG
+	{
+		MESSENGER_DISPOSITION_RESULT_NONE,
+		MESSENGER_DISPOSITION_RESULT_ACCEPTED,
+		MESSENGER_DISPOSITION_RESULT_REJECTED,
+		MESSENGER_DISPOSITION_RESULT_RELEASED
+	} MESSENGER_DISPOSITION_RESULT;
+
 	typedef enum MESSENGER_STATE_TAG
 	{
 		MESSENGER_STATE_STARTING,
 		MESSENGER_STATE_STARTED,
+		MESSENGER_STATE_STOPPING,
 		MESSENGER_STATE_STOPPED,
 		MESSENGER_STATE_ERROR
 	} MESSENGER_STATE;
 
-	typedef void(*ON_MESSENGER_STATE_CHANGED_CALLBACK)(void* context, MESSENGER_STATE previous_state, MESSENGER_STATE new_state);
-
-	typedef enum MESSENGER_DISPOSITION_RESULT_TAG
+	typedef struct MESSENGER_MESSAGE_DISPOSITION_INFO_TAG
 	{
-		MESSENGER_DISPOSITION_RESULT_ACCEPTED,
-		MESSENGER_DISPOSITION_RESULT_REJECTED,
-		MESSENGER_DISPOSITION_RESULT_ABANDONED
-	} MESSENGER_DISPOSITION_RESULT;
+		delivery_number message_id;
+		char* source;
+	} MESSENGER_MESSAGE_DISPOSITION_INFO;
 
-	typedef MESSENGER_DISPOSITION_RESULT(*ON_NEW_MESSAGE_RECEIVED)(IOTHUB_MESSAGE_HANDLE message, void* context);
+	typedef void(*ON_MESSENGER_EVENT_SEND_COMPLETE)(IOTHUB_MESSAGE_LIST* iothub_message_list, MESSENGER_EVENT_SEND_COMPLETE_RESULT messenger_event_send_complete_result, void* context);
+	typedef void(*ON_MESSENGER_STATE_CHANGED_CALLBACK)(void* context, MESSENGER_STATE previous_state, MESSENGER_STATE new_state);
+	typedef MESSENGER_DISPOSITION_RESULT(*ON_MESSENGER_MESSAGE_RECEIVED)(IOTHUB_MESSAGE_HANDLE message, MESSENGER_MESSAGE_DISPOSITION_INFO* disposition_info, void* context);
 
 	typedef struct MESSENGER_CONFIG_TAG
 	{
@@ -46,29 +71,11 @@ azure_uamqp_c
 		void* on_state_changed_context;
 	} MESSENGER_CONFIG;
 
-	typedef struct MESSENGER_INSTANCE* MESSENGER_HANDLE;
-
-	typedef enum EVENT_SEND_COMPLETE_RESULT_TAG
-	{
-		EVENT_SEND_COMPLETE_RESULT_OK,
-		EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE,
-		EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING,
-		EVENT_SEND_COMPLETE_RESULT_ERROR_TIMEOUT,
-		EVENT_SEND_COMPLETE_RESULT_MESSENGER_DESTROYED
-	} EVENT_SEND_COMPLETE_RESULT;
-
-	typedef void(*ON_EVENT_SEND_COMPLETE)(IOTHUB_MESSAGE_LIST* message, EVENT_SEND_COMPLETE_RESULT result, void* context);
-
-	typedef enum MESSENGER_SEND_STATUS_TAG
-	{
-		MESSENGER_SEND_STATUS_IDLE,
-		MESSENGER_SEND_STATUS_BUSY
-	} MESSENGER_SEND_STATUS;
-
 	extern MESSENGER_HANDLE messenger_create(const MESSENGER_CONFIG* messenger_config);
 	extern int messenger_send_async(MESSENGER_HANDLE messenger_handle, IOTHUB_MESSAGE_LIST* message, ON_EVENT_SEND_COMPLETE on_event_send_complete_callback, const void* context);
 	extern int messenger_subscribe_for_messages(MESSENGER_HANDLE messenger_handle, ON_MESSAGE_RECEIVED on_message_received_callback, void* context);
 	extern int messenger_unsubscribe_for_messages(MESSENGER_HANDLE messenger_handle);
+	extern int messenger_send_message_disposition(MESSENGER_HANDLE messenger_handle, MESSENGER_MESSAGE_DISPOSITION_INFO* disposition_info, MESSENGER_DISPOSITION_RESULT disposition_result);
 	extern int messenger_get_send_status(MESSENGER_HANDLE messenger_handle, MESSENGER_SEND_STATUS* send_status);
 	extern int messenger_start(MESSENGER_HANDLE messenger_handle, SESSION_HANDLE session_handle); 
 	extern int messenger_stop(MESSENGER_HANDLE messenger_handle);
@@ -165,6 +172,29 @@ Summary: informs the messenger instance that an existing uAMQP messagereceiver s
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_026: [**messenger_unsubscribe_for_messages() shall set `instance->on_message_received_callback` to NULL**]**  
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_027: [**messenger_unsubscribe_for_messages() shall set `instance->on_message_received_context` to NULL**]**  
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_028: [**If no failures occurr, messenger_unsubscribe_for_messages() shall return 0**]**  
+
+
+## messenger_send_message_disposition
+```c
+extern int messenger_send_message_disposition(MESSENGER_HANDLE messenger_handle, MESSENGER_MESSAGE_DISPOSITION_INFO* disposition_info, MESSENGER_DISPOSITION_RESULT disposition_result);
+```
+
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_179: [**If `messenger_handle` or `disposition_info` are NULL, messenger_send_message_disposition() shall fail and return __FAILURE__**]**  
+
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_180: [**If `disposition_info->source` is NULL, messenger_send_message_disposition() shall fail and return __FAILURE__**]**  
+
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_189: [**If `messenger_handle->message_receiver` is NULL, messenger_send_message_disposition() shall fail and return __FAILURE__**]**  
+
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_181: [**An AMQP_VALUE disposition result shall be created corresponding to the `disposition_result` provided**]**  
+
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_182: [**`messagereceiver_send_message_disposition()` shall be invoked passing `disposition_info->source`, `disposition_info->message_id` and the AMQP_VALUE disposition result**]**  
+
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_183: [**If `messagereceiver_send_message_disposition()` fails, messenger_send_message_disposition() shall fail and return __FAILURE__**]**  
+
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_184: [**messenger_send_message_disposition() shall destroy the AMQP_VALUE disposition result**]**  
+
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_185: [**If no failures occurr, messenger_send_message_disposition() shall return 0**]**  
+
 
 
 ## messenger_start
@@ -298,10 +328,17 @@ static AMQP_VALUE on_message_received_internal_callback(const void* context, MES
 
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_121: [**An IOTHUB_MESSAGE_HANDLE shall be obtained from MESSAGE_HANDLE using IoTHubMessage_CreateFromUamqpMessage()**]**  
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_122: [**If IoTHubMessage_CreateFromUamqpMessage() fails, on_message_received_internal_callback shall return the result of messaging_delivery_rejected()**]**  
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_123: [**`instance->on_message_received_callback` shall be invoked passing the IOTHUB_MESSAGE_HANDLE**]**  
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_124: [**The IOTHUB_MESSAGE_HANDLE instance shall be destroyed using IoTHubMessage_Destroy()**]**  
+
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_186: [**A MESSENGER_MESSAGE_DISPOSITION_INFO instance shall be created containing the source link name and message delivery ID**]**  
+
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_187: [**If the MESSENGER_MESSAGE_DISPOSITION_INFO instance fails to be created, on_message_received_internal_callback shall return messaging_delivery_released()**]**  
+
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_123: [**`instance->on_message_received_callback` shall be invoked passing the IOTHUB_MESSAGE_HANDLE and MESSENGER_MESSAGE_DISPOSITION_INFO instance**]**  
+
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_188: [**The memory allocated for the MESSENGER_MESSAGE_DISPOSITION_INFO instance shall be released**]**  
+
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_125: [**If `instance->on_message_received_callback` returns MESSENGER_DISPOSITION_RESULT_ACCEPTED, on_message_received_internal_callback shall return the result of messaging_delivery_accepted()**]**  
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_126: [**If `instance->on_message_received_callback` returns MESSENGER_DISPOSITION_RESULT_ABANDONED, on_message_received_internal_callback shall return the result of messaging_delivery_released()**]**  
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_126: [**If `instance->on_message_received_callback` returns MESSENGER_DISPOSITION_RESULT_RELEASED, on_message_received_internal_callback shall return the result of messaging_delivery_released()**]**  
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_127: [**If `instance->on_message_received_callback` returns MESSENGER_DISPOSITION_RESULT_REJECTED, on_message_received_internal_callback shall return the result of messaging_delivery_rejected()**]**  
 
 

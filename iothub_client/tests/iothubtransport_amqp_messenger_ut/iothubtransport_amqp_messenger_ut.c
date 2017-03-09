@@ -130,7 +130,7 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 #define TEST_MESSAGE_RECEIVER_TARGET_AMQP_VALUE           (AMQP_VALUE)0x4469
 #define TEST_ON_NEW_MESSAGE_RECEIVED_CB_CONTEXT           (void*)0x4470
 #define TEST_MESSAGE_DISPOSITION_ACCEPTED_AMQP_VALUE      (AMQP_VALUE)0x4471
-#define TEST_MESSAGE_DISPOSITION_ABANDONED_AMQP_VALUE     (AMQP_VALUE)0x4472
+#define TEST_MESSAGE_DISPOSITION_RELEASED_AMQP_VALUE      (AMQP_VALUE)0x4472
 #define TEST_MESSAGE_DISPOSITION_REJECTED_AMQP_VALUE      (AMQP_VALUE)0x4473
 #define TEST_SINGLYLINKEDLIST_HANDLE                      (SINGLYLINKEDLIST_HANDLE)0x4476
 #define TEST_LIST_ITEM_HANDLE                             (LIST_ITEM_HANDLE)0x4477
@@ -145,6 +145,9 @@ static SINGLYLINKEDLIST_HANDLE TEST_IN_PROGRESS_LIST;
 #define TEST_IN_PROGRESS_LIST2                            (SINGLYLINKEDLIST_HANDLE)0x4484
 #define TEST_OPTIONHANDLER_HANDLE                         (OPTIONHANDLER_HANDLE)0x4485
 #define INDEFINITE_TIME                                   ((time_t)-1)
+
+static delivery_number TEST_DELIVERY_NUMBER;
+
 
 // Helpers
 
@@ -206,9 +209,11 @@ static void TEST_free(void* ptr)
         saved_malloc_returns[i] = saved_malloc_returns[j];
     }
 
-    if (i != j) saved_malloc_returns_count--;
-
-    real_free(ptr);
+	if (i != j)
+	{
+		saved_malloc_returns_count--;
+		real_free(ptr);
+	}
 }
 
 
@@ -265,10 +270,12 @@ static MESSAGE_RECEIVER_HANDLE TEST_messagereceiver_create(LINK_HANDLE link, ON_
 
 static IOTHUB_MESSAGE_HANDLE saved_on_new_message_received_callback_message;
 static void* saved_on_new_message_received_callback_context;
+static MESSENGER_MESSAGE_DISPOSITION_INFO* saved_on_new_message_received_callback_disposition_info;
 static MESSENGER_DISPOSITION_RESULT TEST_on_new_message_received_callback_result;
-static MESSENGER_DISPOSITION_RESULT TEST_on_new_message_received_callback(IOTHUB_MESSAGE_HANDLE message, void* context)
+static MESSENGER_DISPOSITION_RESULT TEST_on_new_message_received_callback(IOTHUB_MESSAGE_HANDLE message, MESSENGER_MESSAGE_DISPOSITION_INFO* disposition_info, void* context)
 {
     saved_on_new_message_received_callback_message = message;
+	saved_on_new_message_received_callback_disposition_info = disposition_info;
     saved_on_new_message_received_callback_context = context;
     return TEST_on_new_message_received_callback_result;
 }
@@ -1014,17 +1021,49 @@ static void set_expected_calls_for_messenger_destroy(MESSENGER_CONFIG* config, M
 	STRICT_EXPECTED_CALL(free(messenger_handle));
 }
 
+static char* TEST_messagereceiver_get_link_name_link_name;
+static int TEST_messagereceiver_get_link_name_result;
+static int TEST_messagereceiver_get_link_name(MESSAGE_RECEIVER_HANDLE message_receiver, const char** link_name)
+{
+	(void)message_receiver;
+	*link_name = TEST_messagereceiver_get_link_name_link_name;
+	return TEST_messagereceiver_get_link_name_result;
+}
+
+static void set_expected_calls_for_create_message_disposition_info()
+{
+	STRICT_EXPECTED_CALL(malloc(sizeof(MESSENGER_MESSAGE_DISPOSITION_INFO)));
+	STRICT_EXPECTED_CALL(messagereceiver_get_received_message_id(TEST_MESSAGE_RECEIVER_HANDLE, IGNORED_PTR_ARG))
+		.IgnoreArgument(2)
+		.CopyOutArgumentBuffer(2, &TEST_DELIVERY_NUMBER, sizeof(delivery_number));
+	
+	STRICT_EXPECTED_CALL(messagereceiver_get_link_name(TEST_MESSAGE_RECEIVER_HANDLE, IGNORED_PTR_ARG))
+		.IgnoreArgument(2);
+	static char* link_name = TEST_MESSAGE_RECEIVER_LINK_NAME_CHAR_PTR;
+	EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+		.CopyOutArgumentBuffer_destination(&link_name, sizeof(char*));
+}
+
+static void set_expected_calls_for_destroy_message_disposition_info()
+{
+	EXPECTED_CALL(free(IGNORED_PTR_ARG));
+	EXPECTED_CALL(free(IGNORED_PTR_ARG));
+}
+
 static void set_expected_calls_for_on_message_received_internal_callback(MESSENGER_DISPOSITION_RESULT disposition_result)
 {
     TEST_on_new_message_received_callback_result = disposition_result;
     STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromUamqpMessage(TEST_MESSAGE_HANDLE, IGNORED_PTR_ARG)).IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(TEST_IOTHUB_MESSAGE_HANDLE));
     
+	set_expected_calls_for_create_message_disposition_info();
+
+	set_expected_calls_for_destroy_message_disposition_info();
+
     if (disposition_result == MESSENGER_DISPOSITION_RESULT_ACCEPTED)
     {
         STRICT_EXPECTED_CALL(messaging_delivery_accepted());
     }
-    else if (disposition_result == MESSENGER_DISPOSITION_RESULT_ABANDONED)
+    else if (disposition_result == MESSENGER_DISPOSITION_RESULT_RELEASED)
     {
         STRICT_EXPECTED_CALL(messaging_delivery_released());
     }
@@ -1032,6 +1071,30 @@ static void set_expected_calls_for_on_message_received_internal_callback(MESSENG
     {
         STRICT_EXPECTED_CALL(messaging_delivery_rejected("Rejected by application", "Rejected by application"));
     }
+}
+
+static void set_expected_calls_for_messenger_send_message_disposition(MESSENGER_MESSAGE_DISPOSITION_INFO* disposition_info, MESSENGER_DISPOSITION_RESULT disposition_result)
+{
+	AMQP_VALUE uamqp_disposition_result = NULL;
+
+	if (disposition_result == MESSENGER_DISPOSITION_RESULT_ACCEPTED)
+	{
+		STRICT_EXPECTED_CALL(messaging_delivery_accepted());
+		uamqp_disposition_result = TEST_MESSAGE_DISPOSITION_ACCEPTED_AMQP_VALUE;
+	}
+	else if (disposition_result == MESSENGER_DISPOSITION_RESULT_RELEASED)
+	{
+		STRICT_EXPECTED_CALL(messaging_delivery_released());
+		uamqp_disposition_result = TEST_MESSAGE_DISPOSITION_RELEASED_AMQP_VALUE;
+	}
+	else if (disposition_result == MESSENGER_DISPOSITION_RESULT_REJECTED)
+	{
+		STRICT_EXPECTED_CALL(messaging_delivery_rejected("Rejected by application", "Rejected by application"));
+		uamqp_disposition_result = TEST_MESSAGE_DISPOSITION_REJECTED_AMQP_VALUE;
+	}
+
+	STRICT_EXPECTED_CALL(messagereceiver_send_message_disposition(TEST_MESSAGE_RECEIVER_HANDLE, disposition_info->source, disposition_info->message_id, uamqp_disposition_result));
+	STRICT_EXPECTED_CALL(amqpvalue_destroy(uamqp_disposition_result));
 }
 
 static MESSENGER_HANDLE create_and_start_messenger(MESSENGER_CONFIG* config)
@@ -1132,6 +1195,8 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 	REGISTER_UMOCK_ALIAS_TYPE(pfDestroyOption, void*);
 	REGISTER_UMOCK_ALIAS_TYPE(pfSetOption, void*);
 	REGISTER_UMOCK_ALIAS_TYPE(time_t, int);
+	REGISTER_UMOCK_ALIAS_TYPE(delivery_number, int);
+	REGISTER_UMOCK_ALIAS_TYPE(MESSENGER_MESSAGE_DISPOSITION_INFO, void*);
 
     REGISTER_GLOBAL_MOCK_HOOK(malloc, TEST_malloc);
     REGISTER_GLOBAL_MOCK_HOOK(free, TEST_free);
@@ -1147,7 +1212,7 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 	REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_item_get_value, TEST_singlylinkedlist_item_get_value);
 	REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_get_next_item, TEST_singlylinkedlist_get_next_item);
 	REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_find, TEST_singlylinkedlist_find);
-	
+	REGISTER_GLOBAL_MOCK_HOOK(messagereceiver_get_link_name, TEST_messagereceiver_get_link_name);
 
 	REGISTER_GLOBAL_MOCK_RETURN(singlylinkedlist_remove, 0);
 	REGISTER_GLOBAL_MOCK_FAIL_RETURN(singlylinkedlist_remove, 555);
@@ -1212,11 +1277,29 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_GLOBAL_MOCK_RETURN(messaging_delivery_accepted, TEST_MESSAGE_DISPOSITION_ACCEPTED_AMQP_VALUE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(messaging_delivery_accepted, NULL);
     
-    REGISTER_GLOBAL_MOCK_RETURN(messaging_delivery_released, TEST_MESSAGE_DISPOSITION_ABANDONED_AMQP_VALUE);
+    REGISTER_GLOBAL_MOCK_RETURN(messaging_delivery_released, TEST_MESSAGE_DISPOSITION_RELEASED_AMQP_VALUE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(messaging_delivery_released, NULL);
     
     REGISTER_GLOBAL_MOCK_RETURN(messaging_delivery_rejected, TEST_MESSAGE_DISPOSITION_REJECTED_AMQP_VALUE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(messaging_delivery_rejected, NULL);
+
+	REGISTER_GLOBAL_MOCK_RETURN(mallocAndStrcpy_s, 0);
+	REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, 1);
+
+	REGISTER_GLOBAL_MOCK_RETURN(messagereceiver_get_link_name, 0);
+	REGISTER_GLOBAL_MOCK_FAIL_RETURN(messagereceiver_get_link_name, 1);
+
+	REGISTER_GLOBAL_MOCK_RETURN(messagereceiver_get_received_message_id, 0);
+	REGISTER_GLOBAL_MOCK_FAIL_RETURN(messagereceiver_get_received_message_id, 1);
+
+	REGISTER_GLOBAL_MOCK_RETURN(messagereceiver_send_message_disposition, 0);
+	REGISTER_GLOBAL_MOCK_FAIL_RETURN(messagereceiver_send_message_disposition, 1);
+
+	REGISTER_GLOBAL_MOCK_RETURN(OptionHandler_Create, TEST_OPTIONHANDLER_HANDLE);
+	REGISTER_GLOBAL_MOCK_FAIL_RETURN(OptionHandler_Create, NULL);
+	
+	REGISTER_GLOBAL_MOCK_RETURN(OptionHandler_AddOption, OPTIONHANDLER_OK);
+	REGISTER_GLOBAL_MOCK_FAIL_RETURN(OptionHandler_AddOption, OPTIONHANDLER_ERROR);
 
 	TEST_IOTHUB_MESSAGE_LIST_HANDLE = (IOTHUB_MESSAGE_LIST*)real_malloc(sizeof(IOTHUB_MESSAGE_LIST));
 	ASSERT_IS_NOT_NULL(TEST_IOTHUB_MESSAGE_LIST_HANDLE);
@@ -1294,6 +1377,9 @@ TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
 	TEST_on_event_send_complete_message = NULL;
 	TEST_on_event_send_complete_result = MESSENGER_EVENT_SEND_COMPLETE_RESULT_OK;
 	TEST_on_event_send_complete_context = NULL;
+
+	TEST_DELIVERY_NUMBER = (delivery_number)1234;
+	TEST_messagereceiver_get_link_name_link_name = TEST_MESSAGE_RECEIVER_LINK_NAME_CHAR_PTR;
 }
 
 TEST_FUNCTION_CLEANUP(TestMethodCleanup)
@@ -2257,7 +2343,6 @@ TEST_FUNCTION(messenger_unsubscribe_for_messages_not_subscribed)
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_022: [If no failures occurr, messenger_subscribe_for_messages() shall return 0]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_121: [An IOTHUB_MESSAGE_HANDLE shall be obtained from MESSAGE_HANDLE using IoTHubMessage_CreateFromUamqpMessage()]  
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_123: [`instance->on_message_received_callback` shall be invoked passing the IOTHUB_MESSAGE_HANDLE]  
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_124: [The IOTHUB_MESSAGE_HANDLE instance shall be destroyed using IoTHubMessage_Destroy()]  
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_125: [If `instance->on_message_received_callback` returns MESSENGER_DISPOSITION_RESULT_ACCEPTED, on_message_received_internal_callback shall return the result of messaging_delivery_accepted()]
 TEST_FUNCTION(messenger_on_message_received_internal_callback_ACCEPTED)
 {
@@ -2281,15 +2366,17 @@ TEST_FUNCTION(messenger_on_message_received_internal_callback_ACCEPTED)
     messenger_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_126: [If `instance->on_message_received_callback` returns MESSENGER_DISPOSITION_RESULT_ABANDONED, on_message_received_internal_callback shall return the result of messaging_delivery_released()]
-TEST_FUNCTION(messenger_on_message_received_internal_callback_ABANDONED)
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_126: [If `instance->on_message_received_callback` returns MESSENGER_DISPOSITION_RESULT_RELEASED, on_message_received_internal_callback shall return the result of messaging_delivery_released()]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_186: [A MESSENGER_MESSAGE_DISPOSITION_INFO instance shall be created containing the source link name and message delivery ID]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_188: [The memory allocated for the MESSENGER_MESSAGE_DISPOSITION_INFO instance shall be released]  
+TEST_FUNCTION(messenger_on_message_received_internal_callback_RELEASED)
 {
     // arrange
     MESSENGER_CONFIG* config = get_messenger_config();
     MESSENGER_HANDLE handle = create_and_start_messenger2(config, true);
 
     umock_c_reset_all_calls();
-    set_expected_calls_for_on_message_received_internal_callback(MESSENGER_DISPOSITION_RESULT_ABANDONED);
+    set_expected_calls_for_on_message_received_internal_callback(MESSENGER_DISPOSITION_RESULT_RELEASED);
 
     // act
     ASSERT_IS_NOT_NULL(saved_messagereceiver_open_on_message_received);
@@ -2298,7 +2385,7 @@ TEST_FUNCTION(messenger_on_message_received_internal_callback_ABANDONED)
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-    ASSERT_ARE_EQUAL(void_ptr, result, TEST_MESSAGE_DISPOSITION_ABANDONED_AMQP_VALUE);
+    ASSERT_ARE_EQUAL(void_ptr, result, TEST_MESSAGE_DISPOSITION_RELEASED_AMQP_VALUE);
 
     // cleanup
     messenger_destroy(handle);
@@ -2352,6 +2439,32 @@ TEST_FUNCTION(messenger_on_message_received_internal_callback_IoTHubMessage_Crea
 
     // cleanup
     messenger_destroy(handle);
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_187: [If the MESSENGER_MESSAGE_DISPOSITION_INFO instance fails to be created, on_message_received_internal_callback shall return messaging_delivery_released()]  
+TEST_FUNCTION(messenger_on_message_received_internal_callback_create_MESSENGER_MESSAGE_DISPOSITION_INFO_fails)
+{
+	// arrange
+	MESSENGER_CONFIG* config = get_messenger_config();
+	MESSENGER_HANDLE handle = create_and_start_messenger2(config, true);
+
+	umock_c_reset_all_calls();
+	TEST_on_new_message_received_callback_result = MESSENGER_DISPOSITION_RESULT_ACCEPTED;
+	STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromUamqpMessage(TEST_MESSAGE_HANDLE, IGNORED_PTR_ARG)).IgnoreArgument(2);
+	STRICT_EXPECTED_CALL(malloc(sizeof(MESSENGER_MESSAGE_DISPOSITION_INFO))).SetReturn(NULL);
+	STRICT_EXPECTED_CALL(messaging_delivery_released());
+
+	// act
+	ASSERT_IS_NOT_NULL(saved_messagereceiver_open_on_message_received);
+
+	AMQP_VALUE result = saved_messagereceiver_open_on_message_received(saved_messagereceiver_open_callback_context, TEST_MESSAGE_HANDLE);
+
+	// assert
+	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+	ASSERT_ARE_EQUAL(void_ptr, result, TEST_MESSAGE_DISPOSITION_RELEASED_AMQP_VALUE);
+
+	// cleanup
+	messenger_destroy(handle);
 }
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_025: [messenger_unsubscribe_for_messages() shall set `instance->receive_messages` to false]  
@@ -2683,12 +2796,269 @@ TEST_FUNCTION(messenger_set_option_name_not_supported)
 	messenger_destroy(handle);
 }
 
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_179: [If `messenger_handle` or `disposition_info` are NULL, messenger_send_message_disposition() shall fail and return __FAILURE__]  
+TEST_FUNCTION(messenger_send_message_disposition_NULL_messenger_handle)
+{
+	// arrange
+	MESSENGER_MESSAGE_DISPOSITION_INFO disposition_info;
+	disposition_info.source = TEST_MESSAGE_RECEIVER_LINK_NAME_CHAR_PTR;
+	disposition_info.message_id = TEST_DELIVERY_NUMBER;
+
+	// act
+	int result = messenger_send_message_disposition(NULL, &disposition_info, MESSENGER_DISPOSITION_RESULT_ACCEPTED);
+
+	// assert
+	ASSERT_ARE_NOT_EQUAL(int, 0, result);
+
+	// cleanup
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_179: [If `messenger_handle` or `disposition_info` are NULL, messenger_send_message_disposition() shall fail and return __FAILURE__]  
+TEST_FUNCTION(messenger_send_message_disposition_NULL_disposition_info)
+{
+	// arrange
+	MESSENGER_CONFIG* config = get_messenger_config();
+	MESSENGER_HANDLE handle = create_and_start_messenger2(config, false);
+
+	// act
+	int result = messenger_send_message_disposition(handle, NULL, MESSENGER_DISPOSITION_RESULT_ACCEPTED);
+
+	// assert
+	ASSERT_ARE_NOT_EQUAL(int, 0, result);
+	ASSERT_IS_NOT_NULL(handle);
+
+	// cleanup
+	messenger_destroy(handle);
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_180: [If `disposition_info->source` is NULL, messenger_send_message_disposition() shall fail and return __FAILURE__]  
+TEST_FUNCTION(messenger_send_message_disposition_NULL_source)
+{
+	// arrange
+	MESSENGER_CONFIG* config = get_messenger_config();
+	MESSENGER_HANDLE handle = create_and_start_messenger2(config, false);
+
+	MESSENGER_MESSAGE_DISPOSITION_INFO disposition_info;
+	disposition_info.source = NULL;
+
+	// act
+	int result = messenger_send_message_disposition(handle, &disposition_info, MESSENGER_DISPOSITION_RESULT_ACCEPTED);
+
+	// assert
+	ASSERT_ARE_NOT_EQUAL(int, 0, result);
+	ASSERT_IS_NOT_NULL(handle);
+
+	// cleanup
+	messenger_destroy(handle);
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_181: [An AMQP_VALUE disposition result shall be created corresponding to the `disposition_result` provided]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_182: [`messagereceiver_send_message_disposition()` shall be invoked passing `disposition_info->source`, `disposition_info->message_id` and the AMQP_VALUE disposition result]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_184: [messenger_send_message_disposition() shall destroy the AMQP_VALUE disposition result]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_185: [If no failures occurr, messenger_send_message_disposition() shall return 0]
+TEST_FUNCTION(messenger_send_message_disposition_ACCEPTED_succeeds)
+{
+	// arrange
+	MESSENGER_CONFIG* config = get_messenger_config();
+	MESSENGER_HANDLE handle = create_and_start_messenger2(config, true);
+
+	MESSENGER_MESSAGE_DISPOSITION_INFO disposition_info;
+	disposition_info.source = TEST_MESSAGE_RECEIVER_LINK_NAME_CHAR_PTR;
+	disposition_info.message_id = TEST_DELIVERY_NUMBER;
+
+	umock_c_reset_all_calls();
+	set_expected_calls_for_messenger_send_message_disposition(&disposition_info, MESSENGER_DISPOSITION_RESULT_ACCEPTED);
+
+	// act
+	int result = messenger_send_message_disposition(handle, &disposition_info, MESSENGER_DISPOSITION_RESULT_ACCEPTED);
+
+	// assert
+	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+	ASSERT_ARE_EQUAL(int, 0, result);
+	ASSERT_IS_NOT_NULL(handle);
+
+	// cleanup
+	messenger_destroy(handle);
+}
+
+TEST_FUNCTION(messenger_send_message_disposition_RELEASED_succeeds)
+{
+	// arrange
+	MESSENGER_CONFIG* config = get_messenger_config();
+	MESSENGER_HANDLE handle = create_and_start_messenger2(config, true);
+
+	MESSENGER_MESSAGE_DISPOSITION_INFO disposition_info;
+	disposition_info.source = TEST_MESSAGE_RECEIVER_LINK_NAME_CHAR_PTR;
+	disposition_info.message_id = TEST_DELIVERY_NUMBER;
+
+	umock_c_reset_all_calls();
+	set_expected_calls_for_messenger_send_message_disposition(&disposition_info, MESSENGER_DISPOSITION_RESULT_RELEASED);
+
+	// act
+	int result = messenger_send_message_disposition(handle, &disposition_info, MESSENGER_DISPOSITION_RESULT_RELEASED);
+
+	// assert
+	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+	ASSERT_ARE_EQUAL(int, 0, result);
+	ASSERT_IS_NOT_NULL(handle);
+
+	// cleanup
+	messenger_destroy(handle);
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_189: [If `messenger_handle->message_receiver` is NULL, messenger_send_message_disposition() shall fail and return __FAILURE__]
+TEST_FUNCTION(messenger_send_message_disposition_NOT_SUBSCRIBED)
+{
+	// arrange
+	MESSENGER_CONFIG* config = get_messenger_config();
+	MESSENGER_HANDLE handle = create_and_start_messenger2(config, false); // this "false" is what arranges this test
+
+	MESSENGER_MESSAGE_DISPOSITION_INFO disposition_info;
+	disposition_info.source = TEST_MESSAGE_RECEIVER_LINK_NAME_CHAR_PTR;
+	disposition_info.message_id = TEST_DELIVERY_NUMBER;
+
+	umock_c_reset_all_calls();
+
+	// act
+	int result = messenger_send_message_disposition(handle, &disposition_info, MESSENGER_DISPOSITION_RESULT_ACCEPTED);
+
+	// assert
+	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+	ASSERT_ARE_NOT_EQUAL(int, 0, result);
+	ASSERT_IS_NOT_NULL(handle);
+
+	// cleanup
+	messenger_destroy(handle);
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_183: [If `messagereceiver_send_message_disposition()` fails, messenger_send_message_disposition() shall fail and return __FAILURE__]  
+TEST_FUNCTION(messenger_send_message_disposition_failure_checks)
+{
+	// arrange
+	ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
+
+	MESSENGER_CONFIG* config = get_messenger_config();
+	MESSENGER_HANDLE handle = create_and_start_messenger2(config, true);
+
+	MESSENGER_MESSAGE_DISPOSITION_INFO disposition_info;
+	disposition_info.source = TEST_MESSAGE_RECEIVER_LINK_NAME_CHAR_PTR;
+	disposition_info.message_id = TEST_DELIVERY_NUMBER;
+
+	umock_c_reset_all_calls();
+	set_expected_calls_for_messenger_send_message_disposition(&disposition_info, MESSENGER_DISPOSITION_RESULT_ACCEPTED);
+	umock_c_negative_tests_snapshot();
+
+	size_t i;
+	for (i = 0; i < umock_c_negative_tests_call_count(); i++)
+	{
+		if (i == 2)
+		{
+			// These expected calls do not cause the API to fail.
+			continue;
+		}
+
+		// arrange
+		char error_msg[64];
+
+		umock_c_negative_tests_reset();
+		umock_c_negative_tests_fail_call(i);
+
+		// act
+		int result = messenger_send_message_disposition(handle, &disposition_info, MESSENGER_DISPOSITION_RESULT_ACCEPTED);
+
+		// assert
+		sprintf(error_msg, "On failed call %zu", i);
+		ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, error_msg);
+	}
+
+
+	// cleanup
+	messenger_destroy(handle);
+	umock_c_negative_tests_deinit();
+}
+
+static void set_expected_calls_for_messenger_retrieve_options()
+{
+	EXPECTED_CALL(OptionHandler_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+	STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, IGNORED_PTR_ARG))
+		.IgnoreArgument(3);
+}
+
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_173: [If `messenger_handle` is NULL, messenger_retrieve_options shall fail and return NULL]
+TEST_FUNCTION(messenger_retrieve_options_NULL_handle)
+{
+	// arrange
+	umock_c_reset_all_calls();
+
+	// act
+	OPTIONHANDLER_HANDLE result = messenger_retrieve_options(NULL);
+
+	// assert
+	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+	ASSERT_IS_NULL(result);
+
+	// cleanup
+}
+
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_174: [An OPTIONHANDLER_HANDLE instance shall be created using OptionHandler_Create]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_175: [If an OPTIONHANDLER_HANDLE instance fails to be created, messenger_retrieve_options shall fail and return NULL]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_176: [Each option of `instance` shall be added to the OPTIONHANDLER_HANDLE instance using OptionHandler_AddOption]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_179: [If no failures occur, messenger_retrieve_options shall return the OPTIONHANDLER_HANDLE instance]
+TEST_FUNCTION(messenger_retrieve_options_succeeds)
+{
+	// arrange
+	MESSENGER_CONFIG* config = get_messenger_config();
+	MESSENGER_HANDLE handle = create_and_start_messenger2(config, true);
+
+	umock_c_reset_all_calls();
+	set_expected_calls_for_messenger_retrieve_options();
+
+	// act
+	OPTIONHANDLER_HANDLE result = messenger_retrieve_options(handle);
+
+	// assert
+	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+	ASSERT_ARE_EQUAL(void_ptr, TEST_OPTIONHANDLER_HANDLE, result);
+
+	// cleanup
+	messenger_destroy(handle);
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_175: [If an OPTIONHANDLER_HANDLE instance fails to be created, messenger_retrieve_options shall fail and return NULL]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_177: [If OptionHandler_AddOption fails, messenger_retrieve_options shall fail and return NULL]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_178: [If messenger_retrieve_options fails, any allocated memory shall be freed]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_179: [If no failures occur, messenger_retrieve_options shall return the OPTIONHANDLER_HANDLE instance]
+TEST_FUNCTION(messenger_retrieve_options_failure_checks)
+{
+	// arrange
+	ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
+
+	MESSENGER_CONFIG* config = get_messenger_config();
+	MESSENGER_HANDLE handle = create_and_start_messenger2(config, true);
+
+	umock_c_reset_all_calls();
+	set_expected_calls_for_messenger_retrieve_options();
+	umock_c_negative_tests_snapshot();
+
+	size_t i;
+	for (i = 0; i < umock_c_negative_tests_call_count(); i++)
+	{
+		// arrange
+		char error_msg[64];
+
+		umock_c_negative_tests_reset();
+		umock_c_negative_tests_fail_call(i);
+
+		// act
+		OPTIONHANDLER_HANDLE result = messenger_retrieve_options(handle);
+
+		// assert
+		sprintf(error_msg, "On failed call %zu", i);
+		ASSERT_IS_NULL_WITH_MSG(result, error_msg);
+	}
+
+	// cleanup
+	messenger_destroy(handle);
+	umock_c_negative_tests_deinit();
+}
 
 END_TEST_SUITE(iothubtransport_amqp_messenger_ut)

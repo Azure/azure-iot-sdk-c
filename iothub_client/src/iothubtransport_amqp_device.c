@@ -42,11 +42,11 @@ typedef struct DEVICE_INSTANCE_TAG
 	void* on_message_received_context;
 } DEVICE_INSTANCE;
 
-typedef struct SEND_EVENT_TASK_TAG
+typedef struct DEVICE_SEND_EVENT_TASK_TAG
 {
 	ON_DEVICE_D2C_EVENT_SEND_COMPLETE on_event_send_complete_callback;
 	void* on_event_send_complete_context;
-} SEND_EVENT_TASK;
+} DEVICE_SEND_EVENT_TASK;
 
 
 // Internal state control
@@ -142,7 +142,7 @@ static void on_event_send_complete_messenger_callback(IOTHUB_MESSAGE_LIST* iothu
 	}
 	else
 	{
-		SEND_EVENT_TASK* send_task = (SEND_EVENT_TASK*)context;
+		DEVICE_SEND_EVENT_TASK* send_task = (DEVICE_SEND_EVENT_TASK*)context;
 
 		// Codes_SRS_DEVICE_09_059: [If `ev_send_comp_result` is MESSENGER_EVENT_SEND_COMPLETE_RESULT_OK, D2C_EVENT_SEND_COMPLETE_RESULT_OK shall be reported as `event_send_complete`]
 		// Codes_SRS_DEVICE_09_060: [If `ev_send_comp_result` is MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE, D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE shall be reported as `event_send_complete`]
@@ -211,15 +211,98 @@ static void on_messenger_state_changed_callback(void* context, MESSENGER_STATE p
 	}
 }
 
-static MESSENGER_DISPOSITION_RESULT on_messenger_message_received_callback(IOTHUB_MESSAGE_HANDLE iothub_message_handle, void* context)
+static DEVICE_MESSAGE_DISPOSITION_INFO* create_device_message_disposition_info_from(MESSENGER_MESSAGE_DISPOSITION_INFO* messenger_disposition_info)
+{
+	DEVICE_MESSAGE_DISPOSITION_INFO* device_disposition_info;
+
+	if ((device_disposition_info = (DEVICE_MESSAGE_DISPOSITION_INFO*)malloc(sizeof(DEVICE_MESSAGE_DISPOSITION_INFO))) == NULL)
+	{
+		LogError("Failed creating DEVICE_MESSAGE_DISPOSITION_INFO (malloc failed)");
+	}
+	else if (mallocAndStrcpy_s(&device_disposition_info->source, messenger_disposition_info->source) != RESULT_OK)
+	{
+		LogError("Failed creating DEVICE_MESSAGE_DISPOSITION_INFO (mallocAndStrcpy_s failed)");
+		free(device_disposition_info);
+		device_disposition_info = NULL;
+	}
+	else
+	{
+		device_disposition_info->message_id = messenger_disposition_info->message_id;
+	}
+
+	return device_disposition_info;
+}
+
+static void destroy_device_disposition_info(DEVICE_MESSAGE_DISPOSITION_INFO* disposition_info)
+{
+	free(disposition_info->source);
+	free(disposition_info);
+}
+
+static MESSENGER_MESSAGE_DISPOSITION_INFO* create_messenger_disposition_info(DEVICE_MESSAGE_DISPOSITION_INFO* device_disposition_info)
+{
+	MESSENGER_MESSAGE_DISPOSITION_INFO* messenger_disposition_info;
+
+	if ((messenger_disposition_info = (MESSENGER_MESSAGE_DISPOSITION_INFO*)malloc(sizeof(MESSENGER_MESSAGE_DISPOSITION_INFO))) == NULL)
+	{
+		LogError("Failed creating MESSENGER_MESSAGE_DISPOSITION_INFO (malloc failed)");
+	}
+	else if (mallocAndStrcpy_s(&messenger_disposition_info->source, device_disposition_info->source) != RESULT_OK)
+	{
+		LogError("Failed creating MESSENGER_MESSAGE_DISPOSITION_INFO (mallocAndStrcpy_s failed)");
+		free(messenger_disposition_info);
+		messenger_disposition_info = NULL;
+	}
+	else
+	{
+		messenger_disposition_info->message_id = device_disposition_info->message_id;
+	}
+
+	return messenger_disposition_info;
+}
+
+static void destroy_messenger_disposition_info(MESSENGER_MESSAGE_DISPOSITION_INFO* messenger_disposition_info)
+{
+	free(messenger_disposition_info->source);
+	free(messenger_disposition_info);
+}
+
+static MESSENGER_DISPOSITION_RESULT get_messenger_message_disposition_result_from(DEVICE_MESSAGE_DISPOSITION_RESULT device_disposition_result)
+{
+	MESSENGER_DISPOSITION_RESULT messenger_disposition_result;
+
+	switch (device_disposition_result)
+	{
+		case DEVICE_MESSAGE_DISPOSITION_RESULT_NONE:
+			messenger_disposition_result = MESSENGER_DISPOSITION_RESULT_NONE;
+			break;
+		case DEVICE_MESSAGE_DISPOSITION_RESULT_ACCEPTED:
+			messenger_disposition_result = MESSENGER_DISPOSITION_RESULT_ACCEPTED;
+			break;
+		case DEVICE_MESSAGE_DISPOSITION_RESULT_REJECTED:
+			messenger_disposition_result = MESSENGER_DISPOSITION_RESULT_REJECTED;
+			break;
+		case DEVICE_MESSAGE_DISPOSITION_RESULT_RELEASED:
+			messenger_disposition_result = MESSENGER_DISPOSITION_RESULT_RELEASED;
+			break;
+		default:
+			LogError("Failed to get the corresponding MESSENGER_DISPOSITION_RESULT (%d is not supported)", device_disposition_result);
+			messenger_disposition_result = MESSENGER_DISPOSITION_RESULT_RELEASED;
+			break;
+	}
+
+	return messenger_disposition_result;
+}
+
+static MESSENGER_DISPOSITION_RESULT on_messenger_message_received_callback(IOTHUB_MESSAGE_HANDLE iothub_message_handle, MESSENGER_MESSAGE_DISPOSITION_INFO* disposition_info, void* context)
 {
 	MESSENGER_DISPOSITION_RESULT msgr_disposition_result;
 
-	// Codes_SRS_DEVICE_09_070: [If `iothub_message_handle` or `context` is NULL, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_ABANDONED]
+	// Codes_SRS_DEVICE_09_070: [If `iothub_message_handle` or `context` is NULL, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_RELEASED]
 	if (iothub_message_handle == NULL || context == NULL)
 	{
 		LogError("Failed receiving incoming C2D message (message handle (%p) or context (%p) is NULL)", iothub_message_handle, context);
-		msgr_disposition_result = MESSENGER_DISPOSITION_RESULT_ABANDONED;
+		msgr_disposition_result = MESSENGER_DISPOSITION_RESULT_RELEASED;
 	}
 	else
 	{
@@ -228,26 +311,31 @@ static MESSENGER_DISPOSITION_RESULT on_messenger_message_received_callback(IOTHU
 		if (device_instance->on_message_received_callback == NULL)
 		{
 			LogError("Device '%s' failed receiving incoming C2D message (callback is NULL)", device_instance->config->device_id);
-			msgr_disposition_result = MESSENGER_DISPOSITION_RESULT_ABANDONED;
+			msgr_disposition_result = MESSENGER_DISPOSITION_RESULT_RELEASED;
 		}
 		else
 		{
-			// Codes_SRS_DEVICE_09_071: [The user callback shall be invoked, passing the context it provided]
-			switch (device_instance->on_message_received_callback(iothub_message_handle, device_instance->on_message_received_context))
+			DEVICE_MESSAGE_DISPOSITION_INFO* device_message_disposition_info;
+
+			// Codes_SRS_DEVICE_09_119: [A DEVICE_MESSAGE_DISPOSITION_INFO instance shall be created containing a copy of `disposition_info->source` and `disposition_info->message_id`]
+			if ((device_message_disposition_info = create_device_message_disposition_info_from(disposition_info)) == NULL)
 			{
+				// Codes_SRS_DEVICE_09_120: [If the DEVICE_MESSAGE_DISPOSITION_INFO instance fails to be created, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_RELEASED]
+				LogError("Device '%s' failed receiving incoming C2D message (failed creating DEVICE_MESSAGE_DISPOSITION_INFO)", device_instance->config->device_id);
+				msgr_disposition_result = MESSENGER_DISPOSITION_RESULT_RELEASED;
+			}
+			else
+			{
+				// Codes_SRS_DEVICE_09_071: [The user callback shall be invoked, passing the context it provided]
+				DEVICE_MESSAGE_DISPOSITION_RESULT device_disposition_result = device_instance->on_message_received_callback(iothub_message_handle, device_message_disposition_info, device_instance->on_message_received_context);
+
 				// Codes_SRS_DEVICE_09_072: [If the user callback returns DEVICE_MESSAGE_DISPOSITION_RESULT_ACCEPTED, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_ACCEPTED]
-			case DEVICE_MESSAGE_DISPOSITION_RESULT_ACCEPTED:
-				msgr_disposition_result = MESSENGER_DISPOSITION_RESULT_ACCEPTED;
-				break;
 				// Codes_SRS_DEVICE_09_073: [If the user callback returns DEVICE_MESSAGE_DISPOSITION_RESULT_REJECTED, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_REJECTED]
-			case DEVICE_MESSAGE_DISPOSITION_RESULT_REJECTED:
-				msgr_disposition_result = MESSENGER_DISPOSITION_RESULT_REJECTED;
-				break;
-				// Codes_SRS_DEVICE_09_074: [If the user callback returns DEVICE_MESSAGE_DISPOSITION_RESULT_ABANDONED, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_ABANDONED]
-			case DEVICE_MESSAGE_DISPOSITION_RESULT_ABANDONED:
-			default:
-				msgr_disposition_result = MESSENGER_DISPOSITION_RESULT_ABANDONED;
-				break;
+				// Codes_SRS_DEVICE_09_074: [If the user callback returns DEVICE_MESSAGE_DISPOSITION_RESULT_RELEASED, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_RELEASED]
+				msgr_disposition_result = get_messenger_message_disposition_result_from(device_disposition_result);
+
+				// Codes_SRS_DEVICE_09_121: [on_messenger_message_received_callback shall release the memory allocated for DEVICE_MESSAGE_DISPOSITION_INFO]
+				destroy_device_disposition_info(device_message_disposition_info);
 			}
 		}
 	}
@@ -856,10 +944,10 @@ int device_send_event_async(DEVICE_HANDLE handle, IOTHUB_MESSAGE_LIST* message, 
 	}
 	else
 	{
-		SEND_EVENT_TASK* send_task;
+		DEVICE_SEND_EVENT_TASK* send_task;
 
 		// Codes_SRS_DEVICE_09_052: [A structure (`send_task`) shall be created to track the send state of the message]
-		if ((send_task = (SEND_EVENT_TASK*)malloc(sizeof(SEND_EVENT_TASK))) == NULL)
+		if ((send_task = (DEVICE_SEND_EVENT_TASK*)malloc(sizeof(DEVICE_SEND_EVENT_TASK))) == NULL)
 		{
 			// Codes_SRS_DEVICE_09_053: [If `send_task` fails to be created, device_send_event_async shall return a non-zero value]
 			LogError("Failed sending event (failed creating task to send event)");
@@ -870,7 +958,7 @@ int device_send_event_async(DEVICE_HANDLE handle, IOTHUB_MESSAGE_LIST* message, 
 			DEVICE_INSTANCE* instance = (DEVICE_INSTANCE*)handle;
 
 			// Codes_SRS_DEVICE_09_054: [`send_task` shall contain the user callback and the context provided]
-			memset(send_task, 0, sizeof(SEND_EVENT_TASK));
+			memset(send_task, 0, sizeof(DEVICE_SEND_EVENT_TASK));
 			send_task->on_event_send_complete_callback = on_device_d2c_event_send_complete_callback;
 			send_task->on_event_send_complete_context = context;
 			
@@ -998,6 +1086,59 @@ int device_unsubscribe_message(DEVICE_HANDLE handle)
 		{
 			// Codes_SRS_DEVICE_09_079: [If no failures occur, device_unsubscribe_message shall return 0]
 			result = RESULT_OK;
+		}
+	}
+
+	return result;
+}
+
+int device_send_message_disposition(DEVICE_HANDLE device_handle, DEVICE_MESSAGE_DISPOSITION_INFO* disposition_info, DEVICE_MESSAGE_DISPOSITION_RESULT disposition_result)
+{
+	int result;
+
+	// Codes_SRS_DEVICE_09_111: [If `device_handle` or `disposition_info` are NULL, device_send_message_disposition() shall fail and return __FAILURE__]
+	if (device_handle == NULL || disposition_info == NULL)
+	{
+		LogError("Failed sending message disposition (either device_handle (%p) or disposition_info (%p) are NULL)", device_handle, disposition_info);
+		result = __FAILURE__;
+	}
+	// Codes_SRS_DEVICE_09_112: [If `disposition_info->source` is NULL, device_send_message_disposition() shall fail and return __FAILURE__]  
+	else if (disposition_info->source == NULL)
+	{
+		LogError("Failed sending message disposition (disposition_info->source is NULL)");
+		result = __FAILURE__;
+	}
+	else
+	{
+		DEVICE_INSTANCE* device = (DEVICE_INSTANCE*)device_handle;
+		MESSENGER_MESSAGE_DISPOSITION_INFO* messenger_disposition_info;
+
+		// Codes_SRS_DEVICE_09_113: [A MESSENGER_MESSAGE_DISPOSITION_INFO instance shall be created with a copy of the `source` and `message_id` contained in `disposition_info`]  
+		if ((messenger_disposition_info = create_messenger_disposition_info(disposition_info)) == NULL)
+		{
+			// Codes_SRS_DEVICE_09_114: [If the MESSENGER_MESSAGE_DISPOSITION_INFO fails to be created, device_send_message_disposition() shall fail and return __FAILURE__]  
+			LogError("Failed sending message disposition (failed to create MESSENGER_MESSAGE_DISPOSITION_INFO)");
+			result = __FAILURE__;
+		}
+		else
+		{
+			MESSENGER_DISPOSITION_RESULT messenger_disposition_result = get_messenger_message_disposition_result_from(disposition_result);
+
+			// Codes_SRS_DEVICE_09_115: [`messenger_send_message_disposition()` shall be invoked passing the MESSENGER_MESSAGE_DISPOSITION_INFO instance and the corresponding MESSENGER_DISPOSITION_RESULT]  
+			if (messenger_send_message_disposition(device->messenger_handle, messenger_disposition_info, messenger_disposition_result) != RESULT_OK)
+			{
+				// Codes_SRS_DEVICE_09_116: [If `messenger_send_message_disposition()` fails, device_send_message_disposition() shall fail and return __FAILURE__]  
+				LogError("Failed sending message disposition (messenger_send_message_disposition failed)");
+				result = __FAILURE__;
+			}
+			else
+			{
+				// Codes_SRS_DEVICE_09_118: [If no failures occurr, device_send_message_disposition() shall return 0]  
+				result = RESULT_OK;
+			}
+
+			// Codes_SRS_DEVICE_09_117: [device_send_message_disposition() shall destroy the MESSENGER_MESSAGE_DISPOSITION_INFO instance]  
+			destroy_messenger_disposition_info(messenger_disposition_info);
 		}
 	}
 

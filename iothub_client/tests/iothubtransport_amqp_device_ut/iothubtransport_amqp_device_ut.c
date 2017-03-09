@@ -107,6 +107,9 @@ static const char* DEVICE_OPTION_SAVED_MESSENGER_OPTIONS = "saved_device_messeng
 
 static time_t TEST_current_time;
 
+#define TEST_MESSAGE_SOURCE_NAME_CHAR_PTR                 "link_name"
+static delivery_number TEST_MESSAGE_ID;
+
 
 // ---------- Time-related Test Helpers ---------- //
 
@@ -233,11 +236,13 @@ static void TEST_on_state_changed_callback(void* context, DEVICE_STATE previous_
 }
 
 static IOTHUB_MESSAGE_HANDLE TEST_on_message_received_saved_message;
+static DEVICE_MESSAGE_DISPOSITION_INFO* TEST_on_message_received_saved_disposition_info;
 static void* TEST_on_message_received_saved_context;
 static DEVICE_MESSAGE_DISPOSITION_RESULT TEST_on_message_received_return;
-static DEVICE_MESSAGE_DISPOSITION_RESULT TEST_on_message_received(IOTHUB_MESSAGE_HANDLE message, void* context)
+static DEVICE_MESSAGE_DISPOSITION_RESULT TEST_on_message_received(IOTHUB_MESSAGE_HANDLE message, DEVICE_MESSAGE_DISPOSITION_INFO* disposition_info, void* context)
 {
 	TEST_on_message_received_saved_message = message;
+	TEST_on_message_received_saved_disposition_info = disposition_info;
 	TEST_on_message_received_saved_context = context;
 
 	return TEST_on_message_received_return;
@@ -292,8 +297,9 @@ static void initialize_test_variables()
 	TEST_current_time = time(NULL);
 
 	TEST_on_message_received_saved_message = NULL;
+	TEST_on_message_received_saved_disposition_info = NULL;
 	TEST_on_message_received_saved_context = NULL;
-	TEST_on_message_received_return = DEVICE_MESSAGE_DISPOSITION_RESULT_ABANDONED;
+	TEST_on_message_received_return = DEVICE_MESSAGE_DISPOSITION_RESULT_RELEASED;
 
 	TEST_messenger_subscribe_for_messages_saved_messenger_handle = NULL;
 	TEST_messenger_subscribe_for_messages_saved_on_message_received_callback = NULL;
@@ -318,6 +324,8 @@ static void initialize_test_variables()
 	TEST_on_device_d2c_event_send_complete_callback_saved_message = NULL;
 	TEST_on_device_d2c_event_send_complete_callback_saved_result = D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_UNKNOWN;
 	TEST_on_device_d2c_event_send_complete_callback_saved_context = NULL;
+
+	TEST_MESSAGE_ID = (delivery_number)33445566;
 }
 
 static void register_umock_alias_types()
@@ -342,6 +350,8 @@ static void register_umock_alias_types()
 	REGISTER_UMOCK_ALIAS_TYPE(pfSetOption, void*);
 	REGISTER_UMOCK_ALIAS_TYPE(ON_MESSENGER_MESSAGE_RECEIVED, void*);
 	REGISTER_UMOCK_ALIAS_TYPE(ON_MESSENGER_EVENT_SEND_COMPLETE, int);
+	REGISTER_UMOCK_ALIAS_TYPE(MESSENGER_DISPOSITION_RESULT, int);
+	REGISTER_UMOCK_ALIAS_TYPE(DEVICE_MESSAGE_DISPOSITION_RESULT, int);
 }
 
 static void register_global_mock_hooks()
@@ -401,6 +411,9 @@ static void register_global_mock_returns()
 
 	REGISTER_GLOBAL_MOCK_RETURN(mallocAndStrcpy_s, 0);
 	REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, 1);
+
+	REGISTER_GLOBAL_MOCK_RETURN(messenger_send_message_disposition, 0);
+	REGISTER_GLOBAL_MOCK_FAIL_RETURN(messenger_send_message_disposition, 1);
 }
 
 
@@ -2435,7 +2448,7 @@ TEST_FUNCTION(on_event_send_complete_messenger_callback_succeeds)
 	device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_070: [If `iothub_message_handle` or `context` is NULL, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_ABANDONED]
+// Tests_SRS_DEVICE_09_070: [If `iothub_message_handle` or `context` is NULL, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_RELEASED]
 TEST_FUNCTION(on_messenger_message_received_callback_NULL_handle)
 {
 	// arrange
@@ -2453,22 +2466,27 @@ TEST_FUNCTION(on_messenger_message_received_callback_NULL_handle)
 	(void)device_subscribe_message(handle, TEST_on_message_received, handle);
 	ASSERT_IS_NOT_NULL(TEST_messenger_subscribe_for_messages_saved_on_message_received_callback);
 
+	MESSENGER_MESSAGE_DISPOSITION_INFO disposition_info;
+	disposition_info.source = TEST_MESSAGE_SOURCE_NAME_CHAR_PTR;
+	disposition_info.message_id = TEST_MESSAGE_ID;
+
 	umock_c_reset_all_calls();
 
 	// act
 	MESSENGER_DISPOSITION_RESULT result = TEST_messenger_subscribe_for_messages_saved_on_message_received_callback(
 		NULL,
+		&disposition_info,
 		TEST_messenger_subscribe_for_messages_saved_context);
 
 	// assert
 	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-	ASSERT_ARE_EQUAL(int, MESSENGER_DISPOSITION_RESULT_ABANDONED, result);
+	ASSERT_ARE_EQUAL(int, MESSENGER_DISPOSITION_RESULT_RELEASED, result);
 
 	// cleanup
 	device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_070: [If `iothub_message_handle` or `context` is NULL, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_ABANDONED]
+// Tests_SRS_DEVICE_09_070: [If `iothub_message_handle` or `context` is NULL, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_RELEASED]
 TEST_FUNCTION(on_messenger_message_received_callback_NULL_context)
 {
 	// arrange
@@ -2486,16 +2504,21 @@ TEST_FUNCTION(on_messenger_message_received_callback_NULL_context)
 	(void)device_subscribe_message(handle, TEST_on_message_received, handle);
 	ASSERT_IS_NOT_NULL(TEST_messenger_subscribe_for_messages_saved_on_message_received_callback);
 
+	MESSENGER_MESSAGE_DISPOSITION_INFO disposition_info;
+	disposition_info.source = TEST_MESSAGE_SOURCE_NAME_CHAR_PTR;
+	disposition_info.message_id = TEST_MESSAGE_ID;
+
 	umock_c_reset_all_calls();
 
 	// act
 	MESSENGER_DISPOSITION_RESULT result = TEST_messenger_subscribe_for_messages_saved_on_message_received_callback(
 		TEST_IOTHUB_MESSAGE_HANDLE,
+		&disposition_info,
 		NULL);
 
 	// assert
 	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-	ASSERT_ARE_EQUAL(int, MESSENGER_DISPOSITION_RESULT_ABANDONED, result);
+	ASSERT_ARE_EQUAL(int, MESSENGER_DISPOSITION_RESULT_RELEASED, result);
 
 	// cleanup
 	device_destroy(handle);
@@ -2504,7 +2527,9 @@ TEST_FUNCTION(on_messenger_message_received_callback_NULL_context)
 // Tests_SRS_DEVICE_09_071: [The user callback shall be invoked, passing the context it provided]
 // Tests_SRS_DEVICE_09_072: [If the user callback returns DEVICE_MESSAGE_DISPOSITION_RESULT_ACCEPTED, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_ACCEPTED]
 // Tests_SRS_DEVICE_09_073: [If the user callback returns DEVICE_MESSAGE_DISPOSITION_RESULT_REJECTED, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_REJECTED]
-// Tests_SRS_DEVICE_09_074: [If the user callback returns DEVICE_MESSAGE_DISPOSITION_RESULT_ABANDONED, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_ABANDONED]
+// Tests_SRS_DEVICE_09_074: [If the user callback returns DEVICE_MESSAGE_DISPOSITION_RESULT_RELEASED, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_RELEASED]
+// Tests_SRS_DEVICE_09_119: [A DEVICE_MESSAGE_DISPOSITION_INFO instance shall be created containing a copy of `disposition_info->source` and `disposition_info->message_id`]
+// Tests_SRS_DEVICE_09_121: [on_messenger_message_received_callback shall release the memory allocated for DEVICE_MESSAGE_DISPOSITION_INFO]
 TEST_FUNCTION(on_messenger_message_received_callback_succeess)
 {
 	// arrange
@@ -2516,12 +2541,12 @@ TEST_FUNCTION(on_messenger_message_received_callback_succeess)
 	MESSENGER_DISPOSITION_RESULT messenger_results[3];
 	messenger_results[0] = MESSENGER_DISPOSITION_RESULT_ACCEPTED;
 	messenger_results[1] = MESSENGER_DISPOSITION_RESULT_REJECTED;
-	messenger_results[2] = MESSENGER_DISPOSITION_RESULT_ABANDONED;
+	messenger_results[2] = MESSENGER_DISPOSITION_RESULT_RELEASED;
 
 	DEVICE_MESSAGE_DISPOSITION_RESULT device_results[3];
 	device_results[0] = DEVICE_MESSAGE_DISPOSITION_RESULT_ACCEPTED;
 	device_results[1] = DEVICE_MESSAGE_DISPOSITION_RESULT_REJECTED;
-	device_results[2] = DEVICE_MESSAGE_DISPOSITION_RESULT_ABANDONED;
+	device_results[2] = DEVICE_MESSAGE_DISPOSITION_RESULT_RELEASED;
 
 	umock_c_reset_all_calls();
 	TEST_messenger_subscribe_for_messages_return = 0;
@@ -2540,10 +2565,19 @@ TEST_FUNCTION(on_messenger_message_received_callback_succeess)
 
 		TEST_on_message_received_return = device_results[i];
 
+		MESSENGER_MESSAGE_DISPOSITION_INFO disposition_info;
+		disposition_info.source = TEST_MESSAGE_SOURCE_NAME_CHAR_PTR;
+		disposition_info.message_id = TEST_MESSAGE_ID;
+
 		umock_c_reset_all_calls();
+		STRICT_EXPECTED_CALL(malloc(sizeof(DEVICE_MESSAGE_DISPOSITION_INFO)));
+		EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+		EXPECTED_CALL(free(IGNORED_PTR_ARG));
+		EXPECTED_CALL(free(IGNORED_PTR_ARG));
 
 		MESSENGER_DISPOSITION_RESULT result = TEST_messenger_subscribe_for_messages_saved_on_message_received_callback(
 			TEST_IOTHUB_MESSAGE_HANDLE,
+			&disposition_info,
 			TEST_messenger_subscribe_for_messages_saved_context);
 
 		// assert
@@ -2553,6 +2587,214 @@ TEST_FUNCTION(on_messenger_message_received_callback_succeess)
 
 	// cleanup
 	device_destroy(handle);
+}
+
+// Tests_SRS_DEVICE_09_120: [If the DEVICE_MESSAGE_DISPOSITION_INFO instance fails to be created, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_RELEASED]
+TEST_FUNCTION(on_messenger_message_received_callback_failure_checks)
+{
+	// arrange
+	ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
+
+	DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS, true);
+	DEVICE_HANDLE handle = create_and_start_and_crank_device(config, TEST_current_time);
+
+	umock_c_reset_all_calls();
+	TEST_messenger_subscribe_for_messages_return = 0;
+	STRICT_EXPECTED_CALL(messenger_subscribe_for_messages(TEST_MESSENGER_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+		.IgnoreArgument(2)
+		.IgnoreArgument(3);
+
+	(void)device_subscribe_message(handle, TEST_on_message_received, handle);
+	ASSERT_IS_NOT_NULL(TEST_messenger_subscribe_for_messages_saved_on_message_received_callback);
+
+	MESSENGER_MESSAGE_DISPOSITION_INFO disposition_info;
+	disposition_info.source = TEST_MESSAGE_SOURCE_NAME_CHAR_PTR;
+	disposition_info.message_id = TEST_MESSAGE_ID;
+
+	umock_c_reset_all_calls();
+	STRICT_EXPECTED_CALL(malloc(sizeof(DEVICE_MESSAGE_DISPOSITION_INFO)));
+	EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+	EXPECTED_CALL(free(IGNORED_PTR_ARG));
+	EXPECTED_CALL(free(IGNORED_PTR_ARG));
+	umock_c_negative_tests_snapshot();
+
+	// act
+	size_t i;
+	for (i = 0; i < umock_c_negative_tests_call_count(); i++)
+	{
+		if (i == 2 || i == 3)
+		{
+			// These expected calls do not cause the API to fail.
+			continue;
+		}
+
+		// arrange
+		char error_msg[64];
+
+		umock_c_negative_tests_reset();
+		umock_c_negative_tests_fail_call(i);
+
+		MESSENGER_DISPOSITION_RESULT result = TEST_messenger_subscribe_for_messages_saved_on_message_received_callback(
+			TEST_IOTHUB_MESSAGE_HANDLE,
+			&disposition_info,
+			TEST_messenger_subscribe_for_messages_saved_context);
+
+		// assert
+		sprintf(error_msg, "On failed call %zu", i);
+		ASSERT_ARE_EQUAL_WITH_MSG(int, MESSENGER_DISPOSITION_RESULT_RELEASED, result, error_msg);
+	}
+
+	// cleanup
+	device_destroy(handle);
+	umock_c_negative_tests_deinit();
+}
+
+// Tests_SRS_DEVICE_09_113: [A MESSENGER_MESSAGE_DISPOSITION_INFO instance shall be created with a copy of the `source` and `message_id` contained in `disposition_info`]  
+// Tests_SRS_DEVICE_09_115: [`messenger_send_message_disposition()` shall be invoked passing the MESSENGER_MESSAGE_DISPOSITION_INFO instance and the corresponding MESSENGER_DISPOSITION_RESULT]  
+// Tests_SRS_DEVICE_09_117: [device_send_message_disposition() shall destroy the MESSENGER_MESSAGE_DISPOSITION_INFO instance]  
+// Tests_SRS_DEVICE_09_118: [If no failures occurr, device_send_message_disposition() shall return 0]  
+TEST_FUNCTION(device_send_message_disposition_succeess)
+{
+	// arrange
+	DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS, true);
+	DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+
+	DEVICE_MESSAGE_DISPOSITION_INFO disposition_info;
+	disposition_info.source = TEST_MESSAGE_SOURCE_NAME_CHAR_PTR;
+	disposition_info.message_id = TEST_MESSAGE_ID;
+
+	umock_c_reset_all_calls();
+	STRICT_EXPECTED_CALL(malloc(sizeof(MESSENGER_MESSAGE_DISPOSITION_INFO)));
+	EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+	STRICT_EXPECTED_CALL(messenger_send_message_disposition(TEST_MESSENGER_HANDLE, IGNORED_PTR_ARG, MESSENGER_DISPOSITION_RESULT_ACCEPTED))
+		.IgnoreArgument(2);
+	EXPECTED_CALL(free(IGNORED_PTR_ARG));
+	EXPECTED_CALL(free(IGNORED_PTR_ARG));
+
+	// act
+	int result = device_send_message_disposition(handle, &disposition_info, DEVICE_MESSAGE_DISPOSITION_RESULT_ACCEPTED);
+
+	// assert
+	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+	ASSERT_ARE_EQUAL(int, 0, result);
+
+	// cleanup
+	device_destroy(handle);
+}
+
+// Tests_SRS_DEVICE_09_111: [If `device_handle` or `disposition_info` are NULL, device_send_message_disposition() shall fail and return __FAILURE__]
+TEST_FUNCTION(device_send_message_NULL_disposition_info)
+{
+	// arrange
+	DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS, true);
+	DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+
+	umock_c_reset_all_calls();
+
+	// act
+	int result = device_send_message_disposition(handle, NULL, DEVICE_MESSAGE_DISPOSITION_RESULT_ACCEPTED);
+
+	// assert
+	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+	ASSERT_ARE_NOT_EQUAL(int, 0, result);
+
+	// cleanup
+	device_destroy(handle);
+}
+
+// Tests_SRS_DEVICE_09_111: [If `device_handle` or `disposition_info` are NULL, device_send_message_disposition() shall fail and return __FAILURE__]
+TEST_FUNCTION(device_send_message_NULL_handle)
+{
+	// arrange
+	DEVICE_MESSAGE_DISPOSITION_INFO disposition_info;
+	disposition_info.source = TEST_MESSAGE_SOURCE_NAME_CHAR_PTR;
+	disposition_info.message_id = TEST_MESSAGE_ID;
+
+	umock_c_reset_all_calls();
+
+	// act
+	int result = device_send_message_disposition(NULL, &disposition_info, DEVICE_MESSAGE_DISPOSITION_RESULT_ACCEPTED);
+
+	// assert
+	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+	ASSERT_ARE_NOT_EQUAL(int, 0, result);
+
+	// cleanup
+}
+
+// Tests_SRS_DEVICE_09_112: [If `disposition_info->source` is NULL, device_send_message_disposition() shall fail and return __FAILURE__]  
+TEST_FUNCTION(device_send_message_NULL_disposition_info_source)
+{
+	// arrange
+	DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS, true);
+	DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+
+	DEVICE_MESSAGE_DISPOSITION_INFO disposition_info;
+	disposition_info.source = NULL;
+	disposition_info.message_id = TEST_MESSAGE_ID;
+
+	umock_c_reset_all_calls();
+
+	// act
+	int result = device_send_message_disposition(handle, &disposition_info, DEVICE_MESSAGE_DISPOSITION_RESULT_ACCEPTED);
+
+	// assert
+	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+	ASSERT_ARE_NOT_EQUAL(int, 0, result);
+
+	// cleanup
+	device_destroy(handle);
+}
+
+// Tests_SRS_DEVICE_09_114: [If the MESSENGER_MESSAGE_DISPOSITION_INFO fails to be created, device_send_message_disposition() shall fail and return __FAILURE__]  
+// Tests_SRS_DEVICE_09_116: [If `messenger_send_message_disposition()` fails, device_send_message_disposition() shall fail and return __FAILURE__]  
+TEST_FUNCTION(device_send_message_disposition_failure_checks)
+{
+	// arrange
+	ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
+
+	DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS, true);
+	DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+
+	DEVICE_MESSAGE_DISPOSITION_INFO disposition_info;
+	disposition_info.source = TEST_MESSAGE_SOURCE_NAME_CHAR_PTR;
+	disposition_info.message_id = TEST_MESSAGE_ID;
+
+	umock_c_reset_all_calls();
+	STRICT_EXPECTED_CALL(malloc(sizeof(MESSENGER_MESSAGE_DISPOSITION_INFO)));
+	EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+	STRICT_EXPECTED_CALL(messenger_send_message_disposition(TEST_MESSENGER_HANDLE, IGNORED_PTR_ARG, MESSENGER_DISPOSITION_RESULT_ACCEPTED))
+		.IgnoreArgument(2);
+	EXPECTED_CALL(free(IGNORED_PTR_ARG));
+	EXPECTED_CALL(free(IGNORED_PTR_ARG));
+	umock_c_negative_tests_snapshot();
+
+	// act
+	size_t i;
+	for (i = 0; i < umock_c_negative_tests_call_count(); i++)
+	{
+		if (i == 3 || i == 4)
+		{
+			continue;
+		}
+
+		// arrange
+		char error_msg[64];
+
+		umock_c_negative_tests_reset();
+		umock_c_negative_tests_fail_call(i);
+
+		int result = device_send_message_disposition(handle, &disposition_info, DEVICE_MESSAGE_DISPOSITION_RESULT_ACCEPTED);
+
+		// assert
+		sprintf(error_msg, "On failed call %zu", i);
+		ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, error_msg);
+	}
+
+
+	// cleanup
+	device_destroy(handle);
+	umock_c_negative_tests_deinit();
 }
 
 END_TEST_SUITE(iothubtransport_amqp_device_ut)

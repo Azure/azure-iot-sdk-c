@@ -62,13 +62,14 @@ typedef enum D2C_EVENT_SEND_RESULT_TAG
 
 typedef enum DEVICE_MESSAGE_DISPOSITION_RESULT_TAG
 {
+	DEVICE_MESSAGE_DISPOSITION_RESULT_NONE,
 	DEVICE_MESSAGE_DISPOSITION_RESULT_ACCEPTED,
 	DEVICE_MESSAGE_DISPOSITION_RESULT_REJECTED,
 	DEVICE_MESSAGE_DISPOSITION_RESULT_ABANDONED
 } DEVICE_MESSAGE_DISPOSITION_RESULT;
 
 typedef void(*ON_DEVICE_STATE_CHANGED)(void* context, DEVICE_STATE previous_state, DEVICE_STATE new_state);
-typedef DEVICE_MESSAGE_DISPOSITION_RESULT(*ON_DEVICE_C2D_MESSAGE_RECEIVED)(IOTHUB_MESSAGE_HANDLE message, void* context);
+typedef DEVICE_MESSAGE_DISPOSITION_RESULT(*ON_DEVICE_C2D_MESSAGE_RECEIVED)(IOTHUB_MESSAGE_HANDLE message, DEVICE_MESSAGE_DISPOSITION_INFO* disposition_info, void* context);
 typedef void(*ON_DEVICE_D2C_EVENT_SEND_COMPLETE)(IOTHUB_MESSAGE_LIST* message, D2C_EVENT_SEND_RESULT result, void* context);
 
 typedef struct DEVICE_CONFIG_TAG
@@ -95,6 +96,7 @@ extern int device_send_event_async(DEVICE_HANDLE handle, IOTHUB_MESSAGE_LIST* me
 extern int device_get_send_status(DEVICE_HANDLE handle, DEVICE_SEND_STATUS *send_status);
 extern int device_subscribe_message(DEVICE_HANDLE handle, ON_DEVICE_C2D_MESSAGE_RECEIVED on_message_received_callback, void* context);
 extern int device_unsubscribe_message(DEVICE_HANDLE handle);
+extern int device_send_message_disposition(DEVICE_HANDLE device_handle, DEVICE_MESSAGE_DISPOSITION_INFO* disposition_info, DEVICE_MESSAGE_DISPOSITION_RESULT disposition_result);
 extern int device_set_retry_policy(DEVICE_HANDLE handle, IOTHUB_CLIENT_RETRY_POLICY policy, size_t retry_timeout_limit_in_seconds);
 extern int device_set_option(DEVICE_HANDLE handle, const char* name, void* value);
 extern OPTIONHANDLER_HANDLE device_retrieve_options(DEVICE_HANDLE handle);
@@ -259,14 +261,22 @@ extern int device_subscribe_message(DEVICE_HANDLE handle, ON_DEVICE_C2D_MESSAGE_
 #### on_messenger_message_received_callback
 
 ```c
-static MESSENGER_DISPOSITION_RESULT on_messenger_message_received_callback(IOTHUB_MESSAGE_HANDLE iothub_message_handle, void* context)
+static MESSENGER_DISPOSITION_RESULT on_messenger_message_received_callback(IOTHUB_MESSAGE_HANDLE iothub_message_handle, MESSENGER_MESSAGE_DISPOSITION_INFO* disposition_info, void* context)
 ```
 
-**SRS_DEVICE_09_070: [**If `iothub_message_handle` or `context` is NULL, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_ABANDONED**]**
+**SRS_DEVICE_09_070: [**If `iothub_message_handle` or `context` is NULL, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_RELEASED**]**
+
+**SRS_DEVICE_09_119: [**A DEVICE_MESSAGE_DISPOSITION_INFO instance shall be created containing a copy of `disposition_info->source` and `disposition_info->message_id`**]**
+
+**SRS_DEVICE_09_120: [**If the DEVICE_MESSAGE_DISPOSITION_INFO instance fails to be created, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_RELEASED**]**
+
 **SRS_DEVICE_09_071: [**The user callback shall be invoked, passing the context it provided**]**
 **SRS_DEVICE_09_072: [**If the user callback returns DEVICE_MESSAGE_DISPOSITION_RESULT_ACCEPTED, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_ACCEPTED**]**
 **SRS_DEVICE_09_073: [**If the user callback returns DEVICE_MESSAGE_DISPOSITION_RESULT_REJECTED, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_REJECTED**]**
-**SRS_DEVICE_09_074: [**If the user callback returns DEVICE_MESSAGE_DISPOSITION_RESULT_ABANDONED, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_ABANDONED**]**
+**SRS_DEVICE_09_074: [**If the user callback returns DEVICE_MESSAGE_DISPOSITION_RESULT_RELEASED, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_RELEASED**]**
+
+**SRS_DEVICE_09_121: [**on_messenger_message_received_callback shall release the memory allocated for DEVICE_MESSAGE_DISPOSITION_INFO**]**
+
 
 
 ### device_unsubscribe_message
@@ -279,6 +289,28 @@ extern int device_unsubscribe_message(DEVICE_HANDLE handle);
 **SRS_DEVICE_09_077: [**messenger_unsubscribe_for_messages shall be invoked passing `instance->messenger_handle`**]**
 **SRS_DEVICE_09_078: [**If messenger_unsubscribe_for_messages fails, device_unsubscribe_message shall return a non-zero result**]**
 **SRS_DEVICE_09_079: [**If no failures occur, device_unsubscribe_message shall return 0**]**
+
+
+## device_send_message_disposition
+```c
+extern int device_send_message_disposition(DEVICE_HANDLE device_handle, DEVICE_MESSAGE_DISPOSITION_INFO* disposition_info, DEVICE_MESSAGE_DISPOSITION_RESULT disposition_result);
+```
+
+**SRS_DEVICE_09_111: [**If `device_handle` or `disposition_info` are NULL, device_send_message_disposition() shall fail and return __FAILURE__**]**
+
+**SRS_DEVICE_09_112: [**If `disposition_info->source` is NULL, device_send_message_disposition() shall fail and return __FAILURE__**]**  
+
+**SRS_DEVICE_09_113: [**A MESSENGER_MESSAGE_DISPOSITION_INFO instance shall be created with a copy of the `source` and `message_id` contained in `disposition_info`**]**  
+
+**SRS_DEVICE_09_114: [**If the MESSENGER_MESSAGE_DISPOSITION_INFO fails to be created, device_send_message_disposition() shall fail and return __FAILURE__**]**  
+
+**SRS_DEVICE_09_115: [**`messenger_send_message_disposition()` shall be invoked passing the MESSENGER_MESSAGE_DISPOSITION_INFO instance and the corresponding MESSENGER_DISPOSITION_RESULT**]**  
+
+**SRS_DEVICE_09_116: [**If `messenger_send_message_disposition()` fails, device_send_message_disposition() shall fail and return __FAILURE__**]**  
+
+**SRS_DEVICE_09_117: [**device_send_message_disposition() shall destroy the MESSENGER_MESSAGE_DISPOSITION_INFO instance**]**  
+
+**SRS_DEVICE_09_118: [**If no failures occurr, device_send_message_disposition() shall return 0**]**  
 
 
 ### device_set_retry_policy

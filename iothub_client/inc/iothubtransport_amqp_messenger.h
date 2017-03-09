@@ -37,9 +37,10 @@ typedef enum MESSENGER_EVENT_SEND_COMPLETE_RESULT_TAG
 
 typedef enum MESSENGER_DISPOSITION_RESULT_TAG
 {
+	MESSENGER_DISPOSITION_RESULT_NONE,
 	MESSENGER_DISPOSITION_RESULT_ACCEPTED,
 	MESSENGER_DISPOSITION_RESULT_REJECTED,
-	MESSENGER_DISPOSITION_RESULT_ABANDONED
+	MESSENGER_DISPOSITION_RESULT_RELEASED
 } MESSENGER_DISPOSITION_RESULT;
 
 typedef enum MESSENGER_STATE_TAG
@@ -51,9 +52,15 @@ typedef enum MESSENGER_STATE_TAG
 	MESSENGER_STATE_ERROR
 } MESSENGER_STATE;
 
+typedef struct MESSENGER_MESSAGE_DISPOSITION_INFO_TAG
+{
+	delivery_number message_id;
+	char* source;
+} MESSENGER_MESSAGE_DISPOSITION_INFO;
+
 typedef void(*ON_MESSENGER_EVENT_SEND_COMPLETE)(IOTHUB_MESSAGE_LIST* iothub_message_list, MESSENGER_EVENT_SEND_COMPLETE_RESULT messenger_event_send_complete_result, void* context);
 typedef void(*ON_MESSENGER_STATE_CHANGED_CALLBACK)(void* context, MESSENGER_STATE previous_state, MESSENGER_STATE new_state);
-typedef MESSENGER_DISPOSITION_RESULT(*ON_MESSENGER_MESSAGE_RECEIVED)(IOTHUB_MESSAGE_HANDLE message, void* context);
+typedef MESSENGER_DISPOSITION_RESULT(*ON_MESSENGER_MESSAGE_RECEIVED)(IOTHUB_MESSAGE_HANDLE message, MESSENGER_MESSAGE_DISPOSITION_INFO* disposition_info, void* context);
 
 typedef struct MESSENGER_CONFIG_TAG
 {
@@ -67,6 +74,7 @@ MOCKABLE_FUNCTION(, MESSENGER_HANDLE, messenger_create, const MESSENGER_CONFIG*,
 MOCKABLE_FUNCTION(, int, messenger_send_async, MESSENGER_HANDLE, messenger_handle, IOTHUB_MESSAGE_LIST*, message, ON_MESSENGER_EVENT_SEND_COMPLETE, on_messenger_event_send_complete_callback, void*, context);
 MOCKABLE_FUNCTION(, int, messenger_subscribe_for_messages, MESSENGER_HANDLE, messenger_handle, ON_MESSENGER_MESSAGE_RECEIVED, on_message_received_callback, void*, context);
 MOCKABLE_FUNCTION(, int, messenger_unsubscribe_for_messages, MESSENGER_HANDLE, messenger_handle);
+MOCKABLE_FUNCTION(, int, messenger_send_message_disposition, MESSENGER_HANDLE, messenger_handle, MESSENGER_MESSAGE_DISPOSITION_INFO*, disposition_info, MESSENGER_DISPOSITION_RESULT, disposition_result);
 MOCKABLE_FUNCTION(, int, messenger_get_send_status, MESSENGER_HANDLE, messenger_handle, MESSENGER_SEND_STATUS*, send_status);
 MOCKABLE_FUNCTION(, int, messenger_start, MESSENGER_HANDLE, messenger_handle, SESSION_HANDLE, session_handle);
 MOCKABLE_FUNCTION(, int, messenger_stop, MESSENGER_HANDLE, messenger_handle);

@@ -5,13 +5,15 @@
 #define IOTHUBTRANSPORTAMQP_COMMON_H
 
 #include "azure_c_shared_utility/strings.h"
-#include "iothub_transport_ll.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
+#include "iothub_transport_ll.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
+
+static const char* OPTION_EVENT_SEND_TIMEOUT_SECS = "event_send_timeout_secs";
 
 typedef XIO_HANDLE(*AMQP_GET_IO_TRANSPORT)(const char* target_fqdn);
 

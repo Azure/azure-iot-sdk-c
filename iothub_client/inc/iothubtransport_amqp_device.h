@@ -59,13 +59,20 @@ typedef enum D2C_EVENT_SEND_RESULT_TAG
 
 typedef enum DEVICE_MESSAGE_DISPOSITION_RESULT_TAG
 {
+	DEVICE_MESSAGE_DISPOSITION_RESULT_NONE,
 	DEVICE_MESSAGE_DISPOSITION_RESULT_ACCEPTED,
 	DEVICE_MESSAGE_DISPOSITION_RESULT_REJECTED,
-	DEVICE_MESSAGE_DISPOSITION_RESULT_ABANDONED
+	DEVICE_MESSAGE_DISPOSITION_RESULT_RELEASED
 } DEVICE_MESSAGE_DISPOSITION_RESULT;
 
+typedef struct DEVICE_MESSAGE_DISPOSITION_INFO_TAG
+{
+	unsigned long message_id;
+	char* source;
+} DEVICE_MESSAGE_DISPOSITION_INFO;
+
 typedef void(*ON_DEVICE_STATE_CHANGED)(void* context, DEVICE_STATE previous_state, DEVICE_STATE new_state);
-typedef DEVICE_MESSAGE_DISPOSITION_RESULT(*ON_DEVICE_C2D_MESSAGE_RECEIVED)(IOTHUB_MESSAGE_HANDLE message, void* context);
+typedef DEVICE_MESSAGE_DISPOSITION_RESULT(*ON_DEVICE_C2D_MESSAGE_RECEIVED)(IOTHUB_MESSAGE_HANDLE message, DEVICE_MESSAGE_DISPOSITION_INFO* disposition_info, void* context);
 typedef void(*ON_DEVICE_D2C_EVENT_SEND_COMPLETE)(IOTHUB_MESSAGE_LIST* message, D2C_EVENT_SEND_RESULT result, void* context);
 
 typedef struct DEVICE_CONFIG_TAG
@@ -89,9 +96,10 @@ MOCKABLE_FUNCTION(, int, device_start_async, DEVICE_HANDLE, handle, SESSION_HAND
 MOCKABLE_FUNCTION(, int, device_stop, DEVICE_HANDLE, handle);
 MOCKABLE_FUNCTION(, void, device_do_work, DEVICE_HANDLE, handle);
 MOCKABLE_FUNCTION(, int, device_send_event_async, DEVICE_HANDLE, handle, IOTHUB_MESSAGE_LIST*, message, ON_DEVICE_D2C_EVENT_SEND_COMPLETE, on_device_d2c_event_send_complete_callback, void*, context);
-MOCKABLE_FUNCTION(, int, device_get_send_status, DEVICE_HANDLE, handle, DEVICE_SEND_STATUS, *send_status);
+MOCKABLE_FUNCTION(, int, device_get_send_status, DEVICE_HANDLE, handle, DEVICE_SEND_STATUS*, send_status);
 MOCKABLE_FUNCTION(, int, device_subscribe_message, DEVICE_HANDLE, handle, ON_DEVICE_C2D_MESSAGE_RECEIVED, on_message_received_callback, void*, context);
 MOCKABLE_FUNCTION(, int, device_unsubscribe_message, DEVICE_HANDLE, handle);
+MOCKABLE_FUNCTION(, int, device_send_message_disposition, DEVICE_HANDLE, device_handle, DEVICE_MESSAGE_DISPOSITION_INFO*, disposition_info, DEVICE_MESSAGE_DISPOSITION_RESULT, disposition_result);
 MOCKABLE_FUNCTION(, int, device_set_retry_policy, DEVICE_HANDLE, handle, IOTHUB_CLIENT_RETRY_POLICY, policy, size_t, retry_timeout_limit_in_seconds);
 MOCKABLE_FUNCTION(, int, device_set_option, DEVICE_HANDLE, handle, const char*, name, void*, value);
 MOCKABLE_FUNCTION(, OPTIONHANDLER_HANDLE, device_retrieve_options, DEVICE_HANDLE, handle);
