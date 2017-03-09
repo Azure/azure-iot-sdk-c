@@ -472,6 +472,15 @@ static int save_underlying_io_transport_options(AMQP_TRANSPORT_INSTANCE* transpo
 	return result;
 }
 
+static void destroy_underlying_io_transport_options(AMQP_TRANSPORT_INSTANCE* transport_instance)
+{
+	if (transport_instance->saved_tls_options != NULL)
+	{
+		OptionHandler_Destroy(transport_instance->saved_tls_options);
+		transport_instance->saved_tls_options = NULL;
+	}
+}
+
 // @brief
 //     Applies TLS I/O options if previously saved to a new TLS I/O instance.
 // @returns
@@ -1108,6 +1117,7 @@ static void internal_destroy_instance(AMQP_TRANSPORT_INSTANCE* instance)
 		}
 
 		destroy_underlying_io_transport(instance);
+		destroy_underlying_io_transport_options(instance);
 
 		STRING_delete(instance->iothub_host_fqdn);
 
