@@ -22,7 +22,11 @@
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/lock.h"
 #include "parson.h"
+#ifdef __cplusplus
+#include <csignal>
+#else
 #include <signal.h>
+#endif
 #include "iothub_messaging_ll.h"
 #undef ENABLE_MOCKS
 

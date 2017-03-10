@@ -5,13 +5,15 @@
 #include <cstdlib>
 #include <cstddef>
 #include <cstring>
+#include <ctime>
 #else
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
+#include <time.h>
 #endif
 
-#include <time.h>
+
 #include "iothub_messaging_ll.h"
 
 #include "umock_c.h"

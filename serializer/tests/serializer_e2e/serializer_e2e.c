@@ -5,12 +5,14 @@
 #include <cstdlib>
 #include <cstddef>
 #include <cstdbool>
+#include <ctime>
 #else
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdbool.h>
-#endif
 #include <time.h>
+#endif
+
 #include "azure_c_shared_utility/macro_utils.h"
 
 #include "testrunnerswitcher.h"

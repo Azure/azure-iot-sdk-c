@@ -40,7 +40,12 @@ static int real_strcmp(const char* str1, const char* str2)
 #include "umock_c_negative_tests.h"
 #include "umocktypes.h"
 #include "umocktypes_c.h"
+
+#ifdef __cplusplus
+#include <climits>
+#else
 #include <limits.h>
+#endif
 
 #define ENABLE_MOCKS
 #include "iothub_transport_ll.h"
