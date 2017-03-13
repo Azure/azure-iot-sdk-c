@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <time.h>
 #include <limits.h>
 #include "azure_c_shared_utility/optimize_size.h"
@@ -366,9 +367,11 @@ static void on_methods_error(void* context)
 
 static void on_methods_unsubscribed(void* context)
 {
-    /* Codess_SRS_IOTHUBTRANSPORT_AMQP_METHODS_12_001: [ `on_methods_unsubscribed` calls iothubtransportamqp_methods_unsubscribe. ]*/
+    /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_12_001: [ `on_methods_unsubscribed` calls iothubtransportamqp_methods_unsubscribe. ]*/
     AMQP_TRANSPORT_DEVICE_INSTANCE* device_state = (AMQP_TRANSPORT_DEVICE_INSTANCE*)context;
-    IoTHubTransport_AMQP_Common_Unsubscribe_DeviceMethod(device_state);
+
+	iothubtransportamqp_methods_unsubscribe(device_state->methods_handle);
+	device_state->subscribed_for_methods = false;
 }
 
 static int on_method_request_received(void* context, const char* method_name, const unsigned char* request, size_t request_size, IOTHUBTRANSPORT_AMQP_METHOD_HANDLE method_handle)
