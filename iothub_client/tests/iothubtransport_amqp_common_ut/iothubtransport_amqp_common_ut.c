@@ -5,11 +5,13 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstddef>
+#include <cstdbool>
 #include <ctime>
 #else
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
+#include <stdbool.h>
 #include <time.h>
 #endif
 
@@ -591,6 +593,14 @@ static void set_expected_calls_for_subscribe_methods()
 		.IgnoreArgument_on_method_request_received_context()
 		.IgnoreArgument_on_methods_unsubscribed()
 		.IgnoreArgument_on_methods_unsubscribed_context();
+#endif
+}
+
+static void set_expected_calls_for_on_methods_unsubscribed()
+{
+#ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
+
+	STRICT_EXPECTED_CALL(iothubtransportamqp_methods_unsubscribe(TEST_IOTHUBTRANSPORTAMQP_METHODS));
 #endif
 }
 
@@ -1377,6 +1387,81 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod_After_Subscribe
 
     // cleanup
     destroy_transport(handle, device_handle, NULL);
+}
+
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_12_001: [ `on_methods_unsubscribed` calls iothubtransportamqp_methods_unsubscribe. ]*/
+TEST_FUNCTION(on_methods_unsubscribed_CALLS_iothubtransportamqp_methods_unsubscribe)
+{
+	// arrange
+	initialize_test_variables();
+
+	TRANSPORT_LL_HANDLE handle;
+	IOTHUB_DEVICE_CONFIG device_config;
+	IOTHUB_DEVICE_HANDLE device_handle;
+
+	handle = create_transport();
+
+	device_config.deviceId = "blah";
+	device_config.deviceKey = "cucu";
+	device_config.deviceSasToken = NULL;
+
+	device_handle = register_device(handle, &device_config, &TEST_waitingToSend, true);
+
+	(void)IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod(device_handle);
+
+	crank_transport_ready_after_create(handle, &TEST_waitingToSend, 0, false, true, 1, TEST_current_time, true);
+
+	ASSERT_IS_NOT_NULL(g_on_methods_unsubscribed);
+	ASSERT_IS_NOT_NULL(g_on_methods_unsubscribed_context);
+
+	umock_c_reset_all_calls();
+	set_expected_calls_for_on_methods_unsubscribed();
+
+	// act
+	g_on_methods_unsubscribed(g_on_methods_unsubscribed_context);
+
+	// assert
+	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+	// cleanup
+	destroy_transport(handle, device_handle, NULL);
+}
+
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_12_001: [ `on_methods_unsubscribed` calls iothubtransportamqp_methods_unsubscribe. ]*/
+TEST_FUNCTION(on_methods_unsubscribed_re_subscribes)
+{
+	// arrange
+	initialize_test_variables();
+
+	TRANSPORT_LL_HANDLE handle;
+	IOTHUB_DEVICE_CONFIG device_config;
+	IOTHUB_DEVICE_HANDLE device_handle;
+
+	handle = create_transport();
+
+	device_config.deviceId = "blah";
+	device_config.deviceKey = "cucu";
+	device_config.deviceSasToken = NULL;
+
+	device_handle = register_device(handle, &device_config, &TEST_waitingToSend, true);
+
+	(void)IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod(device_handle);
+	crank_transport_ready_after_create(handle, &TEST_waitingToSend, 0, false, true, 1, TEST_current_time, true);
+
+	umock_c_reset_all_calls();
+	set_expected_calls_for_on_methods_unsubscribed();
+	g_on_methods_unsubscribed(g_on_methods_unsubscribed_context);
+
+	set_expected_calls_for_DoWork(&TEST_waitingToSend, 0, DEVICE_STATE_STARTED, true, true, true, true, 1, TEST_current_time, true /* here lies the difference */);
+
+	// act
+	(void)IoTHubTransport_AMQP_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+	// assert
+	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+	// cleanup
+	destroy_transport(handle, device_handle, NULL);
 }
 
 /* IoTHubTransport_AMQP_Common_Unsubscribe_DeviceMethod */
