@@ -1588,7 +1588,7 @@ static int GetTransportProviderIfNecessary(PMQTTTRANSPORT_HANDLE_DATA transport_
     {
         // construct address
         const char* hostAddress = STRING_c_str(transport_data->hostAddress);
-        transport_data->xioTransport = transport_data->get_io_transport(hostAddress);
+        transport_data->xioTransport = transport_data->get_io_transport(hostAddress, NULL);
         if (transport_data->xioTransport == NULL)
         {
             LogError("Unable to create the lower level TLS layer.");

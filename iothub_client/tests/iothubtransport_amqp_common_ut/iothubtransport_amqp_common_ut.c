@@ -93,6 +93,7 @@ extern "C"
 #include "azure_c_shared_utility/agenttime.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/optionhandler.h"
+#include "azure_c_shared_utility/socketio.h"
 
 #include "azure_uamqp_c/cbs.h"
 #include "azure_uamqp_c/link.h"
@@ -832,9 +833,10 @@ const TRANSPORT_PROVIDER* TEST_get_iothub_client_transport_provider(void)
 }
 
 static XIO_HANDLE TEST_amqp_get_io_transport_result;
-static XIO_HANDLE TEST_amqp_get_io_transport(const char* target_fqdn)
+static XIO_HANDLE TEST_amqp_get_io_transport(const char* target_fqdn, const AMQP_TRANSPORT_PROXY_OPTIONS* amqp_transport_proxy_options)
 {
     (void)target_fqdn;
+    (void)amqp_transport_proxy_options;
     return TEST_amqp_get_io_transport_result;
 }
 

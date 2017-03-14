@@ -1155,15 +1155,17 @@ static void setup_message_recv_msg_callback_mocks()
         .IgnoreArgument_ptr();
 }
 
-static XIO_HANDLE get_IO_transport(const char* fully_qualified_name)
+static XIO_HANDLE get_IO_transport(const char* fully_qualified_name, const MQTT_TRANSPORT_PROXY_OPTIONS* mqtt_transport_proxy_options)
 {
     (void)fully_qualified_name;
+    (void)mqtt_transport_proxy_options;
     return (XIO_HANDLE)my_gballoc_malloc(1);
 }
 
-static XIO_HANDLE get_IO_transport_fail(const char* fully_qualified_name)
+static XIO_HANDLE get_IO_transport_fail(const char* fully_qualified_name, const MQTT_TRANSPORT_PROXY_OPTIONS* mqtt_transport_proxy_options)
 {
     (void)fully_qualified_name;
+    (void)mqtt_transport_proxy_options;
     return NULL;
 }
 
