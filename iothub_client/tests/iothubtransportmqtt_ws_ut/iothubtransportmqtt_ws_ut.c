@@ -1,11 +1,26 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#ifdef __cplusplus
+#include <cstdlib>
+#else
+#include <stdlib.h>
+#endif
 #include "testrunnerswitcher.h"
 #include "umock_c.h"
 #include "umock_c_negative_tests.h"
 #include "umocktypes_charptr.h"
 #include "umocktypes_stdint.h"
+
+static void* real_malloc(size_t size)
+{
+    return malloc(size);
+}
+
+static void real_free(void* ptr)
+{
+    free(ptr);
+}
 
 #define ENABLE_MOCKS
 
@@ -13,6 +28,9 @@
 
 #include "azure_c_shared_utility/xio.h"
 #include "azure_c_shared_utility/wsio.h"
+#include "azure_c_shared_utility/tlsio.h"
+#include "azure_c_shared_utility/platform.h"
+#include "azure_c_shared_utility/http_proxy_io.h"
 #include "iothubtransport_mqtt_common.h"
 
 #undef ENABLE_MOCKS
@@ -35,7 +53,9 @@ static const IOTHUB_CLIENT_LL_HANDLE TEST_IOTHUB_CLIENT_LL_HANDLE = (IOTHUB_CLIE
 static const TRANSPORT_LL_HANDLE TEST_TRANSPORT_HANDLE = (TRANSPORT_LL_HANDLE)0x4444;
 static XIO_HANDLE TEST_XIO_HANDLE = (XIO_HANDLE)0x1126;
 static IOTHUB_DEVICE_HANDLE TEST_DEVICE_HANDLE = (IOTHUB_DEVICE_HANDLE)0x1181;
-static IO_INTERFACE_DESCRIPTION* TEST_INTERFACE_DESC = (IO_INTERFACE_DESCRIPTION*)0x1182;
+static IO_INTERFACE_DESCRIPTION* TEST_WSIO_INTERFACE_DESCRIPTION = (IO_INTERFACE_DESCRIPTION*)0x1182;
+static IO_INTERFACE_DESCRIPTION* TEST_TLSIO_INTERFACE_DESCRIPTION = (IO_INTERFACE_DESCRIPTION*)0x1183;
+static IO_INTERFACE_DESCRIPTION* TEST_HTTP_PROXY_IO_INTERFACE_DESCRIPTION = (IO_INTERFACE_DESCRIPTION*)0x1185;
 
 static IOTHUB_CLIENT_CONFIG g_iothubClientConfig = { 0 };
 static DLIST_ENTRY g_waitingToSend;
@@ -56,6 +76,471 @@ static TEST_MUTEX_HANDLE g_dllByDll;
 
 #define TEST_RETRY_POLICY IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER
 #define TEST_RETRY_TIMEOUT_SECS 60
+
+static int copy_string(char** destination, const char* source)
+{
+    int result;
+
+    if (source == NULL)
+    {
+        *destination = NULL;
+        result = 0;
+    }
+    else
+    {
+        size_t length = strlen(source);
+        *destination = (char*)real_malloc(length + 1);
+        if (*destination == NULL)
+        {
+            result = __LINE__;
+        }
+        else
+        {
+            (void)memcpy(*destination, source, length + 1);
+            result = 0;
+        }
+    }
+
+    return result;
+}
+
+static int umocktypes_copy_WSIO_CONFIG_ptr(WSIO_CONFIG** destination, const WSIO_CONFIG** source)
+{
+    int result;
+
+    if (*source == NULL)
+    {
+        *destination = NULL;
+        result = 0;
+    }
+    else
+    {
+        *destination = (WSIO_CONFIG*)real_malloc(sizeof(WSIO_CONFIG));
+        if (*destination == NULL)
+        {
+            result = __LINE__;
+        }
+        else
+        {
+            if (copy_string((char**)&((*destination)->hostname), (*source)->hostname) != 0)
+            {
+                real_free(*destination);
+                result = __LINE__;
+            }
+            else if (copy_string((char**)&((*destination)->resource_name), (*source)->resource_name) != 0)
+            {
+                real_free((char*)(*destination)->hostname);
+                real_free(*destination);
+                result = __LINE__;
+            }
+            else if (copy_string((char**)&((*destination)->protocol), (*source)->protocol) != 0)
+            {
+                real_free((char*)(*destination)->resource_name);
+                real_free((char*)(*destination)->hostname);
+                real_free(*destination);
+                result = __LINE__;
+            }
+            else
+            {
+                (*destination)->port = (*source)->port;
+                (*destination)->underlying_io_interface = (*source)->underlying_io_interface;
+                if (umocktypes_copy("TLSIO_CONFIG*", &((*destination)->underlying_io_parameters), &((*source)->underlying_io_parameters)) != 0)
+                {
+                    real_free((char*)(*destination)->resource_name);
+                    real_free((char*)(*destination)->hostname);
+                    real_free((char*)(*destination)->protocol);
+                    real_free(*destination);
+                    result = __LINE__;
+                }
+                else
+                {
+                    result = 0;
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
+static void umocktypes_free_WSIO_CONFIG_ptr(WSIO_CONFIG** value)
+{
+    if (*value != NULL)
+    {
+        umocktypes_free("TLSIO_CONFIG*", &((*value)->underlying_io_parameters));
+        real_free((void*)(*value)->hostname);
+        real_free((void*)(*value)->resource_name);
+        real_free((void*)(*value)->protocol);
+        real_free(*value);
+    }
+}
+
+static char* umocktypes_stringify_WSIO_CONFIG_ptr(const WSIO_CONFIG** value)
+{
+    char* result;
+    if (*value == NULL)
+    {
+        result = (char*)real_malloc(5);
+        if (result != NULL)
+        {
+            (void)memcpy(result, "NULL", 5);
+        }
+    }
+    else
+    {
+        int length = snprintf(NULL, 0, "{ %p, %p, %s, %d, %s, %s }",
+            (*value)->underlying_io_interface,
+            (*value)->underlying_io_parameters,
+            (*value)->hostname,
+            (*value)->port,
+            (*value)->resource_name,
+            (*value)->protocol);
+        if (length < 0)
+        {
+            result = NULL;
+        }
+        else
+        {
+            result = (char*)real_malloc(length + 1);
+            (void)snprintf(result, length + 1, "{ %p, %p, %s, %d, %s, %s }",
+                (*value)->underlying_io_interface,
+                (*value)->underlying_io_parameters,
+                (*value)->hostname,
+                (*value)->port,
+                (*value)->resource_name,
+                (*value)->protocol);
+        }
+    }
+
+    return result;
+}
+
+static int umocktypes_are_equal_WSIO_CONFIG_ptr(WSIO_CONFIG** left, WSIO_CONFIG** right)
+{
+    int result;
+
+    if (*left == *right)
+    {
+        result = 1;
+    }
+    else
+    {
+        if ((*left == NULL) ||
+            (*right == NULL))
+        {
+            result = 0;
+        }
+        else
+        {
+            if (((*left)->port != (*right)->port) ||
+                ((*left)->underlying_io_interface != (*right)->underlying_io_interface))
+            {
+                result = 0;
+            }
+            else
+            {
+                if ((strcmp((*left)->hostname, (*right)->hostname) != 0) ||
+                    (strcmp((*left)->protocol, (*right)->protocol) != 0) ||
+                    (strcmp((*left)->resource_name, (*right)->resource_name) != 0) ||
+                    (umocktypes_are_equal("TLSIO_CONFIG*", &((*left)->underlying_io_parameters), &((*right)->underlying_io_parameters)) != 1))
+                {
+                    result = 0;
+                }
+                else
+                {
+                    result = 1;
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
+static int umocktypes_copy_TLSIO_CONFIG_ptr(TLSIO_CONFIG** destination, const TLSIO_CONFIG** source)
+{
+    int result;
+
+    if (*source == NULL)
+    {
+        *destination = NULL;
+        result = 0;
+    }
+    else
+    {
+        *destination = (TLSIO_CONFIG*)real_malloc(sizeof(TLSIO_CONFIG));
+        if (*destination == NULL)
+        {
+            result = __LINE__;
+        }
+        else
+        {
+            if (copy_string((char**)&((*destination)->hostname), (*source)->hostname) != 0)
+            {
+                real_free(*destination);
+                result = __LINE__;
+            }
+            else
+            {
+                (*destination)->port = (*source)->port;
+                (*destination)->underlying_io_interface = (*source)->underlying_io_interface;
+                (*destination)->underlying_io_parameters = (*source)->underlying_io_parameters;
+                if (((*destination)->underlying_io_interface != NULL) && (umocktypes_copy("HTTP_PROXY_IO_CONFIG*", &((*destination)->underlying_io_parameters), &((*source)->underlying_io_parameters)) != 0))
+                {
+                    real_free((char*)((*destination)->hostname));
+                    real_free(*destination);
+                    result = __LINE__;
+                }
+                else
+                {
+                    result = 0;
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
+static void umocktypes_free_TLSIO_CONFIG_ptr(TLSIO_CONFIG** value)
+{
+    if (*value != NULL)
+    {
+        if ((*value)->underlying_io_interface != NULL)
+        {
+            umocktypes_free("HTTP_PROXY_IO_CONFIG*", &((*value)->underlying_io_parameters));
+        }
+
+        real_free((void*)(*value)->hostname);
+        real_free(*value);
+    }
+}
+
+static char* umocktypes_stringify_TLSIO_CONFIG_ptr(const TLSIO_CONFIG** value)
+{
+    char* result;
+    if (*value == NULL)
+    {
+        result = (char*)real_malloc(5);
+        if (result != NULL)
+        {
+            (void)memcpy(result, "NULL", 5);
+        }
+    }
+    else
+    {
+        int length = snprintf(NULL, 0, "{ %p, %p, %s, %d }",
+            (*value)->underlying_io_interface,
+            (*value)->underlying_io_parameters,
+            (*value)->hostname,
+            (*value)->port);
+        if (length < 0)
+        {
+            result = NULL;
+        }
+        else
+        {
+            result = (char*)real_malloc(length + 1);
+            (void)snprintf(result, length + 1, "{ %p, %p, %s, %d }",
+                (*value)->underlying_io_interface,
+                (*value)->underlying_io_parameters,
+                (*value)->hostname,
+                (*value)->port);
+        }
+    }
+
+    return result;
+}
+
+static int umocktypes_are_equal_TLSIO_CONFIG_ptr(TLSIO_CONFIG** left, TLSIO_CONFIG** right)
+{
+    int result;
+
+    if (*left == *right)
+    {
+        result = 1;
+    }
+    else
+    {
+        if ((*left == NULL) ||
+            (*right == NULL))
+        {
+            result = 0;
+        }
+        else
+        {
+            if (((*left)->port != (*right)->port) ||
+                ((*left)->underlying_io_interface != (*right)->underlying_io_interface))
+            {
+                result = 0;
+            }
+            else
+            {
+                if ((strcmp((*left)->hostname, (*right)->hostname) != 0) ||
+                    (((*left)->underlying_io_interface != NULL) && (umocktypes_are_equal("HTTP_PROXY_IO_CONFIG*", &((*left)->underlying_io_parameters), &((*right)->underlying_io_parameters)) != 1)))
+                {
+                    result = 0;
+                }
+                else
+                {
+                    result = 1;
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
+static int umocktypes_copy_HTTP_PROXY_IO_CONFIG_ptr(HTTP_PROXY_IO_CONFIG** destination, const HTTP_PROXY_IO_CONFIG** source)
+{
+    int result;
+
+    if (*source == NULL)
+    {
+        *destination = NULL;
+        result = 0;
+    }
+    else
+    {
+        *destination = (HTTP_PROXY_IO_CONFIG*)real_malloc(sizeof(HTTP_PROXY_IO_CONFIG));
+        if (*destination == NULL)
+        {
+            result = __LINE__;
+        }
+        else
+        {
+            if (copy_string((char**)&((*destination)->hostname), (*source)->hostname) != 0)
+            {
+                real_free(*destination);
+                result = __LINE__;
+            }
+            else if (copy_string((char**)&((*destination)->proxy_hostname), (*source)->proxy_hostname) != 0)
+            {
+                real_free((char*)((*destination)->hostname));
+                real_free(*destination);
+                result = __LINE__;
+            }
+            else if (copy_string((char**)&((*destination)->username), (*source)->username) != 0)
+            {
+                real_free((char*)((*destination)->proxy_hostname));
+                real_free((char*)((*destination)->hostname));
+                real_free(*destination);
+                result = __LINE__;
+            }
+            else if (copy_string((char**)&((*destination)->password), (*source)->password) != 0)
+            {
+                real_free((char*)((*destination)->username));
+                real_free((char*)((*destination)->proxy_hostname));
+                real_free((char*)((*destination)->hostname));
+                real_free(*destination);
+                result = __LINE__;
+            }
+            else
+            {
+                (*destination)->port = (*source)->port;
+                (*destination)->proxy_port = (*source)->proxy_port;
+                result = 0;
+            }
+        }
+    }
+
+    return result;
+}
+
+static void umocktypes_free_HTTP_PROXY_IO_CONFIG_ptr(HTTP_PROXY_IO_CONFIG** value)
+{
+    if (*value != NULL)
+    {
+        real_free((void*)(*value)->hostname);
+        real_free((void*)(*value)->proxy_hostname);
+        real_free((void*)(*value)->username);
+        real_free((void*)(*value)->password);
+        real_free(*value);
+    }
+}
+
+static char* umocktypes_stringify_HTTP_PROXY_IO_CONFIG_ptr(const HTTP_PROXY_IO_CONFIG** value)
+{
+    char* result;
+    if (*value == NULL)
+    {
+        result = (char*)real_malloc(5);
+        if (result != NULL)
+        {
+            (void)memcpy(result, "NULL", 5);
+        }
+    }
+    else
+    {
+        int length = snprintf(NULL, 0, "{ %s, %d, %s, %d, %s, %s }",
+            (*value)->hostname,
+            (*value)->port,
+            (*value)->proxy_hostname,
+            (*value)->proxy_port,
+            (*value)->username,
+            (*value)->password);
+        if (length < 0)
+        {
+            result = NULL;
+        }
+        else
+        {
+            result = (char*)real_malloc(length + 1);
+            (void)snprintf(result, length + 1, "{ %s, %d, %s, %d, %s, %s }",
+                (*value)->hostname,
+                (*value)->port,
+                (*value)->proxy_hostname,
+                (*value)->proxy_port,
+                (*value)->username,
+                (*value)->password);
+        }
+    }
+
+    return result;
+}
+
+static int umocktypes_are_equal_HTTP_PROXY_IO_CONFIG_ptr(HTTP_PROXY_IO_CONFIG** left, HTTP_PROXY_IO_CONFIG** right)
+{
+    int result;
+
+    if (*left == *right)
+    {
+        result = 1;
+    }
+    else
+    {
+        if ((*left == NULL) ||
+            (*right == NULL))
+        {
+            result = 0;
+        }
+        else
+        {
+            if (((*left)->port != (*right)->port) ||
+                ((*left)->proxy_port != (*right)->proxy_port))
+            {
+                result = 0;
+            }
+            else
+            {
+                if ((strcmp((*left)->hostname, (*right)->hostname) != 0) ||
+                    (strcmp((*left)->proxy_hostname, (*right)->proxy_hostname) != 0) ||
+                    (strcmp((*left)->username, (*right)->username) != 0) ||
+                    (strcmp((*left)->password, (*right)->password) != 0))
+                {
+                    result = 0;
+                }
+                else
+                {
+                    result = 1;
+                }
+            }
+        }
+    }
+
+    return result;
+}
 
 //Callbacks for Testing
 static void* g_callbackCtx;
@@ -115,6 +600,9 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_CONFIRMATION_RESULT, int);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUBMESSAGE_DISPOSITION_RESULT, int);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_RETRY_POLICY, int);
+    REGISTER_TYPE(WSIO_CONFIG*, WSIO_CONFIG_ptr);
+    REGISTER_TYPE(TLSIO_CONFIG*, TLSIO_CONFIG_ptr);
+    REGISTER_TYPE(HTTP_PROXY_IO_CONFIG*, HTTP_PROXY_IO_CONFIG_ptr);
 
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubTransport_MQTT_Common_Create, my_IoTHubTransport_MQTT_Common_Create);
 
@@ -126,7 +614,9 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_MQTT_Common_SetRetryPolicy, 0);
 
     REGISTER_GLOBAL_MOCK_RETURN(xio_create, TEST_XIO_HANDLE);
-    REGISTER_GLOBAL_MOCK_RETURN(wsio_get_interface_description, TEST_INTERFACE_DESC);
+    REGISTER_GLOBAL_MOCK_RETURN(wsio_get_interface_description, TEST_WSIO_INTERFACE_DESCRIPTION);
+    REGISTER_GLOBAL_MOCK_RETURN(platform_get_default_tlsio, TEST_TLSIO_INTERFACE_DESCRIPTION);
+    REGISTER_GLOBAL_MOCK_RETURN(http_proxy_io_get_interface_description, TEST_HTTP_PROXY_IO_INTERFACE_DESCRIPTION);
 
     /* Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_011: [ This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for its fields:
 
@@ -213,31 +703,249 @@ TEST_FUNCTION(IoTHubTransportMqtt_WS_Create_success)
     //cleanup
 }
 
-/* Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_012: [ getIoTransportProvider shall return the XIO_HANDLE returns by xio_create. ] */
-TEST_FUNCTION(IoTHubTransportMqtt_WS_getWebSocketsIOTransport_success)
+/* Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_012: [ `getIoTransportProvider` shall return the `XIO_HANDLE` returned by `xio_create`. ] */
+/* Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_002: [ `getIoTransportProvider` shall call `xio_create` while passing the WebSocket IO interface description to it and the WebSocket configuration as a WSIO_CONFIG structure, filled as below ]*/
+/* Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_001: [ `getIoTransportProvider` shall obtain the WebSocket IO interface handle by calling `wsio_get_interface_description`. ]*/
+/* Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_003: [ - `hostname` shall be set to `fully_qualified_name`. ]*/
+/* Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_004: [ - `port` shall be set to 443. ]*/
+/* Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_005: [ - `protocol` shall be set to `MQTT`. ]*/
+/* Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_006: [ - `resource_name` shall be set to `/$iothub/websocket`. ]*/
+/* Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_007: [ - `underlying_io_interface` shall be set to the TLS IO interface description. ]*/
+/* Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_008: [ - `underlying_io_parameters` shall be set to the TLS IO arguments. ]*/
+/* Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_009: [ `getIoTransportProvider` shall obtain the TLS IO interface handle by calling `platform_get_default_tlsio`. ]*/
+/* Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_010: [ The TLS IO parameters shall be a `TLSIO_CONFIG` structure filled as below: ]*/
+/* Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_011: [ - `hostname` shall be set to `fully_qualified_name`. ]*/
+/* Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_012: [ - `port` shall be set to 443. ]*/
+/* Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_013: [ - If `mqtt_transport_proxy_options` is NULL, `underlying_io_interface` shall be set to NULL ]*/
+/* Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_014: [ - If `mqtt_transport_proxy_options` is NULL `underlying_io_parameters` shall be set to NULL. ]*/
+TEST_FUNCTION(IoTHubTransportMqtt_WS_getWebSocketsIOTransport_with_NULL_uses_a_socket_IO)
 {
     // arrange
     IOTHUBTRANSPORT_CONFIG config = { 0 };
+    XIO_HANDLE xioTest;
+    WSIO_CONFIG wsio_config;
+    TLSIO_CONFIG tlsio_config;
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
     (void)IoTHubTransportMqtt_WS_Create(&config);
     umock_c_reset_all_calls();
 
-    // act
+    tlsio_config.hostname = TEST_STRING_VALUE;
+    tlsio_config.port = 443;
+    tlsio_config.underlying_io_interface = NULL;
+    tlsio_config.underlying_io_parameters = NULL;
+
+    wsio_config.hostname = TEST_STRING_VALUE;
+    wsio_config.port = 443;
+    wsio_config.protocol = "MQTT";
+    wsio_config.resource_name = "/$iothub/websocket";
+    wsio_config.underlying_io_interface = TEST_TLSIO_INTERFACE_DESCRIPTION;
+    wsio_config.underlying_io_parameters = &tlsio_config;
+
     STRICT_EXPECTED_CALL(wsio_get_interface_description());
-    STRICT_EXPECTED_CALL(xio_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(platform_get_default_tlsio());
+    STRICT_EXPECTED_CALL(xio_create(TEST_WSIO_INTERFACE_DESCRIPTION, &wsio_config))
+        .ValidateArgumentValue_io_create_parameters_AsType(UMOCK_TYPE(WSIO_CONFIG*));
 
     ASSERT_IS_NOT_NULL(g_get_io_transport);
-    XIO_HANDLE xioTest = g_get_io_transport(TEST_STRING_VALUE);
+
+    // act
+    xioTest = g_get_io_transport(TEST_STRING_VALUE, NULL);
 
     // assert
     ASSERT_IS_NOT_NULL(xioTest);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-    //cleanup
 }
 
-/* Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_013: [ If platform_get_default_tlsio returns NULL getIoTransportProvider shall return NULL. ] */
+/* Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_015: [ - If `mqtt_transport_proxy_options` is not NULL, `underlying_io_interface` shall be set to the HTTP proxy IO interface description. ]*/
+/* Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_016: [ - If `mqtt_transport_proxy_options` is not NULL `underlying_io_parameters` shall be set to the HTTP proxy IO arguments. ]*/
+/* Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_022: [ `getIoTransportProvider` shall obtain the HTTP proxy IO interface handle by calling `http_proxy_io_get_interface_description`. ]*/
+/* Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_023: [ The HTTP proxy IO arguments shall be an `HTTP_PROXY_IO_CONFIG` structure, filled as below: ]*/
+/* Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_024: [ - `hostname` shall be set to `fully_qualified_name`. ]*/
+/* Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_026: [ - `proxy_hostname`, `proxy_port`, `username` and `password` shall be copied from the `mqtt_transport_proxy_options` argument. ]*/
+/* Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_025: [ - `port` shall be set to 443. ]*/
+TEST_FUNCTION(IoTHubTransportMqtt_WS_getWebSocketsIOTransport_with_proxy_settings_uses_the_proxy_settings)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    MQTT_TRANSPORT_PROXY_OPTIONS mqtt_proxy_options;
+    WSIO_CONFIG wsio_config;
+    TLSIO_CONFIG tlsio_config;
+    HTTP_PROXY_IO_CONFIG http_proxy_io_config;
+    XIO_HANDLE xioTest;
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+    (void)IoTHubTransportMqtt_WS_Create(&config);
+    umock_c_reset_all_calls();
+
+    http_proxy_io_config.hostname = TEST_STRING_VALUE;
+    http_proxy_io_config.port = 443;
+    http_proxy_io_config.proxy_hostname = "some_host";
+    http_proxy_io_config.proxy_port = 444;
+    http_proxy_io_config.username = "me";
+    http_proxy_io_config.password = "shhhh";
+
+    tlsio_config.hostname = TEST_STRING_VALUE;
+    tlsio_config.port = 443;
+    tlsio_config.underlying_io_interface = TEST_HTTP_PROXY_IO_INTERFACE_DESCRIPTION;
+    tlsio_config.underlying_io_parameters = &http_proxy_io_config;
+
+    wsio_config.hostname = TEST_STRING_VALUE;
+    wsio_config.port = 443;
+    wsio_config.protocol = "MQTT";
+    wsio_config.resource_name = "/$iothub/websocket";
+    wsio_config.underlying_io_interface = TEST_TLSIO_INTERFACE_DESCRIPTION;
+    wsio_config.underlying_io_parameters = &tlsio_config;
+
+    mqtt_proxy_options.host_address = "some_host";
+    mqtt_proxy_options.port = 444;
+    mqtt_proxy_options.username = "me";
+    mqtt_proxy_options.password = "shhhh";
+
+    STRICT_EXPECTED_CALL(wsio_get_interface_description());
+    STRICT_EXPECTED_CALL(platform_get_default_tlsio());
+    STRICT_EXPECTED_CALL(http_proxy_io_get_interface_description());
+    STRICT_EXPECTED_CALL(xio_create(TEST_WSIO_INTERFACE_DESCRIPTION, &wsio_config))
+        .ValidateArgumentValue_io_create_parameters_AsType(UMOCK_TYPE(WSIO_CONFIG*));
+
+    ASSERT_IS_NOT_NULL(g_get_io_transport);
+
+    // act
+    xioTest = g_get_io_transport(TEST_STRING_VALUE, &mqtt_proxy_options);
+
+    // assert
+    ASSERT_IS_NOT_NULL(xioTest);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+}
+
+/* Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_028: [ If `http_proxy_io_get_interface_description` returns NULL, NULL shall be set in the TLS IO parameters structure for the interface description and parameters. ]*/
+TEST_FUNCTION(when_socket_io_interface_is_NULL_getWebSocketsIOTransport_with_proxy_settings_passes_down_NULL_as_http_proxy_io_interface)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    MQTT_TRANSPORT_PROXY_OPTIONS mqtt_proxy_options;
+    WSIO_CONFIG wsio_config;
+    TLSIO_CONFIG tlsio_config;
+    HTTP_PROXY_IO_CONFIG http_proxy_io_config;
+    XIO_HANDLE xioTest;
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+    (void)IoTHubTransportMqtt_WS_Create(&config);
+    umock_c_reset_all_calls();
+
+    http_proxy_io_config.hostname = TEST_STRING_VALUE;
+    http_proxy_io_config.port = 443;
+    http_proxy_io_config.proxy_hostname = "some_host";
+    http_proxy_io_config.proxy_port = 444;
+    http_proxy_io_config.username = "me";
+    http_proxy_io_config.password = "shhhh";
+
+    tlsio_config.hostname = TEST_STRING_VALUE;
+    tlsio_config.port = 443;
+    tlsio_config.underlying_io_interface = NULL;
+    tlsio_config.underlying_io_parameters = &http_proxy_io_config;
+
+    wsio_config.hostname = TEST_STRING_VALUE;
+    wsio_config.port = 443;
+    wsio_config.protocol = "MQTT";
+    wsio_config.resource_name = "/$iothub/websocket";
+    wsio_config.underlying_io_interface = TEST_TLSIO_INTERFACE_DESCRIPTION;
+    wsio_config.underlying_io_parameters = &tlsio_config;
+
+    mqtt_proxy_options.host_address = "some_host";
+    mqtt_proxy_options.port = 444;
+    mqtt_proxy_options.username = "me";
+    mqtt_proxy_options.password = "shhhh";
+
+    STRICT_EXPECTED_CALL(wsio_get_interface_description());
+    STRICT_EXPECTED_CALL(platform_get_default_tlsio());
+    STRICT_EXPECTED_CALL(http_proxy_io_get_interface_description())
+        .SetReturn(NULL);
+    STRICT_EXPECTED_CALL(xio_create(TEST_WSIO_INTERFACE_DESCRIPTION, &wsio_config))
+        .ValidateArgumentValue_io_create_parameters_AsType(UMOCK_TYPE(WSIO_CONFIG*));
+
+    ASSERT_IS_NOT_NULL(g_get_io_transport);
+
+    // act
+    xioTest = g_get_io_transport(TEST_STRING_VALUE, &mqtt_proxy_options);
+
+    // assert
+    ASSERT_IS_NOT_NULL(xioTest);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+}
+
+/* Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_029: [ If `platform_get_default_tlsio` returns NULL, NULL shall be set in the WebSocket IO parameters structure for the interface description and parameters. ]*/
+TEST_FUNCTION(when_tlsio_interface_is_NULL_getWebSocketsIOTransport_with_proxy_settings_passes_down_NULL_as_tlsio_interface)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    MQTT_TRANSPORT_PROXY_OPTIONS mqtt_proxy_options;
+    WSIO_CONFIG wsio_config;
+    XIO_HANDLE xioTest;
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+    (void)IoTHubTransportMqtt_WS_Create(&config);
+    umock_c_reset_all_calls();
+
+    wsio_config.hostname = TEST_STRING_VALUE;
+    wsio_config.port = 443;
+    wsio_config.protocol = "MQTT";
+    wsio_config.resource_name = "/$iothub/websocket";
+    wsio_config.underlying_io_interface = NULL;
+    wsio_config.underlying_io_parameters = NULL;
+
+    mqtt_proxy_options.host_address = "some_host";
+    mqtt_proxy_options.port = 444;
+    mqtt_proxy_options.username = "me";
+    mqtt_proxy_options.password = "shhhh";
+
+    STRICT_EXPECTED_CALL(wsio_get_interface_description());
+    STRICT_EXPECTED_CALL(platform_get_default_tlsio())
+        .SetReturn(NULL);
+    STRICT_EXPECTED_CALL(xio_create(TEST_WSIO_INTERFACE_DESCRIPTION, &wsio_config))
+        .ValidateArgumentValue_io_create_parameters_AsType(UMOCK_TYPE(WSIO_CONFIG*));
+
+    ASSERT_IS_NOT_NULL(g_get_io_transport);
+
+    // act
+    xioTest = g_get_io_transport(TEST_STRING_VALUE, &mqtt_proxy_options);
+
+    // assert
+    ASSERT_IS_NOT_NULL(xioTest);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+}
+
+/* Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_029: [ If `platform_get_default_tlsio` returns NULL, NULL shall be set in the WebSocket IO parameters structure for the interface description and parameters. ]*/
+TEST_FUNCTION(when_tlsio_interface_is_NULL_getWebSocketsIOTransport_with_NULL_proxy_settings_passes_down_NULL_as_tlsio_interface)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    WSIO_CONFIG wsio_config;
+    XIO_HANDLE xioTest;
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+    (void)IoTHubTransportMqtt_WS_Create(&config);
+    umock_c_reset_all_calls();
+
+    wsio_config.hostname = TEST_STRING_VALUE;
+    wsio_config.port = 443;
+    wsio_config.protocol = "MQTT";
+    wsio_config.resource_name = "/$iothub/websocket";
+    wsio_config.underlying_io_interface = NULL;
+    wsio_config.underlying_io_parameters = NULL;
+
+    STRICT_EXPECTED_CALL(wsio_get_interface_description());
+    STRICT_EXPECTED_CALL(platform_get_default_tlsio())
+        .SetReturn(NULL);
+    STRICT_EXPECTED_CALL(xio_create(TEST_WSIO_INTERFACE_DESCRIPTION, &wsio_config))
+        .ValidateArgumentValue_io_create_parameters_AsType(UMOCK_TYPE(WSIO_CONFIG*));
+
+    ASSERT_IS_NOT_NULL(g_get_io_transport);
+
+    // act
+    xioTest = g_get_io_transport(TEST_STRING_VALUE, NULL);
+
+    // assert
+    ASSERT_IS_NOT_NULL(xioTest);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+}
+
+/* Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_013: [ If `wsio_get_interface_description` returns NULL `getIoTransportProvider` shall return NULL. ] */
 TEST_FUNCTION(IoTHubTransportMqtt_WS_getWebSocketsIOTransport_wsio_get_interface_description_NULL_fail)
 {
     // arrange
@@ -250,7 +958,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_WS_getWebSocketsIOTransport_wsio_get_interface
     STRICT_EXPECTED_CALL(wsio_get_interface_description()).SetReturn(NULL);
 
     ASSERT_IS_NOT_NULL(g_get_io_transport);
-    XIO_HANDLE xioTest = g_get_io_transport(TEST_STRING_VALUE);
+    XIO_HANDLE xioTest = g_get_io_transport(TEST_STRING_VALUE, NULL);
 
     // assert
     ASSERT_IS_NULL(xioTest);
@@ -300,7 +1008,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_WS_Subscribe_success)
     //cleanup
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_25_012: [** IoTHubTransportMqtt_WS_SetRetryPolicy shall call into the IoTHubMqttAbstract_SetRetryPolicy function.]*/
+/* Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_25_012: [** IoTHubTransportMqtt_WS_SetRetryPolicy shall call into the IoTHubMqttAbstract_SetRetryPolicy function.]*/
 TEST_FUNCTION(IoTHubTransportMqtt_WS_SetRetryPolicy_success)
 {
     // arrange

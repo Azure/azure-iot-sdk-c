@@ -529,7 +529,7 @@ static int get_new_underlying_io_transport(AMQP_TRANSPORT_INSTANCE* transport_in
 {
 	int result;
 
-	if ((*xio_handle = transport_instance->underlying_io_transport_provider(STRING_c_str(transport_instance->iothub_host_fqdn))) == NULL)
+	if ((*xio_handle = transport_instance->underlying_io_transport_provider(STRING_c_str(transport_instance->iothub_host_fqdn), NULL)) == NULL)
 	{
 		LogError("Failed to obtain a TLS I/O transport layer (underlying_io_transport_provider() failed)");
 		result = __FAILURE__;

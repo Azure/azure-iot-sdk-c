@@ -33,14 +33,27 @@ extern const TRANSPORT_PROVIDER* MQTT_Protocol(void);
     - IoTHubTransportMqtt_SetRetryPolicy,
     - IoTHubTransportMqtt_GetSendStatus
 
-## typedef XIO_HANDLE(*MQTT_GET_IO_TRANSPORT)(const char* fully_qualified_name);
+## typedef XIO_HANDLE(*MQTT_GET_IO_TRANSPORT)(const char* fully_qualified_name, const MQTT_TRANSPORT_PROXY_OPTIONS* mqtt_transport_proxy_options);
 
 ```c
-static XIO_HANDLE getIoTransportProvider(const char* fqdn)
+static XIO_HANDLE getIoTransportProvider(const char* fqdn, const MQTT_TRANSPORT_PROXY_OPTIONS* mqtt_transport_proxy_options)
 ```
-**SRS_IOTHUB_MQTT_TRANSPORT_07_012: [** getIoTransportProvider shall return the XIO_HANDLE returns by xio_create. **]**
 
-**SRS_IOTHUB_MQTT_TRANSPORT_07_013: [** If platform_get_default_tlsio returns NULL getIoTransportProvider shall return NULL. **]**
+**SRS_IOTHUB_MQTT_TRANSPORT_01_001: [** `getIoTransportProvider` shall obtain the TLS IO interface handle by calling `platform_get_default_tlsio`. **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_01_002: [** The TLS IO parameters shall be a `TLSIO_CONFIG` structure filled as below: **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_01_003: [** - `hostname` shall be set to `fully_qualified_name`. **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_01_004: [** - `port` shall be set to 8883. **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_01_005: [** - `underlying_io_interface` shall be set to NULL. **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_01_006: [** - `underlying_io_parameters` shall be set to NULL. **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_07_012: [** `getIoTransportProvider` shall return the `XIO_HANDLE` returned by `xio_create`. **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_07_013: [** If `platform_get_default_tlsio` returns NULL, `getIoTransportProvider` shall return NULL. **]**
 
 ## IoTHubTransportMqtt_Create
 ```c

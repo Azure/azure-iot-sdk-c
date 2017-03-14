@@ -13,9 +13,16 @@ extern "C"
 {
 #endif
 
-static const char* OPTION_EVENT_SEND_TIMEOUT_SECS = "event_send_timeout_secs";
+typedef struct AMQP_TRANSPORT_PROXY_OPTIONS_TAG
+{
+    const char* host_address;
+    int port;
+    const char* username;
+    const char* password;
+} AMQP_TRANSPORT_PROXY_OPTIONS;
 
-typedef XIO_HANDLE(*AMQP_GET_IO_TRANSPORT)(const char* target_fqdn);
+typedef XIO_HANDLE(*AMQP_GET_IO_TRANSPORT)(const char* target_fqdn, const AMQP_TRANSPORT_PROXY_OPTIONS* amqp_transport_proxy_options);
+static const char* OPTION_EVENT_SEND_TIMEOUT_SECS = "event_send_timeout_secs";
 
 MOCKABLE_FUNCTION(, TRANSPORT_LL_HANDLE, IoTHubTransport_AMQP_Common_Create, const IOTHUBTRANSPORT_CONFIG*, config, AMQP_GET_IO_TRANSPORT, get_io_transport);
 MOCKABLE_FUNCTION(, void, IoTHubTransport_AMQP_Common_Destroy, TRANSPORT_LL_HANDLE, handle);

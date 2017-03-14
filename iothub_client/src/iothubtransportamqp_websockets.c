@@ -4,24 +4,103 @@
 #include "iothubtransportamqp_websockets.h"
 #include "azure_c_shared_utility/wsio.h"
 #include "iothubtransport_amqp_common.h"
+#include "azure_c_shared_utility/tlsio.h"
+#include "azure_c_shared_utility/http_proxy_io.h"
+#include "azure_c_shared_utility/platform.h"
+#include "azure_c_shared_utility/shared_util_options.h"
 
 #define DEFAULT_WS_PROTOCOL_NAME "AMQPWSB10"
 #define DEFAULT_WS_RELATIVE_PATH "/$iothub/websocket"
 #define DEFAULT_WS_PORT 443
 
-static XIO_HANDLE getWebSocketsIOTransport(const char* fqdn)
+static XIO_HANDLE getWebSocketsIOTransport(const char* fqdn, const AMQP_TRANSPORT_PROXY_OPTIONS* amqp_transport_proxy_options)
 {
     WSIO_CONFIG ws_io_config;
-    ws_io_config.host = fqdn;
-    ws_io_config.port = DEFAULT_WS_PORT;
-    ws_io_config.protocol_name = DEFAULT_WS_PROTOCOL_NAME;
-    ws_io_config.relative_path = DEFAULT_WS_RELATIVE_PATH;
-    ws_io_config.use_ssl = true;
+    TLSIO_CONFIG tls_io_config;
+    HTTP_PROXY_IO_CONFIG http_proxy_io_config;
+    /* Codes_SRS_IOTHUBTRANSPORTAMQP_WS_01_001: [ `getIoTransportProvider` shall obtain the WebSocket IO interface handle by calling `wsio_get_interface_description`. ]*/
+    const IO_INTERFACE_DESCRIPTION* io_interface_description = wsio_get_interface_description();
+    XIO_HANDLE result;
 
-    // Codes_SRS_IoTHubTransportAMQP_WS_09_002: [getWebSocketsIOTransport shall get `io_interface_description` using wsio_get_interface_description()]
-    // Codes_SRS_IoTHubTransportAMQP_WS_09_003: [If `io_interface_description` is NULL getWebSocketsIOTransport shall return NULL.]
-    // Codes_SRS_IoTHubTransportAMQP_WS_09_004: [getWebSocketsIOTransport shall return the XIO_HANDLE created using xio_create().]
-    return xio_create(wsio_get_interface_description(), &ws_io_config);
+    if (io_interface_description == NULL)
+    {
+        LogError("Failure constructing the provider interface");
+        /* Codes_SRS_IoTHubTransportAMQP_WS_09_003: [If `io_interface_description` is NULL getWebSocketsIOTransport shall return NULL.] */
+        result = NULL;
+    }
+    else
+    {
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_WS_01_003: [ - `hostname` shall be set to `fqdn`. ]*/
+        ws_io_config.hostname = fqdn;
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_WS_01_004: [ - `port` shall be set to 443. ]*/
+        ws_io_config.port = DEFAULT_WS_PORT;
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_WS_01_005: [ - `protocol` shall be set to `AMQPWSB10`. ]*/
+        ws_io_config.protocol = DEFAULT_WS_PROTOCOL_NAME;
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_WS_01_006: [ - `resource_name` shall be set to `/$iothub/websocket`. ]*/
+        ws_io_config.resource_name = DEFAULT_WS_RELATIVE_PATH;
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_WS_01_007: [ - `underlying_io_interface` shall be set to the TLS IO interface description. ]*/
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_WS_01_009: [ `getIoTransportProvider` shall obtain the TLS IO interface handle by calling `platform_get_default_tlsio`. ]*/
+        ws_io_config.underlying_io_interface = platform_get_default_tlsio();
+
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_WS_01_029: [ If `platform_get_default_tlsio` returns NULL, NULL shall be set in the WebSocket IO parameters structure for the interface description and parameters. ]*/
+        if (ws_io_config.underlying_io_interface == NULL)
+        {
+            ws_io_config.underlying_io_parameters = NULL;
+        }
+        else
+        {
+            /* Codes_SRS_IOTHUBTRANSPORTAMQP_WS_01_008: [ - `underlying_io_parameters` shall be set to the TLS IO arguments. ]*/
+            ws_io_config.underlying_io_parameters = &tls_io_config;
+
+            /* Codes_SRS_IOTHUBTRANSPORTAMQP_WS_01_010: [ The TLS IO parameters shall be a `TLSIO_CONFIG` structure filled as below: ]*/
+            /* Codes_SRS_IOTHUBTRANSPORTAMQP_WS_01_011: [ - `hostname` shall be set to `fqdn`. ]*/
+            tls_io_config.hostname = fqdn;
+            /* Codes_SRS_IOTHUBTRANSPORTAMQP_WS_01_012: [ - `port` shall be set to 443. ]*/
+            tls_io_config.port = DEFAULT_WS_PORT;
+
+            if (amqp_transport_proxy_options != NULL)
+            {
+                /* Codes_SRS_IOTHUBTRANSPORTAMQP_WS_01_015: [ - If `amqp_transport_proxy_options` is not NULL, `underlying_io_interface` shall be set to the HTTP proxy IO interface description. ]*/
+                /* Codes_SRS_IOTHUBTRANSPORTAMQP_WS_01_022: [ `getIoTransportProvider` shall obtain the HTTP proxy IO interface handle by calling `http_proxy_io_get_interface_description`. ]*/
+                tls_io_config.underlying_io_interface = http_proxy_io_get_interface_description();
+
+                /* Codes_SRS_IOTHUBTRANSPORTAMQP_WS_01_028: [ If `http_proxy_io_get_interface_description` returns NULL, NULL shall be set in the TLS IO parameters structure for the interface description and parameters. ]*/
+                if (tls_io_config.underlying_io_interface == NULL)
+                {
+                    tls_io_config.underlying_io_parameters = NULL;
+                }
+                else
+                {
+                    /* Codes_SRS_IOTHUBTRANSPORTAMQP_WS_01_016: [ - If `amqp_transport_proxy_options` is not NULL `underlying_io_parameters` shall be set to the HTTP proxy IO arguments. ]*/
+                    tls_io_config.underlying_io_parameters = &http_proxy_io_config;
+
+                    /* Codes_SRS_IOTHUBTRANSPORTAMQP_WS_01_023: [ The HTTP proxy IO arguments shall be an `HTTP_PROXY_IO_CONFIG` structure, filled as below: ]*/
+                    /* Codes_SRS_IOTHUBTRANSPORTAMQP_WS_01_026: [ - `proxy_hostname`, `proxy_port`, `username` and `password` shall be copied from the `mqtt_transport_proxy_options` argument. ]*/
+                    http_proxy_io_config.proxy_hostname = amqp_transport_proxy_options->host_address;
+                    http_proxy_io_config.proxy_port = amqp_transport_proxy_options->port;
+                    http_proxy_io_config.username = amqp_transport_proxy_options->username;
+                    http_proxy_io_config.password = amqp_transport_proxy_options->password;
+                    /* Codes_SRS_IOTHUBTRANSPORTAMQP_WS_01_024: [ - `hostname` shall be set to `fully_qualified_name`. ]*/
+                    http_proxy_io_config.hostname = fqdn;
+                    /* Codes_SRS_IOTHUBTRANSPORTAMQP_WS_01_025: [ - `port` shall be set to 443. ]*/
+                    http_proxy_io_config.port = DEFAULT_WS_PORT;
+                }
+            }
+            else
+            {
+                /* Codes_SRS_IOTHUBTRANSPORTAMQP_WS_01_013: [ - If `amqp_transport_proxy_options` is NULL, `underlying_io_interface` shall be set to NULL. ]*/
+                tls_io_config.underlying_io_interface = NULL;
+                /* Codes_SRS_IOTHUBTRANSPORTAMQP_WS_01_014: [ - If `amqp_transport_proxy_options` is NULL `underlying_io_parameters` shall be set to NULL. ]*/
+                tls_io_config.underlying_io_interface = NULL;
+            }
+        }
+
+        /* Codes_SRS_IoTHubTransportAMQP_WS_09_004: [getWebSocketsIOTransport shall return the XIO_HANDLE created using xio_create().] */
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_WS_01_002: [ `getIoTransportProvider` shall call `xio_create` while passing the WebSocket IO interface description to it and the WebSocket configuration as a WSIO_CONFIG structure, filled as below: ]*/
+        result = xio_create(io_interface_description, &ws_io_config);
+    }
+
+    return result;
 }
 
 // API functions
