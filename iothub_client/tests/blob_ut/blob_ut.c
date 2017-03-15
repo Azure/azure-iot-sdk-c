@@ -1375,7 +1375,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_fails_when_size_is_exceeded)
     unsigned char c = 3;
 
     ///act
-    BLOB_RESULT result = Blob_UploadFromSasUri("https://h.h", &c, size, &httpResponse, testValidBufferHandle);
+    BLOB_RESULT result = Blob_UploadFromSasUri("https://h.h", &c, size, &httpResponse, testValidBufferHandle, NULL);
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_INVALID_ARG, result);
