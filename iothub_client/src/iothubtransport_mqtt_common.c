@@ -1449,6 +1449,8 @@ static void mqtt_error_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_ERR
             case MQTT_CLIENT_PARSE_ERROR:
             case MQTT_CLIENT_MEMORY_ERROR:
             case MQTT_CLIENT_COMMUNICATION_ERROR:
+                LogError("Mqtt Communication Error. Reconnecting device...");
+                break;
             case MQTT_CLIENT_UNKNOWN_ERROR: 
             {
                 LogError("INTERNAL ERROR: unexpected error value received %s", ENUM_TO_STRING(MQTT_CLIENT_EVENT_ERROR, error));
