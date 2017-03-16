@@ -41,7 +41,7 @@ void iothub_client_sample_upload_to_blob_run(void)
 
     if (platform_init() != 0)
     {
-        printf("Failed to initialize the platform.\r\n");
+        (void)printf("Failed to initialize the platform.\r\n");
     }
     else
     {
@@ -55,17 +55,17 @@ void iothub_client_sample_upload_to_blob_run(void)
         {
             if (IoTHubClient_LL_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
             {
-                printf("failure in IoTHubClient_LL_SetOption (TrustedCerts)");
+                (void)printf("failure in IoTHubClient_LL_SetOption (TrustedCerts)");
             }
             else
             {
                 if (IoTHubClient_LL_UploadToBlob(iotHubClientHandle, "hello_world.txt", (const unsigned char*)HELLO_WORLD, sizeof(HELLO_WORLD) - 1) != IOTHUB_CLIENT_OK)
                 {
-                    printf("hello world failed to upload\n");
+                    (void)printf("hello world failed to upload\n");
                 }
                 else
                 {
-                    printf("hello world has been created\n");
+                    (void)printf("hello world has been created\n");
                 }
             }
             IoTHubClient_LL_Destroy(iotHubClientHandle);
