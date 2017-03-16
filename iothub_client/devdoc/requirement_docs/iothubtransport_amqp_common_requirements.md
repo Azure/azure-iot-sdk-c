@@ -20,7 +20,7 @@ iothubtransport_amqp_device
 ## Exposed API
 
 ```c
-typedef XIO_HANDLE(*AMQP_GET_IO_TRANSPORT)(const char* target_fqdn);
+typedef XIO_HANDLE(*AMQP_GET_IO_TRANSPORT)(const char* target_fqdn, const AMQP_TRANSPORT_PROXY_OPTIONS* amqp_transport_proxy_options);
 
 extern TRANSPORT_LL_HANDLE IoTHubTransport_AMQP_Common_Create(const IOTHUBTRANSPORT_CONFIG* config, AMQP_GET_IO_TRANSPORT get_io_transport);
 extern void IoTHubTransport_AMQP_Common_Destroy(TRANSPORT_LL_HANDLE handle);
@@ -351,6 +351,7 @@ Summary of options:
 |x509certificate        | const char*                  |Default: NONE. An x509 certificate in PEM format |
 |x509privatekey         | const char*                  |Default: NONE. An x509 RSA private key in PEM format|
 |logtrace               | true or false                |Default: false|
+|proxy_data             | *                            |Default: N/A|
 
 
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_101: [**If `handle`, `option` or `value` are NULL then IoTHubTransport_AMQP_Common_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.**]**
@@ -375,6 +376,18 @@ The remaining requirements apply independent of the authentication mode:
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_03_001: [**If xio_setoption fails, IoTHubTransport_AMQP_Common_SetOption shall return IOTHUB_CLIENT_ERROR.**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_03_001: [**If no failures occur, IoTHubTransport_AMQP_Common_SetOption shall return IOTHUB_CLIENT_OK.**]**
 
+The following requirements apply to `proxy_data`:
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_032: [** If `option` is `proxy_data`, `value` shall be used as an `HTTP_PROXY_OPTIONS*`. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_033: [** The fields `host_address`, `port`, `username` and `password` shall be saved for later used (needed when creating the underlying IO to be used by the transport). **]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_034: [** If `host_address` is NULL, `IoTHubTransport_AMQP_Common_SetOption` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_035: [** If copying `host_address`, `username` or `password` fails, `IoTHubTransport_AMQP_Common_SetOption` shall fail and return `IOTHUB_CLIENT_ERROR`. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_036: [** `username` and `password` shall be allowed to be NULL. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_037: [** If only one of `username` and `password` is NULL, `IoTHubTransport_AMQP_Common_SetOption` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_038: [** If the underlying IO has already been created, then `IoTHubTransport_AMQP_Common_SetOption` shall fail and return `IOTHUB_CLIENT_ERROR`. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_039: [** If setting the `proxy_data` option suceeds, `IoTHubTransport_AMQP_Common_SetOption` shall return `IOTHUB_CLIENT_OK` **]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_040: [** When setting the proxy options succeeds any previously saved proxy options shall be freed. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_041: [** If the `proxy_data` option has been set, the proxy options shall be filled in the argument `amqp_transport_proxy_options` when calling the function `underlying_io_transport_provider()` to obtain the underlying IO handle. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_042: [** If no `proxy_data` option has been set, NULL shall be passed as the argument `amqp_transport_proxy_options` when calling the function `underlying_io_transport_provider()`. **]**
 
 ### IoTHubTransport_AMQP_Common_Subscribe_DeviceTwin
 ```c
