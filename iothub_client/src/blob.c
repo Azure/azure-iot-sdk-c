@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include <stdlib.h>
+#include <stdint.h>
 #include "azure_c_shared_utility/gballoc.h"
 #include "blob.h"
 
@@ -32,12 +33,15 @@ BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* sourc
             LogError("combination of source = %p and size = %zu is invalid", source, size);
             result = BLOB_INVALID_ARG;
         }
+        /*the below define avoid a "condition always false" on some compilers*/
+#if SIZE_MAX>UINT32_MAX
         /*Codes_SRS_BLOB_02_034: [ If size is bigger than 50000*4*1024*1024 then Blob_UploadFromSasUri shall fail and return BLOB_INVALID_ARG. ]*/
-        else if ((size / (1024*1024)) >= 4 * 50000UL) /*https://msdn.microsoft.com/en-us/library/azure/dd179467.aspx says "Each block can be a different size, up to a maximum of 4 MB, and a block blob can include a maximum of 50,000 blocks."*/
+        else if (size > 4 * 1024 * 1024 * 50000UL) /*https://msdn.microsoft.com/en-us/library/azure/dd179467.aspx says "Each block can be a different size, up to a maximum of 4 MB, and a block blob can include a maximum of 50,000 blocks."*/
         {
             LogError("size too big (%zu)", size);
             result = BLOB_INVALID_ARG;
         }
+#endif
         else
         {
             /*Codes_SRS_BLOB_02_017: [ Blob_UploadFromSasUri shall copy from SASURI the hostname to a new const char* ]*/
