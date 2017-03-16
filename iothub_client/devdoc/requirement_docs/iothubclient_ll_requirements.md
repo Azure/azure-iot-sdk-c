@@ -575,6 +575,8 @@ the following HTTP request headers:  ]**
 If the credentials used to create `iotHubClientHandle` do not have "deviceKey" or "deviceSasToken" then
 **SRS_IOTHUBCLIENT_LL_02_106: [** - `x509certificate` and `x509privatekey` saved options shall be passed on the HTTPAPIEX_SetOption.** ]**
 
+**SRS_IOTHUBCLIENT_LL_02_111: [** If `certificates` is non-`NULL` then `certificates` shall be passed to HTTPAPIEX_SetOption with optionName `TrustedCerts`. **]**
+
 **SRS_IOTHUBCLIENT_LL_02_107: [** - "Authorization" header shall not be build.** ]**
 
 **SRS_IOTHUBCLIENT_LL_02_108: [** `IoTHubClient_LL_UploadToBlob` shall execute HTTPAPIEX_ExecuteRequest passing the following information for arguments:  ]**

@@ -18,21 +18,24 @@ References
 
 DEFINE_ENUM(BLOB_RESULT, BLOB_RESULT_VALUES)
     
-    /**
-    * @brief	Synchronously uploads a byte array to blob storage
-    *
-    * @param	SASURI	    The URI to use to upload data
-    * @param	size		The size of the data to be uploaded (can be 0)
-    * @param	source		A pointer to the byte array to be uploaded (can be NULL, but then size needs to be zero)
-    *
-    * @return	A @c BLOB_RESULT. BLOB_OK means the blob has been uploaded successfully. Any other value indicates an error
-    */
+/**
+* @brief	Synchronously uploads a byte array to blob storage
+*
+* @param	SASURI	        The URI to use to upload data
+* @param	size		    The size of the data to be uploaded (can be 0)
+* @param	source		    A pointer to the byte array to be uploaded (can be NULL, but then size needs to be zero)
+* @param    httpStatus      A pointer to an out argument receiving the HTTP status (available only when the return value is BLOB_OK)
+* @param    httpResponse    A BUFFER_HANDLE that receives the HTTP response from the server (available only when the return value is BLOB_OK)
+* @param    certificates    A null terminated string containing CA certificates to be used
+*
+* @return	A @c BLOB_RESULT. BLOB_OK means the blob has been uploaded successfully. Any other value indicates an error
+*/
     extern BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* source, size_t size, const unsigned int* httpStatus, BUFFER_HANDLE httpResponse);
 ```
 
 ##Blob_UploadFromSasUri 
 ```c
-BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* source, size_t size, const unsigned int* httpStatus, BUFFER_HANDLE httpResponse)
+BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* source, size_t size, const unsigned int* httpStatus, BUFFER_HANDLE httpResponse, const char* certificates)
 ```
 `Blob_UploadFromSasUri` uploads as a Blob the array of bytes pointed to by `source` having size `size` by using HTTPAPI_EX module.
 
@@ -44,9 +47,13 @@ Steps to follow when size < 64MB:
 
 **SRS_BLOB_02_004: [** `Blob_UploadFromSasUri` shall copy from `SASURI` the hostname to a new const char\*. **]** 
 **SRS_BLOB_02_005: [** If the hostname cannot be determined, then `Blob_UploadFromSasUri` shall fail and return `BLOB_INVALID_ARG`. **]**
-**SRS_BLOB_02_016: [** If the hostname copy cannot be made then then `Blob_UploadFromSasUri` shall fail and return `BLOB_ERROR` **]**
+**SRS_BLOB_02_016: [** If the hostname copy cannot be made then then `Blob_UploadFromSasUri` shall fail and return ``BLOB_INVALID_ARG`` **]**
 **SRS_BLOB_02_006: [** `Blob_UploadFromSasUri` shall create a new `HTTPAPI_EX_HANDLE` by calling `HTTPAPIEX_Create` passing the hostname. **]**
 **SRS_BLOB_02_007: [** If `HTTPAPIEX_Create` fails then `Blob_UploadFromSasUri` shall fail and return `BLOB_ERROR`. **]**
+
+**SRS_BLOB_02_035: [** If `certificates` is non-NULL then `Blob_UploadFromSasUri` shall pass `certificates` to `HTTPAPI_EX_HANDLE` by calling `HTTPAPIEX_SetOption` with the option name "TrustedCerts". **]**
+
+**SRS_BLOB_02_036: [** If `HTTPAPIEX_SetOption` fails then `Blob_UploadFromSasUri` shall fail and return `BLOB_ERROR` **]**
 
 In order for `Blob_UploadFromSasUri` to call `HTTPAPIEX_ExecuteRequest` it will build several data structures:
 
@@ -68,7 +75,13 @@ These blocks have the IDs starting from 000000 and ending with 049999 (potential
 Blocks are uploaded serially by "Put Block" REST API. After all the blocks have been uploaded, a "Put Block List" is executed.
 
 **SRS_BLOB_02_017: [** `Blob_UploadFromSasUri` shall copy from `SASURI` the hostname to a new const char\* **]**
+
 **SRS_BLOB_02_018: [** `Blob_UploadFromSasUri` shall create a new `HTTPAPI_EX_HANDLE` by calling `HTTPAPIEX_Create` passing the hostname. **]**
+
+**SRS_BLOB_02_037: [** If `certificates` is non-NULL then `Blob_UploadFromSasUri` shall pass `certificates` to `HTTPAPI_EX_HANDLE` by calling `HTTPAPIEX_SetOption` with the option name "TrustedCerts". **]**
+
+**SRS_BLOB_02_038: [** If `HTTPAPIEX_SetOption` fails then `Blob_UploadFromSasUri` shall fail and return `BLOB_ERROR`. **]**
+
 **SRS_BLOB_02_019: [** `Blob_UploadFromSasUri` shall compute the base relative path of the request from the `SASURI` parameter. **]**
  
 **SRS_BLOB_02_021: [** For every block of 4MB the following operations shall happen: **]**

@@ -43,10 +43,11 @@ DEFINE_ENUM(BLOB_RESULT, BLOB_RESULT_VALUES)
 * @param	source		    A pointer to the byte array to be uploaded (can be NULL, but then size needs to be zero)
 * @param    httpStatus      A pointer to an out argument receiving the HTTP status (available only when the return value is BLOB_OK)
 * @param    httpResponse    A BUFFER_HANDLE that receives the HTTP response from the server (available only when the return value is BLOB_OK)
+* @param    certificates    A null terminated string containing CA certificates to be used
 *
 * @return	A @c BLOB_RESULT. BLOB_OK means the blob has been uploaded successfully. Any other value indicates an error
 */
-MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadFromSasUri,const char*, SASURI, const unsigned char*, source, size_t, size, unsigned int*, httpStatus, BUFFER_HANDLE, httpResponse)
+MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadFromSasUri,const char*, SASURI, const unsigned char*, source, size_t, size, unsigned int*, httpStatus, BUFFER_HANDLE, httpResponse, const char*, certificates)
 
 #ifdef __cplusplus
 }
