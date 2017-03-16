@@ -52,11 +52,23 @@ static TRANSPORT_LL_HANDLE IoTHubTransportAMQP_Create(const IOTHUBTRANSPORT_CONF
 ### getTLSIOTransport
 
 ```c
-static XIO_HANDLE getTLSIOTransport(const char* fqdn)
+static XIO_HANDLE getTLSIOTransport(const char* fqdn, const AMQP_TRANSPORT_PROXY_OPTIONS* amqp_transport_proxy_options)
 ```
-**SRS_IOTHUBTRANSPORTAMQP_09_002: [**getTLSIOTransport shall get `io_interface_description` using platform_get_default_tlsio())**]**
-**SRS_IOTHUBTRANSPORTAMQP_09_003: [**If `io_interface_description` is NULL getTLSIOTransport shall return NULL.**]**
-**SRS_IOTHUBTRANSPORTAMQP_09_004: [**getTLSIOTransport shall return the XIO_HANDLE created using xio_create().**]**
+
+**SRS_IOTHUBTRANSPORTAMQP_01_009: [** `getIoTransportProvider` shall obtain the TLS IO interface handle by calling `platform_get_default_tlsio`. **]**
+
+**SRS_IOTHUBTRANSPORTAMQP_01_010: [** The TLS IO parameters shall be a `TLSIO_CONFIG` structure filled as below: **]**
+
+**SRS_IOTHUBTRANSPORTAMQP_01_011: [** - `hostname` shall be set to `fqdn`. **]**
+
+**SRS_IOTHUBTRANSPORTAMQP_01_012: [** - `port` shall be set to 5671. **]**
+
+**SRS_IOTHUBTRANSPORTAMQP_01_013: [** `underlying_io_interface` shall be set to NULL. **]**
+
+**SRS_IOTHUBTRANSPORTAMQP_01_014: [** `underlying_io_parameters` shall be set to NULL. **]**
+
+**SRS_IOTHUBTRANSPORTAMQP_09_003: [**If `platform_get_default_tlsio` returns NULL `getTLSIOTransport` shall return NULL.**]**
+**SRS_IOTHUBTRANSPORTAMQP_09_004: [**`getTLSIOTransport` shall return the `XIO_HANDLE` created using `xio_create`.**]**
 
 
 ## IoTHubTransportAMQP_Destroy

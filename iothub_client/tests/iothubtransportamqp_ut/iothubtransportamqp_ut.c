@@ -18,10 +18,21 @@
 #include "umocktypes_c.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 
+static void* real_malloc(size_t size)
+{
+    return malloc(size);
+}
+
+static void real_free(void* ptr)
+{
+    free(ptr);
+}
+
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/xio.h"
 #include "azure_c_shared_utility/tlsio.h"
 #include "azure_c_shared_utility/platform.h"
+#include "azure_c_shared_utility/socketio.h"
 #include "iothubtransport_amqp_common.h"
 #undef ENABLE_MOCKS
 
@@ -57,7 +68,8 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 #define TEST_IOTHUB_DEVICE_HANDLE           ((IOTHUB_DEVICE_HANDLE)0x4446)
 #define TEST_IOTHUB_IDENTITY_TYPE           IOTHUB_TYPE_DEVICE_TWIN
 #define TEST_IOTHUB_IDENTITY_INFO_HANDLE    ((IOTHUB_IDENTITY_INFO*)0x4449)
-#define TEST_IO_INTERFACE_DESCRIPTION_HANDLE ((IO_INTERFACE_DESCRIPTION*)0x4461)
+
+static IO_INTERFACE_DESCRIPTION* TEST_TLSIO_INTERFACE_DESCRIPTION = (IO_INTERFACE_DESCRIPTION*)0x1183;
 
 static const IOTHUBTRANSPORT_CONFIG* saved_IoTHubTransport_AMQP_Common_Create_config;
 static AMQP_GET_IO_TRANSPORT saved_IoTHubTransport_AMQP_Common_Create_get_io_transport;
@@ -67,6 +79,168 @@ static TRANSPORT_LL_HANDLE TEST_IoTHubTransport_AMQP_Common_Create(const IOTHUBT
 	saved_IoTHubTransport_AMQP_Common_Create_config = config;
 	saved_IoTHubTransport_AMQP_Common_Create_get_io_transport = get_io_transport;
 	return TEST_TRANSPORT_LL_HANDLE;
+}
+
+static int copy_string(char** destination, const char* source)
+{
+    int result;
+
+    if (source == NULL)
+    {
+        *destination = NULL;
+        result = 0;
+    }
+    else
+    {
+        size_t length = strlen(source);
+        *destination = (char*)real_malloc(length + 1);
+        if (*destination == NULL)
+        {
+            result = __LINE__;
+        }
+        else
+        {
+            (void)memcpy(*destination, source, length + 1);
+            result = 0;
+        }
+    }
+
+    return result;
+}
+
+static int umocktypes_copy_TLSIO_CONFIG_ptr(TLSIO_CONFIG** destination, const TLSIO_CONFIG** source)
+{
+    int result;
+
+    if (*source == NULL)
+    {
+        *destination = NULL;
+        result = 0;
+    }
+    else
+    {
+        *destination = (TLSIO_CONFIG*)real_malloc(sizeof(TLSIO_CONFIG));
+        if (*destination == NULL)
+        {
+            result = __LINE__;
+        }
+        else
+        {
+            if (copy_string((char**)&((*destination)->hostname), (*source)->hostname) != 0)
+            {
+                real_free(*destination);
+                result = __LINE__;
+            }
+            else
+            {
+                (*destination)->port = (*source)->port;
+                (*destination)->underlying_io_interface = (*source)->underlying_io_interface;
+                (*destination)->underlying_io_parameters = (*source)->underlying_io_parameters;
+                if (((*destination)->underlying_io_interface != NULL) && (umocktypes_copy("HTTP_PROXY_IO_CONFIG*", &((*destination)->underlying_io_parameters), &((*source)->underlying_io_parameters)) != 0))
+                {
+                    real_free((char*)((*destination)->hostname));
+                    real_free(*destination);
+                    result = __LINE__;
+                }
+                else
+                {
+                    result = 0;
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
+static void umocktypes_free_TLSIO_CONFIG_ptr(TLSIO_CONFIG** value)
+{
+    if (*value != NULL)
+    {
+        if ((*value)->underlying_io_interface != NULL)
+        {
+            umocktypes_free("HTTP_PROXY_IO_CONFIG*", &((*value)->underlying_io_parameters));
+        }
+
+        real_free((void*)(*value)->hostname);
+        real_free(*value);
+    }
+}
+
+static char* umocktypes_stringify_TLSIO_CONFIG_ptr(const TLSIO_CONFIG** value)
+{
+    char* result;
+    if (*value == NULL)
+    {
+        result = (char*)real_malloc(5);
+        if (result != NULL)
+        {
+            (void)memcpy(result, "NULL", 5);
+        }
+    }
+    else
+    {
+        int length = snprintf(NULL, 0, "{ %p, %p, %s, %d }",
+            (*value)->underlying_io_interface,
+            (*value)->underlying_io_parameters,
+            (*value)->hostname,
+            (*value)->port);
+        if (length < 0)
+        {
+            result = NULL;
+        }
+        else
+        {
+            result = (char*)real_malloc(length + 1);
+            (void)snprintf(result, length + 1, "{ %p, %p, %s, %d }",
+                (*value)->underlying_io_interface,
+                (*value)->underlying_io_parameters,
+                (*value)->hostname,
+                (*value)->port);
+        }
+    }
+
+    return result;
+}
+
+static int umocktypes_are_equal_TLSIO_CONFIG_ptr(TLSIO_CONFIG** left, TLSIO_CONFIG** right)
+{
+    int result;
+
+    if (*left == *right)
+    {
+        result = 1;
+    }
+    else
+    {
+        if ((*left == NULL) ||
+            (*right == NULL))
+        {
+            result = 0;
+        }
+        else
+        {
+            if (((*left)->port != (*right)->port) ||
+                ((*left)->underlying_io_interface != (*right)->underlying_io_interface))
+            {
+                result = 0;
+            }
+            else
+            {
+                if ((strcmp((*left)->hostname, (*right)->hostname) != 0) ||
+                    (((*left)->underlying_io_interface != NULL) && (umocktypes_are_equal("HTTP_PROXY_IO_CONFIG*", &((*left)->underlying_io_parameters), &((*right)->underlying_io_parameters)) != 1)))
+                {
+                    result = 0;
+                }
+                else
+                {
+                    result = 1;
+                }
+            }
+        }
+    }
+
+    return result;
 }
 
 BEGIN_TEST_SUITE(iothubtransportamqp_ut)
@@ -97,10 +271,11 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 	REGISTER_UMOCK_ALIAS_TYPE(AMQP_GET_IO_TRANSPORT, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUBMESSAGE_DISPOSITION_RESULT, int);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_RESULT, int);
+    REGISTER_TYPE(TLSIO_CONFIG*, TLSIO_CONFIG_ptr);
 
 	REGISTER_GLOBAL_MOCK_HOOK(IoTHubTransport_AMQP_Common_Create, TEST_IoTHubTransport_AMQP_Common_Create);
 
-    REGISTER_GLOBAL_MOCK_RETURN(platform_get_default_tlsio, TEST_XIO_INTERFACE);
+    REGISTER_GLOBAL_MOCK_RETURN(platform_get_default_tlsio, TEST_TLSIO_INTERFACE_DESCRIPTION);
     REGISTER_GLOBAL_MOCK_RETURN(xio_create, TEST_XIO_HANDLE);
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_AMQP_Common_SendMessageDisposition, IOTHUB_CLIENT_OK);
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_AMQP_Common_GetHostname, TEST_STRING_HANDLE);
@@ -111,7 +286,6 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 	REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod, 0);
 	REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_AMQP_Common_ProcessItem, IOTHUB_PROCESS_OK);
 	REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_AMQP_Common_GetSendStatus, IOTHUB_CLIENT_OK);
-	REGISTER_GLOBAL_MOCK_RETURN(platform_get_default_tlsio, TEST_IO_INTERFACE_DESCRIPTION_HANDLE);
 }
 
 TEST_SUITE_CLEANUP(TestClassCleanup)
@@ -174,29 +348,100 @@ TEST_FUNCTION(AMQP_Create)
 	// cleanup
 }
 
-
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_002: [getTLSIOTransport shall get `io_interface_description` using platform_get_default_tlsio())]
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_003: [If `io_interface_description` is NULL getTLSIOTransport shall return NULL.]
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_004: [getTLSIOTransport shall return the XIO_HANDLE created using xio_create().]
-TEST_FUNCTION(AMQP_Create_getTLSIOTransport)
+/* Tests_SRS_IOTHUBTRANSPORTAMQP_01_009: [ `getIoTransportProvider` shall obtain the TLS IO interface handle by calling `platform_get_default_tlsio`. ]*/
+/* Tests_SRS_IOTHUBTRANSPORTAMQP_09_004: [`getTLSIOTransport` shall return the `XIO_HANDLE` created using `xio_create`.] */
+/* Tests_SRS_IOTHUBTRANSPORTAMQP_01_010: [ The TLS IO parameters shall be a `TLSIO_CONFIG` structure filled as below: ]*/
+/* Tests_SRS_IOTHUBTRANSPORTAMQP_01_011: [ - `hostname` shall be set to `fqdn`. ]*/
+/* Tests_SRS_IOTHUBTRANSPORTAMQP_01_012: [ - `port` shall be set to 443. ]*/
+/* Tests_SRS_IOTHUBTRANSPORTAMQP_01_013: [ `underlying_io_interface` shall be set to NULL. ]*/
+/* Tests_SRS_IOTHUBTRANSPORTAMQP_01_014: [ `underlying_io_parameters` shall be set to NULL. ]*/
+TEST_FUNCTION(AMQP_Create_getTLSIOTransport_sets_up_TLS_over_socket_IO)
 {
 	// arrange
 	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+    TLSIO_CONFIG tlsio_config;
+    XIO_HANDLE underlying_io_transport;
 
 	(void)provider->IoTHubTransport_Create(TEST_IOTHUBTRANSPORT_CONFIG_HANDLE);
-
 	umock_c_reset_all_calls();
-	STRICT_EXPECTED_CALL(platform_get_default_tlsio());
-	STRICT_EXPECTED_CALL(xio_create(TEST_IO_INTERFACE_DESCRIPTION_HANDLE, IGNORED_PTR_ARG)).IgnoreArgument_io_create_parameters();
+
+    tlsio_config.hostname = TEST_STRING;
+    tlsio_config.port = 5671;
+    tlsio_config.underlying_io_interface = NULL;
+    tlsio_config.underlying_io_parameters = NULL;
+
+    STRICT_EXPECTED_CALL(platform_get_default_tlsio());
+    STRICT_EXPECTED_CALL(xio_create(TEST_TLSIO_INTERFACE_DESCRIPTION, &tlsio_config))
+        .ValidateArgumentValue_io_create_parameters_AsType(UMOCK_TYPE(TLSIO_CONFIG*));
 
 	// act
-	XIO_HANDLE underlying_io_transport = saved_IoTHubTransport_AMQP_Common_Create_get_io_transport(TEST_STRING);
+	underlying_io_transport = saved_IoTHubTransport_AMQP_Common_Create_get_io_transport(TEST_STRING, NULL);
 
 	// assert
 	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 	ASSERT_ARE_EQUAL(void_ptr, underlying_io_transport, TEST_XIO_HANDLE);
+}
 
-	// cleanup
+/* Tests_SRS_IOTHUBTRANSPORTAMQP_01_009: [ `getIoTransportProvider` shall obtain the TLS IO interface handle by calling `platform_get_default_tlsio`. ]*/
+/* Tests_SRS_IOTHUBTRANSPORTAMQP_09_004: [`getTLSIOTransport` shall return the `XIO_HANDLE` created using `xio_create`.] */
+/* Tests_SRS_IOTHUBTRANSPORTAMQP_01_010: [ The TLS IO parameters shall be a `TLSIO_CONFIG` structure filled as below: ]*/
+/* Tests_SRS_IOTHUBTRANSPORTAMQP_01_011: [ - `hostname` shall be set to `fqdn`. ]*/
+/* Tests_SRS_IOTHUBTRANSPORTAMQP_01_012: [ - `port` shall be set to 443. ]*/
+/* Tests_SRS_IOTHUBTRANSPORTAMQP_01_013: [ `underlying_io_interface` shall be set to NULL. ]*/
+/* Tests_SRS_IOTHUBTRANSPORTAMQP_01_014: [ `underlying_io_parameters` shall be set to NULL. ]*/
+TEST_FUNCTION(AMQP_Create_getTLSIOTransport_ignores_the_http_proxy_seetings)
+{
+    // arrange
+    AMQP_TRANSPORT_PROXY_OPTIONS amqp_proxy_options;
+    TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+    TLSIO_CONFIG tlsio_config;
+    XIO_HANDLE underlying_io_transport;
+
+    (void)provider->IoTHubTransport_Create(TEST_IOTHUBTRANSPORT_CONFIG_HANDLE);
+    umock_c_reset_all_calls();
+
+    tlsio_config.hostname = TEST_STRING;
+    tlsio_config.port = 5671;
+    tlsio_config.underlying_io_interface = NULL;
+    tlsio_config.underlying_io_parameters = NULL;
+
+    STRICT_EXPECTED_CALL(platform_get_default_tlsio());
+    STRICT_EXPECTED_CALL(xio_create(TEST_TLSIO_INTERFACE_DESCRIPTION, &tlsio_config))
+        .ValidateArgumentValue_io_create_parameters_AsType(UMOCK_TYPE(TLSIO_CONFIG*));
+
+    amqp_proxy_options.host_address = "some_host";
+    amqp_proxy_options.port = 444;
+    amqp_proxy_options.username = "me";
+    amqp_proxy_options.password = "shhhh";
+
+    // act
+    underlying_io_transport = saved_IoTHubTransport_AMQP_Common_Create_get_io_transport(TEST_STRING, &amqp_proxy_options);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(void_ptr, underlying_io_transport, TEST_XIO_HANDLE);
+}
+
+/* Tests_SRS_IOTHUBTRANSPORTAMQP_09_003: [If `platform_get_default_tlsio` returns NULL `getTLSIOTransport` shall return NULL.] */
+TEST_FUNCTION(when_platform_get_default_tlsio_returns_NULL_AMQP_Create_getTLSIOTransport_returns_NULL)
+{
+    // arrange
+    TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+    XIO_HANDLE underlying_io_transport;
+
+    (void)provider->IoTHubTransport_Create(TEST_IOTHUBTRANSPORT_CONFIG_HANDLE);
+
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(platform_get_default_tlsio())
+        .SetReturn(NULL);
+
+    // act
+    underlying_io_transport = saved_IoTHubTransport_AMQP_Common_Create_get_io_transport(TEST_STRING, NULL);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_IS_NULL(underlying_io_transport);
 }
 
 // Tests_SRS_IOTHUBTRANSPORTAMQP_09_015: [IoTHubTransportAMQP_DoWork shall call into the IoTHubTransport_AMQP_Common_DoWork()]

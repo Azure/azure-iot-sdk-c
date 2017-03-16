@@ -9,23 +9,39 @@
 #define RESULT_OK 0
 #define DEFAULT_IOTHUB_AMQP_PORT 5671
 
-static XIO_HANDLE getTLSIOTransport(const char* fqdn)
+static XIO_HANDLE getTLSIOTransport(const char* fqdn, const AMQP_TRANSPORT_PROXY_OPTIONS* amqp_transport_proxy_options)
 {
     XIO_HANDLE result;
     TLSIO_CONFIG tls_io_config;
-    tls_io_config.hostname = fqdn;
-    tls_io_config.port = DEFAULT_IOTHUB_AMQP_PORT;
-    tls_io_config.underlying_io_interface = NULL;
-    tls_io_config.underlying_io_parameters = NULL;
 
-    // Codes_SRS_IOTHUBTRANSPORTAMQP_09_002: [getTLSIOTransport shall get `io_interface_description` using platform_get_default_tlsio())]
+    (void)amqp_transport_proxy_options;
+
+    /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_009: [ `getIoTransportProvider` shall obtain the TLS IO interface handle by calling `platform_get_default_tlsio`. ]*/
     const IO_INTERFACE_DESCRIPTION* io_interface_description = platform_get_default_tlsio();
-
-    // Codes_SRS_IOTHUBTRANSPORTAMQP_09_003: [If `io_interface_description` is NULL getTLSIOTransport shall return NULL.]
-    // Codes_SRS_IOTHUBTRANSPORTAMQP_09_004: [getTLSIOTransport shall return the XIO_HANDLE created using xio_create().]
-    if ((result = xio_create(io_interface_description, &tls_io_config)) == NULL)
+    if (io_interface_description == NULL)
     {
-        LogError("Failed to get the TLS/IO transport (xio_create failed)");
+        LogError("Failed obtaining default TLS IO interface");
+        result = NULL;
+    }
+    else
+    {
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_010: [ The TLS IO parameters shall be a `TLSIO_CONFIG` structure filled as below: ]*/
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_011: [ - `hostname` shall be set to `fqdn`. ]*/
+        tls_io_config.hostname = fqdn;
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_012: [ - `port` shall be set to 443. ]*/
+        tls_io_config.port = DEFAULT_IOTHUB_AMQP_PORT;
+
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_013: [ `underlying_io_interface` shall be set to NULL. ]*/
+        tls_io_config.underlying_io_interface = NULL;
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_014: [ `underlying_io_parameters` shall be set to NULL. ]*/
+        tls_io_config.underlying_io_parameters = NULL;
+
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_09_003: [If `platform_get_default_tlsio` returns NULL `getTLSIOTransport` shall return NULL.] */
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_09_004: [`getTLSIOTransport` shall return the `XIO_HANDLE` created using `xio_create`.] */
+        if ((result = xio_create(io_interface_description, &tls_io_config)) == NULL)
+        {
+            LogError("Failed to get the TLS/IO transport (xio_create failed)");
+        }
     }
 
     return result;

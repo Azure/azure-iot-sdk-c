@@ -1,10 +1,25 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#ifdef __cplusplus
+#include <cstdlib>
+#else
+#include <stdlib.h>
+#endif
 #include "testrunnerswitcher.h"
 #include "umock_c.h"
 #include "umock_c_negative_tests.h"
 #include "umocktypes_charptr.h"
+
+static void* real_malloc(size_t size)
+{
+    return malloc(size);
+}
+
+static void real_free(void* ptr)
+{
+    free(ptr);
+}
 
 #define ENABLE_MOCKS
 
@@ -35,7 +50,9 @@ static const TRANSPORT_LL_HANDLE TEST_TRANSPORT_HANDLE = (TRANSPORT_LL_HANDLE)0x
 static XIO_HANDLE TEST_XIO_HANDLE = (XIO_HANDLE)0x1126;
 static IOTHUB_DEVICE_HANDLE TEST_DEVICE_HANDLE = (IOTHUB_DEVICE_HANDLE)0x1181;
 
-static IO_INTERFACE_DESCRIPTION* TEST_IO_INTERFACE = (IO_INTERFACE_DESCRIPTION*)0x1125;
+static IO_INTERFACE_DESCRIPTION* TEST_WSIO_INTERFACE_DESCRIPTION = (IO_INTERFACE_DESCRIPTION*)0x1182;
+static IO_INTERFACE_DESCRIPTION* TEST_TLSIO_INTERFACE_DESCRIPTION = (IO_INTERFACE_DESCRIPTION*)0x1183;
+static IO_INTERFACE_DESCRIPTION* TEST_HTTP_PROXY_IO_INTERFACE_DESCRIPTION = (IO_INTERFACE_DESCRIPTION*)0x1185;
 
 static IOTHUB_CLIENT_CONFIG g_iothubClientConfig = { 0 };
 static DLIST_ENTRY g_waitingToSend;
@@ -98,6 +115,168 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
     ASSERT_FAIL("umock_c reported error");
 }
 
+static int copy_string(char** destination, const char* source)
+{
+    int result;
+
+    if (source == NULL)
+    {
+        *destination = NULL;
+        result = 0;
+    }
+    else
+    {
+        size_t length = strlen(source);
+        *destination = (char*)real_malloc(length + 1);
+        if (*destination == NULL)
+        {
+            result = __LINE__;
+        }
+        else
+        {
+            (void)memcpy(*destination, source, length + 1);
+            result = 0;
+        }
+    }
+
+    return result;
+}
+
+static int umocktypes_copy_TLSIO_CONFIG_ptr(TLSIO_CONFIG** destination, const TLSIO_CONFIG** source)
+{
+    int result;
+
+    if (*source == NULL)
+    {
+        *destination = NULL;
+        result = 0;
+    }
+    else
+    {
+        *destination = (TLSIO_CONFIG*)real_malloc(sizeof(TLSIO_CONFIG));
+        if (*destination == NULL)
+        {
+            result = __LINE__;
+        }
+        else
+        {
+            if (copy_string((char**)&((*destination)->hostname), (*source)->hostname) != 0)
+            {
+                real_free(*destination);
+                result = __LINE__;
+            }
+            else
+            {
+                (*destination)->port = (*source)->port;
+                (*destination)->underlying_io_interface = (*source)->underlying_io_interface;
+                (*destination)->underlying_io_parameters = (*source)->underlying_io_parameters;
+                if (((*destination)->underlying_io_interface != NULL) && (umocktypes_copy("HTTP_PROXY_IO_CONFIG*", &((*destination)->underlying_io_parameters), &((*source)->underlying_io_parameters)) != 0))
+                {
+                    real_free((char*)((*destination)->hostname));
+                    real_free(*destination);
+                    result = __LINE__;
+                }
+                else
+                {
+                    result = 0;
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
+static void umocktypes_free_TLSIO_CONFIG_ptr(TLSIO_CONFIG** value)
+{
+    if (*value != NULL)
+    {
+        if ((*value)->underlying_io_interface != NULL)
+        {
+            umocktypes_free("HTTP_PROXY_IO_CONFIG*", &((*value)->underlying_io_parameters));
+        }
+
+        real_free((void*)(*value)->hostname);
+        real_free(*value);
+    }
+}
+
+static char* umocktypes_stringify_TLSIO_CONFIG_ptr(const TLSIO_CONFIG** value)
+{
+    char* result;
+    if (*value == NULL)
+    {
+        result = (char*)real_malloc(5);
+        if (result != NULL)
+        {
+            (void)memcpy(result, "NULL", 5);
+        }
+    }
+    else
+    {
+        int length = snprintf(NULL, 0, "{ %p, %p, %s, %d }",
+            (*value)->underlying_io_interface,
+            (*value)->underlying_io_parameters,
+            (*value)->hostname,
+            (*value)->port);
+        if (length < 0)
+        {
+            result = NULL;
+        }
+        else
+        {
+            result = (char*)real_malloc(length + 1);
+            (void)snprintf(result, length + 1, "{ %p, %p, %s, %d }",
+                (*value)->underlying_io_interface,
+                (*value)->underlying_io_parameters,
+                (*value)->hostname,
+                (*value)->port);
+        }
+    }
+
+    return result;
+}
+
+static int umocktypes_are_equal_TLSIO_CONFIG_ptr(TLSIO_CONFIG** left, TLSIO_CONFIG** right)
+{
+    int result;
+
+    if (*left == *right)
+    {
+        result = 1;
+    }
+    else
+    {
+        if ((*left == NULL) ||
+            (*right == NULL))
+        {
+            result = 0;
+        }
+        else
+        {
+            if (((*left)->port != (*right)->port) ||
+                ((*left)->underlying_io_interface != (*right)->underlying_io_interface))
+            {
+                result = 0;
+            }
+            else
+            {
+                if ((strcmp((*left)->hostname, (*right)->hostname) != 0) ||
+                    (((*left)->underlying_io_interface != NULL) && (umocktypes_are_equal("HTTP_PROXY_IO_CONFIG*", &((*left)->underlying_io_parameters), &((*right)->underlying_io_parameters)) != 1)))
+                {
+                    result = 0;
+                }
+                else
+                {
+                    result = 1;
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
 BEGIN_TEST_SUITE(iothubtransportmqtt_ut)
 
 TEST_SUITE_INITIALIZE(suite_init)
@@ -120,6 +299,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_UMOCK_ALIAS_TYPE(TRANSPORT_LL_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_RETRY_POLICY, int);
     REGISTER_UMOCK_ALIAS_TYPE(METHOD_HANDLE, void*);
+    REGISTER_TYPE(TLSIO_CONFIG*, TLSIO_CONFIG_ptr);
 
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubTransport_MQTT_Common_Create, my_IoTHubTransport_MQTT_Common_Create);
 
@@ -136,7 +316,7 @@ TEST_SUITE_INITIALIZE(suite_init)
 
     REGISTER_GLOBAL_MOCK_RETURN(xio_create, TEST_XIO_HANDLE);
 
-    REGISTER_GLOBAL_MOCK_RETURN(platform_get_default_tlsio, TEST_IO_INTERFACE);
+    REGISTER_GLOBAL_MOCK_RETURN(platform_get_default_tlsio, TEST_TLSIO_INTERFACE_DESCRIPTION);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(platform_get_default_tlsio, NULL);
 
     IoTHubTransportMqtt_SendMessageDisposition = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_SendMessageDisposition;
@@ -200,9 +380,9 @@ TEST_FUNCTION(IoTHubTransportMqtt_Create_success)
     IOTHUBTRANSPORT_CONFIG config = { 0 };
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
 
-    // act
     STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_Create(&config, IGNORED_PTR_ARG)).IgnoreArgument_get_io_transport();
 
+    // act
     TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config);
 
     // assert
@@ -212,22 +392,36 @@ TEST_FUNCTION(IoTHubTransportMqtt_Create_success)
     //cleanup
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_012: [ getIoTransportProvider shall return the XIO_HANDLE returns by xio_create. ] */
+/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_012: [ `getIoTransportProvider` shall return the `XIO_HANDLE` returned by `xio_create`. ] */
+/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_01_001: [ `getIoTransportProvider` shall obtain the TLS IO interface handle by calling `platform_get_default_tlsio`. ]*/
+/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_01_002: [ The TLS IO parameters shall be a `TLSIO_CONFIG` structure filled as below: ]*/
+/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_01_003: [ - `hostname` shall be set to `fully_qualified_name`. ]*/
+/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_01_004: [ - `port` shall be set to 8883. ]*/
+/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_01_005: [ - `underlying_io_interface` shall be set to NULL. ]*/
+/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_01_006: [ - `underlying_io_parameters` shall be set to NULL. ]*/
 TEST_FUNCTION(IoTHubTransportMqtt_getSocketsIOTransport_success)
 {
     // arrange
     IOTHUBTRANSPORT_CONFIG config = { 0 };
+    TLSIO_CONFIG tlsio_config;
+    XIO_HANDLE xioTest;
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
     (void)IoTHubTransportMqtt_Create(&config);
     umock_c_reset_all_calls();
 
-    // act
+    tlsio_config.hostname = TEST_STRING_VALUE;
+    tlsio_config.port = 8883;
+    tlsio_config.underlying_io_interface = NULL;
+    tlsio_config.underlying_io_parameters = NULL;
+
     STRICT_EXPECTED_CALL(platform_get_default_tlsio());
-    STRICT_EXPECTED_CALL(xio_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(xio_create(TEST_TLSIO_INTERFACE_DESCRIPTION, &tlsio_config))
+        .ValidateArgumentValue_io_create_parameters_AsType(UMOCK_TYPE(TLSIO_CONFIG*));
 
     ASSERT_IS_NOT_NULL(g_get_io_transport);
-    XIO_HANDLE xioTest = g_get_io_transport(TEST_STRING_VALUE);
+
+    // act
+    xioTest = g_get_io_transport(TEST_STRING_VALUE, NULL);
 
     // assert
     ASSERT_IS_NOT_NULL(xioTest);
@@ -236,26 +430,67 @@ TEST_FUNCTION(IoTHubTransportMqtt_getSocketsIOTransport_success)
     //cleanup
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_013: [ If platform_get_default_tlsio returns NULL getIoTransportProvider shall return NULL. ] */
-TEST_FUNCTION(IoTHubTransportMqtt_getSocketsIOTransport_platform_get_default_tlsio_NULL_fail)
+/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_012: [ `getIoTransportProvider` shall return the `XIO_HANDLE` returned by `xio_create`. ] */
+/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_01_001: [ `getIoTransportProvider` shall obtain the TLS IO interface handle by calling `platform_get_default_tlsio`. ]*/
+/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_01_002: [ The TLS IO parameters shall be a `TLSIO_CONFIG` structure filled as below: ]*/
+/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_01_003: [ - `hostname` shall be set to `fully_qualified_name`. ]*/
+/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_01_004: [ - `port` shall be set to 8883. ]*/
+/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_01_005: [ - `underlying_io_interface` shall be set to NULL. ]*/
+/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_01_006: [ - `underlying_io_parameters` shall be set to NULL. ]*/
+TEST_FUNCTION(IoTHubTransportMqtt_getSocketsIOTransport_ignores_proxy_options)
 {
     // arrange
+    MQTT_TRANSPORT_PROXY_OPTIONS mqtt_proxy_options;
     IOTHUBTRANSPORT_CONFIG config = { 0 };
+    TLSIO_CONFIG tlsio_config;
+    XIO_HANDLE xioTest;
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
     (void)IoTHubTransportMqtt_Create(&config);
     umock_c_reset_all_calls();
 
-    // act
-    STRICT_EXPECTED_CALL(platform_get_default_tlsio()).SetReturn(NULL);
+    tlsio_config.hostname = TEST_STRING_VALUE;
+    tlsio_config.port = 8883;
+    tlsio_config.underlying_io_interface = NULL;
+    tlsio_config.underlying_io_parameters = NULL;
+
+    mqtt_proxy_options.host_address = "some_host";
+    mqtt_proxy_options.port = 444;
+    mqtt_proxy_options.username = "me";
+    mqtt_proxy_options.password = "shhhh";
+
+    STRICT_EXPECTED_CALL(platform_get_default_tlsio());
+    STRICT_EXPECTED_CALL(xio_create(TEST_TLSIO_INTERFACE_DESCRIPTION, &tlsio_config))
+        .ValidateArgumentValue_io_create_parameters_AsType(UMOCK_TYPE(TLSIO_CONFIG*));
 
     ASSERT_IS_NOT_NULL(g_get_io_transport);
-    XIO_HANDLE xioTest = g_get_io_transport(TEST_STRING_VALUE);
+
+    // act
+    xioTest = g_get_io_transport(TEST_STRING_VALUE, &mqtt_proxy_options);
+
+    // assert
+    ASSERT_IS_NOT_NULL(xioTest);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+}
+
+/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_013: [ If `platform_get_default_tlsio` returns NULL, `getIoTransportProvider` shall return NULL. ] */
+TEST_FUNCTION(IoTHubTransportMqtt_getSocketsIOTransport_platform_get_default_tlsio_NULL_fail)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    XIO_HANDLE xioTest;
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+    (void)IoTHubTransportMqtt_Create(&config);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(platform_get_default_tlsio()).SetReturn(NULL);
+    ASSERT_IS_NOT_NULL(g_get_io_transport);
+
+    // act
+    xioTest = g_get_io_transport(TEST_STRING_VALUE, NULL);
 
     // assert
     ASSERT_IS_NULL(xioTest);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-    //cleanup
 }
 
 /* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_002: [ IoTHubTransportMqtt_Destroy shall destroy the TRANSPORT_LL_HANDLE by calling into the IoTHubMqttAbstract_Destroy function. ] */
@@ -267,9 +502,9 @@ TEST_FUNCTION(IoTHubTransportMqtt_Destroy_success)
     TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config);
     umock_c_reset_all_calls();
 
-    // act
     STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_Destroy(handle));
     
+    // act
     IoTHubTransportMqtt_Destroy(handle);
 
     // assert
@@ -287,9 +522,9 @@ TEST_FUNCTION(IoTHubTransportMqtt_Subscribe_success)
     TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config);
     umock_c_reset_all_calls();
 
-    // act
     STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_Subscribe(handle));
 
+    // act
     int result = IoTHubTransportMqtt_Subscribe(handle);
 
     // assert
@@ -351,9 +586,9 @@ TEST_FUNCTION(IoTHubTransportMqtt_Unsubscribe_DeviceTwin_success)
     TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config);
     umock_c_reset_all_calls();
 
-    // act
     STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin(handle));
 
+    // act
     IoTHubTransportMqtt_Unsubscribe_DeviceTwin(handle);
 
     // assert
@@ -390,9 +625,9 @@ TEST_FUNCTION(IoTHubTransportMqtt_Unsubscribe_Method_success)
     TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config);
     umock_c_reset_all_calls();
 
-    // act
     STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_Unsubscribe_DeviceMethod(handle));
 
+    // act
     IoTHubTransportMqtt_Unsubscribe_DeviceMethod(handle);
 
     // assert
@@ -430,9 +665,9 @@ TEST_FUNCTION(IoTHubTransportMqtt_DoWork_success)
     TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config);
     umock_c_reset_all_calls();
 
-    // act
     STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE));
 
+    // act
     IoTHubTransportMqtt_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
 
     // assert
@@ -473,9 +708,9 @@ TEST_FUNCTION(IoTHubTransportMqtt_SetOption_success)
     TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config);
     umock_c_reset_all_calls();
 
-    // act
     STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_SetOption(handle, TEST_OPTION_NAME, TEST_OPTION_VALUE));
 
+    // act
     IOTHUB_CLIENT_RESULT result = IoTHubTransportMqtt_SetOption(handle, TEST_OPTION_NAME, TEST_OPTION_VALUE);
 
     // assert
@@ -499,9 +734,9 @@ TEST_FUNCTION(IoTHubTransportMqtt_Register_success)
     deviceConfig.deviceKey = NULL;
     deviceConfig.deviceSasToken = NULL;
 
-    // act
     STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_Register(handle, &deviceConfig, TEST_IOTHUB_CLIENT_LL_HANDLE, config.waitingToSend));
 
+    // act
     IOTHUB_DEVICE_HANDLE result = IoTHubTransportMqtt_Register(handle, &deviceConfig, TEST_IOTHUB_CLIENT_LL_HANDLE, config.waitingToSend);
 
     // assert
@@ -516,9 +751,9 @@ TEST_FUNCTION(IoTHubTransportMqtt_Unregister_success)
 {
     // arrange
 
-    // act
     STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_Unregister(TEST_DEVICE_HANDLE));
 
+    // act
     IoTHubTransportMqtt_Unregister(TEST_DEVICE_HANDLE);
 
     // assert
@@ -553,9 +788,9 @@ TEST_FUNCTION(IoTHubTransportMqtt_GetHostname_success)
     TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config);
     umock_c_reset_all_calls();
 
-    // act
     STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_GetHostname(handle));
 
+    // act
     STRING_HANDLE result = IoTHubTransportMqtt_GetHostname(handle);
 
     // assert

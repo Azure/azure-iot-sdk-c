@@ -4,28 +4,97 @@
 #include <stdlib.h>
 #include "azure_c_shared_utility/xio.h"
 #include "azure_c_shared_utility/wsio.h"
+#include "azure_c_shared_utility/tlsio.h"
+#include "azure_c_shared_utility/platform.h"
+#include "azure_c_shared_utility/http_proxy_io.h"
 #include "iothubtransportmqtt_websockets.h"
 #include "iothubtransport_mqtt_common.h"
 
-static XIO_HANDLE getWebSocketsIOTransport(const char* fully_qualified_name)
+static XIO_HANDLE getWebSocketsIOTransport(const char* fully_qualified_name, const MQTT_TRANSPORT_PROXY_OPTIONS* mqtt_transport_proxy_options)
 {
     XIO_HANDLE result;
+    /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_001: [ `getIoTransportProvider` shall obtain the WebSocket IO interface handle by calling `wsio_get_interface_description`. ]*/
     const IO_INTERFACE_DESCRIPTION* io_interface_description = wsio_get_interface_description();
+    TLSIO_CONFIG tls_io_config;
+    HTTP_PROXY_IO_CONFIG http_proxy_io_config;
+
     if (io_interface_description == NULL)
     {
-        /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_013: [ If platform_get_default_tlsio returns NULL getIoTransportProvider shall return NULL. ] */
+        /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_013: [ If `wsio_get_interface_description` returns NULL `getIoTransportProvider` shall return NULL. ] */
         LogError("Failure constructing the provider interface");
         result = NULL;
     }
     else
     {
-        /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_012: [ getIoTransportProvider shall return the XIO_HANDLE returns by xio_create. ] */
         WSIO_CONFIG ws_io_config;
-        ws_io_config.host = fully_qualified_name;
+
+        /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_003: [ - `hostname` shall be set to `fully_qualified_name`. ]*/
+        ws_io_config.hostname = fully_qualified_name;
+        /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_004: [ - `port` shall be set to 443. ]*/
         ws_io_config.port = 443;
-        ws_io_config.protocol_name = "MQTT";
-        ws_io_config.relative_path = "/$iothub/websocket";
-        ws_io_config.use_ssl = true;
+        /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_005: [ - `protocol` shall be set to `MQTT`. ]*/
+        ws_io_config.protocol = "MQTT";
+        /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_006: [ - `resource_name` shall be set to `/$iothub/websocket`. ]*/
+        ws_io_config.resource_name = "/$iothub/websocket";
+        /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_007: [ - `underlying_io_interface` shall be set to the TLS IO interface description. ]*/
+        /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_009: [ `getIoTransportProvider` shall obtain the TLS IO interface handle by calling `platform_get_default_tlsio`. ]*/
+        ws_io_config.underlying_io_interface = platform_get_default_tlsio();
+
+        /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_029: [ If `platform_get_default_tlsio` returns NULL, NULL shall be set in the WebSocket IO parameters structure for the interface description and parameters. ]*/
+        if (ws_io_config.underlying_io_interface == NULL)
+        {
+            ws_io_config.underlying_io_parameters = NULL;
+        }
+        else
+        {
+            /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_008: [ - `underlying_io_parameters` shall be set to the TLS IO arguments. ]*/
+            /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_010: [ The TLS IO parameters shall be a TLSIO_CONFIG structure filled as below: ]*/
+            ws_io_config.underlying_io_parameters = &tls_io_config;
+
+            /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_011: [ - `hostname` shall be set to `fully_qualified_name`. ]*/
+            tls_io_config.hostname = fully_qualified_name;
+            /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_012: [ - `port` shall be set to 443. ]*/
+            tls_io_config.port = 443;
+
+            if (mqtt_transport_proxy_options != NULL)
+            {
+                /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_015: [ - If `mqtt_transport_proxy_options` is not NULL, `underlying_io_interface` shall be set to the HTTP proxy IO interface description. ]*/
+                /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_022: [ `getIoTransportProvider` shall obtain the HTTP proxy IO interface handle by calling `http_proxy_io_get_interface_description`. ]*/
+                tls_io_config.underlying_io_interface = http_proxy_io_get_interface_description();
+
+                /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_028: [ If `http_proxy_io_get_interface_description` returns NULL, NULL shall be set in the TLS IO parameters structure for the interface description and parameters. ]*/
+                if (tls_io_config.underlying_io_interface == NULL)
+                {
+                    tls_io_config.underlying_io_parameters = NULL;
+                }
+                else
+                {
+                    /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_016: [ - If `mqtt_transport_proxy_options` is not NULL `underlying_io_parameters` shall be set to the HTTP proxy IO arguments. ]*/
+                    tls_io_config.underlying_io_parameters = &http_proxy_io_config;
+
+                    /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_023: [ The HTTP proxy IO arguments shall be an `HTTP_PROXY_IO_CONFIG` structure, filled as below: ]*/
+                    /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_026: [ - `proxy_hostname`, `proxy_port`, `username` and `password` shall be copied from the `mqtt_transport_proxy_options` argument. ]*/
+                    http_proxy_io_config.proxy_hostname = mqtt_transport_proxy_options->host_address;
+                    http_proxy_io_config.proxy_port = mqtt_transport_proxy_options->port;
+                    http_proxy_io_config.username = mqtt_transport_proxy_options->username;
+                    http_proxy_io_config.password = mqtt_transport_proxy_options->password;
+                    /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_024: [ - `hostname` shall be set to `fully_qualified_name`. ]*/
+                    http_proxy_io_config.hostname = fully_qualified_name;
+                    /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_025: [ - `port` shall be set to 443. ]*/
+                    http_proxy_io_config.port = 443;
+                }
+            }
+            else
+            {
+                /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_013: [ - If `mqtt_transport_proxy_options` is NULL, `underlying_io_interface` shall be set to NULL ]*/
+                tls_io_config.underlying_io_interface = NULL;
+                /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_014: [ - If `mqtt_transport_proxy_options` is NULL `underlying_io_parameters` shall be set to NULL. ]*/
+                tls_io_config.underlying_io_parameters = NULL;
+            }
+        }
+
+        /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_012: [ `getIoTransportProvider` shall return the `XIO_HANDLE` returned by `xio_create`. ] */
+        /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_002: [ `getIoTransportProvider` shall call `xio_create` while passing the WebSocket IO interface description to it and the WebSocket configuration as a WSIO_CONFIG structure, filled as below ]*/
         result = xio_create(io_interface_description, &ws_io_config);
     }
     return result;
@@ -128,7 +197,7 @@ static STRING_HANDLE IoTHubTransportMqtt_WS_GetHostname(TRANSPORT_LL_HANDLE hand
 
 static int IoTHubTransportMqtt_WS_SetRetryPolicy(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitinSeconds)
 {
-    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_25_012: [** IoTHubTransportMqtt_WS_SetRetryPolicy shall call into the IoTHubMqttAbstract_SetRetryPolicy function.]*/
+    /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_25_012: [** IoTHubTransportMqtt_WS_SetRetryPolicy shall call into the IoTHubMqttAbstract_SetRetryPolicy function.]*/
     return IoTHubTransport_MQTT_Common_SetRetryPolicy(handle, retryPolicy, retryTimeoutLimitinSeconds);
 }
 

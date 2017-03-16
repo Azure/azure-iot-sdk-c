@@ -8,25 +8,35 @@
 #include "azure_c_shared_utility/platform.h"
 #include "iothubtransport_mqtt_common.h"
 
-
-static XIO_HANDLE getIoTransportProvider(const char* fqdn)
+static XIO_HANDLE getIoTransportProvider(const char* fully_qualified_name, const MQTT_TRANSPORT_PROXY_OPTIONS* mqtt_transport_proxy_options)
 {
     XIO_HANDLE result;
+
+    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_01_001: [ `getIoTransportProvider` shall obtain the TLS IO interface handle by calling `platform_get_default_tlsio`. ]*/
     const IO_INTERFACE_DESCRIPTION* io_interface_description = platform_get_default_tlsio();
+    (void)mqtt_transport_proxy_options;
+
     if (io_interface_description == NULL)
     {
-        /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_013: [ If platform_get_default_tlsio returns NULL getIoTransportProvider shall return NULL. ] */
+        /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_013: [ If `platform_get_default_tlsio` returns NULL, `getIoTransportProvider` shall return NULL. ] */
         LogError("Failure constructing the provider interface");
         result = NULL;
     }
     else
     {
+        /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_01_002: [ The TLS IO parameters shall be a `TLSIO_CONFIG` structure filled as below: ]*/
         TLSIO_CONFIG tls_io_config;
-        tls_io_config.hostname = fqdn;
+
+        /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_01_003: [ - `hostname` shall be set to `fully_qualified_name`. ]*/
+        tls_io_config.hostname = fully_qualified_name;
+        /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_01_004: [ - `port` shall be set to 8883. ]*/
         tls_io_config.port = 8883;
+        /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_01_005: [ - `underlying_io_interface` shall be set to NULL. ]*/
         tls_io_config.underlying_io_interface = NULL;
+        /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_01_006: [ - `underlying_io_parameters` shall be set to NULL. ]*/
         tls_io_config.underlying_io_parameters = NULL;
-        /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_012: [ getIoTransportProvider shall return the XIO_HANDLE returns by xio_create. ] */
+
+        /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_012: [ `getIoTransportProvider` shall return the `XIO_HANDLE` returned by `xio_create`. ] */
         result = xio_create(io_interface_description, &tls_io_config);
     }
     return result;

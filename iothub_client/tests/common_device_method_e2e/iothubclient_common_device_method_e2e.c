@@ -41,11 +41,17 @@ TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_CONNECTION_STATUS, IOTHUB_CLIENT_CONNECTION_
 typedef struct IOTHUB_CONN_INFO_TAG
 {
     IOTHUB_CLIENT_CONNECTION_STATUS conn_status;
+    bool upload_status;
     LOCK_HANDLE lock;
 } IOTHUB_CONN_INFO;
 
 static IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo = NULL;
 static IOTHUB_CONN_INFO g_conn_info;
+
+static IOTHUB_CLIENT_HANDLE iotHubClientHandle = NULL;
+static IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle = NULL;
+static IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE serviceClientDeviceMethodHandle = NULL;
+
 
 void device_method_e2e_init(void)
 {
@@ -56,6 +62,7 @@ void device_method_e2e_init(void)
 
     // Initialize locking
     g_conn_info.lock = Lock_Init();
+    g_conn_info.upload_status = false;
     ASSERT_IS_NOT_NULL(g_conn_info.lock);
 }
 
@@ -71,7 +78,7 @@ void device_method_e2e_deinit(void)
 }
 
 static const char *METHOD_NAME = "MethodName";
-static const int METHOD_RESPONSE_SUCCESS = 201;
+static const int METHOD_RESPONSE_SUCCESS = 200;
 static const int METHOD_RESPONSE_ERROR = 401;
 static const unsigned int TIMEOUT = 60;
 static const unsigned int IOTHUB_CONNECT_TIMEOUT_SEC = 30;
@@ -138,9 +145,54 @@ static int DeviceMethodCallback(const char* method_name, const unsigned char* pa
     return responseCode;
 }
 
-static IOTHUB_CLIENT_HANDLE iotHubClientHandle = NULL;
-static IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle = NULL;
-static IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE serviceClientDeviceMethodHandle = NULL;
+DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, IOTHUB_CLIENT_FILE_UPLOAD_RESULT_VALUES)
+void fileUploadCallback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, void* userContextCallback)
+{
+    LogInfo("fileUploadCallback(%s)", ENUM_TO_STRING(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, result));
+
+    IOTHUB_CONN_INFO* conn_info = (IOTHUB_CONN_INFO*)userContextCallback;
+    if (Lock(conn_info->lock) != LOCK_OK)
+    {
+        ASSERT_FAIL("unable to lock");
+    }
+    else
+    {
+        conn_info->upload_status = result == FILE_UPLOAD_OK;
+        (void)Unlock(conn_info->lock);
+    }
+}
+
+#define HELLO_WORLD "Hello World from IoTHubClient_UploadToBlob"
+static int DeviceMethodWithUploadCallback(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* resp_size, void* userContextCallback)
+{
+    (void)method_name;
+    (void)payload;
+    (void)size;
+    (void)userContextCallback;
+
+    int responseCode;
+    if (IoTHubClient_UploadToBlobAsync(iotHubClientHandle, "hello_world.txt", (const unsigned char*)HELLO_WORLD, sizeof(HELLO_WORLD) - 1, fileUploadCallback, &g_conn_info) == IOTHUB_CLIENT_OK)
+    {
+        LogInfo("Upload succeeded");
+        char* RESPONSE_STRING = "{ \"Response\": \"Nothing\" }";
+        *resp_size = strlen(RESPONSE_STRING);
+        if ((*response = (unsigned char*)malloc(*resp_size)) == NULL)
+        {
+            responseCode = METHOD_RESPONSE_ERROR;
+        }
+        else
+        {
+            (void)memcpy(*response, RESPONSE_STRING, *resp_size);
+            responseCode = METHOD_RESPONSE_SUCCESS;
+        }
+    }
+    else
+    {
+        LogError("Upload failed");
+        responseCode = METHOD_RESPONSE_ERROR;
+    }
+    return responseCode;
+}
 
 void test_device_method_with_string(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char *payload)
 {
@@ -153,7 +205,8 @@ void test_device_method_with_string(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTH
     iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
     ASSERT_IS_NOT_NULL_WITH_MSG(iotHubClientHandle, "Could not invoke IoTHubClient_CreateFromConnectionString");
 
-    if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509) {
+    if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509)
+    {
         result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
         ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
         result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
@@ -168,7 +221,6 @@ void test_device_method_with_string(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTH
 
     result = IoTHubClient_SetDeviceMethodCallback(iotHubClientHandle, DeviceMethodCallback, (void*)payload);
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device method callback");
-
 
     bool continue_running = true;
     beginOperation = time(NULL);
@@ -219,6 +271,102 @@ void test_device_method_with_string(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTH
     }
 
     free(responsePayload);
+}
+
+void test_device_method_calls_upload(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char *payload)
+{
+    g_conn_info.conn_status = IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED;
+
+    iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
+    ASSERT_IS_NOT_NULL_WITH_MSG(iotHubClientHandle, "Could not invoke IoTHubClient_CreateFromConnectionString");
+
+    IOTHUB_CLIENT_RESULT result;
+    if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509)
+    {
+        result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
+        result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
+    }
+
+    result = IoTHubClient_SetConnectionStatusCallback(iotHubClientHandle, connection_status_callback, &g_conn_info);
+    ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set connection Status Callback");
+
+    // Turn on Log 
+    bool trace = true;
+    (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &trace);
+
+    bool continue_running = true;
+    time_t nowTime;
+    time_t beginOperation = time(NULL);
+    do
+    {
+        if (Lock(g_conn_info.lock) != LOCK_OK)
+        {
+            ASSERT_FAIL("unable to lock");
+        }
+        else
+        {
+            if (g_conn_info.conn_status == IOTHUB_CLIENT_CONNECTION_AUTHENTICATED)
+            {
+                continue_running = false;
+            }
+            (void)Unlock(g_conn_info.lock);
+        }
+
+        ThreadAPI_Sleep(10);
+    } while (
+        (nowTime = time(NULL)),
+        (difftime(nowTime, beginOperation) < IOTHUB_CONNECT_TIMEOUT_SEC) &&
+        (continue_running)
+        );
+    ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_CONNECTION_STATUS, IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, g_conn_info.conn_status, "Device Not connected");
+
+    result = IoTHubClient_SetDeviceMethodCallback(iotHubClientHandle, DeviceMethodWithUploadCallback, (void*)payload);
+    ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device method callback");
+
+    // Wait for the method to subscribe
+    ThreadAPI_Sleep(1 * 1000);
+
+    iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo));
+    ASSERT_IS_NOT_NULL_WITH_MSG(iotHubServiceClientHandle, "Could not create service client handle");
+
+    serviceClientDeviceMethodHandle = IoTHubDeviceMethod_Create(iotHubServiceClientHandle);
+    ASSERT_IS_NOT_NULL_WITH_MSG(serviceClientDeviceMethodHandle, "Could not create device method handle");
+
+    int responseStatus;
+    unsigned char* responsePayload = NULL;
+    size_t responsePayloadSize = 0;
+    IOTHUB_DEVICE_METHOD_RESULT invokeResult = IoTHubDeviceMethod_Invoke(serviceClientDeviceMethodHandle, deviceToUse->deviceId, METHOD_NAME, payload, TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
+
+    // yield
+    ThreadAPI_Sleep(1 * 1000);
+
+    continue_running = true;
+    beginOperation = time(NULL);
+    do
+    {
+        if (Lock(g_conn_info.lock) != LOCK_OK)
+        {
+            ASSERT_FAIL("unable to lock");
+        }
+        else
+        {
+            continue_running = g_conn_info.upload_status != true;
+            (void)Unlock(g_conn_info.lock);
+        }
+
+        ThreadAPI_Sleep(10);
+    } while (
+        (nowTime = time(NULL)),
+        (difftime(nowTime, beginOperation) < IOTHUB_CONNECT_TIMEOUT_SEC) &&
+        (continue_running)
+        );
+
+    free(responsePayload);
+
+    ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_OK, invokeResult, "Service Client IoTHubDeviceMethod_Invoke failed");
+    ASSERT_ARE_EQUAL_WITH_MSG(int, METHOD_RESPONSE_SUCCESS, responseStatus, "response status is incorrect");
 }
 
 void device_method_function_cleanup()
@@ -272,6 +420,10 @@ extern void device_method_e2e_method_call_with_embedded_single_quote_sas(IOTHUB_
     test_device_method_with_string(IoTHubAccount_GetSASDevice(g_iothubAcctInfo), protocol, "\"this string has a single quote ' in the middle\"");
 }
 
+void device_method_e2e_method_calls_upload_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+{
+    test_device_method_calls_upload(IoTHubAccount_GetSASDevice(g_iothubAcctInfo), protocol, "\"Hello World.\"");
+}
 
 void device_method_e2e_method_call_with_string_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
@@ -303,3 +455,7 @@ extern void device_method_e2e_method_call_with_embedded_single_quote_x509(IOTHUB
     test_device_method_with_string(IoTHubAccount_GetX509Device(g_iothubAcctInfo), protocol, "\"this string has a single quote ' in the middle\"");
 }
 
+void device_method_e2e_method_calls_upload_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+{
+    test_device_method_calls_upload(IoTHubAccount_GetX509Device(g_iothubAcctInfo), protocol, "\"Hello World.\"");
+}

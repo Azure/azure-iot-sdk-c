@@ -14,9 +14,13 @@ ${theseTestsName}.c
 
 set(${theseTestsName}_c_files
 ../../src/iothub_client.c
+real_crt_abstractions.c
+real_vector.c
 )
 
 set(${theseTestsName}_h_files
+real_crt_abstractions.h
+real_vector.h
 )
 
 build_c_test_artifacts(${theseTestsName} ON "tests/UnitTests")

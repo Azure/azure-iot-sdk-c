@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <time.h>
 #include <limits.h>
 #include "azure_c_shared_utility/optimize_size.h"
@@ -17,6 +18,7 @@
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/tlsio.h"
 #include "azure_c_shared_utility/optionhandler.h"
+#include "azure_c_shared_utility/shared_util_options.h"
 
 #include "azure_uamqp_c/cbs.h"
 #include "azure_uamqp_c/session.h"
@@ -65,6 +67,11 @@ typedef struct AMQP_TRANSPORT_INSTANCE_TAG
     bool is_trace_on;                                                   // Turns logging on and off.
     OPTIONHANDLER_HANDLE saved_tls_options;                             // Here are the options from the xio layer if any is saved.
 	bool is_connection_retry_required;                                  // Flag that controls whether the connection should be restablished or not.
+
+    char* http_proxy_hostname;
+    int http_proxy_port;
+    char* http_proxy_username;
+    char* http_proxy_password;
 	
 	size_t option_sas_token_lifetime_secs;                              // Device-specific option.
 	size_t option_sas_token_refresh_time_secs;                          // Device-specific option.
@@ -102,6 +109,27 @@ typedef struct MESSAGE_DISPOSITION_CONTEXT_TAG
 } MESSAGE_DISPOSITION_CONTEXT;
 
 // ---------- General Helpers ---------- //
+
+static void free_proxy_data(AMQP_TRANSPORT_INSTANCE* amqp_transport_instance)
+{
+    if (amqp_transport_instance->http_proxy_hostname != NULL)
+    {
+        free(amqp_transport_instance->http_proxy_hostname);
+        amqp_transport_instance->http_proxy_hostname = NULL;
+    }
+
+    if (amqp_transport_instance->http_proxy_username != NULL)
+    {
+        free(amqp_transport_instance->http_proxy_username);
+        amqp_transport_instance->http_proxy_username = NULL;
+    }
+
+    if (amqp_transport_instance->http_proxy_password != NULL)
+    {
+        free(amqp_transport_instance->http_proxy_password);
+        amqp_transport_instance->http_proxy_password = NULL;
+    }
+}
 
 // @brief
 //     Evaluates if the ammount of time since start_time is greater or lesser than timeout_in_secs.
@@ -366,9 +394,11 @@ static void on_methods_error(void* context)
 
 static void on_methods_unsubscribed(void* context)
 {
-    /* Codess_SRS_IOTHUBTRANSPORT_AMQP_METHODS_12_001: [ `on_methods_unsubscribed` calls iothubtransportamqp_methods_unsubscribe. ]*/
+    /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_12_001: [ `on_methods_unsubscribed` calls iothubtransportamqp_methods_unsubscribe. ]*/
     AMQP_TRANSPORT_DEVICE_INSTANCE* device_state = (AMQP_TRANSPORT_DEVICE_INSTANCE*)context;
-    IoTHubTransport_AMQP_Common_Unsubscribe_DeviceMethod(device_state);
+
+	iothubtransportamqp_methods_unsubscribe(device_state->methods_handle);
+	device_state->subscribed_for_methods = false;
 }
 
 static int on_method_request_received(void* context, const char* method_name, const unsigned char* request, size_t request_size, IOTHUBTRANSPORT_AMQP_METHOD_HANDLE method_handle)
@@ -525,8 +555,16 @@ static void destroy_underlying_io_transport(AMQP_TRANSPORT_INSTANCE* transport_i
 static int get_new_underlying_io_transport(AMQP_TRANSPORT_INSTANCE* transport_instance, XIO_HANDLE *xio_handle)
 {
 	int result;
+    AMQP_TRANSPORT_PROXY_OPTIONS amqp_transport_proxy_options;
 
-	if ((*xio_handle = transport_instance->underlying_io_transport_provider(STRING_c_str(transport_instance->iothub_host_fqdn))) == NULL)
+    /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_041: [ If the `proxy_data` option has been set, the proxy options shall be filled in the argument `amqp_transport_proxy_options` when calling the function `underlying_io_transport_provider()` to obtain the underlying IO handle. ]*/
+    amqp_transport_proxy_options.host_address = transport_instance->http_proxy_hostname;
+    amqp_transport_proxy_options.port = transport_instance->http_proxy_port;
+    amqp_transport_proxy_options.username = transport_instance->http_proxy_username;
+    amqp_transport_proxy_options.password = transport_instance->http_proxy_password;
+
+    /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_042: [ If no `proxy_data` option has been set, NULL shall be passed as the argument `amqp_transport_proxy_options` when calling the function `underlying_io_transport_provider()`. ]*/
+    if ((*xio_handle = transport_instance->underlying_io_transport_provider(STRING_c_str(transport_instance->iothub_host_fqdn), amqp_transport_proxy_options.host_address == NULL ? NULL : &amqp_transport_proxy_options)) == NULL)
 	{
 		LogError("Failed to obtain a TLS I/O transport layer (underlying_io_transport_provider() failed)");
 		result = __FAILURE__;
@@ -1563,7 +1601,80 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SetOption(TRANSPORT_LL_HANDLE h
 				result = IOTHUB_CLIENT_OK;
 			}
 		}
-		else
+        else if (strcmp(OPTION_HTTP_PROXY, option) == 0)
+        {
+            /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_032: [ If `option` is `proxy_data`, `value` shall be used as an `HTTP_PROXY_OPTIONS*`. ]*/
+            HTTP_PROXY_OPTIONS* proxy_options = (HTTP_PROXY_OPTIONS*)value;
+
+            if (transport_instance->tls_io != NULL)
+            {
+                /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_038: [ If the underlying IO has already been created, then `IoTHubTransport_AMQP_Common_SetOption` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
+                LogError("Cannot set proxy option once the underlying IO is created");
+                result = IOTHUB_CLIENT_ERROR;
+            }
+            else if (proxy_options->host_address == NULL)
+            {
+                /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_034: [ If `host_address` is NULL, `IoTHubTransport_AMQP_Common_SetOption` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
+                LogError("NULL host_address in proxy options");
+                result = IOTHUB_CLIENT_INVALID_ARG;
+            }
+            /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_037: [ If only one of `username` and `password` is NULL, `IoTHubTransport_AMQP_Common_SetOption` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
+            else if (((proxy_options->username == NULL) || (proxy_options->password == NULL)) &&
+                (proxy_options->username != proxy_options->password))
+            {
+                LogError("Only one of username and password for proxy settings was NULL");
+                result = IOTHUB_CLIENT_INVALID_ARG;
+            }
+            else
+            {
+                char* copied_proxy_hostname = NULL;
+                char* copied_proxy_username = NULL;
+                char* copied_proxy_password = NULL;
+
+                /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_033: [ The fields `host_address`, `port`, `username` and `password` shall be saved for later used (needed when creating the underlying IO to be used by the transport). ]*/
+                transport_instance->http_proxy_port = proxy_options->port;
+                if (mallocAndStrcpy_s(&copied_proxy_hostname, proxy_options->host_address) != 0)
+                {
+                    /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_035: [ If copying `host_address`, `username` or `password` fails, `IoTHubTransport_AMQP_Common_SetOption` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
+                    LogError("Cannot copy HTTP proxy hostname");
+                    result = IOTHUB_CLIENT_ERROR;
+                }
+                /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_036: [ `username` and `password` shall be allowed to be NULL. ]*/
+                else if ((proxy_options->username != NULL) && (mallocAndStrcpy_s(&copied_proxy_username, proxy_options->username) != 0))
+                {
+                    /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_035: [ If copying `host_address`, `username` or `password` fails, `IoTHubTransport_AMQP_Common_SetOption` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
+                    free(copied_proxy_hostname);
+                    LogError("Cannot copy HTTP proxy username");
+                    result = IOTHUB_CLIENT_ERROR;
+                }
+                /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_036: [ `username` and `password` shall be allowed to be NULL. ]*/
+                else if ((proxy_options->password != NULL) && (mallocAndStrcpy_s(&copied_proxy_password, proxy_options->password) != 0))
+                {
+                    /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_035: [ If copying `host_address`, `username` or `password` fails, `IoTHubTransport_AMQP_Common_SetOption` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
+                    if (copied_proxy_username != NULL)
+                    {
+                        free(copied_proxy_username);
+                    }
+                    free(copied_proxy_hostname);
+                    LogError("Cannot copy HTTP proxy password");
+                    result = IOTHUB_CLIENT_ERROR;
+                }
+                else
+                {
+                    /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_040: [ Any previously saved proxy options shall be freed. ]*/
+                    free_proxy_data(transport_instance);
+
+                    /* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_040: [ When setting the proxy options succeeds any previously saved proxy options shall be freed. ]*/
+                    transport_instance->http_proxy_hostname = copied_proxy_hostname;
+                    transport_instance->http_proxy_username = copied_proxy_username;
+                    transport_instance->http_proxy_password = copied_proxy_password;
+
+                    /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_039: [ If setting the `proxy_data` option suceeds, `IoTHubTransport_AMQP_Common_SetOption` shall return `IOTHUB_CLIENT_OK` ]*/
+                    result = IOTHUB_CLIENT_OK;
+                }
+            }
+        }
+        else
 		{
 			result = IOTHUB_CLIENT_OK;
 
