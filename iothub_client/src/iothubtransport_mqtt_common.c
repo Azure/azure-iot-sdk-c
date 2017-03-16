@@ -141,6 +141,13 @@ typedef struct MQTT_TRANSPORT_CREDENTIALS_TAG
     } CREDENTIAL_VALUE;
 } MQTT_TRANSPORT_CREDENTIALS;
 
+typedef enum MQTT_CLIENT_STATUS_TAG
+{
+	MQTT_CLIENT_STATUS_NOT_CONNECTED,
+	MQTT_CLIENT_STATUS_CONNECTING,
+	MQTT_CLIENT_STATUS_CONNECTED
+} MQTT_CLIENT_STATUS;
+
 typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
 {
     // Topic control
@@ -184,7 +191,7 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
 
     // Connection state control
     bool isRegistered;
-    bool isConnected;
+    MQTT_CLIENT_STATUS mqttClientStatus;
     bool isDestroyCalled;
     bool device_twin_get_sent;
     bool isRecoverableError;
@@ -1355,6 +1362,7 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
                         // The connect packet has been acked
                         transport_data->currPacketState = CONNACK_TYPE;
                         transport_data->isRecoverableError = true;
+                        transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_CONNECTED;
                         StopRetryTimer(transport_data->retryLogic);
                         IoTHubClient_LL_ConnectionStatusCallBack(transport_data->llClientHandle, IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK);
                     }
@@ -1375,7 +1383,7 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
                         }
                         LogError("Connection Not Accepted: 0x%x: %s", connack->returnCode, retrieve_mqtt_return_codes(connack->returnCode) );
                         (void)mqtt_client_disconnect(transport_data->mqttClient);
-                        transport_data->isConnected = false;
+                        transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_NOT_CONNECTED;
                         transport_data->currPacketState = PACKET_TYPE_ERROR;
                     }
                 }
@@ -1416,7 +1424,7 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
             case MQTT_CLIENT_ON_DISCONNECT:
             {
                 // Close the client so we can reconnect again
-                transport_data->isConnected = false;
+                transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_NOT_CONNECTED;
                 transport_data->currPacketState = DISCONNECT_TYPE;
                 break;
             }
@@ -1459,7 +1467,7 @@ static void mqtt_error_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_ERR
                 break;
             }
         }
-        transport_data->isConnected = false;
+        transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_NOT_CONNECTED;
         transport_data->currPacketState = PACKET_TYPE_ERROR;
         transport_data->device_twin_get_sent = false;
         if (transport_data->topic_MqttMessage != NULL)
@@ -1693,6 +1701,16 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
     return result;
 }
 
+static void DisconnectFromClient(PMQTTTRANSPORT_HANDLE_DATA transport_data)
+{
+	(void)mqtt_client_disconnect(transport_data->mqttClient);
+	xio_destroy(transport_data->xioTransport);
+	transport_data->xioTransport = NULL;
+
+	transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_NOT_CONNECTED;
+	transport_data->currPacketState = DISCONNECT_TYPE;
+}
+
 static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 {
     int result = 0;
@@ -1700,9 +1718,9 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
     // Make sure we're not destroying the object
     if (!transport_data->isDestroyCalled)
     {
-        // If we are not isConnected then check to see if we need 
+        // If we are MQTT_CLIENT_STATUS_NOT_CONNECTED then check to see if we need 
         // to back off the connecting to the server
-        if (!transport_data->isConnected && transport_data->isRecoverableError && CanRetry(transport_data->retryLogic))
+        if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_NOT_CONNECTED && transport_data->isRecoverableError && CanRetry(transport_data->retryLogic))
         {
             if (tickcounter_get_current_ms(transport_data->msgTickCounter, &transport_data->connectTick) != 0)
             {
@@ -1718,16 +1736,31 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 }
                 else
                 {
+                    transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_CONNECTING;
                     transport_data->connectFailCount = 0;
-                    transport_data->isConnected = true;
                     result = 0;
                 }
             }
         }
-
-        if (transport_data->isConnected)
+		// Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_001: [ IoTHubTransport_MQTT_Common_DoWork shall trigger reconnection if the mqtt_client_connect does not complete within `keepalive` seconds]
+        else if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_CONNECTING)
         {
-            // We are isConnected and not being closed, so does SAS need to reconnect?
+            tickcounter_ms_t current_time;
+            if (tickcounter_get_current_ms(transport_data->msgTickCounter, &current_time) != 0)
+            {
+                LogError("failed verifying MQTT_CLIENT_STATUS_CONNECTING timeout");
+                result = __FAILURE__;
+            }
+            else if ((current_time - transport_data->mqtt_connect_time) / 1000 > transport_data->keepAliveValue) 
+            {
+                LogError("mqtt_client timed out waiting for CONNACK");
+                DisconnectFromClient(transport_data);
+                result = 0;
+            }
+        }
+        else if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_CONNECTED)
+        {
+            // We are connected and not being closed, so does SAS need to reconnect?
             tickcounter_ms_t current_time;
             if (tickcounter_get_current_ms(transport_data->msgTickCounter, &current_time) != 0)
             {
@@ -1740,7 +1773,7 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 {
                     (void)mqtt_client_disconnect(transport_data->mqttClient);
                     IoTHubClient_LL_ConnectionStatusCallBack(transport_data->llClientHandle, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_EXPIRED_SAS_TOKEN);
-                    transport_data->isConnected = false;
+                    transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_NOT_CONNECTED;
                     transport_data->currPacketState = UNKNOWN_TYPE;
                     transport_data->device_twin_get_sent = false;
                     if (transport_data->topic_MqttMessage != NULL)
@@ -1942,7 +1975,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                     DList_InitializeListHead(&(state->ack_waiting_queue));
                     state->isDestroyCalled = false;
                     state->isRegistered = false;
-                    state->isConnected = false;
+                    state->mqttClientStatus = MQTT_CLIENT_STATUS_NOT_CONNECTED;
                     state->device_twin_get_sent = false;
                     state->isRecoverableError = true;
                     state->packetId = 1;
@@ -2035,16 +2068,6 @@ TRANSPORT_LL_HANDLE IoTHubTransport_MQTT_Common_Create(const IOTHUBTRANSPORT_CON
     /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_009: [If any error is encountered then IoTHubTransport_MQTT_Common_Create shall return NULL.] */
     /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_011: [On Success IoTHubTransport_MQTT_Common_Create shall return a non-NULL value.] */
     return result;
-}
-
-static void DisconnectFromClient(PMQTTTRANSPORT_HANDLE_DATA transport_data)
-{
-    (void)mqtt_client_disconnect(transport_data->mqttClient);
-    xio_destroy(transport_data->xioTransport);
-    transport_data->xioTransport = NULL;
-
-    transport_data->isConnected = false;
-    transport_data->currPacketState = DISCONNECT_TYPE;
 }
 
 void IoTHubTransport_MQTT_Common_Destroy(TRANSPORT_LL_HANDLE handle)
@@ -2560,7 +2583,7 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIEN
                     currentListEntry = savedFromCurrentListEntry.Flink;
                 }
             }
-            /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_030: [IoTHubTransport_MQTT_Common_DoWork shall call mqtt_client_dowork everytime it is called if it is isConnected.] */
+            /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_030: [IoTHubTransport_MQTT_Common_DoWork shall call mqtt_client_dowork everytime it is called if it is connected.] */
             mqtt_client_dowork(transport_data->mqttClient);
         }
     }
@@ -2631,9 +2654,9 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SetOption(TRANSPORT_LL_HANDLE h
             if (*keepAliveOption != transport_data->keepAliveValue)
             {
                 transport_data->keepAliveValue = (uint16_t)(*keepAliveOption);
-                if (transport_data->isConnected)
+                if (transport_data->mqttClientStatus != MQTT_CLIENT_STATUS_NOT_CONNECTED)
                 {
-                    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_038: [If the client is isConnected when the keepalive is set then IoTHubTransport_MQTT_Common_SetOption shall disconnect and reconnect with the specified keepalive value.] */
+                    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_038: [If the client is connected when the keepalive is set then IoTHubTransport_MQTT_Common_SetOption shall disconnect and reconnect with the specified keepalive value.] */
                     DisconnectFromClient(transport_data);
                 }
             }
