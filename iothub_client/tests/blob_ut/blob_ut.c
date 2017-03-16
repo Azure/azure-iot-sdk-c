@@ -303,7 +303,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_with_certificates_happy_path)
     {
         STRICT_EXPECTED_CALL(HTTPAPIEX_Create(TEST_HOSTNAME_1));
         {
-            STRICT_EXPECTED_CALL(HTTPAPIEX_SetOption(IGNORED_PTR_ARG, "TrustedCerts", "a"));
+            STRICT_EXPECTED_CALL(HTTPAPIEX_SetOption(IGNORED_PTR_ARG, "TrustedCerts", IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(BUFFER_create(&c, 1));
             {
                 STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
@@ -805,7 +805,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_various_sizes_with_certificates_happy_path)
             .IgnoreArgument_size();
 
         STRICT_EXPECTED_CALL(HTTPAPIEX_Create("h.h")); /*this is creating the httpapiex handle to storage (it is always the same host)*/
-        STRICT_EXPECTED_CALL(HTTPAPIEX_SetOption(IGNORED_PTR_ARG, "TrustedCerts", "a"));
+        STRICT_EXPECTED_CALL(HTTPAPIEX_SetOption(IGNORED_PTR_ARG, "TrustedCerts", IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(STRING_construct("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<BlockList>")); /*this is starting to build the XML used in Put Block List operation*/
 
                                                                                                              /*uploading blocks (Put Block)*/
@@ -1232,7 +1232,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_64MB_with_certificate_unhappy_paths)
         .IgnoreArgument_size();
 
     STRICT_EXPECTED_CALL(HTTPAPIEX_Create("h.h")); /*this is creating the httpapiex handle to storage (it is always the same host)*/
-    STRICT_EXPECTED_CALL(HTTPAPIEX_SetOption(IGNORED_PTR_ARG, "TrustedCerts", "a"));
+    STRICT_EXPECTED_CALL(HTTPAPIEX_SetOption(IGNORED_PTR_ARG, "TrustedCerts", IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_construct("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<BlockList>")); /*this is starting to build the XML used in Put Block List operation*/
 
                                                                                                          /*uploading blocks (Put Block)*/
