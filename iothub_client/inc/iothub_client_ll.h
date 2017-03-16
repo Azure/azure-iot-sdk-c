@@ -140,6 +140,7 @@ extern "C"
     IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL,               \
     IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED,                \
     IOTHUB_CLIENT_CONNECTION_NO_NETWORK,                   \
+    IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR,          \
     IOTHUB_CLIENT_CONNECTION_OK                            \
 
     /** @brief Enumeration passed in by the IoT Hub when the connection status
