@@ -11,6 +11,7 @@ endif()
 
 set(iothub_client_sample_upload_to_blob_c_files
 iothub_client_sample_upload_to_blob.c
+../../../certs/certs.c
 )
 
 if(WIN32)
@@ -31,6 +32,8 @@ IF(WIN32)
 ENDIF(WIN32)
 
 include_directories(.)
+include_directories(../../../certs)
+
 
 add_executable(iothub_client_sample_upload_to_blob ${iothub_client_sample_upload_to_blob_c_files} ${iothub_client_sample_upload_to_blob_h_files})
 

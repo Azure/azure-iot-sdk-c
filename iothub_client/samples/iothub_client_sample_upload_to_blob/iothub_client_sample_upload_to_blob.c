@@ -21,6 +21,7 @@ and removing calls to _DoWork will yield the same results. */
 #include "iothub_client_ll.h"
 #include "iothub_message.h"
 #include "iothubtransporthttp.h"
+#include "certs.h"
 #endif
 
 #ifdef MBED_BUILD_TIMESTAMP
@@ -52,15 +53,21 @@ void iothub_client_sample_upload_to_blob_run(void)
         }
         else
         {
-            if (IoTHubClient_LL_UploadToBlob(iotHubClientHandle, "hello_world.txt", (const unsigned char*)HELLO_WORLD, sizeof(HELLO_WORLD)-1) != IOTHUB_CLIENT_OK)
+            if (IoTHubClient_LL_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
             {
-                printf("hello world failed to upload\n");
+                printf("failure in IoTHubClient_LL_SetOption (TrustedCerts)");
             }
             else
             {
-                printf("hello world has been created\n");
+                if (IoTHubClient_LL_UploadToBlob(iotHubClientHandle, "hello_world.txt", (const unsigned char*)HELLO_WORLD, sizeof(HELLO_WORLD) - 1) != IOTHUB_CLIENT_OK)
+                {
+                    printf("hello world failed to upload\n");
+                }
+                else
+                {
+                    printf("hello world has been created\n");
+                }
             }
-
             IoTHubClient_LL_Destroy(iotHubClientHandle);
         }
         platform_deinit();
