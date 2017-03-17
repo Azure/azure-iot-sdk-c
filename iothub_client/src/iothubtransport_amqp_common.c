@@ -1159,6 +1159,9 @@ static void internal_destroy_instance(AMQP_TRANSPORT_INSTANCE* instance)
 
 		STRING_delete(instance->iothub_host_fqdn);
 
+        /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_001: [ `IoTHubTransport_AMQP_Common_Destroy` shall free the stored proxy options. ]*/
+        free_proxy_data(instance);
+
 		free(instance);
 	}
 }
@@ -1661,15 +1664,14 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SetOption(TRANSPORT_LL_HANDLE h
                 }
                 else
                 {
-                    /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_040: [ Any previously saved proxy options shall be freed. ]*/
+                    /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_040: [ When setting the proxy options succeeds any previously saved proxy options shall be freed. ]*/
                     free_proxy_data(transport_instance);
 
-                    /* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_040: [ When setting the proxy options succeeds any previously saved proxy options shall be freed. ]*/
                     transport_instance->http_proxy_hostname = copied_proxy_hostname;
                     transport_instance->http_proxy_username = copied_proxy_username;
                     transport_instance->http_proxy_password = copied_proxy_password;
 
-                    /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_039: [ If setting the `proxy_data` option suceeds, `IoTHubTransport_AMQP_Common_SetOption` shall return `IOTHUB_CLIENT_OK` ]*/
+                    /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_039: [ If setting the `proxy_data` option succeeds, `IoTHubTransport_AMQP_Common_SetOption` shall return `IOTHUB_CLIENT_OK` ]*/
                     result = IOTHUB_CLIENT_OK;
                 }
             }

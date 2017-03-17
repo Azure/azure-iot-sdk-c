@@ -22,6 +22,7 @@
 #include "azure_c_shared_utility/platform.h"
 
 #include "azure_c_shared_utility/string_tokenizer.h"
+#include "azure_c_shared_utility/shared_util_options.h"
 #include "iothub_client_version.h"
 
 #include "iothubtransport_mqtt_common.h"
@@ -215,6 +216,11 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
 
     //Retry Logic
     RETRY_LOGIC* retryLogic;
+
+    char* http_proxy_hostname;
+    int http_proxy_port;
+    char* http_proxy_username;
+    char* http_proxy_password;
 } MQTTTRANSPORT_HANDLE_DATA, *PMQTTTRANSPORT_HANDLE_DATA;
 
 typedef struct MQTT_DEVICE_TWIN_ITEM_TAG
@@ -243,6 +249,27 @@ typedef struct DEVICE_METHOD_INFO_TAG
 {
     STRING_HANDLE request_id;
 } DEVICE_METHOD_INFO;
+
+static void free_proxy_data(MQTTTRANSPORT_HANDLE_DATA* mqtt_transport_instance)
+{
+    if (mqtt_transport_instance->http_proxy_hostname != NULL)
+    {
+        free(mqtt_transport_instance->http_proxy_hostname);
+        mqtt_transport_instance->http_proxy_hostname = NULL;
+    }
+
+    if (mqtt_transport_instance->http_proxy_username != NULL)
+    {
+        free(mqtt_transport_instance->http_proxy_username);
+        mqtt_transport_instance->http_proxy_username = NULL;
+    }
+
+    if (mqtt_transport_instance->http_proxy_password != NULL)
+    {
+        free(mqtt_transport_instance->http_proxy_password);
+        mqtt_transport_instance->http_proxy_password = NULL;
+    }
+}
 
 static int RetryPolicy_Exponential_BackOff_With_Jitter(bool *permit, size_t* delay, void* retryContextCallback)
 {
@@ -1601,7 +1628,16 @@ static int GetTransportProviderIfNecessary(PMQTTTRANSPORT_HANDLE_DATA transport_
     {
         // construct address
         const char* hostAddress = STRING_c_str(transport_data->hostAddress);
-        transport_data->xioTransport = transport_data->get_io_transport(hostAddress, NULL);
+        MQTT_TRANSPORT_PROXY_OPTIONS mqtt_proxy_options;
+
+        /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_011: [ If no `proxy_data` option has been set, NULL shall be passed as the argument `mqtt_transport_proxy_options` when calling the function `get_io_transport` passed in `IoTHubTransport_MQTT_Common__Create`. ]*/
+        mqtt_proxy_options.host_address = transport_data->http_proxy_hostname;
+        mqtt_proxy_options.port = transport_data->http_proxy_port;
+        mqtt_proxy_options.username = transport_data->http_proxy_username;
+        mqtt_proxy_options.password = transport_data->http_proxy_password;
+
+        /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_010: [ If the `proxy_data` option has been set, the proxy options shall be filled in the argument `mqtt_transport_proxy_options` when calling the function `get_io_transport` passed in `IoTHubTransport_MQTT_Common__Create` to obtain the underlying IO handle. ]*/
+        transport_data->xioTransport = transport_data->get_io_transport(hostAddress, (transport_data->http_proxy_hostname == NULL) ? NULL : &mqtt_proxy_options);
         if (transport_data->xioTransport == NULL)
         {
             LogError("Unable to create the lower level TLS layer.");
@@ -2063,6 +2099,9 @@ TRANSPORT_LL_HANDLE IoTHubTransport_MQTT_Common_Create(const IOTHUBTRANSPORT_CON
         if (result != NULL)
         {
             result->get_io_transport = get_io_transport;
+            result->http_proxy_hostname = NULL;
+            result->http_proxy_username = NULL;
+            result->http_proxy_password = NULL;
         }
     }
     /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_009: [If any error is encountered then IoTHubTransport_MQTT_Common_Create shall return NULL.] */
@@ -2123,6 +2162,8 @@ void IoTHubTransport_MQTT_Common_Destroy(TRANSPORT_LL_HANDLE handle)
 
         tickcounter_destroy(transport_data->msgTickCounter);
         DestroyRetryLogic(transport_data->retryLogic);
+        /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_012: [ `IoTHubTransport_MQTT_Common_Destroy` shall free the stored proxy options. ]*/
+        free_proxy_data(transport_data);
         free(transport_data);
     }
 }
@@ -2628,7 +2669,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SetOption(TRANSPORT_LL_HANDLE h
         )
     {
         result = IOTHUB_CLIENT_INVALID_ARG;
-        LogError("invalid parameter (NULL) passed to clientTransportAMQP_SetOption.");
+        LogError("invalid parameter (NULL) passed to IoTHubTransport_MQTT_Common_SetOption.");
     }
     else
     {
@@ -2673,6 +2714,78 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SetOption(TRANSPORT_LL_HANDLE h
         {
             LogError("x509privatekey specified, but authentication method is not x509");
             result = IOTHUB_CLIENT_INVALID_ARG;
+        }
+        else if (strcmp(OPTION_HTTP_PROXY, option) == 0)
+        {
+            /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_001: [ If `option` is `proxy_data`, `value` shall be used as an `HTTP_PROXY_OPTIONS*`. ]*/
+            HTTP_PROXY_OPTIONS* proxy_options = (HTTP_PROXY_OPTIONS*)value;
+
+            if (transport_data->xioTransport != NULL)
+            {
+                /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_007: [ If the underlying IO has already been created, then `IoTHubTransport_MQTT_Common_SetOption` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
+                LogError("Cannot set proxy option once the underlying IO is created");
+                result = IOTHUB_CLIENT_ERROR;
+            }
+            else if (proxy_options->host_address == NULL)
+            {
+                /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_003: [ If `host_address` is NULL, `IoTHubTransport_MQTT_Common_SetOption` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
+                LogError("NULL host_address in proxy options");
+                result = IOTHUB_CLIENT_INVALID_ARG;
+            }
+            /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_006: [ If only one of `username` and `password` is NULL, `IoTHubTransport_MQTT_Common_SetOption` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
+            else if (((proxy_options->username == NULL) || (proxy_options->password == NULL)) &&
+                (proxy_options->username != proxy_options->password))
+            {
+                LogError("Only one of username and password for proxy settings was NULL");
+                result = IOTHUB_CLIENT_INVALID_ARG;
+            }
+            else
+            {
+                char* copied_proxy_hostname = NULL;
+                char* copied_proxy_username = NULL;
+                char* copied_proxy_password = NULL;
+
+                /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_002: [ The fields `host_address`, `port`, `username` and `password` shall be saved for later used (needed when creating the underlying IO to be used by the transport). ]*/
+                transport_data->http_proxy_port = proxy_options->port;
+                if (mallocAndStrcpy_s(&copied_proxy_hostname, proxy_options->host_address) != 0)
+                {
+                    /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_004: [ If copying `host_address`, `username` or `password` fails, `IoTHubTransport_MQTT_Common_SetOption` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
+                    LogError("Cannot copy HTTP proxy hostname");
+                    result = IOTHUB_CLIENT_ERROR;
+                }
+                /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_005: [ `username` and `password` shall be allowed to be NULL. ]*/
+                else if ((proxy_options->username != NULL) && (mallocAndStrcpy_s(&copied_proxy_username, proxy_options->username) != 0))
+                {
+                    /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_004: [ If copying `host_address`, `username` or `password` fails, `IoTHubTransport_MQTT_Common_SetOption` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
+                    free(copied_proxy_hostname);
+                    LogError("Cannot copy HTTP proxy username");
+                    result = IOTHUB_CLIENT_ERROR;
+                }
+                /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_005: [ `username` and `password` shall be allowed to be NULL. ]*/
+                else if ((proxy_options->password != NULL) && (mallocAndStrcpy_s(&copied_proxy_password, proxy_options->password) != 0))
+                {
+                    /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_004: [ If copying `host_address`, `username` or `password` fails, `IoTHubTransport_MQTT_Common_SetOption` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
+                    if (copied_proxy_username != NULL)
+                    {
+                        free(copied_proxy_username);
+                    }
+                    free(copied_proxy_hostname);
+                    LogError("Cannot copy HTTP proxy password");
+                    result = IOTHUB_CLIENT_ERROR;
+                }
+                else
+                {
+                    /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_009: [ When setting the proxy options succeeds any previously saved proxy options shall be freed. ]*/
+                    free_proxy_data(transport_data);
+
+                    transport_data->http_proxy_hostname = copied_proxy_hostname;
+                    transport_data->http_proxy_username = copied_proxy_username;
+                    transport_data->http_proxy_password = copied_proxy_password;
+
+                    /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_008: [ If setting the `proxy_data` option suceeds, `IoTHubTransport_MQTT_Common_SetOption` shall return `IOTHUB_CLIENT_OK` ]*/
+                    result = IOTHUB_CLIENT_OK;
+                }
+            }
         }
         else
         {
