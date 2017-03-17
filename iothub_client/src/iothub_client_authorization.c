@@ -180,7 +180,6 @@ char* IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const c
                 {
                     /* Codes_SRS_IoTHub_Authorization_07_020: [ If any error is encountered IoTHubClient_Auth_Get_ConnString shall return NULL. ] */
                     LogError("Failed copying result");
-                    STRING_delete(sas_token);
                     result = NULL;
                 }
                 STRING_delete(sas_token);

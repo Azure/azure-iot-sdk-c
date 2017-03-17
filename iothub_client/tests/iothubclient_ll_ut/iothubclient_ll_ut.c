@@ -366,7 +366,7 @@ static int my_FAKE_DeviceMethod_Response(IOTHUB_DEVICE_HANDLE handle, METHOD_HAN
 STRING_HANDLE my_FAKE_IoTHubTransport_GetHostname(TRANSPORT_LL_HANDLE handle)
 {
     (void)handle;
-    return (STRING_HANDLE)my_gballoc_malloc(1);
+    return TEST_STRING_HANDLE;
 }
 
 static TRANSPORT_PROVIDER FAKE_transport_provider =

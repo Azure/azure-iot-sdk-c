@@ -67,6 +67,11 @@ static STRING_HANDLE my_SASToken_CreateString(const char* key, const char* scope
     return (STRING_HANDLE)my_gballoc_malloc(1);
 }
 
+void my_STRING_delete(STRING_HANDLE handle)
+{
+    my_gballoc_free(handle);
+}
+
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];
@@ -110,6 +115,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(get_time, ((time_t)(-1)));
 
     REGISTER_GLOBAL_MOCK_RETURN(STRING_c_str, TEST_STRING_VALUE);
+    REGISTER_GLOBAL_MOCK_HOOK(STRING_delete, my_STRING_delete);
 }
 
 TEST_SUITE_CLEANUP(suite_cleanup)
