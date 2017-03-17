@@ -288,6 +288,7 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
                     if ((result->deviceHandle = result->IoTHubTransport_Register(result->transportHandle, &deviceConfig, result, &(result->waitingToSend))) == NULL)
                     {
                         LogError("Registering device in transport failed");
+                        IoTHubClient_Auth_Destroy(result->authorization_module);
                         result->IoTHubTransport_Destroy(result->transportHandle);
                         destroy_blob_upload_module(result);
                         tickcounter_destroy(result->tickCounter);
@@ -304,6 +305,7 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
                         {
                             LogError("Setting default retry policy in transport failed");
                             result->IoTHubTransport_Unregister(result->deviceHandle);
+                            IoTHubClient_Auth_Destroy(result->authorization_module);
                             result->IoTHubTransport_Destroy(result->transportHandle);
                             destroy_blob_upload_module(result);
                             tickcounter_destroy(result->tickCounter);
