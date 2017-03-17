@@ -333,9 +333,9 @@ static IOTHUB_DEVICE_HANDLE my_FAKE_IoTHubTransport_Register(TRANSPORT_LL_HANDLE
     return (IOTHUB_DEVICE_HANDLE)my_gballoc_malloc(1);
 }
 
-static void my_FAKE_IoTHubTransport_Unregister(TRANSPORT_LL_HANDLE handle)
+static void my_FAKE_IoTHubTransport_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle)
 {
-    my_gballoc_free(handle);
+    my_gballoc_free(deviceHandle);
 }
 
 static IOTHUB_CLIENT_RESULT my_FAKE_IoTHubTransport_GetSendStatus(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_STATUS* iotHubClientStatus)

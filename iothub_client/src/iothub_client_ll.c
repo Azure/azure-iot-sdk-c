@@ -303,7 +303,7 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
                         if (IoTHubClient_LL_SetRetryPolicy(result, IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER, 0) != IOTHUB_CLIENT_OK)
                         {
                             LogError("Setting default retry policy in transport failed");
-                            result->IoTHubTransport_Unregister(result->transportHandle);
+                            result->IoTHubTransport_Unregister(result->deviceHandle);
                             result->IoTHubTransport_Destroy(result->transportHandle);
                             destroy_blob_upload_module(result);
                             tickcounter_destroy(result->tickCounter);
