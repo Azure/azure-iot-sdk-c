@@ -25,7 +25,7 @@ function(linkUAMQP whatExecutableIsBuilding)
     endif()
     
     if(${use_wsio})
-        target_link_libraries(${whatExecutableIsBuilding} websockets)
+        target_link_libraries(${whatExecutableIsBuilding})
     endif()
 endfunction(linkUAMQP)
 
@@ -57,7 +57,7 @@ endfunction(linkHttp)
 
 function(linkWebSockets whatExecutableIsBuilding)
     if(${use_wsio})
-        target_link_libraries(${whatExecutableIsBuilding} websockets)
+        target_link_libraries(${whatExecutableIsBuilding})
     endif()
 endfunction(linkWebSockets)
 

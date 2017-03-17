@@ -2860,7 +2860,7 @@ TEST_FUNCTION(SetOption_xio_option_fails)
 
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_032: [ If `option` is `proxy_data`, `value` shall be used as an `HTTP_PROXY_OPTIONS*`. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_033: [ The fields `host_address`, `port`, `username` and `password` shall be saved for later used (needed when creating the underlying IO to be used by the transport). ]*/
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_039: [ If setting the `proxy_data` option suceeds, `IoTHubTransport_AMQP_Common_SetOption` shall return `IOTHUB_CLIENT_OK` ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_039: [ If setting the `proxy_data` option succeeds, `IoTHubTransport_AMQP_Common_SetOption` shall return `IOTHUB_CLIENT_OK` ]*/
 TEST_FUNCTION(SetOption_with_proxy_data_copies_the_options_for_later_use)
 {
     // arrange
@@ -2955,7 +2955,7 @@ TEST_FUNCTION(SetOption_proxy_data_with_NULL_option_value_fails)
 }
 
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_036: [ `username` and `password` shall be allowed to be NULL. ]*/
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_039: [ If setting the `proxy_data` option suceeds, `IoTHubTransport_AMQP_Common_SetOption` shall return `IOTHUB_CLIENT_OK` ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_039: [ If setting the `proxy_data` option succeeds, `IoTHubTransport_AMQP_Common_SetOption` shall return `IOTHUB_CLIENT_OK` ]*/
 TEST_FUNCTION(SetOption_proxy_data_with_NULL_username_and_password_saves_only_the_hostname)
 {
     // arrange
@@ -3551,6 +3551,11 @@ TEST_FUNCTION(SetOption_proxy_data_when_underlying_IO_is_already_created_fails)
     IOTHUB_DEVICE_HANDLE device_handle = register_device(handle, device_config, &TEST_waitingToSend, true);
     ASSERT_IS_NOT_NULL(device_handle);
 
+    amqp_transport_proxy_options.host_address = "test_proxy";
+    amqp_transport_proxy_options.port = 2222;
+    amqp_transport_proxy_options.username = "haha";
+    amqp_transport_proxy_options.password = "bleah";
+
     bool value = true;
     expected_AMQP_TRANSPORT_PROXY_OPTIONS = &amqp_transport_proxy_options;
 
@@ -3571,6 +3576,53 @@ TEST_FUNCTION(SetOption_proxy_data_when_underlying_IO_is_already_created_fails)
 
     // cleanup
     destroy_transport(handle, device_handle, NULL);
+}
+
+/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_001: [ `IoTHubTransport_AMQP_Common_Destroy` shall free the stored proxy options. ]*/
+TEST_FUNCTION(IoTHubTransport_AMQP_Common_Destroy_frees_proxy_options)
+{
+    // arrange
+    HTTP_PROXY_OPTIONS http_proxy_options;
+    initialize_test_variables();
+    TRANSPORT_LL_HANDLE handle = create_transport();
+
+    IOTHUB_DEVICE_CONFIG* device_config = create_device_config(TEST_DEVICE_ID_CHAR_PTR, true);
+    IOTHUB_DEVICE_HANDLE device_handle = register_device(handle, device_config, &TEST_waitingToSend, true);
+    ASSERT_IS_NOT_NULL(device_handle);
+
+    http_proxy_options.host_address = "test_proxy";
+    http_proxy_options.port = 2222;
+    http_proxy_options.username = "haha";
+    http_proxy_options.password = "bleah";
+
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "test_proxy"))
+        .CopyOutArgumentBuffer_destination(&http_proxy_options.host_address, sizeof(char**));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "haha"))
+        .CopyOutArgumentBuffer_destination(&http_proxy_options.username, sizeof(char**));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "bleah"))
+        .CopyOutArgumentBuffer_destination(&http_proxy_options.password, sizeof(char**));
+
+    (void)IoTHubTransport_AMQP_Common_SetOption(handle, "proxy_data", &http_proxy_options);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_REGISTERED_DEVICES_LIST));
+
+    EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+    EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG));
+    set_expected_calls_for_Unregister(device_handle);
+
+    STRICT_EXPECTED_CALL(singlylinkedlist_destroy(TEST_REGISTERED_DEVICES_LIST));
+    STRICT_EXPECTED_CALL(STRING_delete(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE));
+    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+
+    // act
+    IoTHubTransport_AMQP_Common_Destroy(handle);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_079: [if `deviceHandle` provided is NULL, IoTHubTransport_AMQP_Common_Unregister shall return.]

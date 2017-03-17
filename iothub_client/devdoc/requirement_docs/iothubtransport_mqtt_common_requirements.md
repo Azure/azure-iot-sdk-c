@@ -72,6 +72,8 @@ void IoTHubTransport_MQTT_Common_Destroy(TRANSPORT_LL_HANDLE handle)
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_014: [** IoTHubTransport_MQTT_Common_Destroy shall free all the resources currently in use.**]**  
 
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_012: [** `IoTHubTransport_MQTT_Common_Destroy` shall free the stored proxy options. **]**
+
 ### IoTHubTransport_MQTT_Common_Register
 
 ```c
@@ -228,6 +230,8 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIEN
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_029: [** IoTHubTransport_MQTT_Common_DoWork shall create a MQTT_MESSAGE_HANDLE and pass this to a call to  mqtt_client_publish.**]**  
 
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_001: [** IoTHubTransport_MQTT_Common_DoWork shall trigger reconnection if the mqtt_client_connect does not complete within `keepalive` seconds**]**
+
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_030: [** IoTHubTransport_MQTT_Common_DoWork shall call mqtt_client_dowork everytime it is called if it is connected.**]**  
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_033: [** IoTHubTransport_MQTT_Common_DoWork shall iterate through the Waiting Acknowledge messages looking for any message that has been waiting longer than 2 min.**]**  
@@ -266,7 +270,31 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SetOption(TRANSPORT_LL_HANDLE h
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_039: [** If the option parameter is set to "x509certificate" then the value shall be a const char* of the certificate to be used for x509.**]**  
 
-**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_040: [** If the option parameter is set to "x509privatekey" then the value shall be a const char* of the RSA Private Key to be used for x509.**]**  
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_040: [** If the option parameter is set to "x509privatekey" then the value shall be a const char* of the RSA Private Key to be used for x509.**]**
+
+The following requirements apply to `proxy_data`:
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_001: [** If `option` is `proxy_data`, `value` shall be used as an `HTTP_PROXY_OPTIONS*`. **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_002: [** The fields `host_address`, `port`, `username` and `password` shall be saved for later used (needed when creating the underlying IO to be used by the transport). **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_003: [** If `host_address` is NULL, `IoTHubTransport_MQTT_Common_SetOption` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_004: [** If copying `host_address`, `username` or `password` fails, `IoTHubTransport_MQTT_Common_SetOption` shall fail and return `IOTHUB_CLIENT_ERROR`. **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_005: [** `username` and `password` shall be allowed to be NULL. **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_006: [** If only one of `username` and `password` is NULL, `IoTHubTransport_MQTT_Common_SetOption` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_007: [** If the underlying IO has already been created, then `IoTHubTransport_MQTT_Common_SetOption` shall fail and return `IOTHUB_CLIENT_ERROR`. **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_008: [** If setting the `proxy_data` option succeeds, `IoTHubTransport_MQTT_Common_SetOption` shall return `IOTHUB_CLIENT_OK` **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_009: [** When setting the proxy options succeeds any previously saved proxy options shall be freed. **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_010: [** If the `proxy_data` option has been set, the proxy options shall be filled in the argument `mqtt_transport_proxy_options` when calling the function `get_io_transport` passed in `IoTHubTransport_MQTT_Common__Create` to obtain the underlying IO handle. **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_011: [** If no `proxy_data` option has been set, NULL shall be passed as the argument `mqtt_transport_proxy_options` when calling the function `get_io_transport` passed in `IoTHubTransport_MQTT_Common__Create`. **]**
 
 ### IoTHubTransport_MQTT_Common_SetRetryPolicy
 ```c

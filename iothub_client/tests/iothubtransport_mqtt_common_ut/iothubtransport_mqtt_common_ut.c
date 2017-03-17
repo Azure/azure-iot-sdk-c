@@ -31,6 +31,7 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 #include "testrunnerswitcher.h"
 #include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/macro_utils.h"
+#include "azure_c_shared_utility/shared_util_options.h"
 #include "umock_c.h"
 #include "umock_c_negative_tests.h"
 #include "umocktypes_charptr.h"
@@ -122,7 +123,8 @@ static const char* X509_CERT_CERTIFICATE = "-----BEGIN CERTIFICATE-----MIID-----
 static const char* X509_PRIVATE_KEY_OPTION = "x509privatekey";
 static const char* X509_PRIVATE_KEY = "-----BEGIN RSA PRIVATE KEY-----MIIE-----END RSA PRIVATE KEY-----";
 
-const char* PROPERTY_SEPARATOR = "&";
+static const char* PROPERTY_SEPARATOR = "&";
+static MQTT_TRANSPORT_PROXY_OPTIONS* expected_MQTT_TRANSPORT_PROXY_OPTIONS;
 
 static const IOTHUB_CLIENT_LL_HANDLE TEST_IOTHUB_CLIENT_LL_HANDLE = (IOTHUB_CLIENT_LL_HANDLE)0x4343;
 static const TRANSPORT_LL_HANDLE TEST_TRANSPORT_HANDLE = (TRANSPORT_LL_HANDLE)0x4444;
@@ -487,6 +489,32 @@ double my_get_difftime(time_t stopTime, time_t startTime)
     return (double)(stopTime - startTime);
 }
 
+static int error_proxy_options;
+static XIO_HANDLE get_IO_transport(const char* fully_qualified_name, const MQTT_TRANSPORT_PROXY_OPTIONS* mqtt_transport_proxy_options)
+{
+    (void)fully_qualified_name;
+    (void)mqtt_transport_proxy_options;
+    error_proxy_options = 0;
+    if (((expected_MQTT_TRANSPORT_PROXY_OPTIONS == NULL) && (mqtt_transport_proxy_options != NULL)) ||
+        ((expected_MQTT_TRANSPORT_PROXY_OPTIONS != NULL) && (mqtt_transport_proxy_options == NULL)))
+    {
+        error_proxy_options = 1;
+    }
+    else
+    {
+        if (expected_MQTT_TRANSPORT_PROXY_OPTIONS != NULL)
+        {
+            if ((strcmp(expected_MQTT_TRANSPORT_PROXY_OPTIONS->host_address, mqtt_transport_proxy_options->host_address) != 0) ||
+                ((expected_MQTT_TRANSPORT_PROXY_OPTIONS->username != NULL) && (strcmp(expected_MQTT_TRANSPORT_PROXY_OPTIONS->username, mqtt_transport_proxy_options->username) != 0)) ||
+                ((expected_MQTT_TRANSPORT_PROXY_OPTIONS->password != NULL) && (strcmp(expected_MQTT_TRANSPORT_PROXY_OPTIONS->password, mqtt_transport_proxy_options->password) != 0)))
+            {
+                error_proxy_options = 1;
+            }
+        }
+    }
+    return (XIO_HANDLE)my_gballoc_malloc(1);
+}
+
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
@@ -514,6 +542,9 @@ TEST_SUITE_INITIALIZE(suite_init)
     ASSERT_ARE_EQUAL(int, 0, result);
 
     result = umocktypes_stdint_register_types();
+    ASSERT_ARE_EQUAL(int, 0, result);
+
+    result = umocktypes_charptr_register_types();
     ASSERT_ARE_EQUAL(int, 0, result);
 
     REGISTER_UMOCK_ALIAS_TYPE(XIO_HANDLE, void*);
@@ -705,6 +736,7 @@ TEST_FUNCTION_INITIALIZE(method_init)
     real_DList_InitializeListHead(&g_waitingToSend);
 
     g_msg_disposition = IOTHUBMESSAGE_ACCEPTED;
+    expected_MQTT_TRANSPORT_PROXY_OPTIONS = NULL;
 
     umock_c_reset_all_calls();
 }
@@ -853,9 +885,6 @@ static void setup_initialize_reconnection_mocks()
         .IgnoreArgument(2);
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2);
 }
 
 static void setup_devicemethod_response_mocks()
@@ -883,22 +912,21 @@ static void setup_initialize_connection_mocks()
         .IgnoreArgument(1)
         .IgnoreArgument(2);
     STRICT_EXPECTED_CALL(STRING_new());
-    STRICT_EXPECTED_CALL(get_time(IGNORED_PTR_ARG))
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(get_time(NULL));
     EXPECTED_CALL(SASToken_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_DEVICE_ID);
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_SAS_TOKEN);
+	
+	// from GetTransportProviderIfNecessary()
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_HOST_NAME);
+
     EXPECTED_CALL(mqtt_client_connect(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2);
 }
 
 static void setup_subscribe_devicetwin_dowork_mocks()
@@ -920,8 +948,9 @@ static void setup_subscribe_devicetwin_dowork_mocks()
 
 static void setup_IoTHubTransport_MQTT_Common_DoWork_mocks()
 {
-    EXPECTED_CALL(get_time(IGNORED_PTR_ARG));
-    setup_initialize_connection_mocks();
+	STRICT_EXPECTED_CALL(tickcounter_get_current_ms(TEST_COUNTER_HANDLE, IGNORED_PTR_ARG))
+		.IgnoreArgument(1)
+		.IgnoreArgument(2);
 
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_MQTT_MSG_TOPIC);
     EXPECTED_CALL(mqtt_client_subscribe(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
@@ -1153,13 +1182,6 @@ static void setup_message_recv_msg_callback_mocks()
         .IgnoreArgument_iotHubMessageHandle();
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
         .IgnoreArgument_ptr();
-}
-
-static XIO_HANDLE get_IO_transport(const char* fully_qualified_name, const MQTT_TRANSPORT_PROXY_OPTIONS* mqtt_transport_proxy_options)
-{
-    (void)fully_qualified_name;
-    (void)mqtt_transport_proxy_options;
-    return (XIO_HANDLE)my_gballoc_malloc(1);
 }
 
 static XIO_HANDLE get_IO_transport_fail(const char* fully_qualified_name, const MQTT_TRANSPORT_PROXY_OPTIONS* mqtt_transport_proxy_options)
@@ -1479,8 +1501,11 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_Unsubscribe_succeeds)
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
     (void)IoTHubTransport_MQTT_Common_Subscribe(handle);
     CONNECT_ACK connack ={ true, CONNECTION_ACCEPTED };
-    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
+
+    setup_initialize_connection_mocks();
     IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
+
     umock_c_reset_all_calls();
 
     EXPECTED_CALL(STRING_c_str(NULL)).SetReturn(TEST_STRING_VALUE);
@@ -1624,7 +1649,10 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_Succeed)
 
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
 
+	setup_initialize_connection_mocks();
+	IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
     g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
+
     umock_c_reset_all_calls();
 
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_DEVICE_ID);
@@ -1654,7 +1682,11 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_fail)
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
 
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+
+    setup_initialize_connection_mocks();
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
     g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
+
     umock_c_reset_all_calls();
     (void)IoTHubTransport_MQTT_Common_Subscribe(handle);
 
@@ -1697,9 +1729,11 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_set_subscribe_type_Succeed)
 
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
 
+	setup_initialize_connection_mocks();
+	IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
     g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
-    umock_c_reset_all_calls();
-
+    
+	umock_c_reset_all_calls();
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_DEVICE_ID);
     setup_IoTHubTransport_MQTT_Common_DoWork_mocks();
 
@@ -2270,6 +2304,677 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_keepAlive_same_value_succeed
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
+/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_001: [ If `option` is `proxy_data`, `value` shall be used as an `HTTP_PROXY_OPTIONS*`. ]*/
+/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_002: [ The fields `host_address`, `port`, `username` and `password` shall be saved for later used (needed when creating the underlying IO to be used by the transport). ]*/
+/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_008: [ If setting the `proxy_data` option succeeds, `IoTHubTransport_MQTT_Common_SetOption` shall return `IOTHUB_CLIENT_OK` ]*/
+TEST_FUNCTION(SetOption_with_proxy_data_copies_the_options_for_later_use)
+{
+    // arrange
+    HTTP_PROXY_OPTIONS http_proxy_options;
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    umock_c_reset_all_calls();
+
+    http_proxy_options.host_address = "test_proxy";
+    http_proxy_options.port = 2222;
+    http_proxy_options.username = "me";
+    http_proxy_options.password = "shhhh";
+
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "test_proxy"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "me"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "shhhh"));
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_003: [ If `host_address` is NULL, `IoTHubTransport_MQTT_Common_SetOption` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. *]*/
+TEST_FUNCTION(SetOption_proxy_data_with_NULL_host_address_fails)
+{
+    // arrange
+    HTTP_PROXY_OPTIONS http_proxy_options;
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    umock_c_reset_all_calls();
+
+    http_proxy_options.host_address = NULL;
+    http_proxy_options.port = 2222;
+    http_proxy_options.username = "me";
+    http_proxy_options.password = "shhhh";
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_021: [ If any parameter is NULL then IoTHubTransport_MQTT_Common_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.]*/
+TEST_FUNCTION(SetOption_proxy_data_with_NULL_option_value_fails)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    umock_c_reset_all_calls();
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", NULL);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_005: [ `username` and `password` shall be allowed to be NULL. ]*/
+/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_008: [ If setting the `proxy_data` option succeeds, `IoTHubTransport_MQTT_Common_SetOption` shall return `IOTHUB_CLIENT_OK` ]*/
+TEST_FUNCTION(SetOption_proxy_data_with_NULL_username_and_password_saves_only_the_hostname)
+{
+    // arrange
+    HTTP_PROXY_OPTIONS http_proxy_options;
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    umock_c_reset_all_calls();
+
+    http_proxy_options.host_address = "test_proxy";
+    http_proxy_options.port = 2222;
+    http_proxy_options.username = NULL;
+    http_proxy_options.password = NULL;
+
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "test_proxy"));
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_006: [ If only one of `username` and `password` is NULL, `IoTHubTransport_MQTT_Common_SetOption` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
+TEST_FUNCTION(SetOption_proxy_data_with_NULL_username_but_non_NULL_password_fails)
+{
+    // arrange
+    HTTP_PROXY_OPTIONS http_proxy_options;
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    umock_c_reset_all_calls();
+
+    http_proxy_options.host_address = "test_proxy";
+    http_proxy_options.port = 2222;
+    http_proxy_options.username = "the_other_me";
+    http_proxy_options.password = NULL;
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_006: [ If only one of `username` and `password` is NULL, `IoTHubTransport_MQTT_Common_SetOption` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
+TEST_FUNCTION(SetOption_proxy_data_with_NULL_password_but_non_NULL_username_fails)
+{
+    // arrange
+    HTTP_PROXY_OPTIONS http_proxy_options;
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    umock_c_reset_all_calls();
+
+    http_proxy_options.host_address = "test_proxy";
+    http_proxy_options.port = 2222;
+    http_proxy_options.username = NULL;
+    http_proxy_options.password = "bleah";
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_009: [ When setting the proxy options succeeds any previously saved proxy options shall be freed. ]*/
+TEST_FUNCTION(SetOption_proxy_data_frees_previously_Saved_proxy_options)
+{
+    // arrange
+    HTTP_PROXY_OPTIONS http_proxy_options;
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    umock_c_reset_all_calls();
+
+    http_proxy_options.host_address = "test_proxy";
+    http_proxy_options.port = 2222;
+    http_proxy_options.username = "haha";
+    http_proxy_options.password = "bleah";
+
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "test_proxy"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "haha"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "bleah"));
+
+    (void)IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
+
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "test_proxy"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "me"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "shhhh"));
+    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+
+    http_proxy_options.host_address = "test_proxy";
+    http_proxy_options.port = 2222;
+    http_proxy_options.username = "me";
+    http_proxy_options.password = "shhhh";
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_004: [ If copying `host_address`, `username` or `password` fails, `IoTHubTransport_MQTT_Common_SetOption` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
+TEST_FUNCTION(when_allocating_proxy_name_fails_SetOption_proxy_data_fails)
+{
+    // arrange
+    HTTP_PROXY_OPTIONS http_proxy_options;
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    umock_c_reset_all_calls();
+
+    http_proxy_options.host_address = "test_proxy";
+    http_proxy_options.port = 2222;
+    http_proxy_options.username = "haha";
+    http_proxy_options.password = "bleah";
+
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "test_proxy"))
+        .SetReturn(1);
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_ERROR, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_004: [ If copying `host_address`, `username` or `password` fails, `IoTHubTransport_MQTT_Common_SetOption` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
+TEST_FUNCTION(when_allocating_username_fails_SetOption_proxy_data_fails)
+{
+    // arrange
+    HTTP_PROXY_OPTIONS http_proxy_options;
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    umock_c_reset_all_calls();
+
+    http_proxy_options.host_address = "test_proxy";
+    http_proxy_options.port = 2222;
+    http_proxy_options.username = "haha";
+    http_proxy_options.password = "bleah";
+
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "test_proxy"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "haha"))
+        .SetReturn(1);
+    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_ERROR, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_004: [ If copying `host_address`, `username` or `password` fails, `IoTHubTransport_MQTT_Common_SetOption` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
+TEST_FUNCTION(when_allocating_password_fails_SetOption_proxy_data_fails)
+{
+    // arrange
+    HTTP_PROXY_OPTIONS http_proxy_options;
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    umock_c_reset_all_calls();
+
+    http_proxy_options.host_address = "test_proxy";
+    http_proxy_options.port = 2222;
+    http_proxy_options.username = "haha";
+    http_proxy_options.password = "bleah";
+
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "test_proxy"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "haha"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "bleah"))
+        .SetReturn(1);
+    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_ERROR, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_009: [ When setting the proxy options succeeds any previously saved proxy options shall be freed. ]*/
+TEST_FUNCTION(when_allocating_proxy_name_fails_SetOption_proxy_data_does_not_free_previous_proxy_options)
+{
+    // arrange
+    HTTP_PROXY_OPTIONS http_proxy_options;
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    umock_c_reset_all_calls();
+
+    http_proxy_options.host_address = "test_proxy";
+    http_proxy_options.port = 2222;
+    http_proxy_options.username = "haha";
+    http_proxy_options.password = "bleah";
+
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "test_proxy"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "haha"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "bleah"));
+
+    (void)IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
+
+    umock_c_reset_all_calls();
+
+    http_proxy_options.host_address = "test_proxy";
+    http_proxy_options.username = "haha";
+    http_proxy_options.password = "bleah";
+
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "test_proxy"))
+        .SetReturn(1);
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_ERROR, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_009: [ When setting the proxy options succeeds any previously saved proxy options shall be freed. ]*/
+TEST_FUNCTION(when_allocating_username_fails_SetOption_proxy_data_does_not_free_previous_proxy_options)
+{
+    // arrange
+    HTTP_PROXY_OPTIONS http_proxy_options;
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    umock_c_reset_all_calls();
+
+    http_proxy_options.host_address = "test_proxy";
+    http_proxy_options.port = 2222;
+    http_proxy_options.username = "haha";
+    http_proxy_options.password = "bleah";
+
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "test_proxy"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "haha"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "bleah"));
+
+    (void)IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
+
+    umock_c_reset_all_calls();
+
+    http_proxy_options.host_address = "test_proxy";
+    http_proxy_options.username = "haha";
+    http_proxy_options.password = "bleah";
+
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "test_proxy"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "haha"))
+        .SetReturn(1);
+    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_ERROR, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_009: [ When setting the proxy options succeeds any previously saved proxy options shall be freed. ]*/
+TEST_FUNCTION(when_allocating_password_fails_SetOption_proxy_data_does_not_free_previous_proxy_options)
+{
+    // arrange
+    HTTP_PROXY_OPTIONS http_proxy_options;
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    umock_c_reset_all_calls();
+
+    http_proxy_options.host_address = "test_proxy";
+    http_proxy_options.port = 2222;
+    http_proxy_options.username = "haha";
+    http_proxy_options.password = "bleah";
+
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "test_proxy"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "haha"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "bleah"));
+
+    (void)IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
+
+    umock_c_reset_all_calls();
+
+    http_proxy_options.host_address = "test_proxy";
+    http_proxy_options.username = "haha";
+    http_proxy_options.password = "bleah";
+
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "test_proxy"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "haha"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "bleah"))
+        .SetReturn(1);
+    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_ERROR, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_009: [ When setting the proxy options succeeds any previously saved proxy options shall be freed. ]*/
+TEST_FUNCTION(SetOption_proxy_data_with_NULL_hostname_does_not_free_previous_proxy_options)
+{
+    // arrange
+    HTTP_PROXY_OPTIONS http_proxy_options;
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    umock_c_reset_all_calls();
+
+    http_proxy_options.host_address = "test_proxy";
+    http_proxy_options.port = 2222;
+    http_proxy_options.username = "haha";
+    http_proxy_options.password = "bleah";
+
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "test_proxy"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "haha"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "bleah"));
+
+    (void)IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
+
+    umock_c_reset_all_calls();
+
+    http_proxy_options.host_address = NULL;
+    http_proxy_options.username = "haha";
+    http_proxy_options.password = "bleah";
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_009: [ When setting the proxy options succeeds any previously saved proxy options shall be freed. ]*/
+TEST_FUNCTION(SetOption_proxy_data_with_NULL_username_and_non_NULL_password_does_not_free_previous_proxy_options)
+{
+    // arrange
+    HTTP_PROXY_OPTIONS http_proxy_options;
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    umock_c_reset_all_calls();
+
+    http_proxy_options.host_address = "test_proxy";
+    http_proxy_options.port = 2222;
+    http_proxy_options.username = "haha";
+    http_proxy_options.password = "bleah";
+
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "test_proxy"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "haha"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "bleah"));
+
+    (void)IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
+
+    umock_c_reset_all_calls();
+
+    http_proxy_options.host_address = "baba";
+    http_proxy_options.username = NULL;
+    http_proxy_options.password = "cloanta";
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_011: [ If no `proxy_data` option has been set, NULL shall be passed as the argument `mqtt_transport_proxy_options` when calling the function `get_io_transport` passed in `IoTHubTransport_MQTT_Common__Create`. ]*/
+TEST_FUNCTION(SetOption_xio_option_get_underlying_TLS_when_proxy_data_was_not_set_passes_down_NULL)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    umock_c_reset_all_calls();
+
+    bool value = true;
+
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
+    STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, "Some XIO option name", &value));
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, "Some XIO option name", &value);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(int, 0, error_proxy_options);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_010: [ If the `proxy_data` option has been set, the proxy options shall be filled in the argument `mqtt_transport_proxy_options` when calling the function `get_io_transport` passed in `IoTHubTransport_MQTT_Common__Create` to obtain the underlying IO handle. ]*/
+TEST_FUNCTION(SetOption_xio_option_get_underlying_TLS_when_proxy_data_was_set_passes_down_the_proxy_options)
+{
+    // arrange
+    MQTT_TRANSPORT_PROXY_OPTIONS mqtt_transport_proxy_options;
+    HTTP_PROXY_OPTIONS http_proxy_options;
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    umock_c_reset_all_calls();
+
+    http_proxy_options.host_address = "test_proxy";
+    http_proxy_options.port = 2222;
+    http_proxy_options.username = "haha";
+    http_proxy_options.password = "bleah";
+
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "test_proxy"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "haha"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "bleah"));
+
+    (void)IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
+
+    mqtt_transport_proxy_options.host_address = "test_proxy";
+    mqtt_transport_proxy_options.port = 2222;
+    mqtt_transport_proxy_options.username = "haha";
+    mqtt_transport_proxy_options.password = "bleah";
+
+    bool value = true;
+    expected_MQTT_TRANSPORT_PROXY_OPTIONS = &mqtt_transport_proxy_options;
+
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
+    STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, "Some XIO option name", &value));
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, "Some XIO option name", &value);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(int, 0, error_proxy_options);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_007: [ If the underlying IO has already been created, then `IoTHubTransport_MQTT_Common_SetOption` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
+TEST_FUNCTION(SetOption_proxy_data_when_underlying_IO_is_already_created_fails)
+{
+    // arrange
+    HTTP_PROXY_OPTIONS http_proxy_options;
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    umock_c_reset_all_calls();
+
+    bool value = true;
+
+    // act
+    (void)IoTHubTransport_MQTT_Common_SetOption(handle, "Some XIO option name", &value);
+    umock_c_reset_all_calls();
+
+    http_proxy_options.host_address = "test_proxy";
+    http_proxy_options.port = 2222;
+    http_proxy_options.username = "haha";
+    http_proxy_options.password = "bleah";
+
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_ERROR, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_012: [ `IoTHubTransport_MQTT_Common_Destroy` shall free the stored proxy options. ]*/
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_frees_the_proxy_options)
+{
+    // arrange
+    HTTP_PROXY_OPTIONS http_proxy_options;
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    umock_c_reset_all_calls();
+
+    http_proxy_options.host_address = "test_proxy";
+    http_proxy_options.port = 2222;
+    http_proxy_options.username = "haha";
+    http_proxy_options.password = "bleah";
+
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "test_proxy"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "haha"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "bleah"));
+
+    (void)IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(mqtt_client_disconnect(IGNORED_PTR_ARG))
+        .IgnoreAllCalls();
+    STRICT_EXPECTED_CALL(mqtt_client_deinit(IGNORED_PTR_ARG))
+        .IgnoreAllCalls();
+    STRICT_EXPECTED_CALL(xio_destroy(IGNORED_PTR_ARG))
+        .IgnoreAllCalls();
+    EXPECTED_CALL(DList_IsListEmpty(IGNORED_PTR_ARG))
+        .IgnoreAllCalls();;
+    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreAllCalls();
+    STRICT_EXPECTED_CALL(tickcounter_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+
+    // act
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+}
+
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_mqtt_operation_complete_msgInfo_NULL_succeed)
 {
     // arrange
@@ -2355,9 +3060,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_mqtt_client_connect_fail)
         .IgnoreArgument(2);
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2);
     STRICT_EXPECTED_CALL(mqtt_client_dowork(TEST_MQTT_CLIENT_HANDLE))
         .IgnoreArgument(1);
 
@@ -2745,7 +3447,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_Retry_Policy_Connection_Break_R
     connack.isSessionPresent = true;
     connack.returnCode = CONNECTION_ACCEPTED;
     g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
-    connack.isSessionPresent = false;
+	connack.isSessionPresent = false;
     connack.returnCode = CONN_REFUSED_SERVER_UNAVAIL;
     /* Break Connection */
     g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_DISCONNECT, NULL, g_callbackCtx);
@@ -2904,9 +3606,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_SAS_token_from_user_succeed)
         .IgnoreArgument(2);
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2);
     STRICT_EXPECTED_CALL(mqtt_client_dowork(TEST_MQTT_CLIENT_HANDLE))
         .IgnoreArgument(1);
 
@@ -2977,10 +3676,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_x509_succeed)
         .IgnoreArgument(2);
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(TEST_COUNTER_HANDLE, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2);
 
     STRICT_EXPECTED_CALL(mqtt_client_dowork(TEST_MQTT_CLIENT_HANDLE)).IgnoreArgument(1);
 
@@ -3257,6 +3952,8 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_device_twin_resend_message_succ
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
 
+	CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };
+
     QOS_VALUE QosValue[] ={ DELIVER_AT_LEAST_ONCE };
     SUBSCRIBE_ACK suback;
     suback.packetId = 1234;
@@ -3265,6 +3962,8 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_device_twin_resend_message_succ
 
     (void)IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin(handle);
 
+	IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+	g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
     IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
     g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_SUBSCRIBE_ACK, &suback, g_callbackCtx);
     IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -3422,6 +4121,39 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_connectFailCount_exceed_succeed
 
     //cleanup
     IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+// Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_001: [ IoTHubTransport_MQTT_Common_DoWork shall trigger reconnection if the mqtt_client_connect does not complete within `keepalive` seconds]
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_mqtt_client_connect_times_out)
+{
+	// arrange
+	IOTHUBTRANSPORT_CONFIG config = { 0 };
+	SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+	TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+
+	umock_c_reset_all_calls();
+	setup_initialize_connection_mocks();
+	IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+	g_current_ms += 4 * 60 * 1000 + 1; // 4+ minutes have passed.
+
+	umock_c_reset_all_calls();
+	STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+	STRICT_EXPECTED_CALL(mqtt_client_disconnect(TEST_MQTT_CLIENT_HANDLE))
+		.IgnoreArgument(1);
+	STRICT_EXPECTED_CALL(xio_destroy(TEST_XIO_HANDLE))
+		.IgnoreArgument(1);
+	EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
+
+	// act
+	IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+	//assert
+	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+	//cleanup
+	IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
 /* Test_SRS_IOTHUB_MQTT_TRANSPORT_07_023: [IoTHubTransport_MQTT_Common_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter.] */

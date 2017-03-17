@@ -88,7 +88,7 @@ This function will close connection established through AMQP API, as well as des
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_013: [**If `handle` is NULL, IoTHubTransport_AMQP_Common_Destroy shall return immediatelly**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_014: [**IoTHubTransport_AMQP_Common_Destroy shall invoke IoTHubTransport_AMQP_Common_Unregister on each of its registered devices.**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_015: [**All members of `instance` (including tls_io) shall be destroyed and its memory released**]**
-
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_001: [** `IoTHubTransport_AMQP_Common_Destroy` shall free the stored proxy options. **]**
 
 ### IoTHubTransport_AMQP_Common_DoWork
 
@@ -384,7 +384,7 @@ The following requirements apply to `proxy_data`:
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_036: [** `username` and `password` shall be allowed to be NULL. **]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_037: [** If only one of `username` and `password` is NULL, `IoTHubTransport_AMQP_Common_SetOption` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. **]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_038: [** If the underlying IO has already been created, then `IoTHubTransport_AMQP_Common_SetOption` shall fail and return `IOTHUB_CLIENT_ERROR`. **]**
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_039: [** If setting the `proxy_data` option suceeds, `IoTHubTransport_AMQP_Common_SetOption` shall return `IOTHUB_CLIENT_OK` **]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_039: [** If setting the `proxy_data` option succeeds, `IoTHubTransport_AMQP_Common_SetOption` shall return `IOTHUB_CLIENT_OK` **]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_040: [** When setting the proxy options succeeds any previously saved proxy options shall be freed. **]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_041: [** If the `proxy_data` option has been set, the proxy options shall be filled in the argument `amqp_transport_proxy_options` when calling the function `underlying_io_transport_provider()` to obtain the underlying IO handle. **]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_042: [** If no `proxy_data` option has been set, NULL shall be passed as the argument `amqp_transport_proxy_options` when calling the function `underlying_io_transport_provider()`. **]**
