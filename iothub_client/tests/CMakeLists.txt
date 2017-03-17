@@ -5,6 +5,7 @@ cmake_minimum_required(VERSION 2.8.12)
 
 #this is CMakeLists for iothub_client tests folder
 
+add_subdirectory(iothub_client_authorization_ut)
 add_subdirectory(iothubclient_ll_ut)
 if(NOT ${dont_use_uploadtoblob})
 add_subdirectory(iothubclient_ll_u2b_ut)
