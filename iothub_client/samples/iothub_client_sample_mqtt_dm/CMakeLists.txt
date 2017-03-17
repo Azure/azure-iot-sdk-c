@@ -50,9 +50,4 @@ if(LINUX)
         m
     )
 
-    set(iothub_install_files pi_device/iothub_client_sample_firmware_update.service .device_connection_string)
-
-    install (TARGETS iothub_client_sample_mqtt_dm DESTINATION "/usr/share/iothub_client_sample")
-    install (FILES ${iothub_install_files} DESTINATION "/usr/share/iothub_client_sample")
-
 endif()  
