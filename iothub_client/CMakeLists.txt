@@ -12,6 +12,7 @@ compileAsC99()
 
 set(iothub_client_ll_transport_c_files
 ./src/version.c
+./src/iothub_client_authorization.c
 ./src/iothub_message.c
 ./src/iothub_client_ll.c
 ./src/blob.c
@@ -31,6 +32,7 @@ endif()
 
 
 set(iothub_client_ll_transport_h_files
+./inc/iothub_client_authorization.h
 ./inc/iothub_message.h
 ./inc/iothub_client_ll.h
 ./inc/iothub_client_version.h
