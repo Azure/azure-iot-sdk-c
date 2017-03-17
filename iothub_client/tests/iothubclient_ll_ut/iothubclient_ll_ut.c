@@ -631,7 +631,6 @@ static void setup_iothubclient_ll_create_mocks(bool use_device_config)
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the hostname as const char* */
             .SetReturn(TEST_HOSTNAME_VALUE);
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_NUM_ARG));
     }
     else
     {
@@ -1272,7 +1271,7 @@ TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_fail)
     umock_c_negative_tests_snapshot();
 
     // act
-    size_t calls_cannot_fail[] = { 2, 4, 8, 9, 10, 13 };
+    size_t calls_cannot_fail[] = { 2, 7, 8, 9, 12 };
 
     size_t count = umock_c_negative_tests_call_count();
     for (size_t index = 0; index < count; index++)

@@ -241,7 +241,6 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
                         result->isSharedTransport = true;
                     }
                 }
-                STRING_delete(transport_hostname);
             }
         }
 
