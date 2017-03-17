@@ -45,10 +45,10 @@ static int get_seconds_since_epoch(size_t* seconds)
 IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_Create(const char* device_key, const char* device_id, const char* device_sas_token)
 {
     IOTHUB_AUTHORIZATION_DATA* result;
-    /* Codes_SRS_IoTHub_Authorization_07_001: [if device_key or device_id is NULL IoTHubClient_Auth_Create, shall return NULL. ] */
-    if (device_key == NULL || device_id == NULL)
+    /* Codes_SRS_IoTHub_Authorization_07_001: [if device_id is NULL IoTHubClient_Auth_Create, shall return NULL. ] */
+    if (device_id == NULL)
     {
-        LogError("Invalid Parameter device_key: %p, device_id: %p", device_key, device_id);
+        LogError("Invalid Parameter device_id: %p", device_key, device_id);
         result = NULL;
     }
     else
@@ -61,42 +61,47 @@ IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_Create(const char* device_key, con
             LogError("Failed allocating IOTHUB_AUTHORIZATION_DATA");
             result = NULL;
         }
-        else if (mallocAndStrcpy_s(&result->device_key, device_key) != 0)
-        {
-            /* Codes_SRS_IoTHub_Authorization_07_019: [ On error IoTHubClient_Auth_Create shall return NULL. ] */
-            LogError("Failed allocating device_key");
-            free(result);
-            result = NULL;
-        }
-        else if (mallocAndStrcpy_s(&result->device_id, device_id) != 0)
-        {
-            /* Codes_SRS_IoTHub_Authorization_07_019: [ On error IoTHubClient_Auth_Create shall return NULL. ] */
-            LogError("Failed allocating device_key");
-            free(result->device_key);
-            free(result);
-            result = NULL;
-        }
         else
         {
+            memset(result, 0, sizeof(IOTHUB_AUTHORIZATION_DATA) );
             result->token_expiry_time_sec = DEFAULT_SAS_TOKEN_EXPIRY_TIME_SECS;
-            if (device_sas_token == NULL)
+
+            if (device_key != NULL && mallocAndStrcpy_s(&result->device_key, device_key) != 0)
             {
-                /* Codes_SRS_IoTHub_Authorization_07_003: [ IoTHubClient_Auth_Create shall set the credential type to IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY if the device_sas_token is NULL. ]*/
-                result->cred_type = IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY;
-                result->device_sas_token = NULL;
+                /* Codes_SRS_IoTHub_Authorization_07_019: [ On error IoTHubClient_Auth_Create shall return NULL. ] */
+                LogError("Failed allocating device_key");
+                free(result);
+                result = NULL;
+            }
+            else if (mallocAndStrcpy_s(&result->device_id, device_id) != 0)
+            {
+                /* Codes_SRS_IoTHub_Authorization_07_019: [ On error IoTHubClient_Auth_Create shall return NULL. ] */
+                LogError("Failed allocating device_key");
+                free(result->device_key);
+                free(result);
+                result = NULL;
             }
             else
             {
-                /* Codes_SRS_IoTHub_Authorization_07_020: [ else IoTHubClient_Auth_Create shall set the credential type to IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN. ] */
-                result->cred_type = IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN;
-                if (mallocAndStrcpy_s(&result->device_sas_token, device_sas_token) != 0)
+                if (device_sas_token == NULL)
                 {
-                    /* Codes_SRS_IoTHub_Authorization_07_019: [ On error IoTHubClient_Auth_Create shall return NULL. ] */
-                    LogError("Failed allocating device_key");
-                    free(result->device_key);
-                    free(result->device_id);
-                    free(result);
-                    result = NULL;
+                    /* Codes_SRS_IoTHub_Authorization_07_003: [ IoTHubClient_Auth_Create shall set the credential type to IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY if the device_sas_token is NULL. ]*/
+                    result->cred_type = IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY;
+                    result->device_sas_token = NULL;
+                }
+                else
+                {
+                    /* Codes_SRS_IoTHub_Authorization_07_020: [ else IoTHubClient_Auth_Create shall set the credential type to IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN. ] */
+                    result->cred_type = IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN;
+                    if (mallocAndStrcpy_s(&result->device_sas_token, device_sas_token) != 0)
+                    {
+                        /* Codes_SRS_IoTHub_Authorization_07_019: [ On error IoTHubClient_Auth_Create shall return NULL. ] */
+                        LogError("Failed allocating device_key");
+                        free(result->device_key);
+                        free(result->device_id);
+                        free(result);
+                        result = NULL;
+                    }
                 }
             }
         }

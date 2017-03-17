@@ -31,7 +31,7 @@ MOCKABLE_FUNCTION(, bool, IoTHubClient_Auth_Is_SasToken_Valid, IOTHUB_AUTHORIZAT
 extern IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_Create(const char* device_key, const char* device_id, const char* device_sas_token);
 ```
 
-**SRS_IoTHub_Authorization_07_001: [**if `device_key` or `device_id` is NULL `IoTHubClient_Auth_Create`, shall return NULL.**]**
+**SRS_IoTHub_Authorization_07_001: [**if `device_id` is NULL `IoTHubClient_Auth_Create`, shall return NULL.**]**
 
 **SRS_IoTHub_Authorization_07_002: [**`IoTHubClient_Auth_Create` shall allocate a `IOTHUB_AUTHORIZATION_HANDLE` that is needed for subsequent calls. **]**
 
