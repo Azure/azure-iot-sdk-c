@@ -49,6 +49,7 @@ option(run_longhaul_tests "set run_longhaul_tests to ON to run longhaul tests (d
 option(skip_samples "set skip_samples to ON to skip building samples (default is OFF)[if possible, they are always build]" OFF)
 option(compileOption_C "passes a string to the command line of the C compiler" OFF)
 option(compileOption_CXX "passes a string to the command line of the C++ compiler" OFF)
+option(build_service_client "controls whether the iothub_service_client is built or not" ON)
 option(build_python "builds the Python native iothub_client module" OFF)
 option(build_javawrapper "builds the native iothub_client library for java C wrapper" OFF)
 option(dont_use_uploadtoblob "set dont_use_uploadtoblob to ON if the functionality of upload to blob is to be excluded, OFF otherwise. It requires HTTP" OFF)
@@ -194,7 +195,16 @@ else()
     set(THREAD_C_FILE ${SHARED_UTIL_ADAPTER_FOLDER}/threadapi_pthreads.c)
 endif()
 
-add_subdirectory(iothub_service_client)
+
+if(NOT ${use_amqp} OR NOT ${use_http})
+    set (build_service_client OFF)
+    message(STATUS "iothub_service_client build is disabled (AMQP and HTTP support are required)")
+endif()
+
+if(${build_service_client})
+    add_subdirectory(iothub_service_client)
+endif()
+
 
 if(${run_e2e_tests} OR ${run_longhaul_tests} OR ${nuget_e2e_tests})
     add_subdirectory(testtools)
