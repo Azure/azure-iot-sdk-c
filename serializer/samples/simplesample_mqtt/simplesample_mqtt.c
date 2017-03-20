@@ -94,7 +94,6 @@ static void sendMessage(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const unsign
         }
         IoTHubMessage_Destroy(messageHandle);
     }
-    free((void*)buffer);
     messageTrackingId++;
 }
 
@@ -190,24 +189,7 @@ void simplesample_mqtt_run(void)
                             }
                             else
                             {
-                                IOTHUB_MESSAGE_HANDLE messageHandle = IoTHubMessage_CreateFromByteArray(destination, destinationSize);
-                                if (messageHandle == NULL)
-                                {
-                                    printf("unable to create a new IoTHubMessage\r\n");
-                                }
-                                else
-                                {
-                                    if (IoTHubClient_LL_SendEventAsync(iotHubClientHandle, messageHandle, sendCallback, (void*)1) != IOTHUB_CLIENT_OK)
-                                    {
-                                        printf("failed to hand over the message to IoTHubClient");
-                                    }
-                                    else
-                                    {
-                                        printf("IoTHubClient accepted the message for delivery\r\n");
-                                    }
-
-                                    IoTHubMessage_Destroy(messageHandle);
-                                }
+                                sendMessage(iotHubClientHandle, destination, destinationSize);
                                 free(destination);
                             }
                         }
