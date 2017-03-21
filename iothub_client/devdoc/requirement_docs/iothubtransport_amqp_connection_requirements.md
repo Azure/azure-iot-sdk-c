@@ -113,7 +113,7 @@ AMQP_CONNECTION_HANDLE amqp_connection_create(AMQP_CONNECTION_CONFIG* config);
 **SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_063: [**If `on_connection_state_changed` is called back, `instance->on_state_changed_callback` shall be invoked, if defined**]**
 **SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_064: [**If `on_connection_state_changed` new state is CONNECTION_STATE_OPENED, `instance->on_state_changed_callback` shall be invoked with state AMQP_CONNECTION_STATE_OPENED**]**
 **SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_065: [**If `on_connection_state_changed` new state is CONNECTION_STATE_END, `instance->on_state_changed_callback` shall be invoked with state AMQP_CONNECTION_STATE_CLOSED**]**
-**SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_071: [**If `on_connection_state_changed` new state is CONNECTION_STATE_ERROR, `instance->on_state_changed_callback` shall be invoked with state AMQP_CONNECTION_STATE_ERROR**]**
+**SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_071: [**If `on_connection_state_changed` new state is CONNECTION_STATE_ERROR or CONNECTION_STATE_DISCARDING, `instance->on_state_changed_callback` shall be invoked with state AMQP_CONNECTION_STATE_ERROR**]**
 
 #### on_connection_error
 **SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_022: [**If the connection calls back with an I/O error, `instance->on_state_changed_callback` shall be invoked if set passing code AMQP_CONNECTION_STATE_ERROR and `instance->on_state_changed_context`**]**
