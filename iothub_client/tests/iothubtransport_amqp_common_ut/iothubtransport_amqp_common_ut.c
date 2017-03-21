@@ -119,8 +119,13 @@ extern "C"
 
 #include "iothubtransport_amqp_common.h"
 
+TEST_DEFINE_ENUM_TYPE(AMQP_CONNECTION_STATE, AMQP_CONNECTION_STATE_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(AMQP_CONNECTION_STATE, AMQP_CONNECTION_STATE_VALUES);
+
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
+
+DEFINE_ENUM_STRINGS(AMQP_CONNECTION_STATE, AMQP_CONNECTION_STATE_VALUES);
 
 static bool g_failDispositionMake;
 static bool g_failDispositionSend;
@@ -681,13 +686,13 @@ static void set_expected_calls_for_get_new_underlying_io_transport(bool feed_opt
 	}
 }
 
-static void set_expected_calls_for_DoWork(PDLIST_ENTRY wts, int wts_length, DEVICE_STATE current_device_state, bool is_tls_io_acquired, bool is_using_cbs, bool is_connection_created, bool is_connection_open, int number_of_registered_devices, time_t current_time, bool subscribe_for_methods)
+static void set_expected_calls_for_DoWork2(PDLIST_ENTRY wts, int wts_length, DEVICE_STATE current_device_state, bool is_tls_io_acquired, bool feed_options, bool is_using_cbs, bool is_connection_created, bool is_connection_open, int number_of_registered_devices, time_t current_time, bool subscribe_for_methods)
 {
 	STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_REGISTERED_DEVICES_LIST));
 
 	if (!is_tls_io_acquired)
 	{
-		set_expected_calls_for_get_new_underlying_io_transport(false);
+		set_expected_calls_for_get_new_underlying_io_transport(feed_options);
 	}
 
 	if (!is_connection_created)
@@ -712,6 +717,11 @@ static void set_expected_calls_for_DoWork(PDLIST_ENTRY wts, int wts_length, DEVI
 	{
 		STRICT_EXPECTED_CALL(amqp_connection_do_work(TEST_AMQP_CONNECTION_HANDLE));
 	}
+}
+
+static void set_expected_calls_for_DoWork(PDLIST_ENTRY wts, int wts_length, DEVICE_STATE current_device_state, bool is_tls_io_acquired, bool is_using_cbs, bool is_connection_created, bool is_connection_open, int number_of_registered_devices, time_t current_time, bool subscribe_for_methods)
+{
+	set_expected_calls_for_DoWork2(wts, wts_length, current_device_state, is_tls_io_acquired, false /* feed_options */, is_using_cbs, is_connection_created, is_connection_open, number_of_registered_devices, current_time, subscribe_for_methods);
 }
 
 static void set_expected_calls_for_Destroy(int number_of_registered_devices, IOTHUB_DEVICE_HANDLE* registered_devices)
@@ -747,6 +757,35 @@ static void set_expected_calls_for_Unsubscribe(IOTHUB_DEVICE_CONFIG* device_conf
 	set_expected_calls_for_is_device_registered(device_config, registered_device);
 
 	STRICT_EXPECTED_CALL(device_unsubscribe_message(TEST_DEVICE_HANDLE));
+}
+
+static void set_expected_calls_for_prepare_device_for_connection_retry(DEVICE_STATE current_device_state)
+{
+	set_expected_calls_for_on_methods_unsubscribed();
+
+	if (current_device_state != DEVICE_STATE_STOPPED)
+	{
+		STRICT_EXPECTED_CALL(device_stop(TEST_DEVICE_HANDLE));
+	}
+}
+
+static void set_expected_calls_for_prepare_for_connection_retry(int number_of_registered_devices, DEVICE_STATE current_device_state)
+{
+	STRICT_EXPECTED_CALL(xio_retrieveoptions(TEST_UNDERLYING_IO_TRANSPORT))
+		.SetReturn(TEST_OPTIONHANDLER_HANDLE);
+
+	EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+
+	int i;
+	for (i = 0; i < number_of_registered_devices; i++)
+	{
+		EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+		set_expected_calls_for_prepare_device_for_connection_retry(current_device_state);
+		EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG));
+	}
+
+	STRICT_EXPECTED_CALL(amqp_connection_destroy(TEST_AMQP_CONNECTION_HANDLE));
+	STRICT_EXPECTED_CALL(xio_destroy(TEST_UNDERLYING_IO_TRANSPORT));
 }
 
 
@@ -3827,6 +3866,47 @@ TEST_FUNCTION(DoWork_success)
 	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
 	set_expected_calls_for_DoWork(&TEST_waitingToSend, 0, DEVICE_STATE_STARTED, true, true, true, true, 1, TEST_current_time, false);
+	IoTHubTransport_AMQP_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+	// assert
+	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+	// cleanup
+	destroy_transport(handle, device_handle, NULL);
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_115: [If the AMQP connection is closed by the service side, the connection retry logic shall be triggered]
+TEST_FUNCTION(on_amqp_connection_state_changed_CLOSED_unexpectedly)
+{
+	// arrange
+	initialize_test_variables();
+	TRANSPORT_LL_HANDLE handle = create_transport();
+
+	IOTHUB_DEVICE_CONFIG* device_config = create_device_config(TEST_DEVICE_ID_CHAR_PTR, true);
+	IOTHUB_DEVICE_HANDLE device_handle = register_device(handle, device_config, &TEST_waitingToSend, true);
+	ASSERT_IS_NOT_NULL(device_handle);
+
+	umock_c_reset_all_calls();
+
+	set_expected_calls_for_DoWork(&TEST_waitingToSend, 0, DEVICE_STATE_STOPPED, false, true, false, false, 1, TEST_current_time, false);
+	IoTHubTransport_AMQP_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+	TEST_amqp_connection_create_saved_on_state_changed_callback(
+		TEST_amqp_connection_create_saved_on_state_changed_context,
+		AMQP_CONNECTION_STATE_CLOSED, AMQP_CONNECTION_STATE_OPENED);
+
+	set_expected_calls_for_DoWork(&TEST_waitingToSend, 0, DEVICE_STATE_STOPPED, true, true, true, true, 1, TEST_current_time, false);
+	IoTHubTransport_AMQP_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+	// act
+	TEST_amqp_connection_create_saved_on_state_changed_callback(
+		TEST_amqp_connection_create_saved_on_state_changed_context,
+		AMQP_CONNECTION_STATE_OPENED, AMQP_CONNECTION_STATE_CLOSED);
+
+	set_expected_calls_for_prepare_for_connection_retry(1, DEVICE_STATE_STOPPED);
+	IoTHubTransport_AMQP_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+	set_expected_calls_for_DoWork2(&TEST_waitingToSend, 0, DEVICE_STATE_STOPPED, false, true, true, false, false, 1, TEST_current_time, false);
 	IoTHubTransport_AMQP_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
 
 	// assert
