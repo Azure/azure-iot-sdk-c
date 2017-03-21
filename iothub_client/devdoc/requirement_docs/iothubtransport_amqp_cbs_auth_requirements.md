@@ -135,7 +135,7 @@ void authentication_do_work(AUTHENTICATION_HANDLE authentication_handle)
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_036: [**If authentication_handle is NULL, authentication_do_work() shall fail and return**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_037: [**If `instance->state` is not AUTHENTICATION_STATE_STARTING or AUTHENTICATION_STATE_STARTED, authentication_do_work() shall fail and return**]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_038: [**If `instance->is_cbs_put_token_in_progress` is TRUE, authentication_do_work() shall only verify the authentication timeout**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_038: [**If `instance->is_cbs_put_token_async_in_progress` is TRUE, authentication_do_work() shall only verify the authentication timeout**]**
 Note: see "Authentication and SAS token refresh timeout" below.
 
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_039: [**If `instance->state` is AUTHENTICATION_STATE_STARTED and device keys were used, authentication_do_work() shall only verify the SAS token refresh time**]**
@@ -154,14 +154,14 @@ Note: see "Device Key authentication" below.
 
 #### SAS token authentication
 
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_043: [**authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to TRUE**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_043: [**authentication_do_work() shall set `instance->is_cbs_put_token_async_in_progress` to TRUE**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_044: [**A STRING_HANDLE, referred to as `devices_path`, shall be created from the following parts: iothub_host_fqdn + "/devices/" + device_id**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_045: [**If `devices_path` failed to be created, authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to FALSE and return**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_046: [**The SAS token provided shall be sent to CBS using cbs_put_token(), using `servicebus.windows.net:sastoken` as token type, `devices_path` as audience and passing on_cbs_put_token_complete_callback**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_047: [**If cbs_put_token() succeeds, authentication_do_work() shall set `instance->current_sas_token_put_time` with current time**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_048: [**If cbs_put_token() failed, authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to FALSE, destroy `devices_path` and return**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_121: [**If cbs_put_token() fails, `instance->state` shall be updated to AUTHENTICATION_STATE_ERROR and `instance->on_state_changed_callback` invoked**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_122: [**If cbs_put_token() fails, `instance->on_error_callback` shall be invoked with AUTHENTICATION_ERROR_AUTH_FAILED**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_045: [**If `devices_path` failed to be created, authentication_do_work() shall set `instance->is_cbs_put_token_async_in_progress` to FALSE and return**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_046: [**The SAS token provided shall be sent to CBS using cbs_put_token_async(), using `servicebus.windows.net:sastoken` as token type, `devices_path` as audience and passing on_cbs_put_token_complete_callback**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_047: [**If cbs_put_token_async() succeeds, authentication_do_work() shall set `instance->current_sas_token_put_time` with current time**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_048: [**If cbs_put_token_async() failed, authentication_do_work() shall set `instance->is_cbs_put_token_async_in_progress` to FALSE, destroy `devices_path` and return**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_121: [**If cbs_put_token_async() fails, `instance->state` shall be updated to AUTHENTICATION_STATE_ERROR and `instance->on_state_changed_callback` invoked**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_122: [**If cbs_put_token_async() fails, `instance->on_error_callback` shall be invoked with AUTHENTICATION_ERROR_AUTH_FAILED**]**
 
 Note: see "on_cbs_put_token_complete_callback" below. 
 
@@ -182,12 +182,12 @@ Note: see "on_cbs_put_token_complete_callback" below.
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_116: [**If `sasTokenKeyName` failed to be created, authentication_do_work() shall fail and return**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_055: [**The SAS token shall be created using SASToken_Create(), passing the selected device key, `device_path`, `sasTokenKeyName` and expiration time as arguments**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_056: [**If SASToken_Create() fails, authentication_do_work() shall fail and return**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_057: [**authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to TRUE**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_058: [**The SAS token shall be sent to CBS using cbs_put_token(), using `servicebus.windows.net:sastoken` as token type, `devices_path` as audience and passing on_cbs_put_token_complete_callback**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_059: [**If cbs_put_token() succeeds, authentication_do_work() shall set `instance->current_sas_token_put_time` with current time**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_060: [**If cbs_put_token() fails, `instance->is_cbs_put_token_in_progress` shall be set to FALSE**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_061: [**If cbs_put_token() fails, `instance->state` shall be updated to AUTHENTICATION_STATE_ERROR and `instance->on_state_changed_callback` invoked**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_062: [**If cbs_put_token() fails, `instance->on_error_callback` shall be invoked with AUTHENTICATION_ERROR_AUTH_FAILED**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_057: [**authentication_do_work() shall set `instance->is_cbs_put_token_async_in_progress` to TRUE**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_058: [**The SAS token shall be sent to CBS using cbs_put_token_async(), using `servicebus.windows.net:sastoken` as token type, `devices_path` as audience and passing on_cbs_put_token_complete_callback**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_059: [**If cbs_put_token_async() succeeds, authentication_do_work() shall set `instance->current_sas_token_put_time` with current time**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_060: [**If cbs_put_token_async() fails, `instance->is_cbs_put_token_async_in_progress` shall be set to FALSE**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_061: [**If cbs_put_token_async() fails, `instance->state` shall be updated to AUTHENTICATION_STATE_ERROR and `instance->on_state_changed_callback` invoked**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_062: [**If cbs_put_token_async() fails, `instance->on_error_callback` shall be invoked with AUTHENTICATION_ERROR_AUTH_FAILED**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_063: [**authentication_do_work() shall free the memory it allocated for `devices_path`, `sasTokenKeyName` and SAS token**]**
 
 Note: see "on_cbs_put_token_complete_callback" below.
@@ -209,14 +209,14 @@ The requirements below apply to the creation of the SAS token and putting it to 
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_118: [**If `sasTokenKeyName` failed to be created, authentication_do_work() shall fail and return**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_073: [**The SAS token shall be created using SASToken_Create(), passing the selected device key, device_path, sasTokenKeyName and expiration time as arguments**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_074: [**If SASToken_Create() fails, authentication_do_work() shall fail and return**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_075: [**authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to TRUE**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_075: [**authentication_do_work() shall set `instance->is_cbs_put_token_async_in_progress` to TRUE**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_119: [**authentication_do_work() shall set `instance->is_sas_token_refresh_in_progress` to TRUE**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_076: [**The SAS token shall be sent to CBS using cbs_put_token(), using `servicebus.windows.net:sastoken` as token type, `devices_path` as audience and passing on_cbs_put_token_complete_callback**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_077: [**If cbs_put_token() succeeds, authentication_do_work() shall set `instance->current_sas_token_put_time` with the current time**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_078: [**If cbs_put_token() fails, `instance->is_cbs_put_token_in_progress` shall be set to FALSE**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_120: [**If cbs_put_token() fails, `instance->is_sas_token_refresh_in_progress` shall be set to FALSE**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_079: [**If cbs_put_token() fails, `instance->state` shall be updated to AUTHENTICATION_STATE_ERROR and `instance->on_state_changed_callback` invoked**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_080: [**If cbs_put_token() fails, `instance->on_error_callback` shall be invoked with AUTHENTICATION_ERROR_SAS_REFRESH_FAILED**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_076: [**The SAS token shall be sent to CBS using cbs_put_token_async(), using `servicebus.windows.net:sastoken` as token type, `devices_path` as audience and passing on_cbs_put_token_complete_callback**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_077: [**If cbs_put_token_async() succeeds, authentication_do_work() shall set `instance->current_sas_token_put_time` with the current time**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_078: [**If cbs_put_token_async() fails, `instance->is_cbs_put_token_async_in_progress` shall be set to FALSE**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_120: [**If cbs_put_token_async() fails, `instance->is_sas_token_refresh_in_progress` shall be set to FALSE**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_079: [**If cbs_put_token_async() fails, `instance->state` shall be updated to AUTHENTICATION_STATE_ERROR and `instance->on_state_changed_callback` invoked**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_080: [**If cbs_put_token_async() fails, `instance->on_error_callback` shall be invoked with AUTHENTICATION_ERROR_SAS_REFRESH_FAILED**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_081: [**authentication_do_work() shall free the memory it allocated for `devices_path`, `sasTokenKeyName` and SAS token**]**
 
 
@@ -226,7 +226,7 @@ The requirements below apply to the creation of the SAS token and putting it to 
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_084: [**If no timeout has occurred, authentication_do_work() shall return**]**
 
 If the authentication has timed out,
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_085: [**`instance->is_cbs_put_token_in_progress` shall be set to FALSE**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_085: [**`instance->is_cbs_put_token_async_in_progress` shall be set to FALSE**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_086: [**`instance->state` shall be updated to AUTHENTICATION_STATE_ERROR and `instance->on_state_changed_callback` invoked**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_087: [**If `instance->is_sas_token_refresh_in_progress` is TRUE, `instance->on_error_callback` shall be invoked with AUTHENTICATION_ERROR_SAS_REFRESH_TIMEOUT**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_088: [**If `instance->is_sas_token_refresh_in_progress` is FALSE, `instance->on_error_callback` shall be invoked with AUTHENTICATION_ERROR_AUTH_TIMEOUT**]**
@@ -243,7 +243,7 @@ static void on_cbs_put_token_complete_callback(void* context, CBS_OPERATION_RESU
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_092: [**If `result` is not CBS_OPERATION_RESULT_OK `instance->state` shall be set to AUTHENTICATION_STATE_ERROR and `instance->on_state_changed_callback` invoked**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_093: [**If `result` is not CBS_OPERATION_RESULT_OK and `instance->is_sas_token_refresh_in_progress` is FALSE, `instance->on_error_callback`shall be invoked with AUTHENTICATION_ERROR_AUTH_FAILED**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_094: [**If `result` is not CBS_OPERATION_RESULT_OK and `instance->is_sas_token_refresh_in_progress` is TRUE, `instance->on_error_callback`shall be invoked with AUTHENTICATION_ERROR_SAS_REFRESH_FAILED**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_095: [**`instance->is_sas_token_refresh_in_progress` and `instance->is_cbs_put_token_in_progress` shall be set to FALSE**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_095: [**`instance->is_sas_token_refresh_in_progress` and `instance->is_cbs_put_token_async_in_progress` shall be set to FALSE**]**
 
 
 

@@ -100,9 +100,9 @@ AMQP_CONNECTION_HANDLE amqp_connection_create(AMQP_CONNECTION_CONFIG* config);
 
 ### Creating the CBS instance
 **SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_028: [**Only if `config->create_cbs_connection` is true, amqp_connection_create() shall create and open the CBS_HANDLE**]**
-**SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_029: [**`instance->cbs_handle` shall be created using cbs_create(), passing `instance->session_handle`**]**
+**SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_029: [**`instance->cbs_handle` shall be created using cbs_create()**]**
 **SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_030: [**If cbs_create() fails, amqp_connection_create() shall fail and return NULL**]**
-**SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_031: [**`instance->cbs_handle` shall be opened using cbs_open()**]**
+**SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_031: [**`instance->cbs_handle` shall be opened using `cbs_open_async`**]**
 **SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_032: [**If cbs_open() fails, amqp_connection_create() shall fail and return NULL**]**
 
 ### General

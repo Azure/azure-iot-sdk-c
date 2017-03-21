@@ -136,6 +136,22 @@ static void on_connection_state_changed(void* context, CONNECTION_STATE new_conn
 	}
 }
 
+static void on_cbs_open_complete(void* context, CBS_OPEN_COMPLETE_RESULT open_complete_result)
+{
+    (void)context;
+    (void)open_complete_result;
+    if (open_complete_result != CBS_OPEN_OK)
+    {
+        LogError("CBS open failed");
+    }
+}
+
+static void on_cbs_error(void* context)
+{
+    (void)context;
+    LogError("CBS Error occured");
+}
+
 static int create_connection_handle(AMQP_CONNECTION_INSTANCE* instance)
 {
 	int result;
@@ -234,15 +250,15 @@ static int create_cbs_handle(AMQP_CONNECTION_INSTANCE* instance)
 {
 	int result;
 
-	// Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_029: [`instance->cbs_handle` shall be created using cbs_create(), passing `instance->session_handle`]
-	if ((instance->cbs_handle = cbs_create(instance->session_handle, NULL, (void*)instance)) == NULL)
+	// Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_029: [`instance->cbs_handle` shall be created using cbs_create()`]
+	if ((instance->cbs_handle = cbs_create(instance->session_handle)) == NULL)
 	{
 		// Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_030: [If cbs_create() fails, amqp_connection_create() shall fail and return NULL]
 		result = __FAILURE__;
 		LogError("Failed to create the CBS connection.");
 	}
-	// Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_031: [`instance->cbs_handle` shall be opened using cbs_open()]
-	else if (cbs_open(instance->cbs_handle) != RESULT_OK)
+	// Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_031: [`instance->cbs_handle` shall be opened using `cbs_open_async`]
+	else if (cbs_open_async(instance->cbs_handle, on_cbs_open_complete, instance->cbs_handle, on_cbs_error, instance->cbs_handle) != RESULT_OK)
 	{
 		// Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_032: [If cbs_open() fails, amqp_connection_create() shall fail and return NULL]
 		result = __FAILURE__;

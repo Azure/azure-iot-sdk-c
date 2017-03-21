@@ -306,7 +306,7 @@ static int put_SAS_token_to_cbs(AUTHENTICATION_INSTANCE* instance, STRING_HANDLE
 	// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_076: [The SAS token shall be sent to CBS using cbs_put_token(), using `servicebus.windows.net:sastoken` as token type, `devices_path` as audience and passing on_cbs_put_token_complete_callback]
     const char* sas_token_c_str = STRING_c_str(sas_token);
     const char* cbs_audience_c_str = STRING_c_str(cbs_audience);
-	if (cbs_put_token(instance->cbs_handle, SAS_TOKEN_TYPE, cbs_audience_c_str, sas_token_c_str, on_cbs_put_token_complete_callback, instance) != RESULT_OK)
+	if (cbs_put_token_async(instance->cbs_handle, SAS_TOKEN_TYPE, cbs_audience_c_str, sas_token_c_str, on_cbs_put_token_complete_callback, instance) != RESULT_OK)
 	{
 		// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_048: [If cbs_put_token() failed, authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to FALSE, destroy `devices_path` and return]
 		// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_060: [If cbs_put_token() fails, `instance->is_cbs_put_token_in_progress` shall be set to FALSE]

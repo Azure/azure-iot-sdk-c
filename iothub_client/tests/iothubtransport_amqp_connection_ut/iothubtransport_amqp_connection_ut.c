@@ -108,14 +108,18 @@ static void TEST_free(void* ptr)
 	real_free(ptr);
 }
 
-static ON_AMQP_MANAGEMENT_STATE_CHANGED saved_cbs_create_on_amqp_management_state_changed;
-static void* saved_cbs_create_callback_context;
-static CBS_HANDLE TEST_cbs_create(SESSION_HANDLE session, ON_AMQP_MANAGEMENT_STATE_CHANGED on_amqp_management_state_changed, void* callback_context)
+static ON_CBS_OPEN_COMPLETE saved_on_cbs_open_complete;
+static void* saved_on_cbs_open_complete_context;
+static ON_CBS_ERROR saved_on_cbs_error;
+static void* saved_on_cbs_error_context;
+static int TEST_cbs_open_async(CBS_HANDLE cbs, ON_CBS_OPEN_COMPLETE on_cbs_open_complete, void* on_cbs_open_complete_context, ON_CBS_ERROR on_cbs_error, void* on_cbs_error_context)
 {
-	(void)session;
-	saved_cbs_create_on_amqp_management_state_changed = on_amqp_management_state_changed;
-	saved_cbs_create_callback_context = callback_context;
-	return TEST_CBS_HANDLE;
+	(void)cbs;
+    saved_on_cbs_open_complete = on_cbs_open_complete;
+    saved_on_cbs_open_complete_context = on_cbs_open_complete_context;
+    saved_on_cbs_error = on_cbs_error;
+    saved_on_cbs_error_context = on_cbs_error_context;
+    return 0;
 }
 
 static ON_CONNECTION_STATE_CHANGED connection_create2_on_connection_state_changed;
@@ -216,10 +220,8 @@ static void set_exp_calls_for_amqp_connection_create(AMQP_CONNECTION_CONFIG* amq
 	// CBS
 	if (amqp_connection_config->create_cbs_connection)
 	{
-		STRICT_EXPECTED_CALL(cbs_create(TEST_SESSION_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-			.IgnoreArgument(2)
-			.IgnoreArgument(3);
-		STRICT_EXPECTED_CALL(cbs_open(TEST_CBS_HANDLE));
+		STRICT_EXPECTED_CALL(cbs_create(TEST_SESSION_HANDLE));
+		STRICT_EXPECTED_CALL(cbs_open_async(TEST_CBS_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 	}
 }
 
@@ -277,14 +279,16 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 	REGISTER_UMOCK_ALIAS_TYPE(ON_AMQP_MANAGEMENT_STATE_CHANGED, void*);
 	REGISTER_UMOCK_ALIAS_TYPE(CBS_HANDLE, void*);
 	REGISTER_UMOCK_ALIAS_TYPE(ON_LINK_ATTACHED, void*);
-	
+    REGISTER_UMOCK_ALIAS_TYPE(ON_CBS_OPEN_COMPLETE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(ON_CBS_ERROR, void*);
 
 	REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, TEST_malloc);
 	REGISTER_GLOBAL_MOCK_HOOK(malloc, TEST_malloc);
 	REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, TEST_free);
 	REGISTER_GLOBAL_MOCK_HOOK(free, TEST_free);
-	REGISTER_GLOBAL_MOCK_HOOK(cbs_create, TEST_cbs_create);
-	REGISTER_GLOBAL_MOCK_HOOK(connection_create2, TEST_connection_create2);
+    REGISTER_GLOBAL_MOCK_RETURN(cbs_create, TEST_CBS_HANDLE);
+    REGISTER_GLOBAL_MOCK_HOOK(cbs_open_async, TEST_cbs_open_async);
+    REGISTER_GLOBAL_MOCK_HOOK(connection_create2, TEST_connection_create2);
 
 
 	REGISTER_GLOBAL_MOCK_RETURN(saslmssbcbs_get_interface, TEST_SASL_INTERFACE_HANDLE);
@@ -320,8 +324,8 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 	REGISTER_GLOBAL_MOCK_RETURN(cbs_create, TEST_CBS_HANDLE);
 	REGISTER_GLOBAL_MOCK_FAIL_RETURN(cbs_create, NULL);
 
-	REGISTER_GLOBAL_MOCK_RETURN(cbs_open, 0);
-	REGISTER_GLOBAL_MOCK_FAIL_RETURN(cbs_open, 1);
+	REGISTER_GLOBAL_MOCK_RETURN(cbs_open_async, 0);
+	REGISTER_GLOBAL_MOCK_FAIL_RETURN(cbs_open_async, 1);
 
 	REGISTER_GLOBAL_MOCK_RETURN(xio_setoption, 0);
 	REGISTER_GLOBAL_MOCK_FAIL_RETURN(xio_setoption, 1);
@@ -432,8 +436,8 @@ TEST_FUNCTION(amqp_connection_create_NULL_underlying_io_transport)
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_027: [The `instance->session_handle` outgoing window size shall be set as 100 using session_set_outgoing_window()]
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_028: [Only if `config->create_cbs_connection` is true, amqp_connection_create() shall create and open the CBS_HANDLE]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_029: [`instance->cbs_handle` shall be created using cbs_create(), passing `instance->session_handle`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_031: [`instance->cbs_handle` shall be opened using cbs_open()]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_029: [`instance->cbs_handle` shall be created using cbs_create()`]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_031: [`instance->cbs_handle` shall be opened using `cbs_open_async`]
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_034: [If no failures occur, amqp_connection_create() shall return the handle to the connection state]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_073: [The connection idle timeout parameter shall be set to 240000 milliseconds using connection_set_idle_timeout()]
