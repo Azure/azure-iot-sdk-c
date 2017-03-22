@@ -1,0 +1,3 @@
+sudo apt-get -y install python-pip
+sudo -H pip install --upgrade pip
+sudo -H pip install docker-compose
