@@ -129,8 +129,8 @@ static void on_connection_state_changed(void* context, CONNECTION_STATE new_conn
 	{
 		update_state(instance, AMQP_CONNECTION_STATE_CLOSED);
 	}
-	// Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_071: [If `on_connection_state_changed` new state is CONNECTION_STATE_ERROR, `instance->on_state_changed_callback` shall be invoked with state AMQP_CONNECTION_STATE_ERROR]
-	else if (new_connection_state == CONNECTION_STATE_ERROR)
+	// Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_071: [If `on_connection_state_changed` new state is CONNECTION_STATE_ERROR or CONNECTION_STATE_DISCARDING, `instance->on_state_changed_callback` shall be invoked with state AMQP_CONNECTION_STATE_ERROR]
+	else if (new_connection_state == CONNECTION_STATE_ERROR || new_connection_state == CONNECTION_STATE_DISCARDING)
 	{
 		update_state(instance, AMQP_CONNECTION_STATE_ERROR);
 	}

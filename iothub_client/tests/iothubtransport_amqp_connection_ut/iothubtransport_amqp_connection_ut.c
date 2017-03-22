@@ -564,33 +564,51 @@ TEST_FUNCTION(amqp_connection_create_SASL_and_CBS_negative_checks)
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_063: [If `on_connection_state_changed` is called back, `instance->on_state_changed_callback` shall be invoked, if defined]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_064: [If `on_connection_state_changed` new state is CONNECTION_STATE_OPENED, `instance->on_state_changed_callback` shall be invoked with state AMQP_CONNECTION_STATE_OPENED]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_065: [If `on_connection_state_changed` new state is CONNECTION_STATE_END or CONNECTION_STATE_ERROR, `instance->on_state_changed_callback` shall be invoked with state AMQP_CONNECTION_STATE_CLOSED]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_071: [If `on_connection_state_changed` new state is CONNECTION_STATE_ERROR, `instance->on_state_changed_callback` shall be invoked with state AMQP_CONNECTION_STATE_ERROR]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_071: [If `on_connection_state_changed` new state is CONNECTION_STATE_ERROR or CONNECTION_STATE_DISCARDING, `instance->on_state_changed_callback` shall be invoked with state AMQP_CONNECTION_STATE_ERROR]
 TEST_FUNCTION(amqp_connection_create_on_connection_state_changed)
 {
 	// arrange
-	CONNECTION_STATE previous_connection_state[4];
+	#define NUMBER_OF_TRANSITIONS 8
+
+	CONNECTION_STATE previous_connection_state[NUMBER_OF_TRANSITIONS];
 	previous_connection_state[0] = CONNECTION_STATE_END;
 	previous_connection_state[1] = CONNECTION_STATE_OPENED;
 	previous_connection_state[2] = CONNECTION_STATE_ERROR;
 	previous_connection_state[3] = CONNECTION_STATE_END;
+	previous_connection_state[4] = CONNECTION_STATE_ERROR;
+	previous_connection_state[5] = CONNECTION_STATE_DISCARDING;
+	previous_connection_state[6] = CONNECTION_STATE_END;
+	previous_connection_state[7] = CONNECTION_STATE_OPENED;
 
-	CONNECTION_STATE new_connection_state[4];
+	CONNECTION_STATE new_connection_state[NUMBER_OF_TRANSITIONS];
 	new_connection_state[0] = CONNECTION_STATE_OPENED;
 	new_connection_state[1] = CONNECTION_STATE_ERROR;
 	new_connection_state[2] = CONNECTION_STATE_END;
 	new_connection_state[3] = CONNECTION_STATE_ERROR;
+	new_connection_state[4] = CONNECTION_STATE_DISCARDING;
+	new_connection_state[5] = CONNECTION_STATE_END;
+	new_connection_state[6] = CONNECTION_STATE_OPENED;
+	new_connection_state[7] = CONNECTION_STATE_DISCARDING;
 
-	AMQP_CONNECTION_STATE previous_amqp_connection_state[4];
+	AMQP_CONNECTION_STATE previous_amqp_connection_state[NUMBER_OF_TRANSITIONS];
 	previous_amqp_connection_state[0] = AMQP_CONNECTION_STATE_CLOSED;
 	previous_amqp_connection_state[1] = AMQP_CONNECTION_STATE_OPENED;
 	previous_amqp_connection_state[2] = AMQP_CONNECTION_STATE_ERROR;
 	previous_amqp_connection_state[3] = AMQP_CONNECTION_STATE_CLOSED;
+	previous_amqp_connection_state[4] = AMQP_CONNECTION_STATE_CLOSED;
+	previous_amqp_connection_state[5] = AMQP_CONNECTION_STATE_ERROR;
+	previous_amqp_connection_state[6] = AMQP_CONNECTION_STATE_CLOSED;
+	previous_amqp_connection_state[7] = AMQP_CONNECTION_STATE_OPENED;
 
-	AMQP_CONNECTION_STATE new_amqp_connection_state[4];
+	AMQP_CONNECTION_STATE new_amqp_connection_state[NUMBER_OF_TRANSITIONS];
 	new_amqp_connection_state[0] = AMQP_CONNECTION_STATE_OPENED;
 	new_amqp_connection_state[1] = AMQP_CONNECTION_STATE_ERROR;
 	new_amqp_connection_state[2] = AMQP_CONNECTION_STATE_CLOSED;
 	new_amqp_connection_state[3] = AMQP_CONNECTION_STATE_ERROR;
+	new_amqp_connection_state[4] = AMQP_CONNECTION_STATE_ERROR;
+	new_amqp_connection_state[5] = AMQP_CONNECTION_STATE_CLOSED;
+	new_amqp_connection_state[6] = AMQP_CONNECTION_STATE_OPENED;
+	new_amqp_connection_state[7] = AMQP_CONNECTION_STATE_ERROR;
 
 
 	AMQP_CONNECTION_CONFIG* config = get_amqp_connection_config();
@@ -607,7 +625,7 @@ TEST_FUNCTION(amqp_connection_create_on_connection_state_changed)
 
 	// act
 	int i;
-	for (i = 0; i < 4; i++)
+	for (i = 0; i < NUMBER_OF_TRANSITIONS; i++)
 	{
 		// act
 		connection_create2_on_connection_state_changed(handle, new_connection_state[i], previous_connection_state[i]);
@@ -619,6 +637,8 @@ TEST_FUNCTION(amqp_connection_create_on_connection_state_changed)
 
 	// cleanup
 	amqp_connection_destroy(handle);
+	
+	#undef NUMBER_OF_TRANSITIONS
 }
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_022: [If the connection calls back with an I/O error, `instance->on_state_changed_callback` shall be invoked if set passing code AMQP_CONNECTION_STATE_ERROR and `instance->on_state_changed_context`]
