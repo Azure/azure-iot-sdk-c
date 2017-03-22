@@ -17,7 +17,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     #on Linux, enable valgrind
     #these commands (MEMORYCHECK...) need to apear BEFORE include(CTest) or they will not have any effect
     find_program(MEMORYCHECK_COMMAND valgrind)
-    set(MEMORYCHECK_COMMAND_OPTIONS "--trace-children=yes --leak-check=full --error-exitcode=1")
+    set(MEMORYCHECK_COMMAND_OPTIONS "--leak-check=full --error-exitcode=1")
 endif()
 
 include (CTest)
@@ -56,6 +56,7 @@ option(no_logging "disable logging" OFF)
 option(use_installed_dependencies "set use_installed_dependencies to ON to use installed packages instead of building dependencies from submodules" OFF)
 option(use_firmware_update "build the Raspberry PI firmware_update sample" OFF)
 option(build_as_dynamic "build the IoT SDK libaries as dynamic"  OFF)
+option(build_network_e2e "build network E2E tests" OFF)
 
 #Work in progress features
 #=========================
@@ -259,4 +260,8 @@ if(${use_installed_dependencies})
 
 else()
     message(WARNING "This package may only be installed when 'use_installed_dependencies' is ON")
+endif()
+
+if (${build_network_e2e})
+    add_subdirectory(network_e2e/tests)
 endif()
