@@ -32,11 +32,18 @@ IF(WIN32)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
     # Make warning as error
     add_definitions(/WX)
-ELSE()
+ELSEIF(APPLE)
     # Make warning as error
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+ELSE()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
-ENDIF(WIN32)
+ENDIF()
+
+IF(APPLE)
+    SET(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
+ENDIF(APPLE)
 
 #the following variables are project-wide and can be used with cmake-gui
 option(use_amqp "set use_amqp to ON if amqp is to be used, set to OFF to not use amqp" ON)
