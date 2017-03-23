@@ -7,10 +7,6 @@ if(NOT (${use_amqp}))
    message(FATAL_ERROR "iothubclient_amqp_ws_e2e being generated without AMQP support")
 endif()
 
-if(NOT (${use_wsio}))
-   message(FATAL_ERROR "iothubclient_amqp_ws_e2e being generated without WebSockets support")
-endif()
-
 compileAsC11()
 set(theseTestsName iothubclient_amqp_ws_e2e)
 
@@ -75,6 +71,18 @@ if(WIN32)
         )
     endif()
 else()
+    if(UNIX) #LINUX OR APPLE
+        find_package(PkgConfig REQUIRED)
+        pkg_search_module(UUID REQUIRED uuid)
+        link_directories(${UUID_LIBRARY_DIRS})
+    endif()
+
+    if(APPLE)
+        target_link_libraries(${theseTestsName}_exe -L${UUID_LIBRARY_DIRS} pthread ${UUID_LIBRARIES})
+    elseif(LINUX)
+        target_link_libraries(${theseTestsName}_exe pthread ${UUID_LIBRARIES})
+    endif()
+
    if(TARGET ${theseTestsName}_exe)
         target_link_libraries(${theseTestsName}_exe
             iothub_test
@@ -83,7 +91,7 @@ else()
             iothub_service_client
             aziotsharedutil
         )
-        target_link_libraries(${theseTestsName}_exe pthread uuid)
+        target_link_libraries(${theseTestsName}_exe)
         linkSharedUtil(${theseTestsName}_exe)
         linkUAMQP(${theseTestsName}_exe)        
    endif()

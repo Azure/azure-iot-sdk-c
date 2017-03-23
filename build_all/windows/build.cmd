@@ -35,7 +35,6 @@ set build-platform=Win32
 set CMAKE_run_e2e_tests=OFF
 set CMAKE_run_longhaul_tests=OFF
 set CMAKE_run_unittests=OFF
-set CMAKE_use_wsio=OFF
 set MAKE_NUGET_PKG=no
 set CMAKE_DIR=iotsdk_win32
 set build-samples=yes
@@ -52,7 +51,6 @@ if "%1" equ "--platform" goto arg-build-platform
 if "%1" equ "--run-e2e-tests" goto arg-run-e2e-tests
 if "%1" equ "--run-longhaul-tests" goto arg-longhaul-tests
 if "%1" equ "--run-unittests" goto arg-run-unittests
-if "%1" equ "--use-websockets" goto arg-use-websockets
 if "%1" equ "--make_nuget" goto arg-build-nuget
 if "%1" equ "--cmake-root" goto arg-cmake-root
 if "%1" equ "--no-make" goto arg-no-make
@@ -91,10 +89,6 @@ goto args-continue
 
 :arg-run-unittests
 set CMAKE_run_unittests=ON
-goto args-continue
-
-:arg-use-websockets
-set CMAKE_use_wsio=ON
 goto args-continue
 
 :arg-build-nuget
@@ -254,7 +248,7 @@ pushd %cmake-root%\cmake\%CMAKE_DIR%
 
 if %MAKE_NUGET_PKG% == yes (
     echo ***Running CMAKE for Win32***
-    cmake %build-root% -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods%
+    cmake %build-root% -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods%
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
     popd
 	
@@ -266,7 +260,7 @@ if %MAKE_NUGET_PKG% == yes (
 	rem no error checking
 
 	pushd %cmake-root%\cmake\iotsdk_x64
-	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods% %build-root%  -G "Visual Studio 14 Win64"
+	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods% %build-root%  -G "Visual Studio 14 Win64"
 	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
     popd
 
@@ -278,20 +272,20 @@ if %MAKE_NUGET_PKG% == yes (
 	rem no error checking
 
 	pushd %cmake-root%\cmake\iotsdk_arm
-	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods% %build-root%  -G "Visual Studio 14 ARM"
+	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods% %build-root%  -G "Visual Studio 14 ARM"
 	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 ) else if %build-platform% == x64 (
 	echo ***Running CMAKE for Win64***
-	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods% %build-root%  -G "Visual Studio 14 Win64"
+	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods% %build-root%  -G "Visual Studio 14 Win64"
 	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 ) else if %build-platform% == arm (
 	echo ***Running CMAKE for ARM***
-	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods% %build-root%  -G "Visual Studio 14 ARM"
+	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods% %build-root%  -G "Visual Studio 14 ARM"
 	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 ) else (
 	echo ***Running CMAKE for Win32***
-	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods% %build-root% 
+	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods% %build-root% 
 	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 )
 
@@ -358,7 +352,6 @@ echo  --platform ^<value^>          [Win32] build platform (e.g. Win32, x64, arm
 echo  --make_nuget ^<value^>        [no] generates the binaries to be used for nuget packaging (e.g. yes, no)
 echo  --run-e2e-tests               run end-to-end tests
 echo  --run-longhaul-tests          run long-haul tests
-echo  --use-websockets              Enables the support for AMQP over WebSockets.
 echo  --cmake-root		                Directory to place the cmake files used for building the project
 echo  --no-make                     Surpress building the code
 echo  --build-traceabilitytool      Builds an internal tool (traceabilitytool) to check for requirements/code/test consistency

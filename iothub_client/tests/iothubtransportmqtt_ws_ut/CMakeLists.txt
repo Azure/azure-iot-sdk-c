@@ -6,9 +6,6 @@ cmake_minimum_required(VERSION 2.8.11)
 if(NOT ${use_mqtt})
 	message(FATAL_ERROR "iothubtransportmqtt_ws_ut being generated without mqtt support")
 endif()
-if (NOT ${use_wsio})
-	message(FATAL_ERROR "iothubtransportmqtt_ws_ut being generated without wsio support")
-endif()
 
 set(theseTestsName iothubtransportmqtt_ws_ut)
 

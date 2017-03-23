@@ -18,12 +18,6 @@ if(${use_installed_dependencies})
         endif()
     endif()	
 
-    if(${use_wsio})
-        if(NOT libwebsockets_FOUND)
-            find_package(libwebsockets REQUIRED CONFIG)
-        endif()
-    endif()
-
 else()
     add_subdirectory(c-utility)
 

@@ -116,7 +116,7 @@ Follow these steps to build the sample:
    cd azure-iot-sdk-c
    mkdir cmake
    cd cmake
-   cmake -Duse_wsio=ON -G "Visual Studio 14 2015" ..
+   cmake -G "Visual Studio 14 2015" ..
    cmake --build . -- /m /p:Configuration=Release
    ```
 

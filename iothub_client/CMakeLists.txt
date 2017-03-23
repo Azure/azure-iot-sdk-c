@@ -139,37 +139,33 @@ if(${use_amqp})
         ${iothub_client_amqp_transport_h_files}
     )
 
-    if (${use_wsio})
-        set(iothub_client_amqp_ws_transport_c_files
-            ${iothub_client_amqp_transport_common_c_files}
-            ./src/iothubtransportamqp_websockets.c
-        )
+    set(iothub_client_amqp_ws_transport_c_files
+        ${iothub_client_amqp_transport_common_c_files}
+        ./src/iothubtransportamqp_websockets.c
+    )
         
-        set(iothub_client_amqp_ws_transport_h_files
-            ${iothub_client_amqp_transport_common_h_files}
-            ./inc/iothubtransportamqp_websockets.h
-        )
-        
-        set(iothub_client_h_install_files
-            ${iothub_client_h_install_files}
-            ./inc/iothubtransportamqp_websockets.h
-        )
-    endif()
+    set(iothub_client_amqp_ws_transport_h_files
+        ${iothub_client_amqp_transport_common_h_files}
+        ./inc/iothubtransportamqp_websockets.h
+    )
+
+    set(iothub_client_h_install_files
+        ${iothub_client_h_install_files}
+        ./inc/iothubtransportamqp_websockets.h
+    )
 endif()
 
 if(${use_mqtt})
-    if (${use_wsio})
-        set(iothub_client_mqtt_ws_transport_c_files
-            ${iothub_client_ll_transport_c_files}
-            ./src/iothubtransport_mqtt_common.c
-            ./src/iothubtransportmqtt_websockets.c
-        )
-        set(iothub_client_mqtt_ws_transport_h_files
-            ${iothub_client_ll_transport_h_files}
-            ./inc/iothubtransport_mqtt_common.h
-            ./inc/iothubtransportmqtt_websockets.h
-        )
-    endif()
+    set(iothub_client_mqtt_ws_transport_c_files
+        ${iothub_client_ll_transport_c_files}
+        ./src/iothubtransport_mqtt_common.c
+        ./src/iothubtransportmqtt_websockets.c
+    )
+    set(iothub_client_mqtt_ws_transport_h_files
+        ${iothub_client_ll_transport_h_files}
+        ./inc/iothubtransport_mqtt_common.h
+        ./inc/iothubtransportmqtt_websockets.h
+    )
 
     set(iothub_client_mqtt_transport_c_files
         ${iothub_client_ll_transport_c_files}
@@ -258,19 +254,16 @@ if(${use_amqp})
         iothub_client_amqp_transport
     )
 	
-	if (${use_wsio})
-	    include_directories(${iothub_client_amqp_ws_transport_INC_FOLDER} ${UAMQP_INC_FOLDER})
-		add_library(iothub_client_amqp_ws_transport 
-			${iothub_client_amqp_ws_transport_c_files} 
-			${iothub_client_amqp_ws_transport_h_files}
-		)
-		linkSharedUtil(iothub_client_amqp_ws_transport)
-		linkWebSockets(iothub_client_amqp_ws_transport)
-		set(iothub_client_libs
-			${iothub_client_libs}
-			iothub_client_amqp_ws_transport
-		)
-	endif()
+    include_directories(${iothub_client_amqp_ws_transport_INC_FOLDER} ${UAMQP_INC_FOLDER})
+    add_library(iothub_client_amqp_ws_transport 
+	${iothub_client_amqp_ws_transport_c_files} 
+	${iothub_client_amqp_ws_transport_h_files}
+    )
+    linkSharedUtil(iothub_client_amqp_ws_transport)
+    set(iothub_client_libs
+	${iothub_client_libs}
+	iothub_client_amqp_ws_transport
+    )
 endif()
 
 if(${use_mqtt})
@@ -286,21 +279,17 @@ if(${use_mqtt})
         ${iothub_client_libs}
         iothub_client_mqtt_transport
     )
-    if (${use_wsio})
-        include_directories(${IOTHUB_CLIENT_MQTT_TRANSPORT_INC_FOLDER} ${MQTT_INC_FOLDER})
-        add_library(iothub_client_mqtt_ws_transport 
-            ${iothub_client_mqtt_ws_transport_c_files} 
-            ${iothub_client_mqtt_ws_transport_h_files}
-        )
-        linkSharedUtil(iothub_client_mqtt_ws_transport)
-        linkMqttLibrary(iothub_client_mqtt_ws_transport)
-        linkWebSockets(iothub_client_mqtt_ws_transport)
-        set(iothub_client_libs
-            ${iothub_client_libs}
-            iothub_client_mqtt_ws_transport
-        )
-    endif()
-
+    include_directories(${IOTHUB_CLIENT_MQTT_TRANSPORT_INC_FOLDER} ${MQTT_INC_FOLDER})
+    add_library(iothub_client_mqtt_ws_transport 
+        ${iothub_client_mqtt_ws_transport_c_files} 
+        ${iothub_client_mqtt_ws_transport_h_files}
+    )
+    linkSharedUtil(iothub_client_mqtt_ws_transport)
+    linkMqttLibrary(iothub_client_mqtt_ws_transport)
+    set(iothub_client_libs
+        ${iothub_client_libs}
+        iothub_client_mqtt_ws_transport
+    )
 endif()
 
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})
