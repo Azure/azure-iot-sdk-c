@@ -4,7 +4,7 @@
 
 set -e
 
-OPENSSL_ROOT_DIR=/usr/local/opt/openssl
+export OPENSSL_ROOT_DIR=/usr/local/opt/openssl
 
 script_dir=$(cd "$(dirname "$0")" && pwd)
 build_root=$(cd "${script_dir}/../.." && pwd)
@@ -74,9 +74,9 @@ process_args ()
       then
         # save the arg to python version
         build_python="$arg"
-        if [ $build_python != "2.7" ] && [ $build_python != "3.4" ] && [ $build_python != "3.5" ]
+        if [ $build_python != "2.7" ] && [ $build_python != "3.4" ] && [ $build_python != "3.5" ] && [ $build_python != "3.6" ]
         then
-          echo "Supported python versions are 2.7, 3.4 or 3.5"
+          echo "Supported python versions are 2.7, 3.4, 3.5 or 3.6"
           exit 1
         fi 
         save_next_arg=0
@@ -123,10 +123,28 @@ process_args ()
 
 process_args $*
 
+if [ $build_python != "3.4" ] && [ $build_python != "3.5" ] && [ $build_python != "3.6" ]
+then
+	python_prefix=$(python-config --prefix)
+else
+	python_prefix=$(python3-config --prefix)
+fi
+
+# brew installes python 3.6 to $prefix/include/python3.6m
+if [ $build_python != "3.6" ]
+then
+	python_include=$python_prefix/include/python$build_python
+	python_lib=$python_prefix/lib/libpython$build_python.dylib
+else
+	python_include=$python_prefix/include/python${build_python}m
+	python_lib=$python_prefix/lib/libpython${build_python}m.dylib
+fi
+
+
 rm -r -f $build_folder
 mkdir -p $build_folder
 pushd $build_folder
-cmake $toolchainfile $cmake_install_prefix -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Ddont_use_uploadtoblob:BOOL=$no_blob -Duse_wsio:BOOL=$use_wsio -Drun_unittests:BOOL=$run_unittests -Dbuild_python:STRING=$build_python -Dbuild_javawrapper:BOOL=$build_javawrapper -Dno_logging:BOOL=$no_logging $build_root -Dwip_use_c2d_amqp_methods:BOOL=$wip_use_c2d_amqp_methods -DPYTHON_LIBRARY=$(python-config --prefix)/lib/libpython$build_python.dylib -DPYTHON_INCLUDE_DIR=$(python-config --prefix)/include/python$build_python
+cmake $toolchainfile $cmake_install_prefix -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Ddont_use_uploadtoblob:BOOL=$no_blob -Duse_wsio:BOOL=$use_wsio -Drun_unittests:BOOL=$run_unittests -Dbuild_python:STRING=$build_python -Dbuild_javawrapper:BOOL=$build_javawrapper -Dno_logging:BOOL=$no_logging $build_root -Dwip_use_c2d_amqp_methods:BOOL=$wip_use_c2d_amqp_methods -DPYTHON_LIBRARY=$python_lib -DPYTHON_INCLUDE_DIR=$python_include
 
 if [ "$make" = true ]
 then
