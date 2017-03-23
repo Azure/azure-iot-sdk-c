@@ -986,6 +986,7 @@ static void crank_transport_ready_after_create(void* handle, PDLIST_ENTRY wts, i
 	crank_transport(handle, wts, wts_length, DEVICE_STATE_STOPPED, true, is_using_cbs, true, true, number_of_registered_devices, current_time, false);
 
 	STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(TEST_current_time);
+	STRICT_EXPECTED_CALL(IoTHubClient_LL_ConnectionStatusCallBack(TEST_IOTHUB_CLIENT_LL_HANDLE, IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK));
 
 	TEST_device_create_saved_on_state_changed_callback(TEST_device_create_saved_on_state_changed_context,
 		DEVICE_STATE_STOPPED, DEVICE_STATE_STARTED);
@@ -1032,6 +1033,8 @@ static void register_umock_alias_types()
 	REGISTER_UMOCK_ALIAS_TYPE(DEVICE_MESSAGE_DISPOSITION_RESULT, int);
 	REGISTER_UMOCK_ALIAS_TYPE(DEVICE_SEND_STATUS, int);
 	REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_RESULT, int);
+	REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_CONNECTION_STATUS, int);
+	REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, int);
 	REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_STATUS, int);
 	REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_LL_HANDLE, void*);
 	REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_MESSAGE_HANDLE, void*);
@@ -3829,6 +3832,7 @@ TEST_FUNCTION(on_message_received_fails)
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_061: [If `new_state` is the same as `previous_state`, on_device_state_changed_callback shall return]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_062: [If `new_state` shall be saved into the `registered_device` instance]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_063: [If `registered_device->time_of_last_state_change` shall be set using get_time()]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_120: [If `new_state` is DEVICE_STATE_STARTED, IoTHubClient_LL_ConnectionStatusCallBack shall be invoked with IOTHUB_CLIENT_CONNECTION_AUTHENTICATED and IOTHUB_CLIENT_CONNECTION_OK]
 TEST_FUNCTION(DoWork_success)
 {
 	// arrange
@@ -3859,6 +3863,7 @@ TEST_FUNCTION(DoWork_success)
 	ASSERT_IS_NOT_NULL(TEST_device_create_saved_on_state_changed_callback);
 
 	STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(TEST_current_time);
+	STRICT_EXPECTED_CALL(IoTHubClient_LL_ConnectionStatusCallBack(TEST_IOTHUB_CLIENT_LL_HANDLE, IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK));
 
 	TEST_device_create_saved_on_state_changed_callback(TEST_device_create_saved_on_state_changed_context,
 		DEVICE_STATE_STOPPED, DEVICE_STATE_STARTED);
@@ -4009,6 +4014,118 @@ TEST_FUNCTION(DoWork_sets_amqp_connection_for_CBS)
 	// assert
 	ASSERT_IS_TRUE(TEST_amqp_connection_create_saved_create_sasl_io);
 	ASSERT_IS_TRUE(TEST_amqp_connection_create_saved_create_cbs_connection);
+	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+	// cleanup
+	destroy_transport(handle, device_handle, NULL);
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_121: [If `new_state` is DEVICE_STATE_STOPPED, IoTHubClient_LL_ConnectionStatusCallBack shall be invoked with IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED and IOTHUB_CLIENT_CONNECTION_OK]
+TEST_FUNCTION(ConnectionStatusCallBack_UNAUTH_OK)
+{
+	// arrange
+	initialize_test_variables();
+	TRANSPORT_LL_HANDLE handle = create_transport();
+	IOTHUB_DEVICE_CONFIG* device_config = create_device_config(TEST_DEVICE_ID_CHAR_PTR, true);
+
+	IOTHUB_DEVICE_HANDLE device_handle;
+	device_handle = register_device(handle, device_config, &TEST_waitingToSend, true);
+	
+	crank_transport_ready_after_create(handle, &TEST_waitingToSend, 0, false, true, 1, TEST_current_time, false);
+	
+	umock_c_reset_all_calls();
+	STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(TEST_current_time);
+	STRICT_EXPECTED_CALL(IoTHubClient_LL_ConnectionStatusCallBack(TEST_IOTHUB_CLIENT_LL_HANDLE, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK));
+
+	// act
+	TEST_device_create_saved_on_state_changed_callback(TEST_device_create_saved_on_state_changed_context,
+		DEVICE_STATE_STARTED, DEVICE_STATE_STOPPED);
+
+	// assert
+	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+	// cleanup
+	destroy_transport(handle, device_handle, NULL);
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_122: [If `new_state` is DEVICE_STATE_ERROR_AUTH, IoTHubClient_LL_ConnectionStatusCallBack shall be invoked with IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED and IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL]
+TEST_FUNCTION(ConnectionStatusCallBack_UNAUTH_auth_error)
+{
+	// arrange
+	initialize_test_variables();
+	TRANSPORT_LL_HANDLE handle = create_transport();
+	IOTHUB_DEVICE_CONFIG* device_config = create_device_config(TEST_DEVICE_ID_CHAR_PTR, true);
+
+	IOTHUB_DEVICE_HANDLE device_handle;
+	device_handle = register_device(handle, device_config, &TEST_waitingToSend, true);
+
+	crank_transport_ready_after_create(handle, &TEST_waitingToSend, 0, false, true, 1, TEST_current_time, false);
+
+	umock_c_reset_all_calls();
+	STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(TEST_current_time);
+	STRICT_EXPECTED_CALL(IoTHubClient_LL_ConnectionStatusCallBack(TEST_IOTHUB_CLIENT_LL_HANDLE, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL));
+
+	// act
+	TEST_device_create_saved_on_state_changed_callback(TEST_device_create_saved_on_state_changed_context,
+		DEVICE_STATE_STARTED, DEVICE_STATE_ERROR_AUTH);
+
+	// assert
+	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+	// cleanup
+	destroy_transport(handle, device_handle, NULL);
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_123: [If `new_state` is DEVICE_STATE_ERROR_AUTH_TIMEOUT or DEVICE_STATE_ERROR_MSG, IoTHubClient_LL_ConnectionStatusCallBack shall be invoked with IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED and IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR]
+TEST_FUNCTION(ConnectionStatusCallBack_UNAUTH_auth_communication_error)
+{
+	// arrange
+	initialize_test_variables();
+	TRANSPORT_LL_HANDLE handle = create_transport();
+	IOTHUB_DEVICE_CONFIG* device_config = create_device_config(TEST_DEVICE_ID_CHAR_PTR, true);
+
+	IOTHUB_DEVICE_HANDLE device_handle;
+	device_handle = register_device(handle, device_config, &TEST_waitingToSend, true);
+
+	crank_transport_ready_after_create(handle, &TEST_waitingToSend, 0, false, true, 1, TEST_current_time, false);
+
+	umock_c_reset_all_calls();
+	STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(TEST_current_time);
+	STRICT_EXPECTED_CALL(IoTHubClient_LL_ConnectionStatusCallBack(TEST_IOTHUB_CLIENT_LL_HANDLE, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR));
+
+	// act
+	TEST_device_create_saved_on_state_changed_callback(TEST_device_create_saved_on_state_changed_context,
+		DEVICE_STATE_STARTED, DEVICE_STATE_ERROR_AUTH_TIMEOUT);
+
+	// assert
+	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+	// cleanup
+	destroy_transport(handle, device_handle, NULL);
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_123: [If `new_state` is DEVICE_STATE_ERROR_AUTH_TIMEOUT or DEVICE_STATE_ERROR_MSG, IoTHubClient_LL_ConnectionStatusCallBack shall be invoked with IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED and IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR]
+TEST_FUNCTION(ConnectionStatusCallBack_UNAUTH_msg_communication_error)
+{
+	// arrange
+	initialize_test_variables();
+	TRANSPORT_LL_HANDLE handle = create_transport();
+	IOTHUB_DEVICE_CONFIG* device_config = create_device_config(TEST_DEVICE_ID_CHAR_PTR, true);
+
+	IOTHUB_DEVICE_HANDLE device_handle;
+	device_handle = register_device(handle, device_config, &TEST_waitingToSend, true);
+
+	crank_transport_ready_after_create(handle, &TEST_waitingToSend, 0, false, true, 1, TEST_current_time, false);
+
+	umock_c_reset_all_calls();
+	STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(TEST_current_time);
+	STRICT_EXPECTED_CALL(IoTHubClient_LL_ConnectionStatusCallBack(TEST_IOTHUB_CLIENT_LL_HANDLE, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR));
+
+	// act
+	TEST_device_create_saved_on_state_changed_callback(TEST_device_create_saved_on_state_changed_context,
+		DEVICE_STATE_STARTED, DEVICE_STATE_ERROR_MSG);
+
+	// assert
 	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
 	// cleanup
