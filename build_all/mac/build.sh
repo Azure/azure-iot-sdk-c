@@ -123,19 +123,14 @@ process_args ()
 
 process_args $*
 
+# brew installes python 3.x to $prefix/include/python3.xm
 if [ $build_python != "3.4" ] && [ $build_python != "3.5" ] && [ $build_python != "3.6" ]
 then
 	python_prefix=$(python-config --prefix)
-else
-	python_prefix=$(python3-config --prefix)
-fi
-
-# brew installes python 3.6 to $prefix/include/python3.6m
-if [ $build_python != "3.6" ]
-then
 	python_include=$python_prefix/include/python$build_python
 	python_lib=$python_prefix/lib/libpython$build_python.dylib
 else
+	python_prefix=$(python3-config --prefix)
 	python_include=$python_prefix/include/python${build_python}m
 	python_lib=$python_prefix/lib/libpython${build_python}m.dylib
 fi
