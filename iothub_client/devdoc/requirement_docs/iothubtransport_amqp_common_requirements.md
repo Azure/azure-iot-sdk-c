@@ -208,6 +208,10 @@ This handler is provided to each registered device when messenger_create() is in
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_061: [**If `new_state` is the same as `previous_state`, on_device_state_changed_callback shall return**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_062: [**If `new_state` shall be saved into the `registered_device` instance**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_063: [**If `registered_device->time_of_last_state_change` shall be set using get_time()**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_120: [**If `new_state` is DEVICE_STATE_STARTED, IoTHubClient_LL_ConnectionStatusCallBack shall be invoked with IOTHUB_CLIENT_CONNECTION_AUTHENTICATED and IOTHUB_CLIENT_CONNECTION_OK**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_121: [**If `new_state` is DEVICE_STATE_STOPPED, IoTHubClient_LL_ConnectionStatusCallBack shall be invoked with IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED and IOTHUB_CLIENT_CONNECTION_OK**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_122: [**If `new_state` is DEVICE_STATE_ERROR_AUTH, IoTHubClient_LL_ConnectionStatusCallBack shall be invoked with IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED and IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_123: [**If `new_state` is DEVICE_STATE_ERROR_AUTH_TIMEOUT or DEVICE_STATE_ERROR_MSG, IoTHubClient_LL_ConnectionStatusCallBack shall be invoked with IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED and IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR**]**
 
 
 ### IoTHubTransport_AMQP_Common_Register
