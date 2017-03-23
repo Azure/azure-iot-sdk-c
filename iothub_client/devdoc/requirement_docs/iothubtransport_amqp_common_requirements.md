@@ -194,6 +194,7 @@ This handler is provided when amqp_connection_create() is invoked.
 
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_059: [**`new_state` shall be saved in to the transport instance**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_060: [**If `new_state` is AMQP_CONNECTION_STATE_ERROR, the connection shall be flagged as faulty (so the connection retry logic can be triggered)**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_115: [**If the AMQP connection is closed by the service side, the connection retry logic shall be triggered**]**
 
 
 #### on_device_state_changed_callback

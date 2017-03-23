@@ -5,6 +5,7 @@
 #define IOTHUBTRANSPORTAMQP_AMQP_CONNECTION_H
 
 #include "azure_c_shared_utility/umock_c_prod.h"
+#include "azure_c_shared_utility/macro_utils.h"
 #include "azure_c_shared_utility/xio.h"
 #include "azure_uamqp_c/session.h"
 #include "azure_uamqp_c/cbs.h"
@@ -14,12 +15,12 @@ extern "C"
 {
 #endif
 
-typedef enum AMQP_CONNECTION_STATE_TAG
-{
-	AMQP_CONNECTION_STATE_OPENED,
-	AMQP_CONNECTION_STATE_CLOSED,
-	AMQP_CONNECTION_STATE_ERROR
-} AMQP_CONNECTION_STATE;
+#define AMQP_CONNECTION_STATE_VALUES \
+    AMQP_CONNECTION_STATE_OPENED,    \
+    AMQP_CONNECTION_STATE_CLOSED,    \
+    AMQP_CONNECTION_STATE_ERROR
+
+DEFINE_ENUM(AMQP_CONNECTION_STATE, AMQP_CONNECTION_STATE_VALUES);
 
 typedef void(*ON_AMQP_CONNECTION_STATE_CHANGED)(const void* context, AMQP_CONNECTION_STATE old_state, AMQP_CONNECTION_STATE new_state);
 

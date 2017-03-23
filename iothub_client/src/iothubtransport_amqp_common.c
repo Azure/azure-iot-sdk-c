@@ -19,6 +19,7 @@
 #include "azure_c_shared_utility/tlsio.h"
 #include "azure_c_shared_utility/optionhandler.h"
 #include "azure_c_shared_utility/shared_util_options.h"
+#include "azure_c_shared_utility/macro_utils.h"
 
 #include "azure_uamqp_c/cbs.h"
 #include "azure_uamqp_c/session.h"
@@ -62,6 +63,7 @@ typedef struct AMQP_TRANSPORT_INSTANCE_TAG
     AMQP_GET_IO_TRANSPORT underlying_io_transport_provider;             // Pointer to the function that creates the TLS I/O (internal use only).
 	AMQP_CONNECTION_HANDLE amqp_connection;                             // Base amqp connection with service.
 	AMQP_CONNECTION_STATE amqp_connection_state;                        // Current state of the amqp_connection.
+	bool is_connection_shutting_down;                                   // Indicates whether the amqp_connection is being closed/destroyed intentionally or not.
 	AMQP_TRANSPORT_AUTHENTICATION_MODE preferred_authentication_mode;   // Used to avoid registered devices using different authentication modes.
 	SINGLYLINKEDLIST_HANDLE registered_devices;                         // List of devices currently registered in this transport.
     bool is_trace_on;                                                   // Turns logging on and off.
@@ -598,7 +600,14 @@ static void on_amqp_connection_state_changed(const void* context, AMQP_CONNECTIO
 		// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_060: [If `new_state` is AMQP_CONNECTION_STATE_ERROR, the connection shall be flagged as faulty (so the connection retry logic can be triggered)]
 		if (new_state == AMQP_CONNECTION_STATE_ERROR)
 		{
-			LogError("Transport received an ERROR from the amqp_connection (state changed %d->%d); it will be flagged for connection retry.", previous_state, new_state);
+			LogError("Transport received an ERROR from the amqp_connection (state changed %s -> %s); it will be flagged for connection retry.", ENUM_TO_STRING(AMQP_CONNECTION_STATE, previous_state), ENUM_TO_STRING(AMQP_CONNECTION_STATE, new_state));
+
+			transport_instance->is_connection_retry_required = true;
+		}
+		// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_115: [If the AMQP connection is closed by the service side, the connection retry logic shall be triggered]
+		else if (new_state == AMQP_CONNECTION_STATE_CLOSED && previous_state == AMQP_CONNECTION_STATE_OPENED && !transport_instance->is_connection_shutting_down)
+		{
+			LogError("amqp_connection was closed unexpectedly; connection retry will be triggered.");
 
 			transport_instance->is_connection_retry_required = true;
 		}
@@ -715,9 +724,11 @@ static void prepare_for_connection_retry(AMQP_TRANSPORT_INSTANCE* transport_inst
 	}
 
 	// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_033: [`instance->connection` shall be destroyed using amqp_connection_destroy()]
+	transport_instance->is_connection_shutting_down = true;
 	amqp_connection_destroy(transport_instance->amqp_connection);
 	transport_instance->amqp_connection = NULL;
     transport_instance->amqp_connection_state = AMQP_CONNECTION_STATE_CLOSED;
+	transport_instance->is_connection_shutting_down = false;
 
 	// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_035: [`instance->tls_io` shall be destroyed using xio_destroy()]
 	destroy_underlying_io_transport(transport_instance);
@@ -1151,6 +1162,8 @@ static void internal_destroy_instance(AMQP_TRANSPORT_INSTANCE* instance)
 
 		if (instance->amqp_connection != NULL)
 		{
+			instance->is_connection_shutting_down = true;
+			
 			amqp_connection_destroy(instance->amqp_connection);
 		}
 

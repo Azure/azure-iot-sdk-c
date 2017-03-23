@@ -35,6 +35,10 @@ typedef struct AMQP_CONNECTION_INSTANCE_TAG
 	const void* on_state_changed_context;
 } AMQP_CONNECTION_INSTANCE;
 
+
+DEFINE_ENUM_STRINGS(AMQP_CONNECTION_STATE, AMQP_CONNECTION_STATE_VALUES);
+
+
 static int create_sasl_components(AMQP_CONNECTION_INSTANCE* instance)
 {
 	int result;
