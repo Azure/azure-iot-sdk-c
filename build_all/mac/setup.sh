@@ -9,7 +9,7 @@ repo_name_from_uri()
 }
 
 scriptdir=$(cd "$(dirname "$0")" && pwd)
-deps="curl build-essential libcurl4-openssl-dev git cmake libssl-dev uuid-dev valgrind"
+deps="boost openssl cmake"
 repo="https://github.com/Azure/azure-iot-sdk-c.git"
 repo_name=$(repo_name_from_uri $repo)
 
@@ -22,13 +22,14 @@ repo_exists ()
     [ "$(git rev-parse --is-inside-work-tree)" == "true" ] || return 1
     origin=$(git config remote.origin.url) || return 1
     actual_name=$(repo_name_from_uri $origin)
-    [ "${repo_name,,}" == "${actual_name,,}" ] || return 1
+    [ "${repo_name}" == "${actual_name}" ] || return 1
     pop_dir
 }
 
 deps_install ()
 {
-    brew install boost-python openssl cmake
+    brew install $deps
+
 }
 
 clone_source ()
