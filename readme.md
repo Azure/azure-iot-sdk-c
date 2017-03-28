@@ -142,6 +142,22 @@ Contains tools that are currently used in testing the client libraries: Mocking 
 
 ### /tools
 
+## Long Term Support branches
+
+The project is using LTS branches to allow users that do not need the latest and greatest features to be shielded from unwanted changes.
+
+An LTS branch will be created every 6 months. The lifetime of an LTS branch is currently 1 year.
+LTS branches receive all bug fixes that fall in on of these categories:
+
+- security bugfixes
+- critical bugfixes (crashes, memory leaks, etc.)
+
+No new features or improvements will be picked up on LTS branches.
+
+LTS branches are named lts_*mm*_*yyyy*, where *mm* and *yyyy* are the month and year when the branch was created. An example of such a branch is *lts_03_2017*.
+
+![](./lts_branches.png)
+
 Miscellaneous tools: compilembed, mbed_build, traceabilitytool (checks spec requirements vs code implementation).
 
 ---
