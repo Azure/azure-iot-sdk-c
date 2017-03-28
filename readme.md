@@ -149,7 +149,7 @@ Miscellaneous tools: compilembed, mbed_build, traceabilitytool (checks spec requ
 The project is using LTS branches to allow users that do not need the latest and greatest features to be shielded from unwanted changes.
 
 An LTS branch will be created every 6 months. The lifetime of an LTS branch is currently 1 year.
-LTS branches receive all bug fixes that fall in on of these categories:
+LTS branches receive all bug fixes that fall in one of these categories:
 
 - security bugfixes
 - critical bugfixes (crashes, memory leaks, etc.)
