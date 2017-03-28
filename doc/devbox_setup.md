@@ -23,7 +23,7 @@ This document describes how to prepare your development environment to use the *
 
 - Clone the latest release of SDK to your local machine using the tag name you found:
   ```
-  git clone -b <yyyy-dd-mm> --recursive https://github.com/Azure/azure-iot-sdk-c.git
+  git clone -b <yyyy-mm-dd> --recursive https://github.com/Azure/azure-iot-sdk-c.git
   ```
 
   > The `--recursive` argument instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
