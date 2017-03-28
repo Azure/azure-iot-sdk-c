@@ -142,6 +142,8 @@ Contains tools that are currently used in testing the client libraries: Mocking 
 
 ### /tools
 
+Miscellaneous tools: compilembed, mbed_build, traceabilitytool (checks spec requirements vs code implementation).
+
 ## Long Term Support branches
 
 The project is using LTS branches to allow users that do not need the latest and greatest features to be shielded from unwanted changes.
@@ -157,8 +159,6 @@ No new features or improvements will be picked up on LTS branches.
 LTS branches are named lts_*mm*_*yyyy*, where *mm* and *yyyy* are the month and year when the branch was created. An example of such a branch is *lts_03_2017*.
 
 ![](./lts_branches.png)
-
-Miscellaneous tools: compilembed, mbed_build, traceabilitytool (checks spec requirements vs code implementation).
 
 ---
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
