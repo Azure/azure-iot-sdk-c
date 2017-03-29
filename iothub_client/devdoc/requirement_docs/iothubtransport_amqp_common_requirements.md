@@ -35,6 +35,7 @@ extern IOTHUB_PROCESS_ITEM_RESULT IoTHubTransport_AMQP_Common_ProcessItem(TRANSP
 extern void IoTHubTransport_AMQP_Common_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle);
 extern IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_GetSendStatus(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_STATUS* iotHubClientStatus);
 extern IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SetOption(TRANSPORT_LL_HANDLE handle, const char* option, const void* value);
+extern int IoTHubTransport_AMQP_Common_SetRetryPolicy(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitInSeconds);
 extern IOTHUB_DEVICE_HANDLE IoTHubTransport_AMQP_Common_Register(TRANSPORT_LL_HANDLE handle, const IOTHUB_DEVICE_CONFIG* device, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, PDLIST_ENTRY waitingToSend);
 extern void IoTHubTransport_AMQP_Common_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle);
 extern STRING_HANDLE IoTHubTransport_AMQP_Common_GetHostname(TRANSPORT_LL_HANDLE handle);
@@ -67,6 +68,8 @@ TRANSPORT_LL_HANDLE IoTHubTransport_AMQP_Common_Create(const IOTHUBTRANSPORT_CON
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_002: [**IoTHubTransport_AMQP_Common_Create shall fail and return NULL if `config->upperConfig->protocol` is NULL**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_003: [**Memory shall be allocated for the transport's internal state structure (`instance`)**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_004: [**If malloc() fails, IoTHubTransport_AMQP_Common_Create shall fail and return NULL**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_124: [**`instance->connection_retry_control` shall be set using retry_control_create(), passing defaults EXPONENTIAL_BACKOFF_WITH_JITTER and 0**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_125: [**If retry_control_create() fails, IoTHubTransport_AMQP_Common_Create shall fail and return NULL**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_005: [**If `config->upperConfig->protocolGatewayHostName` is NULL, `instance->iothub_target_fqdn` shall be set as `config->upperConfig->iotHubName` + "." + `config->upperConfig->iotHubSuffix`**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_006: [**If `config->upperConfig->protocolGatewayHostName` is not NULL, `instance->iothub_target_fqdn` shall be set with a copy of it**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_007: [**If `instance->iothub_target_fqdn` fails to be set, IoTHubTransport_AMQP_Common_Create shall fail and return NULL**]**
@@ -88,7 +91,7 @@ This function will close connection established through AMQP API, as well as des
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_013: [**If `handle` is NULL, IoTHubTransport_AMQP_Common_Destroy shall return immediatelly**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_014: [**IoTHubTransport_AMQP_Common_Destroy shall invoke IoTHubTransport_AMQP_Common_Unregister on each of its registered devices.**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_015: [**All members of `instance` (including tls_io) shall be destroyed and its memory released**]**
-**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_001: [** `IoTHubTransport_AMQP_Common_Destroy` shall free the stored proxy options. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_043: [** `IoTHubTransport_AMQP_Common_Destroy` shall free the stored proxy options. **]**
 
 ### IoTHubTransport_AMQP_Common_DoWork
 
@@ -97,7 +100,8 @@ void IoTHubTransport_AMQP_Common_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIEN
 ```  
 
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_016: [**If `handle` is NULL, IoTHubTransport_AMQP_Common_DoWork shall return without doing any work**]**
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_017: [**If `instance->is_connection_retry_required` is true, IoTHubTransport_AMQP_Common_DoWork shall trigger the connection-retry logic and return**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_017: [**If `instance->state` is `RECONNECTION_REQUIRED`, IoTHubTransport_AMQP_Common_DoWork shall attempt to trigger the connection-retry logic and return**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_126: [**The connection retry shall be attempted only if retry_control_should_retry() returns RETRY_ACTION_NOW, or if it fails**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_018: [**If there are no devices registered on the transport, IoTHubTransport_AMQP_Common_DoWork shall skip do_work for devices**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_019: [**If `instance->amqp_connection` is NULL, it shall be established**]**
 Note: see section "Connection Establishment" below.
@@ -208,6 +212,7 @@ This handler is provided to each registered device when messenger_create() is in
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_061: [**If `new_state` is the same as `previous_state`, on_device_state_changed_callback shall return**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_062: [**If `new_state` shall be saved into the `registered_device` instance**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_063: [**If `registered_device->time_of_last_state_change` shall be set using get_time()**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_127: [**If `new_state` is DEVICE_STATE_STARTED, retry_control_reset() shall be invoked passing `instance->connection_retry_control`**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_120: [**If `new_state` is DEVICE_STATE_STARTED, IoTHubClient_LL_ConnectionStatusCallBack shall be invoked with IOTHUB_CLIENT_CONNECTION_AUTHENTICATED and IOTHUB_CLIENT_CONNECTION_OK**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_121: [**If `new_state` is DEVICE_STATE_STOPPED, IoTHubClient_LL_ConnectionStatusCallBack shall be invoked with IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED and IOTHUB_CLIENT_CONNECTION_OK**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_122: [**If `new_state` is DEVICE_STATE_ERROR_AUTH, IoTHubClient_LL_ConnectionStatusCallBack shall be invoked with IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED and IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL**]**
@@ -393,6 +398,18 @@ The following requirements apply to `proxy_data`:
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_040: [** When setting the proxy options succeeds any previously saved proxy options shall be freed. **]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_041: [** If the `proxy_data` option has been set, the proxy options shall be filled in the argument `amqp_transport_proxy_options` when calling the function `underlying_io_transport_provider()` to obtain the underlying IO handle. **]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_042: [** If no `proxy_data` option has been set, NULL shall be passed as the argument `amqp_transport_proxy_options` when calling the function `underlying_io_transport_provider()`. **]**
+
+### IoTHubTransport_AMQP_Common_SetRetryPolicy
+```c
+int IoTHubTransport_AMQP_Common_SetRetryPolicy(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitInSeconds);
+```
+
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_128: [**If `handle` is NULL, `IoTHubTransport_AMQP_Common_SetRetryPolicy` shall fail and return non-zero.**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_129: [**`transport_instance->connection_retry_control` shall be set using retry_control_create(), passing `retryPolicy` and `retryTimeoutLimitInSeconds`.**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_130: [**If retry_control_create() fails, `IoTHubTransport_AMQP_Common_SetRetryPolicy` shall fail and return non-zero.**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_128: [**If no errors occur, `IoTHubTransport_AMQP_Common_SetRetryPolicy` shall return zero.**]**
+
+
 
 ### IoTHubTransport_AMQP_Common_Subscribe_DeviceTwin
 ```c
