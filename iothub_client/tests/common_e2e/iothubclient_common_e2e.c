@@ -48,7 +48,7 @@ IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo = NULL;
 
 #define IOTHUB_COUNTER_MAX           10
 #define IOTHUB_TIMEOUT_SEC           1000
-#define MAX_CLOUD_TRAVEL_TIME        20.0
+#define MAX_CLOUD_TRAVEL_TIME        60.0
 
 TEST_DEFINE_ENUM_TYPE(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
@@ -388,8 +388,6 @@ D2C_MESSAGE_HANDLE client_create_and_send_d2c(IOTHUB_CLIENT_HANDLE iotHubClientH
 bool client_wait_for_d2c_confirmation(D2C_MESSAGE_HANDLE d2cMessage)
 {
     time_t beginOperation, nowTime;
-    bool result = false;
-    EXPECTED_SEND_DATA* sendData = (EXPECTED_SEND_DATA*)d2cMessage;
 
     beginOperation = time(NULL);
     while (
@@ -397,21 +395,21 @@ bool client_wait_for_d2c_confirmation(D2C_MESSAGE_HANDLE d2cMessage)
         (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME) // time box
         )
     {
-        if (Lock(sendData->lock) != LOCK_OK)
+        if (client_received_confirmation(d2cMessage))
         {
-            ASSERT_FAIL("unable to lock");
-        }
-        else
-        {
-            if (sendData->dataWasRecv)
-            {
-                Unlock(sendData->lock);
-                break;
-            }
-            Unlock(sendData->lock);
+            break;
         }
         ThreadAPI_Sleep(100);
     }
+    return (client_received_confirmation(d2cMessage));
+ 
+
+}
+
+bool client_received_confirmation(D2C_MESSAGE_HANDLE d2cMessage)
+{
+    bool result = false;
+    EXPECTED_SEND_DATA* sendData = (EXPECTED_SEND_DATA*)d2cMessage;
 
     if (Lock(sendData->lock) != LOCK_OK)
     {
@@ -424,12 +422,6 @@ bool client_wait_for_d2c_confirmation(D2C_MESSAGE_HANDLE d2cMessage)
     }
 
     return result;
-
-}
-
-bool client_received_confirmation(D2C_MESSAGE_HANDLE d2cMessage)
-{
-    return ((EXPECTED_SEND_DATA*)d2cMessage)->dataWasRecv;
 }
 
 void service_wait_for_d2c_event_arrival(IOTHUB_PROVISIONED_DEVICE* deviceToUse, D2C_MESSAGE_HANDLE d2cMessage)
