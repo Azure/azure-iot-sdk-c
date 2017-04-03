@@ -12,7 +12,7 @@
 #define AZCPGMSPACE_H
 
 #include <pgmspace.h>
-#include "azure_c_shared_utility\crt_abstractions.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
 
 
 #ifdef __cplusplus
