@@ -32,6 +32,7 @@
 #ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
 #include "iothubtransportamqp_methods.h"
 #endif
+#include "iothub_client_retry_control.h"
 #include "iothubtransport_amqp_common.h"
 #include "iothubtransport_amqp_connection.h"
 #include "iothubtransport_amqp_device.h"
@@ -45,6 +46,9 @@
 #define DEFAULT_SAS_TOKEN_LIFETIME_SECS           3600
 #define DEFAULT_SAS_TOKEN_REFRESH_TIME_SECS       1800
 #define MAX_NUMBER_OF_DEVICE_FAILURES             5
+#define DEFAULT_RETRY_POLICY                      IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER
+// DEFAULT_MAX_RETRY_TIME_IN_SECS = 0 means infinite retry.
+#define DEFAULT_MAX_RETRY_TIME_IN_SECS            0
 
 
 // ---------- Data Definitions ---------- //
@@ -55,6 +59,19 @@ typedef enum AMQP_TRANSPORT_AUTHENTICATION_MODE_TAG
 	AMQP_TRANSPORT_AUTHENTICATION_MODE_CBS,
 	AMQP_TRANSPORT_AUTHENTICATION_MODE_X509
 } AMQP_TRANSPORT_AUTHENTICATION_MODE;
+                                         \
+
+#define AMQP_TRANSPORT_STATE_STRINGS              \
+	AMQP_TRANSPORT_STATE_NOT_CONNECTED,           \
+	AMQP_TRANSPORT_STATE_CONNECTING,              \
+	AMQP_TRANSPORT_STATE_CONNECTED,               \
+	AMQP_TRANSPORT_STATE_RECONNECTION_REQUIRED,   \
+	AMQP_TRANSPORT_STATE_READY_FOR_RECONNECTION,  \
+	AMQP_TRANSPORT_STATE_RECONNECTING,            \
+	AMQP_TRANSPORT_STATE_BEING_DESTROYED
+
+DEFINE_LOCAL_ENUM(AMQP_TRANSPORT_STATE, AMQP_TRANSPORT_STATE_STRINGS);
+
 
 typedef struct AMQP_TRANSPORT_INSTANCE_TAG
 {
@@ -63,12 +80,12 @@ typedef struct AMQP_TRANSPORT_INSTANCE_TAG
     AMQP_GET_IO_TRANSPORT underlying_io_transport_provider;             // Pointer to the function that creates the TLS I/O (internal use only).
 	AMQP_CONNECTION_HANDLE amqp_connection;                             // Base amqp connection with service.
 	AMQP_CONNECTION_STATE amqp_connection_state;                        // Current state of the amqp_connection.
-	bool is_connection_shutting_down;                                   // Indicates whether the amqp_connection is being closed/destroyed intentionally or not.
 	AMQP_TRANSPORT_AUTHENTICATION_MODE preferred_authentication_mode;   // Used to avoid registered devices using different authentication modes.
 	SINGLYLINKEDLIST_HANDLE registered_devices;                         // List of devices currently registered in this transport.
     bool is_trace_on;                                                   // Turns logging on and off.
     OPTIONHANDLER_HANDLE saved_tls_options;                             // Here are the options from the xio layer if any is saved.
-	bool is_connection_retry_required;                                  // Flag that controls whether the connection should be restablished or not.
+	AMQP_TRANSPORT_STATE state;                                         // Current state of the transport.
+	RETRY_CONTROL_HANDLE connection_retry_control;                      // Controls when the re-connection attempt should occur.
 
     char* http_proxy_hostname;
     int http_proxy_port;
@@ -133,48 +150,6 @@ static void free_proxy_data(AMQP_TRANSPORT_INSTANCE* amqp_transport_instance)
     }
 }
 
-// @brief
-//     Evaluates if the ammount of time since start_time is greater or lesser than timeout_in_secs.
-// @param is_timed_out
-//     Set to true if a timeout has been reached, false otherwise. Not set if any failure occurs.
-// @returns
-//     0 if no failures occur, non-zero otherwise.
-static int is_timeout_reached(time_t start_time, unsigned int timeout_in_secs, bool *is_timed_out)
-{
-	int result;
-
-	if (start_time == INDEFINITE_TIME)
-	{
-		LogError("Failed to verify timeout (start_time is INDEFINITE)");
-		result = __FAILURE__;
-	}
-	else
-	{
-		time_t current_time;
-
-		if ((current_time = get_time(NULL)) == INDEFINITE_TIME)
-		{
-			LogError("Failed to verify timeout (get_time failed)");
-			result = __FAILURE__;
-		}
-		else
-		{
-			if (get_difftime(current_time, start_time) >= timeout_in_secs)
-			{
-				*is_timed_out = 1;
-			}
-			else
-			{
-				*is_timed_out = 0;
-			}
-
-			result = RESULT_OK;
-		}
-	}
-
-	return result;
-}
-
 static STRING_HANDLE get_target_iothub_fqdn(const IOTHUBTRANSPORT_CONFIG* config)
 {
 	STRING_HANDLE fqdn;
@@ -192,6 +167,19 @@ static STRING_HANDLE get_target_iothub_fqdn(const IOTHUBTRANSPORT_CONFIG* config
 	}
 
 	return fqdn;
+}
+
+static void update_state(AMQP_TRANSPORT_INSTANCE* transport_instance, AMQP_TRANSPORT_STATE new_state)
+{
+	AMQP_TRANSPORT_STATE previous_state = transport_instance->state;
+	transport_instance->state = new_state;
+
+	LogInfo("Transport state changed from %s to %s", ENUM_TO_STRING(AMQP_TRANSPORT_STATE, previous_state), ENUM_TO_STRING(AMQP_TRANSPORT_STATE, new_state));
+}
+
+static void reset_retry_control(AMQP_TRANSPORT_DEVICE_INSTANCE* registered_device)
+{
+	retry_control_reset(registered_device->transport_instance->connection_retry_control);
 }
 
 
@@ -231,9 +219,12 @@ static void on_device_state_changed_callback(void* context, DEVICE_STATE previou
 		// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_063: [If `registered_device->time_of_last_state_change` shall be set using get_time()]
 		registered_device->time_of_last_state_change = get_time(NULL);
 
-		// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_120: [If `new_state` is DEVICE_STATE_STARTED, IoTHubClient_LL_ConnectionStatusCallBack shall be invoked with IOTHUB_CLIENT_CONNECTION_AUTHENTICATED and IOTHUB_CLIENT_CONNECTION_OK]
 		if (new_state == DEVICE_STATE_STARTED)
 		{
+			// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_127: [If `new_state` is DEVICE_STATE_STARTED, retry_control_reset() shall be invoked passing `instance->connection_retry_control`]
+			reset_retry_control(registered_device);
+
+			// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_120: [If `new_state` is DEVICE_STATE_STARTED, IoTHubClient_LL_ConnectionStatusCallBack shall be invoked with IOTHUB_CLIENT_CONNECTION_AUTHENTICATED and IOTHUB_CLIENT_CONNECTION_OK]
 			IoTHubClient_LL_ConnectionStatusCallBack(registered_device->iothub_client_handle, IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK);
 		}
 		// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_121: [If `new_state` is DEVICE_STATE_STOPPED, IoTHubClient_LL_ConnectionStatusCallBack shall be invoked with IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED and IOTHUB_CLIENT_CONNECTION_OK]
@@ -623,14 +614,18 @@ static void on_amqp_connection_state_changed(const void* context, AMQP_CONNECTIO
 		{
 			LogError("Transport received an ERROR from the amqp_connection (state changed %s -> %s); it will be flagged for connection retry.", ENUM_TO_STRING(AMQP_CONNECTION_STATE, previous_state), ENUM_TO_STRING(AMQP_CONNECTION_STATE, new_state));
 
-			transport_instance->is_connection_retry_required = true;
+			update_state(transport_instance, AMQP_TRANSPORT_STATE_RECONNECTION_REQUIRED);
+		}
+		else if (new_state == AMQP_CONNECTION_STATE_OPENED)
+		{
+			update_state(transport_instance, AMQP_TRANSPORT_STATE_CONNECTED);
 		}
 		// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_115: [If the AMQP connection is closed by the service side, the connection retry logic shall be triggered]
-		else if (new_state == AMQP_CONNECTION_STATE_CLOSED && previous_state == AMQP_CONNECTION_STATE_OPENED && !transport_instance->is_connection_shutting_down)
+		else if (new_state == AMQP_CONNECTION_STATE_CLOSED && previous_state == AMQP_CONNECTION_STATE_OPENED && transport_instance->state != AMQP_TRANSPORT_STATE_BEING_DESTROYED)
 		{
 			LogError("amqp_connection was closed unexpectedly; connection retry will be triggered.");
 
-			transport_instance->is_connection_retry_required = true;
+			update_state(transport_instance, AMQP_TRANSPORT_STATE_RECONNECTION_REQUIRED);
 		}
 	}
 }
@@ -680,6 +675,15 @@ static int establish_amqp_connection(AMQP_TRANSPORT_INSTANCE* transport_instance
 
 		transport_instance->amqp_connection_state = AMQP_CONNECTION_STATE_CLOSED;
 
+		if (transport_instance->state == AMQP_TRANSPORT_STATE_READY_FOR_RECONNECTION)
+		{
+			update_state(transport_instance, AMQP_TRANSPORT_STATE_RECONNECTING);
+		}
+		else
+		{
+			update_state(transport_instance, AMQP_TRANSPORT_STATE_CONNECTING);
+		}
+
 		// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_026: [If `transport->connection` is NULL, it shall be created using amqp_connection_create()]
 		if ((transport_instance->amqp_connection = amqp_connection_create(&amqp_connection_config)) == NULL)
 		{
@@ -720,6 +724,8 @@ static void prepare_device_for_connection_retry(AMQP_TRANSPORT_DEVICE_INSTANCE* 
 
 static void prepare_for_connection_retry(AMQP_TRANSPORT_INSTANCE* transport_instance)
 {
+	LogInfo("Preparing transport for re-connection");
+
 	// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_034: [`instance->tls_io` options shall be saved on `instance->saved_tls_options` using xio_retrieveoptions()]
 	if (save_underlying_io_transport_options(transport_instance) != RESULT_OK)
 	{
@@ -745,14 +751,14 @@ static void prepare_for_connection_retry(AMQP_TRANSPORT_INSTANCE* transport_inst
 	}
 
 	// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_033: [`instance->connection` shall be destroyed using amqp_connection_destroy()]
-	transport_instance->is_connection_shutting_down = true;
 	amqp_connection_destroy(transport_instance->amqp_connection);
 	transport_instance->amqp_connection = NULL;
     transport_instance->amqp_connection_state = AMQP_CONNECTION_STATE_CLOSED;
-	transport_instance->is_connection_shutting_down = false;
 
 	// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_035: [`instance->tls_io` shall be destroyed using xio_destroy()]
 	destroy_underlying_io_transport(transport_instance);
+
+	update_state(transport_instance, AMQP_TRANSPORT_STATE_READY_FOR_RECONNECTION);
 }
 
 
@@ -1167,6 +1173,8 @@ static void internal_destroy_instance(AMQP_TRANSPORT_INSTANCE* instance)
 {
 	if (instance != NULL)
 	{
+		update_state(instance, AMQP_TRANSPORT_STATE_BEING_DESTROYED);
+
 		if (instance->registered_devices != NULL)
 		{
 			LIST_ITEM_HANDLE list_item = singlylinkedlist_get_head_item(instance->registered_devices);
@@ -1183,21 +1191,50 @@ static void internal_destroy_instance(AMQP_TRANSPORT_INSTANCE* instance)
 
 		if (instance->amqp_connection != NULL)
 		{
-			instance->is_connection_shutting_down = true;
-			
 			amqp_connection_destroy(instance->amqp_connection);
 		}
 
 		destroy_underlying_io_transport(instance);
 		destroy_underlying_io_transport_options(instance);
+		retry_control_destroy(instance->connection_retry_control);
 
 		STRING_delete(instance->iothub_host_fqdn);
 
-        /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_001: [ `IoTHubTransport_AMQP_Common_Destroy` shall free the stored proxy options. ]*/
+        /* SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_043: [ `IoTHubTransport_AMQP_Common_Destroy` shall free the stored proxy options. ]*/
         free_proxy_data(instance);
 
 		free(instance);
 	}
+}
+
+// ---------- SendMessageDisposition helpers ---------- //
+
+static DEVICE_MESSAGE_DISPOSITION_INFO* create_device_message_disposition_info_from(MESSAGE_CALLBACK_INFO* message_data)
+{
+	DEVICE_MESSAGE_DISPOSITION_INFO* result;
+
+	if ((result = (DEVICE_MESSAGE_DISPOSITION_INFO*)malloc(sizeof(DEVICE_MESSAGE_DISPOSITION_INFO))) == NULL)
+	{
+		LogError("Failed creating DEVICE_MESSAGE_DISPOSITION_INFO (malloc failed)");
+	}
+	else if (mallocAndStrcpy_s(&result->source, message_data->transportContext->link_name) != RESULT_OK)
+	{
+		LogError("Failed creating DEVICE_MESSAGE_DISPOSITION_INFO (mallocAndStrcpy_s failed)");
+		free(result);
+		result = NULL;
+	}
+	else
+	{
+		result->message_id = message_data->transportContext->message_id;
+	}
+
+	return result;
+}
+
+static void destroy_device_message_disposition_info(DEVICE_MESSAGE_DISPOSITION_INFO* device_message_disposition_info)
+{
+	free(device_message_disposition_info->source);
+	free(device_message_disposition_info);
 }
 
 
@@ -1234,10 +1271,20 @@ TRANSPORT_LL_HANDLE IoTHubTransport_AMQP_Common_Create(const IOTHUBTRANSPORT_CON
 		else
 		{
 			memset(instance, 0, sizeof(AMQP_TRANSPORT_INSTANCE));
+			instance->amqp_connection_state = AMQP_CONNECTION_STATE_CLOSED;
+			instance->preferred_authentication_mode = AMQP_TRANSPORT_AUTHENTICATION_MODE_NOT_SET;
+			instance->state = AMQP_TRANSPORT_STATE_NOT_CONNECTED;
 
+			// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_124: [`instance->connection_retry_control` shall be set using retry_control_create(), passing defaults EXPONENTIAL_BACKOFF_WITH_JITTER and 0]
+			if ((instance->connection_retry_control = retry_control_create(DEFAULT_RETRY_POLICY, DEFAULT_MAX_RETRY_TIME_IN_SECS)) == NULL)
+			{
+				// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_125: [If retry_control_create() fails, IoTHubTransport_AMQP_Common_Create shall fail and return NULL]
+				LogError("Failed to create the connection retry control.");
+				result = NULL;
+			}
 			// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_005: [If `config->upperConfig->protocolGatewayHostName` is NULL, `instance->iothub_target_fqdn` shall be set as `config->upperConfig->iotHubName` + "." + `config->upperConfig->iotHubSuffix`]
 			// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_006: [If `config->upperConfig->protocolGatewayHostName` is not NULL, `instance->iothub_target_fqdn` shall be set with a copy of it]
-			if ((instance->iothub_host_fqdn = get_target_iothub_fqdn(config)) == NULL)
+			else if ((instance->iothub_host_fqdn = get_target_iothub_fqdn(config)) == NULL)
 			{
 				// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_007: [If `instance->iothub_target_fqdn` fails to be set, IoTHubTransport_AMQP_Common_Create shall fail and return NULL]
 				LogError("Failed to obtain the iothub target fqdn.");
@@ -1254,12 +1301,12 @@ TRANSPORT_LL_HANDLE IoTHubTransport_AMQP_Common_Create(const IOTHUBTRANSPORT_CON
 			{
 				// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_010: [`get_io_transport` shall be saved on `instance->underlying_io_transport_provider`]
 				instance->underlying_io_transport_provider = get_io_transport;
-				instance->preferred_authentication_mode = AMQP_TRANSPORT_AUTHENTICATION_MODE_NOT_SET;
+				instance->is_trace_on = false;
 				instance->option_sas_token_lifetime_secs = DEFAULT_SAS_TOKEN_LIFETIME_SECS;
 				instance->option_sas_token_refresh_time_secs = DEFAULT_SAS_TOKEN_REFRESH_TIME_SECS;
 				instance->option_cbs_request_timeout_secs = DEFAULT_CBS_REQUEST_TIMEOUT_SECS;
 				instance->option_send_event_timeout_secs = DEFAULT_EVENT_SEND_TIMEOUT_SECS;
-				
+
 				// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_012: [If IoTHubTransport_AMQP_Common_Create succeeds it shall return a pointer to `instance`.]
 				result = (TRANSPORT_LL_HANDLE)instance;
 			}
@@ -1298,14 +1345,22 @@ void IoTHubTransport_AMQP_Common_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIEN
         AMQP_TRANSPORT_INSTANCE* transport_instance = (AMQP_TRANSPORT_INSTANCE*)handle;
 		LIST_ITEM_HANDLE list_item;
 
-		// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_017: [If `instance->is_connection_retry_required` is true, IoTHubTransport_AMQP_Common_DoWork shall trigger the connection-retry logic and return]
-		if (transport_instance->is_connection_retry_required)
+		// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_017: [If `instance->state` is `RECONNECTION_REQUIRED`, IoTHubTransport_AMQP_Common_DoWork shall attempt to trigger the connection-retry logic and return]
+		if (transport_instance->state == AMQP_TRANSPORT_STATE_RECONNECTION_REQUIRED)
 		{
-			LogError("An error occured on AMQP connection. The connection will be restablished.");
+			RETRY_ACTION retry_action;
+		
+			// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_126: [The connection retry shall be attempted only if retry_control_should_retry() returns RETRY_ACTION_NOW, or if it fails]
+			if (retry_control_should_retry(transport_instance->connection_retry_control, &retry_action) != RESULT_OK)
+			{
+				LogError("retry_control_should_retry() failed; assuming immediate connection retry for safety.");
+				retry_action = RETRY_ACTION_RETRY_NOW;
+			}
 
-			prepare_for_connection_retry(transport_instance);
-
-			transport_instance->is_connection_retry_required = false;
+			if (retry_action == RETRY_ACTION_RETRY_NOW)
+			{
+				prepare_for_connection_retry(transport_instance);
+			}
 		}
 		// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_018: [If there are no devices registered on the transport, IoTHubTransport_AMQP_Common_DoWork shall skip do_work for devices]
 		else if ((list_item = singlylinkedlist_get_head_item(transport_instance->registered_devices)) != NULL)
@@ -1317,6 +1372,8 @@ void IoTHubTransport_AMQP_Common_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIEN
 			if (transport_instance->amqp_connection == NULL && establish_amqp_connection(transport_instance) != RESULT_OK)
 			{
 				LogError("AMQP transport failed to establish connection with service.");
+
+				update_state(transport_instance, AMQP_TRANSPORT_STATE_RECONNECTION_REQUIRED);
 			}
 			// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_020: [If the amqp_connection is OPENED, the transport shall iterate through each registered device and perform a device-specific do_work on each]
 			else if (transport_instance->amqp_connection_state == AMQP_CONNECTION_STATE_OPENED)
@@ -1333,7 +1390,7 @@ void IoTHubTransport_AMQP_Common_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIEN
 					{
 						LogError("Device '%s' reported a critical failure (events completed sending with failures); connection retry will be triggered.", STRING_c_str(registered_device->device_id));
 
-						transport_instance->is_connection_retry_required = true;
+						update_state(transport_instance, AMQP_TRANSPORT_STATE_RECONNECTION_REQUIRED);
 					}
 					else if (IoTHubTransport_AMQP_Common_Device_DoWork(registered_device) != RESULT_OK)
 					{
@@ -1342,7 +1399,7 @@ void IoTHubTransport_AMQP_Common_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIEN
 						{
 							LogError("Device '%s' reported a critical failure; connection retry will be triggered.", STRING_c_str(registered_device->device_id));
 
-							transport_instance->is_connection_retry_required = true;
+							update_state(transport_instance, AMQP_TRANSPORT_STATE_RECONNECTION_REQUIRED);
 						}
 					}
 
@@ -1980,13 +2037,40 @@ void IoTHubTransport_AMQP_Common_Destroy(TRANSPORT_LL_HANDLE handle)
 int IoTHubTransport_AMQP_Common_SetRetryPolicy(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitInSeconds)
 {
     int result;
-    (void)handle;
-    (void)retryPolicy;
-    (void)retryTimeoutLimitInSeconds;
 
-    /* Retry Policy is currently not available for AMQP */
+	// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_128: [If `handle` is NULL, `IoTHubTransport_AMQP_Common_SetRetryPolicy` shall fail and return non-zero.]
+	if (handle == NULL)
+	{
+		LogError("Cannot set retry policy (transport handle is NULL)");
+		result = __FAILURE__;
+	}
+	else
+	{
+		RETRY_CONTROL_HANDLE new_retry_control;
 
-    result = 0;
+		// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_129: [`transport_instance->connection_retry_control` shall be set using retry_control_create(), passing `retryPolicy` and `retryTimeoutLimitInSeconds`.]
+		if ((new_retry_control = retry_control_create(retryPolicy, (unsigned int)retryTimeoutLimitInSeconds)) == NULL)
+		{
+			// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_130: [If retry_control_create() fails, `IoTHubTransport_AMQP_Common_SetRetryPolicy` shall fail and return non-zero.]
+			LogError("Cannot set retry policy (retry_control_create failed)");
+			result = __FAILURE__;
+		}
+		else
+		{
+			AMQP_TRANSPORT_INSTANCE* transport_instance = (AMQP_TRANSPORT_INSTANCE*)handle;
+			RETRY_CONTROL_HANDLE previous_retry_control = transport_instance->connection_retry_control;
+
+			transport_instance->connection_retry_control = new_retry_control;
+
+			retry_control_destroy(previous_retry_control);
+
+			LogInfo("Retry policy set (%d, timeout = %d)", retryPolicy, retryTimeoutLimitInSeconds);
+
+			// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_128: [If no errors occur, `IoTHubTransport_AMQP_Common_SetRetryPolicy` shall return zero.]
+			result = RESULT_OK;
+		}
+	}
+
     return result;
 }
 
@@ -2008,34 +2092,6 @@ STRING_HANDLE IoTHubTransport_AMQP_Common_GetHostname(TRANSPORT_LL_HANDLE handle
 	}
 
     return result;
-}
-
-static DEVICE_MESSAGE_DISPOSITION_INFO* create_device_message_disposition_info_from(MESSAGE_CALLBACK_INFO* message_data)
-{
-	DEVICE_MESSAGE_DISPOSITION_INFO* result;
-
-	if ((result = (DEVICE_MESSAGE_DISPOSITION_INFO*)malloc(sizeof(DEVICE_MESSAGE_DISPOSITION_INFO))) == NULL)
-	{
-		LogError("Failed creating DEVICE_MESSAGE_DISPOSITION_INFO (malloc failed)");
-	}
-	else if (mallocAndStrcpy_s(&result->source, message_data->transportContext->link_name) != RESULT_OK)
-	{
-		LogError("Failed creating DEVICE_MESSAGE_DISPOSITION_INFO (mallocAndStrcpy_s failed)");
-		free(result);
-		result = NULL;
-	}
-	else
-	{
-		result->message_id = message_data->transportContext->message_id;
-	}
-
-	return result;
-}
-
-static void destroy_device_message_disposition_info(DEVICE_MESSAGE_DISPOSITION_INFO* device_message_disposition_info)
-{
-	free(device_message_disposition_info->source);
-	free(device_message_disposition_info);
 }
 
 IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SendMessageDisposition(MESSAGE_CALLBACK_INFO* message_data, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)

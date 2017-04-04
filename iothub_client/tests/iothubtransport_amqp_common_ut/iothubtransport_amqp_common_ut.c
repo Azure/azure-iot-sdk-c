@@ -112,6 +112,7 @@ extern "C"
 #include "iothub_client_options.h"
 #include "iothub_client_private.h"
 #include "iothub_client_version.h"
+#include "iothub_client_retry_control.h"
 #include "iothubtransportamqp_methods.h"
 #include "iothubtransport_amqp_connection.h"
 #include "iothubtransport_amqp_device.h"
@@ -351,6 +352,8 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 #define TEST_PROT_GW_HOSTNAME_NULL                 NULL
 #define TEST_PROT_GW_HOSTNAME                      "gw"
 #define TEST_DEVICE_STATUS_CODE                    200
+#define DEFAULT_RETRY_POLICY                      IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER
+#define DEFAULT_MAX_RETRY_TIME_IN_SECS            0
 
 #define TEST_STRING_HANDLE                         (STRING_HANDLE)0x4240
 #ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
@@ -390,6 +393,7 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 #define TEST_X509_CERTIFICATE                      "Ariano Suassuna"
 #define TEST_X509_PRIVATE_KEY                      "Raphael Rabello"
 #define TEST_MESSAGE_SOURCE_CHAR_PTR               "messagereceiver_link_name"
+#define TEST_RETRY_CONTROL_HANDLE                  (RETRY_CONTROL_HANDLE)0x4276
 
 
 static const unsigned char* TEST_DEVICE_METHOD_RESPONSE = (const unsigned char*)0x62;
@@ -410,6 +414,8 @@ static delivery_number TEST_MESSAGE_ID;
 static void set_expected_calls_for_Create(IOTHUBTRANSPORT_CONFIG* transport_config)
 {
 	EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+
+	STRICT_EXPECTED_CALL(retry_control_create(DEFAULT_RETRY_POLICY, DEFAULT_MAX_RETRY_TIME_IN_SECS));
 
 	if (transport_config->upperConfig->protocolGatewayHostName != NULL)
 	{
@@ -739,6 +745,7 @@ static void set_expected_calls_for_Destroy(int number_of_registered_devices, IOT
 	STRICT_EXPECTED_CALL(singlylinkedlist_destroy(TEST_REGISTERED_DEVICES_LIST));
 	STRICT_EXPECTED_CALL(amqp_connection_destroy(TEST_AMQP_CONNECTION_HANDLE));
 	STRICT_EXPECTED_CALL(xio_destroy(TEST_UNDERLYING_IO_TRANSPORT));
+	STRICT_EXPECTED_CALL(retry_control_destroy(TEST_RETRY_CONTROL_HANDLE));
 	STRICT_EXPECTED_CALL(STRING_delete(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE));
 	EXPECTED_CALL(free(IGNORED_PTR_ARG));
 }
@@ -771,6 +778,10 @@ static void set_expected_calls_for_prepare_device_for_connection_retry(DEVICE_ST
 
 static void set_expected_calls_for_prepare_for_connection_retry(int number_of_registered_devices, DEVICE_STATE current_device_state)
 {
+	RETRY_ACTION retry_action = RETRY_ACTION_RETRY_NOW;
+	STRICT_EXPECTED_CALL(retry_control_should_retry(TEST_RETRY_CONTROL_HANDLE, IGNORED_PTR_ARG))
+		.CopyOutArgumentBuffer_retry_action(&retry_action, sizeof(RETRY_ACTION));
+
 	STRICT_EXPECTED_CALL(xio_retrieveoptions(TEST_UNDERLYING_IO_TRANSPORT))
 		.SetReturn(TEST_OPTIONHANDLER_HANDLE);
 
@@ -986,6 +997,7 @@ static void crank_transport_ready_after_create(void* handle, PDLIST_ENTRY wts, i
 	crank_transport(handle, wts, wts_length, DEVICE_STATE_STOPPED, true, is_using_cbs, true, true, number_of_registered_devices, current_time, false);
 
 	STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(TEST_current_time);
+	STRICT_EXPECTED_CALL(retry_control_reset(TEST_RETRY_CONTROL_HANDLE));
 	STRICT_EXPECTED_CALL(IoTHubClient_LL_ConnectionStatusCallBack(TEST_IOTHUB_CLIENT_LL_HANDLE, IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK));
 
 	TEST_device_create_saved_on_state_changed_callback(TEST_device_create_saved_on_state_changed_context,
@@ -1037,6 +1049,7 @@ static void register_umock_alias_types()
 	REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, int);
 	REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_STATUS, int);
 	REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_LL_HANDLE, void*);
+	REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_RETRY_POLICY, int);
 	REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_MESSAGE_HANDLE, void*);
 	REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_MESSAGE_RESULT, void*);
 	REGISTER_UMOCK_ALIAS_TYPE(IOTHUBMESSAGE_CONTENT_TYPE, int);
@@ -1068,6 +1081,7 @@ static void register_umock_alias_types()
 	REGISTER_UMOCK_ALIAS_TYPE(const PDLIST_ENTRY, void*);
 	REGISTER_UMOCK_ALIAS_TYPE(PREDICATE_FUNCTION, void*);
 	REGISTER_UMOCK_ALIAS_TYPE(PROPERTIES_HANDLE, void*);
+	REGISTER_UMOCK_ALIAS_TYPE(RETRY_CONTROL_HANDLE, void*);
 	REGISTER_UMOCK_ALIAS_TYPE(SESSION_HANDLE, void*);
 	REGISTER_UMOCK_ALIAS_TYPE(SINGLYLINKEDLIST_HANDLE, void*);
 	REGISTER_UMOCK_ALIAS_TYPE(LIST_ITEM_HANDLE, void*);
@@ -1160,6 +1174,9 @@ static void register_global_mock_returns()
 
 	REGISTER_GLOBAL_MOCK_RETURN(OptionHandler_FeedOptions, OPTIONHANDLER_OK);
 	REGISTER_GLOBAL_MOCK_FAIL_RETURN(OptionHandler_FeedOptions, OPTIONHANDLER_ERROR);
+
+	REGISTER_GLOBAL_MOCK_RETURN(retry_control_create, TEST_RETRY_CONTROL_HANDLE);
+	REGISTER_GLOBAL_MOCK_FAIL_RETURN(retry_control_create, NULL);
 }
 
 static void initialize_static_variables()
@@ -1932,6 +1949,7 @@ TEST_FUNCTION(GetHostName_success)
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_008: [`instance->registered_devices` shall be set using singlylinkedlist_create()]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_010: [`get_io_transport` shall be saved on `instance->underlying_io_transport_provider`]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_012: [If IoTHubTransport_AMQP_Common_Create succeeds it shall return a pointer to `instance`.]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_124: [`instance->connection_retry_control` shall be set using retry_control_create(), passing defaults EXPONENTIAL_BACKOFF_WITH_JITTER and 0]
 TEST_FUNCTION(Create_success)
 {
 	// arrange
@@ -1957,6 +1975,7 @@ TEST_FUNCTION(Create_success)
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_007: [If `instance->iothub_target_fqdn` fails to be set, IoTHubTransport_AMQP_Common_Create shall fail and return NULL]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_009: [If singlylinkedlist_create() fails, IoTHubTransport_AMQP_Common_Create shall fail and return NULL]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_011: [If IoTHubTransport_AMQP_Common_Create fails it shall free any memory it allocated]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_125: [If retry_control_create() fails, IoTHubTransport_AMQP_Common_Create shall fail and return NULL]
 TEST_FUNCTION(Create_failure_checks)
 {
 	// arrange
@@ -3620,7 +3639,7 @@ TEST_FUNCTION(SetOption_proxy_data_when_underlying_IO_is_already_created_fails)
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_001: [ `IoTHubTransport_AMQP_Common_Destroy` shall free the stored proxy options. ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_043: [ `IoTHubTransport_AMQP_Common_Destroy` shall free the stored proxy options. ]*/
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_Destroy_frees_proxy_options)
 {
     // arrange
@@ -3654,6 +3673,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_Destroy_frees_proxy_options)
     set_expected_calls_for_Unregister(device_handle);
 
     STRICT_EXPECTED_CALL(singlylinkedlist_destroy(TEST_REGISTERED_DEVICES_LIST));
+	STRICT_EXPECTED_CALL(retry_control_destroy(TEST_RETRY_CONTROL_HANDLE));
     STRICT_EXPECTED_CALL(STRING_delete(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE));
     STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
@@ -3833,6 +3853,7 @@ TEST_FUNCTION(on_message_received_fails)
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_062: [If `new_state` shall be saved into the `registered_device` instance]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_063: [If `registered_device->time_of_last_state_change` shall be set using get_time()]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_120: [If `new_state` is DEVICE_STATE_STARTED, IoTHubClient_LL_ConnectionStatusCallBack shall be invoked with IOTHUB_CLIENT_CONNECTION_AUTHENTICATED and IOTHUB_CLIENT_CONNECTION_OK]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_127: [If `new_state` is DEVICE_STATE_STARTED, retry_control_reset() shall be invoked passing `instance->connection_retry_control`]
 TEST_FUNCTION(DoWork_success)
 {
 	// arrange
@@ -3863,6 +3884,7 @@ TEST_FUNCTION(DoWork_success)
 	ASSERT_IS_NOT_NULL(TEST_device_create_saved_on_state_changed_callback);
 
 	STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(TEST_current_time);
+	STRICT_EXPECTED_CALL(retry_control_reset(TEST_RETRY_CONTROL_HANDLE));
 	STRICT_EXPECTED_CALL(IoTHubClient_LL_ConnectionStatusCallBack(TEST_IOTHUB_CLIENT_LL_HANDLE, IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK));
 
 	TEST_device_create_saved_on_state_changed_callback(TEST_device_create_saved_on_state_changed_context,
@@ -3881,6 +3903,7 @@ TEST_FUNCTION(DoWork_success)
 }
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_115: [If the AMQP connection is closed by the service side, the connection retry logic shall be triggered]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_126: [The connection retry shall be attempted only if retry_control_should_retry() returns RETRY_ACTION_NOW, or if it fails]
 TEST_FUNCTION(on_amqp_connection_state_changed_CLOSED_unexpectedly)
 {
 	// arrange
@@ -4425,6 +4448,82 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_REJECTED_fails)
 
 	// cleanup
 	destroy_transport(handle, device_handle, NULL);
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_128: [If `handle` is NULL, `IoTHubTransport_AMQP_Common_SetRetryPolicy` shall fail and return non-zero.]
+TEST_FUNCTION(IoTHubTransport_AMQP_Common_SetRetryPolicy_NULL_handle)
+{
+	// arrange
+	initialize_test_variables();
+
+	umock_c_reset_all_calls();
+
+	// act
+	int result = IoTHubTransport_AMQP_Common_SetRetryPolicy(NULL, IOTHUB_CLIENT_RETRY_IMMEDIATE, 1600);
+
+	// assert
+	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+	ASSERT_ARE_NOT_EQUAL(int, 0, result);
+
+	// cleanup
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_130: [If retry_control_create() fails, `IoTHubTransport_AMQP_Common_SetRetryPolicy` shall fail and return non-zero.]
+TEST_FUNCTION(IoTHubTransport_AMQP_Common_SetRetryPolicy_failure_checks)
+{
+	// arrange
+	ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
+	initialize_test_variables();
+	TRANSPORT_LL_HANDLE handle = create_transport();
+
+	umock_c_reset_all_calls();
+	STRICT_EXPECTED_CALL(retry_control_create(IOTHUB_CLIENT_RETRY_IMMEDIATE, 1600));
+	umock_c_negative_tests_snapshot();
+
+	// act
+	size_t i;
+	for (i = 0; i < umock_c_negative_tests_call_count(); i++)
+	{
+		// arrange
+		char error_msg[64];
+
+		umock_c_negative_tests_reset();
+		umock_c_negative_tests_fail_call(i);
+
+		// act
+		int result = IoTHubTransport_AMQP_Common_SetRetryPolicy(handle, IOTHUB_CLIENT_RETRY_IMMEDIATE, 1600);
+
+		// assert
+		sprintf(error_msg, "On failed call %zu", i);
+		ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, error_msg);
+	}
+
+	// cleanup
+	umock_c_negative_tests_deinit();
+	destroy_transport(handle, NULL, NULL);
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_129: [`transport_instance->connection_retry_control` shall be set using retry_control_create(), passing `retryPolicy` and `retryTimeoutLimitInSeconds`.]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_128: [If no errors occur, `IoTHubTransport_AMQP_Common_SetRetryPolicy` shall return zero.]
+TEST_FUNCTION(IoTHubTransport_AMQP_Common_SetRetryPolicy_success)
+{
+	// arrange
+	initialize_test_variables();
+	TRANSPORT_LL_HANDLE handle = create_transport();
+
+	umock_c_reset_all_calls();
+	STRICT_EXPECTED_CALL(retry_control_create(IOTHUB_CLIENT_RETRY_IMMEDIATE, 1600));
+	STRICT_EXPECTED_CALL(retry_control_destroy(TEST_RETRY_CONTROL_HANDLE));
+
+	// act
+	int result = IoTHubTransport_AMQP_Common_SetRetryPolicy(handle, IOTHUB_CLIENT_RETRY_IMMEDIATE, 1600);
+
+	// assert
+	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+	ASSERT_ARE_EQUAL(int, 0, result);
+
+	// cleanup
+	destroy_transport(handle, NULL, NULL);
 }
 
 END_TEST_SUITE(iothubtransport_amqp_common_ut)
