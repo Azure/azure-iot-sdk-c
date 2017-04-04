@@ -39,6 +39,8 @@ extern IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_Create(const char* device_k
 
 **SRS_IoTHub_Authorization_07_020: [** else `IoTHubClient_Auth_Create` shall set the credential type to IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN. **]**
 
+**SRS_IoTHub_Authorization_07_024: [** if device_sas_token and device_key are NULL `IoTHubClient_Auth_Create` shall set the credential type to IOTHUB_CREDENTIAL_TYPE_UNKNOWN. **]**
+
 **SRS_IoTHub_Authorization_07_004: [** If successful `IoTHubClient_Auth_Create` shall return a `IOTHUB_AUTHORIZATION_HANDLE` value. **]**
 
 **SRS_IoTHub_Authorization_07_019: [** On error `IoTHubClient_Auth_Create` shall return NULL. **]**
@@ -79,6 +81,8 @@ extern char* IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, 
 
 **SRS_IoTHub_Authorization_07_012: [** On success `IoTHubClient_Auth_Get_SasToken` shall allocate and return the sas token in a char*. **]**
 
+**SRS_IoTHub_Authorization_07_021: [** If the device_sas_token is NOT NULL `IoTHubClient_Auth_Get_SasToken` shall return a copy of the device_sas_token. **]**
+
 ## IoTHubClient_Auth_Get_DeviceId
 
 ```c
@@ -88,6 +92,16 @@ extern const char* IoTHubClient_Auth_Get_DeviceId(IOTHUB_AUTHORIZATION_HANDLE ha
 **SRS_IoTHub_Authorization_07_013: [** if `handle` is NULL, `IoTHubClient_Auth_Get_DeviceId` shall return NULL. **]**
 
 **SRS_IoTHub_Authorization_07_014: [** `IoTHubClient_Auth_Get_DeviceId` shall return the device_id associated with `handle`. **]**
+
+## IoTHubClient_Auth_Get_DeviceKey
+
+```c
+extern const char* IoTHubClient_Auth_Get_DeviceKey(IOTHUB_AUTHORIZATION_HANDLE handle);
+```
+
+**SRS_IoTHub_Authorization_07_022: [** if `handle` is NULL, `IoTHubClient_Auth_Get_DeviceKey` shall return NULL. **]**
+
+**SRS_IoTHub_Authorization_07_023: [** `IoTHubClient_Auth_Get_DeviceKey` shall return the device_Key associated with `handle`. **]**
 
 ## IoTHubClient_Auth_Is_SasToken_Valid
 

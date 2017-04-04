@@ -120,6 +120,8 @@ static void device_twin_data_destroy(IOTHUB_DEVICE_TWIN* client_item)
 static int create_blob_upload_module(IOTHUB_CLIENT_LL_HANDLE_DATA* handle_data, const IOTHUB_CLIENT_CONFIG* config)
 {
     int result;
+    (void)handle_data;
+    (void)config;
 #ifndef DONT_USE_UPLOADTOBLOB
     handle_data->uploadToBlobHandle = IoTHubClient_LL_UploadToBlob_Create(config);
     if (handle_data->uploadToBlobHandle == NULL)
@@ -139,6 +141,7 @@ static int create_blob_upload_module(IOTHUB_CLIENT_LL_HANDLE_DATA* handle_data, 
 
 static void destroy_blob_upload_module(IOTHUB_CLIENT_LL_HANDLE_DATA* handle_data)
 {
+    (void)handle_data;
 #ifndef DONT_USE_UPLOADTOBLOB
     /*Codes_SRS_IOTHUBCLIENT_LL_02_046: [ If creating the TICK_COUNTER_HANDLE fails then IoTHubClient_LL_Create shall fail and return NULL. ]*/
     IoTHubClient_LL_UploadToBlob_Destroy(handle_data->uploadToBlobHandle);
@@ -160,12 +163,37 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
 
         memset(result, 0, sizeof(IOTHUB_CLIENT_LL_HANDLE_DATA) );
 
-        if (client_config != NULL)
+        const char* device_key;
+        const char* device_id;
+        const char* sas_token;
+
+        if (device_config == NULL)
+        {
+            device_key = client_config->deviceKey;
+            device_id = client_config->deviceId;
+            sas_token = client_config->deviceSasToken;
+        }
+        else
+        {
+            device_key = device_config->deviceKey;
+            device_id = device_config->deviceId;
+            sas_token = device_config->deviceSasToken;
+        }
+
+        /* Codes_SRS_IOTHUBCLIENT_LL_07_029: [ IoTHubClient_LL_Create shall create the Auth module with the device_key, device_id, and/or deviceSasToken values ] */
+        if ((result->authorization_module = IoTHubClient_Auth_Create(device_key, device_id, sas_token) ) == NULL)
+        {
+            LogError("Failed create authorization module");
+            free(result);
+            result = NULL;
+        }
+        else if (client_config != NULL)
         {
             IOTHUBTRANSPORT_CONFIG lowerLayerConfig;
             /*Codes_SRS_IOTHUBCLIENT_LL_02_006: [IoTHubClient_LL_Create shall populate a structure of type IOTHUBTRANSPORT_CONFIG with the information from config parameter and the previous DLIST and shall pass that to the underlying layer _Create function.]*/
             lowerLayerConfig.upperConfig = client_config;
             lowerLayerConfig.waitingToSend = &(result->waitingToSend);
+            lowerLayerConfig.auth_module_handle = result->authorization_module;
 
             setTransportProtocol(result, (TRANSPORT_PROVIDER*)client_config->protocol());
             if ((result->transportHandle = result->IoTHubTransport_Create(&lowerLayerConfig)) == NULL)
@@ -246,13 +274,7 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
 
         if (result != NULL)
         {
-            if ((result->authorization_module = IoTHubClient_Auth_Create(config->deviceKey, config->deviceId, config->deviceSasToken) ) == NULL)
-            {
-                LogError("Failed create authorization module");
-                free(result);
-                result = NULL;
-            }
-            else if (create_blob_upload_module(result, config) != 0)
+            if (create_blob_upload_module(result, config) != 0)
             {
                 LogError("unable to create blob upload");
                 IoTHubClient_Auth_Destroy(result->authorization_module);

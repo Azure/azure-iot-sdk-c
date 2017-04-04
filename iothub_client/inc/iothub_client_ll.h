@@ -95,6 +95,7 @@ DEFINE_ENUM(IOTHUBMESSAGE_DISPOSITION_RESULT, IOTHUBMESSAGE_DISPOSITION_RESULT_V
 #include "azure_c_shared_utility/doublylinkedlist.h"
 #include "iothub_message.h"
 #include "iothub_transport_ll.h"
+#include "iothub_client_authorization.h"
 #include <stddef.h>
 #include <stdint.h>
 
@@ -229,6 +230,7 @@ extern "C"
     {
         const IOTHUB_CLIENT_CONFIG* upperConfig;
         PDLIST_ENTRY waitingToSend;
+        IOTHUB_AUTHORIZATION_HANDLE auth_module_handle;
     };
 
 
