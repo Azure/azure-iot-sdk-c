@@ -202,6 +202,7 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
                 LogError("underlying transport failed");
                 destroy_blob_upload_module(result);
                 tickcounter_destroy(result->tickCounter);
+                IoTHubClient_Auth_Destroy(result->authorization_module);
                 free(result);
                 result = NULL;
             }
@@ -222,6 +223,7 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
             {
                 /*Codes_SRS_IOTHUBCLIENT_LL_02_097: [ If creating the data structures fails or instantiating the IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE fails then IoTHubClient_LL_CreateWithTransport shall fail and return NULL. ]*/
                 LogError("unable to determine the transport IoTHub name");
+                IoTHubClient_Auth_Destroy(result->authorization_module);
                 free(result);
                 result = NULL;
             }
@@ -235,6 +237,7 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
                 {
                     /*Codes_SRS_IOTHUBCLIENT_LL_02_097: [ If creating the data structures fails or instantiating the IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE fails then IoTHubClient_LL_CreateWithTransport shall fail and return NULL. ]*/
                     LogError("unable to determine the IoTHub name");
+                    IoTHubClient_Auth_Destroy(result->authorization_module);
                     free(result);
                     result = NULL;
                 }
@@ -246,6 +249,7 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
                     {
                         /*Codes_SRS_IOTHUBCLIENT_LL_02_097: [ If creating the data structures fails or instantiating the IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE fails then IoTHubClient_LL_CreateWithTransport shall fail and return NULL. ]*/
                         LogError("unable to malloc");
+                        IoTHubClient_Auth_Destroy(result->authorization_module);
                         free(result);
                         result = NULL;
                     }
