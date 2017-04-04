@@ -1,13 +1,11 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include <cstdlib>
-#include <cstddef>
-#include <cstdbool>
+#include <stdlib.h>
+#include <stddef.h>
+#include <stdbool.h>
 
 #include "testrunnerswitcher.h"
-#include "micromock.h"
-#include "micromockcharstararenullterminatedstrings.h"
 
 #include "iothub_client.h"
 #include "iothub_client_options.h"
@@ -23,7 +21,7 @@
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/platform.h"
 
-static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
+static TEST_MUTEX_HANDLE g_dllByDll;
 static bool g_callbackRecv = false;
 
 const char* TEST_EVENT_DATA_FMT = "{\"data\":\"%.24s\",\"id\":\"%d\"}";
@@ -48,9 +46,9 @@ static IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo3 = NULL;
 #define IOTHUB_TIMEOUT_SEC           1000
 #define MAX_CLOUD_TRAVEL_TIME        60.0
 
-DEFINE_MICROMOCK_ENUM_TO_STRING(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
-DEFINE_MICROMOCK_ENUM_TO_STRING(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
-DEFINE_MICROMOCK_ENUM_TO_STRING(MAP_RESULT, MAP_RESULT_VALUES);
+TEST_DEFINE_ENUM_TYPE(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
+TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
+TEST_DEFINE_ENUM_TYPE(MAP_RESULT, MAP_RESULT_VALUES);
 
 typedef struct EXPECTED_SEND_DATA_TAG
 {

@@ -7,22 +7,22 @@ if(NOT ${use_mqtt})
     message(FATAL_ERROR "iothubclient_mqtt_dt_e2e being generated without MQTT support")
 endif()
 
-compileAsC99()
+compileAsC11()
 set(theseTestsName iothubclient_mqtt_dt_e2e)
 
 set(${theseTestsName}_test_files
-    ${theseTestsName}.cpp
-    ../common_dt_e2e/iothubclient_common_dt_e2e.cpp
+    ${theseTestsName}.c
+    ../common_dt_e2e/iothubclient_common_dt_e2e.c
 )
 
-set(${theseTestsName}_cpp_files
-    ${theseTestsName}.cpp
-    ../common_dt_e2e/iothubclient_common_dt_e2e.cpp
+set(${theseTestsName}_c_files
+    ${theseTestsName}.c
+    ../common_dt_e2e/iothubclient_common_dt_e2e.c
 )
 
-set(${theseTestsName}_nuget_cpp_files
-    ${theseTestsName}.cpp
-    ../common_dt_e2e/iothubclient_common_dt_e2e.cpp
+set(${theseTestsName}_nuget_test_files
+    ${theseTestsName}.c
+    ../common_dt_e2e/iothubclient_common_dt_e2e.c
 )
 
 set(${theseTestsName}_nuget_c_files
@@ -47,7 +47,7 @@ include_directories(${IOTHUB_TEST_INC_FOLDER})
 include_directories(${IOTHUB_SERVICE_CLIENT_INC_FOLDER})
 
 file(COPY suppressions.supp DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-build_test_artifacts(${theseTestsName} ON VALGRIND_SUPPRESSIONS_FILE suppressions.supp)
+build_c_test_artifacts(${theseTestsName} ON "tests/E2ETests" VALGRIND_SUPPRESSIONS_FILE suppressions.supp)
 
 if(WIN32)
     if(MSVC)
