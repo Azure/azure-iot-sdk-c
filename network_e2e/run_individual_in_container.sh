@@ -8,9 +8,9 @@ script_dir=$(cd "$(dirname "$0")" && pwd)
 build_root=$(cd "${script_dir}/.." && pwd)
 build_folder=$build_root/cmake/linux_network_e2e
 
-echo running   /bin/bash $script_dir/run_test.sh $*
+echo running   /bin/bash $script_dir/rt_container.sh $*
 
-docker run --rm \
+docker run --rm \	
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v$build_root:$build_root \
   -e IOTHUB_CONNECTION_STRING \
@@ -20,8 +20,8 @@ docker run --rm \
   -e IOTHUB_E2E_X509_THUMBPRINT \
   -e IOTHUB_EVENTHUB_CONNECTION_STRING \
   -e IOTHUB_PARTITION_COUNT \
-  --network="YoYoNet" \
+  --network="TestNat" \
   --privileged \
   -it \
   jenkins-network-e2e \
-  /bin/bash $script_dir/run_test.sh $*
+  /bin/bash $script_dir/rt_container.sh $*

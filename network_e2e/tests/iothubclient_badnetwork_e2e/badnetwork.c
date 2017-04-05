@@ -81,12 +81,12 @@ void disconnect_after_first_confirmation_then_close(IOTHUB_PROVISIONED_DEVICE* d
     }
 
     // Verify that we haven't received all the confirmations.  Otherwise this test is invalid.  We want some pending confirmations
-    printf("making sure we have at least one unconfirmed message before reconnecting\n");
+    printf("making sure we have at least one unconfirmed message before reconnecting\r\n");
     bool atLeastOneUnconfirmed = false;
     for (int i=0; i<MESSAGE_COUNT;i++)
     {
         bool confirmed = client_received_confirmation(d2cMessage[i]);
-        printf ("message %d is %sconfirmed\n",i,confirmed ? "" : "not ");
+        printf ("message %d is %sconfirmed\r\n",i,confirmed ? "" : "not ");
         if (confirmed == false)
         {
             atLeastOneUnconfirmed = true;

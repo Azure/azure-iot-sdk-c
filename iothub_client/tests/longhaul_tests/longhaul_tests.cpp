@@ -40,7 +40,6 @@ static size_t g_iotHubTestId = 0;
 static IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo = NULL;
 
 #define IOTHUB_COUNTER_MAX           10
-#define IOTHUB_TIMEOUT_SEC           1000
 #define MAX_CLOUD_TRAVEL_TIME        60.0
 #define INDEFINITE_TIME ((time_t)(-1))
 

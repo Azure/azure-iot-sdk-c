@@ -34,11 +34,13 @@ BEGIN_TEST_SUITE(iothubclient_badnetwork_e2e)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
+#if defined(__linux__)
         g_host = getenv("HOSTNAME");
         if (g_host== NULL || *g_host == 0)
         {
             ASSERT_FAIL("This test can only run inside a docker container");
         }
+#endif
         e2e_init();
         TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     }
@@ -53,7 +55,7 @@ BEGIN_TEST_SUITE(iothubclient_badnetwork_e2e)
     {
         if (is_network_connected() == false)
         {
-            printf("Function cleanup -- reconnecting\n");
+            printf("Function cleanup -- reconnecting\r\n");
             network_reconnect();
         }
     }

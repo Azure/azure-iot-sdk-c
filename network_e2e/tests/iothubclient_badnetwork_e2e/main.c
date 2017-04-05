@@ -64,6 +64,8 @@ IOTHUB_CLIENT_TRANSPORT_PROVIDER string_to_protocol(const char *pname)
 
 int main(int argc, char* argv[])
 {
+    // disable buffering on stdout.  It causes a bad intermix of printf from this process and output from child processes
+    setbuf(stdout,NULL); 
     IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol = NULL;
     size_t failedTestCount = 0;
     if (argc == 1)
@@ -86,9 +88,9 @@ int main(int argc, char* argv[])
 
     if (protocol == NULL)
     {
-        printf("Usage: iothubclient_badnetwork_e2e [protocol]\n");
-        printf("protocol = one of [AMQP, AMQP-WS, MQTT, MQTT-WS, HTTP]\n");
-        printf("protocol can also be specified in the E2E_PROTOCOL env variable\n");
+        printf("Usage: iothubclient_badnetwork_e2e [protocol]\r\n");
+        printf("protocol = one of [AMQP, AMQP-WS, MQTT, MQTT-WS, HTTP]\r\n");
+        printf("protocol can also be specified in the E2E_PROTOCOL env variable\r\n");
         return -1;
     }
     else
