@@ -1,0 +1,53 @@
+# -*- cmake -*-
+# this one is important
+SET(CMAKE_SYSTEM_NAME Linux)
+#this one not so much
+SET(CMAKE_SYSTEM_VERSION 1)
+
+# specify the cross compiler
+SET(CMAKE_C_COMPILER   arm-linux-gnueabihf-gcc-4.9)
+SET(CMAKE_CXX_COMPILER arm-linux-gnueabihf-g++-4.9)
+
+# where is the target environment
+SET(CMAKE_FIND_ROOT_PATH $ENV{ARMHF_SYSROOT_DIR})
+SET(CURL_LIBRARY ${CMAKE_FIND_ROOT_PATH}/usr/lib/arm-linux-gnueabihf/libcurl.so)
+SET(CURL_INCLUDE_DIR ${CMAKE_FIND_ROOT_PATH}/usr/include/curl)
+SET(OPENSSL_CRYPTO_LIBRARY -L${CMAKE_FIND_ROOT_PATH}/usr/lib/arm-linux-gnueabihf -lcrypto)
+SET(OPENSSL_SSL_LIBRARY -L${CMAKE_FIND_ROOT_PATH}/usr/lib/arm-linux-gnueabihf/ -lssl)
+SET(ZLIB_LIBRARY -L${CMAKE_FIND_ROOT_PATH}/usr/lib/arm-linux-gnueabihf/ -lz)
+SET(ZLIB_INCLUDE_DIR ${CMAKE_FIND_ROOT_PATH}/usr/include/)
+
+# search for programs in the build host directories
+SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+# for libraries and headers in the target directories
+SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+
+# We need to explicitly point cmake to needed libraries:
+SET(CURL_LIBRARY ${CMAKE_FIND_ROOT_PATH}/usr/lib/arm-linux-gnueabihf/libcurl.so)
+SET(CURL_INCLUDE_DIR ${CMAKE_FIND_ROOT_PATH}/usr/include/curl)
+SET(OPENSSL_CRYPTO_LIBRARY -L${CMAKE_FIND_ROOT_PATH}/usr/lib/arm-linux-gnueabihf -lcrypto)
+SET(OPENSSL_SSL_LIBRARY -L${CMAKE_FIND_ROOT_PATH}/usr/lib/arm-linux-gnueabihf -lssl)
+SET(ZLIB_LIBRARY -L${CMAKE_FIND_ROOT_PATH}/usr/lib/arm-linux-gnueabihf -lz)
+SET(ZLIB_INCLUDE_DIR ${CMAKE_FIND_ROOT_PATH}/usr/include)
+SET(GSSAPI_KRB5_LIBRARY -L${CMAKE_FIND_ROOT_PATH}/usr/lib/arm-linux-gnueabihf -lgssapi_krb5)
+SET(KRB5_LIBRARY -L${CMAKE_FIND_ROOT_PATH}/usr/lib/arm-linux-gnueabihf -lkrb5)
+SET(COM_ERR_LIBRARY -lcom_err)
+SET(IDN_LIBRARY         -lidn)
+SET(K5CRYPTO_LIBRARY    -lk5crypto)
+SET(KEYUTILS_LIBRARY    -lkeyutils)
+SET(KRB5SUPPORT_LIBRARY -lkrb5support)
+SET(LBER-2.4_LIBRARY    -llber-2.4)
+SET(LDAP_R-2.4_LIBRARY  -lldap_r-2.4)
+SET(RTMP_LIBRARY        -lrtmp)
+SET(SSH2_LIBRARY        -lssh2)
+SET(GCRYPT_LIBRARY -L${CMAKE_FIND_ROOT_PATH}/lib/arm-linux-gnueabihf -lgcrypt)
+SET(SASL2_LIBRARY       -lsasl2)
+SET(GNUTLS_DEB0_LIBRARY -lgnutls-deb0)
+SET(HOGWEED_LIBRARY     -lhogweed)
+SET(NETTLE_LIBRARY      -lnettle)
+SET(GMP_LIBRARY         -lgmp)
+SET(GPG_ERROR_LIBRARY   -lgpg-error)
+SET(P11_KIT_LIBRARY -lp11-kit)
+SET(TASN1_LIBRARY -ltasn1)
+SET(FFI_LIBRARY -lffi)
