@@ -148,6 +148,8 @@ int main(void)
 
     EVENT_INSTANCE messages[MESSAGE_COUNT];
     double avgWindSpeed = 10.0;
+    double minTemperature = 20.0;
+    double minHumidity = 60.0;
     int receiveContext = 0;
     g_continueRunning = true;
 
@@ -235,11 +237,15 @@ int main(void)
 
                     /* Now that we are ready to receive commands, let's send some messages */
                     size_t iterator = 0;
+                    double temperature = 0;
+                    double humidity = 0;
                     do
                     {
                         if (iterator < MESSAGE_COUNT)
                         {
-                            sprintf_s(msgText, sizeof(msgText), "{\"deviceId\": \"myFirstDevice\",\"windSpeed\": %.2f}", avgWindSpeed + (rand() % 4 + 2));
+                            temperature = minTemperature + (rand() % 10);
+                            humidity = minHumidity +  (rand() % 20);
+                            sprintf_s(msgText, sizeof(msgText), "{\"deviceId\":\"myFirstDevice\",\"windSpeed\":%.2f,\"temperature\":%.2f,\"humidity\":%.2f}", avgWindSpeed + (rand() % 4 + 2), temperature, humidity);
                             if ((messages[iterator].messageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText))) == NULL)
                             {
                                 (void)printf("ERROR: iotHubMessageHandle is NULL!\r\n");
@@ -251,8 +257,8 @@ int main(void)
                                 messages[iterator].messageTrackingId = iterator;
 
                                 propMap = IoTHubMessage_Properties(messages[iterator].messageHandle);
-                                (void)sprintf_s(propText, sizeof(propText), "PropMsg_%zu", iterator);
-                                if (Map_AddOrUpdate(propMap, "PropName", propText) != MAP_OK)
+                                (void)sprintf_s(propText, sizeof(propText), temperature > 28 ? "true" : "false");
+                                if (Map_AddOrUpdate(propMap, "temperatureAlert", propText) != MAP_OK)
                                 {
                                     (void)printf("ERROR: Map_AddOrUpdate Failed!\r\n");
                                 }

@@ -35,6 +35,8 @@ BEGIN_NAMESPACE(WeatherStation);
 DECLARE_MODEL(ContosoAnemometer,
 WITH_DATA(ascii_char_ptr, DeviceId),
 WITH_DATA(int, WindSpeed),
+WITH_DATA(float, Temperature),
+WITH_DATA(float, Humidity),
 WITH_ACTION(TurnFanOn),
 WITH_ACTION(TurnFanOff),
 WITH_ACTION(SetAirResistance, int, Position)
@@ -42,6 +44,7 @@ WITH_ACTION(SetAirResistance, int, Position)
 
 END_NAMESPACE(WeatherStation);
 
+static char propText[1024];
 
 EXECUTE_COMMAND_RESULT TurnFanOn(ContosoAnemometer* device)
 {
@@ -150,6 +153,8 @@ void simplesample_http_run(void)
         {
             IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle = IoTHubClient_LL_CreateFromConnectionString(connectionString, HTTP_Protocol);
             int avgWindSpeed = 10;
+            float minTemperature = 20.0;
+            float minHumidity = 60.0;
 
             srand((unsigned int)time(NULL));
 
@@ -195,10 +200,12 @@ void simplesample_http_run(void)
                     {
                         myWeather->DeviceId = "myFirstDevice";
                         myWeather->WindSpeed = avgWindSpeed + (rand() % 4 + 2);
+                        myWeather->Temperature = minTemperature + (rand() % 10);
+                        myWeather->Humidity = minHumidity + (rand() % 20);
                         {
                             unsigned char* destination;
                             size_t destinationSize;
-                            if (SERIALIZE(&destination, &destinationSize, myWeather->DeviceId, myWeather->WindSpeed) != CODEFIRST_OK)
+                            if (SERIALIZE(&destination, &destinationSize, myWeather->DeviceId, myWeather->WindSpeed, myWeather->Temperature, myWeather->Humidity) != CODEFIRST_OK)
                             {
                                 (void)printf("Failed to serialize\r\n");
                             }
@@ -211,6 +218,13 @@ void simplesample_http_run(void)
                                 }
                                 else
                                 {
+                                    MAP_HANDLE propMap = IoTHubMessage_Properties(messageHandle);
+                                    (void)sprintf_s(propText, sizeof(propText), myWeather->Temperature > 28 ? "true" : "false");
+                                    if (Map_AddOrUpdate(propMap, "temperatureAlert", propText) != MAP_OK)
+                                    {
+                                        printf("ERROR: Map_AddOrUpdate Failed!\r\n");
+                                    }
+
                                     if (IoTHubClient_LL_SendEventAsync(iotHubClientHandle, messageHandle, sendCallback, (void*)1) != IOTHUB_CLIENT_OK)
                                     {
                                         printf("failed to hand over the message to IoTHubClient");

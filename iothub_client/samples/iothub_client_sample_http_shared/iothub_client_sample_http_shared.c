@@ -163,6 +163,10 @@ void iothub_client_sample_http_run(void)
     EVENT_INSTANCE messages1[MESSAGE_COUNT];
     EVENT_INSTANCE messages2[MESSAGE_COUNT];
     double avgWindSpeed = 10.0;
+    double minTemperature = 20.0;
+    double minHumidity = 60.0;
+    double temperature = 0;
+    double humidity = 0;
     int receiveContext1 = 0;
     int receiveContext2 = 0;
 
@@ -240,10 +244,16 @@ void iothub_client_sample_http_run(void)
 
                             for (i = 0; i < MESSAGE_COUNT; i++)
                             {
-                                sprintf_s(msgText, sizeof(msgText), "{\"deviceId\": \"%s\",\"windSpeed\": %.2f}", deviceId1, avgWindSpeed + (rand() % 4 + 2));
+                                temperature = minTemperature + (rand() % 10);
+                                humidity = minHumidity +  (rand() % 20);
+
+                                sprintf_s(msgText, sizeof(msgText), "{\"deviceId\": \"%s\",\"windSpeed\":%.2f,\"temperature\":%.2f,\"humidity\":%.2f}", deviceId1, avgWindSpeed + (rand() % 4 + 2), temperature, humidity);
                                 iothub_client_sample_http_send_one_msg(iothubClient1, &messages1[i], i);
 
-                                sprintf_s(msgText, sizeof(msgText), "{\"deviceId\": \"%s\",\"windSpeed\": %.2f}", deviceId2, avgWindSpeed + (rand() % 4 + 2));
+                                temperature = minTemperature + (rand() % 10);
+                                humidity = minHumidity +  (rand() % 20);
+
+                                sprintf_s(msgText, sizeof(msgText), "{\"deviceId\": \"%s\",\"windSpeed\":%.2f,\"temperature\":%.2f,\"humidity\":%.2f}", deviceId2, avgWindSpeed + (rand() % 4 + 2), temperature, humidity);
                                 iothub_client_sample_http_send_one_msg(iothubClient2, &messages2[i], i);
                             }
                             // Wait for any incoming messages
