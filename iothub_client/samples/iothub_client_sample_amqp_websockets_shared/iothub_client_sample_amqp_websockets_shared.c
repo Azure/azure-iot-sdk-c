@@ -136,11 +136,18 @@ static int create_events(EVENT_INSTANCE* events, const char* deviceId)
 
 	srand((unsigned int)time(NULL));
 	double avgWindSpeed = 10.0;
+    double minTemperature = 20.0;
+    double minHumidity = 60.0;
+    double temperature = 0;
+    double humidity = 0;
 
 	int i;
 	for (i = 0; i < MESSAGE_COUNT; i++)
 	{
-		if (sprintf_s(msgText, sizeof(msgText), "{\"deviceId\":\"%s\",\"windSpeed\":%.2f}", deviceId, avgWindSpeed + (rand() % 4 + 2)) == 0)
+        temperature = minTemperature + (rand() % 10);
+        humidity = minHumidity +  (rand() % 20);
+
+		if (sprintf_s(msgText, sizeof(msgText), "{\"deviceId\":\"myFirstDevice\",\"windSpeed\":%.2f,\"temperature\":%.2f,\"humidity\":%.2f}", avgWindSpeed + (rand() % 4 + 2), temperature, humidity) == 0)
 		{
 			(void)printf("ERROR: failed creating event message for device %s\r\n", deviceId);
 			result = __FAILURE__;
@@ -159,12 +166,12 @@ static int create_events(EVENT_INSTANCE* events, const char* deviceId)
 				(void)printf("ERROR: failed getting device %s's message property map\r\n", deviceId);
 				result = __FAILURE__;
 			}
-			else if (sprintf_s(propText, sizeof(propText), "PropMsg_%d", i) == 0) 
+			else if (sprintf_s(propText, sizeof(propText), temperature > 28 ? "true" : "false") == 0) 
 			{
 				(void)printf("ERROR: sprintf_s failed for device %s's message property\r\n", deviceId);
 				result = __FAILURE__;
 			}
-			else if (Map_AddOrUpdate(propMap, "PropName", propText) != MAP_OK)
+			else if (Map_AddOrUpdate(propMap, "temperatureAlert", propText) != MAP_OK)
 			{
 				(void)printf("ERROR: Map_AddOrUpdate failed for device %s\r\n", deviceId);
 				result = __FAILURE__;

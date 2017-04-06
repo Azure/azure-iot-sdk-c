@@ -32,6 +32,8 @@ BEGIN_NAMESPACE(WeatherStation);
 DECLARE_MODEL(ContosoAnemometer,
 WITH_DATA(ascii_char_ptr, DeviceId),
 WITH_DATA(int, WindSpeed),
+WITH_DATA(float, Temperature),
+WITH_DATA(float, Humidity),
 WITH_ACTION(TurnFanOn),
 WITH_ACTION(TurnFanOff),
 WITH_ACTION(SetAirResistance, int, Position)
@@ -39,6 +41,7 @@ WITH_ACTION(SetAirResistance, int, Position)
 
 END_NAMESPACE(WeatherStation);
 
+static char propText[1024];
 
 EXECUTE_COMMAND_RESULT TurnFanOn(ContosoAnemometer* device)
 {
@@ -71,7 +74,7 @@ void sendCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCal
 }
 
 
-static void sendMessage(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const unsigned char* buffer, size_t size)
+static void sendMessage(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const unsigned char* buffer, size_t size, ContosoAnemometer *myWeather)
 {
     static unsigned int messageTrackingId;
     IOTHUB_MESSAGE_HANDLE messageHandle = IoTHubMessage_CreateFromByteArray(buffer, size);
@@ -81,6 +84,13 @@ static void sendMessage(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const unsigned 
     }
     else
     {
+        MAP_HANDLE propMap = IoTHubMessage_Properties(messageHandle);
+        (void)sprintf_s(propText, sizeof(propText), myWeather->Temperature > 28 ? "true" : "false");
+        if (Map_AddOrUpdate(propMap, "temperatureAlert", propText) != MAP_OK)
+        {
+            (void)printf("ERROR: Map_AddOrUpdate Failed!\r\n");
+        }
+
         if (IoTHubClient_SendEventAsync(iotHubClientHandle, messageHandle, sendCallback, (void*)(uintptr_t)messageTrackingId) != IOTHUB_CLIENT_OK)
         {
             printf("failed to hand over the message to IoTHubClient");
@@ -148,6 +158,8 @@ void simplesample_amqp_run(void)
             IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_CreateFromConnectionString(connectionString, AMQP_Protocol);
             srand((unsigned int)time(NULL));
             int avgWindSpeed = 10;
+            float minTemperature = 20.0;
+            float minHumidity = 60.0;
 
             // Turn on Log 
             bool trace = true;
@@ -185,14 +197,16 @@ void simplesample_amqp_run(void)
                     {
                         myWeather->DeviceId = "myFirstDevice";
                         myWeather->WindSpeed = avgWindSpeed + (rand() % 4 + 2);
+                        myWeather->Temperature = minTemperature + (rand() % 10);
+                        myWeather->Humidity = minHumidity + (rand() % 20);
 
-                        if (SERIALIZE(&destination, &destinationSize, myWeather->DeviceId, myWeather->WindSpeed) != CODEFIRST_OK)
+                        if (SERIALIZE(&destination, &destinationSize, myWeather->DeviceId, myWeather->WindSpeed, myWeather->Temperature, myWeather->Humidity) != CODEFIRST_OK)
                         {
                             (void)printf("Failed to serialize\r\n");
                         }
                         else
                         {
-                            sendMessage(iotHubClientHandle, destination, destinationSize);
+                            sendMessage(iotHubClientHandle, destination, destinationSize, myWeather);
                         }
 
                         /* wait for commands */

@@ -121,6 +121,10 @@ void iothub_client_sample_amqp_websockets_run(void)
 
     srand((unsigned int)time(NULL));
     double avgWindSpeed = 10.0;
+    double minTemperature = 20.0;
+    double minHumidity = 60.0;
+    double temperature = 0;
+    double humidity = 0;
 
     callbackCounter = 0;
     int receiveContext = 0;
@@ -156,7 +160,9 @@ void iothub_client_sample_amqp_websockets_run(void)
             /* Now that we are ready to receive commands, let's send some messages */
             for (size_t i = 0; i < MESSAGE_COUNT; i++)
             {
-                sprintf_s(msgText, sizeof(msgText), "{\"deviceId\":\"myFirstDevice\",\"windSpeed\":%.2f}", avgWindSpeed+(rand()%4+2) );
+                temperature = minTemperature + (rand() % 10);
+                humidity = minHumidity +  (rand() % 20);
+                sprintf_s(msgText, sizeof(msgText), "{\"deviceId\":\"myFirstDevice\",\"windSpeed\":%.2f,\"temperature\":%.2f,\"humidity\":%.2f}", avgWindSpeed + (rand() % 4 + 2), temperature, humidity);
                 if ((messages[i].messageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText))) == NULL)
                 {
                     (void)printf("ERROR: iotHubMessageHandle is NULL!\r\n");
@@ -166,8 +172,8 @@ void iothub_client_sample_amqp_websockets_run(void)
                     messages[i].messageTrackingId = (int)i;
                     
                     MAP_HANDLE propMap = IoTHubMessage_Properties(messages[i].messageHandle);
-                    (void)sprintf_s(propText, sizeof(propText), "PropMsg_%d", (int)i);
-                    if (Map_AddOrUpdate(propMap, "PropName", propText) != MAP_OK)
+                    (void)sprintf_s(propText, sizeof(propText), temperature > 28 ? "true" : "false");
+                    if (Map_AddOrUpdate(propMap, "temperatureAlert", propText) != MAP_OK)
                     {
                         (void)printf("ERROR: Map_AddOrUpdate Failed!\r\n");
                     }
