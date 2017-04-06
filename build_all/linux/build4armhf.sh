@@ -15,10 +15,12 @@ cmake -DCMAKE_TOOLCHAIN_FILE=${repo_root}/build_all/linux/cmake_toolchain_file_a
       -Duse_amqp:BOOL=ON \
       -Duse_http:BOOL=ON \
       -Duse_mqtt:BOOL=ON \
+      -Duse_installed_dependencies:BOOL=ON \
       -Ddont_use_uploadtoblob:BOOL=ON \
       -Drun_unittests:BOOL=OFF \
       -Dbuild_python:STRING=OFF \
       -Dbuild_javawrapper:BOOL=OFF \
       -Dno_logging:BOOL=OFF \
       -Dwip_use_c2d_amqp_methods:BOOL=OFF \
+      -Dazure_c_shared_utility_DIR=${repo_root}/c-utility/configs \
       "$repo_root"
