@@ -96,11 +96,12 @@ void initWifi() {
     Serial.println(ssid);
 
     // Connect to WPA/WPA2 network. Change this line if using open or WEP network:
-    while (WiFi.begin(ssid, pass) != WL_CONNECTED) {
-        // unsuccessful, retry in 4 seconds
-        Serial.print("failed ... ");
-        delay(4000);
-        Serial.print("retrying ... ");
+    WiFi.begin(ssid, pass);
+
+    Serial.print("Waiting for Wifi connection.");
+    while (WiFi.status() != WL_CONNECTED) {
+        Serial.print(".");
+        delay(500);
     }
 
     Serial.println("Connected to wifi");
