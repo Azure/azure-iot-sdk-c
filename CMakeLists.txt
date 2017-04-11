@@ -13,7 +13,7 @@ endif()
 #
 #making a global variable to know if we are on linux, windows, or macosx.
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    set(BUILD_PLAT_WINDOWS TRUE)
+    set(WINDOWS TRUE)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(LINUX TRUE)
     #on Linux, enable valgrind
@@ -21,7 +21,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     find_program(MEMORYCHECK_COMMAND valgrind)
     set(MEMORYCHECK_COMMAND_OPTIONS "--leak-check=full --error-exitcode=1")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    set(BUILD_PLAT_MACOSX TRUE)
+    set(MACOSX TRUE)
 endif()
 
 include (CTest)
