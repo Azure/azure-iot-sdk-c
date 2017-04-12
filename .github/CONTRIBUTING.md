@@ -18,40 +18,26 @@ That is definitely something we want to hear about. Please open an issue on gith
 - Do you have logs showing what's happening?
 - And please share all repro steps for your issue.
 
-*Our SDKs are entirely open-source and we do accept pull-requests if you feel like taking a stab at fixing the bug and maybe adding your name to our commit history :) Please mention any relevant issue number in the pull request description.*
+*Our SDKs are open-source and we do accept pull-requests if you feel like taking a stab at fixing the bug and maybe adding your name to our commit history :) Please mention any relevant issue number in the pull request description.* Please see [Contribute code](#contribute-code) below.
 
 # Contribute code or documentation
 We require pull-requests for code and documentation to be submitted against the `master` branch in order to review and run it in our gated build system. We try to maintain a high bar for code quality and maintainability, we insist on having tests associated with the code, and if necessary, additions/modifications to the requirement documents.
 
 Also, have you signed the [Contribution License Agreement](https://cla.microsoft.com/) ([CLA](https://cla.microsoft.com/))? A friendly bot will remind you about it when you submit your pull-request.
 
-**If your contribution is going to be a major effort, you should give us a heads-up first. We have a lot of items captured in our backlog and we release every two weeks, so before you spend the time, just check with us to make sure your plans and ours are in sync :) Just open an issue on github and tag it as "enhancement".**
+**If your contribution is going to be a major effort, you should give us a heads-up first. We have a lot of items captured in our backlog and we release every two weeks, so before you spend the time, just check with us to make sure your plans and ours are in sync :) Just open an issue on github and tag it as "contribution".**
 
 ## Editing module requirements
 We use requirement documents to describe the expected behavior for each code module. It works as a basis to understand what tests need to be written.
 
-Each requirement has a unique tag that is re-used in the code comments to identify where it's implemented and where it's tested. To generate these unique identifiers, we used to use a Microsoft Word macro.
-We are progressively switching to Markdown though, for which we have no macro, therefore we have to be careful about numbering.
+Each requirement has a unique tag that is re-used in the code comments to identify where it's implemented and where it's tested.
 
-The following steps describe adding a new requirement in a Word document:
+Each unique tag is in the following form:
+SRS_<MODULE_NAME>_<DEVELOPER_ID>_<REQUIREMENT_ID>
 
-* Add the requirement text and select it
+When contributing to requirement docs, you can use `99` as a DEVELOPER_ID, and just increment the requirement ID to be unique.
 
-![](../doc/media/add_requirement/add_requirement_step1.png)
-
-* Invoke the macro with the selected text
-
-![](../doc/media/add_requirement/add_requirement_step2.png)
-
-* Select developer id 99
-
-![](../doc/media/add_requirement/add_requirement_step3.png)
-
-* Done!
-
-![](../doc/media/add_requirement/add_requirement_step4.png)
-
-When contributing to markdown requirement docs, you can also use `99` for a developer id, and just increment the last number of the requirement to be unique.
+For an example see the template in the [Adding new files](#adding-new-files)
 
 ## Adding new files
 If your contribution is not part of an already existing code, you must create a new requirement file and a new unit test project. Our team created a template to help you on it. For the requirements you can copy the [template_requirements.md](https://github.com/Azure/azure-c-shared-utility/blob/master/devdoc/template_requirements.md) to the appropriate `devdoc` directory and change it to fits your needs.
