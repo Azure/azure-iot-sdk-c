@@ -11,13 +11,17 @@ if(POLICY CMP0042)
 endif()
 
 #
-#making a nice global variable to know if we are on linux or not.
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+#making a global variable to know if we are on linux, windows, or macosx.
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    set(WINDOWS TRUE)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(LINUX TRUE)
     #on Linux, enable valgrind
     #these commands (MEMORYCHECK...) need to apear BEFORE include(CTest) or they will not have any effect
     find_program(MEMORYCHECK_COMMAND valgrind)
     set(MEMORYCHECK_COMMAND_OPTIONS "--leak-check=full --error-exitcode=1")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    set(MACOSX TRUE)
 endif()
 
 include (CTest)

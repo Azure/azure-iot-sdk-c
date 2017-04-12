@@ -96,7 +96,7 @@ In addition to the simple samples found in the current repository, you can find 
 [iot-dev-center]: http://azure.com/iotdev
 [iot-hub-documentation]: https://docs.microsoft.com/en-us/azure/iot-hub/
 [device-catalog]: https://catalog.azureiotsuite.com
-[devbox-setup]: doc/devbox_setup.md
+[devbox-setup]: ../doc/devbox_setup.md
 [setup-iothub]: https://aka.ms/howtocreateazureiothub
 [c-sdk-intro]: https://azure.microsoft.com/documentation/articles/iot-hub-device-sdk-c-intro/
 [c-porting-guide]: ../doc/porting_guide.md
