@@ -306,7 +306,7 @@ static int my_messagesender_send(MESSAGE_SENDER_HANDLE message_sender, MESSAGE_H
 }
 
 static ON_MESSAGE_RECEIVED onMessageReceivedCallback;
-static int my_messagereceiver_open(MESSAGE_RECEIVER_HANDLE message_receiver, ON_MESSAGE_RECEIVED on_message_received, const void* callback_context)
+static int my_messagereceiver_open(MESSAGE_RECEIVER_HANDLE message_receiver, ON_MESSAGE_RECEIVED on_message_received, void* callback_context)
 {
     (void)message_receiver;
     (void)callback_context;

@@ -742,7 +742,7 @@ static int create_message_receiver(MESSENGER_INSTANCE* instance)
 		else
 		{
 			// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_088: [`instance->message_receiver` shall be opened using messagereceiver_open(), passing `on_message_received_internal_callback`]
-			if (messagereceiver_open(instance->message_receiver, on_message_received_internal_callback, (const void*)instance) != RESULT_OK)
+			if (messagereceiver_open(instance->message_receiver, on_message_received_internal_callback, (void*)instance) != RESULT_OK)
 			{
 				// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_089: [If messagereceiver_open() fails, messenger_do_work() shall fail and return]
 				result = __FAILURE__;

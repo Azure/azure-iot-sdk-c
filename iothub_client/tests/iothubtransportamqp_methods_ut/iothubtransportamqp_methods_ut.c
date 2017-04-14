@@ -135,7 +135,7 @@ extern "C"
         return TEST_MESSAGE_RECEIVER;
     }
 
-    static int my_messagereceiver_open(MESSAGE_RECEIVER_HANDLE message_receiver, ON_MESSAGE_RECEIVED on_message_received, const void* callback_context)
+    static int my_messagereceiver_open(MESSAGE_RECEIVER_HANDLE message_receiver, ON_MESSAGE_RECEIVED on_message_received, void* callback_context)
     {
         (void)message_receiver;
         g_on_message_received = on_message_received;

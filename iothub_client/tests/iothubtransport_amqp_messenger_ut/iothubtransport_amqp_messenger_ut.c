@@ -284,8 +284,8 @@ static MESSENGER_DISPOSITION_RESULT TEST_on_new_message_received_callback(IOTHUB
 static int TEST_messagereceiver_open_result;
 static MESSAGE_RECEIVER_HANDLE saved_messagereceiver_open_message_receiver;
 static ON_MESSAGE_RECEIVED saved_messagereceiver_open_on_message_received;
-static const void* saved_messagereceiver_open_callback_context;
-static int TEST_messagereceiver_open(MESSAGE_RECEIVER_HANDLE message_receiver, ON_MESSAGE_RECEIVED on_message_received, const void* callback_context)
+static void* saved_messagereceiver_open_callback_context;
+static int TEST_messagereceiver_open(MESSAGE_RECEIVER_HANDLE message_receiver, ON_MESSAGE_RECEIVED on_message_received, void* callback_context)
 {
     saved_messagereceiver_open_message_receiver = message_receiver;
     saved_messagereceiver_open_on_message_received = on_message_received;
