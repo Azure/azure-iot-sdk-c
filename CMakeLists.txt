@@ -123,7 +123,7 @@ endif()
 
 include("dependencies.cmake")
 
-if(${run_unittests})
+if(${run_unittests} OR ${run_e2e_tests})
     include("dependencies-test.cmake")
 endif()
 
