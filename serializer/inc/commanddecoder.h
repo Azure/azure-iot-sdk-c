@@ -39,7 +39,7 @@ typedef METHODRETURN_HANDLE(*METHOD_CALLBACK_FUNC)(void* methodCallbackContext, 
 
 MOCKABLE_FUNCTION(,COMMAND_DECODER_HANDLE, CommandDecoder_Create, SCHEMA_MODEL_TYPE_HANDLE, modelHandle, ACTION_CALLBACK_FUNC, actionCallback, void*, actionCallbackContext, METHOD_CALLBACK_FUNC, methodCallback, void*, methodCallbackContext);
 MOCKABLE_FUNCTION(,EXECUTE_COMMAND_RESULT, CommandDecoder_ExecuteCommand, COMMAND_DECODER_HANDLE, handle, const char*, command);
-MOCKABLE_FUNCTION(, METHODRETURN_HANDLE, CommandDecoder_ExecuteMethod, COMMAND_DECODER_HANDLE, handle, const char*, fullMethodName, const char*, methodPayload);
+MOCKABLE_FUNCTION(,METHODRETURN_HANDLE, CommandDecoder_ExecuteMethod, COMMAND_DECODER_HANDLE, handle, const char*, fullMethodName, const char*, methodPayload);
 MOCKABLE_FUNCTION(,void, CommandDecoder_Destroy, COMMAND_DECODER_HANDLE, commandDecoderHandle);
 
 MOCKABLE_FUNCTION(, EXECUTE_COMMAND_RESULT, CommandDecoder_IngestDesiredProperties, void*, startAddress, COMMAND_DECODER_HANDLE, handle, const char*, desiredProperties);
