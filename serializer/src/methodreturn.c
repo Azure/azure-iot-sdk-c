@@ -42,7 +42,9 @@ METHODRETURN_HANDLE MethodReturn_Create(int statusCode, const char* jsonValue)
         {
             if (jsonValue == NULL)
             {
+                /*Codes_SRS_METHODRETURN_02_001: [ MethodReturn_Create shall create a non-NULL handle containing statusCode and a clone of jsonValue. ]*/
                 result->data.jsonValue = NULL;
+                result->data.statusCode = statusCode;
             }
             else
             {
