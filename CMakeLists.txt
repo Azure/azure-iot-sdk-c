@@ -4,7 +4,7 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(azure_iot_sdks)
 
-set(IOT_SDK_VERSION 1.1.12)
+set(IOT_SDK_VERSION 1.1.13)
 
 if(POLICY CMP0042)
     cmake_policy(SET CMP0042 NEW)
