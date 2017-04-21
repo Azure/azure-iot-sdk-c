@@ -53,9 +53,6 @@ IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo = NULL;
 TEST_DEFINE_ENUM_TYPE(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 
-TEST_DEFINE_ENUM_TYPE(MAP_RESULT, MAP_RESULT_VALUES)
-IMPLEMENT_UMOCK_C_ENUM_TYPE(MAP_RESULT, MAP_RESULT_VALUES);
-
 typedef struct EXPECTED_SEND_DATA_TAG
 {
     const char* expectedString;
@@ -462,8 +459,10 @@ D2C_MESSAGE_HANDLE client_create_with_properies_and_send_d2c(IOTHUB_CLIENT_HANDL
     {
         for (size_t i = 0; i < propCount; i++)
         {
-            MAP_RESULT propUpdateResult = Map_AddOrUpdate(msgMapHandle, keys[i], values[i]);
-            ASSERT_ARE_EQUAL_WITH_MSG(MAP_RESULT, MAP_OK, propUpdateResult, "Map_AddOrUpdate failed!\r\n");
+            if (Map_AddOrUpdate(msgMapHandle, keys[i], values[i]) != MAP_OK)
+            {
+                ASSERT_FAIL("Map_AddOrUpdate failed!");
+            }
         }
     }
 
@@ -666,14 +665,20 @@ void e2e_d2c_with_svc_fault_ctrl(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, cons
 
     MAP_HANDLE propMap = Map_Create(NULL);
 
-    MAP_RESULT propUpdateResult = Map_AddOrUpdate(propMap, "AzIoTHub_FaultOperationType", faultOperationType);
-    ASSERT_ARE_EQUAL_WITH_MSG(MAP_RESULT, MAP_OK, propUpdateResult, "Map_AddOrUpdate failed for AzIoTHub_FaultOperationType!\r\n");
+    if (Map_AddOrUpdate(propMap, "AzIoTHub_FaultOperationType", faultOperationType) != MAP_OK)
+    {
+        ASSERT_FAIL("Map_AddOrUpdate failed for AzIoTHub_FaultOperationType!");
+    }
 
-    propUpdateResult = Map_AddOrUpdate(propMap, "AzIoTHub_FaultOperationCloseReason", faultOperationCloseReason);
-    ASSERT_ARE_EQUAL_WITH_MSG(MAP_RESULT, MAP_OK, propUpdateResult, "Map_AddOrUpdate failed for AzIoTHub_FaultOperationCloseReason!\r\n");
+    if (Map_AddOrUpdate(propMap, "AzIoTHub_FaultOperationCloseReason", faultOperationCloseReason) != MAP_OK)
+    {
+        ASSERT_FAIL("Map_AddOrUpdate failed for AzIoTHub_FaultOperationCloseReason!");
+    }
 
-    propUpdateResult = Map_AddOrUpdate(propMap, "AzIoTHub_FaultOperationDelayInSecs", faultOperationDelayInSecs);
-    ASSERT_ARE_EQUAL_WITH_MSG(MAP_RESULT, MAP_OK, propUpdateResult, "Map_AddOrUpdate failed for AzIoTHub_FaultOperationDelayInSecs!\r\n");
+    if (Map_AddOrUpdate(propMap, "AzIoTHub_FaultOperationDelayInSecs", faultOperationDelayInSecs) != MAP_OK)
+    {
+        ASSERT_FAIL("Map_AddOrUpdate failed for AzIoTHub_FaultOperationDelayInSecs!");
+    }
 
     IOTHUB_PROVISIONED_DEVICE* deviceToUse = IoTHubAccount_GetSASDevice(g_iothubAcctInfo);
 
@@ -727,14 +732,20 @@ void e2e_d2c_with_svc_fault_ctrl_with_transport_status(IOTHUB_CLIENT_TRANSPORT_P
 {
     MAP_HANDLE propMap = Map_Create(NULL);
 
-    MAP_RESULT propUpdateResult = Map_AddOrUpdate(propMap, "AzIoTHub_FaultOperationType", faultOperationType);
-    ASSERT_ARE_EQUAL_WITH_MSG(MAP_RESULT, MAP_OK, propUpdateResult, "Map_AddOrUpdate failed for AzIoTHub_FaultOperationType!\r\n");
+    if (Map_AddOrUpdate(propMap, "AzIoTHub_FaultOperationType", faultOperationType) != MAP_OK)
+    {
+        ASSERT_FAIL("Map_AddOrUpdate failed for AzIoTHub_FaultOperationType!");
+    }
 
-    propUpdateResult = Map_AddOrUpdate(propMap, "AzIoTHub_FaultOperationCloseReason", faultOperationCloseReason);
-    ASSERT_ARE_EQUAL_WITH_MSG(MAP_RESULT, MAP_OK, propUpdateResult, "Map_AddOrUpdate failed for AzIoTHub_FaultOperationCloseReason!\r\n");
+    if (Map_AddOrUpdate(propMap, "AzIoTHub_FaultOperationCloseReason", faultOperationCloseReason) != MAP_OK)
+    {
+        ASSERT_FAIL("Map_AddOrUpdate failed for AzIoTHub_FaultOperationCloseReason!");
+    }
 
-    propUpdateResult = Map_AddOrUpdate(propMap, "AzIoTHub_FaultOperationDelayInSecs", faultOperationDelayInSecs);
-    ASSERT_ARE_EQUAL_WITH_MSG(MAP_RESULT, MAP_OK, propUpdateResult, "Map_AddOrUpdate failed for AzIoTHub_FaultOperationDelayInSecs!\r\n");
+    if (Map_AddOrUpdate(propMap, "AzIoTHub_FaultOperationDelayInSecs", faultOperationDelayInSecs) != MAP_OK)
+    {
+        ASSERT_FAIL("Map_AddOrUpdate failed for AzIoTHub_FaultOperationDelayInSecs!");
+    }
 
     IOTHUB_PROVISIONED_DEVICE* deviceToUse = IoTHubAccount_GetSASDevice(g_iothubAcctInfo);
 
@@ -807,14 +818,20 @@ void e2e_d2c_with_svc_fault_ctrl_no_answer(IOTHUB_CLIENT_TRANSPORT_PROVIDER prot
 {
     MAP_HANDLE propMap = Map_Create(NULL);
 
-    MAP_RESULT propUpdateResult = Map_AddOrUpdate(propMap, "AzIoTHub_FaultOperationType", faultOperationType);
-    ASSERT_ARE_EQUAL_WITH_MSG(MAP_RESULT, MAP_OK, propUpdateResult, "Map_AddOrUpdate failed for AzIoTHub_FaultOperationType!\r\n");
+    if (Map_AddOrUpdate(propMap, "AzIoTHub_FaultOperationType", faultOperationType) != MAP_OK)
+    {
+        ASSERT_FAIL("Map_AddOrUpdate failed for AzIoTHub_FaultOperationType!");
+    }
 
-    propUpdateResult = Map_AddOrUpdate(propMap, "AzIoTHub_FaultOperationCloseReason", faultOperationCloseReason);
-    ASSERT_ARE_EQUAL_WITH_MSG(MAP_RESULT, MAP_OK, propUpdateResult, "Map_AddOrUpdate failed for AzIoTHub_FaultOperationCloseReason!\r\n");
+    if (Map_AddOrUpdate(propMap, "AzIoTHub_FaultOperationCloseReason", faultOperationCloseReason) != MAP_OK)
+    {
+        ASSERT_FAIL("Map_AddOrUpdate failed for AzIoTHub_FaultOperationCloseReason!");
+    }
 
-    propUpdateResult = Map_AddOrUpdate(propMap, "AzIoTHub_FaultOperationDelayInSecs", faultOperationDelayInSecs);
-    ASSERT_ARE_EQUAL_WITH_MSG(MAP_RESULT, MAP_OK, propUpdateResult, "Map_AddOrUpdate failed for AzIoTHub_FaultOperationDelayInSecs!\r\n");
+    if (Map_AddOrUpdate(propMap, "AzIoTHub_FaultOperationDelayInSecs", faultOperationDelayInSecs) != MAP_OK)
+    {
+        ASSERT_FAIL("Map_AddOrUpdate failed for AzIoTHub_FaultOperationDelayInSecs!");
+    }
 
     IOTHUB_PROVISIONED_DEVICE* deviceToUse = IoTHubAccount_GetSASDevice(g_iothubAcctInfo);
 
@@ -1046,14 +1063,20 @@ void e2e_c2d_with_svc_fault_ctrl(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, cons
 
     MAP_HANDLE propMap = Map_Create(NULL);
 
-    MAP_RESULT propUpdateResult = Map_AddOrUpdate(propMap, "AzIoTHub_FaultOperationType", faultOperationType);
-    ASSERT_ARE_EQUAL_WITH_MSG(MAP_RESULT, MAP_OK, propUpdateResult, "Map_AddOrUpdate failed for AzIoTHub_FaultOperationType!\r\n");
+    if (Map_AddOrUpdate(propMap, "AzIoTHub_FaultOperationType", faultOperationType) != MAP_OK)
+    {
+        ASSERT_FAIL("Map_AddOrUpdate failed for AzIoTHub_FaultOperationType!");
+    }
 
-    propUpdateResult = Map_AddOrUpdate(propMap, "AzIoTHub_FaultOperationCloseReason", faultOperationCloseReason);
-    ASSERT_ARE_EQUAL_WITH_MSG(MAP_RESULT, MAP_OK, propUpdateResult, "Map_AddOrUpdate failed for AzIoTHub_FaultOperationCloseReason!\r\n");
+    if (Map_AddOrUpdate(propMap, "AzIoTHub_FaultOperationCloseReason", faultOperationCloseReason) != MAP_OK)
+    {
+        ASSERT_FAIL("Map_AddOrUpdate failed for AzIoTHub_FaultOperationCloseReason!");
+    }
 
-    propUpdateResult = Map_AddOrUpdate(propMap, "AzIoTHub_FaultOperationDelayInSecs", faultOperationDelayInSecs);
-    ASSERT_ARE_EQUAL_WITH_MSG(MAP_RESULT, MAP_OK, propUpdateResult, "Map_AddOrUpdate failed for AzIoTHub_FaultOperationDelayInSecs!\r\n");
+    if (Map_AddOrUpdate(propMap, "AzIoTHub_FaultOperationDelayInSecs", faultOperationDelayInSecs) != MAP_OK)
+    {
+        ASSERT_FAIL("Map_AddOrUpdate failed for AzIoTHub_FaultOperationDelayInSecs!");
+    }
 
     // Create device client
     iotHubClientHandle = client_connect_to_hub(deviceToUse, protocol);
@@ -1131,7 +1154,7 @@ void e2e_d2c_svc_fault_ctrl_AMQP_kill_connection(IOTHUB_CLIENT_TRANSPORT_PROVIDE
     e2e_d2c_with_svc_fault_ctrl_with_transport_status(protocol, "KillAmqpConnection", "Connection fault", "1");
 }
 
-void e2e_d2v_svc_fault_ctrl_AMQP_kill_session(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+void e2e_d2c_svc_fault_ctrl_AMQP_kill_session(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
     e2e_d2c_with_svc_fault_ctrl_with_transport_status(protocol, "KillAmqpSession", "Session fault", "1");
 }
