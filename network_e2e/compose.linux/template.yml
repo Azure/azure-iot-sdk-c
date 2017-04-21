@@ -93,5 +93,5 @@ services:
 networks:
     default:
         external:
-            name: YoYoNet
+            name: TestNat
 

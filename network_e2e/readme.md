@@ -10,9 +10,9 @@ These tests are used to vaildate the behavior of the Azure IoT SDK library in ne
 
 ## Test environment
 
-These tests run inside Docker containers.  There is a single container (the test contorller) which is responsible for controlling the tests, and multiple containers (containers under test) responsible for running the tests (one container per test).  Docker-conpose is used to manage the containers under test.  The containers under test can use the docker executable to control the test controller via unix socket (under Linux) or IP socket (under Windows).
+These tests run inside Docker containers.  There is a single container (the test controller) which is responsible for controlling the tests, and multiple containers (containers under test) responsible for running the tests (one container per test).  Docker-compose is used to manage the containers under test.  The containers under test can use the docker executable to control the test controller via unix socket (under Linux) or IP socket (under Windows).
 
-On Linux, the test controller doesn't necessarily have to be a container.  The tests controller scripts can run within the host OS if convenient (e.g. for developer debugging)
+The test controller doesn't necessarily have to be a container.  The tests controller scripts can run within the host OS if convenient (e.g. for developer debugging)
 
 ## Preparing the Linux environment (one-time)
 
@@ -34,7 +34,7 @@ sudo -H pip install docker-compose
 ## Preparing the Linux environment (per run)
 To build the binaries and images, run prepare.sh
 
-If you get permission denied errors when running prepare.sh, you may need to manullay remove the cmake folder:
+If you get permission denied errors when running prepare.sh, you may need to manually remove the cmake folder:
 ```
 user@machine:/repos/c/network_e2e$ ./prepare.sh
 rm: cannot remove '/repos/c/cmake/linux_network_e2e/network_e2e/tests/iothubclient_badnetwork_e2e/Testing/Temporary/LastTest.log': Permission denied

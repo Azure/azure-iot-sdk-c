@@ -49,7 +49,7 @@ do
 	# 2017-03-23T22:13:08.456542929Z 1: Executing test IotHub_BadNetwork_disconnect_create_send_reconnect_X509 ... 
 	# 2017-03-23T22:12:53.069166382Z 1: !!! FAILED !!! 
 	# 1: 6 tests ran, 1 failed, 5 succeeded.
-	docker logs -t $job | grep -E "Executing test|\!\!\! FAILED|1: Suceeded| tests ran,"
+	docker logs -t $job | grep -E "Executing test|\!\!\! FAILED| Suceeded.$| tests ran,"
 done
 
 echo -----------------------------------------
