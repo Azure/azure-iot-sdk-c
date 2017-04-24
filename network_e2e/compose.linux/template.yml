@@ -14,7 +14,7 @@ services:
             - IOTHUB_E2E_X509_THUMBPRINT
             - IOTHUB_EVENTHUB_CONNECTION_STRING
             - IOTHUB_PARTITION_COUNT
-        command: bash -c "$script_dir/run_test.sh HTTP"
+        command: bash -c "$script_dir/rt_compose.sh HTTP"
         networks:
             - default
 
@@ -32,7 +32,7 @@ services:
             - IOTHUB_E2E_X509_THUMBPRINT
             - IOTHUB_EVENTHUB_CONNECTION_STRING
             - IOTHUB_PARTITION_COUNT
-        command: bash -c "$script_dir/run_test.sh AMQP"
+        command: bash -c "$script_dir/rt_compose.sh AMQP"
         networks:
             - default
 
@@ -50,7 +50,7 @@ services:
             - IOTHUB_E2E_X509_THUMBPRINT
             - IOTHUB_EVENTHUB_CONNECTION_STRING
             - IOTHUB_PARTITION_COUNT
-        command: bash -c "$script_dir/run_test.sh AMQP-WS"
+        command: bash -c "$script_dir/rt_compose.sh AMQP-WS"
         networks:
             - default
 
@@ -68,7 +68,7 @@ services:
             - IOTHUB_E2E_X509_THUMBPRINT
             - IOTHUB_EVENTHUB_CONNECTION_STRING
             - IOTHUB_PARTITION_COUNT
-        command: bash -c "$script_dir/run_test.sh MQTT"
+        command: bash -c "$script_dir/rt_compose.sh MQTT"
         networks:
             - default
 
@@ -86,12 +86,12 @@ services:
             - IOTHUB_E2E_X509_THUMBPRINT
             - IOTHUB_EVENTHUB_CONNECTION_STRING
             - IOTHUB_PARTITION_COUNT
-        command: bash -c "$script_dir/run_test.sh MQTT-WS"
+        command: bash -c "$script_dir/rt_compose.sh MQTT-WS"
         networks:
             - default
 
 networks:
     default:
         external:
-            name: YoYoNet
+            name: TestNat
 

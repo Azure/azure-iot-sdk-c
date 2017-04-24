@@ -1,4 +1,4 @@
-azure-iot-sdk-c (0.1.0-20trusty) trusty; urgency=low
+azure-iot-sdk-c (0.1.0-21trusty) trusty; urgency=low
 
   * See https://github.com/Azure/azure-iot-sdk-c/releases for details of the release
 

@@ -540,7 +540,7 @@ created by `IoTHubDeviceTwin_LL_Create*ModelName*`.
 IoTHubDeviceTwin_SendReportedState*ModelName*(name* model, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK deviceTwinCallback, void* context)
 ```
 
-`IoTHubDeviceTwin_SendReportedState*ModelName*` sends the complee reported state for a model instance. The model instance needs to have been
+`IoTHubDeviceTwin_SendReportedState*ModelName*` sends the complete reported state for a model instance. The model instance needs to have been
 created by `IoTHubDeviceTwin_Create*ModelName*`.
 
 

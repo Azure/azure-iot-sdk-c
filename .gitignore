@@ -204,3 +204,4 @@ build_all/windows/nuget.exe
 
 /cmake
 /build
+*.cert

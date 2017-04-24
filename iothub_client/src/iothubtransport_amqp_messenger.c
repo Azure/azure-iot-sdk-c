@@ -916,33 +916,36 @@ static void internal_on_event_send_complete_callback(void* context, MESSAGE_SEND
 	{
 		MESSENGER_SEND_EVENT_TASK* task = (MESSENGER_SEND_EVENT_TASK*)context;
 
-		if (task->is_timed_out == false)
+		if (task->messenger->message_sender_current_state != MESSAGE_SENDER_STATE_ERROR)
 		{
-			MESSENGER_EVENT_SEND_COMPLETE_RESULT messenger_send_result;
-
-			// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_107: [If no failure occurs, `task->on_event_send_complete_callback` shall be invoked with result EVENT_SEND_COMPLETE_RESULT_OK]  
-			if (send_result == MESSAGE_SEND_OK)
+			if (task->is_timed_out == false)
 			{
-				messenger_send_result = MESSENGER_EVENT_SEND_COMPLETE_RESULT_OK;
+				MESSENGER_EVENT_SEND_COMPLETE_RESULT messenger_send_result;
+
+				// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_107: [If no failure occurs, `task->on_event_send_complete_callback` shall be invoked with result EVENT_SEND_COMPLETE_RESULT_OK]  
+				if (send_result == MESSAGE_SEND_OK)
+				{
+					messenger_send_result = MESSENGER_EVENT_SEND_COMPLETE_RESULT_OK;
+				}
+				// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_108: [If a failure occurred, `task->on_event_send_complete_callback` shall be invoked with result EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING] 
+				else
+				{
+					messenger_send_result = MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING;
+				}
+
+				task->on_event_send_complete_callback(task->message, messenger_send_result, (void*)task->context);
 			}
-			// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_108: [If a failure occurred, `task->on_event_send_complete_callback` shall be invoked with result EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING] 
 			else
 			{
-				messenger_send_result = MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING;
+				LogInfo("messenger on_event_send_complete_callback invoked for timed out event %p; not firing upper layer callback.", task->message);
 			}
 
-			task->on_event_send_complete_callback(task->message, messenger_send_result, (void*)task->context);
-		}
-		else
-		{
-			LogInfo("messenger on_event_send_complete_callback invoked for timed out event %p; not firing upper layer callback.", task->message);
-		}
+			// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_128: [`task` shall be removed from `instance->in_progress_list`]  
+			remove_event_from_in_progress_list(task);
 
-		// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_128: [`task` shall be removed from `instance->in_progress_list`]  
-		remove_event_from_in_progress_list(task);
-
-		// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_130: [`task` shall be destroyed using free()]  
-		free(task);
+			// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_130: [`task` shall be destroyed using free()]  
+			free(task);
+		}
 	}
 }
 
