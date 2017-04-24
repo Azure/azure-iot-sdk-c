@@ -70,7 +70,7 @@ typedef struct MESSENGER_CONFIG_TAG
 	void* on_state_changed_context;
 } MESSENGER_CONFIG;
 
-MOCKABLE_FUNCTION(, MESSENGER_HANDLE, messenger_create, const MESSENGER_CONFIG*, messenger_config, const char*, pi);
+MOCKABLE_FUNCTION(, MESSENGER_HANDLE, messenger_create, const MESSENGER_CONFIG*, messenger_config, const char*, product_info);
 MOCKABLE_FUNCTION(, int, messenger_send_async, MESSENGER_HANDLE, messenger_handle, IOTHUB_MESSAGE_LIST*, message, ON_MESSENGER_EVENT_SEND_COMPLETE, on_messenger_event_send_complete_callback, void*, context);
 MOCKABLE_FUNCTION(, int, messenger_subscribe_for_messages, MESSENGER_HANDLE, messenger_handle, ON_MESSENGER_MESSAGE_RECEIVED, on_message_received_callback, void*, context);
 MOCKABLE_FUNCTION(, int, messenger_unsubscribe_for_messages, MESSENGER_HANDLE, messenger_handle);

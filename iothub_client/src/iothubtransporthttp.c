@@ -170,15 +170,15 @@ static void destroy_eventHTTPrequestHeaders(HTTPTRANSPORT_PERDEVICE_DATA* handle
 
 static HTTP_HEADERS_RESULT addUserAgentHeaderInfo(IOTHUB_CLIENT_LL_HANDLE hClient, HTTP_HEADERS_HANDLE eventHTTPrequestHeaders)
 {
-    void* pi;
+    void* product_info;
     HTTP_HEADERS_RESULT result;
-    if ((IoTHubClient_LL_GetOption(hClient, "product_info", &pi) == IOTHUB_CLIENT_ERROR) || (pi == NULL))
+    if ((IoTHubClient_LL_GetOption(hClient, "product_info", &product_info) == IOTHUB_CLIENT_ERROR) || (product_info == NULL))
     {
         result = HTTPHeaders_AddHeaderNameValuePair(eventHTTPrequestHeaders, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION);
     }
     else
     {
-        result = HTTPHeaders_AddHeaderNameValuePair(eventHTTPrequestHeaders, "User-Agent", STRING_c_str((STRING_HANDLE)pi));
+        result = HTTPHeaders_AddHeaderNameValuePair(eventHTTPrequestHeaders, "User-Agent", STRING_c_str((STRING_HANDLE)product_info));
     }
     return result;
 }

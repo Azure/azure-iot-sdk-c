@@ -1700,7 +1700,7 @@ void messenger_destroy(MESSENGER_HANDLE messenger_handle)
 	}
 }
 
-MESSENGER_HANDLE messenger_create(const MESSENGER_CONFIG* messenger_config, const char* pi)
+MESSENGER_HANDLE messenger_create(const MESSENGER_CONFIG* messenger_config, const char* product_info)
 {
 	MESSENGER_HANDLE handle;
 
@@ -1753,7 +1753,7 @@ MESSENGER_HANDLE messenger_create(const MESSENGER_CONFIG* messenger_config, cons
 				handle = NULL;
 				LogError("messenger_create failed (device_id could not be copied; STRING_construct failed)");
 			}
-            else if ((instance->product_info = STRING_construct(pi)) == NULL)
+            else if ((instance->product_info = STRING_construct(product_info)) == NULL)
             {
                 handle = NULL;
                 LogError("messenger_create failed (iothub_host_fqdn could not be copied; STRING_construct failed)");

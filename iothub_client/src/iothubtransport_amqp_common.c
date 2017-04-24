@@ -1873,14 +1873,14 @@ IOTHUB_DEVICE_HANDLE IoTHubTransport_AMQP_Common_Register(TRANSPORT_LL_HANDLE ha
             else
             {
                 char* local_product_info;
-                void* pi;
-                if ((IoTHubClient_LL_GetOption(iotHubClientHandle, "product_info", &pi) != IOTHUB_CLIENT_OK) || (pi == NULL))
+                void* product_info;
+                if ((IoTHubClient_LL_GetOption(iotHubClientHandle, "product_info", &product_info) != IOTHUB_CLIENT_OK) || (product_info == NULL))
                 {
                     mallocAndStrcpy_s(&local_product_info, CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION);
                 }
                 else
                 {
-                    mallocAndStrcpy_s(&local_product_info, STRING_c_str((STRING_HANDLE)pi));
+                    mallocAndStrcpy_s(&local_product_info, STRING_c_str((STRING_HANDLE)product_info));
                 }
 
 				memset(amqp_device_instance, 0, sizeof(AMQP_TRANSPORT_DEVICE_INSTANCE));
