@@ -23,6 +23,7 @@
 
 #include "azure_c_shared_utility/string_tokenizer.h"
 #include "azure_c_shared_utility/shared_util_options.h"
+#include "azure_c_shared_utility/urlencode.h"
 #include "iothub_client_version.h"
 
 #include "iothubtransport_mqtt_common.h"
@@ -1686,6 +1687,22 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 
     if (result == 0)
     {
+        void* pi;
+        STRING_HANDLE clone;
+        if ((IoTHubClient_LL_GetOption(transport_data->llClientHandle, "product_info", &pi) == IOTHUB_CLIENT_ERROR) || (pi == NULL))
+        {
+            clone = STRING_construct_sprintf("%s%%2F%s", CLIENT_DEVICE_TYPE_PREFIX, IOTHUB_SDK_VERSION);
+        }
+        else
+        {
+            clone = URL_Encode(pi);
+        }
+        if (clone != NULL)
+        {
+            (void)STRING_concat_with_STRING(transport_data->configPassedThroughUsername, clone);
+            STRING_delete(clone);
+        }
+
         MQTT_CLIENT_OPTIONS options = { 0 };
         options.clientId = (char*)STRING_c_str(transport_data->device_id);
         options.willMessage = NULL;
@@ -1824,8 +1841,7 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 
 static STRING_HANDLE buildConfigForUsername(const IOTHUB_CLIENT_CONFIG* upperConfig)
 {
-    STRING_HANDLE result = STRING_construct_sprintf("%s.%s/%s/api-version=%s&DeviceClientType=%s%%2F%s", upperConfig->iotHubName, upperConfig->iotHubSuffix, upperConfig->deviceId, IOTHUB_API_VERSION, CLIENT_DEVICE_TYPE_PREFIX, IOTHUB_SDK_VERSION);
-    return result;
+    return STRING_construct_sprintf("%s.%s/%s/api-version=%s&DeviceClientType=", upperConfig->iotHubName, upperConfig->iotHubSuffix, upperConfig->deviceId, IOTHUB_API_VERSION);
 }
 
 static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLIENT_CONFIG* upperConfig, PDLIST_ENTRY waitingToSend, IOTHUB_AUTHORIZATION_HANDLE auth_module)

@@ -39,6 +39,7 @@
 typedef struct MESSENGER_INSTANCE_TAG
 {
 	STRING_HANDLE device_id;
+    STRING_HANDLE product_info;
 	STRING_HANDLE iothub_host_fqdn;
 	SINGLYLINKEDLIST_HANDLE waiting_to_send;
 	SINGLYLINKEDLIST_HANDLE in_progress_list;
@@ -279,7 +280,7 @@ static void update_messenger_state(MESSENGER_INSTANCE* instance, MESSENGER_STATE
 	}
 }
 
-static void attach_device_client_type_to_link(LINK_HANDLE link)
+static void attach_device_client_type_to_link(LINK_HANDLE link, STRING_HANDLE product_info)
 {
 	fields attach_properties;
 	AMQP_VALUE device_client_type_key_name;
@@ -298,7 +299,7 @@ static void attach_device_client_type_to_link(LINK_HANDLE link)
 		}
 		else
 		{
-			if ((device_client_type_value = amqpvalue_create_string(CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION)) == NULL)
+			if ((device_client_type_value = amqpvalue_create_string(STRING_c_str(product_info))) == NULL)
 			{
 				LogError("Failed to create the key value for the device client type.");
 			}
@@ -430,7 +431,7 @@ static int create_event_sender(MESSENGER_INSTANCE* instance)
 
 		// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_049: [`instance->sender_link` should have a property "com.microsoft:client-version" set as `CLIENT_DEVICE_TYPE_PREFIX/IOTHUB_SDK_VERSION`, using amqpvalue_set_map_value() and link_set_attach_properties()]
 		// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_050: [If amqpvalue_set_map_value() or link_set_attach_properties() fail, the failure shall be ignored]
-		attach_device_client_type_to_link(instance->sender_link);
+		attach_device_client_type_to_link(instance->sender_link, instance->product_info);
 
 		// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_051: [`instance->message_sender` shall be created using messagesender_create(), passing the `instance->sender_link` and `on_event_sender_state_changed_callback`]
 		if ((instance->message_sender = messagesender_create(instance->sender_link, on_event_sender_state_changed_callback, (void*)instance)) == NULL)
@@ -729,7 +730,7 @@ static int create_message_receiver(MESSENGER_INSTANCE* instance)
 
 		// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_084: [`instance->receiver_link` should have a property "com.microsoft:client-version" set as `CLIENT_DEVICE_TYPE_PREFIX/IOTHUB_SDK_VERSION`, using amqpvalue_set_map_value() and link_set_attach_properties()]
 		// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_085: [If amqpvalue_set_map_value() or link_set_attach_properties() fail, the failure shall be ignored]
-		attach_device_client_type_to_link(instance->receiver_link);
+		attach_device_client_type_to_link(instance->receiver_link, instance->product_info);
 
 		// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_086: [`instance->message_receiver` shall be created using messagereceiver_create(), passing the `instance->receiver_link` and `on_messagereceiver_state_changed_callback`]
 		if ((instance->message_receiver = messagereceiver_create(instance->receiver_link, on_message_receiver_state_changed_callback, (void*)instance)) == NULL)
@@ -1689,12 +1690,14 @@ void messenger_destroy(MESSENGER_HANDLE messenger_handle)
 		// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_113: [`instance->device_id` shall be destroyed using STRING_delete()]
 		STRING_delete(instance->device_id);
 
+        STRING_delete(instance->product_info);
+
 		// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_114: [messenger_destroy() shall destroy `instance` with free()]
 		(void)free(instance);
 	}
 }
 
-MESSENGER_HANDLE messenger_create(const MESSENGER_CONFIG* messenger_config)
+MESSENGER_HANDLE messenger_create(const MESSENGER_CONFIG* messenger_config, const char* pi)
 {
 	MESSENGER_HANDLE handle;
 
@@ -1747,6 +1750,11 @@ MESSENGER_HANDLE messenger_create(const MESSENGER_CONFIG* messenger_config)
 				handle = NULL;
 				LogError("messenger_create failed (device_id could not be copied; STRING_construct failed)");
 			}
+            else if ((instance->product_info = STRING_construct(pi)) == NULL)
+            {
+                handle = NULL;
+                LogError("messenger_create failed (iothub_host_fqdn could not be copied; STRING_construct failed)");
+            }
 			// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_010: [messenger_create() shall save a copy of `messenger_config->iothub_host_fqdn` into `instance->iothub_host_fqdn`]
 			else if ((instance->iothub_host_fqdn = STRING_construct(messenger_config->iothub_host_fqdn)) == NULL)
 			{

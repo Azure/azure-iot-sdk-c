@@ -1872,6 +1872,17 @@ IOTHUB_DEVICE_HANDLE IoTHubTransport_AMQP_Common_Register(TRANSPORT_LL_HANDLE ha
 			}
             else
             {
+                char* local_product_info;
+                void* pi;
+                if ((IoTHubClient_LL_GetOption(iotHubClientHandle, "product_info", &pi) != IOTHUB_CLIENT_OK) || (pi == NULL))
+                {
+                    mallocAndStrcpy_s(&local_product_info, CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION);
+                }
+                else
+                {
+                    mallocAndStrcpy_s(&local_product_info, STRING_c_str((STRING_HANDLE)pi));
+                }
+
 				memset(amqp_device_instance, 0, sizeof(AMQP_TRANSPORT_DEVICE_INSTANCE));
             
 				// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_068: [IoTHubTransport_AMQP_Common_Register shall save the handle references to the IoTHubClient, transport, waitingToSend list on `amqp_device_instance`.]
@@ -1904,6 +1915,7 @@ IOTHUB_DEVICE_HANDLE IoTHubTransport_AMQP_Common_Register(TRANSPORT_LL_HANDLE ha
 					device_config.authentication_mode = (device->deviceKey != NULL || device->deviceSasToken != NULL ? DEVICE_AUTH_MODE_CBS : DEVICE_AUTH_MODE_X509);
 					device_config.on_state_changed_callback = on_device_state_changed_callback;
 					device_config.on_state_changed_context = amqp_device_instance;
+                    device_config.product_info = local_product_info;
 
 					// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_071: [`amqp_device_instance->device_handle` shall be set using device_create()]
 					if ((amqp_device_instance->device_handle = device_create(&device_config)) == NULL)
@@ -1966,6 +1978,7 @@ IOTHUB_DEVICE_HANDLE IoTHubTransport_AMQP_Common_Register(TRANSPORT_LL_HANDLE ha
 					// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_077: [If IoTHubTransport_AMQP_Common_Register fails, it shall free all memory it allocated]
 					internal_destroy_amqp_device_instance(amqp_device_instance);
 				}
+                free(local_product_info);
             }
         }
     }

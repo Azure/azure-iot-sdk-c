@@ -351,6 +351,7 @@ static void destroy_device_config(DEVICE_CONFIG* config)
 	if (config != NULL)
 	{
 		free(config->device_id);
+        free(config->product_info);
 		free(config->iothub_host_fqdn);
 		free(config->device_primary_key);
 		free(config->device_secondary_key);
@@ -373,12 +374,18 @@ static DEVICE_CONFIG* clone_device_config(DEVICE_CONFIG *config)
 
 		memset(new_config, 0, sizeof(DEVICE_CONFIG));
 
-		if (mallocAndStrcpy_s(&new_config->device_id, config->device_id) != RESULT_OK)
-		{
-			LogError("Failed copying the DEVICE_CONFIG (failed copying device_id)");
-			result = __FAILURE__;
-		}
-		else if (mallocAndStrcpy_s(&new_config->iothub_host_fqdn, config->iothub_host_fqdn) != RESULT_OK)
+        if (mallocAndStrcpy_s(&new_config->device_id, config->device_id) != RESULT_OK)
+        {
+            LogError("Failed copying the DEVICE_CONFIG (failed copying device_id)");
+            result = __FAILURE__;
+        }
+        else if (config->product_info != NULL &&
+            mallocAndStrcpy_s(&new_config->product_info, config->product_info) != RESULT_OK)
+        {
+            LogError("Failed copying the DEVICE_CONFIG (failed copying device_id)");
+            result = __FAILURE__;
+        }
+        else if (mallocAndStrcpy_s(&new_config->iothub_host_fqdn, config->iothub_host_fqdn) != RESULT_OK)
 		{
 			LogError("Failed copying the DEVICE_CONFIG (failed copying iothub_host_fqdn)");
 			result = __FAILURE__;
@@ -477,7 +484,7 @@ static int create_authentication_instance(DEVICE_INSTANCE *instance)
 	return result;
 }
 
-static int create_messenger_instance(DEVICE_INSTANCE* instance)
+static int create_messenger_instance(DEVICE_INSTANCE* instance, const char* pi)
 {
 	int result;
 
@@ -487,7 +494,7 @@ static int create_messenger_instance(DEVICE_INSTANCE* instance)
 	messenger_config.on_state_changed_callback = on_messenger_state_changed_callback;
 	messenger_config.on_state_changed_context = instance;
 
-	if ((instance->messenger_handle = messenger_create(&messenger_config)) == NULL)
+	if ((instance->messenger_handle = messenger_create(&messenger_config, pi)) == NULL)
 	{
 		LogError("Failed creating the MESSENGER_HANDLE (messenger_create failed)");
 		result = __FAILURE__;
@@ -607,7 +614,7 @@ DEVICE_HANDLE device_create(DEVICE_CONFIG *config)
 			result = __FAILURE__;
 		}
 		// Codes_SRS_DEVICE_09_008: [`instance->messenger_handle` shall be set using messenger_create()]
-		else if (create_messenger_instance(instance) != RESULT_OK)
+		else if (create_messenger_instance(instance, config->product_info) != RESULT_OK)
 		{
 			// Codes_SRS_DEVICE_09_009: [If the MESSENGER_HANDLE fails to be created, device_create shall fail and return NULL]
 			LogError("Failed creating the device instance for device '%s' (failed creating the messenger instance)", instance->config->device_id);

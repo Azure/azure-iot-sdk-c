@@ -335,7 +335,7 @@ IoTHubClient_SetOption allows run-time changing of settings of the IoTHubClient.
 
 **SRS_IOTHUBCLIENT_01_041: [** `IoTHubClient_SetOption` shall be made thread-safe by using the lock created in `IoTHubClient_Create`. **]**
 
-**SRS_IOTHUBCLIENT_01_042: [** If acquiring the lock fails, `IoTHubClient_GetLastMessageReceiveTime` shall return `IOTHUB_CLIENT_ERROR`. **]**
+**SRS_IOTHUBCLIENT_01_042: [** If acquiring the lock fails, `IoTHubClient_SetOption` shall return `IOTHUB_CLIENT_ERROR`. **]**
 
 Options handled by IoTHubClient_SetOption:
 -none.

@@ -531,6 +531,9 @@ static void set_expected_calls_for_Register(IOTHUB_DEVICE_CONFIG* device_config,
 	// Nothing to expect.
 
 	EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_GetOption(IGNORED_PTR_ARG, "product_info", IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 	STRICT_EXPECTED_CALL(STRING_construct(device_config->deviceId))
 		.SetReturn(TEST_DEVICE_ID_STRING_HANDLE);
 	STRICT_EXPECTED_CALL(STRING_c_str(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE))
@@ -560,6 +563,7 @@ static void set_expected_calls_for_Register(IOTHUB_DEVICE_CONFIG* device_config,
 
 	STRICT_EXPECTED_CALL(singlylinkedlist_add(TEST_REGISTERED_DEVICES_LIST, IGNORED_PTR_ARG))
 		.IgnoreArgument(2);
+    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
 }
 
 static void set_expected_calls_for_Unregister(IOTHUB_DEVICE_HANDLE iothub_device_handle)
@@ -911,8 +915,8 @@ static XIO_HANDLE TEST_amqp_get_io_transport(const char* target_fqdn, const AMQP
         if (expected_AMQP_TRANSPORT_PROXY_OPTIONS != NULL)
         {
             if ((strcmp(expected_AMQP_TRANSPORT_PROXY_OPTIONS->host_address, amqp_transport_proxy_options->host_address) != 0) ||
-                ((expected_AMQP_TRANSPORT_PROXY_OPTIONS->username != NULL) && (strcmp(expected_AMQP_TRANSPORT_PROXY_OPTIONS->username, amqp_transport_proxy_options->username) != 0)) ||
-                ((expected_AMQP_TRANSPORT_PROXY_OPTIONS->password != NULL) && (strcmp(expected_AMQP_TRANSPORT_PROXY_OPTIONS->password, amqp_transport_proxy_options->password) != 0)))
+                ((expected_AMQP_TRANSPORT_PROXY_OPTIONS->username != NULL) && (amqp_transport_proxy_options->username != NULL) && (strcmp(expected_AMQP_TRANSPORT_PROXY_OPTIONS->username, amqp_transport_proxy_options->username) != 0)) ||
+                ((expected_AMQP_TRANSPORT_PROXY_OPTIONS->password != NULL) && (amqp_transport_proxy_options->password != NULL) && (strcmp(expected_AMQP_TRANSPORT_PROXY_OPTIONS->password, amqp_transport_proxy_options->password) != 0)))
             {
                 error_proxy_options = 1;
             }
@@ -2249,10 +2253,10 @@ TEST_FUNCTION(Register_failure_checks)
 	umock_c_negative_tests_snapshot();
 
 	// act
-	size_t i;
-	for (i = 0; i < umock_c_negative_tests_call_count(); i++)
+	size_t i, n = umock_c_negative_tests_call_count();
+	for (i = 0; i < n; i++)
 	{
-		if (i == 0 || i == 3 || i == 5 || i >= 6)
+		if (i == 0 || i == 2 || i == 3 || i == 4 || i >= 6)
 		{
 			// These expected calls do not cause the API to fail.
 			continue;
@@ -3670,6 +3674,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_Destroy_frees_proxy_options)
 
     EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
     EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG));
+
     set_expected_calls_for_Unregister(device_handle);
 
     STRICT_EXPECTED_CALL(singlylinkedlist_destroy(TEST_REGISTERED_DEVICES_LIST));

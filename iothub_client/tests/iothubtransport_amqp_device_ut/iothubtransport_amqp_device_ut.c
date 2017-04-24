@@ -83,6 +83,7 @@ static const char* DEVICE_OPTION_SAVED_MESSENGER_OPTIONS = "saved_device_messeng
 
 #define INDEFINITE_TIME                                   ((time_t)-1)
 #define TEST_DEVICE_ID_CHAR_PTR                           "bogus-device"
+#define TEST_PRODUCT_INFO_CHAR_PTR                        "bogus-product_info"
 #define TEST_IOTHUB_HOST_FQDN_CHAR_PTR                    "thisisabogus.azure-devices.net"
 #define TEST_ON_STATE_CHANGED_CONTEXT                     (void*)0x7710
 #define TEST_USER_DEFINED_SAS_TOKEN                       "blablabla"
@@ -203,8 +204,9 @@ static AUTHENTICATION_HANDLE TEST_authentication_create(const AUTHENTICATION_CON
 static ON_MESSENGER_STATE_CHANGED_CALLBACK TEST_messenger_create_saved_on_state_changed_callback;
 static void* TEST_messenger_create_saved_on_state_changed_context;
 static MESSENGER_HANDLE TEST_messenger_create_return;
-static MESSENGER_HANDLE TEST_messenger_create(const MESSENGER_CONFIG *config)
+static MESSENGER_HANDLE TEST_messenger_create(const MESSENGER_CONFIG *config, const char* pfi)
 {
+    (void)pfi;
 	TEST_messenger_create_saved_on_state_changed_callback = config->on_state_changed_callback;
 	TEST_messenger_create_saved_on_state_changed_context = config->on_state_changed_context;
 	return TEST_messenger_create_return;
@@ -266,6 +268,7 @@ static DEVICE_CONFIG* get_device_config(DEVICE_AUTH_MODE auth_mode, bool use_dev
 {
 	memset(&TEST_device_config, 0, sizeof(DEVICE_CONFIG));
 	TEST_device_config.device_id = TEST_DEVICE_ID_CHAR_PTR;
+    TEST_device_config.product_info = TEST_PRODUCT_INFO_CHAR_PTR;
 	TEST_device_config.iothub_host_fqdn = TEST_IOTHUB_HOST_FQDN_CHAR_PTR;
 	TEST_device_config.authentication_mode = auth_mode;
 	TEST_device_config.on_state_changed_callback = TEST_on_state_changed_callback;
@@ -436,7 +439,9 @@ static void set_expected_calls_for_clone_device_config(DEVICE_CONFIG *config)
 	EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
 	STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, config->device_id))
 		.IgnoreArgument(1);
-	STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, config->iothub_host_fqdn))
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, config->product_info))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, config->iothub_host_fqdn))
 		.IgnoreArgument(1);
 
 	if (config->device_sas_token != NULL)
@@ -467,7 +472,7 @@ static void set_expected_calls_for_create_authentication_instance(DEVICE_CONFIG 
 static void set_expected_calls_for_create_messenger_instance(DEVICE_CONFIG *config)
 {
 	(void)config;
-	EXPECTED_CALL(messenger_create(IGNORED_PTR_ARG));
+	EXPECTED_CALL(messenger_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 }
 
 static void set_expected_calls_for_device_create(DEVICE_CONFIG *config, time_t current_time)
@@ -570,6 +575,7 @@ static void set_expected_calls_for_device_destroy(DEVICE_HANDLE handle, DEVICE_C
 
 	// destroy config
 	STRICT_EXPECTED_CALL(free(config->device_id));
+    STRICT_EXPECTED_CALL(free(config->product_info));
 	STRICT_EXPECTED_CALL(free(config->iothub_host_fqdn));
 	STRICT_EXPECTED_CALL(free(config->device_primary_key));
 	STRICT_EXPECTED_CALL(free(config->device_secondary_key));

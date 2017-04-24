@@ -462,7 +462,7 @@ IoTHubClient_LL_SetOption sets the runtime option "optionName" to the value poin
 
 ### Options that shall be handled by IoTHubClient_LL:
 
--**SRS_IOTHUBCLIENT_LL_02_039: [** "messageTimeout" - once `IoTHubClient_LL_SendEventAsync` is called the message shall timeout after `*value` miliseconds. value is a pointer to a tickcounter_ms_t.** ]**
+-**SRS_IOTHUBCLIENT_LL_02_039: [** `"messageTimeout"` - once `IoTHubClient_LL_SendEventAsync` is called the message shall timeout after `*value` miliseconds. value is a pointer to a tickcounter_ms_t.** ]**
 
 -**SRS_IOTHUBCLIENT_LL_02_041: [** If more than \*value miliseconds have passed since the call to `IoTHubClient_LL_SendEventAsync` then the message callback shall be called with a status code of `IOTHUB_CLIENT_CONFIRMATION_TIMEOUT`.** ]**
 
@@ -472,9 +472,17 @@ IoTHubClient_LL_SetOption sets the runtime option "optionName" to the value poin
 
 -**SRS_IOTHUBCLIENT_LL_02_044: [** Messages already delivered to `IoTHubClient_LL` shall not have their timeouts modified by a new call to `IoTHubClient_LL_SetOption`.** ]**
 
+-**SRS_IOTHUBCLIENT_LL_10_032: [** `"product_info"` - takes a char string as an argument to specify the product information(e.g. `"ProductName/ProductVersion"`).** ]**
+
+-**SRS_IOTHUBCLIENT_LL_10_033: [** repeat calls with `"product_info"` will erase the previously set product information if applicatble.** ]**
+
+-**SRS_IOTHUBCLIENT_LL_10_034: [** `"product_info"` - shall store the given string concatenated with the sdk information and the platform information in the form (ProductInfo DeviceSDKName/DeviceSDKVersion (OSName OSVersion; Architecture).** ]**
+
+-**SRS_IOTHUBCLIENT_LL_10_035: [** If string concatenation fails, `IoTHubClient_LL_SetOption` shall return `IOTHUB_CLIENT_ERRROR`. Otherwise, `IOTHUB_CLIENT_OK` shall be returned.** ]**
+
  **SRS_IOTHUBCLIENT_LL_02_099: [** `IoTHubClient_LL_SetOption` shall return according to the table below  ]**
 
-- | IoTHubClient_UploadToBlob_SetOption   | Transport_SetOption       | Return value
+  | IoTHubClient_UploadToBlob_SetOption   | Transport_SetOption       | Return value
 - |---------------------------------------|---------------------------|
 - | IOTHUB_CLIENT_OK                      | IOTHUB_CLIENT_OK          | IOTHUB_CLIENT_OK                                     
 - | IOTHUB_CLIENT_OK                      | IOTHUB_CLIENT_ERROR       | IOTHUB_CLIENT_ERROR

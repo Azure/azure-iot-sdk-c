@@ -1336,7 +1336,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetOption(IOTHUB_CLIENT_HANDLE iotHubClientHan
         /* Codes_SRS_IOTHUBCLIENT_01_041: [ IoTHubClient_SetOption shall be made thread-safe by using the lock created in IoTHubClient_Create. ]*/
         if (Lock(iotHubClientInstance->LockHandle) != LOCK_OK)
         {
-            /* Codes_SRS_IOTHUBCLIENT_01_042: [ If acquiring the lock fails, IoTHubClient_GetLastMessageReceiveTime shall return IOTHUB_CLIENT_ERROR. ]*/
+            /* Codes_SRS_IOTHUBCLIENT_01_042: [ If acquiring the lock fails, IoTHubClient_SetOption shall return IOTHUB_CLIENT_ERROR. ]*/
             result = IOTHUB_CLIENT_ERROR;
             LogError("Could not acquire lock");
         }

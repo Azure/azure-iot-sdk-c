@@ -78,6 +78,7 @@ typedef void(*ON_DEVICE_D2C_EVENT_SEND_COMPLETE)(IOTHUB_MESSAGE_LIST* message, D
 typedef struct DEVICE_CONFIG_TAG
 {
 	char* device_id;
+    char* product_info;
 	char* iothub_host_fqdn;
 	DEVICE_AUTH_MODE authentication_mode;
 	ON_DEVICE_STATE_CHANGED on_state_changed_callback;

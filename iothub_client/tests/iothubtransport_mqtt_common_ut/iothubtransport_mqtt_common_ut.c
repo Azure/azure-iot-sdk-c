@@ -57,6 +57,7 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 #include "azure_c_shared_utility/lock.h"
 #include "azure_c_shared_utility/string_tokenizer.h"
 #include "azure_c_shared_utility/buffer_.h"
+#include "azure_c_shared_utility/urlencode.h"
 #undef ENABLE_MOCKS
 
 #include "iothubtransport_mqtt_common.h"
@@ -85,6 +86,13 @@ static STRING_HANDLE my_STRING_construct(const char* psz)
     return (STRING_HANDLE)my_gballoc_malloc(1);
 }
 
+static int my_STRING_concat_with_STRING(STRING_HANDLE handle, STRING_HANDLE data)
+{
+    (void)handle;
+    (void)data;
+    return 0;
+}
+
 static void my_STRING_delete(STRING_HANDLE handle)
 {
     my_gballoc_free(handle);
@@ -97,6 +105,12 @@ static int my_mallocAndStrcpy_s(char** destination, const char* source)
     *destination = (char*)my_gballoc_malloc(l + 1);
     strcpy(*destination, source);
     return 0;
+}
+
+static STRING_HANDLE my_URL_Encode(STRING_HANDLE string)
+{
+    (void)string;
+    return (STRING_HANDLE)my_gballoc_malloc(1);
 }
 
 static const char* TEST_STRING_VALUE = "Test string value";
@@ -347,7 +361,7 @@ static MQTT_CLIENT_HANDLE my_mqtt_client_init(ON_MQTT_MESSAGE_RECV_CALLBACK msgR
     g_callbackCtx = callbackCtx;
     g_fnMqttErrorCallback = errorCallback;
     g_errorcallbackCtx = errorcallbackCtx;
-    return (MQTT_CLIENT_HANDLE)my_gballoc_malloc(1);;
+    return (MQTT_CLIENT_HANDLE)my_gballoc_malloc(12);
 }
 
 static void my_mqtt_client_deinit(MQTT_CLIENT_HANDLE handle)
@@ -610,14 +624,16 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_new, NULL);
     REGISTER_GLOBAL_MOCK_HOOK(STRING_construct, my_STRING_construct);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_construct, NULL);
+    REGISTER_GLOBAL_MOCK_HOOK(STRING_concat_with_STRING, my_STRING_concat_with_STRING);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat_with_STRING, -1);
     REGISTER_GLOBAL_MOCK_HOOK(STRING_delete, my_STRING_delete);
-
     REGISTER_GLOBAL_MOCK_HOOK(STRING_c_str, my_STRING_c_str);
-    
-    REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Get_DeviceKey, TEST_DEVICE_KEY);
-
     REGISTER_GLOBAL_MOCK_RETURN(STRING_concat, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat, __FAILURE__);
+
+    REGISTER_GLOBAL_MOCK_HOOK(URL_Encode, my_URL_Encode);
+
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Get_DeviceKey, TEST_DEVICE_KEY);
 
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_MessageCallback, my_IoTHubClient_LL_MessageCallback);
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_ConnectionStatusCallBack, my_IoTHubClient_LL_ConnectionStatusCallBack);
@@ -907,6 +923,15 @@ static void setup_initialize_reconnection_mocks()
     EXPECTED_CALL(get_time(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_GetOption(IGNORED_PTR_ARG, "product_info", IGNORED_PTR_ARG))
+        .IgnoreArgument_iotHubClientHandle()
+        .IgnoreArgument_value();
+    STRICT_EXPECTED_CALL(URL_Encode(IGNORED_PTR_ARG))
+        .IgnoreArgument_input();
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreArgument_s1()
+        .IgnoreArgument_s2();
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)).IgnoreArgument_handle();
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_DEVICE_ID);
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
     EXPECTED_CALL(mqtt_client_connect(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
@@ -940,6 +965,15 @@ static void setup_initialize_connection_mocks()
     EXPECTED_CALL(get_time(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_GetOption(IGNORED_PTR_ARG, "product_info", IGNORED_PTR_ARG))
+        .IgnoreArgument_iotHubClientHandle()
+        .IgnoreArgument_value();
+    STRICT_EXPECTED_CALL(URL_Encode(IGNORED_PTR_ARG))
+        .IgnoreArgument_input();
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreArgument_s1()
+        .IgnoreArgument_s2();
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)).IgnoreArgument_handle();
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_DEVICE_ID);
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
     
@@ -3109,6 +3143,15 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_mqtt_client_connect_fail)
 
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_DEVICE_ID);
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_GetOption(IGNORED_PTR_ARG, "product_info", IGNORED_PTR_ARG))
+        .IgnoreArgument_iotHubClientHandle()
+        .IgnoreArgument_value();
+    STRICT_EXPECTED_CALL(URL_Encode(IGNORED_PTR_ARG))
+        .IgnoreArgument_input();
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreArgument_s1()
+        .IgnoreArgument_s2();
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)).IgnoreArgument_handle();
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_HOST_NAME);
@@ -3637,6 +3680,15 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_SAS_token_from_user_succeed)
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Is_SasToken_Valid(IGNORED_PTR_ARG));
 
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_GetOption(IGNORED_PTR_ARG, "product_info", IGNORED_PTR_ARG))
+        .IgnoreArgument_iotHubClientHandle()
+        .IgnoreArgument_value();
+    STRICT_EXPECTED_CALL(URL_Encode(IGNORED_PTR_ARG))
+        .IgnoreArgument_input();
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreArgument_s1()
+        .IgnoreArgument_s2();
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)).IgnoreArgument_handle();
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
@@ -3724,6 +3776,15 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_x509_succeed)
     EXPECTED_CALL(get_time(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_X509);
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_GetOption(IGNORED_PTR_ARG, "product_info", IGNORED_PTR_ARG))
+        .IgnoreArgument_iotHubClientHandle()
+        .IgnoreArgument_value();
+    STRICT_EXPECTED_CALL(URL_Encode(IGNORED_PTR_ARG))
+        .IgnoreArgument_input();
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreArgument_s1()
+        .IgnoreArgument_s2();
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)).IgnoreArgument_handle();
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
