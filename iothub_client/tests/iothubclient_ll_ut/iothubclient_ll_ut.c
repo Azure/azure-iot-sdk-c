@@ -4491,7 +4491,7 @@ TEST_FUNCTION(IoTHubClient_LL_SetOption_product_info_twice_succeeds)
     //arrange
     IOTHUB_CLIENT_LL_HANDLE h = IoTHubClient_LL_Create(&TEST_CONFIG);
     umock_c_reset_all_calls();
-
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(platform_get_platform_info());
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
@@ -4520,7 +4520,7 @@ TEST_FUNCTION(IoTHubClient_LL_SetOption_product_info_succeeds)
     //arrange
     IOTHUB_CLIENT_LL_HANDLE h = IoTHubClient_LL_Create(&TEST_CONFIG);
     umock_c_reset_all_calls();
-
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(platform_get_platform_info());
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
@@ -4541,7 +4541,7 @@ TEST_FUNCTION(IoTHubClient_LL_SetOption_product_info_fails_case2)
     //arrange
     IOTHUB_CLIENT_LL_HANDLE h = IoTHubClient_LL_Create(&TEST_CONFIG);
     umock_c_reset_all_calls();
-
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(platform_get_platform_info());
 
     //act
@@ -4561,6 +4561,7 @@ TEST_FUNCTION(IoTHubClient_LL_SetOption_product_info_fails_case1)
     //arrange
     IOTHUB_CLIENT_LL_HANDLE h = IoTHubClient_LL_Create(&TEST_CONFIG);
     umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(platform_get_platform_info());
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));

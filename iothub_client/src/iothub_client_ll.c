@@ -190,6 +190,7 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
         if (result == NULL)
         {
             LogError("failure allocating IOTHUB_CLIENT_LL_HANDLE_DATA");
+            STRING_delete(product_info);
         }
         else
         {
@@ -221,6 +222,7 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
             {
                 LogError("Failed create authorization module");
                 free(result);
+                STRING_delete(product_info);
                 result = NULL;
             }
             else if (client_config != NULL)
@@ -239,6 +241,7 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
                     destroy_blob_upload_module(result);
                     tickcounter_destroy(result->tickCounter);
                     IoTHubClient_Auth_Destroy(result->authorization_module);
+                    STRING_delete(product_info);
                     free(result);
                     result = NULL;
                 }
@@ -260,6 +263,7 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
                     /*Codes_SRS_IOTHUBCLIENT_LL_02_097: [ If creating the data structures fails or instantiating the IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE fails then IoTHubClient_LL_CreateWithTransport shall fail and return NULL. ]*/
                     LogError("unable to determine the transport IoTHub name");
                     IoTHubClient_Auth_Destroy(result->authorization_module);
+                    STRING_delete(product_info);
                     free(result);
                     result = NULL;
                 }
@@ -274,6 +278,7 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
                         /*Codes_SRS_IOTHUBCLIENT_LL_02_097: [ If creating the data structures fails or instantiating the IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE fails then IoTHubClient_LL_CreateWithTransport shall fail and return NULL. ]*/
                         LogError("unable to determine the IoTHub name");
                         IoTHubClient_Auth_Destroy(result->authorization_module);
+                        STRING_delete(product_info);
                         free(result);
                         result = NULL;
                     }
@@ -286,6 +291,7 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
                             /*Codes_SRS_IOTHUBCLIENT_LL_02_097: [ If creating the data structures fails or instantiating the IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE fails then IoTHubClient_LL_CreateWithTransport shall fail and return NULL. ]*/
                             LogError("unable to malloc");
                             IoTHubClient_Auth_Destroy(result->authorization_module);
+                            STRING_delete(product_info);
                             free(result);
                             result = NULL;
                         }
@@ -317,6 +323,7 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
                 {
                     LogError("unable to create blob upload");
                     IoTHubClient_Auth_Destroy(result->authorization_module);
+                    STRING_delete(product_info);
                     free(result);
                     result = NULL;
                 }
@@ -327,6 +334,7 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
                         LogError("unable to get a tickcounter");
                         destroy_blob_upload_module(result);
                         IoTHubClient_Auth_Destroy(result->authorization_module);
+                        STRING_delete(product_info);
                         free(result);
                         result = NULL;
                     }
@@ -339,6 +347,7 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
                         result->messageCallback.type = CALLBACK_TYPE_NONE;
                         result->lastMessageReceiveTime = INDEFINITE_TIME;
                         result->data_msg_id = 1;
+                        result->product_info = product_info;
 
                         IOTHUB_DEVICE_CONFIG deviceConfig;
                         deviceConfig.deviceId = config->deviceId;
@@ -353,6 +362,7 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
                             result->IoTHubTransport_Destroy(result->transportHandle);
                             destroy_blob_upload_module(result);
                             tickcounter_destroy(result->tickCounter);
+                            STRING_delete(product_info);
                             free(result);
                             result = NULL;
                         }
@@ -370,6 +380,7 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
                                 result->IoTHubTransport_Destroy(result->transportHandle);
                                 destroy_blob_upload_module(result);
                                 tickcounter_destroy(result->tickCounter);
+                                STRING_delete(product_info);
                                 free(result);
                                 result = NULL;
                             }
