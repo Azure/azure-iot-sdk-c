@@ -1756,7 +1756,7 @@ MESSENGER_HANDLE messenger_create(const MESSENGER_CONFIG* messenger_config, cons
             else if ((instance->product_info = STRING_construct(product_info)) == NULL)
             {
                 handle = NULL;
-                LogError("messenger_create failed (iothub_host_fqdn could not be copied; STRING_construct failed)");
+                LogError("messenger_create failed (product_info could not be copied; STRING_construct failed)");
             }
 			// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_010: [messenger_create() shall save a copy of `messenger_config->iothub_host_fqdn` into `instance->iothub_host_fqdn`]
 			else if ((instance->iothub_host_fqdn = STRING_construct(messenger_config->iothub_host_fqdn)) == NULL)

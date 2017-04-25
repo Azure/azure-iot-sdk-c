@@ -16,6 +16,7 @@
 #include "iothub_client_ll.h"
 #include "iothub_transport_ll.h"
 #include "iothub_client_private.h"
+#include "iothub_client_options.h"
 #include "iothub_client_version.h"
 #include <stdint.h>
 
@@ -1526,7 +1527,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetOption(IOTHUB_CLIENT_LL_HANDLE iotHubCli
             handleData->currentMessageTimeout = *(const tickcounter_ms_t*)value;
             result = IOTHUB_CLIENT_OK;
         }
-        else if (strcmp(optionName, "product_info") == 0)
+        else if (strcmp(optionName, OPTION_PRODUCT_INFO) == 0)
         {
             /*Codes_SRS_IOTHUBCLIENT_LL_10_033: [repeat calls with "product_info" will erase the previously set product information if applicatble. ]*/
             if (handleData->product_info != NULL)
@@ -1594,7 +1595,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_GetOption(IOTHUB_CLIENT_LL_HANDLE iotHubCli
         result = IOTHUB_CLIENT_INVALID_ARG;
         LogError("invalid argument iotHubClientHandle(%p); optionName(%p); value(%p)", iotHubClientHandle, optionName, value);
     }
-    else if (strcmp(optionName, "product_info") == 0)
+    else if (strcmp(optionName, OPTION_PRODUCT_INFO) == 0)
     {
         result = IOTHUB_CLIENT_OK;
         *value = iotHubClientHandle->product_info;

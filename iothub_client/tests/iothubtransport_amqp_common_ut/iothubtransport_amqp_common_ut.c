@@ -531,7 +531,7 @@ static void set_expected_calls_for_Register(IOTHUB_DEVICE_CONFIG* device_config,
 	// Nothing to expect.
 
 	EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_LL_GetOption(IGNORED_PTR_ARG, "product_info", IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 	STRICT_EXPECTED_CALL(STRING_construct(device_config->deviceId))

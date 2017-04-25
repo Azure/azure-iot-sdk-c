@@ -172,7 +172,7 @@ static HTTP_HEADERS_RESULT addUserAgentHeaderInfo(IOTHUB_CLIENT_LL_HANDLE hClien
 {
     void* product_info;
     HTTP_HEADERS_RESULT result;
-    if ((IoTHubClient_LL_GetOption(hClient, "product_info", &product_info) == IOTHUB_CLIENT_ERROR) || (product_info == NULL))
+    if ((IoTHubClient_LL_GetOption(hClient, OPTION_PRODUCT_INFO, &product_info) == IOTHUB_CLIENT_ERROR) || (product_info == NULL))
     {
         result = HTTPHeaders_AddHeaderNameValuePair(eventHTTPrequestHeaders, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION);
     }

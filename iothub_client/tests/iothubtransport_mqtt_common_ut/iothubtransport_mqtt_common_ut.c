@@ -923,7 +923,7 @@ static void setup_initialize_reconnection_mocks()
     EXPECTED_CALL(get_time(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_LL_GetOption(IGNORED_PTR_ARG, "product_info", IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
         .IgnoreArgument_iotHubClientHandle()
         .IgnoreArgument_value();
     STRICT_EXPECTED_CALL(URL_Encode(IGNORED_PTR_ARG))
@@ -965,7 +965,7 @@ static void setup_initialize_connection_mocks()
     EXPECTED_CALL(get_time(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_LL_GetOption(IGNORED_PTR_ARG, "product_info", IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
         .IgnoreArgument_iotHubClientHandle()
         .IgnoreArgument_value();
     STRICT_EXPECTED_CALL(URL_Encode(IGNORED_PTR_ARG))
@@ -3143,7 +3143,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_mqtt_client_connect_fail)
 
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_DEVICE_ID);
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_LL_GetOption(IGNORED_PTR_ARG, "product_info", IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
         .IgnoreArgument_iotHubClientHandle()
         .IgnoreArgument_value();
     STRICT_EXPECTED_CALL(URL_Encode(IGNORED_PTR_ARG))
@@ -3680,7 +3680,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_SAS_token_from_user_succeed)
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Is_SasToken_Valid(IGNORED_PTR_ARG));
 
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_LL_GetOption(IGNORED_PTR_ARG, "product_info", IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
         .IgnoreArgument_iotHubClientHandle()
         .IgnoreArgument_value();
     STRICT_EXPECTED_CALL(URL_Encode(IGNORED_PTR_ARG))
@@ -3776,7 +3776,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_x509_succeed)
     EXPECTED_CALL(get_time(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_X509);
-    STRICT_EXPECTED_CALL(IoTHubClient_LL_GetOption(IGNORED_PTR_ARG, "product_info", IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
         .IgnoreArgument_iotHubClientHandle()
         .IgnoreArgument_value();
     STRICT_EXPECTED_CALL(URL_Encode(IGNORED_PTR_ARG))

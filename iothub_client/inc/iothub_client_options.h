@@ -32,6 +32,8 @@ extern "C"
     static const char* OPTION_MIN_POLLING_TIME = "MinimumPollingTime";
     static const char* OPTION_BATCHING = "Batching";
 
+    static const char* OPTION_PRODUCT_INFO = "product_info";
+
 #ifdef __cplusplus
 }
 #endif

@@ -1874,7 +1874,7 @@ IOTHUB_DEVICE_HANDLE IoTHubTransport_AMQP_Common_Register(TRANSPORT_LL_HANDLE ha
             {
                 char* local_product_info;
                 void* product_info;
-                if ((IoTHubClient_LL_GetOption(iotHubClientHandle, "product_info", &product_info) != IOTHUB_CLIENT_OK) || (product_info == NULL))
+                if ((IoTHubClient_LL_GetOption(iotHubClientHandle, OPTION_PRODUCT_INFO, &product_info) != IOTHUB_CLIENT_OK) || (product_info == NULL))
                 {
                     mallocAndStrcpy_s(&local_product_info, CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION);
                 }

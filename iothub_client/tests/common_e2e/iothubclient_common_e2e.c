@@ -371,7 +371,7 @@ IOTHUB_CLIENT_HANDLE client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUs
     (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &trace);
     (void)IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates);
 
-    (void)IoTHubClient_SetOption(iotHubClientHandle, "product_info", "MQTT_E2E/1.1.12");
+    (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_PRODUCT_INFO, "MQTT_E2E/1.1.12");
 
     return iotHubClientHandle;
 }

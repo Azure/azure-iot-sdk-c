@@ -52,6 +52,7 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 #include "iothub_transport_ll.h"
 #include "iothub_client_ll.h"
 #include "iothub_client_private.h"
+#include "iothub_client_options.h"
 
 #define ENABLE_MOCKS
 
@@ -4501,10 +4502,10 @@ TEST_FUNCTION(IoTHubClient_LL_SetOption_product_info_twice_succeeds)
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
 
     //act
-    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_SetOption(h, "product_info", "Eight");
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_SetOption(h, OPTION_PRODUCT_INFO, "Eight");
     if (result == IOTHUB_CLIENT_OK)
     {
-        result = IoTHubClient_LL_SetOption(h, "product_info", "Eight");
+        result = IoTHubClient_LL_SetOption(h, OPTION_PRODUCT_INFO, "Eight");
     }
 
     //assert
@@ -4526,7 +4527,7 @@ TEST_FUNCTION(IoTHubClient_LL_SetOption_product_info_succeeds)
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
 
     //act
-    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_SetOption(h, "product_info", "Eight");
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_SetOption(h, OPTION_PRODUCT_INFO, "Eight");
 
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
@@ -4546,7 +4547,7 @@ TEST_FUNCTION(IoTHubClient_LL_SetOption_product_info_fails_case2)
 
     //act
     g_fail_platform_get_platform_info = true;
-    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_SetOption(h, "product_info", "Eight");
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_SetOption(h, OPTION_PRODUCT_INFO, "Eight");
 
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
@@ -4568,7 +4569,7 @@ TEST_FUNCTION(IoTHubClient_LL_SetOption_product_info_fails_case1)
 
     //act
     g_fail_string_construct_sprintf = true;
-    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_SetOption(h, "product_info", "Eight");
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_SetOption(h, OPTION_PRODUCT_INFO, "Eight");
 
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
