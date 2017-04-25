@@ -113,6 +113,15 @@ static STRING_HANDLE my_URL_Encode(STRING_HANDLE string)
     return (STRING_HANDLE)my_gballoc_malloc(1);
 }
 
+static IOTHUB_CLIENT_RESULT my_IoTHubClient_LL_GetOption(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* optionName, void** value)
+{
+    (void)iotHubClientHandle;
+    (void)optionName;
+
+    *value = (STRING_HANDLE)0x87;
+    return IOTHUB_CLIENT_OK;
+}
+
 static const char* TEST_STRING_VALUE = "Test string value";
 static const char* TEST_DEVICE_ID = "thisIsDeviceID";
 static const char* TEST_DEVICE_KEY = "thisIsDeviceKey";
@@ -632,6 +641,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat, __FAILURE__);
 
     REGISTER_GLOBAL_MOCK_HOOK(URL_Encode, my_URL_Encode);
+    REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_GetOption, my_IoTHubClient_LL_GetOption);
 
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Get_DeviceKey, TEST_DEVICE_KEY);
 
