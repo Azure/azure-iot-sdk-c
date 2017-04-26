@@ -352,6 +352,7 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 
 #define INDEFINITE_TIME                            ((time_t)-1)
 #define TEST_DEVICE_ID_CHAR_PTR                    "deviceid"
+#define TEST_PRODUCT_INFO_CHAR_PTR                 "product info"
 #define TEST_DEVICE_ID_2_CHAR_PTR                  "deviceid2"
 #define TEST_DEVICE_KEY                            "devicekey"
 #define TEST_DEVICE_SAS_TOKEN                      "deviceSas"
@@ -542,8 +543,8 @@ static void set_expected_calls_for_Register(IOTHUB_DEVICE_CONFIG* device_config,
 
 	EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_PRODUCT_INFO_CHAR_PTR);
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_PRODUCT_INFO_CHAR_PTR));
 	STRICT_EXPECTED_CALL(STRING_construct(device_config->deviceId))
 		.SetReturn(TEST_DEVICE_ID_STRING_HANDLE);
 	STRICT_EXPECTED_CALL(STRING_c_str(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE))
@@ -1158,6 +1159,7 @@ static void register_global_mock_hooks()
 
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_MessageCallback, TEST_IoTHubClient_LL_MessageCallback);
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_GetOption, TEST_IoTHubClient_LL_GetOption);
+    REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, TEST_mallocAndStrcpy_s);
 }
 
 static void register_global_mock_returns()
@@ -1241,6 +1243,7 @@ static void initialize_static_variables()
 	TEST_device_subscribe_message_return = 0;
 
 	TEST_MESSAGE_ID = (delivery_number)1234;
+    TEST_mallocAndStrcpy_s_return = 0;
 }
 
 static void initialize_test_variables()

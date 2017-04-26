@@ -1879,7 +1879,7 @@ IOTHUB_DEVICE_HANDLE IoTHubTransport_AMQP_Common_Register(TRANSPORT_LL_HANDLE ha
             {
                 memset(amqp_device_instance, 0, sizeof(AMQP_TRANSPORT_DEVICE_INSTANCE));
 
-                char* local_product_info;
+                char* local_product_info = NULL;
                 void* product_info;
                 if ((IoTHubClient_LL_GetOption(iotHubClientHandle, OPTION_PRODUCT_INFO, &product_info) != IOTHUB_CLIENT_OK) || (product_info == NULL))
                 {
