@@ -301,6 +301,15 @@ extern "C"
 		return TEST_device_subscribe_message_return;
 	}
 
+    static IOTHUB_CLIENT_RESULT TEST_IoTHubClient_LL_GetOption(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* optionName, void** value)
+    {
+        (void)iotHubClientHandle;
+        (void)optionName;
+
+        *value = (STRING_HANDLE)0x87;
+        return IOTHUB_CLIENT_OK;
+    }
+
 #ifdef __cplusplus
 }
 #endif
@@ -1147,6 +1156,7 @@ static void register_global_mock_hooks()
 	REGISTER_GLOBAL_MOCK_HOOK(device_subscribe_message, TEST_device_subscribe_message);
 
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_MessageCallback, TEST_IoTHubClient_LL_MessageCallback);
+    REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_GetOption, TEST_IoTHubClient_LL_GetOption);
 }
 
 static void register_global_mock_returns()
