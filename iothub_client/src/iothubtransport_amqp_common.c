@@ -337,8 +337,11 @@ static MESSAGE_CALLBACK_INFO* MESSAGE_CALLBACK_INFO_Create(IOTHUB_MESSAGE_HANDLE
 
 static void MESSAGE_CALLBACK_INFO_Destroy(MESSAGE_CALLBACK_INFO* message_callback_info)
 {
-	free(message_callback_info->transportContext->link_name);
-	free(message_callback_info->transportContext);
+    if (message_callback_info->transportContext != NULL)
+    {
+        free(message_callback_info->transportContext->link_name);
+        free(message_callback_info->transportContext);
+    }
 	free(message_callback_info);
 }
 
@@ -386,6 +389,7 @@ static DEVICE_MESSAGE_DISPOSITION_RESULT on_message_received(IOTHUB_MESSAGE_HAND
 			// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_090: [If IoTHubClient_LL_MessageCallback() fails, on_message_received_callback shall return DEVICE_MESSAGE_DISPOSITION_RESULT_RELEASED]
 			LogError("Failed processing message received (IoTHubClient_LL_MessageCallback failed)");
 			IoTHubMessage_Destroy(message);
+            MESSAGE_CALLBACK_INFO_Destroy(message_data);
 			device_disposition_result = DEVICE_MESSAGE_DISPOSITION_RESULT_RELEASED;
 		}
 		else
@@ -2136,7 +2140,6 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SendMessageDisposition(MESSAGE_
 				else
 				{
 					IoTHubMessage_Destroy(message_data->messageHandle);
-					MESSAGE_CALLBACK_INFO_Destroy(message_data);
 					result = IOTHUB_CLIENT_OK;
 				}
 
@@ -2144,6 +2147,8 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SendMessageDisposition(MESSAGE_
 				destroy_device_message_disposition_info(device_message_disposition_info);
 			}
         }
+
+        MESSAGE_CALLBACK_INFO_Destroy(message_data);
     }
 
     return result;
