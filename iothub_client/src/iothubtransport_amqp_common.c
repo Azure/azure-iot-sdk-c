@@ -1877,6 +1877,8 @@ IOTHUB_DEVICE_HANDLE IoTHubTransport_AMQP_Common_Register(TRANSPORT_LL_HANDLE ha
 			}
             else
             {
+                memset(amqp_device_instance, 0, sizeof(AMQP_TRANSPORT_DEVICE_INSTANCE));
+
                 char* local_product_info;
                 void* product_info;
                 if ((IoTHubClient_LL_GetOption(iotHubClientHandle, OPTION_PRODUCT_INFO, &product_info) != IOTHUB_CLIENT_OK) || (product_info == NULL))
@@ -1888,8 +1890,6 @@ IOTHUB_DEVICE_HANDLE IoTHubTransport_AMQP_Common_Register(TRANSPORT_LL_HANDLE ha
                     mallocAndStrcpy_s(&local_product_info, STRING_c_str((STRING_HANDLE)product_info));
                 }
 
-				memset(amqp_device_instance, 0, sizeof(AMQP_TRANSPORT_DEVICE_INSTANCE));
-            
 				// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_068: [IoTHubTransport_AMQP_Common_Register shall save the handle references to the IoTHubClient, transport, waitingToSend list on `amqp_device_instance`.]
 				amqp_device_instance->iothub_client_handle = iotHubClientHandle;
                 amqp_device_instance->transport_instance = transport_instance;
