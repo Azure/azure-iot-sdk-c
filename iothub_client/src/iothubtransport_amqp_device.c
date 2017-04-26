@@ -382,7 +382,7 @@ static DEVICE_CONFIG* clone_device_config(DEVICE_CONFIG *config)
         else if (config->product_info != NULL &&
             mallocAndStrcpy_s(&new_config->product_info, config->product_info) != RESULT_OK)
         {
-            LogError("Failed copying the DEVICE_CONFIG (failed copying device_id)");
+            LogError("Failed copying the DEVICE_CONFIG (failed copying product_info)");
             result = __FAILURE__;
         }
         else if (mallocAndStrcpy_s(&new_config->iothub_host_fqdn, config->iothub_host_fqdn) != RESULT_OK)

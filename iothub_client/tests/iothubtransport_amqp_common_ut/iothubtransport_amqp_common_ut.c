@@ -466,6 +466,7 @@ static void set_expected_calls_for_is_device_registered_ex(IOTHUB_DEVICE_CONFIG*
 static MESSAGE_DISPOSITION_CONTEXT* TRANSPORT_CONTEXT_DATA_create2(IOTHUB_DEVICE_HANDLE device_handle)
 {
 	MESSAGE_DISPOSITION_CONTEXT* result = (MESSAGE_DISPOSITION_CONTEXT*)malloc(sizeof(MESSAGE_DISPOSITION_CONTEXT));
+    memset(result, 0, sizeof(MESSAGE_DISPOSITION_CONTEXT));
 	result->link_name = (char*)malloc(12);
 	sprintf(result->link_name, "my_link");
 	result->device_state = (DEVICE_DATA*)device_handle;
@@ -4217,7 +4218,8 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_NULL_MESSAGE_fa
 	ASSERT_IS_NOT_NULL(device_handle);
 
 	MESSAGE_CALLBACK_INFO* data = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
-	data->messageHandle = NULL;
+    memset(data, 0, sizeof(MESSAGE_CALLBACK_INFO));
+    data->messageHandle = NULL;
 	data->transportContext = TRANSPORT_CONTEXT_DATA_create2(device_handle);
 
 	umock_c_reset_all_calls();
@@ -4249,7 +4251,8 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_NULL_CONTEXT_fa
 	ASSERT_IS_NOT_NULL(device_handle);
 
 	MESSAGE_CALLBACK_INFO* data = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
-	data->messageHandle = TEST_IOTHUB_MESSAGE_HANDLE;
+    memset(data, 0, sizeof(MESSAGE_CALLBACK_INFO));
+    data->messageHandle = TEST_IOTHUB_MESSAGE_HANDLE;
 	data->transportContext = NULL;
 
 	umock_c_reset_all_calls();
@@ -4281,7 +4284,8 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_ACCEPTED_succee
 	ASSERT_IS_NOT_NULL(device_handle);
 
 	MESSAGE_CALLBACK_INFO* data = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
-	data->messageHandle = TEST_IOTHUB_MESSAGE_HANDLE;
+    memset(data, 0, sizeof(MESSAGE_CALLBACK_INFO));
+    data->messageHandle = TEST_IOTHUB_MESSAGE_HANDLE;
 	data->transportContext = TRANSPORT_CONTEXT_DATA_create2(device_handle);
 
 	umock_c_reset_all_calls();
@@ -4310,7 +4314,8 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_ACCEPTED_fails)
 	ASSERT_IS_NOT_NULL(device_handle);
 
 	MESSAGE_CALLBACK_INFO* data = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
-	data->messageHandle = TEST_IOTHUB_MESSAGE_HANDLE;
+    memset(data, 0, sizeof(MESSAGE_CALLBACK_INFO));
+    data->messageHandle = TEST_IOTHUB_MESSAGE_HANDLE;
 	data->transportContext = TRANSPORT_CONTEXT_DATA_create2(device_handle);
 
 	umock_c_reset_all_calls();
@@ -4348,7 +4353,8 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_DEVICE_MESSAGE_
 	ASSERT_IS_NOT_NULL(device_handle);
 
 	MESSAGE_CALLBACK_INFO* data = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
-	data->messageHandle = TEST_IOTHUB_MESSAGE_HANDLE;
+    memset(data, 0, sizeof(MESSAGE_CALLBACK_INFO));
+    data->messageHandle = TEST_IOTHUB_MESSAGE_HANDLE;
 	data->transportContext = TRANSPORT_CONTEXT_DATA_create2(device_handle);
 
 	umock_c_reset_all_calls();
@@ -4383,7 +4389,8 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_ABANDONED_succe
 	ASSERT_IS_NOT_NULL(device_handle);
 
 	MESSAGE_CALLBACK_INFO* data = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
-	data->messageHandle = TEST_IOTHUB_MESSAGE_HANDLE;
+    memset(data, 0, sizeof(MESSAGE_CALLBACK_INFO));
+    data->messageHandle = TEST_IOTHUB_MESSAGE_HANDLE;
 	data->transportContext = TRANSPORT_CONTEXT_DATA_create2(device_handle);
 
 	umock_c_reset_all_calls();
@@ -4412,7 +4419,8 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_ABANDONED_fails
 	ASSERT_IS_NOT_NULL(device_handle);
 
 	MESSAGE_CALLBACK_INFO* data = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
-	data->messageHandle = TEST_IOTHUB_MESSAGE_HANDLE;
+    memset(data, 0, sizeof(MESSAGE_CALLBACK_INFO));
+    data->messageHandle = TEST_IOTHUB_MESSAGE_HANDLE;
 	data->transportContext = TRANSPORT_CONTEXT_DATA_create2(device_handle);
 
 	umock_c_reset_all_calls();
@@ -4450,7 +4458,8 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_REJECTED_succee
 	ASSERT_IS_NOT_NULL(device_handle);
 
 	MESSAGE_CALLBACK_INFO* data = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
-	data->messageHandle = TEST_IOTHUB_MESSAGE_HANDLE;
+    memset(data, 0, sizeof(MESSAGE_CALLBACK_INFO));
+    data->messageHandle = TEST_IOTHUB_MESSAGE_HANDLE;
 	data->transportContext = TRANSPORT_CONTEXT_DATA_create2(device_handle);
 
 	umock_c_reset_all_calls();
@@ -4479,6 +4488,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_REJECTED_fails)
 	ASSERT_IS_NOT_NULL(device_handle);
 
 	MESSAGE_CALLBACK_INFO* data = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
+    memset(data, 0, sizeof(MESSAGE_CALLBACK_INFO));
 	data->messageHandle = TEST_IOTHUB_MESSAGE_HANDLE;
 	data->transportContext = TRANSPORT_CONTEXT_DATA_create2(device_handle);
 
