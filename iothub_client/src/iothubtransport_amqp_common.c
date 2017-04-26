@@ -304,8 +304,8 @@ static MESSAGE_CALLBACK_INFO* MESSAGE_CALLBACK_INFO_Create(IOTHUB_MESSAGE_HANDLE
 	}
 	else
 	{
+        memset(result, 0, sizeof(MESSAGE_CALLBACK_INFO));
 		MESSAGE_DISPOSITION_CONTEXT* tc;
-
 		if ((tc = (MESSAGE_DISPOSITION_CONTEXT*)malloc(sizeof(MESSAGE_DISPOSITION_CONTEXT))) == NULL)
 		{
 			LogError("Failed creating MESSAGE_DISPOSITION_CONTEXT (malloc failed)");
@@ -314,6 +314,7 @@ static MESSAGE_CALLBACK_INFO* MESSAGE_CALLBACK_INFO_Create(IOTHUB_MESSAGE_HANDLE
 		}
 		else
 		{
+            memset(tc, 0, sizeof(MESSAGE_DISPOSITION_CONTEXT));
 			if (mallocAndStrcpy_s(&(tc->link_name), disposition_info->source) == 0)
 			{
 				tc->device_state = device_state;
