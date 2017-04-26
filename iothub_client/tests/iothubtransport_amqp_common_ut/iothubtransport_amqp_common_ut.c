@@ -1339,7 +1339,7 @@ TEST_FUNCTION(when_creating_the_methods_handler_fails_then_IoTHubTransport_AMQP_
 	ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
 	TRANSPORT_LL_HANDLE handle;
 	IOTHUB_DEVICE_CONFIG device_config;
-	IOTHUB_DEVICE_HANDLE device_handle;
+	IOTHUB_DEVICE_HANDLE device_handle = NULL;
 
 	initialize_test_variables();
 
@@ -1355,9 +1355,10 @@ TEST_FUNCTION(when_creating_the_methods_handler_fails_then_IoTHubTransport_AMQP_
 
 	// act
 	size_t i;
-	for (i = 0; i < umock_c_negative_tests_call_count(); i++)
+    size_t n = umock_c_negative_tests_call_count();
+	for (i = 0; i < n; i++)
 	{
-		if (i == 0 || i == 3 || i == 5 || i == 6)
+		if (i == 0 || i == 2 || i == 3 || i == 4 || i == 6 || i == 8 || i == 9 || i == 16)
 		{
 			// These expected calls do not cause the API to fail.
 			continue;
