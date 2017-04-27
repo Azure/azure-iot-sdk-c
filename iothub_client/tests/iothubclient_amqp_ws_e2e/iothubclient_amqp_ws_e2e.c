@@ -31,4 +31,14 @@ BEGIN_TEST_SUITE(iothubclient_amqp_ws_e2e)
         e2e_recv_message_test_sas(AMQP_Protocol_over_WebSocketsTls);
     }
 
+    TEST_FUNCTION(IoTHub_AMQP_SendEvent_e2e_x509)
+    {
+        e2e_send_event_test_x509(AMQP_Protocol_over_WebSocketsTls);
+    }
+
+    TEST_FUNCTION(IoTHub_AMQP_RecvMessage_E2ETest_x509)
+    {
+        e2e_recv_message_test_x509(AMQP_Protocol_over_WebSocketsTls);
+    }
+
 END_TEST_SUITE(iothubclient_amqp_ws_e2e)
