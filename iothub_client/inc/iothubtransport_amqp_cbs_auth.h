@@ -20,49 +20,49 @@ extern "C"
 {
 #endif
 
-	typedef enum AUTHENTICATION_STATE_TAG
-	{
-		AUTHENTICATION_STATE_STOPPED,
-		AUTHENTICATION_STATE_STARTING,
-		AUTHENTICATION_STATE_STARTED,
-		AUTHENTICATION_STATE_ERROR
-	} AUTHENTICATION_STATE;
+    typedef enum AUTHENTICATION_STATE_TAG
+    {
+        AUTHENTICATION_STATE_STOPPED,
+        AUTHENTICATION_STATE_STARTING,
+        AUTHENTICATION_STATE_STARTED,
+        AUTHENTICATION_STATE_ERROR
+    } AUTHENTICATION_STATE;
 
-	typedef enum AUTHENTICATION_ERROR_TAG
-	{
-		AUTHENTICATION_ERROR_AUTH_TIMEOUT,
-		AUTHENTICATION_ERROR_AUTH_FAILED,
-		AUTHENTICATION_ERROR_SAS_REFRESH_TIMEOUT,
-		AUTHENTICATION_ERROR_SAS_REFRESH_FAILED
-	} AUTHENTICATION_ERROR_CODE;
+    typedef enum AUTHENTICATION_ERROR_TAG
+    {
+        AUTHENTICATION_ERROR_AUTH_TIMEOUT,
+        AUTHENTICATION_ERROR_AUTH_FAILED,
+        AUTHENTICATION_ERROR_SAS_REFRESH_TIMEOUT,
+        AUTHENTICATION_ERROR_SAS_REFRESH_FAILED
+    } AUTHENTICATION_ERROR_CODE;
 
-	typedef void(*ON_AUTHENTICATION_STATE_CHANGED_CALLBACK)(void* context, AUTHENTICATION_STATE previous_state, AUTHENTICATION_STATE new_state);
-	typedef void(*ON_AUTHENTICATION_ERROR_CALLBACK)(void* context, AUTHENTICATION_ERROR_CODE error_code);
+    typedef void(*ON_AUTHENTICATION_STATE_CHANGED_CALLBACK)(void* context, AUTHENTICATION_STATE previous_state, AUTHENTICATION_STATE new_state);
+    typedef void(*ON_AUTHENTICATION_ERROR_CALLBACK)(void* context, AUTHENTICATION_ERROR_CODE error_code);
 
-	typedef struct AUTHENTICATION_CONFIG_TAG
-	{
-		char* device_id;
-		char* device_primary_key;
-		char* device_secondary_key;
-		char* device_sas_token;
-		char* iothub_host_fqdn;
+    typedef struct AUTHENTICATION_CONFIG_TAG
+    {
+        const char* device_id;
+        char* iothub_host_fqdn;
 
-		ON_AUTHENTICATION_STATE_CHANGED_CALLBACK on_state_changed_callback;
-		void* on_state_changed_callback_context;
+        ON_AUTHENTICATION_STATE_CHANGED_CALLBACK on_state_changed_callback;
+        void* on_state_changed_callback_context;
 
-		ON_AUTHENTICATION_ERROR_CALLBACK on_error_callback;
-		void* on_error_callback_context;
-	} AUTHENTICATION_CONFIG;
+        ON_AUTHENTICATION_ERROR_CALLBACK on_error_callback;
+        void* on_error_callback_context;
 
-	typedef struct AUTHENTICATION_INSTANCE* AUTHENTICATION_HANDLE;
+        IOTHUB_AUTHORIZATION_HANDLE authorization_module;                   // with either SAS Token, x509 Certs, and Device SAS Token
 
-	MOCKABLE_FUNCTION(, AUTHENTICATION_HANDLE, authentication_create, const AUTHENTICATION_CONFIG*, config);
-	MOCKABLE_FUNCTION(, int, authentication_start, AUTHENTICATION_HANDLE, authentication_handle, const CBS_HANDLE, cbs_handle);
-	MOCKABLE_FUNCTION(, int, authentication_stop, AUTHENTICATION_HANDLE, authentication_handle);
-	MOCKABLE_FUNCTION(, void, authentication_do_work, AUTHENTICATION_HANDLE, authentication_handle);
-	MOCKABLE_FUNCTION(, void, authentication_destroy, AUTHENTICATION_HANDLE, authentication_handle);
-	MOCKABLE_FUNCTION(, int, authentication_set_option, AUTHENTICATION_HANDLE, authentication_handle, const char*, name, void*, value);
-	MOCKABLE_FUNCTION(, OPTIONHANDLER_HANDLE, authentication_retrieve_options, AUTHENTICATION_HANDLE, authentication_handle);
+    } AUTHENTICATION_CONFIG;
+
+    typedef struct AUTHENTICATION_INSTANCE* AUTHENTICATION_HANDLE;
+
+    MOCKABLE_FUNCTION(, AUTHENTICATION_HANDLE, authentication_create, const AUTHENTICATION_CONFIG*, config);
+    MOCKABLE_FUNCTION(, int, authentication_start, AUTHENTICATION_HANDLE, authentication_handle, const CBS_HANDLE, cbs_handle);
+    MOCKABLE_FUNCTION(, int, authentication_stop, AUTHENTICATION_HANDLE, authentication_handle);
+    MOCKABLE_FUNCTION(, void, authentication_do_work, AUTHENTICATION_HANDLE, authentication_handle);
+    MOCKABLE_FUNCTION(, void, authentication_destroy, AUTHENTICATION_HANDLE, authentication_handle);
+    MOCKABLE_FUNCTION(, int, authentication_set_option, AUTHENTICATION_HANDLE, authentication_handle, const char*, name, void*, value);
+    MOCKABLE_FUNCTION(, OPTIONHANDLER_HANDLE, authentication_retrieve_options, AUTHENTICATION_HANDLE, authentication_handle);
 
 #ifdef __cplusplus
 }

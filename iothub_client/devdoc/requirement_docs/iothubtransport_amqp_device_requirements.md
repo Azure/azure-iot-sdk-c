@@ -20,7 +20,6 @@ iothubtransport_amqp_messenger
 ## Exposed API
 
 ```c
-
 static const char* DEVICE_OPTION_SAVED_OPTIONS = "saved_device_options";
 static const char* DEVICE_OPTION_EVENT_SEND_TIMEOUT_SECS = "event_send_timeout_secs";
 static const char* DEVICE_OPTION_CBS_REQUEST_TIMEOUT_SECS = "cbs_request_timeout_secs";
@@ -74,15 +73,12 @@ typedef void(*ON_DEVICE_D2C_EVENT_SEND_COMPLETE)(IOTHUB_MESSAGE_LIST* message, D
 
 typedef struct DEVICE_CONFIG_TAG
 {
-	char* device_id;
-	char* iothub_host_fqdn;
-	DEVICE_AUTH_MODE authentication_mode;
-	ON_DEVICE_STATE_CHANGED on_state_changed_callback;
-	void* on_state_changed_context;
-
-	char* device_primary_key;
-	char* device_secondary_key;
-	char* device_sas_token;
+    const char* device_id;
+    char* iothub_host_fqdn;
+    DEVICE_AUTH_MODE authentication_mode;
+    ON_DEVICE_STATE_CHANGED on_state_changed_callback;
+    void* on_state_changed_context;
+    IOTHUB_AUTHORIZATION_HANDLE authorization_module;
 } DEVICE_CONFIG;
 
 typedef struct DEVICE_INSTANCE* DEVICE_HANDLE;
@@ -113,7 +109,7 @@ In each function (other than amqp_device_create) it shall derive from the AMQP_D
 extern DEVICE_HANDLE device_create(DEVICE_CONFIG config);
 ```
 
-**SRS_DEVICE_09_001: [**If `config` or device_id or iothub_host_fqdn or on_state_changed_callback are NULL then device_create shall fail and return NULL**]**
+**SRS_DEVICE_09_001: [**If `config`, `authorization_module` or `iothub_host_fqdn` or on_state_changed_callback are NULL then device_create shall fail and return NULL**]**
 **SRS_DEVICE_09_002: [**device_create shall allocate memory for the device instance structure**]**
 **SRS_DEVICE_09_003: [**If malloc fails, device_create shall fail and return NULL**]**
 **SRS_DEVICE_09_004: [**All `config` parameters shall be saved into `instance`**]**

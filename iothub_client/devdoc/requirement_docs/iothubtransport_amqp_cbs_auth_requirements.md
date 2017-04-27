@@ -36,17 +36,15 @@ typedef void(*ON_AUTHENTICATION_STATE_CHANGED_CALLBACK)(void* context, AUTHENTIC
 
 typedef struct AUTHENTICATION_CONFIG_TAG
 {
-	char* device_id;
-	char* device_primary_key;
-	char* device_secondary_key;
-	char* device_sas_token;
-	char* iothub_host_fqdn;
+    const char* device_id;
+    char* iothub_host_fqdn;
 
-	ON_AUTHENTICATION_STATE_CHANGED_CALLBACK on_state_changed_callback;
-	const void* on_state_changed_callback_context;
+    ON_AUTHENTICATION_STATE_CHANGED_CALLBACK on_state_changed_callback;
+    const void* on_state_changed_callback_context;
 
-	ON_AUTHENTICATION_ERROR_CALLBACK on_error_callback;
-	const void* on_error_callback_context;
+    ON_AUTHENTICATION_ERROR_CALLBACK on_error_callback;
+    const void* on_error_callback_context;
+    IOTHUB_AUTHORIZATION_HANDLE authorization_module;
 } AUTHENTICATION_CONFIG;
 
 typedef struct AUTHENTICATION_INSTANCE* AUTHENTICATION_HANDLE;
@@ -67,9 +65,7 @@ extern OPTIONHANDLER_HANDLE authentication_retrieve_options(AUTHENTICATION_HANDL
 AUTHENTICATION_HANDLE authentication_create(const AUTHENTICATION_CONFIG* config)
 ```
 
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_001: [**If parameter `config` or `config->device_id` are NULL, authentication_create() shall fail and return NULL.**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_002: [**If device keys and SAS token are NULL, authentication_create() shall fail and return NULL.**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_003: [**If device keys and SAS token are both provided, authentication_create() shall fail and return NULL.**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_001: [**If parameter `config` is NULL, authentication_create() shall fail and return NULL.**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_004: [**If `config->iothub_host_fqdn` is NULL, authentication_create() shall fail and return NULL.**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_005: [**If `config->on_state_changed_callback` is NULL, authentication_create() shall fail and return NULL**]**
 
@@ -79,14 +75,9 @@ AUTHENTICATION_HANDLE authentication_create(const AUTHENTICATION_CONFIG* config)
 Note: the AUTHENTICATION_INSTANCE instance shall be referred to as `instance` throughout the remaining requirements.
 
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_123: [**authentication_create() shall initialize all fields of `instance` with 0 using memset().**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_008: [**authentication_create() shall save a copy of `config->device_id` into the `instance->device_id`**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_009: [**If STRING_construct() fails, authentication_create() shall fail and return NULL**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_010: [**If `device_config->device_sas_token` is not NULL, authentication_create() shall save a copy into the `instance->device_sas_token`**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_011: [**If STRING_construct() fails, authentication_create() shall fail and return NULL**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_012: [**If provided, authentication_create() shall save a copy of `config->device_primary_key` into the `instance->device_primary_key`**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_013: [**If STRING_construct() fails to copy `config->device_primary_key`, authentication_create() shall fail and return NULL**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_014: [**If provided, authentication_create() shall save a copy of `config->device_secondary_key` into `instance->device_secondary_key`**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_015: [**If STRING_construct() fails to copy `config->device_secondary_key`, authentication_create() shall fail and return NULL**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_016: [**If provided, authentication_create() shall save a copy of `config->iothub_host_fqdn` into `instance->iothub_host_fqdn`**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_017: [**If STRING_clone() fails to copy `config->iothub_host_fqdn`, authentication_create() shall fail and return NULL**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_018: [**authentication_create() shall save `config->on_state_changed_callback` and `config->on_state_changed_callback_context` into `instance->on_state_changed_callback` and `instance->on_state_changed_callback_context`.**]**
@@ -156,10 +147,13 @@ Note: see "Device Key authentication" below.
 
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_043: [**authentication_do_work() shall set `instance->is_cbs_put_token_async_in_progress` to TRUE**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_044: [**A STRING_HANDLE, referred to as `devices_path`, shall be created from the following parts: iothub_host_fqdn + "/devices/" + device_id**]**
+
+
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_045: [**If `devices_path` failed to be created, authentication_do_work() shall set `instance->is_cbs_put_token_async_in_progress` to FALSE and return**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_046: [**The SAS token provided shall be sent to CBS using cbs_put_token_async(), using `servicebus.windows.net:sastoken` as token type, `devices_path` as audience and passing on_cbs_put_token_complete_callback**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_047: [**If cbs_put_token_async() succeeds, authentication_do_work() shall set `instance->current_sas_token_put_time` with current time**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_048: [**If cbs_put_token_async() failed, authentication_do_work() shall set `instance->is_cbs_put_token_async_in_progress` to FALSE, destroy `devices_path` and return**]**
+
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_121: [**If cbs_put_token_async() fails, `instance->state` shall be updated to AUTHENTICATION_STATE_ERROR and `instance->on_state_changed_callback` invoked**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_122: [**If cbs_put_token_async() fails, `instance->on_error_callback` shall be invoked with AUTHENTICATION_ERROR_AUTH_FAILED**]**
 
@@ -168,27 +162,26 @@ Note: see "on_cbs_put_token_complete_callback" below.
 
 #### Device Key authentication
 
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_049: [**authentication_do_work() shall create a SAS token using `instance->device_primary_key`, unless it has failed previously**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_050: [**If using `instance->device_primary_key` has failed previously and `instance->device_secondary_key` is not provided,  authentication_do_work() shall fail and return**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_051: [**If using `instance->device_primary_key` has failed previously, a SAS token shall be created using `instance->device_secondary_key`**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_07_001: [**`authentication_do_work()` shall determine what credential type is used SAS_TOKEN or DEVICE_KEY by calling `IoTHubClient_Auth_Get_Credential_Type` **]**
 
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_049: [**`authentication_do_work()` shall create a SAS token using `IoTHubClient_Auth_Get_SasToken`, unless it has failed previously**]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_07_002: [** If credential Type is SAS_TOKEN `authentication_do_work()` shall validate the sas_token, and fail if it's not valid. **]**
 
 ##### Creating a SAS token from a device key and putting it to CBS 
 
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_052: [**The SAS token expiration time shall be calculated adding `instance->sas_token_lifetime_secs` to the current number of seconds since epoch time UTC**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_053: [**A STRING_HANDLE, referred to as `devices_path`, shall be created from the following parts: iothub_host_fqdn + "/devices/" + device_id**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_054: [**If `devices_path` failed to be created, authentication_do_work() shall fail and return**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_115: [**An empty STRING_HANDLE, referred to as `sasTokenKeyName`, shall be created using STRING_new()**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_116: [**If `sasTokenKeyName` failed to be created, authentication_do_work() shall fail and return**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_055: [**The SAS token shall be created using SASToken_Create(), passing the selected device key, `device_path`, `sasTokenKeyName` and expiration time as arguments**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_056: [**If SASToken_Create() fails, authentication_do_work() shall fail and return**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_055: [**The SAS token shall be created using `IoTHubClient_Auth_Get_SasToken`, passing the selected device key, `device_path`, `sasTokenKeyName` and expiration time as arguments**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_056: [**If `IoTHubClient_Auth_Get_SasToken` fails, authentication_do_work() shall fail and return**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_057: [**authentication_do_work() shall set `instance->is_cbs_put_token_async_in_progress` to TRUE**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_058: [**The SAS token shall be sent to CBS using cbs_put_token_async(), using `servicebus.windows.net:sastoken` as token type, `devices_path` as audience and passing on_cbs_put_token_complete_callback**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_059: [**If cbs_put_token_async() succeeds, authentication_do_work() shall set `instance->current_sas_token_put_time` with current time**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_060: [**If cbs_put_token_async() fails, `instance->is_cbs_put_token_async_in_progress` shall be set to FALSE**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_061: [**If cbs_put_token_async() fails, `instance->state` shall be updated to AUTHENTICATION_STATE_ERROR and `instance->on_state_changed_callback` invoked**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_062: [**If cbs_put_token_async() fails, `instance->on_error_callback` shall be invoked with AUTHENTICATION_ERROR_AUTH_FAILED**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_063: [**authentication_do_work() shall free the memory it allocated for `devices_path`, `sasTokenKeyName` and SAS token**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_063: [**authentication_do_work() shall free the memory it allocated for `devices_path`, `sas_token` and SAS token**]**
 
 Note: see "on_cbs_put_token_complete_callback" below.
 
@@ -287,10 +280,5 @@ void authentication_destroy(AUTHENTICATION_HANDLE authentication_handle)
 
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_106: [**If authentication_handle is NULL, authentication_destroy() shall return**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_107: [**If `instance->state` is AUTHENTICATION_STATE_STARTING or AUTHENTICATION_STATE_STARTED, authentication_stop() shall be invoked and its result ignored**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_108: [**authentication_destroy() shall destroy `instance->device_id` using STRING_delete()**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_109: [**authentication_destroy() shall destroy `instance->device_sas_token` using STRING_delete()**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_110: [**authentication_destroy() shall destroy `instance->device_primary_key` using STRING_delete()**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_111: [**authentication_destroy() shall destroy `instance->device_secondary_key` using STRING_delete()**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_112: [**authentication_destroy() shall destroy `instance->iothub_host_fqdn` using STRING_delete()**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_113: [**authentication_destroy() shall destroy `instance` using free()**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_108: [**authentication_destroy() shall destroy all resouces used by this module **]**
 

@@ -11,11 +11,11 @@ endif()
 compileAsC99()
 
 set(iothub_client_ll_transport_c_files
-./src/version.c
-./src/iothub_client_authorization.c
-./src/iothub_message.c
-./src/iothub_client_ll.c
-./src/blob.c
+    ./src/version.c
+    ./src/iothub_client_authorization.c
+    ./src/iothub_message.c
+    ./src/iothub_client_ll.c
+    ./src/blob.c
 )
 
 if(NOT ${dont_use_uploadtoblob})
@@ -32,12 +32,12 @@ endif()
 
 
 set(iothub_client_ll_transport_h_files
-./inc/iothub_client_authorization.h
-./inc/iothub_message.h
-./inc/iothub_client_ll.h
-./inc/iothub_client_version.h
-./inc/iothub_transport_ll.h
-./inc/blob.h
+    ./inc/iothub_client_authorization.h
+    ./inc/iothub_message.h
+    ./inc/iothub_client_ll.h
+    ./inc/iothub_client_version.h
+    ./inc/iothub_transport_ll.h
+    ./inc/blob.h
 )
 
 if(NOT ${dont_use_uploadtoblob})
@@ -49,17 +49,17 @@ if(NOT ${dont_use_uploadtoblob})
 endif()
 
 set(iothub_client_c_files
-./src/iothub_client.c
-./src/version.c
-./src/iothubtransport.c
+    ./src/iothub_client.c
+    ./src/version.c
+    ./src/iothubtransport.c
 )
 
 set(iothub_client_h_files
-./inc/iothub_client.h
-./inc/iothub_client_options.h
-./inc/iothub_client_version.h
-./inc/iothubtransport.h
-./inc/iothub_client_private.h
+    ./inc/iothub_client.h
+    ./inc/iothub_client_options.h
+    ./inc/iothub_client_version.h
+    ./inc/iothubtransport.h
+    ./inc/iothub_client_private.h
 )
 
 set(iothub_client_h_install_files
@@ -253,16 +253,16 @@ if(${use_amqp})
         ${iothub_client_libs}
         iothub_client_amqp_transport
     )
-	
+    
     include_directories(${iothub_client_amqp_ws_transport_INC_FOLDER} ${UAMQP_INC_FOLDER})
     add_library(iothub_client_amqp_ws_transport 
-	${iothub_client_amqp_ws_transport_c_files} 
-	${iothub_client_amqp_ws_transport_h_files}
+        ${iothub_client_amqp_ws_transport_c_files} 
+        ${iothub_client_amqp_ws_transport_h_files}
     )
     linkSharedUtil(iothub_client_amqp_ws_transport)
     set(iothub_client_libs
-	${iothub_client_libs}
-	iothub_client_amqp_ws_transport
+        ${iothub_client_libs}
+        iothub_client_amqp_ws_transport
     )
 endif()
 
@@ -339,7 +339,7 @@ endif()
 
 if(NOT IN_OPENWRT)
     # Disable tests for OpenWRT
-    if(${run_unittests})
+    if(${run_unittests} OR ${run_e2e_tests})
         add_subdirectory(tests)
     endif()
 endif()

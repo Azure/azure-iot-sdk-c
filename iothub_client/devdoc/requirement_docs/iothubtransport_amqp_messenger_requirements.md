@@ -65,7 +65,7 @@ azure_uamqp_c
 
 	typedef struct MESSENGER_CONFIG_TAG
 	{
-		char* device_id;
+		const char* device_id;
 		char* iothub_host_fqdn;
 		ON_MESSENGER_STATE_CHANGED_CALLBACK on_state_changed_callback;
 		void* on_state_changed_context;

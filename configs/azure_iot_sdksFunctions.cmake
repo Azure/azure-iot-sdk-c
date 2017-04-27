@@ -54,3 +54,16 @@ endfunction(linkHttp)
 function(linkSharedUtil whatIsBuilding)
     target_link_libraries(${whatIsBuilding} aziotsharedutil)
 endfunction(linkSharedUtil)
+
+function(add_unittest_directory test_directory)
+    if (${run_unittests})
+        add_subdirectory(${test_directory})
+    endif()
+endfunction()
+
+function(add_e2etest_directory test_directory)
+    if (${run_e2e_tests})
+        add_subdirectory(${test_directory})
+    endif()
+    #${nuget_e2e_tests}
+endfunction()

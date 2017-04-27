@@ -18,7 +18,7 @@
 /*String containing Hostname, Device Id & Device Key in the format:                         */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessSignature=<device_sas_token>"    */
-static const char* connectionString = "[device connection string]";
+static const char* connectionString = "HostName=azure-iot-sdk-c.azure-devices.net;DeviceId=tmp_device;SharedAccessKey=4btpX7np20NowpiHEhkrmKliPV6YI2WwNcxloawUNec=";
 
 static int callbackCounter;
 static bool g_continueRunning;
@@ -26,7 +26,6 @@ static char msgText[1024];
 static char propText[1024];
 #define MESSAGE_COUNT       5
 #define DOWORK_LOOP_NUM     3
-
 
 typedef struct EVENT_INSTANCE_TAG
 {
@@ -108,7 +107,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
         }
     }
 
-	if (size == (strlen("quit") * sizeof(char)) && memcmp(buffer, "quit", size) == 0)
+    if (size == (strlen("quit") * sizeof(char)) && memcmp(buffer, "quit", size) == 0)
     {
         g_continueRunning = false;
     }
@@ -136,8 +135,6 @@ void iothub_client_sample_amqp_run(void)
     g_continueRunning = true;
     srand((unsigned int)time(NULL));
     double avgWindSpeed = 10.0;
-    double minTemperature = 20.0;
-    double minHumidity = 60.0;
 
     callbackCounter = 0;
     int receiveContext = 0;
@@ -178,15 +175,11 @@ void iothub_client_sample_amqp_run(void)
 
                 /* Now that we are ready to receive commands, let's send some messages */
                 size_t iterator = 0;
-                double temperature = 0;
-                double humidity = 0;
                 do
                 {
                     if (iterator < MESSAGE_COUNT)
                     {
-                        temperature = minTemperature + (rand() % 10);
-                        humidity = minHumidity +  (rand() % 20);
-                        sprintf_s(msgText, sizeof(msgText), "{\"deviceId\":\"myFirstDevice\",\"windSpeed\":%.2f,\"temperature\":%.2f,\"humidity\":%.2f}", avgWindSpeed + (rand() % 4 + 2), temperature, humidity);
+                        sprintf_s(msgText, sizeof(msgText), "{\"deviceId\":\"myFirstDevice\",\"windSpeed\":%.2f}", avgWindSpeed + (rand() % 4 + 2));
                         if ((messages[iterator].messageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText))) == NULL)
                         {
                             (void)printf("ERROR: iotHubMessageHandle is NULL!\r\n");
@@ -196,8 +189,8 @@ void iothub_client_sample_amqp_run(void)
                             messages[iterator].messageTrackingId = iterator;
 
                             MAP_HANDLE propMap = IoTHubMessage_Properties(messages[iterator].messageHandle);
-                            (void)sprintf_s(propText, sizeof(propText), temperature > 28 ? "true" : "false");
-                            if (Map_AddOrUpdate(propMap, "temperatureAlert", propText) != MAP_OK)
+                            (void)sprintf_s(propText, sizeof(propText), "PropMsg_%zu", iterator);
+                            if (Map_AddOrUpdate(propMap, "PropName", propText) != MAP_OK)
                             {
                                 (void)printf("ERROR: Map_AddOrUpdate Failed!\r\n");
                             }
