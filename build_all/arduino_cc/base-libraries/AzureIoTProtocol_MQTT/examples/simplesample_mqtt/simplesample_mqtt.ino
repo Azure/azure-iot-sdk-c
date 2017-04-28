@@ -74,7 +74,9 @@ void loop() {
 void initSerial() {
     // Start serial and initialize stdout
     Serial.begin(115200);
+#ifdef ARDUINO_ARCH_ESP8266
     Serial.setDebugOutput(true);
+#endif
 }
 
 void initWifi() {

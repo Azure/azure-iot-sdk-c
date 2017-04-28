@@ -4,7 +4,7 @@
 language: generic
 env:
   global:
-    - IDE_VERSION=1.6.11
+    - IDE_VERSION=1.6.12
   matrix:
     - BOARD="arduino:samd:arduino_zero_edbg"
     - BOARD="arduino:samd:mkr1000"
