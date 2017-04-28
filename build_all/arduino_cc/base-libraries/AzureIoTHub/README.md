@@ -56,8 +56,8 @@ You should have the following ready before beginning with any board:
 1. Install Feather M0 board support into your Arduino IDE.
     * Start Arduino and open Preferences window.
     * Enter `https://adafruit.github.io/arduino-board-index/package_adafruit_index.json` into Additional Board Manager URLs field. You can add multiple URLs, separating them with commas.
-    * Open Boards Manager from Tools > Board menu and install Adafruit SAMD Boards 1.0.7 or later.
-    * Select your Adafruit Feather M0 from Tools > Board menu after installation
+    * Open Boards Manager from Tools > Board menu and install `Arduino SAMD Boards` and `Adafruit SAMD Boards` 1.0.7 or later.
+    * Select your `Adafruit Feather M0` from Tools > Board menu after installation
 2. Install the [Adafruit WINC1500 wifi library](https://learn.adafruit.com/adafruit-feather-m0-wifi-atwinc1500/using-the-wifi-module)
 3. Install the `RTCZero` library from the Arduino IDE Library Manager.
 4. Install the `NTPClient` library from the Arduino IDE Library Manager.
