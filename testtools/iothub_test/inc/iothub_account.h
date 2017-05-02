@@ -29,16 +29,22 @@ typedef struct IOTHUB_PROVISIONED_DEVICE_TAG {
     IOTHUB_ACCOUNT_AUTH_METTHOD howToCreate;
 } IOTHUB_PROVISIONED_DEVICE;
 
+typedef struct IOTHUB_ACCOUNT_CONFIG_TAG
+{
+	size_t number_of_sas_devices;
+} IOTHUB_ACCOUNT_CONFIG;
 
 typedef struct IOTHUB_ACCOUNT_INFO_TAG* IOTHUB_ACCOUNT_INFO_HANDLE;
 
 extern IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init(void);
+extern IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG* config);
 extern void IoTHubAccount_deinit(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
 
 extern const char* IoTHubAccount_GetEventHubConnectionString(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
 extern const char* IoTHubAccount_GetIoTHubName(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
 extern const char* IoTHubAccount_GetIoTHubSuffix(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
 extern IOTHUB_PROVISIONED_DEVICE* IoTHubAccount_GetSASDevice(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
+extern IOTHUB_PROVISIONED_DEVICE** IoTHubAccount_GetSASDevices(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
 extern IOTHUB_PROVISIONED_DEVICE* IoTHubAccount_GetX509Device(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
 extern const char* IoTHubAccount_GetEventhubListenName(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
 extern const char* IoTHubAccount_GetIoTHubConnString(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);

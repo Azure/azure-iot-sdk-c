@@ -57,7 +57,10 @@ void device_method_e2e_init(void)
 {
     ASSERT_ARE_EQUAL(int, 0, platform_init() );
 
-    g_iothubAcctInfo = IoTHubAccount_Init();
+    IOTHUB_ACCOUNT_CONFIG config;
+    config.number_of_sas_devices = 2;
+
+    g_iothubAcctInfo = IoTHubAccount_Init_With_Config(&config);
     ASSERT_IS_NOT_NULL(g_iothubAcctInfo);
 
     // Initialize locking
@@ -194,12 +197,159 @@ static int DeviceMethodWithUploadCallback(const char* method_name, const unsigne
     return responseCode;
 }
 
+void test_device_method_with_string_ex(IOTHUB_PROVISIONED_DEVICE** devicesToUse, int number_of_multiplexed_devices, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char *payload)
+{
+    IOTHUB_CLIENT_RESULT result;
+    time_t beginOperation, nowTime;
+    bool trace = true;
+    int iterator;
+
+    // Note: Device multiplexing is only supported by AMQP and HTTP protocols.
+    // Note: device multiplexing is only supported if using CBS authentication.
+
+    IOTHUB_CLIENT_HANDLE* registered_devices = (IOTHUB_CLIENT_HANDLE*)malloc(sizeof(IOTHUB_CLIENT_HANDLE) * number_of_multiplexed_devices);
+    ASSERT_IS_NOT_NULL_WITH_MSG(registered_devices, "Failed allocating array of registered devices");
+
+    IOTHUB_CONN_INFO** connection_infos = (IOTHUB_CONN_INFO**)malloc(sizeof(IOTHUB_CONN_INFO*) * number_of_multiplexed_devices);
+    ASSERT_IS_NOT_NULL_WITH_MSG(connection_infos, "Failed creating the connection info array");
+
+    TRANSPORT_HANDLE transport_handle = IoTHubTransport_Create(protocol, IoTHubAccount_GetIoTHubName(g_iothubAcctInfo), IoTHubAccount_GetIoTHubSuffix(g_iothubAcctInfo));
+    ASSERT_IS_NOT_NULL_WITH_MSG(transport_handle, "Failed creating the transport");
+
+    for (iterator = 0; iterator < number_of_multiplexed_devices; iterator++)
+    {
+        ASSERT_IS_FALSE_WITH_MSG(devicesToUse[iterator]->howToCreate == IOTHUB_ACCOUNT_AUTH_X509, "Device multiplexing not supported with authentication mode other than CBS");
+
+        connection_infos[iterator] = (IOTHUB_CONN_INFO*)malloc(sizeof(IOTHUB_CONN_INFO));
+        ASSERT_IS_NOT_NULL_WITH_MSG(connection_infos[iterator], "Failed creating the connection info instance");
+        connection_infos[iterator]->conn_status = IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED;
+        connection_infos[iterator]->lock = Lock_Init();
+        connection_infos[iterator]->upload_status = false;
+        ASSERT_IS_NOT_NULL_WITH_MSG(connection_infos[iterator]->lock, "Failed creating thread lock");
+
+        IOTHUB_CLIENT_CONFIG client_config;
+        client_config.deviceId = devicesToUse[iterator]->deviceId;
+        client_config.deviceKey = devicesToUse[iterator]->primaryAuthentication;
+        client_config.deviceSasToken = NULL;
+        client_config.iotHubName = IoTHubAccount_GetIoTHubName(g_iothubAcctInfo);
+        client_config.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix(g_iothubAcctInfo);
+        client_config.protocol = (const IOTHUB_CLIENT_TRANSPORT_PROVIDER)protocol;
+
+        registered_devices[iterator] = IoTHubClient_CreateWithTransport(transport_handle, &client_config);
+        ASSERT_IS_NOT_NULL_WITH_MSG(registered_devices[iterator], "Failed creating multiplexed client");
+
+        result = IoTHubClient_SetConnectionStatusCallback(registered_devices[iterator], connection_status_callback, connection_infos[iterator]);
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set connection Status Callback");
+        
+        result = IoTHubClient_SetOption(registered_devices[iterator], OPTION_LOG_TRACE, &trace);
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set tracing option");
+
+        result = IoTHubClient_SetDeviceMethodCallback(registered_devices[iterator], DeviceMethodCallback, (void*)payload);
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device method callback");
+    }
+
+    beginOperation = time(NULL);
+    bool continue_running;
+    do
+    {
+        for (iterator = 0; iterator < number_of_multiplexed_devices; iterator++)
+        {
+            continue_running = false;
+
+            if (Lock(connection_infos[iterator]->lock) != LOCK_OK)
+            {
+                ASSERT_FAIL("unable to lock");
+            }
+            else
+            {
+                if (connection_infos[iterator]->conn_status != IOTHUB_CLIENT_CONNECTION_AUTHENTICATED)
+                {
+                    continue_running = true;
+                }
+                (void)Unlock(connection_infos[iterator]->lock);
+            }
+        }
+
+        ThreadAPI_Sleep(10);
+    } while (
+        (nowTime = time(NULL)),
+        (difftime(nowTime, beginOperation) < IOTHUB_CONNECT_TIMEOUT_SEC) &&
+        (continue_running)
+      );
+
+    for (iterator = 0; iterator < number_of_multiplexed_devices; iterator++)
+    {
+		if (Lock(connection_infos[iterator]->lock) != LOCK_OK)
+		{
+			ASSERT_FAIL("Failed locking to verify connection status");
+		}
+		else
+		{
+			char msg[1024];
+			sprintf(msg, "Device %s not connected", devicesToUse[iterator]->deviceId);
+			ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_CONNECTION_STATUS, IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, connection_infos[iterator]->conn_status, msg);
+			(void)Unlock(connection_infos[iterator]->lock);
+		}
+    }
+
+    // Wait for the method to subscribe
+    ThreadAPI_Sleep(1 * 1000);
+    
+    iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo));
+    ASSERT_IS_NOT_NULL_WITH_MSG(iotHubServiceClientHandle, "Could not create service client handle");
+    
+    serviceClientDeviceMethodHandle = IoTHubDeviceMethod_Create(iotHubServiceClientHandle);
+    ASSERT_IS_NOT_NULL_WITH_MSG(serviceClientDeviceMethodHandle, "Could not create device method handle");
+
+    for (iterator = 0; iterator < number_of_multiplexed_devices; iterator++)
+    {
+        int responseStatus;
+        unsigned char* responsePayload;
+        size_t responsePayloadSize;
+
+        LogInfo("Testing device '%s'", devicesToUse[iterator]->deviceId);
+
+        IOTHUB_DEVICE_METHOD_RESULT invokeResult = IoTHubDeviceMethod_Invoke(serviceClientDeviceMethodHandle, devicesToUse[iterator]->deviceId, METHOD_NAME, payload, TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
+
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_OK, invokeResult, "Service Client IoTHubDeviceMethod_Invoke failed");
+        ASSERT_ARE_EQUAL_WITH_MSG(int, METHOD_RESPONSE_SUCCESS, responseStatus, "response status is incorrect");
+
+        ASSERT_ARE_EQUAL_WITH_MSG(size_t, strlen(payload), responsePayloadSize, "response size is incorrect");
+        if (memcmp(payload, responsePayload, responsePayloadSize))
+        {
+            ASSERT_FAIL("response string does not match");
+        }
+
+        free(responsePayload);
+    }
+
+    for (iterator = 0; iterator < number_of_multiplexed_devices; iterator++)
+    {
+        (void)IoTHubClient_SetDeviceMethodCallback(registered_devices[iterator], NULL, NULL);
+        IoTHubClient_Destroy(registered_devices[iterator]);
+    }
+
+    IoTHubTransport_Destroy(transport_handle);
+    IoTHubDeviceMethod_Destroy(serviceClientDeviceMethodHandle);
+    serviceClientDeviceMethodHandle = NULL;
+    IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
+    iotHubServiceClientHandle = NULL;
+
+    for (iterator = 0; iterator < number_of_multiplexed_devices; iterator++)
+    {
+        Lock_Deinit(connection_infos[iterator]->lock);
+        free(connection_infos[iterator]);
+    }
+    free(connection_infos);
+    free(registered_devices);
+}
+
 void test_device_method_with_string(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char *payload)
 {
     IOTHUB_CLIENT_RESULT result;
     time_t beginOperation, nowTime;
     bool trace = true;
-    
+
     g_conn_info.conn_status = IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED;
 
     iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
@@ -244,15 +394,15 @@ void test_device_method_with_string(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTH
         (nowTime = time(NULL)),
         (difftime(nowTime, beginOperation) < IOTHUB_CONNECT_TIMEOUT_SEC) &&
         (continue_running)
-      );
+        );
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_CONNECTION_STATUS, IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, g_conn_info.conn_status, "Device Not connected");
 
     // Wait for the method to subscribe
     ThreadAPI_Sleep(1 * 1000);
-    
+
     iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo));
     ASSERT_IS_NOT_NULL_WITH_MSG(iotHubServiceClientHandle, "Could not create service client handle");
-    
+
     serviceClientDeviceMethodHandle = IoTHubDeviceMethod_Create(iotHubServiceClientHandle);
     ASSERT_IS_NOT_NULL_WITH_MSG(serviceClientDeviceMethodHandle, "Could not create device method handle");
 
@@ -393,6 +543,11 @@ void device_method_function_cleanup()
 void device_method_e2e_method_call_with_string_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
     test_device_method_with_string(IoTHubAccount_GetSASDevice(g_iothubAcctInfo), protocol, "\"I'm a happy little string\"");
+}
+
+void device_method_e2e_method_call_with_string_sas_multiplexed(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, size_t number_of_devices)
+{
+    test_device_method_with_string_ex(IoTHubAccount_GetSASDevices(g_iothubAcctInfo), number_of_devices, protocol, "\"I'm a happy little string from multiplexed clients\"");
 }
 
 void device_method_e2e_method_call_with_double_quoted_json_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
