@@ -292,7 +292,11 @@ static STRING_HANDLE my_STRING_clone(STRING_HANDLE handle)
 static void my_STRING_delete(STRING_HANDLE handle)
 {
     (void)handle;
-    my_gballoc_free(handle);
+
+    if (handle != TEST_STRING_HANDLE)
+    {
+        my_gballoc_free(handle);
+    }
 }
 
 static STRING_TOKENIZER_HANDLE my_STRING_TOKENIZER_create(STRING_HANDLE handle)
@@ -704,6 +708,7 @@ static void setup_iothubclient_ll_create_mocks(bool use_device_config)
     if (use_device_config)
     {
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     }
 }
 
@@ -1324,7 +1329,7 @@ TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_fail)
     umock_c_negative_tests_snapshot();
 
     // act
-    size_t calls_cannot_fail[] = { 1, 2, 6, 10, 11, 12, 15 };
+    size_t calls_cannot_fail[] = { 1, 2, 6, 10, 11, 12, 15, 16 };
 
     size_t count = umock_c_negative_tests_call_count();
     for (size_t index = 0; index < count; index++)

@@ -503,7 +503,7 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG*
             }
             else
             {
-                memset(iothub_account_info->sasDevices, 0, sizeof(iothub_account_info->sasDevices));
+                memset(iothub_account_info->sasDevices, 0, sizeof(IOTHUB_PROVISIONED_DEVICE*) * iothub_account_info->number_of_sas_devices);
 
 #ifdef MBED_BUILD_TIMESTAMP
                 iothub_account_info->connString = getMbedParameter("IOTHUB_CONNECTION_STRING");

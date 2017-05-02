@@ -197,12 +197,12 @@ static int DeviceMethodWithUploadCallback(const char* method_name, const unsigne
     return responseCode;
 }
 
-void test_device_method_with_string_ex(IOTHUB_PROVISIONED_DEVICE** devicesToUse, int number_of_multiplexed_devices, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char *payload)
+void test_device_method_with_string_ex(IOTHUB_PROVISIONED_DEVICE** devicesToUse, size_t number_of_multiplexed_devices, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char *payload)
 {
     IOTHUB_CLIENT_RESULT result;
     time_t beginOperation, nowTime;
     bool trace = true;
-    int iterator;
+    size_t iterator;
 
     // Note: Device multiplexing is only supported by AMQP and HTTP protocols.
     // Note: device multiplexing is only supported if using CBS authentication.
@@ -249,7 +249,7 @@ void test_device_method_with_string_ex(IOTHUB_PROVISIONED_DEVICE** devicesToUse,
     }
 
     beginOperation = time(NULL);
-    bool continue_running;
+    bool continue_running = true;
     do
     {
         for (iterator = 0; iterator < number_of_multiplexed_devices; iterator++)
