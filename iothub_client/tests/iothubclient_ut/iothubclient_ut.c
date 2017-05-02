@@ -486,10 +486,10 @@ TEST_FUNCTION_INITIALIZE(method_init)
     g_messageCallback = NULL;
     g_messageCallback_ex = NULL;
 
-	my_IoTHubClient_LL_SetDeviceMethodCallback_Ex_result = IOTHUB_CLIENT_OK;
-	my_IoTHubClient_LL_SetConnectionStatusCallback_result = IOTHUB_CLIENT_OK;
-	my_IoTHubClient_LL_SetMessageCallback_Ex_result = IOTHUB_CLIENT_OK;
-	g_fail_my_gballoc_malloc = false;
+    my_IoTHubClient_LL_SetDeviceMethodCallback_Ex_result = IOTHUB_CLIENT_OK;
+    my_IoTHubClient_LL_SetConnectionStatusCallback_result = IOTHUB_CLIENT_OK;
+    my_IoTHubClient_LL_SetMessageCallback_Ex_result = IOTHUB_CLIENT_OK;
+    g_fail_my_gballoc_malloc = false;
 }
 
 TEST_FUNCTION_CLEANUP(TestMethodCleanup)
@@ -1175,7 +1175,7 @@ TEST_FUNCTION(IoTHubClient_SetMessageCallback_succeed)
     umock_c_reset_all_calls();
 
     EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-	STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument_size();
@@ -1225,23 +1225,23 @@ TEST_FUNCTION(IoTHubClient_SetMessageCallback_fail)
     size_t count = umock_c_negative_tests_call_count();
     for (size_t index = 0; index < count; index++)
     {
-		if (index == 4)
-		{
-			continue;
-		}
-		else if (index == 2)
-		{
-			g_fail_my_gballoc_malloc = true;
-		}
-		else if (index == 3)
-		{
-			my_IoTHubClient_LL_SetMessageCallback_Ex_result = IOTHUB_CLIENT_ERROR;
-		}
-		else
-		{
-			g_fail_my_gballoc_malloc = false;
-			my_IoTHubClient_LL_SetMessageCallback_Ex_result = IOTHUB_CLIENT_OK;
-		}
+        if (index == 4)
+        {
+            continue;
+        }
+        else if (index == 2)
+        {
+            g_fail_my_gballoc_malloc = true;
+        }
+        else if (index == 3)
+        {
+            my_IoTHubClient_LL_SetMessageCallback_Ex_result = IOTHUB_CLIENT_ERROR;
+        }
+        else
+        {
+            g_fail_my_gballoc_malloc = false;
+            my_IoTHubClient_LL_SetMessageCallback_Ex_result = IOTHUB_CLIENT_OK;
+        }
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -1342,16 +1342,16 @@ TEST_FUNCTION(IoTHubClient_SetConnectionStatusCallback_fail)
     IOTHUB_CLIENT_HANDLE iothub_handle = IoTHubClient_Create(TEST_CLIENT_CONFIG);
     umock_c_reset_all_calls();
 
-	EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-	STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
-		.IgnoreArgument_handle();
-	STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
-		.IgnoreArgument_size();
-	STRICT_EXPECTED_CALL(IoTHubClient_LL_SetConnectionStatusCallback(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-		.IgnoreArgument_connectionStatusCallback()
-		.IgnoreArgument_userContextCallback();
-	STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
-		.IgnoreArgument_handle();
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
+        .IgnoreArgument_handle();
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        .IgnoreArgument_size();
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_SetConnectionStatusCallback(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreArgument_connectionStatusCallback()
+        .IgnoreArgument_userContextCallback();
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
+        .IgnoreArgument_handle();
 
     umock_c_negative_tests_snapshot();
 
@@ -1359,23 +1359,23 @@ TEST_FUNCTION(IoTHubClient_SetConnectionStatusCallback_fail)
     size_t count = umock_c_negative_tests_call_count();
     for (size_t index = 0; index < count; index++)
     {
-		if (index == 4)
-		{
-			continue;
-		}
-		else if (index == 2)
-		{
-			g_fail_my_gballoc_malloc = true;
-		}
-		else if (index == 3)
-		{
-			my_IoTHubClient_LL_SetConnectionStatusCallback_result = IOTHUB_CLIENT_ERROR;
-		}
-		else
-		{
-			my_IoTHubClient_LL_SetConnectionStatusCallback_result = IOTHUB_CLIENT_OK;
-			g_fail_my_gballoc_malloc = false;
-		}
+        if (index == 4)
+        {
+            continue;
+        }
+        else if (index == 2)
+        {
+            g_fail_my_gballoc_malloc = true;
+        }
+        else if (index == 3)
+        {
+            my_IoTHubClient_LL_SetConnectionStatusCallback_result = IOTHUB_CLIENT_ERROR;
+        }
+        else
+        {
+            my_IoTHubClient_LL_SetConnectionStatusCallback_result = IOTHUB_CLIENT_OK;
+            g_fail_my_gballoc_malloc = false;
+        }
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -2050,30 +2050,30 @@ TEST_FUNCTION(IoTHubClient_SetDeviceMethodCallback_fail)
     int negativeTestsInitResult = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
-	umock_c_reset_all_calls();
-	EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-	STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
-		.IgnoreArgument_handle();
-	EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-	STRICT_EXPECTED_CALL(IoTHubClient_LL_SetDeviceMethodCallback_Ex(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-	STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
-		.IgnoreArgument_handle();
+    umock_c_reset_all_calls();
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
+        .IgnoreArgument_handle();
+    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_SetDeviceMethodCallback_Ex(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
+        .IgnoreArgument_handle();
     umock_c_negative_tests_snapshot();
 
     // act
     size_t count = umock_c_negative_tests_call_count() - 1;
     for (size_t index = 0; index < count; index++)
     {
-		my_IoTHubClient_LL_SetDeviceMethodCallback_Ex_result = IOTHUB_CLIENT_OK;
+        my_IoTHubClient_LL_SetDeviceMethodCallback_Ex_result = IOTHUB_CLIENT_OK;
 
-		if (index == 2)
-		{
-			continue;
-		}
-		else if (index == 3)
-		{
-			my_IoTHubClient_LL_SetDeviceMethodCallback_Ex_result = IOTHUB_CLIENT_ERROR;
-		}
+        if (index == 2)
+        {
+            continue;
+        }
+        else if (index == 3)
+        {
+            my_IoTHubClient_LL_SetDeviceMethodCallback_Ex_result = IOTHUB_CLIENT_ERROR;
+        }
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);

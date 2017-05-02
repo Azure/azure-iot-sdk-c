@@ -833,11 +833,11 @@ void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle)
 
         IOTHUB_CLIENT_INSTANCE* iotHubClientInstance = (IOTHUB_CLIENT_INSTANCE*)iotHubClientHandle;
 
-		if (iotHubClientInstance->TransportHandle != NULL)
-		{
-			/*Codes_SRS_IOTHUBCLIENT_01_007: [ The thread created as part of executing IoTHubClient_SendEventAsync or IoTHubClient_SetNotificationMessageCallback shall be joined. ]*/
-			okToJoin = IoTHubTransport_SignalEndWorkerThread(iotHubClientInstance->TransportHandle, iotHubClientHandle);
-		}
+        if (iotHubClientInstance->TransportHandle != NULL)
+        {
+            /*Codes_SRS_IOTHUBCLIENT_01_007: [ The thread created as part of executing IoTHubClient_SendEventAsync or IoTHubClient_SetNotificationMessageCallback shall be joined. ]*/
+            okToJoin = IoTHubTransport_SignalEndWorkerThread(iotHubClientInstance->TransportHandle, iotHubClientHandle);
+        }
 
         /*Codes_SRS_IOTHUBCLIENT_02_043: [ IoTHubClient_Destroy shall lock the serializing lock and signal the worker thread (if any) to end ]*/
         if (Lock(iotHubClientInstance->LockHandle) != LOCK_OK)
@@ -967,13 +967,13 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SendEventAsync(IOTHUB_CLIENT_HANDLE iotHubClie
     {
         IOTHUB_CLIENT_INSTANCE* iotHubClientInstance = (IOTHUB_CLIENT_INSTANCE*)iotHubClientHandle;
 
-		/* Codes_SRS_IOTHUBCLIENT_01_009: [IoTHubClient_SendEventAsync shall start the worker thread if it was not previously started.] */
-		if ((result = StartWorkerThreadIfNeeded(iotHubClientInstance)) != IOTHUB_CLIENT_OK)
-		{
-			/* Codes_SRS_IOTHUBCLIENT_01_010: [If starting the thread fails, IoTHubClient_SendEventAsync shall return IOTHUB_CLIENT_ERROR.] */
-			result = IOTHUB_CLIENT_ERROR;
-			LogError("Could not start worker thread");
-		}
+        /* Codes_SRS_IOTHUBCLIENT_01_009: [IoTHubClient_SendEventAsync shall start the worker thread if it was not previously started.] */
+        if ((result = StartWorkerThreadIfNeeded(iotHubClientInstance)) != IOTHUB_CLIENT_OK)
+        {
+            /* Codes_SRS_IOTHUBCLIENT_01_010: [If starting the thread fails, IoTHubClient_SendEventAsync shall return IOTHUB_CLIENT_ERROR.] */
+            result = IOTHUB_CLIENT_ERROR;
+            LogError("Could not start worker thread");
+        }
         else
         {
             if (iotHubClientInstance->created_with_transport_handle == 0)
@@ -981,13 +981,13 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SendEventAsync(IOTHUB_CLIENT_HANDLE iotHubClie
                 iotHubClientInstance->event_confirm_callback = eventConfirmationCallback;
             }
 
-			/* Codes_SRS_IOTHUBCLIENT_01_025: [IoTHubClient_SendEventAsync shall be made thread-safe by using the lock created in IoTHubClient_Create.] */
-			if (Lock(iotHubClientInstance->LockHandle) != LOCK_OK)
-			{
-				/* Codes_SRS_IOTHUBCLIENT_01_026: [If acquiring the lock fails, IoTHubClient_SendEventAsync shall return IOTHUB_CLIENT_ERROR.] */
-				result = IOTHUB_CLIENT_ERROR;
-				LogError("Could not acquire lock");
-			}
+            /* Codes_SRS_IOTHUBCLIENT_01_025: [IoTHubClient_SendEventAsync shall be made thread-safe by using the lock created in IoTHubClient_Create.] */
+            if (Lock(iotHubClientInstance->LockHandle) != LOCK_OK)
+            {
+                /* Codes_SRS_IOTHUBCLIENT_01_026: [If acquiring the lock fails, IoTHubClient_SendEventAsync shall return IOTHUB_CLIENT_ERROR.] */
+                result = IOTHUB_CLIENT_ERROR;
+                LogError("Could not acquire lock");
+            }
             else
             {
                 if (iotHubClientInstance->created_with_transport_handle != 0 || eventConfirmationCallback == NULL)
@@ -1018,8 +1018,8 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SendEventAsync(IOTHUB_CLIENT_HANDLE iotHubClie
                     }
                 }
 
-				/* Codes_SRS_IOTHUBCLIENT_01_025: [IoTHubClient_SendEventAsync shall be made thread-safe by using the lock created in IoTHubClient_Create.] */
-				(void)Unlock(iotHubClientInstance->LockHandle);
+                /* Codes_SRS_IOTHUBCLIENT_01_025: [IoTHubClient_SendEventAsync shall be made thread-safe by using the lock created in IoTHubClient_Create.] */
+                (void)Unlock(iotHubClientInstance->LockHandle);
             }
         }
     }
@@ -1090,7 +1090,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetMessageCallback(IOTHUB_CLIENT_HANDLE iotHub
                 iotHubClientInstance->message_callback = messageCallback;
             }
 
-			/* Codes_SRS_IOTHUBCLIENT_01_027: [IoTHubClient_SetMessageCallback shall be made thread-safe by using the lock created in IoTHubClient_Create.] */
+            /* Codes_SRS_IOTHUBCLIENT_01_027: [IoTHubClient_SetMessageCallback shall be made thread-safe by using the lock created in IoTHubClient_Create.] */
             if (Lock(iotHubClientInstance->LockHandle) != LOCK_OK)
             {
                 /* Codes_SRS_IOTHUBCLIENT_01_028: [If acquiring the lock fails, IoTHubClient_SetMessageCallback shall return IOTHUB_CLIENT_ERROR.] */
@@ -1167,8 +1167,8 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetConnectionStatusCallback(IOTHUB_CLIENT_HAND
             result = IOTHUB_CLIENT_ERROR;
             LogError("Could not start worker thread");
         }
-		else
-		{
+        else
+        {
             /* Codes_SRS_IOTHUBCLIENT_25_087: [ `IoTHubClient_SetConnectionStatusCallback` shall be made thread-safe by using the lock created in `IoTHubClient_Create`. ] */
             if (Lock(iotHubClientInstance->LockHandle) != LOCK_OK)
             {
@@ -1176,48 +1176,48 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetConnectionStatusCallback(IOTHUB_CLIENT_HAND
                 result = IOTHUB_CLIENT_ERROR;
                 LogError("Could not acquire lock");
             }
-			else
-			{
-				if (iotHubClientInstance->created_with_transport_handle == 0)
-				{
-					iotHubClientInstance->connection_status_callback = connectionStatusCallback;
-				}
+            else
+            {
+                if (iotHubClientInstance->created_with_transport_handle == 0)
+                {
+                    iotHubClientInstance->connection_status_callback = connectionStatusCallback;
+                }
 
-				if (iotHubClientInstance->created_with_transport_handle != 0 || connectionStatusCallback == NULL)
-				{
-					/* Codes_SRS_IOTHUBCLIENT_25_085: [ `IoTHubClient_SetConnectionStatusCallback` shall call `IoTHubClient_LL_SetConnectionStatusCallback`, while passing the `IoTHubClient_LL` handle created by `IoTHubClient_Create` and the parameters `connectionStatusCallback` and `userContextCallback`. ]*/
-					result = IoTHubClient_LL_SetConnectionStatusCallback(iotHubClientInstance->IoTHubClientLLHandle, connectionStatusCallback, userContextCallback);
-				}
-				else
-				{
-					if (iotHubClientInstance->connection_status_user_context != NULL)
-					{
-						free(iotHubClientInstance->connection_status_user_context);
-					}
-					iotHubClientInstance->connection_status_user_context = (IOTHUB_QUEUE_CONTEXT*)malloc(sizeof(IOTHUB_QUEUE_CONTEXT));
-					if (iotHubClientInstance->connection_status_user_context == NULL)
-					{
-						result = IOTHUB_CLIENT_ERROR;
-						LogError("Failed allocating QUEUE_CONTEXT");
-					}
-					else
-					{
-						iotHubClientInstance->connection_status_user_context->iotHubClientHandle = iotHubClientInstance;
-						iotHubClientInstance->connection_status_user_context->userContextCallback = userContextCallback;
+                if (iotHubClientInstance->created_with_transport_handle != 0 || connectionStatusCallback == NULL)
+                {
+                    /* Codes_SRS_IOTHUBCLIENT_25_085: [ `IoTHubClient_SetConnectionStatusCallback` shall call `IoTHubClient_LL_SetConnectionStatusCallback`, while passing the `IoTHubClient_LL` handle created by `IoTHubClient_Create` and the parameters `connectionStatusCallback` and `userContextCallback`. ]*/
+                    result = IoTHubClient_LL_SetConnectionStatusCallback(iotHubClientInstance->IoTHubClientLLHandle, connectionStatusCallback, userContextCallback);
+                }
+                else
+                {
+                    if (iotHubClientInstance->connection_status_user_context != NULL)
+                    {
+                        free(iotHubClientInstance->connection_status_user_context);
+                    }
+                    iotHubClientInstance->connection_status_user_context = (IOTHUB_QUEUE_CONTEXT*)malloc(sizeof(IOTHUB_QUEUE_CONTEXT));
+                    if (iotHubClientInstance->connection_status_user_context == NULL)
+                    {
+                        result = IOTHUB_CLIENT_ERROR;
+                        LogError("Failed allocating QUEUE_CONTEXT");
+                    }
+                    else
+                    {
+                        iotHubClientInstance->connection_status_user_context->iotHubClientHandle = iotHubClientInstance;
+                        iotHubClientInstance->connection_status_user_context->userContextCallback = userContextCallback;
 
-						/* Codes_SRS_IOTHUBCLIENT_25_085: [ `IoTHubClient_SetConnectionStatusCallback` shall call `IoTHubClient_LL_SetConnectionStatusCallback`, while passing the `IoTHubClient_LL` handle created by `IoTHubClient_Create` and the parameters `connectionStatusCallback` and `userContextCallback`. ]*/
-						result = IoTHubClient_LL_SetConnectionStatusCallback(iotHubClientInstance->IoTHubClientLLHandle, iothub_ll_connection_status_callback, iotHubClientInstance->connection_status_user_context);
-						if (result != IOTHUB_CLIENT_OK)
-						{
-							LogError("IoTHubClient_LL_SetConnectionStatusCallback failed");
-							free(iotHubClientInstance->connection_status_user_context);
-							iotHubClientInstance->connection_status_user_context = NULL;
-						}
-					}
-				}
-				(void)Unlock(iotHubClientInstance->LockHandle);
-			}
-		}
+                        /* Codes_SRS_IOTHUBCLIENT_25_085: [ `IoTHubClient_SetConnectionStatusCallback` shall call `IoTHubClient_LL_SetConnectionStatusCallback`, while passing the `IoTHubClient_LL` handle created by `IoTHubClient_Create` and the parameters `connectionStatusCallback` and `userContextCallback`. ]*/
+                        result = IoTHubClient_LL_SetConnectionStatusCallback(iotHubClientInstance->IoTHubClientLLHandle, iothub_ll_connection_status_callback, iotHubClientInstance->connection_status_user_context);
+                        if (result != IOTHUB_CLIENT_OK)
+                        {
+                            LogError("IoTHubClient_LL_SetConnectionStatusCallback failed");
+                            free(iotHubClientInstance->connection_status_user_context);
+                            iotHubClientInstance->connection_status_user_context = NULL;
+                        }
+                    }
+                }
+                (void)Unlock(iotHubClientInstance->LockHandle);
+            }
+        }
     }
     return result;
 }
@@ -1256,7 +1256,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetRetryPolicy(IOTHUB_CLIENT_HANDLE iotHubClie
             {
                 /* Codes_SRS_IOTHUBCLIENT_25_077: [ `IoTHubClient_SetRetryPolicy` shall call `IoTHubClient_LL_SetRetryPolicy`, while passing the `IoTHubClient_LL` handle created by `IoTHubClient_Create` and the parameters `retryPolicy` and `retryTimeoutLimitinSeconds`.]*/
                 result = IoTHubClient_LL_SetRetryPolicy(iotHubClientInstance->IoTHubClientLLHandle, retryPolicy, retryTimeoutLimitInSeconds);
-				(void)Unlock(iotHubClientInstance->LockHandle);
+                (void)Unlock(iotHubClientInstance->LockHandle);
             }
 
         }
@@ -1300,7 +1300,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_GetRetryPolicy(IOTHUB_CLIENT_HANDLE iotHubClie
                 /* Codes_SRS_IOTHUBCLIENT_25_093: [ `IoTHubClient_GetRetryPolicy` shall call `IoTHubClient_LL_GetRetryPolicy`, while passing the `IoTHubClient_LL` handle created by `IoTHubClient_Create` and the parameters `connectionStatusCallback` and `userContextCallback`.]*/
                 result = IoTHubClient_LL_GetRetryPolicy(iotHubClientInstance->IoTHubClientLLHandle, retryPolicy, retryTimeoutLimitInSeconds);
                 (void)Unlock(iotHubClientInstance->LockHandle);
-			}
+            }
         }
     }
 
@@ -1885,7 +1885,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_UploadToBlobAsync(IOTHUB_CLIENT_HANDLE iotHubC
                             free(savedData);
                             result = IOTHUB_CLIENT_ERROR;
                         }
-						else
+                        else
                         {
                             /*Codes_SRS_IOTHUBCLIENT_02_058: [ IoTHubClient_UploadToBlobAsync shall add the structure to the list of structures that need to be cleaned once file upload finishes. ]*/
                             LIST_ITEM_HANDLE item = singlylinkedlist_add(iotHubClientHandleData->savedDataToBeCleaned, savedData);

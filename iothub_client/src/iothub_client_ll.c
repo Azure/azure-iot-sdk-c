@@ -198,7 +198,7 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
             IOTHUB_CLIENT_CONFIG actual_config;
             const IOTHUB_CLIENT_CONFIG* config = NULL;
             char* IoTHubName = NULL;
-			STRING_HANDLE transport_hostname = NULL;
+            STRING_HANDLE transport_hostname = NULL;
 
             memset(result, 0, sizeof(IOTHUB_CLIENT_LL_HANDLE_DATA));
 

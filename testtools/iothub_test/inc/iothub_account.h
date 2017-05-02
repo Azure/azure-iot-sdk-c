@@ -31,7 +31,7 @@ typedef struct IOTHUB_PROVISIONED_DEVICE_TAG {
 
 typedef struct IOTHUB_ACCOUNT_CONFIG_TAG
 {
-	size_t number_of_sas_devices;
+    size_t number_of_sas_devices;
 } IOTHUB_ACCOUNT_CONFIG;
 
 typedef struct IOTHUB_ACCOUNT_INFO_TAG* IOTHUB_ACCOUNT_INFO_HANDLE;

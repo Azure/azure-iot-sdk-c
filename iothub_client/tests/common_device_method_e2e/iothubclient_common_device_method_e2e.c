@@ -279,17 +279,17 @@ void test_device_method_with_string_ex(IOTHUB_PROVISIONED_DEVICE** devicesToUse,
 
     for (iterator = 0; iterator < number_of_multiplexed_devices; iterator++)
     {
-		if (Lock(connection_infos[iterator]->lock) != LOCK_OK)
-		{
-			ASSERT_FAIL("Failed locking to verify connection status");
-		}
-		else
-		{
-			char msg[1024];
-			sprintf(msg, "Device %s not connected", devicesToUse[iterator]->deviceId);
-			ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_CONNECTION_STATUS, IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, connection_infos[iterator]->conn_status, msg);
-			(void)Unlock(connection_infos[iterator]->lock);
-		}
+        if (Lock(connection_infos[iterator]->lock) != LOCK_OK)
+        {
+            ASSERT_FAIL("Failed locking to verify connection status");
+        }
+        else
+        {
+            char msg[1024];
+            sprintf(msg, "Device %s not connected", devicesToUse[iterator]->deviceId);
+            ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_CONNECTION_STATUS, IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, connection_infos[iterator]->conn_status, msg);
+            (void)Unlock(connection_infos[iterator]->lock);
+        }
     }
 
     // Wait for the method to subscribe
