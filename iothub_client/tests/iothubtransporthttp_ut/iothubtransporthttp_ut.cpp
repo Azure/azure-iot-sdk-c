@@ -15671,6 +15671,9 @@ TEST_FUNCTION(IoTHubTransportHttp_GetHostname_with_non_NULL_handle_succeeds)
     TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
     mocks.ResetAllCalls();
 
+    STRICT_EXPECTED_CALL(mocks, STRING_clone(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
     ///act
     STRING_HANDLE hostname = IoTHubTransportHttp_GetHostname(handle);
 
@@ -15680,6 +15683,7 @@ TEST_FUNCTION(IoTHubTransportHttp_GetHostname_with_non_NULL_handle_succeeds)
     ASSERT_ARE_EQUAL(char_ptr, TEST_IOTHUB_NAME "." TEST_IOTHUB_SUFFIX, STRING_c_str(hostname));
 
     ///cleanup
+    STRING_delete(hostname);
     IoTHubTransportHttp_Destroy(handle);
 }
 

@@ -2824,11 +2824,12 @@ STRING_HANDLE IoTHubTransport_MQTT_Common_GetHostname(TRANSPORT_LL_HANDLE handle
     {
         result = NULL;
     }
-    else
+    /*Codes_SRS_IOTHUB_MQTT_TRANSPORT_02_002: [ Otherwise IoTHubTransport_MQTT_Common_GetHostname shall return a non-NULL STRING_HANDLE containg the hostname. ]*/
+    else if ((result = STRING_clone(((MQTTTRANSPORT_HANDLE_DATA*)(handle))->hostAddress)) == NULL)
     {
-        /*Codes_SRS_IOTHUB_MQTT_TRANSPORT_02_002: [ Otherwise IoTHubTransport_MQTT_Common_GetHostname shall return a non-NULL STRING_HANDLE containg the hostname. ]*/
-        result = ((MQTTTRANSPORT_HANDLE_DATA*)handle)->hostAddress;
+        LogError("Cannot provide the target host name (STRING_clone failed).");
     }
+
     return result;
 }
 

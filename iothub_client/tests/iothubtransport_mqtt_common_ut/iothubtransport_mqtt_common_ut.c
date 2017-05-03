@@ -199,6 +199,7 @@ static METHOD_HANDLE g_method_handle_value = NULL;
 #define TEST_BIG_TIME_T (TEST_RETRY_TIMEOUT_SECS - TEST_DIFF_WITHIN_ERROR)
 #define TEST_SMALL_TIME_T ((time_t)(TEST_DIFF_WITHIN_ERROR - 1))
 #define TEST_DEVICE_STATUS_CODE     200
+#define TEST_HOSTNAME_STRING_HANDLE    (STRING_HANDLE)0x5555
 
 static APP_PAYLOAD TEST_APP_PAYLOAD;
 
@@ -5421,14 +5422,19 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetHostname_with_non_NULL_handle_succe
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
     umock_c_reset_all_calls();
 
+    EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+        .IgnoreArgument_handle()
+        .SetReturn(TEST_HOSTNAME_STRING_HANDLE);
+
     //act
     STRING_HANDLE hostname = IoTHubTransport_MQTT_Common_GetHostname(handle);
 
     //assert
-    ASSERT_IS_NOT_NULL(hostname);
+    ASSERT_ARE_EQUAL(void_ptr, TEST_HOSTNAME_STRING_HANDLE, hostname);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
+    // No need to destroy STRING_HANDLE since it's a fake mem address.
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
