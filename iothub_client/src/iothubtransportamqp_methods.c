@@ -320,10 +320,10 @@ static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE messag
                         {
                             BINARY_DATA binary_data;
 
-                            /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_048: [ - The message payload shall be obtained by calling `message_get_body_amqp_data` with the index argument being 0. ]*/
-                            if (message_get_body_amqp_data(message, 0, &binary_data) != 0)
+                            /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_048: [ - The message payload shall be obtained by calling `message_get_body_amqp_data_in_place` with the index argument being 0. ]*/
+                            if (message_get_body_amqp_data_in_place(message, 0, &binary_data) != 0)
                             {
-                                /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_049: [ If `message_get_body_amqp_data` fails the REJECTED outcome with `amqp:decode-error` shall be returned. ]*/
+                                /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_049: [ If `message_get_body_amqp_data_in_place` fails the REJECTED outcome with `amqp:decode-error` shall be returned. ]*/
                                 free(method_handle);
                                 LogError("Cannot get method request message payload");
                                 message_outcome = MESSAGE_OUTCOME_REJECTED;
@@ -411,8 +411,8 @@ static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE messag
                                                         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_050: [ The binary message payload shall be indicated by calling the `on_method_request_received` callback passed to `iothubtransportamqp_methods_subscribe` with the arguments: ]*/
                                                         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_051: [ - `context` shall be set to the `on_method_request_received_context` argument passed to `iothubtransportamqp_methods_subscribe`. ]*/
                                                         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_098: [ - `method_name` shall be set to the application property value for `IoThub-methodname`. ]*/
-                                                        /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_052: [ - `request` shall be set to the payload bytes obtained by calling `message_get_body_amqp_data`. ]*/
-                                                        /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_053: [ - `request_size` shall be set to the payload size obtained by calling `message_get_body_amqp_data`. ]*/
+                                                        /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_052: [ - `request` shall be set to the payload bytes obtained by calling `message_get_body_amqp_data_in_place`. ]*/
+                                                        /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_053: [ - `request_size` shall be set to the payload size obtained by calling `message_get_body_amqp_data_in_place`. ]*/
                                                         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_054: [ - `method_handle` shall be set to a newly created `IOTHUBTRANSPORT_AMQP_METHOD_HANDLE` that can be passed later as an argument to `iothubtransportamqp_methods_respond`. ]*/
                                                         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_109: [ `iothubtransportamqp_methods_respond` shall be allowed to be called from the callback `on_method_request_received`. ]*/
                                                         if (amqp_methods_handle->on_method_request_received(amqp_methods_handle->on_method_request_received_context, method_name, binary_data.bytes, binary_data.length, method_handle) != 0)
