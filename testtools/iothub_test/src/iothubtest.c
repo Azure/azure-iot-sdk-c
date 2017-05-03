@@ -525,7 +525,7 @@ static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE messag
     MESSAGE_RECEIVER_CONTEXT* msg_received_context = (MESSAGE_RECEIVER_CONTEXT*)context;
     BINARY_DATA binary_data;
 
-    if (message_get_body_amqp_data(message, 0, &binary_data) == 0)
+    if (message_get_body_amqp_data_in_place(message, 0, &binary_data) == 0)
     {
         if (msg_received_context->msgCallback != NULL)
         {
@@ -774,7 +774,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
 
 IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForRecentEvent(IOTHUB_TEST_HANDLE devhubHandle, pfIoTHubMessageCallback msgCallback, size_t partitionCount, void* context, double maxDrainTimeInSeconds)
 {
-	return IoTHubTest_ListenForEvent(devhubHandle, msgCallback, partitionCount, context, time(NULL), maxDrainTimeInSeconds);
+    return IoTHubTest_ListenForEvent(devhubHandle, msgCallback, partitionCount, context, time(NULL), maxDrainTimeInSeconds);
 }
 
 IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEventForMaxDrainTime(IOTHUB_TEST_HANDLE devhubHandle, pfIoTHubMessageCallback msgCallback, size_t partitionCount, void* context)
@@ -866,8 +866,8 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
                         TLSIO_CONFIG tls_io_config;
                         tls_io_config.hostname = devhubValInfo->hostName;
                         tls_io_config.port = 5671;
-						tls_io_config.underlying_io_interface = NULL;
-						tls_io_config.underlying_io_parameters = NULL;
+                        tls_io_config.underlying_io_interface = NULL;
+                        tls_io_config.underlying_io_parameters = NULL;
                         const IO_INTERFACE_DESCRIPTION* tlsio_interface;
 
                         if ((tlsio_interface = platform_get_default_tlsio()) == NULL)

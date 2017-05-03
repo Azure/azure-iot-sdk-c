@@ -236,7 +236,7 @@ static const void* my_list_item_get_value(LIST_ITEM_HANDLE item_handle)
     return result;
 }
 
-static int my_message_get_body_amqp_data(MESSAGE_HANDLE message, size_t index, BINARY_DATA* binary_data)
+static int my_message_get_body_amqp_data_in_place(MESSAGE_HANDLE message, size_t index, BINARY_DATA* binary_data)
 {
     (void)index;
     (void)message;
@@ -654,8 +654,8 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
 
         REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_destroy, my_list_destroy);
 
-        REGISTER_GLOBAL_MOCK_HOOK(message_get_body_amqp_data, my_message_get_body_amqp_data);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(message_get_body_amqp_data, 1);
+        REGISTER_GLOBAL_MOCK_HOOK(message_get_body_amqp_data_in_place, my_message_get_body_amqp_data_in_place);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(message_get_body_amqp_data_in_place, 1);
 
         REGISTER_GLOBAL_MOCK_RETURN(messaging_delivery_accepted, TEST_AMQP_VALUE);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(messaging_delivery_accepted, TEST_AMQP_VALUE_NULL);
@@ -2035,7 +2035,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         IoTHubMessaging_LL_Destroy(iothub_messaging_handle);
     }
 
-    /*Tests_SRS_IOTHUBMESSAGING_12_058: [ If context is not NULL IoTHubMessaging_LL_FeedbackMessageReceived shall get the content string of the message by calling message_get_body_amqp_data ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_058: [ If context is not NULL IoTHubMessaging_LL_FeedbackMessageReceived shall get the content string of the message by calling message_get_body_amqp_data_in_place ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_059: [ IoTHubMessaging_LL_FeedbackMessageReceived shall parse the response JSON to IOTHUB_SERVICE_FEEDBACK_BATCH struct ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_060: [ IoTHubMessaging_LL_FeedbackMessageReceived shall use the following parson APIs to parse the response string: json_parse_string, json_value_get_object, json_object_get_string, json_object_dotget_string  ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_062: [ If context is not NULL IoTHubMessaging_LL_FeedbackMessageReceived shall call IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK with the received IOTHUB_SERVICE_FEEDBACK_BATCH ] */
@@ -2051,7 +2051,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
 
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(message_get_body_amqp_data(IGNORED_PTR_ARG, IGNORED_NUM_ARG, &TEST_BINARY_DATA_INST))
+        STRICT_EXPECTED_CALL(message_get_body_amqp_data_in_place(IGNORED_PTR_ARG, IGNORED_NUM_ARG, &TEST_BINARY_DATA_INST))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG))
@@ -2132,7 +2132,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         IoTHubMessaging_LL_Destroy(iothub_messaging_handle);
     }
 
-    /*Tests_SRS_IOTHUBMESSAGING_12_058: [ If context is not NULL IoTHubMessaging_LL_FeedbackMessageReceived shall get the content string of the message by calling message_get_body_amqp_data ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_058: [ If context is not NULL IoTHubMessaging_LL_FeedbackMessageReceived shall get the content string of the message by calling message_get_body_amqp_data_in_place ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_059: [ IoTHubMessaging_LL_FeedbackMessageReceived shall parse the response JSON to IOTHUB_SERVICE_FEEDBACK_BATCH struct ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_060: [ IoTHubMessaging_LL_FeedbackMessageReceived shall use the following parson APIs to parse the response string: json_parse_string, json_value_get_object, json_object_get_string, json_object_dotget_string  ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_062: [ If context is not NULL IoTHubMessaging_LL_FeedbackMessageReceived shall call IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK with the received IOTHUB_SERVICE_FEEDBACK_BATCH ] */
@@ -2148,7 +2148,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
 
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(message_get_body_amqp_data(IGNORED_PTR_ARG, IGNORED_NUM_ARG, &TEST_BINARY_DATA_INST))
+        STRICT_EXPECTED_CALL(message_get_body_amqp_data_in_place(IGNORED_PTR_ARG, IGNORED_NUM_ARG, &TEST_BINARY_DATA_INST))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG))
@@ -2229,7 +2229,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         IoTHubMessaging_LL_Destroy(iothub_messaging_handle);
     }
 
-    /*Tests_SRS_IOTHUBMESSAGING_12_058: [ If context is not NULL IoTHubMessaging_LL_FeedbackMessageReceived shall get the content string of the message by calling message_get_body_amqp_data ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_058: [ If context is not NULL IoTHubMessaging_LL_FeedbackMessageReceived shall get the content string of the message by calling message_get_body_amqp_data_in_place ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_059: [ IoTHubMessaging_LL_FeedbackMessageReceived shall parse the response JSON to IOTHUB_SERVICE_FEEDBACK_BATCH struct ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_060: [ IoTHubMessaging_LL_FeedbackMessageReceived shall use the following parson APIs to parse the response string: json_parse_string, json_value_get_object, json_object_get_string, json_object_dotget_string  ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_062: [ If context is not NULL IoTHubMessaging_LL_FeedbackMessageReceived shall call IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK with the received IOTHUB_SERVICE_FEEDBACK_BATCH ] */
@@ -2245,7 +2245,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
 
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(message_get_body_amqp_data(IGNORED_PTR_ARG, IGNORED_NUM_ARG, &TEST_BINARY_DATA_INST))
+        STRICT_EXPECTED_CALL(message_get_body_amqp_data_in_place(IGNORED_PTR_ARG, IGNORED_NUM_ARG, &TEST_BINARY_DATA_INST))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG))
@@ -2325,7 +2325,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         IoTHubMessaging_LL_Destroy(iothub_messaging_handle);
     }
 
-    /*Tests_SRS_IOTHUBMESSAGING_12_058: [ If context is not NULL IoTHubMessaging_LL_FeedbackMessageReceived shall get the content string of the message by calling message_get_body_amqp_data ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_058: [ If context is not NULL IoTHubMessaging_LL_FeedbackMessageReceived shall get the content string of the message by calling message_get_body_amqp_data_in_place ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_059: [ IoTHubMessaging_LL_FeedbackMessageReceived shall parse the response JSON to IOTHUB_SERVICE_FEEDBACK_BATCH struct ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_060: [ IoTHubMessaging_LL_FeedbackMessageReceived shall use the following parson APIs to parse the response string: json_parse_string, json_value_get_object, json_object_get_string, json_object_dotget_string  ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_062: [ If context is not NULL IoTHubMessaging_LL_FeedbackMessageReceived shall call IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK with the received IOTHUB_SERVICE_FEEDBACK_BATCH ] */
@@ -2341,7 +2341,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
 
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(message_get_body_amqp_data(IGNORED_PTR_ARG, IGNORED_NUM_ARG, &TEST_BINARY_DATA_INST))
+        STRICT_EXPECTED_CALL(message_get_body_amqp_data_in_place(IGNORED_PTR_ARG, IGNORED_NUM_ARG, &TEST_BINARY_DATA_INST))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG))
@@ -2422,7 +2422,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         IoTHubMessaging_LL_Destroy(iothub_messaging_handle);
     }
 
-    /*Tests_SRS_IOTHUBMESSAGING_12_058: [ If context is not NULL IoTHubMessaging_LL_FeedbackMessageReceived shall get the content string of the message by calling message_get_body_amqp_data ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_058: [ If context is not NULL IoTHubMessaging_LL_FeedbackMessageReceived shall get the content string of the message by calling message_get_body_amqp_data_in_place ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_059: [ IoTHubMessaging_LL_FeedbackMessageReceived shall parse the response JSON to IOTHUB_SERVICE_FEEDBACK_BATCH struct ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_060: [ IoTHubMessaging_LL_FeedbackMessageReceived shall use the following parson APIs to parse the response string: json_parse_string, json_value_get_object, json_object_get_string, json_object_dotget_string  ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_062: [ If context is not NULL IoTHubMessaging_LL_FeedbackMessageReceived shall call IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK with the received IOTHUB_SERVICE_FEEDBACK_BATCH ] */
@@ -2438,7 +2438,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
 
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(message_get_body_amqp_data(IGNORED_PTR_ARG, IGNORED_NUM_ARG, &TEST_BINARY_DATA_INST))
+        STRICT_EXPECTED_CALL(message_get_body_amqp_data_in_place(IGNORED_PTR_ARG, IGNORED_NUM_ARG, &TEST_BINARY_DATA_INST))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG))
@@ -2519,7 +2519,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         IoTHubMessaging_LL_Destroy(iothub_messaging_handle);
     }
 
-    /*Tests_SRS_IOTHUBMESSAGING_12_058: [ If context is not NULL IoTHubMessaging_LL_FeedbackMessageReceived shall get the content string of the message by calling message_get_body_amqp_data ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_058: [ If context is not NULL IoTHubMessaging_LL_FeedbackMessageReceived shall get the content string of the message by calling message_get_body_amqp_data_in_place ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_059: [ IoTHubMessaging_LL_FeedbackMessageReceived shall parse the response JSON to IOTHUB_SERVICE_FEEDBACK_BATCH struct ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_060: [ IoTHubMessaging_LL_FeedbackMessageReceived shall use the following parson APIs to parse the response string: json_parse_string, json_value_get_object, json_object_get_string, json_object_dotget_string  ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_062: [ If context is not NULL IoTHubMessaging_LL_FeedbackMessageReceived shall call IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK with the received IOTHUB_SERVICE_FEEDBACK_BATCH ] */
@@ -2535,7 +2535,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
 
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(message_get_body_amqp_data(IGNORED_PTR_ARG, IGNORED_NUM_ARG, &TEST_BINARY_DATA_INST))
+        STRICT_EXPECTED_CALL(message_get_body_amqp_data_in_place(IGNORED_PTR_ARG, IGNORED_NUM_ARG, &TEST_BINARY_DATA_INST))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG))
@@ -2630,7 +2630,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
 
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(message_get_body_amqp_data(IGNORED_PTR_ARG, IGNORED_NUM_ARG, &TEST_BINARY_DATA_INST))
+        STRICT_EXPECTED_CALL(message_get_body_amqp_data_in_place(IGNORED_PTR_ARG, IGNORED_NUM_ARG, &TEST_BINARY_DATA_INST))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG))

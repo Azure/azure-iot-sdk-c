@@ -411,7 +411,7 @@ int IoTHubMessage_CreateFromUamqpMessage(MESSAGE_HANDLE uamqp_message, IOTHUB_ME
 		{
 			// Codes_SRS_UAMQP_MESSAGING_09_004: [The uAMQP message body data shall be retrieved using message_get_body_amqp_data().]
 			BINARY_DATA binary_data;
-			if (message_get_body_amqp_data(uamqp_message, 0, &binary_data) != 0)
+			if (message_get_body_amqp_data_in_place(uamqp_message, 0, &binary_data) != 0)
 			{
 				// Codes_SRS_UAMQP_MESSAGING_09_005: [If message_get_body_amqp_data() fails, IoTHubMessage_CreateFromuAMQPMessage shall fail and return immediately.]
 				LogError("Failed to get the body of the uamqp message.");
