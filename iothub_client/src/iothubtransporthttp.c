@@ -2381,12 +2381,12 @@ static STRING_HANDLE IoTHubTransportHttp_GetHostname(TRANSPORT_LL_HANDLE handle)
         LogError("invalid parameter handle=%p", handle);
         result = NULL;
     }
-    else
+    /*Codes_SRS_TRANSPORTMULTITHTTP_02_002: [ Otherwise IoTHubTransportHttp_GetHostname shall return a non-NULL STRING_HANDLE containing the hostname. ]*/
+    else if ((result = STRING_clone(((HTTPTRANSPORT_HANDLE_DATA*)(handle))->hostName)) == NULL)
     {
-        /*Codes_SRS_TRANSPORTMULTITHTTP_02_002: [ Otherwise IoTHubTransportHttp_GetHostname shall return a non-NULL STRING_HANDLE containing the hostname. ]*/
-        HTTPTRANSPORT_HANDLE_DATA* handleData = (HTTPTRANSPORT_HANDLE_DATA*)handle;
-        result = handleData->hostName;
+        LogError("Cannot provide the target host name (STRING_clone failed).");
     }
+
     return result;
 }
 

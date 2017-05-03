@@ -4,14 +4,17 @@
 #ifdef __cplusplus
 #include <cstdlib>
 #include <cstddef>
+#include <cstdbool>
 #else
 #include <stdlib.h>
 #include <stddef.h>
+#include <stdbool.h>
 #endif
 
+static bool g_fail_my_gballoc_malloc = false;
 static void* my_gballoc_malloc(size_t size)
 {
-    return malloc(size);
+    return g_fail_my_gballoc_malloc ? NULL : malloc(size);
 }
 
 static void my_gballoc_free(void* ptr)
@@ -246,12 +249,13 @@ static IOTHUB_CLIENT_RESULT my_IoTHubClient_LL_SendReportedState(IOTHUB_CLIENT_L
     return IOTHUB_CLIENT_OK;
 }
 
+static IOTHUB_CLIENT_RESULT my_IoTHubClient_LL_SetConnectionStatusCallback_result;
 static IOTHUB_CLIENT_RESULT my_IoTHubClient_LL_SetConnectionStatusCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK connectionStatusCallback, void* userContextCallback)
 {
     (void)iotHubClientHandle;
     g_connectionStatusCallback = connectionStatusCallback;
     g_userContextCallback = userContextCallback;
-    return IOTHUB_CLIENT_OK;
+    return my_IoTHubClient_LL_SetConnectionStatusCallback_result;
 }
 
 static IOTHUB_CLIENT_RESULT my_IoTHubClient_LL_SetDeviceMethodCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC deviceMethodCallback, void* userContextCallback)
@@ -262,12 +266,13 @@ static IOTHUB_CLIENT_RESULT my_IoTHubClient_LL_SetDeviceMethodCallback(IOTHUB_CL
     return IOTHUB_CLIENT_OK;
 }
 
+static IOTHUB_CLIENT_RESULT my_IoTHubClient_LL_SetDeviceMethodCallback_Ex_result;
 static IOTHUB_CLIENT_RESULT my_IoTHubClient_LL_SetDeviceMethodCallback_Ex(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK inboundDeviceMethodCallback, void* userContextCallback)
 {
     (void)iotHubClientHandle;
     g_inboundDeviceCallback = inboundDeviceMethodCallback;
     g_userContextCallback = userContextCallback;
-    return IOTHUB_CLIENT_OK;
+    return my_IoTHubClient_LL_SetDeviceMethodCallback_Ex_result;
 }
 
 static IOTHUB_CLIENT_RESULT my_IoTHubClient_LL_GetLastMessageReceiveTime(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, time_t* lastMessageReceiveTime)
@@ -277,12 +282,13 @@ static IOTHUB_CLIENT_RESULT my_IoTHubClient_LL_GetLastMessageReceiveTime(IOTHUB_
     return IOTHUB_CLIENT_OK;
 }
 
+static IOTHUB_CLIENT_RESULT my_IoTHubClient_LL_SetMessageCallback_Ex_result;
 static IOTHUB_CLIENT_RESULT my_IoTHubClient_LL_SetMessageCallback_Ex(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC_EX messageCallback, void* userContextCallback)
 {
     (void)iotHubClientHandle;
     g_messageCallback_ex = messageCallback;
     g_userContextCallback = userContextCallback;
-    return IOTHUB_CLIENT_OK;
+    return my_IoTHubClient_LL_SetMessageCallback_Ex_result;
 }
 
 static void my_IoTHubClient_LL_Destroy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
@@ -479,6 +485,11 @@ TEST_FUNCTION_INITIALIZE(method_init)
     g_inboundDeviceCallback = NULL;
     g_messageCallback = NULL;
     g_messageCallback_ex = NULL;
+
+    my_IoTHubClient_LL_SetDeviceMethodCallback_Ex_result = IOTHUB_CLIENT_OK;
+    my_IoTHubClient_LL_SetConnectionStatusCallback_result = IOTHUB_CLIENT_OK;
+    my_IoTHubClient_LL_SetMessageCallback_Ex_result = IOTHUB_CLIENT_OK;
+    g_fail_my_gballoc_malloc = false;
 }
 
 TEST_FUNCTION_CLEANUP(TestMethodCleanup)
@@ -536,12 +547,12 @@ static void setup_iothubclient_createwithtransport()
 
 static void setup_iothubclient_sendeventasync(bool use_threads)
 {
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
-        .IgnoreArgument_handle();
     if (use_threads)
     {
         EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     }
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
+        .IgnoreArgument_handle();
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(IoTHubClient_LL_SendEventAsync(IGNORED_PTR_ARG, TEST_MESSAGE_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
@@ -561,9 +572,9 @@ static void setup_iothubclient_uploadtoblobasync()
         .IgnoreArgument_source();
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is creating a UPLOADTOBLOB_SAVED_DATA*/
         .IgnoreArgument(1);
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG)) /*this is adding UPLOADTOBLOB_SAVED_DATA to the list of UPLOADTOBLOB_SAVED_DATAs to be cleaned*/
         .IgnoreArgument(1)
         .IgnoreArgument(2);
@@ -1163,9 +1174,9 @@ TEST_FUNCTION(IoTHubClient_SetMessageCallback_succeed)
     IOTHUB_CLIENT_HANDLE iothub_handle = IoTHubClient_Create(TEST_CLIENT_CONFIG);
     umock_c_reset_all_calls();
 
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument_size();
     STRICT_EXPECTED_CALL(IoTHubClient_LL_SetMessageCallback_Ex(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
@@ -1197,11 +1208,16 @@ TEST_FUNCTION(IoTHubClient_SetMessageCallback_fail)
     IOTHUB_CLIENT_HANDLE iothub_handle = IoTHubClient_Create(TEST_CLIENT_CONFIG);
     umock_c_reset_all_calls();
 
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument_size();
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_SetMessageCallback_Ex(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreArgument_messageCallback()
+        .IgnoreArgument_userContextCallback();
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
+        .IgnoreArgument_handle();
 
     umock_c_negative_tests_snapshot();
 
@@ -1209,6 +1225,24 @@ TEST_FUNCTION(IoTHubClient_SetMessageCallback_fail)
     size_t count = umock_c_negative_tests_call_count();
     for (size_t index = 0; index < count; index++)
     {
+        if (index == 4)
+        {
+            continue;
+        }
+        else if (index == 2)
+        {
+            g_fail_my_gballoc_malloc = true;
+        }
+        else if (index == 3)
+        {
+            my_IoTHubClient_LL_SetMessageCallback_Ex_result = IOTHUB_CLIENT_ERROR;
+        }
+        else
+        {
+            g_fail_my_gballoc_malloc = false;
+            my_IoTHubClient_LL_SetMessageCallback_Ex_result = IOTHUB_CLIENT_OK;
+        }
+
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 
@@ -1232,10 +1266,10 @@ TEST_FUNCTION(IoTHubClient_SetMessageCallback_fails_if_SetMessageCallback_Ex_fai
     IOTHUB_CLIENT_HANDLE iothub_handle = IoTHubClient_Create(TEST_CLIENT_CONFIG);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
-        .IgnoreArgument_handle();
     STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
+        .IgnoreArgument_handle();
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument_size();
     STRICT_EXPECTED_CALL(IoTHubClient_LL_SetMessageCallback_Ex(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
@@ -1277,9 +1311,9 @@ TEST_FUNCTION(IoTHubClient_SetConnectionStatusCallback_succeed)
     IOTHUB_CLIENT_HANDLE iothub_handle = IoTHubClient_Create(TEST_CLIENT_CONFIG);
     umock_c_reset_all_calls();
 
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument_size();
     STRICT_EXPECTED_CALL(IoTHubClient_LL_SetConnectionStatusCallback(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
@@ -1308,11 +1342,16 @@ TEST_FUNCTION(IoTHubClient_SetConnectionStatusCallback_fail)
     IOTHUB_CLIENT_HANDLE iothub_handle = IoTHubClient_Create(TEST_CLIENT_CONFIG);
     umock_c_reset_all_calls();
 
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument_size();
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_SetConnectionStatusCallback(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreArgument_connectionStatusCallback()
+        .IgnoreArgument_userContextCallback();
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
+        .IgnoreArgument_handle();
 
     umock_c_negative_tests_snapshot();
 
@@ -1320,6 +1359,24 @@ TEST_FUNCTION(IoTHubClient_SetConnectionStatusCallback_fail)
     size_t count = umock_c_negative_tests_call_count();
     for (size_t index = 0; index < count; index++)
     {
+        if (index == 4)
+        {
+            continue;
+        }
+        else if (index == 2)
+        {
+            g_fail_my_gballoc_malloc = true;
+        }
+        else if (index == 3)
+        {
+            my_IoTHubClient_LL_SetConnectionStatusCallback_result = IOTHUB_CLIENT_ERROR;
+        }
+        else
+        {
+            my_IoTHubClient_LL_SetConnectionStatusCallback_result = IOTHUB_CLIENT_OK;
+            g_fail_my_gballoc_malloc = false;
+        }
+
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 
@@ -1363,9 +1420,9 @@ TEST_FUNCTION(IoTHubClient_SetRetryPolicy_succeed)
     IOTHUB_CLIENT_RETRY_POLICY retry_policy = IOTHUB_CLIENT_RETRY_RANDOM;
     size_t retry_in_seconds = 10;
 
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_LL_SetRetryPolicy(TEST_IOTHUB_CLIENT_HANDLE, retry_policy, retry_in_seconds))
         .IgnoreArgument(2);
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
@@ -1409,9 +1466,9 @@ TEST_FUNCTION(IoTHubClient_GetRetryPolicy_succeed)
     IOTHUB_CLIENT_RETRY_POLICY retry_policy;
     size_t retry_in_seconds;
 
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_LL_GetRetryPolicy(TEST_IOTHUB_CLIENT_HANDLE, &retry_policy, &retry_in_seconds));
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
@@ -1717,9 +1774,9 @@ TEST_FUNCTION(IoTHubClient_SetDeviceTwinCallback_succeed)
     IOTHUB_CLIENT_HANDLE iothub_handle = IoTHubClient_Create(TEST_CLIENT_CONFIG);
     umock_c_reset_all_calls();
 
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument_size();
     STRICT_EXPECTED_CALL(IoTHubClient_LL_SetDeviceTwinCallback(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
@@ -1835,9 +1892,9 @@ TEST_FUNCTION(IoTHubClient_SendReportedState_succeed)
 
     const unsigned char* reported_state = (const unsigned char*)0x1234;
 
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument_size();
     STRICT_EXPECTED_CALL(IoTHubClient_LL_SendReportedState(TEST_IOTHUB_CLIENT_HANDLE, reported_state, 1, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
@@ -1962,9 +2019,9 @@ TEST_FUNCTION(IoTHubClient_SetDeviceMethodCallback_succeed)
     IOTHUB_CLIENT_HANDLE iothub_handle = IoTHubClient_Create(TEST_CLIENT_CONFIG);
     umock_c_reset_all_calls();
 
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_LL_SetDeviceMethodCallback_Ex(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
@@ -1989,24 +2046,35 @@ TEST_FUNCTION(IoTHubClient_SetDeviceMethodCallback_fail)
 {
     // arrange
     IOTHUB_CLIENT_HANDLE iothub_handle = IoTHubClient_Create(TEST_CLIENT_CONFIG);
-    umock_c_reset_all_calls();
 
     int negativeTestsInitResult = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
+    umock_c_reset_all_calls();
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
-    STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_LL_SetDeviceMethodCallback_Ex(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
-
     umock_c_negative_tests_snapshot();
 
     // act
     size_t count = umock_c_negative_tests_call_count() - 1;
     for (size_t index = 0; index < count; index++)
     {
+        my_IoTHubClient_LL_SetDeviceMethodCallback_Ex_result = IOTHUB_CLIENT_OK;
+
+        if (index == 2)
+        {
+            continue;
+        }
+        else if (index == 3)
+        {
+            my_IoTHubClient_LL_SetDeviceMethodCallback_Ex_result = IOTHUB_CLIENT_ERROR;
+        }
+
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 
@@ -2048,9 +2116,9 @@ TEST_FUNCTION(IoTHubClient_SetDeviceMethodCallback_Ex_succeed)
     IOTHUB_CLIENT_HANDLE iothub_handle = IoTHubClient_Create(TEST_CLIENT_CONFIG);
     umock_c_reset_all_calls();
 
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_LL_SetDeviceMethodCallback_Ex(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument_inboundDeviceMethodCallback()
@@ -2079,9 +2147,9 @@ TEST_FUNCTION(IoTHubClient_SetDeviceMethodCallback_Ex_NonNULL_callback_succeed)
     IOTHUB_CLIENT_HANDLE iothub_handle = IoTHubClient_Create(TEST_CLIENT_CONFIG);
     umock_c_reset_all_calls();
 
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_LL_SetDeviceMethodCallback_Ex(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument_inboundDeviceMethodCallback()
@@ -2154,9 +2222,9 @@ TEST_FUNCTION(IoTHubClient_SetDeviceMethodCallback_Ex_remove_succeed)
     IOTHUB_CLIENT_HANDLE iothub_handle = IoTHubClient_Create(TEST_CLIENT_CONFIG);
     umock_c_reset_all_calls();
 
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_LL_SetDeviceMethodCallback_Ex(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();

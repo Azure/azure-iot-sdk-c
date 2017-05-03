@@ -20,6 +20,9 @@ typedef struct IOTHUB_CLIENT_INSTANCE_TAG* IOTHUB_CLIENT_HANDLE;
 #endif // IOTHUB_CLIENT_INSTANCE
 
 #include "azure_c_shared_utility/umock_c_prod.h"
+
+typedef void(*IOTHUB_CLIENT_MULTIPLEXED_DO_WORK)(void* iotHubClientInstance);
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -29,7 +32,7 @@ extern "C"
     MOCKABLE_FUNCTION(, void, IoTHubTransport_Destroy, TRANSPORT_HANDLE, transportHandle);
     MOCKABLE_FUNCTION(, LOCK_HANDLE, IoTHubTransport_GetLock, TRANSPORT_HANDLE, transportHandle);
     MOCKABLE_FUNCTION(, TRANSPORT_LL_HANDLE, IoTHubTransport_GetLLTransport, TRANSPORT_HANDLE, transportHandle);
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubTransport_StartWorkerThread, TRANSPORT_HANDLE, transportHandle, IOTHUB_CLIENT_HANDLE, clientHandle);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubTransport_StartWorkerThread, TRANSPORT_HANDLE, transportHandle, IOTHUB_CLIENT_HANDLE, clientHandle, IOTHUB_CLIENT_MULTIPLEXED_DO_WORK, muxDoWork);
     MOCKABLE_FUNCTION(, bool, IoTHubTransport_SignalEndWorkerThread, TRANSPORT_HANDLE, transportHandle, IOTHUB_CLIENT_HANDLE, clientHandle);
     MOCKABLE_FUNCTION(, void, IoTHubTransport_JoinWorkerThread, TRANSPORT_HANDLE, transportHandle, IOTHUB_CLIENT_HANDLE, clientHandle);
 
