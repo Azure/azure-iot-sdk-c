@@ -18,7 +18,7 @@
 /*String containing Hostname, Device Id & Device Key in the format:                         */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessSignature=<device_sas_token>"    */
-static const char* connectionString = "HostName=azure-iot-sdk-c.azure-devices.net;DeviceId=tmp_device;SharedAccessKey=4btpX7np20NowpiHEhkrmKliPV6YI2WwNcxloawUNec=";
+static const char* connectionString = "[device connection string]";
 
 static int callbackCounter;
 static bool g_continueRunning;
