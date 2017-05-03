@@ -198,6 +198,7 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
             IOTHUB_CLIENT_CONFIG actual_config;
             const IOTHUB_CLIENT_CONFIG* config = NULL;
             char* IoTHubName = NULL;
+            STRING_HANDLE transport_hostname = NULL;
 
             memset(result, 0, sizeof(IOTHUB_CLIENT_LL_HANDLE_DATA));
 
@@ -258,7 +259,7 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
                 result->transportHandle = device_config->transportHandle;
                 setTransportProtocol(result, (TRANSPORT_PROVIDER*)device_config->protocol());
 
-                STRING_HANDLE transport_hostname = result->IoTHubTransport_GetHostname(result->transportHandle);
+                transport_hostname = result->IoTHubTransport_GetHostname(result->transportHandle);
                 if (transport_hostname == NULL)
                 {
                     /*Codes_SRS_IOTHUBCLIENT_LL_02_097: [ If creating the data structures fails or instantiating the IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE fails then IoTHubClient_LL_CreateWithTransport shall fail and return NULL. ]*/
@@ -392,6 +393,10 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
             if (IoTHubName)
             {
                 free(IoTHubName);
+            }
+            if (transport_hostname)
+            {
+                STRING_delete(transport_hostname);
             }
         }
     }
