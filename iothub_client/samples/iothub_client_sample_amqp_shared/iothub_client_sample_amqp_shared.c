@@ -32,7 +32,7 @@ static char propText[1024];
 typedef struct EVENT_INSTANCE_TAG
 {
     IOTHUB_MESSAGE_HANDLE messageHandle;
-	const char* deviceId;
+    const char* deviceId;
     size_t messageTrackingId;  // For tracking the messages within the user callback.
 } EVENT_INSTANCE;
 
@@ -123,82 +123,90 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
 static void SendConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
 {
     EVENT_INSTANCE* eventInstance = (EVENT_INSTANCE*)userContextCallback;
-	(void)printf("Confirmation received for message %zu from device %s with result = %s\r\n", eventInstance->messageTrackingId, eventInstance->deviceId, ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
+    (void)printf("Confirmation received for message %zu from device %s with result = %s\r\n", eventInstance->messageTrackingId, eventInstance->deviceId, ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
     /* Some device specific action code goes here... */
+}
+
+static void destroy_events(EVENT_INSTANCE* events)
+{
+    for (size_t i = 0; i < MESSAGE_COUNT; i++)
+    {
+        IoTHubMessage_Destroy(events[i].messageHandle);
+    }
 }
 
 static int create_events(EVENT_INSTANCE* events, const char* deviceId)
 {
-	int result = 0;
+    int result = 0;
 
-	srand((unsigned int)time(NULL));
-	double avgWindSpeed = 10.0;
+    srand((unsigned int)time(NULL));
+    double avgWindSpeed = 10.0;
     double minTemperature = 20.0;
     double minHumidity = 60.0;
     double temperature = 0;
     double humidity = 0;
 
-	int i;
-	for (i = 0; i < MESSAGE_COUNT; i++)
-	{
+    int i;
+    for (i = 0; i < MESSAGE_COUNT; i++)
+    {
         temperature = minTemperature + (rand() % 10);
         humidity = minHumidity +  (rand() % 20);
 
-		if (sprintf_s(msgText, sizeof(msgText), "{\"deviceId\":\"myFirstDevice\",\"windSpeed\":%.2f,\"temperature\":%.2f,\"humidity\":%.2f}", avgWindSpeed + (rand() % 4 + 2), temperature, humidity) == 0)
-		{
-			(void)printf("ERROR: failed creating event message for device %s\r\n", deviceId);
-			result = __FAILURE__;
-		}
-		else if ((events[i].messageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText))) == NULL)
-		{
-			(void)printf("ERROR: failed creating the IOTHUB_MESSAGE_HANDLE for device %s\r\n", deviceId);
-			result = __FAILURE__;
-		}
-		else
-		{
-			MAP_HANDLE propMap;
+        if (sprintf_s(msgText, sizeof(msgText), "{\"deviceId\":\"myFirstDevice\",\"windSpeed\":%.2f,\"temperature\":%.2f,\"humidity\":%.2f}", avgWindSpeed + (rand() % 4 + 2), temperature, humidity) == 0)
+        {
+            (void)printf("ERROR: failed creating event message for device %s\r\n", deviceId);
+            result = __FAILURE__;
+        }
+        else if ((events[i].messageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText))) == NULL)
+        {
+            (void)printf("ERROR: failed creating the IOTHUB_MESSAGE_HANDLE for device %s\r\n", deviceId);
+            result = __FAILURE__;
+        }
+        else
+        {
+            MAP_HANDLE propMap;
 
-			if ((propMap = IoTHubMessage_Properties(events[i].messageHandle)) == NULL) 
-			{
-				(void)printf("ERROR: failed getting device %s's message property map\r\n", deviceId);
-				result = __FAILURE__;
-			}
-			else if (sprintf_s(propText, sizeof(propText), temperature > 28 ? "true" : "false") == 0) 
-			{
-				(void)printf("ERROR: sprintf_s failed for device %s's message property\r\n", deviceId);
-				result = __FAILURE__;
-			}
-			else if (Map_AddOrUpdate(propMap, "temperatureAlert", propText) != MAP_OK)
-			{
-				(void)printf("ERROR: Map_AddOrUpdate failed for device %s\r\n", deviceId);
-				result = __FAILURE__;
-			}
-			else
-			{
-				events[i].deviceId = deviceId;
-				events[i].messageTrackingId = i;
-				result = 0;
-			}
-		}
-	}
+            if ((propMap = IoTHubMessage_Properties(events[i].messageHandle)) == NULL) 
+            {
+                (void)printf("ERROR: failed getting device %s's message property map\r\n", deviceId);
+                result = __FAILURE__;
+            }
+            else if (sprintf_s(propText, sizeof(propText), temperature > 28 ? "true" : "false") == 0) 
+            {
+                (void)printf("ERROR: sprintf_s failed for device %s's message property\r\n", deviceId);
+                result = __FAILURE__;
+            }
+            else if (Map_AddOrUpdate(propMap, "temperatureAlert", propText) != MAP_OK)
+            {
+                (void)printf("ERROR: Map_AddOrUpdate failed for device %s\r\n", deviceId);
+                result = __FAILURE__;
+            }
+            else
+            {
+                events[i].deviceId = deviceId;
+                events[i].messageTrackingId = i;
+                result = 0;
+            }
+        }
+    }
 
-	return result;
+    return result;
 }
 
 void iothub_client_sample_amqp_shared_hl_run(void)
 {
-	TRANSPORT_HANDLE transport_handle;
-	IOTHUB_CLIENT_HANDLE iotHubClientHandle1;
-	IOTHUB_CLIENT_HANDLE iotHubClientHandle2;
+    TRANSPORT_HANDLE transport_handle;
+    IOTHUB_CLIENT_HANDLE iotHubClientHandle1;
+    IOTHUB_CLIENT_HANDLE iotHubClientHandle2;
 
-	EVENT_INSTANCE messages_device1[MESSAGE_COUNT];
-	EVENT_INSTANCE messages_device2[MESSAGE_COUNT];
+    EVENT_INSTANCE messages_device1[MESSAGE_COUNT];
+    EVENT_INSTANCE messages_device2[MESSAGE_COUNT];
 
     g_continueRunning = true;
 
     //callbackCounter = 0;
-	int receiveContext1 = 0;
-	int receiveContext2 = 0;
+    int receiveContext1 = 0;
+    int receiveContext2 = 0;
 
     (void)printf("Starting the IoTHub client sample AMQP...\r\n");
 
@@ -206,39 +214,39 @@ void iothub_client_sample_amqp_shared_hl_run(void)
     {
         printf("Failed to initialize the platform.\r\n");
     }
-	else if ((transport_handle = IoTHubTransport_Create(AMQP_Protocol, hubName, hubSuffix)) == NULL)
-	{
-		printf("Failed to creating the protocol handle.\r\n");
-	}
+    else if ((transport_handle = IoTHubTransport_Create(AMQP_Protocol, hubName, hubSuffix)) == NULL)
+    {
+        printf("Failed to creating the protocol handle.\r\n");
+    }
     else
     {
-		IOTHUB_CLIENT_CONFIG client_config1;
-		client_config1.deviceId = deviceId1;
-		client_config1.deviceKey = deviceKey1;
-		client_config1.deviceSasToken = NULL;
-		client_config1.iotHubName = hubName;
-		client_config1.iotHubSuffix = hubSuffix;
-		client_config1.protocol = AMQP_Protocol;
-		client_config1.protocolGatewayHostName = NULL;
+        IOTHUB_CLIENT_CONFIG client_config1;
+        client_config1.deviceId = deviceId1;
+        client_config1.deviceKey = deviceKey1;
+        client_config1.deviceSasToken = NULL;
+        client_config1.iotHubName = hubName;
+        client_config1.iotHubSuffix = hubSuffix;
+        client_config1.protocol = AMQP_Protocol;
+        client_config1.protocolGatewayHostName = NULL;
 
-		IOTHUB_CLIENT_CONFIG client_config2;
-		client_config2.deviceId = deviceId2;
-		client_config2.deviceKey = deviceKey2;
-		client_config2.deviceSasToken = NULL;
-		client_config2.iotHubName = hubName;
-		client_config2.iotHubSuffix = hubSuffix;
-		client_config2.protocol = AMQP_Protocol;
-		client_config2.protocolGatewayHostName = NULL;
+        IOTHUB_CLIENT_CONFIG client_config2;
+        client_config2.deviceId = deviceId2;
+        client_config2.deviceKey = deviceKey2;
+        client_config2.deviceSasToken = NULL;
+        client_config2.iotHubName = hubName;
+        client_config2.iotHubSuffix = hubSuffix;
+        client_config2.protocol = AMQP_Protocol;
+        client_config2.protocolGatewayHostName = NULL;
 
-		
+        
         if ((iotHubClientHandle1 = IoTHubClient_CreateWithTransport(transport_handle, &client_config1)) == NULL)
         {
             (void)printf("ERROR: iotHubClientHandle1 is NULL!\r\n");
         }
-		else if ((iotHubClientHandle2 = IoTHubClient_CreateWithTransport(transport_handle, &client_config2)) == NULL)
-		{
-			(void)printf("ERROR: iotHubClientHandle2 is NULL!\r\n");
-		}
+        else if ((iotHubClientHandle2 = IoTHubClient_CreateWithTransport(transport_handle, &client_config2)) == NULL)
+        {
+            (void)printf("ERROR: iotHubClientHandle2 is NULL!\r\n");
+        }
         else
         {
             bool traceOn = true;
@@ -252,19 +260,19 @@ void iothub_client_sample_amqp_shared_hl_run(void)
             }
 #endif // MBED_BUILD_TIMESTAMP
 
-			if (create_events(messages_device1, client_config1.deviceId) != 0 || create_events(messages_device2, client_config2.deviceId) != 0)
-			{
-				(void)printf("ERROR: failed creating events for the devices..........FAILED!\r\n");
-			}
+            if (create_events(messages_device1, client_config1.deviceId) != 0 || create_events(messages_device2, client_config2.deviceId) != 0)
+            {
+                (void)printf("ERROR: failed creating events for the devices..........FAILED!\r\n");
+            }
             /* Setting Message call back, so we can receive Commands. */
             else if (IoTHubClient_SetMessageCallback(iotHubClientHandle1, ReceiveMessageCallback, &receiveContext1) != IOTHUB_CLIENT_OK)
             {
                 (void)printf("ERROR: IoTHubClient_SetMessageCallback for device 1..........FAILED!\r\n");
             }
-			else if (IoTHubClient_SetMessageCallback(iotHubClientHandle2, ReceiveMessageCallback, &receiveContext2) != IOTHUB_CLIENT_OK)
-			{
-				(void)printf("ERROR: IoTHubClient_SetMessageCallback for device 2..........FAILED!\r\n");
-			}
+            else if (IoTHubClient_SetMessageCallback(iotHubClientHandle2, ReceiveMessageCallback, &receiveContext2) != IOTHUB_CLIENT_OK)
+            {
+                (void)printf("ERROR: IoTHubClient_SetMessageCallback for device 2..........FAILED!\r\n");
+            }
             else
             {
                 (void)printf("IoTHubClient_SetMessageCallback...successful.\r\n");
@@ -279,10 +287,10 @@ void iothub_client_sample_amqp_shared_hl_run(void)
                         {
                             (void)printf("ERROR: IoTHubClient_SendEventAsync for device 1..........FAILED!\r\n");
                         }
-						else if (IoTHubClient_SendEventAsync(iotHubClientHandle2, messages_device2[iterator].messageHandle, SendConfirmationCallback, &messages_device2[iterator]) != IOTHUB_CLIENT_OK)
-						{
-							(void)printf("ERROR: IoTHubClient_SendEventAsync for device 2..........FAILED!\r\n");
-						}
+                        else if (IoTHubClient_SendEventAsync(iotHubClientHandle2, messages_device2[iterator].messageHandle, SendConfirmationCallback, &messages_device2[iterator]) != IOTHUB_CLIENT_OK)
+                        {
+                            (void)printf("ERROR: IoTHubClient_SendEventAsync for device 2..........FAILED!\r\n");
+                        }
                         else
                         {
                             (void)printf("IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.\r\n");
@@ -294,12 +302,14 @@ void iothub_client_sample_amqp_shared_hl_run(void)
                     iterator++;
                 } while (g_continueRunning);
             }
-			IoTHubClient_Destroy(iotHubClientHandle1);
-			IoTHubClient_Destroy(iotHubClientHandle2);
+            destroy_events(messages_device1);
+            destroy_events(messages_device2);
+
+            IoTHubClient_Destroy(iotHubClientHandle1);
+            IoTHubClient_Destroy(iotHubClientHandle2);
         }
 
-	IoTHubTransport_Destroy(transport_handle);
-
+        IoTHubTransport_Destroy(transport_handle);
         platform_deinit();
     }
 }

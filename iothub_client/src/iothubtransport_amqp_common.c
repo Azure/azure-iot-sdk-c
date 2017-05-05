@@ -1920,7 +1920,7 @@ IOTHUB_DEVICE_HANDLE IoTHubTransport_AMQP_Common_Register(TRANSPORT_LL_HANDLE ha
                     DEVICE_CONFIG device_config;
                     memset(&device_config, 0, sizeof(DEVICE_CONFIG));
                     device_config.iothub_host_fqdn = (char*)STRING_c_str(transport_instance->iothub_host_fqdn);
-                    device_config.authorization_module = transport_instance->authorization_module;
+                    device_config.authorization_module = device->authorization_module;
 
                     // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_072: [The configuration for device_create shall be set according to the authentication preferred by IOTHUB_DEVICE_CONFIG]
                     device_config.authentication_mode = (device->deviceKey != NULL || device->deviceSasToken != NULL ? DEVICE_AUTH_MODE_CBS : DEVICE_AUTH_MODE_X509);
