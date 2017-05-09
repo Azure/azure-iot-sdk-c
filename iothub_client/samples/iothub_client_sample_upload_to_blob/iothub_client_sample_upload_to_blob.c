@@ -31,7 +31,7 @@ and removing calls to _DoWork will yield the same results. */
 /*String containing Hostname, Device Id & Device Key in the format:                         */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessSignature=<device_sas_token>"    */
-static const char* connectionString = "<<device connection string>>";
+static const char* connectionString = "HostName=MarkRadHub1.azure-devices.net;DeviceId=TestDevice1;SharedAccessKey=S25yVuoWbt8kDc/0xxxF06ovWyN8m3SqRlhT4mHaE7Q=";
 
 #define HELLO_WORLD "Hello World from IoTHubClient_LL_UploadToBlob"
 
@@ -59,7 +59,7 @@ void iothub_client_sample_upload_to_blob_run(void)
             }
             else
             {
-                if (IoTHubClient_LL_UploadToBlob(iotHubClientHandle, "hello_world.txt", (const unsigned char*)HELLO_WORLD, sizeof(HELLO_WORLD) - 1) != IOTHUB_CLIENT_OK)
+                if (IoTHubClient_LL_UploadToBlob(iotHubClientHandle, "subdir/hello_world.txt", (const unsigned char*)HELLO_WORLD, sizeof(HELLO_WORLD) - 1) != IOTHUB_CLIENT_OK)
                 {
                     (void)printf("hello world failed to upload\n");
                 }
