@@ -64,6 +64,7 @@ if(WIN32)
             iothub_client
             iothub_service_client
             iothub_client_mqtt_transport
+            iothub_client_mqtt_ws_transport
             rpcrt4
         )
         linkMqttLibrary(${theseTestsName}_dll)
@@ -76,6 +77,7 @@ if(WIN32)
             iothub_client
             iothub_service_client
             iothub_client_mqtt_transport
+            iothub_client_mqtt_ws_transport
             rpcrt4
         )
         linkMqttLibrary(${theseTestsName}_exe)
@@ -110,6 +112,7 @@ else()
             iothub_service_client
             aziotsharedutil
             iothub_client_mqtt_transport
+            iothub_client_mqtt_ws_transport
         )
         linkMqttLibrary(${theseTestsName}_exe)
     endif()

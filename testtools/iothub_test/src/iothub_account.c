@@ -298,7 +298,7 @@ static int createX509ConnectionString(IOTHUB_ACCOUNT_INFO* accountInfo, char** c
     return result;
 }
 
-static int provisionDevice(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_ACCOUNT_AUTH_METTHOD method, IOTHUB_PROVISIONED_DEVICE* deviceToProvision) {
+static int provisionDevice(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_ACCOUNT_AUTH_METHOD method, IOTHUB_PROVISIONED_DEVICE* deviceToProvision) {
 
     int result;
     char* deviceId = NULL;
@@ -417,7 +417,7 @@ static int provisionDevice(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_ACCOUNT_AUTH
     return result;
 }
 
-static int provisionDevices(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_ACCOUNT_AUTH_METTHOD method, IOTHUB_PROVISIONED_DEVICE** devicesToProvision, size_t number_of_devices)
+static int provisionDevices(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_ACCOUNT_AUTH_METHOD method, IOTHUB_PROVISIONED_DEVICE** devicesToProvision, size_t number_of_devices)
 {
     int result;
     size_t iterator;
