@@ -177,13 +177,22 @@ static char *malloc_and_fill_reported_payload(const char *string, int aint)
     return retValue;
 }
 
-void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACCOUNT_AUTH_METTHOD accountAuthMethod)
 {
     // arrange
     IOTHUB_ACCOUNT_INFO_HANDLE iothubAcctInfo = IoTHubAccount_Init();
     ASSERT_IS_NOT_NULL_WITH_MSG(iothubAcctInfo, "IoTHubAccount_Init failed");
 
-    IOTHUB_PROVISIONED_DEVICE* deviceToUse = IoTHubAccount_GetSASDevice(iothubAcctInfo);
+    IOTHUB_PROVISIONED_DEVICE* deviceToUse;
+    if (accountAuthMethod == IOTHUB_ACCOUNT_AUTH_X509)
+    {
+        deviceToUse = IoTHubAccount_GetX509Device(iothubAcctInfo);
+    }
+    else
+    {
+        deviceToUse = IoTHubAccount_GetSASDevice(iothubAcctInfo);
+    }
+	
     DEVICE_REPORTED_DATA *device = device_reported_init();
     ASSERT_IS_NOT_NULL_WITH_MSG(device, "failed to create the device client data");
 
@@ -196,14 +205,14 @@ void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &trace);
     (void)IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates);
 
-    if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509) {
+    if (accountAuthMethod == IOTHUB_ACCOUNT_AUTH_X509) 
+    {
         IOTHUB_CLIENT_RESULT result;
         result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
         ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
         result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
         ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
     }
-
 
     // generate the payload
     char *buffer = malloc_and_fill_reported_payload(device->string_property, device->integer_property);
@@ -386,13 +395,21 @@ static void device_desired_deinit(DEVICE_DESIRED_DATA *device)
     }
 }
 
-void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACCOUNT_AUTH_METTHOD accountAuthMethod)
 {
     // arrange
     IOTHUB_ACCOUNT_INFO_HANDLE iothubAcctInfo = IoTHubAccount_Init();
     ASSERT_IS_NOT_NULL_WITH_MSG(iothubAcctInfo, "IoTHubAccount_Init failed");
 
-    IOTHUB_PROVISIONED_DEVICE* deviceToUse = IoTHubAccount_GetSASDevice(iothubAcctInfo);
+    IOTHUB_PROVISIONED_DEVICE* deviceToUse;
+    if (accountAuthMethod == IOTHUB_ACCOUNT_AUTH_X509)
+    {
+        deviceToUse = IoTHubAccount_GetX509Device(iothubAcctInfo);
+    }
+    else
+    {
+        deviceToUse = IoTHubAccount_GetSASDevice(iothubAcctInfo);
+    }
 
     DEVICE_DESIRED_DATA *device = device_desired_init();
     ASSERT_IS_NOT_NULL_WITH_MSG(device, "failed to create the device client data");
@@ -406,7 +423,8 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     (void) IoTHubClient_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &trace);
     (void) IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates);
 
-    if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509) {
+    if (accountAuthMethod == IOTHUB_ACCOUNT_AUTH_X509)
+    {
         IOTHUB_CLIENT_RESULT result;
         result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
         ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");

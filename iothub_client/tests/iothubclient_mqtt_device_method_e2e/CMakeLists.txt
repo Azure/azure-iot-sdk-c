@@ -42,6 +42,7 @@ if(WIN32)
 			iothub_test
 			iothub_client
 			iothub_client_mqtt_transport
+			iothub_client_mqtt_ws_transport
 			iothub_service_client
 			aziotsharedutil
 			rpcrt4			
@@ -56,6 +57,7 @@ if(WIN32)
 			iothub_test
 			iothub_client
 			iothub_client_mqtt_transport
+			iothub_client_mqtt_ws_transport
 			iothub_service_client
 			aziotsharedutil
 			rpcrt4			
@@ -91,6 +93,7 @@ else()
 			iothub_test
 			iothub_client
 			iothub_client_mqtt_transport
+			iothub_client_mqtt_ws_transport
 			iothub_service_client
 			aziotsharedutil
 		)
