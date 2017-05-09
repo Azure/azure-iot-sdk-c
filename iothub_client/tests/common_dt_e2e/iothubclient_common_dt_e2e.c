@@ -196,7 +196,7 @@ void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB
     {
         deviceToUse = IoTHubAccount_GetSASDevice(g_iothubAcctInfo);
     }
-    
+
     DEVICE_REPORTED_DATA *device = device_reported_init();
     ASSERT_IS_NOT_NULL_WITH_MSG(device, "failed to create the device client data");
 
