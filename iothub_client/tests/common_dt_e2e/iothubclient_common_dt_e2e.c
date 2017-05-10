@@ -452,6 +452,8 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
     char *deviceTwinData = IoTHubDeviceTwin_UpdateTwin(serviceClientDeviceTwinHandle, deviceToUse->deviceId, buffer);
     ASSERT_IS_NOT_NULL_WITH_MSG(deviceTwinData, "IoTHubDeviceTwin_UpdateTwin failed");
 
+    ThreadAPI_Sleep(3000);
+
     JSON_Value *root_value = NULL;
     const char *string_property = NULL;
     int integer_property = 0;
