@@ -34,8 +34,6 @@ extern "C"
 
     static const char* OPTION_PRODUCT_INFO = "product_info";
 
-    static const char* OPTION_NET_INT_MAC_ADDRESS = "net_interface_mac_address";
-
 #ifdef __cplusplus
 }
 #endif
