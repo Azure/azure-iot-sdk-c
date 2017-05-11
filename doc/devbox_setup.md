@@ -19,11 +19,11 @@ This document describes how to prepare your development environment to use the *
 - Install [CMake]. Make sure it is in your PATH by typing `cmake -version` from a command prompt. CMake will be used to create Visual Studio projects to build libraries and samples.
 
 - Locate the tag name for the [latest release][latest-release] of the SDK.
-  > Our release tag names are date values in `yyyy-mm-dd` format.
+  > Our release tag names are date values in `release_yyyy_mm_dd` format.
 
 - Clone the latest release of SDK to your local machine using the tag name you found:
   ```
-  git clone -b <yyyy-mm-dd> --recursive https://github.com/Azure/azure-iot-sdk-c.git
+  git clone -b release_<yyyy_mm_dd> --recursive https://github.com/Azure/azure-iot-sdk-c.git
   ```
 
   > The `--recursive` argument instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
@@ -132,11 +132,11 @@ This section describes how to set up a development environment for the C SDK on 
   > For information about how to upgrade your version of gcc on Ubuntu 14.04, read [How do I use the latest GCC 4.9 on Ubuntu 14.04?](http://askubuntu.com/questions/466651/how-do-i-use-the-latest-gcc-4-9-on-ubuntu-14-04).
 
 - Locate the tag name for the [latest release][latest-release] of the SDK.
-  > Our release tag names are date values in `yyyy-mm-dd` format.
+  > Our release tag names are date values in `release_yyyy_mm_dd` format.
 
 - Clone the latest release of SDK to your local machine using the tag name you found:
   ```
-  git clone -b <yyyy-mm-dd> --recursive https://github.com/Azure/azure-iot-sdk-c.git
+  git clone -b release_<yyyy_mm_dd> --recursive https://github.com/Azure/azure-iot-sdk-c.git
   ```
   > The `--recursive` argument instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
 
@@ -187,11 +187,11 @@ We've tested the device SDK for C on macOS Sierra, with XCode version 8.
   ```
 
 - Locate the tag name for the [latest release][latest-release] of the SDK.
-  > Our release tag names are date values in `yyyy-mm-dd` format.
+  > Our release tag names are date values in `release_yyyy_mm_dd` format.
 
 - Clone the latest release of SDK to your local machine using the tag name you found:
   ```
-  git clone -b <yyyy-mm-dd> --recursive https://github.com/Azure/azure-iot-sdk-c.git
+  git clone -b release_<yyyy_mm_dd> --recursive https://github.com/Azure/azure-iot-sdk-c.git
   ```
   > The `--recursive` argument instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
 
@@ -237,11 +237,11 @@ To build the SDK:
 - Install [CMake]. Make sure it is in your PATH by typing `cmake -version` from a command prompt. CMake will be used to create Visual Studio projects to build libraries and samples.
 
 - Locate the tag name for the [latest release][latest-release] of the SDK.
-  > Our release tag names are date values in `yyyy-mm-dd` format.
+  > Our release tag names are date values in `release_yyyy_mm_dd` format.
 
 - Clone the latest release of SDK to your local machine using the tag name you found:
   ```
-  git clone -b <yyyy-mm-dd> --recursive https://github.com/Azure/azure-iot-sdk-c.git
+  git clone -b release_<yyyy_mm_dd> --recursive https://github.com/Azure/azure-iot-sdk-c.git
   ```
 
   > The `--recursive` argument instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
