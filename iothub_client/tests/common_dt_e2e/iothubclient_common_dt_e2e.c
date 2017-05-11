@@ -257,7 +257,7 @@ void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB
     }
     else
     {
-        ASSERT_IS_TRUE_WITH_MSG(status_code < 300, "SnedReported status_code is an error");
+        ASSERT_IS_TRUE_WITH_MSG(status_code < 300, "SendReported status_code is an error");
 
         const char *connectionString = IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo);
         IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(connectionString);
