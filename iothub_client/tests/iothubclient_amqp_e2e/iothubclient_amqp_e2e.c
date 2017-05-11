@@ -13,6 +13,7 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2e)
     {
         TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
         e2e_init();
+        g_e2e_test_options.set_mac_address = true;
     }
 
     TEST_SUITE_CLEANUP(TestClassCleanup)

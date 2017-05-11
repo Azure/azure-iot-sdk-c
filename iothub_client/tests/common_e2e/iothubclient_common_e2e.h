@@ -11,6 +11,12 @@
 extern "C" {
 #endif
 
+typedef struct E2E_TEST_OPTIONS_TAG
+{
+    bool set_mac_address;
+} E2E_TEST_OPTIONS;
+
+extern E2E_TEST_OPTIONS g_e2e_test_options;
 extern IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo;
 
 extern void e2e_init(void);
