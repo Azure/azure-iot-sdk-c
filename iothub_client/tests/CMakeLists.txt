@@ -4,7 +4,7 @@
 cmake_minimum_required(VERSION 2.8.12)
 
 if(${LINUX})
-   add_definitions(-DLINUX)
+   add_definitions(-DAZIOT_LINUX)
 endif()
 
 #this is CMakeLists for iothub_client tests folder

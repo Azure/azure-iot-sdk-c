@@ -91,7 +91,7 @@ static XIO_HANDLE getWebSocketsIOTransport(const char* fqdn, const AMQP_TRANSPOR
                 /* Codes_SRS_IOTHUBTRANSPORTAMQP_WS_01_013: [ - If `amqp_transport_proxy_options` is NULL, `underlying_io_interface` shall be set to NULL. ]*/
                 tls_io_config.underlying_io_interface = NULL;
                 /* Codes_SRS_IOTHUBTRANSPORTAMQP_WS_01_014: [ - If `amqp_transport_proxy_options` is NULL `underlying_io_parameters` shall be set to NULL. ]*/
-                tls_io_config.underlying_io_interface = NULL;
+                tls_io_config.underlying_io_parameters = NULL;
             }
         }
 

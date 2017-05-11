@@ -14,7 +14,7 @@
 #include "umock_c.h"
 #endif
 
-#ifdef LINUX
+#ifdef AZIOT_LINUX
 #include <unistd.h>
 #include <net/if.h>
 #include <sys/ioctl.h>
@@ -36,6 +36,7 @@
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/platform.h"
+#include "azure_c_shared_utility/shared_util_options.h"
 #include "../../../certs/certs.h"
 
 #include "iothubclient_common_e2e.h"
@@ -339,7 +340,7 @@ static void EventData_Destroy(EXPECTED_SEND_DATA* data)
     }
 }
 
-#ifdef LINUX
+#ifdef AZIOT_LINUX
 static char* get_target_mac_address()
 {
     char* result;
@@ -415,7 +416,7 @@ static char* get_target_mac_address()
     
     return result;
 }
-#endif //LINUX
+#endif //AZIOT_LINUX
 
 
 void e2e_init(void)
@@ -464,7 +465,7 @@ IOTHUB_CLIENT_HANDLE client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUs
 
     (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_PRODUCT_INFO, "MQTT_E2E/1.1.12");
 
-#ifdef LINUX
+#ifdef AZIOT_LINUX
     if (g_e2e_test_options.set_mac_address)
     {
         char* mac_address = get_target_mac_address();
@@ -476,7 +477,7 @@ IOTHUB_CLIENT_HANDLE client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUs
         LogInfo("Target MAC ADDRESS: %s", mac_address);
         free(mac_address);
     }
-#endif //LINUX
+#endif //AZIOT_LINUX
 
     return iotHubClientHandle;
 }

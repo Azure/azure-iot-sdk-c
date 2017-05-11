@@ -23,21 +23,33 @@ BEGIN_TEST_SUITE(iothubclient_amqp_ws_e2e)
 
     TEST_FUNCTION(IoTHub_AMQP_SendEvent_e2e_sas)
     {
+#ifdef AZIOT_LINUX
+        g_e2e_test_options.set_mac_address = false;
+#endif
         e2e_send_event_test_sas(AMQP_Protocol_over_WebSocketsTls);
     }
 
     TEST_FUNCTION(IoTHub_AMQP_RecvMessage_E2ETest_sas)
     {
+#ifdef AZIOT_LINUX
+        g_e2e_test_options.set_mac_address = true;
+#endif
         e2e_recv_message_test_sas(AMQP_Protocol_over_WebSocketsTls);
     }
 
     TEST_FUNCTION(IoTHub_AMQP_SendEvent_e2e_x509)
     {
+#ifdef AZIOT_LINUX
+        g_e2e_test_options.set_mac_address = true;
+#endif
         e2e_send_event_test_x509(AMQP_Protocol_over_WebSocketsTls);
     }
 
     TEST_FUNCTION(IoTHub_AMQP_RecvMessage_E2ETest_x509)
     {
+#ifdef AZIOT_LINUX
+        g_e2e_test_options.set_mac_address = false;
+#endif
         e2e_recv_message_test_x509(AMQP_Protocol_over_WebSocketsTls);
     }
 
