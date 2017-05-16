@@ -3,8 +3,7 @@
     <id>Microsoft.Azure.IoTHub.MqttTransport</id>
     <version>1.1.15</version>
     <title>Microsoft Azure IoTHub MQTT transport</title>
-    <authors>Microsoft Corp</authors>
-    <owners>Azure-IoT</owners>
+    <authors>Microsoft</authors>
     <licenseUrl>https://github.com/Azure/azure-iot-sdk-c/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/Azure/azure-iot-sdk-c</projectUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
@@ -12,7 +11,7 @@
     <iconUrl>http://go.microsoft.com/fwlink/?LinkID=288890</iconUrl>
     <summary>This nuget package can be used to connect to IoTHub over MQTT.</summary>
     <releaseNotes/>
-    <copyright>Copyright 2015</copyright>
+    <copyright>© Microsoft Corporation. All rights reserved.</copyright>
     <tags>MQTT Microsoft Azure IoT Native x86 x64 arm native package</tags>
     <dependencies>
       <dependency id="Microsoft.Azure.IoTHub.IoTHubClient" version="1.1.15"/>
