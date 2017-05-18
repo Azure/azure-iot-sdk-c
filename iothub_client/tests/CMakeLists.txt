@@ -3,6 +3,29 @@
 
 cmake_minimum_required(VERSION 2.8.12)
 
+
+# addSupportedTransportsToTest determines transport dependencies based on which transports are enabled via cmake and
+# sets appropriate TEST_xyz #ifdef's so tests themselves are compiled against appropriate targets.
+function(addSupportedTransportsToTest whatExecutableIsBuilding)
+    if(${use_mqtt})
+    	linkMqttLibrary(${whatExecutableIsBuilding})
+    	target_link_libraries(${whatExecutableIsBuilding} umqtt iothub_client_mqtt_transport iothub_client_mqtt_ws_transport)
+    	add_definitions(-DTEST_MQTT)
+    endif()
+
+    if(${use_amqp})
+    	target_link_libraries(${whatExecutableIsBuilding} iothub_client_amqp_transport iothub_client_amqp_ws_transport)
+        linkUAMQP(${whatExecutableIsBuilding})
+    	add_definitions(-DTEST_AMQP)
+    endif()
+
+    if(${use_http})
+    	target_link_libraries(${whatExecutableIsBuilding} iothub_client_http_transport)
+    	add_definitions(-DTEST_HTTP)
+    endif()
+endfunction()
+
+
 #this is CMakeLists for iothub_client tests folder
 add_unittest_directory(iothub_client_authorization_ut)
 add_unittest_directory(iothubclient_ll_ut)
@@ -15,6 +38,8 @@ add_unittest_directory(iothubmessage_ut)
 add_unittest_directory(iothubtransport_ut)
 add_unittest_directory(blob_ut)
 add_unittest_directory(iothub_client_retry_control_ut)
+
+add_e2etest_directory(iothubclient_uploadtoblob_e2e)
 
 if(${use_http})
     add_unittest_directory(iothubtransporthttp_ut)
