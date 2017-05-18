@@ -34,6 +34,8 @@
 
 #include "iothubclient_common_device_method_e2e.h"
 
+#define DEVICE_METHOD_SUB_WAIT_TIME_MS    (5 * 1000)
+
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 TEST_DEFINE_ENUM_TYPE(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_RESULT_VALUES);
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_CONNECTION_STATUS, IOTHUB_CLIENT_CONNECTION_STATUS_VALUES);
@@ -293,7 +295,7 @@ void test_device_method_with_string_ex(IOTHUB_PROVISIONED_DEVICE** devicesToUse,
     }
 
     // Wait for the method to subscribe
-    ThreadAPI_Sleep(1 * 1000);
+    ThreadAPI_Sleep(DEVICE_METHOD_SUB_WAIT_TIME_MS);
     
     iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo));
     ASSERT_IS_NOT_NULL_WITH_MSG(iotHubServiceClientHandle, "Could not create service client handle");
@@ -398,7 +400,7 @@ void test_device_method_with_string(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTH
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_CONNECTION_STATUS, IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, g_conn_info.conn_status, "Device Not connected");
 
     // Wait for the method to subscribe
-    ThreadAPI_Sleep(1 * 1000);
+    ThreadAPI_Sleep(DEVICE_METHOD_SUB_WAIT_TIME_MS);
 
     iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo));
     ASSERT_IS_NOT_NULL_WITH_MSG(iotHubServiceClientHandle, "Could not create service client handle");
@@ -476,7 +478,7 @@ void test_device_method_calls_upload(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOT
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device method callback");
 
     // Wait for the method to subscribe
-    ThreadAPI_Sleep(1 * 1000);
+    ThreadAPI_Sleep(DEVICE_METHOD_SUB_WAIT_TIME_MS);
 
     iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo));
     ASSERT_IS_NOT_NULL_WITH_MSG(iotHubServiceClientHandle, "Could not create service client handle");
@@ -490,7 +492,7 @@ void test_device_method_calls_upload(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOT
     IOTHUB_DEVICE_METHOD_RESULT invokeResult = IoTHubDeviceMethod_Invoke(serviceClientDeviceMethodHandle, deviceToUse->deviceId, METHOD_NAME, payload, TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
 
     // yield
-    ThreadAPI_Sleep(1 * 1000);
+    ThreadAPI_Sleep(DEVICE_METHOD_SUB_WAIT_TIME_MS);
 
     continue_running = true;
     beginOperation = time(NULL);
@@ -606,7 +608,7 @@ static void test_device_method_with_string_svc_fault_ctrl(IOTHUB_PROVISIONED_DEV
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_CONNECTION_STATUS, IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, g_conn_info.conn_status, "Device Not connected");
 
     // Wait for the method to subscribe
-    ThreadAPI_Sleep(1 * 1000);
+    ThreadAPI_Sleep(DEVICE_METHOD_SUB_WAIT_TIME_MS);
 
     iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo));
     ASSERT_IS_NOT_NULL_WITH_MSG(iotHubServiceClientHandle, "Could not create service client handle");

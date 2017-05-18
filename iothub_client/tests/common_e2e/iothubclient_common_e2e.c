@@ -47,7 +47,7 @@ static size_t g_iotHubTestId = 0;
 IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo = NULL;
 
 #define IOTHUB_COUNTER_MAX           10
-#define MAX_CLOUD_TRAVEL_TIME        60.0
+#define MAX_CLOUD_TRAVEL_TIME        120.0
 // Wait for 60 seconds for the service to tell us that an event was received.
 #define MAX_SERVICE_EVENT_WAIT_TIME_SECONDS 60
 // When waiting for events, start listening for events that happened up to 60 seconds in the past.

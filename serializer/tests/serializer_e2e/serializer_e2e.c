@@ -51,7 +51,7 @@ static IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo = NULL;
 
 /*the following time expressed in seconds denotes the maximum "cloud" travel time - the time from a moment some data reaches the cloud until that data is available for a consumer*/
 #define MAX_CLOUD_TRAVEL_TIME 60.0
-
+#define MAX_TWIN_CLOUD_TRAVEL_TIME 120.0
 #define TIME_DATA_LENGTH    32
 
 TEST_DEFINE_ENUM_TYPE(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
@@ -1006,7 +1006,7 @@ BEGIN_TEST_SUITE(serializer_e2e)
         /*step 4: wait for the callback to be called (it needs to indicate success)*/
         /*time bound it to 1 minute*/
         time_t begin = time(NULL);
-        while (difftime(time(NULL), begin)<60.0)
+        while (difftime(time(NULL), begin)<MAX_TWIN_CLOUD_TRAVEL_TIME)
         {
             (void)Lock(lock);
             if (was_my_IOTHUB_CLIENT_REPORTED_STATE_CALLBACK_called)
