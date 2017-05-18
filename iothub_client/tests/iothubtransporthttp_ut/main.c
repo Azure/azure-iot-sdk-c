@@ -6,6 +6,6 @@
 int main(void)
 {
 	size_t failedTestCount = 0;
-	RUN_TEST_SUITE(iothubtransporthttp, failedTestCount);
+	RUN_TEST_SUITE(iothubtransporthttp_ut, failedTestCount);
 	return failedTestCount;
 }

@@ -5,21 +5,30 @@
 cmake_minimum_required(VERSION 2.8.11)
 
 if(NOT ${use_http})
-	message(FATAL_ERROR "iothubtransporthttp_ut being generated without HTTP support")
+    message(FATAL_ERROR "iothubtransporthttp_ut being generated without HTTP support")
 endif()
 
-compileAsC99()
+compileAsC11()
+
 set(theseTestsName iothubtransporthttp_ut)
-set(${theseTestsName}_cpp_files
-${theseTestsName}.cpp
+
+set(${theseTestsName}_test_files
+    ${theseTestsName}.c
 )
 
+include_directories(${SHARED_UTIL_REAL_TEST_FOLDER})
+
 set(${theseTestsName}_c_files
-../../src/iothubtransporthttp.c
-${SHARED_UTIL_SRC_FOLDER}/crt_abstractions.c
+    ../../src/iothubtransporthttp.c
+    ${SHARED_UTIL_REAL_TEST_FOLDER}/real_crt_abstractions.c
+    ${SHARED_UTIL_REAL_TEST_FOLDER}/real_buffer.c
+    ${SHARED_UTIL_REAL_TEST_FOLDER}/real_strings.c
+    ${SHARED_UTIL_REAL_TEST_FOLDER}/real_vector.c
+    real_doublylinkedlist.c
 )
 
 set(${theseTestsName}_h_files
+    ${SHARED_UTIL_REAL_TEST_FOLDER}/real_strings.h
 )
 
-build_test_artifacts(${theseTestsName} ON)
+build_c_test_artifacts(${theseTestsName} ON "tests/UnitTests")
