@@ -804,6 +804,7 @@ static STRING_HANDLE addPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_me
     const char* const* propertyKeys;
     const char* const* propertyValues;
     size_t propertyCount;
+    size_t index = 0;
 
     // Construct Properties
     MAP_HANDLE properties_map = IoTHubMessage_Properties(iothub_message_handle);
@@ -819,15 +820,46 @@ static STRING_HANDLE addPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_me
         {
             if (propertyCount != 0)
             {
-                size_t index = 0;
                 for (index = 0; index < propertyCount && result != NULL; index++)
                 {
                     if (STRING_sprintf(result, "%s=%s%s", propertyKeys[index], propertyValues[index], propertyCount - 1 == index ? "" : PROPERTY_SEPARATOR) != 0)
                     {
+                        LogError("Failed construting property string.");
                         STRING_delete(result);
                         result = NULL;
                     }
                 }
+            }
+        }
+    }
+
+    /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_052: [ IoTHubTransport_MQTT_Common_DoWork shall check for the CorrelationId property and if found add the value as a system property in the format of $.cid=<id> ] */
+    if (result != NULL)
+    {
+        const char* correlation_id = IoTHubMessage_GetCorrelationId(iothub_message_handle);
+        if (correlation_id != NULL)
+        {
+            if (STRING_sprintf(result, "%s%%24.cid=%s", index == 0 ? "" : PROPERTY_SEPARATOR, correlation_id) != 0)
+            {
+                LogError("Failed setting correlation_id.");
+                STRING_delete(result);
+                result = NULL;
+            }
+            index++;
+        }
+    }
+
+    /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_053: [ IoTHubTransport_MQTT_Common_DoWork shall check for the MessageId property and if found add the value as a system property in the format of $.mid=<id> ] */
+    if (result != NULL)
+    {
+        const char* msg_id = IoTHubMessage_GetMessageId(iothub_message_handle);
+        if (msg_id != NULL)
+        {
+            if (STRING_sprintf(result, "%s%%24.mid=%s", index == 0 ? "" : PROPERTY_SEPARATOR, msg_id) != 0)
+            {
+                LogError("Failed setting correlation_id.");
+                STRING_delete(result);
+                result = NULL;
             }
         }
     }

@@ -62,6 +62,7 @@ TRANSPORT_HANDLE  IoTHubTransport_Create(IOTHUB_CLIENT_TRANSPORT_PROVIDER protoc
             upperConfig.protocolGatewayHostName = NULL;
 
             IOTHUBTRANSPORT_CONFIG transportLLConfig;
+            memset(&transportLLConfig, 0, sizeof(IOTHUBTRANSPORT_CONFIG));
             transportLLConfig.upperConfig = &upperConfig;
             transportLLConfig.waitingToSend = NULL;
 

@@ -230,6 +230,7 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
             else if (client_config != NULL)
             {
                 IOTHUBTRANSPORT_CONFIG lowerLayerConfig;
+                memset(&lowerLayerConfig, 0, sizeof(IOTHUBTRANSPORT_CONFIG));
                 /*Codes_SRS_IOTHUBCLIENT_LL_02_006: [IoTHubClient_LL_Create shall populate a structure of type IOTHUBTRANSPORT_CONFIG with the information from config parameter and the previous DLIST and shall pass that to the underlying layer _Create function.]*/
                 lowerLayerConfig.upperConfig = client_config;
                 lowerLayerConfig.waitingToSend = &(result->waitingToSend);
@@ -355,6 +356,7 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
                         deviceConfig.deviceId = config->deviceId;
                         deviceConfig.deviceKey = config->deviceKey;
                         deviceConfig.deviceSasToken = config->deviceSasToken;
+                        deviceConfig.authorization_module = result->authorization_module;
 
                         /*Codes_SRS_IOTHUBCLIENT_LL_17_008: [IoTHubClient_LL_Create shall call the transport _Register function with a populated structure of type IOTHUB_DEVICE_CONFIG and waitingToSend list.] */
                         if ((result->deviceHandle = result->IoTHubTransport_Register(result->transportHandle, &deviceConfig, result, &(result->waitingToSend))) == NULL)

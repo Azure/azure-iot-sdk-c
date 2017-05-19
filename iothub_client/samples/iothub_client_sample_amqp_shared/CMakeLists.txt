@@ -14,7 +14,6 @@ set(iothub_client_sample_amqp_shared_c_files
 )
 
 set(iothub_client_sample_amqp_shared_h_files
-	iothub_client_sample_amqp_shared.h
 )
 
 IF(WIN32)

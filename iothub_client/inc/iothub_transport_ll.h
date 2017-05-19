@@ -19,6 +19,7 @@ typedef void* METHOD_HANDLE;
 #include "azure_c_shared_utility/doublylinkedlist.h"
 #include "azure_c_shared_utility/strings.h"
 #include "iothub_message.h"
+#include "iothub_client_authorization.h"
 
 struct MESSAGE_DISPOSITION_CONTEXT_TAG;
 typedef struct MESSAGE_DISPOSITION_CONTEXT_TAG* MESSAGE_DISPOSITION_CONTEXT_HANDLE;
@@ -47,6 +48,7 @@ extern "C"
         /** @brief	The device SAS used to authenticate the device in place of using the device key. */
         const char* deviceSasToken;
 
+        IOTHUB_AUTHORIZATION_HANDLE authorization_module; // with either SAS Token, x509 Certs, and Device SAS Token
     } IOTHUB_DEVICE_CONFIG;
 
     typedef STRING_HANDLE (*pfIoTHubTransport_GetHostname)(TRANSPORT_LL_HANDLE handle);

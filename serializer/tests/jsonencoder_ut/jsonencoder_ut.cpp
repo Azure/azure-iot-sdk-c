@@ -11,7 +11,6 @@
 #include "micromockcharstararenullterminatedstrings.h"
 #include <stdexcept>
 #include "multitree.h"
-#include "azure_c_shared_utility/buffer_.h"
 
 /*this is what we test*/
 #include "jsonencoder.h"
@@ -103,7 +102,6 @@ void wchar_ptr_ToString(char* string, size_t bufferSize, const wchar_t* val)
 namespace BASEIMPLEMENTATION
 {
 #include "strings.c"
-#include "buffer.c"
 };
 
 //
@@ -565,19 +563,6 @@ public:
 
     MOCK_STATIC_METHOD_1(, const char*, STRING_c_str, STRING_HANDLE, s)
     MOCK_METHOD_END(const char*, BASEIMPLEMENTATION::STRING_c_str(s))
-
-    /*BUFFER*/
-    MOCK_STATIC_METHOD_0(, BUFFER_HANDLE, BUFFER_new)
-    MOCK_METHOD_END(BUFFER_HANDLE, BASEIMPLEMENTATION::BUFFER_new())
-    MOCK_STATIC_METHOD_1(, void, BUFFER_delete, BUFFER_HANDLE, b)
-        BASEIMPLEMENTATION::BUFFER_delete(b);
-    MOCK_VOID_METHOD_END()
-    MOCK_STATIC_METHOD_2(, int, BUFFER_enlarge, BUFFER_HANDLE, b, size_t, enlargeSize)
-    MOCK_METHOD_END(int, BASEIMPLEMENTATION::BUFFER_enlarge(b, enlargeSize))
-    MOCK_STATIC_METHOD_2(, int, BUFFER_content, BUFFER_HANDLE, b, const unsigned char**, content)
-    MOCK_METHOD_END(int, BASEIMPLEMENTATION::BUFFER_content(b, content))
-    MOCK_STATIC_METHOD_2(, int, BUFFER_size, BUFFER_HANDLE, b, size_t*, size)
-    MOCK_METHOD_END(int, BASEIMPLEMENTATION::BUFFER_size(b, size))
 };
 
 DECLARE_GLOBAL_MOCK_METHOD_2(CJSONMocks, , MULTITREE_HANDLE, MultiTree_Create, MULTITREE_CLONE_FUNCTION, cloneFunction, MULTITREE_FREE_FUNCTION, freeFunction);

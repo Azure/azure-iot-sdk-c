@@ -170,6 +170,10 @@ void iothub_client_sample_mqtt_run(void)
                         }
                         else
                         {
+
+                            (void)IoTHubMessage_SetMessageId(messages[iterator].messageHandle, "MSG_ID");
+                            (void)IoTHubMessage_SetCorrelationId(messages[iterator].messageHandle, "CORE_ID");
+
                             messages[iterator].messageTrackingId = iterator;
                             MAP_HANDLE propMap = IoTHubMessage_Properties(messages[iterator].messageHandle);
                             (void)sprintf_s(propText, sizeof(propText), temperature > 28 ? "true" : "false");
@@ -187,6 +191,7 @@ void iothub_client_sample_mqtt_run(void)
                                 (void)printf("IoTHubClient_LL_SendEventAsync accepted message [%d] for transmission to IoT Hub.\r\n", (int)iterator);
                             }
                         }
+
                     }
                     IoTHubClient_LL_DoWork(iotHubClientHandle);
                     ThreadAPI_Sleep(1);
