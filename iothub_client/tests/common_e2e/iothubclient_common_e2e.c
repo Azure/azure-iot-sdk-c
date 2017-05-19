@@ -36,6 +36,7 @@
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/platform.h"
+#include "azure_c_shared_utility/shared_util_options.h"
 #include "../../../certs/certs.h"
 
 #include "iothubclient_common_e2e.h"
