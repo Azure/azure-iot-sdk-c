@@ -2950,6 +2950,10 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_device_twin_succeed)
     STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG)).SetReturn(1);
 
     STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, 0));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
+        .IgnoreArgument_handle();
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
+        .IgnoreArgument_handle();
     STRICT_EXPECTED_CALL(test_device_twin_callback(DEVICE_TWIN_UPDATE_COMPLETE, NULL, 0, NULL));
 
     STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG));
