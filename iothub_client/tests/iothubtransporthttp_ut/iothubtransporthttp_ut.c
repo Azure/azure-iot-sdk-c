@@ -3482,6 +3482,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"));
@@ -3519,6 +3520,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
     ))
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
@@ -3585,6 +3587,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_asy
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
     ))
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -3620,6 +3623,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_asy
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
     ))
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
@@ -3673,6 +3677,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_asy
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
     ))
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -3714,6 +3719,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_asy
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
     ))
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
@@ -3770,12 +3776,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_asy
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
     ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -3840,10 +3841,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_asy
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
     ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
@@ -3938,12 +3936,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_2device_with_2nd_empty_waiti
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -4023,10 +4016,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_2device_with_2nd_empty_waiti
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
     STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
@@ -4149,10 +4139,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_2devices_2nd_has_1_event_item_as_string
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(6)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &httpStatus200, sizeof(httpStatus200));
 
     /*once the event has been succesfull...*/
@@ -4217,12 +4204,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_2devices_2subscriptions_happy_path_succ
             IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
             IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
             ))
-            .IgnoreArgument(1)
-            .IgnoreArgument(2)
-            .IgnoreArgument(5)
-            .IgnoreArgument(7)
-            .IgnoreArgument(8)
-            .IgnoreArgument(9)
+            .IgnoreArgument_requestType()
             .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
         STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -4301,10 +4283,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_2devices_2subscriptions_happy_path_succ
             NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
             NULL                                                /*BUFFER_HANDLE responseContent))                              */
             ))
-            .IgnoreArgument(1)
-            .IgnoreArgument(2)
-            .IgnoreArgument(5)
-            .IgnoreArgument(7)
+            .IgnoreArgument_requestType()
             .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
         STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
@@ -4339,12 +4318,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_2devices_2subscriptions_happy_path_succ
             IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
             IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
             ))
-            .IgnoreArgument(1)
-            .IgnoreArgument(2)
-            .IgnoreArgument(5)
-            .IgnoreArgument(7)
-            .IgnoreArgument(8)
-            .IgnoreArgument(9)
+            .IgnoreArgument_requestType()
             .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
         STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -4423,10 +4397,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_2devices_2subscriptions_happy_path_succ
             NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
             NULL                                                /*BUFFER_HANDLE responseContent))                              */
             ))
-            .IgnoreArgument(1)
-            .IgnoreArgument(2)
-            .IgnoreArgument(5)
-            .IgnoreArgument(7)
+            .IgnoreArgument_requestType()
             .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
         STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
@@ -4488,12 +4459,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -4572,10 +4538,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
     STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
@@ -4637,12 +4600,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
             IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
             IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
             ))
-            .IgnoreArgument(1)
-            .IgnoreArgument(2)
-            .IgnoreArgument(5)
-            .IgnoreArgument(7)
-            .IgnoreArgument(8)
-            .IgnoreArgument(9)
+            .IgnoreArgument_requestType()
             .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
         STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -4721,10 +4679,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
             NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
             NULL                                                /*BUFFER_HANDLE responseContent))                              */
             ))
-            .IgnoreArgument(1)
-            .IgnoreArgument(2)
-            .IgnoreArgument(5)
-            .IgnoreArgument(7)
+            .IgnoreArgument_requestType()
             .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
         STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
@@ -4792,12 +4747,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -4876,10 +4826,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
     STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
@@ -4976,12 +4923,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -5060,10 +5002,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
     STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
@@ -5122,12 +5061,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -5205,10 +5139,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode404, sizeof(statusCode404));
 
     STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
@@ -5265,12 +5196,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -5349,10 +5275,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
+        .IgnoreArgument_requestType()
         .SetReturn(HTTPAPIEX_ERROR);
 
     STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
@@ -5409,12 +5332,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -5535,12 +5453,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -5658,12 +5571,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -5770,12 +5678,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -5880,12 +5783,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -5988,12 +5886,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -6091,12 +5984,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -6216,12 +6104,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -6299,10 +6182,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
     STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
@@ -6360,12 +6240,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -6443,10 +6318,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(4)
-        .IgnoreArgument(5)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode404, sizeof(statusCode404));
 
     STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
@@ -6504,12 +6376,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -6587,10 +6454,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode404, sizeof(statusCode404))
         .SetReturn(HTTPAPIEX_ERROR);
 
@@ -6648,12 +6512,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -6773,12 +6632,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -6896,12 +6750,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -7008,12 +6857,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -7118,12 +6962,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -7225,12 +7064,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -7327,12 +7161,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -7426,12 +7255,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -7491,10 +7315,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
     //act
@@ -7544,12 +7365,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -7603,12 +7419,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -7662,12 +7473,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -7721,12 +7527,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -7780,12 +7581,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -7839,12 +7635,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -7898,12 +7689,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode500, sizeof(statusCode500));
 
     //act
@@ -7953,12 +7739,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200))
         .SetReturn(HTTPAPIEX_ERROR);
 
@@ -8166,10 +7947,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_happy_path_succeeds)
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(6)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &httpStatus200, sizeof(httpStatus200));
 
     /*once the event has been succesfull...*/
@@ -8293,10 +8071,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_ht
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(6)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &httpStatus404, sizeof(httpStatus404));
 
     STRICT_EXPECTED_CALL(DList_AppendTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreAllArguments();
@@ -8419,10 +8194,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_HT
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(6)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &httpStatus200, sizeof(httpStatus200))
         .SetReturn(HTTPAPIEX_ERROR);
 
@@ -9304,10 +9076,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_almost255_happy_path_
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(6)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &httpStatus200, sizeof(httpStatus200));
 
     /*once the event has been succesfull...*/
@@ -9476,10 +9245,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_makes_1_batch_succee
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(6)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &httpStatus200, sizeof(httpStatus200));
 
     /*once the event has been succesfull...*/
@@ -9636,10 +9402,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_when_the_second_item
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(6)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &httpStatus200, sizeof(httpStatus200));
 
     /*once the event has been succesfull...*/
@@ -9803,10 +9566,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_when_the_second_item
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(6)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &httpStatus200, sizeof(httpStatus200));
 
     /*once the event has been succesfull...*/
@@ -9966,10 +9726,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_the_second_one_does_
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(6)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &httpStatus200, sizeof(httpStatus200));
 
     /*once the event has been succesfull...*/
@@ -10248,10 +10005,7 @@ void setupIrrelevantMocksForProperties(CIoTHubTransportHttpMocks *IOTHUB_MESSAGE
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(6)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &httpStatus200, sizeof(httpStatus200));
 
     /*once the event has been succesfull...*/
@@ -10559,10 +10313,7 @@ void setupIrrelevantMocksForProperties2(CIoTHubTransportHttpMocks *IOTHUB_MESSAG
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(6)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &httpStatus200, sizeof(httpStatus200));
 
     /*once the event has been succesfull...*/
@@ -10995,12 +10746,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -11078,10 +10824,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
     STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
@@ -11141,12 +10884,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -11239,10 +10977,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
     STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
@@ -11302,12 +11037,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -11413,10 +11143,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
     STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
@@ -11477,12 +11204,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -11575,10 +11297,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
     //act
@@ -11633,12 +11352,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -11728,10 +11442,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
     //act
@@ -11785,12 +11496,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -11873,10 +11579,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
     //act
@@ -11930,12 +11633,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -12014,10 +11712,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
     //act
@@ -12071,12 +11766,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -12146,10 +11836,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
     //act
@@ -12226,10 +11913,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_unbatch
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(6)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &httpStatus200, sizeof(httpStatus200));
 
     /*once the event has been succesfull...*/
@@ -12320,10 +12004,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_string_
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(6)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &httpStatus200, sizeof(httpStatus200));
 
     /*once the event has been succesfull...*/
@@ -12421,10 +12102,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_unbatched_happy_path_at_th
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(6)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &httpStatus200, sizeof(httpStatus200));
 
     /*once the event has been succesfull...*/
@@ -12596,10 +12274,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(6)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &httpStatus200, sizeof(httpStatus200));
 
     /*once the event has been succesfull...*/
@@ -12697,10 +12372,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(6)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &httpStatus404, sizeof(httpStatus404));
 
     EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG));
@@ -12787,10 +12459,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(6)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &httpStatus200, sizeof(httpStatus200))
         .SetReturn(HTTPAPIEX_ERROR);
 
@@ -13419,10 +13088,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_happy_path_
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(6)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &httpStatus200, sizeof(httpStatus200));
 
     /*once the event has been succesfull...*/
@@ -13858,12 +13524,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetMessageId_SUCCEED)
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
-        .IgnoreArgument(8)
-        .IgnoreArgument(9)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
@@ -13977,10 +13638,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetMessageId_SUCCEED)
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(5)
-        .IgnoreArgument(7)
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
     STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
@@ -14031,6 +13689,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetMessageId_FAILED)
         IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
     ))
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
         .SetReturn(TEST_ETAG_VALUE);
@@ -14145,6 +13804,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetMessageId_FAILED)
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
     //act
     IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -14210,6 +13870,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetMessageId_succeeds)
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
     ))
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &httpStatus200, sizeof(httpStatus200));
     /*building the list of messages to be notified if HTTP is fine*/
     STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG));
@@ -14279,6 +13940,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetCorrelationId_succeeds)
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
+        .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &httpStatus200, sizeof(httpStatus200));
 
     /*once the event has been succesfull...*/
