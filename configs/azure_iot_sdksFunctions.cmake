@@ -62,8 +62,7 @@ function(add_unittest_directory test_directory)
 endfunction()
 
 function(add_e2etest_directory test_directory)
-    if (${run_e2e_tests})
+    if (${run_e2e_tests} OR ${nuget_e2e_tests})
         add_subdirectory(${test_directory})
     endif()
-    #${nuget_e2e_tests}
 endfunction()
