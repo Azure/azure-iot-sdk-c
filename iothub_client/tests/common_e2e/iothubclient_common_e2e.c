@@ -469,14 +469,14 @@ IOTHUB_CLIENT_HANDLE client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUs
     if (g_e2e_test_options.set_mac_address)
     {
 		// TODO: re-enable this once Gopi changes the job user to root (ewertons)
-        // char* mac_address = get_target_mac_address();
-        // ASSERT_IS_NOT_NULL_WITH_MSG(mac_address, "failed getting the target MAC ADDRESS");
+        char* mac_address = get_target_mac_address();
+        ASSERT_IS_NOT_NULL_WITH_MSG(mac_address, "failed getting the target MAC ADDRESS");
 
-        // result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_NET_INT_MAC_ADDRESS, mac_address);
-        // ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "failed to set the target network interface");
+        result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_NET_INT_MAC_ADDRESS, mac_address);
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "failed to set the target network interface");
 
-        // LogInfo("Target MAC ADDRESS: %s", mac_address);
-        // free(mac_address);
+        LogInfo("Target MAC ADDRESS: %s", mac_address);
+        free(mac_address);
     }
 #endif //AZIOT_LINUX
 
