@@ -5,7 +5,7 @@
         <version>1.1.15</version>
         <title>Microsoft Azure IoTHub AMQP transport</title>
         <authors>Microsoft</authors>
-        <licenseUrl>https://github.com/Azure/azure-iot-sdk-c/blob/develop/LICENSE</licenseUrl>
+        <licenseUrl>https://github.com/Azure/azure-iot-sdk-c/blob/master/LICENSE</licenseUrl>
         <projectUrl>https://github.com/Azure/azure-iot-sdk-c</projectUrl>
         <requireLicenseAcceptance>true</requireLicenseAcceptance>
         <description>Microsoft Azure IoTHub AMQP transport</description>
