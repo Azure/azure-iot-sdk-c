@@ -214,7 +214,7 @@ static unsigned int calculate_next_wait_time(RETRY_CONTROL_INSTANCE* retry_contr
 	// Codes_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_032: [If `retry_control->policy` is IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER, `calculate_next_wait_time` shall return ((pow(2, `retry_control->retry_count` - 1) * `retry_control->initial_wait_time_in_secs`) * (1 + (`retry_control->max_jitter_percent` / 100) * (rand() / RAND_MAX)))]
 	else if (retry_control->policy == IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER)
 	{
-		double jitter_percent = (retry_control->max_jitter_percent / 100) * (rand() / RAND_MAX);
+		double jitter_percent = (retry_control->max_jitter_percent / 100.0) * (rand() / ((double)RAND_MAX));
 
 		result = (unsigned int)(pow(2, retry_control->retry_count - 1) * retry_control->initial_wait_time_in_secs * (1 + jitter_percent));
 	}
@@ -335,7 +335,7 @@ RETRY_CONTROL_HANDLE retry_control_create(IOTHUB_CLIENT_RETRY_POLICY policy, uns
 
 		// Codes_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_007: [`retry_control->max_jitter_percent` shall be set to 5]
 		retry_control->max_jitter_percent = 5;
-	
+
 		// Codes_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_008: [The remaining fields in `retry_control` shall be initialized according to retry_control_reset()]
 		retry_control_reset(retry_control);
 	}
