@@ -214,7 +214,7 @@ static unsigned int calculate_next_wait_time(RETRY_CONTROL_INSTANCE* retry_contr
 	// Codes_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_032: [If `retry_control->policy` is IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER, `calculate_next_wait_time` shall return ((pow(2, `retry_control->retry_count` - 1) * `retry_control->initial_wait_time_in_secs`) * (1 + (`retry_control->max_jitter_percent` / 100) * (rand() / RAND_MAX)))]
 	else if (retry_control->policy == IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER)
 	{
-		double jitter_percent = (retry_control->max_jitter_percent / 100) * (rand() / RAND_MAX);
+		double jitter_percent = (retry_control->max_jitter_percent / 100.0) * (rand() / ((double)RAND_MAX));
 
 		result = (unsigned int)(pow(2, retry_control->retry_count - 1) * retry_control->initial_wait_time_in_secs * (1 + jitter_percent));
 	}
