@@ -27,9 +27,6 @@ void* my_gballoc_realloc(void* ptr, size_t size)
     return realloc(ptr, size);
 }
 
-#include "real_vector.h"
-#include "real_crt_abstractions.h"
-
 #include "testrunnerswitcher.h"
 
 #include "umock_c.h"
@@ -39,10 +36,34 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 #include "umocktypes_stdint.h"
 
 #define ENABLE_MOCKS
+#include "azure_c_shared_utility/vector.h"
 #include "iothubtransport.h"
 #undef ENABLE_MOCKS
 
 #include "iothub_client.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+    extern VECTOR_HANDLE real_VECTOR_create(size_t elementSize);
+    extern VECTOR_HANDLE real_VECTOR_move(VECTOR_HANDLE handle);
+    extern void real_VECTOR_destroy(VECTOR_HANDLE handle);
+    extern int real_VECTOR_push_back(VECTOR_HANDLE handle, const void* elements, size_t numElements);
+    extern void real_VECTOR_erase(VECTOR_HANDLE handle, void* elements, size_t numElements);
+    extern void real_VECTOR_clear(VECTOR_HANDLE handle);
+    extern void* real_VECTOR_element(VECTOR_HANDLE handle, size_t index);
+    extern void* real_VECTOR_front(VECTOR_HANDLE handle);
+    extern void* real_VECTOR_back(VECTOR_HANDLE handle);
+    extern void* real_VECTOR_find_if(VECTOR_HANDLE handle, PREDICATE_FUNCTION pred, const void* value);
+    extern size_t real_VECTOR_size(VECTOR_HANDLE handle);
+
+    extern int real_mallocAndStrcpy_s(char** destination, const char* source);
+    extern int real_size_tToString(char* destination, size_t destinationSize, size_t value);
+
+#ifdef __cplusplus
+}
+#endif
 
 static void* g_userContextCallback;
 static const size_t method_calls_repeat = 3;
@@ -2929,6 +2950,10 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_device_twin_succeed)
     STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG)).SetReturn(1);
 
     STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, 0));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
+        .IgnoreArgument_handle();
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
+        .IgnoreArgument_handle();
     STRICT_EXPECTED_CALL(test_device_twin_callback(DEVICE_TWIN_UPDATE_COMPLETE, NULL, 0, NULL));
 
     STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG));

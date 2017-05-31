@@ -144,6 +144,9 @@ then
   
   make --jobs=$CORES
 
+  # Only for testing E2E behaviour !!! 
+  CORES=4
+
   if [[ $run_valgrind == 1 ]] ;
   then
     #use doctored openssl

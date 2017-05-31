@@ -2090,8 +2090,12 @@ static void DoMessages(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERD
                                 }
                                 else
                                 {
+                                    const unsigned char* resp_content;
+                                    size_t resp_len;
                                     /*Codes_SRS_TRANSPORTMULTITHTTP_17_089: [_DoWork shall assemble an IOTHUBMESSAGE_HANDLE from the received HTTP content (using the responseContent buffer).] */
-                                    IOTHUB_MESSAGE_HANDLE receivedMessage = IoTHubMessage_CreateFromByteArray(BUFFER_u_char(responseContent), BUFFER_length(responseContent));
+                                    resp_content = BUFFER_u_char(responseContent);
+                                    resp_len = BUFFER_length(responseContent);
+                                    IOTHUB_MESSAGE_HANDLE receivedMessage = IoTHubMessage_CreateFromByteArray(resp_content, resp_len);
                                     if (receivedMessage == NULL)
                                     {
                                         /*Codes_SRS_TRANSPORTMULTITHTTP_17_092: [If assembling the message fails in any way, then _DoWork shall "abandon" the message.]*/

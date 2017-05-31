@@ -11,6 +11,12 @@
 extern "C" {
 #endif
 
+typedef struct E2E_TEST_OPTIONS_TAG
+{
+    bool set_mac_address;
+} E2E_TEST_OPTIONS;
+
+extern E2E_TEST_OPTIONS g_e2e_test_options;
 extern IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo;
 
 extern void e2e_init(void);
@@ -21,9 +27,9 @@ extern void e2e_send_event_test_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
 extern void e2e_recv_message_test_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
 extern void e2e_recv_message_test_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
 
-extern void e2e_d2c_svc_fault_ctrl_kill_TCP_connection();
-extern void e2e_d2c_svc_fault_ctrl_kill_TCP_connection_with_transport_status_check();
-extern void e2e_d2c_svc_fault_ctrl_AMQP_kill_connection();
+extern void e2e_d2c_svc_fault_ctrl_kill_TCP_connection(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
+extern void e2e_d2c_svc_fault_ctrl_kill_TCP_connection_with_transport_status_check(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
+extern void e2e_d2c_svc_fault_ctrl_AMQP_kill_connection(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
 extern void e2e_d2c_svc_fault_ctrl_AMQP_kill_session(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
 extern void e2e_d2c_svc_fault_ctrl_AMQP_kill_CBS_request_link(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
 extern void e2e_d2c_svc_fault_ctrl_AMQP_kill_CBS_response_link(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);

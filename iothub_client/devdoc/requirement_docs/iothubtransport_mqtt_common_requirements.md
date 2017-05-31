@@ -236,7 +236,12 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIEN
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_033: [** IoTHubTransport_MQTT_Common_DoWork shall iterate through the Waiting Acknowledge messages looking for any message that has been waiting longer than 2 min.**]**  
 
-**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_034: [** If IoTHubTransport_MQTT_Common_DoWork has previously resent the message two times then it shall fail the message**]**  
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_034: [** If IoTHubTransport_MQTT_Common_DoWork has previously resent the message two times then it shall fail the message**]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_052: [** `IoTHubTransport_MQTT_Common_DoWork` shall check for the CorrelationId property and if found add the value as a system property in the format of `$.cid=<id>` **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_053: [** `IoTHubTransport_MQTT_Common_DoWork` shall check for the MessageId property and if found add the value as a system property in the format of `$.mid=<id>` **]**
+
 
 ### IoTHubTransport_MQTT_Common_GetSendStatus
 

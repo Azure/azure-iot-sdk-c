@@ -4,11 +4,11 @@
 cmake_minimum_required(VERSION 2.8.11)
 
 if(NOT (${use_amqp}))
-   message(FATAL_ERROR "iothubclient_amqp_e2e_svc_fault_ctrl being generated without AMQP support")
+   message(FATAL_ERROR "iothubclient_amqp_e2e_sfc being generated without AMQP support")
 endif()
 
 compileAsC11()
-set(theseTestsName iothubclient_amqp_e2e_svc_fault_ctrl)
+set(theseTestsName iothubclient_amqp_e2e_sfc)
 
 set(${theseTestsName}_test_files
     ${theseTestsName}.c

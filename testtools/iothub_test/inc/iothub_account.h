@@ -15,18 +15,18 @@ extern "C"
 #include <stddef.h>
 #endif
 
-#define IOTHUB_ACCOUNT_AUTH_METTHOD_VALUES      \
-    IOTHUB_ACCOUNT_AUTH_CONNSTRING,             \
-    IOTHUB_ACCOUNT_AUTH_X509                    \
+#define IOTHUB_ACCOUNT_AUTH_METHOD_VALUES      \
+    IOTHUB_ACCOUNT_AUTH_CONNSTRING,            \
+    IOTHUB_ACCOUNT_AUTH_X509                   \
 
-DEFINE_ENUM(IOTHUB_ACCOUNT_AUTH_METTHOD, IOTHUB_ACCOUNT_AUTH_METTHOD_VALUES);
+DEFINE_ENUM(IOTHUB_ACCOUNT_AUTH_METHOD, IOTHUB_ACCOUNT_AUTH_METHOD_VALUES);
 
 typedef struct IOTHUB_PROVISIONED_DEVICE_TAG {
     char* connectionString;
     char* primaryAuthentication;
     char* certificate;
     char* deviceId;
-    IOTHUB_ACCOUNT_AUTH_METTHOD howToCreate;
+    IOTHUB_ACCOUNT_AUTH_METHOD howToCreate;
 } IOTHUB_PROVISIONED_DEVICE;
 
 typedef struct IOTHUB_ACCOUNT_CONFIG_TAG

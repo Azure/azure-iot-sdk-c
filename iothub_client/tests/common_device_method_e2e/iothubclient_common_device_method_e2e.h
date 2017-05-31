@@ -46,6 +46,8 @@ extern void device_method_e2e_method_call_with_embedded_single_quote_x509(IOTHUB
 
 extern void device_method_e2e_method_calls_upload_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
 
+extern void device_method_e2e_method_call_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
+
 #ifdef __cplusplus
 }
 #endif // __cplusplus

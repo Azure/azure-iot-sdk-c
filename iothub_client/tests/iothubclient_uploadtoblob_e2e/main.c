@@ -6,6 +6,6 @@
 int main(void)
 {
     size_t failedTestCount = 0;
-    RUN_TEST_SUITE(iothubclient_amqp_ws_e2e_svc_fault_ctrl, failedTestCount); 
+    RUN_TEST_SUITE(iothubclient_uploadtoblob_e2e, failedTestCount); 
     return failedTestCount;
 }

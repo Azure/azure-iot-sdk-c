@@ -414,15 +414,31 @@ static void dispatch_user_callbacks(IOTHUB_CLIENT_INSTANCE* iotHubClientInstance
             switch (queued_cb->type)
             {
                 case CALLBACK_TYPE_DEVICE_TWIN:
-                    if (iotHubClientInstance->desired_state_callback)
+                {
+                    IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK desired_state_callback;
+
+                    if (Lock(iotHubClientInstance->LockHandle) != LOCK_OK)
                     {
-                        iotHubClientInstance->desired_state_callback(queued_cb->iothub_callback.dev_twin_cb_info.update_state, queued_cb->iothub_callback.dev_twin_cb_info.payLoad, queued_cb->iothub_callback.dev_twin_cb_info.size, queued_cb->userContextCallback);
+                        LogError("failed locking for dispatch_user_callbacks");
+                        desired_state_callback = NULL;
                     }
+                    else
+                    {
+                        desired_state_callback = iotHubClientInstance->desired_state_callback;
+                        (void)Unlock(iotHubClientInstance->LockHandle);
+                    }
+
+                    if (desired_state_callback)
+                    {
+                        desired_state_callback(queued_cb->iothub_callback.dev_twin_cb_info.update_state, queued_cb->iothub_callback.dev_twin_cb_info.payLoad, queued_cb->iothub_callback.dev_twin_cb_info.size, queued_cb->userContextCallback);
+                    }
+
                     if (queued_cb->iothub_callback.dev_twin_cb_info.payLoad)
                     {
                         free(queued_cb->iothub_callback.dev_twin_cb_info.payLoad);
                     }
                     break;
+                }
                 case CALLBACK_TYPE_EVENT_CONFIRM:
                     if (iotHubClientInstance->event_confirm_callback)
                     {
@@ -1406,11 +1422,6 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetDeviceTwinCallback(IOTHUB_CLIENT_HANDLE iot
         }
         else
         {
-            if (iotHubClientInstance->created_with_transport_handle == 0)
-            {
-                iotHubClientInstance->desired_state_callback = deviceTwinCallback;
-            }
-
             /*Codes_SRS_IOTHUBCLIENT_10_020: [** `IoTHubClient_SetDeviceTwinCallback` shall be made thread - safe by using the lock created in IoTHubClient_Create. ]*/
             if (Lock(iotHubClientInstance->LockHandle) != LOCK_OK)
             {
@@ -1420,6 +1431,11 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetDeviceTwinCallback(IOTHUB_CLIENT_HANDLE iot
             }
             else
             {
+                if (iotHubClientInstance->created_with_transport_handle == 0)
+                {
+                    iotHubClientInstance->desired_state_callback = deviceTwinCallback;
+                }
+
                 if (iotHubClientInstance->created_with_transport_handle != 0 || deviceTwinCallback == NULL)
                 {
                     /*Codes_SRS_IOTHUBCLIENT_10_005: [** `IoTHubClient_LL_SetDeviceTwinCallback` shall call `IoTHubClient_LL_SetDeviceTwinCallback`, while passing the `IoTHubClient_LL handle` created by `IoTHubClient_LL_Create` along with the parameters `reportedStateCallback` and `userContextCallback`. ]*/

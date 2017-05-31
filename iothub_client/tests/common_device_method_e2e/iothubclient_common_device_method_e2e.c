@@ -34,6 +34,8 @@
 
 #include "iothubclient_common_device_method_e2e.h"
 
+#define DEVICE_METHOD_SUB_WAIT_TIME_MS    (5 * 1000)
+
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 TEST_DEFINE_ENUM_TYPE(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_RESULT_VALUES);
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_CONNECTION_STATUS, IOTHUB_CLIENT_CONNECTION_STATUS_VALUES);
@@ -293,7 +295,7 @@ void test_device_method_with_string_ex(IOTHUB_PROVISIONED_DEVICE** devicesToUse,
     }
 
     // Wait for the method to subscribe
-    ThreadAPI_Sleep(1 * 1000);
+    ThreadAPI_Sleep(DEVICE_METHOD_SUB_WAIT_TIME_MS);
     
     iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo));
     ASSERT_IS_NOT_NULL_WITH_MSG(iotHubServiceClientHandle, "Could not create service client handle");
@@ -398,7 +400,7 @@ void test_device_method_with_string(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTH
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_CONNECTION_STATUS, IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, g_conn_info.conn_status, "Device Not connected");
 
     // Wait for the method to subscribe
-    ThreadAPI_Sleep(1 * 1000);
+    ThreadAPI_Sleep(DEVICE_METHOD_SUB_WAIT_TIME_MS);
 
     iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo));
     ASSERT_IS_NOT_NULL_WITH_MSG(iotHubServiceClientHandle, "Could not create service client handle");
@@ -476,7 +478,7 @@ void test_device_method_calls_upload(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOT
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device method callback");
 
     // Wait for the method to subscribe
-    ThreadAPI_Sleep(1 * 1000);
+    ThreadAPI_Sleep(DEVICE_METHOD_SUB_WAIT_TIME_MS);
 
     iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo));
     ASSERT_IS_NOT_NULL_WITH_MSG(iotHubServiceClientHandle, "Could not create service client handle");
@@ -490,7 +492,7 @@ void test_device_method_calls_upload(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOT
     IOTHUB_DEVICE_METHOD_RESULT invokeResult = IoTHubDeviceMethod_Invoke(serviceClientDeviceMethodHandle, deviceToUse->deviceId, METHOD_NAME, payload, TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
 
     // yield
-    ThreadAPI_Sleep(1 * 1000);
+    ThreadAPI_Sleep(DEVICE_METHOD_SUB_WAIT_TIME_MS);
 
     continue_running = true;
     beginOperation = time(NULL);
@@ -517,6 +519,151 @@ void test_device_method_calls_upload(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOT
 
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_OK, invokeResult, "Service Client IoTHubDeviceMethod_Invoke failed");
     ASSERT_ARE_EQUAL_WITH_MSG(int, METHOD_RESPONSE_SUCCESS, responseStatus, "response status is incorrect");
+}
+
+static void client_create_with_properies_and_send_d2c(MAP_HANDLE mapHandle)
+{
+    IOTHUB_MESSAGE_HANDLE msgHandle;
+    IOTHUB_CLIENT_RESULT result;
+
+    const char* messageStr = "Happy little message";
+    msgHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)messageStr, strlen(messageStr));
+    ASSERT_IS_NOT_NULL_WITH_MSG(msgHandle, "Could not create the D2C message to be sent");
+
+    MAP_HANDLE msgMapHandle = IoTHubMessage_Properties(msgHandle);
+
+    const char*const* keys;
+    const char*const* values;
+    size_t propCount;
+
+    MAP_RESULT mapResult = Map_GetInternals(mapHandle, &keys, &values, &propCount);
+    if (mapResult == MAP_OK)
+    {
+        for (size_t i = 0; i < propCount; i++)
+        {
+            if (Map_AddOrUpdate(msgMapHandle, keys[i], values[i]) != MAP_OK)
+            {
+                ASSERT_FAIL("Map_AddOrUpdate failed!");
+            }
+        }
+    }
+
+    // act
+    result = IoTHubClient_SendEventAsync(iotHubClientHandle, msgHandle, NULL, NULL);
+    ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "SendEventAsync failed");
+    IoTHubMessage_Destroy(msgHandle);
+}
+
+static void test_device_method_with_string_svc_fault_ctrl(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char *payload, const char* faultOperationType, const char* faultOperationCloseReason, const char* faultOperationDelayInSecs)
+{
+    IOTHUB_CLIENT_RESULT result;
+    time_t beginOperation, nowTime;
+    bool trace = true;
+
+    g_conn_info.conn_status = IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED;
+
+    iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
+    ASSERT_IS_NOT_NULL_WITH_MSG(iotHubClientHandle, "Could not invoke IoTHubClient_CreateFromConnectionString");
+
+    if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509)
+    {
+        result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
+        result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
+    }
+
+    result = IoTHubClient_SetConnectionStatusCallback(iotHubClientHandle, connection_status_callback, &g_conn_info);
+    ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set connection Status Callback");
+
+    // Turn on Log 
+    (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &trace);
+
+    result = IoTHubClient_SetDeviceMethodCallback(iotHubClientHandle, DeviceMethodCallback, (void*)payload);
+    ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device method callback");
+
+    bool continue_running = true;
+    beginOperation = time(NULL);
+    do
+    {
+        if (Lock(g_conn_info.lock) != LOCK_OK)
+        {
+            ASSERT_FAIL("unable to lock");
+        }
+        else
+        {
+            if (g_conn_info.conn_status == IOTHUB_CLIENT_CONNECTION_AUTHENTICATED)
+            {
+                continue_running = false;
+            }
+            (void)Unlock(g_conn_info.lock);
+        }
+
+        ThreadAPI_Sleep(10);
+    } while (
+        (nowTime = time(NULL)),
+        (difftime(nowTime, beginOperation) < IOTHUB_CONNECT_TIMEOUT_SEC) &&
+        (continue_running)
+        );
+    ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_CONNECTION_STATUS, IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, g_conn_info.conn_status, "Device Not connected");
+
+    // Wait for the method to subscribe
+    ThreadAPI_Sleep(DEVICE_METHOD_SUB_WAIT_TIME_MS);
+
+    iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo));
+    ASSERT_IS_NOT_NULL_WITH_MSG(iotHubServiceClientHandle, "Could not create service client handle");
+
+    serviceClientDeviceMethodHandle = IoTHubDeviceMethod_Create(iotHubServiceClientHandle);
+    ASSERT_IS_NOT_NULL_WITH_MSG(serviceClientDeviceMethodHandle, "Could not create device method handle");
+
+    int responseStatus;
+    unsigned char* responsePayload;
+    size_t responsePayloadSize;
+    IOTHUB_DEVICE_METHOD_RESULT invokeResult = IoTHubDeviceMethod_Invoke(serviceClientDeviceMethodHandle, deviceToUse->deviceId, METHOD_NAME, payload, TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
+
+    ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_OK, invokeResult, "Service Client IoTHubDeviceMethod_Invoke failed");
+    ASSERT_ARE_EQUAL_WITH_MSG(int, METHOD_RESPONSE_SUCCESS, responseStatus, "response status is incorrect");
+
+    ASSERT_ARE_EQUAL_WITH_MSG(size_t, strlen(payload), responsePayloadSize, "response size is incorrect");
+    if (memcmp(payload, responsePayload, responsePayloadSize))
+    {
+        ASSERT_FAIL("response string does not match");
+    }
+
+    // Send the Event from the client
+    MAP_HANDLE propMap = Map_Create(NULL);
+    if (Map_AddOrUpdate(propMap, "AzIoTHub_FaultOperationType", faultOperationType) != MAP_OK)
+    {
+        ASSERT_FAIL("Map_AddOrUpdate failed for AzIoTHub_FaultOperationType!");
+    }
+
+    if (Map_AddOrUpdate(propMap, "AzIoTHub_FaultOperationCloseReason", faultOperationCloseReason) != MAP_OK)
+    {
+        ASSERT_FAIL("Map_AddOrUpdate failed for AzIoTHub_FaultOperationCloseReason!");
+    }
+
+    if (Map_AddOrUpdate(propMap, "AzIoTHub_FaultOperationDelayInSecs", faultOperationDelayInSecs) != MAP_OK)
+    {
+        ASSERT_FAIL("Map_AddOrUpdate failed for AzIoTHub_FaultOperationDelayInSecs!");
+    }
+    (void)printf("Send fault control message...\r\n");
+    client_create_with_properies_and_send_d2c(propMap);
+    Map_Destroy(propMap);
+
+    ThreadAPI_Sleep(3000);
+
+    invokeResult = IoTHubDeviceMethod_Invoke(serviceClientDeviceMethodHandle, deviceToUse->deviceId, METHOD_NAME, payload, TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
+
+    ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_OK, invokeResult, "Service Client IoTHubDeviceMethod_Invoke failed");
+    ASSERT_ARE_EQUAL_WITH_MSG(int, METHOD_RESPONSE_SUCCESS, responseStatus, "response status is incorrect");
+
+    ASSERT_ARE_EQUAL_WITH_MSG(size_t, strlen(payload), responsePayloadSize, "response size is incorrect");
+    if (memcmp(payload, responsePayload, responsePayloadSize))
+    {
+        ASSERT_FAIL("response string does not match");
+    }
+
+    free(responsePayload);
 }
 
 void device_method_function_cleanup()
@@ -613,4 +760,9 @@ extern void device_method_e2e_method_call_with_embedded_single_quote_x509(IOTHUB
 void device_method_e2e_method_calls_upload_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
     test_device_method_calls_upload(IoTHubAccount_GetX509Device(g_iothubAcctInfo), protocol, "\"Hello World.\"");
+}
+
+void device_method_e2e_method_call_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+{
+    test_device_method_with_string_svc_fault_ctrl(IoTHubAccount_GetSASDevice(g_iothubAcctInfo), protocol, "\"I'm a happy little string\"", "KillTcp", "boom", "1");
 }
