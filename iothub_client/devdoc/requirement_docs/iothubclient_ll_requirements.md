@@ -522,6 +522,10 @@ step 3: inform IoTHub that the upload has finished.
 
 **SRS_IOTHUBCLIENT_LL_02_067: [** If creating the relativePath fails then `IoTHubClient_LL_UploadToBlob` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
 
+**SRS_IOTHUBCLIENT_LL_32_001: [** `IoTHubClient_LL_UploadToBlob` shall create a JSON string formed from "{ \"blobName\": \" + destinationFileName + "\" }". **]**
+
+**SRS_IOTHUBCLIENT_LL_32_002: [** if creating the JSON string fails then `IoTHubClient_LL_UploadToBlob` shall fail and return `IOTHUB_CLIENT_ERROR` **]**
+
 **SRS_IOTHUBCLIENT_LL_02_068: [** `IoTHubClient_LL_UploadToBlob` shall create an HTTP responseContent BUFFER_HANDLE.** ]**
 
 **SRS_IOTHUBCLIENT_LL_02_069: [** If creating the HTTP response buffer handle fails then `IoTHubClient_LL_UploadToBlob` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
@@ -542,15 +546,15 @@ the following HTTP request headers:  ]**
 
 **SRS_IOTHUBCLIENT_LL_02_074: [** If adding "Authorization" fails then `IoTHubClient_LL_UploadToBlob` shall fail and return `IOTHUB_CLIENT_ERROR`.  ]**
 
-**SRS_IOTHUBCLIENT_LL_02_075: [** `IoTHubClient_LL_UploadToBlob` shall execute `HTTPAPIEX_ExecuteRequest` passing the following information for arguments:  ]**
+**SRS_IOTHUBCLIENT_LL_32_003: [** `IoTHubClient_LL_UploadToBlob` shall execute `HTTPAPIEX_ExecuteRequest` passing the following information for arguments:  ]**
 
 - HTTPAPIEX_HANDLE handle - the handle created at the beginning of `IoTHubClient_LL_UploadToBlob`
-- HTTPAPI_REQUEST_TYPE requestType - HTTPAPI_REQUEST_GET
+- HTTPAPI_REQUEST_TYPE requestType - HTTPAPI_REQUEST_POST
 - const char* relativePath - the HTTP relative path
 - HTTP_HEADERS_HANDLE requestHttpHeadersHandle - request HTTP headers
-- BUFFER_HANDLE requestContent - NULL
+- BUFFER_HANDLE requestContent - the JSON string containing the file name
 - unsigned int* statusCode - the address of an unsigned int that will contain the HTTP status code
-- HTTP_HEADERS_HANDLE responseHttpHeadersHandl - NULL
+- HTTP_HEADERS_HANDLE responseHttpHeadersHandle - NULL
 - BUFFER_HANDLE responseContent - the HTTP response BUFFER_HANDLE
 
 **SRS_IOTHUBCLIENT_LL_02_076: [** If `HTTPAPIEX_ExecuteRequest` call fails then `IoTHubClient_LL_UploadToBlob` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
@@ -565,14 +569,14 @@ the following HTTP request headers:  ]**
 
 **SRS_IOTHUBCLIENT_LL_02_089: [** If creating the `HTTPAPIEX_SAS_HANDLE` fails then `IoTHubClient_LL_UploadToBlob` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
 
-**SRS_IOTHUBCLIENT_LL_02_090: [** `IoTHubClient_LL_UploadToBlob` shall call `HTTPAPIEX_SAS_ExecuteRequest` passing as arguments:  ]**
+**SRS_IOTHUBCLIENT_LL_32_004: [** `IoTHubClient_LL_UploadToBlob` shall call `HTTPAPIEX_SAS_ExecuteRequest` passing as arguments:  ]**
 
 - HTTPAPIEX_SAS_HANDLE sasHandle - the created HTTPAPIEX_SAS_HANDLE
 - HTTPAPIEX_HANDLE handle - the created HTTPAPIEX_HANDLE
-- HTTPAPI_REQUEST_TYPE requestType - HTTPAPI_REQUEST_GET
+- HTTPAPI_REQUEST_TYPE requestType - HTTPAPI_REQUEST_POST
 - const char* relativePath - the HTTP relative path
 - HTTP_HEADERS_HANDLE requestHttpHeadersHandle - request HTTP headers
-- BUFFER_HANDLE requestContent - NULL
+- BUFFER_HANDLE requestContent - the JSON string containing the file name
 - unsigned int* statusCode - the address of an unsigned int that will contain the HTTP status code
 - HTTP_HEADERS_HANDLE responseHeadersHandle - NULL
 - BUFFER_HANDLE responseContent - the HTTP response BUFFER_HANDLE
@@ -588,15 +592,15 @@ If the credentials used to create `iotHubClientHandle` do not have "deviceKey" o
 
 **SRS_IOTHUBCLIENT_LL_02_107: [** - "Authorization" header shall not be build.** ]**
 
-**SRS_IOTHUBCLIENT_LL_02_108: [** `IoTHubClient_LL_UploadToBlob` shall execute HTTPAPIEX_ExecuteRequest passing the following information for arguments:  ]**
+**SRS_IOTHUBCLIENT_LL_32_005: [** `IoTHubClient_LL_UploadToBlob` shall execute HTTPAPIEX_ExecuteRequest passing the following information for arguments:  ]**
 
 - HTTPAPIEX_HANDLE handle - the handle created at the beginning of `IoTHubClient_LL_UploadToBlob`
-- HTTPAPI_REQUEST_TYPE requestType - HTTPAPI_REQUEST_GET
+- HTTPAPI_REQUEST_TYPE requestType - HTTPAPI_REQUEST_POST
 - const char* relativePath - the HTTP relative path
 - HTTP_HEADERS_HANDLE requestHttpHeadersHandle - request HTTP headers
-- BUFFER_HANDLE requestContent - NULL
+- BUFFER_HANDLE requestContent - the JSON string containing the file name
 - unsigned int* statusCode - the address of an unsigned int that will contain the HTTP status code
-- HTTP_HEADERS_HANDLE responseHttpHeadersHandl - NULL
+- HTTP_HEADERS_HANDLE responseHttpHeadersHandle - NULL
 - BUFFER_HANDLE responseContent - the HTTP response BUFFER_HANDLE
 
 **SRS_IOTHUBCLIENT_LL_02_081: [** Otherwise, `IoTHubClient_LL_UploadToBlob` shall use parson to extract and save the following information from the response buffer: correlationID and SasUri.** ]**

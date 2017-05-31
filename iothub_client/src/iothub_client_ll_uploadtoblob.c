@@ -157,7 +157,7 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
 {
     int result;
 
-    /*Codes_SRS_IOTHUBCLIENT_LL_02_066: [ IoTHubClient_LL_UploadToBlob shall create an HTTP relative path formed from "/devices/" + deviceId + "/files/" + destinationFileName + "?api-version=API_VERSION". ]*/
+    /*Codes_SRS_IOTHUBCLIENT_LL_02_066: [ IoTHubClient_LL_UploadToBlob shall create an HTTP relative path formed from "/devices/" + deviceId + "/files/" + "?api-version=API_VERSION". ]*/
     STRING_HANDLE relativePath = STRING_construct("/devices/");
     if (relativePath == NULL)
     {
@@ -165,44 +165,46 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
         LogError("unable to STRING_construct");
         result = __FAILURE__;
     }
-    else
-    {
-		STRING_HANDLE blobName = STRING_construct("{ \"blobName\": \"");
-		if (blobName == NULL)
+	else
+	{
+		if (!(
+			(STRING_concat_with_STRING(relativePath, handleData->deviceId) == 0) &&
+			(STRING_concat(relativePath, "/files") == 0) &&
+			(STRING_concat(relativePath, API_VERSION) == 0)
+			))
 		{
-			/*Codes_TBD*/
-			LogError("unable to STRING_construct");
+			/*Codes_SRS_IOTHUBCLIENT_LL_02_067: [ If creating the relativePath fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+			LogError("unable to concatenate STRING");
 			result = __FAILURE__;
 		}
 		else
 		{
-			if (!(
-				(STRING_concat(blobName, destinationFileName) == 0) &&
-				(STRING_concat(blobName, "\" }") == 0)
-				))
+			/*Codes_SRS_IOTHUBCLIENT_LL_32_001: [ IoTHubClient_LL_UploadToBlob shall create a JSON string formed from "{ \"blobName\": \" + destinationFileName + "\" }" */
+			STRING_HANDLE blobName = STRING_construct("{ \"blobName\": \"");
+			if (blobName == NULL)
 			{
-				/*Codes_TBD*/
-				LogError("unable to concatenate STRING");
+				/*Codes_SRS_IOTHUBCLIENT_LL_32_002: [ If creating the JSON string fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+				LogError("unable to STRING_construct");
 				result = __FAILURE__;
 			}
 			else
 			{
-				BUFFER_HANDLE blobBuffer = BUFFER_create((const unsigned char *)STRING_c_str(blobName), STRING_length(blobName));
-
-				if (blobBuffer == NULL)
+				if (!(
+					(STRING_concat(blobName, destinationFileName) == 0) &&
+					(STRING_concat(blobName, "\" }") == 0)
+					))
 				{
+					/*Codes_SRS_IOTHUBCLIENT_LL_32_002: [ If creating the JSON string fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+					LogError("unable to concatenate STRING");
 					result = __FAILURE__;
 				}
 				else
 				{
-					if (!(
-						(STRING_concat_with_STRING(relativePath, handleData->deviceId) == 0) &&
-						(STRING_concat(relativePath, "/files") == 0) &&
-						(STRING_concat(relativePath, API_VERSION) == 0)
-						))
+					BUFFER_HANDLE blobBuffer = BUFFER_create((const unsigned char *)STRING_c_str(blobName), STRING_length(blobName));
+
+					if (blobBuffer == NULL)
 					{
-						/*Codes_SRS_IOTHUBCLIENT_LL_02_067: [ If creating the relativePath fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-						LogError("unable to concatenate STRING");
+						/*Codes_SRS_IOTHUBCLIENT_LL_32_002: [ If creating the JSON string fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
 						result = __FAILURE__;
 					}
 					else
@@ -247,7 +249,7 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
 								case(X509):
 								{
 									unsigned int statusCode;
-									/*Codes_SRS_IOTHUBCLIENT_LL_02_108: [ IoTHubClient_LL_UploadToBlob shall execute HTTPAPIEX_ExecuteRequest passing the following information for arguments: ]*/
+									/*Codes_SRS_IOTHUBCLIENT_LL_32_003: [ IoTHubClient_LL_UploadToBlob shall execute HTTPAPIEX_ExecuteRequest passing the following information for arguments: ]*/
 									if (HTTPAPIEX_ExecuteRequest(
 										iotHubHttpApiExHandle,          /*HTTPAPIEX_HANDLE handle - the handle created at the beginning of `IoTHubClient_LL_UploadToBlob`*/
 										HTTPAPI_REQUEST_POST,           /*HTTPAPI_REQUEST_TYPE requestType - HTTPAPI_REQUEST_POST*/
@@ -255,7 +257,7 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
 										requestHttpHeaders,             /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle - request HTTP headers*/
 										blobBuffer,                     /*BUFFER_HANDLE requestContent - address of JSON with optional/directory/tree/filename*/
 										&statusCode,                    /*unsigned int* statusCode - the address of an unsigned int that will contain the HTTP status code*/
-										NULL,                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandl - NULL*/
+										NULL,                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle - NULL*/
 										responseContent                 /*BUFFER_HANDLE responseContent - the HTTP response BUFFER_HANDLE - responseContent*/
 									) != HTTPAPIEX_OK)
 									{
@@ -291,7 +293,7 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
 									else
 									{
 										unsigned int statusCode;
-										/*Codes_SRS_IOTHUBCLIENT_LL_02_075: [ IoTHubClient_LL_UploadToBlob shall execute HTTPAPIEX_ExecuteRequest passing the following information for arguments: ]*/
+										/*Codes_SRS_IOTHUBCLIENT_LL_32_004: [ IoTHubClient_LL_UploadToBlob shall execute HTTPAPIEX_ExecuteRequest passing the following information for arguments: ]*/
 										if (HTTPAPIEX_ExecuteRequest(
 											iotHubHttpApiExHandle,          /*HTTPAPIEX_HANDLE handle - the handle created at the beginning of `IoTHubClient_LL_UploadToBlob`*/
 											HTTPAPI_REQUEST_POST,           /*HTTPAPI_REQUEST_TYPE requestType - HTTPAPI_REQUEST_POST*/
@@ -299,7 +301,7 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
 											requestHttpHeaders,             /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle - request HTTP headers*/
 											blobBuffer,                     /*BUFFER_HANDLE requestContent - address of JSON with optional/directory/tree/filename*/
 											&statusCode,                    /*unsigned int* statusCode - the address of an unsigned int that will contain the HTTP status code*/
-											NULL,                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandl - NULL*/
+											NULL,                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle - NULL*/
 											responseContent                 /*BUFFER_HANDLE responseContent - the HTTP response BUFFER_HANDLE - responseContent*/
 										) != HTTPAPIEX_OK)
 										{
@@ -352,7 +354,7 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
 												LogError("unable to STRING_new");
 												result = __FAILURE__;
 											}
-											else
+											else	
 											{
 												/*Codes_SRS_IOTHUBCLIENT_LL_02_089: [ If creating the HTTPAPIEX_SAS_HANDLE fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
 												HTTPAPIEX_SAS_HANDLE sasHandle = HTTPAPIEX_SAS_Create(handleData->credentials.deviceKey, uriResource, empty);
@@ -364,7 +366,7 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
 												else
 												{
 													unsigned int statusCode;
-													/*Codes_SRS_IOTHUBCLIENT_LL_02_090: [ IoTHubClient_LL_UploadToBlob shall call HTTPAPIEX_SAS_ExecuteRequest passing as arguments: ]*/
+													/*Codes_SRS_IOTHUBCLIENT_LL_32_005: [ IoTHubClient_LL_UploadToBlob shall call HTTPAPIEX_SAS_ExecuteRequest passing as arguments: ]*/
 													if (HTTPAPIEX_SAS_ExecuteRequest(
 														sasHandle,                      /*HTTPAPIEX_SAS_HANDLE sasHandle - the created HTTPAPIEX_SAS_HANDLE*/
 														iotHubHttpApiExHandle,          /*HTTPAPIEX_HANDLE handle - the created HTTPAPIEX_HANDLE*/
@@ -537,14 +539,13 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
 							BUFFER_delete(responseContent);
 						}
 					}
+					BUFFER_delete(blobBuffer);
 				}
-				BUFFER_delete(blobBuffer);
+				STRING_delete(blobName);
 			}
-			STRING_delete(blobName);
+			STRING_delete(relativePath);
 		}
-		STRING_delete(relativePath);
 	}
-
     return result;
 }
 
