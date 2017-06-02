@@ -1,0 +1,104 @@
+{
+    CRYPTO_malloc allow customization race in OpenSSL
+    Helgrind:Race
+    obj:/*lib*/libcrypto*
+}
+{
+    DRD CRYPTO_malloc allow customization race in OpenSSL
+    drd:ConflictingAccess
+    obj:/*lib*/libcrypto*
+}
+{
+    SHA256 has unprotected global access
+    Helgrind:Race
+    fun:SHA256Input
+}
+{
+    DRD SHA256 has unprotected global access
+    drd:ConflictingAccess
+    fun:SHA256Input
+}
+{
+    DRD Conflicting store by thread in printf
+    drd:ConflictingAccess
+    fun:__GI_mempcpy
+    fun:_IO_file_xsputn@@GLIBC_2.2.5
+    fun:vfprintf
+}
+{
+    DRD Conflicting store by thread in puts
+    drd:ConflictingAccess
+    fun:__GI_mempcpy
+    fun:_IO_file_xsputn@@GLIBC_2.2.5
+    fun:puts
+}
+{
+    HTTPAPI has unprotected global access
+    Helgrind:Race
+    ...
+    obj:/usr/lib/x86_64-linux-gnu/libcurl.so.4.4.0
+    ...
+}
+{
+    HTTPAPI has unprotected global access
+    Helgrind:Race
+    ...
+    fun:HTTPAPIEX_Destroy
+    ...
+}
+{
+    HTTPAPI has unprotected global access
+    Helgrind:Race
+    ...
+    fun:IoTHubClient_UploadToBlobAsync
+    ...
+}
+{
+    HTTPAPI has unprotected global access
+    Helgrind:Race
+    ...
+    fun:IoTHubClient_LL_UploadToBlob
+    ...
+}
+{
+    DRD HTTPAPI has unprotected global access
+    drd:ConflictingAccess
+    ...
+    obj:/usr/lib/x86_64-linux-gnu/libcurl.so.4.4.0
+    ...
+}
+{
+    DRD HTTPAPI has unprotected global access
+    drd:ConflictingAccess
+    ...
+    fun:HTTPAPIEX_Destroy
+    ...
+}
+{
+    DRD HTTPAPI has unprotected global access
+    drd:ConflictingAccess
+    ...
+    fun:IoTHubClient_LL_UploadToBlob
+    ...
+}
+
+{
+   DRD false conflicting access while setting time basis
+   drd:ConflictingAccess
+   fun:set_time_basis
+}
+{
+   DRD false conflicting access while setting time basis
+   drd:ConflictingAccess
+   fun:get_time_ns
+}
+{
+   Helgrind false race confition while setting time basis
+   Helgrind:Race
+   fun:set_time_basis
+}
+{
+   Helgrind false race confition while setting time basis
+   Helgrind:Race
+   fun:get_time_ns
+}
