@@ -52,7 +52,10 @@ You should have the following items ready before beginning the process:
 
 	![][1]
 
--   In the popup window, enter the link for the sample code https://developer.mbed.org/users/AzureIoTClient/code/iothub_client_sample_amqp/ (note that if you want to try the sample using HTTP instead of AMQP, you can import this other sample: https://developer.mbed.org/users/AzureIoTClient/code/iothub_client_sample_http/
+-   In the popup window, enter the link for the sample code of your choice (we have a sample for each of the protocols supported): 
+    - https://developer.mbed.org/users/AzureIoTClient/code/iothub_client_sample_amqp/ (we'll use this one for this guide, but steps are the same for others).
+    - https://developer.mbed.org/users/AzureIoTClient/code/iothub_client_sample_mqtt/
+    - https://developer.mbed.org/users/AzureIoTClient/code/iothub_client_sample_http/
 
 	![][2]
 
