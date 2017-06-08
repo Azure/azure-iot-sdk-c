@@ -335,7 +335,7 @@ RETRY_CONTROL_HANDLE retry_control_create(IOTHUB_CLIENT_RETRY_POLICY policy, uns
 
 		// Codes_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_007: [`retry_control->max_jitter_percent` shall be set to 5]
 		retry_control->max_jitter_percent = 5;
-	
+
 		// Codes_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_008: [The remaining fields in `retry_control` shall be initialized according to retry_control_reset()]
 		retry_control_reset(retry_control);
 	}
