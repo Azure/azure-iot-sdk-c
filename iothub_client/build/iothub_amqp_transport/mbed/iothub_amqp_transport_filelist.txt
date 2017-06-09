@@ -5,7 +5,7 @@ set(mbed_project_files
 		${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothubtransport_amqp_cbs_auth.h
 		${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothubtransport_amqp_connection.h
 		${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothubtransport_amqp_device.h
-		${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothubtransport_amqp_messenger.h
+		${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothubtransport_amqp_telemetry_messenger.h
 		${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothubtransportamqp_methods.h
 		${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/uamqp_messaging.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothub_client_retry_control.c
@@ -14,6 +14,6 @@ set(mbed_project_files
 		${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothubtransport_amqp_cbs_auth.c
 		${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothubtransport_amqp_connection.c
 		${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothubtransport_amqp_device.c
-		${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothubtransport_amqp_messenger.c
+		${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothubtransport_amqp_telemetry_messenger.c
 		${CMAKE_CURRENT_SOURCE_DIR}/../../../src/uamqp_messaging.c
 		)

@@ -8,6 +8,6 @@
 int main(void)
 {
     size_t failedTestCount = 0;
-    RUN_TEST_SUITE(iothubtransport_amqp_messenger_ut, failedTestCount);
+    RUN_TEST_SUITE(iothubtransport_amqp_telemetry_messenger_ut, failedTestCount);
     return failedTestCount;
 }

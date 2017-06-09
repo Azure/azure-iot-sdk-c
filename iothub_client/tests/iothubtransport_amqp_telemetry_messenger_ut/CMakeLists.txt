@@ -4,14 +4,14 @@
 cmake_minimum_required(VERSION 2.8.11)
 
 compileAsC11()
-set(theseTestsName iothubtransport_amqp_messenger_ut )
+set(theseTestsName iothubtransport_amqp_telemetry_messenger_ut )
 
 set(${theseTestsName}_test_files
 	${theseTestsName}.c
 )
 
 set(${theseTestsName}_c_files
-	../../src/iothubtransport_amqp_messenger.c
+	../../src/iothubtransport_amqp_telemetry_messenger.c
 )
 
 set(${theseTestsName}_h_files

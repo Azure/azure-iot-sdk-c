@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include <stdlib.h>
-#include "iothubtransport_amqp_messenger.h"
+#include "iothubtransport_amqp_telemetry_messenger.h"
 #include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/agenttime.h" 
@@ -33,8 +33,8 @@ typedef struct DEVICE_INSTANCE_TAG
     time_t auth_state_last_changed_time;
     size_t auth_state_change_timeout_secs;
 
-    MESSENGER_HANDLE messenger_handle;
-    MESSENGER_STATE msgr_state;
+    TELEMETRY_MESSENGER_HANDLE messenger_handle;
+    TELEMETRY_MESSENGER_STATE msgr_state;
     time_t msgr_state_last_changed_time;
     size_t msgr_state_change_timeout_secs;
 
@@ -100,25 +100,25 @@ static int is_timeout_reached(time_t start_time, size_t timeout_in_secs, int *is
 }
 
 // Callback Handlers
-static D2C_EVENT_SEND_RESULT get_d2c_event_send_result_from(MESSENGER_EVENT_SEND_COMPLETE_RESULT result)
+static D2C_EVENT_SEND_RESULT get_d2c_event_send_result_from(TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT result)
 {
     D2C_EVENT_SEND_RESULT d2c_esr;
 
     switch (result)
     {
-        case MESSENGER_EVENT_SEND_COMPLETE_RESULT_OK:
+        case TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_OK:
             d2c_esr = D2C_EVENT_SEND_COMPLETE_RESULT_OK;
             break;
-        case MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE:
+        case TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE:
             d2c_esr = D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE;
             break;
-        case MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING:
+        case TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING:
             d2c_esr = D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING;
             break;
-        case MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_TIMEOUT:
+        case TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_TIMEOUT:
             d2c_esr = D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_TIMEOUT;
             break;
-        case MESSENGER_EVENT_SEND_COMPLETE_RESULT_MESSENGER_DESTROYED:
+        case TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_MESSENGER_DESTROYED:
             d2c_esr = D2C_EVENT_SEND_COMPLETE_RESULT_DEVICE_DESTROYED;
             break;
         default:
@@ -130,7 +130,7 @@ static D2C_EVENT_SEND_RESULT get_d2c_event_send_result_from(MESSENGER_EVENT_SEND
     return d2c_esr;
 }
 
-static void on_event_send_complete_messenger_callback(IOTHUB_MESSAGE_LIST* iothub_message, MESSENGER_EVENT_SEND_COMPLETE_RESULT ev_send_comp_result, void* context)
+static void on_event_send_complete_messenger_callback(IOTHUB_MESSAGE_LIST* iothub_message, TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT ev_send_comp_result, void* context)
 {
     if (iothub_message == NULL || context == NULL)
     {
@@ -140,11 +140,11 @@ static void on_event_send_complete_messenger_callback(IOTHUB_MESSAGE_LIST* iothu
     {
         DEVICE_SEND_EVENT_TASK* send_task = (DEVICE_SEND_EVENT_TASK*)context;
 
-        // Codes_SRS_DEVICE_09_059: [If `ev_send_comp_result` is MESSENGER_EVENT_SEND_COMPLETE_RESULT_OK, D2C_EVENT_SEND_COMPLETE_RESULT_OK shall be reported as `event_send_complete`]
-        // Codes_SRS_DEVICE_09_060: [If `ev_send_comp_result` is MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE, D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE shall be reported as `event_send_complete`]
-        // Codes_SRS_DEVICE_09_061: [If `ev_send_comp_result` is MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING, D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING shall be reported as `event_send_complete`]
-        // Codes_SRS_DEVICE_09_062: [If `ev_send_comp_result` is MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_TIMEOUT, D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_TIMEOUT shall be reported as `event_send_complete`]
-        // Codes_SRS_DEVICE_09_063: [If `ev_send_comp_result` is MESSENGER_EVENT_SEND_COMPLETE_RESULT_MESSENGER_DESTROYED, D2C_EVENT_SEND_COMPLETE_RESULT_DEVICE_DESTROYED shall be reported as `event_send_complete`]
+        // Codes_SRS_DEVICE_09_059: [If `ev_send_comp_result` is TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_OK, D2C_EVENT_SEND_COMPLETE_RESULT_OK shall be reported as `event_send_complete`]
+        // Codes_SRS_DEVICE_09_060: [If `ev_send_comp_result` is TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE, D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE shall be reported as `event_send_complete`]
+        // Codes_SRS_DEVICE_09_061: [If `ev_send_comp_result` is TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING, D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING shall be reported as `event_send_complete`]
+        // Codes_SRS_DEVICE_09_062: [If `ev_send_comp_result` is TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_TIMEOUT, D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_TIMEOUT shall be reported as `event_send_complete`]
+        // Codes_SRS_DEVICE_09_063: [If `ev_send_comp_result` is TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_MESSENGER_DESTROYED, D2C_EVENT_SEND_COMPLETE_RESULT_DEVICE_DESTROYED shall be reported as `event_send_complete`]
         D2C_EVENT_SEND_RESULT device_send_result = get_d2c_event_send_result_from(ev_send_comp_result);
 
         // Codes_SRS_DEVICE_09_064: [If provided, the user callback and context saved in `send_task` shall be invoked passing the device `event_send_complete`]
@@ -189,7 +189,7 @@ static void on_authentication_state_changed_callback(void* context, AUTHENTICATI
     }
 }
 
-static void on_messenger_state_changed_callback(void* context, MESSENGER_STATE previous_state, MESSENGER_STATE new_state)
+static void on_messenger_state_changed_callback(void* context, TELEMETRY_MESSENGER_STATE previous_state, TELEMETRY_MESSENGER_STATE new_state)
 {
     if (context == NULL)
     {
@@ -207,7 +207,7 @@ static void on_messenger_state_changed_callback(void* context, MESSENGER_STATE p
     }
 }
 
-static DEVICE_MESSAGE_DISPOSITION_INFO* create_device_message_disposition_info_from(MESSENGER_MESSAGE_DISPOSITION_INFO* messenger_disposition_info)
+static DEVICE_MESSAGE_DISPOSITION_INFO* create_device_message_disposition_info_from(TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO* messenger_disposition_info)
 {
     DEVICE_MESSAGE_DISPOSITION_INFO* device_disposition_info;
 
@@ -235,17 +235,17 @@ static void destroy_device_disposition_info(DEVICE_MESSAGE_DISPOSITION_INFO* dis
     free(disposition_info);
 }
 
-static MESSENGER_MESSAGE_DISPOSITION_INFO* create_messenger_disposition_info(DEVICE_MESSAGE_DISPOSITION_INFO* device_disposition_info)
+static TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO* create_messenger_disposition_info(DEVICE_MESSAGE_DISPOSITION_INFO* device_disposition_info)
 {
-    MESSENGER_MESSAGE_DISPOSITION_INFO* messenger_disposition_info;
+    TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO* messenger_disposition_info;
 
-    if ((messenger_disposition_info = (MESSENGER_MESSAGE_DISPOSITION_INFO*)malloc(sizeof(MESSENGER_MESSAGE_DISPOSITION_INFO))) == NULL)
+    if ((messenger_disposition_info = (TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO*)malloc(sizeof(TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO))) == NULL)
     {
-        LogError("Failed creating MESSENGER_MESSAGE_DISPOSITION_INFO (malloc failed)");
+        LogError("Failed creating TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO (malloc failed)");
     }
     else if (mallocAndStrcpy_s(&messenger_disposition_info->source, device_disposition_info->source) != RESULT_OK)
     {
-        LogError("Failed creating MESSENGER_MESSAGE_DISPOSITION_INFO (mallocAndStrcpy_s failed)");
+        LogError("Failed creating TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO (mallocAndStrcpy_s failed)");
         free(messenger_disposition_info);
         messenger_disposition_info = NULL;
     }
@@ -257,48 +257,48 @@ static MESSENGER_MESSAGE_DISPOSITION_INFO* create_messenger_disposition_info(DEV
     return messenger_disposition_info;
 }
 
-static void destroy_messenger_disposition_info(MESSENGER_MESSAGE_DISPOSITION_INFO* messenger_disposition_info)
+static void destroy_messenger_disposition_info(TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO* messenger_disposition_info)
 {
     free(messenger_disposition_info->source);
     free(messenger_disposition_info);
 }
 
-static MESSENGER_DISPOSITION_RESULT get_messenger_message_disposition_result_from(DEVICE_MESSAGE_DISPOSITION_RESULT device_disposition_result)
+static TELEMETRY_MESSENGER_DISPOSITION_RESULT get_messenger_message_disposition_result_from(DEVICE_MESSAGE_DISPOSITION_RESULT device_disposition_result)
 {
-    MESSENGER_DISPOSITION_RESULT messenger_disposition_result;
+    TELEMETRY_MESSENGER_DISPOSITION_RESULT messenger_disposition_result;
 
     switch (device_disposition_result)
     {
         case DEVICE_MESSAGE_DISPOSITION_RESULT_NONE:
-            messenger_disposition_result = MESSENGER_DISPOSITION_RESULT_NONE;
+            messenger_disposition_result = TELEMETRY_MESSENGER_DISPOSITION_RESULT_NONE;
             break;
         case DEVICE_MESSAGE_DISPOSITION_RESULT_ACCEPTED:
-            messenger_disposition_result = MESSENGER_DISPOSITION_RESULT_ACCEPTED;
+            messenger_disposition_result = TELEMETRY_MESSENGER_DISPOSITION_RESULT_ACCEPTED;
             break;
         case DEVICE_MESSAGE_DISPOSITION_RESULT_REJECTED:
-            messenger_disposition_result = MESSENGER_DISPOSITION_RESULT_REJECTED;
+            messenger_disposition_result = TELEMETRY_MESSENGER_DISPOSITION_RESULT_REJECTED;
             break;
         case DEVICE_MESSAGE_DISPOSITION_RESULT_RELEASED:
-            messenger_disposition_result = MESSENGER_DISPOSITION_RESULT_RELEASED;
+            messenger_disposition_result = TELEMETRY_MESSENGER_DISPOSITION_RESULT_RELEASED;
             break;
         default:
-            LogError("Failed to get the corresponding MESSENGER_DISPOSITION_RESULT (%d is not supported)", device_disposition_result);
-            messenger_disposition_result = MESSENGER_DISPOSITION_RESULT_RELEASED;
+            LogError("Failed to get the corresponding TELEMETRY_MESSENGER_DISPOSITION_RESULT (%d is not supported)", device_disposition_result);
+            messenger_disposition_result = TELEMETRY_MESSENGER_DISPOSITION_RESULT_RELEASED;
             break;
     }
 
     return messenger_disposition_result;
 }
 
-static MESSENGER_DISPOSITION_RESULT on_messenger_message_received_callback(IOTHUB_MESSAGE_HANDLE iothub_message_handle, MESSENGER_MESSAGE_DISPOSITION_INFO* disposition_info, void* context)
+static TELEMETRY_MESSENGER_DISPOSITION_RESULT on_messenger_message_received_callback(IOTHUB_MESSAGE_HANDLE iothub_message_handle, TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO* disposition_info, void* context)
 {
-    MESSENGER_DISPOSITION_RESULT msgr_disposition_result;
+    TELEMETRY_MESSENGER_DISPOSITION_RESULT msgr_disposition_result;
 
-    // Codes_SRS_DEVICE_09_070: [If `iothub_message_handle` or `context` is NULL, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_RELEASED]
+    // Codes_SRS_DEVICE_09_070: [If `iothub_message_handle` or `context` is NULL, on_messenger_message_received_callback shall return TELEMETRY_MESSENGER_DISPOSITION_RESULT_RELEASED]
     if (iothub_message_handle == NULL || context == NULL)
     {
         LogError("Failed receiving incoming C2D message (message handle (%p) or context (%p) is NULL)", iothub_message_handle, context);
-        msgr_disposition_result = MESSENGER_DISPOSITION_RESULT_RELEASED;
+        msgr_disposition_result = TELEMETRY_MESSENGER_DISPOSITION_RESULT_RELEASED;
     }
     else
     {
@@ -307,7 +307,7 @@ static MESSENGER_DISPOSITION_RESULT on_messenger_message_received_callback(IOTHU
         if (device_instance->on_message_received_callback == NULL)
         {
             LogError("Device '%s' failed receiving incoming C2D message (callback is NULL)", device_instance->config->device_id);
-            msgr_disposition_result = MESSENGER_DISPOSITION_RESULT_RELEASED;
+            msgr_disposition_result = TELEMETRY_MESSENGER_DISPOSITION_RESULT_RELEASED;
         }
         else
         {
@@ -316,18 +316,18 @@ static MESSENGER_DISPOSITION_RESULT on_messenger_message_received_callback(IOTHU
             // Codes_SRS_DEVICE_09_119: [A DEVICE_MESSAGE_DISPOSITION_INFO instance shall be created containing a copy of `disposition_info->source` and `disposition_info->message_id`]
             if ((device_message_disposition_info = create_device_message_disposition_info_from(disposition_info)) == NULL)
             {
-                // Codes_SRS_DEVICE_09_120: [If the DEVICE_MESSAGE_DISPOSITION_INFO instance fails to be created, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_RELEASED]
+                // Codes_SRS_DEVICE_09_120: [If the DEVICE_MESSAGE_DISPOSITION_INFO instance fails to be created, on_messenger_message_received_callback shall return TELEMETRY_MESSENGER_DISPOSITION_RESULT_RELEASED]
                 LogError("Device '%s' failed receiving incoming C2D message (failed creating DEVICE_MESSAGE_DISPOSITION_INFO)", device_instance->config->device_id);
-                msgr_disposition_result = MESSENGER_DISPOSITION_RESULT_RELEASED;
+                msgr_disposition_result = TELEMETRY_MESSENGER_DISPOSITION_RESULT_RELEASED;
             }
             else
             {
                 // Codes_SRS_DEVICE_09_071: [The user callback shall be invoked, passing the context it provided]
                 DEVICE_MESSAGE_DISPOSITION_RESULT device_disposition_result = device_instance->on_message_received_callback(iothub_message_handle, device_message_disposition_info, device_instance->on_message_received_context);
 
-                // Codes_SRS_DEVICE_09_072: [If the user callback returns DEVICE_MESSAGE_DISPOSITION_RESULT_ACCEPTED, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_ACCEPTED]
-                // Codes_SRS_DEVICE_09_073: [If the user callback returns DEVICE_MESSAGE_DISPOSITION_RESULT_REJECTED, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_REJECTED]
-                // Codes_SRS_DEVICE_09_074: [If the user callback returns DEVICE_MESSAGE_DISPOSITION_RESULT_RELEASED, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_RELEASED]
+                // Codes_SRS_DEVICE_09_072: [If the user callback returns DEVICE_MESSAGE_DISPOSITION_RESULT_ACCEPTED, on_messenger_message_received_callback shall return TELEMETRY_MESSENGER_DISPOSITION_RESULT_ACCEPTED]
+                // Codes_SRS_DEVICE_09_073: [If the user callback returns DEVICE_MESSAGE_DISPOSITION_RESULT_REJECTED, on_messenger_message_received_callback shall return TELEMETRY_MESSENGER_DISPOSITION_RESULT_REJECTED]
+                // Codes_SRS_DEVICE_09_074: [If the user callback returns DEVICE_MESSAGE_DISPOSITION_RESULT_RELEASED, on_messenger_message_received_callback shall return TELEMETRY_MESSENGER_DISPOSITION_RESULT_RELEASED]
                 msgr_disposition_result = get_messenger_message_disposition_result_from(device_disposition_result);
 
                 // Codes_SRS_DEVICE_09_121: [on_messenger_message_received_callback shall release the memory allocated for DEVICE_MESSAGE_DISPOSITION_INFO]
@@ -414,7 +414,7 @@ static void internal_destroy_device(DEVICE_INSTANCE* instance)
     {
         if (instance->messenger_handle != NULL)
         {
-            messenger_destroy(instance->messenger_handle);
+            telemetry_messenger_destroy(instance->messenger_handle);
         }
 
         if (instance->authentication_handle != NULL)
@@ -451,15 +451,15 @@ static int create_messenger_instance(DEVICE_INSTANCE* instance, const char* pi)
 {
     int result;
 
-    MESSENGER_CONFIG messenger_config;
+    TELEMETRY_MESSENGER_CONFIG messenger_config;
     messenger_config.device_id = instance->config->device_id;
     messenger_config.iothub_host_fqdn = instance->config->iothub_host_fqdn;
     messenger_config.on_state_changed_callback = on_messenger_state_changed_callback;
     messenger_config.on_state_changed_context = instance;
 
-    if ((instance->messenger_handle = messenger_create(&messenger_config, pi)) == NULL)
+    if ((instance->messenger_handle = telemetry_messenger_create(&messenger_config, pi)) == NULL)
     {
-        LogError("Failed creating the MESSENGER_HANDLE (messenger_create failed)");
+        LogError("Failed creating the TELEMETRY_MESSENGER_HANDLE (messenger_create failed)");
         result = __FAILURE__;
     }
     else
@@ -573,17 +573,17 @@ DEVICE_HANDLE device_create(DEVICE_CONFIG *config)
             LogError("Failed creating the device instance for device '%s' (failed creating the authentication instance)", instance->config->device_id);
             result = __FAILURE__;
         }
-        // Codes_SRS_DEVICE_09_008: [`instance->messenger_handle` shall be set using messenger_create()]
+        // Codes_SRS_DEVICE_09_008: [`instance->messenger_handle` shall be set using telemetry_messenger_create()]
         else if (create_messenger_instance(instance, config->product_info) != RESULT_OK)
         {
-            // Codes_SRS_DEVICE_09_009: [If the MESSENGER_HANDLE fails to be created, device_create shall fail and return NULL]
+            // Codes_SRS_DEVICE_09_009: [If the TELEMETRY_MESSENGER_HANDLE fails to be created, device_create shall fail and return NULL]
             LogError("Failed creating the device instance for device '%s' (failed creating the messenger instance)", instance->config->device_id);
             result = __FAILURE__;
         }
         else
         {
             instance->auth_state = AUTHENTICATION_STATE_STOPPED;
-            instance->msgr_state = MESSENGER_STATE_STOPPED;
+            instance->msgr_state = TELEMETRY_MESSENGER_STATE_STOPPED;
             instance->state = DEVICE_STATE_STOPPED;
             instance->auth_state_last_changed_time = INDEFINITE_TIME;
             instance->auth_state_change_timeout_secs = DEFAULT_AUTH_STATE_CHANGED_TIMEOUT_SECS;
@@ -683,10 +683,10 @@ int device_stop(DEVICE_HANDLE handle)
             // Codes_SRS_DEVICE_09_026: [The device state shall be updated to DEVICE_STATE_STOPPING, and state changed callback invoked]
             update_state(instance, DEVICE_STATE_STOPPING);
 
-            // Codes_SRS_DEVICE_09_027: [If `instance->messenger_handle` state is not MESSENGER_STATE_STOPPED, messenger_stop shall be invoked]
-            if (instance->msgr_state != MESSENGER_STATE_STOPPED && 
-                instance->msgr_state != MESSENGER_STATE_STOPPING &&
-                messenger_stop(instance->messenger_handle) != RESULT_OK)
+            // Codes_SRS_DEVICE_09_027: [If `instance->messenger_handle` state is not TELEMETRY_MESSENGER_STATE_STOPPED, messenger_stop shall be invoked]
+            if (instance->msgr_state != TELEMETRY_MESSENGER_STATE_STOPPED && 
+                instance->msgr_state != TELEMETRY_MESSENGER_STATE_STOPPING &&
+                telemetry_messenger_stop(instance->messenger_handle) != RESULT_OK)
             {
                 // Codes_SRS_DEVICE_09_028: [If messenger_stop fails, the `instance` state shall be updated to DEVICE_STATE_ERROR_MSG and the function shall return non-zero result]
                 LogError("Failed stopping device '%s' (messenger_stop failed)", instance->config->device_id);
@@ -780,19 +780,19 @@ void device_do_work(DEVICE_HANDLE handle)
             // Codes_SRS_DEVICE_09_040: [Messenger shall not be started if using CBS authentication and authentication start has not completed yet]
             if (instance->config->authentication_mode == DEVICE_AUTH_MODE_X509 || instance->auth_state == AUTHENTICATION_STATE_STARTED)
             {
-                // Codes_SRS_DEVICE_09_041: [If messenger state is MESSENGER_STATE_STOPPED, messenger_start shall be invoked]
-                if (instance->msgr_state == MESSENGER_STATE_STOPPED)
+                // Codes_SRS_DEVICE_09_041: [If messenger state is TELEMETRY_MESSENGER_STATE_STOPPED, messenger_start shall be invoked]
+                if (instance->msgr_state == TELEMETRY_MESSENGER_STATE_STOPPED)
                 {
                     // Codes_SRS_DEVICE_09_042: [If messenger_start fails, the device state shall be updated to DEVICE_STATE_ERROR_MSG]
-                    if (messenger_start(instance->messenger_handle, instance->session_handle) != RESULT_OK)
+                    if (telemetry_messenger_start(instance->messenger_handle, instance->session_handle) != RESULT_OK)
                     {
                         LogError("Device '%s' messenger failed to be started (messenger_start failed)", instance->config->device_id);
 
                         update_state(instance, DEVICE_STATE_ERROR_MSG);
                     }
                 }
-                // Codes_SRS_DEVICE_09_043: [If messenger state is MESSENGER_STATE_STARTING, the device shall track the time since last event change and timeout if needed]
-                else if (instance->msgr_state == MESSENGER_STATE_STARTING)
+                // Codes_SRS_DEVICE_09_043: [If messenger state is TELEMETRY_MESSENGER_STATE_STARTING, the device shall track the time since last event change and timeout if needed]
+                else if (instance->msgr_state == TELEMETRY_MESSENGER_STATE_STARTING)
                 {
                     int is_timed_out;
                     if (is_timeout_reached(instance->msgr_state_last_changed_time, instance->msgr_state_change_timeout_secs, &is_timed_out) != RESULT_OK)
@@ -809,15 +809,15 @@ void device_do_work(DEVICE_HANDLE handle)
                         update_state(instance, DEVICE_STATE_ERROR_MSG);
                     }
                 }
-                // Codes_SRS_DEVICE_09_045: [If messenger state is MESSENGER_STATE_ERROR, the device state shall be updated to DEVICE_STATE_ERROR_MSG]
-                else if (instance->msgr_state == MESSENGER_STATE_ERROR)
+                // Codes_SRS_DEVICE_09_045: [If messenger state is TELEMETRY_MESSENGER_STATE_ERROR, the device state shall be updated to DEVICE_STATE_ERROR_MSG]
+                else if (instance->msgr_state == TELEMETRY_MESSENGER_STATE_ERROR)
                 {
                     LogError("Device '%s' messenger failed to be started (messenger got into error state)", instance->config->device_id);
                     
                     update_state(instance, DEVICE_STATE_ERROR_MSG);
                 }
-                // Codes_SRS_DEVICE_09_046: [If messenger state is MESSENGER_STATE_STARTED, the device state shall be updated to DEVICE_STATE_STARTED]
-                else if (instance->msgr_state == MESSENGER_STATE_STARTED)
+                // Codes_SRS_DEVICE_09_046: [If messenger state is TELEMETRY_MESSENGER_STATE_STARTED, the device state shall be updated to DEVICE_STATE_STARTED]
+                else if (instance->msgr_state == TELEMETRY_MESSENGER_STATE_STARTED)
                 {
                     update_state(instance, DEVICE_STATE_STARTED);
                 }
@@ -849,8 +849,8 @@ void device_do_work(DEVICE_HANDLE handle)
             }
             else
             {
-                // Codes_SRS_DEVICE_09_048: [If messenger state is not MESSENGER_STATE_STARTED, the device state shall be updated to DEVICE_STATE_ERROR_MSG]
-                if (instance->msgr_state != MESSENGER_STATE_STARTED)
+                // Codes_SRS_DEVICE_09_048: [If messenger state is not TELEMETRY_MESSENGER_STATE_STARTED, the device state shall be updated to DEVICE_STATE_ERROR_MSG]
+                if (instance->msgr_state != TELEMETRY_MESSENGER_STATE_STARTED)
                 {
                     LogError("Device '%s' is started but messenger reported unexpected state %d", instance->config->device_id, instance->msgr_state);
                     update_state(instance, DEVICE_STATE_ERROR_MSG);
@@ -868,10 +868,10 @@ void device_do_work(DEVICE_HANDLE handle)
             }
         }
 
-        if (instance->msgr_state != MESSENGER_STATE_STOPPED && instance->msgr_state != MESSENGER_STATE_ERROR)
+        if (instance->msgr_state != TELEMETRY_MESSENGER_STATE_STOPPED && instance->msgr_state != TELEMETRY_MESSENGER_STATE_ERROR)
         {
             // Codes_SRS_DEVICE_09_050: [If `instance->messenger_handle` state is not STOPPED or ERROR, authentication_do_work shall be invoked]
-            messenger_do_work(instance->messenger_handle);
+            telemetry_messenger_do_work(instance->messenger_handle);
         }
     }
 }
@@ -892,7 +892,7 @@ void device_destroy(DEVICE_HANDLE handle)
             (void)device_stop((DEVICE_HANDLE)instance);
         }
 
-        // Codes_SRS_DEVICE_09_014: [`instance->messenger_handle shall be destroyed using messenger_destroy()`]
+        // Codes_SRS_DEVICE_09_014: [`instance->messenger_handle shall be destroyed using telemetry_messenger_destroy()`]
         // Codes_SRS_DEVICE_09_015: [If created, `instance->authentication_handle` shall be destroyed using authentication_destroy()`]
         // Codes_SRS_DEVICE_09_016: [The contents of `instance->config` shall be detroyed and then it shall be freed]
         internal_destroy_device((DEVICE_INSTANCE*)handle);
@@ -929,11 +929,11 @@ int device_send_event_async(DEVICE_HANDLE handle, IOTHUB_MESSAGE_LIST* message, 
             send_task->on_event_send_complete_callback = on_device_d2c_event_send_complete_callback;
             send_task->on_event_send_complete_context = context;
             
-            // Codes_SRS_DEVICE_09_055: [The message shall be sent using messenger_send_async, passing `on_event_send_complete_messenger_callback` and `send_task`]
-            if (messenger_send_async(instance->messenger_handle, message, on_event_send_complete_messenger_callback, (void*)send_task) != RESULT_OK)
+            // Codes_SRS_DEVICE_09_055: [The message shall be sent using telemetry_messenger_send_async, passing `on_event_send_complete_messenger_callback` and `send_task`]
+            if (telemetry_messenger_send_async(instance->messenger_handle, message, on_event_send_complete_messenger_callback, (void*)send_task) != RESULT_OK)
             {
-                // Codes_SRS_DEVICE_09_056: [If messenger_send_async fails, device_send_event_async shall return a non-zero value]
-                LogError("Failed sending event (messenger_send_async failed)");
+                // Codes_SRS_DEVICE_09_056: [If telemetry_messenger_send_async fails, device_send_event_async shall return a non-zero value]
+                LogError("Failed sending event (telemetry_messenger_send_async failed)");
                 // Codes_SRS_DEVICE_09_057: [If any failures occur, device_send_event_async shall release all memory it has allocated]
                 free(send_task);
                 result = __FAILURE__;
@@ -963,24 +963,24 @@ int device_get_send_status(DEVICE_HANDLE handle, DEVICE_SEND_STATUS *send_status
     else
     {
         DEVICE_INSTANCE* instance = (DEVICE_INSTANCE*)handle;
-        MESSENGER_SEND_STATUS messenger_send_status;
+        TELEMETRY_MESSENGER_SEND_STATUS messenger_send_status;
         
-        // Codes_SRS_DEVICE_09_106: [The status of `instance->messenger_handle` shall be obtained using messenger_get_send_status]
-        if (messenger_get_send_status(instance->messenger_handle, &messenger_send_status) != RESULT_OK)
+        // Codes_SRS_DEVICE_09_106: [The status of `instance->messenger_handle` shall be obtained using telemetry_messenger_get_send_status]
+        if (telemetry_messenger_get_send_status(instance->messenger_handle, &messenger_send_status) != RESULT_OK)
         {
-            // Codes_SRS_DEVICE_09_107: [If messenger_get_send_status fails, device_get_send_status shall return a non-zero result]
-            LogError("Failed getting the device messenger send status (messenger_get_send_status failed)");
+            // Codes_SRS_DEVICE_09_107: [If telemetry_messenger_get_send_status fails, device_get_send_status shall return a non-zero result]
+            LogError("Failed getting the device messenger send status (telemetry_messenger_get_send_status failed)");
             result = __FAILURE__;
         }
         else
         {
-            // Codes_SRS_DEVICE_09_108: [If messenger_get_send_status returns MESSENGER_SEND_STATUS_IDLE, device_get_send_status return status DEVICE_SEND_STATUS_IDLE]
-            if (messenger_send_status == MESSENGER_SEND_STATUS_IDLE)
+            // Codes_SRS_DEVICE_09_108: [If telemetry_messenger_get_send_status returns TELEMETRY_MESSENGER_SEND_STATUS_IDLE, device_get_send_status return status DEVICE_SEND_STATUS_IDLE]
+            if (messenger_send_status == TELEMETRY_MESSENGER_SEND_STATUS_IDLE)
             {
                 *send_status = DEVICE_SEND_STATUS_IDLE;
             }
-            // Codes_SRS_DEVICE_09_109: [If messenger_get_send_status returns MESSENGER_SEND_STATUS_BUSY, device_get_send_status return status DEVICE_SEND_STATUS_BUSY]
-            else // i.e., messenger_send_status == MESSENGER_SEND_STATUS_BUSY
+            // Codes_SRS_DEVICE_09_109: [If telemetry_messenger_get_send_status returns TELEMETRY_MESSENGER_SEND_STATUS_BUSY, device_get_send_status return status DEVICE_SEND_STATUS_BUSY]
+            else // i.e., messenger_send_status == TELEMETRY_MESSENGER_SEND_STATUS_BUSY
             {
                 *send_status = DEVICE_SEND_STATUS_BUSY;
             }
@@ -1008,11 +1008,11 @@ int device_subscribe_message(DEVICE_HANDLE handle, ON_DEVICE_C2D_MESSAGE_RECEIVE
     {
         DEVICE_INSTANCE* instance = (DEVICE_INSTANCE*)handle;
 
-        // Codes_SRS_DEVICE_09_067: [messenger_subscribe_for_messages shall be invoked passing `on_messenger_message_received_callback` and the user callback and context]
-        if (messenger_subscribe_for_messages(instance->messenger_handle, on_messenger_message_received_callback, handle) != RESULT_OK)
+        // Codes_SRS_DEVICE_09_067: [telemetry_messenger_subscribe_for_messages shall be invoked passing `on_messenger_message_received_callback` and the user callback and context]
+        if (telemetry_messenger_subscribe_for_messages(instance->messenger_handle, on_messenger_message_received_callback, handle) != RESULT_OK)
         {
-            // Codes_SRS_DEVICE_09_068: [If messenger_subscribe_for_messages fails, device_subscribe_message shall return a non-zero result]
-            LogError("Failed subscribing to C2D messages (messenger_subscribe_for_messages failed)");
+            // Codes_SRS_DEVICE_09_068: [If telemetry_messenger_subscribe_for_messages fails, device_subscribe_message shall return a non-zero result]
+            LogError("Failed subscribing to C2D messages (telemetry_messenger_subscribe_for_messages failed)");
             result = __FAILURE__;
         }
         else
@@ -1042,11 +1042,11 @@ int device_unsubscribe_message(DEVICE_HANDLE handle)
     {
         DEVICE_INSTANCE* instance = (DEVICE_INSTANCE*)handle;
 
-        // Codes_SRS_DEVICE_09_077: [messenger_unsubscribe_for_messages shall be invoked passing `instance->messenger_handle`]
-        if (messenger_unsubscribe_for_messages(instance->messenger_handle) != RESULT_OK)
+        // Codes_SRS_DEVICE_09_077: [telemetry_messenger_unsubscribe_for_messages shall be invoked passing `instance->messenger_handle`]
+        if (telemetry_messenger_unsubscribe_for_messages(instance->messenger_handle) != RESULT_OK)
         {
-            // Codes_SRS_DEVICE_09_078: [If messenger_unsubscribe_for_messages fails, device_unsubscribe_message shall return a non-zero result]
-            LogError("Failed unsubscribing to C2D messages (messenger_unsubscribe_for_messages failed)");
+            // Codes_SRS_DEVICE_09_078: [If telemetry_messenger_unsubscribe_for_messages fails, device_unsubscribe_message shall return a non-zero result]
+            LogError("Failed unsubscribing to C2D messages (telemetry_messenger_unsubscribe_for_messages failed)");
             result = __FAILURE__;
         }
         else
@@ -1077,24 +1077,24 @@ int device_send_message_disposition(DEVICE_HANDLE device_handle, DEVICE_MESSAGE_
     else
     {
         DEVICE_INSTANCE* device = (DEVICE_INSTANCE*)device_handle;
-        MESSENGER_MESSAGE_DISPOSITION_INFO* messenger_disposition_info;
+        TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO* messenger_disposition_info;
 
-        // Codes_SRS_DEVICE_09_113: [A MESSENGER_MESSAGE_DISPOSITION_INFO instance shall be created with a copy of the `source` and `message_id` contained in `disposition_info`]  
+        // Codes_SRS_DEVICE_09_113: [A TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance shall be created with a copy of the `source` and `message_id` contained in `disposition_info`]  
         if ((messenger_disposition_info = create_messenger_disposition_info(disposition_info)) == NULL)
         {
-            // Codes_SRS_DEVICE_09_114: [If the MESSENGER_MESSAGE_DISPOSITION_INFO fails to be created, device_send_message_disposition() shall fail and return __FAILURE__]  
-            LogError("Failed sending message disposition (failed to create MESSENGER_MESSAGE_DISPOSITION_INFO)");
+            // Codes_SRS_DEVICE_09_114: [If the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO fails to be created, device_send_message_disposition() shall fail and return __FAILURE__]  
+            LogError("Failed sending message disposition (failed to create TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO)");
             result = __FAILURE__;
         }
         else
         {
-            MESSENGER_DISPOSITION_RESULT messenger_disposition_result = get_messenger_message_disposition_result_from(disposition_result);
+            TELEMETRY_MESSENGER_DISPOSITION_RESULT messenger_disposition_result = get_messenger_message_disposition_result_from(disposition_result);
 
-            // Codes_SRS_DEVICE_09_115: [`messenger_send_message_disposition()` shall be invoked passing the MESSENGER_MESSAGE_DISPOSITION_INFO instance and the corresponding MESSENGER_DISPOSITION_RESULT]  
-            if (messenger_send_message_disposition(device->messenger_handle, messenger_disposition_info, messenger_disposition_result) != RESULT_OK)
+            // Codes_SRS_DEVICE_09_115: [`telemetry_messenger_send_message_disposition()` shall be invoked passing the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance and the corresponding TELEMETRY_MESSENGER_DISPOSITION_RESULT]  
+            if (telemetry_messenger_send_message_disposition(device->messenger_handle, messenger_disposition_info, messenger_disposition_result) != RESULT_OK)
             {
-                // Codes_SRS_DEVICE_09_116: [If `messenger_send_message_disposition()` fails, device_send_message_disposition() shall fail and return __FAILURE__]  
-                LogError("Failed sending message disposition (messenger_send_message_disposition failed)");
+                // Codes_SRS_DEVICE_09_116: [If `telemetry_messenger_send_message_disposition()` fails, device_send_message_disposition() shall fail and return __FAILURE__]  
+                LogError("Failed sending message disposition (telemetry_messenger_send_message_disposition failed)");
                 result = __FAILURE__;
             }
             else
@@ -1103,7 +1103,7 @@ int device_send_message_disposition(DEVICE_HANDLE device_handle, DEVICE_MESSAGE_
                 result = RESULT_OK;
             }
 
-            // Codes_SRS_DEVICE_09_117: [device_send_message_disposition() shall destroy the MESSENGER_MESSAGE_DISPOSITION_INFO instance]  
+            // Codes_SRS_DEVICE_09_117: [device_send_message_disposition() shall destroy the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance]  
             destroy_messenger_disposition_info(messenger_disposition_info);
         }
     }
@@ -1172,10 +1172,10 @@ int device_set_option(DEVICE_HANDLE handle, const char* name, void* value)
         }
         else if (strcmp(DEVICE_OPTION_EVENT_SEND_TIMEOUT_SECS, name) == 0)
         {
-            // Codes_SRS_DEVICE_09_086: [If `name` refers to messenger module, it shall be passed along with `value` to messenger_set_option]
-            if (messenger_set_option(instance->messenger_handle, name, value) != RESULT_OK)
+            // Codes_SRS_DEVICE_09_086: [If `name` refers to messenger module, it shall be passed along with `value` to telemetry_messenger_set_option]
+            if (telemetry_messenger_set_option(instance->messenger_handle, name, value) != RESULT_OK)
             {
-                // Codes_SRS_DEVICE_09_087: [If messenger_set_option fails, device_set_option shall return a non-zero result]
+                // Codes_SRS_DEVICE_09_087: [If telemetry_messenger_set_option fails, device_set_option shall return a non-zero result]
                 LogError("failed setting option for device '%s' (failed setting messenger option '%s')", instance->config->device_id, name);
                 result = __FAILURE__;
             }
@@ -1285,10 +1285,10 @@ OPTIONHANDLER_HANDLE device_retrieve_options(DEVICE_HANDLE handle)
                 LogError("Failed to retrieve options from device '%s' (OptionHandler_AddOption failed for option '%s')", instance->config->device_id, DEVICE_OPTION_SAVED_AUTH_OPTIONS);
                 result = NULL;
             }
-            // Codes_SRS_DEVICE_09_099: [`instance->messenger_handle` options shall be retrieved using messenger_retrieve_options]
-            else if ((dependency_options = messenger_retrieve_options(instance->messenger_handle)) == NULL)
+            // Codes_SRS_DEVICE_09_099: [`instance->messenger_handle` options shall be retrieved using telemetry_messenger_retrieve_options]
+            else if ((dependency_options = telemetry_messenger_retrieve_options(instance->messenger_handle)) == NULL)
             {
-                // Codes_SRS_DEVICE_09_100: [If messenger_retrieve_options fails, device_retrieve_options shall return NULL]
+                // Codes_SRS_DEVICE_09_100: [If telemetry_messenger_retrieve_options fails, device_retrieve_options shall return NULL]
                 LogError("Failed to retrieve options from device '%s' (failed to retrieve options from messenger instance)", instance->config->device_id);
                 result = NULL;
             }

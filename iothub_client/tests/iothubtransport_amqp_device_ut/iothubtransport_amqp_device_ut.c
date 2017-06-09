@@ -52,7 +52,7 @@ void real_free(void* ptr)
 #include "iothub_client_version.h"
 #include "iothub_message.h"
 #include "uamqp_messaging.h"
-#include "iothubtransport_amqp_messenger.h"
+#include "iothubtransport_amqp_telemetry_messenger.h"
 #include "iothubtransport_amqp_cbs_auth.h"
 #include "iothub_client_authorization.h"
 
@@ -93,7 +93,7 @@ static const char* DEVICE_OPTION_SAVED_MESSENGER_OPTIONS = "saved_device_messeng
 #define TEST_SECONDARY_DEVICE_KEY                         "WCgCZ0HcNPuWMUhTdec+ZhVqZFQC4tkv1auHFf60lyu="
 #define TEST_SECONDARY_DEVICE_KEY_STRING_HANDLE           (STRING_HANDLE)0x7713
 #define TEST_AUTHENTICATION_HANDLE                        (AUTHENTICATION_HANDLE)0x7714
-#define TEST_MESSENGER_HANDLE                             (MESSENGER_HANDLE)0x7715
+#define TEST_TELEMETRY_MESSENGER_HANDLE                             (TELEMETRY_MESSENGER_HANDLE)0x7715
 #define TEST_GENERIC_CHAR_PTR                             "some generic text"
 #define TEST_STRING_HANDLE                                (STRING_HANDLE)0x7716
 #define TEST_SESSION_HANDLE                               (SESSION_HANDLE)0x7717
@@ -166,17 +166,17 @@ static int TEST_mallocAndStrcpy_s(char** destination, const char* source)
     return TEST_mallocAndStrcpy_s_return;
 }
 
-static MESSENGER_HANDLE TEST_messenger_subscribe_for_messages_saved_messenger_handle;
-static ON_MESSENGER_MESSAGE_RECEIVED TEST_messenger_subscribe_for_messages_saved_on_message_received_callback;
-static void* TEST_messenger_subscribe_for_messages_saved_context;
-static int TEST_messenger_subscribe_for_messages_return;
-static int TEST_messenger_subscribe_for_messages(MESSENGER_HANDLE messenger_handle, ON_MESSENGER_MESSAGE_RECEIVED on_message_received_callback, void* context)
+static TELEMETRY_MESSENGER_HANDLE TEST_telemetry_messenger_subscribe_for_messages_saved_messenger_handle;
+static ON_TELEMETRY_MESSENGER_MESSAGE_RECEIVED TEST_telemetry_messenger_subscribe_for_messages_saved_on_message_received_callback;
+static void* TEST_telemetry_messenger_subscribe_for_messages_saved_context;
+static int TEST_telemetry_messenger_subscribe_for_messages_return;
+static int TEST_telemetry_messenger_subscribe_for_messages(TELEMETRY_MESSENGER_HANDLE messenger_handle, ON_TELEMETRY_MESSENGER_MESSAGE_RECEIVED on_message_received_callback, void* context)
 {
-    TEST_messenger_subscribe_for_messages_saved_messenger_handle = messenger_handle;
-    TEST_messenger_subscribe_for_messages_saved_on_message_received_callback = on_message_received_callback;
-    TEST_messenger_subscribe_for_messages_saved_context = context;
+    TEST_telemetry_messenger_subscribe_for_messages_saved_messenger_handle = messenger_handle;
+    TEST_telemetry_messenger_subscribe_for_messages_saved_on_message_received_callback = on_message_received_callback;
+    TEST_telemetry_messenger_subscribe_for_messages_saved_context = context;
 
-    return TEST_messenger_subscribe_for_messages_return;
+    return TEST_telemetry_messenger_subscribe_for_messages_return;
 }
 
 static double TEST_get_difftime(time_t end_time, time_t start_time)
@@ -198,28 +198,28 @@ static AUTHENTICATION_HANDLE TEST_authentication_create(const AUTHENTICATION_CON
     return TEST_authentication_create_return;
 }
 
-static ON_MESSENGER_STATE_CHANGED_CALLBACK TEST_messenger_create_saved_on_state_changed_callback;
-static void* TEST_messenger_create_saved_on_state_changed_context;
-static MESSENGER_HANDLE TEST_messenger_create_return;
-static MESSENGER_HANDLE TEST_messenger_create(const MESSENGER_CONFIG *config, const char* pfi)
+static ON_TELEMETRY_MESSENGER_STATE_CHANGED_CALLBACK TEST_telemetry_messenger_create_saved_on_state_changed_callback;
+static void* TEST_telemetry_messenger_create_saved_on_state_changed_context;
+static TELEMETRY_MESSENGER_HANDLE TEST_telemetry_messenger_create_return;
+static TELEMETRY_MESSENGER_HANDLE TEST_telemetry_messenger_create(const TELEMETRY_MESSENGER_CONFIG *config, const char* pfi)
 {
     (void)pfi;
-    TEST_messenger_create_saved_on_state_changed_callback = config->on_state_changed_callback;
-    TEST_messenger_create_saved_on_state_changed_context = config->on_state_changed_context;
-    return TEST_messenger_create_return;
+    TEST_telemetry_messenger_create_saved_on_state_changed_callback = config->on_state_changed_callback;
+    TEST_telemetry_messenger_create_saved_on_state_changed_context = config->on_state_changed_context;
+    return TEST_telemetry_messenger_create_return;
 }
 
-static IOTHUB_MESSAGE_LIST* TEST_messenger_send_async_saved_message;
-static ON_MESSENGER_EVENT_SEND_COMPLETE TEST_messenger_send_async_saved_callback;
-static void* TEST_messenger_send_async_saved_context;
-static int TEST_messenger_send_async_result;
-static int TEST_messenger_send_async(MESSENGER_HANDLE messenger_handle, IOTHUB_MESSAGE_LIST* message, ON_MESSENGER_EVENT_SEND_COMPLETE on_messenger_event_send_complete_callback, void* context)
+static IOTHUB_MESSAGE_LIST* TEST_telemetry_messenger_send_async_saved_message;
+static ON_TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE TEST_telemetry_messenger_send_async_saved_callback;
+static void* TEST_telemetry_messenger_send_async_saved_context;
+static int TEST_telemetry_messenger_send_async_result;
+static int TEST_telemetry_messenger_send_async(TELEMETRY_MESSENGER_HANDLE messenger_handle, IOTHUB_MESSAGE_LIST* message, ON_TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE on_messenger_event_send_complete_callback, void* context)
 {
     (void)messenger_handle;
-    TEST_messenger_send_async_saved_message = message;
-    TEST_messenger_send_async_saved_callback = on_messenger_event_send_complete_callback;
-    TEST_messenger_send_async_saved_context = context;
-    return TEST_messenger_send_async_result;
+    TEST_telemetry_messenger_send_async_saved_message = message;
+    TEST_telemetry_messenger_send_async_saved_callback = on_messenger_event_send_complete_callback;
+    TEST_telemetry_messenger_send_async_saved_context = context;
+    return TEST_telemetry_messenger_send_async_result;
 }
 
 // ---------- Test Callbacks ---------- //
@@ -290,10 +290,10 @@ static void initialize_test_variables()
     TEST_on_message_received_saved_context = NULL;
     TEST_on_message_received_return = DEVICE_MESSAGE_DISPOSITION_RESULT_RELEASED;
 
-    TEST_messenger_subscribe_for_messages_saved_messenger_handle = NULL;
-    TEST_messenger_subscribe_for_messages_saved_on_message_received_callback = NULL;
-    TEST_messenger_subscribe_for_messages_saved_context = NULL;
-    TEST_messenger_subscribe_for_messages_return = 0;
+    TEST_telemetry_messenger_subscribe_for_messages_saved_messenger_handle = NULL;
+    TEST_telemetry_messenger_subscribe_for_messages_saved_on_message_received_callback = NULL;
+    TEST_telemetry_messenger_subscribe_for_messages_saved_context = NULL;
+    TEST_telemetry_messenger_subscribe_for_messages_return = 0;
 
     TEST_authentication_create_saved_on_authentication_changed_callback = NULL;
     TEST_authentication_create_saved_on_authentication_changed_context = NULL;
@@ -301,14 +301,14 @@ static void initialize_test_variables()
     TEST_authentication_create_saved_on_error_context = NULL;
     TEST_authentication_create_return = TEST_AUTHENTICATION_HANDLE;
 
-    TEST_messenger_create_saved_on_state_changed_callback = NULL;
-    TEST_messenger_create_saved_on_state_changed_context = NULL;
-    TEST_messenger_create_return = TEST_MESSENGER_HANDLE;
+    TEST_telemetry_messenger_create_saved_on_state_changed_callback = NULL;
+    TEST_telemetry_messenger_create_saved_on_state_changed_context = NULL;
+    TEST_telemetry_messenger_create_return = TEST_TELEMETRY_MESSENGER_HANDLE;
 
-    TEST_messenger_send_async_saved_message = NULL;
-    TEST_messenger_send_async_saved_callback = NULL;
-    TEST_messenger_send_async_saved_context = NULL;
-    TEST_messenger_send_async_result = 0;
+    TEST_telemetry_messenger_send_async_saved_message = NULL;
+    TEST_telemetry_messenger_send_async_saved_callback = NULL;
+    TEST_telemetry_messenger_send_async_saved_context = NULL;
+    TEST_telemetry_messenger_send_async_result = 0;
 
     TEST_on_device_d2c_event_send_complete_callback_saved_message = NULL;
     TEST_on_device_d2c_event_send_complete_callback_saved_result = D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_UNKNOWN;
@@ -323,9 +323,9 @@ static void register_umock_alias_types()
     REGISTER_UMOCK_ALIAS_TYPE(AUTHENTICATION_STATE, int);
     REGISTER_UMOCK_ALIAS_TYPE(const AUTHENTICATION_CONFIG*, void*);
     REGISTER_UMOCK_ALIAS_TYPE(AUTHENTICATION_HANDLE, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(MESSENGER_STATE, int);
-    REGISTER_UMOCK_ALIAS_TYPE(const MESSENGER_CONFIG*, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(MESSENGER_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(TELEMETRY_MESSENGER_STATE, int);
+    REGISTER_UMOCK_ALIAS_TYPE(const TELEMETRY_MESSENGER_CONFIG*, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(TELEMETRY_MESSENGER_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(CBS_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(const CBS_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(SESSION_HANDLE, void*);
@@ -337,9 +337,9 @@ static void register_umock_alias_types()
     REGISTER_UMOCK_ALIAS_TYPE(pfCloneOption, void*);
     REGISTER_UMOCK_ALIAS_TYPE(pfDestroyOption, void*);
     REGISTER_UMOCK_ALIAS_TYPE(pfSetOption, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(ON_MESSENGER_MESSAGE_RECEIVED, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(ON_MESSENGER_EVENT_SEND_COMPLETE, int);
-    REGISTER_UMOCK_ALIAS_TYPE(MESSENGER_DISPOSITION_RESULT, int);
+    REGISTER_UMOCK_ALIAS_TYPE(ON_TELEMETRY_MESSENGER_MESSAGE_RECEIVED, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(ON_TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE, int);
+    REGISTER_UMOCK_ALIAS_TYPE(TELEMETRY_MESSENGER_DISPOSITION_RESULT, int);
     REGISTER_UMOCK_ALIAS_TYPE(DEVICE_MESSAGE_DISPOSITION_RESULT, int);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_AUTHORIZATION_HANDLE, void*);
 }
@@ -349,11 +349,11 @@ static void register_global_mock_hooks()
     REGISTER_GLOBAL_MOCK_HOOK(malloc, TEST_malloc);
     REGISTER_GLOBAL_MOCK_HOOK(free, TEST_free);
     REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, TEST_mallocAndStrcpy_s);
-    REGISTER_GLOBAL_MOCK_HOOK(messenger_subscribe_for_messages, TEST_messenger_subscribe_for_messages);
+    REGISTER_GLOBAL_MOCK_HOOK(telemetry_messenger_subscribe_for_messages, TEST_telemetry_messenger_subscribe_for_messages);
     REGISTER_GLOBAL_MOCK_HOOK(get_difftime, TEST_get_difftime);
     REGISTER_GLOBAL_MOCK_HOOK(authentication_create, TEST_authentication_create);
-    REGISTER_GLOBAL_MOCK_HOOK(messenger_create, TEST_messenger_create);
-    REGISTER_GLOBAL_MOCK_HOOK(messenger_send_async, TEST_messenger_send_async);
+    REGISTER_GLOBAL_MOCK_HOOK(telemetry_messenger_create, TEST_telemetry_messenger_create);
+    REGISTER_GLOBAL_MOCK_HOOK(telemetry_messenger_send_async, TEST_telemetry_messenger_send_async);
 }
 
 static void register_global_mock_returns()
@@ -387,23 +387,23 @@ static void register_global_mock_returns()
     REGISTER_GLOBAL_MOCK_RETURN(authentication_set_option, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(authentication_set_option, 1);
 
-    REGISTER_GLOBAL_MOCK_RETURN(messenger_create, TEST_MESSENGER_HANDLE);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(messenger_create, NULL);
+    REGISTER_GLOBAL_MOCK_RETURN(telemetry_messenger_create, TEST_TELEMETRY_MESSENGER_HANDLE);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(telemetry_messenger_create, NULL);
 
-    REGISTER_GLOBAL_MOCK_RETURN(messenger_stop, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(messenger_stop, 1);
+    REGISTER_GLOBAL_MOCK_RETURN(telemetry_messenger_stop, 0);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(telemetry_messenger_stop, 1);
 
-    REGISTER_GLOBAL_MOCK_RETURN(messenger_set_option, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(messenger_set_option, 1);
+    REGISTER_GLOBAL_MOCK_RETURN(telemetry_messenger_set_option, 0);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(telemetry_messenger_set_option, 1);
 
-    REGISTER_GLOBAL_MOCK_RETURN(messenger_send_async, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(messenger_send_async, 1);
+    REGISTER_GLOBAL_MOCK_RETURN(telemetry_messenger_send_async, 0);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(telemetry_messenger_send_async, 1);
 
     REGISTER_GLOBAL_MOCK_RETURN(mallocAndStrcpy_s, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, 1);
 
-    REGISTER_GLOBAL_MOCK_RETURN(messenger_send_message_disposition, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(messenger_send_message_disposition, 1);
+    REGISTER_GLOBAL_MOCK_RETURN(telemetry_messenger_send_message_disposition, 0);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(telemetry_messenger_send_message_disposition, 1);
 
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Get_DeviceId, TEST_DEVICE_ID_CHAR_PTR);
 }
@@ -438,7 +438,7 @@ static void set_expected_calls_for_create_authentication_instance(DEVICE_CONFIG 
 static void set_expected_calls_for_create_messenger_instance(DEVICE_CONFIG *config)
 {
     (void)config;
-    EXPECTED_CALL(messenger_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(telemetry_messenger_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 }
 
 static void set_expected_calls_for_device_create(DEVICE_CONFIG *config, time_t current_time)
@@ -464,13 +464,13 @@ static void set_expected_calls_for_device_start_async(DEVICE_CONFIG* config, tim
     // Nothing to expect from this function.
 }
 
-static void set_expected_calls_for_device_stop(DEVICE_CONFIG* config, time_t current_time, AUTHENTICATION_STATE auth_state, MESSENGER_STATE messenger_state)
+static void set_expected_calls_for_device_stop(DEVICE_CONFIG* config, time_t current_time, AUTHENTICATION_STATE auth_state, TELEMETRY_MESSENGER_STATE messenger_state)
 {
     (void)current_time;
 
-    if (messenger_state != MESSENGER_STATE_STOPPED && messenger_state != MESSENGER_STATE_STOPPING)
+    if (messenger_state != TELEMETRY_MESSENGER_STATE_STOPPED && messenger_state != TELEMETRY_MESSENGER_STATE_STOPPING)
     {
-        STRICT_EXPECTED_CALL(messenger_stop(TEST_MESSENGER_HANDLE)).SetReturn(0);
+        STRICT_EXPECTED_CALL(telemetry_messenger_stop(TEST_TELEMETRY_MESSENGER_HANDLE)).SetReturn(0);
     }
 
     if (config->authentication_mode == DEVICE_AUTH_MODE_CBS && auth_state != AUTHENTICATION_STATE_STOPPED)
@@ -479,7 +479,7 @@ static void set_expected_calls_for_device_stop(DEVICE_CONFIG* config, time_t cur
     }
 }
 
-static void set_expected_calls_for_device_do_work(DEVICE_CONFIG* config, time_t current_time, DEVICE_STATE device_state, AUTHENTICATION_STATE auth_state, MESSENGER_STATE msgr_state)
+static void set_expected_calls_for_device_do_work(DEVICE_CONFIG* config, time_t current_time, DEVICE_STATE device_state, AUTHENTICATION_STATE auth_state, TELEMETRY_MESSENGER_STATE msgr_state)
 {
     if (device_state == DEVICE_STATE_STARTING)
     {
@@ -497,11 +497,11 @@ static void set_expected_calls_for_device_do_work(DEVICE_CONFIG* config, time_t 
 
         if (config->authentication_mode == DEVICE_AUTH_MODE_X509 || auth_state == AUTHENTICATION_STATE_STARTED)
         {
-            if (msgr_state == MESSENGER_STATE_STOPPED)
+            if (msgr_state == TELEMETRY_MESSENGER_STATE_STOPPED)
             {
-                STRICT_EXPECTED_CALL(messenger_start(TEST_MESSENGER_HANDLE, TEST_SESSION_HANDLE)).SetReturn(0);
+                STRICT_EXPECTED_CALL(telemetry_messenger_start(TEST_TELEMETRY_MESSENGER_HANDLE, TEST_SESSION_HANDLE)).SetReturn(0);
             }
-            else if (msgr_state == MESSENGER_STATE_STARTING)
+            else if (msgr_state == TELEMETRY_MESSENGER_STATE_STARTING)
             {
                 set_expected_calls_for_is_timeout_reached(current_time);
             }
@@ -516,13 +516,13 @@ static void set_expected_calls_for_device_do_work(DEVICE_CONFIG* config, time_t 
         }
     }
 
-    if (msgr_state != MESSENGER_STATE_STOPPED && msgr_state != MESSENGER_STATE_ERROR)
+    if (msgr_state != TELEMETRY_MESSENGER_STATE_STOPPED && msgr_state != TELEMETRY_MESSENGER_STATE_ERROR)
     {
-        STRICT_EXPECTED_CALL(messenger_do_work(TEST_MESSENGER_HANDLE));
+        STRICT_EXPECTED_CALL(telemetry_messenger_do_work(TEST_TELEMETRY_MESSENGER_HANDLE));
     }
 }
 
-static void set_expected_calls_for_device_destroy(DEVICE_HANDLE handle, DEVICE_CONFIG *config, time_t current_time, DEVICE_STATE device_state, AUTHENTICATION_STATE auth_state, MESSENGER_STATE msgr_state)
+static void set_expected_calls_for_device_destroy(DEVICE_HANDLE handle, DEVICE_CONFIG *config, time_t current_time, DEVICE_STATE device_state, AUTHENTICATION_STATE auth_state, TELEMETRY_MESSENGER_STATE msgr_state)
 {
     if (device_state == DEVICE_STATE_STARTED || device_state == DEVICE_STATE_STARTING)
     {
@@ -531,7 +531,7 @@ static void set_expected_calls_for_device_destroy(DEVICE_HANDLE handle, DEVICE_C
 
     if (msgr_state != DEVICE_STATE_STOPPED)
     {
-        STRICT_EXPECTED_CALL(messenger_destroy(TEST_MESSENGER_HANDLE));
+        STRICT_EXPECTED_CALL(telemetry_messenger_destroy(TEST_TELEMETRY_MESSENGER_HANDLE));
     }
 
     if (config->authentication_mode == DEVICE_AUTH_MODE_CBS && auth_state != AUTHENTICATION_STATE_STOPPED)
@@ -560,7 +560,7 @@ static void set_expected_calls_for_device_retrieve_options(DEVICE_CONFIG *config
             .SetReturn(OPTIONHANDLER_OK);
     }
 
-    STRICT_EXPECTED_CALL(messenger_retrieve_options(TEST_MESSENGER_HANDLE))
+    STRICT_EXPECTED_CALL(telemetry_messenger_retrieve_options(TEST_TELEMETRY_MESSENGER_HANDLE))
         .SetReturn(TEST_MSGR_OPTIONHANDLER_HANDLE);
     STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, DEVICE_OPTION_SAVED_MESSENGER_OPTIONS, TEST_MSGR_OPTIONHANDLER_HANDLE))
         .SetReturn(OPTIONHANDLER_OK);
@@ -584,11 +584,11 @@ static void set_expected_calls_for_device_set_option(DEVICE_HANDLE handle, DEVIC
 
     if (strcmp(DEVICE_OPTION_EVENT_SEND_TIMEOUT_SECS, option_name) == 0)
     {
-        STRICT_EXPECTED_CALL(messenger_set_option(TEST_MESSENGER_HANDLE, option_name, option_value));
+        STRICT_EXPECTED_CALL(telemetry_messenger_set_option(TEST_TELEMETRY_MESSENGER_HANDLE, option_name, option_value));
     }
     else if (strcmp(DEVICE_OPTION_SAVED_MESSENGER_OPTIONS, option_name) == 0)
     {
-        STRICT_EXPECTED_CALL(OptionHandler_FeedOptions((OPTIONHANDLER_HANDLE)option_value, TEST_MESSENGER_HANDLE));
+        STRICT_EXPECTED_CALL(OptionHandler_FeedOptions((OPTIONHANDLER_HANDLE)option_value, TEST_TELEMETRY_MESSENGER_HANDLE));
     }
     else if (strcmp(DEVICE_OPTION_SAVED_OPTIONS, option_name) == 0)
     {
@@ -600,7 +600,7 @@ static void set_expected_calls_for_device_send_async(DEVICE_CONFIG *config)
 {
     (void)config;
     EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(messenger_send_async(TEST_MESSENGER_HANDLE, TEST_IOTHUB_MESSAGE_LIST, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(telemetry_messenger_send_async(TEST_TELEMETRY_MESSENGER_HANDLE, TEST_IOTHUB_MESSAGE_LIST, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(3)
         .IgnoreArgument(4);
 }
@@ -633,7 +633,7 @@ static DEVICE_HANDLE create_and_start_device(DEVICE_CONFIG* config, time_t curre
     return handle;
 }
 
-static void crank_device_do_work(DEVICE_HANDLE handle, DEVICE_CONFIG* config, time_t current_time, DEVICE_STATE device_state, AUTHENTICATION_STATE auth_state, MESSENGER_STATE msgr_state)
+static void crank_device_do_work(DEVICE_HANDLE handle, DEVICE_CONFIG* config, time_t current_time, DEVICE_STATE device_state, AUTHENTICATION_STATE auth_state, TELEMETRY_MESSENGER_STATE msgr_state)
 {
     umock_c_reset_all_calls();
     set_expected_calls_for_device_do_work(config, current_time, device_state, auth_state, msgr_state);
@@ -650,12 +650,12 @@ static void set_authentication_state(AUTHENTICATION_STATE previous_state, AUTHEN
         new_state);
 }
 
-static void set_messenger_state(MESSENGER_STATE previous_state, MESSENGER_STATE new_state, time_t current_time)
+static void set_messenger_state(TELEMETRY_MESSENGER_STATE previous_state, TELEMETRY_MESSENGER_STATE new_state, time_t current_time)
 {
     STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(current_time);
 
-    TEST_messenger_create_saved_on_state_changed_callback(
-        TEST_messenger_create_saved_on_state_changed_context, 
+    TEST_telemetry_messenger_create_saved_on_state_changed_callback(
+        TEST_telemetry_messenger_create_saved_on_state_changed_context, 
         previous_state, 
         new_state);
 }
@@ -664,17 +664,17 @@ static DEVICE_HANDLE create_and_start_and_crank_device(DEVICE_CONFIG* config, ti
 {
     DEVICE_HANDLE handle = create_and_start_device(config, current_time);
 
-    crank_device_do_work(handle, config, current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STOPPED, MESSENGER_STATE_STOPPED);
+    crank_device_do_work(handle, config, current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STOPPED, TELEMETRY_MESSENGER_STATE_STOPPED);
     
     set_authentication_state(AUTHENTICATION_STATE_STOPPED, AUTHENTICATION_STATE_STARTING, current_time);
     set_authentication_state(AUTHENTICATION_STATE_STARTING, AUTHENTICATION_STATE_STARTED, current_time);
     
-    crank_device_do_work(handle, config, current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STARTED, MESSENGER_STATE_STOPPED);
+    crank_device_do_work(handle, config, current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STARTED, TELEMETRY_MESSENGER_STATE_STOPPED);
     
-    set_messenger_state(MESSENGER_STATE_STOPPED, MESSENGER_STATE_STARTING, TEST_current_time);
-    set_messenger_state(MESSENGER_STATE_STARTING, MESSENGER_STATE_STARTED, TEST_current_time);
+    set_messenger_state(TELEMETRY_MESSENGER_STATE_STOPPED, TELEMETRY_MESSENGER_STATE_STARTING, TEST_current_time);
+    set_messenger_state(TELEMETRY_MESSENGER_STATE_STARTING, TELEMETRY_MESSENGER_STATE_STARTED, TEST_current_time);
     
-    crank_device_do_work(handle, config, current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STARTED, MESSENGER_STATE_STARTED);
+    crank_device_do_work(handle, config, current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STARTED, TELEMETRY_MESSENGER_STATE_STARTED);
 
     return handle;
 }
@@ -777,7 +777,7 @@ TEST_FUNCTION(device_create_NULL_config_on_state_changed_callback)
 // Tests_SRS_DEVICE_09_002: [device_create shall allocate memory for the device instance structure]
 // Tests_SRS_DEVICE_09_004: [All `config` parameters shall be saved into `instance`]
 // Tests_SRS_DEVICE_09_006: [If `instance->authentication_mode` is DEVICE_AUTH_MODE_CBS, `instance->authentication_handle` shall be set using authentication_create()]
-// Tests_SRS_DEVICE_09_008: [`instance->messenger_handle` shall be set using messenger_create()]
+// Tests_SRS_DEVICE_09_008: [`instance->messenger_handle` shall be set using telemetry_messenger_create()]
 // Tests_SRS_DEVICE_09_011: [If device_create succeeds it shall return a handle to its `instance` structure]
 TEST_FUNCTION(device_create_succeeds)
 {
@@ -801,7 +801,7 @@ TEST_FUNCTION(device_create_succeeds)
 // Tests_SRS_DEVICE_09_003: [If malloc fails, device_create shall fail and return NULL]
 // Tests_SRS_DEVICE_09_005: [If any `config` parameters fail to be saved into `instance`, device_create shall fail and return NULL]
 // Tests_SRS_DEVICE_09_007: [If the AUTHENTICATION_HANDLE fails to be created, device_create shall fail and return NULL]
-// Tests_SRS_DEVICE_09_009: [If the MESSENGER_HANDLE fails to be created, device_create shall fail and return NULL]
+// Tests_SRS_DEVICE_09_009: [If the TELEMETRY_MESSENGER_HANDLE fails to be created, device_create shall fail and return NULL]
 // Tests_SRS_DEVICE_09_010: [If device_create fails it shall release all memory it has allocated]
 TEST_FUNCTION(device_create_failure_checks)
 {
@@ -1005,7 +1005,7 @@ TEST_FUNCTION(device_stop_device_already_stopped)
     DEVICE_HANDLE handle = create_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
-    set_expected_calls_for_device_stop(config, TEST_current_time, AUTHENTICATION_STATE_STOPPED, MESSENGER_STATE_STOPPED);
+    set_expected_calls_for_device_stop(config, TEST_current_time, AUTHENTICATION_STATE_STOPPED, TELEMETRY_MESSENGER_STATE_STOPPED);
 
     // act
     int result = device_stop(handle);
@@ -1021,7 +1021,7 @@ TEST_FUNCTION(device_stop_device_already_stopped)
     device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_028: [If messenger_stop fails, the `instance` state shall be updated to DEVICE_STATE_ERROR_MSG and the function shall return non-zero result]
+// Tests_SRS_DEVICE_09_028: [If telemetry_messenger_stop fails, the `instance` state shall be updated to DEVICE_STATE_ERROR_MSG and the function shall return non-zero result]
 // Tests_SRS_DEVICE_09_030: [If authentication_stop fails, the `instance` state shall be updated to DEVICE_STATE_ERROR_AUTH and the function shall return non-zero result]
 TEST_FUNCTION(device_stop_DEVICE_STATE_STARTED_failure_checks)
 {
@@ -1038,7 +1038,7 @@ TEST_FUNCTION(device_stop_DEVICE_STATE_STARTED_failure_checks)
         DEVICE_HANDLE handle = create_and_start_and_crank_device(config, TEST_current_time);
 
         umock_c_reset_all_calls();
-        set_expected_calls_for_device_stop(config, TEST_current_time, AUTHENTICATION_STATE_STARTED, MESSENGER_STATE_STARTED);
+        set_expected_calls_for_device_stop(config, TEST_current_time, AUTHENTICATION_STATE_STARTED, TELEMETRY_MESSENGER_STATE_STARTED);
         umock_c_negative_tests_snapshot();
         n = umock_c_negative_tests_call_count();
 
@@ -1079,7 +1079,7 @@ TEST_FUNCTION(device_stop_DEVICE_STATE_STARTING_succeeds)
     DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
-    set_expected_calls_for_device_stop(config, TEST_current_time, AUTHENTICATION_STATE_STOPPED, MESSENGER_STATE_STOPPED);
+    set_expected_calls_for_device_stop(config, TEST_current_time, AUTHENTICATION_STATE_STOPPED, TELEMETRY_MESSENGER_STATE_STOPPED);
 
     // act
     int result = device_stop(handle);
@@ -1095,7 +1095,7 @@ TEST_FUNCTION(device_stop_DEVICE_STATE_STARTING_succeeds)
     device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_027: [If `instance->messenger_handle` state is not MESSENGER_STATE_STOPPED, messenger_stop shall be invoked]
+// Tests_SRS_DEVICE_09_027: [If `instance->messenger_handle` state is not TELEMETRY_MESSENGER_STATE_STOPPED, telemetry_messenger_stop shall be invoked]
 // Tests_SRS_DEVICE_09_029: [If CBS authentication is used, if `instance->authentication_handle` state is not AUTHENTICATION_STATE_STOPPED, authentication_stop shall be invoked]
 TEST_FUNCTION(device_stop_DEVICE_STATE_STARTED_succeeds)
 {
@@ -1106,7 +1106,7 @@ TEST_FUNCTION(device_stop_DEVICE_STATE_STARTED_succeeds)
     DEVICE_HANDLE handle = create_and_start_and_crank_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
-    set_expected_calls_for_device_stop(config, TEST_current_time, AUTHENTICATION_STATE_STARTED, MESSENGER_STATE_STARTED);
+    set_expected_calls_for_device_stop(config, TEST_current_time, AUTHENTICATION_STATE_STARTED, TELEMETRY_MESSENGER_STATE_STARTED);
 
     // act
     int result = device_stop(handle);
@@ -1138,7 +1138,7 @@ TEST_FUNCTION(device_destroy_NULL_handle)
 }
 
 // Tests_SRS_DEVICE_09_013: [If the device is in state DEVICE_STATE_STARTED or DEVICE_STATE_STARTING, device_stop() shall be invoked]
-// Tests_SRS_DEVICE_09_014: [`instance->messenger_handle shall be destroyed using messenger_destroy()`]
+// Tests_SRS_DEVICE_09_014: [`instance->messenger_handle shall be destroyed using telemetry_messenger_destroy()`]
 // Tests_SRS_DEVICE_09_015: [If created, `instance->authentication_handle` shall be destroyed using authentication_destroy()`]
 // Tests_SRS_DEVICE_09_016: [The contents of `instance->config` shall be detroyed and then it shall be freed]
 TEST_FUNCTION(device_destroy_DEVICE_STATE_STARTED_succeeds)
@@ -1150,7 +1150,7 @@ TEST_FUNCTION(device_destroy_DEVICE_STATE_STARTED_succeeds)
     DEVICE_HANDLE handle = create_and_start_and_crank_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
-    set_expected_calls_for_device_destroy(handle, config, TEST_current_time, DEVICE_STATE_STARTED, AUTHENTICATION_STATE_STARTED, MESSENGER_STATE_STARTED);
+    set_expected_calls_for_device_destroy(handle, config, TEST_current_time, DEVICE_STATE_STARTED, AUTHENTICATION_STATE_STARTED, TELEMETRY_MESSENGER_STATE_STARTED);
 
     // act
     device_destroy(handle);
@@ -1204,8 +1204,8 @@ TEST_FUNCTION(device_get_send_status_NULL_send_status)
     device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_106: [The status of `instance->messenger_handle` shall be obtained using messenger_get_send_status]
-// Tests_SRS_DEVICE_09_108: [If messenger_get_send_status returns MESSENGER_SEND_STATUS_IDLE, device_get_send_status return status DEVICE_SEND_STATUS_IDLE]
+// Tests_SRS_DEVICE_09_106: [The status of `instance->messenger_handle` shall be obtained using telemetry_messenger_get_send_status]
+// Tests_SRS_DEVICE_09_108: [If telemetry_messenger_get_send_status returns TELEMETRY_MESSENGER_SEND_STATUS_IDLE, device_get_send_status return status DEVICE_SEND_STATUS_IDLE]
 // Tests_SRS_DEVICE_09_110: [If device_get_send_status succeeds, it shall return zero as result]
 TEST_FUNCTION(device_get_send_status_IDLE_success)
 {
@@ -1215,12 +1215,12 @@ TEST_FUNCTION(device_get_send_status_IDLE_success)
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
     DEVICE_HANDLE handle = create_device(config, TEST_current_time);
 
-    MESSENGER_SEND_STATUS messenger_get_send_status_result = MESSENGER_SEND_STATUS_IDLE;
+    TELEMETRY_MESSENGER_SEND_STATUS telemetry_messenger_get_send_status_result = TELEMETRY_MESSENGER_SEND_STATUS_IDLE;
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(messenger_get_send_status(TEST_MESSENGER_HANDLE, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(telemetry_messenger_get_send_status(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
-        .CopyOutArgumentBuffer(2, &messenger_get_send_status_result, sizeof(MESSENGER_SEND_STATUS))
+        .CopyOutArgumentBuffer(2, &telemetry_messenger_get_send_status_result, sizeof(TELEMETRY_MESSENGER_SEND_STATUS))
         .SetReturn(0);
 
     // act
@@ -1237,7 +1237,7 @@ TEST_FUNCTION(device_get_send_status_IDLE_success)
     device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_109: [If messenger_get_send_status returns MESSENGER_SEND_STATUS_BUSY, device_get_send_status return status DEVICE_SEND_STATUS_BUSY]
+// Tests_SRS_DEVICE_09_109: [If telemetry_messenger_get_send_status returns TELEMETRY_MESSENGER_SEND_STATUS_BUSY, device_get_send_status return status DEVICE_SEND_STATUS_BUSY]
 TEST_FUNCTION(device_get_send_status_BUSY_success)
 {
     // arrange
@@ -1246,12 +1246,12 @@ TEST_FUNCTION(device_get_send_status_BUSY_success)
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
     DEVICE_HANDLE handle = create_device(config, TEST_current_time);
 
-    MESSENGER_SEND_STATUS messenger_get_send_status_result = MESSENGER_SEND_STATUS_BUSY;
+    TELEMETRY_MESSENGER_SEND_STATUS telemetry_messenger_get_send_status_result = TELEMETRY_MESSENGER_SEND_STATUS_BUSY;
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(messenger_get_send_status(TEST_MESSENGER_HANDLE, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(telemetry_messenger_get_send_status(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
-        .CopyOutArgumentBuffer(2, &messenger_get_send_status_result, sizeof(MESSENGER_SEND_STATUS))
+        .CopyOutArgumentBuffer(2, &telemetry_messenger_get_send_status_result, sizeof(TELEMETRY_MESSENGER_SEND_STATUS))
         .SetReturn(0);
 
     // act
@@ -1268,7 +1268,7 @@ TEST_FUNCTION(device_get_send_status_BUSY_success)
     device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_107: [If messenger_get_send_status fails, device_get_send_status shall return a non-zero result]
+// Tests_SRS_DEVICE_09_107: [If telemetry_messenger_get_send_status fails, device_get_send_status shall return a non-zero result]
 TEST_FUNCTION(device_get_send_status_failure_checks)
 {
     // arrange
@@ -1278,7 +1278,7 @@ TEST_FUNCTION(device_get_send_status_failure_checks)
     DEVICE_HANDLE handle = create_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(messenger_get_send_status(TEST_MESSENGER_HANDLE, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(telemetry_messenger_get_send_status(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .SetReturn(1);
 
@@ -1357,7 +1357,7 @@ TEST_FUNCTION(device_subscribe_message_NULL_context)
     device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_067: [messenger_subscribe_for_messages shall be invoked passing `on_messenger_message_received_callback` and the user callback and context]
+// Tests_SRS_DEVICE_09_067: [telemetry_messenger_subscribe_for_messages shall be invoked passing `on_messenger_message_received_callback` and the user callback and context]
 // Tests_SRS_DEVICE_09_069: [If no failures occur, device_subscribe_message shall return 0]
 TEST_FUNCTION(device_subscribe_message_succeess)
 {
@@ -1369,8 +1369,8 @@ TEST_FUNCTION(device_subscribe_message_succeess)
 
     umock_c_reset_all_calls();
 
-    TEST_messenger_subscribe_for_messages_return = 0;
-    STRICT_EXPECTED_CALL(messenger_subscribe_for_messages(TEST_MESSENGER_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    TEST_telemetry_messenger_subscribe_for_messages_return = 0;
+    STRICT_EXPECTED_CALL(telemetry_messenger_subscribe_for_messages(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
@@ -1380,14 +1380,14 @@ TEST_FUNCTION(device_subscribe_message_succeess)
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     ASSERT_ARE_EQUAL(int, 0, result);
-    ASSERT_IS_NOT_NULL(TEST_messenger_subscribe_for_messages_saved_on_message_received_callback);
+    ASSERT_IS_NOT_NULL(TEST_telemetry_messenger_subscribe_for_messages_saved_on_message_received_callback);
     ASSERT_IS_NOT_NULL(handle);
 
     // cleanup
     device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_068: [If messenger_subscribe_for_messages fails, device_subscribe_message shall return a non-zero result]
+// Tests_SRS_DEVICE_09_068: [If telemetry_messenger_subscribe_for_messages fails, device_subscribe_message shall return a non-zero result]
 TEST_FUNCTION(device_subscribe_message_failure_checks)
 {
     // arrange
@@ -1398,7 +1398,7 @@ TEST_FUNCTION(device_subscribe_message_failure_checks)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(messenger_subscribe_for_messages(TEST_MESSENGER_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(telemetry_messenger_subscribe_for_messages(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .SetReturn(1);
@@ -1472,7 +1472,7 @@ TEST_FUNCTION(device_retrieve_options_NULL_handle)
 // Tests_SRS_DEVICE_09_094: [A OPTIONHANDLER_HANDLE instance, aka `options` shall be created using OptionHandler_Create]
 // Tests_SRS_DEVICE_09_096: [If CBS authentication is used, `instance->authentication_handle` options shall be retrieved using authentication_retrieve_options]
 // Tests_SRS_DEVICE_09_098: [The authentication options shall be added to `options` using OptionHandler_AddOption as DEVICE_OPTION_SAVED_AUTH_OPTIONS]
-// Tests_SRS_DEVICE_09_099: [`instance->messenger_handle` options shall be retrieved using messenger_retrieve_options]
+// Tests_SRS_DEVICE_09_099: [`instance->messenger_handle` options shall be retrieved using telemetry_messenger_retrieve_options]
 // Tests_SRS_DEVICE_09_101: [The messenger options shall be added to `options` using OptionHandler_AddOption as DEVICE_OPTION_SAVED_MESSENGER_OPTIONS]
 // Tests_SRS_DEVICE_09_104: [If no failures occur, a handle to `options` shall be return]
 TEST_FUNCTION(device_retrieve_options_CBS_succeeds)
@@ -1524,7 +1524,7 @@ TEST_FUNCTION(device_retrieve_options_X509_succeeds)
 
 // Tests_SRS_DEVICE_09_095: [If OptionHandler_Create fails, device_retrieve_options shall return NULL]
 // Tests_SRS_DEVICE_09_097: [If authentication_retrieve_options fails, device_retrieve_options shall return NULL]
-// Tests_SRS_DEVICE_09_100: [If messenger_retrieve_options fails, device_retrieve_options shall return NULL]
+// Tests_SRS_DEVICE_09_100: [If telemetry_messenger_retrieve_options fails, device_retrieve_options shall return NULL]
 // Tests_SRS_DEVICE_09_102: [If any call to OptionHandler_AddOption fails, device_retrieve_options shall return NULL]
 // Tests_SRS_DEVICE_09_103: [If any failure occurs, any memory allocated by device_retrieve_options shall be destroyed]
 TEST_FUNCTION(device_retrieve_options_CBS_failure_checks)
@@ -1625,7 +1625,7 @@ TEST_FUNCTION(device_set_option_saved_auth_options_fails)
     device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_087: [If messenger_set_option fails, device_set_option shall return a non-zero result]
+// Tests_SRS_DEVICE_09_087: [If telemetry_messenger_set_option fails, device_set_option shall return a non-zero result]
 TEST_FUNCTION(device_set_option_saved_msgr_options_fails)
 {
     // arrange
@@ -1686,7 +1686,7 @@ TEST_FUNCTION(device_set_option_CBS_AUTH_succeeds)
     device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_086: [If `name` refers to messenger module, it shall be passed along with `value` to messenger_set_option]
+// Tests_SRS_DEVICE_09_086: [If `name` refers to messenger module, it shall be passed along with `value` to telemetry_messenger_set_option]
 // Tests_SRS_DEVICE_09_092: [If no failures occur, device_set_option shall return 0]
 TEST_FUNCTION(device_set_option_MSGR_succeeds)
 {
@@ -1867,7 +1867,7 @@ TEST_FUNCTION(device_unsubscribe_message_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_DEVICE_09_077: [messenger_unsubscribe_for_messages shall be invoked passing `instance->messenger_handle`]
+// Tests_SRS_DEVICE_09_077: [telemetry_messenger_unsubscribe_for_messages shall be invoked passing `instance->messenger_handle`]
 // Tests_SRS_DEVICE_09_079: [If no failures occur, device_unsubscribe_message shall return 0]
 TEST_FUNCTION(device_unsubscribe_message_succeess)
 {
@@ -1879,7 +1879,7 @@ TEST_FUNCTION(device_unsubscribe_message_succeess)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(messenger_unsubscribe_for_messages(TEST_MESSENGER_HANDLE))
+    STRICT_EXPECTED_CALL(telemetry_messenger_unsubscribe_for_messages(TEST_TELEMETRY_MESSENGER_HANDLE))
         .SetReturn(0);
 
     // act
@@ -1894,7 +1894,7 @@ TEST_FUNCTION(device_unsubscribe_message_succeess)
     device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_078: [If messenger_unsubscribe_for_messages fails, device_unsubscribe_message shall return a non-zero result]
+// Tests_SRS_DEVICE_09_078: [If telemetry_messenger_unsubscribe_for_messages fails, device_unsubscribe_message shall return a non-zero result]
 TEST_FUNCTION(device_unsubscribe_message_failure_checks)
 {
     // arrange
@@ -1905,7 +1905,7 @@ TEST_FUNCTION(device_unsubscribe_message_failure_checks)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(messenger_unsubscribe_for_messages(TEST_MESSENGER_HANDLE))
+    STRICT_EXPECTED_CALL(telemetry_messenger_unsubscribe_for_messages(TEST_TELEMETRY_MESSENGER_HANDLE))
         .SetReturn(1);
 
     // act
@@ -1921,7 +1921,7 @@ TEST_FUNCTION(device_unsubscribe_message_failure_checks)
 }
 
 // Tests_SRS_DEVICE_09_051: [If `handle` or `message` are NULL, device_send_event_async shall return a non-zero result]
-TEST_FUNCTION(messenger_send_async_NULL_handle)
+TEST_FUNCTION(telemetry_messenger_send_async_NULL_handle)
 {
     // arrange
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
@@ -1944,7 +1944,7 @@ TEST_FUNCTION(messenger_send_async_NULL_handle)
 }
 
 // Tests_SRS_DEVICE_09_051: [If `handle` or `message` are NULL, device_send_event_async shall return a non-zero result]
-TEST_FUNCTION(messenger_send_async_NULL_message)
+TEST_FUNCTION(telemetry_messenger_send_async_NULL_message)
 {
     // arrange
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
@@ -1967,9 +1967,9 @@ TEST_FUNCTION(messenger_send_async_NULL_message)
 }
 
 // Tests_SRS_DEVICE_09_053: [If `send_task` fails to be created, device_send_event_async shall return a non-zero value]
-// Tests_SRS_DEVICE_09_056: [If messenger_send_async fails, device_send_event_async shall return a non-zero value]
+// Tests_SRS_DEVICE_09_056: [If telemetry_messenger_send_async fails, device_send_event_async shall return a non-zero value]
 // Tests_SRS_DEVICE_09_057: [If any failures occur, device_send_event_async shall release all memory it has allocated]
-TEST_FUNCTION(messenger_send_async_failure_checks)
+TEST_FUNCTION(telemetry_messenger_send_async_failure_checks)
 {
     // arrange
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
@@ -2009,9 +2009,9 @@ TEST_FUNCTION(messenger_send_async_failure_checks)
 
 // Tests_SRS_DEVICE_09_052: [A structure (`send_task`) shall be created to track the send state of the message]
 // Tests_SRS_DEVICE_09_054: [`send_task` shall contain the user callback and the context provided]
-// Tests_SRS_DEVICE_09_055: [The message shall be sent using messenger_send_async, passing `on_event_send_complete_messenger_callback` and `send_task`]
+// Tests_SRS_DEVICE_09_055: [The message shall be sent using telemetry_messenger_send_async, passing `on_event_send_complete_messenger_callback` and `send_task`]
 // Tests_SRS_DEVICE_09_058: [If no failures occur, device_send_event_async shall return 0]
-TEST_FUNCTION(messenger_send_async_succeeds)
+TEST_FUNCTION(telemetry_messenger_send_async_succeeds)
 {
     // arrange
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
@@ -2032,7 +2032,7 @@ TEST_FUNCTION(messenger_send_async_succeeds)
 
     // cleanup
     EXPECTED_CALL(free(IGNORED_PTR_ARG));
-    TEST_messenger_send_async_saved_callback(TEST_messenger_send_async_saved_message, MESSENGER_EVENT_SEND_COMPLETE_RESULT_OK, TEST_messenger_send_async_saved_context);
+    TEST_telemetry_messenger_send_async_saved_callback(TEST_telemetry_messenger_send_async_saved_message, TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_OK, TEST_telemetry_messenger_send_async_saved_context);
 
     device_destroy(handle);
 }
@@ -2062,7 +2062,7 @@ TEST_FUNCTION(device_do_work_authentication_start_fails)
     DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
-    set_expected_calls_for_device_do_work(config, TEST_current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STOPPED, MESSENGER_STATE_STOPPED);
+    set_expected_calls_for_device_do_work(config, TEST_current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STOPPED, TELEMETRY_MESSENGER_STATE_STOPPED);
 
     // act
     device_do_work(handle);
@@ -2089,12 +2089,12 @@ TEST_FUNCTION(device_do_work_authentication_start_times_out)
     time_t next_time = add_seconds(TEST_current_time, DEFAULT_AUTH_STATE_CHANGED_TIMEOUT_SECS + 1);
 
     umock_c_reset_all_calls();
-    set_expected_calls_for_device_do_work(config, TEST_current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STOPPED, MESSENGER_STATE_STOPPED);
+    set_expected_calls_for_device_do_work(config, TEST_current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STOPPED, TELEMETRY_MESSENGER_STATE_STOPPED);
 
     device_do_work(handle);
     set_authentication_state(AUTHENTICATION_STATE_STOPPED, AUTHENTICATION_STATE_STARTING, TEST_current_time);
 
-    set_expected_calls_for_device_do_work(config, next_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STARTING, MESSENGER_STATE_STOPPED);
+    set_expected_calls_for_device_do_work(config, next_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STARTING, TELEMETRY_MESSENGER_STATE_STOPPED);
 
     // act
     device_do_work(handle);
@@ -2119,7 +2119,7 @@ TEST_FUNCTION(device_do_work_authentication_start_AUTH_FAILED)
     DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
-    set_expected_calls_for_device_do_work(config, TEST_current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STOPPED, MESSENGER_STATE_STOPPED);
+    set_expected_calls_for_device_do_work(config, TEST_current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STOPPED, TELEMETRY_MESSENGER_STATE_STOPPED);
     device_do_work(handle);
     
     ASSERT_IS_NOT_NULL(TEST_authentication_create_saved_on_authentication_changed_callback);
@@ -2151,7 +2151,7 @@ TEST_FUNCTION(device_do_work_authentication_start_AUTH_TIMEOUT)
     DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
-    set_expected_calls_for_device_do_work(config, TEST_current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STOPPED, MESSENGER_STATE_STOPPED);
+    set_expected_calls_for_device_do_work(config, TEST_current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STOPPED, TELEMETRY_MESSENGER_STATE_STOPPED);
     device_do_work(handle);
 
     ASSERT_IS_NOT_NULL(TEST_authentication_create_saved_on_authentication_changed_callback);
@@ -2173,10 +2173,10 @@ TEST_FUNCTION(device_do_work_authentication_start_AUTH_TIMEOUT)
     device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_041: [If messenger state is MESSENGER_STATE_STOPPED, messenger_start shall be invoked]
-// Tests_SRS_DEVICE_09_042: [If messenger_start fails, the device state shall be updated to DEVICE_STATE_ERROR_MSG]
-// Tests_SRS_DEVICE_09_045: [If messenger state is MESSENGER_STATE_ERROR, the device state shall be updated to DEVICE_STATE_ERROR_MSG]
-TEST_FUNCTION(device_do_work_messenger_start_FAILED)
+// Tests_SRS_DEVICE_09_041: [If messenger state is TELEMETRY_MESSENGER_STATE_STOPPED, telemetry_messenger_start shall be invoked]
+// Tests_SRS_DEVICE_09_042: [If telemetry_messenger_start fails, the device state shall be updated to DEVICE_STATE_ERROR_MSG]
+// Tests_SRS_DEVICE_09_045: [If messenger state is TELEMETRY_MESSENGER_STATE_ERROR, the device state shall be updated to DEVICE_STATE_ERROR_MSG]
+TEST_FUNCTION(device_do_work_telemetry_messenger_start_FAILED)
 {
     // arrange
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
@@ -2185,18 +2185,18 @@ TEST_FUNCTION(device_do_work_messenger_start_FAILED)
     DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
-    crank_device_do_work(handle, config, TEST_current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STOPPED, MESSENGER_STATE_STOPPED);
+    crank_device_do_work(handle, config, TEST_current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STOPPED, TELEMETRY_MESSENGER_STATE_STOPPED);
     set_authentication_state(AUTHENTICATION_STATE_STOPPED, AUTHENTICATION_STATE_STARTING, TEST_current_time);
     set_authentication_state(AUTHENTICATION_STATE_STARTING, AUTHENTICATION_STATE_STARTED, TEST_current_time);
 
-    crank_device_do_work(handle, config, TEST_current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STARTED, MESSENGER_STATE_STOPPED);
+    crank_device_do_work(handle, config, TEST_current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STARTED, TELEMETRY_MESSENGER_STATE_STOPPED);
 
-    ASSERT_IS_NOT_NULL(TEST_messenger_create_saved_on_state_changed_callback);
+    ASSERT_IS_NOT_NULL(TEST_telemetry_messenger_create_saved_on_state_changed_callback);
 
-    set_messenger_state(MESSENGER_STATE_STOPPED, MESSENGER_STATE_STARTING, TEST_current_time);
-    set_messenger_state(MESSENGER_STATE_STARTING, MESSENGER_STATE_ERROR, TEST_current_time);
+    set_messenger_state(TELEMETRY_MESSENGER_STATE_STOPPED, TELEMETRY_MESSENGER_STATE_STARTING, TEST_current_time);
+    set_messenger_state(TELEMETRY_MESSENGER_STATE_STARTING, TELEMETRY_MESSENGER_STATE_ERROR, TEST_current_time);
 
-    set_expected_calls_for_device_do_work(config, TEST_current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STARTED, MESSENGER_STATE_ERROR);
+    set_expected_calls_for_device_do_work(config, TEST_current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STARTED, TELEMETRY_MESSENGER_STATE_ERROR);
 
     // act
     device_do_work(handle);
@@ -2211,9 +2211,9 @@ TEST_FUNCTION(device_do_work_messenger_start_FAILED)
     device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_043: [If messenger state is MESSENGER_STATE_STARTING, the device shall track the time since last event change and timeout if needed]
-// Tests_SRS_DEVICE_09_044: [If messenger_start times out, the device state shall be updated to DEVICE_STATE_ERROR_MSG]
-TEST_FUNCTION(device_do_work_messenger_start_timeout)
+// Tests_SRS_DEVICE_09_043: [If messenger state is TELEMETRY_MESSENGER_STATE_STARTING, the device shall track the time since last event change and timeout if needed]
+// Tests_SRS_DEVICE_09_044: [If telemetry_messenger_start times out, the device state shall be updated to DEVICE_STATE_ERROR_MSG]
+TEST_FUNCTION(device_do_work_telemetry_messenger_start_timeout)
 {
     // arrange
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
@@ -2224,16 +2224,16 @@ TEST_FUNCTION(device_do_work_messenger_start_timeout)
     time_t next_time = add_seconds(TEST_current_time, DEFAULT_MSGR_STATE_CHANGED_TIMEOUT_SECS + 1);
 
     umock_c_reset_all_calls();
-    crank_device_do_work(handle, config, TEST_current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STOPPED, MESSENGER_STATE_STOPPED);
+    crank_device_do_work(handle, config, TEST_current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STOPPED, TELEMETRY_MESSENGER_STATE_STOPPED);
     set_authentication_state(AUTHENTICATION_STATE_STOPPED, AUTHENTICATION_STATE_STARTING, TEST_current_time);
     set_authentication_state(AUTHENTICATION_STATE_STARTING, AUTHENTICATION_STATE_STARTED, TEST_current_time);
 
-    crank_device_do_work(handle, config, TEST_current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STARTED, MESSENGER_STATE_STOPPED);
+    crank_device_do_work(handle, config, TEST_current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STARTED, TELEMETRY_MESSENGER_STATE_STOPPED);
 
-    ASSERT_IS_NOT_NULL(TEST_messenger_create_saved_on_state_changed_callback);
-    set_messenger_state(MESSENGER_STATE_STOPPED, MESSENGER_STATE_STARTING, TEST_current_time);
+    ASSERT_IS_NOT_NULL(TEST_telemetry_messenger_create_saved_on_state_changed_callback);
+    set_messenger_state(TELEMETRY_MESSENGER_STATE_STOPPED, TELEMETRY_MESSENGER_STATE_STARTING, TEST_current_time);
 
-    set_expected_calls_for_device_do_work(config, next_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STARTED, MESSENGER_STATE_STARTING);
+    set_expected_calls_for_device_do_work(config, next_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STARTED, TELEMETRY_MESSENGER_STATE_STARTING);
 
     // act
     device_do_work(handle);
@@ -2249,7 +2249,7 @@ TEST_FUNCTION(device_do_work_messenger_start_timeout)
 }
 
 // Tests_SRS_DEVICE_09_040: [Messenger shall not be started if using CBS authentication and authentication start has not completed yet]
-// Tests_SRS_DEVICE_09_046: [If messenger state is MESSENGER_STATE_STARTED, the device state shall be updated to DEVICE_STATE_STARTED]
+// Tests_SRS_DEVICE_09_046: [If messenger state is TELEMETRY_MESSENGER_STATE_STARTED, the device state shall be updated to DEVICE_STATE_STARTED]
 // Tests_SRS_DEVICE_09_049: [If CBS is used for authentication and `instance->authentication_handle` state is not STOPPED or ERROR, authentication_do_work shall be invoked]
 // Tests_SRS_DEVICE_09_050: [If `instance->messenger_handle` state is not STOPPED or ERROR, authentication_do_work shall be invoked]
 TEST_FUNCTION(device_do_work_succeeds)
@@ -2267,19 +2267,19 @@ TEST_FUNCTION(device_do_work_succeeds)
     time_t t4 = add_seconds(t3, DEFAULT_MSGR_STATE_CHANGED_TIMEOUT_SECS + 1);
 
     umock_c_reset_all_calls();
-    crank_device_do_work(handle, config, t0, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STOPPED, MESSENGER_STATE_STOPPED);
+    crank_device_do_work(handle, config, t0, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STOPPED, TELEMETRY_MESSENGER_STATE_STOPPED);
     set_authentication_state(AUTHENTICATION_STATE_STOPPED, AUTHENTICATION_STATE_STARTING, t0);
 
-    crank_device_do_work(handle, config, t1, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STARTING, MESSENGER_STATE_STOPPED);
+    crank_device_do_work(handle, config, t1, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STARTING, TELEMETRY_MESSENGER_STATE_STOPPED);
     set_authentication_state(AUTHENTICATION_STATE_STARTING, AUTHENTICATION_STATE_STARTED, t1);
 
-    crank_device_do_work(handle, config, t2, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STARTED, MESSENGER_STATE_STOPPED);
-    set_messenger_state(MESSENGER_STATE_STOPPED, MESSENGER_STATE_STARTING, t2);
+    crank_device_do_work(handle, config, t2, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STARTED, TELEMETRY_MESSENGER_STATE_STOPPED);
+    set_messenger_state(TELEMETRY_MESSENGER_STATE_STOPPED, TELEMETRY_MESSENGER_STATE_STARTING, t2);
 
-    crank_device_do_work(handle, config, t3, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STARTED, MESSENGER_STATE_STARTING);
-    set_messenger_state(MESSENGER_STATE_STARTING, MESSENGER_STATE_STARTED, t3);
+    crank_device_do_work(handle, config, t3, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STARTED, TELEMETRY_MESSENGER_STATE_STARTING);
+    set_messenger_state(TELEMETRY_MESSENGER_STATE_STARTING, TELEMETRY_MESSENGER_STATE_STARTED, t3);
 
-    set_expected_calls_for_device_do_work(config, t4, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STARTED, MESSENGER_STATE_STARTED);
+    set_expected_calls_for_device_do_work(config, t4, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STARTED, TELEMETRY_MESSENGER_STATE_STARTED);
 
     // act
     device_do_work(handle);
@@ -2307,7 +2307,7 @@ TEST_FUNCTION(device_do_work_STARTED_auth_unexpected_state)
     TEST_authentication_create_saved_on_error_callback(TEST_authentication_create_saved_on_error_context, AUTHENTICATION_ERROR_SAS_REFRESH_TIMEOUT);
     set_authentication_state(AUTHENTICATION_STATE_STARTED, AUTHENTICATION_STATE_ERROR, TEST_current_time);
 
-    set_expected_calls_for_device_do_work(config, TEST_current_time, DEVICE_STATE_STARTED, AUTHENTICATION_STATE_ERROR, MESSENGER_STATE_STARTED);
+    set_expected_calls_for_device_do_work(config, TEST_current_time, DEVICE_STATE_STARTED, AUTHENTICATION_STATE_ERROR, TELEMETRY_MESSENGER_STATE_STARTED);
 
     // act
     device_do_work(handle);
@@ -2322,7 +2322,7 @@ TEST_FUNCTION(device_do_work_STARTED_auth_unexpected_state)
     device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_048: [If messenger state is not MESSENGER_STATE_STARTED, the device state shall be updated to DEVICE_STATE_ERROR_MSG]
+// Tests_SRS_DEVICE_09_048: [If messenger state is not TELEMETRY_MESSENGER_STATE_STARTED, the device state shall be updated to DEVICE_STATE_ERROR_MSG]
 TEST_FUNCTION(device_do_work_STARTED_messenger_unexpected_state)
 {
     // arrange
@@ -2331,10 +2331,10 @@ TEST_FUNCTION(device_do_work_STARTED_messenger_unexpected_state)
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
     DEVICE_HANDLE handle = create_and_start_and_crank_device(config, TEST_current_time);
 
-    set_messenger_state(MESSENGER_STATE_STARTED, MESSENGER_STATE_ERROR, TEST_current_time);
+    set_messenger_state(TELEMETRY_MESSENGER_STATE_STARTED, TELEMETRY_MESSENGER_STATE_ERROR, TEST_current_time);
 
 
-    set_expected_calls_for_device_do_work(config, TEST_current_time, DEVICE_STATE_STARTED, AUTHENTICATION_STATE_STARTED, MESSENGER_STATE_ERROR);
+    set_expected_calls_for_device_do_work(config, TEST_current_time, DEVICE_STATE_STARTED, AUTHENTICATION_STATE_STARTED, TELEMETRY_MESSENGER_STATE_ERROR);
 
     // act
     device_do_work(handle);
@@ -2350,11 +2350,11 @@ TEST_FUNCTION(device_do_work_STARTED_messenger_unexpected_state)
 }
 
 
-// Tests_SRS_DEVICE_09_059: [If `ev_send_comp_result` is MESSENGER_EVENT_SEND_COMPLETE_RESULT_OK, D2C_EVENT_SEND_COMPLETE_RESULT_OK shall be reported as `event_send_complete`]
-// Tests_SRS_DEVICE_09_060: [If `ev_send_comp_result` is MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE, D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE shall be reported as `event_send_complete`]
-// Tests_SRS_DEVICE_09_061: [If `ev_send_comp_result` is MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING, D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING shall be reported as `event_send_complete`]
-// Tests_SRS_DEVICE_09_062: [If `ev_send_comp_result` is MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_TIMEOUT, D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_TIMEOUT shall be reported as `event_send_complete`]
-// Tests_SRS_DEVICE_09_063: [If `ev_send_comp_result` is MESSENGER_EVENT_SEND_COMPLETE_RESULT_MESSENGER_DESTROYED, D2C_EVENT_SEND_COMPLETE_RESULT_DEVICE_DESTROYED shall be reported as `event_send_complete`]
+// Tests_SRS_DEVICE_09_059: [If `ev_send_comp_result` is TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_OK, D2C_EVENT_SEND_COMPLETE_RESULT_OK shall be reported as `event_send_complete`]
+// Tests_SRS_DEVICE_09_060: [If `ev_send_comp_result` is TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE, D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE shall be reported as `event_send_complete`]
+// Tests_SRS_DEVICE_09_061: [If `ev_send_comp_result` is TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING, D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING shall be reported as `event_send_complete`]
+// Tests_SRS_DEVICE_09_062: [If `ev_send_comp_result` is TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_TIMEOUT, D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_TIMEOUT shall be reported as `event_send_complete`]
+// Tests_SRS_DEVICE_09_063: [If `ev_send_comp_result` is TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_MESSENGER_DESTROYED, D2C_EVENT_SEND_COMPLETE_RESULT_DEVICE_DESTROYED shall be reported as `event_send_complete`]
 // Tests_SRS_DEVICE_09_064: [If provided, the user callback and context saved in `send_task` shall be invoked passing the device `event_send_complete`]
 // Tests_SRS_DEVICE_09_065: [The memory allocated for `send_task` shall be released]
 TEST_FUNCTION(on_event_send_complete_messenger_callback_succeeds)
@@ -2365,12 +2365,12 @@ TEST_FUNCTION(on_event_send_complete_messenger_callback_succeeds)
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
     DEVICE_HANDLE handle = create_device(config, TEST_current_time);
 
-    MESSENGER_EVENT_SEND_COMPLETE_RESULT messenger_results[5];
-    messenger_results[0] = MESSENGER_EVENT_SEND_COMPLETE_RESULT_OK;
-    messenger_results[1] = MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE;
-    messenger_results[2] = MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING;
-    messenger_results[3] = MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_TIMEOUT;
-    messenger_results[4] = MESSENGER_EVENT_SEND_COMPLETE_RESULT_MESSENGER_DESTROYED;
+    TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT messenger_results[5];
+    messenger_results[0] = TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_OK;
+    messenger_results[1] = TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE;
+    messenger_results[2] = TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING;
+    messenger_results[3] = TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_TIMEOUT;
+    messenger_results[4] = TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_MESSENGER_DESTROYED;
 
     D2C_EVENT_SEND_RESULT device_results[5];
     device_results[0] = D2C_EVENT_SEND_COMPLETE_RESULT_OK;
@@ -2391,10 +2391,10 @@ TEST_FUNCTION(on_event_send_complete_messenger_callback_succeeds)
         int result = device_send_event_async(handle, TEST_IOTHUB_MESSAGE_LIST, TEST_on_device_d2c_event_send_complete_callback, TEST_ON_DEVICE_EVENT_SEND_COMPLETE_CONTEXT);
         ASSERT_ARE_EQUAL(int, 0, result);
 
-        ASSERT_IS_NOT_NULL(TEST_messenger_send_async_saved_callback);
+        ASSERT_IS_NOT_NULL(TEST_telemetry_messenger_send_async_saved_callback);
         
         EXPECTED_CALL(free(IGNORED_PTR_ARG));
-        TEST_messenger_send_async_saved_callback(TEST_messenger_send_async_saved_message, messenger_results[i], TEST_messenger_send_async_saved_context);
+        TEST_telemetry_messenger_send_async_saved_callback(TEST_telemetry_messenger_send_async_saved_message, messenger_results[i], TEST_telemetry_messenger_send_async_saved_context);
 
         ASSERT_ARE_EQUAL(int, device_results[i], TEST_on_device_d2c_event_send_complete_callback_saved_result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -2404,7 +2404,7 @@ TEST_FUNCTION(on_event_send_complete_messenger_callback_succeeds)
     device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_070: [If `iothub_message_handle` or `context` is NULL, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_RELEASED]
+// Tests_SRS_DEVICE_09_070: [If `iothub_message_handle` or `context` is NULL, on_messenger_message_received_callback shall return TELEMETRY_MESSENGER_DISPOSITION_RESULT_RELEASED]
 TEST_FUNCTION(on_messenger_message_received_callback_NULL_handle)
 {
     // arrange
@@ -2414,35 +2414,35 @@ TEST_FUNCTION(on_messenger_message_received_callback_NULL_handle)
     DEVICE_HANDLE handle = create_and_start_and_crank_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
-    TEST_messenger_subscribe_for_messages_return = 0;
-    STRICT_EXPECTED_CALL(messenger_subscribe_for_messages(TEST_MESSENGER_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    TEST_telemetry_messenger_subscribe_for_messages_return = 0;
+    STRICT_EXPECTED_CALL(telemetry_messenger_subscribe_for_messages(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
     (void)device_subscribe_message(handle, TEST_on_message_received, handle);
-    ASSERT_IS_NOT_NULL(TEST_messenger_subscribe_for_messages_saved_on_message_received_callback);
+    ASSERT_IS_NOT_NULL(TEST_telemetry_messenger_subscribe_for_messages_saved_on_message_received_callback);
 
-    MESSENGER_MESSAGE_DISPOSITION_INFO disposition_info;
+    TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO disposition_info;
     disposition_info.source = TEST_MESSAGE_SOURCE_NAME_CHAR_PTR;
     disposition_info.message_id = TEST_MESSAGE_ID;
 
     umock_c_reset_all_calls();
 
     // act
-    MESSENGER_DISPOSITION_RESULT result = TEST_messenger_subscribe_for_messages_saved_on_message_received_callback(
+    TELEMETRY_MESSENGER_DISPOSITION_RESULT result = TEST_telemetry_messenger_subscribe_for_messages_saved_on_message_received_callback(
         NULL,
         &disposition_info,
-        TEST_messenger_subscribe_for_messages_saved_context);
+        TEST_telemetry_messenger_subscribe_for_messages_saved_context);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-    ASSERT_ARE_EQUAL(int, MESSENGER_DISPOSITION_RESULT_RELEASED, result);
+    ASSERT_ARE_EQUAL(int, TELEMETRY_MESSENGER_DISPOSITION_RESULT_RELEASED, result);
 
     // cleanup
     device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_070: [If `iothub_message_handle` or `context` is NULL, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_RELEASED]
+// Tests_SRS_DEVICE_09_070: [If `iothub_message_handle` or `context` is NULL, on_messenger_message_received_callback shall return TELEMETRY_MESSENGER_DISPOSITION_RESULT_RELEASED]
 TEST_FUNCTION(on_messenger_message_received_callback_NULL_context)
 {
     // arrange
@@ -2452,38 +2452,38 @@ TEST_FUNCTION(on_messenger_message_received_callback_NULL_context)
     DEVICE_HANDLE handle = create_and_start_and_crank_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
-    TEST_messenger_subscribe_for_messages_return = 0;
-    STRICT_EXPECTED_CALL(messenger_subscribe_for_messages(TEST_MESSENGER_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    TEST_telemetry_messenger_subscribe_for_messages_return = 0;
+    STRICT_EXPECTED_CALL(telemetry_messenger_subscribe_for_messages(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
     (void)device_subscribe_message(handle, TEST_on_message_received, handle);
-    ASSERT_IS_NOT_NULL(TEST_messenger_subscribe_for_messages_saved_on_message_received_callback);
+    ASSERT_IS_NOT_NULL(TEST_telemetry_messenger_subscribe_for_messages_saved_on_message_received_callback);
 
-    MESSENGER_MESSAGE_DISPOSITION_INFO disposition_info;
+    TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO disposition_info;
     disposition_info.source = TEST_MESSAGE_SOURCE_NAME_CHAR_PTR;
     disposition_info.message_id = TEST_MESSAGE_ID;
 
     umock_c_reset_all_calls();
 
     // act
-    MESSENGER_DISPOSITION_RESULT result = TEST_messenger_subscribe_for_messages_saved_on_message_received_callback(
+    TELEMETRY_MESSENGER_DISPOSITION_RESULT result = TEST_telemetry_messenger_subscribe_for_messages_saved_on_message_received_callback(
         TEST_IOTHUB_MESSAGE_HANDLE,
         &disposition_info,
         NULL);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-    ASSERT_ARE_EQUAL(int, MESSENGER_DISPOSITION_RESULT_RELEASED, result);
+    ASSERT_ARE_EQUAL(int, TELEMETRY_MESSENGER_DISPOSITION_RESULT_RELEASED, result);
 
     // cleanup
     device_destroy(handle);
 }
 
 // Tests_SRS_DEVICE_09_071: [The user callback shall be invoked, passing the context it provided]
-// Tests_SRS_DEVICE_09_072: [If the user callback returns DEVICE_MESSAGE_DISPOSITION_RESULT_ACCEPTED, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_ACCEPTED]
-// Tests_SRS_DEVICE_09_073: [If the user callback returns DEVICE_MESSAGE_DISPOSITION_RESULT_REJECTED, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_REJECTED]
-// Tests_SRS_DEVICE_09_074: [If the user callback returns DEVICE_MESSAGE_DISPOSITION_RESULT_RELEASED, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_RELEASED]
+// Tests_SRS_DEVICE_09_072: [If the user callback returns DEVICE_MESSAGE_DISPOSITION_RESULT_ACCEPTED, on_messenger_message_received_callback shall return TELEMETRY_MESSENGER_DISPOSITION_RESULT_ACCEPTED]
+// Tests_SRS_DEVICE_09_073: [If the user callback returns DEVICE_MESSAGE_DISPOSITION_RESULT_REJECTED, on_messenger_message_received_callback shall return TELEMETRY_MESSENGER_DISPOSITION_RESULT_REJECTED]
+// Tests_SRS_DEVICE_09_074: [If the user callback returns DEVICE_MESSAGE_DISPOSITION_RESULT_RELEASED, on_messenger_message_received_callback shall return TELEMETRY_MESSENGER_DISPOSITION_RESULT_RELEASED]
 // Tests_SRS_DEVICE_09_119: [A DEVICE_MESSAGE_DISPOSITION_INFO instance shall be created containing a copy of `disposition_info->source` and `disposition_info->message_id`]
 // Tests_SRS_DEVICE_09_121: [on_messenger_message_received_callback shall release the memory allocated for DEVICE_MESSAGE_DISPOSITION_INFO]
 TEST_FUNCTION(on_messenger_message_received_callback_succeess)
@@ -2494,10 +2494,10 @@ TEST_FUNCTION(on_messenger_message_received_callback_succeess)
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
     DEVICE_HANDLE handle = create_and_start_and_crank_device(config, TEST_current_time);
 
-    MESSENGER_DISPOSITION_RESULT messenger_results[3];
-    messenger_results[0] = MESSENGER_DISPOSITION_RESULT_ACCEPTED;
-    messenger_results[1] = MESSENGER_DISPOSITION_RESULT_REJECTED;
-    messenger_results[2] = MESSENGER_DISPOSITION_RESULT_RELEASED;
+    TELEMETRY_MESSENGER_DISPOSITION_RESULT messenger_results[3];
+    messenger_results[0] = TELEMETRY_MESSENGER_DISPOSITION_RESULT_ACCEPTED;
+    messenger_results[1] = TELEMETRY_MESSENGER_DISPOSITION_RESULT_REJECTED;
+    messenger_results[2] = TELEMETRY_MESSENGER_DISPOSITION_RESULT_RELEASED;
 
     DEVICE_MESSAGE_DISPOSITION_RESULT device_results[3];
     device_results[0] = DEVICE_MESSAGE_DISPOSITION_RESULT_ACCEPTED;
@@ -2505,13 +2505,13 @@ TEST_FUNCTION(on_messenger_message_received_callback_succeess)
     device_results[2] = DEVICE_MESSAGE_DISPOSITION_RESULT_RELEASED;
 
     umock_c_reset_all_calls();
-    TEST_messenger_subscribe_for_messages_return = 0;
-    STRICT_EXPECTED_CALL(messenger_subscribe_for_messages(TEST_MESSENGER_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    TEST_telemetry_messenger_subscribe_for_messages_return = 0;
+    STRICT_EXPECTED_CALL(telemetry_messenger_subscribe_for_messages(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
     
     (void)device_subscribe_message(handle, TEST_on_message_received, handle);
-    ASSERT_IS_NOT_NULL(TEST_messenger_subscribe_for_messages_saved_on_message_received_callback);
+    ASSERT_IS_NOT_NULL(TEST_telemetry_messenger_subscribe_for_messages_saved_on_message_received_callback);
 
     // act
     int i;
@@ -2521,7 +2521,7 @@ TEST_FUNCTION(on_messenger_message_received_callback_succeess)
 
         TEST_on_message_received_return = device_results[i];
 
-        MESSENGER_MESSAGE_DISPOSITION_INFO disposition_info;
+        TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO disposition_info;
         disposition_info.source = TEST_MESSAGE_SOURCE_NAME_CHAR_PTR;
         disposition_info.message_id = TEST_MESSAGE_ID;
 
@@ -2531,10 +2531,10 @@ TEST_FUNCTION(on_messenger_message_received_callback_succeess)
         EXPECTED_CALL(free(IGNORED_PTR_ARG));
         EXPECTED_CALL(free(IGNORED_PTR_ARG));
 
-        MESSENGER_DISPOSITION_RESULT result = TEST_messenger_subscribe_for_messages_saved_on_message_received_callback(
+        TELEMETRY_MESSENGER_DISPOSITION_RESULT result = TEST_telemetry_messenger_subscribe_for_messages_saved_on_message_received_callback(
             TEST_IOTHUB_MESSAGE_HANDLE,
             &disposition_info,
-            TEST_messenger_subscribe_for_messages_saved_context);
+            TEST_telemetry_messenger_subscribe_for_messages_saved_context);
 
         // assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -2545,7 +2545,7 @@ TEST_FUNCTION(on_messenger_message_received_callback_succeess)
     device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_120: [If the DEVICE_MESSAGE_DISPOSITION_INFO instance fails to be created, on_messenger_message_received_callback shall return MESSENGER_DISPOSITION_RESULT_RELEASED]
+// Tests_SRS_DEVICE_09_120: [If the DEVICE_MESSAGE_DISPOSITION_INFO instance fails to be created, on_messenger_message_received_callback shall return TELEMETRY_MESSENGER_DISPOSITION_RESULT_RELEASED]
 TEST_FUNCTION(on_messenger_message_received_callback_failure_checks)
 {
     // arrange
@@ -2555,15 +2555,15 @@ TEST_FUNCTION(on_messenger_message_received_callback_failure_checks)
     DEVICE_HANDLE handle = create_and_start_and_crank_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
-    TEST_messenger_subscribe_for_messages_return = 0;
-    STRICT_EXPECTED_CALL(messenger_subscribe_for_messages(TEST_MESSENGER_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    TEST_telemetry_messenger_subscribe_for_messages_return = 0;
+    STRICT_EXPECTED_CALL(telemetry_messenger_subscribe_for_messages(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
     (void)device_subscribe_message(handle, TEST_on_message_received, handle);
-    ASSERT_IS_NOT_NULL(TEST_messenger_subscribe_for_messages_saved_on_message_received_callback);
+    ASSERT_IS_NOT_NULL(TEST_telemetry_messenger_subscribe_for_messages_saved_on_message_received_callback);
 
-    MESSENGER_MESSAGE_DISPOSITION_INFO disposition_info;
+    TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO disposition_info;
     disposition_info.source = TEST_MESSAGE_SOURCE_NAME_CHAR_PTR;
     disposition_info.message_id = TEST_MESSAGE_ID;
 
@@ -2590,14 +2590,14 @@ TEST_FUNCTION(on_messenger_message_received_callback_failure_checks)
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
 
-        MESSENGER_DISPOSITION_RESULT result = TEST_messenger_subscribe_for_messages_saved_on_message_received_callback(
+        TELEMETRY_MESSENGER_DISPOSITION_RESULT result = TEST_telemetry_messenger_subscribe_for_messages_saved_on_message_received_callback(
             TEST_IOTHUB_MESSAGE_HANDLE,
             &disposition_info,
-            TEST_messenger_subscribe_for_messages_saved_context);
+            TEST_telemetry_messenger_subscribe_for_messages_saved_context);
 
         // assert
         sprintf(error_msg, "On failed call %zu", i);
-        ASSERT_ARE_EQUAL_WITH_MSG(int, MESSENGER_DISPOSITION_RESULT_RELEASED, result, error_msg);
+        ASSERT_ARE_EQUAL_WITH_MSG(int, TELEMETRY_MESSENGER_DISPOSITION_RESULT_RELEASED, result, error_msg);
     }
 
     // cleanup
@@ -2605,9 +2605,9 @@ TEST_FUNCTION(on_messenger_message_received_callback_failure_checks)
     umock_c_negative_tests_deinit();
 }
 
-// Tests_SRS_DEVICE_09_113: [A MESSENGER_MESSAGE_DISPOSITION_INFO instance shall be created with a copy of the `source` and `message_id` contained in `disposition_info`]  
-// Tests_SRS_DEVICE_09_115: [`messenger_send_message_disposition()` shall be invoked passing the MESSENGER_MESSAGE_DISPOSITION_INFO instance and the corresponding MESSENGER_DISPOSITION_RESULT]  
-// Tests_SRS_DEVICE_09_117: [device_send_message_disposition() shall destroy the MESSENGER_MESSAGE_DISPOSITION_INFO instance]  
+// Tests_SRS_DEVICE_09_113: [A TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance shall be created with a copy of the `source` and `message_id` contained in `disposition_info`]  
+// Tests_SRS_DEVICE_09_115: [`telemetry_messenger_send_message_disposition()` shall be invoked passing the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance and the corresponding TELEMETRY_MESSENGER_DISPOSITION_RESULT]  
+// Tests_SRS_DEVICE_09_117: [device_send_message_disposition() shall destroy the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance]  
 // Tests_SRS_DEVICE_09_118: [If no failures occurr, device_send_message_disposition() shall return 0]  
 TEST_FUNCTION(device_send_message_disposition_succeess)
 {
@@ -2620,9 +2620,9 @@ TEST_FUNCTION(device_send_message_disposition_succeess)
     disposition_info.message_id = TEST_MESSAGE_ID;
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(malloc(sizeof(MESSENGER_MESSAGE_DISPOSITION_INFO)));
+    STRICT_EXPECTED_CALL(malloc(sizeof(TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO)));
     EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(messenger_send_message_disposition(TEST_MESSENGER_HANDLE, IGNORED_PTR_ARG, MESSENGER_DISPOSITION_RESULT_ACCEPTED))
+    STRICT_EXPECTED_CALL(telemetry_messenger_send_message_disposition(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_PTR_ARG, TELEMETRY_MESSENGER_DISPOSITION_RESULT_ACCEPTED))
         .IgnoreArgument(2);
     EXPECTED_CALL(free(IGNORED_PTR_ARG));
     EXPECTED_CALL(free(IGNORED_PTR_ARG));
@@ -2702,8 +2702,8 @@ TEST_FUNCTION(device_send_message_NULL_disposition_info_source)
     device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_114: [If the MESSENGER_MESSAGE_DISPOSITION_INFO fails to be created, device_send_message_disposition() shall fail and return __FAILURE__]  
-// Tests_SRS_DEVICE_09_116: [If `messenger_send_message_disposition()` fails, device_send_message_disposition() shall fail and return __FAILURE__]  
+// Tests_SRS_DEVICE_09_114: [If the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO fails to be created, device_send_message_disposition() shall fail and return __FAILURE__]  
+// Tests_SRS_DEVICE_09_116: [If `telemetry_messenger_send_message_disposition()` fails, device_send_message_disposition() shall fail and return __FAILURE__]  
 TEST_FUNCTION(device_send_message_disposition_failure_checks)
 {
     // arrange
@@ -2717,9 +2717,9 @@ TEST_FUNCTION(device_send_message_disposition_failure_checks)
     disposition_info.message_id = TEST_MESSAGE_ID;
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(malloc(sizeof(MESSENGER_MESSAGE_DISPOSITION_INFO)));
+    STRICT_EXPECTED_CALL(malloc(sizeof(TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO)));
     EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(messenger_send_message_disposition(TEST_MESSENGER_HANDLE, IGNORED_PTR_ARG, MESSENGER_DISPOSITION_RESULT_ACCEPTED))
+    STRICT_EXPECTED_CALL(telemetry_messenger_send_message_disposition(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_PTR_ARG, TELEMETRY_MESSENGER_DISPOSITION_RESULT_ACCEPTED))
         .IgnoreArgument(2);
     EXPECTED_CALL(free(IGNORED_PTR_ARG));
     EXPECTED_CALL(free(IGNORED_PTR_ARG));
