@@ -3636,18 +3636,17 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_deviceKey_unhappypaths)
         59, /*BUFFER_u_char*/
         68, /*STRING_c_str*/
         73, /*STRING_c_str*/
-        74, /*HTTPAPIEX_SAS_Destroy*/
-        75, /*STRING_delete*/
+        75, /*HTTPAPIEX_SAS_Destroy*/
         76, /*STRING_delete*/
         77, /*STRING_delete*/
-        78, /*BUFFER_delete*/
-        79, /*gballoc_free*/
-        80, /*BUFFER_delete*/
-        81, /*HTTPHeaders_Free*/
-        82, /*STRING_delete*/
+        78, /*STRING_delete*/
+        79, /*BUFFER_delete*/
+        80, /*gballoc_free*/
+        81, /*BUFFER_delete*/
+        82, /*HTTPHeaders_Free*/
         83, /*STRING_delete*/
-        84, /*HTTPAPIEX_Destroy*/
-		85, /*??? - there are only 85 function calls so what is this?*/
+        84, /*STRING_delete*/
+        85, /*HTTPAPIEX_Destroy*/
     };
 
     for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
