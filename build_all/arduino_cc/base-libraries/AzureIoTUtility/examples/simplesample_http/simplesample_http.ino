@@ -48,23 +48,10 @@ Adafruit_WINC1500 WiFi(WINC_CS, WINC_IRQ, WINC_RST);
 static char ssid[] = "yourNetwork";     // your network SSID (name)
 static char pass[] = "yourPassword";    // your network password (use for WPA, or use as key for WEP)
 
-// In the next line we decide each client ssl we'll use.
-#ifdef ARDUINO_ARCH_ESP8266
-static WiFiClientSecure sslClient; // for ESP8266
-#elif ARDUINO_SAMD_FEATHER_M0
-static Adafruit_WINC1500SSLClient sslClient; // for Adafruit WINC1500
-#else
-static WiFiSSLClient sslClient;
-#endif
-
-static AzureIoTHubClient iotHubClient;
-
 void setup() {
     initSerial();
     initWifi();
     initTime();
-
-    iotHubClient.begin(sslClient);
 }
 
 void loop() {
@@ -130,8 +117,6 @@ void initTime() {
 
     Serial.print("Fetched NTP epoch time is: ");
     Serial.println(epochTime);
-
-    iotHubClient.setEpochTime(epochTime);
 
 #elif ARDUINO_ARCH_ESP8266
     time_t epochTime;

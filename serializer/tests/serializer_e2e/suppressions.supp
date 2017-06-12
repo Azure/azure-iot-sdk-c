@@ -22,6 +22,26 @@
 	fun:_IO_file_xsputn@@GLIBC_2.2.5
 	fun:puts
 }
+{
+   DRD false conflicting access while setting time basis
+   drd:ConflictingAccess
+   fun:set_time_basis
+}
+{
+   DRD false conflicting access while setting time basis #2
+   drd:ConflictingAccess
+   fun:fun:get_time_ns
+}
+{
+   Helgrind false race confition while setting time basis
+   Helgrind:Race
+   fun:set_time_basis
+}
+{
+   Helgrind false race confition while setting time basis #2
+   Helgrind:Race
+   fun:fun:get_time_ns
+}
 
 
 
