@@ -584,7 +584,7 @@ static void set_expected_calls_for_device_set_option(DEVICE_HANDLE handle, DEVIC
 
     if (strcmp(DEVICE_OPTION_EVENT_SEND_TIMEOUT_SECS, option_name) == 0)
     {
-        STRICT_EXPECTED_CALL(telemetry_messenger_set_option(TEST_TELEMETRY_MESSENGER_HANDLE, option_name, option_value));
+        STRICT_EXPECTED_CALL(telemetry_messenger_set_option(TEST_TELEMETRY_MESSENGER_HANDLE, MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, option_value));
     }
     else if (strcmp(DEVICE_OPTION_SAVED_MESSENGER_OPTIONS, option_name) == 0)
     {
