@@ -1154,7 +1154,7 @@ static TELEMETRY_MESSENGER_HANDLE create_and_start_messenger2(TELEMETRY_MESSENGE
 	return handle;
 }
 
-BEGIN_TEST_SUITE(iothubtransport_amqp_telemetry_messenger_ut)
+BEGIN_TEST_SUITE(iothubtr_amqp_tel_msgr_ut)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
@@ -3064,4 +3064,4 @@ TEST_FUNCTION(telemetry_messenger_retrieve_options_failure_checks)
 	umock_c_negative_tests_deinit();
 }
 
-END_TEST_SUITE(iothubtransport_amqp_telemetry_messenger_ut)
+END_TEST_SUITE(iothubtr_amqp_tel_msgr_ut)
