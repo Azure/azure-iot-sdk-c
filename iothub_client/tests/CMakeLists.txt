@@ -73,7 +73,7 @@ if(${use_amqp})
         add_unittest_directory(iothubtransportamqp_methods_ut)
     endif()
     add_unittest_directory(iothubtransport_amqp_connection_ut)
-    add_unittest_directory(iothubtransport_amqp_messenger_ut)
+    add_unittest_directory(iothubtr_amqp_tel_msgr_ut)
     add_unittest_directory(iothubtransportamqp_ut)
     add_unittest_directory(iothubtransportamqp_ws_ut)
     
