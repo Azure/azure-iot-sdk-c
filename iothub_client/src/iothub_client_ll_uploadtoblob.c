@@ -539,8 +539,8 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
 							}
 							BUFFER_delete(responseContent);
 						}
+                        BUFFER_delete(blobBuffer);
 					}
-					BUFFER_delete(blobBuffer);
 				}
 				STRING_delete(blobName);
 			}
