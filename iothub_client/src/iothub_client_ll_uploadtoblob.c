@@ -206,6 +206,7 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
 					if (blobBuffer == NULL)
 					{
 						/*Codes_SRS_IOTHUBCLIENT_LL_32_002: [ If creating the JSON string fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+                        LogError("unable to create BUFFER");
 						result = __FAILURE__;
 					}
 					else
@@ -544,8 +545,8 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
 				}
 				STRING_delete(blobName);
 			}
-			STRING_delete(relativePath);
 		}
+		STRING_delete(relativePath);
 	}
     return result;
 }
