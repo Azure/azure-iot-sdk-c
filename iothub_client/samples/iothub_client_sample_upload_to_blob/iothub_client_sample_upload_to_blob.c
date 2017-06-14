@@ -31,7 +31,7 @@ and removing calls to _DoWork will yield the same results. */
 /*String containing Hostname, Device Id & Device Key in the format:                         */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessSignature=<device_sas_token>"    */
-static const char* connectionString = "HostName=MarkRadHub1.azure-devices.net;DeviceId=TestDevice1;SharedAccessKey=S25yVuoWbt8kDc/0xxxF06ovWyN8m3SqRlhT4mHaE7Q=";
+static const char* connectionString = "<<device connection string>>";
 
 #define HELLO_WORLD "Hello World from IoTHubClient_LL_UploadToBlob"
 

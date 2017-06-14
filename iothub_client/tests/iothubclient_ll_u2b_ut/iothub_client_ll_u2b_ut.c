@@ -3666,7 +3666,6 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_deviceKey_unhappypaths)
 
         if (j == sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]))
         {
-			printf(">>>> i=%lu;j=%lu\r\n", i, j);
             /// assert
             sprintf(temp_str, "On failed call %zu", i);
             IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_Impl(h, "text.txt", &c, 1);
