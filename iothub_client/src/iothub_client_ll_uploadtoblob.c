@@ -200,8 +200,8 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
 				}
 				else
 				{
-                    result = STRING_length(blobName);
-					BUFFER_HANDLE blobBuffer = BUFFER_create((const unsigned char *)STRING_c_str(blobName), result);
+                    size_t len = STRING_length(blobName);
+					BUFFER_HANDLE blobBuffer = BUFFER_create((const unsigned char *)STRING_c_str(blobName), len);
 
 					if (blobBuffer == NULL)
 					{
