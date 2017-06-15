@@ -9,7 +9,6 @@
         <projectUrl>https://github.com/Azure/azure-iot-sdk-c</projectUrl>
         <requireLicenseAcceptance>true</requireLicenseAcceptance>
         <description>Microsoft Azure IoTHub AMQP transport</description>
-        <projectUrl>https://github.com/Azure/azure-iot-sdk-c</projectUrl>
         <iconUrl>http://go.microsoft.com/fwlink/?LinkID=288890</iconUrl>
         <summary>This nuget package can be used to connect to IoTHub over AMQP.</summary>
         <releaseNotes/>

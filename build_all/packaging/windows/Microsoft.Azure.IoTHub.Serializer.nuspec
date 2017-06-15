@@ -10,7 +10,6 @@
         <requireLicenseAcceptance>true</requireLicenseAcceptance>
         <description>Microsoft Azure IoTHub Serializer</description>
         <iconUrl>http://go.microsoft.com/fwlink/?LinkID=288890</iconUrl>
-        <projectUrl>https://github.com/Azure/azure-iot-sdk-c</projectUrl>
         <summary>This nuget package contains a serializer library for IoTHub</summary>
         <releaseNotes/>
         <copyright>© Microsoft Corporation. All rights reserved.</copyright>
