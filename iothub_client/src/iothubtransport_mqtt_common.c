@@ -1737,11 +1737,23 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             {
                 clone = URL_Encode(product_info);
             }
-            if (clone != NULL)
+
+            if (clone == NULL)
             {
-                (void)STRING_concat_with_STRING(transport_data->configPassedThroughUsername, clone);
+                LogError("Failed obtaining the product info");
+            }
+            else
+            {
+                if (STRING_concat_with_STRING(transport_data->configPassedThroughUsername, clone) != 0)
+                {
+                    LogError("Failed concatenating the product info");
+                }
+                else
+                {
+                    transport_data->isProductInfoSet = true;
+                }
+
                 STRING_delete(clone);
-                transport_data->isProductInfoSet = true;
             }
         }
 
