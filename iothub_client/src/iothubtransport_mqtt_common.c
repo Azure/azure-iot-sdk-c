@@ -209,6 +209,7 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     int http_proxy_port;
     char* http_proxy_username;
     char* http_proxy_password;
+    bool isProductInfoSet;
 } MQTTTRANSPORT_HANDLE_DATA, *PMQTTTRANSPORT_HANDLE_DATA;
 
 typedef struct MQTT_DEVICE_TWIN_ITEM_TAG
@@ -1719,20 +1720,41 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 
     if (result == 0)
     {
-        void* product_info;
-        STRING_HANDLE clone;
-        if ((IoTHubClient_LL_GetOption(transport_data->llClientHandle, OPTION_PRODUCT_INFO, &product_info) == IOTHUB_CLIENT_ERROR) || (product_info == NULL))
+        if (!transport_data->isProductInfoSet)
         {
-            clone = STRING_construct_sprintf("%s%%2F%s", CLIENT_DEVICE_TYPE_PREFIX, IOTHUB_SDK_VERSION);
-        }
-        else
-        {
-            clone = URL_Encode(product_info);
-        }
-        if (clone != NULL)
-        {
-            (void)STRING_concat_with_STRING(transport_data->configPassedThroughUsername, clone);
-            STRING_delete(clone);
+            // This requires the iothubClientHandle, which sadly the MQTT transport only gets on DoWork, so this code still needs to remain here.
+            // The correct place for this would be in the Create method, but we don't get the client handle there.
+            // Also, when device multiplexing is used, the customer creates the transport directly and explicitly, when the client is still not created.
+            // This will be a major hurdle when we add device multiplexing to MQTT transport.
+
+            void* product_info;
+            STRING_HANDLE clone;
+            if ((IoTHubClient_LL_GetOption(transport_data->llClientHandle, OPTION_PRODUCT_INFO, &product_info) == IOTHUB_CLIENT_ERROR) || (product_info == NULL))
+            {
+                clone = STRING_construct_sprintf("%s%%2F%s", CLIENT_DEVICE_TYPE_PREFIX, IOTHUB_SDK_VERSION);
+            }
+            else
+            {
+                clone = URL_Encode(product_info);
+            }
+
+            if (clone == NULL)
+            {
+                LogError("Failed obtaining the product info");
+            }
+            else
+            {
+                if (STRING_concat_with_STRING(transport_data->configPassedThroughUsername, clone) != 0)
+                {
+                    LogError("Failed concatenating the product info");
+                }
+                else
+                {
+                    transport_data->isProductInfoSet = true;
+                }
+
+                STRING_delete(clone);
+            }
         }
 
         MQTT_CLIENT_OPTIONS options = { 0 };
@@ -1991,6 +2013,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                         state->retryLogic = NULL;
                         srand((unsigned int)get_time(NULL));
                         state->authorization_module = auth_module;
+                        state->isProductInfoSet = false;
                     }
                 }
             }
