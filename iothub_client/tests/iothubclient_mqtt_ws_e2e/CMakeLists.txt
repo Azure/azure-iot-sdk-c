@@ -60,7 +60,7 @@ if(WIN32)
             aziotsharedutil
             rpcrt4
         )
-        linkSharedUtil(${theseTestsName}_dll)
+        linkSharedUtil(${theseTestsName}_exe)
         linkUAMQP(${theseTestsName}_exe)
         linkMqttLibrary(${theseTestsName}_exe)
     endif()
