@@ -95,7 +95,7 @@ The final step in the process is to run the actual build. For this you will need
 cd ~/Source/azure-iot-sdks/c/build_all/linux
 ./build.sh --toolchain-file toolchain-rpi.cmake -cl --sysroot=$RPI_ROOT
 ```
-This will tell cmake to build the SDK using the toolchain file toolchain-rpi.cmake and skip running all tests which is important since the executables will (probably) not run successfully on the host anyway. Finally, and absolutely critical is the use of the *--sysroot* option. Without this the compiler will fail to find required headers and libraries.
+This will tell cmake to build the SDK using the toolchain file toolchain-rpi.cmake. Finally, and absolutely critical is the use of the *--sysroot* option. Without this the compiler will fail to find required headers and libraries.
 
 ### Specifying Additional Build Flags
 
