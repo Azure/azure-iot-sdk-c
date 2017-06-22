@@ -1527,7 +1527,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetOption(IOTHUB_CLIENT_LL_HANDLE iotHubCli
         IOTHUB_CLIENT_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LL_HANDLE_DATA*)iotHubClientHandle;
 
         /*Codes_SRS_IOTHUBCLIENT_LL_02_039: [ "messageTimeout" - once IoTHubClient_LL_SendEventAsync is called the message shall timeout after value miliseconds. Value is a pointer to a uint64. ]*/
-        if (strcmp(optionName, "messageTimeout") == 0)
+        if (strcmp(optionName, OPTION_MESSAGE_TIMEOUT) == 0)
         {
             /*this is an option handled by IoTHubClient_LL*/
             /*Codes_SRS_IOTHUBCLIENT_LL_02_043: [ Calling IoTHubClient_LL_SetOption with value set to "0" shall disable the timeout mechanism for all new messages. ]*/
@@ -1571,7 +1571,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetOption(IOTHUB_CLIENT_LL_HANDLE iotHubCli
             uploadToBlob_result = IOTHUB_CLIENT_INVALID_ARG; /*harmless value (IOTHUB_CLIENT_INVALID_ARG)in the case when uploadtoblob is not compiled in, otherwise whatever IoTHubClient_LL_UploadToBlob_SetOption returned*/
 #endif /*DONT_USE_UPLOADTOBLOB*/
 
-                
+            /*Codes_SRS_IOTHUBCLIENT_LL_12_023: [** `c2d_keep_alive_freq_secs` - shall set the cloud to device keep alive frequency(in seconds) for the connection. Zero means keep alive will not be sent. ]*/
             result =
                 /*based on uploadToBlob_result value this is what happens:*/
                 /*IOTHUB_CLIENT_INVALID_ARG always returns what IoTHubTransport_SetOption returns*/

@@ -14,7 +14,6 @@
 #include "azure_uamqp_c/connection.h"
 
 #define RESULT_OK                            0
-#define DEFAULT_CONNECTION_IDLE_TIMEOUT      240000
 #define DEFAULT_INCOMING_WINDOW_SIZE         UINT_MAX
 #define DEFAULT_OUTGOING_WINDOW_SIZE         100
 #define SASL_IO_OPTION_LOG_TRACE             "logtrace"
@@ -33,6 +32,7 @@ typedef struct AMQP_CONNECTION_INSTANCE_TAG
 	AMQP_CONNECTION_STATE current_state;
 	ON_AMQP_CONNECTION_STATE_CHANGED on_state_changed_callback;
 	const void* on_state_changed_context;
+    uint32_t c2d_keep_alive_freq_secs;
 } AMQP_CONNECTION_INSTANCE;
 
 
@@ -195,8 +195,7 @@ static int create_connection_handle(AMQP_CONNECTION_INSTANCE* instance)
 			result = __FAILURE__;
 			LogError("Failed creating the AMQP connection (connection_create2 failed)");
 		}
-		// Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_073: [The connection idle timeout parameter shall be set to 240000 milliseconds using connection_set_idle_timeout()]
-		else if (connection_set_idle_timeout(instance->connection_handle, DEFAULT_CONNECTION_IDLE_TIMEOUT) != RESULT_OK)
+		else if (connection_set_idle_timeout(instance->connection_handle, 1000 * instance->c2d_keep_alive_freq_secs) != RESULT_OK)
 		{
 			// Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_074: [If connection_set_idle_timeout() fails, amqp_connection_create() shall fail and return NULL]
 			result = __FAILURE__;
@@ -381,6 +380,8 @@ AMQP_CONNECTION_HANDLE amqp_connection_create(AMQP_CONNECTION_CONFIG* config)
 				instance->on_state_changed_callback = config->on_state_changed_callback;
 				// Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_061: [`config->on_state_changed_context` shall be saved on `instance->on_state_changed_context`]
 				instance->on_state_changed_context = config->on_state_changed_context;
+
+                instance->c2d_keep_alive_freq_secs = config->c2d_keep_alive_freq_secs;
 
 				instance->current_state = AMQP_CONNECTION_STATE_CLOSED;
 

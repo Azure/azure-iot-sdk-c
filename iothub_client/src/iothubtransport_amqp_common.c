@@ -46,6 +46,7 @@
 #define DEFAULT_SAS_TOKEN_LIFETIME_SECS           3600
 #define DEFAULT_SAS_TOKEN_REFRESH_TIME_SECS       1800
 #define MAX_NUMBER_OF_DEVICE_FAILURES             5
+#define DEFAULT_C2D_KEEP_ALIVE_FREQ_SECS          240
 #define DEFAULT_RETRY_POLICY                      IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER
 // DEFAULT_MAX_RETRY_TIME_IN_SECS = 0 means infinite retry.
 #define DEFAULT_MAX_RETRY_TIME_IN_SECS            0
@@ -84,6 +85,7 @@ typedef struct AMQP_TRANSPORT_INSTANCE_TAG
     OPTIONHANDLER_HANDLE saved_tls_options;                             // Here are the options from the xio layer if any is saved.
     AMQP_TRANSPORT_STATE state;                                         // Current state of the transport.
     RETRY_CONTROL_HANDLE connection_retry_control;                      // Controls when the re-connection attempt should occur.
+    size_t c2d_keep_alive_freq_secs;                                    // Service to device keep alive frequency
 
     char* http_proxy_hostname;
     int http_proxy_port;
@@ -665,6 +667,8 @@ static int establish_amqp_connection(AMQP_TRANSPORT_INSTANCE* transport_instance
         amqp_connection_config.is_trace_on = transport_instance->is_trace_on;
         amqp_connection_config.on_state_changed_callback = on_amqp_connection_state_changed;
         amqp_connection_config.on_state_changed_context = transport_instance;
+        // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_12_003: [AMQP connection will be configured using the `c2d_keep_alive_freq_secs` value from SetOption ]
+        amqp_connection_config.c2d_keep_alive_freq_secs = transport_instance->c2d_keep_alive_freq_secs;
 
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_027: [If `transport->preferred_authentication_method` is CBS, AMQP_CONNECTION_CONFIG shall be set with `create_sasl_io` = true and `create_cbs_connection` = true]
         if (transport_instance->preferred_authentication_mode == AMQP_TRANSPORT_AUTHENTICATION_MODE_CBS)
@@ -1314,6 +1318,8 @@ TRANSPORT_LL_HANDLE IoTHubTransport_AMQP_Common_Create(const IOTHUBTRANSPORT_CON
                 instance->option_sas_token_refresh_time_secs = DEFAULT_SAS_TOKEN_REFRESH_TIME_SECS;
                 instance->option_cbs_request_timeout_secs = DEFAULT_CBS_REQUEST_TIMEOUT_SECS;
                 instance->option_send_event_timeout_secs = DEFAULT_EVENT_SEND_TIMEOUT_SECS;
+                // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_12_002: [The connection idle timeout parameter default value shall be set to 240000 milliseconds using connection_set_idle_timeout()]
+                instance->c2d_keep_alive_freq_secs = DEFAULT_C2D_KEEP_ALIVE_FREQ_SECS;
 
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_012: [If IoTHubTransport_AMQP_Common_Create succeeds it shall return a pointer to `instance`.]
                 result = (TRANSPORT_LL_HANDLE)instance;
@@ -1377,6 +1383,7 @@ void IoTHubTransport_AMQP_Common_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIEN
             // there is not a preferred authentication mode set yet on the transport.
 
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_019: [If `instance->amqp_connection` is NULL, it shall be established]
+            // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_12_003: [AMQP connection will be configured using the `c2d_keep_alive_freq_secs` value from SetOption ]
             if (transport_instance->amqp_connection == NULL && establish_amqp_connection(transport_instance) != RESULT_OK)
             {
                 LogError("AMQP transport failed to establish connection with service.");
@@ -1668,6 +1675,11 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SetOption(TRANSPORT_LL_HANDLE h
         {
             is_device_specific_option = true;
             transport_instance->option_send_event_timeout_secs = *(size_t*)value;
+        }
+        else if (strcmp(OPTION_C2D_KEEP_ALIVE_FREQ_SECS, option) == 0)
+        {
+            is_device_specific_option = false;
+            transport_instance->c2d_keep_alive_freq_secs = *(size_t*)value;
         }
         else
         {

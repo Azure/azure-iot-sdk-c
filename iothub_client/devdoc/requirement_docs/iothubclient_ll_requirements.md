@@ -480,6 +480,8 @@ IoTHubClient_LL_SetOption sets the runtime option "optionName" to the value poin
 
 -**SRS_IOTHUBCLIENT_LL_10_035: [** If string concatenation fails, `IoTHubClient_LL_SetOption` shall return `IOTHUB_CLIENT_ERRROR`. Otherwise, `IOTHUB_CLIENT_OK` shall be returned.** ]**
 
+-**SRS_IOTHUBCLIENT_LL_12_023: [** `c2d_keep_alive_freq_secs` - shall set the cloud to device keep alive frequency (in seconds) for the connection. Zero means keep alive will not be sent. **]**
+
  **SRS_IOTHUBCLIENT_LL_02_099: [** `IoTHubClient_LL_SetOption` shall return according to the table below  ]**
 
   | IoTHubClient_UploadToBlob_SetOption   | Transport_SetOption       | Return value
