@@ -381,7 +381,7 @@ AMQP_CONNECTION_HANDLE amqp_connection_create(AMQP_CONNECTION_CONFIG* config)
 				// Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_061: [`config->on_state_changed_context` shall be saved on `instance->on_state_changed_context`]
 				instance->on_state_changed_context = config->on_state_changed_context;
 
-                instance->c2d_keep_alive_freq_secs = config->c2d_keep_alive_freq_secs;
+                instance->c2d_keep_alive_freq_secs = (uint32_t)config->c2d_keep_alive_freq_secs;
 
 				instance->current_state = AMQP_CONNECTION_STATE_CLOSED;
 

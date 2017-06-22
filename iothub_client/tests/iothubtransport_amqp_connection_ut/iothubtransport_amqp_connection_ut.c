@@ -207,7 +207,7 @@ static void set_exp_calls_for_amqp_connection_create(AMQP_CONNECTION_CONFIG* amq
 		.IgnoreArgument_on_io_error()
 		.IgnoreArgument_on_io_error_context();
 
-	STRICT_EXPECTED_CALL(connection_set_idle_timeout(TEST_CONNECTION_HANDLE, 1000 * amqp_connection_config->c2d_keep_alive_freq_secs));
+	STRICT_EXPECTED_CALL(connection_set_idle_timeout(TEST_CONNECTION_HANDLE, (milliseconds)(1000 * amqp_connection_config->c2d_keep_alive_freq_secs)));
 	STRICT_EXPECTED_CALL(connection_set_trace(TEST_CONNECTION_HANDLE, amqp_connection_config->is_trace_on));
 
 	EXPECTED_CALL(free(IGNORED_PTR_ARG)); // UniqueId container.
