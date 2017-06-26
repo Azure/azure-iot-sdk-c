@@ -218,3 +218,11 @@ The first "/" designates the root of the tree.
 
 ### MultiTree_Destroy
 **SRS_MULTITREE_99_047: [**  This function frees any system resource used by the tree designated by parameter treeHandle **]**
+
+### MultiTree_DeleteChild
+**SRS_MULTITREE_99_077: [** MultiTree_DeleteChild shall remove the direct children node (no recursive search) set by childName. **]**
+
+**SRS_MULTITREE_99_078: [** If any argument is NULL, MultiTree_DeleteChild shall return MULTITREE_INVALID_ARG. **]**
+
+**SRS_MULTITREE_99_079: [** If childName is not found, MultiTree_DeleteChild shall return MULTITREE_CHILD_NOT_FOUND. **]**
+

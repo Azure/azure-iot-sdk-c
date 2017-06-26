@@ -1581,17 +1581,17 @@ METHODRETURN_HANDLE CodeFirst_ExecuteMethod(void* device, const char* methodName
     return result;
 }
 
-CODEFIRST_RESULT CodeFirst_IngestDesiredProperties(void* device, const char* desiredProperties)
+CODEFIRST_RESULT CodeFirst_IngestDesiredProperties(void* device, const char* jsonPayload, bool parseDesiredNode)
 {
     CODEFIRST_RESULT result;
     /*Codes_SRS_CODEFIRST_02_030: [ If argument device is NULL then CodeFirst_IngestDesiredProperties shall fail and return CODEFIRST_INVALID_ARG. ]*/
-    /*Codes_SRS_CODEFIRST_02_031: [ If argument desiredProperties is NULL then CodeFirst_IngestDesiredProperties shall fail and return CODEFIRST_INVALID_ARG. ]*/
+    /*Codes_SRS_CODEFIRST_02_031: [ If argument jsonPayload is NULL then CodeFirst_IngestDesiredProperties shall fail and return CODEFIRST_INVALID_ARG. ]*/
     if (
         (device == NULL) ||
-        (desiredProperties == NULL)
+        (jsonPayload == NULL)
         )
     {
-        LogError("invalid argument void* device=%p, const char* desiredProperties=%p", device, desiredProperties);
+        LogError("invalid argument void* device=%p, const char* jsonPayload=%p", device, jsonPayload);
         result = CODEFIRST_INVALID_ARG;
     }
     else
@@ -1607,7 +1607,7 @@ CODEFIRST_RESULT CodeFirst_IngestDesiredProperties(void* device, const char* des
         else
         {
             /*Codes_SRS_CODEFIRST_02_033: [ CodeFirst_IngestDesiredProperties shall call Device_IngestDesiredProperties. ]*/
-            if (Device_IngestDesiredProperties(device, deviceHeader->DeviceHandle, desiredProperties) != DEVICE_OK)
+            if (Device_IngestDesiredProperties(device, deviceHeader->DeviceHandle, jsonPayload, parseDesiredNode) != DEVICE_OK)
             {
                 LogError("failure in Device_IngestDesiredProperties");
                 result = CODEFIRST_ERROR;

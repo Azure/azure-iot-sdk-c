@@ -9,10 +9,12 @@
 
 #ifdef __cplusplus
 #include <cstddef>
+#include <cstdbool>
 extern "C"
 {
 #else
 #include <stddef.h>
+#include <stdbool.h>
 #endif
 
 typedef struct MULTITREE_HANDLE_DATA_TAG* MULTITREE_HANDLE;
@@ -44,6 +46,7 @@ MOCKABLE_FUNCTION(, MULTITREE_RESULT, MultiTree_GetValue, MULTITREE_HANDLE, tree
 MOCKABLE_FUNCTION(, MULTITREE_RESULT, MultiTree_GetLeafValue, MULTITREE_HANDLE, treeHandle, const char*, leafPath, const void**, destination);
 MOCKABLE_FUNCTION(, MULTITREE_RESULT, MultiTree_SetValue, MULTITREE_HANDLE, treeHandle, void*, value);
 MOCKABLE_FUNCTION(, void, MultiTree_Destroy, MULTITREE_HANDLE, treeHandle);
+MOCKABLE_FUNCTION(, MULTITREE_RESULT, MultiTree_DeleteChild, MULTITREE_HANDLE, treeHandle, const char*, childName);
 
 #ifdef __cplusplus
 }

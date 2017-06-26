@@ -10,6 +10,13 @@
 #include "azure_c_shared_utility/macro_utils.h"
 #include "methodreturn.h"
 
+#ifdef __cplusplus
+#include <cstdbool>
+extern "C" {
+#else
+#include <stdbool.h>
+#endif
+
 #define COMMANDDECODER_RESULT_VALUES \
     COMMANDDECODER_OK, \
     COMMANDDECODER_ERROR, \
@@ -25,9 +32,7 @@ EXECUTE_COMMAND_ERROR /*when a transient error either in the final recipient or 
 DEFINE_ENUM(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_RESULT_VALUES)
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+
 
 /* Codes_SRS_COMMAND_DECODER_99_001:[ The CommandDecoder module shall expose the following API:] */
 
@@ -42,7 +47,7 @@ MOCKABLE_FUNCTION(,EXECUTE_COMMAND_RESULT, CommandDecoder_ExecuteCommand, COMMAN
 MOCKABLE_FUNCTION(,METHODRETURN_HANDLE, CommandDecoder_ExecuteMethod, COMMAND_DECODER_HANDLE, handle, const char*, fullMethodName, const char*, methodPayload);
 MOCKABLE_FUNCTION(,void, CommandDecoder_Destroy, COMMAND_DECODER_HANDLE, commandDecoderHandle);
 
-MOCKABLE_FUNCTION(, EXECUTE_COMMAND_RESULT, CommandDecoder_IngestDesiredProperties, void*, startAddress, COMMAND_DECODER_HANDLE, handle, const char*, desiredProperties);
+MOCKABLE_FUNCTION(, EXECUTE_COMMAND_RESULT, CommandDecoder_IngestDesiredProperties, void*, startAddress, COMMAND_DECODER_HANDLE, handle, const char*, jsonPayload, bool, parseDesiredNode);
 
 #ifdef __cplusplus
 }

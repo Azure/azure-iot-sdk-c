@@ -16,10 +16,12 @@
 #ifdef __cplusplus
 #include <cstddef>
 #include <cstdarg>
+#include <cstdbool>
 extern "C" {
 #else
 #include <stddef.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #endif
 
 typedef char* ascii_char_ptr;
@@ -181,7 +183,7 @@ MOCKABLE_FUNCTION(, void, CodeFirst_DestroyDevice, void*, device);
 extern CODEFIRST_RESULT CodeFirst_SendAsync(unsigned char** destination, size_t* destinationSize, size_t numProperties, ...);
 extern CODEFIRST_RESULT CodeFirst_SendAsyncReported(unsigned char** destination, size_t* destinationSize, size_t numReportedProperties, ...);
 
-MOCKABLE_FUNCTION(, CODEFIRST_RESULT, CodeFirst_IngestDesiredProperties, void*, device, const char*, desiredProperties);
+MOCKABLE_FUNCTION(, CODEFIRST_RESULT, CodeFirst_IngestDesiredProperties, void*, device, const char*, jsonPayload, bool, parseDesiredNode);
 
 MOCKABLE_FUNCTION(, AGENT_DATA_TYPE_TYPE, CodeFirst_GetPrimitiveType, const char*, typeName);
 

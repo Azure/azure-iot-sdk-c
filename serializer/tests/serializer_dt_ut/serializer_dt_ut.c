@@ -495,24 +495,8 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
     void serializer_ingest_DEVICE_TWIN_UPDATE_COMPLETE_inert_path(size_t payloadSize)
     {
         STRICT_EXPECTED_CALL(gballoc_malloc(payloadSize + 1));
-        STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG))
-            .IgnoreArgument_string();
-        STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG))
-            .IgnoreArgument_value();
-        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, "desired"))
-            .IgnoreArgument_object();
-        STRICT_EXPECTED_CALL(json_object_remove(IGNORED_PTR_ARG, "$version"))
-            .IgnoreArgument_object();
-        STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, "desired"))
-            .IgnoreArgument_object();
-        STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_PTR_ARG))
-            .IgnoreArgument_value();
-        STRICT_EXPECTED_CALL(CodeFirst_IngestDesiredProperties(TEST_SERIALIZER_INGEST_CONTEXT, IGNORED_PTR_ARG))
-            .IgnoreArgument_desiredProperties();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
-            .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG))
-            .IgnoreArgument_value();
+        STRICT_EXPECTED_CALL(CodeFirst_IngestDesiredProperties(TEST_SERIALIZER_INGEST_CONTEXT, IGNORED_PTR_ARG, true))
+            .IgnoreArgument_jsonPayload();
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument_ptr();
     }
@@ -578,20 +562,8 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
     void serializer_ingest_DEVICE_TWIN_UPDATE_PARTIAL_inert_path(size_t payloadSize)
     {
         STRICT_EXPECTED_CALL(gballoc_malloc(payloadSize + 1));
-        STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG))
-            .IgnoreArgument_string();
-        STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG))
-            .IgnoreArgument_value();
-        STRICT_EXPECTED_CALL(json_object_remove(IGNORED_PTR_ARG, "$version"))
-            .IgnoreArgument_object();
-        STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_PTR_ARG))
-            .IgnoreArgument_value();
-        STRICT_EXPECTED_CALL(CodeFirst_IngestDesiredProperties(TEST_SERIALIZER_INGEST_CONTEXT, IGNORED_PTR_ARG))
-            .IgnoreArgument_desiredProperties();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
-            .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG))
-            .IgnoreArgument_value();
+        STRICT_EXPECTED_CALL(CodeFirst_IngestDesiredProperties(TEST_SERIALIZER_INGEST_CONTEXT, IGNORED_PTR_ARG, false))
+            .IgnoreArgument_jsonPayload();
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument_ptr();
     }

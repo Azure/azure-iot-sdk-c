@@ -28,16 +28,6 @@ and then updates the desired properties based on the payload.
 
 **SRS_SERIALIZERDEVICETWIN_02_002: [** `serializer_ingest` shall parse the null terminated string into parson data types. **]**
 
-**SRS_SERIALIZERDEVICETWIN_02_003: [** If `update_state` is `DEVICE_TWIN_UPDATE_COMPLETE` then `serializer_ingest` shall locate "desired" json name. **]**
-
-**SRS_SERIALIZERDEVICETWIN_02_004: [** If "desired" contains "$version" then `serializer_ingest` shall remove it. **]**
-
-**SRS_SERIALIZERDEVICETWIN_02_005: [** The "desired" value shall be outputed to a null terminated string and `serializer_ingest` shall call `CodeFirst_IngestDesiredProperties`. **]**
-
-**SRS_SERIALIZERDEVICETWIN_02_006: [** If `update_state` is `DEVICE_TWIN_UPDATE_PARTIAL` then `serializer_ingest` shall remove "$version" (if it exists). **]**
-
-**SRS_SERIALIZERDEVICETWIN_02_007: [** The JSON shall be outputed to a null terminated string and `serializer_ingest` shall call `CodeFirst_IngestDesiredProperties`. **]**
-
 **SRS_SERIALIZERDEVICETWIN_02_008: [** If any of the above operations fail, then `serializer_ingest` shall return. **]**
 
 ### IoTHubDeviceTwinCreate_Impl

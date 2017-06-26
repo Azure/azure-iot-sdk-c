@@ -3924,7 +3924,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         ///arrange
 
         ///act
-        CODEFIRST_RESULT result = CodeFirst_IngestDesiredProperties(NULL, "{\"a\":3}");
+        CODEFIRST_RESULT result = CodeFirst_IngestDesiredProperties(NULL, "{\"a\":3}", false);
 
         ///assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_INVALID_ARG, result);
@@ -3932,7 +3932,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         ///clean
     }
 
-    /*Tests_SRS_CODEFIRST_02_031: [ If argument desiredProperties is NULL then CodeFirst_IngestDesiredProperties shall fail and return CODEFIRST_INVALID_ARG. ]*/
+    /*Tests_SRS_CODEFIRST_02_031: [ If argument jsonProperties is NULL then CodeFirst_IngestDesiredProperties shall fail and return CODEFIRST_INVALID_ARG. ]*/
     TEST_FUNCTION(CodeFirst_IngestDesiredProperties_with_NULL_desiredProperties_fails)
     {
         ///arrange
@@ -3941,7 +3941,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         umock_c_reset_all_calls();
 
         ///act
-        CODEFIRST_RESULT result = CodeFirst_IngestDesiredProperties(device, NULL);
+        CODEFIRST_RESULT result = CodeFirst_IngestDesiredProperties(device, NULL, false);
 
         ///assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_INVALID_ARG, result);
@@ -3962,7 +3962,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         umock_c_reset_all_calls();
 
         ///act
-        CODEFIRST_RESULT result = CodeFirst_IngestDesiredProperties(device, "{\"a\":3}");
+        CODEFIRST_RESULT result = CodeFirst_IngestDesiredProperties(device, "{\"a\":3}", false);
 
         ///assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
@@ -3981,7 +3981,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         umock_c_reset_all_calls();
 
         ///act
-        CODEFIRST_RESULT result = CodeFirst_IngestDesiredProperties(device-1, "{\"a\":3}"); /*notice how "device-1" is a non-valid memory address as far as FindDevice is concerned*/
+        CODEFIRST_RESULT result = CodeFirst_IngestDesiredProperties(device-1, "{\"a\":3}", false); /*notice how "device-1" is a non-valid memory address as far as FindDevice is concerned*/
 
         ///assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_ERROR, result);

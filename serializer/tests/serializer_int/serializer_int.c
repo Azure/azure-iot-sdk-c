@@ -375,7 +375,7 @@ EXECUTE_COMMAND_RESULT action13(model_WithAction13* model,
     ASSERT_ARE_EQUAL(int32_t,   8,             int32_t13);
     ASSERT_ARE_EQUAL(int64_t,   9,             int64_t13);
     ASSERT_IS_TRUE(bool13);
-    ASSERT_ARE_EQUAL(char_ptr,  "eleven",       ascii_char_ptr13);
+    ASSERT_ARE_EQUAL(char_ptr,  "e/leven",      ascii_char_ptr13);
     ASSERT_ARE_EQUAL(char_ptr,  "\"twelve\"",   ascii_char_ptr_no_quotes13);
     ASSERT_ARE_EQUAL(int,       114,            EdmDateTimeOffset13.dateTime.tm_year);
     ASSERT_ARE_EQUAL(int,       6-1,            EdmDateTimeOffset13.dateTime.tm_mon);
@@ -467,7 +467,7 @@ EXECUTE_COMMAND_RESULT action14(model_WithAction14* model,
     ASSERT_ARE_EQUAL(int32_t,   8,             int32_t14);
     ASSERT_ARE_EQUAL(int64_t,   9,             int64_t14);
     ASSERT_IS_TRUE(bool14);
-    ASSERT_ARE_EQUAL(char_ptr,  "eleven",       ascii_char_ptr14);
+    ASSERT_ARE_EQUAL(char_ptr,  "e/leven",      ascii_char_ptr14);
     ASSERT_ARE_EQUAL(char_ptr,  "\"twelve\"",   ascii_char_ptr_no_quotes14);
     ASSERT_ARE_EQUAL(int,       114,            EdmDateTimeOffset14.dateTime.tm_year);
     ASSERT_ARE_EQUAL(int,       6-1,            EdmDateTimeOffset14.dateTime.tm_mon);
@@ -678,7 +678,7 @@ METHODRETURN_HANDLE method18(model_WithMethod18* model,
     ASSERT_ARE_EQUAL(int32_t,   8,             int32_t18);
     ASSERT_ARE_EQUAL(int64_t,   9,             int64_t18);
     ASSERT_IS_TRUE(bool18);
-    ASSERT_ARE_EQUAL(char_ptr,  "eleven",       ascii_char_ptr18);
+    ASSERT_ARE_EQUAL(char_ptr,  "e/leven",      ascii_char_ptr18);
     ASSERT_ARE_EQUAL(char_ptr,  "\"twelve\"",   ascii_char_ptr_no_quotes18);
     ASSERT_ARE_EQUAL(int,       114,            EdmDateTimeOffset18.dateTime.tm_year);
     ASSERT_ARE_EQUAL(int,       6-1,            EdmDateTimeOffset18.dateTime.tm_mon);
@@ -772,7 +772,7 @@ METHODRETURN_HANDLE method19(model_WithMethod19* model,
     ASSERT_ARE_EQUAL(int32_t,   8,             int32_t19);
     ASSERT_ARE_EQUAL(int64_t,   9,             int64_t19);
     ASSERT_IS_TRUE(bool19);
-    ASSERT_ARE_EQUAL(char_ptr,  "eleven",       ascii_char_ptr19);
+    ASSERT_ARE_EQUAL(char_ptr,  "e/leven",      ascii_char_ptr19);
     ASSERT_ARE_EQUAL(char_ptr,  "\"twelve\"",   ascii_char_ptr_no_quotes19);
     ASSERT_ARE_EQUAL(int,       119,            EdmDateTimeOffset19.dateTime.tm_year);
     ASSERT_ARE_EQUAL(int,       6-1,            EdmDateTimeOffset19.dateTime.tm_mon);
@@ -933,7 +933,7 @@ BEGIN_TEST_SUITE(serializer_int)
         modelWithData->with_data_int32_t1 = 8;
         modelWithData->with_data_int64_t1 = 9;
         modelWithData->with_data_bool1 = true;
-        modelWithData->with_data_ascii_char_ptr1 = "eleven";
+        modelWithData->with_data_ascii_char_ptr1 = "e/leven";
         modelWithData->with_data_ascii_char_ptr_no_quotes1 = "\"twelve\"";
         modelWithData->with_data_EdmDateTimeOffset1.dateTime.tm_year = 114;
         modelWithData->with_data_EdmDateTimeOffset1.dateTime.tm_mon = 6 - 1;
@@ -979,7 +979,7 @@ BEGIN_TEST_SUITE(serializer_int)
             \"with_data_int32_t1\" : 8,                                                           \
             \"with_data_int64_t1\" : 9,                                                           \
             \"with_data_bool1\" : true,                                                           \
-            \"with_data_ascii_char_ptr1\" : \"eleven\",                                           \
+            \"with_data_ascii_char_ptr1\" : \"e/leven\",                                          \
             \"with_data_ascii_char_ptr_no_quotes1\" : \"twelve\",                                 \
             \"with_data_EdmDateTimeOffset1\" : \"2014-06-17T08:51:23.000000000005-08:01\",        \
             \"with_data_EdmGuid1\" : \"00112233-4455-6677-8899-AABBCCDDEEFF\",                    \
@@ -1025,7 +1025,7 @@ BEGIN_TEST_SUITE(serializer_int)
         modelWithStruct->structure2.with_data_int32_t2 = 8;
         modelWithStruct->structure2.with_data_int64_t2 = 9;
         modelWithStruct->structure2.with_data_bool2 = true;
-        modelWithStruct->structure2.with_data_ascii_char_ptr2 = "eleven";
+        modelWithStruct->structure2.with_data_ascii_char_ptr2 = "e/leven";
         modelWithStruct->structure2.with_data_ascii_char_ptr_no_quotes2 = "\"twelve\"";
         modelWithStruct->structure2.with_data_EdmDateTimeOffset2.dateTime.tm_year = 114;
         modelWithStruct->structure2.with_data_EdmDateTimeOffset2.dateTime.tm_mon = 6 - 1;
@@ -1073,7 +1073,7 @@ BEGIN_TEST_SUITE(serializer_int)
                 \"with_data_int32_t2\" : 8,                                                          \
                 \"with_data_int64_t2\" : 9,                                                          \
                 \"with_data_bool2\" : true,                                                          \
-                \"with_data_ascii_char_ptr2\" : \"eleven\",                                          \
+                \"with_data_ascii_char_ptr2\" : \"e/leven\",                                         \
                 \"with_data_ascii_char_ptr_no_quotes2\" : \"twelve\",                                \
                 \"with_data_EdmDateTimeOffset2\" : \"2014-06-17T08:51:23.000000000005-08:01\",       \
                 \"with_data_EdmGuid2\" : \"00112233-4455-6677-8899-AABBCCDDEEFF\",                   \
@@ -1120,7 +1120,7 @@ BEGIN_TEST_SUITE(serializer_int)
         modelWithModel->model3.with_data_int32_t3 = 8;
         modelWithModel->model3.with_data_int64_t3 = 9;
         modelWithModel->model3.with_data_bool3 = true;
-        modelWithModel->model3.with_data_ascii_char_ptr3 = "eleven";
+        modelWithModel->model3.with_data_ascii_char_ptr3 = "e/leven";
         modelWithModel->model3.with_data_ascii_char_ptr_no_quotes3 = "\"twelve\"";
         modelWithModel->model3.with_data_EdmDateTimeOffset3.dateTime.tm_year = 114;
         modelWithModel->model3.with_data_EdmDateTimeOffset3.dateTime.tm_mon = 6 - 1;
@@ -1168,7 +1168,7 @@ BEGIN_TEST_SUITE(serializer_int)
                 \"with_data_int32_t3\" : 8,                                                           \
                 \"with_data_int64_t3\" : 9,                                                           \
                 \"with_data_bool3\" : true,                                                           \
-                \"with_data_ascii_char_ptr3\" : \"eleven\",                                           \
+                \"with_data_ascii_char_ptr3\" : \"e/leven\",                                          \
                 \"with_data_ascii_char_ptr_no_quotes3\" : \"twelve\",                                 \
                 \"with_data_EdmDateTimeOffset3\" : \"2014-06-17T08:51:23.000000000005-08:01\",        \
                 \"with_data_EdmGuid3\" : \"00112233-4455-6677-8899-AABBCCDDEEFF\",                    \
@@ -1215,7 +1215,7 @@ BEGIN_TEST_SUITE(serializer_int)
         modelWithModel->inner_model4.structure4.with_data_int32_t4 = 8;
         modelWithModel->inner_model4.structure4.with_data_int64_t4 = 9;
         modelWithModel->inner_model4.structure4.with_data_bool4 = true;
-        modelWithModel->inner_model4.structure4.with_data_ascii_char_ptr4 = "eleven";
+        modelWithModel->inner_model4.structure4.with_data_ascii_char_ptr4 = "e/leven";
         modelWithModel->inner_model4.structure4.with_data_ascii_char_ptr_no_quotes4 = "\"twelve\"";
         modelWithModel->inner_model4.structure4.with_data_EdmDateTimeOffset4.dateTime.tm_year = 114;
         modelWithModel->inner_model4.structure4.with_data_EdmDateTimeOffset4.dateTime.tm_mon = 6 - 1;
@@ -1265,7 +1265,7 @@ BEGIN_TEST_SUITE(serializer_int)
                     \"with_data_int32_t4\" : 8,                                                       \
                     \"with_data_int64_t4\" : 9,                                                       \
                     \"with_data_bool4\" : true,                                                       \
-                    \"with_data_ascii_char_ptr4\" : \"eleven\",                                       \
+                    \"with_data_ascii_char_ptr4\" : \"e/leven\",                                      \
                     \"with_data_ascii_char_ptr_no_quotes4\" : \"twelve\",                             \
                     \"with_data_EdmDateTimeOffset4\" : \"2014-06-17T08:51:23.000000000005-08:01\",    \
                     \"with_data_EdmGuid4\" : \"00112233-4455-6677-8899-AABBCCDDEEFF\",                \
@@ -1312,7 +1312,7 @@ BEGIN_TEST_SUITE(serializer_int)
         modelWithReportedProperty->with_reported_property_int32_t5 = 8;
         modelWithReportedProperty->with_reported_property_int64_t5 = 9;
         modelWithReportedProperty->with_reported_property_bool5 = true;
-        modelWithReportedProperty->with_reported_property_ascii_char_ptr5 = "eleven";
+        modelWithReportedProperty->with_reported_property_ascii_char_ptr5 = "e/leven";
         modelWithReportedProperty->with_reported_property_ascii_char_ptr_no_quotes5 = "\"twelve\"";
         modelWithReportedProperty->with_reported_property_EdmDateTimeOffset5.dateTime.tm_year = 114;
         modelWithReportedProperty->with_reported_property_EdmDateTimeOffset5.dateTime.tm_mon = 6 - 1;
@@ -1358,7 +1358,7 @@ BEGIN_TEST_SUITE(serializer_int)
             \"with_reported_property_int32_t5\" : 8,                                                           \
             \"with_reported_property_int64_t5\" : 9,                                                           \
             \"with_reported_property_bool5\" : true,                                                           \
-            \"with_reported_property_ascii_char_ptr5\" : \"eleven\",                                           \
+            \"with_reported_property_ascii_char_ptr5\" : \"e/leven\",                                          \
             \"with_reported_property_ascii_char_ptr_no_quotes5\" : \"twelve\",                                 \
             \"with_reported_property_EdmDateTimeOffset5\" : \"2014-06-17T08:51:23.000000000005-08:01\",        \
             \"with_reported_property_EdmGuid5\" : \"00112233-4455-6677-8899-AABBCCDDEEFF\",                    \
@@ -1404,7 +1404,7 @@ BEGIN_TEST_SUITE(serializer_int)
         modelWithStruct->structure6.with_reported_property_int32_t6 = 8;
         modelWithStruct->structure6.with_reported_property_int64_t6 = 9;
         modelWithStruct->structure6.with_reported_property_bool6 = true;
-        modelWithStruct->structure6.with_reported_property_ascii_char_ptr6 = "eleven";
+        modelWithStruct->structure6.with_reported_property_ascii_char_ptr6 = "e/leven";
         modelWithStruct->structure6.with_reported_property_ascii_char_ptr_no_quotes6 = "\"twelve\"";
         modelWithStruct->structure6.with_reported_property_EdmDateTimeOffset6.dateTime.tm_year = 114;
         modelWithStruct->structure6.with_reported_property_EdmDateTimeOffset6.dateTime.tm_mon = 6 - 1;
@@ -1452,7 +1452,7 @@ BEGIN_TEST_SUITE(serializer_int)
                 \"with_reported_property_int32_t6\" : 8,                                                       \
                 \"with_reported_property_int64_t6\" : 9,                                                       \
                 \"with_reported_property_bool6\" : true,                                                       \
-                \"with_reported_property_ascii_char_ptr6\" : \"eleven\",                                       \
+                \"with_reported_property_ascii_char_ptr6\" : \"e/leven\",                                      \
                 \"with_reported_property_ascii_char_ptr_no_quotes6\" : \"twelve\",                             \
                 \"with_reported_property_EdmDateTimeOffset6\" : \"2014-06-17T08:51:23.000000000005-08:01\",    \
                 \"with_reported_property_EdmGuid6\" : \"00112233-4455-6677-8899-AABBCCDDEEFF\",                \
@@ -1499,7 +1499,7 @@ BEGIN_TEST_SUITE(serializer_int)
         basicModel_WithModel->model7.with_reported_property_int32_t7 = 8;
         basicModel_WithModel->model7.with_reported_property_int64_t7 = 9;
         basicModel_WithModel->model7.with_reported_property_bool7 = true;
-        basicModel_WithModel->model7.with_reported_property_ascii_char_ptr7 = "eleven";
+        basicModel_WithModel->model7.with_reported_property_ascii_char_ptr7 = "e/leven";
         basicModel_WithModel->model7.with_reported_property_ascii_char_ptr_no_quotes7 = "\"twelve\"";
         basicModel_WithModel->model7.with_reported_property_EdmDateTimeOffset7.dateTime.tm_year = 114;
         basicModel_WithModel->model7.with_reported_property_EdmDateTimeOffset7.dateTime.tm_mon = 6 - 1;
@@ -1547,7 +1547,7 @@ BEGIN_TEST_SUITE(serializer_int)
                 \"with_reported_property_int32_t7\" : 8,                                                    \
                 \"with_reported_property_int64_t7\" : 9,                                                    \
                 \"with_reported_property_bool7\" : true,                                                    \
-                \"with_reported_property_ascii_char_ptr7\" : \"eleven\",                                    \
+                \"with_reported_property_ascii_char_ptr7\" : \"e/leven\",                                   \
                 \"with_reported_property_ascii_char_ptr_no_quotes7\" : \"twelve\",                          \
                 \"with_reported_property_EdmDateTimeOffset7\" : \"2014-06-17T08:51:23.000000000005-08:01\", \
                 \"with_reported_property_EdmGuid7\" : \"00112233-4455-6677-8899-AABBCCDDEEFF\",             \
@@ -1594,7 +1594,7 @@ BEGIN_TEST_SUITE(serializer_int)
         modelWithModel->inner_model8.structure8.with_reported_property_int32_t8 = 8;
         modelWithModel->inner_model8.structure8.with_reported_property_int64_t8 = 9;
         modelWithModel->inner_model8.structure8.with_reported_property_bool8 = true;
-        modelWithModel->inner_model8.structure8.with_reported_property_ascii_char_ptr8 = "eleven";
+        modelWithModel->inner_model8.structure8.with_reported_property_ascii_char_ptr8 = "e/leven";
         modelWithModel->inner_model8.structure8.with_reported_property_ascii_char_ptr_no_quotes8 = "\"twelve\"";
         modelWithModel->inner_model8.structure8.with_reported_property_EdmDateTimeOffset8.dateTime.tm_year = 114;
         modelWithModel->inner_model8.structure8.with_reported_property_EdmDateTimeOffset8.dateTime.tm_mon = 6 - 1;
@@ -1644,7 +1644,7 @@ BEGIN_TEST_SUITE(serializer_int)
                     \"with_reported_property_int32_t8\" : 8,                                                       \
                     \"with_reported_property_int64_t8\" : 9,                                                       \
                     \"with_reported_property_bool8\" : true,                                                       \
-                    \"with_reported_property_ascii_char_ptr8\" : \"eleven\",                                       \
+                    \"with_reported_property_ascii_char_ptr8\" : \"e/leven\",                                      \
                     \"with_reported_property_ascii_char_ptr_no_quotes8\" : \"twelve\",                             \
                     \"with_reported_property_EdmDateTimeOffset8\" : \"2014-06-17T08:51:23.000000000005-08:01\",    \
                     \"with_reported_property_EdmGuid8\" : \"00112233-4455-6677-8899-AABBCCDDEEFF\",                \
@@ -1685,7 +1685,7 @@ BEGIN_TEST_SUITE(serializer_int)
             \"with_desired_property_int32_t9\" : 8,                                                           \
             \"with_desired_property_int64_t9\" : 9,                                                           \
             \"with_desired_property_bool9\" : true,                                                           \
-            \"with_desired_property_ascii_char_ptr9\" : \"eleven\",                                           \
+            \"with_desired_property_ascii_char_ptr9\" : \"e/leven\",                                          \
             \"with_desired_property_ascii_char_ptr_no_quotes9\" : \"twelve\",                                 \
             \"with_desired_property_EdmDateTimeOffset9\" : \"2014-06-17T08:51:23.000000000005-08:01\",        \
             \"with_desired_property_EdmGuid9\" : \"00112233-4455-6677-8899-AABBCCDDEEFF\",                    \
@@ -1693,7 +1693,7 @@ BEGIN_TEST_SUITE(serializer_int)
         }";
 
         ///act
-        CODEFIRST_RESULT result = INGEST_DESIRED_PROPERTIES(modelWithData, inputJsonAsString);
+        CODEFIRST_RESULT result = INGEST_DESIRED_PROPERTIES(modelWithData, inputJsonAsString, false);
 
         ///assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
@@ -1709,7 +1709,7 @@ BEGIN_TEST_SUITE(serializer_int)
         ASSERT_ARE_EQUAL(int32_t,   8,              modelWithData->with_desired_property_int32_t9);
         ASSERT_ARE_EQUAL(int64_t,   9,              modelWithData->with_desired_property_int64_t9);
         ASSERT_IS_TRUE(modelWithData->with_desired_property_bool9);
-        ASSERT_ARE_EQUAL(char_ptr,  "eleven",       modelWithData->with_desired_property_ascii_char_ptr9);
+        ASSERT_ARE_EQUAL(char_ptr,  "e/leven",      modelWithData->with_desired_property_ascii_char_ptr9);
         ASSERT_ARE_EQUAL(char_ptr,  "\"twelve\"",   modelWithData->with_desired_property_ascii_char_ptr_no_quotes9);
         ASSERT_ARE_EQUAL(int,       114,            modelWithData->with_desired_property_EdmDateTimeOffset9.dateTime.tm_year);
         ASSERT_ARE_EQUAL(int,       6-1,            modelWithData->with_desired_property_EdmDateTimeOffset9.dateTime.tm_mon);
@@ -1767,7 +1767,7 @@ BEGIN_TEST_SUITE(serializer_int)
                 \"with_desired_property_int32_t10\" : 8,                                                           \
                 \"with_desired_property_int64_t10\" : 9,                                                           \
                 \"with_desired_property_bool10\" : true,                                                           \
-                \"with_desired_property_ascii_char_ptr10\" : \"eleven\",                                           \
+                \"with_desired_property_ascii_char_ptr10\" : \"e/leven\",                                          \
                 \"with_desired_property_ascii_char_ptr_no_quotes10\" : \"twelve\",                                 \
                 \"with_desired_property_EdmDateTimeOffset10\" : \"2014-06-17T08:51:23.000000000005-08:01\",        \
                 \"with_desired_property_EdmGuid10\" : \"00112233-4455-6677-8899-AABBCCDDEEFF\",                    \
@@ -1776,7 +1776,7 @@ BEGIN_TEST_SUITE(serializer_int)
         }";
 
         ///act
-        CODEFIRST_RESULT result = INGEST_DESIRED_PROPERTIES(modelWithData, inputJsonAsString);
+        CODEFIRST_RESULT result = INGEST_DESIRED_PROPERTIES(modelWithData, inputJsonAsString, false);
 
         ///assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
@@ -1791,7 +1791,7 @@ BEGIN_TEST_SUITE(serializer_int)
         ASSERT_ARE_EQUAL(int32_t,   8,              modelWithData->structure10.with_desired_property_int32_t10);
         ASSERT_ARE_EQUAL(int64_t,   9,              modelWithData->structure10.with_desired_property_int64_t10);
         ASSERT_IS_TRUE(modelWithData->structure10.with_desired_property_bool10);
-        ASSERT_ARE_EQUAL(char_ptr,  "eleven",       modelWithData->structure10.with_desired_property_ascii_char_ptr10);
+        ASSERT_ARE_EQUAL(char_ptr,  "e/leven",      modelWithData->structure10.with_desired_property_ascii_char_ptr10);
         ASSERT_ARE_EQUAL(char_ptr,  "\"twelve\"",   modelWithData->structure10.with_desired_property_ascii_char_ptr_no_quotes10);
         ASSERT_ARE_EQUAL(int,       114,            modelWithData->structure10.with_desired_property_EdmDateTimeOffset10.dateTime.tm_year);
         ASSERT_ARE_EQUAL(int,       6-1,            modelWithData->structure10.with_desired_property_EdmDateTimeOffset10.dateTime.tm_mon);
@@ -1849,7 +1849,7 @@ BEGIN_TEST_SUITE(serializer_int)
                 \"with_desired_property_int32_t11\" : 8,                                                           \
                 \"with_desired_property_int64_t11\" : 9,                                                           \
                 \"with_desired_property_bool11\" : true,                                                           \
-                \"with_desired_property_ascii_char_ptr11\" : \"eleven\",                                           \
+                \"with_desired_property_ascii_char_ptr11\" : \"e/leven\",                                          \
                 \"with_desired_property_ascii_char_ptr_no_quotes11\" : \"twelve\",                                 \
                 \"with_desired_property_EdmDateTimeOffset11\" : \"2014-06-17T08:51:23.000000000005-08:01\",        \
                 \"with_desired_property_EdmGuid11\" : \"00112233-4455-6677-8899-AABBCCDDEEFF\",                    \
@@ -1858,7 +1858,7 @@ BEGIN_TEST_SUITE(serializer_int)
         }";
 
         ///act
-        CODEFIRST_RESULT result = INGEST_DESIRED_PROPERTIES(modelWithData, inputJsonAsString);
+        CODEFIRST_RESULT result = INGEST_DESIRED_PROPERTIES(modelWithData, inputJsonAsString, false);
 
         ///assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
@@ -1873,7 +1873,7 @@ BEGIN_TEST_SUITE(serializer_int)
         ASSERT_ARE_EQUAL(int32_t,   8,              modelWithData->model11.with_desired_property_int32_t11);
         ASSERT_ARE_EQUAL(int64_t,   9,              modelWithData->model11.with_desired_property_int64_t11);
         ASSERT_IS_TRUE(modelWithData->model11.with_desired_property_bool11);
-        ASSERT_ARE_EQUAL(char_ptr,  "eleven",       modelWithData->model11.with_desired_property_ascii_char_ptr11);
+        ASSERT_ARE_EQUAL(char_ptr,  "e/leven",      modelWithData->model11.with_desired_property_ascii_char_ptr11);
         ASSERT_ARE_EQUAL(char_ptr,  "\"twelve\"",   modelWithData->model11.with_desired_property_ascii_char_ptr_no_quotes11);
         ASSERT_ARE_EQUAL(int,       114,            modelWithData->model11.with_desired_property_EdmDateTimeOffset11.dateTime.tm_year);
         ASSERT_ARE_EQUAL(int,       6-1,            modelWithData->model11.with_desired_property_EdmDateTimeOffset11.dateTime.tm_mon);
@@ -1933,7 +1933,7 @@ BEGIN_TEST_SUITE(serializer_int)
                     \"with_desired_property_int32_t12\" : 8,                                                           \
                     \"with_desired_property_int64_t12\" : 9,                                                           \
                     \"with_desired_property_bool12\" : true,                                                           \
-                    \"with_desired_property_ascii_char_ptr12\" : \"eleven\",                                           \
+                    \"with_desired_property_ascii_char_ptr12\" : \"e/leven\",                                          \
                     \"with_desired_property_ascii_char_ptr_no_quotes12\" : \"twelve\",                                 \
                     \"with_desired_property_EdmDateTimeOffset12\" : \"2014-06-17T08:51:23.000000000005-08:01\",        \
                     \"with_desired_property_EdmGuid12\" : \"00112233-4455-6677-8899-AABBCCDDEEFF\",                    \
@@ -1943,7 +1943,7 @@ BEGIN_TEST_SUITE(serializer_int)
         }";
 
         ///act
-        CODEFIRST_RESULT result = INGEST_DESIRED_PROPERTIES(modelWithData, inputJsonAsString);
+        CODEFIRST_RESULT result = INGEST_DESIRED_PROPERTIES(modelWithData, inputJsonAsString, false);
 
         ///assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
@@ -1958,7 +1958,7 @@ BEGIN_TEST_SUITE(serializer_int)
         ASSERT_ARE_EQUAL(int32_t,   8,              modelWithData->inner_model12.structure12.with_desired_property_int32_t12);
         ASSERT_ARE_EQUAL(int64_t,   9,              modelWithData->inner_model12.structure12.with_desired_property_int64_t12);
         ASSERT_IS_TRUE(modelWithData->inner_model12.structure12.with_desired_property_bool12);
-        ASSERT_ARE_EQUAL(char_ptr,  "eleven",       modelWithData->inner_model12.structure12.with_desired_property_ascii_char_ptr12);
+        ASSERT_ARE_EQUAL(char_ptr,  "e/leven",      modelWithData->inner_model12.structure12.with_desired_property_ascii_char_ptr12);
         ASSERT_ARE_EQUAL(char_ptr,  "\"twelve\"",   modelWithData->inner_model12.structure12.with_desired_property_ascii_char_ptr_no_quotes12);
         ASSERT_ARE_EQUAL(int,       114,            modelWithData->inner_model12.structure12.with_desired_property_EdmDateTimeOffset12.dateTime.tm_year);
         ASSERT_ARE_EQUAL(int,       6-1,            modelWithData->inner_model12.structure12.with_desired_property_EdmDateTimeOffset12.dateTime.tm_mon);
@@ -2017,7 +2017,7 @@ BEGIN_TEST_SUITE(serializer_int)
                 \"int32_t13\" : 8,                                                               \
                 \"int64_t13\" : 9,                                                               \
                 \"bool13\" : true,                                                               \
-                \"ascii_char_ptr13\" : \"eleven\",                                               \
+                \"ascii_char_ptr13\" : \"e/leven\",                                              \
                 \"ascii_char_ptr_no_quotes13\" : \"twelve\",                                     \
                 \"EdmDateTimeOffset13\" : \"2014-06-17T08:51:23.000000000005-08:01\",            \
                 \"EdmGuid13\" : \"00112233-4455-6677-8899-AABBCCDDEEFF\",                        \
@@ -2055,7 +2055,7 @@ BEGIN_TEST_SUITE(serializer_int)
                 \"int32_t14\" : 8,                                                               \
                 \"int64_t14\" : 9,                                                               \
                 \"bool14\" : true,                                                               \
-                \"ascii_char_ptr14\" : \"eleven\",                                               \
+                \"ascii_char_ptr14\" : \"e/leven\",                                              \
                 \"ascii_char_ptr_no_quotes14\" : \"twelve\",                                     \
                 \"EdmDateTimeOffset14\" : \"2014-06-17T08:51:23.000000000005-08:01\",            \
                 \"EdmGuid14\" : \"00112233-4455-6677-8899-AABBCCDDEEFF\",                        \
@@ -2146,7 +2146,7 @@ BEGIN_TEST_SUITE(serializer_int)
             \"with_desired_property_int32_t15\" : 8,                                                           \
             \"with_desired_property_int64_t15\" : 9,                                                           \
             \"with_desired_property_bool15\" : true,                                                           \
-            \"with_desired_property_ascii_char_ptr15\" : \"eleven\",                                           \
+            \"with_desired_property_ascii_char_ptr15\" : \"e/leven\",                                          \
             \"with_desired_property_ascii_char_ptr_no_quotes15\" : \"twelve\",                                 \
             \"with_desired_property_EdmDateTimeOffset15\" : \"2014-06-17T08:51:23.000000000005-08:01\",        \
             \"with_desired_property_EdmGuid15\" : \"00112233-4455-6677-8899-AABBCCDDEEFF\",                    \
@@ -2170,7 +2170,7 @@ BEGIN_TEST_SUITE(serializer_int)
         STRICT_EXPECTED_CALL(on_desired_property_EdmBinary15(modelWithData));
 
         ///act
-        CODEFIRST_RESULT result = INGEST_DESIRED_PROPERTIES(modelWithData, inputJsonAsString);
+        CODEFIRST_RESULT result = INGEST_DESIRED_PROPERTIES(modelWithData, inputJsonAsString, false);
 
         ///assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
@@ -2186,7 +2186,7 @@ BEGIN_TEST_SUITE(serializer_int)
         ASSERT_ARE_EQUAL(int32_t,   8,              modelWithData->with_desired_property_int32_t15);
         ASSERT_ARE_EQUAL(int64_t,   9,              modelWithData->with_desired_property_int64_t15);
         ASSERT_IS_TRUE(modelWithData->with_desired_property_bool15);
-        ASSERT_ARE_EQUAL(char_ptr,  "eleven",       modelWithData->with_desired_property_ascii_char_ptr15);
+        ASSERT_ARE_EQUAL(char_ptr,  "e/leven",      modelWithData->with_desired_property_ascii_char_ptr15);
         ASSERT_ARE_EQUAL(char_ptr,  "\"twelve\"",   modelWithData->with_desired_property_ascii_char_ptr_no_quotes15);
         ASSERT_ARE_EQUAL(int,       114,            modelWithData->with_desired_property_EdmDateTimeOffset15.dateTime.tm_year);
         ASSERT_ARE_EQUAL(int,       6-1,            modelWithData->with_desired_property_EdmDateTimeOffset15.dateTime.tm_mon);
@@ -2249,7 +2249,7 @@ BEGIN_TEST_SUITE(serializer_int)
                     \"with_desired_property_int32_t16\" : 8,                                                           \
                     \"with_desired_property_int64_t16\" : 9,                                                           \
                     \"with_desired_property_bool16\" : true,                                                           \
-                    \"with_desired_property_ascii_char_ptr16\" : \"eleven\",                                           \
+                    \"with_desired_property_ascii_char_ptr16\" : \"e/leven\",                                          \
                     \"with_desired_property_ascii_char_ptr_no_quotes16\" : \"twelve\",                                 \
                     \"with_desired_property_EdmDateTimeOffset16\" : \"2014-06-17T08:51:23.000000000005-08:01\",        \
                     \"with_desired_property_EdmGuid16\" : \"00112233-4455-6677-8899-AABBCCDDEEFF\",                    \
@@ -2262,7 +2262,7 @@ BEGIN_TEST_SUITE(serializer_int)
         STRICT_EXPECTED_CALL(on_inner_model16(modelWithData));
 
         ///act
-        CODEFIRST_RESULT result = INGEST_DESIRED_PROPERTIES(modelWithData, inputJsonAsString);
+        CODEFIRST_RESULT result = INGEST_DESIRED_PROPERTIES(modelWithData, inputJsonAsString, false);
 
         ///assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
@@ -2277,7 +2277,7 @@ BEGIN_TEST_SUITE(serializer_int)
         ASSERT_ARE_EQUAL(int32_t,   8,              modelWithData->inner_model16.structure16.with_desired_property_int32_t16);
         ASSERT_ARE_EQUAL(int64_t,   9,              modelWithData->inner_model16.structure16.with_desired_property_int64_t16);
         ASSERT_IS_TRUE(modelWithData->inner_model16.structure16.with_desired_property_bool16);
-        ASSERT_ARE_EQUAL(char_ptr,  "eleven",       modelWithData->inner_model16.structure16.with_desired_property_ascii_char_ptr16);
+        ASSERT_ARE_EQUAL(char_ptr,  "e/leven",      modelWithData->inner_model16.structure16.with_desired_property_ascii_char_ptr16);
         ASSERT_ARE_EQUAL(char_ptr,  "\"twelve\"",   modelWithData->inner_model16.structure16.with_desired_property_ascii_char_ptr_no_quotes16);
         ASSERT_ARE_EQUAL(int,       114,            modelWithData->inner_model16.structure16.with_desired_property_EdmDateTimeOffset16.dateTime.tm_year);
         ASSERT_ARE_EQUAL(int,       6-1,            modelWithData->inner_model16.structure16.with_desired_property_EdmDateTimeOffset16.dateTime.tm_mon);
@@ -2335,7 +2335,7 @@ BEGIN_TEST_SUITE(serializer_int)
             \"int32_t18\" : 8,                                                               \
             \"int64_t18\" : 9,                                                               \
             \"bool18\" : true,                                                               \
-            \"ascii_char_ptr18\" : \"eleven\",                                               \
+            \"ascii_char_ptr18\" : \"e/leven\",                                              \
             \"ascii_char_ptr_no_quotes18\" : \"twelve\",                                     \
             \"EdmDateTimeOffset18\" : \"2014-06-17T08:51:23.000000000005-08:01\",            \
             \"EdmGuid18\" : \"00112233-4455-6677-8899-AABBCCDDEEFF\",                        \
@@ -2373,7 +2373,7 @@ BEGIN_TEST_SUITE(serializer_int)
             \"int32_t19\" : 8,                                                               \
             \"int64_t19\" : 9,                                                               \
             \"bool19\" : true,                                                               \
-            \"ascii_char_ptr19\" : \"eleven\",                                               \
+            \"ascii_char_ptr19\" : \"e/leven\",                                              \
             \"ascii_char_ptr_no_quotes19\" : \"twelve\",                                     \
             \"EdmDateTimeOffset19\" : \"2019-06-17T08:51:23.000000000005-08:01\",            \
             \"EdmGuid19\" : \"00112233-4455-6677-8899-AABBCCDDEEFF\",                        \

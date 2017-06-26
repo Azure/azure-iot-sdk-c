@@ -763,3 +763,58 @@ MULTITREE_RESULT MultiTree_GetLeafValue(MULTITREE_HANDLE treeHandle, const char*
     }
     return result;
 }
+
+/* Codes_SRS_MULTITREE_99_077:[ MultiTree_DeleteChild shall remove the direct children node (no recursive search) set by childName.] */
+MULTITREE_RESULT MultiTree_DeleteChild(MULTITREE_HANDLE treeHandle, const char* childName)
+{
+    MULTITREE_RESULT result;
+    /* Codes_SRS_MULTITREE_99_077:[ If any argument is NULL, MultiTree_DeleteChild shall return MULTITREE_INVALID_ARG.] */
+    if ((treeHandle == NULL) ||
+        (childName == NULL))
+    {
+        result = MULTITREE_INVALID_ARG;
+        LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+    }
+    else
+    {
+        size_t i;
+        size_t childToRemove = treeHandle->nChildren;
+        MULTITREE_HANDLE treeToRemove = NULL;
+
+        for (i = 0; i < treeHandle->nChildren; i++)
+        {
+            if (0 == strcmp(treeHandle->children[i]->name, childName))
+            {
+                childToRemove = i;
+                treeToRemove = treeHandle->children[childToRemove];
+                break;
+            }
+        }
+
+        if (i == treeHandle->nChildren)
+        {
+            /* Codes_SRS_MULTITREE_99_079:[If childName is not found, MultiTree_DeleteChild shall return MULTITREE_CHILD_NOT_FOUND.] */
+            result = MULTITREE_CHILD_NOT_FOUND;
+            // Don't log error; this function is best effort only.  Caller will determine actual error state.
+        }
+        else
+        {
+            for (i = childToRemove; i < treeHandle->nChildren - 1; i++)
+            {
+                treeHandle->children[i] = treeHandle->children[i+1];
+            }
+
+            /* Codes_SRS_MULTITREE_99_077:[ MultiTree_DeleteChild shall remove the direct children node (no recursive search) set by childName  */
+            MultiTree_Destroy(treeToRemove);
+
+            // Even though this isn't reachable anymore after decrementing count, NULL out for cleanliness
+            treeHandle->children[treeHandle->nChildren - 1] = NULL;
+            treeHandle->nChildren = treeHandle->nChildren - 1;
+
+            result = MULTITREE_OK;
+        }
+    }
+
+    return result;
+}
+

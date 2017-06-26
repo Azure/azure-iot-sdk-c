@@ -940,26 +940,64 @@ static EXECUTE_COMMAND_RESULT DecodeDesiredProperties(void* startAddress, COMMAN
     return validateModel_vs_Multitree(startAddress, handle->ModelHandle, desiredPropertiesTree, 0 )?EXECUTE_COMMAND_SUCCESS:EXECUTE_COMMAND_FAILED;
 }
 
-EXECUTE_COMMAND_RESULT CommandDecoder_IngestDesiredProperties(void* startAddress, COMMAND_DECODER_HANDLE handle, const char* desiredProperties)
+/* Raw JSON has properties we don't need; potentially nodes other than "desired" for full TWIN as well as a $version we don't pass to callees */
+static bool RemoveUnneededTwinProperties(MULTITREE_HANDLE initialParsedTree, bool parseDesiredNode, MULTITREE_HANDLE *desiredPropertiesTree)
+{
+    MULTITREE_HANDLE updateTree;
+    bool result;
+
+    if (parseDesiredNode)
+    {
+        /*Codes_SRS_COMMAND_DECODER_02_014: [ If parseDesiredNode is TRUE, parse only the `desired` part of JSON tree ]*/
+        if (MultiTree_GetChildByName(initialParsedTree, "desired", &updateTree) != MULTITREE_OK)
+        {
+            LogError("Unable to find 'desired' in tree");
+            return false;
+        }
+    }
+    else
+    {
+        // Tree already starts on node we want so just use it.
+        updateTree = initialParsedTree;
+    }
+
+    /*Codes_COMMAND_DECODER_02_015: [ Remove '$version' string from node, if it is present.  It not being present is not an error ]*/
+    MULTITREE_RESULT deleteChildResult = MultiTree_DeleteChild(updateTree, "$version");
+    if ((deleteChildResult == MULTITREE_OK) || (deleteChildResult == MULTITREE_CHILD_NOT_FOUND))
+    {
+        *desiredPropertiesTree = updateTree;
+        result = true;
+    }
+    else
+    {
+        *desiredPropertiesTree = NULL;
+        result = false;
+    }
+
+    return result;
+}
+
+EXECUTE_COMMAND_RESULT CommandDecoder_IngestDesiredProperties(void* startAddress, COMMAND_DECODER_HANDLE handle, const char* jsonPayload, bool parseDesiredNode)
 {
     EXECUTE_COMMAND_RESULT result;
+    
     /*Codes_SRS_COMMAND_DECODER_02_001: [ If startAddress is NULL then CommandDecoder_IngestDesiredProperties shall fail and return EXECUTE_COMMAND_ERROR. ]*/
     /*Codes_SRS_COMMAND_DECODER_02_002: [ If handle is NULL then CommandDecoder_IngestDesiredProperties shall fail and return EXECUTE_COMMAND_ERROR. ]*/
-    /*Codes_SRS_COMMAND_DECODER_02_003: [ If desiredProperties is NULL then CommandDecoder_IngestDesiredProperties shall fail and return EXECUTE_COMMAND_ERROR. ]*/
+    /*Codes_SRS_COMMAND_DECODER_02_003: [ If jsonPayload is NULL then CommandDecoder_IngestDesiredProperties shall fail and return EXECUTE_COMMAND_ERROR. ]*/
     if(
         (startAddress == NULL) ||
         (handle == NULL) ||
-        (desiredProperties == NULL)
+        (jsonPayload == NULL)
         )
     {
-        LogError("invalid argument COMMAND_DECODER_HANDLE handle=%p, const char* desiredProperties=%p", handle, desiredProperties);
+        LogError("invalid argument COMMAND_DECODER_HANDLE handle=%p, const char* jsonPayload=%p", handle, jsonPayload);
         result = EXECUTE_COMMAND_ERROR;
     }
     else
     {
         /*Codes_SRS_COMMAND_DECODER_02_004: [ CommandDecoder_IngestDesiredProperties shall clone desiredProperties. ]*/
         char* copy;
-        if (mallocAndStrcpy_s(&copy, desiredProperties) != 0)
+        if (mallocAndStrcpy_s(&copy, jsonPayload) != 0)
         {
             LogError("failure in mallocAndStrcpy_s");
             result = EXECUTE_COMMAND_FAILED;
@@ -967,20 +1005,31 @@ EXECUTE_COMMAND_RESULT CommandDecoder_IngestDesiredProperties(void* startAddress
         else
         {
             /*Codes_SRS_COMMAND_DECODER_02_005: [ CommandDecoder_IngestDesiredProperties shall create a MULTITREE_HANDLE ouf of the clone of desiredProperties. ]*/
+            MULTITREE_HANDLE initialParsedTree;
             MULTITREE_HANDLE desiredPropertiesTree;
-            if (JSONDecoder_JSON_To_MultiTree(copy, &desiredPropertiesTree) != JSON_DECODER_OK)
+
+            if (JSONDecoder_JSON_To_MultiTree(copy, &initialParsedTree) != JSON_DECODER_OK)
             {
                 LogError("Decoding JSON to a multi tree failed");
                 result = EXECUTE_COMMAND_ERROR;
             }
             else
             {
-                COMMAND_DECODER_HANDLE_DATA* commandDecoderInstance = (COMMAND_DECODER_HANDLE_DATA*)handle;
+                if (RemoveUnneededTwinProperties(initialParsedTree, parseDesiredNode, &desiredPropertiesTree) == false)
+                {
+                    LogError("Removing unneeded twin properties failed");
+                    result = EXECUTE_COMMAND_ERROR;
+                }
+                else
+                {
+                    COMMAND_DECODER_HANDLE_DATA* commandDecoderInstance = (COMMAND_DECODER_HANDLE_DATA*)handle;
 
-                /*Codes_SRS_COMMAND_DECODER_02_006: [ CommandDecoder_IngestDesiredProperties shall parse the MULTITREEE recursively. ]*/
-                result = DecodeDesiredProperties(startAddress, commandDecoderInstance, desiredPropertiesTree);
+                    /*Codes_SRS_COMMAND_DECODER_02_006: [ CommandDecoder_IngestDesiredProperties shall parse the MULTITREEE recursively. ]*/
+                    result = DecodeDesiredProperties(startAddress, commandDecoderInstance, desiredPropertiesTree);
 
-                MultiTree_Destroy(desiredPropertiesTree);
+                    // Do NOT free desiredPropertiesTree.  It is only a pointer into initialParsedTree.
+                    MultiTree_Destroy(initialParsedTree);
+                }
             }
             free(copy);
         }
