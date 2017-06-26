@@ -228,10 +228,10 @@ if("${build_javawrapper}" STREQUAL "ON")
 endif()
 
 
-if(${use_installed_dependencies})
-    #Set CMAKE_INSTALL_LIBDIR if not defined
-    include(GNUInstallDirs)
+#Set CMAKE_INSTALL_LIBDIR if not defined
+include(GNUInstallDirs)
 
+if(${use_installed_dependencies})
     #Install azure_iot_sdks
     set(package_location "cmake")
 
@@ -263,9 +263,6 @@ if(${use_installed_dependencies})
         DESTINATION
             ${package_location}
     )
-
-else()
-    message(WARNING "This package may only be installed when 'use_installed_dependencies' is ON")
 endif()
 
 if (${build_network_e2e})

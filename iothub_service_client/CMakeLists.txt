@@ -81,9 +81,6 @@ if(NOT IN_OPENWRT)
 endif()
 
 if(${use_installed_dependencies})
-    #Set CMAKE_INSTALL_LIBDIR if not defined
-    include(GNUInstallDirs)
-
     if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
         set(CMAKE_INSTALL_LIBDIR "lib")
     endif()
@@ -95,4 +92,13 @@ if(${use_installed_dependencies})
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
     )
     install(FILES ${iothub_service_client_h_files} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
+else()
+	set(install_staticlibs
+		iothub_service_client
+	)
+	install(FILES ${iothub_service_client_h_files}
+		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/iothub_service_client) 
+	install(TARGETS ${install_staticlibs} 
+		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()

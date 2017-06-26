@@ -115,4 +115,12 @@ if(${use_installed_dependencies})
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot 
     )
     install(FILES ${serializer_h_files} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
+else()
+	set(install_staticlibs
+		serializer
+	)
+	install(FILES ${serializer_h_files}
+		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot) 
+	install(TARGETS ${install_staticlibs} 
+		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()

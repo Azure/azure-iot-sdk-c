@@ -30,6 +30,9 @@ if(NOT ${dont_use_uploadtoblob})
     endif()
 endif()
 
+set(install_staticlibs
+	iothub_client
+)
 
 set(iothub_client_ll_transport_h_files
     ./inc/iothub_client_authorization.h
@@ -70,6 +73,9 @@ set(iothub_client_h_install_files
 set(iothub_client_libs)
 
 if(${use_http})
+	set(install_staticlibs ${install_staticlibs}
+		iothub_client_http_transport
+	)
     set(iothub_client_http_transport_c_files
         ${iothub_client_ll_transport_c_files}
         ./src/iothubtransporthttp.c
@@ -88,6 +94,11 @@ if(${use_http})
 endif()
 
 if(${use_amqp})
+	set(install_staticlibs ${install_staticlibs}
+		iothub_client_amqp_transport
+		iothub_client_amqp_ws_transport
+	)
+
     set(iothub_client_amqp_transport_common_c_files
         ${iothub_client_ll_transport_c_files}
         ./src/iothubtransport_amqp_common.c
@@ -156,6 +167,10 @@ if(${use_amqp})
 endif()
 
 if(${use_mqtt})
+	set(install_staticlibs ${install_staticlibs}
+		iothub_client_mqtt_transport
+		iothub_client_mqtt_ws_transport
+	)
     set(iothub_client_mqtt_ws_transport_c_files
         ${iothub_client_ll_transport_c_files}
         ./src/iothubtransport_mqtt_common.c
@@ -359,4 +374,9 @@ if(${use_installed_dependencies})
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot 
     )
     install(FILES ${iothub_client_h_install_files} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
+else()
+    install(FILES ${iothub_client_h_install_files} 
+		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
+	install(TARGETS ${install_staticlibs} 
+		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
