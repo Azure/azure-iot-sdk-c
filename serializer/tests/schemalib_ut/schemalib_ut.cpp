@@ -3,7 +3,6 @@
 
 #include <cstdlib>
 #include <cstddef>
-#include <cstdbool>
 #include "testrunnerswitcher.h"
 #include "micromock.h"
 #include "micromockcharstararenullterminatedstrings.h"
