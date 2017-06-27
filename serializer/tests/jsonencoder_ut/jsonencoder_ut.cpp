@@ -3,7 +3,6 @@
 
 #include <cstdlib>
 #include <cstddef>
-#include <cstdbool>
 #include "testrunnerswitcher.h"
 #include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
