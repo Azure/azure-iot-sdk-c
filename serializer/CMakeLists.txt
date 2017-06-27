@@ -122,5 +122,5 @@ else()
 	install(FILES ${serializer_h_files}
 		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot) 
 	install(TARGETS ${install_staticlibs} 
-		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()

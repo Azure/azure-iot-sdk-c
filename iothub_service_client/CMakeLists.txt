@@ -99,6 +99,5 @@ else()
 	install(FILES ${iothub_service_client_h_files}
 		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/iothub_service_client) 
 	install(TARGETS ${install_staticlibs} 
-		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
