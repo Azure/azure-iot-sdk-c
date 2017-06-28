@@ -15,14 +15,14 @@ Complete the following steps to install the AzureIoT binaries on your developmen
 1. Add the AzureIoT repository to the machine:
 
     ```
-    sudo add-apt-repository ppa:aziotsdklinux/ppa-azureiot  
-    sudo apt-get update  
+    sudo add-apt-repository ppa:aziotsdklinux/ppa-azureiot
+    sudo apt-get update
     ```
 
-2. Install The azure-iot-sdk-c-dev package
+2. Install the azure-iot-sdk-c-dev package
 
     ```
-    sudo apt-get install -y azure-iot-sdk-c-dev  
+    sudo apt-get install -y azure-iot-sdk-c-dev
     ```
 
 ## Create and  application using CMake
@@ -33,6 +33,8 @@ The following steps outline how you can use CMake to build an IoT Hub client app
 
     ```
     cmake_minimum_required(VERSION 2.8.11)
+
+    set (CMAKE_C_FLAGS "--std=c99 ${CMAKE_C_FLAGS}")
 
     set(AZUREIOT_INC_FOLDER ".." "/usr/include/azureiot" "/usr/include/azureiot/inc")
 
@@ -78,12 +80,12 @@ The Azure IoT client libraries and their dependencies install to the following l
   
 Libraries install in /usr/lib:
 
-* libiothub_client_amqp_transport.a  
-* libiothub_client_http_transport.a  
-* libiothub_client_mqtt_transport.a  
-* libserializer.a  
-* libiothub_client.a    
-  
+* libiothub_client_amqp_transport.a
+* libiothub_client_http_transport.a
+* libiothub_client_mqtt_transport.a
+* libserializer.a
+* libiothub_client.a
+
 All azure-iot-sdk header files install in /usr/include/azureiotsdk.
 
 Dependencies install in /usr/lib:
