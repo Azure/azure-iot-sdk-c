@@ -16,7 +16,7 @@ else
     exit 1 
 fi
 
-cd jenkins/esp32_c/build
+cd build_all/esp32
 echo "building in" $(pwd)
 make
 if [ $? = 0 ]
