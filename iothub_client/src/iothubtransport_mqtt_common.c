@@ -509,7 +509,7 @@ static bool CanRetry(RETRY_LOGIC *retryLogic)
                     {
                         retryLogic->delayFromLastConnectToRetry = delay;
 
-                        LogInfo("Evaluated delay time %d.  Retry attempt count %d\n", delay, retryLogic->retrycount);
+                        LogInfo("Evaluated delay time %d sec.  Retry attempt count %d\n", delay, retryLogic->retrycount);
 
                         // If the retry policy is telling us to connect right away ( <= ERROR_TIME_FOR_RETRY_SECS),
                         // or if enough time has elapsed, then we retry.
@@ -2520,11 +2520,11 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIEN
                 PDLIST_ENTRY currentListEntry = transport_data->telemetry_waitingForAck.Flink;
                 while (currentListEntry != &transport_data->telemetry_waitingForAck)
                 {
+                    tickcounter_ms_t current_ms;
                     MQTT_MESSAGE_DETAILS_LIST* mqttMsgEntry = containingRecord(currentListEntry, MQTT_MESSAGE_DETAILS_LIST, entry);
                     DLIST_ENTRY nextListEntry;
                     nextListEntry.Flink = currentListEntry->Flink;
 
-                    tickcounter_ms_t current_ms;
                     (void)tickcounter_get_current_ms(transport_data->msgTickCounter, &current_ms);
                     /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_033: [IoTHubTransport_MQTT_Common_DoWork shall iterate through the Waiting Acknowledge messages looking for any message that has been waiting longer than 2 min.]*/
                     if (((current_ms - mqttMsgEntry->msgPublishTime) / 1000) > RESEND_TIMEOUT_VALUE_MIN)
@@ -2532,6 +2532,7 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIEN
                         /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_034: [If IoTHubTransport_MQTT_Common_DoWork has resent the message two times then it shall fail the message and reconnect to IoTHub ... ] */
                         if (mqttMsgEntry->retryCount >= MAX_SEND_RECOUNT_LIMIT)
                         {
+                            PDLIST_ENTRY current_entry;
                             (void)DList_RemoveEntryList(currentListEntry);
                             sendMsgComplete(mqttMsgEntry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT);
                             free(mqttMsgEntry);
@@ -2541,16 +2542,13 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIEN
                             DisconnectFromClient(transport_data);
 
                             /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_057: [ ... then go through all the rest of the waiting messages and reset the retryCount on the message. ]*/
-                            PDLIST_ENTRY reset_list = transport_data->telemetry_waitingForAck.Flink;
-                            while (reset_list != &transport_data->telemetry_waitingForAck)
+                            current_entry = transport_data->telemetry_waitingForAck.Flink;
+                            while (current_entry != &transport_data->telemetry_waitingForAck)
                             {
-                                DLIST_ENTRY next_entry;
-                                next_entry.Flink = reset_list->Flink;
-
-                                MQTT_MESSAGE_DETAILS_LIST* msg_reset_entry = containingRecord(reset_list, MQTT_MESSAGE_DETAILS_LIST, entry);
+                                MQTT_MESSAGE_DETAILS_LIST* msg_reset_entry;
+                                msg_reset_entry = containingRecord(current_entry, MQTT_MESSAGE_DETAILS_LIST, entry);
                                 msg_reset_entry->retryCount = 0;
-
-                                reset_list = next_entry.Flink;
+                                current_entry = current_entry->Flink;
                             }
                         }
                         else
