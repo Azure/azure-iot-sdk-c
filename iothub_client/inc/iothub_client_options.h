@@ -32,7 +32,9 @@ extern "C"
     static const char* OPTION_MIN_POLLING_TIME = "MinimumPollingTime";
     static const char* OPTION_BATCHING = "Batching";
 
+    static const char* OPTION_MESSAGE_TIMEOUT = "messageTimeout";
     static const char* OPTION_PRODUCT_INFO = "product_info";
+    static const char* OPTION_C2D_KEEP_ALIVE_FREQ_SECS = "c2d_keep_alive_freq_secs";
 
 #ifdef __cplusplus
 }

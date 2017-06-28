@@ -362,6 +362,8 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 #define TEST_PROT_GW_HOSTNAME_NULL                 NULL
 #define TEST_PROT_GW_HOSTNAME                      "gw"
 #define TEST_DEVICE_STATUS_CODE                    200
+#define TEST_DEFAULT_C2D_KEEP_ALIVE_FREQ_SECS      240
+#define TEST_USER_C2D_KEEP_ALIVE_FREQ_SECS         123
 #define DEFAULT_RETRY_POLICY                      IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER
 #define DEFAULT_MAX_RETRY_TIME_IN_SECS            0
 
@@ -849,6 +851,7 @@ static bool TEST_amqp_connection_create_saved_create_sasl_io;
 static bool TEST_amqp_connection_create_saved_create_cbs_connection;
 static ON_AMQP_CONNECTION_STATE_CHANGED TEST_amqp_connection_create_saved_on_state_changed_callback;
 static const void* TEST_amqp_connection_create_saved_on_state_changed_context;
+static size_t TEST_amqp_connection_create_saved_c2d_keep_alive_freq_secs;
 static AMQP_CONNECTION_HANDLE TEST_amqp_connection_create_return;
 static AMQP_CONNECTION_HANDLE TEST_amqp_connection_create(AMQP_CONNECTION_CONFIG* config)
 {
@@ -856,6 +859,8 @@ static AMQP_CONNECTION_HANDLE TEST_amqp_connection_create(AMQP_CONNECTION_CONFIG
     TEST_amqp_connection_create_saved_create_cbs_connection = config->create_cbs_connection;
     TEST_amqp_connection_create_saved_on_state_changed_callback = config->on_state_changed_callback;
     TEST_amqp_connection_create_saved_on_state_changed_context = config->on_state_changed_context;
+    TEST_amqp_connection_create_saved_c2d_keep_alive_freq_secs = config->c2d_keep_alive_freq_secs;
+
     return TEST_amqp_connection_create_return;
 }
 
@@ -4014,6 +4019,7 @@ TEST_FUNCTION(DoWork_get_underlying_io_transport_provider_fails)
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(size_t, TEST_amqp_connection_create_saved_c2d_keep_alive_freq_secs, TEST_DEFAULT_C2D_KEEP_ALIVE_FREQ_SECS);
 
     // cleanup
     destroy_transport(handle, device_handle, NULL);
@@ -4045,6 +4051,7 @@ TEST_FUNCTION(DoWork_sets_amqp_connection_for_X509)
     ASSERT_IS_FALSE(TEST_amqp_connection_create_saved_create_sasl_io);
     ASSERT_IS_FALSE(TEST_amqp_connection_create_saved_create_cbs_connection);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(size_t, TEST_amqp_connection_create_saved_c2d_keep_alive_freq_secs, TEST_DEFAULT_C2D_KEEP_ALIVE_FREQ_SECS);
 
     // cleanup
     destroy_transport(handle, device_handle, NULL);
@@ -4071,6 +4078,41 @@ TEST_FUNCTION(DoWork_sets_amqp_connection_for_CBS)
     ASSERT_IS_TRUE(TEST_amqp_connection_create_saved_create_sasl_io);
     ASSERT_IS_TRUE(TEST_amqp_connection_create_saved_create_cbs_connection);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(size_t, TEST_amqp_connection_create_saved_c2d_keep_alive_freq_secs, TEST_DEFAULT_C2D_KEEP_ALIVE_FREQ_SECS);
+
+    // cleanup
+    destroy_transport(handle, device_handle, NULL);
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_12_003: [AMQP connection will be configured using the `c2d_keep_alive_freq_secs` value from SetOption ]
+TEST_FUNCTION(DoWork_configures_AMQP_connection_using_c2d_keep_alive_freq_secs)
+{
+    // arrange
+    initialize_test_variables();
+    TRANSPORT_LL_HANDLE handle = create_transport();
+
+    const char* certificate = TEST_X509_CERTIFICATE;
+    const char* private_key = TEST_X509_PRIVATE_KEY;
+    size_t c2d_secs = TEST_USER_C2D_KEEP_ALIVE_FREQ_SECS;
+    (void)IoTHubTransport_AMQP_Common_SetOption(handle, OPTION_X509_CERT, certificate);
+    (void)IoTHubTransport_AMQP_Common_SetOption(handle, OPTION_X509_PRIVATE_KEY, private_key);
+    (void)IoTHubTransport_AMQP_Common_SetOption(handle, OPTION_C2D_KEEP_ALIVE_FREQ_SECS, &c2d_secs);
+
+    IOTHUB_DEVICE_CONFIG* device_config = create_device_config_for_x509(TEST_DEVICE_ID_CHAR_PTR);
+    IOTHUB_DEVICE_HANDLE device_handle = register_device(handle, device_config, &TEST_waitingToSend, false);
+    ASSERT_IS_NOT_NULL(device_handle);
+
+    umock_c_reset_all_calls();
+    set_expected_calls_for_DoWork(&TEST_waitingToSend, 0, DEVICE_STATE_STOPPED, true, true, false, false, 1, TEST_current_time, false);
+
+    // act
+    IoTHubTransport_AMQP_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+    // assert
+    ASSERT_IS_FALSE(TEST_amqp_connection_create_saved_create_sasl_io);
+    ASSERT_IS_FALSE(TEST_amqp_connection_create_saved_create_cbs_connection);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(size_t, TEST_amqp_connection_create_saved_c2d_keep_alive_freq_secs, TEST_USER_C2D_KEEP_ALIVE_FREQ_SECS);
 
     // cleanup
     destroy_transport(handle, device_handle, NULL);

@@ -66,7 +66,6 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 
 #define DEFAULT_INCOMING_WINDOW_SIZE                      UINT_MAX
 #define DEFAULT_OUTGOING_WINDOW_SIZE                      100
-#define DEFAULT_CONNECTION_IDLE_TIMEOUT                   240000
 
 #define TEST_STRING                                       "Test string!! $%^%2F0x011"
 #define TEST_IOTHUB_HOST_FQDN                             "some.fqdn.com"
@@ -162,6 +161,7 @@ static AMQP_CONNECTION_CONFIG* get_amqp_connection_config()
 	global_amqp_connection_config.create_sasl_io = true;
 	global_amqp_connection_config.create_cbs_connection = true;
 	global_amqp_connection_config.is_trace_on = true;
+    global_amqp_connection_config.c2d_keep_alive_freq_secs = 123;
 
 	return &global_amqp_connection_config;
 }
@@ -207,7 +207,7 @@ static void set_exp_calls_for_amqp_connection_create(AMQP_CONNECTION_CONFIG* amq
 		.IgnoreArgument_on_io_error()
 		.IgnoreArgument_on_io_error_context();
 
-	STRICT_EXPECTED_CALL(connection_set_idle_timeout(TEST_CONNECTION_HANDLE, DEFAULT_CONNECTION_IDLE_TIMEOUT));
+	STRICT_EXPECTED_CALL(connection_set_idle_timeout(TEST_CONNECTION_HANDLE, (milliseconds)(1000 * amqp_connection_config->c2d_keep_alive_freq_secs)));
 	STRICT_EXPECTED_CALL(connection_set_trace(TEST_CONNECTION_HANDLE, amqp_connection_config->is_trace_on));
 
 	EXPECTED_CALL(free(IGNORED_PTR_ARG)); // UniqueId container.
@@ -440,7 +440,6 @@ TEST_FUNCTION(amqp_connection_create_NULL_underlying_io_transport)
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_031: [`instance->cbs_handle` shall be opened using `cbs_open_async`]
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_034: [If no failures occur, amqp_connection_create() shall return the handle to the connection state]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_073: [The connection idle timeout parameter shall be set to 240000 milliseconds using connection_set_idle_timeout()]
 TEST_FUNCTION(amqp_connection_create_SASL_and_CBS_success)
 {
     // arrange
