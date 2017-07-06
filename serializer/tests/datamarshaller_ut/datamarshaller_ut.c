@@ -20,8 +20,6 @@ static void my_gballoc_free(void* s)
 }
 
 #include "real_parson.h"
-#include "real_vector.h"
-#include "real_crt_abstractions.h"
 #include "real_strings.h"
 
 #include "umock_c.h"
@@ -65,6 +63,31 @@ extern "C"
     MOCKABLE_FUNCTION(, char *, json_serialize_to_string_pretty, const JSON_Value *, value);
     MOCKABLE_FUNCTION(, JSON_Status, json_object_dotset_value, JSON_Object *, object, const char *, name, JSON_Value *, value);
     MOCKABLE_FUNCTION(, JSON_Object *, json_object, const JSON_Value *, value);
+
+    VECTOR_HANDLE real_VECTOR_create(size_t elementSize);
+    VECTOR_HANDLE real_VECTOR_move(VECTOR_HANDLE handle);
+    void real_VECTOR_destroy(VECTOR_HANDLE handle);
+
+    /* insertion */
+    int real_VECTOR_push_back(VECTOR_HANDLE handle, const void* elements, size_t numElements);
+
+    /* removal */
+    void real_VECTOR_erase(VECTOR_HANDLE handle, void* elements, size_t numElements);
+    void real_VECTOR_clear(VECTOR_HANDLE handle);
+
+    /* access */
+    void* real_VECTOR_element(const VECTOR_HANDLE handle, size_t index);
+    void* real_VECTOR_front(const VECTOR_HANDLE handle);
+    void* real_VECTOR_back(const VECTOR_HANDLE handle);
+    void* real_VECTOR_find_if(const VECTOR_HANDLE handle, PREDICATE_FUNCTION pred, const void* value);
+
+    /* capacity */
+    size_t real_VECTOR_size(const VECTOR_HANDLE handle);
+
+    int real_mallocAndStrcpy_s(char** destination, const char* source);
+    int real_size_tToString(char* destination, size_t destinationSize, size_t value);
+
+    int real_unsignedIntToString(char* destination, size_t destinationSize, unsigned int value);
 #ifdef __cplusplus
 }
 #endif
@@ -187,9 +210,7 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         REGISTER_GLOBAL_MOCK_HOOK(MultiTree_Create, my_MultiTree_Create);
         REGISTER_GLOBAL_MOCK_HOOK(MultiTree_Destroy, my_MultiTree_Destroy);
 
-        REGISTER_GLOBAL_MOCK_HOOK(STRING_new, real_STRING_new);
-        REGISTER_GLOBAL_MOCK_HOOK(STRING_c_str, real_STRING_c_str);
-        REGISTER_GLOBAL_MOCK_HOOK(STRING_delete, real_STRING_delete);
+        REGISTER_STRING_GLOBAL_MOCK_HOOK;
 
         REGISTER_GLOBAL_MOCK_HOOK(AgentDataTypes_ToString, my_AgentDataTypes_ToString);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(AgentDataTypes_ToString, AGENT_DATA_TYPES_ERROR);
@@ -223,13 +244,10 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         REGISTER_GLOBAL_MOCK_HOOK(json_value_free, real_json_value_free);
         REGISTER_GLOBAL_MOCK_HOOK(json_serialize_to_string_pretty, real_json_serialize_to_string_pretty);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_serialize_to_string_pretty, NULL);
-            
-            
-            
+
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, my_gballoc_free);
-
     }
 
     TEST_SUITE_CLEANUP(TestClassCleanup)

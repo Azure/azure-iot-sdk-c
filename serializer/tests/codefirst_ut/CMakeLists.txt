@@ -5,10 +5,13 @@
 cmake_minimum_required(VERSION 2.8.11)
 
 compileAsC99()
+
 set(theseTestsName codefirst_ut)
 set(${theseTestsName}_test_files
 ${theseTestsName}.c
 )
+
+include_directories(${SHARED_UTIL_REAL_TEST_FOLDER})
 
 set(${theseTestsName}_c_files
     ../../src/codefirst.c
@@ -16,6 +19,8 @@ set(${theseTestsName}_c_files
     ${SHARED_UTIL_SRC_FOLDER}/gballoc.c
     ${SHARED_UTIL_SRC_FOLDER}/crt_abstractions.c
     ${LOCK_C_FILE}
+    ${SHARED_UTIL_REAL_TEST_FOLDER}/real_strings.c
+
 )
 
 set(${theseTestsName}_h_files
