@@ -11,16 +11,21 @@ set(${theseTestsName}_test_files
 ${theseTestsName}.cpp
 )
 
+include_directories(${SHARED_UTIL_REAL_TEST_FOLDER})
+
 set(${theseTestsName}_c_files
     ../../src/codefirst.c
     ./c_bool_size.c
     ${SHARED_UTIL_SRC_FOLDER}/gballoc.c
     ${SHARED_UTIL_SRC_FOLDER}/crt_abstractions.c
     ${LOCK_C_FILE}
+    ${SHARED_UTIL_REAL_TEST_FOLDER}/real_vector.c
+    ${SHARED_UTIL_REAL_TEST_FOLDER}/real_strings.c
 )
 
 set(${theseTestsName}_h_files
     ./c_bool_size.h
+        ${SHARED_UTIL_REAL_TEST_FOLDER}/real_strings.h
 )
 
 #CPP compiler on windows likes to complain about unused local function removed (C4505)
