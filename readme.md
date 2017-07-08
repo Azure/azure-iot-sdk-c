@@ -144,20 +144,30 @@ Contains tools that are currently used in testing the client libraries: Mocking 
 
 Miscellaneous tools: compilembed, mbed_build, traceabilitytool (checks spec requirements vs code implementation).
 
-## Long Term Support branches
+# Long Term Support
 
-The project is using LTS branches to allow users that do not need the latest and greatest features to be shielded from unwanted changes.
+The project offers a Long Term Support (LTS) version to allow users that do not need the latest features to be shielded from unwanted changes.
 
-An LTS branch will be created every 6 months. The lifetime of an LTS branch is currently 1 year.
-LTS branches receive all bug fixes that fall in one of these categories:
+A new LTS version will be created every 6 months. The lifetime of an LTS branch is currently planned for one year. LTS branches receive all bug fixes that fall in one of these categories:
 
 - security bugfixes
 - critical bugfixes (crashes, memory leaks, etc.)
 
-No new features or improvements will be picked up on LTS branches.
+No new features or improvements will be picked up in an LTS branch.
 
-LTS branches are named lts_*mm*_*yyyy*, where *mm* and *yyyy* are the month and year when the branch was created. An example of such a branch is *lts_03_2017*.
+LTS branches are named lts_*mm*_*yyyy*, where *mm* and *yyyy* are the month and year when the branch was created. An example of such a branch is *lts_07_2017*.
 
+## Schedule<sup>1</sup>
+
+Below is a table showing the mapping of the LTS branches to the packages released
+
+| Package | Github Branch | LTS Status | LTS Start Date | Maintenance End Date | Removed Date |
+| :-----------: | :-----------: | :--------: | :------------: | :------------------: | :----------: |
+| 1.x.x         | lts_07_2017   | Active     | 2017-07-01     | 2017-12-31           | 2018-06-30   |
+
+* <sup>1</sup> All scheduled dates are subject to change by the Azure IoT SDK team.
+
+### Planned Release Schedule
 ![](./lts_branches.png)
 
 ---
