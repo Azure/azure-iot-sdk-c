@@ -123,6 +123,8 @@ endif()
 
 include("dependencies.cmake")
 
+set_platform_files(${CMAKE_CURRENT_LIST_DIR}/c-utility)
+
 if(${run_unittests} OR ${run_e2e_tests})
     include("dependencies-test.cmake")
 endif()
