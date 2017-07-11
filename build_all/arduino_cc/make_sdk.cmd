@@ -80,5 +80,6 @@ del %sdk_path%iothubtransportmqtt_websockets.*
 del %SharedUtility_path%tlsio_*.*
 del %SharedUtility_path%wsio*.*
 del %SharedUtility_path%x509_*.*
+del %SharedUtility_path%etw*.*
 
 popd
