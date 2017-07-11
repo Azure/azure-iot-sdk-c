@@ -4,7 +4,7 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(azure_iot_sdks)
 
-set(IOT_SDK_VERSION 1.1.17)
+set(IOT_SDK_VERSION 1.1.18)
 
 if(POLICY CMP0042)
     cmake_policy(SET CMP0042 NEW)
@@ -122,6 +122,8 @@ if(NOT "${compileOption_CXX}" STREQUAL "OFF")
 endif()
 
 include("dependencies.cmake")
+
+set_platform_files(${CMAKE_CURRENT_LIST_DIR}/c-utility)
 
 if(${run_unittests} OR ${run_e2e_tests})
     include("dependencies-test.cmake")

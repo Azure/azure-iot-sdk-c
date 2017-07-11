@@ -415,26 +415,26 @@ void Device_DestroyTransaction_ReportedProperties(REPORTED_PROPERTIES_TRANSACTIO
     }
 }
 
-DEVICE_RESULT Device_IngestDesiredProperties(void* startAddress, DEVICE_HANDLE deviceHandle, const char* desiredProperties)
+DEVICE_RESULT Device_IngestDesiredProperties(void* startAddress, DEVICE_HANDLE deviceHandle, const char* jsonPayload, bool parseDesiredNode)
 {
     DEVICE_RESULT result;
     /*Codes_SRS_DEVICE_02_032: [ If deviceHandle is NULL then Device_IngestDesiredProperties shall fail and return DEVICE_INVALID_ARG. ]*/
-    /*Codes_SRS_DEVICE_02_033: [ If desiredProperties is NULL then Device_IngestDesiredProperties shall fail and return DEVICE_INVALID_ARG. ]*/
+    /*Codes_SRS_DEVICE_02_033: [ If jsonPayload is NULL then Device_IngestDesiredProperties shall fail and return DEVICE_INVALID_ARG. ]*/
     /*Codes_SRS_DEVICE_02_037: [ If startAddress is NULL then Device_IngestDesiredProperties shall fail and return DEVICE_INVALID_ARG. ]*/
     if (
         (deviceHandle == NULL) ||
-        (desiredProperties == NULL) ||
+        (jsonPayload == NULL) ||
         (startAddress == NULL)
         )
     {
-        LogError("invalid argument void* startAddress=%p, DEVICE_HANDLE deviceHandle=%p, const char* desiredProperties=%p\n", startAddress, deviceHandle, desiredProperties);
+        LogError("invalid argument void* startAddress=%p, DEVICE_HANDLE deviceHandle=%p, const char* jsonPayload=%p\n", startAddress, deviceHandle, jsonPayload);
         result = DEVICE_INVALID_ARG;
     }
     else
     {
         /*Codes_SRS_DEVICE_02_034: [ Device_IngestDesiredProperties shall call CommandDecoder_IngestDesiredProperties. ]*/
         DEVICE_HANDLE_DATA* device = (DEVICE_HANDLE_DATA*)deviceHandle;
-        if (CommandDecoder_IngestDesiredProperties(startAddress, device->commandDecoderHandle, desiredProperties) != COMMANDDECODER_OK)
+        if (CommandDecoder_IngestDesiredProperties(startAddress, device->commandDecoderHandle, jsonPayload, parseDesiredNode) != COMMANDDECODER_OK)
         {
             /*Codes_SRS_DEVICE_02_035: [ If any failure happens then Device_IngestDesiredProperties shall fail and return DEVICE_ERROR. ]*/
             LogError("failure in CommandDecoder_IngestDesiredProperties");

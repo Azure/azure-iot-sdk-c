@@ -78,6 +78,9 @@ TRANSPORT_LL_HANDLE IoTHubTransport_AMQP_Common_Create(const IOTHUBTRANSPORT_CON
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_010: [**`get_io_transport` shall be saved on `instance->underlying_io_transport_provider`**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_011: [**If IoTHubTransport_AMQP_Common_Create fails it shall free any memory it allocated**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_012: [**If IoTHubTransport_AMQP_Common_Create succeeds it shall return a pointer to `instance`.**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_12_002: [**The connection idle timeout parameter default value shall be set to 240000 milliseconds using connection_set_idle_timeout()**]**
+
+
 
  
 ### IoTHubTransport_AMQP_Common_Destroy
@@ -125,8 +128,7 @@ Note: see section "Per-Device DoWork Requirements" below.
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_029: [**`instance->is_trace_on` shall be set into `AMQP_CONNECTION_CONFIG->is_trace_on`**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_030: [**If amqp_connection_create() fails, IoTHubTransport_AMQP_Common_DoWork shall fail and return**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_110: [**If amqp_connection_create() succeeds, IoTHubTransport_AMQP_Common_DoWork shall proceed to invoke amqp_connection_do_work**]**
-
-
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_12_003: [** AMQP connection will be configured using the `c2d_keep_alive_freq_secs` value from SetOption **]**
 
 #### Connection-Retry Logic
 

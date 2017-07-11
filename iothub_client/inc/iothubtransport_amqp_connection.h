@@ -34,6 +34,7 @@ typedef struct AMQP_CONNECTION_CONFIG_TAG
 		
 	ON_AMQP_CONNECTION_STATE_CHANGED on_state_changed_callback;
 	const void* on_state_changed_context;
+    size_t c2d_keep_alive_freq_secs;
 } AMQP_CONNECTION_CONFIG;
 
 typedef struct AMQP_CONNECTION_INSTANCE* AMQP_CONNECTION_HANDLE;

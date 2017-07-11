@@ -282,14 +282,14 @@ extern CODEFIRST_RESULT CodeFirst_SendAsyncReported(unsigned char** destination,
 
 ### CODEFIRST_RESULT CodeFirst_IngestDesiredProperties
 ```c
-extern CODEFIRST_RESULT CodeFirst_IngestDesiredProperties(void* device, const char* desiredProperties);
+extern CODEFIRST_RESULT CodeFirst_IngestDesiredProperties(void* device, const char* jsonPayload, bool removedDesiredNode);
 ```
 
 `CodeFirst_IngestDesiredProperties` applies desired properties to a device.
 
 **SRS_CODEFIRST_02_030: [** If argument `device` is `NULL` then `CodeFirst_IngestDesiredProperties` shall fail and return `CODEFIRST_INVALID_ARG`. **]**
 
-**SRS_CODEFIRST_02_031: [** If argument `desiredProperties` is `NULL` then `CodeFirst_IngestDesiredProperties` shall fail and return `CODEFIRST_INVALID_ARG`. **]**
+**SRS_CODEFIRST_02_031: [** If argument `jsonPayload` is `NULL` then `CodeFirst_IngestDesiredProperties` shall fail and return `CODEFIRST_INVALID_ARG`. **]**
 
 **SRS_CODEFIRST_02_032: [** `CodeFirst_IngestDesiredProperties` shall locate the device associated with `device`. **]**
 

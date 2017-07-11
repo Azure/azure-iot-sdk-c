@@ -140,20 +140,24 @@ If any parameter is NULL then CommandDecoder_ExecuteCommand shall return EXECUTE
 
 ### CommandDecoder_IngestDesiredProperties
 ```c
-extern EXECUTE_COMMAND_RESULT CommandDecoder_IngestDesiredProperties( void* startAddress, COMMAND_DECODER_HANDLE handle, const char* desiredProperties);
+extern EXECUTE_COMMAND_RESULT CommandDecoder_IngestDesiredProperties( void* startAddress, COMMAND_DECODER_HANDLE handle, const char* jsonPayload, bool removedDesiredNode);
 ```
 
-`CommandDecoder_IngestDesiredProperties` applies `desiredProperties` to the device at `startAddress` in memory. It is not transactional (so far).
+`CommandDecoder_IngestDesiredProperties` applies `jsonPayload` to the device at `startAddress` in memory. It is not transactional (so far).
 
 **SRS_COMMAND_DECODER_02_001: [** If `startAddress` is NULL then `CommandDecoder_IngestDesiredProperties` shall fail and return `EXECUTE_COMMAND_ERROR`. **]**
 
 **SRS_COMMAND_DECODER_02_002: [** If `handle` is NULL then `CommandDecoder_IngestDesiredProperties` shall fail and return `EXECUTE_COMMAND_ERROR`. **]**
 
-**SRS_COMMAND_DECODER_02_003: [** If `desiredProperties` is NULL then `CommandDecoder_IngestDesiredProperties` shall fail and return `EXECUTE_COMMAND_ERROR`. **]**
+**SRS_COMMAND_DECODER_02_003: [** If `jsonPayload` is NULL then `CommandDecoder_IngestDesiredProperties` shall fail and return `EXECUTE_COMMAND_ERROR`. **]**
 
-**SRS_COMMAND_DECODER_02_004: [** `CommandDecoder_IngestDesiredProperties` shall clone `desiredProperties`. **]**
+**SRS_COMMAND_DECODER_02_004: [** `CommandDecoder_IngestDesiredProperties` shall clone `jsonPayload`. **]**
 
-**SRS_COMMAND_DECODER_02_005: [** `CommandDecoder_IngestDesiredProperties` shall create a MULTITREE_HANDLE ouf of the clone of `desiredProperties`. **]**
+**SRS_COMMAND_DECODER_02_005: [** `CommandDecoder_IngestDesiredProperties` shall create a MULTITREE_HANDLE ouf of the clone of `jsonPayload`. **]**
+
+**SRS_COMMAND_DECODER_02_014: [** If removedDesiredNode is TRUE, parse only the `desired` part of JSON tree **]**
+
+**SRS_COMMAND_DECODER_02_015: [** Remove '$version' string from node, if it is present.  It not being present is not an error **]**
 
 **SRS_COMMAND_DECODER_02_006: [** `CommandDecoder_IngestDesiredProperties` shall parse the MULTITREEE recursively. **]**
 

@@ -336,6 +336,7 @@ BEGIN_TEST_SUITE(serializer_dt_int)
 
         const char* inputJsonAsString =
         "{\"desired\":{                                                                                        \
+            \"$version\": 1,                                                                                   \
             \"with_desired_property_double15\" : 1.0,                                                          \
             \"with_desired_property_int15\" : 2,                                                               \
             \"with_desired_property_float15\" : 3.000000,                                                      \
@@ -346,7 +347,7 @@ BEGIN_TEST_SUITE(serializer_dt_int)
             \"with_desired_property_int32_t15\" : 8,                                                           \
             \"with_desired_property_int64_t15\" : 9,                                                           \
             \"with_desired_property_bool15\" : true,                                                           \
-            \"with_desired_property_ascii_char_ptr15\" : \"eleven\",                                           \
+            \"with_desired_property_ascii_char_ptr15\" : \"e/leven\",                                          \
             \"with_desired_property_ascii_char_ptr_no_quotes15\" : \"twelve\",                                 \
             \"with_desired_property_EdmDateTimeOffset15\" : \"2014-06-17T08:51:23.000000000005-08:01\",        \
             \"with_desired_property_EdmGuid15\" : \"00112233-4455-6677-8899-AABBCCDDEEFF\",                    \
@@ -398,7 +399,7 @@ BEGIN_TEST_SUITE(serializer_dt_int)
         ASSERT_ARE_EQUAL(int32_t,   8,              modelWithData->with_desired_property_int32_t15);
         ASSERT_ARE_EQUAL(int64_t,   9,              modelWithData->with_desired_property_int64_t15);
         ASSERT_IS_TRUE(modelWithData->with_desired_property_bool15);
-        ASSERT_ARE_EQUAL(char_ptr,  "eleven",       modelWithData->with_desired_property_ascii_char_ptr15);
+        ASSERT_ARE_EQUAL(char_ptr,  "e/leven",       modelWithData->with_desired_property_ascii_char_ptr15);
         ASSERT_ARE_EQUAL(char_ptr,  "\"twelve\"",   modelWithData->with_desired_property_ascii_char_ptr_no_quotes15);
         ASSERT_ARE_EQUAL(int,       114,            modelWithData->with_desired_property_EdmDateTimeOffset15.dateTime.tm_year);
         ASSERT_ARE_EQUAL(int,       6-1,            modelWithData->with_desired_property_EdmDateTimeOffset15.dateTime.tm_mon);
@@ -445,6 +446,7 @@ BEGIN_TEST_SUITE(serializer_dt_int)
 
         const char* inputJsonAsString =
         "{\"desired\":{                                                                                        \
+            \"$version\": 1,                                                                                   \
             \"with_desired_property_double15\" : 1.0,                                                          \
             \"with_desired_property_int15\" : 2,                                                               \
             \"with_desired_property_float15\" : 3.000000,                                                      \
@@ -455,7 +457,7 @@ BEGIN_TEST_SUITE(serializer_dt_int)
             \"with_desired_property_int32_t15\" : 8,                                                           \
             \"with_desired_property_int64_t15\" : 9,                                                           \
             \"with_desired_property_bool15\" : true,                                                           \
-            \"with_desired_property_ascii_char_ptr15\" : \"eleven\",                                           \
+            \"with_desired_property_ascii_char_ptr15\" : \"e/leven\",                                          \
             \"with_desired_property_ascii_char_ptr_no_quotes15\" : \"twelve\",                                 \
             \"with_desired_property_EdmDateTimeOffset15\" : \"2014-06-17T08:51:23.000000000005-08:01\",        \
             \"with_desired_property_EdmGuid15\" : \"00112233-4455-6677-8899-AABBCCDDEEFF\",                    \
@@ -507,7 +509,7 @@ BEGIN_TEST_SUITE(serializer_dt_int)
         ASSERT_ARE_EQUAL(int32_t,   8,              modelWithData->with_desired_property_int32_t15);
         ASSERT_ARE_EQUAL(int64_t,   9,              modelWithData->with_desired_property_int64_t15);
         ASSERT_IS_TRUE(modelWithData->with_desired_property_bool15);
-        ASSERT_ARE_EQUAL(char_ptr,  "eleven",       modelWithData->with_desired_property_ascii_char_ptr15);
+        ASSERT_ARE_EQUAL(char_ptr,  "e/leven",       modelWithData->with_desired_property_ascii_char_ptr15);
         ASSERT_ARE_EQUAL(char_ptr,  "\"twelve\"",   modelWithData->with_desired_property_ascii_char_ptr_no_quotes15);
         ASSERT_ARE_EQUAL(int,       114,            modelWithData->with_desired_property_EdmDateTimeOffset15.dateTime.tm_year);
         ASSERT_ARE_EQUAL(int,       6-1,            modelWithData->with_desired_property_EdmDateTimeOffset15.dateTime.tm_mon);

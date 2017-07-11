@@ -11,20 +11,20 @@ set(${theseTestsName}_test_files
 ${theseTestsName}.c
 )
 
+include_directories(${SHARED_UTIL_REAL_TEST_FOLDER})
+
 set(${theseTestsName}_c_files
-real_parson.c
-real_vector.c
-real_crt_abstractions.c
-real_strings.c
-../../src/datamarshaller.c
+    real_parson.c
+    ${SHARED_UTIL_REAL_TEST_FOLDER}/real_vector.c
+    ${SHARED_UTIL_REAL_TEST_FOLDER}/real_crt_abstractions.c
+    ${SHARED_UTIL_REAL_TEST_FOLDER}/real_strings.c
+    ../../src/datamarshaller.c
 ${LOCK_C_FILE}
 )
 
 set(${theseTestsName}_h_files
-real_parson.h
-real_vector.h
-real_crt_abstractions.h
-real_strings.h
+    real_parson.h
+    ${SHARED_UTIL_REAL_TEST_FOLDER}/real_strings.h
 )
 
 if(MSVC)

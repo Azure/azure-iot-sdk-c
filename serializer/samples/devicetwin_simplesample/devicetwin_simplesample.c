@@ -136,6 +136,7 @@ void device_twin_simple_sample_run(void)
                     {
                         printf("Reported state will be send to IoTHub\n");
 
+                        // Comment out the following three lines if you want to enable callback(s) for updates of the existing model (example: onDesiredMaxSpeed)
                         if (IoTHubClient_SetDeviceTwinCallback(iotHubClientHandle, deviceTwinGetStateCallback, NULL) != IOTHUB_CLIENT_OK)
                         {
                             (void)printf("Failed subscribing for device twin properties\n");

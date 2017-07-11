@@ -204,14 +204,14 @@ void Device_DestroyTransaction_ReportedProperties(REPORTED_PROPERTIES_TRANSACTIO
 
 ### Device_IngestDesiredProperties
 ```c
-DEVICE_RESULT Device_IngestDesiredProperties(void* startAddress, DEVICE_HANDLE deviceHandle, const char* desiredProperties);
+DEVICE_RESULT Device_IngestDesiredProperties(void* startAddress, DEVICE_HANDLE deviceHandle, const char* jsonPayload, bool removedDesiredNode);
 ```
 
 `Device_IngestDesiredProperties` acts as a passthrough for desired properties towards CommandDecoder module.
 
 **SRS_DEVICE_02_032: [** If `deviceHandle` is `NULL` then `Device_IngestDesiredProperties` shall fail and return `DEVICE_INVALID_ARG`. **]**
 
-**SRS_DEVICE_02_033: [** If `desiredProperties` is `NULL` then `Device_IngestDesiredProperties` shall fail and return `DEVICE_INVALID_ARG`. **]**
+**SRS_DEVICE_02_033: [** If `jsonPayload` is `NULL` then `Device_IngestDesiredProperties` shall fail and return `DEVICE_INVALID_ARG`. **]**
 
 **SRS_DEVICE_02_037: [** If `startAddress` is `NULL` then `Device_IngestDesiredProperties` shall fail and return `DEVICE_INVALID_ARG`. **]**
 

@@ -503,6 +503,7 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG*
             }
             else
             {
+                iothub_account_info->number_of_sas_devices = config->number_of_sas_devices;
                 memset(iothub_account_info->sasDevices, 0, sizeof(IOTHUB_PROVISIONED_DEVICE*) * iothub_account_info->number_of_sas_devices);
 
 #ifdef MBED_BUILD_TIMESTAMP
@@ -518,7 +519,7 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG*
                 tempKey = getenv("IOTHUB_E2E_X509_PRIVATE_KEY");
                 tempThumb = getenv("IOTHUB_E2E_X509_THUMBPRINT");
 #endif
-                iothub_account_info->number_of_sas_devices = config->number_of_sas_devices;
+
 
                 if (iothub_account_info->connString == NULL)
                 {

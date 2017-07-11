@@ -342,7 +342,7 @@ extern "C"
 * @param   device                return of CodeFirst_CreateDevice.
 * @param   desiredProperties     a null terminated string containing in JSON format the desired properties
 */
-#define INGEST_DESIRED_PROPERTIES(device, desiredProperties) (CodeFirst_IngestDesiredProperties(device, desiredProperties))
+#define INGEST_DESIRED_PROPERTIES(device, jsonPayload, parseDesiredNode) (CodeFirst_IngestDesiredProperties(device, jsonPayload, parseDesiredNode))
 
 /* Helper macros */
 

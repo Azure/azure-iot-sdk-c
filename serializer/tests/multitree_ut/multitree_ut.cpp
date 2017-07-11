@@ -2244,4 +2244,211 @@ TEST_FUNCTION(MultiTree_SetValue_On_A_Node_That_Has_A_Value_Fails)
     mocks.ResetAllCalls(); /*not caring about what gets called*/
 }
 
+/* Tests_SRS_MULTITREE_99_078:[ If any argument is NULL, MultiTree_DeleteChild shall return MULTITREE_INVALID_ARG.] */
+TEST_FUNCTION(MultiTree_DeleteChild_With_A_NULL_treeHandle_Fails)
+{
+    ///arrange
+    CMultiTreeMocks mocks;
+
+    ///act
+    MULTITREE_RESULT result = MultiTree_DeleteChild(NULL, "childName");
+
+    ///assert
+    ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_INVALID_ARG, result);
+
+    mocks.ResetAllCalls();
+}
+
+/* Tests_SRS_MULTITREE_99_078:[ If any argument is NULL, MultiTree_DeleteChild shall return MULTITREE_INVALID_ARG.] */
+TEST_FUNCTION(MultiTree_DeleteChild_With_A_NULL_childname_Fails)
+{
+    ///arrange
+    CMultiTreeMocks mocks;
+    MULTITREE_HANDLE treeHandle = MultiTree_Create(StringClone, StringFree);
+
+    ///act
+    MULTITREE_RESULT result = MultiTree_DeleteChild(treeHandle, NULL);
+
+    ///assert
+    ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_INVALID_ARG, result);
+
+    MultiTree_Destroy(treeHandle);
+    mocks.ResetAllCalls();
+}
+
+/* Tests_SRS_MULTITREE_99_079:[ If childName is not found, MultiTree_DeleteChild shall return MULTITREE_CHILD_NOT_FOUND.] */
+TEST_FUNCTION(MultiTree_DeleteChild_With_No_Match_Fails)
+{
+    ///arrange
+    CMultiTreeMocks mocks;
+    MULTITREE_HANDLE treeHandle = MultiTree_Create(StringClone, StringFree);
+
+    MULTITREE_HANDLE childHandle1;
+    MULTITREE_HANDLE childHandle2;
+    MULTITREE_HANDLE childHandle3;
+    (void)MultiTree_AddChild(treeHandle, "child1", &childHandle1);
+    (void)MultiTree_AddChild(treeHandle, "child2", &childHandle2);
+    (void)MultiTree_AddChild(treeHandle, "child3", &childHandle3);
+
+    ///act
+    MULTITREE_RESULT result = MultiTree_DeleteChild(treeHandle, "childNotPresent");
+
+    ///assert
+    ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_CHILD_NOT_FOUND, result);
+
+    MultiTree_Destroy(treeHandle);
+    mocks.ResetAllCalls();
+}
+
+/* Tests_SRS_MULTITREE_99_079:[ If childName is not found, MultiTree_DeleteChild shall return MULTITREE_CHILD_NOT_FOUND.] */
+TEST_FUNCTION(MultiTree_DeleteChild_With_No_Match_On_Empty_Tree_Fails)
+{
+    ///arrange
+    CMultiTreeMocks mocks;
+    MULTITREE_HANDLE treeHandle = MultiTree_Create(StringClone, StringFree);
+    // Don't add subnodes
+
+    ///act
+    MULTITREE_RESULT result = MultiTree_DeleteChild(treeHandle, "childNotPresent");
+
+    ///assert
+    ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_CHILD_NOT_FOUND, result);
+
+    MultiTree_Destroy(treeHandle);
+    mocks.ResetAllCalls();
+}
+
+// MultiTree_DeleteChild UT functions below delete one child and leave others.  This function checks expected are there
+void VerifyMultiTreeExpectedAfterDeleteChild(MULTITREE_HANDLE treeHandle, const char *firstChildName, const char *secondChildName)
+{
+    // Verify that there are now exactly 2 child items
+    size_t numChildren;
+    MULTITREE_RESULT result = MultiTree_GetChildCount(treeHandle, &numChildren);
+    ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_OK, result);
+    ASSERT_ARE_EQUAL(size_t, numChildren, 2);
+
+    // Verify the 0th element of the tree matches firstChildName
+    MULTITREE_HANDLE childHandle;
+
+    result = MultiTree_GetChild(treeHandle, 0, &childHandle);
+    ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_OK, result);
+
+    STRING_empty(global_bufferTemp);
+    result = MultiTree_GetName(childHandle, global_bufferTemp);
+    ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_OK, result);
+
+    ASSERT_ARE_EQUAL(int, 0, strcmp(firstChildName, STRING_c_str(global_bufferTemp)));
+    
+    // Verify the 1st element of the tree matches secondChildName
+    result = MultiTree_GetChild(treeHandle, 1, &childHandle);
+    ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_OK, result);
+
+    STRING_empty(global_bufferTemp);
+    result = MultiTree_GetName(childHandle, global_bufferTemp);
+    ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_OK, result);
+
+    ASSERT_ARE_EQUAL(int, 0, strcmp(secondChildName, STRING_c_str(global_bufferTemp)));
+}
+
+/* Tests_SRS_MULTITREE_99_079:[ If childName is not found, MultiTree_DeleteChild shall return MULTITREE_CHILD_NOT_FOUND.] */
+TEST_FUNCTION(MultiTree_DeleteChild_With_Child_First_Node_Succeeds)
+{
+    ///arrange
+    CMultiTreeMocks mocks;
+    MULTITREE_HANDLE treeHandle = MultiTree_Create(StringClone, StringFree);
+
+    MULTITREE_HANDLE childHandle1;
+    MULTITREE_HANDLE childHandle2;
+    MULTITREE_HANDLE childHandle3;
+    (void)MultiTree_AddChild(treeHandle, "child1", &childHandle1);
+    (void)MultiTree_AddChild(treeHandle, "child2", &childHandle2);
+    (void)MultiTree_AddChild(treeHandle, "child3", &childHandle3);
+
+    ///act
+    MULTITREE_RESULT result = MultiTree_DeleteChild(treeHandle, "child1");
+
+    ///assert
+    ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_OK, result);
+    VerifyMultiTreeExpectedAfterDeleteChild(treeHandle, "child2", "child3");
+
+    MultiTree_Destroy(treeHandle);
+    mocks.ResetAllCalls();
+}
+
+/* Tests_SRS_MULTITREE_99_079:[ If childName is not found, MultiTree_DeleteChild shall return MULTITREE_CHILD_NOT_FOUND.] */
+TEST_FUNCTION(MultiTree_DeleteChild_With_Child_Middle_Node_Succeeds)
+{
+    ///arrange
+    CMultiTreeMocks mocks;
+    MULTITREE_HANDLE treeHandle = MultiTree_Create(StringClone, StringFree);
+
+    MULTITREE_HANDLE childHandle1;
+    MULTITREE_HANDLE childHandle2;
+    MULTITREE_HANDLE childHandle3;
+    (void)MultiTree_AddChild(treeHandle, "child1", &childHandle1);
+    (void)MultiTree_AddChild(treeHandle, "child2", &childHandle2);
+    (void)MultiTree_AddChild(treeHandle, "child3", &childHandle3);
+
+    ///act
+    MULTITREE_RESULT result = MultiTree_DeleteChild(treeHandle, "child2");
+
+    ///assert
+    ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_OK, result);
+    VerifyMultiTreeExpectedAfterDeleteChild(treeHandle, "child1", "child3");
+
+    MultiTree_Destroy(treeHandle);
+    mocks.ResetAllCalls();
+}
+
+/* Tests_SRS_MULTITREE_99_079:[ If childName is not found, MultiTree_DeleteChild shall return MULTITREE_CHILD_NOT_FOUND.] */
+TEST_FUNCTION(MultiTree_DeleteChild_With_Child_Last_Node_Succeeds)
+{
+    ///arrange
+    CMultiTreeMocks mocks;
+    MULTITREE_HANDLE treeHandle = MultiTree_Create(StringClone, StringFree);
+
+    MULTITREE_HANDLE childHandle1;
+    MULTITREE_HANDLE childHandle2;
+    MULTITREE_HANDLE childHandle3;
+    (void)MultiTree_AddChild(treeHandle, "child1", &childHandle1);
+    (void)MultiTree_AddChild(treeHandle, "child2", &childHandle2);
+    (void)MultiTree_AddChild(treeHandle, "child3", &childHandle3);
+
+    ///act
+    MULTITREE_RESULT result = MultiTree_DeleteChild(treeHandle, "child3");
+
+    ///assert
+    ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_OK, result);
+    VerifyMultiTreeExpectedAfterDeleteChild(treeHandle, "child1", "child2");
+
+    MultiTree_Destroy(treeHandle);
+    mocks.ResetAllCalls();
+}
+
+/* Tests_SRS_MULTITREE_99_079:[ If childName is not found, MultiTree_DeleteChild shall return MULTITREE_CHILD_NOT_FOUND.] */
+TEST_FUNCTION(MultiTree_DeleteChild_With_Only_Node_Succeeds)
+{
+    ///arrange
+    CMultiTreeMocks mocks;
+    MULTITREE_HANDLE treeHandle = MultiTree_Create(StringClone, StringFree);
+
+    MULTITREE_HANDLE childHandle1;
+    (void)MultiTree_AddChild(treeHandle, "child1", &childHandle1);
+
+    ///act
+    MULTITREE_RESULT result = MultiTree_DeleteChild(treeHandle, "child1");
+
+    ///assert
+    ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_OK, result);
+    size_t numChildren;
+    result = MultiTree_GetChildCount(treeHandle, &numChildren);
+    ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_OK, result);
+    ASSERT_ARE_EQUAL(size_t, numChildren, 0);
+
+    MultiTree_Destroy(treeHandle);
+    mocks.ResetAllCalls();
+}
+
+
+
 END_TEST_SUITE(MultiTree_ut)

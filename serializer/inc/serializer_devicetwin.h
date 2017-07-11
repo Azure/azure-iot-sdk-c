@@ -30,100 +30,18 @@ static void serializer_ingest(DEVICE_TWIN_UPDATE_STATE update_state, const unsig
         (void)memcpy(copyOfPayload, payLoad, size);
         copyOfPayload[size] = '\0';
 
-        /*Codes_SRS_SERIALIZERDEVICETWIN_02_002: [ serializer_ingest shall parse the null terminated string into parson data types. ]*/
-        JSON_Value* allJSON = json_parse_string(copyOfPayload);
-        if (allJSON == NULL)
+        bool parseDesiredNode = (update_state == DEVICE_TWIN_UPDATE_COMPLETE);
+
+        if (CodeFirst_IngestDesiredProperties(userContextCallback, copyOfPayload, parseDesiredNode) != CODEFIRST_OK)
         {
             /*Codes_SRS_SERIALIZERDEVICETWIN_02_008: [ If any of the above operations fail, then serializer_ingest shall return. ]*/
-            LogError("failure in json_parse_string");
+            LogError("failure ingesting desired properties\n");
         }
         else
         {
-            JSON_Object *allObject = json_value_get_object(allJSON);
-            if (allObject == NULL)
-            {
-                /*Codes_SRS_SERIALIZERDEVICETWIN_02_008: [ If any of the above operations fail, then serializer_ingest shall return. ]*/
-                LogError("failure in json_value_get_object");
-            }
-            else
-            {
-                switch (update_state)
-                {
-                    /*Codes_SRS_SERIALIZERDEVICETWIN_02_003: [ If update_state is DEVICE_TWIN_UPDATE_COMPLETE then serializer_ingest shall locate "desired" json name. ]*/
-                    case DEVICE_TWIN_UPDATE_COMPLETE:
-                    {
-                        JSON_Object* desired = json_object_get_object(allObject, "desired");
-                        if (desired == NULL)
-                        {
-                            /*Codes_SRS_SERIALIZERDEVICETWIN_02_008: [ If any of the above operations fail, then serializer_ingest shall return. ]*/
-                            LogError("failure in json_object_get_object");
-                        }
-                        else
-                        {
-                            /*Codes_SRS_SERIALIZERDEVICETWIN_02_004: [ If "desired" contains "$version" then serializer_ingest shall remove it. ]*/
-                            (void)json_object_remove(desired, "$version"); //it might not exist
-                            JSON_Value* desiredAfterRemove = json_object_get_value(allObject, "desired");
-                            if (desiredAfterRemove != NULL)
-                            {
-                                /*Codes_SRS_SERIALIZERDEVICETWIN_02_005: [ The "desired" value shall be outputed to a null terminated string and serializer_ingest shall call CodeFirst_IngestDesiredProperties. ]*/
-                                char* pretty = json_serialize_to_string(desiredAfterRemove);
-                                if (pretty == NULL)
-                                {
-                                    /*Codes_SRS_SERIALIZERDEVICETWIN_02_008: [ If any of the above operations fail, then serializer_ingest shall return. ]*/
-                                    LogError("failure in json_serialize_to_string\n");
-                                }
-                                else
-                                {
-                                    if (CodeFirst_IngestDesiredProperties(userContextCallback, pretty) != CODEFIRST_OK)
-                                    {
-                                        /*Codes_SRS_SERIALIZERDEVICETWIN_02_008: [ If any of the above operations fail, then serializer_ingest shall return. ]*/
-                                        LogError("failure ingesting desired properties\n");
-                                    }
-                                    else
-                                    {
-                                        /*all is fine*/
-                                    }
-                                    free(pretty);
-                                }
-                            }
-                        }
-                        break;
-                    }
-                    case DEVICE_TWIN_UPDATE_PARTIAL:
-                    {
-                        /*Codes_SRS_SERIALIZERDEVICETWIN_02_006: [ If update_state is DEVICE_TWIN_UPDATE_PARTIAL then serializer_ingest shall remove "$version" (if it exists). ]*/
-                        (void)json_object_remove(allObject, "$version");
-
-                        /*Codes_SRS_SERIALIZERDEVICETWIN_02_007: [ The JSON shall be outputed to a null terminated string and serializer_ingest shall call CodeFirst_IngestDesiredProperties. ]*/
-                        char* pretty = json_serialize_to_string(allJSON);
-                        if (pretty == NULL)
-                        {
-                            /*Codes_SRS_SERIALIZERDEVICETWIN_02_008: [ If any of the above operations fail, then serializer_ingest shall return. ]*/
-                            LogError("failure in json_serialize_to_string\n");
-                        }
-                        else
-                        {
-                            if (CodeFirst_IngestDesiredProperties(userContextCallback, pretty) != CODEFIRST_OK)
-                            {
-                                /*Codes_SRS_SERIALIZERDEVICETWIN_02_008: [ If any of the above operations fail, then serializer_ingest shall return. ]*/
-                                LogError("failure ingesting desired properties\n");
-                            }
-                            else
-                            {
-                                /*all is fine*/
-                            }
-                            free(pretty);
-                        }
-                        break;
-                    }
-                    default:
-                    {
-                        LogError("INTERNAL ERROR: unexpected value for update_state=%d\n", (int)update_state);
-                    }
-                }
-            }
-            json_value_free(allJSON);
+            /*all is fine*/
         }
+        
         free(copyOfPayload);
     }
 }
