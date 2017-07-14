@@ -1364,6 +1364,7 @@ TEST_FUNCTION(IoTHubTransport_worker_thread_runs_every_1_ms)
 
     STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE));
     STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE));
+    STRICT_EXPECTED_CALL(mocks, ThreadAPI_Exit(0));
 
     ///act
     threadFunc(threadFuncArg);
@@ -1408,6 +1409,7 @@ TEST_FUNCTION(IoTHubTransport_worker_thread_runs_two_devices_once)
 
     STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE));
     STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE));
+    STRICT_EXPECTED_CALL(mocks, ThreadAPI_Exit(0));
 
     ///act
     threadFunc(threadFuncArg);
@@ -1461,6 +1463,7 @@ TEST_FUNCTION(IoTHubTransport_worker_thread_runs_lock_fails)
     EXPECTED_CALL(mocks, VECTOR_element(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(mocks, Unlock(IGNORED_PTR_ARG))
         .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(mocks, ThreadAPI_Exit(0));
 
     ///act
     threadFunc(threadFuncArg);

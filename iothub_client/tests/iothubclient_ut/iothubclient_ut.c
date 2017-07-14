@@ -614,6 +614,7 @@ static void setup_iothubclient_uploadtoblobasync()
         .IgnoreArgument_handle();
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
+    STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 }
 
 /* Tests_SRS_IOTHUBCLIENT_12_003: [IoTHubClient_CreateFromConnectionString shall verify the input parameters and if any of them NULL then return NULL] */
@@ -1089,6 +1090,7 @@ TEST_FUNCTION(IoTHubClient_SendEventAsync_event_confirm_callback_succeed)
         .IgnoreArgument_handle();
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
+    STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 
     // act
     ASSERT_IS_NOT_NULL(g_thread_func);
@@ -2439,6 +2441,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_method_callback_VECTOR_move_FAILS
     STRICT_EXPECTED_CALL(ThreadAPI_Sleep(1));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 
     // act
     g_thread_func(g_thread_func_arg);
@@ -2470,6 +2473,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_method_callback_STRING_construct_
     STRICT_EXPECTED_CALL(ThreadAPI_Sleep(1));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 
     // act
     g_thread_func(g_thread_func_arg);
@@ -2504,6 +2508,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_method_callback_BUFFER_create_FAI
     STRICT_EXPECTED_CALL(ThreadAPI_Sleep(1));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 
     // act
     g_thread_func(g_thread_func_arg);
@@ -2540,6 +2545,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_method_callback_VECTOR_push_back_
     STRICT_EXPECTED_CALL(ThreadAPI_Sleep(1));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 
     // act
     g_thread_func(g_thread_func_arg);
@@ -2570,6 +2576,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_method_callback_NULL_CONTEXT_fail
     STRICT_EXPECTED_CALL(ThreadAPI_Sleep(1));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 
     // act
     g_thread_func(g_thread_func_arg);
@@ -2612,6 +2619,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_method_callback_DMR_Fails)
     STRICT_EXPECTED_CALL(ThreadAPI_Sleep(1));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 
     // act
     g_thread_func(g_thread_func_arg);
@@ -2654,6 +2662,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_method_callback_succeed)
     STRICT_EXPECTED_CALL(ThreadAPI_Sleep(1));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 
     // act
     g_thread_func(g_thread_func_arg);
@@ -2700,6 +2709,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_repeated_method_callback_succeed)
     STRICT_EXPECTED_CALL(ThreadAPI_Sleep(1));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 
     // act
     g_thread_func(g_thread_func_arg);
@@ -2732,6 +2742,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_incoming_method_callback_STRING_c
     STRICT_EXPECTED_CALL(ThreadAPI_Sleep(1));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 
     // act
     g_thread_func(g_thread_func_arg);
@@ -2766,6 +2777,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_incoming_method_callback_BUFFER_c
     STRICT_EXPECTED_CALL(ThreadAPI_Sleep(1));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 
     // act
     g_thread_func(g_thread_func_arg);
@@ -2803,6 +2815,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_incoming_method_callback_VECTOR_p
     STRICT_EXPECTED_CALL(ThreadAPI_Sleep(1));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 
     // act
     g_thread_func(g_thread_func_arg);
@@ -2833,6 +2846,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_incoming_method_callback_NULL_CON
     STRICT_EXPECTED_CALL(ThreadAPI_Sleep(1));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 
     // act
     g_thread_func(g_thread_func_arg);
@@ -2871,6 +2885,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_incoming_method_callback_succeed)
     STRICT_EXPECTED_CALL(ThreadAPI_Sleep(1));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 
     // act
     g_thread_func(g_thread_func_arg);
@@ -2917,6 +2932,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_repeated_incoming_method_callback
     STRICT_EXPECTED_CALL(ThreadAPI_Sleep(1));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 
     // act
     g_thread_func(g_thread_func_arg);
@@ -2961,6 +2977,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_device_twin_succeed)
         .IgnoreArgument_handle();
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
+    STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 
     // act
     ASSERT_IS_NOT_NULL(g_thread_func);
@@ -3007,6 +3024,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_event_confirm_succeed)
         .IgnoreArgument_handle();
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
+    STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 
     // act
     ASSERT_IS_NOT_NULL(g_thread_func);
@@ -3050,6 +3068,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_reported_state_succeed)
         .IgnoreArgument_handle();
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
+    STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 
     // act
     ASSERT_IS_NOT_NULL(g_thread_func);
@@ -3087,6 +3106,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_message_callback_LOCK_Fails)
     STRICT_EXPECTED_CALL(ThreadAPI_Sleep(1));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 
     // act
     ASSERT_IS_NOT_NULL(g_thread_func);
@@ -3128,6 +3148,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_message_callback_SMD_Fails)
     STRICT_EXPECTED_CALL(ThreadAPI_Sleep(1));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 
     // act
     ASSERT_IS_NOT_NULL(g_thread_func);
@@ -3170,6 +3191,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_message_callback_succeed)
     STRICT_EXPECTED_CALL(ThreadAPI_Sleep(1));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 
     // act
     ASSERT_IS_NOT_NULL(g_thread_func);
