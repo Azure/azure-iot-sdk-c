@@ -195,6 +195,7 @@ static int transport_worker_thread(void* threadArgument)
         ThreadAPI_Sleep(1);
     }
 
+    ThreadAPI_Exit(0);
     return 0;
 }
 

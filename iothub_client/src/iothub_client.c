@@ -600,6 +600,7 @@ static int ScheduleWork_Thread(void* threadArgument)
         (void)ThreadAPI_Sleep(1);
     }
 
+    ThreadAPI_Exit(0);
     return 0;
 }
 
@@ -1799,6 +1800,8 @@ static int uploadingThread(void *data)
             LogError("unable to Unlock after locking");
         }
     }
+
+    ThreadAPI_Exit(0);
     return 0;
 }
 #endif
