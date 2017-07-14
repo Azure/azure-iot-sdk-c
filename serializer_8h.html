@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Microsoft Azure IoT Device SDK for C
-   &#160;<span id="projectnumber">1.1.18</span>
+   &#160;<span id="projectnumber">1.1.19</span>
    </div>
    <div id="projectbrief">The Microsoft Azure IoT device libraries for C contain code that facilitates building devices and applications that connect to and are managed by Azure IoT Hub services.</div>
   </td>
@@ -134,8 +134,8 @@ Macros</h2></td></tr>
 <tr class="separator:a8b306a60e81bcfdf3729962df530ec16"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa8bf7853bcff98b24adaaf6e9ddb730d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="serializer_8h.html#aa8bf7853bcff98b24adaaf6e9ddb730d">EXECUTE_METHOD</a>(device,  methodName,  methodPayload)</td></tr>
 <tr class="separator:aa8bf7853bcff98b24adaaf6e9ddb730d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab98abcb7175b01fc67a4444455e9b4d0"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="serializer_8h.html#ab98abcb7175b01fc67a4444455e9b4d0">INGEST_DESIRED_PROPERTIES</a>(device,  desiredProperties)</td></tr>
-<tr class="separator:ab98abcb7175b01fc67a4444455e9b4d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a30d4c7870e75ffc7178dd94a81788091"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="serializer_8h.html#a30d4c7870e75ffc7178dd94a81788091">INGEST_DESIRED_PROPERTIES</a>(device,  jsonPayload,  parseDesiredNode)</td></tr>
+<tr class="separator:a30d4c7870e75ffc7178dd94a81788091"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>The IoT Hub Serializer APIs allows developers to define models for their devices. </p>
@@ -366,7 +366,7 @@ Macros</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ab98abcb7175b01fc67a4444455e9b4d0"></a>
+<a class="anchor" id="a30d4c7870e75ffc7178dd94a81788091"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -380,7 +380,13 @@ Macros</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname">desiredProperties&#160;</td>
+          <td class="paramname">jsonPayload, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">parseDesiredNode&#160;</td>
         </tr>
         <tr>
           <td></td>
