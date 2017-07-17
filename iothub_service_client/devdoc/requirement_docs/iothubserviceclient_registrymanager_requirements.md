@@ -38,9 +38,10 @@ DEFINE_ENUM(IOTHUB_DEVICE_CONNECTION_STATE, IOTHUB_DEVICE_CONNECTION_STATE_VALUE
 
 DEFINE_ENUM(IOTHUB_REGISTRYMANAGER_RESULT, IOTHUB_REGISTRYMANAGER_RESULT_VALUES);
 
-#define IOTHUB_REGISTRYMANAGER_AUTH_METHOD_VALUES      \
-    IOTHUB_REGISTRYMANAGER_AUTH_SPK,                   \
-    IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT        \
+#define IOTHUB_REGISTRYMANAGER_AUTH_METHOD_VALUES          \
+    IOTHUB_REGISTRYMANAGER_AUTH_SPK,                       \
+    IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT,           \
+    IOTHUB_REGISTRYMANAGER_AUTH_X509_CERTIFICATE_AUTHORITY \
 
 DEFINE_ENUM(IOTHUB_REGISTRYMANAGER_AUTH_METHOD, IOTHUB_REGISTRYMANAGER_AUTH_METHOD_VALUES);
 
@@ -170,15 +171,17 @@ extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_CreateDevice(IOTHUB_R
 
 **SRS_IOTHUBREGISTRYMANAGER_12_011: [** IoTHubRegistryManager_CreateDevice shall set the "deviceId" value to the deviceCreateInfo->deviceId **]**
 
-**SRS_IOTHUBREGISTRYMANAGER_06_001: [** IoTHubRegistryManager_CreateDevice shall, if deviceCreateInfo->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT", set "authorization.x509Thumbprint.primaryThumbprint" to deviceCreateInfo->primaryKey and "authorization.x509Thumbprint.secondaryThumbprint" to deviceCreateInfo->secondaryKey **]**
+**SRS_IOTHUBREGISTRYMANAGER_06_001: [** IoTHubRegistryManager_CreateDevice shall, if deviceCreateInfo->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT" or "IOTHUB_REGISTRYMANAGER_AUTH_X509_CERTIFICATE_AUTHORITY", set "authorization.x509Thumbprint.primaryThumbprint" to deviceCreateInfo->primaryKey and "authorization.x509Thumbprint.secondaryThumbprint" to deviceCreateInfo->secondaryKey **]**
 
-**SRS_IOTHUBREGISTRYMANAGER_06_002: [** IoTHubRegistryManager_CreateDevice shall, if deviceCreateInfo->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_SPK", set "authorization.symmetricKey.primaryKey" to deviceCreateInfo->primaryKey and "authorization.symmetricKey.secondaryKey" to deviceCreateInfo->secondaryKey **]**
+**SRS_IOTHUBREGISTRYMANAGER_06_002: [** IoTHubRegistryManager_CreateDevice shall, if deviceCreateInfo->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_SPK" or "IOTHUB_REGISTRYMANAGER_AUTH_X509_CERTIFICATE_AUTHORITY", set "authorization.symmetricKey.primaryKey" to deviceCreateInfo->primaryKey and "authorization.symmetricKey.secondaryKey" to deviceCreateInfo->secondaryKey **]**
 
 **SRS_IOTHUBREGISTRYMANAGER_06_006: [** IoTHubRegistryManager_CreateDevice shall cleanup and return IOTHUB_REGISTRYMANAGER_INVALID_ARG if deviceUpdate->authMethod is not "IOTHUB_REGISTRYMANAGER_AUTH_SPK" or "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT" **]**
 
 **SRS_IOTHUBREGISTRYMANAGER_12_013: [** IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_JSON_ERROR if the JSON creation failed  **]**
 
 **SRS_IOTHUBREGISTRYMANAGER_12_095: [** IoTHubRegistryManager_CreateDevice shall allocate memory for device info structure by calling malloc **]**
+
+**SRS_IOTHUBREGISTRYMANAGER_31_001: [** IoTHubRegistryManager_CreateDevice shall set 'type' to "sas"/"selfSigned"/"certificateAuthority" based on deviceInfo->authMethod IOTHUB_REGISTRYMANAGER_AUTH_SPK/IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT/IOTHUB_REGISTRYMANAGER_AUTH_X509_CERTIFICATE_AUTHORITY **]**
 
 **SRS_IOTHUBREGISTRYMANAGER_12_096: [** If the malloc fails, IoTHubRegistryManager_Create shall do clean up and return IOTHUB_REGISTRYMANAGER_ERROR. **]**
 
@@ -218,7 +221,7 @@ extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetDevice(IOTHUB_REGI
 ```
 **SRS_IOTHUBREGISTRYMANAGER_12_025: [** IoTHubRegistryManager_GetDevice shall verify the registryManagerHandle and deviceId input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG **]**
 
-**SRS_IOTHUBREGISTRYMANAGER_12_026: [** IoTHubRegistryManager_GetDevice shall create HTTP GET request URL using the given deviceId using the following format: url/devices/[deviceId]?api-version=2016-11-14  **]**
+**SRS_IOTHUBREGISTRYMANAGER_12_026: [** IoTHubRegistryManager_GetDevice shall create HTTP GET request URL using the given deviceId using the following format: url/devices/[deviceId]?api-version=2017-06-30  **]**
 
 **SRS_IOTHUBREGISTRYMANAGER_12_027: [** IoTHubRegistryManager_GetDevice shall add the following headers to the created HTTP GET request: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 **]**
 
@@ -266,11 +269,13 @@ extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_UpdateDevice(IOTHUB_R
 
 **SRS_IOTHUBREGISTRYMANAGER_12_106: [** IoTHubRegistryManager_UpdateDevice shall allocate memory for device info structure by calling malloc **]**
 
+**SRS_IOTHUBREGISTRYMANAGER_31_002: [** IoTHubRegistryManager_UpdateDevice shall set 'type' to "sas"/"selfSigned"/"certificateAuthority" based on deviceInfo->authMethod IOTHUB_REGISTRYMANAGER_AUTH_SPK/IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT/IOTHUB_REGISTRYMANAGER_AUTH_X509_CERTIFICATE_AUTHORITY **]**
+
 **SRS_IOTHUBREGISTRYMANAGER_12_108: [** If the malloc fails, IoTHubRegistryManager_UpdateDevice shall do clean up and return IOTHUB_REGISTRYMANAGER_ERROR **]**
 
 **SRS_IOTHUBREGISTRYMANAGER_12_041: [** IoTHubRegistryManager_UpdateDevice shall create a flat "key1:value2,key2:value2..." JSON representation from the given deviceCreateInfo parameter using the following parson APIs: json_value_init_object, json_value_get_object, json_object_set_string, json_object_dotset_string **]**
 
-**SRS_IOTHUBREGISTRYMANAGER_06_003: [** IoTHubRegistryManager_UpdateDevice shall, if deviceUpdate->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT", set "authorization.x509Thumbprint.primaryThumbprint" to deviceCreateInfo->primaryKey and "authorization.x509Thumbprint.secondaryThumbprint" to deviceCreateInfo->secondaryKey **]**
+**SRS_IOTHUBREGISTRYMANAGER_06_003: [** IoTHubRegistryManager_UpdateDevice shall, if deviceUpdate->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT" or "IOTHUB_REGISTRYMANAGER_AUTH_X509_CERTIFICATE_AUTHORITY", set "authorization.x509Thumbprint.primaryThumbprint" to deviceCreateInfo->primaryKey and "authorization.x509Thumbprint.secondaryThumbprint" to deviceCreateInfo->secondaryKey **]**
 
 **SRS_IOTHUBREGISTRYMANAGER_06_004: [** IoTHubRegistryManager_UpdateDevice shall, if deviceUpdate->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_SPK", set "authorization.symmetricKey.primaryKey" to deviceCreateInfo->primaryKey and "authorization.symmetricKey.secondaryKey" to deviceCreateInfo->secondaryKey **]**
 
@@ -355,20 +360,7 @@ extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetDeviceList(IOTHUB_
 
 **SRS_IOTHUBREGISTRYMANAGER_12_069: [** IoTHubRegistryManager_GetDeviceList shall use the following parson APIs to parse the response JSON: json_parse_string, json_value_get_object, json_object_get_string, json_object_dotget_string  **]**
 
-**SRS_IOTHUBREGISTRYMANAGER_06_013: [** IoTHubRegistryManager_GetDeviceList shall, if json was found for authorization.symetricKey.primaryKey, set the device info authMethod to "IOTHUB_REGISTRYMANAGER_AUTH_SPK" **]**
-
-**SRS_IOTHUBREGISTRYMANAGER_06_014: [** IoTHubRegistryManager_GetDeviceList shall, if no json was found for authorization.symetricKey.primaryKey, parse for authorization.x509Thumbprint.primaryThumbprint **]**
-
-**SRS_IOTHUBREGISTRYMANAGER_06_015: [** IoTHubRegistryManager_GetDeviceList shall, if json was found for authorization.x509Thumbprint.primaryThumbprint, set the device info authMethod to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT" **]**
-
-**SRS_IOTHUBREGISTRYMANAGER_06_016: [** IoTHubRegistryManager_GetDeviceList shall, if json was found for authorization.symetricKey.secondaryKey, set the device info authMethod to "IOTHUB_REGISTRYMANAGER_AUTH_SPK" **]**
-
-**SRS_IOTHUBREGISTRYMANAGER_06_017: [** IoTHubRegistryManager_GetDeviceList shall, if no json was found for authorization.symetricKey.secondaryKey, parse for authorization.x509Thumbprint.secondaryThumbprint **]**
-
 **SRS_IOTHUBREGISTRYMANAGER_06_018: [** IoTHubRegistryManager_GetDeviceList shall, if json was found for authorization.x509Thumbprint.secondaryThumbprint, set the device info authMethod to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT" **]**
-
-
-
 
 **SRS_IOTHUBREGISTRYMANAGER_12_070: [** If any of the parson API fails, IoTHubRegistryManager_GetDeviceList shall return IOTHUB_REGISTRYMANAGER_JSON_ERROR **]**
 

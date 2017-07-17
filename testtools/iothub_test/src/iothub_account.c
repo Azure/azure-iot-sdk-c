@@ -34,7 +34,6 @@
 #define MBED_PARAM_MAX_LENGTH 256
 #endif
 
-static const char* URL_API_VERSION = "api-version=2016-11-14";
 static const char* DEVICE_JSON_FMT = "{\"deviceId\":\"%s\",\"etag\":null,\"connectionState\":\"Disconnected\",\"status\":\"enabled\",\"statusReason\":null,\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"lastActivityTime\":\"0001-01-01T00:00:00\",\"authentication\":{\"symmetricKey\":{\"primaryKey\":null,\"secondaryKey\":null}}}";
 static const char* SAS_DEVICE_PREFIX_FMT = "csdk_e2eDevice_sas_j_please_delete_%s";
 static const char* X509_DEVICE_PREFIX_FMT = "csdk_e2eDevice_x509_j_please_delete_%s";

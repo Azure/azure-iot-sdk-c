@@ -42,7 +42,7 @@ DEFINE_ENUM(IOTHUB_TWIN_REQUEST_MODE, IOTHUB_TWIN_REQUEST_MODE_VALUES);
 #define  HTTP_HEADER_VAL_IFMATCH  "'*'"
 #define UID_LENGTH 37
 
-static const char* URL_API_VERSION = "?api-version=2016-11-14";
+static const char* URL_API_VERSION = "?api-version=2017-06-30";
 
 static const char* RELATIVE_PATH_FMT_TWIN = "/twins/%s%s";
 static const char* RELATIVE_PATH_FMT_TWIN_TAGS = "/twins/%s/tags%s";
