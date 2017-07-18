@@ -1676,11 +1676,6 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SetOption(TRANSPORT_LL_HANDLE h
             is_device_specific_option = true;
             transport_instance->option_send_event_timeout_secs = *(size_t*)value;
         }
-        else if (strcmp(OPTION_C2D_KEEP_ALIVE_FREQ_SECS, option) == 0)
-        {
-            is_device_specific_option = false;
-            transport_instance->c2d_keep_alive_freq_secs = *(size_t*)value;
-        }
         else
         {
             is_device_specific_option = false;
@@ -1698,6 +1693,11 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SetOption(TRANSPORT_LL_HANDLE h
             {
                 result = IOTHUB_CLIENT_OK;
             }
+        }
+        else if (strcmp(OPTION_C2D_KEEP_ALIVE_FREQ_SECS, option) == 0)
+        {
+            transport_instance->c2d_keep_alive_freq_secs = *(size_t*)value;
+            result = IOTHUB_CLIENT_OK;
         }
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_104: [If `option` is `logtrace`, `value` shall be saved and applied to `instance->connection` using amqp_connection_set_logging()]
         else if (strcmp(OPTION_LOG_TRACE, option) == 0)

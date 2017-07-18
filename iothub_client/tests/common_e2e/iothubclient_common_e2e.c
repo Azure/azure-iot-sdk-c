@@ -464,6 +464,9 @@ IOTHUB_CLIENT_HANDLE client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUs
 
     (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_PRODUCT_INFO, "MQTT_E2E/1.1.12");
 
+    unsigned int keep_alive_sec = 120;
+    (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_C2D_KEEP_ALIVE_FREQ_SECS, &keep_alive_sec);
+
 #ifdef AZIOT_LINUX
     if (g_e2e_test_options.set_mac_address)
     {
