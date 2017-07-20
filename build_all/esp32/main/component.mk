@@ -5,7 +5,7 @@ sdk := ../../../../..
 COMPONENT_ADD_INCLUDEDIRS :=  \
 $(sdk)/c-utility/inc  \
 $(sdk)/c-utility/inc/azure_c_shared_utility \
-$(sdk)/c-utility/inc/azure_c_shared_utility/lwip \
+$(sdk)/c-utility/inc/azure_c_shared_utility/lwip_esp32 \
 $(sdk)/iothub_client/inc \
 $(sdk)/umqtt/inc  \
 $(sdk)/umqtt/inc/azure_umqtt_c 	\
