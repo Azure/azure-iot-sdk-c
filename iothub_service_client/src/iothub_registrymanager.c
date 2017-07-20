@@ -402,6 +402,17 @@ static IOTHUB_REGISTRYMANAGER_RESULT parseDeviceJsonObject(JSON_Object* root_obj
     return result;
 }
 
+static void initializeDeviceInfoMembers(IOTHUB_DEVICE* deviceInfo)
+{
+    if (NULL != deviceInfo)
+    {
+        memset(deviceInfo, 0, sizeof(IOTHUB_DEVICE));
+        deviceInfo->connectionState = IOTHUB_DEVICE_CONNECTION_STATE_DISCONNECTED;
+        deviceInfo->status = IOTHUB_DEVICE_STATUS_DISABLED;
+        deviceInfo->isManaged = false;
+    }
+}
+
 // Frees memory allocated building up deviceInfo, but *NOT* deviceInfo itself as we don't own this
 static void freeDeviceInfoMembers(IOTHUB_DEVICE* deviceInfo)
 {
@@ -594,10 +605,7 @@ static IOTHUB_REGISTRYMANAGER_RESULT parseDeviceListJson(BUFFER_HANDLE jsonBuffe
                 }
                 else
                 {
-                    memset(iothubDevice, 0, sizeof(IOTHUB_DEVICE));
-                    iothubDevice->connectionState = IOTHUB_DEVICE_CONNECTION_STATE_DISCONNECTED;
-                    iothubDevice->status = IOTHUB_DEVICE_STATUS_DISABLED;
-                    iothubDevice->isManaged = false;
+                    initializeDeviceInfoMembers(iothubDevice);
                 
                     result = parseDeviceJsonObject(device_object, iothubDevice);
                     if (IOTHUB_REGISTRYMANAGER_OK != result)
@@ -1128,6 +1136,8 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_CreateDevice(IOTHUB_REGISTRY
     }
     else
     {
+        initializeDeviceInfoMembers(deviceInfo);
+
         /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_008: [ IoTHubRegistryManager_CreateDevice shall verify the deviceCreateInfo->deviceId input parameter and if it is NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
         if (deviceCreateInfo->deviceId == NULL)
         {
@@ -1233,11 +1243,7 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetDevice(IOTHUB_REGISTRYMAN
     else
     {
         BUFFER_HANDLE responseBuffer;
-
-        memset(deviceInfo, 0, sizeof(IOTHUB_DEVICE));
-        deviceInfo->connectionState = IOTHUB_DEVICE_CONNECTION_STATE_DISCONNECTED;
-        deviceInfo->status = IOTHUB_DEVICE_STATUS_DISABLED;
-        deviceInfo->isManaged = false;
+        initializeDeviceInfoMembers(deviceInfo);
 
         if ((responseBuffer = BUFFER_new()) == NULL)
         {
