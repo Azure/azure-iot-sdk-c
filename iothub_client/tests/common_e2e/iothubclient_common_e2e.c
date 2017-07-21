@@ -1116,6 +1116,8 @@ static void recv_message_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLI
     iotHubMessagingResult = IoTHubMessaging_Open(iotHubMessagingHandle, openCompleteCallback, (void*)"Context string for open");
     ASSERT_ARE_EQUAL (int, IOTHUB_MESSAGING_OK, iotHubMessagingResult);
 
+    ThreadAPI_Sleep(5000);
+
     // Send message
     service_send_c2d(iotHubMessagingHandle, receiveUserContext, deviceToUse);
 
