@@ -105,7 +105,7 @@ if(IN_OPENWRT)
 endif()
 
 if (LINUX)
-    if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
         # now all static libraries use PIC flag for Python shared lib
         set(CMAKE_C_FLAGS "-fPIC ${CMAKE_C_FLAGS}")
         set(CMAKE_CXX_FLAGS "-fPIC ${CMAKE_CXX_FLAGS}")
