@@ -63,6 +63,10 @@ IoTHubTransport_MQTT_Common_Create shall create a TRANSPORT_LL_HANDLE that can b
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_041: [** If both deviceKey and deviceSasToken fields are NULL then IoTHubTransport_MQTT_Common_Create shall assume a x509 authentication.**]**
 
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_005: [** MQTT transport shall use EXPONENTIAL_WITH_BACK_OFF as default retry policy **]**
+
+
+
 ### IoTHubTransport_MQTT_Common_Destroy
 
 ```c
@@ -227,6 +231,10 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIEN
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_001: [** IoTHubTransport_MQTT_Common_DoWork shall trigger reconnection if the mqtt_client_connect does not complete within `keepalive` seconds**]**
 
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_007: [** IoTHubTransport_MQTT_Common_DoWork shall try to reconnect according to the current retry policy set **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_008: [** Upon successful connection the retry control shall be reset using retry_control_reset() **]**
+
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_030: [** IoTHubTransport_MQTT_Common_DoWork shall call mqtt_client_dowork everytime it is called if it is connected.**]**
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_033: [** IoTHubTransport_MQTT_Common_DoWork shall iterate through the Waiting Acknowledge messages looking for any message that has been waiting longer than 2 min.**]**
@@ -305,11 +313,9 @@ int IoTHubTransport_MQTT_Common_SetRetryPolicy(TRANSPORT_LL_HANDLE handle, IOTHU
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_25_041: [** If any handle is NULL then IoTHubTransport_MQTT_Common_SetRetryPolicy shall return resultant line.**]**
 
-**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_25_042: [** If the retry logic is not already created then IoTHubTransport_MQTT_Common_SetRetryPolicy shall create retry logic by calling CreateRetryLogic with retry policy and retryTimeout as parameters**]**
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_006: [** IoTHubTransport_MQTT_Common_SetRetryPolicy shall set the retry logic by calling retry_control_create() with `retryPolicy` and `retryTimeoutLimitinSeconds` as parameters**]**
 
-**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_25_043: [** If the retry logic is already created then IoTHubTransport_MQTT_Common_SetRetryPolicy shall destroy existing retry logic and create retry logic by calling CreateRetryLogic with retry policy and retryTimeout as parameters**]**
-
-**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_25_044: [** If retry logic for specified parameters of retry policy and retryTimeoutLimitinSeconds cannot be created then IoTHubTransport_MQTT_Common_SetRetryPolicy shall return resultant line **]**
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_009: [** If retry_control_create() fails then IoTHubTransport_MQTT_Common_SetRetryPolicy shall revert to previous retry policy and return non-zero value **]**
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_25_045: [** If retry logic for specified parameters of retry policy and retryTimeoutLimitinSeconds is created successfully then IoTHubTransport_MQTT_Common_SetRetryPolicy shall return 0 **]**
 
