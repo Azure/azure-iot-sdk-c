@@ -1483,6 +1483,16 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
     }
 }
 
+static void DisconnectFromClient(PMQTTTRANSPORT_HANDLE_DATA transport_data)
+{
+    (void)mqtt_client_disconnect(transport_data->mqttClient);
+    xio_destroy(transport_data->xioTransport);
+    transport_data->xioTransport = NULL;
+
+    transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_NOT_CONNECTED;
+    transport_data->currPacketState = DISCONNECT_TYPE;
+}
+
 static void mqtt_error_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_ERROR error, void* callbackCtx)
 {
     (void)handle;
@@ -1504,6 +1514,7 @@ static void mqtt_error_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_ERR
             case MQTT_CLIENT_NO_PING_RESPONSE:
             {
                 LogError("Mqtt Ping Response was not encountered.  Reconnecting device...");
+                DisconnectFromClient(transport_data);
                 break;
             }
             case MQTT_CLIENT_PARSE_ERROR:
@@ -1793,16 +1804,6 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
         }
     }
     return result;
-}
-
-static void DisconnectFromClient(PMQTTTRANSPORT_HANDLE_DATA transport_data)
-{
-    (void)mqtt_client_disconnect(transport_data->mqttClient);
-    xio_destroy(transport_data->xioTransport);
-    transport_data->xioTransport = NULL;
-
-    transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_NOT_CONNECTED;
-    transport_data->currPacketState = DISCONNECT_TYPE;
 }
 
 static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
