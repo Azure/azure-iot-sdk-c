@@ -25,6 +25,7 @@
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "iothub_client_version.h"
+#include "iothub_client_retry_control.h"
 
 #include "iothubtransport_mqtt_common.h"
 
@@ -34,19 +35,21 @@
 #include <limits.h>
 #include <inttypes.h>
 
-#define SAS_TOKEN_DEFAULT_LIFETIME  3600
-#define SAS_REFRESH_MULTIPLIER      .8
-#define EPOCH_TIME_T_VALUE          0
-#define DEFAULT_MQTT_KEEPALIVE      4*60 // 4 min
-#define BUILD_CONFIG_USERNAME       24
-#define SAS_TOKEN_DEFAULT_LEN       10
-#define RESEND_TIMEOUT_VALUE_MIN    1*60
-#define MAX_SEND_RECOUNT_LIMIT      2
-#define DEFAULT_CONNECTION_INTERVAL 30
-#define FAILED_CONN_BACKOFF_VALUE   5
-#define STATUS_CODE_FAILURE_VALUE   500
-#define STATUS_CODE_TIMEOUT_VALUE   408
-#define ERROR_TIME_FOR_RETRY_SECS   5       // We won't retry more than once every 5 seconds
+#define SAS_TOKEN_DEFAULT_LIFETIME          3600
+#define SAS_REFRESH_MULTIPLIER              .8
+#define EPOCH_TIME_T_VALUE                  0
+#define DEFAULT_MQTT_KEEPALIVE              4*60 // 4 min
+#define BUILD_CONFIG_USERNAME               24
+#define SAS_TOKEN_DEFAULT_LEN               10
+#define RESEND_TIMEOUT_VALUE_MIN            1*60
+#define MAX_SEND_RECOUNT_LIMIT              2
+#define DEFAULT_CONNECTION_INTERVAL         30
+#define FAILED_CONN_BACKOFF_VALUE           5
+#define STATUS_CODE_FAILURE_VALUE           500
+#define STATUS_CODE_TIMEOUT_VALUE           408
+
+#define DEFAULT_RETRY_POLICY                IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER
+#define DEFAULT_RETRY_TIMEOUT_IN_SECONDS    0
 
 static const char TOPIC_DEVICE_TWIN_PREFIX[] = "$iothub/twin";
 static const char TOPIC_DEVICE_METHOD_PREFIX[] = "$iothub/methods";
@@ -112,22 +115,6 @@ typedef enum MQTT_TRANSPORT_CREDENTIAL_TYPE_TAG
     SAS_TOKEN_FROM_USER,
     DEVICE_KEY,
 } MQTT_TRANSPORT_CREDENTIAL_TYPE;
-
-typedef int(*RETRY_POLICY)(bool *permit, size_t* delay, void* retryContextCallback);
-
-typedef struct RETRY_LOGIC_TAG
-{
-    IOTHUB_CLIENT_RETRY_POLICY retryPolicy; // Type of policy we're using
-    size_t retryTimeoutLimitInSeconds;      // If we don't connect in this many seconds, give up even trying.
-    RETRY_POLICY fnRetryPolicy;             // Pointer to the policy function
-    time_t start;                           // When did we start retrying?
-    time_t lastConnect;                     // When did we last try to connect?
-    bool retryStarted;                      // true if the retry timer is set and we're trying to retry
-    bool retryExpired;                      // true if we haven't connected in retryTimeoutLimitInSeconds seconds
-    bool firstAttempt;                      // true on init so we can connect the first time without waiting for any timeouts.
-    size_t retrycount;                      // How many times have we tried connecting?
-    size_t delayFromLastConnectToRetry;     // last time delta betweewn retry attempts.
-} RETRY_LOGIC;
 
 typedef enum MQTT_CLIENT_STATUS_TAG
 {
@@ -198,8 +185,8 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     // Telemetry specific
     DLIST_ENTRY telemetry_waitingForAck;
 
-    //Retry Logic
-    RETRY_LOGIC* retryLogic;
+	// Controls frequency of reconnection logic.
+    RETRY_CONTROL_HANDLE retry_control_handle;
 
     // Auth module used to generating handle authorization
     // with either SAS Token, x509 Certs, and Device SAS Token
@@ -260,153 +247,11 @@ static void free_proxy_data(MQTTTRANSPORT_HANDLE_DATA* mqtt_transport_instance)
     }
 }
 
-static int RetryPolicy_Exponential_BackOff_With_Jitter(bool *permit, size_t* delay, void* retryContextCallback)
-{
-    int result;
-
-    if (retryContextCallback != NULL && permit != NULL && delay != NULL)
-    {
-        RETRY_LOGIC *retryLogic = (RETRY_LOGIC*)retryContextCallback;
-        int numOfFailures = (int) retryLogic->retrycount;
-        *permit = true;
-
-        /*Intentionally not evaluating fraction of a second as it woudn't work on all platforms*/
-
-        /* Exponential backoff with jitter
-            1. delay = (pow(2, attempt) - 1 ) / 2
-            2. delay with jitter = delay + rand_between(0, delay/2)
-        */
-
-        size_t halfDelta = ((1 << numOfFailures) - 1) / 4;
-        if (halfDelta > 0)
-        {
-            *delay = halfDelta + (rand() % (int)halfDelta);
-        }
-        else
-        {
-            *delay = halfDelta;
-        }
-
-        result = 0;
-    }
-    else
-    {
-        result = __FAILURE__;
-    }
-    return result;
-}
-
-static RETRY_LOGIC* CreateRetryLogic(IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitInSeconds)
-{
-    RETRY_LOGIC *retryLogic;
-    retryLogic = (RETRY_LOGIC*)malloc(sizeof(RETRY_LOGIC));
-    if (retryLogic != NULL)
-    {
-        retryLogic->retryPolicy = retryPolicy;
-        retryLogic->retryTimeoutLimitInSeconds = retryTimeoutLimitInSeconds;
-        switch (retryLogic->retryPolicy)
-        {
-        case IOTHUB_CLIENT_RETRY_NONE:
-            LogError("Not implemented chosing default");
-            retryLogic->fnRetryPolicy = &RetryPolicy_Exponential_BackOff_With_Jitter;
-            break;
-        case IOTHUB_CLIENT_RETRY_IMMEDIATE:
-            LogError("Not implemented chosing default");
-            retryLogic->fnRetryPolicy = &RetryPolicy_Exponential_BackOff_With_Jitter;
-            break;
-        case IOTHUB_CLIENT_RETRY_INTERVAL:
-            LogError("Not implemented chosing default");
-            retryLogic->fnRetryPolicy = &RetryPolicy_Exponential_BackOff_With_Jitter;
-            break;
-        case IOTHUB_CLIENT_RETRY_LINEAR_BACKOFF:
-            LogError("Not implemented chosing default");
-            retryLogic->fnRetryPolicy = &RetryPolicy_Exponential_BackOff_With_Jitter;
-            break;
-        case IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF:
-            LogError("Not implemented chosing default");
-            retryLogic->fnRetryPolicy = &RetryPolicy_Exponential_BackOff_With_Jitter;
-            break;
-        case IOTHUB_CLIENT_RETRY_RANDOM:
-            LogError("Not implemented chosing default");
-            retryLogic->fnRetryPolicy = &RetryPolicy_Exponential_BackOff_With_Jitter;
-            break;
-        case IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER:
-        default:
-            retryLogic->fnRetryPolicy = &RetryPolicy_Exponential_BackOff_With_Jitter;
-            break;
-        }
-        retryLogic->start = EPOCH_TIME_T_VALUE;
-        retryLogic->delayFromLastConnectToRetry = 0;
-        retryLogic->lastConnect = EPOCH_TIME_T_VALUE;
-        retryLogic->retryStarted = false;
-        retryLogic->retryExpired = false;
-        retryLogic->firstAttempt = true;
-        retryLogic->retrycount = 0;
-    }
-    else
-    {
-        LogError("Init retry logic failed");
-    }
-    return retryLogic;
-}
-
-static void DestroyRetryLogic(RETRY_LOGIC *retryLogic)
-{
-    if (retryLogic != NULL)
-    {
-        free(retryLogic);
-        retryLogic = NULL;
-    }
-}
-
-// Called when first attempted to re-connect
-static void StartRetryTimer(RETRY_LOGIC *retryLogic)
-{
-    if (retryLogic != NULL)
-    {
-        if (retryLogic->retryStarted == false)
-        {
-            retryLogic->start = get_time(NULL);
-            retryLogic->delayFromLastConnectToRetry = 0;
-            retryLogic->retryStarted = true;
-        }
-
-        retryLogic->firstAttempt = false;
-    }
-    else
-    {
-        LogError("Retry Logic parameter. NULL.");
-    }
-}
-
-// Called when connected
-static void StopRetryTimer(RETRY_LOGIC *retryLogic)
-{
-    if (retryLogic != NULL)
-    {
-        if (retryLogic->retryStarted == true)
-        {
-            retryLogic->retryStarted = false;
-            retryLogic->delayFromLastConnectToRetry = 0;
-            retryLogic->lastConnect = EPOCH_TIME_T_VALUE;
-            retryLogic->retrycount = 0;
-        }
-        else
-        {
-            LogError("Start retry logic before stopping");
-        }
-    }
-    else
-    {
-        LogError("Retry Logic parameter. NULL.");
-    }
-}
-
 int IoTHubTransport_MQTT_Common_SetRetryPolicy(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitInSeconds)
 {
     int result;
-    PMQTTTRANSPORT_HANDLE_DATA transport_data = (PMQTTTRANSPORT_HANDLE_DATA)handle;
-    if (transport_data == NULL)
+
+    if (handle == NULL)
     {
         /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_25_041: [**If any handle is NULL then IoTHubTransport_MQTT_Common_SetRetryPolicy shall return resultant line.] */
         LogError("Invalid handle parameter. NULL.");
@@ -414,148 +259,30 @@ int IoTHubTransport_MQTT_Common_SetRetryPolicy(TRANSPORT_LL_HANDLE handle, IOTHU
     }
     else
     {
-        if (transport_data->retryLogic == NULL)
-        {
-            /*Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_25_042: [**If the retry logic is not already created then IoTHubTransport_MQTT_Common_SetRetryPolicy shall create retry logic by calling CreateRetryLogic with retry policy and retryTimeout as parameters]*/
-            transport_data->retryLogic = CreateRetryLogic(retryPolicy, retryTimeoutLimitInSeconds);
-        }
-        else
-        {
-            /*Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_25_043: [**If the retry logic is already created then IoTHubTransport_MQTT_Common_SetRetryPolicy shall destroy existing retry logic and create retry logic by calling CreateRetryLogic with retry policy and retryTimeout as parameters]*/
-            DestroyRetryLogic(transport_data->retryLogic);
-            transport_data->retryLogic = CreateRetryLogic(retryPolicy, retryTimeoutLimitInSeconds);
-        }
+		RETRY_CONTROL_HANDLE new_retry_control_handle;
 
-        if (transport_data->retryLogic != NULL)
-        {
-            /*Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_25_045: [**If retry logic for specified parameters of retry policy and retryTimeoutLimitInSeconds is created successfully then IoTHubTransport_MQTT_Common_SetRetryPolicy shall return 0]*/
-            result = 0;
-        }
-        else
-        {
-            /*Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_25_044: [**If retry logic for specified parameters of retry policy and retryTimeoutLimitInSeconds cannot be created then IoTHubTransport_MQTT_Common_SetRetryPolicy shall return resultant line]*/
-            LogError("Retry Logic is not created");
-            result = __FAILURE__;
-        }
+		// Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_006: [ IoTHubTransport_MQTT_Common_SetRetryPolicy shall set the retry logic by calling retry_control_create() with retry policy and retryTimeout as parameters]
+		// Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_009: [ If retry_control_create() fails then IoTHubTransport_MQTT_Common_SetRetryPolicy shall revert to previous retry policy and return non-zero value ]
+		if ((new_retry_control_handle = retry_control_create(retryPolicy, (unsigned int)retryTimeoutLimitInSeconds)) == NULL)
+		{
+			LogError("Failed creating new retry control handle");
+			result = __FAILURE__;
+		}
+		else
+		{
+			PMQTTTRANSPORT_HANDLE_DATA transport_data = (PMQTTTRANSPORT_HANDLE_DATA)handle;
+			RETRY_CONTROL_HANDLE previous_retry_control_handle = transport_data->retry_control_handle;
+
+			transport_data->retry_control_handle = new_retry_control_handle;
+			retry_control_destroy(previous_retry_control_handle);
+
+			/*Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_25_045: [**If retry logic for specified parameters of retry policy and retryTimeoutLimitInSeconds is created successfully then IoTHubTransport_MQTT_Common_SetRetryPolicy shall return 0]*/
+			result = 0;
+		}
     }
+
     return result;
 }
-
-// Called for every do_work when connection is broken
-static bool CanRetry(RETRY_LOGIC *retryLogic)
-{
-    bool result;
-    time_t now = get_time(NULL);
-
-    if (retryLogic == NULL)
-    {
-        LogError("Retry Logic is not created, retrying forever");
-        result = true;
-    }
-    else if (now < 0 || retryLogic->start < 0)
-    {
-        LogError("Time could not be retrieved, retrying forever");
-        result = true;
-    }
-    else if (retryLogic->retryExpired)
-    {
-        // We've given up trying to retry.  Don't do anything.
-        result = false;
-    }
-    else if (retryLogic->firstAttempt)
-    {
-        // This is the first time ever running through this code.  We need to try connecting no matter what.
-        StartRetryTimer(retryLogic);
-        retryLogic->lastConnect = now;
-        retryLogic->retrycount++;
-        result = true;
-    }
-    else
-    {
-        // Are we trying to retry?
-        if (retryLogic->retryStarted)
-        {
-            // How long since we last tried to connect?  Store this in difftime.
-            double diffTime = get_difftime(now, retryLogic->lastConnect);
-
-            // Has it been less than 5 seconds since we tried last?  If so, we have to
-            // be careful so we don't hit the server too quickly.
-            if (diffTime <= ERROR_TIME_FOR_RETRY_SECS)
-            {
-                // As do_work can be called within as little as 1 ms, wait to avoid throtling server
-                result = false;
-            }
-            else if (diffTime < retryLogic->delayFromLastConnectToRetry)
-            {
-                // delayFromLastConnectionToRetry is either 0 (the first time around)
-                // or it's the backoff delta from the last time through the loop.
-                // If we're less than that, don't even bother trying.  It's
-                // Too early to retry
-                result = false;
-            }
-            else
-            {
-                // last retry time evaluated have crossed, determine when to try next
-                // In other words, it migth be time to retry, so we should validate with the retry policy function.
-                bool permit = false;
-                size_t delay;
-
-                if (retryLogic->fnRetryPolicy != NULL && (retryLogic->fnRetryPolicy(&permit, &delay, retryLogic) == 0))
-                {
-                    // Does the policy function want us to retry (permit == true), or are we still allowed to retry?
-                    // (in other words, are we within retryTimeoutLimitInSeconds seconds since starting to retry?)
-                    // If so, see if we _really_ want to retry.
-                    if ((permit == true) && ((retryLogic->retryTimeoutLimitInSeconds == 0) || retryLogic->retryTimeoutLimitInSeconds >= (delay + get_difftime(now, retryLogic->start))))
-                    {
-                        retryLogic->delayFromLastConnectToRetry = delay;
-
-                        LogInfo("Evaluated delay time %d sec.  Retry attempt count %d\n", delay, retryLogic->retrycount);
-
-                        // If the retry policy is telling us to connect right away ( <= ERROR_TIME_FOR_RETRY_SECS),
-                        // or if enough time has elapsed, then we retry.
-                        if ((retryLogic->delayFromLastConnectToRetry <= ERROR_TIME_FOR_RETRY_SECS) ||
-                            (diffTime >= retryLogic->delayFromLastConnectToRetry))
-                        {
-                            retryLogic->lastConnect = now;
-                            retryLogic->retrycount++;
-                            result = true;
-                        }
-                        else
-                        {
-                            // To soon to retry according to policy.  
-                            result = false;
-                        }
-                    }
-                    else
-                    {
-                        // Retry expired.  Stop trying.
-                        LogError("Retry timeout expired after %d attempts", retryLogic->retrycount);
-                        retryLogic->retryExpired = true;
-                        StopRetryTimer(retryLogic);
-                        result = false;
-                    }
-                }
-                else
-                {
-                    // We don't have a retry policy.  Sorry, can't even guess.  Don't bother even trying to retry.
-                    LogError("Cannot evaluate the next best time to retry");
-                    result = false;
-                }
-            }
-        }
-        else
-        {
-            // Since this function is only called when the connection is 
-            // already broken, we can start doing the rety logic.  We'll do the
-            // actual interval checking next time around this loop.
-            StartRetryTimer(retryLogic);
-            //wait for next do work to evaluate next best attempt
-            result = false;
-        }
-    }
-    return result;
-}
-
 
 static uint16_t get_next_packet_id(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 {
@@ -1410,7 +1137,10 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
                         transport_data->currPacketState = CONNACK_TYPE;
                         transport_data->isRecoverableError = true;
                         transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_CONNECTED;
-                        StopRetryTimer(transport_data->retryLogic);
+
+						// Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_008: [ Upon successful connection the retry control shall be reset using retry_control_reset() ]
+						retry_control_reset(transport_data->retry_control_handle);
+
                         IoTHubClient_LL_ConnectionStatusCallBack(transport_data->llClientHandle, IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK);
                     }
                     else
@@ -1812,10 +1542,14 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
     // Make sure we're not destroying the object
     if (!transport_data->isDestroyCalled)
     {
-        // If we are MQTT_CLIENT_STATUS_NOT_CONNECTED then check to see if we need 
-        // to back off the connecting to the server
-        if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_NOT_CONNECTED && transport_data->isRecoverableError && CanRetry(transport_data->retryLogic))
+		RETRY_ACTION retry_action = RETRY_ACTION_RETRY_LATER;
+
+		// Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_007: [ IoTHubTransport_MQTT_Common_DoWork shall try to reconnect according to the current retry policy set ]
+		if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_NOT_CONNECTED && transport_data->isRecoverableError && 
+			(retry_control_should_retry(transport_data->retry_control_handle, &retry_action) != 0 || retry_action == RETRY_ACTION_RETRY_NOW))
         {
+			// Note: in case retry_control_should_retry fails, the reconnection shall be attempted anyway (defaulting to policy IOTHUB_CLIENT_RETRY_IMMEDIATE).
+
             if (tickcounter_get_current_ms(transport_data->msgTickCounter, &transport_data->connectTick) != 0)
             {
                 transport_data->connectFailCount++;
@@ -1914,15 +1648,26 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
             free(state);
             state = NULL;
         }
+		// Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_005: [ MQTT transport shall use EXPONENTIAL_WITH_BACK_OFF as default retry policy ]
+		else if ((state->retry_control_handle = retry_control_create(DEFAULT_RETRY_POLICY, DEFAULT_RETRY_TIMEOUT_IN_SECONDS)) == NULL)
+		{
+			LogError("Failed creating default retry control");
+			tickcounter_destroy(state->msgTickCounter);
+			free(state);
+			state = NULL;
+		}
         else if ((state->device_id = STRING_construct(upperConfig->deviceId)) == NULL)
         {
             LogError("failure constructing device_id.");
+			retry_control_destroy(state->retry_control_handle);
             tickcounter_destroy(state->msgTickCounter);
             free(state);
             state = NULL;
         }
         else if ((state->devicesPath = STRING_construct_sprintf("%s.%s/devices/%s", upperConfig->iotHubName, upperConfig->iotHubSuffix, upperConfig->deviceId)) == NULL)
         {
+			STRING_delete(state->device_id);
+			retry_control_destroy(state->retry_control_handle);
             tickcounter_destroy(state->msgTickCounter);
             free(state);
             state = NULL;
@@ -1934,7 +1679,8 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                 LogError("Could not create topic_MqttEvent for MQTT");
                 STRING_delete(state->devicesPath);
                 STRING_delete(state->device_id);
-                tickcounter_destroy(state->msgTickCounter);
+				retry_control_destroy(state->retry_control_handle);
+				tickcounter_destroy(state->msgTickCounter);
                 free(state);
                 state = NULL;
             }
@@ -1947,7 +1693,8 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                     STRING_delete(state->devicesPath);
                     STRING_delete(state->topic_MqttEvent);
                     STRING_delete(state->device_id);
-                    tickcounter_destroy(state->msgTickCounter);
+					retry_control_destroy(state->retry_control_handle);
+					tickcounter_destroy(state->msgTickCounter);
                     free(state);
                     state = NULL;
                 }
@@ -1966,22 +1713,24 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                     if (state->hostAddress == NULL)
                     {
                         LogError("failure constructing host address.");
-                        STRING_delete(state->devicesPath);
                         mqtt_client_deinit(state->mqttClient);
-                        STRING_delete(state->topic_MqttEvent);
+						STRING_delete(state->devicesPath);
+						STRING_delete(state->topic_MqttEvent);
                         STRING_delete(state->device_id);
-                        tickcounter_destroy(state->msgTickCounter);
+						retry_control_destroy(state->retry_control_handle);
+						tickcounter_destroy(state->msgTickCounter);
                         free(state);
                         state = NULL;
                     }
                     else if ((state->configPassedThroughUsername = buildConfigForUsername(upperConfig)) == NULL)
                     {
-                        STRING_delete(state->devicesPath);
-                        mqtt_client_deinit(state->mqttClient);
-                        STRING_delete(state->hostAddress);
+						STRING_delete(state->hostAddress);
+						mqtt_client_deinit(state->mqttClient);
+						STRING_delete(state->devicesPath);
                         STRING_delete(state->topic_MqttEvent);
                         STRING_delete(state->device_id);
-                        tickcounter_destroy(state->msgTickCounter);
+						retry_control_destroy(state->retry_control_handle);
+						tickcounter_destroy(state->msgTickCounter);
                         free(state);
                         state = NULL;
                     }
@@ -2010,7 +1759,6 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                         state->topics_ToSubscribe = UNSUBSCRIBE_FROM_TOPIC;
                         state->topic_DeviceMethods = NULL;
                         state->log_trace = state->raw_trace = false;
-                        state->retryLogic = NULL;
                         srand((unsigned int)get_time(NULL));
                         state->authorization_module = auth_module;
                         state->isProductInfoSet = false;
@@ -2129,7 +1877,8 @@ void IoTHubTransport_MQTT_Common_Destroy(TRANSPORT_LL_HANDLE handle)
 
         /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_014: [IoTHubTransport_MQTT_Common_Destroy shall free all the resources currently in use.] */
         mqtt_client_deinit(transport_data->mqttClient);
-        STRING_delete(transport_data->topic_MqttEvent);
+		retry_control_destroy(transport_data->retry_control_handle);
+		STRING_delete(transport_data->topic_MqttEvent);
         STRING_delete(transport_data->topic_MqttMessage);
         STRING_delete(transport_data->device_id);
         STRING_delete(transport_data->hostAddress);
@@ -2139,7 +1888,6 @@ void IoTHubTransport_MQTT_Common_Destroy(TRANSPORT_LL_HANDLE handle)
         STRING_delete(transport_data->topic_DeviceMethods);
 
         tickcounter_destroy(transport_data->msgTickCounter);
-        DestroyRetryLogic(transport_data->retryLogic);
         /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_012: [ `IoTHubTransport_MQTT_Common_Destroy` shall free the stored proxy options. ]*/
         free_proxy_data(transport_data);
         free(transport_data);
