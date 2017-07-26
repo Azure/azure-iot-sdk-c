@@ -673,7 +673,11 @@ Handled options are
 
 **SRS_IOTHUBCLIENT_LL_02_105: [** Otherwise `IoTHubClient_LL_UploadToBlob_SetOption` shall succeed and return `IOTHUB_CLIENT_OK`.** ]**
 
+**SRS_IOTHUBCLIENT_LL_32_008: [** OPTION_HTTP_PROXY - then the value will be a pointer to HTTP_PROXY_OPTIONS structure.** ]**
 
+**SRS_IOTHUBCLIENT_LL_32_006: [** If `host_address` is NULL, `IoTHubClient_LL_UploadToBlob_SetOption` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`** ]**
+
+**SRS_IOTHUBCLIENT_LL_32_007: [** If only one of `username` and `password` is NULL, `IoTHubClient_LL_UploadToBlob_SetOption` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`.** ]**
 
 ## IoTHubClient_LL_SetDeviceTwinCallback
 
