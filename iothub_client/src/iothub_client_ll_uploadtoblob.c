@@ -1111,11 +1111,11 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
 			
 			if (proxy_options->host_address == NULL)
 			{
-				/* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_32_002: [ If `host_address` is NULL, `IoTHubClient_LL_UploadToBlob_SetOption` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
+				/* Codes_SRS_IOTHUBCLIENT_LL_32_006: [ If `host_address` is NULL, `IoTHubClient_LL_UploadToBlob_SetOption` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
 				LogError("NULL host_address in proxy options");
 				result = IOTHUB_CLIENT_INVALID_ARG;
 			}
-			/* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_32_003: [ If only one of `username` and `password` is NULL, `IoTHubClient_LL_UploadToBlob_SetOption` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
+			/* Codes_SRS_IOTHUBCLIENT_LL_32_007: [ If only one of `username` and `password` is NULL, `IoTHubClient_LL_UploadToBlob_SetOption` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
 			else if (((proxy_options->username == NULL) || (proxy_options->password == NULL)) &&
 				(proxy_options->username != proxy_options->password))
 			{
