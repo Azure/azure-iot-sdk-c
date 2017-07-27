@@ -185,7 +185,7 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     // Telemetry specific
     DLIST_ENTRY telemetry_waitingForAck;
 
-	// Controls frequency of reconnection logic.
+    // Controls frequency of reconnection logic.
     RETRY_CONTROL_HANDLE retry_control_handle;
 
     // Auth module used to generating handle authorization
@@ -259,26 +259,26 @@ int IoTHubTransport_MQTT_Common_SetRetryPolicy(TRANSPORT_LL_HANDLE handle, IOTHU
     }
     else
     {
-		RETRY_CONTROL_HANDLE new_retry_control_handle;
+        RETRY_CONTROL_HANDLE new_retry_control_handle;
 
-		// Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_006: [ IoTHubTransport_MQTT_Common_SetRetryPolicy shall set the retry logic by calling retry_control_create() with retry policy and retryTimeout as parameters]
-		// Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_009: [ If retry_control_create() fails then IoTHubTransport_MQTT_Common_SetRetryPolicy shall revert to previous retry policy and return non-zero value ]
-		if ((new_retry_control_handle = retry_control_create(retryPolicy, (unsigned int)retryTimeoutLimitInSeconds)) == NULL)
-		{
-			LogError("Failed creating new retry control handle");
-			result = __FAILURE__;
-		}
-		else
-		{
-			PMQTTTRANSPORT_HANDLE_DATA transport_data = (PMQTTTRANSPORT_HANDLE_DATA)handle;
-			RETRY_CONTROL_HANDLE previous_retry_control_handle = transport_data->retry_control_handle;
+        // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_006: [ IoTHubTransport_MQTT_Common_SetRetryPolicy shall set the retry logic by calling retry_control_create() with retry policy and retryTimeout as parameters]
+        // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_009: [ If retry_control_create() fails then IoTHubTransport_MQTT_Common_SetRetryPolicy shall revert to previous retry policy and return non-zero value ]
+        if ((new_retry_control_handle = retry_control_create(retryPolicy, (unsigned int)retryTimeoutLimitInSeconds)) == NULL)
+        {
+            LogError("Failed creating new retry control handle");
+            result = __FAILURE__;
+        }
+        else
+        {
+            PMQTTTRANSPORT_HANDLE_DATA transport_data = (PMQTTTRANSPORT_HANDLE_DATA)handle;
+            RETRY_CONTROL_HANDLE previous_retry_control_handle = transport_data->retry_control_handle;
 
-			transport_data->retry_control_handle = new_retry_control_handle;
-			retry_control_destroy(previous_retry_control_handle);
+            transport_data->retry_control_handle = new_retry_control_handle;
+            retry_control_destroy(previous_retry_control_handle);
 
-			/*Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_25_045: [**If retry logic for specified parameters of retry policy and retryTimeoutLimitInSeconds is created successfully then IoTHubTransport_MQTT_Common_SetRetryPolicy shall return 0]*/
-			result = 0;
-		}
+            /*Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_25_045: [**If retry logic for specified parameters of retry policy and retryTimeoutLimitInSeconds is created successfully then IoTHubTransport_MQTT_Common_SetRetryPolicy shall return 0]*/
+            result = 0;
+        }
     }
 
     return result;
@@ -1138,8 +1138,8 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
                         transport_data->isRecoverableError = true;
                         transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_CONNECTED;
 
-						// Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_008: [ Upon successful connection the retry control shall be reset using retry_control_reset() ]
-						retry_control_reset(transport_data->retry_control_handle);
+                        // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_008: [ Upon successful connection the retry control shall be reset using retry_control_reset() ]
+                        retry_control_reset(transport_data->retry_control_handle);
 
                         IoTHubClient_LL_ConnectionStatusCallBack(transport_data->llClientHandle, IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK);
                     }
@@ -1542,13 +1542,13 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
     // Make sure we're not destroying the object
     if (!transport_data->isDestroyCalled)
     {
-		RETRY_ACTION retry_action = RETRY_ACTION_RETRY_LATER;
+        RETRY_ACTION retry_action = RETRY_ACTION_RETRY_LATER;
 
-		// Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_007: [ IoTHubTransport_MQTT_Common_DoWork shall try to reconnect according to the current retry policy set ]
-		if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_NOT_CONNECTED && transport_data->isRecoverableError && 
-			(retry_control_should_retry(transport_data->retry_control_handle, &retry_action) != 0 || retry_action == RETRY_ACTION_RETRY_NOW))
+        // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_007: [ IoTHubTransport_MQTT_Common_DoWork shall try to reconnect according to the current retry policy set ]
+        if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_NOT_CONNECTED && transport_data->isRecoverableError && 
+            (retry_control_should_retry(transport_data->retry_control_handle, &retry_action) != 0 || retry_action == RETRY_ACTION_RETRY_NOW))
         {
-			// Note: in case retry_control_should_retry fails, the reconnection shall be attempted anyway (defaulting to policy IOTHUB_CLIENT_RETRY_IMMEDIATE).
+            // Note: in case retry_control_should_retry fails, the reconnection shall be attempted anyway (defaulting to policy IOTHUB_CLIENT_RETRY_IMMEDIATE).
 
             if (tickcounter_get_current_ms(transport_data->msgTickCounter, &transport_data->connectTick) != 0)
             {
@@ -1648,26 +1648,26 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
             free(state);
             state = NULL;
         }
-		// Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_005: [ MQTT transport shall use EXPONENTIAL_WITH_BACK_OFF as default retry policy ]
-		else if ((state->retry_control_handle = retry_control_create(DEFAULT_RETRY_POLICY, DEFAULT_RETRY_TIMEOUT_IN_SECONDS)) == NULL)
-		{
-			LogError("Failed creating default retry control");
-			tickcounter_destroy(state->msgTickCounter);
-			free(state);
-			state = NULL;
-		}
+        // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_005: [ MQTT transport shall use EXPONENTIAL_WITH_BACK_OFF as default retry policy ]
+        else if ((state->retry_control_handle = retry_control_create(DEFAULT_RETRY_POLICY, DEFAULT_RETRY_TIMEOUT_IN_SECONDS)) == NULL)
+        {
+            LogError("Failed creating default retry control");
+            tickcounter_destroy(state->msgTickCounter);
+            free(state);
+            state = NULL;
+        }
         else if ((state->device_id = STRING_construct(upperConfig->deviceId)) == NULL)
         {
             LogError("failure constructing device_id.");
-			retry_control_destroy(state->retry_control_handle);
+            retry_control_destroy(state->retry_control_handle);
             tickcounter_destroy(state->msgTickCounter);
             free(state);
             state = NULL;
         }
         else if ((state->devicesPath = STRING_construct_sprintf("%s.%s/devices/%s", upperConfig->iotHubName, upperConfig->iotHubSuffix, upperConfig->deviceId)) == NULL)
         {
-			STRING_delete(state->device_id);
-			retry_control_destroy(state->retry_control_handle);
+            STRING_delete(state->device_id);
+            retry_control_destroy(state->retry_control_handle);
             tickcounter_destroy(state->msgTickCounter);
             free(state);
             state = NULL;
@@ -1679,8 +1679,8 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                 LogError("Could not create topic_MqttEvent for MQTT");
                 STRING_delete(state->devicesPath);
                 STRING_delete(state->device_id);
-				retry_control_destroy(state->retry_control_handle);
-				tickcounter_destroy(state->msgTickCounter);
+                retry_control_destroy(state->retry_control_handle);
+                tickcounter_destroy(state->msgTickCounter);
                 free(state);
                 state = NULL;
             }
@@ -1693,8 +1693,8 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                     STRING_delete(state->devicesPath);
                     STRING_delete(state->topic_MqttEvent);
                     STRING_delete(state->device_id);
-					retry_control_destroy(state->retry_control_handle);
-					tickcounter_destroy(state->msgTickCounter);
+                    retry_control_destroy(state->retry_control_handle);
+                    tickcounter_destroy(state->msgTickCounter);
                     free(state);
                     state = NULL;
                 }
@@ -1714,23 +1714,23 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                     {
                         LogError("failure constructing host address.");
                         mqtt_client_deinit(state->mqttClient);
-						STRING_delete(state->devicesPath);
-						STRING_delete(state->topic_MqttEvent);
+                        STRING_delete(state->devicesPath);
+                        STRING_delete(state->topic_MqttEvent);
                         STRING_delete(state->device_id);
-						retry_control_destroy(state->retry_control_handle);
-						tickcounter_destroy(state->msgTickCounter);
+                        retry_control_destroy(state->retry_control_handle);
+                        tickcounter_destroy(state->msgTickCounter);
                         free(state);
                         state = NULL;
                     }
                     else if ((state->configPassedThroughUsername = buildConfigForUsername(upperConfig)) == NULL)
                     {
-						STRING_delete(state->hostAddress);
-						mqtt_client_deinit(state->mqttClient);
-						STRING_delete(state->devicesPath);
+                        STRING_delete(state->hostAddress);
+                        mqtt_client_deinit(state->mqttClient);
+                        STRING_delete(state->devicesPath);
                         STRING_delete(state->topic_MqttEvent);
                         STRING_delete(state->device_id);
-						retry_control_destroy(state->retry_control_handle);
-						tickcounter_destroy(state->msgTickCounter);
+                        retry_control_destroy(state->retry_control_handle);
+                        tickcounter_destroy(state->msgTickCounter);
                         free(state);
                         state = NULL;
                     }
@@ -1877,8 +1877,8 @@ void IoTHubTransport_MQTT_Common_Destroy(TRANSPORT_LL_HANDLE handle)
 
         /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_014: [IoTHubTransport_MQTT_Common_Destroy shall free all the resources currently in use.] */
         mqtt_client_deinit(transport_data->mqttClient);
-		retry_control_destroy(transport_data->retry_control_handle);
-		STRING_delete(transport_data->topic_MqttEvent);
+        retry_control_destroy(transport_data->retry_control_handle);
+        STRING_delete(transport_data->topic_MqttEvent);
         STRING_delete(transport_data->topic_MqttMessage);
         STRING_delete(transport_data->device_id);
         STRING_delete(transport_data->hostAddress);
