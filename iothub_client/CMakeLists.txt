@@ -174,23 +174,27 @@ if(${use_mqtt})
     set(iothub_client_mqtt_ws_transport_c_files
         ${iothub_client_ll_transport_c_files}
         ./src/iothubtransport_mqtt_common.c
+        ./src/iothub_client_retry_control.c
         ./src/iothubtransportmqtt_websockets.c
     )
     set(iothub_client_mqtt_ws_transport_h_files
         ${iothub_client_ll_transport_h_files}
         ./inc/iothubtransport_mqtt_common.h
+        ./inc/iothub_client_retry_control.h
         ./inc/iothubtransportmqtt_websockets.h
     )
 
     set(iothub_client_mqtt_transport_c_files
         ${iothub_client_ll_transport_c_files}
         ./src/iothubtransport_mqtt_common.c
+        ./src/iothub_client_retry_control.c
         ./src/iothubtransportmqtt.c
     )
     
     set(iothub_client_mqtt_transport_h_files
         ${iothub_client_ll_transport_h_files}
         ./inc/iothubtransport_mqtt_common.h
+        ./inc/iothub_client_retry_control.h
         ./inc/iothubtransportmqtt.h
     )
     
