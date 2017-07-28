@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Microsoft Azure IoT Device SDK for C
-   &#160;<span id="projectnumber">1.1.19</span>
+   &#160;<span id="projectnumber">1.1.20</span>
    </div>
    <div id="projectbrief">The Microsoft Azure IoT device libraries for C contain code that facilitates building devices and applications that connect to and are managed by Azure IoT Hub services.</div>
   </td>
@@ -962,7 +962,8 @@ Functions</h2></td></tr>
 <li><b>CURLOPT_FORBID_REUSE</b> - only available for HTTP protocol and only when CURL is used. It has the same meaning as CURL's option with the same name. <code>value</code> is pointer to a long.</li>
 <li><b>CURLOPT_FRESH_CONNECT</b> - only available for HTTP protocol and only when CURL is used. It has the same meaning as CURL's option with the same name. <code>value</code> is pointer to a long.</li>
 <li><b>CURLOPT_VERBOSE</b> - only available for HTTP protocol and only when CURL is used. It has the same meaning as CURL's option with the same name. <code>value</code> is pointer to a long.</li>
-<li><b>messageTimeout</b> - the maximum time in milliseconds until a message is timeouted. The time starts at IoTHubClient_SendEventAsync. By default, messages do not expire. <code>is</code> a pointer to a uint64_t <dl class="section return"><dt>Returns</dt><dd>IOTHUB_CLIENT_OK upon success or an error code upon failure. </dd></dl>
+<li><b>messageTimeout</b> - the maximum time in milliseconds until a message is timeouted. The time starts at IoTHubClient_SendEventAsync. By default, messages do not expire. <code>is</code> a pointer to a uint64_t</li>
+<li><b>c2d_keep_alive_freq_secs</b> - the AMQP C2D keep alive interval in seconds. After the connection established the client requests the server to set the keep alive interval for given time. If it is not set then the default 240 sec applies. If it is set to zero the server will not send keep alive messages to the client. <dl class="section return"><dt>Returns</dt><dd>IOTHUB_CLIENT_OK upon success or an error code upon failure. </dd></dl>
 </li>
 </ul>
 
