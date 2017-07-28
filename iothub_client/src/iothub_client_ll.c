@@ -443,6 +443,8 @@ static IOTHUB_DEVICE_TWIN* dev_twin_data_create(IOTHUB_CLIENT_LL_HANDLE_DATA* ha
             result->ms_timesOutAfter = 0;
             result->context = userContextCallback;
             result->reported_state_callback = reportedStateCallback;
+			result->client_handle = handleData;
+			result->device_handle = handleData->deviceHandle;
         }
     }
     else

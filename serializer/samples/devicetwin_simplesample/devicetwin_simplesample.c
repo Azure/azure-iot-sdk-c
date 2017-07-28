@@ -6,6 +6,7 @@
 
 #include "serializer_devicetwin.h"
 #include "iothub_client.h"
+#include "iothubtransportamqp.h"
 #include "iothubtransportmqtt.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "parson.h"
@@ -100,7 +101,7 @@ void device_twin_simple_sample_run(void)
         else
         {
             /*create an IoTHub client*/
-            IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_CreateFromConnectionString(connectionString, MQTT_Protocol);
+            IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_CreateFromConnectionString(connectionString, MQTT_Protocol); // Change to AMQP_Procotol if desired.
             if (iotHubClientHandle == NULL)
             {
                 printf("Failure creating IoTHubClient handle");

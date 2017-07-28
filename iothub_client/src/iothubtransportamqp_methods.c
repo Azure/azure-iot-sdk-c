@@ -820,12 +820,16 @@ void iothubtransportamqp_methods_unsubscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE
             /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_073: [ Otherwise `iothubtransportamqp_methods_unsubscribe` shall free all resources allocated in `iothubtransportamqp_methods_subscribe`: ]*/
             /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_075: [ - It shall free the message receiver by calling `messagereceiver_destroy'. ]*/
             messagereceiver_destroy(iothubtransport_amqp_methods_handle->message_receiver);
+			iothubtransport_amqp_methods_handle->message_receiver = NULL;
             /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_074: [ - It shall free the message sender by calling `messagesender_destroy'. ]*/
             messagesender_destroy(iothubtransport_amqp_methods_handle->message_sender);
-            /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_076: [ - It shall free the sender link by calling `link_destroy'. ]*/
+			iothubtransport_amqp_methods_handle->message_sender = NULL;
+			/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_076: [ - It shall free the sender link by calling `link_destroy'. ]*/
             link_destroy(iothubtransport_amqp_methods_handle->sender_link);
+			iothubtransport_amqp_methods_handle->sender_link = NULL;
             /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_077: [ - It shall free the receiver link by calling `link_destroy'. ]*/
             link_destroy(iothubtransport_amqp_methods_handle->receiver_link);
+			iothubtransport_amqp_methods_handle->receiver_link = NULL;
 
             iothubtransport_amqp_methods_handle->subscribe_state = SUBSCRIBE_STATE_NOT_SUBSCRIBED;
         }

@@ -81,7 +81,7 @@ if(${use_amqp})
     add_unittest_directory(iothubtransportamqp_ws_ut)
     
     add_e2etest_directory(iothubclient_amqp_e2e)
-    # add_e2etest_directory(iothubclient_amqp_dt_e2e)
+    add_e2etest_directory(iothubclient_amqp_dt_e2e)
     # add_e2etest_directory(iothubclient_amqp_e2e_sfc)
     if(${wip_use_c2d_amqp_methods})
         add_e2etest_directory(iothubclient_amqp_device_method_e2e)
