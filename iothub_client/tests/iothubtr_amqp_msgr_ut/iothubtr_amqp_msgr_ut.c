@@ -311,59 +311,43 @@ static PROCESS_MESSAGE_CALLBACK TEST_on_process_message_callback;
 static MESSAGE_QUEUE_HANDLE TEST_message_queue_create(MESSAGE_QUEUE_CONFIG* config)
 {
 	TEST_on_process_message_callback = config->on_process_message_callback;
-
 	return TEST_MESSAGE_QUEUE_HANDLE;
 }
 
-
-static MESSAGE_QUEUE_HANDLE TEST_process_message_completed_callback_message_queue;
-static MQ_MESSAGE_HANDLE TEST_process_message_completed_callback_message;
-static MESSAGE_QUEUE_RESULT TEST_process_message_completed_callback_result;
-static USER_DEFINED_REASON TEST_process_message_completed_callback_reason;
-static void TEST_process_message_completed_callback(MESSAGE_QUEUE_HANDLE message_queue, MQ_MESSAGE_HANDLE message, MESSAGE_QUEUE_RESULT result, USER_DEFINED_REASON reason)
+static void TEST_remove_message_queue_first_item()
 {
-	TEST_process_message_completed_callback_message_queue = message_queue;
-	TEST_process_message_completed_callback_message = message;
-	TEST_process_message_completed_callback_result = result;
-	TEST_process_message_completed_callback_reason = reason;
-}
-
-static void crank_message_queue_do_work(size_t number_of_pending_messages)
-{
-	size_t i, j;
-
-	for (i = 0; i < number_of_pending_messages; i++)
+	if (TEST_message_queue_add_count > 0)
 	{
-		TEST_on_process_message_callback(
-			TEST_message_queue_add_message_queue[0], TEST_message_queue_add_message[0], TEST_process_message_completed_callback, TEST_message_queue_add_user_context[0]);
+		size_t c, d;
 
-		TEST_message_queue_add_on_message_processing_completed_callback[0](
-			TEST_process_message_completed_callback_message_queue, TEST_process_message_completed_callback_result, TEST_process_message_completed_callback_reason, TEST_message_queue_add_user_context[0]);
-	
-		for (j = 0; j < (TEST_MESSAGE_QUEUE_ADD_BUFFERS_SIZE - 1); j++)
+		for (c = 0, d = 1; d < TEST_MESSAGE_QUEUE_ADD_BUFFERS_SIZE; c++, d++)
 		{
-			TEST_message_queue_add_message_queue[j] = TEST_message_queue_add_message_queue[i + 1];
-			TEST_message_queue_add_message[j] = TEST_message_queue_add_message[i + 1];
-			TEST_message_queue_add_on_message_processing_completed_callback[j] = TEST_message_queue_add_on_message_processing_completed_callback[i + 1];
-			TEST_message_queue_add_user_context[j] = TEST_message_queue_add_user_context[i + 1];
+			TEST_message_queue_add_message_queue[c] = TEST_message_queue_add_message_queue[d];
+			TEST_message_queue_add_message[c] = TEST_message_queue_add_message[d];
+			TEST_message_queue_add_on_message_processing_completed_callback[c] = TEST_message_queue_add_on_message_processing_completed_callback[d];
+			TEST_message_queue_add_user_context[c] = TEST_message_queue_add_user_context[d];
 		}
+
+		TEST_message_queue_add_message_queue[c] = NULL;
+		TEST_message_queue_add_message[c] = NULL;
+		TEST_message_queue_add_on_message_processing_completed_callback[c] = NULL;
+		TEST_message_queue_add_user_context[c] = NULL;
+
 		TEST_message_queue_add_count--;
-	}
+	} 
 }
 
-static void TEST_message_queue_destroy(MESSAGE_QUEUE_HANDLE message_queue)
+static void TEST_message_queue_destroy(MESSAGE_QUEUE_HANDLE mq_handle)
 {
-	(void)message_queue;
+	(void)mq_handle;
 
 	while (TEST_message_queue_add_count > 0)
 	{
-		TEST_message_queue_add_on_message_processing_completed_callback[0](
-			TEST_message_queue_add_message_queue[0], MESSAGE_QUEUE_CANCELLED, NULL, TEST_message_queue_add_user_context[0]);
+		TEST_message_queue_add_on_message_processing_completed_callback[0](TEST_message_queue_add_message[0], MESSAGE_QUEUE_CANCELLED, NULL, TEST_message_queue_add_user_context[0]);
 
-		TEST_message_queue_add_count--;
+		TEST_remove_message_queue_first_item();
 	}
 }
-
 
 static AMQP_MESSENGER_CONFIG g_messenger_config;
 static AMQP_MESSENGER_CONFIG* get_messenger_config()
@@ -808,6 +792,12 @@ static void set_expected_calls_for_amqp_messenger_destroy(AMQP_MESSENGER_CONFIG*
 		STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
 	}
 
+	for (i = 0; i < in_progress_list_length; i++)
+	{
+		STRICT_EXPECTED_CALL(message_destroy(IGNORED_PTR_ARG));
+		STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+	}
+
 	set_detroy_configuration_expected_calls();
 	STRICT_EXPECTED_CALL(free(messenger_handle));
 }
@@ -898,6 +888,11 @@ static AMQP_MESSENGER_HANDLE create_and_start_messenger(AMQP_MESSENGER_CONFIG* c
 	(void)amqp_messenger_start(handle, TEST_SESSION_HANDLE);
 
 	return handle;
+}
+
+static void crank_message_queue_do_work(size_t outgoing_messages_pending)
+{
+	(void)outgoing_messages_pending;
 }
 
 static void crank_amqp_messenger_do_work(AMQP_MESSENGER_HANDLE handle, MESSENGER_DO_WORK_EXP_CALL_PROFILE *profile)

@@ -106,7 +106,10 @@ if(${use_amqp})
         ./src/iothubtransport_amqp_cbs_auth.c
         ./src/iothubtransport_amqp_connection.c
         ./src/iothubtransport_amqp_telemetry_messenger.c 
+        ./src/iothubtransport_amqp_twin_messenger.c 
+        ./src/iothubtransport_amqp_messenger.c 
         ./src/iothub_client_retry_control.c
+        ./src/message_queue.c
         ./src/uamqp_messaging.c
     )
 
@@ -124,7 +127,10 @@ if(${use_amqp})
         ./inc/iothubtransport_amqp_cbs_auth.h
         ./inc/iothubtransport_amqp_connection.h
         ./inc/iothubtransport_amqp_telemetry_messenger.h
+        ./inc/iothubtransport_amqp_twin_messenger.h
+        ./inc/iothubtransport_amqp_messenger.h
         ./inc/iothub_client_retry_control.h
+        ./inc/message_queue.h
         ./inc/uamqp_messaging.h
     )
 

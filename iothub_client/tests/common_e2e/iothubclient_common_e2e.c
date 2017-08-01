@@ -470,7 +470,6 @@ IOTHUB_CLIENT_HANDLE client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUs
 #ifdef AZIOT_LINUX
     if (g_e2e_test_options.set_mac_address)
     {
-		// TODO: re-enable this once Gopi changes the job user to root (ewertons)
         char* mac_address = get_target_mac_address();
         ASSERT_IS_NOT_NULL_WITH_MSG(mac_address, "failed getting the target MAC ADDRESS");
 

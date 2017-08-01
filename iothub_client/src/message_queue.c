@@ -467,6 +467,8 @@ int message_queue_move_all_back_to_pending(MESSAGE_QUEUE_HANDLE message_queue)
                     dequeue_message_and_fire_callback(temp_list, list_item, MESSAGE_QUEUE_CANCELLED, NULL);
                 }
             }
+
+			singlylinkedlist_destroy(temp_list);
         }
     }
 
