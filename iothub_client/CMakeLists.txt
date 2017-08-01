@@ -372,6 +372,10 @@ if(${use_installed_dependencies})
         set(CMAKE_INSTALL_LIBDIR "lib")
     endif()
 
+    if(NOT DEFINED CMAKE_INSTALL_INCLUDEDIR)    
+        set(CMAKE_INSTALL_INCLUDEDIR "include") 
+    endif()                                     
+
     install(TARGETS ${iothub_client_libs} EXPORT azure_iot_sdksTargets
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
