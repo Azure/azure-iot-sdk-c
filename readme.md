@@ -175,3 +175,4 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 [c-porting-guide]: doc/porting_guide.md
 [c-cross-compile]: doc/SDK_cross_compile_example.md
 [c-api-reference]: https://azure.github.io/azure-iot-sdk-c/index.html
+[azure-iot-sdks]:https://github.com/azure/azure-iot-sdks
