@@ -1206,9 +1206,11 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
                 break;
             }
             case MQTT_CLIENT_ON_UNSUBSCRIBE_ACK:
+            case MQTT_CLIENT_ON_PING_RESPONSE:
+            default:
             {
                 break;
-            }
+            } 
         }
     }
 }
