@@ -56,6 +56,7 @@ copy %AzureIoTSDKs_path%parson\parson.* %sdk_path%
 copy %AzureIoTSDKs_path%serializer\samples\simplesample_http\simplesample_http.* %AzureIoTHub_path%examples\simplesample_http
 copy %AzureIoTSDKs_path%serializer\samples\simplesample_http\simplesample_http.* %AzureIoTProtocolHTTP_path%examples\simplesample_http
 copy %AzureIoTSDKs_path%serializer\samples\simplesample_mqtt\simplesample_mqtt.* %AzureIoTProtocolMQTT_path%examples\simplesample_mqtt
+copy %AzureIoTSDKs_path%serializer\samples\simplesample_http\simplesample_http.* %AzureIoTUtility_path%examples\simplesample_http
 
 mkdir %SharedUtility_path%
 mkdir %Adapters_path%
