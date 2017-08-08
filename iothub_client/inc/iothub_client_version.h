@@ -8,7 +8,7 @@
 #ifndef IOTHUB_CLIENT_VERSION_H
 #define IOTHUB_CLIENT_VERSION_H
 
-#define IOTHUB_SDK_VERSION "1.1.19"
+#define IOTHUB_SDK_VERSION "1.1.20"
 
 #include "azure_c_shared_utility/umock_c_prod.h"
 

@@ -67,9 +67,23 @@ typedef enum DEVICE_MESSAGE_DISPOSITION_RESULT_TAG
 	DEVICE_MESSAGE_DISPOSITION_RESULT_ABANDONED
 } DEVICE_MESSAGE_DISPOSITION_RESULT;
 
+typedef enum DEVICE_TWIN_UPDATE_RESULT_TAG
+{
+    DEVICE_TWIN_UPDATE_RESULT_OK,
+    DEVICE_TWIN_UPDATE_RESULT_ERROR
+} DEVICE_TWIN_UPDATE_RESULT;
+
+typedef enum DEVICE_TWIN_UPDATE_TYPE_TAG
+{
+    DEVICE_TWIN_UPDATE_TYPE_PARTIAL,
+    DEVICE_TWIN_UPDATE_TYPE_COMPLETE
+} DEVICE_TWIN_UPDATE_TYPE;
+
 typedef void(*ON_DEVICE_STATE_CHANGED)(void* context, DEVICE_STATE previous_state, DEVICE_STATE new_state);
 typedef DEVICE_MESSAGE_DISPOSITION_RESULT(*ON_DEVICE_C2D_MESSAGE_RECEIVED)(IOTHUB_MESSAGE_HANDLE message, DEVICE_MESSAGE_DISPOSITION_INFO* disposition_info, void* context);
 typedef void(*ON_DEVICE_D2C_EVENT_SEND_COMPLETE)(IOTHUB_MESSAGE_LIST* message, D2C_EVENT_SEND_RESULT result, void* context);
+typedef void(*DEVICE_SEND_TWIN_UPDATE_COMPLETE_CALLBACK)(DEVICE_TWIN_UPDATE_RESULT result, int status_code, void* context);
+typedef void(*DEVICE_TWIN_UPDATE_RECEIVED_CALLBACK)(DEVICE_TWIN_UPDATE_TYPE update_type, const unsigned char* message, size_t length, void* context);
 
 typedef struct DEVICE_CONFIG_TAG
 {
@@ -89,6 +103,9 @@ extern int device_start_async(DEVICE_HANDLE handle, SESSION_HANDLE session_handl
 extern int device_stop(DEVICE_HANDLE handle);
 extern void device_do_work(DEVICE_HANDLE handle);
 extern int device_send_event_async(DEVICE_HANDLE handle, IOTHUB_MESSAGE_LIST* message, ON_DEVICE_D2C_EVENT_SEND_COMPLETE on_device_d2c_event_send_complete_callback, void* context);
+extern int device_send_twin_update_async(DEVICE_HANDLE handle, CONSTBUFFER_HANDLE data, DEVICE_SEND_TWIN_UPDATE_COMPLETE_CALLBACK on_send_twin_update_complete_callback, void* context);
+extern int device_subscribe_for_twin_updates(DEVICE_HANDLE handle, DEVICE_TWIN_UPDATE_RECEIVED_CALLBACK on_device_twin_update_received_callback, void* context);
+extern int device_unsubscribe_for_twin_updates(DEVICE_HANDLE handle);
 extern int device_get_send_status(DEVICE_HANDLE handle, DEVICE_SEND_STATUS *send_status);
 extern int device_subscribe_message(DEVICE_HANDLE handle, ON_DEVICE_C2D_MESSAGE_RECEIVED on_message_received_callback, void* context);
 extern int device_unsubscribe_message(DEVICE_HANDLE handle);
@@ -118,6 +135,10 @@ extern DEVICE_HANDLE device_create(DEVICE_CONFIG config);
 **SRS_DEVICE_09_007: [**If the AUTHENTICATION_HANDLE fails to be created, device_create shall fail and return NULL**]**
 **SRS_DEVICE_09_008: [**`instance->messenger_handle` shall be set using telemetry_messenger_create()**]**
 **SRS_DEVICE_09_009: [**If the MESSENGER_HANDLE fails to be created, device_create shall fail and return NULL**]**
+
+**SRS_DEVICE_09_122: [**`instance->twin_messenger_handle` shall be set using twin_messenger_create()**]**
+**SRS_DEVICE_09_123: [**If the TWIN_MESSENGER_HANDLE fails to be created, device_create shall fail and return NULL**]**
+
 **SRS_DEVICE_09_010: [**If device_create fails it shall release all memory it has allocated**]**
 **SRS_DEVICE_09_011: [**If device_create succeeds it shall return a handle to its `instance` structure**]**
 
@@ -161,6 +182,8 @@ extern int device_stop(DEVICE_HANDLE handle);
 **SRS_DEVICE_09_026: [**The device state shall be updated to DEVICE_STATE_STOPPING, and state changed callback invoked**]**
 **SRS_DEVICE_09_027: [**If `instance->messenger_handle` state is not TELEMETRY_MESSENGER_STATE_STOPPED, telemetry_messenger_stop shall be invoked**]**
 **SRS_DEVICE_09_028: [**If telemetry_messenger_stop fails, the `instance` state shall be updated to DEVICE_STATE_ERROR_MSG and the function shall return non-zero result**]**
+**SRS_DEVICE_09_131: [**If `instance->twin_messenger_handle` state is not TWIN_MESSENGER_STATE_STOPPED, twin_messenger_stop shall be invoked**]**
+**SRS_DEVICE_09_132: [**If twin_messenger_stop fails, the `instance` state shall be updated to DEVICE_STATE_ERROR_MSG and the function shall return non-zero result**]**
 **SRS_DEVICE_09_029: [**If CBS authentication is used, if `instance->authentication_handle` state is not AUTHENTICATION_STATE_STOPPED, authentication_stop shall be invoked**]**
 **SRS_DEVICE_09_030: [**If authentication_stop fails, the `instance` state shall be updated to DEVICE_STATE_ERROR_AUTH and the function shall return non-zero result**]**
 **SRS_DEVICE_09_031: [**The device state shall be updated to DEVICE_STATE_STOPPED, and state changed callback invoked**]**
@@ -187,7 +210,7 @@ extern void device_do_work(DEVICE_HANDLE handle);
 **SRS_DEVICE_09_039: [**If authentication state is AUTHENTICATION_STATE_ERROR and error code is TIMEOUT, the device state shall be updated to DEVICE_STATE_ERROR_AUTH_TIMEOUT**]**
 
 
-##### Starting messenger instance
+##### Starting TELEMETRY messenger instance
 
 **SRS_DEVICE_09_040: [**Messenger shall not be started if using CBS authentication and authentication start has not completed yet**]**
 **SRS_DEVICE_09_041: [**If messenger state is TELEMETRY_MESSENGER_STATE_STOPPED, telemetry_messenger_start shall be invoked**]**
@@ -197,18 +220,27 @@ extern void device_do_work(DEVICE_HANDLE handle);
 **SRS_DEVICE_09_045: [**If messenger state is TELEMETRY_MESSENGER_STATE_ERROR, the device state shall be updated to DEVICE_STATE_ERROR_MSG**]**
 **SRS_DEVICE_09_046: [**If messenger state is TELEMETRY_MESSENGER_STATE_STARTED, the device state shall be updated to DEVICE_STATE_STARTED**]**
 
+##### Starting TWIN messenger instance
+
+**SRS_DEVICE_09_124: [**TWIN Messenger shall not be started if using CBS authentication and authentication start has not completed yet**]**
+**SRS_DEVICE_09_125: [**If TWIN messenger state is TWIN_MESSENGER_STATE_STOPPED, twin_messenger_start shall be invoked**]**
+**SRS_DEVICE_09_126: [**If twin_messenger_start fails, the device state shall be updated to DEVICE_STATE_ERROR_MSG**]**
+**SRS_DEVICE_09_127: [**If TWIN messenger state is TWIN_MESSENGER_STATE_STARTING, the device shall track the time since last event change and timeout if needed**]**
+**SRS_DEVICE_09_128: [**If twin_messenger_start times out, the device state shall be updated to DEVICE_STATE_ERROR_MSG**]**
+**SRS_DEVICE_09_129: [**If TWIN messenger state is TWIN_MESSENGER_STATE_ERROR, the device state shall be updated to DEVICE_STATE_ERROR_MSG**]**
+**SRS_DEVICE_09_130: [**If TWIN messenger state is TWIN_MESSENGER_STATE_STARTED, the device state shall be updated to DEVICE_STATE_STARTED**]**
 
 #### device state DEVICE_STATE_STARTED
 
 **SRS_DEVICE_09_047: [**If CBS authentication is used and authentication state is not AUTHENTICATION_STATE_STARTED, the device state shall be updated to DEVICE_STATE_ERROR_AUTH**]**
 **SRS_DEVICE_09_048: [**If messenger state is not TELEMETRY_MESSENGER_STATE_STARTED, the device state shall be updated to DEVICE_STATE_ERROR_MSG**]**
-
+**SRS_DEVICE_09_133: [**If TWIN messenger state is not TWIN_MESSENGER_STATE_STARTED, the device state shall be updated to DEVICE_STATE_ERROR_MSG**]**
 
 #### Any device state
 
 **SRS_DEVICE_09_049: [**If CBS is used for authentication and `instance->authentication_handle` state is not STOPPED or ERROR, authentication_do_work shall be invoked**]**
-**SRS_DEVICE_09_050: [**If `instance->messenger_handle` state is not STOPPED or ERROR, authentication_do_work shall be invoked**]**
-
+**SRS_DEVICE_09_050: [**If `instance->messenger_handle` state is not STOPPED or ERROR, telemetry_messenger_do_work shall be invoked**]**
+**SRS_DEVICE_09_134: [**If `instance->twin_messenger_handle` state is not STOPPED or ERROR, twin_messenger_do_work shall be invoked**]**
 
 
 ### device_send_event_async
@@ -240,6 +272,71 @@ static void on_event_send_complete_messenger_callback(IOTHUB_MESSAGE_LIST* iothu
 **SRS_DEVICE_09_063: [**If `ev_send_comp_result` is TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_MESSENGER_DESTROYED, D2C_EVENT_SEND_COMPLETE_RESULT_DEVICE_DESTROYED shall be reported as `event_send_complete`**]**
 **SRS_DEVICE_09_064: [**If provided, the user callback and context saved in `send_task` shall be invoked passing the device `event_send_complete`**]**
 **SRS_DEVICE_09_065: [**The memory allocated for `send_task` shall be released**]**
+
+
+### device_send_twin_update_async
+```c
+extern int device_send_twin_update_async(DEVICE_HANDLE handle, CONSTBUFFER_HANDLE data, DEVICE_SEND_TWIN_UPDATE_COMPLETE_CALLBACK on_send_twin_update_complete_callback, void* context);
+```
+
+**SRS_DEVICE_09_135: [**If `handle` or `data` are NULL, device_send_twin_update_async shall return a non-zero result**]**
+
+**SRS_DEVICE_09_136: [**A structure (`twin_ctx`) shall be created to track the send state of the twin report**]**
+
+**SRS_DEVICE_09_137: [**If `twin_ctx` fails to be created, device_send_twin_update_async shall return a non-zero value**]**
+
+**SRS_DEVICE_09_138: [**The twin report shall be sent using twin_messenger_report_state_async, passing `on_report_state_complete_callback` and `twin_ctx`**]**
+
+**SRS_DEVICE_09_139: [**If twin_messenger_report_state_async fails, device_send_twin_update_async shall return a non-zero value**]**
+
+**SRS_DEVICE_09_140: [**If no failures occur, device_send_twin_update_async shall return 0**]**
+
+
+#### on_report_state_complete_callback
+```c
+static void on_report_state_complete_callback(TWIN_REPORT_STATE_RESULT result, TWIN_REPORT_STATE_REASON reason, int status_code, const void* context)
+```
+
+**SRS_DEVICE_09_141: [**on_send_twin_update_complete_callback (if provided by user) shall be invoked passing the corresponding device result and `status_code`**]**
+
+**SRS_DEVICE_09_142: [**Memory allocated for `context` shall be released**]**
+
+
+
+### device_subscribe_for_twin_updates
+```c
+extern int device_subscribe_for_twin_updates(DEVICE_HANDLE handle, DEVICE_TWIN_UPDATE_RECEIVED_CALLBACK on_device_twin_update_received_callback, void* context);
+```
+
+**SRS_DEVICE_09_143: [**If `handle` or `on_device_twin_update_received_callback` are NULL, device_subscribe_for_twin_updates shall return a non-zero result**]**
+
+**SRS_DEVICE_09_144: [**twin_messenger_subscribe shall be invoked passing `on_twin_state_update_callback`**]**
+
+**SRS_DEVICE_09_145: [**If twin_messenger_subscribe fails, device_subscribe_for_twin_updates shall return a non-zero value**]**
+
+**SRS_DEVICE_09_146: [**If no failures occur, device_subscribe_for_twin_updates shall return 0**]**
+
+
+#### on_twin_state_update_callback
+```c
+static void on_twin_state_update_callback(TWIN_UPDATE_TYPE update_type, const char* payload, size_t size, const void* context)
+```
+
+**SRS_DEVICE_09_151: [**on_device_twin_update_received_callback (provided by user) shall be invoked passing the corresponding update type, `payload` and `size`**]**
+
+
+### device_unsubscribe_for_twin_updates
+```c
+extern int device_unsubscribe_for_twin_updates(DEVICE_HANDLE handle);
+```
+
+**SRS_DEVICE_09_147: [**If `handle` is NULL, device_unsubscribe_for_twin_updates shall return a non-zero result**]**
+
+**SRS_DEVICE_09_148: [**twin_messenger_unsubscribe shall be invoked passing `on_twin_state_update_callback`**]**
+
+**SRS_DEVICE_09_149: [**If twin_messenger_unsubscribe fails, device_unsubscribe_for_twin_updates shall return a non-zero value**]**
+
+**SRS_DEVICE_09_150: [**If no failures occur, device_unsubscribe_for_twin_updates shall return 0**]**
 
 
 ### device_subscribe_message

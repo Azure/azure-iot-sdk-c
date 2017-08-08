@@ -194,17 +194,17 @@ static BUFFER_HANDLE constructDeviceJson(const IOTHUB_DEVICE* deviceInfo)
         LogError("json_object_dotset_string failed for secondaryKey");
         result = NULL;
     }
-    /*Codes_SRS_IOTHUBREGISTRYMANAGER_06_001: [ IoTHubRegistryManager_CreateDevice shall, if deviceCreateInfo->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT" or "IOTHUB_REGISTRYMANAGER_AUTH_X509_CERTIFICATE_AUTHORITY", set "authorization.x509Thumbprint.primaryThumbprint" to deviceCreateInfo->primaryKey and "authorization.x509Thumbprint.secondaryThumbprint" to deviceCreateInfo->secondaryKey ] */
-    /*Codes_SRS_IOTHUBREGISTRYMANAGER_06_003: [ IoTHubRegistryManager_UpdateDevice shall, if deviceUpdate->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT" or "IOTHUB_REGISTRYMANAGER_AUTH_X509_CERTIFICATE_AUTHORITY", set "authorization.x509Thumbprint.primaryThumbprint" to deviceCreateInfo->primaryKey and "authorization.x509Thumbprint.secondaryThumbprint" to deviceCreateInfo->secondaryKey ] */
-    else if (USING_CERT_BASED_AUTH(deviceInfo->authMethod) && ((json_object_dotset_string(root_object, DEVICE_JSON_KEY_DEVICE_PRIMARY_THUMBPRINT, deviceInfo->primaryKey)) != JSONSuccess))
+    /*Codes_SRS_IOTHUBREGISTRYMANAGER_06_001: [ IoTHubRegistryManager_CreateDevice shall, if deviceCreateInfo->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT", set "authorization.x509Thumbprint.primaryThumbprint" to deviceCreateInfo->primaryKey and "authorization.x509Thumbprint.secondaryThumbprint" to deviceCreateInfo->secondaryKey ] */
+    /*Codes_SRS_IOTHUBREGISTRYMANAGER_06_003: [ IoTHubRegistryManager_UpdateDevice shall, if deviceUpdate->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT", set "authorization.x509Thumbprint.primaryThumbprint" to deviceCreateInfo->primaryKey and "authorization.x509Thumbprint.secondaryThumbprint" to deviceCreateInfo->secondaryKey ] */
+    else if ((deviceInfo->authMethod == IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT) && ((json_object_dotset_string(root_object, DEVICE_JSON_KEY_DEVICE_PRIMARY_THUMBPRINT, deviceInfo->primaryKey)) != JSONSuccess))
     {
         /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
         LogError("json_object_dotset_string failed for primaryThumbprint");
         result = NULL;
     }
-    /*Codes_SRS_IOTHUBREGISTRYMANAGER_06_001: [ IoTHubRegistryManager_CreateDevice shall, if deviceCreateInfo->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT" or "IOTHUB_REGISTRYMANAGER_AUTH_X509_CERTIFICATE_AUTHORITY", set "authorization.x509Thumbprint.primaryThumbprint" to deviceCreateInfo->primaryKey and "authorization.x509Thumbprint.secondaryThumbprint" to deviceCreateInfo->secondaryKey ] */
-    /*Codes_SRS_IOTHUBREGISTRYMANAGER_06_003: [ IoTHubRegistryManager_UpdateDevice shall, if deviceUpdate->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT" or "IOTHUB_REGISTRYMANAGER_AUTH_X509_CERTIFICATE_AUTHORITY", set "authorization.x509Thumbprint.primaryThumbprint" to deviceCreateInfo->primaryKey and "authorization.x509Thumbprint.secondaryThumbprint" to deviceCreateInfo->secondaryKey ] */
-    else if (USING_CERT_BASED_AUTH(deviceInfo->authMethod) && ((json_object_dotset_string(root_object, DEVICE_JSON_KEY_DEVICE_SECONDARY_THUMBPRINT, deviceInfo->secondaryKey)) != JSONSuccess))
+    /*Codes_SRS_IOTHUBREGISTRYMANAGER_06_001: [ IoTHubRegistryManager_CreateDevice shall, if deviceCreateInfo->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT", set "authorization.x509Thumbprint.primaryThumbprint" to deviceCreateInfo->primaryKey and "authorization.x509Thumbprint.secondaryThumbprint" to deviceCreateInfo->secondaryKey ] */
+    /*Codes_SRS_IOTHUBREGISTRYMANAGER_06_003: [ IoTHubRegistryManager_UpdateDevice shall, if deviceUpdate->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT", set "authorization.x509Thumbprint.primaryThumbprint" to deviceCreateInfo->primaryKey and "authorization.x509Thumbprint.secondaryThumbprint" to deviceCreateInfo->secondaryKey ] */
+    else if ((deviceInfo->authMethod == IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT) && ((json_object_dotset_string(root_object, DEVICE_JSON_KEY_DEVICE_SECONDARY_THUMBPRINT, deviceInfo->secondaryKey)) != JSONSuccess))
     {
         /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
         LogError("json_object_dotset_string failed for secondaryThumbprint");

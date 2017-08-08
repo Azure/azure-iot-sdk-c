@@ -106,7 +106,10 @@ if(${use_amqp})
         ./src/iothubtransport_amqp_cbs_auth.c
         ./src/iothubtransport_amqp_connection.c
         ./src/iothubtransport_amqp_telemetry_messenger.c 
+        ./src/iothubtransport_amqp_twin_messenger.c 
+        ./src/iothubtransport_amqp_messenger.c 
         ./src/iothub_client_retry_control.c
+        ./src/message_queue.c
         ./src/uamqp_messaging.c
     )
 
@@ -124,7 +127,10 @@ if(${use_amqp})
         ./inc/iothubtransport_amqp_cbs_auth.h
         ./inc/iothubtransport_amqp_connection.h
         ./inc/iothubtransport_amqp_telemetry_messenger.h
+        ./inc/iothubtransport_amqp_twin_messenger.h
+        ./inc/iothubtransport_amqp_messenger.h
         ./inc/iothub_client_retry_control.h
+        ./inc/message_queue.h
         ./inc/uamqp_messaging.h
     )
 
@@ -174,23 +180,27 @@ if(${use_mqtt})
     set(iothub_client_mqtt_ws_transport_c_files
         ${iothub_client_ll_transport_c_files}
         ./src/iothubtransport_mqtt_common.c
+        ./src/iothub_client_retry_control.c
         ./src/iothubtransportmqtt_websockets.c
     )
     set(iothub_client_mqtt_ws_transport_h_files
         ${iothub_client_ll_transport_h_files}
         ./inc/iothubtransport_mqtt_common.h
+        ./inc/iothub_client_retry_control.h
         ./inc/iothubtransportmqtt_websockets.h
     )
 
     set(iothub_client_mqtt_transport_c_files
         ${iothub_client_ll_transport_c_files}
         ./src/iothubtransport_mqtt_common.c
+        ./src/iothub_client_retry_control.c
         ./src/iothubtransportmqtt.c
     )
     
     set(iothub_client_mqtt_transport_h_files
         ${iothub_client_ll_transport_h_files}
         ./inc/iothubtransport_mqtt_common.h
+        ./inc/iothub_client_retry_control.h
         ./inc/iothubtransportmqtt.h
     )
     

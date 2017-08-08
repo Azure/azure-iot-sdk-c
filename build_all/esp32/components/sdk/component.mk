@@ -52,6 +52,7 @@ $(sdk)/iothub_client/src/iothub_client.o	\
 $(sdk)/iothub_client/src/iothub_client_ll.o	\
 $(sdk)/iothub_client/src/iothub_client_ll_uploadtoblob.o	\
 $(sdk)/iothub_client/src/iothub_client_authorization.o	\
+$(sdk)/iothub_client/src/iothub_client_retry_control.o	\
 $(sdk)/iothub_client/src/iothub_message.o	\
 $(sdk)/iothub_client/src/iothubtransport.o	\
 $(sdk)/iothub_client/src/iothubtransportmqtt.o	\

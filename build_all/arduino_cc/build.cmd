@@ -151,7 +151,7 @@ git clone https://github.com/adafruit/Adafruit_Sensor
 git clone https://github.com/adafruit/Adafruit_DHT_Unified
 git clone https://github.com/adafruit/DHT-sensor-library
 git clone https://github.com/adafruit/Adafruit_BME280_Library
-git clone https://github.com/adafruit/Adafruit_WINC1500
+git clone https://github.com/arduino-libraries/WiFi101
 git clone https://github.com/arduino-libraries/RTCZero
 popd
 

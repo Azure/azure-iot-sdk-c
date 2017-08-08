@@ -15,12 +15,6 @@
 #include <ESP8266WiFi.h>
 #include <WiFiClientSecure.h>
 #include <WiFiUdp.h>
-#elif ARDUINO_SAMD_FEATHER_M0
-// for Adafruit WINC1500
-#include <Adafruit_WINC1500.h>
-#include <Adafruit_WINC1500SSLClient.h>
-#include <Adafruit_WINC1500Udp.h>
-#include <NTPClient.h>
 #else
 #include <WiFi101.h>
 #include <WiFiSSLClient.h>
@@ -35,8 +29,6 @@
 #define WINC_IRQ  7
 #define WINC_RST  4
 #define WINC_EN   2     // or, tie EN to VCC
-// Setup the WINC1500 connection with the pins above and the default hardware SPI.
-Adafruit_WINC1500 WiFi(WINC_CS, WINC_IRQ, WINC_RST);
 #endif
 
 #include <AzureIoTHub.h>
@@ -68,9 +60,14 @@ void initSerial() {
 
 void initWifi() {
 #ifdef ARDUINO_SAMD_FEATHER_M0
+    //Configure pins for Adafruit ATWINC1500 Feather
+    Serial.println(F("WINC1500 on FeatherM0 detected."));
+    Serial.println(F("Setting pins for WiFi101 library (WINC1500 on FeatherM0)"));
+    WiFi.setPins(WINC_CS, WINC_IRQ, WINC_RST, WINC_EN);
     // for the Adafruit WINC1500 we need to enable the chip
     pinMode(WINC_EN, OUTPUT);
     digitalWrite(WINC_EN, HIGH);
+    Serial.println(F("Enabled WINC1500 interface for FeatherM0"));
 #endif
 
     // check for the presence of the shield :
@@ -97,11 +94,8 @@ void initWifi() {
 
 void initTime() {
 #if defined(ARDUINO_SAMD_ZERO) || defined(ARDUINO_SAMD_MKR1000) || defined(ARDUINO_SAMD_FEATHER_M0)
-#ifdef ARDUINO_SAMD_FEATHER_M0
-    Adafruit_WINC1500UDP ntpUdp; // for Adafruit WINC1500
-#else
     WiFiUDP ntpUdp;
-#endif
+
     NTPClient ntpClient(ntpUdp);
 
     ntpClient.begin();

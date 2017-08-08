@@ -5,8 +5,8 @@
 
 compileAsC99()
 
-if(NOT ${use_mqtt})
-	message(FATAL_ERROR "devicetwin_simplesample being generated without mqtt support")
+if(NOT ${use_mqtt} AND NOT ${use_amqp})
+	message(FATAL_ERROR "devicetwin_simplesample being generated without mqtt and amqp support")
 endif()
 
 set(devicetwin_simplesample_c_files
@@ -25,7 +25,17 @@ ENDIF(WIN32)
 include_directories(. ${SERIALIZER_INC_FOLDER} ${SHARED_UTIL_INC_FOLDER} ${IOTHUB_CLIENT_INC_FOLDER})
 
 add_executable(devicetwin_simplesample ${devicetwin_simplesample_c_files} ${devicetwin_simplesample_h_files})
-target_link_libraries(devicetwin_simplesample iothub_client_mqtt_transport serializer iothub_client)
+
+target_link_libraries(devicetwin_simplesample serializer iothub_client)
+
+if(${use_amqp})
+	target_link_libraries(devicetwin_simplesample iothub_client_amqp_transport)
+	linkUAMQP(devicetwin_simplesample)
+endif()
+
+if(${use_mqtt})
+	target_link_libraries(devicetwin_simplesample iothub_client_mqtt_transport)
+endif()
 
 linkSharedUtil(devicetwin_simplesample)
 
