@@ -81,7 +81,6 @@ if(NOT IN_OPENWRT)
 endif()
 
 if(${use_installed_dependencies})
-    include(GNUInstallDirs)
 
     if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
         set(CMAKE_INSTALL_LIBDIR "lib")
