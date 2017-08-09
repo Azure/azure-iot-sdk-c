@@ -198,6 +198,8 @@ extern IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_Create(const IOTHUB_CLIENT_CONFIG
 
 **SRS_IOTHUBCLIENT_LL_25_124: [** `IoTHubClient_LL_Create` shall set the default retry policy as Exponential backoff with jitter and if succeed and return a `non-NULL` handle.** ]**
 
+**SRS_IOTHUBCLIENT_LL_09_010: [** If any failure occurs `IoTHubClient_LL_Create` shall destroy the `transportHandle` only if it has created it **]**
+
 **SRS_IOTHUBCLIENT_LL_07_029: [** `IoTHubClient_LL_Create` shall create the Auth module with the device_key, device_id, and/or deviceSasToken values **]**
 
 ## IoTHubClient_LL_CreateWithTransport

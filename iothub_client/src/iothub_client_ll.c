@@ -325,6 +325,11 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
                 if (create_blob_upload_module(result, config) != 0)
                 {
                     LogError("unable to create blob upload");
+                    // Codes_SRS_IOTHUBCLIENT_LL_09_010: [ If any failure occurs `IoTHubClient_LL_Create` shall destroy the `transportHandle` only if it has created it ]
+                    if (!result->isSharedTransport)
+                    {
+                        result->IoTHubTransport_Destroy(result->transportHandle);
+                    }
                     IoTHubClient_Auth_Destroy(result->authorization_module);
                     STRING_delete(product_info);
                     free(result);
@@ -335,6 +340,11 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
                     if ((result->tickCounter = tickcounter_create()) == NULL)
                     {
                         LogError("unable to get a tickcounter");
+                        // Codes_SRS_IOTHUBCLIENT_LL_09_010: [ If any failure occurs `IoTHubClient_LL_Create` shall destroy the `transportHandle` only if it has created it ]
+                        if (!result->isSharedTransport)
+                        {
+                            result->IoTHubTransport_Destroy(result->transportHandle);
+                        }
                         destroy_blob_upload_module(result);
                         IoTHubClient_Auth_Destroy(result->authorization_module);
                         STRING_delete(product_info);
@@ -363,7 +373,11 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
                         {
                             LogError("Registering device in transport failed");
                             IoTHubClient_Auth_Destroy(result->authorization_module);
-                            result->IoTHubTransport_Destroy(result->transportHandle);
+                            // Codes_SRS_IOTHUBCLIENT_LL_09_010: [ If any failure occurs `IoTHubClient_LL_Create` shall destroy the `transportHandle` only if it has created it ]
+                            if (!result->isSharedTransport)
+                            {
+                                result->IoTHubTransport_Destroy(result->transportHandle);
+                            }
                             destroy_blob_upload_module(result);
                             tickcounter_destroy(result->tickCounter);
                             STRING_delete(product_info);
@@ -381,7 +395,11 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
                                 LogError("Setting default retry policy in transport failed");
                                 result->IoTHubTransport_Unregister(result->deviceHandle);
                                 IoTHubClient_Auth_Destroy(result->authorization_module);
-                                result->IoTHubTransport_Destroy(result->transportHandle);
+                                // Codes_SRS_IOTHUBCLIENT_LL_09_010: [ If any failure occurs `IoTHubClient_LL_Create` shall destroy the `transportHandle` only if it has created it ]
+                                if (!result->isSharedTransport)
+                                {
+                                    result->IoTHubTransport_Destroy(result->transportHandle);
+                                }
                                 destroy_blob_upload_module(result);
                                 tickcounter_destroy(result->tickCounter);
                                 STRING_delete(product_info);
