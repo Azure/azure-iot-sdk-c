@@ -741,7 +741,7 @@ static int IoTHubClient_LL_UploadToBlob_step3(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HAND
 
 IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_Impl(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE handle, const char* destinationFileName, const unsigned char* source, size_t size)
 {
-    IOTHUB_CLIENT_RESULT result;
+    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
     BUFFER_HANDLE toBeTransmitted;
     int requiredStringLength;
     char* requiredString;
