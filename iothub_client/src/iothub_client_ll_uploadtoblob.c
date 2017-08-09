@@ -68,10 +68,6 @@ typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA_TAG
     } credentials;                              /*needed for file upload*/
     char* certificates; /*if there are any certificates used*/
     HTTP_PROXY_OPTIONS http_proxy_options;
-    // char* http_proxy_hostname;
-    // int http_proxy_port;
-    // char* http_proxy_username;
-    // char* http_proxy_password;
 }IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA;
 
 IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE IoTHubClient_LL_UploadToBlob_Create(const IOTHUB_CLIENT_CONFIG* config)
