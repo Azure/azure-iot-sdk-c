@@ -70,7 +70,7 @@ void iothub_client_sample_upload_to_blob_run(void)
 
 				if (proxyHost != NULL && IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_HTTP_PROXY, &http_proxy_options) != IOTHUB_CLIENT_OK)
 				{
-					(void)printf("failure to set proxy");
+					(void)printf("failure to set proxy\n");
 				}
 				else
 				{
