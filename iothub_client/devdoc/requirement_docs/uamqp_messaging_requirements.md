@@ -44,6 +44,12 @@ Copying the AMQP-specific properties:
 **SRS_UAMQP_MESSAGING_09_023: [**If amqpvalue_get_string fails, IoTHubMessage_CreateFromuAMQPMessage() shall fail and return immediately.**]**
 **SRS_UAMQP_MESSAGING_09_024: [**The correlation-id property shall be set on the IOTHUB_MESSAGE_HANDLE by calling IoTHubMessage_SetCorrelationId, passing the value read from the uAMQP message.**]**
 **SRS_UAMQP_MESSAGING_09_025: [**If IoTHubMessage_SetCorrelationId fails, IoTHubMessage_CreateFromuAMQPMessage() shall fail and return immediately.**]**
+**SRS_UAMQP_MESSAGING_09_100: [**If the uamqp message contains property `content-type`, it shall be set on IOTHUB_MESSAGE_HANDLE**]**
+**SRS_UAMQP_MESSAGING_09_101: [**If retrieving the `content-type` property from uAMQP message fails, IoTHubMessage_CreateFromuAMQPMessage() shall fail and return immediately.**]**
+**SRS_UAMQP_MESSAGING_09_102: [**If setting the `content-type` property on IOTHUB_MESSAGE_HANDLE fails, IoTHubMessage_CreateFromuAMQPMessage() shall fail and return immediately.**]**
+**SRS_UAMQP_MESSAGING_09_103: [**If the uAMQP message contains property `content-encoding`, it shall be set on IOTHUB_MESSAGE_HANDLE**]**
+**SRS_UAMQP_MESSAGING_09_104: [**If retrieving the `content-encoding` property from uAMQP message fails, IoTHubMessage_CreateFromuAMQPMessage() shall fail and return immediately.**]**
+**SRS_UAMQP_MESSAGING_09_105: [**If setting the `content-encoding` property on IOTHUB_MESSAGE_HANDLE fails, IoTHubMessage_CreateFromuAMQPMessage() shall fail and return immediately.**]**
 **SRS_UAMQP_MESSAGING_09_026: [**IoTHubMessage_CreateFromuAMQPMessage() shall destroy the uAMQP message properties (obtained with message_get_properties()) by calling properties_destroy().**]**
 
 Copying the AMQP application-properties:
@@ -106,6 +112,12 @@ Copying the AMQP-specific properties:
 **SRS_UAMQP_MESSAGING_09_075: [**The correlation-id AMQP_VALUE shall be set on the uAMQP message using properties_set_correlation_id()**]**
 **SRS_UAMQP_MESSAGING_09_076: [**If properties_set_correlation_id() fails, message_create_from_iothub_message() shall fail and return immediately.**]**
 **SRS_UAMQP_MESSAGING_09_077: [**The uAMQP correlation-id AMQP_VALUE instance shall be destroyed using amqpvalue_destroy().**]**
+**SRS_UAMQP_MESSAGING_09_106: [**If the IOTHUB_MESSAGE contains property `content-type`, it shall be set on the uAMQP message**]**
+**SRS_UAMQP_MESSAGING_09_107: [**If retrieving the `content-type` property from IOTHUB_MESSAGE fails, message_create_from_iothub_message() shall fail and return immediately.**]**
+**SRS_UAMQP_MESSAGING_09_108: [**If setting the `content-type` property on uAMQP message fails, message_create_from_iothub_message() shall fail and return immediately.**]**
+**SRS_UAMQP_MESSAGING_09_109: [**If the IOTHUB_MESSAGE contains property `content-type`, it shall be set on the uAMQP message**]**
+**SRS_UAMQP_MESSAGING_09_110: [**If retrieving the `content-type` property from IOTHUB_MESSAGE fails, message_create_from_iothub_message() shall fail and return immediately.**]**
+**SRS_UAMQP_MESSAGING_09_111: [**If setting the `content-type` property on uAMQP message fails, message_create_from_iothub_message() shall fail and return immediately.**]**
 **SRS_UAMQP_MESSAGING_09_078: [**The updated PROPERTIES_HANDLE instance shall be set on the uAMQP message using message_set_properties()**]**
 **SRS_UAMQP_MESSAGING_09_079: [**If message_set_properties() fails, message_create_from_iothub_message() shall fail and return immediately.**]**
 **SRS_UAMQP_MESSAGING_09_099: [**The uAMQP message properties (obtained with message_get_properties()) shall be destroyed by calling properties_destroy().**]**
