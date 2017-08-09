@@ -201,6 +201,8 @@ else()
     set(THREAD_C_FILE ${SHARED_UTIL_ADAPTER_FOLDER}/threadapi_pthreads.c)
 endif()
 
+#Set CMAKE_INSTALL_LIBDIR if not defined
+include(GNUInstallDirs)
 
 if(NOT ${use_amqp} OR NOT ${use_http})
     set (build_service_client OFF)
@@ -230,8 +232,6 @@ if("${build_javawrapper}" STREQUAL "ON")
 endif()
 
 
-#Set CMAKE_INSTALL_LIBDIR if not defined
-include(GNUInstallDirs)
 
 if(${use_installed_dependencies})
     #Install azure_iot_sdks

@@ -81,8 +81,13 @@ if(NOT IN_OPENWRT)
 endif()
 
 if(${use_installed_dependencies})
+
     if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
         set(CMAKE_INSTALL_LIBDIR "lib")
+    endif()
+    
+    if(NOT DEFINED CMAKE_INSTALL_INCLUDEDIR)
+        set(CMAKE_INSTALL_INCLUDEDIR "include")
     endif()
 
     install(TARGETS iothub_service_client EXPORT azure_iot_sdksTargets
