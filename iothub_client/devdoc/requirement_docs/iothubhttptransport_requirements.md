@@ -209,9 +209,9 @@ MultiDevTransportHttp shall perform the following actions on each device:
 
 **SRS_TRANSPORTMULTITHTTP_17_076: [** A clone of the event HTTP request headers shall be created. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_077: [** The cloned HTTP headers shall have the HTTP header "Content-Type" set to "application/octet-stream".  **]**      
-**SRS_TRANSPORTMULTITHTTP_17_078: [** Every message property "property":"value" shall be added to the HTTP headers as an individual header "iothub-app-property":"value". **]**
-**SRS_TRANSPORTMULTITHTTP_09_001: [** If the IoTHubMessage being sent contains property `content-type` it shall be added to the HTTP headers as "iothub-contenttype":"value". **]**
-**SRS_TRANSPORTMULTITHTTP_09_002: [** If the IoTHubMessage being sent contains property `content-encoding` it shall be added to the HTTP headers as "iothub-contentencoding":"value". **]**
+**SRS_TRANSPORTMULTITHTTP_17_078: [** Every message property "property":"value" shall be added to the HTTP headers as an individual header "iothub-app-property":"value". **]**  
+**SRS_TRANSPORTMULTITHTTP_09_001: [** If the IoTHubMessage being sent contains property `content-type` it shall be added to the HTTP headers as "iothub-contenttype":"value". **]**  
+**SRS_TRANSPORTMULTITHTTP_09_002: [** If the IoTHubMessage being sent contains property `content-encoding` it shall be added to the HTTP headers as "iothub-contentencoding":"value". **]**  
 **SRS_TRANSPORTMULTITHTTP_17_079: [** If any HTTP header operation fails, `_DoWork` shall advance to the next action.  **]**   
 **SRS_TRANSPORTMULTITHTTP_17_080: [** `IoTHubTransportHttp_DoWork` shall call `HTTPAPIEX_SAS_ExecuteRequest` passing the following parameters **]**   
 - requestType: POST    
