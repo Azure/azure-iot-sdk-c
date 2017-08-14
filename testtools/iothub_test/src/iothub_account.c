@@ -464,11 +464,16 @@ static char* convert_base64_to_string(const char* base64_cert)
             LogError("Failure creating cert from binary.\r\n");
             result = NULL;
         }
-        else if (mallocAndStrcpy_s(&result, STRING_c_str(cert) ) != 0)
+        else
         {
-            LogError("Failure allocating certificate.\r\n");
-            result = NULL;
+            if (mallocAndStrcpy_s(&result, STRING_c_str(cert)) != 0)
+            {
+                LogError("Failure allocating certificate.\r\n");
+                result = NULL;
+            }
+            STRING_delete(cert);
         }
+        BUFFER_delete(raw_cert);
     }
     return result;
 }
