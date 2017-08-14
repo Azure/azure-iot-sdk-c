@@ -18,6 +18,7 @@ and removing calls to _DoWork will yield the same results. */
 #else
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/platform.h"
+#include "azure_c_shared_utility/shared_util_options.h"
 #include "iothub_client_ll.h"
 #include "iothub_message.h"
 #include "iothubtransporthttp.h"
@@ -32,6 +33,10 @@ and removing calls to _DoWork will yield the same results. */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessSignature=<device_sas_token>"    */
 static const char* connectionString = "<<device connection string>>";
+
+/*Optional string with http proxy host and integer for http proxy port (Linux only)         */
+static const char* proxyHost = NULL; 
+static int proxyPort = 0;
 
 #define HELLO_WORLD "Hello World from IoTHubClient_LL_UploadToBlob"
 
@@ -59,13 +64,24 @@ void iothub_client_sample_upload_to_blob_run(void)
             }
             else
             {
-                if (IoTHubClient_LL_UploadToBlob(iotHubClientHandle, "subdir/hello_world.txt", (const unsigned char*)HELLO_WORLD, sizeof(HELLO_WORLD) - 1) != IOTHUB_CLIENT_OK)
+                HTTP_PROXY_OPTIONS http_proxy_options = {0};
+                http_proxy_options.host_address = proxyHost;
+                http_proxy_options.port = proxyPort;
+
+                if (proxyHost != NULL && IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_HTTP_PROXY, &http_proxy_options) != IOTHUB_CLIENT_OK)
                 {
-                    (void)printf("hello world failed to upload\n");
+                    (void)printf("failure to set proxy\n");
                 }
                 else
                 {
-                    (void)printf("hello world has been created\n");
+                    if (IoTHubClient_LL_UploadToBlob(iotHubClientHandle, "subdir/hello_world.txt", (const unsigned char*)HELLO_WORLD, sizeof(HELLO_WORLD) - 1) != IOTHUB_CLIENT_OK)
+                    {
+                        (void)printf("hello world failed to upload\n");
+                    }
+                    else
+                    {
+                        (void)printf("hello world has been created\n");
+                    }
                 }
             }
             IoTHubClient_LL_Destroy(iotHubClientHandle);

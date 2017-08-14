@@ -600,6 +600,7 @@ static int publish_mqtt_telemetry_msg(PMQTTTRANSPORT_HANDLE_DATA transport_data,
     STRING_HANDLE msgTopic = addPropertiesTouMqttMessage(mqttMsgEntry->iotHubMessageEntry->messageHandle, STRING_c_str(transport_data->topic_MqttEvent));
     if (msgTopic == NULL)
     {
+        LogError("Failed adding properties to mqtt message");
         result = __FAILURE__;
     }
     else
@@ -607,6 +608,7 @@ static int publish_mqtt_telemetry_msg(PMQTTTRANSPORT_HANDLE_DATA transport_data,
         MQTT_MESSAGE_HANDLE mqttMsg = mqttmessage_create(mqttMsgEntry->packet_id, STRING_c_str(msgTopic), DELIVER_AT_LEAST_ONCE, payload, len);
         if (mqttMsg == NULL)
         {
+            LogError("Failed creating mqtt message");
             result = __FAILURE__;
         }
         else
@@ -620,6 +622,7 @@ static int publish_mqtt_telemetry_msg(PMQTTTRANSPORT_HANDLE_DATA transport_data,
             {
                 if (mqtt_client_publish(transport_data->mqttClient, mqttMsg) != 0)
                 {
+                    LogError("Failed attempting to publish mqtt message");
                     result = __FAILURE__;
                 }
                 else
