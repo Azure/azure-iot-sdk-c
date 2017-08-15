@@ -33,3 +33,9 @@ target_link_libraries(iothub_client_sample_amqp
 
 linkSharedUtil(iothub_client_sample_amqp)
 linkUAMQP(iothub_client_sample_amqp)
+
+if(WIN32)
+    # Place here the install rule for win32
+elseif(LINUX)
+    install (TARGETS iothub_client_sample_amqp RUNTIME DESTINATION bin )
+endif()

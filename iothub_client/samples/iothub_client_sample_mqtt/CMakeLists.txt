@@ -32,3 +32,8 @@ target_link_libraries(iothub_client_sample_mqtt
     iothub_client 
 )
 
+if(WIN32)
+    # Place here the install rule for win32
+elseif(LINUX)
+    install (TARGETS iothub_client_sample_mqtt RUNTIME DESTINATION bin )
+endif()
