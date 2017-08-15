@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 # Script to create the makefile to cross compile for host linux-armhf
 # Assuming that the variable ARMHF_SYSROOT_DIR points to the system root
 # of the host system with requiered libraries and headers.
