@@ -18,7 +18,7 @@
 /*String containing Hostname, Device Id & Device Key in the format:                         */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessSignature=<device_sas_token>"    */
-static const char* connectionString = "[device connection string]";
+static char* connectionString = "[device connection string]";
 
 static int callbackCounter;
 static bool g_continueRunning;
@@ -228,8 +228,9 @@ void iothub_client_sample_amqp_run(void)
     }
 }
 
-int main(void)
+int main(int argc, char* const argv[])
 {
+    if (argc > 1) connectionString = argv[1];
     iothub_client_sample_amqp_run();
     return 0;
 }
