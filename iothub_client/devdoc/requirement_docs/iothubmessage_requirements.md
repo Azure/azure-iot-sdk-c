@@ -163,20 +163,20 @@ extern IOTHUB_MESSAGE_RESULT IoTHubMessage_SetCustomContentType(IOTHUB_MESSAGE_H
 
 **SRS_IOTHUBMESSAGE_09_001: [**If any of the parameters are NULL then IoTHubMessage_SetCustomContentType shall return a IOTHUB_MESSAGE_INVALID_ARG value.**]** 
 
-**SRS_IOTHUBMESSAGE_07_019: [**If the IOTHUB_MESSAGE_HANDLE `contentType` is not NULL it shall be deallocated.**]** 
+**SRS_IOTHUBMESSAGE_09_002: [**If the IOTHUB_MESSAGE_HANDLE `contentType` is not NULL it shall be deallocated.**]** 
 
-**SRS_IOTHUBMESSAGE_07_020: [**If the allocation or the copying of `contentType` fails, then IoTHubMessage_SetCustomContentType shall return IOTHUB_MESSAGE_ERROR.**]** 
+**SRS_IOTHUBMESSAGE_09_003: [**If the allocation or the copying of `contentType` fails, then IoTHubMessage_SetCustomContentType shall return IOTHUB_MESSAGE_ERROR.**]** 
 
-**SRS_IOTHUBMESSAGE_09_001: [**If IoTHubMessage_SetCustomContentType finishes successfully it shall return IOTHUB_MESSAGE_OK.**]**
+**SRS_IOTHUBMESSAGE_09_004: [**If IoTHubMessage_SetCustomContentType finishes successfully it shall return IOTHUB_MESSAGE_OK.**]**
 
 ##IoTHubMessage_GetCustomContentType
 ```c
 extern const char* IoTHubMessage_GetCustomContentType(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle);
 ```
 
-**SRS_IOTHUBMESSAGE_09_001: [**If any of the parameters are NULL then BLAH shall return a IOTHUB_MESSAGE_INVALID_ARG value.**]** 
+**SRS_IOTHUBMESSAGE_09_005: [**If any of the parameters are NULL then IoTHubMessage_GetCustomContentType shall return a IOTHUB_MESSAGE_INVALID_ARG value.**]** 
 
-**SRS_IOTHUBMESSAGE_07_011: [**IoTHubMessage_GetCustomContentType shall return the `contentType` as a const char* **]** 
+**SRS_IOTHUBMESSAGE_09_006: [**IoTHubMessage_GetCustomContentType shall return the `contentType` as a const char* **]** 
 
 
 
@@ -185,13 +185,13 @@ extern const char* IoTHubMessage_GetCustomContentType(IOTHUB_MESSAGE_HANDLE iotH
 extern IOTHUB_MESSAGE_RESULT IoTHubMessage_SetContentEncoding(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const char* contentEncoding);
 ```
 
-**SRS_IOTHUBMESSAGE_09_001: [**If any of the parameters are NULL then IoTHubMessage_SetContentEncoding shall return a IOTHUB_MESSAGE_INVALID_ARG value.**]** 
+**SRS_IOTHUBMESSAGE_09_006: [**If any of the parameters are NULL then IoTHubMessage_SetContentEncoding shall return a IOTHUB_MESSAGE_INVALID_ARG value.**]** 
 
-**SRS_IOTHUBMESSAGE_07_019: [**If the IOTHUB_MESSAGE_HANDLE `contentEncoding` is not NULL it shall be deallocated.**]** 
+**SRS_IOTHUBMESSAGE_09_007: [**If the IOTHUB_MESSAGE_HANDLE `contentEncoding` is not NULL it shall be deallocated.**]** 
 
-**SRS_IOTHUBMESSAGE_07_020: [**If the allocation or the copying of `contentEncoding` fails, then IoTHubMessage_SetContentEncoding shall return IOTHUB_MESSAGE_ERROR.**]**
+**SRS_IOTHUBMESSAGE_09_008: [**If the allocation or the copying of `contentEncoding` fails, then IoTHubMessage_SetContentEncoding shall return IOTHUB_MESSAGE_ERROR.**]**
 
-**SRS_IOTHUBMESSAGE_09_001: [**If IoTHubMessage_SetContentEncoding finishes successfully it shall return IOTHUB_MESSAGE_OK.**]**
+**SRS_IOTHUBMESSAGE_09_009: [**If IoTHubMessage_SetContentEncoding finishes successfully it shall return IOTHUB_MESSAGE_OK.**]**
 
 
 ##IoTHubMessage_GetContentEncoding
@@ -199,6 +199,6 @@ extern IOTHUB_MESSAGE_RESULT IoTHubMessage_SetContentEncoding(IOTHUB_MESSAGE_HAN
 extern const char* IoTHubMessage_GetContentEncoding(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle);
 ```
 
-**SRS_IOTHUBMESSAGE_09_001: [**If any of the parameters are NULL then IoTHubMessage_GetContentEncoding shall return a IOTHUB_MESSAGE_INVALID_ARG value.**]** 
+**SRS_IOTHUBMESSAGE_09_010: [**If any of the parameters are NULL then IoTHubMessage_GetContentEncoding shall return a IOTHUB_MESSAGE_INVALID_ARG value.**]** 
 
-**SRS_IOTHUBMESSAGE_07_011: [**IoTHubMessage_GetContentEncoding shall return the `contentEncoding` as a const char* **]** 
+**SRS_IOTHUBMESSAGE_09_011: [**IoTHubMessage_GetContentEncoding shall return the `contentEncoding` as a const char* **]** 

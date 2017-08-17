@@ -69,6 +69,9 @@ static const char* TEST_VALID_MAP_KEY = "Valid_key";
 static const char* TEST_VALID_MAP_VALUE = "Valid_value";
 static const char* TEST_INVALID_MAP_KEY = "Inval\nd_key";
 static const char* TEST_INVALID_MAP_VALUE = "Inval\nd_value";
+static const char* TEST_CONTENT_TYPE = "text/plain";
+static const char* TEST_CONTENT_ENCODING = "utf8";
+
 
 TEST_DEFINE_ENUM_TYPE(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES);
@@ -458,6 +461,8 @@ TEST_FUNCTION(IoTHubMessage_Destroy_destroys_a_BYTEARRAY_IoTHubMEssage)
     STRICT_EXPECTED_CALL(Map_Destroy(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(h));
 
     //act
@@ -478,6 +483,8 @@ TEST_FUNCTION(IoTHubMessage_Destroy_destroys_a_STRING_IoTHubMessage)
 
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Map_Destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(h));
@@ -1051,6 +1058,346 @@ TEST_FUNCTION(IoTHubMessage_SetCorrelationId_CorrelationId_Not_NULL_SUCCEED)
 
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubMessage_Destroy(h);
+}
+
+// Tests_SRS_IOTHUBMESSAGE_09_004: [If IoTHubMessage_SetCustomContentType finishes successfully it shall return IOTHUB_MESSAGE_OK.]
+TEST_FUNCTION(IoTHubMessage_SetCustomContentType_SUCCEED)
+{
+    //arrange
+    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_CONTENT_TYPE));
+
+    //act
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetCustomContentType(h, TEST_CONTENT_TYPE);
+
+    //assert
+    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubMessage_Destroy(h);
+}
+
+// Tests_SRS_IOTHUBMESSAGE_09_002: [If the IOTHUB_MESSAGE_HANDLE `contentType` is not NULL it shall be deallocated.] 
+TEST_FUNCTION(IoTHubMessage_SetCustomContentType_Not_NULL_SUCCEED)
+{
+    //arrange
+    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetCustomContentType(h, TEST_CONTENT_TYPE);
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_CONTENT_TYPE));
+
+    //act
+    result = IoTHubMessage_SetCustomContentType(h, TEST_CONTENT_TYPE);
+
+    //assert
+    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubMessage_Destroy(h);
+}
+
+// Tests_SRS_IOTHUBMESSAGE_09_001: [If any of the parameters are NULL then IoTHubMessage_SetCustomContentType shall return a IOTHUB_MESSAGE_INVALID_ARG value.] 
+TEST_FUNCTION(IoTHubMessage_SetCustomContentType_NULL_handle_Fails)
+{
+    //arrange
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetCustomContentType(NULL, TEST_CONTENT_TYPE);
+
+    //assert
+    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+}
+
+// Tests_SRS_IOTHUBMESSAGE_09_001: [If any of the parameters are NULL then IoTHubMessage_SetCustomContentType shall return a IOTHUB_MESSAGE_INVALID_ARG value.] 
+TEST_FUNCTION(IoTHubMessage_SetCustomContentType_NULL_contentType_Fails)
+{
+    //arrange
+    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
+
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetCustomContentType(h, NULL);
+
+    //assert
+    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubMessage_Destroy(h);
+}
+
+// Tests_SRS_IOTHUBMESSAGE_09_003: [If the allocation or the copying of `contentType` fails, then IoTHubMessage_SetCustomContentType shall return IOTHUB_MESSAGE_ERROR.] 
+TEST_FUNCTION(IoTHubMessage_SetCustomContentType_Fails)
+{
+    // arrange
+    ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
+
+    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_CONTENT_TYPE));
+    umock_c_negative_tests_snapshot();
+
+    //act
+    size_t count = umock_c_negative_tests_call_count();
+    for (size_t index = 0; index < count; index++)
+    {
+        umock_c_negative_tests_reset();
+        umock_c_negative_tests_fail_call(index);
+
+        char tmp_msg[64];
+        sprintf(tmp_msg, "Failed in test %zu/%zu", index, count);
+
+        //act
+        IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetCustomContentType(h, TEST_CONTENT_TYPE);
+
+        //assert
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_ERROR, result, tmp_msg);
+    }
+
+    //cleanup
+    umock_c_negative_tests_deinit();
+    IoTHubMessage_Destroy(h);
+}
+
+// Tests_SRS_IOTHUBMESSAGE_09_009: [If IoTHubMessage_SetContentEncoding finishes successfully it shall return IOTHUB_MESSAGE_OK.]
+TEST_FUNCTION(IoTHubMessage_SetContentEncoding_SUCCEED)
+{
+    //arrange
+    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_CONTENT_ENCODING));
+
+    //act
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentEncoding(h, TEST_CONTENT_ENCODING);
+
+    //assert
+    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubMessage_Destroy(h);
+}
+
+// Tests_SRS_IOTHUBMESSAGE_09_007: [If the IOTHUB_MESSAGE_HANDLE `contentEncoding` is not NULL it shall be deallocated.] 
+TEST_FUNCTION(IoTHubMessage_SetContentEncoding_Not_NULL_SUCCEED)
+{
+    //arrange
+    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentEncoding(h, TEST_CONTENT_ENCODING);
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_CONTENT_ENCODING));
+
+    //act
+    result = IoTHubMessage_SetContentEncoding(h, TEST_CONTENT_ENCODING);
+
+    //assert
+    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubMessage_Destroy(h);
+}
+
+// Tests_SRS_IOTHUBMESSAGE_09_006: [If any of the parameters are NULL then IoTHubMessage_SetContentEncoding shall return a IOTHUB_MESSAGE_INVALID_ARG value.] 
+TEST_FUNCTION(IoTHubMessage_SetContentEncoding_NULL_handle_Fails)
+{
+    //arrange
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentEncoding(NULL, TEST_CONTENT_ENCODING);
+
+    //assert
+    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+}
+
+// Tests_SRS_IOTHUBMESSAGE_09_006: [If any of the parameters are NULL then IoTHubMessage_SetContentEncoding shall return a IOTHUB_MESSAGE_INVALID_ARG value.] 
+TEST_FUNCTION(IoTHubMessage_SetContentEncoding_NULL_contentType_Fails)
+{
+    //arrange
+    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
+
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentEncoding(h, NULL);
+
+    //assert
+    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubMessage_Destroy(h);
+}
+
+// Tests_SRS_IOTHUBMESSAGE_09_008: [If the allocation or the copying of `contentEncoding` fails, then IoTHubMessage_SetContentEncoding shall return IOTHUB_MESSAGE_ERROR.]
+TEST_FUNCTION(IoTHubMessage_SetContentEncoding_Fails)
+{
+    // arrange
+    ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
+
+    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_CONTENT_ENCODING));
+    umock_c_negative_tests_snapshot();
+
+    //act
+    size_t count = umock_c_negative_tests_call_count();
+    for (size_t index = 0; index < count; index++)
+    {
+        umock_c_negative_tests_reset();
+        umock_c_negative_tests_fail_call(index);
+
+        char tmp_msg[64];
+        sprintf(tmp_msg, "Failed in test %zu/%zu", index, count);
+
+        //act
+        IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentEncoding(h, TEST_CONTENT_ENCODING);
+
+        //assert
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_ERROR, result, tmp_msg);
+    }
+
+    //cleanup
+    umock_c_negative_tests_deinit();
+    IoTHubMessage_Destroy(h);
+}
+
+// Tests_SRS_IOTHUBMESSAGE_09_006: [IoTHubMessage_GetCustomContentType shall return the `contentType` as a const char* ] 
+TEST_FUNCTION(IoTHubMessage_GetCustomContentType_SUCCEED)
+{
+    //arrange
+    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromString(TEST_STRING_VALUE);
+    (void)IoTHubMessage_SetCustomContentType(h, TEST_CONTENT_TYPE);
+    
+    umock_c_reset_all_calls();
+
+    //act
+    const char* result = IoTHubMessage_GetCustomContentType(h);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, TEST_CONTENT_TYPE, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubMessage_Destroy(h);
+}
+
+// Tests_SRS_IOTHUBMESSAGE_09_006: [IoTHubMessage_GetCustomContentType shall return the `contentType` as a const char* ] 
+TEST_FUNCTION(IoTHubMessage_GetCustomContentType_NULL_contentType_SUCCEED)
+{
+    //arrange
+    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromString(TEST_STRING_VALUE);
+
+    umock_c_reset_all_calls();
+
+    //act
+    const char* result = IoTHubMessage_GetCustomContentType(h);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, NULL, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubMessage_Destroy(h);
+}
+
+// Tests_SRS_IOTHUBMESSAGE_09_005: [If any of the parameters are NULL then BLAH shall return a IOTHUB_MESSAGE_INVALID_ARG value.] 
+TEST_FUNCTION(IoTHubMessage_GetCustomContentType_Fails)
+{
+    //arrange
+    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromString(TEST_STRING_VALUE);
+    (void)IoTHubMessage_SetCustomContentType(h, TEST_CONTENT_TYPE);
+
+    umock_c_reset_all_calls();
+
+    //act
+    const char* result = IoTHubMessage_GetCustomContentType(NULL);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, NULL, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubMessage_Destroy(h);
+}
+
+// Tests_SRS_IOTHUBMESSAGE_09_011: [IoTHubMessage_GetContentEncoding shall return the `contentEncoding` as a const char* ] 
+TEST_FUNCTION(IoTHubMessage_GetContentEncoding_SUCCEED)
+{
+    //arrange
+    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromString(TEST_STRING_VALUE);
+    (void)IoTHubMessage_SetContentEncoding(h, TEST_CONTENT_ENCODING);
+
+    umock_c_reset_all_calls();
+
+    //act
+    const char* result = IoTHubMessage_GetContentEncoding(h);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, TEST_CONTENT_ENCODING, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubMessage_Destroy(h);
+}
+
+// Tests_SRS_IOTHUBMESSAGE_09_011: [IoTHubMessage_GetContentEncoding shall return the `contentEncoding` as a const char* ] 
+TEST_FUNCTION(IoTHubMessage_GetContentEncoding_NULL_contentType_SUCCEED)
+{
+    //arrange
+    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromString(TEST_STRING_VALUE);
+
+    umock_c_reset_all_calls();
+
+    //act
+    const char* result = IoTHubMessage_GetContentEncoding(h);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, NULL, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubMessage_Destroy(h);
+}
+
+// Tests_SRS_IOTHUBMESSAGE_09_010: [If any of the parameters are NULL then IoTHubMessage_GetContentEncoding shall return a IOTHUB_MESSAGE_INVALID_ARG value.] 
+TEST_FUNCTION(IoTHubMessage_GetContentEncoding_Fails)
+{
+    //arrange
+    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromString(TEST_STRING_VALUE);
+    (void)IoTHubMessage_SetContentEncoding(h, TEST_CONTENT_ENCODING);
+
+    umock_c_reset_all_calls();
+
+    //act
+    const char* result = IoTHubMessage_GetContentEncoding(NULL);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, NULL, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup

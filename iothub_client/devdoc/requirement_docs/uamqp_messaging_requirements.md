@@ -113,11 +113,9 @@ Copying the AMQP-specific properties:
 **SRS_UAMQP_MESSAGING_09_076: [**If properties_set_correlation_id() fails, message_create_from_iothub_message() shall fail and return immediately.**]**
 **SRS_UAMQP_MESSAGING_09_077: [**The uAMQP correlation-id AMQP_VALUE instance shall be destroyed using amqpvalue_destroy().**]**
 **SRS_UAMQP_MESSAGING_09_106: [**If the IOTHUB_MESSAGE contains property `content-type`, it shall be set on the uAMQP message**]**
-**SRS_UAMQP_MESSAGING_09_107: [**If retrieving the `content-type` property from IOTHUB_MESSAGE fails, message_create_from_iothub_message() shall fail and return immediately.**]**
 **SRS_UAMQP_MESSAGING_09_108: [**If setting the `content-type` property on uAMQP message fails, message_create_from_iothub_message() shall fail and return immediately.**]**
-**SRS_UAMQP_MESSAGING_09_109: [**If the IOTHUB_MESSAGE contains property `content-type`, it shall be set on the uAMQP message**]**
-**SRS_UAMQP_MESSAGING_09_110: [**If retrieving the `content-type` property from IOTHUB_MESSAGE fails, message_create_from_iothub_message() shall fail and return immediately.**]**
-**SRS_UAMQP_MESSAGING_09_111: [**If setting the `content-type` property on uAMQP message fails, message_create_from_iothub_message() shall fail and return immediately.**]**
+**SRS_UAMQP_MESSAGING_09_109: [**If the IOTHUB_MESSAGE contains property `content-encoding`, it shall be set on the uAMQP message**]**
+**SRS_UAMQP_MESSAGING_09_111: [**If setting the `content-encoding` property on uAMQP message fails, message_create_from_iothub_message() shall fail and return immediately.**]**
 **SRS_UAMQP_MESSAGING_09_078: [**The updated PROPERTIES_HANDLE instance shall be set on the uAMQP message using message_set_properties()**]**
 **SRS_UAMQP_MESSAGING_09_079: [**If message_set_properties() fails, message_create_from_iothub_message() shall fail and return immediately.**]**
 **SRS_UAMQP_MESSAGING_09_099: [**The uAMQP message properties (obtained with message_get_properties()) shall be destroyed by calling properties_destroy().**]**
