@@ -888,7 +888,7 @@ TEST_FUNCTION(IoTHubMessage_CreateFromUamqpMessage_error_returns_fails)
         umock_c_negative_tests_fail_call(i);
 
         // act
-        if (i == 4 || i == 5 || i == 8 || i == 9 || i == 16 || i == 25 || i == 26 || i == 27)
+        if (i == 4 || i == 5 || i == 8 || i == 9 || i == 12 || i == 14 || i == 16 || i == 25 || i == 26 || i == 27)
         {
             continue; // these lines have functions that do not return anything (void).
         }

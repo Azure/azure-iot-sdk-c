@@ -529,6 +529,15 @@ static IOTHUB_CLIENT_RESULT my_IoTHubClient_LL_GetOption(IOTHUB_CLIENT_LL_HANDLE
     return IOTHUB_CLIENT_OK;
 }
 
+static MESSAGE_CALLBACK_INFO* my_IoTHubClient_LL_MessageCallback_messageData;
+static bool my_IoTHubClient_LL_MessageCallback_return_value;
+static bool my_IoTHubClient_LL_MessageCallback(IOTHUB_CLIENT_LL_HANDLE handle, MESSAGE_CALLBACK_INFO* messageData)
+{
+    (void)handle;
+    my_IoTHubClient_LL_MessageCallback_messageData = messageData;
+    return my_IoTHubClient_LL_MessageCallback_return_value;
+}
+
 static HTTP_HEADERS_HANDLE my_HTTPHeaders_Alloc(void)
 {
     return (HTTP_HEADERS_HANDLE)my_gballoc_malloc(1);
@@ -1215,6 +1224,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_GetOption, my_IoTHubClient_LL_GetOption);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_LL_GetOption, IOTHUB_CLIENT_ERROR);
 
+    REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_MessageCallback, my_IoTHubClient_LL_MessageCallback);
+
     REGISTER_GLOBAL_MOCK_HOOK(HTTPAPIEX_SAS_Create, my_HTTPAPIEX_SAS_Create);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(HTTPAPIEX_SAS_Create, NULL);
     REGISTER_GLOBAL_MOCK_HOOK(HTTPAPIEX_ExecuteRequest, my_HTTPAPIEX_ExecuteRequest);
@@ -1299,6 +1310,9 @@ TEST_FUNCTION_INITIALIZE(method_init)
     real_DList_InitializeListHead(&waitingToSend);
     real_DList_InitializeListHead(&waitingToSend2);
     last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest = NULL;
+
+    my_IoTHubClient_LL_MessageCallback_messageData = NULL;
+    my_IoTHubClient_LL_MessageCallback_return_value = true;
 }
 
 TEST_FUNCTION_CLEANUP(method_cleanup)
@@ -13860,7 +13874,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetCustomContentType_SetContentEncoding
 
     size_t nHeaders = 6;
     unsigned int statusCode200 = 200;
-    //unsigned int statusCode204 = 204;
+    
+    char* real_ETAG = (char*)malloc(sizeof(TEST_ETAG_VALUE) + 1);
+    (void)sprintf(real_ETAG, "%s", TEST_ETAG_VALUE);
+
     TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
     IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
@@ -13892,7 +13909,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetCustomContentType_SetContentEncoding
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
-        .SetReturn(TEST_ETAG_VALUE);
+        .SetReturn(real_ETAG);
 
     STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));
@@ -13938,9 +13955,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetCustomContentType_SetContentEncoding
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG)).SetReturn(TEST_IOTHUB_MESSAGE_HANDLE_8);
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_NUM_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .SetReturn(true);
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+        .CopyOutArgumentBuffer_destination(&real_ETAG, sizeof(&real_ETAG));
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
@@ -13950,8 +13967,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetCustomContentType_SetContentEncoding
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_IS_NOT_NULL(my_IoTHubClient_LL_MessageCallback_messageData);
 
     //cleanup
+    IoTHubTransportHttp_SendMessageDisposition(my_IoTHubClient_LL_MessageCallback_messageData, IOTHUBMESSAGE_ACCEPTED);
     IoTHubTransportHttp_Destroy(handle);
 }
 
