@@ -247,6 +247,11 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIEN
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_053: [** `IoTHubTransport_MQTT_Common_DoWork` shall check for the MessageId property and if found add the value as a system property in the format of `$.mid=<id>` **]**
 
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_010: [** `IoTHubTransport_MQTT_Common_DoWork` shall check for the ContentType property and if found add the `value` as a system property in the format of `$.ct=<value>` **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_011: [** `IoTHubTransport_MQTT_Common_DoWork` shall check for the ContentEncoding property and if found add the `value` as a system property in the format of `$.ce=<value>` **]**
+
+
 ### IoTHubTransport_MQTT_Common_GetSendStatus
 
 ```c
@@ -353,7 +358,12 @@ static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE msgHandle, void* call
 
 **SRS_IOTHUB_MQTT_TRANSPORT_07_053: [** If type is IOTHUB_TYPE_DEVICE_METHODS, then on success `mqtt_notification_callback` shall call IoTHubClient_LL_DeviceMethodComplete. **]**
 
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_012: [** If type is IOTHUB_TYPE_TELEMETRY and the system property `$.ct` is defined, its value shall be set on the IOTHUB_MESSAGE_HANDLE's ContentType property **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_013: [** If type is IOTHUB_TYPE_TELEMETRY and the system property `$.ce` is defined, its value shall be set on the IOTHUB_MESSAGE_HANDLE's ContentEncoding property **]**
+
 **SRS_IOTHUB_MQTT_TRANSPORT_07_056: [** If type is IOTHUB_TYPE_TELEMETRY, then on success `mqtt_notification_callback` shall call IoTHubClient_LL_MessageCallback. **]**
+
 
 ```c
 IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SendMessageDisposition(MESSAGE_CALLBACK_INFO* messageData, IOTHUBMESSAGE_DISPOSITION_RESULT disposition);

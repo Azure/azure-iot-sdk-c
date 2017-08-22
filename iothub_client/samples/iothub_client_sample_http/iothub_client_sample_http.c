@@ -52,6 +52,8 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
     MAP_HANDLE mapProperties;
     const char* messageId;
     const char* correlationId;
+    const char* contentType; 
+    const char* contentEncoding;
 
     // Message properties
     if ((messageId = IoTHubMessage_GetMessageId(message)) == NULL)
@@ -64,6 +66,18 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
         correlationId = "<null>";
     }
 
+    // TODO: re-enable after IoTHubClient nuget package has been released (ewertons)
+    //if ((contentType = IoTHubMessage_GetContentTypeSystemProperty(message)) == NULL)
+    //{
+        contentType = "<null>";
+    //}
+
+    // TODO: re-enable after IoTHubClient nuget package has been released (ewertons)
+    //if ((contentEncoding = IoTHubMessage_GetContentEncodingSystemProperty(message)) == NULL)
+    //{
+        contentEncoding = "<null>";
+    //}
+
     // Message content
     if (IoTHubMessage_GetByteArray(message, (const unsigned char**)&buffer, &size) != IOTHUB_MESSAGE_OK)
     {
@@ -71,7 +85,8 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
     }
     else
     {
-        (void)printf("Received Message [%d]\r\n Message ID: %s\r\n Correlation ID: %s\r\n Data: <<<%.*s>>> & Size=%d\r\n", *counter, messageId, correlationId, (int)size, buffer, (int)size);
+        (void)printf("Received Message [%d]\r\n Message ID: %s\r\n Correlation ID: %s\r\n Content-Type: %s\r\n Content-Encoding: %s\r\n Data: <<<%.*s>>> & Size=%d\r\n", 
+            *counter, messageId, correlationId, contentType, contentEncoding, (int)size, buffer, (int)size);
 		if (size == (strlen("quit") * sizeof(char)) && memcmp(buffer, "quit", size) == 0)
         {
             g_continueRunning = false;
@@ -207,6 +222,10 @@ void iothub_client_sample_http_run(void)
                             {
                                 (void)printf("ERROR: Map_AddOrUpdate Failed!\r\n");
                             }
+
+                            // TODO: re-enable after IoTHubClient nuget package has been released (ewertons)
+                            //(void)IoTHubMessage_SetContentTypeSystemProperty(messages[iterator].messageHandle, "application/json");
+                            //(void)IoTHubMessage_SetContentEncodingSystemProperty(messages[iterator].messageHandle, "utf-8");
 
                             if (IoTHubClient_LL_SendEventAsync(iotHubClientHandle, messages[iterator].messageHandle, SendConfirmationCallback, &messages[iterator]) != IOTHUB_CLIENT_OK)
                             {

@@ -74,6 +74,8 @@ static const char* REQUEST_ID_PROPERTY = "?$rid=";
 
 static const char* MESSAGE_ID_PROPERTY = "mid";
 static const char* CORRELATION_ID_PROPERTY = "cid";
+static const char* CONTENT_TYPE_PROPERTY = "ct";
+static const char* CONTENT_ENCODING_PROPERTY = "ce";
 
 #define UNSUBSCRIBE_FROM_TOPIC                  0x0000
 #define SUBSCRIBE_GET_REPORTED_STATE_TOPIC      0x0001
@@ -97,6 +99,8 @@ static SYSTEM_PROPERTY_INFO sysPropList[] = {
     { "%24.uid", 7 },
     { "%24.to", 6 },
     { "%24.cid", 7 },
+    { "%24.ct", 6 },
+    { "%24.ce", 6 },
     { "devices/", 8 },
     { "iothub-operation", 16 },
     { "iothub-ack", 10 }
@@ -569,7 +573,7 @@ static STRING_HANDLE addPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_me
         {
             if (STRING_sprintf(result, "%s%%24.cid=%s", index == 0 ? "" : PROPERTY_SEPARATOR, correlation_id) != 0)
             {
-                LogError("Failed setting correlation_id.");
+                LogError("Failed setting correlation id.");
                 STRING_delete(result);
                 result = NULL;
             }
@@ -585,12 +589,46 @@ static STRING_HANDLE addPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_me
         {
             if (STRING_sprintf(result, "%s%%24.mid=%s", index == 0 ? "" : PROPERTY_SEPARATOR, msg_id) != 0)
             {
-                LogError("Failed setting correlation_id.");
+                LogError("Failed setting message id.");
                 STRING_delete(result);
                 result = NULL;
             }
+            index++;
         }
     }
+
+    // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_010: [ `IoTHubTransport_MQTT_Common_DoWork` shall check for the ContentType property and if found add the `value` as a system property in the format of `$.ct=<value>` ]
+    if (result != NULL)
+    {
+        const char* content_type = IoTHubMessage_GetContentTypeSystemProperty(iothub_message_handle);
+        if (content_type != NULL)
+        {
+            if (STRING_sprintf(result, "%s%%24.%s=%s", index == 0 ? "" : PROPERTY_SEPARATOR, CONTENT_TYPE_PROPERTY, content_type) != 0)
+            {
+                LogError("Failed setting content type.");
+                STRING_delete(result);
+                result = NULL;
+            }
+            index++;
+        }
+    }
+
+    // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_011: [ `IoTHubTransport_MQTT_Common_DoWork` shall check for the ContentEncoding property and if found add the `value` as a system property in the format of `$.ce=<value>` ]
+    if (result != NULL)
+    {
+        const char* content_encoding = IoTHubMessage_GetContentEncodingSystemProperty(iothub_message_handle);
+        if (content_encoding != NULL)
+        {
+            if (STRING_sprintf(result, "%s%%24.%s=%s", index == 0 ? "" : PROPERTY_SEPARATOR, CONTENT_ENCODING_PROPERTY, content_encoding) != 0)
+            {
+                LogError("Failed setting content encoding.");
+                STRING_delete(result);
+                result = NULL;
+            }
+            index++;
+        }
+    }
+
     return result;
 }
 
@@ -850,6 +888,7 @@ static int extractMqttProperties(IOTHUB_MESSAGE_HANDLE IoTHubMessage, const char
 
                                         if (propName == NULL || propValue == NULL)
                                         {
+                                            LogError("Failed allocating property name (%p) and/or value (%p)", propName, propValue);
                                             result = __FAILURE__;
                                         }
                                         else
@@ -860,22 +899,43 @@ static int extractMqttProperties(IOTHUB_MESSAGE_HANDLE IoTHubMessage, const char
                                             strncpy(propValue, iterator + 1, valLen);
                                             propValue[valLen] = '\0';
 
-                                            if (nameLen > 3)
+                                            if (nameLen > 2)
                                             {
-                                                if (strcmp((const char*)&propName[nameLen - 3], MESSAGE_ID_PROPERTY) == 0)
+                                                if (nameLen > 3)
                                                 {
-                                                    if (IoTHubMessage_SetMessageId(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
+                                                    if (strcmp((const char*)&propName[nameLen - 3], MESSAGE_ID_PROPERTY) == 0)
                                                     {
-                                                        LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'messageId' property.");
-                                                        result = __FAILURE__;
+                                                        if (IoTHubMessage_SetMessageId(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
+                                                        {
+                                                            LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'messageId' property.");
+                                                            result = __FAILURE__;
+                                                        }
+                                                    }
+                                                    else if (strcmp((const char*)&propName[nameLen - 3], CORRELATION_ID_PROPERTY) == 0)
+                                                    {
+                                                        if (IoTHubMessage_SetCorrelationId(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
+                                                        {
+                                                            LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'correlationId' property.");
+                                                            result = __FAILURE__;
+                                                        }
                                                     }
                                                 }
 
-                                                if (strcmp((const char*)&propName[nameLen - 3], CORRELATION_ID_PROPERTY) == 0)
+                                                // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_012: [ If type is IOTHUB_TYPE_TELEMETRY and the system property `$.ct` is defined, its value shall be set on the IOTHUB_MESSAGE_HANDLE's ContentType property ]
+                                                if (strcmp((const char*)&propName[nameLen - 2], CONTENT_TYPE_PROPERTY) == 0)
                                                 {
-                                                    if (IoTHubMessage_SetCorrelationId(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
+                                                    if (IoTHubMessage_SetContentTypeSystemProperty(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
                                                     {
-                                                        LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'correlationId' property.");
+                                                        LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'customContentType' property.");
+                                                        result = __FAILURE__;
+                                                    }
+                                                }
+                                                // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_013: [ If type is IOTHUB_TYPE_TELEMETRY and the system property `$.ce` is defined, its value shall be set on the IOTHUB_MESSAGE_HANDLE's ContentEncoding property ]
+                                                else if (strcmp((const char*)&propName[nameLen - 2], CONTENT_ENCODING_PROPERTY) == 0)
+                                                {
+                                                    if (IoTHubMessage_SetContentEncodingSystemProperty(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
+                                                    {
+                                                        LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'contentEncoding' property.");
                                                         result = __FAILURE__;
                                                     }
                                                 }

@@ -26,6 +26,8 @@ typedef struct IOTHUB_MESSAGE_HANDLE_DATA_TAG
     MAP_HANDLE properties;
     char* messageId;
     char* correlationId;
+    char* userDefinedContentType;
+    char* contentEncoding;
 }IOTHUB_MESSAGE_HANDLE_DATA;
 
 static bool ContainsOnlyUsAscii(const char* asciiValue)
@@ -127,6 +129,8 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_CreateFromByteArray(const unsigned char* byt
                     result->contentType = IOTHUBMESSAGE_BYTEARRAY;
                     result->messageId = NULL;
                     result->correlationId = NULL;
+                    result->userDefinedContentType = NULL;
+                    result->contentEncoding = NULL;
                     /*all is fine, return result*/
                 }
             }
@@ -178,6 +182,8 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_CreateFromString(const char* source)
                 result->contentType = IOTHUBMESSAGE_STRING;
                 result->messageId = NULL;
                 result->correlationId = NULL;
+                result->userDefinedContentType = NULL;
+                result->contentEncoding = NULL;
             }
         }
     }
@@ -209,6 +215,9 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHan
         {
             result->messageId = NULL;
             result->correlationId = NULL;
+            result->userDefinedContentType = NULL;
+            result->contentEncoding = NULL;
+
             if (source->messageId != NULL && mallocAndStrcpy_s(&result->messageId, source->messageId) != 0)
             {
                 LogError("unable to Copy messageId");
@@ -221,7 +230,38 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHan
                 if (result->messageId != NULL)
                 {
                     free(result->messageId);
-                    result->messageId = NULL;
+                }
+                free(result);
+                result = NULL;
+            }
+            else if (source->userDefinedContentType != NULL && mallocAndStrcpy_s(&result->userDefinedContentType, source->userDefinedContentType) != 0)
+            {
+                LogError("unable to copy contentType");
+                if (result->messageId != NULL)
+                {
+                    free(result->messageId);
+                }
+                if (result->correlationId != NULL)
+                {
+                    free(result->correlationId);
+                }
+                free(result);
+                result = NULL;
+            }
+            else if (source->contentEncoding != NULL && mallocAndStrcpy_s(&result->contentEncoding, source->contentEncoding) != 0)
+            {
+                LogError("unable to copy contentEncoding");
+                if (result->messageId != NULL)
+                {
+                    free(result->messageId);
+                }
+                if (result->correlationId != NULL)
+                {
+                    free(result->correlationId);
+                }
+                if (result->userDefinedContentType != NULL)
+                {
+                    free(result->userDefinedContentType);
                 }
                 free(result);
                 result = NULL;
@@ -450,6 +490,7 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetCorrelationId(IOTHUB_MESSAGE_HANDLE iotHu
         if (handleData->correlationId != NULL)
         {
             free(handleData->correlationId);
+            handleData->correlationId = NULL;
         }
 
         if (mallocAndStrcpy_s(&handleData->correlationId, correlationId) != 0)
@@ -482,6 +523,7 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetMessageId(IOTHUB_MESSAGE_HANDLE iotHubMes
         if (handleData->messageId != NULL)
         {
             free(handleData->messageId);
+            handleData->messageId = NULL;
         }
 
         /* Codes_SRS_IOTHUBMESSAGE_07_014: [If the allocation or the copying of the messageId fails, then IoTHubMessage_SetMessageId shall return IOTHUB_MESSAGE_ERROR.] */
@@ -515,6 +557,122 @@ const char* IoTHubMessage_GetMessageId(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle
     return result;
 }
 
+IOTHUB_MESSAGE_RESULT IoTHubMessage_SetContentTypeSystemProperty(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const char* contentType)
+{
+    IOTHUB_MESSAGE_RESULT result;
+
+    // Codes_SRS_IOTHUBMESSAGE_09_001: [If any of the parameters are NULL then IoTHubMessage_SetContentTypeSystemProperty shall return a IOTHUB_MESSAGE_INVALID_ARG value.] 
+    if (iotHubMessageHandle == NULL || contentType == NULL)
+    {
+        LogError("Invalid argument (iotHubMessageHandle=%p, contentType=%p)", iotHubMessageHandle, contentType);
+        result = IOTHUB_MESSAGE_INVALID_ARG;
+    }
+    else
+    {
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = (IOTHUB_MESSAGE_HANDLE_DATA*)iotHubMessageHandle;
+
+        // Codes_SRS_IOTHUBMESSAGE_09_002: [If the IOTHUB_MESSAGE_HANDLE `contentType` is not NULL it shall be deallocated.] 
+        if (handleData->userDefinedContentType != NULL)
+        {
+            free(handleData->userDefinedContentType);
+            handleData->userDefinedContentType = NULL;
+        }
+
+        if (mallocAndStrcpy_s(&handleData->userDefinedContentType, contentType) != 0)
+        {
+            LogError("Failed saving a copy of contentType");
+            // Codes_SRS_IOTHUBMESSAGE_09_003: [If the allocation or the copying of `contentType` fails, then IoTHubMessage_SetContentTypeSystemProperty shall return IOTHUB_MESSAGE_ERROR.] 
+            result = IOTHUB_MESSAGE_ERROR;
+        }
+        else
+        {
+            // Codes_SRS_IOTHUBMESSAGE_09_004: [If IoTHubMessage_SetContentTypeSystemProperty finishes successfully it shall return IOTHUB_MESSAGE_OK.]
+            result = IOTHUB_MESSAGE_OK;
+        }
+    }
+
+    return result;
+}
+
+const char* IoTHubMessage_GetContentTypeSystemProperty(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
+{
+    const char* result;
+
+    // Codes_SRS_IOTHUBMESSAGE_09_005: [If any of the parameters are NULL then IoTHubMessage_GetContentTypeSystemProperty shall return a IOTHUB_MESSAGE_INVALID_ARG value.] 
+    if (iotHubMessageHandle == NULL)
+    {
+        LogError("Invalid argument (iotHubMessageHandle is NULL)");
+        result = NULL;
+    }
+    else
+    {
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = iotHubMessageHandle;
+
+        // Codes_SRS_IOTHUBMESSAGE_09_006: [IoTHubMessage_GetContentTypeSystemProperty shall return the `contentType` as a const char* ] 
+        result = (const char*)handleData->userDefinedContentType;
+    }
+
+    return result;
+}
+
+IOTHUB_MESSAGE_RESULT IoTHubMessage_SetContentEncodingSystemProperty(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const char* contentEncoding)
+{
+    IOTHUB_MESSAGE_RESULT result;
+
+    // Codes_SRS_IOTHUBMESSAGE_09_006: [If any of the parameters are NULL then IoTHubMessage_SetContentEncodingSystemProperty shall return a IOTHUB_MESSAGE_INVALID_ARG value.] 
+    if (iotHubMessageHandle == NULL || contentEncoding == NULL)
+    {
+        LogError("Invalid argument (iotHubMessageHandle=%p, contentEncoding=%p)", iotHubMessageHandle, contentEncoding);
+        result = IOTHUB_MESSAGE_INVALID_ARG;
+    }
+    else
+    {
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = (IOTHUB_MESSAGE_HANDLE_DATA*)iotHubMessageHandle;
+
+        // Codes_SRS_IOTHUBMESSAGE_09_007: [If the IOTHUB_MESSAGE_HANDLE `contentEncoding` is not NULL it shall be deallocated.] 
+        if (handleData->contentEncoding != NULL)
+        {
+            free(handleData->contentEncoding);
+            handleData->contentEncoding = NULL;
+        }
+
+        if (mallocAndStrcpy_s(&handleData->contentEncoding, contentEncoding) != 0)
+        {
+            LogError("Failed saving a copy of contentEncoding");
+            // Codes_SRS_IOTHUBMESSAGE_09_008: [If the allocation or the copying of `contentEncoding` fails, then IoTHubMessage_SetContentEncodingSystemProperty shall return IOTHUB_MESSAGE_ERROR.]
+            result = IOTHUB_MESSAGE_ERROR;
+        }
+        else
+        {
+            // Codes_SRS_IOTHUBMESSAGE_09_009: [If IoTHubMessage_SetContentEncodingSystemProperty finishes successfully it shall return IOTHUB_MESSAGE_OK.]
+            result = IOTHUB_MESSAGE_OK;
+        }
+    }
+
+    return result;
+}
+
+const char* IoTHubMessage_GetContentEncodingSystemProperty(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
+{
+    const char* result;
+
+    // Codes_SRS_IOTHUBMESSAGE_09_010: [If any of the parameters are NULL then IoTHubMessage_GetContentEncodingSystemProperty shall return a IOTHUB_MESSAGE_INVALID_ARG value.] 
+    if (iotHubMessageHandle == NULL)
+    {
+        LogError("Invalid argument (iotHubMessageHandle is NULL)");
+        result = NULL;
+    }
+    else
+    {
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = iotHubMessageHandle;
+
+        // Codes_SRS_IOTHUBMESSAGE_09_011: [IoTHubMessage_GetContentEncodingSystemProperty shall return the `contentEncoding` as a const char* ] 
+        result = (const char*)handleData->contentEncoding;
+    }
+
+    return result;
+}
+
 void IoTHubMessage_Destroy(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
 {
     /*Codes_SRS_IOTHUBMESSAGE_01_004: [If iotHubMessageHandle is NULL, IoTHubMessage_Destroy shall do nothing.] */
@@ -539,6 +697,8 @@ void IoTHubMessage_Destroy(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
         handleData->messageId = NULL;
         free(handleData->correlationId);
         handleData->correlationId = NULL;
+        free(handleData->userDefinedContentType);
+        free(handleData->contentEncoding);
         free(handleData);
     }
 }
