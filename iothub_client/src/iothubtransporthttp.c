@@ -27,8 +27,10 @@
 #define IOTHUB_APP_PREFIX "iothub-app-"
 static const char* IOTHUB_MESSAGE_ID = "iothub-messageid";
 static const char* IOTHUB_CORRELATION_ID = "iothub-correlationid";
-static const char* IOTHUB_CONTENT_TYPE = "iothub-contenttype";
-static const char* IOTHUB_CONTENT_ENCODING = "iothub-contentencoding";
+static const char* IOTHUB_CONTENT_TYPE_D2C = "iothub-contenttype";
+static const char* IOTHUB_CONTENT_ENCODING_D2C = "iothub-contentencoding";
+static const char* IOTHUB_CONTENT_TYPE_C2D = "ContentType";
+static const char* IOTHUB_CONTENT_ENCODING_C2D = "ContentEncoding";
 
 #define CONTENT_TYPE "Content-Type"
 #define APPLICATION_OCTET_STREAM "application/octet-stream"
@@ -1593,10 +1595,10 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                                 }
 
                                 // Codes_SRS_TRANSPORTMULTITHTTP_09_001: [ If the IoTHubMessage being sent contains property `content-type` it shall be added to the HTTP headers as "iothub-contenttype":"value". ]  
-                                userDefinedContentType = IoTHubMessage_GetCustomContentType(message->messageHandle);
+                                userDefinedContentType = IoTHubMessage_GetContentTypeSystemProperty(message->messageHandle);
                                 if (goOn && userDefinedContentType != NULL)
                                 {
-                                    if (HTTPHeaders_ReplaceHeaderNameValuePair(clonedEventHTTPrequestHeaders, IOTHUB_CONTENT_TYPE, userDefinedContentType) != HTTP_HEADERS_OK)
+                                    if (HTTPHeaders_ReplaceHeaderNameValuePair(clonedEventHTTPrequestHeaders, IOTHUB_CONTENT_TYPE_D2C, userDefinedContentType) != HTTP_HEADERS_OK)
                                     {
                                         LogError("unable to HTTPHeaders_ReplaceHeaderNameValuePair (content-type)");
                                         goOn = false;
@@ -1604,10 +1606,10 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                                 }
 
                                 // Codes_SRS_TRANSPORTMULTITHTTP_09_002: [ If the IoTHubMessage being sent contains property `content-encoding` it shall be added to the HTTP headers as "iothub-contentencoding":"value". ] 
-                                contentEncoding = IoTHubMessage_GetContentEncoding(message->messageHandle);
+                                contentEncoding = IoTHubMessage_GetContentEncodingSystemProperty(message->messageHandle);
                                 if (goOn && contentEncoding != NULL)
                                 {
-                                    if (HTTPHeaders_ReplaceHeaderNameValuePair(clonedEventHTTPrequestHeaders, IOTHUB_CONTENT_ENCODING, contentEncoding) != HTTP_HEADERS_OK)
+                                    if (HTTPHeaders_ReplaceHeaderNameValuePair(clonedEventHTTPrequestHeaders, IOTHUB_CONTENT_ENCODING_D2C, contentEncoding) != HTTP_HEADERS_OK)
                                     {
                                         LogError("unable to HTTPHeaders_ReplaceHeaderNameValuePair (content-encoding)");
                                         goOn = false;
@@ -2198,14 +2200,14 @@ static void DoMessages(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERD
                                                             }
                                                         }
                                                     }
-                                                    // Codes_SRS_TRANSPORTMULTITHTTP_09_003: [ The HTTP header value of `iothub-contenttype` shall be set in the `IoTHubMessage_SetCustomContentType`.  ]   
-                                                    else if (strncmp(IOTHUB_CONTENT_TYPE, completeHeader, strlen(IOTHUB_CONTENT_TYPE)) == 0)
+                                                    // Codes_SRS_TRANSPORTMULTITHTTP_09_003: [ The HTTP header value of `ContentType` shall be set in the `IoTHubMessage_SetContentTypeSystemProperty`.  ]   
+                                                    else if (strncmp(IOTHUB_CONTENT_TYPE_C2D, completeHeader, strlen(IOTHUB_CONTENT_TYPE_C2D)) == 0)
                                                     {
                                                         char* whereIsColon = strchr(completeHeader, ':');
                                                         if (whereIsColon != NULL)
                                                         {
                                                             *whereIsColon = '\0'; /*cut it down*/
-                                                            if (IoTHubMessage_SetCustomContentType(receivedMessage, whereIsColon + 2) != IOTHUB_MESSAGE_OK)
+                                                            if (IoTHubMessage_SetContentTypeSystemProperty(receivedMessage, whereIsColon + 2) != IOTHUB_MESSAGE_OK)
                                                             {
                                                                 LogError("Failed setting IoTHubMessage content-type");
                                                                 free(completeHeader);
@@ -2213,14 +2215,14 @@ static void DoMessages(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERD
                                                             }
                                                         }
                                                     }
-                                                    // Codes_SRS_TRANSPORTMULTITHTTP_09_004: [ The HTTP header value of `iothub-contentencoding` shall be set in the `IoTHub_SetContentEncoding`.  ]   
-                                                    else if (strncmp(IOTHUB_CONTENT_ENCODING, completeHeader, strlen(IOTHUB_CONTENT_ENCODING)) == 0)
+                                                    // Codes_SRS_TRANSPORTMULTITHTTP_09_004: [ The HTTP header value of `ContentEncoding` shall be set in the `IoTHub_SetContentEncoding`.  ]   
+                                                    else if (strncmp(IOTHUB_CONTENT_ENCODING_C2D, completeHeader, strlen(IOTHUB_CONTENT_ENCODING_C2D)) == 0)
                                                     {
                                                         char* whereIsColon = strchr(completeHeader, ':');
                                                         if (whereIsColon != NULL)
                                                         {
                                                             *whereIsColon = '\0'; /*cut it down*/
-                                                            if (IoTHubMessage_SetContentEncoding(receivedMessage, whereIsColon + 2) != IOTHUB_MESSAGE_OK)
+                                                            if (IoTHubMessage_SetContentEncodingSystemProperty(receivedMessage, whereIsColon + 2) != IOTHUB_MESSAGE_OK)
                                                             {
                                                                 LogError("Failed setting IoTHubMessage content-encoding");
                                                                 free(completeHeader);

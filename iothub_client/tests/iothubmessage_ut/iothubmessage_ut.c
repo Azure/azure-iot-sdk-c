@@ -1064,8 +1064,8 @@ TEST_FUNCTION(IoTHubMessage_SetCorrelationId_CorrelationId_Not_NULL_SUCCEED)
     IoTHubMessage_Destroy(h);
 }
 
-// Tests_SRS_IOTHUBMESSAGE_09_004: [If IoTHubMessage_SetCustomContentType finishes successfully it shall return IOTHUB_MESSAGE_OK.]
-TEST_FUNCTION(IoTHubMessage_SetCustomContentType_SUCCEED)
+// Tests_SRS_IOTHUBMESSAGE_09_004: [If IoTHubMessage_SetContentTypeSystemProperty finishes successfully it shall return IOTHUB_MESSAGE_OK.]
+TEST_FUNCTION(IoTHubMessage_SetContentTypeSystemProperty_SUCCEED)
 {
     //arrange
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
@@ -1074,7 +1074,7 @@ TEST_FUNCTION(IoTHubMessage_SetCustomContentType_SUCCEED)
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_CONTENT_TYPE));
 
     //act
-    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetCustomContentType(h, TEST_CONTENT_TYPE);
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentTypeSystemProperty(h, TEST_CONTENT_TYPE);
 
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
@@ -1085,18 +1085,18 @@ TEST_FUNCTION(IoTHubMessage_SetCustomContentType_SUCCEED)
 }
 
 // Tests_SRS_IOTHUBMESSAGE_09_002: [If the IOTHUB_MESSAGE_HANDLE `contentType` is not NULL it shall be deallocated.] 
-TEST_FUNCTION(IoTHubMessage_SetCustomContentType_Not_NULL_SUCCEED)
+TEST_FUNCTION(IoTHubMessage_SetContentTypeSystemProperty_Not_NULL_SUCCEED)
 {
     //arrange
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
-    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetCustomContentType(h, TEST_CONTENT_TYPE);
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentTypeSystemProperty(h, TEST_CONTENT_TYPE);
 
     umock_c_reset_all_calls();
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_CONTENT_TYPE));
 
     //act
-    result = IoTHubMessage_SetCustomContentType(h, TEST_CONTENT_TYPE);
+    result = IoTHubMessage_SetContentTypeSystemProperty(h, TEST_CONTENT_TYPE);
 
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
@@ -1106,14 +1106,14 @@ TEST_FUNCTION(IoTHubMessage_SetCustomContentType_Not_NULL_SUCCEED)
     IoTHubMessage_Destroy(h);
 }
 
-// Tests_SRS_IOTHUBMESSAGE_09_001: [If any of the parameters are NULL then IoTHubMessage_SetCustomContentType shall return a IOTHUB_MESSAGE_INVALID_ARG value.] 
-TEST_FUNCTION(IoTHubMessage_SetCustomContentType_NULL_handle_Fails)
+// Tests_SRS_IOTHUBMESSAGE_09_001: [If any of the parameters are NULL then IoTHubMessage_SetContentTypeSystemProperty shall return a IOTHUB_MESSAGE_INVALID_ARG value.] 
+TEST_FUNCTION(IoTHubMessage_SetContentTypeSystemProperty_NULL_handle_Fails)
 {
     //arrange
     umock_c_reset_all_calls();
 
     //act
-    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetCustomContentType(NULL, TEST_CONTENT_TYPE);
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentTypeSystemProperty(NULL, TEST_CONTENT_TYPE);
 
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, result);
@@ -1122,8 +1122,8 @@ TEST_FUNCTION(IoTHubMessage_SetCustomContentType_NULL_handle_Fails)
     //cleanup
 }
 
-// Tests_SRS_IOTHUBMESSAGE_09_001: [If any of the parameters are NULL then IoTHubMessage_SetCustomContentType shall return a IOTHUB_MESSAGE_INVALID_ARG value.] 
-TEST_FUNCTION(IoTHubMessage_SetCustomContentType_NULL_contentType_Fails)
+// Tests_SRS_IOTHUBMESSAGE_09_001: [If any of the parameters are NULL then IoTHubMessage_SetContentTypeSystemProperty shall return a IOTHUB_MESSAGE_INVALID_ARG value.] 
+TEST_FUNCTION(IoTHubMessage_SetContentTypeSystemProperty_NULL_contentType_Fails)
 {
     //arrange
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
@@ -1131,7 +1131,7 @@ TEST_FUNCTION(IoTHubMessage_SetCustomContentType_NULL_contentType_Fails)
     umock_c_reset_all_calls();
 
     //act
-    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetCustomContentType(h, NULL);
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentTypeSystemProperty(h, NULL);
 
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, result);
@@ -1141,8 +1141,8 @@ TEST_FUNCTION(IoTHubMessage_SetCustomContentType_NULL_contentType_Fails)
     IoTHubMessage_Destroy(h);
 }
 
-// Tests_SRS_IOTHUBMESSAGE_09_003: [If the allocation or the copying of `contentType` fails, then IoTHubMessage_SetCustomContentType shall return IOTHUB_MESSAGE_ERROR.] 
-TEST_FUNCTION(IoTHubMessage_SetCustomContentType_Fails)
+// Tests_SRS_IOTHUBMESSAGE_09_003: [If the allocation or the copying of `contentType` fails, then IoTHubMessage_SetContentTypeSystemProperty shall return IOTHUB_MESSAGE_ERROR.] 
+TEST_FUNCTION(IoTHubMessage_SetContentTypeSystemProperty_Fails)
 {
     // arrange
     ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
@@ -1164,7 +1164,7 @@ TEST_FUNCTION(IoTHubMessage_SetCustomContentType_Fails)
         sprintf(tmp_msg, "Failed in test %zu/%zu", index, count);
 
         //act
-        IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetCustomContentType(h, TEST_CONTENT_TYPE);
+        IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentTypeSystemProperty(h, TEST_CONTENT_TYPE);
 
         //assert
         ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_ERROR, result, tmp_msg);
@@ -1175,8 +1175,8 @@ TEST_FUNCTION(IoTHubMessage_SetCustomContentType_Fails)
     IoTHubMessage_Destroy(h);
 }
 
-// Tests_SRS_IOTHUBMESSAGE_09_009: [If IoTHubMessage_SetContentEncoding finishes successfully it shall return IOTHUB_MESSAGE_OK.]
-TEST_FUNCTION(IoTHubMessage_SetContentEncoding_SUCCEED)
+// Tests_SRS_IOTHUBMESSAGE_09_009: [If IoTHubMessage_SetContentEncodingSystemProperty finishes successfully it shall return IOTHUB_MESSAGE_OK.]
+TEST_FUNCTION(IoTHubMessage_SetContentEncodingSystemProperty_SUCCEED)
 {
     //arrange
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
@@ -1185,7 +1185,7 @@ TEST_FUNCTION(IoTHubMessage_SetContentEncoding_SUCCEED)
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_CONTENT_ENCODING));
 
     //act
-    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentEncoding(h, TEST_CONTENT_ENCODING);
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentEncodingSystemProperty(h, TEST_CONTENT_ENCODING);
 
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
@@ -1196,18 +1196,18 @@ TEST_FUNCTION(IoTHubMessage_SetContentEncoding_SUCCEED)
 }
 
 // Tests_SRS_IOTHUBMESSAGE_09_007: [If the IOTHUB_MESSAGE_HANDLE `contentEncoding` is not NULL it shall be deallocated.] 
-TEST_FUNCTION(IoTHubMessage_SetContentEncoding_Not_NULL_SUCCEED)
+TEST_FUNCTION(IoTHubMessage_SetContentEncodingSystemProperty_Not_NULL_SUCCEED)
 {
     //arrange
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
-    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentEncoding(h, TEST_CONTENT_ENCODING);
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentEncodingSystemProperty(h, TEST_CONTENT_ENCODING);
 
     umock_c_reset_all_calls();
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_CONTENT_ENCODING));
 
     //act
-    result = IoTHubMessage_SetContentEncoding(h, TEST_CONTENT_ENCODING);
+    result = IoTHubMessage_SetContentEncodingSystemProperty(h, TEST_CONTENT_ENCODING);
 
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
@@ -1217,14 +1217,14 @@ TEST_FUNCTION(IoTHubMessage_SetContentEncoding_Not_NULL_SUCCEED)
     IoTHubMessage_Destroy(h);
 }
 
-// Tests_SRS_IOTHUBMESSAGE_09_006: [If any of the parameters are NULL then IoTHubMessage_SetContentEncoding shall return a IOTHUB_MESSAGE_INVALID_ARG value.] 
-TEST_FUNCTION(IoTHubMessage_SetContentEncoding_NULL_handle_Fails)
+// Tests_SRS_IOTHUBMESSAGE_09_006: [If any of the parameters are NULL then IoTHubMessage_SetContentEncodingSystemProperty shall return a IOTHUB_MESSAGE_INVALID_ARG value.] 
+TEST_FUNCTION(IoTHubMessage_SetContentEncodingSystemProperty_NULL_handle_Fails)
 {
     //arrange
     umock_c_reset_all_calls();
 
     //act
-    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentEncoding(NULL, TEST_CONTENT_ENCODING);
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentEncodingSystemProperty(NULL, TEST_CONTENT_ENCODING);
 
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, result);
@@ -1233,8 +1233,8 @@ TEST_FUNCTION(IoTHubMessage_SetContentEncoding_NULL_handle_Fails)
     //cleanup
 }
 
-// Tests_SRS_IOTHUBMESSAGE_09_006: [If any of the parameters are NULL then IoTHubMessage_SetContentEncoding shall return a IOTHUB_MESSAGE_INVALID_ARG value.] 
-TEST_FUNCTION(IoTHubMessage_SetContentEncoding_NULL_contentType_Fails)
+// Tests_SRS_IOTHUBMESSAGE_09_006: [If any of the parameters are NULL then IoTHubMessage_SetContentEncodingSystemProperty shall return a IOTHUB_MESSAGE_INVALID_ARG value.] 
+TEST_FUNCTION(IoTHubMessage_SetContentEncodingSystemProperty_NULL_contentType_Fails)
 {
     //arrange
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
@@ -1242,7 +1242,7 @@ TEST_FUNCTION(IoTHubMessage_SetContentEncoding_NULL_contentType_Fails)
     umock_c_reset_all_calls();
 
     //act
-    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentEncoding(h, NULL);
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentEncodingSystemProperty(h, NULL);
 
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, result);
@@ -1252,8 +1252,8 @@ TEST_FUNCTION(IoTHubMessage_SetContentEncoding_NULL_contentType_Fails)
     IoTHubMessage_Destroy(h);
 }
 
-// Tests_SRS_IOTHUBMESSAGE_09_008: [If the allocation or the copying of `contentEncoding` fails, then IoTHubMessage_SetContentEncoding shall return IOTHUB_MESSAGE_ERROR.]
-TEST_FUNCTION(IoTHubMessage_SetContentEncoding_Fails)
+// Tests_SRS_IOTHUBMESSAGE_09_008: [If the allocation or the copying of `contentEncoding` fails, then IoTHubMessage_SetContentEncodingSystemProperty shall return IOTHUB_MESSAGE_ERROR.]
+TEST_FUNCTION(IoTHubMessage_SetContentEncodingSystemProperty_Fails)
 {
     // arrange
     ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
@@ -1275,7 +1275,7 @@ TEST_FUNCTION(IoTHubMessage_SetContentEncoding_Fails)
         sprintf(tmp_msg, "Failed in test %zu/%zu", index, count);
 
         //act
-        IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentEncoding(h, TEST_CONTENT_ENCODING);
+        IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentEncodingSystemProperty(h, TEST_CONTENT_ENCODING);
 
         //assert
         ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_ERROR, result, tmp_msg);
@@ -1286,17 +1286,17 @@ TEST_FUNCTION(IoTHubMessage_SetContentEncoding_Fails)
     IoTHubMessage_Destroy(h);
 }
 
-// Tests_SRS_IOTHUBMESSAGE_09_006: [IoTHubMessage_GetCustomContentType shall return the `contentType` as a const char* ] 
-TEST_FUNCTION(IoTHubMessage_GetCustomContentType_SUCCEED)
+// Tests_SRS_IOTHUBMESSAGE_09_006: [IoTHubMessage_GetContentTypeSystemProperty shall return the `contentType` as a const char* ] 
+TEST_FUNCTION(IoTHubMessage_GetContentTypeSystemProperty_SUCCEED)
 {
     //arrange
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromString(TEST_STRING_VALUE);
-    (void)IoTHubMessage_SetCustomContentType(h, TEST_CONTENT_TYPE);
+    (void)IoTHubMessage_SetContentTypeSystemProperty(h, TEST_CONTENT_TYPE);
     
     umock_c_reset_all_calls();
 
     //act
-    const char* result = IoTHubMessage_GetCustomContentType(h);
+    const char* result = IoTHubMessage_GetContentTypeSystemProperty(h);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, TEST_CONTENT_TYPE, result);
@@ -1306,8 +1306,8 @@ TEST_FUNCTION(IoTHubMessage_GetCustomContentType_SUCCEED)
     IoTHubMessage_Destroy(h);
 }
 
-// Tests_SRS_IOTHUBMESSAGE_09_006: [IoTHubMessage_GetCustomContentType shall return the `contentType` as a const char* ] 
-TEST_FUNCTION(IoTHubMessage_GetCustomContentType_NULL_contentType_SUCCEED)
+// Tests_SRS_IOTHUBMESSAGE_09_006: [IoTHubMessage_GetContentTypeSystemProperty shall return the `contentType` as a const char* ] 
+TEST_FUNCTION(IoTHubMessage_GetContentTypeSystemProperty_NULL_contentType_SUCCEED)
 {
     //arrange
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromString(TEST_STRING_VALUE);
@@ -1315,7 +1315,7 @@ TEST_FUNCTION(IoTHubMessage_GetCustomContentType_NULL_contentType_SUCCEED)
     umock_c_reset_all_calls();
 
     //act
-    const char* result = IoTHubMessage_GetCustomContentType(h);
+    const char* result = IoTHubMessage_GetContentTypeSystemProperty(h);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, NULL, result);
@@ -1326,16 +1326,16 @@ TEST_FUNCTION(IoTHubMessage_GetCustomContentType_NULL_contentType_SUCCEED)
 }
 
 // Tests_SRS_IOTHUBMESSAGE_09_005: [If any of the parameters are NULL then BLAH shall return a IOTHUB_MESSAGE_INVALID_ARG value.] 
-TEST_FUNCTION(IoTHubMessage_GetCustomContentType_Fails)
+TEST_FUNCTION(IoTHubMessage_GetContentTypeSystemProperty_Fails)
 {
     //arrange
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromString(TEST_STRING_VALUE);
-    (void)IoTHubMessage_SetCustomContentType(h, TEST_CONTENT_TYPE);
+    (void)IoTHubMessage_SetContentTypeSystemProperty(h, TEST_CONTENT_TYPE);
 
     umock_c_reset_all_calls();
 
     //act
-    const char* result = IoTHubMessage_GetCustomContentType(NULL);
+    const char* result = IoTHubMessage_GetContentTypeSystemProperty(NULL);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, NULL, result);
@@ -1345,17 +1345,17 @@ TEST_FUNCTION(IoTHubMessage_GetCustomContentType_Fails)
     IoTHubMessage_Destroy(h);
 }
 
-// Tests_SRS_IOTHUBMESSAGE_09_011: [IoTHubMessage_GetContentEncoding shall return the `contentEncoding` as a const char* ] 
-TEST_FUNCTION(IoTHubMessage_GetContentEncoding_SUCCEED)
+// Tests_SRS_IOTHUBMESSAGE_09_011: [IoTHubMessage_GetContentEncodingSystemProperty shall return the `contentEncoding` as a const char* ] 
+TEST_FUNCTION(IoTHubMessage_GetContentEncodingSystemProperty_SUCCEED)
 {
     //arrange
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromString(TEST_STRING_VALUE);
-    (void)IoTHubMessage_SetContentEncoding(h, TEST_CONTENT_ENCODING);
+    (void)IoTHubMessage_SetContentEncodingSystemProperty(h, TEST_CONTENT_ENCODING);
 
     umock_c_reset_all_calls();
 
     //act
-    const char* result = IoTHubMessage_GetContentEncoding(h);
+    const char* result = IoTHubMessage_GetContentEncodingSystemProperty(h);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, TEST_CONTENT_ENCODING, result);
@@ -1365,8 +1365,8 @@ TEST_FUNCTION(IoTHubMessage_GetContentEncoding_SUCCEED)
     IoTHubMessage_Destroy(h);
 }
 
-// Tests_SRS_IOTHUBMESSAGE_09_011: [IoTHubMessage_GetContentEncoding shall return the `contentEncoding` as a const char* ] 
-TEST_FUNCTION(IoTHubMessage_GetContentEncoding_NULL_contentType_SUCCEED)
+// Tests_SRS_IOTHUBMESSAGE_09_011: [IoTHubMessage_GetContentEncodingSystemProperty shall return the `contentEncoding` as a const char* ] 
+TEST_FUNCTION(IoTHubMessage_GetContentEncodingSystemProperty_NULL_contentType_SUCCEED)
 {
     //arrange
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromString(TEST_STRING_VALUE);
@@ -1374,7 +1374,7 @@ TEST_FUNCTION(IoTHubMessage_GetContentEncoding_NULL_contentType_SUCCEED)
     umock_c_reset_all_calls();
 
     //act
-    const char* result = IoTHubMessage_GetContentEncoding(h);
+    const char* result = IoTHubMessage_GetContentEncodingSystemProperty(h);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, NULL, result);
@@ -1384,17 +1384,17 @@ TEST_FUNCTION(IoTHubMessage_GetContentEncoding_NULL_contentType_SUCCEED)
     IoTHubMessage_Destroy(h);
 }
 
-// Tests_SRS_IOTHUBMESSAGE_09_010: [If any of the parameters are NULL then IoTHubMessage_GetContentEncoding shall return a IOTHUB_MESSAGE_INVALID_ARG value.] 
-TEST_FUNCTION(IoTHubMessage_GetContentEncoding_Fails)
+// Tests_SRS_IOTHUBMESSAGE_09_010: [If any of the parameters are NULL then IoTHubMessage_GetContentEncodingSystemProperty shall return a IOTHUB_MESSAGE_INVALID_ARG value.] 
+TEST_FUNCTION(IoTHubMessage_GetContentEncodingSystemProperty_Fails)
 {
     //arrange
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromString(TEST_STRING_VALUE);
-    (void)IoTHubMessage_SetContentEncoding(h, TEST_CONTENT_ENCODING);
+    (void)IoTHubMessage_SetContentEncodingSystemProperty(h, TEST_CONTENT_ENCODING);
 
     umock_c_reset_all_calls();
 
     //act
-    const char* result = IoTHubMessage_GetContentEncoding(NULL);
+    const char* result = IoTHubMessage_GetContentEncodingSystemProperty(NULL);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, NULL, result);

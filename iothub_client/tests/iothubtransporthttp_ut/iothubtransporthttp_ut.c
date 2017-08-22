@@ -471,8 +471,8 @@ static STRING_HANDLE TEST_STRING_HANDLE = NULL;
 #define TEST_HEADER_1_5 "not-iothub-app-NAME1: VALUE1"
 #define TEST_HEADER_2 "iothub-app-NAME2: VALUE2"
 #define TEST_HEADER_3 "iothub-messageid: VALUE3"
-#define TEST_HEADER_4 "iothub-contenttype: VALUE4"
-#define TEST_HEADER_5 "iothub-contentencoding: VALUE5"
+#define TEST_HEADER_4 "ContentType: VALUE4"
+#define TEST_HEADER_5 "ContentEncoding: VALUE5"
 /*value returned by time() function*/
 /*for the purpose of this implementation, time_t represents the number of seconds since 1970, 1st jan, 0:0:0*/
 #define TEST_GET_TIME_VALUE 384739233
@@ -1191,10 +1191,10 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubMessage_GetByteArray, my_IoTHubMessage_GetByteArray);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_GetByteArray, IOTHUB_MESSAGE_ERROR);
     
-    REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_SetCustomContentType, IOTHUB_MESSAGE_OK);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_SetCustomContentType, IOTHUB_MESSAGE_ERROR);
-    REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_SetContentEncoding, IOTHUB_MESSAGE_OK);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_SetContentEncoding, IOTHUB_MESSAGE_ERROR);
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_SetContentTypeSystemProperty, IOTHUB_MESSAGE_OK);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_SetContentTypeSystemProperty, IOTHUB_MESSAGE_ERROR);
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_SetContentEncodingSystemProperty, IOTHUB_MESSAGE_OK);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_SetContentEncodingSystemProperty, IOTHUB_MESSAGE_ERROR);
 
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_SetMessageId, IOTHUB_MESSAGE_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_SetMessageId, IOTHUB_MESSAGE_ERROR);
@@ -13852,8 +13852,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetMessageId_FAILED)
 }
 #endif
 
-// Tests_SRS_TRANSPORTMULTITHTTP_09_003: [ The HTTP header value of `iothub-contenttype` shall be set in the `IoTHubMessage_SetCustomContentType`.  ]   
-// Tests_SRS_TRANSPORTMULTITHTTP_09_004: [ The HTTP header value of `iothub-contentencoding` shall be set in the `IoTHub_SetContentEncoding`.  ]   
+// Tests_SRS_TRANSPORTMULTITHTTP_09_003: [ The HTTP header value of `ContentType` shall be set in the `IoTHubMessage_SetContentTypeSystemProperty`.  ]   
+// Tests_SRS_TRANSPORTMULTITHTTP_09_004: [ The HTTP header value of `ContentEncoding` shall be set in the `IoTHub_SetContentEncoding`.  ]   
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetCustomContentType_SetContentEncoding_SUCCEED)
 {
     //arrange
@@ -13925,11 +13925,11 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetCustomContentType_SetContentEncoding
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
         STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 4, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(IoTHubMessage_SetCustomContentType(IGNORED_PTR_ARG, "VALUE4"));
+        STRICT_EXPECTED_CALL(IoTHubMessage_SetContentTypeSystemProperty(IGNORED_PTR_ARG, "VALUE4"));
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
         STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 5, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(IoTHubMessage_SetContentEncoding(IGNORED_PTR_ARG, "VALUE5"));
+        STRICT_EXPECTED_CALL(IoTHubMessage_SetContentEncodingSystemProperty(IGNORED_PTR_ARG, "VALUE5"));
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     }
 
@@ -13992,8 +13992,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetMessageId_succeeds)
     EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG)).SetReturn(TEST_MESSAGE_ID);
     STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-messageid", TEST_MESSAGE_ID));
     EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_PTR_ARG));
-    EXPECTED_CALL(IoTHubMessage_GetCustomContentType(IGNORED_PTR_ARG)).SetReturn(NULL);
-    EXPECTED_CALL(IoTHubMessage_GetContentEncoding(IGNORED_PTR_ARG)).SetReturn(NULL);
+    EXPECTED_CALL(IoTHubMessage_GetContentTypeSystemProperty(IGNORED_PTR_ARG)).SetReturn(NULL);
+    EXPECTED_CALL(IoTHubMessage_GetContentEncodingSystemProperty(IGNORED_PTR_ARG)).SetReturn(NULL);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
     STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
@@ -14062,8 +14062,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetCorrelationId_succeeds)
     EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG));
     EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_PTR_ARG)).SetReturn(TEST_MESSAGE_ID);
     STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-correlationid", TEST_MESSAGE_ID));
-    EXPECTED_CALL(IoTHubMessage_GetCustomContentType(IGNORED_PTR_ARG)).SetReturn(NULL);
-    EXPECTED_CALL(IoTHubMessage_GetContentEncoding(IGNORED_PTR_ARG)).SetReturn(NULL);
+    EXPECTED_CALL(IoTHubMessage_GetContentTypeSystemProperty(IGNORED_PTR_ARG)).SetReturn(NULL);
+    EXPECTED_CALL(IoTHubMessage_GetContentEncodingSystemProperty(IGNORED_PTR_ARG)).SetReturn(NULL);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
     STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
@@ -14138,9 +14138,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetCustomContentType_succeeds)
 
     EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG));
     EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_PTR_ARG)).SetReturn(NULL);
-    EXPECTED_CALL(IoTHubMessage_GetCustomContentType(IGNORED_PTR_ARG)).SetReturn(TEST_CONTENT_TYPE);
+    EXPECTED_CALL(IoTHubMessage_GetContentTypeSystemProperty(IGNORED_PTR_ARG)).SetReturn(TEST_CONTENT_TYPE);
     STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-contenttype", TEST_CONTENT_TYPE));
-    EXPECTED_CALL(IoTHubMessage_GetContentEncoding(IGNORED_PTR_ARG)).SetReturn(NULL);
+    EXPECTED_CALL(IoTHubMessage_GetContentEncodingSystemProperty(IGNORED_PTR_ARG)).SetReturn(NULL);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
     STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
@@ -14215,8 +14215,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetContentEncoding_succeeds)
 
     EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG));
     EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_PTR_ARG)).SetReturn(NULL);
-    EXPECTED_CALL(IoTHubMessage_GetCustomContentType(IGNORED_PTR_ARG)).SetReturn(NULL);
-    EXPECTED_CALL(IoTHubMessage_GetContentEncoding(IGNORED_PTR_ARG)).SetReturn(TEST_CONTENT_ENCODING);
+    EXPECTED_CALL(IoTHubMessage_GetContentTypeSystemProperty(IGNORED_PTR_ARG)).SetReturn(NULL);
+    EXPECTED_CALL(IoTHubMessage_GetContentEncodingSystemProperty(IGNORED_PTR_ARG)).SetReturn(TEST_CONTENT_ENCODING);
     STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-contentencoding", TEST_CONTENT_ENCODING));
 
     STRICT_EXPECTED_CALL(BUFFER_new());

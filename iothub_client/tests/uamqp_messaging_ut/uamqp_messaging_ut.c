@@ -146,7 +146,7 @@ void set_exp_calls_for_addPropertiesTouAMQPMessage(
         STRICT_EXPECTED_CALL(IoTHubMessage_GetCorrelationId(TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(NULL);
     }
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetCustomContentType(TEST_IOTHUB_MESSAGE_HANDLE))
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetContentTypeSystemProperty(TEST_IOTHUB_MESSAGE_HANDLE))
         .SetReturn(content_type);
 
     if (content_type != NULL)
@@ -155,7 +155,7 @@ void set_exp_calls_for_addPropertiesTouAMQPMessage(
     }
 
     
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetContentEncoding(TEST_IOTHUB_MESSAGE_HANDLE))
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetContentEncodingSystemProperty(TEST_IOTHUB_MESSAGE_HANDLE))
         .SetReturn(content_encoding);
 
     if (content_encoding != NULL)
@@ -289,7 +289,7 @@ static void set_exp_calls_for_IoTHubMessage_CreateFromUamqpMessage(
    
     if (content_type != NULL)
     {
-        STRICT_EXPECTED_CALL(IoTHubMessage_SetCustomContentType(TEST_IOTHUB_MESSAGE_HANDLE, content_type));
+        STRICT_EXPECTED_CALL(IoTHubMessage_SetContentTypeSystemProperty(TEST_IOTHUB_MESSAGE_HANDLE, content_type));
     }
 
     STRICT_EXPECTED_CALL(properties_get_content_encoding(TEST_PROPERTIES_HANDLE, IGNORED_PTR_ARG))
@@ -297,7 +297,7 @@ static void set_exp_calls_for_IoTHubMessage_CreateFromUamqpMessage(
 
     if (content_encoding != NULL)
     {
-        STRICT_EXPECTED_CALL(IoTHubMessage_SetContentEncoding(TEST_IOTHUB_MESSAGE_HANDLE, content_encoding));
+        STRICT_EXPECTED_CALL(IoTHubMessage_SetContentEncodingSystemProperty(TEST_IOTHUB_MESSAGE_HANDLE, content_encoding));
     }
 
     
@@ -434,8 +434,8 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_GLOBAL_MOCK_RETURN(properties_create, TEST_PROPERTIES_HANDLE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(properties_create, NULL);
 
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_GetCustomContentType, NULL);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_GetContentEncoding, NULL);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_GetContentTypeSystemProperty, NULL);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_GetContentEncodingSystemProperty, NULL);
     REGISTER_GLOBAL_MOCK_RETURN(properties_set_content_type, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(properties_set_content_type, 1);
     REGISTER_GLOBAL_MOCK_RETURN(properties_set_content_encoding, 0);
@@ -450,10 +450,10 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_SetCorrelationId, IOTHUB_MESSAGE_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_SetCorrelationId, IOTHUB_MESSAGE_ERROR);
 
-    REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_SetCustomContentType, IOTHUB_MESSAGE_OK);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_SetCustomContentType, IOTHUB_MESSAGE_ERROR);
-    REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_SetContentEncoding, IOTHUB_MESSAGE_OK);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_SetContentEncoding, IOTHUB_MESSAGE_ERROR);
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_SetContentTypeSystemProperty, IOTHUB_MESSAGE_OK);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_SetContentTypeSystemProperty, IOTHUB_MESSAGE_ERROR);
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_SetContentEncodingSystemProperty, IOTHUB_MESSAGE_OK);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_SetContentEncodingSystemProperty, IOTHUB_MESSAGE_ERROR);
 
     // Initialization of variables.
     TEST_MAP_KEYS = (char**)real_malloc(sizeof(char*) * 5);

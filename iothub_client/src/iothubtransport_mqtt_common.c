@@ -600,7 +600,7 @@ static STRING_HANDLE addPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_me
     // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_010: [ `IoTHubTransport_MQTT_Common_DoWork` shall check for the ContentType property and if found add the `value` as a system property in the format of `$.ct=<value>` ]
     if (result != NULL)
     {
-        const char* content_type = IoTHubMessage_GetCustomContentType(iothub_message_handle);
+        const char* content_type = IoTHubMessage_GetContentTypeSystemProperty(iothub_message_handle);
         if (content_type != NULL)
         {
             if (STRING_sprintf(result, "%s%%24.%s=%s", index == 0 ? "" : PROPERTY_SEPARATOR, CONTENT_TYPE_PROPERTY, content_type) != 0)
@@ -616,7 +616,7 @@ static STRING_HANDLE addPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_me
     // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_011: [ `IoTHubTransport_MQTT_Common_DoWork` shall check for the ContentEncoding property and if found add the `value` as a system property in the format of `$.ce=<value>` ]
     if (result != NULL)
     {
-        const char* content_encoding = IoTHubMessage_GetContentEncoding(iothub_message_handle);
+        const char* content_encoding = IoTHubMessage_GetContentEncodingSystemProperty(iothub_message_handle);
         if (content_encoding != NULL)
         {
             if (STRING_sprintf(result, "%s%%24.%s=%s", index == 0 ? "" : PROPERTY_SEPARATOR, CONTENT_ENCODING_PROPERTY, content_encoding) != 0)
@@ -921,7 +921,7 @@ static int extractMqttProperties(IOTHUB_MESSAGE_HANDLE IoTHubMessage, const char
                                                 // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_012: [ If type is IOTHUB_TYPE_TELEMETRY and the system property `$.ct` is defined, its value shall be set on the IOTHUB_MESSAGE_HANDLE's ContentType property ]
                                                 if (strcmp((const char*)&propName[nameLen - 2], CONTENT_TYPE_PROPERTY) == 0)
                                                 {
-                                                    if (IoTHubMessage_SetCustomContentType(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
+                                                    if (IoTHubMessage_SetContentTypeSystemProperty(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
                                                     {
                                                         LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'customContentType' property.");
                                                         result = __FAILURE__;
@@ -930,7 +930,7 @@ static int extractMqttProperties(IOTHUB_MESSAGE_HANDLE IoTHubMessage, const char
                                                 // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_013: [ If type is IOTHUB_TYPE_TELEMETRY and the system property `$.ce` is defined, its value shall be set on the IOTHUB_MESSAGE_HANDLE's ContentEncoding property ]
                                                 else if (strcmp((const char*)&propName[nameLen - 2], CONTENT_ENCODING_PROPERTY) == 0)
                                                 {
-                                                    if (IoTHubMessage_SetContentEncoding(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
+                                                    if (IoTHubMessage_SetContentEncodingSystemProperty(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
                                                     {
                                                         LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'contentEncoding' property.");
                                                         result = __FAILURE__;

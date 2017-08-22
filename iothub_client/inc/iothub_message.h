@@ -125,11 +125,11 @@ MOCKABLE_FUNCTION(, IOTHUBMESSAGE_CONTENT_TYPE, IoTHubMessage_GetContentType, IO
 *
 * @param   iotHubMessageHandle Handle to the message.
 *
-* @param   contentType String defining the type of the payload.
+* @param   contentType String defining the type of the payload (e.g., text/plain).
 *
 * @return  An @c IOTHUB_MESSAGE_RESULT value.
 */
-MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetCustomContentType, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, contentType);
+MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetContentTypeSystemProperty, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, contentType);
 
 /**
 * @brief   Returns the content-type of the message payload, if defined.
@@ -138,18 +138,18 @@ MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetCustomContentType, I
 *
 * @return  A string with the content-type value if defined (or NULL otherwise).
 */
-MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetCustomContentType, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
+MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetContentTypeSystemProperty, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
 
 /**
 * @brief   Sets the content-encoding of the message payload, as per supported values on RFC 2616.
 *
 * @param   iotHubMessageHandle Handle to the message.
 *
-* @param   contentEncoding String defining the encoding of the payload.
+* @param   contentEncoding String defining the encoding of the payload (e.g., utf-8).
 *
 * @return  An @c IOTHUB_MESSAGE_RESULT value.
 */
-MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetContentEncoding, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, contentEncoding);
+MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetContentEncodingSystemProperty, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, contentEncoding);
 
 /**
 * @brief   Returns the content-encoding of the message payload, if defined.
@@ -158,7 +158,7 @@ MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetContentEncoding, IOT
 *
 * @return  A string with the content-encoding value if defined (or NULL otherwise).
 */
-MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetContentEncoding, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
+MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetContentEncodingSystemProperty, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
 
 /**
  * @brief   Gets a handle to the message's properties map.

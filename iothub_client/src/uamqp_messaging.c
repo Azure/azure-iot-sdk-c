@@ -93,7 +93,7 @@ static int addPropertiesTouAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_hand
 		}
 
         // Codes_SRS_UAMQP_MESSAGING_09_106: [If the IOTHUB_MESSAGE contains property `content-type`, it shall be set on the uAMQP message]
-        if (result == RESULT_OK && (contentType = IoTHubMessage_GetCustomContentType(iothub_message_handle)) != NULL)
+        if (result == RESULT_OK && (contentType = IoTHubMessage_GetContentTypeSystemProperty(iothub_message_handle)) != NULL)
         {
             if ((api_call_result = properties_set_content_type(uamqp_message_properties, contentType)) != 0)
             {
@@ -104,7 +104,7 @@ static int addPropertiesTouAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_hand
         }
 
         // Codes_SRS_UAMQP_MESSAGING_09_109: [If the IOTHUB_MESSAGE contains property `content-encoding`, it shall be set on the uAMQP message]
-        if (result == RESULT_OK && (contentEncoding = IoTHubMessage_GetContentEncoding(iothub_message_handle)) != NULL)
+        if (result == RESULT_OK && (contentEncoding = IoTHubMessage_GetContentEncodingSystemProperty(iothub_message_handle)) != NULL)
         {
             if ((api_call_result = properties_set_content_encoding(uamqp_message_properties, contentEncoding)) != 0)
             {
@@ -314,7 +314,7 @@ static int readPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_h
         }
         else if (uamqp_message_property_value != NULL)
         {
-            if (IoTHubMessage_SetCustomContentType(iothub_message_handle, uamqp_message_property_value) != IOTHUB_MESSAGE_OK)
+            if (IoTHubMessage_SetContentTypeSystemProperty(iothub_message_handle, uamqp_message_property_value) != IOTHUB_MESSAGE_OK)
             {
                 // Codes_SRS_UAMQP_MESSAGING_09_102: [If setting the `content-type` property on IOTHUB_MESSAGE_HANDLE fails, IoTHubMessage_CreateFromuAMQPMessage() shall fail and return immediately.]
                 LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'content-type' property.");
@@ -333,7 +333,7 @@ static int readPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_h
         }
         else if (uamqp_message_property_value != NULL)
         {
-            if (IoTHubMessage_SetContentEncoding(iothub_message_handle, uamqp_message_property_value) != IOTHUB_MESSAGE_OK)
+            if (IoTHubMessage_SetContentEncodingSystemProperty(iothub_message_handle, uamqp_message_property_value) != IOTHUB_MESSAGE_OK)
             {
                 // Codes_SRS_UAMQP_MESSAGING_09_105: [If setting the `content-encoding` property on IOTHUB_MESSAGE_HANDLE fails, IoTHubMessage_CreateFromuAMQPMessage() shall fail and return immediately.]
                 LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'content-encoding' property.");

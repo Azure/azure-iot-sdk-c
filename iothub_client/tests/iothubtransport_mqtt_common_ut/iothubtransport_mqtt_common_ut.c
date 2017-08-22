@@ -904,7 +904,7 @@ static void setup_message_recv_with_properties_mocks(bool has_content_type, bool
             .SetReturn("%24.ct=application/json");
         STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(IoTHubMessage_SetCustomContentType(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(IoTHubMessage_SetContentTypeSystemProperty(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(free(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(free(IGNORED_NUM_ARG));
     }
@@ -918,7 +918,7 @@ static void setup_message_recv_with_properties_mocks(bool has_content_type, bool
             .SetReturn("%24.ce=utf8");
         STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(IoTHubMessage_SetContentEncoding(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(IoTHubMessage_SetContentEncodingSystemProperty(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(free(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(free(IGNORED_NUM_ARG));
     }
@@ -1103,8 +1103,8 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(
     }
     STRICT_EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_PTR_ARG)).SetReturn(core_id);
     STRICT_EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG)).SetReturn(msg_id);
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetCustomContentType(IGNORED_PTR_ARG)).SetReturn(content_type);
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetContentEncoding(IGNORED_PTR_ARG)).SetReturn(content_encoding);
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetContentTypeSystemProperty(IGNORED_PTR_ARG)).SetReturn(content_type);
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetContentEncodingSystemProperty(IGNORED_PTR_ARG)).SetReturn(content_encoding);
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     EXPECTED_CALL(mqttmessage_create(IGNORED_NUM_ARG, IGNORED_PTR_ARG, DELIVER_AT_LEAST_ONCE, appMessage, appMsgSize));
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(TEST_COUNTER_HANDLE, IGNORED_PTR_ARG))
@@ -4071,8 +4071,8 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_2_message_timeout_succeeds)
     STRICT_EXPECTED_CALL(Map_GetInternals(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetCustomContentType(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetContentEncoding(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetContentTypeSystemProperty(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetContentEncodingSystemProperty(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(mqttmessage_create(IGNORED_NUM_ARG, IGNORED_PTR_ARG, DELIVER_AT_LEAST_ONCE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
