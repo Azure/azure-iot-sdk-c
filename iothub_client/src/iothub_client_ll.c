@@ -18,6 +18,7 @@
 #include "iothub_client_private.h"
 #include "iothub_client_options.h"
 #include "iothub_client_version.h"
+#include "iothub_client_diagnostic.h"
 #include <stdint.h>
 
 #ifndef DONT_USE_UPLOADTOBLOB
@@ -82,6 +83,7 @@ typedef struct IOTHUB_CLIENT_LL_HANDLE_DATA_TAG
     bool complete_twin_update_encountered;
     IOTHUB_AUTHORIZATION_HANDLE authorization_module;
     STRING_HANDLE product_info;
+    IOTHUB_DIAGNOSTIC_SETTING_DATA diagnostic_setting;
 }IOTHUB_CLIENT_LL_HANDLE_DATA;
 
 static const char HOSTNAME_TOKEN[] = "HostName";
@@ -389,6 +391,9 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
                             /*Codes_SRS_IOTHUBCLIENT_LL_02_042: [ By default, messages shall not timeout. ]*/
                             result->currentMessageTimeout = 0;
                             result->current_device_twin_timeout = 0;
+
+                            result->diagnostic_setting.currentMessageNumber = 0;
+                            result->diagnostic_setting.diagSamplingPercentage = 0;
                             /*Codes_SRS_IOTHUBCLIENT_LL_25_124: [ `IoTHubClient_LL_Create` shall set the default retry policy as Exponential backoff with jitter and if succeed and return a `non-NULL` handle. ]*/
                             if (IoTHubClient_LL_SetRetryPolicy(result, IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER, 0) != IOTHUB_CLIENT_OK)
                             {
@@ -461,8 +466,8 @@ static IOTHUB_DEVICE_TWIN* dev_twin_data_create(IOTHUB_CLIENT_LL_HANDLE_DATA* ha
             result->ms_timesOutAfter = 0;
             result->context = userContextCallback;
             result->reported_state_callback = reportedStateCallback;
-			result->client_handle = handleData;
-			result->device_handle = handleData->deviceHandle;
+            result->client_handle = handleData;
+            result->device_handle = handleData->deviceHandle;
         }
     }
     else
@@ -908,8 +913,15 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendEventAsync(IOTHUB_CLIENT_LL_HANDLE iotH
                 /*Codes_SRS_IOTHUBCLIENT_LL_02_013: [IoTHubClient_LL_SendEventAsync shall add the DLIST waitingToSend a new record cloning the information from eventMessageHandle, eventConfirmationCallback, userContextCallback.]*/
                 if ((newEntry->messageHandle = IoTHubMessage_Clone(eventMessageHandle)) == NULL)
                 {
-                    /*Codes_SRS_IOTHUBCLIENT_LL_02_014: [If cloning and/or adding the information fails for any reason, IoTHubClient_LL_SendEventAsync shall fail and return IOTHUB_CLIENT_ERROR.] */
                     result = IOTHUB_CLIENT_ERROR;
+                    free(newEntry);
+                    LOG_ERROR_RESULT;
+                }
+                else if (!IoTHubClient_Diagnostic_AddIfNecessary(&handleData->diagnostic_setting, newEntry->messageHandle))
+                {
+                    /*Codes_SRS_IOTHUBCLIENT_LL_02_014: [If cloning and/or adding the information/diagnostic fails for any reason, IoTHubClient_LL_SendEventAsync shall fail and return IOTHUB_CLIENT_ERROR.] */
+                    result = IOTHUB_CLIENT_ERROR;
+                    IoTHubMessage_Destroy(newEntry->messageHandle);
                     free(newEntry);
                     LOG_ERROR_RESULT;
                 }
@@ -1572,6 +1584,23 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetOption(IOTHUB_CLIENT_LL_HANDLE iotHubCli
             }
             else
             {
+                result = IOTHUB_CLIENT_OK;
+            }
+        }
+        else if (strcmp(optionName, OPTION_DIAGNOSTIC_SAMPLING_PERCENTAGE) == 0)
+        {
+            uint32_t percentage = *(uint32_t*)value;
+            if (percentage < 0 || percentage > 100)
+            {
+                /*Codes_SRS_IOTHUBCLIENT_LL_10_036: [Calling IoTHubClient_LL_SetOption with value > 100 shall return `IOTHUB_CLIENT_ERRROR`. ]*/
+                LogError("The value of diag_sampling_percentage must be [0, 100]");
+                result = IOTHUB_CLIENT_ERROR;
+            }
+            else
+            {
+                /*Codes_SRS_IOTHUBCLIENT_LL_10_037: [Calling IoTHubClient_LL_SetOption with value between [0, 100] shall return `IOTHUB_CLIENT_OK`. ]*/
+                handleData->diagnostic_setting.diagSamplingPercentage = (uint32_t)percentage;
+                handleData->diagnostic_setting.currentMessageNumber = 0;
                 result = IOTHUB_CLIENT_OK;
             }
         }

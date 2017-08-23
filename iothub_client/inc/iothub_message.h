@@ -44,6 +44,9 @@ DEFINE_ENUM(IOTHUBMESSAGE_CONTENT_TYPE, IOTHUBMESSAGE_CONTENT_TYPE_VALUES);
 
 typedef struct IOTHUB_MESSAGE_HANDLE_DATA_TAG* IOTHUB_MESSAGE_HANDLE;
 
+static const char DIAGNOSTIC_ID_PROPERTY_NAME[] = "diag-id";
+static const char CREATION_TIME_UTC_PROPERTY_NAME[] = "creation-time-utc";
+
 /**
  * @brief   Creates a new IoT hub message from a byte array. The type of the
  *          message will be set to @c IOTHUBMESSAGE_BYTEARRAY.
@@ -208,6 +211,46 @@ MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetCorrelationId, IOTHUB_MESSAGE_
 *          or an error code otherwise.
 */
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetCorrelationId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, correlationId);
+
+/**
+* @brief   Gets the DiagnosticId from the IOTHUB_MESSAGE_HANDLE.
+*
+* @param   iotHubMessageHandle Handle to the message.
+*
+* @return  A const char* pointing to the Diagnostic Id.
+*/
+MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetDiagnosticId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
+
+/**
+* @brief   Sets the DiagnosticId for the IOTHUB_MESSAGE_HANDLE.
+*
+* @param   iotHubMessageHandle Handle to the message.
+* @param   diagnosticId Pointer to the memory location of the diagnosticId
+*
+* @return  Returns IOTHUB_MESSAGE_OK if the diagnosticId was set successfully
+*          or an error code otherwise.
+*/
+MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetDiagnosticId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, diagnosticId);
+
+/**
+* @brief   Gets the CreationTimeUtc from the IOTHUB_MESSAGE_HANDLE.
+*
+* @param   iotHubMessageHandle Handle to the message.
+*
+* @return  A const char* pointing to the CreationTimeUtc.
+*/
+MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetCreationTimeUtc, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
+
+/**
+* @brief   Sets the CreationTimeUtc for the IOTHUB_MESSAGE_HANDLE.
+*
+* @param   iotHubMessageHandle Handle to the message.
+* @param   creationTimeUtc Pointer to the memory location of the creationTimeUtc
+*
+* @return  Returns IOTHUB_MESSAGE_OK if the creationTimeUtc was set successfully
+*          or an error code otherwise.
+*/
+MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetCreationTimeUtc, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, creationTimeUtc);
 
 /**
  * @brief   Frees all resources associated with the given message handle.

@@ -16,7 +16,8 @@ set(iothub_client_ll_transport_c_files
     ./src/iothub_message.c
     ./src/iothub_client_ll.c
     ./src/blob.c
-)
+    ./src/iothub_client_diagnostic.c
+ )
 
 if(NOT ${dont_use_uploadtoblob})
     set(iothub_client_ll_transport_c_files 
@@ -41,6 +42,7 @@ set(iothub_client_ll_transport_h_files
     ./inc/iothub_client_version.h
     ./inc/iothub_transport_ll.h
     ./inc/blob.h
+    ./inc/iothub_client_diagnostic.h
 )
 
 if(NOT ${dont_use_uploadtoblob})
