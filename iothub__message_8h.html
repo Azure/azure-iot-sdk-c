@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Microsoft Azure IoT Device SDK for C
-   &#160;<span id="projectnumber">1.1.21</span>
+   &#160;<span id="projectnumber">1.1.22</span>
    </div>
    <div id="projectbrief">The Microsoft Azure IoT device libraries for C contain code that facilitates building devices and applications that connect to and are managed by Azure IoT Hub services.</div>
   </td>
@@ -144,6 +144,18 @@ Functions</h2></td></tr>
 <tr class="memitem:a80499b619e1ed446f36ae22b8b454102"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#a80499b619e1ed446f36ae22b8b454102">MOCKABLE_FUNCTION</a> (, <a class="el" href="iothub__message_8h.html#a1540154c626623da1ecf6fab5b380c27">IOTHUBMESSAGE_CONTENT_TYPE</a>, IoTHubMessage_GetContentType, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)</td></tr>
 <tr class="memdesc:a80499b619e1ed446f36ae22b8b454102"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the content type of the message given by parameter <code>iotHubMessageHandle</code>.  <a href="#a80499b619e1ed446f36ae22b8b454102">More...</a><br /></td></tr>
 <tr class="separator:a80499b619e1ed446f36ae22b8b454102"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abfe451794e31287c738bc02374be6a1b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#abfe451794e31287c738bc02374be6a1b">MOCKABLE_FUNCTION</a> (, <a class="el" href="iothub__message_8h.html#ab826e84207e0513abcf6825fa72c7a7f">IOTHUB_MESSAGE_RESULT</a>, IoTHubMessage_SetContentTypeSystemProperty, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char *, contentType)</td></tr>
+<tr class="memdesc:abfe451794e31287c738bc02374be6a1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the content-type of the message payload, as per supported values on RFC 2046.  <a href="#abfe451794e31287c738bc02374be6a1b">More...</a><br /></td></tr>
+<tr class="separator:abfe451794e31287c738bc02374be6a1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af3b5e00902311e90370c57f2fbb6eac2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#af3b5e00902311e90370c57f2fbb6eac2">MOCKABLE_FUNCTION</a> (, const char *, IoTHubMessage_GetContentTypeSystemProperty, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)</td></tr>
+<tr class="memdesc:af3b5e00902311e90370c57f2fbb6eac2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the content-type of the message payload, if defined.  <a href="#af3b5e00902311e90370c57f2fbb6eac2">More...</a><br /></td></tr>
+<tr class="separator:af3b5e00902311e90370c57f2fbb6eac2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3fb3a234da76be0d0cf41b049d338394"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#a3fb3a234da76be0d0cf41b049d338394">MOCKABLE_FUNCTION</a> (, <a class="el" href="iothub__message_8h.html#ab826e84207e0513abcf6825fa72c7a7f">IOTHUB_MESSAGE_RESULT</a>, IoTHubMessage_SetContentEncodingSystemProperty, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char *, contentEncoding)</td></tr>
+<tr class="memdesc:a3fb3a234da76be0d0cf41b049d338394"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the content-encoding of the message payload, as per supported values on RFC 2616.  <a href="#a3fb3a234da76be0d0cf41b049d338394">More...</a><br /></td></tr>
+<tr class="separator:a3fb3a234da76be0d0cf41b049d338394"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5534dba8566ba4f59be53c95a6384be5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#a5534dba8566ba4f59be53c95a6384be5">MOCKABLE_FUNCTION</a> (, const char *, IoTHubMessage_GetContentEncodingSystemProperty, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)</td></tr>
+<tr class="memdesc:a5534dba8566ba4f59be53c95a6384be5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the content-encoding of the message payload, if defined.  <a href="#a5534dba8566ba4f59be53c95a6384be5">More...</a><br /></td></tr>
+<tr class="separator:a5534dba8566ba4f59be53c95a6384be5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a323de720a59d18d6884d6bfa3bde8690"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#a323de720a59d18d6884d6bfa3bde8690">MOCKABLE_FUNCTION</a> (, MAP_HANDLE, IoTHubMessage_Properties, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)</td></tr>
 <tr class="memdesc:a323de720a59d18d6884d6bfa3bde8690"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a handle to the message's properties map.  <a href="#a323de720a59d18d6884d6bfa3bde8690">More...</a><br /></td></tr>
 <tr class="separator:a323de720a59d18d6884d6bfa3bde8690"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -483,7 +495,222 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section remark"><dt>Remarks</dt><dd>This function retrieves the standardized type of the payload, which indicates if <code>iotHubMessageHandle</code> was created using a String or a Byte Array.</dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>An <code>IOTHUBMESSAGE_CONTENT_TYPE</code> value. </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="abfe451794e31287c738bc02374be6a1b"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="iothub__message_8h.html#ab826e84207e0513abcf6825fa72c7a7f">IOTHUB_MESSAGE_RESULT</a>&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IoTHubMessage_SetContentTypeSystemProperty&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IOTHUB_MESSAGE_HANDLE&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">iotHubMessageHandle&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">contentType&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets the content-type of the message payload, as per supported values on RFC 2046. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">iotHubMessageHandle</td><td>Handle to the message.</td></tr>
+    <tr><td class="paramname">contentType</td><td>String defining the type of the payload (e.g., text/plain).</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>An <code>IOTHUB_MESSAGE_RESULT</code> value. </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="af3b5e00902311e90370c57f2fbb6eac2"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IoTHubMessage_GetContentTypeSystemProperty&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IOTHUB_MESSAGE_HANDLE&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">iotHubMessageHandle&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Returns the content-type of the message payload, if defined. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">iotHubMessageHandle</td><td>Handle to the message.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A string with the content-type value if defined (or NULL otherwise). </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a3fb3a234da76be0d0cf41b049d338394"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="iothub__message_8h.html#ab826e84207e0513abcf6825fa72c7a7f">IOTHUB_MESSAGE_RESULT</a>&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IoTHubMessage_SetContentEncodingSystemProperty&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IOTHUB_MESSAGE_HANDLE&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">iotHubMessageHandle&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">contentEncoding&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets the content-encoding of the message payload, as per supported values on RFC 2616. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">iotHubMessageHandle</td><td>Handle to the message.</td></tr>
+    <tr><td class="paramname">contentEncoding</td><td>String defining the encoding of the payload (e.g., utf-8).</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>An <code>IOTHUB_MESSAGE_RESULT</code> value. </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a5534dba8566ba4f59be53c95a6384be5"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IoTHubMessage_GetContentEncodingSystemProperty&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IOTHUB_MESSAGE_HANDLE&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">iotHubMessageHandle&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Returns the content-encoding of the message payload, if defined. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">iotHubMessageHandle</td><td>Handle to the message.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A string with the content-encoding value if defined (or NULL otherwise). </dd></dl>
 
 </div>
 </div>
