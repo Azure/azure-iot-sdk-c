@@ -4,6 +4,6 @@
 #ifndef AZUREIOTPROTOCOLHTTP_H
 #define AZUREIOTPROTOCOLHTTP_H
 
-#define AzureIoTProtocolHTTPVersion "1.0.39"
+#define AzureIoTProtocolHTTPVersion "1.0.40"
 
 #endif //AZUREIOTPROTOCOLHTTP_H
