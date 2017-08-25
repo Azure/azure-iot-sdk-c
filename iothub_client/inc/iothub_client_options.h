@@ -34,6 +34,13 @@ extern "C"
 
     static const char* OPTION_MESSAGE_TIMEOUT = "messageTimeout";
     static const char* OPTION_PRODUCT_INFO = "product_info";
+    /*
+    * @brief Informs the service of what is the maximum period the client will wait for a keep-alive message from the service.
+    *        The service must send keep-alives before this timeout is reached, otherwise the client will trigger its re-connection logic.
+    *        Setting this option to a low value results in more aggressive/responsive re-connection by the client.
+    *        The default value for this option is 240 seconds, and the minimum allowed is usually 5 seconds.
+    *        To virtually disable the keep-alives from the service (and consequently the keep-alive timeout control on the client-side), set this option to a high value (e.g., UINT_MAX).
+    */
     static const char* OPTION_C2D_KEEP_ALIVE_FREQ_SECS = "c2d_keep_alive_freq_secs";
 
 #ifdef __cplusplus
