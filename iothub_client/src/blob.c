@@ -13,6 +13,7 @@
 /*a block has 4MB*/
 #define BLOCK_SIZE (4*1024*1024)
 
+// TODO split this function to show the part where the buffer gets split
 BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* source, size_t size, unsigned int* httpStatus, BUFFER_HANDLE httpResponse, const char* certificates)
 {
     BLOB_RESULT result;
@@ -173,6 +174,9 @@ BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* sourc
                                         int isError = 0; /*used to cleanly exit the loop*/
                                         do
                                         {
+                                            // TODO expose the content of this loop in a function similar to this one:
+                                            // Blob_UploadNextBlock(&toUpload, &isError, &result, &blockID, ...<other handles>...);
+
                                             /*setting this block size*/
                                             size_t thisBlockSize = (toUpload > BLOCK_SIZE) ? BLOCK_SIZE : toUpload;
                                             /*Codes_SRS_BLOB_02_020: [ Blob_UploadFromSasUri shall construct a BASE64 encoded string from the block ID (000000... 0499999) ]*/
