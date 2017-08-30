@@ -77,6 +77,13 @@ else()
     option(use_openssl "set use_openssl to ON to use OpenSSL." ON)
 endif()
 
+#openssl samples on Windows need to have a trusted cert set
+if(WIN32 AND ${use_openssl})
+	option(set_trusted_cert_in_samples "set set_trusted_cert_in_samples to ON to have the samples set the SDK's built-in CA as TrustedCerts" ON)
+else()
+	option(set_trusted_cert_in_samples "set set_trusted_cert_in_samples to ON to have the samples set the SDK's built-in CA as TrustedCerts" OFF)
+endif()
+
 #setting nuget_e2e_tests will only generate e2e tests to run with nuget packages.  Install-packages from Package Manager Console in VS before building the projects
 option(nuget_e2e_tests "set nuget_e2e_tests to ON to generate e2e tests to run with nuget packages (default is OFF)" OFF)
 
