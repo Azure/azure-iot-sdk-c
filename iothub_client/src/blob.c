@@ -9,9 +9,209 @@
 #include "azure_c_shared_utility/httpapiex.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/lock.h"
 
 /*a block has 4MB*/
 #define BLOCK_SIZE (4*1024*1024)
+
+typedef struct LARGE_FILE_TAG {
+    unsigned int blockID;
+    int isError;
+    STRING_HANDLE xml;
+    const char* relativePath;
+    HTTPAPIEX_HANDLE httpApiExHandle;
+    unsigned int* httpStatus;
+    BUFFER_HANDLE httpResponse;
+    LOCK_HANDLE lockHandle;// use lock init/deinit !
+} LARGE_FILE_TAG;
+
+typedef struct LARGE_FILE_TAG* LARGE_FILE_HANDLE;
+
+BLOB_RESULT Blob_UploadNextBlock(
+        BUFFER_HANDLE requestContent,
+        unsigned int blockID,
+        int* isError,
+        STRING_HANDLE xml,
+        const char* relativePath,
+        HTTPAPIEX_HANDLE httpApiExHandle,
+        unsigned int* httpStatus,
+        BUFFER_HANDLE httpResponse)
+{
+    BLOB_RESULT result;
+
+    char temp[7]; /*this will contain 000000... 049999*/
+    if (sprintf(temp, "%6u", (unsigned int)blockID) != 6) /*produces 000000... 049999*/
+    {
+        /*Codes_SRS_BLOB_02_033: [ If any previous operation that doesn't have an explicit failure description fails then Blob_UploadFromSasUri shall fail and return BLOB_ERROR ]*/
+        LogError("failed to sprintf");
+        result = BLOB_ERROR;
+        *isError = 1;
+    }
+    else
+    {
+        STRING_HANDLE blockIdString = Base64_Encode_Bytes((const unsigned char*)temp, 6);
+        if (blockIdString == NULL)
+        {
+            /*Codes_SRS_BLOB_02_033: [ If any previous operation that doesn't have an explicit failure description fails then Blob_UploadFromSasUri shall fail and return BLOB_ERROR ]*/
+            LogError("unable to Base64_Encode_Bytes");
+            result = BLOB_ERROR;
+            *isError = 1;
+        }
+        else
+        {
+            /*add the blockId base64 encoded to the XML*/
+            if (!(
+                (STRING_concat(xml, "<Latest>") == 0) &&
+                (STRING_concat_with_STRING(xml, blockIdString) == 0) &&
+                (STRING_concat(xml, "</Latest>") == 0)
+                ))
+            {
+                /*Codes_SRS_BLOB_02_033: [ If any previous operation that doesn't have an explicit failure description fails then Blob_UploadFromSasUri shall fail and return BLOB_ERROR ]*/
+                LogError("unable to STRING_concat");
+                result = BLOB_ERROR;
+                *isError = 1;
+            }
+            else
+            {
+                /*Codes_SRS_BLOB_02_022: [ Blob_UploadFromSasUri shall construct a new relativePath from following string: base relativePath + "&comp=block&blockid=BASE64 encoded string of blockId" ]*/
+                STRING_HANDLE newRelativePath = STRING_construct(relativePath);
+                if (newRelativePath == NULL)
+                {
+                    /*Codes_SRS_BLOB_02_033: [ If any previous operation that doesn't have an explicit failure description fails then Blob_UploadFromSasUri shall fail and return BLOB_ERROR ]*/
+                    LogError("unable to STRING_construct");
+                    result = BLOB_ERROR;
+                    *isError = 1;
+                }
+                else
+                {
+                    if (!(
+                        (STRING_concat(newRelativePath, "&comp=block&blockid=") == 0) &&
+                        (STRING_concat_with_STRING(newRelativePath, blockIdString) == 0)
+                        ))
+                    {
+                        /*Codes_SRS_BLOB_02_033: [ If any previous operation that doesn't have an explicit failure description fails then Blob_UploadFromSasUri shall fail and return BLOB_ERROR ]*/
+                        LogError("unable to STRING concatenate");
+                        result = BLOB_ERROR;
+                        *isError = 1;
+                    }
+                    else
+                    {
+                        /*Codes_SRS_BLOB_02_024: [ Blob_UploadFromSasUri shall call HTTPAPIEX_ExecuteRequest with a PUT operation, passing httpStatus and httpResponse. ]*/
+                        if (HTTPAPIEX_ExecuteRequest(
+                            httpApiExHandle,
+                            HTTPAPI_REQUEST_PUT,
+                            STRING_c_str(newRelativePath),
+                            NULL,
+                            requestContent,
+                            httpStatus,
+                            NULL,
+                            httpResponse) != HTTPAPIEX_OK
+                            )
+                        {
+                            /*Codes_SRS_BLOB_02_025: [ If HTTPAPIEX_ExecuteRequest fails then Blob_UploadFromSasUri shall fail and return BLOB_HTTP_ERROR. ]*/
+                            LogError("unable to HTTPAPIEX_ExecuteRequest");
+                            result = BLOB_HTTP_ERROR;
+                            *isError = 1;
+                        }
+                        else if (*httpStatus >= 300)
+                        {
+                            /*Codes_SRS_BLOB_02_026: [ Otherwise, if HTTP response code is >=300 then Blob_UploadFromSasUri shall succeed and return BLOB_OK. ]*/
+                            LogError("HTTP status from storage does not indicate success (%d)", (int)*httpStatus);
+                            result = BLOB_OK;
+                            *isError = 1;
+                        }
+                        else
+                        {
+                            /*Codes_SRS_BLOB_02_027: [ Otherwise Blob_UploadFromSasUri shall continue execution. ]*/
+                        }
+                    }
+                    STRING_delete(newRelativePath);
+                }
+            }
+            STRING_delete(blockIdString);
+        }
+    }
+
+    return result;
+}
+
+bool LARGE_FILE_write(const unsigned char* source, size_t size, LARGE_FILE_HANDLE fileHandle)
+{
+    bool result; // TODO find a more significant return value
+    if (
+        (size > 0) &&
+        (source == NULL)
+        )
+    {
+        LogError("combination of source = %p and size = %zu is invalid", source, size);
+        result = false;
+    }
+    else if (size > 4 * 1024 * 1024)
+    {
+        LogError("size too big (%zu)", size);
+        result = false;
+    }
+    else
+    {
+        // fileHandle must be valid
+        if (1 == fileHandle->isError)
+        {
+            LogError("Invalid file handle");
+            result = false;
+        }
+        else if (fileHandle->blockID >= 50000)
+        {
+            LogError("Too many blocks already written (max 50000)");
+        }
+        else
+        {
+            // No concurrent block writing allowed
+            if (Lock(fileHandle->lockHandle) != LOCK_OK)
+            {
+                LogError("unable to lock");
+                result = false;
+            }
+            else
+            {
+                // Create buffer
+                BUFFER_HANDLE requestBuffer = BUFFER_create(source, size);
+                if (requestBuffer == NULL)
+                {
+                    LogError("unable to BUFFER_create");
+                    result = false;
+                }
+                else
+                {
+                    BLOB_RESULT uploadBlockResult;
+                    uploadBlockResult = Blob_UploadNextBlock(requestBuffer,
+                                                             fileHandle->blockID,
+                                                             &(fileHandle->isError),
+                                                             fileHandle->xml,
+                                                             fileHandle->relativePath,
+                                                             fileHandle->httpApiExHandle,
+                                                             fileHandle->httpStatus,
+                                                             fileHandle->httpResponse);
+
+                    if (uploadBlockResult == BLOB_OK && fileHandle->isError == 0)
+                    {
+                        fileHandle->blockID++;
+                    }
+                    else
+                    {
+                        LogError("unable to Blob_UploadNextBlock (uploadBlockResult = %i, fileHandle->isError = %i)", uploadBlockResult, fileHandle->isError);
+                        result = false;
+                    }
+
+                    BUFFER_delete(requestBuffer);
+                }
+
+                (void)Unlock(fileHandle->lockHandle);
+            }
+        }
+    }
+
+    return result;
+}
 
 // TODO split this function to show the part where the buffer gets split
 BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* source, size_t size, unsigned int* httpStatus, BUFFER_HANDLE httpResponse, const char* certificates)
@@ -174,118 +374,35 @@ BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* sourc
                                         int isError = 0; /*used to cleanly exit the loop*/
                                         do
                                         {
-                                            // TODO expose the content of this loop in a function similar to this one:
-                                            // Blob_UploadNextBlock(&toUpload, &isError, &result, &blockID, ...<other handles>...);
-
                                             /*setting this block size*/
                                             size_t thisBlockSize = (toUpload > BLOCK_SIZE) ? BLOCK_SIZE : toUpload;
-                                            /*Codes_SRS_BLOB_02_020: [ Blob_UploadFromSasUri shall construct a BASE64 encoded string from the block ID (000000... 0499999) ]*/
-                                            char temp[7]; /*this will contain 000000... 049999*/
-                                            if (sprintf(temp, "%6u", (unsigned int)blockID) != 6) /*produces 000000... 049999*/
+
+                                            /*Codes_SRS_BLOB_02_023: [ Blob_UploadFromSasUri shall create a BUFFER_HANDLE from source and size parameters. ]*/
+                                            BUFFER_HANDLE requestContent = BUFFER_create(source + (size - toUpload), thisBlockSize);
+                                            if (requestContent == NULL)
                                             {
                                                 /*Codes_SRS_BLOB_02_033: [ If any previous operation that doesn't have an explicit failure description fails then Blob_UploadFromSasUri shall fail and return BLOB_ERROR ]*/
-                                                LogError("failed to sprintf");
+                                                LogError("unable to BUFFER_create");
                                                 result = BLOB_ERROR;
                                                 isError = 1;
                                             }
                                             else
                                             {
-                                                STRING_HANDLE blockIdString = Base64_Encode_Bytes((const unsigned char*)temp, 6);
-                                                if (blockIdString == NULL)
-                                                {
-                                                    /*Codes_SRS_BLOB_02_033: [ If any previous operation that doesn't have an explicit failure description fails then Blob_UploadFromSasUri shall fail and return BLOB_ERROR ]*/
-                                                    LogError("unable to Base64_Encode_Bytes");
-                                                    result = BLOB_ERROR;
-                                                    isError = 1;
-                                                }
-                                                else
-                                                {
-                                                    /*add the blockId base64 encoded to the XML*/
-                                                    if (!(
-                                                        (STRING_concat(xml, "<Latest>") == 0) &&
-                                                        (STRING_concat_with_STRING(xml, blockIdString) == 0) &&
-                                                        (STRING_concat(xml, "</Latest>") == 0)
-                                                        ))
-                                                    {
-                                                        /*Codes_SRS_BLOB_02_033: [ If any previous operation that doesn't have an explicit failure description fails then Blob_UploadFromSasUri shall fail and return BLOB_ERROR ]*/
-                                                        LogError("unable to STRING_concat");
-                                                        result = BLOB_ERROR;
-                                                        isError = 1;
-                                                    }
-                                                    else
-                                                    {
-                                                        /*Codes_SRS_BLOB_02_022: [ Blob_UploadFromSasUri shall construct a new relativePath from following string: base relativePath + "&comp=block&blockid=BASE64 encoded string of blockId" ]*/
-                                                        STRING_HANDLE newRelativePath = STRING_construct(relativePath);
-                                                        if (newRelativePath == NULL)
-                                                        {
-                                                            /*Codes_SRS_BLOB_02_033: [ If any previous operation that doesn't have an explicit failure description fails then Blob_UploadFromSasUri shall fail and return BLOB_ERROR ]*/
-                                                            LogError("unable to STRING_construct");
-                                                            result = BLOB_ERROR;
-                                                            isError = 1;
-                                                        }
-                                                        else
-                                                        {
-                                                            if (!(
-                                                                (STRING_concat(newRelativePath, "&comp=block&blockid=") == 0) &&
-                                                                (STRING_concat_with_STRING(newRelativePath, blockIdString) == 0)
-                                                                ))
-                                                            {
-                                                                /*Codes_SRS_BLOB_02_033: [ If any previous operation that doesn't have an explicit failure description fails then Blob_UploadFromSasUri shall fail and return BLOB_ERROR ]*/
-                                                                LogError("unable to STRING concatenate");
-                                                                result = BLOB_ERROR;
-                                                                isError = 1;
-                                                            }
-                                                            else
-                                                            {
-                                                                /*Codes_SRS_BLOB_02_023: [ Blob_UploadFromSasUri shall create a BUFFER_HANDLE from source and size parameters. ]*/
-                                                                BUFFER_HANDLE requestContent = BUFFER_create(source + (size - toUpload), thisBlockSize);
-                                                                if (requestContent == NULL)
-                                                                {
-                                                                    /*Codes_SRS_BLOB_02_033: [ If any previous operation that doesn't have an explicit failure description fails then Blob_UploadFromSasUri shall fail and return BLOB_ERROR ]*/
-                                                                    LogError("unable to BUFFER_create");
-                                                                    result = BLOB_ERROR;
-                                                                    isError = 1;
-                                                                }
-                                                                else
-                                                                {
-                                                                    /*Codes_SRS_BLOB_02_024: [ Blob_UploadFromSasUri shall call HTTPAPIEX_ExecuteRequest with a PUT operation, passing httpStatus and httpResponse. ]*/
-                                                                    if (HTTPAPIEX_ExecuteRequest(
-                                                                        httpApiExHandle,
-                                                                        HTTPAPI_REQUEST_PUT,
-                                                                        STRING_c_str(newRelativePath),
-                                                                        NULL,
-                                                                        requestContent,
-                                                                        httpStatus,
-                                                                        NULL,
-                                                                        httpResponse) != HTTPAPIEX_OK
-                                                                        )
-                                                                    {
-                                                                        /*Codes_SRS_BLOB_02_025: [ If HTTPAPIEX_ExecuteRequest fails then Blob_UploadFromSasUri shall fail and return BLOB_HTTP_ERROR. ]*/
-                                                                        LogError("unable to HTTPAPIEX_ExecuteRequest");
-                                                                        result = BLOB_HTTP_ERROR;
-                                                                        isError = 1;
-                                                                    }
-                                                                    else if (*httpStatus >= 300)
-                                                                    {
-                                                                        /*Codes_SRS_BLOB_02_026: [ Otherwise, if HTTP response code is >=300 then Blob_UploadFromSasUri shall succeed and return BLOB_OK. ]*/
-                                                                        LogError("HTTP status from storage does not indicate success (%d)", (int)*httpStatus);
-                                                                        result = BLOB_OK;
-                                                                        isError = 1;
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        /*Codes_SRS_BLOB_02_027: [ Otherwise Blob_UploadFromSasUri shall continue execution. ]*/
-                                                                    }
-                                                                    BUFFER_delete(requestContent);
-                                                                }
-                                                            }
-                                                            STRING_delete(newRelativePath);
-                                                        }
-                                                    }
-                                                    STRING_delete(blockIdString);
-                                                }
-                                            }
+                                                // TODO expose the content of this loop in a function similar to this one:
+                                                // Blob_UploadNextBlock(&toUpload, &isError, &result, &blockID, ...<other handles>...);
+                                                result = Blob_UploadNextBlock(
+                                                        requestContent,
+                                                        blockID,
+                                                        &isError,
+                                                        xml,
+                                                        relativePath,
+                                                        httpApiExHandle,
+                                                        httpStatus,
+                                                        httpResponse);
+                                                /*Codes_SRS_BLOB_02_020: [ Blob_UploadFromSasUri shall construct a BASE64 encoded string from the block ID (000000... 0499999) ]*/
 
+                                                BUFFER_delete(requestContent);
+                                            }
                                             blockID++;
                                             toUpload -= thisBlockSize;
                                         } while ((toUpload > 0) && !isError);
