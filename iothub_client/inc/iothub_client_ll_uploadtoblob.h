@@ -42,6 +42,16 @@ typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* IOTHUB_CLIENT_LL_UPLOA
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob_Impl, IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, handle, const char*, destinationFileName, const unsigned char*, source, size_t, size);
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob_SetOption, IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, handle, const char*, optionName, const void*, value);
     MOCKABLE_FUNCTION(, void, IoTHubClient_LL_UploadToBlob_Destroy, IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, handle);
+
+// TODO LARGE FILE UPLOAD maybe to put in an other file ?
+typedef struct LARGE_FILE_TAG* LARGE_FILE_HANDLE;
+
+    MOCKABLE_FUNCTION(, LARGE_FILE_HANDLE, LARGE_FILE_open, const IOTHUB_CLIENT_CONFIG*, config, const char*, destinationFileName);
+    MOCKABLE_FUNCTION(, bool, LARGE_FILE_write, const unsigned char*, source, size_t, size, LARGE_FILE_HANDLE, fileHandle);
+    MOCKABLE_FUNCTION(, void, LARGE_FILE_close, LARGE_FILE_HANDLE, fileHandle);
+
+// END LARGE FILE UPLOAD
+
 #ifdef __cplusplus
 }
 #endif

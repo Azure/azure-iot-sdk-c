@@ -15,6 +15,8 @@
 
 #include "azure_c_shared_utility/macro_utils.h"
 #include "azure_c_shared_utility/buffer_.h"
+#include "azure_c_shared_utility/strings_types.h"
+#include "azure_c_shared_utility/httpapiex.h"
 
 #ifdef __cplusplus
 #include <cstddef>
@@ -48,6 +50,9 @@ DEFINE_ENUM(BLOB_RESULT, BLOB_RESULT_VALUES)
 * @return	A @c BLOB_RESULT. BLOB_OK means the blob has been uploaded successfully. Any other value indicates an error
 */
 MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadFromSasUri,const char*, SASURI, const unsigned char*, source, size_t, size, unsigned int*, httpStatus, BUFFER_HANDLE, httpResponse, const char*, certificates)
+
+// TODO add comments
+MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadNextBlock, BUFFER_HANDLE, requestContent, unsigned int, blockID, int*, isError, STRING_HANDLE, xml, const char*, relativePath, HTTPAPIEX_HANDLE, httpApiExHandle, unsigned int*, httpStatus, BUFFER_HANDLE, httpResponse)
 
 #ifdef __cplusplus
 }

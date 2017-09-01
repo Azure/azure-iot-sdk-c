@@ -9,23 +9,14 @@
 #include "azure_c_shared_utility/httpapiex.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/base64.h"
-#include "azure_c_shared_utility/lock.h"
+//#include "azure_c_shared_utility/lock.h"
 
 /*a block has 4MB*/
 #define BLOCK_SIZE (4*1024*1024)
 
-typedef struct LARGE_FILE_TAG {
-    unsigned int blockID;
-    int isError;
-    STRING_HANDLE xml;
-    const char* relativePath;
-    HTTPAPIEX_HANDLE httpApiExHandle;
-    unsigned int* httpStatus;
-    BUFFER_HANDLE httpResponse;
-    LOCK_HANDLE lockHandle;// use lock init/deinit !
-} LARGE_FILE_TAG;
 
-typedef struct LARGE_FILE_TAG* LARGE_FILE_HANDLE;
+
+//typedef struct LARGE_FILE_TAG* LARGE_FILE_HANDLE;
 
 BLOB_RESULT Blob_UploadNextBlock(
         BUFFER_HANDLE requestContent,
@@ -129,84 +120,6 @@ BLOB_RESULT Blob_UploadNextBlock(
                 }
             }
             STRING_delete(blockIdString);
-        }
-    }
-
-    return result;
-}
-
-bool LARGE_FILE_write(const unsigned char* source, size_t size, LARGE_FILE_HANDLE fileHandle)
-{
-    bool result; // TODO find a more significant return value
-    if (
-        (size > 0) &&
-        (source == NULL)
-        )
-    {
-        LogError("combination of source = %p and size = %zu is invalid", source, size);
-        result = false;
-    }
-    else if (size > 4 * 1024 * 1024)
-    {
-        LogError("size too big (%zu)", size);
-        result = false;
-    }
-    else
-    {
-        // fileHandle must be valid
-        if (1 == fileHandle->isError)
-        {
-            LogError("Invalid file handle");
-            result = false;
-        }
-        else if (fileHandle->blockID >= 50000)
-        {
-            LogError("Too many blocks already written (max 50000)");
-        }
-        else
-        {
-            // No concurrent block writing allowed
-            if (Lock(fileHandle->lockHandle) != LOCK_OK)
-            {
-                LogError("unable to lock");
-                result = false;
-            }
-            else
-            {
-                // Create buffer
-                BUFFER_HANDLE requestBuffer = BUFFER_create(source, size);
-                if (requestBuffer == NULL)
-                {
-                    LogError("unable to BUFFER_create");
-                    result = false;
-                }
-                else
-                {
-                    BLOB_RESULT uploadBlockResult;
-                    uploadBlockResult = Blob_UploadNextBlock(requestBuffer,
-                                                             fileHandle->blockID,
-                                                             &(fileHandle->isError),
-                                                             fileHandle->xml,
-                                                             fileHandle->relativePath,
-                                                             fileHandle->httpApiExHandle,
-                                                             fileHandle->httpStatus,
-                                                             fileHandle->httpResponse);
-
-                    if (uploadBlockResult == BLOB_OK && fileHandle->isError == 0)
-                    {
-                        fileHandle->blockID++;
-                    }
-                    else
-                    {
-                        LogError("unable to Blob_UploadNextBlock (uploadBlockResult = %i, fileHandle->isError = %i)", uploadBlockResult, fileHandle->isError);
-                        result = false;
-                    }
-
-                    BUFFER_delete(requestBuffer);
-                }
-
-                (void)Unlock(fileHandle->lockHandle);
-            }
         }
     }
 

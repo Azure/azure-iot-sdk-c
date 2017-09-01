@@ -15,6 +15,7 @@
 #include "azure_c_shared_utility/tickcounter.h"
 #include "azure_c_shared_utility/httpapiexsas.h"
 #include "azure_c_shared_utility/shared_util_options.h"
+#include "azure_c_shared_utility/lock.h"
 
 #include "iothub_client_ll.h"
 #include "iothub_client_options.h"
@@ -1171,6 +1172,328 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
     return result;
 }
 
+// TODO LARGE FILE maybe put in an other file ?
+
+typedef struct LARGE_FILE_TAG {
+    unsigned int blockID;
+    int isError;
+    STRING_HANDLE xml;
+    const char* relativePath;
+    HTTPAPIEX_HANDLE httpApiExHandle;
+    unsigned int* httpStatus;
+    BUFFER_HANDLE responseToIoTHub;
+    LOCK_HANDLE lockHandle;// use lock init/deinit !
+    IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE blobHandle;
+    STRING_HANDLE sasUri;
+    HTTPAPIEX_HANDLE iotHubHttpApiExHandle;
+    STRING_HANDLE correlationId;
+    HTTP_HEADERS_HANDLE requestHttpHeaders;
+    unsigned int httpResponse;
+} LARGE_FILE_TAG;
+
+static BLOB_RESULT Blob_UploadFromSasUri_start(LARGE_FILE_HANDLE handle)
+{
+
+}
+
+static IOTHUB_CLIENT_RESULT LARGE_FILE_upload_blob_start(LARGE_FILE_HANDLE handle, const char* destinationFileName)
+{
+    IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA*)(handle->blobHandle);
+    IOTHUB_CLIENT_RESULT result;
+
+    /*Codes_SRS_IOTHUBCLIENT_LL_02_064: [ IoTHubClient_LL_UploadToBlob shall create an HTTPAPIEX_HANDLE to the IoTHub hostname. ]*/
+    handle->iotHubHttpApiExHandle = HTTPAPIEX_Create(handleData->hostname);
+
+    /*Codes_SRS_IOTHUBCLIENT_LL_02_065: [ If creating the HTTPAPIEX_HANDLE fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+    if (handle->iotHubHttpApiExHandle == NULL)
+    {
+        LogError("unable to HTTPAPIEX_Create");
+        result = IOTHUB_CLIENT_ERROR;
+    }
+    else
+    {
+        if (
+            (handleData->authorizationScheme == X509) &&
+
+            /*transmit the x509certificate and x509privatekey*/
+            /*Codes_SRS_IOTHUBCLIENT_LL_02_106: [ - x509certificate and x509privatekey saved options shall be passed on the HTTPAPIEX_SetOption ]*/
+            (!(
+                (HTTPAPIEX_SetOption(handle->iotHubHttpApiExHandle, OPTION_X509_CERT, handleData->credentials.x509credentials.x509certificate) == HTTPAPIEX_OK) &&
+                (HTTPAPIEX_SetOption(handle->iotHubHttpApiExHandle, OPTION_X509_PRIVATE_KEY, handleData->credentials.x509credentials.x509privatekey) == HTTPAPIEX_OK)
+            ))
+            )
+        {
+            LogError("unable to HTTPAPIEX_SetOption for x509");
+            result = IOTHUB_CLIENT_ERROR;
+        }
+        else
+        {
+            /*Codes_SRS_IOTHUBCLIENT_LL_02_111: [ If certificates is non-NULL then certificates shall be passed to HTTPAPIEX_SetOption with optionName TrustedCerts. ]*/
+            if ((handleData->certificates != NULL) && (HTTPAPIEX_SetOption(handle->iotHubHttpApiExHandle, "TrustedCerts", handleData->certificates) != HTTPAPIEX_OK))
+            {
+                LogError("unable to set TrustedCerts!");
+                result = IOTHUB_CLIENT_ERROR;
+            }
+            else
+            {
+
+                if (handleData->http_proxy_options.host_address != NULL)
+                {
+                    HTTP_PROXY_OPTIONS proxy_options;
+                    proxy_options = handleData->http_proxy_options;
+
+                    if (HTTPAPIEX_SetOption(handle->iotHubHttpApiExHandle, OPTION_HTTP_PROXY, &proxy_options) != HTTPAPIEX_OK)
+                    {
+                        LogError("unable to set http proxy!");
+                        result = IOTHUB_CLIENT_ERROR;
+                    }
+                    else
+                    {
+                        result = IOTHUB_CLIENT_OK;
+                    }
+                }
+                else
+                {
+                    result = IOTHUB_CLIENT_OK;
+                }
+
+                if (result != IOTHUB_CLIENT_ERROR)
+                {
+                    handle->correlationId = STRING_new();
+                    if (handle->correlationId == NULL)
+                    {
+                        LogError("unable to STRING_new");
+                        result = IOTHUB_CLIENT_ERROR;
+                    }
+                    else
+                    {
+                        handle->sasUri = STRING_new();
+                        if (handle->sasUri == NULL)
+                        {
+                            LogError("unable to STRING_new");
+                            result = IOTHUB_CLIENT_ERROR;
+                        }
+                        else
+                        {
+                            /*Codes_SRS_IOTHUBCLIENT_LL_02_070: [ IoTHubClient_LL_UploadToBlob shall create request HTTP headers. ]*/
+                            handle->requestHttpHeaders = HTTPHeaders_Alloc(); /*these are build by step 1 and used by step 3 too*/
+                            if (handle->requestHttpHeaders == NULL)
+                            {
+                                LogError("unable to HTTPHeaders_Alloc");
+                                result = IOTHUB_CLIENT_ERROR;
+                            }
+                            else
+                            {
+                                /*do step 1*/
+                                if (IoTHubClient_LL_UploadToBlob_step1and2(handleData, handle->iotHubHttpApiExHandle, handle->requestHttpHeaders, destinationFileName, handle->correlationId, handle->sasUri) != 0)
+                                {
+                                    LogError("error in IoTHubClient_LL_UploadToBlob_step1");
+                                    result = IOTHUB_CLIENT_ERROR;
+                                }
+                                else
+                                {
+                                    /*do step 2.*/
+                                    handle->responseToIoTHub = BUFFER_new();
+                                    if (handle->responseToIoTHub == NULL)
+                                    {
+                                        result = IOTHUB_CLIENT_ERROR;
+                                        LogError("unable to BUFFER_new");
+                                    }
+                                    else
+                                    {
+                                        // VICTORY !
+                                        int step2success;
+                                        /*Codes_SRS_IOTHUBCLIENT_LL_02_083: [ IoTHubClient_LL_UploadToBlob shall call Blob_UploadFromSasUri and capture the HTTP return code and HTTP body. ]*/
+                                        /*step2success = (Blob_UploadFromSasUri(
+                                                STRING_c_str(sasUri),
+                                                source,
+                                                size,
+                                                &responseToIoTHub,
+                                                responseToIoTHub,
+                                                handleData->certificates) == BLOB_OK);*/
+                                        // to use : sasUri, httpresponse, responseToIoTHub
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+LARGE_FILE_HANDLE LARGE_FILE_open(const IOTHUB_CLIENT_CONFIG* config, const char* destinationFileName)
+{
+    LARGE_FILE_TAG* handle = NULL;
+    if (destinationFileName == NULL)
+    {
+        LogError("invalid argument destinationFileName=%p", destinationFileName);
+    }
+    else
+    {
+        handle = malloc(sizeof(LARGE_FILE_TAG));
+        if (handle == NULL)
+        {
+            LogError("oom - malloc");
+            /*return as is*/
+        }
+        else
+        {
+            handle->isError = 0;
+            handle->lockHandle = Lock_Init();
+            if (handle == NULL)
+            {
+                LogError("Could not Lock_Init");
+                free(handle);
+                handle = NULL;
+            }
+            else
+            {
+                handle->blobHandle = IoTHubClient_LL_UploadToBlob_Create(config);
+                if (handle == NULL)
+                {
+                    LogError("Could not IoTHubClient_LL_UploadToBlob_Create");
+                    Lock_Deinit(handle->lockHandle);
+                    free(handle);
+                    handle = NULL;
+                }
+                else
+                {
+                    if(LARGE_FILE_upload_blob_start(handle, destinationFileName) != IOTHUB_CLIENT_OK)
+                    {
+                        LogError("Could not LARGE_FILE_upload_blob_start");
+                        IoTHubClient_LL_UploadToBlob_Destroy(handle->blobHandle);
+                        Lock_Deinit(handle->lockHandle);
+                        free(handle);
+                        handle = NULL;
+                    }
+                }
+            }
+        }
+    }
+    return handle;
+}
+
+void LARGE_FILE_close(LARGE_FILE_HANDLE handle)
+{
+    if (handle == NULL)
+    {
+        LogError("unexpected NULL argument");
+    }
+    else
+    {
+        if (handle->responseToIoTHub != NULL)
+        {
+            BUFFER_delete(handle->responseToIoTHub);
+        }
+
+        if (handle->requestHttpHeaders != NULL)
+        {
+            HTTPHeaders_Free(handle->requestHttpHeaders);
+        }
+
+        if (handle->correlationId != NULL)
+        {
+            STRING_delete(handle->correlationId);
+        }
+
+        if (handle->iotHubHttpApiExHandle != NULL)
+        {
+            HTTPAPIEX_Destroy(handle->iotHubHttpApiExHandle);
+        }
+
+        if (handle->lockHandle != NULL)
+        {
+            Lock_Deinit(handle->lockHandle);
+        }
+
+        if (handle->sasUri != NULL)
+        {
+            STRING_delete(handle->sasUri);
+        }
+
+        free(handle);
+    }
+}
+
+bool LARGE_FILE_write(const unsigned char* source, size_t size, LARGE_FILE_HANDLE fileHandle)
+{
+    bool result; // TODO find a more significant return value
+    if (
+        (size > 0) &&
+        (source == NULL)
+        )
+    {
+        LogError("combination of source = %p and size = %zu is invalid", source, size);
+        result = false;
+    }
+    else if (size > 4 * 1024 * 1024)
+    {
+        LogError("size too big (%zu)", size);
+        result = false;
+    }
+    else
+    {
+        // fileHandle must be valid
+        if (1 == fileHandle->isError)
+        {
+            LogError("Invalid file handle");
+            result = false;
+        }
+        else if (fileHandle->blockID >= 50000)
+        {
+            LogError("Too many blocks already written (max 50000)");
+        }
+        else
+        {
+            // No concurrent block writing allowed
+            if (Lock(fileHandle->lockHandle) != LOCK_OK)
+            {
+                LogError("unable to lock");
+                result = false;
+            }
+            else
+            {
+                // Create buffer
+                BUFFER_HANDLE requestBuffer = BUFFER_create(source, size);
+                if (requestBuffer == NULL)
+                {
+                    LogError("unable to BUFFER_create");
+                    result = false;
+                }
+                else
+                {
+                    BLOB_RESULT uploadBlockResult;
+                    uploadBlockResult = Blob_UploadNextBlock(requestBuffer,
+                                                             fileHandle->blockID,
+                                                             &(fileHandle->isError),
+                                                             fileHandle->xml,
+                                                             fileHandle->relativePath,
+                                                             fileHandle->httpApiExHandle,
+                                                             fileHandle->httpStatus,
+                                                             fileHandle->responseToIoTHub);
+
+                    if (uploadBlockResult == BLOB_OK && fileHandle->isError == 0)
+                    {
+                        fileHandle->blockID++;
+                    }
+                    else
+                    {
+                        LogError("unable to Blob_UploadNextBlock (uploadBlockResult = %i, fileHandle->isError = %i)", uploadBlockResult, fileHandle->isError);
+                        result = false;
+                    }
+
+                    BUFFER_delete(requestBuffer);
+                }
+
+                (void)Unlock(fileHandle->lockHandle);
+            }
+        }
+    }
+
+    return result;
+}
 
 #endif /*DONT_USE_UPLOADTOBLOB*/
 
