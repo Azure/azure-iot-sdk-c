@@ -178,6 +178,7 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     bool log_trace;
     bool raw_trace;
     TICK_COUNTER_HANDLE msgTickCounter;
+	OPTIONHANDLER_HANDLE saved_tls_options;		// Here are the options from the xio layer if any is saved.
 
     // Internal lists for message tracking
     PDLIST_ENTRY waitingToSend;
@@ -249,6 +250,15 @@ static void free_proxy_data(MQTTTRANSPORT_HANDLE_DATA* mqtt_transport_instance)
         free(mqtt_transport_instance->http_proxy_password);
         mqtt_transport_instance->http_proxy_password = NULL;
     }
+}
+
+static void set_saved_tls_options(PMQTTTRANSPORT_HANDLE_DATA transport, OPTIONHANDLER_HANDLE new_options)
+{
+	if (transport->saved_tls_options != NULL)
+	{
+		OptionHandler_Destroy(transport->saved_tls_options);
+	}
+	transport->saved_tls_options = new_options;
 }
 
 int IoTHubTransport_MQTT_Common_SetRetryPolicy(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitInSeconds)
@@ -1280,6 +1290,9 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
 
 static void DisconnectFromClient(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 {
+	OPTIONHANDLER_HANDLE options = xio_retrieveoptions(transport_data->xioTransport);
+	set_saved_tls_options(transport_data, options);
+
     (void)mqtt_client_disconnect(transport_data->mqttClient);
     xio_destroy(transport_data->xioTransport);
     transport_data->xioTransport = NULL;
@@ -1469,9 +1482,26 @@ static int GetTransportProviderIfNecessary(PMQTTTRANSPORT_HANDLE_DATA transport_
             LogError("Unable to create the lower level TLS layer.");
             result = __FAILURE__;
         }
-        else
-        {
-            result = 0;
+		else
+		{
+			if (transport_data->saved_tls_options != NULL)
+			{
+				if (OptionHandler_FeedOptions(transport_data->saved_tls_options, transport_data->xioTransport) != OPTIONHANDLER_OK)
+				{
+					LogError("Failed feeding existing options to new TLS instance.");
+					result = __FAILURE__;
+				}
+				else
+				{
+					// The tlsio has the options, so our copy can be deleted
+					set_saved_tls_options(transport_data, NULL);
+					result = 0;
+				}
+			}
+			else
+			{
+				result = 0;
+			}
         }
     }
     else
@@ -1666,7 +1696,9 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 if ((current_time - transport_data->mqtt_connect_time) / 1000 > (SAS_TOKEN_DEFAULT_LIFETIME*SAS_REFRESH_MULTIPLIER))
                 {
                     /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_058: [ If the sas token has timed out IoTHubTransport_MQTT_Common_DoWork shall disconnect from the mqtt client and destroy the transport information and wait for reconnect. ] */
-                    (void)mqtt_client_disconnect(transport_data->mqttClient);
+					OPTIONHANDLER_HANDLE options = xio_retrieveoptions(transport_data->xioTransport);
+					set_saved_tls_options(transport_data, options);
+					(void)mqtt_client_disconnect(transport_data->mqttClient);
                     xio_destroy(transport_data->xioTransport);
                     transport_data->xioTransport = NULL;
 
@@ -1956,6 +1988,8 @@ void IoTHubTransport_MQTT_Common_Destroy(TRANSPORT_LL_HANDLE handle)
         STRING_delete(transport_data->topic_GetState);
         STRING_delete(transport_data->topic_NotifyState);
         STRING_delete(transport_data->topic_DeviceMethods);
+
+		set_saved_tls_options(transport_data, NULL);
 
         tickcounter_destroy(transport_data->msgTickCounter);
         /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_012: [ `IoTHubTransport_MQTT_Common_Destroy` shall free the stored proxy options. ]*/
