@@ -299,6 +299,7 @@ TEST_FUNCTION(IoTHubMessage_CreateFromByteArray_fails)
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(BUFFER_create(c, 1));
     STRICT_EXPECTED_CALL(Map_Create(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Map_Create(IGNORED_PTR_ARG));
 
     umock_c_negative_tests_snapshot();
 
@@ -470,11 +471,12 @@ TEST_FUNCTION(IoTHubMessage_Destroy_destroys_a_BYTEARRAY_IoTHubMEssage)
 
     STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Map_Destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Map_Destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(h));
 
     //act
@@ -495,11 +497,12 @@ TEST_FUNCTION(IoTHubMessage_Destroy_destroys_a_STRING_IoTHubMessage)
 
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Map_Destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Map_Destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(h));
 
     //act
@@ -1421,7 +1424,7 @@ TEST_FUNCTION(IoTHubMessage_GetContentEncodingSystemProperty_Fails)
     IoTHubMessage_Destroy(h);
 }
 
-/* Tests_SRS_IOTHUBMESSAGE_07_022: [if the iotHubMessageHandle parameter is NULL then IoTHubMessage_GetDiagnosticId shall return a NULL value.] */
+// Codes_SRS_IOTHUBMESSAGE_10_001: [If any of the parameters are NULL then IoTHubMessage_GetDiagnosticId shall return a NULL value.] 
 TEST_FUNCTION(IoTHubMessage_GetDiagnosticId_NULL_handle_Fails)
 {
     //arrange
@@ -1436,14 +1439,12 @@ TEST_FUNCTION(IoTHubMessage_GetDiagnosticId_NULL_handle_Fails)
     //cleanup
 }
 
-/* Tests_SRS_IOTHUBMESSAGE_07_022: [if the iotHubMessageHandle parameter is NULL then IoTHubMessage_GetDiagnosticId shall return a NULL value.] */
+/* Codes_SRS_IOTHUBMESSAGE_10_002: [IoTHubMessage_GetDiagnosticId shall return the diagnosticId as a const char*.] */
 TEST_FUNCTION(IoTHubMessage_GetDiagnosticId_DiagnosticId_Not_Set_Fails)
 {
     // arrange
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromString(TEST_STRING_VALUE);
     umock_c_reset_all_calls();
-
-    STRICT_EXPECTED_CALL(Map_GetValueFromKey(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
     //act
     const char* result = IoTHubMessage_GetDiagnosticId(h);
@@ -1456,7 +1457,7 @@ TEST_FUNCTION(IoTHubMessage_GetDiagnosticId_DiagnosticId_Not_Set_Fails)
     IoTHubMessage_Destroy(h);
 }
 
-/* Tests_SRS_IOTHUBMESSAGE_07_023: [IoTHubMessage_GetDiagnosticId shall return the diagnosticId as a const char*.] */
+/* Codes_SRS_IOTHUBMESSAGE_10_002: [IoTHubMessage_GetDiagnosticId shall return the diagnosticId as a const char*.] */
 TEST_FUNCTION(IoTHubMessage_GetDiagnosticId_SUCCEED)
 {
     // arrange
@@ -1464,9 +1465,6 @@ TEST_FUNCTION(IoTHubMessage_GetDiagnosticId_SUCCEED)
     (void)IoTHubMessage_SetDiagnosticId(h, TEST_DIAGNOSTIC_ID);
 
     umock_c_reset_all_calls();
-
-    STRICT_EXPECTED_CALL(Map_GetValueFromKey(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .SetReturn(TEST_DIAGNOSTIC_ID);
 
     //act
     const char* result = IoTHubMessage_GetDiagnosticId(h);
@@ -1479,7 +1477,25 @@ TEST_FUNCTION(IoTHubMessage_GetDiagnosticId_SUCCEED)
     IoTHubMessage_Destroy(h);
 }
 
-/* Tests_SRS_IOTHUBMESSAGE_07_024: [if any of the parameters are NULL then IoTHubMessage_SetDiagnosticId shall return a IOTHUB_MESSAGE_INVALID_ARG value.] */
+// Codes_SRS_IOTHUBMESSAGE_10_003: [If any of the parameters are NULL then IoTHubMessage_SetDiagnosticId shall return a IOTHUB_MESSAGE_INVALID_ARG value.] 
+TEST_FUNCTION(IoTHubMessage_SetDiagnosticId_NULL_handle_Fails)
+{
+    //arrange
+    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetDiagnosticId(NULL, TEST_DIAGNOSTIC_ID);
+
+    //assert
+    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubMessage_Destroy(h);
+}
+
+// Codes_SRS_IOTHUBMESSAGE_10_003: [If any of the parameters are NULL then IoTHubMessage_SetDiagnosticId shall return a IOTHUB_MESSAGE_INVALID_ARG value.] 
 TEST_FUNCTION(IoTHubMessage_SetDiagnosticId_NULL_DiagnosticId_Fails)
 {
     //arrange
@@ -1497,45 +1513,16 @@ TEST_FUNCTION(IoTHubMessage_SetDiagnosticId_NULL_DiagnosticId_Fails)
     IoTHubMessage_Destroy(h);
 }
 
-/* Tests_SRS_IOTHUBMESSAGE_07_025: [if any error then IoTHubMessage_SetDiagnosticId shall return a IOTHUB_MESSAGE_ERROR value.] */
-TEST_FUNCTION(IoTHubMessage_SetDiagnosticId_Fails)
+// Codes_SRS_IOTHUBMESSAGE_10_004: [If the IOTHUB_MESSAGE_HANDLE `diagnosticId` is not NULL it shall be deallocated.] 
+TEST_FUNCTION(IoTHubMessage_SetDiagnosticId_DiagnosticId_Not_NULL_SUCCEED)
 {
     //arrange
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
-
-    int negativeTestsInitResult = umock_c_negative_tests_init();
-    ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
-
-    STRICT_EXPECTED_CALL(Map_AddOrUpdate(IGNORED_PTR_ARG, DIAGNOSTIC_ID_PROPERTY_NAME, TEST_DIAGNOSTIC_ID));
-
-    umock_c_negative_tests_snapshot();
-
-    //act
-    size_t count = umock_c_negative_tests_call_count();
-    for (size_t index = 0; index < count; index++)
-    {
-        umock_c_negative_tests_reset();
-        umock_c_negative_tests_fail_call(index);
-
-        IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetDiagnosticId(h, TEST_DIAGNOSTIC_ID);
-
-        //assert
-        ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_ERROR, result);
-    }
-
-    //cleanup
-    IoTHubMessage_Destroy(h);
-    umock_c_negative_tests_deinit();
-}
-
-/* Tests_SRS_IOTHUBMESSAGE_07_026: [IoTHubMessage_SetDiagnosticId finishes successfully it shall return IOTHUB_MESSAGE_OK.] */
-TEST_FUNCTION(IoTHubMessage_SetDiagnosticId_SUCCEED)
-{
-    //arrange
-    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
+    (void)IoTHubMessage_SetDiagnosticId(h, TEST_DIAGNOSTIC_ID);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Map_AddOrUpdate(IGNORED_PTR_ARG, DIAGNOSTIC_ID_PROPERTY_NAME, TEST_DIAGNOSTIC_ID));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_DIAGNOSTIC_ID));
 
     //act
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetDiagnosticId(h, TEST_DIAGNOSTIC_ID);
@@ -1548,18 +1535,51 @@ TEST_FUNCTION(IoTHubMessage_SetDiagnosticId_SUCCEED)
     IoTHubMessage_Destroy(h);
 }
 
-/* Tests_SRS_IOTHUBMESSAGE_07_027: [If the IOTHUB_MESSAGE_HANDLE diagnosticId is not NULL, then the IOTHUB_MESSAGE_HANDLE diagnosticId will be deallocated.] */
-TEST_FUNCTION(IoTHubMessage_SetDiagnosticId_DiagnosticId_Not_NULL_SUCCEED)
+// Codes_SRS_IOTHUBMESSAGE_10_005: [If the allocation or the copying of `diagnosticId` fails, then IoTHubMessage_SetDiagnosticId shall return IOTHUB_MESSAGE_ERROR.]
+TEST_FUNCTION(IoTHubMessage_SetDiagnosticId_Fails)
+{
+    // arrange
+    ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
+
+    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_DIAGNOSTIC_ID));
+    umock_c_negative_tests_snapshot();
+
+    //act
+    size_t count = umock_c_negative_tests_call_count();
+    for (size_t index = 0; index < count; index++)
+    {
+        umock_c_negative_tests_reset();
+        umock_c_negative_tests_fail_call(index);
+
+        char tmp_msg[64];
+        sprintf(tmp_msg, "Failed in test %zu/%zu", index, count);
+
+        //act
+        IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetDiagnosticId(h, TEST_DIAGNOSTIC_ID);
+
+        //assert
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_ERROR, result, tmp_msg);
+    }
+
+    //cleanup
+    umock_c_negative_tests_deinit();
+    IoTHubMessage_Destroy(h);
+}
+
+// Codes_SRS_IOTHUBMESSAGE_10_006: [If IoTHubMessage_SetDiagnosticId finishes successfully it shall return IOTHUB_MESSAGE_OK.]
+TEST_FUNCTION(IoTHubMessage_SetDiagnosticId_SUCCEED)
 {
     //arrange
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
-    (void)IoTHubMessage_SetDiagnosticId(h, TEST_DIAGNOSTIC_ID);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Map_AddOrUpdate(IGNORED_PTR_ARG, DIAGNOSTIC_ID_PROPERTY_NAME, TEST_DIAGNOSTIC_ID2));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_DIAGNOSTIC_ID));
 
     //act
-    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetDiagnosticId(h, TEST_DIAGNOSTIC_ID2);
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetDiagnosticId(h, TEST_DIAGNOSTIC_ID);
 
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
@@ -1569,13 +1589,13 @@ TEST_FUNCTION(IoTHubMessage_SetDiagnosticId_DiagnosticId_Not_NULL_SUCCEED)
     IoTHubMessage_Destroy(h);
 }
 
-/* Tests_SRS_IOTHUBMESSAGE_07_028: [if the iotHubMessageHandle parameter is NULL then IoTHubMessage_GetCreationTimeUtc shall return a NULL value.] */
-TEST_FUNCTION(IoTHubMessage_GetCreationTimeUtc_NULL_handle_Fails)
+/* Codes_SRS_IOTHUBMESSAGE_10_007: [if the iotHubMessageHandle parameter is NULL then IoTHubMessage_GetDiagnosticCreationTimeUtc shall return a NULL value.] */
+TEST_FUNCTION(IoTHubMessage_GetDiagnosticCreationTimeUtc_NULL_handle_Fails)
 {
     //arrange
 
     //act
-    const char* result = IoTHubMessage_GetCreationTimeUtc(NULL);
+    const char* result = IoTHubMessage_GetDiagnosticCreationTimeUtc(NULL);
 
     //assert
     ASSERT_IS_NULL(result);
@@ -1584,8 +1604,8 @@ TEST_FUNCTION(IoTHubMessage_GetCreationTimeUtc_NULL_handle_Fails)
     //cleanup
 }
 
-/* Tests_SRS_IOTHUBMESSAGE_07_028: [if the iotHubMessageHandle parameter is NULL then IoTHubMessage_GetCreationTimeUtc shall return a NULL value.] */
-TEST_FUNCTION(IoTHubMessage_GetCreationTimeUtc_CreationTimeUtc_Not_Set_Fails)
+/* Codes_SRS_IOTHUBMESSAGE_10_007: [if the iotHubMessageHandle parameter is NULL then IoTHubMessage_GetDiagnosticCreationTimeUtc shall return a NULL value.] */
+TEST_FUNCTION(IoTHubMessage_GetDiagnosticCreationTimeUtc_CreationTimeUtc_Not_Set_Fails)
 {
     // arrange
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromString(TEST_STRING_VALUE);
@@ -1594,7 +1614,7 @@ TEST_FUNCTION(IoTHubMessage_GetCreationTimeUtc_CreationTimeUtc_Not_Set_Fails)
     STRICT_EXPECTED_CALL(Map_GetValueFromKey(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
     //act
-    const char* result = IoTHubMessage_GetCreationTimeUtc(h);
+    const char* result = IoTHubMessage_GetDiagnosticCreationTimeUtc(h);
 
     ///assert
     ASSERT_IS_NULL(result);
@@ -1604,12 +1624,12 @@ TEST_FUNCTION(IoTHubMessage_GetCreationTimeUtc_CreationTimeUtc_Not_Set_Fails)
     IoTHubMessage_Destroy(h);
 }
 
-/* Tests_SRS_IOTHUBMESSAGE_07_029: [IoTHubMessage_GetCreationTimeUtc shall return the CreationTimeUtc as a const char*.] */
-TEST_FUNCTION(IoTHubMessage_GetCreationTimeUtc_SUCCEED)
+/* Codes_SRS_IOTHUBMESSAGE_10_008: [IoTHubMessage_GetDiagnosticCreationTimeUtc shall return the diagCreationTimeUtc as a const char*.] */
+TEST_FUNCTION(IoTHubMessage_GetDiagnosticCreationTimeUtc_SUCCEED)
 {
     // arrange
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromString(TEST_STRING_VALUE);
-    (void)IoTHubMessage_SetCreationTimeUtc(h, TEST_DIAGNOSTIC_ID);
+    (void)IoTHubMessage_SetDiagnosticCreationTimeUtc(h, TEST_DIAGNOSTIC_ID);
 
     umock_c_reset_all_calls();
 
@@ -1617,7 +1637,7 @@ TEST_FUNCTION(IoTHubMessage_GetCreationTimeUtc_SUCCEED)
         .SetReturn(TEST_DIAGNOSTIC_ID);
 
     //act
-    const char* result = IoTHubMessage_GetCreationTimeUtc(h);
+    const char* result = IoTHubMessage_GetDiagnosticCreationTimeUtc(h);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, TEST_DIAGNOSTIC_ID, result);
@@ -1627,15 +1647,15 @@ TEST_FUNCTION(IoTHubMessage_GetCreationTimeUtc_SUCCEED)
     IoTHubMessage_Destroy(h);
 }
 
-/* Tests_SRS_IOTHUBMESSAGE_07_030: [if any of the parameters are NULL then IoTHubMessage_SetCreationTimeUtc shall return a IOTHUB_MESSAGE_INVALID_ARG value.] */
-TEST_FUNCTION(IoTHubMessage_SetCreationTimeUtc_NULL_CreationTimeUtc_Fails)
+/* Tests_SRS_IOTHUBMESSAGE_10_009: [if any of the parameters are NULL then IoTHubMessage_SetDiagnosticCreationTimeUtc shall return a IOTHUB_MESSAGE_INVALID_ARG value.] */
+TEST_FUNCTION(IoTHubMessage_SetDiagnosticCreationTimeUtc_NULL_CreationTimeUtc_Fails)
 {
     //arrange
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
     umock_c_reset_all_calls();
 
     //act
-    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetCreationTimeUtc(h, NULL);
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetDiagnosticCreationTimeUtc(h, NULL);
 
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, result);
@@ -1645,8 +1665,8 @@ TEST_FUNCTION(IoTHubMessage_SetCreationTimeUtc_NULL_CreationTimeUtc_Fails)
     IoTHubMessage_Destroy(h);
 }
 
-/* Tests_SRS_IOTHUBMESSAGE_07_031: [if any error then IoTHubMessage_SetCreationTimeUtc shall return a IOTHUB_MESSAGE_ERROR value.] */
-TEST_FUNCTION(IoTHubMessage_SetCreationTimeUtc_Fails)
+/* Tests_SRS_IOTHUBMESSAGE_10_010: [if any error then IoTHubMessage_SetDiagnosticCreationTimeUtc shall return a IOTHUB_MESSAGE_ERROR value.] */
+TEST_FUNCTION(IoTHubMessage_SetDiagnosticCreationTimeUtc_Fails)
 {
     //arrange
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
@@ -1654,7 +1674,7 @@ TEST_FUNCTION(IoTHubMessage_SetCreationTimeUtc_Fails)
     int negativeTestsInitResult = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
-    STRICT_EXPECTED_CALL(Map_AddOrUpdate(IGNORED_PTR_ARG, CREATION_TIME_UTC_PROPERTY_NAME, TEST_CREATION_TIME_UTC));
+    STRICT_EXPECTED_CALL(Map_AddOrUpdate(IGNORED_PTR_ARG, DIAG_CREATION_TIME_UTC_PROPERTY_NAME, TEST_CREATION_TIME_UTC));
 
     umock_c_negative_tests_snapshot();
 
@@ -1665,7 +1685,7 @@ TEST_FUNCTION(IoTHubMessage_SetCreationTimeUtc_Fails)
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 
-        IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetCreationTimeUtc(h, TEST_CREATION_TIME_UTC);
+        IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetDiagnosticCreationTimeUtc(h, TEST_CREATION_TIME_UTC);
 
         //assert
         ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_ERROR, result);
@@ -1676,17 +1696,17 @@ TEST_FUNCTION(IoTHubMessage_SetCreationTimeUtc_Fails)
     umock_c_negative_tests_deinit();
 }
 
-/* Tests_SRS_IOTHUBMESSAGE_07_032: [IoTHubMessage_SetCreationTimeUtc finishes successfully it shall return IOTHUB_MESSAGE_OK.] */
-TEST_FUNCTION(IoTHubMessage_SetCreationTimeUtc_SUCCEED)
+/* Tests_SRS_IOTHUBMESSAGE_10_011: [IoTHubMessage_SetDiagnosticCreationTimeUtc finishes successfully it shall return IOTHUB_MESSAGE_OK.] */
+TEST_FUNCTION(IoTHubMessage_SetDiagnosticCreationTimeUtc_SUCCEED)
 {
     //arrange
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Map_AddOrUpdate(IGNORED_PTR_ARG, CREATION_TIME_UTC_PROPERTY_NAME, TEST_CREATION_TIME_UTC));
+    STRICT_EXPECTED_CALL(Map_AddOrUpdate(IGNORED_PTR_ARG, DIAG_CREATION_TIME_UTC_PROPERTY_NAME, TEST_CREATION_TIME_UTC));
 
     //act
-    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetCreationTimeUtc(h, TEST_CREATION_TIME_UTC);
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetDiagnosticCreationTimeUtc(h, TEST_CREATION_TIME_UTC);
 
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
@@ -1696,18 +1716,18 @@ TEST_FUNCTION(IoTHubMessage_SetCreationTimeUtc_SUCCEED)
     IoTHubMessage_Destroy(h);
 }
 
-/* Tests_SRS_IOTHUBMESSAGE_07_033: [If the IOTHUB_MESSAGE_HANDLE CreationTimeUtc is not NULL, then the IOTHUB_MESSAGE_HANDLE CreationTimeUtc will be deallocated.] */
-TEST_FUNCTION(IoTHubMessage_SetCreationTimeUtc_CreationTimeUtc_Not_NULL_SUCCEED)
+/* Codes_SRS_IOTHUBMESSAGE_10_012: [If the IOTHUB_MESSAGE_HANDLE CreationTimeUtc is not NULL, then the IOTHUB_MESSAGE_HANDLE diagCreationTimeUtc will be deallocated.] */
+TEST_FUNCTION(IoTHubMessage_SetDiagnosticCreationTimeUtc_CreationTimeUtc_Not_NULL_SUCCEED)
 {
     //arrange
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
-    (void)IoTHubMessage_SetCreationTimeUtc(h, TEST_CREATION_TIME_UTC);
+    (void)IoTHubMessage_SetDiagnosticCreationTimeUtc(h, TEST_CREATION_TIME_UTC);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Map_AddOrUpdate(IGNORED_PTR_ARG, CREATION_TIME_UTC_PROPERTY_NAME, TEST_CREATION_TIME_UTC2));
+    STRICT_EXPECTED_CALL(Map_AddOrUpdate(IGNORED_PTR_ARG, DIAG_CREATION_TIME_UTC_PROPERTY_NAME, TEST_CREATION_TIME_UTC2));
 
     //act
-    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetCreationTimeUtc(h, TEST_CREATION_TIME_UTC2);
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetDiagnosticCreationTimeUtc(h, TEST_CREATION_TIME_UTC2);
 
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);

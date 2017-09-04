@@ -92,7 +92,7 @@ bool IoTHubClient_Diagnostic_AddIfNecessary(IOTHUB_DIAGNOSTIC_SETTING_DATA* diag
         //TODO: get current time with milliseconds precision
         char timeBuffer[30];
         get_current_time_utc(timeBuffer, 30, "%Y-%m-%dT%H:%M:%SZ");
-        if (IoTHubMessage_SetCreationTimeUtc(messageHandle, timeBuffer) != IOTHUB_MESSAGE_OK)
+        if (IoTHubMessage_SetDiagnosticCreationTimeUtc(messageHandle, timeBuffer) != IOTHUB_MESSAGE_OK)
         {
             /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_002: [ IoTHubClient_Diagnostic_AddIfNecessary should return false if failing to add diagnostic property. ]*/
             return false;

@@ -78,8 +78,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_SetDiagnosticId, IOTHUB_MESSAGE_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_SetDiagnosticId, IOTHUB_MESSAGE_ERROR);
-    REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_SetCreationTimeUtc, IOTHUB_MESSAGE_OK);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_SetCreationTimeUtc, IOTHUB_MESSAGE_ERROR);
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_SetDiagnosticCreationTimeUtc, IOTHUB_MESSAGE_OK);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_SetDiagnosticCreationTimeUtc, IOTHUB_MESSAGE_ERROR);
 
 
     REGISTER_GLOBAL_MOCK_RETURN(Map_Add, MAP_OK);
@@ -140,7 +140,7 @@ TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_fails)
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_SetCreationTimeUtc(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_SetDiagnosticCreationTimeUtc(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
@@ -197,7 +197,7 @@ TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_no_diag_info_with_percentag
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_SetCreationTimeUtc(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_SetDiagnosticCreationTimeUtc(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
@@ -226,7 +226,7 @@ TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_no_diag_info_with_normal_pe
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_SetCreationTimeUtc(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_SetDiagnosticCreationTimeUtc(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 

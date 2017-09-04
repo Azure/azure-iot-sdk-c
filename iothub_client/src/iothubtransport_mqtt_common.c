@@ -76,8 +76,10 @@ static const char* MESSAGE_ID_PROPERTY = "mid";
 static const char* CORRELATION_ID_PROPERTY = "cid";
 static const char* CONTENT_TYPE_PROPERTY = "ct";
 static const char* CONTENT_ENCODING_PROPERTY = "ce";
-static const char* CREATION_TIME_UTC_PROPERTY = "ctime";
-static const char* DIAGNOSTIC_ID_PROPERTY = "did";
+static const char* DIAGNOSTIC_ID_PROPERTY = "diagid";
+static const char* DIAGNOSTIC_CONTEXT_PROPERTY = "diagcxt";
+
+static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "diagtime";
 
 #define UNSUBSCRIBE_FROM_TOPIC                  0x0000
 #define SUBSCRIBE_GET_REPORTED_STATE_TOPIC      0x0001
@@ -95,6 +97,7 @@ typedef struct SYSTEM_PROPERTY_INFO_TAG
     size_t propLength;
 } SYSTEM_PROPERTY_INFO;
 
+//TODO: add diagnostic properties support for C2D messages
 static SYSTEM_PROPERTY_INFO sysPropList[] = {
     { "%24.exp", 7 },
     { "%24.mid", 7 },
@@ -103,8 +106,6 @@ static SYSTEM_PROPERTY_INFO sysPropList[] = {
     { "%24.cid", 7 },
     { "%24.ct", 6 },
     { "%24.ce", 6 },
-    { "%24.ctime", 9 },
-    { "%24.did", 7 },
     { "devices/", 8 },
     { "iothub-operation", 16 },
     { "iothub-ack", 10 }
@@ -650,18 +651,60 @@ static STRING_HANDLE addPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_me
 
     if (result != NULL)
     {
-        const char* creation_time_utc = IoTHubMessage_GetCreationTimeUtc(iothub_message_handle);
+        //construct diagnostic context, it should be urlencode(key1=value1,key2=value2)
+        const char* creation_time_utc = IoTHubMessage_GetDiagnosticCreationTimeUtc(iothub_message_handle);
+        STRING_HANDLE diagContextHandle = NULL;
         if (creation_time_utc != NULL)
         {
-            if (STRING_sprintf(result, "%s%%24.%s=%s", index == 0 ? "" : PROPERTY_SEPARATOR, CREATION_TIME_UTC_PROPERTY, creation_time_utc) != 0)
+            diagContextHandle = STRING_construct(DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY);
+            if (diagContextHandle != NULL)
             {
-                LogError("Failed setting creation time utc");
+                if (STRING_sprintf(diagContextHandle, "=%s", creation_time_utc) != 0)
+                {
+                    LogError("Failed setting diagnostic creation time");
+                    STRING_delete(diagContextHandle);
+                    diagContextHandle = NULL;
+                    STRING_delete(result);
+                    result = NULL;
+                }
+            }
+            else
+            {
+                LogError("Failed constructing diagnostic context");
                 STRING_delete(result);
                 result = NULL;
             }
+        }
+        //Add other diagnostic context properties if have more
+
+        if (diagContextHandle != NULL)
+        {
+            STRING_HANDLE encodedContextValueHandle = URL_Encode(diagContextHandle);
+            const char* encodedContextValueString = NULL;
+            if (encodedContextValueHandle != NULL &&
+                (encodedContextValueString = STRING_c_str(encodedContextValueHandle)) != NULL)
+            {
+                if (STRING_sprintf(result, "%s%%24.%s=%s", index == 0 ? "" : PROPERTY_SEPARATOR, DIAGNOSTIC_CONTEXT_PROPERTY, encodedContextValueString) != 0)
+                {
+                    LogError("Failed setting diagnostic context");
+                    STRING_delete(result);
+                    result = NULL;
+                }
+                STRING_delete(encodedContextValueHandle);
+                encodedContextValueHandle = NULL;
+            }
+            else
+            {
+                LogError("Failed encoding diagnostic context value");
+                STRING_delete(result);
+                result = NULL;
+            }
+            STRING_delete(diagContextHandle);
+            diagContextHandle = NULL;
             index++;
         }
     }
+
     return result;
 }
 
@@ -864,7 +907,7 @@ static bool isSystemProperty(const char* tokenData)
     return result;
 }
 
-static int extractMqttProperties(IOTHUB_MESSAGE_HANDLE messageHandle, const char* topic_name)
+static int extractMqttProperties(IOTHUB_MESSAGE_HANDLE IoTHubMessage, const char* topic_name)
 {
     int result;
     STRING_HANDLE mqttTopic = STRING_construct(topic_name);
@@ -878,7 +921,7 @@ static int extractMqttProperties(IOTHUB_MESSAGE_HANDLE messageHandle, const char
         STRING_TOKENIZER_HANDLE token = STRING_TOKENIZER_create(mqttTopic);
         if (token != NULL)
         {
-            MAP_HANDLE propertyMap = IoTHubMessage_Properties(messageHandle);
+            MAP_HANDLE propertyMap = IoTHubMessage_Properties(IoTHubMessage);
             if (propertyMap == NULL)
             {
                 LogError("Failure to retrieve IoTHubMessage_properties.");
@@ -938,7 +981,7 @@ static int extractMqttProperties(IOTHUB_MESSAGE_HANDLE messageHandle, const char
                                                 {
                                                     if (strcmp((const char*)&propName[nameLen - 3], MESSAGE_ID_PROPERTY) == 0)
                                                     {
-                                                        if (IoTHubMessage_SetMessageId(messageHandle, propValue) != IOTHUB_MESSAGE_OK)
+                                                        if (IoTHubMessage_SetMessageId(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
                                                         {
                                                             LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'messageId' property.");
                                                             result = __FAILURE__;
@@ -946,25 +989,9 @@ static int extractMqttProperties(IOTHUB_MESSAGE_HANDLE messageHandle, const char
                                                     }
                                                     else if (strcmp((const char*)&propName[nameLen - 3], CORRELATION_ID_PROPERTY) == 0)
                                                     {
-                                                        if (IoTHubMessage_SetCorrelationId(messageHandle, propValue) != IOTHUB_MESSAGE_OK)
+                                                        if (IoTHubMessage_SetCorrelationId(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
                                                         {
                                                             LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'correlationId' property.");
-                                                            result = __FAILURE__;
-                                                        }
-                                                    }
-                                                    else if (strcmp((const char*)&propName[nameLen - 3], DIAGNOSTIC_ID_PROPERTY) == 0)
-                                                    {
-                                                        if (IoTHubMessage_SetDiagnosticId(messageHandle, propValue) != IOTHUB_MESSAGE_OK)
-                                                        {
-                                                            LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'diagnosticId' property");
-                                                            result = __FAILURE__;
-                                                        }
-                                                    }
-                                                    else if (strcmp((const char*)&propName[nameLen - 3], CREATION_TIME_UTC_PROPERTY) == 0)
-                                                    {
-                                                        if (IoTHubMessage_SetCreationTimeUtc(messageHandle, propValue) != IOTHUB_MESSAGE_OK)
-                                                        {
-                                                            LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'creationTimeUtc' property");
                                                             result = __FAILURE__;
                                                         }
                                                     }
@@ -973,7 +1000,7 @@ static int extractMqttProperties(IOTHUB_MESSAGE_HANDLE messageHandle, const char
                                                 // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_012: [ If type is IOTHUB_TYPE_TELEMETRY and the system property `$.ct` is defined, its value shall be set on the IOTHUB_MESSAGE_HANDLE's ContentType property ]
                                                 if (strcmp((const char*)&propName[nameLen - 2], CONTENT_TYPE_PROPERTY) == 0)
                                                 {
-                                                    if (IoTHubMessage_SetContentTypeSystemProperty(messageHandle, propValue) != IOTHUB_MESSAGE_OK)
+                                                    if (IoTHubMessage_SetContentTypeSystemProperty(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
                                                     {
                                                         LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'customContentType' property.");
                                                         result = __FAILURE__;
@@ -982,7 +1009,7 @@ static int extractMqttProperties(IOTHUB_MESSAGE_HANDLE messageHandle, const char
                                                 // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_013: [ If type is IOTHUB_TYPE_TELEMETRY and the system property `$.ce` is defined, its value shall be set on the IOTHUB_MESSAGE_HANDLE's ContentEncoding property ]
                                                 else if (strcmp((const char*)&propName[nameLen - 2], CONTENT_ENCODING_PROPERTY) == 0)
                                                 {
-                                                    if (IoTHubMessage_SetContentEncodingSystemProperty(messageHandle, propValue) != IOTHUB_MESSAGE_OK)
+                                                    if (IoTHubMessage_SetContentEncodingSystemProperty(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
                                                     {
                                                         LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'contentEncoding' property.");
                                                         result = __FAILURE__;
