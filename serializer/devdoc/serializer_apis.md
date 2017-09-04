@@ -186,11 +186,11 @@ DECLARE_MODEL(FunkyTV,
 The following is the C function definition of a method:
 
 ```c
-METHOD_RETURN_HANDLE methodName(modelName* model, arg1Type arg1, arg2Type arg2)
+METHODRETURN_HANDLE methodName(modelName* model, arg1Type arg1, arg2Type arg2)
 ```
 
-`METHOD_RETURN_HANDLE` is an abstract type around the following data:
--   int result; /\*the result of the method call\*/
+`METHODRETURN_HANDLE` is an abstract type around the following data:
+-   int statusCode; /\*the result of the method call\*/
 -   char* jsonValue; /\*the JSON value to be returned, can be `NULL`. \*/
 
 

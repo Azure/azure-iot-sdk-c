@@ -56,6 +56,7 @@ static XIO_HANDLE getIoTransportProvider(const char* fqdn, const MQTT_TRANSPORT_
 **SRS_IOTHUB_MQTT_TRANSPORT_07_013: [** If `platform_get_default_tlsio` returns NULL, `getIoTransportProvider` shall return NULL. **]**
 
 ## IoTHubTransportMqtt_Create
+
 ```c
 TRANSPORT_LL_HANDLE IoTHubTransportMqtt_Create(const IOTHUBTRANSPORT_CONFIG* config)
 ```
@@ -86,47 +87,13 @@ extern void IoTHubTransportMqtt_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle);
 
 **SRS_IOTHUB_MQTT_TRANSPORT_07_004: [** IoTHubTransportMqtt_Unregister shall register the TRANSPORT_LL_HANDLE by calling into the IoTHubMqttAbstract_Unregister function. **]**
 
-
-### IoTHubTransportMqtt_Subscribe_DeviceTwin
-
-```c
-int IoTHubTransportMqtt_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle)
-```
-
-
-
 ## IoTHubTransportMqtt_SendMessageDisposition
+
 ```c
 IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_SendMessageDisposition(MESSAGE_CALLBACK_INFO* messageData, IOTHUBMESSAGE_DISPOSITION_RESULT disposition);
 ```
 
 **SRS_IOTHUB_MQTT_TRANSPORT_10_001: [** IoTHubTransportMqtt_SendMessageDisposition shall send the message disposition by calling into the IoTHubMqttAbstract_SendMessageDisposition function. **]**
-
-
-
-### IoTHubTransportMqtt_Unsubscribe_DeviceTwin
-
-```c
-void IoTHubTransportMqtt_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle)
-```
-
-
-
-### IoTHubTransportMqtt_Subscribe_DeviceMethod
-
-```c
-int IoTHubTransportMqtt_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
-```
-
-
-
-### IoTHubTransportMqtt_Unsubscribe_DeviceMethod
-
-```c
-void IoTHubTransportMqtt_Unsubscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
-```
-
-
 
 ### IoTHubTransportMqtt_Subscribe
 

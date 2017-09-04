@@ -13,8 +13,12 @@
 #include "iothubtransportamqp.h"
 
 #ifdef MBED_BUILD_TIMESTAMP
-#include "certs.h"
+#define SET_TRUSTED_CERT_IN_SAMPLES
 #endif // MBED_BUILD_TIMESTAMP
+
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+#include "certs.h"
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 static const char* hubName = "[IoT Hub Name]";
 static const char* hubSuffix = "[IoT Hub Suffix]";
@@ -242,13 +246,13 @@ void iothub_client_sample_amqp_run(void)
                 bool traceOn = true;
                 IoTHubClient_LL_SetOption(iotHubClientHandle1, "logtrace", &traceOn);
 
-    #ifdef MBED_BUILD_TIMESTAMP
+    #ifdef SET_TRUSTED_CERT_IN_SAMPLES
                 // For mbed add the certificate information
                 if (IoTHubClient_LL_SetOption(iotHubClientHandle1, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
                 {
                     printf("failure to set option \"TrustedCerts\"\r\n");
                 }
-    #endif // MBED_BUILD_TIMESTAMP
+    #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
                 if (create_events(messages_device1, config1.deviceId) != 0 || create_events(messages_device2, config2.deviceId) != 0)
                 {

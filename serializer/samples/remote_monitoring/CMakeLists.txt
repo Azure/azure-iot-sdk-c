@@ -28,11 +28,18 @@ IF(WIN32)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 ENDIF(WIN32)
 
+#Conditionally use the SDK trusted certs in the samples
+if(${set_trusted_cert_in_samples})
+    add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
+	include_directories(${PROJECT_SOURCE_DIR}/certs)
+	set(samples_cert_file ${PROJECT_SOURCE_DIR}/certs/certs.c)
+endif()
+
 include_directories(. ${IOTHUB_CLIENT_INC_FOLDER})
 
 link_directories(${whatIsBuilding}_dll ${SHARED_UTIL_LIB_DIR})
 
-add_executable(remote_monitoring ${remote_monitoring_c_files} ${remote_monitoring_h_files})
+add_executable(remote_monitoring ${remote_monitoring_c_files} ${remote_monitoring_h_files} ${samples_cert_file})
 target_link_libraries(remote_monitoring serializer iothub_client iothub_client_amqp_transport)
 
 linkSharedUtil(remote_monitoring)
