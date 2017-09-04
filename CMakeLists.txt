@@ -4,7 +4,7 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(azure_iot_sdks)
 
-set(IOT_SDK_VERSION 1.1.21)
+set(IOT_SDK_VERSION 1.1.22)
 
 if(POLICY CMP0042)
     cmake_policy(SET CMP0042 NEW)
@@ -75,6 +75,13 @@ if(WIN32)
     option(use_openssl "set use_openssl to ON to use OpenSSL." OFF)
 else()
     option(use_openssl "set use_openssl to ON to use OpenSSL." ON)
+endif()
+
+#openssl samples on Windows need to have a trusted cert set
+if(WIN32 AND ${use_openssl})
+	option(set_trusted_cert_in_samples "set set_trusted_cert_in_samples to ON to have the samples set the SDK's built-in CA as TrustedCerts" ON)
+else()
+	option(set_trusted_cert_in_samples "set set_trusted_cert_in_samples to ON to have the samples set the SDK's built-in CA as TrustedCerts" OFF)
 endif()
 
 #setting nuget_e2e_tests will only generate e2e tests to run with nuget packages.  Install-packages from Package Manager Console in VS before building the projects

@@ -22,9 +22,16 @@ IF(WIN32)
 	add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
 ENDIF(WIN32)
 
+#Conditionally use the SDK trusted certs in the samples
+if(${set_trusted_cert_in_samples})
+    add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
+	include_directories(${PROJECT_SOURCE_DIR}/certs)
+	set(samples_cert_file ${PROJECT_SOURCE_DIR}/certs/certs.c)
+endif()
+
 include_directories(.)
 
-add_executable(iothub_client_sample_amqp_shared ${iothub_client_sample_amqp_shared_c_files} ${iothub_client_sample_amqp_shared_h_files})
+add_executable(iothub_client_sample_amqp_shared ${iothub_client_sample_amqp_shared_c_files} ${iothub_client_sample_amqp_shared_h_files} ${samples_cert_file})
 
 target_link_libraries(iothub_client_sample_amqp_shared
 		iothub_client

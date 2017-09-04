@@ -345,6 +345,7 @@ target_link_libraries(iothub_client ${iothub_client_libs})
 
 linkSharedUtil(iothub_client)
 set(iothub_client_libs
+    iothub_client_dll
     iothub_client 
     ${iothub_client_libs}
 )

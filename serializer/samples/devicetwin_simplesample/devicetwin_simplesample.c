@@ -77,12 +77,12 @@ static void deviceTwinGetStateCallback(DEVICE_TWIN_UPDATE_STATE update_state, co
 
 void onDesiredMaxSpeed(void* argument)
 {
-    /*by convention 'argument' is of the type of the MODEL encompassing the desired property*/
-    /*in this case, it is 'CarSettings'*/
+    // Note: The argument is NOT a pointer to desired_maxSpeed, but instead a pointer to the MODEL 
+    //       that contains desired_maxSpeed as one of its arguments.  In this case, it
+    //       is CarSettings*.
 
     CarSettings* car = argument;
     printf("received a new desired_maxSpeed = %" PRIu8 "\n", car->desired_maxSpeed);
-
 }
 
 void device_twin_simple_sample_run(void)

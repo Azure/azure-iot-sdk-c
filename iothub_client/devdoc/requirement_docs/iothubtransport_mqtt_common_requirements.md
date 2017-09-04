@@ -65,8 +65,6 @@ IoTHubTransport_MQTT_Common_Create shall create a TRANSPORT_LL_HANDLE that can b
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_005: [** MQTT transport shall use EXPONENTIAL_WITH_BACK_OFF as default retry policy **]**
 
-
-
 ### IoTHubTransport_MQTT_Common_Destroy
 
 ```c
@@ -181,7 +179,7 @@ int IoTHubTransport_MQTT_Common_Subscribe(TRANSPORT_LL_HANDLE handle)
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_016: [** IoTHubTransport_MQTT_Common_Subscribe shall set a flag to enable mqtt_client_subscribe to be called to subscribe to the Message Topic.**]**
 
-**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_035: [** If current packet state is not CONNACK, DISCONNECT_TYPE, or PACKET_TYPE_ERROR then IoTHubTransport_MQTT_Common_Subscribe shall set the packet state to SUBSCRIBE_TYPE.**]** 
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_035: [** If current packet state is not CONNACK, DISCONNECT_TYPE, or PACKET_TYPE_ERROR then IoTHubTransport_MQTT_Common_Subscribe shall set the packet state to SUBSCRIBE_TYPE.**]**
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_017: [** Upon failure IoTHubTransport_MQTT_Common_Subscribe shall return a non-zero value.**]**
 
@@ -251,6 +249,7 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIEN
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_011: [** `IoTHubTransport_MQTT_Common_DoWork` shall check for the ContentEncoding property and if found add the `value` as a system property in the format of `$.ce=<value>` **]**
 
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_058: [** If the sas token has timed out `IoTHubTransport_MQTT_Common_DoWork` shall disconnect from the mqtt client and destroy the transport information and wait for reconnect. **]**
 
 ### IoTHubTransport_MQTT_Common_GetSendStatus
 
@@ -363,7 +362,6 @@ static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE msgHandle, void* call
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_013: [** If type is IOTHUB_TYPE_TELEMETRY and the system property `$.ce` is defined, its value shall be set on the IOTHUB_MESSAGE_HANDLE's ContentEncoding property **]**
 
 **SRS_IOTHUB_MQTT_TRANSPORT_07_056: [** If type is IOTHUB_TYPE_TELEMETRY, then on success `mqtt_notification_callback` shall call IoTHubClient_LL_MessageCallback. **]**
-
 
 ```c
 IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SendMessageDisposition(MESSAGE_CALLBACK_INFO* messageData, IOTHUBMESSAGE_DISPOSITION_RESULT disposition);
