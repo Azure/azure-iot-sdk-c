@@ -1178,22 +1178,195 @@ typedef struct LARGE_FILE_TAG {
     unsigned int blockID;
     int isError;
     STRING_HANDLE xml;
-    const char* relativePath;
+    const char* relativePath; // Points to a part of SasUri
     HTTPAPIEX_HANDLE httpApiExHandle;
-    unsigned int* httpStatus;
-    BUFFER_HANDLE responseToIoTHub;
-    LOCK_HANDLE lockHandle;// use lock init/deinit !
+    BUFFER_HANDLE responseToIoTHub; // ex-httpResponse
+    LOCK_HANDLE lockHandle;
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE blobHandle;
     STRING_HANDLE sasUri;
     HTTPAPIEX_HANDLE iotHubHttpApiExHandle;
     STRING_HANDLE correlationId;
     HTTP_HEADERS_HANDLE requestHttpHeaders;
     unsigned int httpResponse;
+    char *hostname;
 } LARGE_FILE_TAG;
 
 static BLOB_RESULT Blob_UploadFromSasUri_start(LARGE_FILE_HANDLE handle)
 {
+    BLOB_RESULT result;
+    IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* blobHandle = (IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA*)(handle->blobHandle);
 
+    const char* SASURI = STRING_c_str(handle->sasUri); // TODO is it really necessary ?
+
+    /*Codes_SRS_BLOB_02_001: [ If SASURI is NULL then Blob_UploadFromSasUri shall fail and return BLOB_INVALID_ARG. ]*/
+    if (SASURI == NULL)
+    {
+        LogError("parameter SASURI is NULL");
+        result = BLOB_INVALID_ARG;
+    }
+    else
+    {
+        /*Codes_SRS_BLOB_02_017: [ Blob_UploadFromSasUri shall copy from SASURI the hostname to a new const char* ]*/
+        /*Codes_SRS_BLOB_02_004: [ Blob_UploadFromSasUri shall copy from SASURI the hostname to a new const char*. ]*/
+        /*to find the hostname, the following logic is applied:*/
+        /*the hostname starts at the first character after "://"*/
+        /*the hostname ends at the first character before the next "/" after "://"*/
+        const char* hostnameBegin = strstr(SASURI, "://");
+        if (hostnameBegin == NULL)
+        {
+            /*Codes_SRS_BLOB_02_005: [ If the hostname cannot be determined, then Blob_UploadFromSasUri shall fail and return BLOB_INVALID_ARG. ]*/
+            LogError("hostname cannot be determined");
+            result = BLOB_INVALID_ARG;
+        }
+        else
+        {
+            hostnameBegin += 3; /*have to skip 3 characters which are "://"*/
+            const char* hostnameEnd = strchr(hostnameBegin, '/');
+            if (hostnameEnd == NULL)
+            {
+                /*Codes_SRS_BLOB_02_005: [ If the hostname cannot be determined, then Blob_UploadFromSasUri shall fail and return BLOB_INVALID_ARG. ]*/
+                LogError("hostname cannot be determined");
+                result = BLOB_INVALID_ARG;
+            }
+            else
+            {
+                size_t hostnameSize = hostnameEnd - hostnameBegin;
+                handle->hostname = (char*)malloc(hostnameSize + 1); /*+1 because of '\0' at the end*/
+                if (handle->hostname == NULL)
+                {
+                    /*Codes_SRS_BLOB_02_016: [ If the hostname copy cannot be made then then Blob_UploadFromSasUri shall fail and return BLOB_ERROR ]*/
+                    LogError("oom - out of memory");
+                    result = BLOB_ERROR;
+                }
+                else
+                {
+                    (void)memcpy(handle->hostname, hostnameBegin, hostnameSize);
+                    handle->hostname[hostnameSize] = '\0';
+
+                    /*Codes_SRS_BLOB_02_006: [ Blob_UploadFromSasUri shall create a new HTTPAPI_EX_HANDLE by calling HTTPAPIEX_Create passing the hostname. ]*/
+                    /*Codes_SRS_BLOB_02_018: [ Blob_UploadFromSasUri shall create a new HTTPAPI_EX_HANDLE by calling HTTPAPIEX_Create passing the hostname. ]*/
+                    handle->httpApiExHandle = HTTPAPIEX_Create(handle->hostname);
+                    if (handle->httpApiExHandle == NULL)
+                    {
+                        /*Codes_SRS_BLOB_02_007: [ If HTTPAPIEX_Create fails then Blob_UploadFromSasUri shall fail and return BLOB_ERROR. ]*/
+                        LogError("unable to create a HTTPAPIEX_HANDLE");
+                        result = BLOB_ERROR;
+                    }
+                    else
+                    {
+                        if ((blobHandle->certificates != NULL)&& (HTTPAPIEX_SetOption(handle->httpApiExHandle, "TrustedCerts", blobHandle->certificates) == HTTPAPIEX_ERROR))
+                        {
+                            LogError("failure in setting trusted certificates");
+                            result = BLOB_ERROR;
+                        }
+                        else
+                        {
+
+                            /*Codes_SRS_BLOB_02_008: [ Blob_UploadFromSasUri shall compute the relative path of the request from the SASURI parameter. ]*/
+                            /*Codes_SRS_BLOB_02_019: [ Blob_UploadFromSasUri shall compute the base relative path of the request from the SASURI parameter. ]*/
+                            handle->relativePath = hostnameEnd; /*this is where the relative path begins in the SasUri*/
+
+                            /*Codes_SRS_BLOB_02_028: [ Blob_UploadFromSasUri shall construct an XML string with the following content: ]*/
+                            handle->xml = STRING_construct("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<BlockList>"); /*the XML "build as we go"*/
+                            if (handle->xml == NULL)
+                            {
+                                /*Codes_SRS_BLOB_02_033: [ If any previous operation that doesn't have an explicit failure description fails then Blob_UploadFromSasUri shall fail and return BLOB_ERROR ]*/
+                                LogError("failed to STRING_construct");
+                                result = BLOB_HTTP_ERROR;
+                            }
+                            else
+                            {
+                                // VICTORY !!
+                                result = BLOB_OK;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
+static BLOB_RESULT Blob_UploadFromSasUri_stop(LARGE_FILE_HANDLE handle)
+{
+    BLOB_RESULT result;
+    LARGE_FILE_TAG* handleData = (LARGE_FILE_TAG*)handle;
+
+    if (handleData->isError)
+    {
+        /*do nothing, it will be reported "as is"*/
+    }
+    else
+    {
+        /*complete the XML*/
+        if (STRING_concat(handleData->xml, "</BlockList>") != 0)
+        {
+            /*Codes_SRS_BLOB_02_033: [ If any previous operation that doesn't have an explicit failure description fails then Blob_UploadFromSasUri shall fail and return BLOB_ERROR ]*/
+            LogError("failed to STRING_concat");
+            result = BLOB_ERROR;
+        }
+        else
+        {
+            /*Codes_SRS_BLOB_02_029: [Blob_UploadFromSasUri shall construct a new relativePath from following string : base relativePath + "&comp=blocklist"]*/
+            STRING_HANDLE newRelativePath = STRING_construct(handleData->relativePath);
+            if (newRelativePath == NULL)
+            {
+                /*Codes_SRS_BLOB_02_033: [ If any previous operation that doesn't have an explicit failure description fails then Blob_UploadFromSasUri shall fail and return BLOB_ERROR ]*/
+                LogError("failed to STRING_construct");
+                result = BLOB_ERROR;
+            }
+            else
+            {
+                if (STRING_concat(newRelativePath, "&comp=blocklist") != 0)
+                {
+                    /*Codes_SRS_BLOB_02_033: [ If any previous operation that doesn't have an explicit failure description fails then Blob_UploadFromSasUri shall fail and return BLOB_ERROR ]*/
+                    LogError("failed to STRING_concat");
+                    result = BLOB_ERROR;
+                }
+                else
+                {
+                    /*Codes_SRS_BLOB_02_030: [ Blob_UploadFromSasUri shall call HTTPAPIEX_ExecuteRequest with a PUT operation, passing the new relativePath, httpStatus and httpResponse and the XML string as content. ]*/
+                    const char* s = STRING_c_str(handleData->xml);
+                    BUFFER_HANDLE xmlAsBuffer = BUFFER_create((const unsigned char*)s, strlen(s));
+                    if (xmlAsBuffer == NULL)
+                    {
+                        /*Codes_SRS_BLOB_02_033: [ If any previous operation that doesn't have an explicit failure description fails then Blob_UploadFromSasUri shall fail and return BLOB_ERROR ]*/
+                        LogError("failed to BUFFER_create");
+                        result = BLOB_ERROR;
+                    }
+                    else
+                    {
+                        if (HTTPAPIEX_ExecuteRequest(
+                            handleData->httpApiExHandle,
+                            HTTPAPI_REQUEST_PUT,
+                            STRING_c_str(newRelativePath),
+                            NULL,
+                            xmlAsBuffer,
+                            &handleData->httpResponse,
+                            NULL,
+                            handleData->responseToIoTHub
+                        ) != HTTPAPIEX_OK)
+                        {
+                            /*Codes_SRS_BLOB_02_031: [ If HTTPAPIEX_ExecuteRequest fails then Blob_UploadFromSasUri shall fail and return BLOB_HTTP_ERROR. ]*/
+                            LogError("unable to HTTPAPIEX_ExecuteRequest");
+                            result = BLOB_HTTP_ERROR;
+                        }
+                        else
+                        {
+                            /*Codes_SRS_BLOB_02_032: [ Otherwise, Blob_UploadFromSasUri shall succeed and return BLOB_OK. ]*/
+                            result = BLOB_OK;
+                        }
+                        BUFFER_delete(xmlAsBuffer);
+                    }
+                }
+                STRING_delete(newRelativePath);
+            }
+        }
+    }
+
+    return result;
 }
 
 static IOTHUB_CLIENT_RESULT LARGE_FILE_upload_blob_start(LARGE_FILE_HANDLE handle, const char* destinationFileName)
@@ -1301,17 +1474,16 @@ static IOTHUB_CLIENT_RESULT LARGE_FILE_upload_blob_start(LARGE_FILE_HANDLE handl
                                     }
                                     else
                                     {
-                                        // VICTORY !
-                                        int step2success;
-                                        /*Codes_SRS_IOTHUBCLIENT_LL_02_083: [ IoTHubClient_LL_UploadToBlob shall call Blob_UploadFromSasUri and capture the HTTP return code and HTTP body. ]*/
-                                        /*step2success = (Blob_UploadFromSasUri(
-                                                STRING_c_str(sasUri),
-                                                source,
-                                                size,
-                                                &responseToIoTHub,
-                                                responseToIoTHub,
-                                                handleData->certificates) == BLOB_OK);*/
-                                        // to use : sasUri, httpresponse, responseToIoTHub
+                                        if (Blob_UploadFromSasUri_start(handle) != BLOB_OK)
+                                        {
+                                            result = IOTHUB_CLIENT_ERROR;
+                                            LogError("unable to Blob_UploadFromSasUri_start");
+                                        }
+                                        else
+                                        {
+                                            // VICTORY !
+                                            result = IOTHUB_CLIENT_OK;
+                                        }
                                     }
                                 }
                             }
@@ -1321,6 +1493,76 @@ static IOTHUB_CLIENT_RESULT LARGE_FILE_upload_blob_start(LARGE_FILE_HANDLE handl
             }
         }
     }
+
+    return result;
+}
+
+static IOTHUB_CLIENT_RESULT LARGE_FILE_upload_blob_stop(LARGE_FILE_HANDLE handle)
+{
+    IOTHUB_CLIENT_RESULT result;
+    LARGE_FILE_TAG* handleData = (LARGE_FILE_TAG*)handle;
+    IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* blobHandleData = (IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA*)(handleData->blobHandle);
+
+
+    int step2success;
+    step2success = (Blob_UploadFromSasUri_stop(handle) == BLOB_OK);
+
+    if (!step2success)
+    {
+        /*Codes_SRS_IOTHUBCLIENT_LL_02_084: [ If Blob_UploadFromSasUri fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+        LogError("unable to Blob_UploadFromSasUri");
+
+        /*do step 3*/ /*try*/
+        /*Codes_SRS_IOTHUBCLIENT_LL_02_091: [ If step 2 fails without establishing an HTTP dialogue, then the HTTP message body shall look like: ]*/
+        if (BUFFER_build(handleData->responseToIoTHub, (const unsigned char*)FILE_UPLOAD_FAILED_BODY, sizeof(FILE_UPLOAD_FAILED_BODY) / sizeof(FILE_UPLOAD_FAILED_BODY[0])) == 0)
+        {
+            if (IoTHubClient_LL_UploadToBlob_step3(blobHandleData, handleData->correlationId, handleData->iotHubHttpApiExHandle, handleData->requestHttpHeaders, handleData->responseToIoTHub) != 0)
+            {
+                LogError("IoTHubClient_LL_UploadToBlob_step3 failed");
+            }
+        }
+        result = IOTHUB_CLIENT_ERROR;
+    }
+    else
+    {
+        /*must make a json*/
+
+        int requiredStringLength = snprintf(NULL, 0, "{\"isSuccess\":%s, \"statusCode\":%d, \"statusDescription\":\"%s\"}", ((handleData->httpResponse < 300) ? "true" : "false"), handleData->httpResponse, BUFFER_u_char(handleData->responseToIoTHub));
+
+        char * requiredString = malloc(requiredStringLength + 1);
+        if (requiredString == 0)
+        {
+            LogError("unable to malloc");
+            result = IOTHUB_CLIENT_ERROR;
+        }
+        else
+        {
+            /*do again snprintf*/
+            (void)snprintf(requiredString, requiredStringLength + 1, "{\"isSuccess\":%s, \"statusCode\":%d, \"statusDescription\":\"%s\"}", ((handleData->httpResponse < 300) ? "true" : "false"), handleData->httpResponse, BUFFER_u_char(handleData->responseToIoTHub));
+            BUFFER_HANDLE toBeTransmitted = BUFFER_create((const unsigned char*)requiredString, requiredStringLength);
+            if (toBeTransmitted == NULL)
+            {
+                LogError("unable to BUFFER_create");
+                result = IOTHUB_CLIENT_ERROR;
+            }
+            else
+            {
+                if (IoTHubClient_LL_UploadToBlob_step3(blobHandleData, handleData->correlationId, handleData->iotHubHttpApiExHandle, handleData->requestHttpHeaders, toBeTransmitted) != 0)
+                {
+                    LogError("IoTHubClient_LL_UploadToBlob_step3 failed");
+                    result = IOTHUB_CLIENT_ERROR;
+                }
+                else
+                {
+                    result = (handleData->httpResponse < 300) ? IOTHUB_CLIENT_OK : IOTHUB_CLIENT_ERROR;
+                }
+                BUFFER_delete(toBeTransmitted);
+            }
+            free(requiredString);
+        }
+    }
+
+    return result;
 }
 
 LARGE_FILE_HANDLE LARGE_FILE_open(const IOTHUB_CLIENT_CONFIG* config, const char* destinationFileName)
@@ -1342,7 +1584,7 @@ LARGE_FILE_HANDLE LARGE_FILE_open(const IOTHUB_CLIENT_CONFIG* config, const char
         {
             handle->isError = 0;
             handle->lockHandle = Lock_Init();
-            if (handle == NULL)
+            if (handle->lockHandle == NULL)
             {
                 LogError("Could not Lock_Init");
                 free(handle);
@@ -1351,7 +1593,7 @@ LARGE_FILE_HANDLE LARGE_FILE_open(const IOTHUB_CLIENT_CONFIG* config, const char
             else
             {
                 handle->blobHandle = IoTHubClient_LL_UploadToBlob_Create(config);
-                if (handle == NULL)
+                if (handle->blobHandle == NULL)
                 {
                     LogError("Could not IoTHubClient_LL_UploadToBlob_Create");
                     Lock_Deinit(handle->lockHandle);
@@ -1363,9 +1605,7 @@ LARGE_FILE_HANDLE LARGE_FILE_open(const IOTHUB_CLIENT_CONFIG* config, const char
                     if(LARGE_FILE_upload_blob_start(handle, destinationFileName) != IOTHUB_CLIENT_OK)
                     {
                         LogError("Could not LARGE_FILE_upload_blob_start");
-                        IoTHubClient_LL_UploadToBlob_Destroy(handle->blobHandle);
-                        Lock_Deinit(handle->lockHandle);
-                        free(handle);
+                        LARGE_FILE_close(handle);
                         handle = NULL;
                     }
                 }
@@ -1375,46 +1615,75 @@ LARGE_FILE_HANDLE LARGE_FILE_open(const IOTHUB_CLIENT_CONFIG* config, const char
     return handle;
 }
 
-void LARGE_FILE_close(LARGE_FILE_HANDLE handle)
+IOTHUB_CLIENT_RESULT LARGE_FILE_close(LARGE_FILE_HANDLE handle)
 {
+    LARGE_FILE_TAG* handleData = (LARGE_FILE_TAG*)handle;
+    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
+
     if (handle == NULL)
     {
         LogError("unexpected NULL argument");
+        result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else
     {
-        if (handle->responseToIoTHub != NULL)
+        result = LARGE_FILE_upload_blob_stop(handle);
+
+        if (handleData->blobHandle != NULL)
         {
-            BUFFER_delete(handle->responseToIoTHub);
+            IoTHubClient_LL_UploadToBlob_Destroy(handleData->blobHandle);
         }
 
-        if (handle->requestHttpHeaders != NULL)
+        if (handleData->hostname != NULL)
         {
-            HTTPHeaders_Free(handle->requestHttpHeaders);
+            free(handleData->hostname);
         }
 
-        if (handle->correlationId != NULL)
+        if (handleData->httpApiExHandle)
         {
-            STRING_delete(handle->correlationId);
+            HTTPAPIEX_Destroy(handleData->httpApiExHandle);
         }
 
-        if (handle->iotHubHttpApiExHandle != NULL)
+        if (handleData->xml != NULL)
         {
-            HTTPAPIEX_Destroy(handle->iotHubHttpApiExHandle);
+            STRING_delete(handleData->xml);
         }
 
-        if (handle->lockHandle != NULL)
+        if (handleData->responseToIoTHub != NULL)
         {
-            Lock_Deinit(handle->lockHandle);
+            BUFFER_delete(handleData->responseToIoTHub);
         }
 
-        if (handle->sasUri != NULL)
+        if (handleData->requestHttpHeaders != NULL)
         {
-            STRING_delete(handle->sasUri);
+            HTTPHeaders_Free(handleData->requestHttpHeaders);
+        }
+
+        if (handleData->correlationId != NULL)
+        {
+            STRING_delete(handleData->correlationId);
+        }
+
+        if (handleData->iotHubHttpApiExHandle != NULL)
+        {
+            HTTPAPIEX_Destroy(handleData->iotHubHttpApiExHandle);
+        }
+
+        if (handleData->lockHandle != NULL)
+        {
+            Lock_Deinit(handleData->lockHandle);
+        }
+
+        if (handleData->sasUri != NULL)
+        {
+            STRING_delete(handleData->sasUri);
         }
 
         free(handle);
+        handle = NULL;
     }
+
+    return result;
 }
 
 bool LARGE_FILE_write(const unsigned char* source, size_t size, LARGE_FILE_HANDLE fileHandle)
@@ -1471,7 +1740,7 @@ bool LARGE_FILE_write(const unsigned char* source, size_t size, LARGE_FILE_HANDL
                                                              fileHandle->xml,
                                                              fileHandle->relativePath,
                                                              fileHandle->httpApiExHandle,
-                                                             fileHandle->httpStatus,
+                                                             &fileHandle->httpResponse,
                                                              fileHandle->responseToIoTHub);
 
                     if (uploadBlockResult == BLOB_OK && fileHandle->isError == 0)

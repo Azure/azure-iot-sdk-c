@@ -48,7 +48,7 @@ typedef struct LARGE_FILE_TAG* LARGE_FILE_HANDLE;
 
     MOCKABLE_FUNCTION(, LARGE_FILE_HANDLE, LARGE_FILE_open, const IOTHUB_CLIENT_CONFIG*, config, const char*, destinationFileName);
     MOCKABLE_FUNCTION(, bool, LARGE_FILE_write, const unsigned char*, source, size_t, size, LARGE_FILE_HANDLE, fileHandle);
-    MOCKABLE_FUNCTION(, void, LARGE_FILE_close, LARGE_FILE_HANDLE, fileHandle);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, LARGE_FILE_close, LARGE_FILE_HANDLE, fileHandle);
 
 // END LARGE FILE UPLOAD
 
