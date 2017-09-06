@@ -550,11 +550,15 @@ extern "C"
     */
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, destinationFileName, const unsigned char*, source, size_t, size);
 
-#endif /*DONT_USE_UPLOADTOBLOB*/
-
+     // TODO ADD comments
      MOCKABLE_FUNCTION(, LARGE_FILE_HANDLE, IoTHubClient_LL_LARGE_FILE_open, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, destinationFileName);
+
+     // TODO ADD comments
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_LARGE_FILE_close, LARGE_FILE_HANDLE, handle);
+
+     // TODO ADD comments
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_LARGE_FILE_write, LARGE_FILE_HANDLE, fileHandle, const unsigned char*, source, size_t, size);
+#endif /*DONT_USE_UPLOADTOBLOB*/
 
 #ifdef __cplusplus
 }

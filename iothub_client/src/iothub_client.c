@@ -1959,7 +1959,6 @@ IOTHUB_CLIENT_RESULT IoTHubClient_UploadToBlobAsync(IOTHUB_CLIENT_HANDLE iotHubC
     }
     return result;
 }
-#endif /*DONT_USE_UPLOADTOBLOB*/
 
 LARGE_FILE_HANDLE IoTHubClient_LargeFileOpen(IOTHUB_CLIENT_HANDLE handle, const char* destinationFileName)
 {
@@ -1975,3 +1974,5 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LargeFileWrite(LARGE_FILE_HANDLE fileHandle, c
 {
     return IoTHubClient_LL_LARGE_FILE_write(fileHandle, source, size);
 }
+
+#endif /*DONT_USE_UPLOADTOBLOB*/

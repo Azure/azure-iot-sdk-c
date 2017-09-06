@@ -1911,7 +1911,6 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob(IOTHUB_CLIENT_LL_HANDLE iotHub
     }
     return result;
 }
-#endif
 
 LARGE_FILE_HANDLE IoTHubClient_LL_LARGE_FILE_open(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* destinationFileName)
 {
@@ -1927,3 +1926,5 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_LARGE_FILE_write(LARGE_FILE_HANDLE fileHand
 {
     return IoTHubClient_LL_LARGE_FILE_write_Impl(fileHandle, source, size);
 }
+
+#endif //DONT_USE_UPLOADTOBLOB
