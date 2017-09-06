@@ -70,6 +70,8 @@ typedef struct TELEMETRY_MESSENGER_CONFIG_TAG
 	void* on_state_changed_context;
 } TELEMETRY_MESSENGER_CONFIG;
 
+#define AMQP_BATCHING_RESERVE_SIZE              (1024)
+
 MOCKABLE_FUNCTION(, TELEMETRY_MESSENGER_HANDLE, telemetry_messenger_create, const TELEMETRY_MESSENGER_CONFIG*, messenger_config, const char*, product_info);
 MOCKABLE_FUNCTION(, int, telemetry_messenger_send_async, TELEMETRY_MESSENGER_HANDLE, messenger_handle, IOTHUB_MESSAGE_LIST*, message, ON_TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE, on_messenger_event_send_complete_callback, void*, context);
 MOCKABLE_FUNCTION(, int, telemetry_messenger_subscribe_for_messages, TELEMETRY_MESSENGER_HANDLE, messenger_handle, ON_TELEMETRY_MESSENGER_MESSAGE_RECEIVED, on_message_received_callback, void*, context);
