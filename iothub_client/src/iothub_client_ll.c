@@ -1915,15 +1915,15 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob(IOTHUB_CLIENT_LL_HANDLE iotHub
 
 LARGE_FILE_HANDLE IoTHubClient_LL_LARGE_FILE_open(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* destinationFileName)
 {
-    return LARGE_FILE_LL_open(iotHubClientHandle->uploadToBlobHandle, destinationFileName);
+    return IoTHubClient_LL_LARGE_FILE_open_Impl(iotHubClientHandle->uploadToBlobHandle, destinationFileName);
 }
 
 IOTHUB_CLIENT_RESULT IoTHubClient_LL_LARGE_FILE_close(LARGE_FILE_HANDLE handle)
 {
-    return LARGE_FILE_LL_close(handle);
+    return IoTHubClient_LL_LARGE_FILE_close_Impl(handle);
 }
 
 IOTHUB_CLIENT_RESULT IoTHubClient_LL_LARGE_FILE_write(LARGE_FILE_HANDLE fileHandle, const unsigned char* source, size_t size)
 {
-    return LARGE_FILE_LL_write(fileHandle, source, size);
+    return IoTHubClient_LL_LARGE_FILE_write_Impl(fileHandle, source, size);
 }

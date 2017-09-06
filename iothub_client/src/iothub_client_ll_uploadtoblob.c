@@ -1567,7 +1567,7 @@ static IOTHUB_CLIENT_RESULT LARGE_FILE_upload_blob_stop(LARGE_FILE_HANDLE handle
     return result;
 }
 
-LARGE_FILE_HANDLE LARGE_FILE_LL_open(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE blobHandle, const char* destinationFileName)
+LARGE_FILE_HANDLE IoTHubClient_LL_LARGE_FILE_open_Impl(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE blobHandle, const char* destinationFileName)
 {
     LARGE_FILE_TAG* handle = NULL;
     if (destinationFileName == NULL || blobHandle == NULL)
@@ -1598,7 +1598,7 @@ LARGE_FILE_HANDLE LARGE_FILE_LL_open(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE blobHa
                 if(LARGE_FILE_upload_blob_start(handle, destinationFileName) != IOTHUB_CLIENT_OK)
                 {
                     LogError("Could not LARGE_FILE_upload_blob_start");
-                    LARGE_FILE_LL_close(handle);
+                    IoTHubClient_LL_LARGE_FILE_close_Impl(handle);
                     handle = NULL;
                 }
             }
@@ -1607,7 +1607,7 @@ LARGE_FILE_HANDLE LARGE_FILE_LL_open(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE blobHa
     return handle;
 }
 
-IOTHUB_CLIENT_RESULT LARGE_FILE_LL_close(LARGE_FILE_HANDLE handle)
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_LARGE_FILE_close_Impl(LARGE_FILE_HANDLE handle)
 {
     LARGE_FILE_TAG* handleData = (LARGE_FILE_TAG*)handle;
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
@@ -1673,7 +1673,7 @@ IOTHUB_CLIENT_RESULT LARGE_FILE_LL_close(LARGE_FILE_HANDLE handle)
     return result;
 }
 
-IOTHUB_CLIENT_RESULT LARGE_FILE_LL_write(LARGE_FILE_HANDLE fileHandle, const unsigned char* source, size_t size)
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_LARGE_FILE_write_Impl(LARGE_FILE_HANDLE fileHandle, const unsigned char* source, size_t size)
 {
     IOTHUB_CLIENT_RESULT result;
     if (
