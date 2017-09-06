@@ -16,6 +16,13 @@ typedef struct E2E_TEST_OPTIONS_TAG
     bool set_mac_address;
 } E2E_TEST_OPTIONS;
 
+typedef enum TEST_MESSAGE_CREATION_MECHANISM_TAG
+{
+    TEST_MESSAGE_CREATE_BYTE_ARRAY,
+    TEST_MESSAGE_CREATE_STRING
+} TEST_MESSAGE_CREATION_MECHANISM;
+
+
 extern E2E_TEST_OPTIONS g_e2e_test_options;
 extern IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo;
 
@@ -61,7 +68,7 @@ typedef void* D2C_MESSAGE_HANDLE;
 
 extern IOTHUB_CLIENT_HANDLE client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
 
-extern D2C_MESSAGE_HANDLE client_create_and_send_d2c(IOTHUB_CLIENT_HANDLE iotHubClientHandle);
+extern D2C_MESSAGE_HANDLE client_create_and_send_d2c(IOTHUB_CLIENT_HANDLE iotHubClientHandle, TEST_MESSAGE_CREATION_MECHANISM test_message_creation);
 extern bool client_wait_for_d2c_confirmation(D2C_MESSAGE_HANDLE d2cMessage);
 extern bool client_received_confirmation(D2C_MESSAGE_HANDLE d2cMessage);
 
