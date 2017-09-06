@@ -130,7 +130,7 @@ static STRING_HANDLE create_devices_path(STRING_HANDLE iothub_host_fqdn, STRING_
 		LogError("Failed creating devices_path (STRING_new failed)");
 	}
 	else
-        {
+    {
 		const char* iothub_host_fqdn_char_ptr = STRING_c_str(iothub_host_fqdn);
 		const char* device_id_char_ptr = STRING_c_str(device_id);
         	if (STRING_sprintf(devices_path, IOTHUB_DEVICES_PATH_FMT, iothub_host_fqdn_char_ptr, device_id_char_ptr) != RESULT_OK)
@@ -139,7 +139,7 @@ static STRING_HANDLE create_devices_path(STRING_HANDLE iothub_host_fqdn, STRING_
 			devices_path = NULL;
 			LogError("Failed creating devices_path (STRING_sprintf failed)");
 		}
-        }
+    }
 
 	return devices_path;
 }

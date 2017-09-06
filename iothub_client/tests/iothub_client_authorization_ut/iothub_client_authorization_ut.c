@@ -23,17 +23,22 @@ static void my_gballoc_free(void* ptr)
 #include "umock_c_negative_tests.h"
 #include "azure_c_shared_utility/macro_utils.h"
 
-#include "iothub_client_authorization.h"
-
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/agenttime.h" 
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/sastoken.h"
+#include "azure_c_shared_utility/xio.h"
+
+#ifdef USE_DPS_MODULE
+#include "azure_hub_modules/iothub_device_auth.h"
+#endif
 
 #include "azure_c_shared_utility/umock_c_prod.h"
 #undef ENABLE_MOCKS
+
+#include "iothub_client_authorization.h"
 
 static const char* DEVICE_ID = "device_id";
 static const char* DEVICE_KEY = "device_key";
@@ -110,6 +115,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_AUTHORIZATION_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(time_t, long long);
     REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(XDA_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_SECURITY_HANDLE, void*);
 
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
@@ -345,10 +352,13 @@ TEST_FUNCTION(IoTHubClient_Auth_Destroy_succeed)
     IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(DEVICE_KEY, DEVICE_ID, NULL);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_NUM_ARG));
+#ifdef USE_DPS_MODULE
+    STRICT_EXPECTED_CALL(iothub_device_auth_destroy(IGNORED_PTR_ARG));
+#endif
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
     //act
     IoTHubClient_Auth_Destroy(handle);

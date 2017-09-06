@@ -31,7 +31,7 @@ if(NOT ${dont_use_uploadtoblob})
 endif()
 
 set(install_staticlibs
-	iothub_client
+    iothub_client
 )
 
 set(iothub_client_ll_transport_h_files
@@ -42,6 +42,16 @@ set(iothub_client_ll_transport_h_files
     ./inc/iothub_transport_ll.h
     ./inc/blob.h
 )
+
+if (${use_dps_client})
+    set(iothub_client_ll_transport_h_files
+        ${iothub_client_ll_transport_h_files}
+        ./inc/iothub_client_dps_ll.h
+    )
+    set(iothub_client_ll_transport_c_files 
+        ${iothub_client_ll_transport_c_files}
+    )
+endif()
 
 if(NOT ${dont_use_uploadtoblob})
     set(iothub_client_ll_transport_h_files 
@@ -73,9 +83,9 @@ set(iothub_client_h_install_files
 set(iothub_client_libs)
 
 if(${use_http})
-	set(install_staticlibs ${install_staticlibs}
-		iothub_client_http_transport
-	)
+    set(install_staticlibs ${install_staticlibs}
+        iothub_client_http_transport
+    )
     set(iothub_client_http_transport_c_files
         ${iothub_client_ll_transport_c_files}
         ./src/iothubtransporthttp.c
@@ -94,10 +104,10 @@ if(${use_http})
 endif()
 
 if(${use_amqp})
-	set(install_staticlibs ${install_staticlibs}
-		iothub_client_amqp_transport
-		iothub_client_amqp_ws_transport
-	)
+    set(install_staticlibs ${install_staticlibs}
+        iothub_client_amqp_transport
+        iothub_client_amqp_ws_transport
+    )
 
     set(iothub_client_amqp_transport_common_c_files
         ${iothub_client_ll_transport_c_files}
@@ -173,10 +183,10 @@ if(${use_amqp})
 endif()
 
 if(${use_mqtt})
-	set(install_staticlibs ${install_staticlibs}
-		iothub_client_mqtt_transport
-		iothub_client_mqtt_ws_transport
-	)
+    set(install_staticlibs ${install_staticlibs}
+        iothub_client_mqtt_transport
+        iothub_client_mqtt_ws_transport
+    )
     set(iothub_client_mqtt_ws_transport_c_files
         ${iothub_client_ll_transport_c_files}
         ./src/iothubtransport_mqtt_common.c
@@ -231,13 +241,13 @@ if(NOT ${dont_use_uploadtoblob})
     include_directories(../parson)
 endif()
 
+include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})
 include_directories(${AZURE_C_SHARED_UTILITY_INCLUDES})
 include_directories(${SHARED_UTIL_INC_FOLDER})
 
 if (WINCE)
 include_directories(${SHARED_UTIL_INC_FOLDER}/azure_c_shared_utility/windowsce) #windowsce SDK doesn't have stdbool.h
 ENDIF()
-
 
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})
 
@@ -300,6 +310,7 @@ if(${use_mqtt})
     )
     linkSharedUtil(iothub_client_mqtt_transport)
     linkMqttLibrary(iothub_client_mqtt_transport)
+
     set(iothub_client_libs
         ${iothub_client_libs}
         iothub_client_mqtt_transport
@@ -314,6 +325,13 @@ if(${use_mqtt})
     set(iothub_client_libs
         ${iothub_client_libs}
         iothub_client_mqtt_ws_transport
+    )
+endif()
+
+if (${use_dps_client})
+    set(iothub_client_libs
+        ${iothub_client_libs}
+        iothub_security_client
     )
 endif()
 
@@ -390,8 +408,8 @@ if(${use_installed_dependencies})
     install(FILES ${iothub_client_h_install_files} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
 else()
     install(FILES ${iothub_client_h_install_files} 
-		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
-	install(TARGETS ${install_staticlibs} 
-		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
+    install(TARGETS ${install_staticlibs} 
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
