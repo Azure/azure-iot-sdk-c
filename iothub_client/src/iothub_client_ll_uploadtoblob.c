@@ -1570,9 +1570,9 @@ static IOTHUB_CLIENT_RESULT LARGE_FILE_upload_blob_stop(LARGE_FILE_HANDLE handle
 LARGE_FILE_HANDLE LARGE_FILE_LL_open(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE blobHandle, const char* destinationFileName)
 {
     LARGE_FILE_TAG* handle = NULL;
-    if (destinationFileName == NULL)
+    if (destinationFileName == NULL || blobHandle == NULL)
     {
-        LogError("invalid argument destinationFileName=%p", destinationFileName);
+        LogError("invalid arguments : destinationFileName=%p, blobHandle=%p", destinationFileName, blobHandle);
     }
     else
     {
@@ -1586,6 +1586,7 @@ LARGE_FILE_HANDLE LARGE_FILE_LL_open(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE blobHa
         {
             handle->isError = 0;
             handle->lockHandle = Lock_Init();
+            handle->blobHandle = blobHandle;
             if (handle->lockHandle == NULL)
             {
                 LogError("Could not Lock_Init");
@@ -1594,22 +1595,11 @@ LARGE_FILE_HANDLE LARGE_FILE_LL_open(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE blobHa
             }
             else
             {
-                handle->blobHandle = blobHandle;
-                if (handle->blobHandle == NULL)
+                if(LARGE_FILE_upload_blob_start(handle, destinationFileName) != IOTHUB_CLIENT_OK)
                 {
-                    LogError("Could not IoTHubClient_LL_UploadToBlob_Create");
-                    Lock_Deinit(handle->lockHandle);
-                    free(handle);
+                    LogError("Could not LARGE_FILE_upload_blob_start");
+                    LARGE_FILE_LL_close(handle);
                     handle = NULL;
-                }
-                else
-                {
-                    if(LARGE_FILE_upload_blob_start(handle, destinationFileName) != IOTHUB_CLIENT_OK)
-                    {
-                        LogError("Could not LARGE_FILE_upload_blob_start");
-                        LARGE_FILE_LL_close(handle);
-                        handle = NULL;
-                    }
                 }
             }
         }
@@ -1683,21 +1673,21 @@ IOTHUB_CLIENT_RESULT LARGE_FILE_LL_close(LARGE_FILE_HANDLE handle)
     return result;
 }
 
-bool LARGE_FILE_LL_write(const unsigned char* source, size_t size, LARGE_FILE_HANDLE fileHandle)
+IOTHUB_CLIENT_RESULT LARGE_FILE_LL_write(LARGE_FILE_HANDLE fileHandle, const unsigned char* source, size_t size)
 {
-    bool result; // TODO find a more significant return value
+    IOTHUB_CLIENT_RESULT result;
     if (
         (size > 0) &&
         (source == NULL)
         )
     {
         LogError("combination of source = %p and size = %zu is invalid", source, size);
-        result = false;
+        result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else if (size > 4 * 1024 * 1024)
     {
         LogError("size too big (%zu)", size);
-        result = false;
+        result = IOTHUB_CLIENT_INVALID_SIZE;
     }
     else
     {
@@ -1705,11 +1695,12 @@ bool LARGE_FILE_LL_write(const unsigned char* source, size_t size, LARGE_FILE_HA
         if (1 == fileHandle->isError)
         {
             LogError("Invalid file handle");
-            result = false;
+            result = IOTHUB_CLIENT_INVALID_ARG;
         }
         else if (fileHandle->blockID >= 50000)
         {
             LogError("Too many blocks already written (max 50000)");
+            result = IOTHUB_CLIENT_INVALID_SIZE;
         }
         else
         {
@@ -1717,7 +1708,7 @@ bool LARGE_FILE_LL_write(const unsigned char* source, size_t size, LARGE_FILE_HA
             if (Lock(fileHandle->lockHandle) != LOCK_OK)
             {
                 LogError("unable to lock");
-                result = false;
+                result = IOTHUB_CLIENT_ERROR;
             }
             else
             {
@@ -1726,7 +1717,7 @@ bool LARGE_FILE_LL_write(const unsigned char* source, size_t size, LARGE_FILE_HA
                 if (requestBuffer == NULL)
                 {
                     LogError("unable to BUFFER_create");
-                    result = false;
+                    result = IOTHUB_CLIENT_ERROR;
                 }
                 else
                 {
@@ -1743,11 +1734,12 @@ bool LARGE_FILE_LL_write(const unsigned char* source, size_t size, LARGE_FILE_HA
                     if (uploadBlockResult == BLOB_OK && fileHandle->isError == 0)
                     {
                         fileHandle->blockID++;
+                        result = IOTHUB_CLIENT_OK;
                     }
                     else
                     {
                         LogError("unable to Blob_UploadNextBlock (uploadBlockResult = %i, fileHandle->isError = %i)", uploadBlockResult, fileHandle->isError);
-                        result = false;
+                        result = IOTHUB_CLIENT_ERROR;
                     }
 
                     BUFFER_delete(requestBuffer);

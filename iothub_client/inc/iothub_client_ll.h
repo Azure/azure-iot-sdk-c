@@ -554,7 +554,7 @@ extern "C"
 
      MOCKABLE_FUNCTION(, LARGE_FILE_HANDLE, IoTHubClient_LL_LARGE_FILE_open, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, destinationFileName);
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_LARGE_FILE_close, LARGE_FILE_HANDLE, handle);
-     MOCKABLE_FUNCTION(, bool, IoTHubClient_LL_LARGE_FILE_write, const unsigned char*, source, size_t, size, LARGE_FILE_HANDLE, fileHandle);
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_LARGE_FILE_write, LARGE_FILE_HANDLE, fileHandle, const unsigned char*, source, size_t, size);
 
 #ifdef __cplusplus
 }

@@ -1923,7 +1923,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_LARGE_FILE_close(LARGE_FILE_HANDLE handle)
     return LARGE_FILE_LL_close(handle);
 }
 
-bool IoTHubClient_LL_LARGE_FILE_write(const unsigned char* source, size_t size, LARGE_FILE_HANDLE fileHandle)
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_LARGE_FILE_write(LARGE_FILE_HANDLE fileHandle, const unsigned char* source, size_t size)
 {
-    return LARGE_FILE_LL_write(source, size, fileHandle);
+    return LARGE_FILE_LL_write(fileHandle, source, size);
 }

@@ -47,7 +47,7 @@ typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* IOTHUB_CLIENT_LL_UPLOA
 typedef struct LARGE_FILE_TAG* LARGE_FILE_HANDLE;
 
     MOCKABLE_FUNCTION(, LARGE_FILE_HANDLE, LARGE_FILE_LL_open, IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, blobHandle, const char*, destinationFileName);
-    MOCKABLE_FUNCTION(, bool, LARGE_FILE_LL_write, const unsigned char*, source, size_t, size, LARGE_FILE_HANDLE, fileHandle);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, LARGE_FILE_LL_write, LARGE_FILE_HANDLE, fileHandle, const unsigned char*, source, size_t, size);
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, LARGE_FILE_LL_close, LARGE_FILE_HANDLE, fileHandle);
 
 // END LARGE FILE UPLOAD
