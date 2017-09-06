@@ -56,9 +56,9 @@ else()
     if ("${dps_hsm_custom_lib}" STREQUAL "")
         # Default tpm implementation
         if (${dps_hsm_tpm_simulator})
-            set(use_emulator ON)
+            set(use_emulator ON CACHE BOOL "enable use_emulator in utpm" FORCE)
         else()
-            set(use_emulator OFF)
+            set(use_emulator OFF CACHE BOOL "disable use_emulator in utpm" FORCE)
         endif()
 
         add_subdirectory(./utpm)
