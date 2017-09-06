@@ -1917,3 +1917,13 @@ LARGE_FILE_HANDLE IoTHubClient_LL_LARGE_FILE_open(IOTHUB_CLIENT_LL_HANDLE iotHub
 {
     return LARGE_FILE_LL_open(iotHubClientHandle->uploadToBlobHandle, destinationFileName);
 }
+
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_LARGE_FILE_close(LARGE_FILE_HANDLE handle)
+{
+    return LARGE_FILE_LL_close(handle);
+}
+
+bool IoTHubClient_LL_LARGE_FILE_write(const unsigned char* source, size_t size, LARGE_FILE_HANDLE fileHandle)
+{
+    return LARGE_FILE_LL_write(source, size, fileHandle);
+}

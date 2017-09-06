@@ -1631,11 +1631,6 @@ IOTHUB_CLIENT_RESULT LARGE_FILE_LL_close(LARGE_FILE_HANDLE handle)
     {
         result = LARGE_FILE_upload_blob_stop(handle);
 
-        if (handleData->blobHandle != NULL)
-        {
-            IoTHubClient_LL_UploadToBlob_Destroy(handleData->blobHandle);
-        }
-
         if (handleData->hostname != NULL)
         {
             free(handleData->hostname);

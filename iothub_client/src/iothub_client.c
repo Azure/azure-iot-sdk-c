@@ -1966,3 +1966,13 @@ LARGE_FILE_HANDLE IoTHubClient_LargeFileOpen(IOTHUB_CLIENT_HANDLE handle, const 
     return IoTHubClient_LL_LARGE_FILE_open(handle->IoTHubClientLLHandle, destinationFileName);
     //return NULL;
 }
+
+IOTHUB_CLIENT_RESULT IoTHubClient_LargeFileClose(LARGE_FILE_HANDLE handle)
+{
+    return IoTHubClient_LL_LARGE_FILE_close(handle);
+}
+
+bool IoTHubClient_LargeFileWrite(const unsigned char* source, size_t size, LARGE_FILE_HANDLE fileHandle)
+{
+    return IoTHubClient_LL_LARGE_FILE_write(source, size, fileHandle);
+}

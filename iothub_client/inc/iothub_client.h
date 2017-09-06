@@ -348,6 +348,8 @@ extern "C"
 #endif
 
     MOCKABLE_FUNCTION(, LARGE_FILE_HANDLE, IoTHubClient_LargeFileOpen, IOTHUB_CLIENT_HANDLE, handle, const char*, destinationFileName);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LargeFileClose, LARGE_FILE_HANDLE, handle);
+    MOCKABLE_FUNCTION(, bool, IoTHubClient_LargeFileWrite, const unsigned char*, source, size_t, size, LARGE_FILE_HANDLE, fileHandle);
 
 #ifdef __cplusplus
 }
