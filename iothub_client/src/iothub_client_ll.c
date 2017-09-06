@@ -1912,3 +1912,8 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob(IOTHUB_CLIENT_LL_HANDLE iotHub
     return result;
 }
 #endif
+
+LARGE_FILE_HANDLE IoTHubClient_LL_LARGE_FILE_open(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* destinationFileName)
+{
+    return LARGE_FILE_LL_open(iotHubClientHandle->uploadToBlobHandle, destinationFileName);
+}

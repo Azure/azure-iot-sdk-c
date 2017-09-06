@@ -58,6 +58,9 @@ typedef struct IOTHUBTRANSPORT_CONFIG_TAG IOTHUBTRANSPORT_CONFIG;
 
 typedef struct IOTHUB_CLIENT_LL_HANDLE_DATA_TAG* IOTHUB_CLIENT_LL_HANDLE;
 
+// TODO maybe rename to LARGE_FILE_LL_HANDLE
+typedef struct LARGE_FILE_TAG* LARGE_FILE_HANDLE;
+
 #define IOTHUB_CLIENT_STATUS_VALUES       \
     IOTHUB_CLIENT_SEND_STATUS_IDLE,       \
     IOTHUB_CLIENT_SEND_STATUS_BUSY
@@ -548,6 +551,8 @@ extern "C"
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, destinationFileName, const unsigned char*, source, size_t, size);
 
 #endif /*DONT_USE_UPLOADTOBLOB*/
+
+     MOCKABLE_FUNCTION(, LARGE_FILE_HANDLE, IoTHubClient_LL_LARGE_FILE_open, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, destinationFileName);
 
 #ifdef __cplusplus
 }

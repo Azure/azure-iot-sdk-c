@@ -1172,7 +1172,9 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
     return result;
 }
 
-// TODO LARGE FILE maybe put in an other file ?
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                               TODO LARGE FILE maybe put in an other file ?
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 typedef struct LARGE_FILE_TAG {
     unsigned int blockID;
@@ -1565,7 +1567,7 @@ static IOTHUB_CLIENT_RESULT LARGE_FILE_upload_blob_stop(LARGE_FILE_HANDLE handle
     return result;
 }
 
-LARGE_FILE_HANDLE LARGE_FILE_open(const IOTHUB_CLIENT_CONFIG* config, const char* destinationFileName)
+LARGE_FILE_HANDLE LARGE_FILE_LL_open(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE blobHandle, const char* destinationFileName)
 {
     LARGE_FILE_TAG* handle = NULL;
     if (destinationFileName == NULL)
@@ -1592,7 +1594,7 @@ LARGE_FILE_HANDLE LARGE_FILE_open(const IOTHUB_CLIENT_CONFIG* config, const char
             }
             else
             {
-                handle->blobHandle = IoTHubClient_LL_UploadToBlob_Create(config);
+                handle->blobHandle = blobHandle;
                 if (handle->blobHandle == NULL)
                 {
                     LogError("Could not IoTHubClient_LL_UploadToBlob_Create");
@@ -1605,7 +1607,7 @@ LARGE_FILE_HANDLE LARGE_FILE_open(const IOTHUB_CLIENT_CONFIG* config, const char
                     if(LARGE_FILE_upload_blob_start(handle, destinationFileName) != IOTHUB_CLIENT_OK)
                     {
                         LogError("Could not LARGE_FILE_upload_blob_start");
-                        LARGE_FILE_close(handle);
+                        LARGE_FILE_LL_close(handle);
                         handle = NULL;
                     }
                 }
@@ -1615,7 +1617,7 @@ LARGE_FILE_HANDLE LARGE_FILE_open(const IOTHUB_CLIENT_CONFIG* config, const char
     return handle;
 }
 
-IOTHUB_CLIENT_RESULT LARGE_FILE_close(LARGE_FILE_HANDLE handle)
+IOTHUB_CLIENT_RESULT LARGE_FILE_LL_close(LARGE_FILE_HANDLE handle)
 {
     LARGE_FILE_TAG* handleData = (LARGE_FILE_TAG*)handle;
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
@@ -1686,7 +1688,7 @@ IOTHUB_CLIENT_RESULT LARGE_FILE_close(LARGE_FILE_HANDLE handle)
     return result;
 }
 
-bool LARGE_FILE_write(const unsigned char* source, size_t size, LARGE_FILE_HANDLE fileHandle)
+bool LARGE_FILE_LL_write(const unsigned char* source, size_t size, LARGE_FILE_HANDLE fileHandle)
 {
     bool result; // TODO find a more significant return value
     if (
