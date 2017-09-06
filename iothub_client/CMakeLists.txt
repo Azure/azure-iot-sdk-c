@@ -346,7 +346,7 @@ ENDIF(WIN32)
 add_library(iothub_client_dll SHARED
     ${iothub_client_c_files} 
     ${iothub_client_h_files}
-    ./src/iothub_client.def
+    ./src/iothub_client_dll.def
 )
 target_link_libraries(iothub_client_dll ${iothub_client_libs})
 if(NOT WIN32)
