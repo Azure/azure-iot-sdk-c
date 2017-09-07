@@ -15,6 +15,7 @@
 #include "azure_c_shared_utility/tickcounter.h"
 #include "azure_c_shared_utility/httpapiexsas.h"
 #include "azure_c_shared_utility/shared_util_options.h"
+#include "azure_c_shared_utility/urlencode.h"
 
 #include "iothub_client_ll.h"
 #include "iothub_client_options.h"
@@ -511,12 +512,15 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                                                                         }
                                                                         else
                                                                         {
+                                                                            STRING_HANDLE fileName = URL_EncodeString(json_blobName);
+
                                                                             if (!(
+                                                                                fileName != NULL &&
                                                                                 (STRING_concat(sasUri, json_hostName) == 0) &&
                                                                                 (STRING_concat(sasUri, "/") == 0) &&
                                                                                 (STRING_concat(sasUri, json_containerName) == 0) &&
                                                                                 (STRING_concat(sasUri, "/") == 0) &&
-                                                                                (STRING_concat(sasUri, json_blobName) == 0) &&
+                                                                                (STRING_concat(sasUri, STRING_c_str(fileName)) == 0) &&
                                                                                 (STRING_concat(sasUri, json_sasToken) == 0)
                                                                                 ))
                                                                             {
@@ -528,6 +532,8 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                                                                             {
                                                                                 result = 0; /*success in step 1*/
                                                                             }
+
+                                                                            STRING_delete(fileName);
                                                                         }
                                                                     }
                                                                 }
