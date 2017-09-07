@@ -550,43 +550,43 @@ extern "C"
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, destinationFileName, const unsigned char*, source, size_t, size);
 
      /**
-     * @brief    IoTHubClient_LL_LARGE_FILE_open opens a connection to upload data to a file in Azure Blob Storage.
+     * @brief    IoTHubClient_LL_LargeFileOpen opens a connection to upload data to a file in Azure Blob Storage.
      *
      * @param    iotHubClientHandle                  The handle created by a call to the IoTHubClient_Create function.
      * @param    destinationFileName                 The name of the file to be created in Azure Blob Storage.
      *
      *           The IOTHUB_CLIENT_LARGE_FILE_HANDLE returned by the function shall be then used to upload data with
-     *           the function IoTHubClient_LL_LARGE_FILE_write.
-     *           IoTHubClient_LL_LARGE_FILE_write can be called up to 50000 times in a row.
-     *           The handle must be closed by calling the function IoTHubClient_LL_LARGE_FILE_close
+     *           the function IoTHubClient_LL_LargeFileWrite.
+     *           IoTHubClient_LL_LargeFileWrite can be called up to 50000 times in a row.
+     *           The handle must be closed by calling the function IoTHubClient_LL_LargeFileClose
      *
      * @return   A valid handle upon success or NULL upon failure.
      */
-     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_LARGE_FILE_HANDLE, IoTHubClient_LL_LARGE_FILE_open, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, destinationFileName);
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_LARGE_FILE_HANDLE, IoTHubClient_LL_LargeFileOpen, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, destinationFileName);
 
      /**
-     * @brief    IoTHubClient_LL_LARGE_FILE_close closes a handle to a file in Azure Blob Storage.
+     * @brief    IoTHubClient_LL_LargeFileClose closes a handle to a file in Azure Blob Storage.
      *
      * @param    handle                              The handle created by a call to the IoTHubClient_LargeFileOpen function.
      *
-     *           See IoTHubClient_LL_LARGE_FILE_open for more details about usage.
+     *           See IoTHubClient_LL_LargeFileOpen for more details about usage.
      *
      * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
      */
-     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_LARGE_FILE_close, IOTHUB_CLIENT_LARGE_FILE_HANDLE, handle);
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_LargeFileClose, IOTHUB_CLIENT_LARGE_FILE_HANDLE, handle);
 
      /**
-     * @brief    IoTHubClient_LL_LARGE_FILE_write uploads data from memory to a file in Azure Blob Storage.
+     * @brief    IoTHubClient_LL_LargeFileWrite uploads data from memory to a file in Azure Blob Storage.
      *
      * @param    fileHandle                          The handle created by a call to the IoTHubClient_LargeFileOpen function.
      * @param    source                              The source of data.
      * @param    size                                The size of data.
      *
-     *           See IoTHubClient_LL_LARGE_FILE_open for more details about usage.
+     *           See IoTHubClient_LL_LargeFileOpen for more details about usage.
      *
      * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
      */
-     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_LARGE_FILE_write, IOTHUB_CLIENT_LARGE_FILE_HANDLE, fileHandle, const unsigned char*, source, size_t, size);
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_LargeFileWrite, IOTHUB_CLIENT_LARGE_FILE_HANDLE, fileHandle, const unsigned char*, source, size_t, size);
 #endif /*DONT_USE_UPLOADTOBLOB*/
 
 #ifdef __cplusplus

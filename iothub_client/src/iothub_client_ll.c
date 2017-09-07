@@ -1912,7 +1912,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob(IOTHUB_CLIENT_LL_HANDLE iotHub
     return result;
 }
 
-IOTHUB_CLIENT_LARGE_FILE_HANDLE IoTHubClient_LL_LARGE_FILE_open(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* destinationFileName)
+IOTHUB_CLIENT_LARGE_FILE_HANDLE IoTHubClient_LL_LargeFileOpen(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* destinationFileName)
 {
     IOTHUB_CLIENT_LARGE_FILE_HANDLE result;
     if (
@@ -1925,13 +1925,13 @@ IOTHUB_CLIENT_LARGE_FILE_HANDLE IoTHubClient_LL_LARGE_FILE_open(IOTHUB_CLIENT_LL
     }
     else
     {
-        result = IoTHubClient_LL_LARGE_FILE_open_Impl(iotHubClientHandle->uploadToBlobHandle, destinationFileName);
+        result = IoTHubClient_LL_LargeFileOpen_Impl(iotHubClientHandle->uploadToBlobHandle, destinationFileName);
     }
 
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_LL_LARGE_FILE_close(IOTHUB_CLIENT_LARGE_FILE_HANDLE handle)
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_LargeFileClose(IOTHUB_CLIENT_LARGE_FILE_HANDLE handle)
 {
     IOTHUB_CLIENT_RESULT result;
     if (handle == NULL)
@@ -1941,13 +1941,13 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_LARGE_FILE_close(IOTHUB_CLIENT_LARGE_FILE_H
     }
     else
     {
-        result = IoTHubClient_LL_LARGE_FILE_close_Impl(handle);
+        result = IoTHubClient_LL_LargeFileClose_Impl(handle);
     }
 
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_LL_LARGE_FILE_write(IOTHUB_CLIENT_LARGE_FILE_HANDLE fileHandle, const unsigned char* source, size_t size)
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_LargeFileWrite(IOTHUB_CLIENT_LARGE_FILE_HANDLE fileHandle, const unsigned char* source, size_t size)
 {
     IOTHUB_CLIENT_RESULT result;
     if (
@@ -1960,7 +1960,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_LARGE_FILE_write(IOTHUB_CLIENT_LARGE_FILE_H
     }
     else
     {
-        result =  IoTHubClient_LL_LARGE_FILE_write_Impl(fileHandle, source, size);
+        result =  IoTHubClient_LL_LargeFileWrite_Impl(fileHandle, source, size);
     }
     return result;
 }

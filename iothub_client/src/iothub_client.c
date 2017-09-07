@@ -1970,7 +1970,7 @@ IOTHUB_CLIENT_LARGE_FILE_HANDLE IoTHubClient_LargeFileOpen(IOTHUB_CLIENT_HANDLE 
     }
     else
     {
-        result = IoTHubClient_LL_LARGE_FILE_open(handle->IoTHubClientLLHandle, destinationFileName);
+        result = IoTHubClient_LL_LargeFileOpen(handle->IoTHubClientLLHandle, destinationFileName);
     }
 
     return result;
@@ -1986,7 +1986,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LargeFileClose(IOTHUB_CLIENT_LARGE_FILE_HANDLE
     }
     else
     {
-        result = IoTHubClient_LL_LARGE_FILE_close(handle);
+        result = IoTHubClient_LL_LargeFileClose(handle);
     }
 
     return result;
@@ -2005,7 +2005,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LargeFileWrite(IOTHUB_CLIENT_LARGE_FILE_HANDLE
     }
     else
     {
-        result =  IoTHubClient_LL_LARGE_FILE_write(fileHandle, source, size);
+        result =  IoTHubClient_LL_LargeFileWrite(fileHandle, source, size);
     }
     return result;
 }

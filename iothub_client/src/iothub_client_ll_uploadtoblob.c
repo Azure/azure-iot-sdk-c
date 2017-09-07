@@ -1569,7 +1569,7 @@ static IOTHUB_CLIENT_RESULT LARGE_FILE_upload_blob_stop(IOTHUB_CLIENT_LARGE_FILE
     return result;
 }
 
-IOTHUB_CLIENT_LARGE_FILE_HANDLE IoTHubClient_LL_LARGE_FILE_open_Impl(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE blobHandle, const char* destinationFileName)
+IOTHUB_CLIENT_LARGE_FILE_HANDLE IoTHubClient_LL_LargeFileOpen_Impl(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE blobHandle, const char* destinationFileName)
 {
     IOTHUB_CLIENT_LARGE_FILE_HANDLE_DATA* handleData = NULL;
     if (destinationFileName == NULL || blobHandle == NULL)
@@ -1600,7 +1600,7 @@ IOTHUB_CLIENT_LARGE_FILE_HANDLE IoTHubClient_LL_LARGE_FILE_open_Impl(IOTHUB_CLIE
                 if(LARGE_FILE_upload_blob_start((IOTHUB_CLIENT_LARGE_FILE_HANDLE)handleData, destinationFileName) != IOTHUB_CLIENT_OK)
                 {
                     LogError("Could not LARGE_FILE_upload_blob_start");
-                    IoTHubClient_LL_LARGE_FILE_close_Impl((IOTHUB_CLIENT_LARGE_FILE_HANDLE)handleData);
+                    IoTHubClient_LL_LargeFileClose_Impl((IOTHUB_CLIENT_LARGE_FILE_HANDLE)handleData);
                     handleData = NULL;
                 }
             }
@@ -1609,7 +1609,7 @@ IOTHUB_CLIENT_LARGE_FILE_HANDLE IoTHubClient_LL_LARGE_FILE_open_Impl(IOTHUB_CLIE
     return (IOTHUB_CLIENT_LARGE_FILE_HANDLE)handleData;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_LL_LARGE_FILE_close_Impl(IOTHUB_CLIENT_LARGE_FILE_HANDLE handle)
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_LargeFileClose_Impl(IOTHUB_CLIENT_LARGE_FILE_HANDLE handle)
 {
     IOTHUB_CLIENT_LARGE_FILE_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LARGE_FILE_HANDLE_DATA*)handle;
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
@@ -1676,7 +1676,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_LARGE_FILE_close_Impl(IOTHUB_CLIENT_LARGE_F
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_LL_LARGE_FILE_write_Impl(IOTHUB_CLIENT_LARGE_FILE_HANDLE handle, const unsigned char* source, size_t size)
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_LargeFileWrite_Impl(IOTHUB_CLIENT_LARGE_FILE_HANDLE handle, const unsigned char* source, size_t size)
 {
     IOTHUB_CLIENT_RESULT result;
     IOTHUB_CLIENT_LARGE_FILE_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LARGE_FILE_HANDLE_DATA*)handle;

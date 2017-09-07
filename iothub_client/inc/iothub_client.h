@@ -353,9 +353,9 @@ extern "C"
     * @param    destinationFileName                 The name of the file to be created in Azure Blob Storage.
     *
     *           The IOTHUB_CLIENT_LARGE_FILE_HANDLE returned by the function shall be then used to upload data with
-    *           the function IoTHubClient_LL_LARGE_FILE_write.
-    *           IoTHubClient_LL_LARGE_FILE_write can be called up to 50000 times in a row.
-    *           The handle must be closed by calling the function IoTHubClient_LL_LARGE_FILE_close
+    *           the function IoTHubClient_LL_LargeFileWrite.
+    *           IoTHubClient_LL_LargeFileWrite can be called up to 50000 times in a row.
+    *           The handle must be closed by calling the function IoTHubClient_LL_LargeFileClose
     *
     * @return   A valid handle upon success or NULL upon failure.
     */
