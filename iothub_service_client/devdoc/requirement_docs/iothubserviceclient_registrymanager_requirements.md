@@ -171,6 +171,8 @@ extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_CreateDevice(IOTHUB_R
 
 **SRS_IOTHUBREGISTRYMANAGER_12_011: [** IoTHubRegistryManager_CreateDevice shall set the "deviceId" value to the deviceCreateInfo->deviceId **]**
 
+**SRS_IOTHUBREGISTRYMANAGER_12_117: [** IoTHubRegistryManager_CreateDevice shall set the "status" value to the IOTHUB_DEVICE_STATUS_ENABLED  **]**
+
 **SRS_IOTHUBREGISTRYMANAGER_06_001: [** IoTHubRegistryManager_CreateDevice shall, if deviceCreateInfo->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT", set "authorization.x509Thumbprint.primaryThumbprint" to deviceCreateInfo->primaryKey and "authorization.x509Thumbprint.secondaryThumbprint" to deviceCreateInfo->secondaryKey **]**
 
 **SRS_IOTHUBREGISTRYMANAGER_06_002: [** IoTHubRegistryManager_CreateDevice shall, if deviceCreateInfo->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_SPK" or "IOTHUB_REGISTRYMANAGER_AUTH_X509_CERTIFICATE_AUTHORITY", set "authorization.symmetricKey.primaryKey" to deviceCreateInfo->primaryKey and "authorization.symmetricKey.secondaryKey" to deviceCreateInfo->secondaryKey **]**
@@ -214,6 +216,7 @@ extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_CreateDevice(IOTHUB_R
 **SRS_IOTHUBREGISTRYMANAGER_12_024: [** If the deviceInfo out parameter is not NULL IoTHubRegistryManager_CreateDevice shall save the received deviceInfo to the out parameter and return IOTHUB_REGISTRYMANAGER_OK **]**
 
 **SRS_IOTHUBREGISTRYMANAGER_12_100: [** IoTHubRegistryManager_CreateDevice shall do clean up before return **]**
+
 
 ## IoTHubRegistryManager_GetDevice
 ```c
@@ -274,6 +277,8 @@ extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_UpdateDevice(IOTHUB_R
 **SRS_IOTHUBREGISTRYMANAGER_12_108: [** If the malloc fails, IoTHubRegistryManager_UpdateDevice shall do clean up and return IOTHUB_REGISTRYMANAGER_ERROR **]**
 
 **SRS_IOTHUBREGISTRYMANAGER_12_041: [** IoTHubRegistryManager_UpdateDevice shall create a flat "key1:value2,key2:value2..." JSON representation from the given deviceCreateInfo parameter using the following parson APIs: json_value_init_object, json_value_get_object, json_object_set_string, json_object_dotset_string **]**
+
+**SRS_IOTHUBREGISTRYMANAGER_12_118: [** IoTHubRegistryManager_CreateDevice shall set the "status" value to the deviceCreateInfo->status  **]**
 
 **SRS_IOTHUBREGISTRYMANAGER_06_003: [** IoTHubRegistryManager_UpdateDevice shall, if deviceUpdate->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT", set "authorization.x509Thumbprint.primaryThumbprint" to deviceCreateInfo->primaryKey and "authorization.x509Thumbprint.secondaryThumbprint" to deviceCreateInfo->secondaryKey **]**
 
