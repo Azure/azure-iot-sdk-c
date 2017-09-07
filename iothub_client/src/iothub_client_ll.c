@@ -1914,17 +1914,55 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob(IOTHUB_CLIENT_LL_HANDLE iotHub
 
 LARGE_FILE_HANDLE IoTHubClient_LL_LARGE_FILE_open(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* destinationFileName)
 {
-    return IoTHubClient_LL_LARGE_FILE_open_Impl(iotHubClientHandle->uploadToBlobHandle, destinationFileName);
+    LARGE_FILE_HANDLE result;
+    if (
+        (iotHubClientHandle == NULL) ||
+        (destinationFileName == NULL)
+       )
+    {
+        LogError("invalid parameters IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle=%p, const char* destinationFileName=%s", iotHubClientHandle, destinationFileName);
+        result = NULL;
+    }
+    else
+    {
+        result = IoTHubClient_LL_LARGE_FILE_open_Impl(iotHubClientHandle->uploadToBlobHandle, destinationFileName);
+    }
+
+    return result;
 }
 
 IOTHUB_CLIENT_RESULT IoTHubClient_LL_LARGE_FILE_close(LARGE_FILE_HANDLE handle)
 {
-    return IoTHubClient_LL_LARGE_FILE_close_Impl(handle);
+    IOTHUB_CLIENT_RESULT result;
+    if (handle == NULL)
+    {
+        LogError("invalid parameters LARGE_FILE_HANDLE handle=%p", handle);
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    else
+    {
+        result = IoTHubClient_LL_LARGE_FILE_close_Impl(handle);
+    }
+
+    return result;
 }
 
 IOTHUB_CLIENT_RESULT IoTHubClient_LL_LARGE_FILE_write(LARGE_FILE_HANDLE fileHandle, const unsigned char* source, size_t size)
 {
-    return IoTHubClient_LL_LARGE_FILE_write_Impl(fileHandle, source, size);
+    IOTHUB_CLIENT_RESULT result;
+    if (
+        (fileHandle == NULL) ||
+        ((source == NULL) && (size >0))
+        )
+    {
+        LogError("invalid parameters LARGE_FILE_HANDLE fileHandle=%p, const unsigned char* source=%p, size_t size=%zu", fileHandle, source, size);
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    else
+    {
+        result =  IoTHubClient_LL_LARGE_FILE_write_Impl(fileHandle, source, size);
+    }
+    return result;
 }
 
 #endif //DONT_USE_UPLOADTOBLOB
