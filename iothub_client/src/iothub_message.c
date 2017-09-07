@@ -64,20 +64,6 @@ static int ValidateAsciiCharactersFilter(const char* mapKey, const char* mapValu
     return result;
 }
 
-static void InitializeIoTHubMessage(IOTHUB_MESSAGE_HANDLE handleData)
-{
-    handleData->contentType = IOTHUBMESSAGE_UNKNOWN;
-    handleData->value.byteArray = NULL;
-    handleData->value.string = NULL;
-    handleData->correlationId = NULL;
-    handleData->messageId = NULL;
-    handleData->contentEncoding = NULL;
-    handleData->userDefinedContentType = NULL;
-    handleData->properties = NULL;
-    handleData->diagnosticId = NULL;
-    handleData->diagnosticProperties = NULL;
-}
-
 static MAP_HANDLE GetDiagnosticProperties(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
 {
     MAP_HANDLE result;
@@ -265,8 +251,8 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHan
         }
         else
         {
-            result->correlationId = NULL;
             result->messageId = NULL;
+            result->correlationId = NULL;
             result->contentEncoding = NULL;
             result->userDefinedContentType = NULL;
             result->diagnosticId = NULL;
