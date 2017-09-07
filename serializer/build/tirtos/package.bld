@@ -6,7 +6,7 @@ var Build = xdc.useModule('xdc.bld.BuildEnvironment');
 var Pkg = xdc.useModule('xdc.bld.PackageContents');
 
 /* make command to search for the srcs */
-Pkg.makePrologue = "vpath %.c ../../src ../../../parson";
+Pkg.makePrologue = "vpath %.c ../../src ../../../deps/parson";
 
 /* lib/ is a generated directory that 'xdc clean' should remove */
 Pkg.generatedFiles.$add("lib/");
@@ -35,7 +35,7 @@ var slIncs = "";
 var ndkIncs = "";
 var wolfsslIncs = "";
 var serializerIncs = "-I../../inc -I../../../c-utility/inc -I../../../c-utility/inc/azure_c_shared_utility "
-    + "-I../../../iothub_client/inc -I../../../parson ";
+    + "-I../../../iothub_client/inc -I../../../deps/parson ";
 var pthreadIncs = "";
 
 /* Parse out the XDCARGS options for the library source paths */

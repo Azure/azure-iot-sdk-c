@@ -8,17 +8,11 @@ compileAsC99()
 
 set(dev_auth_prov_c_files
     ./tpm_device_provision.c
-    ../../../parson/parson.c
     ../../../certs/certs.c
 )
 
 set(dev_auth_prov_h_files
-    ../../../parson/parson.h
 )
-
-if(MSVC)
-    set_source_files_properties(../../../parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
-endif()
 
 IF(WIN32)
     #windows needs this define
