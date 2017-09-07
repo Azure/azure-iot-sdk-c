@@ -2067,6 +2067,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
             .SetReturn(TEST_JSON_OBJECT);
 
         STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME, TEST_DEVICE_ID));
+        STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_STATUS, TEST_DEVICE_JSON_DEFAULT_VALUE_DISABLED));
         STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_AUTH_TYPE, TEST_AUTH_TYPE_SAS));
         STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY, TEST_PRIMARYKEY));
         STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY, TEST_SECONDARYKEY));
@@ -2103,18 +2104,18 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
 
             /// act
             if (
-                (i != 9) && /*json_free_serialized_string*/
-                (i != 10) && /*json_object_clear*/
-                (i != 11) && /*json_value_free*/
-                (i != 26) && /*HTTPHeaders_Free*/
-                (i != 27) && /*HTTPAPIEX_Destroy*/
-                (i != 28) && /*HTTPAPIEX_SAS_Destroy*/
-                (i != 29) && /*STRING_delete*/
+                (i != 10) && /*json_free_serialized_string*/
+                (i != 11) && /*json_object_clear*/
+                (i != 12) && /*json_value_free*/
+                (i != 27) && /*HTTPHeaders_Free*/
+                (i != 28) && /*HTTPAPIEX_Destroy*/
+                (i != 29) && /*HTTPAPIEX_SAS_Destroy*/
                 (i != 30) && /*STRING_delete*/
                 (i != 31) && /*STRING_delete*/
-                (i != 32) && /*BUFFER_delete*/
+                (i != 32) && /*STRING_delete*/
                 (i != 33) && /*BUFFER_delete*/
-                (i != 34) /*gballoc_free*/
+                (i != 34) && /*BUFFER_delete*/
+                (i != 35) /*gballoc_free*/
                 )
             {
                 printf("i is = %zu\n", i);
