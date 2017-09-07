@@ -31,17 +31,17 @@ set(${theseTestsName}_nuget_c_files
 
 set(${theseTestsName}_c_files
     ../../../certs/certs.c
-    ../../../parson/parson.c
+    ../../../deps/parson/parson.c
 )
 
 set(${theseTestsName}_h_files
     ../../../certs/certs.h
-    ../../../parson/parson.h
+    ../../../deps/parson/parson.h
     ../common_dt_e2e/iothubclient_common_dt_e2e.h
 )
 
 include_directories(../common_dt_e2e)
-include_directories(../../../parson/)
+include_directories(../../../deps/parson/)
 include_directories(../../../certs/)
 include_directories(${IOTHUB_TEST_INC_FOLDER})
 include_directories(${IOTHUB_SERVICE_CLIENT_INC_FOLDER})
