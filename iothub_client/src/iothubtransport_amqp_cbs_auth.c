@@ -265,7 +265,7 @@ static int create_and_put_SAS_token_to_cbs(AUTHENTICATION_INSTANCE* instance)
     {
         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_07_001: [ authentication_do_work() shall determine what credential type is used SAS_TOKEN or DEVICE_KEY by calling IoTHubClient_Auth_Get_Credential_Type ] */
         IOTHUB_CREDENTIAL_TYPE cred_type = IoTHubClient_Auth_Get_Credential_Type(instance->authorization_module);
-        if (cred_type == IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY)
+        if (cred_type == IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY || cred_type == IOTHUB_CREDENTIAL_TYPE_DEVICE_AUTH)
         {
             double seconds_since_epoch;
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_053: [A STRING_HANDLE, referred to as `devices_path`, shall be created from the following parts: iothub_host_fqdn + "/devices/" + device_id]
@@ -326,7 +326,7 @@ static int create_and_put_SAS_token_to_cbs(AUTHENTICATION_INSTANCE* instance)
                 }
             }
         }
-        else if (cred_type == IOTHUB_CREDENTIAL_TYPE_X509)
+        else if (cred_type == IOTHUB_CREDENTIAL_TYPE_X509 || cred_type == IOTHUB_CREDENTIAL_TYPE_X509_ECC)
         {
             sas_token = NULL;
             result = RESULT_OK;

@@ -101,9 +101,15 @@ IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE IoTHubClient_LL_UploadToBlob_Create(const I
             }
             else
             {
-                (void)memcpy((char*)handleData->hostname, config->iotHubName, iotHubNameLength);
-                ((char*)handleData->hostname)[iotHubNameLength] = '.';
-                (void)memcpy((char*)handleData->hostname + iotHubNameLength + 1, config->iotHubSuffix, iotHubSuffixLength + 1); /*+1 will copy the \0 too*/
+                char* insert_pos = (char*)handleData->hostname;
+                (void)memcpy((char*)insert_pos, config->iotHubName, iotHubNameLength);
+                insert_pos += iotHubNameLength;
+                *insert_pos = '.';
+                insert_pos += 1;
+                (void)memcpy(insert_pos, config->iotHubSuffix, iotHubSuffixLength); /*+1 will copy the \0 too*/
+                insert_pos += iotHubSuffixLength;
+                *insert_pos = '\0';
+
                 handleData->certificates = NULL;
                 memset(&(handleData->http_proxy_options), 0, sizeof(HTTP_PROXY_OPTIONS));
 

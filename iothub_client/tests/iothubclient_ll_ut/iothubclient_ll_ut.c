@@ -692,6 +692,8 @@ static void setup_iothubclient_ll_create_mocks(bool use_device_config)
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the hostname as const char* */
             .SetReturn(TEST_HOSTNAME_VALUE);
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     }
     else
     {
@@ -712,7 +714,7 @@ static void setup_iothubclient_ll_create_mocks(bool use_device_config)
     if (use_device_config)
     {
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     }
 }
 
@@ -1333,7 +1335,7 @@ TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_fail)
     umock_c_negative_tests_snapshot();
 
     // act
-    size_t calls_cannot_fail[] = { 1, 2, 6, 10, 11, 12, 15, 16 };
+    size_t calls_cannot_fail[] = { 1, 2, 6, 9, 12, 13, 14, 17, 18 };
 
     size_t count = umock_c_negative_tests_call_count();
     for (size_t index = 0; index < count; index++)
@@ -1375,6 +1377,8 @@ TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_create_tickcounter_fails_share
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the hostname as const char* */
         .SetReturn(TEST_HOSTNAME_VALUE);
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
 
 #ifndef DONT_USE_UPLOADTOBLOB
     STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_Create(IGNORED_PTR_ARG));
@@ -1393,12 +1397,12 @@ TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_create_tickcounter_fails_share
     STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
 
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
     //act
     IOTHUB_CLIENT_LL_HANDLE result = IoTHubClient_LL_CreateWithTransport(&TEST_DEVICE_CONFIG);
 
-    ///assert
+    //assert
     ASSERT_ARE_EQUAL(void_ptr, NULL, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
@@ -1421,6 +1425,8 @@ TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_register_fails_shared_transpor
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the hostname as const char* */
         .SetReturn(TEST_HOSTNAME_VALUE);
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
 
 #ifndef DONT_USE_UPLOADTOBLOB
     STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_Create(IGNORED_PTR_ARG));
@@ -1444,7 +1450,7 @@ TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_register_fails_shared_transpor
     STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
 
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
     //act
     IOTHUB_CLIENT_LL_HANDLE result = IoTHubClient_LL_CreateWithTransport(&TEST_DEVICE_CONFIG);
@@ -1472,6 +1478,8 @@ TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_set_retry_policy_fails_shared_
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the hostname as const char* */
         .SetReturn(TEST_HOSTNAME_VALUE);
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
 
 #ifndef DONT_USE_UPLOADTOBLOB
     STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_Create(IGNORED_PTR_ARG));
@@ -1497,7 +1505,7 @@ TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_set_retry_policy_fails_shared_
     STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
 
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
     //act
     IOTHUB_CLIENT_LL_HANDLE result = IoTHubClient_LL_CreateWithTransport(&TEST_DEVICE_CONFIG);

@@ -17,6 +17,7 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/xlogging.h"
 
 #include "iothub_client_sample_mqtt_dm.h"
 
