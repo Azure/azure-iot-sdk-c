@@ -604,7 +604,6 @@ static void set_expected_calls_for_establish_amqp_connection()
 {
     STRICT_EXPECTED_CALL(STRING_c_str(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE))
         .SetReturn(TEST_IOTHUB_HOST_FQDN_CHAR_PTR);
-
     EXPECTED_CALL(amqp_connection_create(IGNORED_PTR_ARG));
 }
 
@@ -700,6 +699,7 @@ static void set_expected_calls_for_get_new_underlying_io_transport(bool feed_opt
 {
     STRICT_EXPECTED_CALL(STRING_c_str(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE))
         .SetReturn(TEST_IOTHUB_HOST_FQDN_CHAR_PTR);
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
 
     if (feed_options)
     {
@@ -2871,6 +2871,7 @@ TEST_FUNCTION(SetOption_xio_option_success)
 
     STRICT_EXPECTED_CALL(STRING_c_str(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE))
         .SetReturn(TEST_IOTHUB_HOST_FQDN_CHAR_PTR);
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(xio_setoption(TEST_UNDERLYING_IO_TRANSPORT, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
@@ -2935,6 +2936,7 @@ TEST_FUNCTION(SetOption_xio_option_fails)
 
     STRICT_EXPECTED_CALL(STRING_c_str(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE))
         .SetReturn(TEST_IOTHUB_HOST_FQDN_CHAR_PTR);
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(xio_setoption(TEST_UNDERLYING_IO_TRANSPORT, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
@@ -4010,7 +4012,8 @@ TEST_FUNCTION(DoWork_get_underlying_io_transport_provider_fails)
 
     umock_c_reset_all_calls();
     STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_REGISTERED_DEVICES_LIST));
-    set_expected_calls_for_get_new_underlying_io_transport(false);
+    STRICT_EXPECTED_CALL(STRING_c_str(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE))
+        .SetReturn(TEST_IOTHUB_HOST_FQDN_CHAR_PTR);
     TEST_amqp_get_io_transport_result = NULL;
 
     // act
@@ -4018,7 +4021,6 @@ TEST_FUNCTION(DoWork_get_underlying_io_transport_provider_fails)
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-    ASSERT_ARE_EQUAL(size_t, TEST_amqp_connection_create_saved_c2d_keep_alive_freq_secs, TEST_DEFAULT_C2D_KEEP_ALIVE_FREQ_SECS);
 
     // cleanup
     destroy_transport(handle, device_handle, NULL);

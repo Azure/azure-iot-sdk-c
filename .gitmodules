@@ -7,9 +7,12 @@
 [submodule "azure-uamqp-c"]
 	path = uamqp
 	url = https://github.com/Azure/azure-uamqp-c.git
-[submodule "parson"]
-	path = parson
-	url = https://github.com/kgabis/parson
-[submodule "iothub_service_client/parson"]
-	path = iothub_service_client/parson
-	url = https://github.com/kgabis/parson
+[submodule "dps_client/deps/utpm"]
+	path = dps_client/deps/utpm
+	url = https://github.com/Azure/azure-utpm-c.git
+[submodule "dps_client/deps/RIoT"]
+	path = dps_client/deps/RIoT
+	url = https://github.com/Microsoft/RIoT.git
+[submodule "deps/parson"]
+	path = deps/parson
+	url = https://github.com/kgabis/parson.git

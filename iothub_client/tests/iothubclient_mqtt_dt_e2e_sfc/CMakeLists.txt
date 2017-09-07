@@ -31,17 +31,17 @@ set(${theseTestsName}_nuget_c_files
 
 set(${theseTestsName}_c_files
     ../../../certs/certs.c
-    ../../../parson/parson.c
+    ../../../deps/parson/parson.c
 )
 
 set(${theseTestsName}_h_files
     ../../../certs/certs.h
-    ../../../parson/parson.h
+    ../../../deps/parson/parson.h
     ../common_dt_e2e/iothubclient_common_dt_e2e.h
 )
 
 include_directories(../common_dt_e2e)
-include_directories(../../../parson/)
+include_directories(../../../deps/parson/)
 include_directories(../../../certs/)
 include_directories(${IOTHUB_TEST_INC_FOLDER})
 include_directories(${IOTHUB_SERVICE_CLIENT_INC_FOLDER})
@@ -54,7 +54,7 @@ if(WIN32)
         #CPP compiler on windows likes to complain about unused local function removed (C4505)
         #C compiler doesn't like to complain about the same thing
         set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4505")
-        set_source_files_properties(../../../parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
+        set_source_files_properties(../../../deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
     endif()
 
     if(TARGET ${theseTestsName}_dll)

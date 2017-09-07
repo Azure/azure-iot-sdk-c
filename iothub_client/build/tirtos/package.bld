@@ -29,7 +29,7 @@ var slIncs = "";
 var ndkIncs = "";
 var wolfsslIncs = "";
 var iotclientIncs = "-I../../inc -I../../../c-utility/inc -I../../../c-utility/inc/azure_c_shared_utility "
-	+"-I../../../parson ";
+	+"-I../../../deps/parson ";
 var pthreadIncs = "";
 
 /* Parse out the XDCARGS options for the library source paths */

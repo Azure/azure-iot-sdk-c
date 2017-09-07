@@ -178,7 +178,7 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     bool log_trace;
     bool raw_trace;
     TICK_COUNTER_HANDLE msgTickCounter;
-	OPTIONHANDLER_HANDLE saved_tls_options;		// Here are the options from the xio layer if any is saved.
+    OPTIONHANDLER_HANDLE saved_tls_options;		// Here are the options from the xio layer if any is saved.
 
     // Internal lists for message tracking
     PDLIST_ENTRY waitingToSend;
@@ -254,11 +254,11 @@ static void free_proxy_data(MQTTTRANSPORT_HANDLE_DATA* mqtt_transport_instance)
 
 static void set_saved_tls_options(PMQTTTRANSPORT_HANDLE_DATA transport, OPTIONHANDLER_HANDLE new_options)
 {
-	if (transport->saved_tls_options != NULL)
-	{
-		OptionHandler_Destroy(transport->saved_tls_options);
-	}
-	transport->saved_tls_options = new_options;
+    if (transport->saved_tls_options != NULL)
+    {
+        OptionHandler_Destroy(transport->saved_tls_options);
+    }
+    transport->saved_tls_options = new_options;
 }
 
 int IoTHubTransport_MQTT_Common_SetRetryPolicy(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitInSeconds)
@@ -1232,7 +1232,7 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
                             transport_data->isRecoverableError = false;
                         }
                         LogError("Connection Not Accepted: 0x%x: %s", connack->returnCode, retrieve_mqtt_return_codes(connack->returnCode) );
-                        (void)mqtt_client_disconnect(transport_data->mqttClient);
+                        (void)mqtt_client_disconnect(transport_data->mqttClient, NULL, NULL);
                         transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_NOT_CONNECTED;
                         transport_data->currPacketState = PACKET_TYPE_ERROR;
                     }
@@ -1290,10 +1290,10 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
 
 static void DisconnectFromClient(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 {
-	OPTIONHANDLER_HANDLE options = xio_retrieveoptions(transport_data->xioTransport);
-	set_saved_tls_options(transport_data, options);
+    OPTIONHANDLER_HANDLE options = xio_retrieveoptions(transport_data->xioTransport);
+    set_saved_tls_options(transport_data, options);
 
-    (void)mqtt_client_disconnect(transport_data->mqttClient);
+    (void)mqtt_client_disconnect(transport_data->mqttClient, NULL, NULL);
     xio_destroy(transport_data->xioTransport);
     transport_data->xioTransport = NULL;
 
@@ -1482,31 +1482,80 @@ static int GetTransportProviderIfNecessary(PMQTTTRANSPORT_HANDLE_DATA transport_
             LogError("Unable to create the lower level TLS layer.");
             result = __FAILURE__;
         }
-		else
-		{
-			if (transport_data->saved_tls_options != NULL)
-			{
-				if (OptionHandler_FeedOptions(transport_data->saved_tls_options, transport_data->xioTransport) != OPTIONHANDLER_OK)
-				{
-					LogError("Failed feeding existing options to new TLS instance.");
-					result = __FAILURE__;
-				}
-				else
-				{
-					// The tlsio has the options, so our copy can be deleted
-					set_saved_tls_options(transport_data, NULL);
-					result = 0;
-				}
-			}
-			else
-			{
-				result = 0;
-			}
+        else
+        {
+            if (IoTHubClient_Auth_Get_Credential_Type(transport_data->authorization_module) == IOTHUB_CREDENTIAL_TYPE_X509_ECC)
+            {
+                if (IoTHubClient_Auth_Set_xio_Certificate(transport_data->authorization_module, transport_data->xioTransport) != 0)
+                {
+                    LogError("Unable to create the lower level TLS layer.");
+                    result = __FAILURE__;
+                }
+                else
+                {
+                    result = 0;
+                }
+            }
+            else
+            {
+                result = 0;
+            }
+
+            if (result == 0)
+            {
+                if (transport_data->saved_tls_options != NULL)
+                {
+                    if (OptionHandler_FeedOptions(transport_data->saved_tls_options, transport_data->xioTransport) != OPTIONHANDLER_OK)
+                    {
+                        LogError("Failed feeding existing options to new TLS instance.");
+                        result = __FAILURE__;
+                    }
+                    else
+                    {
+                        // The tlsio has the options, so our copy can be deleted
+                        set_saved_tls_options(transport_data, NULL);
+                        result = 0;
+                    }
+                }
+                else
+                {
+                    result = 0;
+                }
+            }
         }
     }
     else
     {
         result = 0;
+    }
+    return result;
+}
+
+static int is_key_validate(const IOTHUBTRANSPORT_CONFIG* config)
+{
+    int result;
+    IOTHUB_CREDENTIAL_TYPE cred_type = IoTHubClient_Auth_Get_Credential_Type(config->auth_module_handle);
+    if (cred_type == IOTHUB_CREDENTIAL_TYPE_X509 || cred_type == IOTHUB_CREDENTIAL_TYPE_X509_ECC)
+    {
+        result = 0;
+    }
+    else
+    {
+        if (config->upperConfig->deviceKey == NULL && config->upperConfig->deviceSasToken == NULL)
+        {
+            if (IoTHubClient_Auth_Get_DeviceKey(config->auth_module_handle) == NULL)
+            {
+                result = __FAILURE__;
+            }
+            else
+            {
+                result = 0;
+            }
+        }
+        else
+        {
+            result = 0;
+        }
     }
     return result;
 }
@@ -1519,14 +1568,14 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
     result = 0;
 
     IOTHUB_CREDENTIAL_TYPE cred_type = IoTHubClient_Auth_Get_Credential_Type(transport_data->authorization_module);
-    if (cred_type == IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY)
+    if (cred_type == IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY || cred_type == IOTHUB_CREDENTIAL_TYPE_DEVICE_AUTH)
     {
         size_t secSinceEpoch = (size_t)(difftime(get_time(NULL), EPOCH_TIME_T_VALUE) + 0);
         size_t expiryTime = secSinceEpoch + SAS_TOKEN_DEFAULT_LIFETIME;
         sasToken = IoTHubClient_Auth_Get_SasToken(transport_data->authorization_module, STRING_c_str(transport_data->devicesPath), expiryTime);
         if (sasToken == NULL)
         {
-            LogError("failure getting sas Token.");
+            LogError("failure getting sas token from IoTHubClient_Auth_Get_SasToken.");
             result = __FAILURE__;
         }
     }
@@ -1696,9 +1745,9 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 if ((current_time - transport_data->mqtt_connect_time) / 1000 > (SAS_TOKEN_DEFAULT_LIFETIME*SAS_REFRESH_MULTIPLIER))
                 {
                     /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_058: [ If the sas token has timed out IoTHubTransport_MQTT_Common_DoWork shall disconnect from the mqtt client and destroy the transport information and wait for reconnect. ] */
-					OPTIONHANDLER_HANDLE options = xio_retrieveoptions(transport_data->xioTransport);
-					set_saved_tls_options(transport_data, options);
-					(void)mqtt_client_disconnect(transport_data->mqttClient);
+                    OPTIONHANDLER_HANDLE options = xio_retrieveoptions(transport_data->xioTransport);
+                    set_saved_tls_options(transport_data, options);
+                    (void)mqtt_client_disconnect(transport_data->mqttClient, NULL, NULL);
                     xio_destroy(transport_data->xioTransport);
                     transport_data->xioTransport = NULL;
 
@@ -1884,15 +1933,22 @@ TRANSPORT_LL_HANDLE IoTHubTransport_MQTT_Common_Create(const IOTHUBTRANSPORT_CON
         LogError("Invalid Argument: Config Parameter is NULL.");
         result = NULL;
     }
+    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_002: [If the parameter config's variables upperConfig, auth_module_handle or waitingToSend are NULL then IoTHubTransport_MQTT_Common_Create shall return NULL.] */
+    else if (config->auth_module_handle == NULL)
+    {
+        LogError("Invalid Argument: auth_module_handle is NULL)");
+        result = NULL;
+    }
     /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_002: [If the parameter config's variables upperConfig or waitingToSend are NULL then IoTHubTransport_MQTT_Common_Create shall return NULL.] */
     /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_003: [If the upperConfig's variables deviceId, both deviceKey and deviceSasToken, iotHubName, protocol, or iotHubSuffix are NULL then IoTHubTransport_MQTT_Common_Create shall return NULL.] */
     /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_03_003: [If both deviceKey & deviceSasToken fields are NOT NULL then IoTHubTransport_MQTT_Common_Create shall return NULL.] */
     else if (config->upperConfig == NULL ||
              config->upperConfig->protocol == NULL || 
              config->upperConfig->deviceId == NULL || 
-            ((config->upperConfig->deviceKey != NULL) && (config->upperConfig->deviceSasToken != NULL)) ||
-            config->upperConfig->iotHubName == NULL || 
-            config->upperConfig->iotHubSuffix == NULL)
+             ((config->upperConfig->deviceKey != NULL) && (config->upperConfig->deviceSasToken != NULL)) ||
+             //is_key_validate(config) != 0 ||
+             config->upperConfig->iotHubName == NULL || 
+             config->upperConfig->iotHubSuffix == NULL)
     {
         LogError("Invalid Argument: upperConfig structure contains an invalid parameter");
         result = NULL;
@@ -1901,12 +1957,6 @@ TRANSPORT_LL_HANDLE IoTHubTransport_MQTT_Common_Create(const IOTHUBTRANSPORT_CON
     else if (config->waitingToSend == NULL)
     {
         LogError("Invalid Argument: waitingToSend is NULL)");
-        result = NULL;
-    }
-    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_002: [If the parameter config's variables upperConfig, auth_module_handle or waitingToSend are NULL then IoTHubTransport_MQTT_Common_Create shall return NULL.] */
-    else if (config->auth_module_handle == NULL)
-    {
-        LogError("Invalid Argument: auth_module_handle is NULL)");
         result = NULL;
     }
     /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_006: [If the upperConfig's variables deviceId is an empty strings or length is greater then 128 then IoTHubTransport_MQTT_Common_Create shall return NULL.] */
@@ -1989,7 +2039,7 @@ void IoTHubTransport_MQTT_Common_Destroy(TRANSPORT_LL_HANDLE handle)
         STRING_delete(transport_data->topic_NotifyState);
         STRING_delete(transport_data->topic_DeviceMethods);
 
-		set_saved_tls_options(transport_data, NULL);
+        set_saved_tls_options(transport_data, NULL);
 
         tickcounter_destroy(transport_data->msgTickCounter);
         /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_012: [ `IoTHubTransport_MQTT_Common_Destroy` shall free the stored proxy options. ]*/

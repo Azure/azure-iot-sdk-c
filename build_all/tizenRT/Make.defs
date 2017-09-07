@@ -6,7 +6,7 @@ AZURE_SERIAL_DIR = $(AZURE_DIR)/serializer
 AZURE_UTIL_DIR = $(AZURE_DIR)/c-utility
 
 CSRCS += $(AZURE_DIR)/certs/certs.c
-CSRCS += $(AZURE_DIR)/parson/parson.c
+CSRCS += $(AZURE_DIR)/deps/parson/parson.c
 
 CSRCS += $(AZURE_CLIENT_DIR)/src/blob.c	$(AZURE_CLIENT_DIR)/src/iothub_client.c	\
 $(AZURE_CLIENT_DIR)/src/iothub_message.c $(AZURE_CLIENT_DIR)/src/iothubtransport.c \
@@ -43,5 +43,5 @@ CSRCS += $(AZURE_SERIAL_DIR)/samples/simplesample_http/simplesample_http.c
 endif
 
 CFLAGS += -I$(AZURE_DIR)/c-utility/inc -I$(AZURE_DIR)/serializer/inc	\
-	  -I$(AZURE_DIR)/iothub_client/inc -I$(AZURE_DIR)/parson -I$(AZURE_DIR)/certs
+	  -I$(AZURE_DIR)/iothub_client/inc -I$(AZURE_DIR)/deps/parson -I$(AZURE_DIR)/certs
 CFLAGS += -DWITH_POSIX -DTIZENRT -DMBED_BUILD_TIMESTAMP -DUSE_MBED_TLS -std=c99 -w

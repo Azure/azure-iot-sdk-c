@@ -14,7 +14,7 @@ $(sdk)/c-utility/inc/azure_c_shared_utility/lwip_esp32 \
 $(sdk)/iothub_client/inc \
 $(sdk)/umqtt/inc  \
 $(sdk)/umqtt/inc/azure_umqtt_c 	\
-$(sdk)/parson  \
+$(sdk)/deps/parson  \
 $(sdk)/iothub_client/samples/iothub_client_sample_mqtt
 
 COMPONENT_OBJS =  \
@@ -84,7 +84,7 @@ $(sdk)/c-utility/adapters  \
 $(sdk)/umqtt/src	\
 $(sdk)/iothub_client/src  \
 $(sdk)/iothub_client/samples/iothub_client_sample_mqtt  \
-$(sdk)/parson	\
+$(sdk)/deps/parson	\
 
 
 
