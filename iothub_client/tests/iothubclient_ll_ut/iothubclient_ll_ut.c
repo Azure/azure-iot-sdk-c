@@ -583,8 +583,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_Clone, (IOTHUB_MESSAGE_HANDLE)0x44);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_Clone, NULL);
 
-    REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Diagnostic_AddIfNecessary, true);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_Diagnostic_AddIfNecessary, false);
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Diagnostic_AddIfNecessary, 0);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_Diagnostic_AddIfNecessary, 100);
 
     REGISTER_GLOBAL_MOCK_RETURN(get_time, (time_t)TEST_TIME_VALUE);
 

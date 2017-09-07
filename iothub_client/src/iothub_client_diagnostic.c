@@ -24,14 +24,7 @@ static char* get_current_time_utc(char* timeBuffer, int bufferLen, const char* f
 
 static char get_base36_char(unsigned char value)
 {
-    if (value <= 9)
-    {
-        return '0' + value;
-    }
-    else
-    {
-        return 'a' + value - 10;
-    }
+    return value <= 9 ? '0' + value : 'a' + value - 10;
 }
 
 static char* generate_eight_random_characters(char *randomString)
@@ -52,31 +45,32 @@ static char* generate_eight_random_characters(char *randomString)
 
 static bool should_add_diagnostic_info(IOTHUB_DIAGNOSTIC_SETTING_DATA* diagSetting)
 {
+    bool result = false;
     if (diagSetting->diagSamplingPercentage > 0)
     {
         if (diagSetting->currentMessageNumber == UINT32_MAX)
         {
-            diagSetting->currentMessageNumber %= diagSetting->diagSamplingPercentage;
+            diagSetting->currentMessageNumber %= diagSetting->diagSamplingPercentage * 100;
         }
         ++diagSetting->currentMessageNumber;
 
         double number = diagSetting->currentMessageNumber;
         double percentage = diagSetting->diagSamplingPercentage;
-        return (floor((number - 2) * percentage / 100.0) < floor((number - 1) * percentage / 100.0));
+        result = (floor((number - 2) * percentage / 100.0) < floor((number - 1) * percentage / 100.0));
     }
-    return false;
+    return result;
 }
 
-bool IoTHubClient_Diagnostic_AddIfNecessary(IOTHUB_DIAGNOSTIC_SETTING_DATA* diagSetting, IOTHUB_MESSAGE_HANDLE messageHandle)
+int IoTHubClient_Diagnostic_AddIfNecessary(IOTHUB_DIAGNOSTIC_SETTING_DATA* diagSetting, IOTHUB_MESSAGE_HANDLE messageHandle)
 {
-    /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_001: [ IoTHubClient_Diagnostic_AddIfNecessary should return false if diagSetting or messageHandle is NULL. ]*/
+    int result;
+    /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_001: [ IoTHubClient_Diagnostic_AddIfNecessary should return nonezero if diagSetting or messageHandle is NULL. ]*/
     if (diagSetting == NULL || messageHandle == NULL)
     {
-        return false;
+        result = __FAILURE__;
     }
-
     /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_003: [ If diagSamplingPercentage is equal to 0, message number should not be increased and no diagnostic properties added ]*/
-    if (should_add_diagnostic_info(diagSetting))
+    else if (should_add_diagnostic_info(diagSetting))
     {
         /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_004: [ If diagSamplingPercentage is equal to 100, diagnostic properties should be added to all messages]*/
         /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_005: [ If diagSamplingPercentage is between(0, 100), diagnostic properties should be added based on percentage]*/
@@ -85,19 +79,28 @@ bool IoTHubClient_Diagnostic_AddIfNecessary(IOTHUB_DIAGNOSTIC_SETTING_DATA* diag
         char randomString[9];
         if (IoTHubMessage_SetDiagnosticId(messageHandle, generate_eight_random_characters(randomString)) != IOTHUB_MESSAGE_OK)
         {
-            /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_002: [ IoTHubClient_Diagnostic_AddIfNecessary should return false if failing to add diagnostic property. ]*/
-            return false;
+            /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_002: [ IoTHubClient_Diagnostic_AddIfNecessary should return nonezero if failing to add diagnostic property. ]*/
+            result = __FAILURE__;
         }
-
-        //TODO: get current time with milliseconds precision
-        char timeBuffer[30];
-        get_current_time_utc(timeBuffer, 30, "%Y-%m-%dT%H:%M:%SZ");
-        if (IoTHubMessage_SetDiagnosticCreationTimeUtc(messageHandle, timeBuffer) != IOTHUB_MESSAGE_OK)
+        else
         {
-            /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_002: [ IoTHubClient_Diagnostic_AddIfNecessary should return false if failing to add diagnostic property. ]*/
-            return false;
+            char timeBuffer[30];
+            get_current_time_utc(timeBuffer, 30, "%Y-%m-%dT%H:%M:%SZ");
+            if (IoTHubMessage_SetDiagnosticCreationTimeUtc(messageHandle, timeBuffer) != IOTHUB_MESSAGE_OK)
+            {
+                /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_002: [ IoTHubClient_Diagnostic_AddIfNecessary should return nonezero if failing to add diagnostic property. ]*/
+                result = __FAILURE__;
+            }
+            else
+            {
+                result = 0;
+            }
         }
     }
+    else
+    {
+        result = 0;
+    }
 
-    return true;
+    return result;
 }

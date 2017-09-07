@@ -265,36 +265,81 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHan
         }
         else
         {
-            InitializeIoTHubMessage(result);
+            result->correlationId = NULL;
+            result->messageId = NULL;
+            result->contentEncoding = NULL;
+            result->userDefinedContentType = NULL;
+            result->diagnosticId = NULL;
+            result->properties = NULL;
+            result->diagnosticProperties = NULL;
 
             if (source->messageId != NULL && mallocAndStrcpy_s(&result->messageId, source->messageId) != 0)
             {
                 LogError("unable to Copy messageId");
-                IoTHubMessage_Destroy(result);
+                free(result);
                 result = NULL;
             }
             else if (source->correlationId != NULL && mallocAndStrcpy_s(&result->correlationId, source->correlationId) != 0)
             {
                 LogError("unable to Copy correlationId");
-                IoTHubMessage_Destroy(result);
+                if (result->messageId != NULL)
+                {
+                    free(result->messageId);
+                }
+                free(result);
                 result = NULL;
             }
             else if (source->userDefinedContentType != NULL && mallocAndStrcpy_s(&result->userDefinedContentType, source->userDefinedContentType) != 0)
             {
                 LogError("unable to copy contentType");
-                IoTHubMessage_Destroy(result);
+                if (result->messageId != NULL)
+                {
+                    free(result->messageId);
+                }
+                if (result->correlationId != NULL)
+                {
+                    free(result->correlationId);
+                }
+                free(result);
                 result = NULL;
             }
             else if (source->contentEncoding != NULL && mallocAndStrcpy_s(&result->contentEncoding, source->contentEncoding) != 0)
             {
                 LogError("unable to copy contentEncoding");
-                IoTHubMessage_Destroy(result);
+                if (result->messageId != NULL)
+                {
+                    free(result->messageId);
+                }
+                if (result->correlationId != NULL)
+                {
+                    free(result->correlationId);
+                }
+                if (result->userDefinedContentType != NULL)
+                {
+                    free(result->userDefinedContentType);
+                }
+                free(result);
                 result = NULL;
             }
             else if (source->diagnosticId != NULL && mallocAndStrcpy_s(&result->diagnosticId, source->diagnosticId) != 0)
             {
                 LogError("unable to copy diagnosticId");
-                IoTHubMessage_Destroy(result);
+                free(result->messageId);
+                free(result->correlationId);
+                free(result->userDefinedContentType);
+                free(result->contentEncoding);
+                free(result);
+                result = NULL;
+            }
+            else if ((result->diagnosticProperties = Map_Clone(source->diagnosticProperties)) == NULL)
+            {
+                LogError("unable to Map_Clone for diagnosticProperties");
+                free(result->messageId);
+                free(result->correlationId);
+                free(result->userDefinedContentType);
+                free(result->contentEncoding);
+                free(result->diagnosticId);
+                free(result);
                 result = NULL;
             }
             else if (source->contentType == IOTHUBMESSAGE_BYTEARRAY)
@@ -304,27 +349,45 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHan
                 {
                     /*Codes_SRS_IOTHUBMESSAGE_03_004: [IoTHubMessage_Clone shall return NULL if it fails for any reason.]*/
                     LogError("unable to BUFFER_clone");
-                    IoTHubMessage_Destroy(result);
+                    if (result->messageId)
+                    {
+                        free(result->messageId);
+                        result->messageId = NULL;
+                    }
+                    if (result->correlationId != NULL)
+                    {
+                        free(result->correlationId);
+                        result->correlationId = NULL;
+                    }
+                    free(result->diagnosticId);
+                    Map_Destroy(result->diagnosticProperties);
+                    free(result);
                     result = NULL;
                 }
                 /*Codes_SRS_IOTHUBMESSAGE_02_005: [IoTHubMessage_Clone shall clone the properties map by using Map_Clone.] */
-                else 
+                else if ((result->properties = Map_Clone(source->properties)) == NULL)
+                {
+                    /*Codes_SRS_IOTHUBMESSAGE_03_004: [IoTHubMessage_Clone shall return NULL if it fails for any reason.]*/
+                    LogError("unable to Map_Clone");
+                    BUFFER_delete(result->value.byteArray);
+                    if (result->messageId)
+                    {
+                        free(result->messageId);
+                        result->messageId = NULL;
+                    }
+                    if (result->correlationId != NULL)
+                    {
+                        free(result->correlationId);
+                        result->correlationId = NULL;
+                    }
+                    free(result->diagnosticId);
+                    Map_Destroy(result->diagnosticProperties);
+                    free(result);
+                    result = NULL;
+                }
+                else
                 {
                     result->contentType = IOTHUBMESSAGE_BYTEARRAY;
-                    if ((result->properties = Map_Clone(source->properties)) == NULL)
-                    {
-                        /*Codes_SRS_IOTHUBMESSAGE_03_004: [IoTHubMessage_Clone shall return NULL if it fails for any reason.]*/
-                        LogError("unable to Map_Clone for properties");
-                        IoTHubMessage_Destroy(result);
-                        result = NULL;
-                    }
-                    else if ((result->diagnosticProperties = Map_Clone(source->diagnosticProperties)) == NULL)
-                    {
-                        LogError("unable to Map_Clone for diagnosticProperties");
-                        IoTHubMessage_Destroy(result);
-                        result = NULL;
-                    }
-                    /*else {}*/
                     /*Codes_SRS_IOTHUBMESSAGE_03_002: [IoTHubMessage_Clone shall return upon success a non-NULL handle to the newly created IoT hub message.]*/
                     /*return as is, this is a good result*/
                 }
@@ -335,27 +398,47 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHan
                 if ((result->value.string = STRING_clone(source->value.string)) == NULL)
                 {
                     /*Codes_SRS_IOTHUBMESSAGE_03_004: [IoTHubMessage_Clone shall return NULL if it fails for any reason.]*/
+                    if (result->messageId)
+                    {
+                        free(result->messageId);
+                        result->messageId = NULL;
+                    }
+                    if (result->correlationId != NULL)
+                    {
+                        free(result->correlationId);
+                        result->correlationId = NULL;
+                    }
+                    free(result->diagnosticId);
+                    Map_Destroy(result->diagnosticProperties);
+                    free(result);
+                    result = NULL;
                     LogError("failed to STRING_clone");
-                    IoTHubMessage_Destroy(result);
+                }
+                /*Codes_SRS_IOTHUBMESSAGE_02_005: [IoTHubMessage_Clone shall clone the properties map by using Map_Clone.] */
+                else if ((result->properties = Map_Clone(source->properties)) == NULL)
+                {
+                    /*Codes_SRS_IOTHUBMESSAGE_03_004: [IoTHubMessage_Clone shall return NULL if it fails for any reason.]*/
+                    LogError("unable to Map_Clone");
+                    STRING_delete(result->value.string);
+                    if (result->messageId)
+                    {
+                        free(result->messageId);
+                        result->messageId = NULL;
+                    }
+                    if (result->correlationId != NULL)
+                    {
+                        free(result->correlationId);
+                        result->correlationId = NULL;
+                    }
+                    free(result->diagnosticId);
+                    Map_Destroy(result->diagnosticProperties);
+                    free(result);
                     result = NULL;
                 }
                 else
                 {
                     result->contentType = IOTHUBMESSAGE_STRING;
-                    /*Codes_SRS_IOTHUBMESSAGE_02_005: [IoTHubMessage_Clone shall clone the properties map by using Map_Clone.] */
-                    if ((result->properties = Map_Clone(source->properties)) == NULL)
-                    {
-                        /*Codes_SRS_IOTHUBMESSAGE_03_004: [IoTHubMessage_Clone shall return NULL if it fails for any reason.]*/
-                        LogError("unable to Map_Clone for properties");
-                        IoTHubMessage_Destroy(result);
-                        result = NULL;
-                    }
-                    else if ((result->diagnosticProperties = Map_Clone(source->diagnosticProperties)) == NULL)
-                    {
-                        LogError("unable to Map_Clone for diagnosticProperties");
-                        IoTHubMessage_Destroy(result);
-                        result = NULL;
-                    }
+                    /*all is fine*/
                 }
             }
         }
@@ -699,7 +782,6 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetDiagnosticId(IOTHUB_MESSAGE_HANDLE iotHub
     IOTHUB_MESSAGE_RESULT result;
 
     // Codes_SRS_IOTHUBMESSAGE_10_003: [If any of the parameters are NULL then IoTHubMessage_SetDiagnosticId shall return a IOTHUB_MESSAGE_INVALID_ARG value.] 
-    //TODO: Validate diagnosticId is correct format [0-9a-z]8
     if (iotHubMessageHandle == NULL || diagnosticId == NULL)
     {
         LogError("Invalid argument (iotHubMessageHandle=%p, diagnosticId=%p)", iotHubMessageHandle, diagnosticId);
@@ -748,13 +830,12 @@ const char* IoTHubMessage_GetDiagnosticCreationTimeUtc(IOTHUB_MESSAGE_HANDLE iot
 IOTHUB_MESSAGE_RESULT IoTHubMessage_SetDiagnosticCreationTimeUtc(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const char* diagCreationTimeUtc)
 {
     IOTHUB_MESSAGE_RESULT result;
-    MAP_HANDLE diagnosticPropHandle;
+    MAP_HANDLE diagnosticPropHandle = NULL;
     /* Codes_SRS_IOTHUBMESSAGE_10_009: [if any of the parameters are NULL then IoTHubMessage_SetDiagnosticCreationTimeUtc shall return a IOTHUB_MESSAGE_INVALID_ARG value.] */
-    //TODO: Validate diagCreationTimeUtc is correct time format
     if (iotHubMessageHandle == NULL || diagCreationTimeUtc == NULL ||
         (diagnosticPropHandle = GetDiagnosticProperties(iotHubMessageHandle)) == NULL)
     {
-        LogError("invalid arg (NULL) passed to IoTHubMessage_SetDiagnosticCreationTimeUtc");
+        LogError("invalid arg (iotHubMessageHandle=%p diagCreationTimeUtc=%p diagnosticPropHandle=%p)", iotHubMessageHandle, diagCreationTimeUtc, diagnosticPropHandle);
         result = IOTHUB_MESSAGE_INVALID_ARG;
     }
     else if (Map_AddOrUpdate(diagnosticPropHandle, DIAG_CREATION_TIME_UTC_PROPERTY_NAME, diagCreationTimeUtc) != MAP_OK)

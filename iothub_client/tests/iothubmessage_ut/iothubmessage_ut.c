@@ -608,8 +608,8 @@ TEST_FUNCTION(IoTHubMessage_Clone_with_BYTE_ARRAY_happy_path)
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_clone(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Map_Clone(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_clone(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Map_Clone(IGNORED_PTR_ARG));
 
     //act
@@ -650,8 +650,8 @@ TEST_FUNCTION(IoTHubMessage_Clone_with_BYTE_ARRAY_fails)
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_clone(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Map_Clone(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_clone(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Map_Clone(IGNORED_PTR_ARG));
 
     umock_c_negative_tests_snapshot();
@@ -688,8 +688,8 @@ TEST_FUNCTION(IoTHubMessage_Clone_with_STRING_happy_path)
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Map_Clone(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Map_Clone(IGNORED_PTR_ARG));
 
     ///act
@@ -715,8 +715,8 @@ TEST_FUNCTION(IoTHubMessage_Clone_with_STRING_fails)
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Map_Clone(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Map_Clone(IGNORED_PTR_ARG));
 
     umock_c_negative_tests_snapshot();

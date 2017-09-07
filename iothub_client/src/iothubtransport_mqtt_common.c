@@ -77,7 +77,7 @@ static const char* CORRELATION_ID_PROPERTY = "cid";
 static const char* CONTENT_TYPE_PROPERTY = "ct";
 static const char* CONTENT_ENCODING_PROPERTY = "ce";
 static const char* DIAGNOSTIC_ID_PROPERTY = "diagid";
-static const char* DIAGNOSTIC_CONTEXT_PROPERTY = "diagcxt";
+static const char* DIAGNOSTIC_CONTEXT_PROPERTY = "diagctx";
 
 static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "diagtime";
 
@@ -644,7 +644,7 @@ static STRING_HANDLE addPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_me
         }
     }
 
-    // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_014: [ `IoTHubTransport_MQTT_Common_DoWork` shall check for the diagnostic properties including diagid and diagCreationTimeUtc and if found both add them as system property in the format of `$.diagid` and `$.diagcxt` respectively]
+    // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_014: [ `IoTHubTransport_MQTT_Common_DoWork` shall check for the diagnostic properties including diagid and diagCreationTimeUtc and if found both add them as system property in the format of `$.diagid` and `$.diagctx` respectively]
     if (result != NULL)
     {
         const char* diag_id = IoTHubMessage_GetDiagnosticId(iothub_message_handle);

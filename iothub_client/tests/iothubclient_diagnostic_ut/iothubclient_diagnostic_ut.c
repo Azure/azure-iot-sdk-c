@@ -108,21 +108,21 @@ TEST_FUNCTION_CLEANUP(method_cleanup)
     TEST_MUTEX_RELEASE(g_testByTest);
 }
 
-/* Tests_SRS_IOTHUB_DIAGNOSTIC_13_001: [ IoTHubClient_Diagnostic_AddIfNecessary should return false if diagSetting or messageHandle is NULL. ]*/
+/* Tests_SRS_IOTHUB_DIAGNOSTIC_13_001: [ IoTHubClient_Diagnostic_AddIfNecessary should return nonezero if diagSetting or messageHandle is NULL. ]*/
 TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_with_null_arguments_fails)
 {
     //arrange
 
     //act
-    bool result = IoTHubClient_Diagnostic_AddIfNecessary(NULL, NULL);
+    int result = IoTHubClient_Diagnostic_AddIfNecessary(NULL, NULL);
 
     //assert
-    ASSERT_IS_FALSE(result);
+    ASSERT_IS_FALSE(result == 0);
 
     //cleanup
 }
 
-/* Tests_SRS_IOTHUB_DIAGNOSTIC_13_002: [ IoTHubClient_Diagnostic_AddIfNecessary should return false if failing to add diagnostic property. ]*/
+/* Tests_SRS_IOTHUB_DIAGNOSTIC_13_002: [ IoTHubClient_Diagnostic_AddIfNecessary should return nonezero if failing to add diagnostic property. ]*/
 TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_fails)
 {
     int negativeTestsInitResult = umock_c_negative_tests_init();
@@ -153,10 +153,10 @@ TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_fails)
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 
-        bool result = IoTHubClient_Diagnostic_AddIfNecessary(&diag_setting, (IOTHUB_MESSAGE_HANDLE)0x12);
+        int result = IoTHubClient_Diagnostic_AddIfNecessary(&diag_setting, (IOTHUB_MESSAGE_HANDLE)0x12);
 
         //assert
-        ASSERT_IS_FALSE(result);
+        ASSERT_IS_FALSE(result == 0);
     }
 
     //cleanup
@@ -173,10 +173,10 @@ TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_no_diag_info_with_percentag
     };
 
     umock_c_reset_all_calls();
-    bool result = IoTHubClient_Diagnostic_AddIfNecessary(&diag_setting, (IOTHUB_MESSAGE_HANDLE)0x12);
+    int result = IoTHubClient_Diagnostic_AddIfNecessary(&diag_setting, (IOTHUB_MESSAGE_HANDLE)0x12);
 
     //assert
-    ASSERT_IS_TRUE(result);
+    ASSERT_IS_TRUE(result == 0);
     ASSERT_ARE_EQUAL(uint32_t, diag_setting.currentMessageNumber, 0);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
@@ -202,10 +202,10 @@ TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_no_diag_info_with_percentag
         .IgnoreArgument(2);
 
     //act
-    bool result = IoTHubClient_Diagnostic_AddIfNecessary(&diag_setting, (IOTHUB_MESSAGE_HANDLE)0x12);
+    int result = IoTHubClient_Diagnostic_AddIfNecessary(&diag_setting, (IOTHUB_MESSAGE_HANDLE)0x12);
 
     //assert
-    ASSERT_IS_TRUE(result);
+    ASSERT_IS_TRUE(result == 0);
     ASSERT_ARE_EQUAL(uint32_t, diag_setting.currentMessageNumber, 1);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
@@ -233,8 +233,8 @@ TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_no_diag_info_with_normal_pe
     //act
     for (size_t index = 0; index < 2; ++index)
     {
-        bool result = IoTHubClient_Diagnostic_AddIfNecessary(&diag_setting, (IOTHUB_MESSAGE_HANDLE)0x12);
-        ASSERT_IS_TRUE(result);
+        int result = IoTHubClient_Diagnostic_AddIfNecessary(&diag_setting, (IOTHUB_MESSAGE_HANDLE)0x12);
+        ASSERT_IS_TRUE(result == 0);
     }
 
     //assert

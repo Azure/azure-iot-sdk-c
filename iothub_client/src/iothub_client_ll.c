@@ -181,6 +181,7 @@ static STRING_HANDLE make_product_info(const char* product)
 static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIENT_CONFIG* client_config, const IOTHUB_CLIENT_DEVICE_CONFIG* device_config)
 {
     IOTHUB_CLIENT_LL_HANDLE_DATA* result;
+    srand((unsigned int)time(NULL));
     STRING_HANDLE product_info = make_product_info(NULL);
     if (product_info == NULL)
     {
@@ -917,7 +918,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendEventAsync(IOTHUB_CLIENT_LL_HANDLE iotH
                     free(newEntry);
                     LOG_ERROR_RESULT;
                 }
-                else if (!IoTHubClient_Diagnostic_AddIfNecessary(&handleData->diagnostic_setting, newEntry->messageHandle))
+                else if (IoTHubClient_Diagnostic_AddIfNecessary(&handleData->diagnostic_setting, newEntry->messageHandle) != 0)
                 {
                     /*Codes_SRS_IOTHUBCLIENT_LL_02_014: [If cloning and/or adding the information/diagnostic fails for any reason, IoTHubClient_LL_SendEventAsync shall fail and return IOTHUB_CLIENT_ERROR.] */
                     result = IOTHUB_CLIENT_ERROR;
@@ -1590,16 +1591,16 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetOption(IOTHUB_CLIENT_LL_HANDLE iotHubCli
         else if (strcmp(optionName, OPTION_DIAGNOSTIC_SAMPLING_PERCENTAGE) == 0)
         {
             uint32_t percentage = *(uint32_t*)value;
-            if (percentage < 0 || percentage > 100)
+            if (percentage > 100)
             {
                 /*Codes_SRS_IOTHUBCLIENT_LL_10_036: [Calling IoTHubClient_LL_SetOption with value > 100 shall return `IOTHUB_CLIENT_ERRROR`. ]*/
-                LogError("The value of diag_sampling_percentage must be [0, 100]");
+                LogError("The value of diag_sampling_percentage is out of range [0, 100]: %u", percentage);
                 result = IOTHUB_CLIENT_ERROR;
             }
             else
             {
                 /*Codes_SRS_IOTHUBCLIENT_LL_10_037: [Calling IoTHubClient_LL_SetOption with value between [0, 100] shall return `IOTHUB_CLIENT_OK`. ]*/
-                handleData->diagnostic_setting.diagSamplingPercentage = (uint32_t)percentage;
+                handleData->diagnostic_setting.diagSamplingPercentage = percentage;
                 handleData->diagnostic_setting.currentMessageNumber = 0;
                 result = IOTHUB_CLIENT_OK;
             }
