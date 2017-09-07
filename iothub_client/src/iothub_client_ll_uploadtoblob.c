@@ -1176,7 +1176,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
 //                               TODO LARGE FILE maybe put in an other file ?
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef struct LARGE_FILE_TAG {
+typedef struct IOTHUB_CLIENT_LARGE_FILE_HANDLE_DATA_TAG {
     unsigned int blockID;
     int isError;
     STRING_HANDLE xml;
@@ -1191,14 +1191,16 @@ typedef struct LARGE_FILE_TAG {
     HTTP_HEADERS_HANDLE requestHttpHeaders;
     unsigned int httpResponse;
     char *hostname;
-} LARGE_FILE_TAG;
+} IOTHUB_CLIENT_LARGE_FILE_HANDLE_DATA;
 
-static BLOB_RESULT Blob_UploadFromSasUri_start(LARGE_FILE_HANDLE handle)
+static BLOB_RESULT Blob_UploadFromSasUri_start(IOTHUB_CLIENT_LARGE_FILE_HANDLE handle)
 {
     BLOB_RESULT result;
-    IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* blobHandle = (IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA*)(handle->blobHandle);
+    IOTHUB_CLIENT_LARGE_FILE_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LARGE_FILE_HANDLE_DATA*)(handle);
 
-    const char* SASURI = STRING_c_str(handle->sasUri); // TODO is it really necessary ?
+    IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* blobHandle = (IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA*)(handleData->blobHandle);
+
+    const char* SASURI = STRING_c_str(handleData->sasUri); // TODO is it really necessary ?
 
     /*Codes_SRS_BLOB_02_001: [ If SASURI is NULL then Blob_UploadFromSasUri shall fail and return BLOB_INVALID_ARG. ]*/
     if (SASURI == NULL)
@@ -1233,8 +1235,8 @@ static BLOB_RESULT Blob_UploadFromSasUri_start(LARGE_FILE_HANDLE handle)
             else
             {
                 size_t hostnameSize = hostnameEnd - hostnameBegin;
-                handle->hostname = (char*)malloc(hostnameSize + 1); /*+1 because of '\0' at the end*/
-                if (handle->hostname == NULL)
+                handleData->hostname = (char*)malloc(hostnameSize + 1); /*+1 because of '\0' at the end*/
+                if (handleData->hostname == NULL)
                 {
                     /*Codes_SRS_BLOB_02_016: [ If the hostname copy cannot be made then then Blob_UploadFromSasUri shall fail and return BLOB_ERROR ]*/
                     LogError("oom - out of memory");
@@ -1242,13 +1244,13 @@ static BLOB_RESULT Blob_UploadFromSasUri_start(LARGE_FILE_HANDLE handle)
                 }
                 else
                 {
-                    (void)memcpy(handle->hostname, hostnameBegin, hostnameSize);
-                    handle->hostname[hostnameSize] = '\0';
+                    (void)memcpy(handleData->hostname, hostnameBegin, hostnameSize);
+                    handleData->hostname[hostnameSize] = '\0';
 
                     /*Codes_SRS_BLOB_02_006: [ Blob_UploadFromSasUri shall create a new HTTPAPI_EX_HANDLE by calling HTTPAPIEX_Create passing the hostname. ]*/
                     /*Codes_SRS_BLOB_02_018: [ Blob_UploadFromSasUri shall create a new HTTPAPI_EX_HANDLE by calling HTTPAPIEX_Create passing the hostname. ]*/
-                    handle->httpApiExHandle = HTTPAPIEX_Create(handle->hostname);
-                    if (handle->httpApiExHandle == NULL)
+                    handleData->httpApiExHandle = HTTPAPIEX_Create(handleData->hostname);
+                    if (handleData->httpApiExHandle == NULL)
                     {
                         /*Codes_SRS_BLOB_02_007: [ If HTTPAPIEX_Create fails then Blob_UploadFromSasUri shall fail and return BLOB_ERROR. ]*/
                         LogError("unable to create a HTTPAPIEX_HANDLE");
@@ -1256,7 +1258,7 @@ static BLOB_RESULT Blob_UploadFromSasUri_start(LARGE_FILE_HANDLE handle)
                     }
                     else
                     {
-                        if ((blobHandle->certificates != NULL)&& (HTTPAPIEX_SetOption(handle->httpApiExHandle, "TrustedCerts", blobHandle->certificates) == HTTPAPIEX_ERROR))
+                        if ((blobHandle->certificates != NULL)&& (HTTPAPIEX_SetOption(handleData->httpApiExHandle, "TrustedCerts", blobHandle->certificates) == HTTPAPIEX_ERROR))
                         {
                             LogError("failure in setting trusted certificates");
                             result = BLOB_ERROR;
@@ -1266,11 +1268,11 @@ static BLOB_RESULT Blob_UploadFromSasUri_start(LARGE_FILE_HANDLE handle)
 
                             /*Codes_SRS_BLOB_02_008: [ Blob_UploadFromSasUri shall compute the relative path of the request from the SASURI parameter. ]*/
                             /*Codes_SRS_BLOB_02_019: [ Blob_UploadFromSasUri shall compute the base relative path of the request from the SASURI parameter. ]*/
-                            handle->relativePath = hostnameEnd; /*this is where the relative path begins in the SasUri*/
+                            handleData->relativePath = hostnameEnd; /*this is where the relative path begins in the SasUri*/
 
                             /*Codes_SRS_BLOB_02_028: [ Blob_UploadFromSasUri shall construct an XML string with the following content: ]*/
-                            handle->xml = STRING_construct("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<BlockList>"); /*the XML "build as we go"*/
-                            if (handle->xml == NULL)
+                            handleData->xml = STRING_construct("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<BlockList>"); /*the XML "build as we go"*/
+                            if (handleData->xml == NULL)
                             {
                                 /*Codes_SRS_BLOB_02_033: [ If any previous operation that doesn't have an explicit failure description fails then Blob_UploadFromSasUri shall fail and return BLOB_ERROR ]*/
                                 LogError("failed to STRING_construct");
@@ -1291,10 +1293,10 @@ static BLOB_RESULT Blob_UploadFromSasUri_start(LARGE_FILE_HANDLE handle)
     return result;
 }
 
-static BLOB_RESULT Blob_UploadFromSasUri_stop(LARGE_FILE_HANDLE handle)
+static BLOB_RESULT Blob_UploadFromSasUri_stop(IOTHUB_CLIENT_LARGE_FILE_HANDLE handle)
 {
     BLOB_RESULT result;
-    LARGE_FILE_TAG* handleData = (LARGE_FILE_TAG*)handle;
+    IOTHUB_CLIENT_LARGE_FILE_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LARGE_FILE_HANDLE_DATA*)handle;
 
     if (handleData->isError)
     {
@@ -1371,16 +1373,17 @@ static BLOB_RESULT Blob_UploadFromSasUri_stop(LARGE_FILE_HANDLE handle)
     return result;
 }
 
-static IOTHUB_CLIENT_RESULT LARGE_FILE_upload_blob_start(LARGE_FILE_HANDLE handle, const char* destinationFileName)
+static IOTHUB_CLIENT_RESULT LARGE_FILE_upload_blob_start(IOTHUB_CLIENT_LARGE_FILE_HANDLE handle, const char* destinationFileName)
 {
-    IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA*)(handle->blobHandle);
+    IOTHUB_CLIENT_LARGE_FILE_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LARGE_FILE_HANDLE_DATA*)handle;
+    IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* blobHandle = (IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA*)(handleData->blobHandle);
     IOTHUB_CLIENT_RESULT result;
 
     /*Codes_SRS_IOTHUBCLIENT_LL_02_064: [ IoTHubClient_LL_UploadToBlob shall create an HTTPAPIEX_HANDLE to the IoTHub hostname. ]*/
-    handle->iotHubHttpApiExHandle = HTTPAPIEX_Create(handleData->hostname);
+    handleData->iotHubHttpApiExHandle = HTTPAPIEX_Create(blobHandle->hostname);
 
     /*Codes_SRS_IOTHUBCLIENT_LL_02_065: [ If creating the HTTPAPIEX_HANDLE fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-    if (handle->iotHubHttpApiExHandle == NULL)
+    if (handleData->iotHubHttpApiExHandle == NULL)
     {
         LogError("unable to HTTPAPIEX_Create");
         result = IOTHUB_CLIENT_ERROR;
@@ -1388,13 +1391,13 @@ static IOTHUB_CLIENT_RESULT LARGE_FILE_upload_blob_start(LARGE_FILE_HANDLE handl
     else
     {
         if (
-            (handleData->authorizationScheme == X509) &&
+            (blobHandle->authorizationScheme == X509) &&
 
             /*transmit the x509certificate and x509privatekey*/
             /*Codes_SRS_IOTHUBCLIENT_LL_02_106: [ - x509certificate and x509privatekey saved options shall be passed on the HTTPAPIEX_SetOption ]*/
             (!(
-                (HTTPAPIEX_SetOption(handle->iotHubHttpApiExHandle, OPTION_X509_CERT, handleData->credentials.x509credentials.x509certificate) == HTTPAPIEX_OK) &&
-                (HTTPAPIEX_SetOption(handle->iotHubHttpApiExHandle, OPTION_X509_PRIVATE_KEY, handleData->credentials.x509credentials.x509privatekey) == HTTPAPIEX_OK)
+                (HTTPAPIEX_SetOption(handleData->iotHubHttpApiExHandle, OPTION_X509_CERT, blobHandle->credentials.x509credentials.x509certificate) == HTTPAPIEX_OK) &&
+                (HTTPAPIEX_SetOption(handleData->iotHubHttpApiExHandle, OPTION_X509_PRIVATE_KEY, blobHandle->credentials.x509credentials.x509privatekey) == HTTPAPIEX_OK)
             ))
             )
         {
@@ -1404,7 +1407,7 @@ static IOTHUB_CLIENT_RESULT LARGE_FILE_upload_blob_start(LARGE_FILE_HANDLE handl
         else
         {
             /*Codes_SRS_IOTHUBCLIENT_LL_02_111: [ If certificates is non-NULL then certificates shall be passed to HTTPAPIEX_SetOption with optionName TrustedCerts. ]*/
-            if ((handleData->certificates != NULL) && (HTTPAPIEX_SetOption(handle->iotHubHttpApiExHandle, "TrustedCerts", handleData->certificates) != HTTPAPIEX_OK))
+            if ((blobHandle->certificates != NULL) && (HTTPAPIEX_SetOption(handleData->iotHubHttpApiExHandle, "TrustedCerts", blobHandle->certificates) != HTTPAPIEX_OK))
             {
                 LogError("unable to set TrustedCerts!");
                 result = IOTHUB_CLIENT_ERROR;
@@ -1412,12 +1415,12 @@ static IOTHUB_CLIENT_RESULT LARGE_FILE_upload_blob_start(LARGE_FILE_HANDLE handl
             else
             {
 
-                if (handleData->http_proxy_options.host_address != NULL)
+                if (blobHandle->http_proxy_options.host_address != NULL)
                 {
                     HTTP_PROXY_OPTIONS proxy_options;
-                    proxy_options = handleData->http_proxy_options;
+                    proxy_options = blobHandle->http_proxy_options;
 
-                    if (HTTPAPIEX_SetOption(handle->iotHubHttpApiExHandle, OPTION_HTTP_PROXY, &proxy_options) != HTTPAPIEX_OK)
+                    if (HTTPAPIEX_SetOption(handleData->iotHubHttpApiExHandle, OPTION_HTTP_PROXY, &proxy_options) != HTTPAPIEX_OK)
                     {
                         LogError("unable to set http proxy!");
                         result = IOTHUB_CLIENT_ERROR;
@@ -1434,16 +1437,16 @@ static IOTHUB_CLIENT_RESULT LARGE_FILE_upload_blob_start(LARGE_FILE_HANDLE handl
 
                 if (result != IOTHUB_CLIENT_ERROR)
                 {
-                    handle->correlationId = STRING_new();
-                    if (handle->correlationId == NULL)
+                    handleData->correlationId = STRING_new();
+                    if (handleData->correlationId == NULL)
                     {
                         LogError("unable to STRING_new");
                         result = IOTHUB_CLIENT_ERROR;
                     }
                     else
                     {
-                        handle->sasUri = STRING_new();
-                        if (handle->sasUri == NULL)
+                        handleData->sasUri = STRING_new();
+                        if (handleData->sasUri == NULL)
                         {
                             LogError("unable to STRING_new");
                             result = IOTHUB_CLIENT_ERROR;
@@ -1451,8 +1454,8 @@ static IOTHUB_CLIENT_RESULT LARGE_FILE_upload_blob_start(LARGE_FILE_HANDLE handl
                         else
                         {
                             /*Codes_SRS_IOTHUBCLIENT_LL_02_070: [ IoTHubClient_LL_UploadToBlob shall create request HTTP headers. ]*/
-                            handle->requestHttpHeaders = HTTPHeaders_Alloc(); /*these are build by step 1 and used by step 3 too*/
-                            if (handle->requestHttpHeaders == NULL)
+                            handleData->requestHttpHeaders = HTTPHeaders_Alloc(); /*these are build by step 1 and used by step 3 too*/
+                            if (handleData->requestHttpHeaders == NULL)
                             {
                                 LogError("unable to HTTPHeaders_Alloc");
                                 result = IOTHUB_CLIENT_ERROR;
@@ -1460,7 +1463,7 @@ static IOTHUB_CLIENT_RESULT LARGE_FILE_upload_blob_start(LARGE_FILE_HANDLE handl
                             else
                             {
                                 /*do step 1*/
-                                if (IoTHubClient_LL_UploadToBlob_step1and2(handleData, handle->iotHubHttpApiExHandle, handle->requestHttpHeaders, destinationFileName, handle->correlationId, handle->sasUri) != 0)
+                                if (IoTHubClient_LL_UploadToBlob_step1and2(blobHandle, handleData->iotHubHttpApiExHandle, handleData->requestHttpHeaders, destinationFileName, handleData->correlationId, handleData->sasUri) != 0)
                                 {
                                     LogError("error in IoTHubClient_LL_UploadToBlob_step1");
                                     result = IOTHUB_CLIENT_ERROR;
@@ -1468,8 +1471,8 @@ static IOTHUB_CLIENT_RESULT LARGE_FILE_upload_blob_start(LARGE_FILE_HANDLE handl
                                 else
                                 {
                                     /*do step 2.*/
-                                    handle->responseToIoTHub = BUFFER_new();
-                                    if (handle->responseToIoTHub == NULL)
+                                    handleData->responseToIoTHub = BUFFER_new();
+                                    if (handleData->responseToIoTHub == NULL)
                                     {
                                         result = IOTHUB_CLIENT_ERROR;
                                         LogError("unable to BUFFER_new");
@@ -1499,12 +1502,11 @@ static IOTHUB_CLIENT_RESULT LARGE_FILE_upload_blob_start(LARGE_FILE_HANDLE handl
     return result;
 }
 
-static IOTHUB_CLIENT_RESULT LARGE_FILE_upload_blob_stop(LARGE_FILE_HANDLE handle)
+static IOTHUB_CLIENT_RESULT LARGE_FILE_upload_blob_stop(IOTHUB_CLIENT_LARGE_FILE_HANDLE handle)
 {
     IOTHUB_CLIENT_RESULT result;
-    LARGE_FILE_TAG* handleData = (LARGE_FILE_TAG*)handle;
+    IOTHUB_CLIENT_LARGE_FILE_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LARGE_FILE_HANDLE_DATA*)handle;
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* blobHandleData = (IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA*)(handleData->blobHandle);
-
 
     int step2success;
     step2success = (Blob_UploadFromSasUri_stop(handle) == BLOB_OK);
@@ -1567,49 +1569,49 @@ static IOTHUB_CLIENT_RESULT LARGE_FILE_upload_blob_stop(LARGE_FILE_HANDLE handle
     return result;
 }
 
-LARGE_FILE_HANDLE IoTHubClient_LL_LARGE_FILE_open_Impl(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE blobHandle, const char* destinationFileName)
+IOTHUB_CLIENT_LARGE_FILE_HANDLE IoTHubClient_LL_LARGE_FILE_open_Impl(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE blobHandle, const char* destinationFileName)
 {
-    LARGE_FILE_TAG* handle = NULL;
+    IOTHUB_CLIENT_LARGE_FILE_HANDLE_DATA* handleData = NULL;
     if (destinationFileName == NULL || blobHandle == NULL)
     {
         LogError("invalid arguments : destinationFileName=%p, blobHandle=%p", destinationFileName, blobHandle);
     }
     else
     {
-        handle = malloc(sizeof(LARGE_FILE_TAG));
-        if (handle == NULL)
+        handleData = malloc(sizeof(IOTHUB_CLIENT_LARGE_FILE_HANDLE_DATA));
+        if (handleData == NULL)
         {
             LogError("oom - malloc");
             /*return as is*/
         }
         else
         {
-            handle->isError = 0;
-            handle->lockHandle = Lock_Init();
-            handle->blobHandle = blobHandle;
-            if (handle->lockHandle == NULL)
+            handleData->isError = 0;
+            handleData->lockHandle = Lock_Init();
+            handleData->blobHandle = blobHandle;
+            if (handleData->lockHandle == NULL)
             {
                 LogError("Could not Lock_Init");
-                free(handle);
-                handle = NULL;
+                free(handleData);
+                handleData = NULL;
             }
             else
             {
-                if(LARGE_FILE_upload_blob_start(handle, destinationFileName) != IOTHUB_CLIENT_OK)
+                if(LARGE_FILE_upload_blob_start((IOTHUB_CLIENT_LARGE_FILE_HANDLE)handleData, destinationFileName) != IOTHUB_CLIENT_OK)
                 {
                     LogError("Could not LARGE_FILE_upload_blob_start");
-                    IoTHubClient_LL_LARGE_FILE_close_Impl(handle);
-                    handle = NULL;
+                    IoTHubClient_LL_LARGE_FILE_close_Impl((IOTHUB_CLIENT_LARGE_FILE_HANDLE)handleData);
+                    handleData = NULL;
                 }
             }
         }
     }
-    return handle;
+    return (IOTHUB_CLIENT_LARGE_FILE_HANDLE)handleData;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_LL_LARGE_FILE_close_Impl(LARGE_FILE_HANDLE handle)
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_LARGE_FILE_close_Impl(IOTHUB_CLIENT_LARGE_FILE_HANDLE handle)
 {
-    LARGE_FILE_TAG* handleData = (LARGE_FILE_TAG*)handle;
+    IOTHUB_CLIENT_LARGE_FILE_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LARGE_FILE_HANDLE_DATA*)handle;
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
 
     if (handle == NULL)
@@ -1674,9 +1676,10 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_LARGE_FILE_close_Impl(LARGE_FILE_HANDLE han
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_LL_LARGE_FILE_write_Impl(LARGE_FILE_HANDLE fileHandle, const unsigned char* source, size_t size)
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_LARGE_FILE_write_Impl(IOTHUB_CLIENT_LARGE_FILE_HANDLE handle, const unsigned char* source, size_t size)
 {
     IOTHUB_CLIENT_RESULT result;
+    IOTHUB_CLIENT_LARGE_FILE_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LARGE_FILE_HANDLE_DATA*)handle;
     if (
         (size > 0) &&
         (source == NULL)
@@ -1693,12 +1696,12 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_LARGE_FILE_write_Impl(LARGE_FILE_HANDLE fil
     else
     {
         // fileHandle must be valid
-        if (1 == fileHandle->isError)
+        if (1 == handleData->isError)
         {
             LogError("Invalid file handle");
             result = IOTHUB_CLIENT_INVALID_ARG;
         }
-        else if (fileHandle->blockID >= 50000)
+        else if (handleData->blockID >= 50000)
         {
             LogError("Too many blocks already written (max 50000)");
             result = IOTHUB_CLIENT_INVALID_SIZE;
@@ -1706,7 +1709,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_LARGE_FILE_write_Impl(LARGE_FILE_HANDLE fil
         else
         {
             // No concurrent block writing allowed
-            if (Lock(fileHandle->lockHandle) != LOCK_OK)
+            if (Lock(handleData->lockHandle) != LOCK_OK)
             {
                 LogError("unable to lock");
                 result = IOTHUB_CLIENT_ERROR;
@@ -1724,29 +1727,29 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_LARGE_FILE_write_Impl(LARGE_FILE_HANDLE fil
                 {
                     BLOB_RESULT uploadBlockResult;
                     uploadBlockResult = Blob_UploadNextBlock(requestBuffer,
-                                                             fileHandle->blockID,
-                                                             &(fileHandle->isError),
-                                                             fileHandle->xml,
-                                                             fileHandle->relativePath,
-                                                             fileHandle->httpApiExHandle,
-                                                             &fileHandle->httpResponse,
-                                                             fileHandle->responseToIoTHub);
+                                                             handleData->blockID,
+                                                             &(handleData->isError),
+                                                             handleData->xml,
+                                                             handleData->relativePath,
+                                                             handleData->httpApiExHandle,
+                                                             &handleData->httpResponse,
+                                                             handleData->responseToIoTHub);
 
-                    if (uploadBlockResult == BLOB_OK && fileHandle->isError == 0)
+                    if (uploadBlockResult == BLOB_OK && handleData->isError == 0)
                     {
-                        fileHandle->blockID++;
+                        handleData->blockID++;
                         result = IOTHUB_CLIENT_OK;
                     }
                     else
                     {
-                        LogError("unable to Blob_UploadNextBlock (uploadBlockResult = %i, fileHandle->isError = %i)", uploadBlockResult, fileHandle->isError);
+                        LogError("unable to Blob_UploadNextBlock (uploadBlockResult = %i, fileHandle->isError = %i)", uploadBlockResult, handleData->isError);
                         result = IOTHUB_CLIENT_ERROR;
                     }
 
                     BUFFER_delete(requestBuffer);
                 }
 
-                (void)Unlock(fileHandle->lockHandle);
+                (void)Unlock(handleData->lockHandle);
             }
         }
     }

@@ -352,14 +352,14 @@ extern "C"
     * @param    iotHubClientHandle                  The handle created by a call to the IoTHubClient_Create function.
     * @param    destinationFileName                 The name of the file to be created in Azure Blob Storage.
     *
-    *           The LARGE_FILE_HANDLE returned by the function shall be then used to upload data with
+    *           The IOTHUB_CLIENT_LARGE_FILE_HANDLE returned by the function shall be then used to upload data with
     *           the function IoTHubClient_LL_LARGE_FILE_write.
     *           IoTHubClient_LL_LARGE_FILE_write can be called up to 50000 times in a row.
     *           The handle must be closed by calling the function IoTHubClient_LL_LARGE_FILE_close
     *
     * @return   A valid handle upon success or NULL upon failure.
     */
-    MOCKABLE_FUNCTION(, LARGE_FILE_HANDLE, IoTHubClient_LargeFileOpen, IOTHUB_CLIENT_HANDLE, handle, const char*, destinationFileName);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_LARGE_FILE_HANDLE, IoTHubClient_LargeFileOpen, IOTHUB_CLIENT_HANDLE, handle, const char*, destinationFileName);
 
     /**
     * @brief    IoTHubClient_LargeFileClose closes a handle to a file in Azure Blob Storage.
@@ -370,7 +370,7 @@ extern "C"
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LargeFileClose, LARGE_FILE_HANDLE, handle);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LargeFileClose, IOTHUB_CLIENT_LARGE_FILE_HANDLE, handle);
 
     /**
     * @brief    IoTHubClient_LargeFileWrite uploads data from memory to a file in Azure Blob Storage.
@@ -383,7 +383,7 @@ extern "C"
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LargeFileWrite, LARGE_FILE_HANDLE, fileHandle, const unsigned char*, source, size_t, size);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LargeFileWrite, IOTHUB_CLIENT_LARGE_FILE_HANDLE, fileHandle, const unsigned char*, source, size_t, size);
 #endif // DONT_USE_UPLOADTOBLOB
 
 #ifdef __cplusplus

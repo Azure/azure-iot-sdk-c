@@ -1912,9 +1912,9 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob(IOTHUB_CLIENT_LL_HANDLE iotHub
     return result;
 }
 
-LARGE_FILE_HANDLE IoTHubClient_LL_LARGE_FILE_open(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* destinationFileName)
+IOTHUB_CLIENT_LARGE_FILE_HANDLE IoTHubClient_LL_LARGE_FILE_open(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* destinationFileName)
 {
-    LARGE_FILE_HANDLE result;
+    IOTHUB_CLIENT_LARGE_FILE_HANDLE result;
     if (
         (iotHubClientHandle == NULL) ||
         (destinationFileName == NULL)
@@ -1931,12 +1931,12 @@ LARGE_FILE_HANDLE IoTHubClient_LL_LARGE_FILE_open(IOTHUB_CLIENT_LL_HANDLE iotHub
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_LL_LARGE_FILE_close(LARGE_FILE_HANDLE handle)
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_LARGE_FILE_close(IOTHUB_CLIENT_LARGE_FILE_HANDLE handle)
 {
     IOTHUB_CLIENT_RESULT result;
     if (handle == NULL)
     {
-        LogError("invalid parameters LARGE_FILE_HANDLE handle=%p", handle);
+        LogError("invalid parameters IOTHUB_CLIENT_LARGE_FILE_HANDLE handle=%p", handle);
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else
@@ -1947,7 +1947,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_LARGE_FILE_close(LARGE_FILE_HANDLE handle)
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_LL_LARGE_FILE_write(LARGE_FILE_HANDLE fileHandle, const unsigned char* source, size_t size)
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_LARGE_FILE_write(IOTHUB_CLIENT_LARGE_FILE_HANDLE fileHandle, const unsigned char* source, size_t size)
 {
     IOTHUB_CLIENT_RESULT result;
     if (
@@ -1955,7 +1955,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_LARGE_FILE_write(LARGE_FILE_HANDLE fileHand
         ((source == NULL) && (size >0))
         )
     {
-        LogError("invalid parameters LARGE_FILE_HANDLE fileHandle=%p, const unsigned char* source=%p, size_t size=%zu", fileHandle, source, size);
+        LogError("invalid parameters IOTHUB_CLIENT_LARGE_FILE_HANDLE fileHandle=%p, const unsigned char* source=%p, size_t size=%zu", fileHandle, source, size);
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else
