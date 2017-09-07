@@ -8,12 +8,10 @@ compileAsC99()
 
 set(dev_auth_prov_c_files
     ./tpm_device_provision.c
-    ../../../parson/parson.c
     ../../../certs/certs.c
 )
 
 set(dev_auth_prov_h_files
-    ../../../parson/parson.h
 )
 
 IF(WIN32)

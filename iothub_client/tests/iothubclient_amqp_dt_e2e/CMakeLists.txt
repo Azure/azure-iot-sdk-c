@@ -54,7 +54,7 @@ if(WIN32)
         #CPP compiler on windows likes to complain about unused local function removed (C4505)
         #C compiler doesn't like to complain about the same thing
         set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4505")
-        set_source_files_properties(../../../parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
+        set_source_files_properties(../../../deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
     endif()
 
     if(TARGET ${theseTestsName}_dll)

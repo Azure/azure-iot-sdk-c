@@ -19,7 +19,7 @@ INCLUDES = \
     -I../../../../iothub_client/inc \
     -I../../../../uamqp/inc \
     -I../../../../c-utility/adapters \
-    -I../../../../parson \
+    -I../../../../deps/parson \
     -I../../../../certs \
     -I/opt/CycloneTCP_SSL_Crypto_Open_1_7_4/inc \
     -I/opt/CycloneTCP_SSL_Crypto_Open_1_7_4/common \
@@ -121,7 +121,7 @@ SOURCES_iothub_client_sample_amqp = \
     iothub_client/src/iothubtransportamqp.c \
     iothub_client/src/uamqp_messaging.c \
     iothub_client/src/version.c \
-    parson/parson.c \
+    deps/parson/parson.c \
     uamqp/src/amqp_definitions.c \
     uamqp/src/amqp_frame_codec.c \
     uamqp/src/amqp_management.c \
