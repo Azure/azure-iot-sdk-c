@@ -11,6 +11,16 @@
 #include <stdint.h>
 #endif
 
+static void* my_gballoc_malloc(size_t size)
+{
+    return malloc(size);
+}
+
+static void my_gballoc_free(void* ptr)
+{
+    free(ptr);
+}
+
 #include "testrunnerswitcher.h"
 #include "umock_c.h"
 #include "umocktypes_charptr.h"
@@ -31,17 +41,6 @@
 
 #include "iothub_client_diagnostic.h"
 
-
-static void* my_gballoc_malloc(size_t size)
-{
-    return malloc(size);
-}
-
-static void my_gballoc_free(void* ptr)
-{
-    free(ptr);
-}
-
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
@@ -53,6 +52,8 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 
 static TEST_MUTEX_HANDLE g_testByTest;
 static TEST_MUTEX_HANDLE g_dllByDll;
+
+static IOTHUB_MESSAGE_HANDLE TEST_MESSAGE_HANDLE = (IOTHUB_MESSAGE_HANDLE)0x12;
 
 BEGIN_TEST_SUITE(iothubclient_diagnostic_ut)
 
@@ -76,10 +77,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, my_gballoc_free);
     
-    REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_SetDiagnosticId, IOTHUB_MESSAGE_OK);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_SetDiagnosticId, IOTHUB_MESSAGE_ERROR);
-    REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_SetDiagnosticCreationTimeUtc, IOTHUB_MESSAGE_OK);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_SetDiagnosticCreationTimeUtc, IOTHUB_MESSAGE_ERROR);
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_SetDiagnosticPropertyData, IOTHUB_MESSAGE_OK);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_SetDiagnosticPropertyData, IOTHUB_MESSAGE_ERROR);
 
 
     REGISTER_GLOBAL_MOCK_RETURN(Map_Add, MAP_OK);
@@ -109,12 +108,26 @@ TEST_FUNCTION_CLEANUP(method_cleanup)
 }
 
 /* Tests_SRS_IOTHUB_DIAGNOSTIC_13_001: [ IoTHubClient_Diagnostic_AddIfNecessary should return nonezero if diagSetting or messageHandle is NULL. ]*/
-TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_with_null_arguments_fails)
+TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_with_null_messageHanlde_fails)
 {
     //arrange
 
     //act
-    int result = IoTHubClient_Diagnostic_AddIfNecessary(NULL, NULL);
+    int result = IoTHubClient_Diagnostic_AddIfNecessary((IOTHUB_DIAGNOSTIC_SETTING_DATA*)0x1, NULL);
+
+    //assert
+    ASSERT_IS_FALSE(result == 0);
+
+    //cleanup
+}
+
+/* Tests_SRS_IOTHUB_DIAGNOSTIC_13_001: [ IoTHubClient_Diagnostic_AddIfNecessary should return nonezero if diagSetting or messageHandle is NULL. ]*/
+TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_with_null_setting_fails)
+{
+    //arrange
+
+    //act
+    int result = IoTHubClient_Diagnostic_AddIfNecessary(NULL, TEST_MESSAGE_HANDLE);
 
     //assert
     ASSERT_IS_FALSE(result == 0);
@@ -136,13 +149,10 @@ TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_fails)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_SetDiagnosticId(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2);
-
-    STRICT_EXPECTED_CALL(IoTHubMessage_SetDiagnosticCreationTimeUtc(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2);
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_SetDiagnosticPropertyData(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
     umock_c_negative_tests_snapshot();
 
@@ -153,7 +163,7 @@ TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_fails)
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 
-        int result = IoTHubClient_Diagnostic_AddIfNecessary(&diag_setting, (IOTHUB_MESSAGE_HANDLE)0x12);
+        int result = IoTHubClient_Diagnostic_AddIfNecessary(&diag_setting, TEST_MESSAGE_HANDLE);
 
         //assert
         ASSERT_IS_FALSE(result == 0);
@@ -173,7 +183,7 @@ TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_no_diag_info_with_percentag
     };
 
     umock_c_reset_all_calls();
-    int result = IoTHubClient_Diagnostic_AddIfNecessary(&diag_setting, (IOTHUB_MESSAGE_HANDLE)0x12);
+    int result = IoTHubClient_Diagnostic_AddIfNecessary(&diag_setting, TEST_MESSAGE_HANDLE);
 
     //assert
     ASSERT_IS_TRUE(result == 0);
@@ -193,16 +203,17 @@ TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_no_diag_info_with_percentag
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_SetDiagnosticId(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_SetDiagnosticCreationTimeUtc(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2);
+    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_SetDiagnosticPropertyData(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
     //act
-    int result = IoTHubClient_Diagnostic_AddIfNecessary(&diag_setting, (IOTHUB_MESSAGE_HANDLE)0x12);
+    int result = IoTHubClient_Diagnostic_AddIfNecessary(&diag_setting, TEST_MESSAGE_HANDLE);
 
     //assert
     ASSERT_IS_TRUE(result == 0);
@@ -222,18 +233,18 @@ TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_no_diag_info_with_normal_pe
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_SetDiagnosticId(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2);
-
-    STRICT_EXPECTED_CALL(IoTHubMessage_SetDiagnosticCreationTimeUtc(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2);
+    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_SetDiagnosticPropertyData(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
     //act
     for (size_t index = 0; index < 2; ++index)
     {
-        int result = IoTHubClient_Diagnostic_AddIfNecessary(&diag_setting, (IOTHUB_MESSAGE_HANDLE)0x12);
+        int result = IoTHubClient_Diagnostic_AddIfNecessary(&diag_setting, TEST_MESSAGE_HANDLE);
         ASSERT_IS_TRUE(result == 0);
     }
 

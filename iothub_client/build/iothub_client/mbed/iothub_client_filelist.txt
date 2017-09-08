@@ -5,6 +5,7 @@ set(mbed_project_files
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothub_message.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothub_client_private.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothubtransport.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothub_client_diagnostic.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothub_client_ll_uploadtoblob.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/blob.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/blob.h
@@ -16,6 +17,7 @@ set(mbed_project_files
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothub_client_ll.c
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothub_message.c
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothubtransport.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothub_client_diagnostic.c
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothub_client_version.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothub_client_options.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/version.c

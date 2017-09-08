@@ -61,6 +61,45 @@ static bool should_add_diagnostic_info(IOTHUB_DIAGNOSTIC_SETTING_DATA* diagSetti
     return result;
 }
 
+static IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* prepare_message_diagnostic_data()
+{
+    IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* result = (IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA*)malloc(sizeof(IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA));
+    if (result == NULL)
+    {
+        LogError("malloc for DiagnosticData failed");
+    }
+    else
+    {
+        char* diagId = (char*)malloc(9);
+        if (diagId == NULL)
+        {
+            LogError("malloc for diagId failed");
+            free(result);
+            result = NULL;
+        }
+        else
+        {
+            generate_eight_random_characters(diagId);
+            result->diagnosticId = diagId;
+
+            char* timeBuffer = (char*)malloc(30);
+            if (timeBuffer == NULL)
+            {
+                LogError("malloc for timeBuffer failed");
+                free(result->diagnosticId);
+                free(result);
+                result = NULL;
+            }
+            else
+            {
+                get_current_time_utc(timeBuffer, 30, "%Y-%m-%dT%H:%M:%SZ");
+                result->diagnosticCreationTimeUtc = timeBuffer;
+            }
+        }
+    }
+    return result;
+}
+
 int IoTHubClient_Diagnostic_AddIfNecessary(IOTHUB_DIAGNOSTIC_SETTING_DATA* diagSetting, IOTHUB_MESSAGE_HANDLE messageHandle)
 {
     int result;
@@ -75,18 +114,14 @@ int IoTHubClient_Diagnostic_AddIfNecessary(IOTHUB_DIAGNOSTIC_SETTING_DATA* diagS
         /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_004: [ If diagSamplingPercentage is equal to 100, diagnostic properties should be added to all messages]*/
         /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_005: [ If diagSamplingPercentage is between(0, 100), diagnostic properties should be added based on percentage]*/
 
-        //generating random string
-        char randomString[9];
-        if (IoTHubMessage_SetDiagnosticId(messageHandle, generate_eight_random_characters(randomString)) != IOTHUB_MESSAGE_OK)
+        IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* diagnosticData;
+        if ((diagnosticData = prepare_message_diagnostic_data()) == NULL)
         {
-            /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_002: [ IoTHubClient_Diagnostic_AddIfNecessary should return nonezero if failing to add diagnostic property. ]*/
             result = __FAILURE__;
         }
         else
         {
-            char timeBuffer[30];
-            get_current_time_utc(timeBuffer, 30, "%Y-%m-%dT%H:%M:%SZ");
-            if (IoTHubMessage_SetDiagnosticCreationTimeUtc(messageHandle, timeBuffer) != IOTHUB_MESSAGE_OK)
+            if (IoTHubMessage_SetDiagnosticPropertyData(messageHandle, diagnosticData) != IOTHUB_MESSAGE_OK)
             {
                 /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_002: [ IoTHubClient_Diagnostic_AddIfNecessary should return nonezero if failing to add diagnostic property. ]*/
                 result = __FAILURE__;
@@ -95,6 +130,11 @@ int IoTHubClient_Diagnostic_AddIfNecessary(IOTHUB_DIAGNOSTIC_SETTING_DATA* diagS
             {
                 result = 0;
             }
+
+            free(diagnosticData->diagnosticCreationTimeUtc);
+            free(diagnosticData->diagnosticId);
+            free(diagnosticData);
+            diagnosticData = NULL;
         }
     }
     else
