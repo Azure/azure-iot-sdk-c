@@ -77,8 +77,8 @@ static const char* DEVICE_JSON_KEY_TOTAL_DEVICECOUNT = "totalDeviceCount";
 static const char* DEVICE_JSON_KEY_ENABLED_DEVICECCOUNT = "enabledDeviceCount";
 static const char* DEVICE_JSON_KEY_DISABLED_DEVICECOUNT = "disabledDeviceCount";
 
-static const char* DEVICE_JSON_DEFAULT_VALUE_ENABLED = "Enabled";
-static const char* DEVICE_JSON_DEFAULT_VALUE_DISABLED = "Disabled";
+static const char* DEVICE_JSON_DEFAULT_VALUE_ENABLED = "enabled";
+static const char* DEVICE_JSON_DEFAULT_VALUE_DISABLED = "disabled";
 static const char* DEVICE_JSON_DEFAULT_VALUE_CONNECTED = "Connected";
 static const char* DEVICE_JSON_DEFAULT_VALUE_DISCONNECTED = "Disconnected";
 static const char* DEVICE_JSON_DEFAULT_VALUE_TIME = "0001-01-01T00:00:00";
@@ -184,17 +184,17 @@ static BUFFER_HANDLE constructDeviceJson(const IOTHUB_DEVICE* deviceInfo)
         LogError("json_object_set_string failed for deviceId");
         result = NULL;
     }
-    else if ((json_object_set_string(root_object, DEVICE_JSON_KEY_DEVICE_STATUS, getStatusStringForJson(deviceInfo->status))) != JSONSuccess)
+    else if (json_object_dotset_string(root_object, DEVICE_JSON_KEY_DEVICE_STATUS, getStatusStringForJson(deviceInfo->status)) != JSONSuccess)
     {
         /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
-        LogError("json_object_set_string failed for status");
+        LogError("json_object_dotset_string failed for status");
         result = NULL;
     }
     /*Codes_SRS_IOTHUBREGISTRYMANAGER_31_001: [** IoTHubRegistryManager_CreateDevice shall set 'type' to "sas"/"selfSigned"/"certificateAuthority" based on deviceInfo->authMethod IOTHUB_REGISTRYMANAGER_AUTH_SPK/IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT/IOTHUB_REGISTRYMANAGER_AUTH_X509_CERTIFICATE_AUTHORITY **]** */
     /*Codes_SRS_IOTHUBREGISTRYMANAGER_31_002: [** IoTHubRegistryManager_UpdateDevice shall set 'type' to "sas"/"selfSigned"/"certificateAuthority" based on deviceInfo->authMethod IOTHUB_REGISTRYMANAGER_AUTH_SPK/IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT/IOTHUB_REGISTRYMANAGER_AUTH_X509_CERTIFICATE_AUTHORITY **]** */
     else if ((NULL == (authTypeForJson = getAuthTypeStringForJson(deviceInfo->authMethod))) || ((json_object_dotset_string(root_object, DEVICE_JSON_KEY_DEVICE_AUTH_TYPE, authTypeForJson)) != JSONSuccess))
     {
-        LogError("json_object_set_string failed for authType");
+        LogError("json_object_dotset_string failed for authType");
         result = NULL;        
     }
     //

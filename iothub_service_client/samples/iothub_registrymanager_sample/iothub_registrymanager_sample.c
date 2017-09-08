@@ -122,6 +122,39 @@ void iothub_registrymanager_sample_run(void)
                 break;
             }
 
+            // Get device before update
+            deviceInfo.deviceId = "";
+            deviceInfo.primaryKey = "";
+            deviceInfo.secondaryKey = "";
+            deviceInfo.generationId = "";
+            deviceInfo.eTag = "";
+            deviceInfo.connectionState = IOTHUB_DEVICE_CONNECTION_STATE_DISCONNECTED;
+            deviceInfo.connectionStateUpdatedTime = "";
+            deviceInfo.status = IOTHUB_DEVICE_STATUS_DISABLED;
+            deviceInfo.statusReason = "";
+            deviceInfo.statusUpdatedTime = "";
+            deviceInfo.lastActivityTime = "";
+            deviceInfo.cloudToDeviceMessageCount = 0;
+            deviceInfo.isManaged = false;
+            deviceInfo.configuration = "";
+            deviceInfo.deviceProperties = "";
+            deviceInfo.serviceProperties = "";
+
+            result = IoTHubRegistryManager_GetDevice(iotHubRegistryManagerHandle, deviceCreateInfo.deviceId, &deviceInfo);
+            switch (result)
+            {
+            case IOTHUB_REGISTRYMANAGER_OK:
+                (void)printf("IoTHubRegistryManager_GetDevice: Successfully got device info: deviceId=%s\r\n", deviceInfo.deviceId);
+                printDeviceInfo(&deviceInfo, -1);
+                break;
+            case IOTHUB_REGISTRYMANAGER_ERROR:
+                (void)printf("IoTHubRegistryManager_GetDevice failed\r\n");
+                break;
+            default:
+                (void)printf("IoTHubRegistryManager_GetDevice failed with unknown error\r\n");
+                break;
+            }
+
             // Update device
             deviceUpdateInfo.deviceId = deviceId;
             deviceUpdateInfo.primaryKey = "aaabbbcccdddeeefffggghhhiiijjjkkklllmmmnnnoo";
@@ -142,7 +175,7 @@ void iothub_registrymanager_sample_run(void)
                 break;
             }
 
-            // Get device
+            // Get device after update
             deviceInfo.deviceId = "";
             deviceInfo.primaryKey = "";
             deviceInfo.secondaryKey = "";
@@ -150,7 +183,7 @@ void iothub_registrymanager_sample_run(void)
             deviceInfo.eTag = "";
             deviceInfo.connectionState = IOTHUB_DEVICE_CONNECTION_STATE_DISCONNECTED;
             deviceInfo.connectionStateUpdatedTime = "";
-            deviceInfo.status = IOTHUB_DEVICE_STATUS_DISABLED;
+            deviceInfo.status = IOTHUB_DEVICE_STATUS_ENABLED;
             deviceInfo.statusReason = "";
             deviceInfo.statusUpdatedTime = "";
             deviceInfo.lastActivityTime = "";
