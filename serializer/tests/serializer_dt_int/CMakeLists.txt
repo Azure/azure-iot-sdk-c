@@ -14,17 +14,17 @@ ${theseTestsName}.c
 )
 
 set(${theseTestsName}_c_files
-    ../../../parson/parson.c
+    ../../../deps/parson/parson.c
     ../../src/methodreturn.c
 )
 
 if(MSVC)
-    set_source_files_properties(../../../parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
+    set_source_files_properties(../../../deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
 endif()
 
 
 set(${theseTestsName}_h_files
-    ../../../parson/parson.h
+    ../../../deps/parson/parson.h
     ../../inc/methodreturn.h
 )
 

@@ -19,7 +19,7 @@ set(${theseTestsName}_c_files
 )
 
 set(${theseTestsName}_h_files
-    ../../../parson/parson.h
+    ../../../deps/parson/parson.h
     ./real_vector.h
     ./real_crt_abstractions.h
 )

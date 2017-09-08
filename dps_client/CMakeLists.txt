@@ -122,24 +122,24 @@ endif()
 set(DPS_SOURCE_C_FILES
     ./src/base32.c
     ./src/dps_client.c
-    ../parson/parson.c
+    ../deps/parson/parson.c
     ./src/uhttp.c)
 
 set(DPS_SOURCE_H_FILES
     ./inc/azure_hub_modules/base32.h
     ./inc/azure_hub_modules/dps_client.h
-    ../parson/parson.h
+    ../deps/parson/parson.h
     ./inc/azure_hub_modules/uhttp.h)
 
 if(MSVC)
-    set_source_files_properties(../parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
+    set_source_files_properties(../deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
 endif()
 
 set(DEV_AUTH_MODULES_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client lib" FORCE)
 
 include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})
 include_directories(${SHARED_UTIL_INC_FOLDER})
-include_directories(${CMAKE_CURRENT_LIST_DIR}/../parson)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/../deps/parson)
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})
 include_directories(${CMAKE_CURRENT_LIST_DIR}/adapters)
 
