@@ -384,7 +384,7 @@ extern "C"
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LargeFileWrite, IOTHUB_CLIENT_LARGE_FILE_HANDLE, fileHandle, const unsigned char*, source, size_t, size);
-#endif // DONT_USE_UPLOADTOBLOB
+#endif /* DONT_USE_UPLOADTOBLOB */
 
 #ifdef __cplusplus
 }

@@ -51,7 +51,18 @@ DEFINE_ENUM(BLOB_RESULT, BLOB_RESULT_VALUES)
 */
 MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadFromSasUri,const char*, SASURI, const unsigned char*, source, size_t, size, unsigned int*, httpStatus, BUFFER_HANDLE, httpResponse, const char*, certificates)
 
-// TODO add comments
+/**
+* @brief  Synchronously uploads a byte array as a new block to blob storage
+*
+* @param  requestContent      The data to upload
+* @param  blockId             The block id (from 00000 to 49999)
+* @param  isError             A pointer to an int stating if there was an error during upload. In case of error, is set to 1.
+* @param  xml                 The XML file containing the blockId list
+* @param  relativePath        The destination path within the storage
+* @param  httpApiExHandle     The connection handle
+* @param  httpStatus          A pointer to an out argument receiving the HTTP status (available only when the return value is BLOB_OK)
+* @param  httpResponse        A BUFFER_HANDLE that receives the HTTP response from the server (available only when the return value is BLOB_OK)
+*/
 MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadNextBlock, BUFFER_HANDLE, requestContent, unsigned int, blockID, int*, isError, STRING_HANDLE, xml, const char*, relativePath, HTTPAPIEX_HANDLE, httpApiExHandle, unsigned int*, httpStatus, BUFFER_HANDLE, httpResponse)
 
 #ifdef __cplusplus

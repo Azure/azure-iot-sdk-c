@@ -9,14 +9,9 @@
 #include "azure_c_shared_utility/httpapiex.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/base64.h"
-//#include "azure_c_shared_utility/lock.h"
 
 /*a block has 4MB*/
 #define BLOCK_SIZE (4*1024*1024)
-
-
-
-//typedef struct LARGE_FILE_TAG* LARGE_FILE_HANDLE;
 
 BLOB_RESULT Blob_UploadNextBlock(
         BUFFER_HANDLE requestContent,
@@ -126,7 +121,6 @@ BLOB_RESULT Blob_UploadNextBlock(
     return result;
 }
 
-// TODO split this function to show the part where the buffer gets split
 BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* source, size_t size, unsigned int* httpStatus, BUFFER_HANDLE httpResponse, const char* certificates)
 {
     BLOB_RESULT result;
@@ -301,8 +295,6 @@ BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* sourc
                                             }
                                             else
                                             {
-                                                // TODO expose the content of this loop in a function similar to this one:
-                                                // Blob_UploadNextBlock(&toUpload, &isError, &result, &blockID, ...<other handles>...);
                                                 result = Blob_UploadNextBlock(
                                                         requestContent,
                                                         blockID,
@@ -312,7 +304,6 @@ BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* sourc
                                                         httpApiExHandle,
                                                         httpStatus,
                                                         httpResponse);
-                                                /*Codes_SRS_BLOB_02_020: [ Blob_UploadFromSasUri shall construct a BASE64 encoded string from the block ID (000000... 0499999) ]*/
 
                                                 BUFFER_delete(requestContent);
                                             }

@@ -1172,10 +1172,6 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
     return result;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//                               TODO LARGE FILE maybe put in an other file ?
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 typedef struct IOTHUB_CLIENT_LARGE_FILE_HANDLE_DATA_TAG {
     unsigned int blockID;
     int isError;
@@ -1280,7 +1276,7 @@ static BLOB_RESULT Blob_UploadFromSasUri_start(IOTHUB_CLIENT_LARGE_FILE_HANDLE h
                             }
                             else
                             {
-                                // VICTORY !!
+                                /* The handle is valid */
                                 result = BLOB_OK;
                             }
                         }
@@ -1486,7 +1482,7 @@ static IOTHUB_CLIENT_RESULT LARGE_FILE_upload_blob_start(IOTHUB_CLIENT_LARGE_FIL
                                         }
                                         else
                                         {
-                                            // VICTORY !
+                                            /* The handle is valid */
                                             result = IOTHUB_CLIENT_OK;
                                         }
                                     }
@@ -1587,8 +1583,9 @@ IOTHUB_CLIENT_LARGE_FILE_HANDLE IoTHubClient_LL_LargeFileOpen_Impl(IOTHUB_CLIENT
         else
         {
             handleData->isError = 0;
-            handleData->lockHandle = Lock_Init();
             handleData->blobHandle = blobHandle;
+
+            handleData->lockHandle = Lock_Init();
             if (handleData->lockHandle == NULL)
             {
                 LogError("Could not Lock_Init");
@@ -1621,10 +1618,10 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_LargeFileClose_Impl(IOTHUB_CLIENT_LARGE_FIL
     }
     else
     {
-        // Close file handle
+        /* Close file handle */
         result = LARGE_FILE_upload_blob_stop(handle);
 
-        // Clean resources
+        /* Clean resources */
         if (handleData->hostname != NULL)
         {
             free(handleData->hostname);
@@ -1708,7 +1705,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_LargeFileWrite_Impl(IOTHUB_CLIENT_LARGE_FIL
         }
         else
         {
-            // No concurrent block writing allowed
+            /* No concurrent block writing allowed */
             if (Lock(handleData->lockHandle) != LOCK_OK)
             {
                 LogError("unable to lock");
@@ -1716,7 +1713,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_LargeFileWrite_Impl(IOTHUB_CLIENT_LARGE_FIL
             }
             else
             {
-                // Create buffer
+                /* Create buffer */
                 BUFFER_HANDLE requestBuffer = BUFFER_create(source, size);
                 if (requestBuffer == NULL)
                 {
