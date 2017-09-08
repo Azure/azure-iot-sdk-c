@@ -1565,63 +1565,15 @@ static IOTHUB_CLIENT_RESULT LARGE_FILE_upload_blob_stop(IOTHUB_CLIENT_LARGE_FILE
     return result;
 }
 
-IOTHUB_CLIENT_LARGE_FILE_HANDLE IoTHubClient_LL_LargeFileOpen_Impl(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE blobHandle, const char* destinationFileName)
-{
-    IOTHUB_CLIENT_LARGE_FILE_HANDLE_DATA* handleData = NULL;
-    if (destinationFileName == NULL || blobHandle == NULL)
-    {
-        LogError("invalid arguments : destinationFileName=%p, blobHandle=%p", destinationFileName, blobHandle);
-    }
-    else
-    {
-        handleData = malloc(sizeof(IOTHUB_CLIENT_LARGE_FILE_HANDLE_DATA));
-        if (handleData == NULL)
-        {
-            LogError("oom - malloc");
-            /*return as is*/
-        }
-        else
-        {
-            handleData->isError = 0;
-            handleData->blobHandle = blobHandle;
-
-            handleData->lockHandle = Lock_Init();
-            if (handleData->lockHandle == NULL)
-            {
-                LogError("Could not Lock_Init");
-                free(handleData);
-                handleData = NULL;
-            }
-            else
-            {
-                if(LARGE_FILE_upload_blob_start((IOTHUB_CLIENT_LARGE_FILE_HANDLE)handleData, destinationFileName) != IOTHUB_CLIENT_OK)
-                {
-                    LogError("Could not LARGE_FILE_upload_blob_start");
-                    IoTHubClient_LL_LargeFileClose_Impl((IOTHUB_CLIENT_LARGE_FILE_HANDLE)handleData);
-                    handleData = NULL;
-                }
-            }
-        }
-    }
-    return (IOTHUB_CLIENT_LARGE_FILE_HANDLE)handleData;
-}
-
-IOTHUB_CLIENT_RESULT IoTHubClient_LL_LargeFileClose_Impl(IOTHUB_CLIENT_LARGE_FILE_HANDLE handle)
+static void Destroy_LargeFileHandle(IOTHUB_CLIENT_LARGE_FILE_HANDLE handle)
 {
     IOTHUB_CLIENT_LARGE_FILE_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LARGE_FILE_HANDLE_DATA*)handle;
-    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
-
     if (handle == NULL)
     {
         LogError("unexpected NULL argument");
-        result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else
     {
-        /* Close file handle */
-        result = LARGE_FILE_upload_blob_stop(handle);
-
-        /* Clean resources */
         if (handleData->hostname != NULL)
         {
             free(handleData->hostname);
@@ -1668,6 +1620,67 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_LargeFileClose_Impl(IOTHUB_CLIENT_LARGE_FIL
         }
 
         free(handle);
+    }
+}
+
+IOTHUB_CLIENT_LARGE_FILE_HANDLE IoTHubClient_LL_LargeFileOpen_Impl(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE blobHandle, const char* destinationFileName)
+{
+    IOTHUB_CLIENT_LARGE_FILE_HANDLE_DATA* handleData = NULL;
+    if (destinationFileName == NULL || blobHandle == NULL)
+    {
+        LogError("invalid arguments : destinationFileName=%p, blobHandle=%p", destinationFileName, blobHandle);
+    }
+    else
+    {
+        handleData = calloc(1, sizeof(IOTHUB_CLIENT_LARGE_FILE_HANDLE_DATA));  /* use calloc to initialize all internal handles to NULL */
+        if (handleData == NULL)
+        {
+            LogError("oom - malloc");
+            /*return as is*/
+        }
+        else
+        {
+            handleData->isError = 0;
+            handleData->blobHandle = blobHandle;
+
+            handleData->lockHandle = Lock_Init();
+            if (handleData->lockHandle == NULL)
+            {
+                LogError("Could not Lock_Init");
+                free(handleData);
+                handleData = NULL;
+            }
+            else
+            {
+                if(LARGE_FILE_upload_blob_start((IOTHUB_CLIENT_LARGE_FILE_HANDLE)handleData, destinationFileName) != IOTHUB_CLIENT_OK)
+                {
+                    LogError("Could not LARGE_FILE_upload_blob_start");
+                    Destroy_LargeFileHandle((IOTHUB_CLIENT_LARGE_FILE_HANDLE)handleData);
+                    handleData = NULL;
+                }
+            }
+        }
+    }
+    return (IOTHUB_CLIENT_LARGE_FILE_HANDLE)handleData;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_LargeFileClose_Impl(IOTHUB_CLIENT_LARGE_FILE_HANDLE handle)
+{
+    IOTHUB_CLIENT_LARGE_FILE_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LARGE_FILE_HANDLE_DATA*)handle;
+    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
+
+    if (handle == NULL)
+    {
+        LogError("unexpected NULL argument");
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    else
+    {
+        /* Close file handle */
+        result = LARGE_FILE_upload_blob_stop(handle);
+
+        /* Clean resources */
+        Destroy_LargeFileHandle(handle);
     }
 
     return result;
