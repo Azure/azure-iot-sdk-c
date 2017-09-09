@@ -46,7 +46,7 @@ This document describes how to run the end to end tests.
 
         For testing-only, you can generate a x509 self-signed certificate using the following openssl command:
 
-        ```c
+        ```Shell
         openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -nodes -days 365 -subj "/C=US/ST=Washington/L=Redmond/O=Company/OU=Org/CN=www.company.com"
         ```
 
@@ -54,15 +54,15 @@ This document describes how to run the end to end tests.
 
         This will generate two files, one with the certificate information (`cert.pem`) and the other with the certificate key (`key.pem`).
 
-        Get Base64-encoded strings out of each file (`cert.pem` and `key.pem`) and populate IOTHUB_E2E_X509_CERT_BASE64 and IOTHUB_E2E_X509_PRIVATE_KEY_BASE64 respectively.
+        Generate Base64-encoded strings out of each file (`cert.pem` and `key.pem`) and populate IOTHUB_E2E_X509_CERT_BASE64 and IOTHUB_E2E_X509_PRIVATE_KEY_BASE64 respectively.
 
         Notes: 
         - There are several tools that can generate Base64-encoded strings. For example: Notepad++ with MIME Tools plugin.
-        - If using the parameters on Linux, make sure you replace Windows-style newlines (`\r\n`) by Linux-style newlines (`\n`) before doing the base64-encoding. 
+        - If using the parameters on Linux, make sure newlines follow the proper style (`\n`) before doing the base64-encoding. 
 
         The final piece of information (IOTHUB_E2E_X509_THUMBPRINT) can be obtained using the following command:
 
-        ```c
+        ```Shell
         openssl x509 -noout -fingerprint -inform pem -in cert.pem
         ```
 
@@ -89,7 +89,7 @@ This document describes how to run the end to end tests.
   - Make sure the contents of "iot_device_params.txt" are properly escaped for Linux (use "\$" for the '$' character).
   - Avoid using `/etc/environment` for defining these variables since it has string-size limitations (the certificate-related variables are too large).
   
-  ```c
+  ```Shell
   set -a
   source ./iot_device_params.txt
   ```
