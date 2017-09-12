@@ -46,7 +46,7 @@ typedef struct DPS_SERVICE_CLIENT_TAG
     char* proxy_hostname;
     char* certificates;
 
-    const char* signer_cert;
+    const char* certificate;
     const char* device_id;
     BUFFER_HANDLE endorsement_key;
 
@@ -59,12 +59,45 @@ typedef struct DPS_SERVICE_CLIENT_TAG
 #define SAS_TOKEN_DEFAULT_LIFETIME  3600
 #define EPOCH_TIME_T_VALUE          (time_t)0
 
+static const char* ATTESTATION_VALUE_TPM = "TPM";
+static const char* ATTESTATION_VALUE_X509 = "X509";
+
+static const char* CREATE_ENROLLMENT_CONTENT_FMT = "{\"id\":\"%s\",\"desiredIotHub\":\"%s\",\"deviceId\":\"%s\",\"identityAttestationMechanism\":\"%s\",\"identityAttestationEndorsementKey\":\"%s\",\"initialDeviceTwin\":\"\",\"enableEntry\":\"%s\"}";
+
 static const char* ENROLL_GROUP_PROVISION_CONTENT_FMT = "{ \"enrollmentGroupId\": \"%s\", \"attestation\": { \"tpm\": null, \"x509\": { \"clientCertificates\": null, \"signingCertificates\": {\"primary\": { \"certificate\": \"%s\", \"info\": {} } }, \"secondary\": null } }, \"initialTwinState\": null }";
 static const char* ENROLL_PROVISION_CONTENT_FMT = "{ \"registrationId\": \"%s\", \"deviceId\": \"%s\", \"attestation\": { \"tpm\": { \"endorsementKey\": \"%s\" } }, \"initialTwinState\": null }";
 static const char* ENROLL_GROUP_PROVISION_PATH_FMT = "/enrollmentGroups/%s?api-version=%s";
 static const char* ENROLL_PROVISION_PATH_FMT = "/enrollments/%s?api-version=%s";
 static const char* HEADER_KEY_AUTHORIZATION = "Authorization";
 static const char* DPS_API_VERSION = "2017-08-31-preview";
+
+static size_t string_length(const char* value)
+{
+    size_t result;
+    if (value != NULL)
+    {
+        result = strlen(value);
+    }
+    else
+    {
+        result = 0;
+    }
+    return result;
+}
+
+static const char* retrieve_json_string(const char* value)
+{
+    const char* result;
+    if (value != NULL)
+    {
+        result = value;
+    }
+    else
+    {
+        result = "";
+    }
+    return result;
+}
 
 static void on_http_connected(void* callback_ctx, HTTP_CALLBACK_REASON connect_result)
 {
@@ -199,18 +232,57 @@ static HTTP_HEADERS_HANDLE construct_http_headers(const DPS_SERVICE_CLIENT* dps_
     return result;
 }
 
-static char* construct_registration_content(const DPS_SERVICE_CLIENT* dps_client, const char* registration_id)
+static char* construct_enrollment_content(const DPS_SERVICE_CLIENT* dps_client, const ENROLLMENT_INFO* enrollment_info)
 {
     char* result;
-    size_t reg_content_len;
+    const char* attestation_type;
+    size_t enrollment_content_len;
 
     if (dps_client->reg_type == TYPE_ENROLL_GROUP)
     {
-        reg_content_len = strlen(ENROLL_GROUP_PROVISION_CONTENT_FMT) + strlen(registration_id) + strlen(dps_client->signer_cert);
-        result = malloc(reg_content_len + 1);
+        result = NULL;
+    }
+    else
+    {
+        if (enrollment_info->type == SECURE_DEVICE_TYPE_TPM)
+        {
+            attestation_type = ATTESTATION_VALUE_TPM;
+        }
+        else
+        {
+            attestation_type = ATTESTATION_VALUE_X509;
+        }
+        enrollment_content_len = strlen(CREATE_ENROLLMENT_CONTENT_FMT) + string_length(enrollment_info->registration_id) + string_length(enrollment_info->desired_iothub) + string_length(enrollment_info->device_id) + string_length(attestation_type) + string_length(enrollment_info->attestation_value) + 5;
+        result = malloc(enrollment_content_len + 1);
+        if (result == NULL)
+        {
+            LogError("failure allocating enrollment content");
+        }
+        else
+        {
+            if (sprintf(result, CREATE_ENROLLMENT_CONTENT_FMT, enrollment_info->registration_id, retrieve_json_string(enrollment_info->desired_iothub), retrieve_json_string(enrollment_info->device_id), attestation_type, enrollment_info->attestation_value, enrollment_info->enable_entry ? "true" : "false") == 0)
+            {
+                LogError("Failure constructing enrollment content value");
+                free(result);
+                result = NULL;
+            }
+        }
+    }
+    return result;
+}
+
+static char* construct_registration_content(const DPS_SERVICE_CLIENT* dps_client, const char* registration_id)
+{
+    char* result;
+    size_t enrollment_content_len;
+
+    if (dps_client->reg_type == TYPE_ENROLL_GROUP)
+    {
+        enrollment_content_len = strlen(ENROLL_GROUP_PROVISION_CONTENT_FMT) + strlen(registration_id) + strlen(dps_client->certificate);
+        result = malloc(enrollment_content_len + 1);
         if (result != NULL)
         {
-            if (sprintf(result, ENROLL_GROUP_PROVISION_CONTENT_FMT, registration_id, dps_client->signer_cert) == 0)
+            if (sprintf(result, ENROLL_GROUP_PROVISION_CONTENT_FMT, registration_id, dps_client->certificate) == 0)
             {
                 LogError("Failure constructing provision content value");
                 free(result);
@@ -233,8 +305,8 @@ static char* construct_registration_content(const DPS_SERVICE_CLIENT* dps_client
         }
         else
         {
-            reg_content_len = strlen(ENROLL_PROVISION_CONTENT_FMT) + STRING_length(encoded_ek) + strlen(registration_id) + strlen(dps_client->device_id);
-            result = malloc(reg_content_len + 1);
+            enrollment_content_len = strlen(ENROLL_PROVISION_CONTENT_FMT) + STRING_length(encoded_ek) + strlen(registration_id) + strlen(dps_client->device_id);
+            result = malloc(enrollment_content_len + 1);
             if (result != NULL)
             {
                 if (sprintf(result, ENROLL_PROVISION_CONTENT_FMT, registration_id, dps_client->device_id, STRING_c_str(encoded_ek)) == 0)
@@ -360,6 +432,72 @@ static int send_delete_to_dps(DPS_SERVICE_CLIENT* dps_client, const char* regist
                 else if (dps_client->http_state == HTTP_STATE_REQUEST_RECV)
                 {
                     dps_client->http_state = HTTP_STATE_COMPLETE;
+                }
+                else if (dps_client->http_state == HTTP_STATE_ERROR)
+                {
+                    result = __LINE__;
+                }
+            } while (dps_client->http_state != HTTP_STATE_COMPLETE && dps_client->http_state != HTTP_STATE_ERROR);
+        }
+    }
+    return result;
+}
+
+static int send_enrollment_to_dps(DPS_SERVICE_CLIENT* dps_client, const ENROLLMENT_INFO* enrollment_info)
+{
+    int result;
+    HTTP_CLIENT_HANDLE http_client;
+
+    http_client = connect_to_service(dps_client);
+    if (http_client == NULL)
+    {
+        LogError("Failed connecting to service");
+        result = __LINE__;
+    }
+    else
+    {
+        STRING_HANDLE registration_path;
+        if ((registration_path = construct_registration_path(dps_client, enrollment_info->registration_id)) == NULL)
+        {
+            LogError("Failed constructing provisioning path");
+            result = __LINE__;
+        }
+        else
+        {
+            HTTP_HEADERS_HANDLE request_headers;
+            result = 0;
+            do
+            {
+                uhttp_client_dowork(http_client);
+                if (dps_client->http_state == HTTP_STATE_CONNECTED)
+                {
+                    char* content = construct_enrollment_content(dps_client, enrollment_info);
+                    if (content == NULL)
+                    {
+                        LogError("Failure creating registration json content");
+                        dps_client->http_state = HTTP_STATE_ERROR;
+                        result = __LINE__;
+                    }
+                    else if ((request_headers = construct_http_headers(dps_client)) == NULL)
+                    {
+                        LogError("Failure creating registration json content");
+                        dps_client->http_state = HTTP_STATE_ERROR;
+                        result = __LINE__;
+                    }
+                    else
+                    {
+                        if (uhttp_client_execute_request(http_client, HTTP_CLIENT_REQUEST_DELETE, STRING_c_str(registration_path), request_headers, NULL, 0, on_http_reply_recv, &dps_client) != HTTP_CLIENT_OK)
+                        {
+                            LogError("Failure executing http request");
+                            dps_client->http_state = HTTP_STATE_ERROR;
+                            result = __LINE__;
+                        }
+                        else
+                        {
+                            dps_client->http_state = HTTP_STATE_REQUEST_SENT;
+                        }
+                        HTTPHeaders_Free(request_headers);
+                    }
                 }
                 else if (dps_client->http_state == HTTP_STATE_ERROR)
                 {
@@ -498,6 +636,36 @@ void dps_serivce_destroy(DPS_SERVICE_CLIENT_HANDLE handle)
     }
 }
 
+int dps_service_create_enrollment(DPS_SERVICE_CLIENT_HANDLE handle, const ENROLLMENT_INFO* device_enrollment)
+{
+    int result;
+    if (handle == NULL || device_enrollment == NULL)
+    {
+        LogError("invalid parameter handle: %p, device_enrollment: %p", handle, device_enrollment);
+        result = __FAILURE__;
+    }
+    else if (device_enrollment->registration_id == NULL)
+    {
+        LogError("invalid parameter registration_id: %p", device_enrollment->registration_id);
+        result = __FAILURE__;
+    }
+    else
+    {
+        handle->http_state = HTTP_STATE_DISCONNECTED;
+        handle->reg_type = TYPE_ENROLL;
+        if (send_enrollment_to_dps(handle, device_enrollment) != 0)
+        {
+            LogError("Failed sending registration to dps");
+            result = __FAILURE__;
+        }
+        else
+        {
+            result = 0;
+        }
+    }
+    return result;
+}
+
 int dps_service_enroll_tpm_device(DPS_SERVICE_CLIENT_HANDLE handle, const char* registration_id, const char* device_id, BUFFER_HANDLE endorsement_key)
 {
     int result;
@@ -525,20 +693,20 @@ int dps_service_enroll_tpm_device(DPS_SERVICE_CLIENT_HANDLE handle, const char* 
     return result;
 }
 
-int dps_service_enroll_x509_device(DPS_SERVICE_CLIENT_HANDLE handle, const char* registration_group, const char* signer_cert)
+int dps_service_enroll_x509_device(DPS_SERVICE_CLIENT_HANDLE handle, const char* registration_id, const char* certificate)
 {
     int result;
-    if (handle == NULL || registration_group == NULL || signer_cert == NULL)
+    if (handle == NULL || registration_id == NULL || certificate == NULL)
     {
-        LogError("invalid parameter handle: %p, registration_group: %p, signer_cert: %p", handle, registration_group, signer_cert);
+        LogError("invalid parameter handle: %p, registration_id: %p, certificate: %p", handle, registration_id, certificate);
         result = __FAILURE__;
     }
     else
     {
         handle->http_state = HTTP_STATE_DISCONNECTED;
-        handle->signer_cert = signer_cert;
+        handle->certificate = certificate;
         handle->reg_type = TYPE_ENROLL;
-        if (send_registration_to_dps(handle, registration_group) != 0)
+        if (send_registration_to_dps(handle, registration_id) != 0)
         {
             LogError("Failed sending registration to dps");
             result = __FAILURE__;
@@ -551,7 +719,7 @@ int dps_service_enroll_x509_device(DPS_SERVICE_CLIENT_HANDLE handle, const char*
     return result;
 }
 
-int dps_service_remove_device(DPS_SERVICE_CLIENT_HANDLE handle, const char* registration_id)
+int dps_service_remove_enrollment(DPS_SERVICE_CLIENT_HANDLE handle, const char* registration_id)
 {
     int result;
     if (handle == NULL || registration_id == NULL)

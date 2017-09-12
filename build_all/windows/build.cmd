@@ -41,6 +41,7 @@ set build-samples=yes
 set make=yes
 set build_traceabilitytool=0
 set CMAKE_use_c2d_amqp_methods=OFF
+set dps_auth_type=""
 
 :args-loop
 if "%1" equ "" goto args-done
@@ -56,6 +57,8 @@ if "%1" equ "--cmake-root" goto arg-cmake-root
 if "%1" equ "--no-make" goto arg-no-make
 if "%1" equ "--build-traceabilitytool" goto arg-build-traceabilitytool
 if "%1" equ "--wip-use-c2d-amqp-methods" goto arg-wip-use-c2d-amqp-methods
+if "%1" equ "--dps-tpm" goto arg-dps-tpm
+if "%1" equ "--dps-x509" goto arg-dps-x509
 call :usage && exit /b 1
 
 :arg-build-clean
@@ -116,6 +119,14 @@ goto args-continue
 set CMAKE_use_c2d_amqp_methods=ON
 goto args-continue
 
+:arg-dps-tpm
+set dps_auth_type="tpm_simulator"
+goto args-continue
+
+:arg-dps-x509
+set dps_auth_type="x509"
+goto args-continue
+
 :args-continue
 shift
 goto args-loop
@@ -123,10 +134,10 @@ goto args-loop
 :args-done
 
 if %make% == no (
-	rem No point running tests if we are not building the code
-	set CMAKE_run_e2e_tests=OFF
-	set CMAKE_run_longhaul_tests=OFF
-	set build-samples=no
+    rem No point running tests if we are not building the code
+    set CMAKE_run_e2e_tests=OFF
+    set CMAKE_run_longhaul_tests=OFF
+    set build-samples=no
 )
 
 rem -----------------------------------------------------------------------------
@@ -134,37 +145,37 @@ rem -- restore packages for solutions
 rem -----------------------------------------------------------------------------
 
 if %build-samples%==yes (
-	where /q nuget.exe
-	if not !errorlevel! == 0 (
-	@Echo Azure IoT SDK needs to download nuget.exe from https://www.nuget.org/nuget.exe 
-	@Echo https://www.nuget.org 
-	choice /C yn /M "Do you want to download and run nuget.exe?" 
-	if not !errorlevel!==1 goto :eof
-	rem if nuget.exe is not found, then ask user
-	Powershell.exe wget -outf nuget.exe https://nuget.org/nuget.exe
-		if not exist .\nuget.exe (
-			echo nuget does not exist
-			exit /b 1
-		)
-	)
+    where /q nuget.exe
+    if not !errorlevel! == 0 (
+    @Echo Azure IoT SDK needs to download nuget.exe from https://www.nuget.org/nuget.exe 
+    @Echo https://www.nuget.org 
+    choice /C yn /M "Do you want to download and run nuget.exe?" 
+    if not !errorlevel!==1 goto :eof
+    rem if nuget.exe is not found, then ask user
+    Powershell.exe wget -outf nuget.exe https://nuget.org/nuget.exe
+        if not exist .\nuget.exe (
+            echo nuget does not exist
+            exit /b 1
+        )
+    )
 
-	rem call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
-	if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
-	call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\samples\iothub_client_sample_http\windows\iothub_client_sample_http.sln"
-	if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
-	call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
-	if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
+    rem call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
+    if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
+    call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\samples\iothub_client_sample_http\windows\iothub_client_sample_http.sln"
+    if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
+    call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
+    if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
-	call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\samples\simplesample_http\windows\simplesample_http.sln"
-	if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
-	call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\samples\simplesample_amqp\windows\simplesample_amqp.sln"
-	if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
-	call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\samples\simplesample_mqtt\windows\simplesample_mqtt.sln"
-	if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
-	call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\samples\remote_monitoring\windows\remote_monitoring.sln"
-	if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
-	call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\samples\temp_sensor_anomaly\windows\temp_sensor_anomaly.sln"
-	if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
+    call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\samples\simplesample_http\windows\simplesample_http.sln"
+    if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
+    call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\samples\simplesample_amqp\windows\simplesample_amqp.sln"
+    if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
+    call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\samples\simplesample_mqtt\windows\simplesample_mqtt.sln"
+    if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
+    call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\samples\remote_monitoring\windows\remote_monitoring.sln"
+    if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
+    call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\samples\temp_sensor_anomaly\windows\temp_sensor_anomaly.sln"
+    if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 )
 
 rem -----------------------------------------------------------------------------
@@ -172,34 +183,34 @@ rem -- clean solutions
 rem -----------------------------------------------------------------------------
 
 if %build-clean%==1 (
-	if %build-samples%==yes (
-		rem call nuget restore "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
-		rem call :clean-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
-		rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+    if %build-samples%==yes (
+        rem call nuget restore "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
+        rem call :clean-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
+        rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
-		call nuget restore "%build-root%\iothub_client\samples\iothub_client_sample_http\windows\iothub_client_sample_http.sln"
-		call :clean-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_http\windows\iothub_client_sample_http.sln"
-		if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+        call nuget restore "%build-root%\iothub_client\samples\iothub_client_sample_http\windows\iothub_client_sample_http.sln"
+        call :clean-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_http\windows\iothub_client_sample_http.sln"
+        if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
-		rem call nuget restore "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
-		rem call :clean-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
-		rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-		
-		call :clean-a-solution "%build-root%\serializer\samples\simplesample_http\windows\simplesample_http.sln"
-		if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-		
-		call :clean-a-solution "%build-root%\serializer\samples\simplesample_amqp\windows\simplesample_amqp.sln"
-		if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-
-		call :clean-a-solution "%build-root%\serializer\samples\simplesample_mqtt\windows\simplesample_mqtt.sln"
-		if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-		
-		call :clean-a-solution "%build-root%\serializer\samples\remote_monitoring\windows\remote_monitoring.sln"
-		if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-		
-		call :clean-a-solution "%build-root%\serializer\samples\temp_sensor_anomaly\windows\temp_sensor_anomaly.sln"
-		if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-	)
+        rem call nuget restore "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
+        rem call :clean-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
+        rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+        
+        call :clean-a-solution "%build-root%\serializer\samples\simplesample_http\windows\simplesample_http.sln"
+        if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+        
+        call :clean-a-solution "%build-root%\serializer\samples\simplesample_amqp\windows\simplesample_amqp.sln"
+        if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+        
+        call :clean-a-solution "%build-root%\serializer\samples\simplesample_mqtt\windows\simplesample_mqtt.sln"
+        if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+        
+        call :clean-a-solution "%build-root%\serializer\samples\remote_monitoring\windows\remote_monitoring.sln"
+        if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+        
+        call :clean-a-solution "%build-root%\serializer\samples\temp_sensor_anomaly\windows\temp_sensor_anomaly.sln"
+        if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+    )
 )
 
 rem -----------------------------------------------------------------------------
@@ -207,29 +218,29 @@ rem -- build solutions
 rem -----------------------------------------------------------------------------
 
 if %build-samples%==yes (
-	rem call :build-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
-	rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+    rem call :build-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
+    rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
-	call :build-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_http\windows\iothub_client_sample_http.sln"
-	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+    call :build-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_http\windows\iothub_client_sample_http.sln"
+    if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
-	rem call :build-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
-	rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+    rem call :build-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
+    rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
-	rem call :build-a-solution "%build-root%\serializer\samples\simplesample_amqp\windows\simplesample_amqp.sln"
-	rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+    rem call :build-a-solution "%build-root%\serializer\samples\simplesample_amqp\windows\simplesample_amqp.sln"
+    rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
-	call :build-a-solution "%build-root%\serializer\samples\simplesample_http\windows\simplesample_http.sln"
-	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+    call :build-a-solution "%build-root%\serializer\samples\simplesample_http\windows\simplesample_http.sln"
+    if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
-	rem call :build-a-solution "%build-root%\serializer\samples\simplesample_mqtt\windows\simplesample_mqtt.sln"
-	rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+    rem call :build-a-solution "%build-root%\serializer\samples\simplesample_mqtt\windows\simplesample_mqtt.sln"
+    rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
-	rem call :build-a-solution "%build-root%\serializer\samples\remote_monitoring\windows\remote_monitoring.sln"
-	rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+    rem call :build-a-solution "%build-root%\serializer\samples\remote_monitoring\windows\remote_monitoring.sln"
+    rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
-	rem call :build-a-solution "%build-root%\serializer\samples\temp_sensor_anomaly\windows\temp_sensor_anomaly.sln"
-	rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+    rem call :build-a-solution "%build-root%\serializer\samples\temp_sensor_anomaly\windows\temp_sensor_anomaly.sln"
+    rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 )
 
 rem -----------------------------------------------------------------------------
@@ -248,83 +259,83 @@ pushd %cmake-root%\cmake\%CMAKE_DIR%
 
 if %MAKE_NUGET_PKG% == yes (
     echo ***Running CMAKE for Win32***
-    cmake %build-root% -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods%
+    cmake %build-root% -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods% -Ddps_auth_type=%dps_auth_type%
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
     popd
-	
+
     echo ***Running CMAKE for Win64***
     if EXIST %cmake-root%\cmake\iotsdk_x64 (
         rmdir /s/q %cmake-root%\cmake\iotsdk_x64
     )
-	mkdir %cmake-root%\cmake\iotsdk_x64
-	rem no error checking
+    mkdir %cmake-root%\cmake\iotsdk_x64
+    rem no error checking
 
-	pushd %cmake-root%\cmake\iotsdk_x64
-	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods% %build-root%  -G "Visual Studio 14 Win64"
-	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+    pushd %cmake-root%\cmake\iotsdk_x64
+    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods% %build-root% -Ddps_auth_type=%dps_auth_type% -G "Visual Studio 14 Win64"
+    if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
     popd
 
     echo ***Running CMAKE for ARM***
     if EXIST %cmake-root%\cmake\iotsdk_arm (
         rmdir /s/q %cmake-root%\cmake\iotsdk_arm
     )
-	mkdir %cmake-root%\cmake\iotsdk_arm
-	rem no error checking
+    mkdir %cmake-root%\cmake\iotsdk_arm
+    rem no error checking
 
-	pushd %cmake-root%\cmake\iotsdk_arm
-	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods% %build-root%  -G "Visual Studio 14 ARM"
-	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+    pushd %cmake-root%\cmake\iotsdk_arm
+    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods% %build-root% -Ddps_auth_type:STRING=%dps_auth_type% -G "Visual Studio 14 ARM"
+    if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 ) else if %build-platform% == x64 (
-	echo ***Running CMAKE for Win64***
-	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods% %build-root%  -G "Visual Studio 14 Win64"
-	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+    echo ***Running CMAKE for Win64***
+    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods% %build-root% -Ddps_auth_type:STRING=%dps_auth_type% -G "Visual Studio 14 Win64"
+    if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 ) else if %build-platform% == arm (
-	echo ***Running CMAKE for ARM***
-	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods% %build-root%  -G "Visual Studio 14 ARM"
-	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+    echo ***Running CMAKE for ARM***
+    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods% %build-root% -Ddps_auth_type:STRING=%dps_auth_type% -G "Visual Studio 14 ARM"
+    if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 ) else (
-	echo ***Running CMAKE for Win32***
-	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods% %build-root% 
-	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+    echo ***Running CMAKE for Win32***
+    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods% %build-root% -Ddps_auth_type:STRING=%dps_auth_type%
+    if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 )
 
 if %MAKE_NUGET_PKG% == yes (
-	if %make%==yes (
-		echo ***Building all configurations***
-		msbuild /m %cmake-root%\cmake\iotsdk_win32\azure_iot_sdks.sln /p:Configuration=Release
-		if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
-		msbuild /m %cmake-root%\cmake\iotsdk_win32\azure_iot_sdks.sln /p:Configuration=Debug
-		if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+    if %make%==yes (
+        echo ***Building all configurations***
+        msbuild /m %cmake-root%\cmake\iotsdk_win32\azure_iot_sdks.sln /p:Configuration=Release
+        if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
+        msbuild /m %cmake-root%\cmake\iotsdk_win32\azure_iot_sdks.sln /p:Configuration=Debug
+        if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
-		msbuild /m %cmake-root%\cmake\iotsdk_x64\azure_iot_sdks.sln /p:Configuration=Release
-		if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
-		msbuild /m %cmake-root%\cmake\iotsdk_x64\azure_iot_sdks.sln /p:Configuration=Debug
-		if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+        msbuild /m %cmake-root%\cmake\iotsdk_x64\azure_iot_sdks.sln /p:Configuration=Release
+        if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
+        msbuild /m %cmake-root%\cmake\iotsdk_x64\azure_iot_sdks.sln /p:Configuration=Debug
+        if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
-		msbuild /m %cmake-root%\cmake\iotsdk_arm\azure_iot_sdks.sln /p:Configuration=Release
-		if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
-		msbuild /m %cmake-root%\cmake\iotsdk_arm\azure_iot_sdks.sln /p:Configuration=Debug
-		if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-	)
+        msbuild /m %cmake-root%\cmake\iotsdk_arm\azure_iot_sdks.sln /p:Configuration=Release
+        if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
+        msbuild /m %cmake-root%\cmake\iotsdk_arm\azure_iot_sdks.sln /p:Configuration=Debug
+        if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+    )
 ) else (
-	if %make%==yes (
-		msbuild /m azure_iot_sdks.sln
-		if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
+    if %make%==yes (
+        msbuild /m azure_iot_sdks.sln
+        if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
-		if %build-platform% neq arm (
- 			ctest -C "debug" -V
-			if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-		)
-	)
+        if %build-platform% neq arm (
+            ctest -C "debug" -V
+            if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+        )
+    )
 )
 
 popd
 
 if %build_traceabilitytool%==1 (
-	rem invoke the traceabilitytool here instead of the second build step in Jenkins windows_c job
-	msbuild /m %build-root%\tools\traceabilitytool\traceabilitytool.sln
-	if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
+    rem invoke the traceabilitytool here instead of the second build step in Jenkins windows_c job
+    msbuild /m %build-root%\tools\traceabilitytool\traceabilitytool.sln
+    if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 )
 
 goto :eof
@@ -352,11 +363,13 @@ echo  --platform ^<value^>          [Win32] build platform (e.g. Win32, x64, arm
 echo  --make_nuget ^<value^>        [no] generates the binaries to be used for nuget packaging (e.g. yes, no)
 echo  --run-e2e-tests               run end-to-end tests
 echo  --run-longhaul-tests          run long-haul tests
-echo  --cmake-root		                Directory to place the cmake files used for building the project
+echo  --cmake-root                  Directory to place the cmake files used for building the project
 echo  --no-make                     Surpress building the code
 echo  --build-traceabilitytool      Builds an internal tool (traceabilitytool) to check for requirements/code/test consistency
 echo  --run-unittests               Run unit tests
 echo  --wip-use-c2d-amqp-methods    Builds with work in progress feature for amqp methods
+echo  --dps-tpm                     Use DPS with tpm Flow
+echo  --dps-x509                    Use DPS with x509 Flow
 goto :eof
 
 

@@ -23,6 +23,7 @@ toolchainfile=" "
 cmake_install_prefix=" "
 no_logging=OFF
 wip_use_c2d_amqp_methods=OFF
+dps_auth_type=""
 
 usage ()
 {
@@ -46,6 +47,8 @@ usage ()
     echo " -rv, --run_valgrind           will execute ctest with valgrind"
     echo " --no-logging                  Disable logging"
     echo " --wip-use-c2d-amqp-methods    Builds with work in progress feature for amqp methods"
+    echo " --dps-tpm                     Use DPS with TPM Flow"
+    echo " --dps-x509                    Use DPS with x509 Flow"
     exit 1
 }
 
@@ -99,6 +102,8 @@ process_args ()
               "--no-logging" ) no_logging=ON;;
               "--install-path-prefix" ) save_next_arg=4;;
               "--wip-use-c2d-amqp-methods" ) wip_use_c2d_amqp_methods=ON;;
+              "--dps-tpm" ) dps_auth_type=tpm_simulator;;
+              "--dps-x509" ) dps_auth_type=x509;;
               * ) usage;;
           esac
       fi
@@ -121,7 +126,7 @@ process_args $*
 rm -r -f $build_folder
 mkdir -p $build_folder
 pushd $build_folder
-cmake $toolchainfile $cmake_install_prefix -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Ddont_use_uploadtoblob:BOOL=$no_blob -Drun_unittests:BOOL=$run_unittests -Dbuild_python:STRING=$build_python -Dbuild_javawrapper:BOOL=$build_javawrapper -Dno_logging:BOOL=$no_logging $build_root -Dwip_use_c2d_amqp_methods:BOOL=$wip_use_c2d_amqp_methods
+cmake $toolchainfile $cmake_install_prefix -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Ddont_use_uploadtoblob:BOOL=$no_blob -Drun_unittests:BOOL=$run_unittests -Dbuild_python:STRING=$build_python -Dbuild_javawrapper:BOOL=$build_javawrapper -Dno_logging:BOOL=$no_logging $build_root -Dwip_use_c2d_amqp_methods:BOOL=$wip_use_c2d_amqp_methods -Ddps_auth_type:STRING=$dps_auth_type
 
 if [ "$make" = true ]
 then

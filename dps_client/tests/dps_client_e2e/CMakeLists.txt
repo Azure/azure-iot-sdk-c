@@ -40,12 +40,15 @@ build_c_test_artifacts(${theseTestsName} ON "tests/DPS_e2e_tests" VALGRIND_SUPPR
 
 set(dps_transports)
 if (${use_http})
+    add_definitions(-DUSE_HTTP)
     set(dps_transports ${dps_transports} dps_http_transport)
 endif()
 if (${use_mqtt} AND ${DPS_PROTOCOL_FEATURE})
+    add_definitions(-DUSE_MQTT)
     set(dps_transports ${dps_transports} dps_mqtt_transport dps_mqtt_ws_transport)
 endif()
 if (${use_amqp} AND ${DPS_PROTOCOL_FEATURE})
+    add_definitions(-DUSE_AMQP)
     set(dps_transports ${dps_transports} dps_amqp_transport dps_amqp_ws_transport)
 endif()
 

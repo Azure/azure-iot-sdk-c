@@ -14,6 +14,7 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/macro_utils.h"
 #include "azure_c_shared_utility/xlogging.h"
+#include "azure_c_shared_utility/base64.h"
 
 #include "azure_hub_modules/dps_client.h"
 #include "azure_hub_modules/secure_device_factory.h"
@@ -52,6 +53,7 @@ typedef struct DPS_CLIENT_E2E_INFO_TAG
 static const char* g_dps_conn_string = NULL;
 static const char* g_dps_scope_id = NULL;
 static char* g_dps_uri = NULL;
+static const char* g_desired_iothub = NULL;
 
 DPS_CLIENT_E2E_INFO g_dps_info;
 PLATFORM_PROCESS_HANDLE g_emulator_proc;
@@ -134,8 +136,15 @@ static DPS_LL_HANDLE create_dps_handle(DPS_TRANSPORT_PROVIDER_FUNCTION dps_trans
 
 static char* construct_simulator_path()
 {
+    const char* path_fmt = "..\\azure-iot-device-auth\\iothub_device_auth\\deps\\utpm\\tools\\tpm_simulator\\Simulator.exe";
+    size_t path_len = strlen(path_fmt);
     // Need to get this done
-    return "..\\azure-iot-device-auth\\iothub_device_auth\\deps\\utpm\\tools\\tpm_simulator\\Simulator.exe";
+    char* sim_path = (char*)malloc(path_len+1);
+    if (sim_path != NULL)
+    {
+        strcpy(sim_path, path_fmt);
+    }
+    return sim_path;
 }
 
 static void start_tpm_emulator()
@@ -195,41 +204,56 @@ static void create_enrollment_device(const char* dps_uri, const char* key, const
     int result;
     DPS_SEC_HANDLE dps_sec_handle;
     DPS_SERVICE_CLIENT_HANDLE svc_client;
-    char* registration_id;
+    ENROLLMENT_INFO enroll_info;
 
+    memset(&enroll_info, 0, sizeof(ENROLLMENT_INFO));
     svc_client = dps_service_create(dps_uri, key, keyname);
     ASSERT_IS_NOT_NULL_WITH_MSG(svc_client, "Failure creating service client");
 
     dps_sec_handle = dps_sec_create();
     ASSERT_IS_NOT_NULL_WITH_MSG(dps_sec_handle, "Failure creating dps sec create");
 
-    registration_id = dps_sec_get_registration_id(dps_sec_handle);
-    ASSERT_IS_NOT_NULL_WITH_MSG(registration_id, "Failure retrieving registration id");
+    enroll_info.registration_id = dps_sec_get_registration_id(dps_sec_handle);
+    ASSERT_IS_NOT_NULL_WITH_MSG(enroll_info.registration_id, "Failure retrieving registration id");
+
+    if (g_desired_iothub != NULL)
+    {
+        ASSERT_ARE_EQUAL_WITH_MSG(int, 0, mallocAndStrcpy_s(&enroll_info.desired_iothub, g_desired_iothub), "failed allocating desired iothub");
+    }
+
+    enroll_info.enable_entry = true;
 
     g_dps_hsm_type = dps_sec_get_type(dps_sec_handle);
     if (g_dps_hsm_type == DPS_SEC_TYPE_X509)
     {
-        char* signer_cert = dps_sec_get_signer_cert(dps_sec_handle);
-        ASSERT_IS_NOT_NULL_WITH_MSG(signer_cert, "Failure retrieving signer certificate");
+        enroll_info.attestation_value = dps_sec_get_certificate(dps_sec_handle);
+        ASSERT_IS_NOT_NULL_WITH_MSG(enroll_info.attestation_value, "Failure retrieving certificate");
 
-        result = dps_service_enroll_x509_device(svc_client, registration_id, signer_cert);
-        ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "Failed enrolling device");
+        enroll_info.type = SECURE_DEVICE_TYPE_X509;
     }
     else
     {
-        char* device_id;
         BUFFER_HANDLE ek;
+        STRING_HANDLE encoded_ek;
 
         ek = dps_sec_get_endorsement_key(dps_sec_handle);
         ASSERT_IS_NOT_NULL_WITH_MSG(ek, "Failure creating endorsement key");
 
-        ASSERT_ARE_EQUAL_WITH_MSG(int, 0, construct_device_id("device_", &device_id), "Failed allocating device name");
+        encoded_ek = Base64_Encoder(ek);
+        ASSERT_IS_NOT_NULL_WITH_MSG(encoded_ek, "Failure base64 encoding endorsement key");
 
-        result = dps_service_enroll_tpm_device(svc_client, registration_id, device_id, ek);
-        ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "Failed enrolling device");
+        ASSERT_ARE_EQUAL_WITH_MSG(int, 0, mallocAndStrcpy_s(&enroll_info.attestation_value, STRING_c_str(encoded_ek)), "failed allocating endorsement key");
+
+        ASSERT_ARE_EQUAL_WITH_MSG(int, 0, construct_device_id("device_", &enroll_info.device_id), "Failed allocating device name");
+
+        enroll_info.type = SECURE_DEVICE_TYPE_TPM;
 
         BUFFER_delete(ek);
+        STRING_delete(encoded_ek);
     }
+
+    result = dps_service_create_enrollment(svc_client, &enroll_info);
+    ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "Failed enrolling device");
 
     dps_serivce_destroy(svc_client);
 }
@@ -266,6 +290,8 @@ BEGIN_TEST_SUITE(dps_client_e2e)
 
         g_dps_conn_string = getenv("DPS_CONNECTION_STRING");
         ASSERT_IS_NOT_NULL_WITH_MSG(g_dps_conn_string, "DPS_CONNECTION_STRING is NULL");
+
+        g_desired_iothub = getenv("DPS_DESIRED_IOTHUB");
 
         // Parse connection string
         g_dps_info.conn_map = connectionstringparser_parse_from_char(g_dps_conn_string);
@@ -361,7 +387,7 @@ BEGIN_TEST_SUITE(dps_client_e2e)
         DPS_LL_Destroy(handle);
     }
 
-#if 0
+#if USE_AMQP
     TEST_FUNCTION(dps_register_device_amqp_success)
     {
         time_t begin_operation;
@@ -415,7 +441,9 @@ BEGIN_TEST_SUITE(dps_client_e2e)
 
         DPS_LL_Destroy(handle);
     }
+#endif
 
+#if USE_MQTT
     TEST_FUNCTION(dps_register_device_mqtt_success)
     {
         time_t begin_operation;

@@ -65,7 +65,7 @@ MOCKABLE_FUNCTION(, int, X509GetDERCsr, DERBuilderContext*, Context, RIOT_ECC_SI
 #include "dps_hsm_riot.h"
 
 static const char* TEST_STRING_VALUE = "Test_String_Value";
-static const char* TEST_CN_VALUE = "riot-common-device";
+static const char* TEST_CN_VALUE = "riot-device-cert";
 
 static int umocktypes_copy_RIOT_ECC_PRIVATE(RIOT_ECC_PRIVATE* dest, const RIOT_ECC_PRIVATE* src)
 {
@@ -355,6 +355,16 @@ BEGIN_TEST_SUITE(dps_hsm_riot_ut)
         return result;
     }
 
+    static void dps_hsm_riot_create_leaf_cert_mock(void)
+    {
+        STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(X509GetDeviceCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(X509MakeDeviceCert(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, CERT_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); //15
+    }
+
     static void dps_hsm_riot_create_mock(bool device_signed)
     {
         RIOT_ECC_PUBLIC pub = { 0 };
@@ -380,8 +390,7 @@ BEGIN_TEST_SUITE(dps_hsm_riot_ut)
         STRICT_EXPECTED_CALL(X509GetAliasCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(X509MakeAliasCert(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-
-        STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, CERT_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); //17
+        STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, CERT_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); //15
 
         if (device_signed)
         {
@@ -389,27 +398,36 @@ BEGIN_TEST_SUITE(dps_hsm_riot_ut)
             STRICT_EXPECTED_CALL(X509GetDeviceCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
             STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(X509MakeDeviceCert(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, CERT_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         }
         else
         {
             STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-            STRICT_EXPECTED_CALL(X509GetDERCsrTbs(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-            STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(X509GetDERCsr(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        }
-        STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, CERT_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+            STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
 
-        STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+            STRICT_EXPECTED_CALL(X509GetDeviceCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+            STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
+
+            STRICT_EXPECTED_CALL(X509MakeRootCert(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, CERT_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+            STRICT_EXPECTED_CALL(X509GetDEREcc(IGNORED_PTR_ARG, pub, pri))
+                .IgnoreArgument_Pub()
+                .IgnoreArgument_Priv();
+            STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, ECC_PRIVATEKEY_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+        }
+
+
+        STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 24
         STRICT_EXPECTED_CALL(X509GetDeviceCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(X509MakeRootCert(IGNORED_PTR_ARG, IGNORED_PTR_ARG)); // 24
+        STRICT_EXPECTED_CALL(X509MakeDeviceCert(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, CERT_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
 
-        STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+        /*/*STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(X509GetDEREcc(IGNORED_PTR_ARG, pub, pri))
             .IgnoreArgument_Pub()
             .IgnoreArgument_Priv();
-        STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, ECC_PRIVATEKEY_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, ECC_PRIVATEKEY_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));*/
 
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     }
@@ -425,7 +443,7 @@ BEGIN_TEST_SUITE(dps_hsm_riot_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        dps_hsm_riot_create_mock(true);
+        dps_hsm_riot_create_mock(false);
 
         //act
         DPS_SECURE_DEVICE_HANDLE sec_handle = dps_hsm_riot_create();
@@ -448,11 +466,11 @@ BEGIN_TEST_SUITE(dps_hsm_riot_ut)
         ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
         //arrange
-        dps_hsm_riot_create_mock(true);
+        dps_hsm_riot_create_mock(false);
 
         umock_c_negative_tests_snapshot();
 
-        size_t calls_cannot_fail[] = { 5, 8, 11, 16, 21, 26 };
+        size_t calls_cannot_fail[] = { 5, 8, 11, 16, 17, 24 };
 
         //act
         size_t count = umock_c_negative_tests_call_count();
@@ -699,6 +717,45 @@ BEGIN_TEST_SUITE(dps_hsm_riot_ut)
         dps_hsm_riot_destroy(sec_handle);
     }
 
+    TEST_FUNCTION(dps_hsm_riot_get_root_cert_handle_NULL_fail)
+    {
+        //arrange
+        initialize_riot_system();
+        umock_c_reset_all_calls();
+
+        //act
+        char* value = dps_hsm_riot_get_root_cert(NULL);
+
+        //assert
+        ASSERT_IS_NULL(value);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+    }
+
+    TEST_FUNCTION(dps_hsm_riot_get_root_cert_succeed)
+    {
+        //arrange
+        initialize_riot_system();
+        DPS_SECURE_DEVICE_HANDLE sec_handle = dps_hsm_riot_create();
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+
+        //act
+        char* value = dps_hsm_riot_get_root_cert(sec_handle);
+
+        //assert
+        ASSERT_IS_NOT_NULL(value);
+        ASSERT_ARE_EQUAL(char_ptr, TEST_STRING_VALUE, value);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        my_gballoc_free(value);
+        dps_hsm_riot_destroy(sec_handle);
+    }
+
+
     /* Tests_SRS_SECURE_DEVICE_RIOT_07_026: [ if handle is NULL, dps_hsm_riot_get_common_name shall return NULL. ] */
     TEST_FUNCTION(dps_hsm_riot_get_common_name_handle_NULL_succeed)
     {
@@ -757,6 +814,107 @@ BEGIN_TEST_SUITE(dps_hsm_riot_ut)
         //cleanup
         my_gballoc_free(value);
         dps_hsm_riot_destroy(sec_handle);
+    }
+
+    /* Tests_SRS_DPS_HSM_RIOT_07_030: [ If handle or common_name is NULL, dps_hsm_riot_create_leaf_cert shall return NULL. ] */
+    TEST_FUNCTION(dps_hsm_riot_create_leaf_cert_handle_NULL_fail)
+    {
+        //arrange
+        initialize_riot_system();
+        umock_c_reset_all_calls();
+
+        //act
+        char* value = dps_hsm_riot_create_leaf_cert(NULL, TEST_CN_VALUE);
+
+        //assert
+        ASSERT_IS_NULL(value);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+    }
+
+    /* Tests_SRS_DPS_HSM_RIOT_07_030: [ If handle or common_name is NULL, dps_hsm_riot_create_leaf_cert shall return NULL. ] */
+    TEST_FUNCTION(dps_hsm_riot_create_leaf_cert_common_name_NULL_fail)
+    {
+        //arrange
+        initialize_riot_system();
+        DPS_SECURE_DEVICE_HANDLE sec_handle = dps_hsm_riot_create();
+        umock_c_reset_all_calls();
+
+        //act
+        char* value = dps_hsm_riot_create_leaf_cert(sec_handle, NULL);
+
+        //assert
+        ASSERT_IS_NULL(value);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        dps_hsm_riot_destroy(sec_handle);
+    }
+
+    /* Tests_SRS_DPS_HSM_RIOT_07_031: [ If successful dps_hsm_riot_create_leaf_cert shall return a leaf cert with the CN of common_name. ] */
+    TEST_FUNCTION(dps_hsm_riot_create_leaf_cert_succeed)
+    {
+        //arrange
+        initialize_riot_system();
+        DPS_SECURE_DEVICE_HANDLE sec_handle = dps_hsm_riot_create();
+        umock_c_reset_all_calls();
+
+        dps_hsm_riot_create_leaf_cert_mock();
+
+        //act
+        char* value = dps_hsm_riot_create_leaf_cert(sec_handle, TEST_CN_VALUE);
+
+        //assert
+        ASSERT_IS_NOT_NULL(value);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        my_gballoc_free(value);
+        dps_hsm_riot_destroy(sec_handle);
+    }
+
+    /* Tests_SRS_DPS_HSM_RIOT_07_032: [ If dps_hsm_riot_create_leaf_cert encounters an error it shall return NULL. ] */
+    TEST_FUNCTION(dps_hsm_riot_create_leaf_cert_fail)
+    {
+        //arrange
+        initialize_riot_system();
+        DPS_SECURE_DEVICE_HANDLE sec_handle = dps_hsm_riot_create();
+        umock_c_reset_all_calls();
+
+        int negativeTestsInitResult = umock_c_negative_tests_init();
+        ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
+
+        dps_hsm_riot_create_leaf_cert_mock();
+
+        umock_c_negative_tests_snapshot();
+
+        size_t calls_cannot_fail[] = { 0 };
+
+        //act
+        size_t count = umock_c_negative_tests_call_count();
+        for (size_t index = 0; index < count; index++)
+        {
+            if (should_skip_index(index, calls_cannot_fail, sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0])) != 0)
+            {
+                continue;
+            }
+
+            umock_c_negative_tests_reset();
+            umock_c_negative_tests_fail_call(index);
+
+            char tmp_msg[64];
+            sprintf(tmp_msg, "dps_hsm_riot_create_leaf_cert failure in test %zu/%zu", index, count);
+
+            char* value = dps_hsm_riot_create_leaf_cert(sec_handle, TEST_CN_VALUE);
+
+            //assert
+            ASSERT_IS_NULL_WITH_MSG(value, tmp_msg);
+        }
+
+        //cleanup
+        dps_hsm_riot_destroy(sec_handle);
+        umock_c_negative_tests_deinit();
     }
 
     /* Tests_SRS_SECURE_DEVICE_RIOT_07_029: [ dps_hsm_riot_interface shall return the SEC_RIOT_INTERFACE structure. ] */

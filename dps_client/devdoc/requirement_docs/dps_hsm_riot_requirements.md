@@ -17,13 +17,17 @@ MOCKABLE_FUNCTION(, DPS_SECURE_DEVICE_HANDLE, dps_hsm_riot_create);
 MOCKABLE_FUNCTION(, void, dps_hsm_riot_destroy, DPS_SECURE_DEVICE_HANDLE, handle);
 MOCKABLE_FUNCTION(, char*, dps_hsm_riot_get_certificate, DPS_SECURE_DEVICE_HANDLE, handle);
 MOCKABLE_FUNCTION(, char*, dps_hsm_riot_get_alias_key, DPS_SECURE_DEVICE_HANDLE, handle);
-MOCKABLE_FUNCTION(, char*, dps_hsm_riot_get_device_cert, DPS_SECURE_DEVICE_HANDLE, handle);
 MOCKABLE_FUNCTION(, char*, dps_hsm_riot_get_signer_cert, DPS_SECURE_DEVICE_HANDLE, handle);
+MOCKABLE_FUNCTION(, char*, dps_hsm_riot_get_root_cert, DPS_SECURE_DEVICE_HANDLE, handle);
+MOCKABLE_FUNCTION(, char*, dps_hsm_riot_get_root_key, DPS_SECURE_DEVICE_HANDLE, handle);
 MOCKABLE_FUNCTION(, char*, dps_hsm_riot_get_common_name, DPS_SECURE_DEVICE_HANDLE, handle);
 
 MOCKABLE_FUNCTION(, const SEC_RIOT_INTERFACE*, dps_hsm_riot_interface);
 MOCKABLE_FUNCTION(, int, initialize_riot_system);
 MOCKABLE_FUNCTION(, void, deinitialize_riot_system);
+
+MOCKABLE_FUNCTION(, char*, dps_hsm_riot_create_leaf_cert, DPS_SECURE_DEVICE_HANDLE, handle, const char*, common_name);
+
 ```
 
 ### dps_hsm_riot_create
@@ -126,6 +130,17 @@ extern char* dps_hsm_riot_get_common_name(DPS_SECURE_DEVICE_HANDLE handle);
 
 **SRS_DPS_HSM_RIOT_07_028: [** If any failure is encountered `dps_hsm_riot_get_signer_cert` shall return NULL **]**
 
+### dps_hsm_riot_create_leaf_cert
+
+```c
+char* dps_hsm_riot_create_leaf_cert(DPS_SECURE_DEVICE_HANDLE handle, const char* common_name);
+```
+
+**SRS_DPS_HSM_RIOT_07_030: [** If handle or `common_name` is NULL, `dps_hsm_riot_create_leaf_cert` shall return NULL. **]**
+
+**SRS_DPS_HSM_RIOT_07_031: [** If successful `dps_hsm_riot_create_leaf_cert` shall return a leaf cert with the CN of `common_name`. **]**
+
+**SRS_DPS_HSM_RIOT_07_032: [** If `dps_hsm_riot_create_leaf_cert` encounters an error it shall return NULL. **]**
 
 ### dev_auth_emulator_interface_desc
 

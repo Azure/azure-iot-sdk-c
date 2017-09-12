@@ -44,6 +44,12 @@ static uint8_t RAMDOM_DIGEST[DICE_DIGEST_LENGTH] = {
     0xe0, 0x94, 0xab, 0xaf, 0xd7, 0x40, 0x78, 0x7e,
     0x05, 0x0d, 0xfe, 0x6d, 0x85, 0x90, 0x53, 0xa0 };
 
+unsigned char firmware_id[RIOT_DIGEST_LENGTH] = {
+    0x6B, 0xE9, 0xB1, 0x84, 0xC9, 0x37, 0xC2, 0x8E,
+    0x12, 0x2E, 0xEE, 0x51, 0x2B, 0x68, 0xEA, 0x8E,
+    0x00, 0xC3, 0xDD, 0x15, 0x9E, 0xA4, 0xE8, 0x5E,
+    0x84, 0xCB, 0xA9, 0x66, 0xF4, 0x46, 0xCD, 0x4E };
+
 // The static data fields that make up the x509 "to be signed" region
 //static RIOT_X509_TBS_DATA X509_TBS_DATA = { { 0x0A, 0x0B, 0x0C, 0x0D, 0x0E },
 //"RIoT Core", "MSR_TEST", "US", "170101000000Z", "370101000000Z", "RIoT Device", "MSR_TEST", "US" };
@@ -151,84 +157,55 @@ static const SEC_X509_INTERFACE sec_riot_interface =
     dps_hsm_riot_get_common_name
 };
 
-static char* convert_key_to_string(const unsigned char* key_value, size_t key_length)
-{
-    char* result;
-
-    result = malloc((key_length*2)+1);
-    memset(result, 0, (key_length*2)+1);
-
-    char hex_val[3];
-    for (size_t index = 0; index < key_length; index++)
-    {
-        sprintf(hex_val, "%02x", key_value[index]);
-        strcat(result, hex_val);
-    }
-    return result;
-}
-
-static int produce_priv_key(DPS_SECURE_DEVICE_INFO* riot_info)
+static int generate_root_ca_info(DPS_SECURE_DEVICE_INFO* riot_info, RIOT_ECC_SIGNATURE* tbs_sig)
 {
     int result;
     uint8_t der_buffer[DER_MAX_TBS] = { 0 };
     DERBuilderContext der_ctx = { 0 };
+    DERBuilderContext der_pri_ctx = { 0 };
+    RIOT_STATUS status;
 
     memcpy(&riot_info->ca_root_pub, eccRootPubBytes, sizeof(ecc_publickey));
     memcpy(&riot_info->ca_root_priv, eccRootPrivBytes, sizeof(ecc_privatekey));
 
-    DERInitContext(&der_ctx, der_buffer, DER_MAX_TBS);
-    if (X509GetDEREcc(&der_ctx, riot_info->ca_root_pub, riot_info->ca_root_priv) != 0)
-    {
-        LogError("Failure: X509GetDEREcc returned invalid status.");
-        result = __FAILURE__;
-    }
-    else
-    {
-        riot_info->root_ca_priv_length = sizeof(riot_info->root_ca_priv_pem);
-        if (DERtoPEM(&der_ctx, ECC_PRIVATEKEY_TYPE, riot_info->root_ca_priv_pem, &riot_info->root_ca_priv_length) != 0)
-        {
-            LogError("Failure: DERtoPEM returned invalid status.");
-            result = __FAILURE__;
-        }
-        else
-        {
-            result = 0;
-        }
-    }
-    return result;
-}
-
-static int produce_root_ca(DPS_SECURE_DEVICE_INFO* riot_info, RIOT_ECC_SIGNATURE tbs_sig)
-{
-    int result;
-    uint8_t der_buffer[DER_MAX_TBS] = { 0 };
-    DERBuilderContext der_ctx = { 0 };
-    RIOT_STATUS status;
-
     // Generating "root"-signed DeviceID certificate
     DERInitContext(&der_ctx, der_buffer, DER_MAX_TBS);
-    if (X509GetDeviceCertTBS(&der_ctx, &X509_ROOT_TBS_DATA, (RIOT_ECC_PUBLIC*)&eccRootPubBytes) != 0)
+    DERInitContext(&der_pri_ctx, der_buffer, DER_MAX_TBS);
+
+    if (X509GetDeviceCertTBS(&der_ctx, &X509_ROOT_TBS_DATA, &riot_info->ca_root_pub) != 0)
     {
         LogError("Failure: X509GetDeviceCertTBS");
         result = __FAILURE__;
     }
     // Sign the DeviceID Certificate's TBS region
-    else if ((status = RiotCrypt_Sign(&tbs_sig, der_ctx.Buffer, der_ctx.Position, &riot_info->device_id_priv)) != RIOT_SUCCESS)
+    else if ((status = RiotCrypt_Sign(tbs_sig, der_ctx.Buffer, der_ctx.Position, &riot_info->ca_root_priv)) != RIOT_SUCCESS)
     {
         LogError("Failure: RiotCrypt_Sign returned invalid status %d.", status);
         result = __FAILURE__;
     }
-    else if (X509MakeRootCert(&der_ctx, &tbs_sig) != 0)
+    else if (X509MakeRootCert(&der_ctx, tbs_sig) != 0)
     {
         LogError("Failure: X509MakeRootCert");
         result = __FAILURE__;
     }
     else
     {
+        riot_info->root_ca_priv_length = sizeof(riot_info->root_ca_priv_pem);
         riot_info->root_ca_length = sizeof(riot_info->root_ca_pem);
+
         if (DERtoPEM(&der_ctx, CERT_TYPE, riot_info->root_ca_pem, &riot_info->root_ca_length) != 0)
         {
             LogError("Failure: DERtoPEM return invalid value.");
+            result = __FAILURE__;
+        }
+        else if (X509GetDEREcc(&der_pri_ctx, riot_info->ca_root_pub, riot_info->ca_root_priv) != 0)
+        {
+            LogError("Failure: X509GetDEREcc returned invalid status.");
+            result = __FAILURE__;
+        }
+        else if (DERtoPEM(&der_pri_ctx, ECC_PRIVATEKEY_TYPE, riot_info->root_ca_priv_pem, &riot_info->root_ca_priv_length) != 0)
+        {
+            LogError("Failure: DERtoPEM returned invalid status.");
             result = __FAILURE__;
         }
         else
@@ -276,7 +253,7 @@ static int produce_device_cert(DPS_SECURE_DEVICE_INFO* riot_info, RIOT_ECC_SIGNA
         DERInitContext(&der_ctx, der_buffer, DER_MAX_TBS);
         if (X509GetDERCsrTbs(&der_ctx, &X509_ALIAS_TBS_DATA, &riot_info->device_id_pub) != 0)
         {
-            LogError("Failure: X509GetDeviceCertTBS");
+            LogError("Failure: X509GetDERCsrTbs");
             result = __FAILURE__;
         }
         // Sign the Alias Key Certificate's TBS region
@@ -416,12 +393,6 @@ static int process_riot_key_info(DPS_SECURE_DEVICE_INFO* riot_info)
     int result;
     RIOT_STATUS status;
 
-    unsigned char firmware_id[RIOT_DIGEST_LENGTH] = {
-        0x6B, 0xE9, 0xB1, 0x84, 0xC9, 0x37, 0xC2, 0x8E,
-        0x12, 0x2E, 0xEE, 0x51, 0x2B, 0x68, 0xEA, 0x8E,
-        0x00, 0xC3, 0xDD, 0x15, 0x9E, 0xA4, 0xE8, 0x5E,
-        0x84, 0xCB, 0xA9, 0x66, 0xF4, 0x46, 0xCD, 0x4E };
-
     /* Codes_SRS_SECURE_DEVICE_RIOT_07_002: [ dps_hsm_riot_create shall call into the RIot code to sign the RIoT certificate. ] */
     // Don't use CDI directly
     if (g_digest_initialized == 0)
@@ -502,19 +473,14 @@ static int process_riot_key_info(DPS_SECURE_DEVICE_INFO* riot_info)
                 LogError("Failure: producing alias cert.");
                 result = __FAILURE__;
             }
-            else if (produce_device_cert(riot_info, tbs_sig, type_root_signed) != 0)
-            {
-                LogError("Failure: producing device certificate.");
-                result = __FAILURE__;
-            }
-            else if (produce_root_ca(riot_info, tbs_sig) != 0)
+            else if (generate_root_ca_info(riot_info, &tbs_sig) != 0)
             {
                 LogError("Failure: producing root ca.");
                 result = __FAILURE__;
             }
-            else if (produce_priv_key(riot_info) != 0)
+            else if (produce_device_cert(riot_info, tbs_sig, type_root_signed) != 0)
             {
-                LogError("Failure: producing root ca private key.");
+                LogError("Failure: producing device certificate.");
                 result = __FAILURE__;
             }
             else if (mallocAndStrcpy_s(&riot_info->certificate_common_name, X509_ALIAS_TBS_DATA.SubjectCommon) != 0)
@@ -774,59 +740,64 @@ char* dps_hsm_riot_create_leaf_cert(DPS_SECURE_DEVICE_HANDLE handle, const char*
 
     // The static data fields that make up the DeviceID Cert "to be signed" region
     RIOT_X509_TBS_DATA LEAF_CERT_TBS_DATA = {
-        { 0x0E, 0x0D, 0x0C, 0x0B, 0x0A }, "", "MSR_TEST", "US",
-        "170101000000Z", "370101000000Z", RIOT_SIGNER_NAME, "MSR_TEST", "US" };
+        { 0x5E, 0x4D, 0x3C, 0x2B, 0x1A }, RIOT_CA_CERT_NAME, "MSR_TEST", "US",
+        "170101000000Z", "370101000000Z", "", "MSR_TEST", "US" };
 
     if (handle == NULL || common_name == NULL)
     {
+        /* Codes_SRS_DPS_HSM_RIOT_07_030: [ If handle or common_name is NULL, dps_hsm_riot_create_leaf_cert shall return NULL. ] */
         LogError("invalid parameter specified.");
         result = NULL;
     }
     else
     {
         RIOT_STATUS status;
-        uint8_t der_buffer[DER_MAX_TBS] = { 0 };
-        DERBuilderContext der_ctx = { 0 };
+        uint8_t leaf_buffer[DER_MAX_TBS] = { 0 };
+        DERBuilderContext leaf_ctx = { 0 };
         RIOT_ECC_PUBLIC     leaf_id_pub;
-        RIOT_ECC_PRIVATE    leaf_id_priv;
         RIOT_ECC_SIGNATURE tbs_sig = { 0 };
+
+        DPS_SECURE_DEVICE_INFO* riot_info = (DPS_SECURE_DEVICE_INFO*)handle;
 
         LEAF_CERT_TBS_DATA.SubjectCommon = common_name;
 
-        DERInitContext(&der_ctx, der_buffer, DER_MAX_TBS);
-        if (X509GetDERCsrTbs(&der_ctx, &LEAF_CERT_TBS_DATA, &leaf_id_pub) != 0)
+        DERInitContext(&leaf_ctx, leaf_buffer, DER_MAX_TBS);
+        if (X509GetDeviceCertTBS(&leaf_ctx, &LEAF_CERT_TBS_DATA, &leaf_id_pub) != 0)
         {
+            /* Codes_SRS_DPS_HSM_RIOT_07_032: [ If dps_hsm_riot_create_leaf_cert encounters an error it shall return NULL. ] */
             LogError("Failure: X509GetDeviceCertTBS");
             result = NULL;
         }
-        // Sign the Alias Key Certificate's TBS region
-        else if ((status = RiotCrypt_Sign(&tbs_sig, der_ctx.Buffer, der_ctx.Position, &leaf_id_priv)) != RIOT_SUCCESS)
+        else if ((status = RiotCrypt_Sign(&tbs_sig, leaf_ctx.Buffer, leaf_ctx.Position, &riot_info->ca_root_priv)) != RIOT_SUCCESS)
         {
+            /* Codes_SRS_DPS_HSM_RIOT_07_032: [ If dps_hsm_riot_create_leaf_cert encounters an error it shall return NULL. ] */
             LogError("Failure: RiotCrypt_Sign returned invalid status %d.", status);
             result = NULL;
         }
-        // Create CSR for DeviceID
-        else if (X509GetDERCsr(&der_ctx, &tbs_sig) != 0)
+        else if (X509MakeDeviceCert(&leaf_ctx, &tbs_sig) != 0)
         {
-            LogError("Failure: X509GetDERCsr");
+            /* Codes_SRS_DPS_HSM_RIOT_07_032: [ If dps_hsm_riot_create_leaf_cert encounters an error it shall return NULL. ] */
+            LogError("Failure: X509MakeDeviceCert");
             result = NULL;
         }
         else if ((result = malloc(DER_MAX_PEM + 1)) == NULL)
         {
+            /* Codes_SRS_DPS_HSM_RIOT_07_032: [ If dps_hsm_riot_create_leaf_cert encounters an error it shall return NULL. ] */
             LogError("Failure allocating leaf cert");
         }
         else
         {
-            memset(result, 0, DER_MAX_PEM+1);
-            uint32_t leaf_len;
-            if (DERtoPEM(&der_ctx, CERT_TYPE, result, &leaf_len) != 0)
+            /* Codes_SRS_DPS_HSM_RIOT_07_031: [ If successful dps_hsm_riot_create_leaf_cert shall return a leaf cert with the CN of common_name. ] */
+            memset(result, 0, DER_MAX_PEM + 1);
+            uint32_t leaf_len = DER_MAX_PEM;
+            if (DERtoPEM(&leaf_ctx, CERT_TYPE, result, &leaf_len) != 0)
             {
+                /* Codes_SRS_DPS_HSM_RIOT_07_032: [ If dps_hsm_riot_create_leaf_cert encounters an error it shall return NULL. ] */
                 LogError("Failure: DERtoPEM return invalid value.");
                 free(result);
                 result = NULL;
             }
         }
     }
-
     return result;
 }
