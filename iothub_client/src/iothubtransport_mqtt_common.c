@@ -79,7 +79,7 @@ static const char* CONTENT_ENCODING_PROPERTY = "ce";
 static const char* DIAGNOSTIC_ID_PROPERTY = "diagid";
 static const char* DIAGNOSTIC_CONTEXT_PROPERTY = "diagctx";
 
-static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "diagtime";
+static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "creationtimeutc";
 
 #define UNSUBSCRIBE_FROM_TOPIC                  0x0000
 #define SUBSCRIBE_GET_REPORTED_STATE_TOPIC      0x0001
@@ -97,7 +97,6 @@ typedef struct SYSTEM_PROPERTY_INFO_TAG
     size_t propLength;
 } SYSTEM_PROPERTY_INFO;
 
-//TODO: add diagnostic properties support for C2D messages
 static SYSTEM_PROPERTY_INFO sysPropList[] = {
     { "%24.exp", 7 },
     { "%24.mid", 7 },
@@ -673,10 +672,9 @@ static STRING_HANDLE addPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_me
                         STRING_delete(result);
                         result = NULL;
                     }
-                    //Add other diagnostic context properties here if have more
-
-                    if (diagContextHandle != NULL)
+                    else
                     {
+                        //Add other diagnostic context properties here if have more
                         STRING_HANDLE encodedContextValueHandle = URL_Encode(diagContextHandle);
                         const char* encodedContextValueString = NULL;
                         if (encodedContextValueHandle != NULL &&
@@ -705,7 +703,7 @@ static STRING_HANDLE addPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_me
             }
             else if (diag_id != NULL || creation_time_utc != NULL)
             {
-                // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_015: [ `IoTHubTransport_MQTT_Common_DoWork` shall check whether diagid and diagCreationTimeUtc be present simultaneously, trade as error if not]
+                // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_015: [ `IoTHubTransport_MQTT_Common_DoWork` shall check whether diagid and diagCreationTimeUtc be present simultaneously, treat as error if not]
                 LogError("diagid and diagcreationtimeutc must be present simultaneously.");
                 STRING_delete(result);
                 result = NULL;

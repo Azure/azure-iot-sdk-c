@@ -152,7 +152,7 @@ static const char* TEST_DIAG_ID = "1234abcd";
 static const char* TEST_DIAG_CREATION_TIME_UTC = "2018-08-08T08:08:08Z";
 
 static const char* PROPERTY_SEPARATOR = "&";
-static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "diagtime";
+static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "creationtimeutc";
 
 static IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA TEST_DIAG_DATA;
 
@@ -4285,7 +4285,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_message_system_properties_
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_015: [ `IoTHubTransport_MQTT_Common_DoWork` shall check whether diagid and diagCreationTimeUtc be present simultaneously, trade as error if not]
+// Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_015: [ `IoTHubTransport_MQTT_Common_DoWork` shall check whether diagid and diagCreationTimeUtc be present simultaneously, treat as error if not]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_message_incomplete_diagnostic_system_properties_fails)
 {
     // arrange
