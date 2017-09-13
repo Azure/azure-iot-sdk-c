@@ -748,7 +748,7 @@ int dps_transport_common_mqtt_close(DPS_TRANSPORT_HANDLE handle)
         mqtt_info->srk = NULL;
 
         /* Tests_DPS_TRANSPORT_MQTT_COMMON_07_012: [ dps_transport_common_mqtt_close shall close all connection associated with mqtt communication. ] */
-        if (mqtt_client_disconnect(mqtt_info->mqtt_client) == 0)
+        if (mqtt_client_disconnect(mqtt_info->mqtt_client, NULL, NULL) == 0)
         {
             mqtt_client_dowork(mqtt_info->mqtt_client);
         }

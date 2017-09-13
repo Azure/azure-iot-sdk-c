@@ -830,7 +830,7 @@ BEGIN_TEST_SUITE(dps_transport_mqtt_common_ut)
         //arrange
         STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mqtt_client_disconnect(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mqtt_client_disconnect(IGNORED_PTR_ARG, NULL, NULL));
         STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(xio_destroy(IGNORED_PTR_ARG));
 
