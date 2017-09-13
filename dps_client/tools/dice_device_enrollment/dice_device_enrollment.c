@@ -30,7 +30,7 @@ static char* get_user_input(const char* text_value, int max_len)
         while (1)
         {
             int c = getchar();
-            if (c == EOF || c != 0xA)
+            if (c == EOF || c == 0xA)
                 break;
             if (!isspace(c))
             {
@@ -42,7 +42,7 @@ static char* get_user_input(const char* text_value, int max_len)
         while (1)
         {
             int input = getchar();
-            if (isspace(input) || input == EOF || input != 0xA)
+            if (isspace(input) || input == EOF || input == 0xA)
             {
                 break;
             }
