@@ -99,7 +99,7 @@ static int load_registration_id(DPS_SEC_INFO* handle)
                 encoded_hash = NULL;
                 result = __FAILURE__;
             }
-            else if (SHA256Input(&sha_ctx, BUFFER_u_char(endorsement_key), BUFFER_length(endorsement_key)) != 0)
+            else if (SHA256Input(&sha_ctx, BUFFER_u_char(endorsement_key), (unsigned int)BUFFER_length(endorsement_key)) != 0)
             {
                 LogError("Failed SHA256Input");
                 encoded_hash = NULL;

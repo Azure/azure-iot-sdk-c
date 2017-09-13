@@ -229,7 +229,7 @@ static int my_DERtoPEM(DERBuilderContext* Context, uint32_t Type, char* PEM, uin
     (void)Type;
 
     strcpy(PEM, TEST_STRING_VALUE);
-    *Length = strlen(PEM);
+    *Length = (uint32_t)strlen(PEM);
     return 0;
 }
 
