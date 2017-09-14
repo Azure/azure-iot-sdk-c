@@ -9,6 +9,6 @@ for %%i in ("%build-root%") do set build-root=%%~fi
 
 REM -- C --
 cd %build-root%\build_all\windows
-call build.cmd --run-unittests --wip-use-c2d-amqp-methods
+call build.cmd --run-unittests
 if errorlevel 1 goto :eof
 cd %build-root%
