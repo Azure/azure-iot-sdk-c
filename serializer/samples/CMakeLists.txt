@@ -29,6 +29,6 @@ if(${use_mqtt} AND (NOT DEFINED use_mqtt_kit OR NOT ${use_mqtt_kit}))
    add_sample_directory(devicemethod_simplesample)
 endif()
 
-if( (${use_mqtt} AND (NOT DEFINED use_mqtt_kit OR NOT ${use_mqtt_kit})) (${use_amqp} AND (NOT DEFINED use_amqp_kit OR NOT ${use_amqp_kit})))
+if((${use_mqtt} AND (NOT DEFINED use_mqtt_kit OR NOT ${use_mqtt_kit})) AND (${use_amqp} AND (NOT DEFINED use_amqp_kit OR NOT ${use_amqp_kit})))
    add_sample_directory(devicetwin_simplesample)
 endif()
