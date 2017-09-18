@@ -18,6 +18,10 @@ To find SDKs in other languages for Azure IoT, please refer to the [azure-iot-sd
 
 Visit [Azure IoT Dev Center][iot-dev-center] to learn more about developing applications for Azure IoT.
 
+## Key features and roadmap
+
+[INSERT CHART FROM EXCEL] *Need help with formatting
+
 ## How to use the Azure IoT SDKs for C
 
 * **Using packages and libraries**: the simplest way to use the Azure IoT SDKs is to use packages and libraries when available. The following are available:
@@ -42,7 +46,9 @@ In the repository, you will find a set of simple samples that will help you get 
 
 ## OS platforms and hardware compatibility
 
-The IoT Hub device SDK for C can be used with a broad range of OS platforms and devices.
+The IoT Hub device SDK for C can be used with a broad range of OS platforms and devices:
+[INCLUDE A LIST OF PLATFORMS SUPPORTED BY C OUT OF BOX]
+
 The minimum requirements are for the device platform to support the following:
 
 - **Being capable of establishing an IP connection**: only IP-capable devices can communicate directly with Azure IoT Hub.
@@ -91,6 +97,10 @@ These are git submodules that contain code, such as adapters and protocol implem
 ### /blob
 
 This folder contains client components that enable access to Azure blob storage.
+
+### /dps_client
+
+This folder contains client library for device provisioning service.
 
 ### /certs
 
