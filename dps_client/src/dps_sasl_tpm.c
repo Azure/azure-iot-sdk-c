@@ -124,7 +124,7 @@ static int construct_send_data(SASL_TPM_INSTANCE* sasl_tpm_info, unsigned char* 
     }
     else
     {
-        payload_data_length = data_len + 1;
+        payload_data_length = (uint32_t)data_len + 1;
         sasl_tpm_info->data_buffer = (unsigned char*)malloc(payload_data_length+1);
         if (sasl_tpm_info->data_buffer == NULL)
         {
@@ -402,7 +402,7 @@ static int dps_sasltpm_challenge(CONCRETE_SASL_MECHANISM_HANDLE handle, const SA
                             }
                             else
                             {
-                                resp_bytes->length = sas_token_len + 1;
+                                resp_bytes->length = (uint32_t)sas_token_len + 1;
                                 if ((sasl_tpm_info->data_buffer = (unsigned char*)malloc(resp_bytes->length)) == NULL)
                                 {
                                     /* Codes_SRS_DPS_SASL_TPM_07_020: [ If any error is encountered dps_sasltpm_challenge shall return a non-zero value. ] */
