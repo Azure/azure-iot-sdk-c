@@ -15,7 +15,7 @@
 
 #ifdef __cplusplus
 #include <cstddef>
-extern "C" 
+extern "C"
 {
 #else
 #include <stddef.h>
@@ -27,9 +27,9 @@ extern "C"
     IOTHUB_MESSAGE_INVALID_TYPE,             \
     IOTHUB_MESSAGE_ERROR                     \
 
-/** @brief Enumeration specifying the status of calls to various  
- *  APIs in this module.
- */
+/** @brief Enumeration specifying the status of calls to various
+*  APIs in this module.
+*/
 DEFINE_ENUM(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES);
 
 #define IOTHUBMESSAGE_CONTENT_TYPE_VALUES \
@@ -37,87 +37,96 @@ IOTHUBMESSAGE_BYTEARRAY, \
 IOTHUBMESSAGE_STRING, \
 IOTHUBMESSAGE_UNKNOWN \
 
-/** @brief Enumeration specifying the content type of the a given  
-  * message.
-  */
+/** @brief Enumeration specifying the content type of the a given
+* message.
+*/
 DEFINE_ENUM(IOTHUBMESSAGE_CONTENT_TYPE, IOTHUBMESSAGE_CONTENT_TYPE_VALUES);
 
 typedef struct IOTHUB_MESSAGE_HANDLE_DATA_TAG* IOTHUB_MESSAGE_HANDLE;
 
+/** @brief diagnostic related data*/
+typedef struct IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA_TAG
+{
+    char* diagnosticId;
+    char* diagnosticCreationTimeUtc;
+}IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA, *IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA_HANDLE;
+
+static const char DIAG_CREATION_TIME_UTC_PROPERTY_NAME[] = "diag_creation_time_utc";
+
 /**
- * @brief   Creates a new IoT hub message from a byte array. The type of the
- *          message will be set to @c IOTHUBMESSAGE_BYTEARRAY.
- *
- * @param   byteArray   The byte array from which the message is to be created.
- * @param   size        The size of the byte array.
- *
- * @return  A valid @c IOTHUB_MESSAGE_HANDLE if the message was successfully
- *          created or @c NULL in case an error occurs.
- */
+* @brief   Creates a new IoT hub message from a byte array. The type of the
+*          message will be set to @c IOTHUBMESSAGE_BYTEARRAY.
+*
+* @param   byteArray   The byte array from which the message is to be created.
+* @param   size        The size of the byte array.
+*
+* @return  A valid @c IOTHUB_MESSAGE_HANDLE if the message was successfully
+*          created or @c NULL in case an error occurs.
+*/
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_HANDLE, IoTHubMessage_CreateFromByteArray, const unsigned char*, byteArray, size_t, size);
 
 /**
- * @brief   Creates a new IoT hub message from a null terminated string.  The
- *          type of the message will be set to @c IOTHUBMESSAGE_STRING.
- *
- * @param   source  The null terminated string from which the message is to be
- *                  created.
- *
- * @return  A valid @c IOTHUB_MESSAGE_HANDLE if the message was successfully
- *          created or @c NULL in case an error occurs.
- */
+* @brief   Creates a new IoT hub message from a null terminated string.  The
+*          type of the message will be set to @c IOTHUBMESSAGE_STRING.
+*
+* @param   source  The null terminated string from which the message is to be
+*                  created.
+*
+* @return  A valid @c IOTHUB_MESSAGE_HANDLE if the message was successfully
+*          created or @c NULL in case an error occurs.
+*/
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_HANDLE, IoTHubMessage_CreateFromString, const char*, source);
 
 /**
- * @brief   Creates a new IoT hub message with the content identical to that
- *          of the @p iotHubMessageHandle parameter.
- *
- * @param   iotHubMessageHandle Handle to the message that is to be cloned.
- *
- * @return  A valid @c IOTHUB_MESSAGE_HANDLE if the message was successfully
- *          cloned or @c NULL in case an error occurs.
- */
+* @brief   Creates a new IoT hub message with the content identical to that
+*          of the @p iotHubMessageHandle parameter.
+*
+* @param   iotHubMessageHandle Handle to the message that is to be cloned.
+*
+* @return  A valid @c IOTHUB_MESSAGE_HANDLE if the message was successfully
+*          cloned or @c NULL in case an error occurs.
+*/
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_HANDLE, IoTHubMessage_Clone, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
 
 /**
- * @brief   Fetches a pointer and size for the data associated with the IoT
- *          hub message handle. If the content type of the message is not
- *          @c IOTHUBMESSAGE_BYTEARRAY then the function returns
- *          @c IOTHUB_MESSAGE_INVALID_ARG.
- *
- * @param   iotHubMessageHandle Handle to the message.
- * @param   buffer              Pointer to the memory location where the
- *                              pointer to the buffer will be written.
- * @param   size                The size of the buffer will be written to
- *                              this address.
- *
- * @return  Returns IOTHUB_MESSAGE_OK if the byte array was fetched successfully
- *          or an error code otherwise.
- */
+* @brief   Fetches a pointer and size for the data associated with the IoT
+*          hub message handle. If the content type of the message is not
+*          @c IOTHUBMESSAGE_BYTEARRAY then the function returns
+*          @c IOTHUB_MESSAGE_INVALID_ARG.
+*
+* @param   iotHubMessageHandle Handle to the message.
+* @param   buffer              Pointer to the memory location where the
+*                              pointer to the buffer will be written.
+* @param   size                The size of the buffer will be written to
+*                              this address.
+*
+* @return  Returns IOTHUB_MESSAGE_OK if the byte array was fetched successfully
+*          or an error code otherwise.
+*/
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_GetByteArray, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const unsigned char**, buffer, size_t*, size);
 
 /**
- * @brief   Returns the null terminated string stored in the message.
- *          If the content type of the message is not @c IOTHUBMESSAGE_STRING
- *          then the function returns @c NULL.
- *
- * @param   iotHubMessageHandle Handle to the message.
- *
- * @return  @c NULL if an error occurs or a pointer to the stored null
- *          terminated string otherwise.
- */
+* @brief   Returns the null terminated string stored in the message.
+*          If the content type of the message is not @c IOTHUBMESSAGE_STRING
+*          then the function returns @c NULL.
+*
+* @param   iotHubMessageHandle Handle to the message.
+*
+* @return  @c NULL if an error occurs or a pointer to the stored null
+*          terminated string otherwise.
+*/
 MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetString, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
 
 /**
- * @brief   Returns the content type of the message given by parameter
- *          @c iotHubMessageHandle.
- *
- * @param   iotHubMessageHandle Handle to the message.
- *
- * @remarks This function retrieves the standardized type of the payload, which indicates if @c iotHubMessageHandle was created using a String or a Byte Array.
- *
- * @return  An @c IOTHUBMESSAGE_CONTENT_TYPE value.
- */
+* @brief   Returns the content type of the message given by parameter
+*          @c iotHubMessageHandle.
+*
+* @param   iotHubMessageHandle Handle to the message.
+*
+* @remarks This function retrieves the standardized type of the payload, which indicates if @c iotHubMessageHandle was created using a String or a Byte Array.
+*
+* @return  An @c IOTHUBMESSAGE_CONTENT_TYPE value.
+*/
 MOCKABLE_FUNCTION(, IOTHUBMESSAGE_CONTENT_TYPE, IoTHubMessage_GetContentType, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
 
 /**
@@ -161,12 +170,12 @@ MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetContentEncodingSyste
 MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetContentEncodingSystemProperty, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
 
 /**
- * @brief   Gets a handle to the message's properties map.
- *
- * @param   iotHubMessageHandle Handle to the message.
- *
- * @return  A @c MAP_HANDLE pointing to the properties map for this message.
- */
+* @brief   Gets a handle to the message's properties map.
+*
+* @param   iotHubMessageHandle Handle to the message.
+*
+* @return  A @c MAP_HANDLE pointing to the properties map for this message.
+*/
 MOCKABLE_FUNCTION(, MAP_HANDLE, IoTHubMessage_Properties, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
 
 /**
@@ -210,10 +219,30 @@ MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetCorrelationId, IOTHUB_MESSAGE_
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetCorrelationId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, correlationId);
 
 /**
- * @brief   Frees all resources associated with the given message handle.
- *
- * @param   iotHubMessageHandle Handle to the message.
- */
+* @brief   Gets the DiagnosticData from the IOTHUB_MESSAGE_HANDLE. CAUTION: SDK user should not call it directly, it is for internal use only.
+*
+* @param   iotHubMessageHandle Handle to the message.
+*
+* @return  A const IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* pointing to the diagnostic property data.
+*/
+MOCKABLE_FUNCTION(, const IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA*, IoTHubMessage_GetDiagnosticPropertyData, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
+
+/**
+* @brief   Sets the DiagnosticData for the IOTHUB_MESSAGE_HANDLE. CAUTION: SDK user should not call it directly, it is for internal use only.
+*
+* @param   iotHubMessageHandle Handle to the message.
+* @param   diagnosticData Pointer to the memory location of the diagnosticData
+*
+* @return  Returns IOTHUB_MESSAGE_OK if the DiagnosticData was set successfully
+*          or an error code otherwise.
+*/
+MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetDiagnosticPropertyData, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA*, diagnosticData);
+
+/**
+* @brief   Frees all resources associated with the given message handle.
+*
+* @param   iotHubMessageHandle Handle to the message.
+*/
 MOCKABLE_FUNCTION(, void, IoTHubMessage_Destroy, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
 
 #ifdef __cplusplus

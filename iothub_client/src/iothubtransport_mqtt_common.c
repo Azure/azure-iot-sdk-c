@@ -76,6 +76,10 @@ static const char* MESSAGE_ID_PROPERTY = "mid";
 static const char* CORRELATION_ID_PROPERTY = "cid";
 static const char* CONTENT_TYPE_PROPERTY = "ct";
 static const char* CONTENT_ENCODING_PROPERTY = "ce";
+static const char* DIAGNOSTIC_ID_PROPERTY = "diagid";
+static const char* DIAGNOSTIC_CONTEXT_PROPERTY = "diagctx";
+
+static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "creationtimeutc";
 
 #define UNSUBSCRIBE_FROM_TOPIC                  0x0000
 #define SUBSCRIBE_GET_REPORTED_STATE_TOPIC      0x0001
@@ -636,6 +640,74 @@ static STRING_HANDLE addPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_me
                 result = NULL;
             }
             index++;
+        }
+    }
+
+    // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_014: [ `IoTHubTransport_MQTT_Common_DoWork` shall check for the diagnostic properties including diagid and diagCreationTimeUtc and if found both add them as system property in the format of `$.diagid` and `$.diagctx` respectively]
+    if (result != NULL)
+    {
+        const IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* diagnosticData = IoTHubMessage_GetDiagnosticPropertyData(iothub_message_handle);
+        if (diagnosticData != NULL)
+        {
+            const char* diag_id = diagnosticData->diagnosticId;
+            const char* creation_time_utc = diagnosticData->diagnosticCreationTimeUtc;
+            //diagid and creationtimeutc must be present/unpresent simultaneously
+            if (diag_id != NULL && creation_time_utc != NULL)
+            {
+                if (STRING_sprintf(result, "%s%%24.%s=%s", index == 0 ? "" : PROPERTY_SEPARATOR, DIAGNOSTIC_ID_PROPERTY, diag_id) != 0)
+                {
+                    LogError("Failed setting diagnostic id");
+                    STRING_delete(result);
+                    result = NULL;
+                }
+                index++;
+
+                if (result != NULL)
+                {
+                    //construct diagnostic context, it should be urlencode(key1=value1,key2=value2)
+                    STRING_HANDLE diagContextHandle = STRING_construct_sprintf("%s=%s", DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY, creation_time_utc);
+                    if (diagContextHandle == NULL)
+                    {
+                        LogError("Failed constructing diagnostic context");
+                        STRING_delete(result);
+                        result = NULL;
+                    }
+                    else
+                    {
+                        //Add other diagnostic context properties here if have more
+                        STRING_HANDLE encodedContextValueHandle = URL_Encode(diagContextHandle);
+                        const char* encodedContextValueString = NULL;
+                        if (encodedContextValueHandle != NULL &&
+                            (encodedContextValueString = STRING_c_str(encodedContextValueHandle)) != NULL)
+                        {
+                            if (STRING_sprintf(result, "%s%%24.%s=%s", index == 0 ? "" : PROPERTY_SEPARATOR, DIAGNOSTIC_CONTEXT_PROPERTY, encodedContextValueString) != 0)
+                            {
+                                LogError("Failed setting diagnostic context");
+                                STRING_delete(result);
+                                result = NULL;
+                            }
+                            STRING_delete(encodedContextValueHandle);
+                            encodedContextValueHandle = NULL;
+                        }
+                        else
+                        {
+                            LogError("Failed encoding diagnostic context value");
+                            STRING_delete(result);
+                            result = NULL;
+                        }
+                        STRING_delete(diagContextHandle);
+                        diagContextHandle = NULL;
+                        index++;
+                    }
+                }
+            }
+            else if (diag_id != NULL || creation_time_utc != NULL)
+            {
+                // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_015: [ `IoTHubTransport_MQTT_Common_DoWork` shall check whether diagid and diagCreationTimeUtc be present simultaneously, treat as error if not]
+                LogError("diagid and diagcreationtimeutc must be present simultaneously.");
+                STRING_delete(result);
+                result = NULL;
+            }
         }
     }
 
