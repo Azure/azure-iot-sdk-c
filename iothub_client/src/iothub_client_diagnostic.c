@@ -29,8 +29,9 @@ static char get_base36_char(unsigned char value)
 
 static char* generate_eight_random_characters(char *randomString)
 {
+	int i;
     char* randomStringPos = randomString;
-    for (int i = 0; i < 4; ++i)
+    for (i = 0; i < 4; ++i)
     {
         int rawRandom = rand();
         int first = rawRandom % BASE_36;
@@ -48,14 +49,17 @@ static bool should_add_diagnostic_info(IOTHUB_DIAGNOSTIC_SETTING_DATA* diagSetti
     bool result = false;
     if (diagSetting->diagSamplingPercentage > 0)
     {
+		double number;
+		double percentage;
+		
         if (diagSetting->currentMessageNumber == UINT32_MAX)
         {
             diagSetting->currentMessageNumber %= diagSetting->diagSamplingPercentage * 100;
         }
         ++diagSetting->currentMessageNumber;
 
-        double number = diagSetting->currentMessageNumber;
-        double percentage = diagSetting->diagSamplingPercentage;
+        number = diagSetting->currentMessageNumber;
+        percentage = diagSetting->diagSamplingPercentage;
         result = (floor((number - 2) * percentage / 100.0) < floor((number - 1) * percentage / 100.0));
     }
     return result;
@@ -79,10 +83,12 @@ static IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* prepare_message_diagnostic_data(
         }
         else
         {
+			char* timeBuffer;
+			
             generate_eight_random_characters(diagId);
             result->diagnosticId = diagId;
 
-            char* timeBuffer = (char*)malloc(30);
+            timeBuffer = (char*)malloc(30);
             if (timeBuffer == NULL)
             {
                 LogError("malloc for timeBuffer failed");
