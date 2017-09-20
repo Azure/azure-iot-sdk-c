@@ -4,7 +4,10 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(azure_iot_sdks)
 
-set(IOT_SDK_VERSION 1.1.23)
+include("configs/azure_iot_sdksFunctions.cmake")
+
+getIoTSDKVersion()
+message("IoT Client SDK Version = ${IOT_SDK_VERSION}")
 
 if(POLICY CMP0042)
     cmake_policy(SET CMP0042 NEW)
@@ -196,8 +199,6 @@ if (NOT DEFINED ARCHITECTURE OR ARCHITECTURE STREQUAL "")
     set(ARCHITECTURE "GENERIC")
 endif()
 message(STATUS "iothub architecture: ${ARCHITECTURE}")
-
-include("configs/azure_iot_sdksFunctions.cmake")
 
 macro(compileAsC99)
   if (CMAKE_VERSION VERSION_LESS "3.1")
