@@ -6,20 +6,42 @@
 #include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/xlogging.h"
+#include "azure_c_shared_utility/agenttime.h"
 #include "azure_c_shared_utility/buffer_.h"
 
 #include "iothub_client_diagnostic.h"
 
 static const int BASE_36 = 36;
 
+#define INDEFINITE_TIME ((time_t)-1)
+
 static char* get_current_time_utc(char* timeBuffer, int bufferLen, const char* formatString)
 {
+    char* result;
     time_t epochTime;
     struct tm* utcTime;
-    epochTime = time(NULL);
-    utcTime = gmtime(&epochTime);
-    strftime(timeBuffer, bufferLen, formatString, utcTime);
-    return timeBuffer;
+    
+    if ((epochTime = get_time(NULL)) == INDEFINITE_TIME)
+    {
+        LogError("Failed getting current time");
+        result = NULL;
+    }
+    else if ((utcTime = get_gmtime(&epochTime)) == NULL)
+    {
+        LogError("Failed getting current time struct");
+        result = NULL;
+    }
+    else if (strftime(timeBuffer, bufferLen, formatString, utcTime) == 0)
+    {
+        LogError("Failed formatting time string");
+        result = NULL;
+    }
+    else
+    {
+        result = timeBuffer;
+    }
+    
+    return result;
 }
 
 static char get_base36_char(unsigned char value)
@@ -85,7 +107,7 @@ static IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* prepare_message_diagnostic_data(
         {
 			char* timeBuffer;
 			
-            generate_eight_random_characters(diagId);
+            (void)generate_eight_random_characters(diagId);
             result->diagnosticId = diagId;
 
             timeBuffer = (char*)malloc(30);
@@ -96,9 +118,15 @@ static IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* prepare_message_diagnostic_data(
                 free(result);
                 result = NULL;
             }
+            else if (get_current_time_utc(timeBuffer, 30, "%Y-%m-%dT%H:%M:%SZ") == NULL)
+            {
+                LogError("Failed getting current UTC time");
+                free(result->diagnosticId);
+                free(result);
+                result = NULL;
+            }
             else
             {
-                get_current_time_utc(timeBuffer, 30, "%Y-%m-%dT%H:%M:%SZ");
                 result->diagnosticCreationTimeUtc = timeBuffer;
             }
         }
