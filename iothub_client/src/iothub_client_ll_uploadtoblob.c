@@ -519,27 +519,35 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                                                                         else
                                                                         {
                                                                             STRING_HANDLE fileName = URL_EncodeString(json_blobName);
+																			
+																			if (fileName == NULL)
+																			{
+																				LogError("Unable to URL encode filename");
+																				result = __FAILURE__;
+																			}
 
-                                                                            if (!(
-                                                                                fileName != NULL &&
-                                                                                (STRING_concat(sasUri, json_hostName) == 0) &&
-                                                                                (STRING_concat(sasUri, "/") == 0) &&
-                                                                                (STRING_concat(sasUri, json_containerName) == 0) &&
-                                                                                (STRING_concat(sasUri, "/") == 0) &&
-                                                                                (STRING_concat(sasUri, STRING_c_str(fileName)) == 0) &&
-                                                                                (STRING_concat(sasUri, json_sasToken) == 0)
-                                                                                ))
-                                                                            {
-                                                                                /*Codes_SRS_IOTHUBCLIENT_LL_02_082: [ If extracting and saving the correlationId or SasUri fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-                                                                                LogError("unable to STRING_concat");
-                                                                                result = __FAILURE__;
-                                                                            }
-                                                                            else
-                                                                            {
-                                                                                result = 0; /*success in step 1*/
-                                                                            }
-
-                                                                            STRING_delete(fileName);
+                                                                            else 
+																			{
+																				if (!(
+																					(STRING_concat(sasUri, json_hostName) == 0) &&
+																					(STRING_concat(sasUri, "/") == 0) &&
+																					(STRING_concat(sasUri, json_containerName) == 0) &&
+																					(STRING_concat(sasUri, "/") == 0) &&
+																					(STRING_concat(sasUri, STRING_c_str(fileName)) == 0) &&
+																					(STRING_concat(sasUri, json_sasToken) == 0)
+																					))
+																				{
+																					/*Codes_SRS_IOTHUBCLIENT_LL_02_082: [ If extracting and saving the correlationId or SasUri fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+																					LogError("unable to STRING_concat");
+																					result = __FAILURE__;
+																				}
+																				else
+																				{
+																					result = 0; /*success in step 1*/
+																				}
+																				
+																				STRING_delete(fileName);
+																			}	
                                                                         }
                                                                     }
                                                                 }
