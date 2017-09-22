@@ -15,27 +15,26 @@ static const int BASE_36 = 36;
 
 #define INDEFINITE_TIME ((time_t)-1)
 
-static char* get_current_time_utc(char* timeBuffer, int bufferLen, const char* formatString)
+static char* get_epoch_time(char* timeBuffer, int bufferLen)
 {
     char* result;
     time_t epochTime;
-    struct tm* utcTime;
     
     if ((epochTime = get_time(NULL)) == INDEFINITE_TIME)
     {
         LogError("Failed getting current time");
         result = NULL;
     }
-    else if ((utcTime = get_gmtime(&epochTime)) == NULL)
-    {
-        LogError("Failed getting current time struct");
-        result = NULL;
-    }
-    else if (strftime(timeBuffer, bufferLen, formatString, utcTime) == 0)
-    {
-        LogError("Failed formatting time string");
-        result = NULL;
-    }
+	else if (sizeof(time_t) == sizeof(int64_t) && sprintf_s(timeBuffer, bufferLen, "%lld", (int64_t)epochTime) < 0)
+	{
+		LogError("Failed sprintf_s");
+		result = NULL;
+	}
+	else if(sprintf_s(timeBuffer, bufferLen, "%d", (int32_t)epochTime) < 0)
+	{
+		LogError("Failed sprintf_s");
+		result = NULL;
+	}
     else
     {
         result = timeBuffer;
@@ -118,9 +117,9 @@ static IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* prepare_message_diagnostic_data(
                 free(result);
                 result = NULL;
             }
-            else if (get_current_time_utc(timeBuffer, 30, "%Y-%m-%dT%H:%M:%SZ") == NULL)
+            else if (get_epoch_time(timeBuffer, 30) == NULL)
             {
-                LogError("Failed getting current UTC time");
+                LogError("Failed getting current time");
                 free(result->diagnosticId);
                 free(result);
                 result = NULL;

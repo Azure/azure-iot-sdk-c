@@ -149,7 +149,7 @@ static const char* X509_PRIVATE_KEY = "-----BEGIN RSA PRIVATE KEY-----MIIE-----E
 static const char* TEST_CONTENT_TYPE = "application/json";
 static const char* TEST_CONTENT_ENCODING = "utf8";
 static const char* TEST_DIAG_ID = "1234abcd";
-static const char* TEST_DIAG_CREATION_TIME_UTC = "2018-08-08T08:08:08Z";
+static const char* TEST_DIAG_CREATION_TIME_UTC = "1506054516.100";
 
 static const char* PROPERTY_SEPARATOR = "&";
 static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "creationtimeutc";

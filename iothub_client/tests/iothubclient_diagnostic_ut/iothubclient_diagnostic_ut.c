@@ -59,7 +59,6 @@ static IOTHUB_MESSAGE_HANDLE TEST_MESSAGE_HANDLE = (IOTHUB_MESSAGE_HANDLE)0x12;
 
 #define INDEFINITE_TIME ((time_t)-1)
 static time_t g_current_time;
-static struct tm* g_current_time_tm;
 
 BEGIN_TEST_SUITE(iothubclient_diagnostic_ut)
 
@@ -77,7 +76,6 @@ TEST_SUITE_INITIALIZE(suite_init)
     ASSERT_ARE_EQUAL(int, 0, result);
 
     g_current_time = time(NULL);
-    g_current_time_tm = gmtime(&g_current_time);
 
     REGISTER_UMOCK_ALIAS_TYPE(MAP_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_MESSAGE_HANDLE, void*);
@@ -94,9 +92,6 @@ TEST_SUITE_INITIALIZE(suite_init)
 
     REGISTER_GLOBAL_MOCK_RETURN(get_time, g_current_time);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(get_time, INDEFINITE_TIME);
-
-    REGISTER_GLOBAL_MOCK_RETURN(get_gmtime, g_current_time_tm);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(get_gmtime, NULL);
 }
 
 TEST_SUITE_CLEANUP(suite_cleanup)
@@ -222,7 +217,6 @@ TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_no_diag_info_with_percentag
     EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     EXPECTED_CALL(get_time(NULL));
-    EXPECTED_CALL(get_gmtime(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(IoTHubMessage_SetDiagnosticPropertyData(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
@@ -253,7 +247,6 @@ TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_no_diag_info_with_normal_pe
     EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     EXPECTED_CALL(get_time(NULL));
-    EXPECTED_CALL(get_gmtime(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(IoTHubMessage_SetDiagnosticPropertyData(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
