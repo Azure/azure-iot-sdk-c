@@ -178,7 +178,8 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     bool log_trace;
     bool raw_trace;
     TICK_COUNTER_HANDLE msgTickCounter;
-    OPTIONHANDLER_HANDLE saved_tls_options;		// Here are the options from the xio layer if any is saved.
+    OPTIONHANDLER_HANDLE saved_tls_options; // Here are the options from the xio layer if any is saved.
+    size_t option_sas_token_lifetime_secs;
 
     // Internal lists for message tracking
     PDLIST_ENTRY waitingToSend;
@@ -1570,7 +1571,7 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
     IOTHUB_CREDENTIAL_TYPE cred_type = IoTHubClient_Auth_Get_Credential_Type(transport_data->authorization_module);
     if (cred_type == IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY || cred_type == IOTHUB_CREDENTIAL_TYPE_DEVICE_AUTH)
     {
-        sasToken = IoTHubClient_Auth_Get_SasToken(transport_data->authorization_module, STRING_c_str(transport_data->devicesPath), SAS_TOKEN_DEFAULT_LIFETIME);
+        sasToken = IoTHubClient_Auth_Get_SasToken(transport_data->authorization_module, STRING_c_str(transport_data->devicesPath), transport_data->option_sas_token_lifetime_secs);
         if (sasToken == NULL)
         {
             LogError("failure getting sas token from IoTHubClient_Auth_Get_SasToken.");
@@ -1740,7 +1741,7 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             }
             else
             {
-                if ((current_time - transport_data->mqtt_connect_time) / 1000 > (SAS_TOKEN_DEFAULT_LIFETIME*SAS_REFRESH_MULTIPLIER))
+                if ((current_time - transport_data->mqtt_connect_time) / 1000 > (transport_data->option_sas_token_lifetime_secs*SAS_REFRESH_MULTIPLIER))
                 {
                     /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_058: [ If the sas token has timed out IoTHubTransport_MQTT_Common_DoWork shall disconnect from the mqtt client and destroy the transport information and wait for reconnect. ] */
                     OPTIONHANDLER_HANDLE options = xio_retrieveoptions(transport_data->xioTransport);
@@ -1911,6 +1912,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                         srand((unsigned int)get_time(NULL));
                         state->authorization_module = auth_module;
                         state->isProductInfoSet = false;
+                        state->option_sas_token_lifetime_secs = SAS_TOKEN_DEFAULT_LIFETIME;
                     }
                 }
             }
@@ -2581,6 +2583,12 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SetOption(TRANSPORT_LL_HANDLE h
         {
             transport_data->raw_trace = *((bool*)value);
             mqtt_client_set_trace(transport_data->mqttClient, transport_data->log_trace, transport_data->raw_trace);
+            result = IOTHUB_CLIENT_OK;
+        }
+        else if (strcmp(OPTION_SAS_TOKEN_LIFETIME, option) == 0)
+        {
+            size_t* sas_lifetime = (size_t*)value;
+            transport_data->option_sas_token_lifetime_secs = *sas_lifetime;
             result = IOTHUB_CLIENT_OK;
         }
         else if (strcmp(OPTION_KEEP_ALIVE, option) == 0)
