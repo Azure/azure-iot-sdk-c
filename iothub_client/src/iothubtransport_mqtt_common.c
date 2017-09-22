@@ -2585,6 +2585,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SetOption(TRANSPORT_LL_HANDLE h
             mqtt_client_set_trace(transport_data->mqttClient, transport_data->log_trace, transport_data->raw_trace);
             result = IOTHUB_CLIENT_OK;
         }
+        /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_052: [ If the option parameter is set to "sas_token_lifetime" then the value shall be a size_t_ptr and the value will determine the mqtt sas token lifetime.] */
         else if (strcmp(OPTION_SAS_TOKEN_LIFETIME, option) == 0)
         {
             size_t* sas_lifetime = (size_t*)value;

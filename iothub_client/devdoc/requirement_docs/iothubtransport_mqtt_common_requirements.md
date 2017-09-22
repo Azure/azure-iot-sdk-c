@@ -277,6 +277,8 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SetOption(TRANSPORT_LL_HANDLE h
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_036: [** If the option parameter is set to "keepalive" then the value shall be a int_ptr and the value will determine the mqtt keepalive time that is set for pings.**]**
 
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_052: [** If the option parameter is set to "sas_token_lifetime" then the value shall be a size_t_ptr and the value will determine the mqtt sas token lifetime.**]**
+
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_037: [** If the option parameter is set to supplied int_ptr keepalive is the same value as the existing keepalive then IoTHubTransport_MQTT_Common_SetOption shall do nothing.**]**
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_038: [** If the client is connected when the keepalive is set then IoTHubTransport_MQTT_Common_SetOption shall disconnect and reconnect with the specified keepalive value.**]**
