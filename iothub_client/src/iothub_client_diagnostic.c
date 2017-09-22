@@ -11,6 +11,8 @@
 
 #include "iothub_client_diagnostic.h"
 
+#define TIME_STRING_BUFFER_LEN 30
+
 static const int BASE_36 = 36;
 
 #define INDEFINITE_TIME ((time_t)-1)
@@ -30,7 +32,7 @@ static char* get_epoch_time(char* timeBuffer, int bufferLen)
 	{
         if (sprintf_s(timeBuffer, bufferLen, "%lld", (int64_t)epochTime) < 0)
         {
-            LogError("Failed sprintf_s");
+            LogError("Failed sprintf_s to timeBuffer with 8 bytes of time_t");
             result = NULL;
         }
         else
@@ -42,7 +44,7 @@ static char* get_epoch_time(char* timeBuffer, int bufferLen)
 	{
         if (sprintf_s(timeBuffer, bufferLen, "%d", (int32_t)epochTime) < 0)
         {
-            LogError("Failed sprintf_s");
+            LogError("Failed sprintf_s to timeBuffer with 4 bytes of time_t");
             result = NULL;
         }
         else
@@ -125,7 +127,7 @@ static IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* prepare_message_diagnostic_data(
             (void)generate_eight_random_characters(diagId);
             result->diagnosticId = diagId;
 
-            timeBuffer = (char*)malloc(30);
+            timeBuffer = (char*)malloc(TIME_STRING_BUFFER_LEN);
             if (timeBuffer == NULL)
             {
                 LogError("malloc for timeBuffer failed");
@@ -133,7 +135,7 @@ static IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* prepare_message_diagnostic_data(
                 free(result);
                 result = NULL;
             }
-            else if (get_epoch_time(timeBuffer, 30) == NULL)
+            else if (get_epoch_time(timeBuffer, TIME_STRING_BUFFER_LEN) == NULL)
             {
                 LogError("Failed getting current time");
                 free(result->diagnosticId);
