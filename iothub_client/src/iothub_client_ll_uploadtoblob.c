@@ -518,11 +518,12 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                                                                         }
                                                                         else
                                                                         {
+                                                                            /*Codes_SRS_IOTHUBCLIENT_LL_32_008: [ The returned file name shall be URL encoded before passing back to the cloud. ]*/
                                                                             STRING_HANDLE fileName = URL_EncodeString(json_blobName);
 																			
 																			if (fileName == NULL)
 																			{
-																				LogError("Unable to URL encode filename");
+                                                                                /*Codes_SRS_IOTHUBCLIENT_LL_32_009: [ If URL_EncodeString fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
 																				result = __FAILURE__;
 																			}
 

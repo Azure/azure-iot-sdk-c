@@ -611,6 +611,10 @@ If the credentials used to create `iotHubClientHandle` do not have "deviceKey" o
 
 **SRS_IOTHUBCLIENT_LL_02_082: [** If extracting and saving the correlationId or SasUri fails then `IoTHubClient_LL_UploadToBlob` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
 
+**SRS_IOTHUBCLIENT_LL_32_008: [** The returned file name shall be URL encoded before passing back to the cloud. **]**
+
+**SRS_IOTHUBCLIENT_LL_32_009: [** If `URL_EncodeString` fails then `IoTHubClient_LL_UploadToBlob` shall fail and return `IOTHUB_CLIENT_ERROR`. **]**
+
 ### step 2: upload using the SasUri
 
 **SRS_IOTHUBCLIENT_LL_02_083: [** `IoTHubClient_LL_UploadToBlob` shall call `Blob_UploadFromSasUri` and capture the HTTP return code and HTTP body.** ]**
