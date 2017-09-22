@@ -30,7 +30,7 @@ static char* get_epoch_time(char* timeBuffer, int bufferLen)
     }
 	else if (timeLen == sizeof(int64_t))
 	{
-        if (sprintf_s(timeBuffer, bufferLen, "%lld", (int64_t)epochTime) < 0)
+        if (snprintf(timeBuffer, bufferLen, "%lld", (int64_t)epochTime) < 0)
         {
             LogError("Failed sprintf_s to timeBuffer with 8 bytes of time_t");
             result = NULL;
@@ -42,7 +42,7 @@ static char* get_epoch_time(char* timeBuffer, int bufferLen)
 	}
 	else if (timeLen == sizeof(int32_t))
 	{
-        if (sprintf_s(timeBuffer, bufferLen, "%d", (int32_t)epochTime) < 0)
+        if (snprintf(timeBuffer, bufferLen, "%d", (int32_t)epochTime) < 0)
         {
             LogError("Failed sprintf_s to timeBuffer with 4 bytes of time_t");
             result = NULL;
