@@ -59,7 +59,7 @@ The minimum requirements are for the device platform to support the following:
 
 The C SDK is written in ANSI C (C99) to allow for it to run on a wide range of platforms.
 In the repository you will find instructions and build tools to compile and run the device client SDK for C on Linux, Windows and microcontroller platforms (refer to the links above for more information on compiling the device client for C).
-If you are considering porting the device client SDK for C to a new platform, check out the [porting guide][c-porting-guide] document.
+If you are considering porting the device client SDK for C to a new platform, check out the [porting guide](https://github.com/Azure/azure-c-shared-utility/blob/master/devdoc/porting_guide.md) document.
 
 ## Contribution, feedback and issues
 
@@ -82,7 +82,7 @@ Here is what you can expect Microsoft Support to be able to help with:
 * [Prepare your development environment to use the Azure IoT device SDK for C][devbox-setup]
 * [Setup IoT Hub][setup-iothub]
 * [Azure IoT device SDK for C tutorial][c-sdk-intro]
-* [How to port the C libraries to other OS platforms][c-porting-guide]
+* [How to port the C libraries to other OS platforms](https://github.com/Azure/azure-c-shared-utility/blob/master/devdoc/porting_guide.md)
 * [Cross compilation example][c-cross-compile]
 * [C SDKs API reference][c-api-reference]
 
@@ -178,6 +178,6 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 [devbox-setup]: doc/devbox_setup.md
 [setup-iothub]: https://aka.ms/howtocreateazureiothub
 [c-sdk-intro]: https://azure.microsoft.com/documentation/articles/iot-hub-device-sdk-c-intro/
-[c-porting-guide]: doc/porting_guide.md
+[c-porting-guide]: https://github.com/Azure/azure-c-shared-utility/blob/master/devdoc/porting_guide.md
 [c-cross-compile]: doc/SDK_cross_compile_example.md
 [c-api-reference]: https://azure.github.io/azure-iot-sdk-c/index.html

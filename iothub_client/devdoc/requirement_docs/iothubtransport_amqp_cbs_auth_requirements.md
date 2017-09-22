@@ -170,7 +170,6 @@ Note: see "on_cbs_put_token_complete_callback" below.
 
 ##### Creating a SAS token from a device key and putting it to CBS 
 
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_052: [**The SAS token expiration time shall be calculated adding `instance->sas_token_lifetime_secs` to the current number of seconds since epoch time UTC**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_053: [**A STRING_HANDLE, referred to as `devices_path`, shall be created from the following parts: iothub_host_fqdn + "/devices/" + device_id**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_054: [**If `devices_path` failed to be created, authentication_do_work() shall fail and return**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_055: [**The SAS token shall be created using `IoTHubClient_Auth_Get_SasToken`, passing the selected device key, `device_path`, `sasTokenKeyName` and expiration time as arguments**]**
@@ -195,7 +194,6 @@ Note: see "on_cbs_put_token_complete_callback" below.
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_069: [**If using `instance->device_primary_key` has failed previously, a SAS token shall be created using `instance->device_secondary_key`**]**
 
 The requirements below apply to the creation of the SAS token and putting it to CBS:
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_070: [**The SAS token expiration time shall be calculated adding `instance->sas_token_lifetime_secs` to the current number of seconds since epoch time UTC**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_071: [**A STRING_HANDLE, referred to as `devices_path`, shall be created from the following parts: iothub_host_fqdn + "/devices/" + device_id**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_072: [**If `devices_path` failed to be created, authentication_do_work() shall fail and return**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_117: [**An empty STRING_HANDLE, referred to as `sasTokenKeyName`, shall be created using STRING_new()**]**

@@ -15,7 +15,7 @@
 #include "azure_c_shared_utility/base64.h"
 
 #include "azure_hub_modules/dps_transport_http_client.h"
-#include "azure_hub_modules/uhttp.h"
+#include "azure_uhttp_c/uhttp.h"
 #include "parson.h"
 
 #define DPS_STATUS_RESULT_VALUES    \

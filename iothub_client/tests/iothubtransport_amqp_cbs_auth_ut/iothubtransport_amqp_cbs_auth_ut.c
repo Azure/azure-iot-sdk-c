@@ -154,11 +154,11 @@ static int TEST_cbs_put_token_async(CBS_HANDLE cbs, const char* type, const char
     return TEST_cbs_put_token_async_return;
 }
 
-char* TEST_IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const char* scope, size_t expire_time)
+static char* TEST_IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const char* scope, size_t expiry_time_relative_seconds)
 {
     (void)handle;
     (void)scope;
-    (void)expire_time;
+    (void)expiry_time_relative_seconds;
     char* result;
     size_t len = strlen(TEST_USER_DEFINED_SAS_TOKEN);
     result = (char*)real_malloc(len+1);
@@ -372,8 +372,6 @@ static void set_expected_calls_for_put_SAS_token_to_cbs(AUTHENTICATION_HANDLE ha
     }
     else
     {
-        STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(current_time);
-        STRICT_EXPECTED_CALL(get_difftime(current_time, IGNORED_NUM_ARG)).SetReturn(13245);
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     }
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken(TEST_AUTHORIZATION_MODULE_HANDLE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
@@ -877,7 +875,6 @@ TEST_FUNCTION(authentication_do_work_SAS_TOKEN_AUTHENTICATION_STATE_STARTING_suc
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_042: [Otherwise, authentication_do_work() shall use device keys for CBS authentication]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_049: [authentication_do_work() shall create a SAS token using `IoTHubClient_Auth_Get_SasToken`, unless it has failed previously]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_052: [The SAS token expiration time shall be calculated adding `instance->sas_token_lifetime_secs` to the current number of seconds since epoch time UTC]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_053: [A STRING_HANDLE, referred to as `devices_path`, shall be created from the following parts: iothub_host_fqdn + "/devices/" + device_id]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_057: [authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to TRUE]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_058: [The SAS token shall be sent to CBS using cbs_put_token_async(), using `servicebus.windows.net:sastoken` as token type, `devices_path` as audience and passing on_cbs_put_token_complete_callback]
@@ -1006,12 +1003,12 @@ TEST_FUNCTION(authentication_do_work_SAS_TOKEN_AUTHENTICATION_STATE_STARTING_fai
     size_t i;
     for (i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
-        if (i == 0 || i == 1 || i == 4 || i == 6 || i == 7)
+        if (i == 0 || i == 1 || i == 2 || i == 4 || i == 5)
         {
             // These expected calls do not cause the API to fail.
             continue;
         }
-        else if (i == 5)
+        else if (i == 3)
         {
             TEST_cbs_put_token_async_return = 1;
         }
@@ -1102,12 +1099,12 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_AUTHENTICATION_STATE_STARTING_f
     size_t i;
     for (i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
-        if (i == 0 || i == 1 || i == 3 || i == 4 || i == 7 || i == 8 || i == 10 || i == 11 || i == 12)
+        if (i == 0 || i == 1 || i == 2 || i == 5 || i == 6 || i == 8 || i == 9 || i == 10)
         {
             // These expected calls do not cause the API to fail.
             continue;
         }
-        else if (i == 9)
+        else if (i == 7)
         {
             TEST_cbs_put_token_async_return = 1;
         }
@@ -1216,7 +1213,6 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_sas_token_refresh_check)
 }
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_067: [authentication_do_work() shall create a SAS token using `instance->device_primary_key`, unless it has failed previously]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_070: [The SAS token expiration time shall be calculated adding `instance->sas_token_lifetime_secs` to the current number of seconds since epoch time UTC]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_071: [A STRING_HANDLE, referred to as `devices_path`, shall be created from the following parts: iothub_host_fqdn + "/devices/" + device_id]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_117: [An empty STRING_HANDLE, referred to as `sasTokenKeyName`, shall be created using STRING_new()]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_073: [The SAS token shall be created using SASToken_Create(), passing the selected device key, device_path, sasTokenKeyName and expiration time as arguments]

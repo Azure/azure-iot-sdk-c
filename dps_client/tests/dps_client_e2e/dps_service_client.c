@@ -16,7 +16,7 @@
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/base64.h"
 
-#include "azure_hub_modules/uhttp.h"
+#include "azure_uhttp_c/uhttp.h"
 
 #include "dps_service_client.h"
 

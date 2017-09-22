@@ -739,7 +739,7 @@ TEST_FUNCTION(dps_sasl_mechanism_challenge_sastoken_last_seq_succeed)
 
     //assert
     ASSERT_IS_NOT_NULL(reply_bytes.bytes);
-    ASSERT_ARE_EQUAL(int, strlen(TEST_SAS_TOKEN)+1, reply_bytes.length);
+    ASSERT_ARE_EQUAL(int, (int)strlen(TEST_SAS_TOKEN)+1, (int)reply_bytes.length);
     ASSERT_ARE_EQUAL(int, 0, reply);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
