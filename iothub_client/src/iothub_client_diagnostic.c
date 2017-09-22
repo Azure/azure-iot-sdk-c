@@ -30,7 +30,8 @@ static char* get_epoch_time(char* timeBuffer, int bufferLen)
     }
 	else if (timeLen == sizeof(int64_t))
 	{
-        if (snprintf(timeBuffer, bufferLen, "%lld", (int64_t)epochTime) < 0)
+        long long llTime = (long long)epochTime;
+        if (snprintf(timeBuffer, bufferLen, "%lld", llTime) < 0)
         {
             LogError("Failed sprintf_s to timeBuffer with 8 bytes of time_t");
             result = NULL;
