@@ -19,25 +19,41 @@ static char* get_epoch_time(char* timeBuffer, int bufferLen)
 {
     char* result;
     time_t epochTime;
+    int timeLen = sizeof(time_t);
     
     if ((epochTime = get_time(NULL)) == INDEFINITE_TIME)
     {
         LogError("Failed getting current time");
         result = NULL;
     }
-	else if (sizeof(time_t) == sizeof(int64_t) && sprintf_s(timeBuffer, bufferLen, "%lld", (int64_t)epochTime) < 0)
+	else if (timeLen == sizeof(int64_t))
 	{
-		LogError("Failed sprintf_s");
-		result = NULL;
+        if (sprintf_s(timeBuffer, bufferLen, "%lld", (int64_t)epochTime) < 0)
+        {
+            LogError("Failed sprintf_s");
+            result = NULL;
+        }
+        else
+        {
+            result = timeBuffer;
+        }
 	}
-	else if(sprintf_s(timeBuffer, bufferLen, "%d", (int32_t)epochTime) < 0)
+	else if (timeLen == sizeof(int32_t))
 	{
-		LogError("Failed sprintf_s");
-		result = NULL;
+        if (sprintf_s(timeBuffer, bufferLen, "%d", (int32_t)epochTime) < 0)
+        {
+            LogError("Failed sprintf_s");
+            result = NULL;
+        }
+        else
+        {
+            result = timeBuffer;
+        }
 	}
     else
     {
-        result = timeBuffer;
+        LogError("Unknow size of time_t");
+        result = NULL;
     }
     
     return result;
