@@ -32,16 +32,16 @@ Copying the AMQP-specific properties:
 **SRS_UAMQP_MESSAGING_09_011: [**If properties_get_message_id fails, message_create_IoTHubMessage_from_uamqp_message() shall fail and return immediately.**]**
 **SRS_UAMQP_MESSAGING_09_012: [**The type of the message-id property value shall be obtained using amqpvalue_get_type().**]**
 **SRS_UAMQP_MESSAGING_09_013: [**If the type of the message-id property value is AMQP_TYPE_NULL, message_create_IoTHubMessage_from_uamqp_message() shall skip processing the message-id (as it is optional) and continue normally.**]**
-**SRS_UAMQP_MESSAGING_09_014: [**The message-id value shall be retrieved from the AMQP_VALUE as char* by calling amqpvalue_get_string().**]**
-**SRS_UAMQP_MESSAGING_09_015: [**If amqpvalue_get_string fails, message_create_IoTHubMessage_from_uamqp_message() shall fail and return immediately.**]**
+**SRS_UAMQP_MESSAGING_09_014: [**The message-id value shall be retrieved from the AMQP_VALUE as char sequence**]**
+**SRS_UAMQP_MESSAGING_09_015: [**If message-id fails to be obtained, message_create_IoTHubMessage_from_uamqp_message() shall fail and return immediately.**]**
 **SRS_UAMQP_MESSAGING_09_016: [**The message-id property shall be set on the IOTHUB_MESSAGE_HANDLE instance by calling IoTHubMessage_SetMessageId(), passing the value read from the uAMQP message.**]**
 **SRS_UAMQP_MESSAGING_09_017: [**If IoTHubMessage_SetMessageId fails, message_create_IoTHubMessage_from_uamqp_message() shall fail and return immediately.**]**
 **SRS_UAMQP_MESSAGING_09_018: [**The correlation-id property shall be read from the uAMQP message by calling properties_get_correlation_id.**]**
 **SRS_UAMQP_MESSAGING_09_019: [**If properties_get_correlation_id() fails, message_create_IoTHubMessage_from_uamqp_message() shall fail and return immediately.**]**
 **SRS_UAMQP_MESSAGING_09_020: [**The type of the correlation-id property value shall be obtained using amqpvalue_get_type().**]**
 **SRS_UAMQP_MESSAGING_09_021: [**If the type of the correlation-id property value is AMQP_TYPE_NULL, message_create_IoTHubMessage_from_uamqp_message() shall skip processing the correlation-id (as it is optional) and continue normally.**]**
-**SRS_UAMQP_MESSAGING_09_022: [**The correlation-id value shall be retrieved from the AMQP_VALUE as char* by calling amqpvalue_get_string.**]**
-**SRS_UAMQP_MESSAGING_09_023: [**If amqpvalue_get_string fails, message_create_IoTHubMessage_from_uamqp_message() shall fail and return immediately.**]**
+**SRS_UAMQP_MESSAGING_09_022: [**The correlation-id value shall be retrieved from the AMQP_VALUE as char sequence**]**
+**SRS_UAMQP_MESSAGING_09_023: [**If correlation-id fails to be obtained, message_create_IoTHubMessage_from_uamqp_message() shall fail and return immediately.**]**
 **SRS_UAMQP_MESSAGING_09_024: [**The correlation-id property shall be set on the IOTHUB_MESSAGE_HANDLE by calling IoTHubMessage_SetCorrelationId, passing the value read from the uAMQP message.**]**
 **SRS_UAMQP_MESSAGING_09_025: [**If IoTHubMessage_SetCorrelationId fails, message_create_IoTHubMessage_from_uamqp_message() shall fail and return immediately.**]**
 **SRS_UAMQP_MESSAGING_09_100: [**If the uamqp message contains property `content-type`, it shall be set on IOTHUB_MESSAGE_HANDLE**]**
