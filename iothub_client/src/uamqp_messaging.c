@@ -474,6 +474,8 @@ static int readPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_h
 
                 char* string_value;
                 char string_buffer[MESSAGE_ID_MAX_SIZE];
+			    
+                memset(string_buffer, 0, MESSAGE_ID_MAX_SIZE);
 
                 if (value_type == AMQP_TYPE_STRING)
                 {
@@ -570,6 +572,8 @@ static int readPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_h
             {
                 char* string_value;
                 char string_buffer[MESSAGE_ID_MAX_SIZE];
+				
+                memset(string_buffer, 0, MESSAGE_ID_MAX_SIZE);
 
                 if (value_type == AMQP_TYPE_STRING)
                 {
