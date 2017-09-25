@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <math.h>
 #include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/gballoc.h"
@@ -10,6 +11,10 @@
 #include "azure_c_shared_utility/buffer_.h"
 
 #include "iothub_client_diagnostic.h"
+
+#ifdef _MSC_VER
+#define snprintf _snprintf
+#endif
 
 #define TIME_STRING_BUFFER_LEN 30
 
