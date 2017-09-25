@@ -7,6 +7,6 @@
 #include "azure_c_shared_utility/lock.h"
 #include "azure_c_shared_utility/threadapi.h"
 
-#define AzureIoTUtilityVersion "1.0.41"
+#define AzureIoTUtilityVersion "1.0.42"
 
 #endif //AZUREIOTUTILITY_H
