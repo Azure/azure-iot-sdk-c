@@ -12,6 +12,7 @@
 #include "iothub_message.h"
 #include "iothubtransportamqp_websockets.h"
 #include "../../../certs/certs.h"
+#include "iothub_client_options.h"
 
 static const char* hubName = "[IoT Hub Name]";
 static const char* hubSuffix = "[IoT Hub Suffix]";
@@ -97,7 +98,7 @@ void iothub_client_sample_amqp_shared_ws_methods_run(void)
             else
             {
                 bool traceOn = true;
-                IoTHubClient_SetOption(iotHubClientHandle1, "logtrace", &traceOn);
+                IoTHubClient_SetOption(iotHubClientHandle1, OPTION_LOG_TRACE, &traceOn);
 
                 // Add certificate information
                 if (IoTHubClient_SetOption(iotHubClientHandle1, OPTION_TRUSTED_CERT, certificates) != IOTHUB_CLIENT_OK)

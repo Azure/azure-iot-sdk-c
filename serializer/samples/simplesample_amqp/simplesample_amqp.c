@@ -17,6 +17,7 @@
 #include "iothub_client.h"
 #include "iothubtransportamqp.h"
 #include "iothub_client_ll.h"
+#include "iothub_client_options.h"
 #endif
 
 #ifdef MBED_BUILD_TIMESTAMP
@@ -168,7 +169,7 @@ void simplesample_amqp_run(void)
 
             // Turn on Log 
             bool trace = true;
-            (void)IoTHubClient_SetOption(iotHubClientHandle, "logtrace", &trace);
+            (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &trace);
 
             if (iotHubClientHandle == NULL)
             {

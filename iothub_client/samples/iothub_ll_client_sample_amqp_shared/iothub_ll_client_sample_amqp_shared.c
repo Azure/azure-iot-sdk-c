@@ -12,6 +12,7 @@
 #include "iothub_client.h"
 #include "iothub_message.h"
 #include "iothubtransportamqp.h"
+#include "iothub_client_options.h"
 
 #ifdef MBED_BUILD_TIMESTAMP
 #define SET_TRUSTED_CERT_IN_SAMPLES
@@ -245,7 +246,7 @@ void iothub_client_sample_amqp_run(void)
             else
             {
                 bool traceOn = true;
-                IoTHubClient_LL_SetOption(iotHubClientHandle1, "logtrace", &traceOn);
+                IoTHubClient_LL_SetOption(iotHubClientHandle1, OPTION_LOG_TRACE, &traceOn);
 
     #ifdef SET_TRUSTED_CERT_IN_SAMPLES
                 // For mbed add the certificate information

@@ -174,7 +174,7 @@ void iothub_client_sample_amqp_run(void)
         else
         {
             bool traceOn = true;
-            IoTHubClient_LL_SetOption(iotHubClientHandle, "logtrace", &traceOn);
+            IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &traceOn);
 
             // Set keep alive is optional. If it is not set the default (240 secs) will be used.
             uint32_t c2d_keep_alive_freq_secs = 120;

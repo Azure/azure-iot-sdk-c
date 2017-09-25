@@ -17,18 +17,10 @@
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/tickcounter.h"
+#include "iothub_client_options.h"
 
 #include "azure_hub_modules/dps_sec_client.h"
 #include "azure_hub_modules/dps_client.h"
-
-static const char* OPTION_LOG_TRACE = "logtrace";
-static const char* OPTION_X509_CERT = "x509certificate";
-static const char* OPTION_X509_PRIVATE_KEY = "x509privatekey";
-static const char* OPTION_KEEP_ALIVE = "keepalive";
-
-static const char* OPTION_PROXY_HOST = "proxy_address";
-static const char* OPTION_PROXY_USERNAME = "proxy_username";
-static const char* OPTION_PROXY_PASSWORD = "proxy_password";
 
 static const char* JSON_NODE_STATUS = "status";
 static const char* JSON_NODE_REG_STATUS = "registrationStatus";

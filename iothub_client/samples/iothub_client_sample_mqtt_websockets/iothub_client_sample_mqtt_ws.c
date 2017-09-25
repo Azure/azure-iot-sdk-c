@@ -10,6 +10,7 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/shared_util_options.h"
+#include "iothub_client_options.h"
 
 #include "iothubtransportmqtt_websockets.h"
 #include "../../../certs/certs.h"
