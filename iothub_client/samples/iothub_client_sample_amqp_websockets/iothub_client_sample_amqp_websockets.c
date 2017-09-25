@@ -7,6 +7,7 @@
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/shared_util_options.h"
 #include "iothub_client.h"
 #include "iothub_message.h"
 #include "iothubtransportamqp_websockets.h"
@@ -26,7 +27,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
 {
     int* counter = (int*)userContextCallback;
     const unsigned char* buffer = NULL;
-	size_t size = 0;
+    size_t size = 0;
     const char* messageId;
     const char* correlationId;
 
@@ -40,37 +41,37 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
     {
         correlationId = "<null>";
     }
-			
+            
     // Message content
     IOTHUBMESSAGE_CONTENT_TYPE contentType = IoTHubMessage_GetContentType(message);
 
-	if (contentType == IOTHUBMESSAGE_BYTEARRAY)
-	{
-		if (IoTHubMessage_GetByteArray(message, &buffer, &size) == IOTHUB_MESSAGE_OK)
-		{
+    if (contentType == IOTHUBMESSAGE_BYTEARRAY)
+    {
+        if (IoTHubMessage_GetByteArray(message, &buffer, &size) == IOTHUB_MESSAGE_OK)
+        {
             (void)printf("Received Message [%d]\r\n Message ID: %s\r\n Correlation ID: %s\r\n BINARY Data: <<<%.*s>>> & Size=%d\r\n", *counter, messageId, correlationId, (int)size, buffer, (int)size);
-		}
-		else
-		{
-			(void)printf("Failed getting the BINARY body of the message received.\r\n");
-		}
-	}
-	else if (contentType == IOTHUBMESSAGE_STRING)
-	{
-		if ((buffer = (const unsigned char*)IoTHubMessage_GetString(message)) != NULL && (size = strlen((const char*)buffer)) > 0)
-		{
+        }
+        else
+        {
+            (void)printf("Failed getting the BINARY body of the message received.\r\n");
+        }
+    }
+    else if (contentType == IOTHUBMESSAGE_STRING)
+    {
+        if ((buffer = (const unsigned char*)IoTHubMessage_GetString(message)) != NULL && (size = strlen((const char*)buffer)) > 0)
+        {
             (void)printf("Received Message [%d]\r\n Message ID: %s\r\n Correlation ID: %s\r\n STRING Data: <<<%.*s>>> & Size=%d\r\n", *counter, messageId, correlationId, (int)size, buffer, (int)size);
-		}
-		else
-		{
-			(void)printf("Failed getting the STRING body of the message received.\r\n");
-		}
-	}
-	else
-	{
-		(void)printf("Failed getting the body of the message received (type %i).\r\n", contentType);
-	}
-	
+        }
+        else
+        {
+            (void)printf("Failed getting the STRING body of the message received.\r\n");
+        }
+    }
+    else
+    {
+        (void)printf("Failed getting the body of the message received (type %i).\r\n", contentType);
+    }
+    
     // Retrieve properties from the message
     MAP_HANDLE mapProperties = IoTHubMessage_Properties(message);
     if (mapProperties != NULL)
@@ -130,11 +131,11 @@ void iothub_client_sample_amqp_websockets_run(void)
     int receiveContext = 0;
 
     (void)printf("Starting the IoTHub client sample AMQP over WebSockets...\r\n");
-	
-	if (platform_init() != 0)
-	{
-		(void)printf("ERROR: failed initializing the platform.\r\n");
-	}
+    
+    if (platform_init() != 0)
+    {
+        (void)printf("ERROR: failed initializing the platform.\r\n");
+    }
     else if ((iotHubClientHandle = IoTHubClient_CreateFromConnectionString(connectionString, AMQP_Protocol_over_WebSocketsTls)) == NULL)
     {
         (void)printf("ERROR: iotHubClientHandle is NULL!\r\n");
@@ -143,7 +144,7 @@ void iothub_client_sample_amqp_websockets_run(void)
     else
     {
         // For mbed add the certificate information
-        if (IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
+        if (IoTHubClient_SetOption(iotHubClientHandle, OPTION_TRUSTED_CERT, certificates) != IOTHUB_CLIENT_OK)
         {
             printf("failure to set option \"TrustedCerts\"\r\n");
         }

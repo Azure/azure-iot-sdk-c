@@ -217,7 +217,7 @@ int main()
             DPS_LL_SetOption(handle, "logtrace", &g_trace_on);
             if (trusted_cert != NULL)
             {
-                DPS_LL_SetOption(handle, "TrustedCerts", trusted_cert);
+                DPS_LL_SetOption(handle, OPTION_TRUSTED_CERT, trusted_cert);
             }
             if (http_proxy.host_address != NULL)
             {
@@ -269,7 +269,7 @@ int main()
                 IoTHubClient_LL_SetOption(iothub_client, "logtrace", &g_trace_on);
                 if (trusted_cert != NULL)
                 {
-                    IoTHubClient_LL_SetOption(iothub_client, "TrustedCerts", trusted_cert);
+                    IoTHubClient_LL_SetOption(iothub_client, OPTION_TRUSTED_CERT, trusted_cert);
                 }
 
                 if (g_use_proxy)

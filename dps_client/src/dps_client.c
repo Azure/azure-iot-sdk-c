@@ -826,7 +826,7 @@ DPS_RESULT DPS_LL_SetOption(DPS_LL_HANDLE handle, const char* option_name, const
     }
     else
     {
-        if (strcmp(option_name, "TrustedCerts") == 0)
+        if (strcmp(option_name, OPTION_TRUSTED_CERT) == 0)
         {
             const char* cert_info = (const char*)value;
             if (handle->dps_transport_protocol->dps_transport_trusted_cert(handle->transport_handle, cert_info) != 0)

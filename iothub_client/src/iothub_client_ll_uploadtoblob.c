@@ -796,7 +796,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_Impl(IOTHUB_CLIENT_LL_UPLOADTO
             else
             {
                 /*Codes_SRS_IOTHUBCLIENT_LL_02_111: [ If certificates is non-NULL then certificates shall be passed to HTTPAPIEX_SetOption with optionName TrustedCerts. ]*/
-                if ((handleData->certificates != NULL) && (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, "TrustedCerts", handleData->certificates) != HTTPAPIEX_OK))
+                if ((handleData->certificates != NULL) && (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_TRUSTED_CERT, handleData->certificates) != HTTPAPIEX_OK))
                 {
                     LogError("unable to set TrustedCerts!");
                     result = IOTHUB_CLIENT_ERROR;
@@ -1083,7 +1083,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
                 }
             }
         }
-        else if (strcmp("TrustedCerts", optionName) == 0)
+        else if (strcmp(OPTION_TRUSTED_CERT, optionName) == 0)
         {
             if (value == NULL)
             {

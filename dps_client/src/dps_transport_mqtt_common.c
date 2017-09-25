@@ -484,7 +484,7 @@ static int create_connection(DPS_TRANSPORT_MQTT_INFO* mqtt_info)
         bool ignore_check = true;
         (void)xio_setoption(mqtt_info->transport_io, "ignore_server_name_check", &ignore_check);
 
-        if (mqtt_info->certificate != NULL && xio_setoption(mqtt_info->transport_io, "TrustedCerts", mqtt_info->certificate) != 0)
+        if (mqtt_info->certificate != NULL && xio_setoption(mqtt_info->transport_io, OPTION_TRUSTED_CERT, mqtt_info->certificate) != 0)
         {
             LogError("Failure setting trusted certs");
             result = __FAILURE__;

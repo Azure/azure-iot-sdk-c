@@ -657,7 +657,7 @@ static int create_amqp_connection(DPS_TRANSPORT_AMQP_INFO* amqp_info)
 
         if (result == 0)
         {
-            if (amqp_info->certificate != NULL && xio_setoption(amqp_info->underlying_io, "TrustedCerts", amqp_info->certificate) != 0)
+            if (amqp_info->certificate != NULL && xio_setoption(amqp_info->underlying_io, OPTION_TRUSTED_CERT, amqp_info->certificate) != 0)
             {
                 LogError("Failure setting trusted certs");
                 result = __FAILURE__;

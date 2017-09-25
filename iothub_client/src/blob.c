@@ -9,6 +9,7 @@
 #include "azure_c_shared_utility/httpapiex.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/shared_util_options.h"
 
 /*a block has 4MB*/
 #define BLOCK_SIZE (4*1024*1024)
@@ -93,7 +94,7 @@ BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* sourc
                         }
                         else
                         {
-                            if ((certificates != NULL)&& (HTTPAPIEX_SetOption(httpApiExHandle, "TrustedCerts", certificates) == HTTPAPIEX_ERROR))
+                            if ((certificates != NULL)&& (HTTPAPIEX_SetOption(httpApiExHandle, OPTION_TRUSTED_CERT, certificates) == HTTPAPIEX_ERROR))
                             {
                                 LogError("failure in setting trusted certificates");
                                 result = BLOB_ERROR;
