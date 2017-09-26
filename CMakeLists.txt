@@ -4,7 +4,7 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(azure_iot_sdks)
 
-set(IOT_SDK_VERSION 1.1.23)
+set(IOT_SDK_VERSION 1.1.24)
 
 if(POLICY CMP0042)
     cmake_policy(SET CMP0042 NEW)
@@ -72,15 +72,6 @@ option(use_firmware_update "build the Raspberry PI firmware_update sample" OFF)
 option(build_as_dynamic "build the IoT SDK libaries as dynamic"  OFF)
 option(build_network_e2e "build network E2E tests" OFF)
 
-#Work in progress features
-#=========================
-#These options turn on features that are either not complete or noy yet enabled in the IoTHub service
-option(wip_use_c2d_amqp_methods "this option enables the C2D method support over AMQP. THIS IS WORK IN PROGRESS, ONLY MEANT FOR DEVELOPMENT (default is OFF)" OFF)
-
-if(${wip_use_c2d_amqp_methods})
-    add_definitions(-DWIP_C2D_METHODS_AMQP)
-endif()
-
 if(WIN32)
     option(use_openssl "set use_openssl to ON to use OpenSSL." OFF)
 else()
@@ -89,9 +80,9 @@ endif()
 
 #openssl samples on Windows need to have a trusted cert set
 if(WIN32 AND ${use_openssl})
-	option(set_trusted_cert_in_samples "set set_trusted_cert_in_samples to ON to have the samples set the SDK's built-in CA as TrustedCerts" ON)
+    option(set_trusted_cert_in_samples "set set_trusted_cert_in_samples to ON to have the samples set the SDK's built-in CA as TrustedCerts" ON)
 else()
-	option(set_trusted_cert_in_samples "set set_trusted_cert_in_samples to ON to have the samples set the SDK's built-in CA as TrustedCerts" OFF)
+    option(set_trusted_cert_in_samples "set set_trusted_cert_in_samples to ON to have the samples set the SDK's built-in CA as TrustedCerts" OFF)
 endif()
 
 if ("${dps_auth_type}" STREQUAL "tpm")

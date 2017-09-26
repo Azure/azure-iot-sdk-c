@@ -469,7 +469,7 @@ BUFFER_HANDLE iothub_security_sas_sign_data(SECURITY_DEVICE_HANDLE handle, const
         BYTE data_signature[1024];
         BYTE* data_copy = (unsigned char*)data;
         /* Codes_SRS_SECURE_DEVICE_TPM_07_021: [ iothub_security_sas_sign_data shall call into the tpm to hash the supplied data value. ] */
-        uint32_t sign_len = SignData(&handle->tpm_device, &NullPwSession, data_copy, data_len, data_signature, sizeof(data_signature) );
+        uint32_t sign_len = SignData(&handle->tpm_device, &NullPwSession, data_copy, (uint32_t)data_len, data_signature, (uint32_t)sizeof(data_signature) );
         if (sign_len == 0)
         {
             /* Codes_SRS_SECURE_DEVICE_TPM_07_023: [ If an error is encountered iothub_security_sas_sign_data shall return NULL. ] */

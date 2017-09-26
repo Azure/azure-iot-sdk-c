@@ -218,6 +218,10 @@ void iothub_client_sample_amqp_run(void)
                                 (void)printf("ERROR: Map_AddOrUpdate Failed!\r\n");
                             }
 
+                            // Setting messages with the same UUID values just for example.
+                            (void)IoTHubMessage_SetMessageId(messages[iterator].messageHandle, "dec14a98-c5fc-430e-b4e3-33c1c434dcaf");
+                            (void)IoTHubMessage_SetCorrelationId(messages[iterator].messageHandle, "33c1c434dcaf-c5fc-430e-b4e3-dec14a98");
+
                             (void)IoTHubMessage_SetContentTypeSystemProperty(messages[iterator].messageHandle, "application/json");
                             (void)IoTHubMessage_SetContentEncodingSystemProperty(messages[iterator].messageHandle, "utf-8");
 

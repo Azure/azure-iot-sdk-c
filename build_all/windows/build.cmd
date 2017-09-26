@@ -40,7 +40,6 @@ set CMAKE_DIR=iotsdk_win32
 set build-samples=yes
 set make=yes
 set build_traceabilitytool=0
-set CMAKE_use_c2d_amqp_methods=OFF
 set dps_auth_type=""
 
 :args-loop
@@ -56,7 +55,6 @@ if "%1" equ "--make_nuget" goto arg-build-nuget
 if "%1" equ "--cmake-root" goto arg-cmake-root
 if "%1" equ "--no-make" goto arg-no-make
 if "%1" equ "--build-traceabilitytool" goto arg-build-traceabilitytool
-if "%1" equ "--wip-use-c2d-amqp-methods" goto arg-wip-use-c2d-amqp-methods
 if "%1" equ "--dps-tpm" goto arg-dps-tpm
 if "%1" equ "--dps-x509" goto arg-dps-x509
 call :usage && exit /b 1
@@ -113,10 +111,6 @@ goto args-continue
 
 :arg-build-traceabilitytool
 set build_traceabilitytool=1
-goto args-continue
-
-:arg-wip-use-c2d-amqp-methods
-set CMAKE_use_c2d_amqp_methods=ON
 goto args-continue
 
 :arg-dps-tpm
@@ -259,7 +253,7 @@ pushd %cmake-root%\cmake\%CMAKE_DIR%
 
 if %MAKE_NUGET_PKG% == yes (
     echo ***Running CMAKE for Win32***
-    cmake %build-root% -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods% -Ddps_auth_type=%dps_auth_type%
+    cmake %build-root% -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Ddps_auth_type=%dps_auth_type%
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
     popd
 
@@ -271,7 +265,7 @@ if %MAKE_NUGET_PKG% == yes (
     rem no error checking
 
     pushd %cmake-root%\cmake\iotsdk_x64
-    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods% %build-root% -Ddps_auth_type=%dps_auth_type% -G "Visual Studio 14 Win64"
+    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Ddps_auth_type=%dps_auth_type% -G "Visual Studio 14 Win64"
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
     popd
 
@@ -283,20 +277,20 @@ if %MAKE_NUGET_PKG% == yes (
     rem no error checking
 
     pushd %cmake-root%\cmake\iotsdk_arm
-    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods% %build-root% -Ddps_auth_type:STRING=%dps_auth_type% -G "Visual Studio 14 ARM"
+    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Ddps_auth_type:STRING=%dps_auth_type% -G "Visual Studio 14 ARM"
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 ) else if %build-platform% == x64 (
     echo ***Running CMAKE for Win64***
-    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods% %build-root% -Ddps_auth_type:STRING=%dps_auth_type% -G "Visual Studio 14 Win64"
+    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Ddps_auth_type:STRING=%dps_auth_type% -G "Visual Studio 14 Win64"
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 ) else if %build-platform% == arm (
     echo ***Running CMAKE for ARM***
-    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods% %build-root% -Ddps_auth_type:STRING=%dps_auth_type% -G "Visual Studio 14 ARM"
+    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Ddps_auth_type:STRING=%dps_auth_type% -G "Visual Studio 14 ARM"
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 ) else (
     echo ***Running CMAKE for Win32***
-    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_c2d_amqp_methods:BOOL=%CMAKE_use_c2d_amqp_methods% %build-root% -Ddps_auth_type:STRING=%dps_auth_type%
+    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Ddps_auth_type:STRING=%dps_auth_type%
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 )
 
@@ -367,7 +361,6 @@ echo  --cmake-root                  Directory to place the cmake files used for 
 echo  --no-make                     Surpress building the code
 echo  --build-traceabilitytool      Builds an internal tool (traceabilitytool) to check for requirements/code/test consistency
 echo  --run-unittests               Run unit tests
-echo  --wip-use-c2d-amqp-methods    Builds with work in progress feature for amqp methods
 echo  --dps-tpm                     Use DPS with tpm Flow
 echo  --dps-x509                    Use DPS with x509 Flow
 goto :eof

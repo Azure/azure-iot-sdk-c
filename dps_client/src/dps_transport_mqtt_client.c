@@ -9,6 +9,8 @@
 #include "azure_c_shared_utility/tlsio.h"
 #include "azure_c_shared_utility/http_proxy_io.h"
 #include "azure_c_shared_utility/platform.h"
+#include "azure_c_shared_utility/xlogging.h"
+
 
 #define DPS_MQTT_PORT_NUM               8883
 

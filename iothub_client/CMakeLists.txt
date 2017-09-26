@@ -16,7 +16,8 @@ set(iothub_client_ll_transport_c_files
     ./src/iothub_message.c
     ./src/iothub_client_ll.c
     ./src/blob.c
-)
+    ./src/iothub_client_diagnostic.c
+ )
 
 if(NOT ${dont_use_uploadtoblob})
     set(iothub_client_ll_transport_c_files 
@@ -41,6 +42,7 @@ set(iothub_client_ll_transport_h_files
     ./inc/iothub_client_version.h
     ./inc/iothub_transport_ll.h
     ./inc/blob.h
+    ./inc/iothub_client_diagnostic.h
 )
 
 if (${use_dps_client})
@@ -118,17 +120,11 @@ if(${use_amqp})
         ./src/iothubtransport_amqp_telemetry_messenger.c 
         ./src/iothubtransport_amqp_twin_messenger.c 
         ./src/iothubtransport_amqp_messenger.c 
+        ./src/iothubtransportamqp_methods.c
         ./src/iothub_client_retry_control.c
         ./src/message_queue.c
         ./src/uamqp_messaging.c
     )
-
-    if(${wip_use_c2d_amqp_methods})
-        set(iothub_client_amqp_transport_common_c_files
-            ${iothub_client_amqp_transport_common_c_files}
-            ./src/iothubtransportamqp_methods.c
-        )
-    endif()
 
     set(iothub_client_amqp_transport_common_h_files
         ${iothub_client_ll_transport_h_files}
@@ -139,17 +135,11 @@ if(${use_amqp})
         ./inc/iothubtransport_amqp_telemetry_messenger.h
         ./inc/iothubtransport_amqp_twin_messenger.h
         ./inc/iothubtransport_amqp_messenger.h
+        ./inc/iothubtransportamqp_methods.h
         ./inc/iothub_client_retry_control.h
         ./inc/message_queue.h
         ./inc/uamqp_messaging.h
     )
-
-    if(${wip_use_c2d_amqp_methods})
-        set(iothub_client_amqp_transport_common_h_files
-            ${iothub_client_amqp_transport_common_h_files}
-            ./inc/iothubtransportamqp_methods.h
-        )
-    endif()
 
     set(iothub_client_amqp_transport_c_files
         ${iothub_client_amqp_transport_common_c_files}

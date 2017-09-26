@@ -144,7 +144,7 @@ extern "C"
 
     static int my_messagesender_send(MESSAGE_SENDER_HANDLE message_sender, MESSAGE_HANDLE message, ON_MESSAGE_SEND_COMPLETE on_message_send_complete, void* callback_context)
     {
-        (void)message_sender, message;
+        (void)message_sender, (void)message;
         g_on_message_send_complete = on_message_send_complete;
         g_on_message_send_complete_context = callback_context;
         return 0;

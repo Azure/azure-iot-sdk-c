@@ -9,6 +9,8 @@
 #include "azure_c_shared_utility/tlsio.h"
 #include "azure_c_shared_utility/http_proxy_io.h"
 #include "azure_c_shared_utility/platform.h"
+#include "azure_c_shared_utility/xlogging.h"
+
 #include "azure_uamqp_c/saslclientio.h"
 
 #define DPS_AMQP_PORT_NUM               5671

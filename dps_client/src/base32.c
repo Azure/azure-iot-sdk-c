@@ -8,16 +8,28 @@
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/gballoc.h"
+#include "azure_c_shared_utility/strings.h"
 
 #include "azure_hub_modules/base32.h"
+
+static const unsigned char BASE32_MAX_VALUE = 31;
 
 static const char BASE32_VALUES[] = "abcdefghijklmnopqrstuvwxyz234567=";
 #define TARGET_BLOCK_SIZE       5
 #define INVALID_CHAR_POS        260
 
+#define BASE32_INPUT_SIZE       8
+
+#define ASCII_VALUE_MAX         0x80
+
 static size_t base32_encoding_length(size_t src_len)
 {
     return (((src_len + TARGET_BLOCK_SIZE - 1) / TARGET_BLOCK_SIZE) * 8);
+}
+
+static size_t base32_decoding_length(size_t src_len)
+{
+    return ((src_len*TARGET_BLOCK_SIZE)/8);
 }
 
 static size_t get_char_position(char pos_char)
@@ -39,25 +51,37 @@ static size_t get_char_position(char pos_char)
     return result;
 }
 
-static BUFFER_HANDLE base32_decode_impl(const char* source)
+static unsigned char convert_value_to_base32_char(unsigned char value)
 {
-    BUFFER_HANDLE result;
-    char target_char;
-    const char* iterator = source;
+    unsigned char result;
 
-    while (*iterator != '\0')
+    if (value >= 50 && value <= 55)
     {
-        target_char = (char)tolower((char)*iterator);
-        // Get the positition of the char in base32
-        size_t pos = get_char_position(target_char);
-        if (pos == INVALID_CHAR_POS)
-        {
-            LogError("Invalid character specified");
-            result = NULL;
-            break;
-        }
-
-        iterator++;
+        result = 0x1a+(value-50);
+    }
+    else if (value == 61)
+    {
+        result = 0x20;
+    }
+    else if ((value <= 49) || (value >= 56 && value <= 64))
+    {
+        result = 0xFF;
+    }
+    else if (value >= 65 && value <= 90)
+    {
+        result = 0x00 + (value - 65);
+    }
+    else if (value >= 97 && value <= 123)
+    {
+        result = 0x00 + (value - 97);
+    }
+    else if (value >= 91 && value <= 96)
+    {
+        result = 0xFF;
+    }
+    else // value > 123
+    {
+        result = 0xFF;
     }
     return result;
 }
@@ -147,19 +171,158 @@ static char* base32_encode_impl(const unsigned char* source, size_t src_size)
     return result;
 }
 
-BUFFER_HANDLE Base32_Decoder(const char* source)
+static BUFFER_HANDLE base32_decode_impl(const char* source)
+{
+    BUFFER_HANDLE result;
+
+    size_t src_length = strlen(source);
+    if (src_length % BASE32_INPUT_SIZE != 0)
+    {
+        /* Codes_SRS_BASE32_07_021: [ If the source length is not evenly divisible by 8, base32_decode_impl shall return NULL. ] */
+        LogError("Failure invalid input length %zu", src_length);
+        result = NULL;
+    }
+    else
+    {
+        size_t dest_size = 0;
+        unsigned char* temp_buffer;
+        unsigned char* dest_buff;
+        bool continue_processing = true;
+        unsigned char input[8];
+        const char* iterator = source;
+
+        /* Codes_SRS_BASE32_07_022: [ base32_decode_impl shall allocate a temp buffer to store the in process value. ] */
+        size_t allocation_len = base32_decoding_length(src_length);
+        if ((temp_buffer = (unsigned char*)malloc(allocation_len)) == NULL)
+        {
+            /* Codes_SRS_BASE32_07_023: [ If an error is encountered, base32_decode_impl shall return NULL. ] */
+            LogError("Failure allocating buffer");
+            result = NULL;
+        }
+        else
+        {
+            dest_buff = temp_buffer;
+            while (*iterator != '\0')
+            {
+                /* Codes_SRS_BASE32_07_024: [ base32_decode_impl shall loop through and collect 8 characters from the source variable. ] */
+                for (size_t index = 0; index < BASE32_INPUT_SIZE; index++)
+                {
+                    input[index] = *iterator;
+                    iterator++;
+                    if (input[index] >= ASCII_VALUE_MAX)
+                    {
+                        LogError("Failure source encoding");
+                        continue_processing = false;
+                        break;
+                    }
+
+                    input[index] = convert_value_to_base32_char(input[index]);
+                }
+
+                if (!continue_processing)
+                {
+                    result = NULL;
+                    break;
+                }
+                else if ((dest_size + TARGET_BLOCK_SIZE) > allocation_len)
+                {
+                    LogError("Failure target length exceeded");
+                    result = NULL;
+                    continue_processing = false;
+                    break;
+                }
+                else
+                {
+                    // Codes_SRS_BASE32_07_025: [ base32_decode_impl shall group 5 bytes at a time into the temp buffer. ] 
+                    *dest_buff++ = ((input[0] & 0x1f) << 3) | ((input[1] & 0x1c) >> 2);
+                    *dest_buff++ = ((input[1] & 0x03) << 6) | ((input[2] & 0x1f) << 1) | ((input[3] & 0x10) >> 4);
+                    *dest_buff++ = ((input[3] & 0x0f) << 4) | ((input[4] & 0x1e) >> 1);
+                    *dest_buff++ = ((input[4] & 0x01) << 7) | ((input[5] & 0x1f) << 2) | ((input[6] & 0x18) >> 3);
+                    *dest_buff++ = ((input[6] & 0x07) << 5) | (input[7] & 0x1f);
+                    dest_size += TARGET_BLOCK_SIZE;
+                    // If there is padding remove it
+                    if (input[7] == BASE32_MAX_VALUE + 1)
+                    {
+                        --dest_size;
+                        if (input[5] == BASE32_MAX_VALUE + 1)
+                        {
+                            --dest_size;
+                            if (input[4] == BASE32_MAX_VALUE + 1)
+                            {
+                                --dest_size;
+                                if (input[2] == BASE32_MAX_VALUE + 1)
+                                {
+                                    --dest_size;
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+
+            if (!continue_processing)
+            {
+                result = NULL;
+            }
+            else
+            {
+                /* Codes_SRS_BASE32_07_026: [ Once base32_decode_impl is complete it shall create a BUFFER with the temp buffer. ] */
+                result = BUFFER_create(temp_buffer, dest_size);
+                if (result == NULL)
+                {
+                    LogError("Failure: BUFFER_create failed to create decoded buffer");
+                }
+            }
+            free(temp_buffer);
+        }
+    }
+    return result;
+}
+
+BUFFER_HANDLE Base32_Decode(STRING_HANDLE handle)
+{
+    BUFFER_HANDLE result;
+    if (handle == NULL)
+    {
+        /* Codes_SRS_BASE32_07_016: [ If source is NULL Base32_Decoder shall return NULL. ] */
+        LogError("invalid parameter handle");
+        result = NULL;
+    }
+    else
+    {
+        const char* str_source = STRING_c_str(handle);
+        if (str_source == NULL)
+        {
+            /* Codes_SRS_BASE32_07_027: [ If the string in source value is NULL, Base32_Decoder shall return NULL. ] */
+            LogError("NULL value specified in string");
+            result = NULL;
+        }
+        else
+        {
+            /* Codes_SRS_BASE32_07_018: [ Base32_Decoder shall call base32_decode_impl to decode the base64 value. ] */
+            result = base32_decode_impl(str_source);
+        }
+    }
+    /* Codes_SRS_BASE32_07_017: [ On success Base32_Decoder shall return a BUFFER_HANDLE that contains the decoded bytes for source. ] */
+    return result;
+}
+
+BUFFER_HANDLE Base32_Decode_String(const char* source)
 {
     BUFFER_HANDLE result;
     if (source == NULL)
     {
+        /* Codes_SRS_BASE32_07_008: [ If source is NULL Base32_Decoder_String shall return NULL. ] */
         LogError("invalid parameter const char* source=%p", source);
         result = NULL;
     }
     else
     {
-        LogError("Not Implemented");
-        result = NULL;
+        /* Codes_SRS_BASE32_07_020: [ Base32_Decoder_String shall call base32_decode_impl to decode the base64 value. ] */
+        result = base32_decode_impl(source);
     }
+    /* Codes_SRS_BASE32_07_019: [ On success Base32_Decoder_String shall return a BUFFER_HANDLE that contains the decoded bytes for source. ] */
     return result;
 }
 
@@ -168,19 +331,19 @@ char* Base32_Encode_Bytes(const unsigned char* source, size_t size)
     char* result;
     if (source == NULL)
     {
-        /* Codes_SRS_BASE32_07_004: [ If source is NULL Base32_Encoder shall return NULL. ] */
+        /* Codes_SRS_BASE32_07_004: [ If source is NULL Base32_Encode shall return NULL. ] */
         result = NULL;
         LogError("Failure: Invalid input parameter source");
     }
     else if (size == 0)
     {
-        /* Codes_SRS_BASE32_07_005: [ If size is 0 Base32_Encoder shall return an empty string. ] */
+        /* Codes_SRS_BASE32_07_005: [ If size is 0 Base32_Encode shall return an empty string. ] */
         result = malloc(1);
         strcpy(result, "");
     }
     else
     {
-        /* Codes_SRS_BASE32_07_007: [ Base32_Encode_Bytes shall call into base32_encoder_impl to encode the source data. ] */
+        /* Codes_SRS_BASE32_07_007: [ Base32_Encode_Bytes shall call into Base32_Encode_impl to encode the source data. ] */
         result = base32_encode_impl(source, size);
         if (result == NULL)
         {
@@ -188,16 +351,16 @@ char* Base32_Encode_Bytes(const unsigned char* source, size_t size)
             LogError("encoding of unsigned char failed.");
         }
     }
-    /* Codes_SRS_BASE32_07_006: [ If successful Base32_Encoder shall return the base32 value of input. ] */
+    /* Codes_SRS_BASE32_07_006: [ If successful Base32_Encode shall return the base32 value of input. ] */
     return result;
 }
 
-STRING_HANDLE Base32_Encoder(BUFFER_HANDLE source)
+STRING_HANDLE Base32_Encode(BUFFER_HANDLE source)
 {
     STRING_HANDLE result;
     if (source == NULL)
     {
-        /* Codes_SRS_BASE32_07_001: [ If source is NULL Base32_Encoder shall return NULL. ] */
+        /* Codes_SRS_BASE32_07_001: [ If source is NULL Base32_Encode shall return NULL. ] */
         result = NULL;
         LogError("Failure: Invalid input parameter");
     }
@@ -207,7 +370,7 @@ STRING_HANDLE Base32_Encoder(BUFFER_HANDLE source)
         const unsigned char* input_value = BUFFER_u_char(source);
         if (input_value == NULL || input_len == 0)
         {
-            /* Codes_SRS_BASE32_07_015: [ If size is 0 Base32_Encoder shall return an empty string. ] */
+            /* Codes_SRS_BASE32_07_015: [ If size is 0 Base32_Encode shall return an empty string. ] */
             result = STRING_new();
             if (result == NULL)
             {
@@ -216,27 +379,27 @@ STRING_HANDLE Base32_Encoder(BUFFER_HANDLE source)
         }
         else
         {
-            /* Codes_SRS_BASE32_07_003: [ Base32_Encoder shall call into base32_encoder_impl to encode the source data. ] */
+            /* Codes_SRS_BASE32_07_003: [ Base32_Encode shall call into Base32_Encode_impl to encode the source data. ] */
             char* encoded = base32_encode_impl(input_value, input_len);
             if (encoded == NULL)
             {
-                /* Codes_SRS_BASE32_07_014: [ Upon failure Base32_Encoder shall return NULL. ] */
+                /* Codes_SRS_BASE32_07_014: [ Upon failure Base32_Encode shall return NULL. ] */
                 LogError("encoding failed.");
                 result = NULL;
             }
             else
             {
-                /* Codes_SRS_BASE32_07_012: [ Base32_Encoder shall wrap the base32_encoder_impl result into a STRING_HANDLE. ] */
+                /* Codes_SRS_BASE32_07_012: [ Base32_Encode shall wrap the Base32_Encode_impl result into a STRING_HANDLE. ] */
                 result = STRING_construct(encoded);
                 if (result == NULL)
                 {
-                    /* Codes_SRS_BASE32_07_014: [ Upon failure Base32_Encoder shall return NULL. ] */
+                    /* Codes_SRS_BASE32_07_014: [ Upon failure Base32_Encode shall return NULL. ] */
                     LogError("string construction failed.");
                 }
                 free(encoded);
             }
         }
     }
-    /* Codes_SRS_BASE32_07_002: [ If successful Base32_Encoder shall return the base32 value of source. ] */
+    /* Codes_SRS_BASE32_07_002: [ If successful Base32_Encode shall return the base32 value of source. ] */
     return result;
 }

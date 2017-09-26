@@ -76,6 +76,10 @@ static const char* MESSAGE_ID_PROPERTY = "mid";
 static const char* CORRELATION_ID_PROPERTY = "cid";
 static const char* CONTENT_TYPE_PROPERTY = "ct";
 static const char* CONTENT_ENCODING_PROPERTY = "ce";
+static const char* DIAGNOSTIC_ID_PROPERTY = "diagid";
+static const char* DIAGNOSTIC_CONTEXT_PROPERTY = "diagctx";
+
+static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "creationtimeutc";
 
 #define UNSUBSCRIBE_FROM_TOPIC                  0x0000
 #define SUBSCRIBE_GET_REPORTED_STATE_TOPIC      0x0001
@@ -178,7 +182,8 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     bool log_trace;
     bool raw_trace;
     TICK_COUNTER_HANDLE msgTickCounter;
-    OPTIONHANDLER_HANDLE saved_tls_options;		// Here are the options from the xio layer if any is saved.
+    OPTIONHANDLER_HANDLE saved_tls_options; // Here are the options from the xio layer if any is saved.
+    size_t option_sas_token_lifetime_secs;
 
     // Internal lists for message tracking
     PDLIST_ENTRY waitingToSend;
@@ -636,6 +641,74 @@ static STRING_HANDLE addPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_me
                 result = NULL;
             }
             index++;
+        }
+    }
+
+    // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_014: [ `IoTHubTransport_MQTT_Common_DoWork` shall check for the diagnostic properties including diagid and diagCreationTimeUtc and if found both add them as system property in the format of `$.diagid` and `$.diagctx` respectively]
+    if (result != NULL)
+    {
+        const IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* diagnosticData = IoTHubMessage_GetDiagnosticPropertyData(iothub_message_handle);
+        if (diagnosticData != NULL)
+        {
+            const char* diag_id = diagnosticData->diagnosticId;
+            const char* creation_time_utc = diagnosticData->diagnosticCreationTimeUtc;
+            //diagid and creationtimeutc must be present/unpresent simultaneously
+            if (diag_id != NULL && creation_time_utc != NULL)
+            {
+                if (STRING_sprintf(result, "%s%%24.%s=%s", index == 0 ? "" : PROPERTY_SEPARATOR, DIAGNOSTIC_ID_PROPERTY, diag_id) != 0)
+                {
+                    LogError("Failed setting diagnostic id");
+                    STRING_delete(result);
+                    result = NULL;
+                }
+                index++;
+
+                if (result != NULL)
+                {
+                    //construct diagnostic context, it should be urlencode(key1=value1,key2=value2)
+                    STRING_HANDLE diagContextHandle = STRING_construct_sprintf("%s=%s", DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY, creation_time_utc);
+                    if (diagContextHandle == NULL)
+                    {
+                        LogError("Failed constructing diagnostic context");
+                        STRING_delete(result);
+                        result = NULL;
+                    }
+                    else
+                    {
+                        //Add other diagnostic context properties here if have more
+                        STRING_HANDLE encodedContextValueHandle = URL_Encode(diagContextHandle);
+                        const char* encodedContextValueString = NULL;
+                        if (encodedContextValueHandle != NULL &&
+                            (encodedContextValueString = STRING_c_str(encodedContextValueHandle)) != NULL)
+                        {
+                            if (STRING_sprintf(result, "%s%%24.%s=%s", index == 0 ? "" : PROPERTY_SEPARATOR, DIAGNOSTIC_CONTEXT_PROPERTY, encodedContextValueString) != 0)
+                            {
+                                LogError("Failed setting diagnostic context");
+                                STRING_delete(result);
+                                result = NULL;
+                            }
+                            STRING_delete(encodedContextValueHandle);
+                            encodedContextValueHandle = NULL;
+                        }
+                        else
+                        {
+                            LogError("Failed encoding diagnostic context value");
+                            STRING_delete(result);
+                            result = NULL;
+                        }
+                        STRING_delete(diagContextHandle);
+                        diagContextHandle = NULL;
+                        index++;
+                    }
+                }
+            }
+            else if (diag_id != NULL || creation_time_utc != NULL)
+            {
+                // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_015: [ `IoTHubTransport_MQTT_Common_DoWork` shall check whether diagid and diagCreationTimeUtc be present simultaneously, treat as error if not]
+                LogError("diagid and diagcreationtimeutc must be present simultaneously.");
+                STRING_delete(result);
+                result = NULL;
+            }
         }
     }
 
@@ -1570,9 +1643,7 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
     IOTHUB_CREDENTIAL_TYPE cred_type = IoTHubClient_Auth_Get_Credential_Type(transport_data->authorization_module);
     if (cred_type == IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY || cred_type == IOTHUB_CREDENTIAL_TYPE_DEVICE_AUTH)
     {
-        size_t secSinceEpoch = (size_t)(difftime(get_time(NULL), EPOCH_TIME_T_VALUE) + 0);
-        size_t expiryTime = secSinceEpoch + SAS_TOKEN_DEFAULT_LIFETIME;
-        sasToken = IoTHubClient_Auth_Get_SasToken(transport_data->authorization_module, STRING_c_str(transport_data->devicesPath), expiryTime);
+        sasToken = IoTHubClient_Auth_Get_SasToken(transport_data->authorization_module, STRING_c_str(transport_data->devicesPath), transport_data->option_sas_token_lifetime_secs);
         if (sasToken == NULL)
         {
             LogError("failure getting sas token from IoTHubClient_Auth_Get_SasToken.");
@@ -1742,7 +1813,7 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             }
             else
             {
-                if ((current_time - transport_data->mqtt_connect_time) / 1000 > (SAS_TOKEN_DEFAULT_LIFETIME*SAS_REFRESH_MULTIPLIER))
+                if ((current_time - transport_data->mqtt_connect_time) / 1000 > (transport_data->option_sas_token_lifetime_secs*SAS_REFRESH_MULTIPLIER))
                 {
                     /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_058: [ If the sas token has timed out IoTHubTransport_MQTT_Common_DoWork shall disconnect from the mqtt client and destroy the transport information and wait for reconnect. ] */
                     OPTIONHANDLER_HANDLE options = xio_retrieveoptions(transport_data->xioTransport);
@@ -1913,6 +1984,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                         srand((unsigned int)get_time(NULL));
                         state->authorization_module = auth_module;
                         state->isProductInfoSet = false;
+                        state->option_sas_token_lifetime_secs = SAS_TOKEN_DEFAULT_LIFETIME;
                     }
                 }
             }
@@ -2583,6 +2655,13 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SetOption(TRANSPORT_LL_HANDLE h
         {
             transport_data->raw_trace = *((bool*)value);
             mqtt_client_set_trace(transport_data->mqttClient, transport_data->log_trace, transport_data->raw_trace);
+            result = IOTHUB_CLIENT_OK;
+        }
+        /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_052: [ If the option parameter is set to "sas_token_lifetime" then the value shall be a size_t_ptr and the value will determine the mqtt sas token lifetime.] */
+        else if (strcmp(OPTION_SAS_TOKEN_LIFETIME, option) == 0)
+        {
+            size_t* sas_lifetime = (size_t*)value;
+            transport_data->option_sas_token_lifetime_secs = *sas_lifetime;
             result = IOTHUB_CLIENT_OK;
         }
         else if (strcmp(OPTION_KEEP_ALIVE, option) == 0)

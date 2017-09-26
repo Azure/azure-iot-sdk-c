@@ -39,6 +39,9 @@ extern IOTHUB_MESSAGE_RESULT
 IoTHubMessage_SetCorrelationId(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const char* correlationId);
 extern const char* IoTHubMessage_GetCorrelationId(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle);
  
+ extern const IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* IoTHubMessage_GetDiagnosticPropertyData(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle);
+ extern IOTHUB_MESSAGE_RESULT IoTHubMessage_SetDiagnosticPropertyData(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* diagnosticData);
+
 extern void IoTHubMessage_Destroy(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle);
 ```
 
@@ -202,3 +205,27 @@ extern const char* IoTHubMessage_GetContentEncodingSystemProperty(IOTHUB_MESSAGE
 **SRS_IOTHUBMESSAGE_09_010: [**If any of the parameters are NULL then IoTHubMessage_GetContentEncodingSystemProperty shall return a IOTHUB_MESSAGE_INVALID_ARG value.**]** 
 
 **SRS_IOTHUBMESSAGE_09_011: [**IoTHubMessage_GetContentEncodingSystemProperty shall return the `contentEncoding` as a const char* **]** 
+
+
+##IoTHubMessage_GetDiagnosticPropertyData
+```c
+extern const IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* IoTHubMessage_GetDiagnosticPropertyData(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle);
+```
+
+**SRS_IOTHUBMESSAGE_10_001: [**If any of the parameters are NULL then IoTHubMessage_GetDiagnosticPropertyData shall return a NULL value.**]** 
+
+**SRS_IOTHUBMESSAGE_10_002: [**IoTHubMessage_GetDiagnosticPropertyData shall return the diagnosticData as a const IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA*.**]** 
+
+
+##IoTHubMessage_GetContentEncodingSystemProperty
+```c
+extern IOTHUB_MESSAGE_RESULT IoTHubMessage_SetDiagnosticPropertyData(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* diagnosticData);
+```
+
+**SRS_IOTHUBMESSAGE_10_003: [**If any of the parameters are NULL then IoTHubMessage_SetDiagnosticId shall return a IOTHUB_MESSAGE_INVALID_ARG value.**]** 
+
+**SRS_IOTHUBMESSAGE_10_004: [**If the IOTHUB_MESSAGE_HANDLE `diagnosticData` is not NULL it shall be deallocated. **]** 
+
+**SRS_IOTHUBMESSAGE_10_005: [**If the allocation or the copying of `diagnosticData` fails, then IoTHubMessage_SetDiagnosticPropertyData shall return IOTHUB_MESSAGE_ERROR.**]**
+
+**SRS_IOTHUBMESSAGE_10_006: [**If IoTHubMessage_SetDiagnosticPropertyData finishes successfully it shall return IOTHUB_MESSAGE_OK.**]**

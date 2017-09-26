@@ -367,9 +367,7 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 #define DEFAULT_MAX_RETRY_TIME_IN_SECS            0
 
 #define TEST_STRING_HANDLE                         (STRING_HANDLE)0x4240
-#ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
-#define TEST_IOTHUBTRANSPORTAMQP_METHODS	       ((IOTHUBTRANSPORT_AMQP_METHODS_HANDLE)0x4244)
-#endif
+#define TEST_IOTHUBTRANSPORTAMQP_METHODS           ((IOTHUBTRANSPORT_AMQP_METHODS_HANDLE)0x4244)
 #define TEST_SESSION_HANDLE                        ((SESSION_HANDLE)0x4245)
 #define TEST_METHOD_HANDLE                         ((IOTHUBTRANSPORT_AMQP_METHOD_HANDLE)0x4246)
 #define TEST_XIO_INTERFACE                         ((const IO_INTERFACE_DESCRIPTION*)0x4247)
@@ -554,10 +552,8 @@ static void set_expected_calls_for_Register(IOTHUB_DEVICE_CONFIG* device_config,
     STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_REGISTERED_DEVICES_LIST))
         .SetReturn(NULL);
 
-#ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
     STRICT_EXPECTED_CALL(STRING_c_str(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE)).SetReturn(TEST_IOTHUB_HOST_FQDN_CHAR_PTR);
     EXPECTED_CALL(iothubtransportamqp_methods_create(TEST_IOTHUB_HOST_FQDN_CHAR_PTR, device_config->deviceId));
-#endif
 
     // replicate_device_options_to
     STRICT_EXPECTED_CALL(device_set_option(TEST_DEVICE_HANDLE, DEVICE_OPTION_EVENT_SEND_TIMEOUT_SECS, IGNORED_PTR_ARG))
@@ -591,9 +587,7 @@ static void set_expected_calls_for_Unregister(IOTHUB_DEVICE_HANDLE iothub_device
     STRICT_EXPECTED_CALL(singlylinkedlist_remove(TEST_REGISTERED_DEVICES_LIST, IGNORED_PTR_ARG))
         .IgnoreArgument(2);
 
-#ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
     STRICT_EXPECTED_CALL(iothubtransportamqp_methods_destroy(TEST_IOTHUBTRANSPORTAMQP_METHODS));
-#endif	
 
     STRICT_EXPECTED_CALL(device_destroy(TEST_DEVICE_HANDLE));
     STRICT_EXPECTED_CALL(STRING_delete(TEST_DEVICE_ID_STRING_HANDLE));
@@ -610,7 +604,6 @@ static void set_expected_calls_for_establish_amqp_connection()
 
 static void set_expected_calls_for_subscribe_methods()
 {
-#ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
     STRICT_EXPECTED_CALL(amqp_connection_get_session_handle(TEST_AMQP_CONNECTION_HANDLE, IGNORED_PTR_ARG))
         .IgnoreArgument_session_handle();
 
@@ -621,15 +614,11 @@ static void set_expected_calls_for_subscribe_methods()
         .IgnoreArgument_on_method_request_received_context()
         .IgnoreArgument_on_methods_unsubscribed()
         .IgnoreArgument_on_methods_unsubscribed_context();
-#endif
 }
 
 static void set_expected_calls_for_on_methods_unsubscribed()
 {
-#ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
-
     STRICT_EXPECTED_CALL(iothubtransportamqp_methods_unsubscribe(TEST_IOTHUBTRANSPORTAMQP_METHODS));
-#endif
 }
 
 static void set_expected_calls_for_send_pending_events(PDLIST_ENTRY wts, int expected_number_of_events)
@@ -822,7 +811,6 @@ static STRING_HANDLE TEST_STRING_construct_sprintf(const char* format, ...)
     return NULL;
 }
 
-#ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
 static ON_METHODS_ERROR g_on_methods_error;
 static void* g_on_methods_error_context;
 static ON_METHOD_REQUEST_RECEIVED g_on_method_request_received;
@@ -835,7 +823,7 @@ static int my_iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS
     ON_METHOD_REQUEST_RECEIVED on_method_request_received, void* on_method_request_received_context,
     ON_METHODS_UNSUBSCRIBED on_methods_unsubscribed, void* on_methods_unsubscribed_context)
 {
-    (void)iothubtransport_amqp_methods_handle, session_handle;
+    (void)iothubtransport_amqp_methods_handle, (void)session_handle;
     g_on_methods_error = on_methods_error;
     g_on_methods_error_context = on_methods_error_context;
     g_on_method_request_received = on_method_request_received;
@@ -844,7 +832,6 @@ static int my_iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS
     g_on_methods_unsubscribed_context = on_methods_unsubscribed_context;
     return 0;
 }
-#endif
 
 static bool TEST_amqp_connection_create_saved_create_sasl_io;
 static bool TEST_amqp_connection_create_saved_create_cbs_connection;
@@ -1115,11 +1102,9 @@ static void register_umock_alias_types()
     REGISTER_UMOCK_ALIAS_TYPE(XIO_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(fields, void*);
     REGISTER_UMOCK_ALIAS_TYPE(role, bool);
-#ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(ON_METHOD_REQUEST_RECEIVED, void*);
     REGISTER_UMOCK_ALIAS_TYPE(ON_METHODS_ERROR, void*);
-#endif
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_AUTHORIZATION_HANDLE, void*);
 }
 
@@ -1128,9 +1113,7 @@ static void register_global_mock_hooks()
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, TEST_malloc);
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, TEST_free);
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_realloc, my_gballoc_realloc);
-#ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
     REGISTER_GLOBAL_MOCK_HOOK(iothubtransportamqp_methods_subscribe, my_iothubtransportamqp_methods_subscribe);
-#endif
 
     REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_add, TEST_singlylinkedlist_add);
     REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_remove, TEST_singlylinkedlist_remove);
@@ -1160,9 +1143,7 @@ static void register_global_mock_hooks()
 
 static void register_global_mock_returns()
 {
-#ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
     REGISTER_GLOBAL_MOCK_RETURN(iothubtransportamqp_methods_create, TEST_IOTHUBTRANSPORTAMQP_METHODS);
-#endif
     REGISTER_GLOBAL_MOCK_RETURN(session_create, TEST_SESSION_HANDLE);
     REGISTER_GLOBAL_MOCK_RETURN(platform_get_default_tlsio, TEST_XIO_INTERFACE);
     REGISTER_GLOBAL_MOCK_RETURN(xio_create, TEST_XIO_HANDLE);
@@ -1297,8 +1278,6 @@ TEST_FUNCTION_CLEANUP(TestMethodCleanup)
 {
     TEST_MUTEX_RELEASE(g_testByTest);
 }
-
-#ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
 
 /* IoTHubTransport_AMQP_Common_Register */
 
@@ -1867,8 +1846,6 @@ TEST_FUNCTION(on_methods_error_does_nothing)
     // cleanup
     destroy_transport(handle, device_handle, NULL);
 }
-
-#endif // WIP_C2D_METHODS_AMQP
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_001: [If `config` or `config->upperConfig` or `get_io_transport` are NULL then IoTHubTransport_AMQP_Common_Create shall fail and return NULL.]
 TEST_FUNCTION(AMQP_Create_NULL_config)

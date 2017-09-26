@@ -253,6 +253,8 @@ static int create_and_put_SAS_token_to_cbs(AUTHENTICATION_INSTANCE* instance)
     char* sas_token;
     STRING_HANDLE devices_path;
 
+    // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_053: [A STRING_HANDLE, referred to as `devices_path`, shall be created from the following parts: iothub_host_fqdn + "/devices/" + device_id]
+    // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_071: [A STRING_HANDLE, referred to as `devices_path`, shall be created from the following parts: iothub_host_fqdn + "/devices/" + device_id]
     if ((devices_path = create_devices_path(instance->iothub_host_fqdn, instance->device_id)) == NULL)
     {
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_054: [If `devices_path` failed to be created, authentication_do_work() shall fail and return]
@@ -267,32 +269,16 @@ static int create_and_put_SAS_token_to_cbs(AUTHENTICATION_INSTANCE* instance)
         IOTHUB_CREDENTIAL_TYPE cred_type = IoTHubClient_Auth_Get_Credential_Type(instance->authorization_module);
         if (cred_type == IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY || cred_type == IOTHUB_CREDENTIAL_TYPE_DEVICE_AUTH)
         {
-            double seconds_since_epoch;
-            // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_053: [A STRING_HANDLE, referred to as `devices_path`, shall be created from the following parts: iothub_host_fqdn + "/devices/" + device_id]
-            // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_071: [A STRING_HANDLE, referred to as `devices_path`, shall be created from the following parts: iothub_host_fqdn + "/devices/" + device_id]
-            if (get_seconds_since_epoch(&seconds_since_epoch) != RESULT_OK)
+            /* Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_049: [authentication_do_work() shall create a SAS token using IoTHubClient_Auth_Get_SasToken, unless it has failed previously] */
+            sas_token = IoTHubClient_Auth_Get_SasToken(instance->authorization_module, STRING_c_str(devices_path), instance->sas_token_lifetime_secs);
+            if (sas_token == NULL)
             {
+                LogError("failure getting sas token.");
                 result = __FAILURE__;
-                sas_token = NULL;
-                LogError("Failed creating a SAS token (get_seconds_since_epoch() failed)");
             }
             else
             {
-                // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_052: [The SAS token expiration time shall be calculated adding `instance->sas_token_lifetime_secs` to the current number of seconds since epoch time UTC]
-                // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_070: [The SAS token expiration time shall be calculated adding `instance->sas_token_lifetime_secs` to the current number of seconds since epoch time UTC]
-                size_t sas_token_expiration_time_secs = (size_t)seconds_since_epoch + instance->sas_token_lifetime_secs;
-
-                /* Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_049: [authentication_do_work() shall create a SAS token using IoTHubClient_Auth_Get_SasToken, unless it has failed previously] */
-                sas_token = IoTHubClient_Auth_Get_SasToken(instance->authorization_module, STRING_c_str(devices_path), sas_token_expiration_time_secs);
-                if (sas_token == NULL)
-                {
-                    LogError("failure getting sas token.");
-                    result = __FAILURE__;
-                }
-                else
-                {
-                    result = RESULT_OK;
-                }
+                result = RESULT_OK;
             }
         }
         else if (cred_type == IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN)
