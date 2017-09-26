@@ -20,7 +20,7 @@ Visit [Azure IoT Dev Center][iot-dev-center] to learn more about developing appl
 
 ## Key features and roadmap
 
-:white_check_mark: : feature available; :large_blue_diamond: : feature in-progress; :large_orange_diamond: : feature planned; :x: : no support planned
+:white_check_mark: feature available  :large_blue_diamond: feature in-progress  :large_orange_diamond: feature planned  :x: no support planned
 
 | Feature                                               | https                  | mqtt                   | mqtt-ws                | amqp                   | amqp-ws                | Description                                                                                                                                                                                                                                                                                                                                                                                            |
 |-------------------------------------------------------|------------------------|------------------------|------------------------|------------------------|------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
