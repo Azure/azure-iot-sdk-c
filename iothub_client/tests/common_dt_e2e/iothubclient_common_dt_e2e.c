@@ -22,6 +22,7 @@
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/uniqueid.h"
+#include "azure_c_shared_utility/xlogging.h"
 
 #include "parson.h"
 #include "certs.h"

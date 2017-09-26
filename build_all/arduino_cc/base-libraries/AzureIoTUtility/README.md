@@ -58,7 +58,7 @@ You should have the following ready before beginning with any board:
     * Enter `https://adafruit.github.io/arduino-board-index/package_adafruit_index.json` into Additional Board Manager URLs field. You can add multiple URLs, separating them with commas.
     * Open Boards Manager from Tools > Board menu and install `Arduino SAMD Boards` and `Adafruit SAMD Boards` 1.0.7 or later.
     * Select your `Adafruit Feather M0` from Tools > Board menu after installation
-2. Install the [Adafruit WINC1500 wifi library](https://learn.adafruit.com/adafruit-feather-m0-wifi-atwinc1500/using-the-wifi-module)
+2. Install the `WiFi101` library from the Arduino IDE Library Manager.
 3. Install the `RTCZero` library from the Arduino IDE Library Manager.
 4. Install the `NTPClient` library from the Arduino IDE Library Manager.
 5. Open the `simplesample_http` example from the Arduino IDE File->Examples->AzureIoTHub menu.

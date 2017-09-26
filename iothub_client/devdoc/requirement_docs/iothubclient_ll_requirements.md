@@ -198,6 +198,8 @@ extern IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_Create(const IOTHUB_CLIENT_CONFIG
 
 **SRS_IOTHUBCLIENT_LL_25_124: [** `IoTHubClient_LL_Create` shall set the default retry policy as Exponential backoff with jitter and if succeed and return a `non-NULL` handle.** ]**
 
+**SRS_IOTHUBCLIENT_LL_09_010: [** If any failure occurs `IoTHubClient_LL_Create` shall destroy the `transportHandle` only if it has created it **]**
+
 **SRS_IOTHUBCLIENT_LL_07_029: [** `IoTHubClient_LL_Create` shall create the Auth module with the device_key, device_id, and/or deviceSasToken values **]**
 
 ## IoTHubClient_LL_CreateWithTransport
@@ -673,7 +675,11 @@ Handled options are
 
 **SRS_IOTHUBCLIENT_LL_02_105: [** Otherwise `IoTHubClient_LL_UploadToBlob_SetOption` shall succeed and return `IOTHUB_CLIENT_OK`.** ]**
 
+**SRS_IOTHUBCLIENT_LL_32_008: [** OPTION_HTTP_PROXY - then the value will be a pointer to HTTP_PROXY_OPTIONS structure.** ]**
 
+**SRS_IOTHUBCLIENT_LL_32_006: [** If `host_address` is NULL, `IoTHubClient_LL_UploadToBlob_SetOption` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`** ]**
+
+**SRS_IOTHUBCLIENT_LL_32_007: [** If only one of `username` and `password` is NULL, `IoTHubClient_LL_UploadToBlob_SetOption` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`.** ]**
 
 ## IoTHubClient_LL_SetDeviceTwinCallback
 
@@ -810,3 +816,39 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_DeviceMethodResponse(IOTHUB_CLIENT_L
 **SRS_IOTHUBCLIENT_LL_07_027: [** `IoTHubClient_LL_DeviceMethodResponse` shall call the `IoTHubTransport_DeviceMethod_Response` transport function. **]**
 
 **SRS_IOTHUBCLIENT_LL_07_028: [** If the transport `IoTHubTransport_DeviceMethod_Response` succeed then, `IoTHubClient_LL_DeviceMethodResponse` shall return `IOTHUB_CLIENT_OK` Otherwise it shall return `IOTHUB_CLIENT_ERROR`. **]** 
+
+## IoTHubClient_LL_CreateFromDeviceAuth
+
+```c
+IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromDeviceAuth(const char* iothub_uri, const char* device_id, XDA_HANDLE device_auth_handle, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+```
+
+**SRS_IOTHUBCLIENT_LL_07_029: [** if `iothub_uri`, `protocol`, `device_id`, or `device_auth_handle` are NULL, `IoTHubClient_LL_CreateFromDeviceAuth` shall return NULL. **]**
+
+**SRS_IOTHUBCLIENT_LL_07_030: [** `IoTHubClient_LL_CreateFromDeviceAuth` shall allocate data for the IOTHUB_CLIENT_LL_HANDLE. **]**
+
+**SRS_IOTHUBCLIENT_LL_07_031: [** `IoTHubClient_LL_CreateFromDeviceAuth` shall initialize the IOTHUB_CLIENT_LL_HANDLE_DATA by calling initialize_iothub_client. **]**
+
+**SRS_IOTHUBCLIENT_LL_07_032: [** If any error is encountered `IoTHubClient_LL_CreateFromDeviceAuth` shall return NULL. **]**
+
+## create_iothub_client_data
+
+```c
+static IOTHUB_CLIENT_LL_HANDLE_DATA* create_iothub_client_data(IOTHUB_CLIENT_CONFIG* client_config, TRANSPORT_LL_HANDLE transport_handle, TRANSPORT_PROVIDER* protocol)
+```
+
+**SRS_IOTHUBCLIENT_LL_07_033: [** `create_iothub_client_data` shall initialize IOTHUB_CLIENT_LL_HANDLE_DATA variables. **]**
+
+**SRS_IOTHUBCLIENT_LL_07_034: [** If any error is encountered `create_iothub_client_data` shall return NULL. **]**
+
+**SRS_IOTHUBCLIENT_LL_07_035: [** `create_iothub_client_data` shall create a IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE from IOTHUB_CLIENT_CONFIG. **]**
+
+**SRS_IOTHUBCLIENT_LL_07_036: [** `create_iothub_client_data` shall initialize a new DLIST (further called "waitingToSend") containing records with fields of the following types: IOTHUB_MESSAGE_HANDLE, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, void*. **]**
+
+**SRS_IOTHUBCLIENT_LL_07_037: [** `create_iothub_client_data` shall populate a structure of type IOTHUBTRANSPORT_CONFIG with the information from config parameter and the previous DLIST and shall pass that to the underlying layer _Create function. **]**
+
+**SRS_IOTHUBCLIENT_LL_07_038: [** If the underlaying layer _Create function fails them `create_iothub_client_data` shall fail and return NULL. **]**
+
+**SRS_IOTHUBCLIENT_LL_07_039: [** `create_iothub_client_data` shall call the transport _Register function with a populated structure of type IOTHUB_DEVICE_CONFIG and waitingToSend list. **]**
+
+**SRS_IOTHUBCLIENT_LL_07_040: [** `create_iothub_client_data` shall set the default retry policy as Exponential backoff with jitter and if succeed and return a `non-NULL` handle. **]**

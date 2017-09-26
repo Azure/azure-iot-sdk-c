@@ -447,27 +447,35 @@ static int provisionDevices(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_ACCOUNT_AUT
     return result;
 }
 
-static void munge(char* mungee, const char* beginningString, const char* endingString)
+static char* convert_base64_to_string(const char* base64_cert)
 {
-    char* shouldBeSameAsMungee;
-    char* endOfMungee;
-    char* currentChar;
-    shouldBeSameAsMungee = strstr(mungee, beginningString);
-    if (shouldBeSameAsMungee == mungee)
+    char* result;
+    BUFFER_HANDLE raw_cert = Base64_Decoder(base64_cert);
+    if (raw_cert == NULL)
     {
-        // Yay, starting right.
-        endOfMungee = strstr(mungee, endingString);
-        if (endOfMungee != NULL)
-        {
-            // Yay, ending string found,  wont try to go past.
-            currentChar = mungee + strlen(beginningString);
-            while (currentChar != endOfMungee)
-            {
-                if (*currentChar == ' ') *currentChar = '\n';
-                currentChar++;
-            }
-        }
+        LogError("Failure decoding base64 encoded cert.\r\n");
+        result = NULL;
     }
+    else
+    {
+        STRING_HANDLE cert = STRING_from_byte_array(BUFFER_u_char(raw_cert), BUFFER_length(raw_cert));
+        if (cert == NULL)
+        {
+            LogError("Failure creating cert from binary.\r\n");
+            result = NULL;
+        }
+        else
+        {
+            if (mallocAndStrcpy_s(&result, STRING_c_str(cert)) != 0)
+            {
+                LogError("Failure allocating certificate.\r\n");
+                result = NULL;
+            }
+            STRING_delete(cert);
+        }
+        BUFFER_delete(raw_cert);
+    }
+    return result;
 }
 
 IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG* config)
@@ -489,8 +497,8 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG*
         }
         else
         {
-            char* tempCert;
-            char* tempKey;
+            char* base64_cert;
+            char* base64_key;
             char* tempThumb;
             memset(iothub_account_info, 0, sizeof(IOTHUB_ACCOUNT_INFO));
 
@@ -514,11 +522,10 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG*
 #else
                 iothub_account_info->connString = getenv("IOTHUB_CONNECTION_STRING");
                 iothub_account_info->eventhubConnString = getenv("IOTHUB_EVENTHUB_CONNECTION_STRING");
-                tempCert = getenv("IOTHUB_E2E_X509_CERT");
-                tempKey = getenv("IOTHUB_E2E_X509_PRIVATE_KEY");
+                base64_cert = getenv("IOTHUB_E2E_X509_CERT_BASE64");
+                base64_key = getenv("IOTHUB_E2E_X509_PRIVATE_KEY_BASE64");
                 tempThumb = getenv("IOTHUB_E2E_X509_THUMBPRINT");
 #endif
-
 
                 if (iothub_account_info->connString == NULL)
                 {
@@ -532,13 +539,13 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG*
                     free(iothub_account_info);
                     iothub_account_info = NULL;
                 }
-                else if (tempCert == NULL)
+                else if (base64_cert == NULL)
                 {
                     LogError("Failure retrieving x509 certificate from the environment.\r\n");
                     free(iothub_account_info);
                     iothub_account_info = NULL;
                 }
-                else if (tempKey == NULL)
+                else if (base64_key == NULL)
                 {
                     LogError("Failure retrieving x509 private key from the environment.\r\n");
                     free(iothub_account_info);
@@ -550,13 +557,13 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG*
                     free(iothub_account_info);
                     iothub_account_info = NULL;
                 }
-                else if (mallocAndStrcpy_s(&iothub_account_info->x509Certificate, tempCert) != 0)
+                else if ((iothub_account_info->x509Certificate = convert_base64_to_string(base64_cert)) == NULL)
                 {
                     LogError("Failure allocating x509 certificate from the environment.\r\n");
                     free(iothub_account_info);
                     iothub_account_info = NULL;
                 }
-                else if (mallocAndStrcpy_s(&iothub_account_info->x509PrivateKey, tempKey) != 0)
+                else if ((iothub_account_info->x509PrivateKey = convert_base64_to_string(base64_key)) == NULL)
                 {
                     LogError("Failure allocating x509 key from the environment.\r\n");
                     free(iothub_account_info->x509Certificate);
@@ -567,18 +574,12 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG*
                 {
                     LogError("Failure allocating x509 thumb print from the environment.\r\n");
                     free(iothub_account_info->x509Certificate);
-                    free(iothub_account_info->x509Thumbprint);
+                    free(iothub_account_info->x509PrivateKey);
                     free(iothub_account_info);
                     iothub_account_info = NULL;
                 }
                 else
                 {
-                    //
-                    // This is a rather large hack to get around Jenkins putting a space into the certs where the lf character should be.
-                    // We replace any spaces in the cert (and private key) proper with lf characters.
-                    //
-                    munge(iothub_account_info->x509Certificate, "-----BEGIN CERTIFICATE-----", "-----END CERTIFICATE-----");
-                    munge(iothub_account_info->x509PrivateKey, "-----BEGIN RSA PRIVATE KEY-----", "-----END RSA PRIVATE KEY-----");
                     if (retrieveConnStringInfo(iothub_account_info) != 0)
                     {
                         LogError("retrieveConnStringInfo failed.\r\n");

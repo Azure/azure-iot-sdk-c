@@ -12,8 +12,12 @@
 #include "iothubtransportmqtt.h"
 
 #ifdef MBED_BUILD_TIMESTAMP
-#include "certs.h"
+#define SET_TRUSTED_CERT_IN_SAMPLES
 #endif // MBED_BUILD_TIMESTAMP
+
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+#include "certs.h"
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 /*String containing Hostname, Device Id & Device Key in the format:                         */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
@@ -42,6 +46,8 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
     MAP_HANDLE mapProperties;
     const char* messageId;
     const char* correlationId;
+    const char* userDefinedContentType;
+    const char* userDefinedContentEncoding;
 
     // Message properties
     if ((messageId = IoTHubMessage_GetMessageId(message)) == NULL)
@@ -54,6 +60,16 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
         correlationId = "<null>";
     }
 
+    if ((userDefinedContentType = IoTHubMessage_GetContentTypeSystemProperty(message)) == NULL)
+    {
+        userDefinedContentType = "<null>";
+    }
+
+    if ((userDefinedContentEncoding = IoTHubMessage_GetContentEncodingSystemProperty(message)) == NULL)
+    {
+        userDefinedContentEncoding = "<null>";
+    }
+
     // Message content
     if (IoTHubMessage_GetByteArray(message, (const unsigned char**)&buffer, &size) != IOTHUB_MESSAGE_OK)
     {
@@ -61,7 +77,8 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
     }
     else
     {
-        (void)printf("Received Message [%d]\r\n Message ID: %s\r\n Correlation ID: %s\r\n Data: <<<%.*s>>> & Size=%d\r\n", *counter, messageId, correlationId, (int)size, buffer, (int)size);
+        (void)printf("Received Message [%d]\r\n Message ID: %s\r\n Correlation ID: %s\r\n Content-Type: %s\r\n Content-Encoding: %s\r\n Data: <<<%.*s>>> & Size=%d\r\n", 
+            *counter, messageId, correlationId, userDefinedContentType, userDefinedContentEncoding, (int)size, buffer, (int)size);
         // If we receive the work 'quit' then we stop running
         if (size == (strlen("quit") * sizeof(char)) && memcmp(buffer, "quit", size) == 0)
         {
@@ -136,13 +153,13 @@ void iothub_client_sample_mqtt_run(void)
             bool traceOn = true;
             IoTHubClient_LL_SetOption(iotHubClientHandle, "logtrace", &traceOn);
 
-#ifdef MBED_BUILD_TIMESTAMP
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
             // For mbed add the certificate information
             if (IoTHubClient_LL_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
             {
                 printf("failure to set option \"TrustedCerts\"\r\n");
             }
-#endif // MBED_BUILD_TIMESTAMP
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
 
             /* Setting Message call back, so we can receive Commands. */
             if (IoTHubClient_LL_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, &receiveContext) != IOTHUB_CLIENT_OK)
@@ -173,6 +190,8 @@ void iothub_client_sample_mqtt_run(void)
 
                             (void)IoTHubMessage_SetMessageId(messages[iterator].messageHandle, "MSG_ID");
                             (void)IoTHubMessage_SetCorrelationId(messages[iterator].messageHandle, "CORE_ID");
+                            (void)IoTHubMessage_SetContentTypeSystemProperty(messages[iterator].messageHandle, "application%2Fjson");
+                            (void)IoTHubMessage_SetContentEncodingSystemProperty(messages[iterator].messageHandle, "utf-8");
 
                             messages[iterator].messageTrackingId = iterator;
                             MAP_HANDLE propMap = IoTHubMessage_Properties(messages[iterator].messageHandle);

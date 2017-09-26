@@ -7,6 +7,7 @@
 #include "azure_c_shared_utility/tlsio.h"
 #include "azure_c_shared_utility/platform.h"
 #include "iothubtransport_mqtt_common.h"
+#include "azure_c_shared_utility/xlogging.h"
 
 static XIO_HANDLE getIoTransportProvider(const char* fully_qualified_name, const MQTT_TRANSPORT_PROXY_OPTIONS* mqtt_transport_proxy_options)
 {

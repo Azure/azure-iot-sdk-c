@@ -8,12 +8,17 @@
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "iothub_client.h"
+#include "iothub_client_options.h"
 #include "iothub_message.h"
 #include "iothubtransportamqp.h"
 
 #ifdef MBED_BUILD_TIMESTAMP
-#include "certs.h"
+#define SET_TRUSTED_CERT_IN_SAMPLES
 #endif // MBED_BUILD_TIMESTAMP
+
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+#include "certs.h"
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 /*String containing Hostname, Device Id & Device Key in the format:                         */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
@@ -40,6 +45,8 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
     size_t size = 0;
     const char* messageId;
     const char* correlationId;
+    const char* userDefinedContentType;
+    const char* userDefinedContentEncoding;
 
     // Message properties
     if ((messageId = IoTHubMessage_GetMessageId(message)) == NULL)
@@ -52,6 +59,16 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
         correlationId = "<null>";
     }
 
+    if ((userDefinedContentType = IoTHubMessage_GetContentTypeSystemProperty(message)) == NULL)
+    {
+        userDefinedContentType = "<null>";
+    }
+
+    if ((userDefinedContentEncoding = IoTHubMessage_GetContentEncodingSystemProperty(message)) == NULL)
+    {
+        userDefinedContentEncoding = "<null>";
+    }
+
     // Message content
     IOTHUBMESSAGE_CONTENT_TYPE contentType = IoTHubMessage_GetContentType(message);
 
@@ -59,7 +76,8 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
     {
         if (IoTHubMessage_GetByteArray(message, &buffer, &size) == IOTHUB_MESSAGE_OK)
         {
-            (void)printf("Received Message [%d]\r\n Message ID: %s\r\n Correlation ID: %s\r\n BINARY Data: <<<%.*s>>> & Size=%d\r\n", *counter, messageId, correlationId, (int)size, buffer, (int)size);
+            (void)printf("Received Message [%d]\r\n Message ID: %s\r\n Correlation ID: %s\r\n Content-Type: %s\r\n Content-Encoding: %s\r\n BINARY Data: <<<%.*s>>> & Size=%d\r\n", 
+                *counter, messageId, correlationId, userDefinedContentType, userDefinedContentEncoding, (int)size, buffer, (int)size);
         }
         else
         {
@@ -70,7 +88,8 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
     {
         if ((buffer = (const unsigned char*)IoTHubMessage_GetString(message)) != NULL && (size = strlen((const char*)buffer)) > 0)
         {
-            (void)printf("Received Message [%d]\r\n Message ID: %s\r\n Correlation ID: %s\r\n STRING Data: <<<%.*s>>> & Size=%d\r\n", *counter, messageId, correlationId, (int)size, buffer, (int)size);
+            (void)printf("Received Message [%d]\r\n Message ID: %s\r\n Correlation ID: %s\r\n Content-Type: %s\r\n Content-Encoding: %s\r\n STRING Data: <<<%.*s>>> & Size=%d\r\n", 
+                *counter, messageId, correlationId, userDefinedContentType, userDefinedContentEncoding, (int)size, buffer, (int)size);
 
             // If we receive the work 'quit' then we stop running
         }
@@ -156,17 +175,17 @@ void iothub_client_sample_amqp_run(void)
             bool traceOn = true;
             IoTHubClient_LL_SetOption(iotHubClientHandle, "logtrace", &traceOn);
 
-            // Set keep alive is optional. If it is not set the default (240 secs) will be used. If it is zero the service won't send keep alive messages.
+            // Set keep alive is optional. If it is not set the default (240 secs) will be used.
             uint32_t c2d_keep_alive_freq_secs = 120;
-            IoTHubClient_LL_SetOption(iotHubClientHandle, "c2d_keep_alive_freq_secs", &c2d_keep_alive_freq_secs);
+            IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_C2D_KEEP_ALIVE_FREQ_SECS, &c2d_keep_alive_freq_secs);
 
-#ifdef MBED_BUILD_TIMESTAMP
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
             // For mbed add the certificate information
             if (IoTHubClient_LL_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
             {
                 printf("failure to set option \"TrustedCerts\"\r\n");
             }
-#endif // MBED_BUILD_TIMESTAMP
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
 
             /* Setting Message call back, so we can receive Commands. */
             if (IoTHubClient_LL_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, &receiveContext) != IOTHUB_CLIENT_OK)
@@ -198,6 +217,13 @@ void iothub_client_sample_amqp_run(void)
                             {
                                 (void)printf("ERROR: Map_AddOrUpdate Failed!\r\n");
                             }
+
+                            // Setting messages with the same UUID values just for example.
+                            (void)IoTHubMessage_SetMessageId(messages[iterator].messageHandle, "dec14a98-c5fc-430e-b4e3-33c1c434dcaf");
+                            (void)IoTHubMessage_SetCorrelationId(messages[iterator].messageHandle, "33c1c434dcaf-c5fc-430e-b4e3-dec14a98");
+
+                            (void)IoTHubMessage_SetContentTypeSystemProperty(messages[iterator].messageHandle, "application/json");
+                            (void)IoTHubMessage_SetContentEncodingSystemProperty(messages[iterator].messageHandle, "utf-8");
 
                             if (IoTHubClient_LL_SendEventAsync(iotHubClientHandle, messages[iterator].messageHandle, SendConfirmationCallback, &messages[iterator]) != IOTHUB_CLIENT_OK)
                             {

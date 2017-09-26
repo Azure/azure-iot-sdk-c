@@ -11,7 +11,7 @@ endif()
 compileAsC99()
 
 set(iothub_service_client_c_files
-../parson/parson.c
+../deps/parson/parson.c
 ./src/iothub_registrymanager.c
 ./src/iothub_messaging.c
 ./src/iothub_messaging_ll.c
@@ -23,7 +23,7 @@ set(iothub_service_client_c_files
 )
 
 set(iothub_service_client_h_files
-../parson/parson.h
+../deps/parson/parson.h
 ./inc/iothub_registrymanager.h
 ./inc/iothub_messaging.h
 ./inc/iothub_messaging_ll.h
@@ -35,7 +35,7 @@ set(iothub_service_client_h_files
 )
 
 if(MSVC)
-set_source_files_properties(../parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
+set_source_files_properties(../deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
 endif()
 
 include_directories(${SHARED_UTIL_INC_FOLDER})
@@ -45,12 +45,12 @@ include_directories(${UAMQP_INCLUDES})
 
 set(IOTHUB_SERVICE_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "This is the include folder for iothub_service_client" FORCE)
 
-include_directories(${CMAKE_CURRENT_LIST_DIR}/../parson ${IOTHUB_SERVICE_CLIENT_INC_FOLDER} ${CMAKE_CURRENT_LIST_DIR}/../iothub_client/inc)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/../deps/parson ${IOTHUB_SERVICE_CLIENT_INC_FOLDER} ${CMAKE_CURRENT_LIST_DIR}/../iothub_client/inc)
 
 IF(WIN32)
-	#windows needs this define
-	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-	add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
+    #windows needs this define
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
 ENDIF(WIN32)
 
 if (${build_as_dynamic})
@@ -69,8 +69,8 @@ endif()
 
 if (NOT ${ARCHITECTURE} STREQUAL "ARM")
     if (NOT ${skip_samples})
-	add_subdirectory(samples)
-	endif()
+    add_subdirectory(samples)
+    endif()
 endif()
 
 if(NOT IN_OPENWRT)
@@ -81,8 +81,13 @@ if(NOT IN_OPENWRT)
 endif()
 
 if(${use_installed_dependencies})
+
     if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
         set(CMAKE_INSTALL_LIBDIR "lib")
+    endif()
+    
+    if(NOT DEFINED CMAKE_INSTALL_INCLUDEDIR)
+        set(CMAKE_INSTALL_INCLUDEDIR "include")
     endif()
 
     install(TARGETS iothub_service_client EXPORT azure_iot_sdksTargets
@@ -93,12 +98,12 @@ if(${use_installed_dependencies})
     )
     install(FILES ${iothub_service_client_h_files} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
 else()
-	set(install_staticlibs
-		iothub_service_client
-	)
-	install(FILES ${iothub_service_client_h_files}
-		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/iothub_service_client) 
-	install(TARGETS ${install_staticlibs} 
-		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+    set(install_staticlibs
+        iothub_service_client
+    )
+    install(FILES ${iothub_service_client_h_files}
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/iothub_service_client) 
+    install(TARGETS ${install_staticlibs} 
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()

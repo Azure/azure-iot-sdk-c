@@ -65,8 +65,6 @@ IoTHubTransport_MQTT_Common_Create shall create a TRANSPORT_LL_HANDLE that can b
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_005: [** MQTT transport shall use EXPONENTIAL_WITH_BACK_OFF as default retry policy **]**
 
-
-
 ### IoTHubTransport_MQTT_Common_Destroy
 
 ```c
@@ -181,7 +179,7 @@ int IoTHubTransport_MQTT_Common_Subscribe(TRANSPORT_LL_HANDLE handle)
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_016: [** IoTHubTransport_MQTT_Common_Subscribe shall set a flag to enable mqtt_client_subscribe to be called to subscribe to the Message Topic.**]**
 
-**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_035: [** If current packet state is not CONNACK, DISCONNECT_TYPE, or PACKET_TYPE_ERROR then IoTHubTransport_MQTT_Common_Subscribe shall set the packet state to SUBSCRIBE_TYPE.**]** 
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_035: [** If current packet state is not CONNACK, DISCONNECT_TYPE, or PACKET_TYPE_ERROR then IoTHubTransport_MQTT_Common_Subscribe shall set the packet state to SUBSCRIBE_TYPE.**]**
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_017: [** Upon failure IoTHubTransport_MQTT_Common_Subscribe shall return a non-zero value.**]**
 
@@ -247,6 +245,12 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIEN
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_053: [** `IoTHubTransport_MQTT_Common_DoWork` shall check for the MessageId property and if found add the value as a system property in the format of `$.mid=<id>` **]**
 
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_010: [** `IoTHubTransport_MQTT_Common_DoWork` shall check for the ContentType property and if found add the `value` as a system property in the format of `$.ct=<value>` **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_011: [** `IoTHubTransport_MQTT_Common_DoWork` shall check for the ContentEncoding property and if found add the `value` as a system property in the format of `$.ce=<value>` **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_058: [** If the sas token has timed out `IoTHubTransport_MQTT_Common_DoWork` shall disconnect from the mqtt client and destroy the transport information and wait for reconnect. **]**
+
 ### IoTHubTransport_MQTT_Common_GetSendStatus
 
 ```c
@@ -272,6 +276,8 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SetOption(TRANSPORT_LL_HANDLE h
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_032: [** IoTHubTransport_MQTT_Common_SetOption shall pass down the option to xio_setoption if the option parameter is not a known option string for the MQTT transport.**]**
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_036: [** If the option parameter is set to "keepalive" then the value shall be a int_ptr and the value will determine the mqtt keepalive time that is set for pings.**]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_052: [** If the option parameter is set to "sas_token_lifetime" then the value shall be a size_t_ptr and the value will determine the mqtt sas token lifetime.**]**
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_037: [** If the option parameter is set to supplied int_ptr keepalive is the same value as the existing keepalive then IoTHubTransport_MQTT_Common_SetOption shall do nothing.**]**
 
@@ -352,6 +358,10 @@ static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE msgHandle, void* call
 **SRS_IOTHUB_MQTT_TRANSPORT_07_055: [** if device_twin_msg_type is not RETRIEVE_PROPERTIES then `mqtt_notification_callback` shall call IoTHubClient_LL_ReportedStateComplete **]**
 
 **SRS_IOTHUB_MQTT_TRANSPORT_07_053: [** If type is IOTHUB_TYPE_DEVICE_METHODS, then on success `mqtt_notification_callback` shall call IoTHubClient_LL_DeviceMethodComplete. **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_012: [** If type is IOTHUB_TYPE_TELEMETRY and the system property `$.ct` is defined, its value shall be set on the IOTHUB_MESSAGE_HANDLE's ContentType property **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_013: [** If type is IOTHUB_TYPE_TELEMETRY and the system property `$.ce` is defined, its value shall be set on the IOTHUB_MESSAGE_HANDLE's ContentEncoding property **]**
 
 **SRS_IOTHUB_MQTT_TRANSPORT_07_056: [** If type is IOTHUB_TYPE_TELEMETRY, then on success `mqtt_notification_callback` shall call IoTHubClient_LL_MessageCallback. **]**
 

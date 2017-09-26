@@ -25,7 +25,7 @@ Complete the following steps to install the AzureIoT binaries on your developmen
     sudo apt-get install -y azure-iot-sdk-c-dev
     ```
 
-## Create and  application using CMake
+## Create an application using CMake
 
 The following steps outline how you can use CMake to build an IoT Hub client application after you have installed the azure-iot-sdk-c-dev package on your development machine.
 

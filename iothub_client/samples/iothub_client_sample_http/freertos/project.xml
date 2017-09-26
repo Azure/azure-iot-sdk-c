@@ -52,7 +52,7 @@
 		    <dir name = "$(AZURESDK_PATH)/uamqp/inc"/>
 		    <dir name = "$(AZURESDK_PATH)/c-utility/inc"/>
 		    <dir name = "$(AZURESDK_PATH)/c-utility/adapters"/>
-		    <dir name = "$(AZURESDK_PATH)/parson"/>
+		    <dir name = "$(AZURESDK_PATH)/deps/parson"/>
 		    <dir name = "$(AZURESDK_PATH)/certs"/>
 
             <dir name = "$(CYCLONETCP_PATH)/inc"/>
@@ -98,7 +98,7 @@
 		    <file name = "$(AZURESDK_PATH)/c-utility/adapters/threadapi_freertos.c"/>
 		    <file name = "$(AZURESDK_PATH)/c-utility/adapters/httpapi_compact.c"/>
 		    <dir name = "$(AZURESDK_PATH)/certs"/>
-		    <dir name = "$(AZURESDK_PATH)/parson">
+		    <dir name = "$(AZURESDK_PATH)/deps/parson">
                 <exclude name = "tests.c"/>
             </dir>
 

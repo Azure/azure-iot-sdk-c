@@ -209,7 +209,9 @@ MultiDevTransportHttp shall perform the following actions on each device:
 
 **SRS_TRANSPORTMULTITHTTP_17_076: [** A clone of the event HTTP request headers shall be created. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_077: [** The cloned HTTP headers shall have the HTTP header "Content-Type" set to "application/octet-stream".  **]**      
-**SRS_TRANSPORTMULTITHTTP_17_078: [** Every message property "property":"value" shall be added to the HTTP headers as an individual header "iothub-app-property":"value". **]**      
+**SRS_TRANSPORTMULTITHTTP_17_078: [** Every message property "property":"value" shall be added to the HTTP headers as an individual header "iothub-app-property":"value". **]**  
+**SRS_TRANSPORTMULTITHTTP_09_001: [** If the IoTHubMessage being sent contains property `content-type` it shall be added to the HTTP headers as "iothub-contenttype":"value". **]**  
+**SRS_TRANSPORTMULTITHTTP_09_002: [** If the IoTHubMessage being sent contains property `content-encoding` it shall be added to the HTTP headers as "iothub-contentencoding":"value". **]**  
 **SRS_TRANSPORTMULTITHTTP_17_079: [** If any HTTP header operation fails, `_DoWork` shall advance to the next action.  **]**   
 **SRS_TRANSPORTMULTITHTTP_17_080: [** `IoTHubTransportHttp_DoWork` shall call `HTTPAPIEX_SAS_ExecuteRequest` passing the following parameters **]**   
 - requestType: POST    
@@ -242,6 +244,8 @@ MultiDevTransportHttp shall perform the following actions on each device:
 **SRS_TRANSPORTMULTITHTTP_17_089: [** `_DoWork` shall assemble an `IOTHUBMESSAGE_HANDLE` from the received HTTP content (using the responseContent buffer). **]**   
 **SRS_TRANSPORTMULTITHTTP_17_090: [** All the HTTP headers of the form iothub-app-name:somecontent shall be transformed in message properties {name, somecontent}.  **]**   
 **SRS_TRANSPORTMULTITHTTP_17_091: [** The HTTP header value of iothub-messageid shall be set in the `IoTHub_SetMessageId`.  **]**   
+**SRS_TRANSPORTMULTITHTTP_09_003: [** The HTTP header value of `ContentType` shall be set in the `IoTHubMessage_SetCustomContentType`.  **]**   
+**SRS_TRANSPORTMULTITHTTP_09_004: [** The HTTP header value of `ContentEncoding` shall be set in the `IoTHub_SetContentEncoding`.  **]**   
 **SRS_TRANSPORTMULTITHTTP_17_092: [** If assembling the message fails in any way, then `_DoWork` shall "abandon" the message. **]**   
 **SRS_TRANSPORTMULTITHTTP_10_006: [** If assembling the transport context fails, `_DoWork` shall "abandon" the message.**]**
 **SRS_TRANSPORTMULTITHTTP_10_007: [** If a message clone fails, `_DoWork` shall "abandon" the message.**]**
