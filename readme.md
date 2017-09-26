@@ -10,19 +10,17 @@ The C SDKs and library code:
 * Avoids compiler extensions.
 * In the device client SDK, the library exposes a platform abstraction layer to isolate OS dependencies (threading and mutual exclusion mechanisms, communications protocol e.g. HTTP). Refer to our [porting guide][c-porting-guide] for more information.
 
+The API reference documentation for the C SDKs is [here][c-api-reference].
+
 To find SDKs in other languages for Azure IoT, please refer to the [azure-iot-sdks][azure-iot-sdks] repository.
 
 ## Developing applications for Azure IoT
 
 Visit [Azure IoT Dev Center][iot-dev-center] to learn more about developing applications for Azure IoT.
 
-## How to clone the repository
+## Key features and roadmap
 
-The repository is using [GitHub Submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules) for its dependencies. In order to automatically clone these submodules, you need to use the --recursive option as described here:
-
-```
-git clone --recursive https://github.com/Azure/azure-iot-sdk-c.git 
-```
+[INSERT CHART FROM EXCEL] *Need help with formatting
 
 ## How to use the Azure IoT SDKs for C
 
@@ -31,13 +29,15 @@ git clone --recursive https://github.com/Azure/azure-iot-sdk-c.git
   * On mbed:                                      [Device SDK library on MBED](./iothub_client/readme.md#mbed)
   * On Arduino:                                   [Device SDK library in the Arduino IDE](./iothub_client/readme.md#arduino)
   * On Windows:                                   [Device SDK on NuGet](./iothub_client/readme.md#nugetpackage)
+* **Clone the repository**: The repository is using [GitHub Submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules) for its dependencies. In order to automatically clone these submodules, you need to use the --recursive option as described here:
+```
+git clone --recursive https://github.com/Azure/azure-iot-sdk-c.git 
+```
 * **Compiling the source code**: when no package or library is available for your platform or if you want to modify the SDKs code, or port the SDKs to a new platform, then you can leverage the build environement provided in the repository.
   * [Device SDK](./iothub_client/readme.md#compile)
   * [Service SDK](./iothub_service_client/readme.md#compile)
 
-The API reference documentation for the C SDKs is [here][c-api-reference].
-
-## samples
+## Samples
 
 In the repository, you will find a set of simple samples that will help you get started:
 * [Device SDK samples](./iothub_client/samples/)
@@ -46,7 +46,9 @@ In the repository, you will find a set of simple samples that will help you get 
 
 ## OS platforms and hardware compatibility
 
-The IoT Hub device SDK for C can be used with a broad range of OS platforms and devices.
+The IoT Hub device SDK for C can be used with a broad range of OS platforms and devices:
+[INCLUDE A LIST OF PLATFORMS SUPPORTED BY C OUT OF BOX]
+
 The minimum requirements are for the device platform to support the following:
 
 - **Being capable of establishing an IP connection**: only IP-capable devices can communicate directly with Azure IoT Hub.
@@ -86,8 +88,6 @@ Here is what you can expect Microsoft Support to be able to help with:
 * [Cross compilation example][c-cross-compile]
 * [C SDKs API reference][c-api-reference]
 
---- 
-
 ## SDK folder structure
 
 ### /c-utility, /uamqp, /umqtt, /parson
@@ -97,6 +97,10 @@ These are git submodules that contain code, such as adapters and protocol implem
 ### /blob
 
 This folder contains client components that enable access to Azure blob storage.
+
+### /dps_client
+
+This folder contains client library for device provisioning service.
 
 ### /certs
 
@@ -181,3 +185,4 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 [c-porting-guide]: doc/porting_guide.md
 [c-cross-compile]: doc/SDK_cross_compile_example.md
 [c-api-reference]: https://azure.github.io/azure-iot-sdk-c/index.html
+[azure-iot-sdks]:https://github.com/azure/azure-iot-sdks
