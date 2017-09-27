@@ -7,10 +7,12 @@
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/shared_util_options.h"
 #include "iothub_client.h"
 #include "iothub_message.h"
 #include "iothubtransportamqp_websockets.h"
 #include "../../../certs/certs.h"
+#include "iothub_client_options.h"
 
 static const char* hubName = "[IoT Hub Name]";
 static const char* hubSuffix = "[IoT Hub Suffix]";
@@ -23,34 +25,34 @@ static const char* deviceKey2 = "[device key 2]";
 
 static int DeviceMethodCallback(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* resp_size, void* userContextCallback)
 {
-	const char* device_id = (const char*)userContextCallback;
+    const char* device_id = (const char*)userContextCallback;
 
-	(void)printf("\r\nDevice Method called for device %s\r\n", device_id);
-	(void)printf("Device Method name:    %s\r\n", method_name);
-	(void)printf("Device Method payload: %.*s\r\n", (int)size, (const char*)payload);
+    (void)printf("\r\nDevice Method called for device %s\r\n", device_id);
+    (void)printf("Device Method name:    %s\r\n", method_name);
+    (void)printf("Device Method payload: %.*s\r\n", (int)size, (const char*)payload);
 
-	int status = 200;
-	char* RESPONSE_STRING = "{ \"Response\": \"This is the response from the device\" }";
-	(void)printf("\r\nResponse status: %d\r\n", status);
-	(void)printf("Response payload: %s\r\n\r\n", RESPONSE_STRING);
+    int status = 200;
+    char* RESPONSE_STRING = "{ \"Response\": \"This is the response from the device\" }";
+    (void)printf("\r\nResponse status: %d\r\n", status);
+    (void)printf("Response payload: %s\r\n\r\n", RESPONSE_STRING);
 
-	*resp_size = strlen(RESPONSE_STRING);
-	if ((*response = malloc(*resp_size)) == NULL)
-	{
-		status = -1;
-	}
-	else
-	{
-		memcpy(*response, RESPONSE_STRING, *resp_size);
-	}
-	return status;
+    *resp_size = strlen(RESPONSE_STRING);
+    if ((*response = malloc(*resp_size)) == NULL)
+    {
+        status = -1;
+    }
+    else
+    {
+        memcpy(*response, RESPONSE_STRING, *resp_size);
+    }
+    return status;
 }
 
 void iothub_client_sample_amqp_shared_ws_methods_run(void)
 {
-	TRANSPORT_HANDLE transport_handle;
-	IOTHUB_CLIENT_HANDLE iotHubClientHandle1;
-	IOTHUB_CLIENT_HANDLE iotHubClientHandle2;
+    TRANSPORT_HANDLE transport_handle;
+    IOTHUB_CLIENT_HANDLE iotHubClientHandle1;
+    IOTHUB_CLIENT_HANDLE iotHubClientHandle2;
 
     (void)printf("Starting the IoTHub client sample C2D methods on AMQP over WebSockets with multiplexing ...\r\n");
 
@@ -96,10 +98,10 @@ void iothub_client_sample_amqp_shared_ws_methods_run(void)
             else
             {
                 bool traceOn = true;
-                IoTHubClient_SetOption(iotHubClientHandle1, "logtrace", &traceOn);
+                IoTHubClient_SetOption(iotHubClientHandle1, OPTION_LOG_TRACE, &traceOn);
 
                 // Add certificate information
-                if (IoTHubClient_SetOption(iotHubClientHandle1, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
+                if (IoTHubClient_SetOption(iotHubClientHandle1, OPTION_TRUSTED_CERT, certificates) != IOTHUB_CLIENT_OK)
                 {
                     (void)printf("failure to set option \"TrustedCerts\"\r\n");
                 }

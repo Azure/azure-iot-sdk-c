@@ -17,4 +17,5 @@ set(${theseTestsName}_c_files
 set(${theseTestsName}_h_files
 )
 
+include_directories(${IOTHUB_CLIENT_INC_FOLDER})
 build_c_test_artifacts(${theseTestsName} ON "tests/azure_dev_auth_tests")

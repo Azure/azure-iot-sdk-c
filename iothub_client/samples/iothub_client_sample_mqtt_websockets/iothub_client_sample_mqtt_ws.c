@@ -9,6 +9,9 @@
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/platform.h"
+#include "azure_c_shared_utility/shared_util_options.h"
+#include "iothub_client_options.h"
+
 #include "iothubtransportmqtt_websockets.h"
 #include "../../../certs/certs.h"
 
@@ -134,7 +137,7 @@ void iothub_client_sample_mqtt_run(void)
             IoTHubClient_LL_SetOption(iotHubClientHandle, "logtrace", &traceOn);
 
             // For mbed add the certificate information
-            if (IoTHubClient_LL_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
+            if (IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_TRUSTED_CERT, certificates) != IOTHUB_CLIENT_OK)
             {
                 printf("failure to set option \"TrustedCerts\"\r\n");
             }
