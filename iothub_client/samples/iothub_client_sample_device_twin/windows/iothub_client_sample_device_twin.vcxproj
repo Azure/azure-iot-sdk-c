@@ -184,7 +184,6 @@
     <ClCompile Include="..\iothub_client_sample_device_twin.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\iothub_client_sample_device_twin.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -17,7 +17,6 @@ set(iothub_client_sample_device_twin_c_files
 )
 
 set(iothub_client_sample_device_twin_h_files
-    ../iothub_client_sample_device_twin.h
 )
 
 add_executable(iothub_client_sample_device_twin ${iothub_client_sample_device_twin_c_files} ${iothub_client_sample_device_twin_h_files})

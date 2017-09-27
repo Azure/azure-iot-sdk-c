@@ -4,18 +4,25 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "iothub_client.h"
-#include "iothub_message.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/macro_utils.h"
 #include "azure_c_shared_utility/threadapi.h"
-#include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/platform.h"
-#include "iothubtransportmqtt.h"
-#include "iothubtransportamqp.h"
+#include "iothub_client.h"
+#include "iothub_client_options.h"
+#include "iothub_message.h"
 
-#ifdef MBED_BUILD_TIMESTAMP
+#ifdef USE_AMQP
+#include "iothubtransportamqp.h"
+#endif
+
+#ifdef USE_MQTT
+#include "iothubtransportmqtt.h"
+#endif
+
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
 #include "certs.h"
-#endif // MBED_BUILD_TIMESTAMP
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 DEFINE_ENUM_STRINGS(DEVICE_TWIN_UPDATE_STATE, DEVICE_TWIN_UPDATE_STATE_VALUES);
 
@@ -23,7 +30,7 @@ DEFINE_ENUM_STRINGS(DEVICE_TWIN_UPDATE_STATE, DEVICE_TWIN_UPDATE_STATE_VALUES);
 /*String containing Hostname, Device Id & Device Key in the format:                         */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessSignature=<device_sas_token>"    */
-static const char* connectionString = "HostName=iot-sdks-test.azure-devices.net;DeviceId=ewertons-device2;SharedAccessKey=yfIId8422KUMOnDuvhDiz54rg2fQ1Hndbwd/XPh5PUo=";
+static const char* connectionString = "[device connection string]";
 
 static char msgText[1024];
 static char propText[1024];
@@ -34,7 +41,7 @@ static void deviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsi
 {
     (void)userContextCallback;
 
-    printf("Device Twin update received (state=%s, size=%lu): %s\r\n", 
+    printf("Device Twin update received (state=%s, size=%zu): %s\r\n", 
         ENUM_TO_STRING(DEVICE_TWIN_UPDATE_STATE, update_state), size, payLoad);
 }
 
@@ -50,16 +57,21 @@ static void reportedStateCallback(int status_code, void* userContextCallback)
 void iothub_client_sample_device_twin_run(void)
 {
     IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle;
-
     g_continueRunning = true;
-    
+
+#ifdef USE_AMQP
+    IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol = AMQP_Protocol;
+#else
+    IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol = MQTT_Protocol;
+#endif
+
     if (platform_init() != 0)
     {
         (void)printf("Failed to initialize the platform.\r\n");
     }
     else
     {
-        if ((iotHubClientHandle = IoTHubClient_LL_CreateFromConnectionString(connectionString, MQTT_Protocol)) == NULL)
+        if ((iotHubClientHandle = IoTHubClient_LL_CreateFromConnectionString(connectionString, protocol)) == NULL)
         {
             (void)printf("ERROR: iotHubClientHandle is NULL!\r\n");
         }
@@ -69,15 +81,15 @@ void iothub_client_sample_device_twin_run(void)
             const char* reportedState = "{ 'device_property': 'new_value'}";
             size_t reportedStateSize = strlen(reportedState);
 
-            (void)IoTHubClient_LL_SetOption(iotHubClientHandle, "logtrace", &traceOn);
+            (void)IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &traceOn);
 
-#ifdef MBED_BUILD_TIMESTAMP
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
             // For mbed add the certificate information
             if (IoTHubClient_LL_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
             {
-                printf("failure to set option \"TrustedCerts\"\r\n");
+                (void)printf("failure to set option \"TrustedCerts\"\r\n");
             }
-#endif // MBED_BUILD_TIMESTAMP
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
 
             // Check the return of all API calls when developing your solution. Return checks ommited for sample simplification.
 
