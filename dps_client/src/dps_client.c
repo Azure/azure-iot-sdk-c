@@ -17,18 +17,10 @@
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/tickcounter.h"
+#include "iothub_client_options.h"
 
 #include "azure_hub_modules/dps_sec_client.h"
 #include "azure_hub_modules/dps_client.h"
-
-static const char* OPTION_LOG_TRACE = "logtrace";
-static const char* OPTION_X509_CERT = "x509certificate";
-static const char* OPTION_X509_PRIVATE_KEY = "x509privatekey";
-static const char* OPTION_KEEP_ALIVE = "keepalive";
-
-static const char* OPTION_PROXY_HOST = "proxy_address";
-static const char* OPTION_PROXY_USERNAME = "proxy_username";
-static const char* OPTION_PROXY_PASSWORD = "proxy_password";
 
 static const char* JSON_NODE_STATUS = "status";
 static const char* JSON_NODE_REG_STATUS = "registrationStatus";
@@ -826,7 +818,7 @@ DPS_RESULT DPS_LL_SetOption(DPS_LL_HANDLE handle, const char* option_name, const
     }
     else
     {
-        if (strcmp(option_name, "TrustedCerts") == 0)
+        if (strcmp(option_name, OPTION_TRUSTED_CERT) == 0)
         {
             const char* cert_info = (const char*)value;
             if (handle->dps_transport_protocol->dps_transport_trusted_cert(handle->transport_handle, cert_info) != 0)

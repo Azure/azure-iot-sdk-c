@@ -13,11 +13,11 @@
 #include "azure_uamqp_c/sasl_mssbcbs.h"
 #include "azure_uamqp_c/connection.h"
 #include "azure_c_shared_utility/xlogging.h"
+#include "iothub_client_options.h"
 
 #define RESULT_OK                            0
 #define DEFAULT_INCOMING_WINDOW_SIZE         UINT_MAX
 #define DEFAULT_OUTGOING_WINDOW_SIZE         100
-#define SASL_IO_OPTION_LOG_TRACE             "logtrace"
 #define DEFAULT_UNIQUE_ID_LENGTH             40
 
 typedef struct AMQP_CONNECTION_INSTANCE_TAG
@@ -69,7 +69,7 @@ static int create_sasl_components(AMQP_CONNECTION_INSTANCE* instance)
             result = __FAILURE__;
         }
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_017: [The sasl_io "logtrace" option shall be set using xio_setoption(), passing `instance->is_trace_on`]
-        else if (xio_setoption(sasl_io, SASL_IO_OPTION_LOG_TRACE, (const void*)&instance->is_trace_on) != RESULT_OK)
+        else if (xio_setoption(sasl_io, OPTION_LOG_TRACE, (const void*)&instance->is_trace_on) != RESULT_OK)
         {
             LogError("Failed setting the SASL I/O logging trace option (xio_setoption failed)");
             xio_destroy(sasl_io);
@@ -527,7 +527,7 @@ int amqp_connection_set_logging(AMQP_CONNECTION_HANDLE conn_handle, bool is_trac
 
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_054: [Tracing on `instance->sasl_io` shall be set to `instance->is_trace_on` if the value has changed]
         if (instance->sasl_io != NULL &&
-            xio_setoption(instance->sasl_io, SASL_IO_OPTION_LOG_TRACE, (const void*)&instance->is_trace_on) != RESULT_OK)
+            xio_setoption(instance->sasl_io, OPTION_LOG_TRACE, (const void*)&instance->is_trace_on) != RESULT_OK)
         {
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_072: [If xio_setoption() fails, amqp_connection_set_logging() shall fail and return __FAILURE__]
             result = __FAILURE__;

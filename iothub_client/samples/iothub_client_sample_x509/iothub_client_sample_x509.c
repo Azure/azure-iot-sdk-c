@@ -18,6 +18,7 @@ and removing calls to _DoWork will yield the same results. */
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/platform.h"
+#include "azure_c_shared_utility/shared_util_options.h"
 
 #ifdef USE_MQTT
 #include "iothubtransportmqtt.h"
@@ -103,7 +104,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
     else
     {
         (void)printf("Received Message [%d]\r\n Message ID: %s\r\n Correlation ID: %s\r\n Data: <<<%.*s>>> & Size=%d\r\n", *counter, messageId, correlationId, (int)size, buffer, (int)size);
-		if (size == (strlen("quit") * sizeof(char)) && memcmp(buffer, "quit", size) == 0)
+        if (size == (strlen("quit") * sizeof(char)) && memcmp(buffer, "quit", size) == 0)
         {
             g_continueRunning = false;
         }
@@ -224,7 +225,7 @@ int main(void)
             {
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
                 // For mbed add the certificate information
-                if (IoTHubClient_LL_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
+                if (IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_TRUSTED_CERT, certificates) != IOTHUB_CLIENT_OK)
                 {
                     printf("failure to set option \"TrustedCerts\"\r\n");
                 }

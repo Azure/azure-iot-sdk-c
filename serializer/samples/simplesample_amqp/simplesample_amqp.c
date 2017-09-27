@@ -13,9 +13,11 @@
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/sastoken.h"
 #include "azure_c_shared_utility/platform.h"
+#include "azure_c_shared_utility/shared_util_options.h"
 #include "iothub_client.h"
 #include "iothubtransportamqp.h"
 #include "iothub_client_ll.h"
+#include "iothub_client_options.h"
 #endif
 
 #ifdef MBED_BUILD_TIMESTAMP
@@ -167,7 +169,7 @@ void simplesample_amqp_run(void)
 
             // Turn on Log 
             bool trace = true;
-            (void)IoTHubClient_SetOption(iotHubClientHandle, "logtrace", &trace);
+            (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &trace);
 
             if (iotHubClientHandle == NULL)
             {
@@ -177,7 +179,7 @@ void simplesample_amqp_run(void)
             {
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
                 // For mbed add the certificate information
-                if (IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
+                if (IoTHubClient_SetOption(iotHubClientHandle, OPTION_TRUSTED_CERT, certificates) != IOTHUB_CLIENT_OK)
                 {
                     (void)printf("failure to set option \"TrustedCerts\"\r\n");
                 }

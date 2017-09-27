@@ -8,9 +8,11 @@
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/shared_util_options.h"
 #include "iothub_client.h"
 #include "iothub_message.h"
 #include "iothubtransportamqp_websockets.h"
+#include "iothub_client_options.h"
 
 #ifdef MBED_BUILD_TIMESTAMP
 #define SET_TRUSTED_CERT_IN_SAMPLES
@@ -39,7 +41,7 @@ static char propText[1024];
 typedef struct EVENT_INSTANCE_TAG
 {
     IOTHUB_MESSAGE_HANDLE messageHandle;
-	const char* deviceId;
+    const char* deviceId;
     size_t messageTrackingId;  // For tracking the messages within the user callback.
 } EVENT_INSTANCE;
 
@@ -130,82 +132,82 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
 static void SendConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
 {
     EVENT_INSTANCE* eventInstance = (EVENT_INSTANCE*)userContextCallback;
-	(void)printf("Confirmation received for message %zu from device %s with result = %s\r\n", eventInstance->messageTrackingId, eventInstance->deviceId, ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
+    (void)printf("Confirmation received for message %zu from device %s with result = %s\r\n", eventInstance->messageTrackingId, eventInstance->deviceId, ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
     /* Some device specific action code goes here... */
 }
 
 static int create_events(EVENT_INSTANCE* events, const char* deviceId)
 {
-	int result = 0;
+    int result = 0;
 
-	srand((unsigned int)time(NULL));
-	double avgWindSpeed = 10.0;
+    srand((unsigned int)time(NULL));
+    double avgWindSpeed = 10.0;
     double minTemperature = 20.0;
     double minHumidity = 60.0;
     double temperature = 0;
     double humidity = 0;
 
-	int i;
-	for (i = 0; i < MESSAGE_COUNT; i++)
-	{
+    int i;
+    for (i = 0; i < MESSAGE_COUNT; i++)
+    {
         temperature = minTemperature + (rand() % 10);
         humidity = minHumidity +  (rand() % 20);
 
-		if (sprintf_s(msgText, sizeof(msgText), "{\"deviceId\":\"myFirstDevice\",\"windSpeed\":%.2f,\"temperature\":%.2f,\"humidity\":%.2f}", avgWindSpeed + (rand() % 4 + 2), temperature, humidity) == 0)
-		{
-			(void)printf("ERROR: failed creating event message for device %s\r\n", deviceId);
-			result = __FAILURE__;
-		}
-		else if ((events[i].messageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText))) == NULL)
-		{
-			(void)printf("ERROR: failed creating the IOTHUB_MESSAGE_HANDLE for device %s\r\n", deviceId);
-			result = __FAILURE__;
-		}
-		else
-		{
-			MAP_HANDLE propMap;
+        if (sprintf_s(msgText, sizeof(msgText), "{\"deviceId\":\"myFirstDevice\",\"windSpeed\":%.2f,\"temperature\":%.2f,\"humidity\":%.2f}", avgWindSpeed + (rand() % 4 + 2), temperature, humidity) == 0)
+        {
+            (void)printf("ERROR: failed creating event message for device %s\r\n", deviceId);
+            result = __FAILURE__;
+        }
+        else if ((events[i].messageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText))) == NULL)
+        {
+            (void)printf("ERROR: failed creating the IOTHUB_MESSAGE_HANDLE for device %s\r\n", deviceId);
+            result = __FAILURE__;
+        }
+        else
+        {
+            MAP_HANDLE propMap;
 
-			if ((propMap = IoTHubMessage_Properties(events[i].messageHandle)) == NULL) 
-			{
-				(void)printf("ERROR: failed getting device %s's message property map\r\n", deviceId);
-				result = __FAILURE__;
-			}
-			else if (sprintf_s(propText, sizeof(propText), temperature > 28 ? "true" : "false") == 0) 
-			{
-				(void)printf("ERROR: sprintf_s failed for device %s's message property\r\n", deviceId);
-				result = __FAILURE__;
-			}
-			else if (Map_AddOrUpdate(propMap, "temperatureAlert", propText) != MAP_OK)
-			{
-				(void)printf("ERROR: Map_AddOrUpdate failed for device %s\r\n", deviceId);
-				result = __FAILURE__;
-			}
-			else
-			{
-				events[i].deviceId = deviceId;
-				events[i].messageTrackingId = i;
-				result = 0;
-			}
-		}
-	}
+            if ((propMap = IoTHubMessage_Properties(events[i].messageHandle)) == NULL) 
+            {
+                (void)printf("ERROR: failed getting device %s's message property map\r\n", deviceId);
+                result = __FAILURE__;
+            }
+            else if (sprintf_s(propText, sizeof(propText), temperature > 28 ? "true" : "false") == 0) 
+            {
+                (void)printf("ERROR: sprintf_s failed for device %s's message property\r\n", deviceId);
+                result = __FAILURE__;
+            }
+            else if (Map_AddOrUpdate(propMap, "temperatureAlert", propText) != MAP_OK)
+            {
+                (void)printf("ERROR: Map_AddOrUpdate failed for device %s\r\n", deviceId);
+                result = __FAILURE__;
+            }
+            else
+            {
+                events[i].deviceId = deviceId;
+                events[i].messageTrackingId = i;
+                result = 0;
+            }
+        }
+    }
 
-	return result;
+    return result;
 }
 
 void iothub_client_sample_amqp_websockets_shared_run(void)
 {
-	TRANSPORT_HANDLE transport_handle;
-	IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle1;
-	IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle2;
+    TRANSPORT_HANDLE transport_handle;
+    IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle1;
+    IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle2;
 
-	EVENT_INSTANCE messages_device1[MESSAGE_COUNT];
-	EVENT_INSTANCE messages_device2[MESSAGE_COUNT];
+    EVENT_INSTANCE messages_device1[MESSAGE_COUNT];
+    EVENT_INSTANCE messages_device2[MESSAGE_COUNT];
 
     g_continueRunning = true;
 
     //callbackCounter = 0;
-	int receiveContext1 = 0;
-	int receiveContext2 = 0;
+    int receiveContext1 = 0;
+    int receiveContext2 = 0;
 
     (void)printf("Starting the IoTHub client sample AMQP...\r\n");
 
@@ -213,7 +215,7 @@ void iothub_client_sample_amqp_websockets_shared_run(void)
     {
         printf("Failed to initialize the platform.\r\n");
     }
-	else 
+    else 
     {
         if ((transport_handle = IoTHubTransport_Create(AMQP_Protocol_over_WebSocketsTls, hubName, hubSuffix)) == NULL)
         {
@@ -246,11 +248,11 @@ void iothub_client_sample_amqp_websockets_shared_run(void)
             else
             {
                 bool traceOn = true;
-                IoTHubClient_LL_SetOption(iotHubClientHandle1, "logtrace", &traceOn);
+                IoTHubClient_LL_SetOption(iotHubClientHandle1, OPTION_LOG_TRACE, &traceOn);
 
     #ifdef SET_TRUSTED_CERT_IN_SAMPLES
                 // For mbed add the certificate information
-                if (IoTHubClient_LL_SetOption(iotHubClientHandle1, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
+                if (IoTHubClient_LL_SetOption(iotHubClientHandle1, OPTION_TRUSTED_CERT, certificates) != IOTHUB_CLIENT_OK)
                 {
                     printf("failure to set option \"TrustedCerts\"\r\n");
                 }

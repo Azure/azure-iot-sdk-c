@@ -12,6 +12,7 @@
 #include "schemaserializer.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/platform.h"
+#include "azure_c_shared_utility/shared_util_options.h"
 
 #ifdef MBED_BUILD_TIMESTAMP
 #define SET_TRUSTED_CERT_IN_SAMPLES
@@ -173,7 +174,7 @@ void remote_monitoring_run(void)
             {
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
                 // For mbed add the certificate information
-                if (IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
+                if (IoTHubClient_SetOption(iotHubClientHandle, OPTION_TRUSTED_CERT, certificates) != IOTHUB_CLIENT_OK)
                 {
                     printf("failure to set option \"TrustedCerts\"\r\n");
                 }
