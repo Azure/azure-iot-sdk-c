@@ -1133,7 +1133,7 @@ static int send_batched_message_and_reset_state(TELEMETRY_MESSENGER_INSTANCE* in
 {
     int result;
 
-    if (messagesender_send(instance->message_sender, send_pending_events_state->message_batch_container, internal_on_event_send_complete_callback, send_pending_events_state->task) != 0)
+    if (messagesender_send_async(instance->message_sender, send_pending_events_state->message_batch_container, internal_on_event_send_complete_callback, send_pending_events_state->task, 0) != 0)
     {
         LogError("messagesender_send failed");
         result = __FAILURE__;
