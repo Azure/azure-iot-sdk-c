@@ -12,6 +12,11 @@
 #include <stdlib.h>
 #endif
 
+typedef struct LOCK_TEST_INFO_TAG
+{
+    void* lock_taken;
+} LOCK_TEST_INFO;
+
 static void* my_gballoc_malloc(size_t size)
 {
     void *result = malloc(size);
@@ -40,6 +45,7 @@ static void my_gballoc_free(void* ptr)
 #include "azure_c_shared_utility/httpapiexsas.h"
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/lock.h"
 #include "blob.h"
 #include "parson.h"
 
@@ -138,6 +144,34 @@ static JSON_Value * my_json_parse_string(const char *string)
 static void my_json_value_free(JSON_Value *value)
 {
     free(value);
+}
+
+static LOCK_HANDLE my_Lock_Init(void)
+{
+    LOCK_TEST_INFO* lock_info = (LOCK_TEST_INFO*)my_gballoc_malloc(sizeof(LOCK_TEST_INFO) );
+    lock_info->lock_taken = NULL;
+    return (LOCK_HANDLE)lock_info;
+}
+
+static LOCK_RESULT my_Lock_Deinit(LOCK_HANDLE handle)
+{
+    LOCK_TEST_INFO* lock_info = (LOCK_TEST_INFO*)handle;
+    my_gballoc_free(lock_info);
+    return LOCK_OK;
+}
+
+static LOCK_RESULT my_Lock(LOCK_HANDLE handle)
+{
+    LOCK_TEST_INFO* lock_info = (LOCK_TEST_INFO*)handle;
+    lock_info->lock_taken = my_gballoc_malloc(1);
+    return LOCK_OK;
+}
+
+static LOCK_RESULT my_Unlock(LOCK_HANDLE handle)
+{
+    LOCK_TEST_INFO* lock_info = (LOCK_TEST_INFO*)handle;
+    my_gballoc_free(lock_info->lock_taken);
+    return LOCK_OK;
 }
 
 static HTTPAPIEX_RESULT my_HTTPAPIEX_ExecuteRequest(HTTPAPIEX_HANDLE handle, HTTPAPI_REQUEST_TYPE requestType, const char* relativePath,
@@ -357,6 +391,14 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, __FAILURE__);
     REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, my_mallocAndStrcpy_s);
 
+    REGISTER_GLOBAL_MOCK_HOOK(Lock_Init, my_Lock_Init);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Lock_Init, NULL);
+    REGISTER_GLOBAL_MOCK_HOOK(Lock_Deinit, my_Lock_Deinit);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Lock_Deinit, LOCK_ERROR);
+    REGISTER_GLOBAL_MOCK_HOOK(Lock, my_Lock);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Lock, LOCK_ERROR);
+    REGISTER_GLOBAL_MOCK_HOOK(Unlock, my_Unlock);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Unlock, LOCK_ERROR);
 }
 
 TEST_SUITE_CLEANUP(TestClassCleanup)

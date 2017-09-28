@@ -677,6 +677,10 @@ TEST_FUNCTION(Blob_UploadFromSasUri_various_sizes_happy_path)
         /*uploading blocks (Put Block)*/
         for (size_t blockNumber = 0;blockNumber < (sizes[iSize] - 1) / (4 * 1024 * 1024) + 1;blockNumber++)
         {
+            STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 4 * 1024 * 1024,
+                (blockNumber != (sizes[iSize] - 1) / (4 * 1024 * 1024)) ? 4 * 1024 * 1024 : (sizes[iSize] - 1) % (4 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
+            )); /*this is the content to be uploaded by this call*/
+
             /*here some sprintf happens and that produces a string in the form: 000000...049999*/
             STRICT_EXPECTED_CALL(Base64_Encode_Bytes(IGNORED_PTR_ARG, 6)) /*this is converting the produced blockID string to a base64 representation*/
                 .IgnoreArgument_source();
@@ -696,10 +700,6 @@ TEST_FUNCTION(Blob_UploadFromSasUri_various_sizes_happy_path)
                 .IgnoreArgument_s1()
                 .IgnoreArgument_s2();
 
-            STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 4 * 1024 * 1024,
-                (blockNumber != (sizes[iSize] - 1) / (4 * 1024 * 1024)) ? 4 * 1024 * 1024 : (sizes[iSize] - 1) % (4 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
-            )); /*this is the content to be uploaded by this call*/
-
             STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the relative path as const char* */
                 .IgnoreArgument_handle();
 
@@ -708,11 +708,11 @@ TEST_FUNCTION(Blob_UploadFromSasUri_various_sizes_happy_path)
                 .IgnoreArgument_relativePath()
                 .IgnoreArgument_requestContent();
 
-            STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG)) /*this was the content to be uploaded*/
-                .IgnoreArgument_handle();
             STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)) /*this is unbuilding the relativePath*/
                 .IgnoreArgument_handle();
             STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)) /*this is unbuilding the blockID string to a base64 representation*/
+                .IgnoreArgument_handle();
+            STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG)) /*this was the content to be uploaded*/
                 .IgnoreArgument_handle();
         }
 
@@ -811,6 +811,10 @@ TEST_FUNCTION(Blob_UploadFromSasUri_various_sizes_with_certificates_happy_path)
                                                                                                              /*uploading blocks (Put Block)*/
         for (size_t blockNumber = 0;blockNumber < (sizes[iSize] - 1) / (4 * 1024 * 1024) + 1;blockNumber++)
         {
+            STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 4 * 1024 * 1024,
+                (blockNumber != (sizes[iSize] - 1) / (4 * 1024 * 1024)) ? 4 * 1024 * 1024 : (sizes[iSize] - 1) % (4 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
+            )); /*this is the content to be uploaded by this call*/
+
             /*here some sprintf happens and that produces a string in the form: 000000...049999*/
             STRICT_EXPECTED_CALL(Base64_Encode_Bytes(IGNORED_PTR_ARG, 6)) /*this is converting the produced blockID string to a base64 representation*/
                 .IgnoreArgument_source();
@@ -830,10 +834,6 @@ TEST_FUNCTION(Blob_UploadFromSasUri_various_sizes_with_certificates_happy_path)
                 .IgnoreArgument_s1()
                 .IgnoreArgument_s2();
 
-            STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 4 * 1024 * 1024,
-                (blockNumber != (sizes[iSize] - 1) / (4 * 1024 * 1024)) ? 4 * 1024 * 1024 : (sizes[iSize] - 1) % (4 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
-            )); /*this is the content to be uploaded by this call*/
-
             STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the relative path as const char* */
                 .IgnoreArgument_handle();
 
@@ -842,11 +842,11 @@ TEST_FUNCTION(Blob_UploadFromSasUri_various_sizes_with_certificates_happy_path)
                 .IgnoreArgument_relativePath()
                 .IgnoreArgument_requestContent();
 
-            STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG)) /*this was the content to be uploaded*/
-                .IgnoreArgument_handle();
             STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)) /*this is unbuilding the relativePath*/
                 .IgnoreArgument_handle();
             STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)) /*this is unbuilding the blockID string to a base64 representation*/
+                .IgnoreArgument_handle();
+            STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG)) /*this was the content to be uploaded*/
                 .IgnoreArgument_handle();
         }
 
@@ -913,22 +913,22 @@ TEST_FUNCTION(Blob_UploadFromSasUri_64MB_unhappy_paths)
 
     size_t calls_that_cannot_fail[] =
     {
-        13   ,/*BUFFER_delete*/
-        26   ,/*BUFFER_delete*/
-        39   ,/*BUFFER_delete*/
-        52   ,/*BUFFER_delete*/
-        65   ,/*BUFFER_delete*/
-        78   ,/*BUFFER_delete*/
-        91   ,/*BUFFER_delete*/
-        104  ,/*BUFFER_delete*/
-        117  ,/*BUFFER_delete*/
-        130  ,/*BUFFER_delete*/
-        143  ,/*BUFFER_delete*/
-        156  ,/*BUFFER_delete*/
-        169  ,/*BUFFER_delete*/
-        182  ,/*BUFFER_delete*/
-        195  ,/*BUFFER_delete*/
-        208  ,/*BUFFER_delete*/
+        13   ,/*STRING_delete*/
+        26   ,/*STRING_delete*/
+        39   ,/*STRING_delete*/
+        52   ,/*STRING_delete*/
+        65   ,/*STRING_delete*/
+        78   ,/*STRING_delete*/
+        91   ,/*STRING_delete*/
+        104  ,/*STRING_delete*/
+        117  ,/*STRING_delete*/
+        130  ,/*STRING_delete*/
+        143  ,/*STRING_delete*/
+        156  ,/*STRING_delete*/
+        169  ,/*STRING_delete*/
+        182  ,/*STRING_delete*/
+        195  ,/*STRING_delete*/
+        208  ,/*STRING_delete*/
         11   ,/*STRING_c_str*/
         24   ,/*STRING_c_str*/
         37   ,/*STRING_c_str*/
@@ -961,22 +961,22 @@ TEST_FUNCTION(Blob_UploadFromSasUri_64MB_unhappy_paths)
         183  ,/*STRING_delete*/
         196  ,/*STRING_delete*/
         209  ,/*STRING_delete*/
-        15   ,/*STRING_delete*/
-        28   ,/*STRING_delete*/
-        41   ,/*STRING_delete*/
-        54   ,/*STRING_delete*/
-        67   ,/*STRING_delete*/
-        80   ,/*STRING_delete*/
-        93   ,/*STRING_delete*/
-        106  ,/*STRING_delete*/
-        119  ,/*STRING_delete*/
-        132  ,/*STRING_delete*/
-        145  ,/*STRING_delete*/
-        158  ,/*STRING_delete*/
-        171  ,/*STRING_delete*/
-        184  ,/*STRING_delete*/
-        197  ,/*STRING_delete*/
-        210  ,/*STRING_delete*/
+        15   ,/*BUFFER_delete*/
+        28   ,/*BUFFER_delete*/
+        41   ,/*BUFFER_delete*/
+        54   ,/*BUFFER_delete*/
+        67   ,/*BUFFER_delete*/
+        80   ,/*BUFFER_delete*/
+        93   ,/*BUFFER_delete*/
+        106  ,/*BUFFER_delete*/
+        119  ,/*BUFFER_delete*/
+        132  ,/*BUFFER_delete*/
+        145  ,/*BUFFER_delete*/
+        158  ,/*BUFFER_delete*/
+        171  ,/*BUFFER_delete*/
+        184  ,/*BUFFER_delete*/
+        197  ,/*BUFFER_delete*/
+        210  ,/*BUFFER_delete*/
 
 
         214, /*STRING_c_str*/
@@ -1011,6 +1011,10 @@ TEST_FUNCTION(Blob_UploadFromSasUri_64MB_unhappy_paths)
     /*uploading blocks (Put Block)*/
     for (size_t blockNumber = 0;blockNumber < (size - 1) / (4 * 1024 * 1024) + 1;blockNumber++)
     {
+        STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 4 * 1024 * 1024,
+            (blockNumber != (size - 1) / (4 * 1024 * 1024)) ? 4 * 1024 * 1024 : (size - 1) % (4 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
+        )); /*this is the content to be uploaded by this call*/
+
         /*here some sprintf happens and that produces a string in the form: 000000...049999*/
         STRICT_EXPECTED_CALL(Base64_Encode_Bytes(IGNORED_PTR_ARG, 6)) /*this is converting the produced blockID string to a base64 representation*/ /*3, 16, 29... (16 numbers)*/
             .IgnoreArgument_source();
@@ -1030,10 +1034,6 @@ TEST_FUNCTION(Blob_UploadFromSasUri_64MB_unhappy_paths)
             .IgnoreArgument_s1()
             .IgnoreArgument_s2();
 
-        STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 4 * 1024 * 1024,
-            (blockNumber != (size - 1) / (4 * 1024 * 1024)) ? 4 * 1024 * 1024 : (size - 1) % (4 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
-        )); /*this is the content to be uploaded by this call*/
-
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the relative path as const char* */ /*11, 24, 27...*/
             .IgnoreArgument_handle();
 
@@ -1044,11 +1044,11 @@ TEST_FUNCTION(Blob_UploadFromSasUri_64MB_unhappy_paths)
             .CopyOutArgumentBuffer_statusCode(&TwoHundred, sizeof(TwoHundred))
             ;
 
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG)) /*this was the content to be uploaded*/ /*13, 26, 39... (16 numbers)*/
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)) /*this is unbuilding the relativePath*/ /*13, 26, 39...*/
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)) /*this is unbuilding the relativePath*/ /*14, 27, 40...*/
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)) /*this is unbuilding the blockID string to a base64 representation*/ /*14, 27, 40...*/
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)) /*this is unbuilding the blockID string to a base64 representation*/ /*15, 28, 41... 210*/
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG)) /*this was the content to be uploaded*/ /*15, 28, 41...210 (16 numbers)*/
             .IgnoreArgument_handle();
     }
 
@@ -1139,22 +1139,22 @@ TEST_FUNCTION(Blob_UploadFromSasUri_64MB_with_certificate_unhappy_paths)
 
     size_t calls_that_cannot_fail[] =
     {
-        13  + 1 ,/*BUFFER_delete*/
-        26  + 1 ,/*BUFFER_delete*/
-        39  + 1 ,/*BUFFER_delete*/
-        52  + 1 ,/*BUFFER_delete*/
-        65  + 1 ,/*BUFFER_delete*/
-        78  + 1 ,/*BUFFER_delete*/
-        91  + 1 ,/*BUFFER_delete*/
-        104 + 1 ,/*BUFFER_delete*/
-        117 + 1 ,/*BUFFER_delete*/
-        130 + 1 ,/*BUFFER_delete*/
-        143 + 1 ,/*BUFFER_delete*/
-        156 + 1 ,/*BUFFER_delete*/
-        169 + 1 ,/*BUFFER_delete*/
-        182 + 1 ,/*BUFFER_delete*/
-        195 + 1 ,/*BUFFER_delete*/
-        208 + 1 ,/*BUFFER_delete*/
+        13  + 1 ,/*STRING_delete*/
+        26  + 1 ,/*STRING_delete*/
+        39  + 1 ,/*STRING_delete*/
+        52  + 1 ,/*STRING_delete*/
+        65  + 1 ,/*STRING_delete*/
+        78  + 1 ,/*STRING_delete*/
+        91  + 1 ,/*STRING_delete*/
+        104 + 1 ,/*STRING_delete*/
+        117 + 1 ,/*STRING_delete*/
+        130 + 1 ,/*STRING_delete*/
+        143 + 1 ,/*STRING_delete*/
+        156 + 1 ,/*STRING_delete*/
+        169 + 1 ,/*STRING_delete*/
+        182 + 1 ,/*STRING_delete*/
+        195 + 1 ,/*STRING_delete*/
+        208 + 1 ,/*STRING_delete*/
         11  + 1 ,/*STRING_c_str*/
         24  + 1 ,/*STRING_c_str*/
         37  + 1 ,/*STRING_c_str*/
@@ -1187,22 +1187,22 @@ TEST_FUNCTION(Blob_UploadFromSasUri_64MB_with_certificate_unhappy_paths)
         183 + 1 ,/*STRING_delete*/
         196 + 1 ,/*STRING_delete*/
         209 + 1 ,/*STRING_delete*/
-        15  + 1 ,/*STRING_delete*/
-        28  + 1 ,/*STRING_delete*/
-        41  + 1 ,/*STRING_delete*/
-        54  + 1 ,/*STRING_delete*/
-        67  + 1 ,/*STRING_delete*/
-        80  + 1 ,/*STRING_delete*/
-        93  + 1 ,/*STRING_delete*/
-        106 + 1 ,/*STRING_delete*/
-        119 + 1 ,/*STRING_delete*/
-        132 + 1 ,/*STRING_delete*/
-        145 + 1 ,/*STRING_delete*/
-        158 + 1 ,/*STRING_delete*/
-        171 + 1 ,/*STRING_delete*/
-        184 + 1 ,/*STRING_delete*/
-        197 + 1 ,/*STRING_delete*/
-        210 + 1 ,/*STRING_delete*/
+        15  + 1 ,/*BUFFER_delete*/
+        28  + 1 ,/*BUFFER_delete*/
+        41  + 1 ,/*BUFFER_delete*/
+        54  + 1 ,/*BUFFER_delete*/
+        67  + 1 ,/*BUFFER_delete*/
+        80  + 1 ,/*BUFFER_delete*/
+        93  + 1 ,/*BUFFER_delete*/
+        106 + 1 ,/*BUFFER_delete*/
+        119 + 1 ,/*BUFFER_delete*/
+        132 + 1 ,/*BUFFER_delete*/
+        145 + 1 ,/*BUFFER_delete*/
+        158 + 1 ,/*BUFFER_delete*/
+        171 + 1 ,/*BUFFER_delete*/
+        184 + 1 ,/*BUFFER_delete*/
+        197 + 1 ,/*BUFFER_delete*/
+        210 + 1 ,/*BUFFER_delete*/
 
 
         214+1, /*STRING_c_str*/
@@ -1238,6 +1238,10 @@ TEST_FUNCTION(Blob_UploadFromSasUri_64MB_with_certificate_unhappy_paths)
                                                                                                          /*uploading blocks (Put Block)*/
     for (size_t blockNumber = 0;blockNumber < (size - 1) / (4 * 1024 * 1024) + 1;blockNumber++)
     {
+        STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 4 * 1024 * 1024,
+            (blockNumber != (size - 1) / (4 * 1024 * 1024)) ? 4 * 1024 * 1024 : (size - 1) % (4 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
+        )); /*this is the content to be uploaded by this call*/
+
         /*here some sprintf happens and that produces a string in the form: 000000...049999*/
         STRICT_EXPECTED_CALL(Base64_Encode_Bytes(IGNORED_PTR_ARG, 6)) /*this is converting the produced blockID string to a base64 representation*/ /*3, 16, 29... (16 numbers)*/
             .IgnoreArgument_source();
@@ -1257,11 +1261,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_64MB_with_certificate_unhappy_paths)
             .IgnoreArgument_s1()
             .IgnoreArgument_s2();
 
-        STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 4 * 1024 * 1024,
-            (blockNumber != (size - 1) / (4 * 1024 * 1024)) ? 4 * 1024 * 1024 : (size - 1) % (4 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
-        )); /*this is the content to be uploaded by this call*/
-
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the relative path as const char* */ /*11, 24, 27...*/
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the relative path as const char* */ /*12, 25, 38...*/
             .IgnoreArgument_handle();
 
         STRICT_EXPECTED_CALL(HTTPAPIEX_ExecuteRequest(IGNORED_PTR_ARG, HTTPAPI_REQUEST_PUT, IGNORED_PTR_ARG, NULL, IGNORED_PTR_ARG, &httpResponse, NULL, testValidBufferHandle))
@@ -1269,18 +1269,18 @@ TEST_FUNCTION(Blob_UploadFromSasUri_64MB_with_certificate_unhappy_paths)
             .IgnoreArgument_relativePath()
             .IgnoreArgument_requestContent()
             .CopyOutArgumentBuffer_statusCode(&TwoHundred, sizeof(TwoHundred))
-            ;
+            ; /* 13 */
 
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG)) /*this was the content to be uploaded*/ /*13, 26, 39... (16 numbers)*/
-            .IgnoreArgument_handle();
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)) /*this is unbuilding the relativePath*/ /*14, 27, 40...*/
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)) /*this is unbuilding the blockID string to a base64 representation*/ /*15, 28, 41... 210*/
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)) /*this is unbuilding the blockID string to a base64 representation*/ /*15, 28, 41... */
             .IgnoreArgument_handle();
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG)) /*this was the content to be uploaded*/ /*16, 29, 42...211 (16 numbers)*/
+                    .IgnoreArgument_handle();
     }
 
     /*this part is Put Block list*/
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "</BlockList>")) /*This is closing the XML*/ /*211*/
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "</BlockList>")) /*This is closing the XML*/ /*212*/
         .IgnoreArgument_handle();
     STRICT_EXPECTED_CALL(STRING_construct("/something?a=b")); /*this is building the relative path for the Put BLock list*/
 
@@ -1320,7 +1320,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_64MB_with_certificate_unhappy_paths)
         .IgnoreArgument_handle();
     STRICT_EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_PTR_ARG)) /*this is the HTTPAPIEX handle*/
         .IgnoreArgument_handle();
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*this is freeing the copy of hte hostname*/
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*this is freeing the copy of the hostname*/ /* 223 */
         .IgnoreArgument_ptr();
 
     umock_c_negative_tests_snapshot();
@@ -1409,6 +1409,10 @@ TEST_FUNCTION(Blob_UploadFromSasUri_when_http_code_is_404_it_immediately_succeed
     /*uploading blocks (Put Block)*/ /*this simply fails first block*/
     size_t blockNumber = 0;
     {
+        STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 4 * 1024 * 1024,
+            (blockNumber != (size - 1) / (4 * 1024 * 1024)) ? 4 * 1024 * 1024 : (size - 1) % (4 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
+        )); /*this is the content to be uploaded by this call*/
+
         /*here some sprintf happens and that produces a string in the form: 000000...049999*/
         STRICT_EXPECTED_CALL(Base64_Encode_Bytes(IGNORED_PTR_ARG, 6)) /*this is converting the produced blockID string to a base64 representation*/
             .IgnoreArgument_source();
@@ -1428,10 +1432,6 @@ TEST_FUNCTION(Blob_UploadFromSasUri_when_http_code_is_404_it_immediately_succeed
             .IgnoreArgument_s1()
             .IgnoreArgument_s2();
 
-        STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 4 * 1024 * 1024,
-            (blockNumber != (size - 1) / (4 * 1024 * 1024)) ? 4 * 1024 * 1024 : (size - 1) % (4 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
-        )); /*this is the content to be uploaded by this call*/
-
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the relative path as const char* */
             .IgnoreArgument_handle();
 
@@ -1442,12 +1442,12 @@ TEST_FUNCTION(Blob_UploadFromSasUri_when_http_code_is_404_it_immediately_succeed
             .CopyOutArgumentBuffer_statusCode(&FourHundredFour, sizeof(FourHundredFour))
             ;
 
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG)) /*this was the content to be uploaded*/
-            .IgnoreArgument_handle();
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)) /*this is unbuilding the relativePath*/
             .IgnoreArgument_handle();
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)) /*this is unbuilding the blockID string to a base64 representation*/
             .IgnoreArgument_handle();
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG)) /*this was the content to be uploaded*/
+        .IgnoreArgument_handle();
     }
 
     /*this part is Put Block list*/ /*notice: no op because it failed before with 404*/
