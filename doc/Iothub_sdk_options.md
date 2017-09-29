@@ -74,4 +74,12 @@ DPS_LL_SetOption(handle, OPTION_HTTP_PROXY, &http_proxy);
 | `"event_send_timeout_secs"`  | OPTION_EVENT_SEND_TIMEOUT_SECS  | `size_t`* value   | Amount of seconds to wait for telemetry message to complete
 | `"c2d_keep_alive_freq_secs"` | OPTION_C2D_KEEP_ALIVE_FREQ_SECS | `size_t`* value   | Informs service of maximum period the client waits for keep-alive message
 
+### HTTP Tansport
+
+| Option Name                  | Option Define                   | Value Type        | Description
+|------------------------------|---------------------------------|-------------------|-------------------------------
+| `"Batching"`                 | OPTION_BATCHING                 | `bool`* value     | Turn on and off message batching
+
+
 [http-proxy-object]: https://github.com/Azure/azure-c-shared-utility/blob/506288cecb9ee4a205fa221dc4fd2e69a7ddaa7e/inc/azure_c_shared_utility/shared_util_options.h
+
