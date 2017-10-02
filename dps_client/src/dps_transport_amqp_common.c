@@ -30,9 +30,9 @@ static const char* SAS_TOKEN_KEY_NAME = "registration";
 static const char* AMQP_ADDRESS_FMT = "amqps://%s/%s/registrations/%s";
 static const char* KEY_NAME_VALUE = "registration";
 
-static const char* AMQP_REGISTER_ME = "iotdps-register-me";
-static const char* AMQP_WHO_AM_I = "iotdps-who-am-i";
-static const char* AMQP_OPERATION_STATUS = "iotdps-operation-status";
+static const char* AMQP_REGISTER_ME = "iotdps-register";
+static const char* AMQP_WHO_AM_I = "iotdps-get-registration";
+static const char* AMQP_OPERATION_STATUS = "iotdps-get-operationstatus";
 
 static const char* AMQP_OP_TYPE_PROPERTY = "iotdps-operation-type";
 static const char* AMQP_STATUS = "iotdps-status";
@@ -423,7 +423,7 @@ static int send_amqp_message(DPS_TRANSPORT_AMQP_INFO* amqp_info, const char* msg
                     LogError("Failed to set map value.");
                     result = __FAILURE__;
                 }
-                else if (messagesender_send(amqp_info->msg_sender, uamqp_message, on_amqp_send_complete, amqp_info) != 0)
+                else if (messagesender_send_async(amqp_info->msg_sender, uamqp_message, on_amqp_send_complete, amqp_info, 0) != 0)
                 {
                     LogError("Failed to send message.");
                     result = __FAILURE__;
