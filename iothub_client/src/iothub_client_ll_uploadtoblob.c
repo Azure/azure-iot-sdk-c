@@ -524,6 +524,7 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
 																			if (fileName == NULL)
 																			{
                                                                                 /*Codes_SRS_IOTHUBCLIENT_LL_32_009: [ If URL_EncodeString fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+																				LogError("unable to URL_EncodeString of filename");
 																				result = __FAILURE__;
 																			}
 
