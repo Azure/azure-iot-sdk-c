@@ -42,4 +42,8 @@ if(${use_amqp})
     add_sample_directory(iothub_client_sample_amqp_shared_ws_methods)
 endif()
 
+if(${use_amqp} OR ${use_mqtt})
+    add_sample_directory(iothub_client_sample_device_twin)
+endif()
+
 add_sample_directory(iothub_client_sample_x509)
