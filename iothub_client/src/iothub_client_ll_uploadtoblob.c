@@ -1215,7 +1215,7 @@ static BLOB_RESULT Blob_UploadFromSasUri_start(IOTHUB_CLIENT_LARGE_FILE_HANDLE h
         if (hostnameBegin == NULL)
         {
             /*Codes_SRS_BLOB_02_005: [ If the hostname cannot be determined, then Blob_UploadFromSasUri shall fail and return BLOB_INVALID_ARG. ]*/
-            LogError("hostname cannot be determined");
+            LogError("hostname cannot be determined from SASURI=%s", SASURI);
             result = BLOB_INVALID_ARG;
         }
         else
