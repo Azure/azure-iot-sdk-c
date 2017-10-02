@@ -197,6 +197,20 @@ BEGIN_TEST_SUITE(dps_transport_amqp_ws_client_ut)
         TEST_MUTEX_RELEASE(g_testByTest);
     }
 
+    static int should_skip_index(size_t current_index, const size_t skip_array[], size_t length)
+    {
+        int result = 0;
+        for (size_t index = 0; index < length; index++)
+        {
+            if (current_index == skip_array[index])
+            {
+                result = __LINE__;
+                break;
+            }
+        }
+        return result;
+    }
+
     /* Tests_DPS_TRANSPORT_AMQP_WS_CLIENT_07_001: [ dps_transport_amqp_ws_create shall call the dps_transport_common_amqp_create function with amqp_transport_ws_io transport IO estabishment. ] */
     TEST_FUNCTION(dps_transport_amqp_create_succeed)
     {
@@ -216,7 +230,7 @@ BEGIN_TEST_SUITE(dps_transport_amqp_ws_client_ut)
     /* Tests_DPS_TRANSPORT_AMQP_WS_CLIENT_07_014: [ On success amqp_transport_ws_io shall return an allocated DPS_TRANSPORT_IO_INFO structure. ] */
     /* Tests_DPS_TRANSPORT_AMQP_WS_CLIENT_07_015: [ amqp_transport_ws_io shall allocate a transfer_handle by calling xio_create with the tlsio_interface. ] */
     /* Tests_DPS_TRANSPORT_AMQP_WS_CLIENT_07_016: [ amqp_transport_ws_io shall allocate a DPS_TRANSPORT_IO_INFO sasl_handle by calling xio_create with the saslio_interface. ] */
-    TEST_FUNCTION(amqp_transport_ws_io_succeed)
+    TEST_FUNCTION(dps_amqp_transport_ws_io_succeed)
     {
         SASL_MECHANISM_HANDLE sasl_mechanism = { 0 };
         DPS_TRANSPORT_IO_INFO* dps_io_info;
@@ -228,6 +242,7 @@ BEGIN_TEST_SUITE(dps_transport_amqp_ws_client_ut)
         STRICT_EXPECTED_CALL(platform_get_default_tlsio());
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(xio_create(TEST_INTERFACE_DESC, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(saslclientio_get_interface_description());
         STRICT_EXPECTED_CALL(xio_create(TEST_INTERFACE_DESC, IGNORED_PTR_ARG));
 
@@ -243,7 +258,7 @@ BEGIN_TEST_SUITE(dps_transport_amqp_ws_client_ut)
     }
 
     /* Tests_DPS_TRANSPORT_AMQP_WS_CLIENT_07_017: [ If sasl_mechanism is NULL amqp_transport_ws_io shall assign the transfer_handle to the result and return the value. ] */
-    TEST_FUNCTION(amqp_transport_ws_io_x509_succeed)
+    TEST_FUNCTION(dps_amqp_transport_ws_io_x509_succeed)
     {
         DPS_TRANSPORT_IO_INFO* dps_io_info;
         (void)dps_amqp_ws_transport_create(TEST_URI_VALUE, DPS_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE);
@@ -254,6 +269,7 @@ BEGIN_TEST_SUITE(dps_transport_amqp_ws_client_ut)
         STRICT_EXPECTED_CALL(platform_get_default_tlsio());
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(xio_create(TEST_INTERFACE_DESC, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
         //act
         dps_io_info = g_transport_io(TEST_URI_VALUE, NULL, NULL);
@@ -267,7 +283,7 @@ BEGIN_TEST_SUITE(dps_transport_amqp_ws_client_ut)
     }
 
     /* Tests_DPS_TRANSPORT_AMQP_WS_CLIENT_07_013: [ If any failure is encountered amqp_transport_ws_io shall return NULL ] */
-    TEST_FUNCTION(amqp_transport_ws_io_fail)
+    TEST_FUNCTION(dps_amqp_transport_ws_io_fail)
     {
         SASL_MECHANISM_HANDLE sasl_mechanism = { 0 };
         DPS_TRANSPORT_IO_INFO* dps_io_info;
@@ -282,14 +298,22 @@ BEGIN_TEST_SUITE(dps_transport_amqp_ws_client_ut)
         STRICT_EXPECTED_CALL(platform_get_default_tlsio());
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(xio_create(TEST_INTERFACE_DESC, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(saslclientio_get_interface_description());
         STRICT_EXPECTED_CALL(xio_create(TEST_INTERFACE_DESC, IGNORED_PTR_ARG));
+
+        size_t calls_cannot_fail[] = { 4 };
 
         umock_c_negative_tests_snapshot();
 
         size_t count = umock_c_negative_tests_call_count();
         for (size_t index = 0; index < count; index++)
         {
+            if (should_skip_index(index, calls_cannot_fail, sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0])) != 0)
+            {
+                continue;
+            }
+
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
@@ -308,7 +332,7 @@ BEGIN_TEST_SUITE(dps_transport_amqp_ws_client_ut)
     }
 
     /* Tests_DPS_TRANSPORT_AMQP_WS_CLIENT_07_012: [ If proxy_info is not NULL, amqp_transport_ws_io shall construct a HTTP_PROXY_IO_CONFIG object and assign it to TLSIO_CONFIG underlying_io_parameters ] */
-    TEST_FUNCTION(amqp_transport_ws_io_w_http_proxy_succeed)
+    TEST_FUNCTION(dps_amqp_transport_ws_io_w_http_proxy_succeed)
     {
         SASL_MECHANISM_HANDLE sasl_mechanism = { 0 };
         HTTP_PROXY_OPTIONS proxy_info;
@@ -322,6 +346,7 @@ BEGIN_TEST_SUITE(dps_transport_amqp_ws_client_ut)
         STRICT_EXPECTED_CALL(http_proxy_io_get_interface_description());
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(xio_create(TEST_INTERFACE_DESC, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(saslclientio_get_interface_description());
         STRICT_EXPECTED_CALL(xio_create(TEST_INTERFACE_DESC, IGNORED_PTR_ARG));
         proxy_info.host_address = TEST_HOST_ADDRESS_VALUE;

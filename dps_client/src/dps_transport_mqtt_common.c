@@ -27,11 +27,11 @@
 static const char* HEADER_KEY_AUTHORIZATION = "Authorization";
 static const char* SAS_TOKEN_KEY_NAME = "registration";
 static const char* MQTT_SUBSCRIBE_TOPIC = "$dps/registrations/res/#";
-static const char* MQTT_USERNAME_FMT = "%s/registrations/%s/api-version=%s&DeviceClientType=%s";
+static const char* MQTT_USERNAME_FMT = "%s/registrations/%s/api-version=%s&ClientVersion=%s";
 static const char* CLIENT_VERSION = "123.123";
 
-static const char* MQTT_REGISTER_MESSAGE_FMT = "$dps/registrations/POST/iotdps-register-me/?$rid=%d";
-static const char* MQTT_STATUS_MESSAGE_FMT = "$dps/registrations/GET/iotdps-operation-status/?$rid=%d&operationId=%s";
+static const char* MQTT_REGISTER_MESSAGE_FMT = "$dps/registrations/PUT/iotdps-register/?$rid=%d";
+static const char* MQTT_STATUS_MESSAGE_FMT = "$dps/registrations/GET/iotdps-get-operationstatus/?$rid=%d&operationId=%s";
 
 static const char* DPS_ASSIGNED_STATUS = "Assigned";
 static const char* DPS_ASSIGNING_STATUS = "Assigning";
@@ -539,7 +539,6 @@ static int create_connection(DPS_TRANSPORT_MQTT_INFO* mqtt_info)
 
             if (result == 0)
             {
-                options.clientId = NULL;
                 options.username = username_info;
                 options.clientId = mqtt_info->registration_id;
                 options.useCleanSession = 1;

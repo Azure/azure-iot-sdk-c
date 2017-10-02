@@ -563,7 +563,7 @@ char* dps_hsm_riot_get_certificate(DPS_SECURE_DEVICE_HANDLE handle)
     else
     {
         /* Codes_SRS_SECURE_DEVICE_RIOT_07_011: [ dps_hsm_riot_get_certificate shall allocate a char* to return the riot certificate. ] */
-        result = malloc(handle->alias_cert_length+1);
+        result = (char*)malloc(handle->alias_cert_length+handle->device_id_length+1);
         if (result == NULL)
         {
             /* Codes_SRS_SECURE_DEVICE_RIOT_07_013: [ If any failure is encountered dps_hsm_riot_get_certificate shall return NULL ] */
@@ -572,8 +572,9 @@ char* dps_hsm_riot_get_certificate(DPS_SECURE_DEVICE_HANDLE handle)
         else
         {
             /* Codes_SRS_SECURE_DEVICE_RIOT_07_012: [ On success dps_hsm_riot_get_certificate shall return the riot certificate. ] */
-            memset(result, 0, handle->alias_cert_length+1);
+            memset(result, 0, handle->alias_cert_length + handle->device_id_length + 1);
             memcpy(result, handle->alias_cert_pem, handle->alias_cert_length);
+            memcpy(result+handle->alias_cert_length, handle->device_id_public_pem, handle->device_id_length);
         }
     }
     return result;
@@ -591,7 +592,7 @@ char* dps_hsm_riot_get_alias_key(DPS_SECURE_DEVICE_HANDLE handle)
     else
     {
         /* Codes_SRS_SECURE_DEVICE_RIOT_07_015: [ dps_hsm_riot_get_alias_key shall allocate a char* to return the alias certificate. ] */
-        if ((result = malloc(handle->alias_key_length+1)) == NULL)
+        if ((result = (char*)malloc(handle->alias_key_length+1)) == NULL)
         {
             /* Codes_SRS_SECURE_DEVICE_RIOT_07_017: [ If any failure is encountered dps_hsm_riot_get_alias_key shall return NULL ] */
             LogError("Failure allocating registration id.");
@@ -618,7 +619,7 @@ char* dps_hsm_riot_get_device_cert(DPS_SECURE_DEVICE_HANDLE handle)
     else
     {
         /* Codes_SRS_SECURE_DEVICE_RIOT_07_019: [ dps_hsm_riot_get_device_cert shall allocate a char* to return the device certificate. ] */
-        if ((result = malloc(handle->device_id_length+1)) == NULL)
+        if ((result = (char*)malloc(handle->device_id_length+1)) == NULL)
         {
             /* Codes_SRS_SECURE_DEVICE_RIOT_07_021: [ If any failure is encountered dps_hsm_riot_get_device_cert shall return NULL ] */
             LogError("Failure allocating registration id.");
@@ -645,7 +646,7 @@ char* dps_hsm_riot_get_signer_cert(DPS_SECURE_DEVICE_HANDLE handle)
     else
     {
         /* Codes_SRS_SECURE_DEVICE_RIOT_07_023: [ dps_hsm_riot_get_signer_cert shall allocate a char* to return the signer certificate. ] */
-        if ((result = malloc(handle->device_signed_length + 1)) == NULL)
+        if ((result = (char*)malloc(handle->device_signed_length + 1)) == NULL)
         {
             /* Codes_SRS_SECURE_DEVICE_RIOT_07_025: [ If any failure is encountered dps_hsm_riot_get_signer_cert shall return NULL ] */
             LogError("Failure allocating registration id.");
@@ -670,7 +671,7 @@ char* dps_hsm_riot_get_root_cert(DPS_SECURE_DEVICE_HANDLE handle)
     }
     else
     {
-        if ((result = malloc(handle->root_ca_length + 1)) == NULL)
+        if ((result = (char*)malloc(handle->root_ca_length + 1)) == NULL)
         {
             LogError("Failure allocating registration id.");
         }
@@ -693,7 +694,7 @@ char* dps_hsm_riot_get_root_key(DPS_SECURE_DEVICE_HANDLE handle)
     }
     else
     {
-        if ((result = malloc(handle->root_ca_priv_length + 1)) == NULL)
+        if ((result = (char*)malloc(handle->root_ca_priv_length + 1)) == NULL)
         {
             LogError("Failure allocating registration id.");
         }
@@ -780,7 +781,7 @@ char* dps_hsm_riot_create_leaf_cert(DPS_SECURE_DEVICE_HANDLE handle, const char*
             LogError("Failure: X509MakeDeviceCert");
             result = NULL;
         }
-        else if ((result = malloc(DER_MAX_PEM + 1)) == NULL)
+        else if ((result = (char*)malloc(DER_MAX_PEM + 1)) == NULL)
         {
             /* Codes_SRS_DPS_HSM_RIOT_07_032: [ If dps_hsm_riot_create_leaf_cert encounters an error it shall return NULL. ] */
             LogError("Failure allocating leaf cert");

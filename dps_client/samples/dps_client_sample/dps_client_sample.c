@@ -110,7 +110,6 @@ static void iothub_connection_status(IOTHUB_CLIENT_CONNECTION_STATUS result, IOT
         }
         else
         {
-            printf("iothub is not authenticated\r\n");
             iothub_info->connected = 0;
             iothub_info->stop_running = 1;
         }
@@ -190,8 +189,8 @@ int main()
         // Pick your transport
         dps_transport = DPS_HTTP_Protocol;
 
-        //iothub_transport = MQTT_Protocol;
-        iothub_transport = AMQP_Protocol;
+        iothub_transport = MQTT_Protocol;
+        //iothub_transport = AMQP_Protocol;
 
         // Set ini
         dps_user_ctx.registration_complete = 0;
