@@ -11,11 +11,12 @@ endif()
 compileAsC99()
 
 set(dps_service_client_c_files
-./src/dps_service_client.c
+./src/dps_sc_client.c
 )
 
 set(dps_service_client_h_files
-./inc/dps_service_client.h
+./inc/dps_sc_client.h
+./inc/dps_sc_enrollment.h
 )
 
 include_directories(${SHARED_UTIL_INC_FOLDER})
@@ -41,11 +42,7 @@ else()
     add_library(dps_service_client ${dps_service_client_c_files} ${dps_service_client_h_files})
 endif()
 
-if(NOT ${nuget_e2e_tests})
-    target_link_libraries(dps_service_client uhttp)
-else()
-    target_link_libraries(dps_service_client)
-endif()
+target_link_libraries(dps_service_client)
 
 if (NOT ${ARCHITECTURE} STREQUAL "ARM")
     if (NOT ${skip_samples})
