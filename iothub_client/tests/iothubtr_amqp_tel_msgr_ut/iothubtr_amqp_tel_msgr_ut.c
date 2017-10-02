@@ -469,21 +469,20 @@ static int TEST_message_create_IoTHubMessage_from_uamqp_message(MESSAGE_HANDLE u
     return TEST_message_create_IoTHubMessage_from_uamqp_message_return;
 }
 
-static int TEST_messagesender_send_result;
 static MESSAGE_SENDER_HANDLE saved_messagesender_send_message_sender;
 static MESSAGE_HANDLE saved_messagesender_send_message;
 static ON_MESSAGE_SEND_COMPLETE saved_messagesender_send_on_message_send_complete;
 static void* saved_messagesender_send_callback_context;
 
-static int TEST_messagesender_send_async(MESSAGE_SENDER_HANDLE message_sender, MESSAGE_HANDLE message, ON_MESSAGE_SEND_COMPLETE on_message_send_complete, void* callback_context, tickcounter_ms_t timeout)
+static ASYNC_OPERATION_HANDLE TEST_messagesender_send_async(MESSAGE_SENDER_HANDLE message_sender, MESSAGE_HANDLE message, ON_MESSAGE_SEND_COMPLETE on_message_send_complete, void* callback_context, tickcounter_ms_t timeout)
 {
-	(void)timeout;
+    (void)timeout;
     saved_messagesender_send_message_sender = message_sender;
     saved_messagesender_send_message = message;
     saved_messagesender_send_on_message_send_complete = on_message_send_complete;
     saved_messagesender_send_callback_context = callback_context;
 
-    return TEST_messagesender_send_result;
+    return (ASYNC_OPERATION_HANDLE)0x64;
 }
 
 
@@ -1641,8 +1640,8 @@ BEGIN_TEST_SUITE(iothubtr_amqp_tel_msgr_ut)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
-	size_t type_size;
-	TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
+    size_t type_size;
+    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -1686,19 +1685,19 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_UMOCK_ALIAS_TYPE(TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO, void*);
     REGISTER_UMOCK_ALIAS_TYPE(BINARY_DATA, void*);
     REGISTER_UMOCK_ALIAS_TYPE(LIST_ACTION_FUNCTION, void*);
-	type_size = sizeof(time_t);
-	if (type_size == sizeof(uint64_t))
-	{
-		REGISTER_UMOCK_ALIAS_TYPE(tickcounter_ms_t, uint64_t);
-	}
-	else if (type_size == sizeof(uint32_t))
-	{
-		REGISTER_UMOCK_ALIAS_TYPE(tickcounter_ms_t, uint32_t);
-	}
-	else
-	{
-		ASSERT_FAIL("Bad size_t size");
-	}
+    type_size = sizeof(time_t);
+    if (type_size == sizeof(uint64_t))
+    {
+        REGISTER_UMOCK_ALIAS_TYPE(tickcounter_ms_t, uint64_t);
+    }
+    else if (type_size == sizeof(uint32_t))
+    {
+        REGISTER_UMOCK_ALIAS_TYPE(tickcounter_ms_t, uint32_t);
+    }
+    else
+    {
+        ASSERT_FAIL("Bad size_t size");
+    }
 
     REGISTER_GLOBAL_MOCK_HOOK(malloc, TEST_malloc);
     REGISTER_GLOBAL_MOCK_HOOK(free, TEST_free);
@@ -1745,8 +1744,8 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_GLOBAL_MOCK_RETURN(messagesender_open, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(messagesender_open, 1);
 
-    REGISTER_GLOBAL_MOCK_RETURN(messagesender_send_async, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(messagesender_send_async, 1);
+    REGISTER_GLOBAL_MOCK_RETURN(messagesender_send_async, (ASYNC_OPERATION_HANDLE)0x64);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(messagesender_send_async, NULL);
 
     REGISTER_GLOBAL_MOCK_RETURN(messagereceiver_create, TEST_MESSAGE_RECEIVER_HANDLE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(messagereceiver_create, NULL);
@@ -1858,7 +1857,6 @@ TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
     TEST_message_create_IoTHubMessage_from_uamqp_message_return = 0;
 
 
-    TEST_messagesender_send_result = 0;
     saved_messagesender_send_message_sender = NULL;
     saved_messagesender_send_message = NULL;
     saved_messagesender_send_on_message_send_complete = NULL;

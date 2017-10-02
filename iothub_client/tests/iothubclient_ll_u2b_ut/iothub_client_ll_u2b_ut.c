@@ -2199,6 +2199,8 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SAS_token_unhappypaths)
 
         STRICT_EXPECTED_CALL(STRING_copy(sasUri, "https://")) /*30*/
             .IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(URL_EncodeString(json_blobName))
+			.IgnoreArgument(1);
         STRICT_EXPECTED_CALL(STRING_concat(sasUri, json_hostName))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
@@ -2209,13 +2211,17 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SAS_token_unhappypaths)
             .IgnoreArgument(2);
         STRICT_EXPECTED_CALL(STRING_concat(sasUri, "/"))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_concat(sasUri, json_blobName))
+		STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(STRING_concat(sasUri, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
         STRICT_EXPECTED_CALL(STRING_concat(sasUri, json_sasToken))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
+		STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
         STRICT_EXPECTED_CALL(json_value_free(allJson))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(STRING_delete(iotHubHttpMessageBodyResponse1_as_STRING_HANDLE))
@@ -2226,7 +2232,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SAS_token_unhappypaths)
 			.IgnoreArgument(1);
 		STRICT_EXPECTED_CALL(STRING_delete(blobJson))
 			.IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_delete(iotHubHttpRelativePath1)) /*40*/
+        STRICT_EXPECTED_CALL(STRING_delete(iotHubHttpRelativePath1)) /*46*/
             .IgnoreArgument(1);
     }
 
@@ -2349,27 +2355,29 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SAS_token_unhappypaths)
         23, /*BUFFER_u_char*/
         24, /*BUFFER_length*/
         26, /*STRING_c_str*/
-        42, /*json_value_free*/
-        43, /*STRING_delete*/
-        44, /*BUFFER_delete*/
-        46, /*BUFFER_delete*/
-        47, /*STRING_delete*/
-        48, /*STRING_delete*/
-        50, /*STRING_c_str*/
-        52, /*BUFFER_u_char*/
-        54, /*BUFFER_u_char*/
-        63, /*STRING_c_str*/
+		41, /*STRING_c_str*/
+		44, /*STRING_delete*/
+        45, /*json_value_free*/
+        46, /*STRING_delete*/
+        47, /*BUFFER_delete*/
+        49, /*BUFFER_delete*/
+        50, /*STRING_delete*/
+        51, /*STRING_delete*/
+        53, /*STRING_c_str*/
+        55, /*BUFFER_u_char*/
+        57, /*BUFFER_u_char*/
         66, /*STRING_c_str*/
-        67, /*BUFFER_delete*/
-        68, /*STRING_delete*/
-        69, /*STRING_delete*/
+        69, /*STRING_c_str*/
         70, /*BUFFER_delete*/
-        71, /*gballoc_free*/
-        72, /*BUFFER_delete*/
-        73, /*HTTPHeaders_Free*/
-        74, /*STRING_delete*/
-        75, /*STRING_delete*/
-        76, /*HTTPAPIEX_Destroy*/
+        71, /*STRING_delete*/
+        72, /*STRING_delete*/
+        73, /*BUFFER_delete*/
+        74, /*gballoc_free*/
+        75, /*BUFFER_delete*/
+        76, /*HTTPHeaders_Free*/
+        77, /*STRING_delete*/
+        78, /*STRING_delete*/
+        79, /*HTTPAPIEX_Destroy*/
     };
 
     for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
@@ -3510,6 +3518,8 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_deviceKey_unhappypaths)
 
         STRICT_EXPECTED_CALL(STRING_copy(sasUri, "https://"))
             .IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(URL_EncodeString(json_blobName))
+			.IgnoreArgument(1);
         STRICT_EXPECTED_CALL(STRING_concat(sasUri, json_hostName))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
@@ -3520,13 +3530,17 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_deviceKey_unhappypaths)
             .IgnoreArgument(2);
         STRICT_EXPECTED_CALL(STRING_concat(sasUri, "/")) /*40*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_concat(sasUri, json_blobName))
+		STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(STRING_concat(sasUri, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
         STRICT_EXPECTED_CALL(STRING_concat(sasUri, json_sasToken))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
+		STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
         STRICT_EXPECTED_CALL(json_value_free(allJson))/*48*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(STRING_delete(iotHubHttpMessageBodyResponse1_as_STRING_HANDLE))
@@ -3669,28 +3683,30 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_deviceKey_unhappypaths)
         29, /*BUFFER_u_char*/
         30, /*BUFFER_length*/
         32, /*STRING_c_str*/
-        48, /*json_value_free*/
-        49, /*STRING_delete*/
-        50, /*BUFFER_delete*/
-        51, /*BUFFER_delete*/
+		47, /*STRING_c_str*/
+		50, /*STRING_delete*/
+        51, /*json_value_free*/
         52, /*STRING_delete*/
-        53, /*STRING_delete*/
-        55, /*STRING_c_str*/
-        57, /*BUFFER_u_char*/
-        59, /*BUFFER_u_char*/
-        68, /*STRING_c_str*/
-        73, /*STRING_c_str*/
-        75, /*HTTPAPIEX_SAS_Destroy*/
-        76, /*STRING_delete*/
-        77, /*STRING_delete*/
-        78, /*STRING_delete*/
-        79, /*BUFFER_delete*/
-        80, /*gballoc_free*/
-        81, /*BUFFER_delete*/
-        82, /*HTTPHeaders_Free*/
-        83, /*STRING_delete*/
-        84, /*STRING_delete*/
-        85, /*HTTPAPIEX_Destroy*/
+        53, /*BUFFER_delete*/
+        54, /*BUFFER_delete*/
+        55, /*STRING_delete*/
+        56, /*STRING_delete*/
+        58, /*STRING_c_str*/
+        60, /*BUFFER_u_char*/
+        62, /*BUFFER_u_char*/
+        71, /*STRING_c_str*/
+        76, /*STRING_c_str*/
+        78, /*HTTPAPIEX_SAS_Destroy*/
+        79, /*STRING_delete*/
+        80, /*STRING_delete*/
+        81, /*STRING_delete*/
+        82, /*BUFFER_delete*/
+        83, /*gballoc_free*/
+        84, /*BUFFER_delete*/
+        85, /*HTTPHeaders_Free*/
+        86, /*STRING_delete*/
+        87, /*STRING_delete*/
+        88, /*HTTPAPIEX_Destroy*/
     };
 
     for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
@@ -4215,6 +4231,8 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_passes_x509_information_to_HTTPAPIEX_
 
         STRICT_EXPECTED_CALL(STRING_copy(sasUri, "https://"))
             .IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(URL_EncodeString(json_blobName))
+			.IgnoreArgument(1);
         STRICT_EXPECTED_CALL(STRING_concat(sasUri, json_hostName)) /*30*/
             .IgnoreArgument(1)
             .IgnoreArgument(2);
@@ -4225,13 +4243,17 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_passes_x509_information_to_HTTPAPIEX_
             .IgnoreArgument(2);
         STRICT_EXPECTED_CALL(STRING_concat(sasUri, "/"))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_concat(sasUri, json_blobName))
+		STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(STRING_concat(sasUri, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
         STRICT_EXPECTED_CALL(STRING_concat(sasUri, json_sasToken))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
+		STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
         STRICT_EXPECTED_CALL(json_value_free(allJson))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(STRING_delete(iotHubHttpMessageBodyResponse1_as_STRING_HANDLE))
@@ -4364,27 +4386,29 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_passes_x509_information_to_HTTPAPIEX_
         22, /*BUFFER_u_char*/
         23, /*BUFFER_length*/
         25, /*STRING_c_str*/
-        41, /*json_value_free*/
-        42, /*STRING_delete*/
-        43, /*BUFFER_delete*/
-        44, /*BUFFER_delete*/
+		40, /*STRING_c_str*/
+		43, /*STRING_delete*/
+        44, /*json_value_free*/
         45, /*STRING_delete*/
-        46, /*STRING_delete*/
-        48, /*STRING_c_str*/
-        50, /*BUFFER_u_char*/
-        52, /*BUFFER_u_char*/
-        61, /*STRING_c_str*/
+        46, /*BUFFER_delete*/
+        47, /*BUFFER_delete*/
+        48, /*STRING_delete*/
+        49, /*STRING_delete*/
+        51, /*STRING_c_str*/
+        53, /*BUFFER_u_char*/
+        55, /*BUFFER_u_char*/
         64, /*STRING_c_str*/
-        65, /*BUFFER_delete*/
-        66, /*STRING_delete*/
-        67, /*STRING_delete*/
+        67, /*STRING_c_str*/
         68, /*BUFFER_delete*/
-        69, /*gballoc_free*/
-        70, /*BUFFER_delete*/
-        71, /*HTTPHeaders_Free*/
-        72, /*STRING_delete*/
-        73, /*STRING_delete*/
-        74, /*HTTPAPIEX_Destroy*/
+        69, /*STRING_delete*/
+        70, /*STRING_delete*/
+        71, /*BUFFER_delete*/
+        72, /*gballoc_free*/
+        73, /*BUFFER_delete*/
+        74, /*HTTPHeaders_Free*/
+        75, /*STRING_delete*/
+        76, /*STRING_delete*/
+        77, /*HTTPAPIEX_Destroy*/
     };
 
     for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
