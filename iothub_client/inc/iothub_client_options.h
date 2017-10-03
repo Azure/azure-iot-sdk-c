@@ -43,6 +43,9 @@ extern "C"
     */
     static const char* OPTION_C2D_KEEP_ALIVE_FREQ_SECS = "c2d_keep_alive_freq_secs";
 
+    //diagnostic sampling percentage value, [0-100]
+    static const char* OPTION_DIAGNOSTIC_SAMPLING_PERCENTAGE = "diag_sampling_percentage";
+
 #ifdef __cplusplus
 }
 #endif

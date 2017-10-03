@@ -24,7 +24,7 @@ void disconnect_create_send_reconnect(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IO
     iotHubClientHandle = client_connect_to_hub(deviceToUse, protocol);
 
     // Send the Event from the client
-    d2cMessage = client_create_and_send_d2c(iotHubClientHandle);
+    d2cMessage = client_create_and_send_d2c(iotHubClientHandle, TEST_MESSAGE_CREATE_BYTE_ARRAY);
 
     // reconnect
     if (0 != network_reconnect())
@@ -60,7 +60,7 @@ void disconnect_after_first_confirmation_then_close(IOTHUB_PROVISIONED_DEVICE* d
     iotHubClientHandle = client_connect_to_hub(deviceToUse, protocol);
 
     // Send the first event from the client
-    d2cMessage[0] = client_create_and_send_d2c(iotHubClientHandle);
+    d2cMessage[0] = client_create_and_send_d2c(iotHubClientHandle, TEST_MESSAGE_CREATE_STRING);
 
     // give it a head start 
     ThreadAPI_Sleep(FIRST_MESSAGE_HEAD_START);
@@ -68,7 +68,7 @@ void disconnect_after_first_confirmation_then_close(IOTHUB_PROVISIONED_DEVICE* d
     // Send the rest
     for (int i=1; i<MESSAGE_COUNT;i++)
     {
-        d2cMessage[i] = client_create_and_send_d2c(iotHubClientHandle);
+        d2cMessage[i] = client_create_and_send_d2c(iotHubClientHandle, TEST_MESSAGE_CREATE_STRING);
     }
 
     // Wait for the first confirmation to arrive
@@ -124,7 +124,7 @@ void send_disconnect_send_reconnect_etc(IOTHUB_PROVISIONED_DEVICE* deviceToUse, 
 
     for (int i=0; i<MESSAGE_COUNT; i++)
     {
-        d2cMessage[i] = client_create_and_send_d2c(iotHubClientHandle);
+        d2cMessage[i] = client_create_and_send_d2c(iotHubClientHandle, TEST_MESSAGE_CREATE_BYTE_ARRAY);
         ThreadAPI_Sleep(SLEEP_TIME_BETWEEN_STEPS);
         
         if (0 != network_disconnect())
@@ -134,7 +134,7 @@ void send_disconnect_send_reconnect_etc(IOTHUB_PROVISIONED_DEVICE* deviceToUse, 
         ThreadAPI_Sleep(SLEEP_TIME_BETWEEN_STEPS);
 
         i++;
-        d2cMessage[i] = client_create_and_send_d2c(iotHubClientHandle);
+        d2cMessage[i] = client_create_and_send_d2c(iotHubClientHandle, TEST_MESSAGE_CREATE_BYTE_ARRAY);
         ThreadAPI_Sleep(SLEEP_TIME_BETWEEN_STEPS);
         
         if (0 != network_reconnect())

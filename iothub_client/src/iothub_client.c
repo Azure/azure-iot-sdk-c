@@ -862,14 +862,6 @@ void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle)
             LogError("unable to Lock - - will still proceed to try to end the thread without locking");
         }
 
-#ifndef DONT_USE_UPLOADTOBLOB
-        /*Codes_SRS_IOTHUBCLIENT_02_069: [ IoTHubClient_Destroy shall free all data created by IoTHubClient_UploadToBlobAsync ]*/
-        /*wait for all uploading threads to finish*/
-        while (singlylinkedlist_get_head_item(iotHubClientInstance->savedDataToBeCleaned) != NULL)
-        {
-            garbageCollectorImpl(iotHubClientInstance);
-        }
-#endif
         if (iotHubClientInstance->ThreadHandle != NULL)
         {
             iotHubClientInstance->StopThread = 1;
@@ -879,16 +871,6 @@ void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle)
         {
             okToJoin = false;
         }
-
-        /* Codes_SRS_IOTHUBCLIENT_01_006: [That includes destroying the IoTHubClient_LL instance by calling IoTHubClient_LL_Destroy.] */
-        IoTHubClient_LL_Destroy(iotHubClientInstance->IoTHubClientLLHandle);
-
-#ifndef DONT_USE_UPLOADTOBLOB
-        if (iotHubClientInstance->savedDataToBeCleaned != NULL)
-        {
-            singlylinkedlist_destroy(iotHubClientInstance->savedDataToBeCleaned);
-        }
-#endif
 
         /*Codes_SRS_IOTHUBCLIENT_02_045: [ IoTHubClient_Destroy shall unlock the serializing lock. ]*/
         if (Unlock(iotHubClientInstance->LockHandle) != LOCK_OK)
@@ -914,6 +896,35 @@ void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle)
                 IoTHubTransport_JoinWorkerThread(iotHubClientInstance->TransportHandle, iotHubClientHandle);
             }
         }
+
+
+        if (Lock(iotHubClientInstance->LockHandle) != LOCK_OK)
+        {
+            LogError("unable to Lock - - will still proceed to try to end the thread without locking");
+        }
+
+#ifndef DONT_USE_UPLOADTOBLOB
+        /*Codes_SRS_IOTHUBCLIENT_02_069: [ IoTHubClient_Destroy shall free all data created by IoTHubClient_UploadToBlobAsync ]*/
+        /*wait for all uploading threads to finish*/
+        while (singlylinkedlist_get_head_item(iotHubClientInstance->savedDataToBeCleaned) != NULL)
+        {
+            garbageCollectorImpl(iotHubClientInstance);
+        }
+
+        if (iotHubClientInstance->savedDataToBeCleaned != NULL)
+        {
+            singlylinkedlist_destroy(iotHubClientInstance->savedDataToBeCleaned);
+        }
+#endif
+
+        /* Codes_SRS_IOTHUBCLIENT_01_006: [That includes destroying the IoTHubClient_LL instance by calling IoTHubClient_LL_Destroy.] */
+        IoTHubClient_LL_Destroy(iotHubClientInstance->IoTHubClientLLHandle);
+
+        if (Unlock(iotHubClientInstance->LockHandle) != LOCK_OK)
+        {
+            LogError("unable to Unlock");
+        }
+
 
         vector_size = VECTOR_size(iotHubClientInstance->saved_user_callback_list);
         size_t index = 0;

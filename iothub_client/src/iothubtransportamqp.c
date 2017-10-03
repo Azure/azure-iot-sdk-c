@@ -5,6 +5,7 @@
 #include "iothubtransport_amqp_common.h"
 #include "azure_c_shared_utility/tlsio.h"
 #include "azure_c_shared_utility/platform.h"
+#include "azure_c_shared_utility/xlogging.h"
 
 #define RESULT_OK 0
 #define DEFAULT_IOTHUB_AMQP_PORT 5671

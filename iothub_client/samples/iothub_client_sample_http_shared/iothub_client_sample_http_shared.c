@@ -20,8 +20,12 @@
 #endif
 
 #ifdef MBED_BUILD_TIMESTAMP
-#include "certs.h"
+#define SET_TRUSTED_CERT_IN_SAMPLES
 #endif // MBED_BUILD_TIMESTAMP
+
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+#include "certs.h"
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 static const char* hubName = "[IoT Hub Name]";
 static const char* hubSuffix = "[IoT Hub Suffix]";

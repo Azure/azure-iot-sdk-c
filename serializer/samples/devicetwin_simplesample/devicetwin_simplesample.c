@@ -128,7 +128,12 @@ void device_twin_simple_sample_run(void)
                     car->state.softwareVersion = 1;
                     car->state.vanityPlate = "1I1";
 
-                    /*sending the values to IoTHub*/
+                    // IoTHubDeviceTwin_SendReportedStateCar sends the reported status back to IoT Hub
+                    // to the associated device twin.
+                    //
+                    // IoTHubDeviceTwin_SendReportedStateCar is an auto-generated function, created 
+                    // via the macro DECLARE_DEVICETWIN_MODEL(Car,...).  It resolves to the underlying function
+                    // IoTHubDeviceTwin_SendReportedState_Impl().
                     if (IoTHubDeviceTwin_SendReportedStateCar(car, deviceTwinReportStateCallback, NULL) != IOTHUB_CLIENT_OK)
                     {
                         (void)printf("Failed sending serialized reported state\n");

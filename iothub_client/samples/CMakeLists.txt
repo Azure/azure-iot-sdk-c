@@ -5,11 +5,11 @@
 #individual protocol samples
 
 function(add_sample_directory whatIsBuilding)
-	add_subdirectory(${whatIsBuilding})
+    add_subdirectory(${whatIsBuilding})
 
-	set_target_properties(${whatIsBuilding}
-			   PROPERTIES
-			   FOLDER "IoTHub_Samples")
+    set_target_properties(${whatIsBuilding}
+               PROPERTIES
+               FOLDER "IoTHub_Samples")
 endfunction()
 
 if(${use_http})
@@ -23,7 +23,7 @@ endif()
 if(${use_mqtt})
     add_sample_directory(iothub_client_sample_mqtt)
     add_sample_directory(iothub_client_sample_mqtt_esp8266)
-    if(${use_amqp} AND ${wip_use_c2d_amqp_methods})
+    if(${use_amqp})
         add_sample_directory(iothub_client_sample_device_method)
     endif()
     if(LINUX)
@@ -33,15 +33,17 @@ if(${use_mqtt})
 endif()
 
 if(${use_amqp})
-	add_sample_directory(iothub_client_sample_amqp)
-	add_sample_directory(iothub_client_sample_amqp_shared)
-	add_sample_directory(iothub_ll_client_sample_amqp_shared)
-	
-	add_sample_directory(iothub_client_sample_amqp_websockets)
-	add_sample_directory(iothub_client_sample_amqp_websockets_shared)
-        if(${wip_use_c2d_amqp_methods})
-		    add_sample_directory(iothub_client_sample_amqp_shared_ws_methods)
-        endif()
+    add_sample_directory(iothub_client_sample_amqp)
+    add_sample_directory(iothub_client_sample_amqp_shared)
+    add_sample_directory(iothub_ll_client_sample_amqp_shared)
+    
+    add_sample_directory(iothub_client_sample_amqp_websockets)
+    add_sample_directory(iothub_client_sample_amqp_websockets_shared)
+    add_sample_directory(iothub_client_sample_amqp_shared_ws_methods)
+endif()
+
+if(${use_amqp} OR ${use_mqtt})
+    add_sample_directory(iothub_client_sample_device_twin)
 endif()
 
 add_sample_directory(iothub_client_sample_x509)

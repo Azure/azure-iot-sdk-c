@@ -4,7 +4,7 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(azure_iot_sdks)
 
-set(IOT_SDK_VERSION 1.1.22)
+set(IOT_SDK_VERSION 1.1.24)
 
 if(POLICY CMP0042)
     cmake_policy(SET CMP0042 NEW)
@@ -42,6 +42,16 @@ ELSE()
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
 ENDIF(WIN32)
 
+set(dps_auth_type "" CACHE STRING "The type of authentication used with the DPS client")
+set(use_dps_client OFF CACHE BOOL "Enable DPS client")
+set(dps_hsm_x509 OFF CACHE BOOL "x509 type of hsm used with the DPS client")
+set(dps_hsm_sastoken OFF CACHE BOOL "tpm type of hsm used with the DPS client")
+set(dps_custom_hsm OFF CACHE BOOL "hsm type of custom used with the DPS client")
+set(dps_hsm_tpm_simulator OFF CACHE BOOL "tpm simulator type of hsm used with the DPS client")
+set(dps_hsm_custom_repo "" CACHE STRING "Custom repo")
+set(dps_hsm_custom_lib "" CACHE STRING "Custom repo library")
+set(DPS_PROTOCOL_FEATURE OFF CACHE BOOL "Disable DPS protocols")
+
 #the following variables are project-wide and can be used with cmake-gui
 option(use_amqp "set use_amqp to ON if amqp is to be used, set to OFF to not use amqp" ON)
 option(use_http "set use_http to ON if http is to be used, set to OFF to not use http" ON)
@@ -62,19 +72,42 @@ option(use_firmware_update "build the Raspberry PI firmware_update sample" OFF)
 option(build_as_dynamic "build the IoT SDK libaries as dynamic"  OFF)
 option(build_network_e2e "build network E2E tests" OFF)
 
-#Work in progress features
-#=========================
-#These options turn on features that are either not complete or noy yet enabled in the IoTHub service
-option(wip_use_c2d_amqp_methods "this option enables the C2D method support over AMQP. THIS IS WORK IN PROGRESS, ONLY MEANT FOR DEVELOPMENT (default is OFF)" OFF)
-
-if(${wip_use_c2d_amqp_methods})
-    add_definitions(-DWIP_C2D_METHODS_AMQP)
-endif()
-
 if(WIN32)
     option(use_openssl "set use_openssl to ON to use OpenSSL." OFF)
 else()
     option(use_openssl "set use_openssl to ON to use OpenSSL." ON)
+endif()
+
+#openssl samples on Windows need to have a trusted cert set
+if(WIN32 AND ${use_openssl})
+    option(set_trusted_cert_in_samples "set set_trusted_cert_in_samples to ON to have the samples set the SDK's built-in CA as TrustedCerts" ON)
+else()
+    option(set_trusted_cert_in_samples "set set_trusted_cert_in_samples to ON to have the samples set the SDK's built-in CA as TrustedCerts" OFF)
+endif()
+
+if ("${dps_auth_type}" STREQUAL "tpm")
+    set(dps_hsm_x509 OFF)
+    set(dps_hsm_sastoken ON)
+    set(dps_hsm_tpm_simulator OFF)
+    set(use_dps_client ON)
+    set(dps_custom_hsm OFF)
+elseif("${dps_auth_type}" STREQUAL "tpm_simulator")
+    set(dps_hsm_x509 OFF)
+    set(dps_hsm_sastoken ON)
+    set(dps_hsm_tpm_simulator ON)
+    set(use_dps_client ON)
+    set(dps_custom_hsm OFF)
+elseif("${dps_auth_type}" STREQUAL "x509")
+    set(dps_hsm_sastoken OFF)
+    set(dps_hsm_tpm_simulator OFF)
+    set(dps_hsm_x509 ON)
+    set(use_dps_client ON)
+    set(dps_custom_hsm OFF)
+elseif(${dps_auth_type})
+    STRING(LENGTH ${dps_auth_type} hsm_length)
+    if (hsm_length GREATER 0)
+        message(FATAL_ERROR "Unknown DPS HSM value specified: ${dps_auth_type}")
+    endif()
 endif()
 
 #setting nuget_e2e_tests will only generate e2e tests to run with nuget packages.  Install-packages from Package Manager Console in VS before building the projects
@@ -209,10 +242,16 @@ if(NOT ${use_amqp} OR NOT ${use_http})
     message(STATUS "iothub_service_client build is disabled (AMQP and HTTP support are required)")
 endif()
 
+if (${use_dps_client})
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_DPS_MODULE")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_DPS_MODULE")
+
+    add_subdirectory(dps_client)
+endif()
+
 if(${build_service_client})
     add_subdirectory(iothub_service_client)
 endif()
-
 
 if(${run_e2e_tests} OR ${run_longhaul_tests} OR ${nuget_e2e_tests})
     add_subdirectory(testtools)
@@ -220,6 +259,12 @@ endif()
 
 add_subdirectory(iothub_client)
 add_subdirectory(serializer)
+
+#add the device_auth sample subdirectory
+if(${use_dps_client} AND NOT ${skip_samples})
+    add_subdirectory(dps_client/samples)
+endif()
+
 if(NOT "${build_python}" STREQUAL "OFF")
     add_subdirectory(../device/iothub_client_python python)
     if(${build_service_client})
