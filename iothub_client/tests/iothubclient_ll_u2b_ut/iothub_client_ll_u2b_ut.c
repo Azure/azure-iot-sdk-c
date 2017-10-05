@@ -6870,6 +6870,56 @@ TEST_FUNCTION(IoTHubClient_LL_LargeFileWrite_Impl_unhappypaths)
     IoTHubClient_LL_UploadToBlob_Destroy(h);
 }
 
+TEST_FUNCTION(IoTHubClient_LL_LargeFileWrite_Impl_write_500_blocks_succeeds)
+{
+    ///arrange
+    IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS);
+    IOTHUB_CLIENT_LARGE_FILE_HANDLE largeFileHandle = BuildLargeFileHandle(h);
+    unsigned char c = '3';
+    size_t size = 1;
+    unsigned int blocksCount = 500;
+
+    umock_c_reset_all_calls();
+
+    for(unsigned int i = 0; i < blocksCount; ++i)
+    {
+        STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+
+        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, size));
+
+        STRICT_EXPECTED_CALL(Blob_UploadNextBlock(IGNORED_PTR_ARG,
+                                                  i, // this is the block id that should increment at each call
+                                                  IGNORED_PTR_ARG,
+                                                  IGNORED_PTR_ARG,
+                                                  IGNORED_PTR_ARG,
+                                                  IGNORED_PTR_ARG,
+                                                  IGNORED_PTR_ARG,
+                                                  IGNORED_PTR_ARG))
+            .SetReturn(BLOB_OK);
+
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
+
+        STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    }
+
+    for(unsigned int i = 0; i < blocksCount; ++i)
+    {
+        ///act
+        IOTHUB_CLIENT_RESULT result;
+        result = IoTHubClient_LL_LargeFileWrite_Impl(largeFileHandle, &c, size);
+
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    }
+
+    ///assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+
+    ///cleanup
+    IoTHubClient_LL_LargeFileClose_Impl(largeFileHandle);
+    IoTHubClient_LL_UploadToBlob_Destroy(h);
+}
+
 /****************************************************************************/
 /*   END tests LARGE FILE interface                                         */
 /****************************************************************************/
