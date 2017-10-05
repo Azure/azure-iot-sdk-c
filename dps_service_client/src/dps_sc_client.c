@@ -5,8 +5,10 @@
 
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/string_tokenizer.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/strings.h"
+#include "azure_c_shared_utility/connection_string_parser.h"
 
 #include "dps_sc_client.h"
 
@@ -28,41 +30,79 @@ typedef struct DPS_SC_TAG
 
 DPS_SC_HANDLE dps_sc_create_from_connection_string(const char* conn_string)
 {
-    UNREFERENCED_PARAMETER(conn_string);
-
-    //in implementation, parse these values from the conn_string
-    const char* hostname = "hostname";
-    const char* key_name = "key_name";
-    const char* key = "key";
-
     DPS_SC* result;
-    
-    if (hostname == NULL || key_name == NULL || key == NULL)
+
+    if (conn_string == NULL)
     {
-        LogError("invalid parameter hostname: %p, key_name: %p, key: %p", hostname, key_name, key);
+        LogError("Input parameter is NULL: conn_string");
         result = NULL;
-    }
-    else if ((result = malloc(sizeof(DPS_SC))) == NULL)
-    {
-        LogError("Allocation of dps service client failed");
     }
     else
     {
-        memset(result, 0, sizeof(DPS_SC));
-        if (mallocAndStrcpy_s(&result->dps_uri, hostname) != 0)
+        STRING_HANDLE cs_string;
+        if ((cs_string = STRING_construct(conn_string)) == NULL)
         {
-            LogError("Failure allocating of dps uri");
-            free(result);
+            LogError("STRING_construct failed");
+            result = NULL;
         }
-        else if (mallocAndStrcpy_s(&result->key_name, key_name) != 0)
+        else
         {
-            LogError("Failure allocating of keyname");
-            free(result);
-        }
-        else if (mallocAndStrcpy_s(&result->access_key, key) != 0)
-        {
-            LogError("Failure allocating of access key");
-            free(result);
+            MAP_HANDLE connection_string_values_map;
+            if ((connection_string_values_map = connectionstringparser_parse(cs_string)) == NULL)
+            {
+                LogError("Tokenizing conn_string failed");
+                result = NULL;
+            }
+            else
+            {
+                const char* hostname;
+                const char* key_name;
+                const char* key;
+
+                if ((hostname = Map_GetValueFromKey(connection_string_values_map, IOTHUBHOSTNAME)) == NULL)
+                {
+                    LogError("Couldn't find %s in conn_string", IOTHUBHOSTNAME);
+                    result = NULL;
+                }
+                else if ((key_name = Map_GetValueFromKey(connection_string_values_map, IOTHUBSHAREDACESSKEYNAME)) == NULL)
+                {
+                    LogError("Couldn't find %s in conn_string", IOTHUBSHAREDACESSKEYNAME);
+                    result = NULL;
+                }
+                else if ((key = Map_GetValueFromKey(connection_string_values_map, IOTHUBSHAREDACESSKEY)) == NULL)
+                {
+                    LogError("Couldn't find %s in conn_string", IOTHUBSHAREDACESSKEY);
+                }
+                //
+                if (hostname == NULL || key_name == NULL || key == NULL)
+                {
+                    LogError("invalid parameter hostname: %p, key_name: %p, key: %p", hostname, key_name, key);
+                    result = NULL;
+                }
+                else if ((result = malloc(sizeof(DPS_SC))) == NULL)
+                {
+                    LogError("Allocation of dps service client failed");
+                }
+                else
+                {
+                    memset(result, 0, sizeof(DPS_SC));
+                    if (mallocAndStrcpy_s(&result->dps_uri, hostname) != 0)
+                    {
+                        LogError("Failure allocating of dps uri");
+                        free(result);
+                    }
+                    else if (mallocAndStrcpy_s(&result->key_name, key_name) != 0)
+                    {
+                        LogError("Failure allocating of keyname");
+                        free(result);
+                    }
+                    else if (mallocAndStrcpy_s(&result->access_key, key) != 0)
+                    {
+                        LogError("Failure allocating of access key");
+                        free(result);
+                    }
+                }
+            }
         }
     }
     return result;
