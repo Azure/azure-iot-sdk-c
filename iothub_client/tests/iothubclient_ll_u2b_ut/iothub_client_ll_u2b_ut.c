@@ -6715,10 +6715,10 @@ TEST_FUNCTION(IoTHubClient_LL_LargeFileWrite_Impl_invalid_source_size_fails)
     ///arrange
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS);
     IOTHUB_CLIENT_LARGE_FILE_HANDLE largeFileHandle = BuildLargeFileHandle(h);
+
     umock_c_reset_all_calls();
 
     ///act
-    unsigned char c = '3';
     IOTHUB_CLIENT_RESULT result;
     result = IoTHubClient_LL_LargeFileWrite_Impl(largeFileHandle, NULL, 1);
 
@@ -6752,6 +6752,120 @@ TEST_FUNCTION(IoTHubClient_LL_LargeFileWrite_Impl_source_size_too_big_fails)
 
     ///cleanup
     gballoc_free(content);
+    IoTHubClient_LL_LargeFileClose_Impl(largeFileHandle);
+    IoTHubClient_LL_UploadToBlob_Destroy(h);
+}
+
+TEST_FUNCTION(IoTHubClient_LL_LargeFileWrite_Impl_happypath)
+{
+    ///arrange
+    IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS);
+    IOTHUB_CLIENT_LARGE_FILE_HANDLE largeFileHandle = BuildLargeFileHandle(h);
+    unsigned char c = '3';
+    size_t size = 1;
+
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+
+    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, size));
+
+    STRICT_EXPECTED_CALL(Blob_UploadNextBlock(IGNORED_PTR_ARG,
+                                              0,
+                                              IGNORED_PTR_ARG,
+                                              IGNORED_PTR_ARG,
+                                              IGNORED_PTR_ARG,
+                                              IGNORED_PTR_ARG,
+                                              IGNORED_PTR_ARG,
+                                              IGNORED_PTR_ARG))
+        .SetReturn(BLOB_OK);
+
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
+
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+
+    ///act
+    IOTHUB_CLIENT_RESULT result;
+    result = IoTHubClient_LL_LargeFileWrite_Impl(largeFileHandle, &c, size);
+
+    ///assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+
+    ///cleanup
+    IoTHubClient_LL_LargeFileClose_Impl(largeFileHandle);
+    IoTHubClient_LL_UploadToBlob_Destroy(h);
+}
+
+TEST_FUNCTION(IoTHubClient_LL_LargeFileWrite_Impl_unhappypaths)
+{
+    size_t calls_that_cannot_fail[] =
+    {
+        3, /*BUFFER_delete*/
+        4, /*Unlock*/
+    };
+
+    (void)umock_c_negative_tests_init();
+
+    ///arrange
+    IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS);
+    IOTHUB_CLIENT_LARGE_FILE_HANDLE largeFileHandle = BuildLargeFileHandle(h);
+    unsigned char c = '3';
+    size_t size = 1;
+
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+
+    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, size));
+
+    STRICT_EXPECTED_CALL(Blob_UploadNextBlock(IGNORED_PTR_ARG,
+                                              0,
+                                              IGNORED_PTR_ARG,
+                                              IGNORED_PTR_ARG,
+                                              IGNORED_PTR_ARG,
+                                              IGNORED_PTR_ARG,
+                                              IGNORED_PTR_ARG,
+                                              IGNORED_PTR_ARG))
+        .SetReturn(BLOB_OK)
+        .SetFailReturn(BLOB_ERROR);
+
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
+
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+
+    umock_c_negative_tests_snapshot();
+
+    for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
+    {
+        size_t j;
+        umock_c_negative_tests_reset();
+
+        for (j = 0;j<sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]);j++) /*not running the tests that cannot fail*/
+        {
+            if (calls_that_cannot_fail[j] == i)
+                break;
+        }
+
+        if (j == sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]))
+        {
+
+            umock_c_negative_tests_fail_call(i);
+            char temp_str[128];
+            sprintf(temp_str, "On failed call %zu", i);
+
+            ///act
+            IOTHUB_CLIENT_RESULT result;
+            result = IoTHubClient_LL_LargeFileWrite_Impl(largeFileHandle, &c, size);
+
+            ///assert
+            ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+        }
+    }
+
+    umock_c_negative_tests_deinit();
+
+    ///cleanup
     IoTHubClient_LL_LargeFileClose_Impl(largeFileHandle);
     IoTHubClient_LL_UploadToBlob_Destroy(h);
 }
