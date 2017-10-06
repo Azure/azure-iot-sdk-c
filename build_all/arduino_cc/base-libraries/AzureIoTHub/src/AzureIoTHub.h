@@ -14,5 +14,5 @@
 #include "sdk/iothubtransportmqtt.h"
 #include "sdk/iothub_client_options.h"
 
-#define AzureIoTHubVersion "1.0.42"
+#define AzureIoTHubVersion "1.0.43"
 #endif
