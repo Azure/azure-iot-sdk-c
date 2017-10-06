@@ -439,13 +439,12 @@ static int TEST_message_create_from_iothub_message(IOTHUB_MESSAGE_HANDLE iothub_
 	return TEST_message_create_from_iothub_message_return;
 }
 
-static int TEST_messagesender_send_result;
 static MESSAGE_SENDER_HANDLE saved_messagesender_send_message_sender;
 static MESSAGE_HANDLE saved_messagesender_send_message;
 static ON_MESSAGE_SEND_COMPLETE saved_messagesender_send_on_message_send_complete;
 static void* saved_messagesender_send_callback_context;
 
-static int TEST_messagesender_send(MESSAGE_SENDER_HANDLE message_sender, MESSAGE_HANDLE message, ON_MESSAGE_SEND_COMPLETE on_message_send_complete, void* callback_context, tickcounter_ms_t timeout)
+static ASYNC_OPERATION_HANDLE TEST_messagesender_send(MESSAGE_SENDER_HANDLE message_sender, MESSAGE_HANDLE message, ON_MESSAGE_SEND_COMPLETE on_message_send_complete, void* callback_context, tickcounter_ms_t timeout)
 {
 	(void)timeout;
 	saved_messagesender_send_message_sender = message_sender;
@@ -453,7 +452,7 @@ static int TEST_messagesender_send(MESSAGE_SENDER_HANDLE message_sender, MESSAGE
 	saved_messagesender_send_on_message_send_complete = on_message_send_complete;
 	saved_messagesender_send_callback_context = callback_context;
 
-	return TEST_messagesender_send_result;
+	return (ASYNC_OPERATION_HANDLE)0x64;
 }
 
 static void set_clone_link_configuration_expected_calls(role link_role, AMQP_MESSENGER_LINK_CONFIG* config)
@@ -964,7 +963,7 @@ static void register_global_mock_returns()
 	REGISTER_GLOBAL_MOCK_FAIL_RETURN(messagesender_open, 1);
 
 	REGISTER_GLOBAL_MOCK_RETURN(messagesender_send_async, 0);
-	REGISTER_GLOBAL_MOCK_FAIL_RETURN(messagesender_send_async, 1);
+	REGISTER_GLOBAL_MOCK_FAIL_RETURN(messagesender_send_async, (ASYNC_OPERATION_HANDLE)0x64);
 
 	REGISTER_GLOBAL_MOCK_RETURN(messagereceiver_create, TEST_MESSAGE_RECEIVER_HANDLE);
 	REGISTER_GLOBAL_MOCK_FAIL_RETURN(messagereceiver_create, NULL);
@@ -1112,7 +1111,6 @@ static void initialize_variables()
 	saved_message_create_from_iothub_message = NULL;
 	TEST_message_create_from_iothub_message_return = 0;
 
-	TEST_messagesender_send_result = 0;
 	saved_messagesender_send_message_sender = NULL;
 	saved_messagesender_send_message = NULL;
 	saved_messagesender_send_on_message_send_complete = NULL;
