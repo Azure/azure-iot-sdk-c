@@ -7005,6 +7005,31 @@ TEST_FUNCTION(IoTHubClient_LL_LargeFileWrite_Impl_write_50000_blocks_succeeds)
     IoTHubClient_LL_UploadToBlob_Destroy(h);
 }
 
+TEST_FUNCTION(IoTHubClient_LL_LargeFileWrite_Impl_invalid_handle_fails)
+{
+    ///arrange
+    IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS);
+    IOTHUB_CLIENT_LARGE_FILE_HANDLE largeFileHandle = BuildLargeFileHandle(h);
+    unsigned char c = '3';
+    size_t size = 1;
+    IOTHUB_CLIENT_LARGE_FILE_HANDLE_TEST_DATA* data = (IOTHUB_CLIENT_LARGE_FILE_HANDLE_TEST_DATA*)largeFileHandle;
+    data->isError = 1;
+
+    umock_c_reset_all_calls();
+
+    ///act
+    IOTHUB_CLIENT_RESULT result;
+    result = IoTHubClient_LL_LargeFileWrite_Impl(largeFileHandle, &c, size);
+
+    ///assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+
+    ///cleanup
+    IoTHubClient_LL_LargeFileClose_Impl(largeFileHandle);
+    IoTHubClient_LL_UploadToBlob_Destroy(h);
+}
+
 /****************************************************************************/
 /*   END tests LARGE FILE interface                                         */
 /****************************************************************************/
