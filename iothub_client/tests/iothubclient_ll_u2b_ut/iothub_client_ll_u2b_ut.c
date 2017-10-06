@@ -7030,6 +7030,23 @@ TEST_FUNCTION(IoTHubClient_LL_LargeFileWrite_Impl_invalid_handle_fails)
     IoTHubClient_LL_UploadToBlob_Destroy(h);
 }
 
+TEST_FUNCTION(IoTHubClient_LL_LargeFileClose_Impl_with_null_handle_fails)
+{
+    ///arrange
+    IOTHUB_CLIENT_LARGE_FILE_HANDLE handle = NULL;
+    umock_c_reset_all_calls();
+
+    ///act
+    IOTHUB_CLIENT_RESULT result;
+    result = IoTHubClient_LL_LargeFileClose_Impl(handle);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    ///cleanup
+}
+
 /****************************************************************************/
 /*   END tests LARGE FILE interface                                         */
 /****************************************************************************/
