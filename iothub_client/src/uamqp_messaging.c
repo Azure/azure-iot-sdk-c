@@ -475,7 +475,6 @@ static int readMessageIdFromuAQMPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_ha
                     // Codes_SRS_UAMQP_MESSAGING_09_015: [If message-id fails to be obtained, message_create_IoTHubMessage_from_uamqp_message() shall fail and return immediately.] 
                     LogError("Failed to get value of uAMQP message 'message-id' property (string)");
                     string_value = NULL;
-                    result = __FAILURE__;
                 }
             }
             else if (value_type == AMQP_TYPE_ULONG)
@@ -488,13 +487,11 @@ static int readMessageIdFromuAQMPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_ha
                     // Codes_SRS_UAMQP_MESSAGING_09_015: [If message-id fails to be obtained, message_create_IoTHubMessage_from_uamqp_message() shall fail and return immediately.] 
                     LogError("Failed to get value of uAMQP message 'message-id' property (ulong)");
                     string_value = NULL;
-                    result = __FAILURE__;
                 }
                 else if (sprintf(string_buffer, "%" PRIu64, ulong_value) < 0)
                 {
                     LogError("Failed converting 'message-id' (ulong) to string");
                     string_value = NULL;
-                    result = __FAILURE__;
                 }
                 else
                 {
@@ -511,14 +508,12 @@ static int readMessageIdFromuAQMPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_ha
                     // Codes_SRS_UAMQP_MESSAGING_09_015: [If message-id fails to be obtained, message_create_IoTHubMessage_from_uamqp_message() shall fail and return immediately.] 
                     LogError("Failed to get value of uAMQP message 'message-id' property (UUID)");
                     string_value = NULL;
-                    result = __FAILURE__;
                 }
                 else if ((string_value = UUID_to_string((UUID*)uuid_value)) == NULL)
                 {
                     // Codes_SRS_UAMQP_MESSAGING_09_015: [If message-id fails to be obtained, message_create_IoTHubMessage_from_uamqp_message() shall fail and return immediately.] 
                     LogError("Failed to get the string representation of 'message-id' UUID");
                     string_value = NULL;
-                    result = __FAILURE__;
                 }
                 else
                 {
@@ -529,7 +524,6 @@ static int readMessageIdFromuAQMPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_ha
             {
                 LogError("Unrecognized type for message-id (%d)", value_type);
                 string_value = NULL;
-                result = __FAILURE__;
             }
 
             if (string_value != NULL)
@@ -552,7 +546,11 @@ static int readMessageIdFromuAQMPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_ha
                     free(string_value);
                 }
             }
-
+            else
+            {
+                LogError("Unexpected null string for message-id");
+                result = __FAILURE__;
+            }
         }
         else
         {
@@ -672,6 +670,11 @@ static int readCorrelationIdFromuAQMPMessage(IOTHUB_MESSAGE_HANDLE iothub_messag
                     // Only certain code paths allocate this.
                     free(string_value);
                 }
+            }
+            else
+            {
+                LogError("Unexpected null string for correlation-id");
+                result = __FAILURE__;
             }
         }
         else
