@@ -7178,6 +7178,7 @@ TEST_FUNCTION(IoTHubClient_LL_LargeFileClose_Impl_happypath)
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     }
 
+    /* Destroy_LargeFileHandle */
     STRICT_EXPECTED_CALL(gballoc_free(handleData->hostname));
     STRICT_EXPECTED_CALL(HTTPAPIEX_Destroy(handleData->httpApiExHandle));
     STRICT_EXPECTED_CALL(STRING_delete(handleData->xml));
@@ -7196,6 +7197,212 @@ TEST_FUNCTION(IoTHubClient_LL_LargeFileClose_Impl_happypath)
     ///assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+
+    ///cleanup
+    IoTHubClient_LL_UploadToBlob_Destroy(h);
+}
+
+TEST_FUNCTION(IoTHubClient_LL_LargeFileClose_Impl_unhappypaths)
+{
+    size_t calls_that_cannot_fail[] =
+    {
+        3, /*STRING_c_str*/
+        5, /*STRING_c_str*/
+        7, /*BUFFER_delete*/
+        8, /*STRING_delete*/
+        9, /*BUFFER_u_char*/
+        11,/*BUFFER_u_char*/
+        20,/*STRING_c_str*/
+        23,/*STRING_c_str*/
+        25,/*STRING_delete*/
+        26,/*STRING_delete*/
+        27,/*BUFFER_delete*/
+        28,/*gballoc_free*/
+        29,/*gballoc_free*/
+        30,/*HTTPAPIEX_Destroy*/
+        31,/*STRING_delete*/
+        32,/*BUFFER_delete*/
+        33,/*HTTPHeaders_Free*/
+        34,/*STRING_delete*/
+        35,/*HTTPAPIEX_Destroy*/
+        36,/*Lock_Deinit*/
+        37,/*STRING_delete*/
+        38,/*gballoc_free*/
+    };
+
+    (void)umock_c_negative_tests_init();
+
+    ///arrange
+    IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS);
+
+    umock_c_reset_all_calls();
+
+    { /* Blob_UploadFromSasUri_stop */
+        /*this part is Put Block list*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "</BlockList>")) /*This is closing the XML*/
+            .IgnoreArgument_handle();
+        STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG)); /*this is building the relative path for the Put BLock list*/
+
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "&comp=blocklist")) /*This is still building relative path for Put Block list*/
+            .IgnoreArgument_handle();
+
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /* 3 */ /*this is getting the XML as const char* so it can be passed to _ExecuteRequest*/
+            .IgnoreArgument_handle();
+
+        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG)) /*this is creating the XML body as BUFFER_HANDLE*/
+            .IgnoreAllArguments();
+
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /* 5 */ /*this is getting the relative path*/
+            .IgnoreArgument_handle();
+
+        STRICT_EXPECTED_CALL(HTTPAPIEX_ExecuteRequest(
+            IGNORED_PTR_ARG,
+            HTTPAPI_REQUEST_PUT,
+            IGNORED_PTR_ARG,
+            NULL,
+            IGNORED_PTR_ARG,
+            IGNORED_PTR_ARG,
+            NULL,
+            IGNORED_PTR_ARG
+        ))
+            .IgnoreArgument_handle()
+            .IgnoreArgument_relativePath()
+            .IgnoreArgument_requestContent()
+            .CopyOutArgumentBuffer_statusCode(&TwoHundred, sizeof(TwoHundred))
+            ;
+
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG)) /* 7 */ /*This is the XML as BUFFER_HANDLE*/
+            .IgnoreArgument_handle();
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)) /* 8 */ /*this is destroying the relative path for Put Block List*/
+            .IgnoreArgument_handle();
+    }
+
+    { /*LARGE_FILE_upload_blob_stop*/
+        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG)) /* 9 */
+            .IgnoreArgument_handle();
+
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+            .IgnoreArgument_size();
+
+        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG)) /* 11 */
+            .IgnoreArgument_handle();
+
+        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+            .IgnoreArgument_source()
+            .IgnoreArgument_size()
+            ;
+
+
+        {/*step3*/
+            STRING_HANDLE uriResource;
+            STRICT_EXPECTED_CALL(STRING_construct(TEST_IOTHUBNAME "." TEST_IOTHUBSUFFIX))
+                .CaptureReturn(&uriResource);
+
+            STRICT_EXPECTED_CALL(STRING_concat(uriResource, "/devices/"))
+                .IgnoreArgument(1);
+            STRICT_EXPECTED_CALL(STRING_concat_with_STRING(uriResource, IGNORED_PTR_ARG))
+                .IgnoreArgument(1)
+                .IgnoreArgument(2);
+            STRICT_EXPECTED_CALL(STRING_concat(uriResource, "/files/notifications"))
+                .IgnoreArgument(1);
+
+            STRING_HANDLE relativePathNotification;
+            STRICT_EXPECTED_CALL(STRING_construct("/devices/"))
+                .CaptureReturn(&relativePathNotification);
+
+            STRICT_EXPECTED_CALL(STRING_concat_with_STRING(relativePathNotification, IGNORED_PTR_ARG))
+                .IgnoreArgument(1)
+                .IgnoreArgument(2);
+            STRICT_EXPECTED_CALL(STRING_concat(relativePathNotification, "/files/notifications/"))
+                .IgnoreArgument(1);
+
+            const char* correlationId_as_char = TEST_DEFAULT_STRING_VALUE;
+            STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /* 20 */
+                .CaptureReturn(&correlationId_as_char)
+                .IgnoreArgument(1);
+            STRICT_EXPECTED_CALL(STRING_concat(relativePathNotification, correlationId_as_char))
+                .IgnoreArgument(1)
+                .IgnoreArgument(2);
+            STRICT_EXPECTED_CALL(STRING_concat(relativePathNotification, TEST_API_VERSION))
+                .IgnoreArgument(1);
+
+            const char* relativePathNotification_as_char = TEST_DEFAULT_STRING_VALUE;
+            STRICT_EXPECTED_CALL(STRING_c_str(relativePathNotification)) /* 23 */
+                .CaptureReturn(&relativePathNotification_as_char)
+                .IgnoreArgument(1);
+
+            STRICT_EXPECTED_CALL(HTTPAPIEX_ExecuteRequest(
+                IGNORED_PTR_ARG, /*iotHubHttpApiExHandle */
+                HTTPAPI_REQUEST_POST,
+                relativePathNotification_as_char,
+                IGNORED_PTR_ARG, /*iotHubHttpRequestHeaders1*/
+                IGNORED_PTR_ARG,
+                IGNORED_PTR_ARG,
+                NULL,
+                NULL
+            ))
+                .IgnoreArgument(1)
+                .IgnoreArgument(3)
+                .IgnoreArgument(4)
+                .IgnoreArgument(5)
+                .CopyOutArgumentBuffer_statusCode(&TwoHundred, sizeof(TwoHundred));
+
+            STRICT_EXPECTED_CALL(STRING_delete(relativePathNotification)) /* 25 */
+                .IgnoreArgument(1);
+            STRICT_EXPECTED_CALL(STRING_delete(uriResource)) /* 26 */
+                .IgnoreArgument(1);
+        }
+
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
+
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    }
+
+    /* Destroy_LargeFileHandle */
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); /* 29 */
+    STRICT_EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock_Deinit(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); /* 38 */
+
+    umock_c_negative_tests_snapshot();
+
+    for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
+    {
+        size_t j;
+
+        for (j = 0;j<sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]);j++) /*not running the tests that cannot fail*/
+        {
+            if (calls_that_cannot_fail[j] == i)
+                break;
+        }
+
+        IOTHUB_CLIENT_LARGE_FILE_HANDLE largeFileHandle = BuildLargeFileHandle(h);
+
+        umock_c_negative_tests_reset();
+
+        if (j == sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]))
+        {
+
+            umock_c_negative_tests_fail_call(i);
+            char temp_str[128];
+            sprintf(temp_str, "On failed call %zu", i);
+
+            ///act
+            IOTHUB_CLIENT_RESULT result;
+            result = IoTHubClient_LL_LargeFileClose_Impl(largeFileHandle);
+
+            ///assert
+            ASSERT_ARE_NOT_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, temp_str);
+        }
+    }
+
+    umock_c_negative_tests_deinit();
 
     ///cleanup
     IoTHubClient_LL_UploadToBlob_Destroy(h);
