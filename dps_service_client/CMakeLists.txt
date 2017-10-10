@@ -12,16 +12,23 @@ compileAsC99()
 
 set(dps_service_client_c_files
 ./src/dps_sc_client.c
+./src/dps_sc_enrollment.c
+../deps/parson/parson.c
 )
 
 set(dps_service_client_h_files
 ./inc/dps_sc_client.h
 ./inc/dps_sc_enrollment.h
+../deps/parson/parson.h
 )
 
-include_directories(${SHARED_UTIL_INC_FOLDER})
+if(MSVC)
+set_source_files_properties(../deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
+endif()
 
+include_directories(${SHARED_UTIL_INC_FOLDER})
 include_directories(${UHTTP_C_INC_FOLDER})
+include_directories(${CMAKE_CURRENT_LIST_DIR}/../deps/parson)
 
 set(DPS_SERVICE_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "This is the include folder for dps_service_client" FORCE)
 

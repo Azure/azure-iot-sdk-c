@@ -99,7 +99,7 @@ extern "C" {
     typedef struct DEVICE_REGISTRATION_STATUS_TAG
     {
         const char* registration_id;
-        time_t created_date_time_utc;
+        const time_t created_date_time_utc;
         const char* assigned_hub;
         const char* device_id;
         REGISTRATION_STATUS status;
@@ -111,8 +111,8 @@ extern "C" {
 
     typedef struct ENROLLMENT_TAG
     {
-        char* registration_id;
-        char* device_id;
+        const char* registration_id;
+        const char* device_id;
         DEVICE_REGISTRATION_STATUS* registration_status;
         ATTESTATION_MECHANISM* attestation;
         char* iothub_hostname;
@@ -120,21 +120,24 @@ extern "C" {
         char* etag;
         char* generation_id;
         PROVISIONING_STATUS provisioning_status;
-        time_t created_date_time_utc;
+        const time_t created_date_time_utc;
         time_t updated_date_time_utc;
     } ENROLLMENT;
 
     typedef struct ENROLLMENT_GROUP_TAG
     {
-        char* enrollment_group_id;
+        const char* enrollment_group_id;
         ATTESTATION_MECHANISM* attestation;
         char* iothub_hostname;
         TWIN_STATE* initial_twin_state;
         char* etag;
         PROVISIONING_STATUS provisioning_status;
-        time_t created_date_time_utc;
+        const time_t created_date_time_utc;
         time_t updated_date_time_utc;
     } ENROLLMENT_GROUP;
+
+
+    MOCKABLE_FUNCTION(, char*, enrollment_toJson, const ENROLLMENT*, enrollment);
 
 #ifdef __cplusplus
 }

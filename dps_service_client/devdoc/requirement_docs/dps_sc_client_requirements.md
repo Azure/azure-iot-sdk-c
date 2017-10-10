@@ -8,7 +8,6 @@ This module is used to perform CRUD operations on the device enrollment records 
 
 ```c
 DPS_SC_HANDLE dps_sc_create_from_connection_string(const char* conn_string);
-
 void dps_sc_destroy(DPS_SC_HANDLE handle);
 int dps_sc_create_or_update_enrollment(DPS_SC_HANDLE handle, const char* id, const ENROLLMENT* enrollment);
 int dps_sc_delete_enrollment(DPS_SC_HANDLE handle, const char* id);
