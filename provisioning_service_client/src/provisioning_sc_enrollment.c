@@ -3,7 +3,7 @@
 
 #include "azure_c_shared_utility/xlogging.h"
 
-#include "dps_sc_enrollment.h"
+#include "provisioning_sc_enrollment.h"
 #include "parson.h"
 
 static void* ENROLLMENT_JSON_DEFUALT_VALUE_NULL = NULL;
@@ -52,7 +52,7 @@ char* enrollment_toJson(const ENROLLMENT* enrollment)
     {
         LogError("Failed to set deviceId in JSON String");
     }
-    //add more
+    //add more fields
 
     else
     {
@@ -77,6 +77,3 @@ char* enrollment_toJson(const ENROLLMENT* enrollment)
 
     return result;
 }
-
-//static int enrollment_fromJson(JSON_Object* root_object)
-

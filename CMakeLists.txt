@@ -63,7 +63,7 @@ option(skip_samples "set skip_samples to ON to skip building samples (default is
 option(compileOption_C "passes a string to the command line of the C compiler" OFF)
 option(compileOption_CXX "passes a string to the command line of the C++ compiler" OFF)
 option(build_service_client "controls whether the iothub_service_client is built or not" ON)
-option(build_dps_service_client "controls whether the dps_service_client is built or not" ON)
+option(build_provisioning_service_client "controls whether the dps_service_client is built or not" ON)
 option(build_python "builds the Python native iothub_client module" OFF)
 option(build_javawrapper "builds the native iothub_client library for java C wrapper" OFF)
 option(dont_use_uploadtoblob "set dont_use_uploadtoblob to ON if the functionality of upload to blob is to be excluded, OFF otherwise. It requires HTTP" OFF)
@@ -244,8 +244,8 @@ if(NOT ${use_amqp} OR NOT ${use_http})
 endif()
 
 if(NOT ${use_http})
-    set (build_dps_service_client OFF)
-    message(STATUS "dps_service_client build is disabled (HTTP support is required)")
+    set (build_provisioning_service_client OFF)
+    message(STATUS "provisioning_service_client build is disabled (HTTP support is required)")
 endif()
 
 if (${use_dps_client})
@@ -254,8 +254,8 @@ if (${use_dps_client})
 
     add_subdirectory(dps_client)
 
-    if(${build_dps_service_client})
-        add_subdirectory(dps_service_client)
+    if(${build_provisioning_service_client})
+        add_subdirectory(provisioning_service_client)
     endif()
 
 endif()

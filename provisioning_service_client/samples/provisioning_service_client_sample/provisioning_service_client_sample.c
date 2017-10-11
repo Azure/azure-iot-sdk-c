@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-#include "dps_sc_client.h"
+#include "provisioning_service_client.h"
 
 int main()
 {
@@ -22,8 +22,8 @@ int main()
     json = enrollment_toJson(&enrollment);
     printf("%s\n", json);
 
-    DPS_SC_HANDLE dps_sc = dps_sc_create_from_connection_string(connectionString);
-    dps_sc_create_or_update_enrollment(dps_sc, registrationId, &enrollment);
+    PROVISIONING_SERVICE_CLIENT_HANDLE prov_sc = prov_sc_create_from_connection_string(connectionString);
+    prov_sc_create_or_update_enrollment(prov_sc, registrationId, &enrollment);
 
     return result;
 }

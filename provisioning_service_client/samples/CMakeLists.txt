@@ -6,7 +6,7 @@ function(add_sample_directory whatIsBuilding)
 
     set_target_properties(${whatIsBuilding}
                PROPERTIES
-               FOLDER "DPS_Service_Samples")
+               FOLDER "Provisioning_Service_Client_Samples")
 endfunction()
 
-add_sample_directory(dps_sc_sample)
+add_sample_directory(provisioning_service_client_sample)

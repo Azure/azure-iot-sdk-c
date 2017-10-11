@@ -3,4 +3,4 @@
 
 cmake_minimum_required(VERSION 2.8.11)
 
-#this is CMakeLists for dps service tests folder
+#this is CMakeLists for provisioning service client tests folder

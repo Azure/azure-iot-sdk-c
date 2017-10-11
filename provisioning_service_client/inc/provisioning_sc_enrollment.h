@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#ifndef DPS_SC_ENROLLMENT_H
-#define DPS_SC_ENROLLMENT_H
+#ifndef PROVISIONING_SC_ENROLLMENT_H
+#define PROVISIONING_SC_ENROLLMENT_H
 
 #include "azure_c_shared_utility/agenttime.h"
 #include "azure_c_shared_utility/macro_utils.h"
@@ -143,4 +143,4 @@ extern "C" {
 }
 #endif /* __cplusplus */
 
-#endif /* DPS_SC_ENROLLMENT_H */
+#endif /* PROVISIONING_SC_ENROLLMENT_H */

@@ -17,7 +17,7 @@
 #include "azure_uhttp_c/uhttp.h"
 
 
-#include "dps_sc_client.h"
+#include "provisioning_service_client.h"
 
 typedef enum HTTP_CONNECTION_STATE_TAG
 {
@@ -31,15 +31,15 @@ typedef enum HTTP_CONNECTION_STATE_TAG
 } HTTP_CONNECTION_STATE;
 
 //consider substructure representing SharedAccessSignature?
-typedef struct DPS_SC_TAG
+typedef struct PROVISIONING_SERVICE_CLIENT_TAG
 {
-    char* dps_uri;
+    char* provisioning_service_uri;
     char* key_name;
     char* access_key;
 
     HTTP_CONNECTION_STATE http_state;
 
-} DPS_SC;
+} PROV_SERVICE_CLIENT;
 
 #define UNREFERENCED_PARAMETER(x) x
 
@@ -58,7 +58,7 @@ static const char* CREATE_ENROLLMENT_CONTENT_FMT = "{\"id\":\"%s\",\"desiredIotH
 static const char* ENROLL_GROUP_PROVISION_PATH_FMT = "/enrollmentGroups/%s?api-version=%s";
 static const char* ENROLL_PROVISION_PATH_FMT = "/enrollments/%s?api-version=%s";
 static const char* HEADER_KEY_AUTHORIZATION = "Authorization";
-static const char* DPS_API_VERSION = "2017-08-31-preview";
+static const char* PROVISIONING_SERVICE_API_VERSION = "2017-08-31-preview";
 
 static size_t string_length(const char* value)
 {
@@ -92,14 +92,14 @@ static void on_http_connected(void* callback_ctx, HTTP_CALLBACK_REASON connect_r
 {
     if (callback_ctx != NULL)
     {
-        DPS_SC* dps_client = (DPS_SC*)callback_ctx;
+        PROV_SERVICE_CLIENT* prov_client = (PROV_SERVICE_CLIENT*)callback_ctx;
         if (connect_result == HTTP_CALLBACK_REASON_OK)
         {
-            dps_client->http_state = HTTP_STATE_CONNECTED;
+            prov_client->http_state = HTTP_STATE_CONNECTED;
         }
         else
         {
-            dps_client->http_state = HTTP_STATE_ERROR;
+            prov_client->http_state = HTTP_STATE_ERROR;
         }
     }
 }
@@ -109,8 +109,8 @@ static void on_http_error(void* callback_ctx, HTTP_CALLBACK_REASON error_result)
     (void)error_result;
     if (callback_ctx != NULL)
     {
-        DPS_SC* dps_client = (DPS_SC*)callback_ctx;
-        dps_client->http_state = HTTP_STATE_ERROR;
+        PROV_SERVICE_CLIENT* prov_client = (PROV_SERVICE_CLIENT*)callback_ctx;
+        prov_client->http_state = HTTP_STATE_ERROR;
         LogError("Failure encountered in http %d", error_result);
     }
     else
@@ -126,21 +126,21 @@ static void on_http_reply_recv(void* callback_ctx, HTTP_CALLBACK_REASON request_
     (void)content_len;
     if (callback_ctx != NULL)
     {
-        DPS_SC* dps_client = (DPS_SC*)callback_ctx;
+        PROV_SERVICE_CLIENT* prov_client = (PROV_SERVICE_CLIENT*)callback_ctx;
         if (request_result == HTTP_CALLBACK_REASON_OK)
         {
             if (status_code >= 200 && status_code <= 299)
             {
-                dps_client->http_state = HTTP_STATE_REQUEST_RECV;
+                prov_client->http_state = HTTP_STATE_REQUEST_RECV;
             }
             else
             {
-                dps_client->http_state = HTTP_STATE_ERROR;
+                prov_client->http_state = HTTP_STATE_ERROR;
             }
         }
         else
         {
-            dps_client->http_state = HTTP_STATE_ERROR;
+            prov_client->http_state = HTTP_STATE_ERROR;
         }
     }
     else
@@ -149,7 +149,7 @@ static void on_http_reply_recv(void* callback_ctx, HTTP_CALLBACK_REASON request_
     }
 }
 
-static HTTP_HEADERS_HANDLE construct_http_headers(const DPS_SC* dps_client)
+static HTTP_HEADERS_HANDLE construct_http_headers(const PROV_SERVICE_CLIENT* prov_client)
 {
     HTTP_HEADERS_HANDLE result;
     if ((result = HTTPHeaders_Alloc()) == NULL)
@@ -161,7 +161,7 @@ static HTTP_HEADERS_HANDLE construct_http_headers(const DPS_SC* dps_client)
         size_t secSinceEpoch = (size_t)(difftime(get_time(NULL), EPOCH_TIME_T_VALUE) + 0);
         size_t expiryTime = secSinceEpoch + SAS_TOKEN_DEFAULT_LIFETIME;
 
-        STRING_HANDLE sas_token = SASToken_CreateString(dps_client->access_key, dps_client->dps_uri, dps_client->key_name, expiryTime);
+        STRING_HANDLE sas_token = SASToken_CreateString(prov_client->access_key, prov_client->provisioning_service_uri, prov_client->key_name, expiryTime);
         if (sas_token == NULL)
         {
             HTTPHeaders_Free(result);
@@ -196,7 +196,7 @@ static STRING_HANDLE construct_registration_path(const char* registration_id, co
     }
     else
     {
-        if ((result = STRING_construct_sprintf(path_fmt, STRING_c_str(registration_encode), DPS_API_VERSION)) == NULL)
+        if ((result = STRING_construct_sprintf(path_fmt, STRING_c_str(registration_encode), PROVISIONING_SERVICE_API_VERSION)) == NULL)
         {
             LogError("Failed constructing provisioning path");
         }
@@ -205,7 +205,7 @@ static STRING_HANDLE construct_registration_path(const char* registration_id, co
     return result;
 }
 
-static HTTP_CLIENT_HANDLE connect_to_service(DPS_SC* dps_client)
+static HTTP_CLIENT_HANDLE connect_to_service(PROV_SERVICE_CLIENT* prov_client)
 {
     HTTP_CLIENT_HANDLE result;
 
@@ -213,16 +213,16 @@ static HTTP_CLIENT_HANDLE connect_to_service(DPS_SC* dps_client)
     TLSIO_CONFIG tls_io_config;
     //HTTP_PROXY_IO_CONFIG http_proxy;
     memset(&tls_io_config, 0, sizeof(TLSIO_CONFIG));
-    tls_io_config.hostname = dps_client->dps_uri;
+    tls_io_config.hostname = prov_client->provisioning_service_uri;
     tls_io_config.port = DEFAULT_HTTPS_PORT;
 
     // // Setup proxy
-    // if (dps_client->proxy_hostname != NULL)
+    // if (prov_client->proxy_hostname != NULL)
     // {
     //     memset(&http_proxy, 0, sizeof(HTTP_PROXY_IO_CONFIG));
-    //     http_proxy.hostname = dps_client->dps_uri;
+    //     http_proxy.hostname = prov_client->provisioning_service_uri;
     //     http_proxy.port = 443;
-    //     http_proxy.proxy_hostname = dps_client->dps_uri;
+    //     http_proxy.proxy_hostname = prov_client->provisioning_service_uri;
     //     http_proxy.proxy_port = DEFAULT_HTTPS_PORT;
 
     //     tls_io_config.underlying_io_interface = http_proxy_io_get_interface_description();
@@ -235,19 +235,19 @@ static HTTP_CLIENT_HANDLE connect_to_service(DPS_SC* dps_client)
         LogError("platform default tlsio is NULL");
         result = NULL;
     }
-    else if ((result = uhttp_client_create(interface_desc, &tls_io_config, on_http_error, dps_client)) == NULL)
+    else if ((result = uhttp_client_create(interface_desc, &tls_io_config, on_http_error, prov_client)) == NULL)
     {
         LogError("Failed creating http object");
     }
-    // else if (dps_client->certificates && uhttp_client_set_trusted_cert(result, dps_client->certificates) != HTTP_CLIENT_OK)
+    // else if (prov_client->certificates && uhttp_client_set_trusted_cert(result, prov_client->certificates) != HTTP_CLIENT_OK)
     // {
     //     LogError("Failed setting trusted cert");
     //     uhttp_client_destroy(result);
     //     result = NULL;
     // }
-    else if (uhttp_client_open(result, dps_client->dps_uri, DEFAULT_HTTPS_PORT, on_http_connected, dps_client) != HTTP_CLIENT_OK)
+    else if (uhttp_client_open(result, prov_client->provisioning_service_uri, DEFAULT_HTTPS_PORT, on_http_connected, prov_client) != HTTP_CLIENT_OK)
     {
-        LogError("Failed opening http url %s", dps_client->dps_uri);
+        LogError("Failed opening http url %s", prov_client->provisioning_service_uri);
         uhttp_client_destroy(result);
         result = NULL;
     }
@@ -258,9 +258,9 @@ static HTTP_CLIENT_HANDLE connect_to_service(DPS_SC* dps_client)
     return result;
 }
 
-DPS_SC_HANDLE dps_sc_create_from_connection_string(const char* conn_string)
+PROVISIONING_SERVICE_CLIENT_HANDLE prov_sc_create_from_connection_string(const char* conn_string)
 {
-    DPS_SC* result;
+    PROV_SERVICE_CLIENT* result;
 
     if (conn_string == NULL)
     {
@@ -308,16 +308,16 @@ DPS_SC_HANDLE dps_sc_create_from_connection_string(const char* conn_string)
                     LogError("invalid parameter hostname: %p, key_name: %p, key: %p", hostname, key_name, key);
                     result = NULL;
                 }
-                else if ((result = malloc(sizeof(DPS_SC))) == NULL)
+                else if ((result = malloc(sizeof(PROV_SERVICE_CLIENT))) == NULL)
                 {
-                    LogError("Allocation of dps service client failed");
+                    LogError("Allocation of provisioning service client failed");
                 }
                 else
                 {
-                    memset(result, 0, sizeof(DPS_SC));
-                    if (mallocAndStrcpy_s(&result->dps_uri, hostname) != 0)
+                    memset(result, 0, sizeof(PROV_SERVICE_CLIENT));
+                    if (mallocAndStrcpy_s(&result->provisioning_service_uri, hostname) != 0)
                     {
-                        LogError("Failure allocating of dps uri");
+                        LogError("Failure allocating of provisioning service uri");
                         free(result);
                     }
                     else if (mallocAndStrcpy_s(&result->key_name, key_name) != 0)
@@ -338,18 +338,18 @@ DPS_SC_HANDLE dps_sc_create_from_connection_string(const char* conn_string)
 }
 
 
-void dps_sc_destroy(DPS_SC_HANDLE handle)
+void prov_sc_destroy(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client)
 {
-    if (handle != NULL)
+    if (prov_client != NULL)
     {
-        free(handle->dps_uri);
-        free(handle->key_name);
-        free(handle->access_key);
-        free(handle);
+        free(prov_client->provisioning_service_uri);
+        free(prov_client->key_name);
+        free(prov_client->access_key);
+        free(prov_client);
     }
 }
 
-int dps_sc_create_or_update_enrollment(DPS_SC_HANDLE dps_client, const char* id, const ENROLLMENT* enrollment)
+int prov_sc_create_or_update_enrollment(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* id, const ENROLLMENT* enrollment)
 {
     UNREFERENCED_PARAMETER(id);
 
@@ -360,7 +360,7 @@ int dps_sc_create_or_update_enrollment(DPS_SC_HANDLE dps_client, const char* id,
     int result;
     HTTP_CLIENT_HANDLE http_client;
 
-    http_client = connect_to_service(dps_client);
+    http_client = connect_to_service(prov_client);
     if (http_client == NULL)
     {
         LogError("Failed connecting to service");
@@ -381,41 +381,41 @@ int dps_sc_create_or_update_enrollment(DPS_SC_HANDLE dps_client, const char* id,
             do
             {
                 uhttp_client_dowork(http_client);
-                if (dps_client->http_state == HTTP_STATE_CONNECTED)
+                if (prov_client->http_state == HTTP_STATE_CONNECTED)
                 {
                     char* content = enrollment_toJson(enrollment);
                     if (content == NULL)
                     {
                         LogError("Failure creating registration json content");
-                        dps_client->http_state = HTTP_STATE_ERROR;
+                        prov_client->http_state = HTTP_STATE_ERROR;
                         result = __LINE__;
                     }
-                    else if ((request_headers = construct_http_headers(dps_client)) == NULL)
+                    else if ((request_headers = construct_http_headers(prov_client)) == NULL)
                     {
                         LogError("Failure creating registration json content");
-                        dps_client->http_state = HTTP_STATE_ERROR;
+                        prov_client->http_state = HTTP_STATE_ERROR;
                         result = __LINE__;
                     }
                     else
                     {
-                        if (uhttp_client_execute_request(http_client, HTTP_CLIENT_REQUEST_DELETE, STRING_c_str(registration_path), request_headers, NULL, 0, on_http_reply_recv, &dps_client) != HTTP_CLIENT_OK)
+                        if (uhttp_client_execute_request(http_client, HTTP_CLIENT_REQUEST_DELETE, STRING_c_str(registration_path), request_headers, NULL, 0, on_http_reply_recv, &prov_client) != HTTP_CLIENT_OK)
                         {
                             LogError("Failure executing http request");
-                            dps_client->http_state = HTTP_STATE_ERROR;
+                            prov_client->http_state = HTTP_STATE_ERROR;
                             result = __LINE__;
                         }
                         else
                         {
-                            dps_client->http_state = HTTP_STATE_REQUEST_SENT;
+                            prov_client->http_state = HTTP_STATE_REQUEST_SENT;
                         }
                         HTTPHeaders_Free(request_headers);
                     }
                 }
-                else if (dps_client->http_state == HTTP_STATE_ERROR)
+                else if (prov_client->http_state == HTTP_STATE_ERROR)
                 {
                     result = __LINE__;
                 }
-            } while (dps_client->http_state != HTTP_STATE_COMPLETE && dps_client->http_state != HTTP_STATE_ERROR);
+            } while (prov_client->http_state != HTTP_STATE_COMPLETE && prov_client->http_state != HTTP_STATE_ERROR);
         }
     }
     return result;
@@ -439,54 +439,54 @@ int dps_sc_create_or_update_enrollment(DPS_SC_HANDLE dps_client, const char* id,
 
 
 
-int dps_sc_delete_enrollment(DPS_SC_HANDLE handle, const char* id)
+int prov_sc_delete_enrollment(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* id)
 {
-    UNREFERENCED_PARAMETER(handle);
+    UNREFERENCED_PARAMETER(prov_client);
     UNREFERENCED_PARAMETER(id);
     return 0;
 }
 
-int dps_sc_get_enrollment(DPS_SC_HANDLE handle, const char* id, ENROLLMENT* enrollment)
+int prov_sc_get_enrollment(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* id, ENROLLMENT* enrollment)
 {
-    UNREFERENCED_PARAMETER(handle);
+    UNREFERENCED_PARAMETER(prov_client);
     UNREFERENCED_PARAMETER(id);
     UNREFERENCED_PARAMETER(enrollment);
     return 0;
 }
 
-int dps_sc_delete_device_registration_status(DPS_SC_HANDLE handle, const char* id)
+int prov_sc_delete_device_registration_status(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* id)
 {
-    UNREFERENCED_PARAMETER(handle);
+    UNREFERENCED_PARAMETER(prov_client);
     UNREFERENCED_PARAMETER(id);
     return 0;
 }
 
-int dps_sc_get_device_registration_status(DPS_SC_HANDLE handle, const char* id, DEVICE_REGISTRATION_STATUS* reg_status)
+int prov_sc_get_device_registration_status(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* id, DEVICE_REGISTRATION_STATUS* reg_status)
 {
-    UNREFERENCED_PARAMETER(handle);
+    UNREFERENCED_PARAMETER(prov_client);
     UNREFERENCED_PARAMETER(id);
     UNREFERENCED_PARAMETER(reg_status);
     return 0;
 }
 
-int dps_sc_create_or_update_enrollment_group(DPS_SC_HANDLE handle, const char* id, const ENROLLMENT_GROUP* enrollment_group)
+int prov_sc_create_or_update_enrollment_group(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* id, const ENROLLMENT_GROUP* enrollment_group)
 {
-    UNREFERENCED_PARAMETER(handle);
+    UNREFERENCED_PARAMETER(prov_client);
     UNREFERENCED_PARAMETER(id);
     UNREFERENCED_PARAMETER(enrollment_group);
     return 0;
 }
 
-int dps_sc_delete_enrollment_group(DPS_SC_HANDLE handle, const char* id)
+int prov_sc_delete_enrollment_group(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* id)
 {
-    UNREFERENCED_PARAMETER(handle);
+    UNREFERENCED_PARAMETER(prov_client);
     UNREFERENCED_PARAMETER(id);
     return 0;
 }
 
-int dps_sc_get_enrollment_group(DPS_SC_HANDLE handle, const char* id, ENROLLMENT_GROUP* enrollment_group)
+int prov_sc_get_enrollment_group(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* id, ENROLLMENT_GROUP* enrollment_group)
 {
-    UNREFERENCED_PARAMETER(handle);
+    UNREFERENCED_PARAMETER(prov_client);
     UNREFERENCED_PARAMETER(id);
     UNREFERENCED_PARAMETER(enrollment_group);
     return 0;
