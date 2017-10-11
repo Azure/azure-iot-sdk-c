@@ -34,6 +34,11 @@ function(linkMqttLibrary whatExecutableIsBuilding)
     target_link_libraries(${whatExecutableIsBuilding} umqtt)
 endfunction(linkMqttLibrary)
 
+function(linkUHTTP whatExecutableIsBuilding)
+    include_directories(${UHTTP_C_INC_FOLDER})
+    target_link_libraries(${whatExecutableIsBuilding} uhttp)
+endfunction(linkUHTTP)
+
 function(includeHttp)
 endfunction(includeHttp)
 
