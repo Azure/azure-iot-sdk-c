@@ -109,7 +109,7 @@ extern "C" {
         const char* etag;
     } DEVICE_REGISTRATION_STATUS;
 
-    typedef struct ENROLLMENT_TAG
+    typedef struct INDIVIDUAL_ENROLLMENT_TAG
     {
         const char* registration_id;
         const char* device_id;
@@ -122,7 +122,7 @@ extern "C" {
         PROVISIONING_STATUS provisioning_status;
         const time_t created_date_time_utc;
         time_t updated_date_time_utc;
-    } ENROLLMENT;
+    } INDIVIDUAL_ENROLLMENT;
 
     typedef struct ENROLLMENT_GROUP_TAG
     {
@@ -137,7 +137,7 @@ extern "C" {
     } ENROLLMENT_GROUP;
 
 
-    MOCKABLE_FUNCTION(, char*, enrollment_toJson, const ENROLLMENT*, enrollment);
+    MOCKABLE_FUNCTION(, char*, individualEnrollment_toJson, const INDIVIDUAL_ENROLLMENT*, enrollment);
 
 #ifdef __cplusplus
 }

@@ -14,16 +14,16 @@ int main()
     const char* deviceId = "[Device Id]";
     const char* registrationId = "[Registration Id]";
 
-    ENROLLMENT enrollment;
+    INDIVIDUAL_ENROLLMENT enrollment;
     enrollment.device_id = deviceId;
     enrollment.registration_id = registrationId;
 
     char* json;
-    json = enrollment_toJson(&enrollment);
+    json = individualEnrollment_toJson(&enrollment);
     printf("%s\n", json);
 
     PROVISIONING_SERVICE_CLIENT_HANDLE prov_sc = prov_sc_create_from_connection_string(connectionString);
-    prov_sc_create_or_update_enrollment(prov_sc, registrationId, &enrollment);
+    prov_sc_create_or_update_individual_enrollment(prov_sc, &enrollment);
 
     return result;
 }

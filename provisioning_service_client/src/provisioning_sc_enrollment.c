@@ -20,7 +20,7 @@ static const char* ENROLLMENT_JSON_KEY_CREATED_TIME = "createdDateTimeUtc";
 static const char* ENROLLMENT_JSON_KEY_UPDATED_TIME = "lastUpdatedDateTimeUtc";
 
 
-char* enrollment_toJson(const ENROLLMENT* enrollment)
+char* individualEnrollment_toJson(const INDIVIDUAL_ENROLLMENT* enrollment)
 {
     char * result = NULL;
     

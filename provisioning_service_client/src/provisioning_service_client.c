@@ -349,10 +349,8 @@ void prov_sc_destroy(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client)
     }
 }
 
-int prov_sc_create_or_update_enrollment(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* id, const ENROLLMENT* enrollment)
+int prov_sc_create_or_update_individual_enrollment(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const INDIVIDUAL_ENROLLMENT* enrollment)
 {
-    UNREFERENCED_PARAMETER(id);
-
     //1. establish path
     //2. construct headers
     //3. make PUT call
@@ -383,7 +381,7 @@ int prov_sc_create_or_update_enrollment(PROVISIONING_SERVICE_CLIENT_HANDLE prov_
                 uhttp_client_dowork(http_client);
                 if (prov_client->http_state == HTTP_STATE_CONNECTED)
                 {
-                    char* content = enrollment_toJson(enrollment);
+                    char* content = individualEnrollment_toJson(enrollment);
                     if (content == NULL)
                     {
                         LogError("Failure creating registration json content");
@@ -439,14 +437,21 @@ int prov_sc_create_or_update_enrollment(PROVISIONING_SERVICE_CLIENT_HANDLE prov_
 
 
 
-int prov_sc_delete_enrollment(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* id)
+int prov_sc_delete_individual_enrollment(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const INDIVIDUAL_ENROLLMENT* enrollment)
+{
+    UNREFERENCED_PARAMETER(prov_client);
+    UNREFERENCED_PARAMETER(enrollment);
+    return 0;
+}
+
+int prov_sc_delete_individual_enrollment_by_id(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* id)
 {
     UNREFERENCED_PARAMETER(prov_client);
     UNREFERENCED_PARAMETER(id);
     return 0;
 }
 
-int prov_sc_get_enrollment(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* id, ENROLLMENT* enrollment)
+int prov_sc_get_individual_enrollment(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* id, INDIVIDUAL_ENROLLMENT* enrollment)
 {
     UNREFERENCED_PARAMETER(prov_client);
     UNREFERENCED_PARAMETER(id);
@@ -477,7 +482,14 @@ int prov_sc_create_or_update_enrollment_group(PROVISIONING_SERVICE_CLIENT_HANDLE
     return 0;
 }
 
-int prov_sc_delete_enrollment_group(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* id)
+int prov_sc_delete_enrollment_group(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const ENROLLMENT_GROUP* enrollment_group)
+{
+    UNREFERENCED_PARAMETER(prov_client);
+    UNREFERENCED_PARAMETER(enrollment_group);
+    return 0;
+}
+
+int prov_sc_delete_enrollment_group_by_id(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* id)
 {
     UNREFERENCED_PARAMETER(prov_client);
     UNREFERENCED_PARAMETER(id);

@@ -9,9 +9,9 @@ This module is used to perform CRUD operations on the device enrollment records 
 ```c
 PROVISIONING_SERVICE_CLIENT_HANDLE prov_sc_create_from_connection_string(const char* conn_string);
 void prov_sc_destroy(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client);
-int prov_sc_create_or_update_enrollment(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* id, const ENROLLMENT* enrollment);
-int prov_sc_delete_enrollment(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* id);
-int prov_sc_get_enrollment(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* id, ENROLLMENT* enrollment);
+int prov_sc_create_or_update_individual_enrollment(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* id, const INDIVIDUAL_ENROLLMENT* enrollment);
+int prov_sc_delete_individual_enrollment(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* id);
+int prov_sc_get_individual_enrollment(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* id, INDIVIDUAL_ENROLLMENT* enrollment);
 int prov_sc_delete_device_registration_status(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* id);
 int prov_sc_get_device_registration_status(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* id, DEVICE_REGISTRATION_STATUS* reg_status);
 int prov_sc_create_or_update_enrollment_group(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* id, const ENROLLMENT_GROUP* enrollment_group);
@@ -44,53 +44,53 @@ void prov_sc_destroy(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client);
 **SRS_PROVISIONING_SERVICE_CLIENT_22_005: [** `prov_sc_destroy` shall free all the memory contained inside `prov_client` **]**
 
 
-### prov_sc_create_or_update_enrollment
+### Iprov_sc_create_or_update_individual_enrollment
 
 ```c
-int prov_sc_create_or_update_enrollment(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* id, const ENROLLMENT* enrollment);
+int prov_sc_create_or_update_individual_enrollment(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const INDIVIDUAL_ENROLLMENT* enrollment);
 ```
 
-**SRS_PROVISIONING_SERVICE_CLIENT_22_006: [** If `prov_client`, `id`, or `enrollment` are NULL, `prov_sc_create_or_update_enrollment` shall fail and return a non-zero value **]**
+**SRS_PROVISIONING_SERVICE_CLIENT_22_006: [** If `prov_client` or `enrollment` are NULL, `Iprov_sc_create_or_update_individual_enrollment` shall fail and return a non-zero value **]**
 
-**SRS_PROVISIONING_SERVICE_CLIENT_22_007: [** A 'PUT' REST call shall be issued to create/update the enrollment record of a device with ID `id` on the Provisioning Service, using data contained in `enrollment` **]**
+**SRS_PROVISIONING_SERVICE_CLIENT_22_007: [** A 'PUT' REST call shall be issued to create/update the enrollment record of a device on the Provisioning Service, using data contained in `enrollment` **]**
 
-**SRS_PROVISIONING_SERVICE_CLIENT_22_008: [** If the 'PUT' REST call fails, `prov_sc_create_or_update_enrollment` shall fail and return a non-zero value **]**
+**SRS_PROVISIONING_SERVICE_CLIENT_22_008: [** If the 'PUT' REST call fails, `Iprov_sc_create_or_update_individual_enrollment` shall fail and return a non-zero value **]**
 
-**SRS_PROVISIONING_SERVICE_CLIENT_22_009: [** Upon a successful create or update, `prov_sc_create_or_update_enrollment` shall return 0 **]**
+**SRS_PROVISIONING_SERVICE_CLIENT_22_009: [** Upon a successful create or update, `Iprov_sc_create_or_update_individual_enrollment` shall return 0 **]**
 
 
-### prov_sc_delete_enrollment
+### prov_sc_delete_individual_enrollment
 
 ```c
-int prov_sc_delete_enrollment(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* id);
+int prov_sc_delete_individual_enrollment(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* id);
 ```
 
-**SRS_PROVISIONING_SERVICE_CLIENT_22_010: [** If `prov_client` or `id` are NULL, `prov_sc_delete_enrollment` shall return return a non-zero value **]**
+**SRS_PROVISIONING_SERVICE_CLIENT_22_010: [** If `prov_client` or `id` are NULL, `prov_sc_delete_individual_enrollment` shall return return a non-zero value **]**
 
 **SRS_PROVISIONING_SERVICE_CLIENT_22_011: [** A 'DELETE' REST call shall be issued to delete the enrollment record of a device with ID `id` from the Provisioning Service **]**
 
-**SRS_PROVISIONING_SERVICE_CLIENT_22_012: [** If the 'DELETE' REST call fails, `prov_sc_delete_enrollment` shall fail and return a non-zero value **]**
+**SRS_PROVISIONING_SERVICE_CLIENT_22_012: [** If the 'DELETE' REST call fails, `prov_sc_delete_individual_enrollment` shall fail and return a non-zero value **]**
 
-**SRS_PROVISIONING_SERVICE_CLIENT_22_013: [** Upon a successful delete, `prov_sc_delete_enrollment` shall return 0 **]**
+**SRS_PROVISIONING_SERVICE_CLIENT_22_013: [** Upon a successful delete, `prov_sc_delete_individual_enrollment` shall return 0 **]**
 
 
-### prov_sc_get_enrollment
+### prov_sc_get_individual_enrollment
 
 ```c
-int prov_sc_get_enrollment(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* id, ENROLLMENT* enrollment);
+int prov_sc_get_individual_enrollment(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* id, INDIVIDUAL_ENROLLMENT* enrollment);
 ```
 
-**SRS_PROVISIONING_SERVICE_CLIENT_22_014: [** If `prov_client` or `id` are NULL, `prov_sc_get_enrollment` shall fail and return a non-zero value **]**
+**SRS_PROVISIONING_SERVICE_CLIENT_22_014: [** If `prov_client` or `id` are NULL, `prov_sc_get_individual_enrollment` shall fail and return a non-zero value **]**
 
 **SRS_PROVISIONING_SERVICE_CLIENT_22_015: [** A 'GET' REST call shall be issued to retrieve the enrollment record of a device with ID `id` from the Provisioning Service **]**
 
-**SRS_PROVISIONING_SERVICE_CLIENT_22_016: [** If the 'GET' REST call fails, `prov_sc_get_enrollment` shall fail and return a non-zero value **]**
+**SRS_PROVISIONING_SERVICE_CLIENT_22_016: [** If the 'GET' REST call fails, `prov_sc_get_individual_enrollment` shall fail and return a non-zero value **]**
 
 **SRS_PROVISIONING_SERVICE_CLIENT_22_017: [** The data from the retrieved device enrollment record shall populate `enrollment` **]**
 
-**SRS_PROVISIONING_SERVICE_CLIENT_22_018: [** If populating `enrollment` with retrieved data fails, `prov_sc_get_enrollment` shall fail and return a non-zero value **]**
+**SRS_PROVISIONING_SERVICE_CLIENT_22_018: [** If populating `enrollment` with retrieved data fails, `prov_sc_get_individual_enrollment` shall fail and return a non-zero value **]**
 
-**SRS_PROVISIONING_SERVICE_CLIENT_22_019: [** Upon successful population of `enrollment` with the retrieved device enrollment record data, `prov_sc_get_enrollment` shall return 0 **]** 
+**SRS_PROVISIONING_SERVICE_CLIENT_22_019: [** Upon successful population of `enrollment` with the retrieved device enrollment record data, `prov_sc_get_individual_enrollment` shall return 0 **]** 
 
 
 ### prov_sc_delete_device_registration_status
@@ -171,6 +171,6 @@ int prov_sc_get_enrollment_group(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client,
 
 **SRS_PROVISIONING_SERVICE_CLIENT_22_041: [** The data from the retrieved device enrollment group shall populate `enrollment_group` **]**
 
-**SRS_PROVISIONING_SERVICE_CLIENT_22_042: [** If populating `enrollment_group` with retrieved data fails, `prov_sc_get_enrollment` shall fail and return a non-zero value **]**
+**SRS_PROVISIONING_SERVICE_CLIENT_22_042: [** If populating `enrollment_group` with retrieved data fails, `prov_sc_get_individual_enrollment` shall fail and return a non-zero value **]**
 
-**SRS_PROVISIONING_SERVICE_CLIENT_22_043: [** Upon successful population of `enrollment_group` with the retrieved device enrollment group data, `prov_sc_get_enrollment` shall return 0 **]** 
+**SRS_PROVISIONING_SERVICE_CLIENT_22_043: [** Upon successful population of `enrollment_group` with the retrieved device enrollment group data, `prov_sc_get_individual_enrollment` shall return 0 **]** 
