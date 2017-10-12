@@ -101,7 +101,7 @@ In addition to the simple samples found in the current repository, you can find 
 [c-sdk-intro]: https://azure.microsoft.com/documentation/articles/iot-hub-device-sdk-c-intro/
 [c-porting-guide]: ../doc/porting_guide.md
 [c-cross-compile]: ../doc/SDK_cross_compile_example.md
-[c-api-reference]: http://azure.github.io/azure-iot-sdks/c/api_reference/index.html
+[c-api-reference]: https://azure.github.io/azure-iot-sdk-c
 [apt-get-instructions]: ../doc/ubuntu_apt-get_sample_setup.md
 [apt-get-packages]: https://launchpad.net/~aziotsdklinux/+archive/ubuntu/ppa-azureiot
 [samples]: ./samples/
