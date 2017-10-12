@@ -120,13 +120,11 @@ if(${use_openssl})
 endif()
 
 set(DPS_SOURCE_C_FILES
-    ./src/base32.c
     ./src/dps_client.c
     ../deps/parson/parson.c
     ../deps/uhttp/src/uhttp.c)
 
 set(DPS_SOURCE_H_FILES
-    ./inc/azure_hub_modules/base32.h
     ./inc/azure_hub_modules/dps_client.h
     ../deps/parson/parson.h
     ../deps/uhttp/inc/azure_uhttp_c/uhttp.h)
