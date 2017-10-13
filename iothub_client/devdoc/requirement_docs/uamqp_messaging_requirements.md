@@ -92,4 +92,6 @@ Creates a binary blob containing AMQP encoding of the same message defined by th
 **SRS_UAMQP_MESSAGING_31_119: [**Invoke underlying AMQP encode routines on data waiting to be encoded.  .**]**
 **SRS_UAMQP_MESSAGING_31_120: [**Create a blob that contains AMQP encoding of IOTHUB_MESSAGE_HANDLE.**]**
 **SRS_UAMQP_MESSAGING_31_121: [**Any errors during `message_create_uamqp_encoding_from_iothub_message` stop processing on this message.**]**
+**SRS_UAMQP_MESSAGING_32_001: [**If optional diagnostic properties are present in the iot hub message, encode them into the AMQP message as annotation properties.**]**
+**SRS_UAMQP_MESSAGING_32_002: [**If optional diagnostic properties are not present in the iot hub message, no error should happen.**]**
 
