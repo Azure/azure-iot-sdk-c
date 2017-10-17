@@ -357,8 +357,6 @@ static int add_map_item(AMQP_VALUE map, const char* name, const char* value)
     return result;
 }
 
-// Codes_SRS_UAMQP_MESSAGING_32_001: [If optional diagnostic properties are present in the iot hub message, encode them into the AMQP message as annotation properties. Errors stop processing on this message.]
-// Codes_SRS_UAMQP_MESSAGING_32_002: [If optional diagnostic properties are not present in the iot hub message, no error should happen.]
 static int create_message_annotations_to_encode(IOTHUB_MESSAGE_HANDLE messageHandle, AMQP_VALUE *message_annotations, size_t *message_annotations_length)
 {
     AMQP_VALUE message_annotations_map = NULL;
@@ -368,6 +366,7 @@ static int create_message_annotations_to_encode(IOTHUB_MESSAGE_HANDLE messageHan
     if ((diagnosticData = IoTHubMessage_GetDiagnosticPropertyData(messageHandle)) != NULL &&
         diagnosticData->diagnosticId != NULL && diagnosticData->diagnosticCreationTimeUtc != NULL)
     {
+        // Codes_SRS_UAMQP_MESSAGING_32_001: [If optional diagnostic properties are present in the iot hub message, encode them into the AMQP message as annotation properties. Errors stop processing on this message.]
         if ((message_annotations_map = amqpvalue_create_map()) == NULL)
         {
             LogError("Failed amqpvalue_create_map for annotations");
@@ -419,6 +418,7 @@ static int create_message_annotations_to_encode(IOTHUB_MESSAGE_HANDLE messageHan
     }
     else
     {
+        // Codes_SRS_UAMQP_MESSAGING_32_002: [If optional diagnostic properties are not present in the iot hub message, no error should happen.]
         result = RESULT_OK;
     }
     
