@@ -466,6 +466,7 @@ BEGIN_TEST_SUITE(dps_transport_amqp_common_ut)
         REGISTER_UMOCK_ALIAS_TYPE(ON_MESSAGE_SENDER_STATE_CHANGED, void*);
         REGISTER_UMOCK_ALIAS_TYPE(MESSAGE_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(tickcounter_ms_t, uint32_t);
 
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
@@ -517,8 +518,8 @@ BEGIN_TEST_SUITE(dps_transport_amqp_common_ut)
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqpvalue_set_map_value, __LINE__);
         REGISTER_GLOBAL_MOCK_RETURN(message_set_application_properties, 0);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(message_set_application_properties, __LINE__);
-        REGISTER_GLOBAL_MOCK_RETURN(messagesender_send, 0);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(messagesender_send, __LINE__);
+        REGISTER_GLOBAL_MOCK_RETURN(messagesender_send_async, 0);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(messagesender_send_async, __LINE__);
         REGISTER_GLOBAL_MOCK_HOOK(amqpvalue_get_string, my_amqpvalue_get_string);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqpvalue_get_string, __LINE__);
 
@@ -644,7 +645,7 @@ BEGIN_TEST_SUITE(dps_transport_amqp_common_ut)
             STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
         }
         STRICT_EXPECTED_CALL(message_set_application_properties(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(messagesender_send(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(messagesender_send_async(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, 0));
         STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(message_destroy(IGNORED_PTR_ARG));
     }

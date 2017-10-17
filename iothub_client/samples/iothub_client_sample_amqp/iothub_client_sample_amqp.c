@@ -7,6 +7,7 @@
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/shared_util_options.h"
 #include "iothub_client.h"
 #include "iothub_client_options.h"
 #include "iothub_message.h"
@@ -173,7 +174,7 @@ void iothub_client_sample_amqp_run(void)
         else
         {
             bool traceOn = true;
-            IoTHubClient_LL_SetOption(iotHubClientHandle, "logtrace", &traceOn);
+            IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &traceOn);
 
             // Set keep alive is optional. If it is not set the default (240 secs) will be used.
             uint32_t c2d_keep_alive_freq_secs = 120;
@@ -181,7 +182,7 @@ void iothub_client_sample_amqp_run(void)
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
             // For mbed add the certificate information
-            if (IoTHubClient_LL_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
+            if (IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_TRUSTED_CERT, certificates) != IOTHUB_CLIENT_OK)
             {
                 printf("failure to set option \"TrustedCerts\"\r\n");
             }
@@ -217,6 +218,10 @@ void iothub_client_sample_amqp_run(void)
                             {
                                 (void)printf("ERROR: Map_AddOrUpdate Failed!\r\n");
                             }
+
+                            // Setting messages with the same UUID values just for example.
+                            (void)IoTHubMessage_SetMessageId(messages[iterator].messageHandle, "dec14a98-c5fc-430e-b4e3-33c1c434dcaf");
+                            (void)IoTHubMessage_SetCorrelationId(messages[iterator].messageHandle, "33c1c434dcaf-c5fc-430e-b4e3-dec14a98");
 
                             (void)IoTHubMessage_SetContentTypeSystemProperty(messages[iterator].messageHandle, "application/json");
                             (void)IoTHubMessage_SetContentEncodingSystemProperty(messages[iterator].messageHandle, "utf-8");

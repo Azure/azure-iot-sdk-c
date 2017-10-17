@@ -69,6 +69,7 @@ static TEST_MUTEX_HANDLE g_testByTest;
 static TEST_MUTEX_HANDLE g_dllByDll;
 
 static STRING_HANDLE TEST_STRING_HANDLE = (STRING_HANDLE)0x4242;
+#define TEST_ASYNC_HANDLE           (ASYNC_OPERATION_HANDLE)0x4246
 
 STRING_HANDLE my_STRING_construct(const char* psz)
 {
@@ -296,13 +297,14 @@ void my_messagereceiver_destroy(MESSAGE_RECEIVER_HANDLE message_receiver)
 }
 
 static ON_MESSAGE_SEND_COMPLETE onMessageSendCompleteCallback;
-static int my_messagesender_send(MESSAGE_SENDER_HANDLE message_sender, MESSAGE_HANDLE message, ON_MESSAGE_SEND_COMPLETE on_message_send_complete, void* callback_context)
+static ASYNC_OPERATION_HANDLE my_messagesender_send_async(MESSAGE_SENDER_HANDLE message_sender, MESSAGE_HANDLE message, ON_MESSAGE_SEND_COMPLETE on_message_send_complete, void* callback_context, tickcounter_ms_t timeout)
 {
+    (void)timeout;
     (void)message;
     (void)message_sender;
     (void)callback_context;
     onMessageSendCompleteCallback = on_message_send_complete;
-    return 0;
+    return TEST_ASYNC_HANDLE;
 }
 
 static ON_MESSAGE_RECEIVED onMessageReceivedCallback;
@@ -451,6 +453,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
+        size_t type_size;
         on_feedback_message_received = f_on_feedback_message_received;
 
         TEST_IOTHUB_MESSAGING_DATA.callback_data = &TEST_CALLBACK_DATA;
@@ -502,7 +505,20 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         REGISTER_UMOCK_ALIAS_TYPE(MAP_RESULT, int);
         REGISTER_UMOCK_ALIAS_TYPE(MAP_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(receiver_settle_mode, uint8_t);
-        
+        type_size = sizeof(time_t);
+        if (type_size == sizeof(uint64_t))
+        {
+            REGISTER_UMOCK_ALIAS_TYPE(tickcounter_ms_t, uint64_t);
+        }
+        else if (type_size == sizeof(uint32_t))
+        {
+            REGISTER_UMOCK_ALIAS_TYPE(tickcounter_ms_t, uint32_t);
+        }
+        else
+        {
+            ASSERT_FAIL("Bad size_t size");
+        }
+
 
         REGISTER_GLOBAL_MOCK_HOOK(STRING_construct, my_STRING_construct);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_construct, NULL);
@@ -619,9 +635,9 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         REGISTER_GLOBAL_MOCK_RETURN(message_set_properties, 0);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(message_set_properties, 1);
 
-        REGISTER_GLOBAL_MOCK_HOOK(messagesender_send, my_messagesender_send);
-        REGISTER_GLOBAL_MOCK_RETURN(messagesender_send, 0);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(messagesender_send, 1);
+        REGISTER_GLOBAL_MOCK_HOOK(messagesender_send_async, my_messagesender_send_async);
+        REGISTER_GLOBAL_MOCK_RETURN(messagesender_send_async, (ASYNC_OPERATION_HANDLE)0x64);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(messagesender_send_async, NULL);
 
         REGISTER_GLOBAL_MOCK_RETURN(json_parse_string, TEST_JSON_VALUE);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_parse_string, NULL);
@@ -1541,7 +1557,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
-        STRICT_EXPECTED_CALL(messagesender_send(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(messagesender_send_async(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(message_destroy(IGNORED_PTR_ARG))
@@ -1665,7 +1681,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
-        STRICT_EXPECTED_CALL(messagesender_send(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(messagesender_send_async(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))

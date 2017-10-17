@@ -78,6 +78,7 @@ MOCK_FUNCTION_END(0)
 MOCK_FUNCTION_WITH_CODE(, void, test_on_methods_unsubscribed, void*, context);
 MOCK_FUNCTION_END()
 
+#define TEST_ASYNC_HANDLE           (ASYNC_OPERATION_HANDLE)0x4246
 #define TEST_SESSION_HANDLE         (SESSION_HANDLE)0x4245
 #define TEST_SENDER_LINK            (LINK_HANDLE)0x4246
 #define TEST_RECEIVER_LINK          (LINK_HANDLE)0x4247
@@ -142,12 +143,13 @@ extern "C"
         return 0;
     }
 
-    static int my_messagesender_send(MESSAGE_SENDER_HANDLE message_sender, MESSAGE_HANDLE message, ON_MESSAGE_SEND_COMPLETE on_message_send_complete, void* callback_context)
+    static ASYNC_OPERATION_HANDLE my_messagesender_send_async(MESSAGE_SENDER_HANDLE message_sender, MESSAGE_HANDLE message, ON_MESSAGE_SEND_COMPLETE on_message_send_complete, void* callback_context, tickcounter_ms_t timeout)
     {
+        (void)timeout;
         (void)message_sender, (void)message;
         g_on_message_send_complete = on_message_send_complete;
         g_on_message_send_complete_context = callback_context;
-        return 0;
+        return TEST_ASYNC_HANDLE;
     }
 
     static int g_STRING_construct_sprintf_call_count;
@@ -298,6 +300,7 @@ BEGIN_TEST_SUITE(iothubtransportamqp_methods_unittests)
 TEST_SUITE_INITIALIZE(suite_init)
 {
     int result;
+    size_t type_size;
 
     TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = TEST_MUTEX_CREATE();
@@ -320,13 +323,26 @@ TEST_SUITE_INITIALIZE(suite_init)
 
     REGISTER_UMOCK_VALUE_TYPE(uuid);
     REGISTER_UMOCK_VALUE_TYPE(BINARY_DATA);
+    type_size = sizeof(time_t);
+    if (type_size == sizeof(uint64_t))
+    {
+        REGISTER_UMOCK_ALIAS_TYPE(tickcounter_ms_t, uint64_t);
+    }
+    else if (type_size == sizeof(uint32_t))
+    {
+        REGISTER_UMOCK_ALIAS_TYPE(tickcounter_ms_t, uint32_t);
+    }
+    else
+    {
+        ASSERT_FAIL("Bad size_t size");
+    }
 
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, my_gballoc_free);
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_realloc, my_gballoc_realloc);
     REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, real_mallocAndStrcpy_s);
     REGISTER_GLOBAL_MOCK_HOOK(messagereceiver_open, my_messagereceiver_open);
-    REGISTER_GLOBAL_MOCK_HOOK(messagesender_send, my_messagesender_send);
+    REGISTER_GLOBAL_MOCK_HOOK(messagesender_send_async, my_messagesender_send_async);
     REGISTER_GLOBAL_MOCK_HOOK(messagesender_create, my_messagesender_create);
     REGISTER_GLOBAL_MOCK_HOOK(messagereceiver_create, my_messagereceiver_create);
     
@@ -345,6 +361,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUBTRANSPORT_AMQP_METHOD_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(ON_MESSAGE_SEND_COMPLETE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(fields, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(ASYNC_OPERATION_HANDLE, void*);
 }
 
 TEST_SUITE_CLEANUP(suite_cleanup)
@@ -508,7 +525,7 @@ static void setup_method_respond_calls(void)
     STRICT_EXPECTED_CALL(amqpvalue_set_map_value(response_properties_map, status_property_key, status_property_value));
     STRICT_EXPECTED_CALL(message_set_application_properties(TEST_RESPONSE_UAMQP_MESSAGE, response_properties_map));
     STRICT_EXPECTED_CALL(message_add_body_amqp_data(TEST_RESPONSE_UAMQP_MESSAGE, response_binary_data));
-    STRICT_EXPECTED_CALL(messagesender_send(TEST_MESSAGE_SENDER, TEST_RESPONSE_UAMQP_MESSAGE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(messagesender_send_async(TEST_MESSAGE_SENDER, TEST_RESPONSE_UAMQP_MESSAGE, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
         .IgnoreArgument_on_message_send_complete()
         .IgnoreArgument_callback_context();
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
@@ -545,7 +562,7 @@ static void setup_respond_calls(int status)
     STRICT_EXPECTED_CALL(amqpvalue_set_map_value(response_properties_map, status_property_key, status_property_value));
     STRICT_EXPECTED_CALL(message_set_application_properties(TEST_RESPONSE_UAMQP_MESSAGE, response_properties_map));
     STRICT_EXPECTED_CALL(message_add_body_amqp_data(TEST_RESPONSE_UAMQP_MESSAGE, response_binary_data));
-    STRICT_EXPECTED_CALL(messagesender_send(TEST_MESSAGE_SENDER, TEST_RESPONSE_UAMQP_MESSAGE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(messagesender_send_async(TEST_MESSAGE_SENDER, TEST_RESPONSE_UAMQP_MESSAGE, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
         .IgnoreArgument_on_message_send_complete()
         .IgnoreArgument_callback_context();
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
@@ -2178,7 +2195,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_respond_sends_the_uAMQP_message)
     STRICT_EXPECTED_CALL(amqpvalue_set_map_value(response_properties_map, status_property_key, status_property_value));
     STRICT_EXPECTED_CALL(message_set_application_properties(TEST_RESPONSE_UAMQP_MESSAGE, response_properties_map));
     STRICT_EXPECTED_CALL(message_add_body_amqp_data(TEST_RESPONSE_UAMQP_MESSAGE, response_binary_data));
-    STRICT_EXPECTED_CALL(messagesender_send(TEST_MESSAGE_SENDER, TEST_RESPONSE_UAMQP_MESSAGE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(messagesender_send_async(TEST_MESSAGE_SENDER, TEST_RESPONSE_UAMQP_MESSAGE, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
         .IgnoreArgument_on_message_send_complete()
         .IgnoreArgument_callback_context();
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
@@ -2289,10 +2306,10 @@ TEST_FUNCTION(when_a_failure_occurs_iothubtransportamqp_methods_respond_fails)
         .SetFailReturn(1);
     STRICT_EXPECTED_CALL(message_add_body_amqp_data(TEST_RESPONSE_UAMQP_MESSAGE, response_binary_data))
         .SetFailReturn(1);
-    STRICT_EXPECTED_CALL(messagesender_send(TEST_MESSAGE_SENDER, TEST_RESPONSE_UAMQP_MESSAGE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(messagesender_send_async(TEST_MESSAGE_SENDER, TEST_RESPONSE_UAMQP_MESSAGE, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
         .IgnoreArgument_on_message_send_complete()
         .IgnoreArgument_callback_context()
-        .SetFailReturn(1);
+        .SetFailReturn(NULL);
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
     umock_c_negative_tests_snapshot();
@@ -2393,7 +2410,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_respond_can_be_called_from_the_method_
     STRICT_EXPECTED_CALL(amqpvalue_set_map_value(response_properties_map, status_property_key, status_property_value));
     STRICT_EXPECTED_CALL(message_set_application_properties(TEST_RESPONSE_UAMQP_MESSAGE, response_properties_map));
     STRICT_EXPECTED_CALL(message_add_body_amqp_data(TEST_RESPONSE_UAMQP_MESSAGE, response_binary_data));
-    STRICT_EXPECTED_CALL(messagesender_send(TEST_MESSAGE_SENDER, TEST_RESPONSE_UAMQP_MESSAGE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(messagesender_send_async(TEST_MESSAGE_SENDER, TEST_RESPONSE_UAMQP_MESSAGE, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
         .IgnoreArgument_on_message_send_complete()
         .IgnoreArgument_callback_context();
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
@@ -2473,7 +2490,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_respond_to_the_second_method_succeeds)
     STRICT_EXPECTED_CALL(amqpvalue_set_map_value(response_properties_map, status_property_key, status_property_value));
     STRICT_EXPECTED_CALL(message_set_application_properties(TEST_RESPONSE_UAMQP_MESSAGE, response_properties_map));
     STRICT_EXPECTED_CALL(message_add_body_amqp_data(TEST_RESPONSE_UAMQP_MESSAGE, response_binary_data));
-    STRICT_EXPECTED_CALL(messagesender_send(TEST_MESSAGE_SENDER, TEST_RESPONSE_UAMQP_MESSAGE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(messagesender_send_async(TEST_MESSAGE_SENDER, TEST_RESPONSE_UAMQP_MESSAGE, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
         .IgnoreArgument_on_message_send_complete()
         .IgnoreArgument_callback_context();
     EXPECTED_CALL(gballoc_realloc(IGNORED_PTR_ARG, IGNORED_NUM_ARG));

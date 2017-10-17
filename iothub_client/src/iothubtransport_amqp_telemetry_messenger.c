@@ -137,20 +137,20 @@ static STRING_HANDLE create_devices_path(STRING_HANDLE iothub_host_fqdn, STRING_
 {
     STRING_HANDLE devices_path;
 
-	if ((devices_path = STRING_new()) == NULL)
-	{
-		LogError("Failed creating devices_path (STRING_new failed)");
-	}
-	else
+    if ((devices_path = STRING_new()) == NULL)
     {
-		const char* iothub_host_fqdn_char_ptr = STRING_c_str(iothub_host_fqdn);
-		const char* device_id_char_ptr = STRING_c_str(device_id);
-        	if (STRING_sprintf(devices_path, IOTHUB_DEVICES_PATH_FMT, iothub_host_fqdn_char_ptr, device_id_char_ptr) != RESULT_OK)
-		{
-			STRING_delete(devices_path);
-			devices_path = NULL;
-			LogError("Failed creating devices_path (STRING_sprintf failed)");
-		}
+        LogError("Failed creating devices_path (STRING_new failed)");
+    }
+    else
+    {
+        const char* iothub_host_fqdn_char_ptr = STRING_c_str(iothub_host_fqdn);
+        const char* device_id_char_ptr = STRING_c_str(device_id);
+            if (STRING_sprintf(devices_path, IOTHUB_DEVICES_PATH_FMT, iothub_host_fqdn_char_ptr, device_id_char_ptr) != RESULT_OK)
+        {
+            STRING_delete(devices_path);
+            devices_path = NULL;
+            LogError("Failed creating devices_path (STRING_sprintf failed)");
+        }
     }
 
     return devices_path;
@@ -1133,7 +1133,7 @@ static int send_batched_message_and_reset_state(TELEMETRY_MESSENGER_INSTANCE* in
 {
     int result;
 
-    if (messagesender_send(instance->message_sender, send_pending_events_state->message_batch_container, internal_on_event_send_complete_callback, send_pending_events_state->task) != 0)
+    if (messagesender_send_async(instance->message_sender, send_pending_events_state->message_batch_container, internal_on_event_send_complete_callback, send_pending_events_state->task, 0) == NULL)
     {
         LogError("messagesender_send failed");
         result = __FAILURE__;

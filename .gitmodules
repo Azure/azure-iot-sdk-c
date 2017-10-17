@@ -16,3 +16,6 @@
 [submodule "deps/parson"]
 	path = deps/parson
 	url = https://github.com/kgabis/parson.git
+[submodule "deps/uhttp"]
+	path = deps/uhttp
+	url = https://github.com/Azure/azure-uhttp-c.git

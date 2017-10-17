@@ -898,7 +898,7 @@ static void on_process_message_callback(MESSAGE_QUEUE_HANDLE message_queue, MQ_M
 		message_context->on_process_message_completed_callback = on_process_message_completed_callback;
 
 		// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_118: [The MESSAGE_HANDLE shall be submitted for sending using messagesender_send(), passing `on_send_complete_callback`]
-		if (messagesender_send(message_context->messenger->message_sender, (MESSAGE_HANDLE)message, on_send_complete_callback, context) != 0)
+		if (messagesender_send_async(message_context->messenger->message_sender, (MESSAGE_HANDLE)message, on_send_complete_callback, context, 0) == NULL)
 		{
 			// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_119: [If messagesender_send() fails, `on_process_message_completed_callback` shall be invoked with result MESSAGE_QUEUE_ERROR]  
 			LogError("Failed sending AMQP message");

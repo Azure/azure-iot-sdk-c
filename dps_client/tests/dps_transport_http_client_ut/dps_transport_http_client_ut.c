@@ -48,7 +48,7 @@ static void my_gballoc_free(void* ptr)
 #include "azure_c_shared_utility/tlsio.h"
 
 #include "azure_hub_modules/dps_transport.h"
-#include "azure_hub_modules/uhttp.h"
+#include "azure_uhttp_c/uhttp.h"
 
 #include "parson.h"
 

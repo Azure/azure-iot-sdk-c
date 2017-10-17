@@ -454,6 +454,8 @@ extern "C"
     *                interval in seconds when pings are sent to the server.
     *              - @b logtrace - available for MQTT protocol.  Boolean value that turns on and
     *                off the diagnostic logging.
+    *              - @b sas_token_lifetime - available for MQTT & AMQP protocol.  size_t value that that determines the
+    *                sas token timeout length.
     *
     * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */

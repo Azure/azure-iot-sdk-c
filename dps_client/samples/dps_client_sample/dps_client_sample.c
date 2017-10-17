@@ -110,7 +110,6 @@ static void iothub_connection_status(IOTHUB_CLIENT_CONNECTION_STATUS result, IOT
         }
         else
         {
-            printf("iothub is not authenticated\r\n");
             iothub_info->connected = 0;
             iothub_info->stop_running = 1;
         }
@@ -190,8 +189,8 @@ int main()
         // Pick your transport
         dps_transport = DPS_HTTP_Protocol;
 
-        //iothub_transport = MQTT_Protocol;
-        iothub_transport = AMQP_Protocol;
+        iothub_transport = MQTT_Protocol;
+        //iothub_transport = AMQP_Protocol;
 
         // Set ini
         dps_user_ctx.registration_complete = 0;
@@ -217,7 +216,7 @@ int main()
             DPS_LL_SetOption(handle, "logtrace", &g_trace_on);
             if (trusted_cert != NULL)
             {
-                DPS_LL_SetOption(handle, "TrustedCerts", trusted_cert);
+                DPS_LL_SetOption(handle, OPTION_TRUSTED_CERT, trusted_cert);
             }
             if (http_proxy.host_address != NULL)
             {
@@ -269,7 +268,7 @@ int main()
                 IoTHubClient_LL_SetOption(iothub_client, "logtrace", &g_trace_on);
                 if (trusted_cert != NULL)
                 {
-                    IoTHubClient_LL_SetOption(iothub_client, "TrustedCerts", trusted_cert);
+                    IoTHubClient_LL_SetOption(iothub_client, OPTION_TRUSTED_CERT, trusted_cert);
                 }
 
                 if (g_use_proxy)

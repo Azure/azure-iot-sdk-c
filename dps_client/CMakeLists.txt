@@ -120,16 +120,14 @@ if(${use_openssl})
 endif()
 
 set(DPS_SOURCE_C_FILES
-    ./src/base32.c
     ./src/dps_client.c
     ../deps/parson/parson.c
-    ./src/uhttp.c)
+    ../deps/uhttp/src/uhttp.c)
 
 set(DPS_SOURCE_H_FILES
-    ./inc/azure_hub_modules/base32.h
     ./inc/azure_hub_modules/dps_client.h
     ../deps/parson/parson.h
-    ./inc/azure_hub_modules/uhttp.h)
+    ../deps/uhttp/inc/azure_uhttp_c/uhttp.h)
 
 if(MSVC)
     set_source_files_properties(../deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
@@ -140,6 +138,7 @@ set(DEV_AUTH_MODULES_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTER
 include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})
 include_directories(${SHARED_UTIL_INC_FOLDER})
 include_directories(${CMAKE_CURRENT_LIST_DIR}/../deps/parson)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/../deps/uhttp/inc)
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})
 include_directories(${CMAKE_CURRENT_LIST_DIR}/adapters)
 

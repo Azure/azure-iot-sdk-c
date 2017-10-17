@@ -31,6 +31,3 @@ else()
     add_unittest_directory(dps_hsm_tpm_ut)
 endif()
 
-add_unittest_directory(uhttp_ut)
-add_unittest_directory(base32_ut)
-

@@ -28,4 +28,8 @@ else()
     if(${use_mqtt})
         add_subdirectory(umqtt)
     endif()
+
+    if(${use_http})
+        add_subdirectory(deps/uhttp)
+    endif()
 endif()

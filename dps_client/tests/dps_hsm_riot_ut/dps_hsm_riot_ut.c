@@ -65,6 +65,7 @@ MOCKABLE_FUNCTION(, int, X509GetDERCsr, DERBuilderContext*, Context, RIOT_ECC_SI
 #include "dps_hsm_riot.h"
 
 static const char* TEST_STRING_VALUE = "Test_String_Value";
+static const char* TEST_CERTIFICATE_VALUE = "Test_String_ValueTest_String_Value";
 static const char* TEST_CN_VALUE = "riot-device-cert";
 
 static int umocktypes_copy_RIOT_ECC_PRIVATE(RIOT_ECC_PRIVATE* dest, const RIOT_ECC_PRIVATE* src)
@@ -587,7 +588,7 @@ BEGIN_TEST_SUITE(dps_hsm_riot_ut)
 
         //assert
         ASSERT_IS_NOT_NULL(value);
-        ASSERT_ARE_EQUAL(char_ptr, TEST_STRING_VALUE, value);
+        ASSERT_ARE_EQUAL(char_ptr, TEST_CERTIFICATE_VALUE, value);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup

@@ -998,7 +998,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
                                             {
                                                 MESSAGE_SEND_STATE message_send_state = MESSAGE_SEND_STATE_NOT_SENT;
 
-                                                if (messagesender_send(message_sender, message, on_message_send_complete, &message_send_state) != 0)
+                                                if (messagesender_send_async(message_sender, message, on_message_send_complete, &message_send_state, 0) != 0)
                                                 {
                                                     LogError("Could not set outgoing window.");
                                                     result = IOTHUB_TEST_CLIENT_ERROR;
