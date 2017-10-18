@@ -8,6 +8,6 @@
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 
-#define AzureIoTUtilityVersion "1.0.42"
+#define AzureIoTUtilityVersion "1.0.43"
 
 #endif //AZUREIOTUTILITY_H

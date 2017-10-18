@@ -32,7 +32,7 @@ static void my_gballoc_free(void* ptr)
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
 #include "azure_c_shared_utility/buffer_.h"
-#include "azure_hub_modules/base32.h"
+#include "azure_c_shared_utility/base32.h"
 #undef ENABLE_MOCKS
 
 #include "azure_hub_modules/dps_sec_client.h"
