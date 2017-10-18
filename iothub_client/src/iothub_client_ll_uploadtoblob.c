@@ -888,7 +888,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_Impl(IOTHUB_CLIENT_LL_UPLOADTO
                                         {
                                             int step2success;
                                             /*Codes_SRS_IOTHUBCLIENT_LL_02_083: [ IoTHubClient_LL_UploadToBlob shall call Blob_UploadFromSasUri and capture the HTTP return code and HTTP body. ]*/
-                                            step2success = (Blob_UploadFromSasUri(STRING_c_str(sasUri), source, size, &httpResponse, responseToIoTHub, handleData->certificates) == BLOB_OK);
+                                            step2success = (Blob_UploadFromSasUri(STRING_c_str(sasUri), source, size, &httpResponse, responseToIoTHub, handleData->certificates, &(handleData->http_proxy_options)) == BLOB_OK);
                                             if (!step2success)
                                             {
                                                 /*Codes_SRS_IOTHUBCLIENT_LL_02_084: [ If Blob_UploadFromSasUri fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
