@@ -81,5 +81,23 @@ DPS_LL_SetOption(handle, OPTION_HTTP_PROXY, &http_proxy);
 | `"Batching"`                 | OPTION_BATCHING                 | `bool`* value     | Turn on and off message batching
 
 
+## Additional notes
+### Batching and IoTHub Client SDK
+Batching is the ability of a protocol to send multiple messages in one payload, rather than one at a time.  This can result in less overhead, especially when sending multiple, small messages.  This SDK supports various levels of batching when using IoTHubClient_SendEventAsync / IoTHubClient_LL_SendEventAsync.
+
+* AMQP uses batching always.
+
+* HTTP can optionally enable batching, using the "Batching" option referenced above.
+
+* MQTT does not have a batching option.
+
+None of the protocols has a windowing or Nagling concept; e.g. they do NOT wait a certain amount of time to attempt to queue up multiple messages to put into a single batch.  Instead they just batch whatever is on the to-send queue.  For customers using the lower-layer protocols (LL), they can force batching via
+
+IoTHubClient_LL_SendEventAsync(msg1)
+IoTHubClient_LL_SendEventAsync(msg2)
+IoTHubClient_LL_DoWork()
+
 [http-proxy-object]: https://github.com/Azure/azure-c-shared-utility/blob/506288cecb9ee4a205fa221dc4fd2e69a7ddaa7e/inc/azure_c_shared_utility/shared_util_options.h
+
+
 
