@@ -29,6 +29,33 @@ void real_free(void* ptr)
 #include "umocktypes.h"
 #include "umocktypes_c.h"
 
+static int saved_malloc_returns_count = 0;
+static void* saved_malloc_returns[20];
+
+static void* TEST_malloc(size_t size)
+{
+    saved_malloc_returns[saved_malloc_returns_count] = real_malloc(size);
+
+    return saved_malloc_returns[saved_malloc_returns_count++];
+}
+
+static void TEST_free(void* ptr)
+{
+    int i, j;
+    for (i = 0, j = 0; j < saved_malloc_returns_count; i++, j++)
+    {
+        if (saved_malloc_returns[i] == ptr)
+        {
+            real_free(ptr);
+            j++;
+        }
+
+        saved_malloc_returns[i] = saved_malloc_returns[j];
+    }
+
+    if (i != j) saved_malloc_returns_count--;
+}
+
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
@@ -284,7 +311,8 @@ static void set_exp_calls_for_message_create_uamqp_encoding_from_iothub_message(
     set_exp_calls_for_create_encoded_annotations_properties(has_diag_properties);
     set_exp_calls_for_create_encoded_data(msg_content_type);
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        .SetReturn(g_encoding_buffer);
     STRICT_EXPECTED_CALL(amqpvalue_encode(TEST_AMQP_VALUE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
     if (number_of_app_properties > 0)
@@ -500,8 +528,10 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_UMOCK_ALIAS_TYPE(data, void*);
     REGISTER_UMOCK_ALIAS_TYPE(message_annotations, void*);
 
-    REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, real_malloc);
+    REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, TEST_malloc);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
+
+    REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, TEST_free);
 
     REGISTER_GLOBAL_MOCK_HOOK(properties_get_message_id, test_properties_get_message_id);
     REGISTER_GLOBAL_MOCK_HOOK(properties_get_correlation_id, test_properties_get_correlation_id);
