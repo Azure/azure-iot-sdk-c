@@ -59,6 +59,15 @@ typedef struct UPLOADTOBLOB_SAVED_DATA_TAG
     LOCK_HANDLE lockGarbage;
     int canBeGarbageCollected; /*flag indicating that the UPLOADTOBLOB_SAVED_DATA structure can be freed because the thread deadling with it finished*/
 }UPLOADTOBLOB_SAVED_DATA;
+
+typedef struct UPLOADMULTIPLEBLOCKS_DATA_TAG
+{
+    char* destinationFileName;
+    IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK getDataCallback;
+    void* context;
+    THREAD_HANDLE uploadingThreadHandle;
+    IOTHUB_CLIENT_HANDLE iotHubClientHandle;
+}UPLOADMULTIPLEBLOCKS_DATA;
 #endif
 
 #define USER_CALLBACK_TYPE_VALUES       \
@@ -1968,6 +1977,96 @@ IOTHUB_CLIENT_RESULT IoTHubClient_UploadToBlobAsync(IOTHUB_CLIENT_HANDLE iotHubC
             }
         }
     }
+    return result;
+}
+
+static int uploadMultipleBlock_thread(void* data)
+{
+    LogInfo("###### CHUNK NORRIS ###### uploadMultipleBlock_thread called");
+    UPLOADMULTIPLEBLOCKS_DATA *blocksData = (UPLOADMULTIPLEBLOCKS_DATA *)data;
+
+    //Open connection and init stuff
+    unsigned char* block = NULL;
+    size_t size = 0;
+
+    //First call to get first data to upload
+    blocksData->getDataCallback(FILE_UPLOAD_OK, &block, &size, blocksData->context);
+    LogInfo("###### CHUNK NORRIS ###### getDataCallback returned block=%p, size=%zu", block, size);
+
+    while(block != NULL && size > 0)
+    {
+        // Do stuff with data
+
+        //Get next block
+        blocksData->getDataCallback(FILE_UPLOAD_OK, &block, &size, blocksData->context);
+        LogInfo("###### CHUNK NORRIS ###### getDataCallback returned block=%p, size=%zu", block, size);
+    }
+
+    //Last call to the callback
+    blocksData->getDataCallback(FILE_UPLOAD_OK, NULL, NULL, blocksData->context);
+
+    // Clean ressources
+    free(blocksData->destinationFileName);
+    free(blocksData);
+    ThreadAPI_Exit(0);
+    return 0;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClient_UploadMultipleBlocksToBlobAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK iotHubClientFileUploadGetDataCallback, void* context)
+{
+    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
+
+    if (
+        (iotHubClientHandle == NULL) ||
+        (destinationFileName == NULL) ||
+        (iotHubClientFileUploadGetDataCallback == NULL)
+        )
+    {
+        LogError("invalid parameters IOTHUB_CLIENT_HANDLE iotHubClientHandle = %p , const char* destinationFileName = %s, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK iotHubClientFileUploadGetDataCallback = %p, void* context = %p",
+            iotHubClientHandle,
+            destinationFileName,
+            iotHubClientFileUploadGetDataCallback,
+            context
+        );
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    else
+    {
+        UPLOADMULTIPLEBLOCKS_DATA *blocksData = (UPLOADMULTIPLEBLOCKS_DATA *)malloc(sizeof(UPLOADMULTIPLEBLOCKS_DATA));
+        if (blocksData == NULL)
+        {
+            LogError("unable to malloc - oom");
+            result = IOTHUB_CLIENT_ERROR;
+        }
+        else
+        {
+            if (mallocAndStrcpy_s((char**)&blocksData->destinationFileName, destinationFileName) != 0)
+            {
+                LogError("unable to mallocAndStrcpy_s");
+                free(blocksData);
+                result = IOTHUB_CLIENT_ERROR;
+            }
+            else
+            {
+                blocksData->getDataCallback = iotHubClientFileUploadGetDataCallback;
+                blocksData->context = context;
+                blocksData->iotHubClientHandle = iotHubClientHandle;
+                if (ThreadAPI_Create(&blocksData->uploadingThreadHandle, uploadMultipleBlock_thread, blocksData) != THREADAPI_OK)
+                {
+                    /*Codes_SRS_IOTHUBCLIENT_02_053: [ If copying to the structure or spawning the thread fails, then IoTHubClient_UploadToBlobAsync shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+                    LogError("unable to ThreadAPI_Create");
+                    free(blocksData->destinationFileName);
+                    free(blocksData);
+                    result = IOTHUB_CLIENT_ERROR;
+                }
+                else
+                {
+                    result = IOTHUB_CLIENT_OK;
+                }
+            }
+        }
+    }
+
     return result;
 }
 
