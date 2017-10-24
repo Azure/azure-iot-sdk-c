@@ -19,7 +19,7 @@
 #include "azure_c_shared_utility/tickcounter.h"
 
 #include "azure_prov_client/prov_auth_client.h"
-#include "azure_prov_client/prov_device_client.h"
+#include "azure_prov_client/prov_device_ll_client.h"
 
 static const char* OPTION_LOG_TRACE = "logtrace";
 

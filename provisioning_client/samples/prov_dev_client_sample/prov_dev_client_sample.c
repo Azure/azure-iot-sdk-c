@@ -17,7 +17,7 @@
 #include "iothubtransportmqtt.h"
 #include "iothubtransportamqp.h"
 #include "iothub_client_hsm_ll.h"
-#include "azure_prov_client/prov_device_client.h"
+#include "azure_prov_client/prov_device_ll_client.h"
 #include "azure_prov_client/prov_security_factory.h"
 
 #include "azure_prov_client/prov_transport_http_client.h"

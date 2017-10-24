@@ -89,11 +89,11 @@ if(${use_openssl})
 endif()
 
 set(PROV_SOURCE_C_FILES
-    ./src/prov_device_client.c
+    ./src/prov_device_ll_client.c
     ../deps/parson/parson.c)
 
 set(PROV_SOURCE_H_FILES
-    ./inc/azure_prov_client/prov_device_client.h
+    ./inc/azure_prov_client/prov_device_ll_client.h
     ../deps/parson/parson.h)
 
 if(MSVC)

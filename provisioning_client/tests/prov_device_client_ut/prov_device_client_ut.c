@@ -44,7 +44,7 @@ static void my_gballoc_free(void* ptr)
 
 #undef ENABLE_MOCKS
 
-#include "azure_prov_client/prov_device_client.h"
+#include "azure_prov_client/prov_device_ll_client.h"
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/umock_c_prod.h"
