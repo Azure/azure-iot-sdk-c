@@ -32,27 +32,6 @@ extern "C"
 {
 #endif
 
-#define IOTHUB_CLIENT_FILE_UPLOAD_RESULT_VALUES \
-    FILE_UPLOAD_OK, \
-    FILE_UPLOAD_ERROR
-
-    DEFINE_ENUM(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, IOTHUB_CLIENT_FILE_UPLOAD_RESULT_VALUES)
-    typedef void(*IOTHUB_CLIENT_FILE_UPLOAD_CALLBACK)(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, void* userContextCallback);
-
-#ifndef DONT_USE_UPLOADTOBLOB
-    /**
-    *  @brief           Callback invoked by IoTHubClient_UploadMultipleBlocksToBlobAsync requesting the chunks of data to be uploaded.
-    *  @param result    The result of the upload of the previous block of data provided by the user.
-    *  @param data      Next block of data to be uploaded, to be provided by the user when this callback is invoked.
-    *  @param size      Size of the data parameter.
-    *  @param context   User context provided on the call to IoTHubClient_UploadMultipleBlocksToBlobAsync.
-    *  @remarks         If a NULL is provided for parameter "data" and/or zero is provided for "size", the user indicates to the client that the complete file has been uploaded.
-    *                   In such case this callback will be invoked only once more to indicate the status of the final block upload.
-    *                   If result is not FILE_UPLOAD_OK, the download is cancelled and this callback stops being invoked.
-    */
-    typedef void(*IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK)(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char** data, size_t* size, void* context);
-#endif /* DONT_USE_UPLOADTOBLOB */
-
     /**
     * @brief	Creates a IoT Hub client for communication with an existing
     * 			IoT Hub using the specified connection string parameter.

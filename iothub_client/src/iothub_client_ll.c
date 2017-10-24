@@ -2074,6 +2074,27 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob(IOTHUB_CLIENT_LL_HANDLE iotHub
     return result;
 }
 
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_WithCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK getDataCallback, void* context)
+{
+    IOTHUB_CLIENT_RESULT result;
+    /*Codes_SRS_IOTHUBCLIENT_LL_02_061: [ If iotHubClientHandle is NULL then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_INVALID_ARG. ]*/
+    /*Codes_SRS_IOTHUBCLIENT_LL_02_062: [ If destinationFileName is NULL then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_INVALID_ARG. ]*/
+    if (
+        (iotHubClientHandle == NULL) ||
+        (destinationFileName == NULL) ||
+        (getDataCallback == NULL)
+        )
+    {
+        LogError("invalid parameters IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle=%p, const char* destinationFileName=%s, getDataCallback=%p, context=%p", iotHubClientHandle, destinationFileName, getDataCallback, context);
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    else
+    {
+        result = IoTHubClient_LL_UploadToBlob_WithCallback_Impl(iotHubClientHandle->uploadToBlobHandle, destinationFileName, getDataCallback, context);
+    }
+    return result;
+}
+
 IOTHUB_CLIENT_LARGE_FILE_HANDLE IoTHubClient_LL_LargeFileOpen(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* destinationFileName)
 {
     IOTHUB_CLIENT_LARGE_FILE_HANDLE result;

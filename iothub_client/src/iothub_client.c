@@ -1982,28 +1982,10 @@ IOTHUB_CLIENT_RESULT IoTHubClient_UploadToBlobAsync(IOTHUB_CLIENT_HANDLE iotHubC
 
 static int uploadMultipleBlock_thread(void* data)
 {
-    LogInfo("###### CHUNK NORRIS ###### uploadMultipleBlock_thread called");
     UPLOADMULTIPLEBLOCKS_DATA *blocksData = (UPLOADMULTIPLEBLOCKS_DATA *)data;
 
-    //Open connection and init stuff
-    unsigned char* block = NULL;
-    size_t size = 0;
-
-    //First call to get first data to upload
-    blocksData->getDataCallback(FILE_UPLOAD_OK, &block, &size, blocksData->context);
-    LogInfo("###### CHUNK NORRIS ###### getDataCallback returned block=%p, size=%zu", block, size);
-
-    while(block != NULL && size > 0)
-    {
-        // Do stuff with data
-
-        //Get next block
-        blocksData->getDataCallback(FILE_UPLOAD_OK, &block, &size, blocksData->context);
-        LogInfo("###### CHUNK NORRIS ###### getDataCallback returned block=%p, size=%zu", block, size);
-    }
-
-    //Last call to the callback
-    blocksData->getDataCallback(FILE_UPLOAD_OK, NULL, NULL, blocksData->context);
+    IOTHUB_CLIENT_LL_HANDLE llHandle = blocksData->iotHubClientHandle->IoTHubClientLLHandle;
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_WithCallback(llHandle, blocksData->destinationFileName, blocksData->getDataCallback, blocksData->context);
 
     // Clean ressources
     free(blocksData->destinationFileName);

@@ -18,6 +18,8 @@
 #include "azure_c_shared_utility/strings_types.h"
 #include "azure_c_shared_utility/httpapiex.h"
 
+#include "iothub_client_ll.h"
+
 #ifdef __cplusplus
 #include <cstddef>
 extern "C"
@@ -49,7 +51,9 @@ DEFINE_ENUM(BLOB_RESULT, BLOB_RESULT_VALUES)
 *
 * @return	A @c BLOB_RESULT. BLOB_OK means the blob has been uploaded successfully. Any other value indicates an error
 */
-MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadFromSasUri,const char*, SASURI, const unsigned char*, source, size_t, size, unsigned int*, httpStatus, BUFFER_HANDLE, httpResponse, const char*, certificates)
+MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadFromSasUri, const char*, SASURI, const unsigned char*, source, size_t, size, unsigned int*, httpStatus, BUFFER_HANDLE, httpResponse, const char*, certificates)
+
+MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadFromSasUri_WithCallback, const char*, SASURI, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK, getDataCallback, void*, context, unsigned int*, httpStatus, BUFFER_HANDLE, httpResponse, const char*, certificates)
 
 /**
 * @brief  Synchronously uploads a byte array as a new block to blob storage
