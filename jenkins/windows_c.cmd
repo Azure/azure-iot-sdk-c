@@ -9,6 +9,6 @@ for %%i in ("%build-root%") do set build-root=%%~fi
 
 REM -- C --
 cd %build-root%\build_all\windows
-call build.cmd --run-unittests --run-e2e-tests --build-traceabilitytool --dps-x509 %*
+call build.cmd --run-unittests --run-e2e-tests --build-traceabilitytool --provisioning %*
 if errorlevel 1 goto :eof
 cd %build-root%

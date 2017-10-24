@@ -40,7 +40,7 @@ set CMAKE_DIR=iotsdk_win32
 set build-samples=yes
 set make=yes
 set build_traceabilitytool=0
-set dps_auth_type=""
+set prov_auth=OFF
 
 :args-loop
 if "%1" equ "" goto args-done
@@ -55,8 +55,7 @@ if "%1" equ "--make_nuget" goto arg-build-nuget
 if "%1" equ "--cmake-root" goto arg-cmake-root
 if "%1" equ "--no-make" goto arg-no-make
 if "%1" equ "--build-traceabilitytool" goto arg-build-traceabilitytool
-if "%1" equ "--dps-tpm" goto arg-dps-tpm
-if "%1" equ "--dps-x509" goto arg-dps-x509
+if "%1" equ "--provisioning" goto arg-provisioning
 call :usage && exit /b 1
 
 :arg-build-clean
@@ -113,12 +112,8 @@ goto args-continue
 set build_traceabilitytool=1
 goto args-continue
 
-:arg-dps-tpm
-set dps_auth_type="tpm_simulator"
-goto args-continue
-
-:arg-dps-x509
-set dps_auth_type="x509"
+:arg-provisioning
+set prov_auth=ON
 goto args-continue
 
 :args-continue
@@ -277,20 +272,20 @@ if %MAKE_NUGET_PKG% == yes (
     rem no error checking
 
     pushd %cmake-root%\cmake\iotsdk_arm
-    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Ddps_auth_type:STRING=%dps_auth_type% -G "Visual Studio 14 ARM"
+    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 14 ARM"
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 ) else if %build-platform% == x64 (
     echo ***Running CMAKE for Win64***
-    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Ddps_auth_type:STRING=%dps_auth_type% -G "Visual Studio 14 Win64"
+    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 14 Win64"
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 ) else if %build-platform% == arm (
     echo ***Running CMAKE for ARM***
-    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Ddps_auth_type:STRING=%dps_auth_type% -G "Visual Studio 14 ARM"
+    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 14 ARM"
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 ) else (
     echo ***Running CMAKE for Win32***
-    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Ddps_auth_type:STRING=%dps_auth_type%
+    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth%
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 )
 
