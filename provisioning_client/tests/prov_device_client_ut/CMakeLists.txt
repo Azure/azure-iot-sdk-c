@@ -11,7 +11,7 @@ set(${theseTestsName}_test_files
 )
 
 set(${theseTestsName}_c_files
-../../src/prov_device_client.c
+../../src/prov_device_ll_client.c
 )
 
 set(${theseTestsName}_h_files
