@@ -101,7 +101,7 @@ static int load_registration_id(PROV_AUTH_INFO* handle)
                 encoded_hash = NULL;
                 result = __FAILURE__;
             }
-            else if (SHA256Input(&sha_ctx, endorsement_key, ek_len) != 0)
+            else if (SHA256Input(&sha_ctx, endorsement_key, (unsigned int)ek_len) != 0)
             {
                 LogError("Failed SHA256Input");
                 encoded_hash = NULL;
