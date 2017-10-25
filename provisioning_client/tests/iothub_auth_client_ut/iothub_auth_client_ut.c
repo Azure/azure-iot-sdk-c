@@ -9,8 +9,6 @@
 #include <stddef.h>
 #endif
 
-#include <vld.h>
-
 static void* my_gballoc_malloc(size_t size)
 {
     return malloc(size);
