@@ -1985,7 +1985,7 @@ static int uploadMultipleBlock_thread(void* data)
     UPLOADMULTIPLEBLOCKS_DATA *blocksData = (UPLOADMULTIPLEBLOCKS_DATA *)data;
 
     IOTHUB_CLIENT_LL_HANDLE llHandle = blocksData->iotHubClientHandle->IoTHubClientLLHandle;
-    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_WithCallback(llHandle, blocksData->destinationFileName, blocksData->getDataCallback, blocksData->context);
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadMultipleBlocksToBlob(llHandle, blocksData->destinationFileName, blocksData->getDataCallback, blocksData->context);
 
     // Clean ressources
     free(blocksData->destinationFileName);
@@ -2049,56 +2049,6 @@ IOTHUB_CLIENT_RESULT IoTHubClient_UploadMultipleBlocksToBlobAsync(IOTHUB_CLIENT_
         }
     }
 
-    return result;
-}
-
-IOTHUB_CLIENT_LARGE_FILE_HANDLE IoTHubClient_LargeFileOpen(IOTHUB_CLIENT_HANDLE handle, const char* destinationFileName)
-{
-    IOTHUB_CLIENT_LARGE_FILE_HANDLE result;
-    if (handle == NULL || destinationFileName == NULL)
-    {
-        LogError("invalid parameters IOTHUB_CLIENT_HANDLE handle=%p, const char* destinationFileName=%s", handle, destinationFileName);
-        result = NULL;
-    }
-    else
-    {
-        result = IoTHubClient_LL_LargeFileOpen(handle->IoTHubClientLLHandle, destinationFileName);
-    }
-
-    return result;
-}
-
-IOTHUB_CLIENT_RESULT IoTHubClient_LargeFileClose(IOTHUB_CLIENT_LARGE_FILE_HANDLE handle)
-{
-    IOTHUB_CLIENT_RESULT result;
-    if (handle == NULL)
-    {
-        LogError("invalid parameters IOTHUB_CLIENT_LARGE_FILE_HANDLE handle=%p", handle);
-        result = IOTHUB_CLIENT_INVALID_ARG;
-    }
-    else
-    {
-        result = IoTHubClient_LL_LargeFileClose(handle);
-    }
-
-    return result;
-}
-
-IOTHUB_CLIENT_RESULT IoTHubClient_LargeFileWrite(IOTHUB_CLIENT_LARGE_FILE_HANDLE fileHandle, const unsigned char* source, size_t size)
-{
-    IOTHUB_CLIENT_RESULT result;
-    if (
-        (fileHandle == NULL) ||
-        ((source == NULL) && (size >0))
-        )
-    {
-        LogError("invalid parameters IOTHUB_CLIENT_LARGE_FILE_HANDLE fileHandle=%p, const unsigned char* source=%p, size_t size=%zu", fileHandle, source, size);
-        result = IOTHUB_CLIENT_INVALID_ARG;
-    }
-    else
-    {
-        result =  IoTHubClient_LL_LargeFileWrite(fileHandle, source, size);
-    }
     return result;
 }
 
