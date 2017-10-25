@@ -31,6 +31,10 @@ typedef struct IOTHUB_SECURITY_INFO_TAG
 
     HSM_CLIENT_GET_CERTIFICATE hsm_client_get_cert;
     HSM_CLIENT_GET_ALIAS_KEY hsm_client_get_alias_key;
+
+    char* sas_token;
+    char* x509_certificate;
+    char* x509_alias_key;
 } IOTHUB_SECURITY_INFO;
 
 #define HMAC_LENGTH                 32
@@ -101,6 +105,9 @@ void iothub_device_auth_destroy(IOTHUB_SECURITY_HANDLE handle)
     if (handle != NULL)
     {
         /* Codes_IOTHUB_DEV_AUTH_07_005: [ iothub_device_auth_destroy shall call the concrete_iothub_device_auth_destroy function associated with the XDA_INTERFACE_DESCRIPTION. ] */
+        free(handle->x509_certificate);
+        free(handle->x509_alias_key);
+        free(handle->sas_token);
         handle->hsm_client_destroy(handle->hsm_client_handle);
         /* Codes_IOTHUB_DEV_AUTH_07_004: [ iothub_device_auth_destroy shall free all resources associated with the IOTHUB_SECURITY_HANDLE handle ] */
         free(handle);
@@ -138,6 +145,11 @@ CREDENTIAL_RESULT* iothub_device_auth_generate_credentials(IOTHUB_SECURITY_HANDL
     {
         if (handle->cred_type == AUTH_TYPE_SAS)
         {
+            if (handle->sas_token != NULL)
+            {
+                free(handle->sas_token);
+                handle->sas_token = NULL;
+            }
             char expire_token[64] = { 0 };
             if (dev_auth_cred == NULL)
             {
@@ -206,9 +218,8 @@ CREDENTIAL_RESULT* iothub_device_auth_generate_credentials(IOTHUB_SECURITY_HANDL
                             }
                             else
                             {
-                                char* sas_token;
                                 const char* temp_sas_token = STRING_c_str(sas_token_handle);
-                                if (mallocAndStrcpy_s(&sas_token, temp_sas_token) != 0)
+                                if (mallocAndStrcpy_s(&handle->sas_token, temp_sas_token) != 0)
                                 {
                                     free(result);
                                     result = NULL;
@@ -216,7 +227,7 @@ CREDENTIAL_RESULT* iothub_device_auth_generate_credentials(IOTHUB_SECURITY_HANDL
                                 }
                                 else
                                 {
-                                    result->auth_cred_result.sas_result.sas_token = sas_token;
+                                    result->auth_cred_result.sas_result.sas_token = handle->sas_token;
                                 }
                                 STRING_delete(sas_token_handle);
                             }
@@ -236,21 +247,39 @@ CREDENTIAL_RESULT* iothub_device_auth_generate_credentials(IOTHUB_SECURITY_HANDL
         }
         else
         {
+            if (handle->x509_certificate != NULL)
+            {
+                free(handle->x509_certificate);
+                handle->x509_certificate = NULL;
+            }
+            if (handle->x509_alias_key != NULL)
+            {
+                free(handle->x509_alias_key);
+                handle->x509_alias_key = NULL;
+            }
+
             if ((result = malloc(sizeof(CREDENTIAL_RESULT))) == NULL)
             {
                 LogError("Failure allocating credential result.");
             }
-            else if ((result->auth_cred_result.x509_result.x509_cert = handle->hsm_client_get_cert(handle->hsm_client_handle)) == NULL)
+            else if ((handle->x509_certificate = handle->hsm_client_get_cert(handle->hsm_client_handle)) == NULL)
             {
                 LogError("Failure allocating device credential result.");
                 free(result);
                 result = NULL;
             }
-            else if ((result->auth_cred_result.x509_result.x509_alias_key = handle->hsm_client_get_alias_key(handle->hsm_client_handle)) == NULL)
+            else if ((handle->x509_alias_key = handle->hsm_client_get_alias_key(handle->hsm_client_handle)) == NULL)
             {
                 LogError("Failure allocating device credential result.");
+                free(handle->x509_certificate);
+                handle->x509_certificate = NULL;
                 free(result);
                 result = NULL;
+            }
+            else
+            {
+                result->auth_cred_result.x509_result.x509_cert = handle->x509_certificate;
+                result->auth_cred_result.x509_result.x509_alias_key = handle->x509_alias_key;
             }
         }
     }

@@ -9,6 +9,8 @@
 #include <stddef.h>
 #endif
 
+#include <vld.h>
+
 static void* my_gballoc_malloc(size_t size)
 {
     return malloc(size);
@@ -664,6 +666,7 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         }
 
         //cleanup
+        iothub_device_auth_destroy(xda_handle);
         umock_c_negative_tests_deinit();
     }
 
@@ -699,6 +702,7 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         }
 
         //cleanup
+        iothub_device_auth_destroy(xda_handle);
         umock_c_negative_tests_deinit();
     }
 

@@ -9,8 +9,6 @@
 #include <stddef.h>
 #endif
 
-//#include <vld.h>
-
 static void* my_gballoc_malloc(size_t size)
 {
     return malloc(size);
@@ -149,6 +147,11 @@ static BUFFER_HANDLE my_BUFFER_clone(BUFFER_HANDLE handle)
 {
     (void)handle;
     return (BUFFER_HANDLE)my_gballoc_malloc(1);
+}
+
+static void my_BUFFER_delete(BUFFER_HANDLE handle)
+{
+    my_gballoc_free(handle);
 }
 
 static int my_mallocAndStrcpy_s(char** destination, const char* source)
@@ -381,6 +384,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(BUFFER_clone, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(Base64_Decoder, my_Base64_Decoder);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Decoder, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(BUFFER_delete, my_BUFFER_delete);
 
         REGISTER_GLOBAL_MOCK_RETURN(platform_get_default_tlsio, TEST_INTERFACE_DESC);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(platform_get_default_tlsio, NULL);
@@ -864,6 +868,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
+        prov_dev_http_transport_close(handle);
         prov_dev_http_transport_destroy(handle);
     }
 
@@ -885,6 +890,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
+        prov_dev_http_transport_close(handle);
         prov_dev_http_transport_destroy(handle);
     }
 
@@ -905,6 +911,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
+        prov_dev_http_transport_close(handle);
         prov_dev_http_transport_destroy(handle);
     }
 

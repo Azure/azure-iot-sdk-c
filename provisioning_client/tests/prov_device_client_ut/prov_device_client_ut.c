@@ -220,6 +220,11 @@ static void my_tickcounter_destroy(TICK_COUNTER_HANDLE tick_counter)
     my_gballoc_free(tick_counter);
 }
 
+static void my_BUFFER_delete(BUFFER_HANDLE handle)
+{
+    my_gballoc_free(handle);
+}
+
 static PROV_DEVICE_TRANSPORT_HANDLE my_prov_transport_create(const char* uri, TRANSPORT_HSM_TYPE type, const char* scope_id, const char* registration_id, const char* prov_api_version)
 {
     (void)type;
@@ -460,7 +465,7 @@ BEGIN_TEST_SUITE(prov_device_client_ut)
 
         REGISTER_GLOBAL_MOCK_RETURN(BUFFER_create, TEST_BUFFER_HANDLE);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(BUFFER_create, NULL);
-        //REGISTER_GLOBAL_MOCK_RETURN(BUFFER_delete, TEST_BUFFER_HANDLE);
+        REGISTER_GLOBAL_MOCK_HOOK(BUFFER_delete, my_BUFFER_delete);
 
         REGISTER_GLOBAL_MOCK_HOOK(URL_EncodeString, my_URL_EncodeString);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(URL_EncodeString, NULL);

@@ -155,6 +155,11 @@ extern "C"
 }
 #endif
 
+static void my_STRING_delete(STRING_HANDLE h)
+{
+    my_gballoc_free((void*)h);
+}
+
 static int my_message_get_application_properties(MESSAGE_HANDLE message, AMQP_VALUE* application_properties)
 {
     (void)message;
@@ -468,6 +473,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(tickcounter_ms_t, uint32_t);
 
+
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, my_gballoc_free);
@@ -522,6 +528,8 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(messagesender_send_async, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(amqpvalue_get_string, my_amqpvalue_get_string);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqpvalue_get_string, __LINE__);
+
+        REGISTER_GLOBAL_MOCK_HOOK(STRING_delete, my_STRING_delete);
 
         /*REGISTER_GLOBAL_MOCK_HOOK(amqpvalue_get_map_value, my_amqpvalue_get_map_value);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqpvalue_get_map_value, NULL);
@@ -1274,6 +1282,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
+        prov_transport_common_amqp_close(handle);
         prov_transport_common_amqp_destroy(handle);
     }
 

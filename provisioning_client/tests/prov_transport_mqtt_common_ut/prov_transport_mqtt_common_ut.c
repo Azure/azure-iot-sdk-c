@@ -1010,6 +1010,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
+        prov_transport_common_mqtt_close(handle);
         prov_transport_common_mqtt_destroy(handle);
     }
 
@@ -1066,10 +1067,10 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
             prov_transport_common_mqtt_dowork(handle);
 
             //assert
+            prov_transport_common_mqtt_close(handle);
         }
 
         //cleanup
-        prov_transport_common_mqtt_close(handle);
         prov_transport_common_mqtt_destroy(handle);
         umock_c_negative_tests_deinit();
     }
