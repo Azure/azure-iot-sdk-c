@@ -182,6 +182,9 @@ extern "C"
     typedef int(*IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK)(const char* method_name, const unsigned char* payload, size_t size, METHOD_HANDLE method_id, void* userContextCallback);
 
 #ifndef DONT_USE_UPLOADTOBLOB
+
+#define BLOCK_SIZE (4*1024*1024)
+
     /**
     *  @brief           Callback invoked by IoTHubClient_UploadMultipleBlocksToBlobAsync requesting the chunks of data to be uploaded.
     *  @param result    The result of the upload of the previous block of data provided by the user.

@@ -11,7 +11,7 @@
 #include "azure_c_shared_utility/base64.h"
 
 /*a block has 4MB*/
-#define BLOCK_SIZE (4*1024*1024)
+//#define BLOCK_SIZE (4*1024*1024)
 
 BLOB_RESULT Blob_UploadNextBlock(
         BUFFER_HANDLE requestContent,
