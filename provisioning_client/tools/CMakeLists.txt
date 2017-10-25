@@ -11,7 +11,7 @@ function(add_tool_directory whatIsBuilding)
                FOLDER "Provision_Tools")
 endfunction()
 
-if (NOT ${dps_custom_hsm})
+if (NOT ${hsm_type_custom})
     add_tool_directory(dice_device_enrollment)
     add_tool_directory(tpm_device_provision)
 endif()
