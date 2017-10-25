@@ -470,6 +470,9 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         IOTHUB_SECURITY_HANDLE xda_handle = iothub_device_auth_create();
         umock_c_reset_all_calls();
 
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(hsm_client_destroy(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(gballoc_free(xda_handle));
 
