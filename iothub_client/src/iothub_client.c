@@ -845,7 +845,8 @@ void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle)
     /* Codes_SRS_IOTHUBCLIENT_01_008: [IoTHubClient_Destroy shall do nothing if parameter iotHubClientHandle is NULL.] */
     if (iotHubClientHandle != NULL)
     {
-        bool okToJoin;
+        bool joinClientThread;
+        bool joinTransportThread;
         size_t vector_size;
 
         IOTHUB_CLIENT_INSTANCE* iotHubClientInstance = (IOTHUB_CLIENT_INSTANCE*)iotHubClientHandle;
@@ -853,7 +854,11 @@ void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle)
         if (iotHubClientInstance->TransportHandle != NULL)
         {
             /*Codes_SRS_IOTHUBCLIENT_01_007: [ The thread created as part of executing IoTHubClient_SendEventAsync or IoTHubClient_SetNotificationMessageCallback shall be joined. ]*/
-            okToJoin = IoTHubTransport_SignalEndWorkerThread(iotHubClientInstance->TransportHandle, iotHubClientHandle);
+            joinTransportThread = IoTHubTransport_SignalEndWorkerThread(iotHubClientInstance->TransportHandle, iotHubClientHandle);
+        }
+        else
+        {
+            joinTransportThread = false;
         }
 
         /*Codes_SRS_IOTHUBCLIENT_02_043: [ IoTHubClient_Destroy shall lock the serializing lock and signal the worker thread (if any) to end ]*/
@@ -865,11 +870,11 @@ void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle)
         if (iotHubClientInstance->ThreadHandle != NULL)
         {
             iotHubClientInstance->StopThread = 1;
-            okToJoin = true;
+            joinClientThread = true;
         }
         else
         {
-            okToJoin = false;
+            joinClientThread = false;
         }
 
         /*Codes_SRS_IOTHUBCLIENT_02_045: [ IoTHubClient_Destroy shall unlock the serializing lock. ]*/
@@ -878,25 +883,21 @@ void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle)
             LogError("unable to Unlock");
         }
 
-        if (okToJoin == true)
+        if (joinClientThread == true)
         {
-            if (iotHubClientInstance->ThreadHandle != NULL)
+            int res;
+            /*Codes_SRS_IOTHUBCLIENT_01_007: [ The thread created as part of executing IoTHubClient_SendEventAsync or IoTHubClient_SetNotificationMessageCallback shall be joined. ]*/
+            if (ThreadAPI_Join(iotHubClientInstance->ThreadHandle, &res) != THREADAPI_OK)
             {
-                int res;
-                /*Codes_SRS_IOTHUBCLIENT_01_007: [ The thread created as part of executing IoTHubClient_SendEventAsync or IoTHubClient_SetNotificationMessageCallback shall be joined. ]*/
-                if (ThreadAPI_Join(iotHubClientInstance->ThreadHandle, &res) != THREADAPI_OK)
-                {
-                    LogError("ThreadAPI_Join failed");
-                }
-            }
-
-            if (iotHubClientInstance->TransportHandle != NULL)
-            {
-                /*Codes_SRS_IOTHUBCLIENT_01_007: [ The thread created as part of executing IoTHubClient_SendEventAsync or IoTHubClient_SetNotificationMessageCallback shall be joined. ]*/
-                IoTHubTransport_JoinWorkerThread(iotHubClientInstance->TransportHandle, iotHubClientHandle);
+                LogError("ThreadAPI_Join failed");
             }
         }
 
+        if (joinTransportThread == true)
+        {
+            /*Codes_SRS_IOTHUBCLIENT_01_007: [ The thread created as part of executing IoTHubClient_SendEventAsync or IoTHubClient_SetNotificationMessageCallback shall be joined. ]*/
+            IoTHubTransport_JoinWorkerThread(iotHubClientInstance->TransportHandle, iotHubClientHandle);
+        }
 
         if (Lock(iotHubClientInstance->LockHandle) != LOCK_OK)
         {
