@@ -368,7 +368,7 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(HTTPAPIEX_ExecuteRequest, HTTPAPIEX_ERROR);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(HTTPAPIEX_SetOption, HTTPAPIEX_ERROR);
 
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Blob_UploadFromSasUri, BLOB_ERROR);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Blob_UploadMultipleBlocksFromSasUri, BLOB_ERROR);
 
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, __FAILURE__);
     REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, my_mallocAndStrcpy_s);
@@ -580,7 +580,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_with_NULL_source_and_non_zero_size_fa
 /*Tests_SRS_IOTHUBCLIENT_LL_02_081: [ Otherwise, IoTHubClient_LL_UploadToBlob shall use parson to extract and save the following information from the response buffer: correlationID and SasUri. ]*/
 /*Tests_SRS_IOTHUBCLIENT_LL_02_085: [ IoTHubClient_LL_UploadToBlob shall use the same authorization as step 1. to prepare and perform a HTTP request with the following parameters: ]*/
 /*Tests_SRS_IOTHUBCLIENT_LL_02_088: [ Otherwise, IoTHubClient_LL_UploadToBlob shall succeed and return IOTHUB_CLIENT_OK. ]*/
-/*Tests_SRS_IOTHUBCLIENT_LL_02_083: [ IoTHubClient_LL_UploadToBlob shall call Blob_UploadFromSasUri and capture the HTTP return code and HTTP body. ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_083: [ IoTHubClient_LL_UploadToBlob shall call Blob_UploadMultipleBlocksFromSasUri and capture the HTTP return code and HTTP body. ]*/
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SAS_token_happypath)
 {
     ///arrange
@@ -782,14 +782,14 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SAS_token_happypath)
     }
     
     {/*step2*/
-        STRICT_EXPECTED_CALL(BUFFER_new()); /*this is building the buffer that will contain the response from Blob_UploadFromSasUri*/
+        STRICT_EXPECTED_CALL(BUFFER_new()); /*this is building the buffer that will contain the response from Blob_UploadMultipleBlocksFromSasUri*/
 
         const char* sasUri_as_const_char = TEST_DEFAULT_STRING_VALUE;
         STRICT_EXPECTED_CALL(STRING_c_str(sasUri))
             .CaptureReturn(&sasUri_as_const_char)
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(Blob_UploadFromSasUri(sasUri_as_const_char, &c, 1, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL))
+        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(sasUri_as_const_char, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL))
             .IgnoreArgument(1)
             .IgnoreArgument(4)
             .IgnoreArgument(5)
@@ -1106,14 +1106,14 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SAS_token_with_certificates_happypath
     }
 
     {/*step2*/
-        STRICT_EXPECTED_CALL(BUFFER_new()); /*this is building the buffer that will contain the response from Blob_UploadFromSasUri*/
+        STRICT_EXPECTED_CALL(BUFFER_new()); /*this is building the buffer that will contain the response from Blob_UploadMultipleBlocksFromSasUri*/
 
         const char* sasUri_as_const_char = TEST_DEFAULT_STRING_VALUE;
         STRICT_EXPECTED_CALL(STRING_c_str(sasUri))
             .CaptureReturn(&sasUri_as_const_char)
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(Blob_UploadFromSasUri(sasUri_as_const_char, &c, 1, IGNORED_PTR_ARG, IGNORED_PTR_ARG, "some certificates"))
+        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(sasUri_as_const_char, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, "some certificates"))
             .IgnoreArgument(1)
             .IgnoreArgument(4)
             .IgnoreArgument(5)
@@ -1592,14 +1592,14 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SAS_token_when_step2_httpStatusCode_i
     }
 
     {/*step2*/
-        STRICT_EXPECTED_CALL(BUFFER_new()); /*this is building the buffer that will contain the response from Blob_UploadFromSasUri*/
+        STRICT_EXPECTED_CALL(BUFFER_new()); /*this is building the buffer that will contain the response from Blob_UploadMultipleBlocksFromSasUri*/
 
         const char* sasUri_as_const_char = TEST_DEFAULT_STRING_VALUE;
         STRICT_EXPECTED_CALL(STRING_c_str(sasUri))
             .CaptureReturn(&sasUri_as_const_char)
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(Blob_UploadFromSasUri(sasUri_as_const_char, &c, 1, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL))
+        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(sasUri_as_const_char, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL))
             .IgnoreArgument(1)
             .IgnoreArgument(4)
             .IgnoreArgument(5)
@@ -1913,14 +1913,14 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SAS_token_when_step3_httpStatusCode_i
     }
 
     {/*step2*/
-        STRICT_EXPECTED_CALL(BUFFER_new()); /*this is building the buffer that will contain the response from Blob_UploadFromSasUri*/
+        STRICT_EXPECTED_CALL(BUFFER_new()); /*this is building the buffer that will contain the response from Blob_UploadMultipleBlocksFromSasUri*/
 
         const char* sasUri_as_const_char = TEST_DEFAULT_STRING_VALUE;
         STRICT_EXPECTED_CALL(STRING_c_str(sasUri))
             .CaptureReturn(&sasUri_as_const_char)
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(Blob_UploadFromSasUri(sasUri_as_const_char, &c, 1, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL))
+        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(sasUri_as_const_char, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL))
             .IgnoreArgument(1)
             .IgnoreArgument(4)
             .IgnoreArgument(5)
@@ -2039,7 +2039,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SAS_token_when_step3_httpStatusCode_i
 /*Tests_SRS_IOTHUBCLIENT_LL_02_074: [ If adding "Authorization" fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR ]*/
 /*Tests_SRS_IOTHUBCLIENT_LL_02_076: [ If HTTPAPIEX_ExecuteRequest call fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
 /*Tests_SRS_IOTHUBCLIENT_LL_02_082: [ If extracting and saving the correlationId or SasUri fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-/*Tests_SRS_IOTHUBCLIENT_LL_02_084: [ If Blob_UploadFromSasUri fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_084: [ If Blob_UploadMultipleBlocksFromSasUri fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
 /*Tests_SRS_IOTHUBCLIENT_LL_02_086: [ If performing the HTTP request fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SAS_token_unhappypaths)
 {
@@ -2244,14 +2244,14 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SAS_token_unhappypaths)
     }
 
     {/*step2*/
-        STRICT_EXPECTED_CALL(BUFFER_new()); /*this is building the buffer that will contain the response from Blob_UploadFromSasUri*/
+        STRICT_EXPECTED_CALL(BUFFER_new()); /*this is building the buffer that will contain the response from Blob_UploadMultipleBlocksFromSasUri*/
 
         const char* sasUri_as_const_char = TEST_DEFAULT_STRING_VALUE;
         STRICT_EXPECTED_CALL(STRING_c_str(sasUri))
             .CaptureReturn(&sasUri_as_const_char)
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(Blob_UploadFromSasUri(sasUri_as_const_char, &c, 1, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL))
+        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(sasUri_as_const_char, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL))
             .IgnoreArgument(1)
             .IgnoreArgument(4)
             .IgnoreArgument(5)
@@ -2733,14 +2733,14 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_deviceKey_happypath)
     }
 
     {/*step2*/
-        STRICT_EXPECTED_CALL(BUFFER_new()); /*this is building the buffer that will contain the response from Blob_UploadFromSasUri*/
+        STRICT_EXPECTED_CALL(BUFFER_new()); /*this is building the buffer that will contain the response from Blob_UploadMultipleBlocksFromSasUri*/
 
         const char* sasUri_as_const_char = TEST_DEFAULT_STRING_VALUE;
         STRICT_EXPECTED_CALL(STRING_c_str(sasUri))
             .CaptureReturn(&sasUri_as_const_char)
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(Blob_UploadFromSasUri(sasUri_as_const_char, &c, 1, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL))
+        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(sasUri_as_const_char, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL))
             .IgnoreArgument(1)
             .IgnoreArgument(4)
             .IgnoreArgument(5)
@@ -3217,14 +3217,14 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_deviceKey_when_step3_httpStatusCode_i
     }
 
     {/*step2*/
-        STRICT_EXPECTED_CALL(BUFFER_new()); /*this is building the buffer that will contain the response from Blob_UploadFromSasUri*/
+        STRICT_EXPECTED_CALL(BUFFER_new()); /*this is building the buffer that will contain the response from Blob_UploadMultipleBlocksFromSasUri*/
 
         const char* sasUri_as_const_char = TEST_DEFAULT_STRING_VALUE;
         STRICT_EXPECTED_CALL(STRING_c_str(sasUri))
             .CaptureReturn(&sasUri_as_const_char)
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(Blob_UploadFromSasUri(sasUri_as_const_char, &c, 1, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL))
+        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(sasUri_as_const_char, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL))
             .IgnoreArgument(1)
             .IgnoreArgument(4)
             .IgnoreArgument(5)
@@ -3563,14 +3563,14 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_deviceKey_unhappypaths)
     }
 
     {/*step2*/
-        STRICT_EXPECTED_CALL(BUFFER_new()); /*this is building the buffer that will contain the response from Blob_UploadFromSasUri*/
+        STRICT_EXPECTED_CALL(BUFFER_new()); /*this is building the buffer that will contain the response from Blob_UploadMultipleBlocksFromSasUri*/
 
         const char* sasUri_as_const_char = TEST_DEFAULT_STRING_VALUE;
         STRICT_EXPECTED_CALL(STRING_c_str(sasUri))
             .CaptureReturn(&sasUri_as_const_char)
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(Blob_UploadFromSasUri(sasUri_as_const_char, &c, 1, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL))
+        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(sasUri_as_const_char, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL))
             .IgnoreArgument(1)
             .IgnoreArgument(4)
             .IgnoreArgument(5)
@@ -3950,14 +3950,14 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_passes_x509_information_to_HTTPAPIEX_
     }
 
     {/*step2*/
-        STRICT_EXPECTED_CALL(BUFFER_new()); /*this is building the buffer that will contain the response from Blob_UploadFromSasUri*/
+        STRICT_EXPECTED_CALL(BUFFER_new()); /*this is building the buffer that will contain the response from Blob_UploadMultipleBlocksFromSasUri*/
 
         const char* sasUri_as_const_char = TEST_DEFAULT_STRING_VALUE;
         STRICT_EXPECTED_CALL(STRING_c_str(sasUri))
             .CaptureReturn(&sasUri_as_const_char)
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(Blob_UploadFromSasUri(sasUri_as_const_char, &c, 1, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL))
+        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(sasUri_as_const_char, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL))
             .IgnoreArgument(1)
             .IgnoreArgument(4)
             .IgnoreArgument(5)
@@ -4276,14 +4276,14 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_passes_x509_information_to_HTTPAPIEX_
     }
 
     {/*step2*/
-        STRICT_EXPECTED_CALL(BUFFER_new()); /*this is building the buffer that will contain the response from Blob_UploadFromSasUri*/ /*40*/
+        STRICT_EXPECTED_CALL(BUFFER_new()); /*this is building the buffer that will contain the response from Blob_UploadMultipleBlocksFromSasUri*/ /*40*/
          
         const char* sasUri_as_const_char = TEST_DEFAULT_STRING_VALUE;
         STRICT_EXPECTED_CALL(STRING_c_str(sasUri))
             .CaptureReturn(&sasUri_as_const_char)
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(Blob_UploadFromSasUri(sasUri_as_const_char, &c, 1, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL))
+        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(sasUri_as_const_char, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL))
             .IgnoreArgument(1)
             .IgnoreArgument(4)
             .IgnoreArgument(5)

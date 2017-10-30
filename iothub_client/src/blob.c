@@ -124,6 +124,7 @@ BLOB_RESULT Blob_UploadNextBlock(
                             }
                             else
                             {
+                                //LogInfo("Blob_UploadNextBlock succeeds");
                                 /*Codes_SRS_BLOB_02_027: [ Otherwise Blob_UploadFromSasUri shall continue execution. ]*/
                                 result = BLOB_OK;
                             }
@@ -238,7 +239,7 @@ BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* SASURI, IOTHUB_CLIEN
                                     unsigned char * source;
                                     size_t size;
                                     getDataCallback(FILE_UPLOAD_OK, &source, &size, context);
-                                    LogInfo("getDataCallback returned source=%p, size=%zu", source, size);
+                                    //LogInfo("getDataCallback returned source=%p, size=%zu", source, size);
 
                                     while(
                                             source != NULL &&
@@ -273,8 +274,10 @@ BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* SASURI, IOTHUB_CLIEN
                                         blockID++;
 
                                         // Get next block to upload
-                                        getDataCallback(FILE_UPLOAD_OK, &source, &size, context);
-                                        LogInfo("getDataCallback returned source=%p, size=%zu", source, size);
+                                        if (result == BLOB_OK && !isError)
+                                        {
+                                            getDataCallback(FILE_UPLOAD_OK, &source, &size, context);
+                                        }
                                     }
 
                                     if (isError)
