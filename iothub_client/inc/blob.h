@@ -30,6 +30,9 @@ extern "C"
 
 #include "azure_c_shared_utility/umock_c_prod.h"
 
+/* Maximum count of blocks uploaded is 50000*/
+#define MAX_BLOCK_COUNT 50000
+
 #define BLOB_RESULT_VALUES \
     BLOB_OK,               \
     BLOB_ERROR,            \

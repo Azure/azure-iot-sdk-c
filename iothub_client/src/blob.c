@@ -10,8 +10,6 @@
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/base64.h"
 
-/*a block has 4MB*/
-
 BLOB_RESULT Blob_UploadNextBlock(
         BUFFER_HANDLE requestContent,
         unsigned int blockID,
@@ -245,7 +243,9 @@ BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* SASURI, IOTHUB_CLIEN
                                             source != NULL &&
                                             size > 0 &&
                                             result == BLOB_OK &&
-                                            !isError
+                                            !isError &&
+                                            size <= BLOCK_SIZE &&
+                                            blockID < MAX_BLOCK_COUNT
                                             )
                                     {
                                         /*Codes_SRS_BLOB_02_023: [ Blob_UploadFromSasUri shall create a BUFFER_HANDLE from source and size parameters. ]*/
@@ -271,18 +271,31 @@ BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* SASURI, IOTHUB_CLIEN
 
                                             BUFFER_delete(requestContent);
                                         }
-                                        blockID++;
 
                                         // Get next block to upload
                                         if (result == BLOB_OK && !isError)
                                         {
                                             getDataCallback(FILE_UPLOAD_OK, &source, &size, context);
+                                            if (source != NULL && size > 0)
+                                            {
+                                                blockID++;
+                                            }
                                         }
                                     }
 
                                     if (isError)
                                     {
                                         /*do nothing, it will be reported "as is"*/
+                                    }
+                                    else if (blockID >= MAX_BLOCK_COUNT)
+                                    {
+                                        LogError("unable to upload more than %zu blocks in one blob", MAX_BLOCK_COUNT);
+                                        result = BLOB_INVALID_ARG;
+                                    }
+                                    else if (size > BLOCK_SIZE)
+                                    {
+                                        LogError("tried to upload block of size %zu, max allowed size is %zu", size, BLOCK_SIZE);
+                                        result = BLOB_INVALID_ARG;
                                     }
                                     else
                                     {

@@ -130,6 +130,12 @@ static unsigned int httpResponse; /*used as out parameter in every call to Blob_
 static const unsigned int TwoHundred = 200;
 static const unsigned int FourHundredFour = 404;
 
+
+/**
+ * BLOB_UPLOAD_CONTEXT and FileUpload_GetData_Callback
+ * allow to simulate a user who wants to upload
+ * a source of size "size".
+ */
 typedef struct BLOB_UPLOAD_CONTEXT_TAG
 {
     const unsigned char* source; /* source to upload */
@@ -166,6 +172,55 @@ static void FileUpload_GetData_Callback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result,
         *data = (unsigned char*)uploadContext->source + (uploadContext->size - uploadContext->toUpload);
         *size = thisBlockSize;
         uploadContext->toUpload -= thisBlockSize;
+    }
+}
+
+/**
+ * BLOB_UPLOAD_CONTEXT_FAKE and FileUpload_GetFakeData_Callback
+ * allow to simulate a user who wants to sent
+ * blocksCount blocks of size blockSize
+ */
+typedef struct BLOB_UPLOAD_CONTEXT_FAKE_TAG
+{
+    unsigned char* fakeData; /* fake data allocated, has to be deallocated at the next call */
+    size_t blockSize; /* size of the block */
+    unsigned int blocksCount; /* number of block wanted */
+    unsigned int blockSent; /* number block already sent */
+}BLOB_UPLOAD_CONTEXT_FAKE;
+
+static void FileUpload_GetFakeData_Callback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char** data, size_t* size, void* context)
+{
+    BLOB_UPLOAD_CONTEXT_FAKE* uploadContext = (BLOB_UPLOAD_CONTEXT_FAKE*) context;
+
+    // always free previous data
+    if (uploadContext->fakeData != NULL)
+    {
+        gballoc_free(uploadContext->fakeData);
+    }
+
+    if (data == NULL || size == NULL)
+    {
+        // This is the last call
+    }
+    else if (result != FILE_UPLOAD_OK)
+    {
+        // Last call failed
+        *data = NULL;
+        *size = 0;
+    }
+    else if (uploadContext->blockSent >= uploadContext->blocksCount)
+    {
+        // Everything has been uploaded
+        *data = NULL;
+        *size = 0;
+    }
+    else
+    {
+        // Upload next block
+        *data = (unsigned char*)gballoc_malloc(uploadContext->blockSize);
+        *size = uploadContext->blockSize;
+        uploadContext->fakeData = *data;
+        uploadContext->blockSent++;
     }
 }
 
@@ -1397,5 +1452,76 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_http_code_is_404_it_immed
     
 }
 
+TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockSize_too_big_fails)
+{
+    ///arrange
+    BLOB_UPLOAD_CONTEXT_FAKE fakeContext;
+    fakeContext.blockSent = 0;
+    fakeContext.blockSize = BLOCK_SIZE + 1;
+    fakeContext.blocksCount = 1;
+    fakeContext.fakeData = NULL;
+
+    ///act
+    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetFakeData_Callback, &fakeContext, &httpResponse, testValidBufferHandle, NULL);
+
+    ///assert
+    ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_INVALID_ARG, result);
+
+    ///cleanup
+}
+
+TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockSize_is_4MB_succeeds)
+{
+    ///arrange
+    BLOB_UPLOAD_CONTEXT_FAKE fakeContext;
+    fakeContext.blockSent = 0;
+    fakeContext.blockSize = BLOCK_SIZE;
+    fakeContext.blocksCount = 1;
+    fakeContext.fakeData = NULL;
+
+    ///act
+    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetFakeData_Callback, &fakeContext, &httpResponse, testValidBufferHandle, NULL);
+
+    ///assert
+    ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_OK, result);
+
+    ///cleanup
+}
+
+TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockCount_is_50000_succeeds)
+{
+    ///arrange
+    BLOB_UPLOAD_CONTEXT_FAKE fakeContext;
+    fakeContext.blockSent = 0;
+    fakeContext.blockSize = 1;
+    fakeContext.blocksCount = MAX_BLOCK_COUNT;
+    fakeContext.fakeData = NULL;
+
+    ///act
+    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetFakeData_Callback, &fakeContext, &httpResponse, testValidBufferHandle, NULL);
+
+    ///assert
+    ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_OK, result);
+
+    ///cleanup
+}
+
+TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockCount_is_50001_fails)
+{
+    ///arrange
+    BLOB_UPLOAD_CONTEXT_FAKE fakeContext;
+    fakeContext.blockSent = 0;
+    fakeContext.blockSize = 1;
+    fakeContext.blocksCount = MAX_BLOCK_COUNT + 1;
+    fakeContext.fakeData = NULL;
+
+    ///act
+    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetFakeData_Callback, &fakeContext, &httpResponse, testValidBufferHandle, NULL);
+
+    ///assert
+    ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_INVALID_ARG, result);
+
+    ///cleanup
+}
 
 END_TEST_SUITE(blob_ut);
