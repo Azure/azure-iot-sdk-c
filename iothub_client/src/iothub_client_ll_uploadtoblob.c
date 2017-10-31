@@ -768,16 +768,14 @@ static int IoTHubClient_LL_UploadToBlob_step3(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HAND
     return result;
 }
 
-// this function split a file in blocks to be fed to IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl
+// this callback splits the source data into blocks to be fed to IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl
 static void FileUpload_GetData_Callback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char** data, size_t* size, void* context)
 {
     BLOB_UPLOAD_CONTEXT* uploadContext = (BLOB_UPLOAD_CONTEXT*) context;
 
     if (data == NULL || size == NULL)
     {
-        // This is the last call
-        // Time to clean the ressources
-        free(context);
+        // This is the last call, nothing to do
     }
     else if (result != FILE_UPLOAD_OK)
     {
@@ -805,13 +803,21 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_Impl(IOTHUB_CLIENT_LL_UPLOADTO
 {
     IOTHUB_CLIENT_RESULT result;
 
-    BLOB_UPLOAD_CONTEXT* context = (BLOB_UPLOAD_CONTEXT*)malloc(sizeof(BLOB_UPLOAD_CONTEXT));
-    context->size = size;
-    context->toUpload = size;
-    context->source = source;
+    BLOB_UPLOAD_CONTEXT context;
 
-    result = IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(handle, destinationFileName, FileUpload_GetData_Callback, context);
+    if (source == NULL && size > 0)
+    {
+        LogError("invalid source and size combination: source=%p size=%zu", source, size);
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    else
+    {
+        context.size = size;
+        context.toUpload = size;
+        context.source = source;
 
+        result = IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(handle, destinationFileName, FileUpload_GetData_Callback, &context);
+    }
     return result;
 }
 
