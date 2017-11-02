@@ -1987,7 +1987,7 @@ static int uploadMultipleBlock_thread(void* data)
     IOTHUB_CLIENT_LL_HANDLE llHandle = blocksData->iotHubClientHandle->IoTHubClientLLHandle;
     IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadMultipleBlocksToBlob(llHandle, blocksData->destinationFileName, blocksData->getDataCallback, blocksData->context);
 
-    // Clean ressources
+    // Clean resources
     free(blocksData->destinationFileName);
     free(blocksData);
     ThreadAPI_Exit(0);
