@@ -248,7 +248,7 @@ pushd %cmake-root%\cmake\%CMAKE_DIR%
 
 if %MAKE_NUGET_PKG% == yes (
     echo ***Running CMAKE for Win32***
-    cmake %build-root% -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Ddps_auth_type=%dps_auth_type%
+    cmake %build-root% -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_prov_client:BOOL=%prov_auth%
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
     popd
 
@@ -260,7 +260,7 @@ if %MAKE_NUGET_PKG% == yes (
     rem no error checking
 
     pushd %cmake-root%\cmake\iotsdk_x64
-    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Ddps_auth_type=%dps_auth_type% -G "Visual Studio 14 Win64"
+    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 14 Win64"
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
     popd
 
@@ -356,8 +356,7 @@ echo  --cmake-root                  Directory to place the cmake files used for 
 echo  --no-make                     Surpress building the code
 echo  --build-traceabilitytool      Builds an internal tool (traceabilitytool) to check for requirements/code/test consistency
 echo  --run-unittests               Run unit tests
-echo  --dps-tpm                     Use DPS with tpm Flow
-echo  --dps-x509                    Use DPS with x509 Flow
+echo  --provisioning                Use Provisiong service
 goto :eof
 
 

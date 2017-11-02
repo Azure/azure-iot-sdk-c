@@ -54,6 +54,9 @@ static const char* TEST_SAS_TOKEN = "sas_token";
 static const char* TEST_STRING_VALUE = "test string value";
 
 static const char* TEST_REG_ID = "1234567890";
+static const int TEST_REG_ID_LEN = 10;
+static const char* TEST_SCOPE_ID = "scope_id";
+static const int TEST_SCOPE_ID_LEN = 8;
 static unsigned char TEST_BUFFER[TEST_BUFFER_SIZE];
 
 static BUFFER_HANDLE TEST_BUFFER_HANDLE = (BUFFER_HANDLE)0x00011;
@@ -252,27 +255,22 @@ static void setup_dps_hsm_tpm_create_mock(void)
     STRICT_EXPECTED_CALL(BUFFER_clone(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_new());
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_SCOPE_ID));
+    STRICT_EXPECTED_CALL(BUFFER_new());
 }
 
 static void setup_prov_sasl_mechanism_challenge_sastoken_mock(bool last_seq)
 {
-    STRICT_EXPECTED_CALL(STRING_from_byte_array(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_append_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
     if (!last_seq)
     {
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(Base64_Decoder(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(on_challenge_callback(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     }
     else
     {
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     }
 }
 
@@ -297,6 +295,7 @@ TEST_FUNCTION(prov_sasltpm_create_ek_NULL_fail)
 {
     SASL_TPM_CONFIG_INFO sasl_tpm_config;
     sasl_tpm_config.challenge_cb = on_challenge_callback;
+    sasl_tpm_config.scope_id = TEST_SCOPE_ID;
     sasl_tpm_config.endorsement_key = NULL;
     sasl_tpm_config.storage_root_key = TEST_BUFFER_HANDLE;
     sasl_tpm_config.registration_id = TEST_REG_ID;
@@ -322,6 +321,7 @@ TEST_FUNCTION(prov_sasltpm_create_challenge_cb_NULL_fail)
 {
     SASL_TPM_CONFIG_INFO sasl_tpm_config;
     sasl_tpm_config.challenge_cb = NULL;
+    sasl_tpm_config.scope_id = TEST_SCOPE_ID;
     sasl_tpm_config.endorsement_key = TEST_BUFFER_HANDLE;
     sasl_tpm_config.storage_root_key = TEST_BUFFER_HANDLE;
     sasl_tpm_config.registration_id = TEST_REG_ID;
@@ -346,6 +346,7 @@ TEST_FUNCTION(prov_sasltpm_create_succeed)
 {
     SASL_TPM_CONFIG_INFO sasl_tpm_config;
     sasl_tpm_config.challenge_cb = on_challenge_callback;
+    sasl_tpm_config.scope_id = TEST_SCOPE_ID;
     sasl_tpm_config.endorsement_key = TEST_BUFFER_HANDLE;
     sasl_tpm_config.storage_root_key = TEST_BUFFER_HANDLE;
     sasl_tpm_config.registration_id = TEST_REG_ID;
@@ -366,10 +367,11 @@ TEST_FUNCTION(prov_sasltpm_create_succeed)
 }
 
 /* Tests_SRS_PROV_SASL_TPM_07_003: [ If any error is encountered, prov_sasltpm_create shall return NULL. ] */
-TEST_FUNCTION(dps_hsm_tpm_create_fail)
+TEST_FUNCTION(prov_sasl_hsm_tpm_create_fail)
 {
     SASL_TPM_CONFIG_INFO sasl_tpm_config;
     sasl_tpm_config.challenge_cb = on_challenge_callback;
+    sasl_tpm_config.scope_id = TEST_SCOPE_ID;
     sasl_tpm_config.endorsement_key = TEST_BUFFER_HANDLE;
     sasl_tpm_config.storage_root_key = TEST_BUFFER_HANDLE;
     sasl_tpm_config.registration_id = TEST_REG_ID;
@@ -423,6 +425,7 @@ TEST_FUNCTION(prov_sasltpm_destroy_succeed)
 {
     SASL_TPM_CONFIG_INFO sasl_tpm_config;
     sasl_tpm_config.challenge_cb = on_challenge_callback;
+    sasl_tpm_config.scope_id = TEST_SCOPE_ID;
     sasl_tpm_config.endorsement_key = TEST_BUFFER_HANDLE;
     sasl_tpm_config.storage_root_key = TEST_BUFFER_HANDLE;
     sasl_tpm_config.registration_id = TEST_REG_ID;
@@ -437,7 +440,8 @@ TEST_FUNCTION(prov_sasltpm_destroy_succeed)
     STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
@@ -472,6 +476,7 @@ TEST_FUNCTION(prov_sasltpm_get_mechanism_name_succeed)
 {
     SASL_TPM_CONFIG_INFO sasl_tpm_config;
     sasl_tpm_config.challenge_cb = on_challenge_callback;
+    sasl_tpm_config.scope_id = TEST_SCOPE_ID;
     sasl_tpm_config.endorsement_key = TEST_BUFFER_HANDLE;
     sasl_tpm_config.storage_root_key = TEST_BUFFER_HANDLE;
     sasl_tpm_config.registration_id = TEST_REG_ID;
@@ -518,6 +523,7 @@ TEST_FUNCTION(prov_sasltpm_get_init_bytes_succeed)
 {
     SASL_TPM_CONFIG_INFO sasl_tpm_config;
     sasl_tpm_config.challenge_cb = on_challenge_callback;
+    sasl_tpm_config.scope_id = TEST_SCOPE_ID;
     sasl_tpm_config.endorsement_key = TEST_BUFFER_HANDLE;
     sasl_tpm_config.storage_root_key = TEST_BUFFER_HANDLE;
     sasl_tpm_config.registration_id = TEST_REG_ID;
@@ -553,13 +559,16 @@ TEST_FUNCTION(prov_sasltpm_get_init_bytes_chunk_succeed)
 {
     SASL_TPM_CONFIG_INFO sasl_tpm_config;
     sasl_tpm_config.challenge_cb = on_challenge_callback;
+    sasl_tpm_config.scope_id = TEST_SCOPE_ID;
     sasl_tpm_config.endorsement_key = TEST_BUFFER_HANDLE;
     sasl_tpm_config.storage_root_key = TEST_BUFFER_HANDLE;
     sasl_tpm_config.registration_id = TEST_REG_ID;
     sasl_tpm_config.hostname = TEST_DPS_URI;
     CONCRETE_SASL_MECHANISM_HANDLE handle = prov_sasl_mechanism_create(&sasl_tpm_config);
 
+    const int TOTAL_TEST_BUFFER = TEST_REG_ID_LEN + 1 + TEST_SCOPE_ID_LEN + 1;
     unsigned char TEST_CHUNK_BUFFER[TEST_CHUNK_BUFF_SIZE];
+
     for (size_t index = 0; index < TEST_CHUNK_BUFF_SIZE; index++)
     {
         TEST_CHUNK_BUFFER[index] = (unsigned char)(index + 1);
@@ -580,8 +589,9 @@ TEST_FUNCTION(prov_sasltpm_get_init_bytes_chunk_succeed)
 
     //assert
     unsigned char* test_bytes = ((unsigned char*)init_bytes.bytes) + 1;
+
     ASSERT_ARE_EQUAL(int, MAX_FRAME_DATA_LEN, init_bytes.length);
-    ASSERT_ARE_EQUAL(int, 0, memcmp(TEST_CHUNK_BUFFER, test_bytes, init_bytes.length-1) );
+    ASSERT_ARE_EQUAL(int, 0, memcmp(TEST_CHUNK_BUFFER, test_bytes+TOTAL_TEST_BUFFER, init_bytes.length - TOTAL_TEST_BUFFER - 1) );
     ASSERT_ARE_EQUAL(int, 0, reply);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
@@ -594,6 +604,7 @@ TEST_FUNCTION(prov_sasltpm_get_init_bytes_fail)
 {
     SASL_TPM_CONFIG_INFO sasl_tpm_config;
     sasl_tpm_config.challenge_cb = on_challenge_callback;
+    sasl_tpm_config.scope_id = TEST_SCOPE_ID;
     sasl_tpm_config.endorsement_key = TEST_BUFFER_HANDLE;
     sasl_tpm_config.storage_root_key = TEST_BUFFER_HANDLE;
     sasl_tpm_config.registration_id = TEST_REG_ID;
@@ -649,6 +660,7 @@ TEST_FUNCTION(prov_sasl_mechanism_challenge_srk_succeed)
 {
     SASL_TPM_CONFIG_INFO sasl_tpm_config;
     sasl_tpm_config.challenge_cb = on_challenge_callback;
+    sasl_tpm_config.scope_id = TEST_SCOPE_ID;
     sasl_tpm_config.endorsement_key = TEST_BUFFER_HANDLE;
     sasl_tpm_config.storage_root_key = TEST_BUFFER_HANDLE;
     sasl_tpm_config.registration_id = TEST_REG_ID;
@@ -683,6 +695,7 @@ TEST_FUNCTION(prov_sasl_mechanism_challenge_srk_fail)
 {
     SASL_TPM_CONFIG_INFO sasl_tpm_config;
     sasl_tpm_config.challenge_cb = on_challenge_callback;
+    sasl_tpm_config.scope_id = TEST_SCOPE_ID;
     sasl_tpm_config.endorsement_key = TEST_BUFFER_HANDLE;
     sasl_tpm_config.storage_root_key = TEST_BUFFER_HANDLE;
     sasl_tpm_config.registration_id = TEST_REG_ID;
@@ -718,6 +731,7 @@ TEST_FUNCTION(prov_sasl_mechanism_challenge_sastoken_last_seq_succeed)
 {
     SASL_TPM_CONFIG_INFO sasl_tpm_config;
     sasl_tpm_config.challenge_cb = on_challenge_callback;
+    sasl_tpm_config.scope_id = TEST_SCOPE_ID;
     sasl_tpm_config.endorsement_key = TEST_BUFFER_HANDLE;
     sasl_tpm_config.storage_root_key = TEST_BUFFER_HANDLE;
     sasl_tpm_config.registration_id = TEST_REG_ID;
@@ -752,6 +766,7 @@ TEST_FUNCTION(prov_sasl_mechanism_challenge_sastoken_not_last_seq_succeed)
 {
     SASL_TPM_CONFIG_INFO sasl_tpm_config;
     sasl_tpm_config.challenge_cb = on_challenge_callback;
+    sasl_tpm_config.scope_id = TEST_SCOPE_ID;
     sasl_tpm_config.endorsement_key = TEST_BUFFER_HANDLE;
     sasl_tpm_config.storage_root_key = TEST_BUFFER_HANDLE;
     sasl_tpm_config.registration_id = TEST_REG_ID;
@@ -786,6 +801,7 @@ TEST_FUNCTION(prov_sasl_mechanism_challenge_sastoken_invalid_seq_succeed)
 {
     SASL_TPM_CONFIG_INFO sasl_tpm_config;
     sasl_tpm_config.challenge_cb = on_challenge_callback;
+    sasl_tpm_config.scope_id = TEST_SCOPE_ID;
     sasl_tpm_config.endorsement_key = TEST_BUFFER_HANDLE;
     sasl_tpm_config.storage_root_key = TEST_BUFFER_HANDLE;
     sasl_tpm_config.registration_id = TEST_REG_ID;
@@ -800,9 +816,7 @@ TEST_FUNCTION(prov_sasl_mechanism_challenge_sastoken_invalid_seq_succeed)
     umock_c_reset_all_calls();
 
     //arrange
-    STRICT_EXPECTED_CALL(STRING_from_byte_array(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_append_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
 
     //act
     int reply = prov_sasl_mechanism_challenge(handle, &challenge_bytes, &reply_bytes);
@@ -820,6 +834,7 @@ TEST_FUNCTION(prov_sasl_mechanism_challenge_sastoken_fail)
 {
     SASL_TPM_CONFIG_INFO sasl_tpm_config;
     sasl_tpm_config.challenge_cb = on_challenge_callback;
+    sasl_tpm_config.scope_id = TEST_SCOPE_ID;
     sasl_tpm_config.endorsement_key = TEST_BUFFER_HANDLE;
     sasl_tpm_config.storage_root_key = TEST_BUFFER_HANDLE;
     sasl_tpm_config.registration_id = TEST_REG_ID;
@@ -842,7 +857,7 @@ TEST_FUNCTION(prov_sasl_mechanism_challenge_sastoken_fail)
 
     umock_c_negative_tests_snapshot();
 
-    size_t calls_cannot_fail[] = { 2, 4, 6, 7, 8 };
+    size_t calls_cannot_fail[] = { 3 };
 
     //act
     size_t count = umock_c_negative_tests_call_count();

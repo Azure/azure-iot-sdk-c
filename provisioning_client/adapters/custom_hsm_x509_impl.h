@@ -26,10 +26,6 @@ extern char* custom_hsm_get_certificate(DPS_CUSTOM_HSM_HANDLE handle);
 extern char* custom_hsm_get_alias_key(DPS_CUSTOM_HSM_HANDLE handle);
 extern char* custom_hsm_get_common_name(DPS_CUSTOM_HSM_HANDLE handle);
 
-extern char* custom_hsm_get_signer_cert(DPS_CUSTOM_HSM_HANDLE handle);
-extern char* custom_hsm_get_root_cert(DPS_CUSTOM_HSM_HANDLE handle);
-extern char* custom_hsm_get_root_key(DPS_CUSTOM_HSM_HANDLE handle);
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

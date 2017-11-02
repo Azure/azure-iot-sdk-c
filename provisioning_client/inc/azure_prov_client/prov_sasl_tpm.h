@@ -22,6 +22,7 @@ extern "C" {
         BUFFER_HANDLE storage_root_key;
         const char* registration_id;
         const char* hostname;
+        const char* scope_id;
         TPM_CHALLENGE_CALLBACK challenge_cb;
         void* user_ctx;
     } SASL_TPM_CONFIG_INFO;

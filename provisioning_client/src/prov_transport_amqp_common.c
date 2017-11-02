@@ -688,6 +688,7 @@ static int create_connection(PROV_TRANSPORT_AMQP_INFO* amqp_info)
     const SASL_MECHANISM_INTERFACE_DESCRIPTION* sasl_interface;
     SASL_TPM_CONFIG_INFO sasl_config;
     sasl_config.registration_id = amqp_info->registration_id;
+    sasl_config.scope_id = amqp_info->scope_id;
     sasl_config.storage_root_key = amqp_info->srk;
     sasl_config.endorsement_key = amqp_info->ek;
     sasl_config.hostname = amqp_info->hostname;
