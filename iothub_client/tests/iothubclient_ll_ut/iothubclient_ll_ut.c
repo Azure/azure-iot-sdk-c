@@ -446,6 +446,16 @@ static const TRANSPORT_PROVIDER* provideFAKE(void)
     return &FAKE_transport_provider;
 }
 
+#ifndef DONT_USE_UPLOADTOBLOB
+static void my_FileUpload_GetData_Callback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
+{
+    (void)data;
+    (void)size;
+    (void)context;
+    (void)result;
+}
+#endif /* DONT_USE_UPLOADTOBLOB */
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -3696,6 +3706,54 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_with_NULL_source_and_size_greater_tha
     ///assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    ///cleanup
+    IoTHubClient_LL_Destroy(h);
+}
+
+TEST_FUNCTION(IoTHubClient_LL_UploadMultipleBlocksToBlob_with_NULL_handle_fails)
+{
+    //arrange
+    unsigned int context = 1;
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadMultipleBlocksToBlob(NULL, "irrelevantFileName", my_FileUpload_GetData_Callback, &context);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+
+    ///cleanup
+}
+
+TEST_FUNCTION(IoTHubClient_LL_UploadMultipleBlocksToBlob_with_NULL_filename_fails)
+{
+    //arrange
+    unsigned int context = 1;
+    IOTHUB_CLIENT_LL_HANDLE h = IoTHubClient_LL_Create(&TEST_CONFIG);
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadMultipleBlocksToBlob(h, NULL, my_FileUpload_GetData_Callback, &context);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+
+    ///cleanup
+    IoTHubClient_LL_Destroy(h);
+}
+
+TEST_FUNCTION(IoTHubClient_LL_UploadMultipleBlocksToBlob_with_NULL_callback_fails)
+{
+    //arrange
+    unsigned int context = 1;
+    IOTHUB_CLIENT_LL_HANDLE h = IoTHubClient_LL_Create(&TEST_CONFIG);
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadMultipleBlocksToBlob(h, "irrelevantFileName", NULL, &context);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
 
     ///cleanup
     IoTHubClient_LL_Destroy(h);
