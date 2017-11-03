@@ -665,7 +665,7 @@ static int get_new_underlying_io_transport(AMQP_TRANSPORT_INSTANCE* transport_in
     }
     else
     {
-        // If this is the DPS x509 ECC certificate
+        // If this is the HSM x509 ECC certificate
         if (IoTHubClient_Auth_Get_Credential_Type(transport_instance->authorization_module) == IOTHUB_CREDENTIAL_TYPE_X509_ECC)
         {
             // Set the xio_handle

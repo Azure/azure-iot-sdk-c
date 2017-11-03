@@ -1282,6 +1282,7 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
 
         for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
         {
+            DATA_PUBLISHER_RESULT result;
             size_t j;
             for (j = 0;j < sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]);j++)
             {
@@ -1298,7 +1299,7 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
             (void)sprintf(temp_str, "On failed call %zu", i);
 
             ///act
-            DATA_PUBLISHER_RESULT result = DataPublisher_PublishTransacted_ReportedProperty(handle, reportedPropertyPath, &ag);
+            result = DataPublisher_PublishTransacted_ReportedProperty(handle, reportedPropertyPath, &ag);
 
             ///assert
             ASSERT_ARE_NOT_EQUAL_WITH_MSG(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK, result, temp_str);
@@ -1381,6 +1382,7 @@ next_fail:;
 
         for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
         {
+            DATA_PUBLISHER_RESULT result;
             size_t j;
             for (j = 0;j < sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]);j++)
             {
@@ -1397,7 +1399,7 @@ next_fail:;
             (void)sprintf(temp_str, "On failed call %zu", i);
 
             ///act
-            DATA_PUBLISHER_RESULT result = DataPublisher_PublishTransacted_ReportedProperty(handle, reportedPropertyPath, &ag);
+            result = DataPublisher_PublishTransacted_ReportedProperty(handle, reportedPropertyPath, &ag);
 
             ///assert
             ASSERT_ARE_NOT_EQUAL_WITH_MSG(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK, result, temp_str);
@@ -1487,6 +1489,7 @@ next_fail:;
 
         for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
         {
+            DATA_PUBLISHER_RESULT result;
             size_t j;
             for (j = 0;j < sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]);j++)
             {
@@ -1503,7 +1506,7 @@ next_fail:;
             (void)sprintf(temp_str, "On failed call %zu", i);
 
             ///act
-            DATA_PUBLISHER_RESULT result = DataPublisher_PublishTransacted_ReportedProperty(handle, reportedPropertyPath, &ag2);
+            result = DataPublisher_PublishTransacted_ReportedProperty(handle, reportedPropertyPath, &ag2);
 
             ///assert
             ASSERT_ARE_NOT_EQUAL_WITH_MSG(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK, result, temp_str);

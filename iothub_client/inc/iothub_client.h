@@ -87,6 +87,19 @@ extern "C"
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_HANDLE, IoTHubClient_CreateWithTransport, TRANSPORT_HANDLE, transportHandle, const IOTHUB_CLIENT_CONFIG*, config);
 
     /**
+    * @brief	Creates a IoT Hub client for communication with an existing IoT
+    * 			Hub using the device auth module.
+    *
+    * @param	iothub_uri	Pointer to an ioThub hostname received in the registration process
+    * @param	device_id	Pointer to the device Id of the device
+    * @param	protocol	Function pointer for protocol implementation
+    *
+    * @return	A non-NULL @c IOTHUB_CLIENT_LL_HANDLE value that is used when
+    * 			invoking other functions for IoT Hub client and @c NULL on failure.
+    */
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_HANDLE, IoTHubClient_CreateFromDeviceAuth, const char*, iothub_uri, const char*, device_id, IOTHUB_CLIENT_TRANSPORT_PROVIDER, protocol);
+
+    /**
     * @brief	Disposes of resources allocated by the IoT Hub client. This is a
     * 			blocking call.
     *
@@ -316,7 +329,6 @@ extern "C"
     * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_SetDeviceMethodCallback_Ex, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK, inboundDeviceMethodCallback, void*, userContextCallback);
-
 
     /**
     * @brief	This API responses to a asnyc method callback identified the methodId.

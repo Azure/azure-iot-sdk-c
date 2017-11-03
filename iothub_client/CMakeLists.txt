@@ -45,10 +45,10 @@ set(iothub_client_ll_transport_h_files
     ./inc/iothub_client_diagnostic.h
 )
 
-if (${use_dps_client})
+if (${use_prov_client})
     set(iothub_client_ll_transport_h_files
         ${iothub_client_ll_transport_h_files}
-        ./inc/iothub_client_dps_ll.h
+        ./inc/iothub_client_hsm_ll.h
     )
     set(iothub_client_ll_transport_c_files 
         ${iothub_client_ll_transport_c_files}
@@ -241,16 +241,18 @@ ENDIF()
 
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})
 
-IF(WIN32)
+if(${memory_trace})
+    add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
+endif()
+
+IF(WIN32)  
     #windows needs this define
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-    add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
-  
-  if (WINCE) # Be lax with WEC 2013 compiler
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3")
-    SET_SOURCE_FILES_PROPERTIES(src/iothub_client.c src/iothubtransport.c src/iothub_client_ll.c src/iothubtransporthttp.c src/blob.c PROPERTIES LANGUAGE CXX)
-  ENDIF(WINCE)
+    if (WINCE) # Be lax with WEC 2013 compiler
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3")
+        SET_SOURCE_FILES_PROPERTIES(src/iothub_client.c src/iothubtransport.c src/iothub_client_ll.c src/iothubtransporthttp.c src/blob.c PROPERTIES LANGUAGE CXX)
+    ENDIF(WINCE)
 ENDIF(WIN32)
 
 if(${use_http})
@@ -318,10 +320,11 @@ if(${use_mqtt})
     )
 endif()
 
-if (${use_dps_client})
+if (${use_prov_client})
     set(iothub_client_libs
         ${iothub_client_libs}
-        iothub_security_client
+        hsm_security_client
+        prov_auth_client
     )
 endif()
 
