@@ -92,8 +92,7 @@ extern "C"
     *
     * @param	iothub_uri	Pointer to an ioThub hostname received in the registration process
     * @param	device_id	Pointer to the device Id of the device
-    * @param	device_auth_handle	a device auth handle used to generate the connection string
-    * @param	protocol			Function pointer for protocol implementation
+    * @param	protocol	Function pointer for protocol implementation
     *
     * @return	A non-NULL @c IOTHUB_CLIENT_LL_HANDLE value that is used when
     * 			invoking other functions for IoT Hub client and @c NULL on failure.
