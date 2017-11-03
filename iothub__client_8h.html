@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Microsoft Azure IoT Device SDK for C
-   &#160;<span id="projectnumber">1.1.26</span>
+   &#160;<span id="projectnumber">1.1.27</span>
    </div>
    <div id="projectbrief">The Microsoft Azure IoT device libraries for C contain code that facilitates building devices and applications that connect to and are managed by Azure IoT Hub services.</div>
   </td>
@@ -91,6 +91,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a8ce62be6053d5e5c715552b7b1c469d9"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a8ce62be6053d5e5c715552b7b1c469d9">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_HANDLE, IoTHubClient_CreateWithTransport, TRANSPORT_HANDLE, transportHandle, const <a class="el" href="iothub__client__ll_8h.html#ac14a59dcc227623976d044d1805b5e22">IOTHUB_CLIENT_CONFIG</a> *, config)</td></tr>
 <tr class="memdesc:a8ce62be6053d5e5c715552b7b1c469d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a IoT Hub client for communication with an existing IoT Hub using the specified parameters.  <a href="#a8ce62be6053d5e5c715552b7b1c469d9">More...</a><br /></td></tr>
 <tr class="separator:a8ce62be6053d5e5c715552b7b1c469d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a177255fd666da6e5b52b4f0cb93d311f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a177255fd666da6e5b52b4f0cb93d311f">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_HANDLE, IoTHubClient_CreateFromDeviceAuth, const char *, iothub_uri, const char *, device_id, IOTHUB_CLIENT_TRANSPORT_PROVIDER, protocol)</td></tr>
+<tr class="memdesc:a177255fd666da6e5b52b4f0cb93d311f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a IoT Hub client for communication with an existing IoT Hub using the device auth module.  <a href="#a177255fd666da6e5b52b4f0cb93d311f">More...</a><br /></td></tr>
+<tr class="separator:a177255fd666da6e5b52b4f0cb93d311f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a72b166577636e060ae439b94e9c18d42"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a72b166577636e060ae439b94e9c18d42">MOCKABLE_FUNCTION</a> (, void, IoTHubClient_Destroy, IOTHUB_CLIENT_HANDLE, iotHubClientHandle)</td></tr>
 <tr class="memdesc:a72b166577636e060ae439b94e9c18d42"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disposes of resources allocated by the IoT Hub client. This is a blocking call.  <a href="#a72b166577636e060ae439b94e9c18d42">More...</a><br /></td></tr>
 <tr class="separator:a72b166577636e060ae439b94e9c18d42"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -145,7 +148,7 @@ Functions</h2></td></tr>
 </ul>
 </div><h2 class="groupheader">Function Documentation</h2>
 <a id="aa9bdb753a3cad9a86c398a8d3a09b286"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa9bdb753a3cad9a86c398a8d3a09b286">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[1/18]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#aa9bdb753a3cad9a86c398a8d3a09b286">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[1/19]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -209,7 +212,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a3047e9e8e5ea59948fde4e7fd390072e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3047e9e8e5ea59948fde4e7fd390072e">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[2/18]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a3047e9e8e5ea59948fde4e7fd390072e">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[2/19]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -259,7 +262,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a8ce62be6053d5e5c715552b7b1c469d9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8ce62be6053d5e5c715552b7b1c469d9">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[3/18]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a8ce62be6053d5e5c715552b7b1c469d9">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[3/19]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -321,8 +324,83 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a177255fd666da6e5b52b4f0cb93d311f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a177255fd666da6e5b52b4f0cb93d311f">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[4/19]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td>(</td>
+          <td class="paramtype">IOTHUB_CLIENT_HANDLE&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IoTHubClient_CreateFromDeviceAuth&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">iothub_uri&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">device_id&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IOTHUB_CLIENT_TRANSPORT_PROVIDER&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">protocol&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Creates a IoT Hub client for communication with an existing IoT Hub using the device auth module. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">iothub_uri</td><td>Pointer to an ioThub hostname received in the registration process </td></tr>
+    <tr><td class="paramname">device_id</td><td>Pointer to the device Id of the device </td></tr>
+    <tr><td class="paramname">protocol</td><td>Function pointer for protocol implementation</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A non-NULL <code>IOTHUB_CLIENT_LL_HANDLE</code> value that is used when invoking other functions for IoT Hub client and <code>NULL</code> on failure. </dd></dl>
+
+</div>
+</div>
 <a id="a72b166577636e060ae439b94e9c18d42"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a72b166577636e060ae439b94e9c18d42">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[4/18]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a72b166577636e060ae439b94e9c18d42">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[5/19]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -370,7 +448,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="aa3314f9cbd49b730e41f10dc90d35f37"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa3314f9cbd49b730e41f10dc90d35f37">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[5/18]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#aa3314f9cbd49b730e41f10dc90d35f37">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[6/19]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -459,7 +537,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a173cb7eda5bd6d8ccba97660995a8b1f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a173cb7eda5bd6d8ccba97660995a8b1f">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[6/18]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a173cb7eda5bd6d8ccba97660995a8b1f">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[7/19]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -521,7 +599,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a77e7e46406bb1819300e044205b0bbbd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a77e7e46406bb1819300e044205b0bbbd">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[7/18]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a77e7e46406bb1819300e044205b0bbbd">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[8/19]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -597,7 +675,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="ab29bb0e99747ab6e26b863a740352c38"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab29bb0e99747ab6e26b863a740352c38">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[8/18]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ab29bb0e99747ab6e26b863a740352c38">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[9/19]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -673,7 +751,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a13fe667b55ff033fcd25e45ca7e64275"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a13fe667b55ff033fcd25e45ca7e64275">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[9/18]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a13fe667b55ff033fcd25e45ca7e64275">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[10/19]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -749,7 +827,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a8ce0c78dc95464f35b3b7d0dc825cb97"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8ce0c78dc95464f35b3b7d0dc825cb97">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[10/18]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a8ce0c78dc95464f35b3b7d0dc825cb97">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[11/19]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -825,7 +903,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="aaa3e44c43e5be5272af822a02bc28b3f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaa3e44c43e5be5272af822a02bc28b3f">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[11/18]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#aaa3e44c43e5be5272af822a02bc28b3f">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[12/19]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -887,7 +965,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a9dde5fbb4e3912faa5fbdf95875d1de6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9dde5fbb4e3912faa5fbdf95875d1de6">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[12/18]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a9dde5fbb4e3912faa5fbdf95875d1de6">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[13/19]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -972,7 +1050,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="ace2219303915c458bdcecb93c7bbc57b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ace2219303915c458bdcecb93c7bbc57b">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[13/18]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ace2219303915c458bdcecb93c7bbc57b">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[14/19]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1052,7 +1130,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="ae9b71f4a849b874609b8cd3c461124e0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae9b71f4a849b874609b8cd3c461124e0">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[14/18]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ae9b71f4a849b874609b8cd3c461124e0">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[15/19]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1153,7 +1231,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a038f24e972bd161298c679c1f856ecda"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a038f24e972bd161298c679c1f856ecda">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[15/18]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a038f24e972bd161298c679c1f856ecda">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[16/19]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1228,7 +1306,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="aa7c9d5886dab687ed715ba23e93efa1c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa7c9d5886dab687ed715ba23e93efa1c">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[16/18]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#aa7c9d5886dab687ed715ba23e93efa1c">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[17/19]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1303,7 +1381,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a3cb595d515e5175b868e0720cbaeb139"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3cb595d515e5175b868e0720cbaeb139">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[17/18]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a3cb595d515e5175b868e0720cbaeb139">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[18/19]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1404,7 +1482,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a09f320467e655289b288c11114bc4be3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a09f320467e655289b288c11114bc4be3">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[18/18]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a09f320467e655289b288c11114bc4be3">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[19/19]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
