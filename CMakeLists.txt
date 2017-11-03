@@ -139,14 +139,28 @@ endif()
 
 include("configs/azure_iot_sdksFunctions.cmake")
 
-include("dependencies.cmake")
-
-set_platform_files(${CMAKE_CURRENT_LIST_DIR}/c-utility)
-
-
 if(${run_unittests} OR ${run_e2e_tests})
     include("dependencies-test.cmake")
 endif()
+
+#do not add or build any tests of the dependencies
+set(original_run_e2e_tests ${run_e2e_tests})
+set(original_run_unittests ${run_unittests})
+
+set(run_e2e_tests OFF)
+set(run_unittests OFF)
+
+include("dependencies.cmake")
+
+if (${original_run_e2e_tests} OR ${original_run_unittests})
+    set(SHARED_UTIL_REAL_TEST_FOLDER ${CMAKE_CURRENT_LIST_DIR}/c-utility/tests/real_test_files CACHE INTERNAL "this is what needs to be included when doing test sources" FORCE)
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/c-utility/testtools)
+endif()
+
+set_platform_files(${CMAKE_CURRENT_LIST_DIR}/c-utility)
+
+set(run_e2e_tests ${original_run_e2e_tests})
+set(run_unittests ${original_run_unittests})
 
 enable_testing()
 
