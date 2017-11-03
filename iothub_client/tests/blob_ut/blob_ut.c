@@ -145,7 +145,7 @@ typedef struct BLOB_UPLOAD_CONTEXT_TAG
 
 BLOB_UPLOAD_CONTEXT context;
 
-static void FileUpload_GetData_Callback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char** data, size_t* size, void* context)
+static void FileUpload_GetData_Callback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
 {
     BLOB_UPLOAD_CONTEXT* uploadContext = (BLOB_UPLOAD_CONTEXT*) context;
 
@@ -188,7 +188,7 @@ typedef struct BLOB_UPLOAD_CONTEXT_FAKE_TAG
     unsigned int blockSent; /* number block already sent */
 }BLOB_UPLOAD_CONTEXT_FAKE;
 
-static void FileUpload_GetFakeData_Callback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char** data, size_t* size, void* context)
+static void FileUpload_GetFakeData_Callback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
 {
     BLOB_UPLOAD_CONTEXT_FAKE* uploadContext = (BLOB_UPLOAD_CONTEXT_FAKE*) context;
 
@@ -217,10 +217,10 @@ static void FileUpload_GetFakeData_Callback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT res
     else
     {
         // Upload next block
-        *data = (unsigned char*)gballoc_malloc(uploadContext->blockSize);
-        *size = uploadContext->blockSize;
-        uploadContext->fakeData = *data;
         uploadContext->blockSent++;
+        uploadContext->fakeData = (unsigned char*)gballoc_malloc(uploadContext->blockSize);
+        *data = uploadContext->fakeData;
+        *size = uploadContext->blockSize;
     }
 }
 

@@ -194,7 +194,7 @@ extern "C"
     *                   If result is not FILE_UPLOAD_OK, the download is cancelled and this callback stops being invoked.
     *                   When this callback is called for the last time, no data or size is expected, so data and size are set to NULL
     */
-    typedef void(*IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK)(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char** data, size_t* size, void* context);
+    typedef void(*IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK)(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context);
 #endif /* DONT_USE_UPLOADTOBLOB */
 
     /** @brief	This struct captures IoTHub client configuration. */

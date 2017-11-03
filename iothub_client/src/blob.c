@@ -234,7 +234,7 @@ BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* SASURI, IOTHUB_CLIEN
 
                                     int isError = 0; /*used to cleanly exit the loop*/
 
-                                    unsigned char * source;
+                                    unsigned char const * source;
                                     size_t size;
                                     getDataCallback(FILE_UPLOAD_OK, &source, &size, context);
                                     //LogInfo("getDataCallback returned source=%p, size=%zu", source, size);
