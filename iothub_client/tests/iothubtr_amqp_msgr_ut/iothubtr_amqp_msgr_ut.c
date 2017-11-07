@@ -88,6 +88,7 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 #define TEST_DEVICE_ID                                    "my_device"
 #define TEST_DEVICE_ID_STRING_HANDLE                      (STRING_HANDLE)0x4442
 #define TEST_IOTHUB_HOST_FQDN_STRING_HANDLE               (STRING_HANDLE)0x4443
+#define TEST_MODULE_ID                                    "my_module"
 #define TEST_IOTHUB_HOST_FQDN                             "some.fqdn.com"
 #define TEST_ON_STATE_CHANGED_CB_CONTEXT                  (void*)0x4445
 #define TEST_STRING_HANDLE                                (STRING_HANDLE)0x4446
@@ -372,6 +373,13 @@ static AMQP_MESSENGER_CONFIG* get_messenger_config()
 	return &g_messenger_config;
 }
 
+static AMQP_MESSENGER_CONFIG* get_messenger_config_with_module()
+{
+    AMQP_MESSENGER_CONFIG* config = get_messenger_config();
+	config->module_id = TEST_MODULE_ID;
+	return config;
+}
+
 typedef struct MESSENGER_DO_WORK_EXP_CALL_PROFILE_STRUCT
 {
 	AMQP_MESSENGER_STATE current_state;
@@ -477,6 +485,11 @@ static void set_clone_configuration_expected_calls(AMQP_MESSENGER_CONFIG* config
 		.CopyOutArgumentBuffer(1, &config->client_version, sizeof(config->client_version));
 	STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, config->device_id))
 		.CopyOutArgumentBuffer(1, &config->device_id, sizeof(config->device_id));
+    if (config->module_id != NULL)
+    {
+		STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, config->module_id))
+			.CopyOutArgumentBuffer(1, &config->module_id, sizeof(config->module_id));
+    }
 	STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, config->iothub_host_fqdn))
 		.CopyOutArgumentBuffer(1, &config->iothub_host_fqdn, sizeof(config->iothub_host_fqdn));
 	set_clone_link_configuration_expected_calls(role_sender, &config->send_link);
@@ -761,10 +774,14 @@ static void set_expected_calls_for_amqp_messenger_do_work(MESSENGER_DO_WORK_EXP_
 	}
 }
 
-static void set_detroy_configuration_expected_calls()
+static void set_detroy_configuration_expected_calls(bool testing_modules)
 {
 	STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
 	STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+	if (testing_modules == true)
+	{
+        STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+	}
 	STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
 
 	STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
@@ -776,7 +793,7 @@ static void set_detroy_configuration_expected_calls()
 	STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
 }
 
-static void set_expected_calls_for_amqp_messenger_destroy(AMQP_MESSENGER_CONFIG* config, AMQP_MESSENGER_HANDLE messenger_handle, bool destroy_message_sender, bool destroy_message_receiver, size_t wait_to_send_list_length, size_t in_progress_list_length)
+static void set_expected_calls_for_amqp_messenger_destroy(AMQP_MESSENGER_CONFIG* config, AMQP_MESSENGER_HANDLE messenger_handle, bool destroy_message_sender, bool destroy_message_receiver, size_t wait_to_send_list_length, size_t in_progress_list_length, bool testing_modules)
 {
 	(void)config;
 	(void)destroy_message_sender;
@@ -797,7 +814,7 @@ static void set_expected_calls_for_amqp_messenger_destroy(AMQP_MESSENGER_CONFIG*
 		STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
 	}
 
-	set_detroy_configuration_expected_calls();
+	set_detroy_configuration_expected_calls(testing_modules);
 	STRICT_EXPECTED_CALL(free(messenger_handle));
 }
 
@@ -1283,6 +1300,29 @@ TEST_FUNCTION(amqp_messenger_create_success)
 	amqp_messenger_destroy(handle);
 }
 
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_003: [amqp_messenger_create() shall allocate memory for the messenger instance structure (aka `instance`)]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_005: [amqp_messenger_create() shall save a copy of `messenger_config` into `instance`]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_007: [`instance->send_queue` shall be set using message_queue_create(), passing `on_process_message_callback`]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_009: [If no failures occurr, amqp_messenger_create() shall return a handle to `instance`]
+TEST_FUNCTION(amqp_messenger_create_with_module_success)
+{
+	// arrange
+	AMQP_MESSENGER_CONFIG* config = get_messenger_config_with_module();
+
+	umock_c_reset_all_calls();
+	set_expected_calls_for_amqp_messenger_create(config);
+
+	// act
+	AMQP_MESSENGER_HANDLE handle = amqp_messenger_create(config);
+
+	// assert
+	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+	ASSERT_IS_NOT_NULL(handle);
+
+	// cleanup
+	amqp_messenger_destroy(handle);
+}
+
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_004: [If malloc() fails, amqp_messenger_create() shall fail and return NULL]  
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_006: [If the copy fails, amqp_messenger_create() shall fail and return NULL]  
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_008: [If message_queue_create() fails, amqp_messenger_create() shall fail and return NULL]
@@ -1291,7 +1331,7 @@ TEST_FUNCTION(amqp_messenger_create_failure_checks)
 	// arrange
 	ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
 
-	AMQP_MESSENGER_CONFIG* config = get_messenger_config();
+	AMQP_MESSENGER_CONFIG* config = get_messenger_config_with_module();
 
 	umock_c_reset_all_calls();
 	set_expected_calls_for_amqp_messenger_create(config);
@@ -1403,12 +1443,10 @@ TEST_FUNCTION(amqp_messenger_start_succeeds)
 	amqp_messenger_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_088: [`new_state`, `previous_state` shall be saved into `instance->message_sender_previous_state` and `instance->message_sender_current_state`]  
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_089: [`instance->last_message_sender_state_change_time` shall be set using get_time()]  
-TEST_FUNCTION(messenger_state_on_event_sender_state_changed_callback_OPEN)
+static void messenger_state_on_event_sender_state_changed_callback_OPEN_impl(bool testing_modules)
 {
 	// arrange
-	AMQP_MESSENGER_CONFIG* config = get_messenger_config();
+	AMQP_MESSENGER_CONFIG* config = testing_modules ? get_messenger_config_with_module() : get_messenger_config();
 	AMQP_MESSENGER_HANDLE handle = create_and_start_messenger(config);
 
 	time_t current_time = time(NULL);
@@ -1429,6 +1467,21 @@ TEST_FUNCTION(messenger_state_on_event_sender_state_changed_callback_OPEN)
 
 	// cleanup
 	amqp_messenger_destroy(handle);
+
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_088: [`new_state`, `previous_state` shall be saved into `instance->message_sender_previous_state` and `instance->message_sender_current_state`]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_089: [`instance->last_message_sender_state_change_time` shall be set using get_time()]  
+TEST_FUNCTION(messenger_state_on_event_sender_state_changed_callback_OPEN)
+{
+    messenger_state_on_event_sender_state_changed_callback_OPEN_impl(false);
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_088: [`new_state`, `previous_state` shall be saved into `instance->message_sender_previous_state` and `instance->message_sender_current_state`]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_089: [`instance->last_message_sender_state_change_time` shall be set using get_time()]  
+TEST_FUNCTION(messenger_state_on_event_sender_state_changed_callback_with_module_OPEN)
+{
+    messenger_state_on_event_sender_state_changed_callback_OPEN_impl(true);
 }
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_088: [`new_state`, `previous_state` shall be saved into `instance->message_sender_previous_state` and `instance->message_sender_current_state`]  
@@ -1543,33 +1596,46 @@ TEST_FUNCTION(amqp_messenger_destroy_NULL_handle)
 	// cleanup
 }
 
+static void amqp_messenger_destroy_succeeds_impl(bool testing_modules)
+{
+    // arrange
+    AMQP_MESSENGER_CONFIG* config = testing_modules ? get_messenger_config_with_module() : get_messenger_config();
+    AMQP_MESSENGER_HANDLE handle = create_and_start_messenger2(config, true);
+
+    ASSERT_ARE_EQUAL(int, 1, send_events(handle, 1));
+
+    time_t current_time = time(NULL);
+    MESSENGER_DO_WORK_EXP_CALL_PROFILE* mdecp = get_msgr_do_work_exp_call_profile(AMQP_MESSENGER_STATE_STARTED, true, true, 1, 0, current_time, DEFAULT_EVENT_SEND_TIMEOUT_SECS);
+    crank_amqp_messenger_do_work(handle, mdecp);
+
+    ASSERT_ARE_EQUAL(int, 1, send_events(handle, 1));
+
+    umock_c_reset_all_calls();
+    set_expected_calls_for_amqp_messenger_destroy(config, handle, true, true, 1, 1, testing_modules);
+
+    // act
+    amqp_messenger_destroy(handle);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+	// cleanup
+}
+
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_124: [If `instance->state` is not AMQP_MESSENGER_STATE_STOPPED, amqp_messenger_destroy() shall invoke amqp_messenger_stop()]  
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_125: [message_queue_destroy() shall be invoked for `instance->send_queue`]  
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_126: [amqp_messenger_destroy() shall release all the memory allocated for `instance`]
 TEST_FUNCTION(amqp_messenger_destroy_succeeds)
 {
-	// arrange
-	AMQP_MESSENGER_CONFIG* config = get_messenger_config();
-	AMQP_MESSENGER_HANDLE handle = create_and_start_messenger2(config, true);
+    amqp_messenger_destroy_succeeds_impl(false);
+}
 
-	ASSERT_ARE_EQUAL(int, 1, send_events(handle, 1));
-
-	time_t current_time = time(NULL);
-	MESSENGER_DO_WORK_EXP_CALL_PROFILE* mdecp = get_msgr_do_work_exp_call_profile(AMQP_MESSENGER_STATE_STARTED, true, true, 1, 0, current_time, DEFAULT_EVENT_SEND_TIMEOUT_SECS);
-	crank_amqp_messenger_do_work(handle, mdecp);
-
-	ASSERT_ARE_EQUAL(int, 1, send_events(handle, 1));
-
-	umock_c_reset_all_calls();
-	set_expected_calls_for_amqp_messenger_destroy(config, handle, true, true, 1, 1);
-
-	// act
-	amqp_messenger_destroy(handle);
-
-	// assert
-	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-	// cleanup
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_124: [If `instance->state` is not AMQP_MESSENGER_STATE_STOPPED, amqp_messenger_destroy() shall invoke amqp_messenger_stop()]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_125: [message_queue_destroy() shall be invoked for `instance->send_queue`]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_126: [amqp_messenger_destroy() shall release all the memory allocated for `instance`]
+TEST_FUNCTION(amqp_messenger_destroy_with_module_succeeds)
+{
+    amqp_messenger_destroy_succeeds_impl(true);
 }
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_061: [If message_queue_move_all_back_to_pending() fails, amqp_messenger_stop() shall change the messenger state to AMQP_MESSENGER_STATE_ERROR and return a non-zero value] 
@@ -1634,22 +1700,10 @@ TEST_FUNCTION(amqp_messenger_do_work_not_started)
 	amqp_messenger_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_065: [amqp_messenger_do_work() shall update the current state according to the states of message sender and receiver]  
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_066: [If the current state is AMQP_MESSENGER_STARTING, amqp_messenger_do_work() shall create and start `instance->message_sender`]  
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_068: [If the message sender state changes to MESSAGE_SENDER_STATE_OPEN, amqp_messenger_do_work() shall set the state to AMQP_MESSENGER_STATE_STARTED]  
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_073: [amqp_messenger_do_work() shall invoke message_queue_do_work() on `instance->send_queue`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_075: [The AMQP link address shall be defined as "amqps://<`iothub_host_fqdn`>/devices/<`device_id`>/<`instance-config->send_link.source_suffix`>"]  
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_076: [The AMQP link name shall be defined as "link-snd-<`device_id`>-<locally generated UUID>"]  
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_077: [The AMQP link source shall be defined as "<link name>-source"]  
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_078: [The AMQP link target shall be defined as <link address>]  
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_080: [The AMQP link shall have its ATTACH properties set using `instance->config->send_link.attach_properties`]  
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_082: [The AMQP link maximum message size shall be set to UINT64_MAX using link_set_max_message_size()]  
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_084: [`instance->message_sender` shall be created using messagesender_create(), passing the `instance->sender_link` and `on_message_sender_state_changed_callback`]  
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_086: [`instance->message_sender` shall be opened using messagesender_open()]  
-TEST_FUNCTION(amqp_messenger_do_work_send_events_success)
+static void amqp_messenger_do_work_send_events_success_impl(bool testing_modules)
 {
 	// arrange
-	AMQP_MESSENGER_CONFIG* config = get_messenger_config();
+    AMQP_MESSENGER_CONFIG* config = testing_modules ? get_messenger_config_with_module() : get_messenger_config();
 	AMQP_MESSENGER_HANDLE handle = create_and_start_messenger2(config, false);
 
 	set_expected_calls_for_amqp_messenger_send_async();
@@ -1670,6 +1724,41 @@ TEST_FUNCTION(amqp_messenger_do_work_send_events_success)
 
 	// cleanup
 	amqp_messenger_destroy(handle);
+
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_065: [amqp_messenger_do_work() shall update the current state according to the states of message sender and receiver]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_066: [If the current state is AMQP_MESSENGER_STARTING, amqp_messenger_do_work() shall create and start `instance->message_sender`]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_068: [If the message sender state changes to MESSAGE_SENDER_STATE_OPEN, amqp_messenger_do_work() shall set the state to AMQP_MESSENGER_STATE_STARTED]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_073: [amqp_messenger_do_work() shall invoke message_queue_do_work() on `instance->send_queue`]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_075: [The AMQP link address shall be defined as "amqps://<`iothub_host_fqdn`>/devices/<`device_id`>/<`instance-config->send_link.source_suffix`>"]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_076: [The AMQP link name shall be defined as "link-snd-<`device_id`>-<locally generated UUID>"]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_077: [The AMQP link source shall be defined as "<link name>-source"]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_078: [The AMQP link target shall be defined as <link address>]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_080: [The AMQP link shall have its ATTACH properties set using `instance->config->send_link.attach_properties`]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_082: [The AMQP link maximum message size shall be set to UINT64_MAX using link_set_max_message_size()]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_084: [`instance->message_sender` shall be created using messagesender_create(), passing the `instance->sender_link` and `on_message_sender_state_changed_callback`]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_086: [`instance->message_sender` shall be opened using messagesender_open()]  
+TEST_FUNCTION(amqp_messenger_do_work_send_events_success)
+{
+    amqp_messenger_do_work_send_events_success_impl(false);
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_065: [amqp_messenger_do_work() shall update the current state according to the states of message sender and receiver]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_066: [If the current state is AMQP_MESSENGER_STARTING, amqp_messenger_do_work() shall create and start `instance->message_sender`]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_068: [If the message sender state changes to MESSAGE_SENDER_STATE_OPEN, amqp_messenger_do_work() shall set the state to AMQP_MESSENGER_STATE_STARTED]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_073: [amqp_messenger_do_work() shall invoke message_queue_do_work() on `instance->send_queue`]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_075: [The AMQP link address shall be defined as "amqps://<`iothub_host_fqdn`>/devices/<`device_id`>/<`instance-config->send_link.source_suffix`>"]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_076: [The AMQP link name shall be defined as "link-snd-<`device_id`>-<locally generated UUID>"]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_077: [The AMQP link source shall be defined as "<link name>-source"]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_078: [The AMQP link target shall be defined as <link address>]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_080: [The AMQP link shall have its ATTACH properties set using `instance->config->send_link.attach_properties`]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_082: [The AMQP link maximum message size shall be set to UINT64_MAX using link_set_max_message_size()]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_084: [`instance->message_sender` shall be created using messagesender_create(), passing the `instance->sender_link` and `on_message_sender_state_changed_callback`]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_086: [`instance->message_sender` shall be opened using messagesender_open()]  
+TEST_FUNCTION(amqp_messenger_do_work_send_events_with_module_success)
+{
+    amqp_messenger_do_work_send_events_success_impl(true);
 }
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_092: [The AMQP link address shall be defined as "amqps://<`iothub_host_fqdn`>/devices/<`device_id`>/<`instance-config->receive_link.target_suffix`>"]  
@@ -1714,7 +1803,7 @@ TEST_FUNCTION(amqp_messenger_do_work_create_message_receiver_failure_checks)
 	// arrange
 	ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
 
-	AMQP_MESSENGER_CONFIG* config = get_messenger_config();
+	AMQP_MESSENGER_CONFIG* config = get_messenger_config_with_module();
 	AMQP_MESSENGER_HANDLE handle = create_and_start_messenger(config);
 
 	(void)amqp_messenger_subscribe_for_messages(handle, TEST_on_new_message_received_callback, TEST_ON_NEW_MESSAGE_RECEIVED_CB_CONTEXT);
@@ -2048,13 +2137,11 @@ TEST_FUNCTION(messenger_on_message_received_internal_callback_create_AMQP_MESSEN
 	amqp_messenger_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_040: [`instance->receive_messages` shall be saved to false]  
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_041: [`instance->on_message_received_callback` and `instance->on_message_received_context` shall be set to NULL]  
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_042: [If no failures occurr, amqp_messenger_unsubscribe_for_messages() shall return 0]  
-TEST_FUNCTION(amqp_messenger_unsubscribe_for_messages_success)
+
+static void amqp_messenger_unsubscribe_for_messages_success_impl(bool testing_modules)
 {
 	// arrange
-	AMQP_MESSENGER_CONFIG* config = get_messenger_config();
+    AMQP_MESSENGER_CONFIG* config = testing_modules ? get_messenger_config_with_module() : get_messenger_config();
 	AMQP_MESSENGER_HANDLE handle = create_and_start_messenger2(config, true);
 
 	umock_c_reset_all_calls();
@@ -2072,6 +2159,22 @@ TEST_FUNCTION(amqp_messenger_unsubscribe_for_messages_success)
 
 	// cleanup
 	amqp_messenger_destroy(handle);
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_040: [`instance->receive_messages` shall be saved to false]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_041: [`instance->on_message_received_callback` and `instance->on_message_received_context` shall be set to NULL]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_042: [If no failures occurr, amqp_messenger_unsubscribe_for_messages() shall return 0]  
+TEST_FUNCTION(amqp_messenger_unsubscribe_for_messages_success)
+{
+    amqp_messenger_unsubscribe_for_messages_success_impl(false);
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_040: [`instance->receive_messages` shall be saved to false]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_041: [`instance->on_message_received_callback` and `instance->on_message_received_context` shall be set to NULL]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_042: [If no failures occurr, amqp_messenger_unsubscribe_for_messages() shall return 0]  
+TEST_FUNCTION(amqp_messenger_unsubscribe_for_messages_with_module_success)
+{
+    amqp_messenger_unsubscribe_for_messages_success_impl(true);
 }
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_010: [If `messenger_handle`, `message` or `on_event_send_complete_callback` are NULL, amqp_messenger_send_async() shall fail and return a non-zero value]  
@@ -2131,7 +2234,7 @@ TEST_FUNCTION(amqp_messenger_send_async_failure_checks)
 	// arrange
 	ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
 
-	AMQP_MESSENGER_CONFIG* config = get_messenger_config();
+	AMQP_MESSENGER_CONFIG* config = get_messenger_config_with_module();
 	AMQP_MESSENGER_HANDLE handle = create_and_start_messenger2(config, false);
 
 	umock_c_reset_all_calls();
@@ -2509,7 +2612,7 @@ TEST_FUNCTION(amqp_messenger_send_message_disposition_failure_checks)
 	// arrange
 	ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
 
-	AMQP_MESSENGER_CONFIG* config = get_messenger_config();
+	AMQP_MESSENGER_CONFIG* config = get_messenger_config_with_module();
 	AMQP_MESSENGER_HANDLE handle = create_and_start_messenger2(config, true);
 
 	AMQP_MESSENGER_MESSAGE_DISPOSITION_INFO disposition_info;

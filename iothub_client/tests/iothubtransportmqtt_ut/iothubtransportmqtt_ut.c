@@ -99,6 +99,9 @@ static pfIoTHubTransport_Subscribe_DeviceMethod     IoTHubTransportMqtt_Subscrib
 static pfIoTHubTransport_Unsubscribe_DeviceMethod   IoTHubTransportMqtt_Unsubscribe_DeviceMethod;
 static pfIoTHubTransport_DeviceMethod_Response      IoTHubTransportMqtt_DeviceMethod_Response;
 static pfIoTHubTransport_ProcessItem                IoTHubTransportMqtt_ProcessItem;
+static pfIoTHubTransport_Subscribe_InputQueue       IoTHubTransportMqtt_Subscribe_InputQueue;
+static pfIoTHubTransport_Unsubscribe_InputQueue     IoTHubTransportMqtt_Unsubscribe_InputQueue;
+
 
 static TRANSPORT_LL_HANDLE my_IoTHubTransport_MQTT_Common_Create(const IOTHUBTRANSPORT_CONFIG* config, MQTT_GET_IO_TRANSPORT get_io_transport)
 {
@@ -313,6 +316,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod, 0);
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_MQTT_Common_ProcessItem, IOTHUB_PROCESS_OK);
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_MQTT_Common_SetRetryPolicy, 0);
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_MQTT_Common_Subscribe_InputQueue, 0);
 
     REGISTER_GLOBAL_MOCK_RETURN(xio_create, TEST_XIO_HANDLE);
 
@@ -337,6 +341,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     IoTHubTransportMqtt_Unsubscribe_DeviceMethod = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_Unsubscribe_DeviceMethod;
     IoTHubTransportMqtt_DeviceMethod_Response = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_DeviceMethod_Response;
     IoTHubTransportMqtt_ProcessItem = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_ProcessItem;
+    IoTHubTransportMqtt_Subscribe_InputQueue = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_Subscribe_InputQueue;
+    IoTHubTransportMqtt_Unsubscribe_InputQueue = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_Unsubscribe_InputQueue;
 }
 
 TEST_SUITE_CLEANUP(suite_cleanup)
@@ -801,7 +807,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_GetHostname_success)
 }
 
 /* Tests_SRS_IOTHUB_MQTT_TRANSPORT_10_001: [ IoTHubTransportMqtt_SendMessageDisposition shall send the message disposition by calling into the IoTHubMqttAbstract_SendMessageDisposition function. ] */
-TEST_FUNCTION(IoTHubTransport_AMQP_SendMessageDisposition_success)
+TEST_FUNCTION(IoTHubTransport_MQTT_SendMessageDisposition_success)
 {
     // arrange
     umock_c_reset_all_calls();
@@ -817,5 +823,42 @@ TEST_FUNCTION(IoTHubTransport_AMQP_SendMessageDisposition_success)
 
     // cleanup
 }
+
+// Tests_SRS_IOTHUB_MQTT_TRANSPORT_31_14: [ IoTHubTransportMqtt_Subscribe shall subscribe the TRANSPORT_LL_HANDLE by calling into IoTHubTransport_MQTT_Common_Subscribe_InputQueue. ]
+TEST_FUNCTION(IoTHubTransport_MQTT_Subscribe_InputQueue_success)
+{
+    // arrange
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_Subscribe_InputQueue(IGNORED_PTR_ARG))
+        .IgnoreAllArguments();
+
+    // act
+    int result = IoTHubTransportMqtt_Subscribe_InputQueue(NULL);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, 0, result);
+
+    // cleanup
+}
+
+// Tests_SRS_IOTHUBTRANSPORTAMQP_31_015: [IotHubTransportMQTT_Unsubscribe_InputQueue shall unsubscribe by calling into IoTHubTransport_MQTT_Common_Unsubscribe_InputQueue. ]
+TEST_FUNCTION(IoTHubTransport_MQTT_Unsubscribe_InputQueue_success)
+{
+    // arrange
+
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_Unsubscribe_InputQueue(TEST_DEVICE_HANDLE));
+
+    // act
+    IoTHubTransportMqtt_Unsubscribe_InputQueue(TEST_DEVICE_HANDLE);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+}
+
+
+
 
 END_TEST_SUITE(iothubtransportmqtt_ut)

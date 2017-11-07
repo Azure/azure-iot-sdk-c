@@ -2032,3 +2032,74 @@ IOTHUB_CLIENT_RESULT IoTHubClient_UploadToBlobAsync(IOTHUB_CLIENT_HANDLE iotHubC
     return result;
 }
 #endif /*DONT_USE_UPLOADTOBLOB*/
+
+
+IOTHUB_CLIENT_RESULT IoTHubClient_SendEventToOutputAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE eventMessageHandle, const char* outputName, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK eventConfirmationCallback, void* userContextCallback)
+{
+    IOTHUB_CLIENT_RESULT result;
+
+    if ((iotHubClientHandle == NULL) || (outputName == NULL) || (eventMessageHandle == NULL))
+    {
+        // Codes_SRS_IOTHUBCLIENT_31_100: [ If `iotHubClientHandle`, `outputName`, or `eventConfirmationCallback` is `NULL`, `IoTHubClient_SendEventToOutputAsync` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]
+        LogError("Invalid argument (iotHubClientHandle=%p, outputName=%p, eventMessageHandle=%p)", iotHubClientHandle, outputName, eventMessageHandle);
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    else
+    {
+        // Codes_SRS_IOTHUBCLIENT_31_101: [ `IoTHubClient_SendEventToOutputAsync` shall set the outputName of the message to send. ]
+        if (IoTHubMessage_SetOutputName(eventMessageHandle, outputName) != IOTHUB_MESSAGE_OK)
+        {
+            LogError("IoTHubMessage_SetOutputName failed");
+            result = IOTHUB_CLIENT_ERROR;
+        }
+        // Codes_SRS_IOTHUBCLIENT_31_102: [ `IoTHubClient_SendEventToOutputAsync` shall invoke `IoTHubClient_SendEventAsync` to send the message. ]
+        else if ((result = IoTHubClient_SendEventAsync(iotHubClientHandle, eventMessageHandle, eventConfirmationCallback, userContextCallback)) != IOTHUB_CLIENT_OK)
+        {
+            LogError("Call into IoTHubClient_SendEventAsync failed, result=%d", result);
+        }
+    }
+
+    return result;
+}
+
+
+IOTHUB_CLIENT_RESULT IoTHubClient_SetInputMessageCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* inputName, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC eventHandlerCallback, void* userContextCallback)
+{
+    IOTHUB_CLIENT_RESULT result;
+
+    // Codes_SRS_IOTHUBCLIENT_31_097: [ If iotHubClientHandle or inputName is NULL, `IoTHubClient_SetInputMessageCallback` shall return IOTHUB_CLIENT_INVALID_ARG. ]
+    if ((iotHubClientHandle == NULL) || (inputName == NULL))
+    {
+        result = IOTHUB_CLIENT_INVALID_ARG;
+        LogError("NULL iothubClientHandle");
+    }
+    else
+    {
+        IOTHUB_CLIENT_INSTANCE* iotHubClientInstance = (IOTHUB_CLIENT_INSTANCE*)iotHubClientHandle;
+
+        // Codes_SRS_IOTHUBCLIENT_31_098: [ `IoTHubClient_SetMessageCallback` shall start the worker thread if it was not previously started. ]
+        if ((result = StartWorkerThreadIfNeeded(iotHubClientInstance)) != IOTHUB_CLIENT_OK)
+        {
+            result = IOTHUB_CLIENT_ERROR;
+            LogError("Could not start worker thread");
+        }
+        else
+        {
+            if (Lock(iotHubClientInstance->LockHandle) != LOCK_OK)
+            {
+                result = IOTHUB_CLIENT_ERROR;
+                LogError("Could not acquire lock");
+            }
+            else
+            {
+                // Codes_SRS_IOTHUBCLIENT_31_099: [ `IoTHubClient_SetMessageCallback` shall call `IoTHubClient_LL_SetInputMessageCallback`, passing its input arguments ]
+                result = IoTHubClient_LL_SetInputMessageCallback(iotHubClientInstance->IoTHubClientLLHandle, inputName, eventHandlerCallback, userContextCallback);
+                (void)Unlock(iotHubClientInstance->LockHandle);
+            }
+        }
+    }
+
+    return result;
+}
+
+

@@ -29,6 +29,7 @@ DEFINE_ENUM_STRINGS(AMQP_MESSENGER_STATE, AMQP_MESSENGER_STATE_VALUES);
 
 // AMQP Link address format: "amqps://<iot hub fqdn>/devices/<device-id>/<suffix>"
 #define LINK_ADDRESS_FORMAT                             "amqps://%s/devices/%s/%s"
+#define LINK_ADDRESS_MODULE_FORMAT                      "amqps://%s/devices/%s/modules/%s/%s"
 #define SEND_LINK_NAME_PREFIX							"link-snd"
 #define MESSAGE_SENDER_MAX_LINK_SIZE                    UINT64_MAX
 #define RECEIVE_LINK_NAME_PREFIX		                "link-rcv"
@@ -166,6 +167,11 @@ static void destroy_configuration(AMQP_MESSENGER_CONFIG* config)
 			free((void*)config->device_id);
 		}
 
+		if (config->module_id != NULL)
+		{
+			free((void*)config->module_id);
+		}			
+
 		if (config->iothub_host_fqdn != NULL)
 		{
 			free((void*)config->iothub_host_fqdn);
@@ -237,6 +243,12 @@ static AMQP_MESSENGER_CONFIG* clone_configuration(const AMQP_MESSENGER_CONFIG* c
 			destroy_configuration(result);
 			result = NULL;
 		}
+		else if ((config->module_id != NULL) && (mallocAndStrcpy_s(&result->module_id, config->module_id) != 0))
+		{
+			LogError("Failed copying module_id");
+			destroy_configuration(result);
+			result = NULL;
+		}
 		else if (mallocAndStrcpy_s(&result->iothub_host_fqdn, config->iothub_host_fqdn) != 0)
 		{
 			LogError("Failed copying iothub_host_fqdn");
@@ -269,25 +281,39 @@ static AMQP_MESSENGER_CONFIG* clone_configuration(const AMQP_MESSENGER_CONFIG* c
 
 static void destroy_message_send_context(MESSAGE_SEND_CONTEXT* context)
 {
-	free(context);
+    free(context);
 }
 
-static STRING_HANDLE create_link_address(const char* host_fqdn, const char* device_id, const char* address_suffix)
+static STRING_HANDLE create_link_address(const char* host_fqdn, const char* device_id, const char* module_id, const char* address_suffix)
 {
-	STRING_HANDLE link_address;
+    STRING_HANDLE link_address;
 
-	if ((link_address = STRING_new()) == NULL)
-	{
-		LogError("failed creating link_address (STRING_new failed)");
-	}
-	else if (STRING_sprintf(link_address, LINK_ADDRESS_FORMAT, host_fqdn, device_id, address_suffix) != RESULT_OK)
-	{
-		LogError("Failed creating the link_address (STRING_sprintf failed)");
-		STRING_delete(link_address);
-		link_address = NULL;
-	}
-
-	return link_address;
+    if ((link_address = STRING_new()) == NULL)
+    {
+        LogError("failed creating link_address (STRING_new failed)");
+    }
+    else
+    {
+        if (module_id != NULL)
+        {
+            if (STRING_sprintf(link_address, LINK_ADDRESS_MODULE_FORMAT, host_fqdn, device_id, module_id, address_suffix) != RESULT_OK)
+            {
+                LogError("Failed creating the link_address for a module (STRING_sprintf failed)");
+                STRING_delete(link_address);
+                link_address = NULL;
+            }
+        }
+        else
+        {
+            if (STRING_sprintf(link_address, LINK_ADDRESS_FORMAT, host_fqdn, device_id, address_suffix) != RESULT_OK)
+            {
+                LogError("Failed creating the link_address (STRING_sprintf failed)");
+                STRING_delete(link_address);
+                link_address = NULL;
+            }
+        }
+    }
+    return link_address;
 }
 
 static STRING_HANDLE create_link_terminus_name(STRING_HANDLE link_name, const char* suffix)
@@ -515,14 +541,14 @@ static int create_link_terminus(role link_role, STRING_HANDLE link_name, STRING_
 	return result;
 }
 
-static LINK_HANDLE create_link(role link_role, SESSION_HANDLE session_handle, AMQP_MESSENGER_LINK_CONFIG* link_config, const char* iothub_host_fqdn, const char* device_id)
+static LINK_HANDLE create_link(role link_role, SESSION_HANDLE session_handle, AMQP_MESSENGER_LINK_CONFIG* link_config, const char* iothub_host_fqdn, const char* device_id, const char* module_id)
 {
 	LINK_HANDLE result = NULL;
 	STRING_HANDLE link_address;
 
 	// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_075: [The AMQP link address shall be defined as "amqps://<`iothub_host_fqdn`>/devices/<`device_id`>/<`instance-config->send_link.source_suffix`>"]  
 	// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_092: [The AMQP link address shall be defined as "amqps://<`iothub_host_fqdn`>/devices/<`device_id`>/<`instance-config->receive_link.target_suffix`>"]  
-	if ((link_address = create_link_address(iothub_host_fqdn, device_id, (link_role == role_sender ? link_config->target_suffix : link_config->source_suffix))) == NULL)
+	if ((link_address = create_link_address(iothub_host_fqdn, device_id, module_id, (link_role == role_sender ? link_config->target_suffix : link_config->source_suffix))) == NULL)
 	{
 		LogError("Failed creating the message sender (failed creating the 'link_address')");
 		result = NULL;
@@ -631,7 +657,7 @@ static int create_message_sender(AMQP_MESSENGER_INSTANCE* instance)
 	int result;
 
 	if ((instance->sender_link = create_link(role_sender,
-		instance->session_handle, &instance->config->send_link, instance->config->iothub_host_fqdn, instance->config->device_id)) == NULL)
+		instance->session_handle, &instance->config->send_link, instance->config->iothub_host_fqdn, instance->config->device_id, instance->config->module_id)) == NULL)
 	{
 		LogError("Failed creating the message sender link");
 		result = __FAILURE__;
@@ -834,7 +860,7 @@ static int create_message_receiver(AMQP_MESSENGER_INSTANCE* instance)
 	int result;
 
 	if ((instance->receiver_link = create_link(role_receiver,
-		instance->session_handle, &instance->config->receive_link, instance->config->iothub_host_fqdn, instance->config->device_id)) == NULL)
+		instance->session_handle, &instance->config->receive_link, instance->config->iothub_host_fqdn, instance->config->device_id, instance->config->module_id)) == NULL)
 	{
 		LogError("Failed creating the message receiver link");
 		result = __FAILURE__;

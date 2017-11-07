@@ -82,6 +82,7 @@ typedef struct TWIN_MESSENGER_INSTANCE_TAG
 {
 	char* client_version;
 	char* device_id;
+	char* module_id;
 	char* iothub_host_fqdn;
 
 	TWIN_MESSENGER_STATE state;
@@ -1329,6 +1330,11 @@ static void internal_twin_messenger_destroy(TWIN_MESSENGER_INSTANCE* twin_msgr)
 	{
 		free(twin_msgr->device_id);
 	}
+	
+	if (twin_msgr->module_id != NULL)
+	{
+		free(twin_msgr->module_id);
+	}
 
 	if (twin_msgr->iothub_host_fqdn != NULL)
 	{
@@ -1721,6 +1727,13 @@ TWIN_MESSENGER_HANDLE twin_messenger_create(const TWIN_MESSENGER_CONFIG* messeng
 				internal_twin_messenger_destroy(twin_msgr);
 				twin_msgr = NULL;
 			}
+			else if ((messenger_config->module_id != NULL) && (mallocAndStrcpy_s(&twin_msgr->module_id, messenger_config->module_id) != 0))
+			{
+				// Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_006: [If any `messenger_config` info fails to be copied, twin_messenger_create() shall fail and return NULL]  
+				LogError("Failed copying module_id (%s)", messenger_config->device_id);
+				internal_twin_messenger_destroy(twin_msgr);
+				twin_msgr = NULL;
+			}
 			else if (mallocAndStrcpy_s(&twin_msgr->iothub_host_fqdn, messenger_config->iothub_host_fqdn) != 0)
 			{
 				// Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_006: [If any `messenger_config` info fails to be copied, twin_messenger_create() shall fail and return NULL]  
@@ -1762,6 +1775,7 @@ TWIN_MESSENGER_HANDLE twin_messenger_create(const TWIN_MESSENGER_CONFIG* messeng
 				AMQP_MESSENGER_CONFIG amqp_msgr_config;
 				amqp_msgr_config.client_version = twin_msgr->client_version;
 				amqp_msgr_config.device_id = twin_msgr->device_id;
+				amqp_msgr_config.module_id = twin_msgr->module_id;
 				amqp_msgr_config.iothub_host_fqdn = twin_msgr->iothub_host_fqdn;
 				amqp_msgr_config.send_link.target_suffix = DEFAULT_TWIN_SEND_LINK_SOURCE_NAME;
 				amqp_msgr_config.send_link.attach_properties = link_attach_properties;

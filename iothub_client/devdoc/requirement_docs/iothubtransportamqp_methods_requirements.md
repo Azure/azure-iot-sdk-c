@@ -80,13 +80,15 @@ int iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE io
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_011: [** - `session_handle` shall be the session_handle argument passed to iothubtransportamqp_methods_subscribe **]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_012: [** - `name` shall be in the format `methods_requests_link-{device_id}`, where device_id is the `device_id` argument passed to `iothubtransportamqp_methods_create`. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_012: [** - `name` shall be in the format `methods_requests_link-{device_id}` (+ `/{module-id}` if module id is present). **]**
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_153: [** If constructing the requests link name fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. **]**
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_013: [** - `role` shall be role_receiver. **]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_014: [** - `source` shall be the a source value created by calling `messaging_create_source`. **]** **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_015: [** The address string used to create the source shall be of the form `/devices/{device id}/methods/devicebound`. **]** **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_016: [** The string shall be created by using `STRING_construct_sprintf`. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_014: [** - `source` shall be the a source value created by calling `messaging_create_source`. **]** 
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_015: [** The address string used to create the source shall be of the form `/devices/{device id}` + (`/modules/{module  id}` if modules are present) + `/methods/devicebound`. **]**
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_017: [** - `target` shall be the a target value created by calling `messaging_create_target`. **]** **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_117: [** The address string used to create the target shall be `requests`. **]**
 
@@ -100,7 +102,7 @@ int iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE io
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_022: [** - `session_handle` shall be the session_handle argument passed to iothubtransportamqp_methods_subscribe **]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_023: [** - `name` shall be format `methods_responses_link-{device_id}`, where device_id is the `device_id` argument passed to `iothubtransportamqp_methods_create`. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_023: [**  - `name` shall be format `methods_responses_link-{device_id}` (+ `/{module-id}` if module id is present). **]**
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_154: [** If constructing the responses link name fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. **]**
 
@@ -118,7 +120,7 @@ int iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE io
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_141: [** A property key which shall be a symbol named `com.microsoft:channel-correlation-id` shall be created by calling `amqp_create_symbol`. **]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_142: [** A property value of type string that shall contain the device id shall be created by calling `amqpvalue_create_string`. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_142: [** A property value of type string that shall contain the device id (and "/" + module id if module is present) shall be created by calling `amqpvalue_create_string`. **]**
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_143: [** The `com.microsoft:channel-correlation-id` shall be added to the link attach properties by calling `amqpvalue_set_map_value`. **]**
 

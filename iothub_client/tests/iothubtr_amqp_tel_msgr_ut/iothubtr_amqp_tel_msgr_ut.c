@@ -86,6 +86,8 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 
 #define TEST_DEVICE_ID                                    "my_device"
 #define TEST_DEVICE_ID_STRING_HANDLE                      (STRING_HANDLE)0x4442
+#define TEST_MODULE_ID                                    "my_module"
+#define TEST_MODULE_ID_STRING_HANDLE                      (STRING_HANDLE)0x4489
 #define TEST_IOTHUB_HOST_FQDN_STRING_HANDLE               (STRING_HANDLE)0x4443
 #define TEST_IOTHUB_HOST_FQDN                             "some.fqdn.com"
 #define TEST_ON_STATE_CHANGED_CB_CONTEXT                  (void*)0x4445
@@ -360,6 +362,7 @@ typedef struct MESSENGER_DO_WORK_EXP_CALL_PROFILE_STRUCT
     size_t send_event_timeout_secs;
     time_t current_time;
     SEND_PENDING_EVENTS_TEST_CONFIG *send_pending_events_test_config;
+    bool testing_modules;
 } MESSENGER_DO_WORK_EXP_CALL_PROFILE;
 
 
@@ -406,6 +409,7 @@ static MESSENGER_DO_WORK_EXP_CALL_PROFILE* get_msgr_do_work_exp_call_profile(TEL
     g_do_work_profile.in_progress_list_length = ip_list_length;
     g_do_work_profile.current_time = current_time;
     g_do_work_profile.send_event_timeout_secs = event_send_timeout_secs;
+    g_do_work_profile.testing_modules = false;
 
     if (g_do_work_profile.current_state == TELEMETRY_MESSENGER_STATE_STARTING)
     {
@@ -762,6 +766,10 @@ static void set_expected_calls_for_telemetry_messenger_create(TELEMETRY_MESSENGE
     EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
     // memset() - not mocked.
     STRICT_EXPECTED_CALL(STRING_construct(config->device_id)).SetReturn(TEST_DEVICE_ID_STRING_HANDLE);
+    if (config->module_id)
+    {
+        STRICT_EXPECTED_CALL(STRING_construct(config->module_id)).SetReturn(TEST_MODULE_ID_STRING_HANDLE);
+    }
     STRICT_EXPECTED_CALL(STRING_construct(config->device_id)).SetReturn(TEST_DEVICE_ID_STRING_HANDLE);
     STRICT_EXPECTED_CALL(STRING_construct(config->iothub_host_fqdn)).SetReturn(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE);
     STRICT_EXPECTED_CALL(singlylinkedlist_create()).SetReturn(TEST_WAIT_TO_SEND_LIST);
@@ -787,13 +795,16 @@ static void set_expected_calls_for_attach_device_client_type_to_link(LINK_HANDLE
     STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_LINK_ATTACH_PROPERTIES));
 }
 
-static void set_expected_calls_for_message_receiver_create()
+static void set_expected_calls_for_message_receiver_create(bool testing_modules)
 {
     // create_event_sender()
     // create_devices_path()
+    STRING_HANDLE module_handle = testing_modules ? TEST_MODULE_ID_STRING_HANDLE : NULL;
+    const char* module_name = testing_modules ? TEST_MODULE_ID : NULL;
     STRICT_EXPECTED_CALL(STRING_new()).SetReturn(TEST_DEVICES_PATH_STRING_HANDLE);
     STRICT_EXPECTED_CALL(STRING_c_str(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE)).SetReturn(TEST_IOTHUB_HOST_FQDN);
     STRICT_EXPECTED_CALL(STRING_c_str(TEST_DEVICE_ID_STRING_HANDLE)).SetReturn(TEST_DEVICE_ID);
+    STRICT_EXPECTED_CALL(STRING_c_str(module_handle)).SetReturn(module_name);
     // EXPECTED: STRING_sprintf
 
     // create_message_receive_address()
@@ -910,13 +921,17 @@ static int send_events(TELEMETRY_MESSENGER_HANDLE handle, int number_of_events)
     return events_sent;
 }
 
-static void set_expected_calls_for_message_sender_create()
+static void set_expected_calls_for_message_sender_create(bool testing_modules)
 {
     // create_event_sender()
     // create_devices_path()
+    STRING_HANDLE module_handle = testing_modules ? TEST_MODULE_ID_STRING_HANDLE : NULL;
+    const char* module_name = testing_modules ? TEST_MODULE_ID : NULL;
+    
     STRICT_EXPECTED_CALL(STRING_new()).SetReturn(TEST_DEVICES_PATH_STRING_HANDLE);
     STRICT_EXPECTED_CALL(STRING_c_str(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE)).SetReturn(TEST_IOTHUB_HOST_FQDN);
     STRICT_EXPECTED_CALL(STRING_c_str(TEST_DEVICE_ID_STRING_HANDLE)).SetReturn(TEST_DEVICE_ID);
+    STRICT_EXPECTED_CALL(STRING_c_str(module_handle)).SetReturn(module_name);
     // EXPECTED: STRING_sprintf
 
     // create_event_send_address()
@@ -1449,13 +1464,13 @@ static void set_expected_calls_for_telemetry_messenger_do_work(MESSENGER_DO_WORK
 {
     if (profile->current_state == TELEMETRY_MESSENGER_STATE_STARTING)
     {
-        set_expected_calls_for_message_sender_create();
+        set_expected_calls_for_message_sender_create(profile->testing_modules);
     }
     else if (profile->current_state == TELEMETRY_MESSENGER_STATE_STARTED)
     {
         if (profile->create_message_receiver)
         {
-            set_expected_calls_for_message_receiver_create();
+            set_expected_calls_for_message_receiver_create(profile->testing_modules);
         }
         else if (profile->destroy_message_receiver)
         {
@@ -1468,7 +1483,7 @@ static void set_expected_calls_for_telemetry_messenger_do_work(MESSENGER_DO_WORK
     }
 }
 
-static void set_expected_calls_for_telemetry_messenger_destroy(TELEMETRY_MESSENGER_CONFIG* config, TELEMETRY_MESSENGER_HANDLE messenger_handle, bool destroy_message_sender, bool destroy_message_receiver, int wait_to_send_list_length, int in_progress_list_length)
+static void set_expected_calls_for_telemetry_messenger_destroy(TELEMETRY_MESSENGER_CONFIG* config, TELEMETRY_MESSENGER_HANDLE messenger_handle, bool destroy_message_sender, bool destroy_message_receiver, int wait_to_send_list_length, int in_progress_list_length, bool testing_modules)
 {
     (void)config;
 
@@ -1477,6 +1492,7 @@ static void set_expected_calls_for_telemetry_messenger_destroy(TELEMETRY_MESSENG
     time_t current_time = time(NULL);
 
     MESSENGER_DO_WORK_EXP_CALL_PROFILE *do_work_profile = get_msgr_do_work_exp_call_profile(TELEMETRY_MESSENGER_STATE_STOPPING, false, false, wait_to_send_list_length, in_progress_list_length, current_time, DEFAULT_EVENT_SEND_TIMEOUT_SECS);
+    do_work_profile->testing_modules = testing_modules;
     do_work_profile->destroy_message_sender = destroy_message_sender;
     do_work_profile->destroy_message_receiver = destroy_message_receiver;
     set_expected_calls_for_telemetry_messenger_do_work(do_work_profile);
@@ -1502,6 +1518,7 @@ static void set_expected_calls_for_telemetry_messenger_destroy(TELEMETRY_MESSENG
 
     STRICT_EXPECTED_CALL(STRING_delete(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE));
     STRICT_EXPECTED_CALL(STRING_delete(TEST_DEVICE_ID_STRING_HANDLE));
+    STRICT_EXPECTED_CALL(STRING_delete(testing_modules ? TEST_MODULE_ID_STRING_HANDLE : NULL));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(free(messenger_handle));
 }
@@ -1622,6 +1639,7 @@ static TELEMETRY_MESSENGER_HANDLE create_and_start_messenger2(TELEMETRY_MESSENGE
 
     MESSENGER_DO_WORK_EXP_CALL_PROFILE *do_work_profile = get_msgr_do_work_exp_call_profile(TELEMETRY_MESSENGER_STATE_STARTING, false, false, 0, 0, current_time, DEFAULT_EVENT_SEND_TIMEOUT_SECS);
     do_work_profile->create_message_sender = true;
+    do_work_profile->testing_modules = (config->module_id != NULL);
     crank_telemetry_messenger_do_work(handle, do_work_profile);
 
     if (subscribe_for_messages)
@@ -1630,6 +1648,7 @@ static TELEMETRY_MESSENGER_HANDLE create_and_start_messenger2(TELEMETRY_MESSENGE
 
         do_work_profile = get_msgr_do_work_exp_call_profile(TELEMETRY_MESSENGER_STATE_STARTED, true, false, 0, 0, current_time, DEFAULT_EVENT_SEND_TIMEOUT_SECS);
         do_work_profile->create_message_receiver = true;
+        do_work_profile->testing_modules = (config->module_id != NULL);
         crank_telemetry_messenger_do_work(handle, do_work_profile);
     }
 
@@ -1953,10 +1972,14 @@ TEST_FUNCTION(telemetry_messenger_create_config_NULL_iothub_host_fqdn)
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_013: [`messenger_config->on_state_changed_callback` shall be saved into `instance->on_state_changed_callback`]  
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_014: [`messenger_config->on_state_changed_context` shall be saved into `instance->on_state_changed_context`]  
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_015: [If no failures occurr, telemetry_messenger_create() shall return a handle to `instance`]
-TEST_FUNCTION(telemetry_messenger_create_success)
+static void telemetry_messenger_create_success_impl(bool testing_modules)
 {
     // arrange
     TELEMETRY_MESSENGER_CONFIG* config = get_messenger_config();
+    if (testing_modules == true)
+    {
+        config->module_id = TEST_MODULE_ID;
+    }
 
     umock_c_reset_all_calls();
     set_expected_calls_for_telemetry_messenger_create(config);
@@ -1970,6 +1993,17 @@ TEST_FUNCTION(telemetry_messenger_create_success)
 
     // cleanup
     telemetry_messenger_destroy(handle);
+}
+
+
+TEST_FUNCTION(telemetry_messenger_create_success)
+{
+    telemetry_messenger_create_success_impl(false);
+}
+
+TEST_FUNCTION(telemetry_messenger_create_with_module_success)
+{
+    telemetry_messenger_create_success_impl(true);
 }
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_007: [If malloc() fails, telemetry_messenger_create() shall fail and return NULL]  
@@ -2237,22 +2271,28 @@ TEST_FUNCTION(telemetry_messenger_destroy_NULL_handle)
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_112: [`instance->iothub_host_fqdn` shall be destroyed using STRING_delete()]  
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_113: [`instance->device_id` shall be destroyed using STRING_delete()]  
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_114: [telemetry_messenger_destroy() shall destroy `instance` with free()] 
-TEST_FUNCTION(telemetry_messenger_destroy_succeeds)
+static void telemetry_messenger_destroy_succeeds_impl(bool testing_modules)
 {
     // arrange
     TELEMETRY_MESSENGER_CONFIG* config = get_messenger_config();
+    if (testing_modules == true)
+    {
+        config->module_id = TEST_MODULE_ID;
+    }
+    
     TELEMETRY_MESSENGER_HANDLE handle = create_and_start_messenger2(config, true);
 
     ASSERT_ARE_EQUAL(int, 1, send_events(handle, 1));
 
     time_t current_time = time(NULL);
     MESSENGER_DO_WORK_EXP_CALL_PROFILE* mdecp = get_msgr_do_work_exp_call_profile(TELEMETRY_MESSENGER_STATE_STARTED, true, true, 1, 0, current_time, DEFAULT_EVENT_SEND_TIMEOUT_SECS);
+    mdecp->testing_modules = testing_modules;
     crank_telemetry_messenger_do_work(handle, mdecp);
 
     ASSERT_ARE_EQUAL(int, 1, send_events(handle, 1));
 
     umock_c_reset_all_calls();
-    set_expected_calls_for_telemetry_messenger_destroy(config, handle, true, true, 1, 1);
+    set_expected_calls_for_telemetry_messenger_destroy(config, handle, true, true, 1, 1, testing_modules);
 
     // act
     telemetry_messenger_destroy(handle);
@@ -2262,6 +2302,18 @@ TEST_FUNCTION(telemetry_messenger_destroy_succeeds)
 
     // cleanup
 }
+
+TEST_FUNCTION(telemetry_messenger_destroy_succeeds)
+{
+    telemetry_messenger_destroy_succeeds_impl(false);
+}
+
+#if 0
+TEST_FUNCTION(telemetry_messenger_destroy_with_module_succeeds)
+{
+    telemetry_messenger_destroy_succeeds_impl(true);
+}
+#endif
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_163: [If not all items from `instance->in_progress_list` can be moved back to `instance->wait_to_send_list`, `instance->state` shall be set to TELEMETRY_MESSENGER_STATE_ERROR, and `instance->on_state_changed_callback` invoked]
 TEST_FUNCTION(telemetry_messenger_destroy_FAIL_TO_ROLLBACK_EVENTS)
@@ -2332,8 +2384,8 @@ TEST_FUNCTION(telemetry_messenger_do_work_not_started)
 }
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_151: [If `instance->state` is TELEMETRY_MESSENGER_STATE_STARTING, telemetry_messenger_do_work() shall create and open `instance->message_sender`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_033: [A variable, named `devices_path`, shall be created concatenating `instance->iothub_host_fqdn`, "/devices/" and `instance->device_id`]  
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_035: [A variable, named `event_send_address`, shall be created concatenating "amqps://", `devices_path` and "/messages/events"]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_033: [A variable, named `devices_and_modules_path`, shall be created concatenating `instance->iothub_host_fqdn`, "/devices/" and `instance->device_id`]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_035: [A variable, named `event_send_address`, shall be created concatenating "amqps://", `devices_and_modules_path` and "/messages/events"]  
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_037: [A `link_name` variable shall be created using an unique string label per AMQP session]  
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_039: [A `source` variable shall be created with messaging_create_source() using an unique string label per AMQP session]  
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_041: [A `target` variable shall be created with messaging_create_target() using `event_send_address`]  
@@ -2347,7 +2399,7 @@ TEST_FUNCTION(telemetry_messenger_do_work_not_started)
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_31_200: [Retrieve an AMQP encoded representation of this message for later appending to main batched message.  On error, invoke callback but continue send loop; this is NOT a fatal error.]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_31_194: [When message is ready to send, invoke AMQP's messagesender_send and free temporary values associated with this batch.]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_31_193: [If (length of current user AMQP message) + (length of user messages pending for this batched message) + (1KB reserve buffer) > maximum link send, send pending messages and create new batched message.]
-void test_send_events(SEND_PENDING_EVENTS_TEST_CONFIG *test_config)
+void test_send_events(SEND_PENDING_EVENTS_TEST_CONFIG *test_config, bool testing_modules)
 {
     // arrange
     TELEMETRY_MESSENGER_CONFIG* config = get_messenger_config();
@@ -2358,6 +2410,7 @@ void test_send_events(SEND_PENDING_EVENTS_TEST_CONFIG *test_config)
     time_t current_time = time(NULL);
     MESSENGER_DO_WORK_EXP_CALL_PROFILE *do_work_profile = get_msgr_do_work_exp_call_profile(TELEMETRY_MESSENGER_STATE_STARTED, false, false, 1, 0, current_time, DEFAULT_EVENT_SEND_TIMEOUT_SECS);
     do_work_profile->send_pending_events_test_config = test_config;
+    do_work_profile->testing_modules = testing_modules;
 
     umock_c_reset_all_calls();
     set_expected_calls_for_telemetry_messenger_do_work(do_work_profile);
@@ -2374,58 +2427,73 @@ void test_send_events(SEND_PENDING_EVENTS_TEST_CONFIG *test_config)
 
 TEST_FUNCTION(telemetry_messenger_do_work_send_events_one_message_success)
 {
-    test_send_events(&test_send_one_message_config);
+    test_send_events(&test_send_one_message_config, false);
+}
+
+TEST_FUNCTION(telemetry_messenger_do_work_send_events_one_message_with_module_success)
+{
+    test_send_events(&test_send_one_message_config, true);
+}
+
+TEST_FUNCTION(telemetry_messenger_do_work_send_events_just_under_rollover_with_module_success)
+{
+    test_send_events(&test_send_just_under_rollover_config, false);
 }
 
 TEST_FUNCTION(telemetry_messenger_do_work_send_events_just_under_rollover_success)
 {
-    test_send_events(&test_send_just_under_rollover_config);
+    test_send_events(&test_send_just_under_rollover_config, true);
 }
 
 TEST_FUNCTION(telemetry_messenger_do_work_send_events_just_rollover_success)
 {
-    test_send_events(&test_send_rollover_config);
+    test_send_events(&test_send_rollover_config, false);
 }
 
 TEST_FUNCTION(telemetry_messenger_do_work_send_events_rollover_one_message_after_config)
 {
-    test_send_events(&test_send_rollover_one_message_after_config);
+    test_send_events(&test_send_rollover_one_message_after_config, false);
 }
 
 TEST_FUNCTION(telemetry_messenger_do_work_send_events_rollover_multiple_message_after_config)
 {
-    test_send_events(&test_send_rollover_multiple_messages_after_config);
+    test_send_events(&test_send_rollover_multiple_messages_after_config, false);
 }
 
 TEST_FUNCTION(telemetry_messenger_do_work_send_single_message_too_big_config)
 {
-    test_send_events(&test_send_only_message_too_big_config);
+    test_send_events(&test_send_only_message_too_big_config, false);
 }
 
 TEST_FUNCTION(telemetry_messenger_do_work_send_first_message_too_big_config)
 {
-    test_send_events(&test_send_first_message_too_big_config);
+    test_send_events(&test_send_first_message_too_big_config, false);
 }
 
 TEST_FUNCTION(telemetry_messenger_do_work_send_last_message_too_big_config)
 {
-    test_send_events(&test_send_last_message_too_big_config);
+    test_send_events(&test_send_last_message_too_big_config, false);
 }
 
 TEST_FUNCTION(telemetry_messenger_do_work_send_middle_message_too_big_events)
 {
-    test_send_events(&test_send_middle_message_too_big_config);
+    test_send_events(&test_send_middle_message_too_big_config, false);
 }
 
 TEST_FUNCTION(telemetry_messenger_do_work_send_middle_message_too_big_and_rollover_config)
 {
-    test_send_events(&test_send_middle_message_too_big_and_rollover_config);
+    test_send_events(&test_send_middle_message_too_big_and_rollover_config, false);
+}
+
+TEST_FUNCTION(telemetry_messenger_do_work_send_middle_message_too_big_and_rollover_with_module_config)
+{
+    test_send_events(&test_send_middle_message_too_big_and_rollover_config, true);
 }
 
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_067: [If `instance->receive_messages` is true and `instance->message_receiver` is NULL, a message_receiver shall be created]  
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_068: [A variable, named `devices_path`, shall be created concatenating `instance->iothub_host_fqdn`, "/devices/" and `instance->device_id`]  
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_070: [A variable, named `message_receive_address`, shall be created concatenating "amqps://", `devices_path` and "/messages/devicebound"]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_068: [A variable, named `devices_and_modules_path`, shall be created concatenating `instance->iothub_host_fqdn`, "/devices/" and `instance->device_id`]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_070: [A variable, named `message_receive_address`, shall be created concatenating "amqps://", `devices_and_modules_path` and "/messages/devicebound"]  
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_072: [A `link_name` variable shall be created using an unique string label per AMQP session]  
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_074: [A `target` variable shall be created with messaging_create_target() using an unique string label per AMQP session]  
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_076: [A `source` variable shall be created with messaging_create_source() using `message_receive_address`]  
@@ -2458,7 +2526,7 @@ TEST_FUNCTION(telemetry_messenger_do_work_create_message_receiver)
     telemetry_messenger_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_069: [If `devices_path` fails to be created, telemetry_messenger_do_work() shall fail and return]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_069: [If `devices_and_modules_path` fails to be created, telemetry_messenger_do_work() shall fail and return]  
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_071: [If `message_receive_address` fails to be created, telemetry_messenger_do_work() shall fail and return]  
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_073: [If `link_name` fails to be created, telemetry_messenger_do_work() shall fail and return]  
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_075: [If `target` fails to be created, telemetry_messenger_do_work() shall fail and return]  
@@ -2480,7 +2548,7 @@ TEST_FUNCTION(telemetry_messenger_do_work_create_message_receiver_failure_checks
     (void)telemetry_messenger_subscribe_for_messages(handle, TEST_on_new_message_received_callback, TEST_ON_NEW_MESSAGE_RECEIVED_CB_CONTEXT);
 
     umock_c_reset_all_calls();
-    set_expected_calls_for_message_receiver_create();
+    set_expected_calls_for_message_receiver_create(false);
     umock_c_negative_tests_snapshot();
 
     saved_messagereceiver_open_on_message_received = NULL;
@@ -2515,7 +2583,7 @@ TEST_FUNCTION(telemetry_messenger_do_work_create_message_receiver_failure_checks
     telemetry_messenger_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_034: [If `devices_path` fails to be created, telemetry_messenger_do_work() shall fail and return]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_034: [If `devices_and_modules_path` fails to be created, telemetry_messenger_do_work() shall fail and return]  
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_036: [If `event_send_address` fails to be created, telemetry_messenger_do_work() shall fail and return]  
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_038: [If `link_name` fails to be created, telemetry_messenger_do_work() shall fail and return]  
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_040: [If `source` fails to be created, telemetry_messenger_do_work() shall fail and return]  
@@ -2537,8 +2605,8 @@ TEST_FUNCTION(telemetry_messenger_do_work_create_message_sender_failure_checks)
     size_t n = 10;
     for (i = 0; i < n; i++)
     {
-        if (i == 1 || i == 2 || i == 4 || i == 5 || i == 9 || i == 11 || i == 12 || 
-            i == 14 || i == 16 || i == 18 || (i >= 19 && i <= 35)) 
+        if (i == 1 || i == 2 || i == 3 || i == 5 || i == 6 || i == 10 || i == 12 || i == 13 || 
+            i == 15 || i == 17 || i == 19 || (i >= 20 && i <= 36))
         {
             continue; // These expected calls do not cause the API to fail.
         }
@@ -2548,7 +2616,7 @@ TEST_FUNCTION(telemetry_messenger_do_work_create_message_sender_failure_checks)
         TELEMETRY_MESSENGER_HANDLE handle = create_and_start_messenger(config);
         
         umock_c_reset_all_calls();
-        set_expected_calls_for_message_sender_create();
+        set_expected_calls_for_message_sender_create(false);
         umock_c_negative_tests_snapshot();
         n = umock_c_negative_tests_call_count();
 
@@ -2689,7 +2757,7 @@ TEST_FUNCTION(telemetry_messenger_do_work_on_event_send_complete_ERROR)
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_31_199: [Errors specific to a message (e.g. failure to encode) are NOT fatal but we'll keep processing.  More general errors (e.g. out of memory) will stop processing.]
 TEST_FUNCTION(telemetry_messenger_do_work_send_events_message_create_from_iothub_message_fails)
 {
-    test_send_events(&test_create_message_failure_config);
+    test_send_events(&test_create_message_failure_config, false);
 }
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_31_198: [While processing pending messages, errors shall result in user callback being invoked.]
