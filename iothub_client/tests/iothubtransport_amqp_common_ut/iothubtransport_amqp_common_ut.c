@@ -553,7 +553,7 @@ static void set_expected_calls_for_Register(IOTHUB_DEVICE_CONFIG* device_config,
         .SetReturn(NULL);
 
     STRICT_EXPECTED_CALL(STRING_c_str(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE)).SetReturn(TEST_IOTHUB_HOST_FQDN_CHAR_PTR);
-    EXPECTED_CALL(iothubtransportamqp_methods_create(TEST_IOTHUB_HOST_FQDN_CHAR_PTR, device_config->deviceId));
+    EXPECTED_CALL(iothubtransportamqp_methods_create(TEST_IOTHUB_HOST_FQDN_CHAR_PTR, device_config->deviceId, NULL));
 
     // replicate_device_options_to
     STRICT_EXPECTED_CALL(device_set_option(TEST_DEVICE_HANDLE, DEVICE_OPTION_EVENT_SEND_TIMEOUT_SECS, IGNORED_PTR_ARG))
@@ -972,6 +972,8 @@ static IOTHUB_DEVICE_CONFIG* create_device_config(const char* device_id, bool us
         device_config.deviceSasToken = TEST_DEVICE_SAS_TOKEN;
     }
 
+    device_config.moduleId = NULL;
+
     return &device_config;
 }
 
@@ -1281,7 +1283,7 @@ TEST_FUNCTION_CLEANUP(TestMethodCleanup)
 
 /* IoTHubTransport_AMQP_Common_Register */
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_010: [ `IoTHubTransport_AMQP_Common_Register` shall create a new iothubtransportamqp_methods instance by calling `iothubtransportamqp_methods_create` while passing to it the the fully qualified domain name and the device Id. ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_010: [ `IoTHubTransport_AMQP_Common_Register` shall create a new iothubtransportamqp_methods instance by calling `iothubtransportamqp_methods_create` while passing to it the the fully qualified domain name, the device Id, and optional module Id. ]*/
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_Register_creates_a_new_methods_handler)
 {
     // arrange
@@ -1294,6 +1296,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_Register_creates_a_new_methods_handler
     handle = create_transport();
 
     device_config.deviceId = "blah";
+    device_config.moduleId = NULL;
     device_config.deviceKey = "cucu";
     device_config.deviceSasToken = NULL;
 
@@ -1325,8 +1328,10 @@ TEST_FUNCTION(when_creating_the_methods_handler_fails_then_IoTHubTransport_AMQP_
     handle = create_transport();
 
     device_config.deviceId = "blah";
+    device_config.moduleId = NULL;
     device_config.deviceKey = "cucu";
     device_config.deviceSasToken = NULL;
+
 
     umock_c_reset_all_calls();
     set_expected_calls_for_Register(&device_config, true);
@@ -1377,6 +1382,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_Unregister_destroys_the_methods_handle
     device_config.deviceId = "blah";
     device_config.deviceKey = "cucu";
     device_config.deviceSasToken = NULL;
+    device_config.moduleId = NULL;
 
     device_handle = register_device(handle, &device_config, &TEST_waitingToSend, true);
 
@@ -1428,6 +1434,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod_with_valid_hand
     device_config.deviceId = "blah";
     device_config.deviceKey = "cucu";
     device_config.deviceSasToken = NULL;
+    device_config.moduleId = NULL;
 
     device_handle = register_device(handle, &device_config, &TEST_waitingToSend, true);
 
@@ -1462,6 +1469,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod_After_Subscribe
     device_config.deviceId = "blah";
     device_config.deviceKey = "cucu";
     device_config.deviceSasToken = NULL;
+    device_config.moduleId = NULL;
 
     device_handle = register_device(handle, &device_config, &TEST_waitingToSend, true);
 
@@ -1497,6 +1505,7 @@ TEST_FUNCTION(on_methods_unsubscribed_CALLS_iothubtransportamqp_methods_unsubscr
     device_config.deviceId = "blah";
     device_config.deviceKey = "cucu";
     device_config.deviceSasToken = NULL;
+    device_config.moduleId = NULL;
 
     device_handle = register_device(handle, &device_config, &TEST_waitingToSend, true);
 
@@ -1535,6 +1544,7 @@ TEST_FUNCTION(on_methods_unsubscribed_re_subscribes)
     device_config.deviceId = "blah";
     device_config.deviceKey = "cucu";
     device_config.deviceSasToken = NULL;
+    device_config.moduleId = NULL;
 
     device_handle = register_device(handle, &device_config, &TEST_waitingToSend, true);
 
@@ -1585,6 +1595,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_Unsubscribe_unsubscribes_from_receivin
     device_config.deviceId = "blah";
     device_config.deviceKey = "cucu";
     device_config.deviceSasToken = NULL;
+    device_config.moduleId = NULL;
 
     device_handle = register_device(handle, &device_config, &TEST_waitingToSend, true);
 
@@ -1619,6 +1630,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_Unsubscribe_without_subscribe_does_not
     device_config.deviceId = "blah";
     device_config.deviceKey = "cucu";
     device_config.deviceSasToken = NULL;
+    device_config.moduleId = NULL;
 
     device_handle = register_device(handle, &device_config, &TEST_waitingToSend, true);
 
@@ -1656,6 +1668,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_DoWork_does_not_subscribe_if_SubScribe
     device_config.deviceId = "blah";
     device_config.deviceKey = "cucu";
     device_config.deviceSasToken = NULL;
+    device_config.moduleId = NULL;
 
     device_handle = register_device(handle, &device_config, &TEST_waitingToSend, true);
 
@@ -1689,6 +1702,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_DoWork_does_not_subscribe_if_already_s
     device_config.deviceId = "blah";
     device_config.deviceKey = "cucu";
     device_config.deviceSasToken = NULL;
+    device_config.moduleId = NULL;
 
     device_handle = register_device(handle, &device_config, &TEST_waitingToSend, true);
 
@@ -1736,6 +1750,7 @@ TEST_FUNCTION(on_methods_request_received_responds_to_the_method_request)
     device_config.deviceId = "blah";
     device_config.deviceKey = "cucu";
     device_config.deviceSasToken = NULL;
+    device_config.moduleId = NULL;
 
     umock_c_reset_all_calls();
     set_expected_calls_for_Register(&device_config, true);
@@ -1828,6 +1843,7 @@ TEST_FUNCTION(on_methods_error_does_nothing)
     device_config.deviceId = "blah";
     device_config.deviceKey = "cucu";
     device_config.deviceSasToken = NULL;
+    device_config.moduleId = NULL;
 
     device_handle = register_device(handle, &device_config, &TEST_waitingToSend, true);
     
@@ -2292,7 +2308,7 @@ TEST_FUNCTION(Register_failure_checks)
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_069: [A copy of `config->deviceId` shall be saved into `device_state->device_id`]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_071: [`amqp_device_instance->device_handle` shall be set using device_create()]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_072: [The configuration for device_create shall be set according to the authentication preferred by IOTHUB_DEVICE_CONFIG]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_010: [ `IoTHubTransport_AMQP_Common_Register` shall create a new iothubtransportamqp_methods instance by calling `iothubtransportamqp_methods_create` while passing to it the the fully qualified domain name and the device Id]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_010: [ `IoTHubTransport_AMQP_Common_Register` shall create a new iothubtransportamqp_methods instance by calling `iothubtransportamqp_methods_create` while passing to it the the fully qualified domain name, the device Id, and optional module Id.]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_074: [IoTHubTransport_AMQP_Common_Register shall add the `amqp_device_instance` to `instance->registered_devices`]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_076: [If the device is the first being registered on the transport, IoTHubTransport_AMQP_Common_Register shall save its authentication mode as the transport preferred authentication mode]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_078: [IoTHubTransport_AMQP_Common_Register shall return a handle to `amqp_device_instance` as a IOTHUB_DEVICE_HANDLE]

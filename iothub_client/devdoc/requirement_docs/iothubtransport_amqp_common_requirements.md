@@ -247,7 +247,7 @@ Note: the instance of AMQP_TRANSPORT_DEVICE_STATE will be referred below as `amq
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_071: [**`amqp_device_instance->device_handle` shall be set using device_create()**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_072: [**The configuration for device_create shall be set according to the authentication preferred by IOTHUB_DEVICE_CONFIG**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_073: [**If device_create() fails, IoTHubTransport_AMQP_Common_Register shall fail and return NULL**]**
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_010: [** `IoTHubTransport_AMQP_Common_Register` shall create a new iothubtransportamqp_methods instance by calling `iothubtransportamqp_methods_create` while passing to it the the fully qualified domain name and the device Id**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_010: [** `IoTHubTransport_AMQP_Common_Register` shall create a new iothubtransportamqp_methods instance by calling `iothubtransportamqp_methods_create` while passing to it the the fully qualified domain name, the device Id, and optional module Id.**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_011: [** If `iothubtransportamqp_methods_create` fails, `IoTHubTransport_AMQP_Common_Register` shall fail and return NULL**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_074: [**IoTHubTransport_AMQP_Common_Register shall add the `amqp_device_instance` to `instance->registered_devices`**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_075: [**If it fails to add `amqp_device_instance`, IoTHubTransport_AMQP_Common_Register shall fail and return NULL**]**

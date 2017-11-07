@@ -327,6 +327,7 @@ static int provisionDevice(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_ACCOUNT_AUTH
         deviceInfo.serviceProperties = NULL;
 
         deviceCreateInfo.deviceId = deviceId;
+        deviceCreateInfo.iotEdge_capable = false;
         if (method == IOTHUB_ACCOUNT_AUTH_CONNSTRING)
         {
             deviceToProvision->howToCreate = IOTHUB_ACCOUNT_AUTH_CONNSTRING;
