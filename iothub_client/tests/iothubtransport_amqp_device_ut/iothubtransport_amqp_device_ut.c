@@ -83,6 +83,7 @@ static const char* DEVICE_OPTION_SAVED_MESSENGER_OPTIONS = "saved_device_messeng
 
 #define INDEFINITE_TIME                                   ((time_t)-1)
 #define TEST_DEVICE_ID_CHAR_PTR                           "bogus-device"
+#define TEST_MODULE_ID_CHAR_PTR                           "bogus-module"
 #define TEST_PRODUCT_INFO_CHAR_PTR                        "bogus-product_info"
 #define TEST_IOTHUB_HOST_FQDN_CHAR_PTR                    "thisisabogus.azure-devices.net"
 #define TEST_ON_STATE_CHANGED_CONTEXT                     (void*)0x7710
@@ -106,7 +107,7 @@ static const char* DEVICE_OPTION_SAVED_MESSENGER_OPTIONS = "saved_device_messeng
 #define TEST_MSGR_OPTIONHANDLER_HANDLE                    (OPTIONHANDLER_HANDLE)0x7723
 #define TEST_ON_DEVICE_EVENT_SEND_COMPLETE_CONTEXT        (void*)0x7724
 #define TEST_IOTHUB_MESSAGE_LIST                          (IOTHUB_MESSAGE_LIST*)0x7725
-#define TEST_AUTHORIZATION_MODULE_HANDLE                  (IOTHUB_AUTHORIZATION_HANDLE)0x7726
+#define TEST_AUTHORIZATION_HANDLE                         (IOTHUB_AUTHORIZATION_HANDLE)0x7726
 
 static time_t TEST_current_time;
 
@@ -279,9 +280,16 @@ static DEVICE_CONFIG* get_device_config(DEVICE_AUTH_MODE auth_mode)
     TEST_device_config.authentication_mode = auth_mode;
     TEST_device_config.on_state_changed_callback = TEST_on_state_changed_callback;
     TEST_device_config.on_state_changed_context = TEST_ON_STATE_CHANGED_CONTEXT;
-    TEST_device_config.authorization_module = TEST_AUTHORIZATION_MODULE_HANDLE;
+    TEST_device_config.authorization_module = TEST_AUTHORIZATION_HANDLE;
 
     return &TEST_device_config;
+}
+
+static DEVICE_CONFIG* get_device_config_with_module_id(DEVICE_AUTH_MODE auth_mode)
+{
+    DEVICE_CONFIG* config = get_device_config(auth_mode);
+    config->module_id = TEST_MODULE_ID_CHAR_PTR;
+    return config;
 }
 
 static void initialize_test_variables()
@@ -432,7 +440,7 @@ static void register_global_mock_returns()
 	REGISTER_GLOBAL_MOCK_FAIL_RETURN(twin_messenger_set_option, 1);
 
 	REGISTER_GLOBAL_MOCK_RETURN(twin_messenger_report_state_async, 0);
-	REGISTER_GLOBAL_MOCK_FAIL_RETURN(twin_messenger_report_state_async, 1);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(twin_messenger_report_state_async, 1);
 
     REGISTER_GLOBAL_MOCK_RETURN(mallocAndStrcpy_s, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, 1);
@@ -441,6 +449,7 @@ static void register_global_mock_returns()
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(telemetry_messenger_send_message_disposition, 1);
 
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Get_DeviceId, TEST_DEVICE_ID_CHAR_PTR);
+	REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Get_ModuleId, NULL);
 }
 
 // ---------- Expected Call Helpers ---------- //
@@ -461,7 +470,8 @@ static void set_expected_calls_for_clone_device_config(DEVICE_CONFIG *config)
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, config->product_info));
 
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, config->iothub_host_fqdn));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_DeviceId(TEST_AUTHORIZATION_MODULE_HANDLE));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_DeviceId(TEST_AUTHORIZATION_HANDLE));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_ModuleId(TEST_AUTHORIZATION_HANDLE)).SetReturn(config->module_id);
 }
 
 static void set_expected_calls_for_create_authentication_instance(DEVICE_CONFIG *config)
@@ -872,6 +882,31 @@ TEST_FUNCTION(device_create_succeeds)
     device_destroy(handle);
 }
 
+// Tests_SRS_DEVICE_09_002: [device_create shall allocate memory for the device instance structure]
+// Tests_SRS_DEVICE_09_004: [All `config` parameters shall be saved into `instance`]
+// Tests_SRS_DEVICE_09_006: [If `instance->authentication_mode` is DEVICE_AUTH_MODE_CBS, `instance->authentication_handle` shall be set using authentication_create()]
+// Tests_SRS_DEVICE_09_008: [`instance->messenger_handle` shall be set using telemetry_messenger_create()]
+// Tests_SRS_DEVICE_09_122: [`instance->twin_messenger_handle` shall be set using twin_messenger_create()]
+// Tests_SRS_DEVICE_09_011: [If device_create succeeds it shall return a handle to its `instance` structure]
+TEST_FUNCTION(device_create_with_module_succeeds)
+{
+    // arrange
+    DEVICE_CONFIG* config = get_device_config_with_module_id(DEVICE_AUTH_MODE_CBS);
+
+    ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
+    set_expected_calls_for_device_create(config, TEST_current_time);
+
+    // act
+    DEVICE_HANDLE handle = device_create(config);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_IS_NOT_NULL(handle);
+
+    // cleanup
+    device_destroy(handle);
+}
+
 // Tests_SRS_DEVICE_09_003: [If malloc fails, device_create shall fail and return NULL]
 // Tests_SRS_DEVICE_09_005: [If any `config` parameters fail to be saved into `instance`, device_create shall fail and return NULL]
 // Tests_SRS_DEVICE_09_007: [If the AUTHENTICATION_HANDLE fails to be created, device_create shall fail and return NULL]
@@ -896,9 +931,9 @@ TEST_FUNCTION(device_create_failure_checks)
         // arrange 
         char error_msg[64];
 
-        if (i == 4)
+        if (i == 4 || i == 5)
         {
-            // for the IoTHubClient_Auth_Get_DeviceId
+            // for the IoTHubClient_Auth_Get_DeviceId and IoTHubClient_Auth_Get_ModuleId
             continue;
         }
 
@@ -1029,6 +1064,34 @@ TEST_FUNCTION(device_start_async_X509_succeeds)
     // cleanup
     device_destroy(handle);
 }
+
+// Tests_SRS_DEVICE_09_022: [The device state shall be updated to DEVICE_STATE_STARTING, and state changed callback invoked]
+// Tests_SRS_DEVICE_09_023: [If no failures occur, device_start_async shall return 0]
+TEST_FUNCTION(device_start_async_X509_with_module_succeeds)
+{
+    // arrange
+    ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
+
+    DEVICE_CONFIG* config = get_device_config_with_module_id(DEVICE_AUTH_MODE_X509);
+    DEVICE_HANDLE handle = create_device(config, TEST_current_time);
+
+    umock_c_reset_all_calls();
+    set_expected_calls_for_device_start_async(config, TEST_current_time);
+
+    // act
+    int result = device_start_async(handle, TEST_SESSION_HANDLE, NULL);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, 0, result);
+    ASSERT_ARE_EQUAL(int, DEVICE_STATE_STOPPED, TEST_on_state_changed_callback_saved_previous_state);
+    ASSERT_ARE_EQUAL(int, DEVICE_STATE_STARTING, TEST_on_state_changed_callback_saved_new_state);
+    ASSERT_IS_NOT_NULL(handle);
+
+    // cleanup
+    device_destroy(handle);
+}
+
 
 // Tests_SRS_DEVICE_09_022: [The device state shall be updated to DEVICE_STATE_STARTING, and state changed callback invoked]
 // Tests_SRS_DEVICE_09_023: [If no failures occur, device_start_async shall return 0]
@@ -1199,6 +1262,35 @@ TEST_FUNCTION(device_stop_DEVICE_STATE_STARTED_succeeds)
     device_destroy(handle);
 }
 
+// Tests_SRS_DEVICE_09_027: [If `instance->messenger_handle` state is not TELEMETRY_MESSENGER_STATE_STOPPED, telemetry_messenger_stop shall be invoked]
+// Tests_SRS_DEVICE_09_131: [If `instance->twin_messenger_handle` state is not TWIN_MESSENGER_STATE_STOPPED, twin_messenger_stop shall be invoked]
+// Tests_SRS_DEVICE_09_029: [If CBS authentication is used, if `instance->authentication_handle` state is not AUTHENTICATION_STATE_STOPPED, authentication_stop shall be invoked]
+TEST_FUNCTION(device_stop_DEVICE_STATE_STARTED_with_module_succeeds)
+{
+    // arrange
+    ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
+
+    DEVICE_CONFIG* config = get_device_config_with_module_id(DEVICE_AUTH_MODE_CBS);
+    DEVICE_HANDLE handle = create_and_start_and_crank_device(config, TEST_current_time);
+
+    umock_c_reset_all_calls();
+    set_expected_calls_for_device_stop(config, TEST_current_time, AUTHENTICATION_STATE_STARTED, TELEMETRY_MESSENGER_STATE_STARTED, TWIN_MESSENGER_STATE_STARTED);
+
+    // act
+    int result = device_stop(handle);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, 0, result);
+    ASSERT_ARE_EQUAL(int, DEVICE_STATE_STOPPING, TEST_on_state_changed_callback_saved_previous_state);
+    ASSERT_ARE_EQUAL(int, DEVICE_STATE_STOPPED, TEST_on_state_changed_callback_saved_new_state);
+    ASSERT_IS_NOT_NULL(handle);
+
+    // cleanup
+    device_destroy(handle);
+}
+
+
 // Tests_SRS_DEVICE_09_012: [If `handle` is NULL, device_destroy shall return]
 TEST_FUNCTION(device_destroy_NULL_handle)
 {
@@ -1313,6 +1405,40 @@ TEST_FUNCTION(device_get_send_status_IDLE_success)
     // cleanup
     device_destroy(handle);
 }
+
+// Tests_SRS_DEVICE_09_106: [The status of `instance->messenger_handle` shall be obtained using telemetry_messenger_get_send_status]
+// Tests_SRS_DEVICE_09_108: [If telemetry_messenger_get_send_status returns TELEMETRY_MESSENGER_SEND_STATUS_IDLE, device_get_send_status return status DEVICE_SEND_STATUS_IDLE]
+// Tests_SRS_DEVICE_09_110: [If device_get_send_status succeeds, it shall return zero as result]
+TEST_FUNCTION(device_get_send_status_IDLE_with_module_success)
+{
+    // arrange
+    ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
+
+    DEVICE_CONFIG* config = get_device_config_with_module_id(DEVICE_AUTH_MODE_CBS);
+    DEVICE_HANDLE handle = create_device(config, TEST_current_time);
+
+    TELEMETRY_MESSENGER_SEND_STATUS telemetry_messenger_get_send_status_result = TELEMETRY_MESSENGER_SEND_STATUS_IDLE;
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(telemetry_messenger_get_send_status(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_PTR_ARG))
+        .IgnoreArgument(2)
+        .CopyOutArgumentBuffer(2, &telemetry_messenger_get_send_status_result, sizeof(TELEMETRY_MESSENGER_SEND_STATUS))
+        .SetReturn(0);
+
+    // act
+    DEVICE_SEND_STATUS send_status;
+    int result = device_get_send_status(handle, &send_status);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, 0, result);
+    ASSERT_ARE_EQUAL(int, DEVICE_SEND_STATUS_IDLE, send_status);
+    ASSERT_IS_NOT_NULL(handle);
+
+    // cleanup
+    device_destroy(handle);
+}
+
 
 // Tests_SRS_DEVICE_09_109: [If telemetry_messenger_get_send_status returns TELEMETRY_MESSENGER_SEND_STATUS_BUSY, device_get_send_status return status DEVICE_SEND_STATUS_BUSY]
 TEST_FUNCTION(device_get_send_status_BUSY_success)

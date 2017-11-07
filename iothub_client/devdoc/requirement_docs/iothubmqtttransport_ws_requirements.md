@@ -28,7 +28,9 @@ extern const TRANSPORT_PROVIDER* MQTT_Protocol(void);
     - IoTHubTransportMqtt_WS_Unsubscribe,  
     - IoTHubTransportMqtt_WS_DoWork,  
     - IoTHubTransportMqtt_WS_SetRetryPolicy,
-    - IoTHubTransportMqtt_WS_GetSendStatus
+    - IoTHubTransportMqtt_WS_GetSendStatus,
+    - IotHubTransportMqtt_WS_Subscribe_InputQueue,
+    - IotHubTransportMqtt_WS_Unsubscribe_InputQueue
 
 ## typedef XIO_HANDLE(*MQTT_GET_IO_TRANSPORT)(const char* fully_qualified_name, const MQTT_TRANSPORT_PROXY_OPTIONS* mqtt_transport_proxy_options);
 
@@ -227,6 +229,22 @@ const TRANSPORT_PROVIDER* MQTT_WebSocket_Protocol(void)
 IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_WS_SendMessageDisposition(MESSAGE_CALLBACK_INFO* messageData, IOTHUBMESSAGE_DISPOSITION_RESULT disposition);
 ```
 
+## IoTHubTransportMQTT_WS_Subscribe_InputQueue
+```c
+static int IoTHubTransportMqtt_WS_Subscribe_InputQueue(IOTHUB_DEVICE_HANDLE handle);
+
+```
+Not implemented (yet).
+
+
+## IoTHubTransportMqtt_WS_Unsubscribe_InputQueue
+```c
+static void IoTHubTransportMqtt_WS_Unsubscribe_InputQueue(IOTHUB_DEVICE_HANDLE handle);
+
+```
+Not implemented (yet).
+
+
 **SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_10_001: [**`IoTHubTransportMqtt_WS_SendMessageDisposition` shall send the message disposition by calling into the `IoTHubTransport_MQTT_Common_SendMessageDisposition`**]**
 
 
@@ -242,4 +260,6 @@ IoTHubTransport_Destroy = IoTHubTransportMqtt_WS_Destroy
 IoTHubTransport_Subscribe = IoTHubTransportMqtt_WS_Subscribe  
 IoTHubTransport_Unsubscribe = IoTHubTransportMqtt_WS_Unsubscribe  
 IoTHubTransport_DoWork = IoTHubTransportMqtt_WS_DoWork  
-IoTHubTransport_SetOption = IoTHubTransportMqtt_WS_SetOption **]**
+IoTHubTransport_SetOption = IoTHubTransportMqtt_WS_SetOption
+IoTHubTransport_Subscribe_InputQueue = IoTHubTransportMqtt_Subscribe_InputQueue
+IoTHubTransport_Unsubscribe_InputQueue = IotHubTransportMqtt_Unsubscribe_InputQueue**]**

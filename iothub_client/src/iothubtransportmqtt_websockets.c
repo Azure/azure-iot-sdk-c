@@ -207,6 +207,19 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_WS_SendMessageDisposition(MESSAG
     return IoTHubTransport_MQTT_Common_SendMessageDisposition(message_data, disposition);
 }
 
+static int IoTHubTransportMqtt_WS_Subscribe_InputQueue(IOTHUB_DEVICE_HANDLE handle)
+{
+    (void)handle;
+    LogError("IoTHubTransportMqtt_WS_Subscribe_InputQueue not implemented\n");
+    return __FAILURE__;
+}
+
+static void IoTHubTransportMqtt_WS_Unsubscribe_InputQueue(IOTHUB_DEVICE_HANDLE handle)
+{
+    LogError("IoTHubTransportMqtt_WS_Unsubscribe_InputQueue not implemented\n");
+    (void)handle;
+}
+
 /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_011: [ This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for its fields:
 IoTHubTransport_SendMessageDisposition = IoTHubTransport_WS_SendMessageDisposition
 IoTHubTransport_Subscribe_DeviceMethod = IoTHubTransport_WS_Subscribe_DeviceMethod
@@ -238,7 +251,9 @@ static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls = {
     IoTHubTransportMqtt_WS_Unsubscribe,
     IoTHubTransportMqtt_WS_DoWork,
     IoTHubTransportMqtt_WS_SetRetryPolicy,
-    IoTHubTransportMqtt_WS_GetSendStatus
+    IoTHubTransportMqtt_WS_GetSendStatus,
+    IoTHubTransportMqtt_WS_Subscribe_InputQueue,
+    IoTHubTransportMqtt_WS_Unsubscribe_InputQueue
 };
 
 const TRANSPORT_PROVIDER* MQTT_WebSocket_Protocol(void)

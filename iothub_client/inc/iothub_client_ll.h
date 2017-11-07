@@ -70,7 +70,8 @@ DEFINE_ENUM(IOTHUB_CLIENT_STATUS, IOTHUB_CLIENT_STATUS_VALUES);
 #define IOTHUB_IDENTITY_TYPE_VALUE  \
     IOTHUB_TYPE_TELEMETRY,          \
     IOTHUB_TYPE_DEVICE_TWIN,        \
-    IOTHUB_TYPE_DEVICE_METHODS
+    IOTHUB_TYPE_DEVICE_METHODS,     \
+    IOTHUB_TYPE_EVENT_QUEUE         
 DEFINE_ENUM(IOTHUB_IDENTITY_TYPE, IOTHUB_IDENTITY_TYPE_VALUE);
 
 #define IOTHUB_PROCESS_ITEM_RESULT_VALUE    \
@@ -231,6 +232,7 @@ extern "C"
         const IOTHUB_CLIENT_CONFIG* upperConfig;
         PDLIST_ENTRY waitingToSend;
         IOTHUB_AUTHORIZATION_HANDLE auth_module_handle;
+        const char* moduleId;
     };
 
 
@@ -547,9 +549,46 @@ extern "C"
     *
     * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, destinationFileName, const unsigned char*, source, size_t, size);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, destinationFileName, const unsigned char*, source, size_t, size);
 
 #endif /*DONT_USE_UPLOADTOBLOB*/
+
+    /**
+    * @brief	Asynchronous call to send the message specified by @p eventMessageHandle.
+    *
+    * @param	iotHubClientHandle		   	The handle created by a call to the create function.
+    * @param	eventMessageHandle		   	The handle to an IoT Hub message.
+    * @param	outputName		   	        The name of the queue to send the message to.
+    * @param	eventConfirmationCallback  	The callback specified by the device for receiving
+    * 										confirmation of the delivery of the IoT Hub message.
+    * 										This callback can be expected to invoke the
+    * 										::IoTHubClient_LL_SendEventAsync function for the
+    * 										same message in an attempt to retry sending a failing
+    * 										message. The user can specify a @c NULL value here to
+    * 										indicate that no callback is required.
+    * @param	userContextCallback			User specified context that will be provided to the
+    * 										callback. This can be @c NULL.
+    *
+    *			@b NOTE: The application behavior is undefined if the user calls
+    *			the ::IoTHubClient_LL_Destroy function from within any callback.
+    *
+    * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
+    */
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SendEventToOutputAsync, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_MESSAGE_HANDLE, eventMessageHandle, const char*, outputName, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, eventConfirmationCallback, void*, userContextCallback);
+
+    /**
+    * @brief	This API sets callback for  method call that is directed to specified 'inputName' queue (e.g. messages from IoTHubClient_SendEventToOutputAsync)
+    *
+    * @param	iotHubClientHandle		The handle created by a call to the create function.
+    * @param	inputName		        The name of the queue to listen on for this deviceMethodCallback/userContextCallback.
+    * @param	deviceMethodCallback	The callback which will be called by IoTHub.
+    * @param	userContextCallback		User specified context that will be provided to the
+    * 									callback. This can be @c NULL.
+    *
+    * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
+    */
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SetInputMessageCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, inputName, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC, eventHandlerCallback, void*, userContextCallback);
+
 
 #ifdef __cplusplus
 }
