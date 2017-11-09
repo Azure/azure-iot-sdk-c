@@ -291,11 +291,10 @@ extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_DeleteModule(IOTHUB_R
 *
 * @param    registryManagerHandle   The handle created by a call to the create function.
 * @param    numberOfModules         Number of modules requested.
-* @param    moduleList              Input parameter, if it is not NULL will contain the requested list of modules.
 *
 * @return   IOTHUB_REGISTRYMANAGER_RESULT_OK upon success or an error code upon failure.
 */
-extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetModuleList(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, const char* deviceId, size_t numberOfModules, SINGLYLINKEDLIST_HANDLE moduleList);
+extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetModuleList(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, const char* deviceId, SINGLYLINKEDLIST_HANDLE moduleList);
 
 #ifdef __cplusplus
 }
