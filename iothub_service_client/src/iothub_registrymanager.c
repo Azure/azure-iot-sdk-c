@@ -1819,8 +1819,8 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_DeleteModule(IOTHUB_REGISTRY
     return result;
 }
 
-IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetModuleList(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, const char* deviceId, size_t numberOfModules, SINGLYLINKEDLIST_HANDLE moduleList)
+IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetModuleList(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, const char* deviceId, SINGLYLINKEDLIST_HANDLE moduleList)
 {
-    return IoTHubRegistryManager_GetModuleOrDeviceList(registryManagerHandle, deviceId, numberOfModules, moduleList);
+    return IoTHubRegistryManager_GetModuleOrDeviceList(registryManagerHandle, deviceId, IOTHUB_DEVICES_MAX_REQUEST, moduleList);
 }
 

@@ -2623,7 +2623,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         umock_c_reset_all_calls();
 
         ///act
-        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetModuleList(NULL, TEST_DEVICE_ID, 10, moduleList);
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetModuleList(NULL, TEST_DEVICE_ID, moduleList);
 
         ///assert
         ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
@@ -2640,7 +2640,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ///arrange
 
         ///act
-        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetModuleList(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, 10, NULL);
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetModuleList(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, NULL);
 
         ///assert
         ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
@@ -2655,7 +2655,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         umock_c_reset_all_calls();
 
         ///act
-        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetModuleList(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, 10, NULL);
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetModuleList(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, NULL);
 
         ///assert
         ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
@@ -2679,7 +2679,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
             .IgnoreArgument(1);        
         
         ///act
-        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetModuleList(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, 10, moduleList);
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetModuleList(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, moduleList);
 
         ///assert
         ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
