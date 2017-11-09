@@ -4,14 +4,14 @@
 cmake_minimum_required(VERSION 2.8.11)
 
 compileAsC11()
-set(theseTestsName prov_device_client_ut)
+set(theseTestsName prov_device_client_ll_ut)
 
 set(${theseTestsName}_test_files
     ${theseTestsName}.c
 )
 
 set(${theseTestsName}_c_files
-../../src/prov_device_client.c
+../../src/prov_device_ll_client.c
 )
 
 set(${theseTestsName}_h_files
