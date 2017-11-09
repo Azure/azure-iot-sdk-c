@@ -1,12 +1,11 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#ifndef PROV_DEVICE_CLIENT_H
-#define PROV_DEVICE_CLIENT_H
+#ifndef PROV_DEVICE_LL_CLIENT_H
+#define PROV_DEVICE_LL_CLIENT_H
 
 #include "azure_c_shared_utility/umock_c_prod.h"
 #include "azure_c_shared_utility/macro_utils.h"
-#include "azure_prov_client/iothub_auth_client.h"
 #include "azure_prov_client/prov_transport.h"
 
 #ifdef __cplusplus
@@ -56,4 +55,4 @@ MOCKABLE_FUNCTION(, const char*, Prov_Device_LL_GetVersionString);
 }
 #endif /* __cplusplus */
 
-#endif // PROV_DEVICE_CLIENT_H
+#endif // PROV_DEVICE_LL_CLIENT_H
