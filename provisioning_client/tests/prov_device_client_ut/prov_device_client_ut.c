@@ -536,6 +536,7 @@ TEST_FUNCTION(Prov_Device_Register_Device_success)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
+    Prov_Device_Destroy(prov_device_handle);
 }
 
 /* Tests_SRS_PROV_DEVICE_CLIENT_12_017: [ If the thread initialization failed the function shall return error. ] */
@@ -587,6 +588,8 @@ TEST_FUNCTION(Prov_Device_Register_Device_fail)
 
     //cleanup
     umock_c_negative_tests_deinit();
+
+    Prov_Device_Destroy(prov_device_handle);
 }
 
 /* Tests_SRS_PROV_DEVICE_CLIENT_12_022: [ If any of the input parameter is NULL `Prov_Device_SetOption` shall return with invalid argument error. ] */
@@ -660,6 +663,7 @@ TEST_FUNCTION(Prov_Device_SetOption_success)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
+    Prov_Device_Destroy(prov_device_handle);
 }
 
 /* Tests_SRS_PROV_DEVICE_CLIENT_12_024: [ The function shall call the LL layer Prov_Device_LL_GetVersionString and return with the result. ] */
