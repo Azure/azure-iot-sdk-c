@@ -595,10 +595,11 @@ static void destroy_message_sender(AMQP_MESSENGER_INSTANCE* instance)
 		// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_090: [`instance->message_sender` shall be destroyed using messagesender_destroy()]  
 		messagesender_destroy(instance->message_sender);
 		instance->message_sender = NULL;
-		instance->message_sender_current_state = MESSAGE_SENDER_STATE_IDLE;
-		instance->message_sender_previous_state = MESSAGE_SENDER_STATE_IDLE;
-		instance->last_message_sender_state_change_time = INDEFINITE_TIME;
 	}
+
+	instance->message_sender_current_state = MESSAGE_SENDER_STATE_IDLE;
+	instance->message_sender_previous_state = MESSAGE_SENDER_STATE_IDLE;
+	instance->last_message_sender_state_change_time = INDEFINITE_TIME;
 
 	if (instance->sender_link != NULL)
 	{
@@ -678,10 +679,11 @@ static void destroy_message_receiver(AMQP_MESSENGER_INSTANCE* instance)
 		messagereceiver_destroy(instance->message_receiver);
 
 		instance->message_receiver = NULL;
-		instance->message_receiver_current_state = MESSAGE_RECEIVER_STATE_IDLE;
-		instance->message_receiver_previous_state = MESSAGE_RECEIVER_STATE_IDLE;
-		instance->last_message_receiver_state_change_time = INDEFINITE_TIME;
 	}
+
+	instance->message_receiver_current_state = MESSAGE_RECEIVER_STATE_IDLE;
+	instance->message_receiver_previous_state = MESSAGE_RECEIVER_STATE_IDLE;
+	instance->last_message_receiver_state_change_time = INDEFINITE_TIME;
 
 	if (instance->receiver_link != NULL)
 	{
