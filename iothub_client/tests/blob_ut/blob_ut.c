@@ -363,7 +363,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_with_proxy_happy_path)
     {
         STRICT_EXPECTED_CALL(HTTPAPIEX_Create(TEST_HOSTNAME_1));
         {
-            STRICT_EXPECTED_CALL(HTTPAPIEX_SetOption(IGNORED_PTR_ARG, OPTION_HTTP_PROXY, IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(HTTPAPIEX_SetOption(IGNORED_PTR_ARG, OPTION_HTTP_PROXY, &proxyOptions));
             STRICT_EXPECTED_CALL(BUFFER_create(&c, 1));
             {
                 STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
