@@ -39,8 +39,6 @@ static void my_gballoc_free(void* ptr)
 
 #include "azure_prov_client/iothub_security_factory.h"
 #include "hsm_client_data.h"
-#include "hsm_client_x509_abstract.h"
-#include "hsm_client_tpm_abstract.h"
 
 MOCKABLE_FUNCTION(, HSM_CLIENT_HANDLE, hsm_client_create);
 MOCKABLE_FUNCTION(, void, hsm_client_destroy, HSM_CLIENT_HANDLE, handle);
@@ -51,6 +49,9 @@ MOCKABLE_FUNCTION(, int, hsm_client_sign_data, HSM_CLIENT_HANDLE, handle, const 
 MOCKABLE_FUNCTION(, char*, hsm_client_get_certificate, HSM_CLIENT_HANDLE, handle);
 MOCKABLE_FUNCTION(, char*, hsm_client_get_alias_key, HSM_CLIENT_HANDLE, handle);
 MOCKABLE_FUNCTION(, char*, hsm_client_get_common_name, HSM_CLIENT_HANDLE, handle);
+
+MOCKABLE_FUNCTION(, const HSM_CLIENT_TPM_INTERFACE*, hsm_client_tpm_interface);
+MOCKABLE_FUNCTION(, const HSM_CLIENT_X509_INTERFACE*, hsm_client_x509_interface);
 
 #undef ENABLE_MOCKS
 

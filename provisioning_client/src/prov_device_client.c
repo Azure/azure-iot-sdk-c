@@ -82,14 +82,14 @@ static PROV_DEVICE_RESULT StartWorkerThreadIfNeeded(PROV_DEVICE_INSTANCE* prov_d
     return result;
 }
 
-PROV_DEVICE_HANDLE Prov_Device_Create(const char* uri, const char* scope_id, PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION protocol)
+PROV_DEVICE_HANDLE Prov_Device_Create(const char* uri, const char* id_scope, PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION protocol)
 {
     PROV_DEVICE_INSTANCE* result;
 
     /* Codes_SRS_PROV_DEVICE_CLIENT_12_001: [ If any of the input parameter is NULL `Prov_Device_Create` shall return NULL.] */
-    if (uri == NULL || scope_id == NULL || protocol == NULL)
+    if (uri == NULL || id_scope == NULL || protocol == NULL)
     {
-        LogError("Invalid parameter specified uri: %p, scope_id: %p, protocol: %p", uri, scope_id, protocol);
+        LogError("Invalid parameter specified uri: %p, id_scope: %p, protocol: %p", uri, id_scope, protocol);
         result = NULL;
     }
     else
@@ -115,7 +115,7 @@ PROV_DEVICE_HANDLE Prov_Device_Create(const char* uri, const char* scope_id, PRO
             else
             {
                 /* Codes_SRS_PROV_DEVICE_CLIENT_12_006: [ The function shall call the LL layer Prov_Device_LL_Create function and return with it's result. ] */
-                result->ProvDeviceLLHandle = Prov_Device_LL_Create(uri, scope_id, protocol);
+                result->ProvDeviceLLHandle = Prov_Device_LL_Create(uri, id_scope, protocol);
                 /* Codes_SRS_PROV_DEVICE_CLIENT_12_007: [ The function shall initialize the result datastructure. ] */
                 result->ThreadHandle = NULL;
                 result->StopThread = 0;

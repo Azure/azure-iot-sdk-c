@@ -13,7 +13,6 @@
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 
-#include "hsm_client_tpm_abstract.h"
 #include "hsm_client_tpm.h"
 #include "hsm_client_data.h"
 

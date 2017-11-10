@@ -6,8 +6,7 @@
 #include "azure_prov_client/prov_security_factory.h"
 #include "azure_c_shared_utility/xlogging.h"
 
-#include "hsm_client_tpm_abstract.h"
-#include "hsm_client_x509_abstract.h"
+#include "hsm_client_data.h"
 
 static IOTHUB_SECURITY_TYPE g_security_type = IOTHUB_SECURITY_TYPE_UNKNOWN;
 
@@ -48,28 +47,14 @@ int iothub_security_init(IOTHUB_SECURITY_TYPE sec_type)
     }
     if (result == 0)
     {
-        if (g_security_type == IOTHUB_SECURITY_TYPE_X509)
-        {
-            result = hsm_init_x509_system();
-        }
-        else
-        {
-            result = hsm_client_tpm_init();
-        }
+        result = initialize_hsm_system();
     }
     return result;
 }
 
 void iothub_security_deinit()
 {
-    if (g_security_type == IOTHUB_SECURITY_TYPE_X509)
-    {
-        hsm_deinit_x509_system();
-    }
-    else
-    {
-        hsm_client_tpm_deinit();
-    }
+    deinitialize_hsm_system();
 }
 
 IOTHUB_SECURITY_TYPE iothub_security_type()

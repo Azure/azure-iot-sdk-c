@@ -48,7 +48,7 @@ ENDIF(WIN32)
 set(hsm_type_x509 OFF CACHE BOOL "x509 type of hsm used with the Provisioning client")
 set(hsm_type_sastoken OFF CACHE BOOL "tpm type of hsm used with the Provisioning client")
 set(hsm_type_custom OFF CACHE BOOL "hsm type of custom used with the Provisioning client")
-set(hsm_custom_lib "" CACHE STRING "Custom repo library")
+set(hsm_custom_lib "" CACHE STRING "Full path to custom HSM repo library")
 
 #the following variables are project-wide and can be used with cmake-gui
 option(use_amqp "set use_amqp to ON if amqp is to be used, set to OFF to not use amqp" ON)

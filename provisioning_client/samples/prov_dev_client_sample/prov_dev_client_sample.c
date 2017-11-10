@@ -32,7 +32,7 @@ DEFINE_ENUM_STRINGS(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
 DEFINE_ENUM_STRINGS(PROV_DEVICE_REG_STATUS, PROV_DEVICE_REG_STATUS_VALUES);
 
 static const char* global_prov_uri = "global.azure-devices-provisioning.net";
-static const char* scope_id = "";
+static const char* id_scope = "";
 
 static bool g_trace_on = true;
 
@@ -127,7 +127,7 @@ int main()
 
         PROV_DEVICE_RESULT prov_device_result = PROV_DEVICE_RESULT_ERROR;
         PROV_DEVICE_HANDLE prov_device_handle;
-        if ((prov_device_handle = Prov_Device_Create(global_prov_uri, scope_id, prov_transport)) == NULL)
+        if ((prov_device_handle = Prov_Device_Create(global_prov_uri, id_scope, prov_transport)) == NULL)
         {
             (void)printf("failed calling Prov_Device_Create\r\n");
             result = __LINE__;

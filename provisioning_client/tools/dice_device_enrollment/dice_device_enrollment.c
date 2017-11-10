@@ -9,7 +9,7 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/platform.h"
 
-#include "hsm_client_x509_abstract.h"
+#include "hsm_client_data.h"
 #include "hsm_client_riot.h"
 
 #define MAX_VALIDATION_CODE_LEN         48
@@ -133,7 +133,7 @@ int main()
 {
     int result;
 
-    if (platform_init() == 0 && hsm_init_x509_system() == 0)
+    if (platform_init() == 0 && initialize_hsm_system() == 0)
     {
         HSM_CLIENT_HANDLE hsm_handle;
         if ((hsm_handle = hsm_client_riot_create()) == NULL)
@@ -177,7 +177,7 @@ int main()
             }
             hsm_client_riot_destroy(hsm_handle);
         }
-        hsm_deinit_x509_system();
+        deinitialize_hsm_system();
         platform_deinit();
     }
     else
