@@ -114,13 +114,11 @@ static void sendMessage(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const unsign
 /*this function "links" IoTHub to the serialization library*/
 static IOTHUBMESSAGE_DISPOSITION_RESULT IoTHubMessage(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback)
 {
-    IOTHUBMESSAGE_DISPOSITION_RESULT result;
     const unsigned char* buffer;
     size_t size;
     if (IoTHubMessage_GetByteArray(message, &buffer, &size) != IOTHUB_MESSAGE_OK)
     {
-        printf("unable to IoTHubMessage_GetByteArray\r\n");
-        result = IOTHUBMESSAGE_ABANDONED;
+        (void)printf("unable to IoTHubMessage_GetByteArray\r\n");
     }
     else
     {
@@ -128,22 +126,22 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT IoTHubMessage(IOTHUB_MESSAGE_HANDLE mess
         char* temp = malloc(size + 1);
         if (temp == NULL)
         {
-            printf("failed to malloc\r\n");
-            result = IOTHUBMESSAGE_ABANDONED;
+            (void)printf("failed to malloc\r\n");
         }
         else
         {
             (void)memcpy(temp, buffer, size);
             temp[size] = '\0';
             EXECUTE_COMMAND_RESULT executeCommandResult = EXECUTE_COMMAND(userContextCallback, temp);
-            result =
-                (executeCommandResult == EXECUTE_COMMAND_ERROR) ? IOTHUBMESSAGE_ABANDONED :
-                (executeCommandResult == EXECUTE_COMMAND_SUCCESS) ? IOTHUBMESSAGE_ACCEPTED :
-                IOTHUBMESSAGE_REJECTED;
+            if (executeCommandResult != EXECUTE_COMMAND_SUCCESS)
+            {
+                (void)printf("Execute command failed\r\n");
+            }
             free(temp);
         }
     }
-    return result;
+    // MQTT can only accept messages
+    return IOTHUBMESSAGE_ACCEPTED;
 }
 
 void simplesample_mqtt_run(void)
