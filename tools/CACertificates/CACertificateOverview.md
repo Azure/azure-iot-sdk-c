@@ -1,7 +1,7 @@
 # Managing CA Certificates Sample
 
 ## WARNING
-Certificates created by these scripts **MUST NOT** be used for production.  They contain hard-coded passwords ("123"), expire after 30 days, and most importantly are provided for demonstration purposes to help you quickly understand CA Certificates.  When productizing against CA Certificates, you'll need to use your own security best practices for certification creation and lifetime management.
+Certificates created by these scripts **MUST NOT** be used for production.  They contain hard-coded passwords ("1234"), expire after 30 days, and most importantly are provided for demonstration purposes to help you quickly understand CA Certificates.  When productizing against CA Certificates, you'll need to use your own security best practices for certification creation and lifetime management.
 
 ## Introduction
 This document assumes you understand the core scenarios and motivation behind CA Certificates.  This document also assumes you have basic familiarity with PowerShell or Bash.
@@ -23,7 +23,8 @@ You'll need to do some initial setup prior to running these scripts.
 * Run `Set-ExecutionPolicy -ExecutionPolicy Unrestricted`.  You'll need this for PowerShell to allow you to run the scripts.
 * Get OpenSSL for Windows.  
   * See [the official documentation] for places to download it.
-  * Set `$ENV:OPENSSL_CONF` to the openssl's openssl.cnf.
+  * `$ENV:PATH += ";<directory containing OpenSSL exe>`
+  * `$ENV:OPENSSL_CONF=<the openssl openssl.cnf>`
 * Run `. .\ca-certs.ps1` .  This is called dot-sourcing and brings the functions of the script into PowerShell's global namespace.
 * Run `Test-CACertsPrerequisites`.
  PowerShell uses the Windows Certificate Store to manage certificates.  This makes sure that there won't be name collisions later with existing certificates and that OpenSSL is setup correctly.
@@ -66,20 +67,25 @@ On Azure IoT Hub, navigate to the "Device Explorer".  Add a new device (e.g. `my
 
 ### **PowerShell**
 * Run `New-CACertsDevice myDevice` to create the new device certificate.  
-This will create files myDevice* that contain the public key, private key, and PFX of this certificate.  When prompted to enter a password during the signing process, enter "123".
+This will create files myDevice* that contain the public key, private key, and PFX of this certificate.  When prompted to enter a password during the signing process, enter "1234".
 
 * To get a sense of how to use these certificates, `Write-CACertsCertificatesToEnvironment myDevice myIotHubName`, replacing myDevice and myIotHub name with your values.  This will create the environment variables `$ENV:IOTHUB_CA_*` that can give a sense of how they could be consumed by an application.
 
 ### **Bash**
+#### IoT Leaf Device
 * Run `./certGen.sh create_device_certificate myDevice` to create the new device certificate.  
-  This will create the files .\certs\new-device.* that contain the public key and PFX and .\private\new-device.key.pem that contains the device's private key.  
-* `cat new-device.cert.pem azure-iot-test-only.intermediate.cert.pem azure-iot-test-only.root.ca.cert.pem > new-device-full-chain.cert.pem` to get the public key.
-* `./private/new-device.cert.pem` contains the device's private key.
-
+  This will create the files ./certs/new-device.* that contain the public key and PFX and ./private/new-device.key.pem that contains the device's private key.  
+* `cd ./certs && cat new-device.cert.pem azure-iot-test-only.intermediate.cert.pem azure-iot-test-only.root.ca.cert.pem > new-device-full-chain.cert.pem` to get the public key.
+#### IoT Edge Device
+* Run `./certGen.sh create_edge_device_certificate myEdgeDevice` to create the new IoT Edge device certificate.  
+  This will create the files ./certs/new-edge-device.* that contain the public key and PFX and ./private/new-edge-device.key.pem that contains the Edge device's private key.  
+* `cd ./certs && cat new-edge-device.cert.pem azure-iot-test-only.intermediate.cert.pem azure-iot-test-only.root.ca.cert.pem > new-edge-device-full-chain.cert.pem` to get the public key.
 
 ## Step 5 - Cleanup
-For PowerShell, open `manage computer certificates` and navigate Certificates -Local Compturer-->personal.  Remove certificates issued by "Azure IoT CA TestOnly*".  Similarly remove them from "Trusted Root Certification Authority->Certificates" and "Intermediate Certificate Authorities->Certificates".
+### **PowerShell***
+From start menu, open `manage computer certificates` and navigate Certificates -Local Compturer-->personal.  Remove certificates issued by "Azure IoT CA TestOnly*".  Similarly remove them from "Trusted Root Certification Authority->Certificates" and "Intermediate Certificate Authorities->Certificates".
 
+### **Bash**
 Bash outputs certificates to the current working directory, so there is no analogous system cleanup needed.
 
 [the official documentation]: https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-security-x509-get-started
