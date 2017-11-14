@@ -91,7 +91,7 @@ keyUsage = critical, digitalSignature, cRLSign, keyCertSign
 # Extensions for a typical intermediate CA.
 subjectKeyIdentifier = hash
 authorityKeyIdentifier = keyid:always,issuer
-basicConstraints = critical, CA:true, pathlen:0
+basicConstraints = critical, CA:true
 keyUsage = critical, digitalSignature, cRLSign, keyCertSign
 
 [ usr_cert ]
