@@ -73,9 +73,9 @@ typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA_TAG
 
 typedef struct BLOB_UPLOAD_CONTEXT_TAG
 {
-    const unsigned char* source; /* source to upload */
-    size_t size; /* size of the source */
-    size_t toUpload; /* size not yet uploaded */
+    const unsigned char* blobSource; /* source to upload */
+    const size_t blobSourceSize; /* size of the source */
+    size_t remainingSizeToUpload; /* size not yet uploaded */
 }BLOB_UPLOAD_CONTEXT;
 
 IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE IoTHubClient_LL_UploadToBlob_Create(const IOTHUB_CLIENT_CONFIG* config)
@@ -783,7 +783,7 @@ static void FileUpload_GetData_Callback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result,
         *data = NULL;
         *size = 0;
     }
-    else if (uploadContext->toUpload == 0)
+    else if (uploadContext->remainingSizeToUpload == 0)
     {
         // Everything has been uploaded
         *data = NULL;
@@ -792,52 +792,27 @@ static void FileUpload_GetData_Callback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result,
     else
     {
         // Upload next block
-        size_t thisBlockSize = (uploadContext->toUpload > BLOCK_SIZE) ? BLOCK_SIZE : uploadContext->toUpload;
-        *data = (unsigned char*)uploadContext->source + (uploadContext->size - uploadContext->toUpload);
+        size_t thisBlockSize = (uploadContext->remainingSizeToUpload > BLOCK_SIZE) ? BLOCK_SIZE : uploadContext->remainingSizeToUpload;
+        *data = (unsigned char*)uploadContext->blobSource + (uploadContext->blobSourceSize - uploadContext->remainingSizeToUpload);
         *size = thisBlockSize;
-        uploadContext->toUpload -= thisBlockSize;
+        uploadContext->remainingSizeToUpload -= thisBlockSize;
     }
-}
-
-IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_Impl(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE handle, const char* destinationFileName, const unsigned char* source, size_t size)
-{
-    IOTHUB_CLIENT_RESULT result;
-
-    BLOB_UPLOAD_CONTEXT context;
-
-    if (source == NULL && size > 0)
-    {
-        LogError("invalid source and size combination: source=%p size=%zu", source, size);
-        result = IOTHUB_CLIENT_INVALID_ARG;
-    }
-    else
-    {
-        context.size = size;
-        context.toUpload = size;
-        context.source = source;
-
-        result = IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(handle, destinationFileName, FileUpload_GetData_Callback, &context);
-    }
-    return result;
 }
 
 IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE handle, const char* destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK getDataCallback, void* context)
 {
     IOTHUB_CLIENT_RESULT result;
-    BUFFER_HANDLE toBeTransmitted;
-    int requiredStringLength;
-    char* requiredString;
 
     /*Codes_SRS_IOTHUBCLIENT_LL_02_061: [ If handle is NULL then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_INVALID_ARG. ]*/
     /*Codes_SRS_IOTHUBCLIENT_LL_02_062: [ If destinationFileName is NULL then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_INVALID_ARG. ]*/
-    /*Codes_SRS_IOTHUBCLIENT_LL_02_063: [ If source is NULL and size is greater than 0 then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_INVALID_ARG. ]*/
+
     if (
         (handle == NULL) ||
         (destinationFileName == NULL) ||
         (getDataCallback == NULL)
         )
     {
-        LogError("invalid argument detected handle=%p destinationFileName=%p getDataCallback=%p context=%zu", handle, destinationFileName, getDataCallback, context);
+        LogError("invalid argument detected handle=%p destinationFileName=%p getDataCallback=%p", handle, destinationFileName, getDataCallback);
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else
@@ -969,9 +944,9 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
                                             {
                                                 /*must make a json*/
 
-                                                requiredStringLength = snprintf(NULL, 0, "{\"isSuccess\":%s, \"statusCode\":%d, \"statusDescription\":\"%s\"}", ((httpResponse < 300) ? "true" : "false"), httpResponse, BUFFER_u_char(responseToIoTHub));
+                                                int requiredStringLength = snprintf(NULL, 0, "{\"isSuccess\":%s, \"statusCode\":%d, \"statusDescription\":\"%s\"}", ((httpResponse < 300) ? "true" : "false"), httpResponse, BUFFER_u_char(responseToIoTHub));
 
-                                                requiredString = malloc(requiredStringLength + 1);
+                                                char * requiredString = malloc(requiredStringLength + 1);
                                                 if (requiredString == 0)
                                                 {
                                                     LogError("unable to malloc");
@@ -981,7 +956,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
                                                 {
                                                     /*do again snprintf*/
                                                     (void)snprintf(requiredString, requiredStringLength + 1, "{\"isSuccess\":%s, \"statusCode\":%d, \"statusDescription\":\"%s\"}", ((httpResponse < 300) ? "true" : "false"), httpResponse, BUFFER_u_char(responseToIoTHub));
-                                                    toBeTransmitted = BUFFER_create((const unsigned char*)requiredString, requiredStringLength);
+                                                    BUFFER_HANDLE toBeTransmitted = BUFFER_create((const unsigned char*)requiredString, requiredStringLength);
                                                     if (toBeTransmitted == NULL)
                                                     {
                                                         LogError("unable to BUFFER_create");
@@ -1021,6 +996,25 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
 
     getDataCallback(result == IOTHUB_CLIENT_OK ? FILE_UPLOAD_OK : FILE_UPLOAD_ERROR, NULL, NULL, context);
 
+    return result;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_Impl(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE handle, const char* destinationFileName, const unsigned char* source, size_t size)
+{
+    IOTHUB_CLIENT_RESULT result;
+
+    /*Codes_SRS_IOTHUBCLIENT_LL_02_063: [ If source is NULL and size is greater than 0 then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_INVALID_ARG. ]*/
+    if (source == NULL && size > 0)
+    {
+        LogError("invalid source and size combination: source=%p size=%zu", source, size);
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    else
+    {
+        BLOB_UPLOAD_CONTEXT context = {source, size, size};
+
+        result = IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(handle, destinationFileName, FileUpload_GetData_Callback, &context);
+    }
     return result;
 }
 

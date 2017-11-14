@@ -43,14 +43,14 @@ extern "C"
 DEFINE_ENUM(BLOB_RESULT, BLOB_RESULT_VALUES)
 
 /**
-* @brief	Synchronously uploads a byte array to blob storage
+* @brief  Synchronously uploads a byte array to blob storage
 *
-* @param	SASURI	        The URI to use to upload data
-* @param	getDataCallback	A callback to be invoked to acquire the file chunks to be uploaded, as well as to indicate the status of the upload of the previous block.
-* @param	context		    Any data provided by the user to serve as context on getDataCallback.
-* @param    httpStatus      A pointer to an out argument receiving the HTTP status (available only when the return value is BLOB_OK)
-* @param    httpResponse    A BUFFER_HANDLE that receives the HTTP response from the server (available only when the return value is BLOB_OK)
-* @param    certificates    A null terminated string containing CA certificates to be used
+* @param  SASURI            The URI to use to upload data
+* @param  getDataCallback   A callback to be invoked to acquire the file chunks to be uploaded, as well as to indicate the status of the upload of the previous block.
+* @param  context           Any data provided by the user to serve as context on getDataCallback.
+* @param  httpStatus        A pointer to an out argument receiving the HTTP status (available only when the return value is BLOB_OK)
+* @param  httpResponse      A BUFFER_HANDLE that receives the HTTP response from the server (available only when the return value is BLOB_OK)
+* @param  certificates      A null terminated string containing CA certificates to be used
 *
 * @return	A @c BLOB_RESULT. BLOB_OK means the blob has been uploaded successfully. Any other value indicates an error
 */
@@ -67,8 +67,8 @@ MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadMultipleBlocksFromSasUri, const char
 * @param  httpStatus          A pointer to an out argument receiving the HTTP status (available only when the return value is BLOB_OK)
 * @param  httpResponse        A BUFFER_HANDLE that receives the HTTP response from the server (available only when the return value is BLOB_OK)
 */
-MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadNextBlock, BUFFER_HANDLE, requestContent, unsigned int, blockID, STRING_HANDLE, xml, const char*, relativePath, HTTPAPIEX_HANDLE, httpApiExHandle, unsigned int*, httpStatus, BUFFER_HANDLE, httpResponse)
-
+//MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadNextBlock, BUFFER_HANDLE, requestContent, unsigned int, blockID, STRING_HANDLE, xml, const char*, relativePath, HTTPAPIEX_HANDLE, httpApiExHandle, unsigned int*, httpStatus, BUFFER_HANDLE, httpResponse)
+MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadBlock, HTTPAPIEX_HANDLE, httpApiExHandle, const char*, relativePath, BUFFER_HANDLE, requestContent, unsigned int, blockID, STRING_HANDLE, blockIDList, unsigned int*, httpStatus, BUFFER_HANDLE, httpResponse)
 #ifdef __cplusplus
 }
 #endif

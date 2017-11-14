@@ -60,14 +60,14 @@ typedef struct UPLOADTOBLOB_SAVED_DATA_TAG
     int canBeGarbageCollected; /*flag indicating that the UPLOADTOBLOB_SAVED_DATA structure can be freed because the thread deadling with it finished*/
 }UPLOADTOBLOB_SAVED_DATA;
 
-typedef struct UPLOADMULTIPLEBLOCKS_DATA_TAG
+typedef struct UPLOADTOBLOB_MULTIBLOCK_SAVED_DATA_TAG
 {
     char* destinationFileName;
     IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK getDataCallback;
     void* context;
     THREAD_HANDLE uploadingThreadHandle;
     IOTHUB_CLIENT_HANDLE iotHubClientHandle;
-}UPLOADMULTIPLEBLOCKS_DATA;
+}UPLOADTOBLOB_MULTIBLOCK_SAVED_DATA;
 #endif
 
 #define USER_CALLBACK_TYPE_VALUES       \
@@ -1982,7 +1982,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_UploadToBlobAsync(IOTHUB_CLIENT_HANDLE iotHubC
 
 static int uploadMultipleBlock_thread(void* data)
 {
-    UPLOADMULTIPLEBLOCKS_DATA *blocksData = (UPLOADMULTIPLEBLOCKS_DATA *)data;
+    UPLOADTOBLOB_MULTIBLOCK_SAVED_DATA *blocksData = (UPLOADTOBLOB_MULTIBLOCK_SAVED_DATA *)data;
 
     IOTHUB_CLIENT_LL_HANDLE llHandle = blocksData->iotHubClientHandle->IoTHubClientLLHandle;
     IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadMultipleBlocksToBlob(llHandle, blocksData->destinationFileName, blocksData->getDataCallback, blocksData->context);
@@ -1994,30 +1994,29 @@ static int uploadMultipleBlock_thread(void* data)
     return 0;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_UploadMultipleBlocksToBlobAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK iotHubClientFileUploadGetDataCallback, void* context)
+IOTHUB_CLIENT_RESULT IoTHubClient_UploadMultipleBlocksToBlobAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK getDataCallback, void* context)
 {
-    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
+    IOTHUB_CLIENT_RESULT result;
 
     if (
         (iotHubClientHandle == NULL) ||
         (destinationFileName == NULL) ||
-        (iotHubClientFileUploadGetDataCallback == NULL)
+        (getDataCallback == NULL)
         )
     {
-        LogError("invalid parameters IOTHUB_CLIENT_HANDLE iotHubClientHandle = %p , const char* destinationFileName = %s, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK iotHubClientFileUploadGetDataCallback = %p, void* context = %p",
+        LogError("invalid parameters iotHubClientHandle = %p , destinationFileName = %p, getDataCallback = %p",
             iotHubClientHandle,
             destinationFileName,
-            iotHubClientFileUploadGetDataCallback,
-            context
+            getDataCallback
         );
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else
     {
-        UPLOADMULTIPLEBLOCKS_DATA *blocksData = (UPLOADMULTIPLEBLOCKS_DATA *)malloc(sizeof(UPLOADMULTIPLEBLOCKS_DATA));
+        UPLOADTOBLOB_MULTIBLOCK_SAVED_DATA *blocksData = (UPLOADTOBLOB_MULTIBLOCK_SAVED_DATA *)malloc(sizeof(UPLOADTOBLOB_MULTIBLOCK_SAVED_DATA));
         if (blocksData == NULL)
         {
-            LogError("unable to malloc - oom");
+            LogError("unable to malloc");
             result = IOTHUB_CLIENT_ERROR;
         }
         else
@@ -2030,12 +2029,11 @@ IOTHUB_CLIENT_RESULT IoTHubClient_UploadMultipleBlocksToBlobAsync(IOTHUB_CLIENT_
             }
             else
             {
-                blocksData->getDataCallback = iotHubClientFileUploadGetDataCallback;
+                blocksData->getDataCallback = getDataCallback;
                 blocksData->context = context;
                 blocksData->iotHubClientHandle = iotHubClientHandle;
                 if (ThreadAPI_Create(&blocksData->uploadingThreadHandle, uploadMultipleBlock_thread, blocksData) != THREADAPI_OK)
                 {
-                    /*Codes_SRS_IOTHUBCLIENT_02_053: [ If copying to the structure or spawning the thread fails, then IoTHubClient_UploadToBlobAsync shall fail and return IOTHUB_CLIENT_ERROR. ]*/
                     LogError("unable to ThreadAPI_Create");
                     free(blocksData->destinationFileName);
                     free(blocksData);

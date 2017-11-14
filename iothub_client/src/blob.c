@@ -10,25 +10,25 @@
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/base64.h"
 
-BLOB_RESULT Blob_UploadNextBlock(
+BLOB_RESULT Blob_UploadBlock(
+        HTTPAPIEX_HANDLE httpApiExHandle,
+        const char* relativePath,
         BUFFER_HANDLE requestContent,
         unsigned int blockID,
-        STRING_HANDLE xml,
-        const char* relativePath,
-        HTTPAPIEX_HANDLE httpApiExHandle,
+        STRING_HANDLE blockIDList,
         unsigned int* httpStatus,
         BUFFER_HANDLE httpResponse)
 {
     BLOB_RESULT result;
 
     if (requestContent == NULL ||
-        xml == NULL ||
+        blockIDList == NULL ||
         relativePath == NULL ||
         httpApiExHandle == NULL ||
         httpStatus == NULL ||
         httpResponse == NULL)
     {
-        LogError("invalid argument detected requestContent=%p xml=%p relativePath=%p httpApiExHandle=%p httpStatus=%p httpResponse=%p", requestContent, xml, relativePath, httpApiExHandle, httpStatus, httpResponse);
+        LogError("invalid argument detected requestContent=%p blockIDList=%p relativePath=%p httpApiExHandle=%p httpStatus=%p httpResponse=%p", requestContent, blockIDList, relativePath, httpApiExHandle, httpStatus, httpResponse);
         result = BLOB_ERROR;
     }
     else
@@ -53,9 +53,9 @@ BLOB_RESULT Blob_UploadNextBlock(
             {
                 /*add the blockId base64 encoded to the XML*/
                 if (!(
-                    (STRING_concat(xml, "<Latest>") == 0) &&
-                    (STRING_concat_with_STRING(xml, blockIdString) == 0) &&
-                    (STRING_concat(xml, "</Latest>") == 0)
+                    (STRING_concat(blockIDList, "<Latest>") == 0) &&
+                    (STRING_concat_with_STRING(blockIDList, blockIdString) == 0) &&
+                    (STRING_concat(blockIDList, "</Latest>") == 0)
                     ))
                 {
                     /*Codes_SRS_BLOB_02_033: [ If any previous operation that doesn't have an explicit failure description fails then Blob_UploadFromSasUri shall fail and return BLOB_ERROR ]*/
@@ -109,7 +109,6 @@ BLOB_RESULT Blob_UploadNextBlock(
                             }
                             else
                             {
-                                //LogInfo("Blob_UploadNextBlock succeeds");
                                 /*Codes_SRS_BLOB_02_027: [ Otherwise Blob_UploadFromSasUri shall continue execution. ]*/
                                 result = BLOB_OK;
                             }
@@ -206,8 +205,8 @@ BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* SASURI, IOTHUB_CLIEN
                                 const char* relativePath = hostnameEnd; /*this is where the relative path begins in the SasUri*/
 
                                 /*Codes_SRS_BLOB_02_028: [ Blob_UploadFromSasUri shall construct an XML string with the following content: ]*/
-                                STRING_HANDLE xml = STRING_construct("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<BlockList>"); /*the XML "build as we go"*/
-                                if (xml == NULL)
+                                STRING_HANDLE blockIDList = STRING_construct("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<BlockList>"); /*the XML "build as we go"*/
+                                if (blockIDList == NULL)
                                 {
                                     /*Codes_SRS_BLOB_02_033: [ If any previous operation that doesn't have an explicit failure description fails then Blob_UploadFromSasUri shall fail and return BLOB_ERROR ]*/
                                     LogError("failed to STRING_construct");
@@ -251,12 +250,12 @@ BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* SASURI, IOTHUB_CLIEN
                                         }
                                         else
                                         {
-                                            result = Blob_UploadNextBlock(
+                                            result = Blob_UploadBlock(
+                                                    httpApiExHandle,
+                                                    relativePath,
                                                     requestContent,
                                                     blockID,
-                                                    xml,
-                                                    relativePath,
-                                                    httpApiExHandle,
+                                                    blockIDList,
                                                     httpStatus,
                                                     httpResponse);
 
@@ -302,7 +301,7 @@ BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* SASURI, IOTHUB_CLIEN
                                     else
                                     {
                                         /*complete the XML*/
-                                        if (STRING_concat(xml, "</BlockList>") != 0)
+                                        if (STRING_concat(blockIDList, "</BlockList>") != 0)
                                         {
                                             /*Codes_SRS_BLOB_02_033: [ If any previous operation that doesn't have an explicit failure description fails then Blob_UploadFromSasUri shall fail and return BLOB_ERROR ]*/
                                             LogError("failed to STRING_concat");
@@ -329,9 +328,9 @@ BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* SASURI, IOTHUB_CLIEN
                                                 else
                                                 {
                                                     /*Codes_SRS_BLOB_02_030: [ Blob_UploadFromSasUri shall call HTTPAPIEX_ExecuteRequest with a PUT operation, passing the new relativePath, httpStatus and httpResponse and the XML string as content. ]*/
-                                                    const char* s = STRING_c_str(xml);
-                                                    BUFFER_HANDLE xmlAsBuffer = BUFFER_create((const unsigned char*)s, strlen(s));
-                                                    if (xmlAsBuffer == NULL)
+                                                    const char* s = STRING_c_str(blockIDList);
+                                                    BUFFER_HANDLE blockIDListAsBuffer = BUFFER_create((const unsigned char*)s, strlen(s));
+                                                    if (blockIDListAsBuffer == NULL)
                                                     {
                                                         /*Codes_SRS_BLOB_02_033: [ If any previous operation that doesn't have an explicit failure description fails then Blob_UploadFromSasUri shall fail and return BLOB_ERROR ]*/
                                                         LogError("failed to BUFFER_create");
@@ -344,7 +343,7 @@ BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* SASURI, IOTHUB_CLIEN
                                                             HTTPAPI_REQUEST_PUT,
                                                             STRING_c_str(newRelativePath),
                                                             NULL,
-                                                            xmlAsBuffer,
+                                                            blockIDListAsBuffer,
                                                             httpStatus,
                                                             NULL,
                                                             httpResponse
@@ -359,14 +358,14 @@ BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* SASURI, IOTHUB_CLIEN
                                                             /*Codes_SRS_BLOB_02_032: [ Otherwise, Blob_UploadFromSasUri shall succeed and return BLOB_OK. ]*/
                                                             result = BLOB_OK;
                                                         }
-                                                        BUFFER_delete(xmlAsBuffer);
+                                                        BUFFER_delete(blockIDListAsBuffer);
                                                     }
                                                 }
                                                 STRING_delete(newRelativePath);
                                             }
                                         }
                                     }
-                                    STRING_delete(xml);
+                                    STRING_delete(blockIDList);
                                 }
 
                             }

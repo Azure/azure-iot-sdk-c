@@ -581,7 +581,7 @@ extern "C"
      * @param    iotHubClientHandle      The handle created by a call to the create function.
      * @param    destinationFileName     name of the file.
      * @param    getDataCallback         A callback to be invoked to acquire the file chunks to be uploaded, as well as to indicate the status of the upload of the previous block.
-     * @param    context                 Any data provided by the user to serve as context on iotHubClientFileUploadGetDataCallback.
+     * @param    context                 Any data provided by the user to serve as context on getDataCallback.
      *
      * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
      */

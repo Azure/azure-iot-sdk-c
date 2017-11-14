@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
 #ifdef DONT_USE_UPLOADTOBLOB
 #error "trying to compile iothub_client_ll_u2b_ut.c while DONT_USE_UPLOADTOBLOB is #define'd"
 #else
