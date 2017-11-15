@@ -570,17 +570,19 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_with_NULL_source_and_non_zero_size_fa
     IoTHubClient_LL_UploadToBlob_Destroy(h);
 }
 
-/*Tests_SRS_IOTHUBCLIENT_LL_02_064: [ IoTHubClient_LL_UploadToBlob shall create an HTTPAPIEX_HANDLE to the IoTHub hostname. ]*/
-/*Tests_SRS_IOTHUBCLIENT_LL_02_066: [ IoTHubClient_LL_UploadToBlob shall create an HTTP relative path formed from "/devices/" + deviceId + "/files/" + destinationFileName + "?api-version=API_VERSION". ]*/
-/*Tests_SRS_IOTHUBCLIENT_LL_02_068: [ IoTHubClient_LL_UploadToBlob shall create an HTTP responseContent BUFFER_HANDLE. ]*/
-/*Tests_SRS_IOTHUBCLIENT_LL_02_070: [ IoTHubClient_LL_UploadToBlob shall create request HTTP headers. ]*/
-/*Tests_SRS_IOTHUBCLIENT_LL_02_072: [ IoTHubClient_LL_UploadToBlob shall add the following name:value to request HTTP headers: ]*/
-/*Tests_SRS_IOTHUBCLIENT_LL_02_073: [ If the credentials used to create iotHubClientHandle have "sasToken" then IoTHubClient_LL_UploadToBlob shall add the following HTTP request headers: ]*/
-/*Tests_SRS_IOTHUBCLIENT_LL_02_075: [ IoTHubClient_LL_UploadToBlob shall execute HTTPAPIEX_ExecuteRequest passing the following information for arguments: ]*/
-/*Tests_SRS_IOTHUBCLIENT_LL_02_081: [ Otherwise, IoTHubClient_LL_UploadToBlob shall use parson to extract and save the following information from the response buffer: correlationID and SasUri. ]*/
-/*Tests_SRS_IOTHUBCLIENT_LL_02_085: [ IoTHubClient_LL_UploadToBlob shall use the same authorization as step 1. to prepare and perform a HTTP request with the following parameters: ]*/
-/*Tests_SRS_IOTHUBCLIENT_LL_02_088: [ Otherwise, IoTHubClient_LL_UploadToBlob shall succeed and return IOTHUB_CLIENT_OK. ]*/
-/*Tests_SRS_IOTHUBCLIENT_LL_02_083: [ IoTHubClient_LL_UploadToBlob shall call Blob_UploadMultipleBlocksFromSasUri and capture the HTTP return code and HTTP body. ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_99_001: [ IoTHubClient_LL_UploadToBlob shall create a struct containing the source, the size, and the remaining size to upload. ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_99_002: [ IoTHubClient_LL_UploadToBlob shall call IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl with FileUpload_GetData_Callback as getDataCallback and pass the struct created at step SRS_IOTHUBCLIENT_LL_99_001 as context ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_064: [ IoTHubClient_LL_UploadMultipleBlocksToBlob shall create an HTTPAPIEX_HANDLE to the IoTHub hostname. ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_066: [ IoTHubClient_LL_UploadMultipleBlocksToBlob shall create an HTTP relative path formed from "/devices/" + deviceId + "/files/" + destinationFileName + "?api-version=API_VERSION". ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_068: [ IoTHubClient_LL_UploadMultipleBlocksToBlob shall create an HTTP responseContent BUFFER_HANDLE. ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_070: [ IoTHubClient_LL_UploadMultipleBlocksToBlob shall create request HTTP headers. ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_072: [ IoTHubClient_LL_UploadMultipleBlocksToBlob shall add the following name:value to request HTTP headers: ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_073: [ If the credentials used to create iotHubClientHandle have "sasToken" then IoTHubClient_LL_UploadMultipleBlocksToBlob shall add the following HTTP request headers: ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_075: [ IoTHubClient_LL_UploadMultipleBlocksToBlob shall execute HTTPAPIEX_ExecuteRequest passing the following information for arguments: ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_081: [ Otherwise, IoTHubClient_LL_UploadMultipleBlocksToBlob shall use parson to extract and save the following information from the response buffer: correlationID and SasUri. ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_085: [ IoTHubClient_LL_UploadMultipleBlocksToBlob shall use the same authorization as step 1. to prepare and perform a HTTP request with the following parameters: ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_088: [ Otherwise, IoTHubClient_LL_UploadMultipleBlocksToBlob shall succeed and return IOTHUB_CLIENT_OK. ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_083: [ IoTHubClient_LL_UploadMultipleBlocksToBlob shall call Blob_UploadMultipleBlocksFromSasUri and capture the HTTP return code and HTTP body. ]*/
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SAS_token_happypath)
 {
     ///arrange
@@ -1391,7 +1393,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SAS_token_when_step1_http_code_is400_
     IoTHubClient_LL_UploadToBlob_Destroy(h);
 }
 
-/*Tests_SRS_IOTHUBCLIENT_LL_02_077: [ If HTTP statusCode is greater than or equal to 300 then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_077: [ If HTTP statusCode is greater than or equal to 300 then IoTHubClient_LL_UploadMultipleBlocksToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SAS_token_when_step2_httpStatusCode_is_bad_fails)
 {
     ///arrange
@@ -1711,7 +1713,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SAS_token_when_step2_httpStatusCode_i
     IoTHubClient_LL_UploadToBlob_Destroy(h);
 }
 
-/*Tests_SRS_IOTHUBCLIENT_LL_02_087: [ If the statusCode of the HTTP request is greater than or equal to 300 then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_087: [ If the statusCode of the HTTP request is greater than or equal to 300 then IoTHubClient_LL_UploadMultipleBlocksToBlob shall fail and return IOTHUB_CLIENT_ERROR ]*/
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SAS_token_when_step3_httpStatusCode_is_bad_fails)
 {
     ///arrange
@@ -2032,15 +2034,15 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SAS_token_when_step3_httpStatusCode_i
     IoTHubClient_LL_UploadToBlob_Destroy(h);
 }
 
-/*Tests_SRS_IOTHUBCLIENT_LL_02_065: [ If creating the HTTPAPIEX_HANDLE fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-/*Tests_SRS_IOTHUBCLIENT_LL_02_067: [ If creating the relativePath fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-/*Tests_SRS_IOTHUBCLIENT_LL_02_069: [ If creating the HTTP response buffer handle fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-/*Tests_SRS_IOTHUBCLIENT_LL_02_071: [ If creating the HTTP headers fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-/*Tests_SRS_IOTHUBCLIENT_LL_02_074: [ If adding "Authorization" fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR ]*/
-/*Tests_SRS_IOTHUBCLIENT_LL_02_076: [ If HTTPAPIEX_ExecuteRequest call fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-/*Tests_SRS_IOTHUBCLIENT_LL_02_082: [ If extracting and saving the correlationId or SasUri fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-/*Tests_SRS_IOTHUBCLIENT_LL_02_084: [ If Blob_UploadMultipleBlocksFromSasUri fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-/*Tests_SRS_IOTHUBCLIENT_LL_02_086: [ If performing the HTTP request fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_065: [ If creating the HTTPAPIEX_HANDLE fails then IoTHubClient_LL_UploadMultipleBlocksToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_067: [ If creating the relativePath fails then IoTHubClient_LL_UploadMultipleBlocksToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_069: [ If creating the HTTP response buffer handle fails then IoTHubClient_LL_UploadMultipleBlocksToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_071: [ If creating the HTTP headers fails then IoTHubClient_LL_UploadMultipleBlocksToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_074: [ If adding "Authorization" fails then IoTHubClient_LL_UploadMultipleBlocksToBlob shall fail and return IOTHUB_CLIENT_ERROR ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_076: [ If HTTPAPIEX_ExecuteRequest call fails then IoTHubClient_LL_UploadMultipleBlocksToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_082: [ If extracting and saving the correlationId or SasUri fails then IoTHubClient_LL_UploadMultipleBlocksToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_084: [ If Blob_UploadMultipleBlocksFromSasUri fails then IoTHubClient_LL_UploadMultipleBlocksToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_086: [ If performing the HTTP request fails then IoTHubClient_LL_UploadMultipleBlocksToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SAS_token_unhappypaths)
 {
     int result2;
@@ -2520,8 +2522,8 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_Destroy_with_DeviceKey_happypath)
     ///cleanup
 }
 
-/*Tests_SRS_IOTHUBCLIENT_LL_02_078: [ If the credentials used to create iotHubClientHandle have "deviceKey" then IoTHubClient_LL_UploadToBlob shall create an HTTPAPIEX_SAS_HANDLE passing as arguments: ]*/
-/*Tests_SRS_IOTHUBCLIENT_LL_02_090: [ IoTHubClient_LL_UploadToBlob shall call HTTPAPIEX_SAS_ExecuteRequest passing as arguments: ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_078: [ If the credentials used to create iotHubClientHandle have "deviceKey" then IoTHubClient_LL_UploadMultipleBlocksToBlob shall create an HTTPAPIEX_SAS_HANDLE passing as arguments: ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_090: [ IoTHubClient_LL_UploadMultipleBlocksToBlob shall call HTTPAPIEX_SAS_ExecuteRequest passing as arguments: ]*/
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_deviceKey_happypath)
 {
     ///arrange
@@ -3005,7 +3007,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_deviceKey_when_step1_httpStatusCode_i
 }
 
 
-/*Tests_SRS_IOTHUBCLIENT_LL_02_080: [ If status code is greater than or equal to 300 then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_080: [ If status code is greater than or equal to 300 then IoTHubClient_LL_UploadMultipleBlocksToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_deviceKey_when_step3_httpStatusCode_is_400_it_fails)
 {
     ///arrange
@@ -3346,8 +3348,8 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_deviceKey_when_step3_httpStatusCode_i
     IoTHubClient_LL_UploadToBlob_Destroy(h);
 }
 
-/*Tests_SRS_IOTHUBCLIENT_LL_02_089: [ If creating the HTTPAPIEX_SAS_HANDLE fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-/*Tests_SRS_IOTHUBCLIENT_LL_02_079: [ If HTTPAPIEX_SAS_ExecuteRequest fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_089: [ If creating the HTTPAPIEX_SAS_HANDLE fails then IoTHubClient_LL_UploadMultipleBlocksToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_079: [ If HTTPAPIEX_SAS_ExecuteRequest fails then IoTHubClient_LL_UploadMultipleBlocksToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_deviceKey_unhappypaths)
 {
     ///arrange
@@ -3748,7 +3750,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_deviceKey_unhappypaths)
 
 /*Tests_SRS_IOTHUBCLIENT_LL_02_106: [ - x509certificate and x509privatekey saved options shall be passed on the HTTPAPIEX_SetOption ]*/
 /*Tests_SRS_IOTHUBCLIENT_LL_02_107: [ - "Authorization" header shall not be build. ]*/
-/*Tests_SRS_IOTHUBCLIENT_LL_02_108: [ IoTHubClient_LL_UploadToBlob shall execute HTTPAPIEX_ExecuteRequest passing the following information for arguments: ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_108: [ IoTHubClient_LL_UploadMultipleBlocksToBlob shall execute HTTPAPIEX_ExecuteRequest passing the following information for arguments: ]*/
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_passes_x509_information_to_HTTPAPIEX_happyPath)
 {
     ///arrange
@@ -4071,7 +4073,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_passes_x509_information_to_HTTPAPIEX_
 
 /*Tests_SRS_IOTHUBCLIENT_LL_02_106: [ - x509certificate and x509privatekey saved options shall be passed on the HTTPAPIEX_SetOption ]*/
 /*Tests_SRS_IOTHUBCLIENT_LL_02_107: [ - "Authorization" header shall not be build. ]*/
-/*Tests_SRS_IOTHUBCLIENT_LL_02_108: [ IoTHubClient_LL_UploadToBlob shall execute HTTPAPIEX_ExecuteRequest passing the following information for arguments: ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_108: [ IoTHubClient_LL_UploadMultipleBlocksToBlob shall execute HTTPAPIEX_ExecuteRequest passing the following information for arguments: ]*/
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_passes_x509_information_to_HTTPAPIEX_unhappy_paths)
 {
     ///arrange
