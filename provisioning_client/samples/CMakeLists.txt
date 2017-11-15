@@ -15,5 +15,6 @@ endfunction()
 add_sample_directory(iothub_client_sample_hsm)
 
 if(${use_mqtt} AND ${use_amqp})
+    add_sample_directory(prov_dev_client_ll_sample)
     add_sample_directory(prov_dev_client_sample)
 endif()

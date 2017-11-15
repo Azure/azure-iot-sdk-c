@@ -14,7 +14,7 @@ $errorActionPreference    = "stop"
 
 $_rootCertSubject         = "CN=Azure IoT CA TestOnly Root CA"
 $_intermediateCertSubject = "CN=Azure IoT CA TestOnly Intermediate {0} CA"
-$_privateKeyPassword      = "123"
+$_privateKeyPassword      = "1234"
 
 $rootCACerFileName          = "./RootCA.cer"
 $rootCAPemFileName          = "./RootCA.pem"
@@ -149,7 +149,8 @@ function New-CACertsVerificationCert([string]$requestedSubjectName)
     Write-Host ("Certificate with subject {0} has been output to {1}" -f $cnRequestedSubjectName, (Join-Path (get-location).path $verifyRequestedFileName)) 
 }
 
-function New-CACertsDevice([string]$deviceName, [string]$signingCertSubject=$_rootCertSubject)
+
+function New-CACertsDevice([string]$deviceName, [string]$signingCertSubject=$_rootCertSubject, [bool]$isEdgeDevice=$false)
 {
     $cnNewDeviceSubjectName = ("CN={0}" -f $deviceName)
     $newDevicePfxFileName = ("./{0}.pfx" -f $deviceName)
@@ -158,8 +159,18 @@ function New-CACertsDevice([string]$deviceName, [string]$signingCertSubject=$_ro
     $newDevicePemPublicFileName   = ("./{0}-public.pem" -f $deviceName)
     
     $signingCert = Get-CACertsCertBySubjectName $signingCertSubject ## "CN=Azure IoT CA TestOnly Intermediate 1 CA"
+    
+    # Certificates for edge devices need to be able to sign other certs.
+    if ($isEdgeDevice -eq $true)
+    {
+        $isASigner = $true
+    }
+    else
+    {
+        $isASigner = $false
+    }
 
-    $newDeviceCertPfx = New-CACertsSelfSignedCertificate $cnNewDeviceSubjectName $signingCert $false
+    $newDeviceCertPfx = New-CACertsSelfSignedCertificate $cnNewDeviceSubjectName $signingCert $isASigner
     
     $certSecureStringPwd = ConvertTo-SecureString -String $_privateKeyPassword -Force -AsPlainText
 
@@ -188,6 +199,11 @@ function New-CACertsDevice([string]$deviceName, [string]$signingCertSubject=$_ro
     openssl x509 -in $newDevicePemAllFileName -out $newDevicePemPublicFileName
  
     Write-Host ("Certificate with subject {0} has been output to {1}" -f $cnNewDeviceSubjectName, (Join-Path (get-location).path $newDevicePemPublicFileName)) 
+}
+
+function New-CACertsEdgeDevice([string]$deviceName, [string]$signingCertSubject=$_rootCertSubject)
+{
+    New-CACertsDevice $deviceName $signingCertSubject $true
 }
 
 function Write-CACertsCertificatesToEnvironment([string]$deviceName, [string]$iothubName, [bool]$useIntermediate)

@@ -519,13 +519,13 @@ static void destroy_instance(PROV_INSTANCE_INFO* prov_info)
     free(prov_info);
 }
 
-PROV_DEVICE_LL_HANDLE Prov_Device_LL_Create(const char* uri, const char* scope_id, PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION protocol)
+PROV_DEVICE_LL_HANDLE Prov_Device_LL_Create(const char* uri, const char* id_scope, PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION protocol)
 {
     PROV_INSTANCE_INFO* result;
     /* Codes_SRS_PROV_CLIENT_07_001: [If uri is NULL Prov_Device_LL_CreateFromUri shall return NULL.] */
-    if (uri == NULL || scope_id == NULL || protocol == NULL)
+    if (uri == NULL || id_scope == NULL || protocol == NULL)
     {
-        LogError("Invalid parameter specified uri: %p, scope_id: %p, protocol: %p", uri, scope_id, protocol);
+        LogError("Invalid parameter specified uri: %p, id_scope: %p, protocol: %p", uri, id_scope, protocol);
         result = NULL;
     }
     else
@@ -544,11 +544,11 @@ PROV_DEVICE_LL_HANDLE Prov_Device_LL_Create(const char* uri, const char* scope_i
             result->prov_state = CLIENT_STATE_READY;
             result->prov_transport_protocol = protocol();
 
-            /* Codes_SRS_PROV_CLIENT_07_034: [ Prov_Device_LL_Create shall construct a scope_id by base64 encoding the uri. ] */
-            if (mallocAndStrcpy_s(&result->scope_id, scope_id) != 0)
+            /* Codes_SRS_PROV_CLIENT_07_034: [ Prov_Device_LL_Create shall construct a id_scope by base64 encoding the uri. ] */
+            if (mallocAndStrcpy_s(&result->scope_id, id_scope) != 0)
             {
                 /* Codes_SRS_PROV_CLIENT_07_003: [ If any error is encountered, Prov_Device_LL_CreateFromUri shall return NULL. ] */
-                LogError("failed to construct scope_id");
+                LogError("failed to construct id_scope");
                 free(result);
                 result = NULL;
             }

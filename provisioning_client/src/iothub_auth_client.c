@@ -15,8 +15,6 @@
 #include "azure_prov_client/iothub_auth_client.h"
 #include "azure_prov_client/iothub_security_factory.h"
 #include "hsm_client_data.h"
-#include "hsm_client_x509_abstract.h"
-#include "hsm_client_tpm_abstract.h"
 
 typedef struct IOTHUB_SECURITY_INFO_TAG
 {
@@ -27,7 +25,7 @@ typedef struct IOTHUB_SECURITY_INFO_TAG
     HSM_CLIENT_CREATE hsm_client_create;
     HSM_CLIENT_DESTROY hsm_client_destroy;
 
-    HSM_CLIENT_SIGN_DATA hsm_client_sign_data;
+    HSM_CLIENT_SIGN_WITH_IDENTITY hsm_client_sign_data;
 
     HSM_CLIENT_GET_CERTIFICATE hsm_client_get_cert;
     HSM_CLIENT_GET_ALIAS_KEY hsm_client_get_alias_key;
@@ -56,7 +54,7 @@ IOTHUB_SECURITY_HANDLE iothub_device_auth_create()
             const HSM_CLIENT_TPM_INTERFACE* tpm_interface = hsm_client_tpm_interface();
             if (((result->hsm_client_create = tpm_interface->hsm_client_tpm_create) == NULL) ||
                 ((result->hsm_client_destroy = tpm_interface->hsm_client_tpm_destroy) == NULL) ||
-                ((result->hsm_client_sign_data = tpm_interface->hsm_client_sign_data) == NULL)
+                ((result->hsm_client_sign_data = tpm_interface->hsm_client_sign_with_identity) == NULL)
                 )
             {
                 /* Codes_IOTHUB_DEV_AUTH_07_034: [ if any of the iothub_security_interface function are NULL iothub_device_auth_create shall return NULL. ] */

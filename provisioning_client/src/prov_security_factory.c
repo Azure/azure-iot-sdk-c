@@ -6,8 +6,7 @@
 #include "azure_prov_client/iothub_security_factory.h"
 #include "azure_c_shared_utility/xlogging.h"
 
-#include "hsm_client_tpm_abstract.h"
-#include "hsm_client_x509_abstract.h"
+#include "hsm_client_data.h"
 
 static SECURE_DEVICE_TYPE g_device_hsm_type = SECURE_DEVICE_TYPE_UNKNOWN;
 
@@ -47,28 +46,14 @@ int prov_dev_security_init(SECURE_DEVICE_TYPE hsm_type)
     }
     if (result == 0)
     {
-        if (g_device_hsm_type == SECURE_DEVICE_TYPE_X509)
-        {
-            result = hsm_init_x509_system();
-        }
-        else
-        {
-            result = hsm_client_tpm_init();
-        }
+        result = initialize_hsm_system();
     }
     return result;
 }
 
 void prov_dev_security_deinit(void)
 {
-    if (g_device_hsm_type == SECURE_DEVICE_TYPE_X509)
-    {
-        hsm_deinit_x509_system();
-    }
-    else
-    {
-        hsm_client_tpm_deinit();
-    }
+    deinitialize_hsm_system();
 }
 
 SECURE_DEVICE_TYPE prov_dev_security_get_type(void)

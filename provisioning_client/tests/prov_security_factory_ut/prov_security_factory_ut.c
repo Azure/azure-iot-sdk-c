@@ -30,8 +30,9 @@ static void my_gballoc_free(void* ptr)
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
-#include "hsm_client_tpm_abstract.h"
-#include "hsm_client_x509_abstract.h"
+#include "hsm_client_data.h"
+MOCKABLE_FUNCTION(, int, initialize_hsm_system);
+MOCKABLE_FUNCTION(, void, deinitialize_hsm_system);
 
 #define DPS_SECURITY_FACTORY_H
 #include "azure_prov_client/iothub_security_factory.h"
@@ -79,8 +80,7 @@ TEST_SUITE_INITIALIZE(suite_init)
 
     //REGISTER_UMOCK_ALIAS_TYPE(BUFFER_HANDLE, void*);
 
-    REGISTER_GLOBAL_MOCK_RETURN(hsm_init_x509_system, 0);
-    REGISTER_GLOBAL_MOCK_RETURN(hsm_client_tpm_init, 0);
+    REGISTER_GLOBAL_MOCK_RETURN(initialize_hsm_system, 0);
 
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
@@ -130,7 +130,7 @@ TEST_FUNCTION(prov_dev_security_init_sas_success)
     //arrange
     STRICT_EXPECTED_CALL(iothub_security_type());
     STRICT_EXPECTED_CALL(iothub_security_init(IOTHUB_SECURITY_TYPE_SAS));
-    STRICT_EXPECTED_CALL(hsm_client_tpm_init());
+    STRICT_EXPECTED_CALL(initialize_hsm_system());
 
     //act
     int result = prov_dev_security_init(SECURE_DEVICE_TYPE_TPM);
@@ -146,7 +146,7 @@ TEST_FUNCTION(prov_dev_security_init_sas_types_success)
 {
     //arrange
     STRICT_EXPECTED_CALL(iothub_security_type()).SetReturn(IOTHUB_SECURITY_TYPE_SAS);
-    STRICT_EXPECTED_CALL(hsm_client_tpm_init());
+    STRICT_EXPECTED_CALL(initialize_hsm_system());
 
     //act
     int result = prov_dev_security_init(SECURE_DEVICE_TYPE_TPM);
@@ -193,7 +193,7 @@ TEST_FUNCTION(prov_dev_security_init_x509_success)
     //arrange
     STRICT_EXPECTED_CALL(iothub_security_type());
     STRICT_EXPECTED_CALL(iothub_security_init(IOTHUB_SECURITY_TYPE_X509));
-    STRICT_EXPECTED_CALL(hsm_init_x509_system());
+    STRICT_EXPECTED_CALL(initialize_hsm_system());
 
     //act
     int result = prov_dev_security_init(SECURE_DEVICE_TYPE_X509);
@@ -209,7 +209,7 @@ TEST_FUNCTION(prov_dev_security_init_x509_types_success)
 {
     //arrange
     STRICT_EXPECTED_CALL(iothub_security_type()).SetReturn(IOTHUB_SECURITY_TYPE_X509);
-    STRICT_EXPECTED_CALL(hsm_init_x509_system());
+    STRICT_EXPECTED_CALL(initialize_hsm_system());
 
     //act
     int result = prov_dev_security_init(SECURE_DEVICE_TYPE_X509);
@@ -242,7 +242,7 @@ TEST_FUNCTION(prov_dev_security_deinit_tpm_success)
     umock_c_reset_all_calls();
 
     //arrange
-    STRICT_EXPECTED_CALL(hsm_client_tpm_deinit());
+    STRICT_EXPECTED_CALL(deinitialize_hsm_system());
 
     //act
     prov_dev_security_deinit();
@@ -259,7 +259,7 @@ TEST_FUNCTION(prov_dev_security_deinit_x509_success)
     umock_c_reset_all_calls();
 
     //arrange
-    STRICT_EXPECTED_CALL(hsm_deinit_x509_system());
+    STRICT_EXPECTED_CALL(deinitialize_hsm_system());
 
     //act
     prov_dev_security_deinit();

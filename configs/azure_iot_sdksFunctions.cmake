@@ -3,7 +3,7 @@
 
 function(getIoTSDKVersion)
 	# First find the applicable line in the file
-	file (STRINGS "${CMAKE_SOURCE_DIR}/iothub_client/inc/iothub_client_version.h" iotsdkverstr
+	file (STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/iothub_client/inc/iothub_client_version.h" iotsdkverstr
 		REGEX "^[\t ]*#[\t ]*define[\t ]*IOTHUB_SDK_VERSION[\t ]*\"([0-9]+)[.]([0-9]+)[.]([0-9]+)\"")
 		
 	if (!MATCHES)

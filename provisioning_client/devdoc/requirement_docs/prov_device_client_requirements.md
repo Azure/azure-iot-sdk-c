@@ -8,167 +8,99 @@ Provisioning Client module implements connecting to the DPS cloud service.
 
 ## Dependencies
 
-uhttp
+prov_device_ll_client
 
 ## Exposed API
 
 ```c
-typedef struct PROV_INSTANCE_INFO_TAG* PROV_DEVICE_LL_HANDLE;
+typedef struct PROV_INSTANCE_INFO_TAG* PROV_DEVICE_HANDLE;
 
-#define PROV_DEVICE_RESULT_VALUE       \
-    PROV_DEVICE_RESULT_OK,              \
-    PROV_DEVICE_RESULT_INVALID_ARG,     \
-    PROV_DEVICE_RESULT_SUCCESS,         \
-    PROV_DEVICE_RESULT_MEMORY,          \
-    PROV_DEVICE_RESULT_PARSING,         \
-    PROV_DEVICE_RESULT_TRANSPORT,       \
-    PROV_DEVICE_RESULT_INVALID_STATE,   \
-    PROV_DEVICE_RESULT_DEV_AUTH_ERROR,  \
-    PROV_DEVICE_RESULT_TIMEOUT,         \
-    PROV_DEVICE_RESULT_KEY_ERROR,       \
-    PROV_DEVICE_RESULT_ERROR
-
-DEFINE_ENUM(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
-
-#define PROV_DEVICE_REG_STATUS_VALUES      \
-    PROV_DEVICE_REG_STATUS_CONNECTED,      \
-    PROV_DEVICE_REG_STATUS_REGISTERING,    \
-    PROV_DEVICE_REG_STATUS_ASSIGNING,      \
-    PROV_DEVICE_REG_STATUS_ASSIGNED,       \
-    PROV_DEVICE_REG_STATUS_ERROR
-
-DEFINE_ENUM(PROV_DEVICE_REG_STATUS, PROV_DEVICE_REG_STATUS_VALUES);
-
-typedef void(*PROV_DEVICE_CLIENT_REGISTER_DEVICE_CALLBACK)(PROV_DEVICE_RESULT register_result, const char* iothub_uri, const char* device_id, void* user_context);
-typedef void(*PROV_DEVICE_CLIENT_REGISTER_STATUS_CALLBACK)(PROV_DEVICE_REG_STATUS reg_status, void* user_context);
-
-typedef const PROV_DEVICE_TRANSPORT_PROVIDER*(*PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION)(void);
-
-MOCKABLE_FUNCTION(, PROV_DEVICE_LL_HANDLE, Prov_Device_LL_Create, const char*, dps_uri, const char*, scope_id, PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION, dps_protocol);
-MOCKABLE_FUNCTION(, void, Prov_Device_LL_Destroy, PROV_DEVICE_LL_HANDLE, handle);
-MOCKABLE_FUNCTION(, PROV_DEVICE_RESULT, Prov_Device_LL_Register_Device, PROV_DEVICE_LL_HANDLE, handle, PROV_DEVICE_CLIENT_REGISTER_DEVICE_CALLBACK, register_callback, void*, user_context, PROV_DEVICE_CLIENT_REGISTER_STATUS_CALLBACK, reg_status_cb, void*, status_user_ctext);
-MOCKABLE_FUNCTION(, void, Prov_Device_LL_DoWork, PROV_DEVICE_LL_HANDLE, handle);
-MOCKABLE_FUNCTION(, PROV_DEVICE_RESULT, Prov_Device_LL_SetOption, PROV_DEVICE_LL_HANDLE, handle, const char*, optionName, const void*, value);
-MOCKABLE_FUNCTION(, const char*, Prov_Device_LL_GetVersionString);
+MOCKABLE_FUNCTION(, PROV_DEVICE_HANDLE, Prov_Device_Create, const char*, uri, const char*, scope_id, PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION, protocol);
+MOCKABLE_FUNCTION(, void, Prov_Device_Destroy, PROV_DEVICE_HANDLE, prov_device_handle);
+MOCKABLE_FUNCTION(, PROV_DEVICE_RESULT, Prov_Device_Register_Device, PROV_DEVICE_HANDLE, prov_device_handle, PROV_DEVICE_CLIENT_REGISTER_DEVICE_CALLBACK, register_callback, void*, user_context, PROV_DEVICE_CLIENT_REGISTER_STATUS_CALLBACK, register_status_callback, void*, status_user_context);
+MOCKABLE_FUNCTION(, PROV_DEVICE_RESULT, Prov_Device_SetOption, PROV_DEVICE_HANDLE, prov_device_handle, const char*, optionName, const void*, value);
+MOCKABLE_FUNCTION(, const char*, Prov_Device_GetVersionString);
 ```
 
-### Prov_device_LL_Create
+### Prov_device_Create
 
 ```c
-extern PROV_DEVICE_LL_HANDLE Prov_device_LL_Create(const char* drs_uri, IOTHUB_PROV_ON_ERROR_CALLBACK on_error_callback, void* user_context);
+extern PROV_DEVICE_HANDLE Prov_Device_Create(const char* uri, const char* scope_id, PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION protocol)
 ```
 
-**SRS_PROV_CLIENT_07_001: [** If uri is NULL `Prov_device_LL_Create` shall return NULL.**]**
+**SRS_PROV_DEVICE_CLIENT_12_001: [** If any of the input parameter is NULL `Prov_Device_Create` shall return NULL.**]**
 
-**SRS_PROV_CLIENT_07_002: [** `Prov_device_LL_Create` shall allocate a PROV_DEVICE_LL_HANDLE and initialize all members. **]**
+**SRS_PROV_DEVICE_CLIENT_12_002: [** The function shall allocate memory for PROV_DEVICE_INSTANCE data structure.**]**
 
-**SRS_PROV_CLIENT_07_003: [** If any error is encountered, `Prov_device_LL_Create` shall return NULL. **]**
+**SRS_PROV_DEVICE_CLIENT_12_003: [** If the memory allocation failed the function shall return NULL.**]**
 
-**SRS_PROV_CLIENT_07_004: [** `on_error_callback` shall be used to communicate error that occur during the registration with DPS. **]**
+**SRS_PROV_DEVICE_CLIENT_12_004: [** The function shall initialize the Lock.**]**
 
-**SRS_PROV_CLIENT_07_034: [** `Prov_device_LL_Create` shall construct a scope_id by base64 encoding the drs_uri. **]**
+**SRS_PROV_DEVICE_CLIENT_12_005: [** If the Lock initialization failed the function shall clean up the all resources and return NULL.**]**
 
-**SRS_PROV_CLIENT_07_035: [** `Prov_device_LL_Create` shall store the registration_id from the security module. **]**
+**SRS_PROV_DEVICE_CLIENT_12_006: [** The function shall call the LL layer Prov_Device_LL_Create function and return with it's result.**]**
 
-### Prov_device_LL_Destroy
+**SRS_PROV_DEVICE_CLIENT_12_007: [** The function shall initialize the result datastructure.**]**
+
+
+### Prov_Device_Destroy
 
 ```c
-extern void Prov_device_LL_Destroy(PROV_DEVICE_LL_HANDLE handle)
+extern void Prov_Device_Destroy(PROV_DEVICE_HANDLE prov_device_handle)
 ```
 
-**SRS_PROV_CLIENT_07_005: [** If handle is NULL `Prov_device_LL_Destroy` shall do nothing. **]**
+**SRS_PROV_DEVICE_CLIENT_12_008: [** If the input parameter is NULL `Prov_Device_Destroy` shall return.**]**
 
-**SRS_PROV_CLIENT_07_006: [** `Prov_device_LL_Destroy` shall destroy resources associated with the drs_client **]**
+**SRS_PROV_DEVICE_CLIENT_12_009: [** The function shall check the Lock status and if it is not OK set the thread signal to stop.**]**
 
-### Prov_device_LL_Register_Device
+**SRS_PROV_DEVICE_CLIENT_12_010: [** The function shall check the Lock status and if it is OK set the thread signal to stop and unlock the Lock.**]**
+
+**SRS_PROV_DEVICE_CLIENT_12_011: [** If there is a running worker thread the function shall call join to finish.**]**
+
+**SRS_PROV_DEVICE_CLIENT_12_012: [** The function shall call the LL layer Prov_Device_LL_Destroy with the given handle.**]**
+
+**SRS_PROV_DEVICE_CLIENT_12_013: [** The function shall free the Lock resource with de-init.**]**
+
+**SRS_PROV_DEVICE_CLIENT_12_014: [** The function shall free the device handle resource.**]**
+
+
+### Prov_Device_Register_Device
 
 ```c
-extern PROV_DEVICE_RESULT Prov_device_LL_Register_Device(PROV_DEVICE_LL_HANDLE handle, const char* device_id, IOTHUB_PROV_REGISTER_DEVICE_CALLBACK register_callback, void* user_context)
+extern PROV_DEVICE_RESULT Prov_Device_Register_Device(PROV_DEVICE_HANDLE prov_device_handle, PROV_DEVICE_CLIENT_REGISTER_DEVICE_CALLBACK register_callback, void* user_context, PROV_DEVICE_CLIENT_REGISTER_STATUS_CALLBACK register_status_callback, void* status_user_context)
 ```
 
-**SRS_PROV_CLIENT_07_007: [** If handle, device_id or register_callback is NULL, `Prov_device_LL_Register_Device` shall return IOTHUB_PROV_INVALID_ARG. **]**
+**SRS_PROV_DEVICE_CLIENT_12_015: [** If the prov_device_handle or register_callback input parameter is NULL `Prov_Device_Register_Device` shall return with invalid argument error.**]**
 
-**SRS_PROV_CLIENT_07_008: [** `Prov_device_LL_Register_Device` shall set the state to send the registration request to DPS on subsequent DoWork calls. **]**
+**SRS_PROV_DEVICE_CLIENT_12_016: [** The function shall start a worker thread with the device instance.**]**
 
-**SRS_PROV_CLIENT_07_009: [** Upon success `Prov_device_LL_Register_Device` shall return IOTHUB_PROV_OK. **]**
+**SRS_PROV_DEVICE_CLIENT_12_017: [** If the thread initialization failed the function shall return error.**]**
 
-**SRS_PROV_CLIENT_07_031: [** Any failure that is encountered `Prov_device_LL_Register_Device` shall return IOTHUB_PROV_ERROR. **]**
+**SRS_PROV_DEVICE_CLIENT_12_018: [** The function shall try to lock the Lock.**]**
 
-### Prov_device_LL_DoWork
+**SRS_PROV_DEVICE_CLIENT_12_019: [** If the locking failed the function shall return with error.**]**
+
+**SRS_PROV_DEVICE_CLIENT_12_020: [** The function shall call the LL layer Prov_Device_LL_Register_Device with the given parameters and return with the result.**]**
+
+**SRS_PROV_DEVICE_CLIENT_12_021: [** The function shall unlock the Lock.**]**
+
+
+### Prov_Device_SetOption
 
 ```c
-extern void Prov_device_LL_DoWork(PROV_DEVICE_LL_HANDLE handle)
+extern PROV_DEVICE_RESULT Prov_Device_SetOption(PROV_DEVICE_HANDLE prov_device_handle, const char* optionName, const void* value)
 ```
 
-**SRS_PROV_CLIENT_07_010: [** If handle is NULL, `Prov_device_LL_DoWork` shall do nothing. **]**
+**SRS_PROV_DEVICE_CLIENT_12_022: [** If any of the input parameter is NULL `Prov_Device_SetOption` shall return with invalid argument error.**]**
 
-**SRS_PROV_CLIENT_07_011: [** `Prov_device_LL_DoWork` shall call the underlying `http_client_dowork` function. **]**
+**SRS_PROV_DEVICE_CLIENT_12_023: [** The function shall call the LL layer Prov_Device_LL_SetOption with the given parameters and return with the result.**]**
 
-`Prov_device_LL_DoWork` is a state machine that shall go through the following states:
 
-**SRS_PROV_CLIENT_07_028: [** `PROV_CLIENT_STATE_READY` is the initial state after the DPS object is created which will send a `uhttp_client_open` call to the DPS http endpoint. **]**
+### Prov_Device_GetVersionString
 
-**SRS_PROV_CLIENT_07_029: [** `iothub_drs_client` shall set the is_connected variable once `on_http_connected` is called from the uHttp object, which causes the transition to the `PROV_CLIENT_STATE_REGISTER_SEND` state. **]**
+```c
+const char* Prov_Device_GetVersionString(void)
+```
 
-**SRS_PROV_CLIENT_07_030: [** `PROV_CLIENT_STATE_REGISTER_SEND` state shall retrieve the endorsement_key and register_id from a call to the dev_auth modules function. **]**
+**SRS_PROV_DEVICE_CLIENT_12_024: [** The function shall call the LL layer Prov_Device_LL_GetVersionString and return with the result.**]**
 
-**SRS_PROV_CLIENT_07_013: [** The `PROV_CLIENT_STATE_REGISTER_SEND` state shall construct http request using `uhttp_client_execute_request` to the DPS service with the following endorsement information: **]**
-
-DPS Service HTTP Request Type: POST
-
-DPS Service URI:
-    /drs/registrations/<registration_id>/register-me?api-version=<api_version>
-
-DPS json Content:
-    { "registrationId":"<registration_id>", "attestation": { "tpm": { "endorsementKey": "<endorsement_key>"} }, "properties": null }
-
-**SRS_PROV_CLIENT_07_018: [** Upon receiving the reply from `iothub_drs_client` shall transition to the `PROV_CLIENT_STATE_REGISTER_RECV` state **]**
-
-**SRS_PROV_CLIENT_07_014: [** The `PROV_CLIENT_STATE_REGISTER_RECV` state shall process the content with the following format: **]**
-
-{ "operationId": "<operation_id>","status": "assigning" }
-
-**SRS_PROV_CLIENT_07_19: [** Upon successfully sending the messge `iothub_drs_client` shall transition to the `PROV_CLIENT_STATE_REGISTER_SENT` state  **]**
-
-**SRS_PROV_CLIENT_07_032: [** If the `PROV_CLIENT_STATE_REGISTER_SENT` message response status code is 200 `iothub_drs_client` shall transition to the `PROV_CLIENT_STATE_STATUS_SEND` state. **]**
-
-**SRS_PROV_CLIENT_07_033: [** If the `PROV_CLIENT_STATE_REGISTER_SENT` message response status code is 401 `iothub_drs_client` shall transition to the `PROV_CLIENT_STATE_CONFIRM_SEND` state. **]**
-
-**SRS_PROV_CLIENT_07_020: [** `iothub_drs_client` shall call into the dev_auth module to decrypt the nonce received from the DPS service. **]**
-
-**SRS_PROV_CLIENT_07_021: [** If an error is encountered decrypting the nonce, `iothub_drs_client` shall transition to the PROV_CLIENT_STATE_ERROR state **]**
-
-**SRS_PROV_CLIENT_07_015: [** `PROV_CLIENT_STATE_CONFIRM_SEND` shall construct an http request using `uhttp_client_execute_request` and send a message with the following format: **]**
-
-DPS Service HTTP Request Type: POST
-DPS Service URI:
-    /drs/trust-confirmation/<registration_id>?api-version=<api_version>
-DPS json Content:
-    {
-        correlationId: "<correlation_Id>",
-        nonce: "decrypted_nonce"
-    }
-
-**SRS_PROV_CLIENT_07_022: [** Upon receiving the reply of the `PROV_CLIENT_STATE_CONFIRM_SEND` message from DPS, `iothub_drs_client` shall transistion to the `PROV_CLIENT_STATE_CONFIRM_RECV` state. **]**
-
-**SRS_PROV_CLIENT_07_023: [** `PROV_CLIENT_STATE_CONFIRM_RECV` state shall process the content with the following format: **]**
-
-**SRS_PROV_CLIENT_07_024: [** Once the progressUrl is extracted from the reply `iothub_drs_client` shall transition to the `PROV_CLIENT_STATE_URL_REQ_RECV` state. **]**
-
-**SRS_PROV_CLIENT_07_025: [** `PROV_CLIENT_STATE_URL_REQ_SEND` shall construct an http request using `uhttp_client_execute_request` to the DPS Service message with the following format: **]**
-
-DPS Service HTTP Request Type: GET
-DPS Service URI:
-    <progressUrl_from_previous_content>?api-version=<api_version>
-DPS json Content:
-    none
-
-**SRS_PROV_CLIENT_07_026: [** Upon receiving the reply of the `PROV_CLIENT_STATE_URL_REQ_SEND` message from DPS, `iothub_drs_client` shall process the the reply of the `PROV_CLIENT_STATE_URL_REQ_SEND` state **]**
-
-{
-    "IotHubUrl" : "<iothub_url>"
-}
-
-**SRS_PROV_CLIENT_07_016: [** `PROV_CLIENT_STATE_URL_REQ_RECV` state shall call the register_callback supplied by the user in the `Prov_device_LL_Register_Device` function call the the url and the iothub keys. **]**
-
-**SRS_PROV_CLIENT_07_017: [** If any errors occur the state shall be set to `PROV_CLIENT_STATE_ERROR` which will cause the user supplied `error_callback` to be executed. **]**

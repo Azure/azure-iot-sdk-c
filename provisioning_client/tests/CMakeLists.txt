@@ -20,6 +20,7 @@ if (${use_mqtt})
 endif()
 
 add_unittest_directory(prov_device_client_ut)
+add_unittest_directory(prov_device_client_ll_ut)
 add_unittest_directory(prov_security_factory_ut)
 
 if(${dps_hsm_x509})

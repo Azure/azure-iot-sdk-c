@@ -8,7 +8,6 @@
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 
-#include "hsm_client_x509_abstract.h"
 #include "hsm_client_riot.h"
 #include "hsm_client_data.h"
 
@@ -496,7 +495,7 @@ static int process_riot_key_info(HSM_CLIENT_X509_INFO* riot_info)
     return result;
 }
 
-int hsm_init_x509_system(void)
+int hsm_client_x509_init(void)
 {
     // Only initialize one time
     if (g_digest_initialized == 0)
@@ -511,7 +510,7 @@ int hsm_init_x509_system(void)
     return 0;
 }
 
-void hsm_deinit_x509_system(void)
+void hsm_client_x509_deinit(void)
 {
 }
 

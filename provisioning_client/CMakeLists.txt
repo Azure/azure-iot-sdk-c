@@ -24,14 +24,14 @@ set(AUTH_CLIENT_C_FILES
 
 set(HSM_CLIENT_LIBRARY)
 
+set(HSM_CLIENT_H_FILES 
+    ./adapters/hsm_client_data.h)
+set(HSM_CLIENT_C_FILES
+    ./adapters/hsm_client_data.c)
+
 if (${hsm_type_custom})
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHSM_AUTH_TYPE_CUSTOM")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHSM_AUTH_TYPE_CUSTOM")
-
-    set(HSM_CLIENT_H_FILES ${HSM_CLIENT_H_FILES} 
-        ./adapters/custom_hsm_abstract.h)
-    set(HSM_CLIENT_C_FILES ${HSM_CLIENT_H_FILES} 
-        ./adapters/custom_hsm_abstract.c)
 
     set(HSM_CLIENT_LIBRARY ${CUSTOM_HSM_LIB})
 endif()
@@ -42,8 +42,7 @@ if (${hsm_type_x509})
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHSM_TYPE_X509")
 
     set(HSM_CLIENT_H_FILES ${HSM_CLIENT_H_FILES} 
-        ./adapters/hsm_client_riot.h
-        ./adapters/hsm_client_x509_abstract.h)
+        ./adapters/hsm_client_riot.h)
     set(HSM_CLIENT_C_FILES ${HSM_CLIENT_C_FILES} 
         ./adapters/hsm_client_riot.c)
 
@@ -61,8 +60,7 @@ if (${hsm_type_sastoken})
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHSM_TYPE_SAS_TOKEN")
 
     set(HSM_CLIENT_H_FILES ${HSM_CLIENT_H_FILES} 
-        ./adapters/hsm_client_tpm.h
-        ./adapters/hsm_client_tpm_abstract.h)
+        ./adapters/hsm_client_tpm.h)
     set(HSM_CLIENT_C_FILES ${HSM_CLIENT_C_FILES} 
         ./adapters/hsm_client_tpm.c)
 
@@ -88,11 +86,17 @@ if(${use_openssl})
     add_definitions(-DUSE_OPENSSL)
 endif()
 
-set(PROV_SOURCE_C_FILES
+set(PROV_DEVICE_CLIENT_SOURCE_C_FILES
+    ./src/prov_device_client.c)
+
+set(PROV_DEVICE_CLIENT_SOURCE_H_FILES
+    ./inc/azure_prov_client/prov_device_client.h)
+
+set(PROV_DEVICE_LL_CLIENT_SOURCE_C_FILES
     ./src/prov_device_ll_client.c
     ../deps/parson/parson.c)
 
-set(PROV_SOURCE_H_FILES
+set(PROV_DEVICE_LL_CLEINT_SOURCE_H_FILES
     ./inc/azure_prov_client/prov_device_ll_client.h
     ../deps/parson/parson.h)
 
@@ -131,9 +135,23 @@ add_library(prov_auth_client ${AUTH_CLIENT_C_FILES} ${AUTH_CLIENT_H_FILES})
 linkSharedUtil(prov_auth_client)
 target_link_libraries(prov_auth_client hsm_security_client)
 
-add_library(prov_device_client ${PROV_SOURCE_C_FILES} ${PROV_SOURCE_H_FILES})
-linkSharedUtil(prov_device_client)
-link_security_client(prov_device_client)
+add_library(prov_device_ll_client ${PROV_DEVICE_LL_CLIENT_SOURCE_C_FILES} ${PROV_DEVICE_LL_CLEINT_SOURCE_H_FILES})
+linkSharedUtil(prov_device_ll_client)
+link_security_client(prov_device_ll_client)
+
+add_library(prov_device_client ${PROV_DEVICE_CLIENT_SOURCE_C_FILES} ${PROV_DEVICE_CLIENT_SOURCE_H_FILES})
+target_link_libraries(prov_device_client  prov_device_ll_client)
+
+add_library(prov_device_client_dll SHARED
+    ${PROV_DEVICE_CLIENT_SOURCE_C_FILES} 
+    ${PROV_DEVICE_CLEINT_SOURCE_H_FILES}
+    ./src/prov_device_client_dll.def
+)
+target_link_libraries(prov_device_client_dll prov_device_ll_client)
+
+if(NOT WIN32)
+    set_target_properties(prov_device_client_dll PROPERTIES OUTPUT_NAME "prov_device_client")
+endif()
 
 if (${use_http})
     set(PROV_HTTP_CLIENT_H_FILES 
@@ -146,7 +164,7 @@ if (${use_http})
     add_library(prov_http_transport ${PROV_HTTP_CLIENT_C_FILES} ${PROV_HTTP_CLIENT_H_FILES})
     linkSharedUtil(prov_http_transport)
 
-    target_link_libraries(prov_http_transport prov_device_client uhttp)
+    target_link_libraries(prov_http_transport uhttp)
 endif()
 
 if (${use_amqp})

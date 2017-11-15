@@ -15,8 +15,6 @@
 
 #include "azure_prov_client/prov_auth_client.h"
 #include "hsm_client_data.h"
-#include "hsm_client_x509_abstract.h"
-#include "hsm_client_tpm_abstract.h"
 
 #include "azure_prov_client/prov_security_factory.h"
 
@@ -31,10 +29,10 @@ typedef struct PROV_AUTH_INFO_TAG
     HSM_CLIENT_CREATE hsm_client_create;
     HSM_CLIENT_DESTROY hsm_client_destroy;
 
-    HSM_CLIENT_IMPORT_KEY hsm_client_import_key;
-    HSM_CLIENT_GET_EK hsm_client_get_endorsement_key;
-    HSM_CLIENT_GET_SRK hsm_client_get_srk;
-    HSM_CLIENT_SIGN_DATA hsm_client_sign_data;
+    HSM_CLIENT_ACTIVATE_IDENTITY_KEY hsm_client_import_key;
+    HSM_CLIENT_GET_ENDORSEMENT_KEY hsm_client_get_endorsement_key;
+    HSM_CLIENT_GET_STORAGE_ROOT_KEY hsm_client_get_srk;
+    HSM_CLIENT_SIGN_WITH_IDENTITY hsm_client_sign_data;
 
     HSM_CLIENT_GET_CERTIFICATE hsm_client_get_cert;
     HSM_CLIENT_GET_ALIAS_KEY hsm_client_get_alias_key;
@@ -163,10 +161,10 @@ PROV_AUTH_HANDLE prov_auth_create()
             const HSM_CLIENT_TPM_INTERFACE* tpm_interface = hsm_client_tpm_interface();
             if ( ( (result->hsm_client_create = tpm_interface->hsm_client_tpm_create) == NULL) ||
                 ((result->hsm_client_destroy = tpm_interface->hsm_client_tpm_destroy) == NULL) ||
-                ((result->hsm_client_import_key = tpm_interface->hsm_client_import_key) == NULL) ||
+                ((result->hsm_client_import_key = tpm_interface->hsm_client_activate_identity_key) == NULL) ||
                 ((result->hsm_client_get_endorsement_key = tpm_interface->hsm_client_get_ek) == NULL) ||
                 ((result->hsm_client_get_srk = tpm_interface->hsm_client_get_srk) == NULL) ||
-                ((result->hsm_client_sign_data = tpm_interface->hsm_client_sign_data) == NULL)
+                ((result->hsm_client_sign_data = tpm_interface->hsm_client_sign_with_identity) == NULL)
                 )
             {
                 /* Codes_SRS_PROV_AUTH_CLIENT_07_002: [ If any failure is encountered prov_auth_create shall return NULL ] */
