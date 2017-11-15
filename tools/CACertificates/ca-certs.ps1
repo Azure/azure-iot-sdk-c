@@ -22,8 +22,16 @@ $intermediate1CAPemFileName = "./Intermediate1.pem"
 $intermediate2CAPemFileName = "./Intermediate2.pem"
 $intermediate3CAPemFileName = "./Intermediate3.pem"
 
+# Variables containing file paths for Edge certificates
+$edgePublicCertDir          = "certs"
+$edgePrivateCertDir         = "private"
+$edgeDeviceCertificate      = Join-Path $edgePublicCertDir "new-edge-device.cert.pem"
+$edgeDevicePrivateKey       = Join-Path $edgePrivateCertDir "new-edge-device.cert.pem"
+$edgeDeviceFullCertChain    = Join-Path $edgePublicCertDir "new-edge-device-full-chain.cert.pem"
+$edgeIotHubOwnerCA          = Join-Path $edgePublicCertDir "azure-iot-test-only.root.ca.cert.pem"
+
 # Whether to use ECC or RSA.
-$useEcc                     = $true
+$useEcc                     = $false
 
 
 function Test-CACertsPrerequisites()
@@ -201,7 +209,7 @@ function New-CACertsDevice([string]$deviceName, [string]$signingCertSubject=$_ro
     Write-Host ("Certificate with subject {0} has been output to {1}" -f $cnNewDeviceSubjectName, (Join-Path (get-location).path $newDevicePemPublicFileName)) 
 }
 
-function New-CACertsEdgeDevice([string]$deviceName, [string]$signingCertSubject=$_rootCertSubject)
+function New-CACertsEdgeDevice([string]$deviceName, [string]$signingCertSubject=($_intermediateCertSubject -f "1"))
 {
     New-CACertsDevice $deviceName $signingCertSubject $true
 }
@@ -239,6 +247,28 @@ function Write-CACertsCertificatesToEnvironment([string]$deviceName, [string]$io
     Write-Host "Success"
 }
 
+# Outputs certificates for Edge device using naming conventions from tutorials
+function Write-CACertsCertificatesForEdgeDevice([string]$deviceName)
+{
+    $originalDevicePublicPem  = ("./{0}-public.pem" -f $deviceName)
+    $originalDevicePrivatePem  = ("./{0}-private.pem" -f $deviceName)
+
+    if (-not (Test-Path $edgePublicCertDir))
+    {
+        mkdir $edgePublicCertDir | Out-Null
+    }
+
+    if (-not (Test-Path $edgePrivateCertDir))
+    {
+        mkdir $edgePrivateCertDir | Out-Null
+    }
+
+    Copy-Item $originalDevicePublicPem $edgeDeviceCertificate
+    Copy-Item $originalDevicePrivatePem $edgeDevicePrivateKey
+    Get-Content $rootCACerFileName, $intermediate1CAPemFileName, $originalDevicePublicPem | Set-Content $edgeDeviceFullCertChain
+    Copy-Item $rootCAPemFileName $edgeIotHubOwnerCA
+    Write-Host "Success"
+}
 
 # This will read in a given .PEM file and output it in a format that we can
 # immediately set ENV variable in it with \r\n done right.  
