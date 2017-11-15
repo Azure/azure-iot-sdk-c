@@ -18,14 +18,6 @@
 #include "azure_uhttp_c/uhttp.h"
 #include "parson.h"
 
-/*#define PROV_STATUS_RESULT_VALUES    \
-    PROV_STATUS_COMPLETE,     \
-    PROV_STATUS_UNASSIGNED,   \
-    PROV_STATUS_ASSIGNING,    \
-    PROV_STATUS_ERROR
-
-DEFINE_ENUM(PROV_STATUS_RESULT, PROV_STATUS_RESULT_VALUES);*/
-
 #define HTTP_PORT_NUM               443
 #define HTTP_STATUS_CODE_OK             200
 #define HTTP_STATUS_CODE_OK_MAX         226
@@ -52,10 +44,6 @@ static const char* JSON_NODE_KEY_NAME = "keyName";
 static const char* JSON_NODE_OPERATION_ID = "operationId";
 static const char* JSON_NODE_ASSIGNED_HUB = "assignedHub";
 static const char* JSON_NODE_TPM_NODE = "tpm";
-
-static const char* PROV_ASSIGNED_STATUS = "assigned";
-static const char* PROV_ASSIGNING_STATUS = "assigning";
-static const char* PROV_UNASSIGNED_STATUS = "unassigned";
 
 static const char* TPM_SECURITY_INFO = "{\"registrationId\":\"%s\",\"tpm\":{\"endorsementKey\":\"%s\", \"storageRootKey\":\"%s\"}}";
 static const char* RIOT_SECURITY_INFO = "{ \"registrationId\":\"%s\" }";

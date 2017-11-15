@@ -45,6 +45,10 @@ else()
         include_directories(./RIoT/Emulator/RIoT)
         include_directories(./RIoT/Emulator/RIoT/RIoTCrypt/include)
 
+if(MSVC)
+    set_source_files_properties(./RIoT/Emulator/RIoT/RIoTCrypt/RiotKdf.c PROPERTIES COMPILE_FLAGS "/wd4100")
+endif()
+
         IF(WIN32)
             #windows needs this define
             add_definitions(-D_CRT_SECURE_NO_WARNINGS)

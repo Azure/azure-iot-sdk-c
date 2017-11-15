@@ -20,6 +20,7 @@
 
 #include "azure_prov_client/prov_auth_client.h"
 #include "azure_prov_client/prov_device_ll_client.h"
+#include "azure_prov_client/prov_client_const.h"
 
 static const char* OPTION_LOG_TRACE = "logtrace";
 
@@ -33,22 +34,16 @@ static const char* JSON_NODE_ASSIGNED_HUB = "assignedHub";
 static const char* JSON_NODE_TPM_NODE = "tpm";
 static const char* JSON_NODE_TRACKING_ID = "trackingId";
 
-static const char* PROV_ASSIGNED_STATUS = "assigned";
-static const char* PROV_ASSIGNING_STATUS = "assigning";
-static const char* PROV_UNASSIGNED_STATUS = "unassigned";
 static const char* PROV_FAILED_STATUS = "failed";
 static const char* PROV_BLACKLISTED_STATUS = "blacklisted";
 
-static const char* PROV_API_VERSION = "2017-08-31-preview";
 static const char* SAS_TOKEN_SCOPE_FMT = "%s/registrations/%s";
-
-static const char* PROV_DEVICE_CLIENT_VERSION = "1.1.01";
 
 #define SAS_TOKEN_DEFAULT_LIFETIME  3600
 #define EPOCH_TIME_T_VALUE          (time_t)0
 #define MAX_AUTH_ATTEMPTS           3
-#define PROV_GET_THROTTLE_TIME       2
-#define PROV_DEFAULT_TIMEOUT         60
+#define PROV_GET_THROTTLE_TIME      2
+#define PROV_DEFAULT_TIMEOUT        60
 
 typedef enum CLIENT_STATE_TAG
 {

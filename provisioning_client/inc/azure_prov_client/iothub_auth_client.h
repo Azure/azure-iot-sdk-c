@@ -34,7 +34,7 @@ typedef struct DEVICE_AUTH_SAS_INFO_TAG
 
 typedef struct DEVICE_AUTH_SAS_RESULT_TAG
 {
-    char* sas_token;
+    const char* sas_token;
 } DEVICE_AUTH_SAS_RESULT;
 
 typedef struct DEVICE_AUTH_X509_RESULT_TAG

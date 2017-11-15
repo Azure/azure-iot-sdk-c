@@ -332,7 +332,6 @@ char* IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const c
                         LogError("failure allocating Sas Token");
                         result = NULL;
                     }
-                    free(cred_result->auth_cred_result.sas_result.sas_token);
                     free(cred_result);
                 }
             }
