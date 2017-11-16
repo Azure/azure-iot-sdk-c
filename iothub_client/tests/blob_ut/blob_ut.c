@@ -324,7 +324,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_with_NULL_getDataCallBack_and_
 
 }
 
-/*Tests_SRS_BLOB_02_015: [ Otherwise, HTTPAPIEX_ExecuteRequest shall succeed and return BLOB_OK. ]*/
+/*Tests_SRS_BLOB_02_032: [ Otherwise, `Blob_UploadMultipleBlocksFromSasUri` shall succeed and return `BLOB_OK`. ]*/
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_succeeds_when_HTTP_status_code_is_404)
 {
     ///arrange
@@ -401,7 +401,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_succeeds_when_HTTP_status_code
     ///cleanup
 }
 
-/*Tests_SRS_BLOB_02_013: [ If HTTPAPIEX_ExecuteRequest fails, then Blob_UploadMultipleBlocksFromSasUri shall fail and return BLOB_HTTP_ERROR. ]*/
+/*Tests_SRS_BLOB_02_025: [ If HTTPAPIEX_ExecuteRequest fails, then Blob_UploadMultipleBlocksFromSasUri shall fail and return BLOB_HTTP_ERROR. ]*/
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_fails_when_HTTPAPIEX_ExecuteRequest_fails)
 {
     ///arrange
@@ -479,7 +479,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_fails_when_HTTPAPIEX_ExecuteRe
     ///cleanup
 }
 
-/*Tests_SRS_BLOB_02_011: [ If any of the previous steps related to building the HTTPAPI_EX_ExecuteRequest parameters fails, then Blob_UploadMultipleBlocksFromSasUri shall fail and return BLOB_ERROR. ]*/
+/*Tests_SRS_BLOB_02_033: [ If any previous operation that doesn't have an explicit failure description fails then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_ERROR` ]  */
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_fails_when_BUFFER_create_fails)
 {
     ///arrange
@@ -609,7 +609,8 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_SasUri_is_wrong_fails_2)
 /*Tests_SRS_BLOB_02_017: [ Blob_UploadMultipleBlocksFromSasUri shall copy from SASURI the hostname to a new const char* ]*/
 /*Tests_SRS_BLOB_02_018: [ Blob_UploadMultipleBlocksFromSasUri shall create a new HTTPAPI_EX_HANDLE by calling HTTPAPIEX_Create passing the hostname. ]*/
 /*Tests_SRS_BLOB_02_019: [ Blob_UploadMultipleBlocksFromSasUri shall compute the base relative path of the request from the SASURI parameter. ]*/
-/*Tests_SRS_BLOB_02_021: [ For every block of 4MB the following operations shall happen: ]*/
+/*Tests_SRS_BLOB_02_021: [ For every block returned by getDataCallback the following operations shall happen: ]*/
+/*Tests_SRS_BLOB_99_002: [ If the size of the block returned by `getDataCallback` is 0 or if the data is NULL, then `Blob_UploadMultipleBlocksFromSasUri` shall exit the loop. ]*/
 /*Tests_SRS_BLOB_02_020: [ Blob_UploadMultipleBlocksFromSasUri shall construct a BASE64 encoded string from the block ID (000000... 049999) ]*/
 /*Tests_SRS_BLOB_02_022: [ Blob_UploadMultipleBlocksFromSasUri shall construct a new relativePath from following string: base relativePath + "&comp=block&blockid=BASE64 encoded string of blockId" ]*/
 /*Tests_SRS_BLOB_02_023: [ Blob_UploadMultipleBlocksFromSasUri shall create a BUFFER_HANDLE from source and size parameters. ]*/
@@ -760,7 +761,6 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_various_sizes_happy_path)
     }
 }
 
-/*Tests_SRS_BLOB_02_035: [ If certificates is non-NULL then Blob_UploadMultipleBlocksFromSasUri shall pass certificates to HTTPAPI_EX_HANDLE by calling HTTPAPIEX_SetOption with the option name "TrustedCerts". ]*/
 /*Tests_SRS_BLOB_02_037: [ If certificates is non-NULL then Blob_UploadMultipleBlocksFromSasUri shall pass certificates to HTTPAPI_EX_HANDLE by calling HTTPAPIEX_SetOption with the option name "TrustedCerts". ]*/
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_various_sizes_with_certificates_happy_path)
 {
@@ -1132,7 +1132,6 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
     
 }
 
-/*Tests_SRS_BLOB_02_036: [ If HTTPAPIEX_SetOption fails then Blob_UploadMultipleBlocksFromSasUri shall fail and return BLOB_ERROR ]*/
 /*Tests_SRS_BLOB_02_038: [ If HTTPAPIEX_SetOption fails then Blob_UploadMultipleBlocksFromSasUri shall fail and return BLOB_ERROR. ]*/
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_with_certificate_unhappy_paths)
 {
@@ -1452,6 +1451,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_http_code_is_404_it_immed
     
 }
 
+/*Tests_SRS_BLOB_99_001: [ If the size of the block returned by `getDataCallback` is bigger than 4MB, then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_INVALID_ARG`. ]*/
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockSize_too_big_fails)
 {
     ///arrange
@@ -1470,6 +1470,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockSize_too_big_fails)
     ///cleanup
 }
 
+/*Tests_SRS_BLOB_99_001: [ If the size of the block returned by `getDataCallback` is bigger than 4MB, then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_INVALID_ARG`. ]*/
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockSize_is_4MB_succeeds)
 {
     ///arrange
@@ -1488,6 +1489,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockSize_is_4MB_succeeds
     ///cleanup
 }
 
+/*Tests_SRS_BLOB_99_003: [ If `getDataCallback` returns more than 50000 blocks, then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_INVALID_ARG`. ]*/
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockCount_is_50000_succeeds)
 {
     ///arrange
@@ -1506,6 +1508,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockCount_is_50000_succe
     ///cleanup
 }
 
+/*Tests_SRS_BLOB_99_003: [ If `getDataCallback` returns more than 50000 blocks, then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_INVALID_ARG`. ]*/
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockCount_is_50001_fails)
 {
     ///arrange

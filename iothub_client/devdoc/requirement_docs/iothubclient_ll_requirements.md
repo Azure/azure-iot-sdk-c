@@ -666,6 +666,10 @@ If the credentials used to create `iotHubClientHandle` do not have "deviceKey" o
 
 **SRS_IOTHUBCLIENT_LL_02_088: [** Otherwise, `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall succeed and return `IOTHUB_CLIENT_OK`.** ]**
 
+**SRS_IOTHUBCLIENT_LL_99_003: [** If `IoTHubClient_LL_UploadMultipleBlocksToBlob` return `IOTHUB_CLIENT_OK`, it shall call `getDataCallback` with `result` set to `FILE_UPLOAD_OK`, and `data` and `size` set to NULL.** ]**
+
+**SRS_IOTHUBCLIENT_LL_99_004: [** If `IoTHubClient_LL_UploadMultipleBlocksToBlob` does not return `IOTHUB_CLIENT_OK`, it shall call `getDataCallback` with `result` set to `FILE_UPLOAD_ERROR`, and `data` and `size` set to NULL.** ]**
+
 
 
 ## IoTHubClient_LL_UploadToBlob_SetOption
