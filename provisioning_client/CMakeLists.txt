@@ -90,6 +90,7 @@ set(PROV_DEVICE_CLIENT_SOURCE_C_FILES
     ./src/prov_device_client.c)
 
 set(PROV_DEVICE_CLIENT_SOURCE_H_FILES
+    ./inc/azure_prov_client/prov_client_const.h
     ./inc/azure_prov_client/prov_device_client.h)
 
 set(PROV_DEVICE_LL_CLIENT_SOURCE_C_FILES

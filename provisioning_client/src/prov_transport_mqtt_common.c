@@ -20,20 +20,15 @@
 #include "azure_prov_client/prov_transport_mqtt_common.h"
 #include "azure_umqtt_c/mqtt_client.h"
 
+#include "azure_prov_client/prov_client_const.h"
+
 #define SUBSCRIBE_TOPIC_COUNT       1
 
-static const char* HEADER_KEY_AUTHORIZATION = "Authorization";
-static const char* SAS_TOKEN_KEY_NAME = "registration";
 static const char* MQTT_SUBSCRIBE_TOPIC = "$dps/registrations/res/#";
-static const char* MQTT_USERNAME_FMT = "%s/registrations/%s/api-version=%s&ClientVersion=%s";
-static const char* CLIENT_VERSION = "123.123";
+static const char* MQTT_USERNAME_FMT = "%s/registrations/%s/api-version=%s&DeviceClientType=%s";
 
 static const char* MQTT_REGISTER_MESSAGE_FMT = "$dps/registrations/PUT/iotdps-register/?$rid=%d";
 static const char* MQTT_STATUS_MESSAGE_FMT = "$dps/registrations/GET/iotdps-get-operationstatus/?$rid=%d&operationId=%s";
-
-static const char* PROV_ASSIGNED_STATUS = "Assigned";
-static const char* PROV_ASSIGNING_STATUS = "Assigning";
-static const char* PROV_UNASSIGNED_STATUS = "Unassigned";
 
 typedef enum MQTT_TRANSPORT_STATE_TAG
 {
@@ -59,7 +54,6 @@ typedef enum PROV_TRANSPORT_STATE_TAG
     TRANSPORT_CLIENT_STATE_STATUS_SEND,
     TRANSPORT_CLIENT_STATE_STATUS_SENT,
     TRANSPORT_CLIENT_STATE_STATUS_RECV,
-
 
     TRANSPORT_CLIENT_STATE_ERROR
 } PROV_TRANSPORT_STATE;
@@ -411,47 +405,17 @@ static int subscribe_to_topic(PROV_TRANSPORT_MQTT_INFO* mqtt_info)
 static char* construct_username(PROV_TRANSPORT_MQTT_INFO* mqtt_info)
 {
     char* result;
-    char* name = NULL;
     size_t length;
-    size_t hostname_len;
 
-    // Extract name from hostname
-    hostname_len = strlen(mqtt_info->hostname);
-    for (size_t index = 0; index < hostname_len; index++)
+    length = strlen(MQTT_USERNAME_FMT) + strlen(mqtt_info->registration_id) + strlen(mqtt_info->scope_id) + strlen(mqtt_info->api_version) + strlen(PROV_DEVICE_CLIENT_VERSION);
+    if ((result = malloc(length + 1)) == NULL)
     {
-        if (mqtt_info->hostname[index] == '.')
-        {
-            if ((name = malloc(index + 1)) == NULL)
-            {
-                LogError("Failure allocating name");
-                result = NULL;
-            }
-            else
-            {
-                strncpy(name, mqtt_info->hostname, index);
-                name[index] = '\0';
-            }
-            break;
-        }
-    }
-
-    if (name != NULL)
-    {
-        length = strlen(MQTT_USERNAME_FMT) + strlen(name) + strlen(mqtt_info->registration_id) + strlen(mqtt_info->scope_id) + strlen(mqtt_info->api_version) + strlen(CLIENT_VERSION);
-        if ((result = malloc(length + 1)) == NULL)
-        {
-            LogError("Failure allocating username");
-            result = NULL;
-        }
-        else if (sprintf(result, MQTT_USERNAME_FMT, mqtt_info->scope_id, mqtt_info->registration_id, mqtt_info->api_version, CLIENT_VERSION) <= 0)
-        {
-            LogError("Failure creating mqtt username");
-        }
-        free(name);
-    }
-    else
-    {
+        LogError("Failure allocating username");
         result = NULL;
+    }
+    else if (sprintf(result, MQTT_USERNAME_FMT, mqtt_info->scope_id, mqtt_info->registration_id, mqtt_info->api_version, PROV_DEVICE_CLIENT_VERSION) <= 0)
+    {
+        LogError("Failure creating mqtt username");
     }
     return result;
 }

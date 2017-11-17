@@ -688,7 +688,7 @@ static void set_expected_calls_for_get_new_underlying_io_transport(bool feed_opt
 {
     STRICT_EXPECTED_CALL(STRING_c_str(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE))
         .SetReturn(TEST_IOTHUB_HOST_FQDN_CHAR_PTR);
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
+    //STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
 
     if (feed_options)
     {
@@ -2864,7 +2864,6 @@ TEST_FUNCTION(SetOption_xio_option_success)
 
     STRICT_EXPECTED_CALL(STRING_c_str(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE))
         .SetReturn(TEST_IOTHUB_HOST_FQDN_CHAR_PTR);
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(xio_setoption(TEST_UNDERLYING_IO_TRANSPORT, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
@@ -2929,7 +2928,6 @@ TEST_FUNCTION(SetOption_xio_option_fails)
 
     STRICT_EXPECTED_CALL(STRING_c_str(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE))
         .SetReturn(TEST_IOTHUB_HOST_FQDN_CHAR_PTR);
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(xio_setoption(TEST_UNDERLYING_IO_TRANSPORT, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
