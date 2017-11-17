@@ -308,7 +308,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_with_NULL_SasUri_fails)
 
 }
 
-/*Tests_SRS_BLOB_02_002: [ If source is NULL and size is not zero then Blob_UploadMultipleBlocksFromSasUri shall fail and return BLOB_INVALID_ARG. ]*/
+/*Tests_SRS_BLOB_02_002: [ If getDataCallback is NULL then Blob_UploadMultipleBlocksFromSasUri shall fail and return BLOB_INVALID_ARG. ]*/
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_with_NULL_getDataCallBack_and_non_NULL_context_fails)
 {
     ///arrange

@@ -54,7 +54,7 @@ typedef void(*IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK)(IOTHUB_CLIENT_FILE_UP
 
 
 **SRS_BLOB_02_001: [** If `SASURI` is NULL then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_INVALID_ARG`. **]**
-**SRS_BLOB_02_002: [** If `source` is NULL and `size` is not zero then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_INVALID_ARG`. **]**
+**SRS_BLOB_02_002: [** If `getDataCallback` is NULL then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_INVALID_ARG`. **]**
 **SRS_BLOB_02_034: [** If size is bigger than 50000\*4\*1024\*1024 then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_INVALID_ARG`. **]**
 **SRS_BLOB_02_005: [** If the hostname cannot be determined, then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_INVALID_ARG`. **]**
 **SRS_BLOB_02_016: [** If the hostname copy cannot be made then then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return ``BLOB_INVALID_ARG`` **]**
@@ -79,16 +79,16 @@ Blocks are uploaded serially by "Put Block" REST API. After all the blocks have 
  
 **SRS_BLOB_02_021: [** For every block returned by `getDataCallback` the following operations shall happen: **]**
   
-0.0 **SRS_BLOB_99_001: [** If the size of the block returned by `getDataCallback` is bigger than 4MB, then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_INVALID_ARG`. **]**
-0.1 **SRS_BLOB_99_002: [** If the size of the block returned by `getDataCallback` is 0 or if the data is NULL, then `Blob_UploadMultipleBlocksFromSasUri` shall exit the loop. **]**
-0.2 **SRS_BLOB_99_003: [** If `getDataCallback` returns more than 50000 blocks, then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_INVALID_ARG`. **]**
-1. **SRS_BLOB_02_020: [** `Blob_UploadMultipleBlocksFromSasUri` shall construct a BASE64 encoded string from the block ID (000000... 049999) **]**
-2. **SRS_BLOB_02_022: [** `Blob_UploadMultipleBlocksFromSasUri` shall construct a new relativePath from following string: base relativePath + "&comp=block&blockid=BASE64 encoded string of blockId" **]**
-3. **SRS_BLOB_02_023: [** `Blob_UploadMultipleBlocksFromSasUri` shall create a BUFFER_HANDLE from `source` and `size` parameters. **]**
-4. **SRS_BLOB_02_024: [** `Blob_UploadMultipleBlocksFromSasUri` shall call `HTTPAPIEX_ExecuteRequest` with a PUT operation, passing `httpStatus` and `httpResponse`. **]**
-5. **SRS_BLOB_02_025: [** If `HTTPAPIEX_ExecuteRequest` fails then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_HTTP_ERROR`. **]**
-6. **SRS_BLOB_02_026: [** Otherwise, if HTTP response code is >=300 then `Blob_UploadMultipleBlocksFromSasUri` shall succeed and return `BLOB_OK`. **]**
-7. **SRS_BLOB_02_027: [** Otherwise `Blob_UploadMultipleBlocksFromSasUri` shall continue execution. **]**
+1. **SRS_BLOB_99_001: [** If the size of the block returned by `getDataCallback` is bigger than 4MB, then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_INVALID_ARG`. **]**
+2. **SRS_BLOB_99_002: [** If the size of the block returned by `getDataCallback` is 0 or if the data is NULL, then `Blob_UploadMultipleBlocksFromSasUri` shall exit the loop. **]**
+3. **SRS_BLOB_99_003: [** If `getDataCallback` returns more than 50000 blocks, then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_INVALID_ARG`. **]**
+4. **SRS_BLOB_02_020: [** `Blob_UploadMultipleBlocksFromSasUri` shall construct a BASE64 encoded string from the block ID (000000... 049999) **]**
+5. **SRS_BLOB_02_022: [** `Blob_UploadMultipleBlocksFromSasUri` shall construct a new relativePath from following string: base relativePath + "&comp=block&blockid=BASE64 encoded string of blockId" **]**
+6. **SRS_BLOB_02_023: [** `Blob_UploadMultipleBlocksFromSasUri` shall create a BUFFER_HANDLE from `source` and `size` parameters. **]**
+7. **SRS_BLOB_02_024: [** `Blob_UploadMultipleBlocksFromSasUri` shall call `HTTPAPIEX_ExecuteRequest` with a PUT operation, passing `httpStatus` and `httpResponse`. **]**
+8. **SRS_BLOB_02_025: [** If `HTTPAPIEX_ExecuteRequest` fails then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_HTTP_ERROR`. **]**
+9. **SRS_BLOB_02_026: [** Otherwise, if HTTP response code is >=300 then `Blob_UploadMultipleBlocksFromSasUri` shall succeed and return `BLOB_OK`. **]**
+10. **SRS_BLOB_02_027: [** Otherwise `Blob_UploadMultipleBlocksFromSasUri` shall continue execution. **]**
 
 **SRS_BLOB_02_028: [** `Blob_UploadMultipleBlocksFromSasUri` shall construct an XML string with the following content: **]**
 ```xml

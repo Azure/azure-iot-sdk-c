@@ -506,6 +506,8 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob(IOTHUB_CLIENT_LL_HANDLE
 
 ### `IoTHubClient_LL_UploadToBlob` calls `IoTHubClient_LL_UploadToBlob_Impl` to synchronously upload the data pointed to by `source` having the size `size` to a blob called `destinationFileName` in Azure Blob Storage.
 
+Design considerations: IoTHubClient_LL_UploadToBlob_Impl uses IoTHubClient_LL_UploadMultipleBlocksToBlob to upload the blob. An internal callback FileUpload_GetData_Callback and the corresponding context are used to chunk the source and feed it to IoTHubClient_LL_UploadMultipleBlocksToBlob.
+
 **SRS_IOTHUBCLIENT_LL_02_062: [** If `destinationFileName` is `NULL` then `IoTHubClient_LL_UploadToBlob` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`.** ]**
 
 **SRS_IOTHUBCLIENT_LL_02_063: [** If `source` is `NULL` and size is greater than 0 then `IoTHubClient_LL_UploadToBlob` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`.** ]**

@@ -134,7 +134,7 @@ BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* SASURI, IOTHUB_CLIEN
     }
     else
     {
-        /*Codes_SRS_BLOB_02_002: [ If source is NULL and size is not zero then Blob_UploadMultipleBlocksFromSasUri shall fail and return BLOB_INVALID_ARG. ]*/
+        /*Codes_SRS_BLOB_02_002: [ If getDataCallback is NULL then Blob_UploadMultipleBlocksFromSasUri shall fail and return BLOB_INVALID_ARG. ]*/
         if (getDataCallback == NULL)
         {
             LogError("IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK getDataCallback = %p is invalid", getDataCallback);
