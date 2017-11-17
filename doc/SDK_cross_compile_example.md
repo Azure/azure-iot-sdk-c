@@ -63,7 +63,7 @@ You can use *export -p* to verify RPI\_ROOT has been added to the environment.
 
 Now we need to switch to the SDK directory tree. Enter this command
 ```
-cd ~Source/azure-iot-sdk-c/build_all/linux
+cd ~/Source/azure-iot-sdk-c/build_all/linux
 ```
 Using the text editor of your choice, create a new file in this directory and call it toolchain-rpi.cmake. Into this file place the following lines
 
