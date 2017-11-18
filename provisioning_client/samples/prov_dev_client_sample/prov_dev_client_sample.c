@@ -32,7 +32,7 @@ DEFINE_ENUM_STRINGS(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
 DEFINE_ENUM_STRINGS(PROV_DEVICE_REG_STATUS, PROV_DEVICE_REG_STATUS_VALUES);
 
 static const char* global_prov_uri = "global.azure-devices-provisioning.net";
-static const char* id_scope = "";
+static const char* id_scope = "[ID Scope]";
 
 static bool g_trace_on = true;
 
@@ -114,7 +114,9 @@ int main()
         // Pick your transport
         prov_transport = Prov_Device_HTTP_Protocol;
         //prov_transport = Prov_Device_AMQP_Protocol;
-        //prov_transport = PROV_DEVICE_MQTT_Protocol;
+        //prov_transport = Prov_Device_AMQP_WS_Protocol;
+        //prov_transport = Prov_Device_MQTT_Protocol;
+        //prov_transport = Prov_Device_MQTT_WS_Protocol;
 
         printf("Provisioning API Version: %s\r\n", Prov_Device_GetVersionString());
         printf("Iothub API Version: %s\r\n", IoTHubClient_GetVersionString());
