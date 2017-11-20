@@ -23,7 +23,7 @@
 
 /*String containing Hostname, Device Id & Device Key, ModuleID, and GatewayHostName in the format:                          */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>;ModuleId=<Module_Id>;GatewayHostName=127.0.0.1" */
-static char* connectionString = "[device connection string]";
+static const char* connectionString = "[device connection string]";
 
 static int callbackCounter;
 static char msgText[1024];
@@ -129,10 +129,10 @@ void iothub_client_sample_module_sender(void)
     IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle;
     EVENT_INSTANCE messages[MESSAGE_COUNT];
 
-    char *envCS = getenv("EdgeHubConnectionString");
-    if (envCS != NULL)
+    char *connectionStringFromEnvironment = getenv("EdgeHubConnectionString");
+    if (connectionStringFromEnvironment != NULL)
     {
-        connectionString = envCS;
+        connectionString = connectionStringFromEnvironment;
     }
 
     g_continueRunning = true;
