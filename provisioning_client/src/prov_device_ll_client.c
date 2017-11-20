@@ -25,7 +25,7 @@
 static const char* OPTION_LOG_TRACE = "logtrace";
 
 static const char* JSON_NODE_STATUS = "status";
-static const char* JSON_NODE_REG_STATUS = "registrationStatus";
+static const char* JSON_NODE_REG_STATUS = "registrationState";
 static const char* JSON_NODE_AUTH_KEY = "authenticationKey";
 static const char* JSON_NODE_DEVICE_ID = "deviceId";
 static const char* JSON_NODE_KEY_NAME = "keyName";
@@ -384,11 +384,15 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
                     }
                 }*/
                 LogError("Unsuccessful json encountered: %s", json_document);
+                free(result);
+                result = NULL;
                 break;
             }
 
             default:
                 LogError("invalid json status specified %d", result->prov_status);
+                free(result);
+                result = NULL;
                 break;
         }
         json_value_free(root_value);
