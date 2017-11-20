@@ -508,6 +508,8 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob(IOTHUB_CLIENT_LL_HANDLE
 
 Design considerations: IoTHubClient_LL_UploadToBlob_Impl uses IoTHubClient_LL_UploadMultipleBlocksToBlob to upload the blob. An internal callback FileUpload_GetData_Callback and the corresponding context are used to chunk the source and feed it to IoTHubClient_LL_UploadMultipleBlocksToBlob.
 
+**SRS_IOTHUBCLIENT_LL_02_061: [** If `iotHubClientHandle` is `NULL` then `IoTHubClient_LL_UploadToBlob` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`.** ]**
+
 **SRS_IOTHUBCLIENT_LL_02_062: [** If `destinationFileName` is `NULL` then `IoTHubClient_LL_UploadToBlob` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`.** ]**
 
 **SRS_IOTHUBCLIENT_LL_02_063: [** If `source` is `NULL` and size is greater than 0 then `IoTHubClient_LL_UploadToBlob` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`.** ]**
@@ -526,7 +528,11 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob(IOTHUB_CL
 
 ### `IoTHubClient_LL_UploadMultipleBlocksToBlob` calls `IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl` to synchronously upload the blocks provided by `getDataCallback` to a blob called `destinationFileName` in Azure Blob Storage.
 
-**SRS_IOTHUBCLIENT_LL_02_061: [** If `iotHubClientHandle` is `NULL` then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`.** ]**
+**SRS_IOTHUBCLIENT_LL_99_005: [** If `iotHubClientHandle` is `NULL` then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`.** ]**
+
+**SRS_IOTHUBCLIENT_LL_99_006: [** If `destinationFileName` is `NULL` then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`.** ]**
+
+**SRS_IOTHUBCLIENT_LL_99_007: [** If `getDataCallback` is `NULL` then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`.** ]**
 
 These are the 3 steps that are required to upload a file to Azure Blob Storage using IoTHub: 
 step 1: get the SasUri components from IoTHub service
