@@ -1,16 +1,16 @@
-# Managing CA Certificates Sample
+# Managing Certificates for Iot Edge SDKs Sample
 
 ## WARNING
 Certificates created by these scripts **MUST NOT** be used for production.  They contain hard-coded passwords ("1234"), expire after 30 days, and most importantly are provided for demonstration purposes to help you quickly understand CA Certificates.  When productizing against CA Certificates, you'll need to use your own security best practices for certification creation and lifetime management.
 
 ## Introduction
-This document assumes you understand the core scenarios and motivation behind CA Certificates.  This document also assumes you have basic familiarity with PowerShell or Bash.
+This document helps create certificates for use in **pre-testing** Iot SDK's against the IoT Hub.  In particular, the tools in this directory can be used to either setup CA Certificates (along with proof of possession) or Edge device certificates.  This document assumes you have basic familiarity with the scenario you are setting up for as well as some knowledge of PowerShell or Bash.
 
-This directory contains a PowerShell (PS1) and Bash script to help create **test** certificates for Azure IoT Hub's CA Certificate and proof-of-possession.  They will create a Root CA, intermediate, leaf signed up to CA or intermediate, and help with the proof-of-possession flow.
+This directory contains a PowerShell (PS1) and Bash script to help create **test** certificates for Azure IoT Hub's CA Certificate / proof-of-possession and/or Edge certificates.
 
 The PS1 and Bash scripts are functionally equivalent; they are both provided depending on your preference for Windows or Linux.
 
-A more detailed document showing UI screen shots is available from [the official documentation].
+A more detailed document showing UI screen shots for CA Certificates and proof of possession flow is available from [the official documentation].
 
 ## USE
 
@@ -48,6 +48,8 @@ First you need to create a CA and an intermediate certificate signer that chains
 Next, go to Azure IoT Hub and navigate to Certificates.  Add a new certificate, providing the root CA file when prompted.  (`.\RootCA.pem` in PowerShell and `./certs/azure-iot-test-only.root.ca.cert.pem` in Bash.)
 
 ## Step 3 - Proof of Possession
+*Optional - Only perform this step if you're setting up CA Certificates and proof of possession.  For simple device certificates, such as Edge certificates, skip to the next step.*
+
 Now that you've registered your root CA with Azure IoT Hub, you'll need to prove that you actually own it.
 
 Select the new certificate that you've created and navigate to and select  "Generate Verification Code".  This will give you a string that specifies the subject name of a certificate that you need to sign.  For our example, assume IoT Hub wants you to create a certificate with subject name = "12345".
@@ -66,10 +68,17 @@ Finally, let's create an application and corresponding device on IoT Hub that sh
 On Azure IoT Hub, navigate to the "Device Explorer".  Add a new device (e.g. `myDevice`, and for its authentication type chose "X.509 CA Signed".  Devices can authenticate to IoT Hub using a certificate that is signed by the Root CA from Step 2.
 
 ### **PowerShell**
+#### IoT Leaf Device
 * Run `New-CACertsDevice myDevice` to create the new device certificate.  
 This will create files myDevice* that contain the public key, private key, and PFX of this certificate.  When prompted to enter a password during the signing process, enter "1234".
 
 * To get a sense of how to use these certificates, `Write-CACertsCertificatesToEnvironment myDevice myIotHubName`, replacing myDevice and myIotHub name with your values.  This will create the environment variables `$ENV:IOTHUB_CA_*` that can give a sense of how they could be consumed by an application.
+
+#### IoT Edge Device
+* Run `New-CACertsDevice myDevice` to create the new device certificate.  
+This will create files myDevice* that contain the public key, private key, and PFX of this certificate.  When prompted to enter a password during the signing process, enter "1234".
+
+* `Write-CACertsCertificatesForEdgeDevice myDevice`.  This will create a .\certs directory that contains public keys of the certificates and .\private which has the device's private key.  These certificates can be consumed 
 
 ### **Bash**
 #### IoT Leaf Device
