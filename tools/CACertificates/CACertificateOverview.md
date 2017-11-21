@@ -78,7 +78,7 @@ This will create files myDevice* that contain the public key, private key, and P
 * Run `New-CACertsDevice myDevice` to create the new device certificate.  
 This will create files myDevice* that contain the public key, private key, and PFX of this certificate.  When prompted to enter a password during the signing process, enter "1234".
 
-* `Write-CACertsCertificatesForEdgeDevice myDevice`.  This will create a .\certs directory that contains public keys of the certificates and .\private which has the device's private key.  These certificates can be consumed 
+* `Write-CACertsCertificatesForEdgeDevice myDevice`.  This will create a .\certs directory that contains public keys of the certificates and .\private which has the device's private key.  These certificates can be consumed by Edge during its initialization.
 
 ### **Bash**
 #### IoT Leaf Device
