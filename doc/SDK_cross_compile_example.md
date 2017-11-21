@@ -34,7 +34,7 @@ git clone --recursive https://github.com/Azure/azure-iot-sdk-c.git
 ```
 Further information regarding this step and other set up requirements can be found in this [guide](https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/devbox_setup.md). This step is only included in this document to establish the directory structure used for the rest of the example.
 
-You might consider building the SDK for your local platform at this point simply to ensure you have all the required components. At the very least, you must ensure that the SDK's prerequisite libraries are installed on your Raspberry Pi. You can achieve this by running the script _setup.sh_ found in _azure-iot-sdks/c/build\_all/linux_.
+You might consider building the SDK for your local platform at this point simply to ensure you have all the required components. At the very least, you must ensure that the SDK's prerequisite libraries are installed on your Raspberry Pi. You can achieve this by running the script _setup.sh_ found in _azure-iot-sdk-c/build\_all/linux_.
 
 In order to cross compile for a different target the first requirement is to set up an environment containing the required toolchain, system libraries and system headers that may be required to build the code. In the instance of the Raspberry Pi this is simplified by the existence of a GitHub project that has much of that work already done for us. Change to your home directory, create a new directory for the Raspberry Pi Tools and clone the project at https://github.com/raspberrypi/tools into that directory. For example:
 ```
