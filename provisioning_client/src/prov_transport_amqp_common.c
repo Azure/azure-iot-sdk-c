@@ -613,9 +613,6 @@ static int create_amqp_connection(PROV_TRANSPORT_AMQP_INFO* amqp_info)
             amqp_info->underlying_io = transport_io->sasl_handle;
         }
 
-        bool ignore_check = true;
-        (void)xio_setoption(amqp_info->underlying_io, "ignore_server_name_check", &ignore_check);
-
         if (amqp_info->hsm_type == TRANSPORT_HSM_TYPE_X509)
         {
             if (amqp_info->x509_cert != NULL && amqp_info->private_key != NULL)

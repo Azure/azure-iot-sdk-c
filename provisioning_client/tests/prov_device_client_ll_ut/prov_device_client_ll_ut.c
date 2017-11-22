@@ -1735,4 +1735,25 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         Prov_Device_LL_Destroy(handle);
     }
 
+    TEST_FUNCTION(Prov_Device_LL_SetOption_Registration_id_success)
+    {
+        //arrange
+        PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(prov_auth_set_registration_id(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+        //act
+        PROV_DEVICE_RESULT prov_result = Prov_Device_LL_SetOption(handle, "registration_id", TEST_REGISTRATION_ID);
+
+        //assert
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        Prov_Device_LL_Destroy(handle);
+    }
+
     END_TEST_SUITE(prov_device_client_ll_ut)

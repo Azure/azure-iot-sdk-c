@@ -16,22 +16,24 @@
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/base64.h"
 
-#include "azure_hub_modules/dps_client.h"
-#include "azure_hub_modules/secure_device_factory.h"
+#include "azure_prov_client/prov_device_ll_client.h"
+#include "azure_prov_client/prov_security_factory.h"
+#include "azure_prov_client/prov_auth_client.h"
 
-#include "azure_hub_modules/dps_transport_http_client.h"
-#include "azure_hub_modules/dps_transport_amqp_ws_client.h"
-#include "azure_hub_modules/dps_transport_amqp_client.h"
-#include "azure_hub_modules/dps_transport_mqtt_ws_client.h"
-#include "azure_hub_modules/dps_transport_mqtt_client.h"
+#include "azure_prov_client/prov_transport_http_client.h"
+#include "azure_prov_client/prov_transport_amqp_client.h"
+#include "azure_prov_client/prov_transport_amqp_ws_client.h"
+#include "azure_prov_client/prov_transport_mqtt_client.h"
+#include "azure_prov_client/prov_transport_mqtt_ws_client.h"
 
 #include "azure_c_shared_utility/connection_string_parser.h" 
 #include "azure_c_shared_utility/map.h"
 #include "azure_c_shared_utility/uniqueid.h"
 
+#include "provisioning_service_client.h"
+#include "provisioning_sc_enrollment.h"
+
 #include "platform_process.h"
-#include "dps_service_client.h"
-#include "azure_hub_modules/dps_sec_client.h"
 
 static TEST_MUTEX_HANDLE g_dllByDll;
 
@@ -42,22 +44,22 @@ typedef enum REGISTRATION_RESULT_TAG
     REG_RESULT_FAILED
 } REGISTRATION_RESULT;
 
-typedef struct DPS_CLIENT_E2E_INFO_TAG
+typedef struct PROV_CLIENT_E2E_INFO_TAG
 {
     char* iothub_uri;
     char* device_id;
     REGISTRATION_RESULT reg_result;
     MAP_HANDLE conn_map;
-} DPS_CLIENT_E2E_INFO;
+} PROV_CLIENT_E2E_INFO;
 
-static const char* g_dps_conn_string = NULL;
+static const char* g_prov_conn_string = NULL;
 static const char* g_dps_scope_id = NULL;
 static char* g_dps_uri = NULL;
 static const char* g_desired_iothub = NULL;
 
-DPS_CLIENT_E2E_INFO g_dps_info;
+PROV_CLIENT_E2E_INFO g_prov_info;
 PLATFORM_PROCESS_HANDLE g_emulator_proc;
-DPS_SEC_TYPE g_dps_hsm_type;
+SECURE_DEVICE_TYPE g_hsm_device_type;
 
 #define MAX_CLOUD_TRAVEL_TIME       60.0
 #define DEVICE_GUID_SIZE            37
@@ -68,46 +70,31 @@ const char* FOLDER_SEPARATOR = "\\";
 const char* FOLDER_SEPARATOR = "/";
 #endif
 
-TEST_DEFINE_ENUM_TYPE(DPS_RESULT, DPS_RESULT_VALUES);
+TEST_DEFINE_ENUM_TYPE(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
 
-static void on_dps_error_callback(DPS_ERROR error_type, void* user_context)
-{
-    (void)error_type;
-    if (user_context == NULL)
-    {
-        ASSERT_FAIL("User Context is NULL in on_dps_error_callback");
-    }
-    else
-    {
-        DPS_CLIENT_E2E_INFO* dps_info = (DPS_CLIENT_E2E_INFO*)user_context;
-        dps_info->reg_result = REG_RESULT_FAILED;
-        ASSERT_FAIL("DPS On Error callback");
-    }
-}
-
-static void iothub_dps_register_device(DPS_RESULT register_result, const char* iothub_uri, const char* device_id, void* user_context)
+static void iothub_prov_register_device(PROV_DEVICE_RESULT register_result, const char* iothub_uri, const char* device_id, void* user_context)
 {
     if (user_context == NULL)
     {
-        ASSERT_FAIL("User Context is NULL iothub_dps_register_device");
+        ASSERT_FAIL("User Context is NULL iothub_prov_register_device");
     }
     else
     {
-        DPS_CLIENT_E2E_INFO* dps_info = (DPS_CLIENT_E2E_INFO*)user_context;
-        if (register_result == DPS_CLIENT_OK)
+        PROV_CLIENT_E2E_INFO* prov_info = (PROV_CLIENT_E2E_INFO*)user_context;
+        if (register_result == PROV_DEVICE_RESULT_OK)
         {
-            (void)mallocAndStrcpy_s(&dps_info->iothub_uri, iothub_uri);
-            (void)mallocAndStrcpy_s(&dps_info->device_id, device_id);
-            dps_info->reg_result = REG_RESULT_COMPLETE;
+            (void)mallocAndStrcpy_s(&prov_info->iothub_uri, iothub_uri);
+            (void)mallocAndStrcpy_s(&prov_info->device_id, device_id);
+            prov_info->reg_result = REG_RESULT_COMPLETE;
         }
         else
         {
-            dps_info->reg_result = REG_RESULT_FAILED;
+            prov_info->reg_result = REG_RESULT_FAILED;
         }
     }
 }
 
-static void dps_registation_status(DPS_REGISTRATION_STATUS reg_status, void* user_context)
+static void dps_registation_status(PROV_DEVICE_REG_STATUS reg_status, void* user_context)
 {
     (void)reg_status;
     if (user_context == NULL)
@@ -126,10 +113,10 @@ static bool provision_dps_device()
     return result;
 }
 
-static DPS_LL_HANDLE create_dps_handle(DPS_TRANSPORT_PROVIDER_FUNCTION dps_transport)
+static PROV_DEVICE_LL_HANDLE create_dps_handle(PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION dps_transport)
 {
-    DPS_LL_HANDLE result;
-    result = DPS_LL_Create(g_dps_uri, g_dps_scope_id, dps_transport, on_dps_error_callback, &g_dps_info);
+    PROV_DEVICE_LL_HANDLE result;
+    result = Prov_Device_LL_Create(g_dps_uri, g_dps_scope_id, dps_transport);
     ASSERT_IS_NOT_NULL_WITH_MSG(result, "Failure create a DPS HANDLE");
     return result;
 }
@@ -163,7 +150,7 @@ static void stop_tpm_emulator()
     platform_process_destroy(g_emulator_proc);
 }
 
-static int construct_device_id(const char* prefix, char** deviceName)
+static int construct_device_id(const char* prefix, char** device_name)
 {
     int result;
     char deviceGuid[DEVICE_GUID_SIZE];
@@ -175,23 +162,23 @@ static int construct_device_id(const char* prefix, char** deviceName)
     else
     {
         size_t len = strlen(prefix) + DEVICE_GUID_SIZE;
-        *deviceName = (char*)malloc(len + 1);
-        if (*deviceName == NULL)
+        *device_name = (char*)malloc(len + 1);
+        if (*device_name == NULL)
         {
             LogError("Failure allocating device ID.\r\n");
             result = __FAILURE__;
         }
         else
         {
-            if (sprintf_s(*deviceName, len + 1, prefix, deviceGuid) <= 0)
+            if (sprintf_s(*device_name, len + 1, prefix, deviceGuid) <= 0)
             {
                 LogError("Failure constructing device ID.\r\n");
-                free(*deviceName);
+                free(*device_name);
                 result = __FAILURE__;
             }
             else
             {
-                LogInfo("Created Device %s.", *deviceName);
+                LogInfo("Created Device %s.", *device_name);
                 result = 0;
             }
         }
@@ -199,82 +186,70 @@ static int construct_device_id(const char* prefix, char** deviceName)
     return result;
 }
 
-static void create_enrollment_device(const char* dps_uri, const char* key, const char* keyname)
+static void create_enrollment_device()
 {
-    int result;
-    DPS_SEC_HANDLE dps_sec_handle;
-    DPS_SERVICE_CLIENT_HANDLE svc_client;
-    ENROLLMENT_INFO enroll_info;
+    /*INDIVIDUAL_ENROLLMENT enrollment;
+    char* registration_id = NULL;
+    char* certificate = NULL;
 
-    memset(&enroll_info, 0, sizeof(ENROLLMENT_INFO));
-    svc_client = dps_service_create(dps_uri, key, keyname);
-    ASSERT_IS_NOT_NULL_WITH_MSG(svc_client, "Failure creating service client");
+    PROVISIONING_SERVICE_CLIENT_HANDLE prov_sc_handle = prov_sc_create_from_connection_string(g_prov_conn_string);
+    ASSERT_IS_NOT_NULL_WITH_MSG(prov_sc_handle, "Failure creating provisioning service client");
 
-    dps_sec_handle = dps_sec_create();
-    ASSERT_IS_NOT_NULL_WITH_MSG(dps_sec_handle, "Failure creating dps sec create");
+    char* device_id;
 
-    enroll_info.registration_id = dps_sec_get_registration_id(dps_sec_handle);
-    ASSERT_IS_NOT_NULL_WITH_MSG(enroll_info.registration_id, "Failure retrieving registration id");
+    ASSERT_ARE_EQUAL_WITH_MSG(int, 0, construct_device_id("device_", &device_id), "Failure creating device name");
 
-    if (g_desired_iothub != NULL)
+    PROV_AUTH_HANDLE auth_handle = prov_auth_create();
+    ASSERT_IS_NOT_NULL_WITH_MSG(auth_handle, "Failure creating auth client");
+
+    enrollment.device_id = device_id;
+
+    if (prov_auth_get_type(auth_handle) == PROV_AUTH_TYPE_X509)
     {
-        ASSERT_ARE_EQUAL_WITH_MSG(int, 0, mallocAndStrcpy_s(&enroll_info.desired_iothub, g_desired_iothub), "failed allocating desired iothub");
-    }
+        registration_id = prov_auth_get_registration_id(auth_handle);
+        ASSERT_IS_NOT_NULL_WITH_MSG(registration_id, "Failure retrieving registration Id");
+        certificate = prov_auth_get_certificate(auth_handle);
+        ASSERT_IS_NOT_NULL_WITH_MSG(certificate, "Failure retrieving certificate");
 
-    enroll_info.enable_entry = true;
-
-    g_dps_hsm_type = dps_sec_get_type(dps_sec_handle);
-    if (g_dps_hsm_type == DPS_SEC_TYPE_X509)
-    {
-        enroll_info.attestation_value = dps_sec_get_certificate(dps_sec_handle);
-        ASSERT_IS_NOT_NULL_WITH_MSG(enroll_info.attestation_value, "Failure retrieving certificate");
-
-        enroll_info.type = SECURE_DEVICE_TYPE_X509;
+        enrollment.registration_id = registration_id;
+        //enrollment.attestation->attestation.x509.client_certificates->primary->certificate = ;
     }
     else
     {
-        BUFFER_HANDLE ek;
-        STRING_HANDLE encoded_ek;
-
-        ek = dps_sec_get_endorsement_key(dps_sec_handle);
-        ASSERT_IS_NOT_NULL_WITH_MSG(ek, "Failure creating endorsement key");
-
-        encoded_ek = Base64_Encoder(ek);
-        ASSERT_IS_NOT_NULL_WITH_MSG(encoded_ek, "Failure base64 encoding endorsement key");
-
-        ASSERT_ARE_EQUAL_WITH_MSG(int, 0, mallocAndStrcpy_s(&enroll_info.attestation_value, STRING_c_str(encoded_ek)), "failed allocating endorsement key");
-
-        ASSERT_ARE_EQUAL_WITH_MSG(int, 0, construct_device_id("device_", &enroll_info.device_id), "Failed allocating device name");
-
-        enroll_info.type = SECURE_DEVICE_TYPE_TPM;
-
-        BUFFER_delete(ek);
-        STRING_delete(encoded_ek);
     }
+    //ASSERT_ARE_EQUAL_WITH_MSG(int, 0, prov_sc_create_or_update_individual_enrollment(prov_sc_handle, &enrollment), "Failure creating enrollment");
 
-    result = dps_service_create_enrollment(svc_client, &enroll_info);
-    ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "Failed enrolling device");
-
-    dps_serivce_destroy(svc_client);
+    free(registration_id);
+    free(certificate);
+    prov_auth_destroy(auth_handle);
+    prov_sc_destroy(prov_sc_handle);*/
 }
 
-static void remove_enrollment_device(const char* dps_uri, const char* key, const char* keyname)
+static void remove_enrollment_device()
 {
-    DPS_SEC_HANDLE dps_sec_handle;
-    DPS_SERVICE_CLIENT_HANDLE svc_client;
-    char* registration_id;
+    /*INDIVIDUAL_ENROLLMENT enrollment;
+    char* registration_id = NULL;
+    char* certificate = NULL;
 
-    svc_client = dps_service_create(dps_uri, key, keyname);
-    ASSERT_IS_NOT_NULL_WITH_MSG(svc_client, "Failure creating service client");
+    PROVISIONING_SERVICE_CLIENT_HANDLE prov_sc_handle = prov_sc_create_from_connection_string(g_prov_conn_string);
+    ASSERT_IS_NOT_NULL_WITH_MSG(prov_sc_handle, "Failure creating provisioning service client");
 
-    dps_sec_handle = dps_sec_create();
-    ASSERT_IS_NOT_NULL_WITH_MSG(dps_sec_handle, "Failure creating dps sec create");
+    PROV_AUTH_HANDLE auth_handle = prov_auth_create();
+    ASSERT_IS_NOT_NULL_WITH_MSG(auth_handle, "Failure creating auth client");
 
-    registration_id = dps_sec_get_registration_id(dps_sec_handle);
-    ASSERT_IS_NOT_NULL_WITH_MSG(registration_id, "Failure retrieving registration id");
+    if (prov_auth_get_type(auth_handle) == PROV_AUTH_TYPE_X509)
+    {
+        registration_id = prov_auth_get_registration_id(auth_handle);
+        ASSERT_IS_NOT_NULL_WITH_MSG(registration_id, "Failure retrieving registration Id");
 
+        enrollment.registration_id = registration_id;
+    }
+    ASSERT_ARE_EQUAL_WITH_MSG(int, 0, prov_sc_delete_individual_enrollment(prov_sc_handle, &enrollment), "Failure deleting enrollment");
 
-    dps_serivce_destroy(svc_client);
+    free(registration_id);
+    free(certificate);
+    prov_auth_destroy(auth_handle);
+    prov_sc_destroy(prov_sc_handle);*/
 }
 
 BEGIN_TEST_SUITE(dps_client_e2e)
@@ -283,39 +258,22 @@ BEGIN_TEST_SUITE(dps_client_e2e)
     {
         TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
 
-        memset(&g_dps_info, 0, sizeof(DPS_CLIENT_E2E_INFO));
+        memset(&g_prov_info, 0, sizeof(PROV_CLIENT_E2E_INFO));
 
         platform_init();
-        dps_secure_device_init();
+        prov_dev_security_init(SECURE_DEVICE_TYPE_X509);
 
-        g_dps_conn_string = getenv("DPS_CONNECTION_STRING");
-        ASSERT_IS_NOT_NULL_WITH_MSG(g_dps_conn_string, "DPS_CONNECTION_STRING is NULL");
-
-        g_desired_iothub = getenv("DPS_DESIRED_IOTHUB");
-
-        // Parse connection string
-        g_dps_info.conn_map = connectionstringparser_parse_from_char(g_dps_conn_string);
-        ASSERT_IS_NOT_NULL_WITH_MSG(g_dps_conn_string, "DPS_CONNECTION_STRING is NULL");
-
-        const char* host_name = Map_GetValueFromKey(g_dps_info.conn_map, "HostName");
-        ASSERT_IS_NOT_NULL_WITH_MSG(host_name, "Failed retrieving connection hostname");
-
-        ASSERT_ARE_EQUAL_WITH_MSG(int, 0, mallocAndStrcpy_s(&g_dps_uri, host_name), "Failed allocating connection hostname");
-
-        const char* key_name = Map_GetValueFromKey(g_dps_info.conn_map, "SharedAccessKeyName");
-        ASSERT_IS_NOT_NULL_WITH_MSG(key_name, "Failed retrieving primary keyname");
-
-        const char* access_key = Map_GetValueFromKey(g_dps_info.conn_map, "SharedAccessKey");
-        ASSERT_IS_NOT_NULL_WITH_MSG(access_key, "Failed retrieving key");
-
-        // Register device
-        create_enrollment_device(host_name, key_name, access_key);
+        g_prov_conn_string = getenv("PROV_CONNECTION_STRING");
+        ASSERT_IS_NOT_NULL_WITH_MSG(g_prov_conn_string, "PROV_CONNECTION_STRING is NULL");
 
         // Start Emulator
-        if (g_dps_hsm_type == DPS_SEC_TYPE_TPM)
+        /*if (g_dps_hsm_type == DPS_SEC_TYPE_TPM)
         {
             start_tpm_emulator();
-        }
+        }*/
+
+        // Register device
+        create_enrollment_device();
 
         g_dps_scope_id = getenv("DPS_SCOPE_ID_VALUE");
         ASSERT_IS_NOT_NULL_WITH_MSG(g_dps_scope_id, "DPS_SCOPE_ID_VALUE is NULL");
@@ -324,28 +282,16 @@ BEGIN_TEST_SUITE(dps_client_e2e)
     TEST_SUITE_CLEANUP(TestClassCleanup)
     {
         // Stop Emulator
-        if (g_dps_hsm_type == DPS_SEC_TYPE_TPM)
+        /*if (g_dps_hsm_type == DPS_SEC_TYPE_TPM)
         {
             stop_tpm_emulator();
-        }
-        dps_secure_device_init();
-        platform_deinit();
-
-        const char* host_name = Map_GetValueFromKey(g_dps_info.conn_map, "HostName");
-        ASSERT_IS_NOT_NULL_WITH_MSG(host_name, "Failed retrieving connection hostname");
-
-        ASSERT_ARE_EQUAL_WITH_MSG(int, 0, mallocAndStrcpy_s(&g_dps_uri, host_name), "Failed allocating connection hostname");
-
-        const char* key_name = Map_GetValueFromKey(g_dps_info.conn_map, "SharedAccessKeyName");
-        ASSERT_IS_NOT_NULL_WITH_MSG(key_name, "Failed retrieving primary keyname");
-
-        const char* access_key = Map_GetValueFromKey(g_dps_info.conn_map, "SharedAccessKey");
-        ASSERT_IS_NOT_NULL_WITH_MSG(access_key, "Failed retrieving key");
+        }*/
 
         // Remove device
-        remove_enrollment_device(host_name, key_name, access_key);
+        remove_enrollment_device();
 
-        Map_Destroy(g_dps_info.conn_map);
+        prov_dev_security_deinit();
+        platform_deinit();
 
         TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
     }
@@ -356,8 +302,8 @@ BEGIN_TEST_SUITE(dps_client_e2e)
 
     TEST_FUNCTION_CLEANUP(method_cleanup)
     {
-        free(g_dps_info.iothub_uri);
-        free(g_dps_info.device_id);
+        free(g_prov_info.iothub_uri);
+        free(g_prov_info.device_id);
     }
 
     TEST_FUNCTION(dps_register_device_http_success)
@@ -365,26 +311,26 @@ BEGIN_TEST_SUITE(dps_client_e2e)
         time_t begin_operation;
         time_t now_time;
         // arrange
-        DPS_LL_HANDLE handle;
-        handle = create_dps_handle(DPS_HTTP_Protocol);
+        PROV_DEVICE_LL_HANDLE handle;
+        handle = create_dps_handle(Prov_Device_HTTP_Protocol);
 
         // act
-        DPS_RESULT dps_result = DPS_LL_Register_Device(handle, iothub_dps_register_device, &g_dps_info, dps_registation_status, &g_dps_info);
-        ASSERT_ARE_EQUAL_WITH_MSG(DPS_RESULT, DPS_CLIENT_OK, dps_result, "Failure calling DPS_LL_Register_Device");
+        PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &g_prov_info, dps_registation_status, &g_prov_info);
+        ASSERT_ARE_EQUAL_WITH_MSG(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
 
         begin_operation = time(NULL);
         do
         {
-            DPS_LL_DoWork(handle);
+            Prov_Device_LL_DoWork(handle);
             ThreadAPI_Sleep(1);
-        } while ( (g_dps_info.reg_result == REG_RESULT_BEGIN) &&
+        } while ( (g_prov_info.reg_result == REG_RESULT_BEGIN) &&
             ( (now_time = time(NULL)),
             (difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME) ) );
 
         // Assert
-        ASSERT_ARE_EQUAL_WITH_MSG(int, REG_RESULT_COMPLETE, g_dps_info.reg_result, "Failure calling registering device");
+        ASSERT_ARE_EQUAL_WITH_MSG(int, REG_RESULT_COMPLETE, g_prov_info.reg_result, "Failure calling registering device");
 
-        DPS_LL_Destroy(handle);
+        Prov_Device_LL_Destroy(handle);
     }
 
 #if USE_AMQP
@@ -393,26 +339,26 @@ BEGIN_TEST_SUITE(dps_client_e2e)
         time_t begin_operation;
         time_t now_time;
         // arrange
-        DPS_LL_HANDLE handle;
-        handle = create_dps_handle(DPS_AMQP_Protocol);
+        PROV_DEVICE_LL_HANDLE handle;
+        handle = create_dps_handle(Prov_Device_AMQP_Protocol);
 
         // act
-        DPS_RESULT dps_result = DPS_LL_Register_Device(handle, iothub_dps_register_device, &g_dps_info, dps_registation_status, &g_dps_info);
-        ASSERT_ARE_EQUAL_WITH_MSG(DPS_RESULT, DPS_CLIENT_OK, dps_result, "Failure calling DPS_LL_Register_Device");
+        PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &g_prov_info, dps_registation_status, &g_prov_info);
+        ASSERT_ARE_EQUAL_WITH_MSG(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
 
         begin_operation = time(NULL);
         do
         {
-            DPS_LL_DoWork(handle);
+            Prov_Device_LL_DoWork(handle);
             ThreadAPI_Sleep(1);
-        } while ((g_dps_info.reg_result == REG_RESULT_BEGIN) &&
+        } while ((g_prov_info.reg_result == REG_RESULT_BEGIN) &&
             ((now_time = time(NULL)),
             (difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME)));
 
         // Assert
-        ASSERT_ARE_EQUAL_WITH_MSG(int, REG_RESULT_COMPLETE, g_dps_info.reg_result, "Failure calling registering device");
+        ASSERT_ARE_EQUAL_WITH_MSG(int, REG_RESULT_COMPLETE, g_prov_info.reg_result, "Failure calling registering device");
 
-        DPS_LL_Destroy(handle);
+        Prov_Device_LL_Destroy(handle);
     }
 
     TEST_FUNCTION(dps_register_device_amqp_ws_success)
@@ -420,26 +366,26 @@ BEGIN_TEST_SUITE(dps_client_e2e)
         time_t begin_operation;
         time_t now_time;
         // arrange
-        DPS_LL_HANDLE handle;
-        handle = create_dps_handle(DPS_AMQP_WS_Protocol);
+        PROV_DEVICE_LL_HANDLE handle;
+        handle = create_dps_handle(Prov_Device_AMQP_WS_Protocol);
 
         // act
-        DPS_RESULT dps_result = DPS_LL_Register_Device(handle, iothub_dps_register_device, &g_dps_info, dps_registation_status, &g_dps_info);
-        ASSERT_ARE_EQUAL_WITH_MSG(DPS_RESULT, DPS_CLIENT_OK, dps_result, "Failure calling DPS_LL_Register_Device");
+        PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &g_prov_info, dps_registation_status, &g_prov_info);
+        ASSERT_ARE_EQUAL_WITH_MSG(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
 
         begin_operation = time(NULL);
         do
         {
-            DPS_LL_DoWork(handle);
+            Prov_Device_LL_DoWork(handle);
             ThreadAPI_Sleep(1);
-        } while ((g_dps_info.reg_result == REG_RESULT_BEGIN) &&
+        } while ((g_prov_info.reg_result == REG_RESULT_BEGIN) &&
             ((now_time = time(NULL)),
             (difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME)));
 
         // Assert
-        ASSERT_ARE_EQUAL_WITH_MSG(int, REG_RESULT_COMPLETE, g_dps_info.reg_result, "Failure calling registering device");
+        ASSERT_ARE_EQUAL_WITH_MSG(int, REG_RESULT_COMPLETE, g_prov_info.reg_result, "Failure calling registering device");
 
-        DPS_LL_Destroy(handle);
+        Prov_Device_LL_Destroy(handle);
     }
 #endif
 
@@ -449,26 +395,26 @@ BEGIN_TEST_SUITE(dps_client_e2e)
         time_t begin_operation;
         time_t now_time;
         // arrange
-        DPS_LL_HANDLE handle;
-        handle = create_dps_handle(DPS_MQTT_Protocol);
+        PROV_DEVICE_LL_HANDLE handle;
+        handle = create_dps_handle(Prov_Device_MQTT_Protocol);
 
         // act
-        DPS_RESULT dps_result = DPS_LL_Register_Device(handle, iothub_dps_register_device, &g_dps_info, dps_registation_status, &g_dps_info);
-        ASSERT_ARE_EQUAL_WITH_MSG(DPS_RESULT, DPS_CLIENT_OK, dps_result, "Failure calling DPS_LL_Register_Device");
+        PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &g_prov_info, dps_registation_status, &g_prov_info);
+        ASSERT_ARE_EQUAL_WITH_MSG(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
 
         begin_operation = time(NULL);
         do
         {
-            DPS_LL_DoWork(handle);
+            Prov_Device_LL_DoWork(handle);
             ThreadAPI_Sleep(1);
-        } while ((g_dps_info.reg_result == REG_RESULT_BEGIN) &&
+        } while ((g_prov_info.reg_result == REG_RESULT_BEGIN) &&
             ((now_time = time(NULL)),
             (difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME)));
 
         // Assert
-        ASSERT_ARE_EQUAL_WITH_MSG(int, REG_RESULT_COMPLETE, g_dps_info.reg_result, "Failure calling registering device");
+        ASSERT_ARE_EQUAL_WITH_MSG(int, REG_RESULT_COMPLETE, g_prov_info.reg_result, "Failure calling registering device");
 
-        DPS_LL_Destroy(handle);
+        Prov_Device_LL_Destroy(handle);
     }
 
     TEST_FUNCTION(dps_register_device_mqtt_ws_success)
@@ -476,26 +422,26 @@ BEGIN_TEST_SUITE(dps_client_e2e)
         time_t begin_operation;
         time_t now_time;
         // arrange
-        DPS_LL_HANDLE handle;
-        handle = create_dps_handle(DPS_MQTT_WS_Protocol);
+        PROV_DEVICE_LL_HANDLE handle;
+        handle = create_dps_handle(Prov_Device_MQTT_WS_Protocol);
 
         // act
-        DPS_RESULT dps_result = DPS_LL_Register_Device(handle, iothub_dps_register_device, &g_dps_info, dps_registation_status, &g_dps_info);
-        ASSERT_ARE_EQUAL_WITH_MSG(DPS_RESULT, DPS_CLIENT_OK, dps_result, "Failure calling DPS_LL_Register_Device");
+        PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &g_prov_info, dps_registation_status, &g_prov_info);
+        ASSERT_ARE_EQUAL_WITH_MSG(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
 
         begin_operation = time(NULL);
         do
         {
-            DPS_LL_DoWork(handle);
+            Prov_Device_LL_DoWork(handle);
             ThreadAPI_Sleep(1);
-        } while ((g_dps_info.reg_result == REG_RESULT_BEGIN) &&
+        } while ((g_prov_info.reg_result == REG_RESULT_BEGIN) &&
             ((now_time = time(NULL)),
             (difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME)));
 
         // Assert
-        ASSERT_ARE_EQUAL_WITH_MSG(int, REG_RESULT_COMPLETE, g_dps_info.reg_result, "Failure calling registering device");
+        ASSERT_ARE_EQUAL_WITH_MSG(int, REG_RESULT_COMPLETE, g_prov_info.reg_result, "Failure calling registering device");
 
-        DPS_LL_Destroy(handle);
+        Prov_Device_LL_Destroy(handle);
     }
 #endif
 
