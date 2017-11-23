@@ -30,8 +30,8 @@ $edgeDevicePrivateKey       = Join-Path $edgePrivateCertDir "new-edge-device.cer
 $edgeDeviceFullCertChain    = Join-Path $edgePublicCertDir "new-edge-device-full-chain.cert.pem"
 $edgeIotHubOwnerCA          = Join-Path $edgePublicCertDir "azure-iot-test-only.root.ca.cert.pem"
 
-# Whether to use ECC or RSA.
-$useEcc                     = $false
+# Whether to use ECC or RSA is stored in a file.  If it doesn't exist, we default to ECC.
+$algorithmUsedFile       = "./algorithmUsed.txt"
 
 
 function Test-CACertsPrerequisites()
@@ -82,7 +82,7 @@ function New-CACertsSelfsignedCertificate([string]$subjectName, [object]$signing
         $selfSignedArgs += @{"-Signer"=$signingCert }
     }
 
-    if ($useEcc -eq $true)
+    if ((Get-CACertsCertUseRSA) -eq $false)
     {
         $selfSignedArgs += @{"-KeyAlgorithm"="ECDSA_nistP256";
                              "-CurveExport"="CurveName" }
@@ -90,7 +90,7 @@ function New-CACertsSelfsignedCertificate([string]$subjectName, [object]$signing
 
     # Now use splatting to process this
     Write-Warning ("Generating certificate {0} which is for prototyping, NOT PRODUCTION.  It has a hard-coded password and will expire in 30 days." -f $subjectName)
-    write (New-SelfSignedCertificate @selfSignedArgs)
+    Write-Output (New-SelfSignedCertificate @selfSignedArgs)
 }
 
 
@@ -106,13 +106,15 @@ function New-CACertsIntermediateCert([string]$subjectName, [Microsoft.Certificat
 
     del $certFileName
    
-    write $newCert
+    Write-Output $newCert
 }
 
 # Creates a new certificate chain.
-function New-CACertsCertChain()
+function New-CACertsCertChain([Parameter(Mandatory=$TRUE)][ValidateSet("rsa","ecc")][string]$algorithm)
 {
-    Write-Host "Beginning to install certificate chain to your LocalMachine\My store"
+    # Store the algorithm we're using in a file so later stages always use the same one (without forcing user to keep passing it around)
+    Set-Content $algorithmUsedFile $algorithm
+
     $rootCACert =  New-CACertsSelfsignedCertificate $_rootCertSubject $null
     
     Export-Certificate -Cert $rootCACert -FilePath $rootCACerFileName  -Type CERT
@@ -123,7 +125,14 @@ function New-CACertsCertChain()
     $intermediateCert1 = New-CACertsIntermediateCert ($_intermediateCertSubject -f "1") $rootCACert $intermediate1CAPemFileName
     $intermediateCert2 = New-CACertsIntermediateCert ($_intermediateCertSubject -f "2") $intermediateCert1 $intermediate2CAPemFileName
     $intermediateCert3 = New-CACertsIntermediateCert ($_intermediateCertSubject -f "3") $intermediateCert2 $intermediate3CAPemFileName
+  
     Write-Host "Success"
+}
+
+# Get-CACertsCertUseEdge retrieves the algorithm (RSA vs ECC) that was specified during New-CACertsCertChain
+function Get-CACertsCertUseRsa()
+{
+    Write-Output ((Get-Content $algorithmUsedFile -ErrorAction SilentlyContinue) -eq "rsa")
 }
 
 function Get-CACertsCertBySubjectName([string]$subjectName)
@@ -135,7 +144,7 @@ function Get-CACertsCertBySubjectName([string]$subjectName)
         throw ("Unable to find certificate with subjectName {0}" -f $subjectName)
     }
     
-    write $cert
+    Write-Output $cert
 }
 
 function New-CACertsVerificationCert([string]$requestedSubjectName)
@@ -196,13 +205,13 @@ function New-CACertsDevice([string]$deviceName, [string]$signingCertSubject=$_ro
     openssl pkcs12 -in $newDevicePfxFileName -out $newDevicePemAllFileName -nodes
 
     # Now that we have a PEM, do some conversions on it to get formats we can process
-    if ($useEcc -eq $true)
+    if ((Get-CACertsCertUseRSA) -eq $true)
     {
-        openssl ec -in $newDevicePemAllFileName -out $newDevicePemPrivateFileName
+        openssl rsa -in $newDevicePemAllFileName -out $newDevicePemPrivateFileName        
     }
     else
     {
-        openssl rsa -in $newDevicePemAllFileName -out $newDevicePemPrivateFileName
+        openssl ec -in $newDevicePemAllFileName -out $newDevicePemPrivateFileName
     }
     openssl x509 -in $newDevicePemAllFileName -out $newDevicePemPublicFileName
  
@@ -235,13 +244,13 @@ function Write-CACertsCertificatesToEnvironment([string]$deviceName, [string]$io
     $env:IOTHUB_CA_X509_PUBLIC                 = $devicePublicPem + $intermediate1CAPem + $rootCAPem
     $env:IOTHUB_CA_X509_PRIVATE_KEY            = $devicePrivatePem
     $env:IOTHUB_CA_CONNECTION_STRING_TO_DEVICE = "HostName={0};DeviceId={1};x509=true" -f $iothubName, $deviceName
-    if ($useEcc -eq $true)
+    if ((Get-CACertsCertUseRSA) -eq $true)
     {
-        $env:IOTHUB_CA_USE_ECC = "1"
+        $env:IOTHUB_CA_USE_ECC = "0"
     }
     else
     {
-        $env:IOTHUB_CA_USE_ECC = "0"
+        $env:IOTHUB_CA_USE_ECC = "1"
     }
     
     Write-Host "Success"
@@ -281,7 +290,7 @@ function Get-CACertsPemEncodingForEnvironmentVariable([string]$fileName)
         $outputString += ($line + "`r`n")
     }
     
-    write $outputString
+    Write-Output $outputString
 }
 
 Write-Warning "This script is provided for prototyping only."

@@ -40,7 +40,9 @@ You'll need to do some initial setup prior to running these scripts.
 First you need to create a CA and an intermediate certificate signer that chains back to the CA.
 
 ### **PowerShell**
-* Run `New-CACertsCertChain`.  Note this updates your Windows Certificate store with these certs.
+* Run `New-CACertsCertChain [ecc|rsa]`.  Note this updates your Windows Certificate store with these certs.  
+  * You **must** use `rsa` if you're creating certificates for Edge.
+  * `ecc` is recommended for CA certificates, but not required.
 
 ### **Bash**
 * Run `./certGen.sh create_root_and_intermediate`
