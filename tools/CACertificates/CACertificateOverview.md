@@ -12,6 +12,8 @@ The PS1 and Bash scripts are functionally equivalent; they are both provided dep
 
 A more detailed document showing UI screen shots for CA Certificates and proof of possession flow is available from [the official documentation].
 
+A more detailed document explaining Edge and showing its use of certificates generated here is available from the [Edge gateway creation documentation].
+
 ## USE
 
 ## Step 1 - Initial Setup
@@ -100,3 +102,4 @@ From start menu, open `manage computer certificates` and navigate Certificates -
 Bash outputs certificates to the current working directory, so there is no analogous system cleanup needed.
 
 [the official documentation]: https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-security-x509-get-started
+[Edge gateway creation documentation]: https://docs.microsoft.com/en-us/azure/iot-edge/how-to-create-gateway-device
