@@ -274,6 +274,10 @@ add_subdirectory(serializer)
 #add the device_auth sample subdirectory
 if(${use_prov_client} AND NOT ${skip_samples})
     add_subdirectory(./provisioning_client/samples)
+
+    if(NOT "${build_python}" STREQUAL "OFF")
+        add_subdirectory(../provisioning_device_client provisioning_device_client_python)
+    endif()
 endif()
 
 if(NOT "${build_python}" STREQUAL "OFF")

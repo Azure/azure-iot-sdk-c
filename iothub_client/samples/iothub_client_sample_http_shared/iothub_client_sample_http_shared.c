@@ -9,15 +9,11 @@
    Simply changing the using the convenience layer (functions not having _LL)
    and removing calls to _DoWork will yield the same results. */
 
-#ifdef ARDUINO
-#include "AzureIoT.h"
-#else
 #include "iothub_client.h"
 #include "iothub_message.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/platform.h"
 #include "iothubtransporthttp.h"
-#endif
 
 #ifdef MBED_BUILD_TIMESTAMP
 #define SET_TRUSTED_CERT_IN_SAMPLES

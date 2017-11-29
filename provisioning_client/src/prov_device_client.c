@@ -152,10 +152,13 @@ void Prov_Device_Destroy(PROV_DEVICE_HANDLE prov_device_handle)
         }
 
         /* Codes_SRS_PROV_DEVICE_CLIENT_12_011: [ If there is a running worker thread the function shall call join to finish. ] */
-        int res;
-        if (ThreadAPI_Join(prov_device_handle->ThreadHandle, &res) != THREADAPI_OK)
+        if (prov_device_handle->ThreadHandle != NULL)
         {
-            LogError("ThreadAPI_Join failed");
+            int res;
+            if (ThreadAPI_Join(prov_device_handle->ThreadHandle, &res) != THREADAPI_OK)
+            {
+                LogError("ThreadAPI_Join failed");
+            }
         }
 
         /* Codes_SRS_PROV_DEVICE_CLIENT_12_012: [ The function shall call the LL layer Prov_Device_LL_Destroy with the given handle. ] */

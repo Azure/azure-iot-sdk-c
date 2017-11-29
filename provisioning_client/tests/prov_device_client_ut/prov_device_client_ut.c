@@ -91,6 +91,7 @@ static LOCK_RESULT my_Unlock(LOCK_HANDLE handle)
 }
 
 static THREAD_HANDLE TEST_THREAD_HANDLE = (THREAD_HANDLE)0x3535;
+static THREAD_HANDLE TEST_THREAD_HANDLE_FAIL = (THREAD_HANDLE)0x1111;
 
 static THREADAPI_RESULT my_ThreadAPI_Create(THREAD_HANDLE* threadHandle, THREAD_START_FUNC func, void* arg)
 {
@@ -102,7 +103,7 @@ static THREADAPI_RESULT my_ThreadAPI_Create(THREAD_HANDLE* threadHandle, THREAD_
 
 static THREADAPI_RESULT my_ThreadAPI_Join(THREAD_HANDLE threadHandle, int *res)
 {
-    if (threadHandle == NULL)
+    if (threadHandle == TEST_THREAD_HANDLE_FAIL)
     {
         return THREADAPI_ERROR;
     }
@@ -455,7 +456,7 @@ TEST_FUNCTION(Prov_Device_Destroy_Thread_Join_fail)
     TEST_PROV_DEVICE_INSTANCE* prov_device_handle_instance = (TEST_PROV_DEVICE_INSTANCE*)prov_device_handle;
     prov_device_handle_instance->LockHandle = TEST_LOCK_HANDLE;
     prov_device_handle_instance->ProvDeviceLLHandle = TEST_PROV_DEVICE_LL_HANDLE;
-    prov_device_handle_instance->ThreadHandle = NULL;
+    prov_device_handle_instance->ThreadHandle = TEST_THREAD_HANDLE_FAIL;
     prov_device_handle_instance->StopThread = 0;
 
     umock_c_reset_all_calls();

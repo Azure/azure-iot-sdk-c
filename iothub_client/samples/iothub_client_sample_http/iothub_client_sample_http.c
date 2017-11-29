@@ -9,9 +9,6 @@ That does not mean that HTTP only works with the _LL APIs.
 Simply changing the using the convenience layer (functions not having _LL)
 and removing calls to _DoWork will yield the same results. */
 
-#ifdef ARDUINO
-#include "AzureIoT.h"
-#else
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/platform.h"
@@ -19,7 +16,6 @@ and removing calls to _DoWork will yield the same results. */
 #include "iothub_client_ll.h"
 #include "iothub_message.h"
 #include "iothubtransporthttp.h"
-#endif
 
 #ifdef MBED_BUILD_TIMESTAMP
 #define SET_TRUSTED_CERT_IN_SAMPLES

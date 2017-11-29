@@ -25,16 +25,16 @@ Though it may be possible to use a host machine running a variant of Windows thi
 
 Open a terminal prompt on your host machine in the manner you prefer.
 
-We need to acquire the SDK source code. This is available in a GitHub repository at https://github.com/Azure/azure-iot-sdks.git. We clone this too our host machine as follows:
+We need to acquire the SDK source code. This is available in the [C SDK GitHub repository](https://github.com/Azure/azure-iot-sdk-c.git). We clone this too our host machine as follows:
 ```
 cd ~
 mkdir Source
 cd Source
-git clone --recursive https://github.com/Azure/azure-iot-sdks.git
+git clone --recursive https://github.com/Azure/azure-iot-sdk-c.git
 ```
-Further information regarding this step, which also includes important other set up requirements, can be found at <https://github.com/Azure/azure-iot-sdks/blob/master/c/doc/devbox_setup.md>. This step is only included in this document to establish the directory structure used for the rest of the example.
+Further information regarding this step and other set up requirements can be found in this [guide](https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/devbox_setup.md). This step is only included in this document to establish the directory structure used for the rest of the example.
 
-You might consider building the SDK for your local platform at this point simply to ensure you have all the required components. At the very least, you must ensure that the SDK's prerequisite libraries are installed on your Raspberry Pi. You can achieve this by running the script _setup.sh_ found in _azure-iot-sdks/c/build\_all/linux_.
+You might consider building the SDK for your local platform at this point simply to ensure you have all the required components. At the very least, you must ensure that the SDK's prerequisite libraries are installed on your Raspberry Pi. You can achieve this by running the script _setup.sh_ found in _azure-iot-sdk-c/build\_all/linux_.
 
 In order to cross compile for a different target the first requirement is to set up an environment containing the required toolchain, system libraries and system headers that may be required to build the code. In the instance of the Raspberry Pi this is simplified by the existence of a GitHub project that has much of that work already done for us. Change to your home directory, create a new directory for the Raspberry Pi Tools and clone the project at https://github.com/raspberrypi/tools into that directory. For example:
 ```
@@ -63,7 +63,7 @@ You can use *export -p* to verify RPI\_ROOT has been added to the environment.
 
 Now we need to switch to the SDK directory tree. Enter this command
 ```
-cd ~/Source/azure-iot-sdks/c/build_all/linux
+cd ~/Source/azure-iot-sdk-c/build_all/linux
 ```
 Using the text editor of your choice, create a new file in this directory and call it toolchain-rpi.cmake. Into this file place the following lines
 
@@ -92,7 +92,7 @@ and save the toolchain file. Your cross compilation environment is now complete.
 
 The final step in the process is to run the actual build. For this you will need to be in the Linux build directory as shown above. Enter the following commands
 ```
-cd ~/Source/azure-iot-sdks/c/build_all/linux
+cd ~/Source/azure-iot-sdk-c/build_all/linux
 ./build.sh --toolchain-file toolchain-rpi.cmake -cl --sysroot=$RPI_ROOT
 ```
 This will tell cmake to build the SDK using the toolchain file toolchain-rpi.cmake. Finally, and absolutely critical is the use of the *--sysroot* option. Without this the compiler will fail to find required headers and libraries.
