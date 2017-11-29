@@ -268,7 +268,7 @@ static bool create_messageHTTPrequestHeaders(HTTPTRANSPORT_PERDEVICE_DATA* handl
     else
     {
         if (!(
-            (addUserAgentHeaderInfo(handleData->iotHubClientHandle, handleData->eventHTTPrequestHeaders) == HTTP_HEADERS_OK) &&
+            (addUserAgentHeaderInfo(handleData->iotHubClientHandle, handleData->messageHTTPrequestHeaders) == HTTP_HEADERS_OK) &&
             (is_x509_used || (HTTPHeaders_AddHeaderNameValuePair(handleData->messageHTTPrequestHeaders, "Authorization", " ") == HTTP_HEADERS_OK))
             ))
         {

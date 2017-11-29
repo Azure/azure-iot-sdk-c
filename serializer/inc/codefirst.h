@@ -11,12 +11,9 @@
 #include "azure_c_shared_utility/strings.h"
 #include "iotdevice.h"
 
-
-
 #ifdef __cplusplus
 #include <cstddef>
 #include <cstdarg>
-#include <cstdbool>
 extern "C" {
 #else
 #include <stddef.h>

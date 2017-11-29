@@ -17,8 +17,8 @@
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/strings_types.h"
 #include "azure_c_shared_utility/httpapiex.h"
-
 #include "iothub_client_ll.h"
+#include "azure_c_shared_utility/shared_util_options.h"
 
 #ifdef __cplusplus
 #include <cstddef>
@@ -51,10 +51,11 @@ DEFINE_ENUM(BLOB_RESULT, BLOB_RESULT_VALUES)
 * @param  httpStatus        A pointer to an out argument receiving the HTTP status (available only when the return value is BLOB_OK)
 * @param  httpResponse      A BUFFER_HANDLE that receives the HTTP response from the server (available only when the return value is BLOB_OK)
 * @param  certificates      A null terminated string containing CA certificates to be used
+* @param    proxyOptions    A structure that contains optional web proxy information
 *
 * @return	A @c BLOB_RESULT. BLOB_OK means the blob has been uploaded successfully. Any other value indicates an error
 */
-MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadMultipleBlocksFromSasUri, const char*, SASURI, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK, getDataCallback, void*, context, unsigned int*, httpStatus, BUFFER_HANDLE, httpResponse, const char*, certificates)
+MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadMultipleBlocksFromSasUri, const char*, SASURI, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK, getDataCallback, void*, context, unsigned int*, httpStatus, BUFFER_HANDLE, httpResponse, const char*, certificates, HTTP_PROXY_OPTIONS*, proxyOptions)
 
 /**
 * @brief  Synchronously uploads a byte array as a new block to blob storage

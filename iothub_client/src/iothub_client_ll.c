@@ -21,8 +21,8 @@
 #include "iothub_client_diagnostic.h"
 #include <stdint.h>
 
-#ifdef USE_DPS_MODULE
-#include "iothub_client_dps_ll.h"
+#ifdef USE_PROV_MODULE
+#include "iothub_client_hsm_ll.h"
 #endif
 
 #ifndef DONT_USE_UPLOADTOBLOB
@@ -520,7 +520,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromDeviceAuth(const char* iothub_
     }
     else
     {
-#ifdef USE_DPS_MODULE
+#ifdef USE_PROV_MODULE
         IOTHUB_CLIENT_CONFIG* config = (IOTHUB_CLIENT_CONFIG*)malloc(sizeof(IOTHUB_CLIENT_CONFIG));
         if (config == NULL)
         {
@@ -603,7 +603,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromDeviceAuth(const char* iothub_
             free(config);
         }
 #else
-        LogError("DPS module is not included");
+        LogError("HSM module is not included");
         result = NULL;
 #endif
     }
@@ -994,7 +994,7 @@ static int attach_ms_timesOutAfter(IOTHUB_CLIENT_LL_HANDLE_DATA* handleData, IOT
     }
     else
     {
-        /*Codes_SRS_IOTHUBCLIENT_LL_02_039: [ "messageTimeout" - once IoTHubClient_LL_SendEventAsync is called the message shall timeout after value miliseconds. Value is a pointer to a uint64. ]*/
+        /*Codes_SRS_IOTHUBCLIENT_LL_02_039: [ "messageTimeout" - once IoTHubClient_LL_SendEventAsync is called the message shall timeout after value miliseconds. Value is a pointer to a tickcounter_ms_t. ]*/
         if (tickcounter_get_current_ms(handleData->tickCounter, &newEntry->ms_timesOutAfter) != 0)
         {
             result = __FAILURE__;
@@ -1691,7 +1691,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetOption(IOTHUB_CLIENT_LL_HANDLE iotHubCli
     {
         IOTHUB_CLIENT_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LL_HANDLE_DATA*)iotHubClientHandle;
 
-        /*Codes_SRS_IOTHUBCLIENT_LL_02_039: [ "messageTimeout" - once IoTHubClient_LL_SendEventAsync is called the message shall timeout after value miliseconds. Value is a pointer to a uint64. ]*/
+        /*Codes_SRS_IOTHUBCLIENT_LL_02_039: [ "messageTimeout" - once IoTHubClient_LL_SendEventAsync is called the message shall timeout after value miliseconds. Value is a pointer to a tickcounter_ms_t. ]*/
         if (strcmp(optionName, OPTION_MESSAGE_TIMEOUT) == 0)
         {
             /*this is an option handled by IoTHubClient_LL*/

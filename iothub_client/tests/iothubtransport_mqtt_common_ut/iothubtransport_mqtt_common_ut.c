@@ -1677,6 +1677,25 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_Unsubscribe_succeeds)
     // assert
 }
 
+static void set_expected_calls_for_free_transport_handle_data()
+{
+    STRICT_EXPECTED_CALL(mqtt_client_deinit(TEST_MQTT_CLIENT_HANDLE)).IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(retry_control_destroy(TEST_RETRY_CONTROL_HANDLE));
+    STRICT_EXPECTED_CALL(tickcounter_destroy(TEST_COUNTER_HANDLE)).IgnoreArgument(1);
+
+    EXPECTED_CALL(STRING_delete(NULL));
+    EXPECTED_CALL(STRING_delete(NULL));
+    EXPECTED_CALL(STRING_delete(NULL));
+    EXPECTED_CALL(STRING_delete(NULL));
+    EXPECTED_CALL(STRING_delete(NULL));
+    EXPECTED_CALL(STRING_delete(NULL));
+    EXPECTED_CALL(STRING_delete(NULL));
+    EXPECTED_CALL(STRING_delete(NULL));
+    EXPECTED_CALL(STRING_delete(NULL));
+
+    EXPECTED_CALL(gballoc_free(NULL));
+}
+
 /* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_014: [IoTHubTransport_MQTT_Common_Destroy shall free all the resources currently in use.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_One_Message_Ack_succeeds)
 {
@@ -1716,19 +1735,8 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_One_Message_Ack_succeeds)
     EXPECTED_CALL(gballoc_free(NULL));
     EXPECTED_CALL(DList_IsListEmpty(IGNORED_PTR_ARG));
     EXPECTED_CALL(DList_IsListEmpty(IGNORED_PTR_ARG));
-    EXPECTED_CALL(STRING_delete(NULL));
-    STRICT_EXPECTED_CALL(mqtt_client_deinit(TEST_MQTT_CLIENT_HANDLE)).IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(retry_control_destroy(TEST_RETRY_CONTROL_HANDLE));
-    EXPECTED_CALL(STRING_delete(NULL));
-    EXPECTED_CALL(STRING_delete(NULL));
-    EXPECTED_CALL(STRING_delete(NULL));
-    EXPECTED_CALL(STRING_delete(NULL));
-    EXPECTED_CALL(STRING_delete(NULL));
-    EXPECTED_CALL(STRING_delete(NULL));
-    EXPECTED_CALL(STRING_delete(NULL));
-    EXPECTED_CALL(STRING_delete(NULL));
-    STRICT_EXPECTED_CALL(tickcounter_destroy(TEST_COUNTER_HANDLE)).IgnoreArgument(1);
-    EXPECTED_CALL(gballoc_free(NULL));
+
+    set_expected_calls_for_free_transport_handle_data();
 
     // act
     IoTHubTransport_MQTT_Common_Destroy(handle);

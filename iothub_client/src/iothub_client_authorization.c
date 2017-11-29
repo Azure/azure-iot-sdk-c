@@ -12,8 +12,8 @@
 #include "azure_c_shared_utility/sastoken.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 
-#ifdef USE_DPS_MODULE
-#include "azure_hub_modules/iothub_device_auth.h"
+#ifdef USE_PROV_MODULE
+#include "azure_prov_client/iothub_auth_client.h"
 #endif
 
 #include "iothub_client_authorization.h"
@@ -28,7 +28,7 @@ typedef struct IOTHUB_AUTHORIZATION_DATA_TAG
     char* device_id;
     size_t token_expiry_time_sec;
     IOTHUB_CREDENTIAL_TYPE cred_type;
-#ifdef USE_DPS_MODULE
+#ifdef USE_PROV_MODULE
     IOTHUB_SECURITY_HANDLE device_auth_handle;
 #endif
 } IOTHUB_AUTHORIZATION_DATA;
@@ -132,7 +132,7 @@ IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_CreateFromDeviceAuth(const char* d
     }
     else
     {
-#ifdef USE_DPS_MODULE
+#ifdef USE_PROV_MODULE
         result = (IOTHUB_AUTHORIZATION_DATA*)malloc(sizeof(IOTHUB_AUTHORIZATION_DATA));
         if (result == NULL)
         {
@@ -159,7 +159,7 @@ IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_CreateFromDeviceAuth(const char* d
             }
             else
             {
-                if (iothub_device_auth_get_auth_type(result->device_auth_handle) == AUTH_TYPE_SAS)
+                if (iothub_device_auth_get_type(result->device_auth_handle) == AUTH_TYPE_SAS)
                 {
                     result->cred_type = IOTHUB_CREDENTIAL_TYPE_DEVICE_AUTH;
                 }
@@ -170,7 +170,7 @@ IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_CreateFromDeviceAuth(const char* d
             }
         }
 #else
-        LogError("Failed DPS module is not supported");
+        LogError("Failed HSM module is not supported");
         result = NULL;
 #endif
     }
@@ -183,7 +183,7 @@ void IoTHubClient_Auth_Destroy(IOTHUB_AUTHORIZATION_HANDLE handle)
     if (handle != NULL)
     {
         /* Codes_SRS_IoTHub_Authorization_07_006: [ IoTHubClient_Auth_Destroy shall free all resources associated with the IOTHUB_AUTHORIZATION_HANDLE handle. ] */
-#ifdef USE_DPS_MODULE
+#ifdef USE_PROV_MODULE
         iothub_device_auth_destroy(handle->device_auth_handle);
 #endif
         free(handle->device_key);
@@ -240,7 +240,7 @@ int IoTHubClient_Auth_Set_xio_Certificate(IOTHUB_AUTHORIZATION_HANDLE handle, XI
     }
     else
     {
-#ifdef USE_DPS_MODULE
+#ifdef USE_PROV_MODULE
         CREDENTIAL_RESULT* cred_result = iothub_device_auth_generate_credentials(handle->device_auth_handle, NULL);
         if (cred_result == NULL)
         {
@@ -266,7 +266,7 @@ int IoTHubClient_Auth_Set_xio_Certificate(IOTHUB_AUTHORIZATION_HANDLE handle, XI
             free(cred_result);
         }
 #else
-        LogError("Failed DPS module is not supported");
+        LogError("Failed HSM module is not supported");
         result = __FAILURE__;
 #endif
     }
@@ -303,7 +303,7 @@ char* IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const c
     {
         if (handle->cred_type == IOTHUB_CREDENTIAL_TYPE_DEVICE_AUTH)
         {
-#ifdef USE_DPS_MODULE
+#ifdef USE_PROV_MODULE
             DEVICE_AUTH_CREDENTIAL_INFO dev_auth_cred;
             size_t sec_since_epoch;
 
@@ -332,12 +332,11 @@ char* IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const c
                         LogError("failure allocating Sas Token");
                         result = NULL;
                     }
-                    free(cred_result->auth_cred_result.sas_result.sas_token);
                     free(cred_result);
                 }
             }
 #else
-            LogError("Failed DPS module is not supported");
+            LogError("Failed HSM module is not supported");
             result = NULL;
 #endif
         }

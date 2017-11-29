@@ -6,6 +6,6 @@ build_root=$(cd "$(dirname "$0")/.." && pwd)
 cd $build_root
 
 # -- C --
-./build_all/linux/build.sh --run-unittests --run_valgrind "$@" #-x 
+./build_all/linux/build.sh --run-unittests --run_valgrind --provisioning "$@" #-x 
 [ $? -eq 0 ] || exit $?
 

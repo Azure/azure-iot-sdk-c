@@ -27,7 +27,7 @@
 #include "parson.h"
 #include "certs.h"
 
-#define MAX_CLOUD_TRAVEL_TIME  600.0    /* 10 minutes */
+#define MAX_CLOUD_TRAVEL_TIME  120.0    /* 2 minutes */
 #define BUFFER_SIZE            37
 
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
@@ -431,22 +431,8 @@ void client_create_with_properies_and_send_d2c(IOTHUB_CLIENT_HANDLE iotHubClient
     IoTHubMessage_Destroy(msgHandle);
 }
 
-void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACCOUNT_AUTH_METHOD accountAuthMethod)
+static IOTHUB_CLIENT_HANDLE dt_e2e_create_client_handle(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACCOUNT_AUTH_METHOD accountAuthMethod)
 {
-    // arrange
-    IOTHUB_PROVISIONED_DEVICE* deviceToUse;
-    if (accountAuthMethod == IOTHUB_ACCOUNT_AUTH_X509)
-    {
-        deviceToUse = IoTHubAccount_GetX509Device(g_iothubAcctInfo);
-    }
-    else
-    {
-        deviceToUse = IoTHubAccount_GetSASDevice(g_iothubAcctInfo);
-    }
-
-    DEVICE_DESIRED_DATA *device = device_desired_init();
-    ASSERT_IS_NOT_NULL_WITH_MSG(device, "failed to create the device client data");
-
     // Create the IoT Hub Data
     IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
     ASSERT_IS_NOT_NULL_WITH_MSG(iotHubClientHandle, "IoTHubClient_Create failed");
@@ -465,6 +451,63 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
         ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
     }
 
+    return iotHubClientHandle;
+}
+
+static int dt_e2e_parse_twin_version(const char *deviceTwinData, bool jsonFromGetTwin)
+{
+    // The twin JSON we get depends on context (callback versus a GetTwin call)
+    const char *jsonToQuery = jsonFromGetTwin ? "properties.desired.$version" : "desired.$version";
+
+    JSON_Value *root_value = json_parse_string(deviceTwinData);
+    ASSERT_IS_NOT_NULL_WITH_MSG(root_value, "json_parse_string failed");
+
+    JSON_Object *root_object = json_value_get_object(root_value);
+    double double_version = json_object_dotget_number(root_object, jsonToQuery); 
+    int int_version = (int)(double_version + 0.1); // Account for possible underflow by small increment and then int typecast.
+
+    if ((int_version == 0) && (jsonFromGetTwin == false))
+    {
+        // Sometimes we're invoked after a patch which means different JSON
+        double_version = json_object_dotget_number(root_object, "$version"); 
+        int_version = (int)(double_version + 0.1);
+    }
+
+    ASSERT_ARE_NOT_EQUAL(int, 0, int_version);
+
+    // cleanup
+    json_value_free(root_value);
+    return int_version;
+}
+
+static int dt_e2e_gettwin_version(IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceClientDeviceTwinHandle, IOTHUB_PROVISIONED_DEVICE* deviceToUse)
+{
+    char *deviceTwinData = IoTHubDeviceTwin_GetTwin(serviceClientDeviceTwinHandle, deviceToUse->deviceId);
+    ASSERT_IS_NOT_NULL_WITH_MSG(deviceTwinData, "IoTHubDeviceTwin_GetTwin failed");
+    int version = dt_e2e_parse_twin_version(deviceTwinData, true);
+
+    // cleanup
+    free(deviceTwinData);
+    return version;
+}
+
+void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACCOUNT_AUTH_METHOD accountAuthMethod)
+{
+    // arrange
+    IOTHUB_PROVISIONED_DEVICE* deviceToUse;
+    if (accountAuthMethod == IOTHUB_ACCOUNT_AUTH_X509)
+    {
+        deviceToUse = IoTHubAccount_GetX509Device(g_iothubAcctInfo);
+    }
+    else
+    {
+        deviceToUse = IoTHubAccount_GetSASDevice(g_iothubAcctInfo);
+    }
+
+    DEVICE_DESIRED_DATA *device = device_desired_init();
+    ASSERT_IS_NOT_NULL_WITH_MSG(device, "failed to create the device client data");
+
+    IOTHUB_CLIENT_HANDLE iotHubClientHandle = dt_e2e_create_client_handle(deviceToUse, protocol, accountAuthMethod);
 
     // subscribe
     IOTHUB_CLIENT_RESULT iot_result = IoTHubClient_SetDeviceTwinCallback(iotHubClientHandle, deviceTwinCallback, device);
@@ -477,6 +520,8 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
     IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceClientDeviceTwinHandle = IoTHubDeviceTwin_Create(iotHubServiceClientHandle);
     ASSERT_IS_NOT_NULL_WITH_MSG(serviceClientDeviceTwinHandle, "IoTHubDeviceTwin_Create failed");
 
+    int initial_twin_version = dt_e2e_gettwin_version(serviceClientDeviceTwinHandle, deviceToUse);
+
     char *expected_desired_string = generate_unique_string();
     int   expected_desired_integer = generate_new_int();
     char *buffer = malloc_and_fill_desired_payload(expected_desired_string, expected_desired_integer);
@@ -484,7 +529,6 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
 
     char *deviceTwinData = IoTHubDeviceTwin_UpdateTwin(serviceClientDeviceTwinHandle, deviceToUse->deviceId, buffer);
     ASSERT_IS_NOT_NULL_WITH_MSG(deviceTwinData, "IoTHubDeviceTwin_UpdateTwin failed");
-
     ThreadAPI_Sleep(3000);
 
     JSON_Value *root_value = NULL;
@@ -492,6 +536,7 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
     int integer_property = 0;
     time_t beginOperation, nowTime;
     beginOperation = time(NULL);
+    
     while (
         (nowTime = time(NULL)),
         (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME) // time box
@@ -506,6 +551,18 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
             if ((device->receivedCallBack) && (device->cb_payload != NULL))
             {
                 LogInfo("device->cb_payload: %s", device->cb_payload);
+                int current_version = dt_e2e_parse_twin_version(device->cb_payload, false);
+
+                if (current_version == initial_twin_version)
+                {
+                    // There is a potential race where we'll get the callback for deviceTwin availability on the initial twin, not on the
+                    // updated one.  We determine this by looking at $version and if they're the same, it means we haven't got update yet.
+                    LogInfo("The version of twin on callback is identical to initially set (%d).  Waiting for update\n", current_version);
+                    Unlock(device->lock);
+                    ThreadAPI_Sleep(1000);
+                    continue;
+                }
+
                 root_value = json_parse_string(device->cb_payload);
                 if (root_value != NULL)
                 {

@@ -31,8 +31,8 @@ static void my_gballoc_free(void* ptr)
 #include "azure_c_shared_utility/sastoken.h"
 #include "azure_c_shared_utility/xio.h"
 
-#ifdef USE_DPS_MODULE
-#include "azure_hub_modules/iothub_device_auth.h"
+#ifdef USE_PROV_MODULE
+#include "azure_prov_client/iothub_auth_client.h"
 #endif
 
 #include "azure_c_shared_utility/umock_c_prod.h"
@@ -352,7 +352,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Destroy_succeed)
     IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(DEVICE_KEY, DEVICE_ID, NULL);
     umock_c_reset_all_calls();
 
-#ifdef USE_DPS_MODULE
+#ifdef USE_PROV_MODULE
     STRICT_EXPECTED_CALL(iothub_device_auth_destroy(IGNORED_PTR_ARG));
 #endif
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));

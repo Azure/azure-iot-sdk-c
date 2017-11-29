@@ -9,6 +9,7 @@
 #include "azure_c_shared_utility/httpapiex.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/shared_util_options.h"
 
 BLOB_RESULT Blob_UploadBlock(
         HTTPAPIEX_HANDLE httpApiExHandle,
@@ -123,7 +124,7 @@ BLOB_RESULT Blob_UploadBlock(
     return result;
 }
 
-BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* SASURI, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK getDataCallback, void* context, unsigned int* httpStatus, BUFFER_HANDLE httpResponse, const char* certificates)
+BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* SASURI, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK getDataCallback, void* context, unsigned int* httpStatus, BUFFER_HANDLE httpResponse, const char* certificates, HTTP_PROXY_OPTIONS *proxyOptions)
 {
     BLOB_RESULT result;
     /*Codes_SRS_BLOB_02_001: [ If SASURI is NULL then Blob_UploadMultipleBlocksFromSasUri shall fail and return BLOB_INVALID_ARG. ]*/
@@ -193,6 +194,11 @@ BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* SASURI, IOTHUB_CLIEN
                             if ((certificates != NULL)&& (HTTPAPIEX_SetOption(httpApiExHandle, "TrustedCerts", certificates) == HTTPAPIEX_ERROR))
                             {
                                 LogError("failure in setting trusted certificates");
+                                result = BLOB_ERROR;
+                            }
+                            else if ((proxyOptions != NULL && proxyOptions->host_address != NULL) && HTTPAPIEX_SetOption(httpApiExHandle, OPTION_HTTP_PROXY, proxyOptions) == HTTPAPIEX_ERROR)
+                            {
+                                LogError("failure in setting proxy options");
                                 result = BLOB_ERROR;
                             }
                             else

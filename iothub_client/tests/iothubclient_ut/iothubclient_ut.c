@@ -53,6 +53,9 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/vector.h"
 #include "iothubtransport.h"
+#ifdef USE_PROV_MODULE
+#include "iothub_client_hsm_ll.h"
+#endif
 #undef ENABLE_MOCKS
 
 #include "iothub_client.h"
@@ -194,6 +197,7 @@ static const char* TEST_IOTHUBNAME = "theNameoftheIotHub";
 static const char* TEST_DEVICE_SAS = "theSasOfTheDevice";
 static const char* TEST_IOTHUBSUFFIX = "theSuffixoftheIotHubHostname";
 static const char* TEST_METHOD_NAME = "method_name";
+static const char* TEST_IOTHUB_URI = "iothub_uri";
 static const unsigned char* TEST_DEVICE_METHOD_RESPONSE = (const unsigned char*)0x62;
 static size_t TEST_DEVICE_RESP_LENGTH = 1;
 static void* CALLBACK_CONTEXT = (void*)0x1210;
@@ -423,6 +427,10 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_LL_Create, NULL);
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_LL_CreateWithTransport, TEST_IOTHUB_CLIENT_HANDLE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_LL_CreateWithTransport, NULL);
+#ifdef USE_PROV_MODULE
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_LL_CreateFromDeviceAuth, TEST_IOTHUB_CLIENT_HANDLE);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_LL_CreateFromDeviceAuth, NULL);
+#endif
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_SendEventAsync, my_IoTHubClient_LL_SendEventAsync);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_LL_SendEventAsync, IOTHUB_CLIENT_ERROR);
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_GetSendStatus, my_IoTHubClient_LL_GetSendStatus);
@@ -592,6 +600,18 @@ static void setup_iothubclient_createwithtransport()
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
 }
+
+#ifdef USE_PROV_MODULE
+static void setup_iothubclient_createwithdeviceauth()
+{
+    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG) );
+    STRICT_EXPECTED_CALL(VECTOR_create(IGNORED_NUM_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(singlylinkedlist_create());
+    STRICT_EXPECTED_CALL(Lock_Init());
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_CreateFromDeviceAuth(TEST_IOTHUB_URI, TEST_DEVICE_ID, TEST_TRANSPORT_PROVIDER));
+}
+#endif
 
 static void setup_iothubclient_sendeventasync(bool use_threads)
 {
@@ -928,6 +948,107 @@ TEST_FUNCTION(IoTHubClient_CreateWithTransport_fail)
     // cleanup
     umock_c_negative_tests_deinit();
 }
+
+#ifdef USE_PROV_MODULE
+
+/* Tests_SRS_IOTHUBCLIENT_12_019: [** `IoTHubClient_CreateFromDeviceAuth` shall verify the input parameters and if any of them `NULL` then return `NULL`. **] */
+TEST_FUNCTION(IoTHubClient_CreateFromDeviceAuth_iothub_uri_NULL_fail)
+{
+    // arrange
+
+    // act
+    IOTHUB_CLIENT_HANDLE result = IoTHubClient_CreateFromDeviceAuth(NULL, TEST_DEVICE_ID, TEST_TRANSPORT_PROVIDER);
+
+    // assert
+    ASSERT_IS_NULL(result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+}
+
+/* Tests_SRS_IOTHUBCLIENT_12_019: [** `IoTHubClient_CreateFromDeviceAuth` shall verify the input parameters and if any of them `NULL` then return `NULL`. **] */
+TEST_FUNCTION(IoTHubClient_CreateFromDeviceAuth_device_id_NULL_fail)
+{
+    // arrange
+
+    // act
+    IOTHUB_CLIENT_HANDLE result = IoTHubClient_CreateFromDeviceAuth(TEST_IOTHUB_URI, NULL, TEST_TRANSPORT_PROVIDER);
+
+    // assert
+    ASSERT_IS_NULL(result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+}
+
+/* Tests_SRS_IOTHUBCLIENT_12_019: [** `IoTHubClient_CreateFromDeviceAuth` shall verify the input parameters and if any of them `NULL` then return `NULL`. **] */
+TEST_FUNCTION(IoTHubClient_CreateFromDeviceAuth_transport_NULL_fail)
+{
+    // arrange
+
+    // act
+    IOTHUB_CLIENT_HANDLE result = IoTHubClient_CreateFromDeviceAuth(TEST_IOTHUB_URI, TEST_DEVICE_ID, NULL);
+
+    // assert
+    ASSERT_IS_NULL(result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+}
+
+
+/* Tests_SRS_IOTHUBCLIENT_12_025: [** `IoTHubClient_CreateFromDeviceAuth` shall instantiate a new `IoTHubClient_LL` instance by calling `IoTHubClient_LL_CreateFromDeviceAuth` and passing iothub_uri, device_id and protocol argument.  **] */
+TEST_FUNCTION(IoTHubClient_CreateFromDeviceAuth_succeed)
+{
+    // arrange
+    setup_iothubclient_createwithdeviceauth();
+
+    // act
+    IOTHUB_CLIENT_HANDLE result = IoTHubClient_CreateFromDeviceAuth(TEST_IOTHUB_URI, TEST_DEVICE_ID, TEST_TRANSPORT_PROVIDER);
+
+    // assert
+    ASSERT_IS_NOT_NULL(result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubClient_Destroy(result);
+}
+
+/* Tests_SRS_IOTHUBCLIENT_12_020: [** `IoTHubClient_CreateFromDeviceAuth` shall allocate a new `IoTHubClient` instance. **] */
+/* Tests_SRS_IOTHUBCLIENT_12_021: [** If allocating memory for the new `IoTHubClient` instance fails, then `IoTHubClient_CreateFromDeviceAuth` shall return `NULL`. **] */
+/* Tests_SRS_IOTHUBCLIENT_12_022: [** `IoTHubClient_CreateFromDeviceAuth` shall create a lock object to be used later for serializing IoTHubClient calls. **] */
+/* Tests_SRS_IOTHUBCLIENT_12_023: [** If creating the lock fails, then IoTHubClient_CreateFromDeviceAuth shall return NULL. **] */
+/* Tests_SRS_IOTHUBCLIENT_12_024: [** If IoTHubClient_CreateFromDeviceAuth fails, all resources allocated by it shall be freed. **] */
+TEST_FUNCTION(IoTHubClient_CreateFromDeviceAuth_fail)
+{
+    // arrange
+    int negativeTestsInitResult = umock_c_negative_tests_init();
+    ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
+
+    setup_iothubclient_createwithdeviceauth();
+
+    umock_c_negative_tests_snapshot();
+
+    // act
+    size_t count = umock_c_negative_tests_call_count();
+    for (size_t index = 0; index < count; index++)
+    {
+        umock_c_negative_tests_reset();
+        umock_c_negative_tests_fail_call(index);
+
+        char tmp_msg[64];
+        sprintf(tmp_msg, "IoTHubClient_CreateFromDeviceAuth failure in test %zu/%zu", index, count);
+        IOTHUB_CLIENT_HANDLE result = IoTHubClient_CreateFromDeviceAuth(TEST_IOTHUB_URI, TEST_DEVICE_ID, TEST_TRANSPORT_PROVIDER);
+
+        // assert
+        ASSERT_IS_NULL_WITH_MSG(result, tmp_msg);
+    }
+
+    // cleanup
+    umock_c_negative_tests_deinit();
+}
+
+#endif
 
 /* Tests_SRS_IOTHUBCLIENT_01_008: [IoTHubClient_Destroy shall do nothing if parameter iotHubClientHandle is NULL.] */
 TEST_FUNCTION(IoTHubClient_Destroy_iothub_client_handle_NULL_fail)

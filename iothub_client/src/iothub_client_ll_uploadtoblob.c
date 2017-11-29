@@ -74,7 +74,7 @@ typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA_TAG
 typedef struct BLOB_UPLOAD_CONTEXT_TAG
 {
     const unsigned char* blobSource; /* source to upload */
-    const size_t blobSourceSize; /* size of the source */
+    size_t blobSourceSize; /* size of the source */
     size_t remainingSizeToUpload; /* size not yet uploaded */
 }BLOB_UPLOAD_CONTEXT;
 
@@ -923,7 +923,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
                                         {
                                             int step2success;
                                             /*Codes_SRS_IOTHUBCLIENT_LL_02_083: [ IoTHubClient_LL_UploadMultipleBlocksToBlob shall call Blob_UploadFromSasUri and capture the HTTP return code and HTTP body. ]*/
-                                            step2success = (Blob_UploadMultipleBlocksFromSasUri(STRING_c_str(sasUri), getDataCallback, context, &httpResponse, responseToIoTHub, handleData->certificates) == BLOB_OK);
+                                            step2success = (Blob_UploadMultipleBlocksFromSasUri(STRING_c_str(sasUri), getDataCallback, context, &httpResponse, responseToIoTHub, handleData->certificates, &(handleData->http_proxy_options)) == BLOB_OK);
                                             if (!step2success)
                                             {
                                                 /*Codes_SRS_IOTHUBCLIENT_LL_02_084: [ If Blob_UploadFromSasUri fails then IoTHubClient_LL_UploadMultipleBlocksToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
@@ -1014,7 +1014,10 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_Impl(IOTHUB_CLIENT_LL_UPLOADTO
     else
     {
         /*Codes_SRS_IOTHUBCLIENT_LL_99_001: [ `IoTHubClient_LL_UploadToBlob` shall create a struct containing the `source`, the `size`, and the remaining size to upload.]*/
-        BLOB_UPLOAD_CONTEXT context = {source, size, size};
+        BLOB_UPLOAD_CONTEXT context;
+        context.blobSource = source;
+        context.blobSourceSize = size;
+        context.remainingSizeToUpload = size;
 
         /*Codes_SRS_IOTHUBCLIENT_LL_99_002: [ `IoTHubClient_LL_UploadToBlob` shall call `IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl` with `FileUpload_GetData_Callback` as `getDataCallback` and pass the struct created at step SRS_IOTHUBCLIENT_LL_99_001 as `context` ]*/
         result = IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(handle, destinationFileName, FileUpload_GetData_Callback, &context);

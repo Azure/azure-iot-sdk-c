@@ -213,9 +213,9 @@ typedef struct BLOB_UPLOAD_CONTEXT_TAG
 
 BLOB_UPLOAD_CONTEXT context;
 
-static void FileUpload_GetData_Callback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
+static void FileUpload_GetData_Callback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* _uploadContext)
 {
-    BLOB_UPLOAD_CONTEXT* uploadContext = (BLOB_UPLOAD_CONTEXT*) context;
+    BLOB_UPLOAD_CONTEXT* uploadContext = (BLOB_UPLOAD_CONTEXT*) _uploadContext;
 
     uploadContext->lastResult = result;
     uploadContext->lastData = data;
@@ -296,7 +296,7 @@ static const TRANSPORT_PROVIDER* provideFAKE(void);
 #define TEST_STRING_HANDLE_DEVICE_SAS ((STRING_HANDLE)0x2)
 
 #define TEST_API_VERSION "?api-version=2016-11-14"
-#define TEST_IOTHUB_SDK_VERSION "1.1.25"
+#define TEST_IOTHUB_SDK_VERSION "1.1.28"
 
 static const IOTHUB_CLIENT_CONFIG TEST_CONFIG_SAS =
 {
@@ -845,7 +845,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SAS_token_happypath)
             .CaptureReturn(&sasUri_as_const_char)
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(sasUri_as_const_char, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL))
+        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(sasUri_as_const_char, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(4)
             .IgnoreArgument(5)
@@ -1169,7 +1169,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SAS_token_with_certificates_happypath
             .CaptureReturn(&sasUri_as_const_char)
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(sasUri_as_const_char, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, "some certificates"))
+        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(sasUri_as_const_char, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, "some certificates", IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(4)
             .IgnoreArgument(5)
@@ -1655,7 +1655,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SAS_token_when_step2_httpStatusCode_i
             .CaptureReturn(&sasUri_as_const_char)
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(sasUri_as_const_char, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL))
+        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(sasUri_as_const_char, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(4)
             .IgnoreArgument(5)
@@ -1976,7 +1976,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SAS_token_when_step3_httpStatusCode_i
             .CaptureReturn(&sasUri_as_const_char)
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(sasUri_as_const_char, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL))
+        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(sasUri_as_const_char, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(4)
             .IgnoreArgument(5)
@@ -2307,7 +2307,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SAS_token_unhappypaths)
             .CaptureReturn(&sasUri_as_const_char)
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(sasUri_as_const_char, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL))
+        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(sasUri_as_const_char, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(4)
             .IgnoreArgument(5)
@@ -2800,7 +2800,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadMultipleBlocksToBlob_deviceKey_happypath)
             .CaptureReturn(&sasUri_as_const_char)
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(sasUri_as_const_char, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL))
+        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(sasUri_as_const_char, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(4)
             .IgnoreArgument(5)
@@ -3289,7 +3289,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_deviceKey_when_step3_httpStatusCode_i
             .CaptureReturn(&sasUri_as_const_char)
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(sasUri_as_const_char, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL))
+        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(sasUri_as_const_char, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(4)
             .IgnoreArgument(5)
@@ -3640,7 +3640,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadMultipleBlocksToBlob_deviceKey_unhappypaths)
             .CaptureReturn(&sasUri_as_const_char)
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(sasUri_as_const_char, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL))
+        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(sasUri_as_const_char, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(4)
             .IgnoreArgument(5)
@@ -4032,7 +4032,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_passes_x509_information_to_HTTPAPIEX_
             .CaptureReturn(&sasUri_as_const_char)
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(sasUri_as_const_char, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL))
+        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(sasUri_as_const_char, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(4)
             .IgnoreArgument(5)
@@ -4358,7 +4358,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_passes_x509_information_to_HTTPAPIEX_
             .CaptureReturn(&sasUri_as_const_char)
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(sasUri_as_const_char, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL))
+        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(sasUri_as_const_char, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(4)
             .IgnoreArgument(5)
