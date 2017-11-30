@@ -955,8 +955,9 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
                                                 else
                                                 {
                                                     /*do again snprintf*/
+                                                    BUFFER_HANDLE toBeTransmitted = NULL;
                                                     (void)snprintf(requiredString, requiredStringLength + 1, "{\"isSuccess\":%s, \"statusCode\":%d, \"statusDescription\":\"%s\"}", ((httpResponse < 300) ? "true" : "false"), httpResponse, BUFFER_u_char(responseToIoTHub));
-                                                    BUFFER_HANDLE toBeTransmitted = BUFFER_create((const unsigned char*)requiredString, requiredStringLength);
+                                                    toBeTransmitted = BUFFER_create((const unsigned char*)requiredString, requiredStringLength);
                                                     if (toBeTransmitted == NULL)
                                                     {
                                                         LogError("unable to BUFFER_create");

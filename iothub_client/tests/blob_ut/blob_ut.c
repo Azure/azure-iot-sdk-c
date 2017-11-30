@@ -1391,33 +1391,6 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_with_certificate_unhappy_
 
 }
 
-
-/*50000*4*1024*1024 is                   209715200000. 
-UINT32_MAX is                              4294967295.
-SIZE_MAX might be                          4294967295 or 
-                                 18446744073709551615
-                                 depending on platform
-*/
-/*run this test only on platforms where 50000*4*1024*1024 does not overflow. Note: code does not have this problem, as 50000 is written as 50000ULL...*/
-#if SIZE_MAX > 4294967295
-/*Tests_SRS_BLOB_02_034: [ If size is bigger than 50000*4*1024*1024 then Blob_UploadFromSasUri shall fail and return BLOB_INVALID_ARG. ]*/
-TEST_FUNCTION(Blob_UploadFromSasUri_fails_when_size_is_exceeded)
-{
-    ///arrange
-    size_t size = 50000ULL * 4 * 1024 * 1024 + 1;
-    unsigned char c = 3;
-
-    ///act
-    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h", FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL);
-
-    ///assert
-    ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_INVALID_ARG, result);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-    
-    ///cleanup
-}
-#endif
-
 /*Tests_SRS_BLOB_02_026: [ Otherwise, if HTTP response code is >=300 then Blob_UploadFromSasUri shall succeed and return BLOB_OK. ]*/
 TEST_FUNCTION(Blob_UploadFromSasUri_when_http_code_is_404_it_immediately_succeeds)
 {
