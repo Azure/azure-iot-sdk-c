@@ -1408,7 +1408,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_fails_when_size_is_exceeded)
     unsigned char c = 3;
 
     ///act
-    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h", &c, size, &httpResponse, testValidBufferHandle, NULL, NULL);
+    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h", FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL);
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_INVALID_ARG, result);
