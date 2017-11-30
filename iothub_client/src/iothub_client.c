@@ -2052,7 +2052,7 @@ static int uploadMultipleBlock_thread(void* data)
     // Clean resources
     free(blocksData->destinationFileName);
     free(blocksData);
-    ThreadAPI_Exit(0);
+    ThreadAPI_Exit(result);
     return 0;
 }
 
