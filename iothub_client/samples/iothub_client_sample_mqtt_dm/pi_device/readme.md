@@ -38,8 +38,12 @@ The instructions below show how to trigger the firmware update after preparing a
 Once triggered, the application will download the new firmware image package, install it then reboot the device.
 The new firmware image contains the application already, which is setup to run as a service at boottime, reporting on the new firmware image version through Device Twins.
 
-The code for the sample application is available in the [azure-io-sdks](https://github.com/azure/azure-io-sdks) repository, but to simplify the exercise, we have compiled and published the sample application in a package.
-If you want to compile the application along with the rest of the SDK directly on the Pi, you can do so following these [instructions](../../../../../doc/get_started/raspbian-3gpi-c.md), but the below instructions assume that you are downloading the app package.
+The code for the sample application is available in the [azure-iot-sdk-c](https://github.com/Azure/azure-iot-sdk-c) 
+repository, but to simplify the exercise, we have compiled and published the sample application in a package.
+If you want to compile the application along with the rest of the SDK directly on the Pi, you can do so 
+following these 
+[instructions](https://github.com/Azure/azure-iot-device-ecosystem/blob/master/get_started/raspbian-3gpi-c.md), 
+but the below instructions assume that you are downloading the app package.
 
 ## Run the sample
 To run the sample, you will need to prepare an existing image running on a Raspberry Pi to run the sample application, and prepare a new firmware image that will be deployed to your device.
