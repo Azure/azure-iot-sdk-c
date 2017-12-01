@@ -4206,6 +4206,38 @@ TEST_FUNCTION(ConnectionStatusCallBack_UNAUTH_msg_communication_error)
     destroy_transport(handle, device_handle, NULL);
 }
 
+TEST_FUNCTION(ConnectionStatusCallBack_UNAUTH_no_network)
+{
+    // arrange
+    initialize_test_variables();
+    TRANSPORT_LL_HANDLE handle = create_transport();
+    IOTHUB_DEVICE_CONFIG* device_config = create_device_config(TEST_DEVICE_ID_CHAR_PTR, true);
+
+    IOTHUB_DEVICE_HANDLE device_handle;
+    device_handle = register_device(handle, device_config, &TEST_waitingToSend, true);
+
+    crank_transport_ready_after_create(handle, &TEST_waitingToSend, 0, false, true, 1, TEST_current_time, false);
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(TEST_current_time);
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_ConnectionStatusCallBack(TEST_IOTHUB_CLIENT_LL_HANDLE, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_NO_NETWORK));
+
+    // act
+
+    TEST_amqp_connection_create_saved_on_state_changed_callback(
+        TEST_amqp_connection_create_saved_on_state_changed_context,
+        AMQP_CONNECTION_STATE_OPENED, AMQP_CONNECTION_STATE_ERROR);
+
+    TEST_device_create_saved_on_state_changed_callback(TEST_device_create_saved_on_state_changed_context,
+        DEVICE_STATE_STARTED, DEVICE_STATE_STOPPED);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    destroy_transport(handle, device_handle, NULL);
+}
+
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_001: [ If messageData is NULL, IoTHubTransport_AMQP_Common_SendMessageDisposition shall fail and return IOTHUB_CLIENT_INVALID_ARG. ] */
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_NULL_data_fails)
 {
