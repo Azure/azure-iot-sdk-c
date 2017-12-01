@@ -1497,6 +1497,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockSize_too_big_fails)
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_INVALID_ARG, result);
 
     ///cleanup
+    gballoc_free(fakeContext.fakeData);
 }
 
 /*Tests_SRS_BLOB_99_001: [ If the size of the block returned by `getDataCallback` is bigger than 4MB, then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_INVALID_ARG`. ]*/
@@ -1516,6 +1517,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockSize_is_4MB_succeeds
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_OK, result);
 
     ///cleanup
+    gballoc_free(fakeContext.fakeData);
 }
 
 /*Tests_SRS_BLOB_99_003: [ If `getDataCallback` returns more than 50000 blocks, then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_INVALID_ARG`. ]*/
@@ -1535,6 +1537,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockCount_is_50000_succe
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_OK, result);
 
     ///cleanup
+    gballoc_free(fakeContext.fakeData);
 }
 
 /*Tests_SRS_BLOB_99_003: [ If `getDataCallback` returns more than 50000 blocks, then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_INVALID_ARG`. ]*/
@@ -1554,6 +1557,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockCount_is_50001_fails
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_INVALID_ARG, result);
 
     ///cleanup
+    gballoc_free(fakeContext.fakeData);
 }
 
 END_TEST_SUITE(blob_ut);
