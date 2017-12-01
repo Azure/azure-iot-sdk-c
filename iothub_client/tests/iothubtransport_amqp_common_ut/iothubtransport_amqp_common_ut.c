@@ -213,6 +213,17 @@ extern "C"
         return (LIST_ITEM_HANDLE)match_context;
     }
 
+    static SINGLYLINKEDLIST_HANDLE TEST_singlylinkedlist_foreach_list;
+    static LIST_ACTION_FUNCTION TEST_singlylinkedlist_foreach_action_function;
+    static const void* TEST_singlylinkedlist_foreach_context;
+    static int TEST_singlylinkedlist_foreach(SINGLYLINKEDLIST_HANDLE list, LIST_ACTION_FUNCTION action_function, const void* action_context)
+    {
+        TEST_singlylinkedlist_foreach_list = list;
+        TEST_singlylinkedlist_foreach_action_function = action_function;
+        TEST_singlylinkedlist_foreach_context = action_context;
+        return 0;
+    }
+
     static const void* TEST_singlylinkedlist_item_get_value(LIST_ITEM_HANDLE item_handle)
     {
         return (const void*)item_handle;
@@ -1068,6 +1079,7 @@ static void register_umock_alias_types()
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUBMESSAGE_DISPOSITION_RESULT, int);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUBTRANSPORT_AMQP_METHOD_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(LINK_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(LIST_ACTION_FUNCTION, void*);
     REGISTER_UMOCK_ALIAS_TYPE(LIST_MATCH_FUNCTION, void*);
     REGISTER_UMOCK_ALIAS_TYPE(MAP_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(MAP_RESULT, int);
@@ -1120,6 +1132,7 @@ static void register_global_mock_hooks()
     REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_get_head_item, TEST_singlylinkedlist_get_head_item);
     REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_get_next_item, TEST_singlylinkedlist_get_next_item);
     REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_find, TEST_singlylinkedlist_find);
+    REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_foreach, TEST_singlylinkedlist_foreach);
     REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_item_get_value, TEST_singlylinkedlist_item_get_value);
 
     REGISTER_GLOBAL_MOCK_HOOK(DList_RemoveEntryList, my_DList_RemoveEntryList);
@@ -1221,6 +1234,10 @@ static void initialize_static_variables()
 
     TEST_MESSAGE_ID = (delivery_number)1234;
     TEST_mallocAndStrcpy_s_return = 0;
+
+    TEST_singlylinkedlist_foreach_list = NULL;
+    TEST_singlylinkedlist_foreach_action_function = NULL;
+    TEST_singlylinkedlist_foreach_context = NULL;
 }
 
 static void initialize_test_variables()
@@ -4200,6 +4217,82 @@ TEST_FUNCTION(ConnectionStatusCallBack_UNAUTH_msg_communication_error)
         DEVICE_STATE_STARTED, DEVICE_STATE_ERROR_MSG);
 
     // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    destroy_transport(handle, device_handle, NULL);
+}
+
+TEST_FUNCTION(ConnectionStatusCallBack_UNAUTH_no_network)
+{
+    // arrange
+    initialize_test_variables();
+    TRANSPORT_LL_HANDLE handle = create_transport();
+    IOTHUB_DEVICE_CONFIG* device_config = create_device_config(TEST_DEVICE_ID_CHAR_PTR, true);
+
+    IOTHUB_DEVICE_HANDLE device_handle;
+    device_handle = register_device(handle, device_config, &TEST_waitingToSend, true);
+
+    crank_transport_ready_after_create(handle, &TEST_waitingToSend, 0, false, true, 1, TEST_current_time, false);
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(TEST_current_time);
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_ConnectionStatusCallBack(TEST_IOTHUB_CLIENT_LL_HANDLE, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_NO_NETWORK));
+
+    // act
+
+    TEST_amqp_connection_create_saved_on_state_changed_callback(
+        TEST_amqp_connection_create_saved_on_state_changed_context,
+        AMQP_CONNECTION_STATE_OPENED, AMQP_CONNECTION_STATE_ERROR);
+
+    TEST_device_create_saved_on_state_changed_callback(TEST_device_create_saved_on_state_changed_context,
+        DEVICE_STATE_STARTED, DEVICE_STATE_STOPPED);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    destroy_transport(handle, device_handle, NULL);
+}
+
+TEST_FUNCTION(ConnectionStatusCallBack_UNAUTH_retry_expired)
+{
+    // arrange
+    initialize_test_variables();
+    TRANSPORT_LL_HANDLE handle = create_transport();
+    int result_set_retry_policy = IoTHubTransport_AMQP_Common_SetRetryPolicy(handle, IOTHUB_CLIENT_RETRY_IMMEDIATE, 1);
+    IOTHUB_DEVICE_CONFIG* device_config = create_device_config(TEST_DEVICE_ID_CHAR_PTR, true);
+
+    IOTHUB_DEVICE_HANDLE device_handle;
+    device_handle = register_device(handle, device_config, &TEST_waitingToSend, true);
+
+    crank_transport_ready_after_create(handle, &TEST_waitingToSend, 0, false, true, 1, TEST_current_time, false);
+
+    umock_c_reset_all_calls();
+    
+    RETRY_ACTION retry_action = RETRY_ACTION_STOP_RETRYING;
+    STRICT_EXPECTED_CALL(retry_control_should_retry(TEST_RETRY_CONTROL_HANDLE, IGNORED_PTR_ARG))
+        .CopyOutArgumentBuffer_retry_action(&retry_action, sizeof(RETRY_ACTION));
+
+    STRICT_EXPECTED_CALL(singlylinkedlist_foreach(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_ConnectionStatusCallBack(TEST_IOTHUB_CLIENT_LL_HANDLE, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED));
+
+    // act
+    TEST_amqp_connection_create_saved_on_state_changed_callback(
+        TEST_amqp_connection_create_saved_on_state_changed_context,
+        AMQP_CONNECTION_STATE_OPENED, AMQP_CONNECTION_STATE_ERROR);
+    
+    (void)IoTHubTransport_AMQP_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+    bool continue_processing;
+    TEST_singlylinkedlist_foreach_action_function(
+        saved_registered_devices_list[saved_registered_devices_list_count - 1], 
+        TEST_singlylinkedlist_foreach_context, 
+        &continue_processing);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, 0, result_set_retry_policy);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     // cleanup
