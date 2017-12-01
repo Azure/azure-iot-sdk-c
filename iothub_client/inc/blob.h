@@ -30,8 +30,11 @@ extern "C"
 
 #include "azure_c_shared_utility/umock_c_prod.h"
 
-/* Maximum count of blocks uploaded is 50000*/
+/* Allow unit tests to override MAX_BLOCK_COUNT to something much smaller */
+#ifndef MAX_BLOCK_COUNT
+/* Maximum count of blocks uploaded is 50000, per server*/
 #define MAX_BLOCK_COUNT 50000
+#endif
 
 #define BLOB_RESULT_VALUES \
     BLOB_OK,               \

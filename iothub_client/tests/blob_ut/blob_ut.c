@@ -183,7 +183,7 @@ static void FileUpload_GetData_Callback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result,
  */
 typedef struct BLOB_UPLOAD_CONTEXT_FAKE_TAG
 {
-    unsigned char* fakeData; /* fake data allocated, has to be deallocated at the next call */
+    unsigned char* fakeData; /* fake data allocated */
     size_t blockSize; /* size of the block */
     unsigned int blocksCount; /* number of block wanted */
     unsigned int blockSent; /* number block already sent */
@@ -193,10 +193,10 @@ static void FileUpload_GetFakeData_Callback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT res
 {
     BLOB_UPLOAD_CONTEXT_FAKE* uploadContext = (BLOB_UPLOAD_CONTEXT_FAKE*) _uploadContext;
 
-    // always free previous data
-    if (uploadContext->fakeData != NULL)
+    if (uploadContext->fakeData == NULL)
     {
-        gballoc_free(uploadContext->fakeData);
+        // Allocate the fake data exactly once (actual LL layer just reads through existing buffer)
+        uploadContext->fakeData = (unsigned char*)gballoc_malloc(uploadContext->blockSize);
     }
 
     if (data == NULL || size == NULL)
@@ -219,9 +219,8 @@ static void FileUpload_GetFakeData_Callback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT res
     {
         // Upload next block
         uploadContext->blockSent++;
-        uploadContext->fakeData = (unsigned char*)gballoc_malloc(uploadContext->blockSize);
         *data = uploadContext->fakeData;
-        *size = uploadContext->blockSize;
+        *size = (uploadContext->fakeData != NULL) ? uploadContext->blockSize : 0;
     }
 }
 
@@ -1521,7 +1520,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockSize_is_4MB_succeeds
 }
 
 /*Tests_SRS_BLOB_99_003: [ If `getDataCallback` returns more than 50000 blocks, then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_INVALID_ARG`. ]*/
-TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockCount_is_50000_succeeds)
+TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockCount_is_maximum_succeeds)
 {
     ///arrange
     BLOB_UPLOAD_CONTEXT_FAKE fakeContext;
@@ -1541,7 +1540,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockCount_is_50000_succe
 }
 
 /*Tests_SRS_BLOB_99_003: [ If `getDataCallback` returns more than 50000 blocks, then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_INVALID_ARG`. ]*/
-TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockCount_is_50001_fails)
+TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockCount_is_one_over_maximum_fails)
 {
     ///arrange
     BLOB_UPLOAD_CONTEXT_FAKE fakeContext;
