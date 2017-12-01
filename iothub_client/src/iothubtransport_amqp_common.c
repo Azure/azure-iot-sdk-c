@@ -61,24 +61,24 @@ typedef enum AMQP_TRANSPORT_AUTHENTICATION_MODE_TAG
 /*
 Definition of transport states:
 
-AMQP_TRANSPORT_STATE_NOT_CONNECTED:               Initial state when the transport is created. 
-AMQP_TRANSPORT_STATE_CONNECTING:                  First connection ever.
-AMQP_TRANSPORT_STATE_CONNECTED:                   Transition from AMQP_TRANSPORT_STATE_CONNECTING or AMQP_TRANSPORT_STATE_RECONNECTING. 
-AMQP_TRANSPORT_STATE_RECONNECTION_REQUIRED:       When a failure occurred and the transport identifies a reconnection is needed.
-AMQP_TRANSPORT_STATE_READY_FOR_RECONNECTION:      Transition from AMQP_TRANSPORT_STATE_RECONNECTION_REQUIRED after all prep is done (transient instances are destroyed, devices are stopped).
-AMQP_TRANSPORT_STATE_RECONNECTING:                Transition from AMQP_TRANSPORT_STATE_READY_FOR_RECONNECTION.
-AMQP_TRANSPORT_STATE_NOT_RECONNECTING:            State reached if the maximum number/length of reconnections has been reached.
-AMQP_TRANSPORT_STATE_BEING_DESTROYED:             State set if IoTHubTransport_AMQP_Common_Destroy function is invoked.
+AMQP_TRANSPORT_STATE_NOT_CONNECTED:                    Initial state when the transport is created. 
+AMQP_TRANSPORT_STATE_CONNECTING:                       First connection ever.
+AMQP_TRANSPORT_STATE_CONNECTED:                        Transition from AMQP_TRANSPORT_STATE_CONNECTING or AMQP_TRANSPORT_STATE_RECONNECTING. 
+AMQP_TRANSPORT_STATE_RECONNECTION_REQUIRED:            When a failure occurred and the transport identifies a reconnection is needed.
+AMQP_TRANSPORT_STATE_READY_FOR_RECONNECTION:           Transition from AMQP_TRANSPORT_STATE_RECONNECTION_REQUIRED after all prep is done (transient instances are destroyed, devices are stopped).
+AMQP_TRANSPORT_STATE_RECONNECTING:                     Transition from AMQP_TRANSPORT_STATE_READY_FOR_RECONNECTION.
+AMQP_TRANSPORT_STATE_NOT_CONNECTED_NO_MORE_RETRIES:    State reached if the maximum number/length of reconnections has been reached.
+AMQP_TRANSPORT_STATE_BEING_DESTROYED:                  State set if IoTHubTransport_AMQP_Common_Destroy function is invoked.
 */
 
-#define AMQP_TRANSPORT_STATE_STRINGS                 \
-    AMQP_TRANSPORT_STATE_NOT_CONNECTED,              \
-    AMQP_TRANSPORT_STATE_CONNECTING,                 \
-    AMQP_TRANSPORT_STATE_CONNECTED,                  \
-    AMQP_TRANSPORT_STATE_RECONNECTION_REQUIRED,      \
-    AMQP_TRANSPORT_STATE_READY_FOR_RECONNECTION,     \
-    AMQP_TRANSPORT_STATE_RECONNECTING,               \
-    AMQP_TRANSPORT_STATE_NOT_RECONNECTING,           \
+#define AMQP_TRANSPORT_STATE_STRINGS                    \
+    AMQP_TRANSPORT_STATE_NOT_CONNECTED,                 \
+    AMQP_TRANSPORT_STATE_CONNECTING,                    \
+    AMQP_TRANSPORT_STATE_CONNECTED,                     \
+    AMQP_TRANSPORT_STATE_RECONNECTION_REQUIRED,         \
+    AMQP_TRANSPORT_STATE_READY_FOR_RECONNECTION,        \
+    AMQP_TRANSPORT_STATE_RECONNECTING,                  \
+    AMQP_TRANSPORT_STATE_NOT_CONNECTED_NO_MORE_RETRIES, \
     AMQP_TRANSPORT_STATE_BEING_DESTROYED
 
 DEFINE_LOCAL_ENUM(AMQP_TRANSPORT_STATE, AMQP_TRANSPORT_STATE_STRINGS);
@@ -1527,7 +1527,7 @@ void IoTHubTransport_AMQP_Common_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIEN
         AMQP_TRANSPORT_INSTANCE* transport_instance = (AMQP_TRANSPORT_INSTANCE*)handle;
         LIST_ITEM_HANDLE list_item;
 
-        if (transport_instance->state == AMQP_TRANSPORT_STATE_NOT_RECONNECTING)
+        if (transport_instance->state == AMQP_TRANSPORT_STATE_NOT_CONNECTED_NO_MORE_RETRIES)
         {
             // Nothing to be done.
         }
@@ -1549,7 +1549,7 @@ void IoTHubTransport_AMQP_Common_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIEN
             }
             else if (retry_action == RETRY_ACTION_STOP_RETRYING)
             {
-                update_state(transport_instance, AMQP_TRANSPORT_STATE_NOT_RECONNECTING);
+                update_state(transport_instance, AMQP_TRANSPORT_STATE_NOT_CONNECTED_NO_MORE_RETRIES);
 
                 (void)singlylinkedlist_foreach(transport_instance->registered_devices, raise_connection_status_callback_retry_expired, NULL);
             }
@@ -2344,7 +2344,7 @@ int IoTHubTransport_AMQP_Common_SetRetryPolicy(TRANSPORT_LL_HANDLE handle, IOTHU
 
             LogInfo("Retry policy set (%d, timeout = %d)", retryPolicy, retryTimeoutLimitInSeconds);
 
-            if (transport_instance->state == AMQP_TRANSPORT_STATE_NOT_RECONNECTING)
+            if (transport_instance->state == AMQP_TRANSPORT_STATE_NOT_CONNECTED_NO_MORE_RETRIES)
             {
                 transport_instance->state = AMQP_TRANSPORT_STATE_RECONNECTION_REQUIRED;
             }
