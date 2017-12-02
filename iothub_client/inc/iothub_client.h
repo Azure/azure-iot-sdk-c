@@ -32,13 +32,6 @@ extern "C"
 {
 #endif
 
-#define IOTHUB_CLIENT_FILE_UPLOAD_RESULT_VALUES \
-    FILE_UPLOAD_OK, \
-    FILE_UPLOAD_ERROR
-
-    DEFINE_ENUM(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, IOTHUB_CLIENT_FILE_UPLOAD_RESULT_VALUES)
-    typedef void(*IOTHUB_CLIENT_FILE_UPLOAD_CALLBACK)(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, void* userContextCallback);
-
     /**
     * @brief	Creates a IoT Hub client for communication with an existing
     * 			IoT Hub using the specified connection string parameter.
@@ -357,7 +350,18 @@ extern "C"
     * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_UploadToBlobAsync, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, const char*, destinationFileName, const unsigned char*, source, size_t, size, IOTHUB_CLIENT_FILE_UPLOAD_CALLBACK, iotHubClientFileUploadCallback, void*, context);
-#endif
+
+    /**
+    * @brief                          Uploads a file to a Blob storage in chunks, fed through the callback function provided by the user.
+    * @remarks                        This function allows users to upload large files in chunks, not requiring the whole file content to be passed in memory.
+    * @param iotHubClientHandle       The handle created by a call to the IoTHubClient_Create function.
+    * @param destinationFileName      The name of the file to be created in Azure Blob Storage.
+    * @param getDataCallback          A callback to be invoked to acquire the file chunks to be uploaded, as well as to indicate the status of the upload of the previous block.
+    * @param context                  Any data provided by the user to serve as context on getDataCallback.
+    * @returns                        An IOTHUB_CLIENT_RESULT value indicating the success or failure of the API call.*/
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_UploadMultipleBlocksToBlobAsync, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, const char*, destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK, getDataCallback, void*, context);
+#endif /* DONT_USE_UPLOADTOBLOB */
+
 #ifdef __cplusplus
 }
 #endif
