@@ -663,6 +663,11 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(messaging_create_target(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(link_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, role_sender, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+        STRICT_EXPECTED_CALL(amqpvalue_create_map());
+        STRICT_EXPECTED_CALL(amqpvalue_create_symbol(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
+
         STRICT_EXPECTED_CALL(link_set_max_message_size(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(messagesender_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(messagesender_open(IGNORED_PTR_ARG));
@@ -678,6 +683,11 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         STRICT_EXPECTED_CALL(messaging_create_target(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(link_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, role_receiver, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(link_set_rcv_settle_mode(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+
+        STRICT_EXPECTED_CALL(amqpvalue_create_map());
+        STRICT_EXPECTED_CALL(amqpvalue_create_symbol(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
+
         STRICT_EXPECTED_CALL(link_set_max_message_size(IGNORED_PTR_ARG, IGNORED_NUM_ARG)); //13
         STRICT_EXPECTED_CALL(messagereceiver_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(messagereceiver_open(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));

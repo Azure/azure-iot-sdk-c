@@ -22,6 +22,8 @@
 #include "azure_prov_client/prov_sasl_tpm.h"
 #include "azure_c_shared_utility/strings.h"
 
+#include "azure_prov_client/prov_client_const.h"
+
 #define AMQP_MAX_SENDER_MSG_SIZE    UINT64_MAX
 #define AMQP_MAX_RECV_MSG_SIZE      65536
 
@@ -31,6 +33,8 @@ static const char* KEY_NAME_VALUE = "registration";
 static const char* AMQP_REGISTER_ME = "iotdps-register";
 static const char* AMQP_WHO_AM_I = "iotdps-get-registration";
 static const char* AMQP_OPERATION_STATUS = "iotdps-get-operationstatus";
+
+static const char* AMQP_API_VERSION_KEY = "com.microsoft:api-version";
 
 static const char* AMQP_OP_TYPE_PROPERTY = "iotdps-operation-type";
 static const char* AMQP_STATUS = "iotdps-status";
@@ -434,6 +438,57 @@ static int send_amqp_message(PROV_TRANSPORT_AMQP_INFO* amqp_info, const char* ms
     return result;
 }
 
+static int add_link_properties(LINK_HANDLE amqp_link, const char* key, const char* value)
+{
+    fields attach_properties;
+    AMQP_VALUE device_client_type_key_name;
+    AMQP_VALUE device_client_type_value;
+    int result;
+
+    if ((attach_properties = amqpvalue_create_map()) == NULL)
+    {
+        LogError("Failed to create the map for device client type.");
+        result = __FAILURE__;
+    }
+    else
+    {
+        if ((device_client_type_key_name = amqpvalue_create_symbol(key)) == NULL)
+        {
+            LogError("Failed to create the key name for the device client type.");
+            result = __FAILURE__;
+        }
+        else
+        {
+            if ((device_client_type_value = amqpvalue_create_string(value)) == NULL)
+            {
+                LogError("Failed to create the key value for the device client type.");
+                result = __FAILURE__;
+            }
+            else
+            {
+                if ((result = amqpvalue_set_map_value(attach_properties, device_client_type_key_name, device_client_type_value)) != 0)
+                {
+                    LogError("Failed to set the property map for the device client type (error code is: %d)", result);
+                    result = __FAILURE__;
+                }
+                else if ((result = link_set_attach_properties(amqp_link, attach_properties)) != 0)
+                {
+                    LogError("Unable to attach the device client type to the link properties (error code is: %d)", result);
+                    result = __FAILURE__;
+                }
+                else
+                {
+                    result = 0;
+                }
+                amqpvalue_destroy(device_client_type_value);
+            }
+            amqpvalue_destroy(device_client_type_key_name);
+        }
+        amqpvalue_destroy(attach_properties);
+    }
+    return 0;
+}
+
 static int create_sender_link(PROV_TRANSPORT_AMQP_INFO* amqp_info)
 {
     int result;
@@ -469,7 +524,14 @@ static int create_sender_link(PROV_TRANSPORT_AMQP_INFO* amqp_info)
         }
         else
         {
-            if (link_set_max_message_size(amqp_info->sender_link, AMQP_MAX_SENDER_MSG_SIZE) != 0)
+            if (add_link_properties(amqp_info->sender_link, AMQP_API_VERSION_KEY, PROV_API_VERSION))
+            {
+                LogError("Failure adding link property");
+                link_destroy(amqp_info->sender_link);
+                amqp_info->sender_link = NULL;
+                result = __FAILURE__;
+            }
+            else if (link_set_max_message_size(amqp_info->sender_link, AMQP_MAX_SENDER_MSG_SIZE) != 0)
             {
                 LogError("Failure setting sender link max size");
                 link_destroy(amqp_info->sender_link);
@@ -540,7 +602,14 @@ static int create_receiver_link(PROV_TRANSPORT_AMQP_INFO* amqp_info)
         else
         {
             link_set_rcv_settle_mode(amqp_info->receiver_link, receiver_settle_mode_first);
-            if (link_set_max_message_size(amqp_info->receiver_link, AMQP_MAX_RECV_MSG_SIZE) != 0)
+            if (add_link_properties(amqp_info->receiver_link, AMQP_API_VERSION_KEY, PROV_API_VERSION))
+            {
+                LogError("Failure adding link property");
+                link_destroy(amqp_info->sender_link);
+                amqp_info->sender_link = NULL;
+                result = __FAILURE__;
+            }
+            else if (link_set_max_message_size(amqp_info->receiver_link, AMQP_MAX_RECV_MSG_SIZE) != 0)
             {
                 LogError("Failure setting max message size");
                 link_destroy(amqp_info->receiver_link);
