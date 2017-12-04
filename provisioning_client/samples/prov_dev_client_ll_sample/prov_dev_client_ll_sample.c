@@ -22,7 +22,9 @@
 
 #include "azure_prov_client/prov_transport_http_client.h"
 #include "azure_prov_client/prov_transport_amqp_client.h"
+#include "azure_prov_client/prov_transport_amqp_ws_client.h"
 #include "azure_prov_client/prov_transport_mqtt_client.h"
+#include "azure_prov_client/prov_transport_mqtt_ws_client.h"
 
 #include "../../../certs/certs.h"
 
@@ -32,7 +34,7 @@ DEFINE_ENUM_STRINGS(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
 DEFINE_ENUM_STRINGS(PROV_DEVICE_REG_STATUS, PROV_DEVICE_REG_STATUS_VALUES);
 
 static const char* global_prov_uri = "global.azure-devices-provisioning.net";
-static const char* id_scope = "";
+static const char* id_scope = "[ID Scope]";
 
 static bool g_trace_on = true;
 
@@ -136,6 +138,7 @@ static void register_device_callback(PROV_DEVICE_RESULT register_result, const c
         }
         else
         {
+            (void)printf("Failure encountered on registration!\r\n");
             user_ctx->registration_complete = 2;
         }
     }
@@ -162,9 +165,9 @@ int main()
     {
         const char* trusted_cert;
         IOTHUB_CLIENT_TRANSPORT_PROVIDER iothub_transport;
+        PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION g_prov_transport;
         HTTP_PROXY_OPTIONS http_proxy;
         CLIENT_SAMPLE_INFO user_ctx;
-        PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION prov_transport;
 
         memset(&http_proxy, 0, sizeof(HTTP_PROXY_OPTIONS));
         memset(&user_ctx, 0, sizeof(CLIENT_SAMPLE_INFO));
@@ -178,10 +181,12 @@ int main()
             trusted_cert = NULL;
         }
 
-        // Pick your transport
-        prov_transport = Prov_Device_HTTP_Protocol;
-        //prov_transport = Prov_Device_AMQP_Protocol;
-        //prov_transport = PROV_DEVICE_MQTT_Protocol;
+        // Protocol to USE - HTTP, AMQP, AMQP_WS, MQTT, MQTT_WS
+        //g_prov_transport = Prov_Device_HTTP_Protocol;
+        //g_prov_transport = Prov_Device_AMQP_Protocol;
+        //g_prov_transport = Prov_Device_AMQP_WS_Protocol;
+        g_prov_transport = Prov_Device_MQTT_Protocol;
+        //g_prov_transport = Prov_Device_MQTT_WS_Protocol;
 
         iothub_transport = MQTT_Protocol;
         //iothub_transport = AMQP_Protocol;
@@ -200,7 +205,7 @@ int main()
         }
 
         PROV_DEVICE_LL_HANDLE handle;
-        if ((handle = Prov_Device_LL_Create(global_prov_uri, id_scope, prov_transport)) == NULL)
+        if ((handle = Prov_Device_LL_Create(global_prov_uri, id_scope, g_prov_transport)) == NULL)
         {
             (void)printf("failed calling Prov_Device_LL_Create\r\n");
             result = __LINE__;

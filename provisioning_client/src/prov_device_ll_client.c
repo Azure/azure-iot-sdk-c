@@ -23,9 +23,10 @@
 #include "azure_prov_client/prov_client_const.h"
 
 static const char* OPTION_LOG_TRACE = "logtrace";
+static const char* PROV_REGISTRATION_ID = "registration_id";
 
 static const char* JSON_NODE_STATUS = "status";
-static const char* JSON_NODE_REG_STATUS = "registrationStatus";
+static const char* JSON_NODE_REG_STATUS = "registrationState";
 static const char* JSON_NODE_AUTH_KEY = "authenticationKey";
 static const char* JSON_NODE_DEVICE_ID = "deviceId";
 static const char* JSON_NODE_KEY_NAME = "keyName";
@@ -384,11 +385,15 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
                     }
                 }*/
                 LogError("Unsuccessful json encountered: %s", json_document);
+                free(result);
+                result = NULL;
                 break;
             }
 
             default:
                 LogError("invalid json status specified %d", result->prov_status);
+                free(result);
+                result = NULL;
                 break;
         }
         json_value_free(root_value);
@@ -784,7 +789,7 @@ void Prov_Device_LL_DoWork(PROV_DEVICE_LL_HANDLE handle)
             (void)tickcounter_get_current_ms(prov_info->tick_counter, &current_time);
             if ((current_time - prov_info->timeout_value) / 1000 > PROV_DEFAULT_TIMEOUT)
             {
-                LogError("Failure sending operation status");
+                LogError("Timed out connecting to provisioning service");
                 prov_info->error_reason = PROV_DEVICE_RESULT_TIMEOUT;
                 prov_info->prov_state = CLIENT_STATE_ERROR;
             }
@@ -835,12 +840,48 @@ PROV_DEVICE_RESULT Prov_Device_LL_SetOption(PROV_DEVICE_LL_HANDLE handle, const 
 
             if (handle->prov_transport_protocol->prov_transport_set_proxy(handle->transport_handle, proxy_options) != 0)
             {
-                LogError("Failure setting proxy options");
+                LogError("setting proxy options");
                 result = PROV_DEVICE_RESULT_ERROR;
             }
             else
             {
                 result = PROV_DEVICE_RESULT_OK;
+            }
+        }
+        else if (strcmp(PROV_REGISTRATION_ID, option_name) == 0)
+        {
+            if (handle->prov_state != CLIENT_STATE_READY)
+            {
+                LogError("registration id cannot be set after registration has begun");
+                result = PROV_DEVICE_RESULT_ERROR;
+            }
+            else if (value == NULL)
+            {
+                LogError("value must be set to the correct registration id");
+                result = PROV_DEVICE_RESULT_ERROR;
+            }
+            else
+            {
+                if (handle->registration_id != NULL)
+                {
+                    free(handle->registration_id);
+                }
+                
+                if (mallocAndStrcpy_s(&handle->registration_id, (const char*)value) != 0)
+                {
+                    LogError("Failure allocating setting registration id");
+                    result = PROV_DEVICE_RESULT_ERROR;
+                }
+                else if (prov_auth_set_registration_id(handle->prov_auth_handle, handle->registration_id) != 0)
+                {
+                    LogError("Failure setting registration id");
+                    free(handle->registration_id);
+                    result = PROV_DEVICE_RESULT_ERROR;
+                }
+                else
+                {
+                    result = PROV_DEVICE_RESULT_OK;
+                }
             }
         }
         else

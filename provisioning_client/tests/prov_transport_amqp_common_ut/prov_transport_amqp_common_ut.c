@@ -689,7 +689,6 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     static void setup_create_amqp_connection_mocks(bool use_x509)
     {
         STRICT_EXPECTED_CALL(on_transport_io(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         if (use_x509)
         {
             STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));

@@ -29,6 +29,7 @@ set CMAKE_build_javawrapper=OFF
 set CMAKE_no_logging=OFF
 set CMAKE_run_unittests=OFF
 set prov_auth=OFF
+set prov_use_tpm_simulator=OFF
 
 :args-loop
 if "%1" equ "" goto args-done
@@ -39,6 +40,7 @@ if "%1" equ "--build-javawrapper" goto arg-build-javawrapper
 if "%1" equ "--no-logging" goto arg-no-logging
 if "%1" equ "--run-unittests" goto arg-run-unittests
 if "%1" equ "--provisioning" goto arg-provisioning
+if "%1" equ "--use-tpm-simulator" goto arg-tpm-simulator
 call :usage && exit /b 1
 
 :arg-build-config
@@ -78,6 +80,10 @@ goto args-continue
 set prov_auth=ON
 goto args-continue
 
+:arg-tpm-simulator
+set prov_use_tpm_simulator=ON
+goto args-continue
+
 :args-continue
 shift
 goto args-loop
@@ -101,11 +107,11 @@ pushd %USERPROFILE%\%cmake-output%
 
 if %build-platform% == Win32 (
 	echo ***Running CMAKE for Win32***
-	cmake %build-root% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Dbuild_python:STRING=%CMAKE_build_python% -Dbuild_javawrapper:BOOL=%CMAKE_build_javawrapper% -Dno_logging:BOOL=%CMAKE_no_logging% -Duse_prov_client:BOOL=%prov_auth%
+	cmake %build-root% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Dbuild_python:STRING=%CMAKE_build_python% -Dbuild_javawrapper:BOOL=%CMAKE_build_javawrapper% -Dno_logging:BOOL=%CMAKE_no_logging% -Duse_prov_client:BOOL=%prov_auth% -Duse_tpm_simulator:BOOL=%prov_use_tpm_simulator%
 	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 ) else (
 	echo ***Running CMAKE for Win64***
-	cmake %build-root% -G "Visual Studio 14 Win64" -Drun_unittests:BOOL=%CMAKE_run_unittests% -Dbuild_python:STRING=%CMAKE_build_python% -Dbuild_javawrapper:BOOL=%CMAKE_build_javawrapper% -Dno_logging:BOOL=%CMAKE_no_logging% -Duse_prov_client:BOOL=%prov_auth%
+	cmake %build-root% -G "Visual Studio 14 Win64" -Drun_unittests:BOOL=%CMAKE_run_unittests% -Dbuild_python:STRING=%CMAKE_build_python% -Dbuild_javawrapper:BOOL=%CMAKE_build_javawrapper% -Dno_logging:BOOL=%CMAKE_no_logging% -Duse_prov_client:BOOL=%prov_auth% -Duse_tpm_simulator:BOOL=%prov_use_tpm_simulator%
 	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 )
 
@@ -134,4 +140,5 @@ echo  --buildpython ^<value^>    [2.7]   build python extension (e.g. 2.7, 3.4, 
 echo  --no-logging               Disable logging
 echo  --run-unittests            Run unittests
 echo  --provisioning             Use Provisiong service
+echo  --use-tpm-simulator        Build TPM simulator
 goto :eof

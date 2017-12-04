@@ -17,15 +17,11 @@ and removing calls to _DoWork will yield the same results. */
 //  Call method with Method:
 //      iothub-explorer device-method device-name TurnFanOff_with_Method "{\"a\":3, \"b\":33}"
 
-#ifdef ARDUINO
-#include "AzureIoTHub.h"
-#else
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/platform.h"
 #include "serializer.h"
 #include "iothub_client_ll.h"
 #include "iothubtransportmqtt.h"
-#endif
 
 #ifdef MBED_BUILD_TIMESTAMP
 #define SET_TRUSTED_CERT_IN_SAMPLES

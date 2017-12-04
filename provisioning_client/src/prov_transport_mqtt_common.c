@@ -443,9 +443,6 @@ static int create_connection(PROV_TRANSPORT_MQTT_INFO* mqtt_info)
     }
     else
     {
-        bool ignore_check = true;
-        (void)xio_setoption(mqtt_info->transport_io, "ignore_server_name_check", &ignore_check);
-
         if (mqtt_info->certificate != NULL && xio_setoption(mqtt_info->transport_io, OPTION_TRUSTED_CERT, mqtt_info->certificate) != 0)
         {
             LogError("Failure setting trusted certs");
@@ -909,6 +906,7 @@ void prov_transport_common_mqtt_dowork(PROV_DEVICE_TRANSPORT_HANDLE handle)
                                         {
                                             mqtt_info->status_cb(parse_info->prov_status, mqtt_info->status_ctx);
                                         }
+                                        mqtt_info->transport_state = TRANSPORT_CLIENT_STATE_IDLE;
                                     }
                                     break;
                                 case PROV_DEVICE_TRANSPORT_STATUS_ASSIGNED:
@@ -926,7 +924,6 @@ void prov_transport_common_mqtt_dowork(PROV_DEVICE_TRANSPORT_HANDLE handle)
                             }
                             free_json_parse_info(parse_info);
                         }
-                        mqtt_info->transport_state = TRANSPORT_CLIENT_STATE_IDLE;
                         break;
                     }
 

@@ -392,7 +392,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
     static void setup_create_connection_mocks(bool use_x509)
     {
         STRICT_EXPECTED_CALL(on_mqtt_transport_io(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(mqtt_client_set_trace(IGNORED_PTR_ARG, false, false));
         if (use_x509)

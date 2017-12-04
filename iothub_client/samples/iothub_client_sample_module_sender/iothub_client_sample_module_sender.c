@@ -29,7 +29,7 @@ static int callbackCounter;
 static char msgText[1024];
 static char propText[1024];
 static bool g_continueRunning;
-#define MESSAGE_COUNT 5
+#define MESSAGE_COUNT 500
 #define DOWORK_LOOP_NUM     3
 
 
@@ -127,8 +127,13 @@ static void SendConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, v
 void iothub_client_sample_module_sender(void)
 {
     IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle;
-
     EVENT_INSTANCE messages[MESSAGE_COUNT];
+
+    char *connectionStringFromEnvironment = getenv("EdgeHubConnectionString");
+    if (connectionStringFromEnvironment != NULL)
+    {
+        connectionString = connectionStringFromEnvironment;
+    }
 
     g_continueRunning = true;
     srand((unsigned int)time(NULL));
@@ -212,7 +217,7 @@ void iothub_client_sample_module_sender(void)
 
                     }
                     IoTHubClient_LL_DoWork(iotHubClientHandle);
-                    ThreadAPI_Sleep(1);
+                    ThreadAPI_Sleep(1000);
 
                     iterator++;
                 } while (g_continueRunning);
