@@ -26,6 +26,13 @@
 #include "azure_c_shared_utility/macro_utils.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
 
+#define IOTHUB_CLIENT_FILE_UPLOAD_RESULT_VALUES \
+    FILE_UPLOAD_OK, \
+    FILE_UPLOAD_ERROR
+
+    DEFINE_ENUM(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, IOTHUB_CLIENT_FILE_UPLOAD_RESULT_VALUES)
+    typedef void(*IOTHUB_CLIENT_FILE_UPLOAD_CALLBACK)(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, void* userContextCallback);
+
 #define IOTHUB_CLIENT_RESULT_VALUES       \
     IOTHUB_CLIENT_OK,                     \
     IOTHUB_CLIENT_INVALID_ARG,            \
@@ -172,6 +179,24 @@ extern "C"
     typedef void(*IOTHUB_CLIENT_REPORTED_STATE_CALLBACK)(int status_code, void* userContextCallback);
     typedef int(*IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC)(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* response_size, void* userContextCallback);
     typedef int(*IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK)(const char* method_name, const unsigned char* payload, size_t size, METHOD_HANDLE method_id, void* userContextCallback);
+
+#ifndef DONT_USE_UPLOADTOBLOB
+
+#define BLOCK_SIZE (4*1024*1024)
+
+    /**
+    *  @brief           Callback invoked by IoTHubClient_UploadMultipleBlocksToBlobAsync requesting the chunks of data to be uploaded.
+    *  @param result    The result of the upload of the previous block of data provided by the user.
+    *  @param data      Next block of data to be uploaded, to be provided by the user when this callback is invoked.
+    *  @param size      Size of the data parameter.
+    *  @param context   User context provided on the call to IoTHubClient_UploadMultipleBlocksToBlobAsync.
+    *  @remarks         If a NULL is provided for parameter "data" and/or zero is provided for "size", the user indicates to the client that the complete file has been uploaded.
+    *                   In such case this callback will be invoked only once more to indicate the status of the final block upload.
+    *                   If result is not FILE_UPLOAD_OK, the download is cancelled and this callback stops being invoked.
+    *                   When this callback is called for the last time, no data or size is expected, so data and size are set to NULL
+    */
+    typedef void(*IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK)(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context);
+#endif /* DONT_USE_UPLOADTOBLOB */
 
     /** @brief	This struct captures IoTHub client configuration. */
     typedef struct IOTHUB_CLIENT_CONFIG_TAG
@@ -551,6 +576,18 @@ extern "C"
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, destinationFileName, const unsigned char*, source, size_t, size);
 
+     /**
+     * @brief    This API uploads to Azure Storage the content provided block by block by @p getDataCallback
+     *           under the blob name devicename/@pdestinationFileName
+     *
+     * @param    iotHubClientHandle      The handle created by a call to the create function.
+     * @param    destinationFileName     name of the file.
+     * @param    getDataCallback         A callback to be invoked to acquire the file chunks to be uploaded, as well as to indicate the status of the upload of the previous block.
+     * @param    context                 Any data provided by the user to serve as context on getDataCallback.
+     *
+     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
+     */
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadMultipleBlocksToBlob, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK, getDataCallback, void*, context);
 #endif /*DONT_USE_UPLOADTOBLOB*/
 
     /**

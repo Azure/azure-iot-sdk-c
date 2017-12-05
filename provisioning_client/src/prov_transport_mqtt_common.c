@@ -25,7 +25,7 @@
 #define SUBSCRIBE_TOPIC_COUNT       1
 
 static const char* MQTT_SUBSCRIBE_TOPIC = "$dps/registrations/res/#";
-static const char* MQTT_USERNAME_FMT = "%s/registrations/%s/api-version=%s&DeviceClientType=%s";
+static const char* MQTT_USERNAME_FMT = "%s/registrations/%s/api-version=%s&ClientVersion=%s";
 
 static const char* MQTT_REGISTER_MESSAGE_FMT = "$dps/registrations/PUT/iotdps-register/?$rid=%d";
 static const char* MQTT_STATUS_MESSAGE_FMT = "$dps/registrations/GET/iotdps-get-operationstatus/?$rid=%d&operationId=%s";

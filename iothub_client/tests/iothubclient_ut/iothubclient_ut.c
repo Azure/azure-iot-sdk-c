@@ -105,6 +105,14 @@ static int my_DeviceMethodCallback_Impl(const char* method_name, const unsigned 
     return 200;
 }
 
+static void my_FileUpload_GetData_Callback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
+{
+    (void)data;
+    (void)size;
+    (void)context;
+    (void)result;
+}
+
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/gballoc.h"
@@ -409,6 +417,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_UMOCK_ALIAS_TYPE(METHOD_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(BUFFER_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(THREADAPI_RESULT, int);
 
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
@@ -2569,7 +2579,7 @@ TEST_FUNCTION(IoTHubClient_UploadToBlobAsync_with_NULL_source_and_size_1_fails)
     IoTHubClient_Destroy(iothub_handle);
 }
 
-/*Tests_SRS_IOTHUBCLIENT_02_051: [ IoTHubClient_UploadToBlobAsync shall copy the souce, size, iotHubClientFileUploadCallback, context and a non-initialized(1) THREAD_HANDLE parameters into a structure. ]*/
+/*Tests_SRS_IOTHUBCLIENT_02_051: [ IoTHubClient_UploadToBlobAsync shall copy the source, size, iotHubClientFileUploadCallback, context and a non-initialized(1) THREAD_HANDLE parameters into a structure. ]*/
 /*Tests_SRS_IOTHUBCLIENT_02_058: [ IoTHubClient_UploadToBlobAsync shall add the structure to the list of structures that need to be cleaned once file upload finishes. ]*/
 /*Tests_SRS_IOTHUBCLIENT_02_052: [ IoTHubClient_UploadToBlobAsync shall spawn a thread passing the structure build in SRS IOTHUBCLIENT 02 051 as thread data.]*/
 /*Tests_SRS_IOTHUBCLIENT_02_054: [ The thread shall call IoTHubClient_LL_UploadToBlob passing the information packed in the structure. ]*/
@@ -2616,6 +2626,168 @@ TEST_FUNCTION(IoTHubClient_UploadToBlobAsync_succeeds)
         .IgnoreArgument_handle();
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     
+    IoTHubClient_Destroy(iothub_handle);
+}
+
+/*Tests_SRS_IOTHUBCLIENT_99_072: [ If `iotHubClientHandle` is `NULL` then `IoTHubClient_UploadMultipleBlocksToBlobAsync` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
+TEST_FUNCTION(IoTHubClient_UploadMultipleBlocksToBlobAsync_fails_when_handle_is_NULL)
+{
+    ///arrange
+    IOTHUB_CLIENT_HANDLE iothub_handle = NULL;
+    int context = 1;
+    umock_c_reset_all_calls();
+
+    ///act
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_UploadMultipleBlocksToBlobAsync(iothub_handle, "someFileName.txt", my_FileUpload_GetData_Callback, &context);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    ///cleanup
+    IoTHubClient_Destroy(iothub_handle);
+}
+
+/*Tests_SRS_IOTHUBCLIENT_99_073: [ If `destinationFileName` is `NULL` then `IoTHubClient_UploadMultipleBlocksToBlobAsync` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
+TEST_FUNCTION(IoTHubClient_UploadMultipleBlocksToBlobAsync_fails_when_destinationFileName_is_NULL)
+{
+    ///arrange
+    IOTHUB_CLIENT_HANDLE iothub_handle = IoTHubClient_Create(TEST_CLIENT_CONFIG);
+    int context = 1;
+    umock_c_reset_all_calls();
+
+    ///act
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_UploadMultipleBlocksToBlobAsync(iothub_handle, NULL, my_FileUpload_GetData_Callback, &context);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    ///cleanup
+    IoTHubClient_Destroy(iothub_handle);
+}
+
+/*Tests_SRS_IOTHUBCLIENT_99_074: [ If `getDataCallback` is `NULL` then `IoTHubClient_UploadMultipleBlocksToBlobAsync` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
+TEST_FUNCTION(IoTHubClient_UploadMultipleBlocksToBlobAsync_fails_when_getDataCallback_is_NULL)
+{
+    ///arrange
+    IOTHUB_CLIENT_HANDLE iothub_handle = IoTHubClient_Create(TEST_CLIENT_CONFIG);
+    int context = 1;
+    umock_c_reset_all_calls();
+
+    ///act
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_UploadMultipleBlocksToBlobAsync(iothub_handle, "someFileName.txt", NULL, &context);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    ///cleanup
+    IoTHubClient_Destroy(iothub_handle);
+}
+
+/*Tests_SRS_IOTHUBCLIENT_99_075: [ IoTHubClient_UploadMultipleBlocksToBlobAsync shall copy the destinationFileName, getDataCallback, context  and iotHubClientHandle into a structure. ]*/
+/*Tests_SRS_IOTHUBCLIENT_99_076: [ IoTHubClient_UploadMultipleBlocksToBlobAsync shall spawn a thread passing the structure build in SRS IOTHUBCLIENT 99 075 as thread data.]*/
+/*Tests_SRS_IOTHUBCLIENT_99_078: [ The thread shall call IoTHubClient_LL_UploadMultipleBlocksToBlob passing the information packed in the structure. ]*/
+/*Tests_SRS_IOTHUBCLIENT_99_077: [ If copying to the structure and spawning the thread succeeds, then IoTHubClient_UploadMultipleBlocksToBlobAsync shall return IOTHUB_CLIENT_OK. ]*/
+TEST_FUNCTION(IoTHubClient_UploadMultipleBlocksToBlobAsync_succeeds)
+{
+    ///arrange
+    IOTHUB_CLIENT_HANDLE iothub_handle = IoTHubClient_Create(TEST_CLIENT_CONFIG);
+    int context = 1;
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+    /* thread uploading function */
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadMultipleBlocksToBlob(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
+
+    ///act
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_UploadMultipleBlocksToBlobAsync(iothub_handle, "someFileName.txt", my_FileUpload_GetData_Callback, &context);
+    g_thread_func(g_thread_func_arg); /*this is the thread uploading function*/
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    ///cleanup
+    IoTHubClient_Destroy(iothub_handle);
+}
+
+/*Tests_SRS_IOTHUBCLIENT_99_077: [ If copying to the structure or spawning the thread fails, then `IoTHubClient_UploadMultipleBlocksToBlobAsync` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
+TEST_FUNCTION(IoTHubClient_UploadMultipleBlocksToBlobAsync_fails_when_ThreadAPI_Create_fails)
+{
+    ///arrange
+    IOTHUB_CLIENT_HANDLE iothub_handle = IoTHubClient_Create(TEST_CLIENT_CONFIG);
+    int context = 1;
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .SetReturn(THREADAPI_ERROR);
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+
+    ///act
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_UploadMultipleBlocksToBlobAsync(iothub_handle, "someFileName.txt", my_FileUpload_GetData_Callback, &context);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    ///cleanup
+    IoTHubClient_Destroy(iothub_handle);
+}
+
+/*Tests_SRS_IOTHUBCLIENT_99_077: [ If copying to the structure or spawning the thread fails, then `IoTHubClient_UploadMultipleBlocksToBlobAsync` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
+TEST_FUNCTION(IoTHubClient_UploadMultipleBlocksToBlobAsync_fails_when_strcpy_fails)
+{
+    ///arrange
+    IOTHUB_CLIENT_HANDLE iothub_handle = IoTHubClient_Create(TEST_CLIENT_CONFIG);
+    int context = 1;
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .SetReturn(1);
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+
+    ///act
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_UploadMultipleBlocksToBlobAsync(iothub_handle, "someFileName.txt", my_FileUpload_GetData_Callback, &context);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    ///cleanup
+    IoTHubClient_Destroy(iothub_handle);
+}
+
+/*Tests_SRS_IOTHUBCLIENT_99_077: [ If copying to the structure or spawning the thread fails, then `IoTHubClient_UploadMultipleBlocksToBlobAsync` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
+TEST_FUNCTION(IoTHubClient_UploadMultipleBlocksToBlobAsync_fails_when_malloc_fails)
+{
+    ///arrange
+    IOTHUB_CLIENT_HANDLE iothub_handle = IoTHubClient_Create(TEST_CLIENT_CONFIG);
+    int context = 1;
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        .SetReturn(NULL);
+
+    ///act
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_UploadMultipleBlocksToBlobAsync(iothub_handle, "someFileName.txt", my_FileUpload_GetData_Callback, &context);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    ///cleanup
     IoTHubClient_Destroy(iothub_handle);
 }
 #endif
