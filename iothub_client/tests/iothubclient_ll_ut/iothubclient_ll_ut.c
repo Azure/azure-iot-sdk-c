@@ -1374,6 +1374,7 @@ TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_Succeeds)
     IoTHubClient_LL_Destroy(result);
 }
 
+#ifdef USE_PROV_MODULE
 TEST_FUNCTION(IoTHubClient_LL_CreateFromDeviceAuth_URI_NULL_fail)
 {
     //arrange
@@ -1416,7 +1417,6 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromDeviceAuth_protocol_NULL_fail)
     //cleanup
 }
 
-#ifdef USE_PROV_MODULE
 TEST_FUNCTION(IoTHubClient_LL_CreateFromDeviceAuth_bad_uri_fail)
 {
     //arrange
