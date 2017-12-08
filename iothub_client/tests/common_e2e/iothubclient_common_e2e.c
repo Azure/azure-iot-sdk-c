@@ -468,9 +468,15 @@ IOTHUB_CLIENT_HANDLE client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUs
 
     (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_PRODUCT_INFO, "MQTT_E2E/1.1.12");
 
-    unsigned int keep_alive_sec = 120;
-    (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_C2D_KEEP_ALIVE_FREQ_SECS, &keep_alive_sec);
+    unsigned int svc2cl_keep_alive_timeout_secs = 120; // service will send pings at 120 x 7/8 = 105 seconds. Higher the value, lesser the frequency of service side pings.
+    (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_SERVICE_SIDE_KEEP_ALIVE_FREQ_SECS, &svc2cl_keep_alive_timeout_secs);
 
+    // Set keep alive for remote idle is optional. If it is not set the default ratio of 1/2 will be used. For default value of 4 minutes, it will be 2 minutes (120 seconds)
+    double cl2svc_keep_alive_send_ratio = 1.0 / 2.0; // Set it to 120 seconds (240 x 1/2 = 120 seconds) for 4 minutes remote idle. 
+
+    // client will send pings to service at 210 second interval for 4 minutes remote idle. For 25 minutes remote idle, it will be set to 21 minutes.
+    IoTHubClient_SetOption(iotHubClientHandle, OPTION_REMOTE_IDLE_TIMEOUT_RATIO, &cl2svc_keep_alive_send_ratio);
+        
 #ifdef AZIOT_LINUX
     if (g_e2e_test_options.set_mac_address)
     {
@@ -532,6 +538,7 @@ D2C_MESSAGE_HANDLE client_create_and_send_d2c(IOTHUB_CLIENT_HANDLE iotHubClientH
 bool client_wait_for_d2c_confirmation(D2C_MESSAGE_HANDLE d2cMessage, IOTHUB_CLIENT_CONFIRMATION_RESULT expectedClientResult)
 {
     time_t beginOperation, nowTime;
+    bool ret;
 
     LogInfo("Begin wait for d2c confirmation.  d2cMessage=<%p>", d2cMessage);
 
@@ -547,7 +554,10 @@ bool client_wait_for_d2c_confirmation(D2C_MESSAGE_HANDLE d2cMessage, IOTHUB_CLIE
         }
         ThreadAPI_Sleep(100);
     }
-    return (client_received_confirmation(d2cMessage, expectedClientResult));
+    ret = client_received_confirmation(d2cMessage, expectedClientResult);
+
+    LogInfo("Completed wait for d2c confirmation.  d2cMessage=<%p>, ret=<%d>", d2cMessage, ret);
+    return ret;
 }
 
 bool client_received_confirmation(D2C_MESSAGE_HANDLE d2cMessage, IOTHUB_CLIENT_CONFIRMATION_RESULT expectedClientResult)
@@ -726,12 +736,15 @@ void service_wait_for_d2c_event_arrival(IOTHUB_PROVISIONED_DEVICE* deviceToUse, 
     IOTHUB_TEST_HANDLE iotHubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo), IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo), deviceToUse->deviceId, IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo), IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo), IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo), IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo));
     ASSERT_IS_NOT_NULL_WITH_MSG(iotHubTestHandle, "Could not initialize IoTHubTest in order to listen for events");
 
+    LogInfo("Beginning to listen for d2c event arrival.  Waiting up to %d seconds...", MAX_SERVICE_EVENT_WAIT_TIME_SECONDS);
     IOTHUB_TEST_CLIENT_RESULT result = IoTHubTest_ListenForEvent(iotHubTestHandle, IoTHubCallback, IoTHubAccount_GetIoTHubPartitionCount(g_iothubAcctInfo), sendData, time(NULL)-SERVICE_EVENT_WAIT_TIME_DELTA_SECONDS, MAX_SERVICE_EVENT_WAIT_TIME_SECONDS);
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_OK, result, "Listening for the event failed");
     
     ASSERT_IS_TRUE_WITH_MSG(sendData->wasFound, "Failure retrieving data that was sent to eventhub"); // was found is written by the callback...
 
     IoTHubTest_Deinit(iotHubTestHandle);
+
+    LogInfo("Completed listening for d2c event arrival.");
 }
 
 bool service_received_the_message(D2C_MESSAGE_HANDLE d2cMessage)
@@ -1003,7 +1016,7 @@ void e2e_d2c_with_svc_fault_ctrl_error_message_callback(IOTHUB_CLIENT_TRANSPORT_
     IoTHubClient_Destroy(iotHubClientHandle);
 
     // Wait for the message to arrive
-    service_wait_for_d2c_event_arrival(deviceToUse, d2cMessageDuringRetry);
+    // service_wait_for_d2c_event_arrival(deviceToUse, d2cMessageDuringRetry);
 
     // cleanup
     destroy_d2c_message_handle(d2cMessageInitial);

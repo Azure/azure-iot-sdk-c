@@ -54,6 +54,9 @@ void iothub_client_sample_upload_to_blob_run(void)
         }
         else
         {
+            size_t log = 1;
+            (void)IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_CURL_VERBOSE, &log);
+
             if (IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_TRUSTED_CERT, certificates) != IOTHUB_CLIENT_OK)
             {
                 (void)printf("failure in IoTHubClient_LL_SetOption (TrustedCerts)");

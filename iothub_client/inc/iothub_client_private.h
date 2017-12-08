@@ -61,8 +61,8 @@ typedef struct IOTHUB_DEVICE_TWIN_TAG
     CONSTBUFFER_HANDLE report_data_handle;
     void* context;
     DLIST_ENTRY entry;
-	IOTHUB_CLIENT_LL_HANDLE client_handle;
-	IOTHUB_DEVICE_HANDLE device_handle;
+    IOTHUB_CLIENT_LL_HANDLE client_handle;
+    IOTHUB_DEVICE_HANDLE device_handle;
 } IOTHUB_DEVICE_TWIN;
 
 union IOTHUB_IDENTITY_INFO_TAG

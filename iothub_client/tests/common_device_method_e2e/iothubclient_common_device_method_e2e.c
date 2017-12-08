@@ -168,6 +168,7 @@ void fileUploadCallback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, void* userConte
     }
 }
 
+#ifndef DONT_USE_UPLOADTOBLOB
 #define HELLO_WORLD "Hello World from IoTHubClient_UploadToBlob"
 static int DeviceMethodWithUploadCallback(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* resp_size, void* userContextCallback)
 {
@@ -199,6 +200,7 @@ static int DeviceMethodWithUploadCallback(const char* method_name, const unsigne
     }
     return responseCode;
 }
+#endif
 
 void test_device_method_with_string_ex(IOTHUB_PROVISIONED_DEVICE** devicesToUse, size_t number_of_multiplexed_devices, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char *payload)
 {
@@ -426,6 +428,7 @@ void test_device_method_with_string(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTH
     free(responsePayload);
 }
 
+#ifndef DONT_USE_UPLOADTOBLOB
 void test_device_method_calls_upload(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char *payload)
 {
     g_conn_info.conn_status = IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED;
@@ -521,6 +524,7 @@ void test_device_method_calls_upload(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOT
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_OK, invokeResult, "Service Client IoTHubDeviceMethod_Invoke failed");
     ASSERT_ARE_EQUAL_WITH_MSG(int, METHOD_RESPONSE_SUCCESS, responseStatus, "response status is incorrect");
 }
+#endif
 
 static void client_create_with_properies_and_send_d2c(MAP_HANDLE mapHandle)
 {
@@ -723,10 +727,12 @@ extern void device_method_e2e_method_call_with_embedded_single_quote_sas(IOTHUB_
     test_device_method_with_string(IoTHubAccount_GetSASDevice(g_iothubAcctInfo), protocol, "\"this string has a single quote ' in the middle\"");
 }
 
+#ifndef DONT_USE_UPLOADTOBLOB
 void device_method_e2e_method_calls_upload_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
     test_device_method_calls_upload(IoTHubAccount_GetSASDevice(g_iothubAcctInfo), protocol, "\"Hello World.\"");
 }
+#endif
 
 void device_method_e2e_method_call_with_string_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
@@ -758,10 +764,12 @@ extern void device_method_e2e_method_call_with_embedded_single_quote_x509(IOTHUB
     test_device_method_with_string(IoTHubAccount_GetX509Device(g_iothubAcctInfo), protocol, "\"this string has a single quote ' in the middle\"");
 }
 
+#ifndef DONT_USE_UPLOADTOBLOB
 void device_method_e2e_method_calls_upload_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
     test_device_method_calls_upload(IoTHubAccount_GetX509Device(g_iothubAcctInfo), protocol, "\"Hello World.\"");
 }
+#endif
 
 void device_method_e2e_method_call_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
