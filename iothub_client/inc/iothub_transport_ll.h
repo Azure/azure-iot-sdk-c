@@ -16,8 +16,10 @@ typedef union IOTHUB_IDENTITY_INFO_TAG IOTHUB_IDENTITY_INFO;
 
 typedef void* METHOD_HANDLE;
 
+#include "azure_c_shared_utility/constbuffer.h"
 #include "azure_c_shared_utility/doublylinkedlist.h"
 #include "azure_c_shared_utility/strings.h"
+#include "azure_c_shared_utility/macro_utils.h"
 #include "iothub_message.h"
 #include "iothub_client_authorization.h"
 
@@ -36,6 +38,15 @@ extern "C"
 {
 #endif
 
+    #define IOTHUB_TRANSPORT_RESULT_VALUES    \
+        IOTHUB_TRANSPORT_OK,                  \
+        IOTHUB_TRANSPORT_INVALIG_ARG,         \
+        IOTHUB_TRANSPORT_ERROR,               \
+        IOTHUB_TRANSPORT_TIMEOUT
+
+    DEFINE_ENUM(IOTHUB_TRANSPORT_RESULT, IOTHUB_TRANSPORT_RESULT_VALUES);
+
+
     /** @brief	This struct captures device configuration. */
     typedef struct IOTHUB_DEVICE_CONFIG_TAG
     {
@@ -51,6 +62,8 @@ extern "C"
         IOTHUB_AUTHORIZATION_HANDLE authorization_module; // with either SAS Token, x509 Certs, and Device SAS Token
     } IOTHUB_DEVICE_CONFIG;
 
+    typedef void (*IOTHUB_TRANSPORT_GET_DEVICE_TWIN_CALLBACK)(IOTHUB_TRANSPORT_RESULT result, CONSTBUFFER_HANDLE data, void* callbackContext);
+	
     typedef STRING_HANDLE (*pfIoTHubTransport_GetHostname)(TRANSPORT_LL_HANDLE handle);
     typedef IOTHUB_CLIENT_RESULT(*pfIoTHubTransport_SetOption)(TRANSPORT_LL_HANDLE handle, const char *optionName, const void* value);
     typedef TRANSPORT_LL_HANDLE(*pfIoTHubTransport_Create)(const IOTHUBTRANSPORT_CONFIG* config);
@@ -66,18 +79,20 @@ extern "C"
     typedef void (*pfIoTHubTransport_Unsubscribe_DeviceTwin)(IOTHUB_DEVICE_HANDLE handle);
     typedef IOTHUB_CLIENT_RESULT(*pfIotHubTransport_SendMessageDisposition)(MESSAGE_CALLBACK_INFO* messageData, IOTHUBMESSAGE_DISPOSITION_RESULT disposition);
     typedef IOTHUB_PROCESS_ITEM_RESULT(*pfIoTHubTransport_ProcessItem)(TRANSPORT_LL_HANDLE handle, IOTHUB_IDENTITY_TYPE item_type, IOTHUB_IDENTITY_INFO* iothub_item);
+    typedef IOTHUB_CLIENT_RESULT(*pfIoTHubTransport_GetDeviceTwin)(IOTHUB_DEVICE_HANDLE handle, IOTHUB_TRANSPORT_GET_DEVICE_TWIN_CALLBACK completionCallback, void* callbackContext);
     typedef int(*pfIoTHubTransport_Subscribe_DeviceMethod)(IOTHUB_DEVICE_HANDLE handle);
     typedef void(*pfIoTHubTransport_Unsubscribe_DeviceMethod)(IOTHUB_DEVICE_HANDLE handle);
     typedef int(*pfIoTHubTransport_DeviceMethod_Response)(IOTHUB_DEVICE_HANDLE handle, METHOD_HANDLE methodId, const unsigned char* response, size_t response_size, int status_response);
 
 #define TRANSPORT_PROVIDER_FIELDS                                                   \
-pfIotHubTransport_SendMessageDisposition IoTHubTransport_SendMessageDisposition;  \
+pfIotHubTransport_SendMessageDisposition IoTHubTransport_SendMessageDisposition;    \
 pfIoTHubTransport_Subscribe_DeviceMethod IoTHubTransport_Subscribe_DeviceMethod;    \
 pfIoTHubTransport_Unsubscribe_DeviceMethod IoTHubTransport_Unsubscribe_DeviceMethod;\
 pfIoTHubTransport_DeviceMethod_Response IoTHubTransport_DeviceMethod_Response;      \
 pfIoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_Subscribe_DeviceTwin;        \
 pfIoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransport_Unsubscribe_DeviceTwin;    \
 pfIoTHubTransport_ProcessItem IoTHubTransport_ProcessItem;                          \
+pfIoTHubTransport_GetDeviceTwin IoTHubTransport_GetDeviceTwin;                      \
 pfIoTHubTransport_GetHostname IoTHubTransport_GetHostname;                          \
 pfIoTHubTransport_SetOption IoTHubTransport_SetOption;                              \
 pfIoTHubTransport_Create IoTHubTransport_Create;                                    \

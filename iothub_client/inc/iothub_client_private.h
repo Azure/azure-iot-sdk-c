@@ -35,7 +35,7 @@ extern "C"
 typedef bool(*IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC_EX)(MESSAGE_CALLBACK_INFO* messageData, void* userContextCallback);
 
 MOCKABLE_FUNCTION(, void, IoTHubClient_LL_SendComplete, IOTHUB_CLIENT_LL_HANDLE, handle, PDLIST_ENTRY, completed, IOTHUB_CLIENT_CONFIRMATION_RESULT, result);
-MOCKABLE_FUNCTION(, void, IoTHubClient_LL_ReportedStateComplete, IOTHUB_CLIENT_LL_HANDLE, handle, uint32_t, item_id, int, status_code);
+MOCKABLE_FUNCTION(, void, IoTHubClient_LL_ReportedStateComplete, IOTHUB_CLIENT_LL_HANDLE, handle, uint32_t, item_id, int, status_code, const char*, up_to_date_version);
 MOCKABLE_FUNCTION(, bool, IoTHubClient_LL_MessageCallback, IOTHUB_CLIENT_LL_HANDLE, handle, MESSAGE_CALLBACK_INFO*, message_data);
 MOCKABLE_FUNCTION(, void, IoTHubClient_LL_RetrievePropertyComplete, IOTHUB_CLIENT_LL_HANDLE, handle, DEVICE_TWIN_UPDATE_STATE, update_state, const unsigned char*, payLoad, size_t, size);
 MOCKABLE_FUNCTION(, int, IoTHubClient_LL_DeviceMethodComplete, IOTHUB_CLIENT_LL_HANDLE, handle, const char*, method_name, const unsigned char*, payLoad, size_t, size, METHOD_HANDLE, response_id);
@@ -58,7 +58,9 @@ typedef struct IOTHUB_DEVICE_TWIN_TAG
     uint32_t item_id;
     tickcounter_ms_t ms_timesOutAfter; /* a value of "0" means "no timeout", if the IOTHUBCLIENT_LL's handle tickcounter > msTimesOutAfer then the message shall timeout*/
     IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reported_state_callback;
+    IOTHUB_CLIENT_REPORTED_STATE_WITH_VERSION_CALLBACK reported_state_with_version_callback;
     CONSTBUFFER_HANDLE report_data_handle;
+    char* version;
     void* context;
     DLIST_ENTRY entry;
 	IOTHUB_CLIENT_LL_HANDLE client_handle;

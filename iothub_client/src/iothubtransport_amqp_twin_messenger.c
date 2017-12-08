@@ -44,6 +44,7 @@ DEFINE_ENUM_STRINGS(TWIN_UPDATE_TYPE, TWIN_UPDATE_TYPE_VALUES);
 #define TWIN_API_VERSION_PROPERTY_NAME					"com.microsoft:api-version"
 #define TWIN_CORRELATION_ID_PROPERTY_FORMAT				"twin:%s"
 #define TWIN_API_VERSION_NUMBER							"2016-11-14"
+#define TWIN_VERSION_UNDEFINED                          "*"
 
 #define DEFAULT_MAX_TWIN_SUBSCRIPTION_ERROR_COUNT		3
 #define DEFAULT_TWIN_OPERATION_TIMEOUT_SECS				300.0
@@ -105,6 +106,7 @@ typedef struct TWIN_MESSENGER_INSTANCE_TAG
 typedef struct TWIN_PATCH_OPERATION_CONTEXT_TAG
 {
 	CONSTBUFFER_HANDLE data;
+    char* version;
 	TWIN_MESSENGER_REPORT_STATE_COMPLETE_CALLBACK on_report_state_complete_callback;
 	const void* on_report_state_complete_context;
 	time_t time_enqueued;
@@ -710,7 +712,7 @@ static const char* get_twin_operation_name(TWIN_OPERATION_TYPE op_type)
 	return result;
 }
 
-static MESSAGE_HANDLE create_amqp_message_for_twin_operation(TWIN_OPERATION_TYPE op_type, char* correlation_id, CONSTBUFFER_HANDLE data)
+static MESSAGE_HANDLE create_amqp_message_for_twin_operation(TWIN_OPERATION_TYPE op_type, char* correlation_id, CONSTBUFFER_HANDLE data, char* version)
 {
 	MESSAGE_HANDLE result;
 	const char* twin_op_name;
@@ -755,6 +757,14 @@ static MESSAGE_HANDLE create_amqp_message_for_twin_operation(TWIN_OPERATION_TYPE
 				message_destroy(result);
 				result = NULL;
 			}
+            else if ((op_type == TWIN_OPERATION_TYPE_PATCH) &&
+                add_map_item(msg_annotations_map, TWIN_MESSAGE_PROPERTY_VERSION, version != NULL ? version : TWIN_VERSION_UNDEFINED) != RESULT_OK)
+            {
+                LogError("Failed adding version to AMQP message annotations (%s)", twin_op_name);
+                // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_072: [If any errors occur, message_create_for_twin_operation shall release all memory it has allocated]  
+                message_destroy(result);
+                result = NULL;
+            }
 			// Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_067: [If `op_type` is PUT or DELETE, `resource=/notifications/twin/properties/desired` must be added to the `amqp_message` annotations] 
 			else if ((op_type == TWIN_OPERATION_TYPE_PUT || op_type == TWIN_OPERATION_TYPE_DELETE) &&
 				add_map_item(msg_annotations_map, TWIN_MESSAGE_PROPERTY_RESOURCE, TWIN_RESOURCE_DESIRED) != RESULT_OK)
@@ -895,7 +905,7 @@ static void on_amqp_send_complete_callback(AMQP_MESSENGER_SEND_RESULT result, AM
 					callback_result = get_twin_messenger_result_from(result);
 					callback_reason = get_twin_messenger_reason_from(reason);
 
-					twin_op_ctx->on_report_state_complete_callback(TWIN_REPORT_STATE_RESULT_ERROR, TWIN_REPORT_STATE_REASON_NONE, 0, (void*)twin_op_ctx->on_report_state_complete_context);
+					twin_op_ctx->on_report_state_complete_callback(TWIN_REPORT_STATE_RESULT_ERROR, TWIN_REPORT_STATE_REASON_NONE, 0,(void*)twin_op_ctx->on_report_state_complete_context);
 				}
 			}
 			else if (reason != AMQP_MESSENGER_REASON_MESSENGER_DESTROYED)
@@ -970,6 +980,24 @@ static int send_twin_operation_request(TWIN_MESSENGER_INSTANCE* twin_msgr, TWIN_
 
 //---------- Internal Helpers----------//
 
+static void destroy_twin_patch_operation_context(TWIN_PATCH_OPERATION_CONTEXT* twin_patch_ctx)
+{
+    if (twin_patch_ctx != NULL)
+    {
+        if (twin_patch_ctx->version != NULL)
+        {
+            free(twin_patch_ctx->version);
+        }
+
+        if (twin_patch_ctx->data != NULL)
+        {
+            CONSTBUFFER_Destroy(twin_patch_ctx->data);
+        }
+
+        free(twin_patch_ctx);
+    }
+}
+
 static bool remove_expired_twin_patch_request(const void* item, const void* match_context, bool* continue_processing)
 {
 	bool remove_item;
@@ -996,8 +1024,7 @@ static bool remove_expired_twin_patch_request(const void* item, const void* matc
 				twin_patch_ctx->on_report_state_complete_callback(TWIN_REPORT_STATE_RESULT_ERROR, TWIN_REPORT_STATE_REASON_TIMEOUT, 0, twin_patch_ctx->on_report_state_complete_context);
 			}
 
-			CONSTBUFFER_Destroy(twin_patch_ctx->data);
-			free(twin_patch_ctx);
+            destroy_twin_patch_operation_context(twin_patch_ctx);
 		}
 		else
 		{
@@ -1155,8 +1182,7 @@ static bool send_pending_twin_patch(const void* item, const void* match_context,
 			}
 		}
 
-		CONSTBUFFER_Destroy(twin_patch_ctx->data);
-		free(twin_patch_ctx);
+        destroy_twin_patch_operation_context(twin_patch_ctx);
 
 		*continue_processing = true;
 		result = true;
@@ -1283,8 +1309,7 @@ static bool cancel_pending_twin_patch_operation(const void* item, const void* ma
 			twin_patch_ctx->on_report_state_complete_callback(TWIN_REPORT_STATE_RESULT_CANCELLED, TWIN_REPORT_STATE_REASON_MESSENGER_DESTROYED, 0, twin_patch_ctx->on_report_state_complete_context);
 		}
 
-		CONSTBUFFER_Destroy(twin_patch_ctx->data);
-		free(twin_patch_ctx);
+        destroy_twin_operation_context(twin_patch_ctx);
 
 		*continue_processing = true;
 		result = true;
@@ -1810,7 +1835,7 @@ TWIN_MESSENGER_HANDLE twin_messenger_create(const TWIN_MESSENGER_CONFIG* messeng
 	return (TWIN_MESSENGER_HANDLE)twin_msgr;
 }
 
-int twin_messenger_report_state_async(TWIN_MESSENGER_HANDLE twin_msgr_handle, CONSTBUFFER_HANDLE data, TWIN_MESSENGER_REPORT_STATE_COMPLETE_CALLBACK on_report_state_complete_callback, const void* context)
+int twin_messenger_report_state_async(TWIN_MESSENGER_HANDLE twin_msgr_handle, CONSTBUFFER_HANDLE data, const char* version, TWIN_MESSENGER_REPORT_STATE_COMPLETE_CALLBACK on_report_state_complete_callback, const void* context)
 {
 	int result;
 
@@ -1837,17 +1862,23 @@ int twin_messenger_report_state_async(TWIN_MESSENGER_HANDLE twin_msgr_handle, CO
 		{
 			LogError("Failed cloning TWIN patch request data (%s)", twin_msgr->device_id);
 			// Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_031: [If any failure occurs, twin_messenger_report_state_async() shall free any memory it has allocated]  
-			free(twin_patch_ctx);
+            destroy_twin_patch_operation_context(twin_patch_ctx);
 			// Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_026: [If `data` fails to be copied, twin_messenger_report_state_async() shall fail and return a non-zero value]    
 			result = __FAILURE__;
 		}
+        else if (version != NULL && mallocAndStrcpy_s(&twin_patch_ctx->version, version) != 0)
+        {
+            LogError("Failed cloning TWIN patch request version (%s)", twin_msgr->device_id);
+            // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_031: [If any failure occurs, twin_messenger_report_state_async() shall free any memory it has allocated]  
+            destroy_twin_patch_operation_context(twin_patch_ctx);
+            result = __FAILURE__;
+        }
 		// Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_027: [`twin_op_ctx->time_enqueued` shall be set using get_time]    
 		else if ((twin_patch_ctx->time_enqueued = get_time(NULL)) == INDEFINITE_TIME)
 		{
 			LogError("Failed setting reported state enqueue time (%s)", twin_msgr->device_id);
 			// Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_031: [If any failure occurs, twin_messenger_report_state_async() shall free any memory it has allocated]  
-			CONSTBUFFER_Destroy(twin_patch_ctx->data);
-			free(twin_patch_ctx);
+            destroy_twin_patch_operation_context(twin_patch_ctx);
 			// Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_028: [If `twin_op_ctx->time_enqueued` fails to be set, twin_messenger_report_state_async() shall fail and return a non-zero value]    
 			result = __FAILURE__;
 		}
@@ -1861,8 +1892,7 @@ int twin_messenger_report_state_async(TWIN_MESSENGER_HANDLE twin_msgr_handle, CO
 			{
 				LogError("Failed adding TWIN patch request to queue (%s)", twin_msgr->device_id);
 				// Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_031: [If any failure occurs, twin_messenger_report_state_async() shall free any memory it has allocated]  
-				CONSTBUFFER_Destroy(twin_patch_ctx->data);
-				free(twin_patch_ctx);
+                destroy_twin_patch_operation_context(twin_patch_ctx);
 				// Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_030: [If singlylinkedlist_add() fails, twin_messenger_report_state_async() shall fail and return a non-zero value]
 				result = __FAILURE__;
 			}

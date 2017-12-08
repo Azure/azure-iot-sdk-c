@@ -250,7 +250,7 @@ static DEVICE_TWIN_UPDATE_RESULT get_device_twin_update_result_from(TWIN_REPORT_
     return device_result;
 }
 
-static void on_report_state_complete_callback(TWIN_REPORT_STATE_RESULT result, TWIN_REPORT_STATE_REASON reason, int status_code, const void* context)
+static void on_report_state_complete_callback(TWIN_REPORT_STATE_RESULT result, TWIN_REPORT_STATE_REASON reason, int status_code, const char* new_version, const void* context)
 {
     (void)reason;
     
@@ -269,7 +269,7 @@ static void on_report_state_complete_callback(TWIN_REPORT_STATE_RESULT result, T
 
             device_result = get_device_twin_update_result_from(result);
 
-            twin_ctx->on_send_twin_update_complete_callback(device_result, status_code, twin_ctx->context);
+            twin_ctx->on_send_twin_update_complete_callback(device_result, status_code, new_version,twin_ctx->context);
         }
 
         // Codes_SRS_DEVICE_09_142: [Memory allocated for `context` shall be released]
@@ -1546,7 +1546,7 @@ OPTIONHANDLER_HANDLE device_retrieve_options(DEVICE_HANDLE handle)
     return result;
 }
 
-int device_send_twin_update_async(DEVICE_HANDLE handle, CONSTBUFFER_HANDLE data, DEVICE_SEND_TWIN_UPDATE_COMPLETE_CALLBACK on_send_twin_update_complete_callback, void* context)
+int device_send_twin_update_async(DEVICE_HANDLE handle, CONSTBUFFER_HANDLE data, const char* version, DEVICE_SEND_TWIN_UPDATE_COMPLETE_CALLBACK on_send_twin_update_complete_callback, void* context)
 {
     int result;
 
@@ -1574,7 +1574,7 @@ int device_send_twin_update_async(DEVICE_HANDLE handle, CONSTBUFFER_HANDLE data,
             twin_ctx->context = context;
 
             // Codes_SRS_DEVICE_09_138: [The twin report shall be sent using twin_messenger_report_state_async, passing `on_report_state_complete_callback` and `twin_ctx`]
-            if (twin_messenger_report_state_async(instance->twin_messenger_handle, data, on_report_state_complete_callback, (const void*)twin_ctx) != 0)
+            if (twin_messenger_report_state_async(instance->twin_messenger_handle, data, version, on_report_state_complete_callback, (const void*)twin_ctx) != 0)
             {
                 // Codes_SRS_DEVICE_09_139: [If twin_messenger_report_state_async fails, device_send_twin_update_async shall return a non-zero value]
                 LogError("Cannot send twin update (failed creating TWIN messenger)");

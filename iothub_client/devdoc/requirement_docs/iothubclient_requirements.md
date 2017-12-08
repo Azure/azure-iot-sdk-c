@@ -36,8 +36,10 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_UploadToBlobAsync(IOTHUB_CLIENT_HANDLE 
 extern IOTHUB_CLIENT_RESULT IoTHubClient_UploadMultipleBlocksToBlobAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK getDataCallback, void* context);
 
 ## Device Twin
+extern IOTHUB_CLIENT_RESULT IoTHubClient_GetDeviceTwin(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback, void* userContextCallback);
 extern IOTHUB_CLIENT_RESULT IoTHubClient_SetDeviceTwinCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback, void* userContextCallback);
-extern IOTHUB_CLIENT_RESULT IoTHubClient_SendReportedState(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const unsigned char* reportedState, size_t size, uint32_t reportedVersion, uint32_t lastSeenDesiredVersion, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reportedStateCallback, void* userContextCallback);
+extern IOTHUB_CLIENT_RESULT IoTHubClient_SendReportedState(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const unsigned char* reportedState, size_t size, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reportedStateCallback, void* userContextCallback);
+extern IOTHUB_CLIENT_RESULT IoTHubClient_SendReportedStateWithVersion(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const unsigned char* reportedState, size_t size, const char* reportedPropertiesVersion, IOTHUB_CLIENT_PATCH_REPORTED_CALLBACK reportedStateCallback, void* userContextCallback);
 
 ## IoTHub Methods
 extern IOTHUB_CLIENT_RESULT IoTHubClient_SetDeviceMethodCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_METHOD_CALLBACK_ASYNC deviceMethodCallback, void* userContextCallback);
@@ -370,6 +372,28 @@ Options handled by IoTHubClient_SetOption:
 -none.
 
 
+## IoTHubClient_GetDeviceTwin
+```c
+extern IOTHUB_CLIENT_RESULT IoTHubClient_GetDeviceTwin(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback, void* userContextCallback);
+```
+
+`IoTHubClient_GetDeviceTwin` retrieves the current complete Device Twin properties from the IoTHub (including Desired and Reported Properties).
+
+**SRS_IOTHUBCLIENT_09_009: [** If `iotHubClientHandle` or `deviceTwinCallback` are `NULL`, `IoTHubClient_GetDeviceTwin` shall return `IOTHUB_CLIENT_INVALID_ARG`. **]**
+
+**SRS_IOTHUBCLIENT_09_010: [** If acquiring the lock fails, `IoTHubClient_GetDeviceTwin` shall return `IOTHUB_CLIENT_ERROR`. **]**
+
+**SRS_IOTHUBCLIENT_09_011: [** If the transport connection is shared, the thread shall be started by calling `IoTHubTransport_StartWorkerThread`. **]**
+
+**SRS_IOTHUBCLIENT_09_012: [** If starting the thread fails, `IoTHubClient_GetDeviceTwin` shall return `IOTHUB_CLIENT_ERROR`. **]**
+
+**SRS_IOTHUBCLIENT_09_013: [** `IoTHubClient_GetDeviceTwin` shall call `IoTHubClient_LL_GetDeviceTwin`, passing the `IoTHubClient_LL handle`, `deviceTwinCallback` and `userContextCallback` as arguments **]**
+
+**SRS_IOTHUBCLIENT_09_014: [** When `IoTHubClient_LL_GetDeviceTwin` is called, `IoTHubClient_GetDeviceTwin` shall return the result of `IoTHubClient_LL_GetDeviceTwin`. **]**
+
+**SRS_IOTHUBCLIENT_09_015: [** `IoTHubClient_GetDeviceTwin` shall be made thread-safe by using the lock created in IoTHubClient_Create. **]**
+
+
 ## IoTHubClient_SetDeviceTwinCallback
 
 ```c
@@ -418,6 +442,33 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_SendReportedState(IOTHUB_CLIENT_HANDLE 
 **SRS_IOTHUBCLIENT_10_021: [** `IoTHubClient_SendReportedState` shall be made thread-safe by using the lock created in IoTHubClient_Create. **]**
 
 **SRS_IOTHUBCLIENT_07_003: [** `IoTHubClient_SendReportedState` shall allocate a IOTHUB_QUEUE_CONTEXT object to be sent to the `IoTHubClient_LL_SendReportedState` function as a user context. **]**
+
+
+
+## IoTHubClient_SendReportedStateWithVersion
+
+```c
+extern IOTHUB_CLIENT_RESULT IoTHubClient_SendReportedStateWithVersion(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const unsigned char* reportedState, size_t size, const char* reportedPropertiesVersion, IOTHUB_CLIENT_PATCH_REPORTED_CALLBACK reportedStateCallback, void* userContextCallback);
+```
+
+`IoTHubClient_SendReportedStateWithVersion` sends an asynchronous reported state to the IoTHub. The response is returned via call to the specified reportedStateCallback.
+
+**SRS_IOTHUBCLIENT_09_001: [** If `iotHubClientHandle` is `NULL`, `IoTHubClient_SendReportedStateWithVersion` shall return `IOTHUB_CLIENT_INVALID_ARG`. **]**
+
+**SRS_IOTHUBCLIENT_09_002: [** If acquiring the lock fails, `IoTHubClient_SendReportedStateWithVersion` shall return `IOTHUB_CLIENT_ERROR`. **]**
+
+**SRS_IOTHUBCLIENT_09_003: [** If the transport connection is shared, the thread shall be started by calling `IoTHubTransport_StartWorkerThread`. **]**
+
+**SRS_IOTHUBCLIENT_09_004: [** If starting the thread fails, `IoTHubClient_SendReportedStateWithVersion` shall return `IOTHUB_CLIENT_ERROR`. **]**
+
+**SRS_IOTHUBCLIENT_09_005: [** `IoTHubClient_SendReportedStateWithVersion` shall call `IoTHubClient_LL_SendReportedStateWithVersion`, while passing the `IoTHubClient_LL handle` created by `IoTHubClient_LL_Create` along with the parameters `reportedState`, `size`, `reportedPropertiesVersion`, `iothub_ll_reported_state_callback`, and IOTHUB_QUEUE_CONTEXT variable. **]**
+
+**SRS_IOTHUBCLIENT_09_006: [** When `IoTHubClient_LL_SendReportedStateWithVersion` is called, `IoTHubClient_SendReportedStateWithVersion` shall return the result of `IoTHubClient_LL_SendReportedState`. **]**
+
+**SRS_IOTHUBCLIENT_09_007: [** `IoTHubClient_SendReportedStateWithVersion` shall be made thread-safe by using the lock created in IoTHubClient_Create. **]**
+
+**SRS_IOTHUBCLIENT_09_008: [** `IoTHubClient_SendReportedStateWithVersion` shall allocate a IOTHUB_QUEUE_CONTEXT object to be sent to the `IoTHubClient_LL_SendReportedStateWithVersion` function as a user context. **]**
+
 
 
 ## IoTHubClient_SetDeviceMethodCallback

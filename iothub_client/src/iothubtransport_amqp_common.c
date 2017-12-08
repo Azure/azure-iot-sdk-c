@@ -542,7 +542,7 @@ static int subscribe_methods(AMQP_TRANSPORT_DEVICE_INSTANCE* deviceState)
     return result;
 }
 
-static void on_device_send_twin_update_complete_callback(DEVICE_TWIN_UPDATE_RESULT result, int status_code, void* context)
+static void on_device_send_twin_update_complete_callback(DEVICE_TWIN_UPDATE_RESULT result, int status_code, const char* new_version, void* context)
 {
     (void)result;
 
@@ -556,7 +556,7 @@ static void on_device_send_twin_update_complete_callback(DEVICE_TWIN_UPDATE_RESU
         AMQP_TRANSPORT_DEVICE_TWIN_CONTEXT* dev_twin_ctx = (AMQP_TRANSPORT_DEVICE_TWIN_CONTEXT*)context;
 
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_152: [`IoTHubClient_LL_ReportedStateComplete` shall be invoked passing `status_code` and `context` details]
-        IoTHubClient_LL_ReportedStateComplete(dev_twin_ctx->client_handle, dev_twin_ctx->item_id, status_code);
+        IoTHubClient_LL_ReportedStateComplete(dev_twin_ctx->client_handle, dev_twin_ctx->item_id, status_code, new_version);
 
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_153: [The memory allocated for `context` shall be released]
         free(dev_twin_ctx);
@@ -1488,6 +1488,7 @@ IOTHUB_PROCESS_ITEM_RESULT IoTHubTransport_AMQP_Common_ProcessItem(TRANSPORT_LL_
                 if (device_send_twin_update_async(
                     registered_device->device_handle,
                     iothub_item->device_twin->report_data_handle,
+                    iothub_item->device_twin->version,
                     on_device_send_twin_update_complete_callback, (void*)dev_twin_ctx) != RESULT_OK)
                 {
                     // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_147: [If device_send_twin_update_async() fails, `IoTHubTransport_AMQP_Common_ProcessItem` shall fail and return IOTHUB_PROCESS_ERROR.]
