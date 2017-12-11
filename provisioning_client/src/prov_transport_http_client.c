@@ -474,6 +474,8 @@ static void free_json_parse_info(PROV_JSON_INFO* parse_info)
         case PROV_DEVICE_TRANSPORT_STATUS_ASSIGNING:
             free(parse_info->operation_id);
             break;
+        default:
+            break;
     }
     free(parse_info);
 }

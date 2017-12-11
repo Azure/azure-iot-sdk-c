@@ -4403,7 +4403,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_resend_max_recount_reached_mess
     for (size_t index = 0; index < 3; index++)
     {
         IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
-        g_current_ms = (tickcounter_ms_t)(3 * index * 60 * 1000);
+        g_current_ms = (tickcounter_ms_t)(index * 15 * 1000);
     }
     umock_c_reset_all_calls();
 

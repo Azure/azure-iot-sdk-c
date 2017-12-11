@@ -493,6 +493,9 @@ static void on_transport_status(PROV_DEVICE_TRANSPORT_STATUS transport_status, v
                     }
                 }
                 break;
+            default:
+                LogError("Unknown status encountered");
+                break;
         }
     }
 }

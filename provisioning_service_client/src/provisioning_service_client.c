@@ -41,8 +41,6 @@ typedef struct PROVISIONING_SERVICE_CLIENT_TAG
 
 } PROV_SERVICE_CLIENT;
 
-#define UNREFERENCED_PARAMETER(x) x
-
 #define IOTHUBHOSTNAME "HostName"
 #define IOTHUBSHAREDACESSKEYNAME "SharedAccessKeyName"
 #define IOTHUBSHAREDACESSKEY "SharedAccessKey"
@@ -52,7 +50,7 @@ typedef struct PROVISIONING_SERVICE_CLIENT_TAG
 #define SAS_TOKEN_DEFAULT_LIFETIME  3600
 #define EPOCH_TIME_T_VALUE          (time_t)0
 
-#define UNREFERENCED_PARAMETER(x) x
+#define UNREFERENCED_PARAMETER(x) (void)x
 
 static const char* CREATE_ENROLLMENT_CONTENT_FMT = "{\"id\":\"%s\",\"desiredIotHub\":\"%s\",\"deviceId\":\"%s\",\"identityAttestationMechanism\":\"%s\",\"identityAttestationEndorsementKey\":\"%s\",\"initialDeviceTwin\":\"\",\"enableEntry\":\"%s\"}";
 static const char* ENROLL_GROUP_PROVISION_PATH_FMT = "/enrollmentGroups/%s?api-version=%s";
