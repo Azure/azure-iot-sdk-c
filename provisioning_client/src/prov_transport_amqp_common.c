@@ -108,7 +108,7 @@ typedef struct PROV_TRANSPORT_AMQP_INFO_TAG
     TRANSPORT_CLIENT_STATE transport_state;
     AMQP_TRANSPORT_STATE amqp_state;
 
-    MESSAGE_SENDER_STATE msg_recv_state;
+    MESSAGE_RECEIVER_STATE msg_recv_state;
     MESSAGE_SENDER_STATE msg_send_state;
 
     SASL_MECHANISM_HANDLE tpm_sasl_handler;
@@ -830,6 +830,8 @@ static void free_json_parse_info(PROV_JSON_INFO* parse_info)
             break;
         case PROV_DEVICE_TRANSPORT_STATUS_ASSIGNING:
             free(parse_info->operation_id);
+            break;
+        default:
             break;
     }
     free(parse_info);
