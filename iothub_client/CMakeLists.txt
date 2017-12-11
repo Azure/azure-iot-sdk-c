@@ -207,6 +207,7 @@ if(${use_mqtt})
     set(iothub_client_h_install_files
         ${iothub_client_h_install_files}
         ${iothub_client_mqtt_transport_h_files}
+        ${iothub_client_mqtt_ws_transport_h_files}
     )
 endif()
 
