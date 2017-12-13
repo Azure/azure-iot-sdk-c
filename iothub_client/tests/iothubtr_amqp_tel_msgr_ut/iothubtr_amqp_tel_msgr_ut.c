@@ -447,8 +447,9 @@ static MESSENGER_DO_WORK_EXP_CALL_PROFILE* get_msgr_do_work_exp_call_profile(TEL
     return &g_do_work_profile;
 }
 
-static int TEST_message_create_uamqp_encoding_from_iothub_message(IOTHUB_MESSAGE_HANDLE message_handle, BINARY_DATA* body_binary_data)
+static int TEST_message_create_uamqp_encoding_from_iothub_message(MESSAGE_HANDLE message_batch_container, IOTHUB_MESSAGE_HANDLE message_handle, BINARY_DATA* body_binary_data)
 {
+    (void)message_batch_container;
     (void)message_handle;
     (void)body_binary_data;
     return 0;
@@ -1357,8 +1358,8 @@ static void set_expected_calls_for_message_do_work_send_pending_events(SEND_PEND
 
         TEST_amqp_data.length = test_config->test_events[i].number_bytes_encoded;
 
-        STRICT_EXPECTED_CALL(message_create_uamqp_encoding_from_iothub_message(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .CopyOutArgumentBuffer(2, &TEST_amqp_data, sizeof(TEST_amqp_data)).SetReturn(message_create_uamqp_encoding_from_iothub_message_return);
+        STRICT_EXPECTED_CALL(message_create_uamqp_encoding_from_iothub_message(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .CopyOutArgumentBuffer(3, &TEST_amqp_data, sizeof(TEST_amqp_data)).SetReturn(message_create_uamqp_encoding_from_iothub_message_return);
 
         if ((SEND_PENDING_EXPECT_ERROR_TOO_LARGE == expected_action) || (SEND_PENDING_EXPECT_CREATE_MESSAGE_FAILURE == expected_action))
         {

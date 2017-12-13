@@ -1104,8 +1104,8 @@ static int create_send_pending_events_state(TELEMETRY_MESSENGER_INSTANCE* instan
     }
     else if (message_set_message_format(send_pending_events_state->message_batch_container, AMQP_BATCHING_FORMAT_CODE) != 0)
     {
-        LogError("Failed setting the message format to batching format");
-        result = __FAILURE__;
+         LogError("Failed setting the message format to batching format");
+         result = __FAILURE__;
     }
     else if ((send_pending_events_state->task = create_task(instance)) == NULL)
     {
@@ -1214,7 +1214,7 @@ static int send_pending_events(TELEMETRY_MESSENGER_INSTANCE* instance)
             break;
         }
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_31_200: [Retrieve an AMQP encoded representation of this message for later appending to main batched message.  On error, invoke callback but continue send loop; this is NOT a fatal error.]
-        else if (message_create_uamqp_encoding_from_iothub_message(caller_info->message->messageHandle, &body_binary_data) != RESULT_OK)
+        else if (message_create_uamqp_encoding_from_iothub_message(send_pending_events_state.message_batch_container, caller_info->message->messageHandle, &body_binary_data) != RESULT_OK)
         {
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_31_201: [If message_create_uamqp_encoding_from_iothub_message fails, invoke callback with TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE]
             LogError("message_create_uamqp_encoding_from_iothub_message() failed.  Will continue to try to process messages, result");
