@@ -183,18 +183,26 @@ extern "C"
 
 #define BLOCK_SIZE (4*1024*1024)
 
+#define IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT_VALUES \
+    IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK, \
+    IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_ABORT
+
+    DEFINE_ENUM(IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT_VALUES);
+
     /**
     *  @brief           Callback invoked by IoTHubClient_UploadMultipleBlocksToBlobAsync requesting the chunks of data to be uploaded.
     *  @param result    The result of the upload of the previous block of data provided by the user.
     *  @param data      Next block of data to be uploaded, to be provided by the user when this callback is invoked.
     *  @param size      Size of the data parameter.
     *  @param context   User context provided on the call to IoTHubClient_UploadMultipleBlocksToBlobAsync.
+    *  @return          If the user wants to abort the upload, the callback should return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_ABORT
+    *                   It should return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK otherwise.
     *  @remarks         If a NULL is provided for parameter "data" and/or zero is provided for "size", the user indicates to the client that the complete file has been uploaded.
     *                   In such case this callback will be invoked only once more to indicate the status of the final block upload.
     *                   If result is not FILE_UPLOAD_OK, the download is cancelled and this callback stops being invoked.
     *                   When this callback is called for the last time, no data or size is expected, so data and size are set to NULL
     */
-    typedef void(*IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK)(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context);
+    typedef IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT (*IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK)(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context);
 #endif /* DONT_USE_UPLOADTOBLOB */
 
     /** @brief	This struct captures IoTHub client configuration. */

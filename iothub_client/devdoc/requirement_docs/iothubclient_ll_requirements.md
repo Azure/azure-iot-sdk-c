@@ -667,6 +667,16 @@ If the credentials used to create `iotHubClientHandle` do not have "deviceKey" o
     "statusDescription": "client not able to connect with the server"
 }
 ```
+**SRS_IOTHUBCLIENT_LL_99_008: [** If step 2 is aborted by the client, then the HTTP message body shall look like:  ** ]**
+
+```json
+{
+    "statusCode": -1
+    "statusDescription": "file upload aborted"
+}
+```
+
+**SRS_IOTHUBCLIENT_LL_99_009: [** If step 2 is aborted by the client and if step 3 succeeds, then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall return `IOTHUB_CLIENT_OK`.** ]**
 
 **SRS_IOTHUBCLIENT_LL_02_086: [** If performing the HTTP request fails then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
 

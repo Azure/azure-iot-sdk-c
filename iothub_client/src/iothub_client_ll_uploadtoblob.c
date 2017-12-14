@@ -44,6 +44,7 @@ int snprintf(char * s, size_t n, const char * format, ...)
 
 /*Codes_SRS_IOTHUBCLIENT_LL_02_085: [ IoTHubClient_LL_UploadToBlob shall use the same authorization as step 1. to prepare and perform a HTTP request with the following parameters: ]*/
 #define FILE_UPLOAD_FAILED_BODY "{ \"isSuccess\":false, \"statusCode\":-1,\"statusDescription\" : \"client not able to connect with the server\" }"
+#define FILE_UPLOAD_ABORTED_BODY "{ \"isSuccess\":false, \"statusCode\":-1,\"statusDescription\" : \"file upload aborted\" }"
 
 #define AUTHORIZATION_SCHEME_VALUES \
     DEVICE_KEY, \
@@ -769,7 +770,7 @@ static int IoTHubClient_LL_UploadToBlob_step3(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HAND
 }
 
 // this callback splits the source data into blocks to be fed to IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl
-static void FileUpload_GetData_Callback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
+static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT FileUpload_GetData_Callback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
 {
     BLOB_UPLOAD_CONTEXT* uploadContext = (BLOB_UPLOAD_CONTEXT*) context;
 
@@ -797,6 +798,8 @@ static void FileUpload_GetData_Callback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result,
         *size = thisBlockSize;
         uploadContext->remainingSizeToUpload -= thisBlockSize;
     }
+
+    return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK;
 }
 
 IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE handle, const char* destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK getDataCallback, void* context)
@@ -921,10 +924,33 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
                                         }
                                         else
                                         {
-                                            int step2success;
                                             /*Codes_SRS_IOTHUBCLIENT_LL_02_083: [ IoTHubClient_LL_UploadMultipleBlocksToBlob shall call Blob_UploadFromSasUri and capture the HTTP return code and HTTP body. ]*/
-                                            step2success = (Blob_UploadMultipleBlocksFromSasUri(STRING_c_str(sasUri), getDataCallback, context, &httpResponse, responseToIoTHub, handleData->certificates, &(handleData->http_proxy_options)) == BLOB_OK);
-                                            if (!step2success)
+                                            BLOB_RESULT blobRes = Blob_UploadMultipleBlocksFromSasUri(STRING_c_str(sasUri), getDataCallback, context, &httpResponse, responseToIoTHub, handleData->certificates, &(handleData->http_proxy_options));
+                                            if (blobRes == BLOB_ABORTED)
+                                            {
+                                                /*Codes_SRS_IOTHUBCLIENT_LL_99_008: [ If step 2 is aborted by the client, then the HTTP message body shall look like:  ]*/
+                                                LogInfo("Blob_UploadFromSasUri aborted file upload");
+
+                                                if (BUFFER_build(responseToIoTHub, (const unsigned char*)FILE_UPLOAD_ABORTED_BODY, sizeof(FILE_UPLOAD_ABORTED_BODY) / sizeof(FILE_UPLOAD_ABORTED_BODY[0])) == 0)
+                                                {
+                                                    if (IoTHubClient_LL_UploadToBlob_step3(handleData, correlationId, iotHubHttpApiExHandle, requestHttpHeaders, responseToIoTHub) != 0)
+                                                    {
+                                                        LogError("IoTHubClient_LL_UploadToBlob_step3 failed");
+                                                        result = IOTHUB_CLIENT_ERROR;
+                                                    }
+                                                    else
+                                                    {
+                                                        /*Codes_SRS_IOTHUBCLIENT_LL_99_009: [ If step 2 is aborted by the client and if step 3 succeeds, then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall return `IOTHUB_CLIENT_OK`. ] */
+                                                        result = IOTHUB_CLIENT_OK;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    LogError("Unable to BUFFER_build, can't perform IoTHubClient_LL_UploadToBlob_step3");
+                                                    result = IOTHUB_CLIENT_ERROR;
+                                                }
+                                            }
+                                            else if (blobRes != BLOB_OK)
                                             {
                                                 /*Codes_SRS_IOTHUBCLIENT_LL_02_084: [ If Blob_UploadFromSasUri fails then IoTHubClient_LL_UploadMultipleBlocksToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
                                                 LogError("unable to Blob_UploadFromSasUri");
@@ -997,7 +1023,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
 
     /*Codes_SRS_IOTHUBCLIENT_LL_99_003: [ If `IoTHubClient_LL_UploadMultipleBlocksToBlob` return `IOTHUB_CLIENT_OK`, it shall call `getDataCallback` with `result` set to `FILE_UPLOAD_OK`, and `data` and `size` set to NULL. ]*/
     /*Codes_SRS_IOTHUBCLIENT_LL_99_004: [ If `IoTHubClient_LL_UploadMultipleBlocksToBlob` does not return `IOTHUB_CLIENT_OK`, it shall call `getDataCallback` with `result` set to `FILE_UPLOAD_ERROR`, and `data` and `size` set to NULL. ]*/
-    getDataCallback(result == IOTHUB_CLIENT_OK ? FILE_UPLOAD_OK : FILE_UPLOAD_ERROR, NULL, NULL, context);
+    (void)getDataCallback(result == IOTHUB_CLIENT_OK ? FILE_UPLOAD_OK : FILE_UPLOAD_ERROR, NULL, NULL, context);
 
     return result;
 }

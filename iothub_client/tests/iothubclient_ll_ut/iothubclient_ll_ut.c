@@ -461,12 +461,13 @@ static const TRANSPORT_PROVIDER* provideFAKE(void)
 }
 
 #ifndef DONT_USE_UPLOADTOBLOB
-static void my_FileUpload_GetData_Callback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
+static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT my_FileUpload_GetData_Callback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
 {
     (void)data;
     (void)size;
     (void)context;
     (void)result;
+    return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK;
 }
 #endif /* DONT_USE_UPLOADTOBLOB */
 

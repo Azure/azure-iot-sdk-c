@@ -14,7 +14,8 @@ References
     BLOB_ERROR,            \
     BLOB_NOT_IMPLEMENTED,  \
     BLOB_HTTP_ERROR,       \
-    BLOB_INVALID_ARG    
+    BLOB_INVALID_ARG,      \
+    BLOB_ABORTED
 
 DEFINE_ENUM(BLOB_RESULT, BLOB_RESULT_VALUES)
     
@@ -48,7 +49,7 @@ BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* SASURI, IOTHUB_CLIEN
 *                   If result is not FILE_UPLOAD_OK, the download is cancelled and this callback stops being invoked.
 *                   When this callback is called for the last time, no data or size is expected, so data and size are set to NULL
 */
-typedef void(*IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK)(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context);
+typedef IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT_VALUES(*IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK)(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context);
 ```
 `Blob_UploadMultipleBlocksFromSasUri` uploads as a Blob the blocks of data repetitively provided by `getDataCallback` by using HTTPAPI_EX module.
 
@@ -82,13 +83,14 @@ Blocks are uploaded serially by "Put Block" REST API. After all the blocks have 
 1. **SRS_BLOB_99_001: [** If the size of the block returned by `getDataCallback` is bigger than 4MB, then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_INVALID_ARG`. **]**
 2. **SRS_BLOB_99_002: [** If the size of the block returned by `getDataCallback` is 0 or if the data is NULL, then `Blob_UploadMultipleBlocksFromSasUri` shall exit the loop. **]**
 3. **SRS_BLOB_99_003: [** If `getDataCallback` returns more than 50000 blocks, then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_INVALID_ARG`. **]**
-4. **SRS_BLOB_02_020: [** `Blob_UploadMultipleBlocksFromSasUri` shall construct a BASE64 encoded string from the block ID (000000... 049999) **]**
-5. **SRS_BLOB_02_022: [** `Blob_UploadMultipleBlocksFromSasUri` shall construct a new relativePath from following string: base relativePath + "&comp=block&blockid=BASE64 encoded string of blockId" **]**
-6. **SRS_BLOB_02_023: [** `Blob_UploadMultipleBlocksFromSasUri` shall create a BUFFER_HANDLE from `source` and `size` parameters. **]**
-7. **SRS_BLOB_02_024: [** `Blob_UploadMultipleBlocksFromSasUri` shall call `HTTPAPIEX_ExecuteRequest` with a PUT operation, passing `httpStatus` and `httpResponse`. **]**
-8. **SRS_BLOB_02_025: [** If `HTTPAPIEX_ExecuteRequest` fails then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_HTTP_ERROR`. **]**
-9. **SRS_BLOB_02_026: [** Otherwise, if HTTP response code is >=300 then `Blob_UploadMultipleBlocksFromSasUri` shall succeed and return `BLOB_OK`. **]**
-10. **SRS_BLOB_02_027: [** Otherwise `Blob_UploadMultipleBlocksFromSasUri` shall continue execution. **]**
+4. **SRS_BLOB_99_004: [** If `getDataCallback` returns `IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT_ABORT`, then `Blob_UploadMultipleBlocksFromSasUri` shall exit the loop and return `BLOB_ABORTED`. **]**
+5. **SRS_BLOB_02_020: [** `Blob_UploadMultipleBlocksFromSasUri` shall construct a BASE64 encoded string from the block ID (000000... 049999) **]**
+6. **SRS_BLOB_02_022: [** `Blob_UploadMultipleBlocksFromSasUri` shall construct a new relativePath from following string: base relativePath + "&comp=block&blockid=BASE64 encoded string of blockId" **]**
+7. **SRS_BLOB_02_023: [** `Blob_UploadMultipleBlocksFromSasUri` shall create a BUFFER_HANDLE from `source` and `size` parameters. **]**
+8. **SRS_BLOB_02_024: [** `Blob_UploadMultipleBlocksFromSasUri` shall call `HTTPAPIEX_ExecuteRequest` with a PUT operation, passing `httpStatus` and `httpResponse`. **]**
+9. **SRS_BLOB_02_025: [** If `HTTPAPIEX_ExecuteRequest` fails then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_HTTP_ERROR`. **]**
+10. **SRS_BLOB_02_026: [** Otherwise, if HTTP response code is >=300 then `Blob_UploadMultipleBlocksFromSasUri` shall succeed and return `BLOB_OK`. **]**
+11. **SRS_BLOB_02_027: [** Otherwise `Blob_UploadMultipleBlocksFromSasUri` shall continue execution. **]**
 
 **SRS_BLOB_02_028: [** `Blob_UploadMultipleBlocksFromSasUri` shall construct an XML string with the following content: **]**
 ```xml
