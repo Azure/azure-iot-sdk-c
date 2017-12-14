@@ -26,6 +26,21 @@
     fun:vfprintf
 }
 {
+    DRD Conflicting store by thread in sprintf
+    drd:ConflictingAccess
+    ...
+    fun:sprintf
+    fun:EventData_Create
+}
+{
+   DRD Conflicting store by thread in printf2
+   drd:ConflictingAccess
+   fun:__GI_mempcpy
+   fun:_IO_default_xsputn
+   fun:_IO_file_xsputn@@GLIBC_2.2.5
+   fun:vfprintf
+}
+{
     DRD Conflicting store by thread in puts
     drd:ConflictingAccess
     fun:__GI_mempcpy
