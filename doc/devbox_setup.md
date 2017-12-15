@@ -88,7 +88,13 @@ ctest -C "debug" -V
 
 ### Build a sample that uses WebSocket
 
-**iothub_client_sample_amqp_websockets** (AMQP over WebSocket) depends on [OpenSSL] libraries **ssleay32** and **libeay32**. You need to build and install these libraries and DLLs before you build the sample that uses them.
+By default the C-SDK will have web sockets enabled for AMQP and MQTT.  The samples that show examples for this are **iothub_client_sample_amqp_websockets** and **iothub_client_sample_mqtt_websockets**.
+
+### Using OpenSSL in the SDK
+
+For TLS operations the C-SDK will use Schannel on the Windows Platforms.  To enable OpenSSL to be used on Windows, you will need to execute the following instructions:
+
+[OpenSSL] binaries that the C-SDK depends on are **ssleay32** and **libeay32**. You need to build and install these libraries and DLLs before you build the sample that uses them.
 
 Below are steps to build and install OpenSSL libraries and corresponding DLLs. These steps were tested with **openssl-1.0.2k**.
 
@@ -104,7 +110,7 @@ After completing the above steps make sure OpenSSL libraries and DLLs are in you
 
 Follow these steps to build the sample:
 
-- Open "Developer Command Prompt for VS2015" and change to the **build_all\\windows** directory
+- Open a Developer Command Prompt and change to the **build_all\\windows** directory
 
 - Set OpenSSLDir and OPENSSL_ROOT_DIR **environment variables** to the OpenSSL install location. For example, if your OpenSSL install location is **C:\\usr\\local\\ssl**, you will set following:
 
@@ -113,17 +119,17 @@ Follow these steps to build the sample:
    set OPENSSL_ROOT_DIR=C:\usr\local\ssl
    ```
 
-- Build the SDK, including the WebSocket sample:
+- Build the SDK to include OpenSSL:
 
    ```Shell
    cd azure-iot-sdk-c
    mkdir cmake
    cd cmake
-   cmake -G "Visual Studio 14 2015" ..
+   cmake -Duse_openssl:BOOL=ON ..
    cmake --build . -- /m /p:Configuration=Release
    ```
 
-This will build the C SDK libraries along with **iothub_client_sample_amqp_websockets** sample.
+This will build the C SDK libraries and use openssl as your TLS library.
 
 <a name="linux"></a>
 
