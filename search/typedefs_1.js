@@ -5,6 +5,7 @@ var searchData=
   ['iothub_5fclient_5fconnection_5fstatus',['IOTHUB_CLIENT_CONNECTION_STATUS',['../iothub__client__ll_8h.html#a96be12e46b5c5521ae4c0631b7964708',1,'iothub_client_ll.h']]],
   ['iothub_5fclient_5fconnection_5fstatus_5freason',['IOTHUB_CLIENT_CONNECTION_STATUS_REASON',['../iothub__client__ll_8h.html#a0b9c3b6812e2a20c34c9af7b6487691c',1,'iothub_client_ll.h']]],
   ['iothub_5fclient_5fdevice_5fconfig',['IOTHUB_CLIENT_DEVICE_CONFIG',['../iothub__client__ll_8h.html#ab9b304ecf293102cb855bee1b8d2cdf7',1,'iothub_client_ll.h']]],
+  ['iothub_5fclient_5ffile_5fupload_5fget_5fdata_5fcallback',['IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK',['../iothub__client__ll_8h.html#a188fa4251310dad00defabb8f77a292f',1,'iothub_client_ll.h']]],
   ['iothub_5fclient_5fiothub_5fmethod_5fstatus',['IOTHUB_CLIENT_IOTHUB_METHOD_STATUS',['../iothub__client__ll_8h.html#a3dab5744b24f585947d35efd26da1dbe',1,'iothub_client_ll.h']]],
   ['iothub_5fclient_5fresult',['IOTHUB_CLIENT_RESULT',['../iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd',1,'iothub_client_ll.h']]],
   ['iothub_5fclient_5fretry_5fpolicy',['IOTHUB_CLIENT_RETRY_POLICY',['../iothub__client__ll_8h.html#a2d8ad59aa248034ed2e231835f703a01',1,'iothub_client_ll.h']]],
