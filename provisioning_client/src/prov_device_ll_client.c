@@ -684,19 +684,25 @@ PROV_DEVICE_RESULT Prov_Device_LL_Register_Device(PROV_DEVICE_LL_HANDLE handle, 
         }
         if (result == PROV_DEVICE_RESULT_OK)
         {
+            /* Codes_SRS_PROV_CLIENT_07_008: [ Prov_Device_LL_Register_Device shall set the state to send the registration request to on subsequent DoWork calls. ] */
+            handle->register_callback = register_callback;
+            handle->user_context = user_context;
+
+            handle->register_status_cb = reg_status_cb;
+            handle->status_user_ctx = status_ctx;
+
             if (handle->prov_transport_protocol->prov_transport_open(handle->transport_handle, ek_value, srk_value, on_transport_registration_data, handle, on_transport_status, handle) != 0)
             {
                 LogError("Failure establishing  connection");
+                handle->register_callback = NULL;
+                handle->user_context = NULL;
+
+                handle->register_status_cb = NULL;
+                handle->status_user_ctx = NULL;
                 result = PROV_DEVICE_RESULT_ERROR;
             }
             else
             {
-                /* Codes_SRS_PROV_CLIENT_07_008: [ Prov_Device_LL_Register_Device shall set the state to send the registration request to on subsequent DoWork calls. ] */
-                handle->register_callback = register_callback;
-                handle->user_context = user_context;
-
-                handle->register_status_cb = reg_status_cb;
-                handle->status_user_ctx = status_ctx;
                 handle->prov_state = CLIENT_STATE_REGISTER_SEND;
                 /* Codes_SRS_PROV_CLIENT_07_009: [ Upon success Prov_Device_LL_Register_Device shall return PROV_CLIENT_OK. ] */
                 result = PROV_DEVICE_RESULT_OK;

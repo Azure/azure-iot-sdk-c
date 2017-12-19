@@ -700,6 +700,11 @@ int prov_transport_http_open(PROV_DEVICE_TRANSPORT_HANDLE handle, BUFFER_HANDLE 
     }
     else
     {
+        http_info->register_data_cb = data_callback;
+        http_info->user_ctx = user_ctx;
+        http_info->status_cb = status_cb;
+        http_info->status_ctx = status_ctx;
+
         if (create_connection(http_info) != 0)
         {
             /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_013: [ If an error is encountered prov_transport_http_open shall return a non-zero value. ] */
@@ -714,14 +719,14 @@ int prov_transport_http_open(PROV_DEVICE_TRANSPORT_HANDLE handle, BUFFER_HANDLE 
                 BUFFER_delete(http_info->srk);
                 http_info->srk = NULL;
             }
+            http_info->register_data_cb = NULL;
+            http_info->user_ctx = NULL;
+            http_info->status_cb = NULL;
+            http_info->status_ctx = NULL;
             result = __FAILURE__;
         }
         else
         {
-            http_info->register_data_cb = data_callback;
-            http_info->user_ctx = user_ctx;
-            http_info->status_cb = status_cb;
-            http_info->status_ctx = status_ctx;
             result = 0;
         }
     }
