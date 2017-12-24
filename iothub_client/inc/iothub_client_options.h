@@ -42,7 +42,15 @@ extern "C"
     *        The default value for this option is 240 seconds, and the minimum allowed is usually 5 seconds.
     *        To virtually disable the keep-alives from the service (and consequently the keep-alive timeout control on the client-side), set this option to a high value (e.g., UINT_MAX).
     */
-    static const char* OPTION_C2D_KEEP_ALIVE_FREQ_SECS = "c2d_keep_alive_freq_secs";
+    static const char* OPTION_SERVICE_SIDE_KEEP_ALIVE_FREQ_SECS = "svc2cl_keep_alive_timeout_secs";
+
+	/*
+	* @brief Ratio to be used for client side pings in AMQP protocol.
+	*        The client must use this ratio to send keep-alives before service side remote idle timeout is reached, otherwise the service will disconnect the client.
+	*        The default value for this option is 1/2 of the remote idle value sent by the service. 
+	*        For AMQP remote idle set to 4 minutes, default client ping will be 2 minutes. For AMQP remote idle set to 25 minutes configured via per Hub basis, the default ping will be 12.5 minutes.
+	*/
+	static const char* OPTION_REMOTE_IDLE_TIMEOUT_RATIO = "cl2svc_keep_alive_send_ratio"; 
 
     //diagnostic sampling percentage value, [0-100]
     static const char* OPTION_DIAGNOSTIC_SAMPLING_PERCENTAGE = "diag_sampling_percentage";
