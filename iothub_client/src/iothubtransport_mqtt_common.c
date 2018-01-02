@@ -39,6 +39,7 @@
 #define SAS_REFRESH_MULTIPLIER              .8
 #define EPOCH_TIME_T_VALUE                  0
 #define DEFAULT_MQTT_KEEPALIVE              4*60 // 4 min
+#define DEFAULT_CONNACK_TIMEOUT             30 // 30 seconds
 #define BUILD_CONFIG_USERNAME               24
 #define SAS_TOKEN_DEFAULT_LEN               10
 #define RESEND_TIMEOUT_VALUE_MIN            1*60
@@ -191,6 +192,7 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     bool device_twin_get_sent;
     bool isRecoverableError;
     uint16_t keepAliveValue;
+    uint16_t connect_timeout_in_sec;
     tickcounter_ms_t mqtt_connect_time;
     size_t connectFailCount;
     tickcounter_ms_t connectTick;
@@ -1987,7 +1989,7 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 LogError("failed verifying MQTT_CLIENT_STATUS_CONNECTING timeout");
                 result = __FAILURE__;
             }
-            else if ((current_time - transport_data->mqtt_connect_time) / 1000 > transport_data->keepAliveValue) 
+            else if ((current_time - transport_data->mqtt_connect_time) / 1000 > transport_data->connect_timeout_in_sec)
             {
                 LogError("mqtt_client timed out waiting for CONNACK");
                 DisconnectFromClient(transport_data);
@@ -2179,6 +2181,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                         state->waitingToSend = waitingToSend;
                         state->currPacketState = CONNECT_TYPE;
                         state->keepAliveValue = DEFAULT_MQTT_KEEPALIVE;
+                        state->connect_timeout_in_sec = DEFAULT_CONNACK_TIMEOUT;
                         state->connectFailCount = 0;
                         state->connectTick = 0;
                         state->topic_MqttMessage = NULL;
@@ -2864,6 +2867,15 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SetOption(TRANSPORT_LL_HANDLE h
         {
             size_t* sas_lifetime = (size_t*)value;
             transport_data->option_sas_token_lifetime_secs = *sas_lifetime;
+            result = IOTHUB_CLIENT_OK;
+        }
+        else if (strcmp(OPTION_CONNECTION_TIMEOUT, option) == 0)
+        {
+            int* connection_time = (int*)value;
+            if (*connection_time != transport_data->connect_timeout_in_sec)
+            {
+                transport_data->connect_timeout_in_sec = (uint16_t)(*connection_time);
+            }
             result = IOTHUB_CLIENT_OK;
         }
         else if (strcmp(OPTION_KEEP_ALIVE, option) == 0)

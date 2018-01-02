@@ -108,6 +108,8 @@ static const char DEVICEKEY_TOKEN[] = "SharedAccessKey";
 static const char DEVICESAS_TOKEN[] = "SharedAccessSignature";
 static const char PROTOCOL_GATEWAY_HOST_TOKEN[] = "GatewayHostName";
 static const char MODULE_ID_TOKEN[] = "ModuleId";
+static const char PROVISIONING_TOKEN[] = "UseProvisioning";
+static const char PROVISIONING_ACCEPTABLE_VALUE[] = "true";
 
 static void setTransportProtocol(IOTHUB_CLIENT_LL_HANDLE_DATA* handleData, TRANSPORT_PROVIDER* protocol)
 {
@@ -576,7 +578,6 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromDeviceAuth(const char* iothub_
             memset(config, 0, sizeof(IOTHUB_CLIENT_CONFIG) );
             config->protocol = protocol;
             config->deviceId = device_id;
-            //config->useDeviceAuthKey = 1;
             
             // Find the iothub suffix
             initial = iterator = iothub_uri;
@@ -605,6 +606,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromDeviceAuth(const char* iothub_
                         {
                             LogError("Failed to allocate iothub suffix");
                             free(iothub_name);
+                            iothub_name = NULL;
                             result = NULL;
                         }
                     }
@@ -732,6 +734,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
             else
             {
                 int isx509found = 0;
+                bool use_provisioning = false;
                 while ((STRING_TOKENIZER_get_next_token(tokenizer1, tokenString, "=") == 0))
                 {
                     if (STRING_TOKENIZER_get_next_token(tokenizer1, valueString, ";") != 0)
@@ -831,6 +834,19 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
                                     isx509found = 1;
                                 }
                             }
+                            else if (strcmp(s_token, PROVISIONING_TOKEN) == 0)
+                            {
+                                if (strcmp(STRING_c_str(valueString), PROVISIONING_ACCEPTABLE_VALUE) != 0)
+                                {
+                                    LogError("provisioning option has wrong value, the only acceptable one is \"true\"");
+                                    break;
+                                }
+                                else
+                                {
+                                    use_provisioning = 1;
+                                }
+                            }
+
                             /* Codes_SRS_IOTHUBCLIENT_LL_04_001: [IoTHubClient_LL_CreateFromConnectionString shall verify the existence of key/value pair GatewayHostName. If it does exist it shall pass the value to IoTHubClient_LL_Create API.] */
                             else if (strcmp(s_token, PROTOCOL_GATEWAY_HOST_TOKEN) == 0)
                             {
@@ -875,17 +891,17 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
                     result = NULL;
                 }
                 else if (!(
-                    ((!isx509found) && (config->deviceSasToken == NULL) ^ (config->deviceKey == NULL)) ||
-                    ((isx509found) && (config->deviceSasToken == NULL) && (config->deviceKey == NULL))
+                    ((!use_provisioning && !isx509found) && (config->deviceSasToken == NULL) ^ (config->deviceKey == NULL)) ||
+                    ((use_provisioning || isx509found) && (config->deviceSasToken == NULL) && (config->deviceKey == NULL))
                     ))
                 {
-                    LogError("invalid combination of x509, deviceSasToken and deviceKey");
+                    LogError("invalid combination of x509, provisioning, deviceSasToken and deviceKey");
                     result = NULL;
                 }
                 else
                 {
                     /* Codes_SRS_IOTHUBCLIENT_LL_12_011: [IoTHubClient_LL_CreateFromConnectionString shall call into the IoTHubClient_LL_Create API with the current structure and returns with the return value of it] */
-                    result = initialize_iothub_client(config, NULL, false, STRING_c_str(moduleId));
+                    result = initialize_iothub_client(config, NULL, use_provisioning, STRING_c_str(moduleId));
                     if (result == NULL)
                     {
                         LogError("IoTHubClient_LL_Create failed");

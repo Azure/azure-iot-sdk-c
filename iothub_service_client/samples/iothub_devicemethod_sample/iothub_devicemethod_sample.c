@@ -31,7 +31,7 @@ void iothub_devicemethod_sample_run(void)
     {
         printf("Failed to initialize the platform.\r\n");
     }
-	else 
+    else 
     {
         (void)printf("Calling IoTHubServiceClientAuth_CreateFromConnectionString with connectionString\n");
         IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(connectionString);

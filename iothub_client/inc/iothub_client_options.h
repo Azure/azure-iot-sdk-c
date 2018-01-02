@@ -20,6 +20,7 @@ extern "C"
     static const char* OPTION_X509_CERT = "x509certificate";
     static const char* OPTION_X509_PRIVATE_KEY = "x509privatekey";
     static const char* OPTION_KEEP_ALIVE = "keepalive";
+    static const char* OPTION_CONNECTION_TIMEOUT = "connect_timeout";
 
     static const char* OPTION_PROXY_HOST = "proxy_address";
     static const char* OPTION_PROXY_USERNAME = "proxy_username";

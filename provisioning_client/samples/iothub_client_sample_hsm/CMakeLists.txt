@@ -26,6 +26,17 @@ include_directories(${SHARED_UTIL_INC_FOLDER})
 
 add_executable(iothub_client_sample_hsm ${iothub_client_sample_hsm_c_files} ${iothub_client_sample_hsm_h_files})
 
+if(${use_openssl})
+    add_definitions(-DUSE_OPENSSL)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_OPENSSL")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_OPENSSL")
+    if (WIN32)
+        target_link_libraries(iothub_client_sample_hsm $ENV{OpenSSLDir}/lib/ssleay32.lib $ENV{OpenSSLDir}/lib/libeay32.lib)
+        file(COPY $ENV{OpenSSLDir}/bin/libeay32.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
+        file(COPY $ENV{OpenSSLDir}/bin/ssleay32.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
+    endif()
+endif()
+
 target_link_libraries(iothub_client_sample_hsm
     iothub_client 
     iothub_client_mqtt_transport

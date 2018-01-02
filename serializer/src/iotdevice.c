@@ -434,7 +434,7 @@ DEVICE_RESULT Device_IngestDesiredProperties(void* startAddress, DEVICE_HANDLE d
     {
         /*Codes_SRS_DEVICE_02_034: [ Device_IngestDesiredProperties shall call CommandDecoder_IngestDesiredProperties. ]*/
         DEVICE_HANDLE_DATA* device = (DEVICE_HANDLE_DATA*)deviceHandle;
-        if (CommandDecoder_IngestDesiredProperties(startAddress, device->commandDecoderHandle, jsonPayload, parseDesiredNode) != COMMANDDECODER_OK)
+        if (CommandDecoder_IngestDesiredProperties(startAddress, device->commandDecoderHandle, jsonPayload, parseDesiredNode) != EXECUTE_COMMAND_SUCCESS)
         {
             /*Codes_SRS_DEVICE_02_035: [ If any failure happens then Device_IngestDesiredProperties shall fail and return DEVICE_ERROR. ]*/
             LogError("failure in CommandDecoder_IngestDesiredProperties");
