@@ -6,7 +6,7 @@
 compileAsC99()
 
 set(iothub_client_sample_x509_c_files
-iothub_client_sample_x509.c
+    iothub_client_sample_x509.c
 )
 
 IF(WIN32)
@@ -18,31 +18,27 @@ ENDIF(WIN32)
 #Conditionally use the SDK trusted certs in the samples
 if(${set_trusted_cert_in_samples})
     add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
-	include_directories(${PROJECT_SOURCE_DIR}/certs)
-	set(samples_cert_file ${PROJECT_SOURCE_DIR}/certs/certs.c)
+    include_directories(${PROJECT_SOURCE_DIR}/certs)
+    set(samples_cert_file ${PROJECT_SOURCE_DIR}/certs/certs.c)
 endif()
 
 include_directories(.)
 
 add_executable(iothub_client_sample_x509 ${iothub_client_sample_x509_c_files} ${samples_cert_file})
 
-target_link_libraries(iothub_client_sample_x509 
-#iothubclient is here only because locking... in gballoc no less.
-    iothub_client
-)
+target_link_libraries(iothub_client_sample_x509 iothub_client)
+linkSharedUtil(iothub_client_sample_x509)
 
 if(${use_http})
     target_link_libraries(iothub_client_sample_x509 
         iothub_client_http_transport
     )
-    linkSharedUtil(iothub_client_sample_x509)
     linkHttp(iothub_client_sample_x509)
     add_definitions(-DUSE_HTTP)
 endif()
 
 if(${use_amqp})
     target_link_libraries(iothub_client_sample_x509 
-    #iothubclient is here only because locking... in gballoc no less.
         iothub_client_amqp_transport
     )
     linkUAMQP(iothub_client_sample_x509)
