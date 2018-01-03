@@ -15,10 +15,10 @@
 #ifdef USE_AMQP
 #include "iothubtransportamqp.h"
 #endif
-
-#ifdef USE_MQTT
-#include "iothubtransportmqtt.h"
-#endif
+//
+//#ifdef USE_MQTT
+//#include "iothubtransportmqtt.h"
+//#endif
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
 #include "certs.h"
@@ -30,7 +30,7 @@ DEFINE_ENUM_STRINGS(DEVICE_TWIN_UPDATE_STATE, DEVICE_TWIN_UPDATE_STATE_VALUES);
 /*String containing Hostname, Device Id & Device Key in the format:                         */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessSignature=<device_sas_token>"    */
-static const char* connectionString = "[device connection string]";
+static const char* connectionString = "";
 
 static char msgText[1024];
 static char propText[1024];
@@ -49,6 +49,14 @@ static void reportedStateCallback(int status_code, void* userContextCallback)
 {
     (void)userContextCallback;
     printf("Device Twin reported properties update completed with result: %d\r\n", status_code);
+
+    g_continueRunning = false;
+}
+
+static void reportedStateWithVersionCallback(int status_code, const char* up_to_date_version, void* userContextCallback)
+{
+    (void)userContextCallback;
+    printf("Device Twin reported properties update completed (result: %d; next version: %s)\r\n", status_code, up_to_date_version);
 
     g_continueRunning = false;
 }
@@ -94,7 +102,9 @@ void iothub_client_sample_device_twin_run(void)
             // Check the return of all API calls when developing your solution. Return checks ommited for sample simplification.
 
             (void)IoTHubClient_LL_SetDeviceTwinCallback(iotHubClientHandle, deviceTwinCallback, iotHubClientHandle);
-            (void)IoTHubClient_LL_SendReportedState(iotHubClientHandle, (const unsigned char*)reportedState, reportedStateSize, reportedStateCallback, iotHubClientHandle);
+            //(void)IoTHubClient_LL_SendReportedState(iotHubClientHandle, (const unsigned char*)reportedState, reportedStateSize, reportedStateCallback, iotHubClientHandle);
+            (void)IoTHubClient_LL_SendReportedStateWithVersion(iotHubClientHandle, (const unsigned char*)reportedState, reportedStateSize, NULL, reportedStateWithVersionCallback, iotHubClientHandle);
+
 
             do
             {

@@ -61,9 +61,9 @@ static IOTHUB_PROCESS_ITEM_RESULT IoTHubTransportAMQP_ProcessItem(TRANSPORT_LL_H
     return IoTHubTransport_AMQP_Common_ProcessItem(handle, item_type, iothub_item);
 }
 
-static void IoTHubTransportAMQP_GetDeviceTwin(TRANSPORT_LL_HANDLE handle)
+static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_GetDeviceTwin(IOTHUB_DEVICE_HANDLE handle, IOTHUB_TRANSPORT_GET_DEVICE_TWIN_CALLBACK completionCallback, void* callbackContext)
 {
-    return IoTHubTransport_AMQP_Common_GetDeviceTwin();
+    return IoTHubTransport_AMQP_Common_GetDeviceTwin(handle, completionCallback, callbackContext);
 }
 
 static void IoTHubTransportAMQP_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)

@@ -1674,6 +1674,25 @@ void IoTHubTransport_AMQP_Common_Unsubscribe(IOTHUB_DEVICE_HANDLE handle)
     }
 }
 
+IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_GetDeviceTwin(IOTHUB_DEVICE_HANDLE handle, IOTHUB_TRANSPORT_GET_DEVICE_TWIN_CALLBACK completionCallback, void* callbackContext)
+{
+    IOTHUB_CLIENT_RESULT result;
+
+    if (handle == NULL || completionCallback == NULL)
+    {
+        LogError("Invalid argument (handle=%p, completionCallback=%p)", handle, completionCallback);
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    else
+    {
+        // TODO: continue this.
+        (void)callbackContext;
+        result = IOTHUB_CLIENT_OK;
+    }
+
+    return result;
+}
+
 int IoTHubTransport_AMQP_Common_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle)
 {
     int result;
