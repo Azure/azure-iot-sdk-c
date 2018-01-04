@@ -431,7 +431,7 @@ static int retrieve_device_method_rid_info(const char* resp_topic, STRING_HANDLE
     return result;
 }
 
-static int parse_device_twin_topic_info(const char* resp_topic, bool* patch_msg, size_t* request_id, int* status_code)
+static int parse_device_twin_topic_info(const char* resp_topic, bool* patch_msg, size_t* request_id, int* status_code, char** version)
 {
     int result;
     STRING_TOKENIZER_HANDLE token_handle = STRING_TOKENIZER_create_from_char(resp_topic);
@@ -441,6 +441,7 @@ static int parse_device_twin_topic_info(const char* resp_topic, bool* patch_msg,
         result = __FAILURE__;
         *status_code = 0;
         *request_id = 0;
+        *version = NULL;
         *patch_msg = false;
     }
     else
@@ -452,6 +453,7 @@ static int parse_device_twin_topic_info(const char* resp_topic, bool* patch_msg,
             result = __FAILURE__;
             *status_code = 0;
             *request_id = 0;
+            *version = NULL;
             *patch_msg = false;
         }
         else
@@ -467,6 +469,11 @@ static int parse_device_twin_topic_info(const char* resp_topic, bool* patch_msg,
                         *patch_msg = true;
                         *status_code = 0;
                         *request_id = 0;
+                        if (*version == NULL)
+                        {
+                            free(version);
+                            *version = NULL;
+                        }
                         result = 0;
                         break;
                     }
@@ -1155,7 +1162,7 @@ static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE msgHandle, void* call
                 int status_code;
                 char* version = NULL; // TODO: add version to parse_device_twin_topic_info
                 bool notification_msg;
-                if (parse_device_twin_topic_info(topic_resp, &notification_msg, &request_id, &status_code) != 0)
+                if (parse_device_twin_topic_info(topic_resp, &notification_msg, &request_id, &status_code, &version) != 0)
                 {
                     LogError("Failure: parsing device topic info");
                 }

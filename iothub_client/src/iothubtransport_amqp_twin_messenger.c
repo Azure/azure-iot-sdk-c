@@ -241,7 +241,7 @@ static int get_message_correlation_id(MESSAGE_HANDLE message, char** correlation
 	return result;
 }
 
-static int add_map_item(AMQP_VALUE map, const char* name, const char* value)
+static int add_map_item(AMQP_VALUE map, const char* name, const void* value, AMQP_TYPE value_type)
 {
 	int result;
 	AMQP_VALUE amqp_value_name;
@@ -253,19 +253,46 @@ static int add_map_item(AMQP_VALUE map, const char* name, const char* value)
 	}
 	else
 	{
-		AMQP_VALUE amqp_value_value = NULL;
-		
-		if (value == NULL && (amqp_value_value = amqpvalue_create_null()) == NULL)
-		{
-			LogError("Failed creating AMQP_VALUE for NULL value");
-			result = __FAILURE__;
-		}
-		else if (value != NULL && (amqp_value_value = amqpvalue_create_string(value)) == NULL)
-		{
-			LogError("Failed creating AMQP_VALUE for value");
-			result = __FAILURE__;
-		}
-		else
+		AMQP_VALUE amqp_value_value;
+
+        if (value_type == AMQP_TYPE_NULL || value == NULL)
+        {
+            if ((amqp_value_value = amqpvalue_create_null()) == NULL)
+            {
+                LogError("Failed creating AMQP_VALUE for NULL value");
+                result = __FAILURE__;
+            }
+        }
+        else if (value_type == AMQP_TYPE_STRING)
+        {
+            if ((amqp_value_value = amqpvalue_create_string((const char*)value)) == NULL)
+            {
+                LogError("Failed creating AMQP STRING value");
+                result = __FAILURE__;
+            }
+        }
+        else if (value_type == AMQP_TYPE_LONG)
+        {
+            int64_t* long_value = (int64_t*)value;
+
+            if ((amqp_value_value = amqpvalue_create_long(*long_value)) == NULL)
+            {
+                LogError("Failed creating AMQP LONG value");
+                result = __FAILURE__;
+            }
+        }
+        else
+        {
+            LogError("Unrecognized AMQP value type");
+            amqp_value_value = NULL;
+            result = __FAILURE__;
+        }
+
+        if (amqp_value_value == NULL)
+        {
+            result = __FAILURE__;
+        }
+        else
 		{
 			if (amqpvalue_set_map_value(map, amqp_value_name, amqp_value_value) != 0)
 			{
@@ -712,6 +739,16 @@ static const char* get_twin_operation_name(TWIN_OPERATION_TYPE op_type)
 	return result;
 }
 
+static int64_t* parse_version(int64_t* dst, char* src)
+{
+    if (sscanf(src, "%llu", dst) != 1)
+    {
+        LogError("Failed parsing long value %s", src);
+    }
+
+    return dst;
+}
+
 static MESSAGE_HANDLE create_amqp_message_for_twin_operation(TWIN_OPERATION_TYPE op_type, char* correlation_id, CONSTBUFFER_HANDLE data, char* version)
 {
 	MESSAGE_HANDLE result;
@@ -740,8 +777,10 @@ static MESSAGE_HANDLE create_amqp_message_for_twin_operation(TWIN_OPERATION_TYPE
 		}
 		else
 		{
+            int64_t version_long;
+
 			// Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_065: [`operation=<op_type>` (GET/PATCH/PUT/DELETE) must be added to the `amqp_message` annotations]
-			if (add_map_item(msg_annotations_map, TWIN_MESSAGE_PROPERTY_OPERATION, twin_op_name) != RESULT_OK)
+			if (add_map_item(msg_annotations_map, TWIN_MESSAGE_PROPERTY_OPERATION, twin_op_name, AMQP_TYPE_STRING) != RESULT_OK)
 			{
 				LogError("Failed adding operation to AMQP message annotations (%s)", twin_op_name);
 				// Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_072: [If any errors occur, message_create_for_twin_operation shall release all memory it has allocated]  
@@ -750,15 +789,16 @@ static MESSAGE_HANDLE create_amqp_message_for_twin_operation(TWIN_OPERATION_TYPE
 			}
 			// Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_066: [If `op_type` is PATCH, `resource=/properties/reported` must be added to the `amqp_message` annotations] 
 			else if ((op_type == TWIN_OPERATION_TYPE_PATCH) &&
-				add_map_item(msg_annotations_map, TWIN_MESSAGE_PROPERTY_RESOURCE, TWIN_RESOURCE_REPORTED) != RESULT_OK)
+				add_map_item(msg_annotations_map, TWIN_MESSAGE_PROPERTY_RESOURCE, TWIN_RESOURCE_REPORTED, AMQP_TYPE_STRING) != RESULT_OK)
 			{
 				LogError("Failed adding resource to AMQP message annotations (%s)", twin_op_name);
 				// Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_072: [If any errors occur, message_create_for_twin_operation shall release all memory it has allocated]  
 				message_destroy(result);
 				result = NULL;
 			}
-            else if ((op_type == TWIN_OPERATION_TYPE_PATCH) &&
-                add_map_item(msg_annotations_map, TWIN_MESSAGE_PROPERTY_VERSION, version != NULL ? version : TWIN_VERSION_UNDEFINED) != RESULT_OK)
+            else if ((op_type == TWIN_OPERATION_TYPE_PATCH) && version != NULL &&
+                (parse_version(&version_long, version) != 0 || 
+                    add_map_item(msg_annotations_map, TWIN_MESSAGE_PROPERTY_VERSION, &version_long, AMQP_TYPE_LONG) != RESULT_OK))
             {
                 LogError("Failed adding version to AMQP message annotations (%s)", twin_op_name);
                 // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_072: [If any errors occur, message_create_for_twin_operation shall release all memory it has allocated]  
@@ -767,7 +807,7 @@ static MESSAGE_HANDLE create_amqp_message_for_twin_operation(TWIN_OPERATION_TYPE
             }
 			// Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_067: [If `op_type` is PUT or DELETE, `resource=/notifications/twin/properties/desired` must be added to the `amqp_message` annotations] 
 			else if ((op_type == TWIN_OPERATION_TYPE_PUT || op_type == TWIN_OPERATION_TYPE_DELETE) &&
-				add_map_item(msg_annotations_map, TWIN_MESSAGE_PROPERTY_RESOURCE, TWIN_RESOURCE_DESIRED) != RESULT_OK)
+				add_map_item(msg_annotations_map, TWIN_MESSAGE_PROPERTY_RESOURCE, TWIN_RESOURCE_DESIRED, AMQP_TYPE_STRING) != RESULT_OK)
 			{
 				LogError("Failed adding resource to AMQP message annotations (%s)", twin_op_name);
 				// Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_072: [If any errors occur, message_create_for_twin_operation shall release all memory it has allocated]  
@@ -901,12 +941,11 @@ static void on_amqp_send_complete_callback(AMQP_MESSENGER_SEND_RESULT result, AM
 				{
 					TWIN_REPORT_STATE_RESULT callback_result;
 					TWIN_REPORT_STATE_REASON callback_reason;
-                    const char* new_version = NULL; // TODO: extract the version.
 
 					callback_result = get_twin_messenger_result_from(result);
 					callback_reason = get_twin_messenger_reason_from(reason);
 
-					twin_op_ctx->on_report_state_complete_callback(TWIN_REPORT_STATE_RESULT_ERROR, TWIN_REPORT_STATE_REASON_NONE, 0, new_version, (void*)twin_op_ctx->on_report_state_complete_context);
+					twin_op_ctx->on_report_state_complete_callback(TWIN_REPORT_STATE_RESULT_ERROR, TWIN_REPORT_STATE_REASON_NONE, 0, NULL, (void*)twin_op_ctx->on_report_state_complete_context);
 				}
 			}
 			else if (reason != AMQP_MESSENGER_REASON_MESSENGER_DESTROYED)
@@ -1423,7 +1462,18 @@ static AMQP_MESSENGER_DISPOSITION_RESULT on_amqp_message_received_callback(MESSA
 					{	
 						if (twin_op_ctx->type == TWIN_OPERATION_TYPE_PATCH)
 						{
-                            char* new_version = NULL; // TODO: parse uint16 version
+                            char* new_version;
+                            char version_str[21]; // max length of an uint64 (20) plus the null terminator.
+
+                            if (sprintf(version_str, "%llu", version) <= 0)
+                            {
+                                LogError("Failed parsing reported properties new version (%u)", version);
+                                new_version = NULL;
+                            }
+                            else
+                            {
+                                new_version = version_str;
+                            }
 
 							if (!has_status_code)
 							{
