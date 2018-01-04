@@ -253,11 +253,17 @@ extern "C"
     *				- @b messageTimeout - the maximum time in milliseconds until a message
     *                 is timeouted. The time starts at IoTHubClient_SendEventAsync. By default,
     *                 messages do not expire. @p is a pointer to a uint64_t
-    *				- @b c2d_keep_alive_freq_secs - the AMQP C2D keep alive interval in seconds.
+    *				- @b svc2cl_keep_alive_timeout_secs - the AMQP service side keep alive interval in seconds.
     *                 After the connection established the client requests the server to set the 
     *                 keep alive interval for given time.
     *                 If it is not set then the default 240 sec applies. 
     *                 If it is set to zero the server will not send keep alive messages to the client.
+	*			    - @b cl2svc_keep_alive_send_ratio - the AMQP client side keep alive interval in seconds.
+	*                 After the connection established the server requests the client to set the
+	*                 keep alive interval for given time.
+	*                 If it is not set then the default ratio of 1/2 is applied.
+	*                 The ratio has to be greater than 0.0 and equal to or less than 0.9
+
     * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_SetOption, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, const char*, optionName, const void*, value);
