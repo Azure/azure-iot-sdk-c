@@ -66,6 +66,7 @@ typedef struct IOTHUB_EVENT_CALLBACK_TAG
     STRING_HANDLE inputName;
     IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC callbackSync;
     void* userContextCallback;
+    void* userContextCallbackExtended;
 }IOTHUB_EVENT_CALLBACK;
 
 typedef struct IOTHUB_CLIENT_LL_HANDLE_DATA_TAG
@@ -530,6 +531,7 @@ static IOTHUB_DEVICE_TWIN* dev_twin_data_create(IOTHUB_CLIENT_LL_HANDLE_DATA* ha
 static void delete_event(IOTHUB_EVENT_CALLBACK* event_callback)
 {
     STRING_delete(event_callback->inputName);
+    free(event_callback->userContextCallbackExtended);
     free(event_callback);
 }
 
@@ -1681,11 +1683,13 @@ bool IoTHubClient_LL_MessageCallbackFromInput(IOTHUB_CLIENT_LL_HANDLE handle, ME
             }
             else
             {
+                void* userContextCallback = (event_callback->userContextCallbackExtended != NULL) ? event_callback->userContextCallbackExtended : event_callback->userContextCallback;
+                    
                 // Codes_SRS_IOTHUBCLIENT_LL_09_004: [IoTHubClient_LL_GetLastMessageReceiveTime shall return lastMessageReceiveTime in localtime]
                 handleData->lastMessageReceiveTime = get_time(NULL);
                 
                 // Codes_SRS_IOTHUBCLIENT_LL_31_139: [ `IoTHubClient_LL_MessageCallbackFromInput` shall the callback from the given inputName queue if it has been registered.** ]
-                IOTHUBMESSAGE_DISPOSITION_RESULT cb_result = event_callback->callbackSync(messageData->messageHandle, event_callback->userContextCallback);
+                IOTHUBMESSAGE_DISPOSITION_RESULT cb_result = event_callback->callbackSync(messageData->messageHandle, userContextCallback);
 
                 // Codes_SRS_IOTHUBCLIENT_LL_31_140: [ `IoTHubClient_LL_MessageCallbackFromInput` shall send the message disposition as returned by the client to the underlying layer and return `true` if an input queue match is found.** ]
                 if (handleData->IoTHubTransport_SendMessageDisposition(messageData, cb_result) != IOTHUB_CLIENT_OK)
@@ -2291,7 +2295,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendEventToOutputAsync(IOTHUB_CLIENT_LL_HAN
 }
 
 
-static IOTHUB_CLIENT_RESULT create_event_handler_callback(IOTHUB_CLIENT_LL_HANDLE_DATA* handleData, const char* inputName, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC callbackSync, void* userContextCallback, size_t userContextCallbackLength)
+static IOTHUB_CLIENT_RESULT create_event_handler_callback(IOTHUB_CLIENT_LL_HANDLE_DATA* handleData, const char* inputName, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC callbackSync, void* userContextCallback, void* userContextCallbackExtended, size_t userContextCallbackExtendedLength)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
     bool add_to_list = false;
@@ -2338,10 +2342,16 @@ static IOTHUB_CLIENT_RESULT create_event_handler_callback(IOTHUB_CLIENT_LL_HANDL
             {
                 event_callback->callbackSync = callbackSync;
 
-                free(event_callback->userContextCallback);
-                event_callback->userContextCallback = malloc(userContextCallbackLength);
+                free(event_callback->userContextCallbackExtended);
+                event_callback->userContextCallbackExtended = NULL;
 
-                if (event_callback->userContextCallback == NULL)
+                if (userContextCallbackExtended == NULL)
+                {
+                    event_callback->userContextCallback = userContextCallback;
+                }
+
+                if ((userContextCallbackExtended != NULL) && 
+                    (NULL == (event_callback->userContextCallbackExtended = malloc(userContextCallbackExtendedLength))))
                 {
                     LogError("Unable to allocate userContextCallback");
                     delete_event(event_callback);
@@ -2355,7 +2365,10 @@ static IOTHUB_CLIENT_RESULT create_event_handler_callback(IOTHUB_CLIENT_LL_HANDL
                 }
                 else
                 {
-                    memcpy(event_callback->userContextCallback, userContextCallback, userContextCallbackLength);
+                    if (userContextCallbackExtended != NULL)
+                    {
+                        memcpy(event_callback->userContextCallbackExtended, userContextCallbackExtended, userContextCallbackExtendedLength);
+                    }
                     result = IOTHUB_CLIENT_OK;
                 }
             }
@@ -2413,7 +2426,8 @@ static IOTHUB_CLIENT_RESULT remove_event_unsubscribe_if_needed(IOTHUB_CLIENT_LL_
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetInputMessageCallbackExtendedContext(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* inputName, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC eventHandlerCallback, void *userContextCallback, size_t userContextCallbackLength)
+
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetInputMessageCallbackImpl(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* inputName, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC eventHandlerCallback, void *userContextCallback, void *userContextExtendedCallback, size_t userContextCallbackExtendedLength)
 {
     IOTHUB_CLIENT_RESULT result;
 
@@ -2433,7 +2447,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetInputMessageCallbackExtendedContext(IOTH
         else
         {
             bool registered_with_transport_handler = (handleData->event_callbacks != NULL) && (singlylinkedlist_get_head_item(handleData->event_callbacks) != NULL);
-            if ((result = (IOTHUB_CLIENT_RESULT)create_event_handler_callback(handleData, inputName, eventHandlerCallback, userContextCallback, userContextCallbackLength)) != IOTHUB_CLIENT_OK)
+            if ((result = (IOTHUB_CLIENT_RESULT)create_event_handler_callback(handleData, inputName, eventHandlerCallback, userContextCallback, userContextExtendedCallback, userContextCallbackExtendedLength)) != IOTHUB_CLIENT_OK)
             {
                 LogError("create_event_handler_callback call failed, error = %d", result);
             }
@@ -2451,11 +2465,17 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetInputMessageCallbackExtendedContext(IOTH
         }
     }
     return result;
+
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetInputMessageCallbackExtendedContext(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* inputName, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC eventHandlerCallback, void *userContextCallback, size_t userContextCallbackLength)
+{
+    return IoTHubClient_LL_SetInputMessageCallbackImpl(iotHubClientHandle, inputName, eventHandlerCallback, NULL, userContextCallback, userContextCallbackLength);
 }
 
 
 IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetInputMessageCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* inputName, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC eventHandlerCallback, void* userContextCallback)
 {
-    return IoTHubClient_LL_SetInputMessageCallbackExtendedContext(iotHubClientHandle, inputName, eventHandlerCallback, &userContextCallback, sizeof(userContextCallback));
+    return IoTHubClient_LL_SetInputMessageCallbackImpl(iotHubClientHandle, inputName, eventHandlerCallback, userContextCallback, NULL, 0);
 }
 

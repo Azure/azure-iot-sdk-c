@@ -2275,7 +2275,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetInputMessageCallback(IOTHUB_CLIENT_HANDLE i
                 inputMessageCallbackContext.eventHandlerCallback = eventHandlerCallback;
                 inputMessageCallbackContext.userContextCallback = userContextCallback;
                 
-                result = IoTHubClient_LL_SetInputMessageCallbackExtendedContext(iotHubClientInstance->IoTHubClientLLHandle, inputName, iothub_ll_inputmessage_callback, (void*)inputMessageCallbackContext, sizeof(inputMessageCallbackContext));
+                result = IoTHubClient_LL_SetInputMessageCallbackExtendedContext(iotHubClientInstance->IoTHubClientLLHandle, inputName, iothub_ll_inputmessage_callback, (void*)&inputMessageCallbackContext, sizeof(inputMessageCallbackContext));
                 (void)Unlock(iotHubClientInstance->LockHandle);
             }
         }
