@@ -466,6 +466,9 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_LL_SetInputMessageCallback, IOTHUB_CLIENT_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_LL_SetInputMessageCallback, IOTHUB_CLIENT_ERROR);
 
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_LL_SetInputMessageCallbackExtendedContext, IOTHUB_CLIENT_OK);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_LL_SetInputMessageCallbackExtendedContext, IOTHUB_CLIENT_ERROR);
+
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_SetOutputName, IOTHUB_MESSAGE_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_SetOutputName, IOTHUB_MESSAGE_ERROR);
     
@@ -3486,7 +3489,7 @@ static void setup_IoTHubClient_SetInputMessageCallback(bool use_threads)
     }
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
-    STRICT_EXPECTED_CALL(IoTHubClient_LL_SetInputMessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_SetInputMessageCallbackExtendedContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(3)
         .IgnoreArgument(4);

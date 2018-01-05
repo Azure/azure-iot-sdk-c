@@ -2291,7 +2291,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendEventToOutputAsync(IOTHUB_CLIENT_LL_HAN
 }
 
 
-static IOTHUB_CLIENT_RESULT create_event_handler_callback(IOTHUB_CLIENT_LL_HANDLE_DATA* handleData, const char* inputName, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC callbackSync, void* userContextCallback)
+static IOTHUB_CLIENT_RESULT create_event_handler_callback(IOTHUB_CLIENT_LL_HANDLE_DATA* handleData, const char* inputName, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC callbackSync, void* userContextCallback, size_t userContextCallbackLength)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
     bool add_to_list = false;
@@ -2337,15 +2337,25 @@ static IOTHUB_CLIENT_RESULT create_event_handler_callback(IOTHUB_CLIENT_LL_HANDL
             if (event_callback->inputName != NULL)
             {
                 event_callback->callbackSync = callbackSync;
-                event_callback->userContextCallback = userContextCallback;
 
-                if ((add_to_list == true) && (NULL == singlylinkedlist_add(handleData->event_callbacks, event_callback)))
+                free(event_callback->userContextCallback);
+                event_callback->userContextCallback = malloc(userContextCallbackLength);
+
+                if (event_callback->userContextCallback == NULL)
                 {
+                    LogError("Unable to allocate userContextCallback");
+                    delete_event(event_callback);
+                    result = IOTHUB_CLIENT_ERROR;
+                }
+                else if ((add_to_list == true) && (NULL == singlylinkedlist_add(handleData->event_callbacks, event_callback)))
+                {
+                    LogError("Unable to add eventCallback to list");
                     delete_event(event_callback);
                     result = IOTHUB_CLIENT_ERROR;
                 }
                 else
                 {
+                    memcpy(event_callback->userContextCallback, userContextCallback, userContextCallbackLength);
                     result = IOTHUB_CLIENT_OK;
                 }
             }
@@ -2403,10 +2413,9 @@ static IOTHUB_CLIENT_RESULT remove_event_unsubscribe_if_needed(IOTHUB_CLIENT_LL_
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetInputMessageCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* inputName, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC eventHandlerCallback, void* userContextCallback)
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetInputMessageCallbackExtendedContext(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* inputName, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC eventHandlerCallback, void *userContextCallback, size_t userContextCallbackLength)
 {
     IOTHUB_CLIENT_RESULT result;
-    (void)userContextCallback;
 
     if ((iotHubClientHandle == NULL) || (inputName == NULL))
     {
@@ -2424,7 +2433,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetInputMessageCallback(IOTHUB_CLIENT_LL_HA
         else
         {
             bool registered_with_transport_handler = (handleData->event_callbacks != NULL) && (singlylinkedlist_get_head_item(handleData->event_callbacks) != NULL);
-            if ((result = (IOTHUB_CLIENT_RESULT)create_event_handler_callback(handleData, inputName, eventHandlerCallback, userContextCallback)) != IOTHUB_CLIENT_OK)
+            if ((result = (IOTHUB_CLIENT_RESULT)create_event_handler_callback(handleData, inputName, eventHandlerCallback, userContextCallback, userContextCallbackLength)) != IOTHUB_CLIENT_OK)
             {
                 LogError("create_event_handler_callback call failed, error = %d", result);
             }
@@ -2442,5 +2451,11 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetInputMessageCallback(IOTHUB_CLIENT_LL_HA
         }
     }
     return result;
+}
+
+
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetInputMessageCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* inputName, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC eventHandlerCallback, void* userContextCallback)
+{
+    return IoTHubClient_LL_SetInputMessageCallbackExtendedContext(iotHubClientHandle, inputName, eventHandlerCallback, &userContextCallback, sizeof(userContextCallback));
 }
 

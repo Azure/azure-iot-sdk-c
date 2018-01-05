@@ -5349,6 +5349,8 @@ static void setup_IoTHubClient_LL_SetInputMessageCallback_first_invocation_mocks
     STRICT_EXPECTED_CALL(singlylinkedlist_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(STRING_construct(IGNORED_NUM_ARG)).IgnoreArgument_psz();
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_NUM_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(FAKE_IotHubTransport_Subscribe_InputQueue(IGNORED_NUM_ARG));
 }
@@ -5369,11 +5371,15 @@ static void setup_IoTHubClient_LL_SetInputMessageCallback_after_first_invocation
     {
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(STRING_construct(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_NUM_ARG, IGNORED_PTR_ARG));
     }
     else
     {
         STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     }
 }
 
@@ -5863,7 +5869,7 @@ TEST_FUNCTION(IoTHubClient_LL_MessageCallbackFromInput_default_handler_no_regist
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(IoTHubMessage_GetInputName(IGNORED_PTR_ARG));
-	
+    
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(messageCallback(testMessage->messageHandle, (void*)50));
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SendMessageDisposition(testMessage, IOTHUBMESSAGE_ACCEPTED));
@@ -5931,7 +5937,7 @@ TEST_FUNCTION(IoTHubClient_LL_MessageCallbackFromInput_default_handler_ex_no_reg
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(IoTHubMessage_GetInputName(IGNORED_PTR_ARG));
-	
+    
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(messageCallbackEx(testMessage, (void*)70));
 
@@ -5996,7 +6002,7 @@ TEST_FUNCTION(IoTHubClient_LL_MessageCallbackFromInput_match_fail)
     
     MESSAGE_CALLBACK_INFO* testMessage = make_test_message_info(TEST_MESSAGE_HANDLE);
 
-	umock_c_reset_all_calls();
+    umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(IoTHubMessage_GetInputName(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(singlylinkedlist_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
@@ -6008,14 +6014,14 @@ TEST_FUNCTION(IoTHubClient_LL_MessageCallbackFromInput_match_fail)
     STRICT_EXPECTED_CALL(messageCallback(testMessage->messageHandle, (void*)20));
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SendMessageDisposition(testMessage, IOTHUBMESSAGE_ACCEPTED));
 
-	umock_c_negative_tests_snapshot();
+    umock_c_negative_tests_snapshot();
 
     //act
     size_t calls_cannot_fail[] = { 
         5,  // get_time
-    	6,  // messageCallback
-    	7   // FAKE_IoTHubTransport_SendMessageDisposition
-	};
+        6,  // messageCallback
+        7   // FAKE_IoTHubTransport_SendMessageDisposition
+    };
     size_t count = umock_c_negative_tests_call_count();
     for (size_t index = 0; index < count; index++)
     {
