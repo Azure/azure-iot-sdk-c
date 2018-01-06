@@ -8,6 +8,7 @@ script_dir=$(cd "$(dirname "$0")" && pwd)
 build_root=$(cd "${script_dir}/../.." && pwd)
 log_dir=$build_root
 run_e2e_tests=OFF
+run_sfc_tests=OFF
 run_longhaul_tests=OFF
 build_amqp=ON
 build_http=ON
@@ -32,6 +33,7 @@ usage ()
     echo " -cl, --compileoption <value>  specify a compile option to be passed to gcc"
     echo "   Example: -cl -O1 -cl ..."
     echo " --run-e2e-tests               run the end-to-end tests (e2e tests are skipped by default)"
+    echo " --run-sfc-tests               run the end-to-end tests for Service Faults (sfc tests are skipped by default)"
     echo " --run-unittests               run the unit tests"
     echo " --run-longhaul-tests          run long haul tests (long haul tests are not run by default)"
     echo ""
@@ -102,6 +104,7 @@ process_args ()
               "--install-path-prefix" ) save_next_arg=4;;
               "--provisioning" ) prov_auth=ON;;
               "--use-tpm-simulator" ) prov_use_tpm_simulator=ON;;
+              "--run-sfc-tests" ) run_sfc_tests=ON;;
               * ) usage;;
           esac
       fi
@@ -124,7 +127,7 @@ process_args $*
 rm -r -f $build_folder
 mkdir -p $build_folder
 pushd $build_folder
-cmake $toolchainfile $cmake_install_prefix -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Ddont_use_uploadtoblob:BOOL=$no_blob -Drun_unittests:BOOL=$run_unittests -Dbuild_python:STRING=$build_python -Dbuild_javawrapper:BOOL=$build_javawrapper -Dno_logging:BOOL=$no_logging $build_root -Duse_prov_client:BOOL=$prov_auth -Duse_tpm_simulator:BOOL=$prov_use_tpm_simulator
+cmake $toolchainfile $cmake_install_prefix -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_sfc_tests:BOOL=$run-sfc-tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Ddont_use_uploadtoblob:BOOL=$no_blob -Drun_unittests:BOOL=$run_unittests -Dbuild_python:STRING=$build_python -Dbuild_javawrapper:BOOL=$build_javawrapper -Dno_logging:BOOL=$no_logging $build_root -Duse_prov_client:BOOL=$prov_auth -Duse_tpm_simulator:BOOL=$prov_use_tpm_simulator
 
 if [ "$make" = true ]
 then

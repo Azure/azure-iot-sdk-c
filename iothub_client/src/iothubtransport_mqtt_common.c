@@ -1410,9 +1410,11 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
 
 static void DisconnectFromClient(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 {
-    OPTIONHANDLER_HANDLE options = xio_retrieveoptions(transport_data->xioTransport);
-    set_saved_tls_options(transport_data, options);
-
+    if (!transport_data->isDestroyCalled)
+    {
+        OPTIONHANDLER_HANDLE options = xio_retrieveoptions(transport_data->xioTransport);
+        set_saved_tls_options(transport_data, options);
+    }
     (void)mqtt_client_disconnect(transport_data->mqttClient, NULL, NULL);
     xio_destroy(transport_data->xioTransport);
     transport_data->xioTransport = NULL;

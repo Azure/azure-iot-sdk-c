@@ -363,6 +363,7 @@ static void my_CONSTBUFFER_Destroy(CONSTBUFFER_HANDLE constbufferHandle)
     my_gballoc_free(constbufferHandle);
 }
 
+#ifndef DONT_USE_UPLOADTOBLOB
 static IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE my_IoTHubClient_LL_UploadToBlob_Create(const IOTHUB_CLIENT_CONFIG* config)
 {
     (void)config;
@@ -373,6 +374,7 @@ static void my_IoTHubClient_LL_UploadToBlob_Destroy(IOTHUB_CLIENT_LL_UPLOADTOBLO
 {
     my_gballoc_free(handle);
 }
+#endif
 
 static IOTHUB_DEVICE_HANDLE my_FAKE_IoTHubTransport_Register(TRANSPORT_LL_HANDLE handle, const IOTHUB_DEVICE_CONFIG* device, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, PDLIST_ENTRY waitingToSend)
 {
@@ -446,7 +448,7 @@ static TRANSPORT_PROVIDER FAKE_transport_provider =
     FAKE_IoTHubTransport_SetOption,     /*pfIoTHubTransport_SetOption IoTHubTransport_SetOption;        */
     FAKE_IoTHubTransport_Create,        /*pfIoTHubTransport_Create IoTHubTransport_Create;              */
     FAKE_IoTHubTransport_Destroy,       /*pfIoTHubTransport_Destroy IoTHubTransport_Destroy;            */
-    FAKE_IoTHubTransport_Register,		/*pfIotHubTransport_Register IoTHubTransport_Register;          */
+    FAKE_IoTHubTransport_Register,      /*pfIotHubTransport_Register IoTHubTransport_Register;          */
     FAKE_IoTHubTransport_Unregister,    /*pfIotHubTransport_Unregister IoTHubTransport_Unegister;       */
     FAKE_IoTHubTransport_Subscribe,     /*pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;        */
     FAKE_IoTHubTransport_Unsubscribe,   /*pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;    */
@@ -3811,9 +3813,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_with_NULL_handle_fails)
 
     ///cleanup
 }
-#endif
 
-#ifndef DONT_USE_UPLOADTOBLOB
 /*Tests_SRS_IOTHUBCLIENT_LL_02_062: [ If destinationFileName is NULL then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_INVALID_ARG. ]*/
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_with_NULL_fileName_fails)
 {

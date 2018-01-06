@@ -1720,7 +1720,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_One_Message_Ack_succeeds)
     IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(xio_retrieveoptions(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(mqtt_client_disconnect(TEST_MQTT_CLIENT_HANDLE, NULL, NULL))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(xio_destroy(TEST_XIO_HANDLE))
@@ -3207,7 +3206,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_frees_the_proxy_options)
     (void)IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(xio_retrieveoptions(IGNORED_PTR_ARG)); 
     STRICT_EXPECTED_CALL(mqtt_client_disconnect(IGNORED_PTR_ARG, NULL, NULL))
         .IgnoreAllCalls();
     STRICT_EXPECTED_CALL(mqtt_client_deinit(IGNORED_PTR_ARG))
