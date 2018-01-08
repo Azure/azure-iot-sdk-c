@@ -608,10 +608,10 @@ static void dispatch_user_callbacks(IOTHUB_CLIENT_INSTANCE* iotHubClientInstance
                         const INPUTMESSAGE_CALLBACK_INFO *inputmessage_cb_info = &queued_cb->iothub_callback.inputmessage_cb_info;
                         IOTHUBMESSAGE_DISPOSITION_RESULT disposition = inputmessage_cb_info->eventHandlerCallback(inputmessage_cb_info->message_cb_info->messageHandle, queued_cb->userContextCallback);
 
-                        if (Lock(message_user_context_handle->LockHandle) == LOCK_OK)
+                        if (Lock(iotHubClientInstance->LockHandle) == LOCK_OK)
                         {
-                            IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_SendMessageDisposition(message_user_context_handle->IoTHubClientLLHandle, inputmessage_cb_info->message_cb_info, disposition);
-                            (void)Unlock(message_user_context_handle->LockHandle);
+                            IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_SendMessageDisposition(iotHubClientInstance->IoTHubClientLLHandle, inputmessage_cb_info->message_cb_info, disposition);
+                            (void)Unlock(iotHubClientInstance->LockHandle);
                             if (result != IOTHUB_CLIENT_OK)
                             {
                                 LogError("IoTHubClient_LL_SendMessageDisposition failed");
