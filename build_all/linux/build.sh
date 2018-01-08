@@ -129,7 +129,7 @@ cmake $toolchainfile $cmake_install_prefix -Drun_valgrind:BOOL=$run_valgrind -Dc
 if [ "$make" = true ]
 then
   # Set the default cores
-  CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
+  CORES=$(nproc)
   
   # Make sure there is enough virtual memory on the device to handle more than one job  
   MINVSPACE="1500000"
