@@ -124,7 +124,7 @@ MOCKABLE_FUNCTION(, void, eventConfirmationCallback, IOTHUB_CLIENT_CONFIRMATION_
 MOCKABLE_FUNCTION(, int, FAKE_IoTHubTransport_DeviceMethod_Response, IOTHUB_DEVICE_HANDLE, handle, METHOD_HANDLE, methodId, const unsigned char*, response, size_t, resp_size, int, status_response);
 MOCKABLE_FUNCTION(, int, FAKE_IotHubTransport_Subscribe_InputQueue, IOTHUB_DEVICE_HANDLE,  handle);
 MOCKABLE_FUNCTION(, void, FAKE_IotHubTransport_Unsubscribe_InputQueue, IOTHUB_DEVICE_HANDLE, handle);
-
+MOCKABLE_FUNCTION(, bool, messageInputCallbackEx, MESSAGE_CALLBACK_INFO*, messageData, void*, userContextCallback);
 
 #undef ENABLE_MOCKS
 
@@ -487,6 +487,40 @@ STRING_HANDLE my_plafrom_get_platform_info(void)
     return result;
 }
 
+typedef struct MESSAGE_INPUT_CALLBACK_CONTEXT_TAG
+{
+    int i1;
+    int i2;
+    int i3;
+    bool returnValue;
+} MESSAGE_INPUT_CALLBACK_CONTEXT;
+
+MESSAGE_INPUT_CALLBACK_CONTEXT expectedContextData;
+
+void SetMessageInputContextValues(MESSAGE_INPUT_CALLBACK_CONTEXT *messageInputCallbackContext, int i1, int i2, int i3, bool returnValue)
+{
+    messageInputCallbackContext->i1 = i1;
+    messageInputCallbackContext->i2 = i2;
+    messageInputCallbackContext->i3 = i3;
+    messageInputCallbackContext->returnValue = returnValue;
+}
+
+void VerifyMessageInputContextEqual(MESSAGE_INPUT_CALLBACK_CONTEXT *messageInputCallbackContextExpected, MESSAGE_INPUT_CALLBACK_CONTEXT *messageInputCallbackActual)
+{
+    ASSERT_ARE_EQUAL(int, messageInputCallbackContextExpected->i1, messageInputCallbackActual->i1);
+    ASSERT_ARE_EQUAL(int, messageInputCallbackContextExpected->i2, messageInputCallbackActual->i2);
+    ASSERT_ARE_EQUAL(int, messageInputCallbackContextExpected->i3, messageInputCallbackActual->i3);
+    ASSERT_ARE_EQUAL(bool, messageInputCallbackContextExpected->returnValue, messageInputCallbackActual->returnValue);
+} 
+
+bool real_messageInputCallbackEx(MESSAGE_CALLBACK_INFO* messageData, void* userContextCallback)
+{
+    (void)messageData;
+    MESSAGE_INPUT_CALLBACK_CONTEXT* actualUserContextCallback = (MESSAGE_INPUT_CALLBACK_CONTEXT*)userContextCallback;
+    VerifyMessageInputContextEqual(&expectedContextData, actualUserContextCallback);
+    return actualUserContextCallback->returnValue;
+}
+
 #ifdef __cplusplus
 extern "C" 
 {
@@ -753,6 +787,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_RETURN(test_message_callback_async, IOTHUBMESSAGE_ACCEPTED);
     REGISTER_GLOBAL_MOCK_RETURN(messageCallback, IOTHUBMESSAGE_ACCEPTED);
     REGISTER_GLOBAL_MOCK_RETURN(messageCallbackEx, true);
+    REGISTER_GLOBAL_MOCK_HOOK(messageInputCallbackEx, real_messageInputCallbackEx);
 
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_Auth_Create, my_IoTHubClient_Auth_Create);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_Auth_Create, NULL);
@@ -6036,6 +6071,97 @@ TEST_FUNCTION(IoTHubClient_LL_MessageCallbackFromInput_match_fail)
     destroy_test_message_info(testMessage);
     IoTHubClient_LL_Destroy(handle);
     umock_c_negative_tests_deinit();
+}
+
+static void IoTHubClient_LL_MessageCallbackFromInput_with_messageCallbackEx_calls_client_layer_impl(bool callbackReturnValue)
+{
+    //arrange
+    IOTHUB_CLIENT_LL_HANDLE handle = IoTHubClient_LL_Create(&TEST_CONFIG);
+    
+    MESSAGE_INPUT_CALLBACK_CONTEXT messageInputCallbackContext;
+    SetMessageInputContextValues(&messageInputCallbackContext, 1, 2, 3, callbackReturnValue);
+    SetMessageInputContextValues(&expectedContextData, 1, 2, 3, callbackReturnValue);
+    
+    (void)IoTHubClient_LL_SetInputMessageCallbackEx(handle, TEST_INPUT_NAME, messageInputCallbackEx, &messageInputCallbackContext, sizeof(messageInputCallbackContext));
+    MESSAGE_CALLBACK_INFO* testMessage = make_test_message_info(TEST_MESSAGE_HANDLE);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetInputName(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_INPUT_NAME);
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+
+    STRICT_EXPECTED_CALL(get_time(NULL));
+    STRICT_EXPECTED_CALL(messageInputCallbackEx(testMessage, IGNORED_PTR_ARG));
+
+    //act
+    bool result = IoTHubClient_LL_MessageCallbackFromInput(handle, testMessage);
+
+    //assert
+    if (callbackReturnValue == true)
+    {
+        ASSERT_IS_TRUE(result);
+    }
+    else
+    {
+        ASSERT_IS_FALSE(result);
+    }
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    destroy_test_message_info(testMessage);
+    IoTHubClient_LL_Destroy(handle);
+
+}
+
+// Tests_SRS_IOTHUBCLIENT_LL_31_139: [ `IoTHubClient_LL_MessageCallbackFromInput` shall the callback from the given inputName queue if it has been registered.** ]
+TEST_FUNCTION(IoTHubClient_LL_MessageCallbackFromInput_with_messageCallbackEx_calls_client_layer_returns_true_succeeds)
+{
+    IoTHubClient_LL_MessageCallbackFromInput_with_messageCallbackEx_calls_client_layer_impl(true);
+}
+
+// Tests_SRS_IOTHUBCLIENT_LL_31_139: [ `IoTHubClient_LL_MessageCallbackFromInput` shall the callback from the given inputName queue if it has been registered.** ]
+TEST_FUNCTION(IoTHubClient_LL_MessageCallbackFromInput_with_messageCallbackEx_calls_client_layer_returns_false_succeeds)
+{
+    IoTHubClient_LL_MessageCallbackFromInput_with_messageCallbackEx_calls_client_layer_impl(false);
+}
+
+// Tests_SRS_IOTHUBCLIENT_31_130: [ If `iotHubClientHandle` or `inputName` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall return IOTHUB_CLIENT_INVALID_ARG. ]
+TEST_FUNCTION(IoTHubClient_LL_SetInputMessageCallbackEx_with_NULL_iotHubClientHandle_fails)
+{
+    //arrange
+    MESSAGE_INPUT_CALLBACK_CONTEXT messageInputCallbackContext;
+    SetMessageInputContextValues(&messageInputCallbackContext, 1, 2, 3, true);
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_SetInputMessageCallbackEx(NULL, TEST_INPUT_NAME, messageInputCallbackEx, &messageInputCallbackContext, sizeof(messageInputCallbackContext));
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+}
+
+// Tests_SRS_IOTHUBCLIENT_31_130: [ If `iotHubClientHandle` or `inputName` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall return IOTHUB_CLIENT_INVALID_ARG. ]
+TEST_FUNCTION(IoTHubClient_LL_SetInputMessageCallbackEx_with_NULL_inputName_fails)
+{
+    //arrange
+    IOTHUB_CLIENT_LL_HANDLE handle = IoTHubClient_LL_Create(&TEST_CONFIG);
+    MESSAGE_INPUT_CALLBACK_CONTEXT messageInputCallbackContext;
+    SetMessageInputContextValues(&messageInputCallbackContext, 1, 2, 3, true);
+    umock_c_reset_all_calls();
+
+    ///act
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_SetInputMessageCallbackEx(handle, NULL, messageInputCallbackEx, &messageInputCallbackContext, sizeof(messageInputCallbackContext));
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+
+    //cleanup
+    IoTHubClient_LL_Destroy(handle);
 }
 
 

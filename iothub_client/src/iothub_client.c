@@ -119,7 +119,7 @@ typedef struct METHOD_CALLBACK_INFO_TAG
 typedef struct INPUTMESSAGE_CALLBACK_INFO_TAG
 {
     IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC eventHandlerCallback;
-    IOTHUB_MESSAGE_HANDLE message;
+    MESSAGE_CALLBACK_INFO* message_cb_info;
 } INPUTMESSAGE_CALLBACK_INFO;
 
 typedef struct USER_CALLBACK_INFO_TAG
@@ -231,14 +231,14 @@ static bool iothub_ll_message_callback(MESSAGE_CALLBACK_INFO* messageData, void*
     return result;
 }
 
-static IOTHUBMESSAGE_DISPOSITION_RESULT iothub_ll_inputmessage_callback(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback)
+static bool iothub_ll_inputmessage_callback(MESSAGE_CALLBACK_INFO* message_cb_info, void* userContextCallback)
 {
-    IOTHUBMESSAGE_DISPOSITION_RESULT result;
+    bool result;
     IOTHUB_INPUTMESSAGE_CALLBACK_CONTEXT *inputMessageCallbackContext = (IOTHUB_INPUTMESSAGE_CALLBACK_CONTEXT *)userContextCallback;
     if (inputMessageCallbackContext == NULL)
     {
         LogError("invalid parameter userContextCallback(NULL)");
-        result = IOTHUBMESSAGE_REJECTED;
+        result = false;
     }
     else
     {
@@ -246,23 +246,16 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT iothub_ll_inputmessage_callback(IOTHUB_M
         queue_cb_info.type = CALLBACK_TYPE_INPUTMESSAGE;
         queue_cb_info.userContextCallback = inputMessageCallbackContext->userContextCallback;
         queue_cb_info.iothub_callback.inputmessage_cb_info.eventHandlerCallback = inputMessageCallbackContext->eventHandlerCallback;
-        queue_cb_info.iothub_callback.inputmessage_cb_info.message = IoTHubMessage_Clone(message);
+        queue_cb_info.iothub_callback.inputmessage_cb_info.message_cb_info = message_cb_info;
 
-        if (queue_cb_info.iothub_callback.inputmessage_cb_info.message == NULL)
+        if (VECTOR_push_back(inputMessageCallbackContext->iotHubClientHandle->saved_user_callback_list, &queue_cb_info, 1) == 0)
         {
-            LogError("cloning message failed.");
-            result = IOTHUBMESSAGE_REJECTED;
-        }
-        else if (VECTOR_push_back(inputMessageCallbackContext->iotHubClientHandle->saved_user_callback_list, &queue_cb_info, 1) == 0)
-        {
-            result = IOTHUBMESSAGE_ACCEPTED;
+            result = true;
         }
         else
         {
             LogError("message callback vector push failed.");
-            IoTHubMessage_Destroy(queue_cb_info.iothub_callback.inputmessage_cb_info.message);
-            queue_cb_info.iothub_callback.inputmessage_cb_info.message = NULL;
-            result = IOTHUBMESSAGE_REJECTED;
+            result = false;
         }
     }
 
@@ -613,12 +606,23 @@ static void dispatch_user_callbacks(IOTHUB_CLIENT_INSTANCE* iotHubClientInstance
                 case CALLBACK_TYPE_INPUTMESSAGE:
                     {
                         const INPUTMESSAGE_CALLBACK_INFO *inputmessage_cb_info = &queued_cb->iothub_callback.inputmessage_cb_info;
-                        // BUGBUG - probably need an _EX()
-                        inputmessage_cb_info->eventHandlerCallback(inputmessage_cb_info->message, queued_cb->userContextCallback);
-                        IoTHubMessage_Destroy(inputmessage_cb_info->message);
+                        IOTHUBMESSAGE_DISPOSITION_RESULT disposition = inputmessage_cb_info->eventHandlerCallback(inputmessage_cb_info->message_cb_info->messageHandle, queued_cb->userContextCallback);
+
+                        if (Lock(message_user_context_handle->LockHandle) == LOCK_OK)
+                        {
+                            IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_SendMessageDisposition(message_user_context_handle->IoTHubClientLLHandle, inputmessage_cb_info->message_cb_info, disposition);
+                            (void)Unlock(message_user_context_handle->LockHandle);
+                            if (result != IOTHUB_CLIENT_OK)
+                            {
+                                LogError("IoTHubClient_LL_SendMessageDisposition failed");
+                            }
+                        }
+                        else
+                        {
+                            LogError("Lock failed");
+                        }
                     }
                     break;
-
                     
                 default:
                     LogError("Invalid callback type '%s'", ENUM_TO_STRING(USER_CALLBACK_TYPE, queued_cb->type));
@@ -2275,7 +2279,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetInputMessageCallback(IOTHUB_CLIENT_HANDLE i
                 inputMessageCallbackContext.eventHandlerCallback = eventHandlerCallback;
                 inputMessageCallbackContext.userContextCallback = userContextCallback;
                 
-                result = IoTHubClient_LL_SetInputMessageCallbackExtendedContext(iotHubClientInstance->IoTHubClientLLHandle, inputName, iothub_ll_inputmessage_callback, (void*)&inputMessageCallbackContext, sizeof(inputMessageCallbackContext));
+                result = IoTHubClient_LL_SetInputMessageCallbackEx(iotHubClientInstance->IoTHubClientLLHandle, inputName, iothub_ll_inputmessage_callback, (void*)&inputMessageCallbackContext, sizeof(inputMessageCallbackContext));
                 (void)Unlock(iotHubClientInstance->LockHandle);
             }
         }
