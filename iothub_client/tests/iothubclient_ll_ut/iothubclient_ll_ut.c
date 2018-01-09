@@ -5213,7 +5213,7 @@ TEST_FUNCTION(IoTHubClient_LL_SetOption_diag_sampling_percentage_fails)
     IoTHubClient_LL_Destroy(h);
 }
 
-// Tests_SRS_IOTHUBCLIENT_31_127: [ If `iotHubClientHandle`, `outputName`, or `eventConfirmationCallback` is `NULL`, `IoTHubClient_LL_SendEventToOutputAsync` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]
+// Tests_SRS_IOTHUBCLIENT_LL_31_127: [ If `iotHubClientHandle`, `outputName`, or `eventConfirmationCallback` is `NULL`, `IoTHubClient_LL_SendEventToOutputAsync` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]
 TEST_FUNCTION(IoTHubClient_LL_SendEventToOutputAsync_with_NULL_iotHubClientHandle_fails)
 {
     //arrange
@@ -5225,7 +5225,7 @@ TEST_FUNCTION(IoTHubClient_LL_SendEventToOutputAsync_with_NULL_iotHubClientHandl
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
 }
 
-// Tests_SRS_IOTHUBCLIENT_31_127: [ If `iotHubClientHandle`, `outputName`, or `eventConfirmationCallback` is `NULL`, `IoTHubClient_LL_SendEventToOutputAsync` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]
+// Tests_SRS_IOTHUBCLIENT_LL_31_127: [ If `iotHubClientHandle`, `outputName`, or `eventConfirmationCallback` is `NULL`, `IoTHubClient_LL_SendEventToOutputAsync` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]
 TEST_FUNCTION(IoTHubClient_LL_SendEventToOutputAsync_with_NULL_messageHandle_fails)
 {
     //arrange
@@ -5244,7 +5244,7 @@ TEST_FUNCTION(IoTHubClient_LL_SendEventToOutputAsync_with_NULL_messageHandle_fai
     IoTHubClient_LL_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUBCLIENT_31_127: [ If `iotHubClientHandle`, `outputName`, or `eventConfirmationCallback` is `NULL`, `IoTHubClient_LL_SendEventToOutputAsync` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]
+// Tests_SRS_IOTHUBCLIENT_LL_31_127: [ If `iotHubClientHandle`, `outputName`, or `eventConfirmationCallback` is `NULL`, `IoTHubClient_LL_SendEventToOutputAsync` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]
 TEST_FUNCTION(IoTHubClient_LL_SendEventToOutputAsync_with_NULL_test_event_confirmation_callback_and_non_NULL_context_fails)
 {
     //arrange
@@ -5263,7 +5263,7 @@ TEST_FUNCTION(IoTHubClient_LL_SendEventToOutputAsync_with_NULL_test_event_confir
     IoTHubClient_LL_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUBCLIENT_31_127: [ If `iotHubClientHandle`, `outputName`, or `eventConfirmationCallback` is `NULL`, `IoTHubClient_LL_SendEventToOutputAsync` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]
+// Tests_SRS_IOTHUBCLIENT_LL_31_127: [ If `iotHubClientHandle`, `outputName`, or `eventConfirmationCallback` is `NULL`, `IoTHubClient_LL_SendEventToOutputAsync` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]
 TEST_FUNCTION(IoTHubClient_LL_SendEventToOutputAsync_with_NULL_OUTPUT_NAME_fails)
 {
     //arrange
@@ -5282,8 +5282,8 @@ TEST_FUNCTION(IoTHubClient_LL_SendEventToOutputAsync_with_NULL_OUTPUT_NAME_fails
     IoTHubClient_LL_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUBCLIENT_31_128: [ `IoTHubClient_LL_SendEventToOutputAsync` shall set the outputName of the message to send. ]
-// Tests_SRS_IOTHUBCLIENT_31_129: [ `IoTHubClient_LL_SendEventToOutputAsync` shall invoke `IoTHubClient_LL_SendEventAsync` to send the message. ]
+// Tests_SRS_IOTHUBCLIENT_LL_31_128: [ `IoTHubClient_LL_SendEventToOutputAsync` shall set the outputName of the message to send. ]
+// Tests_SRS_IOTHUBCLIENT_LL_31_129: [ `IoTHubClient_LL_SendEventToOutputAsync` shall invoke `IoTHubClient_LL_SendEventAsync` to send the message. ]
 TEST_FUNCTION(IoTHubClient_LL_SendEventToOutputAsync_succeeds)
 {
     //arrange
@@ -5348,7 +5348,7 @@ TEST_FUNCTION(IoTHubClient_LL_SendEventToOutputAsync_fails)
 }
 
 
-// Tests_SRS_IOTHUBCLIENT_31_130: [ If `iotHubClientHandle` or `inputName` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall return IOTHUB_CLIENT_INVALID_ARG. ]
+// Tests_SRS_IOTHUBCLIENT_LL_31_130: [ If `iotHubClientHandle` or `inputName` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall return IOTHUB_CLIENT_INVALID_ARG. ]
 TEST_FUNCTION(IoTHubClient_LL_SetInputMessageCallback_with_NULL_iotHubClientHandle_fails)
 {
     ///arrange
@@ -5361,7 +5361,7 @@ TEST_FUNCTION(IoTHubClient_LL_SetInputMessageCallback_with_NULL_iotHubClientHand
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-// Tests_SRS_IOTHUBCLIENT_31_130: [ If `iotHubClientHandle` or `inputName` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall return IOTHUB_CLIENT_INVALID_ARG. ]
+// Tests_SRS_IOTHUBCLIENT_LL_31_130: [ If `iotHubClientHandle` or `inputName` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall return IOTHUB_CLIENT_INVALID_ARG. ]
 TEST_FUNCTION(IoTHubClient_LL_SetInputMessageCallback_with_NULL_inputName_fails)
 {
     //arrange
@@ -5433,8 +5433,8 @@ static void setup_IoTHubClient_LL_SetInputMessageCallback_callback_null(bool uns
     }
 }
 
-// Tests_SRS_IOTHUBCLIENT_31_134: [ `IoTHubClient_LL_SetInputMessageCallback` shall allocate a callback handle to associate callbacks from the transport => client if `inputName` isn't already present in the callback list. ]
-// Tests_SRS_IOTHUBCLIENT_31_136: [ `IoTHubClient_LL_SetInputMessageCallback` shall invoke `IoTHubTransport_Subscribe_InputQueue` if this is the first callback being registered. ]
+// Tests_SRS_IOTHUBCLIENT_LL_31_134: [ `IoTHubClient_LL_SetInputMessageCallback` shall allocate a callback handle to associate callbacks from the transport => client if `inputName` isn't already present in the callback list. ]
+// Tests_SRS_IOTHUBCLIENT_LL_31_136: [ `IoTHubClient_LL_SetInputMessageCallback` shall invoke `IoTHubTransport_Subscribe_InputQueue` if this is the first callback being registered. ]
 TEST_FUNCTION(IoTHubClient_LL_SetInputMessageCallback_one_item_success)
 {
     //arrange
@@ -5454,7 +5454,7 @@ TEST_FUNCTION(IoTHubClient_LL_SetInputMessageCallback_one_item_success)
     IoTHubClient_LL_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUBCLIENT_31_135: [ `IoTHubClient_LL_SetInputMessageCallback` shall reuse the existing callback handle if `inputName` is already present in the callback list. ]
+// Tests_SRS_IOTHUBCLIENT_LL_31_135: [ `IoTHubClient_LL_SetInputMessageCallback` shall reuse the existing callback handle if `inputName` is already present in the callback list. ]
 TEST_FUNCTION(IoTHubClient_LL_SetInputMessageCallback_same_input_queue_twice_success)
 {  
     //arrange
@@ -5506,7 +5506,7 @@ static void setup_three_event_callbacks(IOTHUB_CLIENT_LL_HANDLE handle)
 
 }
 
-// Tests_SRS_IOTHUBCLIENT_31_134: [ `IoTHubClient_LL_SetInputMessageCallback` shall allocate a callback handle to associate callbacks from the transport => client if `inputName` isn't already present in the callback list. ]
+// Tests_SRS_IOTHUBCLIENT_LL_31_134: [ `IoTHubClient_LL_SetInputMessageCallback` shall allocate a callback handle to associate callbacks from the transport => client if `inputName` isn't already present in the callback list. ]
 TEST_FUNCTION(IoTHubClient_LL_SetInputMessageCallback_multiple_items_success)
 {
     //arrange
@@ -5519,7 +5519,7 @@ TEST_FUNCTION(IoTHubClient_LL_SetInputMessageCallback_multiple_items_success)
     IoTHubClient_LL_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUBCLIENT_31_131: [ If `eventHandlerCallback` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall remove the `inputName` from its callback list if present. ]
+// Tests_SRS_IOTHUBCLIENT_LL_31_131: [ If `eventHandlerCallback` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall remove the `inputName` from its callback list if present. ]
 TEST_FUNCTION(IoTHubClient_LL_SetInputMessageCallback_one_item_and_unregister_success)
 {
     //arrange
@@ -5543,7 +5543,7 @@ TEST_FUNCTION(IoTHubClient_LL_SetInputMessageCallback_one_item_and_unregister_su
     IoTHubClient_LL_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUBCLIENT_31_131: [ If `eventHandlerCallback` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall remove the `inputName` from its callback list if present. ]
+// Tests_SRS_IOTHUBCLIENT_LL_31_131: [ If `eventHandlerCallback` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall remove the `inputName` from its callback list if present. ]
 TEST_FUNCTION(IoTHubClient_LL_SetInputMessageCallback_three_items_and_unregister_each_success)
 {
     //arrange
@@ -5596,7 +5596,7 @@ TEST_FUNCTION(IoTHubClient_LL_SetInputMessageCallback_three_items_and_unregister
     IoTHubClient_LL_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUBCLIENT_31_132: [ If `eventHandlerCallback` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall return `IOTHUB_CLIENT_ERROR` if the `inputName` is not present. ]
+// Tests_SRS_IOTHUBCLIENT_LL_31_132: [ If `eventHandlerCallback` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall return `IOTHUB_CLIENT_ERROR` if the `inputName` is not present. ]
 TEST_FUNCTION(IoTHubClient_LL_SetInputMessageCallback_unregister_not_found_fails)
 {
     //arrange
@@ -6116,18 +6116,21 @@ static void IoTHubClient_LL_MessageCallbackFromInput_with_messageCallbackEx_call
 }
 
 // Tests_SRS_IOTHUBCLIENT_LL_31_139: [ `IoTHubClient_LL_MessageCallbackFromInput` shall the callback from the given inputName queue if it has been registered.** ]
+// Tests_SRS_IOTHUBCLIENT_LL_31_141: [`IoTHubClient_LL_SetInputMessageCallbackEx` shall copy the data passed in extended context. ]
 TEST_FUNCTION(IoTHubClient_LL_MessageCallbackFromInput_with_messageCallbackEx_calls_client_layer_returns_true_succeeds)
 {
     IoTHubClient_LL_MessageCallbackFromInput_with_messageCallbackEx_calls_client_layer_impl(true);
 }
 
 // Tests_SRS_IOTHUBCLIENT_LL_31_139: [ `IoTHubClient_LL_MessageCallbackFromInput` shall the callback from the given inputName queue if it has been registered.** ]
+// Tests_SRS_IOTHUBCLIENT_LL_31_141: [`IoTHubClient_LL_SetInputMessageCallbackEx` shall copy the data passed in extended context. ]
 TEST_FUNCTION(IoTHubClient_LL_MessageCallbackFromInput_with_messageCallbackEx_calls_client_layer_returns_false_succeeds)
 {
     IoTHubClient_LL_MessageCallbackFromInput_with_messageCallbackEx_calls_client_layer_impl(false);
 }
 
-// Tests_SRS_IOTHUBCLIENT_31_130: [ If `iotHubClientHandle` or `inputName` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall return IOTHUB_CLIENT_INVALID_ARG. ]
+// Tests_SRS_IOTHUBCLIENT_LL_31_130: [ If `iotHubClientHandle` or `inputName` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall return IOTHUB_CLIENT_INVALID_ARG. ]
+// Tests_SRS_IOTHUBCLIENT_LL_31_141: [`IoTHubClient_LL_SetInputMessageCallbackEx` shall copy the data passed in extended context. ]
 TEST_FUNCTION(IoTHubClient_LL_SetInputMessageCallbackEx_with_NULL_iotHubClientHandle_fails)
 {
     //arrange
@@ -6145,7 +6148,7 @@ TEST_FUNCTION(IoTHubClient_LL_SetInputMessageCallbackEx_with_NULL_iotHubClientHa
     //cleanup
 }
 
-// Tests_SRS_IOTHUBCLIENT_31_130: [ If `iotHubClientHandle` or `inputName` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall return IOTHUB_CLIENT_INVALID_ARG. ]
+// Tests_SRS_IOTHUBCLIENT_LL_31_130: [ If `iotHubClientHandle` or `inputName` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall return IOTHUB_CLIENT_INVALID_ARG. ]
 TEST_FUNCTION(IoTHubClient_LL_SetInputMessageCallbackEx_with_NULL_inputName_fails)
 {
     //arrange

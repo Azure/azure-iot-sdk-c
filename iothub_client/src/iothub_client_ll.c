@@ -1684,6 +1684,7 @@ bool IoTHubClient_LL_MessageCallbackFromInput(IOTHUB_CLIENT_LL_HANDLE handle, ME
             }
             else
             {
+                // Codes_SRS_IOTHUBCLIENT_LL_09_004: [IoTHubClient_LL_GetLastMessageReceiveTime shall return lastMessageReceiveTime in localtime]
                 handleData->lastMessageReceiveTime = get_time(NULL);
 
                 if (event_callback->callbackAsyncEx != NULL)
@@ -2278,19 +2279,19 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendEventToOutputAsync(IOTHUB_CLIENT_LL_HAN
 
     if ((iotHubClientHandle == NULL) || (outputName == NULL) || (eventMessageHandle == NULL) || ((eventConfirmationCallback == NULL) && (userContextCallback != NULL)))
     {
-        // Codes_SRS_IOTHUBCLIENT_31_127: [ If `iotHubClientHandle`, `outputName`, or `eventConfirmationCallback` is `NULL`, `IoTHubClient_LL_SendEventToOutputAsync` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]
+        // Codes_SRS_IOTHUBCLIENT_LL_31_127: [ If `iotHubClientHandle`, `outputName`, or `eventConfirmationCallback` is `NULL`, `IoTHubClient_LL_SendEventToOutputAsync` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]
         LogError("Invalid argument (iotHubClientHandle=%p, outputName=%p, eventMessageHandle=%p)", iotHubClientHandle, outputName, eventMessageHandle);
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else
     {
-        // Codes_SRS_IOTHUBCLIENT_31_128: [ `IoTHubClient_LL_SendEventToOutputAsync` shall set the outputName of the message to send. ]
+        // Codes_SRS_IOTHUBCLIENT_LL_31_128: [ `IoTHubClient_LL_SendEventToOutputAsync` shall set the outputName of the message to send. ]
         if (IoTHubMessage_SetOutputName(eventMessageHandle, outputName) != IOTHUB_MESSAGE_OK)
         {
             LogError("IoTHubMessage_SetOutputName failed");
             result = IOTHUB_CLIENT_ERROR;
         }
-        // Codes_SRS_IOTHUBCLIENT_31_129: [ `IoTHubClient_LL_SendEventToOutputAsync` shall invoke `IoTHubClient_LL_SendEventAsync` to send the message. ]
+        // Codes_SRS_IOTHUBCLIENT_LL_31_129: [ `IoTHubClient_LL_SendEventToOutputAsync` shall invoke `IoTHubClient_LL_SendEventAsync` to send the message. ]
         else if ((result = IoTHubClient_LL_SendEventAsync(iotHubClientHandle, eventMessageHandle, eventConfirmationCallback, userContextCallback)) != IOTHUB_CLIENT_OK)
         {
             LogError("Call into IoTHubClient_LL_SendEventAsync failed, result=%d", result);
@@ -2317,7 +2318,7 @@ static IOTHUB_CLIENT_RESULT create_event_handler_callback(IOTHUB_CLIENT_LL_HANDL
         LIST_ITEM_HANDLE item_handle = singlylinkedlist_find(handleData->event_callbacks, is_event_equal_for_match, (const void*)inputName);
         if (item_handle == NULL)
         {
-            // Codes_SRS_IOTHUBCLIENT_31_134: [ `IoTHubClient_LL_SetInputMessageCallback` shall allocate a callback handle to associate callbacks from the transport => client if `inputName` isn't already present in the callback list. ]
+            // Codes_SRS_IOTHUBCLIENT_LL_31_134: [ `IoTHubClient_LL_SetInputMessageCallback` shall allocate a callback handle to associate callbacks from the transport => client if `inputName` isn't already present in the callback list. ]
             event_callback = (IOTHUB_EVENT_CALLBACK*)malloc(sizeof(IOTHUB_EVENT_CALLBACK));
             if (event_callback == NULL)
             {
@@ -2329,7 +2330,7 @@ static IOTHUB_CLIENT_RESULT create_event_handler_callback(IOTHUB_CLIENT_LL_HANDL
         }
         else
         {
-            // Codes_SRS_IOTHUBCLIENT_31_135: [ `IoTHubClient_LL_SetInputMessageCallback` shall reuse the existing callback handle if `inputName` is already present in the callback list. ]
+            // Codes_SRS_IOTHUBCLIENT_LL_31_135: [ `IoTHubClient_LL_SetInputMessageCallback` shall reuse the existing callback handle if `inputName` is already present in the callback list. ]
             event_callback = (IOTHUB_EVENT_CALLBACK*)singlylinkedlist_item_get_value(item_handle);
             if (event_callback == NULL)
             {
@@ -2374,6 +2375,7 @@ static IOTHUB_CLIENT_RESULT create_event_handler_callback(IOTHUB_CLIENT_LL_HANDL
                 {
                     if (userContextCallbackEx != NULL)
                     {
+                        // Codes_SRS_IOTHUBCLIENT_LL_31_141: [`IoTHubClient_LL_SetInputMessageCallbackEx` shall copy the data passed in extended context. ]
                         memcpy(event_callback->userContextCallbackEx, userContextCallbackEx, userContextCallbackExLength);
                     }
                     result = IOTHUB_CLIENT_OK;
@@ -2397,7 +2399,7 @@ static IOTHUB_CLIENT_RESULT remove_event_unsubscribe_if_needed(IOTHUB_CLIENT_LL_
     LIST_ITEM_HANDLE item_handle = singlylinkedlist_find(handleData->event_callbacks, is_event_equal_for_match, (const void*)inputName);
     if (item_handle == NULL)
     {
-        // Codes_SRS_IOTHUBCLIENT_31_132: [ If `eventHandlerCallback` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall return `IOTHUB_CLIENT_ERROR` if the `inputName` is not present. ]
+        // Codes_SRS_IOTHUBCLIENT_LL_31_132: [ If `eventHandlerCallback` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall return `IOTHUB_CLIENT_ERROR` if the `inputName` is not present. ]
         LogError("Input name %s was not present", inputName);
         result = IOTHUB_CLIENT_ERROR;    
     }
@@ -2412,7 +2414,7 @@ static IOTHUB_CLIENT_RESULT remove_event_unsubscribe_if_needed(IOTHUB_CLIENT_LL_
         else
         {
             delete_event(event_callback);
-            // Codes_SRS_IOTHUBCLIENT_31_131: [ If `eventHandlerCallback` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall remove the `inputName` from its callback list if present. ]
+            // Codes_SRS_IOTHUBCLIENT_LL_31_131: [ If `eventHandlerCallback` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall remove the `inputName` from its callback list if present. ]
             if (singlylinkedlist_remove(handleData->event_callbacks, item_handle) != 0)
             {
                 LogError("singlylinkedlist_remove failed");
@@ -2422,7 +2424,7 @@ static IOTHUB_CLIENT_RESULT remove_event_unsubscribe_if_needed(IOTHUB_CLIENT_LL_
             {
                 if (singlylinkedlist_get_head_item(handleData->event_callbacks) == NULL)
                 {
-                    // Codes_SRS_IOTHUBCLIENT_31_133: [ If `eventHandlerCallback` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall invoke `IoTHubTransport_Unsubscribe_InputQueue` if this was the last input callback. ]
+                    // Codes_SRS_IOTHUBCLIENT_LL_31_133: [ If `eventHandlerCallback` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall invoke `IoTHubTransport_Unsubscribe_InputQueue` if this was the last input callback. ]
                     handleData->IoTHubTransport_Unsubscribe_InputQueue(handleData);
                 }
                 result = IOTHUB_CLIENT_OK;
@@ -2440,7 +2442,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetInputMessageCallbackImpl(IOTHUB_CLIENT_L
 
     if ((iotHubClientHandle == NULL) || (inputName == NULL))
     {
-        // Codes_SRS_IOTHUBCLIENT_31_130: [ If `iotHubClientHandle` or `inputName` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall return IOTHUB_CLIENT_INVALID_ARG. ]
+        // Codes_SRS_IOTHUBCLIENT_LL_31_130: [ If `iotHubClientHandle` or `inputName` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall return IOTHUB_CLIENT_INVALID_ARG. ]
         LogError("Invalid argument - iotHubClientHandle=%p, inputName=%p", iotHubClientHandle, inputName);
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
@@ -2458,7 +2460,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetInputMessageCallbackImpl(IOTHUB_CLIENT_L
             {
                 LogError("create_event_handler_callback call failed, error = %d", result);
             }
-            // Codes_SRS_IOTHUBCLIENT_31_136: [ `IoTHubClient_LL_SetInputMessageCallback` shall invoke `IoTHubTransport_Subscribe_InputQueue` if this is the first callback being registered. ]
+            // Codes_SRS_IOTHUBCLIENT_LL_31_136: [ `IoTHubClient_LL_SetInputMessageCallback` shall invoke `IoTHubTransport_Subscribe_InputQueue` if this is the first callback being registered. ]
             else if (!registered_with_transport_handler && (handleData->IoTHubTransport_Subscribe_InputQueue(handleData->deviceHandle) != 0))
             {
                 LogError("IoTHubTransport_Subscribe_InputQueue failed");
