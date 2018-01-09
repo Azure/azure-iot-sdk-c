@@ -940,3 +940,13 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetInputMessageCallback(IOTHUB_CLIENT_LL_HA
 **SRS_IOTHUBCLIENT_31_136: [** `IoTHubClient_LL_SetInputMessageCallback` shall invoke `IoTHubTransport_Subscribe_InputQueue` if this is the first callback being registered. **]**
 
 
+## IoTHubClient_LL_SetInputMessageCallbackEx
+
+```c
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetInputMessageCallbackEx(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* inputName, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC_EX eventHandlerCallbackEx, void *userContextCallbackEx, size_t userContextCallbackExLength)
+```
+
+This function uses the same logic as `IoTHubClient_LL_SetInputMessageCallback` but uses a context and length.  It is for internal use only.
+
+**SRS_IOTHUBCLIENT_LL_31_141: [** `IoTHubClient_LL_SetInputMessageCallbackEx` shall copy the data passed in extended context. **]**
+
