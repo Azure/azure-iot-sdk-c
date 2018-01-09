@@ -912,11 +912,11 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* create_iothub_client_data(IOTHUB_CLIENT_CON
 IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendEventToOutputAsync(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE eventMessageHandle, const char* outputName, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK eventConfirmationCallback, void* userContextCallback);
 ```
 
-**SRS_IOTHUBCLIENT_31_127: [** If `iotHubClientHandle`, `outputName`, or `eventConfirmationCallback` is `NULL`, `IoTHubClient_LL_SendEventToOutputAsync` shall return `IOTHUB_CLIENT_INVALID_ARG`. **]**
+**SRS_IOTHUBCLIENT_LL_31_127: [** If `iotHubClientHandle`, `outputName`, or `eventConfirmationCallback` is `NULL`, `IoTHubClient_LL_SendEventToOutputAsync` shall return `IOTHUB_CLIENT_INVALID_ARG`. **]**
 
-**SRS_IOTHUBCLIENT_31_128: [** `IoTHubClient_LL_SendEventToOutputAsync` shall set the outputName of the message to send. **]**
+**SRS_IOTHUBCLIENT_LL_31_128: [** `IoTHubClient_LL_SendEventToOutputAsync` shall set the outputName of the message to send. **]**
 
-**SRS_IOTHUBCLIENT_31_129: [** `IoTHubClient_LL_SendEventToOutputAsync` shall invoke `IoTHubClient_LL_SendEventAsync` to send the message. **]**
+**SRS_IOTHUBCLIENT_LL_31_129: [** `IoTHubClient_LL_SendEventToOutputAsync` shall invoke `IoTHubClient_LL_SendEventAsync` to send the message. **]**
 
 
 ## IoTHubClient_LL_SetInputMessageCallback
@@ -925,18 +925,28 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendEventToOutputAsync(IOTHUB_CLIENT_LL_HAN
 IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetInputMessageCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* inputName, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC eventHandlerCallback, void* userContextCallback);
 ```
 
-**SRS_IOTHUBCLIENT_31_130: [** If `iotHubClientHandle` or `inputName` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall return IOTHUB_CLIENT_INVALID_ARG. **]**
+**SRS_IOTHUBCLIENT_LL_31_130: [** If `iotHubClientHandle` or `inputName` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall return IOTHUB_CLIENT_INVALID_ARG. **]**
 
-**SRS_IOTHUBCLIENT_31_131: [** If `eventHandlerCallback` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall remove the `inputName` from its callback list if present. **]**
+**SRS_IOTHUBCLIENT_LL_31_131: [** If `eventHandlerCallback` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall remove the `inputName` from its callback list if present. **]**
 
-**SRS_IOTHUBCLIENT_31_132: [** If `eventHandlerCallback` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall return `IOTHUB_CLIENT_ERROR` if the `inputName` is not present. **]**
+**SRS_IOTHUBCLIENT_LL_31_132: [** If `eventHandlerCallback` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall return `IOTHUB_CLIENT_ERROR` if the `inputName` is not present. **]**
 
-**SRS_IOTHUBCLIENT_31_133: [** If `eventHandlerCallback` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall invoke `IoTHubTransport_Unsubscribe_InputQueue` if this was the last input callback. **]**
+**SRS_IOTHUBCLIENT_LL_31_133: [** If `eventHandlerCallback` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall invoke `IoTHubTransport_Unsubscribe_InputQueue` if this was the last input callback. **]**
 
-**SRS_IOTHUBCLIENT_31_134: [** `IoTHubClient_LL_SetInputMessageCallback` shall allocate a callback handle to associate callbacks from the transport => client if `inputName` isn't already present in the callback list. **]**
+**SRS_IOTHUBCLIENT_LL_31_134: [** `IoTHubClient_LL_SetInputMessageCallback` shall allocate a callback handle to associate callbacks from the transport => client if `inputName` isn't already present in the callback list. **]**
 
-**SRS_IOTHUBCLIENT_31_135: [** `IoTHubClient_LL_SetInputMessageCallback` shall reuse the existing callback handle if `inputName` is already present in the callback list. **]**
+**SRS_IOTHUBCLIENT_LL_31_135: [** `IoTHubClient_LL_SetInputMessageCallback` shall reuse the existing callback handle if `inputName` is already present in the callback list. **]**
 
-**SRS_IOTHUBCLIENT_31_136: [** `IoTHubClient_LL_SetInputMessageCallback` shall invoke `IoTHubTransport_Subscribe_InputQueue` if this is the first callback being registered. **]**
+**SRS_IOTHUBCLIENT_LL_31_136: [** `IoTHubClient_LL_SetInputMessageCallback` shall invoke `IoTHubTransport_Subscribe_InputQueue` if this is the first callback being registered. **]**
 
+
+## IoTHubClient_LL_SetInputMessageCallbackEx
+
+```c
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetInputMessageCallbackEx(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* inputName, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC_EX eventHandlerCallbackEx, void *userContextCallbackEx, size_t userContextCallbackExLength)
+```
+
+This function uses the same logic as `IoTHubClient_LL_SetInputMessageCallback` but uses a context and length.  It is for internal use only.
+
+**SRS_IOTHUBCLIENT_LL_31_141: [** `IoTHubClient_LL_SetInputMessageCallbackEx` shall copy the data passed in extended context. **]**
 
