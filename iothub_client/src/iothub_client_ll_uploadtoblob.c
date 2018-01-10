@@ -925,8 +925,8 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
                                         else
                                         {
                                             /*Codes_SRS_IOTHUBCLIENT_LL_02_083: [ IoTHubClient_LL_UploadMultipleBlocksToBlob shall call Blob_UploadFromSasUri and capture the HTTP return code and HTTP body. ]*/
-                                            BLOB_RESULT blobRes = Blob_UploadMultipleBlocksFromSasUri(STRING_c_str(sasUri), getDataCallback, context, &httpResponse, responseToIoTHub, handleData->certificates, &(handleData->http_proxy_options));
-                                            if (blobRes == BLOB_ABORTED)
+                                            BLOB_RESULT uploadMultipleBlocksResult = Blob_UploadMultipleBlocksFromSasUri(STRING_c_str(sasUri), getDataCallback, context, &httpResponse, responseToIoTHub, handleData->certificates, &(handleData->http_proxy_options));
+                                            if (uploadMultipleBlocksResult == BLOB_ABORTED)
                                             {
                                                 /*Codes_SRS_IOTHUBCLIENT_LL_99_008: [ If step 2 is aborted by the client, then the HTTP message body shall look like:  ]*/
                                                 LogInfo("Blob_UploadFromSasUri aborted file upload");
@@ -950,7 +950,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
                                                     result = IOTHUB_CLIENT_ERROR;
                                                 }
                                             }
-                                            else if (blobRes != BLOB_OK)
+                                            else if (uploadMultipleBlocksResult != BLOB_OK)
                                             {
                                                 /*Codes_SRS_IOTHUBCLIENT_LL_02_084: [ If Blob_UploadFromSasUri fails then IoTHubClient_LL_UploadMultipleBlocksToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
                                                 LogError("unable to Blob_UploadFromSasUri");

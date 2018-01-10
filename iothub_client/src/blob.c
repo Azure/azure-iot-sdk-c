@@ -219,95 +219,81 @@ BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* SASURI, IOTHUB_CLIEN
                                     /*Codes_SRS_BLOB_02_021: [ For every block returned by `getDataCallback` the following operations shall happen: ]*/
                                     unsigned int blockID = 0; /* incremented for each new block */
                                     unsigned int isError = 0; /* set to 1 if a block upload fails or if getDataCallback returns incorrect blocks to upload */
-                                    unsigned int uploadOneMoreBlock; /* set to 1 while getDataCallback returns correct blocks to upload */
+                                    unsigned int uploadOneMoreBlock = 1; /* set to 1 while getDataCallback returns correct blocks to upload */
                                     unsigned char const * source; /* data set by getDataCallback */
                                     size_t size; /* source size set by getDataCallback */
+                                    IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT getDataReturnValue;
 
-                                    /* get first block */
-                                    IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT cbkRet;
-                                    cbkRet = getDataCallback(FILE_UPLOAD_OK, &source, &size, context);
+                                    result = BLOB_OK; /* Initialization needed here in case no block is uploaded, which is be fine */
 
-                                    /*Codes_SRS_BLOB_99_002: [ If the size of the block returned by `getDataCallback` is 0 or if the data is NULL, then `Blob_UploadMultipleBlocksFromSasUri` shall exit the loop. ]*/
-                                    uploadOneMoreBlock = (cbkRet == IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK && source != NULL && size > 0) ? 1 : 0;
-
-                                    if (cbkRet == IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK && size > BLOCK_SIZE)
+                                    do
                                     {
-                                        /*Codes_SRS_BLOB_99_001: [ If the size of the block returned by `getDataCallback` is bigger than 4MB, then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_INVALID_ARG`. ]*/
-                                        LogError("tried to upload block of size %zu, max allowed size is %d", size, BLOCK_SIZE);
-                                        result = BLOB_INVALID_ARG;
-                                        isError = 1;
-                                    }
-                                    else
-                                    {
-                                        result = BLOB_OK;
-                                    }
-
-                                    while(uploadOneMoreBlock && !isError)
-                                    {
-                                        /*Codes_SRS_BLOB_02_023: [ Blob_UploadMultipleBlocksFromSasUri shall create a BUFFER_HANDLE from source and size parameters. ]*/
-                                        BUFFER_HANDLE requestContent = BUFFER_create(source, size);
-                                        if (requestContent == NULL)
+                                        getDataReturnValue = getDataCallback(FILE_UPLOAD_OK, &source, &size, context);
+                                        if (getDataReturnValue == IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_ABORT || source == NULL || size == 0)
                                         {
-                                            /*Codes_SRS_BLOB_02_033: [ If any previous operation that doesn't have an explicit failure description fails then Blob_UploadMultipleBlocksFromSasUri shall fail and return BLOB_ERROR ]*/
-                                            LogError("unable to BUFFER_create");
-                                            result = BLOB_ERROR;
-                                            isError = 1;
+                                            /*Codes_SRS_BLOB_99_002: [ If the size of the block returned by `getDataCallback` is 0 or if the data is NULL, then `Blob_UploadMultipleBlocksFromSasUri` shall exit the loop. ]*/
+                                            /*Codes_SRS_BLOB_99_004: [ If `getDataCallback` returns `IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT_ABORT`, then `Blob_UploadMultipleBlocksFromSasUri` shall exit the loop and return `BLOB_ABORTED`. ]*/
+                                            uploadOneMoreBlock = 0;
                                         }
                                         else
                                         {
-                                            result = Blob_UploadBlock(
-                                                    httpApiExHandle,
-                                                    relativePath,
-                                                    requestContent,
-                                                    blockID,
-                                                    blockIDList,
-                                                    httpStatus,
-                                                    httpResponse);
-
-                                            BUFFER_delete(requestContent);
-                                        }
-
-                                        /*Codes_SRS_BLOB_02_026: [ Otherwise, if HTTP response code is >=300 then Blob_UploadMultipleBlocksFromSasUri shall succeed and return BLOB_OK. ]*/
-                                        if (result != BLOB_OK || *httpStatus >= 300)
-                                        {
-                                            isError = 1;
-                                        }
-                                        else
-                                        {
-                                            // try to get next block
-                                            cbkRet = getDataCallback(FILE_UPLOAD_OK, &source, &size, context);
-                                            if (cbkRet == IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_ABORT || source == NULL || size == 0)
+                                            //blockID++;
+                                            if (size > BLOCK_SIZE)
                                             {
-                                                /*Codes_SRS_BLOB_99_002: [ If the size of the block returned by `getDataCallback` is 0 or if the data is NULL, then `Blob_UploadMultipleBlocksFromSasUri` shall exit the loop. ]*/
-                                                /*Codes_SRS_BLOB_99_004: [ If `getDataCallback` returns `IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT_ABORT`, then `Blob_UploadMultipleBlocksFromSasUri` shall exit the loop and return `BLOB_ABORTED`. ]*/
-                                                uploadOneMoreBlock = 0;
+                                                /*Codes_SRS_BLOB_99_001: [ If the size of the block returned by `getDataCallback` is bigger than 4MB, then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_INVALID_ARG`. ]*/
+                                                LogError("tried to upload block of size %zu, max allowed size is %d", size, BLOCK_SIZE);
+                                                result = BLOB_INVALID_ARG;
+                                                isError = 1;
+                                            }
+                                            else if (blockID >= MAX_BLOCK_COUNT)
+                                            {
+                                                /*Codes_SRS_BLOB_99_003: [ If `getDataCallback` returns more than 50000 blocks, then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_INVALID_ARG`. ]*/
+                                                LogError("unable to upload more than %zu blocks in one blob", MAX_BLOCK_COUNT);
+                                                result = BLOB_INVALID_ARG;
+                                                isError = 1;
                                             }
                                             else
                                             {
-                                                blockID++;
-                                                if (size > BLOCK_SIZE)
+                                                /*Codes_SRS_BLOB_02_023: [ Blob_UploadMultipleBlocksFromSasUri shall create a BUFFER_HANDLE from source and size parameters. ]*/
+                                                BUFFER_HANDLE requestContent = BUFFER_create(source, size);
+                                                if (requestContent == NULL)
                                                 {
-                                                    /*Codes_SRS_BLOB_99_001: [ If the size of the block returned by `getDataCallback` is bigger than 4MB, then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_INVALID_ARG`. ]*/
-                                                    LogError("tried to upload block of size %zu, max allowed size is %d", size, BLOCK_SIZE);
-                                                    result = BLOB_INVALID_ARG;
+                                                    /*Codes_SRS_BLOB_02_033: [ If any previous operation that doesn't have an explicit failure description fails then Blob_UploadMultipleBlocksFromSasUri shall fail and return BLOB_ERROR ]*/
+                                                    LogError("unable to BUFFER_create");
+                                                    result = BLOB_ERROR;
                                                     isError = 1;
                                                 }
-                                                else if (blockID >= MAX_BLOCK_COUNT)
+                                                else
                                                 {
-                                                    /*Codes_SRS_BLOB_99_003: [ If `getDataCallback` returns more than 50000 blocks, then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_INVALID_ARG`. ]*/
-                                                    LogError("unable to upload more than %zu blocks in one blob", MAX_BLOCK_COUNT);
-                                                    result = BLOB_INVALID_ARG;
+                                                    result = Blob_UploadBlock(
+                                                            httpApiExHandle,
+                                                            relativePath,
+                                                            requestContent,
+                                                            blockID,
+                                                            blockIDList,
+                                                            httpStatus,
+                                                            httpResponse);
+
+                                                    BUFFER_delete(requestContent);
+                                                }
+
+                                                /*Codes_SRS_BLOB_02_026: [ Otherwise, if HTTP response code is >=300 then Blob_UploadMultipleBlocksFromSasUri shall succeed and return BLOB_OK. ]*/
+                                                if (result != BLOB_OK || *httpStatus >= 300)
+                                                {
                                                     isError = 1;
                                                 }
                                             }
+                                            blockID++;
                                         }
                                     }
+                                    while(uploadOneMoreBlock && !isError);
+
 
                                     if (isError)
                                     {
                                         /*do nothing, it will be reported "as is"*/
                                     }
-                                    else if (cbkRet == IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_ABORT)
+                                    else if (getDataReturnValue == IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_ABORT)
                                     {
                                         /*Codes_SRS_BLOB_99_004: [ If `getDataCallback` returns `IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT_ABORT`, then `Blob_UploadMultipleBlocksFromSasUri` shall exit the loop and return `BLOB_ABORTED`. ]*/
                                         LogInfo("Upload to blob has been aborted by the user");
