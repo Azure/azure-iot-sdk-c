@@ -25,8 +25,8 @@ You'll need to do some initial setup prior to running these scripts.
 * Run `Set-ExecutionPolicy -ExecutionPolicy Unrestricted`.  You'll need this for PowerShell to allow you to run the scripts.
 * Get OpenSSL for Windows.  
   * See [the official documentation] for places to download it.
-  * `$ENV:PATH += ";<directory containing OpenSSL exe>`
-  * `$ENV:OPENSSL_CONF=<the openssl openssl.cnf>`
+  * `$ENV:PATH += ";<directory containing OpenSSL exe>`"
+  * `$ENV:OPENSSL_CONF=<the path to the openssl.cnf in your OpenSSL installation directory>`
 * Run `. .\ca-certs.ps1` .  This is called dot-sourcing and brings the functions of the script into PowerShell's global namespace.
 * Run `Test-CACertsPrerequisites`.
  PowerShell uses the Windows Certificate Store to manage certificates.  This makes sure that there won't be name collisions later with existing certificates and that OpenSSL is setup correctly.
