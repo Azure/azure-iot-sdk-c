@@ -17,6 +17,7 @@ if(${use_http})
     add_sample_directory(iothub_client_sample_http_shared)
     if(NOT ${dont_use_uploadtoblob})
         add_sample_directory(iothub_client_sample_upload_to_blob)
+        add_sample_directory(iothub_client_sample_upload_to_blob_multi_block)
     endif()
 endif()
 
