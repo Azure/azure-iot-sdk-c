@@ -67,17 +67,15 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
         correlationId = "<null>";
     }
 
-    // TODO: re-enable after IoTHubClient nuget package has been released (ewertons)
-    //if ((contentType = IoTHubMessage_GetContentTypeSystemProperty(message)) == NULL)
-    //{
+    if ((contentType = IoTHubMessage_GetContentTypeSystemProperty(message)) == NULL)
+    {
         contentType = "<null>";
-    //}
+    }
 
-    // TODO: re-enable after IoTHubClient nuget package has been released (ewertons)
-    //if ((contentEncoding = IoTHubMessage_GetContentEncodingSystemProperty(message)) == NULL)
-    //{
+    if ((contentEncoding = IoTHubMessage_GetContentEncodingSystemProperty(message)) == NULL)
+    {
         contentEncoding = "<null>";
-    //}
+    }
 
     // Message content
     if (IoTHubMessage_GetByteArray(message, (const unsigned char**)&buffer, &size) != IOTHUB_MESSAGE_OK)
@@ -224,9 +222,8 @@ void iothub_client_sample_http_run(void)
                                 (void)printf("ERROR: Map_AddOrUpdate Failed!\r\n");
                             }
 
-                            // TODO: re-enable after IoTHubClient nuget package has been released (ewertons)
-                            //(void)IoTHubMessage_SetContentTypeSystemProperty(messages[iterator].messageHandle, "application/json");
-                            //(void)IoTHubMessage_SetContentEncodingSystemProperty(messages[iterator].messageHandle, "utf-8");
+                            (void)IoTHubMessage_SetContentTypeSystemProperty(messages[iterator].messageHandle, "application/json");
+                            (void)IoTHubMessage_SetContentEncodingSystemProperty(messages[iterator].messageHandle, "utf-8");
 
                             if (IoTHubClient_LL_SendEventAsync(iotHubClientHandle, messages[iterator].messageHandle, SendConfirmationCallback, &messages[iterator]) != IOTHUB_CLIENT_OK)
                             {
