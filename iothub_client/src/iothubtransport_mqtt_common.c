@@ -129,7 +129,8 @@ typedef enum MQTT_CLIENT_STATUS_TAG
 {
     MQTT_CLIENT_STATUS_NOT_CONNECTED,
     MQTT_CLIENT_STATUS_CONNECTING,
-    MQTT_CLIENT_STATUS_CONNECTED
+    MQTT_CLIENT_STATUS_CONNECTED,
+    MQTT_CLIENT_STATUS_PENDING_CLOSE
 } MQTT_CLIENT_STATUS;
 
 typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
@@ -1352,8 +1353,7 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
                             transport_data->isRecoverableError = false;
                         }
                         LogError("Connection Not Accepted: 0x%x: %s", connack->returnCode, retrieve_mqtt_return_codes(connack->returnCode) );
-                        (void)mqtt_client_disconnect(transport_data->mqttClient, NULL, NULL);
-                        transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_NOT_CONNECTED;
+                        transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_PENDING_CLOSE;
                         transport_data->currPacketState = PACKET_TYPE_ERROR;
                     }
                 }
@@ -1455,7 +1455,10 @@ static void mqtt_error_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_ERR
                 break;
             }
         }
-        transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_NOT_CONNECTED;
+        if (transport_data->mqttClientStatus != MQTT_CLIENT_STATUS_PENDING_CLOSE)
+        {
+            transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_NOT_CONNECTED;
+        }
         transport_data->currPacketState = PACKET_TYPE_ERROR;
         transport_data->device_twin_get_sent = false;
         if (transport_data->topic_MqttMessage != NULL)
@@ -2473,7 +2476,12 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIEN
         }
         else
         {
-            if (transport_data->currPacketState == CONNACK_TYPE || transport_data->currPacketState == SUBSCRIBE_TYPE)
+            if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_PENDING_CLOSE)
+            {
+                mqtt_client_disconnect(transport_data->mqttClient, NULL, NULL);
+                transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_NOT_CONNECTED;
+            }
+            else if (transport_data->currPacketState == CONNACK_TYPE || transport_data->currPacketState == SUBSCRIBE_TYPE)
             {
                 SubscribeToMqttProtocol(transport_data);
             }
