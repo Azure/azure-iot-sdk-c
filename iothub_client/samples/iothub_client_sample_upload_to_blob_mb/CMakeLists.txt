@@ -1,0 +1,46 @@
+#Copyright (c) Microsoft. All rights reserved.
+#Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+#this is CMakeLists.txt for iothub_client_sample_upload_to_blob_mb
+
+compileAsC99()
+
+if(NOT ${use_http})
+    message(FATAL_ERROR "iothub_client_sample_upload_to_blob_mb being generated without HTTP support")
+endif()
+
+set(iothub_client_sample_upload_to_blob_mb_c_files
+iothub_client_sample_upload_to_blob_mb.c
+../../../certs/certs.c
+)
+
+if(WIN32)
+    set(iothub_client_sample_upload_to_blob_mb_c_files ${iothub_client_sample_upload_to_blob_mb_c_files} ./windows/main.c)
+else()
+    set(iothub_client_sample_upload_to_blob_mb_c_files ${iothub_client_sample_upload_to_blob_mb_c_files} ./linux/main.c)
+endif()
+
+
+set(iothub_client_sample_upload_to_blob_mb_h_files
+iothub_client_sample_upload_to_blob_mb.h
+)
+
+IF(WIN32)
+    #windows needs this define
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
+ENDIF(WIN32)
+
+include_directories(.)
+include_directories(../../../certs)
+
+
+add_executable(iothub_client_sample_upload_to_blob_mb ${iothub_client_sample_upload_to_blob_mb_c_files} ${iothub_client_sample_upload_to_blob_mb_h_files})
+
+target_link_libraries(iothub_client_sample_upload_to_blob_mb 
+    iothub_client
+    iothub_client_http_transport
+)
+
+linkSharedUtil(iothub_client_sample_upload_to_blob_mb)
+linkHttp(iothub_client_sample_upload_to_blob_mb)
