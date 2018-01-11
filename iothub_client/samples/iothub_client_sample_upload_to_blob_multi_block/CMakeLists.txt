@@ -6,7 +6,7 @@
 compileAsC99()
 
 if(NOT ${use_http})
-	message(FATAL_ERROR "iothub_client_sample_upload_to_blob_multi_block being generated without HTTP support")
+    message(FATAL_ERROR "iothub_client_sample_upload_to_blob_multi_block being generated without HTTP support")
 endif()
 
 set(iothub_client_sample_upload_to_blob_multi_block_c_files
@@ -15,9 +15,9 @@ iothub_client_sample_upload_to_blob_multi_block.c
 )
 
 if(WIN32)
-	set(iothub_client_sample_upload_to_blob_multi_block_c_files ${iothub_client_sample_upload_to_blob_multi_block_c_files} ./windows/main.c)
+    set(iothub_client_sample_upload_to_blob_multi_block_c_files ${iothub_client_sample_upload_to_blob_multi_block_c_files} ./windows/main.c)
 else()
-	set(iothub_client_sample_upload_to_blob_multi_block_c_files ${iothub_client_sample_upload_to_blob_multi_block_c_files} ./linux/main.c)
+    set(iothub_client_sample_upload_to_blob_multi_block_c_files ${iothub_client_sample_upload_to_blob_multi_block_c_files} ./linux/main.c)
 endif()
 
 
@@ -26,9 +26,9 @@ iothub_client_sample_upload_to_blob_multi_block.h
 )
 
 IF(WIN32)
-	#windows needs this define
-	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-	add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
+    #windows needs this define
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
 ENDIF(WIN32)
 
 include_directories(.)
@@ -38,9 +38,8 @@ include_directories(../../../certs)
 add_executable(iothub_client_sample_upload_to_blob_multi_block ${iothub_client_sample_upload_to_blob_multi_block_c_files} ${iothub_client_sample_upload_to_blob_multi_block_h_files})
 
 target_link_libraries(iothub_client_sample_upload_to_blob_multi_block 
-#iothubclient is here only because locking... in gballoc no less.
-	iothub_client
-	iothub_client_http_transport
+    iothub_client
+    iothub_client_http_transport
 )
 
 linkSharedUtil(iothub_client_sample_upload_to_blob_multi_block)

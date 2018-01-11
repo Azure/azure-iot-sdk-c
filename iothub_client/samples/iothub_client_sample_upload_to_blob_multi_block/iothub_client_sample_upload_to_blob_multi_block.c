@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #ifdef DONT_USE_UPLOADTOBLOB
-#error "trying to compile iothub_client_sample_upload_to_blob.c while DONT_USE_UPLOADTOBLOB is #define'd"
+#error "trying to compile iothub_client_sample_upload_to_blob_multi_block.c while DONT_USE_UPLOADTOBLOB is #define'd"
 #else
 
 #include <stdio.h>
@@ -21,10 +21,6 @@ and removing calls to _DoWork will yield the same results. */
 #include "iothub_message.h"
 #include "iothubtransporthttp.h"
 #include "certs.h"
-
-#ifdef MBED_BUILD_TIMESTAMP
-#include "certs.h"
-#endif // MBED_BUILD_TIMESTAMP
 
 DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, IOTHUB_CLIENT_FILE_UPLOAD_RESULT_VALUES);
 
@@ -90,7 +86,7 @@ void iothub_client_sample_upload_to_blob_multi_block_run(void)
     }
     else
     {
-        (void)printf("Starting the IoTHub client sample upload to blob...\r\n");
+        (void)printf("Starting the IoTHub client sample upload to blob with multiple blocks...\r\n");
 
         if ((iotHubClientHandle = IoTHubClient_LL_CreateFromConnectionString(connectionString, HTTP_Protocol)) == NULL)
         {
