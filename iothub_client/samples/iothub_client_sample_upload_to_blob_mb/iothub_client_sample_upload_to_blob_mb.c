@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #ifdef DONT_USE_UPLOADTOBLOB
-#error "trying to compile iothub_client_sample_upload_to_blob_multi_block.c while DONT_USE_UPLOADTOBLOB is #define'd"
+#error "trying to compile iothub_client_sample_upload_to_blob_mb.c while DONT_USE_UPLOADTOBLOB is #define'd"
 #else
 
 #include <stdio.h>
