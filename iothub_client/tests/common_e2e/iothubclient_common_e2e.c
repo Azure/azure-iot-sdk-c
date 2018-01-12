@@ -473,10 +473,9 @@ IOTHUB_CLIENT_HANDLE client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUs
 
     // Set keep alive for remote idle is optional. If it is not set the default ratio of 1/2 will be used. For default value of 4 minutes, it will be 2 minutes (120 seconds)
     double cl2svc_keep_alive_send_ratio = 1.0 / 2.0; // Set it to 120 seconds (240 x 1/2 = 120 seconds) for 4 minutes remote idle. 
-    if (IoTHubClient_SetOption(iotHubClientHandle, OPTION_REMOTE_IDLE_TIMEOUT_RATIO, &cl2svc_keep_alive_send_ratio) != IOTHUB_CLIENT_OK) // client will send pings to service at 210 second interval for 4 minutes remote idle. For 25 minutes remote idle, it will be set to 21 minutes.
-    {
-        LogError("ERROR: IoTHubClient_remote_idle_timeout_ratio..........FAILED!\r\n");
-    }
+
+    // client will send pings to service at 210 second interval for 4 minutes remote idle. For 25 minutes remote idle, it will be set to 21 minutes.
+    IoTHubClient_SetOption(iotHubClientHandle, OPTION_REMOTE_IDLE_TIMEOUT_RATIO, &cl2svc_keep_alive_send_ratio);
         
 #ifdef AZIOT_LINUX
     if (g_e2e_test_options.set_mac_address)
