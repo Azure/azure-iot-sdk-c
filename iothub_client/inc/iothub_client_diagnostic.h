@@ -14,6 +14,7 @@
 #include "azure_c_shared_utility/umock_c_prod.h"
 
 #include "iothub_message.h"
+#include "parson.h"
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -23,11 +24,21 @@ extern "C" {
 #include <stddef.h>
 #endif
 
+#define DEVICE_TWIN_SAMPLING_RATE_KEY "__e2e_diag_sample_rate"
+
+#define E2E_DIAG_SETTING_METHOD_VALUE  \
+    E2E_DIAG_SETTING_UNKNOWN,          \
+    E2E_DIAG_SETTING_USE_LOCAL,        \
+    E2E_DIAG_SETTING_USE_REMOTE
+
+DEFINE_ENUM(E2E_DIAG_SETTING_METHOD, E2E_DIAG_SETTING_METHOD_VALUE);
+
 /** @brief diagnostic related setting */
 typedef struct IOTHUB_DIAGNOSTIC_SETTING_DATA_TAG
 {
     uint32_t diagSamplingPercentage;
     uint32_t currentMessageNumber;
+    E2E_DIAG_SETTING_METHOD diagSettingMethod;
 } IOTHUB_DIAGNOSTIC_SETTING_DATA;
 
 /**
@@ -42,6 +53,21 @@ typedef struct IOTHUB_DIAGNOSTIC_SETTING_DATA_TAG
     * @return	0 upon success
     */
 MOCKABLE_FUNCTION(, int, IoTHubClient_Diagnostic_AddIfNecessary, IOTHUB_DIAGNOSTIC_SETTING_DATA *, diagSetting, IOTHUB_MESSAGE_HANDLE, messageHandle);
+
+/**
+    * @brief	Update diagnostic settings from device twin
+    *
+    * @param	diagSetting		Pointer to an @c IOTHUB_DIAGNOSTIC_SETTING_DATA structure
+    *
+    * @param    isPartialUpdate Whether device twin is complete or partial update
+    *
+    * @param	payLoad			Received device twin
+    *
+    * @param	message			Record some messages when updating diagnostic settings
+    *
+    * @return	0 upon success
+    */
+MOCKABLE_FUNCTION(, int, IoTHubClient_Diagnostic_UpdateFromTwin, IOTHUB_DIAGNOSTIC_SETTING_DATA*, diagSetting, bool, isPartialUpdate, const unsigned char*, payLoad, STRING_HANDLE, message);
 
 #ifdef __cplusplus
 }

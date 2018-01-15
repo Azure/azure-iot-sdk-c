@@ -27,9 +27,11 @@ static void my_gballoc_free(void* ptr)
 #include "umock_c_negative_tests.h"
 #include "umocktypes_stdint.h"
 #include "umocktypes_bool.h"
+#include "parson.h"
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"
+#include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/agenttime.h"
 #include "azure_c_shared_utility/buffer_.h"
@@ -44,6 +46,8 @@ static void my_gballoc_free(void* ptr)
 
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
+bool g_fail_string_sprintf;
+
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];
@@ -51,12 +55,19 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
     ASSERT_FAIL(temp_str);
 }
 
+int STRING_sprintf(STRING_HANDLE handle, const char* psz, ...)
+{
+    (void)handle;
+    (void)psz;
+    return g_fail_string_sprintf ? -1 : 0;
+}
+
 static TEST_MUTEX_HANDLE g_testByTest;
 static TEST_MUTEX_HANDLE g_dllByDll;
 
 static IOTHUB_MESSAGE_HANDLE TEST_MESSAGE_HANDLE = (IOTHUB_MESSAGE_HANDLE)0x12;
 
-
+#define TEST_STRING_HANDLE (STRING_HANDLE)0x46
 #define INDEFINITE_TIME ((time_t)-1)
 static time_t g_current_time;
 
@@ -79,6 +90,7 @@ TEST_SUITE_INITIALIZE(suite_init)
 
     REGISTER_UMOCK_ALIAS_TYPE(MAP_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_MESSAGE_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
 
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
@@ -108,6 +120,7 @@ TEST_FUNCTION_INITIALIZE(method_init)
     {
         ASSERT_FAIL("Could not acquire test serialization mutex.");
     }
+    g_fail_string_sprintf = false;
     umock_c_reset_all_calls();
 }
 
@@ -153,7 +166,8 @@ TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_fails)
     IOTHUB_DIAGNOSTIC_SETTING_DATA diag_setting =
     {
         100,	/*diagnostic sampling percentage*/
-        0		/*message number*/
+        0,		/*message number*/
+        E2E_DIAG_SETTING_USE_LOCAL /*use local setting*/
     };
 
     umock_c_reset_all_calls();
@@ -188,7 +202,8 @@ TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_no_diag_info_with_percentag
     IOTHUB_DIAGNOSTIC_SETTING_DATA diag_setting =
     {
         0,		/*diagnostic sampling percentage*/
-        0		/*message number*/
+        0,		/*message number*/
+        E2E_DIAG_SETTING_USE_LOCAL /*use local setting*/
     };
 
     umock_c_reset_all_calls();
@@ -207,11 +222,11 @@ TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_no_diag_info_with_percentag
     IOTHUB_DIAGNOSTIC_SETTING_DATA diag_setting =
     {
         100,	/*diagnostic sampling percentage*/
-        0		/*message number*/
+        0,		/*message number*/
+        E2E_DIAG_SETTING_USE_LOCAL /*use local setting*/
     };
 
     umock_c_reset_all_calls();
-
 
     EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
@@ -238,7 +253,8 @@ TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_no_diag_info_with_normal_pe
     IOTHUB_DIAGNOSTIC_SETTING_DATA diag_setting =
     {
         50,		/*diagnostic sampling percentage*/
-        0		/*message number*/
+        0,		/*message number*/
+        E2E_DIAG_SETTING_USE_LOCAL /*use local setting*/
     };
 
     umock_c_reset_all_calls();
@@ -263,5 +279,157 @@ TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_no_diag_info_with_normal_pe
         ASSERT_IS_TRUE(result == 0);
     }
 }
+
+/* Tests_SRS_IOTHUB_DIAGNOSTIC_13_006: [ IoTHubClient_Diagnostic_UpdateFromTwin should return nonezero if arguments are NULL. ]*/
+TEST_FUNCTION(IoTHubClient_Diagnostic_UpdateFromTwin_with_null_args_fails)
+{
+    //arrange
+
+    //act
+    int result = IoTHubClient_Diagnostic_UpdateFromTwin(NULL, false, NULL, NULL);
+
+    //assert
+    ASSERT_IS_FALSE(result == 0);
+}
+
+/* Tests_SRS_IOTHUB_DIAGNOSTIC_13_007: [ IoTHubClient_Diagnostic_UpdateFromTwin should return nonezero if payLoad is not a valid json string. ]*/
+TEST_FUNCTION(IoTHubClient_Diagnostic_UpdateFromTwin_with_invalid_twin_fails)
+{
+    //arrange
+    IOTHUB_DIAGNOSTIC_SETTING_DATA diag_setting =
+    {
+        0,		/*diagnostic sampling percentage*/
+        0,		/*message number*/
+        E2E_DIAG_SETTING_USE_REMOTE /*use remote setting*/
+    };
+
+    //act
+    int result = IoTHubClient_Diagnostic_UpdateFromTwin(&diag_setting, false, (const unsigned char*)"abc", TEST_STRING_HANDLE);
+
+    //assert
+    ASSERT_IS_FALSE(result == 0);
+}
+
+/* Tests_SRS_IOTHUB_DIAGNOSTIC_13_009: [ IoTHubClient_Diagnostic_UpdateFromTwin should set diagSamplingPercentage = 0 when sampling rate in twin is null. ]*/
+/* Tests_SRS_IOTHUB_DIAGNOSTIC_13_012: [ IoTHubClient_Diagnostic_UpdateFromTwin should set diagSamplingPercentage correctly if sampling rate is valid. ]*/
+TEST_FUNCTION(IoTHubClient_Diagnostic_UpdateFromTwin_update_twin)
+{
+    //arrange
+    IOTHUB_DIAGNOSTIC_SETTING_DATA diag_setting =
+    {
+        0,		/*diagnostic sampling percentage*/
+        0,		/*message number*/
+        E2E_DIAG_SETTING_USE_REMOTE /*use remote setting*/
+    };
+
+    //act
+    int result = IoTHubClient_Diagnostic_UpdateFromTwin(&diag_setting, false, (const unsigned char*)"{ \"desired\": {\"__e2e_diag_sample_rate\": 100,\"$version\": 11}}", TEST_STRING_HANDLE);
+
+    ASSERT_ARE_EQUAL(uint32_t, result, 0);
+    ASSERT_ARE_EQUAL(uint32_t, diag_setting.diagSamplingPercentage, 100);
+
+    result = IoTHubClient_Diagnostic_UpdateFromTwin(&diag_setting, true, (const unsigned char*)"{\"__e2e_diag_sample_rate\":99}", TEST_STRING_HANDLE);
+
+    ASSERT_ARE_EQUAL(uint32_t, result, 0);
+    ASSERT_ARE_EQUAL(uint32_t, diag_setting.diagSamplingPercentage, 99);
+
+    result = IoTHubClient_Diagnostic_UpdateFromTwin(&diag_setting, true, (const unsigned char*)"{\"__e2e_diag_sample_rate\":null}", TEST_STRING_HANDLE);
+
+    ASSERT_ARE_EQUAL(uint32_t, result, 0);
+    ASSERT_ARE_EQUAL(uint32_t, diag_setting.diagSamplingPercentage, 0);
+}
+
+/* Tests_SRS_IOTHUB_DIAGNOSTIC_13_008: [ IoTHubClient_Diagnostic_UpdateFromTwin should return nonezero if device twin json doesn't contains a valid desired property. ]*/
+TEST_FUNCTION(IoTHubClient_Diagnostic_UpdateFromTwin_with_invalid_complete_twin_update)
+{
+    //arrange
+    IOTHUB_DIAGNOSTIC_SETTING_DATA diag_setting =
+    {
+        50,		/*diagnostic sampling percentage*/
+        0,		/*message number*/
+        E2E_DIAG_SETTING_USE_REMOTE /*use remote setting*/
+    };
+
+    //act
+    IoTHubClient_Diagnostic_UpdateFromTwin(&diag_setting, false, (const unsigned char*)"{ \"nodesired\": {\"__e2e_diag_sample_rate\": 100,\"$version\": 11} }", TEST_STRING_HANDLE);
+
+    //assert
+    ASSERT_ARE_EQUAL(uint32_t, diag_setting.diagSamplingPercentage, 50);
+}
+
+/* Tests_SRS_IOTHUB_DIAGNOSTIC_13_011: [ IoTHubClient_Diagnostic_UpdateFromTwin should set diagSamplingPercentage = 0 if sampling rate parsed from twin is not between [0,100]. ]*/
+TEST_FUNCTION(IoTHubClient_Diagnostic_UpdateFromTwin_with_diag_setting_out_of_range)
+{
+    //arrange
+    IOTHUB_DIAGNOSTIC_SETTING_DATA diag_setting =
+    {
+        50,		/*diagnostic sampling percentage*/
+        0,		/*message number*/
+        E2E_DIAG_SETTING_USE_REMOTE /*use remote setting*/
+    };
+
+    //act
+    IoTHubClient_Diagnostic_UpdateFromTwin(&diag_setting, true, (const unsigned char*)"{\"__e2e_diag_sample_rate\":101}", TEST_STRING_HANDLE);
+
+    //assert
+    ASSERT_ARE_EQUAL(uint32_t, diag_setting.diagSamplingPercentage, 50);
+}
+
+/* Tests_SRS_IOTHUB_DIAGNOSTIC_13_010: [ IoTHubClient_Diagnostic_UpdateFromTwin should set diagSamplingPercentage = 0 when cannot parse sampling rate from twin. ]*/
+TEST_FUNCTION(IoTHubClient_Diagnostic_UpdateFromTwin_with_diag_setting_invalid_type)
+{
+    //arrange
+    IOTHUB_DIAGNOSTIC_SETTING_DATA diag_setting =
+    {
+        50,		/*diagnostic sampling percentage*/
+        0,		/*message number*/
+        E2E_DIAG_SETTING_USE_REMOTE /*use remote setting*/
+    };
+
+    //act
+    IoTHubClient_Diagnostic_UpdateFromTwin(&diag_setting, true, (const unsigned char*)"{\"__e2e_diag_sample_rate\": \"19\"}", TEST_STRING_HANDLE);
+
+    //assert
+    ASSERT_ARE_EQUAL(uint32_t, diag_setting.diagSamplingPercentage, 50);
+}
+
+/* Tests_SRS_IOTHUB_DIAGNOSTIC_13_013: [ IoTHubClient_Diagnostic_UpdateFromTwin should report diagnostic property not existed if there is no sampling rate in complete twin. ]*/
+TEST_FUNCTION(IoTHubClient_Diagnostic_UpdateFromTwin_when_no_sampling_rate_in_complete_twin)
+{
+    //arrange
+    IOTHUB_DIAGNOSTIC_SETTING_DATA diag_setting =
+    {
+        50,		/*diagnostic sampling percentage*/
+        0,		/*message number*/
+        E2E_DIAG_SETTING_USE_REMOTE /*use remote setting*/
+    };
+
+    //act
+    IoTHubClient_Diagnostic_UpdateFromTwin(&diag_setting, false, (const unsigned char*)"{ \"desired\": {}}", TEST_STRING_HANDLE);
+
+    //assert
+    ASSERT_ARE_EQUAL(uint32_t, diag_setting.diagSamplingPercentage, 50);
+}
+
+/* Tests_SRS_IOTHUB_DIAGNOSTIC_13_014: [ IoTHubClient_Diagnostic_UpdateFromTwin should return nonzero if STRING_sprintf failed. ]*/
+TEST_FUNCTION(IoTHubClient_Diagnostic_UpdateFromTwin_when_no_sampling_rate_in_complete_twin_fails)
+{
+    //arrange
+    IOTHUB_DIAGNOSTIC_SETTING_DATA diag_setting =
+    {
+        50,		/*diagnostic sampling percentage*/
+        0,		/*message number*/
+        E2E_DIAG_SETTING_USE_REMOTE /*use remote setting*/
+    };
+    g_fail_string_sprintf = true;
+
+    //act
+    int result = IoTHubClient_Diagnostic_UpdateFromTwin(&diag_setting, false, (const unsigned char*)"{ \"desired\": {}}", TEST_STRING_HANDLE);
+
+    //assert
+    ASSERT_IS_TRUE(result != 0);
+    ASSERT_ARE_EQUAL(uint32_t, diag_setting.diagSamplingPercentage, 50);
+}
+
 
 END_TEST_SUITE(iothubclient_diagnostic_ut)

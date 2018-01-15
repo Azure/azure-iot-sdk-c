@@ -32,6 +32,8 @@
 #define LOG_ERROR_RESULT LogError("result = %s", ENUM_TO_STRING(IOTHUB_CLIENT_RESULT, result));
 #define INDEFINITE_TIME ((time_t)(-1))
 
+#define REPORT_TWIN_TEMPLATE  "{ \"__e2e_diag_sample_rate\": %d, \"__e2e_diag_info\": \"%s\"}"
+
 DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_CONFIRMATION_RESULT, IOTHUB_CLIENT_CONFIRMATION_RESULT_VALUES);
 
@@ -429,6 +431,7 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
 
                             result->diagnostic_setting.currentMessageNumber = 0;
                             result->diagnostic_setting.diagSamplingPercentage = 0;
+                            result->diagnostic_setting.diagSettingMethod = E2E_DIAG_SETTING_UNKNOWN;
                             /*Codes_SRS_IOTHUBCLIENT_LL_25_124: [ `IoTHubClient_LL_Create` shall set the default retry policy as Exponential backoff with jitter and if succeed and return a `non-NULL` handle. ]*/
                             if (IoTHubClient_LL_SetRetryPolicy(result, IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER, 0) != IOTHUB_CLIENT_OK)
                             {
@@ -509,6 +512,63 @@ static IOTHUB_DEVICE_TWIN* dev_twin_data_create(IOTHUB_CLIENT_LL_HANDLE_DATA* ha
     {
         LogError("Failure allocating device twin information");
     }
+    return result;
+}
+
+static int send_diagnostic_reported_state(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, int samplingPercentage, STRING_HANDLE error)
+{
+    int result = 0;
+    STRING_HANDLE data = STRING_new();;
+    if (data == NULL)
+    {
+        LogError("Error creating diagnostic reported string");
+        result = __FAILURE__;
+    }
+    else if (STRING_sprintf(data, REPORT_TWIN_TEMPLATE, samplingPercentage, STRING_c_str(error)) != 0)
+    {
+        LogError("Error calling STRING_sprintf for diagnostic reported status");
+        result = __FAILURE__;
+    }
+    else if (IoTHubClient_LL_SendReportedState(iotHubClientHandle, (const unsigned char*)STRING_c_str(data), STRING_length(data), NULL, NULL) != IOTHUB_CLIENT_OK)
+    {
+        LogError("IoTHubClient_LL_SendReportedState failed");
+        result = __FAILURE__;
+    }
+    else
+    {
+        result = 0;
+    }
+
+    STRING_delete(data);
+
+    return result;
+}
+
+static int update_diagnostic_settings_from_twin(IOTHUB_DIAGNOSTIC_SETTING_DATA* diagSetting, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad)
+{
+    int result;
+    STRING_HANDLE message = STRING_new();
+    if (message == NULL)
+    {
+        LogError("Error creating message string");
+        result = __FAILURE__;
+    }
+    else if (IoTHubClient_Diagnostic_UpdateFromTwin(diagSetting, update_state == DEVICE_TWIN_UPDATE_PARTIAL, payLoad, message) != 0)
+    {
+        LogError("Error calling IoTHubClient_Diagnostic_UpdateFromTwin");
+        result = __FAILURE__;
+    }
+    else if (send_diagnostic_reported_state(iotHubClientHandle, diagSetting->diagSamplingPercentage, message) != 0)
+    {
+        LogError("Error calling send_diagnostic_reported_state");
+        result = __FAILURE__;
+    }
+    else
+    {
+        result = 0;
+    }
+    STRING_delete(message);
+
     return result;
 }
 
@@ -1439,6 +1499,12 @@ void IoTHubClient_LL_RetrievePropertyComplete(IOTHUB_CLIENT_LL_HANDLE handle, DE
     else
     {
         IOTHUB_CLIENT_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LL_HANDLE_DATA*)handle;
+
+        if (handleData->diagnostic_setting.diagSettingMethod == E2E_DIAG_SETTING_USE_REMOTE)
+        {
+            update_diagnostic_settings_from_twin(&handleData->diagnostic_setting, handle, update_state, payLoad);
+        }
+
         /* Codes_SRS_IOTHUBCLIENT_LL_07_014: [ If deviceTwinCallback is NULL then IoTHubClient_LL_RetrievePropertyComplete shall do nothing.] */
         if (handleData->deviceTwinCallback)
         {
@@ -1745,11 +1811,18 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetOption(IOTHUB_CLIENT_LL_HANDLE iotHubCli
                 LogError("The value of diag_sampling_percentage is out of range [0, 100]: %u", percentage);
                 result = IOTHUB_CLIENT_ERROR;
             }
+            else if (handleData->diagnostic_setting.diagSettingMethod == E2E_DIAG_SETTING_USE_REMOTE)
+            {
+                /*Codes_SRS_IOTHUBCLIENT_LL_18_001: [If diagnostic has been enabled with could setting, calling IoTHubClient_LL_SetOption to enable local diagnostic setting shall return `IOTHUB_CLIENT_ERROR`. ]*/
+                LogError("The call is not supported because the E2E diagnostic had been enabled with remote setting by calling IoTHubClient_LL_EnableE2EDiagnosticWithCloudSetting");
+                result = IOTHUB_CLIENT_ERROR;
+            }
             else
             {
                 /*Codes_SRS_IOTHUBCLIENT_LL_10_037: [Calling IoTHubClient_LL_SetOption with value between [0, 100] shall return `IOTHUB_CLIENT_OK`. ]*/
                 handleData->diagnostic_setting.diagSamplingPercentage = percentage;
                 handleData->diagnostic_setting.currentMessageNumber = 0;
+                handleData->diagnostic_setting.diagSettingMethod = E2E_DIAG_SETTING_USE_LOCAL;
                 result = IOTHUB_CLIENT_OK;
             }
         }
@@ -2114,3 +2187,42 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob(IOTHUB_CLIENT_LL
 }
 
 #endif /* DONT_USE_UPLOADTOBLOB */
+
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_EnableE2EDiagnosticWithCloudSetting(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
+{
+    IOTHUB_CLIENT_RESULT result;
+    IOTHUB_CLIENT_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LL_HANDLE_DATA*)iotHubClientHandle;
+
+    if (iotHubClientHandle == NULL)
+    {
+        /* Codes_SRS_IOTHUBCLIENT_LL_18_002: [ EnableE2EDiagnosticWithCloudSetting should return `IOTHUB_CLIENT_INVALID_ARG` if argument handle is NULL. ]*/
+        LogError("invalid parameters IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle=%p", iotHubClientHandle);
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    else if (handleData->diagnostic_setting.diagSettingMethod == E2E_DIAG_SETTING_USE_REMOTE)
+    {
+        /* Codes_SRS_IOTHUBCLIENT_LL_18_003: [ EnableE2EDiagnosticWithCloudSetting should return `IOTHUB_CLIENT_ERROR` if calling EnableE2EDiagnosticWithCloudSetting twice. ]*/
+        LogError("Cannot enable E2E diagnostic feature multiple times through calling IoTHubClient_LL_EnableE2EDiagnosticWithCloudSetting");
+        result = IOTHUB_CLIENT_ERROR;
+    }
+    else if (handleData->diagnostic_setting.diagSettingMethod == E2E_DIAG_SETTING_USE_LOCAL)
+    {
+        /* Codes_SRS_IOTHUBCLIENT_LL_18_004: [ EnableE2EDiagnosticWithCloudSetting should return `IOTHUB_CLIENT_ERROR` if diagnostic has been enabled with local setting. ]*/
+        LogError("The call is not supported because the E2E diagnostic had been enabled with local setting by calling IoTHubClient_LL_SetOption");
+        result = IOTHUB_CLIENT_ERROR;
+    }
+    else if (handleData->IoTHubTransport_Subscribe_DeviceTwin(handleData->transportHandle) != 0)
+    {
+        /* Codes_SRS_IOTHUBCLIENT_LL_18_005: [ EnableE2EDiagnosticWithCloudSetting should return `IOTHUB_CLIENT_ERROR` if IoTHubTransport_Subscribe_DeviceTwin failed.]*/
+        LogError("Cannot subscribe device twin for diagnostic setting. Currently device twin supports MQTT and AMQP only.");
+        result = IOTHUB_CLIENT_ERROR;
+    }
+    else
+    {
+        /* Codes_SRS_IOTHUBCLIENT_LL_18_006: [ EnableE2EDiagnosticWithCloudSetting should return `IOTHUB_CLIENT_OK` upon success. ]*/
+        handleData->diagnostic_setting.diagSettingMethod = E2E_DIAG_SETTING_USE_REMOTE;
+        result = IOTHUB_CLIENT_OK;
+    }
+
+    return result;
+}
