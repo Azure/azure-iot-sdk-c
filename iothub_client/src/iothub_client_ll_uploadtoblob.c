@@ -69,7 +69,7 @@ typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA_TAG
     } credentials;                              /*needed for file upload*/
     char* certificates; /*if there are any certificates used*/
     HTTP_PROXY_OPTIONS http_proxy_options;
-    size_t verbose;
+    size_t curl_verbose;
 }IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA;
 
 typedef struct BLOB_UPLOAD_CONTEXT_TAG
@@ -161,7 +161,7 @@ IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE IoTHubClient_LL_UploadToBlob_Create(const I
                     handleData->authorizationScheme = X509;
                     handleData->credentials.x509credentials.x509certificate = NULL;
                     handleData->credentials.x509credentials.x509privatekey = NULL;
-                    handleData->verbose = 0;
+                    handleData->curl_verbose = 0;
                     /*return as is*/
                 }
             }
@@ -832,8 +832,8 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
         }
         else
         {
-            (void)HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_CURL_VERBOSE, &handleData->verbose);
-			
+            (void)HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_CURL_VERBOSE, &handleData->curl_verbose);
+
             if (
                 (handleData->authorizationScheme == X509) &&
 
@@ -1255,7 +1255,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
         }
         else if (strcmp(optionName, OPTION_CURL_VERBOSE) == 0)
         {
-            handleData->verbose = *(size_t*)value;
+            handleData->curl_verbose = *(size_t*)value;
         }
         else
         {
