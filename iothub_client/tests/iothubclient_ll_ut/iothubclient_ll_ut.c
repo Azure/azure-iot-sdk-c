@@ -1013,12 +1013,10 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_with_DeviceKey_fail)
     //arrange
     setup_iothubclient_ll_createfromconnectionstring_mocks(TEST_DEVICEKEY_TOKEN, TEST_STRING_VALUE);
     
-    printf("Expected:: %s\n", umockcallrecorder_get_expected_calls(umock_c_get_call_recorder()));
-
     umock_c_negative_tests_snapshot();
 
     // act
-    size_t calls_cannot_fail[] = { 22 };
+    size_t calls_cannot_fail[] = { 9, 12, 14, 15, 18, 20, 23, 25, 26, 27, 29, 30, 36, 37, 38, 41, 42, 43, 44, 45, 46, 47, 48, 49 };
     size_t count = umock_c_negative_tests_call_count();
     for (size_t index = 0; index < count; index++)
     {
@@ -1296,10 +1294,6 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_with_x509_test_string_f
 TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_with_ModuleId_succeeds)
 {
     //arrange
-#ifndef NO_LOGGING
-    STRICT_EXPECTED_CALL(IoTHubClient_GetVersionString());
-#endif
-
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)).IgnoreArgument_size();
 
     STRICT_EXPECTED_CALL(STRING_construct(IGNORED_NUM_ARG)).IgnoreArgument_psz();
