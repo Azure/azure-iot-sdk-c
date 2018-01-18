@@ -389,7 +389,7 @@ endif()
 
 if(NOT IN_OPENWRT)
     # Disable tests for OpenWRT
-    if(${run_unittests} OR ${run_e2e_tests})
+    if(${run_unittests} OR ${run_e2e_tests} OR ${run_sfc_tests})
         add_subdirectory(tests)
     endif()
 endif()

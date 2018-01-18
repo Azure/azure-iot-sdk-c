@@ -81,7 +81,7 @@ if(WIN32)
         linkMqttLibrary(${theseTestsName}_exe)
     endif()
 
-	if(TARGET ${theseTestsName}_nuget_exe)
+    if(TARGET ${theseTestsName}_nuget_exe)
            target_link_libraries(${theseTestsName}_nuget_exe
                    iothub_test
                    iothub_service_client

@@ -11,6 +11,7 @@
 #include "azure_c_shared_utility/http_proxy_io.h"
 #include "azure_c_shared_utility/platform.h"
 #include "azure_uamqp_c/saslclientio.h"
+#include "azure_c_shared_utility/shared_util_options.h"
 
 #define PROV_AMQP_WS_PORT_NUM               443
 #define PROV_AMQP_WS_PROTOCOL_NAME "AMQPWSB10"
@@ -87,7 +88,7 @@ static PROV_TRANSPORT_IO_INFO* amqp_transport_ws_io(const char* fqdn, SASL_MECHA
 #ifdef USE_OPENSSL
                 // Default to tls 1.2
                 int tls_version = 12;
-                xio_setoption(result->transport_handle, "tls_version", &tls_version);
+                xio_setoption(result->transport_handle, OPTION_TLS_VERSION, &tls_version);
 #endif
 
                 if (sasl_mechanism != NULL)

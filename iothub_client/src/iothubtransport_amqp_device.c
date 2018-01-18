@@ -364,7 +364,7 @@ static TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO* create_messenger_dispositio
     }
     else
     {
-        messenger_disposition_info->message_id = device_disposition_info->message_id;
+        messenger_disposition_info->message_id = (delivery_number)device_disposition_info->message_id;
     }
 
     return messenger_disposition_info;

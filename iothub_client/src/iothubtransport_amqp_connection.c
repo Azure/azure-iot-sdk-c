@@ -35,7 +35,8 @@ typedef struct AMQP_CONNECTION_INSTANCE_TAG
     AMQP_CONNECTION_STATE current_state;
     ON_AMQP_CONNECTION_STATE_CHANGED on_state_changed_callback;
     const void* on_state_changed_context;
-    uint32_t c2d_keep_alive_freq_secs;
+    uint32_t svc2cl_keep_alive_timeout_secs;
+    double cl2svc_keep_alive_send_ratio;
 } AMQP_CONNECTION_INSTANCE;
 
 
@@ -198,11 +199,17 @@ static int create_connection_handle(AMQP_CONNECTION_INSTANCE* instance)
             result = __FAILURE__;
             LogError("Failed creating the AMQP connection (connection_create2 failed)");
         }
-        else if (connection_set_idle_timeout(instance->connection_handle, 1000 * instance->c2d_keep_alive_freq_secs) != RESULT_OK)
+        else if (connection_set_idle_timeout(instance->connection_handle, 1000 * instance->svc2cl_keep_alive_timeout_secs) != RESULT_OK)
         {
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_074: [If connection_set_idle_timeout() fails, amqp_connection_create() shall fail and return NULL]
             result = __FAILURE__;
             LogError("Failed creating the AMQP connection (connection_set_idle_timeout failed)");
+        }
+        else if (connection_set_remote_idle_timeout_empty_frame_send_ratio(instance->connection_handle, instance->cl2svc_keep_alive_send_ratio) != RESULT_OK) 
+		{
+			// Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_99_001: [If connection_set_remote_idle_timeout_empty_frame_send_ratio fails, amqp_connection_create() shall fail and return NULL]
+			result = __FAILURE__;
+			LogError("Failed creating the AMQP connection (connection_set_remote_idle_timeout_empty_frame_send_ratio)");
         }
         else
         {
@@ -386,7 +393,8 @@ AMQP_CONNECTION_HANDLE amqp_connection_create(AMQP_CONNECTION_CONFIG* config)
                 instance->has_sasl_mechanism = config->create_sasl_io;
                 instance->has_cbs = config->create_cbs_connection;
 
-                instance->c2d_keep_alive_freq_secs = (uint32_t)config->c2d_keep_alive_freq_secs;
+                instance->svc2cl_keep_alive_timeout_secs = (uint32_t)config->svc2cl_keep_alive_timeout_secs;
+				instance->cl2svc_keep_alive_send_ratio = (double)config->cl2svc_keep_alive_send_ratio;
 
                 instance->current_state = AMQP_CONNECTION_STATE_CLOSED;
 

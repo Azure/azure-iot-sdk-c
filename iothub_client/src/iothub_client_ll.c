@@ -654,10 +654,6 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
 {
     IOTHUB_CLIENT_LL_HANDLE result;
 
-    /*Codes_SRS_IOTHUBCLIENT_LL_05_001: [IoTHubClient_LL_CreateFromConnectionString shall obtain the version string by a call to IoTHubClient_GetVersionString.]*/
-    /*Codes_SRS_IOTHUBCLIENT_LL_05_002: [IoTHubClient_LL_CreateFromConnectionString shall print the version string to standard output.]*/
-    LogInfo("IoT Hub SDK for C, version %s", IoTHubClient_GetVersionString());
-
     /* Codes_SRS_IOTHUBCLIENT_LL_12_003: [IoTHubClient_LL_CreateFromConnectionString shall verify the input parameter and if it is NULL then return NULL] */
     if (connectionString == NULL)
     {
@@ -1915,7 +1911,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetOption(IOTHUB_CLIENT_LL_HANDLE iotHubCli
             uploadToBlob_result = IOTHUB_CLIENT_INVALID_ARG; /*harmless value (IOTHUB_CLIENT_INVALID_ARG)in the case when uploadtoblob is not compiled in, otherwise whatever IoTHubClient_LL_UploadToBlob_SetOption returned*/
 #endif /*DONT_USE_UPLOADTOBLOB*/
 
-            /*Codes_SRS_IOTHUBCLIENT_LL_12_023: [** `c2d_keep_alive_freq_secs` - shall set the cloud to device keep alive frequency(in seconds) for the connection. Zero means keep alive will not be sent. ]*/
+            /*Codes_SRS_IOTHUBCLIENT_LL_12_023: [** `svc2cl_keep_alive_timeout_secs` - shall set the cloud to device keep alive frequency(in seconds) for the connection. Zero means keep alive will not be sent. ]*/
             result =
                 /*based on uploadToBlob_result value this is what happens:*/
                 /*IOTHUB_CLIENT_INVALID_ARG always returns what IoTHubTransport_SetOption returns*/

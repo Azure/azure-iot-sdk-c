@@ -10,6 +10,7 @@
 #include "azure_c_shared_utility/tlsio.h"
 #include "azure_c_shared_utility/http_proxy_io.h"
 #include "azure_c_shared_utility/platform.h"
+#include "azure_c_shared_utility/shared_util_options.h"
 
 #define MQTT_WS_PORT_NUM               443
 #define MQTT_WS_PROTOCOL_NAME "MQTT"
@@ -72,7 +73,7 @@ static XIO_HANDLE mqtt_transport_ws_io(const char* fqdn, const HTTP_PROXY_OPTION
         {
             // requires tls 1.2
             int tls_version = 12;
-            xio_setoption(result, "tls_version", &tls_version);
+            xio_setoption(result, OPTION_TLS_VERSION, &tls_version);
         }
     }
     /* Codes_PROV_TRANSPORT_MQTT_WS_CLIENT_07_014: [ On success mqtt_transport_ws_io shall return an allocated XIO_HANDLE. ] */

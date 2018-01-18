@@ -161,7 +161,8 @@ static AMQP_CONNECTION_CONFIG* get_amqp_connection_config()
 	global_amqp_connection_config.create_sasl_io = true;
 	global_amqp_connection_config.create_cbs_connection = true;
 	global_amqp_connection_config.is_trace_on = true;
-    global_amqp_connection_config.c2d_keep_alive_freq_secs = 123;
+    global_amqp_connection_config.svc2cl_keep_alive_timeout_secs = 123;
+	global_amqp_connection_config.cl2svc_keep_alive_send_ratio   = 0.5;
 
 	return &global_amqp_connection_config;
 }
@@ -207,7 +208,8 @@ static void set_exp_calls_for_amqp_connection_create(AMQP_CONNECTION_CONFIG* amq
 		.IgnoreArgument_on_io_error()
 		.IgnoreArgument_on_io_error_context();
 
-	STRICT_EXPECTED_CALL(connection_set_idle_timeout(TEST_CONNECTION_HANDLE, (milliseconds)(1000 * amqp_connection_config->c2d_keep_alive_freq_secs)));
+	STRICT_EXPECTED_CALL(connection_set_idle_timeout(TEST_CONNECTION_HANDLE, (milliseconds)(1000 * amqp_connection_config->svc2cl_keep_alive_timeout_secs)));
+	STRICT_EXPECTED_CALL(connection_set_remote_idle_timeout_empty_frame_send_ratio(TEST_CONNECTION_HANDLE, amqp_connection_config->cl2svc_keep_alive_send_ratio)); 
 	STRICT_EXPECTED_CALL(connection_set_trace(TEST_CONNECTION_HANDLE, amqp_connection_config->is_trace_on));
 
 	EXPECTED_CALL(free(IGNORED_PTR_ARG)); // UniqueId container.
@@ -311,6 +313,9 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 
 	REGISTER_GLOBAL_MOCK_RETURN(connection_set_idle_timeout, 0);
 	REGISTER_GLOBAL_MOCK_FAIL_RETURN(connection_set_idle_timeout, 1);
+
+	REGISTER_GLOBAL_MOCK_RETURN(connection_set_remote_idle_timeout_empty_frame_send_ratio, 0);
+	REGISTER_GLOBAL_MOCK_FAIL_RETURN(connection_set_remote_idle_timeout_empty_frame_send_ratio, 1);
 
 	REGISTER_GLOBAL_MOCK_RETURN(session_create, TEST_SESSION_HANDLE);
 	REGISTER_GLOBAL_MOCK_FAIL_RETURN(session_create, NULL);
@@ -536,10 +541,10 @@ TEST_FUNCTION(amqp_connection_create_SASL_and_CBS_negative_checks)
 		if (i == 2  || // saslmssbcbs_get_interface
 			i == 4  || // saslclientio_get_interface_description
 			i == 9  || // STRING_c_str(instance->iothub_fqdn) for connection_create2
-			i == 12 || // connection_set_trace
-			i == 13 || // free(unique_container_id)
-			i == 15 || // session_set_incoming_window
-			i == 16)   // session_set_outgoing_window
+			i == 13 || // connection_set_trace
+			i == 14 || // free(unique_container_id)
+			i == 16 || // session_set_incoming_window
+			i == 17)   // session_set_outgoing_window
 		{
 			continue; // these lines have functions that do not return anything (void) or do not cause failures.
 		}

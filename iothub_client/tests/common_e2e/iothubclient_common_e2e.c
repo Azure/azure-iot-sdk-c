@@ -468,9 +468,15 @@ IOTHUB_CLIENT_HANDLE client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUs
 
     (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_PRODUCT_INFO, "MQTT_E2E/1.1.12");
 
-    unsigned int keep_alive_sec = 120;
-    (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_C2D_KEEP_ALIVE_FREQ_SECS, &keep_alive_sec);
+    unsigned int svc2cl_keep_alive_timeout_secs = 120; // service will send pings at 120 x 7/8 = 105 seconds. Higher the value, lesser the frequency of service side pings.
+    (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_SERVICE_SIDE_KEEP_ALIVE_FREQ_SECS, &svc2cl_keep_alive_timeout_secs);
 
+    // Set keep alive for remote idle is optional. If it is not set the default ratio of 1/2 will be used. For default value of 4 minutes, it will be 2 minutes (120 seconds)
+    double cl2svc_keep_alive_send_ratio = 1.0 / 2.0; // Set it to 120 seconds (240 x 1/2 = 120 seconds) for 4 minutes remote idle. 
+
+    // client will send pings to service at 210 second interval for 4 minutes remote idle. For 25 minutes remote idle, it will be set to 21 minutes.
+    IoTHubClient_SetOption(iotHubClientHandle, OPTION_REMOTE_IDLE_TIMEOUT_RATIO, &cl2svc_keep_alive_send_ratio);
+        
 #ifdef AZIOT_LINUX
     if (g_e2e_test_options.set_mac_address)
     {

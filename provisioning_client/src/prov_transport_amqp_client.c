@@ -10,6 +10,7 @@
 #include "azure_c_shared_utility/http_proxy_io.h"
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/xlogging.h"
+#include "azure_c_shared_utility/shared_util_options.h"
 
 #include "azure_uamqp_c/saslclientio.h"
 
@@ -69,7 +70,7 @@ static PROV_TRANSPORT_IO_INFO* amqp_transport_io(const char* fqdn, SASL_MECHANIS
         {
             // provisioning requires tls 1.2
             int tls_version = 12;
-            xio_setoption(result->transport_handle, "tls_version", &tls_version);
+            xio_setoption(result->transport_handle, OPTION_TLS_VERSION, &tls_version);
 
             if (sasl_mechanism != NULL)
             {
