@@ -196,3 +196,96 @@ int IoTHubClient_Diagnostic_AddIfNecessary(IOTHUB_DIAGNOSTIC_SETTING_DATA* diagS
 
     return result;
 }
+
+int IoTHubClient_Diagnostic_UpdateFromTwin(IOTHUB_DIAGNOSTIC_SETTING_DATA* diagSetting, bool isPartialUpdate, const unsigned char* payLoad, STRING_HANDLE message)
+{
+    int result = 0;
+
+    /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_006: [ IoTHubClient_Diagnostic_UpdateFromTwin should return nonezero if arguments are NULL. ]*/
+    if (diagSetting == NULL || payLoad == NULL || message == NULL)
+    {
+        result = __FAILURE__;
+    }
+    else
+    {
+        JSON_Value* json = json_parse_string((const char *)payLoad);
+
+        /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_007: [ IoTHubClient_Diagnostic_UpdateFromTwin should return nonezero if payLoad is not a valid json string. ]*/
+        if (json == NULL)
+        {
+            result = __FAILURE__;
+        }
+        else
+        {
+            JSON_Object* jsonObject = json_value_get_object(json);
+
+            if (jsonObject == NULL)
+            {
+                result = __FAILURE__;
+            }
+            else
+            {
+                JSON_Object* desiredJsonObject = isPartialUpdate
+                    ? jsonObject
+                    : json_object_get_object(jsonObject, "desired");
+                if (desiredJsonObject == NULL)
+                {
+                    /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_008: [ IoTHubClient_Diagnostic_UpdateFromTwin should return nonezero if device twin json doesn't contain a valid desired property. ]*/
+                    result = __FAILURE__;
+                }
+                else if (json_object_has_value(desiredJsonObject, DEVICE_TWIN_SAMPLING_RATE_KEY))
+                {
+                    JSON_Value* diag_sample_rate_value = json_object_get_value(desiredJsonObject, DEVICE_TWIN_SAMPLING_RATE_KEY);
+                    JSON_Value_Type valueType = json_value_get_type(diag_sample_rate_value);
+                    if (valueType == JSONNull)
+                    {
+                        /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_009: [ IoTHubClient_Diagnostic_UpdateFromTwin should set diagSamplingPercentage = 0 when sampling rate in twin is null. ]*/
+                        diagSetting->diagSamplingPercentage = 0;
+                        if (STRING_sprintf(message, "Property %s is set to null, so set it to 0.", DEVICE_TWIN_SAMPLING_RATE_KEY) != 0)
+                        {
+                            result = __FAILURE__;
+                        }
+                    }
+                    else if (valueType != JSONNumber)
+                    {
+                        /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_010: [ IoTHubClient_Diagnostic_UpdateFromTwin should keep sampling rate untouched when failing parse sampling rate from twin. ]*/
+                        if (STRING_sprintf(message, "Cannot parse property %s from twin settings.", DEVICE_TWIN_SAMPLING_RATE_KEY) != 0)
+                        {
+                            result = __FAILURE__;
+                        }
+                    }
+                    else
+                    {
+                        /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_011: [ IoTHubClient_Diagnostic_UpdateFromTwin should keep sampling rate untouched if sampling rate parsed from twin is not between [0,100]. ]*/
+                        double sampling_rate = json_object_get_number(desiredJsonObject, DEVICE_TWIN_SAMPLING_RATE_KEY);
+                        if (sampling_rate < 0 || sampling_rate > 100)
+                        {
+                            if (STRING_sprintf(message, "The value of property %s must be between [0, 100].", DEVICE_TWIN_SAMPLING_RATE_KEY) != 0)
+                            {
+                                result = __FAILURE__;
+                            }
+                        }
+                        else
+                        {
+                            /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_012: [ IoTHubClient_Diagnostic_UpdateFromTwin should set diagSamplingPercentage correctly if sampling rate is valid. ]*/
+                            diagSetting->diagSamplingPercentage = (int)sampling_rate;
+                        }
+                    }
+                }
+                else if (!isPartialUpdate)
+                {
+                    /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_013: [ IoTHubClient_Diagnostic_UpdateFromTwin should report diagnostic property not existed if there is no sampling rate in complete twin. ]*/
+                    if (STRING_sprintf(message, "Property %s does not exist.", DEVICE_TWIN_SAMPLING_RATE_KEY) != 0)
+                    {
+                        /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_014: [ IoTHubClient_Diagnostic_UpdateFromTwin should return nonzero if STRING_sprintf failed. ]*/
+                        result = __FAILURE__;
+                    }
+                }
+            }
+
+            json_value_free(json);
+        }
+    }
+
+    return result;
+}

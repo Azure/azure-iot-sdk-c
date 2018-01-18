@@ -16,9 +16,11 @@ include_directories(${SHARED_UTIL_REAL_TEST_FOLDER})
 
 set(${theseTestsName}_c_files
     ../../src/iothub_client_diagnostic.c
+	../../../deps/parson/parson.c
 )
 
 set(${theseTestsName}_h_files
+	../../../deps/parson/parson.h
 )
 
 build_c_test_artifacts(${theseTestsName} ON "tests/UnitTests")

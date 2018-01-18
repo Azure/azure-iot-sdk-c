@@ -121,6 +121,9 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendReportedState(IOTHUB_CLIENT_LL_H
 extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetDeviceMethodCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC deviceMethodCallback, void* userContextCallback);
 extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetDeviceMethodCallback_Ex(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK inboundDeviceMethodCallback, void* userContextCallback);
 extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_DeviceMethodResponse(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, uint32_t methodId, unsigned char* response, size_t responeSize);
+
+extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_EnableE2EDiagnosticWithCloudSetting(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle);
+
 ```
 
 ## IoTHubClient_LL_CreateFromConnectionString
@@ -864,3 +867,18 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* create_iothub_client_data(IOTHUB_CLIENT_CON
 **SRS_IOTHUBCLIENT_LL_07_039: [** `create_iothub_client_data` shall call the transport _Register function with a populated structure of type IOTHUB_DEVICE_CONFIG and waitingToSend list. **]**
 
 **SRS_IOTHUBCLIENT_LL_07_040: [** `create_iothub_client_data` shall set the default retry policy as Exponential backoff with jitter and if succeed and return a `non-NULL` handle. **]**
+
+## IoTHubClient_LL_EnableE2EDiagnosticWithCloudSetting
+```c
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_EnableE2EDiagnosticWithCloudSetting(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle);
+```
+
+**SRS_IOTHUBCLIENT_LL_18_002: [**EnableE2EDiagnosticWithCloudSetting should return `IOTHUB_CLIENT_INVALID_ARG` if argument handle is NULL.**]**
+
+**SRS_IOTHUBCLIENT_LL_18_003: [**EnableE2EDiagnosticWithCloudSetting should return `IOTHUB_CLIENT_ERROR` if calling EnableE2EDiagnosticWithCloudSetting twice.**]**
+
+**SRS_IOTHUBCLIENT_LL_18_004: [**EnableE2EDiagnosticWithCloudSetting should return `IOTHUB_CLIENT_ERROR` if diagnostic has been enabled with local setting.**]**
+
+**SRS_IOTHUBCLIENT_LL_18_005: [**EnableE2EDiagnosticWithCloudSetting should return `IOTHUB_CLIENT_ERROR` if IoTHubTransport_Subscribe_DeviceTwin failed.**]**
+
+**SRS_IOTHUBCLIENT_LL_18_006: [**EnableE2EDiagnosticWithCloudSetting should return `IOTHUB_CLIENT_OK` upon success.**]**

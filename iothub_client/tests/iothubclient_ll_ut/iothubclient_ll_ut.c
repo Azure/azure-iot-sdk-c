@@ -130,6 +130,7 @@ static TEST_MUTEX_HANDLE g_dllByDll;
 bool g_fail_string_construct_sprintf;
 bool g_fail_platform_get_platform_info;
 bool g_fail_string_concat_with_string;
+bool g_fail_string_sprintf;
 
 static const char* TEST_STRING_VALUE = "Test string value";
 
@@ -265,6 +266,13 @@ static STRING_HANDLE my_STRING_construct(const char* psz)
 {
     (void)psz;
     return (STRING_HANDLE)my_gballoc_malloc(1);
+}
+
+int STRING_sprintf(STRING_HANDLE handle, const char* psz, ...)
+{
+    (void)handle;
+    (void)psz;
+    return g_fail_string_sprintf ? -1 : 0;
 }
 
 STRING_HANDLE STRING_construct_sprintf(const char* psz, ...)
@@ -686,6 +694,7 @@ TEST_FUNCTION_INITIALIZE(method_init)
     g_fail_string_construct_sprintf = false;
     g_fail_platform_get_platform_info = false;
     g_fail_string_concat_with_string = false;
+    g_fail_string_sprintf = false;
 }
 
 TEST_FUNCTION_CLEANUP(TestMethodCleanup)
@@ -4952,5 +4961,126 @@ TEST_FUNCTION(IoTHubClient_LL_SetOption_diag_sampling_percentage_fails)
     IoTHubClient_LL_Destroy(h);
 }
 
+/*Tests_SRS_IOTHUBCLIENT_LL_18_001: [If diagnostic has been enabled with could setting, calling IoTHubClient_LL_SetOption to enable local diagnostic setting shall return `IOTHUB_CLIENT_ERROR`. ]*/
+TEST_FUNCTION(IoTHubClient_LL_SetOption_diag_sampling_percentage_when_already_enable_cloud_fails)
+{
+    //arrange
+    IOTHUB_CLIENT_LL_HANDLE h = IoTHubClient_LL_Create(&TEST_CONFIG);
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_EnableE2EDiagnosticWithCloudSetting(h);
+
+    umock_c_reset_all_calls();
+
+    uint32_t diagPercentage = 100;
+    result = IoTHubClient_LL_SetOption(h, OPTION_DIAGNOSTIC_SAMPLING_PERCENTAGE, &diagPercentage);
+
+    //assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubClient_LL_Destroy(h);
+}
+
+/* Tests_SRS_IOTHUBCLIENT_LL_18_002: [ EnableE2EDiagnosticWithCloudSetting should return `IOTHUB_CLIENT_INVALID_ARG` if argument handle is NULL. ]*/
+TEST_FUNCTION(IoTHubClient_LL_EnableE2EDiagnosticWithCloudSetting_null_handle_fails)
+{
+    //arrange
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_EnableE2EDiagnosticWithCloudSetting(NULL);
+
+    //assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+}
+
+/* Tests_SRS_IOTHUBCLIENT_LL_18_003: [ EnableE2EDiagnosticWithCloudSetting should return `IOTHUB_CLIENT_ERROR` if calling EnableE2EDiagnosticWithCloudSetting twice. ]*/
+TEST_FUNCTION(IoTHubClient_LL_EnableE2EDiagnosticWithCloudSetting_call_twice_fails)
+{
+    //arrange
+    IOTHUB_CLIENT_LL_HANDLE h = IoTHubClient_LL_Create(&TEST_CONFIG);
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_EnableE2EDiagnosticWithCloudSetting(h);
+    
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+
+    result = IoTHubClient_LL_EnableE2EDiagnosticWithCloudSetting(h);
+
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+
+    //cleanup
+    IoTHubClient_LL_Destroy(h);
+}
+
+/* Tests_SRS_IOTHUBCLIENT_LL_18_004: [ EnableE2EDiagnosticWithCloudSetting should return `IOTHUB_CLIENT_ERROR` if diagnostic has been enabled with local setting. ]*/
+TEST_FUNCTION(IoTHubClient_LL_EnableE2EDiagnosticWithCloudSetting_already_enable_diag_with_local_fails)
+{
+    //arrange
+    IOTHUB_CLIENT_LL_HANDLE h = IoTHubClient_LL_Create(&TEST_CONFIG);
+    umock_c_reset_all_calls();
+
+    //act
+    uint32_t diagPercentage = 100;
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_SetOption(h, OPTION_DIAGNOSTIC_SAMPLING_PERCENTAGE, &diagPercentage);
+
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+
+    result = IoTHubClient_LL_EnableE2EDiagnosticWithCloudSetting(h);
+
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+
+    //cleanup
+    IoTHubClient_LL_Destroy(h);
+}
+
+/* Tests_SRS_IOTHUBCLIENT_LL_18_005: [ EnableE2EDiagnosticWithCloudSetting should return `IOTHUB_CLIENT_ERROR` if IoTHubTransport_Subscribe_DeviceTwin failed.]*/
+TEST_FUNCTION(IoTHubClient_LL_EnableE2EDiagnosticWithCloudSetting_negative_fails)
+{
+    //arrange
+    IOTHUB_CLIENT_LL_HANDLE h = IoTHubClient_LL_Create(&TEST_CONFIG);
+
+    int negativeTestsInitResult = umock_c_negative_tests_init();
+    ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_Subscribe_DeviceTwin(IGNORED_PTR_ARG));
+
+    umock_c_negative_tests_snapshot();
+
+    // act
+    size_t count = umock_c_negative_tests_call_count();
+    for (size_t index = 0; index < count; index++)
+    {
+        umock_c_negative_tests_reset();
+        umock_c_negative_tests_fail_call(index);
+
+        int result = IoTHubClient_LL_EnableE2EDiagnosticWithCloudSetting(h);
+
+        //assert
+        ASSERT_IS_FALSE(result == 0);
+    }
+
+    //cleanup
+    umock_c_negative_tests_deinit();
+}
+
+/* Tests_SRS_IOTHUBCLIENT_LL_18_006: [ EnableE2EDiagnosticWithCloudSetting should return `IOTHUB_CLIENT_OK` upon success. ]*/
+TEST_FUNCTION(IoTHubClient_LL_EnableE2EDiagnosticWithCloudSetting_success)
+{
+    //arrange
+    IOTHUB_CLIENT_LL_HANDLE h = IoTHubClient_LL_Create(&TEST_CONFIG);
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_EnableE2EDiagnosticWithCloudSetting(h);
+
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+
+    //cleanup
+    IoTHubClient_LL_Destroy(h);
+}
 
 END_TEST_SUITE(iothubclient_ll_ut)

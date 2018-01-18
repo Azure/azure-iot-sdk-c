@@ -25,6 +25,7 @@
 
 #include "azure_c_shared_utility/macro_utils.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
+#include "parson.h"
 
 #define IOTHUB_CLIENT_FILE_UPLOAD_RESULT_VALUES \
     FILE_UPLOAD_OK, \
@@ -559,6 +560,15 @@ extern "C"
      * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
      */
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_DeviceMethodResponse, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, METHOD_HANDLE, methodId, const unsigned char*, response, size_t, respSize, int, statusCode);
+
+     /**
+     * @brief    This API can enable E2E diagnostics for the device
+     *
+     * @param    iotHubClientHandle      The handle created by a call to the create function.
+     *
+     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
+     */
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_EnableE2EDiagnosticWithCloudSetting, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle);
 
 #ifndef DONT_USE_UPLOADTOBLOB
     /**
