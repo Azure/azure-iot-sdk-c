@@ -392,7 +392,7 @@ static MESSAGE_CALLBACK_INFO* MESSAGE_CALLBACK_INFO_Create(IOTHUB_MESSAGE_HANDLE
             if (mallocAndStrcpy_s(&(tc->link_name), disposition_info->source) == 0)
             {
                 tc->device_state = device_state;
-                tc->message_id = disposition_info->message_id;
+                tc->message_id = (delivery_number)disposition_info->message_id;
 
                 result->messageHandle = message;
                 result->transportContext = tc;
