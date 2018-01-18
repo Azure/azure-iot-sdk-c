@@ -121,6 +121,7 @@ IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE IoTHubClient_LL_UploadToBlob_Create(const I
 
                 handleData->certificates = NULL;
                 memset(&(handleData->http_proxy_options), 0, sizeof(HTTP_PROXY_OPTIONS));
+                handleData->curl_verbose = 0;
 
                 if ((config->deviceSasToken != NULL) && (config->deviceKey == NULL))
                 {
@@ -161,7 +162,6 @@ IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE IoTHubClient_LL_UploadToBlob_Create(const I
                     handleData->authorizationScheme = X509;
                     handleData->credentials.x509credentials.x509certificate = NULL;
                     handleData->credentials.x509credentials.x509privatekey = NULL;
-                    handleData->curl_verbose = 0;
                     /*return as is*/
                 }
             }
@@ -1256,6 +1256,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
         else if (strcmp(optionName, OPTION_CURL_VERBOSE) == 0)
         {
             handleData->curl_verbose = *(size_t*)value;
+            result = IOTHUB_CLIENT_OK;
         }
         else
         {
