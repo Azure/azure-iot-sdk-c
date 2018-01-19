@@ -33,6 +33,7 @@ set build-clean=0
 set build-config=Debug
 set build-platform=Win32
 set CMAKE_run_e2e_tests=OFF
+set CMAKE_run_sfc_tests=OFF
 set CMAKE_run_longhaul_tests=OFF
 set CMAKE_run_unittests=OFF
 set MAKE_NUGET_PKG=no
@@ -49,6 +50,7 @@ if "%1" equ "--clean" goto arg-build-clean
 if "%1" equ "--config" goto arg-build-config
 if "%1" equ "--platform" goto arg-build-platform
 if "%1" equ "--run-e2e-tests" goto arg-run-e2e-tests
+if "%1" equ "--run-sfc-tests" goto arg-run-sfc-tests
 if "%1" equ "--run-longhaul-tests" goto arg-longhaul-tests
 if "%1" equ "--run-unittests" goto arg-run-unittests
 if "%1" equ "--make_nuget" goto arg-build-nuget
@@ -81,6 +83,10 @@ goto args-continue
 
 :arg-run-e2e-tests
 set CMAKE_run_e2e_tests=ON
+goto args-continue
+
+:arg-run-sfc-tests
+set CMAKE_run_sfc_tests=ON
 goto args-continue
 
 :arg-longhaul-tests
@@ -125,6 +131,7 @@ goto args-loop
 if %make% == no (
     rem No point running tests if we are not building the code
     set CMAKE_run_e2e_tests=OFF
+    set CMAKE_run_sfc_tests=OFF
     set CMAKE_run_longhaul_tests=OFF
     set build-samples=no
 )
@@ -248,7 +255,7 @@ pushd %cmake-root%\cmake\%CMAKE_DIR%
 
 if %MAKE_NUGET_PKG% == yes (
     echo ***Running CMAKE for Win32***
-    cmake %build-root% -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_prov_client:BOOL=%prov_auth%
+    cmake %build-root% -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_prov_client:BOOL=%prov_auth%
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
     popd
 
@@ -260,7 +267,7 @@ if %MAKE_NUGET_PKG% == yes (
     rem no error checking
 
     pushd %cmake-root%\cmake\iotsdk_x64
-    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 14 Win64"
+    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 14 Win64"
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
     popd
 
@@ -272,20 +279,20 @@ if %MAKE_NUGET_PKG% == yes (
     rem no error checking
 
     pushd %cmake-root%\cmake\iotsdk_arm
-    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 14 ARM"
+    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 14 ARM"
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 ) else if %build-platform% == x64 (
     echo ***Running CMAKE for Win64***
-    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 14 Win64"
+    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 14 Win64"
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 ) else if %build-platform% == arm (
     echo ***Running CMAKE for ARM***
-    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 14 ARM"
+    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 14 ARM"
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 ) else (
     echo ***Running CMAKE for Win32***
-    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth%
+    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth%
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 )
 

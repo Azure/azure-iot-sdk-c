@@ -456,8 +456,10 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_LL_SetDeviceMethodCallback_Ex, IOTHUB_CLIENT_ERROR);
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_LL_DeviceMethodResponse, IOTHUB_CLIENT_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_LL_DeviceMethodResponse, IOTHUB_CLIENT_ERROR);
+#ifndef DONT_USE_UPLOADTOBLOB
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_LL_UploadToBlob, IOTHUB_CLIENT_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_LL_UploadToBlob, IOTHUB_CLIENT_ERROR);
+#endif
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_LL_GetRetryPolicy, IOTHUB_CLIENT_OK);
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_Destroy, my_IoTHubClient_LL_Destroy);
     REGISTER_GLOBAL_MOCK_HOOK(test_event_confirmation_callback, my_test_event_confirmation_callback);
@@ -670,6 +672,7 @@ static void setup_gargageCollection(void* saved_data, bool can_item_be_collected
     }
 }
 
+#ifndef DONT_USE_UPLOADTOBLOB
 static void setup_iothubclient_uploadtoblobasync()
 {
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is creating a UPLOADTOBLOB_SAVED_DATA*/
@@ -703,7 +706,7 @@ static void setup_iothubclient_uploadtoblobasync()
         .IgnoreArgument_handle();
     STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 }
-
+#endif
 
 // Initial time we loop through ScheduleWork, including DoWork and into the always run dispatch_user_callbacks functions.
 static void set_expected_calls_first_ScheduleWork_Thread_loop(size_t expected_callbacks_length)

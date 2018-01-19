@@ -99,7 +99,7 @@ typedef struct AMQP_TRANSPORT_INSTANCE_TAG
     AMQP_TRANSPORT_STATE state;                                         // Current state of the transport.
     RETRY_CONTROL_HANDLE connection_retry_control;                      // Controls when the re-connection attempt should occur.
     size_t svc2cl_keep_alive_timeout_secs;                       // Service to device keep alive frequency
-	double cl2svc_keep_alive_send_ratio;								    // Client to service keep alive frequency
+    double cl2svc_keep_alive_send_ratio;								    // Client to service keep alive frequency
 
     char* http_proxy_hostname;
     int http_proxy_port;
@@ -392,7 +392,7 @@ static MESSAGE_CALLBACK_INFO* MESSAGE_CALLBACK_INFO_Create(IOTHUB_MESSAGE_HANDLE
             if (mallocAndStrcpy_s(&(tc->link_name), disposition_info->source) == 0)
             {
                 tc->device_state = device_state;
-                tc->message_id = disposition_info->message_id;
+                tc->message_id = (delivery_number)disposition_info->message_id;
 
                 result->messageHandle = message;
                 result->transportContext = tc;
@@ -796,9 +796,9 @@ static int establish_amqp_connection(AMQP_TRANSPORT_INSTANCE* transport_instance
         amqp_connection_config.on_state_changed_context = transport_instance;
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_12_003: [AMQP connection will be configured using the `svc2cl_keep_alive_timeout_secs` value from SetOption ]
         amqp_connection_config.svc2cl_keep_alive_timeout_secs = transport_instance->svc2cl_keep_alive_timeout_secs;
-		// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_99_001: [AMQP connection will be configured using the `remote_idle_timeout_ratio` value from SetOption ]
-		amqp_connection_config.cl2svc_keep_alive_send_ratio = transport_instance->cl2svc_keep_alive_send_ratio;
-		
+        // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_99_001: [AMQP connection will be configured using the `remote_idle_timeout_ratio` value from SetOption ]
+        amqp_connection_config.cl2svc_keep_alive_send_ratio = transport_instance->cl2svc_keep_alive_send_ratio;
+        
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_027: [If `transport->preferred_authentication_method` is CBS, AMQP_CONNECTION_CONFIG shall be set with `create_sasl_io` = true and `create_cbs_connection` = true]
         if (transport_instance->preferred_authentication_mode == AMQP_TRANSPORT_AUTHENTICATION_MODE_CBS)
         {
@@ -1445,8 +1445,8 @@ TRANSPORT_LL_HANDLE IoTHubTransport_AMQP_Common_Create(const IOTHUBTRANSPORT_CON
                 instance->option_send_event_timeout_secs = DEFAULT_EVENT_SEND_TIMEOUT_SECS;
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_12_002: [The connection idle timeout parameter default value shall be set to 240000 milliseconds using connection_set_idle_timeout()]
                 instance->svc2cl_keep_alive_timeout_secs = DEFAULT_SERVICE_KEEP_ALIVE_FREQ_SECS;
-				// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_99_001: [The remote idle timeout ratio shall be set to 0.5 using connection_set_remote_idle_timeout_empty_frame_send_ratio()]
-				instance->cl2svc_keep_alive_send_ratio = DEFAULT_REMOTE_IDLE_PING_RATIO;
+                // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_99_001: [The remote idle timeout ratio shall be set to 0.5 using connection_set_remote_idle_timeout_empty_frame_send_ratio()]
+                instance->cl2svc_keep_alive_send_ratio = DEFAULT_REMOTE_IDLE_PING_RATIO;
 
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_012: [If IoTHubTransport_AMQP_Common_Create succeeds it shall return a pointer to `instance`.]
                 result = (TRANSPORT_LL_HANDLE)instance;
@@ -1952,21 +1952,21 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SetOption(TRANSPORT_LL_HANDLE h
             transport_instance->svc2cl_keep_alive_timeout_secs = *(size_t*)value;
             result = IOTHUB_CLIENT_OK;
         }
-		else if (strcmp(OPTION_REMOTE_IDLE_TIMEOUT_RATIO, option) == 0)
-		{
-			
-			if ((*(double*)value <= 0.0) || (*(double*)value >= MAX_SERVICE_KEEP_ALIVE_RATIO))
-			{
-			    LogError("Invalid remote idle ratio %lf", *(double*) value);
-			    result = IOTHUB_CLIENT_INVALID_ARG;
-			}
-			else
-			{
-				transport_instance->cl2svc_keep_alive_send_ratio = *(double*)value; // override the default and set the user configured remote idle ratio value
-			    result = IOTHUB_CLIENT_OK;
-			}
-			
-		}
+        else if (strcmp(OPTION_REMOTE_IDLE_TIMEOUT_RATIO, option) == 0)
+        {
+            
+            if ((*(double*)value <= 0.0) || (*(double*)value >= MAX_SERVICE_KEEP_ALIVE_RATIO))
+            {
+                LogError("Invalid remote idle ratio %lf", *(double*) value);
+                result = IOTHUB_CLIENT_INVALID_ARG;
+            }
+            else
+            {
+                transport_instance->cl2svc_keep_alive_send_ratio = *(double*)value; // override the default and set the user configured remote idle ratio value
+                result = IOTHUB_CLIENT_OK;
+            }
+            
+        }
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_104: [If `option` is `logtrace`, `value` shall be saved and applied to `instance->connection` using amqp_connection_set_logging()]
         else if (strcmp(OPTION_LOG_TRACE, option) == 0)
         {
@@ -2363,8 +2363,6 @@ int IoTHubTransport_AMQP_Common_SetRetryPolicy(TRANSPORT_LL_HANDLE handle, IOTHU
             transport_instance->connection_retry_control = new_retry_control;
 
             retry_control_destroy(previous_retry_control);
-
-            LogInfo("Retry policy set (%d, timeout = %d)", retryPolicy, retryTimeoutLimitInSeconds);
 
             if (transport_instance->state == AMQP_TRANSPORT_STATE_NOT_CONNECTED_NO_MORE_RETRIES)
             {

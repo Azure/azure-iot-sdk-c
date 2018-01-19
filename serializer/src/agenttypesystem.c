@@ -3022,7 +3022,7 @@ static int sscanfd(const char *src, int* dst)
     }
     else
     {
-        (*dst) = temp;
+        (*dst) = (int)temp;
         result = 1;
     }
     return result;
@@ -3074,7 +3074,7 @@ static int sscanfu(const char* src, unsigned int* dst)
     else
     {
         result = 1;
-        (*dst) = temp;
+        (*dst) = (unsigned int)temp;
     }
     return result;
 }

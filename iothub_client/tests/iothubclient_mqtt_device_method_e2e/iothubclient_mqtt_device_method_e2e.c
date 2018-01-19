@@ -62,10 +62,17 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_device_method_e2e)
         device_method_e2e_method_call_with_embedded_single_quote_sas(MQTT_Protocol);
     }
 
+#ifndef DONT_USE_UPLOADTOBLOB
     TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_UploadBlob_sas)
     {
         device_method_e2e_method_calls_upload_sas(MQTT_Protocol);
     }
+
+    TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_UploadBlob_x509)
+    {
+        device_method_e2e_method_calls_upload_x509(MQTT_Protocol);
+    }
+#endif
 
     TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_String_x509)
     {
@@ -95,11 +102,6 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_device_method_e2e)
     TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_Embedded_Single_Quote_x509)
     {
         device_method_e2e_method_call_with_embedded_single_quote_x509(MQTT_Protocol);
-    }
-
-    TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_UploadBlob_x509)
-    {
-        device_method_e2e_method_calls_upload_x509(MQTT_Protocol);
     }
 
     //
