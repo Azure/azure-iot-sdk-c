@@ -85,7 +85,7 @@ if(${use_amqp})
     add_sfctest_directory(iothubclient_amqp_ws_e2e_sfc)
  
     if (${run_longhaul_tests})
-        add_unittest_directory(longhaul_tests)
+        #add_unittest_directory(longhaul_tests)
     endif()
 endif()
 
