@@ -2414,24 +2414,24 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SAS_token_when_step2_aborts_unhappypa
     ///act
 
     size_t calls_that_cannot_fail[] = {
-        12, /*STRING_c_str*/
-        19, /*STRING_c_str*/
-        21, /*STRING_c_str*/
-        23, /*BUFFER_u_char*/
-        24, /*BUFFER_length*/
-        26, /*STRING_c_str*/
-        41, /*STRING_c_str*/
-        44, /*STRING_delete*/
-        45, /*json_value_free*/
-        46, /*STRING_delete*/
-        47, /*BUFFER_delete*/
-        67, /*STRING_delete*/
+        13, /*STRING_c_str*/
+        20, /*STRING_c_str*/
+        22, /*STRING_c_str*/
+        24, /*BUFFER_u_char*/
+        25, /*BUFFER_length*/
+        27, /*STRING_c_str*/
+        42, /*STRING_c_str*/
+        45, /*STRING_delete*/
+        46, /*json_value_free*/
+        47, /*STRING_delete*/
+        48, /*BUFFER_delete*/
         68, /*STRING_delete*/
-        69, /*BUFFER_delete*/
-        70, /*HTTPHeaders_Free*/
-        71, /*STRING_delete*/
+        69, /*STRING_delete*/
+        70, /*BUFFER_delete*/
+        71, /*HTTPHeaders_Free*/
         72, /*STRING_delete*/
-        73, /*HTTPAPIEX_Destroy*/
+        73, /*STRING_delete*/
+        74, /*HTTPAPIEX_Destroy*/
     };
 
     for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
@@ -3804,6 +3804,10 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_deviceKey_when_step3_httpStatusCode_i
     STRICT_EXPECTED_CALL(HTTPAPIEX_Create(TEST_IOTHUBNAME "." TEST_IOTHUBSUFFIX))
         .CaptureReturn(&iotHubHttpApiExHandle)
         .IgnoreArgument(1);
+
+    STRICT_EXPECTED_CALL(HTTPAPIEX_SetOption(IGNORED_PTR_ARG, OPTION_CURL_VERBOSE, IGNORED_PTR_ARG))
+        .ValidateArgumentValue_handle(&iotHubHttpApiExHandle)
+        .SetReturn(HTTPAPIEX_OK);
 
     STRING_HANDLE correlationId;
     STRICT_EXPECTED_CALL(STRING_new())
