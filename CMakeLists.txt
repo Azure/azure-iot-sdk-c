@@ -89,6 +89,9 @@ endif()
 
 # Set Provisioning Information
 if (${use_prov_client})
+    getProvSDKVersion()
+    message(STATUS "Provisioning SDK Version = ${PROV_SDK_VERSION}")
+
     if ("${hsm_custom_lib}" STREQUAL "")
         set(hsm_type_x509 ON)
         set(hsm_type_sastoken ON)
