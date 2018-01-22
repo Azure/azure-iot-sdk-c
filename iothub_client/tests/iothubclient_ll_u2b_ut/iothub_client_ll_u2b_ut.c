@@ -2825,7 +2825,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SAS_token_unhappypaths)
     STRICT_EXPECTED_CALL(HTTPAPIEX_SetOption(IGNORED_PTR_ARG, OPTION_CURL_VERBOSE, IGNORED_PTR_ARG))
         .ValidateArgumentValue_handle(&iotHubHttpApiExHandle)
         .SetReturn(HTTPAPIEX_OK);
-		
+
     STRING_HANDLE correlationId;
     STRICT_EXPECTED_CALL(STRING_new())
         .CaptureReturn(&correlationId);
@@ -3311,7 +3311,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadMultipleBlocksToBlob_deviceKey_happypath)
     STRICT_EXPECTED_CALL(HTTPAPIEX_SetOption(IGNORED_PTR_ARG, OPTION_CURL_VERBOSE, IGNORED_PTR_ARG))
         .ValidateArgumentValue_handle(&iotHubHttpApiExHandle)
         .SetReturn(HTTPAPIEX_OK);
-		
+
     STRING_HANDLE correlationId;
     STRICT_EXPECTED_CALL(STRING_new())
         .CaptureReturn(&correlationId);
@@ -4159,6 +4159,10 @@ TEST_FUNCTION(IoTHubClient_LL_UploadMultipleBlocksToBlob_deviceKey_unhappypaths)
     STRICT_EXPECTED_CALL(HTTPAPIEX_Create(TEST_IOTHUBNAME "." TEST_IOTHUBSUFFIX))
         .CaptureReturn(&iotHubHttpApiExHandle)
         .IgnoreArgument(1);
+
+    STRICT_EXPECTED_CALL(HTTPAPIEX_SetOption(IGNORED_PTR_ARG, OPTION_CURL_VERBOSE, IGNORED_PTR_ARG))
+        .ValidateArgumentValue_handle(&iotHubHttpApiExHandle)
+        .SetReturn(HTTPAPIEX_OK);
 
     STRING_HANDLE correlationId;
     STRICT_EXPECTED_CALL(STRING_new())

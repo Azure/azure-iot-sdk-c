@@ -36,6 +36,7 @@ static const char* data_to_upload = "Hello World from IoTHubClient_LL_UploadToBl
 static int block_count = 0;
 
 static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT getDataCallback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
+
 {
     (void)context;
 
