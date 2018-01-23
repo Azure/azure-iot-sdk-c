@@ -25,6 +25,30 @@ function(getIoTSDKVersion)
     endif(!MATCHES)
 endfunction(getIoTSDKVersion)
 
+function(getProvSDKVersion)
+    # First find the applicable line in the file   \inc\azure_prov_client
+    file (STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/provisioning_client/inc/azure_prov_client/prov_client_const.h" provsdkverstr
+        REGEX "^[\t ]*#[\t ]*define[\t ]*PROV_DEVICE_CLIENT_VERSION[\t ]*\"([0-9]+)[.]([0-9]+)[.]([0-9]+)\"")
+        
+    if (!MATCHES)
+        message(FATAL_ERROR "Unable to find version in ${CMAKE_SOURCE_DIR}/provisioning_client/inc/azure_prov_client/prov_client_const.h")
+    else(!MATCHES)
+        # Parse out the three version identifiers
+        set(CMAKE_MATCH_3 "")
+
+        string(REGEX MATCH "^[\t ]*#[\t ]*define[\t ]*PROV_DEVICE_CLIENT_VERSION[\t ]*\"([0-9]+)[.]([0-9]+)[.]([0-9]+)\"" temp "${provsdkverstr}")
+
+        if (CMAKE_MATCH_3)
+            set (PROV_SDK_VERSION_MAJOR "${CMAKE_MATCH_1}" PARENT_SCOPE)
+            set (PROV_SDK_VERSION_MINOR "${CMAKE_MATCH_2}" PARENT_SCOPE)
+            set (PROV_SDK_VERSION_FIX "${CMAKE_MATCH_3}" PARENT_SCOPE)
+            set (PROV_SDK_VERSION "${CMAKE_MATCH_1}.${CMAKE_MATCH_2}.${CMAKE_MATCH_3}" PARENT_SCOPE)
+        else (CMAKE_MATCH_3)
+            message(FATAL_ERROR "Unable to find version in ${provsdkverstr}")
+        endif(CMAKE_MATCH_3)
+    endif(!MATCHES)
+endfunction(getProvSDKVersion)
+
 function(linkUAMQP whatExecutableIsBuilding)
     include_directories(${UAMQP_INC_FOLDER})
     

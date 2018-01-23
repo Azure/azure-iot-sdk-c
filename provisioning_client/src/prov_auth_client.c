@@ -462,7 +462,7 @@ char* prov_auth_construct_sas_token(PROV_AUTH_HANDLE handle, const char* token_s
                 }
                 else
                 {
-                    sas_token_handle = STRING_construct_sprintf("SharedAccessSignature sr=%s&sig=%s&se=%s&skn=", token_scope, STRING_c_str(urlEncodedSignature), expire_token);
+                    sas_token_handle = STRING_construct_sprintf("SharedAccessSignature sr=%s&sig=%s&se=%s&skn=%s", token_scope, STRING_c_str(urlEncodedSignature), expire_token, key_name);
                     if (sas_token_handle == NULL)
                     {
                         result = NULL;
