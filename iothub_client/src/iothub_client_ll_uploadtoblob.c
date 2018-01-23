@@ -804,7 +804,7 @@ static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT FileUpload_GetData_Callback(IOT
     return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE handle, const char* destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK getDataCallback, void* context)
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE handle, const char* destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX getDataCallbackEx, void* context)
 {
     IOTHUB_CLIENT_RESULT result;
 
@@ -814,10 +814,10 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
     if (
         (handle == NULL) ||
         (destinationFileName == NULL) ||
-        (getDataCallback == NULL)
+        (getDataCallbackEx == NULL)
         )
     {
-        LogError("invalid argument detected handle=%p destinationFileName=%p getDataCallback=%p", handle, destinationFileName, getDataCallback);
+        LogError("invalid argument detected handle=%p destinationFileName=%p getDataCallbackEx=%p", handle, destinationFileName, getDataCallbackEx);
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else
@@ -929,7 +929,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
                                         else
                                         {
                                             /*Codes_SRS_IOTHUBCLIENT_LL_02_083: [ IoTHubClient_LL_UploadMultipleBlocksToBlob shall call Blob_UploadFromSasUri and capture the HTTP return code and HTTP body. ]*/
-                                            BLOB_RESULT uploadMultipleBlocksResult = Blob_UploadMultipleBlocksFromSasUri(STRING_c_str(sasUri), getDataCallback, context, &httpResponse, responseToIoTHub, handleData->certificates, &(handleData->http_proxy_options));
+                                            BLOB_RESULT uploadMultipleBlocksResult = Blob_UploadMultipleBlocksFromSasUri(STRING_c_str(sasUri), getDataCallbackEx, context, &httpResponse, responseToIoTHub, handleData->certificates, &(handleData->http_proxy_options));
                                             if (uploadMultipleBlocksResult == BLOB_ABORTED)
                                             {
                                                 /*Codes_SRS_IOTHUBCLIENT_LL_99_008: [ If step 2 is aborted by the client, then the HTTP message body shall look like:  ]*/
@@ -1025,9 +1025,9 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
         }
     }
 
-    /*Codes_SRS_IOTHUBCLIENT_LL_99_003: [ If `IoTHubClient_LL_UploadMultipleBlocksToBlob` return `IOTHUB_CLIENT_OK`, it shall call `getDataCallback` with `result` set to `FILE_UPLOAD_OK`, and `data` and `size` set to NULL. ]*/
-    /*Codes_SRS_IOTHUBCLIENT_LL_99_004: [ If `IoTHubClient_LL_UploadMultipleBlocksToBlob` does not return `IOTHUB_CLIENT_OK`, it shall call `getDataCallback` with `result` set to `FILE_UPLOAD_ERROR`, and `data` and `size` set to NULL. ]*/
-    (void)getDataCallback(result == IOTHUB_CLIENT_OK ? FILE_UPLOAD_OK : FILE_UPLOAD_ERROR, NULL, NULL, context);
+    /*Codes_SRS_IOTHUBCLIENT_LL_99_003: [ If `IoTHubClient_LL_UploadMultipleBlocksToBlob` return `IOTHUB_CLIENT_OK`, it shall call `getDataCallbackEx` with `result` set to `FILE_UPLOAD_OK`, and `data` and `size` set to NULL. ]*/
+    /*Codes_SRS_IOTHUBCLIENT_LL_99_004: [ If `IoTHubClient_LL_UploadMultipleBlocksToBlob` does not return `IOTHUB_CLIENT_OK`, it shall call `getDataCallbackEx` with `result` set to `FILE_UPLOAD_ERROR`, and `data` and `size` set to NULL. ]*/
+    (void)getDataCallbackEx(result == IOTHUB_CLIENT_OK ? FILE_UPLOAD_OK : FILE_UPLOAD_ERROR, NULL, NULL, context);
 
     return result;
 }
@@ -1050,7 +1050,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_Impl(IOTHUB_CLIENT_LL_UPLOADTO
         context.blobSourceSize = size;
         context.remainingSizeToUpload = size;
 
-        /*Codes_SRS_IOTHUBCLIENT_LL_99_002: [ `IoTHubClient_LL_UploadToBlob` shall call `IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl` with `FileUpload_GetData_Callback` as `getDataCallback` and pass the struct created at step SRS_IOTHUBCLIENT_LL_99_001 as `context` ]*/
+        /*Codes_SRS_IOTHUBCLIENT_LL_99_002: [ `IoTHubClient_LL_UploadToBlob` shall call `IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl` with `FileUpload_GetData_Callback` as `getDataCallbackEx` and pass the struct created at step SRS_IOTHUBCLIENT_LL_99_001 as `context` ]*/
         result = IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(handle, destinationFileName, FileUpload_GetData_Callback, &context);
     }
     return result;

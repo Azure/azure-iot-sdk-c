@@ -378,6 +378,7 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_UMOCK_ALIAS_TYPE(HTTPAPIEX_SAS_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(const unsigned char*, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK, void*);
+	REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX, void*);
 
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, my_gballoc_free);
@@ -2020,7 +2021,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SAS_token_when_step2_aborts_succeeds)
             .SetReturn(BLOB_ABORTED)
             ;
         /*Copy the abort buffer */
-        const unsigned char* expectedBuffer = "{ \"isSuccess\":false, \"statusCode\":-1,\"statusDescription\" : \"file upload aborted\" }";
+        const char* expectedBuffer = "{ \"isSuccess\":false, \"statusCode\":-1,\"statusDescription\" : \"file upload aborted\" }";
         STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, strlen(expectedBuffer) + 1))
             .ValidateArgumentBuffer(2, expectedBuffer, strlen(expectedBuffer) + 1)
             ;

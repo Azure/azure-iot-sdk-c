@@ -67,6 +67,7 @@ typedef struct UPLOADTOBLOB_MULTIBLOCK_SAVED_DATA_TAG
 {
     char* destinationFileName;
     IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK getDataCallback;
+    IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX getDataCallbackEx;
     void* context;
     THREAD_HANDLE uploadingThreadHandle;
     IOTHUB_CLIENT_HANDLE iotHubClientHandle;
@@ -2069,7 +2070,16 @@ static int uploadMultipleBlock_thread(void* data)
     IOTHUB_CLIENT_LL_HANDLE llHandle = blocksData->iotHubClientHandle->IoTHubClientLLHandle;
 
     /*Codes_SRS_IOTHUBCLIENT_99_078: [ The thread shall call `IoTHubClient_LL_UploadMultipleBlocksToBlob` passing the information packed in the structure. ]*/
-    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadMultipleBlocksToBlob(llHandle, blocksData->destinationFileName, blocksData->getDataCallback, blocksData->context);
+    IOTHUB_CLIENT_RESULT result;
+
+    if (blocksData->getDataCallback != NULL)
+    {
+        result = IoTHubClient_LL_UploadMultipleBlocksToBlob(llHandle, blocksData->destinationFileName, blocksData->getDataCallback, blocksData->context);
+    }
+    else
+    {
+        result = IoTHubClient_LL_UploadMultipleBlocksToBlobEx(llHandle, blocksData->destinationFileName, blocksData->getDataCallbackEx, blocksData->context);
+    }        
 
     // Clean resources
     free(blocksData->destinationFileName);
@@ -2078,7 +2088,7 @@ static int uploadMultipleBlock_thread(void* data)
     return 0;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_UploadMultipleBlocksToBlobAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK getDataCallback, void* context)
+IOTHUB_CLIENT_RESULT IoTHubClient_UploadMultipleBlocksToBlobAsync_Impl(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK getDataCallback, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX getDataCallbackEx, void* context)
 {
     IOTHUB_CLIENT_RESULT result;
 
@@ -2088,13 +2098,14 @@ IOTHUB_CLIENT_RESULT IoTHubClient_UploadMultipleBlocksToBlobAsync(IOTHUB_CLIENT_
     if (
         (iotHubClientHandle == NULL) ||
         (destinationFileName == NULL) ||
-        (getDataCallback == NULL)
+        ((getDataCallback == NULL) && (getDataCallbackEx == NULL))
         )
     {
-        LogError("invalid parameters iotHubClientHandle = %p , destinationFileName = %p, getDataCallback = %p",
+        LogError("invalid parameters iotHubClientHandle = %p , destinationFileName = %p, getDataCallback = %p, getDataCallbackEx = %p",
             iotHubClientHandle,
             destinationFileName,
-            getDataCallback
+            getDataCallback,
+            getDataCallbackEx
         );
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
@@ -2122,6 +2133,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_UploadMultipleBlocksToBlobAsync(IOTHUB_CLIENT_
             {
                 /*Codes_SRS_IOTHUBCLIENT_99_075: [ `IoTHubClient_UploadMultipleBlocksToBlobAsync` shall copy the `destinationFileName`, `getDataCallback`, `context`  and `iotHubClientHandle` into a structure. ]*/
                 blocksData->getDataCallback = getDataCallback;
+                blocksData->getDataCallbackEx = getDataCallbackEx;
                 blocksData->context = context;
                 blocksData->iotHubClientHandle = iotHubClientHandle;
                 if (ThreadAPI_Create(&blocksData->uploadingThreadHandle, uploadMultipleBlock_thread, blocksData) != THREADAPI_OK)
@@ -2142,6 +2154,16 @@ IOTHUB_CLIENT_RESULT IoTHubClient_UploadMultipleBlocksToBlobAsync(IOTHUB_CLIENT_
     }
 
     return result;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClient_UploadMultipleBlocksToBlobAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK getDataCallback, void* context)
+{
+    return IoTHubClient_UploadMultipleBlocksToBlobAsync_Impl(iotHubClientHandle, destinationFileName, getDataCallback, NULL, context);
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClient_UploadMultipleBlocksToBlobAsyncEx(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX getDataCallbackEx, void* context)
+{
+    return IoTHubClient_UploadMultipleBlocksToBlobAsync_Impl(iotHubClientHandle, destinationFileName, NULL, getDataCallbackEx, context);
 }
 
 #endif /*DONT_USE_UPLOADTOBLOB*/
