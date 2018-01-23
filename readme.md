@@ -2,6 +2,7 @@
 
 This repository contains the following:
 * **Microsoft Azure IoT Hub device SDK for C** to connect devices running C code to Azure IoT Hub
+* **Microsoft Azure Iot Hub Device Provisioning Service client SDK** for enrolling devices with Device Provisioning Services
 * **Microsoft Azure IoT Hub service SDK for C** to interface with an Azure IoT Hub service instance from a back-end C application
 * **Serializer library for C** to help serialize and deserialize data on your device.
 
