@@ -10,6 +10,9 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_PROV_MODULE")
 
 add_subdirectory(./deps)
 
+set(provisioning_libs)
+set(provisioning_headers)
+
 set(AUTH_CLIENT_H_FILES
     ./inc/azure_prov_client/prov_auth_client.h
     ./inc/azure_prov_client/prov_security_factory.h
@@ -131,17 +134,26 @@ ENDIF(WIN32)
 add_library(hsm_security_client ${HSM_CLIENT_C_FILES} ${HSM_CLIENT_H_FILES})
 linkSharedUtil(hsm_security_client)
 target_link_libraries(hsm_security_client ${HSM_CLIENT_LIBRARY})
+set(provisioning_libs ${provisioning_libs} hsm_security_client)
+set(provisioning_headers ${provisioning_headers} ${HSM_CLIENT_H_FILES})
+
 
 add_library(prov_auth_client ${AUTH_CLIENT_C_FILES} ${AUTH_CLIENT_H_FILES})
 linkSharedUtil(prov_auth_client)
 target_link_libraries(prov_auth_client hsm_security_client)
+set(provisioning_libs ${provisioning_libs} prov_auth_client)
+set(provisioning_headers ${provisioning_headers} ${AUTH_CLIENT_H_FILES})
 
 add_library(prov_device_ll_client ${PROV_DEVICE_LL_CLIENT_SOURCE_C_FILES} ${PROV_DEVICE_LL_CLEINT_SOURCE_H_FILES})
 linkSharedUtil(prov_device_ll_client)
 link_security_client(prov_device_ll_client)
+set(provisioning_libs ${provisioning_libs} prov_device_ll_client)
+set(provisioning_headers ${provisioning_headers} ${PROV_DEVICE_LL_CLEINT_SOURCE_H_FILES})
 
 add_library(prov_device_client ${PROV_DEVICE_CLIENT_SOURCE_C_FILES} ${PROV_DEVICE_CLIENT_SOURCE_H_FILES})
 target_link_libraries(prov_device_client  prov_device_ll_client)
+set(provisioning_libs ${provisioning_libs} prov_device_client)
+set(provisioning_headers ${provisioning_headers} ${PROV_DEVICE_CLIENT_SOURCE_H_FILES})
 
 add_library(prov_device_client_dll SHARED
     ${PROV_DEVICE_CLIENT_SOURCE_C_FILES} 
@@ -164,6 +176,8 @@ if (${use_http})
     # Provisioning http Transport Client library
     add_library(prov_http_transport ${PROV_HTTP_CLIENT_C_FILES} ${PROV_HTTP_CLIENT_H_FILES})
     linkSharedUtil(prov_http_transport)
+    set(provisioning_libs ${provisioning_libs} prov_http_transport)
+    set(provisioning_headers ${provisioning_headers} ${PROV_HTTP_CLIENT_H_FILES})
 
     target_link_libraries(prov_http_transport uhttp)
 endif()
@@ -194,11 +208,15 @@ if (${use_amqp})
     add_library(prov_amqp_ws_transport ${PROV_AMQP_WS_CLIENT_C_FILES} ${PROV_AMQP_WS_CLIENT_H_FILES})
     linkSharedUtil(prov_amqp_ws_transport)
     target_link_libraries(prov_amqp_ws_transport uamqp)
+    set(provisioning_libs ${provisioning_libs} prov_amqp_ws_transport)
+    set(provisioning_headers ${provisioning_headers} ${PROV_AMQP_WS_CLIENT_H_FILES})
 
     # Provisioning amqp Transport Client library
     add_library(prov_amqp_transport ${PROV_AMQP_CLIENT_C_FILES} ${PROV_AMQP_CLIENT_H_FILES})
     linkSharedUtil(prov_amqp_transport)
     target_link_libraries(prov_amqp_transport uamqp)
+    set(provisioning_libs ${provisioning_libs} prov_amqp_transport)
+    set(provisioning_headers ${provisioning_headers} ${PROV_AMQP_CLIENT_H_FILES})
 endif()
 
 if (${use_mqtt})
@@ -223,11 +241,15 @@ if (${use_mqtt})
     add_library(prov_mqtt_ws_transport ${PROV_MQTT_WS_CLIENT_C_FILES} ${PROV_MQTT_WS_CLIENT_H_FILES})
     linkSharedUtil(prov_mqtt_ws_transport)
     target_link_libraries(prov_mqtt_ws_transport umqtt)
+    set(provisioning_libs ${provisioning_libs} prov_mqtt_ws_transport)
+    set(provisioning_headers ${provisioning_headers} ${PROV_MQTT_WS_CLIENT_H_FILES})
 
     # Provisioning mqtt Transport Client library
     add_library(prov_mqtt_transport ${PROV_MQTT_CLIENT_C_FILES} ${PROV_MQTT_CLIENT_H_FILES})
     linkSharedUtil(prov_mqtt_transport)
     target_link_libraries(prov_mqtt_transport umqtt)
+    set(provisioning_libs ${provisioning_libs} prov_mqtt_transport)
+    set(provisioning_headers ${provisioning_headers} ${PROV_MQTT_CLIENT_H_FILES})
 endif()
 
 if(NOT IN_OPENWRT)
@@ -236,3 +258,50 @@ if(NOT IN_OPENWRT)
 endif()
 
 add_subdirectory(tools)
+
+if(${use_installed_dependencies})
+
+    # Install Provisioning libs
+    set(package_location "cmake")
+
+    if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
+        set(CMAKE_INSTALL_LIBDIR "lib")
+    endif()
+
+    install(TARGETS ${provisioning_libs} EXPORT azure_prov_sdksTargets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/../bin
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
+    )
+    install(FILES ${provisioning_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot/azure_prov_client)
+
+    include(CMakePackageConfigHelpers)
+
+    write_basic_package_version_file(
+        "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}ConfigVersion.cmake"
+        VERSION ${PROV_SDK_VERSION}
+        COMPATIBILITY SameMajorVersion
+    )
+
+    configure_file("configs/${PROJECT_NAME}Config.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}Config.cmake"
+        COPYONLY
+    )
+
+    install(EXPORT azure_prov_sdksTargets
+        FILE
+            "${PROJECT_NAME}Targets.cmake"
+        DESTINATION
+            ${package_location}
+    )
+
+    install(
+        FILES
+            "configs/${PROJECT_NAME}Config.cmake"
+            "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}ConfigVersion.cmake"
+        DESTINATION
+            ${package_location}
+    )
+
+endif()
