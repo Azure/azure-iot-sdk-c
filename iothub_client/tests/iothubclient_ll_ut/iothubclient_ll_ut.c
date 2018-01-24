@@ -3822,7 +3822,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_with_NULL_source_and_size_greater_tha
     IoTHubClient_LL_Destroy(h);
 }
 
-/*Tests_SRS_IOTHUBCLIENT_LL_99_005: [** If `iotHubClientHandle` is `NULL` then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_99_005: [** If `iotHubClientHandle` is `NULL` then `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
 TEST_FUNCTION(IoTHubClient_LL_UploadMultipleBlocksToBlob_with_NULL_handle_fails)
 {
     //arrange
@@ -3837,7 +3837,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadMultipleBlocksToBlob_with_NULL_handle_fails)
     ///cleanup
 }
 
-/*Tests_SRS_IOTHUBCLIENT_LL_99_006: [ If `destinationFileName` is `NULL` then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_99_006: [ If `destinationFileName` is `NULL` then `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
 TEST_FUNCTION(IoTHubClient_LL_UploadMultipleBlocksToBlob_with_NULL_filename_fails)
 {
     //arrange
@@ -3855,7 +3855,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadMultipleBlocksToBlob_with_NULL_filename_fail
     IoTHubClient_LL_Destroy(h);
 }
 
-/*Tests_SRS_IOTHUBCLIENT_LL_99_007: [ If `getDataCallback` is `NULL` then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_99_007: [ If `getDataCallback` is `NULL` then `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
 TEST_FUNCTION(IoTHubClient_LL_UploadMultipleBlocksToBlob_with_NULL_callback_fails)
 {
     //arrange
@@ -3873,7 +3873,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadMultipleBlocksToBlob_with_NULL_callback_fail
     IoTHubClient_LL_Destroy(h);
 }
 
-/*Tests_SRS_IOTHUBCLIENT_LL_99_005: [** If `iotHubClientHandle` is `NULL` then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_99_005: [** If `iotHubClientHandle` is `NULL` then `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
 TEST_FUNCTION(IoTHubClient_LL_UploadMultipleBlocksToBlobEx_with_NULL_handle_fails)
 {
     //arrange
@@ -3888,7 +3888,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadMultipleBlocksToBlobEx_with_NULL_handle_fail
     ///cleanup
 }
 
-/*Tests_SRS_IOTHUBCLIENT_LL_99_006: [ If `destinationFileName` is `NULL` then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_99_006: [ If `destinationFileName` is `NULL` then `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
 TEST_FUNCTION(IoTHubClient_LL_UploadMultipleBlocksToBlobEx_with_NULL_filename_fails)
 {
     //arrange
@@ -3906,7 +3906,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadMultipleBlocksToBlobEx_with_NULL_filename_fa
     IoTHubClient_LL_Destroy(h);
 }
 
-/*Tests_SRS_IOTHUBCLIENT_LL_99_007: [ If `getDataCallback` is `NULL` then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_99_007: [ If `getDataCallback` is `NULL` then `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
 TEST_FUNCTION(IoTHubClient_LL_UploadMultipleBlocksToBlobEx_with_NULL_callback_fails)
 {
     //arrange

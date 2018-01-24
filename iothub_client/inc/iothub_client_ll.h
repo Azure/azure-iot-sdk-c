@@ -584,7 +584,7 @@ extern "C"
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, destinationFileName, const unsigned char*, source, size_t, size);
 
      /**
-     * DEPRECATED:  APPLICATIONS SHOULD USE IoTHubClient_LL_UploadMultipleBlocksToBlobEx
+     ** DEPRECATED: Use IoTHubClient_LL_UploadMultipleBlocksToBlobAsyncEx instead **
      * @brief    This API uploads to Azure Storage the content provided block by block by @p getDataCallback
      *           under the blob name devicename/@pdestinationFileName
      *
@@ -594,6 +594,7 @@ extern "C"
      * @param    context                 Any data provided by the user to serve as context on getDataCallback.
      *
      * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
+     ** DEPRECATED: Use IoTHubClient_LL_UploadMultipleBlocksToBlobAsyncEx instead **
      */
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadMultipleBlocksToBlob, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK, getDataCallback, void*, context);
 

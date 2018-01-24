@@ -2069,7 +2069,7 @@ static int uploadMultipleBlock_thread(void* data)
     UPLOADTOBLOB_MULTIBLOCK_SAVED_DATA *blocksData = (UPLOADTOBLOB_MULTIBLOCK_SAVED_DATA *)data;
     IOTHUB_CLIENT_LL_HANDLE llHandle = blocksData->iotHubClientHandle->IoTHubClientLLHandle;
 
-    /*Codes_SRS_IOTHUBCLIENT_99_078: [ The thread shall call `IoTHubClient_LL_UploadMultipleBlocksToBlob` passing the information packed in the structure. ]*/
+    /*Codes_SRS_IOTHUBCLIENT_99_078: [ The thread shall call `IoTHubClient_LL_UploadMultipleBlocksToBlob` or `IoTHubClient_LL_UploadMultipleBlocksToBlobEx` passing the information packed in the structure. ]*/
     IOTHUB_CLIENT_RESULT result;
 
     if (blocksData->getDataCallback != NULL)
@@ -2092,9 +2092,9 @@ IOTHUB_CLIENT_RESULT IoTHubClient_UploadMultipleBlocksToBlobAsync_Impl(IOTHUB_CL
 {
     IOTHUB_CLIENT_RESULT result;
 
-    /*Codes_SRS_IOTHUBCLIENT_99_072: [ If `iotHubClientHandle` is `NULL` then `IoTHubClient_UploadMultipleBlocksToBlobAsync` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
-    /*Codes_SRS_IOTHUBCLIENT_99_073: [ If `destinationFileName` is `NULL` then `IoTHubClient_UploadMultipleBlocksToBlobAsync` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
-    /*Codes_SRS_IOTHUBCLIENT_99_074: [ If `getDataCallback` is `NULL` then `IoTHubClient_UploadMultipleBlocksToBlobAsync` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
+    /*Codes_SRS_IOTHUBCLIENT_99_072: [ If `iotHubClientHandle` is `NULL` then `IoTHubClient_UploadMultipleBlocksToBlobAsync(Ex)` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
+    /*Codes_SRS_IOTHUBCLIENT_99_073: [ If `destinationFileName` is `NULL` then `IoTHubClient_UploadMultipleBlocksToBlobAsync(Ex)` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
+    /*Codes_SRS_IOTHUBCLIENT_99_074: [ If `getDataCallback` is `NULL` then `IoTHubClient_UploadMultipleBlocksToBlobAsync(Ex)` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
     if (
         (iotHubClientHandle == NULL) ||
         (destinationFileName == NULL) ||
@@ -2111,34 +2111,34 @@ IOTHUB_CLIENT_RESULT IoTHubClient_UploadMultipleBlocksToBlobAsync_Impl(IOTHUB_CL
     }
     else
     {
-        /*Codes_SRS_IOTHUBCLIENT_99_075: [ `IoTHubClient_UploadMultipleBlocksToBlobAsync` shall copy the `destinationFileName`, `getDataCallback`, `context`  and `iotHubClientHandle` into a structure. ]*/
+        /*Codes_SRS_IOTHUBCLIENT_99_075: [ `IoTHubClient_UploadMultipleBlocksToBlobAsync(Ex)` shall copy the `destinationFileName`, `getDataCallback`, `context`  and `iotHubClientHandle` into a structure. ]*/
         UPLOADTOBLOB_MULTIBLOCK_SAVED_DATA *blocksData = (UPLOADTOBLOB_MULTIBLOCK_SAVED_DATA *)malloc(sizeof(UPLOADTOBLOB_MULTIBLOCK_SAVED_DATA));
         if (blocksData == NULL)
         {
-            /*Codes_SRS_IOTHUBCLIENT_99_077: [ If copying to the structure or spawning the thread fails, then `IoTHubClient_UploadMultipleBlocksToBlobAsync` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
+            /*Codes_SRS_IOTHUBCLIENT_99_077: [ If copying to the structure or spawning the thread fails, then `IoTHubClient_UploadMultipleBlocksToBlobAsync(Ex)` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
             LogError("unable to malloc");
             result = IOTHUB_CLIENT_ERROR;
         }
         else
         {
-            /*Codes_SRS_IOTHUBCLIENT_99_075: [ `IoTHubClient_UploadMultipleBlocksToBlobAsync` shall copy the `destinationFileName`, `getDataCallback`, `context`  and `iotHubClientHandle` into a structure. ]*/
+            /*Codes_SRS_IOTHUBCLIENT_99_075: [ `IoTHubClient_UploadMultipleBlocksToBlobAsync(Ex)` shall copy the `destinationFileName`, `getDataCallback`, `context`  and `iotHubClientHandle` into a structure. ]*/
             if (mallocAndStrcpy_s((char**)&blocksData->destinationFileName, destinationFileName) != 0)
             {
-                /*Codes_SRS_IOTHUBCLIENT_99_077: [ If copying to the structure or spawning the thread fails, then `IoTHubClient_UploadMultipleBlocksToBlobAsync` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
+                /*Codes_SRS_IOTHUBCLIENT_99_077: [ If copying to the structure or spawning the thread fails, then `IoTHubClient_UploadMultipleBlocksToBlobAsync(Ex)` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
                 LogError("unable to mallocAndStrcpy_s");
                 free(blocksData);
                 result = IOTHUB_CLIENT_ERROR;
             }
             else
             {
-                /*Codes_SRS_IOTHUBCLIENT_99_075: [ `IoTHubClient_UploadMultipleBlocksToBlobAsync` shall copy the `destinationFileName`, `getDataCallback`, `context`  and `iotHubClientHandle` into a structure. ]*/
+                /*Codes_SRS_IOTHUBCLIENT_99_075: [ `IoTHubClient_UploadMultipleBlocksToBlobAsync(Ex)` shall copy the `destinationFileName`, `getDataCallback`, `context`  and `iotHubClientHandle` into a structure. ]*/
                 blocksData->getDataCallback = getDataCallback;
                 blocksData->getDataCallbackEx = getDataCallbackEx;
                 blocksData->context = context;
                 blocksData->iotHubClientHandle = iotHubClientHandle;
                 if (ThreadAPI_Create(&blocksData->uploadingThreadHandle, uploadMultipleBlock_thread, blocksData) != THREADAPI_OK)
                 {
-                    /*Codes_SRS_IOTHUBCLIENT_99_077: [ If copying to the structure or spawning the thread fails, then `IoTHubClient_UploadMultipleBlocksToBlobAsync` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
+                    /*Codes_SRS_IOTHUBCLIENT_99_077: [ If copying to the structure or spawning the thread fails, then `IoTHubClient_UploadMultipleBlocksToBlobAsync(Ex)` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
                     LogError("unable to ThreadAPI_Create");
                     free(blocksData->destinationFileName);
                     free(blocksData);
@@ -2146,7 +2146,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_UploadMultipleBlocksToBlobAsync_Impl(IOTHUB_CL
                 }
                 else
                 {
-                    /*Codes_SRS_IOTHUBCLIENT_99_077: [ If copying to the structure and spawning the thread succeeds, then `IoTHubClient_UploadMultipleBlocksToBlobAsync` shall return `IOTHUB_CLIENT_OK`. ]*/
+                    /*Codes_SRS_IOTHUBCLIENT_99_077: [ If copying to the structure and spawning the thread succeeds, then `IoTHubClient_UploadMultipleBlocksToBlobAsync(Ex)` shall return `IOTHUB_CLIENT_OK`. ]*/
                     result = IOTHUB_CLIENT_OK;
                 }
             }
