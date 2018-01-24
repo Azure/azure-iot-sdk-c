@@ -238,19 +238,19 @@ IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT uploadToBlobGetDataEx(IOTHUB_CLIENT_FI
         if (uploadToBlobCauseAbort == true)
         {
             // If we've aborted, expect to be called with final invocation sooner
-            ASSERT_ARE_EQUAL(bool, true, uploadBlobNumber == 3);
+            ASSERT_ARE_EQUAL(bool, true, (uploadBlobNumber == 3) ? true : false);
         }
         else
         {
             // If we're not completing, expect to be called with final invocation after all blocks have been passed up.
-            ASSERT_ARE_EQUAL(bool, true, uploadBlobNumber == 4);
+            ASSERT_ARE_EQUAL(bool, true, (uploadBlobNumber == 4) ? true : false);
         }
         *callbackStatus = UPLOADTOBLOB_CALLBACK_SUCCEEDED;
     }
     else
     {
         // We're invoked with a request for more data.
-        ASSERT_ARE_EQUAL(bool, true, uploadBlobNumber <= 3);
+        ASSERT_ARE_EQUAL(bool, true, (uploadBlobNumber <= 3) ? true : false);
         if (uploadBlobNumber == 0)
         {
             *data = (unsigned char const *)uploadData0;
