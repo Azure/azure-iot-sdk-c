@@ -1963,7 +1963,7 @@ IOTHUB_CLIENT_RESULT initializeUploadToBlobData(UPLOADTOBLOB_THREAD_INFO* thread
 
     if (size != 0)
     {
-        if ((threadInfo->uploadBlobSavedData.source = malloc(size)) == NULL)
+        if ((threadInfo->uploadBlobSavedData.source = (unsigned char*)malloc(size)) == NULL)
         {
             LogError("Cannot allocate source field");
             result = IOTHUB_CLIENT_ERROR;
