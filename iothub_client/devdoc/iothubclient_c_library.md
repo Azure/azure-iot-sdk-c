@@ -1,11 +1,9 @@
-
-
-
-#IoTHub client "C" Library
+# IoTHub client "C" Library  
 Revision 1.7
 03/16/2016
 
-#Revisions:
+
+# Revisions:
 |Revision	 |Updated By|	Date	      |Major updates                                                             |
 |------------|----------|-----------------|--------------------------------------------------------------------------|
 |0.1	     |   TA	    |   01/15/2015	  |Initial draft                                                             |
@@ -21,7 +19,7 @@ Revision 1.7
 |1.8         |   AP     |   06/30/2016    |Added x509 options and convert to .md
 
 
-#Overview
+# Overview
 The IoTHub client "C" library offers developers a means of communication to & from an IoT Hub.
 
 
@@ -39,7 +37,7 @@ The library offers the following features:
 
 The APIs of this library cannot be called from different threads on the same handle without risking data races. Therefore, should more than 1 thread need to access concurrently the APIs of this module on the same handle, there needs to be a user-level synchronization mechanism that guarantees that two APIs are not called at the same time.
 
-#Example1 - SendEventAsync:
+# Example1 - SendEventAsync:
 
 ```c
 #include <stdio.h>
@@ -129,7 +127,7 @@ int main(void)
 ```
 
 
-#Example2 - ReceiveMessage
+# Example2 - ReceiveMessage
 
 ```c
 #include <stdio.h>
@@ -208,7 +206,7 @@ int main(void)
 
 ```
 
-#Types defined by the IoTHub client:
+# Types defined by the IoTHub client:
 ```c
 #define IOTHUB_CLIENT_RESULT_VALUES       \
     IOTHUB_CLIENT_OK,                     \
@@ -269,7 +267,7 @@ typedef struct IOTHUBTRANSPORT_CONFIG_TAG
 }IOTHUBTRANSPORT_CONFIG;
 ```
 
-#Types defined by the IoTHub message module:
+# Types defined by the IoTHub message module:
 ```c
 #define IOTHUB_MESSAGE_RESULT_VALUES         \
     IOTHUB_MESSAGE_OK,                       \
@@ -287,8 +285,8 @@ IOTHUBMESSAGE_UNKNOWN \
 DEFINE_ENUM(IOTHUBMESSAGE_CONTENT_TYPE, IOTHUBMESSAGE_CONTENT_TYPE_VALUES);
 ```
 
-#IoTHub client Structures
-##IOTHUB_CLIENT_CONFIG
+# IoTHub client Structures
+##  IOTHUB_CLIENT_CONFIG
 struct members
 
 |Name	                    |Description                                               |
@@ -301,7 +299,7 @@ struct members
 |protocolGatewayHostName	|The address of the protocol gateway the client will use to connect to send data and receive messages.  This is for protocols which are supported via a protocol gateway.  For example, mqtt. |
 
 
-##IOTHUB_CLIENT_DEVICE_CONFIG
+## IOTHUB_CLIENT_DEVICE_CONFIG
 struct members
 
 |Name	                    |Description                                                |
@@ -312,9 +310,9 @@ struct members
 |transportHandle	        |The transport connection to be used for this device.       |
 
 
-#IoTHub client APIs
+# IoTHub client APIs
 
-##IOTHUB_CLIENT_HANDLE IoTHubClient_CreateFromConnectionString(const char\* connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
+##  IOTHUB_CLIENT_HANDLE IoTHubClient_CreateFromConnectionString(const char\* connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
 
 
 Creates a IoT Hub client for communication with an existing IoT Hub using the specified connection string parameter. The API does not allow sharing of a connection across multiple devices. This is a blocking call.
@@ -323,125 +321,126 @@ Creates a IoT Hub client for communication with an existing IoT Hub using the sp
 
 HostName=\[IoT Hub name goes here\].\[IoT Hub suffix goes here, e.g., azure-devices.net\]; DeviceId=\[Device ID goes here\];SharedAccessKey=\[Device key goes here\];
 
-###Arguments
+### Arguments
 
-|Name	            |Description
-|-------------------|-----------------------------
-|connectionString	|Pointer to a character string
-|protocol	        |Function pointer for protocol implementation
+|Name	            |Description |
+|-------------------|-----------------------------|
+|connectionString	|Pointer to a character string |
+|protocol	        |Function pointer for protocol implementation |
 
 
-###Return
+### Return
 -	A Non-NULL handle value that is used when invoking other functions for IoT Hub client.
 -	NULL on failure. 
 
-##IOTHUB_CLIENT_HANDLE IoTHubClient_Create(const IOTHUB_CLIENT_CONFIG\* config);
+## IOTHUB_CLIENT_HANDLE IoTHubClient_Create(const IOTHUB_CLIENT_CONFIG\* config);
 
 
 Creates a IoT Hub client for communication with an existing IoT Hub using the specified parameters. The API does not allow sharing of a connection across multiple devices. This is a blocking call.
 
-###Arguments
-|Name	            |Description
-|-------------------|
-|config         	|Pointer to a IOTHUB_CLIENT_CONFIG structure
+### Arguments
+
+|Name	            |Description|
+|-------------------|-------------------|
+|config         	|Pointer to a IOTHUB_CLIENT_CONFIG structure |
 
 
-###Return
+### Return
 - A Non-NULL handle value that is used when invoking other functions for IoT Hub client.
 - NULL on failure.
 
-##IOTHUB_CLIENT_HANDLE IoTHubClient_CreateWithTransport(const IOTHUB_CLIENT_DEVICE_CONFIG\* config);
+## IOTHUB_CLIENT_HANDLE IoTHubClient_CreateWithTransport(const IOTHUB_CLIENT_DEVICE_CONFIG\* config);
 
 
 This API allows sharing of a connection across multiple devices. Creates a IoT Hub client for communication with an existing IoT Hub using the specified parameters. This is a blocking call.
 
-###Arguments
+### Arguments
 
-|Name	        |Description
-|---------------|
-|config	        |Pointer to a IOTHUB_CLIENT_DEVICE_CONFIG structure
+|Name	        |Description |
+|---------------|---------------|
+|config	        |Pointer to a IOTHUB_CLIENT_DEVICE_CONFIG structure |
 
-###Return
+### Return
 - A Non-NULL handle value that is used when invoking other functions for IoT Hub client.
 - NULL on failure.
 
-##void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle);
+## void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle);
 
 Disposes of resources allocated by the IoT Hub client.  Any pending events that have not yet been sent to the IoT Hub will be immediately completed with a IOTHUB_CLIENT_CONFIRMATION_BECAUSE_DESTROY status.  Other events that are actually out on the wire but not finished may receive an IOTHUB_CLIENT_CONFIRMATION_ERROR status.  This is a blocking call.
 
-###Arguments
+### Arguments
 |Name	            |Description
-|-------------------|
+|-------------------|-------------------|
 |iotHubClientHandle	|The handle created by a call to the create function.
 
-###Return
+### Return
 - No return.
 
-##IOTHUB_CLIENT_RESULT IoTHubClient_SendEventAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK eventConfirmationCallback, void\* userContextCallback);
+## IOTHUB_CLIENT_RESULT IoTHubClient_SendEventAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK eventConfirmationCallback, void\* userContextCallback);
 
 Asynchronous call to send the message specified by the IoTHubMessageHandle. 
 NOTE: The application behavior is undefined if the user calls the IoTHubClient_Destroy from within any callback.
 
-###Arguments
+### Arguments
 
 |Name	                    |Description
-|---------------------------|
+|---------------------------|---------------------------|
 |iotHubClientHandle	        |The handle created by a call to the create function.
 |eventMessageHandle	        |The handle to a IoT Hub message. 
 |eventConfirmationCallBack	|The callback specified by the device for receiving confirmation of the delivery of the IoT Hub message. This callback can be expected to invoke SendEventAsync for the same message in attempt to retry sending a failing message. The user can specify a NULL value here to indicate no callback required.
 |userContextCallback	    |User specified context that will be provided to the callback. This can be NULL.
 
-###Return
+### Return
 - IOTHUB_CLIENT_OK upon success.
 - Error code upon failure.
 
-##IOTHUB_CLIENT_RESULT IoTHubClient_SetMessageCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC messageCallback, void\* userContextCallback);
+## IOTHUB_CLIENT_RESULT IoTHubClient_SetMessageCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC messageCallback, void\* userContextCallback);
 
 Sets up the message callback invoked when IoT Hub issues a message to the device. This is a blocking call. NOTE: The application behavior is undefined if the user calls the IoTHubClient_Destroy from within any callback.
 
-##Arguments
+## Arguments
 
 |Name	                |Description
-|-----------------------|
+|-----------------------|-----------------------|
 |iotHubClientHandle	    |The handle created by a call to the create function.
 |messageCallback	    |The callback specified by the device for receiving messages from IoT Hub.
 |userContextCallback	|User specified context that will be provided to the callback. This can be NULL.
 
-###Return
+### Return
 - IOTHUB_CLIENT_OK upon success.
 - Error code upon failure.
 
-##IOTHUB_CLIENT_RESULT IoTHubClient_GetLastMessageReceiveTime (IOTHUB_CLIENT_HANDLE iotHubClientHandle, time_t\* lastMessageReceiveTime);
+## IOTHUB_CLIENT_RESULT IoTHubClient_GetLastMessageReceiveTime (IOTHUB_CLIENT_HANDLE iotHubClientHandle, time_t\* lastMessageReceiveTime);
 
 This function returns in the out parameter lastMessageReceiveTime what was the value of the time() function when the last notification was received at the client.
 
-###Arguments
+### Arguments
 |Name	                |Description
-|-----------------------|
+|-----------------------|-----------------------|
 |iotHubClientHandle	    |The handle created by a call to the create function.
 |lastMessageReceiveTime	|Out parameter containing the value of time() function when the last message was received
 
-###Return
+### Return
 - IOTHUB_CLIENT_OK upon success.
 - Error code upon failure.
 
-##IOTHUB_CLIENT_RESULT IoTHubClient_GetSendStatus(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_STATUS\* iotHubClientStatus);
+## IOTHUB_CLIENT_RESULT IoTHubClient_GetSendStatus(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_STATUS\* iotHubClientStatus);
 
 This function returns the current sending status for IoTHubClient.
 
-###Arguments
+### Arguments
 
 |Name           	    |Description
-|-----------------------|
+|-----------------------|-----------------------|
 |iotHubClientHandle	    |The handle created by a call to the create function.
 |iotHubClientStatus	    |A pointer to an IOTHUB_CLIENT_STATUS.  If the function call is successful then what is pointed to will receive: IOTHUBCLIENT_SENDSTATUS_IDLE if there are currently no items to be sent.  IOTHUBCLIENT_SENDSTATUS_BUSY if there are currently items to be sent.
 
-###Return
+### Return
 - IOTHUB_CLIENT_OK upon success
 - IOTHUBCLIENT _INVALID_ARG if called with NULL parameter
 - Error code upon failure
 
-##IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC
+## IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC
 
 Once a message is received from the service, if the user has set a callback, the receive callback shall be invoked. 
 This call back is defined as:
@@ -453,11 +452,11 @@ typedef IOTHUBMESSAGE_DISPOSITION_RESULT
 
 If the callback returns the status IOTHUBMESSAGE_ACCEPTED,  the client will accept the message, meaning that it will not be received again by the client. If the callback returns the status IOTHUBMESSAGE_REJECTED , the message will be rejected.  The message will not be resent to the device.  If the callback returns the status IOTHUBMESSAGE_ABANDONED, the message will be abandoned.  The implies that the user could not process the message but it expected that the message will be resent to the device from the service. message is only valid in the scope of the callback.
 
-##IOTHUB_CLIENT_RESULT IoTHubClient_SetOption(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char\* optionName, const void\* value);
+## IOTHUB_CLIENT_RESULT IoTHubClient_SetOption(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char\* optionName, const void\* value);
 
 IoTHubClient_SetOption shall set a runtime option identified by parameter `optionName` to a value pointed to by parameter value. The optionName and the data type value is pointing to are specific for every option.
 
-###Options:
+### Options:
 
 - "timeout" - the maximum time in miliseconds a communication is allowed to use. value is a pointer to an unsigned int with the meaning of "miliseconds". This is only supported for HTTP protocol so far. When the HTTP protocol uses CURL, the meaning of the parameter is total request time. When the HTTP protocol uses winhttp, the meaning is dwSendTimeout and dwReceiveTimeout parameters of WinHttpSetTimeouts API.
 - "CURLOPT_LOW_SPEED_LIMIT" - only available for HTTP protocol and only when CURL is used. It has the same meaning as CURL's option with the same name. value is pointer to a long.
@@ -494,20 +493,20 @@ const char* privateKey =
 "-----END RSA PRIVATE KEY-----";
 ```
 
-##IotHubClient\_LL\_... APIs
+## IotHubClient\_LL\_... APIs
 
 IoTHubClient API surface also contains a separate set of APIs that allow the user to interact with the lower layer portion of the IoTHubClient. These APIs contain _LL_ in their name, but retain the same functionality like the IoTHubClient_... APIs, with one difference. If the _LL_ APIs are used the user is responsible for scheduling when the actual work done by the IoTHubClient happens (when the data is sent/received on/from the wire). This is useful for constrained devices where spinning a separate thread is often not desired.
 
-##IOTHUB_CLIENT_RESULT void IoTHubClient_LL_DoWork(IOTHUB_CLIENT_HANDLE iotHubClientHandle);
+## IOTHUB_CLIENT_RESULT void IoTHubClient_LL_DoWork(IOTHUB_CLIENT_HANDLE iotHubClientHandle);
 
 This function is user called when work (sending/receiving) can be done by the IoTHubClient. All IoTHubClient interactions (in regards to network trafic and/or user level callbacks) are the effect of calling this function and they take place synchronously inside _DoWork.
 
-###Arguments:
+### Arguments:
 |Name	                    |Description
-|---------------------------|
+|---------------------------|---------------------------|
 |IotHubClientHandle	        |The handle created by a call to the create function.
 
-###Example of using DoWork:
+### Example of using DoWork:
 
 ```c
 #include <stdio.h>
@@ -614,87 +613,87 @@ int main(void)
 
 ```
 
-#IoTHub message APIs
+# IoTHub message APIs
 
-##IOTHUB_MESSAGE_HANDLE IoTHubMessage_CreateFromByteArray(const unsigned char\* byteArray, size_t size);
+## IOTHUB_MESSAGE_HANDLE IoTHubMessage_CreateFromByteArray(const unsigned char\* byteArray, size_t size);
 
 Creates an IoT Hub message to be used for operations between the device and IoT Hub.  The data pointed to by byteArray may contain unprintable data and is not zero terminated.
 
-###Arguments
+### Arguments
 |Name   	            |Description
-|-----------------------|
+|-----------------------|-----------------------|
 |byteArray	            |A pointer to data for the message.
 |size	                |The number of unsigned chars pointed to by byteArray.  If size is zero then byteArray may be NULL.  If size is not zero then byteArray MUST NOT be NULL.
 
-###Return
+### Return
 - A None-NULL handle value that is used when invoking other functions for IoT Hub message.
 - NULL on failure.
 
-##IOTHUB_MESSAGE_HANDLE IoTHubMessage_CreateFromString(const char\* source);
+## IOTHUB_MESSAGE_HANDLE IoTHubMessage_CreateFromString(const char\* source);
 Creates an IoT Hub message to be used for operations between the device and IoT Hub.  The data is assumed to be printable and is zero terminated.
 
-###Arguments
+### Arguments
 |Name	                |Description
-|-----------------------|
+|-----------------------|-----------------------|
 |source	                |A pointer to data for the message.
 
-###Return
+### Return
 - A non-NULL handle value that is used when invoking other functions for IoT Hub message.
 - NULL on failure.
 
-##IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle);
+## IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle);
 
 Creates a new IoT Hub message with the content identical to that of the iotHubMessageHandle parameter.
 
-###Arguments
+### Arguments
 
 |Name	                |Description
-|-----------------------|
+|-----------------------|-----------------------|
 |iotHubMessageHandle	|Handle to the message to be cloned.
 
-###Return
+### Return
 - A non-NULL handle value that is used when invoking other functions for IoT Hub message.
 - NULL on failure.
 
-##IOTHUB_MESSAGE_RESULT IoTHubMessage_GetByteArray(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const unsigned char\*\* buffer, size_t\* size);
+## IOTHUB_MESSAGE_RESULT IoTHubMessage_GetByteArray(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const unsigned char\*\* buffer, size_t\* size);
 Fetches a pointer and size for the data associated with the IoT Hub message handle.  If the content type of the message is not IOTHUBMESSAGE_BYTEARRAY then the function returns IOTHUB_MESSAGE_INVALID_ARG.
 
-###Arguments
+### Arguments
 
 |Name	                |Description
-|-----------------------|
+|-----------------------|-----------------------|
 |iotHubMessageHandle	|Handle to the message to be cloned.
 |buffer	                |Pointer to the memory location where the pointer to the buffer will be written.
 |size	                |The size of the buffer will be written to this address.
 
-###Return
+### Return
 - IOTHUB_MESSAGE_OK if the byte array was fetched successfully.
 - Error code upon failure.
 
-##const char\* IoTHubMessage_GetString(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle);
+## const char\* IoTHubMessage_GetString(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle);
 
 Returns the zero terminated string stored in message.  If the content type of the message is not IOTHUBMESSAGE_STRING then the function returns NULL.
 
-###Arguments
+### Arguments
 
 |Name	                |Description
-|-----------------------|
+|-----------------------|-----------------------|
 |iotHubMessageHandle	|Handle to the message.
 
-###Return
+### Return
 - Pointer to the zero terminated string stored in the message.
 - NULL if an error occurs or the content type is incorrect.
 
-##IOTHUBMESSAGE_CONTENT_TYPE IoTHubMessage_GetContentType(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle);
+## IOTHUBMESSAGE_CONTENT_TYPE IoTHubMessage_GetContentType(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle);
 
 Returns the content type of the message given by the parameter iotHubMessageHandle.
 
-##Arguments
+## Arguments
 |Name	                |Description
-|-----------------------|
+|-----------------------|-----------------------|
 |iotHubMessageHandle    |Handle to the message.
 
-###Return
+### Return
 - IOTHUBMESSAGE_BYTEARRAY for a message created via IoTHubMessage_CreateFromByteArray
 - IOTHUBMESSAGE_STRING for a message created via IoTHubMessage_CreateFromString
 - IOTHUBMESSAGE_UNKNOWN otherwise.
@@ -703,20 +702,20 @@ Returns the content type of the message given by the parameter iotHubMessageHand
 
 Returns a handle to the message's properties map.
 
-###Arguments
+### Arguments
 |Name	                |Description
-|-----------------------|
+|-----------------------|-----------------------|
 |iotHubMessageHandle	|Handle to the message.
 
-###Return
+### Return
 MAP_HANDLE representing the message's property map.
 
-##void IoTHubMessage_Destroy(IOTHUB_MESSAGE_HANDLE ioTHubMessageHandle);
+## void IoTHubMessage_Destroy(IOTHUB_MESSAGE_HANDLE ioTHubMessageHandle);
 Disposes of resources allocated by the IoT Hub message.
 
-###Arguments
+### Arguments
 |Name	                |Description
-|-----------------------|
+|-----------------------|-----------------------|
 |ioTHubMessageHandle	|The handle created by a call to the create function.
 
 Return
