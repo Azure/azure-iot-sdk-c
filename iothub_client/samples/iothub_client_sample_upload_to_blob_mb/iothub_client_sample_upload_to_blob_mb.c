@@ -32,10 +32,11 @@ static const char* connectionString = "[device connection string]";
 /*Optional string with http proxy host and integer for http proxy port (Linux only)         */
 static const char* proxyHost = NULL; 
 static int proxyPort = 0;
-static const char* data_to_upload = "Hello World from IoTHubClient_LL_UploadToBlob";
+static const char* data_to_upload = "Hello World from IoTHubClient_LL_UploadToBlob\n";
 static int block_count = 0;
 
-static void getDataCallback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
+static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT getDataCallback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
+
 {
     (void)context;
 
@@ -74,6 +75,10 @@ static void getDataCallback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned ch
     {
         (void)printf("Received unexpected result %s\r\n", ENUM_TO_STRING(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, result));
     }
+
+    // This callback returns IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK to indicate that the upload shall continue.
+    // To abort the upload, it should return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_ABORT
+    return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK;
 }
 
 void iothub_client_sample_upload_to_blob_multi_block_run(void)
@@ -110,7 +115,7 @@ void iothub_client_sample_upload_to_blob_multi_block_run(void)
                 }
                 else
                 {
-                    if (IoTHubClient_LL_UploadMultipleBlocksToBlob(iotHubClientHandle, "subdir/hello_world_mb.txt", getDataCallback, NULL) != IOTHUB_CLIENT_OK)
+                    if (IoTHubClient_LL_UploadMultipleBlocksToBlobEx(iotHubClientHandle, "subdir/hello_world_mb.txt", getDataCallback, NULL) != IOTHUB_CLIENT_OK)
                     {
                         (void)printf("hello world failed to upload\n");
                     }

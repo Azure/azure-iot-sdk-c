@@ -41,7 +41,8 @@ extern "C"
     BLOB_ERROR,            \
     BLOB_NOT_IMPLEMENTED,  \
     BLOB_HTTP_ERROR,       \
-    BLOB_INVALID_ARG    
+    BLOB_INVALID_ARG,      \
+    BLOB_ABORTED
 
 DEFINE_ENUM(BLOB_RESULT, BLOB_RESULT_VALUES)
 
@@ -49,7 +50,7 @@ DEFINE_ENUM(BLOB_RESULT, BLOB_RESULT_VALUES)
 * @brief  Synchronously uploads a byte array to blob storage
 *
 * @param  SASURI            The URI to use to upload data
-* @param  getDataCallback   A callback to be invoked to acquire the file chunks to be uploaded, as well as to indicate the status of the upload of the previous block.
+* @param  getDataCallbackEx A callback to be invoked to acquire the file chunks to be uploaded, as well as to indicate the status of the upload of the previous block.
 * @param  context           Any data provided by the user to serve as context on getDataCallback.
 * @param  httpStatus        A pointer to an out argument receiving the HTTP status (available only when the return value is BLOB_OK)
 * @param  httpResponse      A BUFFER_HANDLE that receives the HTTP response from the server (available only when the return value is BLOB_OK)
@@ -58,7 +59,7 @@ DEFINE_ENUM(BLOB_RESULT, BLOB_RESULT_VALUES)
 *
 * @return	A @c BLOB_RESULT. BLOB_OK means the blob has been uploaded successfully. Any other value indicates an error
 */
-MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadMultipleBlocksFromSasUri, const char*, SASURI, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK, getDataCallback, void*, context, unsigned int*, httpStatus, BUFFER_HANDLE, httpResponse, const char*, certificates, HTTP_PROXY_OPTIONS*, proxyOptions)
+MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadMultipleBlocksFromSasUri, const char*, SASURI, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX, getDataCallbackEx, void*, context, unsigned int*, httpStatus, BUFFER_HANDLE, httpResponse, const char*, certificates, HTTP_PROXY_OPTIONS*, proxyOptions)
 
 /**
 * @brief  Synchronously uploads a byte array as a new block to blob storage

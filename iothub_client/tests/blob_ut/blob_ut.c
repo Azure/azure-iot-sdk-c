@@ -146,7 +146,7 @@ typedef struct BLOB_UPLOAD_CONTEXT_TAG
 
 BLOB_UPLOAD_CONTEXT context;
 
-static void FileUpload_GetData_Callback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* _uploadContext)
+static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT FileUpload_GetData_Callback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* _uploadContext)
 {
     BLOB_UPLOAD_CONTEXT* uploadContext = (BLOB_UPLOAD_CONTEXT*) _uploadContext;
 
@@ -174,6 +174,8 @@ static void FileUpload_GetData_Callback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result,
         *size = thisBlockSize;
         uploadContext->toUpload -= thisBlockSize;
     }
+
+    return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK;
 }
 
 /**
@@ -187,9 +189,10 @@ typedef struct BLOB_UPLOAD_CONTEXT_FAKE_TAG
     size_t blockSize; /* size of the block */
     unsigned int blocksCount; /* number of block wanted */
     unsigned int blockSent; /* number block already sent */
+    int abortOnBlockNumber; /* the callback shall abort if the block asked is equal to this value */
 }BLOB_UPLOAD_CONTEXT_FAKE;
 
-static void FileUpload_GetFakeData_Callback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* _uploadContext)
+static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT FileUpload_GetFakeData_Callback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* _uploadContext)
 {
     BLOB_UPLOAD_CONTEXT_FAKE* uploadContext = (BLOB_UPLOAD_CONTEXT_FAKE*) _uploadContext;
 
@@ -222,6 +225,11 @@ static void FileUpload_GetFakeData_Callback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT res
         *data = uploadContext->fakeData;
         *size = (uploadContext->fakeData != NULL) ? uploadContext->blockSize : 0;
     }
+
+    if (uploadContext->abortOnBlockNumber + 1 == (int)uploadContext->blockSent)
+        return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_ABORT;
+
+    return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK;
 }
 
 BEGIN_TEST_SUITE(blob_ut)
@@ -1488,6 +1496,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockSize_too_big_fails)
     fakeContext.blockSize = BLOCK_SIZE + 1;
     fakeContext.blocksCount = 1;
     fakeContext.fakeData = NULL;
+    fakeContext.abortOnBlockNumber = -1;
 
     ///act
     BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetFakeData_Callback, &fakeContext, &httpResponse, testValidBufferHandle, NULL, NULL);
@@ -1508,6 +1517,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockSize_is_4MB_succeeds
     fakeContext.blockSize = BLOCK_SIZE;
     fakeContext.blocksCount = 1;
     fakeContext.fakeData = NULL;
+    fakeContext.abortOnBlockNumber = -1;
 
     ///act
     BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetFakeData_Callback, &fakeContext, &httpResponse, testValidBufferHandle, NULL, NULL);
@@ -1528,6 +1538,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockCount_is_maximum_suc
     fakeContext.blockSize = 1;
     fakeContext.blocksCount = MAX_BLOCK_COUNT;
     fakeContext.fakeData = NULL;
+    fakeContext.abortOnBlockNumber = -1;
 
     ///act
     BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetFakeData_Callback, &fakeContext, &httpResponse, testValidBufferHandle, NULL, NULL);
@@ -1548,12 +1559,55 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockCount_is_one_over_ma
     fakeContext.blockSize = 1;
     fakeContext.blocksCount = MAX_BLOCK_COUNT + 1;
     fakeContext.fakeData = NULL;
+    fakeContext.abortOnBlockNumber = -1;
 
     ///act
     BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetFakeData_Callback, &fakeContext, &httpResponse, testValidBufferHandle, NULL, NULL);
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_INVALID_ARG, result);
+
+    ///cleanup
+    gballoc_free(fakeContext.fakeData);
+}
+
+/*Tests_SRS_BLOB_99_004: [ If `getDataCallback` returns `IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT_ABORT`, then `Blob_UploadMultipleBlocksFromSasUri` shall exit the loop and return `BLOB_ABORTED`. ]*/
+TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_returns_BLOB_ABORTED_when_callback_aborts_immediately)
+{
+    ///arrange
+    BLOB_UPLOAD_CONTEXT_FAKE fakeContext;
+    fakeContext.blockSent = 0;
+    fakeContext.blockSize = 1;
+    fakeContext.blocksCount = 10;
+    fakeContext.fakeData = NULL;
+    fakeContext.abortOnBlockNumber = 0;
+
+    ///act
+    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetFakeData_Callback, &fakeContext, &httpResponse, testValidBufferHandle, NULL, NULL);
+
+    ///assert
+    ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_ABORTED, result);
+
+    ///cleanup
+    gballoc_free(fakeContext.fakeData);
+}
+
+/*Tests_SRS_BLOB_99_004: [ If `getDataCallback` returns `IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT_ABORT`, then `Blob_UploadMultipleBlocksFromSasUri` shall exit the loop and return `BLOB_ABORTED`. ]*/
+TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_returns_BLOB_ABORTED_when_callback_aborts_after_5_blocks)
+{
+    ///arrange
+    BLOB_UPLOAD_CONTEXT_FAKE fakeContext;
+    fakeContext.blockSent = 0;
+    fakeContext.blockSize = 1;
+    fakeContext.blocksCount = 10;
+    fakeContext.fakeData = NULL;
+    fakeContext.abortOnBlockNumber = 5;
+
+    ///act
+    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetFakeData_Callback, &fakeContext, &httpResponse, testValidBufferHandle, NULL, NULL);
+
+    ///assert
+    ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_ABORTED, result);
 
     ///cleanup
     gballoc_free(fakeContext.fakeData);

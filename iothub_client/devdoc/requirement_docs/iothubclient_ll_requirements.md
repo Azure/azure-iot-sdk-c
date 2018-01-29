@@ -511,15 +511,18 @@ Design considerations: IoTHubClient_LL_UploadToBlob_Impl uses IoTHubClient_LL_Up
 
 ```c
 extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE handle, const char* destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK getDataCallback, void* context);
+extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlobEx(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE handle, const char* destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX getDataCallbackEx, void* context);
 ```
 
-### `IoTHubClient_LL_UploadMultipleBlocksToBlob` calls `IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl` to synchronously upload the blocks provided by `getDataCallback` to a blob called `destinationFileName` in Azure Blob Storage
+`IoTHubClient_LL_UploadMultipleBlocksToBlobEx` is identical to `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)`, except the callback pointer it takes can return an abort code.
 
-**SRS_IOTHUBCLIENT_LL_99_005: [** If `iotHubClientHandle` is `NULL` then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`.** ]**
+### `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` calls `IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl` to synchronously upload the blocks provided by `getDataCallback` to a blob called `destinationFileName` in Azure Blob Storage.
 
-**SRS_IOTHUBCLIENT_LL_99_006: [** If `destinationFileName` is `NULL` then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`.** ]**
+**SRS_IOTHUBCLIENT_LL_99_005: [** If `iotHubClientHandle` is `NULL` then `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`.** ]**
 
-**SRS_IOTHUBCLIENT_LL_99_007: [** If `getDataCallback` is `NULL` then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`.** ]**
+**SRS_IOTHUBCLIENT_LL_99_006: [** If `destinationFileName` is `NULL` then `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`.** ]**
+
+**SRS_IOTHUBCLIENT_LL_99_007: [** If `getDataCallback` is `NULL` then `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`.** ]**
 
 These are the 3 steps that are required to upload a file to Azure Blob Storage using IoTHub: 
 step 1: get the SasUri components from IoTHub service
@@ -528,41 +531,41 @@ step 3: inform IoTHub that the upload has finished.
 
 ### step 1: get the SasUri components from IoTHub service.
 
-**SRS_IOTHUBCLIENT_LL_02_064: [** `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall create an `HTTPAPIEX_HANDLE` to the IoTHub hostname.** ]**
+**SRS_IOTHUBCLIENT_LL_02_064: [** `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall create an `HTTPAPIEX_HANDLE` to the IoTHub hostname.** ]**
 
-**SRS_IOTHUBCLIENT_LL_02_065: [** If creating the `HTTPAPIEX_HANDLE` fails then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
+**SRS_IOTHUBCLIENT_LL_02_065: [** If creating the `HTTPAPIEX_HANDLE` fails then `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
 
-**SRS_IOTHUBCLIENT_LL_02_066: [** `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall create an HTTP relative path formed from "/devices/" + deviceId + "/files/" + destinationFileName + "?api-version=API_VERSION".** ]**
+**SRS_IOTHUBCLIENT_LL_02_066: [** `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall create an HTTP relative path formed from "/devices/" + deviceId + "/files/" + destinationFileName + "?api-version=API_VERSION".** ]**
 
-**SRS_IOTHUBCLIENT_LL_02_067: [** If creating the relativePath fails then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
+**SRS_IOTHUBCLIENT_LL_02_067: [** If creating the relativePath fails then `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
 
-**SRS_IOTHUBCLIENT_LL_32_001: [** `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall create a JSON string formed from "{ \"blobName\": \" + destinationFileName + "\" }". **]**
+**SRS_IOTHUBCLIENT_LL_32_001: [** `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall create a JSON string formed from "{ \"blobName\": \" + destinationFileName + "\" }". **]**
 
-**SRS_IOTHUBCLIENT_LL_32_002: [** if creating the JSON string fails then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall fail and return `IOTHUB_CLIENT_ERROR` **]**
+**SRS_IOTHUBCLIENT_LL_32_002: [** if creating the JSON string fails then `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall fail and return `IOTHUB_CLIENT_ERROR` **]**
 
-**SRS_IOTHUBCLIENT_LL_02_068: [** `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall create an HTTP responseContent BUFFER_HANDLE.** ]**
+**SRS_IOTHUBCLIENT_LL_02_068: [** `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall create an HTTP responseContent BUFFER_HANDLE.** ]**
 
-**SRS_IOTHUBCLIENT_LL_02_069: [** If creating the HTTP response buffer handle fails then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
+**SRS_IOTHUBCLIENT_LL_02_069: [** If creating the HTTP response buffer handle fails then `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
 
-**SRS_IOTHUBCLIENT_LL_02_070: [** `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall create request HTTP headers.** ]**
+**SRS_IOTHUBCLIENT_LL_02_070: [** `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall create request HTTP headers.** ]**
 
-**SRS_IOTHUBCLIENT_LL_02_071: [** If creating the HTTP headers fails then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
+**SRS_IOTHUBCLIENT_LL_02_071: [** If creating the HTTP headers fails then `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
 
-**SRS_IOTHUBCLIENT_LL_02_072: [** `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall add the following name:value to request HTTP headers:  ]**
+**SRS_IOTHUBCLIENT_LL_02_072: [** `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall add the following name:value to request HTTP headers:  ]**
 "Content-Type": "application/json"
 "Accept": "application/json"
 "User-Agent": "iothubclient/" IOTHUB_SDK_VERSION
 
-**SRS_IOTHUBCLIENT_LL_02_073: [** If the credentials used to create `iotHubClientHandle` have "sasToken" then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall add 
+**SRS_IOTHUBCLIENT_LL_02_073: [** If the credentials used to create `iotHubClientHandle` have "sasToken" then `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall add 
 the following HTTP request headers:  ]**
 
 ### "Authorization": original SAS token
 
-**SRS_IOTHUBCLIENT_LL_02_074: [** If adding "Authorization" fails then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall fail and return `IOTHUB_CLIENT_ERROR`.  ]**
+**SRS_IOTHUBCLIENT_LL_02_074: [** If adding "Authorization" fails then `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall fail and return `IOTHUB_CLIENT_ERROR`.  ]**
 
-**SRS_IOTHUBCLIENT_LL_32_003: [** `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall execute `HTTPAPIEX_ExecuteRequest` passing the following information for arguments:  ]**
+**SRS_IOTHUBCLIENT_LL_32_003: [** `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall execute `HTTPAPIEX_ExecuteRequest` passing the following information for arguments:  ]**
 
-- HTTPAPIEX_HANDLE handle - the handle created at the beginning of `IoTHubClient_LL_UploadMultipleBlocksToBlob`
+- HTTPAPIEX_HANDLE handle - the handle created at the beginning of `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)`
 - HTTPAPI_REQUEST_TYPE requestType - HTTPAPI_REQUEST_POST
 - const char* relativePath - the HTTP relative path
 - HTTP_HEADERS_HANDLE requestHttpHeadersHandle - request HTTP headers
@@ -571,19 +574,19 @@ the following HTTP request headers:  ]**
 - HTTP_HEADERS_HANDLE responseHttpHeadersHandle - NULL
 - BUFFER_HANDLE responseContent - the HTTP response BUFFER_HANDLE
 
-**SRS_IOTHUBCLIENT_LL_02_076: [** If `HTTPAPIEX_ExecuteRequest` call fails then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
+**SRS_IOTHUBCLIENT_LL_02_076: [** If `HTTPAPIEX_ExecuteRequest` call fails then `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
 
-**SRS_IOTHUBCLIENT_LL_02_077: [** If HTTP statusCode is greater than or equal to 300 then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
+**SRS_IOTHUBCLIENT_LL_02_077: [** If HTTP statusCode is greater than or equal to 300 then `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
 
-**SRS_IOTHUBCLIENT_LL_02_078: [** If the credentials used to create `iotHubClientHandle` have "deviceKey" then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall create an `HTTPAPIEX_SAS_HANDLE` passing as arguments:  ]**
+**SRS_IOTHUBCLIENT_LL_02_078: [** If the credentials used to create `iotHubClientHandle` have "deviceKey" then `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall create an `HTTPAPIEX_SAS_HANDLE` passing as arguments:  ]**
 
 - STRING_HANDLE key - deviceKey
 - STRING_HANDLE uriResource - "/devices/" + deviceId
 - STRING_HANDLE keyName - "" (empty string)
 
-**SRS_IOTHUBCLIENT_LL_02_089: [** If creating the `HTTPAPIEX_SAS_HANDLE` fails then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
+**SRS_IOTHUBCLIENT_LL_02_089: [** If creating the `HTTPAPIEX_SAS_HANDLE` fails then `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
 
-**SRS_IOTHUBCLIENT_LL_32_004: [** `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall call `HTTPAPIEX_SAS_ExecuteRequest` passing as arguments:  ]**
+**SRS_IOTHUBCLIENT_LL_32_004: [** `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall call `HTTPAPIEX_SAS_ExecuteRequest` passing as arguments:  ]**
 
 - HTTPAPIEX_SAS_HANDLE sasHandle - the created HTTPAPIEX_SAS_HANDLE
 - HTTPAPIEX_HANDLE handle - the created HTTPAPIEX_HANDLE
@@ -595,9 +598,9 @@ the following HTTP request headers:  ]**
 - HTTP_HEADERS_HANDLE responseHeadersHandle - NULL
 - BUFFER_HANDLE responseContent - the HTTP response BUFFER_HANDLE
 
-**SRS_IOTHUBCLIENT_LL_02_079: [** If `HTTPAPIEX_SAS_ExecuteRequest` fails then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
+**SRS_IOTHUBCLIENT_LL_02_079: [** If `HTTPAPIEX_SAS_ExecuteRequest` fails then `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
 
-**SRS_IOTHUBCLIENT_LL_02_080: [** If status code is greater than or equal to 300 then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
+**SRS_IOTHUBCLIENT_LL_02_080: [** If status code is greater than or equal to 300 then `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
 
 If the credentials used to create `iotHubClientHandle` do not have "deviceKey" or "deviceSasToken" then
 **SRS_IOTHUBCLIENT_LL_02_106: [** - `x509certificate` and `x509privatekey` saved options shall be passed on the HTTPAPIEX_SetOption.** ]**
@@ -606,9 +609,9 @@ If the credentials used to create `iotHubClientHandle` do not have "deviceKey" o
 
 **SRS_IOTHUBCLIENT_LL_02_107: [** - "Authorization" header shall not be build.** ]**
 
-**SRS_IOTHUBCLIENT_LL_32_005: [** `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall execute HTTPAPIEX_ExecuteRequest passing the following information for arguments:  ]**
+**SRS_IOTHUBCLIENT_LL_32_005: [** `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall execute HTTPAPIEX_ExecuteRequest passing the following information for arguments:  ]**
 
-- HTTPAPIEX_HANDLE handle - the handle created at the beginning of `IoTHubClient_LL_UploadMultipleBlocksToBlob`
+- HTTPAPIEX_HANDLE handle - the handle created at the beginning of `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)`
 - HTTPAPI_REQUEST_TYPE requestType - HTTPAPI_REQUEST_POST
 - const char* relativePath - the HTTP relative path
 - HTTP_HEADERS_HANDLE requestHttpHeadersHandle - request HTTP headers
@@ -617,23 +620,23 @@ If the credentials used to create `iotHubClientHandle` do not have "deviceKey" o
 - HTTP_HEADERS_HANDLE responseHttpHeadersHandle - NULL
 - BUFFER_HANDLE responseContent - the HTTP response BUFFER_HANDLE
 
-**SRS_IOTHUBCLIENT_LL_02_081: [** Otherwise, `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall use parson to extract and save the following information from the response buffer: correlationID and SasUri.** ]**
+**SRS_IOTHUBCLIENT_LL_02_081: [** Otherwise, `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall use parson to extract and save the following information from the response buffer: correlationID and SasUri.** ]**
 
-**SRS_IOTHUBCLIENT_LL_02_082: [** If extracting and saving the correlationId or SasUri fails then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
+**SRS_IOTHUBCLIENT_LL_02_082: [** If extracting and saving the correlationId or SasUri fails then `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
 
 **SRS_IOTHUBCLIENT_LL_32_008: [** The returned file name shall be URL encoded before passing back to the cloud. **]**
 
-**SRS_IOTHUBCLIENT_LL_32_009: [** If `URL_EncodeString` fails then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall fail and return `IOTHUB_CLIENT_ERROR`. **]**
+**SRS_IOTHUBCLIENT_LL_32_009: [** If `URL_EncodeString` fails then `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall fail and return `IOTHUB_CLIENT_ERROR`. **]**
 
 ### step 2: upload using the SasUri
 
-**SRS_IOTHUBCLIENT_LL_02_083: [** `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall call `Blob_UploadMultipleBlocksFromSasUri` and capture the HTTP return code and HTTP body.** ]**
+**SRS_IOTHUBCLIENT_LL_02_083: [** `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall call `Blob_UploadMultipleBlocksFromSasUri` and capture the HTTP return code and HTTP body.** ]**
 
-**SRS_IOTHUBCLIENT_LL_02_084: [** If `Blob_UploadMultipleBlocksFromSasUri` fails then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
+**SRS_IOTHUBCLIENT_LL_02_084: [** If `Blob_UploadMultipleBlocksFromSasUri` fails then `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
 
 ### step 3: inform IoTHub that the upload has finished
 
-**SRS_IOTHUBCLIENT_LL_02_085: [** `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall use the same authorization as step 1. to prepare and perform a HTTP request with the following parameters:  ]**
+**SRS_IOTHUBCLIENT_LL_02_085: [** `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall use the same authorization as step 1. to prepare and perform a HTTP request with the following parameters:  ]**
 
 - HTTPAPI_REQUEST_TYPE requestType - HTTPAPI_REQUEST_POST
 - const char* relativePath - "/devices" + deviceId + "/files/notifications/" + correlationId + "?api-version" API_VERSION
@@ -654,16 +657,26 @@ If the credentials used to create `iotHubClientHandle` do not have "deviceKey" o
     "statusDescription": "client not able to connect with the server"
 }
 ```
+**SRS_IOTHUBCLIENT_LL_99_008: [** If step 2 is aborted by the client, then the HTTP message body shall look like:  ** ]**
 
-**SRS_IOTHUBCLIENT_LL_02_086: [** If performing the HTTP request fails then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
+```json
+{
+    "statusCode": -1
+    "statusDescription": "file upload aborted"
+}
+```
 
-**SRS_IOTHUBCLIENT_LL_02_087: [** If the statusCode of the HTTP request is greater than or equal to 300 then `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
+**SRS_IOTHUBCLIENT_LL_99_009: [** If step 2 is aborted by the client and if step 3 succeeds, then `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall return `IOTHUB_CLIENT_OK`.** ]**
 
-**SRS_IOTHUBCLIENT_LL_02_088: [** Otherwise, `IoTHubClient_LL_UploadMultipleBlocksToBlob` shall succeed and return `IOTHUB_CLIENT_OK`.** ]**
+**SRS_IOTHUBCLIENT_LL_02_086: [** If performing the HTTP request fails then `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
 
-**SRS_IOTHUBCLIENT_LL_99_003: [** If `IoTHubClient_LL_UploadMultipleBlocksToBlob` return `IOTHUB_CLIENT_OK`, it shall call `getDataCallback` with `result` set to `FILE_UPLOAD_OK`, and `data` and `size` set to NULL.** ]**
+**SRS_IOTHUBCLIENT_LL_02_087: [** If the statusCode of the HTTP request is greater than or equal to 300 then `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
 
-**SRS_IOTHUBCLIENT_LL_99_004: [** If `IoTHubClient_LL_UploadMultipleBlocksToBlob` does not return `IOTHUB_CLIENT_OK`, it shall call `getDataCallback` with `result` set to `FILE_UPLOAD_ERROR`, and `data` and `size` set to NULL.** ]**
+**SRS_IOTHUBCLIENT_LL_02_088: [** Otherwise, `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall succeed and return `IOTHUB_CLIENT_OK`.** ]**
+
+**SRS_IOTHUBCLIENT_LL_99_003: [** If `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` return `IOTHUB_CLIENT_OK`, it shall call `getDataCallback` with `result` set to `FILE_UPLOAD_OK`, and `data` and `size` set to NULL.** ]**
+
+**SRS_IOTHUBCLIENT_LL_99_004: [** If `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` does not return `IOTHUB_CLIENT_OK`, it shall call `getDataCallback` with `result` set to `FILE_UPLOAD_ERROR`, and `data` and `size` set to NULL.** ]**
 
 ## IoTHubClient_LL_UploadToBlob_SetOption
 
