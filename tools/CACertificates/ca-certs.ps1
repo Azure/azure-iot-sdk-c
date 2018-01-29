@@ -12,8 +12,9 @@ Set-StrictMode -Version 2.0
 # Errors in system routines will stop script execution
 $errorActionPreference    = "stop"
 
-$_rootCertSubject         = "CN=Azure IoT CA TestOnly Root CA"
-$_intermediateCertSubject = "CN=Azure IoT CA TestOnly Intermediate {0} CA"
+$_rootCertCommonName      = "Azure IoT CA TestOnly Root CA"
+$_rootCertSubject         = "CN=$_rootCertCommonName"
+$_intermediateCertCommonName = "Azure IoT CA TestOnly Intermediate {0} CA"
 $_privateKeyPassword      = "123"
 
 $rootCACerFileName          = "./RootCA.cer"
@@ -51,10 +52,10 @@ function Test-CACertsPrerequisites()
     Write-Host "Success"
 }
 
-function New-CACertsSelfsignedCertificate([string]$subjectName, [object]$signingCert, [bool]$isASigner=$true)
+function New-CACertsSelfsignedCertificate([string]$commonName, [object]$signingCert, [bool]$isASigner=$true)
 {
     # Build up argument list
-    $selfSignedArgs =@{"-DnsName"=$subjectName; 
+    $selfSignedArgs =@{"-DnsName"=$commonName; 
                        "-CertStoreLocation"="cert:\LocalMachine\My";
                        "-NotAfter"=(get-date).AddDays(30); 
                       }
@@ -81,15 +82,15 @@ function New-CACertsSelfsignedCertificate([string]$subjectName, [object]$signing
     }
 
     # Now use splatting to process this
-    Write-Warning ("Generating certificate {0} which is for prototyping, NOT PRODUCTION.  It has a hard-coded password and will expire in 30 days." -f $subjectName)
+    Write-Warning ("Generating certificate CN={0} which is for prototyping, NOT PRODUCTION.  It has a hard-coded password and will expire in 30 days." -f $commonName)
     write (New-SelfSignedCertificate @selfSignedArgs)
 }
 
 
-function New-CACertsIntermediateCert([string]$subjectName, [Microsoft.CertificateServices.Commands.Certificate]$signingCert, [string]$pemFileName)
+function New-CACertsIntermediateCert([string]$commonName, [Microsoft.CertificateServices.Commands.Certificate]$signingCert, [string]$pemFileName)
 {
-    $certFileName = ($subjectName + ".cer")
-    $newCert = New-CACertsSelfsignedCertificate $subjectName $signingCert
+    $certFileName = ($commonName + ".cer")
+    $newCert = New-CACertsSelfsignedCertificate $commonName $signingCert
     Export-Certificate -Cert $newCert -FilePath $certFileName -Type CERT | Out-Null
     Import-Certificate -CertStoreLocation "cert:\LocalMachine\CA" -FilePath $certFileName | Out-Null
 
@@ -105,16 +106,16 @@ function New-CACertsIntermediateCert([string]$subjectName, [Microsoft.Certificat
 function New-CACertsCertChain()
 {
     Write-Host "Beginning to install certificate chain to your LocalMachine\My store"
-    $rootCACert =  New-CACertsSelfsignedCertificate $_rootCertSubject $null
+    $rootCACert =  New-CACertsSelfsignedCertificate $_rootCertCommonName $null
     
     Export-Certificate -Cert $rootCACert -FilePath $rootCACerFileName  -Type CERT
     Import-Certificate -CertStoreLocation "cert:\LocalMachine\Root" -FilePath $rootCACerFileName
 
     openssl x509 -inform der -in $rootCACerFileName -out $rootCAPemFileName
 
-    $intermediateCert1 = New-CACertsIntermediateCert ($_intermediateCertSubject -f "1") $rootCACert $intermediate1CAPemFileName
-    $intermediateCert2 = New-CACertsIntermediateCert ($_intermediateCertSubject -f "2") $intermediateCert1 $intermediate2CAPemFileName
-    $intermediateCert3 = New-CACertsIntermediateCert ($_intermediateCertSubject -f "3") $intermediateCert2 $intermediate3CAPemFileName
+    $intermediateCert1 = New-CACertsIntermediateCert ($_intermediateCertCommonName -f "1") $rootCACert $intermediate1CAPemFileName
+    $intermediateCert2 = New-CACertsIntermediateCert ($_intermediateCertCommonName -f "2") $intermediateCert1 $intermediate2CAPemFileName
+    $intermediateCert3 = New-CACertsIntermediateCert ($_intermediateCertCommonName -f "3") $intermediateCert2 $intermediate3CAPemFileName
     Write-Host "Success"
 }
 
@@ -130,15 +131,14 @@ function Get-CACertsCertBySubjectName([string]$subjectName)
     write $cert
 }
 
-function New-CACertsVerificationCert([string]$requestedSubjectName)
+function New-CACertsVerificationCert([string]$requestedCommonName)
 {
-    $cnRequestedSubjectName = ("CN={0}" -f $requestedSubjectName)
     $verifyRequestedFileName = ".\verifyCert4.cer"
     $rootCACert = Get-CACertsCertBySubjectName $_rootCertSubject
     Write-Host "Using Signing Cert:::" 
     Write-Host $rootCACert
     
-    $verifyCert = New-CACertsSelfsignedCertificate $cnRequestedSubjectName $rootCACert $false
+    $verifyCert = New-CACertsSelfsignedCertificate $requestedCommonName $rootCACert $false
 
     Export-Certificate -cert $verifyCert -filePath $verifyRequestedFileName -Type Cert
     if (-not (Test-Path $verifyRequestedFileName))
@@ -146,12 +146,11 @@ function New-CACertsVerificationCert([string]$requestedSubjectName)
         throw ("Error: CERT file {0} doesn't exist" -f $verifyRequestedFileName)
     }
     
-    Write-Host ("Certificate with subject {0} has been output to {1}" -f $cnRequestedSubjectName, (Join-Path (get-location).path $verifyRequestedFileName)) 
+    Write-Host ("Certificate with subject CN={0} has been output to {1}" -f $requestedCommonName, (Join-Path (get-location).path $verifyRequestedFileName)) 
 }
 
 function New-CACertsDevice([string]$deviceName, [string]$signingCertSubject=$_rootCertSubject)
 {
-    $cnNewDeviceSubjectName = ("CN={0}" -f $deviceName)
     $newDevicePfxFileName = ("./{0}.pfx" -f $deviceName)
     $newDevicePemAllFileName      = ("./{0}-all.pem" -f $deviceName)
     $newDevicePemPrivateFileName  = ("./{0}-private.pem" -f $deviceName)
@@ -159,7 +158,7 @@ function New-CACertsDevice([string]$deviceName, [string]$signingCertSubject=$_ro
     
     $signingCert = Get-CACertsCertBySubjectName $signingCertSubject ## "CN=Azure IoT CA TestOnly Intermediate 1 CA"
 
-    $newDeviceCertPfx = New-CACertsSelfSignedCertificate $cnNewDeviceSubjectName $signingCert $false
+    $newDeviceCertPfx = New-CACertsSelfSignedCertificate $deviceName $signingCert $false
     
     $certSecureStringPwd = ConvertTo-SecureString -String $_privateKeyPassword -Force -AsPlainText
 
@@ -187,7 +186,7 @@ function New-CACertsDevice([string]$deviceName, [string]$signingCertSubject=$_ro
     }
     openssl x509 -in $newDevicePemAllFileName -out $newDevicePemPublicFileName
  
-    Write-Host ("Certificate with subject {0} has been output to {1}" -f $cnNewDeviceSubjectName, (Join-Path (get-location).path $newDevicePemPublicFileName)) 
+    Write-Host ("Certificate with subject CN={0} has been output to {1}" -f $deviceName, (Join-Path (get-location).path $newDevicePemPublicFileName)) 
 }
 
 function Write-CACertsCertificatesToEnvironment([string]$deviceName, [string]$iothubName, [bool]$useIntermediate)
