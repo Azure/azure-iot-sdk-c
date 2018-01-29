@@ -160,6 +160,16 @@ This section describes how to set up a development environment for the C SDK on 
 
   > For information about how to upgrade your version of gcc on Ubuntu 14.04, read [How do I use the latest GCC 4.9 on Ubuntu 14.04?](http://askubuntu.com/questions/466651/how-do-i-use-the-latest-gcc-4-9-on-ubuntu-14-04).
 
+- Verify libcurl4-openssl-dev installed is at least version **7.57**:
+
+  ```Shell
+  dpkg -l | grep -i curl
+  ```
+  
+  Previous versions of libcurl4-openssl-dev were failing SSL negotiation.
+  As an alternative, uninstall libcurl4-openssl-dev and replace it with libcurl4-gnutls-dev.
+
+  
 - Locate the tag name for the [latest release][latest-release] of the SDK.
   > Our release tag names are date values in `yyyy-mm-dd` format.
 
@@ -226,6 +236,15 @@ We've tested the device SDK for C on macOS Sierra, with XCode version 8.
   cmake --version
   ```
 
+- Verify libcurl4-openssl-dev installed is at least version **7.57**:
+
+  ```Shell
+  dpkg -l | grep -i curl
+  ```
+  
+  Previous versions of libcurl4-openssl-dev were failing SSL negotiation.
+  If a manual upgrade is needed you can use HomeBrew to build and install the curl library.
+  
 - Locate the tag name for the [latest release][latest-release] of the SDK.
   > Our release tag names are date values in `yyyy-mm-dd` format.
 
@@ -269,6 +288,16 @@ Also, you can build and run unit tests:
   > ```
 
 Note: Any samples you built will not work until you configure them with a valid IoT Hub device connection string. For more information, see the [samples section](#samplecode) below.
+
+If you install a keg-only library (built with HomeBrew), define the path to the custom library using the CMAKE flags (for example, if the latest curl libraries are manually upgraded):
+
+```
+LDFLAGS: -L/usr/local/opt/curl/lib
+CPPFLAGS: -I/usr/local/opt/curl/include
+```
+
+Note: Replace "/usr/local/opt" with the base path where your library is stored.
+
 
 <a name="windowsce"></a>
 
