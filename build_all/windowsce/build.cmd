@@ -41,7 +41,7 @@ rem no error checking
 
 pushd "%USERPROFILE%\cmake_ce8"
 
-rem if you plan to use a different SDK you need to change SDKNAME to the name of your SDK. Ensure that this is also changed in the sample solutions iothub_client_sample_http, simplesample_http and remote_monitoring
+rem if you plan to use a different SDK you need to change SDKNAME to the name of your SDK. Ensure that this is also changed in the sample solutions iothub_ll_telemetry_sample, simplesample_http and remote_monitoring
 set SDKNAME=TORADEX_CE800
 set PROCESSOR=arm
 
@@ -50,8 +50,5 @@ cmake -DWINCE=TRUE -DCMAKE_SYSTEM_NAME=WindowsCE -DCMAKE_SYSTEM_VERSION=8.0 -DCM
 if not %errorlevel%==0 exit /b %errorlevel%
 
 rem Currently, only building of HTTP sample is supported
-msbuild "%USERPROFILE%\cmake_ce8\iothub_client\samples\iothub_client_sample_http\iothub_client_sample_http.vcxproj
-if not %errorlevel%==0 exit /b %errorlevel%
-
-
-
+rem msbuild "%USERPROFILE%\cmake_ce8\iothub_client\samples\iothub_ll_telemetry_sample\iothub_ll_telemetry_sample.vcxproj
+rem if not %errorlevel%==0 exit /b %errorlevel%

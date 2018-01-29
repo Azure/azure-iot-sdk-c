@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "iothub_client_sample_mqtt", "iothub_client_sample_mqtt.vcxproj", "{6015311A-361A-4849-BF7B-1D3E461FE6B7}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "iothub_ll_telemetry_sample", "iothub_ll_telemetry_sample.vcxproj", "{6015311A-361A-4849-BF7B-1D3E461FE6B7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

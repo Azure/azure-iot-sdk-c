@@ -38,7 +38,7 @@ $(AZURE_UTIL_DIR)/adapters/tickcounter_linux.c $(AZURE_UTIL_DIR)/adapters/httpap
 CSRCS += $(wildcard $(AZURE_SERIAL_DIR)/src/*.c)
 
 ifeq ($(CONFIG_CLOUD_AZURE_SAMPLES),y)
-CSRCS += $(AZURE_CLIENT_DIR)/samples/iothub_client_sample_http/iothub_client_sample_http.c
+CSRCS += $(AZURE_CLIENT_DIR)/samples/iothub_ll_telemetry_sample/iothub_ll_telemetry_sample.c
 CSRCS += $(AZURE_SERIAL_DIR)/samples/simplesample_http/simplesample_http.c
 endif
 
