@@ -155,15 +155,17 @@ target_link_libraries(prov_device_client  prov_device_ll_client)
 set(provisioning_libs ${provisioning_libs} prov_device_client)
 set(provisioning_headers ${provisioning_headers} ${PROV_DEVICE_CLIENT_SOURCE_H_FILES})
 
-add_library(prov_device_client_dll SHARED
-    ${PROV_DEVICE_CLIENT_SOURCE_C_FILES} 
-    ${PROV_DEVICE_CLEINT_SOURCE_H_FILES}
-    ./src/prov_device_client_dll.def
-)
-target_link_libraries(prov_device_client_dll prov_device_ll_client)
+if (${build_as_dynamic})
+    add_library(prov_device_client_dll SHARED
+        ${PROV_DEVICE_CLIENT_SOURCE_C_FILES} 
+        ${PROV_DEVICE_CLEINT_SOURCE_H_FILES}
+        ./src/prov_device_client_dll.def
+    )
+    target_link_libraries(prov_device_client_dll prov_device_ll_client)
 
-if(NOT WIN32)
-    set_target_properties(prov_device_client_dll PROPERTIES OUTPUT_NAME "prov_device_client")
+    if(NOT WIN32)
+        set_target_properties(prov_device_client_dll PROPERTIES OUTPUT_NAME "prov_device_client")
+    endif()
 endif()
 
 if (${use_http})
