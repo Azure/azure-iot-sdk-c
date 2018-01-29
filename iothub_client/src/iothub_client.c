@@ -1914,7 +1914,7 @@ static UPLOADTOBLOB_THREAD_INFO* allocateUploadToBlob(const char* destinationFil
         threadInfo->iotHubClientHandle = iotHubClientHandle;
         threadInfo->context = context;
 
-        if (mallocAndStrcpy_s((char**)&threadInfo->destinationFileName, destinationFileName) != 0)
+        if (mallocAndStrcpy_s(&threadInfo->destinationFileName, destinationFileName) != 0)
         {
             /*Codes_SRS_IOTHUBCLIENT_02_053: [ If copying to the structure or spawning the thread fails, then IoTHubClient_UploadToBlobAsync shall fail and return IOTHUB_CLIENT_ERROR. ]*/
             LogError("unable to mallocAndStrcpy_s");
@@ -1954,7 +1954,7 @@ static int markThreadReadyToBeGarbageCollected(UPLOADTOBLOB_THREAD_INFO* threadI
     return 0;   
 }
 
-IOTHUB_CLIENT_RESULT initializeUploadToBlobData(UPLOADTOBLOB_THREAD_INFO* threadInfo, const unsigned char* source, size_t size, IOTHUB_CLIENT_FILE_UPLOAD_CALLBACK iotHubClientFileUploadCallback)
+static IOTHUB_CLIENT_RESULT initializeUploadToBlobData(UPLOADTOBLOB_THREAD_INFO* threadInfo, const unsigned char* source, size_t size, IOTHUB_CLIENT_FILE_UPLOAD_CALLBACK iotHubClientFileUploadCallback)
 {
     IOTHUB_CLIENT_RESULT result;
 

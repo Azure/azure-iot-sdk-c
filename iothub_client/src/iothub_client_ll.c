@@ -2139,7 +2139,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlobEx(IOTHUB_CLIENT_
         (getDataCallbackEx == NULL)
         )
     {
-        LogError("invalid parameters IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle=%p, const char* destinationFileName=%p, getDataCallbackEx=%p", iotHubClientHandle, destinationFileName, getDataCallbackEx);
+        LogError("invalid parameters IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle=%p, destinationFileName=%p, getDataCallbackEx=%p", iotHubClientHandle, destinationFileName, getDataCallbackEx);
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else

@@ -138,7 +138,7 @@ BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* SASURI, IOTHUB_CLIEN
         /*Codes_SRS_BLOB_02_002: [ If getDataCallbackEx is NULL then Blob_UploadMultipleBlocksFromSasUri shall fail and return BLOB_INVALID_ARG. ]*/
         if (getDataCallbackEx == NULL)
         {
-            LogError("IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX getDataCallbackEx = %p is invalid", getDataCallbackEx);
+            LogError("IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX getDataCallbackEx is NULL");
             result = BLOB_INVALID_ARG;
         }
         /*the below define avoid a "condition always false" on some compilers*/
