@@ -1985,34 +1985,26 @@ static IOTHUB_CLIENT_RESULT initializeUploadToBlobData(UPLOADTOBLOB_THREAD_INFO*
 
 static int uploadingThread(void *data)
 {
+    IOTHUB_CLIENT_FILE_UPLOAD_RESULT upload_result;
     UPLOADTOBLOB_THREAD_INFO* threadInfo = (UPLOADTOBLOB_THREAD_INFO*)data;
 
-    if (Lock(threadInfo->iotHubClientHandle->LockHandle) == LOCK_OK)
+    /*it so happens that IoTHubClient_LL_UploadToBlob is thread-safe because there's no saved state in the handle and there are no globals, so no need to protect it*/
+    /*not having it protected means multiple simultaneous uploads can happen*/
+    /*Codes_SRS_IOTHUBCLIENT_02_054: [ The thread shall call IoTHubClient_LL_UploadToBlob passing the information packed in the structure. ]*/
+    if (IoTHubClient_LL_UploadToBlob(threadInfo->iotHubClientHandle->IoTHubClientLLHandle, threadInfo->destinationFileName, threadInfo->uploadBlobSavedData.source, threadInfo->uploadBlobSavedData.size) == IOTHUB_CLIENT_OK)
     {
-        IOTHUB_CLIENT_FILE_UPLOAD_RESULT upload_result;
-        /*it so happens that IoTHubClient_LL_UploadToBlob is thread-safe because there's no saved state in the handle and there are no globals, so no need to protect it*/
-        /*not having it protected means multiple simultaneous uploads can happen*/
-        /*Codes_SRS_IOTHUBCLIENT_02_054: [ The thread shall call IoTHubClient_LL_UploadToBlob passing the information packed in the structure. ]*/
-        if (IoTHubClient_LL_UploadToBlob(threadInfo->iotHubClientHandle->IoTHubClientLLHandle, threadInfo->destinationFileName, threadInfo->uploadBlobSavedData.source, threadInfo->uploadBlobSavedData.size) == IOTHUB_CLIENT_OK)
-        {
-            upload_result = FILE_UPLOAD_OK;
-        }
-        else
-        {
-            LogError("unable to IoTHubClient_LL_UploadToBlob");
-            upload_result = FILE_UPLOAD_ERROR;
-        }
-        (void)Unlock(threadInfo->iotHubClientHandle->LockHandle);
-
-        if (threadInfo->uploadBlobSavedData.iotHubClientFileUploadCallback != NULL)
-        {
-            /*Codes_SRS_IOTHUBCLIENT_02_055: [ If IoTHubClient_LL_UploadToBlob fails then the thread shall call iotHubClientFileUploadCallbackInternal passing as result FILE_UPLOAD_ERROR and as context the structure from SRS IOTHUBCLIENT 02 051. ]*/
-            threadInfo->uploadBlobSavedData.iotHubClientFileUploadCallback(upload_result, threadInfo->context);
-        }
+        upload_result = FILE_UPLOAD_OK;
     }
     else
     {
-        LogError("Lock failed");
+        LogError("unable to IoTHubClient_LL_UploadToBlob");
+        upload_result = FILE_UPLOAD_ERROR;
+    }
+
+    if (threadInfo->uploadBlobSavedData.iotHubClientFileUploadCallback != NULL)
+    {
+        /*Codes_SRS_IOTHUBCLIENT_02_055: [ If IoTHubClient_LL_UploadToBlob fails then the thread shall call iotHubClientFileUploadCallbackInternal passing as result FILE_UPLOAD_ERROR and as context the structure from SRS IOTHUBCLIENT 02 051. ]*/
+        threadInfo->uploadBlobSavedData.iotHubClientFileUploadCallback(upload_result, threadInfo->context);
     }
 
     return markThreadReadyToBeGarbageCollected(threadInfo);
