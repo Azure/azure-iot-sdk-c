@@ -1,6 +1,11 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+//*******************************************************************************
+// THIS SAMPLE IS PROVIDED ONLY FOR ILLUSTRATIVE PURPOSES.  
+// IT RECEIVES MINIMAL MICROSOFT SUPPORT AND SHOULD NOT BE USED FOR PRODUCTION.
+//*******************************************************************************
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
