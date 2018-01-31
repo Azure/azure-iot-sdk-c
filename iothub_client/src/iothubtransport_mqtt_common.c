@@ -1339,7 +1339,12 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
                     }
                     else
                     {
-                        if (connack->returnCode == CONN_REFUSED_BAD_USERNAME_PASSWORD)
+                        if (connack->returnCode == CONN_REFUSED_SERVER_UNAVAIL)
+                        {
+                            transport_data->isRecoverableError = false;
+                            IoTHubClient_LL_ConnectionStatusCallBack(transport_data->llClientHandle, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_DEVICE_DISABLED);
+                        }
+                        else if (connack->returnCode == CONN_REFUSED_BAD_USERNAME_PASSWORD || connack->returnCode == CONN_REFUSED_ID_REJECTED)
                         {
                             transport_data->isRecoverableError = false;
                             IoTHubClient_LL_ConnectionStatusCallBack(transport_data->llClientHandle, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL);
