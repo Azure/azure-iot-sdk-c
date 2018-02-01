@@ -1,4 +1,7 @@
 # Firmware update of a Raspberry Pi 3 using Azure IoT Hub device management
+
+**NOTE: THIS SAMPLE IS PROVIDED ONLY FOR ILLUSTRATIVE PURPOSES.  IT RECEIVES MINIMAL MICROSOFT SUPPORT AND SHOULD NOT BE USED FOR PRODUCTION.**
+
 The following instructions explain how to do a firmware update on a Raspberry Pi 3 running Raspbian using Azure IoT Hub.
 The sample is a simple C application that will run on a Raspberry Pi, establish connection with Azure IoT Hub and wait for a "firmware update" call from Azure IoT Hub.
 Before jumping in, it is recommended to read through the following documentation in order to understand the way device management is done using Azure IoT Hub:
@@ -93,7 +96,7 @@ Assuming you have an older version of Raspbian running on your Raspberry Pi, fol
 
 	```
 	sudo apt-get update
-	sudo apt-get install -y iothub_client_sample_firmware_update
+	sudo apt-get install -y iothub-client-sample-firmware-update
 	```
 
 -	Insert the device's connection string into file /usr/share/iothub_client_sample/.device_connection_string
