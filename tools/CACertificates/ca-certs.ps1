@@ -26,8 +26,9 @@ $intermediate3CAPemFileName = "./Intermediate3.pem"
 # Whether to use ECC or RSA.
 $useEcc                     = $true
 
-
-function Test-CACertsPrerequisites()
+# The script puts certs into the global certificate store.  If there is already a cert of the 
+# same name present, we're not going to be able to tell the new apart from the old, so error out.
+function Test-CACertNotInstalledAlready()
 {
     $certInstalled = $null
     try 
@@ -43,7 +44,12 @@ function Test-CACertsPrerequisites()
     {
         throw ("Certificate {0} already installed.  Cleanup certificates 1st" -f $_rootCertSubject)
     }
+}
 
+function Test-CACertsPrerequisites()
+{
+    Test-CACertNotInstalledAlready
+    
     if ($NULL -eq $ENV:OPENSSL_CONF)
     {
         throw ("OpenSSL not configured on this system.")
@@ -106,6 +112,8 @@ function New-CACertsIntermediateCert([string]$commonName, [Microsoft.Certificate
 function New-CACertsCertChain()
 {
     Write-Host "Beginning to install certificate chain to your LocalMachine\My store"
+    Test-CACertNotInstalledAlready
+    
     $rootCACert =  New-CACertsSelfsignedCertificate $_rootCertCommonName $null
     
     Export-Certificate -Cert $rootCACert -FilePath $rootCACerFileName  -Type CERT

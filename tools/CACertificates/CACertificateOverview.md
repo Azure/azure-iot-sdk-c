@@ -18,12 +18,12 @@ A more detailed document showing UI screen shots is available from [the official
 You'll need to do some initial setup prior to running these scripts.
 
 ###  **PowerShell**
+* Get OpenSSL for Windows.  
+  * See [the official documentation prerequisites] or https://www.openssl.org/docs/faq.html#MISC4 for places to download it or https://www.openssl.org/source/ to build from source.
+  * Set `$ENV:OPENSSL_CONF` to the openssl's openssl.cnf.
 * Start PowerShell as an Administrator.
 * `cd` to the directory you want to run in.  All files will be created as children of this directory.
 * Run `Set-ExecutionPolicy -ExecutionPolicy Unrestricted`.  You'll need this for PowerShell to allow you to run the scripts.
-* Get OpenSSL for Windows.  
-  * See [the official documentation] or https://www.openssl.org/docs/faq.html#MISC4 for places to download it or https://www.openssl.org/source/ to build from source.
-  * Set `$ENV:OPENSSL_CONF` to the openssl's openssl.cnf.
 * Run `. .\ca-certs.ps1` .  This is called dot-sourcing and brings the functions of the script into PowerShell's global namespace.
 * Run `Test-CACertsPrerequisites`.
  PowerShell uses the Windows Certificate Store to manage certificates.  This makes sure that there won't be name collisions later with existing certificates and that OpenSSL is setup correctly.
@@ -83,3 +83,4 @@ For PowerShell, open `manage computer certificates` and navigate Certificates -L
 Bash outputs certificates to the current working directory, so there is no analogous system cleanup needed.
 
 [the official documentation]: https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-security-x509-get-started
+[the official documentation prerequisites]: https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-security-x509-create-certificates#prerequisites
