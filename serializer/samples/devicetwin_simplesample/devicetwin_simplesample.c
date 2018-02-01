@@ -36,6 +36,8 @@ DECLARE_MODEL(CarState,
     WITH_REPORTED_PROPERTY(ascii_char_ptr, vanityPlate)
 );
 
+// NOTE: In order for the callback to be invoked you will need to comment out the
+//       call to IoTHubClient_SetDeviceTwinCallback further down.
 DECLARE_MODEL(CarSettings,
     WITH_DESIRED_PROPERTY(uint8_t, desired_maxSpeed, onDesiredMaxSpeed),
     WITH_DESIRED_PROPERTY(Geo, location)
