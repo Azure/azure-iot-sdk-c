@@ -13,6 +13,7 @@ function(add_sample_directory whatIsBuilding)
 endfunction()
 
 
+add_sample_directory(iothub_ll_c2d_sample)
 add_sample_directory(iothub_ll_telemetry_sample)
 
 if(${use_http})
