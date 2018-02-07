@@ -11,6 +11,7 @@ endfunction()
 
 add_sample_directory(iothub_messaging_sample)
 add_sample_directory(iothub_messaging_ll_sample)
+add_sample_directory(iothub_message_monitoring_sample)
 add_sample_directory(iothub_devicemethod_sample)
 add_sample_directory(iothub_devicetwin_sample)
 add_sample_directory(iothub_registrymanager_sample)
