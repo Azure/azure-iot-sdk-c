@@ -11,37 +11,47 @@
 #include "azure_c_shared_utility/shared_util_options.h"
 
 #ifdef USE_MQTT
-    #include "iothubtransportmqtt.h"
-    #ifdef USE_WEBSOCKETS
-        #include "iothubtransportmqtt_websockets.h"
-    #endif
+#include "iothubtransportmqtt.h"
+#ifdef USE_WEBSOCKETS
+#include "iothubtransportmqtt_websockets.h"
+#endif
 #endif
 #ifdef USE_AMQP
-    #include "iothubtransportamqp.h"
-    #ifdef USE_WEBSOCKETS
-        #include "iothubtransportamqp_websockets.h"
-    #endif
+#include "iothubtransportamqp.h"
+#ifdef USE_WEBSOCKETS
+#include "iothubtransportamqp_websockets.h"
+#endif
 #endif
 #ifdef USE_HTTP
-    #include "iothubtransporthttp.h"
+#include "iothubtransporthttp.h"
 #endif
 
 #include "iothub_client_options.h"
 #include "certs.h"
 
-/* String containing Hostname, Device Id & Device Key in the format:                         */
 /* Paste in the your iothub connection string  */
 static const char* connectionString = "[device connection string]";
 
 #define MESSAGE_COUNT        3
 static bool g_continueRunning = true;
 static size_t g_message_recv_count = 0;
-DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_CONNECTION_STATUS, IOTHUB_CLIENT_CONNECTION_STATUS_VALUES);
-DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, IOTHUB_CLIENT_CONNECTION_STATUS_REASON_VALUES);
 
 static IOTHUBMESSAGE_DISPOSITION_RESULT receive_msg_callback(IOTHUB_MESSAGE_HANDLE message, void* user_context)
 {
     (void)user_context;
+    const char* messageId;
+    const char* correlationId;
+
+    // Message properties
+    if ((messageId = IoTHubMessage_GetMessageId(message)) == NULL)
+    {
+        messageId = "<unavailable>";
+    }
+
+    if ((correlationId = IoTHubMessage_GetCorrelationId(message)) == NULL)
+    {
+        correlationId = "<unavailable>";
+    }
 
     IOTHUBMESSAGE_CONTENT_TYPE content_type = IoTHubMessage_GetContentType(message);
     if (content_type == IOTHUBMESSAGE_BYTEARRAY)
@@ -53,6 +63,10 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT receive_msg_callback(IOTHUB_MESSAGE_HAND
         {
             (void)printf("Failure retrieving byte array message\r\n");
         }
+        else
+        {
+            (void)printf("Received Binary message\r\nMessage ID: %s\r\n Correlation ID: %s\r\n Data: <<<%.*s>>> & Size=%d\r\n", messageId, correlationId, (int)buff_len, buff_msg, (int)buff_len);
+        }
     }
     else
     {
@@ -61,16 +75,14 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT receive_msg_callback(IOTHUB_MESSAGE_HAND
         {
             (void)printf("Failure retrieving byte array message\r\n");
         }
+        else
+        {
+            (void)printf("Received String Message\r\nMessage ID: %s\r\n Correlation ID: %s\r\n Data: <<<%s>>>\r\n", messageId, correlationId, string_msg);
+        }
     }
     g_message_recv_count++;
 
     return IOTHUBMESSAGE_ACCEPTED;
-}
-
-static void iothub_connection_status(IOTHUB_CLIENT_CONNECTION_STATUS result, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason, void* user_context)
-{
-    (void)user_context;
-    (void)printf("iothub_connection_status result: %s reason: %s\r\n", ENUM_TO_STRING(IOTHUB_CLIENT_CONNECTION_STATUS, result), ENUM_TO_STRING(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason));
 }
 
 int main(void)
@@ -108,8 +120,6 @@ int main(void)
     // built in certificate stores.
     IoTHubClient_LL_SetOption(iothub_ll_handle, OPTION_TRUSTED_CERT, certificates);
 
-    (void)IoTHubClient_LL_SetConnectionStatusCallback(iothub_ll_handle, iothub_connection_status, NULL);
-
     if (IoTHubClient_LL_SetMessageCallback(iothub_ll_handle, receive_msg_callback, &messages_count) != IOTHUB_CLIENT_OK)
     {
         (void)printf("ERROR: IoTHubClient_LL_SetMessageCallback..........FAILED!\r\n");
@@ -125,7 +135,7 @@ int main(void)
             }
 
             IoTHubClient_LL_DoWork(iothub_ll_handle);
-            ThreadAPI_Sleep(1);
+            ThreadAPI_Sleep(10);
 
         } while (g_continueRunning);
     }
