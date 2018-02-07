@@ -36,6 +36,8 @@ DECLARE_MODEL(CarState,
     WITH_REPORTED_PROPERTY(ascii_char_ptr, vanityPlate)
 );
 
+// NOTE: For callbacks defined in the serializer model to be fired for desired properties, IoTHubClient_SetDeviceTwinCallback must not be invoked.
+//       Please comment out the call to IoTHubClient_SetDeviceTwinCallback further down to enable the callbacks defined in the model below. 
 DECLARE_MODEL(CarSettings,
     WITH_DESIRED_PROPERTY(uint8_t, desired_maxSpeed, onDesiredMaxSpeed),
     WITH_DESIRED_PROPERTY(Geo, location)
