@@ -3974,40 +3974,34 @@ result = AGENT_DATA_TYPES_OK;
 // extern AGENT_DATA_TYPES_RESULT AgentDataType_GetComplexTypeField(AGENT_DATA_TYPE* agentData, size_t index, COMPLEX_TYPE_FIELD_TYPE* complexField);
 COMPLEX_TYPE_FIELD_TYPE* AgentDataType_GetComplexTypeField(AGENT_DATA_TYPE* agentData, size_t index)
 {
-    AGENT_DATA_TYPES_RESULT result;
     COMPLEX_TYPE_FIELD_TYPE* complexField = NULL;
     if (agentData == NULL)
     {
-        result = AGENT_DATA_TYPES_INVALID_ARG;
-        LogError("(result = %s)", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
+        LogError("(result = %s)", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG));
     }
     else
     {
         if (agentData->type != EDM_COMPLEX_TYPE_TYPE)
         {
-            result = AGENT_DATA_TYPES_INVALID_ARG;
-            LogError("(result = %s)", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
+            LogError("(result = %s)", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG));
         }
 
         else
         {
             if (index >= agentData->value.edmComplexType.nMembers)
             {
-                result = AGENT_DATA_TYPES_INVALID_ARG;
-                LogError("(result = %s)", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
+                LogError("(result = %s)", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG));
             }
             else
             {
                 complexField = (COMPLEX_TYPE_FIELD_TYPE*)malloc(sizeof(COMPLEX_TYPE_FIELD_TYPE));
                 if (complexField == NULL)
                 {
-                    result = AGENT_DATA_TYPES_ERROR;
-                    LogError("(result = %s)", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
+                    LogError("(result = %s)", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_ERROR));
                 }
                 else
                 {
                     *complexField = agentData->value.edmComplexType.fields[index];
-                    result = AGENT_DATA_TYPES_OK;
                 }
             }
         }
