@@ -302,7 +302,7 @@ if %MAKE_NUGET_PKG% == yes (
         if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
         if %build-platform% neq arm (
-            ctest -C "debug" -V -j 4
+            ctest -C "debug" -V -j 8
             if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
         )
     )
