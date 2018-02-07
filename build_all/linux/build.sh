@@ -132,7 +132,7 @@ cmake $toolchainfile $cmake_install_prefix -Drun_valgrind:BOOL=$run_valgrind -Dc
 if [ "$make" = true ]
 then
   # Set the default cores
-  CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
+  MAKE_CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
   
   # Make sure there is enough virtual memory on the device to handle more than one job  
   MINVSPACE="1500000"
@@ -145,22 +145,22 @@ then
   let VSPACE=${MEMAR[0]}+${MEMAR[1]}
 
   if [ "$VSPACE" -lt "$MINVSPACE" ] ; then
-    CORES=1
+    MAKE_CORES=1
   fi
   
-  make --jobs=$CORES
+  make --jobs=$MAKE_CORES
 
   # Only for testing E2E behaviour !!! 
-  CORES=4
+  TEST_CORES=16
 
   if [[ $run_valgrind == 1 ]] ;
   then
     #use doctored openssl
     export LD_LIBRARY_PATH=/usr/local/ssl/lib
-    ctest -j $CORES --output-on-failure
+    ctest -j $TEST_CORES --output-on-failure
     export LD_LIBRARY_PATH=
   else
-    ctest -j $CORES -C "Debug" --output-on-failure
+    ctest -j $TEST_CORES -C "Debug" --output-on-failure
   fi
 fi
 
