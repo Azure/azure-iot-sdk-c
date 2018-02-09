@@ -45,7 +45,7 @@ extern "C"
     static const char* OPTION_SERVICE_SIDE_KEEP_ALIVE_FREQ_SECS = "svc2cl_keep_alive_timeout_secs";
 
     /* DEPRECATED:: OPTION_C2D_KEEP_ALIVE_FREQ_SECS is DEPRECATED!  Use OPTION_SERVICE_SIDE_KEEP_ALIVE_FREQ_SECS, but OPTION_C2D_KEEP_ALIVE_FREQ_SECS legacy variable kept for back-compat.  */ 
-    static const char* OPTION_C2D_KEEP_ALIVE_FREQ_SECS = "svc2cl_keep_alive_timeout_secs"; 
+    static const char* OPTION_C2D_KEEP_ALIVE_FREQ_SECS = "c2d_keep_alive_freq_secs"; 
 
     /*
     * @brief Ratio to be used for client side pings in AMQP protocol.
