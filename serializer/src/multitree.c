@@ -102,6 +102,10 @@ static STATIC_VAR_UNUSED const char* CreateLeaf_ResultAsString[CREATELEAF_RESULT
 };
 
 /*name cannot be empty, value can be empty or NULL*/
+#ifdef __APPLE__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wconditional-uninitialized"
+#endif
 #ifdef _MSC_VER
 #pragma warning(disable: 4701) /* potentially uninitialized local variable 'result' used */ /* the scanner cannot track linked "newNode" and "result" therefore the warning*/
 #endif
@@ -198,6 +202,9 @@ static CREATELEAF_RESULT createLeaf(MULTITREE_HANDLE_DATA* node, const char*name
     return result;
 #ifdef _MSC_VER
 #pragma warning(default: 4701) /* potentially uninitialized local variable 'result' used */ /* the scanner cannot track linked "newNode" and "result" therefore the warning*/
+#endif
+#ifdef __APPLE__
+#pragma clang diagnostic pop
 #endif
 }
 

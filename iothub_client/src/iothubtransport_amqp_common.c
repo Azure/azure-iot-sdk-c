@@ -83,7 +83,15 @@ AMQP_TRANSPORT_STATE_BEING_DESTROYED:                  State set if IoTHubTransp
     AMQP_TRANSPORT_STATE_NOT_CONNECTED_NO_MORE_RETRIES, \
     AMQP_TRANSPORT_STATE_BEING_DESTROYED
 
+// Suppress unused function warning for AMQP_TRANSPORT_STATEstrings 
+#ifdef __APPLE__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
+#endif
 DEFINE_LOCAL_ENUM(AMQP_TRANSPORT_STATE, AMQP_TRANSPORT_STATE_STRINGS);
+#ifdef __APPLE__
+#pragma clang diagnostic pop
+#endif
 
 typedef struct AMQP_TRANSPORT_INSTANCE_TAG
 {

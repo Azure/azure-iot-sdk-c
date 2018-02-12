@@ -882,26 +882,6 @@ static int copy_events_from_in_progress_to_waiting_list(TELEMETRY_MESSENGER_INST
 }
 
 
-static int singlylinkedlist_clear(SINGLYLINKEDLIST_HANDLE list)
-{
-    int result;
-    LIST_ITEM_HANDLE list_item;
-
-    result = RESULT_OK;
-
-    while ((list_item = singlylinkedlist_get_head_item(list)) != NULL)
-    {
-        if (singlylinkedlist_remove(list, list_item) != RESULT_OK)
-        {
-            LogError("Failed removing items from list (%d)", list);
-            result = __FAILURE__;
-            break;
-        }
-    }
-
-    return result;
-}
-
 static int move_events_to_wait_to_send_list(TELEMETRY_MESSENGER_INSTANCE* instance)
 {
     int result;

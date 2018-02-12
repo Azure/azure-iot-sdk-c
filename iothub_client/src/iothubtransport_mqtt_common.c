@@ -62,7 +62,6 @@ static const char* TOPIC_DEVICE_MSG = "devices/%s/messages/devicebound/#";
 static const char* TOPIC_DEVICE_DEVICE = "devices/%s/messages/events/";
 
 static const char* TOPIC_DEVICE_METHOD_SUBSCRIBE = "$iothub/methods/POST/#";
-static const char* TOPIC_DEVICE_METHOD_RESPONSE = "$iothub/methods/res";
 
 static const char* IOTHUB_API_VERSION = "2016-11-14";
 
@@ -1660,34 +1659,34 @@ static int GetTransportProviderIfNecessary(PMQTTTRANSPORT_HANDLE_DATA transport_
     return result;
 }
 
-static int is_key_validate(const IOTHUBTRANSPORT_CONFIG* config)
-{
-    int result;
-    IOTHUB_CREDENTIAL_TYPE cred_type = IoTHubClient_Auth_Get_Credential_Type(config->auth_module_handle);
-    if (cred_type == IOTHUB_CREDENTIAL_TYPE_X509 || cred_type == IOTHUB_CREDENTIAL_TYPE_X509_ECC)
-    {
-        result = 0;
-    }
-    else
-    {
-        if (config->upperConfig->deviceKey == NULL && config->upperConfig->deviceSasToken == NULL)
-        {
-            if (IoTHubClient_Auth_Get_DeviceKey(config->auth_module_handle) == NULL)
-            {
-                result = __FAILURE__;
-            }
-            else
-            {
-                result = 0;
-            }
-        }
-        else
-        {
-            result = 0;
-        }
-    }
-    return result;
-}
+//static int is_key_validate(const IOTHUBTRANSPORT_CONFIG* config)
+//{
+//    int result;
+//    IOTHUB_CREDENTIAL_TYPE cred_type = IoTHubClient_Auth_Get_Credential_Type(config->auth_module_handle);
+//    if (cred_type == IOTHUB_CREDENTIAL_TYPE_X509 || cred_type == IOTHUB_CREDENTIAL_TYPE_X509_ECC)
+//    {
+//        result = 0;
+//    }
+//    else
+//    {
+//        if (config->upperConfig->deviceKey == NULL && config->upperConfig->deviceSasToken == NULL)
+//        {
+//            if (IoTHubClient_Auth_Get_DeviceKey(config->auth_module_handle) == NULL)
+//            {
+//                result = __FAILURE__;
+//            }
+//            else
+//            {
+//                result = 0;
+//            }
+//        }
+//        else
+//        {
+//            result = 0;
+//        }
+//    }
+//    return result;
+//}
 
 static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 {

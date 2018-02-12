@@ -19,12 +19,35 @@ typedef struct METHODRETURN_HANDLE_DATA_TAG
     METHODRETURN_DATA data;
 }METHODRETURN_HANDLE_DATA;
 
+bool is_json_present_and_unparsable(const char* jsonValue)
+{
+    bool is_present_and_unparsable;
+    if (jsonValue == NULL)
+    {
+        // Null json is not considered invalid here
+        is_present_and_unparsable = false;
+    }
+    else
+    {
+        JSON_Value* temp = json_parse_string(jsonValue);
+        if (temp == NULL)
+        {
+            is_present_and_unparsable = true;
+        }
+        else
+        {
+            json_value_free(temp);
+            is_present_and_unparsable = false;
+        }
+    }
+    return is_present_and_unparsable;
+}
+
 METHODRETURN_HANDLE MethodReturn_Create(int statusCode, const char* jsonValue)
 {
     METHODRETURN_HANDLE result;
-    JSON_Value* temp;
     /*Codes_SRS_METHODRETURN_02_009: [ If jsonValue is not a JSON value then MethodReturn_Create shall fail and return NULL. ]*/
-    if ((jsonValue != NULL) && ((temp = json_parse_string(jsonValue), ((temp != NULL) ? json_value_free(temp) : (void)NULL), temp) == NULL))
+    if (is_json_present_and_unparsable(jsonValue))
     {
         LogError("%s is not JSON", jsonValue);
         result = NULL;
@@ -62,7 +85,7 @@ METHODRETURN_HANDLE MethodReturn_Create(int statusCode, const char* jsonValue)
             }
         }
     }
-    
+
     return result;
 }
 

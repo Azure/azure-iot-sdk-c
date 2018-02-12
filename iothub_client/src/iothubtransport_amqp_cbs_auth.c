@@ -48,26 +48,6 @@ typedef struct AUTHENTICATION_INSTANCE_TAG
 
 // Helper functions:
 
-static int get_seconds_since_epoch(double *seconds)
-{
-    int result;
-    time_t current_time;
-
-    if ((current_time = get_time(NULL)) == INDEFINITE_TIME)
-    {
-        LogError("Failed getting the current local time (get_time() failed)");
-        result = __FAILURE__;
-    }
-    else
-    {
-        *seconds = get_difftime(current_time, (time_t)0);
-
-        result = RESULT_OK;
-    }
-
-    return result;
-}
-
 static void update_state(AUTHENTICATION_INSTANCE* instance, AUTHENTICATION_STATE new_state)
 {
     if (new_state != instance->state)
