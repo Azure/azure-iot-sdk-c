@@ -579,23 +579,37 @@ static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE messag
 // After this new code is seasoned and confirmed good, there shall be some consolidation of *Listen* APIs and their callbacks.
 static AMQP_VALUE on_message_received_new(const void* context, MESSAGE_HANDLE message)
 {
+    AMQP_VALUE result;
+
     IOTHUB_VALIDATION_INFO* devhubValInfo = (IOTHUB_VALIDATION_INFO*)context;
 
-    if (devhubValInfo->onMessageReceivedCallback != NULL)
+    if (devhubValInfo->onMessageReceivedCallback == NULL)
+    {
+        result = messaging_delivery_released();
+    }
+    else
     {
         BINARY_DATA binary_data;
 
         if (message_get_body_amqp_data_in_place(message, 0, &binary_data) != 0)
         {
             LogError("Failed getting incoming message body");
+            result = messaging_delivery_rejected("failed parsing body", "failed parsing body");
         }
         else
         {
-            devhubValInfo->onMessageReceivedCallback(devhubValInfo->onMessageReceivedContext, (const char*)binary_data.bytes, binary_data.length);
+            if (devhubValInfo->onMessageReceivedCallback(devhubValInfo->onMessageReceivedContext, (const char*)binary_data.bytes, binary_data.length) == 0)
+            {
+                result = messaging_delivery_accepted();
+            }
+            else
+            {
+                result = messaging_delivery_released();
+            }
         }
     }
 
-    return messaging_delivery_accepted();
+    return result;
 }
 
 static void destroyAmqpConnection(AMQP_THINGS* amqp_connection)
@@ -828,7 +842,6 @@ static AMQP_THINGS* createAmqpConnection(IOTHUB_VALIDATION_INFO* devhubValInfo, 
                                     }
                                     else
                                     {
-                                        
                                         if ((result->message_receiver = messagereceiver_create(result->receive_link, NULL, NULL)) == NULL)
                                         {
                                             LogError("Failed creating message receiver.");
