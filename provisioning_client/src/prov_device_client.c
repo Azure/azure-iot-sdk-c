@@ -9,8 +9,8 @@
 #include "azure_c_shared_utility/lock.h"
 #include "azure_c_shared_utility/xlogging.h"
 
-#include "../inc/azure_prov_client/prov_device_ll_client.h"
-#include "../inc/azure_prov_client/prov_device_client.h"
+#include "azure_prov_client/prov_device_ll_client.h"
+#include "azure_prov_client/prov_device_client.h"
 #include "azure_c_shared_utility/vector.h"
 
 typedef struct PROV_DEVICE_INSTANCE_TAG

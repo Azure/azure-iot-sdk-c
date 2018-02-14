@@ -420,47 +420,37 @@ static char* construct_username(PROV_TRANSPORT_MQTT_INFO* mqtt_info)
     return result;
 }
 
-static int create_connection(PROV_TRANSPORT_MQTT_INFO* mqtt_info)
+static int construct_transport(PROV_TRANSPORT_MQTT_INFO* mqtt_info)
 {
     int result;
-    HTTP_PROXY_OPTIONS* transport_proxy;
-    MQTT_CLIENT_OPTIONS options = { 0 };
-    char* username_info;
 
-    if (mqtt_info->proxy_option.host_address != NULL)
+    if (mqtt_info->transport_io == NULL)
     {
-        transport_proxy = &mqtt_info->proxy_option;
-    }
-    else
-    {
-        transport_proxy = NULL;
-    }
-
-    if ((mqtt_info->transport_io = mqtt_info->transport_io_cb(mqtt_info->hostname, transport_proxy)) == NULL)
-    {
-        LogError("Failure calling transport_io callback");
-        result = __FAILURE__;
-    }
-    else
-    {
-        if (mqtt_info->certificate != NULL && xio_setoption(mqtt_info->transport_io, OPTION_TRUSTED_CERT, mqtt_info->certificate) != 0)
+        HTTP_PROXY_OPTIONS* transport_proxy;
+        if (mqtt_info->proxy_option.host_address != NULL)
         {
-            LogError("Failure setting trusted certs");
-            result = __FAILURE__;
-            xio_destroy(mqtt_info->transport_io);
+            transport_proxy = &mqtt_info->proxy_option;
         }
-        else if ((username_info = construct_username(mqtt_info)) == NULL)
+        else
         {
-            LogError("Failure creating username info");
-            xio_destroy(mqtt_info->transport_io);
-            mqtt_info->transport_io = NULL;
+            transport_proxy = NULL;
+        }
+
+        if ((mqtt_info->transport_io = mqtt_info->transport_io_cb(mqtt_info->hostname, transport_proxy)) == NULL)
+        {
+            LogError("Failure calling transport_io callback");
             result = __FAILURE__;
         }
         else
         {
-            (void)mqtt_client_set_trace(mqtt_info->mqtt_client, mqtt_info->log_trace, false);
-
-            if (mqtt_info->hsm_type == TRANSPORT_HSM_TYPE_X509)
+            if (mqtt_info->certificate != NULL && xio_setoption(mqtt_info->transport_io, OPTION_TRUSTED_CERT, mqtt_info->certificate) != 0)
+            {
+                LogError("Failure setting trusted certs");
+                result = __FAILURE__;
+                xio_destroy(mqtt_info->transport_io);
+                mqtt_info->transport_io = NULL;
+            }
+            else if (mqtt_info->hsm_type == TRANSPORT_HSM_TYPE_X509)
             {
                 if (mqtt_info->x509_cert != NULL && mqtt_info->private_key != NULL)
                 {
@@ -495,28 +485,53 @@ static int create_connection(PROV_TRANSPORT_MQTT_INFO* mqtt_info)
             {
                 result = 0;
             }
-
-            if (result == 0)
-            {
-                options.username = username_info;
-                options.clientId = mqtt_info->registration_id;
-                options.useCleanSession = 1;
-                options.log_trace = mqtt_info->log_trace;
-                options.qualityOfServiceValue = DELIVER_AT_LEAST_ONCE;
-                if (mqtt_client_connect(mqtt_info->mqtt_client, mqtt_info->transport_io, &options) != 0)
-                {
-                    LogError("Failure connecting to mqtt server");
-                    xio_destroy(mqtt_info->transport_io);
-                    mqtt_info->transport_io = NULL;
-                    result = __FAILURE__;
-                }
-                else
-                {
-                    result = 0;
-                }
-            }
-            free(username_info);
         }
+    }
+    else
+    {
+        result = 0;
+    }
+    return result;
+}
+
+static int create_connection(PROV_TRANSPORT_MQTT_INFO* mqtt_info)
+{
+    int result;
+    MQTT_CLIENT_OPTIONS options = { 0 };
+    char* username_info;
+
+    if ((username_info = construct_username(mqtt_info)) == NULL)
+    {
+        LogError("Failure creating username info");
+        result = __FAILURE__;
+    }
+    else if (construct_transport(mqtt_info))
+    {
+        LogError("Failure constructing transport");
+        free(username_info);
+        result = __FAILURE__;
+    }
+    else
+    {
+        (void)mqtt_client_set_trace(mqtt_info->mqtt_client, mqtt_info->log_trace, false);
+
+        options.username = username_info;
+        options.clientId = mqtt_info->registration_id;
+        options.useCleanSession = 1;
+        options.log_trace = mqtt_info->log_trace;
+        options.qualityOfServiceValue = DELIVER_AT_LEAST_ONCE;
+        if (mqtt_client_connect(mqtt_info->mqtt_client, mqtt_info->transport_io, &options) != 0)
+        {
+            xio_destroy(mqtt_info->transport_io);
+            mqtt_info->transport_io = NULL;
+            LogError("Failure connecting to mqtt server");
+            result = __FAILURE__;
+        }
+        else
+        {
+            result = 0;
+        }
+        free(username_info);
     }
     return result;
 }

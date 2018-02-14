@@ -25,6 +25,7 @@
 #include "testrunnerswitcher.h"
 
 #include "iothub_client.h"
+#include "iothub_client_ll.h"
 #include "iothub_client_options.h"
 #include "iothub_message.h"
 #include "iothub_messaging.h"
@@ -43,6 +44,7 @@
 #include "iothubclient_common_e2e.h"
 
 static bool g_callbackRecv = false;
+static TEST_PROTOCOL_TYPE test_protocol_type;
 
 const char* TEST_EVENT_DATA_FMT = "{\"data\":\"%.24s\",\"id\":\"%d\"}";
 
@@ -67,6 +69,7 @@ E2E_TEST_OPTIONS g_e2e_test_options;
 
 TEST_DEFINE_ENUM_TYPE(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
+DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, IOTHUB_CLIENT_CONNECTION_STATUS_REASON_VALUES);
 
 typedef struct EXPECTED_SEND_DATA_TAG
 {
@@ -139,6 +142,35 @@ static int IoTHubCallback(void* context, const char* data, size_t size)
         }
     }
     return result;
+}
+
+// Invoked when a connection status changes.  Tests poll the status in the connection_status_info to make sure expected transitions occur.
+static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS status, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason, void* userContextCallback)
+{
+    LogInfo("connection_status_callback: status=<%d>, reason=<%s>", status, ENUM_TO_STRING(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason));
+
+    CONNECTION_STATUS_INFO* connection_status_info = (CONNECTION_STATUS_INFO*)userContextCallback;
+    if (Lock(connection_status_info->lock) != LOCK_OK)
+    {
+        ASSERT_FAIL("unable to lock");
+    }
+    else
+    {
+        if ((connection_status_info->currentStatus == IOTHUB_CLIENT_CONNECTION_AUTHENTICATED) &&
+            (status == IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED))
+        {
+            connection_status_info->connFaultHappened = true;
+        }
+        if ((connection_status_info->currentStatus == IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED) &&
+            (status == IOTHUB_CLIENT_CONNECTION_AUTHENTICATED))
+        {
+            connection_status_info->connRestored = true;
+        }
+        connection_status_info->currentStatus = status;
+        connection_status_info->currentStatusReason = reason;
+
+        (void)Unlock(connection_status_info->lock);
+    }
 }
 
 static void ReceiveConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
@@ -422,7 +454,7 @@ static char* get_target_mac_address()
 #endif //AZIOT_LINUX
 
 
-void e2e_init(void)
+void e2e_init(TEST_PROTOCOL_TYPE protocol_type)
 {
     int result = platform_init();
     ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "Platform init failed");
@@ -434,6 +466,7 @@ void e2e_init(void)
     g_e2e_test_options.set_mac_address = false;
 
     g_connection_status_info.lock = Lock_Init();
+    test_protocol_type = protocol_type;
 }
 
 void e2e_deinit(void)
@@ -464,19 +497,25 @@ IOTHUB_CLIENT_HANDLE client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUs
     // Turn on Log 
     bool trace = true;
     (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &trace);
-    (void)IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates);
+    (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_TRUSTED_CERT, certificates);
 
     (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_PRODUCT_INFO, "MQTT_E2E/1.1.12");
 
-    unsigned int svc2cl_keep_alive_timeout_secs = 120; // service will send pings at 120 x 7/8 = 105 seconds. Higher the value, lesser the frequency of service side pings.
-    (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_SERVICE_SIDE_KEEP_ALIVE_FREQ_SECS, &svc2cl_keep_alive_timeout_secs);
+    // Set connection status change callback
+    result = IoTHubClient_SetConnectionStatusCallback(iotHubClientHandle, connection_status_callback, &g_connection_status_info);
+    ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Failure setting connection status callback");
 
-    // Set keep alive for remote idle is optional. If it is not set the default ratio of 1/2 will be used. For default value of 4 minutes, it will be 2 minutes (120 seconds)
-    double cl2svc_keep_alive_send_ratio = 1.0 / 2.0; // Set it to 120 seconds (240 x 1/2 = 120 seconds) for 4 minutes remote idle. 
+    if (test_protocol_type == TEST_AMQP || test_protocol_type == TEST_AMQP_WEBSOCKETS)
+    {
+        unsigned int svc2cl_keep_alive_timeout_secs = 120; // service will send pings at 120 x 7/8 = 105 seconds. Higher the value, lesser the frequency of service side pings.
+        (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_SERVICE_SIDE_KEEP_ALIVE_FREQ_SECS, &svc2cl_keep_alive_timeout_secs);
 
-    // client will send pings to service at 210 second interval for 4 minutes remote idle. For 25 minutes remote idle, it will be set to 21 minutes.
-    IoTHubClient_SetOption(iotHubClientHandle, OPTION_REMOTE_IDLE_TIMEOUT_RATIO, &cl2svc_keep_alive_send_ratio);
-        
+        // Set keep alive for remote idle is optional. If it is not set the default ratio of 1/2 will be used. For default value of 4 minutes, it will be 2 minutes (120 seconds)
+        double cl2svc_keep_alive_send_ratio = 1.0 / 2.0; // Set it to 120 seconds (240 x 1/2 = 120 seconds) for 4 minutes remote idle. 
+
+        // client will send pings to service at 210 second interval for 4 minutes remote idle. For 25 minutes remote idle, it will be set to 21 minutes.
+        IoTHubClient_SetOption(iotHubClientHandle, OPTION_REMOTE_IDLE_TIMEOUT_RATIO, &cl2svc_keep_alive_send_ratio);
+    }
 #ifdef AZIOT_LINUX
     if (g_e2e_test_options.set_mac_address)
     {
@@ -575,7 +614,7 @@ bool client_received_confirmation(D2C_MESSAGE_HANDLE d2cMessage, IOTHUB_CLIENT_C
         if (sendData->dataWasRecv == true)
         {
             ASSERT_ARE_EQUAL_WITH_MSG(int, expectedClientResult, sendData->result, "Result from callback does not match expected");
-        }
+        }     
         (void)Unlock(sendData->lock);
     }
 
@@ -611,35 +650,6 @@ D2C_MESSAGE_HANDLE send_error_injection_message(IOTHUB_CLIENT_HANDLE iotHubClien
     return (D2C_MESSAGE_HANDLE)sendData;
 }
 
-// Invoked when a connection status changes.  Tests poll the status in the connection_status_info to make sure expected transitions occur.
-static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS status, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason, void* userContextCallback)
-{
-    LogInfo("connection_status_callback: status=<%d>, reason=<%d>", status, reason);
-
-    CONNECTION_STATUS_INFO* connection_status_info = (CONNECTION_STATUS_INFO*)userContextCallback;
-    if (Lock(connection_status_info->lock) != LOCK_OK)
-    {
-        ASSERT_FAIL("unable to lock");
-    }
-    else
-    {
-        if ((connection_status_info->currentStatus == IOTHUB_CLIENT_CONNECTION_AUTHENTICATED) &&
-            (status == IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED))
-        {
-            connection_status_info->connFaultHappened = true;
-        }
-        if ((connection_status_info->currentStatus == IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED) &&
-            (status == IOTHUB_CLIENT_CONNECTION_AUTHENTICATED))
-        {
-            connection_status_info->connRestored = true;
-        }
-        connection_status_info->currentStatus = status;
-        connection_status_info->currentStatusReason = reason;
-
-        (void)Unlock(connection_status_info->lock);
-    }
-}
-
 bool client_wait_for_connection_fault()
 {
     time_t beginOperation, nowTime;
@@ -673,6 +683,37 @@ bool client_status_fault_happened()
         (void)Unlock(g_connection_status_info.lock);
     }
 
+    return result;
+}
+
+bool wait_for_client_authenticated(size_t wait_time)
+{
+    bool result = false;
+    time_t beginOperation, nowTime;
+
+    beginOperation = time(NULL);
+    while (
+        (nowTime = time(NULL)),
+        (difftime(nowTime, beginOperation) < wait_time) // time box
+        )
+    {
+
+        if (Lock(g_connection_status_info.lock) != LOCK_OK)
+        {
+            ASSERT_FAIL("unable to lock");
+        }
+        else
+        {
+            result = (g_connection_status_info.currentStatus == IOTHUB_CLIENT_CONNECTION_AUTHENTICATED);
+            (void)Unlock(g_connection_status_info.lock);
+
+            if (result)
+            {
+                break;
+            }
+        }
+        ThreadAPI_Sleep(500);
+    }
     return result;
 }
 
@@ -873,10 +914,6 @@ void e2e_d2c_with_svc_fault_ctrl_with_transport_status(IOTHUB_CLIENT_TRANSPORT_P
     // Create the IoT Hub Data
     iotHubClientHandle = client_connect_to_hub(deviceToUse, protocol);
 
-    // Set connection status change callback
-    IOTHUB_CLIENT_RESULT setConnResult = IoTHubClient_SetConnectionStatusCallback(iotHubClientHandle, connection_status_callback, &g_connection_status_info);
-    ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, setConnResult, "Failure setting connection status callback");
-
     if ((0 == strcmp(faultOperationType, "KillAmqpCBSLinkReq")) || (0 == strcmp(faultOperationType, "KillAmqpCBSLinkResp")))
     {
         // We will only detect errors in CBS link when we attempt to refresh the token, which usually is quite long (see DEFAULT_SAS_TOKEN_REFRESH_TIME_SECS).
@@ -961,10 +998,6 @@ void e2e_d2c_with_svc_fault_ctrl_error_message_callback(IOTHUB_CLIENT_TRANSPORT_
 
     // Create the IoT Hub Data
     iotHubClientHandle = client_connect_to_hub(deviceToUse, protocol);
-
-    // Set connection status change callback
-    IOTHUB_CLIENT_RESULT setConnResult = IoTHubClient_SetConnectionStatusCallback(iotHubClientHandle, connection_status_callback, &g_connection_status_info);
-    ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, setConnResult, "Failure setting connection status callback");
 
     if (setTimeoutOption)
     {
@@ -1099,8 +1132,11 @@ static void recv_message_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLI
 
     IOTHUB_MESSAGING_RESULT iotHubMessagingResult;
     IOTHUB_CLIENT_RESULT result;
+    size_t client_conn_wait_time = 4000;
 
     EXPECTED_RECEIVE_DATA* receiveUserContext;
+
+    clear_connection_status_info_flags();
 
     // Create device client
     iotHubClientHandle = client_connect_to_hub(deviceToUse, protocol);
@@ -1112,6 +1148,24 @@ static void recv_message_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLI
     result = IoTHubClient_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, receiveUserContext);
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Setting message callback failed");
 
+    if (test_protocol_type == TEST_HTTP)
+    {
+        // Http protocol does not have a connection callback, so we just need to wait here
+        ThreadAPI_Sleep(2000);
+    }
+    else
+    {
+        // Let the iothub client establish the connection
+        if (!wait_for_client_authenticated(client_conn_wait_time))
+        {
+            // In some situations this will pass due to the device already being connected
+            // Or being amqp.  Make sure we flag this as a possible situation and continue
+            LogInfo("Did not recieve the client connection callback within the alloted time <%d> seconds", client_conn_wait_time);
+        }
+        // Make sure we subscribe to all the events
+        ThreadAPI_Sleep(3000);
+    }
+
     // Create Service Client
     iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo));
     ASSERT_IS_NOT_NULL_WITH_MSG(iotHubServiceClientHandle, "Could not initialize IoTHubServiceClient to send C2D messages to the device");
@@ -1121,8 +1175,6 @@ static void recv_message_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLI
 
     iotHubMessagingResult = IoTHubMessaging_Open(iotHubMessagingHandle, openCompleteCallback, (void*)"Context string for open");
     ASSERT_ARE_EQUAL (int, IOTHUB_MESSAGING_OK, iotHubMessagingResult);
-
-    ThreadAPI_Sleep(5000);
 
     // Send message
     service_send_c2d(iotHubMessagingHandle, receiveUserContext, deviceToUse);

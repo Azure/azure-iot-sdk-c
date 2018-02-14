@@ -102,6 +102,7 @@ typedef struct PROV_TRANSPORT_HTTP_INFO_TAG
 
 static void on_http_error(void* callback_ctx, HTTP_CALLBACK_REASON error_result)
 {
+    (void)error_result;
     if (callback_ctx != NULL)
     {
         PROV_TRANSPORT_HTTP_INFO* http_info = (PROV_TRANSPORT_HTTP_INFO*)callback_ctx;

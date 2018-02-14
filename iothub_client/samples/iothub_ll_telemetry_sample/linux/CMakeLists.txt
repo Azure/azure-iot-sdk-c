@@ -12,20 +12,20 @@ set(AZUREIOT_INC_FOLDER ".." "/usr/include/azureiot" "/usr/include/azureiot/inc"
 
 include_directories(${AZUREIOT_INC_FOLDER})
 
-set(iothub_client_sample_http_c_files
-    ../iothub_client_sample_http.c
+set(iothub_c_files
+    iothub_ll_telemetry_sample.c
+    ${PROJECT_SOURCE_DIR}/certs/certs.c
 )
 
-set(iothub_client_sample_http_h_files
-    ../iothub_client_sample_http.h
-)
+add_executable(iothub_ll_telemetry_sample ${iothub_c_files})
 
-add_executable(iothub_client_sample_http ${iothub_client_sample_http_c_files} ${iothub_client_sample_http_h_files})
-
-target_link_libraries(iothub_client_sample_http
-    iothub_client
+target_link_libraries(iothub_ll_telemetry_sample
+    iothub_client_mqtt_transport
+    iothub_client_amqp_transport
     iothub_client_http_transport
+    iothub_client 
     aziotsharedutil
+    umqtt
     pthread
     curl
     ssl

@@ -20,13 +20,12 @@ A more detailed document explaining Edge and showing its use of certificates gen
 You'll need to do some initial setup prior to running these scripts.
 
 ###  **PowerShell**
+* Get OpenSSL for Windows.  
+  * See [the official documentation prerequisites] or https://www.openssl.org/docs/faq.html#MISC4 for places to download it or https://www.openssl.org/source/ to build from source.
+  * Set `$ENV:OPENSSL_CONF` to the openssl's openssl.cnf.
 * Start PowerShell as an Administrator.
 * `cd` to the directory you want to run in.  All files will be created as children of this directory.
 * Run `Set-ExecutionPolicy -ExecutionPolicy Unrestricted`.  You'll need this for PowerShell to allow you to run the scripts.
-* Get OpenSSL for Windows.  
-  * See [the official documentation] for places to download it.
-  * `$ENV:PATH += ";<directory containing OpenSSL exe>`"
-  * `$ENV:OPENSSL_CONF=<the path to the openssl.cnf in your OpenSSL installation directory>`
 * Run `. .\ca-certs.ps1` .  This is called dot-sourcing and brings the functions of the script into PowerShell's global namespace.
 * Run `Test-CACertsPrerequisites`.
  PowerShell uses the Windows Certificate Store to manage certificates.  This makes sure that there won't be name collisions later with existing certificates and that OpenSSL is setup correctly.
@@ -103,3 +102,4 @@ Bash outputs certificates to the current working directory, so there is no analo
 
 [the official documentation]: https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-security-x509-get-started
 [Edge gateway creation documentation]: https://docs.microsoft.com/en-us/azure/iot-edge/how-to-create-gateway-device
+[the official documentation prerequisites]: https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-security-x509-create-certificates#prerequisites

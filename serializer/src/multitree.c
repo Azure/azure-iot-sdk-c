@@ -9,6 +9,7 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/macro_utils.h"
+#include "azure_c_shared_utility/const_defines.h"
 
 /*assume a name cannot be longer than 100 characters*/
 #define INNER_NODE_NAME_SIZE 128
@@ -92,7 +93,7 @@ typedef enum CREATELEAF_RESULT_TAG
                             // Do not remove, or add new enum values below this one
 }CREATELEAF_RESULT;
 
-static const char* CreateLeaf_ResultAsString[CREATELEAF_RESULT_COUNT] =
+static STATIC_VAR_UNUSED const char* CreateLeaf_ResultAsString[CREATELEAF_RESULT_COUNT] =
 {   
     TOSTRING(CREATELEAF_OK),
     TOSTRING(CREATELEAF_ALREADY_EXISTS),

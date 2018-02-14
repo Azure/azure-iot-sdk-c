@@ -28,7 +28,7 @@ goto args-done
 :longhaul_tests_download_bin_path
 shift
 if NOT "%1" equ "" (
-	set longhaul_tests_download_bin_path=%1
+    set longhaul_tests_download_bin_path=%1
 )
 goto args-continue
 
@@ -72,25 +72,19 @@ call %build-root%\..\c-utility\tools\mbed_build_scripts\release_mbed_project.cmd
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 if %skip_samples%==0 (
-	rem -----------------------------------------------------------------------------
-	rem -- build iothub client samples
-	rem -----------------------------------------------------------------------------
+    rem -----------------------------------------------------------------------------
+    rem -- build iothub client samples
+    rem -----------------------------------------------------------------------------
 
-	call :compile iothub_client_sample_amqp %build-root%\samples\iothub_client_sample_amqp\mbed
-	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+    call :compile iothub_client_sample_http %build-root%\samples\iothub_ll_telemetry_sample\mbed
+    if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
-	call :compile iothub_client_sample_http %build-root%\samples\iothub_client_sample_http\mbed
-	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+    rem -----------------------------------------------------------------------------
+    rem -- build a serializer client sample
+    rem -----------------------------------------------------------------------------
 
-	call :compile iothub_client_sample_mqtt %build-root%\samples\iothub_client_sample_mqtt\mbed
-	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-
-	rem -----------------------------------------------------------------------------
-	rem -- build a serializer client sample
-	rem -----------------------------------------------------------------------------
-
-	call :compile simplesample_amqp %build-root%\..\serializer\samples\simplesample_amqp\mbed
-	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+    call :compile simplesample_amqp %build-root%\..\serializer\samples\simplesample_amqp\mbed
+    if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 )
 
 rem -----------------------------------------------------------------------------

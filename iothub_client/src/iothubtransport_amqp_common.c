@@ -1947,7 +1947,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SetOption(TRANSPORT_LL_HANDLE h
                 result = IOTHUB_CLIENT_OK;
             }
         }
-        else if (strcmp(OPTION_SERVICE_SIDE_KEEP_ALIVE_FREQ_SECS, option) == 0)
+        else if ((strcmp(OPTION_SERVICE_SIDE_KEEP_ALIVE_FREQ_SECS, option) == 0) || (strcmp(OPTION_C2D_KEEP_ALIVE_FREQ_SECS, option) == 0))
         {
             transport_instance->svc2cl_keep_alive_timeout_secs = *(size_t*)value;
             result = IOTHUB_CLIENT_OK;

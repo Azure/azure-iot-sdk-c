@@ -75,11 +75,11 @@ SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 EOM
 
 # ----------------------------------------------------------------------------- 
-# -- Modify iothub_client/samples/iothub_client_sample_http/iothub_client_sample_http.c 
+# -- Modify iothub_client/samples/iothub_ll_telemetry_sample/iothub_ll_telemetry_sample.c 
 # -----------------------------------------------------------------------------
-echo ---------- Modifying iothub_client/samples/iothub_client_sample_http/iothub_client_sample_http.c file ---------- 
+echo ---------- Modifying iothub_client/samples/iothub_ll_telemetry_sample/iothub_ll_telemetry_sample.c file ---------- 
 cd $build_root 
-sed -i 's/\[device connection string\]/'$IOTHUB_DEVICE_CONN_STR'/g' iothub_client/samples/iothub_client_sample_http/iothub_client_sample_http.c
+sed -i 's/\[device connection string\]/'$IOTHUB_DEVICE_CONN_STR'/g' iothub_client/samples/iothub_ll_telemetry_sample/iothub_ll_telemetry_sample.c
 
 # ----------------------------------------------------------------------------- 
 # -- Build the SDK 
