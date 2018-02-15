@@ -382,12 +382,12 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     e2e_uploadblob_deinit();
 }
 
+#ifdef TEST_MQTT
 TEST_FUNCTION(IoTHub_MQTT_UploadToBlob_multithreaded)
 {
     e2e_uploadtoblob_test_multiple_simultaneous_uploads(MQTT_Protocol);
 }
 
-#ifdef TEST_MQTT
 TEST_FUNCTION(IoTHub_MQTT_UploadToBlob_sas)
 {
     e2e_uploadtoblob_test(MQTT_Protocol, IOTHUB_ACCOUNT_AUTH_CONNSTRING);
