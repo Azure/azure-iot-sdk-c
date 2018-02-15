@@ -604,156 +604,304 @@ TEST_FUNCTION(IoTHubDeviceMethod_Destroy_do_clean_up_and_return_if_input_paramet
 }
 //
 
-/*Tests_SRS_IOTHUBDEVICEMETHOD_12_031: [ IoTHubDeviceMethod_Invoke shall verify the input parameters and if any of them (except the timeout) are NULL then return IOTHUB_DEVICE_METHOD_INVALID_ARG ]*/
+static const char* TEST_DEVICE_ID = "TEST_DEVICE_ID";
+static const char* TEST_MODULE_ID = "TEST_MODULE_ID";
+static const char* TEST_METHOD_NAME = "TEST_METHOD_NAME";
+static const char* TEST_METHOD_PAYLOAD = "TEST_METHOD_PAYLOAD";
+static const unsigned int TEST_TIMEOUT = 1;
+
+static void IoTHubDeviceMethod_InvokeDeviceOrModule_return_NULL_if_input_parameter_serviceClientdevicemethodHandle_is_NULL(bool testing_module)
+{
+    // arrange
+
+    // act
+    int responseStatus;
+    unsigned char* responsePayload;
+    size_t responsePayloadSize;
+
+    IOTHUB_DEVICE_METHOD_RESULT result;
+
+    if (testing_module == false)
+    {
+        result = IoTHubDeviceMethod_Invoke(NULL, TEST_DEVICE_ID, TEST_METHOD_NAME, TEST_METHOD_PAYLOAD, TEST_TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
+    }
+    else
+    {
+        result = IoTHubDeviceMethod_InvokeModule(NULL, TEST_DEVICE_ID, TEST_MODULE_ID, TEST_METHOD_NAME, TEST_METHOD_PAYLOAD, TEST_TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
+    }
+
+    // assert
+    ASSERT_ARE_EQUAL(int, result, IOTHUB_DEVICE_METHOD_INVALID_ARG);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+}
+
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_031: [ IoTHubDeviceMethod_Invoke(Module) shall verify the input parameters and if any of them (except the timeout) are NULL then return IOTHUB_DEVICE_METHOD_INVALID_ARG ]*/
 TEST_FUNCTION(IoTHubDeviceMethod_Invoke_return_NULL_if_input_parameter_serviceClientdevicemethodHandle_is_NULL)
 {
+    IoTHubDeviceMethod_InvokeDeviceOrModule_return_NULL_if_input_parameter_serviceClientdevicemethodHandle_is_NULL(false);
+}
+
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_031: [ IoTHubDeviceMethod_Invoke(Module) shall verify the input parameters and if any of them (except the timeout) are NULL then return IOTHUB_DEVICE_METHOD_INVALID_ARG ]*/
+TEST_FUNCTION(IoTHubDeviceMethod_InvokeModule_return_NULL_if_input_parameter_serviceClientdevicemethodHandle_is_NULL)
+{
+    IoTHubDeviceMethod_InvokeDeviceOrModule_return_NULL_if_input_parameter_serviceClientdevicemethodHandle_is_NULL(true);
+}
+
+static void IoTHubDeviceMethod_InvokeDeviceOrModule_return_NULL_if_input_parameter_deviceId_is_NULL(bool testing_module)
+{
     // arrange
 
     // act
-    const char* deviceId = " ";
-    const char* methodName = " ";
-    const char* methodPayload = " ";
-    unsigned int timeout = 1;
     int responseStatus;
     unsigned char* responsePayload;
     size_t responsePayloadSize;
 
-    IOTHUB_DEVICE_METHOD_RESULT result = IoTHubDeviceMethod_Invoke(NULL, deviceId, methodName, methodPayload, timeout, &responseStatus, &responsePayload, &responsePayloadSize);
+    IOTHUB_DEVICE_METHOD_RESULT result;
+
+    if (testing_module == false)
+    {
+        result = IoTHubDeviceMethod_Invoke(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, NULL, TEST_METHOD_NAME, TEST_METHOD_PAYLOAD, TEST_TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
+    }
+    else
+    {
+        result = IoTHubDeviceMethod_InvokeModule(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, NULL, TEST_MODULE_ID, TEST_METHOD_NAME, TEST_METHOD_PAYLOAD, TEST_TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
+    }
 
     // assert
     ASSERT_ARE_EQUAL(int, result, IOTHUB_DEVICE_METHOD_INVALID_ARG);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
 }
 
-/*Tests_SRS_IOTHUBDEVICEMETHOD_12_031: [ IoTHubDeviceMethod_Invoke shall verify the input parameters and if any of them (except the timeout) are NULL then return IOTHUB_DEVICE_METHOD_INVALID_ARG ]*/
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_031: [ IoTHubDeviceMethod_Invoke(Module) shall verify the input parameters and if any of them (except the timeout) are NULL then return IOTHUB_DEVICE_METHOD_INVALID_ARG ]*/
 TEST_FUNCTION(IoTHubDeviceMethod_Invoke_return_NULL_if_input_parameter_deviceId_is_NULL)
 {
+    IoTHubDeviceMethod_InvokeDeviceOrModule_return_NULL_if_input_parameter_deviceId_is_NULL(false);
+}
+
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_031: [ IoTHubDeviceMethod_Invoke(Module) shall verify the input parameters and if any of them (except the timeout) are NULL then return IOTHUB_DEVICE_METHOD_INVALID_ARG ]*/
+TEST_FUNCTION(IoTHubDeviceMethod_InvokeModule_return_NULL_if_input_parameter_deviceId_is_NULL)
+{
+    IoTHubDeviceMethod_InvokeDeviceOrModule_return_NULL_if_input_parameter_deviceId_is_NULL(true);
+}
+
+static void IoTHubDeviceMethod_InvokeDeviceOrModule_return_NULL_if_input_parameter_methodName_is_NULL(bool testing_module)
+{
     // arrange
 
     // act
-    const char* methodName = " ";
-    const char* methodPayload = " ";
-    unsigned int timeout = 1;
     int responseStatus;
     unsigned char* responsePayload;
     size_t responsePayloadSize;
 
-    IOTHUB_DEVICE_METHOD_RESULT result = IoTHubDeviceMethod_Invoke(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, NULL, methodName, methodPayload, timeout, &responseStatus, &responsePayload, &responsePayloadSize);
+    IOTHUB_DEVICE_METHOD_RESULT result;
+
+    if (testing_module == false)
+    {
+        result = IoTHubDeviceMethod_Invoke(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, TEST_DEVICE_ID, NULL, TEST_METHOD_PAYLOAD, TEST_TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
+    }
+    else
+    {
+        result = IoTHubDeviceMethod_InvokeModule(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, TEST_DEVICE_ID, TEST_MODULE_ID, NULL, TEST_METHOD_PAYLOAD, TEST_TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
+    }
 
     // assert
     ASSERT_ARE_EQUAL(int, result, IOTHUB_DEVICE_METHOD_INVALID_ARG);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
 }
 
-/*Tests_SRS_IOTHUBDEVICEMETHOD_12_031: [ IoTHubDeviceMethod_Invoke shall verify the input parameters and if any of them (except the timeout) are NULL then return IOTHUB_DEVICE_METHOD_INVALID_ARG ]*/
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_031: [ IoTHubDeviceMethod_Invoke(Module) shall verify the input parameters and if any of them (except the timeout) are NULL then return IOTHUB_DEVICE_METHOD_INVALID_ARG ]*/
 TEST_FUNCTION(IoTHubDeviceMethod_Invoke_return_NULL_if_input_parameter_methodName_is_NULL)
 {
+    IoTHubDeviceMethod_InvokeDeviceOrModule_return_NULL_if_input_parameter_methodName_is_NULL(false);
+}
+
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_031: [ IoTHubDeviceMethod_Invoke(Module) shall verify the input parameters and if any of them (except the timeout) are NULL then return IOTHUB_DEVICE_METHOD_INVALID_ARG ]*/
+TEST_FUNCTION(IoTHubDeviceMethod_InvokeModule_return_NULL_if_input_parameter_methodName_is_NULL)
+{
+    IoTHubDeviceMethod_InvokeDeviceOrModule_return_NULL_if_input_parameter_methodName_is_NULL(true);
+}
+
+static void IoTHubDeviceMethod_InvokeDeviceOrModule_return_NULL_if_input_parameter_methodPayload_is_NULL(bool testing_module)
+{
     // arrange
 
     // act
-    const char* deviceId = " ";
-    const char* methodPayload = " ";
-    unsigned int timeout = 1;
     int responseStatus;
     unsigned char* responsePayload;
     size_t responsePayloadSize;
 
-    IOTHUB_DEVICE_METHOD_RESULT result = IoTHubDeviceMethod_Invoke(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, deviceId, NULL, methodPayload, timeout, &responseStatus, &responsePayload, &responsePayloadSize);
+    IOTHUB_DEVICE_METHOD_RESULT result;
+
+    if (testing_module == false)
+    {
+        result = IoTHubDeviceMethod_Invoke(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, TEST_DEVICE_ID, TEST_METHOD_NAME, NULL, TEST_TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
+    }
+    else
+    {
+        result = IoTHubDeviceMethod_InvokeModule(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, TEST_DEVICE_ID, TEST_MODULE_ID, TEST_METHOD_NAME, NULL, TEST_TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
+    }
 
     // assert
     ASSERT_ARE_EQUAL(int, result, IOTHUB_DEVICE_METHOD_INVALID_ARG);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
 }
 
-/*Tests_SRS_IOTHUBDEVICEMETHOD_12_031: [ IoTHubDeviceMethod_Invoke shall verify the input parameters and if any of them (except the timeout) are NULL then return IOTHUB_DEVICE_METHOD_INVALID_ARG ]*/
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_031: [ IoTHubDeviceMethod_Invoke(Module) shall verify the input parameters and if any of them (except the timeout) are NULL then return IOTHUB_DEVICE_METHOD_INVALID_ARG ]*/
 TEST_FUNCTION(IoTHubDeviceMethod_Invoke_return_NULL_if_input_parameter_methodPayload_is_NULL)
 {
+    IoTHubDeviceMethod_InvokeDeviceOrModule_return_NULL_if_input_parameter_methodPayload_is_NULL(false);
+}
+
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_031: [ IoTHubDeviceMethod_Invoke(Module) shall verify the input parameters and if any of them (except the timeout) are NULL then return IOTHUB_DEVICE_METHOD_INVALID_ARG ]*/
+TEST_FUNCTION(IoTHubDeviceMethod_InvokeModule_return_NULL_if_input_parameter_methodPayload_is_NULL)
+{
+    IoTHubDeviceMethod_InvokeDeviceOrModule_return_NULL_if_input_parameter_methodPayload_is_NULL(true);
+}
+
+// 
+/*Tests_SRS_IOTHUBDEVICEMETHOD_31_050: [ IoTHubDeviceMethod_ModuleInvoke shall return IOTHUB_DEVICE_METHOD_INVALID_ARG if moduleId is NULL. **]*/
+TEST_FUNCTION(IoTHubDeviceMethod_InvokeModule_return_NULL_if_input_parameter_moduleId_is_NULL)
+{
     // arrange
 
     // act
-    const char* deviceId = " ";
-    const char* methodName = " ";
-    unsigned int timeout = 1;
     int responseStatus;
     unsigned char* responsePayload;
     size_t responsePayloadSize;
 
-    IOTHUB_DEVICE_METHOD_RESULT result = IoTHubDeviceMethod_Invoke(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, deviceId, methodName, NULL, timeout, &responseStatus, &responsePayload, &responsePayloadSize);
+    IOTHUB_DEVICE_METHOD_RESULT result;
+
+    result = IoTHubDeviceMethod_InvokeModule(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, TEST_DEVICE_ID, NULL, TEST_METHOD_NAME, TEST_METHOD_PAYLOAD, TEST_TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
 
     // assert
     ASSERT_ARE_EQUAL(int, result, IOTHUB_DEVICE_METHOD_INVALID_ARG);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_SRS_IOTHUBDEVICEMETHOD_12_031: [ IoTHubDeviceMethod_Invoke shall verify the input parameters and if any of them (except the timeout) are NULL then return IOTHUB_DEVICE_METHOD_INVALID_ARG ]*/
+static void IoTHubDeviceMethod_InvokeDeviceOrModulue_return_NULL_if_input_parameter_responseStatus_is_NULL(bool testing_module)
+{
+    // arrange
+
+    // act
+    unsigned char* responsePayload;
+    size_t responsePayloadSize;
+
+    IOTHUB_DEVICE_METHOD_RESULT result;
+
+    if (testing_module == false)
+    {
+        result = IoTHubDeviceMethod_Invoke(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, TEST_DEVICE_ID, TEST_METHOD_NAME, TEST_METHOD_PAYLOAD, TEST_TIMEOUT, NULL, &responsePayload, &responsePayloadSize);
+    }
+    else
+    {
+        result = IoTHubDeviceMethod_InvokeModule(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, TEST_DEVICE_ID, TEST_MODULE_ID, TEST_METHOD_NAME, TEST_METHOD_PAYLOAD, TEST_TIMEOUT, NULL, &responsePayload, &responsePayloadSize);
+    }
+
+    // assert
+    ASSERT_ARE_EQUAL(int, result, IOTHUB_DEVICE_METHOD_INVALID_ARG);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+}
+
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_031: [ IoTHubDeviceMethod_Invoke(Module) shall verify the input parameters and if any of them (except the timeout) are NULL then return IOTHUB_DEVICE_METHOD_INVALID_ARG ]*/
 TEST_FUNCTION(IoTHubDeviceMethod_Invoke_return_NULL_if_input_parameter_responseStatus_is_NULL)
 {
+    IoTHubDeviceMethod_InvokeDeviceOrModulue_return_NULL_if_input_parameter_responseStatus_is_NULL(false);
+}
+
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_031: [ IoTHubDeviceMethod_Invoke(Module) shall verify the input parameters and if any of them (except the timeout) are NULL then return IOTHUB_DEVICE_METHOD_INVALID_ARG ]*/
+TEST_FUNCTION(IoTHubDeviceMethod_InvokeModule_return_NULL_if_input_parameter_responseStatus_is_NULL)
+{
+    IoTHubDeviceMethod_InvokeDeviceOrModulue_return_NULL_if_input_parameter_responseStatus_is_NULL(true);
+}
+
+static void IoTHubDeviceMethod_InvokeDeviceOrModule_return_NULL_if_input_parameter_responsePayload_is_NULL(bool testing_module)
+{
     // arrange
 
     // act
-    const char* deviceId = " ";
-    const char* methodName = " ";
-    const char* methodPayload = " ";
-    unsigned int timeout = 1;
-    unsigned char* responsePayload;
+    int responseStatus;
     size_t responsePayloadSize;
 
-    IOTHUB_DEVICE_METHOD_RESULT result = IoTHubDeviceMethod_Invoke(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, deviceId, methodName, methodPayload, timeout, NULL, &responsePayload, &responsePayloadSize);
+    IOTHUB_DEVICE_METHOD_RESULT result;
+
+    if (testing_module == false)
+    {
+        result = IoTHubDeviceMethod_Invoke(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, TEST_DEVICE_ID, TEST_METHOD_NAME, TEST_METHOD_PAYLOAD, TEST_TIMEOUT, &responseStatus, NULL, &responsePayloadSize);
+    }
+    else
+    {
+        result = IoTHubDeviceMethod_InvokeModule(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, TEST_DEVICE_ID, TEST_MODULE_ID, TEST_METHOD_NAME, TEST_METHOD_PAYLOAD, TEST_TIMEOUT, &responseStatus, NULL, &responsePayloadSize);
+    }
 
     // assert
     ASSERT_ARE_EQUAL(int, result, IOTHUB_DEVICE_METHOD_INVALID_ARG);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
 }
 
-/*Tests_SRS_IOTHUBDEVICEMETHOD_12_031: [ IoTHubDeviceMethod_Invoke shall verify the input parameters and if any of them (except the timeout) are NULL then return IOTHUB_DEVICE_METHOD_INVALID_ARG ]*/
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_031: [ IoTHubDeviceMethod_Invoke(Module) shall verify the input parameters and if any of them (except the timeout) are NULL then return IOTHUB_DEVICE_METHOD_INVALID_ARG ]*/
 TEST_FUNCTION(IoTHubDeviceMethod_Invoke_return_NULL_if_input_parameter_responsePayload_is_NULL)
 {
-    // arrange
-
-    // act
-    const char* deviceId = " ";
-    const char* methodName = " ";
-    const char* methodPayload = " ";
-    unsigned int timeout = 1;
-    int responseStatus;
-    size_t responsePayloadSize;
-
-    IOTHUB_DEVICE_METHOD_RESULT result = IoTHubDeviceMethod_Invoke(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, deviceId, methodName, methodPayload, timeout, &responseStatus, NULL, &responsePayloadSize);
-
-    // assert
-    ASSERT_ARE_EQUAL(int, result, IOTHUB_DEVICE_METHOD_INVALID_ARG);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    IoTHubDeviceMethod_InvokeDeviceOrModule_return_NULL_if_input_parameter_responsePayload_is_NULL(false);
 }
 
-/*Tests_SRS_IOTHUBDEVICEMETHOD_12_031: [ IoTHubDeviceMethod_Invoke shall verify the input parameters and if any of them (except the timeout) are NULL then return IOTHUB_DEVICE_METHOD_INVALID_ARG ]*/
-TEST_FUNCTION(IoTHubDeviceMethod_Invoke_return_NULL_if_input_parameter_responsePayloadSize_is_NULL)
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_031: [ IoTHubDeviceMethod_Invoke(Module) shall verify the input parameters and if any of them (except the timeout) are NULL then return IOTHUB_DEVICE_METHOD_INVALID_ARG ]*/
+TEST_FUNCTION(IoTHubDeviceMethod_InvokeModule_return_NULL_if_input_parameter_responsePayload_is_NULL)
+{
+    IoTHubDeviceMethod_InvokeDeviceOrModule_return_NULL_if_input_parameter_responsePayload_is_NULL(true);
+}
+
+static void IoTHubDeviceMethod_InvokeDeviceOrModule_return_NULL_if_input_parameter_responsePayloadSize_is_NULL(bool testing_module)
 {
     // arrange
 
     // act
-    const char* deviceId = " ";
-    const char* methodName = " ";
-    const char* methodPayload = " ";
-    unsigned int timeout = 1;
     int responseStatus;
     unsigned char* responsePayload;
 
-    IOTHUB_DEVICE_METHOD_RESULT result = IoTHubDeviceMethod_Invoke(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, deviceId, methodName, methodPayload, timeout, &responseStatus, &responsePayload, NULL);
+    IOTHUB_DEVICE_METHOD_RESULT result;
+
+    if (testing_module == false)
+    {
+        result = IoTHubDeviceMethod_Invoke(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, TEST_DEVICE_ID, TEST_METHOD_NAME, TEST_METHOD_PAYLOAD, TEST_TIMEOUT, &responseStatus, &responsePayload, NULL);
+    }
+    else
+    {
+        result = IoTHubDeviceMethod_InvokeModule(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, TEST_DEVICE_ID, TEST_MODULE_ID, TEST_METHOD_NAME, TEST_METHOD_PAYLOAD, TEST_TIMEOUT, &responseStatus, &responsePayload, NULL);
+    }
 
     // assert
     ASSERT_ARE_EQUAL(int, result, IOTHUB_DEVICE_METHOD_INVALID_ARG);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
 }
 
-/*Tests_SRS_IOTHUBDEVICEMETHOD_12_032: [ IoTHubDeviceMethod_Invoke shall create a BUFFER_HANDLE from methodName, timeout and methodPayload by calling BUFFER_create ]*/
-/*Tests_SRS_IOTHUBDEVICEMETHOD_12_034: [ IoTHubDeviceMethod_Invoke shall allocate memory for response buffer by calling BUFFER_new ]*/
-/*Tests_SRS_IOTHUBDEVICEMETHOD_12_039: [ IoTHubDeviceMethod_Invoke shall create an HTTP POST request using methodPayloadBuffer ]*/
-/*Tests_SRS_IOTHUBDEVICEMETHOD_12_040: [ IoTHubDeviceMethod_Invoke shall create an HTTP POST request using the following HTTP headers: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 ]*/
-/*Tests_SRS_IOTHUBDEVICEMETHOD_12_041: [ IoTHubDeviceMethod_Invoke shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ]*/
-/*Tests_SRS_IOTHUBDEVICEMETHOD_12_042: [ IoTHubDeviceMethod_Invoke shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ]*/
-/*Tests_SRS_IOTHUBDEVICEMETHOD_12_043: [ IoTHubDeviceMethod_Invoke shall execute the HTTP POST request by calling HTTPAPIEX_ExecuteRequest ]*/
-/*Tests_SRS_IOTHUBDEVICEMETHOD_12_049: [ Otherwise IoTHubDeviceMethod_Invoke shall save the received status and payload to the corresponding out parameter and return with IOTHUB_DEVICE_METHOD_OK ]*/
-TEST_FUNCTION(IoTHubDeviceMethod_Invoke_happy_path)
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_031: [ IoTHubDeviceMethod_Invoke(Module) shall verify the input parameters and if any of them (except the timeout) are NULL then return IOTHUB_DEVICE_METHOD_INVALID_ARG ]*/
+TEST_FUNCTION(IoTHubDeviceMethod_Invoke_return_NULL_if_input_parameter_responsePayloadSize_is_NULL)
+{
+    IoTHubDeviceMethod_InvokeDeviceOrModule_return_NULL_if_input_parameter_responsePayloadSize_is_NULL(false);
+}
+
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_031: [ IoTHubDeviceMethod_Invoke(Module) shall verify the input parameters and if any of them (except the timeout) are NULL then return IOTHUB_DEVICE_METHOD_INVALID_ARG ]*/
+TEST_FUNCTION(IoTHubDeviceMethod_InvokeModule_return_NULL_if_input_parameter_responsePayloadSize_is_NULL)
+{
+    IoTHubDeviceMethod_InvokeDeviceOrModule_return_NULL_if_input_parameter_responsePayloadSize_is_NULL(true);
+}
+
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_032: [ IoTHubDeviceMethod_Invoke(Module) shall create a BUFFER_HANDLE from methodName, timeout and methodPayload by calling BUFFER_create ]*/
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_034: [ IoTHubDeviceMethod_Invoke(Module) shall allocate memory for response buffer by calling BUFFER_new ]*/
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_039: [ IoTHubDeviceMethod_Invoke(Module) shall create an HTTP POST request using methodPayloadBuffer ]*/
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_040: [ IoTHubDeviceMethod_Invoke(Module) shall create an HTTP POST request using the following HTTP headers: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 ]*/
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_041: [ IoTHubDeviceMethod_Invoke(Module) shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ]*/
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_042: [ IoTHubDeviceMethod_Invoke(Module) shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ]*/
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_043: [ IoTHubDeviceMethod_Invoke(Module) shall execute the HTTP POST request by calling HTTPAPIEX_ExecuteRequest ]*/
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_049: [ Otherwise IoTHubDeviceMethod_Invoke(Module) shall save the received status and payload to the corresponding out parameter and return with IOTHUB_DEVICE_METHOD_OK ]*/
+static void IoTHubDeviceMethod_InvokeDeviceOrModule_happy_path_impl(bool testing_module)
 {
     // arrange
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
@@ -845,15 +993,20 @@ TEST_FUNCTION(IoTHubDeviceMethod_Invoke_happy_path)
         .IgnoreArgument(1);
 
     // act
-    const char* deviceId = "deviceId";
-    const char* methodName = "methodName";
-    const char* methodPayload = "methodPayload";
-    unsigned int timeout = 1;
     int responseStatus;
     unsigned char* responsePayload;
     size_t responsePayloadSize;
 
-    IOTHUB_DEVICE_METHOD_RESULT result = IoTHubDeviceMethod_Invoke(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, deviceId, methodName, methodPayload, timeout, &responseStatus, &responsePayload, &responsePayloadSize);
+    IOTHUB_DEVICE_METHOD_RESULT result;
+
+    if (testing_module == false)
+    {
+        result = IoTHubDeviceMethod_Invoke(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, TEST_DEVICE_ID, TEST_METHOD_NAME, TEST_METHOD_PAYLOAD, TEST_TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
+    }
+    else
+    {
+        result = IoTHubDeviceMethod_InvokeModule(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, TEST_DEVICE_ID, TEST_MODULE_ID, TEST_METHOD_NAME, TEST_METHOD_PAYLOAD, TEST_TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
+    }    
 
     // assert
     ASSERT_ARE_EQUAL(int, result, IOTHUB_DEVICE_METHOD_OK);
@@ -861,17 +1014,29 @@ TEST_FUNCTION(IoTHubDeviceMethod_Invoke_happy_path)
 
     // cleanup
     free((void*)responsePayload);
+
 }
 
-/*Tests_SRS_IOTHUBDEVICEMETHOD_12_032: [ IoTHubDeviceMethod_Invoke shall create a BUFFER_HANDLE from methodName, timeout and methodPayload by calling BUFFER_create ]*/
-/*Tests_SRS_IOTHUBDEVICEMETHOD_12_034: [ IoTHubDeviceMethod_Invoke shall allocate memory for response buffer by calling BUFFER_new ]*/
-/*Tests_SRS_IOTHUBDEVICEMETHOD_12_039: [ IoTHubDeviceMethod_Invoke shall create an HTTP POST request using methodPayloadBuffer ]*/
-/*Tests_SRS_IOTHUBDEVICEMETHOD_12_040: [ IoTHubDeviceMethod_Invoke shall create an HTTP POST request using the following HTTP headers: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 ]*/
-/*Tests_SRS_IOTHUBDEVICEMETHOD_12_041: [ IoTHubDeviceMethod_Invoke shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ]*/
-/*Tests_SRS_IOTHUBDEVICEMETHOD_12_042: [ IoTHubDeviceMethod_Invoke shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ]*/
-/*Tests_SRS_IOTHUBDEVICEMETHOD_12_043: [ IoTHubDeviceMethod_Invoke shall execute the HTTP POST request by calling HTTPAPIEX_ExecuteRequest ]*/
-/*Tests_SRS_IOTHUBDEVICEMETHOD_12_049: [ Otherwise IoTHubDeviceMethod_Invoke shall save the received status and payload to the corresponding out parameter and return with IOTHUB_DEVICE_METHOD_OK ]*/
-TEST_FUNCTION(IoTHubDeviceMethod_Invoke_happy_path_http_return_not_equal_200)
+TEST_FUNCTION(IoTHubDeviceMethod_Invoke_happy_path)
+{
+    IoTHubDeviceMethod_InvokeDeviceOrModule_happy_path_impl(false);
+}
+
+TEST_FUNCTION(IoTHubDeviceMethod_InvokeModule_happy_path)
+{
+    IoTHubDeviceMethod_InvokeDeviceOrModule_happy_path_impl(true);
+}
+
+
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_032: [ IoTHubDeviceMethod_Invoke(Module) shall create a BUFFER_HANDLE from methodName, timeout and methodPayload by calling BUFFER_create ]*/
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_034: [ IoTHubDeviceMethod_Invoke(Module) shall allocate memory for response buffer by calling BUFFER_new ]*/
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_039: [ IoTHubDeviceMethod_Invoke(Module) shall create an HTTP POST request using methodPayloadBuffer ]*/
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_040: [ IoTHubDeviceMethod_Invoke(Module) shall create an HTTP POST request using the following HTTP headers: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 ]*/
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_041: [ IoTHubDeviceMethod_Invoke(Module) shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ]*/
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_042: [ IoTHubDeviceMethod_Invoke(Module) shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ]*/
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_043: [ IoTHubDeviceMethod_Invoke(Module) shall execute the HTTP POST request by calling HTTPAPIEX_ExecuteRequest ]*/
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_049: [ Otherwise IoTHubDeviceMethod_Invoke(Module) shall save the received status and payload to the corresponding out parameter and return with IOTHUB_DEVICE_METHOD_OK ]*/
+static void IoTHubDeviceMethod_Invoke_happy_path_http_return_not_equal_200_impl(bool testing_module)
 {
     // arrange
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
@@ -935,29 +1100,45 @@ TEST_FUNCTION(IoTHubDeviceMethod_Invoke_happy_path_http_return_not_equal_200)
         .IgnoreArgument(1);
 
     // act
-    const char* deviceId = "deviceId";
-    const char* methodName = "methodName";
-    const char* methodPayload = "methodPayload";
-    unsigned int timeout = 1;
     int responseStatus;
     unsigned char* responsePayload;
     size_t responsePayloadSize;
 
-    IOTHUB_DEVICE_METHOD_RESULT result = IoTHubDeviceMethod_Invoke(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, deviceId, methodName, methodPayload, timeout, &responseStatus, &responsePayload, &responsePayloadSize);
+    IOTHUB_DEVICE_METHOD_RESULT result;
+
+    if (testing_module == false)
+    {
+        result = IoTHubDeviceMethod_Invoke(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, TEST_DEVICE_ID, TEST_METHOD_NAME, TEST_METHOD_PAYLOAD, TEST_TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
+    }
+    else
+    {
+        result = IoTHubDeviceMethod_InvokeModule(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, TEST_DEVICE_ID, TEST_MODULE_ID, TEST_METHOD_NAME, TEST_METHOD_PAYLOAD, TEST_TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
+    }
 
     // assert
     ASSERT_ARE_EQUAL(int, result, IOTHUB_DEVICE_METHOD_ERROR);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_SRS_IOTHUBDEVICEMETHOD_12_033: [ If the creation fails, IoTHubDeviceMethod_Invoke shall return IOTHUB_DEVICE_METHOD_ERROR ]*/
-/*Tests_SRS_IOTHUBDEVICEMETHOD_12_035: [ If the allocation failed, IoTHubDeviceMethod_Invoke shall return IOTHUB_DEVICE_METHOD_ERROR ]*/
-/*Tests_SRS_IOTHUBDEVICEMETHOD_12_044: [ If any of the call fails during the HTTP creation IoTHubDeviceMethod_Invoke shall fail and return IOTHUB_DEVICE_METHOD_ERROR ]*/
-/*Tests_SRS_IOTHUBDEVICEMETHOD_12_045: [ If any of the HTTPAPI call fails IoTHubDeviceMethod_Invoke shall fail and return IOTHUB_DEVICE_METHOD_ERROR ]*/
-/*Tests_SRS_IOTHUBDEVICEMETHOD_12_046: [ IoTHubDeviceMethod_Invoke shall verify the received HTTP status code and if it is not equal to 200 then return IOTHUB_DEVICE_METHOD_ERROR ]*/
-/*Tests_SRS_IOTHUBDEVICEMETHOD_12_048: [ If memory allocation for output paramater fails IoTHubDeviceMethod_Invoke shall return IOTHUB_DEVICE_METHOD_ERROR ]*/
-/*Tests_SRS_IOTHUBDEVICEMETHOD_12_047: [ If parsing the response fails IoTHubDeviceMethod_Invoke shall return IOTHUB_DEVICE_METHOD_ERROR ]*/
-TEST_FUNCTION(IoTHubDeviceMethod_Invoke_non_happy_path)
+TEST_FUNCTION(IoTHubDeviceMethod_Invoke_happy_path_http_return_not_equal_200)
+{
+    IoTHubDeviceMethod_Invoke_happy_path_http_return_not_equal_200_impl(false);
+}
+
+TEST_FUNCTION(IoTHubDeviceMethod_InvokeModule_happy_path_http_return_not_equal_200)
+{
+    IoTHubDeviceMethod_Invoke_happy_path_http_return_not_equal_200_impl(true);
+}
+
+
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_033: [ If the creation fails, IoTHubDeviceMethod_Invoke(Module) shall return IOTHUB_DEVICE_METHOD_ERROR ]*/
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_035: [ If the allocation failed, IoTHubDeviceMethod_Invoke(Module) shall return IOTHUB_DEVICE_METHOD_ERROR ]*/
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_044: [ If any of the call fails during the HTTP creation IoTHubDeviceMethod_Invoke(Module) shall fail and return IOTHUB_DEVICE_METHOD_ERROR ]*/
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_045: [ If any of the HTTPAPI call fails IoTHubDeviceMethod_Invoke(Module) shall fail and return IOTHUB_DEVICE_METHOD_ERROR ]*/
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_046: [ IoTHubDeviceMethod_Invoke(Module) shall verify the received HTTP status code and if it is not equal to 200 then return IOTHUB_DEVICE_METHOD_ERROR ]*/
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_048: [ If memory allocation for output paramater fails IoTHubDeviceMethod_Invoke(Module) shall return IOTHUB_DEVICE_METHOD_ERROR ]*/
+/*Tests_SRS_IOTHUBDEVICEMETHOD_12_047: [ If parsing the response fails IoTHubDeviceMethod_Invoke(Module) shall return IOTHUB_DEVICE_METHOD_ERROR ]*/
+static void IoTHubDeviceMethod_Invoke_non_happy_path_impl(bool testing_module)
 {
     IOTHUB_DEVICE_METHOD_RESULT result;
 
@@ -1054,10 +1235,6 @@ TEST_FUNCTION(IoTHubDeviceMethod_Invoke_non_happy_path)
     EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
 
-    const char* deviceId = "deviceId";
-    const char* methodName = "methodName";
-    const char* methodPayload = "methodPayload";
-    unsigned int timeout = 1;
     int responseStatus;
     unsigned char* responsePayload;
     size_t responsePayloadSize;
@@ -1067,7 +1244,7 @@ TEST_FUNCTION(IoTHubDeviceMethod_Invoke_non_happy_path)
     umock_c_negative_tests_snapshot();
 
     // first make sure our expected calls are correct.
-    result = IoTHubDeviceMethod_Invoke(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, deviceId, methodName, methodPayload, timeout, &responseStatus, &responsePayload, &responsePayloadSize);
+    result = IoTHubDeviceMethod_Invoke(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, TEST_DEVICE_ID, TEST_METHOD_NAME, TEST_METHOD_PAYLOAD, TEST_TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
 
     ASSERT_ARE_EQUAL(int, result, IOTHUB_DEVICE_METHOD_OK);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -1100,7 +1277,14 @@ TEST_FUNCTION(IoTHubDeviceMethod_Invoke_non_happy_path)
             (i != 39)    /*BUFFER_delete*/
             )
         {
-            result = IoTHubDeviceMethod_Invoke(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, deviceId, methodName, methodPayload, timeout, &responseStatus, &responsePayload, &responsePayloadSize);
+            if (testing_module == false)
+            {
+                result = IoTHubDeviceMethod_Invoke(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, TEST_DEVICE_ID, TEST_METHOD_NAME, TEST_METHOD_PAYLOAD, TEST_TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
+            }
+            else
+            {
+                result = IoTHubDeviceMethod_InvokeModule(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, TEST_DEVICE_ID, TEST_MODULE_ID, TEST_METHOD_NAME, TEST_METHOD_PAYLOAD, TEST_TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
+            }
 
             /// assert
             ASSERT_ARE_NOT_EQUAL(int, result, IOTHUB_DEVICE_METHOD_OK);
@@ -1108,6 +1292,16 @@ TEST_FUNCTION(IoTHubDeviceMethod_Invoke_non_happy_path)
         /// cleanup
     }
     umock_c_negative_tests_deinit();
+}
+
+TEST_FUNCTION(IoTHubDeviceMethod_Invoke_non_happy_path)
+{
+    IoTHubDeviceMethod_Invoke_non_happy_path_impl(false);
+}
+
+TEST_FUNCTION(IoTHubDeviceMethod_InvokeModule_non_happy_path)
+{
+    IoTHubDeviceMethod_Invoke_non_happy_path_impl(true);
 }
 
 END_TEST_SUITE(iothub_devicemethod_ut)
