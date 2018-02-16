@@ -11,6 +11,13 @@
 #include <string.h>
 #endif
 
+static const char* TEST_DEVICE_ID = "TEST_DEVICE_ID";
+static const char* TEST_MODULE_ID = "TEST_MODULE_ID";
+static const char* TEST_METHOD_NAME = "TEST_METHOD_NAME";
+static const char* TEST_METHOD_PAYLOAD = "TEST_METHOD_PAYLOAD";
+static const unsigned int TEST_TIMEOUT = 1;
+
+
 static void* my_gballoc_malloc(size_t size)
 {
     return malloc(size);
@@ -603,12 +610,6 @@ TEST_FUNCTION(IoTHubDeviceMethod_Destroy_do_clean_up_and_return_if_input_paramet
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 //
-
-static const char* TEST_DEVICE_ID = "TEST_DEVICE_ID";
-static const char* TEST_MODULE_ID = "TEST_MODULE_ID";
-static const char* TEST_METHOD_NAME = "TEST_METHOD_NAME";
-static const char* TEST_METHOD_PAYLOAD = "TEST_METHOD_PAYLOAD";
-static const unsigned int TEST_TIMEOUT = 1;
 
 static void IoTHubDeviceMethod_InvokeDeviceOrModule_return_NULL_if_input_parameter_serviceClientdevicemethodHandle_is_NULL(bool testing_module)
 {
