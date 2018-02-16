@@ -48,7 +48,6 @@ DEFINE_ENUM_STRINGS(TWIN_UPDATE_TYPE, TWIN_UPDATE_TYPE_VALUES);
 #define DEFAULT_MAX_TWIN_SUBSCRIPTION_ERROR_COUNT		3
 #define DEFAULT_TWIN_OPERATION_TIMEOUT_SECS				300.0
 
-static char* DEFAULT_DEVICES_PATH_FORMAT =				"%s/devices/%s";
 static char* DEFAULT_TWIN_SEND_LINK_SOURCE_NAME =		"twin";
 static char* DEFAULT_TWIN_RECEIVE_LINK_TARGET_NAME =	"twin";
 
@@ -76,7 +75,15 @@ DEFINE_LOCAL_ENUM(TWIN_OPERATION_TYPE, TWIN_OPERATION_TYPE_STRINGS);
 	TWIN_SUBSCRIPTION_STATE_UNSUBSCRIBE, \
 	TWIN_SUBSCRIPTION_STATE_UNSUBSCRIBING
 
+// Suppress unused function warning for TWIN_SUBSCRIPTION_STATEstrings 
+#ifdef __APPLE__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
+#endif
 DEFINE_LOCAL_ENUM(TWIN_SUBSCRIPTION_STATE, TWIN_SUBSCRIPTION_STATE_STRINGS);
+#ifdef __APPLE__
+#pragma clang diagnostic pop
+#endif
 
 typedef struct TWIN_MESSENGER_INSTANCE_TAG
 {
@@ -1565,33 +1572,6 @@ static AMQP_MESSENGER_DISPOSITION_RESULT on_amqp_message_received_callback(MESSA
 	}
 
 	return disposition_result;
-}
-
-static TWIN_MESSENGER_STATE get_twin_state_from(AMQP_MESSENGER_STATE amqp_messenger_state)
-{
-	TWIN_MESSENGER_STATE result;
-
-	switch (amqp_messenger_state)
-	{
-		case AMQP_MESSENGER_STATE_STOPPED:
-			result = TWIN_MESSENGER_STATE_STOPPED;
-			break;
-		case AMQP_MESSENGER_STATE_STOPPING:
-			result = TWIN_MESSENGER_STATE_STOPPING;
-			break;
-		case AMQP_MESSENGER_STATE_STARTED:
-			result = TWIN_MESSENGER_STATE_STARTED;
-			break;
-		case AMQP_MESSENGER_STATE_STARTING:
-			result = TWIN_MESSENGER_STATE_STARTING;
-			break;
-		case AMQP_MESSENGER_STATE_ERROR:
-		default:
-			result = TWIN_MESSENGER_STATE_ERROR;
-			break;
-	};
-
-	return result;
 }
 
 static void on_amqp_messenger_state_changed_callback(void* context, AMQP_MESSENGER_STATE previous_state, AMQP_MESSENGER_STATE new_state)

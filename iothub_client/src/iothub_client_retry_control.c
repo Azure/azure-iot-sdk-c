@@ -32,44 +32,6 @@ typedef int (*RETRY_ACTION_EVALUATION_FUNCTION)(RETRY_CONTROL_INSTANCE* retry_st
 
 // ========== Helper Functions ========== //
 
-static int evaluate_retry_action_fixed_interval(RETRY_CONTROL_INSTANCE* retry_control, RETRY_ACTION* retry_action)
-{
-	int result;
-
-	time_t current_time;
-
-	if ((current_time = get_time(NULL)) == INDEFINITE_TIME)
-	{
-		LogError("Cannot evaluate if should retry (get_time failed)");
-		result = __FAILURE__;
-	}
-	else
-	{
-		if (retry_control->max_retry_time_in_secs > 0 &&
-			get_difftime(current_time, retry_control->last_retry_time) >= retry_control->max_retry_time_in_secs)
-		{
-			*retry_action = RETRY_ACTION_STOP_RETRYING;
-		}
-		else
-		{
-			if (get_difftime(current_time, retry_control->last_retry_time) >= retry_control->current_wait_time_in_secs)
-			{
-				*retry_action = RETRY_ACTION_RETRY_NOW;
-				retry_control->last_retry_time = current_time;
-			}
-			else
-			{
-				*retry_action = RETRY_ACTION_RETRY_LATER;
-			}
-		}
-
-		result = RESULT_OK;
-	}
-
-	return result;
-}
-
-
 // ---------- Set/Retrieve Options Helpers ----------//
 
 static void* retry_control_clone_option(const char* name, const void* value)
