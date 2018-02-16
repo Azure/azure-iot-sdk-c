@@ -22,6 +22,7 @@
 #include "azure_c_shared_utility/macro_utils.h"
 
 #include "azure_uamqp_c/cbs.h"
+#include "azure_uamqp_c/amqp_definitions.h"
 #include "azure_uamqp_c/session.h"
 #include "azure_uamqp_c/message.h"
 #include "azure_uamqp_c/messaging.h"

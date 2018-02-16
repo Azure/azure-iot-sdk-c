@@ -10,6 +10,8 @@
 #include "azure_uamqp_c/message.h"
 #include "azure_uamqp_c/session.h"
 #include "azure_uamqp_c/link.h"
+#include "azure_uamqp_c/amqp_definitions_sequence_no.h"
+#include "azure_uamqp_c/amqp_definitions_delivery_number.h"
 
 #ifdef __cplusplus
 extern "C"
