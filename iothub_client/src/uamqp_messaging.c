@@ -15,6 +15,7 @@
 #include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/uuid.h"
+#include "azure_uamqp_c/amqp_definitions.h"
 #include "azure_uamqp_c/message.h"
 #include "azure_uamqp_c/amqpvalue.h"
 #include "iothub_message.h"
