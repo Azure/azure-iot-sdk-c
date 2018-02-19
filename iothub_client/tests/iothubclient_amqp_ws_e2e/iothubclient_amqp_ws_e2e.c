@@ -12,7 +12,7 @@ BEGIN_TEST_SUITE(iothubclient_amqp_ws_e2e)
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
         TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
-        e2e_init(TEST_AMQP_WEBSOCKETS);
+        e2e_init(TEST_AMQP_WEBSOCKETS, false);
     }
 
     TEST_SUITE_CLEANUP(TestClassCleanup)

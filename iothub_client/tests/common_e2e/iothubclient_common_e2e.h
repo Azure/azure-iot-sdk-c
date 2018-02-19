@@ -34,7 +34,7 @@ typedef enum TEST_PROTOCOL_TYPE_TAG
 extern E2E_TEST_OPTIONS g_e2e_test_options;
 extern IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo;
 
-extern void e2e_init(TEST_PROTOCOL_TYPE protocol_type);
+extern void e2e_init(TEST_PROTOCOL_TYPE protocol_type, bool testing_modules);
 extern void e2e_deinit(void);
 
 extern void e2e_send_event_test_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
