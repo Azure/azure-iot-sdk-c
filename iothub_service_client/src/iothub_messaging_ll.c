@@ -539,7 +539,7 @@ static char* createSendTargetAddress(IOTHUB_MESSAGING_HANDLE messagingHandle)
     return result;
 }
 
-static char* createDeviceDestinationString(const char* deviceId)
+static char* createDeviceDestinationString(const char* deviceId, const char* moduleId)
 {
     char* result;
 
@@ -551,7 +551,8 @@ static char* createDeviceDestinationString(const char* deviceId)
     else
     {
         const char* AMQP_ADDRESS_PATH_FMT = "/devices/%s/messages/deviceBound";
-        size_t deviceDestLen = strlen(AMQP_ADDRESS_PATH_FMT) + strlen(deviceId) + 1;
+		const char* AMQP_ADDRESS_PATH_MODULE_FMT = "/devices/%s/modules/%s/messages/deviceBound";
+        size_t deviceDestLen = strlen(AMQP_ADDRESS_PATH_MODULE_FMT) + strlen(deviceId) + (moduleId == NULL ? 0 : strlen(moduleId)) + 1;
 
         char* buffer = (char*)malloc(deviceDestLen + 1);
         if (buffer == NULL)
@@ -559,15 +560,24 @@ static char* createDeviceDestinationString(const char* deviceId)
             LogError("Could not create device destination string.");
             result = NULL;
         }
-        else if ((snprintf(buffer, deviceDestLen + 1, AMQP_ADDRESS_PATH_FMT, deviceId)) < 0)
+        else 
         {
-            LogError("sprintf_s failed for deviceDestinationString.");
-            free((char*)buffer);
-            result = NULL;
-        }
-        else
-        {
-            result = buffer;
+			if ((moduleId == NULL) && (snprintf(buffer, deviceDestLen + 1, AMQP_ADDRESS_PATH_FMT, deviceId)) < 0)
+	        {
+	            LogError("sprintf_s failed for deviceDestinationString.");
+	            free((char*)buffer);
+	            result = NULL;
+	        }
+			else if ((moduleId != NULL) && (snprintf(buffer, deviceDestLen + 1, AMQP_ADDRESS_PATH_MODULE_FMT, deviceId, moduleId)) < 0)
+	        {
+	            LogError("sprintf_s failed for deviceDestinationString.");
+	            free((char*)buffer);
+	            result = NULL;
+	        }
+	        else
+	        {
+	            result = buffer;
+	        }
         }
     }
     return result;
@@ -1405,7 +1415,8 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_SetFeedbackMessageCallback(IOTHUB_MES
     return result;
 }
 
-IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Send(IOTHUB_MESSAGING_HANDLE messagingHandle, const char* deviceId, IOTHUB_MESSAGE_HANDLE message, IOTHUB_SEND_COMPLETE_CALLBACK sendCompleteCallback, void* userContextCallback)
+
+IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_SendDeviceOrModule(IOTHUB_MESSAGING_HANDLE messagingHandle, const char* deviceId, const char* moduleId, IOTHUB_MESSAGE_HANDLE message, IOTHUB_SEND_COMPLETE_CALLBACK sendCompleteCallback, void* userContextCallback)
 {
     IOTHUB_MESSAGING_RESULT result;
 
@@ -1436,7 +1447,7 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Send(IOTHUB_MESSAGING_HANDLE messagin
         result = IOTHUB_MESSAGING_ERROR;
     }
     /*Codes_SRS_IOTHUBMESSAGING_12_038: [ IoTHubMessaging_LL_SendMessage shall set the uAMQP message properties to the given message properties by calling message_set_properties ] */
-    else if ((deviceDestinationString = createDeviceDestinationString(deviceId)) == NULL)
+    else if ((deviceDestinationString = createDeviceDestinationString(deviceId, moduleId)) == NULL)
     {
         /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendMessage shall return IOTHUB_MESSAGING_ERROR ] */
         LogError("Could not create a message.");
@@ -1528,6 +1539,28 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Send(IOTHUB_MESSAGING_HANDLE messagin
     }
     return result;
 }
+
+IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Send(IOTHUB_MESSAGING_HANDLE messagingHandle, const char* deviceId, IOTHUB_MESSAGE_HANDLE message, IOTHUB_SEND_COMPLETE_CALLBACK sendCompleteCallback, void* userContextCallback)
+{
+	return IoTHubMessaging_LL_SendDeviceOrModule(messagingHandle, deviceId, NULL, message, sendCompleteCallback, userContextCallback);
+}
+
+IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_SendModule(IOTHUB_MESSAGING_HANDLE messagingHandle, const char* deviceId, const char* moduleId, IOTHUB_MESSAGE_HANDLE message, IOTHUB_SEND_COMPLETE_CALLBACK sendCompleteCallback, void* userContextCallback)
+{
+	IOTHUB_MESSAGING_RESULT result;
+
+	if (moduleId == NULL)
+	{
+		result = IOTHUB_MESSAGING_INVALID_ARG;
+	}
+	else
+	{
+		result = IoTHubMessaging_LL_SendDeviceOrModule(messagingHandle, deviceId, moduleId, message, sendCompleteCallback, userContextCallback);
+	}
+
+	return result;
+}
+
 
 void IoTHubMessaging_LL_DoWork(IOTHUB_MESSAGING_HANDLE messagingHandle)
 {
