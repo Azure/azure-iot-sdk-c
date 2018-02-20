@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#include <stdbool.h>
 #include "iothub_client_statistics.h"
+#include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/singlylinkedlist.h"
 #include "azure_c_shared_utility/threadapi.h"
@@ -9,6 +11,8 @@
 #include "parson.h"
 
 #define INDEFINITE_TIME ((time_t)-1)
+
+DEFINE_ENUM_STRINGS(EVENT_TYPE, EVENT_TYPE_STRINGS)
 
 typedef struct EVENT_INFO_TAG
 {
@@ -154,41 +158,46 @@ IOTHUB_CLIENT_STATISTICS_HANDLE iothub_client_statistics_create(void)
     {
         LogError("Failed allocating IOTHUB_CLIENT_STATISTICS");
     }
-    else if ((stats->connection_status_history = singlylinkedlist_create()) == NULL)
+    else
     {
-        LogError("Failed creating list for connection status info");
-        iothub_client_statistics_destroy(stats);
-        stats = NULL;
-    }
-    else if ((stats->telemetry_events = singlylinkedlist_create()) == NULL)
-    {
-        LogError("Failed creating list for telemetry events");
-        iothub_client_statistics_destroy(stats);
-        stats = NULL;
-    }
-    else if ((stats->c2d_messages = singlylinkedlist_create()) == NULL)
-    {
-        LogError("Failed creating list for c2d messages");
-        iothub_client_statistics_destroy(stats);
-        stats = NULL;
-    }
-    else if ((stats->device_methods = singlylinkedlist_create()) == NULL)
-    {
-        LogError("Failed creating list for device methods");
-        iothub_client_statistics_destroy(stats);
-        stats = NULL;
-    }
-    else if ((stats->twin_reported_properties = singlylinkedlist_create()) == NULL)
-    {
-        LogError("Failed creating list for twin reported properties");
-        iothub_client_statistics_destroy(stats);
-        stats = NULL;
-    }
-    else if ((stats->twin_desired_properties = singlylinkedlist_create()) == NULL)
-    {
-        LogError("Failed creating list for twin desired properties");
-        iothub_client_statistics_destroy(stats);
-        stats = NULL;
+        memset(stats, 0, sizeof(IOTHUB_CLIENT_STATISTICS));
+
+        if ((stats->connection_status_history = singlylinkedlist_create()) == NULL)
+        {
+            LogError("Failed creating list for connection status info");
+            iothub_client_statistics_destroy(stats);
+            stats = NULL;
+        }
+        else if ((stats->telemetry_events = singlylinkedlist_create()) == NULL)
+        {
+            LogError("Failed creating list for telemetry events");
+            iothub_client_statistics_destroy(stats);
+            stats = NULL;
+        }
+        else if ((stats->c2d_messages = singlylinkedlist_create()) == NULL)
+        {
+            LogError("Failed creating list for c2d messages");
+            iothub_client_statistics_destroy(stats);
+            stats = NULL;
+        }
+        else if ((stats->device_methods = singlylinkedlist_create()) == NULL)
+        {
+            LogError("Failed creating list for device methods");
+            iothub_client_statistics_destroy(stats);
+            stats = NULL;
+        }
+        else if ((stats->twin_reported_properties = singlylinkedlist_create()) == NULL)
+        {
+            LogError("Failed creating list for twin reported properties");
+            iothub_client_statistics_destroy(stats);
+            stats = NULL;
+        }
+        else if ((stats->twin_desired_properties = singlylinkedlist_create()) == NULL)
+        {
+            LogError("Failed creating list for twin desired properties");
+            iothub_client_statistics_destroy(stats);
+            stats = NULL;
+        }
     }
 
     return stats;
@@ -462,7 +471,7 @@ int iothub_client_statistics_add_telemetry_info(IOTHUB_CLIENT_STATISTICS_HANDLE 
 
     if (handle == NULL || info == NULL || (type != TELEMETRY_QUEUED && type != TELEMETRY_SENT && type != TELEMETRY_RECEIVED))
     {
-        LogError("Invalid argument (handle=%p, type=%d, info=%p)", handle, type, info);
+        LogError("Invalid argument (handle=%p, type=%s, info=%p)", handle, ENUM_TO_STRING(EVENT_TYPE, type), info);
         result = __FAILURE__;
     }
     else
@@ -528,15 +537,13 @@ int iothub_client_statistics_add_telemetry_info(IOTHUB_CLIENT_STATISTICS_HANDLE 
     return result;
 }
 
-int iothub_client_statistics_get_telemetry_summary(
-    IOTHUB_CLIENT_STATISTICS_HANDLE handle, 
-    size_t* messages_sent, size_t* messages_received, double* min_travel_time, double* max_travel_time)
+int iothub_client_statistics_get_telemetry_summary(IOTHUB_CLIENT_STATISTICS_HANDLE handle, IOTHUB_CLIENT_STATISTICS_TELEMETRY_SUMMARY* summary)
 {
     int result;
 
-    if (handle == NULL || messages_sent == NULL || messages_received == NULL)
+    if (handle == NULL || summary == NULL)
     {
-        LogError("Invalid argument (handle=%p, messages_sent=%p, messages_received=%p)", handle, messages_sent, messages_received);
+        LogError("Invalid argument (handle=%p, summary=%p)", handle, summary);
         result = __FAILURE__;
     }
     else
@@ -544,10 +551,8 @@ int iothub_client_statistics_get_telemetry_summary(
         IOTHUB_CLIENT_STATISTICS_HANDLE stats = (IOTHUB_CLIENT_STATISTICS*)handle;
         LIST_ITEM_HANDLE list_item;
 
-        *messages_sent = 0;
-        *messages_received = 0;
-        *min_travel_time = LONG_MAX;
-        *max_travel_time = 0;
+        (void)memset(summary, 0, sizeof(IOTHUB_CLIENT_STATISTICS_TELEMETRY_SUMMARY));
+        summary->min_travel_time_secs = LONG_MAX;
 
         list_item = singlylinkedlist_get_head_item(stats->telemetry_events);
 
@@ -555,23 +560,23 @@ int iothub_client_statistics_get_telemetry_summary(
         {
             TELEMETRY_INFO* telemetry_info = (TELEMETRY_INFO*)singlylinkedlist_item_get_value(list_item);
 
-            *messages_sent = *messages_sent + 1;
+            summary->messages_sent = summary->messages_sent + 1;
 
             if (telemetry_info->time_received != INDEFINITE_TIME)
             {
                 double travel_time = difftime(telemetry_info->time_received, telemetry_info->time_sent);
 
-                if (travel_time < *min_travel_time)
+                if (travel_time < summary->min_travel_time_secs)
                 {
-                    *min_travel_time = travel_time;
+                    summary->min_travel_time_secs = travel_time;
                 }
 
-                if (travel_time > *max_travel_time)
+                if (travel_time > summary->max_travel_time_secs)
                 {
-                    *max_travel_time = travel_time;
+                    summary->max_travel_time_secs = travel_time;
                 }
 
-                *messages_received = *messages_received + 1;
+                summary->messages_received = summary->messages_received + 1;
             }
 
             list_item = singlylinkedlist_get_next_item(list_item);

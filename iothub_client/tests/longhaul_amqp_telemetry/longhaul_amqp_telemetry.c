@@ -27,12 +27,12 @@
 
 #define INDEFINITE_TIME ((time_t)-1)
 
-static int longhaul_amqp_telemetry_run(void)
+int main(void)
 {
     int result;
     IOTHUB_LONGHAUL_RESOURCES_HANDLE iotHubLonghaulRsrcsHandle;
-    size_t test_duration_in_seconds = 20; //12 * 60 * 60;
-    size_t test_loop_wait_time_in_seconds = 5; // 60;
+    size_t test_duration_in_seconds = 12 * 60 * 60;
+    size_t test_loop_wait_time_in_seconds = 60;
 
     if ((iotHubLonghaulRsrcsHandle = longhaul_tests_init()) == NULL)
     {
@@ -55,9 +55,4 @@ static int longhaul_amqp_telemetry_run(void)
     }
 
     return result;
-}
-
-int main(void)
-{
-    return longhaul_amqp_telemetry_run();
 }

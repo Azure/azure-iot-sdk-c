@@ -5,6 +5,7 @@
 #define IOTHUB_CLIENT_COMMON_LONGHAUL_H
 
 #include <stdlib.h>
+#include <stddef.h>
 #include "iothub_client.h"
 #include "iothub_account.h"
 #include "../common_longhaul/iothub_client_statistics.h"

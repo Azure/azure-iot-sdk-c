@@ -3,6 +3,9 @@
 
 #include "iothub_client_common_longhaul.h"
 #include <stdio.h>
+#include <stdbool.h>
+#include <time.h>
+#include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/uuid.h"
@@ -265,8 +268,6 @@ void longhaul_tests_deinit(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
             iotHubLonghaulRsrcs->test_id = NULL;
         }
 
-        // Need a double deinit
-        platform_deinit();
         platform_deinit();
 
         free((void*)handle);
@@ -291,7 +292,7 @@ IOTHUB_LONGHAUL_RESOURCES_HANDLE longhaul_tests_init()
         }
         else
         {
-            memset(result, 0, sizeof(IOTHUB_LONGHAUL_RESOURCES));
+            (void)memset(result, 0, sizeof(IOTHUB_LONGHAUL_RESOURCES));
 
             if ((result->test_id = UUID_to_string(&uuid)) == NULL)
             {
@@ -357,8 +358,6 @@ IOTHUB_CLIENT_HANDLE longhaul_create_and_connect_device_client(IOTHUB_LONGHAUL_R
     else
     {
         bool trace = false;
-        unsigned int svc2cl_keep_alive_timeout_secs = 120; // service will send pings at 120 x 7/8 = 105 seconds. Higher the value, lesser the frequency of service side pings.
-        double cl2svc_keep_alive_send_ratio = 1.0 / 2.0; // Set it to 120 seconds (240 x 1/2 = 120 seconds) for 4 minutes remote idle. 
 
         IOTHUB_LONGHAUL_RESOURCES* iotHubLonghaulRsrcs = (IOTHUB_LONGHAUL_RESOURCES*)handle;
         iotHubLonghaulRsrcs->iotHubClientHandle = result;
@@ -368,8 +367,6 @@ IOTHUB_CLIENT_HANDLE longhaul_create_and_connect_device_client(IOTHUB_LONGHAUL_R
 #endif
         (void)IoTHubClient_SetOption(result, OPTION_LOG_TRACE, &trace);
         (void)IoTHubClient_SetOption(result, OPTION_PRODUCT_INFO, "C-SDK-LongHaul");
-        (void)IoTHubClient_SetOption(result, OPTION_SERVICE_SIDE_KEEP_ALIVE_FREQ_SECS, &svc2cl_keep_alive_timeout_secs);
-        (void)IoTHubClient_SetOption(result, OPTION_REMOTE_IDLE_TIMEOUT_RATIO, &cl2svc_keep_alive_send_ratio);
 
         if (IoTHubClient_SetConnectionStatusCallback(result, connection_status_callback, handle) != IOTHUB_CLIENT_OK)
         {
@@ -404,7 +401,7 @@ static int parse_incoming_message(const char* data, size_t size, char* test_id, 
     int result;
     char data_copy[80];
     
-    memset(data_copy, 0, sizeof(data_copy));
+    (void)memset(data_copy, 0, sizeof(data_copy));
     (void)memcpy(data_copy, data, size);
     data_copy[51] = '\0';
 
@@ -600,12 +597,12 @@ static void send_confirmation_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result,
     }
 }
 
-static IOTHUB_MESSAGE_HANDLE create_telemetry_message(char* test_id, size_t message_id)
+static IOTHUB_MESSAGE_HANDLE create_telemetry_message(const char* test_id, size_t message_id)
 {
     IOTHUB_MESSAGE_HANDLE result;
     char msg_text[80];
 
-    memset(msg_text, 0, sizeof(msg_text));
+    (void)memset(msg_text, 0, sizeof(msg_text));
 
     if (sprintf_s(msg_text, sizeof(msg_text), TELEMETRY_MESSAGE_FORMAT, test_id, message_id) <= 0)
     {
@@ -746,22 +743,19 @@ int longhaul_run_telemetry_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t
                 }
                 else
                 {
-                    size_t messages_sent;
-                    size_t messages_received;
-                    double min_travel_time_secs;
-                    double max_travel_time_secs;
+                    IOTHUB_CLIENT_STATISTICS_TELEMETRY_SUMMARY summary;
 
-                    if (iothub_client_statistics_get_telemetry_summary(
-                        stats_handle, &messages_sent, &messages_received, &min_travel_time_secs, &max_travel_time_secs) != 0)
+                    if (iothub_client_statistics_get_telemetry_summary(stats_handle, &summary) != 0)
                     {
                         LogError("Failed gettting statistics summary");
                         result = __FAILURE__;
                     }
                     else
                     {
-                        LogInfo("Summary: Messages sent=%d, received=%d; travel time: min=%f secs, max=%f secs", messages_sent, messages_received, min_travel_time_secs, max_travel_time_secs);
+                        LogInfo("Summary: Messages sent=%d, received=%d; travel time: min=%f secs, max=%f secs", 
+                            summary.messages_sent, summary.messages_received, summary.min_travel_time_secs, summary.max_travel_time_secs);
                      
-                        if (messages_sent == 0 || messages_received != messages_sent || max_travel_time_secs > MAX_TELEMETRY_TRAVEL_TIME_SECS)
+                        if (summary.messages_sent == 0 || summary.messages_received != summary.messages_sent || summary.max_travel_time_secs > MAX_TELEMETRY_TRAVEL_TIME_SECS)
                         {
                             result = __FAILURE__;
                         }
