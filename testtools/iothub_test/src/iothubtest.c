@@ -29,7 +29,6 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 
 #include "azure_c_shared_utility/threadapi.h"
-#include "azure_c_shared_utility/strings.h"
 #include "iothubtest.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/consolelogger.h"
@@ -53,6 +52,7 @@ const char* AMQP_SEND_AUTHCID_FMT = "iothubowner@sas.root.%s";
 #define THREAD_END                  1
 #define MAX_DRAIN_TIME              1000.0
 #define MAX_SHORT_VALUE             32767         /* maximum (signed) short value */
+#define INDEFINITE_TIME             ((time_t)-1)
 
 DEFINE_ENUM_STRINGS(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
 
@@ -64,7 +64,7 @@ typedef enum MESSAGE_SEND_STATE_TAG
     MESSAGE_SEND_STATE_SEND_FAILED
 } MESSAGE_SEND_STATE;
 
-typedef struct AMQP_THINGS_TAG
+typedef struct AMQP_CONN_INFO_TAG
 {
     XIO_HANDLE tls_io;
     SASL_MECHANISM_HANDLE sasl_mechanism;
@@ -73,7 +73,7 @@ typedef struct AMQP_THINGS_TAG
     SESSION_HANDLE session;
     LINK_HANDLE receive_link;
     MESSAGE_RECEIVER_HANDLE message_receiver;
-} AMQP_THINGS;
+} AMQP_CONN_INFO;
 
 typedef struct IOTHUB_VALIDATION_INFO_TAG
 {
@@ -81,13 +81,13 @@ typedef struct IOTHUB_VALIDATION_INFO_TAG
     char* hostName;
     char* partnerName;
     char* partnerHost;
-    STRING_HANDLE consumerGroup;
-    STRING_HANDLE deviceId;
-    STRING_HANDLE eventhubName;
-    STRING_HANDLE iotSharedSig;
-    STRING_HANDLE eventhubAccessKey;
+    char* consumerGroup;
+    char* deviceId;
+    char* eventhubName;
+    char* iotSharedSig;
+    char* eventhubAccessKey;
     volatile sig_atomic_t messageThreadExit;
-    AMQP_THINGS *amqp_connection;
+    AMQP_CONN_INFO *amqp_connection;
     pfIoTHubMessageCallback onMessageReceivedCallback;
     void* onMessageReceivedContext;
     THREAD_HANDLE asyncWorkThread;
@@ -372,27 +372,27 @@ void IoTHubTest_Deinit(IOTHUB_TEST_HANDLE devhubHandle)
 
         if (devhubValInfo->consumerGroup != NULL)
         {
-            STRING_delete(devhubValInfo->consumerGroup);
+            free(devhubValInfo->consumerGroup);
         }
 
         if (devhubValInfo->eventhubAccessKey != NULL)
         {
-            STRING_delete(devhubValInfo->eventhubAccessKey);
+            free(devhubValInfo->eventhubAccessKey);
         }
 
         if (devhubValInfo->deviceId != NULL)
         {
-            STRING_delete(devhubValInfo->deviceId);
+            free(devhubValInfo->deviceId);
         }
 
         if (devhubValInfo->eventhubName != NULL)
         {
-            STRING_delete(devhubValInfo->eventhubName);
+            free(devhubValInfo->eventhubName);
         }
 
         if (devhubValInfo->iotSharedSig != NULL)
         {
-            STRING_delete(devhubValInfo->iotSharedSig);
+            free(devhubValInfo->iotSharedSig);
         }
 
         if (devhubValInfo->iotHubName != NULL)
@@ -438,31 +438,31 @@ IOTHUB_TEST_HANDLE IoTHubTest_Initialize(const char* eventhubConnString, const c
     {
         memset(devhubValInfo, 0, sizeof(IOTHUB_VALIDATION_INFO));
 
-        if ((devhubValInfo->consumerGroup = STRING_construct(consumerGroup)) == NULL)
+        if (mallocAndStrcpy_s(&devhubValInfo->consumerGroup, consumerGroup) != 0)
         {
             LogError("Failure allocating consumerGroup string.");
             IoTHubTest_Deinit(devhubValInfo);
             result = NULL;
         }
-        else if ((devhubValInfo->deviceId = STRING_construct(deviceId)) == NULL)
+        else if (mallocAndStrcpy_s(&devhubValInfo->deviceId, deviceId) != 0)
         {
             LogError("Failure allocating deviceId string.");
             IoTHubTest_Deinit(devhubValInfo);
             result = NULL;
         }
-        else if ((devhubValInfo->eventhubAccessKey = STRING_construct(eventhubAccessKey)) == NULL)
+        else if (mallocAndStrcpy_s(&devhubValInfo->eventhubAccessKey, eventhubAccessKey) != 0)
         {
             LogError("Failure allocating eventhubAccessKey string.");
             IoTHubTest_Deinit(devhubValInfo);
             result = NULL;
         }
-        else if ((devhubValInfo->eventhubName = STRING_construct(eventhubName)) == NULL)
+        else if (mallocAndStrcpy_s(&devhubValInfo->eventhubName, eventhubName) != 0)
         {
             LogError("Failure allocating eventhubName string.");
             IoTHubTest_Deinit(devhubValInfo);
             result = NULL;
         }
-        else if ((devhubValInfo->iotSharedSig = STRING_construct(sharedSignature)) == NULL)
+        else if (mallocAndStrcpy_s(&devhubValInfo->iotSharedSig, sharedSignature) != 0)
         {
             LogError("Failure allocating sharedSig string.");
             IoTHubTest_Deinit(devhubValInfo);
@@ -490,12 +490,12 @@ IOTHUB_TEST_HANDLE IoTHubTest_Initialize(const char* eventhubConnString, const c
 static char* CreateReceiveAddress(IOTHUB_VALIDATION_INFO* devhubValInfo, size_t partitionCount)
 {
     char* result;
-    size_t addressLen = strlen(AMQP_RECV_ADDRESS_FMT) + STRING_length(devhubValInfo->eventhubName) + STRING_length(devhubValInfo->consumerGroup) + 5;
+    size_t addressLen = strlen(AMQP_RECV_ADDRESS_FMT) + strlen(devhubValInfo->eventhubName) + strlen(devhubValInfo->consumerGroup) + 5;
     result = (char*)malloc(addressLen + 1);
     if (result != NULL)
     {
-        size_t targetPartition = ResolvePartitionIndex(STRING_c_str(devhubValInfo->deviceId), partitionCount);
-        sprintf_s(result, addressLen+1, AMQP_RECV_ADDRESS_FMT, STRING_c_str(devhubValInfo->eventhubName), STRING_c_str(devhubValInfo->consumerGroup), targetPartition);
+        size_t targetPartition = ResolvePartitionIndex(devhubValInfo->deviceId, partitionCount);
+        sprintf_s(result, addressLen+1, AMQP_RECV_ADDRESS_FMT, devhubValInfo->eventhubName, devhubValInfo->consumerGroup, targetPartition);
     }
     else
     {
@@ -612,7 +612,7 @@ static AMQP_VALUE on_message_received_new(const void* context, MESSAGE_HANDLE me
     return result;
 }
 
-static void destroyAmqpConnection(AMQP_THINGS* amqp_connection)
+static void destroyAmqpConnection(AMQP_CONN_INFO* amqp_connection)
 {
     if (amqp_connection->message_receiver != NULL)
     {
@@ -672,11 +672,135 @@ static int asyncWorkFunction(void* context)
     return 0;
 }
 
-static AMQP_THINGS* createAmqpConnection(IOTHUB_VALIDATION_INFO* devhubValInfo, size_t partitionCount, time_t receiveTimeRangeStart)
+static filter_set create_link_source_filter(time_t receiveTimeRangeStart)
 {
-    AMQP_THINGS* result;
+    filter_set result;
+    char tempBuffer[256];
 
-    if ((result = (AMQP_THINGS*)malloc(sizeof(AMQP_THINGS))) == NULL)
+    if ((sprintf(tempBuffer, "amqp.annotation.x-opt-enqueuedtimeutc > %llu", ((unsigned long long)receiveTimeRangeStart - 330) * 1000)) < 0)
+    {
+        LogError("Failed creating filter set with enqueuedtimeutc filter.");
+        result = NULL;
+    }
+    else
+    {
+        if ((result = amqpvalue_create_map()) == NULL)
+        {
+            LogError("Failed creating map");
+        }
+        else
+        {
+            const char filter_name[] = "apache.org:selector-filter:string";
+            AMQP_VALUE descriptor;
+            AMQP_VALUE filter_value;
+            AMQP_VALUE described_filter_value;
+
+            if ((filter_value = amqpvalue_create_string(tempBuffer)) == NULL)
+            {
+                LogError("Failed creating filter value");
+                amqpvalue_destroy(result);
+                result = NULL;
+            }
+            else if ((descriptor = amqpvalue_create_symbol(filter_name)) == NULL)
+            {
+                LogError("Failed creating descriptor");
+                amqpvalue_destroy(filter_value);
+                amqpvalue_destroy(result);
+                result = NULL;
+            }
+            else if ((described_filter_value = amqpvalue_create_described(descriptor, filter_value)) == NULL)
+            {
+                LogError("Failed creating described filter value");
+                amqpvalue_destroy(descriptor);
+                amqpvalue_destroy(filter_value);
+                amqpvalue_destroy(result);
+                result = NULL;
+            }
+            else
+            {
+                AMQP_VALUE filter_key;
+
+                if ((filter_key = amqpvalue_create_symbol(filter_name)) == NULL)
+                {
+                    LogError("Failed creating filter key");
+                    amqpvalue_destroy(described_filter_value);
+                    amqpvalue_destroy(descriptor);
+                    amqpvalue_destroy(filter_value);
+                    amqpvalue_destroy(result);
+                    result = NULL;
+                }
+                else
+                {
+                    if (amqpvalue_set_map_value(result, filter_key, described_filter_value) != 0)
+                    {
+                        LogError("Failed setting map value");
+                        amqpvalue_destroy(described_filter_value);
+                        amqpvalue_destroy(descriptor);
+                        amqpvalue_destroy(filter_value);
+                        amqpvalue_destroy(result);
+                        result = NULL;
+                    }
+
+                    amqpvalue_destroy(filter_key);
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
+static AMQP_VALUE create_link_source(char* receive_address, filter_set filter_set)
+{
+    AMQP_VALUE result;
+    SOURCE_HANDLE source_handle;
+
+    if ((source_handle = source_create()) == NULL)
+    {
+        LogError("Failed creating source handle");
+        result = NULL;
+    }
+    else
+    {
+        AMQP_VALUE address_value;
+
+        if ((address_value = amqpvalue_create_string(receive_address)) == NULL)
+        {
+            LogError("Failed creating the AMQP value for the receive address");
+            result = NULL;
+        }
+        else
+        {
+            if (source_set_address(source_handle, address_value) != 0)
+            {
+                LogError("Failed setting source address");
+                result = NULL;
+            }
+            else if (source_set_filter(source_handle, filter_set) != 0)
+            {
+                LogError("Failed setting source filter");
+                result = NULL;
+            }
+            else if ((result = amqpvalue_create_source(source_handle)) == NULL)
+            {
+                LogError("Failed creating the link source");
+                result = NULL;
+            }
+
+            amqpvalue_destroy(address_value);
+        }
+
+        source_destroy(source_handle);
+    }
+
+    return result;
+}
+
+static AMQP_CONN_INFO* createAmqpConnection(IOTHUB_VALIDATION_INFO* devhubValInfo, size_t partitionCount, time_t receiveTimeRangeStart)
+{
+    AMQP_CONN_INFO* result;
+
+    if ((result = (AMQP_CONN_INFO*)malloc(sizeof(AMQP_CONN_INFO))) == NULL)
     {
         LogError("Failed to allocate memory for AMQP connection elements");
     }
@@ -708,7 +832,7 @@ static AMQP_THINGS* createAmqpConnection(IOTHUB_VALIDATION_INFO* devhubValInfo, 
                 const IO_INTERFACE_DESCRIPTION* tlsio_interface;
 
                 sasl_plain_config.authcid = "iothubowner";
-                sasl_plain_config.passwd = STRING_c_str(devhubValInfo->eventhubAccessKey);
+                sasl_plain_config.passwd = devhubValInfo->eventhubAccessKey;
                 sasl_plain_config.authzid = NULL;
 
                 tls_io_config.hostname = eh_hostname;
@@ -774,26 +898,10 @@ static AMQP_THINGS* createAmqpConnection(IOTHUB_VALIDATION_INFO* devhubValInfo, 
                     }
                     else
                     {
-                        char tempBuffer[256];
-                        const char filter_name[] = "apache.org:selector-filter:string";
-                        int filter_string_length = sprintf(tempBuffer, "amqp.annotation.x-opt-enqueuedtimeutc > %llu", ((unsigned long long)receiveTimeRangeStart - 330) * 1000);
-                        if (filter_string_length < 0)
                         {
-                            LogError("Failed creating filter set with enqueuedtimeutc filter.");
-                            result = NULL;
-                        }
-                        else
-                        {
-                            /* create the filter set to be used for the source of the link */
-                            filter_set filter_set = amqpvalue_create_map();
-                            AMQP_VALUE filter_key = amqpvalue_create_symbol(filter_name);
-                            AMQP_VALUE descriptor = amqpvalue_create_symbol(filter_name);
-                            AMQP_VALUE filter_value = amqpvalue_create_string(tempBuffer);
-                            AMQP_VALUE described_filter_value = amqpvalue_create_described(descriptor, filter_value);
-                            amqpvalue_set_map_value(filter_set, filter_key, described_filter_value);
-                            amqpvalue_destroy(filter_key);
+                            filter_set filter_set;
 
-                            if (filter_set == NULL)
+                            if ((filter_set = create_link_source_filter(receiveTimeRangeStart)) == NULL)
                             {
                                 LogError("Failed creating filter set with enqueuedtimeutc filter.");
                                 destroyAmqpConnection(devhubValInfo->amqp_connection);
@@ -801,19 +909,9 @@ static AMQP_THINGS* createAmqpConnection(IOTHUB_VALIDATION_INFO* devhubValInfo, 
                             }
                             else
                             {
-                                AMQP_VALUE target = NULL;
-                                AMQP_VALUE source = NULL;
+                                AMQP_VALUE source;
 
-                                /* create the source of the link */
-                                SOURCE_HANDLE source_handle = source_create();
-                                AMQP_VALUE address_value = amqpvalue_create_string(receive_address);
-                                source_set_address(source_handle, address_value);
-                                source_set_filter(source_handle, filter_set);
-                                amqpvalue_destroy(address_value);
-                                source = amqpvalue_create_source(source_handle);
-                                source_destroy(source_handle);
-
-                                if (source == NULL)
+                                if ((source = create_link_source(receive_address, filter_set)) == NULL)
                                 {
                                     LogError("Failed creating source for link.");
                                     destroyAmqpConnection(devhubValInfo->amqp_connection);
@@ -821,28 +919,29 @@ static AMQP_THINGS* createAmqpConnection(IOTHUB_VALIDATION_INFO* devhubValInfo, 
                                 }
                                 else
                                 {
-                                    target = messaging_create_target(receive_address);
-                                    if (target == NULL)
+                                    AMQP_VALUE target;
+
+                                    if ((target = messaging_create_target(receive_address)) == NULL)
                                     {
                                         LogError("Failed creating target for link.");
                                         destroyAmqpConnection(devhubValInfo->amqp_connection);
                                         result = NULL;
                                     }
-                                    else if ((result->receive_link = link_create(result->session, "receiver-link", role_receiver, source, target)) == NULL)
-                                    {
-                                        LogError("Failed creating link.");
-                                        destroyAmqpConnection(devhubValInfo->amqp_connection);
-                                        result = NULL;
-                                    }
-                                    else if (link_set_rcv_settle_mode(result->receive_link, receiver_settle_mode_first) != 0)
-                                    {
-                                        LogError("Failed setting link receive settle mode.");
-                                        destroyAmqpConnection(devhubValInfo->amqp_connection);
-                                        result = NULL;
-                                    }
                                     else
                                     {
-                                        if ((result->message_receiver = messagereceiver_create(result->receive_link, NULL, NULL)) == NULL)
+                                        if ((result->receive_link = link_create(result->session, "receiver-link", role_receiver, source, target)) == NULL)
+                                        {
+                                            LogError("Failed creating link.");
+                                            destroyAmqpConnection(devhubValInfo->amqp_connection);
+                                            result = NULL;
+                                        }
+                                        else if (link_set_rcv_settle_mode(result->receive_link, receiver_settle_mode_first) != 0)
+                                        {
+                                            LogError("Failed setting link receive settle mode.");
+                                            destroyAmqpConnection(devhubValInfo->amqp_connection);
+                                            result = NULL;
+                                        }
+                                        else if ((result->message_receiver = messagereceiver_create(result->receive_link, NULL, NULL)) == NULL)
                                         {
                                             LogError("Failed creating message receiver.");
                                             destroyAmqpConnection(devhubValInfo->amqp_connection);
@@ -854,12 +953,13 @@ static AMQP_THINGS* createAmqpConnection(IOTHUB_VALIDATION_INFO* devhubValInfo, 
                                             destroyAmqpConnection(devhubValInfo->amqp_connection);
                                             result = NULL;
                                         }
-
+                                    
                                         amqpvalue_destroy(target);
                                     }
+
                                     amqpvalue_destroy(source);
                                 }
-                                amqpvalue_destroy(described_filter_value);
+
                                 amqpvalue_destroy(filter_set);
                             }
                         }
@@ -987,7 +1087,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                 /* create SASL plain handler */
                 SASL_PLAIN_CONFIG sasl_plain_config;
                 sasl_plain_config.authcid = "iothubowner";
-                sasl_plain_config.passwd = STRING_c_str(devhubValInfo->eventhubAccessKey);
+                sasl_plain_config.passwd = devhubValInfo->eventhubAccessKey;
                 sasl_plain_config.authzid = NULL;
                 const SASL_MECHANISM_INTERFACE_DESCRIPTION* sasl_plain_interface_description;
                 SASL_MECHANISM_HANDLE sasl_mechanism_handle = NULL;
@@ -1248,7 +1348,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
             }
             else
             {
-                size_t deviceDestLen = strlen(AMQP_ADDRESS_PATH_FMT) + STRING_length(devhubValInfo->deviceId) + 1;
+                size_t deviceDestLen = strlen(AMQP_ADDRESS_PATH_FMT) + strlen(devhubValInfo->deviceId) + 1;
                 char* deviceDest = (char*)malloc(deviceDestLen + 1);
                 if (deviceDest == NULL)
                 {
@@ -1259,11 +1359,11 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
                 {
                     SASL_PLAIN_CONFIG sasl_plain_config;
                     sasl_plain_config.authcid = authcid;
-                    sasl_plain_config.passwd = STRING_c_str(devhubValInfo->iotSharedSig);
+                    sasl_plain_config.passwd = devhubValInfo->iotSharedSig;
                     sasl_plain_config.authzid = NULL;
                     const SASL_MECHANISM_INTERFACE_DESCRIPTION* sasl_mechanism_interface_description;
 
-                    (void)sprintf_s(deviceDest, deviceDestLen + 1, AMQP_ADDRESS_PATH_FMT, STRING_c_str(devhubValInfo->deviceId));
+                    (void)sprintf_s(deviceDest, deviceDestLen + 1, AMQP_ADDRESS_PATH_FMT, devhubValInfo->deviceId);
 
                     if ((sasl_mechanism_interface_description = saslplain_get_interface()) == NULL)
                     {
