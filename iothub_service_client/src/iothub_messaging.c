@@ -278,7 +278,8 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_SetFeedbackMessageCallback(IOTHUB_MESSAG
     return result;
 }
 
-IOTHUB_MESSAGING_RESULT IoTHubMessaging_SendAsync(IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle, const char* deviceId, IOTHUB_MESSAGE_HANDLE message, IOTHUB_SEND_COMPLETE_CALLBACK sendCompleteCallback, void* userContextCallback)
+
+IOTHUB_MESSAGING_RESULT IoTHubMessaging_SendAsyncDeviceOrModule(IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle, const char* deviceId, const char* moduleId, IOTHUB_MESSAGE_HANDLE message, IOTHUB_SEND_COMPLETE_CALLBACK sendCompleteCallback, void* userContextCallback)
 {
     IOTHUB_MESSAGING_RESULT result;
 
@@ -312,7 +313,14 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_SendAsync(IOTHUB_MESSAGING_CLIENT_HANDLE
             {
                 /*Codes_SRS_IOTHUBMESSAGING_12_038: [ IoTHubMessaging_SendAsync shall call IoTHubMessaging_LL_Send, while passing the IOTHUB_MESSAGING_HANDLE handle created by IoTHubClient_Create and the parameters deviceId, message, sendCompleteCallback and userContextCallback.*/
                 /*Codes_SRS_IOTHUBMESSAGING_12_039: [ When IoTHubMessaging_LL_Send is called, IoTHubMessaging_SendAsync shall return the result of IoTHubMessaging_LL_Send. ]*/
-                result = IoTHubMessaging_LL_Send(iotHubMessagingClientInstance->IoTHubMessagingHandle, deviceId, message, sendCompleteCallback, userContextCallback);
+                if (moduleId != NULL)
+                {
+                    result = IoTHubMessaging_LL_SendModule(iotHubMessagingClientInstance->IoTHubMessagingHandle, deviceId, moduleId, message, sendCompleteCallback, userContextCallback);
+                }
+                else
+                {
+                    result = IoTHubMessaging_LL_Send(iotHubMessagingClientInstance->IoTHubMessagingHandle, deviceId, message, sendCompleteCallback, userContextCallback);
+                }
             }
 
             /*Codes_SRS_IOTHUBMESSAGING_12_040: [ IoTHubClient_SendEventAsync shall be made thread-safe by using the lock created in IoTHubClient_Create. ]*/
@@ -320,6 +328,29 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_SendAsync(IOTHUB_MESSAGING_CLIENT_HANDLE
         }
     }
 
+    return result;
+
+}
+
+IOTHUB_MESSAGING_RESULT IoTHubMessaging_SendAsync(IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle, const char* deviceId, IOTHUB_MESSAGE_HANDLE message, IOTHUB_SEND_COMPLETE_CALLBACK sendCompleteCallback, void* userContextCallback)
+{
+    return IoTHubMessaging_SendAsyncDeviceOrModule(messagingClientHandle, deviceId, NULL, message, sendCompleteCallback, userContextCallback);
+}
+
+
+IOTHUB_MESSAGING_RESULT IoTHubMessaging_SendAsyncModule(IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle, const char* deviceId, const char* moduleId, IOTHUB_MESSAGE_HANDLE message, IOTHUB_SEND_COMPLETE_CALLBACK sendCompleteCallback, void* userContextCallback)
+{
+    IOTHUB_MESSAGING_RESULT result;
+
+    if (NULL == moduleId)
+    {
+        LogError("NULL moduleId");
+        result = IOTHUB_MESSAGING_INVALID_ARG;
+    }
+    else
+    {
+        result = IoTHubMessaging_SendAsyncDeviceOrModule(messagingClientHandle, deviceId, moduleId, message, sendCompleteCallback, userContextCallback);
+    }
     return result;
 }
 

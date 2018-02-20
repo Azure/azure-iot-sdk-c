@@ -74,6 +74,27 @@ MOCKABLE_FUNCTION(, void, IoTHubMessaging_Close, IOTHUB_MESSAGING_CLIENT_HANDLE,
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGING_RESULT, IoTHubMessaging_SendAsync, IOTHUB_MESSAGING_CLIENT_HANDLE, messagingClientHandle, const char*, deviceId, IOTHUB_MESSAGE_HANDLE, message, IOTHUB_SEND_COMPLETE_CALLBACK, sendCompleteCallback, void*, userContextCallback);
 
 /**
+* @brief	Asynchronous call to send the message to a specified device.
+*
+* @param	messagingClientHandle		The handle created by a call to the create function.
+* @param	deviceId           		   	The name (Id) of the device to send the message to.
+* @param	moduleId           		   	The name (Id) of the module to send the message to.
+* @param	message            		   	The message to send.
+* @param	sendCompleteCallback      	The callback specified by the user for receiving
+* 										confirmation of the delivery of the message.
+* 										The user can specify a @c NULL value here to
+* 										indicate that no callback is required.
+* @param	userContextCallback			User specified context that will be provided to the
+* 										callback. This can be @c NULL.
+*
+*			@b NOTE: The application behavior is undefined if the user calls
+*			the ::IoTHubMessaging_Destroy or IoTHubMessaging_Close function from within any callback.
+*
+* @return	IOTHUB_MESSAGING_OK upon success or an error code upon failure.
+*/
+MOCKABLE_FUNCTION(, IOTHUB_MESSAGING_RESULT, IoTHubMessaging_SendAsyncModule, IOTHUB_MESSAGING_CLIENT_HANDLE, messagingClientHandle, const char*, deviceId, const char*, moduleId, IOTHUB_MESSAGE_HANDLE, message, IOTHUB_SEND_COMPLETE_CALLBACK, sendCompleteCallback, void*, userContextCallback);
+
+/**
 * @brief	This API specifies a callback to be used when the device receives the message.
 *
 * @param	messagingClientHandle		        The handle created by a call to the create function.

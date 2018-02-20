@@ -126,6 +126,8 @@ MOCKABLE_FUNCTION(, void, IoTHubMessaging_LL_Close, IOTHUB_MESSAGING_HANDLE, mes
 */
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGING_RESULT, IoTHubMessaging_LL_Send, IOTHUB_MESSAGING_HANDLE, messagingHandle, const char*, deviceId, IOTHUB_MESSAGE_HANDLE, message, IOTHUB_SEND_COMPLETE_CALLBACK, sendCompleteCallback, void*, userContextCallback);
 
+MOCKABLE_FUNCTION(, IOTHUB_MESSAGING_RESULT, IoTHubMessaging_LL_SendModule, IOTHUB_MESSAGING_HANDLE, messagingHandle, const char*, deviceId, const char*, moduleId, IOTHUB_MESSAGE_HANDLE, message, IOTHUB_SEND_COMPLETE_CALLBACK, sendCompleteCallback, void*, userContextCallback);
+
 /**
 * @brief	This API specifies a callback to be used when the device receives the message.
 *
