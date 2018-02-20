@@ -418,6 +418,7 @@ typedef struct TEST_IOTHUB_MESSAGING_TAG
 static void* TEST_VOID_PTR = (void*)0x5454;
 static char* TEST_CHAR_PTR = "TestString";
 static const char* TEST_CONST_CHAR_PTR = "TestConstPtrString";
+static const char* TEST_MODULE_ID = "TestModuleId";
 static TEST_SASL_PLAIN_CONFIG TEST_SASL_PLAIN_CONFIG_DATA;
 static TEST_CALLBACK TEST_CALLBACK_DATA;
 static TEST_IOTHUB_MESSAGING TEST_IOTHUB_MESSAGING_DATA;
@@ -1474,7 +1475,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
     /*Tests_SRS_IOTHUBMESSAGING_12_095 : [** After adding the property name and value to the uAMQP property map, both AMQP_VALUE instances shall be destroyed using amqpvalue_destroy ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_096 : [** If no errors occurred processing the properties, the uAMQP properties map shall be set on the uAMQP message by calling message_set_application_properties ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_097 : [** If the number of properties is 0, no application properties shall be set on the uAMQP message and message_create_from_iothub_message() shall return with success ] */
-    TEST_FUNCTION(IoTHubMessaging_LL_Send_happy_path)
+    static void IoTHubMessaging_LL_SendDeviceOrModule_happy_path(bool testing_module)
     {
         ///arrange
         size_t number_of_arguments = 1;
@@ -1568,15 +1569,29 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
             .IgnoreArgument(1);
 
         ///act
-        IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_Send(TEST_IOTHUB_MESSAGING_HANDLE, TEST_CONST_CHAR_PTR, TEST_IOTHUB_MESSAGE_HANDLE, TEST_IOTHUB_SEND_COMPLETE_CALLBACK, TEST_VOID_PTR);
+        IOTHUB_MESSAGING_RESULT result;
+
+        if (testing_module == true)
+        {
+            result = IoTHubMessaging_LL_SendModule(TEST_IOTHUB_MESSAGING_HANDLE, TEST_CONST_CHAR_PTR, TEST_MODULE_ID, TEST_IOTHUB_MESSAGE_HANDLE, TEST_IOTHUB_SEND_COMPLETE_CALLBACK, TEST_VOID_PTR);
+        }
+        else
+        {
+            result = IoTHubMessaging_LL_Send(TEST_IOTHUB_MESSAGING_HANDLE, TEST_CONST_CHAR_PTR, TEST_IOTHUB_MESSAGE_HANDLE, TEST_IOTHUB_SEND_COMPLETE_CALLBACK, TEST_VOID_PTR);
+        }            
     
         ///assert
         ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_OK, result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
+    TEST_FUNCTION(IoTHubMessaging_LL_Send_happy_path)
+    {
+        IoTHubMessaging_LL_SendDeviceOrModule_happy_path(false);
+    }
+
     /*Tests_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendMessage shall return IOTHUB_MESSAGING_ERROR ] */
-    TEST_FUNCTION(IoTHubMessaging_LL_Send_non_happy_path)
+    static void IoTHubMessaging_LL_SendDeviceOrModule_non_happy_path(bool testing_module)
     {
         ///arrange
         int umockc_result = umock_c_negative_tests_init();
@@ -1705,7 +1720,16 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
             {
                 umock_c_negative_tests_fail_call(i);
 
-                IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_Send(TEST_IOTHUB_MESSAGING_HANDLE, TEST_CONST_CHAR_PTR, TEST_IOTHUB_MESSAGE_HANDLE, TEST_IOTHUB_SEND_COMPLETE_CALLBACK, TEST_VOID_PTR);
+                IOTHUB_MESSAGING_RESULT result;
+
+                if (testing_module == true)
+                {
+                    result = IoTHubMessaging_LL_SendModule(TEST_IOTHUB_MESSAGING_HANDLE, TEST_CONST_CHAR_PTR, TEST_MODULE_ID, TEST_IOTHUB_MESSAGE_HANDLE, TEST_IOTHUB_SEND_COMPLETE_CALLBACK, TEST_VOID_PTR);
+                }
+                else
+                {
+                    result = IoTHubMessaging_LL_Send(TEST_IOTHUB_MESSAGING_HANDLE, TEST_CONST_CHAR_PTR, TEST_IOTHUB_MESSAGE_HANDLE, TEST_IOTHUB_SEND_COMPLETE_CALLBACK, TEST_VOID_PTR);
+                }
 
                 ///assert
                 ASSERT_ARE_NOT_EQUAL(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_OK, result);
@@ -1713,6 +1737,83 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
             
         }
         umock_c_negative_tests_deinit();
+    }
+
+    TEST_FUNCTION(IoTHubMessaging_LL_Send_non_happy_path)
+    {
+        IoTHubMessaging_LL_SendDeviceOrModule_non_happy_path(false);
+    }
+
+    /*Tests_SRS_IOTHUBMESSAGING_12_034: [ IoTHubMessaging_LL_SendMessage shall verify the messagingHandle, deviceId, message input parameters and if any of them are NULL then return NULL ] */
+    TEST_FUNCTION(IoTHubMessaging_LL_SendModule_return_IOTHUB_MESSAGING_INVALID_ARG_if_input_parameter_messagingHandle_is_NULL)
+    {
+        ///arrange
+
+        ///act
+        IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_SendModule(NULL, TEST_CONST_CHAR_PTR, TEST_MODULE_ID, TEST_IOTHUB_MESSAGE_HANDLE, TEST_IOTHUB_SEND_COMPLETE_CALLBACK, TEST_VOID_PTR);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_INVALID_ARG, result);
+    }
+
+    /*Tests_SRS_IOTHUBMESSAGING_12_034: [ IoTHubMessaging_LL_SendMessage shall verify the messagingHandle, deviceId, message input parameters and if any of them are NULL then return NULL ] */
+    TEST_FUNCTION(IoTHubMessaging_LL_SendModule_return_IOTHUB_MESSAGING_INVALID_ARG_if_input_parameter_deviceId_is_NULL)
+    {
+        ///arrange
+
+        ///act
+        IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_SendModule(TEST_IOTHUB_MESSAGING_HANDLE, NULL, TEST_MODULE_ID, TEST_IOTHUB_MESSAGE_HANDLE, TEST_IOTHUB_SEND_COMPLETE_CALLBACK, TEST_VOID_PTR);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_INVALID_ARG, result);
+    }
+
+    /*Tests_SRS_IOTHUBMESSAGING_12_034: [ IoTHubMessaging_LL_SendMessage shall verify the messagingHandle, deviceId, message input parameters and if any of them are NULL then return NULL ] */
+    TEST_FUNCTION(IoTHubMessaging_LL_SendModule_return_IOTHUB_MESSAGING_INVALID_ARG_if_input_parameter_moduleId_is_NULL)
+    {
+        ///arrange
+
+        ///act
+        IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_SendModule(TEST_IOTHUB_MESSAGING_HANDLE, TEST_CONST_CHAR_PTR, NULL, TEST_IOTHUB_MESSAGE_HANDLE, TEST_IOTHUB_SEND_COMPLETE_CALLBACK, TEST_VOID_PTR);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_INVALID_ARG, result);
+    }
+
+
+    /*Tests_SRS_IOTHUBMESSAGING_12_034: [ IoTHubMessaging_LL_SendMessage shall verify the messagingHandle, deviceId, message input parameters and if any of them are NULL then return NULL ] */
+    TEST_FUNCTION(IoTHubMessaging_LL_SendModule_return_IOTHUB_MESSAGING_INVALID_ARG_if_input_parameter_message_is_NULL)
+    {
+        ///arrange
+
+        ///act
+        IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_SendModule(TEST_IOTHUB_MESSAGING_HANDLE, TEST_CONST_CHAR_PTR, TEST_MODULE_ID, NULL, TEST_IOTHUB_SEND_COMPLETE_CALLBACK, TEST_VOID_PTR);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_INVALID_ARG, result);
+    }
+
+    /*Tests_SRS_IOTHUBMESSAGING_12_035: [ IoTHubMessaging_LL_SendMessage shall verify if the AMQP messaging has been established by a successfull call to _Open and if it is not then return IOTHUB_MESSAGING_ERROR ] */
+    TEST_FUNCTION(IoTHubMessaging_LL_SendModule_return_IOTHUB_MESSAGING_ERROR_if_messaging_is_not_opened)
+    {
+        ///arrange
+        TEST_IOTHUB_MESSAGING_DATA.isOpened = false;
+
+        ///act
+        IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_SendModule(TEST_IOTHUB_MESSAGING_HANDLE, TEST_CONST_CHAR_PTR, TEST_MODULE_ID, TEST_IOTHUB_MESSAGE_HANDLE, TEST_IOTHUB_SEND_COMPLETE_CALLBACK, TEST_VOID_PTR);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_ERROR, result);
+    }
+
+    TEST_FUNCTION(IoTHubMessaging_LL_SendModule_happy_path)
+    {
+        IoTHubMessaging_LL_SendDeviceOrModule_happy_path(true);
+    }
+
+    TEST_FUNCTION(IoTHubMessaging_LL_SendModule_non_happy_path)
+    {
+        IoTHubMessaging_LL_SendDeviceOrModule_non_happy_path(true);
     }
 
     /*Tests_SRS_IOTHUBMESSAGING_12_042: [ IoTHubMessaging_LL_SetCallbacks shall verify the messagingHandle input parameter and if it is NULL then return NULL ] */
@@ -2001,12 +2102,19 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
 
     /*Tests_SRS_IOTHUBMESSAGING_12_056: [ If context is NULL IoTHubMessaging_LL_SendMessageComplete shall return ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_055: [ If context is not NULL and IoTHubMessaging_LL_SendMessageComplete shall call user callback with user context and messaging result ] */
-    TEST_FUNCTION(IoTHubMessaging_LL_SendMessageComplete_call_to_user_callback)
+    static void IoTHubMessaging_LL_SendMessageCompleteDeviceOrModule_call_to_user_callback(bool testing_module)
     {
         ///arrange
         IOTHUB_MESSAGING_HANDLE iothub_messaging_handle = IoTHubMessaging_LL_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
         (void)IoTHubMessaging_LL_Open(iothub_messaging_handle, TEST_FUNC_IOTHUB_OPEN_COMPLETE_CALLBACK, (void*)1);
-        (void)IoTHubMessaging_LL_Send(iothub_messaging_handle, TEST_DEVICE_ID, TEST_IOTHUB_MESSAGE_HANDLE, TEST_FUNC_IOTHUB_SEND_COMPLETE_CALLBACK, (void*)1);
+        if (testing_module == true)
+        {
+            (void)IoTHubMessaging_LL_SendModule(iothub_messaging_handle, TEST_DEVICE_ID, TEST_MODULE_ID, TEST_IOTHUB_MESSAGE_HANDLE, TEST_FUNC_IOTHUB_SEND_COMPLETE_CALLBACK, (void*)1);
+        }
+        else
+        {
+            (void)IoTHubMessaging_LL_Send(iothub_messaging_handle, TEST_DEVICE_ID, TEST_IOTHUB_MESSAGE_HANDLE, TEST_FUNC_IOTHUB_SEND_COMPLETE_CALLBACK, (void*)1);
+        }
 
         umock_c_reset_all_calls();
 
@@ -2024,6 +2132,16 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         ///cleanup
         IoTHubMessaging_LL_Close(iothub_messaging_handle);
         IoTHubMessaging_LL_Destroy(iothub_messaging_handle);
+    }
+
+    TEST_FUNCTION(IoTHubMessaging_LL_SendMessageComplete_call_to_user_callback)
+    {
+        IoTHubMessaging_LL_SendMessageCompleteDeviceOrModule_call_to_user_callback(false);
+    }
+
+    TEST_FUNCTION(IoTHubMessaging_LL_SendModuleMessageComplete_call_to_user_callback)
+    {
+        IoTHubMessaging_LL_SendMessageCompleteDeviceOrModule_call_to_user_callback(true);
     }
 
     /*Tests_SRS_IOTHUBMESSAGING_12_057: [ If context is NULL IoTHubMessaging_LL_FeedbackMessageReceived shall do nothing and return delivery_accepted ] */
