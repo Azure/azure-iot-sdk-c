@@ -186,25 +186,25 @@ extern void IoTHubMessaging_LL_Close(IOTHUB_MESSAGING_HANDLE messagingHandle);
 
 
 
-## IoTHubMessaging_LL_Send
+## IoTHubMessaging_LL_SendDeviceOrModule
 ```c
-extern IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Send(IOTHUB_MESSAGING_HANDLE messagingHandle, const char* deviceId, IOTHUB_MESSAGE_HANDLE message, IOTHUB_SEND_COMPLETE_CALLBACK sendCompleteCallback, void* userContextCallback);
+extern IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_SendDeviceOrModule(IOTHUB_MESSAGING_HANDLE messagingHandle, const char* deviceId, const char* moduleId, IOTHUB_MESSAGE_HANDLE message, IOTHUB_SEND_COMPLETE_CALLBACK sendCompleteCallback, void* userContextCallback);
 ```
-**SRS_IOTHUBMESSAGING_12_034: [** IoTHubMessaging_LL_SendMessage shall verify the messagingHandle, deviceId, message input parameters and if any of them are NULL then return NULL **]**
+**SRS_IOTHUBMESSAGING_12_034: [** IoTHubMessaging_LL_SendDeviceOrModule shall verify the messagingHandle, deviceId, message input parameters and if any of them are NULL then return IOTHUB_MESSAGING_INVALID_ARG **]**
 
-**SRS_IOTHUBMESSAGING_12_035: [** IoTHubMessaging_LL_SendMessage shall verify if the AMQP messaging has been established by a successfull call to _Open and if it is not then return IOTHUB_MESSAGING_ERROR **]**
+**SRS_IOTHUBMESSAGING_12_035: [** IoTHubMessaging_LL_SendDeviceOrModule shall verify if the AMQP messaging has been established by a successfull call to _Open and if it is not then return IOTHUB_MESSAGING_ERROR **]**
 
-**SRS_IOTHUBMESSAGING_12_036: [** IoTHubMessaging_LL_SendMessage shall create a uAMQP message by calling message_create **]**
+**SRS_IOTHUBMESSAGING_12_036: [** IoTHubMessaging_LL_SendDeviceOrModule shall create a uAMQP message by calling message_create **]**
 
-**SRS_IOTHUBMESSAGING_12_037: [** IoTHubMessaging_LL_SendMessage shall set the uAMQP message body to the given message content by calling message_add_body_amqp_data **]**
+**SRS_IOTHUBMESSAGING_12_037: [** IoTHubMessaging_LL_SendDeviceOrModule shall set the uAMQP message body to the given message content by calling message_add_body_amqp_data **]**
 
-**SRS_IOTHUBMESSAGING_12_038: [** IoTHubMessaging_LL_SendMessage shall set the uAMQP message properties to the given message properties by calling message_set_properties **]**
+**SRS_IOTHUBMESSAGING_12_038: [** IoTHubMessaging_LL_SendDeviceOrModule shall set the uAMQP message properties to the given message properties by calling message_set_properties **]**
 
-**SRS_IOTHUBMESSAGING_12_039: [** IoTHubMessaging_LL_SendMessage shall call uAMQP messagesender_send with the created message with IoTHubMessaging_LL_SendMessageComplete callback by which IoTHubMessaging is notified of completition of send **]**
+**SRS_IOTHUBMESSAGING_12_039: [** IoTHubMessaging_LL_SendDeviceOrModule shall call uAMQP messagesender_send with the created message with IoTHubMessaging_LL_SendDeviceOrModuleComplete callback by which IoTHubMessaging is notified of completition of send **]**
 
-**SRS_IOTHUBMESSAGING_12_040: [** If any of the uAMQP call fails IoTHubMessaging_LL_SendMessage shall return IOTHUB_MESSAGING_ERROR **]**
+**SRS_IOTHUBMESSAGING_12_040: [** If any of the uAMQP call fails IoTHubMessaging_LL_SendDeviceOrModule shall return IOTHUB_MESSAGING_ERROR **]**
 
-**SRS_IOTHUBMESSAGING_12_041: [** If all uAMQP call return 0 then IoTHubMessaging_LL_SendMessage shall return IOTHUB_MESSAGING_OK **]**
+**SRS_IOTHUBMESSAGING_12_041: [** If all uAMQP call return 0 then IoTHubMessaging_LL_SendDeviceOrModule shall return IOTHUB_MESSAGING_OK **]**
 
 **SRS_IOTHUBMESSAGING_12_079: [** The uAMQP message properties shall be retrieved using message_get_properties **]**
 
@@ -222,7 +222,7 @@ extern IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Send(IOTHUB_MESSAGING_HANDLE m
 
 **SRS_IOTHUBMESSAGING_12_086: [** The correlation-id AMQP_VALUE shall be set on the uAMQP message using properties_set_correlation_id **]**
 
-**SRS_IOTHUBMESSAGING_12_087: [** IoTHubMessaging_LL_SendMessage shall set the uAMQP message TO property to the given message properties by calling properties_set_to **]**
+**SRS_IOTHUBMESSAGING_12_087: [** IoTHubMessaging_LL_SendDeviceOrModule shall set the uAMQP message TO property to the given message properties by calling properties_set_to **]**
 
 **SRS_IOTHUBMESSAGING_12_088: [** The IOTHUB_MESSAGE_HANDLE properties shall be obtained by calling IoTHubMessage_Properties **]**
 
@@ -244,6 +244,21 @@ extern IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Send(IOTHUB_MESSAGING_HANDLE m
 
 **SRS_IOTHUBMESSAGING_12_097: [** If the number of properties is 0, no application properties shall be set on the uAMQP message and message_create_from_iothub_message() shall return with success **]**
 
+
+## IoTHubMessaging_LL_Send
+```c
+extern IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Send(IOTHUB_MESSAGING_HANDLE messagingHandle, const char* deviceId, IOTHUB_MESSAGE_HANDLE message, IOTHUB_SEND_COMPLETE_CALLBACK sendCompleteCallback, void* userContextCallback);
+```
+`IoTHubMessaging_LL_Send` invokes `IoTHubMessaging_LL_SendDeviceOrModule` to perform its operations.
+
+
+## IoTHubMessaging_LL_SendModule
+```c
+extern IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_SendModule(IOTHUB_MESSAGING_HANDLE messagingHandle, const char* deviceId, const char* moduleId, IOTHUB_MESSAGE_HANDLE message, IOTHUB_SEND_COMPLETE_CALLBACK sendCompleteCallback, void* userContextCallback);
+```
+`IoTHubMessaging_LL_SendModule` invokes `IoTHubMessaging_LL_SendDeviceOrModule` to perform its operations.
+
+**SRS_IOTHUBMESSAGING_31_098: [** IoTHubMessaging_LL_SendModule shall verify the moduleId and if NULL then return IOTHUB_MESSAGING_INVALID_ARG **]**
 
 
 ## IoTHubMessaging_LL_SetFeedbackMessageCallback

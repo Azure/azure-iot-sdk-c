@@ -78,7 +78,7 @@ static int setMessageId(IOTHUB_MESSAGE_HANDLE iothub_message_handle, PROPERTIES_
         AMQP_VALUE uamqp_message_id;
         if ((uamqp_message_id = amqpvalue_create_string(messageId)) == NULL)
         {
-            /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendMessage shall return IOTHUB_MESSAGING_ERROR ] */
+            /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendDeviceOrModule shall return IOTHUB_MESSAGING_ERROR ] */
             LogError("Failed to create an AMQP_VALUE for the messageId property value.");
             result = __FAILURE__;
         }
@@ -89,7 +89,7 @@ static int setMessageId(IOTHUB_MESSAGE_HANDLE iothub_message_handle, PROPERTIES_
             /* Codes_SRS_IOTHUBMESSAGING_12_083: [ The message-id AMQP_VALUE shall be set on the uAMQP message using properties_set_message_id ] */
             if ((api_call_result = properties_set_message_id(uamqp_message_properties, uamqp_message_id)) != 0)
             {
-                /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendMessage shall return IOTHUB_MESSAGING_ERROR ] */
+                /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendDeviceOrModule shall return IOTHUB_MESSAGING_ERROR ] */
                 LogInfo("Failed to set value of uAMQP message 'message-id' property (%d).", api_call_result);
                 result = __FAILURE__;
             }
@@ -118,7 +118,7 @@ static int setCorrelationId(IOTHUB_MESSAGE_HANDLE iothub_message_handle, PROPERT
         AMQP_VALUE uamqp_correlation_id;
         if ((uamqp_correlation_id = amqpvalue_create_string(correlationId)) == NULL)
         {
-            /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendMessage shall return IOTHUB_MESSAGING_ERROR ] */
+            /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendDeviceOrModule shall return IOTHUB_MESSAGING_ERROR ] */
             LogError("Failed to create an AMQP_VALUE for the messageId property value.");
             result = __FAILURE__;
         }
@@ -129,7 +129,7 @@ static int setCorrelationId(IOTHUB_MESSAGE_HANDLE iothub_message_handle, PROPERT
             /*Codes_SRS_IOTHUBMESSAGING_12_086: [ The correlation-id AMQP_VALUE shall be set on the uAMQP message using properties_set_correlation_id ] */
             if ((api_call_result = properties_set_correlation_id(uamqp_message_properties, uamqp_correlation_id)) != 0)
             {
-                /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendMessage shall return IOTHUB_MESSAGING_ERROR ] */
+                /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendDeviceOrModule shall return IOTHUB_MESSAGING_ERROR ] */
                 LogInfo("Failed to set value of uAMQP message 'message-id' property (%d).", api_call_result);
                 result = __FAILURE__;
             }
@@ -157,7 +157,7 @@ static int addPropertiesToAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_handl
     /*Codes_SRS_IOTHUBMESSAGING_12_079: [ The uAMQP message properties shall be retrieved using message_get_properties ] */
     if ((api_call_result = message_get_properties(uamqp_message, &uamqp_message_properties)) != 0)
     {
-        /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendMessage shall return IOTHUB_MESSAGING_ERROR ] */
+        /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendDeviceOrModule shall return IOTHUB_MESSAGING_ERROR ] */
         LogError("Failed to get properties map from uAMQP message (error code %d).", api_call_result);
         result = __FAILURE__;
     }
@@ -165,7 +165,7 @@ static int addPropertiesToAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_handl
     else if (uamqp_message_properties == NULL &&
         (uamqp_message_properties = properties_create()) == NULL)
     {
-        /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendMessage shall return IOTHUB_MESSAGING_ERROR ] */
+        /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendDeviceOrModule shall return IOTHUB_MESSAGING_ERROR ] */
         LogError("Failed to create properties map for uAMQP message (error code %d).", api_call_result);
         result = __FAILURE__;
     }
@@ -187,17 +187,17 @@ static int addPropertiesToAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_handl
         }
         else
         {
-            /*Codes_SRS_IOTHUBMESSAGING_12_87: [ IoTHubMessaging_LL_SendMessage shall set the uAMQP message TO property to the given message properties by calling properties_set_to ] */
+            /*Codes_SRS_IOTHUBMESSAGING_12_87: [ IoTHubMessaging_LL_SendDeviceOrModule shall set the uAMQP message TO property to the given message properties by calling properties_set_to ] */
             if ((properties_set_to(uamqp_message_properties, to_amqp_value)) != 0)
             {
-                /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendMessage shall return IOTHUB_MESSAGING_ERROR ] */
+                /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendDeviceOrModule shall return IOTHUB_MESSAGING_ERROR ] */
                 LogError("Could not create properties for message - properties_set_to failed");
                 result = __FAILURE__;
             }
-            /*Codes_SRS_IOTHUBMESSAGING_12_038: [ IoTHubMessaging_LL_SendMessage shall set the uAMQP message properties to the given message properties by calling message_set_properties ] */
+            /*Codes_SRS_IOTHUBMESSAGING_12_038: [ IoTHubMessaging_LL_SendDeviceOrModule shall set the uAMQP message properties to the given message properties by calling message_set_properties ] */
             else if ((api_call_result = message_set_properties(uamqp_message, uamqp_message_properties)) != 0)
             {
-                /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendMessage shall return IOTHUB_MESSAGING_ERROR ] */
+                /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendDeviceOrModule shall return IOTHUB_MESSAGING_ERROR ] */
                 LogError("Failed to set properties map on uAMQP message (error code %d).", api_call_result);
                 result = __FAILURE__;
             }
@@ -225,7 +225,7 @@ static int addApplicationPropertiesToAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_me
     /*Codes_SRS_IOTHUBMESSAGING_12_089: [ The actual keys and values, as well as the number of properties shall be obtained by calling Map_GetInternals on the handle obtained from IoTHubMessage_Properties ] */
     if (Map_GetInternals(properties_map, &propertyKeys, &propertyValues, &propertyCount) != MAP_OK)
     {
-        /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendMessage shall return IOTHUB_MESSAGING_ERROR ] */
+        /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendDeviceOrModule shall return IOTHUB_MESSAGING_ERROR ] */
         LogError("Failed to get the internals of the property map.");
         result = __FAILURE__;
     }
@@ -239,7 +239,7 @@ static int addApplicationPropertiesToAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_me
             /*Codes_SRS_IOTHUBMESSAGING_12_091: [ A uAMQP property map shall be created by calling amqpvalue_create_map ] */
             if ((uamqp_map = amqpvalue_create_map()) == NULL)
             {
-                /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendMessage shall return IOTHUB_MESSAGING_ERROR ] */
+                /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendDeviceOrModule shall return IOTHUB_MESSAGING_ERROR ] */
                 LogError("Failed to create uAMQP map for the properties.");
                 result = __FAILURE__;
             }
@@ -254,7 +254,7 @@ static int addApplicationPropertiesToAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_me
                     /*Codes_SRS_IOTHUBMESSAGING_12_092: [ An AMQP_VALUE instance shall be created using amqpvalue_create_string() to hold each uAMQP property name ] */
                     if ((map_key_value = amqpvalue_create_string(propertyKeys[i])) == NULL)
                     {
-                        /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendMessage shall return IOTHUB_MESSAGING_ERROR ] */
+                        /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendDeviceOrModule shall return IOTHUB_MESSAGING_ERROR ] */
                         LogError("Failed to create uAMQP property key name.");
                         break;
                     }
@@ -263,7 +263,7 @@ static int addApplicationPropertiesToAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_me
                         /*Codes_SRS_IOTHUBMESSAGING_12_093: [ An AMQP_VALUE instance shall be created using amqpvalue_create_string() to hold each uAMQP property value ] */
                         if ((map_value_value = amqpvalue_create_string(propertyValues[i])) == NULL)
                         {
-                            /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendMessage shall return IOTHUB_MESSAGING_ERROR ] */
+                            /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendDeviceOrModule shall return IOTHUB_MESSAGING_ERROR ] */
                             LogError("Failed to create uAMQP property key value.");
                             break;
                         }
@@ -272,7 +272,7 @@ static int addApplicationPropertiesToAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_me
                             /*Codes_SRS_IOTHUBMESSAGING_12_094: [ The property name and value (AMQP_VALUE instances) shall be added to the uAMQP property map by calling amqpvalue_map_set_value ] */
                             if (amqpvalue_set_map_value(uamqp_map, map_key_value, map_value_value) != 0)
                             {
-                                /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendMessage shall return IOTHUB_MESSAGING_ERROR ] */
+                                /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendDeviceOrModule shall return IOTHUB_MESSAGING_ERROR ] */
                                 LogError("Failed to set key/value into the the uAMQP property map.");
                                 break;
                             }
@@ -288,7 +288,7 @@ static int addApplicationPropertiesToAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_me
                     /*Codes_SRS_IOTHUBMESSAGING_12_096: [ If no errors occurred processing the properties, the uAMQP properties map shall be set on the uAMQP message by calling message_set_application_properties ] */
                     if (message_set_application_properties(uamqp_message, uamqp_map) != 0)
                     {
-                        /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendMessage shall return IOTHUB_MESSAGING_ERROR ] */
+                        /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendDeviceOrModule shall return IOTHUB_MESSAGING_ERROR ] */
                         LogError("Failed to transfer the message properties to the uAMQP message.");
                         result = __FAILURE__;
                     }
@@ -1422,34 +1422,34 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_SendDeviceOrModule(IOTHUB_MESSAGING_H
 
     char* deviceDestinationString;
 
-    /*Codes_SRS_IOTHUBMESSAGING_12_034: [ IoTHubMessaging_LL_SendMessage shall verify the messagingHandle, deviceId, message input parameters and if any of them are NULL then return NULL ] */
+    /*Codes_SRS_IOTHUBMESSAGING_12_034: [ IoTHubMessaging_LL_SendDeviceOrModule shall verify the messagingHandle, deviceId, message input parameters and if any of them are NULL then return NULL ] */
     if (messagingHandle == NULL)
     {
         LogError("Input parameter messagingHandle cannot be NULL");
         result = IOTHUB_MESSAGING_INVALID_ARG;
     }
-    /*Codes_SRS_IOTHUBMESSAGING_12_034: [ IoTHubMessaging_LL_SendMessage shall verify the messagingHandle, deviceId, message input parameters and if any of them are NULL then return NULL ] */
+    /*Codes_SRS_IOTHUBMESSAGING_12_034: [ IoTHubMessaging_LL_SendDeviceOrModule shall verify the messagingHandle, deviceId, message input parameters and if any of them are NULL then return NULL ] */
     else if (deviceId == NULL)
     {
         LogError("Input parameter deviceId cannot be NULL");
         result = IOTHUB_MESSAGING_INVALID_ARG;
     }
-    /*Codes_SRS_IOTHUBMESSAGING_12_034: [ IoTHubMessaging_LL_SendMessage shall verify the messagingHandle, deviceId, message input parameters and if any of them are NULL then return NULL ] */
+    /*Codes_SRS_IOTHUBMESSAGING_12_034: [ IoTHubMessaging_LL_SendDeviceOrModule shall verify the messagingHandle, deviceId, message input parameters and if any of them are NULL then return NULL ] */
     else if (message == NULL)
     {
         LogError("Input parameter message cannot be NULL");
         result = IOTHUB_MESSAGING_INVALID_ARG;
     }
-    /*Codes_SRS_IOTHUBMESSAGING_12_035: [ IoTHubMessaging_LL_SendMessage shall verify if the AMQP messaging has been established by a successfull call to _Open and if it is not then return IOTHUB_MESSAGING_ERROR ] */
+    /*Codes_SRS_IOTHUBMESSAGING_12_035: [ IoTHubMessaging_LL_SendDeviceOrModule shall verify if the AMQP messaging has been established by a successfull call to _Open and if it is not then return IOTHUB_MESSAGING_ERROR ] */
     else if (messagingHandle->isOpened == 0)
     {
         LogError("Messaging is not opened - call IoTHubMessaging_LL_Open to open");
         result = IOTHUB_MESSAGING_ERROR;
     }
-    /*Codes_SRS_IOTHUBMESSAGING_12_038: [ IoTHubMessaging_LL_SendMessage shall set the uAMQP message properties to the given message properties by calling message_set_properties ] */
+    /*Codes_SRS_IOTHUBMESSAGING_12_038: [ IoTHubMessaging_LL_SendDeviceOrModule shall set the uAMQP message properties to the given message properties by calling message_set_properties ] */
     else if ((deviceDestinationString = createDeviceDestinationString(deviceId, moduleId)) == NULL)
     {
-        /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendMessage shall return IOTHUB_MESSAGING_ERROR ] */
+        /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendDeviceOrModule shall return IOTHUB_MESSAGING_ERROR ] */
         LogError("Could not create a message.");
         result = IOTHUB_MESSAGING_ERROR;
     }
@@ -1468,17 +1468,17 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_SendDeviceOrModule(IOTHUB_MESSAGING_H
             MESSAGE_HANDLE amqpMessage;
             AMQP_VALUE to_amqp_value;
 
-            /*Codes_SRS_IOTHUBMESSAGING_12_036: [ IoTHubMessaging_LL_SendMessage shall create a uAMQP message by calling message_create ] */
+            /*Codes_SRS_IOTHUBMESSAGING_12_036: [ IoTHubMessaging_LL_SendDeviceOrModule shall create a uAMQP message by calling message_create ] */
             if ((amqpMessage = message_create()) == NULL)
             {
-                /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendMessage shall return IOTHUB_MESSAGING_ERROR ] */
+                /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendDeviceOrModule shall return IOTHUB_MESSAGING_ERROR ] */
                 LogError("Could not create a message.");
                 result = IOTHUB_MESSAGING_ERROR;
             }
-            /*Codes_SRS_IOTHUBMESSAGING_12_038: [ IoTHubMessaging_LL_SendMessage shall set the uAMQP message properties to the given message properties by calling message_set_properties ] */
+            /*Codes_SRS_IOTHUBMESSAGING_12_038: [ IoTHubMessaging_LL_SendDeviceOrModule shall set the uAMQP message properties to the given message properties by calling message_set_properties ] */
             else if ((to_amqp_value = amqpvalue_create_string(deviceDestinationString)) == NULL)
             {
-                /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendMessage shall return IOTHUB_MESSAGING_ERROR ] */
+                /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendDeviceOrModule shall return IOTHUB_MESSAGING_ERROR ] */
                 LogError("Could not create properties for message - amqpvalue_create_string");
                 message_destroy(amqpMessage);
                 result = IOTHUB_MESSAGING_ERROR;
@@ -1490,24 +1490,24 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_SendDeviceOrModule(IOTHUB_MESSAGING_H
                 binary_data.bytes = messageContent;
                 binary_data.length = messageContentSize;
 
-                /*Codes_SRS_IOTHUBMESSAGING_12_037: [ IoTHubMessaging_LL_SendMessage shall set the uAMQP message body to the given message content by calling message_add_body_amqp_data ] */
+                /*Codes_SRS_IOTHUBMESSAGING_12_037: [ IoTHubMessaging_LL_SendDeviceOrModule shall set the uAMQP message body to the given message content by calling message_add_body_amqp_data ] */
                 if (message_add_body_amqp_data(amqpMessage, binary_data) != 0)
                 {
-                    /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendMessage shall return IOTHUB_MESSAGING_ERROR ] */
+                    /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendDeviceOrModule shall return IOTHUB_MESSAGING_ERROR ] */
                     LogError("Failed setting the body of the uAMQP message.");
                     result = IOTHUB_MESSAGING_ERROR;
                 }
-                /*Codes_SRS_IOTHUBMESSAGING_12_038: [ IoTHubMessaging_LL_SendMessage shall set the uAMQP message properties to the given message properties by calling message_set_properties ] */
+                /*Codes_SRS_IOTHUBMESSAGING_12_038: [ IoTHubMessaging_LL_SendDeviceOrModule shall set the uAMQP message properties to the given message properties by calling message_set_properties ] */
                 else if (addPropertiesToAMQPMessage(message, amqpMessage, to_amqp_value) != 0)
                 {
-                    /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendMessage shall return IOTHUB_MESSAGING_ERROR ] */
+                    /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendDeviceOrModule shall return IOTHUB_MESSAGING_ERROR ] */
                     message_destroy(amqpMessage);
                     LogError("Failed setting properties of the uAMQP message.");
                     result = IOTHUB_MESSAGING_ERROR;
                 }
                 else if (addApplicationPropertiesToAMQPMessage(message, amqpMessage) != 0)
                 {
-                    /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendMessage shall return IOTHUB_MESSAGING_ERROR ] */
+                    /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendDeviceOrModule shall return IOTHUB_MESSAGING_ERROR ] */
                     message_destroy(amqpMessage);
                     LogError("Failed setting application properties of the uAMQP message.");
                     result = IOTHUB_MESSAGING_ERROR;
@@ -1517,17 +1517,17 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_SendDeviceOrModule(IOTHUB_MESSAGING_H
                     messagingHandle->callback_data->sendCompleteCallback = sendCompleteCallback;
                     messagingHandle->callback_data->sendUserContext = userContextCallback;
 
-                    /*Codes_SRS_IOTHUBMESSAGING_12_039: [ IoTHubMessaging_LL_SendMessage shall call uAMQP messagesender_send with the created message with IoTHubMessaging_LL_SendMessageComplete callback by which IoTHubMessaging is notified of completition of send ] */
+                    /*Codes_SRS_IOTHUBMESSAGING_12_039: [ IoTHubMessaging_LL_SendDeviceOrModule shall call uAMQP messagesender_send with the created message with IoTHubMessaging_LL_SendMessageComplete callback by which IoTHubMessaging is notified of completition of send ] */
                     if (messagesender_send_async(messagingHandle->message_sender, amqpMessage, (ON_MESSAGE_SEND_COMPLETE)IoTHubMessaging_LL_SendMessageComplete, messagingHandle, 0) == NULL)
                     {
-                        /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendMessage shall return IOTHUB_MESSAGING_ERROR ] */
+                        /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendDeviceOrModule shall return IOTHUB_MESSAGING_ERROR ] */
                         LogError("Could not set outgoing window.");
                         message_destroy(amqpMessage);
                         result = IOTHUB_MESSAGING_ERROR;
                     }
                     else
                     {
-                        /*Codes_SRS_IOTHUBMESSAGING_12_041: [ If all uAMQP call return 0 then IoTHubMessaging_LL_SendMessage shall return IOTHUB_MESSAGING_OK  ] */
+                        /*Codes_SRS_IOTHUBMESSAGING_12_041: [ If all uAMQP call return 0 then IoTHubMessaging_LL_SendDeviceOrModule shall return IOTHUB_MESSAGING_OK  ] */
                         result = IOTHUB_MESSAGING_OK;
                     }
                 }
@@ -1551,6 +1551,8 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_SendModule(IOTHUB_MESSAGING_HANDLE me
 
     if (moduleId == NULL)
     {
+    	/*Codes_IOTHUBMESSAGING_31_098: [ IoTHubMessaging_LL_SendModule shall verify the moduleId and if NULL then return IOTHUB_MESSAGING_INVALID_ARG] */
+    	LogError("moduleId is NULL");
         result = IOTHUB_MESSAGING_INVALID_ARG;
     }
     else

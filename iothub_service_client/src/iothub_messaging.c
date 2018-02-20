@@ -231,7 +231,7 @@ void IoTHubMessaging_Close(IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle)
         if (iotHubMessagingClientInstance->ThreadHandle != NULL)
         {
             int res;
-            /*Codes_SRS_IOTHUBMESSAGING_12_013: [ The thread created as part of executing IoTHubMessaging_SendAsync shall be joined. ]*/
+            /*Codes_SRS_IOTHUBMESSAGING_12_013: [ The thread created as part of executing IoTHubMessaging_SendAsyncDeviceOrModule shall be joined. ]*/
             if (ThreadAPI_Join(iotHubMessagingClientInstance->ThreadHandle, &res) != THREADAPI_OK)
             {
                 LogError("ThreadAPI_Join failed");
@@ -285,7 +285,7 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_SendAsyncDeviceOrModule(IOTHUB_MESSAGING
 
     if (messagingClientHandle == NULL)
     {
-        /*Codes_SRS_IOTHUBMESSAGING_12_033: [ If messagingClientHandle is NULL, IoTHubMessaging_SendAsync shall return IOTHUB_MESSAGING_INVALID_ARG. ]*/
+        /*Codes_SRS_IOTHUBMESSAGING_12_033: [ If messagingClientHandle is NULL, IoTHubMessaging_SendAsyncDeviceOrModule shall return IOTHUB_MESSAGING_INVALID_ARG. ]*/
         LogError("NULL iothubClientHandle");
         result = IOTHUB_MESSAGING_INVALID_ARG;
     }
@@ -293,10 +293,10 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_SendAsyncDeviceOrModule(IOTHUB_MESSAGING
     {
         IOTHUB_MESSAGING_CLIENT_INSTANCE* iotHubMessagingClientInstance = (IOTHUB_MESSAGING_CLIENT_INSTANCE*)messagingClientHandle;
 
-        /*Codes_SRS_IOTHUBMESSAGING_12_034: [ IoTHubMessaging_SendAsync shall be made thread-safe by using the lock created in IoTHubMessaging_Create. ]*/
+        /*Codes_SRS_IOTHUBMESSAGING_12_034: [ IoTHubMessaging_SendAsyncDeviceOrModule shall be made thread-safe by using the lock created in IoTHubMessaging_Create. ]*/
         if (Lock(iotHubMessagingClientInstance->LockHandle) != LOCK_OK)
         {
-            /*Codes_SRS_IOTHUBMESSAGING_12_035: [ If acquiring the lock fails, IoTHubMessaging_SendAsync shall return IOTHUB_MESSAGING_ERROR. ]*/
+            /*Codes_SRS_IOTHUBMESSAGING_12_035: [ If acquiring the lock fails, IoTHubMessaging_SendAsyncDeviceOrModule shall return IOTHUB_MESSAGING_ERROR. ]*/
             LogError("Could not acquire lock");
             result = IOTHUB_MESSAGING_INVALID_ARG;
         }
@@ -311,8 +311,8 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_SendAsyncDeviceOrModule(IOTHUB_MESSAGING
             }
             else
             {
-                /*Codes_SRS_IOTHUBMESSAGING_12_038: [ IoTHubMessaging_SendAsync shall call IoTHubMessaging_LL_Send, while passing the IOTHUB_MESSAGING_HANDLE handle created by IoTHubClient_Create and the parameters deviceId, message, sendCompleteCallback and userContextCallback.*/
-                /*Codes_SRS_IOTHUBMESSAGING_12_039: [ When IoTHubMessaging_LL_Send is called, IoTHubMessaging_SendAsync shall return the result of IoTHubMessaging_LL_Send. ]*/
+                /*Codes_SRS_IOTHUBMESSAGING_12_038: [ IoTHubMessaging_SendAsyncDeviceOrModule shall call IoTHubMessaging_LL_Send, while passing the IOTHUB_MESSAGING_HANDLE handle created by IoTHubClient_Create and the parameters deviceId, message, sendCompleteCallback and userContextCallback.*/
+                /*Codes_SRS_IOTHUBMESSAGING_12_039: [ When IoTHubMessaging_LL_Send is called, IoTHubMessaging_SendAsyncDeviceOrModule shall return the result of IoTHubMessaging_LL_Send. ]*/
                 if (moduleId != NULL)
                 {
                     result = IoTHubMessaging_LL_SendModule(iotHubMessagingClientInstance->IoTHubMessagingHandle, deviceId, moduleId, message, sendCompleteCallback, userContextCallback);
@@ -344,6 +344,7 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_SendAsyncModule(IOTHUB_MESSAGING_CLIENT_
 
     if (NULL == moduleId)
     {
+        /*Codes_SRS_IOTHUBMESSAGING_31_045: [ If moduleId is NULL, IoTHubMessaging_SendAsyncModule shall return IOTHUB_MESSAGING_INVALID_ARG. ]*/
         LogError("NULL moduleId");
         result = IOTHUB_MESSAGING_INVALID_ARG;
     }
