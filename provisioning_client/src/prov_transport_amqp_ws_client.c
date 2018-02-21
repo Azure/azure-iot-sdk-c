@@ -127,10 +127,10 @@ static PROV_TRANSPORT_IO_INFO* amqp_transport_ws_io(const char* fqdn, SASL_MECHA
     return result;
 }
 
-PROV_DEVICE_TRANSPORT_HANDLE prov_transport_amqp_ws_create(const char* uri, TRANSPORT_HSM_TYPE type, const char* scope_id, const char* registration_id, const char* api_version)
+PROV_DEVICE_TRANSPORT_HANDLE prov_transport_amqp_ws_create(const char* uri, TRANSPORT_HSM_TYPE type, const char* scope_id, const char* api_version)
 {
     /* Codes_PROV_TRANSPORT_AMQP_WS_CLIENT_07_001: [ prov_transport_amqp_ws_create shall call the prov_transport_common_amqp_create function with amqp_transport_ws_io transport IO estabishment. ] */
-    return prov_transport_common_amqp_create(uri, type, scope_id, registration_id, api_version, amqp_transport_ws_io);
+    return prov_transport_common_amqp_create(uri, type, scope_id, api_version, amqp_transport_ws_io);
 }
 
 void prov_transport_amqp_ws_destroy(PROV_DEVICE_TRANSPORT_HANDLE handle)
@@ -139,10 +139,10 @@ void prov_transport_amqp_ws_destroy(PROV_DEVICE_TRANSPORT_HANDLE handle)
     prov_transport_common_amqp_destroy(handle);
 }
 
-int prov_transport_amqp_ws_open(PROV_DEVICE_TRANSPORT_HANDLE handle, BUFFER_HANDLE ek, BUFFER_HANDLE srk, PROV_DEVICE_TRANSPORT_REGISTER_CALLBACK data_callback, void* user_ctx, PROV_DEVICE_TRANSPORT_STATUS_CALLBACK status_cb, void* status_ctx)
+int prov_transport_amqp_ws_open(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* registration_id, BUFFER_HANDLE ek, BUFFER_HANDLE srk, PROV_DEVICE_TRANSPORT_REGISTER_CALLBACK data_callback, void* user_ctx, PROV_DEVICE_TRANSPORT_STATUS_CALLBACK status_cb, void* status_ctx)
 {
     /* Codes_PROV_TRANSPORT_AMQP_WS_CLIENT_07_003: [ prov_transport_amqp_ws_open shall invoke the prov_transport_common_amqp_open method ] */
-    return prov_transport_common_amqp_open(handle, ek, srk, data_callback, user_ctx, status_cb, status_ctx);
+    return prov_transport_common_amqp_open(handle, registration_id, ek, srk, data_callback, user_ctx, status_cb, status_ctx);
 }
 
 int prov_transport_amqp_ws_close(PROV_DEVICE_TRANSPORT_HANDLE handle)

@@ -86,12 +86,11 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(PROV_DEVICE_TRANSPORT_STATUS, PROV_DEVICE_TRANSPORT_
 TEST_DEFINE_ENUM_TYPE(TRANSPORT_HSM_TYPE, HSM_AUTH_TYPE_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(TRANSPORT_HSM_TYPE, HSM_AUTH_TYPE_VALUES);
 
-static PROV_DEVICE_TRANSPORT_HANDLE my_prov_transport_common_mqtt_create(const char* uri, TRANSPORT_HSM_TYPE type, const char* scope_id, const char* registration_id, const char* dps_api_version, PROV_MQTT_TRANSPORT_IO transport_io)
+static PROV_DEVICE_TRANSPORT_HANDLE my_prov_transport_common_mqtt_create(const char* uri, TRANSPORT_HSM_TYPE type, const char* scope_id, const char* dps_api_version, PROV_MQTT_TRANSPORT_IO transport_io)
 {
     (void)uri;
     (void)type;
     (void)scope_id;
-    (void)registration_id;
     (void)dps_api_version;
     
     g_transport_io = transport_io;
@@ -200,10 +199,10 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_ws_client_ut)
     TEST_FUNCTION(prov_transport_mqtt_ws_create_succeed)
     {
         //arrange
-        STRICT_EXPECTED_CALL(prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, IGNORED_PTR_ARG));
 
         //act
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_mqtt_ws_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_mqtt_ws_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
 
         //assert
         ASSERT_IS_NOT_NULL(handle);
@@ -216,7 +215,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_ws_client_ut)
     TEST_FUNCTION(mqtt_transport_ws_io_succeed)
     {
         XIO_HANDLE dps_io_info;
-        (void)prov_mqtt_ws_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE);
+        (void)prov_mqtt_ws_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
         umock_c_reset_all_calls();
 
         //arrange
@@ -239,7 +238,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_ws_client_ut)
     TEST_FUNCTION(mqtt_transport_ws_io_x509_succeed)
     {
         XIO_HANDLE dps_io_info;
-        (void)prov_mqtt_ws_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE);
+        (void)prov_mqtt_ws_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
         umock_c_reset_all_calls();
 
         //arrange
@@ -262,7 +261,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_ws_client_ut)
     TEST_FUNCTION(mqtt_transport_ws_io_fail)
     {
         XIO_HANDLE dps_io_info;
-        (void)prov_mqtt_ws_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE);
+        (void)prov_mqtt_ws_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
         umock_c_reset_all_calls();
 
         int negativeTestsInitResult = umock_c_negative_tests_init();
@@ -302,7 +301,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_ws_client_ut)
     {
         HTTP_PROXY_OPTIONS proxy_info;
         XIO_HANDLE dps_io_info;
-        (void)prov_mqtt_ws_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE);
+        (void)prov_mqtt_ws_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
         umock_c_reset_all_calls();
 
         //arrange
@@ -345,10 +344,10 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_ws_client_ut)
     TEST_FUNCTION(prov_transport_mqtt_ws_open_succeed)
     {
         //arrange
-        STRICT_EXPECTED_CALL(prov_transport_common_mqtt_open(TEST_DPS_HANDLE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL));
+        STRICT_EXPECTED_CALL(prov_transport_common_mqtt_open(TEST_DPS_HANDLE, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL));
 
         //act
-        int result = prov_mqtt_ws_transport_open(TEST_DPS_HANDLE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+        int result = prov_mqtt_ws_transport_open(TEST_DPS_HANDLE, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
 
         //assert
         ASSERT_ARE_EQUAL(int, 0, result);

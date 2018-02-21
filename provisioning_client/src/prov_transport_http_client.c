@@ -602,13 +602,13 @@ static int create_connection(PROV_TRANSPORT_HTTP_INFO* http_info)
     return result;
 }
 
-PROV_DEVICE_TRANSPORT_HANDLE prov_transport_http_create(const char* uri, TRANSPORT_HSM_TYPE type, const char* scope_id, const char* registration_id, const char* api_version)
+PROV_DEVICE_TRANSPORT_HANDLE prov_transport_http_create(const char* uri, TRANSPORT_HSM_TYPE type, const char* scope_id, const char* api_version)
 {
     PROV_TRANSPORT_HTTP_INFO* result;
-    if (uri == NULL || scope_id == NULL || registration_id == NULL || api_version == NULL)
+    if (uri == NULL || scope_id == NULL || api_version == NULL)
     {
         /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_001: [ If uri, scope_id, registration_id or api_version are NULL prov_transport_http_create shall return NULL. ] */
-        LogError("Invalid parameter specified uri: %p, scope_id: %p, registration_id: %p, api_version: %p", uri, scope_id, registration_id, api_version);
+        LogError("Invalid parameter specified uri: %p, scope_id: %p, api_version: %p", uri, scope_id, api_version);
         result = NULL;
     }
     else
@@ -628,13 +628,6 @@ PROV_DEVICE_TRANSPORT_HANDLE prov_transport_http_create(const char* uri, TRANSPO
                 /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_003: [ If any error is encountered prov_transport_http_create shall return NULL. ] */
                 LogError("Failure allocating hostname");
                 free(result);
-                result = NULL;
-            }
-            else if (mallocAndStrcpy_s(&result->registration_id, registration_id) != 0)
-            {
-                /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_003: [ If any error is encountered prov_transport_http_create shall return NULL. ] */
-                LogError("failure constructing registration Id");
-                free_allocated_data(result);
                 result = NULL;
             }
             else if (mallocAndStrcpy_s(&result->api_version, api_version) != 0)
@@ -672,14 +665,14 @@ void prov_transport_http_destroy(PROV_DEVICE_TRANSPORT_HANDLE handle)
     }
 }
 
-int prov_transport_http_open(PROV_DEVICE_TRANSPORT_HANDLE handle, BUFFER_HANDLE ek, BUFFER_HANDLE srk, PROV_DEVICE_TRANSPORT_REGISTER_CALLBACK data_callback, void* user_ctx, PROV_DEVICE_TRANSPORT_STATUS_CALLBACK status_cb, void* status_ctx)
+int prov_transport_http_open(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* registration_id, BUFFER_HANDLE ek, BUFFER_HANDLE srk, PROV_DEVICE_TRANSPORT_REGISTER_CALLBACK data_callback, void* user_ctx, PROV_DEVICE_TRANSPORT_STATUS_CALLBACK status_cb, void* status_ctx)
 {
     int result;
     PROV_TRANSPORT_HTTP_INFO* http_info = (PROV_TRANSPORT_HTTP_INFO*)handle;
-    if (http_info == NULL || data_callback == NULL || status_cb == NULL)
+    if (http_info == NULL || data_callback == NULL || status_cb == NULL || registration_id == NULL)
     {
         /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_008: [ If the argument handle, data_callback, or status_cb are NULL, prov_transport_http_open shall return a non-zero value. ] */
-        LogError("Invalid parameter specified handle: %p, data_callback: %p, status_cb: %p", handle, data_callback, status_cb);
+        LogError("Invalid parameter specified handle: %p, data_callback: %p, status_cb: %p, registration_id: %p", handle, data_callback, status_cb, registration_id);
         result = __FAILURE__;
     }
     else if (http_info->hsm_type == TRANSPORT_HSM_TYPE_TPM && (ek == NULL || srk == NULL))
@@ -697,6 +690,16 @@ int prov_transport_http_open(PROV_DEVICE_TRANSPORT_HANDLE handle, BUFFER_HANDLE 
         LogError("Unable to allocate storage root key");
         BUFFER_delete(http_info->ek);
         http_info->ek = NULL;
+        result = __FAILURE__;
+    }
+    else if (mallocAndStrcpy_s(&http_info->registration_id, registration_id) != 0)
+    {
+        /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_003: [ If any error is encountered prov_transport_http_create shall return NULL. ] */
+        LogError("failure constructing registration Id");
+        BUFFER_delete(http_info->ek);
+        http_info->ek = NULL;
+        BUFFER_delete(http_info->srk);
+        http_info->srk = NULL;
         result = __FAILURE__;
     }
     else
@@ -724,6 +727,8 @@ int prov_transport_http_open(PROV_DEVICE_TRANSPORT_HANDLE handle, BUFFER_HANDLE 
             http_info->user_ctx = NULL;
             http_info->status_cb = NULL;
             http_info->status_ctx = NULL;
+            free(http_info->registration_id);
+            http_info->registration_id = NULL;
             result = __FAILURE__;
         }
         else
@@ -754,6 +759,8 @@ int prov_transport_http_close(PROV_DEVICE_TRANSPORT_HANDLE handle)
             http_info->ek = NULL;
             BUFFER_delete(http_info->srk);
             http_info->srk = NULL;
+            free(http_info->registration_id);
+            http_info->registration_id = NULL;
 
             uhttp_client_close(http_info->http_client, NULL, NULL);
             uhttp_client_dowork(http_info->http_client);
