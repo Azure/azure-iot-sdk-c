@@ -40,6 +40,8 @@ include_directories(.)
 
 add_executable(longhaul_amqp_telemetry ${longhaul_amqp_telemetry_c_files} ${longhaul_amqp_telemetry_h_files} ${samples_cert_file})
 
+add_test(NAME longhaul_amqp_telemetry COMMAND $<TARGET_FILE:longhaul_amqp_telemetry>)
+
 target_link_libraries(longhaul_amqp_telemetry
         iothub_test
         iothub_client

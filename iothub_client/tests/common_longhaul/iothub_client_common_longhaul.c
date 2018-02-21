@@ -48,12 +48,12 @@ typedef struct IOTHUB_LONGHAUL_RESOURCES_TAG
     IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle;
     IOTHUB_TEST_HANDLE iotHubTestHandle;
     IOTHUB_PROVISIONED_DEVICE* deviceInfo;
-    size_t counter;
+    unsigned int counter;
 } IOTHUB_LONGHAUL_RESOURCES;
 
 typedef struct SEND_TELEMETRY_CONTEXT_TAG
 {
-    size_t message_id;
+    unsigned int message_id;
     IOTHUB_LONGHAUL_RESOURCES* iotHubLonghaul;
 } SEND_TELEMETRY_CONTEXT;
 
@@ -94,9 +94,9 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT c2d_message_received_callback(IOTHUB_MES
     return IOTHUBMESSAGE_ACCEPTED;
 }
 
-static size_t generate_unique_id(IOTHUB_LONGHAUL_RESOURCES* iotHubLonghaul)
+static unsigned int generate_unique_id(IOTHUB_LONGHAUL_RESOURCES* iotHubLonghaul)
 {
-    size_t result;
+    unsigned int result;
 
     if (Lock(iotHubLonghaul->lock) != LOCK_OK)
     {
@@ -396,7 +396,7 @@ static void on_service_client_messaging_opened(void* context)
     (void)context;
 }
 
-static int parse_incoming_message(const char* data, size_t size, char* test_id, size_t* message_id)
+static int parse_incoming_message(const char* data, size_t size, char* test_id, unsigned int* message_id)
 {
     int result;
     char data_copy[80];
@@ -433,7 +433,7 @@ static int on_message_received(void* context, const char* data, size_t size)
     else
     {
         IOTHUB_LONGHAUL_RESOURCES* iotHubLonghaul = (IOTHUB_LONGHAUL_RESOURCES*)context;
-        size_t message_id;
+        unsigned int message_id;
         char tests_id[40];
 
         if (parse_incoming_message(data, size, tests_id, &message_id) == 0 &&
@@ -597,7 +597,7 @@ static void send_confirmation_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result,
     }
 }
 
-static IOTHUB_MESSAGE_HANDLE create_telemetry_message(const char* test_id, size_t message_id)
+static IOTHUB_MESSAGE_HANDLE create_telemetry_message(const char* test_id, unsigned int message_id)
 {
     IOTHUB_MESSAGE_HANDLE result;
     char msg_text[80];
@@ -638,7 +638,7 @@ static int send_telemetry(const void* context)
 {
     int result;
     IOTHUB_LONGHAUL_RESOURCES* longhaulResources = (IOTHUB_LONGHAUL_RESOURCES*)context;
-    size_t message_id;
+    unsigned int message_id;
 
     if ((message_id = generate_unique_id(longhaulResources)) == 0)
     {
