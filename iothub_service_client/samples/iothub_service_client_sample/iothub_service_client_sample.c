@@ -153,27 +153,6 @@ void iothub_service_client_sample_run(void)
                 (void)printf("IoTHubRegistryManager_DeleteDevice: Delete device failed\n");
             }
 
-            // Get device list
-            SINGLYLINKEDLIST_HANDLE deviceList = singlylinkedlist_create();
-
-            result = IoTHubRegistryManager_GetDeviceList(iotHubRegistryManagerHandle, 3, deviceList);
-            if (result == IOTHUB_REGISTRYMANAGER_OK)
-            {
-                (void)printf("IoTHubRegistryManager_GetDeviceList: Successfully got device list\n");
-                LIST_ITEM_HANDLE next_device = singlylinkedlist_get_head_item(deviceList);
-                int i = 0;
-                while (next_device != NULL)
-                {
-                    IOTHUB_DEVICE* device = (IOTHUB_DEVICE*)singlylinkedlist_item_get_value(next_device);
-                    printDeviceInfo(device, i++);
-                    next_device = singlylinkedlist_get_next_item(next_device);
-                }
-            }
-            else if (result == IOTHUB_REGISTRYMANAGER_ERROR)
-            {
-                (void)printf("IoTHubRegistryManager_GetDeviceList failed\n");
-            }
-
             // Get statistics
             IOTHUB_REGISTRY_STATISTICS registryStatistics;
             result = IoTHubRegistryManager_GetStatistics(iotHubRegistryManagerHandle, &registryStatistics);
@@ -188,8 +167,6 @@ void iothub_service_client_sample_run(void)
             {
                 (void)printf("IoTHubRegistryManager_GetStatistics failed\n");
             }
-
-            singlylinkedlist_destroy(deviceList);
 
             free((char*)deviceInfo.deviceId);
             free((char*)deviceInfo.primaryKey);
