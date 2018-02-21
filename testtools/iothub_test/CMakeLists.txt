@@ -5,6 +5,8 @@
 
 compileAsC99()
 
+usePermissiveRulesForSamplesAndTests()
+
 set(iothub_test_c_files
 ./src/iothubtest.c
 ./src/iothub_account.c

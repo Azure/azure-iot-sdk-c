@@ -37,8 +37,6 @@ endif()
 
 include_directories(. ${IOTHUB_CLIENT_INC_FOLDER})
 
-link_directories(${whatIsBuilding}_dll ${SHARED_UTIL_LIB_DIR})
-
 add_executable(remote_monitoring ${remote_monitoring_c_files} ${remote_monitoring_h_files} ${samples_cert_file})
 target_link_libraries(remote_monitoring serializer iothub_client iothub_client_amqp_transport)
 
