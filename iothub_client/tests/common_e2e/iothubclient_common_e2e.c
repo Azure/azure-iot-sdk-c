@@ -1094,7 +1094,15 @@ static void service_send_c2d(IOTHUB_MESSAGING_CLIENT_HANDLE iotHubMessagingHandl
 {
     IOTHUB_MESSAGING_RESULT iotHubMessagingResult;
 
-    iotHubMessagingResult = IoTHubMessaging_SendAsync(iotHubMessagingHandle, deviceToUse->deviceId, receiveUserContext->msgHandle, sendCompleteCallback, receiveUserContext);
+    if (deviceToUse->moduleId)
+    {
+        iotHubMessagingResult = IoTHubMessaging_SendAsyncModule(iotHubMessagingHandle, deviceToUse->deviceId, deviceToUse->moduleId, receiveUserContext->msgHandle, sendCompleteCallback, receiveUserContext);
+    }
+    else
+    {
+        iotHubMessagingResult = IoTHubMessaging_SendAsync(iotHubMessagingHandle, deviceToUse->deviceId, receiveUserContext->msgHandle, sendCompleteCallback, receiveUserContext);
+    }
+ 
     ASSERT_ARE_EQUAL_WITH_MSG(int, IOTHUB_MESSAGING_OK, iotHubMessagingResult, "IoTHubMessaging_SendAsync failed, could not send C2D message to the device");
 }
 

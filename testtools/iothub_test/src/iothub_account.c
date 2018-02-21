@@ -475,13 +475,20 @@ static int provisionModule(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_PROVISIONED_
     moduleCreate.primaryKey = "";
     moduleCreate.secondaryKey = "";
 
+    
+
     // Even though we already have a IOTHUB_SERVICE_CLIENT_AUTH_HANDLE handle (iothub_account_info->iothub_service_client_auth_handle), we get a
     // new one based on the device's connection string (not the Hub) as we need to test this scenario, too.
-    IOTHUB_SERVICE_CLIENT_AUTH_HANDLE service_auth_from_device_connection;
+    IOTHUB_SERVICE_CLIENT_AUTH_HANDLE service_auth_from_device_connection = NULL;
     IOTHUB_REGISTRYMANAGER_RESULT iothub_registrymanager_result;
     IOTHUB_REGISTRYMANAGER_HANDLE iothub_registrymanager_handle = NULL; 
 
-    if ((service_auth_from_device_connection = IoTHubServiceClientAuth_CreateFromConnectionString(deviceToProvision->connectionString)) == NULL)
+    if (mallocAndStrcpy_s(&deviceToProvision->moduleId, TEST_MODULE_NAME) != 0)
+    {
+        LogError("mallocAndStrcpy_s failed");
+        result = __FAILURE__;
+    }
+    else if ((service_auth_from_device_connection = IoTHubServiceClientAuth_CreateFromConnectionString(deviceToProvision->connectionString)) == NULL)
     {
         LogError("IoTHubServiceClientAuth_CreateFromConnectionString(%s) failed", deviceToProvision->connectionString);
         result = __FAILURE__;
@@ -761,6 +768,7 @@ void IoTHubAccount_deinit(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
                 }
 
                 free(provisioned_device->deviceId);
+                free(provisioned_device->moduleId);
                 free(provisioned_device->primaryAuthentication);
                 free(provisioned_device->connectionString);
                 free(provisioned_device->moduleConnectionString);

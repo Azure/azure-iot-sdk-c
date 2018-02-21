@@ -56,14 +56,14 @@ static IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle = NULL;
 static IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE serviceClientDeviceMethodHandle = NULL;
 
 
-void device_method_e2e_init(void)
+void device_method_e2e_init(bool testing_modules)
 {
     ASSERT_ARE_EQUAL(int, 0, platform_init() );
 
     IOTHUB_ACCOUNT_CONFIG config;
     config.number_of_sas_devices = 2;
 
-    g_iothubAcctInfo = IoTHubAccount_Init_With_Config(&config);
+    g_iothubAcctInfo = IoTHubAccount_Init_With_Config(&config, testing_modules);
     ASSERT_IS_NOT_NULL(g_iothubAcctInfo);
 
     // Initialize locking
@@ -202,6 +202,35 @@ static int DeviceMethodWithUploadCallback(const char* method_name, const unsigne
 }
 #endif
 
+void test_invoke_device_method(const char* deviceId, const char* moduleId, const char *payload)
+{
+    int responseStatus;
+    unsigned char* responsePayload;
+    size_t responsePayloadSize;
+
+    if (moduleId != NULL)
+    {
+        LogInfo("IoTHubDeviceMethod_InvokeModule deviceId='%s', moduleId='%s'", deviceId, moduleId);
+        IOTHUB_DEVICE_METHOD_RESULT invokeResult = IoTHubDeviceMethod_InvokeModule(serviceClientDeviceMethodHandle, deviceId, moduleId, METHOD_NAME, payload, TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_OK, invokeResult, "Service Client IoTHubDeviceMethod_InvokeModule failed");
+    }
+    else
+    {
+        LogInfo("IoTHubDeviceMethod_InvokeModule deviceId='%s'", deviceId);
+        IOTHUB_DEVICE_METHOD_RESULT invokeResult = IoTHubDeviceMethod_Invoke(serviceClientDeviceMethodHandle, deviceId, METHOD_NAME, payload, TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_OK, invokeResult, "Service Client IoTHubDeviceMethod_Invoke failed");
+    }
+
+    ASSERT_ARE_EQUAL_WITH_MSG(int, METHOD_RESPONSE_SUCCESS, responseStatus, "response status is incorrect");
+    ASSERT_ARE_EQUAL_WITH_MSG(size_t, strlen(payload), responsePayloadSize, "response size is incorrect");
+    if (memcmp(payload, responsePayload, responsePayloadSize))
+    {
+        ASSERT_FAIL("response string does not match");
+    }
+
+    free(responsePayload);
+}
+
 void test_device_method_with_string_ex(IOTHUB_PROVISIONED_DEVICE** devicesToUse, size_t number_of_multiplexed_devices, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char *payload)
 {
     IOTHUB_CLIENT_RESULT result;
@@ -308,24 +337,7 @@ void test_device_method_with_string_ex(IOTHUB_PROVISIONED_DEVICE** devicesToUse,
 
     for (iterator = 0; iterator < number_of_multiplexed_devices; iterator++)
     {
-        int responseStatus;
-        unsigned char* responsePayload;
-        size_t responsePayloadSize;
-
-        LogInfo("Testing device '%s'", devicesToUse[iterator]->deviceId);
-
-        IOTHUB_DEVICE_METHOD_RESULT invokeResult = IoTHubDeviceMethod_Invoke(serviceClientDeviceMethodHandle, devicesToUse[iterator]->deviceId, METHOD_NAME, payload, TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
-
-        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_OK, invokeResult, "Service Client IoTHubDeviceMethod_Invoke failed");
-        ASSERT_ARE_EQUAL_WITH_MSG(int, METHOD_RESPONSE_SUCCESS, responseStatus, "response status is incorrect");
-
-        ASSERT_ARE_EQUAL_WITH_MSG(size_t, strlen(payload), responsePayloadSize, "response size is incorrect");
-        if (memcmp(payload, responsePayload, responsePayloadSize))
-        {
-            ASSERT_FAIL("response string does not match");
-        }
-
-        free(responsePayload);
+        test_invoke_device_method(devicesToUse[iterator]->deviceId, devicesToUse[iterator]->moduleId, payload);
     }
 
     for (iterator = 0; iterator < number_of_multiplexed_devices; iterator++)
@@ -349,17 +361,17 @@ void test_device_method_with_string_ex(IOTHUB_PROVISIONED_DEVICE** devicesToUse,
     free(registered_devices);
 }
 
-void test_device_method_with_string(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char *payload)
+void create_hub_client_from_provisioned_device(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
-    IOTHUB_CLIENT_RESULT result;
-    time_t beginOperation, nowTime;
-    bool trace = true;
+    ASSERT_IS_NULL_WITH_MSG(iotHubClientHandle, "iotHubClientHandle is non-NULL on test initialization");
+    
+    const char* connectionString = deviceToUse->moduleConnectionString ? deviceToUse->moduleConnectionString : deviceToUse->connectionString;
+    iotHubClientHandle = IoTHubClient_CreateFromConnectionString(connectionString, protocol);
 
-    g_conn_info.conn_status = IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED;
-
-    iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
     ASSERT_IS_NOT_NULL_WITH_MSG(iotHubClientHandle, "Could not invoke IoTHubClient_CreateFromConnectionString");
 
+
+    IOTHUB_CLIENT_RESULT result;
     if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509)
     {
         result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
@@ -372,7 +384,17 @@ void test_device_method_with_string(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTH
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set connection Status Callback");
 
     // Turn on Log 
+    bool trace = true;
     (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &trace);
+}
+
+void test_device_method_with_string(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char *payload)
+{
+    IOTHUB_CLIENT_RESULT result;
+    time_t beginOperation, nowTime;
+    g_conn_info.conn_status = IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED;
+
+    create_hub_client_from_provisioned_device(deviceToUse, protocol);
 
     result = IoTHubClient_SetDeviceMethodCallback(iotHubClientHandle, DeviceMethodCallback, (void*)payload);
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device method callback");
@@ -411,21 +433,7 @@ void test_device_method_with_string(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTH
     serviceClientDeviceMethodHandle = IoTHubDeviceMethod_Create(iotHubServiceClientHandle);
     ASSERT_IS_NOT_NULL_WITH_MSG(serviceClientDeviceMethodHandle, "Could not create device method handle");
 
-    int responseStatus;
-    unsigned char* responsePayload;
-    size_t responsePayloadSize;
-    IOTHUB_DEVICE_METHOD_RESULT invokeResult = IoTHubDeviceMethod_Invoke(serviceClientDeviceMethodHandle, deviceToUse->deviceId, METHOD_NAME, payload, TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
-
-    ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_OK, invokeResult, "Service Client IoTHubDeviceMethod_Invoke failed");
-    ASSERT_ARE_EQUAL_WITH_MSG(int, METHOD_RESPONSE_SUCCESS, responseStatus, "response status is incorrect");
-
-    ASSERT_ARE_EQUAL_WITH_MSG(size_t, strlen(payload), responsePayloadSize, "response size is incorrect");
-    if (memcmp(payload, responsePayload, responsePayloadSize))
-    {
-        ASSERT_FAIL("response string does not match");
-    }
-
-    free(responsePayload);
+    test_invoke_device_method(deviceToUse->deviceId, deviceToUse->moduleId, payload);
 }
 
 #ifndef DONT_USE_UPLOADTOBLOB
@@ -433,24 +441,9 @@ void test_device_method_calls_upload(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOT
 {
     g_conn_info.conn_status = IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED;
 
-    iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
-    ASSERT_IS_NOT_NULL_WITH_MSG(iotHubClientHandle, "Could not invoke IoTHubClient_CreateFromConnectionString");
+    create_hub_client_from_provisioned_device(deviceToUse, protocol);
 
     IOTHUB_CLIENT_RESULT result;
-    if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509)
-    {
-        result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
-        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
-        result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
-        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
-    }
-
-    result = IoTHubClient_SetConnectionStatusCallback(iotHubClientHandle, connection_status_callback, &g_conn_info);
-    ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set connection Status Callback");
-
-    // Turn on Log 
-    bool trace = true;
-    (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &trace);
 
     bool continue_running = true;
     time_t nowTime;
@@ -490,10 +483,7 @@ void test_device_method_calls_upload(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOT
     serviceClientDeviceMethodHandle = IoTHubDeviceMethod_Create(iotHubServiceClientHandle);
     ASSERT_IS_NOT_NULL_WITH_MSG(serviceClientDeviceMethodHandle, "Could not create device method handle");
 
-    int responseStatus;
-    unsigned char* responsePayload = NULL;
-    size_t responsePayloadSize = 0;
-    IOTHUB_DEVICE_METHOD_RESULT invokeResult = IoTHubDeviceMethod_Invoke(serviceClientDeviceMethodHandle, deviceToUse->deviceId, METHOD_NAME, payload, TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
+    test_invoke_device_method(deviceToUse->deviceId, deviceToUse->moduleId, payload);
 
     // yield
     ThreadAPI_Sleep(DEVICE_METHOD_SUB_WAIT_TIME_MS);
@@ -518,11 +508,6 @@ void test_device_method_calls_upload(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOT
         (difftime(nowTime, beginOperation) < IOTHUB_CONNECT_TIMEOUT_SEC) &&
         (continue_running)
         );
-
-    free(responsePayload);
-
-    ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_OK, invokeResult, "Service Client IoTHubDeviceMethod_Invoke failed");
-    ASSERT_ARE_EQUAL_WITH_MSG(int, METHOD_RESPONSE_SUCCESS, responseStatus, "response status is incorrect");
 }
 #endif
 
@@ -563,26 +548,10 @@ static void test_device_method_with_string_svc_fault_ctrl(IOTHUB_PROVISIONED_DEV
 {
     IOTHUB_CLIENT_RESULT result;
     time_t beginOperation, nowTime;
-    bool trace = true;
 
     g_conn_info.conn_status = IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED;
 
-    iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
-    ASSERT_IS_NOT_NULL_WITH_MSG(iotHubClientHandle, "Could not invoke IoTHubClient_CreateFromConnectionString");
-
-    if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509)
-    {
-        result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
-        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
-        result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
-        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
-    }
-
-    result = IoTHubClient_SetConnectionStatusCallback(iotHubClientHandle, connection_status_callback, &g_conn_info);
-    ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set connection Status Callback");
-
-    // Turn on Log 
-    (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &trace);
+    create_hub_client_from_provisioned_device(deviceToUse, protocol);
 
     result = IoTHubClient_SetDeviceMethodCallback(iotHubClientHandle, DeviceMethodCallback, (void*)payload);
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device method callback");
@@ -621,19 +590,7 @@ static void test_device_method_with_string_svc_fault_ctrl(IOTHUB_PROVISIONED_DEV
     serviceClientDeviceMethodHandle = IoTHubDeviceMethod_Create(iotHubServiceClientHandle);
     ASSERT_IS_NOT_NULL_WITH_MSG(serviceClientDeviceMethodHandle, "Could not create device method handle");
 
-    int responseStatus;
-    unsigned char* responsePayload;
-    size_t responsePayloadSize;
-    IOTHUB_DEVICE_METHOD_RESULT invokeResult = IoTHubDeviceMethod_Invoke(serviceClientDeviceMethodHandle, deviceToUse->deviceId, METHOD_NAME, payload, TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
-
-    ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_OK, invokeResult, "Service Client IoTHubDeviceMethod_Invoke failed");
-    ASSERT_ARE_EQUAL_WITH_MSG(int, METHOD_RESPONSE_SUCCESS, responseStatus, "response status is incorrect");
-
-    ASSERT_ARE_EQUAL_WITH_MSG(size_t, strlen(payload), responsePayloadSize, "response size is incorrect");
-    if (memcmp(payload, responsePayload, responsePayloadSize))
-    {
-        ASSERT_FAIL("response string does not match");
-    }
+    test_invoke_device_method(deviceToUse->deviceId, deviceToUse->moduleId, payload);
 
     // Send the Event from the client
     MAP_HANDLE propMap = Map_Create(NULL);
@@ -657,18 +614,7 @@ static void test_device_method_with_string_svc_fault_ctrl(IOTHUB_PROVISIONED_DEV
 
     ThreadAPI_Sleep(3000);
 
-    invokeResult = IoTHubDeviceMethod_Invoke(serviceClientDeviceMethodHandle, deviceToUse->deviceId, METHOD_NAME, payload, TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
-
-    ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_OK, invokeResult, "Service Client IoTHubDeviceMethod_Invoke failed");
-    ASSERT_ARE_EQUAL_WITH_MSG(int, METHOD_RESPONSE_SUCCESS, responseStatus, "response status is incorrect");
-
-    ASSERT_ARE_EQUAL_WITH_MSG(size_t, strlen(payload), responsePayloadSize, "response size is incorrect");
-    if (memcmp(payload, responsePayload, responsePayloadSize))
-    {
-        ASSERT_FAIL("response string does not match");
-    }
-
-    free(responsePayload);
+    test_invoke_device_method(deviceToUse->deviceId, deviceToUse->moduleId, payload);
 }
 
 void device_method_function_cleanup()

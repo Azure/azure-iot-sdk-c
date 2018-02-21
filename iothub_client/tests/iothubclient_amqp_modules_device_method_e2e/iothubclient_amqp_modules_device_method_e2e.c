@@ -15,12 +15,12 @@
 
 static TEST_MUTEX_HANDLE g_dllByDll;
 
-BEGIN_TEST_SUITE(iothubclient_amqp_device_method_e2e)
+BEGIN_TEST_SUITE(iothubclient_amqp_modules_device_method_e2e)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
         TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
-        device_method_e2e_init(false);
+        device_method_e2e_init(true);
     }
 
     TEST_SUITE_CLEANUP(TestClassCleanup)
@@ -64,36 +64,6 @@ BEGIN_TEST_SUITE(iothubclient_amqp_device_method_e2e)
         device_method_e2e_method_call_with_embedded_single_quote_sas(AMQP_Protocol);
     }
 
-    TEST_FUNCTION(IotHub_AMQP_Method_Call_With_String_x509)
-    {
-        device_method_e2e_method_call_with_string_x509(AMQP_Protocol);
-    }
-
-    TEST_FUNCTION(IotHub_AMQP_Method_Call_With_Double_Quoted_Json_x509)
-    {
-        device_method_e2e_method_call_with_double_quoted_json_x509(AMQP_Protocol);
-    }
-
-    TEST_FUNCTION(IotHub_AMQP_Method_Call_With_Empty_Json_Object_x509)
-    {
-        device_method_e2e_method_call_with_empty_json_object_x509(AMQP_Protocol);
-    }
-
-    TEST_FUNCTION(IotHub_AMQP_Method_Call_With_Null_x509)
-    {
-        device_method_e2e_method_call_with_null_x509(AMQP_Protocol);
-    }
-
-    TEST_FUNCTION(IotHub_AMQP_Method_Call_With_Embedded_Double_Quote_x509)
-    {
-        device_method_e2e_method_call_with_embedded_double_quote_x509(AMQP_Protocol);
-    }
-
-    TEST_FUNCTION(IotHub_AMQP_Method_Call_With_Embedded_Single_Quote_x509)
-    {
-        device_method_e2e_method_call_with_embedded_single_quote_x509(AMQP_Protocol);
-    }
-
     TEST_FUNCTION(IotHub_AMQP_Method_Call_With_String_sas_multiplexed)
     {
         device_method_e2e_method_call_with_string_sas_multiplexed(AMQP_Protocol, 2);
@@ -105,5 +75,5 @@ BEGIN_TEST_SUITE(iothubclient_amqp_device_method_e2e)
     }
 
 
-END_TEST_SUITE(iothubclient_amqp_device_method_e2e)
+END_TEST_SUITE(iothubclient_amqp_modules_device_method_e2e)
 

@@ -26,6 +26,7 @@ typedef struct IOTHUB_PROVISIONED_DEVICE_TAG {
     char* primaryAuthentication;
     char* certificate;
     char* deviceId;
+    char* moduleId;
     char* moduleConnectionString;
     IOTHUB_ACCOUNT_AUTH_METHOD howToCreate;
 } IOTHUB_PROVISIONED_DEVICE;
