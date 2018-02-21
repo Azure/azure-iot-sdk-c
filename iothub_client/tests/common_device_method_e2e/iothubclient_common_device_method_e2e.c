@@ -370,7 +370,6 @@ void create_hub_client_from_provisioned_device(IOTHUB_PROVISIONED_DEVICE* device
 
     ASSERT_IS_NOT_NULL_WITH_MSG(iotHubClientHandle, "Could not invoke IoTHubClient_CreateFromConnectionString");
 
-
     IOTHUB_CLIENT_RESULT result;
     if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509)
     {

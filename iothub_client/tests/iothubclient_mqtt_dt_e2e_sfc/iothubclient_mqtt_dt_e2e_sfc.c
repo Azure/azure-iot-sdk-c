@@ -12,7 +12,7 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_dt_e2e_sfc)
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
     TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
-    dt_e2e_init();
+    dt_e2e_init(false);
 }
 
 TEST_SUITE_CLEANUP(TestClassCleanup)
