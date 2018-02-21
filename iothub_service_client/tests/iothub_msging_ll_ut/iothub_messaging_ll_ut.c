@@ -36,7 +36,6 @@
 #include "azure_uamqp_c/sasl_plain.h"
 #include "azure_uamqp_c/cbs.h"
 #include "azure_uamqp_c/link.h"
-#include "azure_uamqp_c/amqp_definitions.h"
 
 #include "parson.h"
 #include "iothub_message.h"

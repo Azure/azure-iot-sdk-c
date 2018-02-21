@@ -44,6 +44,7 @@ void real_free(void* ptr)
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/uniqueid.h"
 #include "azure_c_shared_utility/singlylinkedlist.h"
+#include "azure_uamqp_c/amqp_definitions_fields.h"
 #include "azure_uamqp_c/messaging.h"
 #include "iothub_client_private.h"
 #include "iothubtransport_amqp_messenger.h"

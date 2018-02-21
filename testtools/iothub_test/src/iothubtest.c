@@ -33,6 +33,7 @@
 #include "iothubtest.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/consolelogger.h"
+#include "azure_uamqp_c/amqp_definitions.h"
 #include "azure_uamqp_c/connection.h"
 #include "azure_uamqp_c/message_receiver.h"
 #include "azure_uamqp_c/message_sender.h"
