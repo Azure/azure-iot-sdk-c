@@ -17,10 +17,6 @@
 #include "iothubtest.h"
 #include "../common_longhaul/iothub_client_common_longhaul.h"
 
-#ifdef MBED_BUILD_TIMESTAMP
-#define SET_TRUSTED_CERT_IN_SAMPLES
-#endif // MBED_BUILD_TIMESTAMP
-
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
 #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
