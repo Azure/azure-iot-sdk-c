@@ -36,7 +36,6 @@ if(${set_trusted_cert_in_samples})
 endif()
 
 include_directories(. ${SHARED_UTIL_INC_FOLDER} ${IOTHUB_CLIENT_INC_FOLDER})
-link_directories(${whatIsBuilding}_dll ${SHARED_UTIL_LIB_DIR})
 
 add_executable(simplesample_amqp ${simplesample_amqp_c_files} ${simplesample_amqp_h_files} ${samples_cert_file})
 

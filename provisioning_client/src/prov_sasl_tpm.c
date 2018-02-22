@@ -270,7 +270,7 @@ static CONCRETE_SASL_MECHANISM_HANDLE prov_sasltpm_create(void* config)
                 else if (config_info->scope_id == NULL || mallocAndStrcpy_s(&result->scope_id, config_info->scope_id) != 0)
                 {
                     /* Codes_SRS_PROV_SASL_TPM_07_004: [ if SASL_TPM_CONFIG_INFO, challenge_cb, endorsement_key, storage_root_key, or hostname, registration_id is NULL, prov_sasltpm_create shall fail and return NULL. ] */
-                    LogError("Failure copying registration_id");
+                    LogError("Failure copying scope Id");
                     cleanup_sasl_data(result);
                     result = NULL;
                 }

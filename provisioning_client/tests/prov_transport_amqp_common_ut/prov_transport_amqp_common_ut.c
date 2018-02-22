@@ -730,7 +730,6 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     {
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_URI_VALUE));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_REGISTRATION_ID_VALUE));
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_DPS_API_VALUE));
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_SCOPE_ID_VALUE));
     }
@@ -741,7 +740,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         //arrange
 
         //act
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(NULL, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(NULL, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
 
         //assert
         ASSERT_IS_NULL(handle);
@@ -756,23 +755,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         //arrange
 
         //act
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, NULL, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
-
-        //assert
-        ASSERT_IS_NULL(handle);
-        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-        //cleanup
-        prov_transport_common_amqp_destroy(handle);
-    }
-
-    /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_001: [ If uri, scope_id, registration_id, dps_api_version, or transport_io is NULL, prov_transport_common_amqp_create shall return NULL. ] */
-    TEST_FUNCTION(prov_transport_common_amqp_create_registration_id_NULL_fail)
-    {
-        //arrange
-
-        //act
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, NULL, TEST_DPS_API_VALUE, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, NULL, TEST_DPS_API_VALUE, on_transport_io);
 
         //assert
         ASSERT_IS_NULL(handle);
@@ -788,7 +771,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         //arrange
 
         //act
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, NULL, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, NULL, on_transport_io);
 
         //assert
         ASSERT_IS_NULL(handle);
@@ -804,7 +787,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         //arrange
 
         //act
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, NULL);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, NULL);
 
         //assert
         ASSERT_IS_NULL(handle);
@@ -836,7 +819,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
             sprintf(tmp_msg, "prov_transport_common_amqp_create failure in test %zu/%zu", index, count);
 
             //act
-            PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+            PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
 
             //assert
             ASSERT_IS_NULL_WITH_MSG(handle, tmp_msg);
@@ -853,7 +836,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         setup_prov_transport_common_amqp_create_mocks();
 
         //act
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
 
         //assert
         ASSERT_IS_NOT_NULL(handle);
@@ -880,7 +863,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_006: [ prov_transport_common_amqp_destroy shall free all resources used in this module. ] */
     TEST_FUNCTION(prov_transport_common_amqp_destroy_succeed)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
         umock_c_reset_all_calls();
 
         //arrange
@@ -914,7 +897,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         //arrange
 
         //act
-        int result = prov_transport_common_amqp_open(NULL, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+        int result = prov_transport_common_amqp_open(NULL, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
 
         //assert
         ASSERT_ARE_NOT_EQUAL(int, 0, result);
@@ -923,16 +906,34 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_007: [ If handle, data_callback, or status_cb is NULL, prov_transport_common_amqp_open shall return a non-zero value. ] */
-    TEST_FUNCTION(prov_transport_common_amqp_open_data_callback_NULL_fail)
+    TEST_FUNCTION(prov_transport_common_amqp_open_registration_id_NULL_fail)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
         umock_c_reset_all_calls();
 
         //arrange
 
         //act
-        int result = prov_transport_common_amqp_open(handle, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, NULL, NULL, on_transport_status_cb, NULL);
+        int result = prov_transport_common_amqp_open(handle, NULL, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, NULL, NULL, on_transport_status_cb, NULL);
+
+        //assert
+        ASSERT_ARE_NOT_EQUAL(int, 0, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        prov_transport_common_amqp_destroy(handle);
+    }
+
+    /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_007: [ If handle, data_callback, or status_cb is NULL, prov_transport_common_amqp_open shall return a non-zero value. ] */
+    TEST_FUNCTION(prov_transport_common_amqp_open_data_callback_NULL_fail)
+    {
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        umock_c_reset_all_calls();
+
+        //arrange
+
+        //act
+        int result = prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, NULL, NULL, on_transport_status_cb, NULL);
 
         //assert
         ASSERT_ARE_NOT_EQUAL(int, 0, result);
@@ -945,13 +946,13 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_007: [ If handle, data_callback, or status_cb is NULL, prov_transport_common_amqp_open shall return a non-zero value. ] */
     TEST_FUNCTION(prov_transport_common_amqp_open_status_callback_NULL_fail)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
         umock_c_reset_all_calls();
 
         //arrange
 
         //act
-        int result = prov_transport_common_amqp_open(handle, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, NULL, NULL);
+        int result = prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, NULL, NULL);
 
         //assert
         ASSERT_ARE_NOT_EQUAL(int, 0, result);
@@ -964,13 +965,13 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_008: [ If hsm_type is TRANSPORT_HSM_TYPE_TPM and ek or srk is NULL, prov_transport_common_amqp_open shall return a non-zero value. ] */
     TEST_FUNCTION(prov_transport_common_amqp_open_ek_NULL_fail)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
         umock_c_reset_all_calls();
 
         //arrange
 
         //act
-        int result = prov_transport_common_amqp_open(handle, NULL, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+        int result = prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, NULL, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
 
         //assert
         ASSERT_ARE_NOT_EQUAL(int, 0, result);
@@ -983,13 +984,13 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_008: [ If hsm_type is TRANSPORT_HSM_TYPE_TPM and ek or srk is NULL, prov_transport_common_amqp_open shall return a non-zero value. ] */
     TEST_FUNCTION(prov_transport_common_amqp_open_srk_NULL_fail)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
         umock_c_reset_all_calls();
 
         //arrange
 
         //act
-        int result = prov_transport_common_amqp_open(handle, TEST_BUFFER_VALUE, NULL, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+        int result = prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, NULL, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
 
         //assert
         ASSERT_ARE_NOT_EQUAL(int, 0, result);
@@ -1003,16 +1004,17 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_009: [ prov_transport_common_amqp_open shall clone the ek and srk values.] */
     TEST_FUNCTION(prov_transport_common_amqp_open_succeed)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
         umock_c_reset_all_calls();
 
         //arrange
         STRICT_EXPECTED_CALL(BUFFER_clone(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(BUFFER_clone(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_REGISTRATION_ID_VALUE));
         STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, IGNORED_PTR_ARG));
 
         //act
-        int result = prov_transport_common_amqp_open(handle, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+        int result = prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
 
         //assert
         ASSERT_ARE_EQUAL(int, 0, result);
@@ -1026,7 +1028,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_041: [ If a failure is encountered, prov_transport_common_amqp_open shall return a non-zero value. ] */
     TEST_FUNCTION(prov_transport_common_amqp_open_fail)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
         umock_c_reset_all_calls();
 
         int negativeTestsInitResult = umock_c_negative_tests_init();
@@ -1056,7 +1058,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
             char tmp_msg[64];
             sprintf(tmp_msg, "prov_transport_common_amqp_open failure in test %zu/%zu", index, count);
 
-            int result = prov_transport_common_amqp_open(handle, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+            int result = prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
 
             //assert
             ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, tmp_msg);
@@ -1071,14 +1073,15 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_009: [ prov_transport_common_amqp_open shall clone the ek and srk values.] */
     TEST_FUNCTION(prov_transport_common_amqp_open_x509_succeed)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
         umock_c_reset_all_calls();
 
         //arrange
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_REGISTRATION_ID_VALUE));
         STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, IGNORED_PTR_ARG));
 
         //act
-        int result = prov_transport_common_amqp_open(handle, NULL, NULL, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+        int result = prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, NULL, NULL, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
 
         //assert
         ASSERT_ARE_EQUAL(int, 0, result);
@@ -1108,12 +1111,13 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_013: [ On success prov_transport_common_amqp_close shall return a zero value. ] */
     TEST_FUNCTION(prov_transport_amqp_close_succeed)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
         umock_c_reset_all_calls();
 
         //arrange
         STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(messagesender_close(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(messagereceiver_close(IGNORED_PTR_ARG));
 
@@ -1155,7 +1159,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_015: [ If hsm_type is of type TRANSPORT_HSM_TYPE_TPM and reg_challenge_cb is NULL, prov_transport_common_amqp_register_device shall return a non-zero value. ] */
     TEST_FUNCTION(prov_transport_common_amqp_register_device_challenge_NULL_succeed)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
         umock_c_reset_all_calls();
 
         //arrange
@@ -1174,7 +1178,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_015: [ If hsm_type is of type TRANSPORT_HSM_TYPE_TPM and reg_challenge_cb is NULL, prov_transport_common_amqp_register_device shall return a non-zero value. ] */
     TEST_FUNCTION(prov_transport_common_amqp_register_device_x509_challenge_NULL_succeed)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
         umock_c_reset_all_calls();
 
         //arrange
@@ -1193,7 +1197,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_017: [ On success prov_transport_common_amqp_register_device shall return a zero value. ] */
     TEST_FUNCTION(prov_transport_common_amqp_register_device_succeed)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
         umock_c_reset_all_calls();
 
         //arrange
@@ -1212,7 +1216,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_061: [ If the transport_state is TRANSPORT_CLIENT_STATE_REG_SEND or the the operation_id is NULL, prov_transport_common_amqp_register_device shall return a non-zero value. ] */
     TEST_FUNCTION(prov_transport_common_amqp_register_device_twice_fail)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
         (void)prov_transport_common_amqp_register_device(handle, on_transport_challenge_callback, NULL, on_transport_json_parse, NULL);
         umock_c_reset_all_calls();
 
@@ -1247,7 +1251,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_019: [ If the operation_id is NULL, prov_transport_common_amqp_get_operation_status shall return a non-zero value. ] */
     TEST_FUNCTION(prov_transport_common_amqp_get_operation_status_operation_id_zero_fail)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
         umock_c_reset_all_calls();
 
         //arrange
@@ -1268,8 +1272,8 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     TEST_FUNCTION(prov_transport_common_amqp_get_operation_status_success)
     {
         int result;
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
-        (void)prov_transport_common_amqp_open(handle, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
         (void)prov_transport_common_amqp_register_device(handle, on_transport_challenge_callback, NULL, on_transport_json_parse, NULL);
         prov_transport_common_amqp_dowork(handle);
         g_msg_sndr_state_changed(g_msg_sndr_state_changed_ctx, MESSAGE_SENDER_STATE_OPEN, MESSAGE_SENDER_STATE_OPENING);
@@ -1298,8 +1302,8 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     TEST_FUNCTION(prov_transport_common_amqp_challenge_cb_user_ctx_NULL_fail)
     {
         char* result;
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
-        (void)prov_transport_common_amqp_open(handle, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
         prov_transport_common_amqp_dowork(handle);
         umock_c_reset_all_calls();
 
@@ -1321,8 +1325,8 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     TEST_FUNCTION(prov_transport_common_amqp_challenge_cb_NULL_fail)
     {
         char* result;
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
-        (void)prov_transport_common_amqp_open(handle, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
         prov_transport_common_amqp_dowork(handle);
         umock_c_reset_all_calls();
 
@@ -1344,8 +1348,8 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     TEST_FUNCTION(prov_transport_common_amqp_challenge_cb_succeed)
     {
         char* result;
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
-        (void)prov_transport_common_amqp_open(handle, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
         (void)prov_transport_common_amqp_register_device(handle, on_transport_challenge_callback, NULL, on_transport_json_parse, NULL);
         prov_transport_common_amqp_dowork(handle);
         umock_c_reset_all_calls();
@@ -1372,8 +1376,8 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     TEST_FUNCTION(prov_transport_common_amqp_challenge_cb_fail)
     {
         char* result;
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
-        (void)prov_transport_common_amqp_open(handle, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
         (void)prov_transport_common_amqp_register_device(handle, on_transport_challenge_callback, NULL, on_transport_json_parse, NULL);
         prov_transport_common_amqp_dowork(handle);
         umock_c_reset_all_calls();
@@ -1412,8 +1416,8 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_047: [ If the amqp_state is AMQP_STATE_DISCONNECTED prov_transport_common_amqp_dowork shall attempt to connect the amqp connections and links. ] */
     TEST_FUNCTION(prov_transport_common_amqp_dowork_connected_succeed)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
-        (void)prov_transport_common_amqp_open(handle, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
         umock_c_reset_all_calls();
 
         //arrange
@@ -1433,9 +1437,9 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_047: [ If the amqp_state is AMQP_STATE_DISCONNECTED prov_transport_common_amqp_dowork shall attempt to connect the amqp connections and links. ] */
     TEST_FUNCTION(prov_transport_common_amqp_dowork_x509_connected_succeed)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
         (void)prov_transport_common_amqp_x509_cert(handle, TEST_X509_CERT_VALUE, TEST_PRIVATE_KEY_VALUE);
-        (void)prov_transport_common_amqp_open(handle, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+        (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
         umock_c_reset_all_calls();
         g_use_x509 = true;
 
@@ -1457,8 +1461,8 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_052: [ Once the uamqp reciever and sender link are connected the amqp_state shall be set to AMQP_STATE_CONNECTED ] */
     TEST_FUNCTION(prov_transport_common_amqp_dowork_idle_succeed)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
-        (void)prov_transport_common_amqp_open(handle, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
         prov_transport_common_amqp_dowork(handle);
         g_msg_sndr_state_changed(g_msg_sndr_state_changed_ctx, MESSAGE_SENDER_STATE_OPEN, MESSAGE_SENDER_STATE_OPENING);
         g_msg_rcvr_state_changed(g_msg_rcvr_state_changed_ctx, MESSAGE_RECEIVER_STATE_OPEN, MESSAGE_RECEIVER_STATE_OPENING);
@@ -1482,8 +1486,8 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_053: [ When then transport_state is set to TRANSPORT_CLIENT_STATE_REG_SEND, prov_transport_common_amqp_dowork shall send a AMQP_REGISTER_ME message ] */
     TEST_FUNCTION(prov_transport_common_amqp_dowork_register_succeed)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
-        (void)prov_transport_common_amqp_open(handle, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
         (void)prov_transport_common_amqp_register_device(handle, on_transport_challenge_callback, NULL, on_transport_json_parse, NULL);
         prov_transport_common_amqp_dowork(handle);
         g_msg_sndr_state_changed(g_msg_sndr_state_changed_ctx, MESSAGE_SENDER_STATE_OPEN, MESSAGE_SENDER_STATE_OPENING);
@@ -1512,8 +1516,8 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     TEST_FUNCTION(prov_transport_common_amqp_dowork_register_recv_succeed)
     {
         AMQP_VALUE result;
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
-        (void)prov_transport_common_amqp_open(handle, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
         (void)prov_transport_common_amqp_register_device(handle, on_transport_challenge_callback, NULL, on_transport_json_parse, NULL);
         prov_transport_common_amqp_dowork(handle);
         g_msg_sndr_state_changed(g_msg_sndr_state_changed_ctx, MESSAGE_SENDER_STATE_OPEN, MESSAGE_SENDER_STATE_OPENING);
@@ -1540,8 +1544,8 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     {
         AMQP_VALUE result;
 
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
-        (void)prov_transport_common_amqp_open(handle, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
         (void)prov_transport_common_amqp_register_device(handle, on_transport_challenge_callback, NULL, on_transport_json_parse, NULL);
         prov_transport_common_amqp_dowork(handle);
         g_msg_sndr_state_changed(g_msg_sndr_state_changed_ctx, MESSAGE_SENDER_STATE_OPEN, MESSAGE_SENDER_STATE_OPENING);
@@ -1569,8 +1573,8 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_056: [ Upon successful sending of a AMQP_OPERATION_STATUS message, prov_transport_common_amqp_dowork shall set the transport_state to TRANSPORT_CLIENT_STATE_STATUS_SENT ] */
     TEST_FUNCTION(prov_transport_common_amqp_dowork_send_status_succeed)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
-        (void)prov_transport_common_amqp_open(handle, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
         (void)prov_transport_common_amqp_register_device(handle, on_transport_challenge_callback, NULL, on_transport_json_parse, NULL);
         prov_transport_common_amqp_dowork(handle);
         g_msg_sndr_state_changed(g_msg_sndr_state_changed_ctx, MESSAGE_SENDER_STATE_OPEN, MESSAGE_SENDER_STATE_OPENING);
@@ -1599,8 +1603,8 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
 
     TEST_FUNCTION(prov_transport_common_amqp_dowork_device_assigned_succeed)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
-        (void)prov_transport_common_amqp_open(handle, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
         (void)prov_transport_common_amqp_register_device(handle, on_transport_challenge_callback, NULL, on_transport_json_parse, NULL);
         prov_transport_common_amqp_dowork(handle);
         g_msg_sndr_state_changed(g_msg_sndr_state_changed_ctx, MESSAGE_SENDER_STATE_OPEN, MESSAGE_SENDER_STATE_OPENING);
@@ -1633,8 +1637,8 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_049: [ If any error is encountered prov_transport_common_amqp_dowork shall set the amqp_state to AMQP_STATE_ERROR and the transport_state to TRANSPORT_CLIENT_STATE_ERROR. ] */
     TEST_FUNCTION(prov_transport_common_amqp_dowork_register_fail)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
-        (void)prov_transport_common_amqp_open(handle, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
         (void)prov_transport_common_amqp_register_device(handle, on_transport_challenge_callback, NULL, on_transport_json_parse, NULL);
         prov_transport_common_amqp_dowork(handle);
         g_msg_rcvr_state_changed(g_msg_rcvr_state_changed_ctx, MESSAGE_RECEIVER_STATE_OPEN, MESSAGE_RECEIVER_STATE_OPENING);
@@ -1681,7 +1685,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_049: [ If any error is encountered prov_transport_common_amqp_dowork shall set the amqp_state to AMQP_STATE_ERROR and the transport_state to TRANSPORT_CLIENT_STATE_ERROR. ] */
     TEST_FUNCTION(prov_transport_common_amqp_dowork_disconnected_fail)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
         umock_c_reset_all_calls();
 
         int negativeTestsInitResult = umock_c_negative_tests_init();
@@ -1703,7 +1707,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
                 continue;
             }
 
-            (void)prov_transport_common_amqp_open(handle, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+            (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
 
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
@@ -1723,8 +1727,8 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_052: [ Once the uamqp reciever and sender link are connected the amqp_state shall be set to AMQP_STATE_CONNECTED ] */
     TEST_FUNCTION(prov_transport_common_amqp_msg_recv_state_change_open_succeed)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
-        (void)prov_transport_common_amqp_open(handle, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
         prov_transport_common_amqp_dowork(handle);
         umock_c_reset_all_calls();
 
@@ -1743,8 +1747,8 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
 
     TEST_FUNCTION(prov_transport_common_amqp_msg_recv_state_change_error_succeed)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
-        (void)prov_transport_common_amqp_open(handle, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
         prov_transport_common_amqp_dowork(handle);
         umock_c_reset_all_calls();
 
@@ -1766,8 +1770,8 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
 
     TEST_FUNCTION(prov_transport_common_amqp_msg_recv_state_change_user_ctx_NULL_fail)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
-        (void)prov_transport_common_amqp_open(handle, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
         prov_transport_common_amqp_dowork(handle);
         umock_c_reset_all_calls();
 
@@ -1787,8 +1791,8 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_052: [ Once the uamqp reciever and sender link are connected the amqp_state shall be set to AMQP_STATE_CONNECTED ] */
     TEST_FUNCTION(prov_transport_common_amqp_msg_sender_state_change_open_succeed)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
-        (void)prov_transport_common_amqp_open(handle, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
         prov_transport_common_amqp_dowork(handle);
         umock_c_reset_all_calls();
 
@@ -1807,8 +1811,8 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
 
     TEST_FUNCTION(prov_transport_common_amqp_msg_sender_state_change_error_succeed)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
-        (void)prov_transport_common_amqp_open(handle, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
         prov_transport_common_amqp_dowork(handle);
         umock_c_reset_all_calls();
 
@@ -1827,8 +1831,8 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
 
     TEST_FUNCTION(prov_transport_common_amqp_msg_sender_state_change_user_ctx_NULL_succeed)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
-        (void)prov_transport_common_amqp_open(handle, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
         prov_transport_common_amqp_dowork(handle);
         umock_c_reset_all_calls();
 
@@ -1864,7 +1868,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_025: [ On success prov_transport_common_amqp_set_trace shall return a zero value. ] */
     TEST_FUNCTION(prov_transport_common_amqp_set_trace_succeed)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
         umock_c_reset_all_calls();
 
         //arrange
@@ -1899,7 +1903,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_029: [ On success prov_transport_common_amqp_x509_cert shall return a zero value. ] */
     TEST_FUNCTION(prov_transport_common_amqp_x509_cert_succeed)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
         umock_c_reset_all_calls();
 
         //arrange
@@ -1920,7 +1924,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_028: [ On any failure prov_transport_common_amqp_x509_cert, shall return a non-zero value. ] */
     TEST_FUNCTION(prov_transport_common_amqp_x509_cert_fail)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
         umock_c_reset_all_calls();
 
         int negativeTestsInitResult = umock_c_negative_tests_init();
@@ -1971,7 +1975,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_030: [ If handle or certificate is NULL, prov_transport_common_amqp_set_trusted_cert shall return a non-zero value. ] */
     TEST_FUNCTION(prov_transport_common_amqp_set_trusted_cert_cert_NULL_fail)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
         umock_c_reset_all_calls();
 
         //arrange
@@ -1991,7 +1995,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_033: [ On success prov_transport_common_amqp_set_trusted_cert shall return a zero value. ] */
     TEST_FUNCTION(prov_transport_common_amqp_set_trusted_cert_succeed)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
         umock_c_reset_all_calls();
 
         //arrange
@@ -2011,7 +2015,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_032: [ On any failure prov_transport_common_amqp_set_trusted_cert, shall return a non-zero value. ] */
     TEST_FUNCTION(prov_transport_common_amqp_set_trusted_cert_fail)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
         umock_c_reset_all_calls();
 
         //arrange
@@ -2049,7 +2053,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_034: [ If handle or proxy_options is NULL, prov_transport_common_amqp_set_proxy shall return a non-zero value. ]*/
     TEST_FUNCTION(prov_transport_common_amqp_set_proxy_proxy_NULL_fail)
     {
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
         umock_c_reset_all_calls();
 
         //arrange
@@ -2069,7 +2073,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     TEST_FUNCTION(prov_transport_common_amqp_set_proxy_no_username_fail)
     {
         HTTP_PROXY_OPTIONS proxy_options = { 0 };
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
         umock_c_reset_all_calls();
 
         //arrange
@@ -2093,7 +2097,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     TEST_FUNCTION(prov_transport_common_amqp_set_proxy_2_succeed)
     {
         HTTP_PROXY_OPTIONS proxy_options = { 0 };
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
         umock_c_reset_all_calls();
 
         //arrange
@@ -2121,7 +2125,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     TEST_FUNCTION(prov_transport_common_amqp_set_proxy_hostname_NULL_fail)
     {
         HTTP_PROXY_OPTIONS proxy_options = { 0 };
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
         umock_c_reset_all_calls();
 
         //arrange
@@ -2142,7 +2146,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     TEST_FUNCTION(prov_transport_common_amqp_set_proxy_fail)
     {
         HTTP_PROXY_OPTIONS proxy_options = { 0 };
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
         umock_c_reset_all_calls();
 
         int negativeTestsInitResult = umock_c_negative_tests_init();
@@ -2186,7 +2190,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     TEST_FUNCTION(prov_transport_common_amqp_set_proxy_succeed)
     {
         HTTP_PROXY_OPTIONS proxy_options = { 0 };
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
         umock_c_reset_all_calls();
 
         //arrange
@@ -2212,7 +2216,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     TEST_FUNCTION(prov_transport_common_amqp_set_proxy_twice_succeed)
     {
         HTTP_PROXY_OPTIONS proxy_options = { 0 };
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_REGISTRATION_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io);
 
         proxy_options.host_address = TEST_HOST_ADDRESS_VALUE;
         proxy_options.port = 443;

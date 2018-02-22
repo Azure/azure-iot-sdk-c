@@ -335,7 +335,9 @@ extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_DeleteDevice(IOTHUB_R
 
 
 
-## IoTHubRegistryManager_GetDeviceList
+## IoTHubRegistryManager_GetDeviceList (**DEPRECATED**)
+**DEPRECATED: `IoTHubRegistryManager_GetDeviceList` is deprecated and may be removed from a future release.**
+
 ```c
 extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetDeviceList(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, size_t numberOfDevices, SINGLYLINKEDLIST_HANDLE deviceList);
 ```

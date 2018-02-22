@@ -74,7 +74,7 @@ option(build_network_e2e "build network E2E tests" OFF)
 option(use_prov_client "Enable provisioning client" OFF)
 option(use_tpm_simulator "tpm simulator type of hsm used with the provisioning client" OFF)
 
-if(WIN32)
+if(WIN32 OR MACOSX)
     option(use_openssl "set use_openssl to ON to use OpenSSL." OFF)
 else()
     option(use_openssl "set use_openssl to ON to use OpenSSL." ON)
