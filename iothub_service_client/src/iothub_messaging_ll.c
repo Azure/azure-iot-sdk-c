@@ -62,11 +62,13 @@ typedef struct IOTHUB_MESSAGING_TAG
 } IOTHUB_MESSAGING;
 
 
-static const char* FEEDBACK_RECORD_KEY_DEVICE_ID = "deviceId";
-static const char* FEEDBACK_RECORD_KEY_DEVICE_GENERATION_ID = "deviceGenerationId";
-static const char* FEEDBACK_RECORD_KEY_DESCRIPTION = "description";
-static const char* FEEDBACK_RECORD_KEY_ENQUED_TIME_UTC = "enqueuedTimeUtc";
-static const char* FEEDBACK_RECORD_KEY_ORIGINAL_MESSAGE_ID = "originalMessageId";
+static const char* const FEEDBACK_RECORD_KEY_DEVICE_ID = "deviceId";
+static const char* const FEEDBACK_RECORD_KEY_DEVICE_GENERATION_ID = "deviceGenerationId";
+static const char* const FEEDBACK_RECORD_KEY_DESCRIPTION = "description";
+static const char* const FEEDBACK_RECORD_KEY_ENQUED_TIME_UTC = "enqueuedTimeUtc";
+static const char* const FEEDBACK_RECORD_KEY_ORIGINAL_MESSAGE_ID = "originalMessageId";
+static const char* const AMQP_ADDRESS_PATH_FMT = "/devices/%s/messages/deviceBound";
+static const char* const AMQP_ADDRESS_PATH_MODULE_FMT = "/devices/%s/modules/%s/messages/deviceBound";
 
 static int setMessageId(IOTHUB_MESSAGE_HANDLE iothub_message_handle, PROPERTIES_HANDLE uamqp_message_properties)
 {
@@ -550,11 +552,9 @@ static char* createDeviceDestinationString(const char* deviceId, const char* mod
     }
     else
     {
-        const char* AMQP_ADDRESS_PATH_FMT = "/devices/%s/messages/deviceBound";
-        const char* AMQP_ADDRESS_PATH_MODULE_FMT = "/devices/%s/modules/%s/messages/deviceBound";
         size_t deviceDestLen = strlen(AMQP_ADDRESS_PATH_MODULE_FMT) + strlen(deviceId) + (moduleId == NULL ? 0 : strlen(moduleId)) + 1;
 
-        char* buffer = (char*)malloc(deviceDestLen + 1);
+        char* buffer = (char*)malloc(deviceDestLen);
         if (buffer == NULL)
         {
             LogError("Could not create device destination string.");
@@ -562,15 +562,15 @@ static char* createDeviceDestinationString(const char* deviceId, const char* mod
         }
         else 
         {
-            if ((moduleId == NULL) && (snprintf(buffer, deviceDestLen + 1, AMQP_ADDRESS_PATH_FMT, deviceId)) < 0)
+            if ((moduleId == NULL) && (snprintf(buffer, deviceDestLen, AMQP_ADDRESS_PATH_FMT, deviceId)) < 0)
             {
                 LogError("sprintf_s failed for deviceDestinationString.");
                 free((char*)buffer);
                 result = NULL;
             }
-            else if ((moduleId != NULL) && (snprintf(buffer, deviceDestLen + 1, AMQP_ADDRESS_PATH_MODULE_FMT, deviceId, moduleId)) < 0)
+            else if ((moduleId != NULL) && (snprintf(buffer, deviceDestLen, AMQP_ADDRESS_PATH_MODULE_FMT, deviceId, moduleId)) < 0)
             {
-                LogError("sprintf_s failed for deviceDestinationString.");
+                LogError("sprintf_s failed for deviceDestinationString for module.");
                 free((char*)buffer);
                 result = NULL;
             }

@@ -50,8 +50,12 @@ MOCKABLE_FUNCTION(, void,  IoTHubDeviceMethod_Destroy, IOTHUB_SERVICE_CLIENT_DEV
 * @param    methodName                      The method name to call.
 * @param    methodPayload                   The message payload to send.
 * @param    response                        Output buffer for response payload.
+* @param    timeout                         Time before IoTHubDeviceMethod_InvokeModule times out.
+* @param    responseStatus                  Response status code from invocation
+* @param    responsePayload                 Output buffer for response payload.
+* @param    responsePayloadSize             String length of responsePayload.
 *
-* @return	A non-NULL char* containing the return status of the method on the device.
+* @return	An IOTHUB_DEVICE_METHOD_RESULT containing the return status.
 */
 MOCKABLE_FUNCTION(, IOTHUB_DEVICE_METHOD_RESULT, IoTHubDeviceMethod_Invoke, IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, serviceClientDeviceMethodHandle, const char*, deviceId, const char*, methodName, const char*, methodPayload, unsigned int, timeout, int*, responseStatus, unsigned char**, responsePayload, size_t*, responsePayloadSize);
 
@@ -62,9 +66,12 @@ MOCKABLE_FUNCTION(, IOTHUB_DEVICE_METHOD_RESULT, IoTHubDeviceMethod_Invoke, IOTH
 * @param    moduleId                        The module name (id) to call a method on.
 * @param    methodName                      The method name to call.
 * @param    methodPayload                   The message payload to send.
-* @param    response                        Output buffer for response payload.
+* @param    timeout                         Time before IoTHubDeviceMethod_InvokeModule times out.
+* @param    responseStatus                  Response status code from invocation.
+* @param    responsePayload                 Output buffer for response payload.
+* @param    responsePayloadSize             String length of responsePayload.
 *
-* @return	A non-NULL char* containing the return status of the method on the device.
+* @return	An IOTHUB_DEVICE_METHOD_RESULT containing the return status.
 */
 MOCKABLE_FUNCTION(, IOTHUB_DEVICE_METHOD_RESULT, IoTHubDeviceMethod_InvokeModule, IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, serviceClientDeviceMethodHandle, const char*, deviceId, const char*, moduleId, const char*, methodName, const char*, methodPayload, unsigned int, timeout, int*, responseStatus, unsigned char**, responsePayload, size_t*, responsePayloadSize);
 
