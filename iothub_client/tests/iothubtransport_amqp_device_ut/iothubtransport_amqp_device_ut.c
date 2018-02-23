@@ -43,18 +43,12 @@ void real_free(void* ptr)
 #include "azure_c_shared_utility/singlylinkedlist.h"
 #include "azure_c_shared_utility/uniqueid.h"
 #include "azure_uamqp_c/session.h"
-#include "azure_uamqp_c/link.h"
-#include "azure_uamqp_c/messaging.h"
-#include "azure_uamqp_c/message_sender.h"
-#include "azure_uamqp_c/message_receiver.h"
 #include "iothub_client_private.h"
-#include "iothub_client_version.h"
-#include "iothub_message.h"
-#include "uamqp_messaging.h"
 #include "iothubtransport_amqp_telemetry_messenger.h"
 #include "iothubtransport_amqp_twin_messenger.h"
 #include "iothubtransport_amqp_cbs_auth.h"
 #include "iothub_client_authorization.h"
+
 
 #undef ENABLE_MOCKS
 
