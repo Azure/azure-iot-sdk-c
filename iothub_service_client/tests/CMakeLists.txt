@@ -3,6 +3,8 @@
 
 cmake_minimum_required(VERSION 2.8.11)
 
+usePermissiveRulesForSdkSamplesAndTests()
+
 #this is CMakeLists for service tests folder
 
 add_subdirectory(iothub_devicemethod_ut)

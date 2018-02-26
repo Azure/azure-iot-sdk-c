@@ -3,6 +3,8 @@
 
 cmake_minimum_required(VERSION 2.8.11)
 
+usePermissiveRulesForSdkSamplesAndTests()
+
 #this is CMakeLists for serializer e2e folder
 if(${run_unittests})
 add_subdirectory(agentmacros_ut)
@@ -30,5 +32,5 @@ add_subdirectory(serializer_dt_ut)
 endif()
 
 if(${use_amqp} AND ${use_http} AND (${run_e2e_tests} OR ${nuget_e2e_tests}))
-	add_subdirectory(serializer_e2e)
+    add_subdirectory(serializer_e2e)
 endif()

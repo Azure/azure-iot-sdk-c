@@ -4,7 +4,7 @@
 #this is CMakeLists.txt for samples. There's noithig here, except redirections to 
 #individual protocol samples
 
-usePermissiveRulesForSamplesAndTests()
+usePermissiveRulesForSdkSamplesAndTests()
 
 function(add_sample_directory whatIsBuilding)
     add_subdirectory(${whatIsBuilding})
