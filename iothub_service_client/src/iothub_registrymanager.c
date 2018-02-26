@@ -42,7 +42,6 @@ DEFINE_ENUM(IOTHUB_REQUEST_MODE, IOTHUB_REQUEST_MODE_VALUES);
 
 static size_t IOTHUB_DEVICES_MAX_REQUEST = 1000;
 
-static void* DEVICE_JSON_DEFAULT_VALUE_NULL = NULL;
 static const char* DEVICE_JSON_KEY_DEVICE_NAME = "deviceId";
 static const char* DEVICE_JSON_KEY_MODULE_NAME = "moduleId";
 static const char* DEVICE_JSON_KEY_DEVICE_AUTH_TYPE = "authentication.type";
@@ -81,10 +80,7 @@ static const char* DEVICE_JSON_KEY_DISABLED_DEVICECOUNT = "disabledDeviceCount";
 static const char* DEVICE_JSON_DEFAULT_VALUE_ENABLED = "enabled";
 static const char* DEVICE_JSON_DEFAULT_VALUE_DISABLED = "disabled";
 static const char* DEVICE_JSON_DEFAULT_VALUE_CONNECTED = "Connected";
-static const char* DEVICE_JSON_DEFAULT_VALUE_DISCONNECTED = "Disconnected";
-static const char* DEVICE_JSON_DEFAULT_VALUE_TIME = "0001-01-01T00:00:00";
 static const char* DEVICE_JSON_DEFAULT_VALUE_TRUE = "true";
-static const char* DEVICE_JSON_DEFAULT_VALUE_FALSE = "false";
 
 static const char* URL_API_VERSION = "api-version=2017-11-08-preview";
 
@@ -1680,6 +1676,7 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetModuleOrDeviceList(IOTHUB
 
 }
 
+/* DEPRECATED: IoTHubRegistryManager_GetDeviceList is deprecated and may be removed from a future release. */
 IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetDeviceList(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, size_t numberOfDevices, SINGLYLINKEDLIST_HANDLE deviceList)
 {
     return IoTHubRegistryManager_GetModuleOrDeviceList(registryManagerHandle, NULL, numberOfDevices, deviceList);

@@ -89,7 +89,6 @@ void iothub_registrymanager_sample_run(void)
         {
             IOTHUB_REGISTRYMANAGER_HANDLE iotHubRegistryManagerHandle = NULL;
             IOTHUB_DEVICE deviceInfo;
-            SINGLYLINKEDLIST_HANDLE deviceList = NULL;
             IOTHUB_REGISTRY_STATISTICS registryStatistics;
 
             (void)printf("iotHubServiceClientHandle has been created successfully\r\n");
@@ -220,31 +219,6 @@ void iothub_registrymanager_sample_run(void)
                 break;
             default:
                 (void)printf("IoTHubRegistryManager_DeleteDevice failed with unknown error\r\n");
-                break;
-            }
-
-            // Get device list
-            deviceList = singlylinkedlist_create();
-
-            result = IoTHubRegistryManager_GetDeviceList(iotHubRegistryManagerHandle, 3, deviceList);
-            switch (result)
-            {
-            case IOTHUB_REGISTRYMANAGER_OK:
-                (void)printf("IoTHubRegistryManager_GetDeviceList: Successfully got device list\r\n");
-                LIST_ITEM_HANDLE next_device = singlylinkedlist_get_head_item(deviceList);
-                int i = 0;
-                while (next_device != NULL)
-                {
-                    IOTHUB_DEVICE* device = (IOTHUB_DEVICE*)singlylinkedlist_item_get_value(next_device);
-                    printDeviceInfo(device, i++);
-                    next_device = singlylinkedlist_get_next_item(next_device);
-                }
-                break;
-            case IOTHUB_REGISTRYMANAGER_ERROR:
-                (void)printf("IoTHubRegistryManager_GetDeviceList failed\r\n");
-                break;
-            default:
-                (void)printf("IoTHubRegistryManager_GetDeviceList failed with unknown error\r\n");
                 break;
             }
 

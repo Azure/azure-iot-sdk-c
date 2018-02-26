@@ -21,7 +21,6 @@ IF(WIN32)
 ENDIF(WIN32)
 
 include_directories(. ${SHARED_UTIL_INC_FOLDER} ${IOTHUB_CLIENT_INC_FOLDER})
-link_directories(${whatIsBuilding}_dll ${SHARED_UTIL_LIB_DIR})
 
 add_executable(temp_sensor_anomaly ${temp_sensor_anomaly_c_files} ${temp_sensor_anomaly_h_files})
 
