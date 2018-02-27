@@ -550,11 +550,11 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
     TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     platform_init();
-    g_iothubAcctInfo1 = IoTHubAccount_Init();
+    g_iothubAcctInfo1 = IoTHubAccount_Init(false);
     ASSERT_IS_NOT_NULL(g_iothubAcctInfo1);
-    g_iothubAcctInfo2 = IoTHubAccount_Init();
+    g_iothubAcctInfo2 = IoTHubAccount_Init(false);
     ASSERT_IS_NOT_NULL_WITH_MSG(g_iothubAcctInfo2, "Failure to init 2nd IoTHubAccount information.");
-    g_iothubAcctInfo3 = IoTHubAccount_Init();
+    g_iothubAcctInfo3 = IoTHubAccount_Init(false);
     ASSERT_IS_NOT_NULL_WITH_MSG(g_iothubAcctInfo3, "Failure to init 3rd IoTHubAccount information.");
     platform_init();
 }
