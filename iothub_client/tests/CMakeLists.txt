@@ -7,6 +7,8 @@ if(${LINUX})
    add_definitions(-DAZIOT_LINUX)
 endif()
 
+usePermissiveRulesForSamplesAndTests()
+
 # addSupportedTransportsToTest determines transport dependencies based on which transports are enabled via cmake and
 # sets appropriate TEST_xyz #ifdef's so tests themselves are compiled against appropriate targets.
 function(addSupportedTransportsToTest whatExecutableIsBuilding)
@@ -87,10 +89,9 @@ if(${use_amqp})
     add_e2etest_directory(iothubclient_amqp_modules_device_method_e2e)
     add_e2etest_directory(iothubclient_amqp_modules_dt_e2e)
     add_e2etest_directory(iothubclient_amqp_modules_e2e_sfc)
- 
-    if (${run_longhaul_tests})
-        add_unittest_directory(longhaul_tests)
-    endif()
+	
+    add_longhaul_test_directory(longhaul_amqp_telemetry)
+    add_longhaul_test_directory(longhaul_mqtt_telemetry)
 endif()
 
 add_unittest_directory(version_ut)

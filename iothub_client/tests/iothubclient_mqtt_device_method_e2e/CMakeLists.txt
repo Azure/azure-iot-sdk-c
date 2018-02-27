@@ -5,7 +5,7 @@
 cmake_minimum_required(VERSION 2.8.11)
 
 if(NOT (${use_mqtt}))
-	message(FATAL_ERROR "iothubclient_mqtt_device_method_e2e being generated without MQTT support")
+    message(FATAL_ERROR "iothubclient_mqtt_device_method_e2e being generated without MQTT support")
 endif()
 
 compileAsC11()
@@ -13,7 +13,7 @@ set(theseTestsName iothubclient_mqtt_device_method_e2e)
 
 set(${theseTestsName}_test_files
         ${theseTestsName}.c
-	../common_device_method_e2e/iothubclient_common_device_method_e2e.c
+    ../common_device_method_e2e/iothubclient_common_device_method_e2e.c
 )
 
 set(${theseTestsName}_nuget_c_files
@@ -26,7 +26,7 @@ set(${theseTestsName}_c_files
 )
 
 set(${theseTestsName}_h_files
-	../common_device_method_e2e/iothubclient_common_device_method_e2e.h
+    ../common_device_method_e2e/iothubclient_common_device_method_e2e.h
 )
 
 include_directories(../common_device_method_e2e)
@@ -37,37 +37,37 @@ file(COPY ../global_valgrind_suppression.supp DESTINATION ${CMAKE_CURRENT_BINARY
 build_c_test_artifacts(${theseTestsName} ON "tests/E2ETests" VALGRIND_SUPPRESSIONS_FILE global_valgrind_suppression.supp)
 
 if(WIN32)
-	if(TARGET ${theseTestsName}_dll)
-		target_link_libraries(${theseTestsName}_dll
-			iothub_test
-			iothub_client
-			iothub_client_mqtt_transport
-			iothub_client_mqtt_ws_transport
-			iothub_service_client
-			aziotsharedutil
-			rpcrt4			
-		)
-		linkSharedUtil(${theseTestsName}_dll)
-		linkUAMQP(${theseTestsName}_dll)
-		linkMqttLibrary(${theseTestsName}_dll)
-	endif()
-	
-	if(TARGET ${theseTestsName}_exe)
-		target_link_libraries(${theseTestsName}_exe
-			iothub_test
-			iothub_client
-			iothub_client_mqtt_transport
-			iothub_client_mqtt_ws_transport
-			iothub_service_client
-			aziotsharedutil
-			rpcrt4			
-		)
-		linkSharedUtil(${theseTestsName}_exe)
-		linkUAMQP(${theseTestsName}_exe)	
-		linkMqttLibrary(${theseTestsName}_exe)
-	endif()
+    if(TARGET ${theseTestsName}_dll)
+        target_link_libraries(${theseTestsName}_dll
+            iothub_test
+            iothub_client
+            iothub_client_mqtt_transport
+            iothub_client_mqtt_ws_transport
+            iothub_service_client
+            aziotsharedutil
+            rpcrt4            
+        )
+        linkSharedUtil(${theseTestsName}_dll)
+        linkUAMQP(${theseTestsName}_dll)
+        linkMqttLibrary(${theseTestsName}_dll)
+    endif()
+    
+    if(TARGET ${theseTestsName}_exe)
+        target_link_libraries(${theseTestsName}_exe
+            iothub_test
+            iothub_client
+            iothub_client_mqtt_transport
+            iothub_client_mqtt_ws_transport
+            iothub_service_client
+            aziotsharedutil
+            rpcrt4            
+        )
+        linkSharedUtil(${theseTestsName}_exe)
+        linkUAMQP(${theseTestsName}_exe)    
+        linkMqttLibrary(${theseTestsName}_exe)
+    endif()
 
-	if(TARGET ${theseTestsName}_nuget_exe)
+    if(TARGET ${theseTestsName}_nuget_exe)
            target_link_libraries(${theseTestsName}_nuget_exe
                    iothub_test
                    iothub_service_client
@@ -88,18 +88,18 @@ else()
         target_link_libraries(${theseTestsName}_exe pthread ${UUID_LIBRARIES})
     endif()
 
-	if(TARGET ${theseTestsName}_exe)
-		target_link_libraries(${theseTestsName}_exe
-			iothub_test
-			iothub_client
-			iothub_client_mqtt_transport
-			iothub_client_mqtt_ws_transport
-			iothub_service_client
-			aziotsharedutil
-		)
-		linkSharedUtil(${theseTestsName}_exe)
-		linkUAMQP(${theseTestsName}_exe)	
-		linkMqttLibrary(${theseTestsName}_exe)
-	endif()
+    if(TARGET ${theseTestsName}_exe)
+        target_link_libraries(${theseTestsName}_exe
+            iothub_test
+            iothub_client
+            iothub_client_mqtt_transport
+            iothub_client_mqtt_ws_transport
+            iothub_service_client
+            aziotsharedutil
+        )
+        linkSharedUtil(${theseTestsName}_exe)
+        linkUAMQP(${theseTestsName}_exe)    
+        linkMqttLibrary(${theseTestsName}_exe)
+    endif()
 endif()
 

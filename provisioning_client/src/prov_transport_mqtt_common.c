@@ -576,13 +576,13 @@ void cleanup_mqtt_data(PROV_TRANSPORT_MQTT_INFO* mqtt_info)
     free(mqtt_info);
 }
 
-PROV_DEVICE_TRANSPORT_HANDLE prov_transport_common_mqtt_create(const char* uri, TRANSPORT_HSM_TYPE type, const char* scope_id, const char* registration_id, const char* api_version, PROV_MQTT_TRANSPORT_IO transport_io)
+PROV_DEVICE_TRANSPORT_HANDLE prov_transport_common_mqtt_create(const char* uri, TRANSPORT_HSM_TYPE type, const char* scope_id, const char* api_version, PROV_MQTT_TRANSPORT_IO transport_io)
 {
     PROV_TRANSPORT_MQTT_INFO* result;
-    if (uri == NULL || scope_id == NULL || registration_id == NULL || api_version == NULL || transport_io == NULL)
+    if (uri == NULL || scope_id == NULL || api_version == NULL || transport_io == NULL)
     {
         /* Codes_PROV_TRANSPORT_MQTT_COMMON_07_001: [ If uri, scope_id, registration_id, api_version, or transport_io is NULL, prov_transport_common_mqtt_create shall return NULL. ] */
-        LogError("Invalid parameter specified uri: %p, scope_id: %p, registration_id: %p, api_version: %p, transport_io: %p", uri, scope_id, registration_id, api_version, transport_io);
+        LogError("Invalid parameter specified uri: %p, scope_id: %p, api_version: %p, transport_io: %p", uri, scope_id, api_version, transport_io);
         result = NULL;
     }
     else if (type == TRANSPORT_HSM_TYPE_TPM)
@@ -608,13 +608,6 @@ PROV_DEVICE_TRANSPORT_HANDLE prov_transport_common_mqtt_create(const char* uri, 
                 /* Codes_PROV_TRANSPORT_MQTT_COMMON_07_002: [ If any error is encountered, prov_transport_common_mqtt_create shall return NULL. ] */
                 LogError("Failure allocating hostname");
                 free(result);
-                result = NULL;
-            }
-            else if (mallocAndStrcpy_s(&result->registration_id, registration_id) != 0)
-            {
-                /* Codes_PROV_TRANSPORT_MQTT_COMMON_07_002: [ If any error is encountered, prov_transport_common_mqtt_create shall return NULL. ] */
-                LogError("failure constructing registration Id");
-                cleanup_mqtt_data(result);
                 result = NULL;
             }
             else if (mallocAndStrcpy_s(&result->api_version, api_version) != 0)
@@ -662,14 +655,14 @@ void prov_transport_common_mqtt_destroy(PROV_DEVICE_TRANSPORT_HANDLE handle)
     }
 }
 
-int prov_transport_common_mqtt_open(PROV_DEVICE_TRANSPORT_HANDLE handle, BUFFER_HANDLE ek, BUFFER_HANDLE srk, PROV_DEVICE_TRANSPORT_REGISTER_CALLBACK data_callback, void* user_ctx, PROV_DEVICE_TRANSPORT_STATUS_CALLBACK status_cb, void* status_ctx)
+int prov_transport_common_mqtt_open(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* registration_id, BUFFER_HANDLE ek, BUFFER_HANDLE srk, PROV_DEVICE_TRANSPORT_REGISTER_CALLBACK data_callback, void* user_ctx, PROV_DEVICE_TRANSPORT_STATUS_CALLBACK status_cb, void* status_ctx)
 {
     int result;
     PROV_TRANSPORT_MQTT_INFO* mqtt_info = (PROV_TRANSPORT_MQTT_INFO*)handle;
-    if (mqtt_info == NULL || data_callback == NULL || status_cb == NULL)
+    if (mqtt_info == NULL || data_callback == NULL || status_cb == NULL || registration_id == NULL)
     {
         /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_007: [ If handle, data_callback, or status_cb is NULL, prov_transport_common_mqtt_open shall return a non-zero value. ] */
-        LogError("Invalid parameter specified handle: %p, data_callback: %p, status_cb: %p", handle, data_callback, status_cb);
+        LogError("Invalid parameter specified handle: %p, data_callback: %p, status_cb: %p, registration_id: %p", handle, data_callback, status_cb, registration_id);
         result = __FAILURE__;
     }
     else if ( (mqtt_info->hsm_type == TRANSPORT_HSM_TYPE_TPM) && (ek == NULL || srk == NULL) )
@@ -691,6 +684,16 @@ int prov_transport_common_mqtt_open(PROV_DEVICE_TRANSPORT_HANDLE handle, BUFFER_
         LogError("Unable to allocate storage root key");
         BUFFER_delete(mqtt_info->ek);
         mqtt_info->ek = NULL;
+        result = __FAILURE__;
+    }
+    else if (mallocAndStrcpy_s(&mqtt_info->registration_id, registration_id) != 0)
+    {
+        /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_003: [ If any error is encountered prov_transport_http_create shall return NULL. ] */
+        LogError("failure constructing registration Id");
+        BUFFER_delete(mqtt_info->ek);
+        mqtt_info->ek = NULL;
+        BUFFER_delete(mqtt_info->srk);
+        mqtt_info->srk = NULL;
         result = __FAILURE__;
     }
     else
@@ -721,6 +724,8 @@ int prov_transport_common_mqtt_close(PROV_DEVICE_TRANSPORT_HANDLE handle)
         mqtt_info->ek = NULL;
         BUFFER_delete(mqtt_info->srk);
         mqtt_info->srk = NULL;
+        free(mqtt_info->registration_id);
+        mqtt_info->registration_id = NULL;
 
         /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_012: [ prov_transport_common_mqtt_close shall close all connection associated with mqtt communication. ] */
         if (mqtt_client_disconnect(mqtt_info->mqtt_client, NULL, NULL) == 0)
