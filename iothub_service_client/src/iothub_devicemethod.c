@@ -35,7 +35,7 @@ DEFINE_ENUM(IOTHUB_DEVICEMETHOD_REQUEST_MODE, IOTHUB_DEVICE_METHOD_REQUEST_MODE_
 #define  HTTP_HEADER_VAL_CONTENT_TYPE  "application/json; charset=utf-8"
 #define UID_LENGTH 37
 
-static const char* URL_API_VERSION = "?api-version=2017-06-30";
+static const char* URL_API_VERSION = "?api-version=2017-11-08-preview";
 static const char* RELATIVE_PATH_FMT_DEVICEMETHOD = "/twins/%s/methods%s";
 static const char* RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD = "{\"methodName\":\"%s\",\"timeout\":%d,\"payload\":%s}";
 
@@ -236,14 +236,14 @@ static IOTHUB_DEVICE_METHOD_RESULT sendHttpRequestDeviceMethod(IOTHUB_SERVICE_CL
 {
     IOTHUB_DEVICE_METHOD_RESULT result;
 
-    STRING_HANDLE uriResouce;
+    STRING_HANDLE uriResource;
     STRING_HANDLE accessKey;
     STRING_HANDLE keyName;
     HTTPAPIEX_SAS_HANDLE httpExApiSasHandle;
     HTTPAPIEX_HANDLE httpExApiHandle;
     HTTP_HEADERS_HANDLE httpHeader;
 
-    if ((uriResouce = STRING_construct(serviceClientDeviceMethodHandle->hostname)) == NULL)
+    if ((uriResource = STRING_construct(serviceClientDeviceMethodHandle->hostname)) == NULL)
     {
         LogError("STRING_construct failed for uriResource");
         result = IOTHUB_DEVICE_METHOD_ERROR;
@@ -251,14 +251,14 @@ static IOTHUB_DEVICE_METHOD_RESULT sendHttpRequestDeviceMethod(IOTHUB_SERVICE_CL
     else if ((accessKey = STRING_construct(serviceClientDeviceMethodHandle->sharedAccessKey)) == NULL)
     {
         LogError("STRING_construct failed for accessKey");
-        STRING_delete(uriResouce);
+        STRING_delete(uriResource);
         result = IOTHUB_DEVICE_METHOD_ERROR;
     }
     else if ((keyName = STRING_construct(serviceClientDeviceMethodHandle->keyName)) == NULL)
     {
         LogError("STRING_construct failed for keyName");
         STRING_delete(accessKey);
-        STRING_delete(uriResouce);
+        STRING_delete(uriResource);
         result = IOTHUB_DEVICE_METHOD_ERROR;
     }
     else if ((httpHeader = createHttpHeader()) == NULL)
@@ -266,16 +266,16 @@ static IOTHUB_DEVICE_METHOD_RESULT sendHttpRequestDeviceMethod(IOTHUB_SERVICE_CL
         LogError("HttpHeader creation failed");
         STRING_delete(keyName);
         STRING_delete(accessKey);
-        STRING_delete(uriResouce);
+        STRING_delete(uriResource);
         result = IOTHUB_DEVICE_METHOD_ERROR;
     }
-    else if ((httpExApiSasHandle = HTTPAPIEX_SAS_Create(accessKey, uriResouce, keyName)) == NULL)
+    else if ((httpExApiSasHandle = HTTPAPIEX_SAS_Create(accessKey, uriResource, keyName)) == NULL)
     {
         LogError("HTTPAPIEX_SAS_Create failed");
         HTTPHeaders_Free(httpHeader);
         STRING_delete(keyName);
         STRING_delete(accessKey);
-        STRING_delete(uriResouce);
+        STRING_delete(uriResource);
         result = IOTHUB_DEVICE_METHOD_HTTPAPI_ERROR;
     }
     else if ((httpExApiHandle = HTTPAPIEX_Create(serviceClientDeviceMethodHandle->hostname)) == NULL)
@@ -285,7 +285,7 @@ static IOTHUB_DEVICE_METHOD_RESULT sendHttpRequestDeviceMethod(IOTHUB_SERVICE_CL
         HTTPHeaders_Free(httpHeader);
         STRING_delete(keyName);
         STRING_delete(accessKey);
-        STRING_delete(uriResouce);
+        STRING_delete(uriResource);
         result = IOTHUB_DEVICE_METHOD_HTTPAPI_ERROR;
     }
     else 
@@ -341,7 +341,7 @@ static IOTHUB_DEVICE_METHOD_RESULT sendHttpRequestDeviceMethod(IOTHUB_SERVICE_CL
         HTTPHeaders_Free(httpHeader);
         STRING_delete(keyName);
         STRING_delete(accessKey);
-        STRING_delete(uriResouce);
+        STRING_delete(uriResource);
     }
     return result;
 }

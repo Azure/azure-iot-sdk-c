@@ -41,6 +41,7 @@ static void my_gballoc_free(void* ptr)
 #include "iothub_client_authorization.h"
 
 static const char* DEVICE_ID = "device_id";
+static const char* MODULE_ID = "module_id";
 static const char* DEVICE_KEY = "device_key";
 static const char* SCOPE_NAME = "Scope_name";
 static const char* TEST_SAS_TOKEN = "sas_token";
@@ -159,7 +160,7 @@ TEST_FUNCTION_CLEANUP(method_cleanup)
     TEST_MUTEX_RELEASE(g_testByTest);
 }
 
-static void setup_IoTHubClient_Auth_Create_mocks(bool device_key)
+static void setup_IoTHubClient_Auth_Create_mocks(bool device_key, bool module_id)
 {
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     if (device_key)
@@ -167,6 +168,10 @@ static void setup_IoTHubClient_Auth_Create_mocks(bool device_key)
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, DEVICE_KEY));
     }
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, DEVICE_ID));
+    if (module_id)
+    {
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, MODULE_ID));
+    }
 }
 
 static void setup_IoTHubClient_Auth_Get_ConnString_mocks()
@@ -200,7 +205,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Create_id_NULL_succeed)
     umock_c_reset_all_calls();
 
     //act
-    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(DEVICE_KEY, NULL, NULL);
+    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(DEVICE_KEY, NULL, NULL, NULL);
 
     //assert
     ASSERT_IS_NULL(handle);
@@ -218,10 +223,10 @@ TEST_FUNCTION(IoTHubClient_Auth_Create_succeed)
     //arrange
     umock_c_reset_all_calls();
 
-    setup_IoTHubClient_Auth_Create_mocks(true);
+    setup_IoTHubClient_Auth_Create_mocks(true, false);
 
     //act
-    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(DEVICE_KEY, DEVICE_ID, NULL);
+    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(DEVICE_KEY, DEVICE_ID, NULL, NULL);
 
     //assert
     ASSERT_IS_NOT_NULL(handle);
@@ -241,7 +246,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Create_unknown_status_succeed)
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, DEVICE_ID));
 
     //act
-    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(NULL, DEVICE_ID, NULL);
+    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(NULL, DEVICE_ID, NULL, NULL);
     IOTHUB_CREDENTIAL_TYPE cred_type = IoTHubClient_Auth_Get_Credential_Type(handle);
 
     //assert
@@ -261,10 +266,10 @@ TEST_FUNCTION(IoTHubClient_Auth_Create_device_key_NULL_succeed)
     //arrange
     umock_c_reset_all_calls();
 
-    setup_IoTHubClient_Auth_Create_mocks(false);
+    setup_IoTHubClient_Auth_Create_mocks(false, false);
 
     //act
-    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(NULL, DEVICE_ID, NULL);
+    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(NULL, DEVICE_ID, NULL, NULL);
 
     //assert
     ASSERT_IS_NOT_NULL(handle);
@@ -273,6 +278,26 @@ TEST_FUNCTION(IoTHubClient_Auth_Create_device_key_NULL_succeed)
     //cleanup
     IoTHubClient_Auth_Destroy(handle);
 }
+
+
+TEST_FUNCTION(IoTHubClient_Auth_Create_module_id_succeed)
+{
+    //arrange
+    umock_c_reset_all_calls();
+
+    setup_IoTHubClient_Auth_Create_mocks(false, true);
+
+    //act
+    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(NULL, DEVICE_ID, NULL, MODULE_ID);
+
+    //assert
+    ASSERT_IS_NOT_NULL(handle);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubClient_Auth_Destroy(handle);
+}
+
 
 /* Codes_SRS_IoTHub_Authorization_07_002: [IoTHubClient_Auth_Create shall allocate a IOTHUB_AUTHORIZATION_HANDLE that is needed for subsequent calls. ] */
 /* Codes_SRS_IoTHub_Authorization_07_004: [ If successful IoTHubClient_Auth_Create shall return a IOTHUB_AUTHORIZATION_HANDLE value. ] */
@@ -287,7 +312,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Create_with_sas_succeed)
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_SAS_TOKEN));
 
     //act
-    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(NULL, DEVICE_ID, TEST_SAS_TOKEN);
+    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(NULL, DEVICE_ID, TEST_SAS_TOKEN, NULL);
     IOTHUB_CREDENTIAL_TYPE cred_type = IoTHubClient_Auth_Get_Credential_Type(handle);
 
     //assert
@@ -308,7 +333,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Create_fail)
     int negativeTestsInitResult = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
-    setup_IoTHubClient_Auth_Create_mocks(true);
+    setup_IoTHubClient_Auth_Create_mocks(true, true);
 
     umock_c_negative_tests_snapshot();
 
@@ -322,7 +347,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Create_fail)
         char tmp_msg[64];
         sprintf(tmp_msg, "IoTHubClient_Auth_Create failure in test %zu/%zu", index, count);
 
-        IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(DEVICE_KEY, DEVICE_ID, NULL);
+        IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(DEVICE_KEY, DEVICE_ID, NULL, MODULE_ID);
 
         //assert
         ASSERT_IS_NULL(handle);
@@ -349,12 +374,13 @@ TEST_FUNCTION(IoTHubClient_Auth_Destroy_handle_NULL_succeed)
 TEST_FUNCTION(IoTHubClient_Auth_Destroy_succeed)
 {
     //arrange
-    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(DEVICE_KEY, DEVICE_ID, NULL);
+    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(DEVICE_KEY, DEVICE_ID, NULL, NULL);
     umock_c_reset_all_calls();
 
 #ifdef USE_PROV_MODULE
     STRICT_EXPECTED_CALL(iothub_device_auth_destroy(IGNORED_PTR_ARG));
 #endif
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
@@ -387,7 +413,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Set_x509_Type_do_nothing)
 TEST_FUNCTION(IoTHubClient_Auth_Set_x509_Type_succeed)
 {
     //arrange
-    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(NULL, DEVICE_ID, NULL);
+    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(NULL, DEVICE_ID, NULL, NULL);
     umock_c_reset_all_calls();
 
     //act
@@ -404,7 +430,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Set_x509_Type_succeed)
 TEST_FUNCTION(IoTHubClient_Auth_Set_x509_Type_no_x509_succeed)
 {
     //arrange
-    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(DEVICE_KEY, DEVICE_ID, NULL);
+    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(DEVICE_KEY, DEVICE_ID, NULL, NULL);
     (void)IoTHubClient_Auth_Set_x509_Type(handle, true);
     umock_c_reset_all_calls();
 
@@ -439,7 +465,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_Credential_Type_handle_NULL)
 TEST_FUNCTION(IoTHubClient_Auth_Get_Credential_Type_succeed)
 {
     //arrange
-    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(DEVICE_KEY, DEVICE_ID, NULL);
+    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(DEVICE_KEY, DEVICE_ID, NULL, NULL);
     umock_c_reset_all_calls();
 
     //act
@@ -472,7 +498,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_handle_NULL)
 TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_scope_NULL_fail)
 {
     //arrange
-    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(DEVICE_KEY, DEVICE_ID, NULL);
+    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(DEVICE_KEY, DEVICE_ID, NULL, NULL);
     umock_c_reset_all_calls();
 
     //act
@@ -492,7 +518,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_scope_NULL_fail)
 TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_succeed)
 {
     //arrange
-    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(DEVICE_KEY, DEVICE_ID, NULL);
+    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(DEVICE_KEY, DEVICE_ID, NULL, NULL);
     umock_c_reset_all_calls();
 
     setup_IoTHubClient_Auth_Get_ConnString_mocks();
@@ -509,11 +535,31 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_succeed)
     IoTHubClient_Auth_Destroy(handle);
 }
 
+TEST_FUNCTION(IoTHubClient_Auth_Get_ModuleId_succeed)
+{
+    //arrange
+    setup_IoTHubClient_Auth_Create_mocks(false, true);
+    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(NULL, DEVICE_ID, NULL, MODULE_ID);
+    ASSERT_IS_NOT_NULL(handle);
+
+    //act
+    const char* module_id = IoTHubClient_Auth_Get_ModuleId(handle);
+
+    //assert
+    ASSERT_IS_NOT_NULL(module_id);
+    ASSERT_ARE_EQUAL(char_ptr, module_id, MODULE_ID);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubClient_Auth_Destroy(handle);
+}
+
+
 /* Codes_SRS_IoTHub_Authorization_07_020: [ If any error is encountered IoTHubClient_Auth_Get_ConnString shall return NULL. ] */
 TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_fail)
 {
     //arrange
-    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(DEVICE_KEY, DEVICE_ID, NULL);
+    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(DEVICE_KEY, DEVICE_ID, NULL, NULL);
     umock_c_reset_all_calls();
 
     int negativeTestsInitResult = umock_c_negative_tests_init();
@@ -570,7 +616,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_DeviceId_handle_NULL)
 TEST_FUNCTION(IoTHubClient_Auth_Get_DeviceId_succeed)
 {
     //arrange
-    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(DEVICE_KEY, DEVICE_ID, NULL);
+    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(DEVICE_KEY, DEVICE_ID, NULL, NULL);
     umock_c_reset_all_calls();
 
     //act
@@ -604,7 +650,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_DeviceKey_handle_NULL)
 TEST_FUNCTION(IoTHubClient_Auth_Get_Devicekey_succeed)
 {
     //arrange
-    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(DEVICE_KEY, DEVICE_ID, NULL);
+    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(DEVICE_KEY, DEVICE_ID, NULL, NULL);
     umock_c_reset_all_calls();
 
     //act
@@ -638,7 +684,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Is_SasToken_Valid_handle_NULL_fail)
 TEST_FUNCTION(IoTHubClient_Auth_Is_SasToken_Valid_succeed)
 {
     //arrange
-    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(DEVICE_KEY, DEVICE_ID, NULL);
+    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(DEVICE_KEY, DEVICE_ID, NULL, NULL);
     umock_c_reset_all_calls();
 
     //act
@@ -656,7 +702,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Is_SasToken_Valid_succeed)
 TEST_FUNCTION(IoTHubClient_Auth_Is_SasToken_Valid_sas_token_succeed)
 {
     //arrange
-    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(NULL, DEVICE_ID, TEST_SAS_TOKEN);
+    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(NULL, DEVICE_ID, TEST_SAS_TOKEN, NULL);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(STRING_construct(TEST_SAS_TOKEN));
