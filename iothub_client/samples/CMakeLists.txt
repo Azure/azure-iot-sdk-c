@@ -34,8 +34,6 @@ if(${use_mqtt})
     if(LINUX)
         add_sample_directory(iothub_client_sample_mqtt_dm)
     endif()
-    add_sample_directory(iothub_client_sample_module_sender)
-    add_sample_directory(iothub_client_sample_module_filter)
 endif()
 
 if(${use_amqp})

@@ -84,8 +84,7 @@ typedef struct UPLOADTOBLOB_THREAD_INFO_TAG
     CALLBACK_TYPE_CONNECTION_STATUS,    \
     CALLBACK_TYPE_DEVICE_METHOD,        \
     CALLBACK_TYPE_INBOUD_DEVICE_METHOD, \
-    CALLBACK_TYPE_MESSAGE,              \
-    CALLBACK_TYPE_INPUTMESSAGE          \
+    CALLBACK_TYPE_MESSAGE
 
 DEFINE_ENUM(USER_CALLBACK_TYPE, USER_CALLBACK_TYPE_VALUES)
 DEFINE_ENUM_STRINGS(USER_CALLBACK_TYPE, USER_CALLBACK_TYPE_VALUES)
@@ -120,12 +119,6 @@ typedef struct METHOD_CALLBACK_INFO_TAG
     METHOD_HANDLE method_id;
 } METHOD_CALLBACK_INFO;
 
-typedef struct INPUTMESSAGE_CALLBACK_INFO_TAG
-{
-    IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC eventHandlerCallback;
-    MESSAGE_CALLBACK_INFO* message_cb_info;
-} INPUTMESSAGE_CALLBACK_INFO;
-
 typedef struct USER_CALLBACK_INFO_TAG
 {
     USER_CALLBACK_TYPE type;
@@ -138,7 +131,6 @@ typedef struct USER_CALLBACK_INFO_TAG
         CONNECTION_STATUS_CALLBACK_INFO connection_status_cb_info;
         METHOD_CALLBACK_INFO method_cb_info;
         MESSAGE_CALLBACK_INFO* message_cb_info;
-        INPUTMESSAGE_CALLBACK_INFO inputmessage_cb_info;
     } iothub_callback;
 } USER_CALLBACK_INFO;
 
@@ -147,13 +139,6 @@ typedef struct IOTHUB_QUEUE_CONTEXT_TAG
     IOTHUB_CLIENT_INSTANCE* iotHubClientHandle;
     void* userContextCallback;
 } IOTHUB_QUEUE_CONTEXT;
-
-typedef struct IOTHUB_INPUTMESSAGE_CALLBACK_CONTEXT_TAG
-{
-    IOTHUB_CLIENT_HANDLE iotHubClientHandle;
-    IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC eventHandlerCallback;
-    void* userContextCallback;
-} IOTHUB_INPUTMESSAGE_CALLBACK_CONTEXT;
 
 /*used by unittests only*/
 const size_t IoTHubClient_ThreadTerminationOffset = offsetof(IOTHUB_CLIENT_INSTANCE, StopThread);
@@ -239,38 +224,6 @@ static bool iothub_ll_message_callback(MESSAGE_CALLBACK_INFO* messageData, void*
     }
     return result;
 }
-
-static bool iothub_ll_inputmessage_callback(MESSAGE_CALLBACK_INFO* message_cb_info, void* userContextCallback)
-{
-    bool result;
-    IOTHUB_INPUTMESSAGE_CALLBACK_CONTEXT *inputMessageCallbackContext = (IOTHUB_INPUTMESSAGE_CALLBACK_CONTEXT *)userContextCallback;
-    if (inputMessageCallbackContext == NULL)
-    {
-        LogError("invalid parameter userContextCallback(NULL)");
-        result = false;
-    }
-    else
-    {
-        USER_CALLBACK_INFO queue_cb_info;
-        queue_cb_info.type = CALLBACK_TYPE_INPUTMESSAGE;
-        queue_cb_info.userContextCallback = inputMessageCallbackContext->userContextCallback;
-        queue_cb_info.iothub_callback.inputmessage_cb_info.eventHandlerCallback = inputMessageCallbackContext->eventHandlerCallback;
-        queue_cb_info.iothub_callback.inputmessage_cb_info.message_cb_info = message_cb_info;
-
-        if (VECTOR_push_back(inputMessageCallbackContext->iotHubClientHandle->saved_user_callback_list, &queue_cb_info, 1) == 0)
-        {
-            result = true;
-        }
-        else
-        {
-            LogError("message callback vector push failed.");
-            result = false;
-        }
-    }
-
-    return result;
-}
-
 
 static int make_method_calback_queue_context(USER_CALLBACK_INFO* queue_cb_info, const char* method_name, const unsigned char* payload, size_t size, METHOD_HANDLE method_id, IOTHUB_QUEUE_CONTEXT* queue_context)
 {
@@ -612,27 +565,6 @@ static void dispatch_user_callbacks(IOTHUB_CLIENT_INSTANCE* iotHubClientInstance
                         }
                     }
                     break;
-                case CALLBACK_TYPE_INPUTMESSAGE:
-                    {
-                        const INPUTMESSAGE_CALLBACK_INFO *inputmessage_cb_info = &queued_cb->iothub_callback.inputmessage_cb_info;
-                        IOTHUBMESSAGE_DISPOSITION_RESULT disposition = inputmessage_cb_info->eventHandlerCallback(inputmessage_cb_info->message_cb_info->messageHandle, queued_cb->userContextCallback);
-
-                        if (Lock(iotHubClientInstance->LockHandle) == LOCK_OK)
-                        {
-                            IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_SendMessageDisposition(iotHubClientInstance->IoTHubClientLLHandle, inputmessage_cb_info->message_cb_info, disposition);
-                            (void)Unlock(iotHubClientInstance->LockHandle);
-                            if (result != IOTHUB_CLIENT_OK)
-                            {
-                                LogError("IoTHubClient_LL_SendMessageDisposition failed");
-                            }
-                        }
-                        else
-                        {
-                            LogError("Lock failed");
-                        }
-                    }
-                    break;
-                    
                 default:
                     LogError("Invalid callback type '%s'", ENUM_TO_STRING(USER_CALLBACK_TYPE, queued_cb->type));
                     break;
@@ -2228,79 +2160,3 @@ IOTHUB_CLIENT_RESULT IoTHubClient_UploadMultipleBlocksToBlobAsyncEx(IOTHUB_CLIEN
 }
 
 #endif /*DONT_USE_UPLOADTOBLOB*/
-
-
-IOTHUB_CLIENT_RESULT IoTHubClient_SendEventToOutputAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE eventMessageHandle, const char* outputName, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK eventConfirmationCallback, void* userContextCallback)
-{
-    IOTHUB_CLIENT_RESULT result;
-
-    if ((iotHubClientHandle == NULL) || (outputName == NULL) || (eventMessageHandle == NULL))
-    {
-        // Codes_SRS_IOTHUBCLIENT_31_100: [ If `iotHubClientHandle`, `outputName`, or `eventConfirmationCallback` is `NULL`, `IoTHubClient_SendEventToOutputAsync` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]
-        LogError("Invalid argument (iotHubClientHandle=%p, outputName=%p, eventMessageHandle=%p)", iotHubClientHandle, outputName, eventMessageHandle);
-        result = IOTHUB_CLIENT_INVALID_ARG;
-    }
-    else
-    {
-        // Codes_SRS_IOTHUBCLIENT_31_101: [ `IoTHubClient_SendEventToOutputAsync` shall set the outputName of the message to send. ]
-        if (IoTHubMessage_SetOutputName(eventMessageHandle, outputName) != IOTHUB_MESSAGE_OK)
-        {
-            LogError("IoTHubMessage_SetOutputName failed");
-            result = IOTHUB_CLIENT_ERROR;
-        }
-        // Codes_SRS_IOTHUBCLIENT_31_102: [ `IoTHubClient_SendEventToOutputAsync` shall invoke `IoTHubClient_SendEventAsync` to send the message. ]
-        else if ((result = IoTHubClient_SendEventAsync(iotHubClientHandle, eventMessageHandle, eventConfirmationCallback, userContextCallback)) != IOTHUB_CLIENT_OK)
-        {
-            LogError("Call into IoTHubClient_SendEventAsync failed, result=%d", result);
-        }
-    }
-
-    return result;
-}
-
-
-IOTHUB_CLIENT_RESULT IoTHubClient_SetInputMessageCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* inputName, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC eventHandlerCallback, void* userContextCallback)
-{
-    IOTHUB_CLIENT_RESULT result;
-
-    // Codes_SRS_IOTHUBCLIENT_31_097: [ If iotHubClientHandle or inputName is NULL, `IoTHubClient_SetInputMessageCallback` shall return IOTHUB_CLIENT_INVALID_ARG. ]
-    if ((iotHubClientHandle == NULL) || (inputName == NULL))
-    {
-        result = IOTHUB_CLIENT_INVALID_ARG;
-        LogError("NULL iothubClientHandle");
-    }
-    else
-    {
-        IOTHUB_CLIENT_INSTANCE* iotHubClientInstance = (IOTHUB_CLIENT_INSTANCE*)iotHubClientHandle;
-
-        // Codes_SRS_IOTHUBCLIENT_31_098: [ `IoTHubClient_SetMessageCallback` shall start the worker thread if it was not previously started. ]
-        if ((result = StartWorkerThreadIfNeeded(iotHubClientInstance)) != IOTHUB_CLIENT_OK)
-        {
-            result = IOTHUB_CLIENT_ERROR;
-            LogError("Could not start worker thread");
-        }
-        else
-        {
-            if (Lock(iotHubClientInstance->LockHandle) != LOCK_OK)
-            {
-                result = IOTHUB_CLIENT_ERROR;
-                LogError("Could not acquire lock");
-            }
-            else
-            {
-                // Codes_SRS_IOTHUBCLIENT_31_099: [ `IoTHubClient_SetMessageCallback` shall call `IoTHubClient_LL_SetInputMessageCallback`, passing its input arguments ]
-                IOTHUB_INPUTMESSAGE_CALLBACK_CONTEXT inputMessageCallbackContext;
-                inputMessageCallbackContext.iotHubClientHandle = iotHubClientHandle;
-                inputMessageCallbackContext.eventHandlerCallback = eventHandlerCallback;
-                inputMessageCallbackContext.userContextCallback = userContextCallback;
-                
-                result = IoTHubClient_LL_SetInputMessageCallbackEx(iotHubClientInstance->IoTHubClientLLHandle, inputName, iothub_ll_inputmessage_callback, (void*)&inputMessageCallbackContext, sizeof(inputMessageCallbackContext));
-                (void)Unlock(iotHubClientInstance->LockHandle);
-            }
-        }
-    }
-
-    return result;
-}
-
-

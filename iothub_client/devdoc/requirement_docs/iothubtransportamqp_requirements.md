@@ -36,9 +36,8 @@ static const TRANSPORT_PROVIDER* AMQP_Protocol(void);
     - IoTHubTransportAMQP_Unsubscribe,
     - IoTHubTransportAMQP_DoWork,
     - IoTHubTransportAMQP_SetRetryPolicy,
-    - IoTHubTransportAMQP_GetSendStatus,
-    - IotHubTransportAMQP_Subscribe_InputQueue,
-    - IotHubTransportAMQP_Unsubscribe_InputQueue
+    - IoTHubTransportAMQP_GetSendStatus
+
 
 
 ## IoTHubTransportAMQP_Create
@@ -214,27 +213,6 @@ IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_SendMessageDisposition(MESSAGE_CALLBACK
 
 **SRS_IOTHUBTRANSPORTAMQP_10_001: [**IoTHubTransportAMQP_SendMessageDisposition shall send the message disposition by calling into the IoTHubTransport_AMQP_Common_SendMessageDisposition()**]**
 
-
-## IoTHubTransportAMQP_Subscribe_InputQueue
-```c
-static int IotHubTransportAMQP_Subscribe_InputQueue(IOTHUB_DEVICE_HANDLE handle);
-
-```
-
-**SRS_IOTHUBTRANSPORTAMQP_31_021: [**IoTHubTransportAMQP_Subscribe_InputQueue shall return a failure as input queues are not implemented for AMQP**]**
-
-
-
-## IotHubTransportAMQP_Unsubscribe_InputQueue
-```c
-static void IotHubTransportAMQP_Unsubscribe_InputQueue(IOTHUB_DEVICE_HANDLE handle);
-
-```
-
-**SRS_IOTHUBTRANSPORTAMQP_31_022: [**IotHubTransportAMQP_Unsubscribe_InputQueue shall do nothing as input queues are not implemented for AMQP**]**
-
-
-
 ### AMQP_Protocol
 
 ```c
@@ -255,6 +233,4 @@ IoTHubTransport_Subscribe = IoTHubTransportAMQP_Subscribe
 IoTHubTransport_Unsubscribe = IoTHubTransportAMQP_Unsubscribe
 IoTHubTransport_DoWork = IoTHubTransportAMQP_DoWork
 IoTHubTransport_SetRetryPolicy = IoTHubTransportAMQP_SetRetryPolicy
-IoTHubTransport_SetOption = IoTHubTransportAMQP_SetOption
-IoTHubTransport_Subscribe_InputQueue = IoTHubTransportAMQP_Subscribe_InputQueue
-IoTHubTransport_Unsubscribe_InputQueue = IotHubTransportAMQP_Unsubscribe_InputQueue**]**
+IoTHubTransport_SetOption = IoTHubTransportAMQP_SetOption**]**

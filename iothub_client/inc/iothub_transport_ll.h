@@ -49,9 +49,6 @@ extern "C"
         const char* deviceSasToken;
 
         IOTHUB_AUTHORIZATION_HANDLE authorization_module; // with either SAS Token, x509 Certs, and Device SAS Token
-
-        /** @brief	A string that identifies the module.  Optional. */
-        const char* moduleId;
     } IOTHUB_DEVICE_CONFIG;
 
     typedef STRING_HANDLE (*pfIoTHubTransport_GetHostname)(TRANSPORT_LL_HANDLE handle);
@@ -72,8 +69,6 @@ extern "C"
     typedef int(*pfIoTHubTransport_Subscribe_DeviceMethod)(IOTHUB_DEVICE_HANDLE handle);
     typedef void(*pfIoTHubTransport_Unsubscribe_DeviceMethod)(IOTHUB_DEVICE_HANDLE handle);
     typedef int(*pfIoTHubTransport_DeviceMethod_Response)(IOTHUB_DEVICE_HANDLE handle, METHOD_HANDLE methodId, const unsigned char* response, size_t response_size, int status_response);
-    typedef int(*pfIoTHubTransport_Subscribe_InputQueue)(IOTHUB_DEVICE_HANDLE handle);
-    typedef void(*pfIoTHubTransport_Unsubscribe_InputQueue)(IOTHUB_DEVICE_HANDLE handle);
 
 #define TRANSPORT_PROVIDER_FIELDS                                                   \
 pfIotHubTransport_SendMessageDisposition IoTHubTransport_SendMessageDisposition;  \
@@ -93,9 +88,7 @@ pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;                          
 pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;                          \
 pfIoTHubTransport_DoWork IoTHubTransport_DoWork;                                    \
 pfIoTHubTransport_SetRetryPolicy IoTHubTransport_SetRetryPolicy;                    \
-pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus;                      \
-pfIoTHubTransport_Subscribe_InputQueue IoTHubTransport_Subscribe_InputQueue;        \
-pfIoTHubTransport_Unsubscribe_InputQueue IoTHubTransport_Unsubscribe_InputQueue     /*there's an intentional missing ; on this line*/
+pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus  /*there's an intentional missing ; on this line*/
 
     struct TRANSPORT_PROVIDER_TAG
     {
