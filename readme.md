@@ -1,4 +1,4 @@
-# Microsoft Azure IoT SDKs and libraries for C
+# Microsoft Azure IoT SDKs and libraries for C 
 
 This repository contains the following:
 * **Microsoft Azure IoT Hub device SDK for C** to connect devices running C code to Azure IoT Hub
