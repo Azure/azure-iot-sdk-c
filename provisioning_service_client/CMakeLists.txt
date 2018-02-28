@@ -11,15 +11,30 @@ endif()
 compileAsC99()
 
 set(provisioning_service_client_c_files
-./src/provisioning_service_client.c
-./src/provisioning_sc_enrollment.c
 ../deps/parson/parson.c
+./src/provisioning_sc_attestation_mechanism.c
+./src/provisioning_sc_device_registration_state.c
+./src/provisioning_sc_enrollment.c
+./src/provisioning_sc_tpm_attestation.c
+./src/provisioning_sc_twin.c
+./src/provisioning_sc_shared_helpers.c
+./src/provisioning_sc_x509_attestation.c
+./src/provisioning_service_client.c
 )
 
 set(provisioning_service_client_h_files
-./inc/provisioning_service_client.h
-./inc/provisioning_sc_enrollment.h
 ../deps/parson/parson.h
+./inc/provisioning_sc_attestation_mechanism.h
+./inc/provisioning_sc_device_registration_state.h
+./inc/provisioning_sc_enrollment.h
+./inc/provisioning_sc_models.h
+./inc/provisioning_sc_models_serializer.h
+./inc/provisioning_sc_json_const.h
+./inc/provisioning_sc_tpm_attestation.h
+./inc/provisioning_sc_twin.h
+./inc/provisioning_sc_shared_helpers.h
+./inc/provisioning_sc_x509_attestation.h
+./inc/provisioning_service_client.h
 )
 
 if(MSVC)

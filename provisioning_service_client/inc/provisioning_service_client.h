@@ -4,134 +4,138 @@
 #ifndef PROVISIONING_SERVICE_CLIENT_H
 #define PROVISIONING_SERVICE_CLIENT_H
 
-#include "azure_c_shared_utility/macro_utils.h"
-#include "azure_c_shared_utility/umock_c_prod.h"
-
-#include "provisioning_sc_enrollment.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-    #define BULK_OPERATION_MODE_VALUES \
-        BULK_CREATE, \
-        BULK_UPDATE, \
-        BULK_UPDATE_IF_MATCH_ETAG, \
-        BULK_DELETE
+#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_c_shared_utility/umock_c_prod.h"
+#include "azure_c_shared_utility/shared_util_options.h"
 
-    DEFINE_ENUM(BULK_OPERATION_MODE, BULK_OPERATION_MODE_VALUES);
+#include "provisioning_sc_models.h"
 
-    /** @brief  Handle to hide struct and use it in consequent APIs
-    */
-    typedef struct PROVISIONING_SERVICE_CLIENT_TAG* PROVISIONING_SERVICE_CLIENT_HANDLE;
+#define TRACING_STATUS_VALUES \
+        TRACING_STATUS_ON,\
+        TRACING_STATUS_OFF
+DEFINE_ENUM(TRACING_STATUS, TRACING_STATUS_VALUES);
 
-    /** @brief  Creates a Provisioning Service Client handle for use in consequent APIs.
-    *
-    * @param    conn_string     A connection string used to establish connection with the Provisioning Service.
-    *
-    * @return   A non-NULL PROVISIONING_SERVICE_CLIENT_HANDLE value that is used when invoking other functions in the Provisioning Service Client
-    *           and NULL on failure.
-    */
-    MOCKABLE_FUNCTION(, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_sc_create_from_connection_string, const char*, conn_string);
-    
-    /** @brief  Disposes of resources allocated by creating a Provisioning Service Client handle.
-    *
-    * @param    prov_client     The handle created by a call to the create function.
-    */
-    MOCKABLE_FUNCTION(, void, prov_sc_destroy, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client);
+/** @brief  Handle to hide struct and use it in consequent APIs
+*/
+typedef struct PROVISIONING_SERVICE_CLIENT_TAG* PROVISIONING_SERVICE_CLIENT_HANDLE;
 
-    /** @brief Creates or updates an individual device enrollment record on the Provisioning Service.
-    *
-    * @param    prov_client    The handle used for connecting to the Provisioning Service.
-    * @param    enrollment     A struct describing the desired changes to the individual enrollment.
-    *
-    * @return   0 upon success, a non-zero number upon failure.
-    */
-    MOCKABLE_FUNCTION(, int, prov_sc_create_or_update_individual_enrollment, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client, const INDIVIDUAL_ENROLLMENT*, enrollment);
-  
-    /** @brief  Deletes a individual device enrollment record on the Provisioning Service.
-    *
-    * @param    prov_client    The handle used for connecting to the Provisioning Service.
-    * @param    enrollment     A struct representation of the target individual enrollment.
-    *
-    * @return   0 upon success, a non-zero number upon failure.
-    */
-    MOCKABLE_FUNCTION(, int, prov_sc_delete_individual_enrollment, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client, const INDIVIDUAL_ENROLLMENT*, enrollment);
+/** @brief  Creates a Provisioning Service Client handle for use in consequent APIs.
+*
+* @param    conn_string     A connection string used to establish connection with the Provisioning Service.
+*
+* @return   A non-NULL PROVISIONING_SERVICE_CLIENT_HANDLE value that is used when invoking other functions in the Provisioning Service Client
+*           and NULL on failure.
+*/
+MOCKABLE_FUNCTION(, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_sc_create_from_connection_string, const char*, conn_string);
 
+/** @brief  Disposes of resources allocated by creating a Provisioning Service Client handle.
+*
+* @param    prov_client     The handle created by a call to the create function.
+*/
+MOCKABLE_FUNCTION(, void, prov_sc_destroy, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client);
 
-    /** @brief  Deletes an individual device enrollment record on the Provisioning Service with a specified id, irregardless of etag.
-    *
-    * @param    prov_client     The handle used for connecting to the Provisioning Service.
-    * @param    id              The registration id of the target individual enrollment.
-    *
-    * @return   0 upon success, a non-zero number upon failure.
-    */
-    MOCKABLE_FUNCTION(, int, prov_sc_delete_individual_enrollment_by_id, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client, const char*, id);
+/** @brief  Sets tracing/logging of http communications on or off.
+*
+* @param    prov_client     The handle for the connection that should be traced.
+* @param    status          The tracing status to set.
+*/
+MOCKABLE_FUNCTION(, void, prov_sc_set_trace, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client, TRACING_STATUS, status);
 
-    /** @breif  Retreives an individual device enrollment record from the Provisioning Service.
-    *
-    * @param    prov_client     The handle used for connecting to the Provisioning Service.
-    * @param    id              The registration id of the target individual enrollment.
-    * @param    enrollment      A struct representing an individual enrollment, to be filled with retreived data.
-    *
-    * @return   0 upon success, a non-zero number upon failure.
-    */
-    MOCKABLE_FUNCTION(, int, prov_sc_get_individual_enrollment, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client, const char*, id, INDIVIDUAL_ENROLLMENT*, enrollment);
+/** @brief  Set the trusted certificate for HTTP communication with the Provisioning Service.
+*
+* @param    prov_client     The handle used for connecting to the Provisioning Service.
+* @param    certificate     The trusted certificate to be used for HTTP connections. If given as NULL, will clear a previously set certificate.
+*
+* @return   0 upon success, a non-zero number upon failure.
+*/
+MOCKABLE_FUNCTION(, int, prov_sc_set_certificate, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client, const char*, certificate);
 
-    /** @brief  Deletes a device registration status on the Provisioning Service.
-    *
-    * @param    prov_client     The handle used for connecting to the Provisioning Service.
-    * @param    id              The registration id of the target individual enrollment.
-    *
-    * @return   0 upon success, a non-zero number upon failure.
-    */
-    MOCKABLE_FUNCTION(, int, prov_sc_delete_device_registration_status, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client, const char*, id);
+/** @brief  Set the proxy options for HTTP communication with the Provisioning Service.
+*
+* @param    prov_client     The handle used for connecting to the Provisioning Service.
+* @param    proxy_options   A struct containing the desired proxy settings
+*
+* @return   0 upon success, a non-zero number upon failure.
+*/
+MOCKABLE_FUNCTION(, int, prov_sc_set_proxy, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client, HTTP_PROXY_OPTIONS*, proxy_options);
 
-    /** @brief  Retreives a device registration status from the Provisioning Service.
-    *
-    * @param    prov_client     A handle used for connecting to the Provisioning Service.
-    * @param    id              The registration id of the target registration status.
-    * @param    reg_status      A struct representing a registration status, to be filled with retreived data.
-    *
-    * @return   0 upon success, a non-zero number upon failure.
-    */
-    MOCKABLE_FUNCTION(, int, prov_sc_get_device_registration_status, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client, const char*, id, DEVICE_REGISTRATION_STATUS*, reg_status);
+/** @brief Creates or updates an individual device enrollment record on the Provisioning Service, reflecting the changes in the given struct.
+*
+* @param    prov_client         The handle used for connecting to the Provisioning Service.
+* @param    enrollment_ptr      Pointer to a handle for a new or updated individual enrollment (will be updated with new info from the Provisioning Service).
+*
+* @return   0 upon success, a non-zero number upon failure.
+*/
+MOCKABLE_FUNCTION(, int, prov_sc_create_or_update_individual_enrollment, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client, INDIVIDUAL_ENROLLMENT_HANDLE*, enrollment_ptr);
 
-    /** @brief  Creates or updates a device enrollment group record on the Provisioning Service.
-    *
-    * @param    prov_client         The handle used for connecting to the Provisioning Service.
-    * @param    id                  The enrollment group id of the target enrollment group.
-    * @param    enrollment_group    A struct describing the desired changes to the enrollment group.
-    *
-    * @return   0 upon success, a non-zero number upon failure.
-    */
-    MOCKABLE_FUNCTION(, int, prov_sc_create_or_update_enrollment_group, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client, const char*, id, const ENROLLMENT_GROUP*, enrollment_group);
+/** @brief  Deletes a individual device enrollment record on the Provisioning Service.
+*
+* @param    prov_client    The handle used for connecting to the Provisioning Service.
+* @param    enrollment     The handle for the target individual enrollment. Will be matched based on registration id and etag.
+*
+* @return   0 upon success, a non-zero number upon failure.
+*/
+MOCKABLE_FUNCTION(, int, prov_sc_delete_individual_enrollment, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client, INDIVIDUAL_ENROLLMENT_HANDLE, enrollment);
 
-    /** @brief  Deletes a device enrollment group record on the Provisioning Service.
-    * @param    prov_client         The handle used for connecting to the Provisioning Service.
-    * @param    enrollment_group    A struct representation of the target enrollment
-    *
-    * @return   0 upon success, a non-zero number upon failure.
-    */
-    MOCKABLE_FUNCTION(, int, prov_sc_delete_enrollment_group, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client, const ENROLLMENT_GROUP*, enrollment_group);
+/** @brief  Deletes an individual device enrollment record on the Provisioning Service.
+*
+* @param    prov_client     The handle used for connecting to the Provisioning Service.
+* @param    reg_id          The registration id of the target individual enrollment.
+* @param    etag            The etag of the target individual enrollment. If given as "*", will match any etag. If given as NULL, will be ignored.
+*
+* @return   0 upon success, a non-zero number upon failure.
+*/
+MOCKABLE_FUNCTION(, int, prov_sc_delete_individual_enrollment_by_param, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client, const char*, reg_id, const char*, etag);
 
-    /** @brief  Deletes a device enrollment group record on the Provisioning Service with a specified id, irregardless of etag.
-    * @param    prov_client     The handle used for connecting to the Provisioning Service.
-    * @param    id              The enrollment group id of the target enrollment group.
-    *
-    * @return   0 upon success, a non-zero number upon failure.
-    */
-    MOCKABLE_FUNCTION(, int, prov_sc_delete_enrollment_group_by_id, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client, const char*, id);
+/** @breif  Retreives an individual device enrollment record from the Provisioning Service.
+*
+* @param    prov_client     The handle used for connecting to the Provisioning Service.
+* @param    reg_id          The registration id of the target individual enrollment.
+* @param    enrollment      Pointer to a handle for an individual enrollment, to be filled with retreived data.
+*
+* @return   0 upon success, a non-zero number upon failure.
+*/
+MOCKABLE_FUNCTION(, int, prov_sc_get_individual_enrollment, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client, const char*, reg_id, INDIVIDUAL_ENROLLMENT_HANDLE*, enrollment_ptr);
 
-    /** @brief  Retreives a device enrollment group record from the Provisioning Service.
-    *
-    * @param    prov_client         The handle used for connecting to the Provisioning Service.
-    * @param    id                  The enrollment group id of the target enrollment group.
-    * @param    enrollment_group    A struct representing an enrollment group, to be filled with the retreived data.
-    *
-    * @return   0 upon success, a non-zero number upon failure.
-    */
-    MOCKABLE_FUNCTION(, int, prov_sc_get_enrollment_group, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client, const char*, id, ENROLLMENT_GROUP*, enrollment_group);
+/** @brief  Creates or updates a device enrollment group record on the Provisioning Service.
+*
+* @param    prov_client         The handle used for connecting to the Provisioning Service.
+* @param    enrollment_ptr      Pointer to a handle for a new or updated enrollment group.
+*
+* @return   0 upon success, a non-zero number upon failure.
+*/
+MOCKABLE_FUNCTION(, int, prov_sc_create_or_update_enrollment_group, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client, ENROLLMENT_GROUP_HANDLE*, enrollment_ptr);
+
+/** @brief  Deletes a device enrollment group record on the Provisioning Service.
+* @param    prov_client     The handle used for connecting to the Provisioning Service.
+* @param    enrollment      The handle for the target enrollment group
+*
+* @return   0 upon success, a non-zero number upon failure.
+*/
+MOCKABLE_FUNCTION(, int, prov_sc_delete_enrollment_group, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client, ENROLLMENT_GROUP_HANDLE, enrollment);
+
+/** @brief  Deletes a device enrollment group record on the Provisioning Service.
+* @param    prov_client     The handle used for connecting to the Provisioning Service.
+* @param    group_id        The enrollment group id of the target enrollment group.
+* @param    etag            The etag of the target enrollment group. If given as "*", will match any etag.
+*
+* @return   0 upon success, a non-zero number upon failure.
+*/
+MOCKABLE_FUNCTION(, int, prov_sc_delete_enrollment_group_by_param, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client, const char*, group_id, const char*, etag);
+
+/** @brief  Retreives a device enrollment group record from the Provisioning Service.
+*
+* @param    prov_client         The handle used for connecting to the Provisioning Service.
+* @param    group_id            The enrollment group id of the target enrollment group.
+* @param    enrollment_ptr      A pointer to a handle for an enrollment group, to be filled with the retreived data.
+*
+* @return   0 upon success, a non-zero number upon failure.
+*/
+MOCKABLE_FUNCTION(, int, prov_sc_get_enrollment_group, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client, const char*, group_id, ENROLLMENT_GROUP_HANDLE*, enrollment_ptr);
 
 #ifdef __cplusplus
 }
