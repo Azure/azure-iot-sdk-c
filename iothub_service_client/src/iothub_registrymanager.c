@@ -487,16 +487,6 @@ static IOTHUB_REGISTRYMANAGER_RESULT parseDeviceOrModuleJsonObject(JSON_Object* 
     return result;
 }
 
-static void initializeDeviceInfoMembers(IOTHUB_DEVICE* deviceInfo)
-{
-    if (NULL != deviceInfo)
-    {
-        memset(deviceInfo, 0, sizeof(IOTHUB_DEVICE));
-        deviceInfo->connectionState = IOTHUB_DEVICE_CONNECTION_STATE_DISCONNECTED;
-        deviceInfo->status = IOTHUB_DEVICE_STATUS_DISABLED;
-    }
-}
-
 static void initializeDeviceOrModuleInfoMembers(IOTHUB_DEVICE_OR_MODULE* deviceOrModuleInfo)
 {
     if (NULL != deviceOrModuleInfo)
