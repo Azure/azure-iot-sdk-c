@@ -95,7 +95,6 @@ typedef struct AMQP_MESSENGER_CONFIG_TAG
 {
 	char* client_version;
 	char* device_id;
-	char* module_id;
 	char* iothub_host_fqdn;
 
 	AMQP_MESSENGER_LINK_CONFIG send_link;

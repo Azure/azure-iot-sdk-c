@@ -280,9 +280,6 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 
     REGISTER_GLOBAL_MOCK_RETURN(HTTPAPIEX_SAS_ExecuteRequest, HTTPAPIEX_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(HTTPAPIEX_SAS_ExecuteRequest, HTTPAPIEX_ERROR);
-
-    REGISTER_GLOBAL_MOCK_RETURN(UniqueId_Generate, UNIQUEID_OK);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(UniqueId_Generate, UNIQUEID_ERROR);
 }
 
 TEST_SUITE_CLEANUP(TestClassCleanup)
@@ -547,8 +544,17 @@ TEST_FUNCTION(IoTHubDeviceTwin_GetTwin_return_NULL_if_input_parameter_deviceId_i
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-static void set_expected_calls_for_sendHttpRequestTwin(const unsigned int httpStatusCode, bool update_twin)
+/*Tests_SRS_IOTHUBDEVICETWIN_12_019: [ IoTHubDeviceTwin_GetTwin shall create HTTP GET request URL using the given deviceId using the following format: url/twins/[deviceId] ]*/
+/*Tests_SRS_IOTHUBDEVICETWIN_12_020: [ IoTHubDeviceTwin_GetTwin shall add the following headers to the created HTTP GET request: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 ]*/
+/*Tests_SRS_IOTHUBDEVICETWIN_12_021: [ IoTHubDeviceTwin_GetTwin shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ]*/
+/*Tests_SRS_IOTHUBDEVICETWIN_12_022: [ IoTHubDeviceTwin_GetTwin shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ]*/
+/*Tests_SRS_IOTHUBDEVICETWIN_12_023: [ IoTHubDeviceTwin_GetTwin shall execute the HTTP GET request by calling HTTPAPIEX_ExecuteRequest ]*/
+/*Tests_SRS_IOTHUBDEVICETWIN_12_030: [ Otherwise IoTHubDeviceTwin_GetTwin shall save the received deviceTwin to the out parameter and return with it ]*/
+TEST_FUNCTION(IoTHubDeviceTwin_GetTwin_happy_path_status_code_200)
 {
+    // arrange
+    EXPECTED_CALL(BUFFER_new());
+
     EXPECTED_CALL(STRING_construct(TEST_HOSTNAME));
     EXPECTED_CALL(STRING_construct(TEST_SHAREDACCESSKEY));
     EXPECTED_CALL(STRING_construct(TEST_SHAREDACCESSKEYNAME));
@@ -565,12 +571,6 @@ static void set_expected_calls_for_sendHttpRequestTwin(const unsigned int httpSt
         .IgnoreArgument(1);
     EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_ACCEPT, TEST_HTTP_HEADER_VAL_ACCEPT))
         .IgnoreArgument(1);
-
-    if (update_twin)
-    {
-        EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_IFMATCH, TEST_HTTP_HEADER_VAL_IFMATCH))
-            .IgnoreArgument(1);
-    }
     
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
@@ -582,7 +582,7 @@ static void set_expected_calls_for_sendHttpRequestTwin(const unsigned int httpSt
 
     EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(IGNORED_PTR_ARG, IGNORED_PTR_ARG, HTTPAPI_REQUEST_GET, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments()
-        .CopyOutArgumentBuffer_statusCode(&httpStatusCode, sizeof(httpStatusCode))
+        .CopyOutArgumentBuffer_statusCode(&httpStatusCodeOk, sizeof(httpStatusCodeOk))
         .SetReturn(HTTPAPIEX_OK);
 
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
@@ -600,10 +600,7 @@ static void set_expected_calls_for_sendHttpRequestTwin(const unsigned int httpSt
         .IgnoreArgument(1);
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-}
 
-static void set_expected_calls_for_GetDeviceOrModuleTwin_processing()
-{
     EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
 
@@ -615,22 +612,6 @@ static void set_expected_calls_for_GetDeviceOrModuleTwin_processing()
 
     STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-
-}
-
-/*Tests_SRS_IOTHUBDEVICETWIN_12_019: [ IoTHubDeviceTwin_GetTwin shall create HTTP GET request URL using the given deviceId using the following format: url/twins/[deviceId] ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_020: [ IoTHubDeviceTwin_GetTwin shall add the following headers to the created HTTP GET request: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_021: [ IoTHubDeviceTwin_GetTwin shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_022: [ IoTHubDeviceTwin_GetTwin shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_023: [ IoTHubDeviceTwin_GetTwin shall execute the HTTP GET request by calling HTTPAPIEX_ExecuteRequest ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_030: [ Otherwise IoTHubDeviceTwin_GetTwin shall save the received deviceTwin to the out parameter and return with it ]*/
-TEST_FUNCTION(IoTHubDeviceTwin_GetTwin_happy_path_status_code_200)
-{
-    // arrange
-    EXPECTED_CALL(BUFFER_new());
-
-    set_expected_calls_for_sendHttpRequestTwin(httpStatusCodeOk, false);
-    set_expected_calls_for_GetDeviceOrModuleTwin_processing();
 
     // act
     const char* deviceId = " ";
@@ -655,7 +636,53 @@ TEST_FUNCTION(IoTHubDeviceTwin_GetTwin_happy_path_status_code_400)
     // arrange
     EXPECTED_CALL(BUFFER_new());
 
-    set_expected_calls_for_sendHttpRequestTwin(httpStatusCodeBadRequest, false);
+    EXPECTED_CALL(STRING_construct(TEST_HOSTNAME));
+    EXPECTED_CALL(STRING_construct(TEST_SHAREDACCESSKEY));
+    EXPECTED_CALL(STRING_construct(TEST_SHAREDACCESSKEYNAME));
+
+    EXPECTED_CALL(HTTPHeaders_Alloc());
+    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_AUTHORIZATION, TEST_HTTP_HEADER_VAL_AUTHORIZATION))
+        .IgnoreArgument(1);
+
+    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(UniqueId_Generate(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+
+    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_REQUEST_ID, TEST_HTTP_HEADER_VAL_REQUEST_ID))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_USER_AGENT, IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_ACCEPT, TEST_HTTP_HEADER_VAL_ACCEPT))
+        .IgnoreArgument(1);
+
+    EXPECTED_CALL(gballoc_free(IGNORED_NUM_ARG));
+
+    EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreAllArguments();
+    EXPECTED_CALL(HTTPAPIEX_Create(TEST_HOSTNAME));
+
+    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+
+    EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(IGNORED_PTR_ARG, IGNORED_PTR_ARG, HTTPAPI_REQUEST_GET, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreAllArguments()
+        .CopyOutArgumentBuffer_statusCode(&httpStatusCodeBadRequest, sizeof(httpStatusCodeBadRequest))
+        .SetReturn(HTTPAPIEX_OK);
+
+    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(HTTPAPIEX_SAS_Destroy(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
 
     EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
@@ -680,8 +707,65 @@ TEST_FUNCTION(IoTHubDeviceTwin_GetTwin_non_happy_path)
 
     EXPECTED_CALL(BUFFER_new());
 
-    set_expected_calls_for_sendHttpRequestTwin(httpStatusCodeOk, false);
-    set_expected_calls_for_GetDeviceOrModuleTwin_processing();
+    EXPECTED_CALL(STRING_construct(TEST_HOSTNAME));
+    EXPECTED_CALL(STRING_construct(TEST_SHAREDACCESSKEY));
+    EXPECTED_CALL(STRING_construct(TEST_SHAREDACCESSKEYNAME));
+
+    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(UniqueId_Generate(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+
+    EXPECTED_CALL(HTTPHeaders_Alloc());
+    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_AUTHORIZATION, TEST_HTTP_HEADER_VAL_AUTHORIZATION))
+        .IgnoreArgument(1);
+
+    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_REQUEST_ID, TEST_HTTP_HEADER_VAL_REQUEST_ID))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_USER_AGENT, IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_ACCEPT, TEST_HTTP_HEADER_VAL_ACCEPT))
+        .IgnoreArgument(1);
+
+    EXPECTED_CALL(gballoc_free(IGNORED_NUM_ARG));
+
+    EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreAllArguments();
+    EXPECTED_CALL(HTTPAPIEX_Create(TEST_HOSTNAME));
+
+    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+
+    EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(IGNORED_PTR_ARG, IGNORED_PTR_ARG, HTTPAPI_REQUEST_GET, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreAllArguments()
+        .CopyOutArgumentBuffer_statusCode(&httpStatusCodeOk, sizeof(httpStatusCodeOk))
+        .SetReturn(HTTPAPIEX_OK);
+
+    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(HTTPAPIEX_SAS_Destroy(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+	    .SetReturn(NULL);
+
+    EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(TEST_UNSIGNED_CHAR_PTR);
+
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
 
     // act
     umock_c_negative_tests_snapshot();
@@ -695,96 +779,30 @@ TEST_FUNCTION(IoTHubDeviceTwin_GetTwin_non_happy_path)
 
         /// act
         if (
-            (i != 11) && /*gballoc_free*/
-            (i != 14) && /*STRING_c_str*/
-            (i != 16) && /*STRING_delete*/
-            (i != 17) && /*HTTPAPIEX_Destroy*/
-            (i != 18) && /*HTTPAPIEX_SAS_Destroy*/
-            (i != 19) && /*HTTPHeaders_Free*/
+            (i != 7) && /*gballoc_malloc*/
+            (i != 13) && /*STRING_c_str*/
+            (i != 15) && /*HTTPHeaders_Free*/
+            (i != 16) && /*HTTPAPIEX_Destroy*/
+            (i != 17) && /*HTTPAPIEX_SAS_Destroy*/
+            (i != 18) && /*STRING_delete*/
+            (i != 19) && /*STRING_delete*/
             (i != 20) && /*STRING_delete*/
-            (i != 21) && /*STRING_delete*/
-            (i != 22) && /*STRING_delete*/
-            (i != 23) && /*BUFFER_length*/
-            (i != 25) && /*BUFFER_u_char*/
-            (i != 26)    /*BUFFER_delete*/
+            (i != 21) && /*BUFFER_u_char*/
+            (i != 22) && /*mallocAndStrcpy_s*/
+            (i != 23)    /*BUFFER_delete*/
             )
         {
-            char message_on_error[64];
-            sprintf(message_on_error, "Got unexpected non-NULL ptr on run %zu", i);
-        
             const char* deviceId = " ";
             char* result = IoTHubDeviceTwin_GetTwin(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE, deviceId);
 
             /// assert
-            ASSERT_IS_NULL_WITH_MSG(result, message_on_error);
+            ASSERT_IS_NULL(result);
         }
 
         ///cleanup
     }
     umock_c_negative_tests_deinit();
 }
-
-TEST_FUNCTION(IoTHubDeviceTwin_GetModuleTwin_return_NULL_if_input_parameter_serviceClientDeviceTwinHandle_is_NULL)
-{
-    // arrange
-
-    // act
-    const char* deviceId = " ";
-    const char* moduleId = " ";
-    char* result = IoTHubDeviceTwin_GetModuleTwin(NULL, deviceId, moduleId);
-
-    // assert
-    ASSERT_IS_NULL(result);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-}
-
-TEST_FUNCTION(IoTHubDeviceTwin_GetModuleTwin_return_NULL_if_input_parameter_deviceId_is_NULL)
-{
-    // arrange
-    const char* moduleId = " ";
-
-    // act
-    char* result = IoTHubDeviceTwin_GetModuleTwin(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE, NULL, moduleId);
-
-    // assert
-    ASSERT_IS_NULL(result);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-}
-
-TEST_FUNCTION(IoTHubDeviceTwin_GetModuleTwin_return_NULL_if_input_parameter_moduleId_is_NULL)
-{
-    // arrange
-    const char* deviceId = " ";
-
-    // act
-    char* result = IoTHubDeviceTwin_GetModuleTwin(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE, deviceId, NULL);
-
-    // assert
-    ASSERT_IS_NULL(result);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-}
-
-TEST_FUNCTION(IoTHubDeviceTwin_GetModuleTwin_happy_path_status_code_200)
-{
-    // arrange
-    EXPECTED_CALL(BUFFER_new());
-
-    set_expected_calls_for_sendHttpRequestTwin(httpStatusCodeOk, false);
-    set_expected_calls_for_GetDeviceOrModuleTwin_processing();
-
-    // act
-    const char* deviceId = " ";
-    const char* moduleId = " ";
-    char* result = IoTHubDeviceTwin_GetModuleTwin(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE, deviceId, moduleId);
-
-    // assert
-    ASSERT_IS_NOT_NULL(result);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-    // cleanup
-    free((void*)result);
-}
-
 
 /*Tests_SRS_IOTHUBDEVICETWIN_12_031: [ IoTHubDeviceTwin_UpdateTwin shall verify the input parameters and if any of them are NULL then return NULL ]*/
 TEST_FUNCTION(IoTHubDeviceTwin_UpdateTwin_return_NULL_if_input_parameter_serviceClientDeviceTwinHandle_is_NULL)
@@ -829,24 +847,6 @@ TEST_FUNCTION(IoTHubDeviceTwin_UpdateTwin_return_NULL_if_input_parameter_deviceT
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-static void set_expected_calls_for_UpdateDeviceOrModuleTwin_processing()
-{
-    EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
-        .IgnoreArgument(1);
-
-    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-
-    EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .SetReturn(TEST_UNSIGNED_CHAR_PTR);
-
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
-        .IgnoreArgument(1);
-
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
-        .IgnoreArgument(1);
-}
-
 /*Tests_SRS_IOTHUBDEVICETWIN_12_034: [ IoTHubDeviceTwin_UpdateTwin shall allocate memory for response buffer by calling BUFFER_new ]*/
 /*Tests_SRS_IOTHUBDEVICETWIN_12_039: [ IoTHubDeviceTwin_UpdateTwin shall create an HTTP PATCH request using deviceTwinJson ]*/
 /*Tests_SRS_IOTHUBDEVICETWIN_12_040: [ IoTHubDeviceTwin_UpdateTwin shall create an HTTP PATCH request using the createdfollowing HTTP headers: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 ]*/
@@ -862,8 +862,69 @@ TEST_FUNCTION(IoTHubDeviceTwin_UpdateTwin_happy_path_status_code_200)
 
     EXPECTED_CALL(BUFFER_new());
 
-    set_expected_calls_for_sendHttpRequestTwin(httpStatusCodeOk, true);
-    set_expected_calls_for_UpdateDeviceOrModuleTwin_processing();
+    EXPECTED_CALL(STRING_construct(TEST_HOSTNAME));
+    EXPECTED_CALL(STRING_construct(TEST_SHAREDACCESSKEY));
+    EXPECTED_CALL(STRING_construct(TEST_SHAREDACCESSKEYNAME));
+
+    EXPECTED_CALL(HTTPHeaders_Alloc());
+    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_AUTHORIZATION, TEST_HTTP_HEADER_VAL_AUTHORIZATION))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(UniqueId_Generate(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+
+    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_REQUEST_ID, TEST_HTTP_HEADER_VAL_REQUEST_ID))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_USER_AGENT, IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_ACCEPT, TEST_HTTP_HEADER_VAL_ACCEPT))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_ACCEPT, TEST_HTTP_HEADER_VAL_ACCEPT))
+        .IgnoreArgument(1);
+
+    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+
+    EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreAllArguments();
+    EXPECTED_CALL(HTTPAPIEX_Create(TEST_HOSTNAME));
+
+    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+
+    EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(IGNORED_PTR_ARG, IGNORED_PTR_ARG, HTTPAPI_REQUEST_GET, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreAllArguments()
+        .CopyOutArgumentBuffer_statusCode(&httpStatusCodeOk, sizeof(httpStatusCodeOk))
+        .SetReturn(HTTPAPIEX_OK);
+
+    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(HTTPAPIEX_SAS_Destroy(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+
+    EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(TEST_UNSIGNED_CHAR_PTR);
+
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
 
     // act
     const char* deviceId = " ";
@@ -893,7 +954,54 @@ TEST_FUNCTION(IoTHubDeviceTwin_UpdateTwin_happy_path_status_code_400)
 
     EXPECTED_CALL(BUFFER_new());
 
-    set_expected_calls_for_sendHttpRequestTwin(httpStatusCodeBadRequest, true);
+    EXPECTED_CALL(STRING_construct(TEST_HOSTNAME));
+    EXPECTED_CALL(STRING_construct(TEST_SHAREDACCESSKEY));
+    EXPECTED_CALL(STRING_construct(TEST_SHAREDACCESSKEYNAME));
+
+    EXPECTED_CALL(HTTPHeaders_Alloc());
+    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_AUTHORIZATION, TEST_HTTP_HEADER_VAL_AUTHORIZATION))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(UniqueId_Generate(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+
+    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_REQUEST_ID, TEST_HTTP_HEADER_VAL_REQUEST_ID))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_USER_AGENT, IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_ACCEPT, TEST_HTTP_HEADER_VAL_ACCEPT))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_ACCEPT, TEST_HTTP_HEADER_VAL_ACCEPT))
+        .IgnoreArgument(1);
+
+    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+
+    EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreAllArguments();
+    EXPECTED_CALL(HTTPAPIEX_Create(TEST_HOSTNAME));
+
+    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+
+    EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(IGNORED_PTR_ARG, IGNORED_PTR_ARG, HTTPAPI_REQUEST_GET, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreAllArguments()
+        .CopyOutArgumentBuffer_statusCode(&httpStatusCodeBadRequest, sizeof(httpStatusCodeBadRequest))
+        .SetReturn(HTTPAPIEX_OK);
+
+    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(HTTPAPIEX_SAS_Destroy(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
 
     EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
@@ -927,8 +1035,71 @@ TEST_FUNCTION(IoTHubDeviceTwin_UpdateTwin_non_happy_path)
 
     EXPECTED_CALL(BUFFER_new());
 
-    set_expected_calls_for_sendHttpRequestTwin(httpStatusCodeOk, true);
-    set_expected_calls_for_UpdateDeviceOrModuleTwin_processing();
+    EXPECTED_CALL(STRING_construct(TEST_HOSTNAME));
+    EXPECTED_CALL(STRING_construct(TEST_SHAREDACCESSKEY));
+    EXPECTED_CALL(STRING_construct(TEST_SHAREDACCESSKEYNAME));
+
+    EXPECTED_CALL(HTTPHeaders_Alloc());
+    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_AUTHORIZATION, TEST_HTTP_HEADER_VAL_AUTHORIZATION))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(UniqueId_Generate(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+
+    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_REQUEST_ID, TEST_HTTP_HEADER_VAL_REQUEST_ID))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_USER_AGENT, IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_ACCEPT, TEST_HTTP_HEADER_VAL_ACCEPT))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_ACCEPT, TEST_HTTP_HEADER_VAL_ACCEPT))
+        .IgnoreArgument(1);
+
+    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+
+    EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreAllArguments();
+    EXPECTED_CALL(HTTPAPIEX_Create(TEST_HOSTNAME));
+
+    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+
+    EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(IGNORED_PTR_ARG, IGNORED_PTR_ARG, HTTPAPI_REQUEST_GET, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreAllArguments()
+        .CopyOutArgumentBuffer_statusCode(&httpStatusCodeOk, sizeof(httpStatusCodeOk))
+        .SetReturn(HTTPAPIEX_OK);
+
+    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(HTTPAPIEX_SAS_Destroy(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+
+    EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)
+	    .SetReturn(NULL));
+
+    EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(TEST_UNSIGNED_CHAR_PTR);
+
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
 
     // act
     umock_c_negative_tests_snapshot();
@@ -942,30 +1113,28 @@ TEST_FUNCTION(IoTHubDeviceTwin_UpdateTwin_non_happy_path)
 
         /// act
         if (
+            (i != 7)  && /*gballoc_malloc*/
+            (i != 8)  && /*UniqueId_Generate*/
             (i != 13) && /*gballoc_free*/
             (i != 16) && /*STRING_c_str*/
             (i != 18) && /*STRING_delete*/
-            (i != 19) && /*HTTPAPIEX_Destroy*/
-            (i != 20) && /*HTTPAPIEX_SAS_Destroy*/
-            (i != 21) && /*HTTPHeaders_Free*/
-            (i != 22) && /*STRING_delete*/
-            (i != 23) && /*STRING_delete*/
-            (i != 24) && /*STRING_delete*/
-            (i != 25) && /*BUFFER_length*/
-            (i != 27) && /*BUFFER_u_char*/
-            (i != 28) && /*BUFFER_delete*/
-            (i != 29)    /*BUFFER_delete*/
+            (i != 19) && /*STRING_delete*/
+            (i != 20) && /*STRING_delete*/
+            (i != 21) && /*BUFFER_u_char*/
+            (i != 22) && /*mallocAndStrcpy_s*/
+            (i != 23) && /*BUFFER_delete*/
+            (i != 24) && /*BUFFER_delete*/
+            (i != 25) && /*BUFFER_delete*/
+            (i != 27) && /*BUFFER_delete*/
+            (i != 28)    /*BUFFER_delete*/
             )
         {
-            char message_on_error[64];
-            sprintf(message_on_error, "Got unexpected non-NULL ptr on run %zu", i);
-
             const char* deviceId = " ";
             const char* deviceTwinJson = " ";
             char* result = IoTHubDeviceTwin_UpdateTwin(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE, deviceId, deviceTwinJson);
 
             /// assert
-            ASSERT_IS_NULL_WITH_MSG(result, message_on_error);
+            ASSERT_IS_NULL(result);
         }
 
         ///cleanup
@@ -973,90 +1142,4 @@ TEST_FUNCTION(IoTHubDeviceTwin_UpdateTwin_non_happy_path)
     umock_c_negative_tests_deinit();
 }
 
-
-TEST_FUNCTION(IoTHubDeviceTwin_UpdateModuleTwin_return_NULL_if_input_parameter_serviceClientDeviceTwinHandle_is_NULL)
-{
-    // arrange
-
-    // act
-    const char* deviceId = " ";
-    const char* moduleId = " ";
-    const char* deviceTwinJson = " ";
-    
-    char* result = IoTHubDeviceTwin_UpdateModuleTwin(NULL, deviceId, moduleId, deviceTwinJson);
-
-    // assert
-    ASSERT_IS_NULL(result);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-}
-
-TEST_FUNCTION(IoTHubDeviceTwin_UpdateModuleTwin_return_NULL_if_input_parameter_deviceId_is_NULL)
-{
-    // arrange
-
-    // act
-    const char* deviceTwinJson = " ";
-    const char* moduleId = " ";
-    char* result = IoTHubDeviceTwin_UpdateModuleTwin(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE, NULL, moduleId, deviceTwinJson);
-
-    // assert
-    ASSERT_IS_NULL(result);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-}
-
-TEST_FUNCTION(IoTHubDeviceTwin_UpdateModuleTwin_return_NULL_if_input_parameter_moduleId_is_NULL)
-{
-    // arrange
-
-    // act
-    const char* deviceTwinJson = " ";
-    const char* deviceId = " ";
-    char* result = IoTHubDeviceTwin_UpdateModuleTwin(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE, deviceId, NULL, deviceTwinJson);
-
-    // assert
-    ASSERT_IS_NULL(result);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-}
-
-TEST_FUNCTION(IoTHubDeviceTwin_UpdateModuleTwin_return_NULL_if_input_parameter_deviceTwinJson_is_NULL)
-{
-    // arrange
-
-    // act
-    const char* deviceId = " ";
-    const char* moduleId = " ";
-    char* result = IoTHubDeviceTwin_UpdateModuleTwin(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE, deviceId, moduleId, NULL);
-
-    // assert
-    ASSERT_IS_NULL(result);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-}
-
-
-TEST_FUNCTION(IoTHubDeviceTwin_UpdateModuleTwin_happy_path_status_code_200)
-{
-    // arrange
-    EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-        .IgnoreAllArguments();
-
-    EXPECTED_CALL(BUFFER_new());
-
-    set_expected_calls_for_sendHttpRequestTwin(httpStatusCodeOk, true);
-    set_expected_calls_for_UpdateDeviceOrModuleTwin_processing();
-
-    // act
-    const char* deviceId = " ";
-    const char* moduleId = " ";
-    const char* deviceTwinJson = " ";
-    char* result = IoTHubDeviceTwin_UpdateModuleTwin(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE, deviceId, moduleId, deviceTwinJson);
-
-    // assert
-    ASSERT_IS_NOT_NULL(result);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-    // cleanup
-    free((void*)result);
-}
-
 END_TEST_SUITE(iothub_devicetwin_ut)
-    

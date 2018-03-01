@@ -84,7 +84,6 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 #define INDEFINITE_TIME                                   ((time_t)(-1))
 #define TEST_GENERIC_CHAR_PTR                             "generic char* string"
 #define TEST_DEVICE_ID                                    "my_device"
-#define TEST_MODULE_ID                                    "my_module"
 #define TEST_DEVICE_ID_STRING_HANDLE                      (STRING_HANDLE)0x4442
 #define TEST_IOTHUB_HOST_FQDN                             "some.fqdn.com"
 #define TEST_IOTHUB_HOST_FQDN_STRING_HANDLE               (STRING_HANDLE)0x4443
@@ -104,7 +103,7 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 #define TEST_DEVICES_PATH_STRING_HANDLE                   (STRING_HANDLE)0x4453
 #define SAS_TOKEN_TYPE                                    "servicebus.windows.net:sastoken"
 #define TEST_OPTIONHANDLER_HANDLE                         (OPTIONHANDLER_HANDLE)0x4455
-#define TEST_AUTHORIZATION_HANDLE                         (IOTHUB_AUTHORIZATION_HANDLE)0x4456
+#define TEST_AUTHORIZATION_MODULE_HANDLE                  (IOTHUB_AUTHORIZATION_HANDLE)0x4456
 
 static AUTHENTICATION_CONFIG global_auth_config;
 
@@ -257,8 +256,6 @@ static void register_global_mock_returns()
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(OptionHandler_AddOption, OPTIONHANDLER_ERROR);
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Get_DeviceId, TEST_DEVICE_ID);
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Is_SasToken_Valid, SAS_TOKEN_STATUS_VALID);
-
-    REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Get_ModuleId, NULL);
 }
 
 // Auxiliary Functions
@@ -316,7 +313,7 @@ static AUTHENTICATION_CONFIG* get_auth_config(USE_DEVICE_KEYS_OR_SAS_TOKEN_OPTIO
     global_auth_config.on_state_changed_callback_context = TEST_ON_STATE_CHANGED_CALLBACK_CONTEXT;
     global_auth_config.on_error_callback = TEST_on_error_callback;
     global_auth_config.on_error_callback_context = TEST_ON_ERROR_CALLBACK_CONTEXT;
-    global_auth_config.authorization_module = TEST_AUTHORIZATION_HANDLE;
+    global_auth_config.authorization_module = TEST_AUTHORIZATION_MODULE_HANDLE;
     return &global_auth_config;
 }
 
@@ -338,22 +335,12 @@ static time_t add_seconds(time_t base_time, unsigned int seconds)
     return new_time;
 }
 
-static void set_expected_calls_for_authentication_create(AUTHENTICATION_CONFIG* config, bool testing_modules)
+static void set_expected_calls_for_authentication_create(AUTHENTICATION_CONFIG* config)
 {
     (void)config;
-
     EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_DeviceId(TEST_AUTHORIZATION_HANDLE));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_DeviceId(TEST_AUTHORIZATION_MODULE_HANDLE));
     STRICT_EXPECTED_CALL(STRING_construct(TEST_IOTHUB_HOST_FQDN)).SetReturn(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE);
-
-    if (testing_modules)
-    {
-        STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_ModuleId(TEST_AUTHORIZATION_HANDLE)).SetReturn(TEST_MODULE_ID);
-    }
-    else
-    {
-        STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_ModuleId(TEST_AUTHORIZATION_HANDLE)).SetReturn(NULL);
-    }
 }
 
 static void set_expected_calls_for_authentication_destroy(AUTHENTICATION_HANDLE handle)
@@ -378,16 +365,16 @@ static void set_expected_calls_for_put_SAS_token_to_cbs(AUTHENTICATION_HANDLE ha
         sas_token_char_ptr = TEST_GENERATED_SAS_TOKEN;
     }
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(TEST_AUTHORIZATION_HANDLE)).SetReturn(cred_type);
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(TEST_AUTHORIZATION_MODULE_HANDLE)).SetReturn(cred_type);
     if (sas_token == TEST_USER_DEFINED_SAS_TOKEN_STRING_HANDLE)
     {
-        STRICT_EXPECTED_CALL(IoTHubClient_Auth_Is_SasToken_Valid(TEST_AUTHORIZATION_HANDLE));
+        STRICT_EXPECTED_CALL(IoTHubClient_Auth_Is_SasToken_Valid(TEST_AUTHORIZATION_MODULE_HANDLE));
     }
     else
     {
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     }
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken(TEST_AUTHORIZATION_HANDLE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken(TEST_AUTHORIZATION_MODULE_HANDLE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
 
     STRICT_EXPECTED_CALL(STRING_c_str(TEST_DEVICES_PATH_STRING_HANDLE)).SetReturn(TEST_DEVICES_PATH);
     STRICT_EXPECTED_CALL(cbs_put_token_async(TEST_CBS_HANDLE, SAS_TOKEN_TYPE, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, handle));
@@ -445,12 +432,12 @@ static void crank_authentication_do_work(AUTHENTICATION_CONFIG* config, AUTHENTI
     authentication_do_work(handle);
 }
 
-static AUTHENTICATION_HANDLE create_and_start_authentication(AUTHENTICATION_CONFIG* config, bool testing_modules)
+static AUTHENTICATION_HANDLE create_and_start_authentication(AUTHENTICATION_CONFIG* config)
 {
     AUTHENTICATION_HANDLE handle;
 
     umock_c_reset_all_calls();
-    set_expected_calls_for_authentication_create(config, testing_modules);
+    set_expected_calls_for_authentication_create(config);
 
     handle = authentication_create(config);
 
@@ -593,7 +580,7 @@ TEST_FUNCTION(authentication_create_DEVICE_KEYS_succeeds)
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_KEYS);
 
     umock_c_reset_all_calls();
-    set_expected_calls_for_authentication_create(config, false);
+    set_expected_calls_for_authentication_create(config);
 
     // act
     AUTHENTICATION_HANDLE handle = authentication_create(config);
@@ -613,7 +600,7 @@ TEST_FUNCTION(authentication_start_NULL_auth_handle)
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_KEYS);
 
     umock_c_reset_all_calls();
-    set_expected_calls_for_authentication_create(config, false);
+    set_expected_calls_for_authentication_create(config);
     AUTHENTICATION_HANDLE handle = authentication_create(config);
 
     umock_c_reset_all_calls();
@@ -637,7 +624,7 @@ TEST_FUNCTION(authentication_start_NULL_cbs_handle)
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_KEYS);
 
     umock_c_reset_all_calls();
-    set_expected_calls_for_authentication_create(config, false);
+    set_expected_calls_for_authentication_create(config);
     AUTHENTICATION_HANDLE handle = authentication_create(config);
 
     umock_c_reset_all_calls();
@@ -662,7 +649,7 @@ TEST_FUNCTION(authentication_start_succeeds)
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_KEYS);
 
     umock_c_reset_all_calls();
-    set_expected_calls_for_authentication_create(config, false);
+    set_expected_calls_for_authentication_create(config);
     AUTHENTICATION_HANDLE handle = authentication_create(config);
 
     umock_c_reset_all_calls();
@@ -680,42 +667,13 @@ TEST_FUNCTION(authentication_start_succeeds)
     // cleanup
     authentication_destroy(handle);
 }
-
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_029: [If no failures occur, `instance->state` shall be set to AUTHENTICATION_STATE_STARTING and `instance->on_state_changed_callback` invoked]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_030: [If no failures occur, authentication_start() shall return 0]
-TEST_FUNCTION(authentication_start_succeeds_with_module)
-{
-    // arrange
-    AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_KEYS);
-
-    umock_c_reset_all_calls();
-    set_expected_calls_for_authentication_create(config, true);
-    AUTHENTICATION_HANDLE handle = authentication_create(config);
-
-    umock_c_reset_all_calls();
-
-    // act
-    int result = authentication_start(handle, TEST_CBS_HANDLE);
-
-    // assert
-    ASSERT_IS_NOT_NULL(handle);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-    ASSERT_ARE_EQUAL(int, result, 0);
-    ASSERT_ARE_EQUAL(int, AUTHENTICATION_STATE_STOPPED, saved_on_state_changed_callback_previous_state);
-    ASSERT_ARE_EQUAL(int, AUTHENTICATION_STATE_STARTING, saved_on_state_changed_callback_new_state);
-
-    // cleanup
-    authentication_destroy(handle);
-}
-
-
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_027: [If authenticate state has been started already, authentication_start() shall fail and return __FAILURE__ as error code]
 TEST_FUNCTION(authentication_start_already_started_fails)
 {
     // arrange
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_KEYS);
-    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
+    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
 
     saved_on_state_changed_callback_previous_state = saved_on_state_changed_callback_new_state = AUTHENTICATION_STATE_STOPPED;
 
@@ -737,7 +695,7 @@ TEST_FUNCTION(authentication_stop_NULL_handle)
 {
     // arrange
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_KEYS);
-    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
+    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
 
     saved_on_state_changed_callback_previous_state = saved_on_state_changed_callback_new_state = AUTHENTICATION_STATE_STOPPED;
 
@@ -760,7 +718,7 @@ TEST_FUNCTION(authentication_stop_already_stoppped)
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_KEYS);
 
     umock_c_reset_all_calls();
-    set_expected_calls_for_authentication_create(config, false);
+    set_expected_calls_for_authentication_create(config);
     AUTHENTICATION_HANDLE handle = authentication_create(config);
 
     umock_c_reset_all_calls();
@@ -783,7 +741,7 @@ TEST_FUNCTION(authentication_stop_succeeds)
 {
     // arrange
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_KEYS);
-    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
+    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
 
     // act
     int result = authentication_stop(handle);
@@ -804,7 +762,7 @@ TEST_FUNCTION(authentication_destroy_NULL_handle)
 {
     // arrange
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_KEYS);
-    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
+    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
 
     umock_c_reset_all_calls();
     // act
@@ -830,7 +788,7 @@ TEST_FUNCTION(authentication_destroy_succeeds)
 {
     // arrange
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_KEYS);
-    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
+    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
 
     umock_c_reset_all_calls();
     set_expected_calls_for_authentication_destroy(handle);
@@ -868,7 +826,7 @@ TEST_FUNCTION(authentication_do_work_not_started)
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_KEYS);
     
     umock_c_reset_all_calls();
-    set_expected_calls_for_authentication_create(config, false);
+    set_expected_calls_for_authentication_create(config);
     AUTHENTICATION_HANDLE handle = authentication_create(config);
 
     umock_c_reset_all_calls();
@@ -885,13 +843,14 @@ TEST_FUNCTION(authentication_do_work_not_started)
 }
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_041: [If `instance->device_sas_token` is provided, authentication_do_work() shall put it to CBS]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_046: [The SAS token provided shall be sent to CBS using cbs_put_token_async(), using `servicebus.windows.net:sastoken` as token type, `devices_and_modules_path` as audience and passing on_cbs_put_token_complete_callback]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_044: [A STRING_HANDLE, referred to as `devices_path`, shall be created from the following parts: iothub_host_fqdn + "/devices/" + device_id]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_046: [The SAS token provided shall be sent to CBS using cbs_put_token_async(), using `servicebus.windows.net:sastoken` as token type, `devices_path` as audience and passing on_cbs_put_token_complete_callback]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_047: [If cbs_put_token_async() succeeds, authentication_do_work() shall set `instance->current_sas_token_put_time` with current time]
 TEST_FUNCTION(authentication_do_work_SAS_TOKEN_AUTHENTICATION_STATE_STARTING_success)
 {
     // arrange
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_SAS_TOKEN);
-    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
+    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
 
     time_t current_time = time(NULL);
 
@@ -916,16 +875,16 @@ TEST_FUNCTION(authentication_do_work_SAS_TOKEN_AUTHENTICATION_STATE_STARTING_suc
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_042: [Otherwise, authentication_do_work() shall use device keys for CBS authentication]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_049: [authentication_do_work() shall create a SAS token using `IoTHubClient_Auth_Get_SasToken`, unless it has failed previously]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_053: [A STRING_HANDLE, referred to as `devices_and_modules_path`, shall be created from: iothub_host_fqdn + "/devices/" + device_id (+ "/modules/" + module_id if a module): iothub_host_fqdn + "/devices/" + device_id]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_053: [A STRING_HANDLE, referred to as `devices_path`, shall be created from the following parts: iothub_host_fqdn + "/devices/" + device_id]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_057: [authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to TRUE]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_058: [The SAS token shall be sent to CBS using cbs_put_token_async(), using `servicebus.windows.net:sastoken` as token type, `devices_and_modules_path` as audience and passing on_cbs_put_token_complete_callback]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_058: [The SAS token shall be sent to CBS using cbs_put_token_async(), using `servicebus.windows.net:sastoken` as token type, `devices_path` as audience and passing on_cbs_put_token_complete_callback]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_059: [If cbs_put_token_async() succeeds, authentication_do_work() shall set `instance->current_sas_token_put_time` with current time]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_063: [authentication_do_work() shall free the memory it allocated for `devices_and_modules_path`, `sasTokenKeyName` and SAS token]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_063: [authentication_do_work() shall free the memory it allocated for `devices_path`, `sasTokenKeyName` and SAS token]
 TEST_FUNCTION(authentication_do_work_AUTHENTICATION_STATE_STARTING_success)
 {
     // arrange
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_KEYS);
-    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
+    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
 
     time_t current_time = time(NULL);
 
@@ -956,7 +915,7 @@ TEST_FUNCTION(authentication_do_work_SAS_TOKEN_on_cbs_put_token_callback_success
 {
     // arrange
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_SAS_TOKEN);
-    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
+    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
 
     time_t current_time = time(NULL);
 
@@ -981,40 +940,6 @@ TEST_FUNCTION(authentication_do_work_SAS_TOKEN_on_cbs_put_token_callback_success
     // cleanup
     authentication_destroy(handle);
 }
-
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_028: [authentication_start() shall save `cbs_handle` on `instance->cbs_handle`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_091: [If `result` is CBS_OPERATION_RESULT_OK `instance->state` shall be set to AUTHENTICATION_STATE_STARTED and `instance->on_state_changed_callback` invoked]
-TEST_FUNCTION(authentication_do_work_SAS_TOKEN_on_cbs_put_token_callback_success_with_module)
-{
-    // arrange
-    AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_SAS_TOKEN);
-    config->module_id = TEST_MODULE_ID;
-    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, true);
-
-    time_t current_time = time(NULL);
-
-    AUTHENTICATION_DO_WORK_EXPECTED_STATE *exp_state = get_do_work_expected_state_struct();
-    exp_state->current_state = AUTHENTICATION_STATE_STARTING;
-
-    crank_authentication_do_work(config, handle, current_time, exp_state);
-    
-    ASSERT_IS_NOT_NULL(saved_cbs_put_token_on_operation_complete);
-
-    umock_c_reset_all_calls();
-    
-    // act
-    saved_cbs_put_token_on_operation_complete(saved_cbs_put_token_context, CBS_OPERATION_RESULT_OK, 0, "all good");
-
-    // assert
-    ASSERT_IS_NOT_NULL(handle);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-    ASSERT_ARE_EQUAL(int, AUTHENTICATION_STATE_STARTING, saved_on_state_changed_callback_previous_state);
-    ASSERT_ARE_EQUAL(int, AUTHENTICATION_STATE_STARTED, saved_on_state_changed_callback_new_state);
-
-    // cleanup
-    authentication_destroy(handle);
-}
-
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_049: [authentication_do_work() shall create a SAS token using `IoTHubClient_Auth_Get_SasToken`, unless it has failed previously]
 TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_primary_key_only_fallback)
@@ -1022,7 +947,7 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_primary_key_only_fallback)
     // arrange
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_KEYS);
     //config->device_secondary_key = NULL;
-    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
+    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
 
     time_t current_time = time(NULL);
 
@@ -1052,8 +977,8 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_primary_key_only_fallback)
     authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_045: [If `devices_and_modules_path` failed to be created, authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to FALSE and return]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_048: [If cbs_put_token_async() failed, authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to FALSE, destroy `devices_and_modules_path` and return]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_045: [If `devices_path` failed to be created, authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to FALSE and return]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_048: [If cbs_put_token_async() failed, authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to FALSE, destroy `devices_path` and return]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_121: [If cbs_put_token_async() fails, `instance->state` shall be updated to AUTHENTICATION_STATE_ERROR and `instance->on_state_changed_callback` invoked]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_122: [If cbs_put_token_async() fails, `instance->on_error_callback` shall be invoked with AUTHENTICATION_ERROR_AUTH_FAILED]
 TEST_FUNCTION(authentication_do_work_SAS_TOKEN_AUTHENTICATION_STATE_STARTING_failure_checks)
@@ -1062,7 +987,7 @@ TEST_FUNCTION(authentication_do_work_SAS_TOKEN_AUTHENTICATION_STATE_STARTING_fai
     ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
 
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_SAS_TOKEN);
-    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
+    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
 
     time_t current_time = time(NULL);
 
@@ -1119,7 +1044,7 @@ TEST_FUNCTION(authentication_do_work_SAS_TOKEN_on_cbs_put_token_callback_error)
 {
     // arrange
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_SAS_TOKEN);
-    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
+    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
 
     time_t current_time = time(NULL);
 
@@ -1147,7 +1072,7 @@ TEST_FUNCTION(authentication_do_work_SAS_TOKEN_on_cbs_put_token_callback_error)
 }
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_022: [authentication_create() shall set `instance->sas_token_lifetime_secs` with the default value of one hour]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_054: [If `devices_and_modules_path` failed to be created, authentication_do_work() shall fail and return]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_054: [If `devices_path` failed to be created, authentication_do_work() shall fail and return]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_056: [If SASToken_Create() fails, authentication_do_work() shall fail and return]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_060: [If cbs_put_token_async() fails, `instance->is_cbs_put_token_in_progress` shall be set to FALSE]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_061: [If cbs_put_token_async() fails, `instance->state` shall be updated to AUTHENTICATION_STATE_ERROR and `instance->on_state_changed_callback` invoked]
@@ -1158,7 +1083,7 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_AUTHENTICATION_STATE_STARTING_f
     ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
 
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_KEYS);
-    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
+    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
 
     time_t current_time = time(NULL);
 
@@ -1213,7 +1138,7 @@ TEST_FUNCTION(authentication_do_work_SAS_TOKEN_next_calls_no_op)
 {
     // arrange
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_SAS_TOKEN);
-    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
+    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
 
     time_t current_time = time(NULL);
 
@@ -1256,7 +1181,7 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_sas_token_refresh_check)
 {
     // arrange
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_KEYS);
-    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
+    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
 
     time_t current_time = time(NULL);
     time_t next_time = add_seconds(current_time, DEFAULT_SAS_TOKEN_REFRESH_TIME_SECS - 1);
@@ -1288,18 +1213,18 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_sas_token_refresh_check)
 }
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_067: [authentication_do_work() shall create a SAS token using `instance->device_primary_key`, unless it has failed previously]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_071: [A STRING_HANDLE, referred to as `devices_and_modules_path`, shall be created from: iothub_host_fqdn + "/devices/" + device_id (+ "/modules/" + module_id if a module)]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_071: [A STRING_HANDLE, referred to as `devices_path`, shall be created from the following parts: iothub_host_fqdn + "/devices/" + device_id]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_117: [An empty STRING_HANDLE, referred to as `sasTokenKeyName`, shall be created using STRING_new()]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_073: [The SAS token shall be created using SASToken_Create(), passing the selected device key, device_path, sasTokenKeyName and expiration time as arguments]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_076: [The SAS token shall be sent to CBS using cbs_put_token_async(), using `servicebus.windows.net:sastoken` as token type, `devices_and_modules_path` as audience and passing on_cbs_put_token_complete_callback]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_076: [The SAS token shall be sent to CBS using cbs_put_token_async(), using `servicebus.windows.net:sastoken` as token type, `devices_path` as audience and passing on_cbs_put_token_complete_callback]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_077: [If cbs_put_token_async() succeeds, authentication_do_work() shall set `instance->current_sas_token_put_time` with the current time]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_081: [authentication_do_work() shall free the memory it allocated for `devices_and_modules_path`, `sasTokenKeyName` and SAS token]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_081: [authentication_do_work() shall free the memory it allocated for `devices_path`, `sasTokenKeyName` and SAS token]
 // Tests_SRSIOTHUBTRANSPORT_AMQP_AUTH_09_125: [If name matches AUTHENTICATION_OPTION_SAS_TOKEN_LIFETIME_SECS, `value` shall be saved on `instance->sas_token_lifetime_secs`]
 TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_sas_token_refresh)
 {
     // arrange
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_KEYS);
-    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
+    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
 
     time_t current_time = time(NULL);
     time_t next_time = add_seconds(current_time, 11);
@@ -1348,7 +1273,7 @@ TEST_FUNCTION(authentication_do_work_first_auth_timeout_check)
 {
     // arrange
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_SAS_TOKEN);
-    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
+    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
 
     time_t current_time = time(NULL);
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != current_time, "current_time = time(NULL) failed");
@@ -1387,7 +1312,7 @@ TEST_FUNCTION(authentication_do_work_first_auth_times_out)
 {
     // arrange
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_SAS_TOKEN);
-    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
+    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
 
     size_t timeout_secs = 10;
     int result = authentication_set_option(handle, AUTHENTICATION_OPTION_CBS_REQUEST_TIMEOUT_SECS, &timeout_secs);
@@ -1446,7 +1371,7 @@ TEST_FUNCTION(authentication_set_option_NULL_name)
 {
     // arrange
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_SAS_TOKEN);
-    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
+    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
 
     umock_c_reset_all_calls();
 
@@ -1468,7 +1393,7 @@ TEST_FUNCTION(authentication_set_option_NULL_value)
 {
     // arrange
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_SAS_TOKEN);
-    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
+    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
 
     umock_c_reset_all_calls();
 
@@ -1488,7 +1413,7 @@ TEST_FUNCTION(authentication_set_option_name_not_supported)
 {
     // arrange
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_SAS_TOKEN);
-    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
+    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
 
     umock_c_reset_all_calls();
 
@@ -1510,7 +1435,7 @@ TEST_FUNCTION(authentication_set_option_saved_options_succeeds)
 {
     // arrange
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_SAS_TOKEN);
-    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
+    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
 
     umock_c_reset_all_calls();
 
@@ -1533,7 +1458,7 @@ TEST_FUNCTION(authentication_set_option_OptionHandler_FeedOptions_OPTIONHANDLER_
 {
     // arrange
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_SAS_TOKEN);
-    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
+    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
 
     umock_c_reset_all_calls();
 
@@ -1557,7 +1482,7 @@ TEST_FUNCTION(authentication_set_option_OptionHandler_FeedOptions_OPTIONHANDLER_
 {
     // arrange
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_SAS_TOKEN);
-    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
+    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
 
     umock_c_reset_all_calls();
 
@@ -1598,7 +1523,7 @@ TEST_FUNCTION(authentication_retrieve_options_succeeds)
 {
     // arrange
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_SAS_TOKEN);
-    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
+    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
 
     umock_c_reset_all_calls();
     EXPECTED_CALL(OptionHandler_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(TEST_OPTIONHANDLER_HANDLE);
@@ -1635,7 +1560,7 @@ TEST_FUNCTION(authentication_retrieve_options_failure_checks)
     ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
 
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_SAS_TOKEN);
-    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
+    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config);
     
     umock_c_reset_all_calls();
     EXPECTED_CALL(OptionHandler_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(TEST_OPTIONHANDLER_HANDLE);

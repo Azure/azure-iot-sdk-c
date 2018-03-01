@@ -210,19 +210,6 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_WS_SendMessageDisposition(MESSAG
     return IoTHubTransport_AMQP_Common_SendMessageDisposition(message_data, disposition);
 }
 
-static int IotHubTransportAMQP_WS_Subscribe_InputQueue(IOTHUB_DEVICE_HANDLE handle)
-{
-    (void)handle;
-    LogError("AMQP WS does not support input queues");
-    return (int)-1;
-}
-
-static void IotHubTransportAMQP_WS_Unsubscribe_InputQueue(IOTHUB_DEVICE_HANDLE handle)
-{
-    (void)handle;
-    LogError("AMQP WS does not support input queues");
-}
-
 static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls = 
 {
     IoTHubTransportAMQP_WS_SendMessageDisposition,                     /*pfIotHubTransport_Send_Message_Disposition IoTHubTransport_Send_Message_Disposition;*/
@@ -242,9 +229,7 @@ static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls =
     IoTHubTransportAMQP_WS_Unsubscribe,                                /*pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;*/
     IoTHubTransportAMQP_WS_DoWork,                                     /*pfIoTHubTransport_DoWork IoTHubTransport_DoWork;*/
     IoTHubTransportAMQP_WS_SetRetryPolicy,                             /*pfIoTHubTransport_SetRetryLogic IoTHubTransport_SetRetryPolicy;*/
-    IoTHubTransportAMQP_WS_GetSendStatus,                              /*pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus;*/
-    IotHubTransportAMQP_WS_Subscribe_InputQueue,                       /*pfIoTHubTransport_Subscribe_InputQueue IoTHubTransport_Subscribe_InputQueue; */
-    IotHubTransportAMQP_WS_Unsubscribe_InputQueue                      /*pfIoTHubTransport_Unsubscribe_InputQueue IoTHubTransport_Unsubscribe_InputQueue; */
+    IoTHubTransportAMQP_WS_GetSendStatus                               /*pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus;*/
 };
 
 /* Codes_SRS_IoTHubTransportAMQP_WS_09_019: [This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for it's fields:

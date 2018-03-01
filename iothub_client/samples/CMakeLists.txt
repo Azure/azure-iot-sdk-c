@@ -4,7 +4,7 @@
 #this is CMakeLists.txt for samples. There's noithig here, except redirections to 
 #individual protocol samples
 
-usePermissiveRulesForSamplesAndTests()
+usePermissiveRulesForSdkSamplesAndTests()
 
 function(add_sample_directory whatIsBuilding)
     add_subdirectory(${whatIsBuilding})
@@ -34,8 +34,6 @@ if(${use_mqtt})
     if(LINUX)
         add_sample_directory(iothub_client_sample_mqtt_dm)
     endif()
-    add_sample_directory(iothub_client_sample_module_sender)
-    add_sample_directory(iothub_client_sample_module_filter)
 endif()
 
 if(${use_amqp})

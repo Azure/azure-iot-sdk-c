@@ -25,7 +25,6 @@ typedef enum SUBSCRIBE_STATE_TAG
 typedef struct IOTHUBTRANSPORT_AMQP_METHODS_TAG
 {
     char* device_id;
-    char* module_id;
     char* hostname;
     LINK_HANDLE receiver_link;
     LINK_HANDLE sender_link;
@@ -91,7 +90,7 @@ static void remove_tracked_handle(IOTHUBTRANSPORT_AMQP_METHODS* amqp_methods_han
     }
 }
 
-IOTHUBTRANSPORT_AMQP_METHODS_HANDLE iothubtransportamqp_methods_create(const char* hostname, const char* device_id, const char* module_id)
+IOTHUBTRANSPORT_AMQP_METHODS_HANDLE iothubtransportamqp_methods_create(const char* hostname, const char* device_id)
 {
     IOTHUBTRANSPORT_AMQP_METHODS* result;
 
@@ -114,21 +113,11 @@ IOTHUBTRANSPORT_AMQP_METHODS_HANDLE iothubtransportamqp_methods_create(const cha
         }
         else
         {
-            memset(result, 0, sizeof(IOTHUBTRANSPORT_AMQP_METHODS));
-            
             /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_115: [ `iothubtransportamqp_methods_create` shall save the device id for later use by using `mallocAndStrcpy_s`. ]*/
             if (mallocAndStrcpy_s(&result->device_id, device_id) != 0)
             {
                 /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_116: [ If `mallocAndStrcpy_s` fails, `iothubtransportamqp_methods_create` shall return NULL. ]*/
                 LogError("Cannot copy device_id");
-                free(result);
-                result = NULL;
-            }
-            else if ((module_id != NULL) && (mallocAndStrcpy_s(&result->module_id, module_id) != 0))
-            {
-                /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_116: [ If `mallocAndStrcpy_s` fails, `iothubtransportamqp_methods_create` shall return NULL. ]*/
-                LogError("Cannot copy device_id");
-                free(result->device_id);
                 free(result);
                 result = NULL;
             }
@@ -140,7 +129,6 @@ IOTHUBTRANSPORT_AMQP_METHODS_HANDLE iothubtransportamqp_methods_create(const cha
                     /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_116: [ If `mallocAndStrcpy_s` fails, `iothubtransportamqp_methods_create` shall return NULL. ]*/
                     LogError("Cannot copy hostname");
                     free(result->device_id);
-                    free(result->module_id);
                     free(result);
                     result = NULL;
                 }
@@ -189,7 +177,6 @@ void iothubtransportamqp_methods_destroy(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE iot
         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_005: [ `iothubtransportamqp_methods_destroy` shall free all resources allocated by `iothubtransportamqp_methods_create` for the handle `iothubtransport_amqp_methods_handle`. ]*/
         free(iothubtransport_amqp_methods_handle->hostname);
         free(iothubtransport_amqp_methods_handle->device_id);
-        free(iothubtransport_amqp_methods_handle->module_id);
         free(iothubtransport_amqp_methods_handle);
     }
 }
@@ -489,56 +476,6 @@ static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE messag
     return result;
 }
 
-STRING_HANDLE create_correlation_id(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE iothubtransport_amqp_methods_handle)
-{
-    if (iothubtransport_amqp_methods_handle->module_id != NULL)
-    {
-        return STRING_construct_sprintf("%s/%s", iothubtransport_amqp_methods_handle->device_id, iothubtransport_amqp_methods_handle->module_id);  
-    }
-    else
-    {
-        return STRING_construct(iothubtransport_amqp_methods_handle->device_id);
-    }
-}
-
-STRING_HANDLE create_peer_endpoint_name(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE iothubtransport_amqp_methods_handle)
-{
-    if (iothubtransport_amqp_methods_handle->module_id != NULL)
-    {
-        return STRING_construct_sprintf("amqps://%s/devices/%s/modules/%s/methods/devicebound", iothubtransport_amqp_methods_handle->hostname, iothubtransport_amqp_methods_handle->device_id, iothubtransport_amqp_methods_handle->module_id);
-    }
-    else
-    {
-        return STRING_construct_sprintf("amqps://%s/devices/%s/methods/devicebound", iothubtransport_amqp_methods_handle->hostname, iothubtransport_amqp_methods_handle->device_id);
-    }
-}
-
-STRING_HANDLE create_requests_link_name(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE iothubtransport_amqp_methods_handle)
-{
-    if (iothubtransport_amqp_methods_handle->module_id != NULL)
-    {
-        return STRING_construct_sprintf("methods_requests_link-%s/%s", iothubtransport_amqp_methods_handle->device_id, iothubtransport_amqp_methods_handle->module_id);
-    }
-    else
-    {
-        return STRING_construct_sprintf("methods_requests_link-%s", iothubtransport_amqp_methods_handle->device_id);
-    }
-}
-
-STRING_HANDLE create_responses_link_name(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE iothubtransport_amqp_methods_handle)
-{
-    if (iothubtransport_amqp_methods_handle->module_id != NULL)
-    {
-        return STRING_construct_sprintf("methods_responses_link-%s/%s", iothubtransport_amqp_methods_handle->device_id, iothubtransport_amqp_methods_handle->module_id);
-    }
-    else
-    {
-        return STRING_construct_sprintf("methods_responses_link-%s", iothubtransport_amqp_methods_handle->device_id);
-    }
-}
-
-
-
 static int set_link_attach_properties(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE iothubtransport_amqp_methods_handle)
 {
     int result = 0;
@@ -549,7 +486,7 @@ static int set_link_attach_properties(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE iothub
     if (link_attach_properties == NULL)
     {
         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_145: [ If any call for creating or setting the link attach properties fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
-        LogError("Cannot create the map for link attach properties");
+        LogError("Cannot create the map for link ttach properties");
         result = __FAILURE__;
     }
     else
@@ -564,17 +501,9 @@ static int set_link_attach_properties(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE iothub
         }
         else
         {
-            /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_142: [ A property value of type string that shall contain the device id (and "/" + module id if module is present) shall be created by calling `amqpvalue_create_string`. ]*/
-            STRING_HANDLE correlation_id = NULL;
-            AMQP_VALUE channel_correlation_id_property_value = NULL;
-
-            if ((correlation_id = create_correlation_id(iothubtransport_amqp_methods_handle)) == NULL)
-            {
-                /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_145: [ If any call for creating or setting the link attach properties fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
-                LogError("Cannot create the channel correlation id string for the link attach properties");
-                result = __FAILURE__;
-            }
-            else if ((channel_correlation_id_property_value = amqpvalue_create_string(STRING_c_str(correlation_id))) == NULL)
+            /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_142: [ A property value of type string that shall contain the device id shall be created by calling `amqpvalue_create_string`. ]*/
+            AMQP_VALUE channel_correlation_id_property_value = amqpvalue_create_string(iothubtransport_amqp_methods_handle->device_id);
+            if (channel_correlation_id_property_value == NULL)
             {
                 /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_145: [ If any call for creating or setting the link attach properties fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
                 LogError("Cannot create the channel correlation id property key for the link attach properties");
@@ -648,7 +577,6 @@ static int set_link_attach_properties(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE iothub
                 /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_146: [ The link attach properties and all associated values shall be freed by calling `amqpvalue_destroy` after setting the link attach properties. ]*/
                 amqpvalue_destroy(channel_correlation_id_property_value);
             }
-            STRING_delete(correlation_id);
 
             /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_146: [ The link attach properties and all associated values shall be freed by calling `amqpvalue_destroy` after setting the link attach properties. ]*/
             amqpvalue_destroy(channel_correlation_id_property_key);
@@ -687,9 +615,9 @@ int iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE io
     }
     else
     {
-        /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_015: [ The address string used to create the source shall be of the form `/devices/{device id}` + (`/modules/{module  id}` if modules are present) + `/methods/devicebound`. ]*/
+        /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_015: [ The address string used to create the source shall be of the form `/devices/{device id}/methods/devicebound`. ]*/
         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_016: [ The string shall be created by using `STRING_construct_sprintf`. ]*/
-        STRING_HANDLE peer_endpoint_string = create_peer_endpoint_name(iothubtransport_amqp_methods_handle);
+        STRING_HANDLE peer_endpoint_string = STRING_construct_sprintf("amqps://%s/devices/%s/methods/devicebound", iothubtransport_amqp_methods_handle->hostname, iothubtransport_amqp_methods_handle->device_id);
         if (peer_endpoint_string == NULL)
         {
             /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_018: [ If `STRING_construct_sprintf` fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
@@ -725,8 +653,8 @@ int iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE io
                 }
                 else
                 {
-                    /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_012: [ - `name` shall be in the format `methods_requests_link-{device_id}` (+ `/{module-id}` if module id is present). ]*/
-                    STRING_HANDLE requests_link_name = create_requests_link_name(iothubtransport_amqp_methods_handle); 
+                    /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_012: [ - `name` shall be in the format `methods_requests_link-{device_id}`, where device_id is the `device_id` argument passed to `iothubtransportamqp_methods_create`. ]*/
+                    STRING_HANDLE requests_link_name = STRING_construct_sprintf("methods_requests_link-%s", iothubtransport_amqp_methods_handle->device_id);
                     if (requests_link_name == NULL)
                     {
                         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_153: [ If constructing the requests link name fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
@@ -768,11 +696,11 @@ int iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE io
                                 }
                                 else
                                 {
-                                    /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_023: [ - `name` shall be format `methods_responses_link-{device_id}` (+ `/{module-id}` if module id is present). ]*/
-                                    STRING_HANDLE responses_link_name = create_responses_link_name(iothubtransport_amqp_methods_handle);
+                                    /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_023: [ - `name` shall be format `methods_responses_link-{device_id}`, where device_id is the `device_id` argument passed to `iothubtransportamqp_methods_create`. ]*/
+                                    STRING_HANDLE responses_link_name = STRING_construct_sprintf("methods_responses_link-%s", iothubtransport_amqp_methods_handle->device_id);
                                     if (responses_link_name == NULL)
                                     {
-                                        /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_154: [ If constructing the responses link name fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
+                                        /* CodeS_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_154: [ If constructing the responses link name fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
                                         LogError("Cannot create methods responses link name.");
                                         result = __FAILURE__;
                                     }

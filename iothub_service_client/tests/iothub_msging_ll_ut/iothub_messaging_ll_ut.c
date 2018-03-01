@@ -518,6 +518,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
             ASSERT_FAIL("Bad size_t size");
         }
 
+
         REGISTER_GLOBAL_MOCK_HOOK(STRING_construct, my_STRING_construct);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_construct, NULL);
 

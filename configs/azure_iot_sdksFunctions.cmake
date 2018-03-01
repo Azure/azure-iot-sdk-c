@@ -128,10 +128,10 @@ endfunction()
 
 # XCode warns about unused variables and unused static functions,
 # both of which are produced by serializer
-function(usePermissiveRulesForSamplesAndTests)
+function(usePermissiveRulesForSdkSamplesAndTests)
     if(XCODE)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable  -Wno-unused-function" PARENT_SCOPE)
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-variable  -Wno-unused-function" PARENT_SCOPE)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable  -Wno-unused-function -Wno-overloaded-virtual -Wno-missing-braces" PARENT_SCOPE)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-variable  -Wno-unused-function -Wno-overloaded-virtual -Wno-missing-braces" PARENT_SCOPE)
     endif()
 endfunction()
 

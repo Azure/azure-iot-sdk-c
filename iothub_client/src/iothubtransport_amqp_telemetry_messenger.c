@@ -23,7 +23,6 @@
 #define INDEFINITE_TIME ((time_t)(-1))
 
 #define IOTHUB_DEVICES_PATH_FMT                         "%s/devices/%s"
-#define IOTHUB_DEVICES_MODULE_PATH_FMT                  "%s/devices/%s/modules/%s"
 #define IOTHUB_EVENT_SEND_ADDRESS_FMT                   "amqps://%s/messages/events"
 #define IOTHUB_MESSAGE_RECEIVE_ADDRESS_FMT              "amqps://%s/messages/devicebound"
 #define MESSAGE_SENDER_LINK_NAME_PREFIX                 "link-snd"
@@ -42,7 +41,6 @@
 typedef struct TELEMETRY_MESSENGER_INSTANCE_TAG
 {
     STRING_HANDLE device_id;
-    STRING_HANDLE module_id;
     STRING_HANDLE product_info;
     STRING_HANDLE iothub_host_fqdn;
     SINGLYLINKEDLIST_HANDLE waiting_to_send;   // List of MESSENGER_SEND_EVENT_CALLER_INFORMATION's
@@ -135,44 +133,30 @@ static int is_timeout_reached(time_t start_time, size_t timeout_in_secs, int *is
     return result;
 }
 
-static STRING_HANDLE create_devices_and_modules_path(STRING_HANDLE iothub_host_fqdn, STRING_HANDLE device_id, STRING_HANDLE module_id)
+static STRING_HANDLE create_devices_path(STRING_HANDLE iothub_host_fqdn, STRING_HANDLE device_id)
 {
-    STRING_HANDLE devices_and_modules_path;
+    STRING_HANDLE devices_path;
 
-    if ((devices_and_modules_path = STRING_new()) == NULL)
+    if ((devices_path = STRING_new()) == NULL)
     {
-        LogError("Failed creating devices_and_modules_path (STRING_new failed)");
+        LogError("Failed creating devices_path (STRING_new failed)");
     }
     else
     {
         const char* iothub_host_fqdn_char_ptr = STRING_c_str(iothub_host_fqdn);
         const char* device_id_char_ptr = STRING_c_str(device_id);
-        const char* module_id_char_ptr = STRING_c_str(module_id);
-
-        if (module_id_char_ptr != NULL)
+            if (STRING_sprintf(devices_path, IOTHUB_DEVICES_PATH_FMT, iothub_host_fqdn_char_ptr, device_id_char_ptr) != RESULT_OK)
         {
-            if (STRING_sprintf(devices_and_modules_path, IOTHUB_DEVICES_MODULE_PATH_FMT, iothub_host_fqdn_char_ptr, device_id_char_ptr, module_id_char_ptr) != RESULT_OK)
-            {
-                STRING_delete(devices_and_modules_path);
-                devices_and_modules_path = NULL;
-                LogError("Failed creating devices_and_modules_path (STRING_sprintf failed)");
-            }
-        }
-        else
-        {
-            if (STRING_sprintf(devices_and_modules_path, IOTHUB_DEVICES_PATH_FMT, iothub_host_fqdn_char_ptr, device_id_char_ptr) != RESULT_OK)
-            {
-                STRING_delete(devices_and_modules_path);
-                devices_and_modules_path = NULL;
-                LogError("Failed creating devices_and_modules_path (STRING_sprintf failed)");
-            }
+            STRING_delete(devices_path);
+            devices_path = NULL;
+            LogError("Failed creating devices_path (STRING_sprintf failed)");
         }
     }
 
-    return devices_and_modules_path;
+    return devices_path;
 }
 
-static STRING_HANDLE create_event_send_address(STRING_HANDLE devices_and_modules_path)
+static STRING_HANDLE create_event_send_address(STRING_HANDLE devices_path)
 {
     STRING_HANDLE event_send_address;
 
@@ -182,8 +166,8 @@ static STRING_HANDLE create_event_send_address(STRING_HANDLE devices_and_modules
     }
     else
     {
-        const char* devices_and_modules_path_char_ptr = STRING_c_str(devices_and_modules_path);
-        if (STRING_sprintf(event_send_address, IOTHUB_EVENT_SEND_ADDRESS_FMT, devices_and_modules_path_char_ptr) != RESULT_OK)
+        const char* devices_path_char_ptr = STRING_c_str(devices_path);
+        if (STRING_sprintf(event_send_address, IOTHUB_EVENT_SEND_ADDRESS_FMT, devices_path_char_ptr) != RESULT_OK)
         {
             STRING_delete(event_send_address);
             event_send_address = NULL;
@@ -216,7 +200,7 @@ static STRING_HANDLE create_event_sender_source_name(STRING_HANDLE link_name)
     return source_name;
 }
 
-static STRING_HANDLE create_message_receive_address(STRING_HANDLE devices_and_modules_path)
+static STRING_HANDLE create_message_receive_address(STRING_HANDLE devices_path)
 {
     STRING_HANDLE message_receive_address;
 
@@ -226,8 +210,8 @@ static STRING_HANDLE create_message_receive_address(STRING_HANDLE devices_and_mo
     }
     else
     {
-        const char* devices_and_modules_path_char_ptr = STRING_c_str(devices_and_modules_path);
-        if (STRING_sprintf(message_receive_address, IOTHUB_MESSAGE_RECEIVE_ADDRESS_FMT, devices_and_modules_path_char_ptr) != RESULT_OK)
+        const char* devices_path_char_ptr = STRING_c_str(devices_path);
+        if (STRING_sprintf(message_receive_address, IOTHUB_MESSAGE_RECEIVE_ADDRESS_FMT, devices_path_char_ptr) != RESULT_OK)
         {
             STRING_delete(message_receive_address);
             message_receive_address = NULL;
@@ -399,18 +383,18 @@ static int create_event_sender(TELEMETRY_MESSENGER_INSTANCE* instance)
     STRING_HANDLE source_name = NULL;
     AMQP_VALUE source = NULL;
     AMQP_VALUE target = NULL;
-    STRING_HANDLE devices_and_modules_path = NULL;
+    STRING_HANDLE devices_path = NULL;
     STRING_HANDLE event_send_address = NULL;
 
-    // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_033: [A variable, named `devices_and_modules_path`, shall be created concatenating `instance->iothub_host_fqdn`, "/devices/" and `instance->device_id` (and "/modules/" and `instance->module_id` if modules are present)]
-    if ((devices_and_modules_path = create_devices_and_modules_path(instance->iothub_host_fqdn, instance->device_id, instance->module_id)) == NULL)
+    // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_033: [A variable, named `devices_path`, shall be created concatenating `instance->iothub_host_fqdn`, "/devices/" and `instance->device_id`]
+    if ((devices_path = create_devices_path(instance->iothub_host_fqdn, instance->device_id)) == NULL)
     {
-        // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_034: [If `devices_and_modules_path` fails to be created, telemetry_messenger_do_work() shall fail and return]
+        // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_034: [If `devices_path` fails to be created, telemetry_messenger_do_work() shall fail and return]
         result = __FAILURE__;
-        LogError("Failed creating the message sender (failed creating the 'devices_and_modules_path')");
+        LogError("Failed creating the message sender (failed creating the 'devices_path')");
     }
-    // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_035: [A variable, named `event_send_address`, shall be created concatenating "amqps://", `devices_and_modules_path` and "/messages/events"]
-    else if ((event_send_address = create_event_send_address(devices_and_modules_path)) == NULL)
+    // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_035: [A variable, named `event_send_address`, shall be created concatenating "amqps://", `devices_path` and "/messages/events"]
+    else if ((event_send_address = create_event_send_address(devices_path)) == NULL)
     {
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_036: [If `event_send_address` fails to be created, telemetry_messenger_do_work() shall fail and return]
         result = __FAILURE__;
@@ -496,8 +480,8 @@ static int create_event_sender(TELEMETRY_MESSENGER_INSTANCE* instance)
         amqpvalue_destroy(source);
     if (target != NULL)
         amqpvalue_destroy(target);
-    if (devices_and_modules_path != NULL)
-        STRING_delete(devices_and_modules_path);
+    if (devices_path != NULL)
+        STRING_delete(devices_path);
     if (event_send_address != NULL)
         STRING_delete(event_send_address);
 
@@ -684,22 +668,22 @@ static int create_message_receiver(TELEMETRY_MESSENGER_INSTANCE* instance)
 {
     int result;
 
-    STRING_HANDLE devices_and_modules_path = NULL;
+    STRING_HANDLE devices_path = NULL;
     STRING_HANDLE message_receive_address = NULL;
     STRING_HANDLE link_name = NULL;
     STRING_HANDLE target_name = NULL;
     AMQP_VALUE source = NULL;
     AMQP_VALUE target = NULL;
 
-    // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_068: [A variable, named `devices_and_modules_path`, shall be created concatenating `instance->iothub_host_fqdn`, "/devices/" and `instance->device_id` (and "/modules/" and `instance->module_id` if modules are present)]
-    if ((devices_and_modules_path = create_devices_and_modules_path(instance->iothub_host_fqdn, instance->device_id, instance->module_id)) == NULL)
+    // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_068: [A variable, named `devices_path`, shall be created concatenating `instance->iothub_host_fqdn`, "/devices/" and `instance->device_id`]
+    if ((devices_path = create_devices_path(instance->iothub_host_fqdn, instance->device_id)) == NULL)
     {
-        // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_069: [If `devices_and_modules_path` fails to be created, telemetry_messenger_do_work() shall fail and return]
+        // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_069: [If `devices_path` fails to be created, telemetry_messenger_do_work() shall fail and return]
         result = __FAILURE__;
-        LogError("Failed creating the message receiver (failed creating the 'devices_and_modules_path')");
+        LogError("Failed creating the message receiver (failed creating the 'devices_path')");
     }
-    // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_070: [A variable, named `message_receive_address`, shall be created concatenating "amqps://", `devices_and_modules_path` and "/messages/devicebound"]
-    else if ((message_receive_address = create_message_receive_address(devices_and_modules_path)) == NULL)
+    // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_070: [A variable, named `message_receive_address`, shall be created concatenating "amqps://", `devices_path` and "/messages/devicebound"]
+    else if ((message_receive_address = create_message_receive_address(devices_path)) == NULL)
     {
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_071: [If `message_receive_address` fails to be created, telemetry_messenger_do_work() shall fail and return]
         result = __FAILURE__;
@@ -783,8 +767,8 @@ static int create_message_receiver(TELEMETRY_MESSENGER_INSTANCE* instance)
         }
     }
 
-    if (devices_and_modules_path != NULL)
-        STRING_delete(devices_and_modules_path);
+    if (devices_path != NULL)
+        STRING_delete(devices_path);
     if (message_receive_address != NULL)
         STRING_delete(message_receive_address);
     if (link_name != NULL)
@@ -1950,8 +1934,6 @@ void telemetry_messenger_destroy(TELEMETRY_MESSENGER_HANDLE messenger_handle)
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_113: [`instance->device_id` shall be destroyed using STRING_delete()]
         STRING_delete(instance->device_id);
 
-        STRING_delete(instance->module_id);
-
         STRING_delete(instance->product_info);
 
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_114: [telemetry_messenger_destroy() shall destroy `instance` with free()]
@@ -2011,11 +1993,6 @@ TELEMETRY_MESSENGER_HANDLE telemetry_messenger_create(const TELEMETRY_MESSENGER_
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_009: [If STRING_construct() fails, telemetry_messenger_create() shall fail and return NULL]
                 handle = NULL;
                 LogError("telemetry_messenger_create failed (device_id could not be copied; STRING_construct failed)");
-            }
-            else if ((messenger_config->module_id != NULL) && ((instance->module_id = STRING_construct(messenger_config->module_id)) == NULL))
-            {
-                handle = NULL;
-                LogError("telemetry_messenger_create failed (module_id could not be copied; STRING_construct failed)");
             }
             else if ((instance->product_info = STRING_construct(product_info)) == NULL)
             {

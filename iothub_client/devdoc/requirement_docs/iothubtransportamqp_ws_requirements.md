@@ -36,9 +36,7 @@ static const TRANSPORT_PROVIDER* AMQP_Protocol_over_WebSocketsTls(void);
     - IoTHubTransportAMQP_WS_Subscribe,
     - IoTHubTransportAMQP_WS_Unsubscribe,
     - IoTHubTransportAMQP_WS_DoWork,
-    - IoTHubTransportAMQP_WS_GetSendStatus,
-    - IotHubTransportAMQP_WS_Subscribe_InputQueue,
-    - IotHubTransportAMQP_WS_Unsubscribe_InputQueue
+    - IoTHubTransportAMQP_WS_GetSendStatus
 
 
 
@@ -242,18 +240,6 @@ static STRING_HANDLE IoTHubTransportAMQP_WS_SendMessageDisposition(TRANSPORT_LL_
 **SRS_IOTHUBTRANSPORTAMQP_WS_10_001 [**IoTHubTransportAMQP_WS_SendMessageDisposition shall sned the message disposition by calling into the IoTHubTransport_AMQP_Common_SendMessageDisposition()**]**
 
 
-## IotHubTransportAMQP_WS_Subscribe_InputQueue
-```c
-static int IotHubTransportAMQP_WS_Subscribe_InputQueue(IOTHUB_DEVICE_HANDLE handle)
-```
-Not implemented (yet).
-
-## IotHubTransportAMQP_WS_Unsubscribe_InputQueue
-```c
-static void IotHubTransportAMQP_WS_Unsubscribe_InputQueue(IOTHUB_DEVICE_HANDLE handle)
-```
-Not implemented (yet).
-
 
 ### AMQP_Protocol_over_WebSocketsTls
 
@@ -275,6 +261,4 @@ IoTHubTransport_Subscribe = IoTHubTransportAMQP_WS_Subscribe
 IoTHubTransport_Unsubscribe = IoTHubTransportAMQP_WS_Unsubscribe
 IoTHubTransport_DoWork = IoTHubTransportAMQP_WS_DoWork
 IoTHubTransport_SetRetryLogic = IoTHubTransportAMQP_WS_SetRetryLogic
-IoTHubTransport_SetOption = IoTHubTransportAMQP_WS_SetOption
-IoTHubTransport_Subscribe_InputQueue = IoTHubTransportAMQP_WS_Subscribe_InputQueue
-IoTHubTransport_Unsubscribe_InputQueue = IotHubTransportAMQP_WS_Unsubscribe_InputQueue**]**
+IoTHubTransport_SetOption = IoTHubTransportAMQP_WS_SetOption**]**

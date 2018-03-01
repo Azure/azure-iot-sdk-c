@@ -63,7 +63,6 @@ extern "C"
 	{
 		const char* client_version;
 		const char* device_id;
-		const char* module_id;
 		char* iothub_host_fqdn;
 		TWIN_MESSENGER_STATE_CHANGED_CALLBACK on_state_changed_callback;
 		void* on_state_changed_context;
