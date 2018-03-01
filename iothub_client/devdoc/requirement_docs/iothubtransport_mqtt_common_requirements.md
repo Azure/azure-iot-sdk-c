@@ -28,7 +28,9 @@ MOCKABLE_FUNCTION(, IOTHUB_DEVICE_HANDLE, IoTHubTransport_MQTT_Common_Register, 
 MOCKABLE_FUNCTION(, void, IoTHubTransport_MQTT_Common_Unregister, IOTHUB_DEVICE_HANDLE, deviceHandle);
 MOCKABLE_FUNCTION(, int, IoTHubTransport_MQTT_Common_SetRetryPolicy, TRANSPORT_LL_HANDLE, handle, IOTHUB_CLIENT_RETRY_POLICY, retryPolicy, size_t, retryTimeoutLimitInSeconds);
 MOCKABLE_FUNCTION(, STRING_HANDLE, IoTHubTransport_MQTT_Common_GetHostname, TRANSPORT_LL_HANDLE, handle);
-MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubTransport_MQTT_Common_SendMessageDisposition, MESSAGE_CALLBACK_INFO*, message_data, IOTHUBMESSAGE_DISPOSITION_RESULT, disposition)
+MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubTransport_MQTT_Common_SendMessageDisposition, MESSAGE_CALLBACK_INFO*, message_data, IOTHUBMESSAGE_DISPOSITION_RESULT, disposition);
+MOCKABLE_FUNCTION(, int, IoTHubTransport_MQTT_Common_Subscribe_InputQueue, IOTHUB_DEVICE_HANDLE, handle);
+MOCKABLE_FUNCTION(, void, IoTHubTransport_MQTT_Common_Unsubscribe_InputQueue, IOTHUB_DEVICE_HANDLE, handle);
 ```
 
 ## IoTHubTransport_MQTT_Common_Create
@@ -169,6 +171,7 @@ void IoTHubTransport_MQTT_Common_Unsubscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE h
 
 **SRS_IOTHUB_MQTT_TRANSPORT_12_012: [** `IoTHubTransport_MQTT_Common_Unsubscribe_DeviceMethod` shall removes the signaling flag for DEVICE_METHOD topic from the receiver's topic list. **]**
 
+
 ### IoTHubTransport_MQTT_Common_Subscribe
 
 ```c
@@ -190,6 +193,38 @@ int IoTHubTransport_MQTT_Common_Subscribe(TRANSPORT_LL_HANDLE handle)
 ```c
 void IoTHubTransport_MQTT_Common_Unsubscribe(TRANSPORT_LL_HANDLE handle)
 ```
+
+
+### IoTHubTransport_MQTT_Common_Subscribe_InputQueue
+```c
+int IoTHubTransport_MQTT_Common_Subscribe_InputQueue(IOTHUB_DEVICE_HANDLE handle);
+
+```
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_066: [** If parameter handle is NULL than IoTHubTransport_MQTT_Common_Subscribe_InputQueue shall return a non-zero value.**]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_073: [** If module ID is not set on the transpont, IoTHubTransport_MQTT_Common_Unsubscribe_InputQueue shall fail.**]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_067: [** IoTHubTransport_MQTT_Common_Subscribe_InputQueue shall set a flag to enable mqtt_client_subscribe to be called to subscribe to the input queue Message Topic.**]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_068: [** If current packet state is not CONNACK, DISCONNECT_TYPE, or PACKET_TYPE_ERROR then IoTHubTransport_MQTT_Common_Subscribe_InputQueue shall set the packet state to SUBSCRIBE_TYPE.**]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_069: [** Upon failure IoTHubTransport_MQTT_Common_Subscribe_InputQueue shall return a non-zero value.**]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_070: [** On success IoTHubTransport_MQTT_Common_Subscribe_InputQueue shall return 0.**]**
+
+
+### IoTHubTransport_MQTT_Common_Unsubscribe_InputQueue
+```c
+void IoTHubTransport_MQTT_Common_Unsubscribe_InputQueue(IOTHUB_DEVICE_HANDLE handle);
+```
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_071: [** If parameter handle is NULL then IoTHubTransport_MQTT_Common_Unsubscribe_InputQueue shall do nothing.**]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_072: [** IoTHubTransport_MQTT_Common_Unsubscribe_InputQueue shall call mqtt_client_unsubscribe to unsubscribe the mqtt input queue message topic.**]**
+
+
+
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_019: [** If parameter handle is NULL then IoTHubTransport_MQTT_Common_Unsubscribe shall do nothing.**]**
 
@@ -248,6 +283,12 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIEN
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_010: [** `IoTHubTransport_MQTT_Common_DoWork` shall check for the ContentType property and if found add the `value` as a system property in the format of `$.ct=<value>` **]**
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_011: [** `IoTHubTransport_MQTT_Common_DoWork` shall check for the ContentEncoding property and if found add the `value` as a system property in the format of `$.ce=<value>` **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_060: [** `IoTHubTransport_MQTT_Common_DoWork` shall check for the OutputName property and if found add the `value` as a system property in the format of `$.on=<value>` **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_061: [** If the message is sent to an input queue, `IoTHubTransport_MQTT_Common_DoWork` shall parse out to the input queue name and store it in the message with `IoTHubMessage_SetInputName` **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_062: [** If `IoTHubTransport_MQTT_Common_DoWork` receives a malformatted inputQueue, it shall fail **]**
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_058: [** If the sas token has timed out `IoTHubTransport_MQTT_Common_DoWork` shall disconnect from the mqtt client and destroy the transport information and wait for reconnect. **]**
 
@@ -363,7 +404,13 @@ static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE msgHandle, void* call
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_013: [** If type is IOTHUB_TYPE_TELEMETRY and the system property `$.ce` is defined, its value shall be set on the IOTHUB_MESSAGE_HANDLE's ContentEncoding property **]**
 
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_063: [** If type is IOTHUB_TYPE_TELEMETRY and the system property `$.cdid` is defined, its value shall be set on the IOTHUB_MESSAGE_HANDLE's ConnectionDeviceId property **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_064: [** If type is IOTHUB_TYPE_TELEMETRY and the system property `$.cmid` is defined, its value shall be set on the IOTHUB_MESSAGE_HANDLE's ConnectionModuleId property **]**
+
 **SRS_IOTHUB_MQTT_TRANSPORT_07_056: [** If type is IOTHUB_TYPE_TELEMETRY, then on success `mqtt_notification_callback` shall call IoTHubClient_LL_MessageCallback. **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_31_065: [** If type is IOTHUB_TYPE_TELEMETRY and sent to an input queue, then on success `mqtt_notification_callback` shall call `IoTHubClient_LL_MessageCallbackFromInput`. **]**
 
 ```c
 IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SendMessageDisposition(MESSAGE_CALLBACK_INFO* messageData, IOTHUBMESSAGE_DISPOSITION_RESULT disposition);

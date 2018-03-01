@@ -2470,6 +2470,20 @@ static int IoTHubTransportHttp_SetRetryPolicy(TRANSPORT_LL_HANDLE handle, IOTHUB
     return result;
 }
 
+static int IotHubTransportHttp_Subscribe_InputQueue(IOTHUB_DEVICE_HANDLE handle)
+{
+    (void)handle;
+    LogError("HTTP does not support input queues");
+    return __FAILURE__;
+}
+
+static void IotHubTransportHttp_Unsubscribe_InputQueue(IOTHUB_DEVICE_HANDLE handle)
+{
+    (void)handle;
+    LogError("HTTP does not support input queues");
+}
+
+
 /*Codes_SRS_TRANSPORTMULTITHTTP_17_125: [This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for its fields:] */
 static TRANSPORT_PROVIDER thisTransportProvider =
 {
@@ -2490,7 +2504,9 @@ static TRANSPORT_PROVIDER thisTransportProvider =
     IoTHubTransportHttp_Unsubscribe,                /*pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;*/
     IoTHubTransportHttp_DoWork,                     /*pfIoTHubTransport_DoWork IoTHubTransport_DoWork;*/
     IoTHubTransportHttp_SetRetryPolicy,             /*pfIoTHubTransport_DoWork IoTHubTransport_SetRetryPolicy;*/
-    IoTHubTransportHttp_GetSendStatus               /*pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus;*/
+    IoTHubTransportHttp_GetSendStatus,              /*pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus;*/
+    IotHubTransportHttp_Subscribe_InputQueue,       /*pfIoTHubTransport_Subscribe_InputQueue IoTHubTransport_Subscribe_InputQueue; */
+    IotHubTransportHttp_Unsubscribe_InputQueue      /*pfIoTHubTransport_Unsubscribe_InputQueue IoTHubTransport_Unsubscribe_InputQueue; */
 };
 
 const TRANSPORT_PROVIDER* HTTP_Protocol(void)

@@ -34,6 +34,7 @@ DEFINE_ENUM(IOTHUB_REGISTRYMANAGER_RESULT, IOTHUB_REGISTRYMANAGER_RESULT_VALUES)
     IOTHUB_REGISTRYMANAGER_AUTH_SPK,                        \
     IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT,            \
     IOTHUB_REGISTRYMANAGER_AUTH_X509_CERTIFICATE_AUTHORITY, \
+    IOTHUB_REGISTRYMANAGER_AUTH_NONE,                       \
     IOTHUB_REGISTRYMANAGER_AUTH_UNKNOWN                     \
     
 
@@ -59,6 +60,8 @@ typedef struct IOTHUB_DEVICE_TAG
     const char* deviceProperties;
     const char* serviceProperties;
     IOTHUB_REGISTRYMANAGER_AUTH_METHOD authMethod;
+
+    bool iotEdge_capable;
 } IOTHUB_DEVICE;
 
 typedef struct IOTHUB_REGISTRY_DEVICE_CREATE_TAG
@@ -67,6 +70,7 @@ typedef struct IOTHUB_REGISTRY_DEVICE_CREATE_TAG
     const char* primaryKey;
     const char* secondaryKey;
     IOTHUB_REGISTRYMANAGER_AUTH_METHOD authMethod;
+    bool iotEdge_capable;
 } IOTHUB_REGISTRY_DEVICE_CREATE;
 
 typedef struct IOTHUB_REGISTRY_DEVICE_UPDATE_TAG
@@ -76,6 +80,7 @@ typedef struct IOTHUB_REGISTRY_DEVICE_UPDATE_TAG
     const char* secondaryKey;
     IOTHUB_DEVICE_STATUS status;
     IOTHUB_REGISTRYMANAGER_AUTH_METHOD authMethod;
+    bool iotEdge_capable;
 } IOTHUB_REGISTRY_DEVICE_UPDATE;
 
 typedef struct IOTHUB_REGISTRY_STATISTIC_TAG
@@ -84,6 +89,53 @@ typedef struct IOTHUB_REGISTRY_STATISTIC_TAG
     size_t enabledDeviceCount;
     size_t disabledDeviceCount;
 } IOTHUB_REGISTRY_STATISTICS;
+
+typedef struct IOTHUB_MODULE_TAG
+{
+    const char* deviceId;
+    const char* primaryKey;
+    const char* secondaryKey;
+    const char* generationId;
+    const char* eTag;
+    IOTHUB_DEVICE_CONNECTION_STATE connectionState;
+    const char* connectionStateUpdatedTime;
+    IOTHUB_DEVICE_STATUS status;
+    const char* statusReason;
+    const char* statusUpdatedTime;
+    const char* lastActivityTime;
+    size_t cloudToDeviceMessageCount;
+
+    bool isManaged;
+    const char* configuration;
+    const char* deviceProperties;
+    const char* serviceProperties;
+    IOTHUB_REGISTRYMANAGER_AUTH_METHOD authMethod;
+
+    bool iotEdge_capable;
+    const char* moduleId;
+} IOTHUB_MODULE;
+
+typedef struct IOTHUB_REGISTRY_MODULE_CREATE_TAG
+{
+    const char* deviceId;
+    const char* primaryKey;
+    const char* secondaryKey;
+    IOTHUB_REGISTRYMANAGER_AUTH_METHOD authMethod;
+    bool iotEdge_capable;
+    const char* moduleId;
+} IOTHUB_REGISTRY_MODULE_CREATE;
+
+typedef struct IOTHUB_REGISTRY_MODULE_UPDATE_TAG
+{
+    const char* deviceId;
+    const char* primaryKey;
+    const char* secondaryKey;
+    IOTHUB_DEVICE_STATUS status;
+    IOTHUB_REGISTRYMANAGER_AUTH_METHOD authMethod;
+    bool iotEdge_capable;
+    const char* moduleId;
+} IOTHUB_REGISTRY_MODULE_UPDATE;
+
 
 /** @brief Structure to store IoTHub authentication information
 */
@@ -94,6 +146,7 @@ typedef struct IOTHUB_REGISTRYMANAGER_TAG
     char* iothubSuffix;
     char* sharedAccessKey;
     char* keyName;
+    char* deviceId;
 } IOTHUB_REGISTRYMANAGER;
 
 /** @brief Handle to hide struct and use it in consequent APIs
@@ -102,91 +155,147 @@ typedef struct IOTHUB_REGISTRYMANAGER_TAG* IOTHUB_REGISTRYMANAGER_HANDLE;
 
 
 /**
-* @brief	Creates a IoT Hub Registry Manager handle for use it
-* 			in consequent APIs.
+* @brief    Creates a IoT Hub Registry Manager handle for use it
+*           in consequent APIs.
 *
-* @param	serviceClientHandle	Service client handle.
+* @param    serviceClientHandle     Service client handle.
 *
-* @return	A non-NULL @c IOTHUB_REGISTRYMANAGER_HANDLE value that is used when
-* 			invoking other functions for IoT Hub REgistry Manager and @c NULL on failure.
+* @return   A non-NULL @c IOTHUB_REGISTRYMANAGER_HANDLE value that is used when
+*           invoking other functions for IoT Hub REgistry Manager and @c NULL on failure.
 */
 extern IOTHUB_REGISTRYMANAGER_HANDLE IoTHubRegistryManager_Create(IOTHUB_SERVICE_CLIENT_AUTH_HANDLE serviceClientHandle);
 
 /**
-* @brief	Disposes of resources allocated by the IoT Hub Registry Manager.
+* @brief    Disposes of resources allocated by the IoT Hub Registry Manager.
 *
-* @param	registryManagerHandle	The handle created by a call to the create function.
+* @param    registryManagerHandle   The handle created by a call to the create function.
 */
 extern void IoTHubRegistryManager_Destroy(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle);
 
 /**
-* @brief	Creates a device on IoT Hub.
-* 			in consequent APIs.
+* @brief    Creates a device on IoT Hub.
 *
-* @param	registryManagerHandle   The handle created by a call to the create function.
+* @param    registryManagerHandle   The handle created by a call to the create function.
 * @param    deviceCreate            IOTHUB_REGISTRY_DEVICE_CREATE structure containing
 *                                   the new device Id, primaryKey (optional) and secondaryKey (optional)
 * @param    device                  Input parameter, if it is not NULL will contain the created device info structure
 *
-* @return	IOTHUB_REGISTRYMANAGER_RESULT_OK upon success or an error code upon failure.
+* @return   IOTHUB_REGISTRYMANAGER_RESULT_OK upon success or an error code upon failure.
 */
 extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_CreateDevice(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, const IOTHUB_REGISTRY_DEVICE_CREATE* deviceCreate, IOTHUB_DEVICE* device);
 
 /**
-* @brief	Gets device info for a given device.
+* @brief    Gets device info for a given device.
 *
-* @param	registryManagerHandle   The handle created by a call to the create function.
-* @param	deviceId    The Id of the requested device.
-* @param    device      Input parameter, if it is not NULL will contain the requested device info structure
+* @param    registryManagerHandle   The handle created by a call to the create function.
+* @param    deviceId                The Id of the requested device.
+* @param    device                  Input parameter, if it is not NULL will contain the requested device info structure
 *
-* @return	IOTHUB_REGISTRYMANAGER_RESULT_OK upon success or an error code upon failure.
+* @return   IOTHUB_REGISTRYMANAGER_RESULT_OK upon success or an error code upon failure.
 */
 extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetDevice(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, const char* deviceId, IOTHUB_DEVICE* device);
 
 /**
-* @brief	Creates a device on IoT Hub.
-* 			in consequent APIs.
+* @brief    Updates a device on IoT Hub.
 *
-* @param	registryManagerHandle   The handle created by a call to the create function.
+* @param    registryManagerHandle   The handle created by a call to the create function.
 * @param    deviceUpdate            IOTHUB_REGISTRY_DEVICE_UPDATE structure containing
 *                                   the new device Id, primaryKey (optional), secondaryKey (optional),
 *                                   authentication method, and status
 *
-* @return	IOTHUB_REGISTRYMANAGER_RESULT_OK upon success or an error code upon failure.
+* @return   IOTHUB_REGISTRYMANAGER_RESULT_OK upon success or an error code upon failure.
 */
 extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_UpdateDevice(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, IOTHUB_REGISTRY_DEVICE_UPDATE* deviceUpdate);
 
 /**
-* @brief	Deletes a given device.
+* @brief    Deletes a given device.
 *
-* @param	registryManagerHandle   The handle created by a call to the create function.
-* @param	deviceId    The Id of the device to delete.
+* @param    registryManagerHandle   The handle created by a call to the create function.
+* @param    deviceId    The Id of the device to delete.
 *
-* @return	IOTHUB_REGISTRYMANAGER_RESULT_OK upon success or an error code upon failure.
+* @return   IOTHUB_REGISTRYMANAGER_RESULT_OK upon success or an error code upon failure.
 */
 extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_DeleteDevice(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, const char* deviceId);
 
 /**
-* @brief	Gets device a list of devices registered on the IoTHUb.
+* @brief    Gets device a list of devices registered on the IoTHUb.
 *
-* @param	registryManagerHandle   The handle created by a call to the create function.
-* @param	numberOfDevices     Number of devices requested.
-* @param    deviceList          Input parameter, if it is not NULL will contain the requested list of devices.
+* @param    registryManagerHandle   The handle created by a call to the create function.
+* @param    numberOfDevices         Number of devices requested.
+* @param    deviceList              Input parameter, if it is not NULL will contain the requested list of devices.
 *
-* @return	IOTHUB_REGISTRYMANAGER_RESULT_OK upon success or an error code upon failure.
+* @return   IOTHUB_REGISTRYMANAGER_RESULT_OK upon success or an error code upon failure.
 */
 /* DEPRECATED: IoTHubRegistryManager_GetDeviceList is deprecated and may be removed from a future release. */
 extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetDeviceList(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, size_t numberOfDevices, SINGLYLINKEDLIST_HANDLE deviceList);
 
 /**
-* @brief	Gets the registry statistic info.
+* @brief    Gets the registry statistic info.
 *
-* @param	registryManagerHandle   The handle created by a call to the create function.
+* @param    registryManagerHandle   The handle created by a call to the create function.
 * @param    registryStatistics      Input parameter, if it is not NULL will contain the requested registry info.
 *
-* @return	IOTHUB_REGISTRYMANAGER_RESULT_OK upon success or an error code upon failure.
+* @return   IOTHUB_REGISTRYMANAGER_RESULT_OK upon success or an error code upon failure.
 */
 extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetStatistics(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, IOTHUB_REGISTRY_STATISTICS* registryStatistics);
+
+
+/**
+* @brief    Creates a module on IoT Hub.
+*
+* @param    registryManagerHandle   The handle created by a call to the create function.
+* @param    moduleCreate            IOTHUB_REGISTRY_MODULE_CREATE structure containing
+*                                   the existing deviceID, new module Id, primaryKey (optional) and secondaryKey (optional)
+* @param    module                  Input parameter, if it is not NULL will contain the created module info structure
+*
+* @return   IOTHUB_REGISTRYMANAGER_RESULT_OK upon success or an error code upon failure.
+*/
+extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_CreateModule(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, const IOTHUB_REGISTRY_MODULE_CREATE* moduleCreate, IOTHUB_MODULE* module);
+
+/**
+* @brief    Gets module info for a given module.
+*
+* @param    registryManagerHandle   The handle created by a call to the create function.
+* @param    deviceId                The Id of the requested device.
+* @param    moduleId                The Id of the requested module.
+* @param    module                  Input parameter, if it is not NULL will contain the requested module info structure
+*
+* @return   IOTHUB_REGISTRYMANAGER_RESULT_OK upon success or an error code upon failure.
+*/
+extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetModule(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, const char* deviceId, const char* moduleId, IOTHUB_MODULE* module);
+
+/**
+* @brief    Updates a module on IoT Hub.
+*
+* @param    registryManagerHandle   The handle created by a call to the create function.
+* @param    moduleUpdate            IOTHUB_REGISTRY_MODULE_UPDATE structure containing
+*                                   the new module Id, primaryKey (optional), secondaryKey (optional),
+*                                   authentication method, and status
+*
+* @return   IOTHUB_REGISTRYMANAGER_RESULT_OK upon success or an error code upon failure.
+*/
+extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_UpdateModule(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, IOTHUB_REGISTRY_MODULE_UPDATE* moduleUpdate);
+
+/**
+* @brief    Deletes a given module.
+*
+* @param    registryManagerHandle   The handle created by a call to the create function.
+* @param    deviceId                The Id of the device containing module to delete.
+* @param    moduleId                The Id of the module to delete.
+*
+* @return   IOTHUB_REGISTRYMANAGER_RESULT_OK upon success or an error code upon failure.
+*/
+extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_DeleteModule(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, const char* deviceId, const char* moduleId);
+
+/**
+* @brief    Gets a list of modules registered on the specified device.
+*
+* @param    registryManagerHandle   The handle created by a call to the create function.
+* @param    numberOfModules         Number of modules requested.
+*
+* @return   IOTHUB_REGISTRYMANAGER_RESULT_OK upon success or an error code upon failure.
+*/
+extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetModuleList(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, const char* deviceId, SINGLYLINKEDLIST_HANDLE moduleList);
 
 #ifdef __cplusplus
 }

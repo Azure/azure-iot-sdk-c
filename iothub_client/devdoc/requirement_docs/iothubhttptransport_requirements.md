@@ -30,7 +30,9 @@ extern const TRANSPORT_PROVIDER* HTTP_Protocol(void);
     - IoTHubTransportHttp_Subscribe, 
     - IoTHubTransportHttp_Unsubscribe, 
     - IoTHubTransportHttp_DoWork, 
-    - IoTHubTransportHttp_GetSendStatus 
+    - IoTHubTransportHttp_GetSendStatus, 
+    - IotHubTransportHttp_Subscribe_InputQueue, 
+    - IotHubTransportHttp_Unsubscribe_InputQueue 
     
 ## IoTHubTransportHttp_Create
 ```c
@@ -392,18 +394,36 @@ void IoTHubTransportHttp_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle, IOT
 **SRS_TRANSPORTMULTITHTTP_02_004: [** `IoTHubTransportHttp_Unsubscribe_DeviceTwin` shall return **]**
 
 
-### IoTHubTransportHttp_Subscribe_DeviceMethod
+## IoTHubTransportHttp_Subscribe_DeviceMethod
 ```c
 int IoTHubTransportHttp_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
 ```
 Not implemented (yet)
 
 
-### IoTHubTransportHttp_Unsubscribe_DeviceMethod
+## IoTHubTransportHttp_Unsubscribe_DeviceMethod
 ```c
 void IoTHubTransportHttp_Unsubscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
 ```
 Not implemented (yet)
+
+
+## IoTHubTransportHttp_Subscribe_InputQueue
+```c
+static int IotHubTransportHttp_Subscribe_InputQueue(IOTHUB_DEVICE_HANDLE handle);
+
+```
+Not implemented (yet)
+
+
+
+## IotHubTransportHttp_Unsubscribe_InputQueue
+```c
+static void IotHubTransportHttp_Unsubscribe_InputQueue(IOTHUB_DEVICE_HANDLE handle)
+
+```
+Not implemented (yet)
+
 
 
 ## HTTP_Protocol
@@ -429,4 +449,6 @@ IoTHubTransport_Subscribe=IoTHubTransportHttp_Subscribe
 IoTHubTransport_Unsubscribe=IoTHubTransportHttp_Unsubscribe   
 IoTHubTransport_DoWork=IoTHubTransportHttp_DoWork   
 IoTHubTransport_GetSendStatus=IoTHubTransportHttp_GetSendStatus   
+IoTHubTransport_Subscribe_InputQueue = IoTHubTransportHttp_Subscribe_InputQueue
+IoTHubTransport_Unsubscribe_InputQueue = IotHubTransportHttp_Unsubscribe_InputQueue
 

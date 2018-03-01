@@ -191,6 +191,7 @@ static IOTHUB_CLIENT_LL_HANDLE TEST_IOTHUB_CLIENT_HANDLE = (IOTHUB_CLIENT_LL_HAN
 static SINGLYLINKEDLIST_HANDLE TEST_SLL_HANDLE = (SINGLYLINKEDLIST_HANDLE)0x1114;
 static const IOTHUB_CLIENT_CONFIG* TEST_CLIENT_CONFIG = (IOTHUB_CLIENT_CONFIG*)0x1115;
 static IOTHUB_MESSAGE_HANDLE TEST_MESSAGE_HANDLE = (IOTHUB_MESSAGE_HANDLE)0x1116;
+
 static THREAD_HANDLE TEST_THREAD_HANDLE = (THREAD_HANDLE)0x1117;
 static LIST_ITEM_HANDLE TEST_LIST_HANDLE = (LIST_ITEM_HANDLE)0x1118;
 static TRANSPORT_HANDLE TEST_TRANSPORT_HANDLE = (TRANSPORT_HANDLE)0x1119;
@@ -206,6 +207,8 @@ static const char* TEST_IOTHUBNAME = "theNameoftheIotHub";
 static const char* TEST_DEVICE_SAS = "theSasOfTheDevice";
 static const char* TEST_IOTHUBSUFFIX = "theSuffixoftheIotHubHostname";
 static const char* TEST_METHOD_NAME = "method_name";
+static const char* TEST_INPUT_NAME = "theInputName";
+static const char* TEST_OUTPUT_NAME = "theOutputName";
 static const char* TEST_IOTHUB_URI = "iothub_uri";
 static const unsigned char* TEST_DEVICE_METHOD_RESPONSE = (const unsigned char*)0x62;
 static size_t TEST_DEVICE_RESP_LENGTH = 1;
@@ -470,6 +473,16 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_LL_GetRetryPolicy, IOTHUB_CLIENT_OK);
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_Destroy, my_IoTHubClient_LL_Destroy);
     REGISTER_GLOBAL_MOCK_HOOK(test_event_confirmation_callback, my_test_event_confirmation_callback);
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_LL_SendEventToOutputAsync, IOTHUB_CLIENT_OK);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_LL_SendEventToOutputAsync, IOTHUB_CLIENT_ERROR);
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_LL_SetInputMessageCallback, IOTHUB_CLIENT_OK);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_LL_SetInputMessageCallback, IOTHUB_CLIENT_ERROR);
+
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_LL_SetInputMessageCallbackEx, IOTHUB_CLIENT_OK);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_LL_SetInputMessageCallbackEx, IOTHUB_CLIENT_ERROR);
+
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_SetOutputName, IOTHUB_MESSAGE_OK);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_SetOutputName, IOTHUB_MESSAGE_ERROR);
     
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_LL_GetRetryPolicy, IOTHUB_CLIENT_ERROR);
 
@@ -1759,7 +1772,7 @@ TEST_FUNCTION(IoTHubClient_GetRetryPolicy_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubClient_CreateFromConnectionString failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubClient_GetRetryPolicy failure in test %zu/%zu", index, count);
         IOTHUB_CLIENT_RESULT result = IoTHubClient_GetRetryPolicy(iothub_handle, &retry_policy, &retry_in_seconds);
 
         // assert
@@ -3552,4 +3565,150 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_message_callback_succeed)
     IoTHubClient_Destroy(iothub_handle);
 }
 
+// Tests_SRS_IOTHUBCLIENT_31_100: [ If `iotHubClientHandle`, `outputName`, or `eventConfirmationCallback` is `NULL`, `IoTHubClient_SendEventToOutputAsync` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]
+TEST_FUNCTION(IoTHubClient_SendEventToOutputAsync_iothub_client_handle_NULL_fail)
+{
+    // arrange
+    umock_c_reset_all_calls();
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_SendEventToOutputAsync(NULL, TEST_MESSAGE_HANDLE, TEST_OUTPUT_NAME, test_event_confirmation_callback, NULL);
+
+    // assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+}
+
+// Tests_SRS_IOTHUBCLIENT_31_100: [ If `iotHubClientHandle`, `outputName`, or `eventConfirmationCallback` is `NULL`, `IoTHubClient_SendEventToOutputAsync` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]
+TEST_FUNCTION(IoTHubClient_SendEventToOutputAsync_message_handle_NULL_fail)
+{
+    // arrange
+    IOTHUB_CLIENT_HANDLE iothub_handle = IoTHubClient_Create(TEST_CLIENT_CONFIG);
+    umock_c_reset_all_calls();
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_SendEventToOutputAsync(iothub_handle, NULL, TEST_OUTPUT_NAME, test_event_confirmation_callback, NULL);
+
+    // assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubClient_Destroy(iothub_handle);
+}
+
+// Tests_SRS_IOTHUBCLIENT_31_100: [ If `iotHubClientHandle`, `outputName`, or `eventConfirmationCallback` is `NULL`, `IoTHubClient_SendEventToOutputAsync` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]
+TEST_FUNCTION(IoTHubClient_SendEventToOutputAsync_output_name_NULL_fail)
+{
+    // arrange
+    IOTHUB_CLIENT_HANDLE iothub_handle = IoTHubClient_Create(TEST_CLIENT_CONFIG);
+    umock_c_reset_all_calls();
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_SendEventToOutputAsync(iothub_handle, TEST_MESSAGE_HANDLE, NULL, test_event_confirmation_callback, NULL);
+
+    // assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubClient_Destroy(iothub_handle);
+}
+
+// Tests_SRS_IOTHUBCLIENT_31_101: [ `IoTHubClient_SendEventToOutputAsync` shall set the outputName of the message to send. ]
+// Tests_SRS_IOTHUBCLIENT_31_102: [ `IoTHubClient_SendEventToOutputAsync` shall invoke `IoTHubClient_SendEventAsync` to send the message. ]
+TEST_FUNCTION(IoTHubClient_SendEventToOutputAsync_succeed)
+{
+    // arrange
+    IOTHUB_CLIENT_HANDLE iothub_handle = IoTHubClient_Create(TEST_CLIENT_CONFIG);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(IoTHubMessage_SetOutputName(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    setup_iothubclient_sendeventasync(true);
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_SendEventToOutputAsync(iothub_handle, TEST_MESSAGE_HANDLE, TEST_OUTPUT_NAME, test_event_confirmation_callback, NULL);
+
+    // assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubClient_Destroy(iothub_handle);
+}
+
+static void setup_IoTHubClient_SetInputMessageCallback(bool use_threads)
+{
+    if (use_threads)
+    {
+        STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    }
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
+        .IgnoreArgument_handle();
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_SetInputMessageCallbackEx(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        .IgnoreArgument(1)
+        .IgnoreArgument(3)
+        .IgnoreArgument(4);
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
+        .IgnoreArgument_handle();
+}
+
+// Tests_SRS_IOTHUBCLIENT_31_099: [ `IoTHubClient_SetMessageCallback` shall call `IoTHubClient_LL_SetInputMessageCallback`, passing its input arguments ]
+// Tests_SRS_IOTHUBCLIENT_31_098: [ `IoTHubClient_SetMessageCallback` shall start the worker thread if it was not previously started. ]
+TEST_FUNCTION(IoTHubClient_SetInputMessageCallback_succeed)
+{
+    // arrange
+    IOTHUB_CLIENT_HANDLE iothub_handle = IoTHubClient_Create(TEST_CLIENT_CONFIG);
+    umock_c_reset_all_calls();
+
+    setup_IoTHubClient_SetInputMessageCallback(true);
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_SetInputMessageCallback(iothub_handle, TEST_INPUT_NAME, test_message_confirmation_callback, NULL);
+
+    // assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubClient_Destroy(iothub_handle);
+}
+
+// Tests_SRS_IOTHUBCLIENT_31_097: [ If `iotHubClientHandle` or `inputName` is NULL, `IoTHubClient_SetInputMessageCallback` shall return IOTHUB_CLIENT_INVALID_ARG. ]
+TEST_FUNCTION(IoTHubClient_SetInputMessageCallback_iothub_client_handle_NULL_fail)
+{
+    // arrange
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_SetInputMessageCallback(NULL, TEST_INPUT_NAME, test_message_confirmation_callback, NULL);
+
+    // assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+}
+
+// Tests_SRS_IOTHUBCLIENT_31_097: [ If `iotHubClientHandle` or `inputName` is NULL, `IoTHubClient_SetInputMessageCallback` shall return IOTHUB_CLIENT_INVALID_ARG. ]
+TEST_FUNCTION(IoTHubClient_SetInputMessageCallback_iothub_inputName_NULL_fail)
+{
+    // arrange
+    IOTHUB_CLIENT_HANDLE iothub_handle = IoTHubClient_Create(TEST_CLIENT_CONFIG);
+    umock_c_reset_all_calls();
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_SetInputMessageCallback(iothub_handle, NULL, test_message_confirmation_callback, NULL);
+
+    // assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubClient_Destroy(iothub_handle);
+}
+
+
+
 END_TEST_SUITE(iothubclient_ut)
+
+
+
+

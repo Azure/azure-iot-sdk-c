@@ -271,6 +271,12 @@ public:
         MOCK_STATIC_METHOD_5(, int, FAKE_IoTHubTransport_DeviceMethod_Response, IOTHUB_DEVICE_HANDLE, handle, METHOD_HANDLE, methodId, const unsigned char*, response, size_t, resp_size, int, status_response)
         MOCK_METHOD_END(int, 0)
 
+        MOCK_STATIC_METHOD_1(, int, FAKE_IoTHubTransport_Subscribe_InputQueue, TRANSPORT_LL_HANDLE, handle)
+        MOCK_METHOD_END(int, 0)
+
+        MOCK_STATIC_METHOD_1(, void, FAKE_IoTHubTransport_Unsubscribe_InputQueue, TRANSPORT_LL_HANDLE, handle)
+        MOCK_VOID_METHOD_END()
+
         MOCK_STATIC_METHOD_2(, void, eventConfirmationCallback, IOTHUB_CLIENT_CONFIRMATION_RESULT, result2, void*, userContextCallback)
         MOCK_VOID_METHOD_END()
 
@@ -414,6 +420,9 @@ DECLARE_GLOBAL_MOCK_METHOD_3(CIotHubTransportMocks, , int, FAKE_IoTHubTransport_
 DECLARE_GLOBAL_MOCK_METHOD_2(CIotHubTransportMocks, , IOTHUB_CLIENT_RESULT, FAKE_IoTHubTransport_GetSendStatus, TRANSPORT_LL_HANDLE, handle, IOTHUB_CLIENT_STATUS*, iotHubClientStatus);
 DECLARE_GLOBAL_MOCK_METHOD_5(CIotHubTransportMocks, , int, FAKE_IoTHubTransport_DeviceMethod_Response, IOTHUB_DEVICE_HANDLE, handle, METHOD_HANDLE, methodId, const unsigned char*, response, size_t, resp_size, int, status_response);
 
+DECLARE_GLOBAL_MOCK_METHOD_1(CIotHubTransportMocks, , int, FAKE_IoTHubTransport_Subscribe_InputQueue, TRANSPORT_LL_HANDLE, handle);
+DECLARE_GLOBAL_MOCK_METHOD_1(CIotHubTransportMocks, , void, FAKE_IoTHubTransport_Unsubscribe_InputQueue, TRANSPORT_LL_HANDLE, handle);
+
 DECLARE_GLOBAL_MOCK_METHOD_2(CIotHubTransportMocks, , void, eventConfirmationCallback, IOTHUB_CLIENT_CONFIRMATION_RESULT, result2, void*, userContextCallback);
 
 DECLARE_GLOBAL_MOCK_METHOD_1(CIotHubTransportMocks, , time_t, get_time, time_t*, t);
@@ -473,7 +482,9 @@ static TRANSPORT_PROVIDER FAKE_transport_provider =
     FAKE_IoTHubTransport_Unsubscribe,
     FAKE_IoTHubTransport_DoWork,
     FAKE_IoTHubTransport_SetRetryPolicy,
-    FAKE_IoTHubTransport_GetSendStatus
+    FAKE_IoTHubTransport_GetSendStatus,
+    FAKE_IoTHubTransport_Subscribe_InputQueue,
+    FAKE_IoTHubTransport_Unsubscribe_InputQueue
 };
 
 static const TRANSPORT_PROVIDER* provideFAKE(void)

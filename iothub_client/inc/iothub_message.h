@@ -239,6 +239,90 @@ MOCKABLE_FUNCTION(, const IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA*, IoTHubMessag
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetDiagnosticPropertyData, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA*, diagnosticData);
 
 /**
+* @brief   Gets the output name from the IOTHUB_MESSAGE_HANDLE.
+*
+* @param   iotHubMessageHandle Handle to the message.
+*
+* @return  A const char* pointing to the Output Id.
+*/
+MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetOutputName, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
+
+
+/**
+* @brief   Sets output for named queues. CAUTION: SDK user should not call it directly, it is for internal use only.
+*
+* @param   iotHubMessageHandle Handle to the message.
+* @param   outputName Pointer to the queue to output message to
+*
+* @return  Returns IOTHUB_MESSAGE_OK if the DiagnosticData was set successfully
+*          or an error code otherwise.
+*/
+MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetOutputName, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, outputName);
+
+
+/**
+* @brief   Gets the input name from the IOTHUB_MESSAGE_HANDLE.
+*
+* @param   iotHubMessageHandle Handle to the message.
+*
+* @return  A const char* pointing to the Input Id.
+*/
+MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetInputName, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
+
+/**
+* @brief   Sets input for named queues. CAUTION: SDK user should not call it directly, it is for internal use only.
+*
+* @param   iotHubMessageHandle Handle to the message.
+* @param   inputName Pointer to the queue to input message to
+*
+* @return  Returns IOTHUB_MESSAGE_OK if the DiagnosticData was set successfully
+*          or an error code otherwise.
+*/
+MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetInputName, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, inputName);
+
+/**
+* @brief   Gets the module name from the IOTHUB_MESSAGE_HANDLE.
+*
+* @param   iotHubMessageHandle Handle to the message.
+*
+* @return  A const char* pointing to the connection module Id.
+*/
+MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetConnectionModuleId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
+
+/**
+* @brief   Sets connection module ID. CAUTION: SDK user should not call it directly, it is for internal use only.
+*
+* @param   iotHubMessageHandle Handle to the message.
+* @param   connectionModuleId Pointer to the module ID of connector
+*
+* @return  Returns IOTHUB_MESSAGE_OK if the DiagnosticData was set successfully
+*          or an error code otherwise.
+*/
+MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetConnectionModuleId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, connectionModuleId);
+
+
+/**
+* @brief   Gets the connection device ID from the IOTHUB_MESSAGE_HANDLE.
+*
+* @param   iotHubMessageHandle Handle to the message.
+*
+* @return  A const char* pointing to the connection device Id.
+*/
+MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetConnectionDeviceId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
+
+/**
+* @brief   Sets connection device Id. CAUTION: SDK user should not call it directly, it is for internal use only.
+*
+* @param   iotHubMessageHandle Handle to the message.
+* @param   connectionDeviceId Pointer to the device ID of connector
+*
+* @return  Returns IOTHUB_MESSAGE_OK if the DiagnosticData was set successfully
+*          or an error code otherwise.
+*/
+MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetConnectionDeviceId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, connectionDeviceId);
+
+
+/**
 * @brief   Frees all resources associated with the given message handle.
 *
 * @param   iotHubMessageHandle Handle to the message.
