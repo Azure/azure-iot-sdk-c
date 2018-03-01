@@ -32,7 +32,6 @@ set(serializer_c_files
 ./src/schema.c
 ./src/schemalib.c
 ./src/schemaserializer.c
-../deps/parson/parson.c
 ./src/methodreturn.c
 )
 
@@ -55,10 +54,6 @@ set(serializer_h_files
 ./inc/methodreturn.h
 )
 
-if(MSVC)
-    set_source_files_properties(../deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
-endif()
-
 #these are the include folders
 #the following "set" statetement exports across the project a global variable called SHARED_UTIL_INC_FOLDER that expands to whatever needs to included when using COMMON library
 set(SERIALIZER_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using serializer lib" FORCE)
@@ -77,11 +72,23 @@ if (${build_as_dynamic})
     serializer SHARED ${serializer_c_files} ${serializer_h_files} ./src/serializer.def
     )
     linkSharedUtil(serializer)
+
+    set_target_properties(serializer PROPERTIES
+        ARCHIVE_OUTPUT_NAME "serializer_dll_import"
+        ENABLE_EXPORTS YES
+        VERSION ${IOT_SDK_VERSION}
+        SOVERSION ${IOT_SDK_VERION_MAJOR}
+        BUILD_WITH_INSTALL_RPATH TRUE
+    )
 else()
     add_library(
     serializer ${serializer_c_files} ${serializer_h_files} 
     )
 endif()
+
+target_link_libraries(serializer
+    parson
+)
 
 if (NOT ${skip_samples})
 if(WIN32)
