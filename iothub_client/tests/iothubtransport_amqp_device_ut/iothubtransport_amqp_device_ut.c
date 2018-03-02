@@ -578,7 +578,7 @@ static void set_expected_calls_for_device_do_work(DEVICE_CONFIG* config, time_t 
 	}
 }
 
-static void set_expected_calls_for_device_destroy(DEVICE_HANDLE handle, DEVICE_CONFIG *config, time_t current_time, DEVICE_STATE device_state, AUTHENTICATION_STATE auth_state, TELEMETRY_MESSENGER_STATE msgr_state, TWIN_MESSENGER_STATE twin_msgr_state)
+static void set_expected_calls_for_device_destroy(AMQP_DEVICE_HANDLE handle, DEVICE_CONFIG *config, time_t current_time, DEVICE_STATE device_state, AUTHENTICATION_STATE auth_state, TELEMETRY_MESSENGER_STATE msgr_state, TWIN_MESSENGER_STATE twin_msgr_state)
 {
     if (device_state == DEVICE_STATE_STARTED || device_state == DEVICE_STATE_STARTING)
     {
@@ -620,7 +620,7 @@ static void set_expected_calls_for_device_retrieve_options(DEVICE_CONFIG *config
         .SetReturn(OPTIONHANDLER_OK);
 }
 
-static void set_expected_calls_for_device_set_option(DEVICE_HANDLE handle, DEVICE_CONFIG *config, const char* option_name, void* option_value)
+static void set_expected_calls_for_device_set_option(AMQP_DEVICE_HANDLE handle, DEVICE_CONFIG *config, const char* option_name, void* option_value)
 {
     if (config->authentication_mode == DEVICE_AUTH_MODE_CBS)
     {
@@ -662,16 +662,16 @@ static void set_expected_calls_for_device_send_async(DEVICE_CONFIG *config)
 
 // ---------- set_expected*-dependent Test Helpers ---------- //
 
-static DEVICE_HANDLE create_device(DEVICE_CONFIG* config, time_t current_time)
+static AMQP_DEVICE_HANDLE create_device(DEVICE_CONFIG* config, time_t current_time)
 {
     umock_c_reset_all_calls();
     set_expected_calls_for_device_create(config, current_time);
     return device_create(config);
 }
 
-static DEVICE_HANDLE create_and_start_device(DEVICE_CONFIG* config, time_t current_time)
+static AMQP_DEVICE_HANDLE create_and_start_device(DEVICE_CONFIG* config, time_t current_time)
 {
-    DEVICE_HANDLE handle = create_device(config, current_time);
+    AMQP_DEVICE_HANDLE handle = create_device(config, current_time);
 
     set_expected_calls_for_device_start_async(config, current_time);
 
@@ -687,7 +687,7 @@ static DEVICE_HANDLE create_and_start_device(DEVICE_CONFIG* config, time_t curre
     return handle;
 }
 
-static void crank_device_do_work(DEVICE_HANDLE handle, DEVICE_CONFIG* config, time_t current_time, DEVICE_STATE device_state, AUTHENTICATION_STATE auth_state, TELEMETRY_MESSENGER_STATE msgr_state, TWIN_MESSENGER_STATE twin_msgr_state)
+static void crank_device_do_work(AMQP_DEVICE_HANDLE handle, DEVICE_CONFIG* config, time_t current_time, DEVICE_STATE device_state, AUTHENTICATION_STATE auth_state, TELEMETRY_MESSENGER_STATE msgr_state, TWIN_MESSENGER_STATE twin_msgr_state)
 {
     umock_c_reset_all_calls();
     set_expected_calls_for_device_do_work(config, current_time, device_state, auth_state, msgr_state, twin_msgr_state);
@@ -724,9 +724,9 @@ static void set_twin_messenger_state(TWIN_MESSENGER_STATE previous_state, TWIN_M
 		new_state);
 }
 
-static DEVICE_HANDLE create_and_start_and_crank_device(DEVICE_CONFIG* config, time_t current_time)
+static AMQP_DEVICE_HANDLE create_and_start_and_crank_device(DEVICE_CONFIG* config, time_t current_time)
 {
-    DEVICE_HANDLE handle = create_and_start_device(config, current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_device(config, current_time);
 
     crank_device_do_work(handle, config, current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STOPPED, TELEMETRY_MESSENGER_STATE_STOPPED, TWIN_MESSENGER_STATE_STOPPED);
     
@@ -801,7 +801,7 @@ TEST_FUNCTION(device_create_NULL_config)
     // arrange
 
     // act
-    DEVICE_HANDLE handle = device_create(NULL);
+    AMQP_DEVICE_HANDLE handle = device_create(NULL);
 
     // assert
     ASSERT_IS_NULL(handle);
@@ -817,7 +817,7 @@ TEST_FUNCTION(device_create_NULL_config_iothub_host_fqdn)
     config->iothub_host_fqdn = NULL;
 
     // act
-    DEVICE_HANDLE handle = device_create(config);
+    AMQP_DEVICE_HANDLE handle = device_create(config);
 
     // assert
     ASSERT_IS_NULL(handle);
@@ -833,7 +833,7 @@ TEST_FUNCTION(device_create_NULL_config_on_state_changed_callback)
     config->on_state_changed_callback = NULL;
 
     // act
-    DEVICE_HANDLE handle = device_create(config);
+    AMQP_DEVICE_HANDLE handle = device_create(config);
 
     // assert
     ASSERT_IS_NULL(handle);
@@ -856,7 +856,7 @@ TEST_FUNCTION(device_create_succeeds)
     set_expected_calls_for_device_create(config, TEST_current_time);
 
     // act
-    DEVICE_HANDLE handle = device_create(config);
+    AMQP_DEVICE_HANDLE handle = device_create(config);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -899,7 +899,7 @@ TEST_FUNCTION(device_create_failure_checks)
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
 
-        DEVICE_HANDLE handle = device_create(config);
+        AMQP_DEVICE_HANDLE handle = device_create(config);
 
         // assert
         sprintf(error_msg, "On failed call %zu", i);
@@ -930,7 +930,7 @@ TEST_FUNCTION(device_start_async_device_not_stopped)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     ASSERT_ARE_EQUAL(int, DEVICE_STATE_STOPPED, TEST_on_state_changed_callback_saved_previous_state);
     ASSERT_ARE_EQUAL(int, DEVICE_STATE_STARTING, TEST_on_state_changed_callback_saved_new_state);
@@ -956,7 +956,7 @@ TEST_FUNCTION(device_start_async_NULL_session_handle)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
     set_expected_calls_for_device_start_async(config, TEST_current_time);
@@ -980,7 +980,7 @@ TEST_FUNCTION(device_start_async_CBS_NULL_cbs_handle)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
     set_expected_calls_for_device_start_async(config, TEST_current_time);
@@ -1005,7 +1005,7 @@ TEST_FUNCTION(device_start_async_X509_succeeds)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_X509);
-    DEVICE_HANDLE handle = create_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
     set_expected_calls_for_device_start_async(config, TEST_current_time);
@@ -1032,7 +1032,7 @@ TEST_FUNCTION(device_start_async_CBS_succeeds)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
     set_expected_calls_for_device_start_async(config, TEST_current_time);
@@ -1071,7 +1071,7 @@ TEST_FUNCTION(device_stop_device_already_stopped)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
     set_expected_calls_for_device_stop(config, TEST_current_time, AUTHENTICATION_STATE_STOPPED, TELEMETRY_MESSENGER_STATE_STOPPED, TWIN_MESSENGER_STATE_STOPPED);
@@ -1105,7 +1105,7 @@ TEST_FUNCTION(device_stop_DEVICE_STATE_STARTED_failure_checks)
     for (i = 0, n = 1; i < n; i++)
     {
         // arrange 
-        DEVICE_HANDLE handle = create_and_start_and_crank_device(config, TEST_current_time);
+        AMQP_DEVICE_HANDLE handle = create_and_start_and_crank_device(config, TEST_current_time);
 
         umock_c_reset_all_calls();
         set_expected_calls_for_device_stop(config, TEST_current_time, AUTHENTICATION_STATE_STARTED, TELEMETRY_MESSENGER_STATE_STARTED, TWIN_MESSENGER_STATE_STARTED);
@@ -1146,7 +1146,7 @@ TEST_FUNCTION(device_stop_DEVICE_STATE_STARTING_succeeds)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
     set_expected_calls_for_device_stop(config, TEST_current_time, AUTHENTICATION_STATE_STOPPED, TELEMETRY_MESSENGER_STATE_STOPPED, TWIN_MESSENGER_STATE_STOPPED);
@@ -1174,7 +1174,7 @@ TEST_FUNCTION(device_stop_DEVICE_STATE_STARTED_succeeds)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_and_start_and_crank_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_and_crank_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
     set_expected_calls_for_device_stop(config, TEST_current_time, AUTHENTICATION_STATE_STARTED, TELEMETRY_MESSENGER_STATE_STARTED, TWIN_MESSENGER_STATE_STARTED);
@@ -1218,7 +1218,7 @@ TEST_FUNCTION(device_destroy_DEVICE_STATE_STARTED_succeeds)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_and_start_and_crank_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_and_crank_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
     set_expected_calls_for_device_destroy(handle, config, TEST_current_time, DEVICE_STATE_STARTED, AUTHENTICATION_STATE_STARTED, TELEMETRY_MESSENGER_STATE_STARTED, TWIN_MESSENGER_STATE_STARTED);
@@ -1259,7 +1259,7 @@ TEST_FUNCTION(device_get_send_status_NULL_send_status)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
 
@@ -1284,7 +1284,7 @@ TEST_FUNCTION(device_get_send_status_IDLE_success)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_device(config, TEST_current_time);
 
     TELEMETRY_MESSENGER_SEND_STATUS telemetry_messenger_get_send_status_result = TELEMETRY_MESSENGER_SEND_STATUS_IDLE;
 
@@ -1315,7 +1315,7 @@ TEST_FUNCTION(device_get_send_status_BUSY_success)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_device(config, TEST_current_time);
 
     TELEMETRY_MESSENGER_SEND_STATUS telemetry_messenger_get_send_status_result = TELEMETRY_MESSENGER_SEND_STATUS_BUSY;
 
@@ -1346,7 +1346,7 @@ TEST_FUNCTION(device_get_send_status_failure_checks)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
     STRICT_EXPECTED_CALL(telemetry_messenger_get_send_status(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_PTR_ARG))
@@ -1389,7 +1389,7 @@ TEST_FUNCTION(device_subscribe_message_NULL_callback)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
 
@@ -1412,7 +1412,7 @@ TEST_FUNCTION(device_subscribe_message_NULL_context)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
 
@@ -1436,7 +1436,7 @@ TEST_FUNCTION(device_subscribe_message_succeess)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
 
@@ -1465,7 +1465,7 @@ TEST_FUNCTION(device_subscribe_message_failure_checks)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
 
@@ -1509,7 +1509,7 @@ TEST_FUNCTION(device_set_retry_policy_succeeds)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
 
@@ -1552,7 +1552,7 @@ TEST_FUNCTION(device_retrieve_options_CBS_succeeds)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
     set_expected_calls_for_device_retrieve_options(config);
@@ -1576,7 +1576,7 @@ TEST_FUNCTION(device_retrieve_options_X509_succeeds)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_X509);
-    DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
     set_expected_calls_for_device_retrieve_options(config);
@@ -1605,7 +1605,7 @@ TEST_FUNCTION(device_retrieve_options_CBS_failure_checks)
     
     ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
     set_expected_calls_for_device_retrieve_options(config);
@@ -1643,7 +1643,7 @@ TEST_FUNCTION(device_set_option_X509_AUTH_fails)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_X509);
-    DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     size_t value = 400;
 
@@ -1671,7 +1671,7 @@ TEST_FUNCTION(device_set_option_saved_auth_options_fails)
     ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     size_t value = 400;
 
@@ -1705,7 +1705,7 @@ TEST_FUNCTION(device_set_option_saved_msgr_options_fails)
     ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     size_t value = 400;
 
@@ -1738,7 +1738,7 @@ TEST_FUNCTION(device_set_option_CBS_AUTH_succeeds)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     size_t value = 400;
 
@@ -1765,7 +1765,7 @@ TEST_FUNCTION(device_set_option_MSGR_succeeds)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     size_t value = 400;
 
@@ -1791,7 +1791,7 @@ TEST_FUNCTION(device_set_option_X509_saved_auth_options)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_X509);
-    DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     OPTIONHANDLER_HANDLE value = TEST_AUTH_OPTIONHANDLER_HANDLE;
 
@@ -1816,7 +1816,7 @@ TEST_FUNCTION(device_set_option_AUTH_saved_auth_options_succeeds)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     OPTIONHANDLER_HANDLE value = TEST_AUTH_OPTIONHANDLER_HANDLE;
 
@@ -1842,7 +1842,7 @@ TEST_FUNCTION(device_set_option_MSGR_saved_msgr_options_succeeds)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     OPTIONHANDLER_HANDLE value = TEST_MSGR_OPTIONHANDLER_HANDLE;
 
@@ -1868,7 +1868,7 @@ TEST_FUNCTION(device_set_option_saved_device_options_succeeds)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     OPTIONHANDLER_HANDLE value = TEST_OPTIONHANDLER_HANDLE;
 
@@ -1896,7 +1896,7 @@ TEST_FUNCTION(device_set_option_saved_device_options_fails)
     ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     OPTIONHANDLER_HANDLE value = TEST_OPTIONHANDLER_HANDLE;
 
@@ -1946,7 +1946,7 @@ TEST_FUNCTION(device_unsubscribe_message_succeess)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
 
@@ -1972,7 +1972,7 @@ TEST_FUNCTION(device_unsubscribe_message_failure_checks)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
 
@@ -1998,7 +1998,7 @@ TEST_FUNCTION(telemetry_messenger_send_async_NULL_handle)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
 
@@ -2021,7 +2021,7 @@ TEST_FUNCTION(telemetry_messenger_send_async_NULL_message)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
 
@@ -2048,7 +2048,7 @@ TEST_FUNCTION(telemetry_messenger_send_async_failure_checks)
     ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
     set_expected_calls_for_device_send_async(config);
@@ -2088,7 +2088,7 @@ TEST_FUNCTION(telemetry_messenger_send_async_succeeds)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
     set_expected_calls_for_device_send_async(config);
@@ -2130,7 +2130,7 @@ TEST_FUNCTION(device_do_work_authentication_start_fails)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
     set_expected_calls_for_device_do_work(config, TEST_current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STOPPED, TELEMETRY_MESSENGER_STATE_STOPPED, TWIN_MESSENGER_STATE_STOPPED);
@@ -2155,7 +2155,7 @@ TEST_FUNCTION(device_do_work_authentication_start_times_out)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     time_t next_time = add_seconds(TEST_current_time, DEFAULT_AUTH_STATE_CHANGED_TIMEOUT_SECS + 1);
 
@@ -2187,7 +2187,7 @@ TEST_FUNCTION(device_do_work_authentication_start_AUTH_FAILED)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
     set_expected_calls_for_device_do_work(config, TEST_current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STOPPED, TELEMETRY_MESSENGER_STATE_STOPPED, TWIN_MESSENGER_STATE_STOPPED);
@@ -2219,7 +2219,7 @@ TEST_FUNCTION(device_do_work_authentication_start_AUTH_TIMEOUT)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
     set_expected_calls_for_device_do_work(config, TEST_current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STOPPED, TELEMETRY_MESSENGER_STATE_STOPPED, TWIN_MESSENGER_STATE_STOPPED);
@@ -2255,7 +2255,7 @@ TEST_FUNCTION(device_do_work_telemetry_messenger_start_FAILED)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
     crank_device_do_work(handle, config, TEST_current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STOPPED, TELEMETRY_MESSENGER_STATE_STOPPED, TWIN_MESSENGER_STATE_STOPPED);
@@ -2294,7 +2294,7 @@ TEST_FUNCTION(device_do_work_telemetry_messenger_start_timeout)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     time_t next_time = add_seconds(TEST_current_time, DEFAULT_MSGR_STATE_CHANGED_TIMEOUT_SECS + 1);
 
@@ -2338,7 +2338,7 @@ TEST_FUNCTION(device_do_work_succeeds)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     time_t t0 = TEST_current_time;
     time_t t1 = add_seconds(t0, DEFAULT_AUTH_STATE_CHANGED_TIMEOUT_SECS - 1);
@@ -2384,7 +2384,7 @@ TEST_FUNCTION(device_do_work_STARTED_auth_unexpected_state)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_and_start_and_crank_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_and_crank_device(config, TEST_current_time);
 
     TEST_authentication_create_saved_on_error_callback(TEST_authentication_create_saved_on_error_context, AUTHENTICATION_ERROR_SAS_REFRESH_TIMEOUT);
     set_authentication_state(AUTHENTICATION_STATE_STARTED, AUTHENTICATION_STATE_ERROR, TEST_current_time);
@@ -2411,7 +2411,7 @@ TEST_FUNCTION(device_do_work_STARTED_messenger_unexpected_state)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_and_start_and_crank_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_and_crank_device(config, TEST_current_time);
 
 	set_messenger_state(TELEMETRY_MESSENGER_STATE_STARTED, TELEMETRY_MESSENGER_STATE_ERROR, TEST_current_time);
 
@@ -2444,7 +2444,7 @@ TEST_FUNCTION(on_event_send_complete_messenger_callback_succeeds)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_device(config, TEST_current_time);
 
     TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT messenger_results[5];
     messenger_results[0] = TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_OK;
@@ -2492,7 +2492,7 @@ TEST_FUNCTION(on_messenger_message_received_callback_NULL_handle)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_and_start_and_crank_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_and_crank_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
     TEST_telemetry_messenger_subscribe_for_messages_return = 0;
@@ -2530,7 +2530,7 @@ TEST_FUNCTION(on_messenger_message_received_callback_NULL_context)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_and_start_and_crank_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_and_crank_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
     TEST_telemetry_messenger_subscribe_for_messages_return = 0;
@@ -2573,7 +2573,7 @@ TEST_FUNCTION(on_messenger_message_received_callback_succeess)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_and_start_and_crank_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_and_crank_device(config, TEST_current_time);
 
     TELEMETRY_MESSENGER_DISPOSITION_RESULT messenger_results[3];
     messenger_results[0] = TELEMETRY_MESSENGER_DISPOSITION_RESULT_ACCEPTED;
@@ -2633,7 +2633,7 @@ TEST_FUNCTION(on_messenger_message_received_callback_failure_checks)
     ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_and_start_and_crank_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_and_crank_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
     TEST_telemetry_messenger_subscribe_for_messages_return = 0;
@@ -2694,7 +2694,7 @@ TEST_FUNCTION(device_send_message_disposition_succeess)
 {
     // arrange
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     DEVICE_MESSAGE_DISPOSITION_INFO disposition_info;
     disposition_info.source = TEST_MESSAGE_SOURCE_NAME_CHAR_PTR;
@@ -2724,7 +2724,7 @@ TEST_FUNCTION(device_send_message_NULL_disposition_info)
 {
     // arrange
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
 
@@ -2764,7 +2764,7 @@ TEST_FUNCTION(device_send_message_NULL_disposition_info_source)
 {
     // arrange
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     DEVICE_MESSAGE_DISPOSITION_INFO disposition_info;
     disposition_info.source = NULL;
@@ -2791,7 +2791,7 @@ TEST_FUNCTION(device_send_message_disposition_failure_checks)
     ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
 
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     DEVICE_MESSAGE_DISPOSITION_INFO disposition_info;
     disposition_info.source = TEST_MESSAGE_SOURCE_NAME_CHAR_PTR;

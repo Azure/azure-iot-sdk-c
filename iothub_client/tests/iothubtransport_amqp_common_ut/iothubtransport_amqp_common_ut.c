@@ -296,7 +296,7 @@ extern "C"
     static ON_DEVICE_C2D_MESSAGE_RECEIVED TEST_device_subscribe_message_saved_callback;
     static void* TEST_device_subscribe_message_saved_context;
     static int TEST_device_subscribe_message_return;
-    static int TEST_device_subscribe_message(DEVICE_HANDLE handle, ON_DEVICE_C2D_MESSAGE_RECEIVED on_message_received_callback, void* context)
+    static int TEST_device_subscribe_message(AMQP_DEVICE_HANDLE handle, ON_DEVICE_C2D_MESSAGE_RECEIVED on_message_received_callback, void* context)
     {
         (void)handle;
         TEST_device_subscribe_message_saved_callback = on_message_received_callback;
@@ -323,7 +323,7 @@ MOCKABLE_FUNCTION(, double, get_difftime, time_t, stopTime, time_t, startTime);
 
 typedef struct DEVICE_DATA_TAG
 {
-    DEVICE_HANDLE device_handle;
+    AMQP_DEVICE_HANDLE device_handle;
 } DEVICE_DATA;
 
 
@@ -396,7 +396,7 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 #define TEST_PROTOCOL_PROVIDER                     (IOTHUB_CLIENT_TRANSPORT_PROVIDER)0x4266
 #define TEST_REGISTERED_DEVICES_LIST               (SINGLYLINKEDLIST_HANDLE)0x4267
 #define TEST_DEVICE_ID_STRING_HANDLE               (STRING_HANDLE)0x4268
-#define TEST_DEVICE_HANDLE                         (DEVICE_HANDLE)0x4269
+#define TEST_DEVICE_HANDLE                         (AMQP_DEVICE_HANDLE)0x4269
 #define TEST_LIST_ITEM_HANDLE                      (LIST_ITEM_HANDLE)0x4270
 #define TEST_AMQP_CONNECTION_HANDLE                (AMQP_CONNECTION_HANDLE)0x4271
 #define TEST_IOTHUB_MESSAGE_LIST_HANDLE            (IOTHUB_MESSAGE_LIST*)0x4272
@@ -883,8 +883,8 @@ static double TEST_get_difftime(time_t t1, time_t t0)
 
 static ON_DEVICE_STATE_CHANGED TEST_device_create_saved_on_state_changed_callback;
 static void* TEST_device_create_saved_on_state_changed_context;
-static DEVICE_HANDLE TEST_device_create_return;
-static DEVICE_HANDLE TEST_device_create(DEVICE_CONFIG* config)
+static AMQP_DEVICE_HANDLE TEST_device_create_return;
+static AMQP_DEVICE_HANDLE TEST_device_create(DEVICE_CONFIG* config)
 {
     TEST_device_create_saved_on_state_changed_callback = config->on_state_changed_callback;
     TEST_device_create_saved_on_state_changed_context = config->on_state_changed_context;
@@ -1057,7 +1057,7 @@ static void register_umock_alias_types()
     REGISTER_UMOCK_ALIAS_TYPE(BUFFER_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(CBS_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(CONNECTION_HANDLE, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(DEVICE_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(AMQP_DEVICE_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(DEVICE_CONFIG, void*);
     REGISTER_UMOCK_ALIAS_TYPE(DEVICE_MESSAGE_DISPOSITION_RESULT, int);
     REGISTER_UMOCK_ALIAS_TYPE(DEVICE_SEND_STATUS, int);
