@@ -2361,8 +2361,11 @@ static IOTHUB_CLIENT_RESULT create_event_handler_callback(IOTHUB_CLIENT_LL_HANDL
                 LogError("Could not allocate IOTHUB_EVENT_CALLBACK");
                 result = IOTHUB_CLIENT_ERROR;
             }
-            memset(event_callback, 0, sizeof(*event_callback));
-            add_to_list = true;
+            else
+            {
+                memset(event_callback, 0, sizeof(*event_callback));
+                add_to_list = true;
+            }
         }
         else
         {
