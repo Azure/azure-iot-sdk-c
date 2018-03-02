@@ -497,7 +497,7 @@ static void on_process_message_callback(MESSAGE_QUEUE_HANDLE message_queue, MQ_M
 
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_127: [**If `messenger_handle` or `name` or `value` is NULL, amqp_messenger_set_option shall fail and return a non-zero value**]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_128: [**If name matches MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, `value` shall be set on `instance->send_queue` using message_queue_set_max_message_enqueued_time_secs()**]**
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_128: [**If name matches AMQP_MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, `value` shall be set on `instance->send_queue` using message_queue_set_max_message_enqueued_time_secs()**]**
 
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_129: [**If message_queue_set_max_message_enqueued_time_secs() fails, amqp_messenger_set_option() shall fail and return a non-zero value**]**
 

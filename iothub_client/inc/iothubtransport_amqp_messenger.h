@@ -19,7 +19,7 @@ extern "C"
 #endif
 
 
-static const char* MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS = "amqp_event_send_timeout_secs";
+static const char* AMQP_MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS = "amqp_event_send_timeout_secs";
 
 typedef struct AMQP_MESSENGER_INSTANCE* AMQP_MESSENGER_HANDLE;
 

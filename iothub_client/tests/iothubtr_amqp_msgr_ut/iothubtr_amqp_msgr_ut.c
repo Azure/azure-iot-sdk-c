@@ -2274,7 +2274,7 @@ TEST_FUNCTION(amqp_messenger_set_option_NULL_handle)
 	size_t value = 100;
 
 	// act
-	int result = amqp_messenger_set_option(NULL, MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, &value);
+	int result = amqp_messenger_set_option(NULL, AMQP_MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, &value);
 
 	// assert
 	ASSERT_ARE_NOT_EQUAL(int, 0, result);
@@ -2310,7 +2310,7 @@ TEST_FUNCTION(amqp_messenger_set_option_NULL_value)
 	AMQP_MESSENGER_HANDLE handle = create_and_start_messenger2(config, false);
 
 	// act
-	int result = amqp_messenger_set_option(handle, MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, NULL);
+	int result = amqp_messenger_set_option(handle, AMQP_MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, NULL);
 
 	// assert
 	ASSERT_ARE_NOT_EQUAL(int, 0, result);
@@ -2320,7 +2320,7 @@ TEST_FUNCTION(amqp_messenger_set_option_NULL_value)
 	amqp_messenger_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_128: [If name matches MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, `value` shall be set on `instance->send_queue` using message_queue_set_max_message_enqueued_time_secs()]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_128: [If name matches AMQP_MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, `value` shall be set on `instance->send_queue` using message_queue_set_max_message_enqueued_time_secs()]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_131: [If no errors occur, amqp_messenger_set_option shall return 0]
 TEST_FUNCTION(amqp_messenger_set_option_EVENT_SEND_TIMEOUT_SECS)
 {
@@ -2334,7 +2334,7 @@ TEST_FUNCTION(amqp_messenger_set_option_EVENT_SEND_TIMEOUT_SECS)
 	STRICT_EXPECTED_CALL(message_queue_set_max_message_enqueued_time_secs(TEST_MESSAGE_QUEUE_HANDLE, value));
 
 	// act
-	int result = amqp_messenger_set_option(handle, MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, &value);
+	int result = amqp_messenger_set_option(handle, AMQP_MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, &value);
 
 	// assert
 	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
