@@ -19,8 +19,8 @@ extern "C"
 #endif
 
 
-static const char* MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS = "telemetry_event_send_timeout_secs";
-static const char* MESSENGER_OPTION_SAVED_OPTIONS = "saved_telemetry_messenger_options";
+static const char* TELEMETRY_MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS = "telemetry_event_send_timeout_secs";
+static const char* TELEMETRY_MESSENGER_OPTION_SAVED_OPTIONS = "saved_telemetry_messenger_options";
 
 typedef struct TELEMETRY_MESSENGER_INSTANCE* TELEMETRY_MESSENGER_HANDLE;
 

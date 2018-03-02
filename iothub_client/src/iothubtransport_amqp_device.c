@@ -1403,7 +1403,7 @@ int device_set_option(DEVICE_HANDLE handle, const char* name, void* value)
         else if (strcmp(DEVICE_OPTION_EVENT_SEND_TIMEOUT_SECS, name) == 0)
         {
             // Codes_SRS_DEVICE_09_086: [If `name` refers to messenger module, it shall be passed along with `value` to telemetry_messenger_set_option]
-            if (telemetry_messenger_set_option(instance->messenger_handle, MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, value) != RESULT_OK)
+            if (telemetry_messenger_set_option(instance->messenger_handle, TELEMETRY_MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, value) != RESULT_OK)
             {
                 // Codes_SRS_DEVICE_09_087: [If telemetry_messenger_set_option fails, device_set_option shall return a non-zero result]
                 LogError("failed setting option for device '%s' (failed setting messenger option '%s')", instance->config->device_id, name);
