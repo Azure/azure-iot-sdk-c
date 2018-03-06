@@ -346,8 +346,7 @@ static const char* connectionString = "[device connection string]";
 
 ```Shell
 cd ./azure-iot-sdk-c/cmake/iothub_client/samples/iothub_client_sample_amqp
-make
-./iothub_client_sample_amqp
+make ./iothub_client_sample_amqp
 ```
 
 [visual-studio]: https://www.visualstudio.com/downloads/
