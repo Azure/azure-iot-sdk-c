@@ -861,31 +861,10 @@ static int copy_events_to_list(SINGLYLINKEDLIST_HANDLE from_list, SINGLYLINKEDLI
     return result;
 }
 
-// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_31_201: [Freeing a `task` will free callback items associated with it and free the data itself]
-static void free_task(MESSENGER_SEND_EVENT_TASK* task)
-{
-    LIST_ITEM_HANDLE list_node;
-
-    if (NULL != task->callback_list)
-    {
-        while ((list_node = singlylinkedlist_get_head_item(task->callback_list)) != NULL)
-        {
-            MESSENGER_SEND_EVENT_CALLER_INFORMATION* caller_info = (MESSENGER_SEND_EVENT_CALLER_INFORMATION*)singlylinkedlist_item_get_value(list_node);
-            (void)singlylinkedlist_remove(task->callback_list, list_node);
-            free(caller_info);
-        }
-        singlylinkedlist_destroy(task->callback_list);
-    }
-
-    printf("free_task %p\n", task);
-    free(task);
-}
-
 static int copy_events_from_in_progress_to_waiting_list(TELEMETRY_MESSENGER_INSTANCE* instance, SINGLYLINKEDLIST_HANDLE to_list)
 {
     int result;
     LIST_ITEM_HANDLE list_task_item;
-    LIST_ITEM_HANDLE list_task_item_next;
 
     result = RESULT_OK;
     list_task_item = singlylinkedlist_get_head_item(instance->in_progress_list);
@@ -912,14 +891,7 @@ static int copy_events_from_in_progress_to_waiting_list(TELEMETRY_MESSENGER_INST
             list_caller_item = singlylinkedlist_get_next_item(list_caller_item);
         }
         
-        list_task_item_next = singlylinkedlist_get_next_item(list_task_item);
-
-        // 
-        singlylinkedlist_destroy(task->callback_list);
-        task->callback_list = NULL;
-        free_task(task);
-        singlylinkedlist_remove(instance->in_progress_list, list_task_item);
-        list_task_item = list_task_item_next;
+        list_task_item = singlylinkedlist_get_next_item(list_task_item);
     }
 
     return result;
@@ -980,6 +952,24 @@ static int move_events_to_wait_to_send_list(TELEMETRY_MESSENGER_INSTANCE* instan
     return result;
 }
 
+// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_31_201: [Freeing a `task` will free callback items associated with it and free the data itself]
+static void free_task(MESSENGER_SEND_EVENT_TASK* task)
+{
+    LIST_ITEM_HANDLE list_node;
+
+    if (NULL != task->callback_list)
+    {
+        while ((list_node = singlylinkedlist_get_head_item(task->callback_list)) != NULL)
+        {
+            MESSENGER_SEND_EVENT_CALLER_INFORMATION* caller_info = (MESSENGER_SEND_EVENT_CALLER_INFORMATION*)singlylinkedlist_item_get_value(list_node);
+            (void)singlylinkedlist_remove(task->callback_list, list_node);
+            free(caller_info);
+        }
+        singlylinkedlist_destroy(task->callback_list);
+    }
+
+    free(task);
+}
 
 static MESSENGER_SEND_EVENT_TASK* create_task(TELEMETRY_MESSENGER_INSTANCE *messenger)
 {
@@ -991,7 +981,6 @@ static MESSENGER_SEND_EVENT_TASK* create_task(TELEMETRY_MESSENGER_INSTANCE *mess
     }
     else
     {
-        printf("create_task %p\n", task);
         memset(task, 0, sizeof(*task ));
         task->messenger = messenger;
         task->send_time = INDEFINITE_TIME;
