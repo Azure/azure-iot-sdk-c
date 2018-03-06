@@ -832,12 +832,14 @@ static void register_global_mock_returns()
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(get_time, INDEFINITE_TIME);
 }
 
-static void initialize_variables()
+static void reset_test_data()
 {
     g_STRING_sprintf_call_count = 0;
     g_STRING_sprintf_fail_on_count = -1;
+    saved_STRING_sprintf_handle = NULL;
 
     saved_malloc_returns_count = 0;
+    memset(saved_malloc_returns, 0, sizeof(saved_malloc_returns));
 
     memset(&TEST_amqp_messenger_create_config, 0, sizeof(TEST_amqp_messenger_create_config));
     TEST_amqp_messenger_create_return = TEST_AMQP_MESSENGER_HANDLE;
@@ -859,6 +861,8 @@ static void initialize_variables()
 
     TEST_CONSTBUFFER.buffer = TWIN_REPORTED_PROPERTIES;
     TEST_CONSTBUFFER.size = TWIN_REPORTED_PROPERTIES_LENGTH;
+
+    TEST_on_state_changed_callback_context = NULL;
 }
 
 BEGIN_TEST_SUITE(iothubtr_amqp_twin_msgr_ut)
@@ -906,11 +910,12 @@ TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
 
     umock_c_reset_all_calls();
 
-    initialize_variables();
+    reset_test_data();
 }
 
 TEST_FUNCTION_CLEANUP(TestMethodCleanup)
 {
+    reset_test_data();
     TEST_MUTEX_RELEASE(g_testByTest);
 }
 

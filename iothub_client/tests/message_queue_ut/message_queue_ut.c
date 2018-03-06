@@ -475,13 +475,17 @@ static void set_message_queue_retrieve_options_expected_calls()
     STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 }
 
-static void initialize_variables()
+static void reset_test_data()
 {    
     TEST_current_time = time(NULL);
+
+    saved_malloc_returns_count = 0;
+    memset(saved_malloc_returns, 0, sizeof(saved_malloc_returns));
 
     TEST_OptionHandler_AddOption_saved_value = 0;
     TEST_OptionHandler_AddOption_result = OPTIONHANDLER_OK;
 
+    TEST_on_process_message_callback_message_queue = NULL;
     TEST_on_process_message_callback_message = NULL;
     TEST_on_process_message_callback_on_process_message_completed_callback = NULL;
     TEST_on_process_message_callback_context = NULL;
@@ -618,11 +622,12 @@ TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
     umock_c_reset_all_calls();
     umock_c_negative_tests_deinit();
 
-    initialize_variables();
+    reset_test_data();
 }
 
 TEST_FUNCTION_CLEANUP(TestMethodCleanup)
 {
+    reset_test_data();
     TEST_MUTEX_RELEASE(g_testByTest);
 }
 

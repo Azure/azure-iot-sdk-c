@@ -177,6 +177,11 @@ TEST_SUITE_CLEANUP(suite_cleanup)
     TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
+static void reset_test_data()
+{
+    g_mapFilterFunc = NULL;
+}
+
 TEST_FUNCTION_INITIALIZE(method_init)
 {
     if (TEST_MUTEX_ACQUIRE(g_testByTest))
@@ -184,12 +189,12 @@ TEST_FUNCTION_INITIALIZE(method_init)
         ASSERT_FAIL("Could not acquire test serialization mutex.");
     }
     umock_c_reset_all_calls();
-
-    g_mapFilterFunc = NULL;
+    reset_test_data();
 }
 
 TEST_FUNCTION_CLEANUP(method_cleanup)
 {
+    reset_test_data();
     TEST_MUTEX_RELEASE(g_testByTest);
 }
 

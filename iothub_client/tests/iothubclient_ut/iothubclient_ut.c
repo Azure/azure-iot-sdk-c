@@ -533,11 +533,8 @@ TEST_SUITE_CLEANUP(suite_cleanup)
     TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
-TEST_FUNCTION_INITIALIZE(method_init)
+static void reset_test_data()
 {
-    TEST_MUTEX_ACQUIRE(test_serialize_mutex);
-    umock_c_reset_all_calls();
-
     g_thread_func = NULL;
     g_thread_func_arg = NULL;
     g_userContextCallback = NULL;
@@ -560,8 +557,16 @@ TEST_FUNCTION_INITIALIZE(method_init)
     memset(my_malloc_items, 0, sizeof(my_malloc_items));
 }
 
+TEST_FUNCTION_INITIALIZE(method_init)
+{
+    TEST_MUTEX_ACQUIRE(test_serialize_mutex);
+    umock_c_reset_all_calls();
+    reset_test_data();
+}
+
 TEST_FUNCTION_CLEANUP(TestMethodCleanup)
 {
+    reset_test_data();
     TEST_MUTEX_RELEASE(test_serialize_mutex);
 }
 
