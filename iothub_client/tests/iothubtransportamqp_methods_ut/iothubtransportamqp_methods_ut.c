@@ -79,30 +79,30 @@ MOCK_FUNCTION_END(0)
 MOCK_FUNCTION_WITH_CODE(, void, test_on_methods_unsubscribed, void*, context);
 MOCK_FUNCTION_END()
 
-#define TEST_ASYNC_HANDLE           (ASYNC_OPERATION_HANDLE)0x4246
-#define TEST_SESSION_HANDLE         (SESSION_HANDLE)0x4245
-#define TEST_SENDER_LINK            (LINK_HANDLE)0x4246
-#define TEST_RECEIVER_LINK          (LINK_HANDLE)0x4247
-#define TEST_MESSAGE_RECEIVER       (MESSAGE_RECEIVER_HANDLE)0x4248
-#define TEST_MESSAGE_SENDER         (MESSAGE_SENDER_HANDLE)0x4249
-#define TEST_RECEIVER_SOURCE        (AMQP_VALUE)0x4250
-#define TEST_RECEIVER_TARGET        (AMQP_VALUE)0x4251
-#define TEST_SENDER_SOURCE          (AMQP_VALUE)0x4252
-#define TEST_SENDER_TARGET          (AMQP_VALUE)0x4253
-#define TEST_STRING_HANDLE          (STRING_HANDLE)0x4254
-#define TEST_UAMQP_MESSAGE          (MESSAGE_HANDLE)0x4255
-#define TEST_RESPONSE_UAMQP_MESSAGE (MESSAGE_HANDLE)0x4256
-#define TEST_DELIVERY_ACCEPTED      (AMQP_VALUE)0x4257
-#define TEST_DELIVERY_RELEASED      (AMQP_VALUE)0x4258
-#define TEST_DELIVERY_REJECTED      (AMQP_VALUE)0x4259
+#define TEST_ASYNC_HANDLE            (ASYNC_OPERATION_HANDLE)0x4246
+#define TEST_SESSION_HANDLE          (SESSION_HANDLE)0x4245
+#define TEST_SENDER_LINK             (LINK_HANDLE)0x4246
+#define TEST_RECEIVER_LINK           (LINK_HANDLE)0x4247
+#define TEST_MESSAGE_RECEIVER        (MESSAGE_RECEIVER_HANDLE)0x4248
+#define TEST_MESSAGE_SENDER          (MESSAGE_SENDER_HANDLE)0x4249
+#define TEST_RECEIVER_SOURCE         (AMQP_VALUE)0x4250
+#define TEST_RECEIVER_TARGET         (AMQP_VALUE)0x4251
+#define TEST_SENDER_SOURCE           (AMQP_VALUE)0x4252
+#define TEST_SENDER_TARGET           (AMQP_VALUE)0x4253
+#define TEST_STRING_HANDLE           (STRING_HANDLE)0x4254
+#define TEST_UAMQP_MESSAGE           (MESSAGE_HANDLE)0x4255
+#define TEST_RESPONSE_UAMQP_MESSAGE  (MESSAGE_HANDLE)0x4256
+#define TEST_DELIVERY_ACCEPTED       (AMQP_VALUE)0x4257
+#define TEST_DELIVERY_RELEASED       (AMQP_VALUE)0x4258
+#define TEST_DELIVERY_REJECTED       (AMQP_VALUE)0x4259
 
-#define LINK_ATTACH_PROPERTIES_MAP		(AMQP_VALUE)0x4260
-#define CHANNEL_CORRELATION_ID_KEY		(AMQP_VALUE)0x4261
-#define CHANNEL_CORRELATION_ID_VALUE	(AMQP_VALUE)0x4262
-#define API_VERSION_KEY					(AMQP_VALUE)0x4263
-#define API_VERSION_VALUE				(AMQP_VALUE)0x4264
+#define LINK_ATTACH_PROPERTIES_MAP   (AMQP_VALUE)0x4260
+#define CHANNEL_CORRELATION_ID_KEY   (AMQP_VALUE)0x4261
+#define CHANNEL_CORRELATION_ID_VALUE (AMQP_VALUE)0x4262
+#define API_VERSION_KEY              (AMQP_VALUE)0x4263
+#define API_VERSION_VALUE            (AMQP_VALUE)0x4264
 
-#define TEST_METHOD_NAME            "test_method_name"
+#define TEST_METHOD_NAME              "test_method_name"
 
 static PROPERTIES_HANDLE test_properties_handle = (PROPERTIES_HANDLE)0x4256;
 
@@ -373,6 +373,16 @@ TEST_SUITE_CLEANUP(suite_cleanup)
     TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
+static void reset_test_data()
+{
+    g_STRING_construct_sprintf_call_count = 0;
+    g_when_shall_STRING_construct_sprintf_fail = 0;
+    g_method_handle = NULL;
+    g_on_message_send_complete_context = NULL;
+    g_on_message_sender_state_changed_context = NULL;
+    g_on_message_receiver_state_changed_context = NULL;
+}
+
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
 {
     if (TEST_MUTEX_ACQUIRE(g_testByTest))
@@ -380,13 +390,13 @@ TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
         ASSERT_FAIL("our mutex is ABANDONED. Failure in test framework");
     }
 
-    g_STRING_construct_sprintf_call_count = 0;
-    g_when_shall_STRING_construct_sprintf_fail = 0;
+    reset_test_data();
     umock_c_reset_all_calls();
 }
 
 TEST_FUNCTION_CLEANUP(TestMethodCleanup)
 {
+    reset_test_data();
     TEST_MUTEX_RELEASE(g_testByTest);
 }
 

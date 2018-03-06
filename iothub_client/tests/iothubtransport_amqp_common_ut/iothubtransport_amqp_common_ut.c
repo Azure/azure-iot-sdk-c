@@ -851,7 +851,7 @@ static AMQP_CONNECTION_HANDLE TEST_amqp_connection_create(AMQP_CONNECTION_CONFIG
     TEST_amqp_connection_create_saved_on_state_changed_callback = config->on_state_changed_callback;
     TEST_amqp_connection_create_saved_on_state_changed_context = config->on_state_changed_context;
     TEST_amqp_connection_create_saved_c2d_keep_alive_freq_secs = config->svc2cl_keep_alive_timeout_secs;
-	TEST_amqp_connection_create_saved_cl2svc_keep_alive_send_ratio = config->cl2svc_keep_alive_send_ratio;
+    TEST_amqp_connection_create_saved_cl2svc_keep_alive_send_ratio = config->cl2svc_keep_alive_send_ratio;
 
     return TEST_amqp_connection_create_return;
 }
@@ -1187,12 +1187,13 @@ static void register_global_mock_returns()
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(retry_control_create, NULL);
 }
 
-static void initialize_static_variables()
+static void reset_test_data()
 {
     g_STRING_sprintf_call_count = 0;
     g_STRING_sprintf_fail_on_count = 0;
 
     STRING_construct_sprintf_result = NULL;
+    saved_STRING_sprintf_handle = NULL;
 
     TEST_amqp_get_io_transport_result = TEST_UNDERLYING_IO_TRANSPORT;
 
@@ -1222,6 +1223,13 @@ static void initialize_static_variables()
     TEST_singlylinkedlist_foreach_list = NULL;
     TEST_singlylinkedlist_foreach_action_function = NULL;
     TEST_singlylinkedlist_foreach_context = NULL;
+    
+    memset(&TEST_waitingToSend, 0, sizeof(TEST_waitingToSend));
+
+    g_on_methods_error_context = NULL;
+    g_on_method_request_received_context = NULL;
+    g_on_methods_unsubscribed_context = NULL;
+    expected_AMQP_TRANSPORT_PROXY_OPTIONS = NULL;
 }
 
 static void initialize_test_variables()
@@ -1272,11 +1280,12 @@ TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
 
     umock_c_reset_all_calls();
     
-    initialize_static_variables();
+    reset_test_data();
 }
 
 TEST_FUNCTION_CLEANUP(TestMethodCleanup)
 {
+    reset_test_data();
     TEST_MUTEX_RELEASE(g_testByTest);
 }
 
@@ -2930,85 +2939,85 @@ TEST_FUNCTION(SetOption_xio_option_fails)
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_99_002: [If `OPTION_AMQP_REMOTE_IDLE_TIMEOUT_RATIO` value is 0, the test will fail]
 TEST_FUNCTION(SetOption_cl2svc_keep_alive_send_ratio_fail_for_zero)
 {
-	// arrange
-	initialize_test_variables();
-	TRANSPORT_LL_HANDLE handle = create_transport();
+    // arrange
+    initialize_test_variables();
+    TRANSPORT_LL_HANDLE handle = create_transport();
 
-	IOTHUB_DEVICE_CONFIG* device_config = create_device_config(TEST_DEVICE_ID_CHAR_PTR, true);
-	IOTHUB_DEVICE_HANDLE device_handle = register_device(handle, device_config, &TEST_waitingToSend, true);
-	ASSERT_IS_NOT_NULL(device_handle);
+    IOTHUB_DEVICE_CONFIG* device_config = create_device_config(TEST_DEVICE_ID_CHAR_PTR, true);
+    IOTHUB_DEVICE_HANDLE device_handle = register_device(handle, device_config, &TEST_waitingToSend, true);
+    ASSERT_IS_NOT_NULL(device_handle);
 
-	// This creates the amqp_connection_handle
-	crank_transport_ready_after_create(handle, &TEST_waitingToSend, 0, false, true, 1, TEST_current_time, false);
+    // This creates the amqp_connection_handle
+    crank_transport_ready_after_create(handle, &TEST_waitingToSend, 0, false, true, 1, TEST_current_time, false);
 
-	umock_c_reset_all_calls();
-	double value = 0.0;
+    umock_c_reset_all_calls();
+    double value = 0.0;
 
-	// act
-	IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SetOption(handle, OPTION_REMOTE_IDLE_TIMEOUT_RATIO, &value);
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SetOption(handle, OPTION_REMOTE_IDLE_TIMEOUT_RATIO, &value);
 
-	// assert
-	ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_INVALID_ARG, result);
-	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    // assert
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
-	// cleanup
-	destroy_transport(handle, device_handle, NULL);
+    // cleanup
+    destroy_transport(handle, device_handle, NULL);
 }
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_99_003: [If `OPTION_AMQP_REMOTE_IDLE_TIMEOUT_RATIO` value is 1, the test will fail]
 TEST_FUNCTION(SetOption_cl2svc_keep_alive_send_ratio_fail_for_1)
 {
-	// arrange
-	initialize_test_variables();
-	TRANSPORT_LL_HANDLE handle = create_transport();
+    // arrange
+    initialize_test_variables();
+    TRANSPORT_LL_HANDLE handle = create_transport();
 
-	IOTHUB_DEVICE_CONFIG* device_config = create_device_config(TEST_DEVICE_ID_CHAR_PTR, true);
-	IOTHUB_DEVICE_HANDLE device_handle = register_device(handle, device_config, &TEST_waitingToSend, true);
-	ASSERT_IS_NOT_NULL(device_handle);
+    IOTHUB_DEVICE_CONFIG* device_config = create_device_config(TEST_DEVICE_ID_CHAR_PTR, true);
+    IOTHUB_DEVICE_HANDLE device_handle = register_device(handle, device_config, &TEST_waitingToSend, true);
+    ASSERT_IS_NOT_NULL(device_handle);
 
-	// This creates the amqp_connection_handle
-	crank_transport_ready_after_create(handle, &TEST_waitingToSend, 0, false, true, 1, TEST_current_time, false);
+    // This creates the amqp_connection_handle
+    crank_transport_ready_after_create(handle, &TEST_waitingToSend, 0, false, true, 1, TEST_current_time, false);
 
-	umock_c_reset_all_calls();
-	double value = 1.0;
+    umock_c_reset_all_calls();
+    double value = 1.0;
 
-	// act
-	IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SetOption(handle, OPTION_REMOTE_IDLE_TIMEOUT_RATIO, &value);
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SetOption(handle, OPTION_REMOTE_IDLE_TIMEOUT_RATIO, &value);
 
-	// assert
-	ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_INVALID_ARG, result);
-	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    // assert
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
-	// cleanup
-	destroy_transport(handle, device_handle, NULL);
+    // cleanup
+    destroy_transport(handle, device_handle, NULL);
 }
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_99_004: [If `OPTION_AMQP_REMOTE_IDLE_TIMEOUT_RATIO` value is 0.875, the test will succeed]
 TEST_FUNCTION(SetOption_cl2svc_keep_alive_send_ratio_success_for_0875)
 {
-	// arrange
-	initialize_test_variables();
-	TRANSPORT_LL_HANDLE handle = create_transport();
+    // arrange
+    initialize_test_variables();
+    TRANSPORT_LL_HANDLE handle = create_transport();
 
-	IOTHUB_DEVICE_CONFIG* device_config = create_device_config(TEST_DEVICE_ID_CHAR_PTR, true);
-	IOTHUB_DEVICE_HANDLE device_handle = register_device(handle, device_config, &TEST_waitingToSend, true);
-	ASSERT_IS_NOT_NULL(device_handle);
+    IOTHUB_DEVICE_CONFIG* device_config = create_device_config(TEST_DEVICE_ID_CHAR_PTR, true);
+    IOTHUB_DEVICE_HANDLE device_handle = register_device(handle, device_config, &TEST_waitingToSend, true);
+    ASSERT_IS_NOT_NULL(device_handle);
 
-	// This creates the amqp_connection_handle
-	crank_transport_ready_after_create(handle, &TEST_waitingToSend, 0, false, true, 1, TEST_current_time, false);
+    // This creates the amqp_connection_handle
+    crank_transport_ready_after_create(handle, &TEST_waitingToSend, 0, false, true, 1, TEST_current_time, false);
 
-	umock_c_reset_all_calls();
-	double value = 0.875;
+    umock_c_reset_all_calls();
+    double value = 0.875;
 
-	// act
-	IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SetOption(handle, OPTION_REMOTE_IDLE_TIMEOUT_RATIO, &value);
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SetOption(handle, OPTION_REMOTE_IDLE_TIMEOUT_RATIO, &value);
 
-	// assert
-	ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
-	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    // assert
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
-	// cleanup
-	destroy_transport(handle, device_handle, NULL);
+    // cleanup
+    destroy_transport(handle, device_handle, NULL);
 }
 
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_032: [ If `option` is `proxy_data`, `value` shall be used as an `HTTP_PROXY_OPTIONS*`. ]*/
@@ -4111,7 +4120,7 @@ TEST_FUNCTION(DoWork_sets_amqp_connection_for_X509)
     ASSERT_IS_FALSE(TEST_amqp_connection_create_saved_create_cbs_connection);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     ASSERT_ARE_EQUAL(size_t, TEST_amqp_connection_create_saved_c2d_keep_alive_freq_secs, TEST_DEFAULT_SVC2CL_KEEP_ALIVE_FREQ_SECS);
-	ASSERT_ARE_EQUAL(double, TEST_amqp_connection_create_saved_cl2svc_keep_alive_send_ratio, TEST_DEFAULT_REMOTE_IDLE_TIMEOUT_RATIO);
+    ASSERT_ARE_EQUAL(double, TEST_amqp_connection_create_saved_cl2svc_keep_alive_send_ratio, TEST_DEFAULT_REMOTE_IDLE_TIMEOUT_RATIO);
     // cleanup
     destroy_transport(handle, device_handle, NULL);
 }
@@ -4138,7 +4147,7 @@ TEST_FUNCTION(DoWork_sets_amqp_connection_for_CBS)
     ASSERT_IS_TRUE(TEST_amqp_connection_create_saved_create_cbs_connection);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     ASSERT_ARE_EQUAL(size_t, TEST_amqp_connection_create_saved_c2d_keep_alive_freq_secs, TEST_DEFAULT_SVC2CL_KEEP_ALIVE_FREQ_SECS);
-	ASSERT_ARE_EQUAL(double, TEST_amqp_connection_create_saved_cl2svc_keep_alive_send_ratio, TEST_DEFAULT_REMOTE_IDLE_TIMEOUT_RATIO);
+    ASSERT_ARE_EQUAL(double, TEST_amqp_connection_create_saved_cl2svc_keep_alive_send_ratio, TEST_DEFAULT_REMOTE_IDLE_TIMEOUT_RATIO);
 
     // cleanup
     destroy_transport(handle, device_handle, NULL);
@@ -4180,35 +4189,35 @@ TEST_FUNCTION(DoWork_configures_AMQP_connection_using_c2d_keep_alive_freq_secs)
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_99_001: [AMQP connection will be configured using the `cl2svc_keep_alive_send_ratio` value from SetOption ]
 TEST_FUNCTION(DoWork_configures_AMQP_connection_using_cl2svc_keep_alive_send_ratio)
 {
-	// arrange
-	initialize_test_variables();
-	TRANSPORT_LL_HANDLE handle = create_transport();
+    // arrange
+    initialize_test_variables();
+    TRANSPORT_LL_HANDLE handle = create_transport();
 
-	const char* certificate = TEST_X509_CERTIFICATE;
-	const char* private_key = TEST_X509_PRIVATE_KEY;
-	double cl2svc_ratio = TEST_USER_REMOTE_IDLE_TIMEOUT_RATIO;
-	(void)IoTHubTransport_AMQP_Common_SetOption(handle, OPTION_X509_CERT, certificate);
-	(void)IoTHubTransport_AMQP_Common_SetOption(handle, OPTION_X509_PRIVATE_KEY, private_key);
-	(void)IoTHubTransport_AMQP_Common_SetOption(handle, OPTION_REMOTE_IDLE_TIMEOUT_RATIO, &cl2svc_ratio);
+    const char* certificate = TEST_X509_CERTIFICATE;
+    const char* private_key = TEST_X509_PRIVATE_KEY;
+    double cl2svc_ratio = TEST_USER_REMOTE_IDLE_TIMEOUT_RATIO;
+    (void)IoTHubTransport_AMQP_Common_SetOption(handle, OPTION_X509_CERT, certificate);
+    (void)IoTHubTransport_AMQP_Common_SetOption(handle, OPTION_X509_PRIVATE_KEY, private_key);
+    (void)IoTHubTransport_AMQP_Common_SetOption(handle, OPTION_REMOTE_IDLE_TIMEOUT_RATIO, &cl2svc_ratio);
 
-	IOTHUB_DEVICE_CONFIG* device_config = create_device_config_for_x509(TEST_DEVICE_ID_CHAR_PTR);
-	IOTHUB_DEVICE_HANDLE device_handle = register_device(handle, device_config, &TEST_waitingToSend, false);
-	ASSERT_IS_NOT_NULL(device_handle);
+    IOTHUB_DEVICE_CONFIG* device_config = create_device_config_for_x509(TEST_DEVICE_ID_CHAR_PTR);
+    IOTHUB_DEVICE_HANDLE device_handle = register_device(handle, device_config, &TEST_waitingToSend, false);
+    ASSERT_IS_NOT_NULL(device_handle);
 
-	umock_c_reset_all_calls();
-	set_expected_calls_for_DoWork(&TEST_waitingToSend, 0, DEVICE_STATE_STOPPED, true, true, false, false, 1, TEST_current_time, false);
+    umock_c_reset_all_calls();
+    set_expected_calls_for_DoWork(&TEST_waitingToSend, 0, DEVICE_STATE_STOPPED, true, true, false, false, 1, TEST_current_time, false);
 
-	// act
-	IoTHubTransport_AMQP_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+    // act
+    IoTHubTransport_AMQP_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
 
-	// assert
-	ASSERT_IS_FALSE(TEST_amqp_connection_create_saved_create_sasl_io);
-	ASSERT_IS_FALSE(TEST_amqp_connection_create_saved_create_cbs_connection);
-	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-	ASSERT_ARE_EQUAL(double, TEST_amqp_connection_create_saved_cl2svc_keep_alive_send_ratio, TEST_USER_REMOTE_IDLE_TIMEOUT_RATIO);
+    // assert
+    ASSERT_IS_FALSE(TEST_amqp_connection_create_saved_create_sasl_io);
+    ASSERT_IS_FALSE(TEST_amqp_connection_create_saved_create_cbs_connection);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(double, TEST_amqp_connection_create_saved_cl2svc_keep_alive_send_ratio, TEST_USER_REMOTE_IDLE_TIMEOUT_RATIO);
 
-	// cleanup
-	destroy_transport(handle, device_handle, NULL);
+    // cleanup
+    destroy_transport(handle, device_handle, NULL);
 }
 
 

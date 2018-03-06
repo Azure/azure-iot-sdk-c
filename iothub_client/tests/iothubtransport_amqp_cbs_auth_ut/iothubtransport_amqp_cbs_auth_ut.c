@@ -448,9 +448,10 @@ static AUTHENTICATION_HANDLE create_and_start_authentication(AUTHENTICATION_CONF
     return handle;
 }
 
-static void reset_parameters()
+static void reset_test_data()
 {
     saved_malloc_returns_count = 0;
+    memset(saved_malloc_returns, 0, sizeof(saved_malloc_returns));
 
     saved_on_state_changed_callback_context = NULL;
     saved_on_state_changed_callback_previous_state = AUTHENTICATION_STATE_STOPPED;
@@ -513,11 +514,12 @@ TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
 
     umock_c_reset_all_calls();
 
-    reset_parameters();
+    reset_test_data();
 }
 
 TEST_FUNCTION_CLEANUP(TestMethodCleanup)
 {
+    reset_test_data();
     TEST_MUTEX_RELEASE(g_testByTest);
 }
 

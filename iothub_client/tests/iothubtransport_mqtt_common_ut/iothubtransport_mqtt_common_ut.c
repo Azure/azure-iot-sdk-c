@@ -800,10 +800,8 @@ TEST_SUITE_CLEANUP(suite_cleanup)
     TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
-TEST_FUNCTION_INITIALIZE(method_init)
+static void reset_test_data()
 {
-    TEST_MUTEX_ACQUIRE(test_serialize_mutex);
-
     g_fnMqttMsgRecv = NULL;
     g_fnMqttOperationCallback = NULL;
     g_callbackCtx = NULL;
@@ -815,16 +813,23 @@ TEST_FUNCTION_INITIALIZE(method_init)
     g_tokenizerIndex = 0;
     g_nullMapVariable = true;
 
-    real_DList_InitializeListHead(&g_waitingToSend);
-
     g_msg_disposition = IOTHUBMESSAGE_ACCEPTED;
     expected_MQTT_TRANSPORT_PROXY_OPTIONS = NULL;
+}
+
+TEST_FUNCTION_INITIALIZE(method_init)
+{
+    TEST_MUTEX_ACQUIRE(test_serialize_mutex);
+
+    reset_test_data();
+    real_DList_InitializeListHead(&g_waitingToSend);
 
     umock_c_reset_all_calls();
 }
 
 TEST_FUNCTION_CLEANUP(TestMethodCleanup)
 {
+    reset_test_data();
     TEST_MUTEX_RELEASE(test_serialize_mutex);
 }
 

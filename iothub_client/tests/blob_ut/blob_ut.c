@@ -295,9 +295,20 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
+static void reset_test_data()
+{
+    memset(&context, 0, sizeof(context));
+}
+
 TEST_FUNCTION_INITIALIZE(Setup)
 {
     umock_c_reset_all_calls();
+    reset_test_data();
+}
+
+TEST_FUNCTION_CLEANUP(Cleanup)
+{
+    reset_test_data();
 }
 
 /*Tests_SRS_BLOB_02_001: [ If SASURI is NULL then Blob_UploadMultipleBlocksFromSasUri shall fail and return BLOB_INVALID_ARG. ]*/
@@ -770,7 +781,7 @@ static void Blob_UploadMultipleBlocksFromSasUri_various_sizes_happy_path_Impl(HT
 /*Tests_SRS_BLOB_32_001: [ If proxy was provided then Blob_UploadFromSasUri shall pass proxy information to HTTPAPI_EX_HANDLE by calling HTTPAPIEX_SetOption with the option name OPTION_HTTP_PROXY. ]*/
 TEST_FUNCTION(Blob_UploadFromSasUri_with_proxy_happy_path)
 {
-	HTTP_PROXY_OPTIONS proxyOptions = { "a", 8888, NULL, NULL };
+    HTTP_PROXY_OPTIONS proxyOptions = { "a", 8888, NULL, NULL };
     Blob_UploadMultipleBlocksFromSasUri_various_sizes_happy_path_Impl(&proxyOptions);
 }
 

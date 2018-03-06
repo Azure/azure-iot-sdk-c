@@ -449,6 +449,11 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
+static void reset_test_data()
+{
+    memset(&context, 0, sizeof(context));
+}
+
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
 {
     if (TEST_MUTEX_ACQUIRE(g_testByTest))
@@ -456,13 +461,13 @@ TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
         ASSERT_FAIL("our mutex is ABANDONED. Failure in test framework");
     }
 
+    reset_test_data();
     umock_c_reset_all_calls();
-    
 }
 
 TEST_FUNCTION_CLEANUP(TestMethodCleanup)
 {
-    
+    reset_test_data();
     TEST_MUTEX_RELEASE(g_testByTest);
 }
 
