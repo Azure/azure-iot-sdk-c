@@ -10,6 +10,10 @@
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 
+// USE_MQTT, USE_AMQP, and/or USE_HTTP are set in .\CMakeLists.txt based/
+// on which protocols the IoT C SDK has been set to include during cmake
+// generation time.
+
 #ifdef USE_MQTT
     #include "iothubtransportmqtt.h"
     #ifdef USE_WEBSOCKETS
@@ -52,17 +56,17 @@ int main(void)
     size_t messages_sent = 0;
     const char* telemetry_msg = "test_message";
 
-    // Select the Protocol to use with the connection
+    // Select the Protocol to use with the connection.
+#ifdef USE_HTTP
+    protocol = HTTP_Protocol;
+#endif
 #ifdef USE_AMQP
     //protocol = AMQP_Protocol_over_WebSocketsTls;
     protocol = AMQP_Protocol;
 #endif
 #ifdef USE_MQTT
-    //protocol = MQTT_Protocol;
+    protocol = MQTT_Protocol;
     //protocol = MQTT_WebSocket_Protocol;
-#endif
-#ifdef USE_HTTP
-    //protocol = HTTP_Protocol;
 #endif
 
     IOTHUB_CLIENT_LL_HANDLE iothub_ll_handle;
