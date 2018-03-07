@@ -16,8 +16,8 @@ azure_uamqp_c
 ## Exposed API
 
 ```c
-	static const char* MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS = "telemetry_event_send_timeout_secs";
-	static const char* MESSENGER_OPTION_SAVED_OPTIONS = "saved_telemetry_messenger_options";
+	static const char* TELEMETRY_MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS = "telemetry_event_send_timeout_secs";
+	static const char* TELEMETRY_MESSENGER_OPTION_SAVED_OPTIONS = "saved_telemetry_messenger_options";
 
 	typedef struct TELEMETRY_MESSENGER_INSTANCE* TELEMETRY_MESSENGER_HANDLE;
 
@@ -408,8 +408,8 @@ In that case, when they are rolled back, they need to go to the beginning of the
 ```
 
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_167: [**If `messenger_handle` or `name` or `value` is NULL, telemetry_messenger_set_option shall fail and return a non-zero value**]**
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_168: [**If name matches MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, `value` shall be saved on `instance->event_send_timeout_secs`**]**
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_169: [**If name matches MESSENGER_OPTION_SAVED_OPTIONS, `value` shall be applied using OptionHandler_FeedOptions**]**
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_168: [**If name matches TELEMETRY_MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, `value` shall be saved on `instance->event_send_timeout_secs`**]**
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_169: [**If name matches TELEMETRY_MESSENGER_OPTION_SAVED_OPTIONS, `value` shall be applied using OptionHandler_FeedOptions**]**
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_170: [**If OptionHandler_FeedOptions fails, telemetry_messenger_set_option shall fail and return a non-zero value**]**
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_171: [**If no errors occur, telemetry_messenger_set_option shall return 0**]**
 

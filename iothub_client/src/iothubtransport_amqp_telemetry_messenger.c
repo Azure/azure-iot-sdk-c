@@ -834,6 +834,25 @@ static void remove_event_from_in_progress_list(MESSENGER_SEND_EVENT_TASK *task)
     }
 }
 
+// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_31_201: [Freeing a `task` will free callback items associated with it and free the data itself]
+static void free_task(MESSENGER_SEND_EVENT_TASK* task)
+{
+    LIST_ITEM_HANDLE list_node;
+
+    if (NULL != task->callback_list)
+    {
+        while ((list_node = singlylinkedlist_get_head_item(task->callback_list)) != NULL)
+        {
+            MESSENGER_SEND_EVENT_CALLER_INFORMATION* caller_info = (MESSENGER_SEND_EVENT_CALLER_INFORMATION*)singlylinkedlist_item_get_value(list_node);
+            (void)singlylinkedlist_remove(task->callback_list, list_node);
+            free(caller_info);
+        }
+        singlylinkedlist_destroy(task->callback_list);
+    }
+
+    free(task);
+}
+
 static int copy_events_to_list(SINGLYLINKEDLIST_HANDLE from_list, SINGLYLINKEDLIST_HANDLE to_list)
 {
     int result;
@@ -865,6 +884,7 @@ static int copy_events_from_in_progress_to_waiting_list(TELEMETRY_MESSENGER_INST
 {
     int result;
     LIST_ITEM_HANDLE list_task_item;
+    LIST_ITEM_HANDLE list_task_item_next;
 
     result = RESULT_OK;
     list_task_item = singlylinkedlist_get_head_item(instance->in_progress_list);
@@ -891,7 +911,14 @@ static int copy_events_from_in_progress_to_waiting_list(TELEMETRY_MESSENGER_INST
             list_caller_item = singlylinkedlist_get_next_item(list_caller_item);
         }
         
-        list_task_item = singlylinkedlist_get_next_item(list_task_item);
+        list_task_item_next = singlylinkedlist_get_next_item(list_task_item);
+
+        singlylinkedlist_destroy(task->callback_list);
+        task->callback_list = NULL;
+
+        free_task(task);
+        singlylinkedlist_remove(instance->in_progress_list, list_task_item);
+        list_task_item = list_task_item_next;
     }
 
     return result;
@@ -950,25 +977,6 @@ static int move_events_to_wait_to_send_list(TELEMETRY_MESSENGER_INSTANCE* instan
     }
 
     return result;
-}
-
-// Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_31_201: [Freeing a `task` will free callback items associated with it and free the data itself]
-static void free_task(MESSENGER_SEND_EVENT_TASK* task)
-{
-    LIST_ITEM_HANDLE list_node;
-
-    if (NULL != task->callback_list)
-    {
-        while ((list_node = singlylinkedlist_get_head_item(task->callback_list)) != NULL)
-        {
-            MESSENGER_SEND_EVENT_CALLER_INFORMATION* caller_info = (MESSENGER_SEND_EVENT_CALLER_INFORMATION*)singlylinkedlist_item_get_value(list_node);
-            (void)singlylinkedlist_remove(task->callback_list, list_node);
-            free(caller_info);
-        }
-        singlylinkedlist_destroy(task->callback_list);
-    }
-
-    free(task);
 }
 
 static MESSENGER_SEND_EVENT_TASK* create_task(TELEMETRY_MESSENGER_INSTANCE *messenger)
@@ -1384,8 +1392,8 @@ static void* telemetry_messenger_clone_option(const char* name, const void* valu
     }
     else
     {
-        if (strcmp(MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, name) == 0 ||
-            strcmp(MESSENGER_OPTION_SAVED_OPTIONS, name) == 0)
+        if (strcmp(TELEMETRY_MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, name) == 0 ||
+            strcmp(TELEMETRY_MESSENGER_OPTION_SAVED_OPTIONS, name) == 0)
         {
             result = (void*)value;
         }
@@ -2080,14 +2088,14 @@ int telemetry_messenger_set_option(TELEMETRY_MESSENGER_HANDLE messenger_handle, 
     {
         TELEMETRY_MESSENGER_INSTANCE* instance = (TELEMETRY_MESSENGER_INSTANCE*)messenger_handle;
 
-        // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_168: [If name matches MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, `value` shall be saved on `instance->event_send_timeout_secs`]
-        if (strcmp(MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, name) == 0)
+        // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_168: [If name matches TELEMETRY_MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, `value` shall be saved on `instance->event_send_timeout_secs`]
+        if (strcmp(TELEMETRY_MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, name) == 0)
         {
             instance->event_send_timeout_secs = *((size_t*)value);
             result = RESULT_OK;
         }
-        // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_169: [If name matches MESSENGER_OPTION_SAVED_OPTIONS, `value` shall be applied using OptionHandler_FeedOptions]
-        else if (strcmp(MESSENGER_OPTION_SAVED_OPTIONS, name) == 0)
+        // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_169: [If name matches TELEMETRY_MESSENGER_OPTION_SAVED_OPTIONS, `value` shall be applied using OptionHandler_FeedOptions]
+        else if (strcmp(TELEMETRY_MESSENGER_OPTION_SAVED_OPTIONS, name) == 0)
         {
             if (OptionHandler_FeedOptions((OPTIONHANDLER_HANDLE)value, messenger_handle) != OPTIONHANDLER_OK)
             {
@@ -2139,9 +2147,9 @@ OPTIONHANDLER_HANDLE telemetry_messenger_retrieve_options(TELEMETRY_MESSENGER_HA
 
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_176: [Each option of `instance` shall be added to the OPTIONHANDLER_HANDLE instance using OptionHandler_AddOption]
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_177: [If OptionHandler_AddOption fails, telemetry_messenger_retrieve_options shall fail and return NULL]
-            if (OptionHandler_AddOption(options, MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, (void*)&instance->event_send_timeout_secs) != OPTIONHANDLER_OK)
+            if (OptionHandler_AddOption(options, TELEMETRY_MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, (void*)&instance->event_send_timeout_secs) != OPTIONHANDLER_OK)
             {
-                LogError("Failed to retrieve options from messenger instance (OptionHandler_Create failed for option '%s')", MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS);
+                LogError("Failed to retrieve options from messenger instance (OptionHandler_Create failed for option '%s')", TELEMETRY_MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS);
                 result = NULL;
             }
             else

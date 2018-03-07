@@ -489,7 +489,7 @@ static void set_exp_calls_for_message_create_IoTHubMessage_from_uamqp_message(
     }
 }
 
-static void initialize_variables()
+static void reset_test_data()
 {
     saved_amqpvalue_get_ulong_value = NULL;
     test_amqpvalue_get_ulong_ulong_value = 10;
@@ -498,6 +498,9 @@ static void initialize_variables()
     saved_amqpvalue_get_uuid_value = NULL;
     test_amqpvalue_get_uuid_uuid_value = &TEST_UUID_BYTES;
     test_amqpvalue_get_uuid_return = 0;
+
+    saved_malloc_returns_count = 0;
+    memset(saved_malloc_returns, 0, sizeof(saved_malloc_returns));
 }
 
 
@@ -702,11 +705,12 @@ TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
 
     umock_c_reset_all_calls();
 
-    initialize_variables();
+    reset_test_data();
 }
 
 TEST_FUNCTION_CLEANUP(TestMethodCleanup)
 {
+    reset_test_data();
     TEST_MUTEX_RELEASE(g_testByTest);
 }
 

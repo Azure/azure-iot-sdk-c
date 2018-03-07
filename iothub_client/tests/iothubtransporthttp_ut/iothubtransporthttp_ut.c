@@ -1299,6 +1299,12 @@ TEST_SUITE_CLEANUP(suite_cleanup)
     real_STRING_delete(TEST_STRING_HANDLE);
 }
 
+static void reset_test_data()
+{
+    last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest = NULL;
+    my_IoTHubClient_LL_MessageCallback_messageData = NULL;
+}
+
 TEST_FUNCTION_INITIALIZE(method_init)
 {
     if (TEST_MUTEX_ACQUIRE(g_testByTest))
@@ -1309,20 +1315,19 @@ TEST_FUNCTION_INITIALIZE(method_init)
 
     real_DList_InitializeListHead(&waitingToSend);
     real_DList_InitializeListHead(&waitingToSend2);
-    last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest = NULL;
-
-    my_IoTHubClient_LL_MessageCallback_messageData = NULL;
+    reset_test_data();
     my_IoTHubClient_LL_MessageCallback_return_value = true;
 }
 
 TEST_FUNCTION_CLEANUP(method_cleanup)
 {
-    TEST_MUTEX_RELEASE(g_testByTest);
-
     if (last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest != NULL)
     {
         real_BUFFER_delete(last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest);
     }
+
+    reset_test_data();
+    TEST_MUTEX_RELEASE(g_testByTest);
 }
 
 static int should_skip_index(size_t current_index, const size_t skip_array[], size_t length)

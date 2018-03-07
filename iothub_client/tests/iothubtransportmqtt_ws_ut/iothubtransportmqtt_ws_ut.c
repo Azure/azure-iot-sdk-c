@@ -657,16 +657,25 @@ TEST_SUITE_CLEANUP(suite_cleanup)
     TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
+static void reset_test_data()
+{
+    g_callbackCtx = NULL;
+    memset(&g_waitingToSend, 0, sizeof(g_waitingToSend));
+    memset(&g_get_io_transport, 0, sizeof(g_get_io_transport));
+}
+
 TEST_FUNCTION_INITIALIZE(method_init)
 {
     TEST_MUTEX_ACQUIRE(test_serialize_mutex);
 
-    g_callbackCtx = NULL;
+    
+    reset_test_data();
     umock_c_reset_all_calls();
 }
 
 TEST_FUNCTION_CLEANUP(TestMethodCleanup)
 {
+    reset_test_data();
     TEST_MUTEX_RELEASE(test_serialize_mutex);
 }
 

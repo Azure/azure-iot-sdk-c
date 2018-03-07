@@ -1004,6 +1004,9 @@ static void set_expected_calls_for_copy_events_from_in_progress_to_waiting_list(
         EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG)).SetReturn(NULL);
         EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG));
+        EXPECTED_CALL(singlylinkedlist_destroy(IGNORED_PTR_ARG));
+        EXPECTED_CALL(free(IGNORED_PTR_ARG));
+        EXPECTED_CALL(singlylinkedlist_remove(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     }
 }
 
@@ -1497,7 +1500,7 @@ static void set_expected_calls_for_telemetry_messenger_destroy(TELEMETRY_MESSENG
     do_work_profile->destroy_message_receiver = destroy_message_receiver;
     set_expected_calls_for_telemetry_messenger_do_work(do_work_profile);
 
-    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_IN_PROGRESS_LIST)).SetReturn(NULL);
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_IN_PROGRESS_LIST));
 
     wait_to_send_list_length += in_progress_list_length; // all events from in_progress_list should have been moved to wts list.
 
@@ -1844,15 +1847,8 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
-TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
+static void reset_test_data()
 {
-    if (TEST_MUTEX_ACQUIRE(g_testByTest))
-    {
-        ASSERT_FAIL("our mutex is ABANDONED. Failure in test framework");
-    }
-
-    umock_c_reset_all_calls();
-
     g_STRING_sprintf_call_count = 0;
     g_STRING_sprintf_fail_on_count = -1;
 
@@ -1903,10 +1899,30 @@ TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
 
     TEST_DELIVERY_NUMBER = (delivery_number)1234;
     TEST_messagereceiver_get_link_name_link_name = TEST_MESSAGE_RECEIVER_LINK_NAME_CHAR_PTR;
+
+    // Zero out the data after each test to make sure that a lingering global reference here
+    // doesn't contfuse Valgrind into thinking the data is still legit.
+    memset((void*)saved_wait_to_send_list, 0, sizeof(saved_wait_to_send_list));
+    memset((void*)saved_wait_to_send_list2, 0, sizeof(saved_wait_to_send_list2));
+    memset((void*)saved_in_progress_list, 0, sizeof(saved_in_progress_list));
+    memset((void*)saved_in_progress_list2, 0, sizeof(saved_in_progress_list2));
+    memset((void*)saved_callback_list1, 0, sizeof(saved_callback_list1));
+}
+
+TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
+{
+    if (TEST_MUTEX_ACQUIRE(g_testByTest))
+    {
+        ASSERT_FAIL("our mutex is ABANDONED. Failure in test framework");
+    }
+
+    umock_c_reset_all_calls();
+    reset_test_data();
 }
 
 TEST_FUNCTION_CLEANUP(TestMethodCleanup)
 {
+    reset_test_data();
     TEST_MUTEX_RELEASE(g_testByTest);
 }
 
@@ -3234,7 +3250,7 @@ TEST_FUNCTION(telemetry_messenger_set_option_NULL_handle)
     size_t value = 100;
 
     // act
-    int result = telemetry_messenger_set_option(NULL, MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, &value);
+    int result = telemetry_messenger_set_option(NULL, TELEMETRY_MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, &value);
 
     // assert
     ASSERT_ARE_NOT_EQUAL(int, 0, result);
@@ -3270,7 +3286,7 @@ TEST_FUNCTION(telemetry_messenger_set_option_NULL_value)
     TELEMETRY_MESSENGER_HANDLE handle = create_and_start_messenger2(config, false);
 
     // act
-    int result = telemetry_messenger_set_option(handle, MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, NULL);
+    int result = telemetry_messenger_set_option(handle, TELEMETRY_MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, NULL);
 
     // assert
     ASSERT_ARE_NOT_EQUAL(int, 0, result);
@@ -3280,7 +3296,7 @@ TEST_FUNCTION(telemetry_messenger_set_option_NULL_value)
     telemetry_messenger_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_168: [If name matches MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, `value` shall be saved on `instance->event_send_timeout_secs`]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_168: [If name matches TELEMETRY_MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, `value` shall be saved on `instance->event_send_timeout_secs`]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_172: [If no errors occur, telemetry_messenger_set_option shall return 0]
 TEST_FUNCTION(telemetry_messenger_set_option_EVENT_SEND_TIMEOUT_SECS)
 {
@@ -3291,7 +3307,7 @@ TEST_FUNCTION(telemetry_messenger_set_option_EVENT_SEND_TIMEOUT_SECS)
     size_t value = 100;
 
     // act
-    int result = telemetry_messenger_set_option(handle, MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, &value);
+    int result = telemetry_messenger_set_option(handle, TELEMETRY_MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, &value);
 
     // assert
     ASSERT_ARE_EQUAL(int, 0, result);
@@ -3301,7 +3317,7 @@ TEST_FUNCTION(telemetry_messenger_set_option_EVENT_SEND_TIMEOUT_SECS)
     telemetry_messenger_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_169: [If name matches MESSENGER_OPTION_SAVED_OPTIONS, `value` shall be applied using OptionHandler_FeedOptions]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_169: [If name matches TELEMETRY_MESSENGER_OPTION_SAVED_OPTIONS, `value` shall be applied using OptionHandler_FeedOptions]
 TEST_FUNCTION(telemetry_messenger_set_option_SAVED_OPTIONS)
 {
     // arrange
@@ -3312,7 +3328,7 @@ TEST_FUNCTION(telemetry_messenger_set_option_SAVED_OPTIONS)
     STRICT_EXPECTED_CALL(OptionHandler_FeedOptions(value, handle)).SetReturn(OPTIONHANDLER_OK);
 
     // act
-    int result = telemetry_messenger_set_option(handle, MESSENGER_OPTION_SAVED_OPTIONS, value);
+    int result = telemetry_messenger_set_option(handle, TELEMETRY_MESSENGER_OPTION_SAVED_OPTIONS, value);
 
     // assert
     ASSERT_ARE_EQUAL(int, 0, result);
@@ -3333,7 +3349,7 @@ TEST_FUNCTION(telemetry_messenger_set_option_OptionHandler_FeedOptions_fails)
     STRICT_EXPECTED_CALL(OptionHandler_FeedOptions(value, handle)).SetReturn(OPTIONHANDLER_ERROR);
 
     // act
-    int result = telemetry_messenger_set_option(handle, MESSENGER_OPTION_SAVED_OPTIONS, value);
+    int result = telemetry_messenger_set_option(handle, TELEMETRY_MESSENGER_OPTION_SAVED_OPTIONS, value);
 
     // assert
     ASSERT_ARE_NOT_EQUAL(int, 0, result);
@@ -3548,7 +3564,7 @@ static void set_expected_calls_for_telemetry_messenger_retrieve_options()
 {
     EXPECTED_CALL(OptionHandler_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
-    STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, TELEMETRY_MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, IGNORED_PTR_ARG))
         .IgnoreArgument(3);
 }
 

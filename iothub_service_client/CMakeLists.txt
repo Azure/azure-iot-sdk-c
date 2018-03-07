@@ -11,7 +11,6 @@ endif()
 compileAsC99()
 
 set(iothub_service_client_c_files
-../deps/parson/parson.c
 ./src/iothub_registrymanager.c
 ./src/iothub_messaging.c
 ./src/iothub_messaging_ll.c
@@ -23,7 +22,6 @@ set(iothub_service_client_c_files
 )
 
 set(iothub_service_client_h_files
-../deps/parson/parson.h
 ./inc/iothub_registrymanager.h
 ./inc/iothub_messaging.h
 ./inc/iothub_messaging_ll.h
@@ -33,10 +31,6 @@ set(iothub_service_client_h_files
 ./inc/iothub_sc_version.h
 ../iothub_client/inc/iothub_message.h
 )
-
-if(MSVC)
-set_source_files_properties(../deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
-endif()
 
 include_directories(${SHARED_UTIL_INC_FOLDER})
 
@@ -56,15 +50,30 @@ ENDIF(WIN32)
 if (${build_as_dynamic})
     add_library(iothub_service_client SHARED ${iothub_service_client_c_files} ${iothub_service_client_h_files} ./src/iothub_service_client.def)
     linkSharedUtil(iothub_service_client)
+    
+    if ("${CMAKE_COMPILER_ID}" STREQUAL "GNU")
+        target_link_libraries(iothub_service_client
+            "-Wl,--exclude-libs,libparson.a"
+        )
+    endif()
 
+    set_target_properties(iothub_service_client PROPERTIES
+        OUTPUT_NAME "iothub_service_client"
+        ARCHIVE_OUTPUT_NAME "iothub_service_client_dll_import"
+        ENABLE_EXPORTS YES
+        WINDOWS_EXPORT_ALL_SYMBOLS YES
+        VERSION ${IOT_SDK_VERSION}
+        SOVERSION ${IOT_SDK_VERION_MAJOR}
+        BUILD_WITH_INSTALL_RPATH TRUE
+    )
 else()
     add_library(iothub_service_client ${iothub_service_client_c_files} ${iothub_service_client_h_files})
 endif()
 
 if(NOT ${nuget_e2e_tests})
-    target_link_libraries(iothub_service_client uamqp)
+    target_link_libraries(iothub_service_client uamqp parson)
 else()
-    target_link_libraries(iothub_service_client)
+    target_link_libraries(iothub_service_client parson)
 endif()
 
 if (NOT ${ARCHITECTURE} STREQUAL "ARM")

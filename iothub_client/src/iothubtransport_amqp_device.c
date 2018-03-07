@@ -56,7 +56,7 @@ typedef struct DEVICE_INSTANCE_TAG
     size_t twin_msgr_state_change_timeout_secs;
     DEVICE_TWIN_UPDATE_RECEIVED_CALLBACK on_device_twin_update_received_callback;
     void* on_device_twin_update_received_context;
-} DEVICE_INSTANCE;
+} AMQP_DEVICE_INSTANCE;
 
 typedef struct DEVICE_SEND_EVENT_TASK_TAG
 {
@@ -71,7 +71,7 @@ typedef struct DEVICE_SEND_TWIN_UPDATE_CONTEXT_TAG
 } DEVICE_SEND_TWIN_UPDATE_CONTEXT;
 
 // Internal state control
-static void update_state(DEVICE_INSTANCE* instance, DEVICE_STATE new_state)
+static void update_state(AMQP_DEVICE_INSTANCE* instance, DEVICE_STATE new_state)
 {
     if (new_state != instance->state)
     {
@@ -190,7 +190,7 @@ static void on_authentication_error_callback(void* context, AUTHENTICATION_ERROR
     }
     else
     { 
-        DEVICE_INSTANCE* instance = (DEVICE_INSTANCE*)context;
+        AMQP_DEVICE_INSTANCE* instance = (AMQP_DEVICE_INSTANCE*)context;
         instance->auth_error_code = error_code;
     }
 }
@@ -203,7 +203,7 @@ static void on_authentication_state_changed_callback(void* context, AUTHENTICATI
     }
     else if (new_state != previous_state)
     {
-        DEVICE_INSTANCE* instance = (DEVICE_INSTANCE*)context;
+        AMQP_DEVICE_INSTANCE* instance = (AMQP_DEVICE_INSTANCE*)context;
         instance->auth_state = new_state;
 
         if ((instance->auth_state_last_changed_time = get_time(NULL)) == INDEFINITE_TIME)
@@ -221,7 +221,7 @@ static void on_messenger_state_changed_callback(void* context, TELEMETRY_MESSENG
     }
     else if (new_state != previous_state)
     {
-        DEVICE_INSTANCE* instance = (DEVICE_INSTANCE*)context;
+        AMQP_DEVICE_INSTANCE* instance = (AMQP_DEVICE_INSTANCE*)context;
         instance->msgr_state = new_state;
 
         if ((instance->msgr_state_last_changed_time = get_time(NULL)) == INDEFINITE_TIME)
@@ -285,7 +285,7 @@ static void on_twin_state_update_callback(TWIN_UPDATE_TYPE update_type, const ch
     }
     else
     {
-        DEVICE_INSTANCE* instance = (DEVICE_INSTANCE*)context;
+        AMQP_DEVICE_INSTANCE* instance = (AMQP_DEVICE_INSTANCE*)context;
 
         DEVICE_TWIN_UPDATE_TYPE device_update_type;
 
@@ -307,7 +307,7 @@ static void on_twin_messenger_state_changed_callback(void* context, TWIN_MESSENG
 {
     if (context != NULL && new_state != previous_state)
     {
-        DEVICE_INSTANCE* instance = (DEVICE_INSTANCE*)context;
+        AMQP_DEVICE_INSTANCE* instance = (AMQP_DEVICE_INSTANCE*)context;
         instance->twin_msgr_state = new_state;
 
         if ((instance->twin_msgr_state_last_changed_time = get_time(NULL)) == INDEFINITE_TIME)
@@ -415,7 +415,7 @@ static TELEMETRY_MESSENGER_DISPOSITION_RESULT on_messenger_message_received_call
     }
     else
     {
-        DEVICE_INSTANCE* device_instance = (DEVICE_INSTANCE*)context;
+        AMQP_DEVICE_INSTANCE* device_instance = (AMQP_DEVICE_INSTANCE*)context;
 
         if (device_instance->on_message_received_callback == NULL)
         {
@@ -510,7 +510,7 @@ static DEVICE_CONFIG* clone_device_config(DEVICE_CONFIG *config)
     return new_config;
 }
 
-static void set_authentication_config(DEVICE_INSTANCE* device_instance, AUTHENTICATION_CONFIG* auth_config)
+static void set_authentication_config(AMQP_DEVICE_INSTANCE* device_instance, AUTHENTICATION_CONFIG* auth_config)
 {
     DEVICE_CONFIG *device_config = device_instance->config;
 
@@ -525,7 +525,7 @@ static void set_authentication_config(DEVICE_INSTANCE* device_instance, AUTHENTI
 }
 
 // Create and Destroy Helpers
-static void internal_destroy_device(DEVICE_INSTANCE* instance)
+static void internal_destroy_device(AMQP_DEVICE_INSTANCE* instance)
 {
     if (instance != NULL)
     {
@@ -549,7 +549,7 @@ static void internal_destroy_device(DEVICE_INSTANCE* instance)
     }
 }
 
-static int create_authentication_instance(DEVICE_INSTANCE *instance)
+static int create_authentication_instance(AMQP_DEVICE_INSTANCE *instance)
 {
     int result;
     AUTHENTICATION_CONFIG auth_config;
@@ -569,7 +569,7 @@ static int create_authentication_instance(DEVICE_INSTANCE *instance)
     return result;
 }
 
-static int create_telemetry_messenger_instance(DEVICE_INSTANCE* instance, const char* pi)
+static int create_telemetry_messenger_instance(AMQP_DEVICE_INSTANCE* instance, const char* pi)
 {
     int result;
 
@@ -593,7 +593,7 @@ static int create_telemetry_messenger_instance(DEVICE_INSTANCE* instance, const 
     return result;
 }
 
-static int create_twin_messenger(DEVICE_INSTANCE* instance)
+static int create_twin_messenger(AMQP_DEVICE_INSTANCE* instance)
 {
     int result;
     TWIN_MESSENGER_CONFIG twin_msgr_config;
@@ -672,9 +672,9 @@ static void device_destroy_option(const char* name, const void* value)
 
 //---------- Public APIs ----------//
 
-DEVICE_HANDLE device_create(DEVICE_CONFIG *config)
+AMQP_DEVICE_HANDLE device_create(DEVICE_CONFIG *config)
 {
-    DEVICE_INSTANCE *instance;
+    AMQP_DEVICE_INSTANCE *instance;
 
     // Codes_SRS_DEVICE_09_001: [If config, authorization_module or iothub_host_fqdn or on_state_changed_callback are NULL then device_create shall fail and return NULL]
     if (config == NULL)
@@ -698,7 +698,7 @@ DEVICE_HANDLE device_create(DEVICE_CONFIG *config)
         instance = NULL;
     }
     // Codes_SRS_DEVICE_09_002: [device_create shall allocate memory for the device instance structure]
-    else if ((instance = (DEVICE_INSTANCE*)malloc(sizeof(DEVICE_INSTANCE))) == NULL)
+    else if ((instance = (AMQP_DEVICE_INSTANCE*)malloc(sizeof(AMQP_DEVICE_INSTANCE))) == NULL)
     {
         // Codes_SRS_DEVICE_09_003: [If malloc fails, device_create shall fail and return NULL]
         LogError("Failed creating the device instance (malloc failed)");
@@ -707,7 +707,7 @@ DEVICE_HANDLE device_create(DEVICE_CONFIG *config)
     {
         int result;
 
-        memset(instance, 0, sizeof(DEVICE_INSTANCE));
+        memset(instance, 0, sizeof(AMQP_DEVICE_INSTANCE));
 
         // Codes_SRS_DEVICE_09_004: [All `config` parameters shall be saved into `instance`]
         if ((instance->config = clone_device_config(config)) == NULL)
@@ -763,10 +763,10 @@ DEVICE_HANDLE device_create(DEVICE_CONFIG *config)
     }
 
     // Codes_SRS_DEVICE_09_011: [If device_create succeeds it shall return a handle to its `instance` structure]
-    return (DEVICE_HANDLE)instance;
+    return (AMQP_DEVICE_HANDLE)instance;
 }
 
-int device_start_async(DEVICE_HANDLE handle, SESSION_HANDLE session_handle, CBS_HANDLE cbs_handle)
+int device_start_async(AMQP_DEVICE_HANDLE handle, SESSION_HANDLE session_handle, CBS_HANDLE cbs_handle)
 {
     int result;
 
@@ -778,7 +778,7 @@ int device_start_async(DEVICE_HANDLE handle, SESSION_HANDLE session_handle, CBS_
     }
     else
     {
-        DEVICE_INSTANCE* instance = (DEVICE_INSTANCE*)handle;
+        AMQP_DEVICE_INSTANCE* instance = (AMQP_DEVICE_INSTANCE*)handle;
 
         // Codes_SRS_DEVICE_09_018: [If the device state is not DEVICE_STATE_STOPPED, device_start_async shall return a non-zero result]
         if (instance->state != DEVICE_STATE_STOPPED)
@@ -819,7 +819,7 @@ int device_start_async(DEVICE_HANDLE handle, SESSION_HANDLE session_handle, CBS_
 //     stops a device instance (stops messenger and authentication) synchronously.
 // @returns
 //     0 if the function succeeds, non-zero otherwise.
-int device_stop(DEVICE_HANDLE handle)
+int device_stop(AMQP_DEVICE_HANDLE handle)
 {
     int result;
 
@@ -831,7 +831,7 @@ int device_stop(DEVICE_HANDLE handle)
     }
     else
     {
-        DEVICE_INSTANCE* instance = (DEVICE_INSTANCE*)handle;
+        AMQP_DEVICE_INSTANCE* instance = (AMQP_DEVICE_INSTANCE*)handle;
 
         // Codes_SRS_DEVICE_09_025: [If the device state is already DEVICE_STATE_STOPPED or DEVICE_STATE_STOPPING, device_stop shall return a non-zero result]
         if (instance->state == DEVICE_STATE_STOPPED || instance->state == DEVICE_STATE_STOPPING)
@@ -888,7 +888,7 @@ int device_stop(DEVICE_HANDLE handle)
     return result;
 }
 
-void device_do_work(DEVICE_HANDLE handle)
+void device_do_work(AMQP_DEVICE_HANDLE handle)
 {
     // Codes_SRS_DEVICE_09_033: [If `handle` is NULL, device_do_work shall return]
     if (handle == NULL)
@@ -898,7 +898,7 @@ void device_do_work(DEVICE_HANDLE handle)
     else
     {
         // Cranking the state monster:
-        DEVICE_INSTANCE* instance = (DEVICE_INSTANCE*)handle;
+        AMQP_DEVICE_INSTANCE* instance = (AMQP_DEVICE_INSTANCE*)handle;
 
         if (instance->state == DEVICE_STATE_STARTING)
         {
@@ -1110,7 +1110,7 @@ void device_do_work(DEVICE_HANDLE handle)
     }
 }
 
-void device_destroy(DEVICE_HANDLE handle)
+void device_destroy(AMQP_DEVICE_HANDLE handle)
 {
     // Codes_SRS_DEVICE_09_012: [If `handle` is NULL, device_destroy shall return]
     if (handle == NULL)
@@ -1119,21 +1119,21 @@ void device_destroy(DEVICE_HANDLE handle)
     }
     else
     {
-        DEVICE_INSTANCE* instance = (DEVICE_INSTANCE*)handle;
+        AMQP_DEVICE_INSTANCE* instance = (AMQP_DEVICE_INSTANCE*)handle;
         // Codes_SRS_DEVICE_09_013: [If the device is in state DEVICE_STATE_STARTED or DEVICE_STATE_STARTING, device_stop() shall be invoked]
         if (instance->state == DEVICE_STATE_STARTED || instance->state == DEVICE_STATE_STARTING)
         {
-            (void)device_stop((DEVICE_HANDLE)instance);
+            (void)device_stop((AMQP_DEVICE_HANDLE)instance);
         }
 
         // Codes_SRS_DEVICE_09_014: [`instance->messenger_handle shall be destroyed using telemetry_messenger_destroy()`]
         // Codes_SRS_DEVICE_09_015: [If created, `instance->authentication_handle` shall be destroyed using authentication_destroy()`]
         // Codes_SRS_DEVICE_09_016: [The contents of `instance->config` shall be detroyed and then it shall be freed]
-        internal_destroy_device((DEVICE_INSTANCE*)handle);
+        internal_destroy_device((AMQP_DEVICE_INSTANCE*)handle);
     }
 }
 
-int device_send_event_async(DEVICE_HANDLE handle, IOTHUB_MESSAGE_LIST* message, ON_DEVICE_D2C_EVENT_SEND_COMPLETE on_device_d2c_event_send_complete_callback, void* context)
+int device_send_event_async(AMQP_DEVICE_HANDLE handle, IOTHUB_MESSAGE_LIST* message, ON_DEVICE_D2C_EVENT_SEND_COMPLETE on_device_d2c_event_send_complete_callback, void* context)
 {
     int result;
 
@@ -1156,7 +1156,7 @@ int device_send_event_async(DEVICE_HANDLE handle, IOTHUB_MESSAGE_LIST* message, 
         }
         else
         {
-            DEVICE_INSTANCE* instance = (DEVICE_INSTANCE*)handle;
+            AMQP_DEVICE_INSTANCE* instance = (AMQP_DEVICE_INSTANCE*)handle;
 
             // Codes_SRS_DEVICE_09_054: [`send_task` shall contain the user callback and the context provided]
             memset(send_task, 0, sizeof(DEVICE_SEND_EVENT_TASK));
@@ -1183,7 +1183,7 @@ int device_send_event_async(DEVICE_HANDLE handle, IOTHUB_MESSAGE_LIST* message, 
     return result;
 }
 
-int device_get_send_status(DEVICE_HANDLE handle, DEVICE_SEND_STATUS *send_status)
+int device_get_send_status(AMQP_DEVICE_HANDLE handle, DEVICE_SEND_STATUS *send_status)
 {
     int result;
 
@@ -1196,7 +1196,7 @@ int device_get_send_status(DEVICE_HANDLE handle, DEVICE_SEND_STATUS *send_status
     }
     else
     {
-        DEVICE_INSTANCE* instance = (DEVICE_INSTANCE*)handle;
+        AMQP_DEVICE_INSTANCE* instance = (AMQP_DEVICE_INSTANCE*)handle;
         TELEMETRY_MESSENGER_SEND_STATUS messenger_send_status;
         
         // Codes_SRS_DEVICE_09_106: [The status of `instance->messenger_handle` shall be obtained using telemetry_messenger_get_send_status]
@@ -1227,7 +1227,7 @@ int device_get_send_status(DEVICE_HANDLE handle, DEVICE_SEND_STATUS *send_status
     return result;
 }
 
-int device_subscribe_message(DEVICE_HANDLE handle, ON_DEVICE_C2D_MESSAGE_RECEIVED on_message_received_callback, void* context)
+int device_subscribe_message(AMQP_DEVICE_HANDLE handle, ON_DEVICE_C2D_MESSAGE_RECEIVED on_message_received_callback, void* context)
 {
     int result;
 
@@ -1240,7 +1240,7 @@ int device_subscribe_message(DEVICE_HANDLE handle, ON_DEVICE_C2D_MESSAGE_RECEIVE
     }
     else
     {
-        DEVICE_INSTANCE* instance = (DEVICE_INSTANCE*)handle;
+        AMQP_DEVICE_INSTANCE* instance = (AMQP_DEVICE_INSTANCE*)handle;
 
         // Codes_SRS_DEVICE_09_067: [telemetry_messenger_subscribe_for_messages shall be invoked passing `on_messenger_message_received_callback` and the user callback and context]
         if (telemetry_messenger_subscribe_for_messages(instance->messenger_handle, on_messenger_message_received_callback, handle) != RESULT_OK)
@@ -1262,7 +1262,7 @@ int device_subscribe_message(DEVICE_HANDLE handle, ON_DEVICE_C2D_MESSAGE_RECEIVE
     return result;
 }
 
-int device_unsubscribe_message(DEVICE_HANDLE handle)
+int device_unsubscribe_message(AMQP_DEVICE_HANDLE handle)
 {
     int result;
 
@@ -1274,7 +1274,7 @@ int device_unsubscribe_message(DEVICE_HANDLE handle)
     }
     else
     {
-        DEVICE_INSTANCE* instance = (DEVICE_INSTANCE*)handle;
+        AMQP_DEVICE_INSTANCE* instance = (AMQP_DEVICE_INSTANCE*)handle;
 
         // Codes_SRS_DEVICE_09_077: [telemetry_messenger_unsubscribe_for_messages shall be invoked passing `instance->messenger_handle`]
         if (telemetry_messenger_unsubscribe_for_messages(instance->messenger_handle) != RESULT_OK)
@@ -1292,7 +1292,7 @@ int device_unsubscribe_message(DEVICE_HANDLE handle)
     return result;
 }
 
-int device_send_message_disposition(DEVICE_HANDLE device_handle, DEVICE_MESSAGE_DISPOSITION_INFO* disposition_info, DEVICE_MESSAGE_DISPOSITION_RESULT disposition_result)
+int device_send_message_disposition(AMQP_DEVICE_HANDLE device_handle, DEVICE_MESSAGE_DISPOSITION_INFO* disposition_info, DEVICE_MESSAGE_DISPOSITION_RESULT disposition_result)
 {
     int result;
 
@@ -1310,7 +1310,7 @@ int device_send_message_disposition(DEVICE_HANDLE device_handle, DEVICE_MESSAGE_
     }
     else
     {
-        DEVICE_INSTANCE* device = (DEVICE_INSTANCE*)device_handle;
+        AMQP_DEVICE_INSTANCE* device = (AMQP_DEVICE_INSTANCE*)device_handle;
         TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO* messenger_disposition_info;
 
         // Codes_SRS_DEVICE_09_113: [A TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance shall be created with a copy of the `source` and `message_id` contained in `disposition_info`]  
@@ -1345,7 +1345,7 @@ int device_send_message_disposition(DEVICE_HANDLE device_handle, DEVICE_MESSAGE_
     return result;
 }
 
-int device_set_retry_policy(DEVICE_HANDLE handle, IOTHUB_CLIENT_RETRY_POLICY policy, size_t retry_timeout_limit_in_seconds)
+int device_set_retry_policy(AMQP_DEVICE_HANDLE handle, IOTHUB_CLIENT_RETRY_POLICY policy, size_t retry_timeout_limit_in_seconds)
 {
     (void)retry_timeout_limit_in_seconds;
     (void)policy;
@@ -1367,7 +1367,7 @@ int device_set_retry_policy(DEVICE_HANDLE handle, IOTHUB_CLIENT_RETRY_POLICY pol
     return result;
 }
 
-int device_set_option(DEVICE_HANDLE handle, const char* name, void* value)
+int device_set_option(AMQP_DEVICE_HANDLE handle, const char* name, void* value)
 {
     int result;
 
@@ -1380,7 +1380,7 @@ int device_set_option(DEVICE_HANDLE handle, const char* name, void* value)
     }
     else
     {
-        DEVICE_INSTANCE* instance = (DEVICE_INSTANCE*)handle;
+        AMQP_DEVICE_INSTANCE* instance = (AMQP_DEVICE_INSTANCE*)handle;
 
         if (strcmp(DEVICE_OPTION_CBS_REQUEST_TIMEOUT_SECS, name) == 0 ||
             strcmp(DEVICE_OPTION_SAS_TOKEN_REFRESH_TIME_SECS, name) == 0 ||
@@ -1407,7 +1407,7 @@ int device_set_option(DEVICE_HANDLE handle, const char* name, void* value)
         else if (strcmp(DEVICE_OPTION_EVENT_SEND_TIMEOUT_SECS, name) == 0)
         {
             // Codes_SRS_DEVICE_09_086: [If `name` refers to messenger module, it shall be passed along with `value` to telemetry_messenger_set_option]
-            if (telemetry_messenger_set_option(instance->messenger_handle, MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, value) != RESULT_OK)
+            if (telemetry_messenger_set_option(instance->messenger_handle, TELEMETRY_MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, value) != RESULT_OK)
             {
                 // Codes_SRS_DEVICE_09_087: [If telemetry_messenger_set_option fails, device_set_option shall return a non-zero result]
                 LogError("failed setting option for device '%s' (failed setting messenger option '%s')", instance->config->device_id, name);
@@ -1476,7 +1476,7 @@ int device_set_option(DEVICE_HANDLE handle, const char* name, void* value)
     return result;
 }
 
-OPTIONHANDLER_HANDLE device_retrieve_options(DEVICE_HANDLE handle)
+OPTIONHANDLER_HANDLE device_retrieve_options(AMQP_DEVICE_HANDLE handle)
 {
     OPTIONHANDLER_HANDLE result;
 
@@ -1499,7 +1499,7 @@ OPTIONHANDLER_HANDLE device_retrieve_options(DEVICE_HANDLE handle)
         }
         else
         {
-            DEVICE_INSTANCE* instance = (DEVICE_INSTANCE*)handle;
+            AMQP_DEVICE_INSTANCE* instance = (AMQP_DEVICE_INSTANCE*)handle;
 
             OPTIONHANDLER_HANDLE dependency_options = NULL;
 
@@ -1550,7 +1550,7 @@ OPTIONHANDLER_HANDLE device_retrieve_options(DEVICE_HANDLE handle)
     return result;
 }
 
-int device_send_twin_update_async(DEVICE_HANDLE handle, CONSTBUFFER_HANDLE data, DEVICE_SEND_TWIN_UPDATE_COMPLETE_CALLBACK on_send_twin_update_complete_callback, void* context)
+int device_send_twin_update_async(AMQP_DEVICE_HANDLE handle, CONSTBUFFER_HANDLE data, DEVICE_SEND_TWIN_UPDATE_COMPLETE_CALLBACK on_send_twin_update_complete_callback, void* context)
 {
     int result;
 
@@ -1562,7 +1562,7 @@ int device_send_twin_update_async(DEVICE_HANDLE handle, CONSTBUFFER_HANDLE data,
     }
     else
     {
-        DEVICE_INSTANCE* instance = (DEVICE_INSTANCE*)handle;
+        AMQP_DEVICE_INSTANCE* instance = (AMQP_DEVICE_INSTANCE*)handle;
         DEVICE_SEND_TWIN_UPDATE_CONTEXT* twin_ctx;
 
         // Codes_SRS_DEVICE_09_136: [A structure (`twin_ctx`) shall be created to track the send state of the twin report]
@@ -1596,7 +1596,7 @@ int device_send_twin_update_async(DEVICE_HANDLE handle, CONSTBUFFER_HANDLE data,
     return result;
 }
 
-int device_subscribe_for_twin_updates(DEVICE_HANDLE handle, DEVICE_TWIN_UPDATE_RECEIVED_CALLBACK on_device_twin_update_received_callback, void* context)
+int device_subscribe_for_twin_updates(AMQP_DEVICE_HANDLE handle, DEVICE_TWIN_UPDATE_RECEIVED_CALLBACK on_device_twin_update_received_callback, void* context)
 {
     int result;
 
@@ -1608,7 +1608,7 @@ int device_subscribe_for_twin_updates(DEVICE_HANDLE handle, DEVICE_TWIN_UPDATE_R
     }
     else
     {
-        DEVICE_INSTANCE* instance = (DEVICE_INSTANCE*)handle;
+        AMQP_DEVICE_INSTANCE* instance = (AMQP_DEVICE_INSTANCE*)handle;
 
         DEVICE_TWIN_UPDATE_RECEIVED_CALLBACK previous_callback = instance->on_device_twin_update_received_callback;
         void* previous_context = instance->on_device_twin_update_received_context;
@@ -1635,7 +1635,7 @@ int device_subscribe_for_twin_updates(DEVICE_HANDLE handle, DEVICE_TWIN_UPDATE_R
     return result;
 }
 
-int device_unsubscribe_for_twin_updates(DEVICE_HANDLE handle)
+int device_unsubscribe_for_twin_updates(AMQP_DEVICE_HANDLE handle)
 {
     int result;
 
@@ -1648,7 +1648,7 @@ int device_unsubscribe_for_twin_updates(DEVICE_HANDLE handle)
     }
     else
     {
-        DEVICE_INSTANCE* instance = (DEVICE_INSTANCE*)handle;
+        AMQP_DEVICE_INSTANCE* instance = (AMQP_DEVICE_INSTANCE*)handle;
 
         // Codes_SRS_DEVICE_09_148: [twin_messenger_unsubscribe shall be invoked passing `on_twin_state_update_callback`]
         if (twin_messenger_unsubscribe(instance->twin_messenger_handle) != 0)
