@@ -13,14 +13,9 @@
 
 #define INDEFINITE_TIME ((time_t)-1)
 
-DEFINE_ENUM_STRINGS(EVENT_TYPE, EVENT_TYPE_STRINGS)
+DEFINE_ENUM_STRINGS(TELEMETRY_EVENT_TYPE, TELEMETRY_EVENT_TYPE_STRINGS)
+DEFINE_ENUM_STRINGS(C2D_EVENT_TYPE, C2D_EVENT_TYPE_STRINGS)
 
-typedef struct EVENT_INFO_TAG
-{
-    EVENT_TYPE type;
-    time_t time;
-    size_t api_result;
-} EVENT_INFO;
 
 typedef struct CONNECTION_STATUS_INFO_TAG
 {
@@ -329,6 +324,76 @@ static void serialize_telemetry_event(const void* item, const void* action_conte
     *continue_processing = true;
 }
 
+static void serialize_c2d_event(const void* item, const void* action_context, bool* continue_processing)
+{
+    JSON_Array* c2d_array = json_value_get_array((const JSON_Value*)action_context);
+
+    if (c2d_array == NULL)
+    {
+        LogError("Failed to retrieve the telemetry events json array");
+    }
+    else
+    {
+        C2D_MESSAGE_INFO* info = (C2D_MESSAGE_INFO*)item;
+        JSON_Value* info_json;
+
+        if ((info_json = json_value_init_object()) == NULL)
+        {
+            LogError("Failed creating c2d event json");
+        }
+        else
+        {
+            JSON_Object* info_json_obj;
+
+            if ((info_json_obj = json_value_get_object(info_json)) == NULL)
+            {
+                LogError("Failed getting json object");
+                json_value_free(info_json);
+            }
+            else
+            {
+                if (json_object_set_number(info_json_obj, "id", info->message_id) != JSONSuccess)
+                {
+                    LogError("Failed serializing c2d event id");
+                    json_value_free(info_json);
+                }
+                else if (json_object_dotset_string(info_json_obj, "enqueue.time", (info->time_queued == INDEFINITE_TIME ? "undefined" : ctime(&info->time_queued))) != JSONSuccess)
+                {
+                    LogError("Failed serializing c2d event enqueue time");
+                    json_value_free(info_json);
+                }
+                else if (json_object_dotset_number(info_json_obj, "enqueue.result", info->send_result) != JSONSuccess)
+                {
+                    LogError("Failed serializing c2d event enqueue result");
+                    json_value_free(info_json);
+                }
+                else if (json_object_dotset_string(info_json_obj, "send.time", (info->time_sent == INDEFINITE_TIME ? "undefined" : ctime(&info->time_sent))) != JSONSuccess)
+                {
+                    LogError("Failed serializing c2d event send time");
+                    json_value_free(info_json);
+                }
+                else if (json_object_dotset_string(info_json_obj, "send.result", ENUM_TO_STRING(IOTHUB_MESSAGING_RESULT, info->send_callback_result)) != JSONSuccess)
+                {
+                    LogError("Failed serializing c2d event send result");
+                    json_value_free(info_json);
+                }
+                else if (json_object_dotset_string(info_json_obj, "receive.time", (info->time_received == INDEFINITE_TIME ? "undefined" : ctime(&info->time_received))) != JSONSuccess)
+                {
+                    LogError("Failed serializing c2d event receive time");
+                    json_value_free(info_json);
+                }
+                else if (json_array_append_value(c2d_array, info_json) != 0)
+                {
+                    LogError("Failed appending c2d event json");
+                    json_value_free(info_json);
+                }
+            }
+        }
+    }
+
+    *continue_processing = true;
+}
+
 char* iothub_client_statistics_to_json(IOTHUB_CLIENT_STATISTICS_HANDLE handle)
 {
     char* result;
@@ -362,6 +427,7 @@ char* iothub_client_statistics_to_json(IOTHUB_CLIENT_STATISTICS_HANDLE handle)
             {
                 JSON_Value* conn_status_array;
                 JSON_Value* telemetry_array;
+                JSON_Value* c2d_array;
 
                 if ((conn_status_array = json_value_init_array()) == NULL)
                 {
@@ -378,7 +444,8 @@ char* iothub_client_statistics_to_json(IOTHUB_CLIENT_STATISTICS_HANDLE handle)
                     LogError("Failed adding connection status array to json object");
                     result = NULL;
                 }
-                else if ((telemetry_array = json_value_init_array()) == NULL)
+                
+                if ((telemetry_array = json_value_init_array()) == NULL)
                 {
                     LogError("Failed creating json array for telemetry events");
                     result = NULL;
@@ -393,11 +460,27 @@ char* iothub_client_statistics_to_json(IOTHUB_CLIENT_STATISTICS_HANDLE handle)
                     LogError("Failed adding telemetry events array to json object");
                     result = NULL;
                 }
-                else if ((result = json_serialize_to_string_pretty(root_value)) == NULL)
+
+                if ((c2d_array = json_value_init_array()) == NULL)
+                {
+                    LogError("Failed creating json array for c2d events");
+                    result = NULL;
+                }
+                else if (singlylinkedlist_foreach(stats->c2d_messages, serialize_c2d_event, c2d_array) != 0)
+                {
+                    LogError("Failed adding c2d event to json array");
+                    result = NULL;
+                }
+                else if ((json_object_set_value(root_object, "c2d", c2d_array)) != JSONSuccess)
+                {
+                    LogError("Failed adding c2d events array to json object");
+                    result = NULL;
+                }
+                    
+                if ((result = json_serialize_to_string_pretty(root_value)) == NULL)
                 {
                     LogError("Failed serializing json to string");
                 }
-
 
                 if (json_object_clear(root_object) != JSONSuccess)
                 {
@@ -466,13 +549,13 @@ static bool find_telemetry_info_by_id(LIST_ITEM_HANDLE list_item, const void* ma
     return (item_info->message_id == match_info->message_id);
 }
 
-int iothub_client_statistics_add_telemetry_info(IOTHUB_CLIENT_STATISTICS_HANDLE handle, EVENT_TYPE type, TELEMETRY_INFO* info)
+int iothub_client_statistics_add_telemetry_info(IOTHUB_CLIENT_STATISTICS_HANDLE handle, TELEMETRY_EVENT_TYPE type, TELEMETRY_INFO* info)
 {
     int result;
 
     if (handle == NULL || info == NULL || (type != TELEMETRY_QUEUED && type != TELEMETRY_SENT && type != TELEMETRY_RECEIVED))
     {
-        LogError("Invalid argument (handle=%p, type=%s, info=%p)", handle, ENUM_TO_STRING(EVENT_TYPE, type), info);
+        LogError("Invalid argument (handle=%p, type=%s, info=%p)", handle, ENUM_TO_STRING(TELEMETRY_EVENT_TYPE, type), info);
         result = __FAILURE__;
     }
     else
@@ -578,6 +661,144 @@ int iothub_client_statistics_get_telemetry_summary(IOTHUB_CLIENT_STATISTICS_HAND
                 }
 
                 summary->messages_received = summary->messages_received + 1;
+            }
+
+            list_item = singlylinkedlist_get_next_item(list_item);
+        }
+
+        result = 0;
+    }
+
+    return result;
+}
+
+static bool find_c2d_message_info_by_id(LIST_ITEM_HANDLE list_item, const void* match_context)
+{
+    C2D_MESSAGE_INFO* match_info = (C2D_MESSAGE_INFO*)match_context;
+    C2D_MESSAGE_INFO* item_info = (C2D_MESSAGE_INFO*)singlylinkedlist_item_get_value(list_item);
+
+    return (item_info->message_id == match_info->message_id);
+}
+
+int iothub_client_statistics_add_c2d_info(IOTHUB_CLIENT_STATISTICS_HANDLE handle, C2D_EVENT_TYPE type, C2D_MESSAGE_INFO* info)
+{
+    int result;
+
+    if (handle == NULL || info == NULL)
+    {
+        LogError("Invalid argument (handle=%p, type=%s, info=%p)", handle, ENUM_TO_STRING(C2D_EVENT_TYPE, type), info);
+        result = __FAILURE__;
+    }
+    else
+    {
+        IOTHUB_CLIENT_STATISTICS_HANDLE stats = (IOTHUB_CLIENT_STATISTICS*)handle;
+        C2D_MESSAGE_INFO* queued_info;
+        LIST_ITEM_HANDLE list_item = singlylinkedlist_find(stats->c2d_messages, find_c2d_message_info_by_id, info);
+
+        if (list_item == NULL)
+        {
+            if (type != C2D_QUEUED)
+            {
+                LogError("C2D message info not found for message %d (%d)", info->message_id, type);
+                result = __FAILURE__;
+            }
+            else if ((queued_info = (C2D_MESSAGE_INFO*)malloc(sizeof(C2D_MESSAGE_INFO))) == NULL)
+            {
+                LogError("Failed clonning the C2D_MESSAGE_INFO");
+                result = __FAILURE__;
+            }
+            else if (singlylinkedlist_add(stats->c2d_messages, queued_info) == NULL)
+            {
+                LogError("Failed adding c2d message info (message id: %d)", info->message_id);
+                free(queued_info);
+                result = __FAILURE__;
+            }
+            else
+            {
+                queued_info->message_id = info->message_id;
+                queued_info->time_queued = info->time_queued;
+                queued_info->send_result = info->send_result;
+                queued_info->time_received = INDEFINITE_TIME;
+                queued_info->time_sent = INDEFINITE_TIME;
+
+                result = 0;
+            }
+        }
+        else
+        {
+            if ((queued_info = (C2D_MESSAGE_INFO*)singlylinkedlist_item_get_value(list_item)) == NULL)
+            {
+                LogError("Failed retrieving queued c2d message info (message id: %d)", info->message_id);
+                result = __FAILURE__;
+            }
+            else
+            {
+                if (type == C2D_SENT)
+                {
+                    queued_info->time_sent = info->time_sent;
+                    queued_info->send_callback_result = info->send_callback_result;
+                    result = 0;
+                }
+                else if (type == C2D_RECEIVED)
+                {
+                    queued_info->time_received = info->time_received;
+                    result = 0;
+                }
+                else
+                {
+                    LogError("C2D message %d in queue, invalid event type (%d)", info->message_id, ENUM_TO_STRING(C2D_EVENT_TYPE, type));
+                    result = __FAILURE__;
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
+int iothub_client_statistics_get_c2d_summary(IOTHUB_CLIENT_STATISTICS_HANDLE handle, IOTHUB_CLIENT_STATISTICS_C2D_SUMMARY* summary)
+{
+    int result;
+
+    if (handle == NULL || summary == NULL)
+    {
+        LogError("Invalid argument (handle=%p, summary=%p)", handle, summary);
+        result = __FAILURE__;
+    }
+    else
+    {
+        IOTHUB_CLIENT_STATISTICS_HANDLE stats = (IOTHUB_CLIENT_STATISTICS*)handle;
+        LIST_ITEM_HANDLE list_item;
+
+        (void)memset(summary, 0, sizeof(IOTHUB_CLIENT_STATISTICS_C2D_SUMMARY));
+        summary->min_travel_time_secs = LONG_MAX;
+
+        list_item = singlylinkedlist_get_head_item(stats->c2d_messages);
+
+        while (list_item != NULL)
+        {
+            C2D_MESSAGE_INFO* c2d_msg_info = (C2D_MESSAGE_INFO*)singlylinkedlist_item_get_value(list_item);
+
+            if (c2d_msg_info->time_sent != INDEFINITE_TIME)
+            {
+                summary->messages_sent = summary->messages_sent + 1;
+
+                if (c2d_msg_info->time_received != INDEFINITE_TIME)
+                {
+                    double travel_time = difftime(c2d_msg_info->time_received, c2d_msg_info->time_sent);
+
+                    if (travel_time < summary->min_travel_time_secs)
+                    {
+                        summary->min_travel_time_secs = travel_time;
+                    }
+
+                    if (travel_time > summary->max_travel_time_secs)
+                    {
+                        summary->max_travel_time_secs = travel_time;
+                    }
+
+                    summary->messages_received = summary->messages_received + 1;
+                }
             }
 
             list_item = singlylinkedlist_get_next_item(list_item);
