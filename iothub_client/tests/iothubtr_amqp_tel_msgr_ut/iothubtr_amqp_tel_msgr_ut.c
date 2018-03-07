@@ -2324,12 +2324,10 @@ TEST_FUNCTION(telemetry_messenger_destroy_succeeds)
     telemetry_messenger_destroy_succeeds_impl(false);
 }
 
-#if 0
 TEST_FUNCTION(telemetry_messenger_destroy_with_module_succeeds)
 {
     telemetry_messenger_destroy_succeeds_impl(true);
 }
-#endif
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_163: [If not all items from `instance->in_progress_list` can be moved back to `instance->wait_to_send_list`, `instance->state` shall be set to TELEMETRY_MESSENGER_STATE_ERROR, and `instance->on_state_changed_callback` invoked]
 TEST_FUNCTION(telemetry_messenger_destroy_FAIL_TO_ROLLBACK_EVENTS)
