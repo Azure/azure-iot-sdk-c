@@ -1039,7 +1039,6 @@ static void setup_iothubclient_ll_createfromconnectionstring_mocks(const char* d
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_NUM_ARG)).IgnoreArgument_ptr();
 }
 
-
 /*Tests_SRS_IOTHUBCLIENT_LL_12_004: [IoTHubClient_LL_CreateFromConnectionString shall allocate IOTHUB_CLIENT_CONFIG structure] */
 /*Tests_SRS_IOTHUBCLIENT_LL_12_006: [IoTHubClient_LL_CreateFromConnectionString shall verify the existence of the following Key/Value pairs in the connection string: HostName, DeviceId, SharedAccessKey, SharedAccessSignature or x509, ModuleId]  */
 /*Tests_SRS_IOTHUBCLIENT_LL_03_010: [IoTHubClient_LL_CreateFromConnectionString shall return NULL if both a deviceKey & a deviceSasToken are specified.] */
@@ -5709,7 +5708,7 @@ TEST_FUNCTION(IoTHubClient_LL_SetInputMessageCallback_one_item_fail)
     for (size_t index = 5; index < count; index++)
     {
         umock_c_negative_tests_reset();
-        umock_c_negative_tests_fail_call(index);        
+        umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[128];
         sprintf(tmp_msg, "IoTHubClient_LL_SetInputMessageCallback failure in test %zu/%zu", index, count);
