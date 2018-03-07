@@ -456,8 +456,8 @@ Actions are discarded, since no marshalling will be done for those when sending 
 
 #define REFLECTED_DESIRED_PROPERTY(type, name, modelName, ...)                                                              \
     IF(COUNT_ARG(__VA_ARGS__),                                                                                              \
-        DELAY(REFLECTED_DESIRED_PROPERTY_WITH_ON_DESIRED_PROPERTY_CHANGE)(type, name, modelName,__COUNTER__, __VA_ARGS__),  \
-        DELAY(REFLECTED_DESIRED_PROPERTY_WITH_ON_DESIRED_PROPERTY_CHANGE)(type, name, modelName,DEC(__COUNTER__), NULL)     \
+        MACRO_UTILS_DELAY(REFLECTED_DESIRED_PROPERTY_WITH_ON_DESIRED_PROPERTY_CHANGE)(type, name, modelName,__COUNTER__, __VA_ARGS__),  \
+        MACRO_UTILS_DELAY(REFLECTED_DESIRED_PROPERTY_WITH_ON_DESIRED_PROPERTY_CHANGE)(type, name, modelName,DEC(__COUNTER__), NULL)     \
     )                                                                                                                       \
 
 #define REFLECTED_ACTION(name, argc, argv, fn, modelName) \
