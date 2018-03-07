@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Microsoft Azure IoT Device SDK for C
-   &#160;<span id="projectnumber">1.1.32</span>
+   &#160;<span id="projectnumber">1.2.0</span>
    </div>
    <div id="projectbrief">The Microsoft Azure IoT device libraries for C contain code that facilitates building devices and applications that connect to and are managed by Azure IoT Hub services.</div>
   </td>
@@ -113,7 +113,7 @@ typedef enum <a class="el" href="iothub__client__ll_8h.html#abe1761cf9195b46ecc1
 <tr class="separator:a2d8ad59aa248034ed2e231835f703a01"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a06bec2310f92a54329a1f39b0804ee88"><td class="memItemLeft" align="right" valign="top"><a id="a06bec2310f92a54329a1f39b0804ee88"></a>
 typedef enum <a class="el" href="iothub__client__ll_8h.html#aad29ba44eb4ad88bf10e7d3d43138bf7">IOTHUB_CLIENT_STATUS_TAG</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#a06bec2310f92a54329a1f39b0804ee88">IOTHUB_CLIENT_STATUS</a></td></tr>
-<tr class="memdesc:a06bec2310f92a54329a1f39b0804ee88"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enumeration returned by the ::IoTHubClient_LL_GetSendStatus API to indicate the current sending status of the IoT Hub client. <br /></td></tr>
+<tr class="memdesc:a06bec2310f92a54329a1f39b0804ee88"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enumeration returned by the IoTHubClient_LL_GetSendStatus API to indicate the current sending status of the IoT Hub client. <br /></td></tr>
 <tr class="separator:a06bec2310f92a54329a1f39b0804ee88"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a988b1c83b28d268c642d72dcab8228a4"><td class="memItemLeft" align="right" valign="top"><a id="a988b1c83b28d268c642d72dcab8228a4"></a>
 typedef enum <a class="el" href="iothub__client__ll_8h.html#ad6c1da5dbe6e1dd6746ab930b377d531">IOTHUBMESSAGE_DISPOSITION_RESULT_TAG</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#a988b1c83b28d268c642d72dcab8228a4">IOTHUBMESSAGE_DISPOSITION_RESULT</a></td></tr>
@@ -155,7 +155,7 @@ Enumerations</h2></td></tr>
 <tr class="memitem:abe1761cf9195b46ecc118ce8c5d730b8"><td class="memItemLeft" align="right" valign="top"><a id="abe1761cf9195b46ecc118ce8c5d730b8"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#abe1761cf9195b46ecc118ce8c5d730b8">IOTHUB_CLIENT_RETRY_POLICY_TAG</a> <tr class="memdesc:abe1761cf9195b46ecc118ce8c5d730b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enumeration passed in by the IoT Hub when the event confirmation callback is invoked to indicate status of the event processing in the hub. <br /></td></tr>
 </td></tr>
 <tr class="separator:abe1761cf9195b46ecc118ce8c5d730b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aad29ba44eb4ad88bf10e7d3d43138bf7"><td class="memItemLeft" align="right" valign="top"><a id="aad29ba44eb4ad88bf10e7d3d43138bf7"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#aad29ba44eb4ad88bf10e7d3d43138bf7">IOTHUB_CLIENT_STATUS_TAG</a> <tr class="memdesc:aad29ba44eb4ad88bf10e7d3d43138bf7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enumeration returned by the ::IoTHubClient_LL_GetSendStatus API to indicate the current sending status of the IoT Hub client. <br /></td></tr>
+<tr class="memitem:aad29ba44eb4ad88bf10e7d3d43138bf7"><td class="memItemLeft" align="right" valign="top"><a id="aad29ba44eb4ad88bf10e7d3d43138bf7"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#aad29ba44eb4ad88bf10e7d3d43138bf7">IOTHUB_CLIENT_STATUS_TAG</a> <tr class="memdesc:aad29ba44eb4ad88bf10e7d3d43138bf7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enumeration returned by the IoTHubClient_LL_GetSendStatus API to indicate the current sending status of the IoT Hub client. <br /></td></tr>
 </td></tr>
 <tr class="separator:aad29ba44eb4ad88bf10e7d3d43138bf7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad6c1da5dbe6e1dd6746ab930b377d531"><td class="memItemLeft" align="right" valign="top"><a id="ad6c1da5dbe6e1dd6746ab930b377d531"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#ad6c1da5dbe6e1dd6746ab930b377d531">IOTHUBMESSAGE_DISPOSITION_RESULT_TAG</a> <tr class="memdesc:ad6c1da5dbe6e1dd6746ab930b377d531"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enumeration returned by the callback which is invoked whenever the IoT Hub sends a message to the device. <br /></td></tr>
@@ -267,8 +267,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>If the user wants to abort the upload, the callback should return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_ABORT It should return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK otherwise. </dd></dl>
-<dl class="section remark"><dt>Remarks</dt><dd>If a NULL is provided for parameter "data" and/or zero is provided for "size", the user indicates to the client that the complete file has been uploaded. In such case this callback will be invoked only once more to indicate the status of the final block upload. If result is not FILE_UPLOAD_OK, the download is cancelled and this callback stops being invoked. When this callback is called for the last time, no data or size is expected, so data and size are set to NULL </dd></dl>
+<dl class="section remark"><dt>Remarks</dt><dd>If the user wants to abort the upload, the callback should return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_ABORT It should return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK otherwise. If a NULL is provided for parameter "data" and/or zero is provided for "size", the user indicates to the client that the complete file has been uploaded. In such case this callback will be invoked only once more to indicate the status of the final block upload. If result is not FILE_UPLOAD_OK, the download is cancelled and this callback stops being invoked. When this callback is called for the last time, no data or size is expected, so data and size are set to NULL </dd></dl>
 
 </div>
 </div>
