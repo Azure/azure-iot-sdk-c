@@ -893,7 +893,7 @@ TEST_FUNCTION(device_create_with_module_succeeds)
     set_expected_calls_for_device_create(config, TEST_current_time);
 
     // act
-    DEVICE_HANDLE handle = device_create(config);
+    AMQP_DEVICE_HANDLE handle = device_create(config);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -1069,7 +1069,7 @@ TEST_FUNCTION(device_start_async_X509_with_module_succeeds)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config_with_module_id(DEVICE_AUTH_MODE_X509);
-    DEVICE_HANDLE handle = create_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
     set_expected_calls_for_device_start_async(config, TEST_current_time);
@@ -1267,7 +1267,7 @@ TEST_FUNCTION(device_stop_DEVICE_STATE_STARTED_with_module_succeeds)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config_with_module_id(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_and_start_and_crank_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_and_start_and_crank_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
     set_expected_calls_for_device_stop(config, TEST_current_time, AUTHENTICATION_STATE_STARTED, TELEMETRY_MESSENGER_STATE_STARTED, TWIN_MESSENGER_STATE_STARTED);
@@ -1411,7 +1411,7 @@ TEST_FUNCTION(device_get_send_status_IDLE_with_module_success)
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     DEVICE_CONFIG* config = get_device_config_with_module_id(DEVICE_AUTH_MODE_CBS);
-    DEVICE_HANDLE handle = create_device(config, TEST_current_time);
+    AMQP_DEVICE_HANDLE handle = create_device(config, TEST_current_time);
 
     TELEMETRY_MESSENGER_SEND_STATUS telemetry_messenger_get_send_status_result = TELEMETRY_MESSENGER_SEND_STATUS_IDLE;
 
