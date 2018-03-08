@@ -12,7 +12,7 @@ This document describes how to prepare your development environment to use the *
 
 ## Set up a Windows development environment
 
-- Install [Visual Studio 2015][visual-studio]. You can use the **Visual Studio Community** Free download if you meet the licensing requirements.
+- Install [Visual Studio 2017][visual-studio]. You can use the **Visual Studio Community** Free download if you meet the licensing requirements.  (**Visual Studio 2015** is also supported.)
 > Be sure to include Visual C++ and NuGet Package Manager.
 
 - Install [git]. Confirm git is in your PATH by typing `git version` from a command prompt.
@@ -33,7 +33,7 @@ git clone -b <yyyy-mm-dd> --recursive https://github.com/Azure/azure-iot-sdk-c.g
 ### Build a sample application without building the SDK
 
 To quickly build one of our sample applications, open the corresponding [solution file][sln-file] (.sln) in Visual Studio.
-  For example, to build our **MQTT sample**, open **iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln**.
+  For example, to build the **telemetry message sample**, open **iothub_client\samples\iothub_ll_telemetry_sample\windows\iothub_ll_telemetry_sample.sln**.
 
 In the sample's main source file, find the line similar to this:
 
@@ -49,7 +49,7 @@ Build the sample project. As part of the build, [NuGet] Package Manager will dow
 
 In some cases, you may want to build the SDK locally for development and testing purposes. First, take the following steps to generate project files:
 
-- Open a "Developer Command Prompt for VS2015".
+- Open a "Developer Command Prompt for VS2015" or "Developer Command Prompt for VS2017".
 
 - Run the following CMake commands from the root of the repository:
 
@@ -57,10 +57,13 @@ In some cases, you may want to build the SDK locally for development and testing
 cd azure-iot-sdk-c
 mkdir cmake
 cd cmake
-cmake -G "Visual Studio 14 2015" ..
+# Either
+  cmake -G "Visual Studio 14 2015" .. ## For Visual Studio 2015
+# or
+  cmake -G "Visual Studio 15 2017" .. ## For Visual Studio 2017
 ```
 
-> This builds x86 libraries. To build for x64, modify the cmake generator argument: `cmake .. -G "Visual Studio 14 2015 Win64"`
+> This builds x86 libraries. To build for x64 for Visual Studio 2015, modify the cmake generator argument: `cmake .. -G "Visual Studio 14 2015 Win64"` or for Visual Studio 2017, `cmake .. -G "Visual Studio 15 2017 Win64"`
 
 If project generation completes successfully, you should see a Visual Studio solution file (.sln) under the `cmake` folder. To build the SDK, do one of the following:
 
@@ -86,19 +89,19 @@ cmake --build . -- /m /p:Configuration=Debug
 ctest -C "debug" -V
 ```
 
-### Build a sample that uses WebSocket
+### Build a sample that uses different protocols, including over WebSockets
 
-By default the C-SDK will have web sockets enabled for AMQP and MQTT.  The samples that show examples for this are **iothub_client_sample_amqp_websockets** and **iothub_client_sample_mqtt_websockets**.
+By default the C-SDK will have web sockets enabled for AMQP and MQTT.  The sample **iothub_client\samples\iothub_ll_telemetry_sample** lets you specify the `protocol` variable.
 
 ### Using OpenSSL in the SDK
 
-For TLS operations the C-SDK will use Schannel on the Windows Platforms.  To enable OpenSSL to be used on Windows, you will need to execute the following instructions:
+For TLS operations, by default the C-SDK uses Schannel on Windows Platforms.  To enable OpenSSL to be used on Windows, you will need to execute the following instructions:
 
 [OpenSSL] binaries that the C-SDK depends on are **ssleay32** and **libeay32**. You need to build and install these libraries and DLLs before you build the sample that uses them.
 
-Below are steps to build and install OpenSSL libraries and corresponding DLLs. These steps were tested with **openssl-1.0.2k**.
+Below are steps to build and install OpenSSL libraries and corresponding DLLs. These steps were tested with **openssl-1.0.2k** on **Visual Studio 2015**.
 
-- Go to the [OpenSSL Github Repository] and clone the release [git clone `https://github.com/openssl/openssl.git` -b OpenSSL_1_0_2k]
+- Go to the [OpenSSL Github Repository] and clone an appropriate release.
 
 - For more details on supported configurations, prerequisites, and build steps read [OpenSSL Installation] and [Compilation and Installation].
 
@@ -272,7 +275,14 @@ Note: Any samples you built will not work until you configure them with a valid 
 
 <a name="windowsce"></a>
 
-## Set up a Windows Embedded Compact 2013 development environment
+## [**DEPRECATED**: Set up a Windows Embedded Compact 2013 development environment
+***WINDOWS EMBEDDED COMPACT 2013 RECEIVES MINIMAL SUPPORT FROM AZURE IOT SDK.***  In particular please be aware:
+* No new features will be added to WEC.  
+* The only supported protocol is HTTPS.  Popular protocols like AMQP and MQTT, both over TCP directly and over WebSockets, are not and will not be supported.
+* HTTPS over proxy is not supported.
+* Developers may want to evaluate [Windows 10 IoT Core], which has much broader Azure IoT SDK support.
+
+**SETUP INSTRUCTIONS FOR WINDOWS EMBEDDED COMPACT 2013**
 
 - Install [Visual Studio 2015][visual-studio]. You can use the **Visual Studio Community** Free download if you meet the licensing requirements.
   > Be sure to include Visual C++ and NuGet Package Manager.
@@ -345,9 +355,9 @@ static const char* connectionString = "[device connection string]";
 -Navigate to the directory of the sample that was edited, build the sample with the new changes and execute the sample:
 
 ```Shell
-cd ./azure-iot-sdk-c/cmake/iothub_client/samples/iothub_client_sample_amqp
+cd ./azure-iot-sdk-c/cmake/iothub_client/samples/iothub_ll_telemetry_sample
 make
-./iothub_client_sample_amqp
+./iothub_ll_telemetry_sample
 ```
 
 [visual-studio]: https://www.visualstudio.com/downloads/
@@ -363,7 +373,7 @@ make
 [CMake]:https://cmake.org/
 [MSBuild]:https://msdn.microsoft.com/en-us/library/0k6kkbsd.aspx
 [OpenSSL]:https://www.openssl.org/
-[OpenSSL Repository]: https://github.com/openssl/openssl
+[OpenSSL Github Repository]: https://github.com/openssl/openssl
 [OpenSSL Installation]:https://github.com/openssl/openssl/blob/master/INSTALL
 [Compilation and Installation]:https://wiki.openssl.org/index.php/Compilation_and_Installation#Windows
 [Ubuntu]:http://www.ubuntu.com/desktop
@@ -376,3 +386,4 @@ make
 [simple_samples]: ../iothub_client/samples/
 [serializer_samples]: ../serializer/samples/
 [latest-release]:https://github.com/Azure/azure-iot-sdk-c/releases/latest
+[Windows 10 IoT Core]:https://docs.microsoft.com/en-us/windows/iot-core/develop-your-app/buildingappsforiotcore
