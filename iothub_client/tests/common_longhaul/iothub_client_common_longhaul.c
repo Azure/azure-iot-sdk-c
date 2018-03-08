@@ -85,7 +85,7 @@ static time_t add_seconds(time_t base_time, int seconds)
     return new_time;
 }
 
-static int parse_iothub_message(const char* data, size_t size, char* test_id, unsigned int* message_id)
+static int parse_iothub_message(const char* data, size_t size, const char* test_id, const unsigned int* message_id)
 {
     int result;
     char data_copy[80];
@@ -125,9 +125,9 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT on_c2d_message_received(IOTHUB_MESSAGE_H
 {
     IOTHUBMESSAGE_DISPOSITION_RESULT result;
 
-    if (message == NULL || userContextCallback == 0)
+    if (message == NULL || userContextCallback == NULL)
     {
-        LogError("Invalid argument (message=%p, userContextCallback=%d)", message, userContextCallback);
+        LogError("Invalid argument (message=%p, userContextCallback=%p)", message, userContextCallback);
         result = IOTHUBMESSAGE_ABANDONED;
     }
     else
@@ -248,66 +248,6 @@ static int run_on_loop(RUN_ON_LOOP_ACTION action, size_t iterationDurationInSeco
                 // We should get the current time again to be 100% precise, but we will optimize here since wait_time_secs is supposed to be way smaller than totalDurationInSeconds.
             }
         } while (difftime(current_time, start_time) < totalDurationInSeconds);
-    }
-
-    return result;
-}
-
-
-typedef enum FUNCTION_RESULT_TAG
-{
-    FUNCTION_RESULT_SUCCESS,
-    FUNCTION_RESULT_FAILURE,
-    FUNCTION_RESULT_CONTINUE
-} FUNCTION_RESULT;
-
-typedef FUNCTION_RESULT(*AWAITABLE_FUNCTION)(const void* context);
-
-static int wait_for(AWAITABLE_FUNCTION function, size_t maxWaitTimeInSeconds, const void* function_context)
-{
-    int result;
-    time_t start_time;
-
-    if ((start_time = time(NULL)) == INDEFINITE_TIME)
-    {
-        LogError("Failed setting start time");
-        result = __FAILURE__;
-    }
-    else
-    {
-        time_t current_time;
-
-        do
-        {
-            FUNCTION_RESULT func_res = function(function_context);
-
-            if (func_res == FUNCTION_RESULT_SUCCESS)
-            {
-                result = 0;
-                break;
-            }
-            else if (func_res == FUNCTION_RESULT_FAILURE)
-            {
-                result = __FAILURE__;
-                break;
-            }
-            else if ((current_time = time(NULL)) == INDEFINITE_TIME)
-            {
-                LogError("Failed getting current time");
-                result = __FAILURE__;
-                break;
-            }
-            else if (difftime(current_time, start_time) >= maxWaitTimeInSeconds)
-            {
-                LogError("Function timed out");
-                result = __FAILURE__;
-                break;
-            }
-            else
-            {
-                ThreadAPI_Sleep(100);
-            }
-        } while (true);
     }
 
     return result;
@@ -1083,46 +1023,42 @@ int longhaul_run_c2d_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t itera
         }
         else
         {
+            int loop_result;
+            IOTHUB_CLIENT_STATISTICS_HANDLE stats_handle;
 
+            loop_result = run_on_loop(send_c2d, iterationDurationInSeconds, totalDurationInSeconds, iotHubLonghaul);
 
+            ThreadAPI_Sleep(iterationDurationInSeconds * 1000 * 10); // Extra time for the last messages.
+
+            stats_handle = longhaul_get_statistics(iotHubLonghaul);
+
+            LogInfo("Longhaul Cloud-to-Device stats: %s", iothub_client_statistics_to_json(stats_handle));
+
+            if (loop_result != 0)
             {
-                int loop_result;
-                IOTHUB_CLIENT_STATISTICS_HANDLE stats_handle;
+                result = __FAILURE__;
+            }
+            else
+            {
+                IOTHUB_CLIENT_STATISTICS_C2D_SUMMARY summary;
 
-                loop_result = run_on_loop(send_c2d, iterationDurationInSeconds, totalDurationInSeconds, iotHubLonghaul);
-
-                //ThreadAPI_Sleep(iterationDurationInSeconds * 1000 * 10); // Extra time for the last messages.
-
-                stats_handle = longhaul_get_statistics(iotHubLonghaul);
-
-                LogInfo("Longhaul Cloud-to-Device stats: %s", iothub_client_statistics_to_json(stats_handle));
-
-                if (loop_result != 0)
+                if (iothub_client_statistics_get_c2d_summary(stats_handle, &summary) != 0)
                 {
+                    LogError("Failed gettting statistics summary");
                     result = __FAILURE__;
                 }
                 else
                 {
-                    IOTHUB_CLIENT_STATISTICS_C2D_SUMMARY summary;
+                    LogInfo("Summary: Messages sent=%d, received=%d; travel time: min=%f secs, max=%f secs",
+                        summary.messages_sent, summary.messages_received, summary.min_travel_time_secs, summary.max_travel_time_secs);
 
-                    if (iothub_client_statistics_get_c2d_summary(stats_handle, &summary) != 0)
+                    if (summary.messages_sent == 0 || summary.messages_received != summary.messages_sent || summary.max_travel_time_secs > MAX_C2D_TRAVEL_TIME_SECS)
                     {
-                        LogError("Failed gettting statistics summary");
                         result = __FAILURE__;
                     }
                     else
                     {
-                        LogInfo("Summary: Messages sent=%d, received=%d; travel time: min=%f secs, max=%f secs",
-                            summary.messages_sent, summary.messages_received, summary.min_travel_time_secs, summary.max_travel_time_secs);
-
-                        if (summary.messages_sent == 0 || summary.messages_received != summary.messages_sent || summary.max_travel_time_secs > MAX_C2D_TRAVEL_TIME_SECS)
-                        {
-                            result = __FAILURE__;
-                        }
-                        else
-                        {
-                            result = 0;
-                        }
+                        result = 0;
                     }
                 }
             }
