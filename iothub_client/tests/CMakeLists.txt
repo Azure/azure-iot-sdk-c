@@ -67,8 +67,9 @@ if(${use_mqtt})
 
     add_longhaul_test_directory(longhaul_mqtt_telemetry)
     add_longhaul_test_directory(longhaul_mqtt_c2d)
-    # add_longhaul_test_directory(longhaul_mqtt_device_methods)
-    # add_longhaul_test_directory(longhaul_mqtt_device_twin)
+    add_longhaul_test_directory(longhaul_mqtt_device_methods)
+    add_longhaul_test_directory(longhaul_mqtt_device_twin_desired)
+    add_longhaul_test_directory(longhaul_mqtt_device_twin_reported)
 endif()
 
 if(${use_amqp})

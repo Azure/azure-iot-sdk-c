@@ -13,9 +13,10 @@
 
 #define INDEFINITE_TIME ((time_t)-1)
 
-DEFINE_ENUM_STRINGS(TELEMETRY_EVENT_TYPE, TELEMETRY_EVENT_TYPE_STRINGS)
-DEFINE_ENUM_STRINGS(C2D_EVENT_TYPE, C2D_EVENT_TYPE_STRINGS)
-
+DEFINE_ENUM_STRINGS(TELEMETRY_EVENT_TYPE, TELEMETRY_EVENT_TYPE_VALUES)
+DEFINE_ENUM_STRINGS(C2D_EVENT_TYPE, C2D_EVENT_TYPE_VALUES)
+DEFINE_ENUM_STRINGS(DEVICE_METHOD_EVENT_TYPE, DEVICE_METHOD_EVENT_TYPE_VALUES)
+DEFINE_ENUM_STRINGS(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_RESULT_VALUES)
 
 typedef struct CONNECTION_STATUS_INFO_TAG
 {
@@ -330,7 +331,7 @@ static void serialize_c2d_event(const void* item, const void* action_context, bo
 
     if (c2d_array == NULL)
     {
-        LogError("Failed to retrieve the telemetry events json array");
+        LogError("Failed to retrieve the c2d events json array");
     }
     else
     {
@@ -394,6 +395,66 @@ static void serialize_c2d_event(const void* item, const void* action_context, bo
     *continue_processing = true;
 }
 
+static void serialize_device_method_event(const void* item, const void* action_context, bool* continue_processing)
+{
+    JSON_Array* c2d_array = json_value_get_array((const JSON_Value*)action_context);
+
+    if (c2d_array == NULL)
+    {
+        LogError("Failed to retrieve the device method events json array");
+    }
+    else
+    {
+        DEVICE_METHOD_INFO* info = (DEVICE_METHOD_INFO*)item;
+        JSON_Value* info_json;
+
+        if ((info_json = json_value_init_object()) == NULL)
+        {
+            LogError("Failed creating device method event json");
+        }
+        else
+        {
+            JSON_Object* info_json_obj;
+
+            if ((info_json_obj = json_value_get_object(info_json)) == NULL)
+            {
+                LogError("Failed getting json object");
+                json_value_free(info_json);
+            }
+            else
+            {
+                if (json_object_set_number(info_json_obj, "id", info->method_id) != JSONSuccess)
+                {
+                    LogError("Failed serializing device method event id");
+                    json_value_free(info_json);
+                }
+                else if (json_object_dotset_string(info_json_obj, "send.time", (info->time_invoked == INDEFINITE_TIME ? "undefined" : ctime(&info->time_invoked))) != JSONSuccess)
+                {
+                    LogError("Failed serializing device method event send time");
+                    json_value_free(info_json);
+                }
+                else if (json_object_dotset_string(info_json_obj, "send.result", ENUM_TO_STRING(IOTHUB_DEVICE_METHOD_RESULT, info->method_result)) != JSONSuccess)
+                {
+                    LogError("Failed serializing device method event send result");
+                    json_value_free(info_json);
+                }
+                else if (json_object_dotset_string(info_json_obj, "receive.time", (info->time_received == INDEFINITE_TIME ? "undefined" : ctime(&info->time_received))) != JSONSuccess)
+                {
+                    LogError("Failed serializing device method event receive time");
+                    json_value_free(info_json);
+                }
+                else if (json_array_append_value(c2d_array, info_json) != 0)
+                {
+                    LogError("Failed appending device method event json");
+                    json_value_free(info_json);
+                }
+            }
+        }
+    }
+
+    *continue_processing = true;
+}
+
 char* iothub_client_statistics_to_json(IOTHUB_CLIENT_STATISTICS_HANDLE handle)
 {
     char* result;
@@ -406,8 +467,7 @@ char* iothub_client_statistics_to_json(IOTHUB_CLIENT_STATISTICS_HANDLE handle)
     else
     {
         IOTHUB_CLIENT_STATISTICS* stats = (IOTHUB_CLIENT_STATISTICS*)handle;
-
-        JSON_Value* root_value = json_value_init_object();
+        JSON_Value* root_value;
 
         if ((root_value = json_value_init_object()) == NULL)
         {
@@ -428,7 +488,9 @@ char* iothub_client_statistics_to_json(IOTHUB_CLIENT_STATISTICS_HANDLE handle)
                 JSON_Value* conn_status_array;
                 JSON_Value* telemetry_array;
                 JSON_Value* c2d_array;
+                JSON_Value* methods_array;
 
+                // Connection Status
                 if ((conn_status_array = json_value_init_array()) == NULL)
                 {
                     LogError("Failed creating json array for connection status");
@@ -445,6 +507,7 @@ char* iothub_client_statistics_to_json(IOTHUB_CLIENT_STATISTICS_HANDLE handle)
                     result = NULL;
                 }
                 
+                // Telemetry
                 if ((telemetry_array = json_value_init_array()) == NULL)
                 {
                     LogError("Failed creating json array for telemetry events");
@@ -461,6 +524,7 @@ char* iothub_client_statistics_to_json(IOTHUB_CLIENT_STATISTICS_HANDLE handle)
                     result = NULL;
                 }
 
+                // C2D
                 if ((c2d_array = json_value_init_array()) == NULL)
                 {
                     LogError("Failed creating json array for c2d events");
@@ -477,6 +541,23 @@ char* iothub_client_statistics_to_json(IOTHUB_CLIENT_STATISTICS_HANDLE handle)
                     result = NULL;
                 }
                     
+                // Device Methods
+                if ((methods_array = json_value_init_array()) == NULL)
+                {
+                    LogError("Failed creating json array for device method events");
+                    result = NULL;
+                }
+                else if (singlylinkedlist_foreach(stats->device_methods, serialize_device_method_event, methods_array) != 0)
+                {
+                    LogError("Failed adding device method event to json array");
+                    result = NULL;
+                }
+                else if ((json_object_set_value(root_object, "device methods", methods_array)) != JSONSuccess)
+                {
+                    LogError("Failed adding device method events array to json object");
+                    result = NULL;
+                }
+
                 if ((result = json_serialize_to_string_pretty(root_value)) == NULL)
                 {
                     LogError("Failed serializing json to string");
@@ -798,6 +879,137 @@ int iothub_client_statistics_get_c2d_summary(IOTHUB_CLIENT_STATISTICS_HANDLE han
                     }
 
                     summary->messages_received = summary->messages_received + 1;
+                }
+            }
+
+            list_item = singlylinkedlist_get_next_item(list_item);
+        }
+
+        result = 0;
+    }
+
+    return result;
+}
+
+
+static bool find_device_method_info_by_id(LIST_ITEM_HANDLE list_item, const void* match_context)
+{
+    DEVICE_METHOD_INFO* match_info = (DEVICE_METHOD_INFO*)match_context;
+    DEVICE_METHOD_INFO* item_info = (DEVICE_METHOD_INFO*)singlylinkedlist_item_get_value(list_item);
+
+    return (item_info->method_id == match_info->method_id);
+}
+
+int iothub_client_statistics_add_device_method_info(IOTHUB_CLIENT_STATISTICS_HANDLE handle, DEVICE_METHOD_EVENT_TYPE type, DEVICE_METHOD_INFO* info)
+{
+    int result;
+
+    if (handle == NULL || info == NULL)
+    {
+        LogError("Invalid argument (handle=%p, type=%s, info=%p)", handle, ENUM_TO_STRING(DEVICE_METHOD_EVENT_TYPE, type), info);
+        result = __FAILURE__;
+    }
+    else
+    {
+        IOTHUB_CLIENT_STATISTICS_HANDLE stats = (IOTHUB_CLIENT_STATISTICS*)handle;
+        DEVICE_METHOD_INFO* queued_info;
+        LIST_ITEM_HANDLE list_item = singlylinkedlist_find(stats->device_methods, find_device_method_info_by_id, info);
+
+        result = __FAILURE__;
+
+        if (list_item == NULL)
+        {
+            if ((queued_info = (DEVICE_METHOD_INFO*)malloc(sizeof(DEVICE_METHOD_INFO))) == NULL)
+            {
+                LogError("Failed clonning the DEVICE_METHOD_INFO");
+            }
+            else if (singlylinkedlist_add(stats->device_methods, queued_info) == NULL)
+            {
+                LogError("Failed adding device methods info (method id: %d)", info->method_id);
+                free(queued_info);
+                queued_info = NULL;
+            }
+            else
+            {
+                memset(queued_info, 0, sizeof(DEVICE_METHOD_INFO));
+                queued_info->method_id = info->method_id;
+                queued_info->time_invoked = INDEFINITE_TIME;
+                queued_info->time_received = INDEFINITE_TIME;
+            }
+        }
+        else
+        {
+            if ((queued_info = (DEVICE_METHOD_INFO*)singlylinkedlist_item_get_value(list_item)) == NULL)
+            {
+                LogError("Failed retrieving queued device method info (method id: %d)", info->method_id);
+            }
+        }
+
+        if (queued_info != NULL)
+        {
+            if (type == DEVICE_METHOD_INVOKED)
+            {
+                queued_info->time_invoked = info->time_invoked;
+                queued_info->method_result = info->method_result;
+                result = 0;
+            }
+            else if (type == DEVICE_METHOD_RECEIVED)
+            {
+                queued_info->time_received = info->time_received;
+                result = 0;
+            }
+            else
+            {
+                LogError("Device method %d in queue; invalid event type (%d)", info->method_id, ENUM_TO_STRING(DEVICE_METHOD_EVENT_TYPE, type));
+            }
+        }
+    }
+
+    return result;
+}
+
+int iothub_client_statistics_get_device_method_summary(IOTHUB_CLIENT_STATISTICS_HANDLE handle, IOTHUB_CLIENT_STATISTICS_DEVICE_METHOD_SUMMARY* summary)
+{
+    int result;
+
+    if (handle == NULL || summary == NULL)
+    {
+        LogError("Invalid argument (handle=%p, summary=%p)", handle, summary);
+        result = __FAILURE__;
+    }
+    else
+    {
+        IOTHUB_CLIENT_STATISTICS_HANDLE stats = (IOTHUB_CLIENT_STATISTICS*)handle;
+        LIST_ITEM_HANDLE list_item;
+
+        (void)memset(summary, 0, sizeof(IOTHUB_CLIENT_STATISTICS_DEVICE_METHOD_SUMMARY));
+        summary->min_travel_time_secs = LONG_MAX;
+
+        list_item = singlylinkedlist_get_head_item(stats->device_methods);
+
+        while (list_item != NULL)
+        {
+            DEVICE_METHOD_INFO* device_method_info = (DEVICE_METHOD_INFO*)singlylinkedlist_item_get_value(list_item);
+
+            if (device_method_info->time_invoked != INDEFINITE_TIME)
+            {
+                summary->methods_invoked = summary->methods_invoked + 1;
+
+                if (device_method_info->time_received != INDEFINITE_TIME)
+                {
+                    double travel_time = difftime(device_method_info->time_received, device_method_info->time_invoked);
+
+                    if (travel_time < summary->min_travel_time_secs)
+                    {
+                        summary->min_travel_time_secs = travel_time;
+                    }
+
+                    if (travel_time > summary->max_travel_time_secs)
+                    {
+                        summary->max_travel_time_secs = travel_time;
+                    }
+
+                    summary->methods_received = summary->methods_received + 1;
                 }
             }
 

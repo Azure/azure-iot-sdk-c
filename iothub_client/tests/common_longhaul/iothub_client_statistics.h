@@ -8,6 +8,8 @@
 #include <stddef.h>
 #include <time.h>
 #include "iothub_messaging_ll.h"
+#include "iothub_devicemethod.h"
+#include "iothub_devicetwin.h"
 #include "iothub_client_ll.h"
 
 #define TELEMETRY_EVENT_TYPE_VALUES \
@@ -23,6 +25,13 @@ DEFINE_ENUM(TELEMETRY_EVENT_TYPE, TELEMETRY_EVENT_TYPE_VALUES)
     C2D_RECEIVED
 
 DEFINE_ENUM(C2D_EVENT_TYPE, C2D_EVENT_TYPE_VALUES)
+
+#define DEVICE_METHOD_EVENT_TYPE_VALUES \
+    DEVICE_METHOD_INVOKED, \
+    DEVICE_METHOD_RECEIVED
+
+DEFINE_ENUM(DEVICE_METHOD_EVENT_TYPE, DEVICE_METHOD_EVENT_TYPE_VALUES)
+
 
 
 typedef struct TELEMETRY_INFO_TAG
@@ -67,6 +76,25 @@ typedef struct IOTHUB_CLIENT_STATISTICS_C2D_SUMMARY_TAG
     double max_travel_time_secs;
 } IOTHUB_CLIENT_STATISTICS_C2D_SUMMARY;
 
+typedef struct DEVICE_METHOD_INFO_TAG
+{
+    size_t method_id;
+
+    time_t time_invoked;
+    IOTHUB_DEVICE_METHOD_RESULT method_result;
+
+    time_t time_received;
+} DEVICE_METHOD_INFO;
+
+typedef struct IOTHUB_CLIENT_STATISTICS_DEVICE_METHOD_SUMMARY_TAG
+{
+    size_t methods_invoked;
+    size_t methods_received;
+    double min_travel_time_secs;
+    double max_travel_time_secs;
+} IOTHUB_CLIENT_STATISTICS_DEVICE_METHOD_SUMMARY;
+
+
 typedef struct IOTHUB_CLIENT_STATISTICS_TAG* IOTHUB_CLIENT_STATISTICS_HANDLE;
 
 extern IOTHUB_CLIENT_STATISTICS_HANDLE iothub_client_statistics_create(void);
@@ -82,6 +110,10 @@ extern int iothub_client_statistics_get_telemetry_summary(IOTHUB_CLIENT_STATISTI
 extern int iothub_client_statistics_add_c2d_info(IOTHUB_CLIENT_STATISTICS_HANDLE handle, C2D_EVENT_TYPE type, C2D_MESSAGE_INFO* info);
 
 extern int iothub_client_statistics_get_c2d_summary(IOTHUB_CLIENT_STATISTICS_HANDLE handle, IOTHUB_CLIENT_STATISTICS_C2D_SUMMARY* summary);
+
+extern int iothub_client_statistics_add_device_method_info(IOTHUB_CLIENT_STATISTICS_HANDLE handle, DEVICE_METHOD_EVENT_TYPE type, DEVICE_METHOD_INFO* info);
+
+extern int iothub_client_statistics_get_device_method_summary(IOTHUB_CLIENT_STATISTICS_HANDLE handle, IOTHUB_CLIENT_STATISTICS_DEVICE_METHOD_SUMMARY* summary);
 
 extern void iothub_client_statistics_destroy(IOTHUB_CLIENT_STATISTICS_HANDLE handle);
 
