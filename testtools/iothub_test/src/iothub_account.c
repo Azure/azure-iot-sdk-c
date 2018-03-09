@@ -462,20 +462,47 @@ static int provisionDevices(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_ACCOUNT_AUT
     return result;
 }
 
+static int updateTestModule(IOTHUB_REGISTRYMANAGER_HANDLE iothub_registrymanager_handle, IOTHUB_PROVISIONED_DEVICE* deviceToProvision)
+{
+    int result;
+    IOTHUB_REGISTRY_MODULE_UPDATE moduleUpdate;
+
+    // Update the auth method type from its initially set NONE to IOTHUB_REGISTRYMANAGER_AUTH_SPK.
+    moduleUpdate.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
+    moduleUpdate.deviceId = deviceToProvision->deviceId;
+    moduleUpdate.primaryKey = "";
+    moduleUpdate.secondaryKey = "";
+    moduleUpdate.iotEdge_capable = false;
+    moduleUpdate.moduleId = TEST_MODULE_NAME;
+
+    IOTHUB_REGISTRYMANAGER_RESULT iothub_registrymanager_result = IoTHubRegistryManager_UpdateModule(iothub_registrymanager_handle, &moduleUpdate);
+    if (iothub_registrymanager_result != IOTHUB_REGISTRYMANAGER_OK)
+    {
+        LogError("IoTHubRegistryManager_UpdateModule failed, err=%d", iothub_registrymanager_result);
+        result = __FAILURE__;
+    }
+    else
+    {
+        result = 0;
+    }
+
+    return result;
+}
+
 static int provisionModule(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_PROVISIONED_DEVICE* deviceToProvision)
 {
     IOTHUB_REGISTRY_MODULE_CREATE moduleCreate;
     IOTHUB_MODULE moduleInfo;
     int result;
 
-    moduleCreate.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
+    // We set the initial auth type to none, to simulate and test more closely how Edge
+    // modules are created.  We'll upgrade this to SPK after creation.
+    moduleCreate.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_NONE;
     moduleCreate.deviceId = deviceToProvision->deviceId;
     moduleCreate.iotEdge_capable = false;
     moduleCreate.moduleId = TEST_MODULE_NAME;
     moduleCreate.primaryKey = "";
     moduleCreate.secondaryKey = "";
-
-    
 
     // Even though we already have a IOTHUB_SERVICE_CLIENT_AUTH_HANDLE handle (iothub_account_info->iothub_service_client_auth_handle), we get a
     // new one based on the device's connection string (not the Hub) as we need to test this scenario, too.
@@ -503,16 +530,21 @@ static int provisionModule(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_PROVISIONED_
         LogError("IoTHubRegistryManager_CreateModule failed, err=%d", iothub_registrymanager_result);
         result = __FAILURE__;
     }
-    else if (0 != strcmp(moduleInfo.moduleId, TEST_MODULE_NAME))
+    else if (strcmp(moduleInfo.moduleId, TEST_MODULE_NAME) != 0)
     {
         LogError("ModuleName expected (%s) does not match what was returned from IoTHubRegistryManager_CreateModule (%s)", TEST_MODULE_NAME, moduleInfo.moduleId);
         result = __FAILURE__;
     }
-    else if (0 != strcmp(deviceToProvision->deviceId, moduleInfo.deviceId))
+    else if (strcmp(deviceToProvision->deviceId, moduleInfo.deviceId) != 0)
     {
         LogError("DeviceId expected (%s) does not match what was returned from IoTHubRegistryManager_CreateModule (%s)", deviceToProvision->deviceId, moduleInfo.deviceId);
         result = __FAILURE__;
     }    
+    else if (updateTestModule(iothub_registrymanager_handle, deviceToProvision) != 0)
+    {
+        LogError("Unable to update test module");
+        result = __FAILURE__;
+    }
     else if (createSASConnectionString(accountInfo, deviceToProvision->deviceId, TEST_MODULE_NAME, deviceToProvision->primaryAuthentication, &deviceToProvision->moduleConnectionString) != 0)
     {
         LogError("createSASConnectionStringForModule failed");
