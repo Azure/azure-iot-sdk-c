@@ -25,6 +25,9 @@
 #define MESSAGE_TEST_ID_FIELD          "longhaul-tests"
 #define MESSAGE_ID_FIELD               "message-id"
 #define LONGHAUL_DEVICE_METHOD_NAME    "longhaulDeviceMethod"
+#define TWIN_FIELD_VERSION             "$version"
+#define TWIN_DESIRED_BLOCK_DOT         "desired."
+
 
 #ifdef MBED_BUILD_TIMESTAMP
 #define SET_TRUSTED_CERT_IN_SAMPLES
@@ -59,6 +62,7 @@ typedef struct IOTHUB_LONGHAUL_RESOURCES_TAG
     bool is_svc_cl_c2d_msgr_open;
     IOTHUB_MESSAGING_CLIENT_HANDLE iotHubSvcMsgHandle;
     IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE iotHubSvcDevMethodHandle;
+    IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE iotHubSvcDevTwinHandle;
     IOTHUB_TEST_HANDLE iotHubTestHandle;
     IOTHUB_PROVISIONED_DEVICE* deviceInfo;
     unsigned int counter;
@@ -94,7 +98,7 @@ static time_t add_seconds(time_t base_time, int seconds)
     return new_time;
 }
 
-static int parse_message(const char* data, size_t size, const char* test_id, const unsigned int* message_id)
+static int parse_message(const char* data, size_t size, char* test_id, unsigned int* message_id)
 {
     (void)size;
 
@@ -129,20 +133,65 @@ static int parse_message(const char* data, size_t size, const char* test_id, con
             test_id[36] = '\0';
             result = 0;
         }
+
+        json_value_free(root_value);
     }
 
     return result;
 }
 
-static char* create_message(const char* test_id, unsigned int message_id)
+
+static int parse_twin_desired_properties(const char* data, size_t size, char* test_id, unsigned int* message_id, int* version)
 {
-    char* result;
+    (void)size;
+
+    int result;
+    JSON_Value* root_value;
+
+    if ((root_value = json_parse_string(data)) == NULL)
+    {
+        LogError("Failed parsing json string");
+        result = __FAILURE__;
+    }
+    else
+    {
+        JSON_Object* root_object;
+        const char* test_id_ref;
+
+        if ((root_object = json_value_get_object(root_value)) == NULL)
+        {
+            LogError("Failed creating root json object");
+            result = __FAILURE__;
+        }
+        else if ((test_id_ref = json_object_dotget_string(root_object, TWIN_DESIRED_BLOCK_DOT MESSAGE_TEST_ID_FIELD)) == NULL)
+        {
+            LogError("Failed getting message test id");
+            result = __FAILURE__;
+        }
+        else
+        {
+            *message_id = (unsigned int)json_object_dotget_number(root_object, TWIN_DESIRED_BLOCK_DOT MESSAGE_ID_FIELD);
+            *version = (int)json_object_dotget_number(root_object, TWIN_DESIRED_BLOCK_DOT TWIN_FIELD_VERSION);
+
+            (void)memcpy(test_id, test_id_ref, 36);
+            test_id[36] = '\0';
+            result = 0;
+        }
+
+        json_value_free(root_value);
+    }
+
+    return result;
+}
+
+
+static JSON_Value* create_message_as_json(const char* test_id, unsigned int message_id)
+{
     JSON_Value* root_value;
 
     if ((root_value = json_value_init_object()) == NULL)
     {
         LogError("Failed creating root json value");
-        result = NULL;
     }
     else
     {
@@ -151,29 +200,41 @@ static char* create_message(const char* test_id, unsigned int message_id)
         if ((root_object = json_value_get_object(root_value)) == NULL)
         {
             LogError("Failed creating root json object");
-            result = NULL;
+            json_value_free(root_value);
+            root_value = NULL;
         }
-        else
+        else if (json_object_set_string(root_object, MESSAGE_TEST_ID_FIELD, test_id) != JSONSuccess)
         {
-            if (json_object_set_string(root_object, MESSAGE_TEST_ID_FIELD, test_id) != JSONSuccess)
-            {
-                LogError("Failed setting test id");
-                result = NULL;
-            }
-            else if (json_object_set_number(root_object, MESSAGE_ID_FIELD, (double)message_id) != JSONSuccess)
-            {
-                LogError("Failed setting message id");
-                result = NULL;
-            }
-            else if ((result = json_serialize_to_string(root_value)) == NULL)
-            {
-                LogError("Failed serializing json to string");
-            }
+            LogError("Failed setting test id");
+            json_value_free(root_value);
+            root_value = NULL;
+        }
+        else if (json_object_set_number(root_object, MESSAGE_ID_FIELD, (double)message_id) != JSONSuccess)
+        {
+            LogError("Failed setting message id");
+            json_value_free(root_value);
+            root_value = NULL;
+        }
+    }
 
-            if (json_object_clear(root_object) != JSONSuccess)
-            {
-                LogError("Failed clearing root object");
-            }
+    return root_value;
+}
+
+static char* create_message(const char* test_id, unsigned int message_id)
+{
+    char* result;
+    JSON_Value* root_value;
+
+    if ((root_value = create_message_as_json(test_id, message_id)) == NULL)
+    {
+        LogError("Failed creating root json value");
+        result = NULL;
+    }
+    else
+    {
+        if ((result = json_serialize_to_string(root_value)) == NULL)
+        {
+            LogError("Failed serializing json to string");
         }
 
         json_value_free(root_value);
@@ -204,6 +265,54 @@ static IOTHUB_MESSAGE_HANDLE create_iothub_message(const char* test_id, unsigned
 
     return result;
 }
+
+static char* create_twin_desired_properties_update(const char* test_id, unsigned int message_id)
+{
+    char* result;
+
+    JSON_Value* root_value;
+
+    if ((root_value = json_value_init_object()) == NULL)
+    {
+        LogError("Failed creating root json value");
+        result = NULL;
+    }
+    else
+    {
+        JSON_Object* root_object;
+
+        if ((root_object = json_value_get_object(root_value)) == NULL)
+        {
+            LogError("Failed creating root json object");
+            result = NULL;
+        }
+        else
+        {
+            JSON_Value* message;
+
+            if ((message = create_message_as_json(test_id, message_id)) == NULL)
+            {
+                LogError("Failed creating device twin update");
+                result = NULL;
+            }
+            else if (json_object_dotset_value(root_object, "properties.desired", message) != JSONSuccess)
+            {
+                LogError("Failed setting desired properties");
+                json_value_free(message);
+                result = NULL;
+            }
+            else if ((result = json_serialize_to_string(root_value)) == NULL)
+            {
+                LogError("Failed serializing json to string");
+            }
+        }
+
+        json_value_free(root_value);
+    }
+
+    return result;
+}
+
 
 static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS status, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason, void* userContextCallback)
 {
@@ -267,7 +376,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT on_c2d_message_received(IOTHUB_MESSAGE_H
         }
     }
 
-    return IOTHUBMESSAGE_ACCEPTED;
+    return result;
 }
 
 static int on_device_method_received(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* response_size, void* userContextCallback)
@@ -486,6 +595,11 @@ void longhaul_tests_deinit(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
             IoTHubMessaging_Destroy(iotHubLonghaulRsrcs->iotHubSvcMsgHandle);
         }
 
+        if (iotHubLonghaulRsrcs->iotHubSvcDevTwinHandle != NULL)
+        {
+            IoTHubDeviceTwin_Destroy(iotHubLonghaulRsrcs->iotHubSvcDevTwinHandle);
+        }
+
         if (iotHubLonghaulRsrcs->iotHubSvcDevMethodHandle != NULL)
         {
             IoTHubDeviceMethod_Destroy(iotHubLonghaulRsrcs->iotHubSvcDevMethodHandle);
@@ -587,7 +701,7 @@ IOTHUB_LONGHAUL_RESOURCES_HANDLE longhaul_tests_init()
     return result;
 }
 
-IOTHUB_CLIENT_HANDLE longhaul_create_and_connect_device_client(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+IOTHUB_CLIENT_HANDLE longhaul_initialize_device_client(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
     IOTHUB_CLIENT_HANDLE result;
 
@@ -885,6 +999,29 @@ static IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE longhaul_initialize_service_de
     return result;
 }
 
+static IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE longhaul_initialize_service_device_twin_client(IOTHUB_LONGHAUL_RESOURCES* iotHubLonghaul)
+{
+    IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE result;
+
+    if (iotHubLonghaul->iotHubSvcDevTwinHandle != NULL)
+    {
+        LogError("IoT Hub Service device twin client already initialized");
+        result = NULL;
+    }
+    else if ((iotHubLonghaul->iotHubSvcDevTwinHandle = IoTHubDeviceTwin_Create(iotHubLonghaul->iotHubServiceClientHandle)) == NULL)
+    {
+        LogError("Failed creating the IoT Hub Service device twin client");
+        result = NULL;
+    }
+    else
+    {
+        result = iotHubLonghaul->iotHubSvcDevTwinHandle;
+    }
+
+    return result;
+}
+
+
 // Conveniency *run* functions
 
 static void send_confirmation_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
@@ -1150,6 +1287,95 @@ static int invoke_device_method(const void* context)
     return result;
 }
 
+static int get_twin_desired_version(const char* twin)
+{
+    int result;
+    JSON_Value* root_value;
+
+    if ((root_value = json_parse_string(twin)) == NULL)
+    {
+        LogError("Failed parsing twin document");
+        result = -1;
+    }
+    else
+    {
+        JSON_Object* root_object;
+
+        if ((root_object = json_value_get_object(root_value)) == NULL)
+        {
+            LogError("Failed getting json root object");
+            result = -1;
+        }
+        else
+        {
+            result = (int)json_object_dotget_number(root_object, "properties.desired.$version");
+        }
+
+        json_value_free(root_value);
+    }
+
+
+    return result;
+}
+
+static int update_device_twin_desired_property(const void* context)
+{
+    int result;
+    IOTHUB_LONGHAUL_RESOURCES* iotHubLonghaul = (IOTHUB_LONGHAUL_RESOURCES*)context;
+    unsigned int update_id;
+
+    if ((update_id = generate_unique_id(iotHubLonghaul)) == 0)
+    {
+        LogError("Failed generating device method id");
+        result = __FAILURE__;
+    }
+    else
+    {
+        char* message;
+
+        if ((message = create_twin_desired_properties_update(iotHubLonghaul->test_id, update_id)) == NULL)
+        {
+            LogError("Failed creating twin desired property update");
+            result = __FAILURE__;
+        }
+        else
+        {
+            char* update_response;
+            DEVICE_TWIN_INFO device_twin_info;
+            device_twin_info.update_id = update_id;
+            device_twin_info.time_updated = time(NULL);
+
+            if ((update_response = IoTHubDeviceTwin_UpdateTwin(
+                iotHubLonghaul->iotHubSvcDevTwinHandle,
+                iotHubLonghaul->deviceInfo->deviceId,
+                message)) == NULL)
+            {
+                LogError("Failed sending twin desired properties update");
+                device_twin_info.update_result = -1;
+            }
+            else
+            {
+                device_twin_info.update_result = get_twin_desired_version(update_response);
+                free(update_response);
+            }
+
+            if (iothub_client_statistics_add_device_twin_desired_info(iotHubLonghaul->iotHubClientStats, DEVICE_TWIN_UPDATE_SENT, &device_twin_info) != 0)
+            {
+                LogError("Failed adding device method statistics info (update_id=%d)", update_id);
+                result = __FAILURE__;
+            }
+            else
+            {
+                result = 0;
+            }
+
+            free(message);
+        }
+    }
+
+    return result;
+}
+
 int longhaul_run_telemetry_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t iterationDurationInSeconds, size_t totalDurationInSeconds)
 {
     int result;
@@ -1376,13 +1602,124 @@ int longhaul_run_device_methods_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, s
     return result;
 }
 
+static void on_device_twin_update_received(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback)
+{
+    if (payLoad == NULL || userContextCallback == NULL)
+    {
+        LogError("Invalid argument (payLoad=%p, userContextCallback=%p)", payLoad, userContextCallback);
+    }
+    else 
+    {
+        IOTHUB_LONGHAUL_RESOURCES* iotHubLonghaul = (IOTHUB_LONGHAUL_RESOURCES*)userContextCallback;
+        unsigned int message_id;
+        char tests_id[40];
+        int version;
+
+        if (update_state == DEVICE_TWIN_UPDATE_COMPLETE && 
+            parse_twin_desired_properties((const char*)payLoad, size, tests_id, &message_id, &version) != 0)
+        {
+            LogError("Failed parsing complete twin update data");
+        }
+        else if (update_state == DEVICE_TWIN_UPDATE_PARTIAL && 
+            parse_message((const char*)payLoad, size, tests_id, &message_id) != 0)
+        {
+            LogError("Failed parsing twin update data");
+        }
+        else if (strcmp(tests_id, iotHubLonghaul->test_id) == 0)
+        {
+            DEVICE_TWIN_INFO info;
+            info.update_id = message_id;
+            info.time_received = time(NULL);
+
+            if (info.time_received == INDEFINITE_TIME)
+            {
+                LogError("Failed setting the receive time for twin update %d", info.update_id);
+            }
+
+            if (iothub_client_statistics_add_device_twin_desired_info(iotHubLonghaul->iotHubClientStats, DEVICE_TWIN_UPDATE_RECEIVED, &info) != 0)
+            {
+                LogError("Failed adding receive info for twin update %d", info.update_id);
+            }
+        }
+    }
+}
+
 int longhaul_run_twin_desired_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t iterationDurationInSeconds, size_t totalDurationInSeconds)
 {
-    (void)handle;
-    (void)iterationDurationInSeconds;
-    (void)totalDurationInSeconds;
-    // TO BE SENT ON A SEPARATE CODE REVIEW
-    return 0;
+    int result;
+
+    if (handle == NULL)
+    {
+        LogError("Invalig argument (handle is NULL)");
+        result = __FAILURE__;
+    }
+    else
+    {
+        IOTHUB_LONGHAUL_RESOURCES* iotHubLonghaul = (IOTHUB_LONGHAUL_RESOURCES*)handle;
+
+        if (iotHubLonghaul->iotHubClientHandle == NULL || iotHubLonghaul->deviceInfo == NULL)
+        {
+            LogError("IoTHubClient not initialized.");
+            result = __FAILURE__;
+        }
+        else if (IoTHubClient_SetDeviceTwinCallback(iotHubLonghaul->iotHubClientHandle, on_device_twin_update_received, iotHubLonghaul) != IOTHUB_CLIENT_OK)
+        {
+            LogError("Failed subscribing device client for twin desired properties updates");
+            result = __FAILURE__;
+        }
+        else if (longhaul_initialize_service_client(iotHubLonghaul) == NULL)
+        {
+            LogError("Failed to initialize IoT hub service client");
+            result = __FAILURE__;
+        }
+        else if (longhaul_initialize_service_device_twin_client(iotHubLonghaul) == NULL)
+        {
+            LogError("Failed to initialize IoT hub service device twin client");
+            result = __FAILURE__;
+        }
+        else
+        {
+            int loop_result;
+            IOTHUB_CLIENT_STATISTICS_HANDLE stats_handle;
+
+            loop_result = run_on_loop(update_device_twin_desired_property, iterationDurationInSeconds, totalDurationInSeconds, iotHubLonghaul);
+
+            stats_handle = longhaul_get_statistics(iotHubLonghaul);
+
+            LogInfo("Longhaul Device Twin Desired Properties stats: %s", iothub_client_statistics_to_json(stats_handle));
+
+            if (loop_result != 0)
+            {
+                result = __FAILURE__;
+            }
+            else
+            {
+                IOTHUB_CLIENT_STATISTICS_DEVICE_TWIN_SUMMARY summary;
+
+                if (iothub_client_statistics_get_device_twin_desired_summary(stats_handle, &summary) != 0)
+                {
+                    LogError("Failed gettting statistics summary");
+                    result = __FAILURE__;
+                }
+                else
+                {
+                    LogInfo("Summary: Updates sent=%d, received=%d; travel time: min=%f secs, max=%f secs",
+                        summary.updates_sent, summary.updates_received, summary.min_travel_time_secs, summary.max_travel_time_secs);
+
+                    if (summary.updates_sent == 0 || summary.updates_received != summary.updates_sent || summary.max_travel_time_secs > MAX_TWIN_DESIRED_PROP_TRAVEL_TIME_SECS)
+                    {
+                        result = __FAILURE__;
+                    }
+                    else
+                    {
+                        result = 0;
+                    }
+                }
+            }
+        }
+    }
+
+    return result;
 }
 
 int longhaul_run_twin_reported_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t iterationDurationInSeconds, size_t totalDurationInSeconds)
