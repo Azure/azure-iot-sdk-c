@@ -569,10 +569,6 @@ static int parse_incoming_twin_message(MESSAGE_HANDLE message,
 										*has_version = true;
 									}
 								}
-								else
-								{
-									LogError("Unrecognized TWIN message property %s", map_key_name);
-								}
 
 								amqpvalue_destroy(amqp_map_value);
 							}
