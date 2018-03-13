@@ -227,7 +227,7 @@ if(${use_mqtt})
 endif()
 
 #these are the include folders
-#the following "set" statetement exports across the project a global variable called SHARED_UTIL_INC_FOLDER that expands to whatever needs to included when using COMMON library
+#the following "set" statement exports across the project a global variable called SHARED_UTIL_INC_FOLDER that expands to whatever needs to included when using COMMON library
 
 if(${use_http})
     set(IOTHUB_CLIENT_HTTP_TRANSPORT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client_http_transport lib" FORCE)
@@ -291,11 +291,6 @@ if(${use_http})
         )
         linkSharedUtil(iothub_client_http_transport_dll)
 
-        if ("${CMAKE_COMPILER_ID}" STREQUAL "GNU")
-            target_link_libraries(iothub_client_http_transport_dll
-                "-Wl,--exclude-libs,libparson.a"
-            )
-        endif()
         set_target_properties(iothub_client_http_transport_dll PROPERTIES
             OUTPUT_NAME "iothub_client_http_transport"
             ARCHIVE_OUTPUT_NAME "iothub_client_http_transport_dll_import"
@@ -405,12 +400,6 @@ if(${use_mqtt})
         )
         linkSharedUtil(iothub_client_mqtt_transport_dll)
 
-        # if ("${CMAKE_COMPILER_ID}" STREQUAL "GNU")
-            # target_link_libraries(iothub_client_mqtt_transport_dll
-                # "-Wl,--exclude-libs,libparson.a"
-            # )
-        # endif()
-
         set_target_properties(iothub_client_mqtt_transport_dll PROPERTIES
             OUTPUT_NAME "iothub_client_mqtt_transport"
             ARCHIVE_OUTPUT_NAME "iothub_client_mqtt_transport_dll_import"
@@ -427,12 +416,6 @@ if(${use_mqtt})
             ${iothub_client_mqtt_ws_transport_h_files}
         )
         linkSharedUtil(iothub_client_mqtt_ws_transport_dll)
-
-        # if ("${CMAKE_COMPILER_ID}" STREQUAL "GNU")
-            # target_link_libraries(iothub_client_mqtt_transport_dll
-                # "-Wl,--exclude-libs,libparson.a"
-            # )
-        # endif()
 
         set_target_properties(iothub_client_mqtt_ws_transport_dll PROPERTIES
             OUTPUT_NAME "iothub_client_mqtt_ws_transport"
@@ -507,19 +490,19 @@ set(iothub_client_libs
 )
 # Don't build samples under Win32 ARM for now
 if(NOT ${skip_samples})
-if(WIN32)
-# Build samples for WEC 2013 for both ARM and x86 processsor types
-  if(WINCE)
-    add_subdirectory(samples)
-  else()
-    if (NOT ${ARCHITECTURE} STREQUAL "ARM")
-    add_subdirectory(samples)
-    endif()
-  endif()
+    if(WIN32)
+    # Build samples for WEC 2013 for both ARM and x86 processsor types
+        if(WINCE)
+            add_subdirectory(samples)
+        else()
+            if (NOT ${ARCHITECTURE} STREQUAL "ARM")
+                add_subdirectory(samples)
+            endif()
+        endif()
 
-else()
-    add_subdirectory(samples)
-endif()
+    else()
+        add_subdirectory(samples)
+    endif()
 endif()
 
 if(NOT IN_OPENWRT)

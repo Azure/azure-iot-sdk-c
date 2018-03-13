@@ -55,7 +55,7 @@ set(serializer_h_files
 )
 
 #these are the include folders
-#the following "set" statetement exports across the project a global variable called SHARED_UTIL_INC_FOLDER that expands to whatever needs to included when using COMMON library
+#the following "set" statement exports across the project a global variable called SHARED_UTIL_INC_FOLDER that expands to whatever needs to included when using COMMON library
 set(SERIALIZER_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using serializer lib" FORCE)
 
 include_directories(../deps/parson)
@@ -67,36 +67,53 @@ IF(WIN32)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 ENDIF(WIN32)
 
+add_library(
+    serializer ${serializer_c_files} ${serializer_h_files}
+)
+target_link_libraries(serializer
+    parson
+)
+
+set (install_libs serializer)
+
 if (${build_as_dynamic})
     add_library(
-    serializer SHARED ${serializer_c_files} ${serializer_h_files} ./src/serializer.def
+        serializer_dll SHARED ${serializer_c_files} ${serializer_h_files}
     )
     linkSharedUtil(serializer)
 
-    set_target_properties(serializer PROPERTIES
+    target_link_libraries(serializer_dll
+        parson
+    )
+
+    if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+        target_link_libraries(serializer_dll
+            "-Wl,--exclude-libs,libparson.a"
+        )
+    # else()
+        # target_link_libraries(serializer_dll
+            # parson
+        # )
+    endif()
+
+    set_target_properties(serializer_dll PROPERTIES
+        OUTPUT_NAME "serializer"
         ARCHIVE_OUTPUT_NAME "serializer_dll_import"
         ENABLE_EXPORTS YES
         VERSION ${IOT_SDK_VERSION}
         SOVERSION ${IOT_SDK_VERION_MAJOR}
         BUILD_WITH_INSTALL_RPATH TRUE
     )
-else()
-    add_library(
-    serializer ${serializer_c_files} ${serializer_h_files} 
-    )
+    set (install_libs ${install_libs} serializer_dll)
 endif()
 
-target_link_libraries(serializer
-    parson
-)
-
 if (NOT ${skip_samples})
-if(WIN32)
-    if (NOT ${ARCHITECTURE} STREQUAL "ARM")
+    if(WIN32)
+        if (NOT ${ARCHITECTURE} STREQUAL "ARM")
+            add_subdirectory(samples)
+        endif()
+    else()
         add_subdirectory(samples)
-    endif()
-else()
-    add_subdirectory(samples)
     endif()
 endif()
 
@@ -123,12 +140,9 @@ if(${use_installed_dependencies})
     )
     install(FILES ${serializer_h_files} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
 else()
-    set(install_staticlibs
-        serializer
-    )
     install(FILES ${serializer_h_files}
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot) 
-    install(TARGETS ${install_staticlibs} 
+    install(TARGETS ${install_libs} 
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()

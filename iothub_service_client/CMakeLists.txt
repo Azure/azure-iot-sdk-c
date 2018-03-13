@@ -51,7 +51,7 @@ if (${build_as_dynamic})
     add_library(iothub_service_client SHARED ${iothub_service_client_c_files} ${iothub_service_client_h_files} ./src/iothub_service_client.def)
     linkSharedUtil(iothub_service_client)
     
-    if ("${CMAKE_COMPILER_ID}" STREQUAL "GNU")
+    if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
         target_link_libraries(iothub_service_client
             "-Wl,--exclude-libs,libparson.a"
         )
