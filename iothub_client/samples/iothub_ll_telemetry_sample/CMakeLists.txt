@@ -1,7 +1,7 @@
 #Copyright (c) Microsoft. All rights reserved.
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#this is CMakeLists.txt for iothub_client_sample_mqtt
+#this is CMakeLists.txt for iothub_ll_telemetry_sample
 
 if(NOT ${use_mqtt} AND NOT ${use_amqp} AND NOT ${use_http})
     message(FATAL_ERROR "iothub_ll_telemetry_sample being generated without protocol support")
