@@ -26,8 +26,9 @@
 #define MESSAGE_ID_FIELD               "message-id"
 #define LONGHAUL_DEVICE_METHOD_NAME    "longhaulDeviceMethod"
 #define TWIN_FIELD_VERSION             "$version"
-#define TWIN_PROPERTIES_BLOCK          "properties"
 #define TWIN_DESIRED_BLOCK             "desired"
+#define TWIN_PROPERTIES_BLOCK          "properties"
+#define TWIN_REPORTED_BLOCK            "reported"
 #define DOT                            "."
 
 
@@ -81,6 +82,12 @@ typedef struct SEND_C2D_CONTEXT_TAG
     unsigned int message_id;
     IOTHUB_LONGHAUL_RESOURCES* iotHubLonghaul;
 } SEND_C2D_CONTEXT;
+
+typedef struct SEND_TWIN_REPORTED_CONTEXT_TAG
+{
+    unsigned int update_id;
+    IOTHUB_LONGHAUL_RESOURCES* iotHubLonghaul;
+} SEND_TWIN_REPORTED_CONTEXT;
 
 static time_t add_seconds(time_t base_time, int seconds)
 {
@@ -163,7 +170,7 @@ static int parse_twin_desired_properties(const char* data, char* test_id, unsign
             LogError("Failed creating root json object");
             result = __FAILURE__;
         }
-        else if ((test_id_ref = json_object_dotget_string(root_object, TWIN_DESIRED_BLOCK_DOT MESSAGE_TEST_ID_FIELD)) == NULL)
+        else if ((test_id_ref = json_object_dotget_string(root_object, TWIN_DESIRED_BLOCK DOT MESSAGE_TEST_ID_FIELD)) == NULL)
         {
             LogError("Failed getting message test id");
             result = __FAILURE__;
@@ -202,6 +209,65 @@ static int parse_twin_desired_properties(const char* data, char* test_id, unsign
     return result;
 }
 
+static int parse_twin_reported_properties(const char* data, int* prop_count, char* test_id, unsigned int* message_id, int* version)
+{
+    int result;
+    JSON_Value* root_value;
+
+    if ((root_value = json_parse_string(data)) == NULL)
+    {
+        LogError("Failed parsing json string");
+        result = __FAILURE__;
+    }
+    else
+    {
+        JSON_Object* root_object;
+
+        if ((root_object = json_value_get_object(root_value)) == NULL)
+        {
+            LogError("Failed getting root json object");
+            result = __FAILURE__;
+        }
+        else
+        {
+            JSON_Object* reported_root_object;
+
+            if ((reported_root_object = json_object_dotget_object(root_object, TWIN_PROPERTIES_BLOCK DOT TWIN_REPORTED_BLOCK)) == NULL)
+            {
+                LogError("Failed getting json reported properties block");
+                result = __FAILURE__;
+            }
+            else
+            {
+                const char* test_id_ref;
+                
+                *version = (int)json_object_dotget_number(reported_root_object, TWIN_FIELD_VERSION);
+                *prop_count = 0;
+
+                if ((test_id_ref = json_object_dotget_string(reported_root_object, MESSAGE_TEST_ID_FIELD)) != NULL)
+                {
+                    (void)memcpy(test_id, test_id_ref, 36);
+                    test_id[36] = '\0';
+
+                    *prop_count = *prop_count + 1;
+                }
+
+                if (json_object_has_value(reported_root_object, MESSAGE_ID_FIELD) == 1)
+                {
+                    *message_id = (unsigned int)json_object_get_number(reported_root_object, MESSAGE_ID_FIELD);
+
+                    *prop_count = *prop_count + 1;
+                }
+
+                result = 0;
+            }
+        }
+
+        json_value_free(root_value);
+    }
+
+    return result;
+}
 
 static JSON_Value* create_message_as_json(const char* test_id, unsigned int message_id)
 {
@@ -330,7 +396,6 @@ static char* create_twin_desired_properties_update(const char* test_id, unsigned
 
     return result;
 }
-
 
 static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS status, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason, void* userContextCallback)
 {
@@ -1359,7 +1424,7 @@ static int update_device_twin_desired_property(const void* context)
         else
         {
             char* update_response;
-            DEVICE_TWIN_INFO device_twin_info;
+            DEVICE_TWIN_DESIRED_INFO device_twin_info;
             device_twin_info.update_id = update_id;
             device_twin_info.time_updated = time(NULL);
 
@@ -1377,17 +1442,161 @@ static int update_device_twin_desired_property(const void* context)
                 free(update_response);
             }
 
-            if (iothub_client_statistics_add_device_twin_desired_info(iotHubLonghaul->iotHubClientStats, DEVICE_TWIN_UPDATE_SENT, &device_twin_info) != 0)
+            if (Lock(iotHubLonghaul->lock) != LOCK_OK)
             {
-                LogError("Failed adding device method statistics info (update_id=%d)", update_id);
+                LogError("Failed locking (%s, %d)", iotHubLonghaul->test_id, update_id);
                 result = __FAILURE__;
             }
             else
             {
-                result = 0;
+                if (iothub_client_statistics_add_device_twin_desired_info(iotHubLonghaul->iotHubClientStats, DEVICE_TWIN_UPDATE_SENT, &device_twin_info) != 0)
+                {
+                    LogError("Failed adding twin reported properties statistics info (update_id=%d)", update_id);
+                    result = __FAILURE__;
+                }
+                else
+                {
+                    result = 0;
+                }
+
+                if (Unlock(iotHubLonghaul->lock) != LOCK_OK)
+                {
+                    LogError("Failed unlocking (%s, %d)", iotHubLonghaul->test_id, update_id);
+                }
             }
 
             free(message);
+        }
+    }
+
+    return result;
+}
+
+static void on_twin_report_state_completed(int status_code, void* userContextCallback)
+{
+    if (userContextCallback == NULL)
+    {
+        LogError("Invalid argument (userContextCallback=NULL)");
+    }
+    else
+    {
+        SEND_TWIN_REPORTED_CONTEXT* send_context = (SEND_TWIN_REPORTED_CONTEXT*)userContextCallback;
+        DEVICE_TWIN_REPORTED_INFO device_twin_info;
+        device_twin_info.update_id = send_context->update_id;
+        device_twin_info.time_sent = time(NULL);
+        device_twin_info.send_status_code = status_code;
+
+        if (iothub_client_statistics_add_device_twin_reported_info(send_context->iotHubLonghaul->iotHubClientStats, DEVICE_TWIN_UPDATE_SENT, &device_twin_info) != 0)
+        {
+            LogError("Failed adding device twin reported properties statistics info (update_id=%d)", send_context->update_id);
+        }
+
+        free(send_context);
+    }
+}
+
+static void check_for_reported_properties_update_on_service_side(IOTHUB_LONGHAUL_RESOURCES* iotHubLonghaul)
+{
+    char* twin;
+
+    if ((twin = IoTHubDeviceTwin_GetTwin(
+        iotHubLonghaul->iotHubSvcDevTwinHandle,
+        iotHubLonghaul->deviceInfo->deviceId)) == NULL)
+    {
+        LogError("Failed getting the twin document on service side");
+    }
+    else
+    {
+        int property_count;
+        unsigned int message_id;
+        char test_id[40];
+        int version;
+
+        if (parse_twin_reported_properties(twin, &property_count, test_id, &message_id, &version) != 0)
+        {
+            LogError("Failed parsing the device twin reported properties");
+        }
+        else if (property_count == 2) //i.e., if not empty.
+        {
+            if (strcmp(test_id, iotHubLonghaul->test_id) == 0)
+            {
+                DEVICE_TWIN_REPORTED_INFO info;
+                info.update_id = message_id;
+                info.time_received = time(NULL);
+
+                if (info.time_received == INDEFINITE_TIME)
+                {
+                    LogError("Failed setting the receive time for twin update %d", info.update_id);
+                }
+
+                if (iothub_client_statistics_add_device_twin_reported_info(iotHubLonghaul->iotHubClientStats, DEVICE_TWIN_UPDATE_RECEIVED, &info) != 0)
+                {
+                    LogError("Failed adding receive info for twin update %d", info.update_id);
+                }
+            }
+        }
+    }
+}
+
+static int update_device_twin_reported_property(const void* context)
+{
+    int result;
+    IOTHUB_LONGHAUL_RESOURCES* iotHubLonghaul = (IOTHUB_LONGHAUL_RESOURCES*)context;
+    unsigned int update_id;
+
+    check_for_reported_properties_update_on_service_side(iotHubLonghaul);
+
+    if ((update_id = generate_unique_id(iotHubLonghaul)) == 0)
+    {
+        LogError("Failed generating device method id");
+        result = __FAILURE__;
+    }
+    else
+    {
+        SEND_TWIN_REPORTED_CONTEXT* send_context;
+
+        if ((send_context = malloc(sizeof(SEND_TWIN_REPORTED_CONTEXT))) == NULL)
+        {
+            LogError("Failed allocating context for sending twin reported update");
+            result = __FAILURE__;
+        }
+        else
+        {
+            char* message;
+
+            send_context->update_id = update_id;
+            send_context->iotHubLonghaul = iotHubLonghaul;
+
+            if ((message = create_message(iotHubLonghaul->test_id, update_id)) == NULL)
+            {
+                LogError("Failed creating twin reported property update");
+                free(send_context);
+                result = __FAILURE__;
+            }
+            else
+            {
+                DEVICE_TWIN_REPORTED_INFO device_twin_info;
+                device_twin_info.update_id = update_id;
+                device_twin_info.time_queued = time(NULL);
+
+                if ((device_twin_info.update_result = IoTHubClient_SendReportedState(iotHubLonghaul->iotHubClientHandle, (const unsigned char*)message, strlen(message), on_twin_report_state_completed, send_context)) != IOTHUB_CLIENT_OK)
+                {
+                    LogError("Failed sending twin reported properties update");
+                    free(send_context);
+                }
+
+                if (iothub_client_statistics_add_device_twin_reported_info(iotHubLonghaul->iotHubClientStats, DEVICE_TWIN_UPDATE_QUEUED, &device_twin_info) != 0)
+                {
+                    LogError("Failed adding device twin reported properties statistics info (update_id=%d)", update_id);
+                    result = __FAILURE__;
+                }
+                else
+                {
+                    result = 0;
+                }
+
+                free(message);
+            }
         }
     }
 
@@ -1645,7 +1854,7 @@ static void on_device_twin_update_received(DEVICE_TWIN_UPDATE_STATE update_state
         }
         else if (strcmp(tests_id, iotHubLonghaul->test_id) == 0)
         {
-            DEVICE_TWIN_INFO info;
+            DEVICE_TWIN_DESIRED_INFO info;
             info.update_id = message_id;
             info.time_received = time(NULL);
 
@@ -1654,9 +1863,21 @@ static void on_device_twin_update_received(DEVICE_TWIN_UPDATE_STATE update_state
                 LogError("Failed setting the receive time for twin update %d", info.update_id);
             }
 
-            if (iothub_client_statistics_add_device_twin_desired_info(iotHubLonghaul->iotHubClientStats, DEVICE_TWIN_UPDATE_RECEIVED, &info) != 0)
+            if (Lock(iotHubLonghaul->lock) != LOCK_OK)
             {
-                LogError("Failed adding receive info for twin update %d", info.update_id);
+                LogError("Failed locking (%s, %d)", iotHubLonghaul->test_id, message_id);
+            }
+            else
+            {
+                if (iothub_client_statistics_add_device_twin_desired_info(iotHubLonghaul->iotHubClientStats, DEVICE_TWIN_UPDATE_RECEIVED, &info) != 0)
+                {
+                    LogError("Failed adding receive info for twin update %d", info.update_id);
+                }
+
+                if (Unlock(iotHubLonghaul->lock) != LOCK_OK)
+                {
+                    LogError("Failed unlocking (%s, %d)", iotHubLonghaul->test_id, message_id);
+                }
             }
         }
     }
@@ -1742,9 +1963,77 @@ int longhaul_run_twin_desired_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE 
 
 int longhaul_run_twin_reported_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t iterationDurationInSeconds, size_t totalDurationInSeconds)
 {
-    (void)handle;
-    (void)iterationDurationInSeconds;
-    (void)totalDurationInSeconds;
-    // TO BE SENT ON A SEPARATE CODE REVIEW
-    return 0;
+    int result;
+
+    if (handle == NULL)
+    {
+        LogError("Invalig argument (handle is NULL)");
+        result = __FAILURE__;
+    }
+    else
+    {
+        IOTHUB_LONGHAUL_RESOURCES* iotHubLonghaul = (IOTHUB_LONGHAUL_RESOURCES*)handle;
+
+        if (iotHubLonghaul->iotHubClientHandle == NULL || iotHubLonghaul->deviceInfo == NULL)
+        {
+            LogError("IoTHubClient not initialized.");
+            result = __FAILURE__;
+        }
+        else if (longhaul_initialize_service_client(iotHubLonghaul) == NULL)
+        {
+            LogError("Failed to initialize IoT hub service client");
+            result = __FAILURE__;
+        }
+        else if (longhaul_initialize_service_device_twin_client(iotHubLonghaul) == NULL)
+        {
+            LogError("Failed to initialize IoT hub service device twin client");
+            result = __FAILURE__;
+        }
+        else
+        {
+            int loop_result;
+            IOTHUB_CLIENT_STATISTICS_HANDLE stats_handle;
+
+            loop_result = run_on_loop(update_device_twin_reported_property, iterationDurationInSeconds, totalDurationInSeconds, iotHubLonghaul);
+
+            // One last check...
+            ThreadAPI_Sleep(iterationDurationInSeconds * 1000);
+            check_for_reported_properties_update_on_service_side(iotHubLonghaul);
+
+            stats_handle = longhaul_get_statistics(iotHubLonghaul);
+
+            LogInfo("Longhaul Device Twin Reported Properties stats: %s", iothub_client_statistics_to_json(stats_handle));
+
+            if (loop_result != 0)
+            {
+                result = __FAILURE__;
+            }
+            else
+            {
+                IOTHUB_CLIENT_STATISTICS_DEVICE_TWIN_SUMMARY summary;
+
+                if (iothub_client_statistics_get_device_twin_reported_summary(stats_handle, &summary) != 0)
+                {
+                    LogError("Failed gettting statistics summary");
+                    result = __FAILURE__;
+                }
+                else
+                {
+                    LogInfo("Summary: Updates sent=%d, received=%d; travel time: min=%f secs, max=%f secs",
+                        summary.updates_sent, summary.updates_received, summary.min_travel_time_secs, summary.max_travel_time_secs);
+
+                    if (summary.updates_sent == 0 || summary.updates_received != summary.updates_sent || summary.max_travel_time_secs > MAX_TWIN_REPORTED_PROP_TRAVEL_TIME_SECS)
+                    {
+                        result = __FAILURE__;
+                    }
+                    else
+                    {
+                        result = 0;
+                    }
+                }
+            }
+        }
+    }
+
+    return result;
 }

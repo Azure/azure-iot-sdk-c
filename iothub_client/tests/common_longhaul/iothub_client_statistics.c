@@ -458,7 +458,7 @@ static void serialize_device_method_event(const void* item, const void* action_c
     *continue_processing = true;
 }
 
-static void serialize_device_twin_event(const void* item, const void* action_context, bool* continue_processing)
+static void serialize_device_twin_reported_event(const void* item, const void* action_context, bool* continue_processing)
 {
     JSON_Array* device_twin_array = json_value_get_array((const JSON_Value*)action_context);
 
@@ -468,7 +468,77 @@ static void serialize_device_twin_event(const void* item, const void* action_con
     }
     else
     {
-        DEVICE_TWIN_INFO* info = (DEVICE_TWIN_INFO*)item;
+        DEVICE_TWIN_REPORTED_INFO* info = (DEVICE_TWIN_REPORTED_INFO*)item;
+        JSON_Value* info_json;
+
+        if ((info_json = json_value_init_object()) == NULL)
+        {
+            LogError("Failed creating device twin event json");
+        }
+        else
+        {
+            JSON_Object* info_json_obj;
+
+            if ((info_json_obj = json_value_get_object(info_json)) == NULL)
+            {
+                LogError("Failed getting json object");
+                json_value_free(info_json);
+            }
+            else
+            {
+                if (json_object_set_number(info_json_obj, "id", info->update_id) != JSONSuccess)
+                {
+                    LogError("Failed serializing device twin event id");
+                    json_value_free(info_json);
+                }
+                else if (json_object_dotset_string(info_json_obj, "enqueue.time", (info->time_queued == INDEFINITE_TIME ? "undefined" : ctime(&info->time_queued))) != JSONSuccess)
+                {
+                    LogError("Failed serializing device twin event enqueue time");
+                    json_value_free(info_json);
+                }
+                else if (json_object_dotset_string(info_json_obj, "enqueue.result", ENUM_TO_STRING(IOTHUB_CLIENT_RESULT, info->update_result)) != JSONSuccess)
+                {
+                    LogError("Failed serializing device twin event send result");
+                    json_value_free(info_json);
+                }
+                else if (json_object_dotset_string(info_json_obj, "send.time", (info->time_sent == INDEFINITE_TIME ? "undefined" : ctime(&info->time_sent))) != JSONSuccess)
+                {
+                    LogError("Failed serializing device twin event send time");
+                    json_value_free(info_json);
+                }
+                else if (json_object_dotset_number(info_json_obj, "send.result", info->send_status_code) != JSONSuccess)
+                {
+                    LogError("Failed serializing device twin event send result");
+                    json_value_free(info_json);
+                }
+                else if (json_object_dotset_string(info_json_obj, "receive.time", (info->time_received == INDEFINITE_TIME ? "undefined" : ctime(&info->time_received))) != JSONSuccess)
+                {
+                    LogError("Failed serializing device twin event receive time");
+                    json_value_free(info_json);
+                }
+                else if (json_array_append_value(device_twin_array, info_json) != 0)
+                {
+                    LogError("Failed appending device twin event json");
+                    json_value_free(info_json);
+                }
+            }
+        }
+    }
+
+    *continue_processing = true;
+}
+
+static void serialize_device_twin_desired_event(const void* item, const void* action_context, bool* continue_processing)
+{
+    JSON_Array* device_twin_array = json_value_get_array((const JSON_Value*)action_context);
+
+    if (device_twin_array == NULL)
+    {
+        LogError("Failed to retrieve the device twin events json array");
+    }
+    else
+    {
+        DEVICE_TWIN_DESIRED_INFO* info = (DEVICE_TWIN_DESIRED_INFO*)item;
         JSON_Value* info_json;
 
         if ((info_json = json_value_init_object()) == NULL)
@@ -616,7 +686,7 @@ char* iothub_client_statistics_to_json(IOTHUB_CLIENT_STATISTICS_HANDLE handle)
                 {
                     LogError("Failed creating json array for device twin desired properties events");
                 }
-                else if (singlylinkedlist_foreach(stats->twin_desired_properties, serialize_device_twin_event, twin_desired_array) != 0)
+                else if (singlylinkedlist_foreach(stats->twin_desired_properties, serialize_device_twin_desired_event, twin_desired_array) != 0)
                 {
                     LogError("Failed adding device twin event to json array");
                 }
@@ -630,7 +700,7 @@ char* iothub_client_statistics_to_json(IOTHUB_CLIENT_STATISTICS_HANDLE handle)
                 {
                     LogError("Failed creating json array for device twin reported properties events");
                 }
-                else if (singlylinkedlist_foreach(stats->twin_reported_properties, serialize_device_twin_event, twin_reported_array) != 0)
+                else if (singlylinkedlist_foreach(stats->twin_reported_properties, serialize_device_twin_reported_event, twin_reported_array) != 0)
                 {
                     LogError("Failed adding device twin event to json array");
                 }
@@ -1100,110 +1170,21 @@ int iothub_client_statistics_get_device_method_summary(IOTHUB_CLIENT_STATISTICS_
 
 static bool find_device_twin_info_by_id(LIST_ITEM_HANDLE list_item, const void* match_context)
 {
-    DEVICE_TWIN_INFO* match_info = (DEVICE_TWIN_INFO*)match_context;
-    DEVICE_TWIN_INFO* item_info = (DEVICE_TWIN_INFO*)singlylinkedlist_item_get_value(list_item);
+    DEVICE_TWIN_DESIRED_INFO* match_info = (DEVICE_TWIN_DESIRED_INFO*)match_context;
+    DEVICE_TWIN_DESIRED_INFO* item_info = (DEVICE_TWIN_DESIRED_INFO*)singlylinkedlist_item_get_value(list_item);
 
     return (item_info->update_id == match_info->update_id);
 }
 
-static int iothub_client_statistics_add_device_twin_info(SINGLYLINKEDLIST_HANDLE twin_info_list_handle, DEVICE_TWIN_EVENT_TYPE type, DEVICE_TWIN_INFO* info)
+static bool find_device_twin_reported_info_by_id(LIST_ITEM_HANDLE list_item, const void* match_context)
 {
-    int result;
-    DEVICE_TWIN_INFO* queued_info;
-    LIST_ITEM_HANDLE list_item = singlylinkedlist_find(twin_info_list_handle, find_device_twin_info_by_id, info);
+    DEVICE_TWIN_REPORTED_INFO* match_info = (DEVICE_TWIN_REPORTED_INFO*)match_context;
+    DEVICE_TWIN_REPORTED_INFO* item_info = (DEVICE_TWIN_REPORTED_INFO*)singlylinkedlist_item_get_value(list_item);
 
-    result = __FAILURE__;
-
-    if (list_item == NULL)
-    {
-        if ((queued_info = (DEVICE_TWIN_INFO*)malloc(sizeof(DEVICE_TWIN_INFO))) == NULL)
-        {
-            LogError("Failed clonning the DEVICE_TWIN_INFO");
-        }
-        else if (singlylinkedlist_add(twin_info_list_handle, queued_info) == NULL)
-        {
-            LogError("Failed adding device twin info (update id: %d)", info->update_id);
-            free(queued_info);
-            queued_info = NULL;
-        }
-        else
-        {
-            memset(queued_info, 0, sizeof(DEVICE_TWIN_INFO));
-            queued_info->update_id = info->update_id;
-            queued_info->time_updated = INDEFINITE_TIME;
-            queued_info->time_received = INDEFINITE_TIME;
-        }
-    }
-    else
-    {
-        if ((queued_info = (DEVICE_TWIN_INFO*)singlylinkedlist_item_get_value(list_item)) == NULL)
-        {
-            LogError("Failed retrieving queued device twin info (update id: %d)", info->update_id);
-        }
-    }
-
-    if (queued_info != NULL)
-    {
-        if (type == DEVICE_TWIN_UPDATE_SENT)
-        {
-            queued_info->time_updated = info->time_updated;
-            queued_info->update_result = info->update_result;
-            result = 0;
-        }
-        else if (type == DEVICE_TWIN_UPDATE_RECEIVED)
-        {
-            queued_info->time_received = info->time_received;
-            result = 0;
-        }
-        else
-        {
-            LogError("Device twin %d in queue; invalid event type (%d)", info->update_id, ENUM_TO_STRING(DEVICE_TWIN_EVENT_TYPE, type));
-        }
-    }
-
-    return result;
+    return (item_info->update_id == match_info->update_id);
 }
 
-static void iothub_client_statistics_get_device_twin_summary(SINGLYLINKEDLIST_HANDLE twin_info_list_handle, IOTHUB_CLIENT_STATISTICS_DEVICE_TWIN_SUMMARY* summary)
-{
-    LIST_ITEM_HANDLE list_item;
-
-    (void)memset(summary, 0, sizeof(IOTHUB_CLIENT_STATISTICS_DEVICE_TWIN_SUMMARY));
-    summary->min_travel_time_secs = LONG_MAX;
-
-    list_item = singlylinkedlist_get_head_item(twin_info_list_handle);
-
-    while (list_item != NULL)
-    {
-        DEVICE_TWIN_INFO* device_twin_info = (DEVICE_TWIN_INFO*)singlylinkedlist_item_get_value(list_item);
-
-        if (device_twin_info->time_updated != INDEFINITE_TIME)
-        {
-            summary->updates_sent = summary->updates_sent + 1;
-
-            if (device_twin_info->time_received != INDEFINITE_TIME)
-            {
-                double travel_time = difftime(device_twin_info->time_received, device_twin_info->time_updated);
-
-                if (travel_time < summary->min_travel_time_secs)
-                {
-                    summary->min_travel_time_secs = travel_time;
-                }
-
-                if (travel_time > summary->max_travel_time_secs)
-                {
-                    summary->max_travel_time_secs = travel_time;
-                }
-
-                summary->updates_received = summary->updates_received + 1;
-            }
-        }
-
-        list_item = singlylinkedlist_get_next_item(list_item);
-    }
-}
-
-int iothub_client_statistics_add_device_twin_desired_info(IOTHUB_CLIENT_STATISTICS_HANDLE handle, DEVICE_TWIN_EVENT_TYPE type, DEVICE_TWIN_INFO* info)
+int iothub_client_statistics_add_device_twin_desired_info(IOTHUB_CLIENT_STATISTICS_HANDLE handle, DEVICE_TWIN_EVENT_TYPE type, DEVICE_TWIN_DESIRED_INFO* info)
 {
     int result;
 
@@ -1215,8 +1196,59 @@ int iothub_client_statistics_add_device_twin_desired_info(IOTHUB_CLIENT_STATISTI
     else
     {
         IOTHUB_CLIENT_STATISTICS_HANDLE stats = (IOTHUB_CLIENT_STATISTICS*)handle;
+        DEVICE_TWIN_DESIRED_INFO* queued_info;
+        LIST_ITEM_HANDLE list_item = singlylinkedlist_find(stats->twin_desired_properties, find_device_twin_info_by_id, info);
 
-        result = iothub_client_statistics_add_device_twin_info(stats->twin_desired_properties, type, info);
+        LogInfo("type=%s, id=%d)", ENUM_TO_STRING(DEVICE_TWIN_EVENT_TYPE, type), info->update_id);
+
+        if (list_item == NULL)
+        {
+            if (type != DEVICE_TWIN_UPDATE_SENT)
+            {
+                LogError("Invalid info type (update id=%d, type=%s)", info->update_id, ENUM_TO_STRING(DEVICE_TWIN_EVENT_TYPE, type));
+                result = __FAILURE__;
+            }
+            else if ((queued_info = (DEVICE_TWIN_DESIRED_INFO*)malloc(sizeof(DEVICE_TWIN_DESIRED_INFO))) == NULL)
+            {
+                LogError("Failed clonning the DEVICE_TWIN_DESIRED_INFO");
+                result = __FAILURE__;
+            }
+            else if (singlylinkedlist_add(stats->twin_desired_properties, queued_info) == NULL)
+            {
+                LogError("Failed adding device twin info (update id: %d)", info->update_id);
+                free(queued_info);
+                result = __FAILURE__;
+            }
+            else
+            {
+                memset(queued_info, 0, sizeof(DEVICE_TWIN_DESIRED_INFO));
+                queued_info->update_id = info->update_id;
+                queued_info->time_updated = info->time_updated;
+                queued_info->update_result = info->update_result;
+                queued_info->time_received = INDEFINITE_TIME;
+
+                result = 0;
+            }
+        }
+        else
+        {
+            if ((queued_info = (DEVICE_TWIN_DESIRED_INFO*)singlylinkedlist_item_get_value(list_item)) == NULL)
+            {
+                LogError("Failed retrieving queued device twin info (update id: %d)", info->update_id);
+                result = __FAILURE__;
+            }
+            else if (type == DEVICE_TWIN_UPDATE_RECEIVED)
+            {
+                queued_info->time_received = info->time_received;
+
+                result = 0;
+            }
+            else
+            {
+                LogError("Device twin %d in queue; invalid event type (%d)", info->update_id, ENUM_TO_STRING(DEVICE_TWIN_EVENT_TYPE, type));
+                result = __FAILURE__;
+            }
+        }
     }
 
     return result;
@@ -1234,8 +1266,41 @@ int iothub_client_statistics_get_device_twin_desired_summary(IOTHUB_CLIENT_STATI
     else
     {
         IOTHUB_CLIENT_STATISTICS_HANDLE stats = (IOTHUB_CLIENT_STATISTICS*)handle;
+        LIST_ITEM_HANDLE list_item;
 
-        iothub_client_statistics_get_device_twin_summary(stats->twin_desired_properties, summary);
+        (void)memset(summary, 0, sizeof(IOTHUB_CLIENT_STATISTICS_DEVICE_TWIN_SUMMARY));
+        summary->min_travel_time_secs = LONG_MAX;
+
+        list_item = singlylinkedlist_get_head_item(stats->twin_desired_properties);
+
+        while (list_item != NULL)
+        {
+            DEVICE_TWIN_DESIRED_INFO* device_twin_info = (DEVICE_TWIN_DESIRED_INFO*)singlylinkedlist_item_get_value(list_item);
+
+            if (device_twin_info->time_updated != INDEFINITE_TIME)
+            {
+                summary->updates_sent = summary->updates_sent + 1;
+
+                if (device_twin_info->time_received != INDEFINITE_TIME)
+                {
+                    double travel_time = difftime(device_twin_info->time_received, device_twin_info->time_updated);
+
+                    if (travel_time < summary->min_travel_time_secs)
+                    {
+                        summary->min_travel_time_secs = travel_time;
+                    }
+
+                    if (travel_time > summary->max_travel_time_secs)
+                    {
+                        summary->max_travel_time_secs = travel_time;
+                    }
+
+                    summary->updates_received = summary->updates_received + 1;
+                }
+            }
+
+            list_item = singlylinkedlist_get_next_item(list_item);
+        }
 
         result = 0;
     }
@@ -1243,7 +1308,7 @@ int iothub_client_statistics_get_device_twin_desired_summary(IOTHUB_CLIENT_STATI
     return result;
 }
 
-int iothub_client_statistics_add_device_twin_reported_info(IOTHUB_CLIENT_STATISTICS_HANDLE handle, DEVICE_TWIN_EVENT_TYPE type, DEVICE_TWIN_INFO* info)
+int iothub_client_statistics_add_device_twin_reported_info(IOTHUB_CLIENT_STATISTICS_HANDLE handle, DEVICE_TWIN_EVENT_TYPE type, DEVICE_TWIN_REPORTED_INFO* info)
 {
     int result;
 
@@ -1255,8 +1320,70 @@ int iothub_client_statistics_add_device_twin_reported_info(IOTHUB_CLIENT_STATIST
     else
     {
         IOTHUB_CLIENT_STATISTICS_HANDLE stats = (IOTHUB_CLIENT_STATISTICS*)handle;
+        DEVICE_TWIN_REPORTED_INFO* queued_info;
+        LIST_ITEM_HANDLE list_item = singlylinkedlist_find(stats->twin_reported_properties, find_device_twin_reported_info_by_id, info);
 
-        result = iothub_client_statistics_add_device_twin_info(stats->twin_reported_properties, type, info);
+        if (list_item == NULL)
+        {
+            if (type != DEVICE_TWIN_UPDATE_QUEUED)
+            {
+                LogError("Invalid info type (update id=%d, type=%s)", info->update_id, ENUM_TO_STRING(DEVICE_TWIN_EVENT_TYPE, type));
+                result = __FAILURE__;
+            }
+            else if ((queued_info = (DEVICE_TWIN_REPORTED_INFO*)malloc(sizeof(DEVICE_TWIN_REPORTED_INFO))) == NULL)
+            {
+                LogError("Failed clonning the DEVICE_TWIN_REPORTED_INFO");
+                result = __FAILURE__;
+            }
+            else if (singlylinkedlist_add(stats->twin_reported_properties, queued_info) == NULL)
+            {
+                LogError("Failed adding device twin info (update id: %d)", info->update_id);
+                free(queued_info);
+                result = __FAILURE__;
+            }
+            else
+            {
+                memset(queued_info, 0, sizeof(DEVICE_TWIN_REPORTED_INFO));
+                queued_info->update_id = info->update_id;
+                queued_info->time_queued = info->time_queued;
+                queued_info->update_result = info->update_result;
+                queued_info->time_sent = INDEFINITE_TIME;
+                queued_info->time_received = INDEFINITE_TIME;
+
+                result = 0;
+            }
+        }
+        else
+        {
+            if ((queued_info = (DEVICE_TWIN_REPORTED_INFO*)singlylinkedlist_item_get_value(list_item)) == NULL)
+            {
+                LogError("Failed retrieving queued device twin info (update id: %d)", info->update_id);
+                result = __FAILURE__;
+            }
+            else  if (type == DEVICE_TWIN_UPDATE_SENT)
+            {
+                queued_info->time_sent = info->time_sent;
+                queued_info->send_status_code = info->send_status_code;
+                    
+                result = 0;
+            }
+            else if (type == DEVICE_TWIN_UPDATE_RECEIVED)
+            {
+                // Due to the nature of the service client, this function might be called several times for the same
+                // test and message ID, so we must ensure only the first call sets the receive time.
+                if (queued_info->time_received == INDEFINITE_TIME)
+                {
+                    queued_info->time_received = info->time_received;
+                }
+
+                result = 0;
+            }
+            else
+            {
+                LogError("Device twin %d in queue; invalid event type (%d)", info->update_id, ENUM_TO_STRING(DEVICE_TWIN_EVENT_TYPE, type));
+                result = __FAILURE__;
+            }
+        }
     }
 
     return result;
@@ -1274,8 +1401,38 @@ int iothub_client_statistics_get_device_twin_reported_summary(IOTHUB_CLIENT_STAT
     else
     {
         IOTHUB_CLIENT_STATISTICS_HANDLE stats = (IOTHUB_CLIENT_STATISTICS*)handle;
+        LIST_ITEM_HANDLE list_item;
 
-        iothub_client_statistics_get_device_twin_summary(stats->twin_reported_properties, summary);
+        (void)memset(summary, 0, sizeof(IOTHUB_CLIENT_STATISTICS_DEVICE_TWIN_SUMMARY));
+        summary->min_travel_time_secs = LONG_MAX;
+
+        list_item = singlylinkedlist_get_head_item(stats->twin_reported_properties);
+
+        while (list_item != NULL)
+        {
+            DEVICE_TWIN_REPORTED_INFO* device_twin_info = (DEVICE_TWIN_REPORTED_INFO*)singlylinkedlist_item_get_value(list_item);
+
+            summary->updates_sent = summary->updates_sent + 1;
+
+            if (device_twin_info->time_sent != INDEFINITE_TIME && device_twin_info->time_received != INDEFINITE_TIME)
+            {
+                double travel_time = difftime(device_twin_info->time_received, device_twin_info->time_sent);
+
+                if (travel_time < summary->min_travel_time_secs)
+                {
+                    summary->min_travel_time_secs = travel_time;
+                }
+
+                if (travel_time > summary->max_travel_time_secs)
+                {
+                    summary->max_travel_time_secs = travel_time;
+                }
+
+                summary->updates_received = summary->updates_received + 1;
+            }
+
+            list_item = singlylinkedlist_get_next_item(list_item);
+        }
 
         result = 0;
     }

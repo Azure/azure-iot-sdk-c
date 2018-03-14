@@ -33,6 +33,7 @@ DEFINE_ENUM(C2D_EVENT_TYPE, C2D_EVENT_TYPE_VALUES)
 DEFINE_ENUM(DEVICE_METHOD_EVENT_TYPE, DEVICE_METHOD_EVENT_TYPE_VALUES)
 
 #define DEVICE_TWIN_EVENT_TYPE_VALUES \
+    DEVICE_TWIN_UPDATE_QUEUED, \
     DEVICE_TWIN_UPDATE_SENT, \
     DEVICE_TWIN_UPDATE_RECEIVED
 
@@ -99,7 +100,7 @@ typedef struct IOTHUB_CLIENT_STATISTICS_DEVICE_METHOD_SUMMARY_TAG
     double max_travel_time_secs;
 } IOTHUB_CLIENT_STATISTICS_DEVICE_METHOD_SUMMARY;
 
-typedef struct DEVICE_TWIN_INFO_TAG
+typedef struct DEVICE_TWIN_DESIRED_INFO_TAG
 {
     size_t update_id;
 
@@ -107,7 +108,20 @@ typedef struct DEVICE_TWIN_INFO_TAG
     int update_result;
 
     time_t time_received;
-} DEVICE_TWIN_INFO;
+} DEVICE_TWIN_DESIRED_INFO;
+
+typedef struct DEVICE_TWIN_REPORTED_INFO_TAG
+{
+    size_t update_id;
+
+    time_t time_queued;
+    IOTHUB_CLIENT_RESULT update_result;
+
+    time_t time_sent;
+    int send_status_code;
+
+    time_t time_received;
+} DEVICE_TWIN_REPORTED_INFO;
 
 typedef struct IOTHUB_CLIENT_STATISTICS_DEVICE_TWIN_SUMMARY_TAG
 {
@@ -137,11 +151,11 @@ extern int iothub_client_statistics_add_device_method_info(IOTHUB_CLIENT_STATIST
 
 extern int iothub_client_statistics_get_device_method_summary(IOTHUB_CLIENT_STATISTICS_HANDLE handle, IOTHUB_CLIENT_STATISTICS_DEVICE_METHOD_SUMMARY* summary);
 
-extern int iothub_client_statistics_add_device_twin_desired_info(IOTHUB_CLIENT_STATISTICS_HANDLE handle, DEVICE_TWIN_EVENT_TYPE type, DEVICE_TWIN_INFO* info);
+extern int iothub_client_statistics_add_device_twin_desired_info(IOTHUB_CLIENT_STATISTICS_HANDLE handle, DEVICE_TWIN_EVENT_TYPE type, DEVICE_TWIN_DESIRED_INFO* info);
 
 extern int iothub_client_statistics_get_device_twin_desired_summary(IOTHUB_CLIENT_STATISTICS_HANDLE handle, IOTHUB_CLIENT_STATISTICS_DEVICE_TWIN_SUMMARY* summary);
 
-extern int iothub_client_statistics_add_device_twin_reported_info(IOTHUB_CLIENT_STATISTICS_HANDLE handle, DEVICE_TWIN_EVENT_TYPE type, DEVICE_TWIN_INFO* info);
+extern int iothub_client_statistics_add_device_twin_reported_info(IOTHUB_CLIENT_STATISTICS_HANDLE handle, DEVICE_TWIN_EVENT_TYPE type, DEVICE_TWIN_REPORTED_INFO* info);
 
 extern int iothub_client_statistics_get_device_twin_reported_summary(IOTHUB_CLIENT_STATISTICS_HANDLE handle, IOTHUB_CLIENT_STATISTICS_DEVICE_TWIN_SUMMARY* summary);
 
