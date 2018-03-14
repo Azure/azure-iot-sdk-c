@@ -26,7 +26,9 @@
 #define MESSAGE_ID_FIELD               "message-id"
 #define LONGHAUL_DEVICE_METHOD_NAME    "longhaulDeviceMethod"
 #define TWIN_FIELD_VERSION             "$version"
-#define TWIN_DESIRED_BLOCK_DOT         "desired."
+#define TWIN_PROPERTIES_BLOCK          "properties"
+#define TWIN_DESIRED_BLOCK             "desired"
+#define DOT                            "."
 
 
 #ifdef MBED_BUILD_TIMESTAMP
@@ -141,10 +143,8 @@ static int parse_message(const char* data, size_t size, char* test_id, unsigned 
 }
 
 
-static int parse_twin_desired_properties(const char* data, size_t size, char* test_id, unsigned int* message_id, int* version)
+static int parse_twin_desired_properties(const char* data, char* test_id, unsigned int* message_id, int* version)
 {
-    (void)size;
-
     int result;
     JSON_Value* root_value;
 
@@ -170,12 +170,30 @@ static int parse_twin_desired_properties(const char* data, size_t size, char* te
         }
         else
         {
-            *message_id = (unsigned int)json_object_dotget_number(root_object, TWIN_DESIRED_BLOCK_DOT MESSAGE_ID_FIELD);
-            *version = (int)json_object_dotget_number(root_object, TWIN_DESIRED_BLOCK_DOT TWIN_FIELD_VERSION);
+            double raw_message_id = json_object_dotget_number(root_object, TWIN_DESIRED_BLOCK_DOT MESSAGE_ID_FIELD);
 
-            (void)memcpy(test_id, test_id_ref, 36);
-            test_id[36] = '\0';
-            result = 0;
+            if (raw_message_id < 0)
+            {
+                LogError("Unexpected message id (%d)", raw_message_id);
+                result = __FAILURE__;
+            }
+            else
+            {
+                *message_id = (unsigned int)raw_message_id;
+
+                if ((*version = (int)json_object_dotget_number(root_object, TWIN_DESIRED_BLOCK_DOT TWIN_FIELD_VERSION)) == NULL)
+                {
+                    LogError("Failed getting desired properties version (%d)", *message_id);
+                    result = __FAILURE__;
+                }
+                else
+                {
+                    (void)memcpy(test_id, test_id_ref, 36);
+                    test_id[36] = '\0';
+                    
+                    result = 0;
+                }
+            }
         }
 
         json_value_free(root_value);
@@ -1308,7 +1326,7 @@ static int get_twin_desired_version(const char* twin)
         }
         else
         {
-            result = (int)json_object_dotget_number(root_object, "properties.desired.$version");
+            result = (int)json_object_dotget_number(root_object, TWIN_PROPERTIES_BLOCK DOT TWIN_DESIRED_BLOCK DOT TWIN_FIELD_VERSION);
         }
 
         json_value_free(root_value);
@@ -1616,7 +1634,7 @@ static void on_device_twin_update_received(DEVICE_TWIN_UPDATE_STATE update_state
         int version;
 
         if (update_state == DEVICE_TWIN_UPDATE_COMPLETE && 
-            parse_twin_desired_properties((const char*)payLoad, size, tests_id, &message_id, &version) != 0)
+            parse_twin_desired_properties((const char*)payLoad, tests_id, &message_id, &version) != 0)
         {
             LogError("Failed parsing complete twin update data");
         }
