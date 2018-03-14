@@ -173,24 +173,23 @@ void fileUploadCallback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, void* userConte
 static int DeviceMethodWithUploadCallback(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* resp_size, void* userContextCallback)
 {
     (void)method_name;
-    (void)payload;
-    (void)size;
     (void)userContextCallback;
 
     int responseCode;
     if (IoTHubClient_UploadToBlobAsync(iotHubClientHandle, "hello_world.txt", (const unsigned char*)HELLO_WORLD, sizeof(HELLO_WORLD) - 1, fileUploadCallback, &g_conn_info) == IOTHUB_CLIENT_OK)
     {
         LogInfo("Upload succeeded");
-        char* RESPONSE_STRING = "{ \"Response\": \"Nothing\" }";
-        *resp_size = strlen(RESPONSE_STRING);
-        if ((*response = (unsigned char*)malloc(*resp_size)) == NULL)
+        
+        if ((*response = (unsigned char*)malloc(size)) == NULL)
         {
             responseCode = METHOD_RESPONSE_ERROR;
+            *resp_size = 0;
         }
         else
         {
-            (void)memcpy(*response, RESPONSE_STRING, *resp_size);
+            (void)memcpy(*response, payload, size);
             responseCode = METHOD_RESPONSE_SUCCESS;
+            *resp_size = size;    
         }
     }
     else
@@ -225,6 +224,7 @@ void test_invoke_device_method(const char* deviceId, const char* moduleId, const
     ASSERT_ARE_EQUAL_WITH_MSG(size_t, strlen(payload), responsePayloadSize, "response size is incorrect");
     if (memcmp(payload, responsePayload, responsePayloadSize))
     {
+        LogInfo("response string does not match.  Expected=<%s>, Actual=<%s>", payload, responsePayload);
         ASSERT_FAIL("response string does not match");
     }
 
@@ -675,7 +675,7 @@ extern void device_method_e2e_method_call_with_embedded_single_quote_sas(IOTHUB_
 #ifndef DONT_USE_UPLOADTOBLOB
 void device_method_e2e_method_calls_upload_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
-    test_device_method_calls_upload(IoTHubAccount_GetSASDevice(g_iothubAcctInfo), protocol, "\"Hello World.\"");
+    test_device_method_calls_upload(IoTHubAccount_GetSASDevice(g_iothubAcctInfo), protocol, "{\"Response\":\"Nothing\"}");
 }
 #endif
 
@@ -712,7 +712,7 @@ extern void device_method_e2e_method_call_with_embedded_single_quote_x509(IOTHUB
 #ifndef DONT_USE_UPLOADTOBLOB
 void device_method_e2e_method_calls_upload_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
-    test_device_method_calls_upload(IoTHubAccount_GetX509Device(g_iothubAcctInfo), protocol, "\"Hello World.\"");
+    test_device_method_calls_upload(IoTHubAccount_GetX509Device(g_iothubAcctInfo), protocol, "{\"Response\":\"Nothing\"}");
 }
 #endif
 
