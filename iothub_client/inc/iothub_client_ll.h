@@ -26,6 +26,11 @@
 #include "azure_c_shared_utility/macro_utils.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #define IOTHUB_CLIENT_FILE_UPLOAD_RESULT_VALUES \
     FILE_UPLOAD_OK, \
     FILE_UPLOAD_ERROR
@@ -97,6 +102,10 @@ DEFINE_ENUM(IOTHUB_PROCESS_ITEM_RESULT, IOTHUB_PROCESS_ITEM_RESULT_VALUE);
 */
 DEFINE_ENUM(IOTHUBMESSAGE_DISPOSITION_RESULT, IOTHUBMESSAGE_DISPOSITION_RESULT_VALUES);
 
+#ifdef __cplusplus
+}
+#endif
+
 #include "azure_c_shared_utility/agenttime.h"
 #include "azure_c_shared_utility/xio.h"
 #include "azure_c_shared_utility/doublylinkedlist.h"
@@ -106,6 +115,11 @@ DEFINE_ENUM(IOTHUBMESSAGE_DISPOSITION_RESULT, IOTHUBMESSAGE_DISPOSITION_RESULT_V
 #include <stddef.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #define IOTHUB_CLIENT_IOTHUB_METHOD_STATUS_VALUES \
     IOTHUB_CLIENT_IOTHUB_METHOD_STATUS_SUCCESS,   \
     IOTHUB_CLIENT_IOTHUB_METHOD_STATUS_ERROR      \
@@ -114,10 +128,6 @@ DEFINE_ENUM(IOTHUBMESSAGE_DISPOSITION_RESULT, IOTHUBMESSAGE_DISPOSITION_RESULT_V
 */
 DEFINE_ENUM(IOTHUB_CLIENT_IOTHUB_METHOD_STATUS, IOTHUB_CLIENT_IOTHUB_METHOD_STATUS_VALUES);
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
 
 #define IOTHUB_CLIENT_CONFIRMATION_RESULT_VALUES     \
     IOTHUB_CLIENT_CONFIRMATION_OK,                   \
