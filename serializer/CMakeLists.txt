@@ -85,6 +85,7 @@ else()
     serializer ${serializer_c_files} ${serializer_h_files} 
     )
 endif()
+setSdkTargetBuildProperties(serializer)
 
 target_link_libraries(serializer
     parson

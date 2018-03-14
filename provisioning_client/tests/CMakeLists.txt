@@ -3,6 +3,8 @@
 
 cmake_minimum_required(VERSION 2.8.12)
 
+usePermissiveRulesForSdkSamplesAndTests()
+
 #add_unittest_directory(dps_sec_client_ut)
 add_unittest_directory(prov_transport_http_client_ut)
 
