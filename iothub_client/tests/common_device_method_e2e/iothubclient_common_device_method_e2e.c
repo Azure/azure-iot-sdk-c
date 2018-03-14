@@ -216,7 +216,7 @@ void test_invoke_device_method(const char* deviceId, const char* moduleId, const
     }
     else
     {
-        LogInfo("IoTHubDeviceMethod_InvokeModule deviceId='%s'", deviceId);
+        LogInfo("IoTHubDeviceMethod_Invoke deviceId='%s'", deviceId);
         IOTHUB_DEVICE_METHOD_RESULT invokeResult = IoTHubDeviceMethod_Invoke(serviceClientDeviceMethodHandle, deviceId, METHOD_NAME, payload, TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
         ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_OK, invokeResult, "Service Client IoTHubDeviceMethod_Invoke failed");
     }
