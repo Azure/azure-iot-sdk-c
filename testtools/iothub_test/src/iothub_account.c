@@ -474,6 +474,7 @@ static int updateTestModule(IOTHUB_REGISTRYMANAGER_HANDLE iothub_registrymanager
     moduleUpdate.secondaryKey = "";
     moduleUpdate.iotEdge_capable = false;
     moduleUpdate.moduleId = TEST_MODULE_NAME;
+    moduleUpdate.status = IOTHUB_DEVICE_STATUS_ENABLED;
 
     IOTHUB_REGISTRYMANAGER_RESULT iothub_registrymanager_result = IoTHubRegistryManager_UpdateModule(iothub_registrymanager_handle, &moduleUpdate);
     if (iothub_registrymanager_result != IOTHUB_REGISTRYMANAGER_OK)
@@ -509,6 +510,8 @@ static int provisionModule(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_PROVISIONED_
     IOTHUB_SERVICE_CLIENT_AUTH_HANDLE service_auth_from_device_connection = NULL;
     IOTHUB_REGISTRYMANAGER_RESULT iothub_registrymanager_result;
     IOTHUB_REGISTRYMANAGER_HANDLE iothub_registrymanager_handle = NULL; 
+
+    memset(&moduleInfo, 0, sizeof(moduleInfo));
 
     if (mallocAndStrcpy_s(&deviceToProvision->moduleId, TEST_MODULE_NAME) != 0)
     {
@@ -556,7 +559,32 @@ static int provisionModule(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_PROVISIONED_
         result = 0;
     }
 
-    // BUGBUG - free the memory
+    if (moduleInfo.deviceId != NULL)
+        free((char*)moduleInfo.deviceId);
+    if (moduleInfo.primaryKey != NULL)
+        free((char*)moduleInfo.primaryKey);
+    if (moduleInfo.secondaryKey != NULL)
+        free((char*)moduleInfo.secondaryKey);
+    if (moduleInfo.generationId != NULL)
+        free((char*)moduleInfo.generationId);
+    if (moduleInfo.eTag != NULL)
+        free((char*)moduleInfo.eTag);
+    if (moduleInfo.connectionStateUpdatedTime != NULL)
+        free((char*)moduleInfo.connectionStateUpdatedTime);
+    if (moduleInfo.statusReason != NULL)
+        free((char*)moduleInfo.statusReason);
+    if (moduleInfo.statusUpdatedTime != NULL)
+        free((char*)moduleInfo.statusUpdatedTime);
+    if (moduleInfo.lastActivityTime != NULL)
+        free((char*)moduleInfo.lastActivityTime);
+    if (moduleInfo.configuration != NULL)
+        free((char*)moduleInfo.configuration);
+    if (moduleInfo.deviceProperties != NULL)
+        free((char*)moduleInfo.deviceProperties);
+    if (moduleInfo.serviceProperties != NULL)
+        free((char*)moduleInfo.serviceProperties);
+    if (moduleInfo.moduleId != NULL)
+        free((char*)moduleInfo.moduleId);
 
     if (iothub_registrymanager_handle != NULL)
     {

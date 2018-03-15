@@ -1250,6 +1250,7 @@ void IoTHubRegistryManager_Destroy(IOTHUB_REGISTRYMANAGER_HANDLE registryManager
         free(regManHandle->iothubSuffix);
         free(regManHandle->sharedAccessKey);
         free(regManHandle->keyName);
+        free(regManHandle->deviceId);
         free(regManHandle);
     }
 }
