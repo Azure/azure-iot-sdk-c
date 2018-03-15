@@ -57,7 +57,7 @@ IF(WIN32)
 ENDIF(WIN32)
 
 if (${build_as_dynamic})
-    add_library(provisioning_service_client SHARED ${provisioning_service_client_c_files} ${provisioning_service_client_h_files} ./src/provisioning_service_client.def)
+    add_library(provisioning_service_client SHARED ${provisioning_service_client_c_files} ${provisioning_service_client_h_files} ./src/provisioning_service_client_dll.def)
     linkSharedUtil(provisioning_service_client)
 
 else()
