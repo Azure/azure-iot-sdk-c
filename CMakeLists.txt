@@ -262,11 +262,11 @@ if (${use_prov_client})
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_PROV_MODULE")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_PROV_MODULE")
 
-    add_subdirectory(provisioning_client)
     if(${build_provisioning_service_client})
         add_subdirectory(provisioning_service_client)
     endif()
 
+    add_subdirectory(provisioning_client)
 endif()
 
 if(${build_service_client})

@@ -33,8 +33,6 @@
 #include "provisioning_service_client.h"
 #include "provisioning_sc_enrollment.h"
 
-#include "platform_process.h"
-
 static TEST_MUTEX_HANDLE g_dllByDll;
 
 typedef enum REGISTRATION_RESULT_TAG
@@ -49,17 +47,12 @@ typedef struct PROV_CLIENT_E2E_INFO_TAG
     char* iothub_uri;
     char* device_id;
     REGISTRATION_RESULT reg_result;
-    MAP_HANDLE conn_map;
 } PROV_CLIENT_E2E_INFO;
 
 static const char* g_prov_conn_string = NULL;
 static const char* g_dps_scope_id = NULL;
-static char* g_dps_uri = NULL;
+static const char* const g_dps_uri = "global.azure-devices-provisioning.net";
 static const char* g_desired_iothub = NULL;
-
-PROV_CLIENT_E2E_INFO g_prov_info;
-PLATFORM_PROCESS_HANDLE g_emulator_proc;
-SECURE_DEVICE_TYPE g_hsm_device_type;
 
 #define MAX_CLOUD_TRAVEL_TIME       60.0
 #define DEVICE_GUID_SIZE            37
@@ -106,13 +99,6 @@ static void dps_registation_status(PROV_DEVICE_REG_STATUS reg_status, void* user
     }
 }
 
-static bool provision_dps_device()
-{
-    bool result;
-    result = true;
-    return result;
-}
-
 static PROV_DEVICE_LL_HANDLE create_dps_handle(PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION dps_transport)
 {
     PROV_DEVICE_LL_HANDLE result;
@@ -134,20 +120,19 @@ static char* construct_simulator_path()
     return sim_path;
 }
 
-static void start_tpm_emulator()
+static void wait_for_dps_result(PROV_DEVICE_LL_HANDLE handle, PROV_CLIENT_E2E_INFO* prov_info)
 {
-    char* simulator_path = construct_simulator_path();
-    ASSERT_IS_NOT_NULL_WITH_MSG(simulator_path, "Unable to construct simulator path");
+    time_t begin_operation;
+    time_t now_time;
 
-    g_emulator_proc = platform_process_create(simulator_path);
-    ASSERT_IS_NOT_NULL_WITH_MSG(g_emulator_proc, "Failure starting TPM Emulator");
-
-    free(simulator_path);
-}
-
-static void stop_tpm_emulator()
-{
-    platform_process_destroy(g_emulator_proc);
+    begin_operation = time(NULL);
+    do
+    {
+        Prov_Device_LL_DoWork(handle);
+        ThreadAPI_Sleep(1);
+    } while ((prov_info->reg_result == REG_RESULT_BEGIN) &&
+        ((now_time = time(NULL)),
+        (difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME)));
 }
 
 static int construct_device_id(const char* prefix, char** device_name)
@@ -186,70 +171,62 @@ static int construct_device_id(const char* prefix, char** device_name)
     return result;
 }
 
-static void create_enrollment_device()
+static void create_x509_enrollment_device()
 {
-    /*INDIVIDUAL_ENROLLMENT enrollment;
-    char* registration_id = NULL;
-    char* certificate = NULL;
+    INDIVIDUAL_ENROLLMENT_HANDLE indiv_enrollment = NULL;
 
     PROVISIONING_SERVICE_CLIENT_HANDLE prov_sc_handle = prov_sc_create_from_connection_string(g_prov_conn_string);
     ASSERT_IS_NOT_NULL_WITH_MSG(prov_sc_handle, "Failure creating provisioning service client");
 
-    char* device_id;
-
-    ASSERT_ARE_EQUAL_WITH_MSG(int, 0, construct_device_id("device_", &device_id), "Failure creating device name");
+    prov_sc_set_trace(prov_sc_handle, TRACING_STATUS_ON);
 
     PROV_AUTH_HANDLE auth_handle = prov_auth_create();
     ASSERT_IS_NOT_NULL_WITH_MSG(auth_handle, "Failure creating auth client");
 
-    enrollment.device_id = device_id;
+    char* registration_id = prov_auth_get_registration_id(auth_handle);
+    ASSERT_IS_NOT_NULL_WITH_MSG(registration_id, "Failure prov_auth_get_common_name");
 
-    if (prov_auth_get_type(auth_handle) == PROV_AUTH_TYPE_X509)
+    if (prov_sc_get_individual_enrollment(prov_sc_handle, registration_id, &indiv_enrollment) != 0)
     {
-        registration_id = prov_auth_get_registration_id(auth_handle);
-        ASSERT_IS_NOT_NULL_WITH_MSG(registration_id, "Failure retrieving registration Id");
-        certificate = prov_auth_get_certificate(auth_handle);
-        ASSERT_IS_NOT_NULL_WITH_MSG(certificate, "Failure retrieving certificate");
+        char* x509_cert = prov_auth_get_certificate(auth_handle);
+        ASSERT_IS_NOT_NULL_WITH_MSG(x509_cert, "Failure prov_auth_get_certificate");
 
-        enrollment.registration_id = registration_id;
-        //enrollment.attestation->attestation.x509.client_certificates->primary->certificate = ;
-    }
-    else
-    {
-    }
-    //ASSERT_ARE_EQUAL_WITH_MSG(int, 0, prov_sc_create_or_update_individual_enrollment(prov_sc_handle, &enrollment), "Failure creating enrollment");
+        STRING_HANDLE base64_cert = Base64_Encode_Bytes((const unsigned char*)x509_cert, strlen(x509_cert));
+        ASSERT_IS_NOT_NULL_WITH_MSG(base64_cert, "Failure Base64_Encode_Bytes");
 
+        ATTESTATION_MECHANISM_HANDLE attest_handle = attestationMechanism_createWithX509ClientCert(STRING_c_str(base64_cert), NULL);
+        ASSERT_IS_NOT_NULL_WITH_MSG(attest_handle, "Failure hsm_client_riot_get_certificate ");
+
+        indiv_enrollment = individualEnrollment_create(registration_id, attest_handle);
+        ASSERT_IS_NOT_NULL_WITH_MSG(indiv_enrollment, "Failure hsm_client_riot_get_certificate ");
+
+        ASSERT_ARE_EQUAL_WITH_MSG(int, 0, prov_sc_create_or_update_individual_enrollment(prov_sc_handle, &indiv_enrollment), "Failure prov_sc_create_or_update_individual_enrollment");
+
+        STRING_delete(base64_cert);
+        free(x509_cert);
+    }
     free(registration_id);
-    free(certificate);
+    individualEnrollment_destroy(indiv_enrollment);
     prov_auth_destroy(auth_handle);
-    prov_sc_destroy(prov_sc_handle);*/
+    prov_sc_destroy(prov_sc_handle);
 }
 
-static void remove_enrollment_device()
+static void remove_x509_enrollment_device()
 {
-    /*INDIVIDUAL_ENROLLMENT enrollment;
-    char* registration_id = NULL;
-    char* certificate = NULL;
-
     PROVISIONING_SERVICE_CLIENT_HANDLE prov_sc_handle = prov_sc_create_from_connection_string(g_prov_conn_string);
     ASSERT_IS_NOT_NULL_WITH_MSG(prov_sc_handle, "Failure creating provisioning service client");
 
     PROV_AUTH_HANDLE auth_handle = prov_auth_create();
     ASSERT_IS_NOT_NULL_WITH_MSG(auth_handle, "Failure creating auth client");
 
-    if (prov_auth_get_type(auth_handle) == PROV_AUTH_TYPE_X509)
-    {
-        registration_id = prov_auth_get_registration_id(auth_handle);
-        ASSERT_IS_NOT_NULL_WITH_MSG(registration_id, "Failure retrieving registration Id");
+    char* registration_id = prov_auth_get_registration_id(auth_handle);
+    ASSERT_IS_NOT_NULL_WITH_MSG(registration_id, "Failure retrieving registration Id");
 
-        enrollment.registration_id = registration_id;
-    }
-    ASSERT_ARE_EQUAL_WITH_MSG(int, 0, prov_sc_delete_individual_enrollment(prov_sc_handle, &enrollment), "Failure deleting enrollment");
+    ASSERT_ARE_EQUAL_WITH_MSG(int, 0, prov_sc_delete_individual_enrollment_by_param(prov_sc_handle, registration_id, NULL), "Failure deleting enrollment");
 
     free(registration_id);
-    free(certificate);
     prov_auth_destroy(auth_handle);
-    prov_sc_destroy(prov_sc_handle);*/
+    prov_sc_destroy(prov_sc_handle);
 }
 
 BEGIN_TEST_SUITE(dps_client_e2e)
@@ -258,37 +235,24 @@ BEGIN_TEST_SUITE(dps_client_e2e)
     {
         TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
 
-        memset(&g_prov_info, 0, sizeof(PROV_CLIENT_E2E_INFO));
-
         platform_init();
+
         prov_dev_security_init(SECURE_DEVICE_TYPE_X509);
 
-        g_prov_conn_string = getenv("PROV_CONNECTION_STRING");
+        g_prov_conn_string = getenv("DPS_C_CONNECTION_STRING");
         ASSERT_IS_NOT_NULL_WITH_MSG(g_prov_conn_string, "PROV_CONNECTION_STRING is NULL");
 
-        // Start Emulator
-        /*if (g_dps_hsm_type == DPS_SEC_TYPE_TPM)
-        {
-            start_tpm_emulator();
-        }*/
-
         // Register device
-        create_enrollment_device();
+        create_x509_enrollment_device();
 
-        g_dps_scope_id = getenv("DPS_SCOPE_ID_VALUE");
+        g_dps_scope_id = getenv("DPS_C_SCOPE_ID_VALUE");
         ASSERT_IS_NOT_NULL_WITH_MSG(g_dps_scope_id, "DPS_SCOPE_ID_VALUE is NULL");
     }
 
     TEST_SUITE_CLEANUP(TestClassCleanup)
     {
-        // Stop Emulator
-        /*if (g_dps_hsm_type == DPS_SEC_TYPE_TPM)
-        {
-            stop_tpm_emulator();
-        }*/
-
         // Remove device
-        remove_enrollment_device();
+        remove_x509_enrollment_device();
 
         prov_dev_security_deinit();
         platform_deinit();
@@ -302,33 +266,28 @@ BEGIN_TEST_SUITE(dps_client_e2e)
 
     TEST_FUNCTION_CLEANUP(method_cleanup)
     {
-        free(g_prov_info.iothub_uri);
-        free(g_prov_info.device_id);
     }
 
     TEST_FUNCTION(dps_register_device_http_success)
     {
-        time_t begin_operation;
-        time_t now_time;
+        PROV_CLIENT_E2E_INFO prov_info;
+        memset(&prov_info, 0, sizeof(PROV_CLIENT_E2E_INFO));
+
         // arrange
         PROV_DEVICE_LL_HANDLE handle;
         handle = create_dps_handle(Prov_Device_HTTP_Protocol);
 
         // act
-        PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &g_prov_info, dps_registation_status, &g_prov_info);
+        PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &prov_info, dps_registation_status, &prov_info);
         ASSERT_ARE_EQUAL_WITH_MSG(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
 
-        begin_operation = time(NULL);
-        do
-        {
-            Prov_Device_LL_DoWork(handle);
-            ThreadAPI_Sleep(1);
-        } while ( (g_prov_info.reg_result == REG_RESULT_BEGIN) &&
-            ( (now_time = time(NULL)),
-            (difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME) ) );
+        wait_for_dps_result(handle, &prov_info);
 
         // Assert
-        ASSERT_ARE_EQUAL_WITH_MSG(int, REG_RESULT_COMPLETE, g_prov_info.reg_result, "Failure calling registering device");
+        ASSERT_ARE_EQUAL_WITH_MSG(int, REG_RESULT_COMPLETE, prov_info.reg_result, "Failure calling registering device x509 http");
+
+        free(prov_info.iothub_uri);
+        free(prov_info.device_id);
 
         Prov_Device_LL_Destroy(handle);
     }
@@ -336,55 +295,49 @@ BEGIN_TEST_SUITE(dps_client_e2e)
 #if USE_AMQP
     TEST_FUNCTION(dps_register_device_amqp_success)
     {
-        time_t begin_operation;
-        time_t now_time;
+        PROV_CLIENT_E2E_INFO prov_info;
+        memset(&prov_info, 0, sizeof(PROV_CLIENT_E2E_INFO));
+
         // arrange
         PROV_DEVICE_LL_HANDLE handle;
         handle = create_dps_handle(Prov_Device_AMQP_Protocol);
 
         // act
-        PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &g_prov_info, dps_registation_status, &g_prov_info);
+        PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &prov_info, dps_registation_status, &prov_info);
         ASSERT_ARE_EQUAL_WITH_MSG(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
 
-        begin_operation = time(NULL);
-        do
-        {
-            Prov_Device_LL_DoWork(handle);
-            ThreadAPI_Sleep(1);
-        } while ((g_prov_info.reg_result == REG_RESULT_BEGIN) &&
-            ((now_time = time(NULL)),
-            (difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME)));
+        wait_for_dps_result(handle, &prov_info);
 
         // Assert
-        ASSERT_ARE_EQUAL_WITH_MSG(int, REG_RESULT_COMPLETE, g_prov_info.reg_result, "Failure calling registering device");
+        ASSERT_ARE_EQUAL_WITH_MSG(int, REG_RESULT_COMPLETE, prov_info.reg_result, "Failure calling registering device x509 amqp");
+
+        free(prov_info.iothub_uri);
+        free(prov_info.device_id);
 
         Prov_Device_LL_Destroy(handle);
     }
 
     TEST_FUNCTION(dps_register_device_amqp_ws_success)
     {
-        time_t begin_operation;
-        time_t now_time;
+        PROV_CLIENT_E2E_INFO prov_info;
+        memset(&prov_info, 0, sizeof(PROV_CLIENT_E2E_INFO));
+
         // arrange
         PROV_DEVICE_LL_HANDLE handle;
         handle = create_dps_handle(Prov_Device_AMQP_WS_Protocol);
 
         // act
-        PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &g_prov_info, dps_registation_status, &g_prov_info);
+        PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &prov_info, dps_registation_status, &prov_info);
         ASSERT_ARE_EQUAL_WITH_MSG(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
 
-        begin_operation = time(NULL);
-        do
-        {
-            Prov_Device_LL_DoWork(handle);
-            ThreadAPI_Sleep(1);
-        } while ((g_prov_info.reg_result == REG_RESULT_BEGIN) &&
-            ((now_time = time(NULL)),
-            (difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME)));
+        wait_for_dps_result(handle, &prov_info);
 
         // Assert
-        ASSERT_ARE_EQUAL_WITH_MSG(int, REG_RESULT_COMPLETE, g_prov_info.reg_result, "Failure calling registering device");
+        ASSERT_ARE_EQUAL_WITH_MSG(int, REG_RESULT_COMPLETE, prov_info.reg_result, "Failure calling registering device x509 amqp ws");
 
+        free(prov_info.iothub_uri);
+        free(prov_info.device_id);
+        
         Prov_Device_LL_Destroy(handle);
     }
 #endif
@@ -392,57 +345,50 @@ BEGIN_TEST_SUITE(dps_client_e2e)
 #if USE_MQTT
     TEST_FUNCTION(dps_register_device_mqtt_success)
     {
-        time_t begin_operation;
-        time_t now_time;
+        PROV_CLIENT_E2E_INFO prov_info;
+        memset(&prov_info, 0, sizeof(PROV_CLIENT_E2E_INFO));
+
         // arrange
         PROV_DEVICE_LL_HANDLE handle;
         handle = create_dps_handle(Prov_Device_MQTT_Protocol);
 
         // act
-        PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &g_prov_info, dps_registation_status, &g_prov_info);
+        PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &prov_info, dps_registation_status, &prov_info);
         ASSERT_ARE_EQUAL_WITH_MSG(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
 
-        begin_operation = time(NULL);
-        do
-        {
-            Prov_Device_LL_DoWork(handle);
-            ThreadAPI_Sleep(1);
-        } while ((g_prov_info.reg_result == REG_RESULT_BEGIN) &&
-            ((now_time = time(NULL)),
-            (difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME)));
+        wait_for_dps_result(handle, &prov_info);
 
         // Assert
-        ASSERT_ARE_EQUAL_WITH_MSG(int, REG_RESULT_COMPLETE, g_prov_info.reg_result, "Failure calling registering device");
+        ASSERT_ARE_EQUAL_WITH_MSG(int, REG_RESULT_COMPLETE, prov_info.reg_result, "Failure calling registering device with x509 mqtt");
 
+        free(prov_info.iothub_uri);
+        free(prov_info.device_id);
+       
         Prov_Device_LL_Destroy(handle);
     }
 
     TEST_FUNCTION(dps_register_device_mqtt_ws_success)
     {
-        time_t begin_operation;
-        time_t now_time;
+        PROV_CLIENT_E2E_INFO prov_info;
+        memset(&prov_info, 0, sizeof(PROV_CLIENT_E2E_INFO));
+
         // arrange
         PROV_DEVICE_LL_HANDLE handle;
         handle = create_dps_handle(Prov_Device_MQTT_WS_Protocol);
 
         // act
-        PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &g_prov_info, dps_registation_status, &g_prov_info);
+        PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &prov_info, dps_registation_status, &prov_info);
         ASSERT_ARE_EQUAL_WITH_MSG(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
 
-        begin_operation = time(NULL);
-        do
-        {
-            Prov_Device_LL_DoWork(handle);
-            ThreadAPI_Sleep(1);
-        } while ((g_prov_info.reg_result == REG_RESULT_BEGIN) &&
-            ((now_time = time(NULL)),
-            (difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME)));
+        wait_for_dps_result(handle, &prov_info);
 
         // Assert
-        ASSERT_ARE_EQUAL_WITH_MSG(int, REG_RESULT_COMPLETE, g_prov_info.reg_result, "Failure calling registering device");
+        ASSERT_ARE_EQUAL_WITH_MSG(int, REG_RESULT_COMPLETE, prov_info.reg_result, "Failure calling registering device x509 mqtt ws");
 
+        free(prov_info.iothub_uri);
+        free(prov_info.device_id);
+        
         Prov_Device_LL_Destroy(handle);
     }
 #endif
-
 END_TEST_SUITE(dps_client_e2e)
