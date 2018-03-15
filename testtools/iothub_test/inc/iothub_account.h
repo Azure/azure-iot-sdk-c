@@ -26,6 +26,8 @@ typedef struct IOTHUB_PROVISIONED_DEVICE_TAG {
     char* primaryAuthentication;
     char* certificate;
     char* deviceId;
+    char* moduleId;
+    char* moduleConnectionString;
     IOTHUB_ACCOUNT_AUTH_METHOD howToCreate;
 } IOTHUB_PROVISIONED_DEVICE;
 
@@ -36,8 +38,8 @@ typedef struct IOTHUB_ACCOUNT_CONFIG_TAG
 
 typedef struct IOTHUB_ACCOUNT_INFO_TAG* IOTHUB_ACCOUNT_INFO_HANDLE;
 
-extern IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init(void);
-extern IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG* config);
+extern IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init(bool testingModules);
+extern IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG* config, bool testingModules);
 extern void IoTHubAccount_deinit(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
 
 extern const char* IoTHubAccount_GetEventHubConnectionString(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);

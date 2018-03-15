@@ -7,7 +7,7 @@
 #include "iothub_client_ll.h"
 #include "iothub_account.h"
 
-extern void dt_e2e_init(void);
+extern void dt_e2e_init(bool testing_modules);
 extern void dt_e2e_deinit(void);
 extern void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACCOUNT_AUTH_METHOD accountAuthMethod);
 extern void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACCOUNT_AUTH_METHOD accountAuthMethod);

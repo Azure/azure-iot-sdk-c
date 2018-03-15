@@ -380,7 +380,7 @@ BEGIN_TEST_SUITE(serializer_e2e)
         ASSERT_ARE_EQUAL(int, 0, platform_init() );
         ASSERT_ARE_EQUAL(int, 0, serializer_init(NULL));
 
-        g_iothubAcctInfo = IoTHubAccount_Init();
+        g_iothubAcctInfo = IoTHubAccount_Init(false);
         ASSERT_IS_NOT_NULL(g_iothubAcctInfo);
 
         g_uniqueTestId = 0;

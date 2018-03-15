@@ -96,7 +96,7 @@ void e2e_uploadblob_init()
 
     int result = platform_init();
     ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "Platform init failed");
-    g_iothubAcctInfo = IoTHubAccount_Init();
+    g_iothubAcctInfo = IoTHubAccount_Init(false);
     ASSERT_IS_NOT_NULL_WITH_MSG(g_iothubAcctInfo, "Could not initialize IoTHubAccount");
     platform_init();
 }

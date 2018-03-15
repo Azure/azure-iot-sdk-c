@@ -454,11 +454,11 @@ static char* get_target_mac_address()
 #endif //AZIOT_LINUX
 
 
-void e2e_init(TEST_PROTOCOL_TYPE protocol_type)
+void e2e_init(TEST_PROTOCOL_TYPE protocol_type, bool testing_modules)
 {
     int result = platform_init();
     ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "Platform init failed");
-    g_iothubAcctInfo = IoTHubAccount_Init();
+    g_iothubAcctInfo = IoTHubAccount_Init(testing_modules);
     ASSERT_IS_NOT_NULL_WITH_MSG(g_iothubAcctInfo, "Could not initialize IoTHubAccount");
     platform_init();
 
@@ -484,7 +484,9 @@ IOTHUB_CLIENT_HANDLE client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUs
     IOTHUB_CLIENT_HANDLE iotHubClientHandle;
     IOTHUB_CLIENT_RESULT result;
 
-    iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
+    const char* connectionString = deviceToUse->moduleConnectionString ? deviceToUse->moduleConnectionString : deviceToUse->connectionString;
+
+    iotHubClientHandle = IoTHubClient_CreateFromConnectionString(connectionString, protocol);
     ASSERT_IS_NOT_NULL_WITH_MSG(iotHubClientHandle, "Could not create IoTHubClient");
 
     if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509) {
@@ -1092,7 +1094,15 @@ static void service_send_c2d(IOTHUB_MESSAGING_CLIENT_HANDLE iotHubMessagingHandl
 {
     IOTHUB_MESSAGING_RESULT iotHubMessagingResult;
 
-    iotHubMessagingResult = IoTHubMessaging_SendAsync(iotHubMessagingHandle, deviceToUse->deviceId, receiveUserContext->msgHandle, sendCompleteCallback, receiveUserContext);
+    if (deviceToUse->moduleId)
+    {
+        iotHubMessagingResult = IoTHubMessaging_SendAsyncModule(iotHubMessagingHandle, deviceToUse->deviceId, deviceToUse->moduleId, receiveUserContext->msgHandle, sendCompleteCallback, receiveUserContext);
+    }
+    else
+    {
+        iotHubMessagingResult = IoTHubMessaging_SendAsync(iotHubMessagingHandle, deviceToUse->deviceId, receiveUserContext->msgHandle, sendCompleteCallback, receiveUserContext);
+    }
+ 
     ASSERT_ARE_EQUAL_WITH_MSG(int, IOTHUB_MESSAGING_OK, iotHubMessagingResult, "IoTHubMessaging_SendAsync failed, could not send C2D message to the device");
 }
 

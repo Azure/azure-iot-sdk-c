@@ -14,7 +14,7 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_dm_e2e_sfc)
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
         TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
-        device_method_e2e_init();
+        device_method_e2e_init(false);
     }
 
     TEST_SUITE_CLEANUP(TestClassCleanup)

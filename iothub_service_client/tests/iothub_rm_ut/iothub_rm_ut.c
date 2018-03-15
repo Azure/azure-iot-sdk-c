@@ -1210,6 +1210,8 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
 
         // act
         IoTHubRegistryManager_Destroy(handle);
