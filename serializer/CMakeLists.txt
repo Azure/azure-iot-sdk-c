@@ -83,17 +83,14 @@ if (${build_as_dynamic})
     linkSharedUtil(serializer)
 
     target_link_libraries(serializer_dll
+		aziotsharedutil
         parson
     )
 
-    if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+    if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
         target_link_libraries(serializer_dll
             "-Wl,--exclude-libs,libparson.a"
         )
-    # else()
-        # target_link_libraries(serializer_dll
-            # parson
-        # )
     endif()
 
     set_target_properties(serializer_dll PROPERTIES
