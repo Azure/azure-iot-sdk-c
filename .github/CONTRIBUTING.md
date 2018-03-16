@@ -1,22 +1,14 @@
 **The Azure IoT SDKs team wants to hear from you!**
 
-- [Ask a question](#ask-a-question)
-- [File a bug](#file-a-bug)
-- [Contribute documentation](#contribute-documentation)
-- [Contribute code](#contribute-code)
+- [Need support?](#need-support)
+- [Contribute code or documentation](#contribute-code-or-documentation)
 
-# Ask a question
-Our team monitors Stack Overflow, especially the [azure-iot-hub](http://stackoverflow.com/questions/tagged/azure-iot-hub) tag. It really is the best place to ask.
+# Need Support?
+* Have a feature request for SDKs? Please post it on [User Voice](https://feedback.azure.com/forums/321918-azure-iot) to help us prioritize.
+* Have a technical question? Ask on [Stack Overflow](https://stackoverflow.com/questions/tagged/azure-iot-hub) with tag "azure-iot-hub".
+* Need Support? Every customer with an active Azure subscription has access to [support](https://docs.microsoft.com/en-us/azure/azure-supportability/how-to-create-azure-support-request) with guaranteed response time.  Consider submitting a ticket and get assistance from Microsoft support team
+* Found a bug? Please help us fix it by thoroughly documenting it and filing an issue on GitHub ([C](https://github.com/Azure/azure-iot-sdk-c), [Java](https://github.com/Azure/azure-iot-sdk-java), [.NET](https://github.com/Azure/azure-iot-sdk-csharp), [Node.js](https://github.com/Azure/azure-iot-sdk-node), [Python](https://github.com/Azure/azure-iot-sdk-python)).
 
-We monitor the Github issues section specifically for bugs found with our SDK, however we will reply to questions asked using Github issues too.
-
-# File a bug
-That is definitely something we want to hear about. Please open an issue on github, we'll address it as fast as possible. Typically here's the information we're going to ask for to get started:
-
-- What version of the SDK you are using?
-- Do you have a snippet of code that would help us reproduce the bug?
-- Do you have logs showing what's happening?
-- And please share all repro steps for your issue.
 
 *Our SDKs are open-source and we do accept pull-requests if you feel like taking a stab at fixing the bug and maybe adding your name to our commit history :) Please mention any relevant issue number in the pull request description.* Please see [Contribute code](#contribute-code) below.
 
