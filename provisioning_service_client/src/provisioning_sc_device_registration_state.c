@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include <stdlib.h>  
+#include <stdlib.h>
 
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/gballoc.h"
@@ -9,6 +9,7 @@
 #include "provisioning_sc_device_registration_state.h"
 #include "provisioning_sc_json_const.h"
 #include "provisioning_sc_shared_helpers.h"
+#include "provisioning_sc_models_serializer.h"
 #include "parson.h"
 
 typedef struct DEVICE_REGISTRATION_STATE_TAG
@@ -140,6 +141,39 @@ DEVICE_REGISTRATION_STATE_HANDLE deviceRegistrationState_fromJson(JSON_Object* r
 
     return new_device_reg_state;
 }
+
+
+DEVICE_REGISTRATION_STATE_HANDLE deviceRegistrationState_deserializeFromJson(const char* json_string)
+{
+    DEVICE_REGISTRATION_STATE_HANDLE new_drs = NULL;
+    JSON_Value* root_value = NULL;
+    JSON_Object* root_object = NULL;
+
+    if (json_string == NULL)
+    {
+        LogError("Cannot deserialize NULL");
+    }
+    else if ((root_value = json_parse_string(json_string)) == NULL)
+    {
+        LogError("Parsing JSON string failed");
+    }
+    else if ((root_object = json_value_get_object(root_value)) == NULL)
+    {
+        LogError("Creating JSON object failed");
+    }
+    else
+    {
+        if ((new_drs = deviceRegistrationState_fromJson(root_object)) == NULL)
+        {
+            LogError("Creating new Device Registration State failed");
+        }
+        json_value_free(root_value); //implicitly frees root_object
+        root_value = NULL;
+    }
+
+    return new_drs;
+}
+
 
 /* Acessor Functions */
 const char* deviceRegistrationState_getRegistrationId(DEVICE_REGISTRATION_STATE_HANDLE drs)

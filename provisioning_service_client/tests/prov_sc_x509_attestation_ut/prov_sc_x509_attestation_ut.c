@@ -29,6 +29,8 @@ void real_free(void* ptr)
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/strings.h"
 #include "parson.h"
 
 #include "azure_c_shared_utility/umock_c_prod.h"
@@ -46,6 +48,12 @@ MOCKABLE_FUNCTION(, void, json_value_free, JSON_Value*, value);
 MOCKABLE_FUNCTION(, JSON_Object*, json_value_get_object, const JSON_Value*, value);
 MOCKABLE_FUNCTION(, void, json_free_serialized_string, char*, string);
 MOCKABLE_FUNCTION(, JSON_Value*, json_object_get_wrapping_value, const JSON_Object*, object);
+MOCKABLE_FUNCTION(, JSON_Value*, json_value_init_array);
+MOCKABLE_FUNCTION(, JSON_Array*, json_value_get_array, const JSON_Value*, value);
+MOCKABLE_FUNCTION(, JSON_Status, json_array_append_value, JSON_Array*, array, JSON_Value*, value);
+MOCKABLE_FUNCTION(, size_t, json_array_get_count, const JSON_Array*, array);
+MOCKABLE_FUNCTION(, JSON_Object*, json_array_get_object, const JSON_Array*, array, size_t, index);
+MOCKABLE_FUNCTION(, JSON_Array*, json_object_get_array, const JSON_Object*, object, const char*, name);
 
 #undef ENABLE_MOCKS
 
@@ -65,12 +73,15 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 
 //Control Parameters
 static char* DUMMY_CERT1 = "DUMMY_CERT1";
+static char* DUMMY_CERT1_64 = "DUMMY_CERT1_64";
 static char* DUMMY_CERT2 = "DUMMY_CERT2";
+static char* DUMMY_CERT2_64 = "DUMMY_CERT2_64";
 static char* DUMMY_REF1 = "DUMMY_REF1";
 static char* DUMMY_REF2 = "DUMMY_REF2";
 static char* DUMMY_JSON = "{\"json\":\"dummy\"}";
 
 static const char* DUMMY_STRING = "dummy";
+static const char* DUMMY_STRING_64 = "dummy_64";
 static int DUMMY_NUMBER = 1111;
 static const char* DUMMY_SUBJECT_NAME = "SUBJECT_NAME";
 static const char* DUMMY_SHA1_THUMBPRINT = "SHA1_THUMBPRINT";
@@ -83,6 +94,7 @@ static int DUMMY_VERSION = 4747;
 
 #define TEST_JSON_VALUE (JSON_Value*)0x11111111
 #define TEST_JSON_OBJECT (JSON_Object*)0x11111112
+#define TEST_STRING_HANDLE (STRING_HANDLE)0x11111113
 
 static int my_mallocAndStrcpy_s(char** destination, const char* source)
 {
@@ -123,6 +135,14 @@ static void register_global_mocks()
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_object_get_number, 0);
     REGISTER_GLOBAL_MOCK_RETURN(json_object_set_number, JSONSuccess);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_object_set_number, JSONFailure);
+
+    //base64
+    REGISTER_GLOBAL_MOCK_RETURN(Base64_Encode_Bytes, TEST_STRING_HANDLE);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Encode_Bytes, NULL);
+
+    //string
+    REGISTER_GLOBAL_MOCK_RETURN(STRING_c_str, DUMMY_STRING_64);
+    REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
 }
 
 BEGIN_TEST_SUITE(prov_sc_x509_attestation_ut)
@@ -247,18 +267,21 @@ static void expected_calls_x509Attestation_destroy(X509_CERTIFICATE_TYPE cert_ty
 
 static void expected_calls_x509CAReferences_create(const char* primary_ref, const char* secondary_ref)
 {
+    (void)primary_ref;
+    (void)secondary_ref;
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, primary_ref));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     if (secondary_ref != NULL)
     {
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, secondary_ref));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     }
 }
 
 static void expected_calls_x509CertificateWithInfo_create(const char* cert)
 {
+    (void)cert;
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, cert));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 }
 
 static void expected_calls_x509Certificates_create(const char* primary_cert, const char* secondary_cert)
@@ -271,8 +294,23 @@ static void expected_calls_x509Certificates_create(const char* primary_cert, con
     }
 }
 
+static void expected_calls_convert_cert_to_b64(const char* in, const char* out)
+{
+    STRICT_EXPECTED_CALL(Base64_Encode_Bytes((const unsigned char*)in, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(out);
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+}
+
 static void expected_calls_x509Attestation_create(X509_CERTIFICATE_TYPE cert_type, const char* primary_cert, const char* secondary_cert)
 {
+    expected_calls_convert_cert_to_b64(primary_cert, DUMMY_CERT1_64);
+    primary_cert = DUMMY_CERT1_64;
+    if (secondary_cert != NULL)
+    {
+        expected_calls_convert_cert_to_b64(secondary_cert, DUMMY_CERT2_64);
+        secondary_cert = DUMMY_CERT2_64;
+    }
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     if (cert_type == X509_CERTIFICATE_TYPE_CLIENT || cert_type == X509_CERTIFICATE_TYPE_SIGNING)
     {
@@ -282,6 +320,8 @@ static void expected_calls_x509Attestation_create(X509_CERTIFICATE_TYPE cert_typ
     {
         expected_calls_x509CAReferences_create(primary_cert, secondary_cert);
     }
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 }
 
 static void expected_calls_x509CertificateInfo_fromJson() //7 - 27
@@ -1185,15 +1225,15 @@ TEST_FUNCTION(x509Attestation_create_client_both_certs_error)
     expected_calls_x509Attestation_create(X509_CERTIFICATE_TYPE_CLIENT, DUMMY_CERT1, DUMMY_CERT2);
     umock_c_negative_tests_snapshot();
 
-    //size_t calls_cannot_fail[] = { };
-    size_t num_cannot_fail = 0; //sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0]);
+    size_t calls_cannot_fail[] = { 1, 3, 5, 7, 14, 15};
+    size_t num_cannot_fail = sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0]);
     size_t count = umock_c_negative_tests_call_count();
     size_t test_num = 0;
     size_t test_max = count - num_cannot_fail;
 
     for (size_t index = 0; index < count; index++)
     {
-        if (should_skip_index(index, NULL, num_cannot_fail) != 0)
+        if (should_skip_index(index, calls_cannot_fail, num_cannot_fail) != 0)
             continue;
         test_num++;
 
@@ -1272,15 +1312,15 @@ TEST_FUNCTION(x509Attestation_create_signing_both_certs_error)
     expected_calls_x509Attestation_create(X509_CERTIFICATE_TYPE_SIGNING, DUMMY_CERT1, DUMMY_CERT2);
     umock_c_negative_tests_snapshot();
 
-    //size_t calls_cannot_fail[] = { };
-    size_t num_cannot_fail = 0; //sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0]);
+    size_t calls_cannot_fail[] = { 1, 3, 5, 7, 14, 15};
+    size_t num_cannot_fail = sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0]);
     size_t count = umock_c_negative_tests_call_count();
     size_t test_num = 0;
     size_t test_max = count - num_cannot_fail;
 
     for (size_t index = 0; index < count; index++)
     {
-        if (should_skip_index(index, NULL, num_cannot_fail) != 0)
+        if (should_skip_index(index, calls_cannot_fail, num_cannot_fail) != 0)
             continue;
         test_num++;
 
@@ -1355,15 +1395,15 @@ TEST_FUNCTION(x509Attestation_create_ca_both_refs_error)
     expected_calls_x509Attestation_create(X509_CERTIFICATE_TYPE_CA_REFERENCES, DUMMY_CERT1, DUMMY_CERT2);
     umock_c_negative_tests_snapshot();
 
-    //size_t calls_cannot_fail[] = { };
-    size_t num_cannot_fail = 0; //sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0]);
+    size_t calls_cannot_fail[] = { 1, 3, 5, 7, 12, 13 };
+    size_t num_cannot_fail = sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0]);
     size_t count = umock_c_negative_tests_call_count();
     size_t test_num = 0;
     size_t test_max = count - num_cannot_fail;
 
     for (size_t index = 0; index < count; index++)
     {
-        if (should_skip_index(index, NULL, num_cannot_fail) != 0)
+        if (should_skip_index(index, calls_cannot_fail, num_cannot_fail) != 0)
             continue;
         test_num++;
 
