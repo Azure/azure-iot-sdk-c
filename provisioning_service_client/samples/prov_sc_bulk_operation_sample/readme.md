@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a quick tutorial with the steps to create and delete Individual Enrollmens with Bulk Operations on the Microsoft Azure IoT Hub Device Provisioning Service using the C SDK.
+This is a quick tutorial with the steps to create and delete Individual Enrollments with Bulk Operations on the Microsoft Azure IoT Hub Device Provisioning Service using the C SDK.
 
 ## References
 
