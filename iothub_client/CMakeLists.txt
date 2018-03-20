@@ -305,6 +305,7 @@ if(${use_http})
             OUTPUT_NAME "iothub_client_http_transport"
             ARCHIVE_OUTPUT_NAME "iothub_client_http_transport_dll_import"
             ENABLE_EXPORTS YES
+			PDB_NAME "iothub_client_http_transport_dll"
             VERSION ${IOT_SDK_VERSION}
             SOVERSION ${IOT_SDK_VERION_MAJOR}
             BUILD_WITH_INSTALL_RPATH TRUE
@@ -366,6 +367,7 @@ if(${use_amqp})
             OUTPUT_NAME "iothub_client_amqp_transport"
             ARCHIVE_OUTPUT_NAME "iothub_client_amqp_transport_dll_import"
             ENABLE_EXPORTS YES
+			PDB_NAME "iothub_client_aqmp_transport_dll"
             VERSION ${IOT_SDK_VERSION}
             SOVERSION ${IOT_SDK_VERION_MAJOR}
             BUILD_WITH_INSTALL_RPATH TRUE
@@ -392,6 +394,7 @@ if(${use_amqp})
             OUTPUT_NAME "iothub_client_amqp_ws_transport"
             ARCHIVE_OUTPUT_NAME "iothub_client_amqp_ws_transport_dll_import"
             ENABLE_EXPORTS YES
+			PDB_NAME "iothub_client_aqmp_ws_transport_dll"
             VERSION ${IOT_SDK_VERSION}
             SOVERSION ${IOT_SDK_VERION_MAJOR}
             BUILD_WITH_INSTALL_RPATH TRUE
@@ -448,6 +451,7 @@ if(${use_mqtt})
             OUTPUT_NAME "iothub_client_mqtt_transport"
             ARCHIVE_OUTPUT_NAME "iothub_client_mqtt_transport_dll_import"
             ENABLE_EXPORTS YES
+			PDB_NAME "iothub_client_mqtt_transport_dll"
             VERSION ${IOT_SDK_VERSION}
             SOVERSION ${IOT_SDK_VERION_MAJOR}
             BUILD_WITH_INSTALL_RPATH TRUE
@@ -475,6 +479,7 @@ if(${use_mqtt})
             OUTPUT_NAME "iothub_client_mqtt_ws_transport"
             ARCHIVE_OUTPUT_NAME "iothub_client_mqtt_ws_transport_dll_import"
             ENABLE_EXPORTS YES
+			PDB_NAME "iothub_client_mqtt_ws_transport_dll"
             VERSION ${IOT_SDK_VERSION}
             SOVERSION ${IOT_SDK_VERION_MAJOR}
             BUILD_WITH_INSTALL_RPATH TRUE
