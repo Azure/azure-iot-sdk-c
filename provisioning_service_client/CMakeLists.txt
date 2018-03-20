@@ -70,6 +70,8 @@ if (${build_as_dynamic})
 		SOVERSION ${IOT_SDK_VERION_MAJOR}
 		BUILD_WITH_INSTALL_RPATH TRUE
 	)
+	
+	target_link_libraries(provisioning_service_client uhttp)
 else()
     add_library(provisioning_service_client 
 		${provisioning_service_client_c_files} 
