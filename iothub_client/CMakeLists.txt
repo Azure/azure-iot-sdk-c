@@ -14,7 +14,6 @@ set(iothub_client_ll_transport_c_files
     ./src/version.c
     ./src/iothub_client_authorization.c
     ./src/iothub_message.c
-    ./src/iothub_client_diagnostic.c
  )
 
 set(iothub_client_libs)
@@ -39,26 +38,12 @@ set(iothub_client_libs ${iothub_client_libs}
     parson
 )
 
-if(NOT dont_use_uploadtoblob)
-    set(iothub_client_ll_transport_c_files
-        ${iothub_client_ll_transport_c_files}
-        ./src/iothub_client_ll_uploadtoblob.c
-        ./src/blob.c
-    )
-
-    set(iothub_client_ll_transport_h_files
-        ${iothub_client_ll_transport_h_files}
-        ./inc/blob.h
-    )
-endif()
-
 set(iothub_client_ll_transport_h_files
     ./inc/iothub_client_authorization.h
     ./inc/iothub_message.h
     ./inc/iothub_client_version.h
     ./inc/iothub_transport_ll.h
     ./inc/blob.h
-    ./inc/iothub_client_diagnostic.h
 )
 
 if (${use_prov_client})
@@ -83,6 +68,7 @@ set(iothub_client_c_files
 	./src/iothub_client_ll.c
     ./src/version.c
     ./src/iothubtransport.c
+    ./src/iothub_client_diagnostic.c
 )
 
 set(iothub_client_h_files
@@ -92,7 +78,21 @@ set(iothub_client_h_files
     ./inc/iothub_client_version.h
     ./inc/iothubtransport.h
     ./inc/iothub_client_private.h
+    ./inc/iothub_client_diagnostic.h
 )
+
+if(NOT dont_use_uploadtoblob)
+    set(iothub_client_c_files
+        ${iothub_client_c_files}
+        ./src/iothub_client_ll_uploadtoblob.c
+        ./src/blob.c
+    )
+
+    set(iothub_client_h_files
+        ${iothub_client_h_files}
+        ./inc/blob.h
+    )
+endif()
 
 set(iothub_client_h_install_files
     ${iothub_client_ll_transport_h_files}
