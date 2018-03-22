@@ -56,43 +56,39 @@ if (${use_prov_client})
     )
 endif()
 
-if(NOT ${dont_use_uploadtoblob})
-    set(iothub_client_ll_transport_h_files
-        ${iothub_client_ll_transport_h_files}
-        ./inc/iothub_client_ll_uploadtoblob.h
-    )
-endif()
-
-set(iothub_client_c_files
-    ./src/iothub_client.c
-	./src/iothub_client_ll.c
-    ./src/version.c
-    ./src/iothubtransport.c
-    ./src/iothub_client_diagnostic.c
-)
-
-set(iothub_client_h_files
-    ./inc/iothub_client.h
-	./inc/iothub_client_ll.h
-    ./inc/iothub_client_options.h
-    ./inc/iothub_client_version.h
-    ./inc/iothubtransport.h
-    ./inc/iothub_client_private.h
-    ./inc/iothub_client_diagnostic.h
-)
-
 if(NOT dont_use_uploadtoblob)
+    set(iothub_client_h_files
+        ${iothub_client_h_files}
+        ./inc/iothub_client_ll_uploadtoblob.h
+        ./inc/blob.h
+    )
     set(iothub_client_c_files
         ${iothub_client_c_files}
         ./src/iothub_client_ll_uploadtoblob.c
         ./src/blob.c
     )
 
-    set(iothub_client_h_files
-        ${iothub_client_h_files}
-        ./inc/blob.h
-    )
 endif()
+
+set(iothub_client_c_files
+    ${iothub_client_c_files}
+    ./src/iothub_client.c
+    ./src/iothub_client_ll.c
+    ./src/version.c
+    ./src/iothubtransport.c
+    ./src/iothub_client_diagnostic.c
+)
+
+set(iothub_client_h_files
+    ${iothub_client_h_files}
+    ./inc/iothub_client.h
+    ./inc/iothub_client_ll.h
+    ./inc/iothub_client_options.h
+    ./inc/iothub_client_version.h
+    ./inc/iothubtransport.h
+    ./inc/iothub_client_private.h
+    ./inc/iothub_client_diagnostic.h
+)
 
 set(iothub_client_h_install_files
     ${iothub_client_ll_transport_h_files}
@@ -273,9 +269,9 @@ IF(WIN32)
 ENDIF(WIN32)
 
 if(dont_use_uploadtoblob)
-	set(upload "_no_upload")
+    set(upload "_no_upload")
 else()
-	set(upload "")
+    set(upload "")
 endif()
 
 if(${use_http})
@@ -283,7 +279,7 @@ if(${use_http})
     add_library(iothub_client_http_transport
         ${iothub_client_http_transport_c_files}
         ${iothub_client_http_transport_h_files}
-	)
+    )
     linkSharedUtil(iothub_client_http_transport)
     set(iothub_client_libs
         ${iothub_client_libs}
@@ -291,32 +287,34 @@ if(${use_http})
     )
 
     if(build_as_dynamic)
-		set(transport "http")
-		
-		configure_file(./src/iothub_client_transport${upload}_template.def ${CMAKE_CURRENT_SOURCE_DIR}/src/iothub_client_${transport}_transport_dll_temp.def @ONLY)
-		add_library(iothub_client_http_transport_dll SHARED
+        set(transport "http")
+
+        configure_file(./src/iothub_client_transport${upload}_template.def ${CMAKE_CURRENT_SOURCE_DIR}/src/iothub_client_${transport}_transport_dll_temp.def @ONLY)
+        add_library(iothub_client_http_transport_dll SHARED
             ${iothub_client_http_transport_c_files}
             ${iothub_client_http_transport_h_files}
-			./src/iothub_client_${transport}_transport_dll_temp.def
-		)
+            ./src/iothub_client.c
+            ./src/iothub_client_ll.c
+            ./src/iothub_client_${transport}_transport_dll_temp.def
+        )
         linkSharedUtil(iothub_client_http_transport_dll)
 
         set_target_properties(iothub_client_http_transport_dll PROPERTIES
             OUTPUT_NAME "iothub_client_http_transport"
             ARCHIVE_OUTPUT_NAME "iothub_client_http_transport_dll_import"
             ENABLE_EXPORTS YES
-			PDB_NAME "iothub_client_http_transport_dll"
+            PDB_NAME "iothub_client_http_transport_dll"
             VERSION ${IOT_SDK_VERSION}
             SOVERSION ${IOT_SDK_VERION_MAJOR}
             BUILD_WITH_INSTALL_RPATH TRUE
         )
-		target_link_libraries(iothub_client_http_transport_dll iothub_client parson)
-		
-		if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
-			target_link_libraries(iothub_client_http_transport_dll
-				"-Wl,--exclude-libs,libparson.a"
-			)
-		endif()
+        target_link_libraries(iothub_client_http_transport_dll iothub_client parson)
+
+        if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
+            target_link_libraries(iothub_client_http_transport_dll
+                "-Wl,--exclude-libs,libparson.a"
+            )
+        endif()
 
         set(install_staticlibs ${install_staticlibs} iothub_client_http_transport_dll)
     endif(build_as_dynamic)
@@ -347,54 +345,58 @@ if(${use_amqp})
     )
 
     if (build_as_dynamic)
-		set(transport "amqp")
-		configure_file(./src/iothub_client_transport${upload}_template.def ${CMAKE_CURRENT_SOURCE_DIR}/src/iothub_client_${transport}_transport_dll_temp.def @ONLY)
+        set(transport "amqp")
+        configure_file(./src/iothub_client_transport${upload}_template.def ${CMAKE_CURRENT_SOURCE_DIR}/src/iothub_client_${transport}_transport_dll_temp.def @ONLY)
         add_library(iothub_client_amqp_transport_dll SHARED
             ${iothub_client_amqp_transport_c_files}
             ${iothub_client_amqp_transport_h_files}
-			./src/iothub_client_${transport}_transport_dll_temp.def
+            ./src/iothub_client.c
+            ./src/iothub_client_ll.c
+            ./src/iothub_client_${transport}_transport_dll_temp.def
         )
         linkSharedUtil(iothub_client_amqp_transport_dll)
         target_link_libraries(iothub_client_amqp_transport_dll iothub_client parson uamqp)
-		
-		if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
-			target_link_libraries(iothub_client_amqp_transport_dll
-				"-Wl,--exclude-libs,libparson.a"
-			)
-		endif()
+
+        if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
+            target_link_libraries(iothub_client_amqp_transport_dll
+                "-Wl,--exclude-libs,libparson.a"
+            )
+        endif()
 
         set_target_properties(iothub_client_amqp_transport_dll PROPERTIES
             OUTPUT_NAME "iothub_client_amqp_transport"
             ARCHIVE_OUTPUT_NAME "iothub_client_amqp_transport_dll_import"
             ENABLE_EXPORTS YES
-			PDB_NAME "iothub_client_aqmp_transport_dll"
+            PDB_NAME "iothub_client_aqmp_transport_dll"
             VERSION ${IOT_SDK_VERSION}
             SOVERSION ${IOT_SDK_VERION_MAJOR}
             BUILD_WITH_INSTALL_RPATH TRUE
         )
         set(install_staticlibs ${install_staticlibs} iothub_client_amqp_transport_dll)
 
-		set(transport "amqp_ws")
-		configure_file(./src/iothub_client_transport${upload}_template.def ${CMAKE_CURRENT_SOURCE_DIR}/src/iothub_client_${transport}_transport_dll_temp.def @ONLY)
+        set(transport "amqp_ws")
+        configure_file(./src/iothub_client_transport${upload}_template.def ${CMAKE_CURRENT_SOURCE_DIR}/src/iothub_client_${transport}_transport_dll_temp.def @ONLY)
         add_library(iothub_client_amqp_ws_transport_dll SHARED
             ${iothub_client_amqp_ws_transport_c_files}
             ${iothub_client_amqp_ws_transport_h_files}
-			./src/iothub_client_${transport}_transport_dll_temp.def
+            ./src/iothub_client.c
+            ./src/iothub_client_ll.c
+            ./src/iothub_client_${transport}_transport_dll_temp.def
         )
         linkSharedUtil(iothub_client_amqp_ws_transport_dll)
         target_link_libraries(iothub_client_amqp_ws_transport_dll iothub_client parson uamqp)
-		
-		if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
-			target_link_libraries(iothub_client_amqp_ws_transport_dll
-				"-Wl,--exclude-libs,libparson.a"
-			)
-		endif()
+
+        if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
+            target_link_libraries(iothub_client_amqp_ws_transport_dll
+                "-Wl,--exclude-libs,libparson.a"
+            )
+        endif()
 
         set_target_properties(iothub_client_amqp_ws_transport_dll PROPERTIES
             OUTPUT_NAME "iothub_client_amqp_ws_transport"
             ARCHIVE_OUTPUT_NAME "iothub_client_amqp_ws_transport_dll_import"
             ENABLE_EXPORTS YES
-			PDB_NAME "iothub_client_aqmp_ws_transport_dll"
+            PDB_NAME "iothub_client_aqmp_ws_transport_dll"
             VERSION ${IOT_SDK_VERSION}
             SOVERSION ${IOT_SDK_VERION_MAJOR}
             BUILD_WITH_INSTALL_RPATH TRUE
@@ -430,56 +432,60 @@ if(${use_mqtt})
     )
 
     if (build_as_dynamic)
-		set(transport "mqtt")
-		configure_file(./src/iothub_client_transport${upload}_template.def ${CMAKE_CURRENT_SOURCE_DIR}/src/iothub_client_${transport}_transport_dll_temp.def @ONLY)
+        set(transport "mqtt")
+        configure_file(./src/iothub_client_transport${upload}_template.def ${CMAKE_CURRENT_SOURCE_DIR}/src/iothub_client_${transport}_transport_dll_temp.def @ONLY)
         add_library(iothub_client_mqtt_transport_dll SHARED
             ${iothub_client_mqtt_transport_c_files}
             ${iothub_client_mqtt_transport_h_files}
-			./src/iothub_client_${transport}_transport_dll_temp.def
+            ./src/iothub_client.c
+            ./src/iothub_client_ll.c
+            ./src/iothub_client_${transport}_transport_dll_temp.def
         )
         linkSharedUtil(iothub_client_mqtt_transport_dll)
-		linkMqttLibrary(iothub_client_mqtt_transport_dll)
-		target_link_libraries(iothub_client_mqtt_transport_dll iothub_client parson)
-		
-		if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
-			target_link_libraries(iothub_client_mqtt_transport_dll
-				"-Wl,--exclude-libs,libparson.a"
-			)
-		endif()
-		
+        linkMqttLibrary(iothub_client_mqtt_transport_dll)
+        target_link_libraries(iothub_client_mqtt_transport_dll iothub_client parson)
+
+        if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
+            target_link_libraries(iothub_client_mqtt_transport_dll
+                "-Wl,--exclude-libs,libparson.a"
+            )
+        endif()
+
         set_target_properties(iothub_client_mqtt_transport_dll PROPERTIES
             OUTPUT_NAME "iothub_client_mqtt_transport"
             ARCHIVE_OUTPUT_NAME "iothub_client_mqtt_transport_dll_import"
             ENABLE_EXPORTS YES
-			PDB_NAME "iothub_client_mqtt_transport_dll"
+            PDB_NAME "iothub_client_mqtt_transport_dll"
             VERSION ${IOT_SDK_VERSION}
             SOVERSION ${IOT_SDK_VERION_MAJOR}
             BUILD_WITH_INSTALL_RPATH TRUE
         )
         set(install_staticlibs ${install_staticlibs} iothub_client_mqtt_transport_dll)
 
-		set(transport "mqtt_ws")
-		configure_file(./src/iothub_client_transport${upload}_template.def ${CMAKE_CURRENT_SOURCE_DIR}/src/iothub_client_${transport}_transport_dll_temp.def @ONLY)
+        set(transport "mqtt_ws")
+        configure_file(./src/iothub_client_transport${upload}_template.def ${CMAKE_CURRENT_SOURCE_DIR}/src/iothub_client_${transport}_transport_dll_temp.def @ONLY)
         add_library(iothub_client_mqtt_ws_transport_dll SHARED
             ${iothub_client_mqtt_ws_transport_c_files}
             ${iothub_client_mqtt_ws_transport_h_files}
-			./src/iothub_client_${transport}_transport_dll_temp.def
+            ./src/iothub_client.c
+            ./src/iothub_client_ll.c
+            ./src/iothub_client_${transport}_transport_dll_temp.def
         )
         linkSharedUtil(iothub_client_mqtt_ws_transport_dll)
-		linkMqttLibrary(iothub_client_mqtt_ws_transport_dll)
-		target_link_libraries(iothub_client_mqtt_ws_transport_dll iothub_client parson)
-		
-		if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
-			target_link_libraries(iothub_client_mqtt_ws_transport_dll
-				"-Wl,--exclude-libs,libparson.a"
-			)
-		endif()
+        linkMqttLibrary(iothub_client_mqtt_ws_transport_dll)
+        target_link_libraries(iothub_client_mqtt_ws_transport_dll iothub_client parson)
+
+        if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
+            target_link_libraries(iothub_client_mqtt_ws_transport_dll
+                "-Wl,--exclude-libs,libparson.a"
+            )
+        endif()
 
         set_target_properties(iothub_client_mqtt_ws_transport_dll PROPERTIES
             OUTPUT_NAME "iothub_client_mqtt_ws_transport"
             ARCHIVE_OUTPUT_NAME "iothub_client_mqtt_ws_transport_dll_import"
             ENABLE_EXPORTS YES
-			PDB_NAME "iothub_client_mqtt_ws_transport_dll"
+            PDB_NAME "iothub_client_mqtt_ws_transport_dll"
             VERSION ${IOT_SDK_VERSION}
             SOVERSION ${IOT_SDK_VERION_MAJOR}
             BUILD_WITH_INSTALL_RPATH TRUE
@@ -521,39 +527,39 @@ set(iothub_client_libs
 )
 
 # if (${build_as_dynamic})
-	# add_library(iothub_client_dll SHARED
-		# ${iothub_client_c_files}
-		# ${iothub_client_h_files}
-		# ${iothub_def_file}
-	# )
+    # add_library(iothub_client_dll SHARED
+        # ${iothub_client_c_files}
+        # ${iothub_client_h_files}
+        # ${iothub_def_file}
+    # )
 
-	# target_link_libraries(iothub_client_dll parson)
-		
-	# if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
-		# target_link_libraries(iothub_client_dll
-			# "-Wl,--exclude-libs,libparson.a"
-		# )
-	# endif()
+    # target_link_libraries(iothub_client_dll parson)
 
-	# if (${use_prov_client})
-		# target_link_libraries(iothub_client_dll hsm_security_client prov_auth_client)
-	# endif()
+    # if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
+        # target_link_libraries(iothub_client_dll
+            # "-Wl,--exclude-libs,libparson.a"
+        # )
+    # endif()
 
-	# set_target_properties(iothub_client_dll PROPERTIES
-		# OUTPUT_NAME "iothub_client"
-		# ARCHIVE_OUTPUT_NAME "iothub_client_dll_import"
-		# ENABLE_EXPORTS YES
-		# VERSION ${IOT_SDK_VERSION}
-		# SOVERSION ${IOT_SDK_VERION_MAJOR}
-		# BUILD_WITH_INSTALL_RPATH TRUE
-	# )
+    # if (${use_prov_client})
+        # target_link_libraries(iothub_client_dll hsm_security_client prov_auth_client)
+    # endif()
 
-	# linkSharedUtil(iothub_client_dll)
-	# set(iothub_client_libs
-		# iothub_client_dll
-		# ${iothub_client_libs}
+    # set_target_properties(iothub_client_dll PROPERTIES
+        # OUTPUT_NAME "iothub_client"
+        # ARCHIVE_OUTPUT_NAME "iothub_client_dll_import"
+        # ENABLE_EXPORTS YES
+        # VERSION ${IOT_SDK_VERSION}
+        # SOVERSION ${IOT_SDK_VERION_MAJOR}
+        # BUILD_WITH_INSTALL_RPATH TRUE
+    # )
+
+    # linkSharedUtil(iothub_client_dll)
+    # set(iothub_client_libs
+        # iothub_client_dll
+        # ${iothub_client_libs}
 # )
-	
+
 # endif(${build_as_dynamic})
 
 # Don't build samples under Win32 ARM for now
