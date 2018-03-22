@@ -161,7 +161,8 @@ if (${build_as_dynamic})
         ${PROV_DEVICE_CLEINT_SOURCE_H_FILES}
         ./src/prov_device_client_dll.def
     )
-    target_link_libraries(prov_device_client_dll prov_device_ll_client)
+	linkSharedUtil(prov_device_client_dll)
+	target_link_libraries(prov_device_client_dll prov_device_ll_client)
 
     if(NOT WIN32)
         set_target_properties(prov_device_client_dll PROPERTIES OUTPUT_NAME "prov_device_client")
