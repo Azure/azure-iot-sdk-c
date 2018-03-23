@@ -164,9 +164,20 @@ if (${build_as_dynamic})
 	linkSharedUtil(prov_device_client_dll)
 	target_link_libraries(prov_device_client_dll prov_device_ll_client)
 
+	set_target_properties(prov_device_client_dll PROPERTIES
+		OUTPUT_NAME "prov_device_client"
+		ARCHIVE_OUTPUT_NAME "prov_device_client_dll_import"
+		ENABLE_EXPORTS YES
+		PDB_NAME "prov_device_client_dll"
+		VERSION ${IOT_SDK_VERSION}
+		SOVERSION ${IOT_SDK_VERION_MAJOR}
+		BUILD_WITH_INSTALL_RPATH TRUE
+	)
+	
     if(NOT WIN32)
         set_target_properties(prov_device_client_dll PROPERTIES OUTPUT_NAME "prov_device_client")
     endif()
+	set(provisioning_libs ${provisioning_libs} prov_device_client_dll)
 endif()
 
 if (${use_http})
@@ -306,5 +317,17 @@ if(${use_installed_dependencies})
         DESTINATION
             ${package_location}
     )
+else()
+    # Install Provisioning libs
+    if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
+        set(CMAKE_INSTALL_LIBDIR "lib")
+    endif()
 
+    install(TARGETS ${provisioning_libs}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/../bin
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
+    )
+    install(FILES ${provisioning_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot/azure_prov_client)
 endif()
