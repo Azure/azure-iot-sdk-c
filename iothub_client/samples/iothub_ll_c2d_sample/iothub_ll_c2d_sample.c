@@ -10,24 +10,34 @@
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 
-#ifdef USE_MQTT
-#include "iothubtransportmqtt.h"
-#ifdef USE_WEBSOCKETS
-#include "iothubtransportmqtt_websockets.h"
-#endif
-#endif
-#ifdef USE_AMQP
-#include "iothubtransportamqp.h"
-#ifdef USE_WEBSOCKETS
-#include "iothubtransportamqp_websockets.h"
-#endif
-#endif
-#ifdef USE_HTTP
-#include "iothubtransporthttp.h"
-#endif
+// The protocol you wish to use should be uncommented
+//
+#define SAMPLE_HTTP
+//#define SAMPLE_MQTT
+//#define SAMPLE_MQTT_OVER_WEBSOCKETS
+//#define SAMPLE_AMQP
+//#define SAMPLE_AMQP_OVER_WEBSOCKETS
+
+#ifdef SAMPLE_MQTT
+    #include "iothubtransportmqtt.h"
+#endif // SAMPLE_MQTT
+#ifdef SAMPLE_MQTT_OVER_WEBSOCKETS
+    #include "iothubtransportmqtt_websockets.h"
+#endif // SAMPLE_MQTT_OVER_WEBSOCKETS
+#ifdef SAMPLE_AMQP
+    #include "iothubtransportamqp.h"
+#endif // SAMPLE_AMQP
+#ifdef SAMPLE_AMQP_OVER_WEBSOCKETS
+    #include "iothubtransportamqp_websockets.h"
+#endif // SAMPLE_AMQP_OVER_WEBSOCKETS
+#ifdef SAMPLE_HTTP
+    #include "iothubtransporthttp.h"
+#endif // SAMPLE_HTTP
 
 #include "iothub_client_options.h"
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
 #include "certs.h"
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 /* Paste in the your iothub connection string  */
 static const char* connectionString = "[device connection string]";
@@ -91,17 +101,21 @@ int main(void)
     size_t messages_count = 0;
 
     // Select the Protocol to use with the connection
-#ifdef USE_AMQP
-    //protocol = AMQP_Protocol_over_WebSocketsTls;
-    protocol = AMQP_Protocol;
-#endif
-#ifdef USE_MQTT
-    //protocol = MQTT_Protocol;
-    //protocol = MQTT_WebSocket_Protocol;
-#endif
-#ifdef USE_HTTP
-    //protocol = HTTP_Protocol;
-#endif
+#ifdef SAMPLE_MQTT
+        protocol = MQTT_Protocol;
+#endif // SAMPLE_MQTT
+#ifdef SAMPLE_MQTT_OVER_WEBSOCKETS
+        protocol = MQTT_WebSocket_Protocol;
+#endif // SAMPLE_MQTT_OVER_WEBSOCKETS
+#ifdef SAMPLE_AMQP
+        protocol = AMQP_Protocol;
+#endif // SAMPLE_AMQP
+#ifdef SAMPLE_AMQP_OVER_WEBSOCKETS
+        protocol = AMQP_Protocol_over_WebSocketsTls;
+#endif // SAMPLE_AMQP_OVER_WEBSOCKETS
+#ifdef SAMPLE_HTTP
+        protocol = HTTP_Protocol;
+#endif // SAMPLE_HTTP
 
     IOTHUB_CLIENT_LL_HANDLE iothub_ll_handle;
 
@@ -118,7 +132,9 @@ int main(void)
     //IoTHubClient_LL_SetOption(iothub_ll_handle, OPTION_LOG_TRACE, &traceOn);
     // Setting the Trusted Certificate.  This is only necessary on system with without
     // built in certificate stores.
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
     IoTHubClient_LL_SetOption(iothub_ll_handle, OPTION_TRUSTED_CERT, certificates);
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
 
     if (IoTHubClient_LL_SetMessageCallback(iothub_ll_handle, receive_msg_callback, &messages_count) != IOTHUB_CLIENT_OK)
     {
