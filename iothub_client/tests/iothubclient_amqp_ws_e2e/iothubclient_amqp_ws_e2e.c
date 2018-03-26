@@ -37,6 +37,7 @@ BEGIN_TEST_SUITE(iothubclient_amqp_ws_e2e)
         e2e_recv_message_test_sas(AMQP_Protocol_over_WebSocketsTls);
     }
 
+#ifndef __APPLE__
     TEST_FUNCTION(IoTHub_AMQP_SendEvent_e2e_x509)
     {
 #ifdef AZIOT_LINUX
@@ -52,5 +53,5 @@ BEGIN_TEST_SUITE(iothubclient_amqp_ws_e2e)
 #endif
         e2e_recv_message_test_x509(AMQP_Protocol_over_WebSocketsTls);
     }
-
+#endif
 END_TEST_SUITE(iothubclient_amqp_ws_e2e)

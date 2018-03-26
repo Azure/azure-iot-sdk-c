@@ -11,30 +11,34 @@ endif()
 compileAsC99()
 
 set(provisioning_service_client_c_files
-../deps/parson/parson.c
 ./src/provisioning_sc_attestation_mechanism.c
+./src/provisioning_sc_bulk_operation.c
 ./src/provisioning_sc_device_registration_state.c
 ./src/provisioning_sc_enrollment.c
+./src/provisioning_sc_query.c
+./src/provisioning_sc_shared_helpers.c
 ./src/provisioning_sc_tpm_attestation.c
 ./src/provisioning_sc_twin.c
-./src/provisioning_sc_shared_helpers.c
 ./src/provisioning_sc_x509_attestation.c
 ./src/provisioning_service_client.c
+../deps/parson/parson.c
 )
 
 set(provisioning_service_client_h_files
-../deps/parson/parson.h
 ./inc/provisioning_sc_attestation_mechanism.h
+./inc/provisioning_sc_bulk_operation.h
 ./inc/provisioning_sc_device_registration_state.h
 ./inc/provisioning_sc_enrollment.h
+./inc/provisioning_sc_json_const.h
 ./inc/provisioning_sc_models.h
 ./inc/provisioning_sc_models_serializer.h
-./inc/provisioning_sc_json_const.h
+./inc/provisioning_sc_query.h
+./inc/provisioning_sc_shared_helpers.h
 ./inc/provisioning_sc_tpm_attestation.h
 ./inc/provisioning_sc_twin.h
-./inc/provisioning_sc_shared_helpers.h
 ./inc/provisioning_sc_x509_attestation.h
 ./inc/provisioning_service_client.h
+../deps/parson/parson.h
 )
 
 if(MSVC)
@@ -57,7 +61,7 @@ IF(WIN32)
 ENDIF(WIN32)
 
 if (${build_as_dynamic})
-    add_library(provisioning_service_client SHARED ${provisioning_service_client_c_files} ${provisioning_service_client_h_files} ./src/provisioning_service_client.def)
+    add_library(provisioning_service_client SHARED ${provisioning_service_client_c_files} ${provisioning_service_client_h_files} ./src/provisioning_service_client_dll.def)
     linkSharedUtil(provisioning_service_client)
 
 else()

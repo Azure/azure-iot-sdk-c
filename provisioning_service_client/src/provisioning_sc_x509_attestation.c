@@ -1,11 +1,13 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include <stdlib.h>  
+#include <stdlib.h>
 
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/strings.h"
+#include "azure_c_shared_utility/base64.h"
 
 #include "provisioning_sc_x509_attestation.h"
 #include "provisioning_sc_json_const.h"
@@ -54,6 +56,36 @@ typedef struct X509_ATTESTATION_TAG
     } certificates;
 
 } X509_ATTESTATION;
+
+static int convert_cert_to_b64(const char* cert_in, char** cert_b64_out)
+{
+    int ret = 0;
+    if (cert_in != NULL)
+    {
+        STRING_HANDLE cert_b64;
+        if ((cert_b64 = Base64_Encode_Bytes((const unsigned char*)cert_in, strlen(cert_in))) == NULL)
+        {
+            LogError("Could not convert certificate to Base64");
+            ret = __FAILURE__;
+            *cert_b64_out = NULL;
+        }
+        else
+        {
+            if (mallocAndStrcpy_s(cert_b64_out, STRING_c_str(cert_b64)) != 0)
+            {
+                LogError("copying b64 cert failed");
+                ret = __FAILURE__;
+                *cert_b64_out = NULL;
+            }
+            STRING_delete(cert_b64);
+        }
+    }
+    else
+    {
+        *cert_b64_out = NULL;
+    }
+    return ret;
+}
 
 static void x509CAReferences_free(X509_CA_REFERENCES* x509_ca_ref)
 {
@@ -695,47 +727,62 @@ X509_ATTESTATION_HANDLE x509Attestation_fromJson(JSON_Object* root_object)
 X509_ATTESTATION_HANDLE x509Attestation_create(X509_CERTIFICATE_TYPE cert_type, const char* primary_cert, const char* secondary_cert)
 {
     X509_ATTESTATION_HANDLE new_x509Att = NULL;
+    char* primary_cert_b64 = NULL;
+    char* secondary_cert_b64 = NULL;
 
     if ((cert_type == X509_CERTIFICATE_TYPE_NONE) || (primary_cert == NULL))
     {
         LogError("Requires valid certificate type and primary certificate to create X509 Attestation");
     }
-    else if ((new_x509Att = malloc(sizeof(X509_ATTESTATION))) == NULL)
-    {
-        LogError("Failed to allocate memory for X509 Attestation");
-    }
     else
     {
-        memset(new_x509Att, 0, sizeof(X509_ATTESTATION));
-        
-        new_x509Att->type = cert_type;
-        if (cert_type == X509_CERTIFICATE_TYPE_CLIENT)
+        if (convert_cert_to_b64(primary_cert, &primary_cert_b64) != 0)
         {
-            if ((new_x509Att->certificates.client_certificates = x509Certificates_create(primary_cert, secondary_cert)) == NULL)
+            LogError("Could not convert primary cert to Base64");
+        }
+        else if (convert_cert_to_b64(secondary_cert, &secondary_cert_b64) != 0)
+        {
+            LogError("Could not convert secondary cert to Base64");
+        }
+        else if ((new_x509Att = malloc(sizeof(X509_ATTESTATION))) == NULL)
+        {
+            LogError("Failed to allocate memory for X509 Attestation");
+        }
+        else
+        {
+            memset(new_x509Att, 0, sizeof(X509_ATTESTATION));
+
+            new_x509Att->type = cert_type;
+            if (cert_type == X509_CERTIFICATE_TYPE_CLIENT)
             {
-                LogError("Failed to create Client Certificates");
-                x509Attestation_destroy(new_x509Att);
-                new_x509Att = NULL;
+                if ((new_x509Att->certificates.client_certificates = x509Certificates_create(primary_cert_b64, secondary_cert_b64)) == NULL)
+                {
+                    LogError("Failed to create Client Certificates");
+                    x509Attestation_destroy(new_x509Att);
+                    new_x509Att = NULL;
+                }
+            }
+            else if (cert_type == X509_CERTIFICATE_TYPE_SIGNING)
+            {
+                if ((new_x509Att->certificates.signing_certificates = x509Certificates_create(primary_cert_b64, secondary_cert_b64)) == NULL)
+                {
+                    LogError("Failed to create Client Certificates");
+                    x509Attestation_destroy(new_x509Att);
+                    new_x509Att = NULL;
+                }
+            }
+            else if (cert_type == X509_CERTIFICATE_TYPE_CA_REFERENCES)
+            {
+                if ((new_x509Att->certificates.ca_references = x509CAReferences_create(primary_cert_b64, secondary_cert_b64)) == NULL)
+                {
+                    LogError("Failed to create CA References");
+                    x509Attestation_destroy(new_x509Att);
+                    new_x509Att = NULL;
+                }
             }
         }
-        else if (cert_type == X509_CERTIFICATE_TYPE_SIGNING)
-        {
-            if ((new_x509Att->certificates.signing_certificates = x509Certificates_create(primary_cert, secondary_cert)) == NULL)
-            {
-                LogError("Failed to create Client Certificates");
-                x509Attestation_destroy(new_x509Att);
-                new_x509Att = NULL;
-            }
-        }
-        else if (cert_type == X509_CERTIFICATE_TYPE_CA_REFERENCES)
-        {
-            if ((new_x509Att->certificates.ca_references = x509CAReferences_create(primary_cert, secondary_cert)) == NULL)
-            {
-                LogError("Failed to create CA References");
-                x509Attestation_destroy(new_x509Att);
-                new_x509Att = NULL;
-            }
-        }
+        free(primary_cert_b64);
+        free(secondary_cert_b64);
     }
 
     return new_x509Att;

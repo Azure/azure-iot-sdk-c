@@ -69,6 +69,7 @@ if (${build_as_dynamic})
 else()
     add_library(iothub_service_client ${iothub_service_client_c_files} ${iothub_service_client_h_files})
 endif()
+setSdkTargetBuildProperties(iothub_service_client)
 
 if(NOT ${nuget_e2e_tests})
     target_link_libraries(iothub_service_client uamqp parson)

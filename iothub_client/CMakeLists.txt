@@ -278,6 +278,7 @@ if(${use_http})
         ${iothub_client_http_transport_c_files}
         ${iothub_client_http_transport_h_files}
     )
+    setSdkTargetBuildProperties(iothub_client_http_transport)
     linkSharedUtil(iothub_client_http_transport)
     set(iothub_client_libs
         ${iothub_client_libs}
@@ -289,6 +290,7 @@ if(${use_http})
             ${iothub_client_http_transport_c_files}
             ${iothub_client_http_transport_h_files}
         )
+        setSdkTargetBuildProperties(iothub_client_http_transport_dll)
         linkSharedUtil(iothub_client_http_transport_dll)
 
         if ("${CMAKE_COMPILER_ID}" STREQUAL "GNU")
@@ -316,6 +318,7 @@ if(${use_amqp})
         ${iothub_client_amqp_transport_c_files}
         ${iothub_client_amqp_transport_h_files}
     )
+    setSdkTargetBuildProperties(iothub_client_amqp_transport)
     linkSharedUtil(iothub_client_amqp_transport)
     set(iothub_client_libs
         ${iothub_client_libs}
@@ -327,6 +330,7 @@ if(${use_amqp})
         ${iothub_client_amqp_ws_transport_c_files}
         ${iothub_client_amqp_ws_transport_h_files}
     )
+    setSdkTargetBuildProperties(iothub_client_amqp_ws_transport)
     linkSharedUtil(iothub_client_amqp_ws_transport)
     set(iothub_client_libs
         ${iothub_client_libs}
@@ -338,6 +342,7 @@ if(${use_amqp})
             ${iothub_client_amqp_transport_c_files}
             ${iothub_client_amqp_transport_h_files}
         )
+        setSdkTargetBuildProperties(iothub_client_amqp_transport_dll)
         linkSharedUtil(iothub_client_amqp_transport_dll)
         target_link_libraries(iothub_client_amqp_transport_dll uamqp)
 
@@ -356,6 +361,7 @@ if(${use_amqp})
             ${iothub_client_amqp_ws_transport_c_files}
             ${iothub_client_amqp_ws_transport_h_files}
         )
+        setSdkTargetBuildProperties(iothub_client_amqp_ws_transport_dll)
         linkSharedUtil(iothub_client_amqp_ws_transport_dll)
         target_link_libraries(iothub_client_amqp_transport_dll uamqp)
 
@@ -379,6 +385,7 @@ if(${use_mqtt})
         ${iothub_client_mqtt_transport_c_files}
         ${iothub_client_mqtt_transport_h_files}
     )
+    setSdkTargetBuildProperties(iothub_client_mqtt_transport)
     linkSharedUtil(iothub_client_mqtt_transport)
     linkMqttLibrary(iothub_client_mqtt_transport)
 
@@ -391,6 +398,7 @@ if(${use_mqtt})
         ${iothub_client_mqtt_ws_transport_c_files}
         ${iothub_client_mqtt_ws_transport_h_files}
     )
+    setSdkTargetBuildProperties(iothub_client_mqtt_ws_transport)
     linkSharedUtil(iothub_client_mqtt_ws_transport)
     linkMqttLibrary(iothub_client_mqtt_ws_transport)
     set(iothub_client_libs
@@ -403,6 +411,7 @@ if(${use_mqtt})
             ${iothub_client_mqtt_transport_c_files}
             ${iothub_client_mqtt_transport_h_files}
         )
+        setSdkTargetBuildProperties(iothub_client_mqtt_transport_dll)
         linkSharedUtil(iothub_client_mqtt_transport_dll)
 
         # if ("${CMAKE_COMPILER_ID}" STREQUAL "GNU")
@@ -426,6 +435,7 @@ if(${use_mqtt})
             ${iothub_client_mqtt_ws_transport_c_files}
             ${iothub_client_mqtt_ws_transport_h_files}
         )
+        setSdkTargetBuildProperties(iothub_client_mqtt_ws_transport_dll)
         linkSharedUtil(iothub_client_mqtt_ws_transport_dll)
 
         # if ("${CMAKE_COMPILER_ID}" STREQUAL "GNU")
@@ -467,6 +477,7 @@ if (${build_as_dynamic})
         ${iothub_client_h_files}
         ${iothub_def_file}
     )
+    setSdkTargetBuildProperties(iothub_client_dll)
     target_link_libraries(iothub_client_dll ${iothub_client_libs})
     if(NOT WIN32)
         set_target_properties(iothub_client_dll PROPERTIES OUTPUT_NAME "iothub_client")
@@ -494,6 +505,7 @@ add_library(iothub_client
     ${iothub_client_c_files}
     ${iothub_client_h_files}
 )
+setSdkTargetBuildProperties(iothub_client)
 target_link_libraries(iothub_client ${iothub_client_libs})
 
 if (${use_prov_client})

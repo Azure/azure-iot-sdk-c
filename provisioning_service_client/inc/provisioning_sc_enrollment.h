@@ -14,6 +14,7 @@ extern "C" {
 #include "provisioning_sc_attestation_mechanism.h"
 #include "provisioning_sc_device_registration_state.h"
 #include "provisioning_sc_twin.h"
+#include "parson.h"
 
 /** @brief  Handles to hide structs and use them in consequent APIs
 */
@@ -112,6 +113,15 @@ MOCKABLE_FUNCTION(, PROVISIONING_STATUS, enrollmentGroup_getProvisioningStatus, 
 MOCKABLE_FUNCTION(, int, enrollmentGroup_setProvisioningStatus, ENROLLMENT_GROUP_HANDLE, enrollment, PROVISIONING_STATUS, prov_status);
 MOCKABLE_FUNCTION(, const char*, enrollmentGroup_getCreatedDateTime, ENROLLMENT_GROUP_HANDLE, enrollment);
 MOCKABLE_FUNCTION(, const char*, enrollmentGroup_getUpdatedDateTime, ENROLLMENT_GROUP_HANDLE, enrollment);
+
+
+/* INTERNAL FUNCTIONS
+*
+* Do NOT use these. They are for internal use ONLY
+*/
+MOCKABLE_FUNCTION(, JSON_Value*, individualEnrollment_toJson, const INDIVIDUAL_ENROLLMENT_HANDLE, enrollment);
+MOCKABLE_FUNCTION(, INDIVIDUAL_ENROLLMENT_HANDLE, individualEnrollment_fromJson, JSON_Object*, root_object);
+MOCKABLE_FUNCTION(, ENROLLMENT_GROUP_HANDLE, enrollmentGroup_fromJson, JSON_Object*, root_object);
 
 #ifdef __cplusplus
 }

@@ -12,28 +12,39 @@
 #include "iothub_client_options.h"
 #include "iothub_message.h"
 
-#ifdef USE_AMQP
-#include "iothubtransportamqp.h"
-#endif
+// The protocol you wish to use should be uncommented
+//
+#define SAMPLE_HTTP
+//#define SAMPLE_MQTT
+//#define SAMPLE_MQTT_OVER_WEBSOCKETS
+//#define SAMPLE_AMQP
+//#define SAMPLE_AMQP_OVER_WEBSOCKETS
 
-#ifdef USE_MQTT
-#include "iothubtransportmqtt.h"
-#endif
+#ifdef SAMPLE_MQTT
+    #include "iothubtransportmqtt.h"
+#endif // SAMPLE_MQTT
+#ifdef SAMPLE_MQTT_OVER_WEBSOCKETS
+    #include "iothubtransportmqtt_websockets.h"
+#endif // SAMPLE_MQTT_OVER_WEBSOCKETS
+#ifdef SAMPLE_AMQP
+    #include "iothubtransportamqp.h"
+#endif // SAMPLE_AMQP
+#ifdef SAMPLE_AMQP_OVER_WEBSOCKETS
+    #include "iothubtransportamqp_websockets.h"
+#endif // SAMPLE_AMQP_OVER_WEBSOCKETS
+#ifdef SAMPLE_HTTP
+    #include "iothubtransporthttp.h"
+#endif // SAMPLE_HTTP
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
 #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
-
-DEFINE_ENUM_STRINGS(DEVICE_TWIN_UPDATE_STATE, DEVICE_TWIN_UPDATE_STATE_VALUES);
-
 
 /*String containing Hostname, Device Id & Device Key in the format:                         */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessSignature=<device_sas_token>"    */
 static const char* connectionString = "[device connection string]";
 
-static char msgText[1024];
-static char propText[1024];
 static bool g_continueRunning;
 #define DOWORK_LOOP_NUM     3
 
@@ -56,14 +67,26 @@ static void reportedStateCallback(int status_code, void* userContextCallback)
 
 void iothub_client_sample_device_twin_run(void)
 {
+    IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;
     IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle;
     g_continueRunning = true;
 
-#ifdef USE_AMQP
-    IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol = AMQP_Protocol;
-#else
-    IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol = MQTT_Protocol;
-#endif
+    // Select the Protocol to use with the connection
+#ifdef SAMPLE_MQTT
+    protocol = MQTT_Protocol;
+#endif // SAMPLE_MQTT
+#ifdef SAMPLE_MQTT_OVER_WEBSOCKETS
+    protocol = MQTT_WebSocket_Protocol;
+#endif // SAMPLE_MQTT_OVER_WEBSOCKETS
+#ifdef SAMPLE_AMQP
+    protocol = AMQP_Protocol;
+#endif // SAMPLE_AMQP
+#ifdef SAMPLE_AMQP_OVER_WEBSOCKETS
+    protocol = AMQP_Protocol_over_WebSocketsTls;
+#endif // SAMPLE_AMQP_OVER_WEBSOCKETS
+#ifdef SAMPLE_HTTP
+    protocol = HTTP_Protocol;
+#endif // SAMPLE_HTTP
 
     if (platform_init() != 0)
     {

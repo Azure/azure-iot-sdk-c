@@ -12,11 +12,9 @@ set(${theseTestsName}_test_files
 
 if(WIN32)
     set(PROCESS_C_FILES
-        platform_process_win32.c
     )
 else()
     set(PROCESS_C_FILES
-        platform_process_linux.c
     )
 endif()
 
@@ -26,7 +24,6 @@ set(${theseTestsName}_c_files
 )
 
 set(${theseTestsName}_h_files
-    platform_process.h
 )
 
 include_directories(${IOTHUB_TEST_INC_FOLDER})
@@ -69,17 +66,16 @@ if(WIN32)
             rpcrt4
         )
     endif()
+    target_link_libraries(${theseTestsName}_dll provisioning_service_client)
 else()
-    if(UNIX) #LINUX OR APPLE
+
+    if(APPLE)
         find_package(PkgConfig REQUIRED)
         pkg_search_module(UUID REQUIRED uuid)
         link_directories(${UUID_LIBRARY_DIRS})
-    endif()
-
-    if(APPLE)
         target_link_libraries(${theseTestsName}_exe -L${UUID_LIBRARY_DIRS} pthread ${UUID_LIBRARIES})
-    elseif(LINUX)
-        target_link_libraries(${theseTestsName}_exe pthread ${UUID_LIBRARIES})
+    elseif(APPLE)
+        target_link_libraries(${theseTestsName}_exe pthread uuid)
     endif()
 
     if(TARGET ${theseTestsName}_exe)
@@ -94,4 +90,3 @@ endif()
 target_link_libraries(${theseTestsName}_exe provisioning_service_client)
 link_security_client(${theseTestsName}_exe)
 linkSharedUtil(${theseTestsName}_exe)
-#linkUAMQP(${theseTestsName}_exe)

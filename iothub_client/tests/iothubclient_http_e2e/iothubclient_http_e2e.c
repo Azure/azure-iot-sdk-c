@@ -737,7 +737,6 @@ TEST_FUNCTION(IoTHub_HTTP_RecvMessage_E2ETest_x509)
 }
 #endif
 
-
 TEST_FUNCTION(IoTHub_HTTP_RecvMessage_shared_E2ETest)
 {
     // arrange

@@ -37,6 +37,7 @@ TEST_FUNCTION(IoTHub_MQTT_RecvMessage_E2ETest_sas)
     e2e_recv_message_test_sas(MQTT_WebSocket_Protocol);
 }
 
+#ifndef __APPLE__
 TEST_FUNCTION(IoTHub_MQTT_SendEvent_e2e_x509)
 {
 #ifdef AZIOT_LINUX
@@ -52,5 +53,5 @@ TEST_FUNCTION(IoTHub_MQTT_RecvMessage_E2ETest_x509)
 #endif
     e2e_recv_message_test_x509(MQTT_WebSocket_Protocol);
 }
-
+#endif
 END_TEST_SUITE(iothubclient_mqtt_ws_e2e)
