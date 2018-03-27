@@ -40,10 +40,6 @@
 #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_CONNECTION_STATUS, IOTHUB_CLIENT_CONNECTION_STATUS_VALUES)
-DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, IOTHUB_CLIENT_CONNECTION_STATUS_REASON_VALUES)
-DEFINE_ENUM_STRINGS(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_RESULT_VALUES)
-
 #define INDEFINITE_TIME                         ((time_t)-1)
 #define SERVICE_EVENT_WAIT_TIME_DELTA_SECONDS   60
 #define DEVICE_METHOD_SUB_WAIT_TIME_MS          (5 * 1000)
@@ -177,7 +173,7 @@ static int parse_twin_desired_properties(const char* data, char* test_id, unsign
         }
         else
         {
-            double raw_message_id = json_object_dotget_number(root_object, TWIN_DESIRED_BLOCK_DOT MESSAGE_ID_FIELD);
+            double raw_message_id = json_object_dotget_number(root_object, TWIN_DESIRED_BLOCK DOT MESSAGE_ID_FIELD);
 
             if (raw_message_id < 0)
             {
@@ -188,7 +184,7 @@ static int parse_twin_desired_properties(const char* data, char* test_id, unsign
             {
                 *message_id = (unsigned int)raw_message_id;
 
-                if ((*version = (int)json_object_dotget_number(root_object, TWIN_DESIRED_BLOCK_DOT TWIN_FIELD_VERSION)) == NULL)
+                if ((*version = (int)json_object_dotget_number(root_object, TWIN_DESIRED_BLOCK DOT TWIN_FIELD_VERSION)) < 0)
                 {
                     LogError("Failed getting desired properties version (%d)", *message_id);
                     result = __FAILURE__;
