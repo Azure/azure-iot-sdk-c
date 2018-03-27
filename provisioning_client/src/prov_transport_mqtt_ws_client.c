@@ -71,9 +71,11 @@ static XIO_HANDLE mqtt_transport_ws_io(const char* fqdn, const HTTP_PROXY_OPTION
         }
         else
         {
+#ifdef USE_OPENSSL
             // requires tls 1.2
             int tls_version = 12;
             xio_setoption(result, OPTION_TLS_VERSION, &tls_version);
+#endif
         }
     }
     /* Codes_PROV_TRANSPORT_MQTT_WS_CLIENT_07_014: [ On success mqtt_transport_ws_io shall return an allocated XIO_HANDLE. ] */

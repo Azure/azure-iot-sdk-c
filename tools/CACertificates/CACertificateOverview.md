@@ -62,16 +62,18 @@ In both cases, the scripts will output the name of the file containing `"CN=1234
 ## Step 4 - Create a new device
 Finally, let's create an application and corresponding device on IoT Hub that shows how CA Certificates are used.
 
-On Azure IoT Hub, navigate to the "Device Explorer".  Add a new device (e.g. `myDevice`, and for its authentication type chose "X.509 CA Signed".  Devices can authenticate to IoT Hub using a certificate that is signed by the Root CA from Step 2.
+On Azure IoT Hub, navigate to the "Device Explorer".  Add a new device (e.g. `mydevice`), and for its authentication type chose "X.509 CA Signed".  Devices can authenticate to IoT Hub using a certificate that is signed by the Root CA from Step 2.
+
+Note that if you're using this certificate as a DPS registration ID, the ID **must be lower case** or the server will reject it.
 
 ### **PowerShell**
-* Run `New-CACertsDevice myDevice` to create the new device certificate.  
-This will create files myDevice* that contain the public key, private key, and PFX of this certificate.  When prompted to enter a password during the signing process, enter "123".
+* Run `New-CACertsDevice mydevice` to create the new device certificate.  
+This will create files mydevice* that contain the public key, private key, and PFX of this certificate.  When prompted to enter a password during the signing process, enter "123".
 
-* To get a sense of how to use these certificates, `Write-CACertsCertificatesToEnvironment myDevice myIotHubName`, replacing myDevice and myIotHub name with your values.  This will create the environment variables `$ENV:IOTHUB_CA_*` that can give a sense of how they could be consumed by an application.
+* To get a sense of how to use these certificates, `Write-CACertsCertificatesToEnvironment mydevice myIotHubName`, replacing mydevice and myIotHub name with your values.  This will create the environment variables `$ENV:IOTHUB_CA_*` that can give a sense of how they could be consumed by an application.
 
 ### **Bash**
-* Run `./certGen.sh create_device_certificate myDevice` to create the new device certificate.  
+* Run `./certGen.sh create_device_certificate mydevice` to create the new device certificate.  
   This will create the files .\certs\new-device.* that contain the public key and PFX and .\private\new-device.key.pem that contains the device's private key.  
 * `cat new-device.cert.pem azure-iot-test-only.intermediate.cert.pem azure-iot-test-only.root.ca.cert.pem > new-device-full-chain.cert.pem` to get the public key.
 * `./private/new-device.cert.pem` contains the device's private key.

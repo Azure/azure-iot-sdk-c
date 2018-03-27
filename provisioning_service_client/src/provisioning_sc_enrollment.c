@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include <stdlib.h>  
+#include <stdlib.h>
 
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/gballoc.h"
@@ -101,7 +101,7 @@ void individualEnrollment_destroy(INDIVIDUAL_ENROLLMENT_HANDLE enrollment)
     }
 }
 
-static JSON_Value* individualEnrollment_toJson(const INDIVIDUAL_ENROLLMENT_HANDLE enrollment)
+JSON_Value* individualEnrollment_toJson(const INDIVIDUAL_ENROLLMENT_HANDLE enrollment)
 {
     JSON_Value* root_value = NULL;
     JSON_Object* root_object = NULL;
@@ -166,7 +166,7 @@ static JSON_Value* individualEnrollment_toJson(const INDIVIDUAL_ENROLLMENT_HANDL
     return root_value;
 }
 
-static INDIVIDUAL_ENROLLMENT_HANDLE individualEnrollment_fromJson(JSON_Object* root_object)
+INDIVIDUAL_ENROLLMENT_HANDLE individualEnrollment_fromJson(JSON_Object* root_object)
 {
     INDIVIDUAL_ENROLLMENT_HANDLE new_enrollment = NULL;
 
@@ -318,7 +318,7 @@ static JSON_Value* enrollmentGroup_toJson(const ENROLLMENT_GROUP_HANDLE enrollme
     return root_value;
 }
 
-static ENROLLMENT_GROUP_HANDLE enrollmentGroup_fromJson(JSON_Object* root_object)
+ENROLLMENT_GROUP_HANDLE enrollmentGroup_fromJson(JSON_Object* root_object)
 {
     ENROLLMENT_GROUP_HANDLE new_enrollment = NULL;
 

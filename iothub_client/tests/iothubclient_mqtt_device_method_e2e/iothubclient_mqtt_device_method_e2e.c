@@ -62,6 +62,7 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_device_method_e2e)
         device_method_e2e_method_call_with_embedded_single_quote_sas(MQTT_Protocol);
     }
 
+#ifndef __APPLE__
 #ifndef DONT_USE_UPLOADTOBLOB
     TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_UploadBlob_sas)
     {
@@ -107,14 +108,15 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_device_method_e2e)
     //
     // MQTT_WS tests.  Only test small subset.
     //
-    TEST_FUNCTION(IotHub_Mqtt_Ws_Method_Call_With_String_sas)
-    {
-        device_method_e2e_method_call_with_string_sas(MQTT_WebSocket_Protocol);
-    }
-
     TEST_FUNCTION(IotHub_Mqtt_Ws_Method_Call_With_String_x509)
     {
         device_method_e2e_method_call_with_string_x509(MQTT_WebSocket_Protocol);
+    }
+#endif
+
+    TEST_FUNCTION(IotHub_Mqtt_Ws_Method_Call_With_String_sas)
+    {
+        device_method_e2e_method_call_with_string_sas(MQTT_WebSocket_Protocol);
     }
 
 END_TEST_SUITE(iothubclient_mqtt_device_method_e2e)

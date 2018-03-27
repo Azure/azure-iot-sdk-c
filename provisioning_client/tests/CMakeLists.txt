@@ -3,6 +3,8 @@
 
 cmake_minimum_required(VERSION 2.8.12)
 
+usePermissiveRulesForSdkSamplesAndTests()
+
 #add_unittest_directory(dps_sec_client_ut)
 add_unittest_directory(prov_transport_http_client_ut)
 
@@ -25,11 +27,14 @@ add_unittest_directory(prov_security_factory_ut)
 
 if(${dps_hsm_x509})
     add_unittest_directory(hsm_client_riot_ut)
-    #add_e2etest_directory(dps_client_e2e)
 endif()
 
 if(${dps_hsm_sastoken})
     add_unittest_directory(hsm_client_tpm_ut)
+endif()
+
+if(${build_provisioning_service_client})
+    #add_e2etest_directory(dps_client_e2e)
 endif()
 
 add_unittest_directory(iothub_auth_client_ut)

@@ -18,6 +18,8 @@ In order to run the samples, you will first need to do the following:
 
 * [Individual Enrollment](prov_sc_individual_enrollment_sample) - Create, update, get and delete Individual Enrollments on the Provisioning Service.
 * [Enrollment Group](prov_sc_enrollment_group_sample) - Create, update, get and delete Enrollment Groups on the Provisioning Service.
+* [Bulk Enrollment](prov_sc_bulk_operation_sample) - Run bulk enrollment operations for Individual Enrollments on the Provisioning Service.
+* [Query](prov_sc_query_sample) - Run a query operation on the Provisioning Service
 
 [setup-iot-hub]: https://aka.ms/howtocreateazureiothub
 [setup-provisioning-service]: https://docs.microsoft.com/en-us/azure/iot-dps/quick-setup-auto-provision

@@ -4,7 +4,7 @@
 #ifndef PROV_CLIENT_CONST_H
 #define PROV_CLIENT_CONST_H
 
-#define PROV_DEVICE_CLIENT_VERSION "1.2.0"
+#define PROV_DEVICE_CLIENT_VERSION "1.2.1"
 
 static const char* PROV_ASSIGNED_STATUS = "assigned";
 static const char* PROV_ASSIGNING_STATUS = "assigning";

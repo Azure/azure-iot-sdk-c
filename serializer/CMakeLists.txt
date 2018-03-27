@@ -104,6 +104,7 @@ if (${build_as_dynamic})
     )
     set (install_libs ${install_libs} serializer_dll)
 endif()
+setSdkTargetBuildProperties(serializer)
 
 if (NOT ${skip_samples})
     if(WIN32)

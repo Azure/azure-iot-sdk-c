@@ -1,11 +1,22 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#include <stdlib.h>
 #include <stdio.h>
 
 #include "azure_c_shared_utility/platform.h"
 
+#include "../../../certs/certs.h"
+
 #include "provisioning_service_client.h"
+
+static bool g_use_trace = true;
+
+#ifdef USE_OPENSSL
+static bool g_use_certificate = true;
+#else
+static bool g_use_certificate = false;
+#endif //USE_OPENSSL
 
 int main()
 {
@@ -37,8 +48,14 @@ int main()
     prov_sc = prov_sc_create_from_connection_string(connectionString);
 
     /* ---Optionally set connection options--- */
-    prov_sc_set_trace(prov_sc, TRACING_STATUS_ON);
-    //Other options can also be set here - refer to the APIs
+    if (g_use_trace)
+    {
+        prov_sc_set_trace(prov_sc, TRACING_STATUS_ON);
+    }
+    if (g_use_certificate)
+    {
+        prov_sc_set_certificate(prov_sc, certificates);
+    }
 
     /* ---Create an Individual Enrollment structure--- */
     printf("Creating an Individual Enrollment structure...\n");
@@ -82,6 +99,7 @@ int main()
     /* ---Clean up handles--- */
     individualEnrollment_destroy(ie_handle);
     prov_sc_destroy(prov_sc);
+    platform_deinit();
 
     return result;
 }

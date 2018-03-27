@@ -7,6 +7,7 @@ compileAsC99()
 
 set(prov_sc_enrollment_group_sample_c_files
     prov_sc_enrollment_group_sample.c
+    ../../../certs/certs.c
 )
 
 set (prov_sc_enrollment_group_sample_h_files
@@ -24,6 +25,15 @@ add_executable(prov_sc_enrollment_group_sample ${prov_sc_enrollment_group_sample
 
 target_link_libraries(prov_sc_enrollment_group_sample
     provisioning_service_client)
+
+if(${use_openssl})
+    add_definitions(-DUSE_OPENSSL)
+    if (WIN32)
+        target_link_libraries(prov_sc_enrollment_group_sample $ENV{OpenSSLDir}/lib/ssleay32.lib $ENV{OpenSSLDir}/lib/libeay32.lib)
+        file(COPY $ENV{OpenSSLDir}/bin/libeay32.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
+        file(COPY $ENV{OpenSSLDir}/bin/ssleay32.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
+    endif()
+endif()
 
 linkSharedUtil(prov_sc_enrollment_group_sample)
 linkUHTTP(prov_sc_enrollment_group_sample)

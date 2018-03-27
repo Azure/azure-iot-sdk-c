@@ -49,6 +49,13 @@ MOCKABLE_FUNCTION(, void, json_value_free, JSON_Value*, value);
 MOCKABLE_FUNCTION(, JSON_Object*, json_value_get_object, const JSON_Value*, value);
 MOCKABLE_FUNCTION(, void, json_free_serialized_string, char*, string);
 MOCKABLE_FUNCTION(, JSON_Value*, json_object_get_wrapping_value, const JSON_Object*, object);
+MOCKABLE_FUNCTION(, JSON_Value*, json_value_init_array);
+MOCKABLE_FUNCTION(, JSON_Array*, json_value_get_array, const JSON_Value*, value);
+MOCKABLE_FUNCTION(, JSON_Status, json_array_append_value, JSON_Array*, array, JSON_Value*, value);
+MOCKABLE_FUNCTION(, size_t, json_array_get_count, const JSON_Array*, array);
+MOCKABLE_FUNCTION(, JSON_Object*, json_array_get_object, const JSON_Array*, array, size_t, index);
+MOCKABLE_FUNCTION(, JSON_Array*, json_object_get_array, const JSON_Object*, object, const char*, name);
+
 
 #undef ENABLE_MOCKS
 

@@ -10,6 +10,7 @@ EXPORTS
     attestationMechanism_getX509Attestation
     attestationMechanism_isValidForEnrollmentGroup
     attestationMechanism_isValidForIndividualEnrollment
+    bulkOperationResult_free
     deviceRegistrationState_getCreatedDateTime
     deviceRegistrationState_getDeviceId
     deviceRegistrationState_getErrorCode
@@ -58,16 +59,24 @@ EXPORTS
     prov_sc_create_from_connection_string
     prov_sc_create_or_update_enrollment_group
     prov_sc_create_or_update_individual_enrollment
+    prov_sc_delete_device_registration_state
+    prov_sc_delete_device_registration_state_by_param
     prov_sc_delete_enrollment_group
     prov_sc_delete_enrollment_group_by_param
     prov_sc_delete_individual_enrollment
     prov_sc_delete_individual_enrollment_by_param
     prov_sc_destroy
+    prov_sc_get_device_registration_state
     prov_sc_get_enrollment_group
     prov_sc_get_individual_enrollment
+    prov_sc_query_device_registration_state
+    prov_sc_query_enrollment_group
+    prov_sc_query_individual_enrollment
+    prov_sc_run_individual_enrollment_bulk_operation
     prov_sc_set_certificate
     prov_sc_set_proxy
     prov_sc_set_trace
+    queryResponse_free
     tpmAttestation_getEndorsementKey
     x509Attestation_getCertificateType
     x509Certificate_getIssuerName

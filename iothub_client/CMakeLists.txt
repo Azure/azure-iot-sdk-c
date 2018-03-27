@@ -280,6 +280,7 @@ if(${use_http})
         ${iothub_client_http_transport_c_files}
         ${iothub_client_http_transport_h_files}
     )
+    setSdkTargetBuildProperties(iothub_client_http_transport)
     linkSharedUtil(iothub_client_http_transport)
     set(iothub_client_libs
         ${iothub_client_libs}
@@ -297,6 +298,7 @@ if(${use_http})
             ./src/iothub_client_ll.c
             ./src/iothub_client_${transport}_transport_dll_temp.def
         )
+        setSdkTargetBuildProperties(iothub_client_http_transport_dll)
         linkSharedUtil(iothub_client_http_transport_dll)
 
         set_target_properties(iothub_client_http_transport_dll PROPERTIES
@@ -327,6 +329,7 @@ if(${use_amqp})
         ${iothub_client_amqp_transport_c_files}
         ${iothub_client_amqp_transport_h_files}
     )
+    setSdkTargetBuildProperties(iothub_client_amqp_transport)
     linkSharedUtil(iothub_client_amqp_transport)
     set(iothub_client_libs
         ${iothub_client_libs}
@@ -338,6 +341,7 @@ if(${use_amqp})
         ${iothub_client_amqp_ws_transport_c_files}
         ${iothub_client_amqp_ws_transport_h_files}
     )
+    setSdkTargetBuildProperties(iothub_client_amqp_ws_transport)
     linkSharedUtil(iothub_client_amqp_ws_transport)
     set(iothub_client_libs
         ${iothub_client_libs}
@@ -354,6 +358,7 @@ if(${use_amqp})
             ./src/iothub_client_ll.c
             ./src/iothub_client_${transport}_transport_dll_temp.def
         )
+        setSdkTargetBuildProperties(iothub_client_amqp_transport_dll)
         linkSharedUtil(iothub_client_amqp_transport_dll)
         target_link_libraries(iothub_client_amqp_transport_dll iothub_client parson uamqp)
 
@@ -383,6 +388,7 @@ if(${use_amqp})
             ./src/iothub_client_ll.c
             ./src/iothub_client_${transport}_transport_dll_temp.def
         )
+        setSdkTargetBuildProperties(iothub_client_amqp_ws_transport_dll)
         linkSharedUtil(iothub_client_amqp_ws_transport_dll)
         target_link_libraries(iothub_client_amqp_ws_transport_dll iothub_client parson uamqp)
 
@@ -412,6 +418,7 @@ if(${use_mqtt})
         ${iothub_client_mqtt_transport_c_files}
         ${iothub_client_mqtt_transport_h_files}
     )
+    setSdkTargetBuildProperties(iothub_client_mqtt_transport)
     linkSharedUtil(iothub_client_mqtt_transport)
     linkMqttLibrary(iothub_client_mqtt_transport)
 
@@ -424,6 +431,7 @@ if(${use_mqtt})
         ${iothub_client_mqtt_ws_transport_c_files}
         ${iothub_client_mqtt_ws_transport_h_files}
     )
+    setSdkTargetBuildProperties(iothub_client_mqtt_ws_transport)
     linkSharedUtil(iothub_client_mqtt_ws_transport)
     linkMqttLibrary(iothub_client_mqtt_ws_transport)
     set(iothub_client_libs
@@ -441,6 +449,7 @@ if(${use_mqtt})
             ./src/iothub_client_ll.c
             ./src/iothub_client_${transport}_transport_dll_temp.def
         )
+        setSdkTargetBuildProperties(iothub_client_mqtt_transport_dll)
         linkSharedUtil(iothub_client_mqtt_transport_dll)
         linkMqttLibrary(iothub_client_mqtt_transport_dll)
         target_link_libraries(iothub_client_mqtt_transport_dll iothub_client parson)
@@ -471,6 +480,7 @@ if(${use_mqtt})
             ./src/iothub_client_ll.c
             ./src/iothub_client_${transport}_transport_dll_temp.def
         )
+        setSdkTargetBuildProperties(iothub_client_mqtt_ws_transport_dll)
         linkSharedUtil(iothub_client_mqtt_ws_transport_dll)
         linkMqttLibrary(iothub_client_mqtt_ws_transport_dll)
         target_link_libraries(iothub_client_mqtt_ws_transport_dll iothub_client parson)
@@ -508,13 +518,12 @@ else()
     set(iothub_def_file ./src/iothub_client_dll.def)
 endif()
 
-
 add_library(iothub_client
     ${iothub_client_c_files}
     ${iothub_client_h_files}
 )
-
-target_link_libraries(iothub_client parson)
+setSdkTargetBuildProperties(iothub_client)
+target_link_libraries(iothub_client ${iothub_client_libs})
 
 if (${use_prov_client})
     target_link_libraries(iothub_client hsm_security_client prov_auth_client)
@@ -525,42 +534,6 @@ set(iothub_client_libs
     iothub_client
     ${iothub_client_libs}
 )
-
-# if (${build_as_dynamic})
-    # add_library(iothub_client_dll SHARED
-        # ${iothub_client_c_files}
-        # ${iothub_client_h_files}
-        # ${iothub_def_file}
-    # )
-
-    # target_link_libraries(iothub_client_dll parson)
-
-    # if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
-        # target_link_libraries(iothub_client_dll
-            # "-Wl,--exclude-libs,libparson.a"
-        # )
-    # endif()
-
-    # if (${use_prov_client})
-        # target_link_libraries(iothub_client_dll hsm_security_client prov_auth_client)
-    # endif()
-
-    # set_target_properties(iothub_client_dll PROPERTIES
-        # OUTPUT_NAME "iothub_client"
-        # ARCHIVE_OUTPUT_NAME "iothub_client_dll_import"
-        # ENABLE_EXPORTS YES
-        # VERSION ${IOT_SDK_VERSION}
-        # SOVERSION ${IOT_SDK_VERION_MAJOR}
-        # BUILD_WITH_INSTALL_RPATH TRUE
-    # )
-
-    # linkSharedUtil(iothub_client_dll)
-    # set(iothub_client_libs
-        # iothub_client_dll
-        # ${iothub_client_libs}
-# )
-
-# endif(${build_as_dynamic})
 
 # Don't build samples under Win32 ARM for now
 if(NOT ${skip_samples})

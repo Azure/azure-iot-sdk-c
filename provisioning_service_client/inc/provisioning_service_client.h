@@ -13,6 +13,8 @@ extern "C" {
 #include "azure_c_shared_utility/shared_util_options.h"
 
 #include "provisioning_sc_models.h"
+#include "provisioning_sc_query.h"
+#include "provisioning_sc_bulk_operation.h"
 
 #define TRACING_STATUS_VALUES \
         TRACING_STATUS_ON,\
@@ -91,7 +93,7 @@ MOCKABLE_FUNCTION(, int, prov_sc_delete_individual_enrollment, PROVISIONING_SERV
 */
 MOCKABLE_FUNCTION(, int, prov_sc_delete_individual_enrollment_by_param, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client, const char*, reg_id, const char*, etag);
 
-/** @breif  Retreives an individual device enrollment record from the Provisioning Service.
+/** @brief  Retreives an individual device enrollment record from the Provisioning Service.
 *
 * @param    prov_client     The handle used for connecting to the Provisioning Service.
 * @param    reg_id          The registration id of the target individual enrollment.
@@ -100,6 +102,28 @@ MOCKABLE_FUNCTION(, int, prov_sc_delete_individual_enrollment_by_param, PROVISIO
 * @return   0 upon success, a non-zero number upon failure.
 */
 MOCKABLE_FUNCTION(, int, prov_sc_get_individual_enrollment, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client, const char*, reg_id, INDIVIDUAL_ENROLLMENT_HANDLE*, enrollment_ptr);
+
+
+/** @brief  Queries individual device enrollment records from the Provisioning Service.
+*
+* @param    prov_client     The handle used for connecting to the Provisioning Service.
+* @param    query_spec      The query specification with query details and settings
+* @param    cont_token_ptr  A pointer to a continuation token, which will be updated based on the response
+* @param    query_resp_ptr  A pointer to a query response pointer, which will be filled with retrieved data
+*
+* @return   0 upon success, a non-zero number upon failure
+*/
+MOCKABLE_FUNCTION(, int, prov_sc_query_individual_enrollment, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client, PROVISIONING_QUERY_SPECIFICATION*, query_spec, char**, cont_token_ptr, PROVISIONING_QUERY_RESPONSE**, query_resp_ptr);
+
+/** @brief  Performs a bulk operation on individual device enrollment records from the provisioning service.
+*
+* @param    prov_client     The handle used for connecting to the Provisioning Service.
+* @param    bulk_op         A pointer to a bulk operation structure with details about the bulk operation.
+* @param    bulk_res_ptr    A pointer to a bulk operation result pointer that will be filled with the results upon completion
+*
+* @return   0 upon success, a non-zero number upon failure.
+*/
+MOCKABLE_FUNCTION(, int, prov_sc_run_individual_enrollment_bulk_operation, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client, PROVISIONING_BULK_OPERATION*, bulk_op, PROVISIONING_BULK_OPERATION_RESULT**, bulk_res_ptr);
 
 /** @brief  Creates or updates a device enrollment group record on the Provisioning Service.
 *
@@ -136,6 +160,57 @@ MOCKABLE_FUNCTION(, int, prov_sc_delete_enrollment_group_by_param, PROVISIONING_
 * @return   0 upon success, a non-zero number upon failure.
 */
 MOCKABLE_FUNCTION(, int, prov_sc_get_enrollment_group, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client, const char*, group_id, ENROLLMENT_GROUP_HANDLE*, enrollment_ptr);
+
+/** @brief  Queries enrollment group records from the Provisioning Service.
+*
+* @param    prov_client     The handle used for connecting to the Provisioning Service.
+* @param    query_spec      The query specification with query details and settings
+* @param    cont_token_ptr  A pointer to a continuation token, which will be updated based on the response
+* @param    query_resp_ptr  A pointer to a query response pointer, which will be filled with retrieved data
+*
+* @return   0 upon success, a non-zero number upon failure
+*/
+MOCKABLE_FUNCTION(, int, prov_sc_query_enrollment_group, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client, PROVISIONING_QUERY_SPECIFICATION*, query_spec, char**, cont_token_ptr, PROVISIONING_QUERY_RESPONSE**, query_resp_ptr);
+
+/** @brief  Deletes a device registration state on the Provisioning Service.
+*
+* @param    prov_client     The handle used for connecting to the Provisioning Service.
+* @param    reg_state       The handle for the target device registration state.
+*
+* @return   0 upon success, a non-zero number upon failure.
+*/
+MOCKABLE_FUNCTION(, int, prov_sc_delete_device_registration_state, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client, DEVICE_REGISTRATION_STATE_HANDLE, reg_state);
+
+/** @brief  Deletes a device registration state on the Provisioning Service.
+*
+* @param    prov_client     The handle used for connecting to the Provisioning Service.
+* @param    reg_id          The registration id of the target registration state.
+* @param    etag            The etag of the target registration state
+*
+* @return   0 upon success, a non-zero number upon failure.
+*/
+MOCKABLE_FUNCTION(, int, prov_sc_delete_device_registration_state_by_param, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client, const char*, reg_id, const char*, etag);
+
+/** @brief  Retreives a device registration state from the Provisioning Service.
+*
+* @param    prov_client     A handle used for connecting to the Provisioning Service.
+* @param    reg_id          The registration id of the target registration status.
+* @param    reg_state_ptr   A pointer to a handle for a registration state, to be filled with retreived data.
+*
+* @return   0 upon success, a non-zero number upon failure.
+*/
+MOCKABLE_FUNCTION(, int, prov_sc_get_device_registration_state, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client, const char*, reg_id, DEVICE_REGISTRATION_STATE_HANDLE*, reg_state_ptr);
+
+/** @brief  Queries device registration state records from the Provisioning Service.
+*
+* @param    prov_client     The handle used for connecting to the Provisioning Service.
+* @param    query_spec      The query specification with query details and settings
+* @param    cont_token_ptr  A pointer to a continuation token, which will be updated based on the response
+* @param    query_resp_ptr  A pointer to a query response pointer, which will be filled with retrieved data
+*
+* @return   0 upon success, a non-zero number upon failure
+*/
+MOCKABLE_FUNCTION(, int, prov_sc_query_device_registration_state, PROVISIONING_SERVICE_CLIENT_HANDLE, prov_client, PROVISIONING_QUERY_SPECIFICATION*, query_spec, char**, cont_token_ptr, PROVISIONING_QUERY_RESPONSE**, query_resp_ptr);
 
 #ifdef __cplusplus
 }
