@@ -44,7 +44,7 @@ int main(void)
         }
         else
         {
-            result = longhaul_run_telemetry_tests(iotHubLonghaulRsrcsHandle, test_loop_wait_time_in_seconds, test_duration_in_seconds);
+            result = longhaul_run_c2d_tests(iotHubLonghaulRsrcsHandle, test_loop_wait_time_in_seconds, test_duration_in_seconds);
         }
 
         longhaul_tests_deinit(iotHubLonghaulRsrcsHandle);
