@@ -56,8 +56,8 @@ extern const HSM_CLIENT_X509_INTERFACE* hsm_client_x509_interface();
 
 extern int hsm_client_x509_init();
 extern void hsm_client_x509_deinit();
-int hsm_client_tpm_init();
-void hsm_client_tpm_deinit();
+extern int hsm_client_tpm_init();
+extern void hsm_client_tpm_deinit();
 
 
 #ifdef __cplusplus

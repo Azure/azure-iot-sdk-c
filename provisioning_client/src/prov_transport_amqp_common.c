@@ -486,7 +486,7 @@ static int add_link_properties(LINK_HANDLE amqp_link, const char* key, const cha
         }
         amqpvalue_destroy(attach_properties);
     }
-    return 0;
+    return result;
 }
 
 static int create_sender_link(PROV_TRANSPORT_AMQP_INFO* amqp_info)
