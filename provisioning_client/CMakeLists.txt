@@ -274,7 +274,7 @@ endif()
 add_subdirectory(tools)
 
 if(${use_installed_dependencies})
-
+	message("what the fuck")
     # Install Provisioning libs
     set(package_location "cmake")
 
@@ -318,6 +318,7 @@ if(${use_installed_dependencies})
             ${package_location}
     )
 else()
+	message("phew")
     # Install Provisioning libs
     if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
         set(CMAKE_INSTALL_LIBDIR "lib")
@@ -327,7 +328,7 @@ else()
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/../bin
-        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
-    install(FILES ${provisioning_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot/azure_prov_client)
+    install(FILES ${provisioning_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azure_prov_client)
 endif()
