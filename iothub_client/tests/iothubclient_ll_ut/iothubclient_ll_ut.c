@@ -3198,83 +3198,87 @@ TEST_FUNCTION(IoTHubClient_LL_SetOption_with_NULL_value_fails)
 #ifndef DONT_USE_UPLOADTOBLOB
 /*these tests are to be run when upload to blob functionality exists*/
 
-/*Tests_SRS_IOTHUBCLIENT_LL_02_099 : [IoTHubClient_LL_SetOption shall return according to the table below]*/
-TEST_FUNCTION(IoTHubClient_LL_SetOption_all_combinations)
-{
-
-    static struct SetOptionTriplet
-    {
-        IOTHUB_CLIENT_RESULT IoTHubClient_UploadToBlob_SetOption_return;
-        IOTHUB_CLIENT_RESULT Transport_SetOption_return;
-        IOTHUB_CLIENT_RESULT expected_return;
-    } allCombinations[] =
-    {
-        { IOTHUB_CLIENT_OK, IOTHUB_CLIENT_OK , IOTHUB_CLIENT_OK },
-        { IOTHUB_CLIENT_OK, IOTHUB_CLIENT_ERROR, IOTHUB_CLIENT_ERROR },
-        { IOTHUB_CLIENT_OK, IOTHUB_CLIENT_INVALID_ARG, IOTHUB_CLIENT_OK },
-        { IOTHUB_CLIENT_ERROR, IOTHUB_CLIENT_OK , IOTHUB_CLIENT_ERROR },
-        { IOTHUB_CLIENT_ERROR, IOTHUB_CLIENT_ERROR, IOTHUB_CLIENT_ERROR },
-        { IOTHUB_CLIENT_ERROR, IOTHUB_CLIENT_INVALID_ARG, IOTHUB_CLIENT_ERROR },
-        { IOTHUB_CLIENT_INVALID_ARG, IOTHUB_CLIENT_OK , IOTHUB_CLIENT_OK },
-        { IOTHUB_CLIENT_INVALID_ARG, IOTHUB_CLIENT_ERROR, IOTHUB_CLIENT_ERROR },
-        { IOTHUB_CLIENT_INVALID_ARG, IOTHUB_CLIENT_INVALID_ARG, IOTHUB_CLIENT_INVALID_ARG }
-    };
-
-    //arrange
-
-    IOTHUB_CLIENT_LL_HANDLE handle = IoTHubClient_LL_Create(&TEST_CONFIG);
-
-
-    for (size_t i = 0;i < sizeof(allCombinations) / sizeof(allCombinations[0]);i++)
-    {
-        umock_c_reset_all_calls();
-        EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_SetOption(IGNORED_PTR_ARG, "a", "b"))
-            .SetReturn(allCombinations[i].IoTHubClient_UploadToBlob_SetOption_return);
-
-        EXPECTED_CALL(FAKE_IoTHubTransport_SetOption(IGNORED_PTR_ARG, "a", "b"))
-            .SetReturn(allCombinations[i].Transport_SetOption_return);
-
-        //act
-        IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_SetOption(handle, "a", "b");
-
-        ///assert
-        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, allCombinations[i].expected_return, result);
-    }
-
-    ///cleanup
-    IoTHubClient_LL_Destroy(handle);
-    umock_c_reset_all_calls();
-}
-
-/*Tests_SRS_IOTHUBCLIENT_LL_02_038: [Otherwise, IoTHubClient_LL shall call the function _SetOption of the underlying transport and return what that function is returning.] */
-TEST_FUNCTION(IoTHubClient_LL_SetOption_fails_when_underlying_transport_fails)
+/*Tests_SRS_IOTHUBCLIENT_LL_30_010: [ blob_xfr_timeout - IoTHubClient_LL_SetOption shall pass this option to IoTHubClient_UploadToBlob_SetOption and return its result. ]*/
+TEST_FUNCTION(IoTHubClient_LL_SetOption_blob_upload_timeout_succeeds)
 {
     //arrange
     IOTHUB_CLIENT_LL_HANDLE handle = IoTHubClient_LL_Create(&TEST_CONFIG);
     umock_c_reset_all_calls();
-
+    
     STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_SetOption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreArgument_handle()
-        .IgnoreArgument_optionName()
-        .IgnoreArgument_value()
-        .SetReturn(IOTHUB_CLIENT_INVALID_ARG);
-
-    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SetOption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreArgument_handle()
-        .IgnoreArgument_optionName()
-        .IgnoreArgument_value()
-        .SetReturn(IOTHUB_CLIENT_INDEFINITE_TIME);
-
+    .IgnoreArgument_handle()
+    .IgnoreArgument_optionName()
+    .IgnoreArgument_value()
+    .SetReturn(IOTHUB_CLIENT_INDEFINITE_TIME);
+    
     //act
-    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_SetOption(handle, "a", "b");
-
+    long timeout = 10;
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_SetOption(handle, OPTION_BLOB_UPLOAD_TIMEOUT_SECS, &timeout);
+    
     ///assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INDEFINITE_TIME, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
+    
     ///cleanup
     IoTHubClient_LL_Destroy(handle);
+    
+}
 
+/*Tests_SRS_IOTHUBCLIENT_LL_30_011: [ IoTHubClient_LL_SetOption shall always pass unhandled options to Transport_SetOption. ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_30_012: [ If Transport_SetOption fails, IoTHubClient_LL_SetOption shall return that failure code. ]*/
+TEST_FUNCTION(IoTHubClient_LL_SetOption_fails_when_IoTHubTransport_SetOption_fails)
+{
+    //arrange
+    IOTHUB_CLIENT_LL_HANDLE handle = IoTHubClient_LL_Create(&TEST_CONFIG);
+    umock_c_reset_all_calls();
+    
+    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SetOption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    .IgnoreArgument_handle()
+    .IgnoreArgument_optionName()
+    .IgnoreArgument_value()
+    .SetReturn(IOTHUB_CLIENT_INDEFINITE_TIME);
+    
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_SetOption(handle, "a", "b");
+    
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INDEFINITE_TIME, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    
+    ///cleanup
+    IoTHubClient_LL_Destroy(handle);
+    
+}
+
+/*Tests_SRS_IOTHUBCLIENT_LL_30_013: [ If the DONT_USE_UPLOADTOBLOB compiler switch is undefined, IoTHubClient_LL_SetOption shall pass unhandled options to IoTHubClient_UploadToBlob_SetOption and ignore the result. ]*/
+TEST_FUNCTION(IoTHubClient_LL_SetOption_succeeds_when_IoTHubClient_LL_UploadToBlob_SetOption_fails)
+{
+    //arrange
+    IOTHUB_CLIENT_LL_HANDLE handle = IoTHubClient_LL_Create(&TEST_CONFIG);
+    umock_c_reset_all_calls();
+    
+    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SetOption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    .IgnoreArgument_handle()
+    .IgnoreArgument_optionName()
+    .IgnoreArgument_value()
+    .SetReturn(IOTHUB_CLIENT_OK);
+
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_SetOption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    .IgnoreArgument_handle()
+    .IgnoreArgument_optionName()
+    .IgnoreArgument_value()
+    .SetReturn(IOTHUB_CLIENT_INVALID_ARG);
+    
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_SetOption(handle, "a", "b");
+    
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    
+    ///cleanup
+    IoTHubClient_LL_Destroy(handle);
+    
 }
 #else
 /*these tests are to be run when uploadtoblob is not present*/
