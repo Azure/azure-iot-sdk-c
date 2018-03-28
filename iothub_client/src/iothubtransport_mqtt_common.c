@@ -433,7 +433,7 @@ static int retrieve_device_method_rid_info(const char* resp_topic, STRING_HANDLE
     return result;
 }
 
-static int parse_device_twin_topic_info(const char* resp_topic, bool* patch_msg, size_t* request_id, int* status_code)
+static int parse_device_twin_topic_info(const char* resp_topic, bool* patch_msg, size_t* request_id, int* status_code, char** version)
 {
     int result;
     STRING_TOKENIZER_HANDLE token_handle = STRING_TOKENIZER_create_from_char(resp_topic);
@@ -443,6 +443,7 @@ static int parse_device_twin_topic_info(const char* resp_topic, bool* patch_msg,
         result = __FAILURE__;
         *status_code = 0;
         *request_id = 0;
+        *version = NULL;
         *patch_msg = false;
     }
     else
@@ -454,6 +455,7 @@ static int parse_device_twin_topic_info(const char* resp_topic, bool* patch_msg,
             result = __FAILURE__;
             *status_code = 0;
             *request_id = 0;
+            *version = NULL;
             *patch_msg = false;
         }
         else
@@ -469,6 +471,11 @@ static int parse_device_twin_topic_info(const char* resp_topic, bool* patch_msg,
                         *patch_msg = true;
                         *status_code = 0;
                         *request_id = 0;
+                        if (*version == NULL)
+                        {
+                            free(version);
+                            *version = NULL;
+                        }
                         result = 0;
                         break;
                     }
@@ -1155,8 +1162,9 @@ static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE msgHandle, void* call
             {
                 size_t request_id;
                 int status_code;
+                char* version = NULL; // TODO: add version to parse_device_twin_topic_info
                 bool notification_msg;
-                if (parse_device_twin_topic_info(topic_resp, &notification_msg, &request_id, &status_code) != 0)
+                if (parse_device_twin_topic_info(topic_resp, &notification_msg, &request_id, &status_code, &version) != 0)
                 {
                     LogError("Failure: parsing device topic info");
                 }
@@ -1186,7 +1194,7 @@ static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE msgHandle, void* call
                                 else
                                 {
                                     /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_055: [ if device_twin_msg_type is not RETRIEVE_PROPERTIES then mqtt_notification_callback shall call IoTHubClient_LL_ReportedStateComplete ] */
-                                    IoTHubClient_LL_ReportedStateComplete(transportData->llClientHandle, msg_entry->iothub_msg_id, status_code);
+                                    IoTHubClient_LL_ReportedStateComplete(transportData->llClientHandle, msg_entry->iothub_msg_id, status_code, version);
                                 }
                                 free(msg_entry);
                                 break;
@@ -2122,7 +2130,7 @@ void IoTHubTransport_MQTT_Common_Destroy(TRANSPORT_LL_HANDLE handle)
         {
             PDLIST_ENTRY currentEntry = DList_RemoveHeadList(&transport_data->ack_waiting_queue);
             MQTT_DEVICE_TWIN_ITEM* mqtt_device_twin = containingRecord(currentEntry, MQTT_DEVICE_TWIN_ITEM, entry);
-            IoTHubClient_LL_ReportedStateComplete(transport_data->llClientHandle, mqtt_device_twin->iothub_msg_id, STATUS_CODE_TIMEOUT_VALUE);
+            IoTHubClient_LL_ReportedStateComplete(transport_data->llClientHandle, mqtt_device_twin->iothub_msg_id, STATUS_CODE_TIMEOUT_VALUE, NULL);
             free(mqtt_device_twin);
         }
 
@@ -2461,6 +2469,25 @@ IOTHUB_PROCESS_ITEM_RESULT IoTHubTransport_MQTT_Common_ProcessItem(TRANSPORT_LL_
             result = IOTHUB_PROCESS_NOT_CONNECTED;
         }
     }
+    return result;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_GetDeviceTwin(IOTHUB_DEVICE_HANDLE handle, IOTHUB_TRANSPORT_GET_DEVICE_TWIN_CALLBACK completionCallback, void* callbackContext)
+{
+    IOTHUB_CLIENT_RESULT result;
+
+    if (handle == NULL || completionCallback == NULL)
+    {
+        LogError("Invalid argument (handle=%p, completionCallback=%p)", handle, completionCallback);
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    else
+    {
+        // TODO: continue this.
+        (void)callbackContext;
+        result = IOTHUB_CLIENT_OK;
+    }
+
     return result;
 }
 

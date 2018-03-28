@@ -39,6 +39,7 @@ typedef struct IOTHUB_CLIENT_INSTANCE_TAG
     IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK desired_state_callback;
     IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK event_confirm_callback;
     IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reported_state_callback;
+    IOTHUB_CLIENT_REPORTED_STATE_WITH_VERSION_CALLBACK reported_state_with_version_callback;
     IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK connection_status_callback;
     IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC device_method_callback;
     IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK inbound_device_method_callback;
@@ -104,6 +105,7 @@ typedef struct EVENT_CONFIRM_CALLBACK_INFO_TAG
 typedef struct REPORTED_STATE_CALLBACK_INFO_TAG
 {
     int status_code;
+    char* version;
 } REPORTED_STATE_CALLBACK_INFO;
 
 typedef struct CONNECTION_STATUS_CALLBACK_INFO_TAG
@@ -351,7 +353,7 @@ static void iothub_ll_event_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT r
     }
 }
 
-static void iothub_ll_reported_state_callback(int status_code, void* userContextCallback)
+static void iothub_ll_reported_state_callback(int status_code, const char* up_to_date_version, void* userContextCallback)
 {
     IOTHUB_QUEUE_CONTEXT* queue_context = (IOTHUB_QUEUE_CONTEXT*)userContextCallback;
     if (queue_context != NULL)
@@ -360,6 +362,13 @@ static void iothub_ll_reported_state_callback(int status_code, void* userContext
         queue_cb_info.type = CALLBACK_TYPE_REPORTED_STATE;
         queue_cb_info.userContextCallback = queue_context->userContextCallback;
         queue_cb_info.iothub_callback.reported_state_cb_info.status_code = status_code;
+
+        if (up_to_date_version != NULL && mallocAndStrcpy_s(&queue_cb_info.iothub_callback.reported_state_cb_info.version, up_to_date_version) != 0)
+        {
+            LogError("failed copying new reported state version");
+            queue_cb_info.iothub_callback.reported_state_cb_info.version = NULL;
+        }
+
         if (VECTOR_push_back(queue_context->iotHubClientHandle->saved_user_callback_list, &queue_cb_info, 1) != 0)
         {
             LogError("reported state callback vector push failed.");
@@ -495,6 +504,13 @@ static void dispatch_user_callbacks(IOTHUB_CLIENT_INSTANCE* iotHubClientInstance
                     if (reported_state_callback)
                     {
                         reported_state_callback(queued_cb->iothub_callback.reported_state_cb_info.status_code, queued_cb->userContextCallback);
+                    }
+                    else if (iotHubClientInstance->reported_state_with_version_callback)
+                    {
+                        iotHubClientInstance->reported_state_with_version_callback(
+                            queued_cb->iothub_callback.reported_state_cb_info.status_code, 
+                            queued_cb->iothub_callback.reported_state_cb_info.version, 
+                            queued_cb->userContextCallback);
                     }
                     break;
                 case CALLBACK_TYPE_CONNECTION_STATUS:
@@ -1590,7 +1606,14 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetDeviceTwinCallback(IOTHUB_CLIENT_HANDLE iot
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_SendReportedState(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const unsigned char* reportedState, size_t size, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reportedStateCallback, void* userContextCallback)
+static IOTHUB_CLIENT_RESULT internal_SendReportedState(
+    IOTHUB_CLIENT_HANDLE iotHubClientHandle, 
+    const unsigned char* reportedState, 
+    size_t size, 
+    const char* version,
+    IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reportedStateCallback,
+    IOTHUB_CLIENT_REPORTED_STATE_WITH_VERSION_CALLBACK reportedStateWithVersionCallback,
+    void* userContextCallback)
 {
     IOTHUB_CLIENT_RESULT result;
 
@@ -1613,6 +1636,12 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SendReportedState(IOTHUB_CLIENT_HANDLE iotHubC
         }
         else
         {
+            if (iotHubClientInstance->created_with_transport_handle == 0)
+            {
+                iotHubClientInstance->reported_state_callback = reportedStateCallback;
+                iotHubClientInstance->reported_state_with_version_callback = reportedStateWithVersionCallback;
+            }
+
             /*Codes_SRS_IOTHUBCLIENT_10_021: [** `IoTHubClient_SendReportedState` shall be made thread-safe by using the lock created in IoTHubClient_Create. ]*/
             if (Lock(iotHubClientInstance->LockHandle) != LOCK_OK)
             {
@@ -1627,11 +1656,11 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SendReportedState(IOTHUB_CLIENT_HANDLE iotHubC
                     iotHubClientInstance->reported_state_callback = reportedStateCallback;
                 }
 
-                if (iotHubClientInstance->created_with_transport_handle != 0 || reportedStateCallback == NULL)
+                if (iotHubClientInstance->created_with_transport_handle != 0 || reportedStateCallback == NULL && reportedStateWithVersionCallback == NULL)
                 {
                     /*Codes_SRS_IOTHUBCLIENT_10_017: [** `IoTHubClient_SendReportedState` shall call `IoTHubClient_LL_SendReportedState`, while passing the `IoTHubClient_LL handle` created by `IoTHubClient_LL_Create` along with the parameters `reportedState`, `size`, `reportedStateCallback`, and `userContextCallback`. ]*/
                     /*Codes_SRS_IOTHUBCLIENT_10_018: [** When `IoTHubClient_LL_SendReportedState` is called, `IoTHubClient_SendReportedState` shall return the result of `IoTHubClient_LL_SendReportedState`. **]*/
-                    result = IoTHubClient_LL_SendReportedState(iotHubClientInstance->IoTHubClientLLHandle, reportedState, size, reportedStateCallback, userContextCallback);
+                    result = IoTHubClient_LL_SendReportedStateWithVersion(iotHubClientInstance->IoTHubClientLLHandle, reportedState, size, version, reportedStateWithVersionCallback, userContextCallback);
                 }
                 else
                 {
@@ -1648,7 +1677,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SendReportedState(IOTHUB_CLIENT_HANDLE iotHubC
                         queue_context->userContextCallback = userContextCallback;
                         /*Codes_SRS_IOTHUBCLIENT_10_017: [** `IoTHubClient_SendReportedState` shall call `IoTHubClient_LL_SendReportedState`, while passing the `IoTHubClient_LL handle` created by `IoTHubClient_LL_Create` along with the parameters `reportedState`, `size`, `iothub_ll_reported_state_callback` and IOTHUB_QUEUE_CONTEXT variable. ]*/
                         /*Codes_SRS_IOTHUBCLIENT_10_018: [** When `IoTHubClient_LL_SendReportedState` is called, `IoTHubClient_SendReportedState` shall return the result of `IoTHubClient_LL_SendReportedState`. **]*/
-                        result = IoTHubClient_LL_SendReportedState(iotHubClientInstance->IoTHubClientLLHandle, reportedState, size, iothub_ll_reported_state_callback, queue_context);
+                        result = IoTHubClient_LL_SendReportedStateWithVersion(iotHubClientInstance->IoTHubClientLLHandle, reportedState, size, version, iothub_ll_reported_state_callback, queue_context);
                         if (result != IOTHUB_CLIENT_OK)
                         {
                             LogError("IoTHubClient_LL_SendReportedState failed");
@@ -1662,6 +1691,16 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SendReportedState(IOTHUB_CLIENT_HANDLE iotHubC
         }
     }
     return result;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClient_SendReportedState(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const unsigned char* reportedState, size_t size, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reportedStateCallback, void* userContextCallback)
+{
+    return internal_SendReportedState(iotHubClientHandle, reportedState, size, NULL, reportedStateCallback, NULL, userContextCallback);
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClient_SendReportedStateWithVersion(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const unsigned char* reportedState, size_t size, const char* version, IOTHUB_CLIENT_REPORTED_STATE_WITH_VERSION_CALLBACK reportedStateCallback, void* userContextCallback)
+{ 
+    return internal_SendReportedState(iotHubClientHandle, reportedState, size, version, NULL, reportedStateCallback, userContextCallback);
 }
 
 IOTHUB_CLIENT_RESULT IoTHubClient_SetDeviceMethodCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC deviceMethodCallback, void* userContextCallback)

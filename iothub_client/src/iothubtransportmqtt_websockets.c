@@ -159,6 +159,11 @@ static IOTHUB_PROCESS_ITEM_RESULT IoTHubTransportMqtt_WS_ProcessItem(TRANSPORT_L
     return IoTHubTransport_MQTT_Common_ProcessItem(handle, item_type, iothub_item);
 }
 
+static IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_WS_GetDeviceTwin(IOTHUB_DEVICE_HANDLE handle, IOTHUB_TRANSPORT_GET_DEVICE_TWIN_CALLBACK completionCallback, void* callbackContext)
+{
+    return IoTHubTransport_MQTT_Common_GetDeviceTwin(handle, completionCallback, callbackContext);
+}
+
 /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_007: [ IoTHubTransportMqtt_WS_DoWork shall call into the IoTHubMqttAbstract_DoWork function. ] */
 static void IoTHubTransportMqtt_WS_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
 {
@@ -228,6 +233,7 @@ static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls = {
     IoTHubTransportMqtt_WS_Subscribe_DeviceTwin,
     IoTHubTransportMqtt_WS_Unsubscribe_DeviceTwin,
     IoTHubTransportMqtt_WS_ProcessItem,
+    IoTHubTransportMqtt_WS_GetDeviceTwin,
     IoTHubTransportMqtt_WS_GetHostname,
     IoTHubTransportMqtt_WS_SetOption,
     IoTHubTransportMqtt_WS_Create,
