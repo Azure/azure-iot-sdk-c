@@ -37,7 +37,7 @@ int main(void)
     }
     else
     {
-        if (longhaul_create_and_connect_device_client(iotHubLonghaulRsrcsHandle, IoTHubAccount_GetSASDevice(longhaul_get_account_info(iotHubLonghaulRsrcsHandle)), MQTT_Protocol) == NULL)
+        if (longhaul_initialize_device_client(iotHubLonghaulRsrcsHandle, IoTHubAccount_GetSASDevice(longhaul_get_account_info(iotHubLonghaulRsrcsHandle)), MQTT_Protocol) == NULL)
         {
             LogError("Failed creating the device client");
             result = __FAILURE__;
