@@ -90,6 +90,8 @@ typedef struct IOTHUB_CLIENT_LL_HANDLE_DATA_TAG
     uint64_t current_device_twin_timeout;
     IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback;
     void* deviceTwinContextCallback;
+    IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK getDeviceTwinCallback;
+    void* getDeviceTwinContext;
     IOTHUB_CLIENT_RETRY_POLICY retryPolicy;
     size_t retryTimeoutLimitInSeconds;
 #ifndef DONT_USE_UPLOADTOBLOB
@@ -1844,6 +1846,10 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_GetOption(IOTHUB_CLIENT_LL_HANDLE iotHubCli
     return result;
 }
 
+static void on_get_device_twin_completed(void)
+{
+    // TODO: complete this.
+}
 
 
 IOTHUB_CLIENT_RESULT IoTHubClient_LL_GetDeviceTwin(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback, void* userContextCallback)
@@ -1853,15 +1859,18 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_GetDeviceTwin(IOTHUB_CLIENT_LL_HANDLE iotHu
     if (iotHubClientHandle == NULL || deviceTwinCallback == NULL)
     {
         result = IOTHUB_CLIENT_INVALID_ARG;
-        LogError("Invalid argument specified iothubClientHandle=%p, deviceTwinCallback=%p", iotHubClientHandle, deviceTwinCallback);
+        LogError("Invalid argument iothubClientHandle=%p, deviceTwinCallback=%p", iotHubClientHandle, deviceTwinCallback);
     }
     else
     {
         IOTHUB_CLIENT_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LL_HANDLE_DATA*)iotHubClientHandle;
-        (void)userContextCallback;
-        (void)handleData;
+        handleData->getDeviceTwinCallback = deviceTwinCallback;
+        handleData->getDeviceTwinContext = userContextCallback;
+
+        // TODO: continue from here.
+        handleData->IoTHubTransport_GetDeviceTwin(handleData->deviceHandle, on_get_device_twin_completed, handleData);
+
         result = IOTHUB_CLIENT_OK;
-        // handleData->IoTHubTransport_GetDeviceTwin(handleData->deviceHandle, )
     }
 
     return result;

@@ -14,10 +14,10 @@
 
 // The protocol you wish to use should be uncommented
 //
-#define SAMPLE_HTTP
+//#define SAMPLE_HTTP
 //#define SAMPLE_MQTT
 //#define SAMPLE_MQTT_OVER_WEBSOCKETS
-//#define SAMPLE_AMQP
+#define SAMPLE_AMQP
 //#define SAMPLE_AMQP_OVER_WEBSOCKETS
 
 #ifdef SAMPLE_MQTT
@@ -46,14 +46,15 @@
 static const char* connectionString = "";
 
 static bool g_continueRunning;
-#define DOWORK_LOOP_NUM     3
+
+#define THREE_SECOND_DURATION 3000
 
 static void deviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback)
 {
-    (void)userContextCallback;
+    char* requestSource = (char*)userContextCallback;
 
-    printf("Device Twin update received (state=%s, size=%zu): %s\r\n", 
-        ENUM_TO_STRING(DEVICE_TWIN_UPDATE_STATE, update_state), size, payLoad);
+    printf("Device Twin update received (requestSource=%s, state=%s, size=%zu): %s\r\n", 
+        requestSource, ENUM_TO_STRING(DEVICE_TWIN_UPDATE_STATE, update_state), size, payLoad);
 }
 
 static void reportedStateCallback(int status_code, const char* up_to_date_version, void* userContextCallback)
@@ -104,6 +105,7 @@ void iothub_client_sample_device_twin_run(void)
             const char* reportedState = "{ 'device_property': 'new_value2'}";
             size_t reportedStateSize = strlen(reportedState);
             const char* vs = NULL; // change to the current reported properties version value for testing (e.g., "44").
+            size_t doWorkCounter = 0;
 
             (void)IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &traceOn);
 
@@ -117,20 +119,15 @@ void iothub_client_sample_device_twin_run(void)
 
             // Check the return of all API calls when developing your solution. Return checks ommited for sample simplification.
 
-            (void)IoTHubClient_LL_SetDeviceTwinCallback(iotHubClientHandle, deviceTwinCallback, iotHubClientHandle);
+            (void)IoTHubClient_LL_SetDeviceTwinCallback(iotHubClientHandle, deviceTwinCallback, "TwinSubscription");
             (void)IoTHubClient_LL_SendReportedStateWithVersion(iotHubClientHandle, (const unsigned char*)reportedState, reportedStateSize, vs, reportedStateCallback, iotHubClientHandle);
+            (void)IoTHubClient_LL_GetDeviceTwin(iotHubClientHandle, deviceTwinCallback, "GetTwin");
 
             do
             {
                 IoTHubClient_LL_DoWork(iotHubClientHandle);
                 ThreadAPI_Sleep(1);
-            } while (g_continueRunning);
-
-            for (size_t index = 0; index < DOWORK_LOOP_NUM; index++)
-            {
-                IoTHubClient_LL_DoWork(iotHubClientHandle);
-                ThreadAPI_Sleep(1);
-            }
+            } while (doWorkCounter++ < THREE_SECOND_DURATION || g_continueRunning);
 
             IoTHubClient_LL_Destroy(iotHubClientHandle);
         }
