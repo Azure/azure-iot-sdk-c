@@ -283,7 +283,6 @@ endif()
 add_subdirectory(tools)
 
 if(${use_installed_dependencies})
-	message("what the fuck")
     # Install Provisioning libs
     set(package_location "cmake")
 
@@ -327,7 +326,6 @@ if(${use_installed_dependencies})
             ${package_location}
     )
 else()
-	message("phew")
     # Install Provisioning libs
     if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
         set(CMAKE_INSTALL_LIBDIR "lib")
