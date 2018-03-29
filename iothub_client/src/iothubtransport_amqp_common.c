@@ -1692,6 +1692,8 @@ void IoTHubTransport_AMQP_Common_Unsubscribe(IOTHUB_DEVICE_HANDLE handle)
 
 IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_GetDeviceTwin(IOTHUB_DEVICE_HANDLE handle, IOTHUB_TRANSPORT_GET_DEVICE_TWIN_CALLBACK completionCallback, void* callbackContext)
 {
+    (void)callbackContext;
+
     IOTHUB_CLIENT_RESULT result;
 
     if (handle == NULL || completionCallback == NULL)
@@ -1701,8 +1703,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_GetDeviceTwin(IOTHUB_DEVICE_HAN
     }
     else
     {
-        // TODO: continue this.
-        (void)callbackContext;
+
         result = IOTHUB_CLIENT_OK;
     }
 

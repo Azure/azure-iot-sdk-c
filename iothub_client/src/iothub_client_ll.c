@@ -129,6 +129,7 @@ static void setTransportProtocol(IOTHUB_CLIENT_LL_HANDLE_DATA* handleData, TRANS
     handleData->IoTHubTransport_SetRetryPolicy = protocol->IoTHubTransport_SetRetryPolicy;
     handleData->IoTHubTransport_GetSendStatus = protocol->IoTHubTransport_GetSendStatus;
     handleData->IoTHubTransport_ProcessItem = protocol->IoTHubTransport_ProcessItem;
+    handleData->IoTHubTransport_GetDeviceTwin = protocol->IoTHubTransport_GetDeviceTwin;
     handleData->IoTHubTransport_Subscribe_DeviceTwin = protocol->IoTHubTransport_Subscribe_DeviceTwin;
     handleData->IoTHubTransport_Unsubscribe_DeviceTwin = protocol->IoTHubTransport_Unsubscribe_DeviceTwin;
     handleData->IoTHubTransport_Subscribe_DeviceMethod = protocol->IoTHubTransport_Subscribe_DeviceMethod;
@@ -1846,11 +1847,33 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_GetOption(IOTHUB_CLIENT_LL_HANDLE iotHubCli
     return result;
 }
 
-static void on_get_device_twin_completed(void)
+static void on_get_device_twin_completed(IOTHUB_TRANSPORT_RESULT result, CONSTBUFFER_HANDLE data_handle, void* callbackContext)
 {
-    // TODO: complete this.
-}
+    (void)result;
 
+    if (data_handle == NULL || callbackContext == NULL)
+    {
+        LogError("Invalid argument (data_handle=%p, callbackContext=%p)", data_handle, callbackContext);
+    }
+    else
+    {
+        IOTHUB_CLIENT_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LL_HANDLE_DATA*)callbackContext;
+
+        if (handleData->getDeviceTwinCallback != NULL)
+        {
+            const CONSTBUFFER* data;
+
+            if ((data = CONSTBUFFER_GetContent(data_handle)) == NULL)
+            {
+                LogError("Failed retrieving the CONSTBUFFER content");
+            }
+            else
+            {
+                handleData->getDeviceTwinCallback(DEVICE_TWIN_UPDATE_COMPLETE, data->buffer, data->size, handleData->getDeviceTwinContext);
+            }
+        }
+    }
+}
 
 IOTHUB_CLIENT_RESULT IoTHubClient_LL_GetDeviceTwin(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback, void* userContextCallback)
 {
@@ -1867,10 +1890,17 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_GetDeviceTwin(IOTHUB_CLIENT_LL_HANDLE iotHu
         handleData->getDeviceTwinCallback = deviceTwinCallback;
         handleData->getDeviceTwinContext = userContextCallback;
 
-        // TODO: continue from here.
-        handleData->IoTHubTransport_GetDeviceTwin(handleData->deviceHandle, on_get_device_twin_completed, handleData);
-
-        result = IOTHUB_CLIENT_OK;
+        if (handleData->IoTHubTransport_GetDeviceTwin(handleData->deviceHandle, on_get_device_twin_completed, handleData) != IOTHUB_CLIENT_OK)
+        {
+            LogError("Failed getting device twin document");
+            handleData->getDeviceTwinCallback = NULL;
+            handleData->getDeviceTwinContext = NULL;
+            result = IOTHUB_CLIENT_ERROR;
+        }
+        else
+        {
+            result = IOTHUB_CLIENT_OK;
+        }
     }
 
     return result;

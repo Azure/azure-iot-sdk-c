@@ -54,7 +54,8 @@ static char* DEFAULT_TWIN_SEND_LINK_SOURCE_NAME =		"twin";
 static char* DEFAULT_TWIN_RECEIVE_LINK_TARGET_NAME =	"twin";
 
 static const char* TWIN_OPERATION_PATCH =				"PATCH";
-static const char* TWIN_OPERATION_GET =					"GET";
+static const char* TWIN_OPERATION_GET =                 "GET";
+static const char* TWIN_OPERATION_GET_ON_DEMAND =       "GET";
 static const char* TWIN_OPERATION_PUT =					"PUT";
 static const char* TWIN_OPERATION_DELETE =				"DELETE";
 
@@ -62,6 +63,7 @@ static const char* TWIN_OPERATION_DELETE =				"DELETE";
 #define TWIN_OPERATION_TYPE_STRINGS \
 	TWIN_OPERATION_TYPE_PATCH, \
 	TWIN_OPERATION_TYPE_GET, \
+	TWIN_OPERATION_TYPE_GET_ON_DEMAND, \
 	TWIN_OPERATION_TYPE_PUT, \
 	TWIN_OPERATION_TYPE_DELETE
 
@@ -125,8 +127,21 @@ typedef struct TWIN_OPERATION_CONTEXT_TAG
 	TWIN_OPERATION_TYPE type;
 	TWIN_MESSENGER_INSTANCE* msgr;
 	char* correlation_id;
-	TWIN_MESSENGER_REPORT_STATE_COMPLETE_CALLBACK on_report_state_complete_callback;
-	const void* on_report_state_complete_context;
+
+    union {
+        struct reported_properties_tag
+        {
+            TWIN_MESSENGER_REPORT_STATE_COMPLETE_CALLBACK callback;
+            const void* context;
+        } reported_properties;
+
+        struct get_twin_tag
+        {
+            TWIN_STATE_UPDATE_CALLBACK callback;
+            const void* context;
+        } get_twin;
+    } cb;
+
 	time_t time_sent;
 } TWIN_OPERATION_CONTEXT;
 
@@ -732,6 +747,9 @@ static const char* get_twin_operation_name(TWIN_OPERATION_TYPE op_type)
 		case TWIN_OPERATION_TYPE_GET:
 			result = TWIN_OPERATION_GET;
 			break;
+        case TWIN_OPERATION_TYPE_GET_ON_DEMAND:
+            result = TWIN_OPERATION_GET_ON_DEMAND;
+            break;
 		case TWIN_OPERATION_TYPE_PUT:
 			result = TWIN_OPERATION_PUT;
 			break;
@@ -941,7 +959,7 @@ static void on_amqp_send_complete_callback(AMQP_MESSENGER_SEND_RESULT result, AM
 			if (twin_op_ctx->type == TWIN_OPERATION_TYPE_PATCH)
 			{
 				// Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_095: [If operation is a reported state PATCH, if a failure occurs `on_report_state_complete_callback` shall be invoked with TWIN_REPORT_STATE_RESULT_ERROR, status code from the AMQP response and the saved context]  
-				if (twin_op_ctx->on_report_state_complete_callback != NULL)
+				if (twin_op_ctx->cb.reported_properties.callback != NULL)
 				{
 					TWIN_REPORT_STATE_RESULT callback_result;
 					TWIN_REPORT_STATE_REASON callback_reason;
@@ -949,9 +967,16 @@ static void on_amqp_send_complete_callback(AMQP_MESSENGER_SEND_RESULT result, AM
 					callback_result = get_twin_messenger_result_from(result);
 					callback_reason = get_twin_messenger_reason_from(reason);
 
-					twin_op_ctx->on_report_state_complete_callback(TWIN_REPORT_STATE_RESULT_ERROR, TWIN_REPORT_STATE_REASON_NONE, 0, NULL, (void*)twin_op_ctx->on_report_state_complete_context);
+					twin_op_ctx->cb.reported_properties.callback(TWIN_REPORT_STATE_RESULT_ERROR, TWIN_REPORT_STATE_REASON_NONE, 0, NULL, (void*)twin_op_ctx->cb.reported_properties.context);
 				}
 			}
+            else if (twin_op_ctx->type == TWIN_OPERATION_TYPE_GET_ON_DEMAND)
+            {
+                if (twin_op_ctx->cb.get_twin.callback != NULL)
+                {
+                    twin_op_ctx->cb.get_twin.callback(TWIN_UPDATE_TYPE_COMPLETE, NULL, 0, (void*)twin_op_ctx->cb.get_twin.context);
+                }
+            }
 			else if (reason != AMQP_MESSENGER_REASON_MESSENGER_DESTROYED)
 			{
 				// Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_096: [If operation is a GET/PUT/DELETE, if a failure occurs the TWIN messenger shall attempt to subscribe/unsubscribe again]  
@@ -1111,9 +1136,9 @@ static bool remove_expired_twin_operation_request(const void* item, const void* 
 			if (twin_op_ctx->type == TWIN_OPERATION_TYPE_PATCH)
 			{
 				// Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_081: [If a timed-out item is a reported property PATCH, `on_report_state_complete_callback` shall be invoked with RESULT_ERROR and REASON_TIMEOUT]  
-				if (twin_op_ctx->on_report_state_complete_callback != NULL)
+				if (twin_op_ctx->cb.reported_properties.callback != NULL)
 				{
-					twin_op_ctx->on_report_state_complete_callback(TWIN_REPORT_STATE_RESULT_ERROR, TWIN_REPORT_STATE_REASON_TIMEOUT, 0, NULL, twin_op_ctx->on_report_state_complete_context);
+					twin_op_ctx->cb.reported_properties.callback(TWIN_REPORT_STATE_RESULT_ERROR, TWIN_REPORT_STATE_REASON_TIMEOUT, 0, NULL, twin_op_ctx->cb.reported_properties.context);
 				}
 			}
 			else if (twin_op_ctx->type == TWIN_OPERATION_TYPE_GET)
@@ -1207,8 +1232,8 @@ static bool send_pending_twin_patch(const void* item, const void* match_context,
 		}
 		else
 		{
-			twin_op_ctx->on_report_state_complete_callback = twin_patch_ctx->on_report_state_complete_callback;
-			twin_op_ctx->on_report_state_complete_context = twin_patch_ctx->on_report_state_complete_context;
+			twin_op_ctx->cb.reported_properties.callback = twin_patch_ctx->on_report_state_complete_callback;
+			twin_op_ctx->cb.reported_properties.context = twin_patch_ctx->on_report_state_complete_context;
 
 			// Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_059: [If reported property PATCH shall be sent as an uAMQP MESSAGE_HANDLE instance using amqp_send_async() passing `on_amqp_send_complete_callback`]
 			if (send_twin_operation_request(twin_msgr, twin_op_ctx, twin_patch_ctx->data, twin_patch_ctx->version) != RESULT_OK)
@@ -1263,7 +1288,7 @@ static void process_twin_subscription(TWIN_MESSENGER_INSTANCE* twin_msgr)
 		// Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_076: [If unsubscribing, twin_messenger_do_work() shall send a DELETE request to the service]
 		else if (twin_msgr->subscription_state == TWIN_SUBSCRIPTION_STATE_UNSUBSCRIBE)
 		{
-			op_type = TWIN_OPERATION_TYPE_PUT;
+			op_type = TWIN_OPERATION_TYPE_DELETE;
 			next_subscription_state = TWIN_SUBSCRIPTION_STATE_UNSUBSCRIBING;
 		}
 
@@ -1318,9 +1343,9 @@ static bool cancel_all_pending_twin_operations(const void* item, const void* mat
 
 		if (twin_op_ctx->type == TWIN_OPERATION_TYPE_PATCH)
 		{
-			if (twin_op_ctx->on_report_state_complete_callback != NULL)
+			if (twin_op_ctx->cb.reported_properties.callback != NULL)
 			{
-				twin_op_ctx->on_report_state_complete_callback(TWIN_REPORT_STATE_RESULT_CANCELLED, TWIN_REPORT_STATE_REASON_MESSENGER_DESTROYED, 0, NULL, twin_op_ctx->on_report_state_complete_context);
+				twin_op_ctx->cb.reported_properties.callback(TWIN_REPORT_STATE_RESULT_CANCELLED, TWIN_REPORT_STATE_REASON_MESSENGER_DESTROYED, 0, NULL, twin_op_ctx->cb.reported_properties.context);
 			}
 		}
 
@@ -1486,17 +1511,17 @@ static AMQP_MESSENGER_DISPOSITION_RESULT on_amqp_message_received_callback(MESSA
 
 								disposition_result = AMQP_MESSENGER_DISPOSITION_RESULT_REJECTED;
 								
-								if (twin_op_ctx->on_report_state_complete_callback != NULL)
+								if (twin_op_ctx->cb.reported_properties.callback != NULL)
 								{
-									twin_op_ctx->on_report_state_complete_callback(TWIN_REPORT_STATE_RESULT_ERROR, TWIN_REPORT_STATE_REASON_INVALID_RESPONSE, 0, new_version, twin_op_ctx->on_report_state_complete_context);
+									twin_op_ctx->cb.reported_properties.callback(TWIN_REPORT_STATE_RESULT_ERROR, TWIN_REPORT_STATE_REASON_INVALID_RESPONSE, 0, new_version, twin_op_ctx->cb.reported_properties.context);
 								}
 							}
 							else
 							{
 								// Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_085: [If `message` is a success response for a PATCH request, the `on_report_state_complete_callback` shall be invoked if provided passing RESULT_SUCCESS and the status_code received]  
-								if (twin_op_ctx->on_report_state_complete_callback != NULL)
+								if (twin_op_ctx->cb.reported_properties.callback != NULL)
 								{
-                                    twin_op_ctx->on_report_state_complete_callback(TWIN_REPORT_STATE_RESULT_SUCCESS, TWIN_REPORT_STATE_REASON_NONE, status_code, new_version, twin_op_ctx->on_report_state_complete_context);
+                                    twin_op_ctx->cb.reported_properties.callback(TWIN_REPORT_STATE_RESULT_SUCCESS, TWIN_REPORT_STATE_REASON_NONE, status_code, new_version, twin_op_ctx->cb.reported_properties.context);
 								}
 							}
 						}
@@ -1536,6 +1561,21 @@ static AMQP_MESSENGER_DISPOSITION_RESULT on_amqp_message_received_callback(MESSA
 								}
 							}
 						}
+                        else if (twin_op_ctx->type == TWIN_OPERATION_TYPE_GET_ON_DEMAND)
+                        {
+                            if (!has_twin_report)
+                            {
+                                LogError("Received an incoming TWIN message for a GET operation, but with no report (%s, %s)", twin_msgr->device_id, correlation_id);
+
+                                disposition_result = AMQP_MESSENGER_DISPOSITION_RESULT_REJECTED;
+
+                                twin_op_ctx->cb.get_twin.callback(TWIN_UPDATE_TYPE_COMPLETE, NULL, 0, twin_op_ctx->cb.get_twin.context);
+                            }
+                            else
+                            {
+                                twin_op_ctx->cb.get_twin.callback(TWIN_UPDATE_TYPE_COMPLETE, (const char*)twin_report.bytes, twin_report.length, twin_op_ctx->cb.get_twin.context);
+                            }
+                        }
 						else if (twin_op_ctx->type == TWIN_OPERATION_TYPE_PUT)
 						{
 							if (twin_msgr->subscription_state == TWIN_SUBSCRIPTION_STATE_SUBSCRIBED)
@@ -1940,6 +1980,57 @@ int twin_messenger_report_state_async(TWIN_MESSENGER_HANDLE twin_msgr_handle, CO
 	}
 
 	return result;
+}
+
+int twin_messenger_get_twin_async(TWIN_MESSENGER_HANDLE twin_msgr_handle, TWIN_STATE_UPDATE_CALLBACK on_get_twin_completed_callback, void* context)
+{
+    (void)context;
+    int result;
+
+    if (twin_msgr_handle == NULL || on_get_twin_completed_callback == NULL)
+    {
+        LogError("Invalid argument (twin_msgr_handle=%p, on_get_twin_completed_callback=%p)", twin_msgr_handle, on_get_twin_completed_callback);
+        result = __FAILURE__;
+    }
+    else
+    {
+        TWIN_MESSENGER_INSTANCE* twin_msgr = (TWIN_MESSENGER_INSTANCE*)twin_msgr_handle;
+        TWIN_OPERATION_CONTEXT* twin_op_ctx;
+
+        if ((twin_op_ctx = create_twin_operation_context(twin_msgr, TWIN_OPERATION_TYPE_GET_ON_DEMAND)) == NULL)
+        {
+            LogError("Failed creating a context for TWIN request (%s, TWIN_OPERATION_TYPE_GET_ON_DEMAND)", twin_msgr->device_id);
+            result = __FAILURE__;
+        }
+        else
+        {
+            twin_op_ctx->cb.get_twin.callback = on_get_twin_completed_callback;
+            twin_op_ctx->cb.get_twin.context = context;
+
+            if (add_twin_operation_context_to_queue(twin_op_ctx) != RESULT_OK)
+            {
+                LogError("Failed queueing TWIN request context (%s, TWIN_OPERATION_TYPE_GET_ON_DEMAND)", twin_msgr->device_id);
+
+                destroy_twin_operation_context(twin_op_ctx);
+                result = __FAILURE__;
+            }
+            else if (send_twin_operation_request(twin_msgr, twin_op_ctx, NULL, NULL) != RESULT_OK)
+            {
+                LogError("Failed sending TWIN request (%s, TWIN_OPERATION_TYPE_GET_ON_DEMAND)", twin_msgr->device_id);
+
+                (void)remove_twin_operation_context_from_queue(twin_op_ctx);
+                destroy_twin_operation_context(twin_op_ctx);
+                result = __FAILURE__;
+            }
+            else
+            {
+                result = RESULT_OK;
+            }
+        }
+
+    }
+
+    return result;
 }
 
 int twin_messenger_subscribe(TWIN_MESSENGER_HANDLE twin_msgr_handle, TWIN_STATE_UPDATE_CALLBACK on_twin_state_update_callback, void* context)
