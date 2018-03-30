@@ -1411,6 +1411,21 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
     }
 }
 
+// Prior to creating a new connection, if we have an existing xioTransport we need to clear 
+// it now or else cached settings (especially TLS when communicating with HTTP proxies) will 
+// break reconnection attempt.  
+static void ResetConnectionIfNecessary(PMQTTTRANSPORT_HANDLE_DATA transport_data)
+{
+    if (transport_data->xioTransport != NULL)
+    {
+        OPTIONHANDLER_HANDLE options = xio_retrieveoptions(transport_data->xioTransport);
+        set_saved_tls_options(transport_data, options);
+
+        xio_destroy(transport_data->xioTransport);
+        transport_data->xioTransport = NULL;
+    }
+}
+
 static void DisconnectFromClient(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 {
     if (!transport_data->isDestroyCalled)
@@ -1418,6 +1433,7 @@ static void DisconnectFromClient(PMQTTTRANSPORT_HANDLE_DATA transport_data)
         OPTIONHANDLER_HANDLE options = xio_retrieveoptions(transport_data->xioTransport);
         set_saved_tls_options(transport_data, options);
     }
+
     (void)mqtt_client_disconnect(transport_data->mqttClient, NULL, NULL);
     xio_destroy(transport_data->xioTransport);
     transport_data->xioTransport = NULL;
@@ -1612,7 +1628,21 @@ static int GetTransportProviderIfNecessary(PMQTTTRANSPORT_HANDLE_DATA transport_
         }
         else
         {
-            if (IoTHubClient_Auth_Get_Credential_Type(transport_data->authorization_module) == IOTHUB_CREDENTIAL_TYPE_X509_ECC)
+            if (transport_data->saved_tls_options != NULL)
+            {
+                if (OptionHandler_FeedOptions(transport_data->saved_tls_options, transport_data->xioTransport) != OPTIONHANDLER_OK)
+                {
+                    LogError("Failed feeding existing options to new TLS instance.");
+                    result = __FAILURE__;
+                }
+                else
+                {
+                    // The tlsio has the options, so our copy can be deleted
+                    set_saved_tls_options(transport_data, NULL);
+                    result = 0;
+                }
+            }
+            else if (IoTHubClient_Auth_Get_Credential_Type(transport_data->authorization_module) == IOTHUB_CREDENTIAL_TYPE_X509_ECC)
             {
                 if (IoTHubClient_Auth_Set_xio_Certificate(transport_data->authorization_module, transport_data->xioTransport) != 0)
                 {
@@ -1627,28 +1657,6 @@ static int GetTransportProviderIfNecessary(PMQTTTRANSPORT_HANDLE_DATA transport_
             else
             {
                 result = 0;
-            }
-
-            if (result == 0)
-            {
-                if (transport_data->saved_tls_options != NULL)
-                {
-                    if (OptionHandler_FeedOptions(transport_data->saved_tls_options, transport_data->xioTransport) != OPTIONHANDLER_OK)
-                    {
-                        LogError("Failed feeding existing options to new TLS instance.");
-                        result = __FAILURE__;
-                    }
-                    else
-                    {
-                        // The tlsio has the options, so our copy can be deleted
-                        set_saved_tls_options(transport_data, NULL);
-                        result = 0;
-                    }
-                }
-                else
-                {
-                    result = 0;
-                }
             }
         }
     }
@@ -1828,6 +1836,8 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             }
             else
             {
+                ResetConnectionIfNecessary(transport_data);
+
                 if (SendMqttConnectMsg(transport_data) != 0)
                 {
                     transport_data->connectFailCount++;
