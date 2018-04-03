@@ -205,3 +205,6 @@ build_all/windows/nuget.exe
 /cmake
 /build
 *.cert
+
+# Ignore temporary generated .def files
+/iothub_client/src/iothub_client_*_temp.def

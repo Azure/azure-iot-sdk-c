@@ -1,4 +1,4 @@
-LIBRARY iothub_client_dll
+LIBRARY iothub_client_@transport@_transport
 EXPORTS
     IoTHubTransport_ThreadTerminationOffset
     IoTHubTransport_Create
@@ -27,3 +27,26 @@ EXPORTS
     IoTHubClient_SendReportedState
     IoTHubClient_SetDeviceMethodCallback
     IoTHubClient_UploadToBlobAsync
+    IoTHubClient_UploadMultipleBlocksToBlobAsync
+    IoTHubClient_UploadMultipleBlocksToBlobAsyncEx
+    IoTHubClient_LL_CreateFromConnectionString
+    IoTHubClient_LL_Create
+    IoTHubClient_LL_CreateWithTransport
+    IoTHubClient_LL_Destroy
+    IoTHubClient_LL_SendEventAsync
+    IoTHubClient_LL_GetSendStatus
+    IoTHubClient_LL_SetMessageCallback
+    IoTHubClient_LL_SetConnectionStatusCallback
+    IoTHubClient_LL_SetRetryPolicy
+    IoTHubClient_LL_GetRetryPolicy
+    IoTHubClient_LL_GetLastMessageReceiveTime
+    IoTHubClient_LL_DoWork
+    IoTHubClient_LL_SetOption
+    IoTHubClient_LL_SetDeviceTwinCallback
+    IoTHubClient_LL_SendReportedState
+    IoTHubClient_LL_SetDeviceMethodCallback
+    IoTHubClient_LL_SetDeviceMethodCallback_Ex
+    IoTHubClient_LL_DeviceMethodResponse
+    IoTHubClient_LL_UploadToBlob
+    IoTHubClient_LL_UploadMultipleBlocksToBlob
+    IoTHubClient_LL_UploadMultipleBlocksToBlobEx

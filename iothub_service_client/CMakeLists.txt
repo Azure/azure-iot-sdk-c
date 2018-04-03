@@ -51,7 +51,7 @@ if (${build_as_dynamic})
     add_library(iothub_service_client SHARED ${iothub_service_client_c_files} ${iothub_service_client_h_files} ./src/iothub_service_client.def)
     linkSharedUtil(iothub_service_client)
     
-    if ("${CMAKE_COMPILER_ID}" STREQUAL "GNU")
+    if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
         target_link_libraries(iothub_service_client
             "-Wl,--exclude-libs,libparson.a"
         )
@@ -61,7 +61,6 @@ if (${build_as_dynamic})
         OUTPUT_NAME "iothub_service_client"
         ARCHIVE_OUTPUT_NAME "iothub_service_client_dll_import"
         ENABLE_EXPORTS YES
-        WINDOWS_EXPORT_ALL_SYMBOLS YES
         VERSION ${IOT_SDK_VERSION}
         SOVERSION ${IOT_SDK_VERION_MAJOR}
         BUILD_WITH_INSTALL_RPATH TRUE

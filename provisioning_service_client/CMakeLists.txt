@@ -61,14 +61,37 @@ IF(WIN32)
 ENDIF(WIN32)
 
 if (${build_as_dynamic})
-    add_library(provisioning_service_client SHARED ${provisioning_service_client_c_files} ${provisioning_service_client_h_files} ./src/provisioning_service_client_dll.def)
+    add_library(provisioning_service_client SHARED 
+		${provisioning_service_client_c_files} 
+		${provisioning_service_client_h_files} 
+		./src/provisioning_service_client_dll.def
+	)
     linkSharedUtil(provisioning_service_client)
 
+	set_target_properties(provisioning_service_client PROPERTIES
+		OUTPUT_NAME "provisioning_service_client"
+		ARCHIVE_OUTPUT_NAME "provisioning_service_client_dll_import"
+		ENABLE_EXPORTS YES
+		VERSION ${IOT_SDK_VERSION}
+		SOVERSION ${IOT_SDK_VERION_MAJOR}
+		BUILD_WITH_INSTALL_RPATH TRUE
+	)
+	
+	target_link_libraries(provisioning_service_client uhttp)
 else()
-    add_library(provisioning_service_client ${provisioning_service_client_c_files} ${provisioning_service_client_h_files})
+    add_library(provisioning_service_client 
+		${provisioning_service_client_c_files} 
+		${provisioning_service_client_h_files}
+	)
 endif()
 
-target_link_libraries(provisioning_service_client)
+target_link_libraries(provisioning_service_client parson)
+		
+if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
+	target_link_libraries(provisioning_service_client
+		"-Wl,--exclude-libs,libparson.a"
+	)
+endif()
 
 if (NOT ${ARCHITECTURE} STREQUAL "ARM")
     if (NOT ${skip_samples})
@@ -82,3 +105,9 @@ if(NOT IN_OPENWRT)
         add_subdirectory(tests)
     endif()
 endif()
+
+install(FILES ${provisioning_service_client_h_files}
+	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(TARGETS provisioning_service_client
+	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})

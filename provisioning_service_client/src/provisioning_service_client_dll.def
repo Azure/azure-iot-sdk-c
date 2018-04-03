@@ -1,4 +1,4 @@
-LIBRARY provisioning_service_client_dll
+LIBRARY provisioning_service_client
 EXPORTS
     attestationMechanism_createWithTpm
     attestationMechanism_createWithX509CAReference
