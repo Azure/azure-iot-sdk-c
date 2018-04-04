@@ -23,9 +23,6 @@ Change your current directory to the iOS sample directory.
 
 `cd azure-iot-sdk-c/iothub_client/samples/ios/AzureIoTSample`
 
-**Note:** The sample does not need to be within the SDK tree, so you may copy it to a 
-convenient location instead of building it within the tree.
-
 #### 3. Install the CocoaPods
 
 Make sure that XCode does not already have the sample project open. If
@@ -37,10 +34,10 @@ Run this command:
 
 This will cause CocoaPods to read the `Podfile` and install the pods accordingly.
 
-#### 4. Copy an Azure IoT sample into your iOS project
+#### 4. (Optional) Choose a different sample for your iOS project
 
-The `azure-iot-sdk-c/iothub_client/samples` directory some Azure IoT samples that
-are appropriate for working with the iOS sample application:
+AzureIoTSample is an iOS app that can run different samples from the AzureIoT C SDK
+depending on how it is compiled:
 
 * **iothub_ll_c2d_sample** (cloud to device) This sample demonstrates sending messages
 from the cloud to the device. Device Explorer can be used to send the messages.
@@ -51,32 +48,33 @@ from the device to the cloud. See
 twins in IoT Hub.  See [here](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-device-twins) 
 for details.
 
+The `iothub_ll_telemetry_sample` is the default. You may choose a different sample by deleting
+the `iothub_ll_telemetry_sample.c` file from the AzureIoTSample project in XCode and 
+adding one of the alternate sample files:
+* `azure-iot-sdk-c/iothub_client/samples/iothub_ll_c2d_sample/iothub_ll_c2d_sample.c`, or
+* `azure-iot-sdk-c/iothub_client/samples/iothub_client_sample_device_twin/iothub_client_sample_device_twin.c`, or
+ 
 Each sample can use one of the five communication protocols supported: HTTP, MQTT, 
 MQTT over Websockets, AMQP, and AMQP over Websockets.
-
-Choose one of these samples and copy its `.c` file into your AzureIoTSample project directory
-(it should be in the same directory with `ios-sample.h`).
 
 #### 5. Open the XCode workspace
 
 Double-click the `AzureIoTSampleWorkspace.xcworkspace` workspace file (**not** the project file) to
 open XCode and select your build target device (iPhone 7 simulator works well).
 
-Make sure you open the workspace, and not the similarly-named (without the `WS` suffix) project.
+Make sure you open the workspace, and not `AzureIoTSample.xcodeproj`.
 
 #### 4. Modify your sample file
 
-1. Select the AzureIoTSample project, choose "Add files...", and add the sample `.c` file that
-that you chose in Step 4.
-2. Open the `.c` sample file that you just added.
-3. Add the line `#include "ios-sample.h"` below all the other include files.
-4. Near the top of the file, uncomment a single protocol that you want to use:
+1. Open the `iothub_ll_telemetry_sample.c` sample file (or the one you replaced it with).
+2. Near the top of the file, uncomment a single protocol that you want to use:
     * SAMPLE_HTTP
     * SAMPLE_MQTT
     * SAMPLE_MQTT_OVER_WEBSOCKETS
     * SAMPLE_AMQP
     * SAMPLE_AMQP_OVER_WEBSOCKETS
-5. Replace the `<insert connections string here>` string with
+3. Add the line `#include "ios-sample.h"` **below all the other include files**.
+4. Replace the `<insert connections string here>` string with
 the connection string for your provisioned device.
 
 **Note:** The file you just modified is the only file in the iOS sample that needs any modification

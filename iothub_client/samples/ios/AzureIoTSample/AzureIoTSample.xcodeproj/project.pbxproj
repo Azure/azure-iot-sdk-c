@@ -14,6 +14,7 @@
 		5B9317FC2062E426006A2AA0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5B9317FB2062E426006A2AA0 /* Assets.xcassets */; };
 		5B9317FF2062E426006A2AA0 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5B9317FD2062E426006A2AA0 /* LaunchScreen.storyboard */; };
 		5BE9E3AF2062EF8A000DDC0D /* connector.m in Sources */ = {isa = PBXBuildFile; fileRef = 5BE9E3AE2062EF8A000DDC0D /* connector.m */; };
+		5BFEBCD62075913400E03021 /* iothub_ll_telemetry_sample.c in Sources */ = {isa = PBXBuildFile; fileRef = 5BFEBCD52075913400E03021 /* iothub_ll_telemetry_sample.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,6 +30,7 @@
 		5BE9E3AE2062EF8A000DDC0D /* connector.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = connector.m; sourceTree = "<group>"; };
 		5BE9E3B020631467000DDC0D /* connector.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = connector.h; sourceTree = "<group>"; };
 		5BE9E3B620632ACF000DDC0D /* ios-sample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ios-sample.h"; sourceTree = "<group>"; };
+		5BFEBCD52075913400E03021 /* iothub_ll_telemetry_sample.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = iothub_ll_telemetry_sample.c; path = ../../../iothub_ll_telemetry_sample/iothub_ll_telemetry_sample.c; sourceTree = "<group>"; };
 		B714F282A6AB7E48EC44B0F1 /* Pods_AzureIoTSample.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_AzureIoTSample.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		EE87D5FCB3696A87CAD3B548 /* Pods-AzureIoTSample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AzureIoTSample.release.xcconfig"; path = "Pods/Target Support Files/Pods-AzureIoTSample/Pods-AzureIoTSample.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -83,6 +85,7 @@
 		5B9317F32062E426006A2AA0 /* AzureIoTSample */ = {
 			isa = PBXGroup;
 			children = (
+				5BFEBCD52075913400E03021 /* iothub_ll_telemetry_sample.c */,
 				5BE9E3B620632ACF000DDC0D /* ios-sample.h */,
 				5B9317F42062E426006A2AA0 /* AppDelegate.swift */,
 				5B9317F62062E426006A2AA0 /* ViewController.swift */,
@@ -128,7 +131,7 @@
 			attributes = {
 				LastSwiftUpdateCheck = 0920;
 				LastUpgradeCheck = 0920;
-				ORGANIZATIONNAME = "Contoso";
+				ORGANIZATIONNAME = Contoso;
 				TargetAttributes = {
 					5B9317F02062E426006A2AA0 = {
 						CreatedOnToolsVersion = 9.2;
@@ -235,6 +238,7 @@
 			files = (
 				5B9317F72062E426006A2AA0 /* ViewController.swift in Sources */,
 				5BE9E3AF2062EF8A000DDC0D /* connector.m in Sources */,
+				5BFEBCD62075913400E03021 /* iothub_ll_telemetry_sample.c in Sources */,
 				5B9317F52062E426006A2AA0 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
