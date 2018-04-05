@@ -496,7 +496,9 @@ IOTHUB_CLIENT_HANDLE client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUs
     // Turn on Log 
     bool trace = true;
     (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &trace);
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
     (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_TRUSTED_CERT, certificates);
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
 
     (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_PRODUCT_INFO, "MQTT_E2E/1.1.12");
 
