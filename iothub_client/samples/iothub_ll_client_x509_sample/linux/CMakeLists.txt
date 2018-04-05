@@ -1,7 +1,7 @@
 #Copyright (c) Microsoft. All rights reserved.
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#this is CMakeLists.txt for iothub_ll_telemetry_sample
+#this is CMakeLists.txt for iothub_client_x509_sample
 cmake_minimum_required(VERSION 2.8.11)
 
 if(WIN32)
@@ -12,18 +12,18 @@ set(AZUREIOT_INC_FOLDER ".." "../../../../certs" "/usr/include/azureiot" "/usr/i
 
 include_directories(${AZUREIOT_INC_FOLDER})
 
-set(iothub_c_files
-    ../iothub_ll_telemetry_sample.c
+set(iothub_client_x509_sample_c_files
     ../../../../certs/certs.c
+    ../iothub_client_x509_sample.c
 )
 
 add_definitions(-DUSE_HTTP)
 add_definitions(-DUSE_AMQP)
 add_definitions(-DUSE_MQTT)
 
-add_executable(iothub_ll_telemetry_sample ${iothub_c_files})
+add_executable(iothub_client_x509_sample ${iothub_client_x509_sample_c_files})
 
-target_link_libraries(iothub_ll_telemetry_sample
+target_link_libraries(iothub_client_x509_sample
     iothub_client_mqtt_transport
     iothub_client_amqp_transport
     iothub_client_http_transport
