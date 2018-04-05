@@ -8,7 +8,7 @@
 
 #include "../../../certs/certs.h"
 
-#include "provisioning_service_client.h"
+#include "prov_service_client/provisioning_service_client.h"
 
 static bool g_use_trace = true;
 

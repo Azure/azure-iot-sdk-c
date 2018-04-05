@@ -40,14 +40,14 @@ static void real_free(void* ptr)
 
 #include "azure_uhttp_c/uhttp.h"
 
-#include "provisioning_sc_enrollment.h"
-#include "provisioning_sc_models_serializer.h"
-#include "provisioning_sc_shared_helpers.h"
+#include "prov_service_client/provisioning_sc_enrollment.h"
+#include "prov_service_client/provisioning_sc_models_serializer.h"
+#include "prov_service_client/provisioning_sc_shared_helpers.h"
 
 #undef ENABLE_MOCKS
 
-#include "provisioning_service_client.h"
-#include "provisioning_sc_json_const.h"
+#include "prov_service_client/provisioning_service_client.h"
+#include "prov_service_client/provisioning_sc_json_const.h"
 
 typedef enum {RESPONSE_ON, RESPONSE_OFF} response_switch;
 typedef enum {CERT, NO_CERT} cert_flag;

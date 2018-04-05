@@ -7,9 +7,9 @@
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 
-#include "provisioning_sc_tpm_attestation.h"
-#include "provisioning_sc_json_const.h"
-#include "provisioning_sc_shared_helpers.h"
+#include "prov_service_client/provisioning_sc_tpm_attestation.h"
+#include "prov_service_client/provisioning_sc_json_const.h"
+#include "prov_service_client/provisioning_sc_shared_helpers.h"
 #include "parson.h"
 
 typedef struct TPM_ATTESTATION_TAG

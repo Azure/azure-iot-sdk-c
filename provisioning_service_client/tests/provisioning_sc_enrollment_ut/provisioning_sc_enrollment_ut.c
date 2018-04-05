@@ -30,9 +30,9 @@ void real_free(void* ptr)
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "parson.h"
-#include "provisioning_sc_device_registration_state.h"
-#include "provisioning_sc_twin.h"
-#include "provisioning_sc_attestation_mechanism.h"
+#include "prov_service_client/provisioning_sc_device_registration_state.h"
+#include "prov_service_client/provisioning_sc_twin.h"
+#include "prov_service_client/provisioning_sc_attestation_mechanism.h"
 
 #include "azure_c_shared_utility/umock_c_prod.h"
 MOCKABLE_FUNCTION(, JSON_Value*, json_parse_string, const char*, string);
@@ -59,8 +59,8 @@ MOCKABLE_FUNCTION(, JSON_Array*, json_object_get_array, const JSON_Object*, obje
 
 #undef ENABLE_MOCKS
 
-#include "provisioning_sc_enrollment.h"
-#include "provisioning_sc_models_serializer.h"
+#include "prov_service_client/provisioning_sc_enrollment.h"
+#include "prov_service_client/provisioning_sc_models_serializer.h"
 
 static TEST_MUTEX_HANDLE g_testByTest;
 static TEST_MUTEX_HANDLE g_dllByDll;

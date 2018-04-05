@@ -57,7 +57,7 @@ MOCKABLE_FUNCTION(, JSON_Array*, json_object_get_array, const JSON_Object*, obje
 
 #undef ENABLE_MOCKS
 
-#include "provisioning_sc_x509_attestation.h"
+#include "prov_service_client/provisioning_sc_x509_attestation.h"
 
 static TEST_MUTEX_HANDLE g_testByTest;
 static TEST_MUTEX_HANDLE g_dllByDll;

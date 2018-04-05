@@ -17,9 +17,9 @@
 
 #include "azure_uhttp_c/uhttp.h"
 
-#include "provisioning_service_client.h"
-#include "provisioning_sc_models_serializer.h"
-#include "provisioning_sc_shared_helpers.h"
+#include "prov_service_client/provisioning_service_client.h"
+#include "prov_service_client/provisioning_sc_models_serializer.h"
+#include "prov_service_client/provisioning_sc_shared_helpers.h"
 
 typedef enum HTTP_CONNECTION_STATE_TAG
 {

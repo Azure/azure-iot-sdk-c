@@ -7,11 +7,11 @@
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 
-#include "provisioning_sc_bulk_operation.h"
-#include "provisioning_sc_models_serializer.h"
-#include "provisioning_sc_shared_helpers.h"
-#include "provisioning_sc_json_const.h"
-#include "provisioning_sc_enrollment.h"
+#include "prov_service_client/provisioning_sc_bulk_operation.h"
+#include "prov_service_client/provisioning_sc_models_serializer.h"
+#include "prov_service_client/provisioning_sc_shared_helpers.h"
+#include "prov_service_client/provisioning_sc_json_const.h"
+#include "prov_service_client/provisioning_sc_enrollment.h"
 #include "parson.h"
 
 static const char* bulkOperation_mode_toString(PROVISIONING_BULK_OPERATION_MODE mode)

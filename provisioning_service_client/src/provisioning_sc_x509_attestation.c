@@ -9,9 +9,9 @@
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/base64.h"
 
-#include "provisioning_sc_x509_attestation.h"
-#include "provisioning_sc_json_const.h"
-#include "provisioning_sc_shared_helpers.h"
+#include "prov_service_client/provisioning_sc_x509_attestation.h"
+#include "prov_service_client/provisioning_sc_json_const.h"
+#include "prov_service_client/provisioning_sc_shared_helpers.h"
 #include "parson.h"
 
 DEFINE_ENUM_STRINGS(X509_CERTIFICATE_TYPE, X509_CERTIFICATE_TYPE_VALUES)

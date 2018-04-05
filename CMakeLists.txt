@@ -68,7 +68,6 @@ option(build_javawrapper "builds the native iothub_client library for java C wra
 option(dont_use_uploadtoblob "set dont_use_uploadtoblob to ON if the functionality of upload to blob is to be excluded, OFF otherwise. It requires HTTP" OFF)
 option(no_logging "disable logging" OFF)
 option(use_installed_dependencies "set use_installed_dependencies to ON to use installed packages instead of building dependencies from submodules" OFF)
-option(use_firmware_update "build the Raspberry PI firmware_update sample" OFF)
 option(build_as_dynamic "build the IoT SDK libaries as dynamic"  OFF)
 option(build_network_e2e "build network E2E tests" OFF)
 option(use_prov_client "Enable provisioning client" OFF)
@@ -127,6 +126,15 @@ endif()
 
 #Use solution folders.
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+# build the parson library for json parsing
+add_library(parson
+    ./deps/parson/parson.c
+    ./deps/parson/parson.h
+)
+if(MSVC)
+    set_source_files_properties(../deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
+endif()
 
 if(IN_OPENWRT)
     ADD_DEFINITIONS("$ENV{TARGET_LDFLAGS}" "$ENV{TARGET_CPPFLAGS}" "$ENV{TARGET_CFLAGS}")
@@ -212,7 +220,7 @@ message(STATUS "iothub architecture: ${ARCHITECTURE}")
 
 macro(compileAsC99)
   if (CMAKE_VERSION VERSION_LESS "3.1")
-    if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
       set (CMAKE_C_FLAGS "--std=c99 ${CMAKE_C_FLAGS}")
     if (NOT IN_OPENWRT)
       set (CMAKE_CXX_FLAGS "--std=c++11 ${CMAKE_CXX_FLAGS}")
@@ -226,7 +234,7 @@ endmacro(compileAsC99)
 
 macro(compileAsC11)
   if (CMAKE_VERSION VERSION_LESS "3.1")
-    if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
       set (CMAKE_C_FLAGS "--std=c11 ${CMAKE_C_FLAGS}")
       set (CMAKE_C_FLAGS "-D_POSIX_C_SOURCE=200112L ${CMAKE_C_FLAGS}")
       set (CMAKE_CXX_FLAGS "--std=c++11 ${CMAKE_CXX_FLAGS}")
@@ -332,6 +340,12 @@ if(${use_installed_dependencies})
         DESTINATION
             ${package_location}
     )
+else()
+    install(FILES ${parson_h_install_files}
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
+    install(TARGETS ${parson_install_libs}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
 
 if (${build_network_e2e})
