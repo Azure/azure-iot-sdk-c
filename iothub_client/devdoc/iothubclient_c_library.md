@@ -17,6 +17,7 @@ Revision 1.7
 |1.6	     |   TE	    |   09/24/2015	  |Rework to bring up to date with current API                               |
 |1.7	     |   DR	    |   03/16/2016	  |Adding ability to create multi-device transport.     
 |1.8         |   AP     |   06/30/2016    |Added x509 options and convert to .md
+|1.9         | v-royspr |   03/28/2018    |Added timeout for blob transfer
 
 
 # Overview
@@ -458,7 +459,12 @@ IoTHubClient_SetOption shall set a runtime option identified by parameter `optio
 
 ### Options:
 
-- "timeout" - the maximum time in miliseconds a communication is allowed to use. value is a pointer to an unsigned int with the meaning of "miliseconds". This is only supported for HTTP protocol so far. When the HTTP protocol uses CURL, the meaning of the parameter is total request time. When the HTTP protocol uses winhttp, the meaning is dwSendTimeout and dwReceiveTimeout parameters of WinHttpSetTimeouts API.
+- "timeout" - the maximum time in miliseconds a communication is allowed to use. value is a pointer 
+to an unsigned int with the meaning of "miliseconds". This is only supported for HTTP protocol so far. 
+When the HTTP protocol uses CURL, the meaning of the parameter is total request time. 
+When the HTTP protocol uses winhttp, the meaning is dwSendTimeout and dwReceiveTimeout parameters of WinHttpSetTimeouts API.
+- "blob_upload_timeout_secs" - the maximum time in seconds allowed for a blob transfer. The value is a
+pointer to a `size_t`. A value of 0 uses the default timeout for the underlying transport.
 - "CURLOPT_LOW_SPEED_LIMIT" - only available for HTTP protocol and only when CURL is used. It has the same meaning as CURL's option with the same name. value is pointer to a long.
 - "CURLOPT_LOW_SPEED_TIME"  - only available for HTTP protocol and only when CURL is used. It has the same meaning as CURL's option with the same name. value is pointer to a long.
 - "CURLOPT_FORBID_REUSE"  - only available for HTTP protocol and only when CURL is used. It has the same meaning as CURL's option with the same name. value is pointer to a long.
@@ -468,7 +474,8 @@ IoTHubClient_SetOption shall set a runtime option identified by parameter `optio
 By default messages never expire. The meaning of the messageTimeout value is the following:
     - 0 = disable message timeout for all messages send by _SendAsync from now on
     - Any other number - consider that number as the timeout.
-- "x509certificate" - feeds a x509 certificate in PEM format to IoTHubClient to be used for authentication. value is a pointer to a null terminated string that contains the certificate. Example:
+- "x509certificate" - feeds a x509 certificate in PEM format to IoTHubClient to be used for 
+authentication. value is a pointer to a null terminated string that contains the certificate. Example:
 ```c
 const char* value =
 "-----BEGIN CERTIFICATE-----"
