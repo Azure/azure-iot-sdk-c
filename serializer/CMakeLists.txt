@@ -18,44 +18,44 @@ endif()
 compileAsC99()
 
 set(serializer_c_files
-./src/agenttypesystem.c
-./src/codefirst.c
-./src/commanddecoder.c
-./src/datamarshaller.c
-./src/datapublisher.c
-./src/dataserializer.c
-./src/iotdevice.c
-./src/jsondecoder.c
-./src/jsonencoder.c
-./src/makefile
-./src/multitree.c
-./src/schema.c
-./src/schemalib.c
-./src/schemaserializer.c
-./src/methodreturn.c
+    ./src/agenttypesystem.c
+    ./src/codefirst.c
+    ./src/commanddecoder.c
+    ./src/datamarshaller.c
+    ./src/datapublisher.c
+    ./src/dataserializer.c
+    ./src/iotdevice.c
+    ./src/jsondecoder.c
+    ./src/jsonencoder.c
+    ./src/makefile
+    ./src/multitree.c
+    ./src/schema.c
+    ./src/schemalib.c
+    ./src/schemaserializer.c
+    ./src/methodreturn.c
 )
 
 set(serializer_h_files
-./inc/agenttypesystem.h
-./inc/codefirst.h
-./inc/commanddecoder.h
-./inc/datamarshaller.h
-./inc/datapublisher.h
-./inc/dataserializer.h
-./inc/iotdevice.h
-./inc/jsondecoder.h
-./inc/jsonencoder.h
-./inc/multitree.h
-./inc/schema.h
-./inc/schemalib.h
-./inc/schemaserializer.h
-./inc/serializer.h
-./inc/serializer_devicetwin.h
-./inc/methodreturn.h
+    ./inc/agenttypesystem.h
+    ./inc/codefirst.h
+    ./inc/commanddecoder.h
+    ./inc/datamarshaller.h
+    ./inc/datapublisher.h
+    ./inc/dataserializer.h
+    ./inc/iotdevice.h
+    ./inc/jsondecoder.h
+    ./inc/jsonencoder.h
+    ./inc/multitree.h
+    ./inc/schema.h
+    ./inc/schemalib.h
+    ./inc/schemaserializer.h
+    ./inc/serializer.h
+    ./inc/serializer_devicetwin.h
+    ./inc/methodreturn.h
 )
 
 #these are the include folders
-#the following "set" statetement exports across the project a global variable called SHARED_UTIL_INC_FOLDER that expands to whatever needs to included when using COMMON library
+#the following "set" statement exports across the project a global variable called SHARED_UTIL_INC_FOLDER that expands to whatever needs to included when using COMMON library
 set(SERIALIZER_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using serializer lib" FORCE)
 
 include_directories(../deps/parson)
@@ -67,37 +67,47 @@ IF(WIN32)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 ENDIF(WIN32)
 
+add_library(serializer ${serializer_c_files} ${serializer_h_files})
+target_link_libraries(serializer parson)
+
+set (install_libs serializer)
+
 if (${build_as_dynamic})
     add_library(
-    serializer SHARED ${serializer_c_files} ${serializer_h_files} ./src/serializer.def
+        serializer_dll SHARED ${serializer_c_files} ${serializer_h_files} ./src/serializer.def
     )
-    linkSharedUtil(serializer)
+    target_link_libraries(serializer_dll
+        aziotsharedutil_dll
+        parson
+    )
 
-    set_target_properties(serializer PROPERTIES
+    if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
+        target_link_libraries(serializer_dll
+            "-Wl,--exclude-libs,libparson.a"
+        )
+    endif()
+
+    set_target_properties(serializer_dll PROPERTIES
+        OUTPUT_NAME "serializer"
         ARCHIVE_OUTPUT_NAME "serializer_dll_import"
         ENABLE_EXPORTS YES
+        WINDOWS_EXPORT_ALL_SYMBOLS YES
+        PDB_NAME "serializer_dll"
         VERSION ${IOT_SDK_VERSION}
         SOVERSION ${IOT_SDK_VERION_MAJOR}
         BUILD_WITH_INSTALL_RPATH TRUE
     )
-else()
-    add_library(
-    serializer ${serializer_c_files} ${serializer_h_files} 
-    )
+    set (install_libs ${install_libs} serializer_dll)
 endif()
 setSdkTargetBuildProperties(serializer)
 
-target_link_libraries(serializer
-    parson
-)
-
 if (NOT ${skip_samples})
-if(WIN32)
-    if (NOT ${ARCHITECTURE} STREQUAL "ARM")
+    if(WIN32)
+        if (NOT ${ARCHITECTURE} STREQUAL "ARM")
+            add_subdirectory(samples)
+        endif()
+    else()
         add_subdirectory(samples)
-    endif()
-else()
-    add_subdirectory(samples)
     endif()
 endif()
 
@@ -124,12 +134,9 @@ if(${use_installed_dependencies})
     )
     install(FILES ${serializer_h_files} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
 else()
-    set(install_staticlibs
-        serializer
-    )
     install(FILES ${serializer_h_files}
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot) 
-    install(TARGETS ${install_staticlibs} 
+    install(TARGETS ${install_libs} 
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()

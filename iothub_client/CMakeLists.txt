@@ -377,7 +377,7 @@ if (${build_as_dynamic})
     endif()
     target_link_libraries(iothub_client_dll parson)
 
-    if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
+    if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
         target_link_libraries(iothub_client_dll
             "-Wl,--exclude-libs,libparson.a"
         )
