@@ -18,13 +18,11 @@ IF(WIN32)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 ENDIF(WIN32)
 
-set(samples_cert_file)
-
 #Conditionally use the SDK trusted certs in the samples
-if(${set_trusted_cert_in_samples})
+if(${use_sample_trusted_cert})
     add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
     include_directories(${PROJECT_SOURCE_DIR}/certs)
-    set(samples_cert_file ${PROJECT_SOURCE_DIR}/certs/certs.c)
+    set(iothub_c_files ${iothub_c_files} ${PROJECT_SOURCE_DIR}/certs/certs.c)
 endif()
 
 include_directories(.)

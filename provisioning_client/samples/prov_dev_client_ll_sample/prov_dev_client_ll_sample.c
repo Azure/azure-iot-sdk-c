@@ -205,7 +205,7 @@ int main()
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
         // Setting the Trusted Certificate.  This is only necessary on system with without
         // built in certificate stores.
-        Prov_Device_LL_SetOption(handle, OPTION_TRUSTED_CERT, trusted_cert);
+        Prov_Device_LL_SetOption(handle, OPTION_TRUSTED_CERT, certificates);
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
         if (http_proxy.host_address != NULL)
         {
@@ -275,7 +275,7 @@ int main()
             // Setting the Trusted Certificate.  This is only necessary on system with without
             // built in certificate stores.
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
-            IoTHubClient_LL_SetOption(handle, OPTION_TRUSTED_CERT, trusted_cert);
+            IoTHubClient_LL_SetOption(iothub_client, OPTION_TRUSTED_CERT, certificates);
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
             if (g_use_proxy)

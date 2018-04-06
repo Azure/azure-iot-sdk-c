@@ -23,15 +23,15 @@ IF(WIN32)
 ENDIF(WIN32)
 
 #Conditionally use the SDK trusted certs in the samples
-if(${set_trusted_cert_in_samples})
+if(${use_sample_trusted_cert})
     add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
-	include_directories(${PROJECT_SOURCE_DIR}/certs)
-	set(samples_cert_file ${PROJECT_SOURCE_DIR}/certs/certs.c)
+    include_directories(${PROJECT_SOURCE_DIR}/certs)
+    set(iothub_client_sample_device_twin_c_files ${iothub_client_sample_device_twin_c_files} ${PROJECT_SOURCE_DIR}/certs/certs.c)
 endif()
 
 include_directories(.)
 
-add_executable(iothub_client_sample_device_twin ${iothub_client_sample_device_twin_c_files} ${iothub_client_sample_device_twin_h_files} ${samples_cert_file})
+add_executable(iothub_client_sample_device_twin ${iothub_client_sample_device_twin_c_files} ${iothub_client_sample_device_twin_h_files})
 
 if(${use_amqp}) 
     target_link_libraries(iothub_client_sample_device_twin  

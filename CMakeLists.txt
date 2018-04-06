@@ -51,6 +51,8 @@ set(hsm_type_custom OFF CACHE BOOL "hsm type of custom used with the Provisionin
 set(hsm_custom_lib "" CACHE STRING "Full path to custom HSM repo library")
 set(run_sfc_tests OFF CACHE BOOL "setup the Service Fault tests")
 
+set(use_wolfssl)
+
 #the following variables are project-wide and can be used with cmake-gui
 option(use_amqp "set use_amqp to ON if amqp is to be used, set to OFF to not use amqp" ON)
 option(use_http "set use_http to ON if http is to be used, set to OFF to not use http" ON)
@@ -86,10 +88,10 @@ else()
 endif()
 
 #openssl samples on Windows need to have a trusted cert set
-if(WIN32 AND ${use_openssl})
-    option(set_trusted_cert_in_samples "set set_trusted_cert_in_samples to ON to have the samples set the SDK's built-in CA as TrustedCerts" ON)
+if("${use_openssl}" OR "${use_wolfssl}")
+    option(use_sample_trusted_cert "Set flag in samples to use SDK's built-in CA as TrustedCerts" ON)
 else()
-    option(set_trusted_cert_in_samples "set set_trusted_cert_in_samples to ON to have the samples set the SDK's built-in CA as TrustedCerts" OFF)
+    option(use_sample_trusted_cert "Set flag in samples to use SDK's built-in CA as TrustedCerts" OFF)
 endif()
 
 # Set Provisioning Information
