@@ -19,6 +19,12 @@ IF(WIN32)
     add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
 ENDIF(WIN32)
 
+if(${set_trusted_cert_in_samples})
+    add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
+    include_directories(${PROJECT_SOURCE_DIR}/certs)
+    set(samples_cert_file ${PROJECT_SOURCE_DIR}/certs/certs.c)
+endif()
+
 include_directories(.)
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})
 include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})

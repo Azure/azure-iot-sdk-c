@@ -10,7 +10,7 @@ Outlined below are the steps to customize a device HSM for the IoThub SDK Client
 
 ## Developing a Custom Repo
 
-- You must develop a library to provide access to the target HSM.  This library will need to be a static library for which the IoThub SDK to link against.
+- You must develop a library to provide access to the target HSM.  This library will need to be a static library for which the IoThub SDK to link against.  For more detail see the [custom_hsm_example](https://github.com/Azure/azure-iot-sdk-c/tree/master/provisioning_client/samples/custom_hsm_example)
 
 - The library must implement functions defined in the [hsm_client_data file](https://github.com/Azure/azure-iot-device-auth/blob/master/dps_client/adapters/hsm_client_data.h)
 
@@ -90,7 +90,7 @@ void custom_hsm_destroy(HSM_CLIENT_HANDLE handle);
 char* custom_hsm_get_certificate(HSM_CLIENT_HANDLE handle);
 ```
 
-- Retrieves the certificate to be used for x509 communication.
+- Retrieves the certificate to be used for x509 communication.  This value is sent unmodified to the tlsio layer as a set_options of OPTION_X509_ECC_CERT.
 
 ### custom_hsm_get_alias_key
 
@@ -98,7 +98,7 @@ char* custom_hsm_get_certificate(HSM_CLIENT_HANDLE handle);
 char* custom_hsm_get_alias_key(HSM_CLIENT_HANDLE handle);
 ```
 
-- Retrieves the alias key from the x509 certificate.
+- Retrieves the alias key from the x509 certificate.  This value is sent unmodified to the tlsio layer as a set_options of OPTION_X509_ECC_KEY.
 
 ### custom_hsm_get_common_name
 
@@ -106,7 +106,7 @@ char* custom_hsm_get_alias_key(HSM_CLIENT_HANDLE handle);
 char* custom_hsm_get_common_name(HSM_CLIENT_HANDLE handle);
 ```
 
-- Retrieves the common name from the x509 certificate.
+- Retrieves the common name from the x509 certificate.  Passed to the Device Provisioning Service as a registration Id.
 
 #### HSM TPM API
 

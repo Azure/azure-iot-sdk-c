@@ -20,8 +20,14 @@ endif()
 IF(WIN32)
     #windows needs this define
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-    add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
 ENDIF(WIN32)
+
+#Conditionally use the SDK trusted certs in the samples
+if(${set_trusted_cert_in_samples})
+    add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
+    include_directories(${PROJECT_SOURCE_DIR}/certs)
+    set(iothub_c_files ${PROJECT_SOURCE_DIR}/certs/certs.c)
+endif()
 
 include_directories(.)
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})
