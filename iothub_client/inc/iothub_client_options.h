@@ -34,6 +34,7 @@ extern "C"
     static const char* OPTION_BATCHING = "Batching";
 
     static const char* OPTION_MESSAGE_TIMEOUT = "messageTimeout";
+    static const char* OPTION_BLOB_UPLOAD_TIMEOUT_SECS = "blob_upload_timeout_secs";
     static const char* OPTION_PRODUCT_INFO = "product_info";
     /*
     * @brief Informs the service of what is the maximum period the client will wait for a keep-alive message from the service.
