@@ -33,7 +33,7 @@ This is a quick tutorial with the steps to create and delete Individual Enrollme
 
 4. Build as shown [here][devbox-setup-link] and run the sample.
 
-[root-link]: https://github.com/Azure/azure-iot-sdk-c/tree/prov_sc_bugbash
+[root-link]: https://github.com/Azure/azure-iot-sdk-c
 [source-code-link]: ../../src
 [tpm-simulator-link]: https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-tools/tpm-simulator
 [dice-link]: https://azure.microsoft.com/en-us/blog/azure-iot-supports-new-security-hardware-to-strengthen-iot-security/

@@ -50,6 +50,6 @@ This is a quick tutorial with the steps to query Individual Enrollmens from the 
 4. Build as shown [here][devbox-setup-link] and run the sample.
 
 [ie-sample-link]:../prov_sc_individual_enrollment_sample
-[root-link]: https://github.com/Azure/azure-iot-sdk-c/tree/prov_sc_bugbash
+[root-link]: https://github.com/Azure/azure-iot-sdk-c
 [source-code-link]: ../../src
 [devbox-setup-link]: ../../../doc/devbox_setup.md

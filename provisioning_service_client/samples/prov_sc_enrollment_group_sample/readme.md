@@ -52,7 +52,7 @@ This is a quick tutorial with the steps to create, update, get, and delete an En
 
 4. Build as shown [here][devbox-setup-link] and run the sample.
 
-[root-link]: https://github.com/Azure/azure-iot-sdk-c/tree/prov_sc_bugbash
+[root-link]: https://github.com/Azure/azure-iot-sdk-c
 [source-code-link]: ../../src
 [dice-link]: https://azure.microsoft.com/en-us/blog/azure-iot-supports-new-security-hardware-to-strengthen-iot-security/
 [devbox-setup-link]: ../../../doc/devbox-setup.md
