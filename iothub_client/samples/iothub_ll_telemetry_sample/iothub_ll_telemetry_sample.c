@@ -43,7 +43,6 @@ and removing calls to _DoWork will yield the same results. */
 #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-/* String containing Hostname, Device Id & Device Key in the format:                         */
 /* Paste in the your iothub connection string  */
 static const char* connectionString = "[device connection string]";
 

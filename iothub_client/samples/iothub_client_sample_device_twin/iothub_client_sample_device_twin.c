@@ -14,11 +14,11 @@
 
 // The protocol you wish to use should be uncommented
 //
-#define SAMPLE_HTTP
-//#define SAMPLE_MQTT
+#define SAMPLE_MQTT
 //#define SAMPLE_MQTT_OVER_WEBSOCKETS
 //#define SAMPLE_AMQP
 //#define SAMPLE_AMQP_OVER_WEBSOCKETS
+//#define SAMPLE_HTTP
 
 #ifdef SAMPLE_MQTT
     #include "iothubtransportmqtt.h"
@@ -40,9 +40,7 @@
 #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-/*String containing Hostname, Device Id & Device Key in the format:                         */
-/*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
-/*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessSignature=<device_sas_token>"    */
+/* Paste in the your iothub connection string  */
 static const char* connectionString = "[device connection string]";
 
 static bool g_continueRunning;

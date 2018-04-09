@@ -200,6 +200,11 @@ int main()
     }
     else
     {
+        if (http_proxy.host_address != NULL)
+        {
+            Prov_Device_LL_SetOption(handle, OPTION_HTTP_PROXY, &http_proxy);
+        }
+
         //bool traceOn = true;
         //Prov_Device_LL_SetOption(handle, OPTION_LOG_TRACE, &traceOn);
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
@@ -207,10 +212,6 @@ int main()
         // built in certificate stores.
         Prov_Device_LL_SetOption(handle, OPTION_TRUSTED_CERT, certificates);
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
-        if (http_proxy.host_address != NULL)
-        {
-            Prov_Device_LL_SetOption(handle, OPTION_HTTP_PROXY, &http_proxy);
-        }
 
         if (Prov_Device_LL_Register_Device(handle, register_device_callback, &user_ctx, registation_status_callback, &user_ctx) != PROV_DEVICE_RESULT_OK)
         {

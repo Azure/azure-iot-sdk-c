@@ -22,10 +22,8 @@
 #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-/*String containing Hostname, Device Id & Device Key in the format:                         */
-/*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
-/*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessSignature=<device_sas_token>"    */
-static const char* connectionString = "";
+/* Paste in the your iothub connection string  */
+static const char* connectionString = "[device connection string]";
 
 static char msgText[1024];
 static char propText[1024];
