@@ -21,6 +21,11 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
+TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
+{
+    g_e2e_test_options.use_special_chars = false;
+}
+
 TEST_FUNCTION(IoTHub_MQTT_SendEvent_e2e_sas)
 {
 #ifdef AZIOT_LINUX
@@ -29,11 +34,29 @@ TEST_FUNCTION(IoTHub_MQTT_SendEvent_e2e_sas)
     e2e_send_event_test_sas(MQTT_Protocol);
 }
 
+TEST_FUNCTION(IoTHub_MQTT_SendEvent_e2e_sas_urlEncode)
+{
+#ifdef AZIOT_LINUX
+    g_e2e_test_options.set_mac_address = true;
+#endif
+    g_e2e_test_options.use_special_chars = true;
+    e2e_send_event_test_sas(MQTT_Protocol);
+}
+
 TEST_FUNCTION(IoTHub_MQTT_RecvMessage_E2ETest_sas)
 {
 #ifdef AZIOT_LINUX
     g_e2e_test_options.set_mac_address = false;
 #endif
+    e2e_recv_message_test_sas(MQTT_Protocol);
+}
+
+TEST_FUNCTION(IoTHub_MQTT_RecvMessage_E2ETest_sas_urlDecode)
+{
+#ifdef AZIOT_LINUX
+    g_e2e_test_options.set_mac_address = false;
+#endif
+    g_e2e_test_options.use_special_chars = true;
     e2e_recv_message_test_sas(MQTT_Protocol);
 }
 

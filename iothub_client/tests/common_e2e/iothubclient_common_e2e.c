@@ -47,14 +47,21 @@ static bool g_callbackRecv = false;
 static TEST_PROTOCOL_TYPE test_protocol_type;
 
 const char* TEST_EVENT_DATA_FMT = "{\"data\":\"%.24s\",\"id\":\"%d\"}";
+const char* TEST_EVENT_DATA_FMT_SPECIAL_CHAR = "{\"#data\":\"$%.24s\",\";id\":\"*%d\"}";
 
 const char* MSG_ID = "MessageIdForE2E";
+const char* MSG_ID_SPECIAL = "MessageIdForE2E*";
 const char* MSG_CORRELATION_ID = "MessageCorrelationIdForE2E";
+const char* MSG_CORRELATION_ID_SPECIAL = "MessageCorrelationIdFor#E2E";
 const char* MSG_CONTENT = "Message content for E2E";
+const char* MSG_CONTENT_SPECIAL = "!*'();:@&=+$,/?#[]";
 
 #define MSG_PROP_COUNT 3
 const char* MSG_PROP_KEYS[MSG_PROP_COUNT] = { "Key1", "Key2", "Key3" };
 const char* MSG_PROP_VALS[MSG_PROP_COUNT] = { "Val1", "Val2", "Val3" };
+
+const char* MSG_PROP_KEYS_SPECIAL[MSG_PROP_COUNT] = { "&ey1", "K/y2", "Ke?3"};
+const char* MSG_PROP_VALS_SPECIAL[MSG_PROP_COUNT] = { "=al1", "V@l2", "Va%3" };
 
 static size_t g_iotHubTestId = 0;
 IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo = NULL;
@@ -218,7 +225,11 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
             }
             else
             {
-                if (strcmp(messageId, MSG_ID) != 0)
+                if (g_e2e_test_options.use_special_chars && strcmp(messageId, MSG_ID_SPECIAL) != 0)
+                {
+                    ASSERT_FAIL("Message ID mismatch.");
+                }
+                else if (!g_e2e_test_options.use_special_chars && strcmp(messageId, MSG_ID) != 0)
                 {
                     ASSERT_FAIL("Message ID mismatch.");
                 }
@@ -230,7 +241,11 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
             }
             else
             {
-                if (strcmp(correlationId, MSG_CORRELATION_ID) != 0)
+                if (g_e2e_test_options.use_special_chars && strcmp(correlationId, MSG_CORRELATION_ID_SPECIAL) != 0)
+                {
+                    ASSERT_FAIL("Message correlation ID mismatch.");
+                }
+                else if (!g_e2e_test_options.use_special_chars && strcmp(correlationId, MSG_CORRELATION_ID) != 0)
                 {
                     ASSERT_FAIL("Message correlation ID mismatch.");
                 }
@@ -265,14 +280,26 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
                         if (propertyCount == MSG_PROP_COUNT)
                         {
                             LogInfo("Message Properties:");
+                            const char** msg_prop_keys;
+                            const char** msg_prop_vals;
+                            if (g_e2e_test_options.use_special_chars)
+                            {
+                                msg_prop_keys = MSG_PROP_KEYS_SPECIAL;
+                                msg_prop_vals = MSG_PROP_VALS_SPECIAL;
+                            }
+                            else
+                            {
+                                msg_prop_keys = MSG_PROP_KEYS;
+                                msg_prop_vals = MSG_PROP_VALS;
+                            }
                             for (size_t index = 0; index < propertyCount; index++)
                             {
                                 LogInfo("\tKey: %s Value: %s", keys[index], values[index]);
-                                if (strcmp(keys[index], MSG_PROP_KEYS[index]) != 0)
+                                if (strcmp(keys[index], msg_prop_keys[index]) != 0)
                                 {
                                     receiveUserContext->wasFound = false;
                                 }
-                                if (strcmp(values[index], MSG_PROP_VALS[index]) != 0)
+                                if (strcmp(values[index], msg_prop_vals[index]) != 0)
                                 {
                                     receiveUserContext->wasFound = false;
                                 }
@@ -337,7 +364,18 @@ static EXPECTED_SEND_DATA* EventData_Create(void)
             char* tempString;
             time_t t = time(NULL);
             size_t string_length;
-            string_length = sprintf(temp, TEST_EVENT_DATA_FMT, ctime(&t), g_iotHubTestId);
+            const char* data_fmt;
+
+            if (g_e2e_test_options.use_special_chars)
+            {
+                data_fmt = TEST_EVENT_DATA_FMT_SPECIAL_CHAR;
+            }
+            else
+            {
+                data_fmt = TEST_EVENT_DATA_FMT;
+            }
+
+            string_length = sprintf(temp, data_fmt, ctime(&t), g_iotHubTestId);
             if ((tempString = (char*)malloc(string_length + 1)) == NULL)
             {
                 Lock_Deinit(result->lock);
@@ -463,6 +501,7 @@ void e2e_init(TEST_PROTOCOL_TYPE protocol_type)
 
     memset(&g_e2e_test_options, 0, sizeof(E2E_TEST_OPTIONS));
     g_e2e_test_options.set_mac_address = false;
+    g_e2e_test_options.use_special_chars = false;
 
     g_connection_status_info.lock = Lock_Init();
     test_protocol_type = protocol_type;
@@ -501,6 +540,13 @@ IOTHUB_CLIENT_HANDLE client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUs
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
     (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_PRODUCT_INFO, "MQTT_E2E/1.1.12");
+
+    //Turn on URL encoding/decoding (MQTT)
+    if (g_e2e_test_options.use_special_chars)
+    {
+        bool encodeDecode = true;
+        IoTHubClient_SetOption(iotHubClientHandle, OPTION_AUTO_URL_ENCODE_DECODE, &encodeDecode);
+    }
 
     // Set connection status change callback
     result = IoTHubClient_SetConnectionStatusCallback(iotHubClientHandle, connection_status_callback, &g_connection_status_info);
@@ -560,9 +606,19 @@ D2C_MESSAGE_HANDLE client_create_and_send_d2c(IOTHUB_CLIENT_HANDLE iotHubClientH
     MAP_HANDLE mapHandle = IoTHubMessage_Properties(msgHandle);
     for (size_t i = 0; i < MSG_PROP_COUNT; i++)
     {
-        if (Map_AddOrUpdate(mapHandle, MSG_PROP_KEYS[i], MSG_PROP_VALS[i]) != MAP_OK)
+        if (g_e2e_test_options.use_special_chars)
         {
-            LogError("ERROR: Map_AddOrUpdate failed for property %zu!", i);
+            if (Map_AddOrUpdate(mapHandle, MSG_PROP_KEYS_SPECIAL[i], MSG_PROP_VALS_SPECIAL[i]) != MAP_OK)
+            {
+                LogError("ERROR: Map_AddOrUpdate failed for property %zu!", i);
+            }
+        }
+        else
+        {
+            if (Map_AddOrUpdate(mapHandle, MSG_PROP_KEYS[i], MSG_PROP_VALS[i]) != MAP_OK)
+            {
+                LogError("ERROR: Map_AddOrUpdate failed for property %zu!", i);
+            }
         }
     }
 
@@ -1069,18 +1125,43 @@ EXPECTED_RECEIVE_DATA *service_create_c2d(const char *content)
     messageHandle = IoTHubMessage_CreateFromString(content);
     ASSERT_IS_NOT_NULL_WITH_MSG(messageHandle, "Could not create IoTHubMessage to send C2D messages to the device");
 
-    iotHubMessageResult = IoTHubMessage_SetMessageId(messageHandle, MSG_ID);
-    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_OK, iotHubMessageResult);
+    if (g_e2e_test_options.use_special_chars)
+    {
+        iotHubMessageResult = IoTHubMessage_SetMessageId(messageHandle, MSG_ID_SPECIAL);
+    }
+    else
+    {
+        iotHubMessageResult = IoTHubMessage_SetMessageId(messageHandle, MSG_ID);
 
-    iotHubMessageResult = IoTHubMessage_SetCorrelationId(messageHandle, MSG_CORRELATION_ID);
+    }
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_OK, iotHubMessageResult);
+    if (g_e2e_test_options.use_special_chars)
+    {
+        iotHubMessageResult = IoTHubMessage_SetCorrelationId(messageHandle, MSG_CORRELATION_ID_SPECIAL);
+    }
+    else
+    {
+        iotHubMessageResult = IoTHubMessage_SetCorrelationId(messageHandle, MSG_CORRELATION_ID);
+
+    }
     ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_OK, iotHubMessageResult);
 
     MAP_HANDLE mapHandle = IoTHubMessage_Properties(messageHandle);
     for (size_t i = 0; i < MSG_PROP_COUNT; i++)
     {
-        if (Map_AddOrUpdate(mapHandle, MSG_PROP_KEYS[i], MSG_PROP_VALS[i]) != MAP_OK)
+        if (g_e2e_test_options.use_special_chars)
         {
-            LogError("ERROR: Map_AddOrUpdate failed for property %zu!", i);
+            if (Map_AddOrUpdate(mapHandle, MSG_PROP_KEYS_SPECIAL[i], MSG_PROP_VALS_SPECIAL[i]) != MAP_OK)
+            {
+                LogError("ERROR: Map_AddOrUpdate failed for property %zu!", i);
+            }
+        }
+        else
+        {
+            if (Map_AddOrUpdate(mapHandle, MSG_PROP_KEYS[i], MSG_PROP_VALS[i]) != MAP_OK)
+            {
+                LogError("ERROR: Map_AddOrUpdate failed for property %zu!", i);
+            }
         }
     }
 
@@ -1143,7 +1224,17 @@ static void recv_message_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLI
     iotHubClientHandle = client_connect_to_hub(deviceToUse, protocol);
 
     // Create receive context
-    receiveUserContext = service_create_c2d(MSG_CONTENT);
+    const char* msg_content;
+    if (g_e2e_test_options.use_special_chars)
+    {
+        msg_content = MSG_CONTENT;
+    }
+    else
+    {
+        msg_content = MSG_CONTENT_SPECIAL;
+    }
+
+    receiveUserContext = service_create_c2d(msg_content);
 
     // Set callback
     result = IoTHubClient_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, receiveUserContext);

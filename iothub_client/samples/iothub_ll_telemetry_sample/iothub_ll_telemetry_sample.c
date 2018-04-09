@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "iothub_client.h"
+#include "iothub_client_options.h"
 #include "iothub_message.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
@@ -38,14 +39,12 @@ and removing calls to _DoWork will yield the same results. */
     #include "iothubtransporthttp.h"
 #endif // SAMPLE_HTTP
 
-#include "iothub_client_options.h"
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
 #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 /* Paste in the your iothub connection string  */
 static const char* connectionString = "[device connection string]";
-
 #define MESSAGE_COUNT        5
 static bool g_continueRunning = true;
 static size_t g_message_count_send_confirmations = 0;
@@ -93,13 +92,23 @@ int main(void)
 
     // Set any option that are neccessary.
     // For available options please see the iothub_sdk_options.md documentation
+
     //bool traceOn = true;
     //IoTHubClient_LL_SetOption(iothub_ll_handle, OPTION_LOG_TRACE, &traceOn);
+
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
     // Setting the Trusted Certificate.  This is only necessary on system with without
     // built in certificate stores.
-#ifdef SET_TRUSTED_CERT_IN_SAMPLES
     IoTHubClient_LL_SetOption(iothub_ll_handle, OPTION_TRUSTED_CERT, certificates);
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
+
+#if defined SAMPLE_MQTT || defined SAMPLE_MQTT_WS
+    //Setting the auto URL Encoder (recommended for MQTT). Please use this option unless
+    //you are URL Encoding inputs yourself.
+    //ONLY valid for use with MQTT
+    //bool urlEncodeOn = true;
+    //IoTHubClient_LL_SetOption(iothub_ll_handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
+#endif
 
     do
     {
@@ -112,7 +121,7 @@ int main(void)
             // Set Message property
             (void)IoTHubMessage_SetMessageId(message_handle, "MSG_ID");
             (void)IoTHubMessage_SetCorrelationId(message_handle, "CORE_ID");
-            (void)IoTHubMessage_SetContentTypeSystemProperty(message_handle, "application%2Fjson");
+            (void)IoTHubMessage_SetContentTypeSystemProperty(message_handle, "application%2fjson");
             (void)IoTHubMessage_SetContentEncodingSystemProperty(message_handle, "utf-8");
 
             // Add custom properties to message

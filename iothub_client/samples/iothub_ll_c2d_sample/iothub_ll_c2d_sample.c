@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "iothub_client.h"
+#include "iothub_client_options.h"
 #include "iothub_message.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
@@ -34,7 +35,6 @@
     #include "iothubtransporthttp.h"
 #endif // SAMPLE_HTTP
 
-#include "iothub_client_options.h"
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
 #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
@@ -130,11 +130,19 @@ int main(void)
     // For available options please see the iothub_sdk_options.md documentation
     //bool traceOn = true;
     //IoTHubClient_LL_SetOption(iothub_ll_handle, OPTION_LOG_TRACE, &traceOn);
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
     // Setting the Trusted Certificate.  This is only necessary on system with without
     // built in certificate stores.
-#ifdef SET_TRUSTED_CERT_IN_SAMPLES
     IoTHubClient_LL_SetOption(iothub_ll_handle, OPTION_TRUSTED_CERT, certificates);
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
+
+#if defined SAMPLE_MQTT || defined SAMPLE_MQTT_WS
+    //Setting the auto URL Decoder (recommended for MQTT). Please use this option unless
+    //you are URL Decoding responses yourself.
+    //ONLY valid for use with MQTT
+    //bool urlDecodeOn = true;
+    //IoTHubClient_LL_SetOption(iothub_ll_handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlDecodeOn);
+#endif
 
     if (IoTHubClient_LL_SetMessageCallback(iothub_ll_handle, receive_msg_callback, &messages_count) != IOTHUB_CLIENT_OK)
     {

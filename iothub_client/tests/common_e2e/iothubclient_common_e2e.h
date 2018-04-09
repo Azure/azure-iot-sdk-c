@@ -14,6 +14,7 @@ extern "C" {
 typedef struct E2E_TEST_OPTIONS_TAG
 {
     bool set_mac_address;
+    bool use_special_chars;
 } E2E_TEST_OPTIONS;
 
 typedef enum TEST_MESSAGE_CREATION_MECHANISM_TAG
