@@ -27,7 +27,7 @@ $intermediate3CAPemFileName = "./Intermediate3.pem"
 $edgePublicCertDir          = "certs"
 $edgePrivateCertDir         = "private"
 $edgeDeviceCertificate      = Join-Path $edgePublicCertDir "new-edge-device.cert.pem"
-$edgeDevicePrivateKey       = Join-Path $edgePrivateCertDir "new-edge-device.cert.pem"
+$edgeDevicePrivateKey       = Join-Path $edgePrivateCertDir "new-edge-device.key.pem"
 $edgeDeviceFullCertChain    = Join-Path $edgePublicCertDir "new-edge-device-full-chain.cert.pem"
 $edgeIotHubOwnerCA          = Join-Path $edgePublicCertDir "azure-iot-test-only.root.ca.cert.pem"
 
