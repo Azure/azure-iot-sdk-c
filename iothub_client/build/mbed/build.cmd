@@ -76,7 +76,7 @@ if %skip_samples%==0 (
     rem -- build iothub client samples
     rem -----------------------------------------------------------------------------
 
-    call :compile iothub_client_sample_http %build-root%\samples\iothub_ll_telemetry_sample\mbed
+    call :compile iothub_client_sample_mqtt %build-root%\samples\iothub_ll_telemetry_sample\mbed
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
     rem -----------------------------------------------------------------------------
