@@ -1,5 +1,5 @@
-#Copyright (c) Microsoft. All rights reserved.
-#Licensed under the MIT license. See LICENSE file in the project root for full license information.
+# Copyright (c) Microsoft. All rights reserved.
+# Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 cmake_minimum_required(VERSION 2.8.11)
 project(azure_iot_sdks)
@@ -9,7 +9,7 @@ include("configs/azure_iot_sdksFunctions.cmake")
 getIoTSDKVersion()
 message(STATUS "IoT Client SDK Version = ${IOT_SDK_VERSION}")
 
-if(POLICY CMP0042)
+if (POLICY CMP0042)
     cmake_policy(SET CMP0042 NEW)
 endif()
 
@@ -19,32 +19,32 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set(WINDOWS TRUE)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(LINUX TRUE)
-    #on Linux, enable valgrind
-    #these commands (MEMORYCHECK...) need to apear BEFORE include(CTest) or they will not have any effect
+    # on Linux, enable valgrind
+    # these commands (MEMORYCHECK...) need to apear BEFORE include(CTest) or they will not have any effect
     find_program(MEMORYCHECK_COMMAND valgrind)
     set(MEMORYCHECK_COMMAND_OPTIONS "--leak-check=full --error-exitcode=1")
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(MACOSX TRUE)
     add_definitions(-DMACOSX)
 endif()
 
 include (CTest)
 
-if(MSVC)
+if (MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /wd4232")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4 /wd4232")
 endif()
 
-IF(WIN32)
-    #windows needs this define
+if (WIN32)
+    # windows needs this define
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
     # Make warning as error
     add_definitions(/WX)
-ELSE()
+else()
     # Make warning as error
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
-ENDIF(WIN32)
+endif(WIN32)
 
 set(hsm_type_x509 OFF CACHE BOOL "x509 type of hsm used with the Provisioning client")
 set(hsm_type_sastoken OFF CACHE BOOL "tpm type of hsm used with the Provisioning client")
@@ -54,7 +54,7 @@ set(run_sfc_tests OFF CACHE BOOL "setup the Service Fault tests")
 
 set(use_wolfssl)
 
-#the following variables are project-wide and can be used with cmake-gui
+# the following variables are project-wide and can be used with cmake-gui
 option(use_amqp "set use_amqp to ON if amqp is to be used, set to OFF to not use amqp" ON)
 option(use_http "set use_http to ON if http is to be used, set to OFF to not use http" ON)
 option(use_mqtt "set use_mqtt to ON if mqtt is to be used, set to OFF to not use mqtt" ON)
@@ -82,19 +82,19 @@ if(${use_custom_heap})
 endif()
 
 message(STATUS "Provisioning client ${use_prov_client}")
-if(XCODE AND ${use_prov_client})
+if (XCODE AND ${use_prov_client})
     # The TPM module is not available on Mac, and Mac's <string.h> and <unistd.h> files collide as well
     message(FATAL_ERROR "Provisioning client is not supported on Mac")
 endif()
 
-if(WIN32 OR MACOSX)
+if (WIN32 OR MACOSX)
     option(use_openssl "set use_openssl to ON to use OpenSSL." OFF)
 else()
     option(use_openssl "set use_openssl to ON to use OpenSSL." ON)
 endif()
 
-#openssl samples on Windows need to have a trusted cert set
-if("${use_openssl}" OR "${use_wolfssl}")
+# openssl samples on Windows need to have a trusted cert set
+if ("${use_openssl}" OR "${use_wolfssl}")
     option(use_sample_trusted_cert "Set flag in samples to use SDK's built-in CA as TrustedCerts" ON)
 else()
     option(use_sample_trusted_cert "Set flag in samples to use SDK's built-in CA as TrustedCerts" OFF)
@@ -113,26 +113,27 @@ if (${use_prov_client})
     endif()
 endif()
 
-#setting nuget_e2e_tests will only generate e2e tests to run with nuget packages.  Install-packages from Package Manager Console in VS before building the projects
+# setting nuget_e2e_tests will only generate e2e tests to run with nuget packages.
+# Install-packages from Package Manager Console in VS before building the projects
 option(nuget_e2e_tests "set nuget_e2e_tests to ON to generate e2e tests to run with nuget packages (default is OFF)" OFF)
 
-#check for conflicting options
-if(NOT ${use_http})
+# check for conflicting options
+if (NOT ${use_http})
     MESSAGE( "Setting dont_use_uploadtoblob to ON because use_http is OFF")
     set(dont_use_uploadtoblob "ON")
     MESSAGE( STATUS "use_http:         " ${use_http} )
     MESSAGE( STATUS "dont_use_uploadtoblob:         " ${dont_use_uploadtoblob} )
 endif()
 
-if(${dont_use_uploadtoblob})
+if (${dont_use_uploadtoblob})
     add_definitions(-DDONT_USE_UPLOADTOBLOB)
 endif()
 
-if(${no_logging})
+if (${no_logging})
     add_definitions(-DNO_LOGGING)
 endif()
 
-#Use solution folders.
+# Use solution folders.
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # build the parson library for json parsing
@@ -140,13 +141,13 @@ add_library(parson
     ./deps/parson/parson.c
     ./deps/parson/parson.h
 )
-if(MSVC)
+if (MSVC)
     set_source_files_properties(../deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
 endif()
 set(parson_h_install_files ./deps/parson/parson.h)
 set(parson_install_libs parson)
 
-if(IN_OPENWRT)
+if (IN_OPENWRT)
     ADD_DEFINITIONS("$ENV{TARGET_LDFLAGS}" "$ENV{TARGET_CPPFLAGS}" "$ENV{TARGET_CFLAGS}")
     INCLUDE_DIRECTORIES("$ENV{TOOLCHAIN_DIR}/usr/include" "$ENV{TARGET_LDFLAGS}" "$ENV{TARGET_CPPFLAGS}" "$ENV{TARGET_CFLAGS}")
 endif()
@@ -159,22 +160,22 @@ if (LINUX)
     endif()
 endif()
 
-#if any compiler has a command line switch called "OFF" then it will need special care
-if(NOT "${compileOption_C}" STREQUAL "OFF")
+# if any compiler has a command line switch called "OFF" then it will need special care
+if (NOT "${compileOption_C}" STREQUAL "OFF")
     set(CMAKE_C_FLAGS "${compileOption_C} ${CMAKE_C_FLAGS}")
 endif()
 
-if(NOT "${compileOption_CXX}" STREQUAL "OFF")
+if (NOT "${compileOption_CXX}" STREQUAL "OFF")
     set(CMAKE_CXX_FLAGS "${compileOption_CXX} ${CMAKE_CXX_FLAGS}")
 endif()
 
 include("configs/azure_iot_sdksFunctions.cmake")
 
-if(${run_unittests} OR ${run_e2e_tests} OR ${run_sfc_tests})
+if (${run_unittests} OR ${run_e2e_tests} OR ${run_sfc_tests})
     include("dependencies-test.cmake")
 endif()
 
-#do not add or build any tests of the dependencies
+# do not add or build any tests of the dependencies
 set(original_run_e2e_tests ${run_e2e_tests})
 set(original_run_unittests ${run_unittests})
 
@@ -195,8 +196,8 @@ set(run_unittests ${original_run_unittests})
 
 enable_testing()
 
-#this project uses several other projects that are build not by these CMakeFiles
-#this project also targets several OSes
+# this project uses several other projects that are build not by these CMakeFiles
+# this project also targets several OSes
 
 include(CheckSymbolExists)
 function(detect_architecture symbol arch)
@@ -214,6 +215,7 @@ function(detect_architecture symbol arch)
         endif()
     endif()
 endfunction()
+
 if (MSVC)
     detect_architecture("_M_AMD64" x86_64)
     detect_architecture("_M_IX86" x86)
@@ -223,39 +225,41 @@ else()
     detect_architecture("__i386__" x86)
     detect_architecture("__arm__" ARM)
 endif()
+
 if (NOT DEFINED ARCHITECTURE OR ARCHITECTURE STREQUAL "")
     set(ARCHITECTURE "GENERIC")
 endif()
+
 message(STATUS "iothub architecture: ${ARCHITECTURE}")
 
 macro(compileAsC99)
-  if (CMAKE_VERSION VERSION_LESS "3.1")
-    if (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
-      set (CMAKE_C_FLAGS "--std=c99 ${CMAKE_C_FLAGS}")
-    if (NOT IN_OPENWRT)
-      set (CMAKE_CXX_FLAGS "--std=c++11 ${CMAKE_CXX_FLAGS}")
+    if (CMAKE_VERSION VERSION_LESS "3.1")
+        if (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
+            set (CMAKE_C_FLAGS "--std=c99 ${CMAKE_C_FLAGS}")
+            if (NOT IN_OPENWRT)
+                set (CMAKE_CXX_FLAGS "--std=c++11 ${CMAKE_CXX_FLAGS}")
+            endif()
+        endif()
+    else()
+        set (CMAKE_C_STANDARD 99)
+        set (CMAKE_CXX_STANDARD 11)
     endif()
-    endif()
-  else()
-    set (CMAKE_C_STANDARD 99)
-    set (CMAKE_CXX_STANDARD 11)
-  endif()
 endmacro(compileAsC99)
 
 macro(compileAsC11)
-  if (CMAKE_VERSION VERSION_LESS "3.1")
-    if (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
-      set (CMAKE_C_FLAGS "--std=c11 ${CMAKE_C_FLAGS}")
-      set (CMAKE_C_FLAGS "-D_POSIX_C_SOURCE=200112L ${CMAKE_C_FLAGS}")
-      set (CMAKE_CXX_FLAGS "--std=c++11 ${CMAKE_CXX_FLAGS}")
+    if (CMAKE_VERSION VERSION_LESS "3.1")
+        if (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
+            set (CMAKE_C_FLAGS "--std=c11 ${CMAKE_C_FLAGS}")
+            set (CMAKE_C_FLAGS "-D_POSIX_C_SOURCE=200112L ${CMAKE_C_FLAGS}")
+            set (CMAKE_CXX_FLAGS "--std=c++11 ${CMAKE_CXX_FLAGS}")
+        endif()
+    else()
+        set (CMAKE_C_STANDARD 11)
+        set (CMAKE_CXX_STANDARD 11)
     endif()
-  else()
-    set (CMAKE_C_STANDARD 11)
-    set (CMAKE_CXX_STANDARD 11)
-  endif()
 endmacro(compileAsC11)
 
-if(WIN32)
+if (WIN32)
     set(LOCK_C_FILE ${SHARED_UTIL_ADAPTER_FOLDER}/lock_win32.c)
     set(THREAD_C_FILE ${SHARED_UTIL_ADAPTER_FOLDER}/threadapi_c11.c)
 else()
@@ -263,15 +267,15 @@ else()
     set(THREAD_C_FILE ${SHARED_UTIL_ADAPTER_FOLDER}/threadapi_pthreads.c)
 endif()
 
-#Set CMAKE_INSTALL_LIBDIR if not defined
+# Set CMAKE_INSTALL_LIBDIR if not defined
 include(GNUInstallDirs)
 
-if(NOT ${use_amqp} OR NOT ${use_http})
+if (NOT ${use_amqp} OR NOT ${use_http})
     set (build_service_client OFF)
     message(STATUS "iothub_service_client build is disabled (AMQP and HTTP support are required)")
 endif()
 
-if(NOT ${use_http})
+if (NOT ${use_http})
     set (build_provisioning_service_client OFF)
     message(STATUS "provisioning_service_client build is disabled (HTTP support is required)")
 endif()
@@ -280,46 +284,46 @@ if (${use_prov_client})
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_PROV_MODULE")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_PROV_MODULE")
 
-    if(${build_provisioning_service_client})
+    if (${build_provisioning_service_client})
         add_subdirectory(provisioning_service_client)
     endif()
 
     add_subdirectory(provisioning_client)
 endif()
 
-if(${build_service_client})
+if (${build_service_client})
     add_subdirectory(iothub_service_client)
 endif()
 
-if(${run_e2e_tests} OR ${run_longhaul_tests} OR ${nuget_e2e_tests} OR ${run_sfc_tests})
+if (${run_e2e_tests} OR ${run_longhaul_tests} OR ${nuget_e2e_tests} OR ${run_sfc_tests})
     add_subdirectory(testtools)
 endif()
 
 add_subdirectory(iothub_client)
 add_subdirectory(serializer)
 
-#add the device_auth sample subdirectory
-if(${use_prov_client} AND NOT ${skip_samples})
+# add the device_auth sample subdirectory
+if (${use_prov_client} AND NOT ${skip_samples})
     add_subdirectory(./provisioning_client/samples)
 
-    if(NOT "${build_python}" STREQUAL "OFF")
+    if (NOT "${build_python}" STREQUAL "OFF")
         add_subdirectory(../provisioning_device_client provisioning_device_client_python)
     endif()
 endif()
 
-if(NOT "${build_python}" STREQUAL "OFF")
+if (NOT "${build_python}" STREQUAL "OFF")
     add_subdirectory(../device/iothub_client_python python)
-    if(${build_service_client})
+    if (${build_service_client})
         add_subdirectory(../service python_service_client)
     endif()
 endif()
 
-if("${build_javawrapper}" STREQUAL "ON")
+if ("${build_javawrapper}" STREQUAL "ON")
      add_subdirectory(../device/iothub_client_javawrapper javawrapper)
 endif()
 
-if(${use_installed_dependencies})
-    #Install azure_iot_sdks
+if (${use_installed_dependencies})
+    # Install azure_iot_sdks
     set(package_location "cmake")
 
     include(CMakePackageConfigHelpers)
