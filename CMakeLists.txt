@@ -13,11 +13,10 @@ if(POLICY CMP0042)
     cmake_policy(SET CMP0042 NEW)
 endif()
 
-#
-#making a global variable to know if we are on linux, windows, or macosx.
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    set(WINDOWS TRUE)
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+# making a global variable to know if we are on linux, windows, or macosx.
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    # use WIN32 for Windows
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(LINUX TRUE)
     #on Linux, enable valgrind
     #these commands (MEMORYCHECK...) need to apear BEFORE include(CTest) or they will not have any effect
