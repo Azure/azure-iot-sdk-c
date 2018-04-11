@@ -4,7 +4,7 @@ This document describes how to create a program that uses the *azure-iot-sdk-c-d
 
 Before you start, make sure you have **CMake**, **g++**, and **gcc** installed on your development machine:
 
-```
+```Shell
 sudo apt-get install cmake gcc g++
 ```
 
@@ -14,14 +14,14 @@ Complete the following steps to install the AzureIoT binaries on your developmen
 
 1. Add the AzureIoT repository to the machine:
 
-    ```
+    ```Shell
     sudo add-apt-repository ppa:aziotsdklinux/ppa-azureiot
     sudo apt-get update
     ```
 
 2. Install the azure-iot-sdk-c-dev package
 
-    ```
+    ```Shell
     sudo apt-get install -y azure-iot-sdk-c-dev
     ```
 
@@ -31,7 +31,7 @@ The following steps outline how you can use CMake to build an IoT Hub client app
 
 1. Create a CMakeLists.txt file for the application. The example shown here assumes you are using the *serializer* module in your code, that your application uses the AMQP protocol, and that your source code is contained in the files **sample.c**, **sample.h**, and **main.c**. You can add source files by changing the contents of the **sample_application_c_files** and **sample_application_h_files** sets. If you are not using the serializer module, you can omit it from **target_link_libraries**. If you are using a different protocol (such as MQTT) you need to change the content of **target_link_libraries** accordingly.
 
-    ```
+    ```Shell
     cmake_minimum_required(VERSION 2.8.11)
 
     set (CMAKE_C_FLAGS "--std=c99 ${CMAKE_C_FLAGS}")
@@ -65,9 +65,9 @@ The following steps outline how you can use CMake to build an IoT Hub client app
     )
     ```
 
-3. Create a directory that will store the make files that CMake creates and then run the **cmake** and **make** commands as follows:
+2. Create a directory that will store the make files that CMake creates and then run the **cmake** and **make** commands as follows:
 
-    ```
+    ```Shell
     mkdir cmake
     cd cmake
     cmake ../[Directory that contains your CMakeLists.txt File]
@@ -77,7 +77,7 @@ The following steps outline how you can use CMake to build an IoT Hub client app
 ## Notes
 
 The Azure IoT client libraries and their dependencies install to the following locations.
-  
+
 Libraries install in /usr/lib:
 
 * libiothub_client_amqp_transport.a
@@ -96,6 +96,6 @@ Dependencies install in /usr/lib:
 
 To remove the azure-iot-sdk-c-dev package, run the following command:
 
-```
+```Shell
 sudo apt-get --purge remove azure-iot-sdk-c-dev
 ```
