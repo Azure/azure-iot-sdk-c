@@ -1,5 +1,3 @@
-
-$_intermediateCertSubject = "CN=$_intermediateCertCommonName"#
 #  Routines to help *experiment* (not necessarily productize) CA certificates.
 #
 
