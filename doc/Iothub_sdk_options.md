@@ -62,9 +62,10 @@ DPS_LL_SetOption(handle, OPTION_HTTP_PROXY, &http_proxy);
 
 ### MQTT Transport
 
-| Option Name            | Option Define             | Value Type         | Description
-|------------------------|---------------------------|--------------------|-------------------------------
-| `"keepalive"`          | OPTION_KEEP_ALIVE         | int*               | Length of time to send `Keep Alives` to service for D2C Messages
+| Option Name               | Option Define                 | Value Type         | Description
+|---------------------------|-------------------------------|--------------------|-------------------------------
+| `"keepalive"`             | OPTION_KEEP_ALIVE             | int*               | Length of time to send `Keep Alives` to service for D2C Messages
+| `"auto_url_encode_decode"`| OPTION_AUTO_URL_ENCODE_DECODE | bool*              | Turn on and off automatic URL Encoding and Decoding.
 
 ### AMQP Transport
 
