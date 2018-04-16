@@ -163,7 +163,7 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     // Upper layer
     IOTHUB_CLIENT_LL_HANDLE llClientHandle;
 
-    // Protocol 
+    // Protocol
     MQTT_CLIENT_HANDLE mqttClient;
     XIO_HANDLE xioTransport;
 
@@ -284,7 +284,7 @@ static void free_transport_handle_data(MQTTTRANSPORT_HANDLE_DATA* transport_data
     set_saved_tls_options(transport_data, NULL);
 
     tickcounter_destroy(transport_data->msgTickCounter);
-    
+
     free_proxy_data(transport_data);
 
     STRING_delete(transport_data->devicesPath);
@@ -296,7 +296,7 @@ static void free_transport_handle_data(MQTTTRANSPORT_HANDLE_DATA* transport_data
     STRING_delete(transport_data->topic_GetState);
     STRING_delete(transport_data->topic_NotifyState);
     STRING_delete(transport_data->topic_DeviceMethods);
-    
+
     free(transport_data);
 }
 
@@ -350,6 +350,7 @@ static uint16_t get_next_packet_id(PMQTTTRANSPORT_HANDLE_DATA transport_data)
     return transport_data->packetId;
 }
 
+#ifndef NO_LOGGING
 static const char* retrieve_mqtt_return_codes(CONNECT_RETURN_CODE rtn_code)
 {
     switch (rtn_code)
@@ -371,6 +372,7 @@ static const char* retrieve_mqtt_return_codes(CONNECT_RETURN_CODE rtn_code)
             return "Unknown";
     }
 }
+#endif // NO_LOGGING
 
 static int retrieve_device_method_rid_info(const char* resp_topic, STRING_HANDLE method_name, STRING_HANDLE request_id)
 {
@@ -1504,14 +1506,14 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
             default:
             {
                 break;
-            } 
+            }
         }
     }
 }
 
-// Prior to creating a new connection, if we have an existing xioTransport we need to clear 
-// it now or else cached settings (especially TLS when communicating with HTTP proxies) will 
-// break reconnection attempt.  
+// Prior to creating a new connection, if we have an existing xioTransport we need to clear
+// it now or else cached settings (especially TLS when communicating with HTTP proxies) will
+// break reconnection attempt.
 static void ResetConnectionIfNecessary(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 {
     if (transport_data->xioTransport != NULL)
@@ -1566,7 +1568,7 @@ static void mqtt_error_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_ERR
             }
             case MQTT_CLIENT_PARSE_ERROR:
             case MQTT_CLIENT_MEMORY_ERROR:
-            case MQTT_CLIENT_UNKNOWN_ERROR: 
+            case MQTT_CLIENT_UNKNOWN_ERROR:
             {
                 LogError("INTERNAL ERROR: unexpected error value received %s", ENUM_TO_STRING(MQTT_CLIENT_EVENT_ERROR, error));
                 break;
@@ -1903,7 +1905,7 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
         {
             result = __FAILURE__;
         }
-            
+
         if (sasToken != NULL)
         {
             free(sasToken);
@@ -1922,7 +1924,7 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
         RETRY_ACTION retry_action = RETRY_ACTION_RETRY_LATER;
 
         // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_007: [ IoTHubTransport_MQTT_Common_DoWork shall try to reconnect according to the current retry policy set ]
-        if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_NOT_CONNECTED && transport_data->isRecoverableError && 
+        if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_NOT_CONNECTED && transport_data->isRecoverableError &&
             (retry_control_should_retry(transport_data->retry_control_handle, &retry_action) != 0 || retry_action == RETRY_ACTION_RETRY_NOW))
         {
             // Note: in case retry_control_should_retry fails, the reconnection shall be attempted anyway (defaulting to policy IOTHUB_CLIENT_RETRY_IMMEDIATE).
@@ -2080,7 +2082,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                     {
                         state->hostAddress = STRING_construct(upperConfig->protocolGatewayHostName);
                     }
-                
+
                     if (state->hostAddress == NULL)
                     {
                         LogError("failure constructing host address.");
@@ -2153,11 +2155,11 @@ TRANSPORT_LL_HANDLE IoTHubTransport_MQTT_Common_Create(const IOTHUBTRANSPORT_CON
     /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_003: [If the upperConfig's variables deviceId, both deviceKey and deviceSasToken, iotHubName, protocol, or iotHubSuffix are NULL then IoTHubTransport_MQTT_Common_Create shall return NULL.] */
     /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_03_003: [If both deviceKey & deviceSasToken fields are NOT NULL then IoTHubTransport_MQTT_Common_Create shall return NULL.] */
     else if (config->upperConfig == NULL ||
-             config->upperConfig->protocol == NULL || 
-             config->upperConfig->deviceId == NULL || 
+             config->upperConfig->protocol == NULL ||
+             config->upperConfig->deviceId == NULL ||
              ((config->upperConfig->deviceKey != NULL) && (config->upperConfig->deviceSasToken != NULL)) ||
              //is_key_validate(config) != 0 ||
-             config->upperConfig->iotHubName == NULL || 
+             config->upperConfig->iotHubName == NULL ||
              config->upperConfig->iotHubSuffix == NULL)
     {
         LogError("Invalid Argument: upperConfig structure contains an invalid parameter");
@@ -2540,7 +2542,7 @@ IOTHUB_PROCESS_ITEM_RESULT IoTHubTransport_MQTT_Common_ProcessItem(TRANSPORT_LL_
                     mqtt_info->iothub_type = item_type;
                     mqtt_info->iothub_msg_id = iothub_item->device_twin->item_id;
                     mqtt_info->retryCount = 0;
-                    
+
                     /* Codes_SRS_IOTHUBCLIENT_LL_07_005: [ If successful IoTHubTransport_MQTT_Common_ProcessItem shall add mqtt info structure acknowledgement queue. ] */
                     DList_InsertTailList(&transport_data->ack_waiting_queue, &mqtt_info->entry);
 
@@ -2970,7 +2972,7 @@ IOTHUB_DEVICE_HANDLE IoTHubTransport_MQTT_Common_Register(TRANSPORT_LL_HANDLE ha
                 LogError("IoTHubTransport_MQTT_Common_Register: deviceId does not match.");
                 result = NULL;
             }
-            else if (IoTHubClient_Auth_Get_Credential_Type(transport_data->authorization_module) == IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY && 
+            else if (IoTHubClient_Auth_Get_Credential_Type(transport_data->authorization_module) == IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY &&
                 (strcmp(IoTHubClient_Auth_Get_DeviceKey(transport_data->authorization_module), device->deviceKey) != 0))
             {
                 LogError("IoTHubTransport_MQTT_Common_Register: deviceKey does not match.");
@@ -3052,4 +3054,3 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SendMessageDisposition(MESSAGE_
     }
     return result;
 }
-

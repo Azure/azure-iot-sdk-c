@@ -11,7 +11,7 @@
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/uniqueid.h"
-#include "azure_c_shared_utility/sastoken.h" 
+#include "azure_c_shared_utility/sastoken.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/base64.h"
 #include "azure_c_shared_utility/urlencode.h"
@@ -32,7 +32,7 @@ static const char* JSON_NODE_KEY_NAME = "keyName";
 static const char* JSON_NODE_OPERATION_ID = "operationId";
 static const char* JSON_NODE_ASSIGNED_HUB = "assignedHub";
 static const char* JSON_NODE_TPM_NODE = "tpm";
-static const char* JSON_NODE_TRACKING_ID = "trackingId";
+//static const char* JSON_NODE_TRACKING_ID = "trackingId";
 
 static const char* PROV_FAILED_STATUS = "failed";
 static const char* PROV_BLACKLISTED_STATUS = "blacklisted";
@@ -827,7 +827,7 @@ void Prov_Device_LL_DoWork(PROV_DEVICE_LL_HANDLE handle)
         }
         else
         {
-            // Check the connection 
+            // Check the connection
             tickcounter_ms_t current_time = 0;
             (void)tickcounter_get_current_ms(prov_info->tick_counter, &current_time);
             if ((current_time - prov_info->timeout_value) / 1000 > PROV_DEFAULT_TIMEOUT)
@@ -909,7 +909,7 @@ PROV_DEVICE_RESULT Prov_Device_LL_SetOption(PROV_DEVICE_LL_HANDLE handle, const 
                 {
                     free(handle->registration_id);
                 }
-                
+
                 if (mallocAndStrcpy_s(&handle->registration_id, (const char*)value) != 0)
                 {
                     LogError("Failure allocating setting registration id");
