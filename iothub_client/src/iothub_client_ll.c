@@ -478,7 +478,7 @@ static IOTHUB_CLIENT_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIEN
 
 static uint32_t get_next_item_id(IOTHUB_CLIENT_LL_HANDLE_DATA* handleData)
 {    
-    if (handleData->data_msg_id+1 >= UINT32_MAX)
+    if (handleData->data_msg_id+1 == UINT32_MAX)
     {
         handleData->data_msg_id = 1;
     }
