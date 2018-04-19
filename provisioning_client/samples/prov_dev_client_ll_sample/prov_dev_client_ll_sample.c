@@ -271,6 +271,10 @@ int main()
 
             (void)IoTHubClient_LL_SetConnectionStatusCallback(iothub_client, iothub_connection_status, &iothub_info);
 
+            if (g_use_proxy)
+            {
+                IoTHubClient_LL_SetOption(iothub_client, OPTION_HTTP_PROXY, &http_proxy);
+            }
             //bool traceOn = true;
             //IoTHubClient_LL_SetOption(iothub_client, OPTION_LOG_TRACE, &traceOn);
             // Setting the Trusted Certificate.  This is only necessary on system with without
@@ -278,11 +282,6 @@ int main()
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
             IoTHubClient_LL_SetOption(iothub_client, OPTION_TRUSTED_CERT, certificates);
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
-
-            if (g_use_proxy)
-            {
-                IoTHubClient_LL_SetOption(iothub_client, OPTION_HTTP_PROXY, &http_proxy);
-            }
 
             if (IoTHubClient_LL_SetMessageCallback(iothub_client, receive_msg_callback, &iothub_info) != IOTHUB_CLIENT_OK)
             {
