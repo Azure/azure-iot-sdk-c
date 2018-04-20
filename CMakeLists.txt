@@ -137,6 +137,8 @@ add_library(parson
 if(MSVC)
     set_source_files_properties(../deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
 endif()
+set(parson_h_install_files ./deps/parson/parson.h)
+set(parson_install_libs parson)
 
 if(IN_OPENWRT)
     ADD_DEFINITIONS("$ENV{TARGET_LDFLAGS}" "$ENV{TARGET_CPPFLAGS}" "$ENV{TARGET_CFLAGS}")
