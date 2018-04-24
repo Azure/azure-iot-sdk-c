@@ -25,6 +25,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(MEMORYCHECK_COMMAND_OPTIONS "--leak-check=full --error-exitcode=1")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(MACOSX TRUE)
+    add_definitions(-DMACOSX)
 endif()
 
 include (CTest)
