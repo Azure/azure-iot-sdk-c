@@ -15,6 +15,7 @@ $errorActionPreference    = "stop"
 $_rootCertCommonName      = "Azure IoT CA TestOnly Root CA"
 $_rootCertSubject         = "CN=$_rootCertCommonName"
 $_intermediateCertCommonName = "Azure IoT CA TestOnly Intermediate {0} CA"
+$_intermediateCertSubject    = "CN=$_intermediateCertCommonName"
 $_privateKeyPassword      = "1234"
 
 $rootCACerFileName          = "./RootCA.cer"
@@ -281,7 +282,7 @@ function Write-CACertsCertificatesForEdgeDevice([string]$deviceName)
 
     Copy-Item $originalDevicePublicPem $edgeDeviceCertificate
     Copy-Item $originalDevicePrivatePem $edgeDevicePrivateKey
-    Get-Content $rootCACerFileName, $intermediate1CAPemFileName, $originalDevicePublicPem | Set-Content $edgeDeviceFullCertChain
+    Get-Content $rootCAPemFileName, $intermediate1CAPemFileName, $originalDevicePublicPem | Set-Content $edgeDeviceFullCertChain
     Copy-Item $rootCAPemFileName $edgeIotHubOwnerCA
     Write-Host "Success"
 }
