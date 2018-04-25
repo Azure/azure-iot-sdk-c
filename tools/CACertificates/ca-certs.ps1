@@ -282,7 +282,7 @@ function Write-CACertsCertificatesForEdgeDevice([string]$deviceName)
 
     Copy-Item $originalDevicePublicPem $edgeDeviceCertificate
     Copy-Item $originalDevicePrivatePem $edgeDevicePrivateKey
-    Get-Content $rootCAPemFileName, $intermediate1CAPemFileName, $originalDevicePublicPem | Set-Content $edgeDeviceFullCertChain
+    Get-Content $originalDevicePublicPem, $intermediate1CAPemFileName, $rootCAPemFileName | Set-Content $edgeDeviceFullCertChain    
     Copy-Item $rootCAPemFileName $edgeIotHubOwnerCA
     Write-Host "Success"
 }
