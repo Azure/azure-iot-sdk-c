@@ -212,9 +212,10 @@ ctest -C "debug" -V
 
 ## Set up a macOS (Mac OS X) development environment
 
-This section describes how to set up a development environment for the C SDK on [macOS]. [CMake] will create makefiles and [make] will use them to compile the C SDK source code using [clang]. [clang] is included with [XCode].
+This section describes how to set up a development environment for the C SDK on [macOS]. [CMake] will 
+create an XCode project containing the various SDK libraries and samples.
 
-We've tested the device SDK for C on macOS Sierra, with XCode version 8.
+We've tested the device SDK for C on macOS High Sierra, with XCode version 9.2.
 
 - Make sure all dependencies are installed before building the SDK. For macOS, you can use [Homebrew] to install the right packages:
 
@@ -229,6 +230,10 @@ We've tested the device SDK for C on macOS Sierra, with XCode version 8.
   cmake --version
   ```
 
+- Patch CURL to the latest version available.
+  > The minimum version of curl required is 7.56, as recent previous versions [presented critical failures](https://github.com/Azure/azure-iot-sdk-c/issues/308).
+  > To upgrade see "Upgrade CURL on Mac OS" steps below.
+  
 - Locate the tag name for the [latest release][latest-release] of the SDK.
   > Our release tag names are date values in `yyyy-mm-dd` format.
 
@@ -239,9 +244,53 @@ We've tested the device SDK for C on macOS Sierra, with XCode version 8.
   ```
   > The `--recursive` argument instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
 
+#### Upgrade CURL on Mac OS
+
+1. Install the latest version of curl
+```macosx:~ username$ brew install curl```
+
+At the end of the installation you will get this info:
+```
+Error: Failed to create /usr/local/opt/curl
+...
+==> Caveats
+This formula is keg-only, which means it was not symlinked into /usr/local,
+because macOS already provides this software and installing another version in
+parallel can cause all kinds of trouble.
+...
+==> Summary
+🍺  /usr/local/Cellar/curl/7.58.0: 415 files, 3MB
+```
+Save the path "/usr/local/Cellar/curl/7.58.0", this is where the library and headers were actually installed.
+
+2. Force link updates:
+
+```
+brew link curl --force
+```
+
+3. Set DYLD_LIBRARY_PATH:
+```
+export DYLD_LIBRARY_PATH="/usr/local/Cellar/curl/7.58.0/lib:$DYLD_LIBRARY_PATH"
+```
+
+Make sure the path above matches the one saved on step 1.
+  
 ### Build the C SDK
 
-To build the SDK:
+If you upgraded CURL, make sure to set DYLD_LIBRARY_PATH each time you open a new shell.
+The next command assumes curl was saved on the path below mentioned ("keg install"). 
+Make sure you use the path as informed by `brew` when curl was upgraded.
+
+```
+export DYLD_LIBRARY_PATH="/usr/local/Cellar/curl/7.58.0/lib:$DYLD_LIBRARY_PATH"
+``` 
+
+Note: Any samples you built will not work until you configure them with a valid IoT Hub device connection string. For more information, see the [samples section](#samplecode) below.
+
+Next you can either build the C SDK with CMake directly, or you can use CMake to generate an XCode project.
+
+#### Building the C SDK with CMake directly
 
 ```Shell
 cd azure-iot-sdk-c
@@ -271,7 +320,21 @@ Also, you can build and run unit tests:
   > ctest -C "debug" -V
   > ```
 
-Note: Any samples you built will not work until you configure them with a valid IoT Hub device connection string. For more information, see the [samples section](#samplecode) below.
+#### Generate an XCode Project
+
+To generate the XCode project:
+
+```Shell
+cd azure-iot-sdk-c
+mkdir cmake
+cd cmake
+cmake -G Xcode ..
+```
+All of the CMake options described above will work for XCode generation as well.
+
+When project generation completes you will see an XCode project file (.xcodeproj) under 
+the `cmake` folder. To build the SDK, open **cmake\azure_iot_sdks.xcodeproj** in XCode and 
+use XCode's build and run features.
 
 <a name="windowsce"></a>
 

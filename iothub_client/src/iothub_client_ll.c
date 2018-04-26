@@ -46,7 +46,9 @@ DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_CONNECTION_STATUS, IOTHUB_CLIENT_CONNECTION_ST
 DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, IOTHUB_CLIENT_CONNECTION_STATUS_REASON_VALUES);
 DEFINE_ENUM_STRINGS(TRANSPORT_TYPE, TRANSPORT_TYPE_VALUES);
 DEFINE_ENUM_STRINGS(DEVICE_TWIN_UPDATE_STATE, DEVICE_TWIN_UPDATE_STATE_VALUES);
+#ifndef DONT_USE_UPLOADTOBLOB
 DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT_VALUES);
+#endif // DONT_USE_UPLOADTOBLOB
 
 #define CALLBACK_TYPE_VALUES \
     CALLBACK_TYPE_NONE,      \
@@ -1917,39 +1919,40 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetOption(IOTHUB_CLIENT_LL_HANDLE iotHubCli
                 result = IOTHUB_CLIENT_OK;
             }
         }
-        else
+        else if (strcmp(optionName, OPTION_BLOB_UPLOAD_TIMEOUT_SECS) == 0)
         {
-
-            /*Codes_SRS_IOTHUBCLIENT_LL_02_099: [ IoTHubClient_LL_SetOption shall return according to the table below ]*/
-            IOTHUB_CLIENT_RESULT uploadToBlob_result; 
 #ifndef DONT_USE_UPLOADTOBLOB
-            uploadToBlob_result = IoTHubClient_LL_UploadToBlob_SetOption(handleData->uploadToBlobHandle, optionName, value);
-            if(uploadToBlob_result == IOTHUB_CLIENT_ERROR)
+            // This option just gets passed down into IoTHubClient_LL_UploadToBlob
+            /*Codes_SRS_IOTHUBCLIENT_LL_30_010: [ blob_xfr_timeout - IoTHubClient_LL_SetOption shall pass this option to IoTHubClient_UploadToBlob_SetOption and return its result. ]*/
+            result = IoTHubClient_LL_UploadToBlob_SetOption(handleData->uploadToBlobHandle, optionName, value);
+            if(result != IOTHUB_CLIENT_OK)
             {
                 LogError("unable to IoTHubClient_LL_UploadToBlob_SetOption");
-                result = IOTHUB_CLIENT_ERROR;
             }
 #else
-            uploadToBlob_result = IOTHUB_CLIENT_INVALID_ARG; /*harmless value (IOTHUB_CLIENT_INVALID_ARG)in the case when uploadtoblob is not compiled in, otherwise whatever IoTHubClient_LL_UploadToBlob_SetOption returned*/
+            LogError("OPTION_BLOB_TRANSFER_TIMEOUT option being set with DONT_USE_UPLOADTOBLOB compiler switch");
+            result = IOTHUB_CLIENT_ERROR;
 #endif /*DONT_USE_UPLOADTOBLOB*/
-
-            /*Codes_SRS_IOTHUBCLIENT_LL_12_023: [** `svc2cl_keep_alive_timeout_secs` - shall set the cloud to device keep alive frequency(in seconds) for the connection. Zero means keep alive will not be sent. ]*/
-            result =
-                /*based on uploadToBlob_result value this is what happens:*/
-                /*IOTHUB_CLIENT_INVALID_ARG always returns what IoTHubTransport_SetOption returns*/
-                /*IOTHUB_CLIENT_ERROR always returns IOTHUB_CLIENT_ERROR */
-                /*IOTHUB_CLIENT_OK returns OK
-                    IOTHUB_CLIENT_OK if IoTHubTransport_SetOption returns OK or INVALID_ARG
-                    IOTHUB_CLIENT_ERROR if IoTHubTransport_SetOption returns ERROR*/
-
-                (uploadToBlob_result == IOTHUB_CLIENT_INVALID_ARG) ? handleData->IoTHubTransport_SetOption(handleData->transportHandle, optionName, value) :
-                (uploadToBlob_result == IOTHUB_CLIENT_ERROR) ? IOTHUB_CLIENT_ERROR :
-                (handleData->IoTHubTransport_SetOption(handleData->transportHandle, optionName, value) == IOTHUB_CLIENT_ERROR) ? IOTHUB_CLIENT_ERROR : IOTHUB_CLIENT_OK;
-
-            if (result != IOTHUB_CLIENT_OK)
+        }
+        else
+        {
+            // This section is unusual for SetOption calls because it attempts to pass unhandled options
+            // to two downstream targets (IoTHubTransport_SetOption and IoTHubClient_LL_UploadToBlob_SetOption) instead of one.
+            
+            /*Codes_SRS_IOTHUBCLIENT_LL_30_011: [ IoTHubClient_LL_SetOption shall always pass unhandled options to Transport_SetOption. ]*/
+            /*Codes_SRS_IOTHUBCLIENT_LL_30_012: [ If Transport_SetOption fails, IoTHubClient_LL_SetOption shall return that failure code. ]*/
+            result = handleData->IoTHubTransport_SetOption(handleData->transportHandle, optionName, value);
+            if(result != IOTHUB_CLIENT_OK)
             {
-                LogError("underlying transport failed, returned = %s", ENUM_TO_STRING(IOTHUB_CLIENT_RESULT, result));
+                LogError("unable to IoTHubTransport_SetOption");
             }
+#ifndef DONT_USE_UPLOADTOBLOB
+            else
+            {
+                /*Codes_SRS_IOTHUBCLIENT_LL_30_013: [ If the DONT_USE_UPLOADTOBLOB compiler switch is undefined, IoTHubClient_LL_SetOption shall pass unhandled options to IoTHubClient_UploadToBlob_SetOption and ignore the result. ]*/
+                (void)IoTHubClient_LL_UploadToBlob_SetOption(handleData->uploadToBlobHandle, optionName, value);
+            }
+#endif /*DONT_USE_UPLOADTOBLOB*/
         }
     }
     return result;

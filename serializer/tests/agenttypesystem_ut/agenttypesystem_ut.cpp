@@ -252,6 +252,7 @@ static bool operator==(EDM_BINARY left, EDM_BINARY right)
                 )
             {
                 ASSERT_FAIL("invalid data");
+                return false; // quiet compiler warning
             }
             else
             {
@@ -266,6 +267,7 @@ static bool operator==(EDM_BINARY left, EDM_BINARY right)
                 )
             {
                 ASSERT_FAIL("invalid data");
+                return false; // quiet compiler warning
             }
             else
             {

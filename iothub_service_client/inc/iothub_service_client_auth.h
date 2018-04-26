@@ -19,6 +19,9 @@
 #ifndef IOTHUB_SERVICE_CLIENT_AUTH_H
 #define IOTHUB_SERVICE_CLIENT_AUTH_H
 
+#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_c_shared_utility/umock_c_prod.h"
+
 #define IOTHUB_DEVICE_STATUS_VALUES       \
     IOTHUB_DEVICE_STATUS_ENABLED,         \
     IOTHUB_DEVICE_STATUS_DISABLED         \

@@ -14,7 +14,10 @@ CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
 rm -r -f $build_folder
 mkdir -p $build_folder
 pushd $build_folder
-cmake .. -Drun_unittests:bool=ON -G Xcode
+
+export DYLD_LIBRARY_PATH="/usr/local/Cellar/curl/7.58.0/lib:$DYLD_LIBRARY_PATH"
+
+cmake .. -Drun_unittests:bool=ON -Drun_e2e_tests=ON -G Xcode
 cmake --build . -- --jobs=$CORES
-ctest -C "debug" -V
+ctest -j 8 -C "debug" -V
 popd

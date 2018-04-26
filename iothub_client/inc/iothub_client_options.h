@@ -34,7 +34,13 @@ extern "C"
     static const char* OPTION_BATCHING = "Batching";
 
     static const char* OPTION_MESSAGE_TIMEOUT = "messageTimeout";
+    static const char* OPTION_BLOB_UPLOAD_TIMEOUT_SECS = "blob_upload_timeout_secs";
     static const char* OPTION_PRODUCT_INFO = "product_info";
+
+    /*
+    * @brief    Turns on automatic URL encoding of message properties + system properties. Only valid for use with MQTT Transport
+    */
+    static const char* OPTION_AUTO_URL_ENCODE_DECODE = "auto_url_encode_decode";
     /*
     * @brief Informs the service of what is the maximum period the client will wait for a keep-alive message from the service.
     *        The service must send keep-alives before this timeout is reached, otherwise the client will trigger its re-connection logic.

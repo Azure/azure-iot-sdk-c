@@ -10,24 +10,13 @@ compileAsC99()
 # endif()
 
 set(iothub_messaging_ll_sample_c_files
-iothub_messaging_ll_sample.c
+    iothub_messaging_ll_sample.c
 )
 
-if(WIN32)
-	set(iothub_messaging_ll_sample_c_files ${iothub_messaging_ll_sample_c_files} ./windows/main.c)
-else()
-	set(iothub_messaging_ll_sample_c_files ${iothub_messaging_ll_sample_c_files} ./linux/main.c)
-endif()
-
-
-set(iothub_messaging_ll_sample_h_files
-iothub_messaging_ll_sample.h
-)
 
 IF(WIN32)
-	#windows needs this define
-	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-	add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
+    #windows needs this define
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 ENDIF(WIN32)
 
 include_directories(.)
@@ -35,7 +24,7 @@ include_directories(.)
 add_executable(iothub_messaging_ll_sample ${iothub_messaging_ll_sample_c_files} ${iothub_messaging_ll_sample_h_files})
 
 target_link_libraries(iothub_messaging_ll_sample 
-	iothub_service_client
+    iothub_service_client
 )
 
 linkSharedUtil(iothub_messaging_ll_sample)

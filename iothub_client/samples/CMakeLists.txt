@@ -14,8 +14,9 @@ function(add_sample_directory whatIsBuilding)
                FOLDER "IoTHub_Samples")
 endfunction()
 
-
+add_sample_directory(iothub_convenience_sample)
 add_sample_directory(iothub_ll_c2d_sample)
+add_sample_directory(iothub_ll_client_x509_sample)
 add_sample_directory(iothub_ll_telemetry_sample)
 
 if(${use_http})
@@ -27,10 +28,6 @@ if(${use_http})
 endif()
 
 if(${use_mqtt})
-    add_sample_directory(iothub_client_sample_mqtt_esp8266)
-    if(${use_amqp})
-        add_sample_directory(iothub_client_sample_device_method)
-    endif()
     if(LINUX)
         add_sample_directory(iothub_client_sample_mqtt_dm)
     endif()
@@ -47,7 +44,6 @@ if(${use_amqp})
 endif()
 
 if(${use_amqp} OR ${use_mqtt})
+    add_sample_directory(iothub_client_sample_device_method)
     add_sample_directory(iothub_client_sample_device_twin)
 endif()
-
-add_sample_directory(iothub_client_sample_x509)

@@ -486,7 +486,7 @@ static int add_link_properties(LINK_HANDLE amqp_link, const char* key, const cha
         }
         amqpvalue_destroy(attach_properties);
     }
-    return 0;
+    return result;
 }
 
 static int create_sender_link(PROV_TRANSPORT_AMQP_INFO* amqp_info)
@@ -691,12 +691,14 @@ static int create_amqp_connection(PROV_TRANSPORT_AMQP_INFO* amqp_info)
                     LogError("Failure setting x509 cert on xio");
                     result = __FAILURE__;
                     xio_destroy(amqp_info->underlying_io);
+                    amqp_info->underlying_io = NULL;
                 }
                 else if (xio_setoption(amqp_info->underlying_io, OPTION_X509_ECC_KEY, amqp_info->private_key) != 0)
                 {
                     LogError("Failure setting x509 key on xio");
                     result = __FAILURE__;
                     xio_destroy(amqp_info->underlying_io);
+                    amqp_info->underlying_io = NULL;
                 }
                 else
                 {
@@ -708,6 +710,7 @@ static int create_amqp_connection(PROV_TRANSPORT_AMQP_INFO* amqp_info)
                 LogError("x509 certificate is NULL");
                 result = __FAILURE__;
                 xio_destroy(amqp_info->underlying_io);
+                amqp_info->underlying_io = NULL;
             }
         }
         else

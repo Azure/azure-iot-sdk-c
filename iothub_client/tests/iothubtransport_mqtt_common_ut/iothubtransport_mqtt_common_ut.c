@@ -113,6 +113,18 @@ static STRING_HANDLE my_URL_Encode(STRING_HANDLE string)
     return (STRING_HANDLE)my_gballoc_malloc(1);
 }
 
+static STRING_HANDLE my_URL_EncodeString(const char* textEncode)
+{
+    (void)textEncode;
+    return (STRING_HANDLE)my_gballoc_malloc(1);
+}
+
+static STRING_HANDLE my_URL_DecodeString(const char* textDecode)
+{
+    (void)textDecode;
+    return (STRING_HANDLE)my_gballoc_malloc(1);
+}
+
 static IOTHUB_CLIENT_RESULT my_IoTHubClient_LL_GetOption(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* optionName, void** value)
 {
     (void)iotHubClientHandle;
@@ -714,6 +726,10 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat, __FAILURE__);
 
     REGISTER_GLOBAL_MOCK_HOOK(URL_Encode, my_URL_Encode);
+    REGISTER_GLOBAL_MOCK_HOOK(URL_EncodeString, my_URL_EncodeString);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(URL_EncodeString, NULL);
+    REGISTER_GLOBAL_MOCK_HOOK(URL_DecodeString, my_URL_DecodeString);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(URL_DecodeString, NULL);
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_GetOption, my_IoTHubClient_LL_GetOption);
 
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Get_DeviceKey, TEST_DEVICE_KEY);
@@ -974,7 +990,7 @@ static void setup_IoTHubTransport_MQTT_Common_Create_mocks(bool use_gateway, con
         .IgnoreArgument(1).SetReturn(TEST_SMALL_TIME_T);
 }
 
-static void setup_message_recv_with_properties_mocks(bool has_content_type, bool has_content_encoding)
+static void setup_message_recv_with_properties_mocks(bool has_content_type, bool has_content_encoding, bool auto_decode)
 {
     STRICT_EXPECTED_CALL(mqttmessage_getTopicName(TEST_MQTT_MESSAGE_HANDLE)).SetReturn(TEST_MQTT_MSG_TOPIC_W_1_PROP);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
@@ -995,7 +1011,16 @@ static void setup_message_recv_with_properties_mocks(bool has_content_type, bool
             .SetReturn("%24.ct=application/json");
         STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+        if (auto_decode)
+        {
+            STRICT_EXPECTED_CALL(URL_DecodeString(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+        }
         STRICT_EXPECTED_CALL(IoTHubMessage_SetContentTypeSystemProperty(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        if (auto_decode)
+        {
+            STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        }
         STRICT_EXPECTED_CALL(free(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(free(IGNORED_NUM_ARG));
     }
@@ -1009,7 +1034,16 @@ static void setup_message_recv_with_properties_mocks(bool has_content_type, bool
             .SetReturn("%24.ce=utf8");
         STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+        if (auto_decode)
+        {
+            STRICT_EXPECTED_CALL(URL_DecodeString(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+        }
         STRICT_EXPECTED_CALL(IoTHubMessage_SetContentEncodingSystemProperty(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        if (auto_decode)
+        {
+            STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        }
         STRICT_EXPECTED_CALL(free(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(free(IGNORED_NUM_ARG));
     }
@@ -1022,11 +1056,23 @@ static void setup_message_recv_with_properties_mocks(bool has_content_type, bool
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)).IgnoreArgument_size();
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)).IgnoreArgument_size();
+    if (auto_decode)
+    {
+        STRICT_EXPECTED_CALL(URL_DecodeString(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(URL_DecodeString(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+    }
 
     STRICT_EXPECTED_CALL(Map_AddOrUpdate(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument_handle()
         .IgnoreArgument_key()
         .IgnoreArgument_value();
+    if (auto_decode)
+    {
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    }
 
     STRICT_EXPECTED_CALL(gballoc_free(NULL)).IgnoreArgument_ptr();
     STRICT_EXPECTED_CALL(gballoc_free(NULL)).IgnoreArgument_ptr();
@@ -1061,6 +1107,8 @@ static void setup_initialize_reconnection_mocks()
     STRICT_EXPECTED_CALL(retry_control_should_retry(TEST_RETRY_CONTROL_HANDLE, IGNORED_PTR_ARG))
         .CopyOutArgumentBuffer_retry_action(&retry_action, sizeof(retry_action));
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(xio_retrieveoptions(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(xio_destroy(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
@@ -1068,6 +1116,8 @@ static void setup_initialize_reconnection_mocks()
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(NULL);
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
+    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
     EXPECTED_CALL(mqtt_client_connect(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
@@ -1169,6 +1219,7 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(
     const char* content_encoding,
     const char* diag_id,
     const char* creation_time_utc,
+    bool auto_urlencode,
     const char* output_name)
 {
     TEST_DIAG_DATA.diagnosticId = (char*)diag_id;
@@ -1191,6 +1242,7 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(
     }
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_construct(TEST_MQTT_EVENT_TOPIC)).IgnoreArgument(1);
+    //Add Properties
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(msg_handle));
     if (propCount == 0)
     {
@@ -1203,11 +1255,48 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(
             .CopyOutArgumentBuffer(2, &ppKeys, sizeof(ppKeys))
             .CopyOutArgumentBuffer(3, &ppValues, sizeof(ppValues))
             .CopyOutArgumentBuffer(4, &propCount, sizeof(propCount));
+        
+        for (size_t i=0; i < propCount; i++)
+        {
+            if (auto_urlencode)
+            {
+                STRICT_EXPECTED_CALL(URL_EncodeString((const char*)ppKeys[i]));
+                STRICT_EXPECTED_CALL(URL_EncodeString((const char*)ppValues[i]));
+                STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+                STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+                STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+                STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+            }
+        }
     }
     STRICT_EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_PTR_ARG)).SetReturn(core_id);
+    if (auto_urlencode && (core_id != NULL))
+    {
+        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    }
     STRICT_EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG)).SetReturn(msg_id);
+    if (auto_urlencode && (msg_id != NULL))
+    {
+        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    }
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentTypeSystemProperty(IGNORED_PTR_ARG)).SetReturn(content_type);
+    if (auto_urlencode && (content_type != NULL))
+    {
+        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    }
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentEncodingSystemProperty(IGNORED_PTR_ARG)).SetReturn(content_encoding);
+    if (auto_urlencode && (content_encoding != NULL))
+    {
+        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    }
     STRICT_EXPECTED_CALL(IoTHubMessage_GetDiagnosticPropertyData(IGNORED_PTR_ARG)).SetReturn(&TEST_DIAG_DATA);
 
     bool validMessage = true;
@@ -1224,6 +1313,7 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(
         validMessage = false;
     }
 
+    //Publish
     if (validMessage)
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_GetOutputName(IGNORED_PTR_ARG)).SetReturn(output_name);
@@ -3971,7 +4061,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_1_event_item_succeeds)
     IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
     umock_c_reset_all_calls();
 
-    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(NULL, NULL, 0, TEST_IOTHUB_MSG_BYTEARRAY, false, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(NULL, NULL, 0, TEST_IOTHUB_MSG_BYTEARRAY, false, NULL, NULL, NULL, NULL, NULL, NULL, false, NULL);
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -4008,7 +4098,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_1_event_item_fail)
     IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
     umock_c_reset_all_calls();
 
-    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(NULL, NULL, 0, TEST_IOTHUB_MSG_BYTEARRAY, false, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(NULL, NULL, 0, TEST_IOTHUB_MSG_BYTEARRAY, false, NULL, NULL, NULL, NULL, NULL, NULL, false, NULL);
 
     umock_c_negative_tests_snapshot();
 
@@ -4068,7 +4158,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_1_event_item_with_properti
     IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
     umock_c_reset_all_calls();
 
-    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks((const char* const**)&keys, (const char* const**)&values, propCount, TEST_IOTHUB_MSG_BYTEARRAY, false, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks((const char* const**)&keys, (const char* const**)&values, propCount, TEST_IOTHUB_MSG_BYTEARRAY, false, NULL, NULL, NULL, NULL, NULL, NULL, false, NULL);
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -4109,7 +4199,93 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_1_event_item_with_2_proper
     IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
     umock_c_reset_all_calls();
 
-    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks((const char* const**)&keys, (const char* const**)&values, propCount, TEST_IOTHUB_MSG_BYTEARRAY, false, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks((const char* const**)&keys, (const char* const**)&values, propCount, TEST_IOTHUB_MSG_BYTEARRAY, false, NULL, NULL, NULL, NULL, NULL, NULL, false, NULL);
+
+    // act
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_1_event_item_with_properties_succeeds_autoencode)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, NULL);
+
+    QOS_VALUE QosValue[] = { DELIVER_AT_LEAST_ONCE };
+    SUBSCRIBE_ACK suback;
+    suback.packetId = 1234;
+    suback.qosCount = 1;
+    suback.qosReturn = QosValue;
+
+    g_nullMapVariable = false;
+
+    const size_t propCount = 1;
+    const char* keys[1] = { "propKey1" };
+    const char* values[1] = { "propValue1" };
+
+    IOTHUB_MESSAGE_LIST message1;
+    memset(&message1, 0, sizeof(IOTHUB_MESSAGE_LIST));
+    message1.messageHandle = TEST_IOTHUB_MSG_BYTEARRAY;
+
+    DList_InsertTailList(config.waitingToSend, &(message1.entry));
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    bool urlencode = true;
+    IoTHubTransport_MQTT_Common_SetOption(handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlencode);
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_SUBSCRIBE_ACK, &suback, g_callbackCtx);
+    setup_initialize_connection_mocks();
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+    umock_c_reset_all_calls();
+
+    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks((const char* const**)&keys, (const char* const**)&values, propCount, TEST_IOTHUB_MSG_BYTEARRAY, false, NULL, NULL, NULL, NULL, NULL, NULL, true, NULL);
+
+    // act
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_1_event_item_with_2_properties_succeeds_autoencode)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, NULL);
+
+    QOS_VALUE QosValue[] = { DELIVER_AT_LEAST_ONCE };
+    SUBSCRIBE_ACK suback;
+    suback.packetId = 1234;
+    suback.qosCount = 1;
+    suback.qosReturn = QosValue;
+
+    g_nullMapVariable = false;
+
+    const size_t propCount = 2;
+    const char* keys[2] = { "propKey1", "propKey2" };
+    const char* values[2] = { "propValue1", "propValue2" };
+
+    IOTHUB_MESSAGE_LIST message1;
+    memset(&message1, 0, sizeof(IOTHUB_MESSAGE_LIST));
+    message1.messageHandle = TEST_IOTHUB_MSG_BYTEARRAY;
+
+    DList_InsertTailList(config.waitingToSend, &(message1.entry));
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    bool urlencode = true;
+    IoTHubTransport_MQTT_Common_SetOption(handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlencode);
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_SUBSCRIBE_ACK, &suback, g_callbackCtx);
+    setup_initialize_connection_mocks();
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+    umock_c_reset_all_calls();
+
+    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks((const char* const**)&keys, (const char* const**)&values, propCount, TEST_IOTHUB_MSG_BYTEARRAY, false, NULL, NULL, NULL, NULL, NULL, NULL, true, NULL);
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -4191,7 +4367,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_resend_message_succeeds)
         .IgnoreArgument(1)
         .CopyOutArgumentBuffer(2, &g_current_ms, sizeof(g_current_ms));
     g_current_ms += 5*60*1000;
-    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(NULL, NULL, 0, TEST_IOTHUB_MSG_STRING, true, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(NULL, NULL, 0, TEST_IOTHUB_MSG_STRING, true, NULL, NULL, NULL, NULL, NULL, NULL, false, NULL);
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -4440,7 +4616,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_1_event_item_STRING_type_s
     IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
     umock_c_reset_all_calls();
 
-    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(NULL, NULL, 0, TEST_IOTHUB_MSG_STRING, false, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(NULL, NULL, 0, TEST_IOTHUB_MSG_STRING, false, NULL, NULL, NULL, NULL, NULL, NULL, false, NULL);
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -4481,7 +4657,45 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_message_system_properties_
     umock_c_reset_all_calls();
 
     setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(NULL, NULL, 0, TEST_IOTHUB_MSG_STRING, false, 
-        "msg_id", "core_id", TEST_CONTENT_TYPE, TEST_CONTENT_ENCODING, TEST_DIAG_ID, TEST_DIAG_CREATION_TIME_UTC, TEST_OUTPUT_NAME);
+        "msg_id", "core_id", TEST_CONTENT_TYPE, TEST_CONTENT_ENCODING, TEST_DIAG_ID, TEST_DIAG_CREATION_TIME_UTC, false, TEST_OUTPUT_NAME);
+
+    // act
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_message_system_properties_succeeds_autoencode)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, NULL);
+
+    QOS_VALUE QosValue[] = { DELIVER_AT_LEAST_ONCE };
+    SUBSCRIBE_ACK suback;
+    suback.packetId = 1234;
+    suback.qosCount = 1;
+    suback.qosReturn = QosValue;
+
+    IOTHUB_MESSAGE_LIST message2;
+    memset(&message2, 0, sizeof(IOTHUB_MESSAGE_LIST));
+    message2.messageHandle = TEST_IOTHUB_MSG_STRING;
+
+    DList_InsertTailList(config.waitingToSend, &(message2.entry));
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    bool urlencode = true;
+    IoTHubTransport_MQTT_Common_SetOption(handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlencode);
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_SUBSCRIBE_ACK, &suback, g_callbackCtx);
+    setup_initialize_connection_mocks();
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+    umock_c_reset_all_calls();
+
+    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(NULL, NULL, 0, TEST_IOTHUB_MSG_STRING, false,
+        "msg_id", "core_id", TEST_CONTENT_TYPE, TEST_CONTENT_ENCODING, TEST_DIAG_ID, TEST_DIAG_CREATION_TIME_UTC, true, NULL);
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -4518,7 +4732,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_message_incomplete_diagnos
     umock_c_reset_all_calls();
 
     setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(NULL, NULL, 0, TEST_IOTHUB_MSG_STRING, false,
-        NULL, NULL, NULL, NULL, TEST_DIAG_ID, NULL, NULL);
+        NULL, NULL, NULL, NULL, TEST_DIAG_ID, NULL, false, NULL);
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -5231,6 +5445,76 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_sys_Properties_succee
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_sys_Properties_succeed_autodecode)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, NULL);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    bool urlencode = true;
+    IoTHubTransport_MQTT_Common_SetOption(handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlencode);
+    g_tokenizerIndex = 6;
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(mqttmessage_getTopicName(TEST_MQTT_MESSAGE_HANDLE)).SetReturn(TEST_MQTT_MSG_TOPIC_W_1_PROP);
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        .SetReturn(NULL);
+    STRICT_EXPECTED_CALL(mqttmessage_getApplicationMsg(TEST_MQTT_MESSAGE_HANDLE));
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(appMessage, appMsgSize));
+    STRICT_EXPECTED_CALL(STRING_construct(TEST_MQTT_MSG_TOPIC_W_1_PROP));
+    EXPECTED_CALL(STRING_TOKENIZER_create(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MSG_BYTEARRAY));
+    STRICT_EXPECTED_CALL(STRING_new());
+
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&"))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn("iothub-ack=Full");
+
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(URL_DecodeString(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&"))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        .IgnoreArgument(3);
+    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        .IgnoreArgument_size();
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_MessageCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_PTR_ARG))
+        .IgnoreArgument_message_data();
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+        .IgnoreArgument_iotHubMessageHandle();
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument_ptr();
+
+    // act
+    ASSERT_IS_NOT_NULL(g_fnMqttMsgRecv);
+    g_fnMqttMsgRecv(TEST_MQTT_MESSAGE_HANDLE, g_callbackCtx);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
 /* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_054: [ If type is IOTHUB_TYPE_DEVICE_TWIN, then on success if msg_type is RETRIEVE_PROPERTIES then mqtt_notification_callback shall call IoTHubClient_LL_RetrievePropertyComplete... ]*/
 // Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_012: [ If type is IOTHUB_TYPE_TELEMETRY and the system property `$.ct` is defined, its value shall be set on the IOTHUB_MESSAGE_HANDLE's ContentType property ]
 // Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_013: [ If type is IOTHUB_TYPE_TELEMETRY and the system property `$.ce` is defined, its value shall be set on the IOTHUB_MESSAGE_HANDLE's ContentEncoding property ]
@@ -5245,7 +5529,33 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_Properties_succeed)
     IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
     umock_c_reset_all_calls();
 
-    setup_message_recv_with_properties_mocks(true, true);
+    setup_message_recv_with_properties_mocks(true, true, false);
+
+    // act
+    ASSERT_IS_NOT_NULL(g_fnMqttMsgRecv);
+    g_fnMqttMsgRecv(TEST_MQTT_MESSAGE_HANDLE, g_callbackCtx);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_Properties_succeed_autodecode)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, NULL);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    bool urlencode = true;
+    IoTHubTransport_MQTT_Common_SetOption(handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlencode);
+    g_tokenizerIndex = 4;
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+    umock_c_reset_all_calls();
+
+    setup_message_recv_with_properties_mocks(true, true, true);
 
     // act
     ASSERT_IS_NOT_NULL(g_fnMqttMsgRecv);
@@ -5273,7 +5583,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_Properties_fail)
     IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
     umock_c_reset_all_calls();
 
-    setup_message_recv_with_properties_mocks(false, false);
+    setup_message_recv_with_properties_mocks(false, false, false);
 
     umock_c_negative_tests_snapshot();
 
@@ -5293,6 +5603,53 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_Properties_fail)
         char tmp_msg[64];
         sprintf(tmp_msg, "g_fnMqttMsgRecv failure in test %zu/%zu", index, count);
         
+        g_fnMqttMsgRecv(TEST_MQTT_MESSAGE_HANDLE, g_callbackCtx);
+    }
+
+    // assert
+
+    //cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+    umock_c_negative_tests_deinit();
+}
+
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_Properties_fail_autodecode)
+{
+    // arrange
+    int negativeTestsInitResult = umock_c_negative_tests_init();
+    ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
+
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, NULL);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    bool urlencode = true;
+    IoTHubTransport_MQTT_Common_SetOption(handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlencode);
+    g_tokenizerIndex = 6;
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+    umock_c_reset_all_calls();
+
+    setup_message_recv_with_properties_mocks(false, false, true);
+
+    umock_c_negative_tests_snapshot();
+
+    // act
+    // size_t calls_cannot_fail[] = { 0, 1, 8, 13, 14, 16, 17, 18, 19, 21, 22, 23, 25 };
+    size_t calls_cannot_fail[] = { 0, 1, 2, 9, 14, 15, 17, 18, 19, 20, 22, 23, 24, 26 };
+    size_t count = umock_c_negative_tests_call_count();
+    for (size_t index = 0; index < count; index++)
+    {
+        if (should_skip_index(index, calls_cannot_fail, sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0])) != 0)
+        {
+            continue;
+        }
+
+        umock_c_negative_tests_reset();
+        umock_c_negative_tests_fail_call(index);
+
+        char tmp_msg[64];
+        sprintf(tmp_msg, "g_fnMqttMsgRecv failure in test %zu/%zu", index, count);
+
         g_fnMqttMsgRecv(TEST_MQTT_MESSAGE_HANDLE, g_callbackCtx);
     }
 

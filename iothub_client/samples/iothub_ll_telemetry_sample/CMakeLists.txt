@@ -11,7 +11,6 @@ compileAsC99()
 
 set(iothub_c_files
     iothub_ll_telemetry_sample.c
-    ${PROJECT_SOURCE_DIR}/certs/certs.c
 )
 
 IF(WIN32)
@@ -19,7 +18,12 @@ IF(WIN32)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 ENDIF(WIN32)
 
-include_directories(${PROJECT_SOURCE_DIR}/certs)
+#Conditionally use the SDK trusted certs in the samples
+if(${use_sample_trusted_cert})
+    add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
+    include_directories(${PROJECT_SOURCE_DIR}/certs)
+    set(iothub_c_files ${iothub_c_files} ${PROJECT_SOURCE_DIR}/certs/certs.c)
+endif()
 
 include_directories(.)
 

@@ -7,21 +7,22 @@ compileAsC99()
 
 set(prov_dev_client_sample_c_files
     prov_dev_client_sample.c
-    ../../../certs/certs.c
 )
 
 set(prov_dev_client_sample_h_files
 )
 
-if(${use_openssl})
-    add_definitions(-DUSE_OPENSSL)
-endif()
-
 IF(WIN32)
     #windows needs this define
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-    add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
 ENDIF(WIN32)
+
+#Conditionally use the SDK trusted certs in the samples
+if(${use_sample_trusted_cert})
+    add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
+    include_directories(${PROJECT_SOURCE_DIR}/certs)
+    set(prov_dev_client_sample_c_files ${prov_dev_client_sample_c_files} ${PROJECT_SOURCE_DIR}/certs/certs.c)
+endif()
 
 include_directories(.)
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})
@@ -38,6 +39,7 @@ target_link_libraries(prov_dev_client_sample
     iothub_client_amqp_transport)
 
 if(${use_openssl})
+    add_definitions(-DUSE_OPENSSL)
     if (WIN32)
         target_link_libraries(prov_dev_client_sample $ENV{OpenSSLDir}/lib/ssleay32.lib $ENV{OpenSSLDir}/lib/libeay32.lib)
         file(COPY $ENV{OpenSSLDir}/bin/libeay32.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)

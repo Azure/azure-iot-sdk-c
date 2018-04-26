@@ -56,7 +56,7 @@ MOCKABLE_FUNCTION(, void*, from_json_mock, JSON_Object*, root_object);
 
 #undef ENABLE_MOCKS
 
-#include "provisioning_sc_shared_helpers.h"
+#include "prov_service_client/provisioning_sc_shared_helpers.h"
 
 static TEST_MUTEX_HANDLE g_testByTest;
 static TEST_MUTEX_HANDLE g_dllByDll;

@@ -97,30 +97,26 @@ void iothub_client_sample_upload_to_blob_multi_block_run(void)
         }
         else
         {
-            if (IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_TRUSTED_CERT, certificates) != IOTHUB_CLIENT_OK)
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+            (void)IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_TRUSTED_CERT, certificates);
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
+            HTTP_PROXY_OPTIONS http_proxy_options = {0};
+            http_proxy_options.host_address = proxyHost;
+            http_proxy_options.port = proxyPort;
+
+            if (proxyHost != NULL && IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_HTTP_PROXY, &http_proxy_options) != IOTHUB_CLIENT_OK)
             {
-                (void)printf("failure in IoTHubClient_LL_SetOption (TrustedCerts)");
+                (void)printf("failure to set proxy\n");
             }
             else
             {
-                HTTP_PROXY_OPTIONS http_proxy_options = {0};
-                http_proxy_options.host_address = proxyHost;
-                http_proxy_options.port = proxyPort;
-
-                if (proxyHost != NULL && IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_HTTP_PROXY, &http_proxy_options) != IOTHUB_CLIENT_OK)
+                if (IoTHubClient_LL_UploadMultipleBlocksToBlobEx(iotHubClientHandle, "subdir/hello_world_mb.txt", getDataCallback, NULL) != IOTHUB_CLIENT_OK)
                 {
-                    (void)printf("failure to set proxy\n");
+                    (void)printf("hello world failed to upload\n");
                 }
                 else
                 {
-                    if (IoTHubClient_LL_UploadMultipleBlocksToBlobEx(iotHubClientHandle, "subdir/hello_world_mb.txt", getDataCallback, NULL) != IOTHUB_CLIENT_OK)
-                    {
-                        (void)printf("hello world failed to upload\n");
-                    }
-                    else
-                    {
-                        (void)printf("hello world has been created\n");
-                    }
+                    (void)printf("hello world has been created\n");
                 }
             }
             IoTHubClient_LL_Destroy(iotHubClientHandle);

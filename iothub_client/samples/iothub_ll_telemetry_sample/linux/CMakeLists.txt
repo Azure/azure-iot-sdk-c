@@ -17,6 +17,10 @@ set(iothub_c_files
     ../../../../certs/certs.c
 )
 
+add_definitions(-DUSE_HTTP)
+add_definitions(-DUSE_AMQP)
+add_definitions(-DUSE_MQTT)
+
 add_executable(iothub_ll_telemetry_sample ${iothub_c_files})
 
 target_link_libraries(iothub_ll_telemetry_sample

@@ -7,11 +7,11 @@
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/gballoc.h"
 
-#include "provisioning_sc_attestation_mechanism.h"
-#include "provisioning_sc_tpm_attestation.h"
-#include "provisioning_sc_x509_attestation.h"
-#include "provisioning_sc_json_const.h"
-#include "provisioning_sc_shared_helpers.h"
+#include "prov_service_client/provisioning_sc_attestation_mechanism.h"
+#include "prov_service_client/provisioning_sc_tpm_attestation.h"
+#include "prov_service_client/provisioning_sc_x509_attestation.h"
+#include "prov_service_client/provisioning_sc_json_const.h"
+#include "prov_service_client/provisioning_sc_shared_helpers.h"
 #include "parson.h"
 
 DEFINE_ENUM_STRINGS(ATTESTATION_TYPE, ATTESTATION_TYPE_VALUES)

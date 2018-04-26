@@ -51,6 +51,8 @@ set(hsm_type_custom OFF CACHE BOOL "hsm type of custom used with the Provisionin
 set(hsm_custom_lib "" CACHE STRING "Full path to custom HSM repo library")
 set(run_sfc_tests OFF CACHE BOOL "setup the Service Fault tests")
 
+set(use_wolfssl)
+
 #the following variables are project-wide and can be used with cmake-gui
 option(use_amqp "set use_amqp to ON if amqp is to be used, set to OFF to not use amqp" ON)
 option(use_http "set use_http to ON if http is to be used, set to OFF to not use http" ON)
@@ -68,7 +70,6 @@ option(build_javawrapper "builds the native iothub_client library for java C wra
 option(dont_use_uploadtoblob "set dont_use_uploadtoblob to ON if the functionality of upload to blob is to be excluded, OFF otherwise. It requires HTTP" OFF)
 option(no_logging "disable logging" OFF)
 option(use_installed_dependencies "set use_installed_dependencies to ON to use installed packages instead of building dependencies from submodules" OFF)
-option(use_firmware_update "build the Raspberry PI firmware_update sample" OFF)
 option(build_as_dynamic "build the IoT SDK libaries as dynamic"  OFF)
 option(build_network_e2e "build network E2E tests" OFF)
 option(use_prov_client "Enable provisioning client" OFF)
@@ -87,10 +88,10 @@ else()
 endif()
 
 #openssl samples on Windows need to have a trusted cert set
-if(WIN32 AND ${use_openssl})
-    option(set_trusted_cert_in_samples "set set_trusted_cert_in_samples to ON to have the samples set the SDK's built-in CA as TrustedCerts" ON)
+if("${use_openssl}" OR "${use_wolfssl}")
+    option(use_sample_trusted_cert "Set flag in samples to use SDK's built-in CA as TrustedCerts" ON)
 else()
-    option(set_trusted_cert_in_samples "set set_trusted_cert_in_samples to ON to have the samples set the SDK's built-in CA as TrustedCerts" OFF)
+    option(use_sample_trusted_cert "Set flag in samples to use SDK's built-in CA as TrustedCerts" OFF)
 endif()
 
 # Set Provisioning Information
@@ -127,6 +128,15 @@ endif()
 
 #Use solution folders.
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+# build the parson library for json parsing
+add_library(parson
+    ./deps/parson/parson.c
+    ./deps/parson/parson.h
+)
+if(MSVC)
+    set_source_files_properties(../deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
+endif()
 
 if(IN_OPENWRT)
     ADD_DEFINITIONS("$ENV{TARGET_LDFLAGS}" "$ENV{TARGET_CPPFLAGS}" "$ENV{TARGET_CFLAGS}")
@@ -212,7 +222,7 @@ message(STATUS "iothub architecture: ${ARCHITECTURE}")
 
 macro(compileAsC99)
   if (CMAKE_VERSION VERSION_LESS "3.1")
-    if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
       set (CMAKE_C_FLAGS "--std=c99 ${CMAKE_C_FLAGS}")
     if (NOT IN_OPENWRT)
       set (CMAKE_CXX_FLAGS "--std=c++11 ${CMAKE_CXX_FLAGS}")
@@ -226,7 +236,7 @@ endmacro(compileAsC99)
 
 macro(compileAsC11)
   if (CMAKE_VERSION VERSION_LESS "3.1")
-    if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
       set (CMAKE_C_FLAGS "--std=c11 ${CMAKE_C_FLAGS}")
       set (CMAKE_C_FLAGS "-D_POSIX_C_SOURCE=200112L ${CMAKE_C_FLAGS}")
       set (CMAKE_CXX_FLAGS "--std=c++11 ${CMAKE_CXX_FLAGS}")
@@ -332,6 +342,12 @@ if(${use_installed_dependencies})
         DESTINATION
             ${package_location}
     )
+else()
+    install(FILES ${parson_h_install_files}
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
+    install(TARGETS ${parson_install_libs}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
 
 if (${build_network_e2e})

@@ -55,8 +55,8 @@ MOCKABLE_FUNCTION(, JSON_Array*, json_object_get_array, const JSON_Object*, obje
 
 #undef ENABLE_MOCKS
 
-#include "provisioning_sc_device_registration_state.h"
-#include "provisioning_sc_json_const.h"
+#include "prov_service_client/provisioning_sc_device_registration_state.h"
+#include "prov_service_client/provisioning_sc_json_const.h"
 
 static TEST_MUTEX_HANDLE g_testByTest;
 static TEST_MUTEX_HANDLE g_dllByDll;

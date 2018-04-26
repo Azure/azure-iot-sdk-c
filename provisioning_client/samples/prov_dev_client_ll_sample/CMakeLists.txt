@@ -7,7 +7,6 @@ compileAsC99()
 
 set(prov_dev_client_ll_sample_c_files
     prov_dev_client_ll_sample.c
-    ../../../certs/certs.c
 )
 
 set(prov_dev_client_ll_sample_h_files
@@ -18,6 +17,12 @@ IF(WIN32)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
     add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
 ENDIF(WIN32)
+
+if(${use_sample_trusted_cert})
+    add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
+    include_directories(${PROJECT_SOURCE_DIR}/certs)
+    set(prov_dev_client_ll_sample_c_files ${prov_dev_client_ll_sample_c_files} ${PROJECT_SOURCE_DIR}/certs/certs.c)
+endif()
 
 include_directories(.)
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})

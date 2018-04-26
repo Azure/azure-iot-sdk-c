@@ -97,16 +97,10 @@ set(PROV_DEVICE_CLIENT_SOURCE_H_FILES
     ./inc/azure_prov_client/prov_device_client.h)
 
 set(PROV_DEVICE_LL_CLIENT_SOURCE_C_FILES
-    ./src/prov_device_ll_client.c
-    ../deps/parson/parson.c)
+    ./src/prov_device_ll_client.c)
 
 set(PROV_DEVICE_LL_CLEINT_SOURCE_H_FILES
-    ./inc/azure_prov_client/prov_device_ll_client.h
-    ../deps/parson/parson.h)
-
-if(MSVC)
-    set_source_files_properties(../deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
-endif()
+    ./inc/azure_prov_client/prov_device_ll_client.h)
 
 set(DEV_AUTH_MODULES_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client lib" FORCE)
 
@@ -138,7 +132,6 @@ target_link_libraries(hsm_security_client ${HSM_CLIENT_LIBRARY})
 set(provisioning_libs ${provisioning_libs} hsm_security_client)
 set(provisioning_headers ${provisioning_headers} ${HSM_CLIENT_H_FILES})
 
-
 add_library(prov_auth_client ${AUTH_CLIENT_C_FILES} ${AUTH_CLIENT_H_FILES})
 setSdkTargetBuildProperties(prov_auth_client)
 linkSharedUtil(prov_auth_client)
@@ -152,24 +145,44 @@ linkSharedUtil(prov_device_ll_client)
 link_security_client(prov_device_ll_client)
 set(provisioning_libs ${provisioning_libs} prov_device_ll_client)
 set(provisioning_headers ${provisioning_headers} ${PROV_DEVICE_LL_CLEINT_SOURCE_H_FILES})
+target_link_libraries(prov_device_ll_client parson)
 
 add_library(prov_device_client ${PROV_DEVICE_CLIENT_SOURCE_C_FILES} ${PROV_DEVICE_CLIENT_SOURCE_H_FILES})
 setSdkTargetBuildProperties(prov_device_client)
 target_link_libraries(prov_device_client  prov_device_ll_client)
 set(provisioning_libs ${provisioning_libs} prov_device_client)
 set(provisioning_headers ${provisioning_headers} ${PROV_DEVICE_CLIENT_SOURCE_H_FILES})
+target_link_libraries(prov_device_client parson)
 
 if (${build_as_dynamic})
     add_library(prov_device_client_dll SHARED
         ${PROV_DEVICE_CLIENT_SOURCE_C_FILES} 
         ${PROV_DEVICE_CLEINT_SOURCE_H_FILES}
+        ${PROV_DEVICE_LL_CLIENT_SOURCE_C_FILES}
+        ${PROV_DEVICE_LL_CLEINT_SOURCE_H_FILES}
         ./src/prov_device_client_dll.def
     )
-    target_link_libraries(prov_device_client_dll prov_device_ll_client)
+    linkSharedUtil(prov_device_client_dll)
+    target_link_libraries(prov_device_client_dll prov_device_ll_client parson)
 
     if(NOT WIN32)
         set_target_properties(prov_device_client_dll PROPERTIES OUTPUT_NAME "prov_device_client")
     endif()
+    set_target_properties(prov_device_client_dll PROPERTIES
+        OUTPUT_NAME "prov_device_client"
+        ARCHIVE_OUTPUT_NAME "prov_device_client_dll_import"
+        ENABLE_EXPORTS YES
+        PDB_NAME "prov_device_client_dll"
+        VERSION ${PROV_SDK_VERSION}
+        SOVERSION ${PROV_SDK_VERSION_MAJOR}
+        BUILD_WITH_INSTALL_RPATH TRUE
+    )
+    if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
+        target_link_libraries(prov_device_client_dll
+            "-Wl,--exclude-libs,libparson.a"
+        )
+    endif()
+    set(provisioning_libs ${provisioning_libs} prov_device_client_dll)
 endif()
 
 if (${use_http})
@@ -314,5 +327,18 @@ if(${use_installed_dependencies})
         DESTINATION
             ${package_location}
     )
+else()
+    # Install Provisioning libs
+    if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
+        set(CMAKE_INSTALL_LIBDIR "lib")
+    endif()
 
+    install(FILES ${provisioning_headers} 
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azure_prov_client)
+    install(TARGETS ${provisioning_libs}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/../bin
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    )
 endif()

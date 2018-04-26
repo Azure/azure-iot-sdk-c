@@ -27,9 +27,9 @@ void real_free(void* ptr)
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
-#include "provisioning_sc_shared_helpers.h"
-#include "provisioning_sc_enrollment.h"
-#include "provisioning_sc_device_registration_state.h"
+#include "prov_service_client/provisioning_sc_shared_helpers.h"
+#include "prov_service_client/provisioning_sc_enrollment.h"
+#include "prov_service_client/provisioning_sc_device_registration_state.h"
 #include "parson.h"
 
 #include "azure_c_shared_utility/umock_c_prod.h"
@@ -56,9 +56,9 @@ MOCKABLE_FUNCTION(, JSON_Array*, json_object_get_array, const JSON_Object*, obje
 
 #undef ENABLE_MOCKS
 
-#include "provisioning_sc_query.h"
-#include "provisioning_sc_models_serializer.h"
-#include "provisioning_sc_json_const.h"
+#include "prov_service_client/provisioning_sc_query.h"
+#include "prov_service_client/provisioning_sc_models_serializer.h"
+#include "prov_service_client/provisioning_sc_json_const.h"
 
 static TEST_MUTEX_HANDLE g_testByTest;
 static TEST_MUTEX_HANDLE g_dllByDll;
