@@ -9,15 +9,16 @@
 #include "azure_c_shared_utility/optionhandler.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
 #include "iothub_client_ll.h"
+#include "azure_c_shared_utility/const_defines.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-static const char* RETRY_CONTROL_OPTION_INITIAL_WAIT_TIME_IN_SECS = "initial_wait_time_in_secs";
-static const char* RETRY_CONTROL_OPTION_MAX_JITTER_PERCENT = "max_jitter_percent";
-static const char* RETRY_CONTROL_OPTION_SAVED_OPTIONS = "retry_control_saved_options";
+static STATIC_VAR_UNUSED const char* RETRY_CONTROL_OPTION_INITIAL_WAIT_TIME_IN_SECS = "initial_wait_time_in_secs";
+static STATIC_VAR_UNUSED const char* RETRY_CONTROL_OPTION_MAX_JITTER_PERCENT = "max_jitter_percent";
+static STATIC_VAR_UNUSED const char* RETRY_CONTROL_OPTION_SAVED_OPTIONS = "retry_control_saved_options";
 
 typedef enum RETRY_ACTION_TAG
 {
