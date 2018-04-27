@@ -4715,7 +4715,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_mqtt_client_connecting_times_ou
 {
     // arrange
     IOTHUBTRANSPORT_CONFIG config = { 0 };
-    CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };
 
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
 
