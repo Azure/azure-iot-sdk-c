@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include <stdlib.h> 
+#include <stdlib.h>
 #include "azure_c_shared_utility/gballoc.h"
 #include <signal.h>
 #include <stddef.h>
@@ -132,7 +132,7 @@ TRANSPORT_HANDLE  IoTHubTransport_Create(IOTHUB_CLIENT_TRANSPORT_PROVIDER protoc
             }
         }
     }
-    
+
     return result;
 }
 
@@ -203,7 +203,7 @@ static bool find_by_handle(const void* element, const void* value)
 {
     /* data stored at element is device handle */
     const IOTHUB_CLIENT_HANDLE * guess = (const IOTHUB_CLIENT_HANDLE *)element;
-    const IOTHUB_CLIENT_HANDLE match = (const IOTHUB_CLIENT_HANDLE)value;
+    const IOTHUB_CLIENT_HANDLE match = (IOTHUB_CLIENT_HANDLE)value;
     return (*guess == match);
 }
 

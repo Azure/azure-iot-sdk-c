@@ -43,4 +43,4 @@ MOCKABLE_FUNCTION(, int, is_timeout_reached, time_t, start_time, unsigned int, t
 }
 #endif
 
-#endif // IOTHUB_CLIENT_RETRY_CONTROL 
+#endif // IOTHUB_CLIENT_RETRY_CONTROL
