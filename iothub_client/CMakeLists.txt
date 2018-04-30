@@ -341,13 +341,12 @@ IF(WIN32)
     add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
 ENDIF(WIN32)
 
-if(${dont_use_uploadtoblob})
-    set(iothub_def_file ./src/iothub_client_dll_no_upload.def)
-else()
-    set(iothub_def_file ./src/iothub_client_dll.def)
-endif()
-
 if (${build_as_dynamic})
+    set(iothub_def_file ./src/iothub_client_dll.def)
+    if(NOT ${dont_use_uploadtoblob})
+        set(iothub_def_file ${iothub_def_file} ./src/upload_to_blob.def)
+    endif()
+
     add_library(iothub_client_dll SHARED
         ${iothub_client_c_files}
         ${iothub_client_h_files}
