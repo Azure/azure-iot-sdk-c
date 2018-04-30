@@ -341,7 +341,6 @@ static int provisionDevice(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_ACCOUNT_AUTH
         deviceInfo.serviceProperties = NULL;
 
         deviceCreateInfo.deviceId = deviceId;
-        deviceCreateInfo.iotEdge_capable = false;
         if (method == IOTHUB_ACCOUNT_AUTH_CONNSTRING)
         {
             deviceToProvision->howToCreate = IOTHUB_ACCOUNT_AUTH_CONNSTRING;
@@ -468,11 +467,11 @@ static int updateTestModule(IOTHUB_REGISTRYMANAGER_HANDLE iothub_registrymanager
     IOTHUB_REGISTRY_MODULE_UPDATE moduleUpdate;
 
     // Update the auth method type from its initially set NONE to IOTHUB_REGISTRYMANAGER_AUTH_SPK.
+    moduleUpdate.version = IOTHUB_REGISTRY_MODULE_UPDATE_VERSION_1;
     moduleUpdate.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
     moduleUpdate.deviceId = deviceToProvision->deviceId;
     moduleUpdate.primaryKey = "";
     moduleUpdate.secondaryKey = "";
-    moduleUpdate.iotEdge_capable = false;
     moduleUpdate.moduleId = TEST_MODULE_NAME;
     moduleUpdate.status = IOTHUB_DEVICE_STATUS_ENABLED;
 
@@ -498,9 +497,9 @@ static int provisionModule(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_PROVISIONED_
 
     // We set the initial auth type to none, to simulate and test more closely how Edge
     // modules are created.  We'll upgrade this to SPK after creation.
+    moduleCreate.version = IOTHUB_REGISTRY_MODULE_CREATE_VERSION_1;
     moduleCreate.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_NONE;
     moduleCreate.deviceId = deviceToProvision->deviceId;
-    moduleCreate.iotEdge_capable = false;
     moduleCreate.moduleId = TEST_MODULE_NAME;
     moduleCreate.primaryKey = "";
     moduleCreate.secondaryKey = "";
@@ -512,6 +511,7 @@ static int provisionModule(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_PROVISIONED_
     IOTHUB_REGISTRYMANAGER_HANDLE iothub_registrymanager_handle = NULL; 
 
     memset(&moduleInfo, 0, sizeof(moduleInfo));
+    moduleInfo.version = IOTHUB_MODULE_VERSION_1;
 
     if (mallocAndStrcpy_s(&deviceToProvision->moduleId, TEST_MODULE_NAME) != 0)
     {
