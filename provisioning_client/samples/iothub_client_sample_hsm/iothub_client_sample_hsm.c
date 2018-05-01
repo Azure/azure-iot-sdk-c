@@ -110,8 +110,8 @@ int main(void)
                 (void)printf("ERROR: IoTHubClient_LL_SetConnectionStatusCallback..........FAILED!\r\n");
             }
 
-            bool traceOn = true;
-            IoTHubClient_LL_SetOption(iothub_client, "logtrace", &traceOn);
+            //bool traceOn = true;
+            //IoTHubClient_LL_SetOption(iothub_client, OPTION_LOG_TRACE, &traceOn);
             if (g_using_cert)
             {
                 IoTHubClient_LL_SetOption(iothub_client, OPTION_TRUSTED_CERT, certificates);

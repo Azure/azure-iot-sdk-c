@@ -100,6 +100,7 @@ set(PROV_DEVICE_LL_CLIENT_SOURCE_C_FILES
     ./src/prov_device_ll_client.c)
 
 set(PROV_DEVICE_LL_CLEINT_SOURCE_H_FILES
+    ./inc/azure_prov_client/prov_client_const.h
     ./inc/azure_prov_client/prov_device_ll_client.h)
 
 set(DEV_AUTH_MODULES_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client lib" FORCE)
