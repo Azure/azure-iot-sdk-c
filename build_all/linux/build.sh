@@ -74,7 +74,7 @@ process_args ()
       then
         # save the arg to python version
         build_python="$arg"
-        if [ $build_python != "2.7" ] && [ $build_python != "3.4" ] && [ $build_python != "3.5" ] && [$build_python != "3.6"]
+        if [ $build_python != "2.7" ] && [ $build_python != "3.4" ] && [ $build_python != "3.5" ] && [ $build_python != "3.6" ]
         then
           echo "Supported python versions are 2.7, 3.4 or 3.5 or 3.6"
           exit 1
