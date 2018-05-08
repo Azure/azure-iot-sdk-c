@@ -25,7 +25,6 @@ EXPORTS
     IoTHubClient_SetDeviceTwinCallback
     IoTHubClient_SendReportedState
     IoTHubClient_SetDeviceMethodCallback
-    IoTHubClient_UploadToBlobAsync
 
     IoTHubClient_LL_CreateFromConnectionString
     IoTHubClient_LL_ConnectionStatusCallBack
@@ -72,4 +71,3 @@ EXPORTS
     IOTHUB_CLIENT_CONNECTION_STATUS_REASONStrings
     TRANSPORT_TYPEStrings
     DEVICE_TWIN_UPDATE_STATEStrings
-    IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULTStrings

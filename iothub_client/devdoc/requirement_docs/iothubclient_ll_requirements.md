@@ -358,7 +358,6 @@ This function is only called by the lower layers upon receiving a message from I
 
 **SRS_IOTHUBCLIENT_LL_31_140: [** `IoTHubClient_LL_MessageCallbackFromInput` shall send the message disposition as returned by the client to the underlying layer and return `true` if an input queue match is found.** ]**
 
-
 ## IoTHubClient_LL_SetMessageCallback_Ex
 
 ```c
@@ -717,7 +716,6 @@ Handled options are
 **SRS_IOTHUBCLIENT_LL_02_100: [** `x509certificate` - then `value` then is a null terminated string that contains the x509 certificate. **]**
 
 **SRS_IOTHUBCLIENT_LL_02_101: [** `x509privatekey` - then `value` is a null terminated string that contains the x509 privatekey. **]**
-
 
 **SRS_IOTHUBCLIENT_LL_30_000: [** `blob_upload_timeout_secs` - shall set the timeout in seconds for blob transfer operations. **]**
 

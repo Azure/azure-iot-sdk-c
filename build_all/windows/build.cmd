@@ -202,14 +202,14 @@ rem -- build solutions
 rem -----------------------------------------------------------------------------
 
 if %build-samples%==yes (
-    call :build-a-solution "%build-root%\iothub_client\samples\iothub_ll_telemetry_sample\windows\iothub_ll_telemetry_sample.sln"
-    if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+    rem call :build-a-solution "%build-root%\iothub_client\samples\iothub_ll_telemetry_sample\windows\iothub_ll_telemetry_sample.sln"
+    rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
     rem call :build-a-solution "%build-root%\serializer\samples\simplesample_amqp\windows\simplesample_amqp.sln"
     rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
-    call :build-a-solution "%build-root%\serializer\samples\simplesample_http\windows\simplesample_http.sln"
-    if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+    rem call :build-a-solution "%build-root%\serializer\samples\simplesample_http\windows\simplesample_http.sln"
+    rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
     rem call :build-a-solution "%build-root%\serializer\samples\simplesample_mqtt\windows\simplesample_mqtt.sln"
     rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!

@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
     <metadata>
         <id>Microsoft.Azure.IoTHub.AmqpTransport</id>
-        <version>1.1.33</version>
+        <version>1.2.4</version>
         <title>Microsoft Azure IoTHub AMQP transport</title>
         <authors>Microsoft</authors>
         <licenseUrl>https://github.com/Azure/azure-iot-sdk-c/blob/master/LICENSE</licenseUrl>
@@ -15,9 +15,9 @@
         <copyright>© Microsoft Corporation. All rights reserved.</copyright>
         <tags>AMQP Microsoft Azure IoT Native x86 x64 arm native package</tags>
         <dependencies>
-            <dependency id="Microsoft.Azure.Uamqp" version="1.0.52"/>
-            <dependency id="Microsoft.Azure.IoTHub.IoTHubClient" version="1.1.33"/>
-            <dependency id="Microsoft.Azure.C.SharedUtility" version="1.0.52"/>
+            <dependency id="Microsoft.Azure.Uamqp" version="1.2.4"/>
+            <dependency id="Microsoft.Azure.IoTHub.IoTHubClient" version="1.2.4"/>
+            <dependency id="Microsoft.Azure.C.SharedUtility" version="1.1.4"/>
         </dependencies>
     </metadata>
     <files>
@@ -49,5 +49,6 @@
 
         <file src="Microsoft.Azure.IoTHub.AmqpTransport.targets" target="build\native"/>
         <file src="..\..\..\iothub_client\inc\iothubtransportamqp.h" target="build\native\include"/>
+        <file src="..\..\..\iothub_client\inc\iothubtransportamqp_websockets.h" target="build\native\include"/>
     </files>
 </package>

@@ -816,7 +816,7 @@ static STRING_HANDLE addPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_me
             }
             index++;
         }
-       }
+    }
 
     return result;
 }
@@ -2109,7 +2109,7 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             {
                 LogError("mqtt_client timed out waiting for CONNACK");
                 DisconnectFromClient(transport_data);
-                result = 0;
+                result = __FAILURE__;
             }
         }
         else if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_CONNECTED)
