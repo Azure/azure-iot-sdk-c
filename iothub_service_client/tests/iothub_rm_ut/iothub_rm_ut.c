@@ -414,6 +414,7 @@ static const LIST_ITEM_HANDLE TEST_LIST_ITEM_HANDLE = (LIST_ITEM_HANDLE)0x3434;
 static const unsigned int httpStatusCodeOk = 200;
 static const unsigned int httpStatusCodeBadRequest = 400;
 static const unsigned int httpStatusCodeDeviceExists = 409;
+static const unsigned int httpStatusCodeDeviceNotExists = 404;
 static const HTTPAPIEX_HANDLE TEST_HTTPAPIEX_HANDLE = (HTTPAPIEX_HANDLE)0x4343;
 static HTTPAPIEX_SAS_HANDLE TEST_HTTPAPIEX_SAS_HANDLE = (HTTPAPIEX_SAS_HANDLE)0x4444;
 static const HTTP_HEADERS_HANDLE TEST_HTTP_HEADERS_HANDLE = (HTTP_HEADERS_HANDLE)0x4545;
@@ -1801,6 +1802,22 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
     TEST_FUNCTION(IoTHubRegistryManager_GetDevice_happy_path_with_certificate_authority)
     {
         TestGetDevice(IOTHUB_REGISTRYMANAGER_AUTH_X509_CERTIFICATE_AUTHORITY);
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_GetDevice_not_found)
+    {
+        //TestGetDevice(IOTHUB_REGISTRYMANAGER_AUTH_SPK);
+        //arrange
+        setupHttpMockCalls(false, httpStatusCodeDeviceNotExists, HTTPAPI_REQUEST_GET);
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
+
+        //act
+        IOTHUB_DEVICE deviceInfo;
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetDevice(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, &deviceInfo);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_DEVICE_NOT_EXIST, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_031: [ If any of the HTTPAPI call fails IoTHubRegistryManager_GetDevice shall fail and return IOTHUB_REGISTRYMANAGER_ERROR ]*/

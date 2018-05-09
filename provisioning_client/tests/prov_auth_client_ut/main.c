@@ -6,6 +6,6 @@
 int main(void)
 {
     size_t failedTestCount = 0;
-    RUN_TEST_SUITE(dps_sec_client_ut, failedTestCount);
+    RUN_TEST_SUITE(prov_auth_client_ut, failedTestCount);
     return failedTestCount;
 }

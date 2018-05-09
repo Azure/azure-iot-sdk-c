@@ -44,7 +44,7 @@ static void my_gballoc_free(void* ptr)
 #undef ENABLE_MOCKS
 
 #include "hsm_client_tpm.h"
-#include "hsm_client_tpm_abstract.h"
+#include "hsm_client_data.h"
 
 #define ENABLE_MOCKS
 #include "azure_utpm_c/TpmTypes.h"
@@ -979,8 +979,8 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         ASSERT_IS_NOT_NULL(tpm_iface->hsm_client_tpm_destroy);
         ASSERT_IS_NOT_NULL(tpm_iface->hsm_client_get_ek);
         ASSERT_IS_NOT_NULL(tpm_iface->hsm_client_get_srk);
-        ASSERT_IS_NOT_NULL(tpm_iface->hsm_client_import_key);
-        ASSERT_IS_NOT_NULL(tpm_iface->hsm_client_sign_data);
+        ASSERT_IS_NOT_NULL(tpm_iface->hsm_client_activate_identity_key);
+        ASSERT_IS_NOT_NULL(tpm_iface->hsm_client_sign_with_identity);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup

@@ -990,6 +990,11 @@ static IOTHUB_REGISTRYMANAGER_RESULT sendHttpRequestCRUD(IOTHUB_REGISTRYMANAGER_
                         /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_020: [ IoTHubRegistryManager_CreateDevice shall verify the received HTTP status code and if it is 409 then return IOTHUB_REGISTRYMANAGER_DEVICE_EXIST ] */
                         result = IOTHUB_REGISTRYMANAGER_DEVICE_EXIST;
                     }
+                    else if ((iotHubRequestMode == IOTHUB_REQUEST_GET) && (statusCode == 404))
+                    {
+                        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_020: [ IoTHubRegistryManager_CreateDevice shall verify the received HTTP status code and if it is 404 then return IOTHUB_REGISTRYMANAGER_DEVICE_NOT_EXIST ] */
+                        result = IOTHUB_REGISTRYMANAGER_DEVICE_NOT_EXIST;
+                    }
                     else
                     {
                         /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_021: [ IoTHubRegistryManager_CreateDevice shall verify the received HTTP status code and if it is greater than 300 then return IOTHUB_REGISTRYMANAGER_HTTP_STATUS_ERROR ] */
