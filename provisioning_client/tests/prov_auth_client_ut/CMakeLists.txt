@@ -18,4 +18,4 @@ set(${theseTestsName}_c_files
 set(${theseTestsName}_h_files
 )
 
-build_c_test_artifacts(${theseTestsName} ON "tests/azure_dev_auth_tests")
+build_c_test_artifacts(${theseTestsName} ON "tests/azure_prov_device_tests")

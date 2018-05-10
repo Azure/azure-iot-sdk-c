@@ -45,6 +45,7 @@ static const char* DEVICE_KEY = "device_key";
 static const char* SCOPE_NAME = "Scope_name";
 static const char* TEST_SAS_TOKEN = "sas_token";
 static const char* TEST_STRING_VALUE = "Test_string_value";
+static const char* TEST_KEYNAME_VALUE = "Test_keyname_value";
 static size_t TEST_EXPIRY_TIME = 1;
 
 #define TEST_TIME_VALUE                     (time_t)123456
@@ -459,7 +460,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_handle_NULL)
     //arrange
 
     //act
-    char* conn_string = IoTHubClient_Auth_Get_SasToken(NULL, SCOPE_NAME, TEST_EXPIRY_TIME);
+    char* conn_string = IoTHubClient_Auth_Get_SasToken(NULL, SCOPE_NAME, TEST_EXPIRY_TIME, TEST_KEYNAME_VALUE);
 
     //assert
     ASSERT_IS_NULL(conn_string);
@@ -476,7 +477,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_scope_NULL_fail)
     umock_c_reset_all_calls();
 
     //act
-    char* conn_string = IoTHubClient_Auth_Get_SasToken(handle, NULL, TEST_EXPIRY_TIME);
+    char* conn_string = IoTHubClient_Auth_Get_SasToken(handle, NULL, TEST_EXPIRY_TIME, TEST_KEYNAME_VALUE);
 
     //assert
     ASSERT_IS_NULL(conn_string);
@@ -498,7 +499,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_succeed)
     setup_IoTHubClient_Auth_Get_ConnString_mocks();
 
     //act
-    char* conn_string = IoTHubClient_Auth_Get_SasToken(handle, SCOPE_NAME, TEST_EXPIRY_TIME);
+    char* conn_string = IoTHubClient_Auth_Get_SasToken(handle, SCOPE_NAME, TEST_EXPIRY_TIME, NULL);
 
     //assert
     ASSERT_IS_NOT_NULL(conn_string);
@@ -541,7 +542,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_fail)
         sprintf(tmp_msg, "IoTHubClient_Auth_Get_ConnString failure in test %zu/%zu", index, count);
 
         //act
-        char* conn_string = IoTHubClient_Auth_Get_SasToken(handle, SCOPE_NAME, TEST_EXPIRY_TIME);
+        char* conn_string = IoTHubClient_Auth_Get_SasToken(handle, SCOPE_NAME, TEST_EXPIRY_TIME, TEST_KEYNAME_VALUE);
 
         //assert
         ASSERT_IS_NULL(conn_string);

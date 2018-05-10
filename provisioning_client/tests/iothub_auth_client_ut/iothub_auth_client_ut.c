@@ -208,6 +208,7 @@ static void my_STRING_delete(STRING_HANDLE h)
 }
 
 static DEVICE_AUTH_CREDENTIAL_INFO g_test_sas_cred;
+static DEVICE_AUTH_CREDENTIAL_INFO g_test_sas_cred_no_keyname;
 static DEVICE_AUTH_CREDENTIAL_INFO g_test_x509_cred;
 
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
@@ -280,7 +281,13 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         g_test_sas_cred.dev_auth_type = AUTH_TYPE_SAS;
         g_test_sas_cred.sas_info.token_scope = "scope";
         g_test_sas_cred.sas_info.expiry_seconds = 123;
+        g_test_sas_cred.sas_info.key_name = "key_name";
 
+        g_test_sas_cred_no_keyname.dev_auth_type = AUTH_TYPE_SAS;
+        g_test_sas_cred_no_keyname.sas_info.token_scope = "scope";
+        g_test_sas_cred_no_keyname.sas_info.expiry_seconds = 123;
+        g_test_sas_cred_no_keyname.sas_info.key_name = NULL;
+        
         g_test_x509_cred.dev_auth_type = AUTH_TYPE_X509;
     }
 
@@ -599,6 +606,26 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
 
         //act
         void* result = iothub_device_auth_generate_credentials(xda_handle, &g_test_sas_cred);
+
+        //assert
+        ASSERT_IS_NOT_NULL(result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        my_gballoc_free(result);
+        iothub_device_auth_destroy(xda_handle);
+    }
+
+    TEST_FUNCTION(iothub_device_auth_generate_credentials_no_key_succeed)
+    {
+        //arrange
+        IOTHUB_SECURITY_HANDLE xda_handle = iothub_device_auth_create();
+        umock_c_reset_all_calls();
+
+        setup_iothub_device_auth_generate_credentials_mocks();
+
+        //act
+        void* result = iothub_device_auth_generate_credentials(xda_handle, &g_test_sas_cred_no_keyname);
 
         //assert
         ASSERT_IS_NOT_NULL(result);
