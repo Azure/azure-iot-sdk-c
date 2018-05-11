@@ -17,7 +17,7 @@
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/strings_types.h"
 #include "azure_c_shared_utility/httpapiex.h"
-#include "iothub_client_ll.h"
+#include "iothub_client_core_ll.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 
 #ifdef __cplusplus
