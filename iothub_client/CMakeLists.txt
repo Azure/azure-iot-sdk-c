@@ -172,11 +172,15 @@ if(${use_mqtt})
     )
 
     set(iothub_client_mqtt_transport_c_files
+        ./src/iothub_client_authorization.c
+        ./src/iothub_client_retry_control.c
         ./src/iothubtransport_mqtt_common.c
         ./src/iothubtransportmqtt.c
     )
 
     set(iothub_client_mqtt_transport_h_files
+        ./inc/iothub_client_authorization.h
+        ./inc/iothub_client_retry_control.h
         ./inc/iothubtransport_mqtt_common.h
         ./inc/iothubtransportmqtt.h
     )
