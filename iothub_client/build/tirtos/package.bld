@@ -13,9 +13,13 @@ Pkg.generatedFiles.$add("lib/");
 
 var SRCS = [
     "iothub_client.c",
+    "iothub_device_client.c",
+    "iothub_client_core.c",
 	"iothub_client_authorization.c",
 	"iothub_client_diagnostic.c",
     "iothub_client_ll.c",
+    "iothub_device_client_ll.c",
+    "iothub_client_core_ll.c",
     "iothub_message.c",
     "iothubtransporthttp.c",
     "version.c",

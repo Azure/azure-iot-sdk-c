@@ -17,7 +17,7 @@
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/urlencode.h"
 
-#include "iothub_client_ll.h"
+#include "iothub_client_core_ll.h"
 #include "iothub_client_options.h"
 #include "iothub_client_private.h"
 #include "iothub_client_version.h"

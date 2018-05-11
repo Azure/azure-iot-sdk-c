@@ -9,12 +9,13 @@ compileAsC11()
 set(theseTestsName iothubclient_ll_ut)
 
 set(${theseTestsName}_test_files
-${theseTestsName}.c
+    ${theseTestsName}.c
 )
 
+include_directories(${SHARED_UTIL_REAL_TEST_FOLDER})
+
 set(${theseTestsName}_c_files
-../../src/iothub_client_ll.c
-real_doublylinkedlist.c
+    ../../src/iothub_client_ll.c
 )
 
 set(${theseTestsName}_h_files

@@ -7,8 +7,9 @@ EXPORTS
     IoTHubTransport_StartWorkerThread
     IoTHubTransport_SignalEndWorkerThread
     IoTHubTransport_JoinWorkerThread
+
     IoTHubClient_GetVersionString
-    IoTHubClient_ThreadTerminationOffset
+
     IoTHubClient_CreateFromConnectionString
     IoTHubClient_Create
     IoTHubClient_CreateWithTransport
@@ -26,19 +27,53 @@ EXPORTS
     IoTHubClient_SendReportedState
     IoTHubClient_SetDeviceMethodCallback
 
+    IoTHubDeviceClient_CreateFromConnectionString
+    IoTHubDeviceClient_Create
+    IoTHubDeviceClient_CreateWithTransport
+    IoTHubDeviceClient_CreateFromDeviceAuth
+    IoTHubDeviceClient_Destroy
+    IoTHubDeviceClient_SendEventAsync
+    IoTHubDeviceClient_GetSendStatus
+    IoTHubDeviceClient_SetMessageCallback
+    IoTHubDeviceClient_SetConnectionStatusCallback
+    IoTHubDeviceClient_SetRetryPolicy
+    IoTHubDeviceClient_GetRetryPolicy
+    IoTHubDeviceClient_GetLastMessageReceiveTime
+    IoTHubDeviceClient_SetOption
+    IoTHubDeviceClient_SetDeviceTwinCallback
+    IoTHubDeviceClient_SendReportedState
+    IoTHubDeviceClient_SetDeviceMethodCallback
+    IoTHubDeviceClient_DeviceMethodResponse
+    IoTHubDeviceClient_UploadToBlobAsync
+    IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync
+
     IoTHubClient_LL_CreateFromConnectionString
-    IoTHubClient_LL_ConnectionStatusCallBack
     IoTHubClient_LL_Destroy
-    IoTHubClient_LL_DeviceMethodComplete
     IoTHubClient_LL_DoWork
-    IoTHubClient_LL_MessageCallback
-    IoTHubClient_LL_ReportedStateComplete
-    IoTHubClient_LL_RetrievePropertyComplete
-    IoTHubClient_LL_GetOption
-    IoTHubClient_LL_SendComplete
     IoTHubClient_LL_SendEventAsync
     IoTHubClient_LL_SetMessageCallback
     IoTHubClient_LL_SetOption
+
+    IoTHubDeviceClient_LL_CreateFromConnectionString
+    IoTHubDeviceClient_LL_Create
+    IoTHubDeviceClient_LL_CreateWithTransport
+    IoTHubDeviceClient_LL_CreateFromDeviceAuth
+    IoTHubDeviceClient_LL_Destroy
+    IoTHubDeviceClient_LL_SendEventAsync
+    IoTHubDeviceClient_LL_GetSendStatus
+    IoTHubDeviceClient_LL_SetMessageCallback
+    IoTHubDeviceClient_LL_SetConnectionStatusCallback
+    IoTHubDeviceClient_LL_SetRetryPolicy
+    IoTHubDeviceClient_LL_GetRetryPolicy
+    IoTHubDeviceClient_LL_GetLastMessageReceiveTime
+    IoTHubDeviceClient_LL_DoWork
+    IoTHubDeviceClient_LL_SetOption
+    IoTHubDeviceClient_LL_SetDeviceTwinCallback
+    IoTHubDeviceClient_LL_SendReportedState
+    IoTHubDeviceClient_LL_SetDeviceMethodCallback
+    IoTHubDeviceClient_LL_DeviceMethodResponse
+    IoTHubDeviceClient_LL_UploadToBlob
+    IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob
 
     IoTHubMessage_CreateFromString
     IoTHubMessage_CreateFromByteArray
