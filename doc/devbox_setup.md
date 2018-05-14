@@ -337,10 +337,10 @@ the `cmake` folder. To build the SDK, open **cmake\azure_iot_sdks.xcodeproj** in
 use XCode's build and run features.
 
 **Note:** Until Mac updates the Curl library to version to 7.58 or greater it will also be necessary
-to modify your XCode project file (.xcodeproj) to replace all the lines that read
+to modify your XCode project file (.xcodeproj) to replace all the lines that read</br>
 `LIBRARY_SEARCH_PATHS = "";`</br>
 with</br>
-`LIBRARY_SEARCH_PATHS = "/usr/local/Cellar/curl/7.59.0/lib";`</br>
+`LIBRARY_SEARCH_PATHS = "/usr/local/Cellar/curl/7.58.0/lib";`</br>
 
 <a name="windowsce"></a>
 
