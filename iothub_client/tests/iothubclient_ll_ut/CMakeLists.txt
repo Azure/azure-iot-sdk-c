@@ -16,7 +16,6 @@ include_directories(${SHARED_UTIL_REAL_TEST_FOLDER})
 
 set(${theseTestsName}_c_files
     ../../src/iothub_client_ll.c
-    real_doublylinkedlist.c
     ../../../c-utility/tests/real_test_files/real_singlylinkedlist.c
 )
 
