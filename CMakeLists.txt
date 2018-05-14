@@ -75,6 +75,11 @@ option(build_as_dynamic "build the IoT SDK libaries as dynamic"  OFF)
 option(build_network_e2e "build network E2E tests" OFF)
 option(use_prov_client "Enable provisioning client" OFF)
 option(use_tpm_simulator "tpm simulator type of hsm used with the provisioning client" OFF)
+option(use_custom_heap "use externally defined heap functions instead of the malloc family" OFF)
+
+if(${use_custom_heap})
+    add_definitions(-DGB_USE_CUSTOM_HEAP)
+endif()
 
 message(STATUS "Provisioning client ${use_prov_client}")
 if(XCODE AND ${use_prov_client})
