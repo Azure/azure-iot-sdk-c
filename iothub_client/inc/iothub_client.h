@@ -15,17 +15,20 @@
 #ifndef IOTHUB_CLIENT_H
 #define IOTHUB_CLIENT_H
 
-#ifndef IOTHUB_CLIENT_INSTANCE_TYPE
-typedef struct IOTHUB_CLIENT_INSTANCE_TAG* IOTHUB_CLIENT_HANDLE;
-#define IOTHUB_CLIENT_INSTANCE_TYPE
-#endif // IOTHUB_CLIENT_INSTANCE
-
-#include "iothubtransport.h"
 #include <stddef.h>
 #include <stdint.h>
 
-#include "iothub_client_ll.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
+#include "iothubtransport.h"
+#include "iothub_client_core_ll.h"
+#include "iothub_client_core.h"
+#include "iothub_client_ll.h"
+
+#ifndef IOTHUB_CLIENT_INSTANCE_TYPE
+typedef IOTHUB_CLIENT_CORE_HANDLE IOTHUB_CLIENT_HANDLE;
+#define IOTHUB_CLIENT_INSTANCE_TYPE
+#endif // IOTHUB_CLIENT_INSTANCE
+
 
 #ifdef __cplusplus
 extern "C"

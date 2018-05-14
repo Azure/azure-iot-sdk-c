@@ -36,6 +36,8 @@ typedef struct IOTHUB_SECURITY_INFO_TAG
 } IOTHUB_SECURITY_INFO;
 
 #define HMAC_LENGTH                 32
+static const char* const SAS_TOKEN_FORMAT = "SharedAccessSignature sr=%s&sig=%s&se=%s%s%s";
+static const char* const SKN_SECTION_FORMAT = "&skn=";
 
 IOTHUB_SECURITY_HANDLE iothub_device_auth_create()
 {
@@ -203,7 +205,15 @@ CREDENTIAL_RESULT* iothub_device_auth_generate_credentials(IOTHUB_SECURITY_HANDL
                         }
                         else
                         {
-                            sas_token_handle = STRING_construct_sprintf("SharedAccessSignature sr=%s&sig=%s&se=%s&skn=", dev_auth_cred->sas_info.token_scope, STRING_c_str(urlEncodedSignature), expire_token);
+                            const char* skn_key = "";
+                            const char* skn_value = "";
+                            if ((dev_auth_cred->sas_info.key_name != NULL) && (strlen(dev_auth_cred->sas_info.key_name) > 0))
+                            {
+                                // If the key name is valid then add to the sas token
+                                skn_key = SKN_SECTION_FORMAT;
+                                skn_value = dev_auth_cred->sas_info.key_name;
+                            }
+                            sas_token_handle = STRING_construct_sprintf(SAS_TOKEN_FORMAT, dev_auth_cred->sas_info.token_scope, STRING_c_str(urlEncodedSignature), expire_token, skn_key, skn_value);
                             if (sas_token_handle == NULL)
                             {
                                 result = NULL;

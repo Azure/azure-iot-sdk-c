@@ -32,39 +32,39 @@ static void my_gballoc_free(void* ptr)
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
 #include "azure_c_shared_utility/buffer_.h"
-#include "azure_hub_modules/base32.h"
+#include "azure_c_shared_utility/base32.h"
+#include "hsm_client_data.h"
 #undef ENABLE_MOCKS
 
-#include "azure_hub_modules/dps_sec_client.h"
+#include "azure_prov_client/prov_auth_client.h"
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/base64.h"
 #include "azure_c_shared_utility/sha.h"
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
-#include "azure_hub_modules/secure_device_factory.h"
+#include "azure_prov_client/prov_security_factory.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/sastoken.h"
 
-MOCKABLE_FUNCTION(, DPS_SECURE_DEVICE_HANDLE, secure_device_create);
-MOCKABLE_FUNCTION(, void, secure_device_destroy, DPS_SECURE_DEVICE_HANDLE, handle);
-MOCKABLE_FUNCTION(, int, secure_device_import_key, DPS_SECURE_DEVICE_HANDLE, handle, const unsigned char*, key, size_t, key_len);
+MOCKABLE_FUNCTION(, HSM_CLIENT_HANDLE, secure_device_create);
+MOCKABLE_FUNCTION(, void, secure_device_destroy, HSM_CLIENT_HANDLE, handle);
+MOCKABLE_FUNCTION(, int, secure_device_import_key, HSM_CLIENT_HANDLE, handle, const unsigned char*, key, size_t, key_len);
 
-MOCKABLE_FUNCTION(, BUFFER_HANDLE, secure_device_get_endorsement_key, DPS_SECURE_DEVICE_HANDLE, handle);
-MOCKABLE_FUNCTION(, BUFFER_HANDLE, secure_device_get_storage_key, DPS_SECURE_DEVICE_HANDLE, handle);
-MOCKABLE_FUNCTION(, BUFFER_HANDLE, secure_device_sign_data, DPS_SECURE_DEVICE_HANDLE, handle, const unsigned char*, data, size_t, data_len);
-MOCKABLE_FUNCTION(, BUFFER_HANDLE, secure_device_decrypt_data, DPS_SECURE_DEVICE_HANDLE, handle, const unsigned char*, data, size_t, data_len);
+MOCKABLE_FUNCTION(, int, secure_device_get_endorsement_key, HSM_CLIENT_HANDLE, handle, unsigned char**, key, size_t*, key_len);
+MOCKABLE_FUNCTION(, int, secure_device_get_storage_key, HSM_CLIENT_HANDLE, handle, unsigned char**, key, size_t*, key_len);
+MOCKABLE_FUNCTION(, int, secure_device_sign_data, HSM_CLIENT_HANDLE, handle, const unsigned char*, data, size_t, data_len, unsigned char**, key, size_t*, key_len);
 
-MOCKABLE_FUNCTION(, char*, secure_device_get_certificate, DPS_SECURE_DEVICE_HANDLE, handle);
-MOCKABLE_FUNCTION(, char*, secure_device_get_alias_key, DPS_SECURE_DEVICE_HANDLE, handle);
-MOCKABLE_FUNCTION(, char*, secure_device_get_signer_cert, DPS_SECURE_DEVICE_HANDLE, handle);
-MOCKABLE_FUNCTION(, char*, secure_device_get_root_cert, DPS_SECURE_DEVICE_HANDLE, handle);
-MOCKABLE_FUNCTION(, char*, secure_device_get_root_key, DPS_SECURE_DEVICE_HANDLE, handle);
-MOCKABLE_FUNCTION(, char*, secure_device_get_common_name, DPS_SECURE_DEVICE_HANDLE, handle);
+MOCKABLE_FUNCTION(, char*, secure_device_get_certificate, HSM_CLIENT_HANDLE, handle);
+MOCKABLE_FUNCTION(, char*, secure_device_get_alias_key, HSM_CLIENT_HANDLE, handle);
+MOCKABLE_FUNCTION(, char*, secure_device_get_common_name, HSM_CLIENT_HANDLE, handle);
 
 MOCKABLE_FUNCTION(, int, SHA256Reset, SHA256Context*, ctx);
 MOCKABLE_FUNCTION(, int, SHA256Input, SHA256Context*, ctx, const uint8_t*, bytes, unsigned int, bytecount);
 MOCKABLE_FUNCTION(, int, SHA256Result, SHA256Context*, ctx, uint8_t*, Message_Digest);
+
+MOCKABLE_FUNCTION(, const HSM_CLIENT_TPM_INTERFACE*, hsm_client_tpm_interface);
+MOCKABLE_FUNCTION(, const HSM_CLIENT_X509_INTERFACE*, hsm_client_x509_interface);
 
 #undef ENABLE_MOCKS
 
@@ -110,13 +110,13 @@ static const char* TEST_TOKEN_SCOPE_VALUE = "token_scope";
 static const char* TEST_KEY_NAME_VALUE = "key_value";
 static const char* TEST_BASE32_VALUE = "aebagbaf";
 
-TEST_DEFINE_ENUM_TYPE(DPS_SEC_RESULT, DPS_SEC_RESULT_VALUES);
-IMPLEMENT_UMOCK_C_ENUM_TYPE(DPS_SEC_RESULT, DPS_SEC_RESULT_VALUES);
+TEST_DEFINE_ENUM_TYPE(PROV_AUTH_RESULT, PROV_AUTH_RESULT_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(PROV_AUTH_RESULT, PROV_AUTH_RESULT_VALUES);
 
-TEST_DEFINE_ENUM_TYPE(DPS_SEC_TYPE, DPS_SEC_TYPE_VALUES);
-IMPLEMENT_UMOCK_C_ENUM_TYPE(DPS_SEC_TYPE, DPS_SEC_TYPE_VALUES);
+TEST_DEFINE_ENUM_TYPE(PROV_AUTH_TYPE, PROV_AUTH_TYPE_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(PROV_AUTH_TYPE, PROV_AUTH_TYPE_VALUES);
 
-static const SEC_TPM_INTERFACE test_tpm_interface = 
+static const HSM_CLIENT_TPM_INTERFACE test_tpm_interface = 
 {
     secure_device_create,
     secure_device_destroy,
@@ -126,7 +126,7 @@ static const SEC_TPM_INTERFACE test_tpm_interface =
     secure_device_sign_data,
 };
 
-static const SEC_TPM_INTERFACE test_tpm_interface_fail =
+static const HSM_CLIENT_TPM_INTERFACE test_tpm_interface_fail =
 {
     secure_device_create,
     secure_device_destroy,
@@ -136,60 +136,57 @@ static const SEC_TPM_INTERFACE test_tpm_interface_fail =
     NULL
 };
 
-static const SEC_X509_INTERFACE test_riot_interface =
+static const HSM_CLIENT_X509_INTERFACE test_x509_interface =
 {
     secure_device_create,
     secure_device_destroy,
     secure_device_get_certificate,
     secure_device_get_alias_key,
-    secure_device_get_signer_cert,
-    secure_device_get_root_cert,
-    secure_device_get_root_key,
     secure_device_get_common_name
 };
 
-static const SEC_X509_INTERFACE test_riot_interface_fail =
+static const HSM_CLIENT_X509_INTERFACE test_x509_interface_fail =
 {
     secure_device_create,
     secure_device_destroy,
-    secure_device_get_certificate,
+    NULL,
     secure_device_get_alias_key,
-    NULL,
-    secure_device_get_root_cert,
-    NULL,
     secure_device_get_common_name
 };
 
-static DPS_SECURE_DEVICE_HANDLE my_secure_device_create(void)
+static HSM_CLIENT_HANDLE my_secure_device_create(void)
 {
-    return (DPS_SECURE_DEVICE_HANDLE)my_gballoc_malloc(1);
+    return (HSM_CLIENT_HANDLE)my_gballoc_malloc(1);
 }
 
-static char* my_secure_device_get_alias_key(DPS_SECURE_DEVICE_HANDLE handle)
+static void my_secure_device_destroy(HSM_CLIENT_HANDLE handle)
+{
+    my_gballoc_free(handle);
+}
+
+static char* my_secure_device_get_alias_key(HSM_CLIENT_HANDLE handle)
 {
     (void)handle;
     return (char*)my_gballoc_malloc(1);
 }
 
-static char* my_secure_device_get_signer_cert(DPS_SECURE_DEVICE_HANDLE handle)
+static int my_secure_device_get_storage_key(HSM_CLIENT_HANDLE handle, unsigned char** key, size_t* key_len)
 {
     (void)handle;
-    return (char*)my_gballoc_malloc(1);
+    *key = (unsigned char*)my_gballoc_malloc(1);
+    *key_len = 1;
+    return 0;
 }
 
-static BUFFER_HANDLE my_secure_device_get_storage_key(DPS_SECURE_DEVICE_HANDLE handle)
+static int my_secure_device_get_endorsement_key(HSM_CLIENT_HANDLE handle, unsigned char** key, size_t* key_len)
 {
     (void)handle;
-    return (BUFFER_HANDLE)my_gballoc_malloc(1);
+    *key = (unsigned char*)my_gballoc_malloc(1);
+    *key_len = 1;
+    return 0;
 }
 
-static BUFFER_HANDLE my_secure_device_get_endorsement_key(DPS_SECURE_DEVICE_HANDLE handle)
-{
-    (void)handle;
-    return (BUFFER_HANDLE)my_gballoc_malloc(1);
-}
-
-static char* my_secure_device_get_common_name(DPS_SECURE_DEVICE_HANDLE handle)
+static char* my_secure_device_get_common_name(HSM_CLIENT_HANDLE handle)
 {
     (void)handle;
     size_t len = strlen(TEST_STRING_VALUE);
@@ -198,12 +195,14 @@ static char* my_secure_device_get_common_name(DPS_SECURE_DEVICE_HANDLE handle)
     return result;
 }
 
-static BUFFER_HANDLE my_secure_device_sign_data(DPS_SECURE_DEVICE_HANDLE handle, const unsigned char* data, size_t data_len)
+static int my_secure_device_sign_data(HSM_CLIENT_HANDLE handle, const unsigned char* data, size_t data_len, unsigned char** key, size_t* key_len)
 {
     (void)handle;
     (void)data;
     (void)data_len;
-    return (BUFFER_HANDLE)my_gballoc_malloc(1);
+    *key = (unsigned char*)my_gballoc_malloc(1);
+    *key_len = 1;
+    return 0;
 }
 
 static int my_mallocAndStrcpy_s(char** destination, const char* source)
@@ -280,7 +279,7 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 static TEST_MUTEX_HANDLE g_testByTest;
 static TEST_MUTEX_HANDLE g_dllByDll;
 
-BEGIN_TEST_SUITE(dps_sec_client_ut)
+BEGIN_TEST_SUITE(prov_auth_client_ut)
 
     TEST_SUITE_INITIALIZE(suite_init)
     {
@@ -298,25 +297,24 @@ BEGIN_TEST_SUITE(dps_sec_client_ut)
         ASSERT_ARE_EQUAL(int, 0, result);
 
         REGISTER_UMOCK_ALIAS_TYPE(XDA_HANDLE, void*);
-        REGISTER_UMOCK_ALIAS_TYPE(DPS_SECURE_DEVICE_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(HSM_CLIENT_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(SECURE_DEVICE_TYPE, int);
         REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(BUFFER_HANDLE, void*);
 
         REGISTER_GLOBAL_MOCK_HOOK(secure_device_create, my_secure_device_create);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(secure_device_create, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(secure_device_destroy, my_secure_device_destroy);
         REGISTER_GLOBAL_MOCK_HOOK(secure_device_get_endorsement_key, my_secure_device_get_endorsement_key);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(secure_device_get_endorsement_key, NULL);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(secure_device_get_endorsement_key, __LINE__);
         REGISTER_GLOBAL_MOCK_HOOK(secure_device_get_common_name, my_secure_device_get_common_name);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(secure_device_get_common_name, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(secure_device_get_storage_key, my_secure_device_get_storage_key);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(secure_device_get_storage_key, NULL);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(secure_device_get_storage_key, __LINE__);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(secure_device_import_key, __LINE__);
 
         REGISTER_GLOBAL_MOCK_RETURN(secure_device_get_alias_key, TEST_STRING_VALUE);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(secure_device_get_alias_key, NULL);
-        REGISTER_GLOBAL_MOCK_RETURN(secure_device_get_signer_cert, TEST_STRING_VALUE);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(secure_device_get_signer_cert, NULL);
         REGISTER_GLOBAL_MOCK_RETURN(secure_device_get_certificate, TEST_STRING_VALUE);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(secure_device_get_certificate, NULL);
 
@@ -331,10 +329,12 @@ BEGIN_TEST_SUITE(dps_sec_client_ut)
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(SHA256Result, __LINE__);
 
         REGISTER_GLOBAL_MOCK_HOOK(secure_device_sign_data, my_secure_device_sign_data);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(secure_device_sign_data, NULL);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(secure_device_sign_data, __LINE__);
         REGISTER_GLOBAL_MOCK_HOOK(Base64_Encoder, my_Base64_Encoder);
         REGISTER_GLOBAL_MOCK_RETURN(Base64_Encoder, NULL);
 
+        REGISTER_GLOBAL_MOCK_RETURN(BUFFER_create, TEST_BUFFER_VALUE);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(BUFFER_create, NULL);
         REGISTER_GLOBAL_MOCK_RETURN(size_tToString, 0);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(size_tToString, __LINE__);
 
@@ -361,9 +361,10 @@ BEGIN_TEST_SUITE(dps_sec_client_ut)
         REGISTER_GLOBAL_MOCK_HOOK(URL_EncodeString, my_URL_EncodeString);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(URL_EncodeString, NULL);
 
-        REGISTER_GLOBAL_MOCK_RETURN(dps_secure_device_type, SECURE_DEVICE_TYPE_TPM);
-        REGISTER_GLOBAL_MOCK_RETURN(dps_secure_device_interface, &test_tpm_interface);
-    }
+        REGISTER_GLOBAL_MOCK_RETURN(prov_dev_security_get_type, SECURE_DEVICE_TYPE_TPM);
+        REGISTER_GLOBAL_MOCK_RETURN(hsm_client_tpm_interface, &test_tpm_interface);
+        REGISTER_GLOBAL_MOCK_RETURN(hsm_client_x509_interface, &test_x509_interface);
+}
 
     TEST_SUITE_CLEANUP(suite_cleanup)
     {
@@ -401,12 +402,12 @@ BEGIN_TEST_SUITE(dps_sec_client_ut)
         return result;
     }
 
-    static void setup_dps_sec_construct_sas_token_mocks(void)
+    static void setup_prov_auth_construct_sas_token_mocks(void)
     {
         STRICT_EXPECTED_CALL(size_tToString(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(secure_device_sign_data(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(Base64_Encoder(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(secure_device_sign_data(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Base64_Encode_Bytes(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(URL_Encode(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
@@ -414,7 +415,7 @@ BEGIN_TEST_SUITE(dps_sec_client_ut)
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     }
 
@@ -422,16 +423,14 @@ BEGIN_TEST_SUITE(dps_sec_client_ut)
     {
         if (use_tpm)
         {
-            STRICT_EXPECTED_CALL(secure_device_get_endorsement_key(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(secure_device_get_endorsement_key(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(SHA256Reset(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(SHA256Input(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
             STRICT_EXPECTED_CALL(SHA256Result(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(Base32_Encode_Bytes(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
             STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
         }
         else
         {
@@ -439,124 +438,123 @@ BEGIN_TEST_SUITE(dps_sec_client_ut)
         }
     }
 
-    static void setup_dps_sec_get_registration_id_mocks()
+    static void setup_prov_auth_get_registration_id_mocks()
     {
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
     }
 
-    /* Tests_SRS_DPS_SEC_CLIENT_07_002: [ If any failure is encountered dps_sec_create shall return NULL ] */
-    TEST_FUNCTION(dps_sec_client_create_tpm_malloc_NULL_fail)
+    /* Tests_SRS_DPS_SEC_CLIENT_07_002: [ If any failure is encountered prov_auth_create shall return NULL ] */
+    TEST_FUNCTION(prov_auth_client_create_tpm_malloc_NULL_fail)
     {
         //arrange
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)).SetReturn(NULL);
 
         //act
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
 
         //assert
         ASSERT_IS_NULL(sec_handle);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
-        dps_sec_destroy(sec_handle);
+        prov_auth_destroy(sec_handle);
     }
 
-    /* Tests_SRS_DPS_SEC_CLIENT_07_002: [ If any failure is encountered dps_sec_create shall return NULL ] */
-    TEST_FUNCTION(dps_sec_client_create_tpm_interface_NULL_fail)
+    /* Tests_SRS_DPS_SEC_CLIENT_07_002: [ If any failure is encountered prov_auth_create shall return NULL ] */
+    TEST_FUNCTION(prov_auth_client_create_tpm_interface_NULL_fail)
     {
         //arrange
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(dps_secure_device_type()).SetReturn(SECURE_DEVICE_TYPE_TPM);
-        STRICT_EXPECTED_CALL(dps_secure_device_interface()).SetReturn(&test_tpm_interface_fail);
+        STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_TPM);
+        STRICT_EXPECTED_CALL(hsm_client_tpm_interface()).SetReturn(&test_tpm_interface_fail);
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
         //act
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
 
         //assert
         ASSERT_IS_NULL(sec_handle);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
-        dps_sec_destroy(sec_handle);
+        prov_auth_destroy(sec_handle);
     }
 
-    /* Tests_SRS_DPS_SEC_CLIENT_07_001: [ dps_sec_create shall allocate the DPS_SEC_INFO. ] */
-    /* Tests_SRS_DPS_SEC_CLIENT_07_003: [ dps_sec_create shall validate the specified secure enclave interface to ensure. ] */
-    /* Tests_SRS_DPS_SEC_CLIENT_07_004: [ dps_sec_create shall call secure_device_create on the secure enclave interface. ] */
-    TEST_FUNCTION(dps_sec_client_create_tpm_succeed)
+    /* Tests_SRS_DPS_SEC_CLIENT_07_001: [ prov_auth_create shall allocate the DPS_SEC_INFO. ] */
+    /* Tests_SRS_DPS_SEC_CLIENT_07_003: [ prov_auth_create shall validate the specified secure enclave interface to ensure. ] */
+    /* Tests_SRS_DPS_SEC_CLIENT_07_004: [ prov_auth_create shall call secure_device_create on the secure enclave interface. ] */
+    TEST_FUNCTION(prov_auth_client_create_tpm_succeed)
     {
         //arrange
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(dps_secure_device_type()).SetReturn(SECURE_DEVICE_TYPE_TPM);
-        STRICT_EXPECTED_CALL(dps_secure_device_interface()).SetReturn(&test_tpm_interface);
+        STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_TPM);
+        STRICT_EXPECTED_CALL(hsm_client_tpm_interface()).SetReturn(&test_tpm_interface);
         STRICT_EXPECTED_CALL(secure_device_create());
 
         //act
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
 
         //assert
         ASSERT_IS_NOT_NULL(sec_handle);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
-        dps_sec_destroy(sec_handle);
+        prov_auth_destroy(sec_handle);
     }
 
-    /* Tests_SRS_DPS_SEC_CLIENT_07_002: [ If any failure is encountered dps_sec_create shall return NULL ] */
-    TEST_FUNCTION(dps_sec_client_create_riot_interface_NULL_fail)
+    /* Tests_SRS_DPS_SEC_CLIENT_07_002: [ If any failure is encountered prov_auth_create shall return NULL ] */
+    TEST_FUNCTION(prov_auth_client_create_x509_interface_NULL_fail)
     {
         //arrange
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(dps_secure_device_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
-        STRICT_EXPECTED_CALL(dps_secure_device_interface()).SetReturn(&test_riot_interface_fail);
+        STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
+        STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface_fail);
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
         //act
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
 
         //assert
         ASSERT_IS_NULL(sec_handle);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
-        dps_sec_destroy(sec_handle);
+        prov_auth_destroy(sec_handle);
     }
 
-    /* Tests_SRS_DPS_SEC_CLIENT_07_001: [ dps_sec_create shall allocate the DPS_SEC_INFO. ] */
-    /* Tests_SRS_DPS_SEC_CLIENT_07_003: [ dps_sec_create shall validate the specified secure enclave interface to ensure. ] */
-    /* Tests_SRS_DPS_SEC_CLIENT_07_004: [ dps_sec_create shall call secure_device_create on the secure enclave interface. ] */
-    TEST_FUNCTION(dps_sec_client_create_riot_succeed)
+    /* Tests_SRS_DPS_SEC_CLIENT_07_001: [ prov_auth_create shall allocate the DPS_SEC_INFO. ] */
+    /* Tests_SRS_DPS_SEC_CLIENT_07_003: [ prov_auth_create shall validate the specified secure enclave interface to ensure. ] */
+    /* Tests_SRS_DPS_SEC_CLIENT_07_004: [ prov_auth_create shall call secure_device_create on the secure enclave interface. ] */
+    TEST_FUNCTION(prov_auth_client_create_x509_succeed)
     {
         //arrange
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(dps_secure_device_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
-        STRICT_EXPECTED_CALL(dps_secure_device_interface()).SetReturn(&test_riot_interface);
+        STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
+        STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface);
         STRICT_EXPECTED_CALL(secure_device_create());
 
         //act
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
 
         //assert
         ASSERT_IS_NOT_NULL(sec_handle);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
-        dps_sec_destroy(sec_handle);
+        prov_auth_destroy(sec_handle);
     }
 
-    /* Tests_SRS_DPS_SEC_CLIENT_07_002: [ If any failure is encountered dps_sec_create shall return NULL ] */
-    TEST_FUNCTION(dps_sec_client_create_riot_sec_device_create_NULL_fail)
+    /* Tests_SRS_DPS_SEC_CLIENT_07_002: [ If any failure is encountered prov_auth_create shall return NULL ] */
+    TEST_FUNCTION(prov_auth_client_create_x509_sec_device_create_NULL_fail)
     {
         //arrange
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(dps_secure_device_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
-        STRICT_EXPECTED_CALL(dps_secure_device_interface()).SetReturn(&test_riot_interface);
-        STRICT_EXPECTED_CALL(secure_device_create()).SetReturn(NULL);
+        STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
+        STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface_fail);
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
         //act
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
 
         //assert
         ASSERT_IS_NULL(sec_handle);
@@ -565,11 +563,11 @@ BEGIN_TEST_SUITE(dps_sec_client_ut)
         //cleanup
     }
 
-    /* Tests_SRS_DPS_SEC_CLIENT_07_006: [ dps_sec_destroy shall free the DPS_SEC_HANDLE instance. ] */
-    /* Tests_SRS_DPS_SEC_CLIENT_07_007: [ dps_sec_destroy shall free all resources allocated in this module. ] */
-    TEST_FUNCTION(dps_sec_destroy_succeed)
+    /* Tests_SRS_DPS_SEC_CLIENT_07_006: [ prov_auth_destroy shall free the PROV_AUTH_HANDLE instance. ] */
+    /* Tests_SRS_DPS_SEC_CLIENT_07_007: [ prov_auth_destroy shall free all resources allocated in this module. ] */
+    TEST_FUNCTION(prov_auth_destroy_succeed)
     {
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
         umock_c_reset_all_calls();
 
         //arrange
@@ -578,7 +576,7 @@ BEGIN_TEST_SUITE(dps_sec_client_ut)
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
         //act
-        dps_sec_destroy(sec_handle);
+        prov_auth_destroy(sec_handle);
 
         //assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -586,15 +584,15 @@ BEGIN_TEST_SUITE(dps_sec_client_ut)
         //cleanup
     }
 
-    /* Tests_SRS_DPS_SEC_CLIENT_07_005: [ if handle is NULL, dps_sec_destroy shall do nothing. ] */
-    TEST_FUNCTION(dps_sec_destroy_handle_NULL_succeed)
+    /* Tests_SRS_DPS_SEC_CLIENT_07_005: [ if handle is NULL, prov_auth_destroy shall do nothing. ] */
+    TEST_FUNCTION(prov_auth_destroy_handle_NULL_succeed)
     {
         umock_c_reset_all_calls();
 
         //arrange
 
         //act
-        dps_sec_destroy(NULL);
+        prov_auth_destroy(NULL);
 
         //assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -602,69 +600,69 @@ BEGIN_TEST_SUITE(dps_sec_client_ut)
         //cleanup
     }
 
-    /* Tests_SRS_DPS_SEC_CLIENT_07_008: [ if handle is NULL dps_sec_get_type shall return DPS_SEC_TYPE_UNKNOWN ] */
-    TEST_FUNCTION(dps_sec_get_type_handle_NULL_fail)
+    /* Tests_SRS_DPS_SEC_CLIENT_07_008: [ if handle is NULL prov_auth_get_type shall return PROV_AUTH_TYPE_UNKNOWN ] */
+    TEST_FUNCTION(prov_auth_get_type_handle_NULL_fail)
     {
         //arrange
 
         //act
-        DPS_SEC_TYPE sec_type = dps_sec_get_type(NULL);
+        PROV_AUTH_TYPE sec_type = prov_auth_get_type(NULL);
 
         //assert
-        ASSERT_ARE_EQUAL(DPS_SEC_TYPE, DPS_SEC_TYPE_UNKNOWN, sec_type);
+        ASSERT_ARE_EQUAL(PROV_AUTH_TYPE, PROV_AUTH_TYPE_UNKNOWN, sec_type);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
     }
 
-    /* Tests_SRS_DPS_SEC_CLIENT_07_009: [ dps_sec_get_type shall return the DPS_SEC_TYPE of the underlying secure enclave. ] */
-    TEST_FUNCTION(dps_sec_get_type_succeed)
+    /* Tests_SRS_DPS_SEC_CLIENT_07_009: [ prov_auth_get_type shall return the PROV_AUTH_TYPE of the underlying secure enclave. ] */
+    TEST_FUNCTION(prov_auth_get_type_succeed)
     {
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
         umock_c_reset_all_calls();
 
         //arrange
 
         //act
-        DPS_SEC_TYPE sec_type = dps_sec_get_type(sec_handle);
+        PROV_AUTH_TYPE sec_type = prov_auth_get_type(sec_handle);
 
         //assert
-        ASSERT_ARE_EQUAL(DPS_SEC_TYPE, DPS_SEC_TYPE_TPM, sec_type);
+        ASSERT_ARE_EQUAL(PROV_AUTH_TYPE, PROV_AUTH_TYPE_TPM, sec_type);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
-        dps_sec_destroy(sec_handle);
+        prov_auth_destroy(sec_handle);
     }
 
-    /* Tests_SRS_DPS_SEC_CLIENT_07_009: [ dps_sec_get_type shall return the DPS_SEC_TYPE of the underlying secure enclave. ] */
-    TEST_FUNCTION(dps_sec_get_type_riot_succeed)
+    /* Tests_SRS_DPS_SEC_CLIENT_07_009: [ prov_auth_get_type shall return the PROV_AUTH_TYPE of the underlying secure enclave. ] */
+    TEST_FUNCTION(prov_auth_get_type_x509_succeed)
     {
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(dps_secure_device_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
-        STRICT_EXPECTED_CALL(dps_secure_device_interface()).SetReturn(&test_riot_interface);
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
+        STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
+        STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface);
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
         umock_c_reset_all_calls();
 
         //arrange
 
         //act
-        DPS_SEC_TYPE sec_type = dps_sec_get_type(sec_handle);
+        PROV_AUTH_TYPE sec_type = prov_auth_get_type(sec_handle);
 
         //assert
-        ASSERT_ARE_EQUAL(DPS_SEC_TYPE, DPS_SEC_TYPE_X509, sec_type);
+        ASSERT_ARE_EQUAL(PROV_AUTH_TYPE, PROV_AUTH_TYPE_X509, sec_type);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
-        dps_sec_destroy(sec_handle);
+        prov_auth_destroy(sec_handle);
     }
 
-    /* Tests_SRS_DPS_SEC_CLIENT_07_010: [ if handle is NULL dps_sec_get_registration_id shall return NULL. ] */
-    TEST_FUNCTION(dps_sec_get_registration_id_handle_NULL_fail)
+    /* Tests_SRS_DPS_SEC_CLIENT_07_010: [ if handle is NULL prov_auth_get_registration_id shall return NULL. ] */
+    TEST_FUNCTION(prov_auth_get_registration_id_handle_NULL_fail)
     {
         //arrange
 
         //act
-        char* result = dps_sec_get_registration_id(NULL);
+        char* result = prov_auth_get_registration_id(NULL);
 
         //assert
         ASSERT_IS_NULL(result);
@@ -673,10 +671,10 @@ BEGIN_TEST_SUITE(dps_sec_client_ut)
         //cleanup
     }
 
-    /* Tests_SRS_DPS_SEC_CLIENT_07_012: [ If a failure is encountered, dps_sec_get_registration_id shall return NULL. ] */
-    TEST_FUNCTION(dps_sec_get_registration_id_tpm_fail)
+    /* Tests_SRS_DPS_SEC_CLIENT_07_012: [ If a failure is encountered, prov_auth_get_registration_id shall return NULL. ] */
+    TEST_FUNCTION(prov_auth_get_registration_id_tpm_fail)
     {
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
         umock_c_reset_all_calls();
 
         int negativeTestsInitResult = umock_c_negative_tests_init();
@@ -684,11 +682,11 @@ BEGIN_TEST_SUITE(dps_sec_client_ut)
 
         //arrange
         setup_load_registration_id_mocks(true);
-        setup_dps_sec_get_registration_id_mocks();
+        setup_prov_auth_get_registration_id_mocks();
 
         umock_c_negative_tests_snapshot();
 
-        size_t calls_cannot_fail[] = { 2, 3, 8, 9 };
+        size_t calls_cannot_fail[] = { 6, 7 };
 
         //act
         size_t count = umock_c_negative_tests_call_count();
@@ -703,30 +701,31 @@ BEGIN_TEST_SUITE(dps_sec_client_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[64];
-            sprintf(tmp_msg, "dps_sec_get_registration_id failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "prov_auth_get_registration_id failure in test %zu/%zu", index, count);
             
-            char* result = dps_sec_get_registration_id(sec_handle);
+            char* result = prov_auth_get_registration_id(sec_handle);
 
             //assert
             ASSERT_IS_NULL_WITH_MSG(result, tmp_msg);
         }
 
         //cleanup
+        prov_auth_destroy(sec_handle);
         umock_c_negative_tests_deinit();
     }
 
-    /* Tests_SRS_DPS_SEC_CLIENT_07_013: [ Upon success dps_sec_get_registration_id shall return the registration id of the secure enclave. ] */
-    TEST_FUNCTION(dps_sec_get_registration_id_tpm_succeed)
+    /* Tests_SRS_DPS_SEC_CLIENT_07_013: [ Upon success prov_auth_get_registration_id shall return the registration id of the secure enclave. ] */
+    TEST_FUNCTION(prov_auth_get_registration_id_tpm_succeed)
     {
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
         umock_c_reset_all_calls();
 
         //arrange
         setup_load_registration_id_mocks(true);
-        setup_dps_sec_get_registration_id_mocks();
+        setup_prov_auth_get_registration_id_mocks();
 
         //act
-        char* result = dps_sec_get_registration_id(sec_handle);
+        char* result = prov_auth_get_registration_id(sec_handle);
 
         //assert
         ASSERT_IS_NOT_NULL(result);
@@ -734,16 +733,16 @@ BEGIN_TEST_SUITE(dps_sec_client_ut)
 
         //cleanup
         my_gballoc_free(result);
-        dps_sec_destroy(sec_handle);
+        prov_auth_destroy(sec_handle);
     }
 
-    /* Tests_SRS_DPS_SEC_CLIENT_07_012: [ If a failure is encountered, dps_sec_get_registration_id shall return NULL. ] */
-    TEST_FUNCTION(dps_sec_get_registration_id_riot_fail)
+    /* Tests_SRS_DPS_SEC_CLIENT_07_012: [ If a failure is encountered, prov_auth_get_registration_id shall return NULL. ] */
+    TEST_FUNCTION(prov_auth_get_registration_id_x509_fail)
     {
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(dps_secure_device_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
-        STRICT_EXPECTED_CALL(dps_secure_device_interface()).SetReturn(&test_riot_interface);
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
+        STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
+        STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface_fail);
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
         umock_c_reset_all_calls();
 
         int negativeTestsInitResult = umock_c_negative_tests_init();
@@ -751,7 +750,7 @@ BEGIN_TEST_SUITE(dps_sec_client_ut)
 
         //arrange
         setup_load_registration_id_mocks(false);
-        setup_dps_sec_get_registration_id_mocks();
+        setup_prov_auth_get_registration_id_mocks();
 
         umock_c_negative_tests_snapshot();
 
@@ -770,9 +769,9 @@ BEGIN_TEST_SUITE(dps_sec_client_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[64];
-            sprintf(tmp_msg, "dps_sec_get_registration_id failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "prov_auth_get_registration_id failure in test %zu/%zu", index, count);
 
-            char* result = dps_sec_get_registration_id(sec_handle);
+            char* result = prov_auth_get_registration_id(sec_handle);
 
             //assert
             ASSERT_IS_NULL_WITH_MSG(result, tmp_msg);
@@ -782,21 +781,21 @@ BEGIN_TEST_SUITE(dps_sec_client_ut)
         umock_c_negative_tests_deinit();
     }
 
-    /* Tests_SRS_DPS_SEC_CLIENT_07_013: [ Upon success dps_sec_get_registration_id shall return the registration id of the secure enclave. ] */
-    TEST_FUNCTION(dps_sec_get_registration_id_riot_succeed)
+    /* Tests_SRS_DPS_SEC_CLIENT_07_013: [ Upon success prov_auth_get_registration_id shall return the registration id of the secure enclave. ] */
+    TEST_FUNCTION(prov_auth_get_registration_id_x509_succeed)
     {
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(dps_secure_device_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
-        STRICT_EXPECTED_CALL(dps_secure_device_interface()).SetReturn(&test_riot_interface);
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
+        STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
+        STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface);
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
         umock_c_reset_all_calls();
 
         //arrange
         setup_load_registration_id_mocks(false);
-        setup_dps_sec_get_registration_id_mocks();
+        setup_prov_auth_get_registration_id_mocks();
 
         //act
-        char* result = dps_sec_get_registration_id(sec_handle);
+        char* result = prov_auth_get_registration_id(sec_handle);
 
         //assert
         ASSERT_IS_NOT_NULL(result);
@@ -804,36 +803,36 @@ BEGIN_TEST_SUITE(dps_sec_client_ut)
 
         //cleanup
         my_gballoc_free(result);
-        dps_sec_destroy(sec_handle);
+        prov_auth_destroy(sec_handle);
     }
 
-    TEST_FUNCTION(dps_sec_get_endorsement_key_riot_fail)
+    TEST_FUNCTION(prov_auth_get_endorsement_key_x509_fail)
     {
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(dps_secure_device_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
-        STRICT_EXPECTED_CALL(dps_secure_device_interface()).SetReturn(&test_riot_interface);
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
+        STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
+        STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface_fail);
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
         umock_c_reset_all_calls();
 
         //arrange
 
         //act
-        BUFFER_HANDLE result = dps_sec_get_endorsement_key(sec_handle);
+        BUFFER_HANDLE result = prov_auth_get_endorsement_key(sec_handle);
 
         //assert
         ASSERT_IS_NULL(result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
-        dps_sec_destroy(sec_handle);
+        prov_auth_destroy(sec_handle);
     }
 
-    TEST_FUNCTION(dps_sec_get_endorsement_key_tpm_handle_NULL_fail)
+    TEST_FUNCTION(prov_auth_get_endorsement_key_tpm_handle_NULL_fail)
     {
         //arrange
 
         //act
-        BUFFER_HANDLE result = dps_sec_get_endorsement_key(NULL);
+        BUFFER_HANDLE result = prov_auth_get_endorsement_key(NULL);
 
         //assert
         ASSERT_IS_NULL(result);
@@ -842,53 +841,54 @@ BEGIN_TEST_SUITE(dps_sec_client_ut)
         //cleanup
     }
 
-    TEST_FUNCTION(dps_sec_get_endorsement_key_tpm_succeed)
+    TEST_FUNCTION(prov_auth_get_endorsement_key_tpm_succeed)
     {
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(secure_device_get_endorsement_key(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(secure_device_get_endorsement_key(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
         //act
-        BUFFER_HANDLE result = dps_sec_get_endorsement_key(sec_handle);
+        BUFFER_HANDLE result = prov_auth_get_endorsement_key(sec_handle);
 
         //assert
         ASSERT_IS_NOT_NULL(result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
-        my_gballoc_free(result);
-        dps_sec_destroy(sec_handle);
+        prov_auth_destroy(sec_handle);
     }
 
-    TEST_FUNCTION(dps_sec_get_storage_key_riot_fail)
+    TEST_FUNCTION(prov_auth_get_storage_key_x509_fail)
     {
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(dps_secure_device_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
-        STRICT_EXPECTED_CALL(dps_secure_device_interface()).SetReturn(&test_riot_interface);
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
+        STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
+        STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface_fail);
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
         umock_c_reset_all_calls();
 
         //arrange
 
         //act
-        BUFFER_HANDLE result = dps_sec_get_storage_key(sec_handle);
+        BUFFER_HANDLE result = prov_auth_get_storage_key(sec_handle);
 
         //assert
         ASSERT_IS_NULL(result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
-        dps_sec_destroy(sec_handle);
+        prov_auth_destroy(sec_handle);
     }
 
-    TEST_FUNCTION(dps_sec_get_storage_key_tpm_handle_NULL_fail)
+    TEST_FUNCTION(prov_auth_get_storage_key_tpm_handle_NULL_fail)
     {
         //arrange
 
         //act
-        BUFFER_HANDLE result = dps_sec_get_storage_key(NULL);
+        BUFFER_HANDLE result = prov_auth_get_storage_key(NULL);
 
         //assert
         ASSERT_IS_NULL(result);
@@ -897,53 +897,54 @@ BEGIN_TEST_SUITE(dps_sec_client_ut)
         //cleanup
     }
 
-    TEST_FUNCTION(dps_sec_get_storage_key_tpm_succeed)
+    TEST_FUNCTION(prov_auth_get_storage_key_tpm_succeed)
     {
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(secure_device_get_storage_key(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(secure_device_get_storage_key(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
         //act
-        BUFFER_HANDLE result = dps_sec_get_storage_key(sec_handle);
+        BUFFER_HANDLE result = prov_auth_get_storage_key(sec_handle);
 
         //assert
         ASSERT_IS_NOT_NULL(result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
-        my_gballoc_free(result);
-        dps_sec_destroy(sec_handle);
+        prov_auth_destroy(sec_handle);
     }
 
-    TEST_FUNCTION(dps_sec_import_key_riot_fail)
+    TEST_FUNCTION(prov_auth_import_key_x509_fail)
     {
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(dps_secure_device_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
-        STRICT_EXPECTED_CALL(dps_secure_device_interface()).SetReturn(&test_riot_interface);
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
+        STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
+        STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface_fail);
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
         umock_c_reset_all_calls();
 
         //arrange
 
         //act
-        int result = dps_sec_import_key(sec_handle, TEST_DATA, TEST_DATA_LEN);
+        int result = prov_auth_import_key(sec_handle, TEST_DATA, TEST_DATA_LEN);
 
         //assert
         ASSERT_ARE_NOT_EQUAL(int, 0, result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
-        dps_sec_destroy(sec_handle);
+        prov_auth_destroy(sec_handle);
     }
 
-    TEST_FUNCTION(dps_sec_import_key_handle_NULL_fail)
+    TEST_FUNCTION(prov_auth_import_key_handle_NULL_fail)
     {
         //arrange
 
         //act
-        int result = dps_sec_import_key(NULL, TEST_DATA, TEST_DATA_LEN);
+        int result = prov_auth_import_key(NULL, TEST_DATA, TEST_DATA_LEN);
 
         //assert
         ASSERT_ARE_NOT_EQUAL(int, 0, result);
@@ -952,87 +953,87 @@ BEGIN_TEST_SUITE(dps_sec_client_ut)
         //cleanup
     }
 
-    TEST_FUNCTION(dps_sec_import_key_key_len_0_fail)
+    TEST_FUNCTION(prov_auth_import_key_key_len_0_fail)
     {
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
         umock_c_reset_all_calls();
 
         //arrange
 
         //act
-        int result = dps_sec_import_key(sec_handle, TEST_DATA, 0);
+        int result = prov_auth_import_key(sec_handle, TEST_DATA, 0);
 
         //assert
         ASSERT_ARE_NOT_EQUAL(int, 0, result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
-        dps_sec_destroy(sec_handle);
+        prov_auth_destroy(sec_handle);
     }
 
-    TEST_FUNCTION(dps_sec_import_key_key_value_NULL_fail)
+    TEST_FUNCTION(prov_auth_import_key_key_value_NULL_fail)
     {
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
         umock_c_reset_all_calls();
 
         //arrange
 
         //act
-        int result = dps_sec_import_key(sec_handle, NULL, TEST_DATA_LEN);
+        int result = prov_auth_import_key(sec_handle, NULL, TEST_DATA_LEN);
 
         //assert
         ASSERT_ARE_NOT_EQUAL(int, 0, result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
-        dps_sec_destroy(sec_handle);
+        prov_auth_destroy(sec_handle);
     }
 
-    TEST_FUNCTION(dps_sec_import_key_tpm_succeed)
+    TEST_FUNCTION(prov_auth_import_key_tpm_succeed)
     {
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
         umock_c_reset_all_calls();
 
         //arrange
         STRICT_EXPECTED_CALL(secure_device_import_key(IGNORED_PTR_ARG, TEST_DATA, TEST_DATA_LEN));
 
         //act
-        int result = dps_sec_import_key(sec_handle, TEST_DATA, TEST_DATA_LEN);
+        int result = prov_auth_import_key(sec_handle, TEST_DATA, TEST_DATA_LEN);
 
         //assert
         ASSERT_ARE_EQUAL(int, 0, result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
-        dps_sec_destroy(sec_handle);
+        prov_auth_destroy(sec_handle);
     }
 
-    TEST_FUNCTION(dps_sec_import_key_tpm_fail)
+    TEST_FUNCTION(prov_auth_import_key_tpm_fail)
     {
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
         umock_c_reset_all_calls();
 
         //arrange
         STRICT_EXPECTED_CALL(secure_device_import_key(IGNORED_PTR_ARG, TEST_DATA, TEST_DATA_LEN)).SetReturn(__LINE__);
 
         //act
-        int result = dps_sec_import_key(sec_handle, TEST_DATA, TEST_DATA_LEN);
+        int result = prov_auth_import_key(sec_handle, TEST_DATA, TEST_DATA_LEN);
 
         //assert
         ASSERT_ARE_NOT_EQUAL(int, 0, result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
-        dps_sec_destroy(sec_handle);
+        prov_auth_destroy(sec_handle);
     }
 
-    TEST_FUNCTION(dps_sec_construct_sas_token_handle_NULL_fail)
+    TEST_FUNCTION(prov_auth_construct_sas_token_handle_NULL_fail)
     {
 
         //arrange
 
         //act
-        char* result = dps_sec_construct_sas_token(NULL, TEST_TOKEN_SCOPE_VALUE, TEST_KEY_NAME_VALUE, TEST_EXPIRY_TIME_T_VALUE);
+        char* result = prov_auth_construct_sas_token(NULL, TEST_TOKEN_SCOPE_VALUE, TEST_KEY_NAME_VALUE, TEST_EXPIRY_TIME_T_VALUE);
 
         //assert
         ASSERT_IS_NULL(result);
@@ -1041,92 +1042,93 @@ BEGIN_TEST_SUITE(dps_sec_client_ut)
         //cleanup
     }
 
-    TEST_FUNCTION(dps_sec_construct_sas_token_key_name_NULL_fail)
+    TEST_FUNCTION(prov_auth_construct_sas_token_key_name_NULL_fail)
     {
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
         umock_c_reset_all_calls();
 
         //arrange
 
         //act
-        char* result = dps_sec_construct_sas_token(sec_handle, TEST_TOKEN_SCOPE_VALUE, NULL, TEST_EXPIRY_TIME_T_VALUE);
+        char* result = prov_auth_construct_sas_token(sec_handle, TEST_TOKEN_SCOPE_VALUE, NULL, TEST_EXPIRY_TIME_T_VALUE);
 
         //assert
         ASSERT_IS_NULL(result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
-        dps_sec_destroy(sec_handle);
+        prov_auth_destroy(sec_handle);
     }
 
-    TEST_FUNCTION(dps_sec_construct_sas_token_token_scope_NULL_fail)
+    TEST_FUNCTION(prov_auth_construct_sas_token_token_scope_NULL_fail)
     {
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
         umock_c_reset_all_calls();
 
         //arrange
 
         //act
-        char* result = dps_sec_construct_sas_token(sec_handle, NULL, TEST_KEY_NAME_VALUE, TEST_EXPIRY_TIME_T_VALUE);
+        char* result = prov_auth_construct_sas_token(sec_handle, NULL, TEST_KEY_NAME_VALUE, TEST_EXPIRY_TIME_T_VALUE);
 
         //assert
         ASSERT_IS_NULL(result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
-        dps_sec_destroy(sec_handle);
+        prov_auth_destroy(sec_handle);
     }
 
-    TEST_FUNCTION(dps_sec_construct_sas_token_riot_fail)
+    TEST_FUNCTION(prov_auth_construct_sas_token_x509_fail)
     {
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(dps_secure_device_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
-        STRICT_EXPECTED_CALL(dps_secure_device_interface()).SetReturn(&test_riot_interface);
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
+        STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
+        STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface_fail);
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
         umock_c_reset_all_calls();
 
         //arrange
 
         //act
-        char* result = dps_sec_construct_sas_token(sec_handle, TEST_TOKEN_SCOPE_VALUE, TEST_KEY_NAME_VALUE, TEST_EXPIRY_TIME_T_VALUE);
+        char* result = prov_auth_construct_sas_token(sec_handle, TEST_TOKEN_SCOPE_VALUE, TEST_KEY_NAME_VALUE, TEST_EXPIRY_TIME_T_VALUE);
 
         //assert
         ASSERT_IS_NULL(result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
-        dps_sec_destroy(sec_handle);
+        prov_auth_destroy(sec_handle);
     }
 
-    TEST_FUNCTION(dps_sec_construct_sas_token_succeed)
+    TEST_FUNCTION(prov_auth_construct_sas_token_succeed)
     {
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
         umock_c_reset_all_calls();
 
         //arrange
-        setup_dps_sec_construct_sas_token_mocks();
+        setup_prov_auth_construct_sas_token_mocks();
 
         //act
-        char* result = dps_sec_construct_sas_token(sec_handle, TEST_TOKEN_SCOPE_VALUE, TEST_KEY_NAME_VALUE, TEST_EXPIRY_TIME_T_VALUE);
+        char* result = prov_auth_construct_sas_token(sec_handle, TEST_TOKEN_SCOPE_VALUE, TEST_KEY_NAME_VALUE, TEST_EXPIRY_TIME_T_VALUE);
 
         //assert
         ASSERT_IS_NOT_NULL(result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
-        dps_sec_destroy(sec_handle);
+        my_gballoc_free(result);
+        prov_auth_destroy(sec_handle);
     }
 
-    TEST_FUNCTION(dps_sec_construct_sas_token_fail)
+    TEST_FUNCTION(prov_auth_construct_sas_token_fail)
     {
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
         umock_c_reset_all_calls();
 
         int negativeTestsInitResult = umock_c_negative_tests_init();
         ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
         //arrange
-        setup_dps_sec_construct_sas_token_mocks();
+        setup_prov_auth_construct_sas_token_mocks();
 
         umock_c_negative_tests_snapshot();
 
@@ -1145,25 +1147,25 @@ BEGIN_TEST_SUITE(dps_sec_client_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[128];
-            sprintf(tmp_msg, "dps_sec_construct_sas_token failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "prov_auth_construct_sas_token failure in test %zu/%zu", index, count);
 
-            char* result = dps_sec_construct_sas_token(sec_handle, TEST_TOKEN_SCOPE_VALUE, TEST_KEY_NAME_VALUE, TEST_EXPIRY_TIME_T_VALUE);
+            char* result = prov_auth_construct_sas_token(sec_handle, TEST_TOKEN_SCOPE_VALUE, TEST_KEY_NAME_VALUE, TEST_EXPIRY_TIME_T_VALUE);
 
             //assert
             ASSERT_IS_NULL_WITH_MSG(result, tmp_msg);
         }
 
         //cleanup
-        dps_sec_destroy(sec_handle);
+        prov_auth_destroy(sec_handle);
         umock_c_negative_tests_deinit();
     }
 
-    TEST_FUNCTION(dps_sec_get_certificate_handle_NULL_fail)
+    TEST_FUNCTION(prov_auth_get_certificate_handle_NULL_fail)
     {
         //arrange
 
         //act
-        char* result = dps_sec_get_certificate(NULL);
+        char* result = prov_auth_get_certificate(NULL);
 
         //assert
         ASSERT_IS_NULL(result);
@@ -1172,52 +1174,52 @@ BEGIN_TEST_SUITE(dps_sec_client_ut)
         //cleanup
     }
 
-    TEST_FUNCTION(dps_sec_get_certificate_tpm_fail)
+    TEST_FUNCTION(prov_auth_get_certificate_tpm_fail)
     {
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
         umock_c_reset_all_calls();
 
         //arrange
 
         //act
-        char* result = dps_sec_get_certificate(sec_handle);
+        char* result = prov_auth_get_certificate(sec_handle);
 
         //assert
         ASSERT_IS_NULL(result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
-        dps_sec_destroy(sec_handle);
+        prov_auth_destroy(sec_handle);
     }
 
-    TEST_FUNCTION(dps_sec_get_certificate_succeed)
+    TEST_FUNCTION(prov_auth_get_certificate_succeed)
     {
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(dps_secure_device_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
-        STRICT_EXPECTED_CALL(dps_secure_device_interface()).SetReturn(&test_riot_interface);
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
+        STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
+        STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface);
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
         umock_c_reset_all_calls();
 
         //arrange
         STRICT_EXPECTED_CALL(secure_device_get_certificate(IGNORED_PTR_ARG));
 
         //act
-        char* result = dps_sec_get_certificate(sec_handle);
+        char* result = prov_auth_get_certificate(sec_handle);
 
         //assert
         ASSERT_IS_NOT_NULL(result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
-        dps_sec_destroy(sec_handle);
+        prov_auth_destroy(sec_handle);
     }
 
-    TEST_FUNCTION(dps_sec_get_alias_key_handle_NULL_fail)
+    TEST_FUNCTION(prov_auth_get_alias_key_handle_NULL_fail)
     {
         //arrange
 
         //act
-        char* result = dps_sec_get_alias_key(NULL);
+        char* result = prov_auth_get_alias_key(NULL);
 
         //assert
         ASSERT_IS_NULL(result);
@@ -1226,98 +1228,44 @@ BEGIN_TEST_SUITE(dps_sec_client_ut)
         //cleanup
     }
 
-    TEST_FUNCTION(dps_sec_get_alias_key_tpm_fail)
+    TEST_FUNCTION(prov_auth_get_alias_key_tpm_fail)
     {
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
         umock_c_reset_all_calls();
 
         //arrange
 
         //act
-        char* result = dps_sec_get_alias_key(sec_handle);
+        char* result = prov_auth_get_alias_key(sec_handle);
 
         //assert
         ASSERT_IS_NULL(result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
-        dps_sec_destroy(sec_handle);
+        prov_auth_destroy(sec_handle);
     }
 
-    TEST_FUNCTION(dps_sec_get_alias_key_succeed)
+    TEST_FUNCTION(prov_auth_get_alias_key_succeed)
     {
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(dps_secure_device_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
-        STRICT_EXPECTED_CALL(dps_secure_device_interface()).SetReturn(&test_riot_interface);
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
+        STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
+        STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface);
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
         umock_c_reset_all_calls();
 
         //arrange
         STRICT_EXPECTED_CALL(secure_device_get_alias_key(IGNORED_PTR_ARG));
 
         //act
-        char* result = dps_sec_get_alias_key(sec_handle);
+        char* result = prov_auth_get_alias_key(sec_handle);
 
         //assert
         ASSERT_IS_NOT_NULL(result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
-        dps_sec_destroy(sec_handle);
+        prov_auth_destroy(sec_handle);
     }
 
-    TEST_FUNCTION(dps_sec_get_signer_cert_handle_NULL_fail)
-    {
-        //arrange
-
-        //act
-        char* result = dps_sec_get_signer_cert(NULL);
-
-        //assert
-        ASSERT_IS_NULL(result);
-        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-        //cleanup
-    }
-
-    TEST_FUNCTION(dps_sec_get_signer_cert_tpm_fail)
-    {
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
-        umock_c_reset_all_calls();
-
-        //arrange
-
-        //act
-        char* result = dps_sec_get_signer_cert(sec_handle);
-
-        //assert
-        ASSERT_IS_NULL(result);
-        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-        //cleanup
-        dps_sec_destroy(sec_handle);
-    }
-
-    TEST_FUNCTION(dps_sec_get_signer_cert_succeed)
-    {
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(dps_secure_device_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
-        STRICT_EXPECTED_CALL(dps_secure_device_interface()).SetReturn(&test_riot_interface);
-        DPS_SEC_HANDLE sec_handle = dps_sec_create();
-        umock_c_reset_all_calls();
-
-        //arrange
-        STRICT_EXPECTED_CALL(secure_device_get_signer_cert(IGNORED_PTR_ARG));
-
-        //act
-        char* result = dps_sec_get_signer_cert(sec_handle);
-
-        //assert
-        ASSERT_IS_NOT_NULL(result);
-        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-        //cleanup
-        dps_sec_destroy(sec_handle);
-    }
-
-    END_TEST_SUITE(dps_sec_client_ut)
+    END_TEST_SUITE(prov_auth_client_ut)

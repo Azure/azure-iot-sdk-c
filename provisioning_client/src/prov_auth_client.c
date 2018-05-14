@@ -249,10 +249,15 @@ char* prov_auth_get_registration_id(PROV_AUTH_HANDLE handle)
     else
     {
         int load_result = 0;
+        int reg_id_allocated = 0;
         if (handle->registration_id == NULL)
         {
             /* Codes_SRS_PROV_AUTH_CLIENT_07_011: [ prov_auth_get_registration_id shall load the registration id if it has not been previously loaded. ] */
             load_result = load_registration_id(handle);
+            if (load_result == 0)
+            {
+                reg_id_allocated = 1;
+            }
         }
 
         if (load_result != 0)
@@ -266,6 +271,11 @@ char* prov_auth_get_registration_id(PROV_AUTH_HANDLE handle)
         {
             /* Codes_SRS_PROV_AUTH_CLIENT_07_012: [ If a failure is encountered, prov_auth_get_registration_id shall return NULL. ] */
             LogError("Failed allocating registration key");
+            if (reg_id_allocated == 1)
+            {
+                free(handle->registration_id);
+                handle->registration_id = NULL;
+            }
             result = NULL;
         }
     }

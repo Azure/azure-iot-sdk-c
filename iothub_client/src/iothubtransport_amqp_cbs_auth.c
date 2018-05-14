@@ -263,7 +263,7 @@ static int create_and_put_SAS_token_to_cbs(AUTHENTICATION_INSTANCE* instance)
         if (cred_type == IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY || cred_type == IOTHUB_CREDENTIAL_TYPE_DEVICE_AUTH)
         {
             /* Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_049: [authentication_do_work() shall create a SAS token using IoTHubClient_Auth_Get_SasToken, unless it has failed previously] */
-            sas_token = IoTHubClient_Auth_Get_SasToken(instance->authorization_module, STRING_c_str(device_and_module_path), instance->sas_token_lifetime_secs);
+            sas_token = IoTHubClient_Auth_Get_SasToken(instance->authorization_module, STRING_c_str(device_and_module_path), instance->sas_token_lifetime_secs, NULL);
             if (sas_token == NULL)
             {
                 LogError("failure getting sas token.");
@@ -293,7 +293,7 @@ static int create_and_put_SAS_token_to_cbs(AUTHENTICATION_INSTANCE* instance)
             else
             {
                 /* Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_049: [authentication_do_work() shall create a SAS token using IoTHubClient_Auth_Get_SasToken, unless it has failed previously] */
-                sas_token = IoTHubClient_Auth_Get_SasToken(instance->authorization_module, NULL, 0);
+                sas_token = IoTHubClient_Auth_Get_SasToken(instance->authorization_module, NULL, 0, NULL);
                 if (sas_token == NULL)
                 {
                     LogError("failure getting sas Token.");

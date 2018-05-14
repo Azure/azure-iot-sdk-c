@@ -44,7 +44,7 @@ static void my_gballoc_free(void* ptr)
 #undef ENABLE_MOCKS
 
 #include "hsm_client_tpm.h"
-#include "hsm_client_tpm_abstract.h"
+#include "hsm_client_data.h"
 
 #define ENABLE_MOCKS
 #include "azure_utpm_c/TpmTypes.h"
@@ -64,6 +64,18 @@ static uint16_t g_rsa_size;
 static void my_STRING_delete(STRING_HANDLE h)
 {
     my_gballoc_free((void*)h);
+}
+
+static TPM_HANDLE my_TSS_CreatePersistentKey(TSS_DEVICE* tpm_device, TPM_HANDLE request_handle, TSS_SESSION* sess, TPMI_DH_OBJECT hierarchy, TPM2B_PUBLIC* inPub, TPM2B_PUBLIC* outPub)
+{
+    (void)tpm_device;
+    (void)request_handle;
+    (void)sess;
+    (void)hierarchy;
+    (void)inPub;
+    
+    (*outPub).publicArea.unique.rsa.t.size = g_rsa_size;
+    return (TPM_HANDLE)0x1;
 }
 
 static TPM_RC my_TSS_CreatePrimary(TSS_DEVICE *tpm, TSS_SESSION *sess, TPM_HANDLE hierarchy, TPM2B_PUBLIC *inPub, TPM_HANDLE *outHandle, TPM2B_PUBLIC *outPub)
@@ -165,6 +177,9 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(TSS_Create, TPM_RC_FAILURE);
         REGISTER_GLOBAL_MOCK_RETURN(TSS_GetTpmProperty, 1028);
 
+        REGISTER_GLOBAL_MOCK_HOOK(TSS_CreatePersistentKey, my_TSS_CreatePersistentKey);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(TSS_CreatePersistentKey, 0);
+
         REGISTER_GLOBAL_MOCK_RETURN(TSS_StartAuthSession, TPM_RC_SUCCESS);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(TSS_StartAuthSession, TPM_RC_FAILURE);
         REGISTER_GLOBAL_MOCK_RETURN(TSS_PolicySecret, TPM_RC_SUCCESS);
@@ -250,38 +265,15 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
     static void setup_hsm_client_tpm_create_mock()
     {
         OBJECT_ATTR tmp = FixedTPM;
-        TPM_HANDLE tmp_tpm_handle = 0;
-        TPMI_RH_PROVISION tpm_rh_prov = 0;
-        TPMI_DH_OBJECT tpm_obj = 0;
-        TPMI_DH_PERSISTENT tpm_persistent = 0;
-        TPMI_DH_CONTEXT tmp_ctx = 0;
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(TSS_CreatePwAuthSession(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(Initialize_TPM_Codec(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(ToTpmaObject(tmp))
             .IgnoreArgument_attrs();
-        STRICT_EXPECTED_CALL(TPM2_ReadPublic(IGNORED_PTR_ARG, tpm_obj, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreArgument_objectHandle(); // 4
-        STRICT_EXPECTED_CALL(TSS_CreatePrimary(IGNORED_PTR_ARG, IGNORED_PTR_ARG, tmp_tpm_handle, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreArgument_hierarchy();
-        STRICT_EXPECTED_CALL(TPM2_EvictControl(IGNORED_PTR_ARG, IGNORED_PTR_ARG, tpm_rh_prov, tpm_obj, tpm_persistent))
-            .IgnoreArgument_auth()
-            .IgnoreArgument_objectHandle()
-            .IgnoreArgument_persistentHandle();
-        STRICT_EXPECTED_CALL(TPM2_FlushContext(IGNORED_PTR_ARG, tmp_ctx))
-            .IgnoreArgument_flushHandle();
-        EXPECTED_CALL(ToTpmaObject(tmp))
-            .IgnoreArgument_attrs(); // 8
-        STRICT_EXPECTED_CALL(TPM2_ReadPublic(IGNORED_PTR_ARG, tpm_obj, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreArgument_objectHandle();
-        STRICT_EXPECTED_CALL(TSS_CreatePrimary(IGNORED_PTR_ARG, IGNORED_PTR_ARG, tmp_tpm_handle, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreArgument_hierarchy();
-        STRICT_EXPECTED_CALL(TPM2_EvictControl(IGNORED_PTR_ARG, IGNORED_PTR_ARG, tpm_rh_prov, tpm_obj, tpm_persistent))
-            .IgnoreArgument_auth()
-            .IgnoreArgument_objectHandle()
-            .IgnoreArgument_persistentHandle();
-        STRICT_EXPECTED_CALL(TPM2_FlushContext(IGNORED_PTR_ARG, tmp_ctx))
-            .IgnoreArgument_flushHandle();
+        STRICT_EXPECTED_CALL(TSS_CreatePersistentKey(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(ToTpmaObject(tmp))
+            .IgnoreArgument_attrs();
+        STRICT_EXPECTED_CALL(TSS_CreatePersistentKey(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     }
 
     static void setup_hsm_client_tpm_import_key_mock()
@@ -376,7 +368,7 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
 
         umock_c_negative_tests_snapshot();
 
-        size_t calls_cannot_fail[] = { 3, 8 };
+        size_t calls_cannot_fail[] = { 3, 5 };
 
         //act
         size_t count = umock_c_negative_tests_call_count();
@@ -979,8 +971,8 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         ASSERT_IS_NOT_NULL(tpm_iface->hsm_client_tpm_destroy);
         ASSERT_IS_NOT_NULL(tpm_iface->hsm_client_get_ek);
         ASSERT_IS_NOT_NULL(tpm_iface->hsm_client_get_srk);
-        ASSERT_IS_NOT_NULL(tpm_iface->hsm_client_import_key);
-        ASSERT_IS_NOT_NULL(tpm_iface->hsm_client_sign_data);
+        ASSERT_IS_NOT_NULL(tpm_iface->hsm_client_activate_identity_key);
+        ASSERT_IS_NOT_NULL(tpm_iface->hsm_client_sign_with_identity);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup

@@ -63,7 +63,7 @@ MOCKABLE_FUNCTION(, int, X509GetDERCsr, DERBuilderContext*, Context, RIOT_ECC_SI
 #undef ENABLE_MOCKS
 
 #include "hsm_client_riot.h"
-#include "hsm_client_x509_abstract.h"
+#include "hsm_client_data.h"
 
 static const char* TEST_STRING_VALUE = "Test_String_Value";
 static const char* TEST_CERTIFICATE_VALUE = "Test_String_ValueTest_String_Value";
@@ -441,7 +441,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
     /* Tests_SRS_SECURE_DEVICE_RIOT_07_005: [ hsm_client_riot_create shall create the Signer regions of the alias key certificate. ]*/
     TEST_FUNCTION(hsm_client_riot_create_succeed)
     {
-        hsm_init_x509_system();
+        hsm_client_x509_init();
         umock_c_reset_all_calls();
 
         //arrange
@@ -461,7 +461,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
     /* Tests_SRS_SECURE_DEVICE_RIOT_07_006: [ If any failure is encountered hsm_client_riot_create shall return NULL ] */
     TEST_FUNCTION(hsm_client_riot_create_fail)
     {
-        hsm_init_x509_system();
+        hsm_client_x509_init();
         umock_c_reset_all_calls();
 
         int negativeTestsInitResult = umock_c_negative_tests_init();
@@ -504,8 +504,10 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
     /* Tests_SRS_SECURE_DEVICE_RIOT_07_009: [ hsm_client_riot_destroy shall free all resources allocated in this module. ] */
     TEST_FUNCTION(hsm_client_riot_destroy_succeed)
     {
+        hsm_client_x509_init();
+        umock_c_reset_all_calls();
+
         //arrange
-        hsm_init_x509_system();
         HSM_CLIENT_HANDLE sec_handle = hsm_client_riot_create();
         umock_c_reset_all_calls();
 
@@ -556,7 +558,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
     TEST_FUNCTION(hsm_client_riot_get_certificate_malloc_fail)
     {
         //arrange
-        hsm_init_x509_system();
+        hsm_client_x509_init();
         HSM_CLIENT_HANDLE sec_handle = hsm_client_riot_create();
         umock_c_reset_all_calls();
 
@@ -578,7 +580,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
     TEST_FUNCTION(hsm_client_riot_get_certificate_succeed)
     {
         //arrange
-        hsm_init_x509_system();
+        hsm_client_x509_init();
         HSM_CLIENT_HANDLE sec_handle = hsm_client_riot_create();
         umock_c_reset_all_calls();
 
@@ -601,7 +603,6 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
     TEST_FUNCTION(hsm_client_riot_get_alias_key_handle_NULL_succeed)
     {
         //arrange
-        umock_c_reset_all_calls();
 
         //act
         char* value = hsm_client_riot_get_alias_key(NULL);
@@ -617,7 +618,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
     TEST_FUNCTION(hsm_client_riot_get_alias_key_malloc_fail)
     {
         //arrange
-        hsm_init_x509_system();
+        hsm_client_x509_init();
         HSM_CLIENT_HANDLE sec_handle = hsm_client_riot_create();
         umock_c_reset_all_calls();
 
@@ -639,7 +640,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
     TEST_FUNCTION(hsm_client_riot_get_alias_key_succeed)
     {
         //arrange
-        hsm_init_x509_system();
+        hsm_client_x509_init();
         HSM_CLIENT_HANDLE sec_handle = hsm_client_riot_create();
         umock_c_reset_all_calls();
 
@@ -678,7 +679,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
     TEST_FUNCTION(hsm_client_riot_get_signer_cert_malloc_fail)
     {
         //arrange
-        hsm_init_x509_system();
+        hsm_client_x509_init();
         HSM_CLIENT_HANDLE sec_handle = hsm_client_riot_create();
         umock_c_reset_all_calls();
 
@@ -700,7 +701,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
     TEST_FUNCTION(hsm_client_riot_get_signer_cert_succeed)
     {
         //arrange
-        hsm_init_x509_system();
+        hsm_client_x509_init();
         HSM_CLIENT_HANDLE sec_handle = hsm_client_riot_create();
         umock_c_reset_all_calls();
 
@@ -722,7 +723,6 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
     TEST_FUNCTION(hsm_client_riot_get_root_cert_handle_NULL_fail)
     {
         //arrange
-        hsm_init_x509_system();
         umock_c_reset_all_calls();
 
         //act
@@ -738,7 +738,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
     TEST_FUNCTION(hsm_client_riot_get_root_cert_succeed)
     {
         //arrange
-        hsm_init_x509_system();
+        hsm_client_x509_init();
         HSM_CLIENT_HANDLE sec_handle = hsm_client_riot_create();
         umock_c_reset_all_calls();
 
@@ -762,7 +762,6 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
     TEST_FUNCTION(hsm_client_riot_get_common_name_handle_NULL_succeed)
     {
         //arrange
-        umock_c_reset_all_calls();
 
         //act
         char* value = hsm_client_riot_get_common_name(NULL);
@@ -778,7 +777,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
     TEST_FUNCTION(hsm_client_riot_get_common_name_mallocAndStrcpy_s_fail)
     {
         //arrange
-        hsm_init_x509_system();
+        hsm_client_x509_init();
         HSM_CLIENT_HANDLE sec_handle = hsm_client_riot_create();
         umock_c_reset_all_calls();
 
@@ -799,7 +798,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
     TEST_FUNCTION(hsm_client_riot_get_common_name_succeed)
     {
         //arrange
-        hsm_init_x509_system();
+        hsm_client_x509_init();
         HSM_CLIENT_HANDLE sec_handle = hsm_client_riot_create();
         umock_c_reset_all_calls();
 
@@ -822,8 +821,6 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
     TEST_FUNCTION(hsm_client_riot_create_leaf_cert_handle_NULL_fail)
     {
         //arrange
-        hsm_init_x509_system();
-        umock_c_reset_all_calls();
 
         //act
         char* value = hsm_client_riot_create_leaf_cert(NULL, TEST_CN_VALUE);
@@ -839,7 +836,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
     TEST_FUNCTION(hsm_client_riot_create_leaf_cert_common_name_NULL_fail)
     {
         //arrange
-        hsm_init_x509_system();
+        hsm_client_x509_init();
         HSM_CLIENT_HANDLE sec_handle = hsm_client_riot_create();
         umock_c_reset_all_calls();
 
@@ -858,7 +855,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
     TEST_FUNCTION(hsm_client_riot_create_leaf_cert_succeed)
     {
         //arrange
-        hsm_init_x509_system();
+        hsm_client_x509_init();
         HSM_CLIENT_HANDLE sec_handle = hsm_client_riot_create();
         umock_c_reset_all_calls();
 
@@ -880,7 +877,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
     TEST_FUNCTION(hsm_client_riot_create_leaf_cert_fail)
     {
         //arrange
-        hsm_init_x509_system();
+        hsm_client_x509_init();
         HSM_CLIENT_HANDLE sec_handle = hsm_client_riot_create();
         umock_c_reset_all_calls();
 
@@ -923,7 +920,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
     TEST_FUNCTION(hsm_client_riot_interface_succeed)
     {
         //arrange
-        hsm_init_x509_system();
+        hsm_client_x509_init();
         HSM_CLIENT_HANDLE sec_handle = hsm_client_riot_create();
         umock_c_reset_all_calls();
 

@@ -30,8 +30,8 @@
 #include "azure_c_shared_utility/map.h"
 #include "azure_c_shared_utility/uniqueid.h"
 
-#include "provisioning_service_client.h"
-#include "provisioning_sc_enrollment.h"
+#include "prov_service_client/provisioning_service_client.h"
+#include "prov_service_client/provisioning_sc_enrollment.h"
 
 static TEST_MUTEX_HANDLE g_dllByDll;
 
@@ -237,7 +237,7 @@ BEGIN_TEST_SUITE(dps_client_e2e)
 
         platform_init();
 
-        prov_dev_security_init(SECURE_DEVICE_TYPE_X509);
+        prov_dev_security_init(SECURE_DEVICE_TYPE_TPM);
 
         g_prov_conn_string = getenv("DPS_C_CONNECTION_STRING");
         ASSERT_IS_NOT_NULL_WITH_MSG(g_prov_conn_string, "PROV_CONNECTION_STRING is NULL");

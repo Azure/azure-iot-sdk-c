@@ -5,17 +5,17 @@
 cmake_minimum_required(VERSION 2.8.11)
 
 compileAsC11()
-set(theseTestsName dps_sec_client_ut)
+set(theseTestsName prov_auth_client_ut)
 
 set(${theseTestsName}_test_files
 ${theseTestsName}.c
 )
 
 set(${theseTestsName}_c_files
-../../src/dps_sec_client.c
+../../src/prov_auth_client.c
 )
 
 set(${theseTestsName}_h_files
 )
 
-build_c_test_artifacts(${theseTestsName} ON "tests/azure_dev_auth_tests")
+build_c_test_artifacts(${theseTestsName} ON "tests/azure_prov_device_tests")

@@ -14,7 +14,7 @@
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/http_proxy_io.h"
 
-#include "iothub_client_hsm_ll.h"
+#include "iothub_client_ll.h"
 #include "azure_prov_client/prov_device_ll_client.h"
 #include "azure_prov_client/prov_security_factory.h"
 

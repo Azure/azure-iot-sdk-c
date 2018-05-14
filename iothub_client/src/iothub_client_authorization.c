@@ -302,7 +302,7 @@ IOTHUB_CREDENTIAL_TYPE IoTHubClient_Auth_Get_Credential_Type(IOTHUB_AUTHORIZATIO
     return result;
 }
 
-char* IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const char* scope, size_t expiry_time_relative_seconds)
+char* IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const char* scope, size_t expiry_time_relative_seconds, const char* key_name)
 {
     char* result;
     /* Codes_SRS_IoTHub_Authorization_07_009: [ if handle or scope are NULL, IoTHubClient_Auth_Get_SasToken shall return NULL. ] */
@@ -326,9 +326,11 @@ char* IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const c
             }
             else 
             {
+                memset(&dev_auth_cred, 0, sizeof(DEVICE_AUTH_CREDENTIAL_INFO));
                 size_t expiry_time = sec_since_epoch+expiry_time_relative_seconds;
                 dev_auth_cred.sas_info.expiry_seconds = expiry_time;
                 dev_auth_cred.sas_info.token_scope = scope;
+                dev_auth_cred.sas_info.key_name = key_name;
                 dev_auth_cred.dev_auth_type = AUTH_TYPE_SAS;
 
                 CREDENTIAL_RESULT* cred_result = iothub_device_auth_generate_credentials(handle->device_auth_handle, &dev_auth_cred);
@@ -379,7 +381,6 @@ char* IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const c
             }
             else
             {
-                const char* key_name = "";
                 STRING_HANDLE sas_token;
                 size_t sec_since_epoch;
 
@@ -518,8 +519,8 @@ SAS_TOKEN_STATUS IoTHubClient_Auth_Is_SasToken_Valid(IOTHUB_AUTHORIZATION_HANDLE
         }
         else
         {
-            /* Codes_SRS_IoTHub_Authorization_07_016: [ if credential type is not IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN IoTHubClient_Auth_Is_SasToken_Valid shall return true. ] */
-            result = true;
+            /* Codes_SRS_IoTHub_Authorization_07_016: [ if credential type is not IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN IoTHubClient_Auth_Is_SasToken_Valid shall return SAS_TOKEN_STATUS_VALID. ] */
+            result = SAS_TOKEN_STATUS_VALID;
         }
     }
     return result;

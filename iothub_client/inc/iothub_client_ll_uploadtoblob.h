@@ -25,7 +25,7 @@
 #ifndef IOTHUB_CLIENT_LL_UPLOADTOBLOB_H
 #define IOTHUB_CLIENT_LL_UPLOADTOBLOB_H
 
-#include "iothub_client_ll.h"
+#include "iothub_client_core_ll.h"
 
 #include "azure_c_shared_utility/umock_c_prod.h"
 #ifdef __cplusplus
