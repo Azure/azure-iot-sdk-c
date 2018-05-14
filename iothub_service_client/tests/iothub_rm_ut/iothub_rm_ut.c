@@ -2621,6 +2621,22 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         TestGetModule(IOTHUB_REGISTRYMANAGER_AUTH_SPK);
     }    
 
+    TEST_FUNCTION(IoTHubRegistryManager_GetDevice_not_found)
+    {
+        //TestGetDevice(IOTHUB_REGISTRYMANAGER_AUTH_SPK);
+        //arrange
+        setupHttpMockCalls(false, httpStatusCodeDeviceNotExists, HTTPAPI_REQUEST_GET);
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
+
+        //act
+        IOTHUB_DEVICE deviceInfo;
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetDevice(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, &deviceInfo);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_DEVICE_NOT_EXIST, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_031: [ If any of the HTTPAPI call fails IoTHubRegistryManager_GetDevice shall fail and return IOTHUB_REGISTRYMANAGER_ERROR ]*/
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_033: [ IoTHubRegistryManager_GetDevice shall verify the received HTTP status code and if it is less or equal than 300 then try to parse the response JSON to deviceInfo for the following properties: deviceId, primaryKey, secondaryKey, generationId, eTag, connectionState, connectionstateUpdatedTime, status, statusReason, statusUpdatedTime, lastActivityTime, cloudToDeviceMessageCount ]*/
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_034: [ If any of the property field above missing from the JSON the property value will not be populated ]*/
@@ -2698,29 +2714,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         umock_c_negative_tests_deinit();
     }
 
-    TEST_FUNCTION(IoTHubRegistryManager_GetDevice_not_found)
-    {
-        //TestGetDevice(IOTHUB_REGISTRYMANAGER_AUTH_SPK);
-        //arrange
-        setupHttpMockCalls(false, httpStatusCodeDeviceNotExists, HTTPAPI_REQUEST_GET);
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-
-        //act
-        IOTHUB_DEVICE deviceInfo;
-        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetDevice(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, &deviceInfo);
-
-        ///assert
-        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_DEVICE_NOT_EXIST, result);
-        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-    }
-
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_031: [ If any of the HTTPAPI call fails IoTHubRegistryManager_GetDevice shall fail and return IOTHUB_REGISTRYMANAGER_ERROR ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_033: [ IoTHubRegistryManager_GetDevice shall verify the received HTTP status code and if it is less or equal than 300 then try to parse the response JSON to deviceInfo for the following properties: deviceId, primaryKey, secondaryKey, generationId, eTag, connectionState, connectionstateUpdatedTime, status, statusReason, statusUpdatedTime, lastActivityTime, cloudToDeviceMessageCount ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_034: [ If any of the property field above missing from the JSON the property value will not be populated ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_035: [ If the JSON parsing failed, IoTHubRegistryManager_GetDevice shall return IOTHUB_REGISTRYMANAGER_JSON_ERROR ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_036: [ If the received JSON is empty, IoTHubRegistryManager_GetDevice shall return IOTHUB_REGISTRYMANAGER_DEVICE_NOT_EXIST ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_037: [ If the deviceInfo out parameter if not NULL IoTHubRegistryManager_GetDevice shall save the received deviceInfo to the out parameter and return IOTHUB_REGISTRYMANAGER_OK ]*/
-    TEST_FUNCTION(IoTHubRegistryManager_GetDevice_non_happy_path)
+    TEST_FUNCTION(IoTHubRegistryManager_GetDevice_Ex_non_happy_path)
     {
         ///arrange
         int umockc_result = umock_c_negative_tests_init();
@@ -2791,6 +2785,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         }
         umock_c_negative_tests_deinit();
     }
+
 
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_038: [ IoTHubRegistryManager_UpdateDevice shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
     TEST_FUNCTION(IoTHubRegistryManager_UpdateModule_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_registryManagerHandle_is_NULL)
