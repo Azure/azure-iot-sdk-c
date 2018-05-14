@@ -1647,7 +1647,7 @@ static bool is_event_equal_for_match(LIST_ITEM_HANDLE list_item, const void* mat
     return is_event_equal((IOTHUB_EVENT_CALLBACK*)singlylinkedlist_item_get_value(list_item), (const char*)match_context);
 }
 
-bool IoTHubClient_LL_MessageCallbackFromInput(IOTHUB_CLIENT_CORE_LL_HANDLE handle, MESSAGE_CALLBACK_INFO* messageData)
+bool IoTHubClientCore_LL_MessageCallbackFromInput(IOTHUB_CLIENT_CORE_LL_HANDLE handle, MESSAGE_CALLBACK_INFO* messageData)
 {
     bool result;
     if ((handle == NULL) || messageData == NULL)
@@ -2317,7 +2317,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx(IOTHUB_CLI
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendEventToOutputAsync(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE eventMessageHandle, const char* outputName, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK eventConfirmationCallback, void* userContextCallback)
+IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SendEventToOutputAsync(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE eventMessageHandle, const char* outputName, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK eventConfirmationCallback, void* userContextCallback)
 {
     IOTHUB_CLIENT_RESULT result;
 
@@ -2483,7 +2483,7 @@ static IOTHUB_CLIENT_RESULT remove_event_unsubscribe_if_needed(IOTHUB_CLIENT_COR
 }
 
 
-IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetInputMessageCallbackImpl(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, const char* inputName, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC eventHandlerCallback, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC_EX eventHandlerCallbackEx, void *userContextCallback, void *userContextCallbackEx, size_t userContextCallbackExLength)
+IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetInputMessageCallbackImpl(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, const char* inputName, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC eventHandlerCallback, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC_EX eventHandlerCallbackEx, void *userContextCallback, void *userContextCallbackEx, size_t userContextCallbackExLength)
 {
     IOTHUB_CLIENT_RESULT result;
 
@@ -2524,14 +2524,14 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetInputMessageCallbackImpl(IOTHUB_CLIENT_C
 
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetInputMessageCallbackEx(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, const char* inputName, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC_EX eventHandlerCallbackEx, void *userContextCallbackEx, size_t userContextCallbackExLength)
+IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetInputMessageCallbackEx(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, const char* inputName, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC_EX eventHandlerCallbackEx, void *userContextCallbackEx, size_t userContextCallbackExLength)
 {
-    return IoTHubClient_LL_SetInputMessageCallbackImpl(iotHubClientHandle, inputName, NULL, eventHandlerCallbackEx, NULL, userContextCallbackEx, userContextCallbackExLength);
+    return IoTHubClientCore_LL_SetInputMessageCallbackImpl(iotHubClientHandle, inputName, NULL, eventHandlerCallbackEx, NULL, userContextCallbackEx, userContextCallbackExLength);
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetInputMessageCallback(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, const char* inputName, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC eventHandlerCallback, void* userContextCallback)
+IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetInputMessageCallback(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, const char* inputName, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC eventHandlerCallback, void* userContextCallback)
 {
-    return IoTHubClient_LL_SetInputMessageCallbackImpl(iotHubClientHandle, inputName, eventHandlerCallback, NULL, userContextCallback, NULL, 0);
+    return IoTHubClientCore_LL_SetInputMessageCallbackImpl(iotHubClientHandle, inputName, eventHandlerCallback, NULL, userContextCallback, NULL, 0);
 }
 
 

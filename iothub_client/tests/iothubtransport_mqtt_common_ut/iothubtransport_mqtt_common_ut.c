@@ -868,8 +868,6 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_SetConnectionModuleId, IOTHUB_MESSAGE_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_SetConnectionModuleId, IOTHUB_MESSAGE_ERROR);
 
-    REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_MessageCallbackFromInput, my_IoTHubClient_LL_MessageCallback);
-
     REGISTER_GLOBAL_MOCK_RETURN(retry_control_create, TEST_RETRY_CONTROL_HANDLE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(retry_control_create, NULL);
 
@@ -7254,7 +7252,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_InputQueue_DoWork_Succeed)
 
     IoTHubTransport_MQTT_Common_Subscribe_InputQueue(handle);
 
-    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
 
     CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };
     g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
@@ -7264,7 +7262,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_InputQueue_DoWork_Succeed)
     setup_subscribe_inputqueue_dowork_mocks();
 
     // act
-    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -7285,7 +7283,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_InputQueue_DoWork_fails)
 
     (void)IoTHubTransport_MQTT_Common_Subscribe_InputQueue(handle);
 
-    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
 
     umock_c_reset_all_calls();
 
@@ -7312,7 +7310,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_InputQueue_DoWork_fails)
         char tmp_msg[64];
         sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_DoWork failure in test %zu/%zu", index, count);
 
-        IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+        IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
 
         // assert
     }
@@ -7398,7 +7396,7 @@ static void setup_message_recv_with_input_queue_mocks(const char* topicName, con
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument_size();
-    STRICT_EXPECTED_CALL(IoTHubClient_LL_MessageCallbackFromInput(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallbackFromInput(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG))
         .IgnoreArgument_message_data();
 
     STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_iotHubMessageHandle();
@@ -7417,7 +7415,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_InputQueue_succeed)
 
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
     
-    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
     umock_c_reset_all_calls();
 
     g_tokenizerIndex = PARSE_SLASHES_FOR_INPUT_QUEUE_INDEX_0;
@@ -7444,7 +7442,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_InputQueue_no_system_
 
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
     
-    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
     umock_c_reset_all_calls();
 
     g_tokenizerIndex = PARSE_SLASHES_FOR_INPUT_QUEUE_NO_SYSTEM_PROPS_INDEX_0;
@@ -7471,7 +7469,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_InputQueue_missing_qu
 
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
     
-    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
     umock_c_reset_all_calls();
 
     g_tokenizerIndex = PARSE_SLASHES_FOR_INPUT_QUEUE_NO_SYSTEM_PROPS_INDEX_1;
@@ -7515,7 +7513,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_with_InputQueue_fail)
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, TEST_MODULE_ID);
 
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
-    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
     umock_c_reset_all_calls();
 
     setup_message_recv_with_input_queue_mocks(TEST_MQTT_INPUT_1, TEST_MQTT_INPUT_QUEUE_SUBSCRIBE_NAME_1, TEST_INPUT_QUEUE_1, true);

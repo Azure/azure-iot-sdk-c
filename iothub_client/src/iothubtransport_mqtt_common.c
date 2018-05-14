@@ -1464,7 +1464,7 @@ static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE msgHandle, void* call
                             if (type == IOTHUB_TYPE_EVENT_QUEUE)
                             {
                                 // Codes_SRS_IOTHUB_MQTT_TRANSPORT_31_065: [ If type is IOTHUB_TYPE_TELEMETRY and sent to an input queue, then on success `mqtt_notification_callback` shall call `IoTHubClient_LL_MessageCallback`. ]
-                                if (!IoTHubClientCore_LL_MessageCallback(transportData->llClientHandle, messageData))
+                                if (!IoTHubClientCore_LL_MessageCallbackFromInput(transportData->llClientHandle, messageData))
                                 {
                                     LogError("IoTHubClientCore_LL_MessageCallbackreturned false");
 
