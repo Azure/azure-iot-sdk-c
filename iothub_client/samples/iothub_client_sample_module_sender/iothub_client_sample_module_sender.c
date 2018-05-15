@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "iothub_client.h"
+#include "iothub_module_client.h"
 #include "iothub_message.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
@@ -126,7 +126,7 @@ static void SendConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, v
 
 void iothub_client_sample_module_sender(void)
 {
-    IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle;
+    IOTHUB_MODULE_CLIENT_LL_HANDLE iotHubModuleClientHandle;
     EVENT_INSTANCE messages[MESSAGE_COUNT];
 
     char *connectionStringFromEnvironment = getenv("EdgeHubConnectionString");
@@ -150,31 +150,31 @@ void iothub_client_sample_module_sender(void)
     }
     else
     {
-        if ((iotHubClientHandle = IoTHubClient_LL_CreateFromConnectionString(connectionString, MQTT_Protocol)) == NULL)
+        if ((iotHubModuleClientHandle = IoTHubModuleClient_LL_CreateFromConnectionString(connectionString, MQTT_Protocol)) == NULL)
         {
-            (void)printf("ERROR: iotHubClientHandle is NULL!\r\n");
+            (void)printf("ERROR: iotHubModuleClientHandle is NULL!\r\n");
         }
         else
         {
             bool traceOn = true;
-            IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &traceOn);
+            IoTHubModuleClient_LL_SetOption(iotHubModuleClientHandle, OPTION_LOG_TRACE, &traceOn);
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
             // For mbed add the certificate information
-            if (IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_TRUSTED_CERT, certificates) != IOTHUB_CLIENT_OK)
+            if (IoTHubModuleClient_LL_SetOption(iotHubModuleClientHandle, OPTION_TRUSTED_CERT, certificates) != IOTHUB_CLIENT_OK)
             {
                 printf("failure to set option \"TrustedCerts\"\r\n");
             }
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
             /* Setting Message call back, so we can receive Commands. */
-            if (IoTHubClient_LL_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, &receiveContext) != IOTHUB_CLIENT_OK)
+            if (IoTHubModuleClient_LL_SetMessageCallback(iotHubModuleClientHandle, ReceiveMessageCallback, &receiveContext) != IOTHUB_CLIENT_OK)
             {
-                (void)printf("ERROR: IoTHubClient_LL_SetMessageCallback..........FAILED!\r\n");
+                (void)printf("ERROR: IoTHubModuleClient_LL_SetMessageCallback..........FAILED!\r\n");
             }
             else
             {
-                (void)printf("IoTHubClient_LL_SetMessageCallback...successful.\r\n");
+                (void)printf("IoTHubModuleClient_LL_SetMessageCallback...successful.\r\n");
 
                 /* Now that we are ready to receive commands, let's send some messages */
                 size_t iterator = 0;
@@ -205,18 +205,18 @@ void iothub_client_sample_module_sender(void)
                                 (void)printf("ERROR: Map_AddOrUpdate Failed!\r\n");
                             }
 
-                            if (IoTHubClient_LL_SendEventToOutputAsync(iotHubClientHandle, messages[iterator].messageHandle, "temperatureOutput", SendConfirmationCallback, &messages[iterator]) != IOTHUB_CLIENT_OK)
+                            if (IoTHubModuleClient_LL_SendEventToOutputAsync(iotHubModuleClientHandle, messages[iterator].messageHandle, "temperatureOutput", SendConfirmationCallback, &messages[iterator]) != IOTHUB_CLIENT_OK)
                             {
-                                (void)printf("ERROR: IoTHubClient_LL_SendEventAsync..........FAILED!\r\n");
+                                (void)printf("ERROR: IoTHubModuleClient_LL_SendEventAsync..........FAILED!\r\n");
                             }
                             else
                             {
-                                (void)printf("IoTHubClient_LL_SendEventAsync accepted message [%d] for transmission to IoT Hub.\r\n", (int)iterator);
+                                (void)printf("IoTHubModuleClient_LL_SendEventAsync accepted message [%d] for transmission to IoT Hub.\r\n", (int)iterator);
                             }
                         }
 
                     }
-                    IoTHubClient_LL_DoWork(iotHubClientHandle);
+                    IoTHubModuleClient_LL_DoWork(iotHubModuleClientHandle);
                     ThreadAPI_Sleep(1000);
 
                     iterator++;
@@ -226,11 +226,11 @@ void iothub_client_sample_module_sender(void)
                 size_t index = 0;
                 for (index = 0; index < DOWORK_LOOP_NUM; index++)
                 {
-                    IoTHubClient_LL_DoWork(iotHubClientHandle);
+                    IoTHubModuleClient_LL_DoWork(iotHubModuleClientHandle);
                     ThreadAPI_Sleep(1);
                 }
             }
-            IoTHubClient_LL_Destroy(iotHubClientHandle);
+            IoTHubModuleClient_LL_Destroy(iotHubModuleClientHandle);
         }
         platform_deinit();
     }

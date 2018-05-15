@@ -19,6 +19,8 @@ set(iothub_client_c_files
     ./src/iothub_device_client.c
     ./src/iothub_device_client_ll.c
     ./src/iothub_message.c
+    ./src/iothub_module_client.c
+    ./src/iothub_module_client_ll.c
     ./src/iothubtransport.c
     ./src/version.c
 )

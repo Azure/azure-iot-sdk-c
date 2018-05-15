@@ -139,16 +139,3 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlobEx(IOTHUB_CLIENT_
 }
 #endif
 
-
-IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendEventToOutputAsync(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE eventMessageHandle, const char* outputName, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK eventConfirmationCallback, void* userContextCallback)
-{
-    return IoTHubClientCore_LL_SendEventToOutputAsync((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, eventMessageHandle, outputName, eventConfirmationCallback, userContextCallback);
-}
-
-IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetInputMessageCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* inputName, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC eventHandlerCallback, void* userContextCallback)
-{
-    return IoTHubClientCore_LL_SetInputMessageCallback((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, inputName, eventHandlerCallback, userContextCallback);
-}
-
-
-
