@@ -102,15 +102,15 @@ extern "C"
 
 #include "iothub_client_core_ll.h"
 #include "iothub_client_options.h"
-#include "iothub_client_private.h"
+#include "internal/iothub_client_private.h"
 #include "iothub_client_version.h"
-#include "iothub_client_retry_control.h"
-#include "iothubtransportamqp_methods.h"
-#include "iothubtransport_amqp_connection.h"
-#include "iothubtransport_amqp_device.h"
+#include "internal/iothub_client_retry_control.h"
+#include "internal/iothubtransportamqp_methods.h"
+#include "internal/iothubtransport_amqp_connection.h"
+#include "internal/iothubtransport_amqp_device.h"
 #undef ENABLE_MOCKS
 
-#include "iothubtransport_amqp_common.h"
+#include "internal/iothubtransport_amqp_common.h"
 
 TEST_DEFINE_ENUM_TYPE(AMQP_CONNECTION_STATE, AMQP_CONNECTION_STATE_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(AMQP_CONNECTION_STATE, AMQP_CONNECTION_STATE_VALUES);

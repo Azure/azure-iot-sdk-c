@@ -11,10 +11,10 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "iothub_client_core.h"
 #include "iothub_client_core_ll.h"
-#include "iothub_client_common.h"
+#include "internal/iothub_client_common.h"
 //#include "iothub_client_ll.h"
-#include "iothub_client_private.h"
-#include "iothubtransport.h"
+#include "internal/iothub_client_private.h"
+#include "internal/iothubtransport.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/lock.h"
 #include "azure_c_shared_utility/xlogging.h"
@@ -2083,8 +2083,9 @@ static int uploadMultipleBlock_thread(void* data)
     {
         result = IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx(llHandle, threadInfo->destinationFileName, threadInfo->uploadBlobMultiblockSavedData.getDataCallbackEx, threadInfo->context);
     }
+    (void)markThreadReadyToBeGarbageCollected(threadInfo);
 
-    return markThreadReadyToBeGarbageCollected(threadInfo);
+    return result;
 }
 
 IOTHUB_CLIENT_RESULT IoTHubClientCore_UploadMultipleBlocksToBlobAsync(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle, const char* destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK getDataCallback, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX getDataCallbackEx, void* context)

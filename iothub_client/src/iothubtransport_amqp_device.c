@@ -7,10 +7,10 @@
 #include "azure_c_shared_utility/agenttime.h" 
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/strings.h"
-#include "iothubtransport_amqp_cbs_auth.h"
-#include "iothubtransport_amqp_device.h"
-#include "iothubtransport_amqp_telemetry_messenger.h"
-#include "iothubtransport_amqp_twin_messenger.h"
+#include "internal/iothubtransport_amqp_cbs_auth.h"
+#include "internal/iothubtransport_amqp_device.h"
+#include "internal/iothubtransport_amqp_telemetry_messenger.h"
+#include "internal/iothubtransport_amqp_twin_messenger.h"
 
 DEFINE_ENUM_STRINGS(DEVICE_STATE, DEVICE_STATE_VALUES);
 DEFINE_ENUM_STRINGS(DEVICE_AUTH_MODE, DEVICE_AUTH_MODE_VALUES);

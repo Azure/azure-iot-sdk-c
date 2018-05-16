@@ -14,10 +14,11 @@ set(provisioning_libs)
 set(provisioning_headers)
 
 set(AUTH_CLIENT_H_FILES
-    ./inc/azure_prov_client/prov_auth_client.h
+    ./inc/azure_prov_client/internal/prov_auth_client.h
     ./inc/azure_prov_client/prov_security_factory.h
-    ./inc/azure_prov_client/iothub_auth_client.h
-    ./inc/azure_prov_client/iothub_security_factory.h)
+    ./inc/azure_prov_client/internal/iothub_auth_client.h
+    ./inc/azure_prov_client/internal/prov_auth_client.h
+    )
 
 set(AUTH_CLIENT_C_FILES
     ./src/prov_auth_client.c
@@ -103,7 +104,7 @@ set(PROV_DEVICE_LL_CLEINT_SOURCE_H_FILES
     ./inc/azure_prov_client/prov_client_const.h
     ./inc/azure_prov_client/prov_device_ll_client.h)
 
-set(DEV_AUTH_MODULES_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client lib" FORCE)
+set(DEV_AUTH_MODULES_CLIENT_INC_FOLDER "${CMAKE_CURRENT_LIST_DIR}/inc" "${CMAKE_CURRENT_LIST_DIR}/inc/internal" CACHE INTERNAL "this is what needs to be included if using iothub_client lib" FORCE)
 
 include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})
 include_directories(${SHARED_UTIL_INC_FOLDER})
@@ -189,6 +190,7 @@ endif()
 if (${use_http})
     set(PROV_HTTP_CLIENT_H_FILES 
         ./inc/azure_prov_client/prov_transport.h
+        ./inc/azure_prov_client/internal/prov_transport_private.h
         ./inc/azure_prov_client/prov_transport_http_client.h)
     set(PROV_HTTP_CLIENT_C_FILES 
         ./src/prov_transport_http_client.c)
@@ -209,8 +211,9 @@ if (${use_amqp})
     set(PROV_AMQP_CLIENT_H_FILES 
         ./inc/azure_prov_client/prov_transport.h
         ./inc/azure_prov_client/prov_transport_amqp_client.h
-        ./inc/azure_prov_client/prov_transport_amqp_common.h
-        ./inc/azure_prov_client/prov_sasl_tpm.h)
+        ./inc/azure_prov_client/internal/prov_transport_amqp_common.h
+        ./inc/azure_prov_client/internal/prov_transport_private.h
+        ./inc/azure_prov_client/internal/prov_sasl_tpm.h)
     set(PROV_AMQP_CLIENT_C_FILES 
         ./src/prov_transport_amqp_client.c
         ./src/prov_transport_amqp_common.c
@@ -219,8 +222,9 @@ if (${use_amqp})
     set(PROV_AMQP_WS_CLIENT_H_FILES 
         ./inc/azure_prov_client/prov_transport.h
         ./inc/azure_prov_client/prov_transport_amqp_ws_client.h
-        ./inc/azure_prov_client/prov_transport_amqp_common.h
-        ./inc/azure_prov_client/prov_sasl_tpm.h)
+        ./inc/azure_prov_client/internal/prov_transport_amqp_common.h
+        ./inc/azure_prov_client/internal/prov_transport_private.h
+        ./inc/azure_prov_client/internal/prov_sasl_tpm.h)
     set(PROV_AMQP_WS_CLIENT_C_FILES 
         ./src/prov_transport_amqp_ws_client.c
         ./src/prov_transport_amqp_common.c
@@ -248,7 +252,8 @@ if (${use_mqtt})
     set(PROV_MQTT_CLIENT_H_FILES 
         ./inc/azure_prov_client/prov_transport.h
         ./inc/azure_prov_client/prov_transport_mqtt_client.h
-        ./inc/azure_prov_client/prov_transport_mqtt_common.h)
+        ./inc/azure_prov_client/internal/prov_transport_private.h
+        ./inc/azure_prov_client/internal/prov_transport_mqtt_common.h)
     set(PROV_MQTT_CLIENT_C_FILES 
         ./src/prov_transport_mqtt_client.c
         ./src/prov_transport_mqtt_common.c)
@@ -256,7 +261,8 @@ if (${use_mqtt})
     set(PROV_MQTT_WS_CLIENT_H_FILES 
         ./inc/azure_prov_client/prov_transport.h
         ./inc/azure_prov_client/prov_transport_mqtt_ws_client.h
-        ./inc/azure_prov_client/prov_transport_mqtt_common.h)
+        ./inc/azure_prov_client/internal/prov_transport_private.h
+        ./inc/azure_prov_client/internal/prov_transport_mqtt_common.h)
     set(PROV_MQTT_WS_CLIENT_C_FILES 
         ./src/prov_transport_mqtt_ws_client.c
         ./src/prov_transport_mqtt_common.c)

@@ -45,7 +45,7 @@ static int my_mallocAndStrcpy_s(char** destination, const char* source)
 
 #include "azure_c_shared_utility/gballoc.h"
 
-#include "iothub_client_private.h"
+#include "internal/iothub_client_private.h"
 #include "iothub_client_options.h"
 
 #include "azure_c_shared_utility/platform.h"

@@ -20,4 +20,4 @@ set(${theseTestsName}_c_files
 set(${theseTestsName}_h_files
 )
 
-build_c_test_artifacts(${theseTestsName} ON "tests/UnitTests")
+build_c_test_artifacts(${theseTestsName} ON "tests/azure_iothub_client_tests")

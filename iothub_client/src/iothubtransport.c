@@ -6,9 +6,9 @@
 #include <signal.h>
 #include <stddef.h>
 #include "azure_c_shared_utility/crt_abstractions.h"
-#include "iothubtransport.h"
+#include "internal/iothubtransport.h"
 #include "iothub_client_core.h"
-#include "iothub_client_private.h"
+#include "internal/iothub_client_private.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/lock.h"
 #include "azure_c_shared_utility/xlogging.h"

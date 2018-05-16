@@ -13,9 +13,9 @@
 #include "azure_uamqp_c/messaging.h"
 #include "azure_uamqp_c/message_sender.h"
 #include "azure_uamqp_c/message_receiver.h"
-#include "message_queue.h"
-#include "iothub_client_retry_control.h"
-#include "iothubtransport_amqp_messenger.h"
+#include "internal/message_queue.h"
+#include "internal/iothub_client_retry_control.h"
+#include "internal/iothubtransport_amqp_messenger.h"
 
 DEFINE_ENUM_STRINGS(AMQP_MESSENGER_SEND_STATUS, AMQP_MESSENGER_SEND_STATUS_VALUES);
 DEFINE_ENUM_STRINGS(AMQP_MESSENGER_SEND_RESULT, AMQP_MESSENGER_SEND_RESULT_VALUES);

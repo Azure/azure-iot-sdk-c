@@ -40,7 +40,7 @@ static void my_gballoc_free(void* ptr)
 
 #undef ENABLE_MOCKS
 
-#include "iothub_client_diagnostic.h"
+#include "internal/iothub_client_diagnostic.h"
 
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 

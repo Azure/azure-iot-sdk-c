@@ -17,7 +17,7 @@
 #include "azure_c_shared_utility/http_proxy_io.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/http_proxy_io.h"
-#include "azure_prov_client/prov_transport_mqtt_common.h"
+#include "azure_prov_client/internal/prov_transport_mqtt_common.h"
 #include "azure_umqtt_c/mqtt_client.h"
 
 #include "azure_prov_client/prov_client_const.h"

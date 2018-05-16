@@ -13,7 +13,7 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/sastoken.h"
 
-#include "azure_prov_client/prov_auth_client.h"
+#include "azure_prov_client/internal/prov_auth_client.h"
 #include "hsm_client_data.h"
 
 #include "azure_prov_client/prov_security_factory.h"

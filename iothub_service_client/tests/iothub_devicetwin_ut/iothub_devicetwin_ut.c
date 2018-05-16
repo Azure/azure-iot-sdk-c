@@ -46,7 +46,7 @@ static int my_mallocAndStrcpy_s(char** destination, const char* source)
 
 #include "azure_c_shared_utility/gballoc.h"
 
-#include "iothub_client_private.h"
+#include "internal/iothub_client_private.h"
 #include "iothub_client_options.h"
 
 #include "azure_c_shared_utility/platform.h"
@@ -758,7 +758,7 @@ TEST_FUNCTION(IoTHubDeviceTwin_GetTwin_non_happy_path)
         .IgnoreArgument(1);
 
     EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
-	    .SetReturn(NULL);
+        .SetReturn(NULL);
 
     EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
         .IgnoreArgument(1)
@@ -1089,7 +1089,7 @@ TEST_FUNCTION(IoTHubDeviceTwin_UpdateTwin_non_happy_path)
         .IgnoreArgument(1);
 
     EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)
-	    .SetReturn(NULL));
+        .SetReturn(NULL));
 
     EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
         .IgnoreArgument(1)

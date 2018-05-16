@@ -10,7 +10,7 @@
 #include <inttypes.h>
 #endif
 
-#include "uamqp_messaging.h"
+#include "internal/uamqp_messaging.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/xlogging.h"

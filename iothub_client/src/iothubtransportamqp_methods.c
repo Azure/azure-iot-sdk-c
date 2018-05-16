@@ -14,7 +14,7 @@
 #include "azure_uamqp_c/message_sender.h"
 #include "azure_uamqp_c/amqp_definitions_application_properties.h"
 
-#include "iothubtransportamqp_methods.h"
+#include "internal/iothubtransportamqp_methods.h"
 
 typedef enum SUBSCRIBE_STATE_TAG
 {

@@ -46,9 +46,9 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 
 #include "azure_umqtt_c/mqtt_client.h"
 
-#include "iothub_client_private.h"
+#include "internal/iothub_client_private.h"
 #include "iothub_client_options.h"
-#include "iothub_client_retry_control.h"
+#include "internal/iothub_client_retry_control.h"
 
 #include "azure_c_shared_utility/xio.h"
 #include "azure_c_shared_utility/tlsio.h"
@@ -60,7 +60,7 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 #include "azure_c_shared_utility/urlencode.h"
 #undef ENABLE_MOCKS
 
-#include "iothubtransport_mqtt_common.h"
+#include "internal/iothubtransport_mqtt_common.h"
 #include "azure_c_shared_utility/strings.h"
 
 #ifdef __cplusplus

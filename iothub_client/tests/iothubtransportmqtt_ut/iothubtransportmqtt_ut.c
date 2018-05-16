@@ -28,7 +28,7 @@ static void real_free(void* ptr)
 
 #include "azure_c_shared_utility/xio.h"
 #include "azure_c_shared_utility/tlsio.h"
-#include "iothubtransport_mqtt_common.h"
+#include "internal/iothubtransport_mqtt_common.h"
 
 #undef ENABLE_MOCKS
 
