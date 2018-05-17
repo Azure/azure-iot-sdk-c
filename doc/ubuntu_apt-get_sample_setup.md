@@ -5,7 +5,7 @@ This document describes how to create a program that uses the *azure-iot-sdk-c-d
 Before you start, make sure you have **CMake**, **g++**, and **gcc** installed on your development machine:
 
 ```Shell
-sudo apt-get install cmake gcc g++
+sudo apt-get install cmake build-essential
 ```
 
 ## Update and install the azure-iot-sdk-c-dev package on your machine
@@ -15,6 +15,7 @@ Complete the following steps to install the AzureIoT binaries on your developmen
 1. Add the AzureIoT repository to the machine:
 
     ```Shell
+    sudo apt-get install -y software-properties-common
     sudo add-apt-repository ppa:aziotsdklinux/ppa-azureiot
     sudo apt-get update
     ```
