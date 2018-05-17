@@ -292,9 +292,10 @@ static void my_IoTHubClient_Auth_Destroy(IOTHUB_AUTHORIZATION_HANDLE handle)
     my_gballoc_free(handle);
 }
 
-static IOTHUB_AUTHORIZATION_HANDLE my_IoTHubClient_Auth_CreateFromDeviceAuth(const char* device_id)
+static IOTHUB_AUTHORIZATION_HANDLE my_IoTHubClient_Auth_CreateFromDeviceAuth(const char* device_id, const char* module_id)
 {
     (void)device_id;
+    (void)module_id;
     return (IOTHUB_AUTHORIZATION_HANDLE)my_gballoc_malloc(1);
 }
 
@@ -854,7 +855,7 @@ static void setup_IoTHubClientCore_LL_create_mocks(bool use_device_config)
 
     if (use_device_config)
     {
-        STRICT_EXPECTED_CALL(IoTHubClient_Auth_CreateFromDeviceAuth(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(IoTHubClient_Auth_CreateFromDeviceAuth(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         //STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
         //STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     }

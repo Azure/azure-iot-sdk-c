@@ -22,6 +22,13 @@ int initialize_hsm_system()
         LogError("Failure initializing tpm system");
         result = __LINE__;
     }
+#ifdef HSM_TYPE_HTTP_EDGE
+    else if (hsm_client_http_edge_init() != 0)
+    {
+        LogError("Failure initializing http edge system");
+        result = __LINE__;
+    }
+#endif
     else
     {
         result = 0;
@@ -31,6 +38,9 @@ int initialize_hsm_system()
 
 void deinitialize_hsm_system()
 {
+#ifdef HSM_TYPE_HTTP_EDGE
+    hsm_client_http_edge_deinit();
+#endif
     hsm_client_x509_deinit();
     hsm_client_tpm_deinit();
 }

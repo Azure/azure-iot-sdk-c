@@ -37,3 +37,4 @@ endif()
 
 linkSharedUtil(dice_device_enrollment)
 link_security_client(dice_device_enrollment)
+target_link_libraries(dice_device_enrollment parson)

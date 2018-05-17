@@ -81,6 +81,19 @@ if (${hsm_type_sastoken})
     endif()
 endif()
 
+if (${hsm_type_edge_module})
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHSM_TYPE_HTTP_EDGE")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHSM_TYPE_HTTP_EDGE")
+
+    set(HSM_CLIENT_H_FILES ${HSM_CLIENT_H_FILES} 
+        ./adapters/hsm_client_http_edge.h)
+    set(HSM_CLIENT_C_FILES ${HSM_CLIENT_C_FILES} 
+        ./adapters/hsm_client_http_edge.c)
+        
+    set(HSM_CLIENT_LIBRARY ${HSM_CLIENT_LIBRARY} uhttp)
+endif()
+
+
 function(link_security_client whatExeIsBuilding)
     target_link_libraries(${whatExeIsBuilding} prov_auth_client)
     target_link_libraries(${whatExeIsBuilding} hsm_security_client)

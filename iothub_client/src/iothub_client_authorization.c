@@ -133,7 +133,7 @@ IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_Create(const char* device_key, con
     return result;
 }
 
-IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_CreateFromDeviceAuth(const char* device_id)
+IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_CreateFromDeviceAuth(const char* device_id, const char* module_id)
 {
     IOTHUB_AUTHORIZATION_DATA* result;
     if (device_id == NULL)
@@ -163,8 +163,16 @@ IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_CreateFromDeviceAuth(const char* d
             }
             else if (mallocAndStrcpy_s(&result->device_id, device_id) != 0)
             {
-                LogError("Failed allocating device_key");
+                LogError("Failed allocating device_id");
                 iothub_device_auth_destroy(result->device_auth_handle);
+                free(result);
+                result = NULL;
+            }
+            else if ((module_id != NULL) && (mallocAndStrcpy_s(&result->module_id, module_id) != 0))
+            {
+                LogError("Failed allocating module_id");
+                iothub_device_auth_destroy(result->device_auth_handle);
+                free(result->device_id);
                 free(result);
                 result = NULL;
             }
@@ -181,6 +189,7 @@ IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_CreateFromDeviceAuth(const char* d
             }
         }
 #else
+        (void)module_id;
         LogError("Failed HSM module is not supported");
         result = NULL;
 #endif

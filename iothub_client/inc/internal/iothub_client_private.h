@@ -34,6 +34,7 @@ extern "C"
 #define REJECT_QUERY_PARAMETER "&reject"
 
 typedef bool(*IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC_EX)(MESSAGE_CALLBACK_INFO* messageData, void* userContextCallback);
+
 MOCKABLE_FUNCTION(, void, IoTHubClientCore_LL_SendComplete, IOTHUB_CLIENT_CORE_LL_HANDLE, handle, PDLIST_ENTRY, completed, IOTHUB_CLIENT_CONFIRMATION_RESULT, result);
 MOCKABLE_FUNCTION(, void, IoTHubClientCore_LL_ReportedStateComplete, IOTHUB_CLIENT_CORE_LL_HANDLE, handle, uint32_t, item_id, int, status_code);
 MOCKABLE_FUNCTION(, bool, IoTHubClientCore_LL_MessageCallback, IOTHUB_CLIENT_CORE_LL_HANDLE, handle, MESSAGE_CALLBACK_INFO*, message_data);

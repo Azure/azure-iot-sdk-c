@@ -12,8 +12,8 @@
 *				- thread-safe APIs
 */
 
-#ifndef IOTHUB_CLIENT_H
-#define IOTHUB_CLIENT_H
+#ifndef IOTHUB_DEVICE_CLIENT_H
+#define IOTHUB_DEVICE_CLIENT_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -365,4 +365,4 @@ extern "C"
 }
 #endif
 
-#endif /* IOTHUB_CLIENT_H */
+#endif /* IOTHUB_DEVICE_CLIENT_H */

@@ -21,6 +21,10 @@
 #include "azure_c_shared_utility/singlylinkedlist.h"
 #include "azure_c_shared_utility/vector.h"
 
+#ifdef USE_EDGE_MODULES
+#include "iothub_client_ll_edge.h"
+#endif
+
 struct IOTHUB_QUEUE_CONTEXT_TAG;
 
 typedef struct IOTHUB_CLIENT_CORE_INSTANCE_TAG
@@ -156,6 +160,15 @@ typedef struct IOTHUB_INPUTMESSAGE_CALLBACK_CONTEXT_TAG
 
 /*used by unittests only*/
 const size_t IoTHubClientCore_ThreadTerminationOffset = offsetof(IOTHUB_CLIENT_CORE_INSTANCE, StopThread);
+
+typedef enum CREATE_HUB_INSTANCE_TYPE_TAG
+{
+    CREATE_HUB_INSTANCE_FROM_CONNECTION_STRING,
+    CREATE_HUB_INSTANCE_FROM_EDGE_ENVIRONMENT,
+    CREATE_HUB_INSTANCE_FROM_TRANSPORT,
+    CREATE_HUB_INSTANCE_FROM_CLIENT_CONFIG,
+    CREATE_HUB_INSTANCE_FROM_DEVICE_AUTH
+} CREATE_HUB_INSTANCE_TYPE;
 
 #ifndef DONT_USE_UPLOADTOBLOB
 static void freeUploadToBlobThreadInfo(UPLOADTOBLOB_THREAD_INFO* threadInfo)
@@ -748,10 +761,11 @@ static IOTHUB_CLIENT_RESULT StartWorkerThreadIfNeeded(IOTHUB_CLIENT_CORE_INSTANC
     return result;
 }
 
-static IOTHUB_CLIENT_CORE_INSTANCE* create_iothub_instance(const IOTHUB_CLIENT_CONFIG* config, TRANSPORT_HANDLE transportHandle, const char* connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char* iothub_uri, const char* device_id)
+static IOTHUB_CLIENT_CORE_INSTANCE* create_iothub_instance(CREATE_HUB_INSTANCE_TYPE create_hub_instance_type, const IOTHUB_CLIENT_CONFIG* config, TRANSPORT_HANDLE transportHandle, const char* connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char* iothub_uri, const char* device_id)
 {
     /* Codes_SRS_IOTHUBCLIENT_12_020: [** `IoTHubClient_CreateFromDeviceAuth` shall allocate a new `IoTHubClient` instance. **] */
     IOTHUB_CLIENT_CORE_INSTANCE* result = (IOTHUB_CLIENT_CORE_INSTANCE*)malloc(sizeof(IOTHUB_CLIENT_CORE_INSTANCE));
+    (void)create_hub_instance_type;
 
     /* Codes_SRS_IOTHUBCLIENT_12_021: [** If allocating memory for the new `IoTHubClient` instance fails, then `IoTHubClient_CreateFromDeviceAuth` shall return `NULL`. **] */
     /* Codes_SRS_IOTHUBCLIENT_01_004: [If allocating memory for the new IoTHubClient instance fails, then IoTHubClient_Create shall return NULL.] */
@@ -867,6 +881,23 @@ static IOTHUB_CLIENT_CORE_INSTANCE* create_iothub_instance(const IOTHUB_CLIENT_C
                     result->IoTHubClientLLHandle = NULL;
 #endif
                 }
+#ifdef USE_EDGE_MODULES
+                else if (create_hub_instance_type == CREATE_HUB_INSTANCE_FROM_EDGE_ENVIRONMENT)
+                {
+                    result->LockHandle = Lock_Init();
+                    if (result->LockHandle == NULL)
+                    {
+                        /* Codes_SRS_IOTHUBCLIENT_01_030: [If creating the lock fails, then IoTHubClient_Create shall return NULL.] */
+                        /* Codes_SRS_IOTHUBCLIENT_01_031: [If IoTHubClient_Create fails, all resources allocated by it shall be freed.] */
+                        LogError("Failure creating Lock object");
+                        result->IoTHubClientLLHandle = NULL;
+                    }
+                    else
+                    {
+                        result->IoTHubClientLLHandle = IoTHubModuleClient_LL_CreateFromEnvironment(protocol);
+                    }
+                }
+#endif
                 else
                 {
                     result->LockHandle = Lock_Init();
@@ -935,7 +966,7 @@ IOTHUB_CLIENT_CORE_HANDLE IoTHubClientCore_CreateFromConnectionString(const char
     }
     else
     {
-        result = create_iothub_instance(NULL, NULL, connectionString, protocol, NULL, NULL);
+        result = create_iothub_instance(CREATE_HUB_INSTANCE_FROM_CONNECTION_STRING, NULL, NULL, connectionString, protocol, NULL, NULL);
     }
     return result;
 }
@@ -950,7 +981,7 @@ IOTHUB_CLIENT_CORE_HANDLE IoTHubClientCore_Create(const IOTHUB_CLIENT_CONFIG* co
     }
     else
     {
-        result = create_iothub_instance(config, NULL, NULL, NULL, NULL, NULL);
+        result = create_iothub_instance(CREATE_HUB_INSTANCE_FROM_CLIENT_CONFIG, config, NULL, NULL, NULL, NULL, NULL);
     }
     return result;
 }
@@ -967,7 +998,7 @@ IOTHUB_CLIENT_CORE_HANDLE IoTHubClientCore_CreateWithTransport(TRANSPORT_HANDLE 
     }
     else
     {
-        result = create_iothub_instance(config, transportHandle, NULL, NULL, NULL, NULL);
+        result = create_iothub_instance(CREATE_HUB_INSTANCE_FROM_TRANSPORT, config, transportHandle, NULL, NULL, NULL, NULL);
     }
     return result;
 }
@@ -999,11 +1030,19 @@ IOTHUB_CLIENT_CORE_HANDLE IoTHubClientCore_CreateFromDeviceAuth(const char* ioth
         /* Codes_SRS_IOTHUBCLIENT_12_022: [** `IoTHubClient_CreateFromDeviceAuth` shall create a lock object to be used later for serializing IoTHubClient calls. **] */
         /* Codes_SRS_IOTHUBCLIENT_12_023: [** If creating the lock fails, then IoTHubClient_CreateFromDeviceAuth shall return NULL. **] */
         /* Codes_SRS_IOTHUBCLIENT_12_024: [** If IoTHubClient_CreateFromDeviceAuth fails, all resources allocated by it shall be freed. **] */
-        /* Codes_SRS_IOTHUBCLIENT_12_025: [** `IoTHubClient_CreateFromDeviceAuth` shall instantiate a new `IoTHubClientCore_LL` instance by calling `IoTHubClientCore_LL_CreateFromDeviceAuth` and passing iothub_uri, device_id and protocol argument.  **] */
-        result = create_iothub_instance(NULL, NULL, NULL, protocol, iothub_uri, device_id);
+        /* Codes_SRS_IOTHUBCLIENT_12_025: [** `IoTHubClient_CreateFromDeviceAuth` shall instantiate a new `IoTHubClientCore_LL` instance by calling `IoTHubClientCore_LL_CreateFromDeviceAuth` and passing iothub_uri, device_id and protocol argument.  **] */      
+        result = create_iothub_instance(CREATE_HUB_INSTANCE_FROM_DEVICE_AUTH, NULL, NULL, NULL, protocol, iothub_uri, device_id);
     }
     return result;
 }
+
+#ifdef USE_EDGE_MODULES
+IOTHUB_CLIENT_CORE_HANDLE IoTHubClientCore_CreateFromEnvironment(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+{
+    return create_iothub_instance(CREATE_HUB_INSTANCE_FROM_EDGE_ENVIRONMENT, NULL, NULL, NULL, protocol, NULL, NULL);
+}
+#endif
+
 
 /* Codes_SRS_IOTHUBCLIENT_01_005: [IoTHubClient_Destroy shall free all resources associated with the iotHubClientHandle instance.] */
 void IoTHubClientCore_Destroy(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle)

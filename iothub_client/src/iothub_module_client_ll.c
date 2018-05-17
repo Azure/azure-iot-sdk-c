@@ -111,4 +111,3 @@ IOTHUB_CLIENT_RESULT IoTHubModuleClient_LL_SetInputMessageCallback(IOTHUB_MODULE
     return IoTHubClientCore_LL_SetInputMessageCallback((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, inputName, eventHandlerCallback, userContextCallback);
 }
 
-
