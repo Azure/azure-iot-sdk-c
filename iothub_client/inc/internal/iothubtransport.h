@@ -4,16 +4,13 @@
 #ifndef IOTHUB_TRANSPORT_H
 #define IOTHUB_TRANSPORT_H
 
-typedef struct TRANSPORT_HANDLE_DATA_TAG* TRANSPORT_HANDLE;
-
-
 #include "azure_c_shared_utility/lock.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 
 #include "iothub_client_core.h"
 #include "iothub_client_core_ll.h"
-#include "iothub_client_private.h"
-#include "iothub_transport_ll.h"
+#include "internal/iothub_client_private.h"
+#include "internal/iothub_transport_ll_private.h"
 //
 #ifndef IOTHUB_CLIENT_CORE_INSTANCE_TYPE
 typedef struct IOTHUB_CLIENT_CORE_INSTANCE_TAG* IOTHUB_CLIENT_CORE_HANDLE;

@@ -6,7 +6,7 @@
 
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
-#include "iothub_transport_ll.h"
+#include "internal/iothub_transport_ll_private.h"
 
 #ifdef __cplusplus
 extern "C"

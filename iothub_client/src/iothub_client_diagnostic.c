@@ -9,7 +9,7 @@
 #include "azure_c_shared_utility/agenttime.h"
 #include "azure_c_shared_utility/buffer_.h"
 
-#include "iothub_client_diagnostic.h"
+#include "internal/iothub_client_diagnostic.h"
 
 #define TIME_STRING_BUFFER_LEN 30
 

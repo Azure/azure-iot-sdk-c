@@ -11,11 +11,13 @@ extern "C" {
 #else
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 #endif /* __cplusplus */
 
 #include "azure_c_shared_utility/umock_c_prod.h"
 #include "azure_c_shared_utility/macro_utils.h"
 #include "azure_prov_client/prov_transport.h"
+#include "azure_prov_client/internal/prov_transport_private.h"
 #include "azure_uamqp_c/saslclientio.h"
 #include "azure_c_shared_utility/http_proxy_io.h"
 

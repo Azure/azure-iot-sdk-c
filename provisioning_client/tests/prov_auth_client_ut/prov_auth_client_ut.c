@@ -36,7 +36,7 @@ static void my_gballoc_free(void* ptr)
 #include "hsm_client_data.h"
 #undef ENABLE_MOCKS
 
-#include "azure_prov_client/prov_auth_client.h"
+#include "azure_prov_client/internal/prov_auth_client.h"
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/base64.h"

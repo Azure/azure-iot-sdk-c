@@ -18,7 +18,6 @@
 #include "iothubtransportmqtt.h"
 #include "iothubtransportamqp.h"
 
-#include "azure_prov_client/iothub_auth_client.h"
 #include "iothub_client_ll.h"
 
 #include "../../../certs/certs.h"

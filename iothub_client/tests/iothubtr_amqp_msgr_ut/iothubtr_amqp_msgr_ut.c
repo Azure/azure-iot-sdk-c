@@ -50,12 +50,12 @@ void real_free(void* ptr)
 #include "azure_uamqp_c/messaging.h"
 #include "azure_uamqp_c/message_sender.h"
 #include "azure_uamqp_c/message_receiver.h"
-#include "message_queue.h"
-#include "iothub_client_retry_control.h"
+#include "internal/message_queue.h"
+#include "internal/iothub_client_retry_control.h"
 
 #undef ENABLE_MOCKS
 
-#include "iothubtransport_amqp_messenger.h"
+#include "internal/iothubtransport_amqp_messenger.h"
 
 
 static TEST_MUTEX_HANDLE g_testByTest;

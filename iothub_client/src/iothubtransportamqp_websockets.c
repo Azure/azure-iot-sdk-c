@@ -3,7 +3,7 @@
 
 #include "iothubtransportamqp_websockets.h"
 #include "azure_c_shared_utility/wsio.h"
-#include "iothubtransport_amqp_common.h"
+#include "internal/iothubtransport_amqp_common.h"
 #include "azure_c_shared_utility/tlsio.h"
 #include "azure_c_shared_utility/http_proxy_io.h"
 #include "azure_c_shared_utility/platform.h"

@@ -13,7 +13,7 @@
 
 #include "iothub_client_core_ll.h"
 #include "iothub_client_options.h"
-#include "iothub_client_private.h"
+#include "internal/iothub_client_private.h"
 #include "azure_umqtt_c/mqtt_client.h"
 #include "azure_c_shared_utility/sastoken.h"
 #include "azure_c_shared_utility/tickcounter.h"
@@ -25,9 +25,9 @@
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "iothub_client_version.h"
-#include "iothub_client_retry_control.h"
+#include "internal/iothub_client_retry_control.h"
 
-#include "iothubtransport_mqtt_common.h"
+#include "internal/iothubtransport_mqtt_common.h"
 
 #include <stdarg.h>
 #include <stdio.h>

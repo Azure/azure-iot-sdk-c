@@ -8,7 +8,7 @@
 #include "micromockcharstararenullterminatedstrings.h"
 
 #include "iothub_client_core.h"
-#include "iothubtransport.h"
+#include "internal/iothubtransport.h"
 
 #include "azure_c_shared_utility/lock.h"
 #include "azure_c_shared_utility/doublylinkedlist.h"

@@ -11,7 +11,7 @@
 #include "azure_c_shared_utility/strings.h"
 
 #include "azure_prov_client/prov_transport.h"
-#include "azure_prov_client/prov_sasl_tpm.h"
+#include "azure_prov_client/internal/prov_sasl_tpm.h"
 #include "azure_uamqp_c/sasl_mechanism.h"
 
 typedef struct SASL_TPM_INSTANCE_TAG

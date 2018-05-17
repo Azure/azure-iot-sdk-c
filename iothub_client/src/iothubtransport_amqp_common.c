@@ -29,12 +29,12 @@
 
 #include "iothub_client_core_ll.h"
 #include "iothub_client_options.h"
-#include "iothub_client_private.h"
-#include "iothubtransportamqp_methods.h"
-#include "iothub_client_retry_control.h"
-#include "iothubtransport_amqp_common.h"
-#include "iothubtransport_amqp_connection.h"
-#include "iothubtransport_amqp_device.h"
+#include "internal/iothub_client_private.h"
+#include "internal/iothubtransportamqp_methods.h"
+#include "internal/iothub_client_retry_control.h"
+#include "internal/iothubtransport_amqp_common.h"
+#include "internal/iothubtransport_amqp_connection.h"
+#include "internal/iothubtransport_amqp_device.h"
 #include "iothub_client_version.h"
 
 #define RESULT_OK                                 0

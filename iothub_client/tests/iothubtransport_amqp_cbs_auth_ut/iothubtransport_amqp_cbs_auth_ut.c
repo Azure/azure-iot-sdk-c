@@ -50,15 +50,16 @@ static int real_strcmp(const char* str1, const char* str2)
 #define ENABLE_MOCKS
 #include "iothub_transport_ll.h"
 #include "azure_uamqp_c/cbs.h"
+#include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
 #include "azure_c_shared_utility/agenttime.h" 
 #include "azure_c_shared_utility/xlogging.h"
-#include "iothub_client_authorization.h"
+#include "internal/iothub_client_authorization.h"
 #undef ENABLE_MOCKS
 
-#include "iothubtransport_amqp_cbs_auth.h"
+#include "internal/iothubtransport_amqp_cbs_auth.h"
 
 MOCKABLE_FUNCTION(, time_t, get_time, time_t*, currentTime);
 MOCKABLE_FUNCTION(, double, get_difftime, time_t, stopTime, time_t, startTime);

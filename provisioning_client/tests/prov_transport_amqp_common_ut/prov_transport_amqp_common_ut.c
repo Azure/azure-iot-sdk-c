@@ -40,7 +40,7 @@ static void my_gballoc_free(void* ptr)
 #include "azure_uamqp_c/link.h"
 #undef ENABLE_MOCKS
 
-#include "azure_prov_client/prov_transport_amqp_common.h"
+#include "azure_prov_client/internal/prov_transport_amqp_common.h"
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"
@@ -53,7 +53,7 @@ static void my_gballoc_free(void* ptr)
 #include "azure_uamqp_c/message_receiver.h"
 #include "azure_uamqp_c/message.h"
 #include "azure_uamqp_c/messaging.h"
-#include "azure_prov_client/prov_sasl_tpm.h"
+#include "azure_prov_client/internal/prov_sasl_tpm.h"
 #include "azure_c_shared_utility/buffer_.h"
 #undef ENABLE_MOCKS
 

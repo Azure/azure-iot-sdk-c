@@ -21,7 +21,7 @@
 
 #define ENABLE_MOCKS
 #include "iothub_client_core_ll.h"
-#include "iothub_client_private.h"
+#include "internal/iothub_client_private.h"
 #undef ENABLE_MOCKS
 
 #include "iothub_device_client_ll.h"

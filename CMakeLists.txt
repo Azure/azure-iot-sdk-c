@@ -335,6 +335,15 @@ if(${use_installed_dependencies})
         COPYONLY
     )
 
+    install(FILES ${parson_h_install_files} EXPORT azure_iot_sdksTargets
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
+    )
+    install(TARGETS ${parson_install_libs}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
+    )
+
     install(EXPORT azure_iot_sdksTargets
         FILE
             "${PROJECT_NAME}Targets.cmake"
