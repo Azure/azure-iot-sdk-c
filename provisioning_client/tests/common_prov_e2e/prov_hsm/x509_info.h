@@ -13,7 +13,7 @@
 
     typedef struct X509_CERT_INFO_TAG* X509_INFO_HANDLE;
 
-    extern void generate_keys();
+    extern void initialize_device();
     extern X509_INFO_HANDLE x509_info_create();
     extern void x509_info_destroy(X509_INFO_HANDLE handle);
     extern const char* x509_info_get_cert(X509_INFO_HANDLE handle);

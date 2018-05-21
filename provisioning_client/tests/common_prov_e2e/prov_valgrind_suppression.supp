@@ -1,0 +1,69 @@
+{
+    CRYPTO_malloc allow customization race in OpenSSL
+    Helgrind:Race
+    obj:/*lib*/libcrypto*
+}
+{
+    DRD CRYPTO_malloc allow customization race in OpenSSL
+    drd:ConflictingAccess
+    obj:/*lib*/libcrypto*
+}
+{
+    SHA256 has unprotected global access
+    Helgrind:Race
+    fun:SHA256Input
+}
+{
+    DRD SHA256 has unprotected global access
+    drd:ConflictingAccess
+    fun:SHA256Input
+}
+{
+    DRD Conflicting store by thread in printf
+    drd:ConflictingAccess
+    fun:__GI_mempcpy
+    fun:_IO_file_xsputn@@GLIBC_2.2.5
+    fun:vfprintf
+}
+{
+    DRD Conflicting store by thread in sprintf
+    drd:ConflictingAccess
+    ...
+    fun:sprintf
+    fun:EventData_Create
+}
+{
+   DRD Conflicting store by thread in printf2
+   drd:ConflictingAccess
+   fun:__GI_mempcpy
+   fun:_IO_default_xsputn
+   fun:_IO_file_xsputn@@GLIBC_2.2.5
+   fun:vfprintf
+}
+{
+    DRD Conflicting store by thread in puts
+    drd:ConflictingAccess
+    fun:__GI_mempcpy
+    fun:_IO_file_xsputn@@GLIBC_2.2.5
+    fun:puts
+}
+{
+   DRD false conflicting access while setting time basis
+   drd:ConflictingAccess
+   fun:set_time_basis
+}
+{
+   DRD false conflicting access while setting time basis
+   drd:ConflictingAccess
+   fun:get_time_ns
+}
+{
+   Helgrind false race confition while setting time basis
+   Helgrind:Race
+   fun:set_time_basis
+}
+{
+   Helgrind false race confition while setting time basis
+   Helgrind:Race
+   fun:get_time_ns
+}

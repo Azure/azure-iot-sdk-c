@@ -22,7 +22,7 @@ typedef struct IOTHUB_HSM_IMPL_TAG
 int hsm_client_x509_init()
 {
     int result = 0;
-    generate_keys();
+    initialize_device();
     return result;
 }
 
@@ -39,7 +39,7 @@ void hsm_client_tpm_deinit()
 {
 }
 
-HSM_CLIENT_HANDLE iothub_hsm_create()
+HSM_CLIENT_HANDLE iothub_hsm_x509_create()
 {
     IOTHUB_HSM_IMPL* result;
     result = malloc(sizeof(IOTHUB_HSM_IMPL));
@@ -54,7 +54,22 @@ HSM_CLIENT_HANDLE iothub_hsm_create()
         {
             (void)printf("Failure: x509_info_create.");
         }
-        else if ((result->tpm_info = tpm_msr_create()) == NULL)
+    }
+    return (HSM_CLIENT_HANDLE)result;
+}
+
+HSM_CLIENT_HANDLE iothub_hsm_tpm_create()
+{
+    IOTHUB_HSM_IMPL* result;
+    result = malloc(sizeof(IOTHUB_HSM_IMPL));
+    if (result == NULL)
+    {
+        (void)printf("Failure: malloc IOTHUB_HSM_IMPL.");
+    }
+    else
+    {
+        memset(result, 0, sizeof(IOTHUB_HSM_IMPL));
+        if ((result->tpm_info = tpm_msr_create()) == NULL)
         {
             (void)printf("Failure: tpm_msr_create.");
             x509_info_destroy(result->x509_info);
@@ -288,8 +303,8 @@ int iothub_tpm_hsm_activate_identity_key(HSM_CLIENT_HANDLE handle, const unsigne
     }
     else
     {
-        // Decrypt the key and store the value in the hsm
-        result = 0;
+        IOTHUB_HSM_IMPL* hsm_impl = (IOTHUB_HSM_IMPL*)handle;
+        result = tpm_msr_import_key(hsm_impl->tpm_info, key, key_len);
     }
     return result;
 }
@@ -297,7 +312,7 @@ int iothub_tpm_hsm_activate_identity_key(HSM_CLIENT_HANDLE handle, const unsigne
 // Defining the v-table for the x509 hsm calls
 static const HSM_CLIENT_X509_INTERFACE x509_interface =
 {
-    iothub_hsm_create,
+    iothub_hsm_x509_create,
     iothub_hsm_destroy,
     iothub_x509_hsm_get_certificate,
     iothub_x509_hsm_get_alias_key,
@@ -311,7 +326,7 @@ const HSM_CLIENT_X509_INTERFACE* hsm_client_x509_interface()
 
 static const HSM_CLIENT_TPM_INTERFACE tpm_interface =
 {
-    iothub_hsm_create,
+    iothub_hsm_tpm_create,
     iothub_hsm_destroy,
     iothub_tpm_hsm_activate_identity_key,
     iothub_tpm_hsm_get_endorsement_key,

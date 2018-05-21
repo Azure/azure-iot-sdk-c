@@ -20,6 +20,8 @@
 
 typedef struct X509_CERT_INFO_TAG
 {
+    char device_name[64];
+
     RIOT_ECC_PUBLIC     device_id_pub;
     RIOT_ECC_PRIVATE    device_id_priv;
 
@@ -46,15 +48,13 @@ typedef struct X509_CERT_INFO_TAG
 
     uint32_t root_ca_priv_length;
     char root_ca_priv_pem[DER_MAX_PEM];
-
-    char device_name[64];
 } X509_CERT_INFO;
 
 static const char* g_subject_name = NULL;
 
 static const char* const ECCTYPE = "prime256v1";
 static const char* const COMMON_NAME = "hsm_cert_example";
-static const char* const DEVICE_PREFIX = "hsm_dev_";
+static const char* const DEVICE_PREFIX = "hsm-dev-";
 
 #define HSM_SIGNER_NAME            "hsm-signer"
 #define HSM_CA_CERT_NAME           "hsm-ca-cert"
@@ -66,6 +66,7 @@ static unsigned char g_uds_seed[DICE_UDS_LENGTH];
 static unsigned char firmware_id[RIOT_DIGEST_LENGTH] = { 0 };
 static uint8_t g_digest[RIOT_DIGEST_LENGTH] = { 0 };
 static uint8_t g_CDI[RIOT_DIGEST_LENGTH] = { 0 };
+static char g_device_name[64] = { 0 };
 
 static int g_digest_initialized = 0;
 
@@ -370,25 +371,24 @@ static int process_riot_key_info(X509_CERT_INFO* x509_info)
     return result;
 }
 
-static void generate_subject_name(X509_CERT_INFO* x509_info)
+static void generate_subject_name()
 {
     unsigned char rand_buff[RANDOM_BUFFER_LENGTH];
-    for (size_t index = 0; index < DICE_UDS_LENGTH; index++)
+    for (size_t index = 0; index < RANDOM_BUFFER_LENGTH; index++)
     {
         rand_buff[index] = (unsigned char)gb_rand();
     }
 
-    strcpy(x509_info->device_name, DEVICE_PREFIX);
-    char* insert_pos = x509_info->device_name + strlen(x509_info->device_name);
+    strcpy(g_device_name, DEVICE_PREFIX);
+    char* insert_pos = g_device_name + strlen(g_device_name);
     for (size_t index = 0; index < RANDOM_BUFFER_LENGTH; index++)
     {
         int pos = sprintf(insert_pos, "%x", rand_buff[index]);
         insert_pos += pos;
     }
-    X509_ALIAS_TBS_DATA.SubjectCommon = x509_info->device_name;
 }
 
-void generate_keys()
+static void generate_keys()
 {
     if (g_digest_initialized == 0)
     {
@@ -407,8 +407,14 @@ void generate_keys()
         }
         DiceSHA256(g_uds_seed, DICE_UDS_LENGTH, g_digest);
         DiceSHA256_2(g_digest, RIOT_DIGEST_LENGTH, random_digest, RIOT_DIGEST_LENGTH, g_CDI);
-        g_digest_initialized = 0;
+        g_digest_initialized = 1;
     }
+}
+
+void initialize_device()
+{
+    generate_keys();
+    generate_subject_name();
 }
 
 X509_INFO_HANDLE x509_info_create()
@@ -424,7 +430,9 @@ X509_INFO_HANDLE x509_info_create()
     else
     {
         memset(result, 0, sizeof(X509_CERT_INFO));
-        generate_subject_name(result);
+        strcpy(result->device_name, g_device_name);
+        X509_ALIAS_TBS_DATA.SubjectCommon = result->device_name;
+
         if (process_riot_key_info(result) != 0)
         {
             free(result);

@@ -770,7 +770,7 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         umock_c_reset_all_calls();
 
         //act
-        int result = hsm_client_tpm_sign_data(NULL, TEST_BUFFER, TEST_BUFFER_SIZE, &key, &key_len);
+        int result = hsm_client_tpm_sign_data(sec_handle, NULL, TEST_BUFFER_SIZE, &key, &key_len);
 
         //assert
         ASSERT_ARE_NOT_EQUAL(int, 0, result);
@@ -791,7 +791,45 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         umock_c_reset_all_calls();
 
         //act
-        int result = hsm_client_tpm_sign_data(NULL, TEST_BUFFER, TEST_BUFFER_SIZE, &key, &key_len);
+        int result = hsm_client_tpm_sign_data(sec_handle, TEST_BUFFER, 0, &key, &key_len);
+
+        //assert
+        ASSERT_ARE_NOT_EQUAL(int, 0, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        hsm_client_tpm_destroy(sec_handle);
+    }
+
+    TEST_FUNCTION(hsm_client_tpm_sign_data_key_NULL_fail)
+    {
+        size_t key_len;
+
+        //arrange
+        HSM_CLIENT_HANDLE sec_handle = hsm_client_tpm_create();
+        umock_c_reset_all_calls();
+
+        //act
+        int result = hsm_client_tpm_sign_data(sec_handle, TEST_BUFFER, TEST_BUFFER_SIZE, NULL, &key_len);
+
+        //assert
+        ASSERT_ARE_NOT_EQUAL(int, 0, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        hsm_client_tpm_destroy(sec_handle);
+    }
+
+    TEST_FUNCTION(hsm_client_tpm_sign_data_keylen_NULL_fail)
+    {
+        unsigned char* key;
+
+        //arrange
+        HSM_CLIENT_HANDLE sec_handle = hsm_client_tpm_create();
+        umock_c_reset_all_calls();
+
+        //act
+        int result = hsm_client_tpm_sign_data(sec_handle, TEST_BUFFER, TEST_BUFFER_SIZE, &key, NULL);
 
         //assert
         ASSERT_ARE_NOT_EQUAL(int, 0, result);
