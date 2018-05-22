@@ -1,6 +1,6 @@
-# Running the C SDK on Constrained Device
+# Running the C SDK on Constrained Devices
 
-Iot devices are coming with greater memory constrains and the IoTHub SDK has options to shrink its ROM and RAM footprint considerably when you invoke cmake with the correct flags.  These are some tips to reduce the c sdk memory footprints on these devices.
+IoT devices are coming with greater memory constrains and the IoTHub SDK has options to shrink its ROM and RAM footprint considerably when you invoke cmake with the correct flags.  These are some tips to reduce the c sdk memory footprints on these devices.
 
 ## Run with only MQTT
 
