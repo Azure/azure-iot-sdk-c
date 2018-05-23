@@ -26,7 +26,7 @@ static void my_gballoc_free(void* ptr)
 #include "umock_c_negative_tests.h"
 #include "azure_c_shared_utility/macro_utils.h"
 
-#include "azure_prov_client/iothub_auth_client.h"
+#include "azure_prov_client/internal/iothub_auth_client.h"
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"

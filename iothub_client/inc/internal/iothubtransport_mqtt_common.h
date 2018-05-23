@@ -4,7 +4,7 @@
 #ifndef IOTHUBTRANSPORT_MQTT_COMMON_H
 #define IOTHUBTRANSPORT_MQTT_COMMON_H
 
-#include "iothub_transport_ll.h"
+#include "internal/iothub_transport_ll_private.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
 
 #ifdef __cplusplus

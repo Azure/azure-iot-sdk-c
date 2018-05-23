@@ -46,12 +46,12 @@ void real_free(void* ptr)
 #include "azure_c_shared_utility/singlylinkedlist.h"
 #include "azure_uamqp_c/amqp_definitions_fields.h"
 #include "azure_uamqp_c/messaging.h"
-#include "iothub_client_private.h"
-#include "iothubtransport_amqp_messenger.h"
+#include "internal/iothub_client_private.h"
+#include "internal/iothubtransport_amqp_messenger.h"
 
 #undef ENABLE_MOCKS
 
-#include "iothubtransport_amqp_twin_messenger.h"
+#include "internal/iothubtransport_amqp_twin_messenger.h"
 
 DEFINE_ENUM_STRINGS(AMQP_MESSENGER_SEND_STATUS, AMQP_MESSENGER_SEND_STATUS_VALUES);
 DEFINE_ENUM_STRINGS(AMQP_MESSENGER_SEND_RESULT, AMQP_MESSENGER_SEND_RESULT_VALUES);

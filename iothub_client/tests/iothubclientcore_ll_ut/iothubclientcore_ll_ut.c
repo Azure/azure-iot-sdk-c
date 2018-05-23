@@ -45,20 +45,20 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 
 #include "iothub_client_version.h"
 #include "iothub_message.h"
-#include "iothub_client_authorization.h"
-#include "iothub_client_diagnostic.h"
+#include "internal/iothub_client_authorization.h"
+#include "internal/iothub_client_diagnostic.h"
 
 #undef ENABLE_MOCKS
 
 #include "iothub_transport_ll.h"
 #include "iothub_client_core_ll.h"
-#include "iothub_client_private.h"
+#include "internal/iothub_client_private.h"
 #include "iothub_client_options.h"
 
 #define ENABLE_MOCKS
 
 #ifndef DONT_USE_UPLOADTOBLOB
-#include "iothub_client_ll_uploadtoblob.h"
+#include "internal/iothub_client_ll_uploadtoblob.h"
 #endif
 
 MOCKABLE_FUNCTION(, void, test_event_confirmation_callback, IOTHUB_CLIENT_CONFIRMATION_RESULT, result, void*, userContextCallback);

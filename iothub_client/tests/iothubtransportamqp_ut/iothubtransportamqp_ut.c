@@ -33,7 +33,7 @@ static void real_free(void* ptr)
 #include "azure_c_shared_utility/tlsio.h"
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/socketio.h"
-#include "iothubtransport_amqp_common.h"
+#include "internal/iothubtransport_amqp_common.h"
 #undef ENABLE_MOCKS
 
 #include "iothubtransportamqp.h"

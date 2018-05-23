@@ -14,10 +14,11 @@ set(provisioning_libs)
 set(provisioning_headers)
 
 set(AUTH_CLIENT_H_FILES
-    ./inc/azure_prov_client/prov_auth_client.h
+    ./inc/azure_prov_client/internal/prov_auth_client.h
     ./inc/azure_prov_client/prov_security_factory.h
-    ./inc/azure_prov_client/iothub_auth_client.h
-    ./inc/azure_prov_client/iothub_security_factory.h)
+    ./inc/azure_prov_client/internal/iothub_auth_client.h
+    ./inc/azure_prov_client/internal/prov_auth_client.h
+    )
 
 set(AUTH_CLIENT_C_FILES
     ./src/prov_auth_client.c
@@ -37,48 +38,69 @@ if (${hsm_type_custom})
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHSM_AUTH_TYPE_CUSTOM")
 
     set(HSM_CLIENT_LIBRARY ${CUSTOM_HSM_LIB})
-endif()
+else ()
+    if (${run_e2e_tests})
+        # For e2e test we need to run a custom HSM to handle testing
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHSM_TYPE_X509 -DHSM_TYPE_SAS_TOKEN")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHSM_TYPE_X509 -DHSM_TYPE_SAS_TOKEN")
 
-if (${hsm_type_x509})
-    # Using x509
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHSM_TYPE_X509")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHSM_TYPE_X509")
+        include_directories(${TPM_C_INC_FOLDER})
 
-    set(HSM_CLIENT_H_FILES ${HSM_CLIENT_H_FILES} 
-        ./adapters/hsm_client_riot.h)
-    set(HSM_CLIENT_C_FILES ${HSM_CLIENT_C_FILES} 
-        ./adapters/hsm_client_riot.c)
+        # Include the riot directories
+        include_directories(./deps/RIoT/Emulator/DICE)
+        include_directories(./deps/RIoT/Emulator/RIoT)
+        include_directories(./deps/RIoT/Emulator/RIoT/RIoTCrypt/include)
 
-    # Include the riot directories
-    include_directories(./deps/RIoT/Emulator/DICE)
-    include_directories(./deps/RIoT/Emulator/RIoT)
-    include_directories(./deps/RIoT/Emulator/RIoT/RIoTCrypt/include)
+        # For e2e test a custom HSM is needed
+        add_subdirectory(./tests/common_prov_e2e/prov_hsm)
 
-    set(HSM_CLIENT_LIBRARY ${HSM_CLIENT_LIBRARY} msr_riot)
-endif()
+        set(HSM_CLIENT_LIBRARY ${HSM_CLIENT_LIBRARY} msr_riot utpm prov_hsm)
+        if (WIN32)
+            set(HSM_CLIENT_LIBRARY ${HSM_CLIENT_LIBRARY} Tbs)
+        endif ()
+    else ()
+        if (${hsm_type_x509})
+            # Using x509
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHSM_TYPE_X509")
+            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHSM_TYPE_X509")
 
-if (${hsm_type_sastoken})
-    # Using Sas Token
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHSM_TYPE_SAS_TOKEN")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHSM_TYPE_SAS_TOKEN")
+            set(HSM_CLIENT_H_FILES ${HSM_CLIENT_H_FILES} 
+                ./adapters/hsm_client_riot.h)
+            set(HSM_CLIENT_C_FILES ${HSM_CLIENT_C_FILES} 
+                ./adapters/hsm_client_riot.c)
 
-    set(HSM_CLIENT_H_FILES ${HSM_CLIENT_H_FILES} 
-        ./adapters/hsm_client_tpm.h)
-    set(HSM_CLIENT_C_FILES ${HSM_CLIENT_C_FILES} 
-        ./adapters/hsm_client_tpm.c)
+            # Include the riot directories
+            include_directories(./deps/RIoT/Emulator/DICE)
+            include_directories(./deps/RIoT/Emulator/RIoT)
+            include_directories(./deps/RIoT/Emulator/RIoT/RIoTCrypt/include)
 
-    if (${use_tpm_simulator})
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_EMULATOR_MODULE")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_EMULATOR_MODULE")
-    endif()
+            set(HSM_CLIENT_LIBRARY ${HSM_CLIENT_LIBRARY} msr_riot)
+        endif()
 
-    include_directories(${TPM_C_INC_FOLDER})
+        if (${hsm_type_sastoken})
+            # Using Sas Token
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHSM_TYPE_SAS_TOKEN")
+            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHSM_TYPE_SAS_TOKEN")
 
-    set(HSM_CLIENT_LIBRARY ${HSM_CLIENT_LIBRARY} utpm)
-    if (WIN32)
-        set(HSM_CLIENT_LIBRARY ${HSM_CLIENT_LIBRARY} Tbs)
-    endif()
-endif()
+            set(HSM_CLIENT_H_FILES ${HSM_CLIENT_H_FILES} 
+                ./adapters/hsm_client_tpm.h)
+            set(HSM_CLIENT_C_FILES ${HSM_CLIENT_C_FILES} 
+                ./adapters/hsm_client_tpm.c)
+    
+            if (${use_tpm_simulator})
+                set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_EMULATOR_MODULE")
+                set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_EMULATOR_MODULE")
+            endif()
+
+            include_directories(${TPM_C_INC_FOLDER})
+
+            set(HSM_CLIENT_LIBRARY ${HSM_CLIENT_LIBRARY} utpm)
+            if (WIN32)
+                set(HSM_CLIENT_LIBRARY ${HSM_CLIENT_LIBRARY} Tbs)
+            endif ()
+        endif ()
+    endif ()
+endif ()
 
 function(link_security_client whatExeIsBuilding)
     target_link_libraries(${whatExeIsBuilding} prov_auth_client)
@@ -103,7 +125,7 @@ set(PROV_DEVICE_LL_CLEINT_SOURCE_H_FILES
     ./inc/azure_prov_client/prov_client_const.h
     ./inc/azure_prov_client/prov_device_ll_client.h)
 
-set(DEV_AUTH_MODULES_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client lib" FORCE)
+set(DEV_AUTH_MODULES_CLIENT_INC_FOLDER "${CMAKE_CURRENT_LIST_DIR}/inc" "${CMAKE_CURRENT_LIST_DIR}/inc/internal" "${CMAKE_CURRENT_LIST_DIR/adapters}" CACHE INTERNAL "this is what needs to be included if using iothub_client lib" FORCE)
 
 include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})
 include_directories(${SHARED_UTIL_INC_FOLDER})
@@ -189,6 +211,7 @@ endif()
 if (${use_http})
     set(PROV_HTTP_CLIENT_H_FILES 
         ./inc/azure_prov_client/prov_transport.h
+        ./inc/azure_prov_client/internal/prov_transport_private.h
         ./inc/azure_prov_client/prov_transport_http_client.h)
     set(PROV_HTTP_CLIENT_C_FILES 
         ./src/prov_transport_http_client.c)
@@ -209,8 +232,9 @@ if (${use_amqp})
     set(PROV_AMQP_CLIENT_H_FILES 
         ./inc/azure_prov_client/prov_transport.h
         ./inc/azure_prov_client/prov_transport_amqp_client.h
-        ./inc/azure_prov_client/prov_transport_amqp_common.h
-        ./inc/azure_prov_client/prov_sasl_tpm.h)
+        ./inc/azure_prov_client/internal/prov_transport_amqp_common.h
+        ./inc/azure_prov_client/internal/prov_transport_private.h
+        ./inc/azure_prov_client/internal/prov_sasl_tpm.h)
     set(PROV_AMQP_CLIENT_C_FILES 
         ./src/prov_transport_amqp_client.c
         ./src/prov_transport_amqp_common.c
@@ -219,8 +243,9 @@ if (${use_amqp})
     set(PROV_AMQP_WS_CLIENT_H_FILES 
         ./inc/azure_prov_client/prov_transport.h
         ./inc/azure_prov_client/prov_transport_amqp_ws_client.h
-        ./inc/azure_prov_client/prov_transport_amqp_common.h
-        ./inc/azure_prov_client/prov_sasl_tpm.h)
+        ./inc/azure_prov_client/internal/prov_transport_amqp_common.h
+        ./inc/azure_prov_client/internal/prov_transport_private.h
+        ./inc/azure_prov_client/internal/prov_sasl_tpm.h)
     set(PROV_AMQP_WS_CLIENT_C_FILES 
         ./src/prov_transport_amqp_ws_client.c
         ./src/prov_transport_amqp_common.c
@@ -248,7 +273,8 @@ if (${use_mqtt})
     set(PROV_MQTT_CLIENT_H_FILES 
         ./inc/azure_prov_client/prov_transport.h
         ./inc/azure_prov_client/prov_transport_mqtt_client.h
-        ./inc/azure_prov_client/prov_transport_mqtt_common.h)
+        ./inc/azure_prov_client/internal/prov_transport_private.h
+        ./inc/azure_prov_client/internal/prov_transport_mqtt_common.h)
     set(PROV_MQTT_CLIENT_C_FILES 
         ./src/prov_transport_mqtt_client.c
         ./src/prov_transport_mqtt_common.c)
@@ -256,7 +282,8 @@ if (${use_mqtt})
     set(PROV_MQTT_WS_CLIENT_H_FILES 
         ./inc/azure_prov_client/prov_transport.h
         ./inc/azure_prov_client/prov_transport_mqtt_ws_client.h
-        ./inc/azure_prov_client/prov_transport_mqtt_common.h)
+        ./inc/azure_prov_client/internal/prov_transport_private.h
+        ./inc/azure_prov_client/internal/prov_transport_mqtt_common.h)
     set(PROV_MQTT_WS_CLIENT_C_FILES 
         ./src/prov_transport_mqtt_ws_client.c
         ./src/prov_transport_mqtt_common.c)
@@ -282,7 +309,9 @@ if(NOT IN_OPENWRT)
     add_subdirectory(tests)
 endif()
 
-add_subdirectory(tools)
+if (NOT ${skip_samples})
+    add_subdirectory(tools)
+endif ()
 
 if(${use_installed_dependencies})
 

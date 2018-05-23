@@ -12,7 +12,7 @@
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 
-#include "azure_prov_client/iothub_auth_client.h"
+#include "azure_prov_client/internal/iothub_auth_client.h"
 #include "azure_prov_client/iothub_security_factory.h"
 #include "hsm_client_data.h"
 

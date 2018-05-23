@@ -50,7 +50,7 @@ void real_free(void* ptr)
 #include "azure_uamqp_c/connection.h"
 #undef ENABLE_MOCKS
 
-#include "iothubtransport_amqp_connection.h"
+#include "internal/iothubtransport_amqp_connection.h"
 
 static TEST_MUTEX_HANDLE g_testByTest;
 static TEST_MUTEX_HANDLE g_dllByDll;

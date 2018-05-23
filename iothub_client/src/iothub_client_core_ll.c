@@ -13,16 +13,16 @@
 #include "azure_c_shared_utility/platform.h"
 
 #include "iothub_client_core_ll.h"
-#include "iothub_client_authorization.h"
+#include "internal/iothub_client_authorization.h"
 #include "iothub_transport_ll.h"
-#include "iothub_client_private.h"
+#include "internal/iothub_client_private.h"
 #include "iothub_client_options.h"
 #include "iothub_client_version.h"
-#include "iothub_client_diagnostic.h"
+#include "internal/iothub_client_diagnostic.h"
 #include <stdint.h>
 
 #ifndef DONT_USE_UPLOADTOBLOB
-#include "iothub_client_ll_uploadtoblob.h"
+#include "internal/iothub_client_ll_uploadtoblob.h"
 #endif
 
 #define LOG_ERROR_RESULT LogError("result = %s", ENUM_TO_STRING(IOTHUB_CLIENT_RESULT, result));

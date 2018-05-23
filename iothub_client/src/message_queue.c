@@ -12,7 +12,7 @@
 
 typedef struct MESSAGE_QUEUE_TAG MESSAGE_QUEUE;
 
-#include "message_queue.h"
+#include "internal/message_queue.h"
 
 #define RESULT_OK 0
 #define INDEFINITE_TIME ((time_t)(-1))

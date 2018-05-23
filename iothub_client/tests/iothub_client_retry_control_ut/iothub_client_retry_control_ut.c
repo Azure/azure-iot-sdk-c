@@ -41,7 +41,7 @@ void real_free(void* ptr)
 #include "iothub_client_core_ll.h"
 #undef ENABLE_MOCKS
 
-#include "iothub_client_retry_control.h"
+#include "internal/iothub_client_retry_control.h"
 
 static TEST_MUTEX_HANDLE g_testByTest;
 static TEST_MUTEX_HANDLE g_dllByDll;

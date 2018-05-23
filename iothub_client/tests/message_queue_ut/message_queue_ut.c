@@ -41,7 +41,7 @@ void real_free(void* ptr)
 #include "azure_c_shared_utility/singlylinkedlist.h"
 #undef ENABLE_MOCKS
 
-#include "message_queue.h"
+#include "internal/message_queue.h"
 
 static TEST_MUTEX_HANDLE g_testByTest;
 static TEST_MUTEX_HANDLE g_dllByDll;

@@ -7,7 +7,7 @@
 #include <time.h>
 #include "iothub_client_options.h"
 #include "iothub_client_version.h"
-#include "iothub_client_private.h"
+#include "internal/iothub_client_private.h"
 #include "iothub_transport_ll.h"
 #include "iothubtransporthttp.h"
 

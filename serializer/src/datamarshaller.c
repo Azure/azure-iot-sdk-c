@@ -363,4 +363,3 @@ DATA_MARSHALLER_RESULT DataMarshaller_SendData_ReportedProperties(DATA_MARSHALLE
     }
     return result;
 }
- 

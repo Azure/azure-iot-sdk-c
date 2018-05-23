@@ -62,7 +62,7 @@ extern "C"
 
 #undef ENABLE_MOCKS
 
-#include "iothubtransportamqp_methods.h"
+#include "internal/iothubtransportamqp_methods.h"
 
 static IOTHUBTRANSPORT_AMQP_METHOD_HANDLE g_method_handle;
 static int g_respond_result;

@@ -17,7 +17,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include "iothubtransport.h"
+#include "internal/iothubtransport.h"
 #include "iothub_client_core_ll.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
 

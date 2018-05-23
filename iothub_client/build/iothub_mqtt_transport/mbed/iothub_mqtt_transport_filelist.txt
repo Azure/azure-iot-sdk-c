@@ -1,8 +1,8 @@
 set(mbed_project_files
-        ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothub_client_retry_control.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothub_client_retry_control.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/internal/iothub_client_retry_control.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/internal/iothubtransport_mqtt_common.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothubtransportmqtt.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothub_client_retry_control.c
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothubtransportmqtt.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothubtransport_mqtt_common.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothubtransport_mqtt_common.c
 )

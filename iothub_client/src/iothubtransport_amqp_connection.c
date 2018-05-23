@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 #include <limits.h>
-#include "iothubtransport_amqp_connection.h"
+#include "internal/iothubtransport_amqp_connection.h"
 #include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/strings.h"

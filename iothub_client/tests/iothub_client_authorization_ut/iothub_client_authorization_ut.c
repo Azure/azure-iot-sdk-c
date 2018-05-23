@@ -32,13 +32,13 @@ static void my_gballoc_free(void* ptr)
 #include "azure_c_shared_utility/xio.h"
 
 #ifdef USE_PROV_MODULE
-#include "azure_prov_client/iothub_auth_client.h"
+#include "azure_prov_client/internal/iothub_auth_client.h"
 #endif
 
 #include "azure_c_shared_utility/umock_c_prod.h"
 #undef ENABLE_MOCKS
 
-#include "iothub_client_authorization.h"
+#include "internal/iothub_client_authorization.h"
 
 static const char* DEVICE_ID = "device_id";
 static const char* DEVICE_KEY = "device_key";

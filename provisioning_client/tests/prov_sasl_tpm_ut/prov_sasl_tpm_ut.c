@@ -40,7 +40,7 @@ MOCKABLE_FUNCTION(, char*, on_challenge_callback, BUFFER_HANDLE, data, void*, us
 
 #undef ENABLE_MOCKS
 
-#include "azure_prov_client/prov_sasl_tpm.h"
+#include "azure_prov_client/internal/prov_sasl_tpm.h"
 
 #define TEST_BUFFER_SIZE        32
 #define TEST_KEY_SIZE           10
