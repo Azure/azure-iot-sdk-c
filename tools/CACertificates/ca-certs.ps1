@@ -1,4 +1,3 @@
-#
 #  Routines to help *experiment* (not necessarily productize) CA certificates.
 #
 
@@ -15,6 +14,7 @@ $errorActionPreference    = "stop"
 $_rootCertCommonName      = "Azure IoT CA TestOnly Root CA"
 $_rootCertSubject         = "CN=$_rootCertCommonName"
 $_intermediateCertCommonName = "Azure IoT CA TestOnly Intermediate {0} CA"
+$_intermediateCertSubject = "CN=$_intermediateCertCommonName"
 $_privateKeyPassword      = "1234"
 
 $rootCACerFileName          = "./RootCA.cer"
