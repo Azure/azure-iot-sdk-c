@@ -342,6 +342,8 @@ to modify your XCode project file (.xcodeproj) to replace all the lines that rea
 with</br>
 `LIBRARY_SEARCH_PATHS = "/usr/local/Cellar/curl/7.58.0/lib";`</br>
 
+The example above assumes curl 7.58 has been compiled and saved into `/usr/local/Cellar/curl/7.58.0`. For more details please see section "Upgrade CURL on Mac OS".
+
 <a name="windowsce"></a>
 
 ## [**DEPRECATED**: Set up a Windows Embedded Compact 2013 development environment
