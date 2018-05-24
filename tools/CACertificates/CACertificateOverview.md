@@ -75,13 +75,13 @@ Note that if you're using this certificate as a DPS registration ID, the ID **mu
 ### **PowerShell**
 #### IoT Leaf Device
 * Run `New-CACertsDevice mydevice` to create the new device certificate.  
-This will create files mydevice* that contain the public key, private key, and PFX of this certificate.  When prompted to enter a password during the signing process, enter "1234".
+This will create files mydevice* that contain the public key, private key, and PFX of this certificate.
 
 * To get a sense of how to use these certificates, `Write-CACertsCertificatesToEnvironment mydevice myIotHubName`, replacing mydevice and myIotHub name with your values.  This will create the environment variables `$ENV:IOTHUB_CA_*` that can give a sense of how they could be consumed by an application.
 
 #### IoT Edge Device
-* Run `New-CACertsDevice mydevice` to create the new device certificate.  
-This will create files mydevice* that contain the public key, private key, and PFX of this certificate.  When prompted to enter a password during the signing process, enter "1234".
+* Run `New-CACertsEdgeDevice mydevice` to create the new device certificate for Edge.  
+This will create files mydevice* that contain the public key, private key, and PFX of this certificate.
 
 * `Write-CACertsCertificatesForEdgeDevice mydevice`.  This will create a .\certs directory that contains public keys of the certificates and .\private which has the device's private key.  These certificates can be consumed by Edge during its initialization.
 
