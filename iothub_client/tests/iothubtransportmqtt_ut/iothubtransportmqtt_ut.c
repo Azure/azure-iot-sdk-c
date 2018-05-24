@@ -28,7 +28,7 @@ static void real_free(void* ptr)
 
 #include "azure_c_shared_utility/xio.h"
 #include "azure_c_shared_utility/tlsio.h"
-#include "iothubtransport_mqtt_common.h"
+#include "internal/iothubtransport_mqtt_common.h"
 
 #undef ENABLE_MOCKS
 
@@ -45,7 +45,7 @@ static const char* TEST_PROTOCOL_GATEWAY_HOSTNAME_NON_NULL = "ssl://thisIsAGatew
 static const char* TEST_OPTION_NAME = "TEST_OPTION_NAME";
 static const char* TEST_OPTION_VALUE = "test_option_value";
 
-static const IOTHUB_CLIENT_LL_HANDLE TEST_IOTHUB_CLIENT_LL_HANDLE = (IOTHUB_CLIENT_LL_HANDLE)0x4343;
+static const IOTHUB_CLIENT_CORE_LL_HANDLE TEST_IOTHUB_CLIENT_CORE_LL_HANDLE = (IOTHUB_CLIENT_CORE_LL_HANDLE)0x4343;
 static const TRANSPORT_LL_HANDLE TEST_TRANSPORT_HANDLE = (TRANSPORT_LL_HANDLE)0x4444;
 static XIO_HANDLE TEST_XIO_HANDLE = (XIO_HANDLE)0x1126;
 static IOTHUB_DEVICE_HANDLE TEST_DEVICE_HANDLE = (IOTHUB_DEVICE_HANDLE)0x1181;
@@ -294,7 +294,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_UMOCK_ALIAS_TYPE(XIO_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(PDLIST_ENTRY, void*);
     REGISTER_UMOCK_ALIAS_TYPE(const PDLIST_ENTRY, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_LL_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_CORE_LL_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_CONFIRMATION_RESULT, int);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUBMESSAGE_DISPOSITION_RESULT, int);
     REGISTER_UMOCK_ALIAS_TYPE(MQTT_GET_IO_TRANSPORT, void*);
@@ -677,10 +677,10 @@ TEST_FUNCTION(IoTHubTransportMqtt_DoWork_success)
     TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE));
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE));
 
     // act
-    IoTHubTransportMqtt_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+    IoTHubTransportMqtt_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -746,10 +746,10 @@ TEST_FUNCTION(IoTHubTransportMqtt_Register_success)
     deviceConfig.deviceKey = NULL;
     deviceConfig.deviceSasToken = NULL;
 
-    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_Register(handle, &deviceConfig, TEST_IOTHUB_CLIENT_LL_HANDLE, config.waitingToSend));
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_Register(handle, &deviceConfig, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, config.waitingToSend));
 
     // act
-    IOTHUB_DEVICE_HANDLE result = IoTHubTransportMqtt_Register(handle, &deviceConfig, TEST_IOTHUB_CLIENT_LL_HANDLE, config.waitingToSend);
+    IOTHUB_DEVICE_HANDLE result = IoTHubTransportMqtt_Register(handle, &deviceConfig, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, config.waitingToSend);
 
     // assert
     ASSERT_IS_NOT_NULL(result);

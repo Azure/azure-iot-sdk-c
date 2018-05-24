@@ -11,25 +11,25 @@ endif()
 compileAsC99()
 
 set(iothub_service_client_c_files
-./src/iothub_registrymanager.c
-./src/iothub_messaging.c
-./src/iothub_messaging_ll.c
-./src/iothub_devicetwin.c
-./src/iothub_devicemethod.c
-./src/iothub_service_client_auth.c
-./src/iothub_sc_version.c
-../iothub_client/src/iothub_message.c
+    ./src/iothub_registrymanager.c
+    ./src/iothub_messaging.c
+    ./src/iothub_messaging_ll.c
+    ./src/iothub_devicetwin.c
+    ./src/iothub_devicemethod.c
+    ./src/iothub_service_client_auth.c
+    ./src/iothub_sc_version.c
+    ../iothub_client/src/iothub_message.c
 )
 
 set(iothub_service_client_h_files
-./inc/iothub_registrymanager.h
-./inc/iothub_messaging.h
-./inc/iothub_messaging_ll.h
-./inc/iothub_devicetwin.h
-./inc/iothub_devicemethod.h
-./inc/iothub_service_client_auth.h
-./inc/iothub_sc_version.h
-../iothub_client/inc/iothub_message.h
+    ./inc/iothub_registrymanager.h
+    ./inc/iothub_messaging.h
+    ./inc/iothub_messaging_ll.h
+    ./inc/iothub_devicetwin.h
+    ./inc/iothub_devicemethod.h
+    ./inc/iothub_service_client_auth.h
+    ./inc/iothub_sc_version.h
+    ../iothub_client/inc/iothub_message.h
 )
 
 include_directories(${SHARED_UTIL_INC_FOLDER})
@@ -47,27 +47,34 @@ IF(WIN32)
     add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
 ENDIF(WIN32)
 
+add_library(iothub_service_client ${iothub_service_client_c_files} ${iothub_service_client_h_files})
+
+set(install_libs iothub_service_client)
+
+
 if (${build_as_dynamic})
-    add_library(iothub_service_client SHARED ${iothub_service_client_c_files} ${iothub_service_client_h_files} ./src/iothub_service_client.def)
-    linkSharedUtil(iothub_service_client)
+    add_library(iothub_service_client_dll SHARED ${iothub_service_client_c_files} ${iothub_service_client_h_files} ./src/iothub_service_client.def)
+    linkSharedUtil(iothub_service_client_dll)
     
-    if ("${CMAKE_COMPILER_ID}" STREQUAL "GNU")
-        target_link_libraries(iothub_service_client
+    target_link_libraries(iothub_service_client_dll uamqp parson)
+
+    if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
+        target_link_libraries(iothub_service_client_dll
             "-Wl,--exclude-libs,libparson.a"
         )
     endif()
 
-    set_target_properties(iothub_service_client PROPERTIES
+    set_target_properties(iothub_service_client_dll PROPERTIES
         OUTPUT_NAME "iothub_service_client"
         ARCHIVE_OUTPUT_NAME "iothub_service_client_dll_import"
         ENABLE_EXPORTS YES
         WINDOWS_EXPORT_ALL_SYMBOLS YES
+        PDB_NAME "iothub_service_client_dll"
         VERSION ${IOT_SDK_VERSION}
         SOVERSION ${IOT_SDK_VERION_MAJOR}
         BUILD_WITH_INSTALL_RPATH TRUE
     )
-else()
-    add_library(iothub_service_client ${iothub_service_client_c_files} ${iothub_service_client_h_files})
+    set (install_libs ${install_libs} iothub_service_client_dll)
 endif()
 setSdkTargetBuildProperties(iothub_service_client)
 
@@ -108,12 +115,9 @@ if(${use_installed_dependencies})
     )
     install(FILES ${iothub_service_client_h_files} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
 else()
-    set(install_staticlibs
-        iothub_service_client
-    )
     install(FILES ${iothub_service_client_h_files}
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/iothub_service_client) 
-    install(TARGETS ${install_staticlibs} 
+    install(TARGETS ${install_libs} 
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()

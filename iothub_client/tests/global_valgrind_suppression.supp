@@ -65,14 +65,14 @@
     HTTPAPI has unprotected global access
     Helgrind:Race
     ...
-    fun:IoTHubClient_UploadToBlobAsync
+    fun:IoTHubClientCore_UploadToBlobAsync
     ...
 }
 {
     HTTPAPI has unprotected global access
     Helgrind:Race
     ...
-    fun:IoTHubClient_LL_UploadToBlob
+    fun:IoTHubClientCore_LL_UploadToBlob
     ...
 }
 {
@@ -93,7 +93,7 @@
     DRD HTTPAPI has unprotected global access
     drd:ConflictingAccess
     ...
-    fun:IoTHubClient_LL_UploadToBlob
+    fun:IoTHubClientCore_LL_UploadToBlob
     ...
 }
 

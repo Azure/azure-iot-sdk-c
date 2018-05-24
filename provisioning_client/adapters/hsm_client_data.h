@@ -48,6 +48,15 @@ typedef struct HSM_CLIENT_X509_INTERFACE_TAG
     HSM_CLIENT_GET_COMMON_NAME hsm_client_get_common_name;
 } HSM_CLIENT_X509_INTERFACE;
 
+#ifdef HSM_TYPE_HTTP_EDGE
+typedef struct HSM_CLIENT_HTTP_EDGE_INTERFACE_TAG
+{
+    HSM_CLIENT_CREATE hsm_client_http_edge_create;
+    HSM_CLIENT_DESTROY hsm_client_http_edge_destroy;
+    HSM_CLIENT_SIGN_WITH_IDENTITY hsm_client_sign_with_identity;
+} HSM_CLIENT_HTTP_EDGE_INTERFACE;
+#endif
+
 extern int initialize_hsm_system();
 extern void deinitialize_hsm_system();
 
@@ -56,9 +65,15 @@ extern const HSM_CLIENT_X509_INTERFACE* hsm_client_x509_interface();
 
 extern int hsm_client_x509_init();
 extern void hsm_client_x509_deinit();
-int hsm_client_tpm_init();
-void hsm_client_tpm_deinit();
+extern int hsm_client_tpm_init();
+extern void hsm_client_tpm_deinit();
 
+
+#ifdef HSM_TYPE_HTTP_EDGE
+extern int hsm_client_http_edge_init();
+extern void hsm_client_http_edge_deinit(void);
+extern const HSM_CLIENT_HTTP_EDGE_INTERFACE* hsm_client_http_edge_interface();
+#endif
 
 #ifdef __cplusplus
 }

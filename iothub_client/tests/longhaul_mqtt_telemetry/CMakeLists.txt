@@ -22,6 +22,5 @@ set(project_h_files
 includeMqtt()
 build_c_test_longhaul_test(${PROJECT_NAME} ${project_c_files} ${project_h_files})
 
-
 linkSharedUtil(${PROJECT_NAME})
 linkMqttLibrary(${PROJECT_NAME})

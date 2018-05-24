@@ -18,7 +18,7 @@
 
 #include "azure_prov_client/prov_device_ll_client.h"
 #include "azure_prov_client/prov_security_factory.h"
-#include "azure_prov_client/prov_auth_client.h"
+#include "azure_prov_client/internal/prov_auth_client.h"
 
 #include "azure_prov_client/prov_transport_http_client.h"
 #include "azure_prov_client/prov_transport_amqp_client.h"
@@ -30,8 +30,8 @@
 #include "azure_c_shared_utility/map.h"
 #include "azure_c_shared_utility/uniqueid.h"
 
-#include "provisioning_service_client.h"
-#include "provisioning_sc_enrollment.h"
+#include "prov_service_client/provisioning_service_client.h"
+#include "prov_service_client/provisioning_sc_enrollment.h"
 
 static TEST_MUTEX_HANDLE g_dllByDll;
 
@@ -171,6 +171,44 @@ static int construct_device_id(const char* prefix, char** device_name)
     return result;
 }
 
+static void create_tpm_enrollment_device()
+{
+    INDIVIDUAL_ENROLLMENT_HANDLE indiv_enrollment = NULL;
+
+    PROVISIONING_SERVICE_CLIENT_HANDLE prov_sc_handle = prov_sc_create_from_connection_string(g_prov_conn_string);
+    ASSERT_IS_NOT_NULL_WITH_MSG(prov_sc_handle, "Failure creating provisioning service client");
+
+    prov_sc_set_trace(prov_sc_handle, TRACING_STATUS_ON);
+
+    PROV_AUTH_HANDLE auth_handle = prov_auth_create();
+    ASSERT_IS_NOT_NULL_WITH_MSG(auth_handle, "Failure creating auth client");
+
+    char* registration_id = prov_auth_get_registration_id(auth_handle);
+    ASSERT_IS_NOT_NULL_WITH_MSG(registration_id, "Failure prov_auth_get_common_name");
+
+    if (prov_sc_get_individual_enrollment(prov_sc_handle, registration_id, &indiv_enrollment) != 0)
+    {
+        BUFFER_HANDLE ek_handle = prov_auth_get_endorsement_key(auth_handle);
+        ASSERT_IS_NOT_NULL_WITH_MSG(ek_handle, "Failure prov_auth_get_endorsement_key");
+
+        STRING_HANDLE ek_value = Base64_Encoder(ek_handle);
+        ASSERT_IS_NOT_NULL_WITH_MSG(ek_value, "Failure Base64_Encoder Endorsement key");
+
+        ATTESTATION_MECHANISM_HANDLE attest_handle = attestationMechanism_createWithTpm(STRING_c_str(ek_value), NULL);
+        ASSERT_IS_NOT_NULL_WITH_MSG(attest_handle, "Failure attestationMechanism_createWithTpm");
+
+        indiv_enrollment = individualEnrollment_create(registration_id, attest_handle);
+        ASSERT_IS_NOT_NULL_WITH_MSG(indiv_enrollment, "Failure hsm_client_riot_get_certificate ");
+
+        BUFFER_delete(ek_handle);
+        STRING_delete(ek_value);
+    }
+    free(registration_id);
+    individualEnrollment_destroy(indiv_enrollment);
+    prov_auth_destroy(auth_handle);
+    prov_sc_destroy(prov_sc_handle);
+}
+
 static void create_x509_enrollment_device()
 {
     INDIVIDUAL_ENROLLMENT_HANDLE indiv_enrollment = NULL;
@@ -237,15 +275,16 @@ BEGIN_TEST_SUITE(dps_client_e2e)
 
         platform_init();
 
-        prov_dev_security_init(SECURE_DEVICE_TYPE_X509);
+        prov_dev_security_init(SECURE_DEVICE_TYPE_TPM);
 
-        g_prov_conn_string = getenv("DPS_C_CONNECTION_STRING");
+        g_prov_conn_string = "HostName=dps-c-sdk-test.azure-devices-provisioning.net;SharedAccessKeyName=provisioningserviceowner;SharedAccessKey=ZPJDYmnlXGfTH0vAs2MXHwZNnbETJCSHYqHFbf8cLhM=";// getenv("DPS_C_CONNECTION_STRING");
         ASSERT_IS_NOT_NULL_WITH_MSG(g_prov_conn_string, "PROV_CONNECTION_STRING is NULL");
 
         // Register device
-        create_x509_enrollment_device();
+        create_tpm_enrollment_device();
+        //create_x509_enrollment_device();
 
-        g_dps_scope_id = getenv("DPS_C_SCOPE_ID_VALUE");
+        g_dps_scope_id = "0ne00000032";// getenv("DPS_C_SCOPE_ID_VALUE");
         ASSERT_IS_NOT_NULL_WITH_MSG(g_dps_scope_id, "DPS_SCOPE_ID_VALUE is NULL");
     }
 

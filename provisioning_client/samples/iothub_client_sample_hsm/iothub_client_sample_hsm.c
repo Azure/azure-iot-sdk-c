@@ -18,8 +18,7 @@
 #include "iothubtransportmqtt.h"
 #include "iothubtransportamqp.h"
 
-#include "azure_prov_client/iothub_auth_client.h"
-#include "iothub_client_hsm_ll.h"
+#include "iothub_client_ll.h"
 
 #include "../../../certs/certs.h"
 
@@ -110,8 +109,8 @@ int main(void)
                 (void)printf("ERROR: IoTHubClient_LL_SetConnectionStatusCallback..........FAILED!\r\n");
             }
 
-            bool traceOn = true;
-            IoTHubClient_LL_SetOption(iothub_client, "logtrace", &traceOn);
+            //bool traceOn = true;
+            //IoTHubClient_LL_SetOption(iothub_client, OPTION_LOG_TRACE, &traceOn);
             if (g_using_cert)
             {
                 IoTHubClient_LL_SetOption(iothub_client, OPTION_TRUSTED_CERT, certificates);

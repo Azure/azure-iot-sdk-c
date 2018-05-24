@@ -13,10 +13,10 @@
 #include "azure_c_shared_utility/shared_util_options.h"
 
 #ifdef USE_PROV_MODULE
-#include "azure_prov_client/iothub_auth_client.h"
+#include "azure_prov_client/internal/iothub_auth_client.h"
 #endif
 
-#include "iothub_client_authorization.h"
+#include "internal/iothub_client_authorization.h"
 
 #define DEFAULT_SAS_TOKEN_EXPIRY_TIME_SECS          3600
 #define INDEFINITE_TIME                             ((time_t)(-1))
@@ -133,7 +133,7 @@ IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_Create(const char* device_key, con
     return result;
 }
 
-IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_CreateFromDeviceAuth(const char* device_id)
+IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_CreateFromDeviceAuth(const char* device_id, const char* module_id)
 {
     IOTHUB_AUTHORIZATION_DATA* result;
     if (device_id == NULL)
@@ -163,8 +163,16 @@ IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_CreateFromDeviceAuth(const char* d
             }
             else if (mallocAndStrcpy_s(&result->device_id, device_id) != 0)
             {
-                LogError("Failed allocating device_key");
+                LogError("Failed allocating device_id");
                 iothub_device_auth_destroy(result->device_auth_handle);
+                free(result);
+                result = NULL;
+            }
+            else if ((module_id != NULL) && (mallocAndStrcpy_s(&result->module_id, module_id) != 0))
+            {
+                LogError("Failed allocating module_id");
+                iothub_device_auth_destroy(result->device_auth_handle);
+                free(result->device_id);
                 free(result);
                 result = NULL;
             }
@@ -181,6 +189,7 @@ IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_CreateFromDeviceAuth(const char* d
             }
         }
 #else
+        (void)module_id;
         LogError("Failed HSM module is not supported");
         result = NULL;
 #endif
@@ -302,7 +311,7 @@ IOTHUB_CREDENTIAL_TYPE IoTHubClient_Auth_Get_Credential_Type(IOTHUB_AUTHORIZATIO
     return result;
 }
 
-char* IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const char* scope, size_t expiry_time_relative_seconds)
+char* IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const char* scope, size_t expiry_time_relative_seconds, const char* key_name)
 {
     char* result;
     /* Codes_SRS_IoTHub_Authorization_07_009: [ if handle or scope are NULL, IoTHubClient_Auth_Get_SasToken shall return NULL. ] */
@@ -326,9 +335,11 @@ char* IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const c
             }
             else 
             {
+                memset(&dev_auth_cred, 0, sizeof(DEVICE_AUTH_CREDENTIAL_INFO));
                 size_t expiry_time = sec_since_epoch+expiry_time_relative_seconds;
                 dev_auth_cred.sas_info.expiry_seconds = expiry_time;
                 dev_auth_cred.sas_info.token_scope = scope;
+                dev_auth_cred.sas_info.key_name = key_name;
                 dev_auth_cred.dev_auth_type = AUTH_TYPE_SAS;
 
                 CREDENTIAL_RESULT* cred_result = iothub_device_auth_generate_credentials(handle->device_auth_handle, &dev_auth_cred);
@@ -379,7 +390,6 @@ char* IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const c
             }
             else
             {
-                const char* key_name = "";
                 STRING_HANDLE sas_token;
                 size_t sec_since_epoch;
 
@@ -518,8 +528,8 @@ SAS_TOKEN_STATUS IoTHubClient_Auth_Is_SasToken_Valid(IOTHUB_AUTHORIZATION_HANDLE
         }
         else
         {
-            /* Codes_SRS_IoTHub_Authorization_07_016: [ if credential type is not IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN IoTHubClient_Auth_Is_SasToken_Valid shall return true. ] */
-            result = true;
+            /* Codes_SRS_IoTHub_Authorization_07_016: [ if credential type is not IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN IoTHubClient_Auth_Is_SasToken_Valid shall return SAS_TOKEN_STATUS_VALID. ] */
+            result = SAS_TOKEN_STATUS_VALID;
         }
     }
     return result;

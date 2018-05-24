@@ -47,13 +47,13 @@ void real_free(void* ptr)
 #include "azure_uamqp_c/messaging.h"
 #include "azure_uamqp_c/message_sender.h"
 #include "azure_uamqp_c/message_receiver.h"
-#include "iothub_client_private.h"
+#include "internal/iothub_client_private.h"
 #include "iothub_client_version.h"
-#include "uamqp_messaging.h"
+#include "internal/uamqp_messaging.h"
 
 #undef ENABLE_MOCKS
 
-#include "iothubtransport_amqp_telemetry_messenger.h"
+#include "internal/iothubtransport_amqp_telemetry_messenger.h"
 
 
 static TEST_MUTEX_HANDLE g_testByTest;

@@ -25,6 +25,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(MEMORYCHECK_COMMAND_OPTIONS "--leak-check=full --error-exitcode=1")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(MACOSX TRUE)
+    add_definitions(-DMACOSX)
 endif()
 
 include (CTest)
@@ -51,6 +52,8 @@ set(hsm_type_custom OFF CACHE BOOL "hsm type of custom used with the Provisionin
 set(hsm_custom_lib "" CACHE STRING "Full path to custom HSM repo library")
 set(run_sfc_tests OFF CACHE BOOL "setup the Service Fault tests")
 
+set(use_wolfssl)
+
 #the following variables are project-wide and can be used with cmake-gui
 option(use_amqp "set use_amqp to ON if amqp is to be used, set to OFF to not use amqp" ON)
 option(use_http "set use_http to ON if http is to be used, set to OFF to not use http" ON)
@@ -68,11 +71,16 @@ option(build_javawrapper "builds the native iothub_client library for java C wra
 option(dont_use_uploadtoblob "set dont_use_uploadtoblob to ON if the functionality of upload to blob is to be excluded, OFF otherwise. It requires HTTP" OFF)
 option(no_logging "disable logging" OFF)
 option(use_installed_dependencies "set use_installed_dependencies to ON to use installed packages instead of building dependencies from submodules" OFF)
-option(use_firmware_update "build the Raspberry PI firmware_update sample" OFF)
 option(build_as_dynamic "build the IoT SDK libaries as dynamic"  OFF)
 option(build_network_e2e "build network E2E tests" OFF)
 option(use_prov_client "Enable provisioning client" OFF)
 option(use_tpm_simulator "tpm simulator type of hsm used with the provisioning client" OFF)
+option(use_edge_modules "Enable support for running modules against Azure IoT Edge" OFF)
+option(use_custom_heap "use externally defined heap functions instead of the malloc family" OFF)
+
+if(${use_custom_heap})
+    add_definitions(-DGB_USE_CUSTOM_HEAP)
+endif()
 
 message(STATUS "Provisioning client ${use_prov_client}")
 if(XCODE AND ${use_prov_client})
@@ -87,10 +95,18 @@ else()
 endif()
 
 #openssl samples on Windows need to have a trusted cert set
-if(WIN32 AND ${use_openssl})
-    option(set_trusted_cert_in_samples "set set_trusted_cert_in_samples to ON to have the samples set the SDK's built-in CA as TrustedCerts" ON)
+if("${use_openssl}" OR "${use_wolfssl}")
+    option(use_sample_trusted_cert "Set flag in samples to use SDK's built-in CA as TrustedCerts" ON)
 else()
-    option(set_trusted_cert_in_samples "set set_trusted_cert_in_samples to ON to have the samples set the SDK's built-in CA as TrustedCerts" OFF)
+    option(use_sample_trusted_cert "Set flag in samples to use SDK's built-in CA as TrustedCerts" OFF)
+endif()
+
+# Enable IoT SDK to act as a module for Edge
+if(${use_edge_modules})
+    set(use_prov_client ON)
+    set(use_http ON)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_EDGE_MODULES")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_EDGE_MODULES")
 endif()
 
 # Set Provisioning Information
@@ -101,6 +117,9 @@ if (${use_prov_client})
     if ("${hsm_custom_lib}" STREQUAL "")
         set(hsm_type_x509 ON)
         set(hsm_type_sastoken ON)
+        if(${use_edge_modules})
+            set(hsm_type_edge_module ON)
+        endif()
     else()
         set(hsm_type_custom ON)
     endif()
@@ -127,6 +146,17 @@ endif()
 
 #Use solution folders.
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+# build the parson library for json parsing
+add_library(parson
+    ./deps/parson/parson.c
+    ./deps/parson/parson.h
+)
+if(MSVC)
+    set_source_files_properties(../deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
+endif()
+set(parson_h_install_files ./deps/parson/parson.h)
+set(parson_install_libs parson)
 
 if(IN_OPENWRT)
     ADD_DEFINITIONS("$ENV{TARGET_LDFLAGS}" "$ENV{TARGET_CPPFLAGS}" "$ENV{TARGET_CFLAGS}")
@@ -212,7 +242,7 @@ message(STATUS "iothub architecture: ${ARCHITECTURE}")
 
 macro(compileAsC99)
   if (CMAKE_VERSION VERSION_LESS "3.1")
-    if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
       set (CMAKE_C_FLAGS "--std=c99 ${CMAKE_C_FLAGS}")
     if (NOT IN_OPENWRT)
       set (CMAKE_CXX_FLAGS "--std=c++11 ${CMAKE_CXX_FLAGS}")
@@ -226,7 +256,7 @@ endmacro(compileAsC99)
 
 macro(compileAsC11)
   if (CMAKE_VERSION VERSION_LESS "3.1")
-    if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
       set (CMAKE_C_FLAGS "--std=c11 ${CMAKE_C_FLAGS}")
       set (CMAKE_C_FLAGS "-D_POSIX_C_SOURCE=200112L ${CMAKE_C_FLAGS}")
       set (CMAKE_CXX_FLAGS "--std=c++11 ${CMAKE_CXX_FLAGS}")
@@ -317,6 +347,15 @@ if(${use_installed_dependencies})
         COPYONLY
     )
 
+    install(FILES ${parson_h_install_files} EXPORT azure_iot_sdksTargets
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
+    )
+    install(TARGETS ${parson_install_libs}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
+    )
+
     install(EXPORT azure_iot_sdksTargets
         FILE
             "${PROJECT_NAME}Targets.cmake"
@@ -332,6 +371,12 @@ if(${use_installed_dependencies})
         DESTINATION
             ${package_location}
     )
+else()
+    install(FILES ${parson_h_install_files}
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
+    install(TARGETS ${parson_install_libs}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
 
 if (${build_network_e2e})

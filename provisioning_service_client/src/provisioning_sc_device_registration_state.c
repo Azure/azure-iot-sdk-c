@@ -6,10 +6,10 @@
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/gballoc.h"
 
-#include "provisioning_sc_device_registration_state.h"
-#include "provisioning_sc_json_const.h"
-#include "provisioning_sc_shared_helpers.h"
-#include "provisioning_sc_models_serializer.h"
+#include "prov_service_client/provisioning_sc_device_registration_state.h"
+#include "prov_service_client/provisioning_sc_json_const.h"
+#include "prov_service_client/provisioning_sc_shared_helpers.h"
+#include "prov_service_client/provisioning_sc_models_serializer.h"
 #include "parson.h"
 
 typedef struct DEVICE_REGISTRATION_STATE_TAG

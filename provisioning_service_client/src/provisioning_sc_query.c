@@ -7,10 +7,10 @@
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 
-#include "provisioning_sc_query.h"
-#include "provisioning_sc_json_const.h"
-#include "provisioning_sc_shared_helpers.h"
-#include "provisioning_sc_models_serializer.h"
+#include "prov_service_client/provisioning_sc_query.h"
+#include "prov_service_client/provisioning_sc_json_const.h"
+#include "prov_service_client/provisioning_sc_shared_helpers.h"
+#include "prov_service_client/provisioning_sc_models_serializer.h"
 #include "parson.h"
 
 void queryResponse_free(PROVISIONING_QUERY_RESPONSE* query_resp)

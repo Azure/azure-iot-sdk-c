@@ -289,7 +289,7 @@ This function enables the transport to notify the upper client layer of new mess
 
 #### on_message_received
 
-````c
+```c
 static DEVICE_MESSAGE_DISPOSITION_RESULT on_message_received(IOTHUB_MESSAGE_HANDLE iothub_message, void* context)
 ```
 

@@ -31,88 +31,16 @@ extern "C"
 {
 #endif
 
-#define IOTHUB_CLIENT_FILE_UPLOAD_RESULT_VALUES \
-    FILE_UPLOAD_OK, \
-    FILE_UPLOAD_ERROR
+#include "iothub_transport_ll.h"
+#include "iothub_client_core_ll.h"
 
-    DEFINE_ENUM(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, IOTHUB_CLIENT_FILE_UPLOAD_RESULT_VALUES)
-    typedef void(*IOTHUB_CLIENT_FILE_UPLOAD_CALLBACK)(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, void* userContextCallback);
-
-#define IOTHUB_CLIENT_RESULT_VALUES       \
-    IOTHUB_CLIENT_OK,                     \
-    IOTHUB_CLIENT_INVALID_ARG,            \
-    IOTHUB_CLIENT_ERROR,                  \
-    IOTHUB_CLIENT_INVALID_SIZE,           \
-    IOTHUB_CLIENT_INDEFINITE_TIME
-
-/** @brief Enumeration specifying the status of calls to various APIs in this module.
-*/
-
-DEFINE_ENUM(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
-
-#define IOTHUB_CLIENT_RETRY_POLICY_VALUES     \
-    IOTHUB_CLIENT_RETRY_NONE,                   \
-    IOTHUB_CLIENT_RETRY_IMMEDIATE,                  \
-    IOTHUB_CLIENT_RETRY_INTERVAL,      \
-    IOTHUB_CLIENT_RETRY_LINEAR_BACKOFF,      \
-    IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF,                 \
-    IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER,                 \
-    IOTHUB_CLIENT_RETRY_RANDOM
-
-/** @brief Enumeration passed in by the IoT Hub when the event confirmation
-*		   callback is invoked to indicate status of the event processing in
-*		   the hub.
-*/
-DEFINE_ENUM(IOTHUB_CLIENT_RETRY_POLICY, IOTHUB_CLIENT_RETRY_POLICY_VALUES);
-
-struct IOTHUBTRANSPORT_CONFIG_TAG;
-typedef struct IOTHUBTRANSPORT_CONFIG_TAG IOTHUBTRANSPORT_CONFIG;
-
-typedef struct IOTHUB_CLIENT_LL_HANDLE_DATA_TAG* IOTHUB_CLIENT_LL_HANDLE;
-
-#define IOTHUB_CLIENT_STATUS_VALUES       \
-    IOTHUB_CLIENT_SEND_STATUS_IDLE,       \
-    IOTHUB_CLIENT_SEND_STATUS_BUSY
-
-/** @brief Enumeration returned by the ::IoTHubClient_LL_GetSendStatus
-*		   API to indicate the current sending status of the IoT Hub client.
-*/
-DEFINE_ENUM(IOTHUB_CLIENT_STATUS, IOTHUB_CLIENT_STATUS_VALUES);
-
-#define IOTHUB_IDENTITY_TYPE_VALUE  \
-    IOTHUB_TYPE_TELEMETRY,          \
-    IOTHUB_TYPE_DEVICE_TWIN,        \
-    IOTHUB_TYPE_DEVICE_METHODS,     \
-    IOTHUB_TYPE_EVENT_QUEUE         
-DEFINE_ENUM(IOTHUB_IDENTITY_TYPE, IOTHUB_IDENTITY_TYPE_VALUE);
-
-#define IOTHUB_PROCESS_ITEM_RESULT_VALUE    \
-    IOTHUB_PROCESS_OK,                      \
-    IOTHUB_PROCESS_ERROR,                   \
-    IOTHUB_PROCESS_NOT_CONNECTED,           \
-    IOTHUB_PROCESS_CONTINUE
-DEFINE_ENUM(IOTHUB_PROCESS_ITEM_RESULT, IOTHUB_PROCESS_ITEM_RESULT_VALUE);
-
-#define IOTHUBMESSAGE_DISPOSITION_RESULT_VALUES \
-    IOTHUBMESSAGE_ACCEPTED, \
-    IOTHUBMESSAGE_REJECTED, \
-    IOTHUBMESSAGE_ABANDONED
-
-/** @brief Enumeration returned by the callback which is invoked whenever the
-*		   IoT Hub sends a message to the device.
-*/
-DEFINE_ENUM(IOTHUBMESSAGE_DISPOSITION_RESULT, IOTHUBMESSAGE_DISPOSITION_RESULT_VALUES);
+typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_CLIENT_LL_HANDLE;
 
 #ifdef __cplusplus
 }
 #endif
 
 #include "azure_c_shared_utility/agenttime.h"
-#include "azure_c_shared_utility/xio.h"
-#include "azure_c_shared_utility/doublylinkedlist.h"
-#include "iothub_message.h"
-#include "iothub_transport_ll.h"
-#include "iothub_client_authorization.h"
 #include <stddef.h>
 #include <stdint.h>
 
@@ -120,165 +48,6 @@ DEFINE_ENUM(IOTHUBMESSAGE_DISPOSITION_RESULT, IOTHUBMESSAGE_DISPOSITION_RESULT_V
 extern "C"
 {
 #endif
-
-#define IOTHUB_CLIENT_IOTHUB_METHOD_STATUS_VALUES \
-    IOTHUB_CLIENT_IOTHUB_METHOD_STATUS_SUCCESS,   \
-    IOTHUB_CLIENT_IOTHUB_METHOD_STATUS_ERROR      \
-
-/** @brief Enumeration returned by remotely executed functions
-*/
-DEFINE_ENUM(IOTHUB_CLIENT_IOTHUB_METHOD_STATUS, IOTHUB_CLIENT_IOTHUB_METHOD_STATUS_VALUES);
-
-
-#define IOTHUB_CLIENT_CONFIRMATION_RESULT_VALUES     \
-    IOTHUB_CLIENT_CONFIRMATION_OK,                   \
-    IOTHUB_CLIENT_CONFIRMATION_BECAUSE_DESTROY,      \
-    IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT,      \
-    IOTHUB_CLIENT_CONFIRMATION_ERROR                 \
-
-    /** @brief Enumeration passed in by the IoT Hub when the event confirmation
-    *		   callback is invoked to indicate status of the event processing in
-    *		   the hub.
-    */
-    DEFINE_ENUM(IOTHUB_CLIENT_CONFIRMATION_RESULT, IOTHUB_CLIENT_CONFIRMATION_RESULT_VALUES);
-
-#define IOTHUB_CLIENT_CONNECTION_STATUS_VALUES             \
-    IOTHUB_CLIENT_CONNECTION_AUTHENTICATED,                \
-    IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED               \
-
-
-    /** @brief Enumeration passed in by the IoT Hub when the connection status
-    *		   callback is invoked to indicate status of the connection in
-    *		   the hub.
-    */
-    DEFINE_ENUM(IOTHUB_CLIENT_CONNECTION_STATUS, IOTHUB_CLIENT_CONNECTION_STATUS_VALUES);
-
-#define IOTHUB_CLIENT_CONNECTION_STATUS_REASON_VALUES      \
-    IOTHUB_CLIENT_CONNECTION_EXPIRED_SAS_TOKEN,            \
-    IOTHUB_CLIENT_CONNECTION_DEVICE_DISABLED,              \
-    IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL,               \
-    IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED,                \
-    IOTHUB_CLIENT_CONNECTION_NO_NETWORK,                   \
-    IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR,          \
-    IOTHUB_CLIENT_CONNECTION_OK                            \
-
-    /** @brief Enumeration passed in by the IoT Hub when the connection status
-    *		   callback is invoked to indicate status of the connection in
-    *		   the hub.
-    */
-    DEFINE_ENUM(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, IOTHUB_CLIENT_CONNECTION_STATUS_REASON_VALUES);
-
-#define TRANSPORT_TYPE_VALUES \
-    TRANSPORT_LL, /*LL comes from "LowLevel" */ \
-    TRANSPORT_THREADED
-
-    DEFINE_ENUM(TRANSPORT_TYPE, TRANSPORT_TYPE_VALUES);
-
-#define DEVICE_TWIN_UPDATE_STATE_VALUES \
-    DEVICE_TWIN_UPDATE_COMPLETE, \
-    DEVICE_TWIN_UPDATE_PARTIAL
-
-    DEFINE_ENUM(DEVICE_TWIN_UPDATE_STATE, DEVICE_TWIN_UPDATE_STATE_VALUES);
-
-    typedef void(*IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK)(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback);
-    typedef void(*IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK)(IOTHUB_CLIENT_CONNECTION_STATUS result, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason, void* userContextCallback);
-    typedef IOTHUBMESSAGE_DISPOSITION_RESULT (*IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC)(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback);
-    typedef const TRANSPORT_PROVIDER*(*IOTHUB_CLIENT_TRANSPORT_PROVIDER)(void);
-
-    typedef void(*IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback);
-    typedef void(*IOTHUB_CLIENT_REPORTED_STATE_CALLBACK)(int status_code, void* userContextCallback);
-    typedef int(*IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC)(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* response_size, void* userContextCallback);
-    typedef int(*IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK)(const char* method_name, const unsigned char* payload, size_t size, METHOD_HANDLE method_id, void* userContextCallback);
-
-#ifndef DONT_USE_UPLOADTOBLOB
-
-#define BLOCK_SIZE (4*1024*1024)
-
-#define IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT_VALUES \
-    IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK, \
-    IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_ABORT
-
-    DEFINE_ENUM(IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT_VALUES);
-
-    /**
-    *  @brief           Callback invoked by IoTHubClient_UploadMultipleBlocksToBlobAsync requesting the chunks of data to be uploaded.
-    *  @param result    The result of the upload of the previous block of data provided by the user (IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX only)
-    *  @param data      Next block of data to be uploaded, to be provided by the user when this callback is invoked.
-    *  @param size      Size of the data parameter.
-    *  @param context   User context provided on the call to IoTHubClient_UploadMultipleBlocksToBlobAsync.
-    *  @remarks         If the user wants to abort the upload, the callback should return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_ABORT
-    *                   It should return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK otherwise.
-    *                   If a NULL is provided for parameter "data" and/or zero is provided for "size", the user indicates to the client that the complete file has been uploaded.
-    *                   In such case this callback will be invoked only once more to indicate the status of the final block upload.
-    *                   If result is not FILE_UPLOAD_OK, the download is cancelled and this callback stops being invoked.
-    *                   When this callback is called for the last time, no data or size is expected, so data and size are set to NULL
-    */
-    typedef void(*IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK)(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context);
-    typedef IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT (*IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX)(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context);
-#endif /* DONT_USE_UPLOADTOBLOB */
-
-    /** @brief	This struct captures IoTHub client configuration. */
-    typedef struct IOTHUB_CLIENT_CONFIG_TAG
-    {
-        /** @brief A function pointer that is passed into the @c IoTHubClientCreate.
-        *	A function definition for AMQP is defined in the include @c iothubtransportamqp.h.
-        *   A function definition for HTTP is defined in the include @c iothubtransporthttp.h
-        *   A function definition for MQTT is defined in the include @c iothubtransportmqtt.h */
-        IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;
-
-        /** @brief	A string that identifies the device. */
-        const char* deviceId;
-
-        /** @brief	The device key used to authenticate the device. 
-        If neither deviceSasToken nor deviceKey is present then the authentication is assumed x509.*/
-        const char* deviceKey;
-
-        /** @brief	The device SAS Token used to authenticate the device in place of device key. 
-        If neither deviceSasToken nor deviceKey is present then the authentication is assumed x509.*/
-        const char* deviceSasToken;
-
-        /** @brief	The IoT Hub name to which the device is connecting. */
-        const char* iotHubName;
-
-        /** @brief	IoT Hub suffix goes here, e.g., private.azure-devices-int.net. */
-        const char* iotHubSuffix;
-
-        const char* protocolGatewayHostName;
-    } IOTHUB_CLIENT_CONFIG;
-
-    /** @brief	This struct captures IoTHub client device configuration. */
-    typedef struct IOTHUB_CLIENT_DEVICE_CONFIG_TAG
-    {
-        /** @brief A function pointer that is passed into the @c IoTHubClientCreate.
-        *	A function definition for AMQP is defined in the include @c iothubtransportamqp.h.
-        *   A function definition for HTTP is defined in the include @c iothubtransporthttp.h
-        *   A function definition for MQTT is defined in the include @c iothubtransportmqtt.h */
-        IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;
-
-        /** @brief a transport handle implementing the protocol */
-        void * transportHandle;
-
-        /** @brief	A string that identifies the device. */
-        const char* deviceId;
-
-        /** @brief	The device key used to authenticate the device. 
-        x509 authentication is is not supported for multiplexed connections*/
-        const char* deviceKey;
-
-        /** @brief	The device SAS Token used to authenticate the device in place of device key. 
-        x509 authentication is is not supported for multiplexed connections.*/
-        const char* deviceSasToken;
-    } IOTHUB_CLIENT_DEVICE_CONFIG;
-
-    /** @brief	This struct captures IoTHub transport configuration. */
-    struct IOTHUBTRANSPORT_CONFIG_TAG
-    {
-        const IOTHUB_CLIENT_CONFIG* upperConfig;
-        PDLIST_ENTRY waitingToSend;
-        IOTHUB_AUTHORIZATION_HANDLE auth_module_handle;
-        const char* moduleId;
-    };
-
 
     /**
     * @brief	Creates a IoT Hub client for communication with an existing
@@ -324,6 +93,20 @@ DEFINE_ENUM(IOTHUB_CLIENT_IOTHUB_METHOD_STATUS, IOTHUB_CLIENT_IOTHUB_METHOD_STAT
     * 			invoking other functions for IoT Hub client and @c NULL on failure.
     */
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_LL_HANDLE, IoTHubClient_LL_CreateWithTransport, const IOTHUB_CLIENT_DEVICE_CONFIG*, config);
+
+     /**
+     * @brief	Creates a IoT Hub client for communication with an existing IoT
+     * 			Hub using the device auth module.
+     *
+     * @param	iothub_uri	Pointer to an ioThub hostname received in the registration process
+     * @param	device_id	Pointer to the device Id of the device
+     * @param	device_auth_handle	a device auth handle used to generate the connection string
+     * @param	protocol			Function pointer for protocol implementation
+     *
+     * @return	A non-NULL @c IOTHUB_CLIENT_LL_HANDLE value that is used when
+     * 			invoking other functions for IoT Hub client and @c NULL on failure.
+     */
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_LL_HANDLE, IoTHubClient_LL_CreateFromDeviceAuth, const char*, iothub_uri, const char*, device_id, IOTHUB_CLIENT_TRANSPORT_PROVIDER, protocol);
 
     /**
     * @brief	Disposes of resources allocated by the IoT Hub client. This is a
@@ -593,7 +376,7 @@ DEFINE_ENUM(IOTHUB_CLIENT_IOTHUB_METHOD_STATUS, IOTHUB_CLIENT_IOTHUB_METHOD_STAT
     *
     * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, destinationFileName, const unsigned char*, source, size_t, size);
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, destinationFileName, const unsigned char*, source, size_t, size);
 
      /**
      ** DEPRECATED: Use IoTHubClient_LL_UploadMultipleBlocksToBlobAsyncEx instead **
@@ -624,43 +407,6 @@ DEFINE_ENUM(IOTHUB_CLIENT_IOTHUB_METHOD_STATUS, IOTHUB_CLIENT_IOTHUB_METHOD_STAT
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadMultipleBlocksToBlobEx, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX, getDataCallbackEx, void*, context);
 
 #endif /*DONT_USE_UPLOADTOBLOB*/
-
-    /**
-    * @brief	Asynchronous call to send the message specified by @p eventMessageHandle.
-    *
-    * @param	iotHubClientHandle		   	The handle created by a call to the create function.
-    * @param	eventMessageHandle		   	The handle to an IoT Hub message.
-    * @param	outputName		   	        The name of the queue to send the message to.
-    * @param	eventConfirmationCallback  	The callback specified by the device for receiving
-    * 										confirmation of the delivery of the IoT Hub message.
-    * 										This callback can be expected to invoke the
-    * 										::IoTHubClient_LL_SendEventAsync function for the
-    * 										same message in an attempt to retry sending a failing
-    * 										message. The user can specify a @c NULL value here to
-    * 										indicate that no callback is required.
-    * @param	userContextCallback			User specified context that will be provided to the
-    * 										callback. This can be @c NULL.
-    *
-    *			@b NOTE: The application behavior is undefined if the user calls
-    *			the ::IoTHubClient_LL_Destroy function from within any callback.
-    *
-    * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
-    */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SendEventToOutputAsync, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_MESSAGE_HANDLE, eventMessageHandle, const char*, outputName, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, eventConfirmationCallback, void*, userContextCallback);
-
-    /**
-    * @brief	This API sets callback for  method call that is directed to specified 'inputName' queue (e.g. messages from IoTHubClient_SendEventToOutputAsync)
-    *
-    * @param	iotHubClientHandle		The handle created by a call to the create function.
-    * @param	inputName		        The name of the queue to listen on for this deviceMethodCallback/userContextCallback.
-    * @param	deviceMethodCallback	The callback which will be called by IoTHub.
-    * @param	userContextCallback		User specified context that will be provided to the
-    * 									callback. This can be @c NULL.
-    *
-    * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
-    */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SetInputMessageCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, inputName, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC, eventHandlerCallback, void*, userContextCallback);
-
 
 #ifdef __cplusplus
 }

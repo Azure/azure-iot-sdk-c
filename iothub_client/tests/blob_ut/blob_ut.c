@@ -32,7 +32,7 @@ static void my_gballoc_free(void* s)
 #include "azure_c_shared_utility/shared_util_options.h"
 #undef ENABLE_MOCKS
 
-#include "blob.h"
+#include "internal/blob.h"
 #include "testrunnerswitcher.h"
 #include "umock_c.h"
 #include "umocktypes_charptr.h"

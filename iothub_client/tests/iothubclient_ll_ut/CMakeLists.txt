@@ -9,16 +9,17 @@ compileAsC11()
 set(theseTestsName iothubclient_ll_ut)
 
 set(${theseTestsName}_test_files
-${theseTestsName}.c
+    ${theseTestsName}.c
 )
 
+include_directories(${SHARED_UTIL_REAL_TEST_FOLDER})
+
 set(${theseTestsName}_c_files
-../../src/iothub_client_ll.c
-real_doublylinkedlist.c
-../../../c-utility/tests/real_test_files/real_singlylinkedlist.c
+    ../../src/iothub_client_ll.c
+    ../../../c-utility/tests/real_test_files/real_singlylinkedlist.c
 )
 
 set(${theseTestsName}_h_files
 )
 
-build_c_test_artifacts(${theseTestsName} ON "tests/UnitTests")
+build_c_test_artifacts(${theseTestsName} ON "tests/azure_iothub_client_tests")

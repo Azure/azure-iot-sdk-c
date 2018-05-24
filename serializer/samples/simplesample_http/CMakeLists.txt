@@ -4,7 +4,7 @@
 #this is CMakeLists.txt for simplesample_http sample
 
 if(NOT ${use_http})
-	message(FATAL_ERROR "simplesample_http being generated without HTTP support")
+    message(FATAL_ERROR "simplesample_http being generated without HTTP support")
 endif()
 
 compileAsC99()
@@ -14,36 +14,36 @@ simplesample_http.c
 )
 
 if(WIN32)
-	set(simplesample_http_c_files ${simplesample_http_c_files} ./windows/main.c)
+    set(simplesample_http_c_files ${simplesample_http_c_files} ./windows/main.c)
 else()
-	set(simplesample_http_c_files ${simplesample_http_c_files} ./linux/main.c)
+    set(simplesample_http_c_files ${simplesample_http_c_files} ./linux/main.c)
 endif()
 
 
 set(simplesample_http_h_files
-	simplesample_http.h
+    simplesample_http.h
 )
 
 IF(WIN32)
-	#windows needs this define
-	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    #windows needs this define
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 ENDIF(WIN32)
 
 #Conditionally use the SDK trusted certs in the samples
-if(${set_trusted_cert_in_samples})
+if(${use_sample_trusted_cert})
     add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
-	include_directories(${PROJECT_SOURCE_DIR}/certs)
-	set(samples_cert_file ${PROJECT_SOURCE_DIR}/certs/certs.c)
+    include_directories(${PROJECT_SOURCE_DIR}/certs)
+    set(simplesample_http_c_files ${simplesample_http_c_files} ${PROJECT_SOURCE_DIR}/certs/certs.c)
 endif()
 
 include_directories(. ${SHARED_UTIL_INC_FOLDER} ${IOTHUB_CLIENT_INC_FOLDER})
 
-add_executable(simplesample_http ${simplesample_http_c_files} ${simplesample_http_h_files} ${samples_cert_file})
+add_executable(simplesample_http ${simplesample_http_c_files} ${simplesample_http_h_files})
 
 target_link_libraries(simplesample_http 
-	serializer 
-	iothub_client 
-	iothub_client_http_transport 
+    serializer 
+    iothub_client 
+    iothub_client_http_transport 
 )
 
 linkSharedUtil(simplesample_http)

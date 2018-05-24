@@ -38,10 +38,10 @@ void real_free(void* ptr)
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/agenttime.h"
 #include "azure_c_shared_utility/optionhandler.h"
-#include "iothub_client_ll.h"
+#include "iothub_client_core_ll.h"
 #undef ENABLE_MOCKS
 
-#include "iothub_client_retry_control.h"
+#include "internal/iothub_client_retry_control.h"
 
 static TEST_MUTEX_HANDLE g_testByTest;
 static TEST_MUTEX_HANDLE g_dllByDll;
@@ -720,11 +720,11 @@ TEST_FUNCTION(Set_Options_UNSUPPORTED_name)
     umock_c_reset_all_calls();
 
     /*
-    Cumpriu sua sentença.
-    Encontrou-se com o único mal irremediável,
-    aquilo que é a marca do nosso estranho destino sobre a terra,
-    aquele fato sem explicação que iguala tudo o que é vivo num só rebanho de condenados,
-    porque tudo o que é vivo, morre.
+    Cumpriu sua sentenï¿½a.
+    Encontrou-se com o ï¿½nico mal irremediï¿½vel,
+    aquilo que ï¿½ a marca do nosso estranho destino sobre a terra,
+    aquele fato sem explicaï¿½ï¿½o que iguala tudo o que ï¿½ vivo num sï¿½ rebanho de condenados,
+    porque tudo o que ï¿½ vivo, morre.
     (Ariano Suassuna) 
     */
 

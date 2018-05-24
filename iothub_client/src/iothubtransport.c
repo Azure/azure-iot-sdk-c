@@ -6,9 +6,9 @@
 #include <signal.h>
 #include <stddef.h>
 #include "azure_c_shared_utility/crt_abstractions.h"
-#include "iothubtransport.h"
-#include "iothub_client.h"
-#include "iothub_client_private.h"
+#include "internal/iothubtransport.h"
+#include "iothub_client_core.h"
+#include "internal/iothub_client_private.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/lock.h"
 #include "azure_c_shared_utility/xlogging.h"
@@ -97,8 +97,8 @@ TRANSPORT_HANDLE  IoTHubTransport_Create(IOTHUB_CLIENT_TRANSPORT_PROVIDER protoc
                 }
                 else
                 {
-                    /*Codes_SRS_IOTHUBTRANSPORT_17_038: [ IoTHubTransport_Create shall call VECTOR_Create to make a list of IOTHUB_CLIENT_HANDLE using this transport. ]*/
-                    result->clients = VECTOR_create(sizeof(IOTHUB_CLIENT_HANDLE));
+                    /*Codes_SRS_IOTHUBTRANSPORT_17_038: [ IoTHubTransport_Create shall call VECTOR_Create to make a list of IOTHUB_CLIENT_CORE_HANDLE using this transport. ]*/
+                    result->clients = VECTOR_create(sizeof(IOTHUB_CLIENT_CORE_HANDLE));
                     if (result->clients == NULL)
                     {
                         /*Codes_SRS_IOTHUBTRANSPORT_17_039: [ If the Vector creation fails, IoTHubTransport_Create shall return NULL. ]*/
@@ -150,7 +150,7 @@ static void multiplexed_client_do_work(TRANSPORT_HANDLE_DATA* transportData)
         numberOfClients = VECTOR_size(transportData->clients);
         for (iterator = 0; iterator < numberOfClients; iterator++)
         {
-            IOTHUB_CLIENT_HANDLE* clientHandle = (IOTHUB_CLIENT_HANDLE*)VECTOR_element(transportData->clients, iterator);
+            IOTHUB_CLIENT_CORE_HANDLE* clientHandle = (IOTHUB_CLIENT_CORE_HANDLE*)VECTOR_element(transportData->clients, iterator);
 
             if (clientHandle != NULL)
             {
@@ -202,12 +202,12 @@ static int transport_worker_thread(void* threadArgument)
 static bool find_by_handle(const void* element, const void* value)
 {
     /* data stored at element is device handle */
-    const IOTHUB_CLIENT_HANDLE * guess = (const IOTHUB_CLIENT_HANDLE *)element;
-    const IOTHUB_CLIENT_HANDLE match = (const IOTHUB_CLIENT_HANDLE)value;
+    const IOTHUB_CLIENT_CORE_HANDLE * guess = (const IOTHUB_CLIENT_CORE_HANDLE *)element;
+    const IOTHUB_CLIENT_CORE_HANDLE match = (const IOTHUB_CLIENT_CORE_HANDLE)value;
     return (*guess == match);
 }
 
-static IOTHUB_CLIENT_RESULT start_worker_if_needed(TRANSPORT_HANDLE_DATA * transportData, IOTHUB_CLIENT_HANDLE clientHandle)
+static IOTHUB_CLIENT_RESULT start_worker_if_needed(TRANSPORT_HANDLE_DATA * transportData, IOTHUB_CLIENT_CORE_HANDLE clientHandle)
 {
     IOTHUB_CLIENT_RESULT result;
     if (transportData->workerThreadHandle == NULL)
@@ -285,7 +285,7 @@ static void wait_worker_thread(TRANSPORT_HANDLE_DATA * transportData)
     }
 }
 
-static bool signal_end_worker_thread(TRANSPORT_HANDLE_DATA * transportData, IOTHUB_CLIENT_HANDLE clientHandle)
+static bool signal_end_worker_thread(TRANSPORT_HANDLE_DATA * transportData, IOTHUB_CLIENT_CORE_HANDLE clientHandle)
 {
     bool okToJoin;
 
@@ -389,7 +389,7 @@ TRANSPORT_LL_HANDLE IoTHubTransport_GetLLTransport(TRANSPORT_HANDLE transportHan
     return llTransport;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubTransport_StartWorkerThread(TRANSPORT_HANDLE transportHandle, IOTHUB_CLIENT_HANDLE clientHandle, IOTHUB_CLIENT_MULTIPLEXED_DO_WORK muxDoWork)
+IOTHUB_CLIENT_RESULT IoTHubTransport_StartWorkerThread(TRANSPORT_HANDLE transportHandle, IOTHUB_CLIENT_CORE_HANDLE clientHandle, IOTHUB_CLIENT_MULTIPLEXED_DO_WORK muxDoWork)
 {
     IOTHUB_CLIENT_RESULT result;
     if (transportHandle == NULL || clientHandle == NULL)
@@ -421,7 +421,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_StartWorkerThread(TRANSPORT_HANDLE transpor
     return result;
 }
 
-bool IoTHubTransport_SignalEndWorkerThread(TRANSPORT_HANDLE transportHandle, IOTHUB_CLIENT_HANDLE clientHandle)
+bool IoTHubTransport_SignalEndWorkerThread(TRANSPORT_HANDLE transportHandle, IOTHUB_CLIENT_CORE_HANDLE clientHandle)
 {
     bool okToJoin;
     /*Codes_SRS_IOTHUBTRANSPORT_17_023: [ If transportHandle is NULL, IoTHubTransport_EndWorkerThread shall return. ]*/
@@ -438,7 +438,7 @@ bool IoTHubTransport_SignalEndWorkerThread(TRANSPORT_HANDLE transportHandle, IOT
     return okToJoin;
 }
 
-void IoTHubTransport_JoinWorkerThread(TRANSPORT_HANDLE transportHandle, IOTHUB_CLIENT_HANDLE clientHandle)
+void IoTHubTransport_JoinWorkerThread(TRANSPORT_HANDLE transportHandle, IOTHUB_CLIENT_CORE_HANDLE clientHandle)
 {
     /*Codes_SRS_IOTHUBTRANSPORT_17_044: [ If transportHandle is NULL, IoTHubTransport_JoinWorkerThread shall do nothing. ]*/
     /*Codes_SRS_IOTHUBTRANSPORT_17_045: [ If clientHandle is NULL, IoTHubTransport_JoinWorkerThread shall do nothing. ]*/

@@ -17,6 +17,14 @@
 #include "iothub_registrymanager.h"
 #include "iothub_sc_version.h"
 
+#define IOTHUB_DEVICE_EX_VERSION_LATEST IOTHUB_DEVICE_EX_VERSION_1
+#define IOTHUB_REGISTRY_DEVICE_CREATE_EX_VERSION_LATEST IOTHUB_REGISTRY_DEVICE_CREATE_EX_VERSION_1
+#define IOTHUB_REGISTRY_DEVICE_UPDATE_EX_VERSION_LATEST IOTHUB_REGISTRY_DEVICE_CREATE_EX_VERSION_1
+#define IOTHUB_MODULE_VERSION_LATEST IOTHUB_MODULE_VERSION_1
+#define IOTHUB_REGISTRY_MODULE_CREATE_VERSION_LATEST IOTHUB_REGISTRY_MODULE_CREATE_VERSION_1
+#define IOTHUB_REGISTRY_MODULE_UPDATE_VERSION_LATEST IOTHUB_REGISTRY_MODULE_UPDATE_VERSION_1
+
+
 #define IOTHUB_REQUEST_MODE_VALUES    \
     IOTHUB_REQUEST_CREATE,            \
     IOTHUB_REQUEST_GET,               \
@@ -93,11 +101,246 @@ static const char* RELATIVE_PATH_FMT_LIST = "/devices/?top=%s&%s";
 static const char* RELATIVE_PATH_FMT_STAT = "/statistics/devices?%s";
 static const char* RELATIVE_PATH_FMT_MODULE_LIST = "/devices/%s/modules?%s";
 
+typedef enum {IOTHUB_REGISTRYMANAGER_MODEL_TYPE_DEVICE, IOTHUB_REGISTRYMANAGER_MODEL_TYPE_MODULE} IOTHUB_REGISTRYMANAGER_MODEL_TYPE;
 
-typedef IOTHUB_REGISTRY_MODULE_CREATE  IOTHUB_REGISTRY_DEVICE_OR_MODULE_CREATE;
-typedef IOTHUB_MODULE IOTHUB_DEVICE_OR_MODULE;
-typedef IOTHUB_REGISTRY_MODULE_UPDATE IOTHUB_REGISTRY_DEVICE_OR_MODULE_UPDATE;
+typedef struct IOTHUB_DEVICE_OR_MODULE_TAG
+{
+    IOTHUB_REGISTRYMANAGER_MODEL_TYPE type;
 
+    const char* deviceId;
+    const char* primaryKey;
+    const char* secondaryKey;
+    const char* generationId;
+    const char* eTag;
+    IOTHUB_DEVICE_CONNECTION_STATE connectionState;
+    const char* connectionStateUpdatedTime;
+    IOTHUB_DEVICE_STATUS status;
+    const char* statusReason;
+    const char* statusUpdatedTime;
+    const char* lastActivityTime;
+    size_t cloudToDeviceMessageCount;
+
+    bool isManaged;
+    const char* configuration;
+    const char* deviceProperties;
+    const char* serviceProperties;
+    IOTHUB_REGISTRYMANAGER_AUTH_METHOD authMethod;
+
+    //Device exclusive fields
+    bool iotEdge_capable;
+
+    //Module exclusive fields
+    const char* moduleId;
+} IOTHUB_DEVICE_OR_MODULE;
+
+typedef struct IOTHUB_REGISTRY_DEVICE_OR_MODULE_CREATE_TAG
+{
+    IOTHUB_REGISTRYMANAGER_MODEL_TYPE type;
+    const char* deviceId;
+    const char* primaryKey;
+    const char* secondaryKey;
+    IOTHUB_REGISTRYMANAGER_AUTH_METHOD authMethod;
+    //Device exclusive fields
+    bool iotEdge_capable;
+    //Module exclusive fields
+    const char* moduleId;
+} IOTHUB_REGISTRY_DEVICE_OR_MODULE_CREATE;
+
+typedef struct IOTHUB_REGISTRY_DEVICE_OR_MODULE_UPDATE_TAG
+{
+    IOTHUB_REGISTRYMANAGER_MODEL_TYPE type;
+    const char* deviceId;
+    const char* primaryKey;
+    const char* secondaryKey;
+    IOTHUB_DEVICE_STATUS status;
+    IOTHUB_REGISTRYMANAGER_AUTH_METHOD authMethod;
+    //Device exclusive fields
+    bool iotEdge_capable;
+    //Module exclusive fields
+    const char* moduleId;
+} IOTHUB_REGISTRY_DEVICE_OR_MODULE_UPDATE;
+
+static void initializeDeviceOrModuleInfoMembers(IOTHUB_DEVICE_OR_MODULE* deviceOrModuleInfo)
+{
+    if (NULL != deviceOrModuleInfo)
+    {
+        memset(deviceOrModuleInfo, 0, sizeof(IOTHUB_DEVICE_OR_MODULE));
+        deviceOrModuleInfo->connectionState = IOTHUB_DEVICE_CONNECTION_STATE_DISCONNECTED;
+        deviceOrModuleInfo->status = IOTHUB_DEVICE_STATUS_DISABLED;
+    }
+}
+
+void IoTHubRegistryManager_FreeDeviceExMembers(IOTHUB_DEVICE_EX* deviceInfo)
+{
+    free((void*)deviceInfo->deviceId);
+    free((void*)deviceInfo->primaryKey);
+    free((void*)deviceInfo->secondaryKey);
+    free((void*)deviceInfo->generationId);
+    free((void*)deviceInfo->eTag);
+    free((void*)deviceInfo->connectionStateUpdatedTime);
+    free((void*)deviceInfo->statusReason);
+    free((void*)deviceInfo->statusUpdatedTime);
+    free((void*)deviceInfo->lastActivityTime);
+    free((void*)deviceInfo->configuration);
+    free((void*)deviceInfo->deviceProperties);
+    free((void*)deviceInfo->serviceProperties);
+    memset(deviceInfo, 0, sizeof(*deviceInfo));
+}
+
+void IoTHubRegistryManager_FreeModuleMembers(IOTHUB_MODULE* moduleInfo)
+{
+    free((void*)moduleInfo->deviceId);
+    free((void*)moduleInfo->primaryKey);
+    free((void*)moduleInfo->secondaryKey);
+    free((void*)moduleInfo->generationId);
+    free((void*)moduleInfo->eTag);
+    free((void*)moduleInfo->connectionStateUpdatedTime);
+    free((void*)moduleInfo->statusReason);
+    free((void*)moduleInfo->statusUpdatedTime);
+    free((void*)moduleInfo->lastActivityTime);
+    free((void*)moduleInfo->configuration);
+    free((void*)moduleInfo->deviceProperties);
+    free((void*)moduleInfo->serviceProperties);
+    free((void*)moduleInfo->moduleId);
+    memset(moduleInfo, 0, sizeof(*moduleInfo));
+}
+
+// Frees memory allocated building up deviceInfo, but *NOT* deviceInfo itself as we don't own this
+static void free_deviceOrModule_members(IOTHUB_DEVICE_OR_MODULE* deviceInfo)
+{
+    free((void*)deviceInfo->deviceId);
+    free((void*)deviceInfo->primaryKey);
+    free((void*)deviceInfo->secondaryKey);
+    free((void*)deviceInfo->generationId);
+    free((void*)deviceInfo->eTag);
+    free((void*)deviceInfo->connectionStateUpdatedTime);
+    free((void*)deviceInfo->statusReason);
+    free((void*)deviceInfo->statusUpdatedTime);
+    free((void*)deviceInfo->lastActivityTime);
+    free((void*)deviceInfo->configuration);
+    free((void*)deviceInfo->deviceProperties);
+    free((void*)deviceInfo->serviceProperties);
+    free((void*)deviceInfo->moduleId);
+    memset(deviceInfo, 0, sizeof(*deviceInfo));
+}
+
+static void free_device_members(IOTHUB_DEVICE* deviceInfo)
+{
+    free((void*)deviceInfo->deviceId);
+    free((void*)deviceInfo->primaryKey);
+    free((void*)deviceInfo->secondaryKey);
+    free((void*)deviceInfo->generationId);
+    free((void*)deviceInfo->eTag);
+    free((void*)deviceInfo->connectionStateUpdatedTime);
+    free((void*)deviceInfo->statusReason);
+    free((void*)deviceInfo->statusUpdatedTime);
+    free((void*)deviceInfo->lastActivityTime);
+    free((void*)deviceInfo->configuration);
+    free((void*)deviceInfo->deviceProperties);
+    free((void*)deviceInfo->serviceProperties);
+    memset(deviceInfo, 0, sizeof(*deviceInfo));
+}
+
+static void move_deviceOrModule_members_to_device(IOTHUB_DEVICE_OR_MODULE* deviceOrModule, IOTHUB_DEVICE* device)
+{
+    if ((deviceOrModule != NULL) && (device != NULL))
+    {
+        device->deviceId = deviceOrModule->deviceId;
+        device->primaryKey = deviceOrModule->primaryKey;
+        device->secondaryKey = deviceOrModule->secondaryKey;
+        device->generationId = deviceOrModule->generationId;
+        device->eTag = deviceOrModule->eTag;
+        device->connectionState = deviceOrModule->connectionState;
+        device->connectionStateUpdatedTime = deviceOrModule->connectionStateUpdatedTime;
+        device->status = deviceOrModule->status;
+        device->statusReason = deviceOrModule->statusReason;
+        device->statusUpdatedTime = deviceOrModule->statusUpdatedTime;
+        device->lastActivityTime = deviceOrModule->lastActivityTime;
+        device->cloudToDeviceMessageCount = deviceOrModule->cloudToDeviceMessageCount;
+        device->isManaged = deviceOrModule->isManaged;
+        device->configuration = deviceOrModule->configuration;
+        device->deviceProperties = deviceOrModule->deviceProperties;
+        device->serviceProperties = deviceOrModule->serviceProperties;
+        device->authMethod = deviceOrModule->authMethod;
+    }
+}
+
+static void free_nonDevice_members_from_deviceOrModule(IOTHUB_DEVICE_OR_MODULE* deviceOrModule)
+{
+    if (deviceOrModule != NULL)
+    {
+        //free module exclusive fields
+        free((void*)deviceOrModule->moduleId);
+        deviceOrModule->moduleId = NULL;
+        //free device_ex exclusive fields (none currently require deallocation)
+    }
+}
+
+static void move_deviceOrModule_members_to_deviceEx(IOTHUB_DEVICE_OR_MODULE* deviceOrModule, IOTHUB_DEVICE_EX* device)
+{
+    if ((deviceOrModule != NULL) && (device != NULL))
+    {
+        if (device->version >= IOTHUB_DEVICE_EX_VERSION_1)
+        {
+            device->deviceId = deviceOrModule->deviceId;
+            device->primaryKey = deviceOrModule->primaryKey;
+            device->secondaryKey = deviceOrModule->secondaryKey;
+            device->generationId = deviceOrModule->generationId;
+            device->eTag = deviceOrModule->eTag;
+            device->connectionState = deviceOrModule->connectionState;
+            device->connectionStateUpdatedTime = deviceOrModule->connectionStateUpdatedTime;
+            device->status = deviceOrModule->status;
+            device->statusReason = deviceOrModule->statusReason;
+            device->statusUpdatedTime = deviceOrModule->statusUpdatedTime;
+            device->lastActivityTime = deviceOrModule->lastActivityTime;
+            device->cloudToDeviceMessageCount = deviceOrModule->cloudToDeviceMessageCount;
+            device->isManaged = deviceOrModule->isManaged;
+            device->configuration = deviceOrModule->configuration;
+            device->deviceProperties = deviceOrModule->deviceProperties;
+            device->serviceProperties = deviceOrModule->serviceProperties;
+            device->authMethod = deviceOrModule->authMethod;
+            device->iotEdge_capable = deviceOrModule->iotEdge_capable;
+        }
+    }
+}
+
+static void free_nonDeviceEx_members_from_deviceOrModule(IOTHUB_DEVICE_OR_MODULE* deviceOrModule)
+{
+    if (deviceOrModule != NULL)
+    {
+        //free module exclusive fields
+        free((void*)deviceOrModule->moduleId);
+        deviceOrModule->moduleId = NULL;
+    }
+}
+
+static void move_deviceOrModule_members_to_module(IOTHUB_DEVICE_OR_MODULE* deviceOrModule, IOTHUB_MODULE* module)
+{
+    if ((deviceOrModule != NULL) && (module != NULL))
+    {
+        if (module->version >= IOTHUB_MODULE_VERSION_1)
+        {
+            module->deviceId = deviceOrModule->deviceId;
+            module->primaryKey = deviceOrModule->primaryKey;
+            module->secondaryKey = deviceOrModule->secondaryKey;
+            module->generationId = deviceOrModule->generationId;
+            module->eTag = deviceOrModule->eTag;
+            module->connectionState = deviceOrModule->connectionState;
+            module->connectionStateUpdatedTime = deviceOrModule->connectionStateUpdatedTime;
+            module->status = deviceOrModule->status;
+            module->statusReason = deviceOrModule->statusReason;
+            module->statusUpdatedTime = deviceOrModule->statusUpdatedTime;
+            module->lastActivityTime = deviceOrModule->lastActivityTime;
+            module->cloudToDeviceMessageCount = deviceOrModule->cloudToDeviceMessageCount;
+            module->isManaged = deviceOrModule->isManaged;
+            module->configuration = deviceOrModule->configuration;
+            module->deviceProperties = deviceOrModule->deviceProperties;
+            module->serviceProperties = deviceOrModule->serviceProperties;
+            module->authMethod = deviceOrModule->authMethod;
+            module->moduleId = deviceOrModule->moduleId;
+        }
+    }
+}
 
 static bool isAuthTypeAllowed(IOTHUB_REGISTRYMANAGER_AUTH_METHOD authMethod)
 {
@@ -490,75 +733,6 @@ static IOTHUB_REGISTRYMANAGER_RESULT parseDeviceOrModuleJsonObject(JSON_Object* 
     return result;
 }
 
-static void initializeDeviceOrModuleInfoMembers(IOTHUB_DEVICE_OR_MODULE* deviceOrModuleInfo)
-{
-    if (NULL != deviceOrModuleInfo)
-    {
-        memset(deviceOrModuleInfo, 0, sizeof(IOTHUB_DEVICE_OR_MODULE));
-        deviceOrModuleInfo->connectionState = IOTHUB_DEVICE_CONNECTION_STATE_DISCONNECTED;
-        deviceOrModuleInfo->status = IOTHUB_DEVICE_STATUS_DISABLED;
-    }
-}
-
-// Frees memory allocated building up deviceInfo, but *NOT* deviceInfo itself as we don't own this
-static void freeDeviceInfoOrModulesMembers(IOTHUB_DEVICE_OR_MODULE* deviceInfo)
-{
-    if (deviceInfo->deviceId != NULL)
-    {
-        free((void*)deviceInfo->deviceId);
-    }
-    if (deviceInfo->primaryKey != NULL)
-    {
-        free((void*)deviceInfo->primaryKey);
-    }
-    if (deviceInfo->secondaryKey != NULL)
-    {
-        free((void*)deviceInfo->secondaryKey);
-    }
-    if (deviceInfo->generationId != NULL)
-    {
-        free((void*)deviceInfo->generationId);
-    }
-    if (deviceInfo->eTag != NULL)
-    {
-        free((void*)deviceInfo->eTag);
-    }
-    if (deviceInfo->connectionStateUpdatedTime != NULL)
-    {
-        free((void*)deviceInfo->connectionStateUpdatedTime);
-    }
-    if (deviceInfo->statusReason != NULL)
-    {
-        free((void*)deviceInfo->statusReason);
-    }
-    if (deviceInfo->statusUpdatedTime != NULL)
-    {
-        free((void*)deviceInfo->statusUpdatedTime);
-    }
-    if (deviceInfo->lastActivityTime != NULL)
-    {
-        free((void*)deviceInfo->lastActivityTime);
-    }
-    if (deviceInfo->configuration != NULL)
-    {
-        free((void*)deviceInfo->configuration);
-    }
-    if (deviceInfo->deviceProperties != NULL)
-    {
-        free((void*)deviceInfo->deviceProperties);
-    }
-    if (deviceInfo->serviceProperties != NULL)
-    {
-        free((void*)deviceInfo->serviceProperties);
-    }
-    if (deviceInfo->moduleId != NULL)
-    {
-        free((void*)deviceInfo->moduleId);
-    }
-
-    memset(deviceInfo, 0, sizeof(IOTHUB_DEVICE_OR_MODULE));
-}
-
 static IOTHUB_REGISTRYMANAGER_RESULT parseDeviceOrModuleJson(BUFFER_HANDLE jsonBuffer, IOTHUB_DEVICE_OR_MODULE* deviceOrModuleInfo)
 {
     IOTHUB_REGISTRYMANAGER_RESULT result;
@@ -625,13 +799,75 @@ static IOTHUB_REGISTRYMANAGER_RESULT parseDeviceOrModuleJson(BUFFER_HANDLE jsonB
 
         if (result != IOTHUB_REGISTRYMANAGER_OK)
         {
-            freeDeviceInfoOrModulesMembers(deviceOrModuleInfo);
+            free_deviceOrModule_members(deviceOrModuleInfo);
         }
     }
     return result;
 }
 
-static IOTHUB_REGISTRYMANAGER_RESULT parseDeviceOrModuleListJson(BUFFER_HANDLE jsonBuffer, SINGLYLINKEDLIST_HANDLE deviceOrModuleList)
+static int addDeviceOrModuleToLinkedListAsDevice(IOTHUB_DEVICE_OR_MODULE* iothubDeviceOrModule, SINGLYLINKEDLIST_HANDLE deviceOrModuleList)
+{
+    int result;
+    IOTHUB_DEVICE* device = NULL;
+    
+    if ((device = (IOTHUB_DEVICE*)malloc(sizeof(IOTHUB_DEVICE))) == NULL)
+    {
+        LogError("Malloc failed for device");
+        result = IOTHUB_REGISTRYMANAGER_ERROR;
+    }
+    else
+    {
+        //Convert to a Device struct
+        move_deviceOrModule_members_to_device(iothubDeviceOrModule, device);
+
+        if ((singlylinkedlist_add(deviceOrModuleList, device)) == NULL)
+        {
+            /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_072: [** If populating the deviceList parameter fails IoTHubRegistryManager_GetDeviceList shall return IOTHUB_REGISTRYMANAGER_ERROR **] */
+            LogError("singlylinkedlist_add failed");
+            free(device);   //only free structure. Because members are still referenced by iothubDeviceOrModule we will free them after
+            result = IOTHUB_REGISTRYMANAGER_JSON_ERROR;
+        }
+        else
+        {
+            result = IOTHUB_REGISTRYMANAGER_OK;
+        }
+    }
+
+    return result;
+}
+
+static int addDeviceOrModuleToLinkedListAsModule(IOTHUB_DEVICE_OR_MODULE* iothubDeviceOrModule, SINGLYLINKEDLIST_HANDLE deviceOrModuleList, int version)
+{
+    int result;
+    IOTHUB_MODULE* module = NULL;
+
+    if ((module = (IOTHUB_MODULE*)malloc(sizeof(IOTHUB_MODULE))) == NULL)
+    {
+        LogError("Malloc failed for module");
+        result = IOTHUB_REGISTRYMANAGER_ERROR;
+    }
+    else
+    {
+        //Convert to a Module struct
+        module->version = version;
+        move_deviceOrModule_members_to_module(iothubDeviceOrModule, module);
+
+        if ((singlylinkedlist_add(deviceOrModuleList, module)) == NULL)
+        {
+            LogError("singlylinkedlist_add failed");
+            free(module);   //only free structure. Because members are still referenced by iothubDeviceOrModule we will free them after
+            result = IOTHUB_REGISTRYMANAGER_JSON_ERROR;
+        }
+        else
+        {
+            result = IOTHUB_REGISTRYMANAGER_OK;
+        }
+    }
+
+    return result;
+}
+
+static IOTHUB_REGISTRYMANAGER_RESULT parseDeviceOrModuleListJson(BUFFER_HANDLE jsonBuffer, SINGLYLINKEDLIST_HANDLE deviceOrModuleList, IOTHUB_REGISTRYMANAGER_MODEL_TYPE struct_type, int struct_version)
 {
     IOTHUB_REGISTRYMANAGER_RESULT result;
 
@@ -677,40 +913,44 @@ static IOTHUB_REGISTRYMANAGER_RESULT parseDeviceOrModuleListJson(BUFFER_HANDLE j
             size_t array_count = json_array_get_count(device_or_module_array);
             for (size_t i = 0; i < array_count; i++)
             {
-                IOTHUB_DEVICE_OR_MODULE* iothubDeviceOrModule = NULL;
                 JSON_Object* device_or_module_object = NULL;
+                IOTHUB_DEVICE_OR_MODULE iothubDeviceOrModule;
 
-                // Create temp device struct
-                if ((iothubDeviceOrModule = (IOTHUB_DEVICE_OR_MODULE*)malloc(sizeof(IOTHUB_DEVICE_OR_MODULE))) == NULL)
-                {
-                    /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_072: [** If populating the deviceList parameter fails IoTHubRegistryManager_GetDeviceList shall return IOTHUB_REGISTRYMANAGER_ERROR **] */
-                    LogError("Malloc failed for iothubDeviceOrModule");
-                    result = IOTHUB_REGISTRYMANAGER_ERROR;
-                }
-                else if ((device_or_module_object = json_array_get_object(device_or_module_array, i)) == NULL)
+                if ((device_or_module_object = json_array_get_object(device_or_module_array, i)) == NULL)
                 {
                     /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_070: [** If any of the parson API fails, IoTHubRegistryManager_GetDeviceList shall return IOTHUB_REGISTRYMANAGER_JSON_ERROR **] */
                     LogError("json_array_get_object failed");
-                    free(iothubDeviceOrModule);
                     result = IOTHUB_REGISTRYMANAGER_JSON_ERROR;
                 }
                 else
                 {
-                    initializeDeviceOrModuleInfoMembers(iothubDeviceOrModule);
-                
-                    result = parseDeviceOrModuleJsonObject(device_or_module_object, iothubDeviceOrModule);
+                    initializeDeviceOrModuleInfoMembers(&iothubDeviceOrModule);
+
+                    result = parseDeviceOrModuleJsonObject(device_or_module_object, &iothubDeviceOrModule);
                     if (IOTHUB_REGISTRYMANAGER_OK != result)
                     {
-                        freeDeviceInfoOrModulesMembers(iothubDeviceOrModule);
-                        free(iothubDeviceOrModule);
+                        free_deviceOrModule_members(&iothubDeviceOrModule);
                     }
-                    else if ((singlylinkedlist_add(deviceOrModuleList, iothubDeviceOrModule)) == NULL)
+                    else
                     {
-                        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_072: [** If populating the deviceList parameter fails IoTHubRegistryManager_GetDeviceList shall return IOTHUB_REGISTRYMANAGER_ERROR **] */
-                        LogError("singlylinkedlist_add failed");
-                        freeDeviceInfoOrModulesMembers(iothubDeviceOrModule);
-                        free(iothubDeviceOrModule);
-                        result = IOTHUB_REGISTRYMANAGER_JSON_ERROR;
+                        if (struct_type == IOTHUB_REGISTRYMANAGER_MODEL_TYPE_DEVICE)
+                        {
+                            result = addDeviceOrModuleToLinkedListAsDevice(&iothubDeviceOrModule, deviceOrModuleList);
+                            if (result == IOTHUB_REGISTRYMANAGER_OK) //only free these if we pass, if we fail, will deal with below
+                            {
+                                free_nonDevice_members_from_deviceOrModule(&iothubDeviceOrModule);
+                            }
+                        }
+                        else //IOTHUB_REGISTRYMANAGER_MODEL_TYPE_MODULE
+                        {
+                            result = addDeviceOrModuleToLinkedListAsModule(&iothubDeviceOrModule, deviceOrModuleList, struct_version);
+                            //no nonModule members to free... yet
+                        }
+
+                        if (result != IOTHUB_REGISTRYMANAGER_OK)
+                        {
+                            free_deviceOrModule_members(&iothubDeviceOrModule);
+                        }
                     }
                 }
 
@@ -749,13 +989,22 @@ static IOTHUB_REGISTRYMANAGER_RESULT parseDeviceOrModuleListJson(BUFFER_HANDLE j
             LIST_ITEM_HANDLE itemHandle = singlylinkedlist_get_head_item(deviceOrModuleList);
             while (itemHandle != NULL)
             {
-                IOTHUB_DEVICE_OR_MODULE* deviceOrModuleInfo = (IOTHUB_DEVICE_OR_MODULE*)singlylinkedlist_item_get_value(itemHandle);
+                const void* curr_item = singlylinkedlist_item_get_value(itemHandle);
+                if (struct_type == IOTHUB_REGISTRYMANAGER_MODEL_TYPE_DEVICE)
+                {
+                    IOTHUB_DEVICE* deviceInfo = (IOTHUB_DEVICE*)curr_item;
+                    free_device_members(deviceInfo);
+                    free(deviceInfo);
+                }
+                else //IOTHUB_REGISTRYMANAGER_MODEL_TYPE_MODULE
+                {
+                    IOTHUB_MODULE* moduleInfo = (IOTHUB_MODULE*)curr_item;
+                    IoTHubRegistryManager_FreeModuleMembers(moduleInfo);
+                    free(moduleInfo);
+                }
+
                 LIST_ITEM_HANDLE lastHandle = itemHandle;
                 itemHandle = singlylinkedlist_get_next_item(itemHandle);
-
-                freeDeviceInfoOrModulesMembers(deviceOrModuleInfo);
-                free(deviceOrModuleInfo);
-
                 singlylinkedlist_remove(deviceOrModuleList, lastHandle);
             }
         }
@@ -1083,6 +1332,11 @@ static IOTHUB_REGISTRYMANAGER_RESULT sendHttpRequestCRUD(IOTHUB_REGISTRYMANAGER_
                         /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_020: [ IoTHubRegistryManager_CreateDevice shall verify the received HTTP status code and if it is 409 then return IOTHUB_REGISTRYMANAGER_DEVICE_EXIST ] */
                         result = IOTHUB_REGISTRYMANAGER_DEVICE_EXIST;
                     }
+                    else if ((iotHubRequestMode == IOTHUB_REQUEST_GET) && (statusCode == 404))
+                    {
+                        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_020: [ IoTHubRegistryManager_CreateDevice shall verify the received HTTP status code and if it is 404 then return IOTHUB_REGISTRYMANAGER_DEVICE_NOT_EXIST ] */
+                        result = IOTHUB_REGISTRYMANAGER_DEVICE_NOT_EXIST;
+                    }
                     else
                     {
                         /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_021: [ IoTHubRegistryManager_CreateDevice shall verify the received HTTP status code and if it is greater than 300 then return IOTHUB_REGISTRYMANAGER_HTTP_STATUS_ERROR ] */
@@ -1367,24 +1621,79 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_CreateDevice(IOTHUB_REGISTRY
     /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_007: [ IoTHubRegistryManager_CreateDevice shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
     if ((registryManagerHandle == NULL) || (deviceCreateInfo == NULL) || (deviceInfo == NULL))
     {
-        // error
+        LogError("Input parameter cannot be NULL");
         result = IOTHUB_REGISTRYMANAGER_INVALID_ARG;
     }
     else
     {
         IOTHUB_REGISTRY_DEVICE_OR_MODULE_CREATE deviceOrModuleCreateInfo;
         IOTHUB_DEVICE_OR_MODULE deviceOrModuleInfo;
-    
-        memcpy(&deviceOrModuleCreateInfo, deviceCreateInfo, sizeof(*deviceCreateInfo));
-        deviceOrModuleCreateInfo.moduleId = NULL;
-        deviceOrModuleInfo.moduleId = NULL;
+
+        memset(&deviceOrModuleInfo, 0, sizeof(deviceOrModuleInfo));
+        memset(&deviceOrModuleCreateInfo, 0, sizeof(deviceOrModuleCreateInfo));
+        deviceOrModuleCreateInfo.type = IOTHUB_REGISTRYMANAGER_MODEL_TYPE_DEVICE;
+        deviceOrModuleCreateInfo.deviceId = deviceCreateInfo->deviceId;
+        deviceOrModuleCreateInfo.primaryKey = deviceCreateInfo->primaryKey;
+        deviceOrModuleCreateInfo.secondaryKey = deviceCreateInfo->secondaryKey;
+        deviceOrModuleCreateInfo.authMethod = deviceCreateInfo->authMethod;
+        deviceOrModuleCreateInfo.iotEdge_capable = false; //IOTHUB_DEVICE does not have this field, so set it to disabled
 
         result = IoTHubRegistryManager_CreateDeviceOrModule(registryManagerHandle, &deviceOrModuleCreateInfo, &deviceOrModuleInfo);
         if (result == IOTHUB_REGISTRYMANAGER_OK)
         {
-            memcpy(deviceInfo, &deviceOrModuleInfo, sizeof(*deviceInfo));   
+            move_deviceOrModule_members_to_device(&deviceOrModuleInfo, deviceInfo);
+            free_nonDevice_members_from_deviceOrModule(&deviceOrModuleInfo);
         }
-        free((void*)deviceOrModuleInfo.moduleId);
+    }
+
+    return result;
+}
+
+IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_CreateDevice_Ex(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, const IOTHUB_REGISTRY_DEVICE_CREATE_EX* deviceCreateInfo, IOTHUB_DEVICE_EX* deviceInfo)
+{
+    IOTHUB_REGISTRYMANAGER_RESULT result;
+
+    if ((registryManagerHandle == NULL) || (deviceCreateInfo == NULL) || (deviceInfo == NULL))
+    {
+        LogError("Input parameter cannot be NULL");
+        result = IOTHUB_REGISTRYMANAGER_INVALID_ARG;
+    }
+    else if ((deviceCreateInfo->version < IOTHUB_REGISTRY_DEVICE_CREATE_EX_VERSION_1) || 
+            (deviceCreateInfo->version > IOTHUB_REGISTRY_DEVICE_CREATE_EX_VERSION_LATEST))
+    {
+        LogError("deviceCreateInfo must have a valid version");
+        result = IOTHUB_REGISTRYMANAGER_INVALID_VERSION;
+    }
+    else if ((deviceInfo->version < IOTHUB_DEVICE_EX_VERSION_1) ||
+            (deviceInfo->version > IOTHUB_DEVICE_EX_VERSION_LATEST))
+    {
+        LogError("deviceInfo must have a valid version");
+        result = IOTHUB_REGISTRYMANAGER_INVALID_VERSION;
+    }
+    else
+    {
+        IOTHUB_REGISTRY_DEVICE_OR_MODULE_CREATE deviceOrModuleCreateInfo;
+        IOTHUB_DEVICE_OR_MODULE deviceOrModuleInfo;
+
+        memset(&deviceOrModuleInfo, 0, sizeof(deviceOrModuleInfo));
+        memset(&deviceOrModuleCreateInfo, 0, sizeof(deviceOrModuleCreateInfo));
+        deviceOrModuleCreateInfo.type = IOTHUB_REGISTRYMANAGER_MODEL_TYPE_DEVICE;
+
+        if (deviceCreateInfo->version >= IOTHUB_REGISTRY_DEVICE_CREATE_EX_VERSION_1)
+        {
+            deviceOrModuleCreateInfo.deviceId = deviceCreateInfo->deviceId;
+            deviceOrModuleCreateInfo.primaryKey = deviceCreateInfo->primaryKey;
+            deviceOrModuleCreateInfo.secondaryKey = deviceCreateInfo->secondaryKey;
+            deviceOrModuleCreateInfo.authMethod = deviceCreateInfo->authMethod;
+            deviceOrModuleCreateInfo.iotEdge_capable = deviceCreateInfo->iotEdge_capable;
+        }
+
+        result = IoTHubRegistryManager_CreateDeviceOrModule(registryManagerHandle, &deviceOrModuleCreateInfo, &deviceOrModuleInfo);
+        if (result == IOTHUB_REGISTRYMANAGER_OK)
+        {
+            move_deviceOrModule_members_to_deviceEx(&deviceOrModuleInfo, deviceInfo);
+            free_nonDeviceEx_members_from_deviceOrModule(&deviceOrModuleInfo);
+        }
     }
 
     return result;
@@ -1432,7 +1741,7 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetDeviceOrModule(IOTHUB_REG
                 /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_036: [ If the received JSON is empty, IoTHubRegistryManager_GetDevice shall return IOTHUB_REGISTRYMANAGER_DEVICE_NOT_EXIST ] */
                 if (deviceOrModuleInfo->deviceId == NULL)
                 {
-                    freeDeviceInfoOrModulesMembers(deviceOrModuleInfo);
+                    free_deviceOrModule_members(deviceOrModuleInfo);
                     result = IOTHUB_REGISTRYMANAGER_DEVICE_NOT_EXIST;
                 }
             }
@@ -1462,9 +1771,41 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetDevice(IOTHUB_REGISTRYMAN
         result = IoTHubRegistryManager_GetDeviceOrModule(registryManagerHandle, deviceId, NULL, &deviceOrModuleInfo);
         if (result == IOTHUB_REGISTRYMANAGER_OK)
         {
-            memcpy(deviceInfo, &deviceOrModuleInfo, sizeof(*deviceInfo));
+            move_deviceOrModule_members_to_device(&deviceOrModuleInfo, deviceInfo);
+            free_nonDevice_members_from_deviceOrModule(&deviceOrModuleInfo);
         }
-        free((void*)deviceOrModuleInfo.moduleId);
+    }
+
+    return result;
+}
+
+IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetDevice_Ex(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, const char* deviceId, IOTHUB_DEVICE_EX* deviceInfo)
+{
+    IOTHUB_REGISTRYMANAGER_RESULT result;
+
+    /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_007: [ IoTHubRegistryManager_CreateDevice shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
+    if ((registryManagerHandle == NULL) || (deviceId == NULL) || (deviceInfo == NULL))
+    {
+        LogError("Input parameter cannot be NULL");
+        result = IOTHUB_REGISTRYMANAGER_INVALID_ARG;
+    }
+    else if ((deviceInfo->version < IOTHUB_DEVICE_EX_VERSION_1) ||
+            (deviceInfo->version > IOTHUB_DEVICE_EX_VERSION_LATEST))
+    {
+        LogError("deviceInfo must have a valid version");
+        result = IOTHUB_REGISTRYMANAGER_INVALID_VERSION;
+    }
+    else
+    {
+        IOTHUB_DEVICE_OR_MODULE deviceOrModuleInfo;
+        memset(&deviceOrModuleInfo, 0, sizeof(deviceOrModuleInfo));
+    
+        result = IoTHubRegistryManager_GetDeviceOrModule(registryManagerHandle, deviceId, NULL, &deviceOrModuleInfo);
+        if (result == IOTHUB_REGISTRYMANAGER_OK)
+        {
+            move_deviceOrModule_members_to_deviceEx(&deviceOrModuleInfo, deviceInfo);
+            free_nonDeviceEx_members_from_deviceOrModule(&deviceOrModuleInfo);
+        }
     }
 
     return result;
@@ -1565,23 +1906,65 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_UpdateDeviceOrModule(IOTHUB_
 IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_UpdateDevice(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, IOTHUB_REGISTRY_DEVICE_UPDATE* deviceUpdate)
 {
     IOTHUB_REGISTRYMANAGER_RESULT result;
-    IOTHUB_REGISTRY_DEVICE_OR_MODULE_UPDATE deviceOrModuleUpdate;
 
-    if (NULL == deviceUpdate)
+    if (registryManagerHandle == NULL || deviceUpdate == NULL)
     {
-        // error
+        LogError("Input parameter cannot be NULL");
         result = IOTHUB_REGISTRYMANAGER_INVALID_ARG;
     }
     else
     {
-        memcpy(&deviceOrModuleUpdate, deviceUpdate, sizeof(*deviceUpdate));
-        deviceOrModuleUpdate.moduleId = NULL;
+        IOTHUB_REGISTRY_DEVICE_OR_MODULE_UPDATE deviceOrModuleUpdate;
+        memset(&deviceOrModuleUpdate, 0, sizeof(deviceOrModuleUpdate));
+
+        //Convert to generic update struct
+        deviceOrModuleUpdate.type = IOTHUB_REGISTRYMANAGER_MODEL_TYPE_DEVICE;
+        deviceOrModuleUpdate.deviceId = deviceUpdate->deviceId;
+        deviceOrModuleUpdate.primaryKey = deviceUpdate->primaryKey;
+        deviceOrModuleUpdate.secondaryKey = deviceUpdate->secondaryKey;
+        deviceOrModuleUpdate.status = deviceUpdate->status;
+        deviceOrModuleUpdate.authMethod = deviceUpdate->authMethod;
+        deviceOrModuleUpdate.iotEdge_capable = false;   //IOTHUB_REGISTRY_DEVICE_UPDATE does not have this field, so set false
 
         result = IoTHubRegistryManager_UpdateDeviceOrModule(registryManagerHandle, &deviceOrModuleUpdate);
-        if (result != IOTHUB_REGISTRYMANAGER_OK)
+    }
+
+    return result;
+}
+
+IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_UpdateDevice_Ex(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, IOTHUB_REGISTRY_DEVICE_UPDATE_EX* deviceUpdate)
+{
+    IOTHUB_REGISTRYMANAGER_RESULT result;
+
+    if (registryManagerHandle == NULL || deviceUpdate == NULL)
+    {
+        LogError("Input parameter cannot be NULL");
+        result = IOTHUB_REGISTRYMANAGER_INVALID_ARG;
+    }
+    else if (deviceUpdate->version < IOTHUB_REGISTRY_DEVICE_UPDATE_EX_VERSION_1 || deviceUpdate->version > IOTHUB_REGISTRY_DEVICE_UPDATE_EX_VERSION_LATEST)
+    {
+        LogError("deviceUpdate must have valid version");
+        result = IOTHUB_REGISTRYMANAGER_INVALID_VERSION;
+    }
+    else
+    {
+        IOTHUB_REGISTRY_DEVICE_OR_MODULE_UPDATE deviceOrModuleUpdate;
+        memset(&deviceOrModuleUpdate, 0, sizeof(deviceOrModuleUpdate));
+
+        //Convert to generic update struct
+        deviceOrModuleUpdate.type = IOTHUB_REGISTRYMANAGER_MODEL_TYPE_DEVICE;
+        
+        if (deviceUpdate->version >= IOTHUB_REGISTRY_DEVICE_UPDATE_EX_VERSION_1)
         {
-            // Error;
+            deviceOrModuleUpdate.deviceId = deviceUpdate->deviceId;
+            deviceOrModuleUpdate.primaryKey = deviceUpdate->primaryKey;
+            deviceOrModuleUpdate.secondaryKey = deviceUpdate->secondaryKey;
+            deviceOrModuleUpdate.status = deviceUpdate->status;
+            deviceOrModuleUpdate.authMethod = deviceUpdate->authMethod;
+            deviceOrModuleUpdate.iotEdge_capable = deviceUpdate->iotEdge_capable;
         }
+
+        result = IoTHubRegistryManager_UpdateDeviceOrModule(registryManagerHandle, &deviceOrModuleUpdate);
     }
 
     return result;
@@ -1611,7 +1994,7 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_DeleteDevice(IOTHUB_REGISTRY
     return result;
 }
 
-IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetModuleOrDeviceList(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, const char* deviceId, size_t numberOfDevices, SINGLYLINKEDLIST_HANDLE deviceOrModuleList)
+IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetModuleOrDeviceList(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, const char* deviceId, size_t numberOfDevices, SINGLYLINKEDLIST_HANDLE deviceOrModuleList, IOTHUB_REGISTRYMANAGER_MODEL_TYPE struct_type, int struct_version)
 {
     IOTHUB_REGISTRYMANAGER_RESULT result;
 
@@ -1626,6 +2009,11 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetModuleOrDeviceList(IOTHUB
     {
         LogError("numberOfDevices has to be between 1 and 1000");
         result = IOTHUB_REGISTRYMANAGER_INVALID_ARG;
+    }
+    else if ((struct_type == IOTHUB_REGISTRYMANAGER_MODEL_TYPE_MODULE) && ((struct_version < IOTHUB_MODULE_VERSION_1) || (struct_version > IOTHUB_MODULE_VERSION_LATEST)))
+    {
+        LogError("Invalid module version");
+        result = IOTHUB_REGISTRYMANAGER_INVALID_VERSION;
     }
     else
     {
@@ -1657,7 +2045,7 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetModuleOrDeviceList(IOTHUB
             /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_071: [ IoTHubRegistryManager_GetDeviceList shall populate the deviceList parameter with structures of type "IOTHUB_DEVICE" ] */
             /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_072: [ If populating the deviceList parameter fails IoTHubRegistryManager_GetDeviceList shall return IOTHUB_REGISTRYMANAGER_ERROR ] */
             /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_073: [ If populating the deviceList parameter successful IoTHubRegistryManager_GetDeviceList shall return IOTHUB_REGISTRYMANAGER_OK ] */
-            result = parseDeviceOrModuleListJson(responseBuffer, deviceOrModuleList);
+            result = parseDeviceOrModuleListJson(responseBuffer, deviceOrModuleList, struct_type, struct_version);
         }
 
         /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_111: [ IoTHubRegistryManager_GetDeviceList shall do clean up before return ] */
@@ -1673,7 +2061,7 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetModuleOrDeviceList(IOTHUB
 /* DEPRECATED: IoTHubRegistryManager_GetDeviceList is deprecated and may be removed from a future release. */
 IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetDeviceList(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, size_t numberOfDevices, SINGLYLINKEDLIST_HANDLE deviceList)
 {
-    return IoTHubRegistryManager_GetModuleOrDeviceList(registryManagerHandle, NULL, numberOfDevices, deviceList);
+    return IoTHubRegistryManager_GetModuleOrDeviceList(registryManagerHandle, NULL, numberOfDevices, deviceList, IOTHUB_REGISTRYMANAGER_MODEL_TYPE_DEVICE, 0);
 }
 
 IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetStatistics(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, IOTHUB_REGISTRY_STATISTICS* registryStatistics)
@@ -1728,22 +2116,50 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetStatistics(IOTHUB_REGISTR
 IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_CreateModule(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, const IOTHUB_REGISTRY_MODULE_CREATE* moduleCreate, IOTHUB_MODULE* module)
 {
     IOTHUB_REGISTRYMANAGER_RESULT result;
-    IOTHUB_REGISTRY_DEVICE_OR_MODULE_CREATE* deviceOrModuleCreateInfo = (IOTHUB_REGISTRY_DEVICE_OR_MODULE_CREATE*)moduleCreate;
-    IOTHUB_DEVICE_OR_MODULE* deviceOrModuleInfo = (IOTHUB_DEVICE_OR_MODULE*)module;
 
-    if ((moduleCreate == NULL) || (moduleCreate->moduleId == NULL))
+    if ((registryManagerHandle == NULL) || (module == NULL))
+    {
+        LogError("Input parameter cannot be NULL");
+        result = IOTHUB_REGISTRYMANAGER_INVALID_ARG;
+    }
+    else if ((moduleCreate == NULL) || (moduleCreate->moduleId == NULL))
     {
         LogError("moduleId cannot be NULL");
         result = IOTHUB_REGISTRYMANAGER_INVALID_ARG;
     }
-    else if (moduleCreate->iotEdge_capable == true)
+    else if (moduleCreate->version < IOTHUB_REGISTRY_MODULE_CREATE_VERSION_1 || moduleCreate->version > IOTHUB_REGISTRY_MODULE_CREATE_VERSION_LATEST)
     {
-        LogError("iotEdge_capable cannot be set for modules");
-        result = IOTHUB_REGISTRYMANAGER_INVALID_ARG;
+        LogError("moduleCreate must have a valid version");
+        result = IOTHUB_REGISTRYMANAGER_INVALID_VERSION;
+    }
+    else if (module->version < IOTHUB_MODULE_VERSION_1 || module->version > IOTHUB_MODULE_VERSION_LATEST)
+    {
+        LogError("module must have a valid version");
+        result = IOTHUB_REGISTRYMANAGER_INVALID_VERSION;
     }
     else
     {
-        result = IoTHubRegistryManager_CreateDeviceOrModule(registryManagerHandle, deviceOrModuleCreateInfo, deviceOrModuleInfo);
+        IOTHUB_REGISTRY_DEVICE_OR_MODULE_CREATE deviceOrModuleCreateInfo;
+        IOTHUB_DEVICE_OR_MODULE deviceOrModuleInfo;
+        memset(&deviceOrModuleCreateInfo, 0, sizeof(deviceOrModuleCreateInfo));
+        memset(&deviceOrModuleInfo, 0, sizeof(deviceOrModuleInfo));
+        
+        //Convert to generic create struct
+        deviceOrModuleCreateInfo.type = IOTHUB_REGISTRYMANAGER_MODEL_TYPE_MODULE;
+        if (moduleCreate->version >= IOTHUB_REGISTRY_MODULE_CREATE_VERSION_1)
+        {
+            deviceOrModuleCreateInfo.deviceId = moduleCreate->deviceId;
+            deviceOrModuleCreateInfo.primaryKey = moduleCreate->primaryKey;
+            deviceOrModuleCreateInfo.secondaryKey = moduleCreate->secondaryKey;
+            deviceOrModuleCreateInfo.authMethod = moduleCreate->authMethod;
+            deviceOrModuleCreateInfo.moduleId = moduleCreate->moduleId;
+        }
+
+        result = IoTHubRegistryManager_CreateDeviceOrModule(registryManagerHandle, &deviceOrModuleCreateInfo, &deviceOrModuleInfo);
+        if (result == IOTHUB_REGISTRYMANAGER_OK)
+        {
+            move_deviceOrModule_members_to_module(&deviceOrModuleInfo, module);
+        }
     }
 
     return result;
@@ -1752,19 +2168,29 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_CreateModule(IOTHUB_REGISTRY
 IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetModule(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, const char* deviceId, const char* moduleId, IOTHUB_MODULE* module)
 {
     IOTHUB_REGISTRYMANAGER_RESULT result;
-    IOTHUB_DEVICE_OR_MODULE* deviceOrModuleInfo = (IOTHUB_DEVICE_OR_MODULE*)module;
 
-    if ((deviceId == NULL) || (moduleId == NULL) || (module == NULL))
+    if ((registryManagerHandle == NULL) || (deviceId == NULL) || (moduleId == NULL) || (module == NULL))
     {
         LogError("Input parameter cannot be NULL");
         result = IOTHUB_REGISTRYMANAGER_INVALID_ARG;
     }
+    else if (module->version < IOTHUB_MODULE_VERSION_1 || module->version > IOTHUB_MODULE_VERSION_LATEST)
+    {
+        LogError("module must have a valid version");
+        result = IOTHUB_REGISTRYMANAGER_INVALID_VERSION;
+    }
     else
     {
-        result = IoTHubRegistryManager_GetDeviceOrModule(registryManagerHandle, deviceId, moduleId, deviceOrModuleInfo);
-        if (deviceOrModuleInfo->moduleId == NULL)
+        IOTHUB_DEVICE_OR_MODULE deviceOrModuleInfo;
+
+        result = IoTHubRegistryManager_GetDeviceOrModule(registryManagerHandle, deviceId, moduleId, &deviceOrModuleInfo);
+        if (deviceOrModuleInfo.moduleId == NULL)
         {
             result = IOTHUB_REGISTRYMANAGER_DEVICE_NOT_EXIST;
+        }
+        else if (result == IOTHUB_REGISTRYMANAGER_OK)
+        {
+            move_deviceOrModule_members_to_module(&deviceOrModuleInfo, module);
         }
     }
 
@@ -1774,21 +2200,40 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetModule(IOTHUB_REGISTRYMAN
 IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_UpdateModule(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, IOTHUB_REGISTRY_MODULE_UPDATE* moduleUpdate)
 {
     IOTHUB_REGISTRYMANAGER_RESULT result;
-    IOTHUB_REGISTRY_DEVICE_OR_MODULE_UPDATE* deviceOrModuleUpdate = (IOTHUB_REGISTRY_DEVICE_OR_MODULE_UPDATE*)moduleUpdate;
 
-    if ((deviceOrModuleUpdate == NULL) || (deviceOrModuleUpdate->moduleId == NULL))
+    if (registryManagerHandle == NULL)
+    {
+        LogError("Input parameter cannot be NULL");
+        result = IOTHUB_REGISTRYMANAGER_INVALID_ARG;
+    }
+    else if ((moduleUpdate == NULL) || (moduleUpdate->moduleId == NULL))
     {
         LogError("moduleId cannot be NULL");
         result = IOTHUB_REGISTRYMANAGER_INVALID_ARG;
     }
-    else if (moduleUpdate->iotEdge_capable == true)
+    else if (moduleUpdate->version < IOTHUB_REGISTRY_MODULE_UPDATE_VERSION_1 || moduleUpdate->version > IOTHUB_REGISTRY_MODULE_UPDATE_VERSION_LATEST)
     {
-        LogError("iotEdge_capable cannot be set for modules");
-        result = IOTHUB_REGISTRYMANAGER_INVALID_ARG;
+        LogError("moduleUpdate must have valid version");
+        result = IOTHUB_REGISTRYMANAGER_INVALID_VERSION;
     }
     else
     {
-        result = IoTHubRegistryManager_UpdateDeviceOrModule(registryManagerHandle, deviceOrModuleUpdate);
+        IOTHUB_REGISTRY_DEVICE_OR_MODULE_UPDATE deviceOrModuleUpdate;
+        memset(&deviceOrModuleUpdate, 0, sizeof(deviceOrModuleUpdate));
+
+        //Convert to generic update struct
+        deviceOrModuleUpdate.type = IOTHUB_REGISTRYMANAGER_MODEL_TYPE_MODULE;
+        if (moduleUpdate-> version >= IOTHUB_REGISTRY_MODULE_UPDATE_VERSION_1)
+        {
+            deviceOrModuleUpdate.deviceId = moduleUpdate->deviceId;
+            deviceOrModuleUpdate.primaryKey = moduleUpdate->primaryKey;
+            deviceOrModuleUpdate.secondaryKey = moduleUpdate->secondaryKey;
+            deviceOrModuleUpdate.status = moduleUpdate->status;
+            deviceOrModuleUpdate.authMethod = moduleUpdate->authMethod;
+            deviceOrModuleUpdate.moduleId = moduleUpdate->moduleId;
+        }
+
+        result = IoTHubRegistryManager_UpdateDeviceOrModule(registryManagerHandle, &deviceOrModuleUpdate);
     }
 
     return result;
@@ -1810,8 +2255,8 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_DeleteModule(IOTHUB_REGISTRY
     return result;
 }
 
-IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetModuleList(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, const char* deviceId, SINGLYLINKEDLIST_HANDLE moduleList)
+IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetModuleList(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, const char* deviceId, SINGLYLINKEDLIST_HANDLE moduleList, int module_version)
 {
-    return IoTHubRegistryManager_GetModuleOrDeviceList(registryManagerHandle, deviceId, IOTHUB_DEVICES_MAX_REQUEST, moduleList);
+    return IoTHubRegistryManager_GetModuleOrDeviceList(registryManagerHandle, deviceId, IOTHUB_DEVICES_MAX_REQUEST, moduleList, IOTHUB_REGISTRYMANAGER_MODEL_TYPE_MODULE, module_version);
 }
 

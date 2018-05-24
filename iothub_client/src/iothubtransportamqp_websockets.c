@@ -3,7 +3,7 @@
 
 #include "iothubtransportamqp_websockets.h"
 #include "azure_c_shared_utility/wsio.h"
-#include "iothubtransport_amqp_common.h"
+#include "internal/iothubtransport_amqp_common.h"
 #include "azure_c_shared_utility/tlsio.h"
 #include "azure_c_shared_utility/http_proxy_io.h"
 #include "azure_c_shared_utility/platform.h"
@@ -116,7 +116,7 @@ static IOTHUB_PROCESS_ITEM_RESULT IoTHubTransportAMQP_WS_ProcessItem(TRANSPORT_L
     return IoTHubTransport_AMQP_Common_ProcessItem(handle, item_type, iothub_item);
 }
 
-static void IoTHubTransportAMQP_WS_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
+static void IoTHubTransportAMQP_WS_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle)
 {
     // Codes_SRS_IoTHubTransportAMQP_WS_09_015: [IoTHubTransportAMQP_WS_DoWork shall call into the IoTHubTransport_AMQP_Common_DoWork()]
     IoTHubTransport_AMQP_Common_DoWork(handle, iotHubClientHandle);
@@ -175,7 +175,7 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_WS_SetOption(TRANSPORT_LL_HANDLE
     return IoTHubTransport_AMQP_Common_SetOption(handle, option, value);
 }
 
-static IOTHUB_DEVICE_HANDLE IoTHubTransportAMQP_WS_Register(TRANSPORT_LL_HANDLE handle, const IOTHUB_DEVICE_CONFIG* device, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, PDLIST_ENTRY waitingToSend)
+static IOTHUB_DEVICE_HANDLE IoTHubTransportAMQP_WS_Register(TRANSPORT_LL_HANDLE handle, const IOTHUB_DEVICE_CONFIG* device, IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, PDLIST_ENTRY waitingToSend)
 {
     // Codes_SRS_IoTHubTransportAMQP_WS_09_006: [IoTHubTransportAMQP_WS_Register shall register the device by calling into the IoTHubTransport_AMQP_Common_Register().]
     return IoTHubTransport_AMQP_Common_Register(handle, device, iotHubClientHandle, waitingToSend);

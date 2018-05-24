@@ -15,17 +15,20 @@
 #ifndef IOTHUB_CLIENT_H
 #define IOTHUB_CLIENT_H
 
-#ifndef IOTHUB_CLIENT_INSTANCE_TYPE
-typedef struct IOTHUB_CLIENT_INSTANCE_TAG* IOTHUB_CLIENT_HANDLE;
-#define IOTHUB_CLIENT_INSTANCE_TYPE
-#endif // IOTHUB_CLIENT_INSTANCE
-
-#include "iothubtransport.h"
 #include <stddef.h>
 #include <stdint.h>
 
-#include "iothub_client_ll.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
+#include "internal/iothubtransport.h"
+#include "iothub_client_core_ll.h"
+#include "iothub_client_core.h"
+#include "iothub_client_ll.h"
+
+#ifndef IOTHUB_CLIENT_INSTANCE_TYPE
+typedef IOTHUB_CLIENT_CORE_HANDLE IOTHUB_CLIENT_HANDLE;
+#define IOTHUB_CLIENT_INSTANCE_TYPE
+#endif // IOTHUB_CLIENT_INSTANCE
+
 
 #ifdef __cplusplus
 extern "C"
@@ -258,11 +261,11 @@ extern "C"
     *                 keep alive interval for given time.
     *                 If it is not set then the default 240 sec applies. 
     *                 If it is set to zero the server will not send keep alive messages to the client.
-	*			    - @b cl2svc_keep_alive_send_ratio - the AMQP client side keep alive interval in seconds.
-	*                 After the connection established the server requests the client to set the
-	*                 keep alive interval for given time.
-	*                 If it is not set then the default ratio of 1/2 is applied.
-	*                 The ratio has to be greater than 0.0 and equal to or less than 0.9
+    *			    - @b cl2svc_keep_alive_send_ratio - the AMQP client side keep alive interval in seconds.
+    *                 After the connection established the server requests the client to set the
+    *                 keep alive interval for given time.
+    *                 If it is not set then the default ratio of 1/2 is applied.
+    *                 The ratio has to be greater than 0.0 and equal to or less than 0.9
 
     * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -381,43 +384,6 @@ extern "C"
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_UploadMultipleBlocksToBlobAsyncEx, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, const char*, destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX, getDataCallbackEx, void*, context);
 
 #endif /* DONT_USE_UPLOADTOBLOB */
-
-    /**
-    * @brief	Asynchronous call to send the message specified by @p eventMessageHandle.
-    *
-    * @param	iotHubClientHandle		   	The handle created by a call to the create function.
-    * @param	eventMessageHandle		   	The handle to an IoT Hub message.
-    * @param	outputName		   	        The name of the queue to send the message to.
-    * @param	eventConfirmationCallback  	The callback specified by the device for receiving
-    * 										confirmation of the delivery of the IoT Hub message.
-    * 										This callback can be expected to invoke the
-    * 										::IoTHubClient_SendEventAsync function for the
-    * 										same message in an attempt to retry sending a failing
-    * 										message. The user can specify a @c NULL value here to
-    * 										indicate that no callback is required.
-    * @param	userContextCallback			User specified context that will be provided to the
-    * 										callback. This can be @c NULL.
-    *
-    *           @b NOTE: The application behavior is undefined if the user calls
-    *           the ::IoTHubClient_Destroy function from within any callback.
-    *
-    * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
-    */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_SendEventToOutputAsync, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_MESSAGE_HANDLE, eventMessageHandle, const char*, outputName, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, eventConfirmationCallback, void*, userContextCallback);
-
-
-    /**
-    * @brief	This API sets callback for  method call that is directed to specified 'inputName' queue (e.g. messages from IoTHubClient_SendEventToOutputAsync)
-    *
-    * @param	iotHubClientHandle		The handle created by a call to the create function.
-    * @param	inputName		        The name of the queue to listen on for this deviceMethodCallback/userContextCallback.
-    * @param	deviceMethodCallback	The callback which will be called by IoTHub.
-    * @param	userContextCallback		User specified context that will be provided to the
-    * 									callback. This can be @c NULL.
-    *
-    * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
-    */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_SetInputMessageCallback, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, const char*, inputName, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC, eventHandlerCallback, void*, userContextCallback);
 
 #ifdef __cplusplus
 }

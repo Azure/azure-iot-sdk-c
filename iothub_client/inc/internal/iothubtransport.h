@@ -1,0 +1,41 @@
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+#ifndef IOTHUB_TRANSPORT_H
+#define IOTHUB_TRANSPORT_H
+
+#include "azure_c_shared_utility/lock.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
+
+#include "iothub_client_core.h"
+#include "iothub_client_core_ll.h"
+#include "internal/iothub_client_private.h"
+#include "internal/iothub_transport_ll_private.h"
+//
+#ifndef IOTHUB_CLIENT_CORE_INSTANCE_TYPE
+typedef struct IOTHUB_CLIENT_CORE_INSTANCE_TAG* IOTHUB_CLIENT_CORE_HANDLE;
+#define IOTHUB_CLIENT_CORE_INSTANCE_TYPE
+#endif // IOTHUB_CLIENT_CORE_INSTANCE
+
+#include "azure_c_shared_utility/umock_c_prod.h"
+
+typedef void(*IOTHUB_CLIENT_MULTIPLEXED_DO_WORK)(void* iotHubClientInstance);
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    MOCKABLE_FUNCTION(, TRANSPORT_HANDLE, IoTHubTransport_Create, IOTHUB_CLIENT_TRANSPORT_PROVIDER, protocol, const char*, iotHubName, const char*, iotHubSuffix);
+    MOCKABLE_FUNCTION(, void, IoTHubTransport_Destroy, TRANSPORT_HANDLE, transportHandle);
+    MOCKABLE_FUNCTION(, LOCK_HANDLE, IoTHubTransport_GetLock, TRANSPORT_HANDLE, transportHandle);
+    MOCKABLE_FUNCTION(, TRANSPORT_LL_HANDLE, IoTHubTransport_GetLLTransport, TRANSPORT_HANDLE, transportHandle);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubTransport_StartWorkerThread, TRANSPORT_HANDLE, transportHandle, IOTHUB_CLIENT_CORE_HANDLE, clientHandle, IOTHUB_CLIENT_MULTIPLEXED_DO_WORK, muxDoWork);
+    MOCKABLE_FUNCTION(, bool, IoTHubTransport_SignalEndWorkerThread, TRANSPORT_HANDLE, transportHandle, IOTHUB_CLIENT_CORE_HANDLE, clientHandle);
+    MOCKABLE_FUNCTION(, void, IoTHubTransport_JoinWorkerThread, TRANSPORT_HANDLE, transportHandle, IOTHUB_CLIENT_CORE_HANDLE, clientHandle);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* IOTHUB_TRANSPORT_H */

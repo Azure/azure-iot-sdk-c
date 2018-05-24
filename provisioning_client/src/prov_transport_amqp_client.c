@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_prov_client/prov_transport_amqp_client.h"
-#include "azure_prov_client/prov_transport_amqp_common.h"
+#include "azure_prov_client/internal/prov_transport_amqp_common.h"
 #include "azure_c_shared_utility/xio.h"
 #include "azure_c_shared_utility/tlsio.h"
 #include "azure_c_shared_utility/http_proxy_io.h"

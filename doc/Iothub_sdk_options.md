@@ -39,11 +39,12 @@ DPS_LL_SetOption(handle, OPTION_HTTP_PROXY, &http_proxy);
 
 ### IoThub_Client
 
-| Option Name        | Option Define              | Value Type         | Description
-|--------------------|----------------------------|--------------------|-------------------------------
-| `"messageTimeout"` | OPTION_MESSAGE_TIMEOUT     | tickcounter_ms_t*  | Timeout used for message on the message queue
-| `"product_info"`   | OPTION_PRODUCT_INFO        | const char*        | User defined Product identifier sent to the IoThub service
-| `"TrustedCerts"`   | OPTION_TRUSTED_CERT        | const char*        | Azure Server certificate used to validate TLS connection to iothub
+| Option Name                       | Option Define                   | Value Type         | Description
+|-----------------------------------|---------------------------------|--------------------|-------------------------------
+| `"messageTimeout"`              | OPTION_MESSAGE_TIMEOUT         | tickcounter_ms_t*  | Timeout used for message on the message queue
+| `"blob_upload_timeout_secs"`  | OPTION_BLOB_UPLOAD_TIMEOUT_SECS | size_t*            | Timeout in seconds of blob uploads
+| `"product_info"`                | OPTION_PRODUCT_INFO             | const char*        | User defined Product identifier sent to the IoThub service
+| `"TrustedCerts"`                | OPTION_TRUSTED_CERT             | const char*        | Azure Server certificate used to validate TLS connection to iothub
 
 <a name="transport_option"></a>
 
@@ -52,18 +53,20 @@ DPS_LL_SetOption(handle, OPTION_HTTP_PROXY, &http_proxy);
 | Option Name            | Option Define             | Value Type         | Description
 |------------------------|---------------------------|--------------------|-------------------------------
 | `"logtrace"`           | OPTION_LOG_TRACE          | bool* value        | Turn on and off log tracing for the transport
-| `"sas_token_lifetime"` | OPTION_SAS_TOKEN_LIFETIME | `size_t`* value    | Length of time in seconds used for lifetime of sas token.
+| `"sas_token_lifetime"` | OPTION_SAS_TOKEN_LIFETIME | size_t* value    | Length of time in seconds used for lifetime of sas token.
 | `"x509certificate"`    | OPTION_X509_CERT          | const char*        | Sets an RSA x509 certificate used for connection authentication
 | `"x509privatekey"`     | OPTION_X509_PRIVATE_KEY   | const char*        | Sets the private key for the RSA x509 certificate
 | `"x509EccCertificate"` | OPTION_X509_ECC_CERT      | const char*        | Sets the ECC x509 certificate used for connection authentication
 | `"x509EccAliasKey"`    | OPTION_X509_ECC_KEY       | const char*        | Sets the private key for the ECC x509 certificate
 | `"proxy_data"`         | OPTION_HTTP_PROXY         | [HTTP_PROXY_OPTIONS*][http-proxy-object]| Http proxy data object used for proxy connection to IoTHub
+| `"tls_version"`         | OPTION_TLS_VERSION         | int*            | TLS version to use for openssl, 10 for version 1.0, 11 for version 1.1, 12 for version 1.2
 
 ### MQTT Transport
 
-| Option Name            | Option Define             | Value Type         | Description
-|------------------------|---------------------------|--------------------|-------------------------------
-| `"keepalive"`          | OPTION_KEEP_ALIVE         | int*               | Length of time to send `Keep Alives` to service for D2C Messages
+| Option Name               | Option Define                 | Value Type         | Description
+|---------------------------|-------------------------------|--------------------|-------------------------------
+| `"keepalive"`             | OPTION_KEEP_ALIVE             | int*               | Length of time to send `Keep Alives` to service for D2C Messages
+| `"auto_url_encode_decode"`| OPTION_AUTO_URL_ENCODE_DECODE | bool*              | Turn on and off automatic URL Encoding and Decoding.
 
 ### AMQP Transport
 

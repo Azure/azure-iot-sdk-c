@@ -14,10 +14,10 @@
 #include "azure_uamqp_c/messaging.h"
 #include "azure_uamqp_c/message_sender.h"
 #include "azure_uamqp_c/message_receiver.h"
-#include "uamqp_messaging.h"
-#include "iothub_client_private.h"
+#include "internal/uamqp_messaging.h"
+#include "internal/iothub_client_private.h"
 #include "iothub_client_version.h"
-#include "iothubtransport_amqp_telemetry_messenger.h"
+#include "internal/iothubtransport_amqp_telemetry_messenger.h"
 
 #define RESULT_OK 0
 #define INDEFINITE_TIME ((time_t)(-1))

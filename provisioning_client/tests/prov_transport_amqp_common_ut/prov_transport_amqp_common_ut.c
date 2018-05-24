@@ -36,9 +36,11 @@ static void my_gballoc_free(void* ptr)
 #include "azure_c_shared_utility/http_proxy_io.h"
 #include "azure_prov_client/prov_transport.h"
 #include "azure_uamqp_c/saslclientio.h"
+#include "azure_uamqp_c/amqpvalue.h"
+#include "azure_uamqp_c/link.h"
 #undef ENABLE_MOCKS
 
-#include "azure_prov_client/prov_transport_amqp_common.h"
+#include "azure_prov_client/internal/prov_transport_amqp_common.h"
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"
@@ -51,7 +53,7 @@ static void my_gballoc_free(void* ptr)
 #include "azure_uamqp_c/message_receiver.h"
 #include "azure_uamqp_c/message.h"
 #include "azure_uamqp_c/messaging.h"
-#include "azure_prov_client/prov_sasl_tpm.h"
+#include "azure_prov_client/internal/prov_sasl_tpm.h"
 #include "azure_c_shared_utility/buffer_.h"
 #undef ENABLE_MOCKS
 
@@ -416,6 +418,12 @@ static int my_mallocAndStrcpy_s(char** destination, const char* source)
     return 0;
 }
 
+static AMQP_VALUE my_amqpvalue_create_symbol(const char* value)
+{
+    (void)value;
+    return (AMQP_VALUE)my_gballoc_malloc(1);
+}
+
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
@@ -464,6 +472,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         REGISTER_UMOCK_ALIAS_TYPE(ON_LINK_ATTACHED, void*);
         REGISTER_UMOCK_ALIAS_TYPE(role, bool);
         REGISTER_UMOCK_ALIAS_TYPE(AMQP_VALUE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(fields, void*);
         REGISTER_UMOCK_ALIAS_TYPE(receiver_settle_mode, uint8_t);
         REGISTER_UMOCK_ALIAS_TYPE(ON_MESSAGE_RECEIVER_STATE_CHANGED, void*);
         REGISTER_UMOCK_ALIAS_TYPE(ON_MESSAGE_RECEIVED, void*);
@@ -517,8 +526,6 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqpvalue_create_string, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(amqpvalue_create_map, my_amqpvalue_create_map);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqpvalue_create_map, NULL);
-        REGISTER_GLOBAL_MOCK_HOOK(amqpvalue_create_string, my_amqpvalue_create_string);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqpvalue_create_string, NULL);
         REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_set_map_value, 0);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqpvalue_set_map_value, __LINE__);
         REGISTER_GLOBAL_MOCK_RETURN(message_set_application_properties, 0);
@@ -537,6 +544,10 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_get_inplace_described_value, TEST_AMQP_VALUE);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqpvalue_get_inplace_described_value, NULL);*/
 
+        REGISTER_GLOBAL_MOCK_HOOK(amqpvalue_create_symbol, my_amqpvalue_create_symbol);
+        //REGISTER_GLOBAL_MOCK_RETURN(link_set_attach_properties, 0);
+        REGISTER_GLOBAL_MOCK_HOOK(amqpvalue_destroy, my_amqpvalue_destroy);
+
         REGISTER_GLOBAL_MOCK_HOOK(message_get_body_type, my_message_get_body_type);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(message_get_body_type, __LINE__);
         REGISTER_GLOBAL_MOCK_HOOK(message_get_body_amqp_data_in_place, my_message_get_body_amqp_data_in_place);
@@ -544,7 +555,6 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
 
         REGISTER_GLOBAL_MOCK_RETURN(messaging_delivery_accepted, TEST_AMQP_VALUE);
 
-        REGISTER_GLOBAL_MOCK_HOOK(amqpvalue_destroy, my_amqpvalue_destroy);
         REGISTER_GLOBAL_MOCK_HOOK(message_destroy, my_message_destroy);
         
         REGISTER_GLOBAL_MOCK_HOOK(message_create, my_message_create);
@@ -666,6 +676,11 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
 
         STRICT_EXPECTED_CALL(amqpvalue_create_map());
         STRICT_EXPECTED_CALL(amqpvalue_create_symbol(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_set_map_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(link_set_attach_properties(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
 
         STRICT_EXPECTED_CALL(link_set_max_message_size(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
@@ -686,6 +701,11 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
 
         STRICT_EXPECTED_CALL(amqpvalue_create_map());
         STRICT_EXPECTED_CALL(amqpvalue_create_symbol(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_set_map_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(link_set_attach_properties(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
 
         STRICT_EXPECTED_CALL(link_set_max_message_size(IGNORED_PTR_ARG, IGNORED_NUM_ARG)); //13

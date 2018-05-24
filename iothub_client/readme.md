@@ -27,6 +27,12 @@ At this point you can use the packages on Ubuntu 14.04, 15.04, 15.10, 16.04 usin
 
 If you are working with a device running a Linux distribution not supporting these packages, then you will need to compile the SDK following the instructions below.
 
+<a name="cocoapods"></a>
+## Using CocoaPods on Apple devices
+
+The IoT Hub Device SDK is available as [CocoaPods](https://cocoapods.org/) for Mac and iOS device development.
+Details for how to use the CocoaPods are available [here](/iothub_client/samples/ios).
+
 <a name="nugetpackage"></a>
 ## Using the NuGet packages for Windows devices
 
@@ -74,6 +80,7 @@ Detailed instructions can be found below for each platforms:
 
 * [Setting up a Windows development environment](../doc/devbox_setup.md#windows)
 * [Setting up a Linux development environment](../doc/devbox_setup.md#linux)
+* [Setting up a Mac OS X development environment](../doc/devbox_setup.md#macos)
 * [Cross compile the C device SDK (targeting Raspbian and using Ubuntu as host)](../doc/SDK_cross_compile_example.md)
 
 ## Samples

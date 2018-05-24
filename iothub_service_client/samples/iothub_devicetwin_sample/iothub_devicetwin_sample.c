@@ -2,29 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include <stdlib.h>
-#include "azure_c_shared_utility/crt_abstractions.h"
-#include "azure_c_shared_utility/threadapi.h"
-#include "azure_c_shared_utility/map.h"
-#include "azure_c_shared_utility/lock.h"
-#include "azure_c_shared_utility/strings.h"
-#include "azure_c_shared_utility/string_tokenizer.h"
-#include "azure_c_shared_utility/consolelogger.h"
-#include "azure_c_shared_utility/xlogging.h"
-#include "azure_c_shared_utility/uniqueid.h"
-#include "azure_c_shared_utility/connection_string_parser.h"
 #include "azure_c_shared_utility/platform.h"
-
-#include "iothub_devicetwin_sample.h"
 
 #include "iothub_service_client_auth.h"
 #include "iothub_devicetwin.h"
 
-/* String containing Hostname, SharedAccessKeyName and SharedAccessKey in the format:                       */
-/* "HostName=<host_name>;SharedAccessKeyName=<shared_access_key_name>;SharedAccessKey=<shared_access_key>" */
-static const char* connectionString = "[IoTHub Connection String]";
+/* Paste in the your iothub connection string  */
+static const char* connectionString = "[device connection string]";
 static const char* deviceId = "[Device Id]";
 
-void iothub_devicetwin_sample_run(void)
+int main(void)
 {
     //IOTHUB_TWIN_REQUEST_GET               GET      {iot hub}/twins/{device id}                     // Get device twin  
     //IOTHUB_TWIN_REQUEST_UPDATE            PATCH    {iot hub}/twins/{device id}                     // Partally update device twin
@@ -32,65 +19,56 @@ void iothub_devicetwin_sample_run(void)
     //IOTHUB_TWIN_REQUEST_REPLACE_DESIRED   PUT      {iot hub}/twins/{device id}/properties/desired  // Replace update desired properties
     //IOTHUB_TWIN_REQUEST_UPDATE_DESIRED    PATCH    {iot hub}/twins/{device id}/properties/desired  // Partially update desired properties
 
-    if (platform_init() != 0)
-    {
-        printf("Failed to initialize the platform.\r\n");
-    }
-	else 
-    {
-        xlogging_set_log_function(consolelogger_log);
+    (void)platform_init();
 
-        (void)printf("Calling IoTHubServiceClientAuth_CreateFromConnectionString with the connection string\r\n");
-        IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(connectionString);
-        if (iotHubServiceClientHandle == NULL)
+    IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(connectionString);
+    if (iotHubServiceClientHandle == NULL)
+    {
+        (void)printf("IoTHubServiceClientAuth_CreateFromConnectionString failed\r\n");
+    }
+    else
+    {
+        IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceClientDeviceTwinHandle = IoTHubDeviceTwin_Create(iotHubServiceClientHandle);
+        if (serviceClientDeviceTwinHandle == NULL)
         {
-            (void)printf("IoTHubServiceClientAuth_CreateFromConnectionString failed\r\n");
+            (void)printf("IoTHubDeviceTwin_Create failed\r\n");
         }
         else
         {
-            (void)printf("iotHubServiceClientHandle has been created successfully\r\n");
+            (void)printf("Retrieving DeviceTwin...\r\n");
 
-            IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceClientDeviceTwinHandle = IoTHubDeviceTwin_Create(iotHubServiceClientHandle);
-            if (serviceClientDeviceTwinHandle == NULL)
+            char* deviceTwinJson;
+
+            if ((deviceTwinJson = IoTHubDeviceTwin_GetTwin(serviceClientDeviceTwinHandle, deviceId)) == NULL)
             {
-                (void)printf("IoTHubDeviceTwin_Create failed\r\n");
+                (void)printf("IoTHubDeviceTwin_GetTwin failed\r\n");
             }
             else
             {
-                (void)printf("Getting DeviceTwin...\r\n");
+                (void)printf("\r\nDeviceTwin:\r\n");
+                printf("%s\r\n", deviceTwinJson);
 
-                char* deviceTwinJson;
+                const char* updateJson = "{\"properties\":{\"desired\":{\"telemetryInterval\":30}}}";
+                char* updatedDeviceTwinJson;
 
-                if ((deviceTwinJson = IoTHubDeviceTwin_GetTwin(serviceClientDeviceTwinHandle, deviceId)) == NULL)
+                if ((updatedDeviceTwinJson = IoTHubDeviceTwin_UpdateTwin(serviceClientDeviceTwinHandle, deviceId, updateJson)) == NULL)
                 {
-                    (void)printf("IoTHubDeviceTwin_GetTwin failed\r\n");
+                    (void)printf("IoTHubDeviceTwin_UpdateTwin failed\r\n");
                 }
                 else
                 {
-                    (void)printf("\r\nDeviceTwin:\r\n");
-                    printf("%s\r\n", deviceTwinJson);
+                    (void)printf("\r\nDeviceTwin has been successfully updated (partial update):\r\n");
+                    printf("%s\r\n", updatedDeviceTwinJson);
 
-                    const char* updateJson = "{\"properties\":{\"desired\":{\"telemetryInterval\":30}}}";
-                    char* updatedDeviceTwinJson;
-
-                    if ((updatedDeviceTwinJson = IoTHubDeviceTwin_UpdateTwin(serviceClientDeviceTwinHandle, deviceId, updateJson)) == NULL)
-                    {
-                        (void)printf("IoTHubDeviceTwin_UpdateTwin failed\r\n");
-                    }
-                    else
-                    {
-                        (void)printf("\r\nDeviceTwin has been successfully updated (partial update):\r\n");
-                        printf("%s\r\n", updatedDeviceTwinJson);
-
-                        free(updatedDeviceTwinJson);
-                    }
-
-                    free(deviceTwinJson);
+                    free(updatedDeviceTwinJson);
                 }
-                IoTHubDeviceTwin_Destroy(serviceClientDeviceTwinHandle);
+
+                // Free the device Twin json string
+                free(deviceTwinJson);
             }
-            IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
+            IoTHubDeviceTwin_Destroy(serviceClientDeviceTwinHandle);
         }
-        platform_deinit();
+        IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
     }
+    platform_deinit();
 }

@@ -32,7 +32,6 @@ static const UINT32 DPS_ID_KEY_HANDLE = HR_PERSISTENT | 0x00000100;
 
 typedef struct HSM_CLIENT_INFO_TAG
 {
-    TPM_HANDLE tpm_handle;
     TSS_DEVICE tpm_device;
     TPM2B_PUBLIC ek_pub;
     TPM2B_PUBLIC srk_pub;
@@ -438,53 +437,6 @@ static BUFFER_HANDLE decrypt_data(HSM_CLIENT_INFO* sec_info, const unsigned char
     return result;
 }
 
-static int create_persistent_key(HSM_CLIENT_INFO* tpm_info, TPM_HANDLE request_handle, TPMI_DH_OBJECT hierarchy, TPM2B_PUBLIC* inPub, TPM2B_PUBLIC* outPub)
-{
-    int result;
-    TPM_RC tpm_result;
-    TPM2B_NAME name;
-    TPM2B_NAME qName;
-
-    tpm_result = TPM2_ReadPublic(&tpm_info->tpm_device, request_handle, outPub, &name, &qName);
-    if (tpm_result == TPM_RC_SUCCESS)
-    {
-        tpm_info->tpm_handle = request_handle;
-        result = 0;
-    }
-    else if (tpm_result != TPM_RC_HANDLE)
-    {
-        LogError("Failed calling TPM2_ReadPublic 0%x", tpm_result);
-        result = __FAILURE__;
-    }
-    else
-    {
-        if (TSS_CreatePrimary(&tpm_info->tpm_device, &NullPwSession, hierarchy, inPub, &tpm_info->tpm_handle, outPub) != TPM_RC_SUCCESS)
-        {
-            LogError("Failed calling TSS_CreatePrimary");
-            result = __FAILURE__;
-        }
-        else
-        {
-            if (TPM2_EvictControl(&tpm_info->tpm_device, &NullPwSession, TPM_RH_OWNER, tpm_info->tpm_handle, request_handle) != TPM_RC_SUCCESS)
-            {
-                LogError("Failed calling TPM2_EvictControl");
-                result = __FAILURE__;
-            }
-            else if (TPM2_FlushContext(&tpm_info->tpm_device, tpm_info->tpm_handle) != TPM_RC_SUCCESS)
-            {
-                LogError("Failed calling TPM2_FlushContext");
-                result = __FAILURE__;
-            }
-            else
-            {
-                tpm_info->tpm_handle = request_handle;
-                result = 0;
-            }
-        }
-    }
-    return result;
-}
-
 static int initialize_tpm_device(HSM_CLIENT_INFO* tpm_info)
 {
     int result;
@@ -500,13 +452,13 @@ static int initialize_tpm_device(HSM_CLIENT_INFO* tpm_info)
         result = __FAILURE__;
     }
     /* Codes_SRS_HSM_CLIENT_TPM_07_031: [ secure_dev_tpm_create shall get a handle to the Endorsement Key and Storage Root Key. ] */
-    else if (create_persistent_key(tpm_info, TPM_20_EK_HANDLE, TPM_RH_ENDORSEMENT, GetEkTemplate(), &tpm_info->ek_pub) != 0)
+    else if ((TSS_CreatePersistentKey(&tpm_info->tpm_device, TPM_20_EK_HANDLE, &NullPwSession, TPM_RH_ENDORSEMENT, GetEkTemplate(), &tpm_info->ek_pub) ) == 0)
     {
         LogError("Failure calling creating persistent key for Endorsement key");
         result = __FAILURE__;
     }
     /* Codes_SRS_HSM_CLIENT_TPM_07_031: [ secure_dev_tpm_create shall get a handle to the Endorsement Key and Storage Root Key. ] */
-    else if (create_persistent_key(tpm_info, TPM_20_SRK_HANDLE, TPM_RH_OWNER, GetSrkTemplate(), &tpm_info->srk_pub) != 0)
+    else if (TSS_CreatePersistentKey(&tpm_info->tpm_device, TPM_20_SRK_HANDLE, &NullPwSession, TPM_RH_OWNER, GetSrkTemplate(), &tpm_info->srk_pub) == 0)
     {
         LogError("Failure calling creating persistent key for Storage Root key");
         result = __FAILURE__;

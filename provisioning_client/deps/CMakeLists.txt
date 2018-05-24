@@ -73,7 +73,7 @@ endif()
         set(run_e2e_tests OFF)
         set(run_unittests OFF)
 
-        add_subdirectory(./utpm)
+        add_subdirectory(./utpm EXCLUDE_FROM_ALL)
 
         set(run_e2e_tests ${original_run_e2e_tests})
         set(run_unittests ${original_run_unittests})

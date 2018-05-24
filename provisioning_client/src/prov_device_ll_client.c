@@ -18,7 +18,8 @@
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/tickcounter.h"
 
-#include "azure_prov_client/prov_auth_client.h"
+#include "azure_prov_client/internal/prov_auth_client.h"
+#include "azure_prov_client/internal/prov_transport_private.h"
 #include "azure_prov_client/prov_device_ll_client.h"
 #include "azure_prov_client/prov_client_const.h"
 

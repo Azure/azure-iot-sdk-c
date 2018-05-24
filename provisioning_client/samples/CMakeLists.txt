@@ -12,6 +12,7 @@ function(add_sample_directory whatIsBuilding)
                FOLDER "Provision_Samples")
 endfunction()
 
+add_sample_directory(custom_hsm_example)
 add_sample_directory(iothub_client_sample_hsm)
 
 if(${use_mqtt} AND ${use_amqp})

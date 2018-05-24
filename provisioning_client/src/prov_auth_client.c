@@ -13,7 +13,7 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/sastoken.h"
 
-#include "azure_prov_client/prov_auth_client.h"
+#include "azure_prov_client/internal/prov_auth_client.h"
 #include "hsm_client_data.h"
 
 #include "azure_prov_client/prov_security_factory.h"
@@ -159,7 +159,8 @@ PROV_AUTH_HANDLE prov_auth_create()
             /* Codes_SRS_PROV_AUTH_CLIENT_07_003: [ prov_auth_create shall validate the specified secure enclave interface to ensure. ] */
             result->sec_type = PROV_AUTH_TYPE_TPM;
             const HSM_CLIENT_TPM_INTERFACE* tpm_interface = hsm_client_tpm_interface();
-            if ( ( (result->hsm_client_create = tpm_interface->hsm_client_tpm_create) == NULL) ||
+            if ((tpm_interface == NULL) ||
+                ( (result->hsm_client_create = tpm_interface->hsm_client_tpm_create) == NULL) ||
                 ((result->hsm_client_destroy = tpm_interface->hsm_client_tpm_destroy) == NULL) ||
                 ((result->hsm_client_import_key = tpm_interface->hsm_client_activate_identity_key) == NULL) ||
                 ((result->hsm_client_get_endorsement_key = tpm_interface->hsm_client_get_ek) == NULL) ||
@@ -168,7 +169,7 @@ PROV_AUTH_HANDLE prov_auth_create()
                 )
             {
                 /* Codes_SRS_PROV_AUTH_CLIENT_07_002: [ If any failure is encountered prov_auth_create shall return NULL ] */
-                LogError("Invalid secure device interface");
+                LogError("Invalid TPM secure device interface was specified");
                 free(result);
                 result = NULL;
             }
@@ -178,14 +179,15 @@ PROV_AUTH_HANDLE prov_auth_create()
             /* Codes_SRS_PROV_AUTH_CLIENT_07_003: [ prov_auth_create shall validate the specified secure enclave interface to ensure. ] */
             result->sec_type = PROV_AUTH_TYPE_X509;
             const HSM_CLIENT_X509_INTERFACE* x509_interface = hsm_client_x509_interface();
-            if ( ( (result->hsm_client_create = x509_interface->hsm_client_x509_create) == NULL) ||
+            if ((x509_interface == NULL) ||
+                ( (result->hsm_client_create = x509_interface->hsm_client_x509_create) == NULL) ||
                 ((result->hsm_client_destroy = x509_interface->hsm_client_x509_destroy) == NULL) ||
                 ((result->hsm_client_get_cert = x509_interface->hsm_client_get_cert) == NULL) ||
                 ((result->hsm_client_get_common_name = x509_interface->hsm_client_get_common_name) == NULL) ||
                 ((result->hsm_client_get_alias_key = x509_interface->hsm_client_get_key) == NULL)
                 )
             {
-                LogError("Invalid handle parameter: DEVICE_AUTH_CREATION_INFO is NULL");
+                LogError("Invalid x509 secure device interface was specified");
                 free(result);
                 result = NULL;
             }
@@ -247,10 +249,15 @@ char* prov_auth_get_registration_id(PROV_AUTH_HANDLE handle)
     else
     {
         int load_result = 0;
+        int reg_id_allocated = 0;
         if (handle->registration_id == NULL)
         {
             /* Codes_SRS_PROV_AUTH_CLIENT_07_011: [ prov_auth_get_registration_id shall load the registration id if it has not been previously loaded. ] */
             load_result = load_registration_id(handle);
+            if (load_result == 0)
+            {
+                reg_id_allocated = 1;
+            }
         }
 
         if (load_result != 0)
@@ -264,6 +271,11 @@ char* prov_auth_get_registration_id(PROV_AUTH_HANDLE handle)
         {
             /* Codes_SRS_PROV_AUTH_CLIENT_07_012: [ If a failure is encountered, prov_auth_get_registration_id shall return NULL. ] */
             LogError("Failed allocating registration key");
+            if (reg_id_allocated == 1)
+            {
+                free(handle->registration_id);
+                handle->registration_id = NULL;
+            }
             result = NULL;
         }
     }

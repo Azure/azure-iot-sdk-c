@@ -16,11 +16,9 @@ include_directories(${SHARED_UTIL_REAL_TEST_FOLDER})
 
 set(${theseTestsName}_c_files
     ../../src/iothub_client.c
-    ${SHARED_UTIL_REAL_TEST_FOLDER}/real_crt_abstractions.c
-    ${SHARED_UTIL_REAL_TEST_FOLDER}/real_vector.c
 )
 
 set(${theseTestsName}_h_files
 )
 
-build_c_test_artifacts(${theseTestsName} ON "tests/UnitTests")
+build_c_test_artifacts(${theseTestsName} ON "tests/azure_iothub_client_tests")

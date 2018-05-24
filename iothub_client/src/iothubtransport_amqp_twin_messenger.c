@@ -13,9 +13,9 @@
 #include "azure_c_shared_utility/singlylinkedlist.h"
 #include "azure_uamqp_c/amqp_definitions_fields.h"
 #include "azure_uamqp_c/messaging.h"
-#include "iothub_client_private.h"
-#include "iothubtransport_amqp_messenger.h"
-#include "iothubtransport_amqp_twin_messenger.h"
+#include "internal/iothub_client_private.h"
+#include "internal/iothubtransport_amqp_messenger.h"
+#include "internal/iothubtransport_amqp_twin_messenger.h"
 
 DEFINE_ENUM_STRINGS(TWIN_MESSENGER_SEND_STATUS, TWIN_MESSENGER_SEND_STATUS_VALUES);
 DEFINE_ENUM_STRINGS(TWIN_REPORT_STATE_RESULT, TWIN_REPORT_STATE_RESULT_VALUES);

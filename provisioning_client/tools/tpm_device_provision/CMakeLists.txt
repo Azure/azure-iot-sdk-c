@@ -30,3 +30,4 @@ add_executable(tpm_device_provision ${dev_auth_prov_c_files} ${dev_auth_prov_h_f
 
 linkSharedUtil(tpm_device_provision)
 link_security_client(tpm_device_provision)
+target_link_libraries(tpm_device_provision parson)

@@ -32,7 +32,7 @@ int prov_dev_security_init(SECURE_DEVICE_TYPE hsm_type)
                 result = 0;
             }
         }
-        else
+        else if (security_type == IOTHUB_SECURITY_TYPE_X509)
         {
             if (g_device_hsm_type != SECURE_DEVICE_TYPE_X509)
             {
@@ -42,6 +42,23 @@ int prov_dev_security_init(SECURE_DEVICE_TYPE hsm_type)
             {
                 result = 0;
             }
+        }
+#ifdef HSM_TYPE_HTTP_EDGE
+        else if (security_type == IOTHUB_SECURITY_TYPE_HTTP_EDGE)
+        {
+            if (g_device_hsm_type != SECURE_DEVICE_TYPE_HTTP_EDGE)
+            {
+                result = __FAILURE__;
+            }
+            else
+            {
+                result = 0;
+            }
+        }
+#endif
+        else
+        {
+            result = __FAILURE__;
         }
     }
     if (result == 0)

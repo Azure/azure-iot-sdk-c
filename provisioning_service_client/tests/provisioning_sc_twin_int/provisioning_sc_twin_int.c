@@ -31,7 +31,7 @@ static void my_gballoc_free(void* ptr)
 #include "azure_c_shared_utility/umock_c_prod.h"
 #undef ENABLE_MOCKS
 
-#include "provisioning_sc_twin.h"
+#include "prov_service_client/provisioning_sc_twin.h"
 #include "parson.h"
 #include "real_strings.h"
 

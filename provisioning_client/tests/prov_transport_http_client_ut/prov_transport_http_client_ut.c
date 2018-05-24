@@ -45,6 +45,7 @@ static void my_gballoc_free(void* ptr)
 #include "azure_c_shared_utility/http_proxy_io.h"
 #include "azure_c_shared_utility/tlsio.h"
 
+#include "azure_prov_client/internal/prov_transport_private.h"
 #include "azure_prov_client/prov_transport.h"
 #include "azure_uhttp_c/uhttp.h"
 

@@ -5,42 +5,60 @@
 
 #include "iothub_client.h"
 #include "iothub_message.h"
+#include "iothub_client_version.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/tickcounter.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
-#include "azure_c_shared_utility/string_tokenizer.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/http_proxy_io.h"
 
-#include "iothubtransportmqtt.h"
-#include "iothubtransportamqp.h"
-#include "iothub_client_hsm_ll.h"
 #include "azure_prov_client/prov_device_client.h"
 #include "azure_prov_client/prov_security_factory.h"
 
-#include "azure_prov_client/prov_transport_http_client.h"
-#include "azure_prov_client/prov_transport_amqp_client.h"
+//
+// The protocol you wish to use should be uncommented
+//
+#define SAMPLE_MQTT
+//#define SAMPLE_MQTT_OVER_WEBSOCKETS
+//#define SAMPLE_AMQP
+//#define SAMPLE_AMQP_OVER_WEBSOCKETS
+//#define SAMPLE_HTTP
+
+#ifdef SAMPLE_MQTT
+#include "iothubtransportmqtt.h"
 #include "azure_prov_client/prov_transport_mqtt_client.h"
+#endif // SAMPLE_MQTT
+#ifdef SAMPLE_MQTT_OVER_WEBSOCKETS
+#include "iothubtransportmqtt_websockets.h"
+#include "azure_prov_client/prov_transport_mqtt_ws_client.h"
+#endif // SAMPLE_MQTT_OVER_WEBSOCKETS
+#ifdef SAMPLE_AMQP
+#include "iothubtransportamqp.h"
+#include "azure_prov_client/prov_transport_amqp_client.h"
+#endif // SAMPLE_AMQP
+#ifdef SAMPLE_AMQP_OVER_WEBSOCKETS
+#include "iothubtransportamqp_websockets.h"
+#include "azure_prov_client/prov_transport_amqp_ws_client.h"
+#endif // SAMPLE_AMQP_OVER_WEBSOCKETS
+#ifdef SAMPLE_HTTP
+#include "iothubtransportmqtt.h"
+#include "azure_prov_client/prov_transport_http_client.h"
+#endif // SAMPLE_HTTP
 
-#include "../../../certs/certs.h"
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+#include "certs.h"
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-#include "iothub_client_version.h"
+// This sample is to demostrate iothub reconnection with provisioning and should not
+// be confused as production code
 
 DEFINE_ENUM_STRINGS(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
 DEFINE_ENUM_STRINGS(PROV_DEVICE_REG_STATUS, PROV_DEVICE_REG_STATUS_VALUES);
 
 static const char* global_prov_uri = "global.azure-devices-provisioning.net";
 static const char* id_scope = "[ID Scope]";
-
-static bool g_trace_on = true;
-
-#ifdef USE_OPENSSL
-    static bool g_using_cert = true;
-#else
-    static bool g_using_cert = false;
-#endif // USE_OPENSSL
 
 static bool g_use_proxy = false;
 static const char* PROXY_ADDRESS = "127.0.0.1";
@@ -53,18 +71,6 @@ static void registation_status_callback(PROV_DEVICE_REG_STATUS reg_status, void*
 {
     (void)user_context;
     (void)printf("Provisioning Status: %s\r\n", ENUM_TO_STRING(PROV_DEVICE_REG_STATUS, reg_status));
-    if (reg_status == PROV_DEVICE_REG_STATUS_CONNECTED)
-    {
-        (void)printf("\r\nRegistration status: CONNECTED\r\n");
-    }
-    else if (reg_status == PROV_DEVICE_REG_STATUS_REGISTERING)
-    {
-        (void)printf("\r\nRegistration status: REGISTERING\r\n");
-    }
-    else if (reg_status == PROV_DEVICE_REG_STATUS_ASSIGNING)
-    {
-        (void)printf("\r\nRegistration status: ASSIGNING\r\n");
-    }
 }
 
 static void register_device_callback(PROV_DEVICE_RESULT register_result, const char* iothub_uri, const char* device_id, void* user_context)
@@ -83,83 +89,74 @@ int main()
     //hsm_type = SECURE_DEVICE_TYPE_TPM;
     hsm_type = SECURE_DEVICE_TYPE_X509;
 
-    if (platform_init() != 0)
+    (void)platform_init();
+    (void)prov_dev_security_init(hsm_type);
+    
+    HTTP_PROXY_OPTIONS http_proxy;
+    PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION prov_transport;
+
+    memset(&http_proxy, 0, sizeof(HTTP_PROXY_OPTIONS));
+
+    // Protocol to USE - HTTP, AMQP, AMQP_WS, MQTT, MQTT_WS
+#ifdef SAMPLE_MQTT
+    prov_transport = Prov_Device_MQTT_Protocol;
+#endif // SAMPLE_MQTT
+#ifdef SAMPLE_MQTT_OVER_WEBSOCKETS
+    prov_transport = Prov_Device_MQTT_WS_Protocol;
+#endif // SAMPLE_MQTT_OVER_WEBSOCKETS
+#ifdef SAMPLE_AMQP
+    prov_transport = Prov_Device_AMQP_Protocol;
+#endif // SAMPLE_AMQP
+#ifdef SAMPLE_AMQP_OVER_WEBSOCKETS
+    prov_transport = Prov_Device_AMQP_WS_Protocol;
+#endif // SAMPLE_AMQP_OVER_WEBSOCKETS
+#ifdef SAMPLE_HTTP
+    prov_transport = Prov_Device_HTTP_Protocol;
+#endif // SAMPLE_HTTP
+
+    printf("Provisioning API Version: %s\r\n", Prov_Device_GetVersionString());
+
+    if (g_use_proxy)
     {
-        (void)printf("platform_init failed\r\n");
-        result = __LINE__;
+        http_proxy.host_address = PROXY_ADDRESS;
+        http_proxy.port = PROXY_PORT;
     }
-    else if (prov_dev_security_init(hsm_type) != 0)
+
+    PROV_DEVICE_RESULT prov_device_result = PROV_DEVICE_RESULT_ERROR;
+    PROV_DEVICE_HANDLE prov_device_handle;
+    if ((prov_device_handle = Prov_Device_Create(global_prov_uri, id_scope, prov_transport)) == NULL)
     {
-        (void)printf("prov_dev_security_init failed\r\n");
+        (void)printf("failed calling Prov_Device_Create\r\n");
         result = __LINE__;
     }
     else
     {
-        const char* trusted_cert;
-
-        HTTP_PROXY_OPTIONS http_proxy;
-        PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION prov_transport;
-
-        memset(&http_proxy, 0, sizeof(HTTP_PROXY_OPTIONS));
-
-        if (g_using_cert)
+        if (http_proxy.host_address != NULL)
         {
-            trusted_cert = certificates;
-        }
-        else
-        {
-            trusted_cert = NULL;
+            Prov_Device_SetOption(prov_device_handle, OPTION_HTTP_PROXY, &http_proxy);
         }
 
-        // Pick your transport
-        prov_transport = Prov_Device_HTTP_Protocol;
-        //prov_transport = Prov_Device_AMQP_Protocol;
-        //prov_transport = Prov_Device_AMQP_WS_Protocol;
-        //prov_transport = Prov_Device_MQTT_Protocol;
-        //prov_transport = Prov_Device_MQTT_WS_Protocol;
+        //bool traceOn = true;
+        //Prov_Device_SetOption(prov_device_handle, PROV_OPTION_LOG_TRACE, &traceOn);
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+        // Setting the Trusted Certificate.  This is only necessary on system with without
+        // built in certificate stores.
+        Prov_Device_SetOption(prov_device_handle, OPTION_TRUSTED_CERT, certificates);
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-        printf("Provisioning API Version: %s\r\n", Prov_Device_GetVersionString());
-        printf("Iothub API Version: %s\r\n", IoTHubClient_GetVersionString());
+        prov_device_result = Prov_Device_Register_Device(prov_device_handle, register_device_callback, NULL, registation_status_callback, NULL);
 
-        if (g_use_proxy)
-        {
-            http_proxy.host_address = PROXY_ADDRESS;
-            http_proxy.port = PROXY_PORT;
-        }
+        (void)printf("\r\nRegistering... Press enter key to interrupt.\r\n\r\n");
+        (void)getchar();
 
-        PROV_DEVICE_RESULT prov_device_result = PROV_DEVICE_RESULT_ERROR;
-        PROV_DEVICE_HANDLE prov_device_handle;
-        if ((prov_device_handle = Prov_Device_Create(global_prov_uri, id_scope, prov_transport)) == NULL)
-        {
-            (void)printf("failed calling Prov_Device_Create\r\n");
-            result = __LINE__;
-        }
-        else
-        {
-            Prov_Device_SetOption(prov_device_handle, "logtrace", &g_trace_on);
-            if (trusted_cert != NULL)
-            {
-                Prov_Device_SetOption(prov_device_handle, OPTION_TRUSTED_CERT, trusted_cert);
-            }
-            if (http_proxy.host_address != NULL)
-            {
-                Prov_Device_SetOption(prov_device_handle, OPTION_HTTP_PROXY, &http_proxy);
-            }
-
-            prov_device_result = Prov_Device_Register_Device(prov_device_handle, register_device_callback, NULL, registation_status_callback, NULL);
-
-            (void)printf("\r\nRegistering... Press any key to interrupt.\r\n\r\n");
-            (void)getchar();
-
-            Prov_Device_Destroy(prov_device_handle);
-        }
-        prov_dev_security_deinit();
-        platform_deinit();
-
-        result = 0;
+        Prov_Device_Destroy(prov_device_handle);
     }
+    prov_dev_security_deinit();
+    platform_deinit();
 
-    (void)printf("Press any key to exit:\r\n");
+    result = 0;
+
+    (void)printf("Press enter key to exit:\r\n");
     (void)getchar();
 
     return result;

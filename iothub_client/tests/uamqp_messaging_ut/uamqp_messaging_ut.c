@@ -69,7 +69,7 @@ static void TEST_free(void* ptr)
 
 #undef ENABLE_MOCKS
 
-#include "uamqp_messaging.h"
+#include "internal/uamqp_messaging.h"
 
 static TEST_MUTEX_HANDLE g_testByTest;
 static TEST_MUTEX_HANDLE g_dllByDll;
