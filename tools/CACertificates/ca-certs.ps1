@@ -225,7 +225,7 @@ function New-CACertsDevice([string]$deviceName, [string]$signingCertSubject=$_ro
     Write-Host ("Certificate with subject CN={0} has been output to {1}" -f $deviceName, (Join-Path (get-location).path $newDevicePemPublicFileName)) 
 }
 
-function New-CACertsEdgeDevice([string]$deviceName, [string]$signingCertSubject=($_intermediateCertSubject -f "1"))
+function New-CACertsEdgeDevice([string]$deviceName, [string]$signingCertSubject=($_rootCertSubject -f "1"))
 {
     New-CACertsDevice $deviceName $signingCertSubject $true
 }
