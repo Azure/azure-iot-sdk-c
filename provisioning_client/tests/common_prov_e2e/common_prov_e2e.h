@@ -27,6 +27,11 @@ typedef struct PROV_CLIENT_E2E_INFO_TAG
     REGISTRATION_RESULT reg_result;
 } PROV_CLIENT_E2E_INFO;
 
+static const char* const DPS_CONNECTION_STRING = "IOT_DPS_CONNECTION_STRING";
+static const char* const DPS_GLOBAL_ENDPOINT = "IOT_DPS_GLOBAL_ENDPOINT";
+static const char* const DPS_ID_SCOPE = "IOT_DPS_ID_SCOPE";
+static const char* const DPS_TPM_SIMULATOR_IP_ADDRESS = "IOT_DPS_TPM_SIMULATOR_IP_ADDRESS";
+
 extern void create_x509_enrollment_device(const char* prov_conn_string, bool use_tracing);
 extern void create_tpm_enrollment_device(const char* prov_conn_string, bool use_tracing);
 extern void remove_enrollment_device(const char* prov_conn_string);

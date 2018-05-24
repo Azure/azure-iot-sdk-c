@@ -27,7 +27,7 @@ set(iothub_client_h_files
     ./inc/iothub_client_core.h
     ./inc/iothub_client_core_ll.h
     ./inc/iothub_client.h
-    ./inc/internal/iothub_client_common.h
+    ./inc/iothub_client_core_common.h
     ./inc/iothub_client_ll.h
     ./inc/internal/iothub_client_diagnostic.h
     ./inc/iothub_client_options.h

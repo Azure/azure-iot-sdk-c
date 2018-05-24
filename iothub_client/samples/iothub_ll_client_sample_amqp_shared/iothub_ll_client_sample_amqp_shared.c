@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <time.h>
 #include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/threadapi.h"
@@ -13,6 +13,7 @@
 #include "iothub_message.h"
 #include "iothubtransportamqp.h"
 #include "iothub_client_options.h"
+#include "iothub_transport_ll.h"
 
 #ifdef MBED_BUILD_TIMESTAMP
 #define SET_TRUSTED_CERT_IN_SAMPLES

@@ -17,9 +17,9 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include "internal/iothubtransport.h"
-#include "iothub_client_core_ll.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
+
+#include "iothub_client_core_ll.h"
 
 #ifndef IOTHUB_CLIENT_CORE_INSTANCE_TYPE
 typedef struct IOTHUB_CLIENT_CORE_INSTANCE_TAG* IOTHUB_CLIENT_CORE_HANDLE;

@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#include <stdlib.h>
 #include <stdbool.h>
 #include "testrunnerswitcher.h"
 
@@ -68,14 +69,14 @@ BEGIN_TEST_SUITE(prov_x509_client_e2e)
         platform_init();
         prov_dev_security_init(SECURE_DEVICE_TYPE_X509);
 
-        g_prov_conn_string = getenv("DPS_C_CONNECTION_STRING");
-        ASSERT_IS_NOT_NULL_WITH_MSG(g_prov_conn_string, "PROV_CONNECTION_STRING is NULL");
+        g_prov_conn_string = getenv(DPS_CONNECTION_STRING);
+        ASSERT_IS_NOT_NULL_WITH_MSG(g_prov_conn_string, "DPS_CONNECTION_STRING is NULL");
 
-        g_dps_uri = "global.azure-devices-provisioning.net"; // genenv(DPS_GLOBAL_URI);
-        ASSERT_IS_NOT_NULL_WITH_MSG(g_prov_conn_string, "DPS_GLOBAL_URI is NULL");
+        g_dps_uri = getenv(DPS_GLOBAL_ENDPOINT);
+        ASSERT_IS_NOT_NULL_WITH_MSG(g_prov_conn_string, "DPS_GLOBAL_ENDPOINT is NULL");
 
-        g_dps_scope_id = getenv("DPS_C_SCOPE_ID_VALUE");
-        ASSERT_IS_NOT_NULL_WITH_MSG(g_dps_scope_id, "DPS_SCOPE_ID_VALUE is NULL");
+        g_dps_scope_id = getenv(DPS_ID_SCOPE);
+        ASSERT_IS_NOT_NULL_WITH_MSG(g_dps_scope_id, "DPS_ID_SCOPE is NULL");
 
         // Register device
         create_x509_enrollment_device(g_prov_conn_string, g_enable_tracing);

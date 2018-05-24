@@ -4,7 +4,6 @@
 #ifndef IOTHUBTRANSPORTMQTT_WEBSOCKETS_H
 #define IOTHUBTRANSPORTMQTT_WEBSOCKETS_H
 
-#include "internal/iothub_client_private.h"
 #include "iothub_transport_ll.h"
 
 #ifdef __cplusplus

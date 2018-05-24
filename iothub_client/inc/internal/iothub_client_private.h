@@ -4,6 +4,7 @@
 #ifndef IOTHUB_CLIENT_PRIVATE_H
 #define IOTHUB_CLIENT_PRIVATE_H
 
+#include <stdbool.h>
 #include <signal.h>
 
 #include "azure_c_shared_utility/constbuffer.h"
@@ -16,6 +17,7 @@
 #include "iothub_message.h"
 #include "iothub_client_core_ll.h"
 #include "internal/iothub_transport_ll_private.h"
+#include "internal/iothubtransport.h"
 
 #ifdef __cplusplus
 extern "C"
