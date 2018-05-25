@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+// There is an analogous sample using the iothub_client and parson (a json-parsing library): iothub_client_device_twin_and_methods_sample  
+// Most applications should use that sample, not the serializer.
+
 #include <stdio.h>
 #include <inttypes.h>
 
