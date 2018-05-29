@@ -21,6 +21,7 @@
 #include "azure_c_shared_utility/tlsio.h"
 #include "azure_c_shared_utility/platform.h"
 
+#include "azure_c_shared_utility/option_store.h"
 #include "azure_c_shared_utility/string_tokenizer.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/urlencode.h"
@@ -210,6 +211,9 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     char* http_proxy_username;
     char* http_proxy_password;
     bool isProductInfoSet;
+
+    // TODO: protoype code here
+    OPTION_STORE transport_option_store;
 } MQTTTRANSPORT_HANDLE_DATA, *PMQTTTRANSPORT_HANDLE_DATA;
 
 typedef struct MQTT_DEVICE_TWIN_ITEM_TAG
@@ -284,6 +288,8 @@ static void free_transport_handle_data(MQTTTRANSPORT_HANDLE_DATA* transport_data
     set_saved_tls_options(transport_data, NULL);
 
     tickcounter_destroy(transport_data->msgTickCounter);
+
+    option_store_safe_invoke_delete(&transport_data->transport_option_store);
     
     free_proxy_data(transport_data);
 
@@ -1718,7 +1724,9 @@ static int GetTransportProviderIfNecessary(PMQTTTRANSPORT_HANDLE_DATA transport_
         mqtt_proxy_options.password = transport_data->http_proxy_password;
 
         /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_010: [ If the `proxy_data` option has been set, the proxy options shall be filled in the argument `mqtt_transport_proxy_options` when calling the function `get_io_transport` passed in `IoTHubTransport_MQTT_Common__Create` to obtain the underlying IO handle. ]*/
-        transport_data->xioTransport = transport_data->get_io_transport(hostAddress, (transport_data->http_proxy_hostname == NULL) ? NULL : &mqtt_proxy_options);
+        transport_data->xioTransport = transport_data->get_io_transport(hostAddress, 
+            (transport_data->http_proxy_hostname == NULL) ? NULL : &mqtt_proxy_options,
+            &transport_data->transport_option_store);
         if (transport_data->xioTransport == NULL)
         {
             LogError("Unable to create the lower level TLS layer.");

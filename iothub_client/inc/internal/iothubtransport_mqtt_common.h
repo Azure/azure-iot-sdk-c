@@ -6,6 +6,7 @@
 
 #include "internal/iothub_transport_ll_private.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
+#include "azure_c_shared_utility/option_store.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -20,7 +21,7 @@ typedef struct MQTT_TRANSPORT_PROXY_OPTIONS_TAG
     const char* password;
 } MQTT_TRANSPORT_PROXY_OPTIONS;
 
-typedef XIO_HANDLE(*MQTT_GET_IO_TRANSPORT)(const char* fully_qualified_name, const MQTT_TRANSPORT_PROXY_OPTIONS* mqtt_transport_proxy_options);
+typedef XIO_HANDLE(*MQTT_GET_IO_TRANSPORT)(const char* fully_qualified_name, const MQTT_TRANSPORT_PROXY_OPTIONS* mqtt_transport_proxy_options, OPTION_STORE* transport_option_store);
 
 MOCKABLE_FUNCTION(, TRANSPORT_LL_HANDLE, IoTHubTransport_MQTT_Common_Create, const IOTHUBTRANSPORT_CONFIG*,  config, MQTT_GET_IO_TRANSPORT, get_io_transport);
 MOCKABLE_FUNCTION(, void, IoTHubTransport_MQTT_Common_Destroy, TRANSPORT_LL_HANDLE, handle);

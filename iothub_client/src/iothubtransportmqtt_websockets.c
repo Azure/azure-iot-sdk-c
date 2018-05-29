@@ -10,7 +10,8 @@
 #include "iothubtransportmqtt_websockets.h"
 #include "internal/iothubtransport_mqtt_common.h"
 
-static XIO_HANDLE getWebSocketsIOTransport(const char* fully_qualified_name, const MQTT_TRANSPORT_PROXY_OPTIONS* mqtt_transport_proxy_options)
+static XIO_HANDLE getWebSocketsIOTransport(const char* fully_qualified_name, 
+    const MQTT_TRANSPORT_PROXY_OPTIONS* mqtt_transport_proxy_options, OPTION_STORE* transport_option_store)
 {
     XIO_HANDLE result;
     /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_001: [ `getIoTransportProvider` shall obtain the WebSocket IO interface handle by calling `wsio_get_interface_description`. ]*/
@@ -55,6 +56,8 @@ static XIO_HANDLE getWebSocketsIOTransport(const char* fully_qualified_name, con
             tls_io_config.hostname = fully_qualified_name;
             /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_012: [ - `port` shall be set to 443. ]*/
             tls_io_config.port = 443;
+            // TODO: prototype code here
+            tls_io_config.option_store = transport_option_store;
 
             if (mqtt_transport_proxy_options != NULL)
             {

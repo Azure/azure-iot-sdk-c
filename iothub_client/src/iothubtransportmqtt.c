@@ -8,8 +8,11 @@
 #include "azure_c_shared_utility/platform.h"
 #include "internal/iothubtransport_mqtt_common.h"
 #include "azure_c_shared_utility/xlogging.h"
+#include "azure_c_shared_utility/option_store.h"
 
-static XIO_HANDLE getIoTransportProvider(const char* fully_qualified_name, const MQTT_TRANSPORT_PROXY_OPTIONS* mqtt_transport_proxy_options)
+static XIO_HANDLE getIoTransportProvider(const char* fully_qualified_name, 
+    const MQTT_TRANSPORT_PROXY_OPTIONS* mqtt_transport_proxy_options,
+    OPTION_STORE* transport_option_store)
 {
     XIO_HANDLE result;
 
@@ -36,6 +39,8 @@ static XIO_HANDLE getIoTransportProvider(const char* fully_qualified_name, const
         tls_io_config.underlying_io_interface = NULL;
         /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_01_006: [ - `underlying_io_parameters` shall be set to NULL. ]*/
         tls_io_config.underlying_io_parameters = NULL;
+        // TODO: prototype code here
+        tls_io_config.option_store = transport_option_store;
 
         /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_012: [ `getIoTransportProvider` shall return the `XIO_HANDLE` returned by `xio_create`. ] */
         result = xio_create(io_interface_description, &tls_io_config);
