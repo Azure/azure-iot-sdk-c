@@ -44,7 +44,7 @@ and removing calls to _DoWork will yield the same results. */
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 /* Paste in the your iothub connection string  */
-static const char* connectionString = "";
+static const char* connectionString = "[device connection string]";
 #define MESSAGE_COUNT        5
 static bool g_continueRunning = true;
 static size_t g_message_count_send_confirmations = 0;
@@ -106,8 +106,8 @@ int main(void)
     //Setting the auto URL Encoder (recommended for MQTT). Please use this option unless
     //you are URL Encoding inputs yourself.
     //ONLY valid for use with MQTT
-    bool urlEncodeOn = true;
-    IoTHubClient_LL_SetOption(iothub_ll_handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
+    //bool urlEncodeOn = true;
+    //IoTHubClient_LL_SetOption(iothub_ll_handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
 #endif
 
     do
