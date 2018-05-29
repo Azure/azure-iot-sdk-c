@@ -1736,7 +1736,9 @@ static int GetTransportProviderIfNecessary(PMQTTTRANSPORT_HANDLE_DATA transport_
         {
             if (transport_data->saved_tls_options != NULL)
             {
-                if (OptionHandler_FeedOptions(transport_data->saved_tls_options, transport_data->xioTransport) != OPTIONHANDLER_OK)
+                //if (OptionHandler_FeedOptions(transport_data->saved_tls_options, transport_data->xioTransport) != OPTIONHANDLER_OK)
+                // TODO: prototype code here (remove the retrieve/set options stuff
+                if (false)
                 {
                     LogError("Failed feeding existing options to new TLS instance.");
                     result = __FAILURE__;
