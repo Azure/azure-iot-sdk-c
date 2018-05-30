@@ -214,6 +214,9 @@ static const char* TEST_INPUT_NAME = "TestInputName";
 static const char* TEST_INPUT_NAME2 = "TestInputName2";
 static const char* TEST_INPUT_NAME3 = "TestInputName3";
 static const char* TEST_INPUT_NAME_NOTFOUND = "TestInputNameNotFound";
+static const char* TEST_MODULE_ID = "TestModuleId";
+
+static const char* TEST_CERTIFICATE = "TestCertificateData";
 
 static SINGLYLINKEDLIST_HANDLE test_singlylinkedlist_handle = (SINGLYLINKEDLIST_HANDLE)0x4243;
 static LIST_ITEM_HANDLE find_item_handle = (LIST_ITEM_HANDLE)0x4244;
@@ -285,6 +288,12 @@ static IOTHUB_AUTHORIZATION_HANDLE my_IoTHubClient_Auth_Create(const char* devic
     (void)sas_token;
     (void)module_id;
     return (IOTHUB_AUTHORIZATION_HANDLE)my_gballoc_malloc(1);
+}
+
+static char* my_IoTHubClient_Auth_Get_TrustBundle(IOTHUB_AUTHORIZATION_HANDLE handle)
+{
+    (void)handle;
+    return (char*)my_gballoc_malloc(1);
 }
 
 static void my_IoTHubClient_Auth_Destroy(IOTHUB_AUTHORIZATION_HANDLE handle)
@@ -793,6 +802,11 @@ TEST_SUITE_INITIALIZE(suite_init)
 
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_Auth_Create, my_IoTHubClient_Auth_Create);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_Auth_Create, NULL);
+
+#ifdef USE_EDGE_MODULES
+    REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_Auth_Get_TrustBundle, my_IoTHubClient_Auth_Get_TrustBundle);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_Auth_Get_TrustBundle, NULL);
+#endif
 
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_Auth_Destroy, my_IoTHubClient_Auth_Destroy);
 
@@ -6260,6 +6274,103 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallbackEx_with_NULL_inputName_
     //cleanup
     IoTHubClientCore_LL_Destroy(handle);
 }
+
+
+#ifdef USE_EDGE_MODULES
+static void set_expected_calls_for_IoTHubClientCore_LL_CreateFromEnvironment()
+{
+    setup_IoTHubClientCore_LL_create_mocks(true);
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_TrustBundle(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SetOption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+#ifndef DONT_USE_UPLOADTOBLOB
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_SetOption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+#endif
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+}
+
+
+TEST_FUNCTION(IoTHubClientCore_LL_CreateFromEnvironment_suceeds)
+{
+    //arrange
+    set_expected_calls_for_IoTHubClientCore_LL_CreateFromEnvironment();
+
+    //act
+    IOTHUB_CLIENT_CORE_LL_HANDLE result = IoTHubClientCore_LL_CreateFromEnvironment(&TEST_CONFIG, TEST_MODULE_ID);
+
+    ///assert
+    ASSERT_ARE_NOT_EQUAL(void_ptr, NULL, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubClientCore_LL_Destroy(result);
+}
+
+
+TEST_FUNCTION(IoTHubClientCore_LL_CreateFromEnvironment_config_NULL_fails)
+{
+    //act
+    IOTHUB_CLIENT_CORE_LL_HANDLE result = IoTHubClientCore_LL_CreateFromEnvironment(NULL, TEST_MODULE_ID);
+
+    ///assert
+    ASSERT_IS_NULL(result);
+}
+
+TEST_FUNCTION(IoTHubClientCore_LL_CreateFromEnvironment_module_id_NULL_fails)
+{
+    //act
+    IOTHUB_CLIENT_CORE_LL_HANDLE result = IoTHubClientCore_LL_CreateFromEnvironment(&TEST_CONFIG, NULL);
+
+    ///assert
+    ASSERT_IS_NULL(result);
+}
+
+TEST_FUNCTION(IoTHubClientCore_LL_CreateFromEnvironment_fails)
+{
+    int negativeTestsInitResult = umock_c_negative_tests_init();
+    ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
+
+    umock_c_reset_all_calls();
+
+    set_expected_calls_for_IoTHubClientCore_LL_CreateFromEnvironment();
+
+    umock_c_negative_tests_snapshot();
+
+    // act
+    size_t calls_cannot_fail[] = { 
+        1, // STRING_c_str
+        2, // STRING_delete
+        8, // DList_InitializeListHead
+        9, // DList_InitializeListHead
+        10, // DList_InitializeListHead
+        15, // IoTHubClient_LL_UploadToBlob_SetOption
+        16, // gballoc_free
+    };
+    size_t count = umock_c_negative_tests_call_count();
+    for (size_t index = 0; index < count; index++)
+    {
+        if (should_skip_index(index, calls_cannot_fail, sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0])) != 0)
+        {
+            continue;
+        }
+
+        umock_c_negative_tests_reset();
+        umock_c_negative_tests_fail_call(index);
+
+        char tmp_msg[128];
+        sprintf(tmp_msg, "IoTHubClientCore_LL_Create failure in test %zu/%zu", index, count);
+
+        IOTHUB_CLIENT_CORE_LL_HANDLE result = IoTHubClientCore_LL_CreateFromEnvironment(&TEST_CONFIG, TEST_MODULE_ID);
+
+        //assert
+        ASSERT_ARE_EQUAL_WITH_MSG(void_ptr, NULL, result, tmp_msg);
+    }
+
+    // cleanup
+    umock_c_negative_tests_deinit();
+}
+
+#endif
+
 
 
 END_TEST_SUITE(iothubclientcore_ll_ut)
