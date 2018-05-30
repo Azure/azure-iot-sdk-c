@@ -43,7 +43,7 @@ However there are companion functions to each of these APIs:
 * IoTHubClient\_LL\_SetMessageCallback
 * IoTHubClient\_LL\_Destroy
 
-These functions all include “LL” in the API name. Other than that, the parameters of each of these functions are identical to their non-LL counterparts. However, the behavior of these functions is different in one important way.
+These functions all include “LL” in the API name. Other than that, the parameters of each of these functions are almost identical to their non-LL counterparts.  LL APIs take a handle of type IOTHUB_CLIENT_LL_HANDLE instead of IOTHUB_CLIENT_HANDLE. However, the behavior of these functions is different in one important way.
 
 When you call **IoTHubClient\_CreateFromConnectionString**, the underlying libraries create a new thread that runs in the background. This thread sends events to, and receives messages from, IoT Hub. No such thread is created when working with the "LL" APIs. The creation of the background thread is a convenience to the developer. You don’t have to worry about explicitly sending events and receiving messages from IoT Hub -- it happens automatically in the background. In contrast, the "LL" APIs give you explicit control over communication with IoT Hub, if you need it.
 
