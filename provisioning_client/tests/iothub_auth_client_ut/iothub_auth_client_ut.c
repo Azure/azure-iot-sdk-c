@@ -46,6 +46,7 @@ MOCKABLE_FUNCTION(, int, hsm_client_import_key, HSM_CLIENT_HANDLE, handle, const
 MOCKABLE_FUNCTION(, int, hsm_client_get_ek, HSM_CLIENT_HANDLE, handle, unsigned char**, key, size_t*, key_len);
 MOCKABLE_FUNCTION(, int, hsm_client_get_srk, HSM_CLIENT_HANDLE, handle, unsigned char**, key, size_t*, key_len);
 MOCKABLE_FUNCTION(, int, hsm_client_sign_data, HSM_CLIENT_HANDLE, handle, const unsigned char*, data, size_t, data_len, unsigned char**, key, size_t*, key_len);
+MOCKABLE_FUNCTION(, char*, hsm_client_get_trust_bundle, HSM_CLIENT_HANDLE, handle);
 MOCKABLE_FUNCTION(, char*, hsm_client_get_certificate, HSM_CLIENT_HANDLE, handle);
 MOCKABLE_FUNCTION(, char*, hsm_client_get_alias_key, HSM_CLIENT_HANDLE, handle);
 MOCKABLE_FUNCTION(, char*, hsm_client_get_common_name, HSM_CLIENT_HANDLE, handle);
@@ -143,7 +144,8 @@ static const HSM_CLIENT_HTTP_EDGE_INTERFACE test_http_edge_interface =
 {
     hsm_client_create,
     hsm_client_destroy,
-    hsm_client_sign_data
+    hsm_client_sign_data,
+    hsm_client_get_trust_bundle
 };
 #endif
 
@@ -195,6 +197,13 @@ static int my_hsm_client_sign_data(HSM_CLIENT_HANDLE handle, const unsigned char
     *key_len = 1;
     return 0;
 }
+
+static char* my_hsm_client_get_trust_bundle(HSM_CLIENT_HANDLE handle)
+{
+    (void)handle;
+    return (char*)my_gballoc_malloc(1);
+}
+
 
 static int my_mallocAndStrcpy_s(char** destination, const char* source)
 {
@@ -287,6 +296,8 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(hsm_client_sign_data, __LINE__);
         REGISTER_GLOBAL_MOCK_HOOK(hsm_client_get_certificate, my_hsm_client_get_certificate);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(hsm_client_get_certificate, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(hsm_client_get_trust_bundle, my_hsm_client_get_trust_bundle);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(hsm_client_get_trust_bundle, NULL);
 
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
@@ -886,8 +897,51 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         iothub_device_auth_destroy(xda_handle);
         umock_c_negative_tests_deinit();
     }   
+
+TEST_FUNCTION(IoTHubClient_Auth_Get_TrustedBundle_succeed)
+{
+    //arrange
+    set_expected_calls_for_device_auth_create_http_edge();
+    IOTHUB_SECURITY_HANDLE xda_handle = iothub_device_auth_create();
+    umock_c_reset_all_calls();
+    
+    STRICT_EXPECTED_CALL(hsm_client_get_trust_bundle(IGNORED_PTR_ARG));
+        
+    //act
+    char* result = iothub_device_auth_get_trust_bundle(xda_handle);
+    
+    //assert
+    ASSERT_IS_NOT_NULL(result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    
+    //cleanup
+    my_gballoc_free(result);
+    iothub_device_auth_destroy(xda_handle);
+}
+
+
+// IoTHubClient_Auth_Get_TrustBundle only supports Edge based auth.  Verify that others fail.
+TEST_FUNCTION(IoTHubClient_Auth_Get_TrustedBundle_unsupported_authtype_fail)
+{
+    //arrange
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(iothub_security_type()).SetReturn(IOTHUB_SECURITY_TYPE_X509);
+    STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface);
+    STRICT_EXPECTED_CALL(hsm_client_create());
+    
+    IOTHUB_SECURITY_HANDLE xda_handle = iothub_device_auth_create();
+    umock_c_reset_all_calls();
+
+    //act
+    char* result = iothub_device_auth_get_trust_bundle(xda_handle);
+
+    //assert
+    ASSERT_IS_NULL(result);
+
+    //cleanup
+    iothub_device_auth_destroy(xda_handle);
+}
+
 #endif
-
-
 
     END_TEST_SUITE(iothub_auth_client_ut)

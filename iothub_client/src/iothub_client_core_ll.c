@@ -13,6 +13,7 @@
 #include "azure_c_shared_utility/constbuffer.h"
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/singlylinkedlist.h" 
+#include "azure_c_shared_utility/shared_util_options.h"
 
 #include "iothub_client_core_ll.h"
 #include "internal/iothub_client_authorization.h"
@@ -989,7 +990,36 @@ IOTHUB_CLIENT_CORE_LL_HANDLE IoTHubClientCore_LL_Create(const IOTHUB_CLIENT_CONF
 #ifdef USE_EDGE_MODULES
 IOTHUB_CLIENT_CORE_LL_HANDLE IoTHubClientCore_LL_CreateFromEnvironment(const IOTHUB_CLIENT_CONFIG* config, const char* module_id)
 {
-    return IoTHubClientCore_LL_CreateImpl(config, module_id, true);
+    IOTHUB_CLIENT_CORE_LL_HANDLE result;
+
+    if (module_id == NULL)
+    {
+        LogError("module_id cannot be NULL");
+        result = NULL;
+    }
+    else if ((result = IoTHubClientCore_LL_CreateImpl(config, module_id, true)) != NULL)
+    {
+        // Because the Edge Hub almost always use self-signed certificates, we need
+        // to query it for the the certificate its using so we can trust it.
+        char* trustedCertificate = IoTHubClient_Auth_Get_TrustBundle(result->authorization_module);
+        IOTHUB_CLIENT_RESULT setTrustResult;
+
+        if (trustedCertificate == NULL)
+        {
+            LogError("IoTHubClient_Auth_Get_TrustBundle failed");
+            IoTHubClientCore_LL_Destroy(result);
+            result = NULL;
+        }
+        else if ((setTrustResult = IoTHubClientCore_LL_SetOption(result, OPTION_TRUSTED_CERT, trustedCertificate)) != IOTHUB_CLIENT_OK) 
+        {
+            LogError("IoTHubClientCore_LL_SetOption failed, err = %d", setTrustResult);
+            IoTHubClientCore_LL_Destroy(result);
+            result = NULL;
+        }
+
+        free(trustedCertificate);
+    }
+    return result;
 }
 #endif
 

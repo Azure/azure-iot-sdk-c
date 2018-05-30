@@ -19,7 +19,7 @@ pushd $build_folder
 
 export DYLD_LIBRARY_PATH="/usr/local/Cellar/curl/7.58.0/lib:$DYLD_LIBRARY_PATH"
 
-cmake .. -Drun_unittests:bool=ON -Drun_e2e_tests=ON -Drun_sfc_tests=ON -G Xcode
+cmake .. -Drun_unittests:bool=ON -Drun_e2e_tests=ON -G Xcode
 cmake --build . -- --jobs=$CORES
 ctest -j $TEST_JOB_COUNT -C "debug" -V
 popd

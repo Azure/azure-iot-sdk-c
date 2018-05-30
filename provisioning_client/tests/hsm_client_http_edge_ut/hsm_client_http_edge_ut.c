@@ -96,6 +96,8 @@ MOCKABLE_FUNCTION(, JSON_Status, json_object_set_string, JSON_Object*, object, c
 MOCKABLE_FUNCTION(, JSON_Status, json_object_clear, JSON_Object*, object);
 MOCKABLE_FUNCTION(, JSON_Value*, json_value_init_object);
 MOCKABLE_FUNCTION(, JSON_Object*, json_value_get_object, const JSON_Value *, value);
+MOCKABLE_FUNCTION(, void, json_value_free, JSON_Value*, value);
+
 
 #undef ENABLE_MOCKS
 
@@ -165,7 +167,7 @@ static void my_STRING_delete(STRING_HANDLE h)
 }
 
 
-HSM_HTTP_EDGE_SIGNING_CONTEXT* edge_signing_context;
+HSM_HTTP_WORKLOAD_CONTEXT* workload_context;
 static int g_uhttp_client_dowork_call_count;
 static ON_HTTP_OPEN_COMPLETE_CALLBACK g_on_http_open;
 static void* g_http_open_ctx;
@@ -178,10 +180,10 @@ static HTTP_CLIENT_HANDLE my_uhttp_client_create(const IO_INTERFACE_DESCRIPTION*
     (void)io_interface_desc;
     (void)xio_param;
     (void)on_http_error;
-    edge_signing_context = (HSM_HTTP_EDGE_SIGNING_CONTEXT*)callback_ctx;
+    workload_context = (HSM_HTTP_WORKLOAD_CONTEXT*)callback_ctx;
 
-    ASSERT_ARE_EQUAL_WITH_MSG(bool, edge_signing_context->continue_running, true, "Signing context not in running mode");
-    ASSERT_IS_NULL_WITH_MSG(edge_signing_context->http_response, "HTTP response not NULL during initialization");
+    ASSERT_ARE_EQUAL_WITH_MSG(bool, workload_context->continue_running, true, "Signing context not in running mode");
+    ASSERT_IS_NULL_WITH_MSG(workload_context->http_response, "HTTP response not NULL during initialization");
 
     return (HTTP_CLIENT_HANDLE)my_gballoc_malloc(1);
 }
@@ -528,11 +530,11 @@ static void set_expected_calls_construct_json_signing_blob()
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_NUM_ARG));
 }
 
-static void set_expected_calls_send_and_poll_http_signing_request()
+static void set_expected_calls_send_and_poll_http_signing_request(bool post_data)
 {
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_NUM_ARG)).SetReturn(post_data ? (unsigned char*)TEST_STRING_1 : NULL);
     STRICT_EXPECTED_CALL(get_time(IGNORED_NUM_ARG)).SetReturn(TEST_TIME_T);
-    STRICT_EXPECTED_CALL(uhttp_client_execute_request(IGNORED_PTR_ARG, HTTP_CLIENT_REQUEST_POST, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(uhttp_client_execute_request(IGNORED_PTR_ARG, post_data ? HTTP_CLIENT_REQUEST_POST : HTTP_CLIENT_REQUEST_GET, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(uhttp_client_dowork(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(get_time(IGNORED_NUM_ARG)).SetReturn(timed_out ? TEST_TIME_FOR_TIMEOUT_T : TEST_TIME_T);
     STRICT_EXPECTED_CALL(uhttp_client_dowork(IGNORED_NUM_ARG));
@@ -540,18 +542,19 @@ static void set_expected_calls_send_and_poll_http_signing_request()
     STRICT_EXPECTED_CALL(get_time(IGNORED_NUM_ARG)).SetReturn(TEST_TIME_T);
 }
 
-static void set_expected_calls_send_http_signing_request(bool expect_success)
+static void set_expected_calls_send_http_workload_request(bool expect_success, bool post_data)
 {
     STRICT_EXPECTED_CALL(socketio_get_interface_description());
     STRICT_EXPECTED_CALL(uhttp_client_create(IGNORED_NUM_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(uhttp_client_open(IGNORED_NUM_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_NUM_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    set_expected_calls_send_and_poll_http_signing_request();
+    if (post_data)
+    {
+        STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_NUM_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG));
+    }
+    set_expected_calls_send_and_poll_http_signing_request(post_data);
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(uhttp_client_destroy(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_NUM_ARG));
 
     if (expect_success == false)
     {
@@ -559,7 +562,7 @@ static void set_expected_calls_send_http_signing_request(bool expect_success)
     }
 }
 
-static void set_expected_calls_parse_json_signing_response()
+static void set_expected_calls_parse_json_workload_response()
 {
     STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(json_parse_string(IGNORED_NUM_ARG));
@@ -567,15 +570,18 @@ static void set_expected_calls_parse_json_signing_response()
     STRICT_EXPECTED_CALL(json_object_dotget_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG));
 }
 
 static void set_expected_calls_hsm_client_http_edge_sign_data()
 {
     set_expected_calls_construct_json_signing_blob();
-    set_expected_calls_send_http_signing_request(true);
-    set_expected_calls_parse_json_signing_response();
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_1);
+    set_expected_calls_send_http_workload_request(true, true);
+    set_expected_calls_parse_json_workload_response();
     STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_NUM_ARG));
 }
 
 TEST_FUNCTION(hsm_client_http_edge_sign_data_succeed)
@@ -678,8 +684,8 @@ TEST_FUNCTION(hsm_client_http_edge_sign_data_http_fail)
         16, // STRING_delete
         17, // STRING_delete
         18, // STRING_delete
-        19, // socketio_get_interface_description
-        24, // STRING_c_str
+        19, // STRING_c_str
+        20, // socketio_get_interface_description
         25, // BUFFER_u_char
         26, // get_time
         28, // uhttp_client_dowork
@@ -688,10 +694,11 @@ TEST_FUNCTION(hsm_client_http_edge_sign_data_http_fail)
         32, // get_time
         33, // HTTPHeaders_Free
         34, // uhttp_client_destroy
-        35, // STRING_delete
-        41, // json_object_clear
+        40, // json_object_clear
+        41, // json_value_free
         42, // BUFFER_delete
-        43 // BUFFER_delete
+        43, // BUFFER_delete
+        44 // STRING_delete
     };
 
     // act
@@ -707,7 +714,7 @@ TEST_FUNCTION(hsm_client_http_edge_sign_data_http_fail)
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
         
-        char tmp_msg[64];
+        char tmp_msg[128];
         sprintf(tmp_msg, "hsm_client_http_edge_sign_data failure in test %zu/%zu", index, count);
         int result = hsm_client_http_edge_sign_data(sec_handle, TEST_SIGNING_DATA, TEST_SIGNING_DATA_LENGTH, &signed_value, &signed_len);
         ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, result, 0, tmp_msg);
@@ -719,6 +726,112 @@ TEST_FUNCTION(hsm_client_http_edge_sign_data_http_fail)
     umock_c_negative_tests_deinit();
 }
 
+
+static void set_expected_calls_hsm_client_http_edge_get_trust_bundle()
+{
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_1);
+    set_expected_calls_send_http_workload_request(true, false);
+    set_expected_calls_parse_json_workload_response();
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_NUM_ARG));
+}
+
+TEST_FUNCTION(hsm_client_http_edge_get_trust_bundle_success)
+{
+    setup_hsm_client_http_edge_create_mock(TEST_ENV_WORKLOADURI, true);
+
+    HSM_CLIENT_HANDLE sec_handle = hsm_client_http_edge_create();
+
+    ASSERT_IS_NOT_NULL(sec_handle);
+
+    umock_c_reset_all_calls();
+
+    set_expected_calls_hsm_client_http_edge_get_trust_bundle();
+    const char* trusted_certificate = hsm_client_http_edge_get_trust_bundle(sec_handle);
+    ASSERT_IS_NOT_NULL_WITH_MSG(trusted_certificate, "hsm_client_http_edge_get_trust_bundle fails");
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    hsm_client_http_edge_destroy(sec_handle);
+    free((char*)trusted_certificate);
+}
+
+TEST_FUNCTION(hsm_client_http_edge_get_trust_bundle_NULL_sec_handle_fail)
+{
+    setup_hsm_client_http_edge_create_mock(TEST_ENV_WORKLOADURI, true);
+
+    HSM_CLIENT_HANDLE sec_handle = hsm_client_http_edge_create();
+
+    ASSERT_IS_NOT_NULL(sec_handle);
+
+    umock_c_reset_all_calls();
+
+    const char* trusted_certificate = hsm_client_http_edge_get_trust_bundle(NULL);
+    ASSERT_IS_NULL(trusted_certificate);
+
+    hsm_client_http_edge_destroy(sec_handle);
+    free((char*)trusted_certificate);
+}
+
+TEST_FUNCTION(hsm_client_http_edge_get_trust_bundle_fail)
+{
+    // arrange
+    int negativeTestsInitResult = umock_c_negative_tests_init();
+    ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
+
+    setup_hsm_client_http_edge_create_mock(TEST_ENV_WORKLOADURI, true);
+    
+    HSM_CLIENT_HANDLE sec_handle = hsm_client_http_edge_create();
+    
+    ASSERT_IS_NOT_NULL(sec_handle);
+    
+    umock_c_reset_all_calls();
+    
+    set_expected_calls_hsm_client_http_edge_get_trust_bundle();
+
+    umock_c_negative_tests_snapshot();
+
+    size_t calls_cannot_fail[] = {
+        0, // STRING_c_str
+        1, // socketio_get_interface_description
+        4, // BUFFER_u_char
+        5, // get_time
+        7, // uhttp_client_dowork
+        8, // get_time
+        9, // uhttp_client_dowork
+        11, // get_time
+        12, // HTTPHeaders_Free
+        13, // uhttp_client_destroy
+        19, // json_object_clear
+        20, // json_value_free
+        21, // BUFFER_delete
+        22 // BUFFER_delete
+    };
+
+    // act
+    size_t count = umock_c_negative_tests_call_count();
+    for (size_t index = 0; index < count; index++)
+    {
+        if (should_skip_index(index, calls_cannot_fail, sizeof(calls_cannot_fail)/sizeof(calls_cannot_fail[0])) != 0)
+        {
+            continue;
+        }
+        g_uhttp_client_dowork_call_count = 0;        
+    
+        umock_c_negative_tests_reset();
+        umock_c_negative_tests_fail_call(index);
+        
+        char tmp_msg[128];
+        sprintf(tmp_msg, "hsm_client_http_edge_get_trust_bundle failure in test %zu/%zu", index, count);
+        const char* trusted_certificate = hsm_client_http_edge_get_trust_bundle(sec_handle);
+        ASSERT_IS_NULL_WITH_MSG(trusted_certificate, tmp_msg);
+    }
+
+    // cleanup
+    
+    hsm_client_http_edge_destroy(sec_handle);    
+    umock_c_negative_tests_deinit();
+
+}
 
 
 END_TEST_SUITE(hsm_client_http_edge_ut)
