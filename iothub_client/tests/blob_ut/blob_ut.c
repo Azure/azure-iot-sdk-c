@@ -38,6 +38,10 @@ static void my_gballoc_free(void* s)
 #include "umocktypes_charptr.h"
 #include "umock_c_negative_tests.h"
 
+#define ENABLE_MOCKS
+#include "internal/iothub_client_ll_uploadtoblob.h"
+#undef ENABLE_MOCKS
+
 /*helps when enums are not matched*/
 #ifdef malloc
 #undef malloc

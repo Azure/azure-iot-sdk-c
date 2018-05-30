@@ -55,15 +55,15 @@ Next, go to Azure IoT Hub and navigate to Certificates.  Add a new certificate, 
 
 Now that you've registered your root CA with Azure IoT Hub, you'll need to prove that you actually own it.
 
-Select the new certificate that you've created and navigate to and select  "Generate Verification Code".  This will give you a string that specifies the subject name of a certificate that you need to sign.  For our example, assume IoT Hub wants you to create a certificate with subject name = "12345".
+Select the new certificate that you've created and navigate to and select  "Generate Verification Code".  This will give you a verification string you will need to place as the subject name of a certificate that you need to sign.  For our example, assume IoT Hub verification code was "106A5SD242AF512B3498BD6098C4941E66R34H268DDB3288", the certificate subject name should be that code. See below example PowerShell and Bash scripts
 
 ### **PowerShell**
-* Run  `New-CACertsVerificationCert "12345"`
+* Run  `New-CACertsVerificationCert "106A5SD242AF512B3498BD6098C4941E66R34H268DDB3288"`
 
 ### **Bash**
-* Run `./certGen.sh create_verification_certificate 12345`
+* Run `./certGen.sh create_verification_certificate 106A5SD242AF512B3498BD6098C4941E66R34H268DDB3288`
 
-In both cases, the scripts will output the name of the file containing `"CN=12345"` to the console.  Upload this file to IoT Hub (in the same UX that had the "Generate Verification Code") and select "Verify".
+In both cases, the scripts will output the name of the file containing `"CN=106A5SD242AF512B3498BD6098C4941E66R34H268DDB3288"` to the console.  Upload this file to IoT Hub (in the same UX that had the "Generate Verification Code") and select "Verify".
 
 ## Step 4 - Create a new device
 Finally, let's create an application and corresponding device on IoT Hub that shows how CA Certificates are used.

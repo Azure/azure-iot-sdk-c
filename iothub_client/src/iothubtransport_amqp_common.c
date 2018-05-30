@@ -35,6 +35,7 @@
 #include "internal/iothubtransport_amqp_common.h"
 #include "internal/iothubtransport_amqp_connection.h"
 #include "internal/iothubtransport_amqp_device.h"
+#include "internal/iothubtransport.h"
 #include "iothub_client_version.h"
 
 #define RESULT_OK                                 0

@@ -23,6 +23,9 @@
 #ifndef IOTHUB_DEVICE_CLIENT_LL_H
 #define IOTHUB_DEVICE_CLIENT_LL_H
 
+#include <stddef.h>
+#include <stdint.h>
+
 #include "azure_c_shared_utility/macro_utils.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
 
@@ -36,18 +39,6 @@ extern "C"
 
 typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HANDLE;
 
-#ifdef __cplusplus
-}
-#endif
-
-#include "azure_c_shared_utility/agenttime.h"
-#include <stddef.h>
-#include <stdint.h>
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
 
     /**
     * @brief	Creates a IoT Hub client for communication with an existing

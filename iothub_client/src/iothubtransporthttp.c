@@ -10,6 +10,7 @@
 #include "internal/iothub_client_private.h"
 #include "iothub_transport_ll.h"
 #include "iothubtransporthttp.h"
+#include "internal/iothubtransport.h"
 
 #include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/httpapiexsas.h"

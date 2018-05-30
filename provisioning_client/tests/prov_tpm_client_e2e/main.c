@@ -5,6 +5,6 @@
 int main(void)
 {
     size_t failedTestCount = 0;
-    RUN_TEST_SUITE(dps_client_e2e, failedTestCount);
+    RUN_TEST_SUITE(prov_tpm_client_e2e, failedTestCount);
     return failedTestCount;
 }

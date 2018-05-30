@@ -10,6 +10,8 @@
 #include <stdbool.h>
 #endif
 
+#include <time.h>
+
 static size_t my_malloc_count;
 static void* my_malloc_items[100];
 

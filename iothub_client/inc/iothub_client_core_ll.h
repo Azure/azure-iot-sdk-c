@@ -25,10 +25,10 @@
 
 typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_CLIENT_CORE_LL_HANDLE;
 
-#include "azure_c_shared_utility/macro_utils.h"
+#include <time.h>
 #include "azure_c_shared_utility/umock_c_prod.h"
 #include "iothub_transport_ll.h"
-#include "internal/iothub_client_common.h"
+#include "iothub_client_core_common.h"
 
 #ifdef __cplusplus
 extern "C"

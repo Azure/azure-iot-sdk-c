@@ -43,6 +43,7 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 #include "azure_c_shared_utility/sastoken.h"
 #include "azure_c_shared_utility/doublylinkedlist.h"
 #include "azure_c_shared_utility/gballoc.h"
+#include "azure_c_shared_utility/agenttime.h"
 
 #include "azure_umqtt_c/mqtt_client.h"
 

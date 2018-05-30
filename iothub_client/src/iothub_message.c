@@ -473,6 +473,53 @@ MAP_HANDLE IoTHubMessage_Properties(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
     return result;
 }
 
+IOTHUB_MESSAGE_RESULT IoTHubMessage_SetProperty(IOTHUB_MESSAGE_HANDLE msg_handle, const char* key, const char* value)
+{
+    IOTHUB_MESSAGE_RESULT result;
+    if (msg_handle == NULL || key == NULL || value == NULL)
+    {
+        LogError("invalid parameter (NULL) to IoTHubMessage_SetProperty iotHubMessageHandle=%p, key=%p, value=%p", msg_handle, key, value);
+        result = IOTHUB_MESSAGE_INVALID_ARG;
+    }
+    else
+    {
+        if (Map_AddOrUpdate(msg_handle->properties, key, value) != MAP_OK)
+        {
+            LogError("Failure adding property to internal map");
+            result = IOTHUB_MESSAGE_ERROR;
+        }
+        else
+        {
+            result = IOTHUB_MESSAGE_OK;
+        }
+    }
+    return result;
+}
+
+const char* IoTHubMessage_GetProperty(IOTHUB_MESSAGE_HANDLE msg_handle, const char* key)
+{
+    const char* result;
+    if (msg_handle == NULL || key == NULL)
+    {
+        LogError("invalid parameter (NULL) to IoTHubMessage_GetProperty iotHubMessageHandle=%p, key=%p", msg_handle, key);
+        result = NULL;
+    }
+    else
+    {
+        bool key_exists = false;
+        // The return value is not neccessary, just check the key_exist variable
+        if ((Map_ContainsKey(msg_handle->properties, key, &key_exists) == MAP_OK) && key_exists)
+        {
+            result = Map_GetValueFromKey(msg_handle->properties, key);
+        }
+        else
+        {
+            result = NULL;
+        }
+    }
+    return result;
+}
+
 const char* IoTHubMessage_GetCorrelationId(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
 {
     const char* result;

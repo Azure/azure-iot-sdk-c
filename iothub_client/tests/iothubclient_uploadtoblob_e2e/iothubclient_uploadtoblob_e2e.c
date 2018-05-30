@@ -14,6 +14,7 @@
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/platform.h"
+#include "azure_c_shared_utility/lock.h"
 #include "../../../certs/certs.h"
 #include "azure_c_shared_utility/xlogging.h"
 

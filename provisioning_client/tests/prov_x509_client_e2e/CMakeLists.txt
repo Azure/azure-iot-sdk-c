@@ -4,28 +4,28 @@
 cmake_minimum_required(VERSION 2.8.11)
 
 compileAsC11()
-set(theseTestsName dps_client_e2e)
+set(theseTestsName prov_x509_client_e2e)
 
 set(${theseTestsName}_test_files
     ${theseTestsName}.c
+    ../common_prov_e2e/common_prov_e2e.c
 )
 
 set(${theseTestsName}_c_files
     ../../../certs/certs.c
-    ${PROCESS_C_FILES}
 )
 
 set(${theseTestsName}_h_files
+    ../common_prov_e2e/common_prov_e2e.h
 )
-
-add_subdirectory(provisioning_hsm)
 
 include_directories(${IOTHUB_TEST_INC_FOLDER})
 include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})
 include_directories(${SHARED_UTIL_INC_FOLDER})
 include_directories(${PROVISIONING_SERVICE_CLIENT_INC_FOLDER})
+include_directories(../common_prov_e2e)
 
-file(COPY suppressions.supp DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ../common_prov_e2e/prov_valgrind_suppression.supp DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 build_c_test_artifacts(${theseTestsName} ON "tests/azure_prov_e2e_tests" VALGRIND_SUPPRESSIONS_FILE suppressions.supp)
 
 set(prov_transport)
@@ -72,7 +72,7 @@ else()
     endif()
 endif()
 
-target_link_libraries(${theseTestsName}_exe provisioning_hsm provisioning_service_client)
+target_link_libraries(${theseTestsName}_exe provisioning_service_client)
 
 link_security_client(${theseTestsName}_exe)
 linkSharedUtil(${theseTestsName}_exe)

@@ -92,7 +92,6 @@ pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus;                  
 pfIoTHubTransport_Subscribe_InputQueue IoTHubTransport_Subscribe_InputQueue;        \
 pfIoTHubTransport_Unsubscribe_InputQueue IoTHubTransport_Unsubscribe_InputQueue     /*there's an intentional missing ; on this line*/
 
-
     struct TRANSPORT_PROVIDER_TAG
     {
         TRANSPORT_PROVIDER_FIELDS;

@@ -80,6 +80,8 @@ static const char* TEST_CONNECTION_DEVICE_ID = "connectiondeviceid";
 static const char* TEST_CONNECTION_DEVICE_ID2 = "connectiondeviceid2";
 static const char* TEST_CONNECTION_MODULE_ID = "connectionmoduleid";
 static const char* TEST_CONNECTION_MODULE_ID2 = "connectionmoduleid2";
+static const char* TEST_PROPERTY_KEY = "property_key";
+static const char* TEST_PROPERTY_VALUE = "property_value";
 
 static IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA TEST_DIAGNOSTIC_DATA = { "12345678",  "1506054179"};
 static IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA TEST_DIAGNOSTIC_DATA2 = { "87654321", "1506054179.100" };
@@ -279,6 +281,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_UMOCK_ALIAS_TYPE(BUFFER_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(MAP_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(MAP_RESULT, int);
 
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
@@ -305,6 +308,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(Map_Destroy, my_Map_Destroy);
     REGISTER_GLOBAL_MOCK_RETURN(Map_AddOrUpdate, MAP_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(Map_AddOrUpdate, MAP_ERROR);
+    REGISTER_GLOBAL_MOCK_RETURN(Map_ContainsKey, MAP_OK);
 
     REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, my_mallocAndStrcpy_s);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, __FAILURE__);
@@ -1738,6 +1742,164 @@ TEST_FUNCTION(IoTHubMessage_SetDiagnosticPropertyData_SUCCEED)
     IoTHubMessage_Destroy(h);
 }
 
+TEST_FUNCTION(IoTHubMessage_SetProperty_handle_NULL_Fail)
+{
+    //arrange
+
+    //act
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetProperty(NULL, TEST_PROPERTY_KEY, TEST_PROPERTY_VALUE);
+
+    //assert
+    ASSERT_ARE_NOT_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+}
+
+TEST_FUNCTION(IoTHubMessage_SetProperty_key_NULL_Fail)
+{
+    //arrange
+    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetProperty(h, NULL, TEST_PROPERTY_VALUE);
+
+    //assert
+    ASSERT_ARE_NOT_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubMessage_Destroy(h);
+}
+
+TEST_FUNCTION(IoTHubMessage_SetProperty_value_NULL_Fail)
+{
+    //arrange
+    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetProperty(h, TEST_PROPERTY_KEY, NULL);
+
+    //assert
+    ASSERT_ARE_NOT_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubMessage_Destroy(h);
+}
+
+TEST_FUNCTION(IoTHubMessage_SetProperty_Fail)
+{
+    //arrange
+    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(Map_AddOrUpdate(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(MAP_ERROR);
+
+    //act
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetProperty(h, TEST_PROPERTY_KEY, TEST_PROPERTY_VALUE);
+
+    //assert
+    ASSERT_ARE_NOT_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubMessage_Destroy(h);
+}
+
+TEST_FUNCTION(IoTHubMessage_SetProperty_Succeed)
+{
+    //arrange
+    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(Map_AddOrUpdate(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+    //act
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetProperty(h, TEST_PROPERTY_KEY, TEST_PROPERTY_VALUE);
+
+    //assert
+    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubMessage_Destroy(h);
+}
+
+TEST_FUNCTION(IoTHubMessage_GetProperty_handle_NULL_Fail)
+{
+    //arrange
+
+    //act
+    const char* result = IoTHubMessage_GetProperty(NULL, TEST_PROPERTY_KEY);
+
+    //assert
+    ASSERT_IS_NULL(result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+}
+
+TEST_FUNCTION(IoTHubMessage_GetProperty_key_NULL_Fail)
+{
+    //arrange
+    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
+    umock_c_reset_all_calls();
+
+    //act
+    const char* result = IoTHubMessage_GetProperty(h, NULL);
+
+    //assert
+    ASSERT_IS_NULL(result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubMessage_Destroy(h);
+}
+
+TEST_FUNCTION(IoTHubMessage_GetProperty_Succeed)
+{
+    //arrange
+    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
+    umock_c_reset_all_calls();
+
+    bool key_exist = true;
+    STRICT_EXPECTED_CALL(Map_ContainsKey(IGNORED_PTR_ARG, TEST_PROPERTY_KEY, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_keyExists(&key_exist, sizeof(bool));
+    STRICT_EXPECTED_CALL(Map_GetValueFromKey(IGNORED_PTR_ARG, TEST_PROPERTY_KEY)).SetReturn(TEST_PROPERTY_VALUE);
+
+    //act
+    const char* result = IoTHubMessage_GetProperty(h, TEST_PROPERTY_KEY);
+
+    //assert
+    ASSERT_IS_NOT_NULL(result);
+    ASSERT_ARE_EQUAL(char_ptr, TEST_PROPERTY_VALUE, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubMessage_Destroy(h);
+}
+
+TEST_FUNCTION(IoTHubMessage_GetProperty_Fail)
+{
+    //arrange
+    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
+    umock_c_reset_all_calls();
+
+    bool key_exist = false;
+    STRICT_EXPECTED_CALL(Map_ContainsKey(IGNORED_PTR_ARG, TEST_PROPERTY_KEY, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_keyExists(&key_exist, sizeof(bool));
+
+    //act
+    const char* result = IoTHubMessage_GetProperty(h, TEST_PROPERTY_KEY);
+
+    //assert
+    ASSERT_IS_NULL(result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubMessage_Destroy(h);
+}
 
 // Tests_SRS_IOTHUBMESSAGE_31_036: [If any of the parameters are NULL then IoTHubMessage_SetOutputName shall return a IOTHUB_MESSAGE_INVALID_ARG value.]
 TEST_FUNCTION(IoTHubMessage_SetOutputName_NULL_handle_Fails)

@@ -9,8 +9,6 @@
 #ifndef IOTHUB_CLIENT_DIAGNOSTIC_H
 #define IOTHUB_CLIENT_DIAGNOSTIC_H
 
-#include "azure_c_shared_utility/macro_utils.h"
-#include "azure_c_shared_utility/map.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
 
 #include "iothub_message.h"

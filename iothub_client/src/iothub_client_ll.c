@@ -11,8 +11,21 @@
 #include "azure_c_shared_utility/tickcounter.h"
 #include "azure_c_shared_utility/constbuffer.h"
 #include "azure_c_shared_utility/platform.h"
+
+#include "iothub_client_core_ll.h"
+#include "internal/iothub_client_authorization.h"
 #include "iothub_client_ll.h"
+#include "iothub_transport_ll.h"
+#include "iothub_device_client_ll.h"
 #include "internal/iothub_client_private.h"
+#include "iothub_client_options.h"
+#include "iothub_client_version.h"
+#include "internal/iothub_client_diagnostic.h"
+#include <stdint.h>
+
+#ifndef DONT_USE_UPLOADTOBLOB
+#include "internal/iothub_client_ll_uploadtoblob.h"
+#endif
 
 IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
@@ -125,4 +138,5 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlobEx(IOTHUB_CLIENT_
     return IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, destinationFileName, getDataCallbackEx, context);
 }
 #endif
+
 

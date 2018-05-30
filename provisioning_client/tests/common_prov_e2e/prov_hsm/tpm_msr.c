@@ -3,11 +3,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-//#include <stdbool.h>
 #include <stdint.h>
-//#include <stddef.h>
 
 #include "tpm_msr.h"
+#include "azure_c_shared_utility/envvariable.h"
+#include "azure_c_shared_utility/xlogging.h"
 
 #include "azure_utpm_c/tpm_comm.h"
 #include "azure_utpm_c/tpm_codec.h"
@@ -84,7 +84,7 @@ static TPM2B_PUBLIC* GetSrkTemplate()
     TPM_RC rc = Type##_Unmarshal(pValue, &curr_pos, (INT32*)&act_size);         \
     if (rc != TPM_RC_SUCCESS)                                           \
     {                                                                   \
-        printf(#Type"_Unmarshal() for " #pValue " failed");           \
+        LogError(#Type"_Unmarshal() for " #pValue " failed");           \
     }                                                                   \
 }
 
@@ -93,16 +93,16 @@ static TPM2B_PUBLIC* GetSrkTemplate()
     TPM_RC rc = Type##_Unmarshal(pValue, &curr_pos, (INT32*)&act_size, TRUE);   \
     if (rc != TPM_RC_SUCCESS)                                           \
     {                                                                   \
-        printf(#Type"_Unmarshal() for " #pValue " failed");           \
+        LogError(#Type"_Unmarshal() for " #pValue " failed");           \
     }                                                                   \
 }
 
 #define DPS_UNMARSHAL_ARRAY(dstPtr, arrSize) \
     DPS_UNMARSHAL(UINT32, &(arrSize));                                          \
-    printf("act_size %d < actSize %d\r\n", act_size, arrSize);   \
+    LogError("act_size %d < actSize %d\r\n", act_size, arrSize);   \
     if (act_size < arrSize)                                                     \
     {                                                                           \
-        printf("Unmarshaling " #dstPtr " failed: Need %d bytes, while only %d left", arrSize, act_size);  \
+        LogError("Unmarshaling " #dstPtr " failed: Need %d bytes, while only %d left", arrSize, act_size);  \
         result = __FAILURE__;       \
     }                                                                           \
     else                            \
@@ -118,12 +118,12 @@ static int create_tpm_session(TPM_INFO* tpm_info, TSS_SESSION* tpm_session)
     TPMA_SESSION sess_attrib = { 1 };
     if (TSS_StartAuthSession(&tpm_info->tpm_device, TPM_SE_POLICY, TPM_ALG_SHA256, sess_attrib, tpm_session) != TPM_RC_SUCCESS)
     {
-        printf("Failure: Starting EK policy session");
+        LogError("Failure: Starting EK policy session");
         result = __FAILURE__;
     }
     else if (TSS_PolicySecret(&tpm_info->tpm_device, &null_pw_sess, TPM_RH_ENDORSEMENT, tpm_session, NULL, 0) != TPM_RC_SUCCESS)
     {
-        printf("Failure: PolicySecret() for EK");
+        LogError("Failure: PolicySecret() for EK");
         result = __FAILURE__;
     }
     else
@@ -139,7 +139,7 @@ static int insert_key_in_tpm(TPM_INFO* tpm_info, const unsigned char* key, size_
     TSS_SESSION ek_sess = { { TPM_RH_NULL } };
     if (create_tpm_session(tpm_info, &ek_sess) != 0)
     {
-        printf("Failure: Starting EK policy session");
+        LogError("Failure: Starting EK policy session");
         result = __FAILURE__;
     }
     else
@@ -172,12 +172,12 @@ static int insert_key_in_tpm(TPM_INFO* tpm_info, const unsigned char* key, size_
         if (TPM2_ActivateCredential(&tpm_info->tpm_device, &null_pw_sess, &ek_sess, TPM_20_SRK_HANDLE, TPM_20_EK_HANDLE,
             &enc_key_blob, &tpm_enc_secret, &inner_wrap_key) != TPM_RC_SUCCESS)
         {
-            printf("Failure: TPM2_ActivateCredential");
+            LogError("Failure: TPM2_ActivateCredential");
             result = __FAILURE__;
         }
         else if (TPM2_Import(&tpm_info->tpm_device, &null_pw_sess, TPM_20_SRK_HANDLE, (TPM2B_DATA*)&inner_wrap_key, &id_key_Public, &id_key_dup_blob, &encrypt_wrap_key, &Aes128SymDef, &id_key_priv) != TPM_RC_SUCCESS)
         {
-            printf("Failure: importing dps Id key");
+            LogError("Failure: importing dps Id key");
             result = __FAILURE__;
         }
         else
@@ -205,12 +205,12 @@ static int insert_key_in_tpm(TPM_INFO* tpm_info, const unsigned char* key, size_
 
             if (TSS_Create(&tpm_info->tpm_device, &null_pw_sess, TPM_20_SRK_HANDLE, &sen_create, &symTemplate, &sym_priv, &sym_pub) != TPM_RC_SUCCESS)
             {
-                printf("Failed to inject symmetric key data");
+                LogError("Failed to inject symmetric key data");
                 result = __FAILURE__;
             }
             else if (TPM2_Load(&tpm_info->tpm_device, &null_pw_sess, TPM_20_SRK_HANDLE, &id_key_priv, &id_key_Public, &load_id_key, NULL) != TPM_RC_SUCCESS)
             {
-                printf("Failed Load Id key.");
+                LogError("Failed Load Id key.");
                 result = __FAILURE__;
             }
             else
@@ -220,12 +220,12 @@ static int insert_key_in_tpm(TPM_INFO* tpm_info, const unsigned char* key, size_
 
                 if (TPM2_EvictControl(&tpm_info->tpm_device, &null_pw_sess, TPM_RH_OWNER, load_id_key, DPS_ID_KEY_HANDLE) != TPM_RC_SUCCESS)
                 {
-                    printf("Failed Load Id key.");
+                    LogError("Failed Load Id key.");
                     result = __FAILURE__;
                 }
                 else if (TPM2_FlushContext(&tpm_info->tpm_device, load_id_key) != TPM_RC_SUCCESS)
                 {
-                    printf("Failed Load Id key.");
+                    LogError("Failed Load Id key.");
                     result = __FAILURE__;
                 }
                 else
@@ -243,22 +243,22 @@ static int initialize_tpm(TPM_INFO* tpm_info)
     int result;
     if (TSS_CreatePwAuthSession(&null_auth_token, &null_pw_sess) != TPM_RC_SUCCESS)
     {
-        printf("Failure calling TSS_CreatePwAuthSession");
+        LogError("Failure calling TSS_CreatePwAuthSession");
         result = __FAILURE__;
     }
     else if (Initialize_TPM_Codec(&tpm_info->tpm_device) != TPM_RC_SUCCESS)
     {
-        printf("Failure initializeing TPM Codec");
+        LogError("Failure initializeing TPM Codec");
         result = __FAILURE__;
     }
     else if ((TSS_CreatePersistentKey(&tpm_info->tpm_device, TPM_20_EK_HANDLE, &null_pw_sess, TPM_RH_ENDORSEMENT, GetEkTemplate(), &tpm_info->ek_pub)) == 0)
     {
-        printf("Failure calling creating persistent key for Endorsement key");
+        LogError("Failure calling creating persistent key for Endorsement key");
         result = __FAILURE__;
     }
     else if (TSS_CreatePersistentKey(&tpm_info->tpm_device, TPM_20_SRK_HANDLE, &null_pw_sess, TPM_RH_OWNER, GetSrkTemplate(), &tpm_info->srk_pub) == 0)
     {
-        printf("Failure calling creating persistent key for Storage Root key");
+        LogError("Failure calling creating persistent key for Storage Root key");
         result = __FAILURE__;
     }
     else
@@ -274,14 +274,20 @@ TPM_INFO_HANDLE tpm_msr_create()
     result = (TPM_INFO*)malloc(sizeof(TPM_INFO));
     if (result == NULL)
     {
-        printf("Failure: malloc TPM_INFO.");
+        LogError("Failure: malloc TPM_INFO.");
     }
     else
     {
         memset(result, 0, sizeof(TPM_INFO));
-        if (initialize_tpm(result) != 0)
+
+        result->tpm_device.comms_endpoint = environment_get_variable("IOT_DPS_TPM_SIMULATOR_IP_ADDRESS");
+        if (result->tpm_device.comms_endpoint == NULL)
         {
-            printf("Failure initializing tpm device.");
+            LogError("Failure retrieving endpoint address");
+        }
+        else if (initialize_tpm(result) != 0)
+        {
+            LogError("Failure initializing tpm device.");
             free(result);
             result = NULL;
         }
@@ -304,19 +310,19 @@ int tpm_msr_get_ek(TPM_INFO_HANDLE handle, unsigned char* data_pos, size_t* key_
     int result;
     if (handle == NULL || key_len == 0)
     {
-        printf("Failure with parameter.");
+        LogError("Failure with parameter.");
         result = __LINE__;
     }
     else
     {
         if (handle->ek_pub.publicArea.unique.rsa.t.size == 0)
         {
-            printf("Endorsement key is invalid.");
+            LogError("Endorsement key is invalid.");
             result = __LINE__;
         }
         else
         {
-            INT32 len = *key_len;
+            INT32 len = (INT32)*key_len;
             *key_len = (size_t)TPM2B_PUBLIC_Marshal(&handle->ek_pub, &data_pos, &len);
             result = 0;
         }
@@ -329,19 +335,19 @@ int tpm_msr_get_srk(TPM_INFO_HANDLE handle, unsigned char* data_pos, size_t* key
     int result;
     if (handle == NULL || key_len == 0)
     {
-        printf("Failure with parameter.");
+        LogError("Failure with parameter.");
         result = __LINE__;
     }
     else
     {
         if (handle->srk_pub.publicArea.unique.rsa.t.size == 0)
         {
-            printf("Endorsement key is invalid.");
+            LogError("Endorsement key is invalid.");
             result = __LINE__;
         }
         else
         {
-            INT32 len = *key_len;
+            INT32 len = (INT32)*key_len;
             *key_len = (size_t)TPM2B_PUBLIC_Marshal(&handle->srk_pub, &data_pos, &len);
             result = 0;
         }
@@ -354,14 +360,14 @@ int tpm_msr_import_key(TPM_INFO_HANDLE handle, const unsigned char* key, size_t 
     int result;
     if (handle == NULL || key == NULL || key_len == 0)
     {
-        printf("Failure with parameter.");
+        LogError("Failure with parameter.");
         result = __LINE__;
     }
     else
     {
         if (insert_key_in_tpm(handle, key, key_len))
         {
-            printf("Failure with parameter.");
+            LogError("Failure with parameter.");
             result = __LINE__;
         }
         else
@@ -377,7 +383,7 @@ int tpm_msr_sign_data(TPM_INFO_HANDLE handle, const unsigned char* data, size_t 
     int result;
     if (handle == NULL || data == NULL || data_len == 0 || data_signature == NULL || signed_len == NULL)
     {
-        printf("Failure with parameter.");
+        LogError("Failure with parameter.");
         result = __LINE__;
     }
     else
@@ -385,11 +391,11 @@ int tpm_msr_sign_data(TPM_INFO_HANDLE handle, const unsigned char* data, size_t 
         BYTE* data_copy = (unsigned char*)data;
 
         /* Codes_SRS_HSM_CLIENT_TPM_07_021: [ hsm_client_tpm_sign_data shall call into the tpm to hash the supplied data value. ] */
-        *signed_len = SignData(&handle->tpm_device, &null_pw_sess, data_copy, (UINT32)data_len, data_signature, *signed_len);
+        *signed_len = (size_t)SignData(&handle->tpm_device, &null_pw_sess, data_copy, (UINT32)data_len, data_signature, (INT32)*signed_len);
         if (*signed_len == 0)
         {
             /* Codes_SRS_HSM_CLIENT_TPM_07_023: [ If an error is encountered hsm_client_tpm_sign_data shall return NULL. ] */
-            printf("Failure signing data from hash");
+            LogError("Failure signing data from hash");
             result = __FAILURE__;
         }
         else

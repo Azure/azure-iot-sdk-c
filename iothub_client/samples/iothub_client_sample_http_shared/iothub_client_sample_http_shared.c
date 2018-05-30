@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <time.h>
 /* This sample uses the _LL APIs of iothub_client for example purposes.
    That does not mean that HTTP only works with the _LL APIs.
    Simply changing the using the convenience layer (functions not having _LL)
@@ -14,6 +14,7 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/platform.h"
 #include "iothubtransporthttp.h"
+#include "iothub_transport_ll.h"
 
 #ifdef MBED_BUILD_TIMESTAMP
 #define SET_TRUSTED_CERT_IN_SAMPLES

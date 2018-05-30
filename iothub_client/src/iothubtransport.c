@@ -2,9 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include <stdlib.h> 
-#include "azure_c_shared_utility/gballoc.h"
 #include <signal.h>
 #include <stddef.h>
+#include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "internal/iothubtransport.h"
 #include "iothub_client_core.h"
@@ -13,6 +13,11 @@
 #include "azure_c_shared_utility/lock.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/vector.h"
+
+#include "internal/iothubtransport.h"
+#include "internal/iothub_client_private.h"
+#include "iothub_transport_ll.h"
+#include "iothub_client_core.h"
 
 typedef struct TRANSPORT_HANDLE_DATA_TAG
 {
@@ -29,7 +34,7 @@ typedef struct TRANSPORT_HANDLE_DATA_TAG
 /* Used for Unit test */
 const size_t IoTHubTransport_ThreadTerminationOffset = offsetof(TRANSPORT_HANDLE_DATA, stopThread);
 
-TRANSPORT_HANDLE  IoTHubTransport_Create(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char* iotHubName, const char* iotHubSuffix)
+TRANSPORT_HANDLE IoTHubTransport_Create(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char* iotHubName, const char* iotHubSuffix)
 {
     TRANSPORT_HANDLE_DATA *result;
 

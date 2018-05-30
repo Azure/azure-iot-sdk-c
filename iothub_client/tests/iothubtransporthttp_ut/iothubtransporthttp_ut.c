@@ -44,6 +44,7 @@ static void my_gballoc_free(void* ptr)
 #include "azure_c_shared_utility/vector.h"
 #include "azure_c_shared_utility/vector_types_internal.h"
 #include "azure_c_shared_utility/lock.h"
+#include "azure_c_shared_utility/agenttime.h"
 
 #include "iothub_client_options.h"
 #include "iothub_client_version.h"

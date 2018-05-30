@@ -1,6 +1,7 @@
 set(mbed_project_files
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothub_client.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothub_client_core.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothub_client_core_common.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothub_client_core_ll.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothub_client_ll.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothub_client_options.h

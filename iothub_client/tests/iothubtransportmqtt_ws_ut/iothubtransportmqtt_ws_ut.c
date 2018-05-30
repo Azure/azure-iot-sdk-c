@@ -32,6 +32,7 @@ static void real_free(void* ptr)
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/http_proxy_io.h"
 #include "internal/iothubtransport_mqtt_common.h"
+#include "internal/iothubtransport.h"
 
 #undef ENABLE_MOCKS
 

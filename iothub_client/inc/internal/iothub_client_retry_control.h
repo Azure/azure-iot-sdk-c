@@ -9,7 +9,7 @@
 #include "azure_c_shared_utility/optionhandler.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
 #include "iothub_client_core_ll.h"
-#include "iothub_client_common.h"
+#include "internal/iothubtransport.h"
 #include "azure_c_shared_utility/const_defines.h"
 
 #ifdef __cplusplus
