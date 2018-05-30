@@ -1,26 +1,6 @@
----
-title: Azure IoT device SDK for C - Serializer | Microsoft Docs
-description: How to use the Serializer library in the Azure IoT device SDK for C to create device apps that communicate with an IoT hub.
-services: iot-hub
-documentationcenter: ''
-author: yzhong94
-manager: timlt
-editor: ''
-
-ms.assetid: defbed34-de73-429c-8592-cd863a38e4dd
-ms.service: iot-hub
-ms.devlang: cpp
-ms.topic: article
-ms.tgt_pltfrm: na
-ms.workload: na
-ms.date: 09/06/2016
-ms.author: yizhon
-
----
 # Azure IoT device SDK for C – more about serializer
-The [first article](iot-hub-device-sdk-c-intro.md) in this series introduced the **Azure IoT device SDK for C**. The next article provided a more detailed description of the [**IoTHubClient**](iot-hub-device-sdk-c-iothubclient.md). This article completes coverage of the SDK by providing a more detailed description of the remaining component: the **serializer** library.
+["Azure IoT device SDK for C"][lnk-c-intro] document provides an overview of Azure IoT Hub C SDK. That article explained that there are two architectural layers in SDK. The next article provided a more detailed description of the [**IoTHubClient**][lnk-c-iothubclient]. This article completes coverage of the SDK by providing a more detailed description of the remaining component: the **serializer** library.
 
-[!INCLUDE [iot-hub-basic](../../includes/iot-hub-basic-partial.md)]
 
 The introductory article described how to use the **serializer** library to send events to and receive messages from IoT Hub. In this article, we extend that discussion by providing a more complete explanation of how to model your data with the **serializer** macro language. The article also includes more detail about how the library serializes messages (and in some cases how you can control the serialization behavior). We'll also describe some parameters you can modify that determine the size of the models you create.
 
@@ -444,7 +424,7 @@ If you think about your model in an object-oriented fashion, then the second app
 Nether approach is right or wrong. Just be aware of how the **serializer** library works, and pick the modeling approach that best fits your needs.
 
 ## Message handling
-So far this article has only discussed sending events to IoT Hub, and hasn't addressed receiving messages. The reason for this is that what we need to know about receiving messages has largely been covered in an [earlier article](iot-hub-device-sdk-c-intro.md). Recall from that article that you process messages by registering a message callback function:
+So far this article has only discussed sending events to IoT Hub, and hasn't addressed receiving messages. The reason for this is that what we need to know about receiving messages has largely been covered in the [overview document][lnk-c-iothubclient]. Recall from that article that you process messages by registering a message callback function:
 
 ```
 IoTHubClient_SetMessageCallback(iotHubClientHandle, IoTHubMessage, myWeather)
@@ -550,9 +530,7 @@ Within the shared utility library, you will find the following folder:
 azure-c-shared-utility\\macro\_utils\_h\_generator.
 ```
 
-This folder contains a Visual Studio solution called **macro\_utils\_h\_generator.sln**:
-
-  ![](media/iot-hub-device-sdk-c-serializer/01-macro_utils_h_generator.PNG)
+This folder contains a Visual Studio solution called **macro\_utils\_h\_generator.sln**.
 
 The program in this solution generates the **macro\_utils.h** file. There’s a default macro\_utils.h file included with the SDK. This solution allows you to modify some parameters and then recreate the header file based on these parameters.
 
@@ -577,13 +555,9 @@ WITH_DATA(int, MyData)
 );
 ```
 
-As mentioned previously, **DECLARE\_MODEL** is just a C macro. The names of the model and the **WITH\_DATA** statement (yet another macro) are parameters of **DECLARE\_MODEL**. **nMacroParameters** defines how many parameters can be included in **DECLARE\_MODEL**. Effectively, this defines how many data event and action declarations you can have. As such, with the default limit of 124 this means that you can define a model with a combination of about 60 actions and data events. If you try to exceed this limit, you'll receive compiler errors that look similar to this:
+As mentioned previously, **DECLARE\_MODEL** is just a C macro. The names of the model and the **WITH\_DATA** statement (yet another macro) are parameters of **DECLARE\_MODEL**. **nMacroParameters** defines how many parameters can be included in **DECLARE\_MODEL**. Effectively, this defines how many data event and action declarations you can have. As such, with the default limit of 124 this means that you can define a model with a combination of about 60 actions and data events. If you try to exceed this limit, you'll receive compiler errors.
 
-  ![](media/iot-hub-device-sdk-c-serializer/02-nMacroParametersCompilerErrors.PNG)
-
-The **nArithmetic** parameter is more about the internal workings of the macro language than your application.  It controls the total number of members you can have in your model, including **DECLARE_STRUCT** macros. If you start seeing compiler errors such as this, then you should try increasing **nArithmetic**:
-
-   ![](media/iot-hub-device-sdk-c-serializer/03-nArithmeticCompilerErrors.PNG)
+The **nArithmetic** parameter is more about the internal workings of the macro language than your application.  It controls the total number of members you can have in your model, including **DECLARE_STRUCT** macros. If you start seeing compiler errors such as this, then you should try increasing **nArithmetic**.
 
 If you want to change these parameters, modify the values in the macro\_utils.tt file, recompile the macro\_utils\_h\_generator.sln solution, and run the compiled program. When you do so, a new macro\_utils.h file is generated and placed in the .\\common\\inc directory.
 
@@ -597,10 +571,6 @@ Then add this project to your Visual Studio solution:
 > 
 > 
 
-When you're done, your solution should look like this:
-
-   ![](media/iot-hub-device-sdk-c-serializer/05-serializer-project.PNG)
-
 Now when you compile your solution, the updated macro\_utils.h is included in your binary.
 
 Note that increasing these values high enough can exceed compiler limits. To this point, the **nMacroParameters** is the main parameter with which to be concerned. The C99 spec specifies that a minimum of 127 parameters are allowed in a macro definition. The Microsoft compiler follows the spec exactly (and has a limit of 127), so you won't be able to increase **nMacroParameters** beyond the default. Other compilers might allow you to do so (for example, the GNU compiler supports a higher limit).
@@ -610,7 +580,7 @@ So far we've covered just about everything you need to know about how to write c
 ## The lower-level APIs
 The sample application on which this article focused is **simplesample\_amqp**. This sample uses the higher-level (the non-"LL") APIs to send events and receive messages. If you use these APIs, a background thread runs which takes care of both sending events and receiving messages. However, you can use the lower-level (LL) APIs to eliminate this background thread and take explicit control over when you send events or receive messages from the cloud.
 
-As described in a [previous article](iot-hub-device-sdk-c-iothubclient.md), there is a set of functions that consists of the higher-level APIs:
+As described in the [IoT Hub Client overview][lnk-c-iothubclient], there is a set of functions that consists of the higher-level APIs:
 
 * IoTHubClient\_CreateFromConnectionString
 * IoTHubClient\_SendEventAsync
@@ -631,7 +601,7 @@ Note that the lower-level APIs work exactly the same way as described in the pre
 For an example of how the lower-level APIs are used with the **serializer** library, see the **simplesample\_http** application.
 
 ## Additional topics
-A few other topics worth mentioning again are property handling, using alternate device credentials, and configuration options. These are all topics covered in a [previous article](iot-hub-device-sdk-c-iothubclient.md). The main point is that all of these features work in the same way with the **serializer** library as they do with the **IoTHubClient** library. For example, if you want to attach properties to an event from your model, you use **IoTHubMessage\_Properties** and **Map**\_**AddorUpdate**, the same way as described previously:
+A few other topics worth mentioning again are property handling, using alternate device credentials, and configuration options. These are all topics covered in the [IoT Hub Client overview][lnk-c-iothubclient]. The main point is that all of these features work in the same way with the **serializer** library as they do with the **IoTHubClient** library. For example, if you want to attach properties to an event from your model, you use **IoTHubMessage\_Properties** and **Map**\_**AddorUpdate**, the same way as described previously:
 
 ```
 MAP_HANDLE propMap = IoTHubMessage_Properties(message.messageHandle);
@@ -659,19 +629,21 @@ Similarly, when you're done working with the library, the last call you’ll mak
 serializer_deinit();
 ```
 
-Otherwise, all of the other features listed above work the same in the **serializer** library as they do in the **IoTHubClient** library. For more information about any of these topics, see the [previous article](iot-hub-device-sdk-c-iothubclient.md) in this series.
+Otherwise, all of the other features listed above work the same in the **serializer** library as they do in the **IoTHubClient** library. For more information about any of these topics, see the the [IoT Hub Client overview][lnk-c-iothubclient] in this series.
 
 ## Next steps
 This article describes in detail the unique aspects of the **serializer** library contained in the **Azure IoT device SDK for C**. With the information provided you should have a good understanding of how to use models to send events and receive messages from IoT Hub.
 
 This also concludes the three-part series on how to develop applications with the **Azure IoT device SDK for C**. This should be enough information to not only get you started but give you a thorough understanding of how the APIs work. For additional information, there are a few samples in the SDK not covered here. Otherwise, the [SDK documentation](https://github.com/Azure/azure-iot-sdk-c) is a good resource for additional information.
 
+
 To learn more about developing for IoT Hub, see the [Azure IoT SDKs][lnk-sdks].
 
-To further explore the capabilities of IoT Hub, see:
 
-* [Deploying AI to edge devices with Azure IoT Edge][lnk-iotedge]
+[lnk-sdks]: https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-sdks
 
-[lnk-sdks]: iot-hub-devguide-sdks.md
+[lnk-c-intro]:https://docs.microsoft.com/azure/iot-hub/iot-hub-device-sdk-c-intro
 
-[lnk-iotedge]: ../iot-edge/tutorial-simulate-device-linux.md
+[lnk-c-serializer]: ./iot-hub-device-sdk-c-serializer.md
+
+[lnk-c-iothubclient]: ./iot-hub-device-sdk-c-iothubclient.md
