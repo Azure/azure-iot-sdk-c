@@ -11,6 +11,7 @@ endif()
 compileAsC99()
 
 set(iothub_client_c_files
+    ./src/iothub.c
     ./src/iothub_client.c
     ./src/iothub_client_core.c
     ./src/iothub_client_core_ll.c
@@ -26,6 +27,7 @@ set(iothub_client_c_files
 )
 
 set(iothub_client_h_files
+    ./inc/iothub.h
     ./inc/iothub_client_core.h
     ./inc/iothub_client_core_ll.h
     ./inc/iothub_client.h

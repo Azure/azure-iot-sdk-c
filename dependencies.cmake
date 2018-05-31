@@ -19,18 +19,18 @@ if(${use_installed_dependencies})
     endif ()
 
 else ()
-    add_subdirectory(c-utility EXCLUDE_FROM_ALL)
+    add_subdirectory(c-utility)
 
     if (${use_amqp})
-        add_subdirectory(uamqp EXCLUDE_FROM_ALL)
+        add_subdirectory(uamqp)
     endif ()
 
     if (${use_mqtt})
-        add_subdirectory(umqtt EXCLUDE_FROM_ALL)
+        add_subdirectory(umqtt)
     endif ()
 
     if (${use_http})
-        add_subdirectory(deps/uhttp EXCLUDE_FROM_ALL)
+        add_subdirectory(deps/uhttp)
     endif ()
 endif()
 
