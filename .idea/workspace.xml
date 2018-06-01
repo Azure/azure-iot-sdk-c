@@ -1,0 +1,389 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true" buildAllGenerated="false">
+    <generated />
+  </component>
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" CONFIG_NAME="Debug" />
+    </configurations>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="f18b87a5-0d09-4170-92e7-808ca11b1d98" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/deps/uhttp" afterPath="$PROJECT_DIR$/deps/uhttp" />
+      <change beforePath="$PROJECT_DIR$/provisioning_client/deps/RIoT" afterPath="$PROJECT_DIR$/provisioning_client/deps/RIoT" />
+      <change beforePath="$PROJECT_DIR$/provisioning_client/deps/utpm" afterPath="$PROJECT_DIR$/provisioning_client/deps/utpm" />
+      <change beforePath="$PROJECT_DIR$/uamqp" afterPath="$PROJECT_DIR$/uamqp" />
+      <change beforePath="$PROJECT_DIR$/umqtt" afterPath="$PROJECT_DIR$/umqtt" />
+    </list>
+    <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="TRACKING_ENABLED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="message_queue.c" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/iothub_client/src/message_queue.c">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="357">
+              <caret line="80" column="32" lean-forward="false" selection-start-line="80" selection-start-column="32" selection-end-line="80" selection-end-column="32" />
+              <folding>
+                <element signature="e#4104#5991#0" expanded="false" />
+                <element signature="e#5993#10520#0" expanded="false" />
+                <element signature="e#13856#14637#0" expanded="false" />
+                <element signature="e#14639#15133#0" expanded="false" />
+                <element signature="e#15178#16566#0" expanded="false" />
+                <element signature="e#16568#17674#0" expanded="false" />
+                <element signature="e#17676#19366#0" expanded="false" />
+                <element signature="e#19368#20177#0" expanded="false" />
+                <element signature="e#20179#23178#0" expanded="false" />
+                <element signature="e#23180#26154#0" expanded="false" />
+                <element signature="e#26156#27148#0" expanded="false" />
+                <element signature="e#27150#27465#0" expanded="false" />
+                <element signature="e#27467#28264#0" expanded="false" />
+                <element signature="e#28266#29073#0" expanded="false" />
+                <element signature="e#29075#29821#0" expanded="false" />
+                <element signature="e#29823#31338#0" expanded="false" />
+                <element signature="e#31340#34216#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="message_queue_ut.c" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/iothub_client/tests/message_queue_ut/message_queue_ut.c">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1122">
+              <caret line="66" column="47" lean-forward="false" selection-start-line="66" selection-start-column="47" selection-end-line="66" selection-end-column="47" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>send</find>
+      <find>DList_InsertTailList</find>
+      <find>publish</find>
+      <find>MESSAGE_QUEUE_HANDLE</find>
+      <find>SINGLYLINKEDLIST_HANDLE</find>
+      <find>MESSAGE_QUEUE_TAG</find>
+      <find>MESSAGE_QUEUE_ITEM_TAG</find>
+    </findStrings>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/iothub_client/src/message_queue.c" />
+      </list>
+    </option>
+  </component>
+  <component name="JsBuildToolGruntFileManager" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsBuildToolPackageJson" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsGulpfileManager">
+    <detection-done>true</detection-done>
+    <sorting>DEFINITION_ORDER</sorting>
+  </component>
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="260" />
+    <option name="y" value="20" />
+    <option name="width" value="1400" />
+    <option name="height" value="1000" />
+  </component>
+  <component name="ProjectView">
+    <navigator currentView="ProjectPane" proportions="" version="1">
+      <flattenPackages />
+      <showMembers />
+      <showModules />
+      <showLibraryContents />
+      <hideEmptyPackages />
+      <abbreviatePackageNames />
+      <autoscrollToSource />
+      <autoscrollFromSource />
+      <sortByType />
+      <manualOrder />
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="azure_iot_sdks" type="dad4c3:CidrFilesViewHelper$MyProjectTreeStructure$1" />
+              <item name="azure-iot-sdk-c" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="azure_iot_sdks" type="dad4c3:CidrFilesViewHelper$MyProjectTreeStructure$1" />
+              <item name="azure-iot-sdk-c" type="462c0819:PsiDirectoryNode" />
+              <item name="iothub_client" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="WebServerToolWindowFactoryState" value="false" />
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="ShelveChangesManager" show_recycled="false">
+    <option name="remove_strategy" value="false" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="f18b87a5-0d09-4170-92e7-808ca11b1d98" name="Default" comment="" />
+      <created>1523344782501</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1523344782501</updated>
+      <workItem from="1523344787551" duration="3155000" />
+      <workItem from="1523956422515" duration="29000" />
+      <workItem from="1524139383405" duration="1015000" />
+      <workItem from="1524631462411" duration="11847000" />
+      <workItem from="1524808670232" duration="4652000" />
+      <workItem from="1525067504984" duration="601000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="21299000" />
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
+    <editor active="true" />
+    <layout>
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1500732" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.0792393" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+    </layout>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/iothub_client/src/message_queue.c</url>
+          <line>652</line>
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/iothub_client/src/message_queue.c</url>
+          <line>561</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+      <option name="time" value="2" />
+    </breakpoint-manager>
+    <watches-manager />
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/iothub_client/src/message_queue.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#4104#5991#0" expanded="false" />
+            <element signature="e#5993#10520#0" expanded="false" />
+            <element signature="e#13856#14637#0" expanded="false" />
+            <element signature="e#14639#15133#0" expanded="false" />
+            <element signature="e#15178#16566#0" expanded="false" />
+            <element signature="e#16568#17674#0" expanded="false" />
+            <element signature="e#17676#19366#0" expanded="false" />
+            <element signature="e#19368#20177#0" expanded="false" />
+            <element signature="e#20179#23178#0" expanded="false" />
+            <element signature="e#23180#26154#0" expanded="false" />
+            <element signature="e#26156#27148#0" expanded="false" />
+            <element signature="e#27150#27465#0" expanded="false" />
+            <element signature="e#27467#28264#0" expanded="false" />
+            <element signature="e#28266#29073#0" expanded="false" />
+            <element signature="e#29075#29821#0" expanded="false" />
+            <element signature="e#29823#31338#0" expanded="false" />
+            <element signature="e#31340#34216#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/iothub_client/tests/message_queue_ut/message_queue_ut.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1122">
+          <caret line="66" column="47" lean-forward="false" selection-start-line="66" selection-start-column="47" selection-end-line="66" selection-end-column="47" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/iothub_client/src/message_queue.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#4104#5991#0" expanded="false" />
+            <element signature="e#5993#10520#0" expanded="false" />
+            <element signature="e#13856#14637#0" expanded="false" />
+            <element signature="e#14639#15133#0" expanded="false" />
+            <element signature="e#15178#16566#0" expanded="false" />
+            <element signature="e#16568#17674#0" expanded="false" />
+            <element signature="e#17676#19366#0" expanded="false" />
+            <element signature="e#19368#20177#0" expanded="false" />
+            <element signature="e#20179#23178#0" expanded="false" />
+            <element signature="e#23180#26154#0" expanded="false" />
+            <element signature="e#26156#27148#0" expanded="false" />
+            <element signature="e#27150#27465#0" expanded="false" />
+            <element signature="e#27467#28264#0" expanded="false" />
+            <element signature="e#28266#29073#0" expanded="false" />
+            <element signature="e#29075#29821#0" expanded="false" />
+            <element signature="e#29823#31338#0" expanded="false" />
+            <element signature="e#31340#34216#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/iothub_client/tests/message_queue_ut/message_queue_ut.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="816">
+          <caret line="48" column="19" lean-forward="false" selection-start-line="48" selection-start-column="0" selection-end-line="48" selection-end-column="19" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/iothub_client/src/iothub_client_ll.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="249">
+          <caret line="1306" column="56" lean-forward="true" selection-start-line="1306" selection-start-column="56" selection-end-line="1306" selection-end-column="56" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/iothub_client/src/iothubtransportamqp.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-2550">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/iothub_client/src/iothubtransport_mqtt_common.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/iothub_client/samples/iothub_client_sample_amqp_shared/iothub_client_sample_amqp_shared.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="6" lean-forward="false" selection-start-line="0" selection-start-column="6" selection-end-line="0" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/iothub_client/src/iothub_client.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-119">
+          <caret line="446" column="85" lean-forward="false" selection-start-line="446" selection-start-column="59" selection-end-line="446" selection-end-column="85" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/iothub_client/src/uamqp_messaging.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="256">
+          <caret line="305" column="50" lean-forward="false" selection-start-line="305" selection-start-column="11" selection-end-line="305" selection-end-column="50" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/iothub_client/src/iothubtransport_amqp_messenger.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1122">
+          <caret line="180" column="35" lean-forward="false" selection-start-line="180" selection-start-column="11" selection-end-line="180" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/iothub_client/src/iothub_message.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-748">
+          <caret line="544" column="64" lean-forward="false" selection-start-line="544" selection-start-column="22" selection-end-line="544" selection-end-column="64" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Microsoft/Windows/INetCache/Content.Outlook/568EJQO0/StoragePool.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-2006">
+          <caret line="80" column="48" lean-forward="false" selection-start-line="80" selection-start-column="31" selection-end-line="80" selection-end-column="48" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/iothub_client/tests/message_queue_ut/message_queue_ut.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1122">
+          <caret line="66" column="47" lean-forward="false" selection-start-line="66" selection-start-column="47" selection-end-line="66" selection-end-column="47" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/iothub_client/src/message_queue.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="357">
+          <caret line="80" column="32" lean-forward="false" selection-start-line="80" selection-start-column="32" selection-end-line="80" selection-end-column="32" />
+          <folding>
+            <element signature="e#4104#5991#0" expanded="false" />
+            <element signature="e#5993#10520#0" expanded="false" />
+            <element signature="e#13856#14637#0" expanded="false" />
+            <element signature="e#14639#15133#0" expanded="false" />
+            <element signature="e#15178#16566#0" expanded="false" />
+            <element signature="e#16568#17674#0" expanded="false" />
+            <element signature="e#17676#19366#0" expanded="false" />
+            <element signature="e#19368#20177#0" expanded="false" />
+            <element signature="e#20179#23178#0" expanded="false" />
+            <element signature="e#23180#26154#0" expanded="false" />
+            <element signature="e#26156#27148#0" expanded="false" />
+            <element signature="e#27150#27465#0" expanded="false" />
+            <element signature="e#27467#28264#0" expanded="false" />
+            <element signature="e#28266#29073#0" expanded="false" />
+            <element signature="e#29075#29821#0" expanded="false" />
+            <element signature="e#29823#31338#0" expanded="false" />
+            <element signature="e#31340#34216#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+  </component>
+</project>
