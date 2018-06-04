@@ -1,6 +1,10 @@
 # Azure IoT device SDK for C – more about serializer
+<<<<<<< HEAD
 ["Azure IoT device SDK for C"][lnk-c-intro] document provides an overview of Azure IoT Hub C SDK. That article explained that there are two architectural layers in SDK. The next article provided a more detailed description of the [**IoTHubClient**][lnk-c-iothubclient]. This article completes coverage of the SDK by providing a more detailed description of the remaining component: the **serializer** library.
 
+=======
+The [introduction document][lnk-c-intro] in this series introduced the **Azure IoT device SDK for C**. The next article provided a more detailed description of the [IoT Hub Client overview document](.\iot-hub-device-sdk-c-iothubclient.md). This article completes coverage of the SDK by providing a more detailed description of the remaining component: the **serializer** library.
+>>>>>>> master
 
 The introductory article described how to use the **serializer** library to send events to and receive messages from IoT Hub. In this article, we extend that discussion by providing a more complete explanation of how to model your data with the **serializer** macro language. The article also includes more detail about how the library serializes messages (and in some cases how you can control the serialization behavior). We'll also describe some parameters you can modify that determine the size of the models you create.
 
@@ -11,7 +15,7 @@ Everything described in this article is based on the **serializer** SDK samples.
 You can find the [**Azure IoT device SDK for C**](https://github.com/Azure/azure-iot-sdk-c) GitHub repository and view details of the API in the [C API reference](https://azure.github.io/azure-iot-sdk-c/index.html).
 
 ## The modeling language
-The [introductory article](iot-hub-device-sdk-c-intro.md) in this series introduced the **Azure IoT device SDK for C** modeling language through the example provided in the **simplesample\_amqp** application:
+The [introduction document][lnk-c-intro] in this series introduced the **Azure IoT device SDK for C** modeling language through the example provided in the **simplesample\_amqp** application:
 
 ```
 BEGIN_NAMESPACE(WeatherStation);
@@ -424,7 +428,11 @@ If you think about your model in an object-oriented fashion, then the second app
 Nether approach is right or wrong. Just be aware of how the **serializer** library works, and pick the modeling approach that best fits your needs.
 
 ## Message handling
+<<<<<<< HEAD
 So far this article has only discussed sending events to IoT Hub, and hasn't addressed receiving messages. The reason for this is that what we need to know about receiving messages has largely been covered in the [overview document][lnk-c-iothubclient]. Recall from that article that you process messages by registering a message callback function:
+=======
+So far this article has only discussed sending events to IoT Hub, and hasn't addressed receiving messages. The reason for this is that what we need to know about receiving messages has largely been covered in an the [introduction document][lnk-c-intro]. Recall from that article that you process messages by registering a message callback function:
+>>>>>>> master
 
 ```
 IoTHubClient_SetMessageCallback(iotHubClientHandle, IoTHubMessage, myWeather)
@@ -580,7 +588,11 @@ So far we've covered just about everything you need to know about how to write c
 ## The lower-level APIs
 The sample application on which this article focused is **simplesample\_amqp**. This sample uses the higher-level (the non-"LL") APIs to send events and receive messages. If you use these APIs, a background thread runs which takes care of both sending events and receiving messages. However, you can use the lower-level (LL) APIs to eliminate this background thread and take explicit control over when you send events or receive messages from the cloud.
 
+<<<<<<< HEAD
 As described in the [IoT Hub Client overview][lnk-c-iothubclient], there is a set of functions that consists of the higher-level APIs:
+=======
+As described in [IoT Hub Client overview document](.\iot-hub-device-sdk-c-iothubclient.md), there is a set of functions that consists of the higher-level APIs:
+>>>>>>> master
 
 * IoTHubClient\_CreateFromConnectionString
 * IoTHubClient\_SendEventAsync
@@ -601,7 +613,11 @@ Note that the lower-level APIs work exactly the same way as described in the pre
 For an example of how the lower-level APIs are used with the **serializer** library, see the **simplesample\_http** application.
 
 ## Additional topics
+<<<<<<< HEAD
 A few other topics worth mentioning again are property handling, using alternate device credentials, and configuration options. These are all topics covered in the [IoT Hub Client overview][lnk-c-iothubclient]. The main point is that all of these features work in the same way with the **serializer** library as they do with the **IoTHubClient** library. For example, if you want to attach properties to an event from your model, you use **IoTHubMessage\_Properties** and **Map**\_**AddorUpdate**, the same way as described previously:
+=======
+A few other topics worth mentioning again are property handling, using alternate device credentials, and configuration options. These are all topics covered in [IoT Hub Client overview document](.\iot-hub-device-sdk-c-iothubclient.md). The main point is that all of these features work in the same way with the **serializer** library as they do with the **IoTHubClient** library. For example, if you want to attach properties to an event from your model, you use **IoTHubMessage\_Properties** and **Map**\_**AddorUpdate**, the same way as described previously:
+>>>>>>> master
 
 ```
 MAP_HANDLE propMap = IoTHubMessage_Properties(message.messageHandle);
@@ -629,7 +645,11 @@ Similarly, when you're done working with the library, the last call you’ll mak
 serializer_deinit();
 ```
 
+<<<<<<< HEAD
 Otherwise, all of the other features listed above work the same in the **serializer** library as they do in the **IoTHubClient** library. For more information about any of these topics, see the the [IoT Hub Client overview][lnk-c-iothubclient] in this series.
+=======
+Otherwise, all of the other features listed above work the same in the **serializer** library as they do in the **IoTHubClient** library. For more information about any of these topics, see the [IoT Hub Client overview document](.\iot-hub-device-sdk-c-iothubclient.md) in this series.
+>>>>>>> master
 
 ## Next steps
 This article describes in detail the unique aspects of the **serializer** library contained in the **Azure IoT device SDK for C**. With the information provided you should have a good understanding of how to use models to send events and receive messages from IoT Hub.
@@ -639,6 +659,7 @@ This also concludes the three-part series on how to develop applications with th
 
 To learn more about developing for IoT Hub, see the [Azure IoT SDKs][lnk-sdks].
 
+<<<<<<< HEAD
 
 [lnk-sdks]: https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-sdks
 
@@ -647,3 +668,8 @@ To learn more about developing for IoT Hub, see the [Azure IoT SDKs][lnk-sdks].
 [lnk-c-serializer]: ./iot-hub-device-sdk-c-serializer.md
 
 [lnk-c-iothubclient]: ./iot-hub-device-sdk-c-iothubclient.md
+=======
+[lnk-sdks]: https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-sdks
+
+[lnk-c-intro]: https://docs.microsoft.com/azure/iot-hub/iot-hub-device-sdk-c-intro
+>>>>>>> master
