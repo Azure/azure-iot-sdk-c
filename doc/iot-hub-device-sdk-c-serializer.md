@@ -10,12 +10,12 @@ The introductory article described how to use the **serializer** library to send
 
 Finally, the article revisits some topics covered in previous articles such as message and property handling. As we'll find out, those features work in the same way using the **serializer** library as they do with the **IoTHubClient** library.
 
-Everything described in this article is based on the **serializer** SDK samples. If you want to follow along, see the **simplesample\_amqp** and **simplesample\_http** applications included in the Azure IoT device SDK for C.
+Everything described in this article is based on the **serializer** SDK samples. If you want to follow along, see the **\_serializer\_samples\_simplesample_amqp** and **\_serializer\_samples\_simplesample_mqtt** applications included in the Azure IoT device SDK for C.
 
 You can find the [**Azure IoT device SDK for C**](https://github.com/Azure/azure-iot-sdk-c) GitHub repository and view details of the API in the [C API reference](https://azure.github.io/azure-iot-sdk-c/index.html).
 
 ## The modeling language
-The [introduction document][lnk-c-intro] in this series introduced the **Azure IoT device SDK for C** modeling language through the example provided in the **simplesample\_amqp** application:
+The [introduction document][lnk-c-intro] in this series introduced the **Azure IoT device SDK for C** modeling language through the example provided in the **\_serializer\_samples\_simplesample_amqp** application:
 
 ```
 BEGIN_NAMESPACE(WeatherStation);
@@ -234,7 +234,7 @@ if (SERIALIZE(&destination, &destinationSize, thermostat->Temperature) == IOT_AG
 
 We'll use hard-coded values for temperature and humidity in the sample code, but imagine that we’re actually retrieving these values by sampling the corresponding sensors on the thermostat.
 
-The code above uses the **GetDateTimeOffset** helper that was introduced previously. For reasons that will become clear later, this code explicitly separates the task of serializing and sending the event. The previous code serializes the temperature event into a buffer. Then, **sendMessage** is a helper function (included in **simplesample\_amqp**) that sends the event to IoT Hub:
+The code above uses the **GetDateTimeOffset** helper that was introduced previously. For reasons that will become clear later, this code explicitly separates the task of serializing and sending the event. The previous code serializes the temperature event into a buffer. Then, **sendMessage** is a helper function (included in **\_serializer\_samples\_simplesample_amqp**) that sends the event to IoT Hub:
 
 ```
 static void sendMessage(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const unsigned char* buffer, size_t size)
@@ -569,7 +569,7 @@ The **nArithmetic** parameter is more about the internal workings of the macro l
 
 If you want to change these parameters, modify the values in the macro\_utils.tt file, recompile the macro\_utils\_h\_generator.sln solution, and run the compiled program. When you do so, a new macro\_utils.h file is generated and placed in the .\\common\\inc directory.
 
-In order to use the new version of macro\_utils.h, remove the **serializer** NuGet package from your solution and in its place include the **serializer** Visual Studio project. This enables your code to compile against the source code of the serializer library. This includes the updated macro\_utils.h. If you want to do this for **simplesample\_amqp**, start by removing the NuGet package for the serializer library from the solution:
+In order to use the new version of macro\_utils.h, remove the **serializer** NuGet package from your solution and in its place include the **serializer** Visual Studio project. This enables your code to compile against the source code of the serializer library. This includes the updated macro\_utils.h. If you want to do this for **\_serializer\_samples\_simplesample_amqp**, start by removing the NuGet package for the serializer library from the solution:
 
    ![](media/iot-hub-device-sdk-c-serializer/04-serializer-github-package.PNG)
 
@@ -586,7 +586,7 @@ Note that increasing these values high enough can exceed compiler limits. To thi
 So far we've covered just about everything you need to know about how to write code with the **serializer** library. Before concluding, let's revisit some topics from previous articles that you may be wondering about.
 
 ## The lower-level APIs
-The sample application on which this article focused is **simplesample\_amqp**. This sample uses the higher-level (the non-"LL") APIs to send events and receive messages. If you use these APIs, a background thread runs which takes care of both sending events and receiving messages. However, you can use the lower-level (LL) APIs to eliminate this background thread and take explicit control over when you send events or receive messages from the cloud.
+The sample application on which this article focused is **\_serializer\_samples\_simplesample_amqp**. This sample uses the higher-level (the non-"LL") APIs to send events and receive messages. If you use these APIs, a background thread runs which takes care of both sending events and receiving messages. However, you can use the lower-level (LL) APIs to eliminate this background thread and take explicit control over when you send events or receive messages from the cloud.
 
 <<<<<<< HEAD
 As described in the [IoT Hub Client overview][lnk-c-iothubclient], there is a set of functions that consists of the higher-level APIs:
@@ -599,7 +599,7 @@ As described in [IoT Hub Client overview document](.\iot-hub-device-sdk-c-iothub
 * IoTHubClient\_SetMessageCallback
 * IoTHubClient\_Destroy
 
-These APIs are demonstrated in **simplesample\_amqp**.
+These APIs are demonstrated in **\_serializer\_samples\_simplesample_amqp**.
 
 There is also an analogous set of lower-level APIs.
 
