@@ -69,7 +69,7 @@ static void _Bool_ToString(char* string, size_t bufferSize, _Bool val)
 
 #define TEST_ENV_IOTHUB_NAME "edgehubtest1"
 #define TEST_ENV_IOTHUB_SUFFIX "azure-devices.net"
-static const char* TEST_ENV_AUTHSCHEME = "SasToken";
+static const char* TEST_ENV_AUTHSCHEME = "sasToken";
 static const char* TEST_ENV_AUTHSCHEME_INVALID = "SasToken_Invalid";
 static const char* TEST_ENV_DEVICEID = "Test_DeviceId";
 static const char* TEST_ENV_HOSTNAME = TEST_ENV_IOTHUB_NAME "." TEST_ENV_IOTHUB_SUFFIX;
