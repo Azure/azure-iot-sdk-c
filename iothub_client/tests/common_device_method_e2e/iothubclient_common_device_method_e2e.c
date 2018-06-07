@@ -31,7 +31,7 @@
 #include "iothub_devicemethod.h"
 #include "iothub_device_client.h"
 
-#include "Iothubclient_common_device_method_e2e.h"
+#include "iothubclient_common_device_method_e2e.h"
 
 #define DEVICE_METHOD_SUB_WAIT_TIME_MS    (5 * 1000)
 
