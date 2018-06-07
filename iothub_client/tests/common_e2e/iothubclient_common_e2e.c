@@ -24,8 +24,8 @@
 
 #include "testrunnerswitcher.h"
 
-#include "iothub_client.h"
-#include "iothub_client_ll.h"
+#include "iothub.h"
+#include "iothub_device_client.h"
 #include "iothub_client_options.h"
 #include "iothub_message.h"
 #include "iothub_messaging.h"
@@ -35,7 +35,6 @@
 
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/threadapi.h"
-#include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/lock.h"
@@ -77,6 +76,7 @@ E2E_TEST_OPTIONS g_e2e_test_options;
 
 TEST_DEFINE_ENUM_TYPE(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
+TEST_DEFINE_ENUM_TYPE(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES);
 
 typedef struct EXPECTED_SEND_DATA_TAG
 {
@@ -494,11 +494,11 @@ static char* get_target_mac_address()
 
 void e2e_init(TEST_PROTOCOL_TYPE protocol_type)
 {
-    int result = platform_init();
-    ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "Platform init failed");
+    int result = IoTHub_Init();
+    ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "Iothub init failed");
     g_iothubAcctInfo = IoTHubAccount_Init();
     ASSERT_IS_NOT_NULL_WITH_MSG(g_iothubAcctInfo, "Could not initialize IoTHubAccount");
-    platform_init();
+    (void)IoTHub_Init();
 
     memset(&g_e2e_test_options, 0, sizeof(E2E_TEST_OPTIONS));
     g_e2e_test_options.set_mac_address = false;
@@ -512,57 +512,57 @@ void e2e_deinit(void)
 {
     IoTHubAccount_deinit(g_iothubAcctInfo);
     // Need a double deinit
-    platform_deinit();
-    platform_deinit();
+    IoTHub_Deinit();
+    IoTHub_Deinit();
 
     Lock_Deinit(g_connection_status_info.lock);
 }
 
-IOTHUB_CLIENT_HANDLE client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+IOTHUB_DEVICE_CLIENT_HANDLE client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
-    IOTHUB_CLIENT_HANDLE iotHubClientHandle;
+    IOTHUB_DEVICE_CLIENT_HANDLE iot_client_handle;
     IOTHUB_CLIENT_RESULT result;
 
-    iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
-    ASSERT_IS_NOT_NULL_WITH_MSG(iotHubClientHandle, "Could not create IoTHubClient");
+    iot_client_handle = IoTHubDeviceClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
+    ASSERT_IS_NOT_NULL_WITH_MSG(iot_client_handle, "Could not create IoTHubClient");
 
     if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509) {
-        result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
+        result = IoTHubDeviceClient_SetOption(iot_client_handle, OPTION_X509_CERT, deviceToUse->certificate);
         ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
-        result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
+        result = IoTHubDeviceClient_SetOption(iot_client_handle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
         ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
     }
 
     // Turn on Log 
     bool trace = true;
-    (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &trace);
+    (void)IoTHubDeviceClient_SetOption(iot_client_handle, OPTION_LOG_TRACE, &trace);
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
-    (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_TRUSTED_CERT, certificates);
+    (void)IoTHubDeviceClient_SetOption(iot_client_handle, OPTION_TRUSTED_CERT, certificates);
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-    (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_PRODUCT_INFO, "MQTT_E2E/1.1.12");
+    (void)IoTHubDeviceClient_SetOption(iot_client_handle, OPTION_PRODUCT_INFO, "MQTT_E2E/1.1.12");
 
     //Turn on URL encoding/decoding (MQTT)
     if (g_e2e_test_options.use_special_chars)
     {
         bool encodeDecode = true;
-        IoTHubClient_SetOption(iotHubClientHandle, OPTION_AUTO_URL_ENCODE_DECODE, &encodeDecode);
+        IoTHubDeviceClient_SetOption(iot_client_handle, OPTION_AUTO_URL_ENCODE_DECODE, &encodeDecode);
     }
 
     // Set connection status change callback
-    result = IoTHubClient_SetConnectionStatusCallback(iotHubClientHandle, connection_status_callback, &g_connection_status_info);
+    result = IoTHubDeviceClient_SetConnectionStatusCallback(iot_client_handle, connection_status_callback, &g_connection_status_info);
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Failure setting connection status callback");
 
     if (test_protocol_type == TEST_AMQP || test_protocol_type == TEST_AMQP_WEBSOCKETS)
     {
         unsigned int svc2cl_keep_alive_timeout_secs = 120; // service will send pings at 120 x 7/8 = 105 seconds. Higher the value, lesser the frequency of service side pings.
-        (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_SERVICE_SIDE_KEEP_ALIVE_FREQ_SECS, &svc2cl_keep_alive_timeout_secs);
+        (void)IoTHubDeviceClient_SetOption(iot_client_handle, OPTION_SERVICE_SIDE_KEEP_ALIVE_FREQ_SECS, &svc2cl_keep_alive_timeout_secs);
 
         // Set keep alive for remote idle is optional. If it is not set the default ratio of 1/2 will be used. For default value of 4 minutes, it will be 2 minutes (120 seconds)
         double cl2svc_keep_alive_send_ratio = 1.0 / 2.0; // Set it to 120 seconds (240 x 1/2 = 120 seconds) for 4 minutes remote idle. 
 
         // client will send pings to service at 210 second interval for 4 minutes remote idle. For 25 minutes remote idle, it will be set to 21 minutes.
-        IoTHubClient_SetOption(iotHubClientHandle, OPTION_REMOTE_IDLE_TIMEOUT_RATIO, &cl2svc_keep_alive_send_ratio);
+        IoTHubDeviceClient_SetOption(iot_client_handle, OPTION_REMOTE_IDLE_TIMEOUT_RATIO, &cl2svc_keep_alive_send_ratio);
     }
 #ifdef AZIOT_LINUX
     if (g_e2e_test_options.set_mac_address)
@@ -570,7 +570,7 @@ IOTHUB_CLIENT_HANDLE client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUs
         char* mac_address = get_target_mac_address();
         ASSERT_IS_NOT_NULL_WITH_MSG(mac_address, "failed getting the target MAC ADDRESS");
 
-        result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_NET_INT_MAC_ADDRESS, mac_address);
+        result = IoTHubDeviceClient_SetOption(iot_client_handle, OPTION_NET_INT_MAC_ADDRESS, mac_address);
         ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "failed to set the target network interface");
 
         LogInfo("Target MAC ADDRESS: %s", mac_address);
@@ -578,10 +578,10 @@ IOTHUB_CLIENT_HANDLE client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUs
     }
 #endif //AZIOT_LINUX
 
-    return iotHubClientHandle;
+    return iot_client_handle;
 }
 
-D2C_MESSAGE_HANDLE client_create_and_send_d2c(IOTHUB_CLIENT_HANDLE iotHubClientHandle, TEST_MESSAGE_CREATION_MECHANISM test_message_creation)
+D2C_MESSAGE_HANDLE client_create_and_send_d2c(IOTHUB_DEVICE_CLIENT_HANDLE iot_client_handle, TEST_MESSAGE_CREATION_MECHANISM test_message_creation)
 {
     IOTHUB_MESSAGE_HANDLE msgHandle;
     IOTHUB_CLIENT_RESULT result;
@@ -626,7 +626,7 @@ D2C_MESSAGE_HANDLE client_create_and_send_d2c(IOTHUB_CLIENT_HANDLE iotHubClientH
     sendData->msgHandle = msgHandle;
 
     // act
-    result = IoTHubClient_SendEventAsync(iotHubClientHandle, msgHandle, ReceiveConfirmationCallback, sendData);
+    result = IoTHubDeviceClient_SendEventAsync(iot_client_handle, msgHandle, ReceiveConfirmationCallback, sendData);
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "SendEventAsync failed");
 
     return (D2C_MESSAGE_HANDLE)sendData;
@@ -681,7 +681,7 @@ bool client_received_confirmation(D2C_MESSAGE_HANDLE d2cMessage, IOTHUB_CLIENT_C
 
 // White-listed IoT Hub's (ONLY!) have special logic that looks at message properties such as 'AzIoTHub_FaultOperationType' and if so, will
 // cause the specified error to occur.  This allows end-to-end testing to simulate across a wide range of errors.
-D2C_MESSAGE_HANDLE send_error_injection_message(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* faultOperationType, const char* faultOperationCloseReason, const char* faultOperationDelayInSecs)
+D2C_MESSAGE_HANDLE send_error_injection_message(IOTHUB_DEVICE_CLIENT_HANDLE iot_client_handle, const char* faultOperationType, const char* faultOperationCloseReason, const char* faultOperationDelayInSecs)
 {
     IOTHUB_MESSAGE_HANDLE msgHandle;
     IOTHUB_CLIENT_RESULT result;
@@ -692,17 +692,15 @@ D2C_MESSAGE_HANDLE send_error_injection_message(IOTHUB_CLIENT_HANDLE iotHubClien
     msgHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)sendData->expectedString, strlen(sendData->expectedString));
     ASSERT_IS_NOT_NULL_WITH_MSG(msgHandle, "Could not create the D2C message to be sent");
 
-    MAP_HANDLE msgMapHandle = IoTHubMessage_Properties(msgHandle);
-
-    ASSERT_ARE_EQUAL(int, MAP_OK, Map_AddOrUpdate(msgMapHandle, "AzIoTHub_FaultOperationType", faultOperationType));
-    ASSERT_ARE_EQUAL(int, MAP_OK, Map_AddOrUpdate(msgMapHandle, "AzIoTHub_FaultOperationCloseReason", faultOperationCloseReason));
-    ASSERT_ARE_EQUAL(int, MAP_OK, Map_AddOrUpdate(msgMapHandle, "AzIoTHub_FaultOperationDelayInSecs", faultOperationDelayInSecs));
-    ASSERT_ARE_EQUAL(int, MAP_OK, Map_AddOrUpdate(msgMapHandle, "AzIoTHub_FaultOperationDurationInSecs", "20"));
+    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, IoTHubMessage_SetProperty(msgHandle, "AzIoTHub_FaultOperationType", faultOperationType));
+    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, IoTHubMessage_SetProperty(msgHandle, "AzIoTHub_FaultOperationCloseReason", faultOperationCloseReason));
+    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, IoTHubMessage_SetProperty(msgHandle, "AzIoTHub_FaultOperationDelayInSecs", faultOperationDelayInSecs));
+    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, IoTHubMessage_SetProperty(msgHandle, "AzIoTHub_FaultOperationDurationInSecs", "20"));
 
     sendData->msgHandle = msgHandle;
 
     // act
-    result = IoTHubClient_SendEventAsync(iotHubClientHandle, msgHandle, ReceiveConfirmationCallback, sendData);
+    result = IoTHubDeviceClient_SendEventAsync(iot_client_handle, msgHandle, ReceiveConfirmationCallback, sendData);
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "SendEventAsync failed");
 
     return (D2C_MESSAGE_HANDLE)sendData;
@@ -864,21 +862,21 @@ static void send_event_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIEN
     for (i = 0; i < sizeof(test_message_creation) / sizeof(test_message_creation[0]); i++)
     {
         // arrange
-        IOTHUB_CLIENT_HANDLE iotHubClientHandle;
+        IOTHUB_DEVICE_CLIENT_HANDLE iot_client_handle;
         D2C_MESSAGE_HANDLE d2cMessage;
 
         // Create the IoT Hub Data
-        iotHubClientHandle = client_connect_to_hub(deviceToUse, protocol);
+        iot_client_handle = client_connect_to_hub(deviceToUse, protocol);
 
         // Send the Event from the client
-        d2cMessage = client_create_and_send_d2c(iotHubClientHandle, test_message_creation[i]);
+        d2cMessage = client_create_and_send_d2c(iot_client_handle, test_message_creation[i]);
 
         // Wait for confirmation that the event was recevied
         bool dataWasRecv = client_wait_for_d2c_confirmation(d2cMessage, IOTHUB_CLIENT_CONFIRMATION_OK);
         ASSERT_IS_TRUE_WITH_MSG(dataWasRecv, "Failure sending data to IotHub"); // was received by the callback...
 
         // close the client connection
-        IoTHubClient_Destroy(iotHubClientHandle);
+        IoTHubDeviceClient_Destroy(iot_client_handle);
 
         // Wait for the message to arrive
         service_wait_for_d2c_event_arrival(deviceToUse, d2cMessage);
@@ -904,7 +902,7 @@ void e2e_send_event_test_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 void e2e_d2c_with_svc_fault_ctrl(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char* faultOperationType, const char* faultOperationCloseReason, const char* faultOperationDelayInSecs)
 {
     // arrange
-    IOTHUB_CLIENT_HANDLE iotHubClientHandle;
+    IOTHUB_DEVICE_CLIENT_HANDLE iot_client_handle;
     D2C_MESSAGE_HANDLE d2cMessage;
 
     IOTHUB_PROVISIONED_DEVICE* deviceToUse = IoTHubAccount_GetSASDevice(g_iothubAcctInfo);
@@ -912,17 +910,17 @@ void e2e_d2c_with_svc_fault_ctrl(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, cons
     clear_connection_status_info_flags();
 
     // Create the IoT Hub Data
-    iotHubClientHandle = client_connect_to_hub(deviceToUse, protocol);
+    iot_client_handle = client_connect_to_hub(deviceToUse, protocol);
 
     // Send the Event from the client
     LogInfo("Send message and wait for confirmation...");
-    d2cMessage = client_create_and_send_d2c(iotHubClientHandle, TEST_MESSAGE_CREATE_STRING);
+    d2cMessage = client_create_and_send_d2c(iot_client_handle, TEST_MESSAGE_CREATE_STRING);
     // Wait for confirmation that the event was recevied
     bool dataWasRecv = client_wait_for_d2c_confirmation(d2cMessage, IOTHUB_CLIENT_CONFIRMATION_OK);
     ASSERT_IS_TRUE_WITH_MSG(dataWasRecv, "Failure sending data to IotHub"); // was received by the callback...
 
     LogInfo("Send server fault control message...");
-    d2cMessage = send_error_injection_message(iotHubClientHandle, faultOperationType, faultOperationCloseReason, faultOperationDelayInSecs);
+    d2cMessage = send_error_injection_message(iot_client_handle, faultOperationType, faultOperationCloseReason, faultOperationDelayInSecs);
 
     LogInfo("Sleeping after sending fault injection...");
     ThreadAPI_Sleep(3000);
@@ -932,7 +930,7 @@ void e2e_d2c_with_svc_fault_ctrl(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, cons
     {
         // Send the Event from the client
         LogInfo("Send message after the server fault and wait for confirmation...");
-        d2cMessage = client_create_and_send_d2c(iotHubClientHandle, TEST_MESSAGE_CREATE_STRING);
+        d2cMessage = client_create_and_send_d2c(iot_client_handle, TEST_MESSAGE_CREATE_STRING);
 
         // Wait for confirmation that the event was recevied
         dataWasRecv = client_wait_for_d2c_confirmation(d2cMessage, IOTHUB_CLIENT_CONFIRMATION_OK);
@@ -944,7 +942,7 @@ void e2e_d2c_with_svc_fault_ctrl(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, cons
     ASSERT_ARE_NOT_EQUAL_WITH_MSG(size_t, 10, i, "Don't recover after the fault..."); // was received by the callback...
 
     // close the client connection
-    IoTHubClient_Destroy(iotHubClientHandle);
+    IoTHubDeviceClient_Destroy(iot_client_handle);
 
     // Wait for the message to arrive
     service_wait_for_d2c_event_arrival(deviceToUse, d2cMessage);
@@ -961,7 +959,7 @@ void e2e_d2c_with_svc_fault_ctrl_with_transport_status(IOTHUB_CLIENT_TRANSPORT_P
     IOTHUB_PROVISIONED_DEVICE* deviceToUse = IoTHubAccount_GetSASDevice(g_iothubAcctInfo);
 
     // arrange
-    IOTHUB_CLIENT_HANDLE iotHubClientHandle;
+    IOTHUB_DEVICE_CLIENT_HANDLE iot_client_handle;
     D2C_MESSAGE_HANDLE d2cMessageInitial = NULL;
     D2C_MESSAGE_HANDLE d2cMessageFaultInjection = NULL;
     D2C_MESSAGE_HANDLE d2cMessageDuringRetry = NULL;
@@ -970,19 +968,19 @@ void e2e_d2c_with_svc_fault_ctrl_with_transport_status(IOTHUB_CLIENT_TRANSPORT_P
     clear_connection_status_info_flags();
 
     // Create the IoT Hub Data
-    iotHubClientHandle = client_connect_to_hub(deviceToUse, protocol);
+    iot_client_handle = client_connect_to_hub(deviceToUse, protocol);
 
     if ((0 == strcmp(faultOperationType, "KillAmqpCBSLinkReq")) || (0 == strcmp(faultOperationType, "KillAmqpCBSLinkResp")))
     {
         // We will only detect errors in CBS link when we attempt to refresh the token, which usually is quite long (see DEFAULT_SAS_TOKEN_REFRESH_TIME_SECS).
         // We make the refresh time only 10 seconds so that the error is detected more quickly.
         size_t refresh_time = 10;
-        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, IoTHubClient_SetOption(iotHubClientHandle, OPTION_SAS_TOKEN_REFRESH_TIME, (const void*)&refresh_time));
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, IoTHubDeviceClient_SetOption(iot_client_handle, OPTION_SAS_TOKEN_REFRESH_TIME, (const void*)&refresh_time));
     }
 
     // Send the Event from the client
     LogInfo("Send message and wait for confirmation...");
-    d2cMessageInitial = client_create_and_send_d2c(iotHubClientHandle, TEST_MESSAGE_CREATE_BYTE_ARRAY);
+    d2cMessageInitial = client_create_and_send_d2c(iot_client_handle, TEST_MESSAGE_CREATE_BYTE_ARRAY);
     
     // Wait for confirmation that the event was recevied
     bool dataWasRecv = client_wait_for_d2c_confirmation(d2cMessageInitial, IOTHUB_CLIENT_CONFIRMATION_OK);
@@ -990,12 +988,12 @@ void e2e_d2c_with_svc_fault_ctrl_with_transport_status(IOTHUB_CLIENT_TRANSPORT_P
 
     // Set callback.  This is required to create the D2C link (it's not created otherwise) that we'll get DETATCH message on.
     receiveUserContext = ReceiveUserContext_Create();
-    IOTHUB_CLIENT_RESULT result = IoTHubClient_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, receiveUserContext);
+    IOTHUB_CLIENT_RESULT result = IoTHubDeviceClient_SetMessageCallback(iot_client_handle, ReceiveMessageCallback, receiveUserContext);
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Setting message callback failed");
 
     // Send the Fault Control Event from the client
     LogInfo("Send server fault control message...");
-    d2cMessageFaultInjection = send_error_injection_message(iotHubClientHandle, faultOperationType, faultOperationCloseReason, faultOperationDelayInSecs);
+    d2cMessageFaultInjection = send_error_injection_message(iot_client_handle, faultOperationType, faultOperationCloseReason, faultOperationDelayInSecs);
 
     LogInfo("Sleeping after sending fault injection...");
     ThreadAPI_Sleep(3000);
@@ -1018,14 +1016,14 @@ void e2e_d2c_with_svc_fault_ctrl_with_transport_status(IOTHUB_CLIENT_TRANSPORT_P
 
     // Send the Event from the client
     LogInfo("Send message after the server fault and wait for confirmation...");
-    d2cMessageDuringRetry = client_create_and_send_d2c(iotHubClientHandle, TEST_MESSAGE_CREATE_BYTE_ARRAY);
+    d2cMessageDuringRetry = client_create_and_send_d2c(iot_client_handle, TEST_MESSAGE_CREATE_BYTE_ARRAY);
     // Wait for confirmation that the event was recevied
     LogInfo("wait for d2c confirm...");
     dataWasRecv = client_wait_for_d2c_confirmation(d2cMessageDuringRetry, IOTHUB_CLIENT_CONFIRMATION_OK);
     ASSERT_IS_TRUE_WITH_MSG(dataWasRecv, "Failure sending data to IotHub"); // was received by the callback...
 
     // close the client connection
-    IoTHubClient_Destroy(iotHubClientHandle);
+    IoTHubDeviceClient_Destroy(iot_client_handle);
 
     // Wait for the message to arrive
     LogInfo("waiting for d2c arrive...");
@@ -1047,7 +1045,7 @@ void e2e_d2c_with_svc_fault_ctrl_error_message_callback(IOTHUB_CLIENT_TRANSPORT_
     IOTHUB_PROVISIONED_DEVICE* deviceToUse = IoTHubAccount_GetSASDevice(g_iothubAcctInfo);
 
     // arrange
-    IOTHUB_CLIENT_HANDLE iotHubClientHandle;
+    IOTHUB_DEVICE_CLIENT_HANDLE iot_client_handle;
     D2C_MESSAGE_HANDLE d2cMessageInitial = NULL;
     D2C_MESSAGE_HANDLE d2cMessageFaultInjection = NULL;
     D2C_MESSAGE_HANDLE d2cMessageDuringRetry = NULL;
@@ -1055,17 +1053,17 @@ void e2e_d2c_with_svc_fault_ctrl_error_message_callback(IOTHUB_CLIENT_TRANSPORT_
     clear_connection_status_info_flags();
 
     // Create the IoT Hub Data
-    iotHubClientHandle = client_connect_to_hub(deviceToUse, protocol);
+    iot_client_handle = client_connect_to_hub(deviceToUse, protocol);
 
     if (setTimeoutOption)
     {
-        IOTHUB_CLIENT_RESULT setOptionResult = IoTHubClient_SetOption(iotHubClientHandle, "event_send_timeout_secs", "30");
+        IOTHUB_CLIENT_RESULT setOptionResult = IoTHubDeviceClient_SetOption(iot_client_handle, "event_send_timeout_secs", "30");
         ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, setOptionResult, "Failure setting transport timeout");
     }
 
     // Send the Event from the client
     LogInfo("Send message and wait for confirmation...");
-    d2cMessageInitial = client_create_and_send_d2c(iotHubClientHandle, TEST_MESSAGE_CREATE_STRING);
+    d2cMessageInitial = client_create_and_send_d2c(iot_client_handle, TEST_MESSAGE_CREATE_STRING);
 
     // Wait for confirmation that the event was recevied
     bool dataWasRecv = client_wait_for_d2c_confirmation(d2cMessageInitial, IOTHUB_CLIENT_CONFIRMATION_OK);
@@ -1073,13 +1071,13 @@ void e2e_d2c_with_svc_fault_ctrl_error_message_callback(IOTHUB_CLIENT_TRANSPORT_
 
     // Send the Fault Control Event from the client
     LogInfo("Send server fault control message...");
-    d2cMessageFaultInjection = send_error_injection_message(iotHubClientHandle, faultOperationType, faultOperationCloseReason, faultOperationDelayInSecs);
+    d2cMessageFaultInjection = send_error_injection_message(iot_client_handle, faultOperationType, faultOperationCloseReason, faultOperationDelayInSecs);
 
     LogInfo("Sleeping after sending fault injection...");
     ThreadAPI_Sleep(3000);
 
     LogInfo("Sending message and expect no confirmation...");
-    d2cMessageDuringRetry = client_create_and_send_d2c(iotHubClientHandle, TEST_MESSAGE_CREATE_STRING);
+    d2cMessageDuringRetry = client_create_and_send_d2c(iot_client_handle, TEST_MESSAGE_CREATE_STRING);
     dataWasRecv = client_wait_for_d2c_confirmation(d2cMessageDuringRetry, IOTHUB_CLIENT_CONFIRMATION_ERROR);
 
     if (isMqtt)
@@ -1098,13 +1096,13 @@ void e2e_d2c_with_svc_fault_ctrl_error_message_callback(IOTHUB_CLIENT_TRANSPORT_
         // MQTT should be able to reconnect.  This creates a new connection, and the initial fault-injection we
         // performed at the beginning of this test is NOT associated with this new connection which is why we expect success.
         LogInfo("Send message after the server fault and wait for confirmation...");
-        d2cMessageDuringRetry = client_create_and_send_d2c(iotHubClientHandle, TEST_MESSAGE_CREATE_STRING);
+        d2cMessageDuringRetry = client_create_and_send_d2c(iot_client_handle, TEST_MESSAGE_CREATE_STRING);
         dataWasRecv = client_wait_for_d2c_confirmation(d2cMessageDuringRetry, IOTHUB_CLIENT_CONFIRMATION_OK);
         ASSERT_IS_TRUE_WITH_MSG(dataWasRecv, "Failure getting response from IoT Hub..."); // was received by the callback...
     }
 
     // close the client connection
-    IoTHubClient_Destroy(iotHubClientHandle);
+    IoTHubDeviceClient_Destroy(iot_client_handle);
 
     // Wait for the message to arrive
     // service_wait_for_d2c_event_arrival(deviceToUse, d2cMessageDuringRetry);
@@ -1211,7 +1209,7 @@ static void recv_message_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLI
     // arrange
     IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle;
     IOTHUB_MESSAGING_CLIENT_HANDLE iotHubMessagingHandle;
-    IOTHUB_CLIENT_HANDLE iotHubClientHandle;
+    IOTHUB_DEVICE_CLIENT_HANDLE iot_client_handle;
 
     IOTHUB_MESSAGING_RESULT iotHubMessagingResult;
     IOTHUB_CLIENT_RESULT result;
@@ -1222,7 +1220,7 @@ static void recv_message_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLI
     clear_connection_status_info_flags();
 
     // Create device client
-    iotHubClientHandle = client_connect_to_hub(deviceToUse, protocol);
+    iot_client_handle = client_connect_to_hub(deviceToUse, protocol);
 
     // Create receive context
     const char* msg_content;
@@ -1238,7 +1236,7 @@ static void recv_message_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLI
     receiveUserContext = service_create_c2d(msg_content);
 
     // Set callback
-    result = IoTHubClient_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, receiveUserContext);
+    result = IoTHubDeviceClient_SetMessageCallback(iot_client_handle, ReceiveMessageCallback, receiveUserContext);
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Setting message callback failed");
 
     if (test_protocol_type == TEST_HTTP)
@@ -1283,7 +1281,7 @@ static void recv_message_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLI
     IoTHubMessaging_Destroy(iotHubMessagingHandle);
     IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
 
-    IoTHubClient_Destroy(iotHubClientHandle);
+    IoTHubDeviceClient_Destroy(iot_client_handle);
     ReceiveUserContext_Destroy(receiveUserContext);
 }
 
@@ -1302,7 +1300,7 @@ void e2e_c2d_with_svc_fault_ctrl(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, cons
     // arrange
     IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle;
     IOTHUB_MESSAGING_CLIENT_HANDLE iotHubMessagingHandle;
-    IOTHUB_CLIENT_HANDLE iotHubClientHandle;
+    IOTHUB_DEVICE_CLIENT_HANDLE iot_client_handle;
 
     IOTHUB_MESSAGING_RESULT iotHubMessagingResult;
     IOTHUB_CLIENT_RESULT result;
@@ -1315,13 +1313,13 @@ void e2e_c2d_with_svc_fault_ctrl(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, cons
     clear_connection_status_info_flags();
 
     // Create device client
-    iotHubClientHandle = client_connect_to_hub(deviceToUse, protocol);
+    iot_client_handle = client_connect_to_hub(deviceToUse, protocol);
 
     // Create receive context
     receiveUserContext = service_create_c2d(MSG_CONTENT);
 
     // Set callback
-    result = IoTHubClient_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, receiveUserContext);
+    result = IoTHubDeviceClient_SetMessageCallback(iot_client_handle, ReceiveMessageCallback, receiveUserContext);
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Setting message callback failed");
 
     // Create Service Client
@@ -1342,7 +1340,7 @@ void e2e_c2d_with_svc_fault_ctrl(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, cons
     ASSERT_IS_TRUE_WITH_MSG(receiveUserContext->wasFound, "Failure retrieving data from C2D"); // was found is written by the callback...
 
     LogInfo("Send server fault control message...");
-    d2cMessage = send_error_injection_message(iotHubClientHandle, faultOperationType, faultOperationCloseReason, faultOperationDelayInSecs);
+    d2cMessage = send_error_injection_message(iot_client_handle, faultOperationType, faultOperationCloseReason, faultOperationDelayInSecs);
 
     LogInfo("Sleeping after sending fault injection...");
     ThreadAPI_Sleep(3000);
@@ -1360,7 +1358,7 @@ void e2e_c2d_with_svc_fault_ctrl(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, cons
     IoTHubMessaging_Destroy(iotHubMessagingHandle);
     IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
 
-    IoTHubClient_Destroy(iotHubClientHandle);
+    IoTHubDeviceClient_Destroy(iot_client_handle);
     ReceiveUserContext_Destroy(receiveUserContext);
 
     destroy_d2c_message_handle(d2cMessage);

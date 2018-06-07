@@ -3814,7 +3814,7 @@ TEST_FUNCTION(prov_sc_query_individual_enrollment_success_paging_given_token_w_t
     queryResponse_free(query_resp);
 }
 
-/*---Note that this failure test covers all failures from other cases by virtue of making all possible calls---/*
+/*---Note that this failure test covers all failures from other cases by virtue of making all possible calls---*/
 /*Tests_PROVISIONING_SERVICE_CLIENT_22_080: [ If the 'POST' REST call fails, prov_sc_query_individual_enrollment shall fail and return a non-zero value ]*/
 /*Tests_PROVISIONING_SERVICE_CLIENT_22_082: [ If populating query_resp_ptr with the retrieved data fails, prov_sc_query_individual_enrollment shall fail and return a non-zero value ]*/
 TEST_FUNCTION(prov_sc_query_individual_enrollment_success_paging_given_token_w_token_return_ERROR)
@@ -4626,7 +4626,7 @@ TEST_FUNCTION(prov_sc_query_device_registration_state_success_paging_given_token
     queryResponse_free(query_resp);
 }
 
-/*---Note that this failure test covers all failures from other cases by virtue of making all possible calls--/*
+/*---Note that this failure test covers all failures from other cases by virtue of making all possible calls--*/
 /*Tests_PROVISIONING_SERVICE_CLIENT_22_096: [ If the 'POST' REST call fails, prov_sc_query_device_registration_state shall fail and return a non-zero value ]*/
 /*Tests_PROVISIONING_SERVICE_CLIENT_22_098: [ If populating query_resp_ptr with the retrieved data fails, prov_sc_query_device_registration_state shall fail and return a non-zero value ]*/
 TEST_FUNCTION(prov_sc_query_device_registration_state_success_paging_given_token_w_token_return_ERROR)

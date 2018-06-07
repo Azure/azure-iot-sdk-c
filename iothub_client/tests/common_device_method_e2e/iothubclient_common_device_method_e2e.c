@@ -13,7 +13,7 @@
 #include <time.h>
 #endif
 
-
+#include "iothub.h"
 #include "iothub_messaging_ll.h"
 
 #include "umock_c.h"
@@ -26,14 +26,12 @@
 
 #include "azure_c_shared_utility/lock.h"
 #include "azure_c_shared_utility/xlogging.h"
-
-#include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "iothub_service_client_auth.h"
 #include "iothub_devicemethod.h"
-#include "iothub_client.h"
+#include "iothub_device_client.h"
 
-#include "iothubclient_common_device_method_e2e.h"
+#include "Iothubclient_common_device_method_e2e.h"
 
 #define DEVICE_METHOD_SUB_WAIT_TIME_MS    (5 * 1000)
 
@@ -51,14 +49,14 @@ typedef struct IOTHUB_CONN_INFO_TAG
 static IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo = NULL;
 static IOTHUB_CONN_INFO g_conn_info;
 
-static IOTHUB_CLIENT_HANDLE iotHubClientHandle = NULL;
+static IOTHUB_DEVICE_CLIENT_HANDLE iot_client_handle = NULL;
 static IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle = NULL;
 static IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE serviceClientDeviceMethodHandle = NULL;
 
 
 void device_method_e2e_init(void)
 {
-    ASSERT_ARE_EQUAL(int, 0, platform_init() );
+    ASSERT_ARE_EQUAL(int, 0, IoTHub_Init() );
 
     IOTHUB_ACCOUNT_CONFIG config;
     config.number_of_sas_devices = 2;
@@ -77,8 +75,8 @@ void device_method_e2e_deinit(void)
     IoTHubAccount_deinit(g_iothubAcctInfo);
 
     // Need a double deinit
-    platform_deinit();
-    platform_deinit();
+    IoTHub_Deinit();
+    IoTHub_Deinit();
 
     Lock_Deinit(g_conn_info.lock);
 }
@@ -177,7 +175,7 @@ static int DeviceMethodWithUploadCallback(const char* method_name, const unsigne
     (void)userContextCallback;
 
     int responseCode;
-    if (IoTHubClient_UploadToBlobAsync(iotHubClientHandle, "hello_world.txt", (const unsigned char*)HELLO_WORLD, sizeof(HELLO_WORLD) - 1, fileUploadCallback, &g_conn_info) == IOTHUB_CLIENT_OK)
+    if (IoTHubDeviceClient_UploadToBlobAsync(iot_client_handle, "hello_world.txt", (const unsigned char*)HELLO_WORLD, sizeof(HELLO_WORLD) - 1, fileUploadCallback, &g_conn_info) == IOTHUB_CLIENT_OK)
     {
         LogInfo("Upload succeeded");
         char* RESPONSE_STRING = "{ \"Response\": \"Nothing\" }";
@@ -211,7 +209,7 @@ void test_device_method_with_string_ex(IOTHUB_PROVISIONED_DEVICE** devicesToUse,
     // Note: Device multiplexing is only supported by AMQP and HTTP protocols.
     // Note: device multiplexing is only supported if using CBS authentication.
 
-    IOTHUB_CLIENT_HANDLE* registered_devices = (IOTHUB_CLIENT_HANDLE*)malloc(sizeof(IOTHUB_CLIENT_HANDLE) * number_of_multiplexed_devices);
+    IOTHUB_DEVICE_CLIENT_HANDLE* registered_devices = (IOTHUB_DEVICE_CLIENT_HANDLE*)malloc(sizeof(IOTHUB_DEVICE_CLIENT_HANDLE) * number_of_multiplexed_devices);
     ASSERT_IS_NOT_NULL_WITH_MSG(registered_devices, "Failed allocating array of registered devices");
 
     IOTHUB_CONN_INFO** connection_infos = (IOTHUB_CONN_INFO**)malloc(sizeof(IOTHUB_CONN_INFO*) * number_of_multiplexed_devices);
@@ -239,16 +237,16 @@ void test_device_method_with_string_ex(IOTHUB_PROVISIONED_DEVICE** devicesToUse,
         client_config.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix(g_iothubAcctInfo);
         client_config.protocol = (const IOTHUB_CLIENT_TRANSPORT_PROVIDER)protocol;
 
-        registered_devices[iterator] = IoTHubClient_CreateWithTransport(transport_handle, &client_config);
+        registered_devices[iterator] = IoTHubDeviceClient_CreateWithTransport(transport_handle, &client_config);
         ASSERT_IS_NOT_NULL_WITH_MSG(registered_devices[iterator], "Failed creating multiplexed client");
 
-        result = IoTHubClient_SetConnectionStatusCallback(registered_devices[iterator], connection_status_callback, connection_infos[iterator]);
+        result = IoTHubDeviceClient_SetConnectionStatusCallback(registered_devices[iterator], connection_status_callback, connection_infos[iterator]);
         ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set connection Status Callback");
         
-        result = IoTHubClient_SetOption(registered_devices[iterator], OPTION_LOG_TRACE, &trace);
+        result = IoTHubDeviceClient_SetOption(registered_devices[iterator], OPTION_LOG_TRACE, &trace);
         ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set tracing option");
 
-        result = IoTHubClient_SetDeviceMethodCallback(registered_devices[iterator], DeviceMethodCallback, (void*)payload);
+        result = IoTHubDeviceClient_SetDeviceMethodCallback(registered_devices[iterator], DeviceMethodCallback, (void*)payload);
         ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device method callback");
     }
 
@@ -329,8 +327,8 @@ void test_device_method_with_string_ex(IOTHUB_PROVISIONED_DEVICE** devicesToUse,
 
     for (iterator = 0; iterator < number_of_multiplexed_devices; iterator++)
     {
-        (void)IoTHubClient_SetDeviceMethodCallback(registered_devices[iterator], NULL, NULL);
-        IoTHubClient_Destroy(registered_devices[iterator]);
+        (void)IoTHubDeviceClient_SetDeviceMethodCallback(registered_devices[iterator], NULL, NULL);
+        IoTHubDeviceClient_Destroy(registered_devices[iterator]);
     }
 
     IoTHubTransport_Destroy(transport_handle);
@@ -356,24 +354,24 @@ void test_device_method_with_string(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTH
 
     g_conn_info.conn_status = IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED;
 
-    iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
-    ASSERT_IS_NOT_NULL_WITH_MSG(iotHubClientHandle, "Could not invoke IoTHubClient_CreateFromConnectionString");
+    iot_client_handle = IoTHubDeviceClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
+    ASSERT_IS_NOT_NULL_WITH_MSG(iot_client_handle, "Could not invoke IoTHubDeviceClient_CreateFromConnectionString");
 
     if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509)
     {
-        result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
+        result = IoTHubDeviceClient_SetOption(iot_client_handle, OPTION_X509_CERT, deviceToUse->certificate);
         ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
-        result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
+        result = IoTHubDeviceClient_SetOption(iot_client_handle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
         ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
     }
 
-    result = IoTHubClient_SetConnectionStatusCallback(iotHubClientHandle, connection_status_callback, &g_conn_info);
+    result = IoTHubDeviceClient_SetConnectionStatusCallback(iot_client_handle, connection_status_callback, &g_conn_info);
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set connection Status Callback");
 
     // Turn on Log 
-    (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &trace);
+    (void)IoTHubDeviceClient_SetOption(iot_client_handle, OPTION_LOG_TRACE, &trace);
 
-    result = IoTHubClient_SetDeviceMethodCallback(iotHubClientHandle, DeviceMethodCallback, (void*)payload);
+    result = IoTHubDeviceClient_SetDeviceMethodCallback(iot_client_handle, DeviceMethodCallback, (void*)payload);
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device method callback");
 
     bool continue_running = true;
@@ -432,24 +430,24 @@ void test_device_method_calls_upload(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOT
 {
     g_conn_info.conn_status = IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED;
 
-    iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
-    ASSERT_IS_NOT_NULL_WITH_MSG(iotHubClientHandle, "Could not invoke IoTHubClient_CreateFromConnectionString");
+    iot_client_handle = IoTHubDeviceClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
+    ASSERT_IS_NOT_NULL_WITH_MSG(iot_client_handle, "Could not invoke IoTHubDeviceClient_CreateFromConnectionString");
 
     IOTHUB_CLIENT_RESULT result;
     if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509)
     {
-        result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
+        result = IoTHubDeviceClient_SetOption(iot_client_handle, OPTION_X509_CERT, deviceToUse->certificate);
         ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
-        result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
+        result = IoTHubDeviceClient_SetOption(iot_client_handle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
         ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
     }
 
-    result = IoTHubClient_SetConnectionStatusCallback(iotHubClientHandle, connection_status_callback, &g_conn_info);
+    result = IoTHubDeviceClient_SetConnectionStatusCallback(iot_client_handle, connection_status_callback, &g_conn_info);
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set connection Status Callback");
 
     // Turn on Log 
     bool trace = true;
-    (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &trace);
+    (void)IoTHubDeviceClient_SetOption(iot_client_handle, OPTION_LOG_TRACE, &trace);
 
     bool continue_running = true;
     time_t nowTime;
@@ -477,7 +475,7 @@ void test_device_method_calls_upload(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOT
         );
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_CONNECTION_STATUS, IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, g_conn_info.conn_status, "Device Not connected");
 
-    result = IoTHubClient_SetDeviceMethodCallback(iotHubClientHandle, DeviceMethodWithUploadCallback, (void*)payload);
+    result = IoTHubDeviceClient_SetDeviceMethodCallback(iot_client_handle, DeviceMethodWithUploadCallback, (void*)payload);
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device method callback");
 
     // Wait for the method to subscribe
@@ -553,7 +551,7 @@ static void client_create_with_properies_and_send_d2c(MAP_HANDLE mapHandle)
     }
 
     // act
-    result = IoTHubClient_SendEventAsync(iotHubClientHandle, msgHandle, NULL, NULL);
+    result = IoTHubDeviceClient_SendEventAsync(iot_client_handle, msgHandle, NULL, NULL);
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "SendEventAsync failed");
     IoTHubMessage_Destroy(msgHandle);
 }
@@ -566,24 +564,24 @@ static void test_device_method_with_string_svc_fault_ctrl(IOTHUB_PROVISIONED_DEV
 
     g_conn_info.conn_status = IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED;
 
-    iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
-    ASSERT_IS_NOT_NULL_WITH_MSG(iotHubClientHandle, "Could not invoke IoTHubClient_CreateFromConnectionString");
+    iot_client_handle = IoTHubDeviceClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
+    ASSERT_IS_NOT_NULL_WITH_MSG(iot_client_handle, "Could not invoke IoTHubDeviceClient_CreateFromConnectionString");
 
     if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509)
     {
-        result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
+        result = IoTHubDeviceClient_SetOption(iot_client_handle, OPTION_X509_CERT, deviceToUse->certificate);
         ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
-        result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
+        result = IoTHubDeviceClient_SetOption(iot_client_handle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
         ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
     }
 
-    result = IoTHubClient_SetConnectionStatusCallback(iotHubClientHandle, connection_status_callback, &g_conn_info);
+    result = IoTHubDeviceClient_SetConnectionStatusCallback(iot_client_handle, connection_status_callback, &g_conn_info);
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set connection Status Callback");
 
     // Turn on Log 
-    (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &trace);
+    (void)IoTHubDeviceClient_SetOption(iot_client_handle, OPTION_LOG_TRACE, &trace);
 
-    result = IoTHubClient_SetDeviceMethodCallback(iotHubClientHandle, DeviceMethodCallback, (void*)payload);
+    result = IoTHubDeviceClient_SetDeviceMethodCallback(iot_client_handle, DeviceMethodCallback, (void*)payload);
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device method callback");
 
     bool continue_running = true;
@@ -684,10 +682,10 @@ void device_method_function_cleanup()
         iotHubServiceClientHandle = NULL;
     }
 
-    if (iotHubClientHandle != NULL)
+    if (iot_client_handle != NULL)
     {
-        IoTHubClient_Destroy(iotHubClientHandle);
-        iotHubClientHandle = NULL;
+        IoTHubDeviceClient_Destroy(iot_client_handle);
+        iot_client_handle = NULL;
     }
 }
 
