@@ -75,9 +75,6 @@ extern void e2e_c2d_svc_fault_ctrl_MQTT_shut_down(IOTHUB_CLIENT_TRANSPORT_PROVID
 
 typedef void* D2C_MESSAGE_HANDLE;
 
-extern IOTHUB_DEVICE_CLIENT_HANDLE client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
-
-extern D2C_MESSAGE_HANDLE client_create_and_send_d2c(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, TEST_MESSAGE_CREATION_MECHANISM test_message_creation);
 extern bool client_wait_for_d2c_confirmation(D2C_MESSAGE_HANDLE d2cMessage, IOTHUB_CLIENT_CONFIRMATION_RESULT expectedClientResult);
 extern bool client_received_confirmation(D2C_MESSAGE_HANDLE d2cMessage, IOTHUB_CLIENT_CONFIRMATION_RESULT expectedClientResult);
 
