@@ -9,8 +9,6 @@
 #include <stddef.h>
 #endif
 
-#define UNREFERENCED_PARAMETER(x) x
-
 void* real_malloc(size_t size)
 {
     return malloc(size);
@@ -29,6 +27,7 @@ void real_free(void* ptr)
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/const_defines.h"
 #include "azure_c_shared_utility/base64.h"
 #include "azure_c_shared_utility/strings.h"
 #include "parson.h"
@@ -229,7 +228,7 @@ static void expected_calls_x509CertificateInfo_free(bool is_processed)
 
 static void expected_calls_x509CAReferences_free(bool has_secondary_ref)
 {
-    UNREFERENCED_PARAMETER(has_secondary_ref);
+    AZURE_UNREFERENCED_PARAMETER(has_secondary_ref);
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));

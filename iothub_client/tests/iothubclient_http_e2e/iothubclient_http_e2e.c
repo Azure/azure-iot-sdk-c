@@ -7,6 +7,7 @@
 
 #include "testrunnerswitcher.h"
 
+#include "iothub.h"
 #include "iothub_client.h"
 #include "iothub_client_options.h"
 #include "iothub_message.h"
@@ -19,7 +20,6 @@
 
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/threadapi.h"
-#include "azure_c_shared_utility/platform.h"
 
 static TEST_MUTEX_HANDLE g_dllByDll;
 static bool g_callbackRecv = false;
@@ -451,7 +451,7 @@ static void RecvMessage(IOTHUB_PROVISIONED_DEVICE* deviceToUse)
     IOTHUB_MESSAGE_HANDLE messageHandle;
 
     // act
-    platform_init();
+    IoTHub_Init();
 
     // Create Service Client
     iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo1));
@@ -549,14 +549,14 @@ static void RecvMessage(IOTHUB_PROVISIONED_DEVICE* deviceToUse)
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
     TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
-    platform_init();
+    IoTHub_Init();
     g_iothubAcctInfo1 = IoTHubAccount_Init(false);
     ASSERT_IS_NOT_NULL(g_iothubAcctInfo1);
     g_iothubAcctInfo2 = IoTHubAccount_Init(false);
     ASSERT_IS_NOT_NULL_WITH_MSG(g_iothubAcctInfo2, "Failure to init 2nd IoTHubAccount information.");
     g_iothubAcctInfo3 = IoTHubAccount_Init(false);
     ASSERT_IS_NOT_NULL_WITH_MSG(g_iothubAcctInfo3, "Failure to init 3rd IoTHubAccount information.");
-    platform_init();
+    IoTHub_Init();
 }
 
 TEST_SUITE_CLEANUP(TestClassCleanup)
@@ -564,7 +564,7 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     IoTHubAccount_deinit(g_iothubAcctInfo3);
     IoTHubAccount_deinit(g_iothubAcctInfo2);
     IoTHubAccount_deinit(g_iothubAcctInfo1);
-    platform_deinit();
+    IoTHub_Deinit();
     TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
@@ -774,7 +774,7 @@ TEST_FUNCTION(IoTHub_HTTP_RecvMessage_shared_E2ETest)
     iotHubConfig2.deviceKey = IoTHubAccount_GetSASDevice(g_iothubAcctInfo2)->primaryAuthentication;
     iotHubConfig2.protocol = HTTP_Protocol;
 
-    platform_init();
+    IoTHub_Init();
 
     // Create the transport
     {

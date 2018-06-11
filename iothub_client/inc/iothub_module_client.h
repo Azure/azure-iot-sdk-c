@@ -270,13 +270,13 @@ extern "C"
     * @brief    This API sets callback for async cloud to module method call.
     *
     * @param    iotHubClientHandle              The handle created by a call to the create function.
-    * @param    inboundModuleMethodCallback     The callback which will be called by IoTHub.
+    * @param    methodCallback                  The callback which will be called by IoTHub.
     * @param    userContextCallback             User specified context that will be provided to the
     *                                           callback. This can be @c NULL.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SetModuleMethodCallback, IOTHUB_MODULE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK, inboundModuleMethodCallback, void*, userContextCallback);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SetModuleMethodCallback, IOTHUB_MODULE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC, methodCallback, void*, userContextCallback);
 
     /**
     * @brief    This API responses to a asnyc method callback identified the methodId.

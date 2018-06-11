@@ -14,8 +14,6 @@ extern "C"
     /**
     * @brief    IoTHubClient_Init Initializes the IoTHub Client System.
     *
-    * @param    client_param    Reserved for future use.
-    *
     * @return   int zero upon success, any other value upon failure.
     */
     MOCKABLE_FUNCTION(, int, IoTHub_Init);
