@@ -503,7 +503,7 @@ void test_device_method_with_string(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTH
 #ifndef DONT_USE_UPLOADTOBLOB
 void test_device_method_calls_upload(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char *payload)
 {
-    ASSERT_IS_NOT_NULL_WITH_MSG(deviceToUse->moduleConnectionString, "Modules do not support uploadToBlob")
+    ASSERT_IS_NULL_WITH_MSG(deviceToUse->moduleConnectionString, "Modules do not support uploadToBlob")
     g_conn_info.conn_status = IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED;
 
     create_hub_client_from_provisioned_device(deviceToUse, protocol);
