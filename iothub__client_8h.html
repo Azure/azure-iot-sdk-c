@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Microsoft Azure IoT Device SDK for C
-   &#160;<span id="projectnumber">1.2.4</span>
+   &#160;<span id="projectnumber">1.2.5</span>
    </div>
    <div id="projectbrief">The Microsoft Azure IoT device libraries for C contain code that facilitates building devices and applications that connect to and are managed by Azure IoT Hub services.</div>
   </td>
@@ -73,10 +73,13 @@ $(function() {
 
 <p>Extends the IoTHubCLient_LL module with additional features.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &quot;iothubtransport.h&quot;</code><br />
-<code>#include &lt;stddef.h&gt;</code><br />
+<div class="textblock"><code>#include &lt;stddef.h&gt;</code><br />
 <code>#include &lt;stdint.h&gt;</code><br />
 <code>#include &quot;azure_c_shared_utility/umock_c_prod.h&quot;</code><br />
+<code>#include &quot;iothub_transport_ll.h&quot;</code><br />
+<code>#include &quot;iothub_client_core_ll.h&quot;</code><br />
+<code>#include &quot;iothub_client_core.h&quot;</code><br />
+<code>#include &quot;<a class="el" href="iothub__client__ll_8h_source.html">iothub_client_ll.h</a>&quot;</code><br />
 </div>
 <p><a href="iothub__client_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -85,10 +88,10 @@ Functions</h2></td></tr>
 <tr class="memitem:aa9bdb753a3cad9a86c398a8d3a09b286"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#aa9bdb753a3cad9a86c398a8d3a09b286">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_HANDLE, IoTHubClient_CreateFromConnectionString, const char *, connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER, protocol)</td></tr>
 <tr class="memdesc:aa9bdb753a3cad9a86c398a8d3a09b286"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a IoT Hub client for communication with an existing IoT Hub using the specified connection string parameter.  <a href="#aa9bdb753a3cad9a86c398a8d3a09b286">More...</a><br /></td></tr>
 <tr class="separator:aa9bdb753a3cad9a86c398a8d3a09b286"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3047e9e8e5ea59948fde4e7fd390072e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a3047e9e8e5ea59948fde4e7fd390072e">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_HANDLE, IoTHubClient_Create, const <a class="el" href="iothub__client__ll_8h.html#ac14a59dcc227623976d044d1805b5e22">IOTHUB_CLIENT_CONFIG</a> *, config)</td></tr>
+<tr class="memitem:a3047e9e8e5ea59948fde4e7fd390072e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a3047e9e8e5ea59948fde4e7fd390072e">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_HANDLE, IoTHubClient_Create, const IOTHUB_CLIENT_CONFIG *, config)</td></tr>
 <tr class="memdesc:a3047e9e8e5ea59948fde4e7fd390072e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a IoT Hub client for communication with an existing IoT Hub using the specified parameters.  <a href="#a3047e9e8e5ea59948fde4e7fd390072e">More...</a><br /></td></tr>
 <tr class="separator:a3047e9e8e5ea59948fde4e7fd390072e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8ce62be6053d5e5c715552b7b1c469d9"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a8ce62be6053d5e5c715552b7b1c469d9">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_HANDLE, IoTHubClient_CreateWithTransport, TRANSPORT_HANDLE, transportHandle, const <a class="el" href="iothub__client__ll_8h.html#ac14a59dcc227623976d044d1805b5e22">IOTHUB_CLIENT_CONFIG</a> *, config)</td></tr>
+<tr class="memitem:a8ce62be6053d5e5c715552b7b1c469d9"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a8ce62be6053d5e5c715552b7b1c469d9">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_HANDLE, IoTHubClient_CreateWithTransport, TRANSPORT_HANDLE, transportHandle, const IOTHUB_CLIENT_CONFIG *, config)</td></tr>
 <tr class="memdesc:a8ce62be6053d5e5c715552b7b1c469d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a IoT Hub client for communication with an existing IoT Hub using the specified parameters.  <a href="#a8ce62be6053d5e5c715552b7b1c469d9">More...</a><br /></td></tr>
 <tr class="separator:a8ce62be6053d5e5c715552b7b1c469d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a177255fd666da6e5b52b4f0cb93d311f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a177255fd666da6e5b52b4f0cb93d311f">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_HANDLE, IoTHubClient_CreateFromDeviceAuth, const char *, iothub_uri, const char *, device_id, IOTHUB_CLIENT_TRANSPORT_PROVIDER, protocol)</td></tr>
@@ -97,52 +100,52 @@ Functions</h2></td></tr>
 <tr class="memitem:a72b166577636e060ae439b94e9c18d42"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a72b166577636e060ae439b94e9c18d42">MOCKABLE_FUNCTION</a> (, void, IoTHubClient_Destroy, IOTHUB_CLIENT_HANDLE, iotHubClientHandle)</td></tr>
 <tr class="memdesc:a72b166577636e060ae439b94e9c18d42"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disposes of resources allocated by the IoT Hub client. This is a blocking call.  <a href="#a72b166577636e060ae439b94e9c18d42">More...</a><br /></td></tr>
 <tr class="separator:a72b166577636e060ae439b94e9c18d42"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa3314f9cbd49b730e41f10dc90d35f37"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#aa3314f9cbd49b730e41f10dc90d35f37">MOCKABLE_FUNCTION</a> (, <a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>, IoTHubClient_SendEventAsync, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_MESSAGE_HANDLE, eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, eventConfirmationCallback, void *, userContextCallback)</td></tr>
+<tr class="memitem:aa3314f9cbd49b730e41f10dc90d35f37"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#aa3314f9cbd49b730e41f10dc90d35f37">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_RESULT, IoTHubClient_SendEventAsync, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_MESSAGE_HANDLE, eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, eventConfirmationCallback, void *, userContextCallback)</td></tr>
 <tr class="memdesc:aa3314f9cbd49b730e41f10dc90d35f37"><td class="mdescLeft">&#160;</td><td class="mdescRight">Asynchronous call to send the message specified by <code>eventMessageHandle</code>.  <a href="#aa3314f9cbd49b730e41f10dc90d35f37">More...</a><br /></td></tr>
 <tr class="separator:aa3314f9cbd49b730e41f10dc90d35f37"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a173cb7eda5bd6d8ccba97660995a8b1f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a173cb7eda5bd6d8ccba97660995a8b1f">MOCKABLE_FUNCTION</a> (, <a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>, IoTHubClient_GetSendStatus, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, <a class="el" href="iothub__client__ll_8h.html#a06bec2310f92a54329a1f39b0804ee88">IOTHUB_CLIENT_STATUS</a> *, iotHubClientStatus)</td></tr>
+<tr class="memitem:a173cb7eda5bd6d8ccba97660995a8b1f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a173cb7eda5bd6d8ccba97660995a8b1f">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_RESULT, IoTHubClient_GetSendStatus, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_STATUS *, iotHubClientStatus)</td></tr>
 <tr class="memdesc:a173cb7eda5bd6d8ccba97660995a8b1f"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function returns the current sending status for IoTHubClient.  <a href="#a173cb7eda5bd6d8ccba97660995a8b1f">More...</a><br /></td></tr>
 <tr class="separator:a173cb7eda5bd6d8ccba97660995a8b1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a77e7e46406bb1819300e044205b0bbbd"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a77e7e46406bb1819300e044205b0bbbd">MOCKABLE_FUNCTION</a> (, <a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>, IoTHubClient_SetMessageCallback, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC, messageCallback, void *, userContextCallback)</td></tr>
+<tr class="memitem:a77e7e46406bb1819300e044205b0bbbd"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a77e7e46406bb1819300e044205b0bbbd">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_RESULT, IoTHubClient_SetMessageCallback, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC, messageCallback, void *, userContextCallback)</td></tr>
 <tr class="memdesc:a77e7e46406bb1819300e044205b0bbbd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets up the message callback to be invoked when IoT Hub issues a message to the device. This is a blocking call.  <a href="#a77e7e46406bb1819300e044205b0bbbd">More...</a><br /></td></tr>
 <tr class="separator:a77e7e46406bb1819300e044205b0bbbd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab29bb0e99747ab6e26b863a740352c38"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#ab29bb0e99747ab6e26b863a740352c38">MOCKABLE_FUNCTION</a> (, <a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>, IoTHubClient_SetConnectionStatusCallback, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK, connectionStatusCallback, void *, userContextCallback)</td></tr>
+<tr class="memitem:ab29bb0e99747ab6e26b863a740352c38"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#ab29bb0e99747ab6e26b863a740352c38">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_RESULT, IoTHubClient_SetConnectionStatusCallback, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK, connectionStatusCallback, void *, userContextCallback)</td></tr>
 <tr class="memdesc:ab29bb0e99747ab6e26b863a740352c38"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets up the connection status callback to be invoked representing the status of the connection to IOT Hub. This is a blocking call.  <a href="#ab29bb0e99747ab6e26b863a740352c38">More...</a><br /></td></tr>
 <tr class="separator:ab29bb0e99747ab6e26b863a740352c38"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a13fe667b55ff033fcd25e45ca7e64275"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a13fe667b55ff033fcd25e45ca7e64275">MOCKABLE_FUNCTION</a> (, <a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>, IoTHubClient_SetRetryPolicy, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, <a class="el" href="iothub__client__ll_8h.html#a2d8ad59aa248034ed2e231835f703a01">IOTHUB_CLIENT_RETRY_POLICY</a>, retryPolicy, size_t, retryTimeoutLimitInSeconds)</td></tr>
+<tr class="memitem:a13fe667b55ff033fcd25e45ca7e64275"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a13fe667b55ff033fcd25e45ca7e64275">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_RESULT, IoTHubClient_SetRetryPolicy, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY, retryPolicy, size_t, retryTimeoutLimitInSeconds)</td></tr>
 <tr class="memdesc:a13fe667b55ff033fcd25e45ca7e64275"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets up the connection status callback to be invoked representing the status of the connection to IOT Hub. This is a blocking call.  <a href="#a13fe667b55ff033fcd25e45ca7e64275">More...</a><br /></td></tr>
 <tr class="separator:a13fe667b55ff033fcd25e45ca7e64275"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8ce0c78dc95464f35b3b7d0dc825cb97"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a8ce0c78dc95464f35b3b7d0dc825cb97">MOCKABLE_FUNCTION</a> (, <a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>, IoTHubClient_GetRetryPolicy, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, <a class="el" href="iothub__client__ll_8h.html#a2d8ad59aa248034ed2e231835f703a01">IOTHUB_CLIENT_RETRY_POLICY</a> *, retryPolicy, size_t *, retryTimeoutLimitInSeconds)</td></tr>
+<tr class="memitem:a8ce0c78dc95464f35b3b7d0dc825cb97"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a8ce0c78dc95464f35b3b7d0dc825cb97">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_RESULT, IoTHubClient_GetRetryPolicy, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY *, retryPolicy, size_t *, retryTimeoutLimitInSeconds)</td></tr>
 <tr class="memdesc:a8ce0c78dc95464f35b3b7d0dc825cb97"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets up the connection status callback to be invoked representing the status of the connection to IOT Hub. This is a blocking call.  <a href="#a8ce0c78dc95464f35b3b7d0dc825cb97">More...</a><br /></td></tr>
 <tr class="separator:a8ce0c78dc95464f35b3b7d0dc825cb97"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaa3e44c43e5be5272af822a02bc28b3f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#aaa3e44c43e5be5272af822a02bc28b3f">MOCKABLE_FUNCTION</a> (, <a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>, IoTHubClient_GetLastMessageReceiveTime, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, time_t *, lastMessageReceiveTime)</td></tr>
+<tr class="memitem:aaa3e44c43e5be5272af822a02bc28b3f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#aaa3e44c43e5be5272af822a02bc28b3f">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_RESULT, IoTHubClient_GetLastMessageReceiveTime, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, time_t *, lastMessageReceiveTime)</td></tr>
 <tr class="memdesc:aaa3e44c43e5be5272af822a02bc28b3f"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function returns in the out parameter <code>lastMessageReceiveTime</code> what was the value of the <code>time</code> function when the last message was received at the client.  <a href="#aaa3e44c43e5be5272af822a02bc28b3f">More...</a><br /></td></tr>
 <tr class="separator:aaa3e44c43e5be5272af822a02bc28b3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9dde5fbb4e3912faa5fbdf95875d1de6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a9dde5fbb4e3912faa5fbdf95875d1de6">MOCKABLE_FUNCTION</a> (, <a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>, IoTHubClient_SetOption, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, const char *, optionName, const void *, value)</td></tr>
+<tr class="memitem:a9dde5fbb4e3912faa5fbdf95875d1de6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a9dde5fbb4e3912faa5fbdf95875d1de6">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_RESULT, IoTHubClient_SetOption, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, const char *, optionName, const void *, value)</td></tr>
 <tr class="memdesc:a9dde5fbb4e3912faa5fbdf95875d1de6"><td class="mdescLeft">&#160;</td><td class="mdescRight">This API sets a runtime option identified by parameter <code>optionName</code> to a value pointed to by <code>value</code>. <code>optionName</code> and the data type <code>value</code> is pointing to are specific for every option.  <a href="#a9dde5fbb4e3912faa5fbdf95875d1de6">More...</a><br /></td></tr>
 <tr class="separator:a9dde5fbb4e3912faa5fbdf95875d1de6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ace2219303915c458bdcecb93c7bbc57b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#ace2219303915c458bdcecb93c7bbc57b">MOCKABLE_FUNCTION</a> (, <a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>, IoTHubClient_SetDeviceTwinCallback, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK, deviceTwinCallback, void *, userContextCallback)</td></tr>
+<tr class="memitem:ace2219303915c458bdcecb93c7bbc57b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#ace2219303915c458bdcecb93c7bbc57b">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_RESULT, IoTHubClient_SetDeviceTwinCallback, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK, deviceTwinCallback, void *, userContextCallback)</td></tr>
 <tr class="memdesc:ace2219303915c458bdcecb93c7bbc57b"><td class="mdescLeft">&#160;</td><td class="mdescRight">This API specifies a call back to be used when the device receives a state update.  <a href="#ace2219303915c458bdcecb93c7bbc57b">More...</a><br /></td></tr>
 <tr class="separator:ace2219303915c458bdcecb93c7bbc57b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae9b71f4a849b874609b8cd3c461124e0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#ae9b71f4a849b874609b8cd3c461124e0">MOCKABLE_FUNCTION</a> (, <a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>, IoTHubClient_SendReportedState, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, const unsigned char *, reportedState, size_t, size, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK, reportedStateCallback, void *, userContextCallback)</td></tr>
+<tr class="memitem:ae9b71f4a849b874609b8cd3c461124e0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#ae9b71f4a849b874609b8cd3c461124e0">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_RESULT, IoTHubClient_SendReportedState, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, const unsigned char *, reportedState, size_t, size, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK, reportedStateCallback, void *, userContextCallback)</td></tr>
 <tr class="memdesc:ae9b71f4a849b874609b8cd3c461124e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">This API sends a report of the device's properties and their current values.  <a href="#ae9b71f4a849b874609b8cd3c461124e0">More...</a><br /></td></tr>
 <tr class="separator:ae9b71f4a849b874609b8cd3c461124e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a038f24e972bd161298c679c1f856ecda"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a038f24e972bd161298c679c1f856ecda">MOCKABLE_FUNCTION</a> (, <a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>, IoTHubClient_SetDeviceMethodCallback, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC, deviceMethodCallback, void *, userContextCallback)</td></tr>
+<tr class="memitem:a038f24e972bd161298c679c1f856ecda"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a038f24e972bd161298c679c1f856ecda">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_RESULT, IoTHubClient_SetDeviceMethodCallback, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC, deviceMethodCallback, void *, userContextCallback)</td></tr>
 <tr class="memdesc:a038f24e972bd161298c679c1f856ecda"><td class="mdescLeft">&#160;</td><td class="mdescRight">This API sets callback for cloud to device method call.  <a href="#a038f24e972bd161298c679c1f856ecda">More...</a><br /></td></tr>
 <tr class="separator:a038f24e972bd161298c679c1f856ecda"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa7c9d5886dab687ed715ba23e93efa1c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#aa7c9d5886dab687ed715ba23e93efa1c">MOCKABLE_FUNCTION</a> (, <a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>, IoTHubClient_SetDeviceMethodCallback_Ex, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK, inboundDeviceMethodCallback, void *, userContextCallback)</td></tr>
+<tr class="memitem:aa7c9d5886dab687ed715ba23e93efa1c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#aa7c9d5886dab687ed715ba23e93efa1c">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_RESULT, IoTHubClient_SetDeviceMethodCallback_Ex, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK, inboundDeviceMethodCallback, void *, userContextCallback)</td></tr>
 <tr class="memdesc:aa7c9d5886dab687ed715ba23e93efa1c"><td class="mdescLeft">&#160;</td><td class="mdescRight">This API sets callback for async cloud to device method call.  <a href="#aa7c9d5886dab687ed715ba23e93efa1c">More...</a><br /></td></tr>
 <tr class="separator:aa7c9d5886dab687ed715ba23e93efa1c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3cb595d515e5175b868e0720cbaeb139"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a3cb595d515e5175b868e0720cbaeb139">MOCKABLE_FUNCTION</a> (, <a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>, IoTHubClient_DeviceMethodResponse, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, METHOD_HANDLE, methodId, const unsigned char *, response, size_t, response_size, int, statusCode)</td></tr>
+<tr class="memitem:a3cb595d515e5175b868e0720cbaeb139"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a3cb595d515e5175b868e0720cbaeb139">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_RESULT, IoTHubClient_DeviceMethodResponse, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, METHOD_HANDLE, methodId, const unsigned char *, response, size_t, response_size, int, statusCode)</td></tr>
 <tr class="memdesc:a3cb595d515e5175b868e0720cbaeb139"><td class="mdescLeft">&#160;</td><td class="mdescRight">This API responses to a asnyc method callback identified the methodId.  <a href="#a3cb595d515e5175b868e0720cbaeb139">More...</a><br /></td></tr>
 <tr class="separator:a3cb595d515e5175b868e0720cbaeb139"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a09f320467e655289b288c11114bc4be3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a09f320467e655289b288c11114bc4be3">MOCKABLE_FUNCTION</a> (, <a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>, IoTHubClient_UploadToBlobAsync, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, const char *, destinationFileName, const unsigned char *, source, size_t, size, IOTHUB_CLIENT_FILE_UPLOAD_CALLBACK, iotHubClientFileUploadCallback, void *, context)</td></tr>
+<tr class="memitem:a09f320467e655289b288c11114bc4be3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a09f320467e655289b288c11114bc4be3">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_RESULT, IoTHubClient_UploadToBlobAsync, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, const char *, destinationFileName, const unsigned char *, source, size_t, size, IOTHUB_CLIENT_FILE_UPLOAD_CALLBACK, iotHubClientFileUploadCallback, void *, context)</td></tr>
 <tr class="memdesc:a09f320467e655289b288c11114bc4be3"><td class="mdescLeft">&#160;</td><td class="mdescRight">IoTHubClient_UploadToBlobAsync uploads data from memory to a file in Azure Blob Storage.  <a href="#a09f320467e655289b288c11114bc4be3">More...</a><br /></td></tr>
 <tr class="separator:a09f320467e655289b288c11114bc4be3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a951773062a5c680391f362988f0647d8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a951773062a5c680391f362988f0647d8">MOCKABLE_FUNCTION</a> (, <a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>, IoTHubClient_UploadMultipleBlocksToBlobAsync, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, const char *, destinationFileName, <a class="el" href="iothub__client__ll_8h.html#a188fa4251310dad00defabb8f77a292f">IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK</a>, getDataCallback, void *, context)</td></tr>
+<tr class="memitem:a951773062a5c680391f362988f0647d8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a951773062a5c680391f362988f0647d8">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_RESULT, IoTHubClient_UploadMultipleBlocksToBlobAsync, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, const char *, destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK, getDataCallback, void *, context)</td></tr>
 <tr class="memdesc:a951773062a5c680391f362988f0647d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Uploads a file to a Blob storage in chunks, fed through the callback function provided by the user.  <a href="#a951773062a5c680391f362988f0647d8">More...</a><br /></td></tr>
 <tr class="separator:a951773062a5c680391f362988f0647d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a569b1228f6e4b270c3ad6f4651832659"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a569b1228f6e4b270c3ad6f4651832659">MOCKABLE_FUNCTION</a> (, <a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>, IoTHubClient_UploadMultipleBlocksToBlobAsyncEx, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, const char *, destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX, getDataCallbackEx, void *, context)</td></tr>
+<tr class="memitem:a569b1228f6e4b270c3ad6f4651832659"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a569b1228f6e4b270c3ad6f4651832659">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_RESULT, IoTHubClient_UploadMultipleBlocksToBlobAsyncEx, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, const char *, destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX, getDataCallbackEx, void *, context)</td></tr>
 <tr class="memdesc:a569b1228f6e4b270c3ad6f4651832659"><td class="mdescLeft">&#160;</td><td class="mdescRight">Uploads a file to a Blob storage in chunks, fed through the callback function provided by the user.  <a href="#a569b1228f6e4b270c3ad6f4651832659">More...</a><br /></td></tr>
 <tr class="separator:a569b1228f6e4b270c3ad6f4651832659"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -238,7 +241,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="iothub__client__ll_8h.html#ac14a59dcc227623976d044d1805b5e22">IOTHUB_CLIENT_CONFIG</a> *&#160;</td>
+          <td class="paramtype">const IOTHUB_CLIENT_CONFIG *&#160;</td>
           <td class="paramname">, </td>
         </tr>
         <tr>
@@ -300,7 +303,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="iothub__client__ll_8h.html#ac14a59dcc227623976d044d1805b5e22">IOTHUB_CLIENT_CONFIG</a> *&#160;</td>
+          <td class="paramtype">const IOTHUB_CLIENT_CONFIG *&#160;</td>
           <td class="paramname">, </td>
         </tr>
         <tr>
@@ -462,7 +465,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">MOCKABLE_FUNCTION </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>&#160;</td>
+          <td class="paramtype">IOTHUB_CLIENT_RESULT&#160;</td>
           <td class="paramname">, </td>
         </tr>
         <tr>
@@ -551,7 +554,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">MOCKABLE_FUNCTION </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>&#160;</td>
+          <td class="paramtype">IOTHUB_CLIENT_RESULT&#160;</td>
           <td class="paramname">, </td>
         </tr>
         <tr>
@@ -575,7 +578,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#a06bec2310f92a54329a1f39b0804ee88">IOTHUB_CLIENT_STATUS</a> *&#160;</td>
+          <td class="paramtype">IOTHUB_CLIENT_STATUS *&#160;</td>
           <td class="paramname">, </td>
         </tr>
         <tr>
@@ -613,7 +616,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">MOCKABLE_FUNCTION </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>&#160;</td>
+          <td class="paramtype">IOTHUB_CLIENT_RESULT&#160;</td>
           <td class="paramname">, </td>
         </tr>
         <tr>
@@ -689,7 +692,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">MOCKABLE_FUNCTION </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>&#160;</td>
+          <td class="paramtype">IOTHUB_CLIENT_RESULT&#160;</td>
           <td class="paramname">, </td>
         </tr>
         <tr>
@@ -765,7 +768,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">MOCKABLE_FUNCTION </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>&#160;</td>
+          <td class="paramtype">IOTHUB_CLIENT_RESULT&#160;</td>
           <td class="paramname">, </td>
         </tr>
         <tr>
@@ -789,7 +792,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#a2d8ad59aa248034ed2e231835f703a01">IOTHUB_CLIENT_RETRY_POLICY</a>&#160;</td>
+          <td class="paramtype">IOTHUB_CLIENT_RETRY_POLICY&#160;</td>
           <td class="paramname">, </td>
         </tr>
         <tr>
@@ -841,7 +844,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">MOCKABLE_FUNCTION </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>&#160;</td>
+          <td class="paramtype">IOTHUB_CLIENT_RESULT&#160;</td>
           <td class="paramname">, </td>
         </tr>
         <tr>
@@ -865,7 +868,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#a2d8ad59aa248034ed2e231835f703a01">IOTHUB_CLIENT_RETRY_POLICY</a> *&#160;</td>
+          <td class="paramtype">IOTHUB_CLIENT_RETRY_POLICY *&#160;</td>
           <td class="paramname">, </td>
         </tr>
         <tr>
@@ -917,7 +920,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">MOCKABLE_FUNCTION </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>&#160;</td>
+          <td class="paramtype">IOTHUB_CLIENT_RESULT&#160;</td>
           <td class="paramname">, </td>
         </tr>
         <tr>
@@ -979,7 +982,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">MOCKABLE_FUNCTION </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>&#160;</td>
+          <td class="paramtype">IOTHUB_CLIENT_RESULT&#160;</td>
           <td class="paramname">, </td>
         </tr>
         <tr>
@@ -1065,7 +1068,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">MOCKABLE_FUNCTION </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>&#160;</td>
+          <td class="paramtype">IOTHUB_CLIENT_RESULT&#160;</td>
           <td class="paramname">, </td>
         </tr>
         <tr>
@@ -1145,7 +1148,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">MOCKABLE_FUNCTION </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>&#160;</td>
+          <td class="paramtype">IOTHUB_CLIENT_RESULT&#160;</td>
           <td class="paramname">, </td>
         </tr>
         <tr>
@@ -1246,7 +1249,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">MOCKABLE_FUNCTION </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>&#160;</td>
+          <td class="paramtype">IOTHUB_CLIENT_RESULT&#160;</td>
           <td class="paramname">, </td>
         </tr>
         <tr>
@@ -1321,7 +1324,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">MOCKABLE_FUNCTION </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>&#160;</td>
+          <td class="paramtype">IOTHUB_CLIENT_RESULT&#160;</td>
           <td class="paramname">, </td>
         </tr>
         <tr>
@@ -1396,7 +1399,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">MOCKABLE_FUNCTION </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>&#160;</td>
+          <td class="paramtype">IOTHUB_CLIENT_RESULT&#160;</td>
           <td class="paramname">, </td>
         </tr>
         <tr>
@@ -1497,7 +1500,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">MOCKABLE_FUNCTION </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>&#160;</td>
+          <td class="paramtype">IOTHUB_CLIENT_RESULT&#160;</td>
           <td class="paramname">, </td>
         </tr>
         <tr>
@@ -1611,7 +1614,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">MOCKABLE_FUNCTION </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>&#160;</td>
+          <td class="paramtype">IOTHUB_CLIENT_RESULT&#160;</td>
           <td class="paramname">, </td>
         </tr>
         <tr>
@@ -1647,7 +1650,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#a188fa4251310dad00defabb8f77a292f">IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK</a>&#160;</td>
+          <td class="paramtype">IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK&#160;</td>
           <td class="paramname">, </td>
         </tr>
         <tr>
@@ -1700,7 +1703,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">MOCKABLE_FUNCTION </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>&#160;</td>
+          <td class="paramtype">IOTHUB_CLIENT_RESULT&#160;</td>
           <td class="paramname">, </td>
         </tr>
         <tr>
