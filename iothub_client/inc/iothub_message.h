@@ -179,6 +179,30 @@ MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetContentEncodingSystemProperty,
 MOCKABLE_FUNCTION(, MAP_HANDLE, IoTHubMessage_Properties, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
 
 /**
+* @brief   Sets a property on a Iothub Message.
+*
+* @param   iotHubMessageHandle Handle to the message.
+*
+* @param   key name of the property to set.
+*
+* @param   value of the property to set.
+*
+* @return  An @c IOTHUB_MESSAGE_RESULT value indicating the result of setting the property.
+*/
+MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetProperty, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, key, const char*, value);
+
+/**
+* @brief   Gets a IotHub Message's properties item.
+*
+* @param   iotHubMessageHandle Handle to the message.
+*
+* @param   key name of the property to retrieve.
+*
+* @return  A string with the property's value, or NULL if it does not exist in the properties list.
+*/
+MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetProperty, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, key);
+
+/**
 * @brief   Gets the MessageId from the IOTHUB_MESSAGE_HANDLE.
 *
 * @param   iotHubMessageHandle Handle to the message.

@@ -81,6 +81,10 @@ if(${use_custom_heap})
     add_definitions(-DGB_USE_CUSTOM_HEAP)
 endif()
 
+if (NOT ${use_amqp} AND NOT ${use_http} AND NOT ${use_mqtt})
+    message(FATAL_ERROR "CMAKE Failure: AMQP, HTTP & MQTT are all disable, iothub client must have one protocol enabled")
+endif()
+
 message(STATUS "Provisioning client ${use_prov_client}")
 if (XCODE AND ${use_prov_client})
     # The TPM module is not available on Mac, and Mac's <string.h> and <unistd.h> files collide as well
@@ -178,9 +182,11 @@ endif()
 # do not add or build any tests of the dependencies
 set(original_run_e2e_tests ${run_e2e_tests})
 set(original_run_unittests ${run_unittests})
+set(original_skip_samples ${skip_samples})
 
 set(run_e2e_tests OFF)
 set(run_unittests OFF)
+set(skip_samples ON)
 
 include("dependencies.cmake")
 
@@ -193,6 +199,7 @@ set_platform_files(${CMAKE_CURRENT_LIST_DIR}/c-utility)
 
 set(run_e2e_tests ${original_run_e2e_tests})
 set(run_unittests ${original_run_unittests})
+set(skip_samples ${original_skip_samples})
 
 enable_testing()
 
@@ -275,7 +282,7 @@ if (NOT ${use_amqp} OR NOT ${use_http})
     message(STATUS "iothub_service_client build is disabled (AMQP and HTTP support are required)")
 endif()
 
-if (NOT ${use_http})
+if (NOT ${use_http} AND ${use_prov_client})
     set (build_provisioning_service_client OFF)
     message(STATUS "provisioning_service_client build is disabled (HTTP support is required)")
 endif()

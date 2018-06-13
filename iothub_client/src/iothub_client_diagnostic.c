@@ -28,8 +28,8 @@ static char* get_epoch_time(char* timeBuffer)
         LogError("Failed getting current time");
         result = NULL;
     }
-	else if (timeLen == sizeof(int64_t))
-	{
+    else if (timeLen == sizeof(int64_t))
+    {
         long long llTime = (long long)epochTime;
         if (sprintf(timeBuffer, "%lld", llTime) < 0)
         {
@@ -40,9 +40,9 @@ static char* get_epoch_time(char* timeBuffer)
         {
             result = timeBuffer;
         }
-	}
-	else if (timeLen == sizeof(int32_t))
-	{
+    }
+    else if (timeLen == sizeof(int32_t))
+    {
         if (sprintf(timeBuffer, "%d", (int32_t)epochTime) < 0)
         {
             LogError("Failed sprintf to timeBuffer with 4 bytes of time_t");
@@ -52,7 +52,7 @@ static char* get_epoch_time(char* timeBuffer)
         {
             result = timeBuffer;
         }
-	}
+    }
     else
     {
         LogError("Unknow size of time_t");
@@ -69,7 +69,7 @@ static char get_base36_char(unsigned char value)
 
 static char* generate_eight_random_characters(char *randomString)
 {
-	int i;
+    int i;
     char* randomStringPos = randomString;
     for (i = 0; i < 4; ++i)
     {
@@ -89,9 +89,9 @@ static bool should_add_diagnostic_info(IOTHUB_DIAGNOSTIC_SETTING_DATA* diagSetti
     bool result = false;
     if (diagSetting->diagSamplingPercentage > 0)
     {
-		double number;
-		double percentage;
-		
+        double number;
+        double percentage;
+        
         if (diagSetting->currentMessageNumber == UINT32_MAX)
         {
             diagSetting->currentMessageNumber %= diagSetting->diagSamplingPercentage * 100;
@@ -123,8 +123,8 @@ static IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* prepare_message_diagnostic_data(
         }
         else
         {
-			char* timeBuffer;
-			
+            char* timeBuffer;
+            
             (void)generate_eight_random_characters(diagId);
             result->diagnosticId = diagId;
 

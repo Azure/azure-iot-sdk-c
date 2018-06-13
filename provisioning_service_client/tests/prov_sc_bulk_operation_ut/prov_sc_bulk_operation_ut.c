@@ -9,8 +9,6 @@
 #include <stddef.h>
 #endif
 
-#define UNREFERENCED_PARAMETER(x) x
-
 void* real_malloc(size_t size)
 {
     return malloc(size);
@@ -29,6 +27,7 @@ void real_free(void* ptr)
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/const_defines.h"
 #include "prov_service_client/provisioning_sc_shared_helpers.h"
 #include "prov_service_client/provisioning_sc_enrollment.h"
 #include "parson.h"
@@ -97,8 +96,8 @@ static int my_mallocAndStrcpy_s(char** destination, const char* source)
 
 static int my_copy_json_string_field(char** dest, JSON_Object* root_object, const char* json_key)
 {
-    UNREFERENCED_PARAMETER(root_object);
-    UNREFERENCED_PARAMETER(json_key);
+    AZURE_UNREFERENCED_PARAMETER(root_object);
+    AZURE_UNREFERENCED_PARAMETER(json_key);
 
     my_mallocAndStrcpy_s(dest, DUMMY_STRING);
 
@@ -107,9 +106,9 @@ static int my_copy_json_string_field(char** dest, JSON_Object* root_object, cons
 
 static int my_deserialize_and_get_struct_array(void*** dest_arr, size_t* dest_len, JSON_Object* root_object, const char* json_key, FROM_JSON_FUNCTION element_fromJson)
 {
-    UNREFERENCED_PARAMETER(root_object);
-    UNREFERENCED_PARAMETER(json_key);
-    UNREFERENCED_PARAMETER(element_fromJson);
+    AZURE_UNREFERENCED_PARAMETER(root_object);
+    AZURE_UNREFERENCED_PARAMETER(json_key);
+    AZURE_UNREFERENCED_PARAMETER(element_fromJson);
 
     if (error_arr_is_empty)
     {
