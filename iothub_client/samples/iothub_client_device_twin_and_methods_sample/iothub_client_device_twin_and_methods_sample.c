@@ -17,7 +17,7 @@
 #include "azure_c_shared_utility/macro_utils.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/platform.h"
-#include "iothub_client.h"
+#include "iothub_device_client.h"
 #include "iothub_client_options.h"
 #include "iothub_message.h"
 #include "parson.h"
@@ -269,7 +269,7 @@ static void reportedStateCallback(int status_code, void* userContextCallback)
 static void iothub_client_device_twin_and_methods_sample_run(void)
 {
     IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;
-    IOTHUB_CLIENT_HANDLE iotHubClientHandle;
+    IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle;
 
     // Select the Protocol to use with the connection
 #ifdef SAMPLE_MQTT
@@ -294,7 +294,7 @@ static void iothub_client_device_twin_and_methods_sample_run(void)
     }
     else
     {
-        if ((iotHubClientHandle = IoTHubClient_CreateFromConnectionString(connectionString, protocol)) == NULL)
+        if ((iotHubClientHandle = IoTHubDeviceClient_CreateFromConnectionString(connectionString, protocol)) == NULL)
         {
             (void)printf("ERROR: iotHubClientHandle is NULL!\r\n");
         }
@@ -302,11 +302,11 @@ static void iothub_client_device_twin_and_methods_sample_run(void)
         {
             // Uncomment the following lines to enable verbose logging (e.g., for debugging).
             //bool traceOn = true;
-            //(void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &traceOn);
+            //(void)IoTHubDeviceClient_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &traceOn);
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
             // For mbed add the certificate information
-            if (IoTHubClient_LL_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
+            if (IoTHubDeviceClient_LL_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
             {
                 (void)printf("failure to set option \"TrustedCerts\"\r\n");
             }
@@ -324,13 +324,13 @@ static void iothub_client_device_twin_and_methods_sample_run(void)
 
             char* reportedProperties = serializeToJson(&car);
 
-            (void)IoTHubClient_SendReportedState(iotHubClientHandle, (const unsigned char*)reportedProperties, strlen(reportedProperties), reportedStateCallback, NULL);
-            (void)IoTHubClient_SetDeviceMethodCallback(iotHubClientHandle, deviceMethodCallback, NULL);
-            (void)IoTHubClient_SetDeviceTwinCallback(iotHubClientHandle, deviceTwinCallback, &car);
+            (void)IoTHubDeviceClient_SendReportedState(iotHubClientHandle, (const unsigned char*)reportedProperties, strlen(reportedProperties), reportedStateCallback, NULL);
+            (void)IoTHubDeviceClient_SetDeviceMethodCallback(iotHubClientHandle, deviceMethodCallback, NULL);
+            (void)IoTHubDeviceClient_SetDeviceTwinCallback(iotHubClientHandle, deviceTwinCallback, &car);
 
             getchar();
 
-            IoTHubClient_Destroy(iotHubClientHandle);
+            IoTHubDeviceClient_Destroy(iotHubClientHandle);
             free(reportedProperties);
             free(car.changeOilReminder);
         }
