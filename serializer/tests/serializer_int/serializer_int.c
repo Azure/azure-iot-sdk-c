@@ -17,17 +17,6 @@
 static TEST_MUTEX_HANDLE g_testByTest;
 static TEST_MUTEX_HANDLE g_dllByDll;
 
-#ifdef CPP_UNITTEST
-/*apparently CppUniTest.h does not define the below which is needed for int64_t asserts*/
-template <> static std::wstring Microsoft::VisualStudio::CppUnitTestFramework::ToString < int64_t >(const int64_t& q)
-{
-    std::wstring result;
-    std::wostringstream o;
-    o << q;
-    return o.str();
-}
-#endif
-
 BEGIN_NAMESPACE(basic1)
 
 DECLARE_MODEL(basicModel_WithData1,

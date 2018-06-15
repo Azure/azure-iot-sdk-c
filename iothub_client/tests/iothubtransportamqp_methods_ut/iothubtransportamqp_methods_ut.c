@@ -19,6 +19,10 @@
 #include "umocktypes_bool.h"
 #include "umock_c_negative_tests.h"
 
+#if defined _MSC_VER
+#pragma warning(disable: 4054) /* MSC incorrectly fires this */
+#endif
+
 static TEST_MUTEX_HANDLE g_testByTest;
 static TEST_MUTEX_HANDLE g_dllByDll;
 

@@ -12,6 +12,10 @@
 
 #include <time.h>
 
+#if defined _MSC_VER
+#pragma warning(disable: 4054) /* MSC incorrectly fires this */
+#endif
+
 static size_t my_malloc_count;
 static void* my_malloc_items[100];
 

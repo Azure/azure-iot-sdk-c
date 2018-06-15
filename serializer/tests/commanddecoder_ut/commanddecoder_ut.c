@@ -9,6 +9,10 @@
 #include <stddef.h>
 #endif
 
+#if defined _MSC_VER
+#pragma warning(disable: 4054) /* MSC incorrectly fires this */
+#endif
+
 void* my_gballoc_malloc(size_t t)
 {
     return malloc(t);
