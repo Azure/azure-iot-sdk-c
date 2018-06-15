@@ -500,9 +500,9 @@ TEST_FUNCTION(hsm_client_http_edge_interface_succeed)
 
     //assert
     ASSERT_IS_NOT_NULL(http_edge_iface);
-    ASSERT_IS_NOT_NULL(http_edge_iface->hsm_client_http_edge_create);
-    ASSERT_IS_NOT_NULL(http_edge_iface->hsm_client_http_edge_destroy);
-    ASSERT_IS_NOT_NULL(http_edge_iface->hsm_client_sign_with_identity);
+    ASSERT_IS_NOT_NULL((void*)http_edge_iface->hsm_client_http_edge_create);
+    ASSERT_IS_NOT_NULL((void*)http_edge_iface->hsm_client_http_edge_destroy);
+    ASSERT_IS_NOT_NULL((void*)http_edge_iface->hsm_client_sign_with_identity);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
