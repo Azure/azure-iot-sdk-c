@@ -12,6 +12,7 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/socketio.h"
 #include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_uhttp_c/uhttp.h"
 
 #include "azure_c_shared_utility/envvariable.h"
@@ -34,12 +35,20 @@ static const int HSM_HTTP_EDGE_MAXIMUM_REQUEST_TIME = 60; // 1 Minute
 
 #include "hsm_client_http_edge.h"
 
+typedef enum WORKLOAD_PROTOCOL_TYPE_TAG
+{
+    WORKLOAD_PROTOCOL_TYPE_UNSPECIFIED,
+    WORKLOAD_PROTOCOL_TYPE_HTTP,
+    WORKLOAD_PROTOCOL_TYPE_UNIX_DOMAIN_SOCKET
+} WORKLOAD_PROTOCOL_TYPE;
+
 static const char* ENVIRONMENT_VAR_WORKLOADURI = "IOTEDGE_WORKLOADURI";
 static const char* ENVIRONMENT_VAR_MODULE_GENERATION_ID = "IOTEDGE_MODULEGENERATIONID";
 static const char* ENVIRONMENT_VAR_EDGEMODULEID = "IOTEDGE_MODULEID";
 
 typedef struct HSM_CLIENT_HTTP_EDGE
 {
+    WORKLOAD_PROTOCOL_TYPE workload_protocol_type;
     char* workload_hostname;
     int   workload_portnumber;
     char* edge_module_generation_id;
@@ -48,6 +57,9 @@ typedef struct HSM_CLIENT_HTTP_EDGE
 
 static const char http_prefix[] = "http://";
 static const int http_prefix_len = sizeof(http_prefix) - 1;
+
+static const char unix_domain_sockets_prefix[] = "unix://";
+static const int unix_domain_sockets_prefix_len = sizeof(unix_domain_sockets_prefix) - 1;
 
 static HSM_CLIENT_HTTP_EDGE_INTERFACE http_edge_interface = 
 {
@@ -58,6 +70,27 @@ static HSM_CLIENT_HTTP_EDGE_INTERFACE http_edge_interface =
     hsm_client_http_edge_get_trust_bundle
 };
 
+static WORKLOAD_PROTOCOL_TYPE get_workload_protocol_type(const char* workload_uri)
+{
+    WORKLOAD_PROTOCOL_TYPE workload_protocol_type;
+
+    if (strncmp(workload_uri, http_prefix, http_prefix_len) == 0)
+    {
+        workload_protocol_type = WORKLOAD_PROTOCOL_TYPE_HTTP;
+    }
+    else if (strncmp(workload_uri, unix_domain_sockets_prefix, unix_domain_sockets_prefix_len) == 0)
+    {
+        workload_protocol_type = WORKLOAD_PROTOCOL_TYPE_UNIX_DOMAIN_SOCKET;
+    }
+    else
+    {
+        LogError("WorkloadUri is set to %s, which is invalid", workload_uri);
+        workload_protocol_type = WORKLOAD_PROTOCOL_TYPE_UNSPECIFIED;
+    }
+
+    return workload_protocol_type;
+}
+
 // This is the string we use to connect to the edge device itself.  An example will be 
 // http://127.0.0.1:8080.  Note NOT "https" as that would require us to trust the edgelet's
 // server certificate, which we can't because we're still bootstrapping.
@@ -65,40 +98,64 @@ static int read_and_parse_edge_uri(HSM_CLIENT_HTTP_EDGE* hsm_client_http_edge)
 {
     const char* workload_uri;
     const char* colon_begin;
-    int result;
+    int result = 0;
 
     if ((workload_uri = environment_get_variable(ENVIRONMENT_VAR_WORKLOADURI)) == NULL)
     {
         LogError("Environment variable %s not specified", ENVIRONMENT_VAR_WORKLOADURI);
         result = __FAILURE__;
     }
-    else if (strncmp(workload_uri, http_prefix, http_prefix_len) != 0)
+    else if ((hsm_client_http_edge->workload_protocol_type = get_workload_protocol_type(workload_uri)) == WORKLOAD_PROTOCOL_TYPE_UNSPECIFIED)
     {
-        LogError("WorkloadUri is set to %s, but must begin with %s", workload_uri, http_prefix);
         result = __FAILURE__;
     }
-    else if ((colon_begin = strchr(workload_uri + http_prefix_len + 1, ':')) == NULL)
+
+    if (result == 0)
     {
-        LogError("WorkloadUri is set to %s, missing ':' to indicate port number", workload_uri);
-        result = __FAILURE__;
-    }
-    else if ((hsm_client_http_edge->workload_portnumber = atoi(colon_begin + 1)) == 0)
-    {
-        LogError("WorkloadUri is set to %s, port number is not legal", workload_uri);
-        result = __FAILURE__;
-    }
-    else if ((hsm_client_http_edge->workload_hostname = malloc(colon_begin - workload_uri)) == NULL)
-    {
-        LogError("Failed allocating workload_hostname");
-        result = __FAILURE__;
-    }
-    else
-    {
-        const char* hostname_start = workload_uri + http_prefix_len;
-        size_t chars_to_copy = colon_begin - workload_uri - http_prefix_len;
-        strncpy(hsm_client_http_edge->workload_hostname, hostname_start, chars_to_copy);
-        hsm_client_http_edge->workload_hostname[chars_to_copy] = 0;
-        result = 0;
+        if (hsm_client_http_edge->workload_protocol_type == WORKLOAD_PROTOCOL_TYPE_HTTP)
+        {
+            if ((colon_begin = strchr(workload_uri + http_prefix_len + 1, ':')) == NULL)
+            {
+                LogError("WorkloadUri is set to %s, missing ':' to indicate port number", workload_uri);
+                result = __FAILURE__;
+            }
+            else if ((hsm_client_http_edge->workload_portnumber = atoi(colon_begin + 1)) == 0)
+            {
+                LogError("WorkloadUri is set to %s, port number is not legal", workload_uri);
+                result = __FAILURE__;
+            }
+            else if ((hsm_client_http_edge->workload_hostname = malloc(colon_begin - workload_uri)) == NULL)
+            {
+                LogError("Failed allocating workload_hostname");
+                result = __FAILURE__;
+            }
+            else
+            {
+                const char* hostname_start = workload_uri + http_prefix_len;
+                size_t chars_to_copy = colon_begin - workload_uri - http_prefix_len;
+                strncpy(hsm_client_http_edge->workload_hostname, hostname_start, chars_to_copy);
+                hsm_client_http_edge->workload_hostname[chars_to_copy] = 0;
+                result = 0;
+            }
+        }
+        else if (hsm_client_http_edge->workload_protocol_type == WORKLOAD_PROTOCOL_TYPE_UNIX_DOMAIN_SOCKET)
+        {
+            // Make sure that there is an address set.
+            if (workload_uri[unix_domain_sockets_prefix_len] == 0)
+            {
+                LogError("hostname does not have content after prefix");
+                result = __FAILURE__;
+            }
+            else if (mallocAndStrcpy_s(&hsm_client_http_edge->workload_hostname, workload_uri + unix_domain_sockets_prefix_len) != 0)
+            {
+                LogError("Failed copying workload hostname");
+                result = __FAILURE__;
+            }
+            else
+            {
+                result = 0;
+            }
+        }
     }
 
     return result;
@@ -155,6 +212,7 @@ HSM_CLIENT_HANDLE hsm_client_http_edge_create()
     else
     {
         memset(result, 0, sizeof(HSM_CLIENT_HTTP_EDGE));
+        result->workload_protocol_type = WORKLOAD_PROTOCOL_TYPE_UNSPECIFIED;
         if (initialize_http_edge_device(result) != 0)
         {
             LogError("Failure initializing http edge device.");
@@ -397,6 +455,12 @@ static BUFFER_HANDLE send_http_workload_request(HSM_CLIENT_HTTP_EDGE* hsm_client
     if ((http_handle = uhttp_client_create(socketio_get_interface_description(), &config, on_edge_hsm_http_error, &workload_context)) == NULL)
     {
         LogError("uhttp_client_create failed");
+        result = __FAILURE__;
+    }
+    else if ((hsm_client_http_edge->workload_protocol_type == WORKLOAD_PROTOCOL_TYPE_UNIX_DOMAIN_SOCKET) &&
+             (uhttp_client_set_option(http_handle, OPTION_ADDRESS_TYPE, OPTION_ADDRESS_TYPE_DOMAIN_SOCKET) != 0))
+    {
+        LogError("setting unix domain socket option failed");
         result = __FAILURE__;
     }
     else if ((http_open_result = uhttp_client_open(http_handle, hsm_client_http_edge->workload_hostname, hsm_client_http_edge->workload_portnumber, on_edge_hsm_http_connected, &workload_context) != HTTP_CLIENT_OK) != HTTP_CLIENT_OK)
