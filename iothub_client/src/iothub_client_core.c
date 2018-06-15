@@ -2288,8 +2288,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetInputMessageCallback(IOTHUB_CLIENT_CORE
 {
     IOTHUB_CLIENT_RESULT result;
 
-    // Codes_SRS_IOTHUBCLIENT_31_097: [ If iotHubClientHandle or inputName is NULL, `IoTHubClient_SetInputMessageCallback` shall return IOTHUB_CLIENT_INVALID_ARG. ]
-    if ((iotHubClientHandle == NULL) || (inputName == NULL))
+    if (iotHubClientHandle == NULL)
     {
         result = IOTHUB_CLIENT_INVALID_ARG;
         LogError("NULL iothubClientHandle");

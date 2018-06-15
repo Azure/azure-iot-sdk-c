@@ -1673,7 +1673,13 @@ static bool is_event_equal(IOTHUB_EVENT_CALLBACK *event_callback, const char *in
         const char* event_input_name = STRING_c_str(event_callback->inputName);
         if ((event_input_name != NULL) && (input_name != NULL))
         {
+            // Matched the input queue name of a named handler
             result = (strcmp(event_input_name, input_name) == 0);
+        }
+        else if ((input_name == NULL) && (event_input_name == NULL))
+        {
+            // Matched the default handler
+            result = true;
         }
         else
         {
@@ -1695,6 +1701,8 @@ static bool is_event_equal_for_match(LIST_ITEM_HANDLE list_item, const void* mat
 bool IoTHubClientCore_LL_MessageCallbackFromInput(IOTHUB_CLIENT_CORE_LL_HANDLE handle, MESSAGE_CALLBACK_INFO* messageData)
 {
     bool result;
+    IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)handle;
+
     if ((handle == NULL) || messageData == NULL)
     {
         // Codes_SRS_IOTHUBCLIENT_LL_31_137: [ If either parameter `handle` or `messageData` is `NULL` then `IoTHubClient_LL_MessageCallbackFromInput` shall return `false`.** ]
@@ -1707,22 +1715,29 @@ bool IoTHubClientCore_LL_MessageCallbackFromInput(IOTHUB_CLIENT_CORE_LL_HANDLE h
         LogError("invalid argument messageData->messageHandle(NULL)");
         result = false;
     }
+    else if (handleData->event_callbacks == NULL)
+    {
+        LogError("Callback from input called but no input specific callbacks registered");
+        result = false;
+    }
     else
     {
-        IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)handle;
         const char* inputName = IoTHubMessage_GetInputName(messageData->messageHandle);
-        
+  
         LIST_ITEM_HANDLE item_handle = NULL;
-
-        if (handleData->event_callbacks != NULL)
-        {
-            item_handle = singlylinkedlist_find(handleData->event_callbacks, is_event_equal_for_match, (const void*)inputName);
-        }
+    
+        item_handle = singlylinkedlist_find(handleData->event_callbacks, is_event_equal_for_match, (const void*)inputName);
 
         if (item_handle == NULL)
         {
             // Codes_SRS_IOTHUBCLIENT_LL_31_138: [ If there is no registered handler for the inputName from `IoTHubMessage_GetInputName`, then `IoTHubClient_LL_MessageCallbackFromInput` shall attempt invoke the default handler handler.** ]
-            result = invoke_message_callback(handleData, messageData);
+            item_handle = singlylinkedlist_find(handleData->event_callbacks, is_event_equal_for_match, NULL);
+        }
+
+        if (item_handle == NULL)
+        {
+            LogError("Could not find callback (explicit or default) for input queue %s", inputName);
+            result = false;
         }
         else
         {
@@ -2432,12 +2447,12 @@ static IOTHUB_CLIENT_RESULT create_event_handler_callback(IOTHUB_CLIENT_CORE_LL_
 
         if (event_callback != NULL)
         {
-            if (event_callback->inputName == NULL)
+            if ((inputName != NULL) && (event_callback->inputName == NULL))
             {
                 event_callback->inputName = STRING_construct(inputName);
             }
 
-            if (event_callback->inputName != NULL)
+            if ((inputName == NULL) || (event_callback->inputName != NULL))
             {
                 event_callback->callbackAsync = callbackSync;
                 event_callback->callbackAsyncEx = callbackSyncEx;
@@ -2532,7 +2547,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetInputMessageCallbackImpl(IOTHUB_CLIE
 {
     IOTHUB_CLIENT_RESULT result;
 
-    if ((iotHubClientHandle == NULL) || (inputName == NULL))
+    if (iotHubClientHandle == NULL)
     {
         // Codes_SRS_IOTHUBCLIENT_LL_31_130: [ If `iotHubClientHandle` or `inputName` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall return IOTHUB_CLIENT_INVALID_ARG. ]
         LogError("Invalid argument - iotHubClientHandle=%p, inputName=%p", iotHubClientHandle, inputName);

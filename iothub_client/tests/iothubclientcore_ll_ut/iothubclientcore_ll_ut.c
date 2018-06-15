@@ -5393,7 +5393,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallback_with_NULL_iotHubClient
 }
 
 // Tests_SRS_IoTHubClientCore_LL_31_130: [ If `iotHubClientHandle` or `inputName` is NULL, `IoTHubClientCore_LL_SetInputMessageCallback` shall return IOTHUB_CLIENT_INVALID_ARG. ]
-TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallback_with_NULL_inputName_fails)
+TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallback_with_NULL_inputName_succeeds)
 {
     //arrange
     IOTHUB_CLIENT_CORE_LL_HANDLE handle = IoTHubClientCore_LL_Create(&TEST_CONFIG);
@@ -5403,7 +5403,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallback_with_NULL_inputName_fa
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SetInputMessageCallback(handle, NULL, messageCallback, (void*)1);
 
     ///assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
 
     //cleanup
     IoTHubClientCore_LL_Destroy(handle);
@@ -5775,8 +5775,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_with_unsubscribed_ret
     MESSAGE_CALLBACK_INFO* testMessage = make_test_message_info(TEST_MESSAGE_HANDLE);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetInputName(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(get_time(NULL));
 
     //act
     bool result = IoTHubClientCore_LL_MessageCallbackFromInput(handle, testMessage);
@@ -5841,7 +5839,10 @@ TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_no_match_one_item_in_
     STRICT_EXPECTED_CALL(singlylinkedlist_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_INPUT_NAME);
-    STRICT_EXPECTED_CALL(get_time(NULL));
+
+    STRICT_EXPECTED_CALL(singlylinkedlist_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_INPUT_NAME);    
 
     //act
     bool result = IoTHubClientCore_LL_MessageCallbackFromInput(handle, testMessage);
@@ -5934,7 +5935,16 @@ TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_no_match_with_multipl
     STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_INPUT_NAME3);
 
-    STRICT_EXPECTED_CALL(get_time(NULL));
+    STRICT_EXPECTED_CALL(singlylinkedlist_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_INPUT_NAME);
+
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_INPUT_NAME2);
+
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_INPUT_NAME3);
+
 
     //act
     bool result = IoTHubClientCore_LL_MessageCallbackFromInput(handle, testMessage);
@@ -5995,16 +6005,26 @@ TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_default_handler_no_re
     //arrange
     IOTHUB_CLIENT_CORE_LL_HANDLE handle = IoTHubClientCore_LL_Create(&TEST_CONFIG);
 
-    IOTHUB_CLIENT_RESULT result_set = IoTHubClientCore_LL_SetMessageCallback(handle, messageCallback, (void*)50);
+    setup_IoTHubClientCore_LL_SetInputMessageCallback_first_invocation_mocks();
+
+    IOTHUB_CLIENT_RESULT result_set = IoTHubClientCore_LL_SetInputMessageCallback(handle, NULL, messageCallback, (void*)61);
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result_set);
     
     MESSAGE_CALLBACK_INFO* testMessage = make_test_message_info(TEST_MESSAGE_HANDLE);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(IoTHubMessage_GetInputName(IGNORED_PTR_ARG));
-    
+    STRICT_EXPECTED_CALL(singlylinkedlist_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(NULL);
+
+    STRICT_EXPECTED_CALL(singlylinkedlist_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(NULL);
+
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(get_time(NULL));
-    STRICT_EXPECTED_CALL(messageCallback(testMessage->messageHandle, (void*)50));
+    STRICT_EXPECTED_CALL(messageCallback(testMessage->messageHandle, (void*)61));
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SendMessageDisposition(testMessage, IOTHUBMESSAGE_ACCEPTED));
 
     //act
@@ -6019,6 +6039,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_default_handler_no_re
     IoTHubClientCore_LL_Destroy(handle);
 }
 
+
 // Tests_SRS_IoTHubClientCore_LL_31_138: [ If there is no registered handler for the inputName from `IoTHubMessage_GetInputName`, then `IoTHubClientCore_LL_MessageCallbackFromInput` shall attempt invoke the default handler handler.** ]
 TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_default_handler_no_match_on_registered_inputs_suceeds)
 {
@@ -6030,7 +6051,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_default_handler_no_ma
 
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result_set);
 
-    result_set = IoTHubClientCore_LL_SetMessageCallback(handle, messageCallback, (void*)61);
+    result_set = IoTHubClientCore_LL_SetInputMessageCallback(handle, NULL, messageCallback, (void*)61);
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result_set);
     
     MESSAGE_CALLBACK_INFO* testMessage = make_test_message_info(TEST_MESSAGE_HANDLE);
@@ -6040,7 +6061,16 @@ TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_default_handler_no_ma
     STRICT_EXPECTED_CALL(singlylinkedlist_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_INPUT_NAME_NOTFOUND);
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(NULL);
 
+    STRICT_EXPECTED_CALL(singlylinkedlist_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_INPUT_NAME_NOTFOUND);
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(NULL);
+
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(messageCallback(testMessage->messageHandle, (void*)61));
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SendMessageDisposition(testMessage, IOTHUBMESSAGE_ACCEPTED));
@@ -6058,7 +6088,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_default_handler_no_ma
 }
 
 // Tests_SRS_IoTHubClientCore_LL_31_138: [ If there is no registered handler for the inputName from `IoTHubMessage_GetInputName`, then `IoTHubClientCore_LL_MessageCallbackFromInput` shall attempt invoke the default handler handler.** ]
-TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_default_handler_ex_no_registered_inputs_suceeds)
+TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_default_handler_ex_no_registered_inputs_fails)
 {
     //arrange
     IOTHUB_CLIENT_CORE_LL_HANDLE handle = IoTHubClientCore_LL_Create(&TEST_CONFIG);
@@ -6068,17 +6098,12 @@ TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_default_handler_ex_no
     
     MESSAGE_CALLBACK_INFO* testMessage = make_test_message_info(TEST_MESSAGE_HANDLE);
     umock_c_reset_all_calls();
-
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetInputName(IGNORED_PTR_ARG));
     
-    STRICT_EXPECTED_CALL(get_time(NULL));
-    STRICT_EXPECTED_CALL(messageCallbackEx(testMessage, (void*)70));
-
     //act
     bool result = IoTHubClientCore_LL_MessageCallbackFromInput(handle, testMessage);
 
     //assert
-    ASSERT_IS_TRUE(result);
+    ASSERT_IS_FALSE(result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -6097,7 +6122,12 @@ TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_default_handler_ex_no
 
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result_set);
 
-    result_set = IoTHubClientCore_LL_SetMessageCallback_Ex(handle, messageCallbackEx, (void*)81);
+
+    MESSAGE_INPUT_CALLBACK_CONTEXT messageInputCallbackContext;
+    SetMessageInputContextValues(&messageInputCallbackContext, 1, 2, 3, true);
+    SetMessageInputContextValues(&expectedContextData, 1, 2, 3, true);
+    
+    result_set = IoTHubClientCore_LL_SetInputMessageCallbackEx(handle, TEST_INPUT_NAME, messageInputCallbackEx, &messageInputCallbackContext, sizeof(messageInputCallbackContext));
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result_set);
     
     MESSAGE_CALLBACK_INFO* testMessage = make_test_message_info(TEST_MESSAGE_HANDLE);
@@ -6107,9 +6137,18 @@ TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_default_handler_ex_no
     STRICT_EXPECTED_CALL(singlylinkedlist_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_INPUT_NAME_NOTFOUND);
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(NULL);
 
+    STRICT_EXPECTED_CALL(singlylinkedlist_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_INPUT_NAME_NOTFOUND);
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(NULL);
+
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(get_time(NULL));
-    STRICT_EXPECTED_CALL(messageCallbackEx(testMessage, (void*)81));
+    STRICT_EXPECTED_CALL(messageInputCallbackEx(testMessage, IGNORED_PTR_ARG));
 
     //act
     bool result = IoTHubClientCore_LL_MessageCallbackFromInput(handle, testMessage);
@@ -6257,7 +6296,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallbackEx_with_NULL_iotHubClie
 }
 
 // Tests_SRS_IoTHubClientCore_LL_31_130: [ If `iotHubClientHandle` or `inputName` is NULL, `IoTHubClientCore_LL_SetInputMessageCallback` shall return IOTHUB_CLIENT_INVALID_ARG. ]
-TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallbackEx_with_NULL_inputName_fails)
+TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallbackEx_with_NULL_inputName_succeeds)
 {
     //arrange
     IOTHUB_CLIENT_CORE_LL_HANDLE handle = IoTHubClientCore_LL_Create(&TEST_CONFIG);
@@ -6269,7 +6308,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallbackEx_with_NULL_inputName_
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SetInputMessageCallbackEx(handle, NULL, messageInputCallbackEx, &messageInputCallbackContext, sizeof(messageInputCallbackContext));
 
     ///assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
 
     //cleanup
     IoTHubClientCore_LL_Destroy(handle);

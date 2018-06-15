@@ -539,8 +539,6 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetInputMessageCallback(IOTHUB_CLIENT_HANDLE i
 
 `IoTHubClient_SetInputMessageCallback` sets up the callback for a method which will be called by IoTHub when the message arrives on `inputName` queue.
 
-**SRS_IOTHUBCLIENT_31_097: [** If `iotHubClientHandle` or `inputName` is NULL, `IoTHubClient_SetInputMessageCallback` shall return IOTHUB_CLIENT_INVALID_ARG. **]**
-
 **SRS_IOTHUBCLIENT_31_098: [** `IoTHubClient_SetMessageCallback` shall start the worker thread if it was not previously started. **]**
 
 **SRS_IOTHUBCLIENT_31_099: [** `IoTHubClient_SetMessageCallback` shall call `IoTHubClient_LL_SetInputMessageCallback`, passing its input arguments. **]**
