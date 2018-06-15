@@ -29,6 +29,10 @@ static void my_gballoc_free(void* ptr)
 #include "umock_c_negative_tests.h"
 #include "azure_c_shared_utility/macro_utils.h"
 
+#if defined _MSC_VER
+#pragma warning(disable: 4054) /* MSC incorrectly fires this */
+#endif
+
 static int bool_Compare(bool left, bool right)
 {
     return left != right;
@@ -500,9 +504,9 @@ TEST_FUNCTION(hsm_client_http_edge_interface_succeed)
 
     //assert
     ASSERT_IS_NOT_NULL(http_edge_iface);
-    ASSERT_IS_NOT_NULL((void*)http_edge_iface->hsm_client_http_edge_create);
-    ASSERT_IS_NOT_NULL((void*)http_edge_iface->hsm_client_http_edge_destroy);
-    ASSERT_IS_NOT_NULL((void*)http_edge_iface->hsm_client_sign_with_identity);
+    ASSERT_IS_NOT_NULL(http_edge_iface->hsm_client_http_edge_create);
+    ASSERT_IS_NOT_NULL(http_edge_iface->hsm_client_http_edge_destroy);
+    ASSERT_IS_NOT_NULL(http_edge_iface->hsm_client_sign_with_identity);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
