@@ -12,6 +12,7 @@ This folder contains simple samples showing how to use the various features of t
    * **iothub_registrymanager_sample**: Shows how to use CRUD operations on the device registry 
 
 * Device services samples (Device Twins, Methods, and Device Management):
+   * **iothub_deviceconfiguration_sample**: Shows how to work with device Configurations in a back-end application
    * **iothub_devicemethod_sample**: Shows how to invoke a Cloud to Device direct Method from a back-end application
    * **iothub_devicetwin_sample**: Shows how to work with device Twins in a back-end application
 

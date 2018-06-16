@@ -40,7 +40,7 @@ DEFINE_ENUM_STRINGS(IOTHUB_DEVICE_TWIN_RESULT, IOTHUB_DEVICE_TWIN_RESULT_VALUES)
 #define  HTTP_HEADER_KEY_CONTENT_TYPE  "Content-Type"
 #define  HTTP_HEADER_VAL_CONTENT_TYPE  "application/json; charset=utf-8"
 #define  HTTP_HEADER_KEY_IFMATCH  "If-Match"
-#define  HTTP_HEADER_VAL_IFMATCH  "'*'"
+#define  HTTP_HEADER_VAL_IFMATCH  "*"
 #define UID_LENGTH 37
 
 static const char* URL_API_VERSION = "?api-version=2017-11-08-preview";
