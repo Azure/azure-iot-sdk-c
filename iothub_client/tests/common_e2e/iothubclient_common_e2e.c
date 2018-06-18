@@ -1322,6 +1322,10 @@ void e2e_c2d_with_svc_fault_ctrl(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, cons
     result = IoTHubDeviceClient_SetMessageCallback(iot_client_handle, ReceiveMessageCallback, receiveUserContext);
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Setting message callback failed");
 
+    LogInfo("Sleeping 3 seconds to let SetMessageCallback() register with server.");
+    ThreadAPI_Sleep(3000);
+    LogInfo("Continue with service client message.");
+
     // Create Service Client
     iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo));
     ASSERT_IS_NOT_NULL_WITH_MSG(iotHubServiceClientHandle, "Could not initialize IoTHubServiceClient to send C2D messages to the device");
@@ -1334,8 +1338,10 @@ void e2e_c2d_with_svc_fault_ctrl(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, cons
 
     // Send message
     service_send_c2d(iotHubMessagingHandle, receiveUserContext, deviceToUse);
+
     // wait for message to arrive on client
     client_wait_for_c2d_event_arrival(receiveUserContext);
+
     // assert
     ASSERT_IS_TRUE_WITH_MSG(receiveUserContext->wasFound, "Failure retrieving data from C2D"); // was found is written by the callback...
 
