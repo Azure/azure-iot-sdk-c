@@ -6,6 +6,11 @@
 
 set -e
 
+cat /etc/*release | grep VERSION*
+gcc --version
+openssl version
+curl --version
+
 script_dir=$(cd "$(dirname "$0")" && pwd)
 build_root=$(cd "${script_dir}/.." && pwd)
 build_folder=$build_root"/cmake/iot_option"

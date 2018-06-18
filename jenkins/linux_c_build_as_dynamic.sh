@@ -4,6 +4,12 @@
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+# Print version
+cat /etc/*release | grep VERSION*
+gcc --version
+openssl version
+curl --version
+
 set -e
 
 script_dir=$(cd "$(dirname "$0")" && pwd)
