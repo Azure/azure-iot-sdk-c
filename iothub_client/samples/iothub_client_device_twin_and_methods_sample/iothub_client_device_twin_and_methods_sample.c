@@ -13,12 +13,12 @@
 #include <stdlib.h>
 #include <inttypes.h>
 
-#include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/macro_utils.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/platform.h"
 #include "iothub_device_client.h"
 #include "iothub_client_options.h"
+#include "iothub.h"
 #include "iothub_message.h"
 #include "parson.h"
 
@@ -188,7 +188,7 @@ static int deviceMethodCallback(const char* method_name, const unsigned char* pa
         const char* deviceMethodResponse = "{ \"Response\": \"1HGCM82633A004352\" }";
         *response_size = sizeof(deviceMethodResponse);
         *response = malloc(sizeof(*response_size));
-        (void)sprintf((char *const)*response, deviceMethodResponse);
+        (void)memcpy(*response, deviceMethodResponse, *response_size);
         result = 200;
     }
     else
@@ -197,7 +197,7 @@ static int deviceMethodCallback(const char* method_name, const unsigned char* pa
         const char* deviceMethodResponse = "{ }";
         *response_size = sizeof(deviceMethodResponse);
         *response = malloc(sizeof(*response_size));
-        (void)sprintf((char *const)*response, deviceMethodResponse);
+        (void)memcpy(*response, deviceMethodResponse, *response_size);
         result = -1;
     }
 
@@ -288,7 +288,7 @@ static void iothub_client_device_twin_and_methods_sample_run(void)
     protocol = HTTP_Protocol;
 #endif // SAMPLE_HTTP
 
-    if (platform_init() != 0)
+    if (IoTHub_Init() != 0)
     {
         (void)printf("Failed to initialize the platform.\r\n");
     }
@@ -306,7 +306,7 @@ static void iothub_client_device_twin_and_methods_sample_run(void)
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
             // For mbed add the certificate information
-            if (IoTHubDeviceClient_LL_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
+            if (IoTHubDeviceClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
             {
                 (void)printf("failure to set option \"TrustedCerts\"\r\n");
             }
@@ -335,7 +335,7 @@ static void iothub_client_device_twin_and_methods_sample_run(void)
             free(car.changeOilReminder);
         }
 
-        platform_deinit();
+        IoTHub_Deinit();
     }
 }
 
