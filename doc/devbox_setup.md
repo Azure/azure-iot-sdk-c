@@ -163,6 +163,10 @@ This section describes how to set up a development environment for the C SDK on 
 
   > For information about how to upgrade your version of gcc on Ubuntu 14.04, read [How do I use the latest GCC 4.9 on Ubuntu 14.04?](http://askubuntu.com/questions/466651/how-do-i-use-the-latest-gcc-4-9-on-ubuntu-14-04).
 
+- Patch CURL to the latest version available.
+  > The minimum version of curl required is 7.56, as recent previous versions [presented critical failures](https://github.com/Azure/azure-iot-sdk-c/issues/308).
+  > To upgrade see "Upgrade CURL on Mac OS" steps below.
+  
 - Locate the tag name for the [latest release][latest-release] of the SDK.
   > Our release tag names are date values in `yyyy-mm-dd` format.
 

@@ -8,7 +8,7 @@ This repository contains the following:
 
 ## Packages and Libraries
   The simplest way to get started with the Azure IoT SDKs is to use the following packages and libraries:
-  * Linux (Ubuntu 14.04, 16.04): [Device SDK on apt-get](./iothub_client/readme.md#aptgetpackage)
+  * Linux: [Device SDK on apt-get](./iothub_client/readme.md#aptgetpackage)
   * mbed:                                      [Device SDK library on MBED](./iothub_client/readme.md#mbed)
   * Arduino:                                   [Device SDK library in the Arduino IDE](./iothub_client/readme.md#arduino)
   * Windows:                                   [Device SDK on NuGet](./iothub_client/readme.md#nugetpackage)
@@ -68,9 +68,9 @@ This SDK also contains options you can set and platform specific features.  You 
 | [Cloud-to-device messaging](https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-messages-c2d)     | :heavy_check_mark: | Use your backend app to send cloud-to-device messages in AMQP and AMQP-WS, and set up cloud-to-device message receivers.           |
 | [Direct Methods operations](https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-direct-methods)   | :heavy_check_mark: | Use your backend app to invoke direct method on device.                                                                            |
 | [Device Twins operations](https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-device-twins)       | :heavy_check_mark:* | Use your backend app to perform device twin operations.  *Twin reported property update callback and replace twin are in progress. |
-| [Query](https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-query-language)                       | :x: | Use your backend app to perform query for information.                                                                             |
-| [Jobs](https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-jobs)                                  | :x:                | Use your backend app to perform job operation.                                                                                     |
-| [File Upload](https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-file-upload)                    | :x:                | Set up your backend app to send file upload notification receiver.                                                                 |
+| [Query](https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-query-language)                       | :heavy_multiplication_x: | Use your backend app to perform query for information.                                                                             |
+| [Jobs](https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-jobs)                                  | :heavy_multiplication_x:                | Use your backend app to perform job operation.                                                                                     |
+| [File Upload](https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-file-upload)                    | :heavy_multiplication_x:                | Set up your backend app to send file upload notification receiver.                                                                 |
 
 ### Provisioning client SDK
 This repository contains [provisioning client SDK](./provisioning_client) for the [Device Provisioning Service](https://docs.microsoft.com/azure/iot-dps/).  Provisioning service SDK for C is work in progress.  Please see provisioning service SDK in [Node.js](https://github.com/Azure/azure-iot-sdk-node), [Java](https://github.com/Azure/azure-iot-sdk-java) and [.NET](https://github.com/Azure/azure-iot-sdk-csharp) in the meantime.

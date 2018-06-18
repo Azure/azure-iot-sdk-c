@@ -63,7 +63,7 @@ static const char* TOPIC_DEVICE_DEVICE = "devices/%s/messages/events/";
 
 static const char* TOPIC_DEVICE_METHOD_SUBSCRIBE = "$iothub/methods/POST/#";
 
-static const char* IOTHUB_API_VERSION = "2016-11-14";
+static const char* IOTHUB_API_VERSION = "2017-11-08-preview";
 
 static const char* PROPERTY_SEPARATOR = "&";
 static const char* REPORTED_PROPERTIES_TOPIC = "$iothub/twin/PATCH/properties/reported/?$rid=%"PRIu16;
@@ -2014,7 +2014,7 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 
 static STRING_HANDLE buildConfigForUsername(const IOTHUB_CLIENT_CONFIG* upperConfig)
 {
-    return STRING_construct_sprintf("%s.%s/%s/api-version=%s&DeviceClientType=", upperConfig->iotHubName, upperConfig->iotHubSuffix, upperConfig->deviceId, IOTHUB_API_VERSION);
+    return STRING_construct_sprintf("%s.%s/%s/?api-version=%s&DeviceClientType=", upperConfig->iotHubName, upperConfig->iotHubSuffix, upperConfig->deviceId, IOTHUB_API_VERSION);
 }
 
 static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLIENT_CONFIG* upperConfig, PDLIST_ENTRY waitingToSend, IOTHUB_AUTHORIZATION_HANDLE auth_module)

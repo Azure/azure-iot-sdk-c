@@ -12,6 +12,10 @@
 #include "umocktypes_charptr.h"
 #include "umocktypes_stdint.h"
 
+#if defined _MSC_VER
+#pragma warning(disable: 4054) /* MSC incorrectly fires this */
+#endif
+
 static void* real_malloc(size_t size)
 {
     return malloc(size);
