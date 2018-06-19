@@ -30,6 +30,7 @@ if(${use_sample_trusted_cert})
 endif()
 
 include_directories(.)
+include_directories(${PROJECT_SOURCE_DIR}/deps/parson)
 
 add_executable(iothub_client_device_twin_and_methods_sample ${iothub_client_device_twin_and_methods_sample_c_files} ${iothub_client_device_twin_and_methods_sample_h_files})
 
