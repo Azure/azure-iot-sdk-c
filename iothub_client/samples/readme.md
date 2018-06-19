@@ -14,7 +14,7 @@ This folder contains simple samples showing how to use the various features of t
   * **iothub_client_sample_http_shared**: send and receive messages from 2 devices over a single HTTP connection (multiplexing) (useful in Gateway scenarios)
 
 * Device services samples (Device Twins, Methods, and Device Management):
-  * **iothub_client_sample_device_method**: Implements a simple Cloud to Device Direct Method
+  * **iothub_client_device_twin_and_methods_sample**: Implements a simple Cloud to Device Direct Method and Device Twin sample
   * **iothub_client_sample_mqtt_dm**: Shows the implementation of a firmware update of a device (Raspberry Pi 3)
 
 * Uploading blob to Azure:

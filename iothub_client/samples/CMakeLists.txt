@@ -42,6 +42,5 @@ if(${use_amqp})
 endif()
 
 if(${use_amqp} AND ${use_mqtt})
-    add_sample_directory(iothub_client_sample_device_method)
-    add_sample_directory(iothub_client_sample_device_twin)
+    add_sample_directory(iothub_client_device_twin_and_methods_sample)
 endif()
