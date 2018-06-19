@@ -1,4 +1,5 @@
 set(mbed_project_files
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothub.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothub_client.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothub_client_core.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothub_client_core_common.h
@@ -20,6 +21,7 @@ set(mbed_project_files
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/internal/iothubtransport.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/blob.c
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothub_client_authorization.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothub.c
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothub_client.c
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothub_client_core.c
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothub_client_core_ll.c

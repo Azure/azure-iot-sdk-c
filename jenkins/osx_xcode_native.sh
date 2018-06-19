@@ -5,6 +5,9 @@
 
 set -e
 
+sw_vers
+xcodebuild -version
+
 script_dir=$(cd "$(dirname "$0")" && pwd)
 build_root=$(cd "${script_dir}/.." && pwd)
 build_folder=$build_root"/cmake"
