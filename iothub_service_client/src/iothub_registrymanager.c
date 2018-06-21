@@ -83,6 +83,7 @@ static const char* DEVICE_JSON_KEY_DEVICE_ISMANAGED = "isManaged";
 static const char* DEVICE_JSON_KEY_DEVICE_CONFIGURATION = "configuration";
 static const char* DEVICE_JSON_KEY_DEVICE_DEVICEROPERTIES = "deviceProperties";
 static const char* DEVICE_JSON_KEY_DEVICE_SERVICEPROPERTIES = "serviceProperties";
+static const char* DEVICE_JSON_KEY_MANAGED_BY = "managedBy";
 
 static const char* DEVICE_JSON_KEY_TOTAL_DEVICECOUNT = "totalDeviceCount";
 static const char* DEVICE_JSON_KEY_ENABLED_DEVICECCOUNT = "enabledDeviceCount";
@@ -131,6 +132,7 @@ typedef struct IOTHUB_DEVICE_OR_MODULE_TAG
 
     //Module exclusive fields
     const char* moduleId;
+    const char* managedBy;
 } IOTHUB_DEVICE_OR_MODULE;
 
 typedef struct IOTHUB_REGISTRY_DEVICE_OR_MODULE_CREATE_TAG
@@ -144,6 +146,7 @@ typedef struct IOTHUB_REGISTRY_DEVICE_OR_MODULE_CREATE_TAG
     bool iotEdge_capable;
     //Module exclusive fields
     const char* moduleId;
+    const char* managedBy;
 } IOTHUB_REGISTRY_DEVICE_OR_MODULE_CREATE;
 
 typedef struct IOTHUB_REGISTRY_DEVICE_OR_MODULE_UPDATE_TAG
@@ -158,6 +161,7 @@ typedef struct IOTHUB_REGISTRY_DEVICE_OR_MODULE_UPDATE_TAG
     bool iotEdge_capable;
     //Module exclusive fields
     const char* moduleId;
+    const char* managedBy;
 } IOTHUB_REGISTRY_DEVICE_OR_MODULE_UPDATE;
 
 static void initializeDeviceOrModuleInfoMembers(IOTHUB_DEVICE_OR_MODULE* deviceOrModuleInfo)
@@ -202,6 +206,7 @@ void IoTHubRegistryManager_FreeModuleMembers(IOTHUB_MODULE* moduleInfo)
     free((void*)moduleInfo->deviceProperties);
     free((void*)moduleInfo->serviceProperties);
     free((void*)moduleInfo->moduleId);
+    free((void*)moduleInfo->managedBy);
     memset(moduleInfo, 0, sizeof(*moduleInfo));
 }
 
@@ -221,6 +226,7 @@ static void free_deviceOrModule_members(IOTHUB_DEVICE_OR_MODULE* deviceInfo)
     free((void*)deviceInfo->deviceProperties);
     free((void*)deviceInfo->serviceProperties);
     free((void*)deviceInfo->moduleId);
+    free((void*)deviceInfo->managedBy);
     memset(deviceInfo, 0, sizeof(*deviceInfo));
 }
 
@@ -272,6 +278,8 @@ static void free_nonDevice_members_from_deviceOrModule(IOTHUB_DEVICE_OR_MODULE* 
         //free module exclusive fields
         free((void*)deviceOrModule->moduleId);
         deviceOrModule->moduleId = NULL;
+        free((void*)deviceOrModule->managedBy);
+        deviceOrModule->managedBy = NULL;
         //free device_ex exclusive fields (none currently require deallocation)
     }
 }
@@ -311,6 +319,8 @@ static void free_nonDeviceEx_members_from_deviceOrModule(IOTHUB_DEVICE_OR_MODULE
         //free module exclusive fields
         free((void*)deviceOrModule->moduleId);
         deviceOrModule->moduleId = NULL;
+        free((void*)deviceOrModule->managedBy);
+        deviceOrModule->managedBy = NULL;
     }
 }
 
@@ -338,6 +348,7 @@ static void move_deviceOrModule_members_to_module(IOTHUB_DEVICE_OR_MODULE* devic
             module->serviceProperties = deviceOrModule->serviceProperties;
             module->authMethod = deviceOrModule->authMethod;
             module->moduleId = deviceOrModule->moduleId;
+            module->managedBy = deviceOrModule->managedBy;
         }
     }
 }
@@ -464,7 +475,13 @@ static BUFFER_HANDLE constructDeviceOrModuleJson(const IOTHUB_DEVICE_OR_MODULE* 
     else if ((deviceOrModuleInfo->moduleId != NULL) && ((json_object_set_string(root_object, DEVICE_JSON_KEY_MODULE_NAME, deviceOrModuleInfo->moduleId)) != JSONSuccess))
     {
         /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_JSON_ERROR if the JSON creation failed  ] */
-        LogError("json_object_set_string failed for deviceId");
+        LogError("json_object_set_string failed for moduleId");
+        result = NULL;
+    }
+    else if ((deviceOrModuleInfo->managedBy != NULL) && ((json_object_set_string(root_object, DEVICE_JSON_KEY_MANAGED_BY, deviceOrModuleInfo->managedBy)) != JSONSuccess))
+    {
+        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
+        LogError("json_object_set_string failed for managedBy");
         result = NULL;
     }
     else if (json_object_dotset_string(root_object, DEVICE_JSON_KEY_DEVICE_STATUS, getStatusStringForJson(deviceOrModuleInfo->status)) != JSONSuccess)
@@ -560,6 +577,7 @@ static IOTHUB_REGISTRYMANAGER_RESULT parseDeviceOrModuleJsonObject(JSON_Object* 
 
     const char* deviceId = json_object_get_string(root_object, DEVICE_JSON_KEY_DEVICE_NAME);
     const char* moduleId = json_object_get_string(root_object, DEVICE_JSON_KEY_MODULE_NAME);
+    const char* managedBy = json_object_get_string(root_object, DEVICE_JSON_KEY_MANAGED_BY);
     const char* primaryKey = NULL;
     const char* secondaryKey = NULL;
     const char* authType = json_object_dotget_string(root_object, DEVICE_JSON_KEY_DEVICE_AUTH_TYPE);
@@ -699,6 +717,11 @@ static IOTHUB_REGISTRYMANAGER_RESULT parseDeviceOrModuleJsonObject(JSON_Object* 
         /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_023: [ If the JSON parsing failed, IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_JSON_ERROR ] */
         /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_035: [ If the JSON parsing failed, IoTHubRegistryManager_GetDevice shall return IOTHUB_REGISTRYMANAGER_JSON_ERROR ] */
         LogError("mallocAndStrcpy_s failed for serviceProperties");
+        result = IOTHUB_REGISTRYMANAGER_JSON_ERROR;
+    }
+    else if ((managedBy != NULL) && (mallocAndStrcpy_s((char**)&(deviceOrModuleInfo->managedBy), managedBy) != 0))
+    {
+        LogError("mallocAndStrcpy_s failed for managedBy");
         result = IOTHUB_REGISTRYMANAGER_JSON_ERROR;
     }
     else
@@ -1557,6 +1580,7 @@ static IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_CreateDeviceOrModule(
                 tempDeviceOrModuleInfo->authMethod = deviceOrModuleCreateInfo->authMethod;
                 tempDeviceOrModuleInfo->status = IOTHUB_DEVICE_STATUS_ENABLED;
                 tempDeviceOrModuleInfo->iotEdge_capable = deviceOrModuleCreateInfo->iotEdge_capable;
+                tempDeviceOrModuleInfo->managedBy = deviceOrModuleCreateInfo->managedBy;
 
                 BUFFER_HANDLE deviceJsonBuffer = NULL;
                 BUFFER_HANDLE responseBuffer = NULL;
@@ -1856,6 +1880,7 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_UpdateDeviceOrModule(IOTHUB_
                 tempDeviceOrModuleInfo->status = deviceOrModuleUpdate->status;
                 tempDeviceOrModuleInfo->moduleId = deviceOrModuleUpdate->moduleId;
                 tempDeviceOrModuleInfo->iotEdge_capable = deviceOrModuleUpdate->iotEdge_capable;
+                tempDeviceOrModuleInfo->managedBy = deviceOrModuleUpdate->managedBy;
 
                 BUFFER_HANDLE deviceJsonBuffer = NULL;
                 BUFFER_HANDLE responseBuffer = NULL;
@@ -2152,6 +2177,7 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_CreateModule(IOTHUB_REGISTRY
             deviceOrModuleCreateInfo.secondaryKey = moduleCreate->secondaryKey;
             deviceOrModuleCreateInfo.authMethod = moduleCreate->authMethod;
             deviceOrModuleCreateInfo.moduleId = moduleCreate->moduleId;
+            deviceOrModuleCreateInfo.managedBy = moduleCreate->managedBy;
         }
 
         result = IoTHubRegistryManager_CreateDeviceOrModule(registryManagerHandle, &deviceOrModuleCreateInfo, &deviceOrModuleInfo);
@@ -2230,6 +2256,7 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_UpdateModule(IOTHUB_REGISTRY
             deviceOrModuleUpdate.status = moduleUpdate->status;
             deviceOrModuleUpdate.authMethod = moduleUpdate->authMethod;
             deviceOrModuleUpdate.moduleId = moduleUpdate->moduleId;
+            deviceOrModuleUpdate.managedBy = moduleUpdate->managedBy;
         }
 
         result = IoTHubRegistryManager_UpdateDeviceOrModule(registryManagerHandle, &deviceOrModuleUpdate);

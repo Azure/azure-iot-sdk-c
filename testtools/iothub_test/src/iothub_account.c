@@ -47,6 +47,10 @@ static const char* PRIMARY_KEY_FIELD = "\"primaryKey\":\"";
 static const size_t PRIMARY_KEY_FIELD_LEN = 14;
 
 static const char* TEST_MODULE_NAME = "TestModule";
+static const char* TEST_MANAGED_BY_1 = "TestManagedBy1";
+static const char* TEST_MANAGED_BY_2 = "TestManagedBy2";
+
+
 
 
 #define MAX_LENGTH_OF_UNSIGNED_INT  6
@@ -465,6 +469,7 @@ static int updateTestModule(IOTHUB_REGISTRYMANAGER_HANDLE iothub_registrymanager
 {
     int result;
     IOTHUB_REGISTRY_MODULE_UPDATE moduleUpdate;
+    IOTHUB_MODULE moduleInfo;
 
     // Update the auth method type from its initially set NONE to IOTHUB_REGISTRYMANAGER_AUTH_SPK.
     moduleUpdate.version = IOTHUB_REGISTRY_MODULE_UPDATE_VERSION_1;
@@ -474,6 +479,11 @@ static int updateTestModule(IOTHUB_REGISTRYMANAGER_HANDLE iothub_registrymanager
     moduleUpdate.secondaryKey = "";
     moduleUpdate.moduleId = TEST_MODULE_NAME;
     moduleUpdate.status = IOTHUB_DEVICE_STATUS_ENABLED;
+    moduleUpdate.managedBy = TEST_MANAGED_BY_2;
+
+    memset(&moduleInfo, 0, sizeof(moduleInfo));
+    moduleInfo.version = IOTHUB_MODULE_VERSION_1;
+
 
     IOTHUB_REGISTRYMANAGER_RESULT iothub_registrymanager_result = IoTHubRegistryManager_UpdateModule(iothub_registrymanager_handle, &moduleUpdate);
     if (iothub_registrymanager_result != IOTHUB_REGISTRYMANAGER_OK)
@@ -481,11 +491,34 @@ static int updateTestModule(IOTHUB_REGISTRYMANAGER_HANDLE iothub_registrymanager
         LogError("IoTHubRegistryManager_UpdateModule failed, err=%d", iothub_registrymanager_result);
         result = __FAILURE__;
     }
+    else if ((iothub_registrymanager_result = IoTHubRegistryManager_GetModule(iothub_registrymanager_handle, deviceToProvision->deviceId, deviceToProvision->moduleId, &moduleInfo)) != IOTHUB_REGISTRYMANAGER_OK)
+    {
+        LogError("IoTHubRegistryManager_UpdateModule(deviceId=%s, moduleId=%s) failed, err=%d", deviceToProvision->deviceId, deviceToProvision->moduleId, iothub_registrymanager_result);
+        result = __FAILURE__;
+    }
+    else if (strcmp(moduleInfo.moduleId, TEST_MODULE_NAME) != 0)
+    {
+        LogError("ModuleName expected (%s) does not match what was returned from IoTHubRegistryManager_CreateModule (%s)", TEST_MODULE_NAME, moduleInfo.moduleId);
+        result = __FAILURE__;
+    }
+    else if (strcmp(deviceToProvision->deviceId, moduleInfo.deviceId) != 0)
+    {
+        LogError("DeviceId expected (%s) does not match what was returned from IoTHubRegistryManager_CreateModule (%s)", deviceToProvision->deviceId, moduleInfo.deviceId);
+        result = __FAILURE__;
+    }
+#if 0  // IoTHub currently returns incorrect value.  Will bring back in once fixed.
+    else if (strcmp(moduleInfo.managedBy, TEST_MANAGED_BY_2) != 0)
+    {
+        LogError("IoTHubRegistryManager_UpdateModule sets managedBy=%s, expected=%s", moduleInfo.managedBy, TEST_MANAGED_BY_2);
+        result = __FAILURE__;
+    }
+#endif
     else
     {
         result = 0;
     }
 
+    IoTHubRegistryManager_FreeModuleMembers(&moduleInfo);
     return result;
 }
 
@@ -503,6 +536,7 @@ static int provisionModule(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_PROVISIONED_
     moduleCreate.moduleId = TEST_MODULE_NAME;
     moduleCreate.primaryKey = "";
     moduleCreate.secondaryKey = "";
+    moduleCreate.managedBy = TEST_MANAGED_BY_1;
 
     // Even though we already have a IOTHUB_SERVICE_CLIENT_AUTH_HANDLE handle (iothub_account_info->iothub_service_client_auth_handle), we get a
     // new one based on the device's connection string (not the Hub) as we need to test this scenario, too.
@@ -542,7 +576,14 @@ static int provisionModule(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_PROVISIONED_
     {
         LogError("DeviceId expected (%s) does not match what was returned from IoTHubRegistryManager_CreateModule (%s)", deviceToProvision->deviceId, moduleInfo.deviceId);
         result = __FAILURE__;
-    }    
+    }
+#if 0 // IoTHub currently returns incorrect value.  Will bring back in once fixed.
+    else if (strcmp(TEST_MANAGED_BY_1, moduleInfo.managedBy) != 0)
+    {
+        LogError("managedBy expected (%s) does not match what was returned from IoTHubRegistryManager_CreateModule (%s)", TEST_MANAGED_BY_1, moduleInfo.managedBy);
+        result = __FAILURE__;
+    }
+#endif
     else if (updateTestModule(iothub_registrymanager_handle, deviceToProvision) != 0)
     {
         LogError("Unable to update test module");
@@ -559,32 +600,7 @@ static int provisionModule(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_PROVISIONED_
         result = 0;
     }
 
-    if (moduleInfo.deviceId != NULL)
-        free((char*)moduleInfo.deviceId);
-    if (moduleInfo.primaryKey != NULL)
-        free((char*)moduleInfo.primaryKey);
-    if (moduleInfo.secondaryKey != NULL)
-        free((char*)moduleInfo.secondaryKey);
-    if (moduleInfo.generationId != NULL)
-        free((char*)moduleInfo.generationId);
-    if (moduleInfo.eTag != NULL)
-        free((char*)moduleInfo.eTag);
-    if (moduleInfo.connectionStateUpdatedTime != NULL)
-        free((char*)moduleInfo.connectionStateUpdatedTime);
-    if (moduleInfo.statusReason != NULL)
-        free((char*)moduleInfo.statusReason);
-    if (moduleInfo.statusUpdatedTime != NULL)
-        free((char*)moduleInfo.statusUpdatedTime);
-    if (moduleInfo.lastActivityTime != NULL)
-        free((char*)moduleInfo.lastActivityTime);
-    if (moduleInfo.configuration != NULL)
-        free((char*)moduleInfo.configuration);
-    if (moduleInfo.deviceProperties != NULL)
-        free((char*)moduleInfo.deviceProperties);
-    if (moduleInfo.serviceProperties != NULL)
-        free((char*)moduleInfo.serviceProperties);
-    if (moduleInfo.moduleId != NULL)
-        free((char*)moduleInfo.moduleId);
+    IoTHubRegistryManager_FreeModuleMembers(&moduleInfo);
 
     if (iothub_registrymanager_handle != NULL)
     {

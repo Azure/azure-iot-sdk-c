@@ -109,26 +109,27 @@ typedef struct IOTHUB_REGISTRY_STATISTIC_TAG
 typedef struct IOTHUB_MODULE_TAG
 {
     int version;
-    const char* deviceId;
-    const char* primaryKey;
-    const char* secondaryKey;
-    const char* generationId;
-    const char* eTag;
-    IOTHUB_DEVICE_CONNECTION_STATE connectionState;
-    const char* connectionStateUpdatedTime;
-    IOTHUB_DEVICE_STATUS status;
-    const char* statusReason;
-    const char* statusUpdatedTime;
-    const char* lastActivityTime;
-    size_t cloudToDeviceMessageCount;
+    const char* deviceId;                              //version 1+
+    const char* primaryKey;                            //version 1+
+    const char* secondaryKey;                          //version 1+
+    const char* generationId;                          //version 1+
+    const char* eTag;                                  //version 1+
+    IOTHUB_DEVICE_CONNECTION_STATE connectionState;    //version 1+
+    const char* connectionStateUpdatedTime;            //version 1+
+    IOTHUB_DEVICE_STATUS status;                       //version 1+ 
+    const char* statusReason;                          //version 1+ 
+    const char* statusUpdatedTime;                     //version 1+ 
+    const char* lastActivityTime;                      //version 1+ 
+    size_t cloudToDeviceMessageCount;                  //version 1+ 
 
-    bool isManaged;
-    const char* configuration;
-    const char* deviceProperties;
-    const char* serviceProperties;
-    IOTHUB_REGISTRYMANAGER_AUTH_METHOD authMethod;
+    bool isManaged;                                    //version 1+ 
+    const char* configuration;                         //version 1+ 
+    const char* deviceProperties;                      //version 1+ 
+    const char* serviceProperties;                     //version 1+ 
+    IOTHUB_REGISTRYMANAGER_AUTH_METHOD authMethod;     //version 1+ 
 
-    const char* moduleId;
+    const char* moduleId;                              //version 1+ 
+    const char* managedBy;                             //version 1+ 
 } IOTHUB_MODULE;
 
 /**
@@ -148,6 +149,7 @@ typedef struct IOTHUB_REGISTRY_MODULE_CREATE_TAG
     const char* secondaryKey;                       //version 1+
     IOTHUB_REGISTRYMANAGER_AUTH_METHOD authMethod;  //version 1+
     const char* moduleId;                           //version 1+
+    const char* managedBy;                          //version 1+
 } IOTHUB_REGISTRY_MODULE_CREATE;
 
 #define IOTHUB_REGISTRY_MODULE_UPDATE_VERSION_1 1
@@ -160,6 +162,7 @@ typedef struct IOTHUB_REGISTRY_MODULE_UPDATE_TAG
     IOTHUB_DEVICE_STATUS status;                    //version 1+
     IOTHUB_REGISTRYMANAGER_AUTH_METHOD authMethod;  //version 1+
     const char* moduleId;                           //version 1+
+    const char* managedBy;                          //version 1+
 } IOTHUB_REGISTRY_MODULE_UPDATE;
 
 /** @brief Structure to store IoTHub authentication information
