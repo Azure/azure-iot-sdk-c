@@ -10,20 +10,18 @@ if(NOT ${use_http})
 endif()
 
 set(iothub_client_sample_upload_to_blob_mb_c_files
-iothub_client_sample_upload_to_blob_mb.c
-../../../certs/certs.c
+    iothub_client_sample_upload_to_blob_mb.c
 )
-
-if(WIN32)
-    set(iothub_client_sample_upload_to_blob_mb_c_files ${iothub_client_sample_upload_to_blob_mb_c_files} ./windows/main.c)
-else()
-    set(iothub_client_sample_upload_to_blob_mb_c_files ${iothub_client_sample_upload_to_blob_mb_c_files} ./linux/main.c)
-endif()
-
 
 set(iothub_client_sample_upload_to_blob_mb_h_files
-iothub_client_sample_upload_to_blob_mb.h
 )
+
+#Conditionally use the SDK trusted certs in the samples
+if(${use_sample_trusted_cert})
+    add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
+    include_directories(${PROJECT_SOURCE_DIR}/certs)
+    set(iothub_client_sample_upload_to_blob_mb_c_files ${iothub_client_sample_upload_to_blob_mb_c_files} ${PROJECT_SOURCE_DIR}/certs/certs.c)
+endif()
 
 IF(WIN32)
     #windows needs this define
@@ -32,8 +30,6 @@ IF(WIN32)
 ENDIF(WIN32)
 
 include_directories(.)
-include_directories(../../../certs)
-
 
 add_executable(iothub_client_sample_upload_to_blob_mb ${iothub_client_sample_upload_to_blob_mb_c_files} ${iothub_client_sample_upload_to_blob_mb_h_files})
 

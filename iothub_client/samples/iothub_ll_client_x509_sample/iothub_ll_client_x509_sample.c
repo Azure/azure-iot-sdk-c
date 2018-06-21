@@ -1,15 +1,18 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+// CAVEAT: This sample is to demonstrate azure IoT client concepts only and is not a guide design principles or style
+// Checking of return codes and error values shall be omitted for brevity.  Please practice sound engineering practices 
+// when writing production code.
+
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "iothub_client.h"
+#include "iothub.h"
+#include "iothub_device_client_ll.h"
 #include "iothub_client_options.h"
 #include "iothub_message.h"
 #include "azure_c_shared_utility/threadapi.h"
-#include "azure_c_shared_utility/crt_abstractions.h"
-#include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 
 /* This sample uses the _LL APIs of iothub_client for example purposes.
@@ -114,77 +117,81 @@ int main(void)
     protocol = HTTP_Protocol;
 #endif // SAMPLE_HTTP
 
-    IOTHUB_CLIENT_LL_HANDLE iothub_ll_handle;
+    IOTHUB_DEVICE_CLIENT_LL_HANDLE device_ll_handle;
 
     // Used to initialize IoTHub SDK subsystem
-    (void)platform_init();
+    (void)IoTHub_Init();
 
     (void)printf("Creating IoTHub handle\r\n");
     // Create the iothub handle here
-    iothub_ll_handle = IoTHubClient_LL_CreateFromConnectionString(connectionString, protocol);
-
-    // Set any option that are neccessary.
-    // For available options please see the iothub_sdk_options.md documentation
-    //bool traceOn = true;
-    //IoTHubClient_LL_SetOption(iothub_ll_handle, OPTION_LOG_TRACE, &traceOn);
-    // Setting the Trusted Certificate.  This is only necessary on system with without
-    // built in certificate stores.
-#ifdef SET_TRUSTED_CERT_IN_SAMPLES
-    IoTHubClient_LL_SetOption(iothub_ll_handle, OPTION_TRUSTED_CERT, certificates);
-#endif // SET_TRUSTED_CERT_IN_SAMPLES
-
-    // Set the X509 certificates in the SDK
-    if (
-        (IoTHubClient_LL_SetOption(iothub_ll_handle, OPTION_X509_CERT, x509certificate) != IOTHUB_CLIENT_OK) ||
-        (IoTHubClient_LL_SetOption(iothub_ll_handle, OPTION_X509_PRIVATE_KEY, x509privatekey) != IOTHUB_CLIENT_OK)
-        )
+    device_ll_handle = IoTHubDeviceClient_LL_CreateFromConnectionString(connectionString, protocol);
+    if (device_ll_handle == NULL)
     {
-        printf("failure to set options for x509, aborting\r\n");
+        (void)printf("Failure createing Iothub device.  Hint: Check you connection string.\r\n");
     }
     else
     {
-        do
+        // Set any option that are neccessary.
+        // For available options please see the iothub_sdk_options.md documentation
+        //bool traceOn = true;
+        //IoTHubClient_LL_SetOption(iothub_ll_handle, OPTION_LOG_TRACE, &traceOn);
+        // Setting the Trusted Certificate.  This is only necessary on system with without
+        // built in certificate stores.
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+        IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_TRUSTED_CERT, certificates);
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
+
+        // Set the X509 certificates in the SDK
+        if (
+            (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_X509_CERT, x509certificate) != IOTHUB_CLIENT_OK) ||
+            (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_X509_PRIVATE_KEY, x509privatekey) != IOTHUB_CLIENT_OK)
+            )
         {
-            if (messages_sent < MESSAGE_COUNT)
+            printf("failure to set options for x509, aborting\r\n");
+        }
+        else
+        {
+            do
             {
-                // Construct the iothub message from a string or a byte array
-                message_handle = IoTHubMessage_CreateFromString(telemetry_msg);
-                //message_handle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText)));
+                if (messages_sent < MESSAGE_COUNT)
+                {
+                    // Construct the iothub message from a string or a byte array
+                    message_handle = IoTHubMessage_CreateFromString(telemetry_msg);
+                    //message_handle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText)));
 
-                // Set Message property
-                (void)IoTHubMessage_SetMessageId(message_handle, "MSG_ID");
-                (void)IoTHubMessage_SetCorrelationId(message_handle, "CORE_ID");
-                (void)IoTHubMessage_SetContentTypeSystemProperty(message_handle, "application%2Fjson");
-                (void)IoTHubMessage_SetContentEncodingSystemProperty(message_handle, "utf-8");
+                    // Set Message property
+                    (void)IoTHubMessage_SetMessageId(message_handle, "MSG_ID");
+                    (void)IoTHubMessage_SetCorrelationId(message_handle, "CORE_ID");
+                    (void)IoTHubMessage_SetContentTypeSystemProperty(message_handle, "application%2Fjson");
+                    (void)IoTHubMessage_SetContentEncodingSystemProperty(message_handle, "utf-8");
 
-                // Add custom properties to message
-                MAP_HANDLE propMap = IoTHubMessage_Properties(message_handle);
-                Map_AddOrUpdate(propMap, "property_key", "property_value");
+                    // Add custom properties to message
+                    (void)IoTHubMessage_SetProperty(message_handle, "property_key", "property_value");
 
-                (void)printf("Sending message %d to IoTHub\r\n", (int)(messages_sent + 1));
-                IoTHubClient_LL_SendEventAsync(iothub_ll_handle, message_handle, send_confirm_callback, NULL);
+                    (void)printf("Sending message %d to IoTHub\r\n", (int)(messages_sent + 1));
+                    IoTHubDeviceClient_LL_SendEventAsync(device_ll_handle, message_handle, send_confirm_callback, NULL);
 
-                // The message is copied to the sdk so the we can destroy it
-                IoTHubMessage_Destroy(message_handle);
+                    // The message is copied to the sdk so the we can destroy it
+                    IoTHubMessage_Destroy(message_handle);
 
-                messages_sent++;
-            }
-            else if (g_message_count_send_confirmations >= MESSAGE_COUNT)
-            {
-                // After all messages are all received stop running
-                g_continueRunning = false;
-            }
+                    messages_sent++;
+                }
+                else if (g_message_count_send_confirmations >= MESSAGE_COUNT)
+                {
+                    // After all messages are all received stop running
+                    g_continueRunning = false;
+                }
 
-            IoTHubClient_LL_DoWork(iothub_ll_handle);
-            ThreadAPI_Sleep(1);
+                IoTHubDeviceClient_LL_DoWork(device_ll_handle);
+                ThreadAPI_Sleep(1);
 
-        } while (g_continueRunning);
+            } while (g_continueRunning);
+        }
+        // Clean up the iothub sdk handle
+        IoTHubDeviceClient_LL_Destroy(device_ll_handle);
     }
-    // Clean up the iothub sdk handle
-    IoTHubClient_LL_Destroy(iothub_ll_handle);
-
     // Free all the sdk subsystem
-    platform_deinit();
+    IoTHub_Deinit();
 
     printf("Press any key to continue");
     getchar();

@@ -8,17 +8,15 @@ if(WIN32)
     message(FATAL_ERROR "This CMake file is only support Linux builds!")
 endif()
 
-set(AZUREIOT_INC_FOLDER ".." "/usr/include/azureiot" "/usr/include/azureiot/inc")
+set(AZUREIOT_INC_FOLDER ".." ${PROJECT_SOURCE_DIR}/certs "/usr/include/azureiot" "/usr/include/azureiot/inc")
 
 include_directories(${AZUREIOT_INC_FOLDER})
 
 set(iothub_client_sample_http_c_files
     ../iothub_client_sample_http.c
-    ./main.c
 )
 
 set(iothub_client_sample_http_h_files
-    ../iothub_client_sample_http.h
 )
 
 add_executable(iothub_client_sample_http ${iothub_client_sample_http_c_files} ${iothub_client_sample_http_h_files})

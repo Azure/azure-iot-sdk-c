@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+// CAVEAT: This sample is to demonstrate azure IoT client concepts only and is not a guide design principles or style
+// Checking of return codes and error values shall be omitted for brevity.  Please practice sound engineering practices 
+// when writing production code.
+
 #ifdef DONT_USE_UPLOADTOBLOB
 #error "trying to compile iothub_client_sample_upload_to_blob_mb.c while DONT_USE_UPLOADTOBLOB is #define'd"
 #else
@@ -13,14 +17,15 @@ That does not mean that HTTP only works with the _LL APIs.
 Simply changing the using the convenience layer (functions not having _LL)
 and removing calls to _DoWork will yield the same results. */
 
-#include "azure_c_shared_utility/crt_abstractions.h"
-#include "azure_c_shared_utility/macro_utils.h"
-#include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/shared_util_options.h"
-#include "iothub_client_ll.h"
+#include "iothub.h"
+#include "iothub_device_client_ll.h"
 #include "iothub_message.h"
 #include "iothubtransporthttp.h"
+
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
 #include "certs.h"
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 /*String containing Hostname, Device Id & Device Key in the format:                         */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
@@ -34,10 +39,8 @@ static const char* data_to_upload = "Hello World from IoTHubClient_LL_UploadToBl
 static int block_count = 0;
 
 static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT getDataCallback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
-
 {
     (void)context;
-
     if (result == FILE_UPLOAD_OK)
     {
         if (data != NULL && size != NULL)
@@ -79,49 +82,53 @@ static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT getDataCallback(IOTHUB_CLIENT_F
     return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK;
 }
 
-void iothub_client_sample_upload_to_blob_multi_block_run(void)
+int main(void)
 {
-    IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle;
+    IOTHUB_DEVICE_CLIENT_LL_HANDLE device_ll_handle;
 
-    if (platform_init() != 0)
+    (void)IoTHub_Init();
+    (void)printf("Starting the IoTHub client sample upload to blob with multiple blocks...\r\n");
+
+    device_ll_handle = IoTHubDeviceClient_LL_CreateFromConnectionString(connectionString, HTTP_Protocol);
+    if (device_ll_handle == NULL)
     {
-        (void)printf("Failed to initialize the platform.\r\n");
+        (void)printf("Failure createing Iothub device.  Hint: Check you connection string.\r\n");
     }
     else
     {
-        (void)printf("Starting the IoTHub client sample upload to blob with multiple blocks...\r\n");
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+        // Setting the Trusted Certificate.  This is only necessary on system with without
+        // built in certificate stores.
+        IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_TRUSTED_CERT, certificates);
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-        if ((iotHubClientHandle = IoTHubClient_LL_CreateFromConnectionString(connectionString, HTTP_Protocol)) == NULL)
+        HTTP_PROXY_OPTIONS http_proxy_options = { 0 };
+        http_proxy_options.host_address = proxyHost;
+        http_proxy_options.port = proxyPort;
+
+        if (proxyHost != NULL && IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_HTTP_PROXY, &http_proxy_options) != IOTHUB_CLIENT_OK)
         {
-            (void)printf("ERROR: iotHubClientHandle is NULL!\r\n");
+            (void)printf("failure to set proxy\n");
         }
         else
         {
-#ifdef SET_TRUSTED_CERT_IN_SAMPLES
-            (void)IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_TRUSTED_CERT, certificates);
-#endif // SET_TRUSTED_CERT_IN_SAMPLES
-            HTTP_PROXY_OPTIONS http_proxy_options = {0};
-            http_proxy_options.host_address = proxyHost;
-            http_proxy_options.port = proxyPort;
-
-            if (proxyHost != NULL && IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_HTTP_PROXY, &http_proxy_options) != IOTHUB_CLIENT_OK)
+            if (IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob(device_ll_handle, "subdir/hello_world_mb.txt", getDataCallback, NULL) != IOTHUB_CLIENT_OK)
             {
-                (void)printf("failure to set proxy\n");
+                (void)printf("hello world failed to upload\n");
             }
             else
             {
-                if (IoTHubClient_LL_UploadMultipleBlocksToBlobEx(iotHubClientHandle, "subdir/hello_world_mb.txt", getDataCallback, NULL) != IOTHUB_CLIENT_OK)
-                {
-                    (void)printf("hello world failed to upload\n");
-                }
-                else
-                {
-                    (void)printf("hello world has been created\n");
-                }
+                (void)printf("hello world has been created\n");
             }
-            IoTHubClient_LL_Destroy(iotHubClientHandle);
         }
-        platform_deinit();
+
+        printf("Press any key to continue");
+        (void)getchar();
+
+        // Clean up the iothub sdk handle
+        IoTHubDeviceClient_LL_Destroy(device_ll_handle);
     }
+    IoTHub_Deinit();
+    return 0;
 }
 #endif /*DONT_USE_UPLOADTOBLOB*/

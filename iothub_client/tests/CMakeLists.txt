@@ -75,7 +75,9 @@ if(${use_mqtt})
     add_sfctest_directory(iothubclient_mqtt_dm_e2e_sfc)
     add_e2etest_directory(iothubclient_mqtt_ws_e2e)
     add_sfctest_directory(iothubclient_mqtt_ws_e2e_sfc)
-
+    add_e2etest_directory(iothubclient_mqtt_modules_device_method_e2e)
+    add_e2etest_directory(iothubclient_mqtt_modules_dt_e2e)
+	
     add_longhaul_test_directory(longhaul_mqtt_telemetry)
     add_longhaul_test_directory(longhaul_mqtt_c2d)
     add_longhaul_test_directory(longhaul_mqtt_device_methods)
@@ -105,7 +107,7 @@ if(${use_amqp})
 
     add_e2etest_directory(iothubclient_amqp_modules_device_method_e2e)
     add_e2etest_directory(iothubclient_amqp_modules_dt_e2e)
-
+	
     add_longhaul_test_directory(longhaul_amqp_telemetry)
     add_longhaul_test_directory(longhaul_amqp_c2d)
     add_longhaul_test_directory(longhaul_amqp_device_methods)

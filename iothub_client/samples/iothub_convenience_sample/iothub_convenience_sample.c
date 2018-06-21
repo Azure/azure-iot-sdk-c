@@ -1,9 +1,15 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+// CAVEAT: This sample is to demonstrate azure IoT client concepts only and is not a guide design principles or style
+// Checking of return codes and error values shall be omitted for brevity.  Please practice sound engineering practices 
+// when writing production code.
+
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "iothub_client.h"
+#include "iothub.h"
+#include "iothub_device_client.h"
 #include "iothub_client_options.h"
 #include "iothub_message.h"
 #include "azure_c_shared_utility/threadapi.h"
@@ -43,6 +49,7 @@
 
 /* Paste in your device connection string  */
 static const char* connectionString = "[device connection string]";
+
 #define MESSAGE_COUNT        5
 static bool g_continueRunning = true;
 static size_t g_message_count_send_confirmations = 0;
@@ -142,71 +149,75 @@ int main(void)
     protocol = HTTP_Protocol;
 #endif // SAMPLE_HTTP
 
-    IOTHUB_CLIENT_HANDLE iothub_handle;
+    IOTHUB_DEVICE_CLIENT_HANDLE device_handle;
 
     // Used to initialize IoTHub SDK subsystem
-    (void)platform_init();
+    (void)IoTHub_Init();
 
     (void)printf("Creating IoTHub handle\r\n");
     // Create the iothub handle here
-    iothub_handle = IoTHubClient_CreateFromConnectionString(connectionString, protocol);
+    device_handle = IoTHubDeviceClient_CreateFromConnectionString(connectionString, protocol);
+    if (device_handle == NULL)
+    {
+        (void)printf("Failure createing Iothub device.  Hint: Check you connection string.\r\n");
+    }
+    else
+    {
+        // Setting message callback to get C2D messages
+        (void)IoTHubDeviceClient_SetMessageCallback(device_handle, receive_msg_callback, NULL);
+        // Setting connection status callback to get indication of connection to iothub
+        (void)IoTHubDeviceClient_SetConnectionStatusCallback(device_handle, connection_status_callback, NULL);
 
-    // Setting message callback to get C2D messages
-    (void)IoTHubClient_SetMessageCallback(iothub_handle, receive_msg_callback, NULL);
-    // Setting connection status callback to get indication of connection to iothub
-    (void)IoTHubClient_SetConnectionStatusCallback(iothub_handle, connection_status_callback, NULL);
+        // Set any option that are neccessary.
+        // For available options please see the iothub_sdk_options.md documentation
 
-    // Set any option that are neccessary.
-    // For available options please see the iothub_sdk_options.md documentation
-
-    //bool traceOn = true;
-    //IoTHubClient_SetOption(iothub_handle, OPTION_LOG_TRACE, &traceOn);
+        //bool traceOn = true;
+        //IoTHubDeviceClient_SetOption(iothub_handle, OPTION_LOG_TRACE, &traceOn);
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
-    // Setting the Trusted Certificate.  This is only necessary on system with without
-    // built in certificate stores.
-    IoTHubClient_SetOption(iothub_handle, OPTION_TRUSTED_CERT, certificates);
+        // Setting the Trusted Certificate.  This is only necessary on system with without
+        // built in certificate stores.
+        IoTHubDeviceClient_SetOption(device_handle, OPTION_TRUSTED_CERT, certificates);
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 #if defined SAMPLE_MQTT || defined SAMPLE_MQTT_WS
-    //Setting the auto URL Encoder (recommended for MQTT). Please use this option unless
-    //you are URL Encoding inputs yourself.
-    //ONLY valid for use with MQTT
-    //bool urlEncodeOn = true;
-    //IoTHubClient_SetOption(iothub_handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
+        //Setting the auto URL Encoder (recommended for MQTT). Please use this option unless
+        //you are URL Encoding inputs yourself.
+        //ONLY valid for use with MQTT
+        //bool urlEncodeOn = true;
+        //IoTHubDeviceClient_SetOption(device_handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
 #endif
 
-    for (size_t index = 0; index < MESSAGE_COUNT; index++)
-    {
-        // Construct the iothub message from a string or a byte array
-        message_handle = IoTHubMessage_CreateFromString(telemetry_msg);
-        //message_handle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText)));
+        for (size_t index = 0; index < MESSAGE_COUNT; index++)
+        {
+            // Construct the iothub message from a string or a byte array
+            message_handle = IoTHubMessage_CreateFromString(telemetry_msg);
+            //message_handle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText)));
 
-        // Set Message property
-        (void)IoTHubMessage_SetMessageId(message_handle, "MSG_ID");
-        (void)IoTHubMessage_SetCorrelationId(message_handle, "CORE_ID");
-        (void)IoTHubMessage_SetContentTypeSystemProperty(message_handle, "application%2fjson");
-        (void)IoTHubMessage_SetContentEncodingSystemProperty(message_handle, "utf-8");
+            // Set Message property
+            (void)IoTHubMessage_SetMessageId(message_handle, "MSG_ID");
+            (void)IoTHubMessage_SetCorrelationId(message_handle, "CORE_ID");
+            (void)IoTHubMessage_SetContentTypeSystemProperty(message_handle, "application%2fjson");
+            (void)IoTHubMessage_SetContentEncodingSystemProperty(message_handle, "utf-8");
 
-        // Add custom properties to message
-        MAP_HANDLE propMap = IoTHubMessage_Properties(message_handle);
-        Map_AddOrUpdate(propMap, "property_key", "property_value");
+            // Add custom properties to message
+            (void)IoTHubMessage_SetProperty(message_handle, "property_key", "property_value");
 
-        (void)printf("Sending message %d to IoTHub\r\n", (int)(index + 1));
-        IoTHubClient_SendEventAsync(iothub_handle, message_handle, send_confirm_callback, NULL);
+            (void)printf("Sending message %d to IoTHub\r\n", (int)(index + 1));
+            IoTHubDeviceClient_SendEventAsync(device_handle, message_handle, send_confirm_callback, NULL);
 
-        // The message is copied to the sdk so the we can destroy it
-        IoTHubMessage_Destroy(message_handle);
+            // The message is copied to the sdk so the we can destroy it
+            IoTHubMessage_Destroy(message_handle);
+        }
 
-    } 
+        printf("\r\nPress any key to continue\r\n");
+        getchar();
 
-    getchar();
-
-    // Clean up the iothub sdk handle
-    IoTHubClient_Destroy(iothub_handle);
-
+        // Clean up the iothub sdk handle
+        IoTHubDeviceClient_Destroy(device_handle);
+    }
     // Free all the sdk subsystem
-    platform_deinit();
+    IoTHub_Deinit();
 
     return 0;
 }

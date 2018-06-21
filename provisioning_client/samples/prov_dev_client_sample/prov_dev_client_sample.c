@@ -1,21 +1,23 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+// CAVEAT: This sample is to demonstrate azure IoT client concepts only and is not a guide design principles or style
+// Checking of return codes and error values shall be omitted for brevity.  Please practice sound engineering practices 
+// when writing production code.
+
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "iothub_client.h"
-#include "iothub_message.h"
-#include "iothub_client_version.h"
-#include "azure_c_shared_utility/threadapi.h"
-#include "azure_c_shared_utility/tickcounter.h"
-#include "azure_c_shared_utility/crt_abstractions.h"
-#include "azure_c_shared_utility/platform.h"
-#include "azure_c_shared_utility/crt_abstractions.h"
+#include "iothub.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/http_proxy_io.h"
 
 #include "azure_prov_client/prov_device_client.h"
 #include "azure_prov_client/prov_security_factory.h"
+
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+#include "certs.h"
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 //
 // The protocol you wish to use should be uncommented
@@ -84,12 +86,12 @@ static void register_device_callback(PROV_DEVICE_RESULT register_result, const c
 
 int main()
 {
-    int result;
     SECURE_DEVICE_TYPE hsm_type;
     //hsm_type = SECURE_DEVICE_TYPE_TPM;
     hsm_type = SECURE_DEVICE_TYPE_X509;
 
-    (void)platform_init();
+    // Used to initialize IoTHub SDK subsystem
+    (void)IoTHub_Init();
     (void)prov_dev_security_init(hsm_type);
     
     HTTP_PROXY_OPTIONS http_proxy;
@@ -127,7 +129,6 @@ int main()
     if ((prov_device_handle = Prov_Device_Create(global_prov_uri, id_scope, prov_transport)) == NULL)
     {
         (void)printf("failed calling Prov_Device_Create\r\n");
-        result = __LINE__;
     }
     else
     {
@@ -152,12 +153,12 @@ int main()
         Prov_Device_Destroy(prov_device_handle);
     }
     prov_dev_security_deinit();
-    platform_deinit();
 
-    result = 0;
+    // Free all the sdk subsystem
+    IoTHub_Deinit();
 
     (void)printf("Press enter key to exit:\r\n");
     (void)getchar();
 
-    return result;
+    return 0;
 }
