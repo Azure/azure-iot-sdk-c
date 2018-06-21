@@ -12,14 +12,8 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/shared_util_options.h"
-#include "iothub.h"
-
-
-#ifdef USE_MQTT
 #include "iothubtransportmqtt.h"
-#else
-#error "This sample currently only works when using MQTT protocol"
-#endif
+#include "iothub.h"
 
 typedef struct FILTERED_MESSAGE_INSTANCE_TAG
 {

@@ -12,14 +12,9 @@
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "iothub_client_options.h"
+#include "iothubtransportmqtt.h"
 #include "iothub.h"
 
-
-#ifdef USE_MQTT
-#include "iothubtransportmqtt.h"
-#else
-#error "This sample currently only works when using MQTT protocol"
-#endif
 
 static int callbackCounter;
 static char msgText[1024];
