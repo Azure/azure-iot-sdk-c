@@ -213,8 +213,8 @@ static int SetupCallbacksForInputQueues(IOTHUB_MODULE_CLIENT_LL_HANDLE iotHubMod
     }
     else if (IoTHubModuleClient_LL_SetMessageCallback(iotHubModuleClientHandle, DefaultMessageCallback, (void*)iotHubModuleClientHandle) != IOTHUB_CLIENT_OK)
     {
-       printf("ERROR: IoTHubModuleClient_LL_SetMessageCallback(default)..........FAILED!\r\n");
-       ret = __FAILURE__;
+        printf("ERROR: IoTHubModuleClient_LL_SetMessageCallback(default)..........FAILED!\r\n");
+        ret = __FAILURE__;
     }
     else
     {
