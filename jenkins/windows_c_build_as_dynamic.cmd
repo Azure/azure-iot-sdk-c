@@ -4,6 +4,9 @@
 @setlocal EnableExtensions EnableDelayedExpansion
 @echo off
 
+ver
+msbuild -version
+
 set current-path=%~dp0
 rem // remove trailing slash
 set current-path=%current-path:~0,-1%

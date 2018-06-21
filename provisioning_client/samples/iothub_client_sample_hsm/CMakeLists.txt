@@ -7,7 +7,6 @@ compileAsC99()
 
 set(iothub_client_sample_hsm_c_files
     iothub_client_sample_hsm.c
-    ../../../certs/certs.c
 )
 
 set(iothub_client_sample_hsm_h_files
@@ -16,8 +15,14 @@ set(iothub_client_sample_hsm_h_files
 IF(WIN32)
     #windows needs this define
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-    add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
 ENDIF(WIN32)
+
+#Conditionally use the SDK trusted certs in the samples
+if(${use_sample_trusted_cert})
+    add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
+    include_directories(${PROJECT_SOURCE_DIR}/certs)
+    set(iothub_client_sample_hsm_c_files ${iothub_client_sample_hsm_c_files} ${PROJECT_SOURCE_DIR}/certs/certs.c)
+endif()
 
 include_directories(.)
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})

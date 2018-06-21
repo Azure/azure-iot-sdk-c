@@ -349,13 +349,13 @@ static void IoTHubDeviceTwin_Destroy_Impl(void* model)
                 LogError("INTERNAL ERROR");
             }
             }/*switch*/
+
+             /*Codes_SRS_SERIALIZERDEVICETWIN_02_017: [ IoTHubDeviceTwin_Destroy_Impl shall call CodeFirst_DestroyDevice. ]*/
+            CodeFirst_DestroyDevice(protoHandle->deviceAssigned);
+
+            /*Codes_SRS_SERIALIZERDEVICETWIN_02_018: [ IoTHubDeviceTwin_Destroy_Impl shall remove the IoTHubClient_Handle and the device handle from the recorded set. ]*/
+            VECTOR_erase(g_allProtoHandles, protoHandle, 1);
         }
-
-        /*Codes_SRS_SERIALIZERDEVICETWIN_02_017: [ IoTHubDeviceTwin_Destroy_Impl shall call CodeFirst_DestroyDevice. ]*/
-        CodeFirst_DestroyDevice(protoHandle->deviceAssigned);
-
-        /*Codes_SRS_SERIALIZERDEVICETWIN_02_018: [ IoTHubDeviceTwin_Destroy_Impl shall remove the IoTHubClient_Handle and the device handle from the recorded set. ]*/
-        VECTOR_erase(g_allProtoHandles, protoHandle, 1);
 
         /*Codes_SRS_SERIALIZERDEVICETWIN_02_019: [ If the recorded set of IoTHubClient handles is zero size, then the set shall be destroyed. ]*/
         if (VECTOR_size(g_allProtoHandles) == 0) /*lazy init means more work @ destroy time*/
