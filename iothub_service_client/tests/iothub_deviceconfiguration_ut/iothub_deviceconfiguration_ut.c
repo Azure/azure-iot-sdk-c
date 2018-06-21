@@ -643,13 +643,13 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_Create_return_null_if_input_parameter_se
 /*Tests_SRS_IOTHUBDEVICECONFIGURATION_38_002: [ If any member of the serviceClientHandle input parameter is NULL IoTHubDeviceConfiguration_Create shall return NULL ]*/
 TEST_FUNCTION(IoTHubDeviceConfiguration_Create_return_null_if_input_parameter_serviceClientHandle_hostName_is_NULL)
 {
-    // arrange
+    ///arrange
     TEST_IOTHUB_SERVICE_CLIENT_AUTH.hostname = NULL;
 
-    // act
+    ///act
     IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE result = IoTHubDeviceConfiguration_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
 
-    // assert
+    ///assert
     ASSERT_IS_NULL(result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
@@ -657,13 +657,13 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_Create_return_null_if_input_parameter_se
 /*Tests_SRS_IOTHUBDEVICECONFIGURATION_38_002: [ If any member of the serviceClientHandle input parameter is NULL IoTHubDeviceConfiguration_Create shall return NULL ]*/
 TEST_FUNCTION(IoTHubDeviceConfiguration_Create_return_null_if_input_parameter_serviceClientHandle_iothubName_is_NULL)
 {
-    // arrange
+    ///arrange
     TEST_IOTHUB_SERVICE_CLIENT_AUTH.iothubName = NULL;
 
-    // act
+    ///act
     IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE result = IoTHubDeviceConfiguration_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
 
-    // assert
+    ///assert
     ASSERT_IS_NULL(result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
@@ -671,13 +671,13 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_Create_return_null_if_input_parameter_se
 /*Tests_SRS_IOTHUBDEVICECONFIGURATION_38_002: [ If any member of the serviceClientHandle input parameter is NULL IoTHubDeviceConfiguration_Create shall return NULL ]*/
 TEST_FUNCTION(IoTHubDeviceConfiguration_Create_return_null_if_input_parameter_serviceClientHandle_iothubSuffix_is_NULL)
 {
-    // arrange
+    ///arrange
     TEST_IOTHUB_SERVICE_CLIENT_AUTH.iothubSuffix = NULL;
 
-    // act
+    ///act
     IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE result = IoTHubDeviceConfiguration_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
 
-    // assert
+    ///assert
     ASSERT_IS_NULL(result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
@@ -685,13 +685,13 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_Create_return_null_if_input_parameter_se
 /*Tests_SRS_IOTHUBDEVICECONFIGURATION_38_002: [ If any member of the serviceClientHandle input parameter is NULL IoTHubDeviceConfiguration_Create shall return NULL ]*/
 TEST_FUNCTION(IoTHubDeviceConfiguration_Create_return_null_if_input_parameter_serviceClientHandle_keyName_is_NULL)
 {
-    // arrange
+    ///arrange
     TEST_IOTHUB_SERVICE_CLIENT_AUTH.keyName = NULL;
 
-    // act
+    ///act
     IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE result = IoTHubDeviceConfiguration_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
 
-    // assert
+    ///assert
     ASSERT_IS_NULL(result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
@@ -699,13 +699,13 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_Create_return_null_if_input_parameter_se
 /*Tests_SRS_IOTHUBDEVICECONFIGURATION_38_002: [ If any member of the serviceClientHandle input parameter is NULL IoTHubDeviceConfiguration_Create shall return NULL ]*/
 TEST_FUNCTION(IoTHubDeviceConfiguration_Create_return_null_if_input_parameter_serviceClientHandle_sharedAccessKey_is_NULL)
 {
-    // arrange
+    ///arrange
     TEST_IOTHUB_SERVICE_CLIENT_AUTH.sharedAccessKey = NULL;
 
-    // act
+    ///act
     IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE result = IoTHubDeviceConfiguration_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
 
-    // assert
+    ///assert
     ASSERT_IS_NULL(result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
@@ -719,16 +719,16 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_Create_return_null_if_input_parameter_se
 /*Tests_SRS_IOTHUBDEVICECONFIGURATION_38_014: [ IoTHubDeviceConfiguration_Create shall allocate memory and copy keyName to `result->keyName` by calling mallocAndStrcpy_s. ]*/
 TEST_FUNCTION(IoTHubDeviceConfiguration_Create_happy_path)
 {
-    // arrange
+    ///arrange
     EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
-    // act
+    ///act
     IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE result = IoTHubDeviceConfiguration_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
 
-    // assert
+    ///assert
     ASSERT_IS_NOT_NULL(result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
@@ -755,7 +755,7 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_Create_happy_path)
 /*Tests_SRS_IOTHUBDEVICECONFIGURATION_38_015: [ If the mallocAndStrcpy_s fails, IoTHubDeviceConfiguration_Create shall do clean up and return NULL. ]*/
 TEST_FUNCTION(IoTHubDeviceConfiguration_Create_non_happy_path)
 {
-    // arrange
+    ///arrange
     int umockc_result = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, umockc_result);
 
@@ -769,14 +769,14 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_Create_non_happy_path)
     ///act
     for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
-        /// arrange
+        ///arrange
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
 
-        /// act
+        ///act
         IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE result = IoTHubDeviceConfiguration_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
 
-        /// assert
+        ///assert
         ASSERT_ARE_EQUAL(void_ptr, NULL, result);
 
         ///cleanup
@@ -787,19 +787,19 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_Create_non_happy_path)
 /*Tests_SRS_IOTHUBDEVICECONFIGURATION_38_016: [ If the serviceClientDeviceConfigurationHandle input parameter is NULL IoTHubDeviceConfiguration_Destroy shall return ]*/
 TEST_FUNCTION(IoTHubDeviceConfiguration_Destroy_return_if_input_parameter_serviceClientDeviceConfigurationHandle_is_NULL)
 {
-    // arrange
+    ///arrange
     
-    // act
+    ///act
     IoTHubDeviceConfiguration_Destroy(NULL);
     
-    // assert
+    ///assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
 /*Tests_SRS_IOTHUBDEVICECONFIGURATION_38_017: [ If the serviceClientDeviceConfigurationHandle input parameter is not NULL IoTHubDeviceConfiguration_Destroy shall free the memory of it and return ]*/
 TEST_FUNCTION(IoTHubDeviceConfiguration_Destroy_do_clean_up_and_return_if_input_parameter_serviceClientDeviceConfigurationHandle_is_not_NULL)
 {
-    // arrange
+    ///arrange
     IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE handle = IoTHubDeviceConfiguration_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
     ASSERT_IS_NOT_NULL(handle);
 
@@ -810,23 +810,23 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_Destroy_do_clean_up_and_return_if_input_
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     
-    // act
+    ///act
     IoTHubDeviceConfiguration_Destroy(handle);
     
-    // assert
+    ///assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
 /*Tests_SRS_IOTHUBDEVICECONFIGURATION_38_018: [ IoTHubDeviceConfiguration_GetConfiguration shall verify the input parameters and if any of them are NULL then return IOTHUB_DEVICE_CONFIGURATION_INVALID_ARG ]*/
 TEST_FUNCTION(IoTHubDeviceConfiguration_GetConfiguration_return_NULL_if_input_parameter_serviceClientDeviceConfigurationHandle_is_NULL)
 {
-    //arrange
+    ///arrange
     const char* configurationId = " ";
 
-    //act
+    ///act
     IOTHUB_DEVICE_CONFIGURATION_RESULT result = IoTHubDeviceConfiguration_GetConfiguration(NULL, configurationId, (IOTHUB_DEVICE_CONFIGURATION*)0x4242);
 
-    //assert
+    ///assert
     ASSERT_ARE_EQUAL(int, IOTHUB_DEVICE_CONFIGURATION_INVALID_ARG, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
@@ -834,20 +834,20 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_GetConfiguration_return_NULL_if_input_pa
 ///*Tests_SRS_IOTHUBDEVICECONFIGURATION_38_018: [ IoTHubDeviceConfiguration_GetConfiguration shall verify the input parameters and if any of them are NULL then return IOTHUB_DEVICE_CONFIGURATION_INVALID_ARG ]*/
 TEST_FUNCTION(IoTHubDeviceConfiguration_GetConfiguration_return_NULL_if_input_parameter_configurationId_is_NULL)
 {
-    // arrange
+    ///arrange
     IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE handle = IoTHubDeviceConfiguration_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
     ASSERT_IS_NOT_NULL(handle);
 
     umock_c_reset_all_calls();
 
-    // act
+    ///act
     IOTHUB_DEVICE_CONFIGURATION_RESULT result = IoTHubDeviceConfiguration_GetConfiguration(handle, NULL, (IOTHUB_DEVICE_CONFIGURATION*)0x4242);
 
-    // assert
+    ///assert
     ASSERT_ARE_EQUAL(int, IOTHUB_DEVICE_CONFIGURATION_INVALID_ARG, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     
-    // cleanup
+    ///cleanup
     IoTHubDeviceConfiguration_Destroy(handle);
 }
 
@@ -967,7 +967,7 @@ static void set_expected_calls_for_GetConfiguration_processing()
 /*Tests_SRS_IOTHUBDEVICECONFIGURATION_38_030: [ Otherwise IoTHubDeviceConfiguration_GetConfiguration shall save the received deviceTwin to the out parameter and return with it ]*/
 //TEST_FUNCTION(IoTHubDeviceConfiguration_GetConfiguration_happy_path_status_code_200)
 //{
-//    // arrange
+//    ///arrange
 //    IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE handle = IoTHubDeviceConfiguration_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
 //    ASSERT_IS_NOT_NULL(handle);
 //
@@ -979,19 +979,19 @@ static void set_expected_calls_for_GetConfiguration_processing()
 //    set_expected_calls_for_sendHttpRequestDeviceConfiguration(httpStatusCodeOk, HTTPAPI_REQUEST_GET);
 //    set_expected_calls_for_GetConfiguration_processing();
 //
-//    // act
+//    ///act
 //    IOTHUB_DEVICE_CONFIGURATION configuration;
 //    const char* configurationId = " ";
 //    IOTHUB_DEVICE_CONFIGURATION_RESULT result = IoTHubDeviceConfiguration_GetConfiguration(handle, configurationId, &configuration);
 //    (void)result;
-//    // assert
+//    ///assert
 //    //TODO: Fixup mock expected calls after integration is complete
 //    //ASSERT_ARE_EQUAL(int, IOTHUB_DEVICE_CONFIGURATION_OK, result);
 //    
 //	//TODO: Fixup mock expected calls after integration is complete
 //	//ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 //
-//    // cleanup
+//    ///cleanup
 //    //TODO: Readd after free() mock call sequence has been figured out
 //	//IoTHubDeviceConfiguration_FreeConfigurationMembers(&configuration);
 //}
@@ -1010,21 +1010,24 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_DeleteConfiguration_return_IOTHUB_DEVICE
 }
 
 /* Tests_SRS_IOTHUBDEVICECONFIGURATION_38_052: [ IoTHubDeviceConfiguration_DeleteConfiguration shall verify the input parameters and if any of them are NULL then return IOTHUB_DEVICE_CONFIGURATION_INVALID_ARG ] */
-//TEST_FUNCTION(IoTHubDeviceConfiguration_DeleteConfiguration_return_IOTHUB_DEVICECONFIGURATION_INVALID_ARG_if_input_parameter_configurationId_is_NULL)
-//{
-//	///arrange
-//	IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE handle = IoTHubDeviceConfiguration_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
-//	ASSERT_IS_NOT_NULL(handle);
-//
-//	umock_c_reset_all_calls();
-//
-//	///act
-//	IOTHUB_DEVICE_CONFIGURATION_RESULT result = IoTHubDeviceConfiguration_DeleteConfiguration(handle, NULL);
-//
-//	///assert
-//	ASSERT_ARE_EQUAL(int, IOTHUB_DEVICE_CONFIGURATION_INVALID_ARG, result);
-//	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-//}
+TEST_FUNCTION(IoTHubDeviceConfiguration_DeleteConfiguration_return_IOTHUB_DEVICECONFIGURATION_INVALID_ARG_if_input_parameter_configurationId_is_NULL)
+{
+	///arrange
+	IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE handle = IoTHubDeviceConfiguration_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
+	ASSERT_IS_NOT_NULL(handle);
+
+	umock_c_reset_all_calls();
+
+	///act
+	IOTHUB_DEVICE_CONFIGURATION_RESULT result = IoTHubDeviceConfiguration_DeleteConfiguration(handle, NULL);
+
+	///assert
+	ASSERT_ARE_EQUAL(int, IOTHUB_DEVICE_CONFIGURATION_INVALID_ARG, result);
+	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    ///cleanup
+    IoTHubDeviceConfiguration_Destroy(handle);
+}
 
 /* Tests_SRS_IOTHUBDEVICECONFIGURATION_38_053: [ IoTHubDeviceConfiguration_DeleteConfiguration shall create HTTP DELETE request URL using the given configurationId using the following format : url/configurations/[configurationId]  ] */
 /* Tests_SRS_IOTHUBDEVICECONFIGURATION_38_054: [ IoTHubDeviceConfiguration_DeleteConfiguration shall add the following headers to the created HTTP GET request : authorization=sasToken,Request-Id=<generatedGuid>,Accept=application/json,Content-Type=application/json,charset=utf-8 ] */
@@ -1033,23 +1036,26 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_DeleteConfiguration_return_IOTHUB_DEVICE
 /* Tests_SRS_IOTHUBDEVICECONFIGURATION_38_057: [ IoTHubDeviceConfiguration_DeleteConfiguration shall execute the HTTP DELETE request by calling HTTPAPIEX_ExecuteRequest ] */
 /* Tests_SRS_IOTHUBDEVICECONFIGURATION_38_058: [ IoTHubDeviceConfiguration_DeleteConfiguration shall verify the received HTTP status code and if it is greater than 300 then return IOTHUB_DEVICE_CONFIGURATION_HTTP_STATUS_ERROR ] */
 /* Tests_SRS_IOTHUBDEVICECONFIGURATION_38_059: [ IoTHubDeviceConfiguration_DeleteConfiguration shall verify the received HTTP status code and if it is less or equal than 300 then return IOTHUB_DEVICE_CONFIGURATION_OK ] */
-//TEST_FUNCTION(IoTHubDeviceConfiguration_DeleteConfiguration_happy_path)
-//{
-//	///arrange
-//	IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE handle = IoTHubDeviceConfiguration_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
-//	ASSERT_IS_NOT_NULL(handle);
-//
-//	umock_c_reset_all_calls();
-//	
-//	set_expected_calls_for_sendHttpRequestDeviceConfiguration(httpStatusCodeDeleted, HTTPAPI_REQUEST_DELETE);
-//
-//	///act
-//	IOTHUB_DEVICE_CONFIGURATION_RESULT result = IoTHubDeviceConfiguration_DeleteConfiguration(handle, TEST_CONST_CHAR_PTR);
-//
-//	///assert
-//	ASSERT_ARE_EQUAL(int, IOTHUB_DEVICE_CONFIGURATION_OK, result);
-//	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-//}
+TEST_FUNCTION(IoTHubDeviceConfiguration_DeleteConfiguration_happy_path)
+{
+	///arrange
+	IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE handle = IoTHubDeviceConfiguration_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
+	ASSERT_IS_NOT_NULL(handle);
+
+	umock_c_reset_all_calls();
+	
+	set_expected_calls_for_sendHttpRequestDeviceConfiguration(httpStatusCodeDeleted, HTTPAPI_REQUEST_DELETE);
+
+	///act
+	IOTHUB_DEVICE_CONFIGURATION_RESULT result = IoTHubDeviceConfiguration_DeleteConfiguration(handle, TEST_CONST_CHAR_PTR);
+
+	///assert
+	ASSERT_ARE_EQUAL(int, IOTHUB_DEVICE_CONFIGURATION_OK, result);
+	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    ///cleanup
+    IoTHubDeviceConfiguration_Destroy(handle);
+}
 
 /* Tests_SRS_IOTHUBDEVICECONFIGURATION_38_053: [ IoTHubDeviceConfiguration_DeleteConfiguration shall create HTTP DELETE request URL using the given configurationId using the following format : url/configurations/[configurationId ] */
 /* Tests_SRS_IOTHUBDEVICECONFIGURATION_38_054: [ IoTHubDeviceConfiguration_DeleteConfiguration shall add the following headers to the created HTTP GET request : authorization=sasToken,Request-Id=<generatedGuid>,Accept=application/json,Content-Type=application/json,charset=utf-8  ] */
@@ -1058,51 +1064,54 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_DeleteConfiguration_return_IOTHUB_DEVICE
 /* Tests_SRS_IOTHUBDEVICECONFIGURATION_38_057: [ IoTHubDeviceConfiguration_DeleteConfiguration shall execute the HTTP DELETE request by calling HTTPAPIEX_ExecuteRequest ] */
 /* Tests_SRS_IOTHUBDEVICECONFIGURATION_38_058: [ IoTHubDeviceConfiguration_DeleteConfiguration shall verify the received HTTP status code and if it is greater than 300 then return IOTHUB_DEVICE_CONFIGURATION_HTTP_STATUS_ERROR ] */
 /* Tests_SRS_IOTHUBDEVICECONFIGURATION_38_059: [ IoTHubDeviceConfiguration_DeleteConfiguration shall verify the received HTTP status code and if it is less or equal than 300 then return IOTHUB_DEVICE_CONFIGURATION_OK ] */
-//TEST_FUNCTION(IoTHubDeviceConfiguration_DeleteConfiguration_non_happy_path)
-//{
-//	///arrange
-//	IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE handle = IoTHubDeviceConfiguration_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
-//	ASSERT_IS_NOT_NULL(handle);
-//
-//	umock_c_reset_all_calls();
-//	
-//	int umockc_result = umock_c_negative_tests_init();
-//	ASSERT_ARE_EQUAL(int, 0, umockc_result);
-//
-//	set_expected_calls_for_sendHttpRequestDeviceConfiguration(httpStatusCodeOk, HTTPAPI_REQUEST_DELETE);
-//
-//	umock_c_negative_tests_snapshot();
-//
-//	///act
-//	for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
-//	{
-//		/// arrange
-//		umock_c_negative_tests_reset();
-//		umock_c_negative_tests_fail_call(i);
-//
-//		/// act
-//		if (
-//			(i != 6) && /*UniqueId_Generate*/
-//			(i != 11) && /*gballoc_free*/
-//			(i != 14) && /*STRING_c_str*/
-//			(i != 15) && /*HTTPAPIEX_SAS_Destroy*/
-//			(i != 16) && /*STRING_delete*/
-//			(i != 17) && /*HTTPAPIEX_Destroy*/
-//			(i != 18) && /*HTTPAPIEX_SAS_Destroy*/
-//			(i != 19) && /*HTTPHeaders_Free*/
-//			(i != 20) && /*STRING_delete*/
-//			(i != 21) && /*STRING_delete*/
-//			(i != 22)    /*STRING_delete*/
-//			)
-//		{
-//			IOTHUB_DEVICE_CONFIGURATION_RESULT result = IoTHubDeviceConfiguration_DeleteConfiguration(handle, TEST_CONST_CHAR_PTR);
-//			
-//			/// assert
-//			ASSERT_ARE_NOT_EQUAL(int, IOTHUB_DEVICE_CONFIGURATION_OK, result);
-//		}
-//		///cleanup
-//	}
-//	umock_c_negative_tests_deinit();
-//}
+TEST_FUNCTION(IoTHubDeviceConfiguration_DeleteConfiguration_non_happy_path)
+{
+	///arrange
+	IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE handle = IoTHubDeviceConfiguration_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
+	ASSERT_IS_NOT_NULL(handle);
+
+	umock_c_reset_all_calls();
+	
+	int umockc_result = umock_c_negative_tests_init();
+	ASSERT_ARE_EQUAL(int, 0, umockc_result);
+
+	set_expected_calls_for_sendHttpRequestDeviceConfiguration(httpStatusCodeOk, HTTPAPI_REQUEST_DELETE);
+
+	umock_c_negative_tests_snapshot();
+
+	///act
+	for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
+	{
+		////arrange
+		umock_c_negative_tests_reset();
+		umock_c_negative_tests_fail_call(i);
+
+		////act
+		if (
+			(i != 6) && /*UniqueId_Generate*/
+			(i != 11) && /*gballoc_free*/
+			(i != 14) && /*STRING_c_str*/
+			(i != 15) && /*HTTPAPIEX_SAS_Destroy*/
+			(i != 16) && /*STRING_delete*/
+			(i != 17) && /*HTTPAPIEX_Destroy*/
+			(i != 18) && /*HTTPAPIEX_SAS_Destroy*/
+			(i != 19) && /*HTTPHeaders_Free*/
+			(i != 20) && /*STRING_delete*/
+			(i != 21) && /*STRING_delete*/
+			(i != 22)    /*STRING_delete*/
+			)
+		{
+			IOTHUB_DEVICE_CONFIGURATION_RESULT result = IoTHubDeviceConfiguration_DeleteConfiguration(handle, TEST_CONST_CHAR_PTR);
+			
+			////assert
+			ASSERT_ARE_NOT_EQUAL(int, IOTHUB_DEVICE_CONFIGURATION_OK, result);
+		}
+		///cleanup
+	}
+	umock_c_negative_tests_deinit();
+
+    ///cleanup
+    IoTHubDeviceConfiguration_Destroy(handle);
+}
 
 END_TEST_SUITE(iothub_deviceconfiguration_ut)
