@@ -144,8 +144,8 @@ int main(void)
 
         // Update configuration
         mallocAndStrcpy_s((char **)&deviceConfigurationInfo.configurationId, configurationId);
-        mallocAndStrcpy_s((char **)&deviceConfigurationInfo.targetCondition, targetCondition);
-        deviceConfigurationInfo.version = IOTHUB_DEVICE_CONFIGURATION_UPDATE_VERSION_1;
+        mallocAndStrcpy_s((char **)&deviceConfigurationInfo.targetCondition, updatedTargetCondition);
+        deviceConfigurationInfo.version = IOTHUB_DEVICE_CONFIGURATION_VERSION_1;
 
         if ((result = IoTHubDeviceConfiguration_UpdateConfiguration(iotHubDeviceConfigurationHandle, &deviceConfigurationInfo)) != IOTHUB_DEVICE_CONFIGURATION_OK)
         {

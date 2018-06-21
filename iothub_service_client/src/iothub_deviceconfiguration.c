@@ -55,7 +55,6 @@ static const char*  HTTP_HEADER_VAL_IFMATCH = "*";
 
 static const char* CONFIGURATION_JSON_KEY_CONFIGURATION_ID = "id";
 static const char* CONFIGURATION_JSON_KEY_SCHEMA_VERSION = "schemaVersion";
-static const char* CONFIGURATION_JSON_KEY_CONTENT_TYPE = "contentType";
 static const char* CONFIGURATION_JSON_KEY_TARGET_CONDITION = "targetCondition";
 static const char* CONFIGURATION_JSON_KEY_CREATED_TIME = "createdTimeUtc";
 static const char* CONFIGURATION_JSON_KEY_LAST_UPDATED_TIME = "lastUpdatedTimeUtc";
@@ -77,7 +76,6 @@ static const char* const RELATIVE_PATH_FMT_DEVICECONFIGURATIONS = "/configuratio
 
 static const char* const CONFIGURATION_DEFAULT_SCHEMA_VERSION = "1.0";
 static const char* const CONFIGURATION_DEFAULT_ETAG = "MQ==";
-static const char* const CONFIGURATION_DEFAULT_CONTENT_TYPE = "assignment";
 
 typedef struct IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_TAG
 {
@@ -749,7 +747,6 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT parseDeviceConfigurationJsonObject(JSO
     const char* schemaVersion = json_object_get_string(root_object, CONFIGURATION_JSON_KEY_SCHEMA_VERSION);
     const char* deviceContent = json_serialize_to_string(json_object_dotget_value(root_object, CONFIGURATION_DEVICE_CONTENT_NODE_NAME));
     const char* modulesContent = json_serialize_to_string(json_object_dotget_value(root_object, CONFIGURATION_MODULES_CONTENT_NODE_NAME));
-    const char* contentType = json_object_get_string(root_object, CONFIGURATION_JSON_KEY_CONTENT_TYPE);
     const char* targetCondition = json_object_get_string(root_object, CONFIGURATION_JSON_KEY_TARGET_CONDITION);
     const char* createdTime = json_object_get_string(root_object, CONFIGURATION_JSON_KEY_CREATED_TIME);
     const char* lastUpdatedTime = json_object_get_string(root_object, CONFIGURATION_JSON_KEY_LAST_UPDATED_TIME);
@@ -786,11 +783,6 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT parseDeviceConfigurationJsonObject(JSO
     else if ((eTag != NULL) && (mallocAndStrcpy_s((char**)&configuration->eTag, eTag) != 0))
     {
         LogError("mallocAndStrcpy_s failed for eTag");
-        result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
-    }
-    else if ((contentType != NULL) && (mallocAndStrcpy_s((char**)&configuration->contentType, contentType) != 0))
-    {
-        LogError("mallocAndStrcpy_s failed for contentType");
         result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
     }
     else if ((targetCondition != NULL) && (mallocAndStrcpy_s((char**)&configuration->targetCondition, targetCondition) != 0))
@@ -838,7 +830,6 @@ void IoTHubDeviceConfiguration_FreeConfigurationMembers(IOTHUB_DEVICE_CONFIGURAT
     free((char *)configuration->schemaVersion);
     free((char *)configuration->targetCondition);
     free((char *)configuration->eTag);
-    free((char *)configuration->contentType);
     free((char *)configuration->createdTimeUtc);
     free((char *)configuration->lastUpdatedTimeUtc);
 
@@ -849,64 +840,59 @@ void IoTHubDeviceConfiguration_FreeConfigurationMembers(IOTHUB_DEVICE_CONFIGURAT
             free((void *)(configuration->labels.labelNames[i]));
             free((void *)(configuration->labels.labelValues[i]));
         }
+        
+        free((void *)configuration->labels.labelNames);
+        free((void *)configuration->labels.labelValues);
     }
     
-    if (configuration->metricsDefinition.numQueries > 0) 
+    if (configuration->metricsDefinition.numQueries > 0)
     {
-        if (configuration->metricsDefinition.numQueries > 0)
+        for (size_t i = 0; i < configuration->metricsDefinition.numQueries; i++)
         {
-            for (size_t i = 0; i < configuration->metricsDefinition.numQueries; i++)
-            {
-                free((void *)(configuration->metricsDefinition.queryNames[i]));
-                free((void *)(configuration->metricsDefinition.queryStrings[i]));
-            }
+            free((void *)(configuration->metricsDefinition.queryNames[i]));
+            free((void *)(configuration->metricsDefinition.queryStrings[i]));
         }
-    }
-    
-    if (configuration->metricResult.numQueries > 0) 
-    {
-        if (configuration->metricResult.numQueries > 0)
-        {
-            for (size_t i = 0; i < configuration->metricResult.numQueries; i++)
-            {
-                free((void *)(configuration->metricResult.queryNames[i]));
-            }
-        }
-    }
-    
-    if (configuration->systemMetricsDefinition.numQueries > 0) 
-    {
-        if (configuration->systemMetricsDefinition.numQueries > 0)
-        {
-            for (size_t i = 0; i < configuration->systemMetricsDefinition.numQueries; i++)
-            {
-                free((void *)(configuration->systemMetricsDefinition.queryNames[i]));
-                free((void *)(configuration->systemMetricsDefinition.queryStrings[i]));
-            }
-        }
+            
+        free((void *)configuration->metricsDefinition.queryNames);
+        free((void *)configuration->metricsDefinition.queryStrings);
     }
 
-    if (configuration->systemMetricsResult.numQueries > 0) 
+    
+    if (configuration->metricResult.numQueries > 0)
     {
-        if (configuration->systemMetricsResult.numQueries > 0)
+        for (size_t i = 0; i < configuration->metricResult.numQueries; i++)
         {
-            for (size_t i = 0; i < configuration->systemMetricsResult.numQueries; i++)
-            {
-                free((void *)(configuration->systemMetricsResult.queryNames[i]));
-            }
+            free((void *)(configuration->metricResult.queryNames[i]));
         }
+
+        free((void *)configuration->metricResult.queryNames);
+        free((void *)configuration->metricResult.results);
+    }
+
+    
+    if (configuration->systemMetricsDefinition.numQueries > 0)
+    {
+        for (size_t i = 0; i < configuration->systemMetricsDefinition.numQueries; i++)
+        {
+            free((void *)(configuration->systemMetricsDefinition.queryNames[i]));
+            free((void *)(configuration->systemMetricsDefinition.queryStrings[i]));
+        }
+
+        free((void *)configuration->systemMetricsDefinition.queryNames);
+        free((void *)configuration->systemMetricsDefinition.queryStrings);
+    }
+
+    if (configuration->systemMetricsResult.numQueries > 0)
+    {
+        for (size_t i = 0; i < configuration->systemMetricsResult.numQueries; i++)
+        {
+            free((void *)(configuration->systemMetricsResult.queryNames[i]));
+        }
+
+        free((void *)configuration->systemMetricsResult.queryNames);
+        free((void *)configuration->systemMetricsResult.results);
     }
     
-    free((void *)configuration->labels.labelNames);
-    free((void *)configuration->labels.labelValues);
-    free((void *)configuration->metricsDefinition.queryNames);
-    free((void *)configuration->metricsDefinition.queryStrings);
-    free((void *)configuration->metricResult.queryNames);
-    free((void *)configuration->metricResult.results);
-    free((void *)configuration->systemMetricsDefinition.queryNames);
-    free((void *)configuration->systemMetricsDefinition.queryStrings);
-    free((void *)configuration->systemMetricsResult.queryNames);
-    free((void *)configuration->systemMetricsResult.results);
 
     memset(configuration, 0, sizeof(*configuration));
 }
@@ -1216,11 +1202,6 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT clone_deviceConfiguration(IOTHUB_DEVIC
             LogError("mallocAndStrcpy_s failed for IOTHUB_DEVICE_CONFIGURATION eTag");
             result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
         }
-        else if (source->contentType != NULL && mallocAndStrcpy_s((char**)&(target->contentType), source->contentType) != 0)
-        {
-            LogError("mallocAndStrcpy_s failed for IOTHUB_DEVICE_CONFIGURATION contentType");
-            result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
-        }
         else if (source->createdTimeUtc != NULL && mallocAndStrcpy_s((char**)&(target->createdTimeUtc), source->createdTimeUtc) != 0)
         {
             LogError("mallocAndStrcpy_s failed for IOTHUB_DEVICE_CONFIGURATION createdTimeUtc");
@@ -1367,20 +1348,20 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT parseDeviceConfigurationListJson(BUFFE
                     result = parseDeviceConfigurationJsonObject(device_configuration_object, &iotHubDeviceConfiguration);
                     if (result != IOTHUB_DEVICE_CONFIGURATION_OK)
                     {
-                        IoTHubDeviceConfiguration_FreeConfigurationMembers(&iotHubDeviceConfiguration);
+                        LogError("parseDeviceConfigurationJsonObject failed");
                     }
                     else
                     {
                         result = addDeviceConfigurationToLinkedList(&iotHubDeviceConfiguration, configurationList);
-
                         if (result != IOTHUB_DEVICE_CONFIGURATION_OK)
                         {
-                            IoTHubDeviceConfiguration_FreeConfigurationMembers(&iotHubDeviceConfiguration);
+                            LogError("addDeviceConfigurationToLinkedList failed");
                         }
                     }
                 }
 
                 json_object_clear(device_configuration_object);
+                IoTHubDeviceConfiguration_FreeConfigurationMembers(&iotHubDeviceConfiguration);
 
                 if (result != IOTHUB_DEVICE_CONFIGURATION_OK)
                 {
@@ -1580,7 +1561,6 @@ IOTHUB_DEVICE_CONFIGURATION_RESULT IoTHubDeviceConfiguration_AddConfiguration(IO
 
                 tempConfigurationInfo->schemaVersion = CONFIGURATION_DEFAULT_SCHEMA_VERSION;
                 tempConfigurationInfo->eTag = CONFIGURATION_DEFAULT_ETAG;
-                tempConfigurationInfo->contentType = CONFIGURATION_DEFAULT_CONTENT_TYPE;
 
                 BUFFER_HANDLE configurationJsonBuffer = NULL;
                 BUFFER_HANDLE responseBuffer = NULL;

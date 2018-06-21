@@ -367,7 +367,6 @@ static const char* TEST_SCHEMA_VERSION = "theschemaVersion";
 static const char* TEST_CONTENT = "thecontent";
 static const char* TEST_DEVICE_CONTENT = "thedeviceContent";
 static const char* TEST_MODULES_CONTENT = "themodulesContent";
-static const char* TEST_CONTENT_TYPE = "thecontentType";
 static const char* TEST_TARGET_CONDITION = "thetargetCondition";
 static const char* TEST_CREATED_TIME = "thecreatedTimeUtc";
 static const char* TEST_LAST_UPDATED_TIME = "thelastUpdatedTimeUtc";
@@ -395,7 +394,6 @@ static const char* TEST_CONFIGURATION_JSON_KEY_SCHEMA_VERSION = "schemaVersion";
 static const char* TEST_CONFIGURATION_JSON_KEY_CONTENT = "content";
 static const char* TEST_CONFIGURATION_JSON_KEY_DEVICE_CONTENT = "deviceContent";
 static const char* TEST_CONFIGURATION_JSON_KEY_MODULES_CONTENT = "modulesContent";
-static const char* TEST_CONFIGURATION_JSON_KEY_CONTENT_TYPE = "contentType";
 static const char* TEST_CONFIGURATION_JSON_KEY_TARGET_CONDITION = "targetCondition";
 static const char* TEST_CONFIGURATION_JSON_KEY_CREATED_TIME = "createdTimeUtc";
 static const char* TEST_CONFIGURATION_JSON_KEY_LAST_UPDATED_TIME = "lastUpdatedTimeUtc";
@@ -943,7 +941,6 @@ static void set_expected_calls_for_GetConfiguration_processing()
     [json_object_get_string(0000000000005151, "content")]
     [json_object_get_string(0000000000005151, "deviceContent")]
     [json_object_get_string(0000000000005151, "modulesContent")]
-    [json_object_get_string(0000000000005151, "contentType")]
     ]json_object_get_string(0000000000005151, "targetCondition")]
     [json_object_get_string(0000000000005151, "createdTimeUtc")]
     [json_object_get_string(0000000000005151, "lastUpdatedTimeUtc")]
