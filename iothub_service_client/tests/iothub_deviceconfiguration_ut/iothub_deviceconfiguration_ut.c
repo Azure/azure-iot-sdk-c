@@ -884,7 +884,7 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_AddConfiguration_return_NULL_if_input_pa
     IoTHubDeviceConfiguration_Destroy(handle);*/
 }
 
-static void set_expected_calls_for_sendHttpRequestDeviceConfiguration(const unsigned int httpStatusCode, HTTPAPI_REQUEST_TYPE requestType)
+static void set_expected_calls_for_sendHttpRequestDeviceConfiguration(const unsigned int httpStatusCode, HTTPAPI_REQUEST_TYPE requestType, IOTHUB_DEVICECONFIGURATION_REQUEST_MODE hubRequestType)
 {
     EXPECTED_CALL(STRING_construct(TEST_HOSTNAME));
     EXPECTED_CALL(STRING_construct(TEST_SHAREDACCESSKEY));
@@ -899,7 +899,7 @@ static void set_expected_calls_for_sendHttpRequestDeviceConfiguration(const unsi
     EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_USER_AGENT, IGNORED_PTR_ARG));
     EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_ACCEPT, TEST_HTTP_HEADER_VAL_ACCEPT));
     EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_CONTENT_TYPE, TEST_HTTP_HEADER_VAL_CONTENT_TYPE));
-    if ((requestType == IOTHUB_DEVICECONFIGURATION_REQUEST_UPDATE) || (requestType == IOTHUB_DEVICECONFIGURATION_REQUEST_DELETE))
+    if ((hubRequestType == IOTHUB_DEVICECONFIGURATION_REQUEST_UPDATE) || (hubRequestType == IOTHUB_DEVICECONFIGURATION_REQUEST_DELETE))
     {
         EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_IFMATCH, TEST_HTTP_HEADER_VAL_IFMATCH));
     }
@@ -1000,20 +1000,9 @@ static void set_expected_calls_for_GetConfiguration_processing()
     STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
 }
 
-/*Tests_SRS_IOTHUBDEVICECONFIGURATION_38_019: [ IoTHubDeviceConfiguration_AddConfiguration shall create HTTP PUT request URL using the given configurationId using the following format: url/configurations/[configurationId] ]*/
-/*Tests_SRS_IOTHUBDEVICECONFIGURATION_38_020: [ IoTHubDeviceConfiguration_AddConfiguration shall add the following headers to the created HTTP GET request: authorization=sasToken,Request-Id=<generatedGuid>,Accept=application/json,Content-Type=application/json,charset=utf-8 ]*/
-/*Tests_SRS_IOTHUBDEVICECONFIGURATION_38_021: [ IoTHubDeviceConfiguration_AddConfiguration shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ]*/
-/*Tests_SRS_IOTHUBDEVICECONFIGURATION_38_022: [ IoTHubDeviceConfiguration_AddConfiguration shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ]*/
-/*Tests_SRS_IOTHUBDEVICECONFIGURATION_38_023: [ IoTHubDeviceConfiguration_AddConfiguration shall execute the HTTP GET request by calling HTTPAPIEX_ExecuteRequest ]*/
-/*Tests_SRS_IOTHUBDEVICECONFIGURATION_38_030: [ Otherwise IoTHubDeviceConfiguration_AddConfiguration shall save the received configuration to the out parameter and return with it ]*/
-TEST_FUNCTION(IoTHubDeviceConfiguration_AddConfiguration_happy_path_status_code_200)
+static void set_expected_calls_for_AddConfiguration_UpdateConfiguration_processing()
 {
-    IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE handle = IoTHubDeviceConfiguration_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
-    ASSERT_IS_NOT_NULL(handle);
-
-    umock_c_reset_all_calls();
-
-    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    // build configuration JSON doc
     EXPECTED_CALL(json_value_init_object());
     EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_CONFIGURATION_JSON_KEY_CONFIGURATION_ID, TEST_CONFIGURATION_ID));
@@ -1043,16 +1032,34 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_AddConfiguration_happy_path_status_code_
     STRICT_EXPECTED_CALL(json_free_serialized_string(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(json_object_clear(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG));
+}
+
+/*Tests_SRS_IOTHUBDEVICECONFIGURATION_38_019: [ IoTHubDeviceConfiguration_AddConfiguration shall create HTTP PUT request URL using the given configurationId using the following format: url/configurations/[configurationId] ]*/
+/*Tests_SRS_IOTHUBDEVICECONFIGURATION_38_020: [ IoTHubDeviceConfiguration_AddConfiguration shall add the following headers to the created HTTP GET request: authorization=sasToken,Request-Id=<generatedGuid>,Accept=application/json,Content-Type=application/json,charset=utf-8 ]*/
+/*Tests_SRS_IOTHUBDEVICECONFIGURATION_38_021: [ IoTHubDeviceConfiguration_AddConfiguration shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ]*/
+/*Tests_SRS_IOTHUBDEVICECONFIGURATION_38_022: [ IoTHubDeviceConfiguration_AddConfiguration shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ]*/
+/*Tests_SRS_IOTHUBDEVICECONFIGURATION_38_023: [ IoTHubDeviceConfiguration_AddConfiguration shall execute the HTTP GET request by calling HTTPAPIEX_ExecuteRequest ]*/
+/*Tests_SRS_IOTHUBDEVICECONFIGURATION_38_030: [ Otherwise IoTHubDeviceConfiguration_AddConfiguration shall save the received configuration to the out parameter and return with it ]*/
+TEST_FUNCTION(IoTHubDeviceConfiguration_AddConfiguration_happy_path_status_code_200)
+{
+    IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE handle = IoTHubDeviceConfiguration_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
+    ASSERT_IS_NOT_NULL(handle);
+
+    umock_c_reset_all_calls();
+
+    ///arrange
+    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+
+    set_expected_calls_for_AddConfiguration_UpdateConfiguration_processing();
 
     STRICT_EXPECTED_CALL(BUFFER_new());
 
-    set_expected_calls_for_sendHttpRequestDeviceConfiguration(httpStatusCodeOk, HTTPAPI_REQUEST_PUT);
+    set_expected_calls_for_sendHttpRequestDeviceConfiguration(httpStatusCodeOk, HTTPAPI_REQUEST_PUT, IOTHUB_DEVICECONFIGURATION_REQUEST_ADD);
     set_expected_calls_for_GetConfiguration_processing();
 
     STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
-    ///arrange
     IOTHUB_DEVICE_CONFIGURATION_ADD deviceConfigurationAddInfo;
     IOTHUB_DEVICE_CONFIGURATION deviceConfiguration;
 
@@ -1122,7 +1129,7 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_GetConfiguration_happy_path_status_code_
 
     EXPECTED_CALL(BUFFER_new());
 
-    set_expected_calls_for_sendHttpRequestDeviceConfiguration(httpStatusCodeOk, HTTPAPI_REQUEST_GET);
+    set_expected_calls_for_sendHttpRequestDeviceConfiguration(httpStatusCodeOk, HTTPAPI_REQUEST_GET, IOTHUB_DEVICECONFIGURATION_REQUEST_GET);
     set_expected_calls_for_GetConfiguration_processing();
 
     ///act
@@ -1210,7 +1217,7 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_GetConfigurations_happy_path_status_code
 
     EXPECTED_CALL(BUFFER_new());
 
-    set_expected_calls_for_sendHttpRequestDeviceConfiguration(httpStatusCodeOk, HTTPAPI_REQUEST_GET);
+    set_expected_calls_for_sendHttpRequestDeviceConfiguration(httpStatusCodeOk, HTTPAPI_REQUEST_GET, IOTHUB_DEVICECONFIGURATION_REQUEST_GET_LIST);
 
     EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
         .SetReturn(TEST_UNSIGNED_CHAR_PTR);
@@ -1275,6 +1282,35 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_UpdateConfiguration_return_NULL_if_input
 /*Tests_SRS_IOTHUBDEVICECONFIGURATION_38_030: [ Otherwise IoTHubDeviceConfiguration_UpdateConfiguration shall save the received configuration to the out parameter and return with it ]*/
 TEST_FUNCTION(IoTHubDeviceConfiguration_UpdateConfiguration_happy_path_status_code_200)
 {
+    IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE handle = IoTHubDeviceConfiguration_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
+    ASSERT_IS_NOT_NULL(handle);
+
+    umock_c_reset_all_calls();
+
+    ///arrange
+    set_expected_calls_for_AddConfiguration_UpdateConfiguration_processing();
+    STRICT_EXPECTED_CALL(BUFFER_new());
+
+    set_expected_calls_for_sendHttpRequestDeviceConfiguration(httpStatusCodeOk, HTTPAPI_REQUEST_PUT, IOTHUB_DEVICECONFIGURATION_REQUEST_UPDATE);
+
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
+
+    IOTHUB_DEVICE_CONFIGURATION deviceConfiguration;
+
+    memset(&deviceConfiguration, 0, sizeof(IOTHUB_DEVICE_CONFIGURATION));
+
+    deviceConfiguration.configurationId = TEST_CONFIGURATION_ID;
+    deviceConfiguration.targetCondition = TEST_TARGET_CONDITION;
+    deviceConfiguration.priority = TEST_PRIORITY;
+    deviceConfiguration.content.deviceContent = TEST_DEVICE_CONTENT;
+
+    ///act
+    IOTHUB_DEVICE_CONFIGURATION_RESULT result = IoTHubDeviceConfiguration_UpdateConfiguration(handle, &deviceConfiguration);
+
+    ///assert
+    ASSERT_ARE_EQUAL(int, IOTHUB_DEVICE_CONFIGURATION_OK, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
 /* Tests_SRS_IOTHUBDEVICECONFIGURATION_38_052: [ IoTHubDeviceConfiguration_DeleteConfiguration shall verify the input parameters and if any of them are NULL then return IOTHUB_DEVICE_CONFIGURATION_INVALID_ARG ] */
@@ -1325,7 +1361,7 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_DeleteConfiguration_happy_path)
 
     umock_c_reset_all_calls();
 
-    set_expected_calls_for_sendHttpRequestDeviceConfiguration(httpStatusCodeDeleted, HTTPAPI_REQUEST_DELETE);
+    set_expected_calls_for_sendHttpRequestDeviceConfiguration(httpStatusCodeDeleted, HTTPAPI_REQUEST_DELETE, IOTHUB_DEVICECONFIGURATION_REQUEST_DELETE);
 
     ///act
     IOTHUB_DEVICE_CONFIGURATION_RESULT result = IoTHubDeviceConfiguration_DeleteConfiguration(handle, TEST_CONST_CHAR_PTR);
@@ -1356,7 +1392,7 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_DeleteConfiguration_non_happy_path)
     int umockc_result = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, umockc_result);
 
-    set_expected_calls_for_sendHttpRequestDeviceConfiguration(httpStatusCodeOk, HTTPAPI_REQUEST_DELETE);
+    set_expected_calls_for_sendHttpRequestDeviceConfiguration(httpStatusCodeOk, HTTPAPI_REQUEST_DELETE, IOTHUB_DEVICECONFIGURATION_REQUEST_DELETE);
 
     umock_c_negative_tests_snapshot();
 
