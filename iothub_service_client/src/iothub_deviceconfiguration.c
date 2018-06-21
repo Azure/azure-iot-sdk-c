@@ -1563,9 +1563,8 @@ IOTHUB_DEVICE_CONFIGURATION_RESULT IoTHubDeviceConfiguration_AddConfiguration(IO
                     LogError("both deviceContent and modulesContent cannot be null");
                     result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
                 }
-
                 /*Codes_SRS_IOTHUBDEVICECONFIGURATION_38_010: [ IoTHubDeviceConfiguration_AddConfiguration shall create a flat "key1:value2,key2:value2..." JSON representation from the given deviceOrModuleCreateInfo parameter using parson APIs ] */
-                if ((configurationJsonBuffer = createConfigurationPayloadJson(tempConfigurationInfo)) == NULL)
+                else if ((configurationJsonBuffer = createConfigurationPayloadJson(tempConfigurationInfo)) == NULL)
                 {
                     /*Codes_SRS_IOTHUBDEVICECONFIGURATION_38_013: [ IoTHubDeviceConfiguration_AddConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR if the JSON creation failed  ] */
                     LogError("Json creation failed");
