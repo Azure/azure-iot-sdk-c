@@ -12,6 +12,7 @@
 #include "azure_c_shared_utility/tickcounter.h"
 #include "azure_c_shared_utility/constbuffer.h"
 #include "azure_c_shared_utility/platform.h"
+#include "azure_c_shared_utility/agenttime.h"
 
 #include "iothub_client_core_ll.h"
 #include "internal/iothub_client_authorization.h"
