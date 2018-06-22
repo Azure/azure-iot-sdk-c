@@ -13,6 +13,7 @@
 
 static const char* connectionString = "[Hub connection string]";
 static const char* configurationId = "[New configuration id]";
+static const char* deviceId = "[Existing device id]";
 static const char* targetCondition = "tags.UniqueTag='configurationapplyedgeagentreportinge2etestcita5b4e2b7f6464fe9988feea7d887584a' and tags.Environment='test'";
 static const char* updatedTargetCondition = "tags.Environment='test'";
 
@@ -167,6 +168,11 @@ int main(void)
 
             singlylinkedlist_foreach(temp_list, printDeviceInfo, NULL);
 		}
+
+        if ((result = IoTHubDeviceConfiguration_ApplyConfigurationContentToDeviceOrModule(iotHubDeviceConfigurationHandle, deviceId, &(deviceConfigurationAddInfo.content))) != IOTHUB_DEVICE_CONFIGURATION_OK)
+        {
+            (void)printf("IoTHubDeviceConfiguration_ApplyConfigurationContentToDeviceOrModule failed. Result = %d\r\n", result);
+        }
 
         if ((result = IoTHubDeviceConfiguration_DeleteConfiguration(iotHubDeviceConfigurationHandle, deviceConfigurationAddInfo.configurationId)) != IOTHUB_DEVICE_CONFIGURATION_OK)
         {

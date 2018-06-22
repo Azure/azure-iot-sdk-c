@@ -162,6 +162,17 @@ MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CONFIGURATION_RESULT, IoTHubDeviceConfiguratio
 */
 MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CONFIGURATION_RESULT, IoTHubDeviceConfiguration_DeleteConfiguration, IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE, serviceClientDeviceConfigurationHandle, const char*, configurationId);
 
+/** @brief  Deletes the given Configuration from IoT Hub.
+*
+* @param    serviceClientDeviceConfigurationHandle    The handle created by a call to the create function.
+* @param    deviceOrModuleId                     The target device or module id for the Configuration content.
+* @param    configurationContent                 The configuration content to be applied.
+*
+* @return   IOTHUB_DEVICE_CONFIGURATION_RESULT upon success or an error code upon failure.
+*/
+MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CONFIGURATION_RESULT, IoTHubDeviceConfiguration_ApplyConfigurationContentToDeviceOrModule, IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE, serviceClientDeviceConfigurationHandle, const char*, deviceOrModuleId, const IOTHUB_DEVICE_CONFIGURATION_CONTENT*, configurationContent);
+
+
 /**
 * @brief    Free members of the IOTHUB_DEVICE_CONFIGURATION structure (NOT the structure itself)
 *
