@@ -825,6 +825,9 @@ void IoTHubDeviceConfiguration_FreeConfigurationMembers(IOTHUB_DEVICE_CONFIGURAT
     free((char *)configuration->createdTimeUtc);
     free((char *)configuration->lastUpdatedTimeUtc);
 
+    if (configuration->content.deviceContent != NULL) free((char *)configuration->content.deviceContent);
+    if (configuration->content.modulesContent != NULL) free((char *)configuration->content.modulesContent);
+
     if (configuration->labels.numLabels > 0)
     {
         for (size_t i = 0; i < configuration->labels.numLabels; i++)

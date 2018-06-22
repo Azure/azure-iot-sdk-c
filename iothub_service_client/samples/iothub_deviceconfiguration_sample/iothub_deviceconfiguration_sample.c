@@ -174,9 +174,8 @@ int main(void)
         }
 
         IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
+        IoTHubDeviceConfiguration_FreeConfigurationMembers(&deviceConfigurationInfo);
     }
-    
-    IoTHubDeviceConfiguration_FreeConfigurationMembers(&deviceConfigurationInfo);
     
     platform_deinit();
 }
