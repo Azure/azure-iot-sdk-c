@@ -70,7 +70,7 @@ extern void IoTHubMessaging_Close(IOTHUB_MESSAGING_CLIENT_HANDLE messagingClient
 
 **SRS_IOTHUBMESSAGING_12_022: [** `IoTHubMessaging_Close` shall be made thread-safe by using the lock created in `IoTHubMessaging_Create`. **]**
 
-**SRS_IOTHUBMESSAGING_12_013: [** The thread created as part of executing `IoTHubMessaging_SendAsyncDeviceOrModule` shall be joined. **]**
+**SRS_IOTHUBMESSAGING_12_013: [** The thread created as part of executing `IoTHubMessaging_SendAsync` shall be joined. **]**
 
 **SRS_IOTHUBMESSAGING_12_024: [** `IoTHubMessaging_Close` shall call `IoTHubMessaging_LL_Close`, while passing the `IOTHUB_MESSAGING_HANDLE` handle created by `IoTHubMessaging_Create` **]**
 
@@ -94,43 +94,26 @@ extern IOTHUB_MESSAGING_RESULT IoTHubMessaging_SetFeedbackMessageCallback(IOTHUB
 **SRS_IOTHUBMESSAGING_12_032: [** `IoTHubMessaging_SetFeedbackMessageCallback` shall be made thread-safe by using the lock created in `IoTHubMessaging_Create`. **]**
 
 
-## IoTHubMessaging_SendAsyncDeviceOrModule
-```c
-extern IOTHUB_MESSAGING_RESULT IoTHubMessaging_SendAsyncDeviceOrModule(IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle, const char* deviceId, const char* moduleId, IOTHUB_MESSAGE_HANDLE message, IOTHUB_SEND_COMPLETE_CALLBACK sendCompleteCallback, void* userContextCallback)
-```
-
-**SRS_IOTHUBMESSAGING_12_033: [** If `messagingClientHandle` is `NULL`, `IoTHubMessaging_SendAsyncDeviceOrModule` shall return `IOTHUB_MESSAGING_INVALID_ARG`. **]**
-
-**SRS_IOTHUBMESSAGING_12_034: [** `IoTHubMessaging_SendAsyncDeviceOrModule` shall be made thread-safe by using the lock created in `IoTHubMessaging_Create`. **]**
-
-**SRS_IOTHUBMESSAGING_12_035: [** If acquiring the lock fails, `IoTHubMessaging_SendAsyncDeviceOrModule` shall return `IOTHUB_MESSAGING_ERROR`. **]**
-
-**SRS_IOTHUBMESSAGING_12_036: [** `IoTHubMessaging_SendAsyncDeviceOrModule` shall start the worker thread if it was not previously started. **]**
-
-**SRS_IOTHUBMESSAGING_12_037: [** If starting the thread fails, `IoTHubMessaging_SendAsyncDeviceOrModule` shall return `IOTHUB_CLIENT_ERROR`. **]**
-
-**SRS_IOTHUBMESSAGING_12_038: [** `IoTHubMessaging_SendAsyncDeviceOrModule` shall call `IoTHubMessaging_LL_Send`, while passing the `IOTHUB_MESSAGING_HANDLE` handle created by `IoTHubClient_Create` and the parameters `deviceId`, `message`, `sendCompleteCallback` and `userContextCallback`.
-
-**SRS_IOTHUBMESSAGING_12_039: [** When `IoTHubMessaging_LL_Send` is called, `IoTHubMessaging_SendAsyncDeviceOrModule` shall return the result of `IoTHubMessaging_LL_Send`. **]**
-
-**SRS_IOTHUBMESSAGING_12_040: [** `IoTHubClient_SendEventAsync` shall be made thread-safe by using the lock created in `IoTHubClient_Create`. **]**
-
-
 ## IoTHubMessaging_SendAsync
 ```c
 extern IOTHUB_MESSAGING_RESULT IoTHubMessaging_SendAsync(IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle, const char* deviceId, IOTHUB_MESSAGE_HANDLE message, IOTHUB_SEND_COMPLETE_CALLBACK sendCompleteCallback, void* userContextCallback)
 ```
-`IoTHubMessaging_SendAsync` invokes `IoTHubMessaging_SendAsyncDeviceOrModule` to perform its operations.
 
+**SRS_IOTHUBMESSAGING_12_033: [** If `messagingClientHandle` is `NULL`, `IoTHubMessaging_SendAsync` shall return `IOTHUB_MESSAGING_INVALID_ARG`. **]**
 
-## IoTHubMessaging_SendAsyncModule
-```c
-extern IOTHUB_MESSAGING_RESULT IoTHubMessaging_SendAsyncModule(IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle, const char* deviceId, const char* moduleId, IOTHUB_MESSAGE_HANDLE message, IOTHUB_SEND_COMPLETE_CALLBACK sendCompleteCallback, void* userContextCallback)
-```
-`IoTHubMessaging_SendAsyncModule` invokes `IoTHubMessaging_SendAsyncDeviceOrModule` to perform its operations.
+**SRS_IOTHUBMESSAGING_12_034: [** `IoTHubMessaging_SendAsync` shall be made thread-safe by using the lock created in `IoTHubMessaging_Create`. **]**
 
+**SRS_IOTHUBMESSAGING_12_035: [** If acquiring the lock fails, `IoTHubMessaging_SendAsync` shall return `IOTHUB_MESSAGING_ERROR`. **]**
 
-**SRS_IOTHUBMESSAGING_31_045: [** If `moduleId` is `NULL`, `IoTHubMessaging_SendAsyncModule` shall return `IOTHUB_MESSAGING_INVALID_ARG`. **]**
+**SRS_IOTHUBMESSAGING_12_036: [** `IoTHubMessaging_SendAsync` shall start the worker thread if it was not previously started. **]**
+
+**SRS_IOTHUBMESSAGING_12_037: [** If starting the thread fails, `IoTHubMessaging_SendAsync` shall return `IOTHUB_CLIENT_ERROR`. **]**
+
+**SRS_IOTHUBMESSAGING_12_038: [** `IoTHubMessaging_SendAsync` shall call `IoTHubMessaging_LL_Send`, while passing the `IOTHUB_MESSAGING_HANDLE` handle created by `IoTHubClient_Create` and the parameters `deviceId`, `message`, `sendCompleteCallback` and `userContextCallback`.
+
+**SRS_IOTHUBMESSAGING_12_039: [** When `IoTHubMessaging_LL_Send` is called, `IoTHubMessaging_SendAsync` shall return the result of `IoTHubMessaging_LL_Send`. **]**
+
+**SRS_IOTHUBMESSAGING_12_040: [** `IoTHubClient_SendEventAsync` shall be made thread-safe by using the lock created in `IoTHubClient_Create`. **]**
 
 
 ### Scheduling work
