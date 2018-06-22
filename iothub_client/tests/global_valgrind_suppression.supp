@@ -48,10 +48,29 @@
     fun:puts
 }
 {
+    DRD Conflicting store by thread in console_log
+    drd:ConflictingAccess
+    ...
+    fun:consolelogger_log
+}
+{
+    Race conflicting store by thread in console_log
+    Helgrind:Race
+    ...
+    fun:consolelogger_log
+}
+{
     HTTPAPI has unprotected global access
     Helgrind:Race
     ...
     obj:/usr/lib/x86_64-linux-gnu/libcurl.so.4.4.0
+    ...
+}
+{
+    HTTPAPI has unprotected global access
+    Helgrind:Race
+    ...
+    obj:/usr/lib/x86_64-linux-gnu/libcurl.so.4.5.0
     ...
 }
 {
@@ -80,6 +99,13 @@
     drd:ConflictingAccess
     ...
     obj:/usr/lib/x86_64-linux-gnu/libcurl.so.4.4.0
+    ...
+}
+{
+    DRD HTTPAPI has unprotected global access
+    drd:ConflictingAccess
+    ...
+    obj:/usr/lib/x86_64-linux-gnu/libcurl.so.4.5.0
     ...
 }
 {
