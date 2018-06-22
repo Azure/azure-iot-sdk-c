@@ -13,6 +13,7 @@ compileAsC99()
 set(provisioning_service_client_c_files
     ./src/provisioning_sc_attestation_mechanism.c
     ./src/provisioning_sc_bulk_operation.c
+    ./src/provisioning_sc_device_capabilities.c
     ./src/provisioning_sc_device_registration_state.c
     ./src/provisioning_sc_enrollment.c
     ./src/provisioning_sc_query.c
@@ -26,6 +27,7 @@ set(provisioning_service_client_c_files
 set(provisioning_service_client_h_files
     ./inc/prov_service_client/provisioning_sc_attestation_mechanism.h
     ./inc/prov_service_client/provisioning_sc_bulk_operation.h
+    ./inc/prov_service_client/provisioning_sc_device_capabilities.h
     ./inc/prov_service_client/provisioning_sc_device_registration_state.h
     ./inc/prov_service_client/provisioning_sc_enrollment.h
     ./inc/prov_service_client/provisioning_sc_json_const.h

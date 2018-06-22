@@ -90,7 +90,6 @@ int json_deserialize_and_get_struct(void** dest, JSON_Object* root_object, const
     int result;
 
     JSON_Object* struct_object = json_object_get_object(root_object, json_key);
-
     if (necessity == OPTIONAL && struct_object == NULL)
     {
         result = 0;
