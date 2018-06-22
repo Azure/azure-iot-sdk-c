@@ -245,7 +245,7 @@ void iothub_client_sample_module_filter()
         while (true)
         {
             IoTHubModuleClient_LL_DoWork(iotHubModuleClientHandle);
-            ThreadAPI_Sleep(1);
+            ThreadAPI_Sleep(100);
         }
     }
 
