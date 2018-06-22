@@ -1781,7 +1781,6 @@ IOTHUB_DEVICE_CONFIGURATION_RESULT IoTHubDeviceConfiguration_ApplyConfigurationC
                 if ((configurationJsonBuffer = BUFFER_create((const unsigned char*)serialized_string, strlen(serialized_string))) == NULL)
                 {
                     LogError("Buffer_Create failed");
-                    configurationJsonBuffer = NULL;
                 }
                 json_free_serialized_string(serialized_string);
             }

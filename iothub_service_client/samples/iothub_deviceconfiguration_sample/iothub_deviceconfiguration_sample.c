@@ -54,7 +54,7 @@ static void printDeviceInfo(const void* item, const void* action_context, bool* 
 {
     (void)action_context;
     IOTHUB_DEVICE_CONFIGURATION* configuration = (IOTHUB_DEVICE_CONFIGURATION *)item;
-    
+
     if (configuration != NULL)
     {
         (void)printf("Configuration\n");
@@ -117,10 +117,10 @@ int main(void)
 
         mallocAndStrcpy_s((char **)&deviceConfigurationAddInfoContent.deviceContent, deviceContent);
         mallocAndStrcpy_s((char **)&deviceConfigurationAddInfoContent.modulesContent, modulesContent);
-        
-        Map_Add(labels, "label1", "value1");               
+
+        Map_Add(labels, "label1", "value1");
         Map_GetInternals(labels, (const char* const **)&deviceConfigurationAddInfoLabels.labelNames, (const char* const **)&deviceConfigurationAddInfoLabels.labelValues, &deviceConfigurationAddInfoLabels.numLabels);
-        
+
         mallocAndStrcpy_s((char **)&deviceConfigurationAddInfo.configurationId, configurationId);
         mallocAndStrcpy_s((char **)&deviceConfigurationAddInfo.targetCondition, targetCondition);
         deviceConfigurationAddInfo.content = deviceConfigurationAddInfoContent;
@@ -152,22 +152,22 @@ int main(void)
         {
             (void)printf("IoTHubDeviceConfiguration_UpdateConfiguration failed. Result = %d\r\n", result);
         }
-        
+
         SINGLYLINKEDLIST_HANDLE temp_list;
 
-		if ((temp_list = singlylinkedlist_create()) == NULL)
-		{
+        if ((temp_list = singlylinkedlist_create()) == NULL)
+        {
             (void)printf("singlylinkedlist_create failed. skip IoTHubDeviceConfiguration_GetConfigurations\r\n");
-		}
-		else
-		{
+        }
+        else
+        {
             if ((result = IoTHubDeviceConfiguration_GetConfigurations(iotHubDeviceConfigurationHandle, 20, temp_list)) != IOTHUB_DEVICE_CONFIGURATION_OK)
             {
                 (void)printf("IoTHubDeviceConfiguration_GetConfigurations failed. Result = %d\r\n", result);
             }
 
             singlylinkedlist_foreach(temp_list, printDeviceInfo, NULL);
-		}
+        }
 
         if ((result = IoTHubDeviceConfiguration_ApplyConfigurationContentToDeviceOrModule(iotHubDeviceConfigurationHandle, deviceId, &(deviceConfigurationAddInfo.content))) != IOTHUB_DEVICE_CONFIGURATION_OK)
         {
@@ -181,8 +181,8 @@ int main(void)
 
         IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
     }
-    
+
     IoTHubDeviceConfiguration_FreeConfigurationMembers(&deviceConfigurationInfo);
-    
+
     platform_deinit();
 }
