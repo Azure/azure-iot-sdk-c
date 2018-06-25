@@ -53,7 +53,7 @@ int main(void)
     if (IoTHub_Init() != 0)
     {
         (void)printf("Failed to initialize the platform.\r\n");
-        return; 
+        return 1; 
     }
     else if ((iotHubModuleClientHandle = IoTHubModuleClient_LL_CreateFromEnvironment(MQTT_Protocol)) == NULL)
     {
