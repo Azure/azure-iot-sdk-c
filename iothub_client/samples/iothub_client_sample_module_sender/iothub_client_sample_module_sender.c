@@ -38,7 +38,7 @@ static void SendConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, v
     IoTHubMessage_Destroy(eventInstance->messageHandle);
 }
 
-void iothub_client_sample_module_sender(void)
+int main(void)
 {
     IOTHUB_MODULE_CLIENT_LL_HANDLE iotHubModuleClientHandle;
     EVENT_INSTANCE messages[MESSAGE_COUNT];
@@ -75,7 +75,7 @@ void iothub_client_sample_module_sender(void)
                 temperature = minTemperature + (rand() % 10);
                 humidity = minHumidity +  (rand() % 20);
                 sprintf_s(msgText, sizeof(msgText), "{\"deviceId\":\"myFirstDevice\",\"windSpeed\":%.2f,\"temperature\":%.2f,\"humidity\":%.2f}", avgWindSpeed + (rand() % 4 + 2), temperature, humidity);
-                if ((messages[iterator].messageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText))) == NULL)
+                if ((messages[iterator].messageHandle = IoTHubMessage_CreateFromString(msgText)) == NULL)
                 {
                     (void)printf("ERROR: iotHubMessageHandle is NULL!\r\n");
                 }
@@ -119,10 +119,6 @@ void iothub_client_sample_module_sender(void)
 
     printf("Finished executing\n");
     IoTHub_Deinit();
-}
-
-int main(void)
-{
-    iothub_client_sample_module_sender();
     return 0;
 }
+

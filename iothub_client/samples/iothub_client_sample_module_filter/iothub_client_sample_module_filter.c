@@ -224,7 +224,7 @@ static int SetupCallbacksForInputQueues(IOTHUB_MODULE_CLIENT_LL_HANDLE iotHubMod
     return ret;
 }
 
-void iothub_client_sample_module_filter()
+int main(void)
 {
     IOTHUB_MODULE_CLIENT_LL_HANDLE iotHubModuleClientHandle;
 
@@ -250,10 +250,6 @@ void iothub_client_sample_module_filter()
     }
 
     DeInitializeConnectionForFilter(iotHubModuleClientHandle);
-}
-
-int main(void)
-{
-    iothub_client_sample_module_filter();
     return 0;
 }
+
