@@ -23,11 +23,11 @@ void real_free(void* ptr)
 #include "azure_c_shared_utility/macro_utils.h"
 #include "umock_c.h"
 #include "umock_c_negative_tests.h"
+#include "azure_c_shared_utility/const_defines.h"
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
-#include "azure_c_shared_utility/const_defines.h"
 #include "parson.h"
 #include "prov_service_client/provisioning_sc_tpm_attestation.h"
 #include "prov_service_client/provisioning_sc_x509_attestation.h"

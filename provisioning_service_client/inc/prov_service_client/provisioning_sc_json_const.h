@@ -20,6 +20,7 @@ static const char* const REGISTRATION_STATUS_JSON_VALUE_ASSIGNED = "assigned";
 static const char* const REGISTRATION_STATUS_JSON_VALUE_FAILED = "failed";
 static const char* const REGISTRATION_STATUS_JSON_VALUE_DISABLED = "disabled";
 
+static const char* const INDIVIDUAL_ENROLLMENT_JSON_KEY_CAPABILITIES = "capabilities";
 static const char* const INDIVIDUAL_ENROLLMENT_JSON_KEY_REG_ID = "registrationId";
 static const char* const INDIVIDUAL_ENROLLMENT_JSON_KEY_DEVICE_ID = "deviceId";
 static const char* const INDIVIDUAL_ENROLLMENT_JSON_KEY_REG_STATE = "registrationState";
@@ -48,6 +49,8 @@ static const char* const DEVICE_REGISTRATION_STATE_JSON_KEY_UPDATED_TIME = "last
 static const char* const DEVICE_REGISTRATION_STATE_JSON_KEY_ERROR_CODE = "errorCode";
 static const char* const DEVICE_REGISTRATION_STATE_JSON_KEY_ERROR_MSG = "errorMessage";
 static const char* const DEVICE_REGISTRATION_STATE_JSON_KEY_ETAG = "etag";
+
+static const char* const DEVICE_CAPABILITIES_JSON_KEY_IOT_EDGE = "iotEdge";
 
 static const char* const ATTESTATION_MECHANISM_JSON_KEY_TYPE = "type";
 static const char* const ATTESTATION_MECHANISM_JSON_KEY_TPM = "tpm";

@@ -11,6 +11,10 @@ EXPORTS
     attestationMechanism_isValidForEnrollmentGroup
     attestationMechanism_isValidForIndividualEnrollment
     bulkOperationResult_free
+    deviceCapabilities_create
+    deviceCapabilities_destroy
+    deviceCapabilities_isIotEdgeCapable
+    deviceCapabilities_setIotEdgeCapable
     deviceRegistrationState_getCreatedDateTime
     deviceRegistrationState_getDeviceId
     deviceRegistrationState_getErrorCode
@@ -38,6 +42,7 @@ EXPORTS
     individualEnrollment_getAttestationMechanism
     individualEnrollment_getCreatedDateTime
     individualEnrollment_getDeviceId
+    individualEnrollment_getDeviceCapabilities
     individualEnrollment_getDeviceRegistrationState
     individualEnrollment_getEtag
     individualEnrollment_getInitialTwin
@@ -46,6 +51,7 @@ EXPORTS
     individualEnrollment_getRegistrationId
     individualEnrollment_getUpdatedDateTime
     individualEnrollment_setAttestationMechanism
+    individualEnrollment_setDeviceCapabilities
     individualEnrollment_setDeviceId
     individualEnrollment_setEtag
     individualEnrollment_setInitialTwin

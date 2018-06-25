@@ -10,6 +10,7 @@
 #include "prov_service_client/provisioning_sc_enrollment.h"
 #include "prov_service_client/provisioning_sc_attestation_mechanism.h"
 #include "prov_service_client/provisioning_sc_device_registration_state.h"
+#include "prov_service_client/provisioning_sc_device_capabilities.h"
 #include "prov_service_client/provisioning_sc_twin.h"
 #include "prov_service_client/provisioning_sc_json_const.h"
 #include "prov_service_client/provisioning_sc_shared_helpers.h"
@@ -17,6 +18,7 @@
 
 typedef struct INDIVIDUAL_ENROLLMENT_TAG
 {
+    DEVICE_CAPABILITIES_HANDLE capabilities;
     char* registration_id; //read only
     char* device_id;
     DEVICE_REGISTRATION_STATE_HANDLE registration_state; //read only
@@ -88,6 +90,7 @@ static PROVISIONING_STATUS provisioningStatus_fromJson(const char* str_rep)
 void individualEnrollment_destroy(INDIVIDUAL_ENROLLMENT_HANDLE enrollment)
 {
     if (enrollment != NULL) {
+        deviceCapabilities_destroy(enrollment->capabilities);
         free(enrollment->registration_id);
         free(enrollment->device_id);
         free(enrollment->etag);
@@ -101,7 +104,7 @@ void individualEnrollment_destroy(INDIVIDUAL_ENROLLMENT_HANDLE enrollment)
     }
 }
 
-JSON_Value* individualEnrollment_toJson(const INDIVIDUAL_ENROLLMENT_HANDLE enrollment)
+JSON_Value* individualEnrollment_toJson(INDIVIDUAL_ENROLLMENT_HANDLE enrollment)
 {
     JSON_Value* root_value = NULL;
     JSON_Object* root_object = NULL;
@@ -125,6 +128,12 @@ JSON_Value* individualEnrollment_toJson(const INDIVIDUAL_ENROLLMENT_HANDLE enrol
     }
 
     //Set data
+    else if (json_serialize_and_set_struct(root_object, INDIVIDUAL_ENROLLMENT_JSON_KEY_CAPABILITIES, enrollment->capabilities, (TO_JSON_FUNCTION)deviceCapabilities_toJson, OPTIONAL) != 0)
+    {
+        LogError("Failed to set '%s' in JSON string", INDIVIDUAL_ENROLLMENT_JSON_KEY_CAPABILITIES);
+        json_value_free(root_value);
+        root_value = NULL;
+    }
     else if (json_object_set_string(root_object, INDIVIDUAL_ENROLLMENT_JSON_KEY_REG_ID, enrollment->registration_id) != JSONSuccess)
     {
         LogError("Failed to set '%s' in JSON string", INDIVIDUAL_ENROLLMENT_JSON_KEY_REG_ID);
@@ -182,7 +191,13 @@ INDIVIDUAL_ENROLLMENT_HANDLE individualEnrollment_fromJson(JSON_Object* root_obj
     {
         memset(new_enrollment, 0, sizeof(INDIVIDUAL_ENROLLMENT));
 
-        if (copy_json_string_field(&(new_enrollment->registration_id), root_object, INDIVIDUAL_ENROLLMENT_JSON_KEY_REG_ID) != 0)
+        if (json_deserialize_and_get_struct((void**)&(new_enrollment->capabilities), root_object, INDIVIDUAL_ENROLLMENT_JSON_KEY_CAPABILITIES, (FROM_JSON_FUNCTION)deviceCapabilities_fromJson, OPTIONAL) != 0)
+        {
+            LogError("Failed to set '%s' in Individual Enrollment", INDIVIDUAL_ENROLLMENT_JSON_KEY_CAPABILITIES);
+            individualEnrollment_destroy(new_enrollment);
+            new_enrollment = NULL;
+        }
+        else if (copy_json_string_field(&(new_enrollment->registration_id), root_object, INDIVIDUAL_ENROLLMENT_JSON_KEY_REG_ID) != 0)
         {
             LogError("Failed to set '%s' in Individual Enrollment", INDIVIDUAL_ENROLLMENT_JSON_KEY_REG_ID);
             individualEnrollment_destroy(new_enrollment);
@@ -403,9 +418,16 @@ INDIVIDUAL_ENROLLMENT_HANDLE individualEnrollment_create(const char* reg_id, ATT
     {
         memset(new_enrollment, 0, sizeof(INDIVIDUAL_ENROLLMENT));
 
-        if (mallocAndStrcpy_s(&(new_enrollment->registration_id), reg_id) != 0)
+        if ((new_enrollment->capabilities = deviceCapabilities_create()) == NULL)
+        {
+            LogError("Creating device capabilities failed");
+            individualEnrollment_destroy(new_enrollment);
+            new_enrollment = NULL;
+        }
+        else if (mallocAndStrcpy_s(&(new_enrollment->registration_id), reg_id) != 0)
         {
             LogError("Allocation of registration id failed");
+            deviceCapabilities_destroy(new_enrollment->capabilities);
             individualEnrollment_destroy(new_enrollment);
             new_enrollment = NULL;
         }
@@ -677,6 +699,39 @@ DEVICE_REGISTRATION_STATE_HANDLE individualEnrollment_getDeviceRegistrationState
     else
     {
         result = enrollment->registration_state;
+    }
+
+    return result;
+}
+
+int individualEnrollment_setDeviceCapabilities(INDIVIDUAL_ENROLLMENT_HANDLE enrollment, DEVICE_CAPABILITIES_HANDLE capabilities)
+{
+    int result = 0;
+
+    if (enrollment == NULL)
+    {
+        LogError("enrollment handle is NULL");
+        result = __FAILURE__;
+    }
+    else
+    {
+        deviceCapabilities_destroy(enrollment->capabilities);
+        enrollment->capabilities = capabilities;
+    }
+    return result;
+}
+
+DEVICE_CAPABILITIES_HANDLE individualEnrollment_getDeviceCapabilities(INDIVIDUAL_ENROLLMENT_HANDLE enrollment)
+{
+    DEVICE_CAPABILITIES_HANDLE result = NULL;
+
+    if (enrollment == NULL)
+    {
+        LogError("enrollment is NULL");
+    }
+    else
+    {
+        result = enrollment->capabilities;
     }
 
     return result;

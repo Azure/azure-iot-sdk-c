@@ -21,13 +21,13 @@ void real_free(void* ptr)
 
 #include "testrunnerswitcher.h"
 #include "azure_c_shared_utility/macro_utils.h"
+#include "azure_c_shared_utility/const_defines.h"
 #include "umock_c.h"
 #include "umock_c_negative_tests.h"
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
-#include "azure_c_shared_utility/const_defines.h"
 #include "prov_service_client/provisioning_sc_shared_helpers.h"
 #include "prov_service_client/provisioning_sc_enrollment.h"
 #include "parson.h"

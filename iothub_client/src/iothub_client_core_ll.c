@@ -14,6 +14,7 @@
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/singlylinkedlist.h" 
 #include "azure_c_shared_utility/shared_util_options.h"
+#include "azure_c_shared_utility/agenttime.h"
 
 #include "iothub_client_core_ll.h"
 #include "internal/iothub_client_authorization.h"

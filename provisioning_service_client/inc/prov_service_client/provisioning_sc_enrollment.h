@@ -13,6 +13,7 @@ extern "C" {
 #include "azure_c_shared_utility/umock_c_prod.h"
 #include "provisioning_sc_attestation_mechanism.h"
 #include "provisioning_sc_device_registration_state.h"
+#include "provisioning_sc_device_capabilities.h"
 #include "provisioning_sc_twin.h"
 #include "parson.h"
 
@@ -88,6 +89,8 @@ MOCKABLE_FUNCTION(, ATTESTATION_MECHANISM_HANDLE, individualEnrollment_getAttest
 MOCKABLE_FUNCTION(, int, individualEnrollment_setAttestationMechanism, INDIVIDUAL_ENROLLMENT_HANDLE, enrollment, ATTESTATION_MECHANISM_HANDLE, att_mech);
 MOCKABLE_FUNCTION(, INITIAL_TWIN_HANDLE, individualEnrollment_getInitialTwin, INDIVIDUAL_ENROLLMENT_HANDLE, enrollment);
 MOCKABLE_FUNCTION(, int, individualEnrollment_setInitialTwin, INDIVIDUAL_ENROLLMENT_HANDLE, enrollment, INITIAL_TWIN_HANDLE, twin);
+MOCKABLE_FUNCTION(, DEVICE_CAPABILITIES_HANDLE, individualEnrollment_getDeviceCapabilities, INDIVIDUAL_ENROLLMENT_HANDLE, enrollment);
+MOCKABLE_FUNCTION(, int, individualEnrollment_setDeviceCapabilities, INDIVIDUAL_ENROLLMENT_HANDLE, enrollment, DEVICE_CAPABILITIES_HANDLE, capabilities);
 MOCKABLE_FUNCTION(, DEVICE_REGISTRATION_STATE_HANDLE, individualEnrollment_getDeviceRegistrationState, INDIVIDUAL_ENROLLMENT_HANDLE, enrollment);
 MOCKABLE_FUNCTION(, const char*, individualEnrollment_getRegistrationId, INDIVIDUAL_ENROLLMENT_HANDLE, enrollment);
 MOCKABLE_FUNCTION(, const char*, individualEnrollment_getIotHubHostName, INDIVIDUAL_ENROLLMENT_HANDLE, enrollment);
@@ -119,7 +122,7 @@ MOCKABLE_FUNCTION(, const char*, enrollmentGroup_getUpdatedDateTime, ENROLLMENT_
 *
 * Do NOT use these. They are for internal use ONLY
 */
-MOCKABLE_FUNCTION(, JSON_Value*, individualEnrollment_toJson, const INDIVIDUAL_ENROLLMENT_HANDLE, enrollment);
+MOCKABLE_FUNCTION(, JSON_Value*, individualEnrollment_toJson, INDIVIDUAL_ENROLLMENT_HANDLE, enrollment);
 MOCKABLE_FUNCTION(, INDIVIDUAL_ENROLLMENT_HANDLE, individualEnrollment_fromJson, JSON_Object*, root_object);
 MOCKABLE_FUNCTION(, ENROLLMENT_GROUP_HANDLE, enrollmentGroup_fromJson, JSON_Object*, root_object);
 

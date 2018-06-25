@@ -10,6 +10,7 @@
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/doublylinkedlist.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/agenttime.h"
 
 #include "iothub_client_core_ll.h"
 #include "iothub_client_options.h"
