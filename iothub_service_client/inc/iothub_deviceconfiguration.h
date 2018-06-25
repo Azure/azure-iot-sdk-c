@@ -30,6 +30,16 @@ extern "C"
 
 DEFINE_ENUM(IOTHUB_DEVICE_CONFIGURATION_RESULT, IOTHUB_DEVICE_CONFIGURATION_RESULT_VALUES);
 
+#define IOTHUB_DEVICECONFIGURATION_REQUEST_MODE_VALUES              \
+    IOTHUB_DEVICECONFIGURATION_REQUEST_GET_LIST,                    \
+    IOTHUB_DEVICECONFIGURATION_REQUEST_GET,                         \
+    IOTHUB_DEVICECONFIGURATION_REQUEST_ADD,                         \
+    IOTHUB_DEVICECONFIGURATION_REQUEST_UPDATE,                      \
+    IOTHUB_DEVICECONFIGURATION_REQUEST_DELETE,                      \
+    IOTHUB_DEVICECONFIGURATION_REQUEST_APPLY_CONFIGURATION_CONTENT
+
+DEFINE_ENUM(IOTHUB_DEVICECONFIGURATION_REQUEST_MODE, IOTHUB_DEVICECONFIGURATION_REQUEST_MODE_VALUES);
+
 typedef struct IOTHUB_DEVICE_CONFIGURATION_CONTENT_TAG
 {
     const char* deviceContent;
@@ -161,6 +171,17 @@ MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CONFIGURATION_RESULT, IoTHubDeviceConfiguratio
 * @return   IOTHUB_DEVICE_CONFIGURATION_RESULT upon success or an error code upon failure.
 */
 MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CONFIGURATION_RESULT, IoTHubDeviceConfiguration_DeleteConfiguration, IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE, serviceClientDeviceConfigurationHandle, const char*, configurationId);
+
+/** @brief  Deletes the given Configuration from IoT Hub.
+*
+* @param    serviceClientDeviceConfigurationHandle    The handle created by a call to the create function.
+* @param    deviceOrModuleId                     The target device or module id for the Configuration content.
+* @param    configurationContent                 The configuration content to be applied.
+*
+* @return   IOTHUB_DEVICE_CONFIGURATION_RESULT upon success or an error code upon failure.
+*/
+MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CONFIGURATION_RESULT, IoTHubDeviceConfiguration_ApplyConfigurationContentToDeviceOrModule, IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE, serviceClientDeviceConfigurationHandle, const char*, deviceOrModuleId, const IOTHUB_DEVICE_CONFIGURATION_CONTENT*, configurationContent);
+
 
 /**
 * @brief    Free members of the IOTHUB_DEVICE_CONFIGURATION structure (NOT the structure itself)
