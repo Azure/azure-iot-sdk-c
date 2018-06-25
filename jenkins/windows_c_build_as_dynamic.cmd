@@ -35,7 +35,7 @@ rem no error checking
 pushd %cmake-root%\cmake\%CMAKE_DIR%
 
 echo ***Running CMAKE for building dynamic***
-cmake %build-root% -Dbuild_as_dynamic:BOOL=ON
+cmake %build-root% -Dbuild_as_dynamic:BOOL=ON -Duse_edge_modules=ON
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 popd
 

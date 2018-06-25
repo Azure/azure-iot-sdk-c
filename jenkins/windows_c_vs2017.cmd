@@ -53,7 +53,7 @@ echo CMAKE Output Path: %build-root%\cmake\%CMAKE_DIR%
 mkdir %build-root%\cmake\%CMAKE_DIR%
 pushd %build-root%\cmake\%CMAKE_DIR%
 
-cmake -Drun_longhaul_tests:BOOL=OFF -Drun_e2e_tests:BOOL=ON -Drun_sfc_tests:BOOL=ON -Drun_unittests:BOOL=ON -Duse_c2d_amqp_methods:BOOL=ON %build-root% -G %BUILD_ARCH%
+cmake -Drun_longhaul_tests:BOOL=OFF -Drun_e2e_tests:BOOL=ON -Drun_sfc_tests:BOOL=ON -Drun_unittests:BOOL=ON -Duse_c2d_amqp_methods:BOOL=ON -Duse_edge_modules=ON %build-root% -G %BUILD_ARCH%
 
 msbuild /m azure_iot_sdks.sln
 if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!

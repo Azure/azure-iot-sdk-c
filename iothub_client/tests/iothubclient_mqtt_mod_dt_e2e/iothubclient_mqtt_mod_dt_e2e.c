@@ -8,7 +8,7 @@
 
 static TEST_MUTEX_HANDLE g_dllByDll;
 
-BEGIN_TEST_SUITE(iothubclient_mqtt_modules_dt_e2e)
+BEGIN_TEST_SUITE(iothubclient_mqtt_mod_dt_e2e)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
@@ -72,5 +72,5 @@ TEST_FUNCTION(IoTHub_MQTT_WS_SendReported_e2e_x509)
 }
 #endif
 
-END_TEST_SUITE(iothubclient_mqtt_modules_dt_e2e)
+END_TEST_SUITE(iothubclient_mqtt_mod_dt_e2e)
 

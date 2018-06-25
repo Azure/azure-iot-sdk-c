@@ -15,7 +15,7 @@
 
 static TEST_MUTEX_HANDLE g_dllByDll;
 
-BEGIN_TEST_SUITE(iothubclient_amqp_modules_device_method_e2e)
+BEGIN_TEST_SUITE(iothubclient_amqp_mod_dm_e2e)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
@@ -64,5 +64,5 @@ BEGIN_TEST_SUITE(iothubclient_amqp_modules_device_method_e2e)
         device_method_e2e_method_call_with_embedded_single_quote_sas(AMQP_Protocol);
     }
 
-END_TEST_SUITE(iothubclient_amqp_modules_device_method_e2e)
+END_TEST_SUITE(iothubclient_amqp_mod_dm_e2e)
 

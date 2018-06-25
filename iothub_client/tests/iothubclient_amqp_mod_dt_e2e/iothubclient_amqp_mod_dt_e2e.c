@@ -8,7 +8,7 @@
 
 static TEST_MUTEX_HANDLE g_dllByDll;
 
-BEGIN_TEST_SUITE(iothubclient_amqp_modules_dt_e2e)
+BEGIN_TEST_SUITE(iothubclient_amqp_mod_dt_e2e)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
@@ -50,5 +50,5 @@ TEST_FUNCTION(IoTHub_AMQP_WS_GetFullDesired_e2e_sas)
 //
 
 
-END_TEST_SUITE(iothubclient_amqp_modules_dt_e2e)
+END_TEST_SUITE(iothubclient_amqp_mod_dt_e2e)
 

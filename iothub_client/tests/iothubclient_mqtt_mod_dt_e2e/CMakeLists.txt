@@ -3,12 +3,12 @@
 
 cmake_minimum_required(VERSION 2.8.11)
 
-if(NOT ${use_amqp})
-    message(FATAL_ERROR "iothubclient_amqp_modules_dt_e2e being generated without amqp support")
+if(NOT ${use_mqtt})
+    message(FATAL_ERROR "iothubclient_mqtt_mod_dt_e2e being generated without MQTT support")
 endif()
 
 compileAsC11()
-set(theseTestsName iothubclient_amqp_modules_dt_e2e)
+set(theseTestsName iothubclient_mqtt_mod_dt_e2e)
 
 set(${theseTestsName}_test_files
     ${theseTestsName}.c
@@ -63,11 +63,11 @@ if(WIN32)
             iothub_test
             iothub_client
             iothub_service_client
-            iothub_client_amqp_transport
-            iothub_client_amqp_ws_transport
+            iothub_client_mqtt_transport
+            iothub_client_mqtt_ws_transport
             rpcrt4
         )
-        linkUAMQP(${theseTestsName}_dll)
+        linkMqttLibrary(${theseTestsName}_dll)
     endif()
 
     if(TARGET ${theseTestsName}_exe)
@@ -76,11 +76,11 @@ if(WIN32)
             iothub_test
             iothub_client
             iothub_service_client
-            iothub_client_amqp_transport
-            iothub_client_amqp_ws_transport
+            iothub_client_mqtt_transport
+            iothub_client_mqtt_ws_transport
             rpcrt4
         )
-        linkUAMQP(${theseTestsName}_exe)
+        linkMqttLibrary(${theseTestsName}_exe)
     endif()
 
 	if(TARGET ${theseTestsName}_nuget_exe)
@@ -108,11 +108,12 @@ else()
             aziotsharedutil
             iothub_test
             iothub_client
+            iothub_client_mqtt_transport
             iothub_service_client
             aziotsharedutil
-            iothub_client_amqp_transport
-            iothub_client_amqp_ws_transport
+            iothub_client_mqtt_transport
+            iothub_client_mqtt_ws_transport
         )
-        linkUAMQP(${theseTestsName}_exe)
+        linkMqttLibrary(${theseTestsName}_exe)
     endif()
 endif()
