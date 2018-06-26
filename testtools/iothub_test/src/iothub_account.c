@@ -46,6 +46,11 @@ static const int DEFAULT_PARTITION_COUNT = 16;
 static const char* PRIMARY_KEY_FIELD = "\"primaryKey\":\"";
 static const size_t PRIMARY_KEY_FIELD_LEN = 14;
 
+static const char* TEST_MODULE_NAME = "TestModule";
+static const char* TEST_MANAGED_BY_1 = "TestManagedBy1";
+static const char* TEST_MANAGED_BY_2 = "TestManagedBy2";
+
+
 
 
 #define MAX_LENGTH_OF_UNSIGNED_INT  6
@@ -225,12 +230,13 @@ static const char* getMbedParameter(const char* name)
     return value;
 }
 #endif
-#define CONN_HOST_PART "HostName="
-#define CONN_DEVICE_PART ";DeviceId="
-#define CONN_KEY_PART ";SharedAccessKey="
-#define CONN_X509_PART ";x509=true"
+static const char* CONN_HOST_PART = "HostName=";
+static const char* CONN_DEVICE_PART = ";DeviceId=";
+static const char* CONN_KEY_PART = ";SharedAccessKey=";
+static const char* CONN_X509_PART = ";x509=true";
+static const char* CONN_MODULE_PART = ";ModuleId=";
 
-static int createSASConnectionString(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_PROVISIONED_DEVICE* deviceToProvision, char** connectionString) {
+static int createSASConnectionString(IOTHUB_ACCOUNT_INFO* accountInfo, const char* deviceId, const char* moduleId, const char* primaryAuthentication, char** connectionString) {
 
     int result;
     char* conn;
@@ -241,20 +247,31 @@ static int createSASConnectionString(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_PR
     size_t sizeOfKeyPart = strlen(CONN_KEY_PART);
 
     size_t sizeOfHostName = strlen(accountInfo->hostname);
-    size_t sizeOfDeviceId = strlen(deviceToProvision->deviceId);
-    size_t sizeOfDeviceKey = strlen(deviceToProvision->primaryAuthentication);
+    size_t sizeOfDeviceId = strlen(deviceId);
+    size_t sizeOfDeviceKey = strlen(primaryAuthentication);
 
-    size_t connectionStringLength = sizeOfHostPart + sizeOfDevicePart + sizeOfKeyPart + sizeOfHostName + sizeOfDeviceId + sizeOfDeviceKey + 1;
+    size_t sizeOfModulePart = moduleId ? strlen(CONN_MODULE_PART) : 0;
+    size_t sizeOfModuleId = moduleId ? strlen(moduleId) : 0;
+    
+    size_t connectionStringLength = sizeOfHostPart + sizeOfDevicePart + sizeOfKeyPart + sizeOfHostName + sizeOfDeviceId + sizeOfDeviceKey + sizeOfModulePart + sizeOfModuleId + 1;
 
     conn = (char*)malloc(connectionStringLength);
-    if (conn == NULL) {
+    if (conn == NULL) 
+    {
         LogError("Failed to allocate space for the SAS based connection string\r\n");
         result = __FAILURE__;
     }
-    else if (sprintf_s(conn, connectionStringLength,"%s%s%s%s%s%s", CONN_HOST_PART, accountInfo->hostname, CONN_DEVICE_PART, (char*)deviceToProvision->deviceId, CONN_KEY_PART, (char*)deviceToProvision->primaryAuthentication) <= 0) {
-            LogError("Failed to form the connection string for SAS based connection string.\r\n");
-            free(conn);
-            result = __FAILURE__;
+    else if ((moduleId == NULL) && sprintf_s(conn, connectionStringLength,"%s%s%s%s%s%s", CONN_HOST_PART, accountInfo->hostname, CONN_DEVICE_PART, (char*)deviceId, CONN_KEY_PART, (char*)primaryAuthentication) <= 0) 
+    {
+        LogError("Failed to form the connection string for SAS based connection string.\r\n");
+        free(conn);
+        result = __FAILURE__;
+    }
+    else if ((moduleId != NULL) && sprintf_s(conn, connectionStringLength,"%s%s%s%s%s%s%s%s", CONN_HOST_PART, accountInfo->hostname, CONN_DEVICE_PART, (char*)deviceId, CONN_KEY_PART, (char*)primaryAuthentication, CONN_MODULE_PART, moduleId) <= 0) 
+    {
+        LogError("Failed to form the connection string for SAS based connection string.\r\n");
+        free(conn);
+        result = __FAILURE__;
     }
     else
     {
@@ -297,7 +314,8 @@ static int createX509ConnectionString(IOTHUB_ACCOUNT_INFO* accountInfo, char** c
     return result;
 }
 
-static int provisionDevice(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_ACCOUNT_AUTH_METHOD method, IOTHUB_PROVISIONED_DEVICE* deviceToProvision) {
+static int provisionDevice(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_ACCOUNT_AUTH_METHOD method, IOTHUB_PROVISIONED_DEVICE* deviceToProvision)
+{
 
     int result;
     char* deviceId = NULL;
@@ -362,7 +380,7 @@ static int provisionDevice(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_ACCOUNT_AUTH
                 }
                 else
                 {
-                    if (createSASConnectionString(accountInfo, deviceToProvision, &deviceToProvision->connectionString) != 0)
+                    if (createSASConnectionString(accountInfo, deviceToProvision->deviceId, NULL, deviceToProvision->primaryAuthentication, &deviceToProvision->connectionString) != 0)
                     {
                         result = __FAILURE__;
                     }
@@ -447,6 +465,155 @@ static int provisionDevices(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_ACCOUNT_AUT
     return result;
 }
 
+static int updateTestModule(IOTHUB_REGISTRYMANAGER_HANDLE iothub_registrymanager_handle, IOTHUB_PROVISIONED_DEVICE* deviceToProvision)
+{
+    int result;
+    IOTHUB_REGISTRY_MODULE_UPDATE moduleUpdate;
+    IOTHUB_MODULE moduleInfo;
+
+    // Update the auth method type from its initially set NONE to IOTHUB_REGISTRYMANAGER_AUTH_SPK.
+    moduleUpdate.version = IOTHUB_REGISTRY_MODULE_UPDATE_VERSION_1;
+    moduleUpdate.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
+    moduleUpdate.deviceId = deviceToProvision->deviceId;
+    moduleUpdate.primaryKey = "";
+    moduleUpdate.secondaryKey = "";
+    moduleUpdate.moduleId = TEST_MODULE_NAME;
+    moduleUpdate.status = IOTHUB_DEVICE_STATUS_ENABLED;
+    moduleUpdate.managedBy = TEST_MANAGED_BY_2;
+
+    memset(&moduleInfo, 0, sizeof(moduleInfo));
+    moduleInfo.version = IOTHUB_MODULE_VERSION_1;
+
+
+    IOTHUB_REGISTRYMANAGER_RESULT iothub_registrymanager_result = IoTHubRegistryManager_UpdateModule(iothub_registrymanager_handle, &moduleUpdate);
+    if (iothub_registrymanager_result != IOTHUB_REGISTRYMANAGER_OK)
+    {
+        LogError("IoTHubRegistryManager_UpdateModule failed, err=%d", iothub_registrymanager_result);
+        result = __FAILURE__;
+    }
+    else if ((iothub_registrymanager_result = IoTHubRegistryManager_GetModule(iothub_registrymanager_handle, deviceToProvision->deviceId, deviceToProvision->moduleId, &moduleInfo)) != IOTHUB_REGISTRYMANAGER_OK)
+    {
+        LogError("IoTHubRegistryManager_UpdateModule(deviceId=%s, moduleId=%s) failed, err=%d", deviceToProvision->deviceId, deviceToProvision->moduleId, iothub_registrymanager_result);
+        result = __FAILURE__;
+    }
+    else if (strcmp(moduleInfo.moduleId, TEST_MODULE_NAME) != 0)
+    {
+        LogError("ModuleName expected (%s) does not match what was returned from IoTHubRegistryManager_CreateModule (%s)", TEST_MODULE_NAME, moduleInfo.moduleId);
+        result = __FAILURE__;
+    }
+    else if (strcmp(deviceToProvision->deviceId, moduleInfo.deviceId) != 0)
+    {
+        LogError("DeviceId expected (%s) does not match what was returned from IoTHubRegistryManager_CreateModule (%s)", deviceToProvision->deviceId, moduleInfo.deviceId);
+        result = __FAILURE__;
+    }
+#if 0  // IoTHub currently returns incorrect value.  Will bring back in once fixed.
+    else if (strcmp(moduleInfo.managedBy, TEST_MANAGED_BY_2) != 0)
+    {
+        LogError("IoTHubRegistryManager_UpdateModule sets managedBy=%s, expected=%s", moduleInfo.managedBy, TEST_MANAGED_BY_2);
+        result = __FAILURE__;
+    }
+#endif
+    else
+    {
+        result = 0;
+    }
+
+    IoTHubRegistryManager_FreeModuleMembers(&moduleInfo);
+    return result;
+}
+
+static int provisionModule(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_PROVISIONED_DEVICE* deviceToProvision)
+{
+    IOTHUB_REGISTRY_MODULE_CREATE moduleCreate;
+    IOTHUB_MODULE moduleInfo;
+    int result;
+
+    // We set the initial auth type to none, to simulate and test more closely how Edge
+    // modules are created.  We'll upgrade this to SPK after creation.
+    moduleCreate.version = IOTHUB_REGISTRY_MODULE_CREATE_VERSION_1;
+    moduleCreate.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_NONE;
+    moduleCreate.deviceId = deviceToProvision->deviceId;
+    moduleCreate.moduleId = TEST_MODULE_NAME;
+    moduleCreate.primaryKey = "";
+    moduleCreate.secondaryKey = "";
+    moduleCreate.managedBy = TEST_MANAGED_BY_1;
+
+    // Even though we already have a IOTHUB_SERVICE_CLIENT_AUTH_HANDLE handle (iothub_account_info->iothub_service_client_auth_handle), we get a
+    // new one based on the device's connection string (not the Hub) as we need to test this scenario, too.
+    IOTHUB_SERVICE_CLIENT_AUTH_HANDLE service_auth_from_device_connection = NULL;
+    IOTHUB_REGISTRYMANAGER_RESULT iothub_registrymanager_result;
+    IOTHUB_REGISTRYMANAGER_HANDLE iothub_registrymanager_handle = NULL; 
+
+    memset(&moduleInfo, 0, sizeof(moduleInfo));
+    moduleInfo.version = IOTHUB_MODULE_VERSION_1;
+
+    if (mallocAndStrcpy_s(&deviceToProvision->moduleId, TEST_MODULE_NAME) != 0)
+    {
+        LogError("mallocAndStrcpy_s failed");
+        result = __FAILURE__;
+    }
+    else if ((service_auth_from_device_connection = IoTHubServiceClientAuth_CreateFromConnectionString(deviceToProvision->connectionString)) == NULL)
+    {
+        LogError("IoTHubServiceClientAuth_CreateFromConnectionString(%s) failed", deviceToProvision->connectionString);
+        result = __FAILURE__;
+    }
+    else if ((iothub_registrymanager_handle = IoTHubRegistryManager_Create(service_auth_from_device_connection)) == NULL)
+    {
+        LogError("IoTHubServiceClientAuth_CreateFromConnectionString(%s) failed", deviceToProvision->connectionString);
+        result = __FAILURE__;
+    }
+    else if ((iothub_registrymanager_result = IoTHubRegistryManager_CreateModule(iothub_registrymanager_handle, &moduleCreate, &moduleInfo)) != IOTHUB_REGISTRYMANAGER_OK)
+    {
+        LogError("IoTHubRegistryManager_CreateModule failed, err=%d", iothub_registrymanager_result);
+        result = __FAILURE__;
+    }
+    else if (strcmp(moduleInfo.moduleId, TEST_MODULE_NAME) != 0)
+    {
+        LogError("ModuleName expected (%s) does not match what was returned from IoTHubRegistryManager_CreateModule (%s)", TEST_MODULE_NAME, moduleInfo.moduleId);
+        result = __FAILURE__;
+    }
+    else if (strcmp(deviceToProvision->deviceId, moduleInfo.deviceId) != 0)
+    {
+        LogError("DeviceId expected (%s) does not match what was returned from IoTHubRegistryManager_CreateModule (%s)", deviceToProvision->deviceId, moduleInfo.deviceId);
+        result = __FAILURE__;
+    }
+#if 0 // IoTHub currently returns incorrect value.  Will bring back in once fixed.
+    else if (strcmp(TEST_MANAGED_BY_1, moduleInfo.managedBy) != 0)
+    {
+        LogError("managedBy expected (%s) does not match what was returned from IoTHubRegistryManager_CreateModule (%s)", TEST_MANAGED_BY_1, moduleInfo.managedBy);
+        result = __FAILURE__;
+    }
+#endif
+    else if (updateTestModule(iothub_registrymanager_handle, deviceToProvision) != 0)
+    {
+        LogError("Unable to update test module");
+        result = __FAILURE__;
+    }
+    else if (createSASConnectionString(accountInfo, deviceToProvision->deviceId, TEST_MODULE_NAME, deviceToProvision->primaryAuthentication, &deviceToProvision->moduleConnectionString) != 0)
+    {
+        LogError("createSASConnectionStringForModule failed");
+        result = __FAILURE__;
+    }
+    else
+    {
+        LogInfo("Created device/module = %s/%s", deviceToProvision->deviceId, TEST_MODULE_NAME);
+        result = 0;
+    }
+
+    IoTHubRegistryManager_FreeModuleMembers(&moduleInfo);
+
+    if (iothub_registrymanager_handle != NULL)
+    {
+        IoTHubRegistryManager_Destroy(iothub_registrymanager_handle);
+    }
+    if (service_auth_from_device_connection != NULL)
+    {
+        IoTHubServiceClientAuth_Destroy(service_auth_from_device_connection);
+    }
+
+    return result;
+}
+
 static char* convert_base64_to_string(const char* base64_cert)
 {
     char* result;
@@ -478,7 +645,7 @@ static char* convert_base64_to_string(const char* base64_cert)
     return result;
 }
 
-IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG* config)
+IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG* config, bool testingModules)
 {
     IOTHUB_ACCOUNT_INFO* iothub_account_info;
 
@@ -621,16 +788,18 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG*
                                         IoTHubAccount_deinit(iothub_account_info);
                                         iothub_account_info = NULL;
                                     }
-                                    else
+                                    else if (provisionDevice(iothub_account_info, IOTHUB_ACCOUNT_AUTH_X509, &iothub_account_info->x509Device) != 0)
                                     {
-                                        if (provisionDevice(iothub_account_info, IOTHUB_ACCOUNT_AUTH_X509, &iothub_account_info->x509Device) != 0)
-                                        {
-                                            LogError("Failed to create the X509 device\r\n");
-                                            IoTHubAccount_deinit(iothub_account_info);
-                                            iothub_account_info = NULL;
-                                        }
+                                        LogError("Failed to create the X509 device\r\n");
+                                        IoTHubAccount_deinit(iothub_account_info);
+                                        iothub_account_info = NULL;
                                     }
-
+                                    else if (testingModules && provisionModule(iothub_account_info, iothub_account_info->sasDevices[0]))
+                                    {
+                                        LogError("Failed to create the module\r\n");
+                                        IoTHubAccount_deinit(iothub_account_info);
+                                        iothub_account_info = NULL;
+                                    }
                                 }
                             }
                         }
@@ -643,12 +812,12 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG*
     return (IOTHUB_ACCOUNT_INFO_HANDLE)iothub_account_info;
 }
 
-IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init(void)
+IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init(bool testingModules)
 {
     IOTHUB_ACCOUNT_CONFIG config;
     config.number_of_sas_devices = 1;
 
-    return IoTHubAccount_Init_With_Config(&config);
+    return IoTHubAccount_Init_With_Config(&config, testingModules);
 }
 
 void IoTHubAccount_deinit(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
@@ -675,8 +844,10 @@ void IoTHubAccount_deinit(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
                 }
 
                 free(provisioned_device->deviceId);
+                free(provisioned_device->moduleId);
                 free(provisioned_device->primaryAuthentication);
                 free(provisioned_device->connectionString);
+                free(provisioned_device->moduleConnectionString);
                 free(provisioned_device);
             }
         }
@@ -805,7 +976,6 @@ IOTHUB_PROVISIONED_DEVICE* IoTHubAccount_GetX509Device(IOTHUB_ACCOUNT_INFO_HANDL
         return NULL;
     }
 }
-
 
 const char* IoTHubAccount_GetIoTHubConnString(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
 {
@@ -981,3 +1151,4 @@ const IOTHUB_MESSAGING_HANDLE IoTHubAccount_GetMessagingHandle(IOTHUB_ACCOUNT_IN
     }
     return result;
 }
+

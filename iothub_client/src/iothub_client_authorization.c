@@ -26,6 +26,7 @@ typedef struct IOTHUB_AUTHORIZATION_DATA_TAG
     char* device_sas_token;
     char* device_key;
     char* device_id;
+    char* module_id;
     size_t token_expiry_time_sec;
     IOTHUB_CREDENTIAL_TYPE cred_type;
 #ifdef USE_PROV_MODULE
@@ -50,7 +51,7 @@ static int get_seconds_since_epoch(size_t* seconds)
     return result;
 }
 
-IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_Create(const char* device_key, const char* device_id, const char* device_sas_token)
+IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_Create(const char* device_key, const char* device_id, const char* device_sas_token, const char *module_id)
 {
     IOTHUB_AUTHORIZATION_DATA* result;
     /* Codes_SRS_IoTHub_Authorization_07_001: [if device_id is NULL IoTHubClient_Auth_Create, shall return NULL. ] */
@@ -89,6 +90,15 @@ IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_Create(const char* device_key, con
                 free(result);
                 result = NULL;
             }
+            else if (module_id != NULL && mallocAndStrcpy_s(&result->module_id, module_id) != 0)
+            {
+                /* Codes_SRS_IoTHub_Authorization_07_019: [ On error IoTHubClient_Auth_Create shall return NULL. ] */
+                LogError("Failed allocating module_id");
+                free(result->device_id);
+                free(result->device_key);
+                free(result);
+                result = NULL;
+            }
             else
             {
                 if (device_key != NULL)
@@ -106,6 +116,7 @@ IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_Create(const char* device_key, con
                         LogError("Failed allocating device_key");
                         free(result->device_key);
                         free(result->device_id);
+                        free(result->module_id);
                         free(result);
                         result = NULL;
                     }
@@ -122,7 +133,7 @@ IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_Create(const char* device_key, con
     return result;
 }
 
-IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_CreateFromDeviceAuth(const char* device_id)
+IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_CreateFromDeviceAuth(const char* device_id, const char* module_id)
 {
     IOTHUB_AUTHORIZATION_DATA* result;
     if (device_id == NULL)
@@ -152,8 +163,16 @@ IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_CreateFromDeviceAuth(const char* d
             }
             else if (mallocAndStrcpy_s(&result->device_id, device_id) != 0)
             {
-                LogError("Failed allocating device_key");
+                LogError("Failed allocating device_id");
                 iothub_device_auth_destroy(result->device_auth_handle);
+                free(result);
+                result = NULL;
+            }
+            else if ((module_id != NULL) && (mallocAndStrcpy_s(&result->module_id, module_id) != 0))
+            {
+                LogError("Failed allocating module_id");
+                iothub_device_auth_destroy(result->device_auth_handle);
+                free(result->device_id);
                 free(result);
                 result = NULL;
             }
@@ -170,6 +189,7 @@ IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_CreateFromDeviceAuth(const char* d
             }
         }
 #else
+        (void)module_id;
         LogError("Failed HSM module is not supported");
         result = NULL;
 #endif
@@ -188,6 +208,7 @@ void IoTHubClient_Auth_Destroy(IOTHUB_AUTHORIZATION_HANDLE handle)
 #endif
         free(handle->device_key);
         free(handle->device_id);
+        free(handle->module_id);
         free(handle->device_sas_token);
         free(handle);
     }
@@ -429,6 +450,23 @@ const char* IoTHubClient_Auth_Get_DeviceId(IOTHUB_AUTHORIZATION_HANDLE handle)
     return result;
 }
 
+const char* IoTHubClient_Auth_Get_ModuleId(IOTHUB_AUTHORIZATION_HANDLE handle)
+{
+    const char* result;
+    if (handle == NULL)
+    {
+        /* Codes_SRS_IoTHub_Authorization_31_025: [ if handle is NULL, IoTHubClient_Auth_Get_ModuleId shall return NULL. ] */
+        LogError("Invalid Parameter handle: %p", handle);
+        result = NULL;
+    }
+    else
+    {
+        /* Codes_SRS_IoTHub_Authorization_31_026: [ IoTHubClient_Auth_Get_ModuleId shall return the module_id specified upon creation. ] */
+        result = handle->module_id;
+    }
+    return result;
+}
+
 const char* IoTHubClient_Auth_Get_DeviceKey(IOTHUB_AUTHORIZATION_HANDLE handle)
 {
     const char* result;
@@ -496,3 +534,12 @@ SAS_TOKEN_STATUS IoTHubClient_Auth_Is_SasToken_Valid(IOTHUB_AUTHORIZATION_HANDLE
     }
     return result;
 }
+
+
+#ifdef USE_EDGE_MODULES
+char* IoTHubClient_Auth_Get_TrustBundle(IOTHUB_AUTHORIZATION_HANDLE handle)
+{
+    return iothub_device_auth_get_trust_bundle(handle->device_auth_handle);
+}
+#endif
+

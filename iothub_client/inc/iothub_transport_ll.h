@@ -38,3 +38,4 @@ MOCKABLE_FUNCTION(, TRANSPORT_LL_HANDLE, IoTHubTransport_GetLLTransport, TRANSPO
 #endif
 
 #endif /* IOTHUB_TRANSPORT_LL_H */
+

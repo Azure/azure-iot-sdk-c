@@ -35,6 +35,9 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_SetOption(IOTHUB_CLIENT_HANDLE iotHubCl
 extern IOTHUB_CLIENT_RESULT IoTHubClient_UploadToBlobAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* destinationFileName, const unsigned char* source, size_t size, IOTHUB_CLIENT_FILE_UPLOAD_CALLBACK iotHubClientFileUploadCallback, void* context);
 extern IOTHUB_CLIENT_RESULT IoTHubClient_UploadMultipleBlocksToBlobAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK getDataCallback, void* context);
 
+extern IOTHUB_CLIENT_RESULT IoTHubClient_SendEventToOutputAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE eventMessageHandle, const char* outputName, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK eventConfirmationCallback, void* userContextCallback);
+extern IOTHUB_CLIENT_RESULT IoTHubClient_SetInputMessageCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* inputName, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC eventHandlerCallback, void* userContextCallback);
+
 ## Device Twin
 extern IOTHUB_CLIENT_RESULT IoTHubClient_SetDeviceTwinCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback, void* userContextCallback);
 extern IOTHUB_CLIENT_RESULT IoTHubClient_SendReportedState(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const unsigned char* reportedState, size_t size, uint32_t reportedVersion, uint32_t lastSeenDesiredVersion, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reportedStateCallback, void* userContextCallback);
@@ -512,6 +515,35 @@ called `destinationFileName` in Azure Blob Storage and calls `iotHubClientFileUp
 **SRS_IOTHUBCLIENT_02_056: [** Otherwise the thread `iotHubClientFileUploadCallbackInternal` passing as result `FILE_UPLOAD_OK` and the structure from SRS IOTHUBCLIENT 02 051. **]**
 
 **SRS_IOTHUBCLIENT_02_071: [** The thread shall mark itself as disposable. **]**
+
+
+## IoTHubClient_SendEventToOutputAsync
+```c
+IOTHUB_CLIENT_RESULT IoTHubClient_SendEventToOutputAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE eventMessageHandle, const char* outputName, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK eventConfirmationCallback, void* userContextCallback);
+```
+
+`IoTHubClient_SendEventToOutputAsync` sends a message to specified `outputName`
+
+**SRS_IOTHUBCLIENT_31_100: [** If `iotHubClientHandle`, `outputName`, or `eventConfirmationCallback` is `NULL`, `IoTHubClient_SendEventToOutputAsync` shall return `IOTHUB_CLIENT_INVALID_ARG`. **]**
+
+**SRS_IOTHUBCLIENT_31_101: [** `IoTHubClient_SendEventToOutputAsync` shall set the outputName of the message to send. **]**
+
+**SRS_IOTHUBCLIENT_31_102: [** `IoTHubClient_SendEventToOutputAsync` shall invoke `IoTHubClient_SendEventAsync` to send the message. **]**
+
+
+## IoTHubClient_SetInputMessageCallback 
+
+```c
+IOTHUB_CLIENT_RESULT IoTHubClient_SetInputMessageCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* inputName, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC eventHandlerCallback, void* userContextCallback);
+```
+
+`IoTHubClient_SetInputMessageCallback` sets up the callback for a method which will be called by IoTHub when the message arrives on `inputName` queue.
+
+**SRS_IOTHUBCLIENT_31_098: [** `IoTHubClient_SetMessageCallback` shall start the worker thread if it was not previously started. **]**
+
+**SRS_IOTHUBCLIENT_31_099: [** `IoTHubClient_SetMessageCallback` shall call `IoTHubClient_LL_SetInputMessageCallback`, passing its input arguments. **]**
+
+
 
 ## IoTHubClient_UploadMultipleBlocksToBlobAsync
 

@@ -31,7 +31,9 @@ extern const TRANSPORT_PROVIDER* MQTT_Protocol(void);
     - IoTHubTransportMqtt_Unsubscribe,
     - IoTHubTransportMqtt_DoWork,
     - IoTHubTransportMqtt_SetRetryPolicy,
-    - IoTHubTransportMqtt_GetSendStatus
+    - IoTHubTransportMqtt_GetSendStatus,
+    - IoTHubTransportMQTT_Subscribe_InputQueue,
+    - IotHubTransportMQTT_Unsubscribe_InputQueue
 
 ## typedef XIO_HANDLE(*MQTT_GET_IO_TRANSPORT)(const char* fully_qualified_name, const MQTT_TRANSPORT_PROXY_OPTIONS* mqtt_transport_proxy_options);
 
@@ -196,6 +198,27 @@ STRING_HANDLE IoTHubTransportMqtt_GetHostname(TRANSPORT_LL_HANDLE handle)
 
 **SRS_IOTHUB_MQTT_TRANSPORT_07_010: [** IoTHubTransportMqtt_GetHostname shall get the hostname by calling into the IoTHubMqttAbstract_GetHostname function. **]**
 
+
+## IoTHubTransportMQTT_Subscribe_InputQueue
+```c
+static int IotHubTransportMQTT_Subscribe_InputQueue(IOTHUB_DEVICE_HANDLE handle);
+
+```
+**SRS_IOTHUB_MQTT_TRANSPORT_31_14: [** IoTHubTransportMqtt_Subscribe shall subscribe the TRANSPORT_LL_HANDLE by calling into IoTHubTransport_MQTT_Common_Subscribe_InputQueue. **]**
+
+
+
+## IotHubTransportMQTT_Unsubscribe_InputQueue
+```c
+static void IotHubTransportMQTT_Unsubscribe_InputQueue(IOTHUB_DEVICE_HANDLE handle);
+
+```
+
+**SRS_IOTHUBTRANSPORTAMQP_31_015: [** IotHubTransportMQTT_Unsubscribe_InputQueue shall unsubscribe by calling into IoTHubTransport_MQTT_Common_Unsubscribe_InputQueue. **]**
+
+
+
+
 ### MQTT_Protocol
 
 ```c
@@ -216,5 +239,7 @@ IoTHubTransport_Subscribe = IoTHubTransportMqtt_Subscribe
 IoTHubTransport_Unsubscribe = IoTHubTransportMqtt_Unsubscribe
 IoTHubTransport_DoWork = IoTHubTransportMqtt_DoWork
 IoTHubTransport_SetRetryPolicy = IoTHubTransportMqtt_SetRetryPolicy
-IoTHubTransport_SetOption = IoTHubTransportMqtt_SetOption**]**
+IoTHubTransport_SetOption = IoTHubTransportMqtt_SetOption
+IoTHubTransport_Subscribe_InputQueue = IoTHubTransportMqtt_Subscribe_InputQueue
+IoTHubTransport_Unsubscribe_InputQueue = IotHubTransportMqtt_Unsubscribe_InputQueue**]**
 

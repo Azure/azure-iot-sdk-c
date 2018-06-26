@@ -496,6 +496,7 @@ static DEVICE_CONFIG* clone_device_config(DEVICE_CONFIG *config)
             new_config->on_state_changed_callback = config->on_state_changed_callback;
             new_config->on_state_changed_context = config->on_state_changed_context;
             new_config->device_id = IoTHubClient_Auth_Get_DeviceId(config->authorization_module);
+            new_config->module_id = IoTHubClient_Auth_Get_ModuleId(config->authorization_module);
             result = RESULT_OK;
         }
 
@@ -514,6 +515,7 @@ static void set_authentication_config(AMQP_DEVICE_INSTANCE* device_instance, AUT
     DEVICE_CONFIG *device_config = device_instance->config;
 
     auth_config->device_id = device_config->device_id;
+    auth_config->module_id = device_config->module_id;
     auth_config->iothub_host_fqdn = device_config->iothub_host_fqdn;
     auth_config->on_error_callback = on_authentication_error_callback;
     auth_config->on_error_callback_context = device_instance;
@@ -573,6 +575,7 @@ static int create_telemetry_messenger_instance(AMQP_DEVICE_INSTANCE* instance, c
 
     TELEMETRY_MESSENGER_CONFIG messenger_config;
     messenger_config.device_id = instance->config->device_id;
+    messenger_config.module_id = instance->config->module_id;
     messenger_config.iothub_host_fqdn = instance->config->iothub_host_fqdn;
     messenger_config.on_state_changed_callback = on_messenger_state_changed_callback;
     messenger_config.on_state_changed_context = instance;
@@ -597,6 +600,7 @@ static int create_twin_messenger(AMQP_DEVICE_INSTANCE* instance)
 
     twin_msgr_config.client_version = instance->config->product_info;
     twin_msgr_config.device_id = instance->config->device_id;
+    twin_msgr_config.module_id = instance->config->module_id;
     twin_msgr_config.iothub_host_fqdn = instance->config->iothub_host_fqdn;
     twin_msgr_config.on_state_changed_callback = on_twin_messenger_state_changed_callback;
     twin_msgr_config.on_state_changed_context = (void*)instance;
@@ -1169,7 +1173,7 @@ int device_send_event_async(AMQP_DEVICE_HANDLE handle, IOTHUB_MESSAGE_LIST* mess
                 result = __FAILURE__;
             }
             else
-            {	
+            {    
                 // Codes_SRS_DEVICE_09_058: [If no failures occur, device_send_event_async shall return 0]
                 result = RESULT_OK;
             }

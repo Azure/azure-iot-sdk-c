@@ -737,4 +737,33 @@ TEST_FUNCTION(AMQP_SendMessageDisposition)
     // cleanup
 }
 
+// Tests_SRS_IOTHUBTRANSPORTAMQP_31_021: [IoTHubTransportAMQP_Subscribe_InputQueue shall return a failure as input queues are not implemented for AMQP]
+TEST_FUNCTION(AMQP_Subscribe_InputQueue)
+{
+    // arrange
+    TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+
+    umock_c_reset_all_calls();
+
+    // act
+    int result = provider->IoTHubTransport_Subscribe_InputQueue(NULL);
+
+    // assert
+    ASSERT_ARE_NOT_EQUAL(int, result, 0);
+
+    // cleanup
+}
+
+// Tests_SRS_IOTHUBTRANSPORTAMQP_31_022: [IotHubTransportAMQP_Unsubscribe_InputQueue shall do nothing as input queues are not implemented for AMQP]
+TEST_FUNCTION(AMQP_Unsubscribe_InputQueue)
+{
+    // arrange
+    TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+
+    umock_c_reset_all_calls();
+
+    // act
+    provider->IoTHubTransport_Unsubscribe_InputQueue(NULL);
+}
+
 END_TEST_SUITE(iothubtransportamqp_ut)

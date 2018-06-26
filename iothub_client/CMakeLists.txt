@@ -20,6 +20,8 @@ set(iothub_client_c_files
     ./src/iothub_device_client.c
     ./src/iothub_device_client_ll.c
     ./src/iothub_message.c
+    ./src/iothub_module_client.c
+    ./src/iothub_module_client_ll.c
     ./src/iothubtransport.c
     ./src/version.c
 )
@@ -70,6 +72,20 @@ if (${use_prov_client})
     )
 endif()
 #end back compat only
+
+if (${use_edge_modules})
+    set(iothub_client_c_files
+        ${iothub_client_c_files}
+        ./src/iothub_client_ll_edge.c
+        ./src/iothub_client_edge.c
+    )
+    
+    set(iothub_client_h_files
+        ${iothub_client_h_files}
+        ./inc/iothub_client_ll_edge.h
+        ./inc/iothub_client_edge.h
+    )
+endif()
 
 set(iothub_client_h_install_files
     ${iothub_client_h_files}
@@ -361,6 +377,10 @@ if (${build_as_dynamic})
     set(iothub_def_file ./src/iothub_client_dll.def)
     if(NOT ${dont_use_uploadtoblob})
         set(iothub_def_file ${iothub_def_file} ./src/upload_to_blob.def)
+    endif()
+    
+    if (${use_edge_modules})
+        set(iothub_def_file ${iothub_def_file} ./src/iothub_edge_modules.def)
     endif()
 
     add_library(iothub_client_dll SHARED

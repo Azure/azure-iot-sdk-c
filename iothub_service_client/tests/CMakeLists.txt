@@ -7,6 +7,7 @@ usePermissiveRulesForSdkSamplesAndTests()
 
 #this is CMakeLists for service tests folder
 
+add_subdirectory(iothub_deviceconfiguration_ut)
 add_subdirectory(iothub_devicemethod_ut)
 add_subdirectory(iothub_devicetwin_ut)
 add_subdirectory(iothub_msging_ll_ut)

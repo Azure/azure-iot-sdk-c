@@ -10,6 +10,32 @@
 
 static IOTHUB_SECURITY_TYPE g_security_type = IOTHUB_SECURITY_TYPE_UNKNOWN;
 
+static SECURE_DEVICE_TYPE get_secure_device_type(IOTHUB_SECURITY_TYPE sec_type)
+{
+    SECURE_DEVICE_TYPE ret;
+
+    switch (sec_type)
+    {
+        case IOTHUB_SECURITY_TYPE_SAS:
+            ret = SECURE_DEVICE_TYPE_TPM;
+            break;
+
+        case IOTHUB_SECURITY_TYPE_X509:
+            ret = SECURE_DEVICE_TYPE_X509;
+            break;
+
+        case IOTHUB_SECURITY_TYPE_HTTP_EDGE:
+            ret = SECURE_DEVICE_TYPE_HTTP_EDGE;
+            break;
+
+        default:
+            ret = SECURE_DEVICE_TYPE_UNKNOWN;
+            break;
+    }
+
+    return ret;
+}
+
 int iothub_security_init(IOTHUB_SECURITY_TYPE sec_type)
 {
     int result;
@@ -17,7 +43,7 @@ int iothub_security_init(IOTHUB_SECURITY_TYPE sec_type)
     SECURE_DEVICE_TYPE device_type = prov_dev_security_get_type();
     if (device_type == SECURE_DEVICE_TYPE_UNKNOWN)
     {
-        result = prov_dev_security_init(g_security_type == IOTHUB_SECURITY_TYPE_SAS ? SECURE_DEVICE_TYPE_TPM : SECURE_DEVICE_TYPE_X509);
+        result = prov_dev_security_init(get_secure_device_type(g_security_type));
     }
     else
     {
@@ -33,7 +59,7 @@ int iothub_security_init(IOTHUB_SECURITY_TYPE sec_type)
                 result = 0;
             }
         }
-        else
+        else if (device_type == SECURE_DEVICE_TYPE_X509)
         {
             if (g_security_type != IOTHUB_SECURITY_TYPE_X509)
             {
@@ -43,6 +69,23 @@ int iothub_security_init(IOTHUB_SECURITY_TYPE sec_type)
             {
                 result = 0;
             }
+        }
+#ifdef HSM_TYPE_HTTP_EDGE
+        else if (device_type == SECURE_DEVICE_TYPE_HTTP_EDGE)
+        {
+            if (g_security_type != IOTHUB_SECURITY_TYPE_HTTP_EDGE)
+            {
+                result = __FAILURE__;
+            }
+            else
+            {
+                result = 0;
+            }
+        }
+#endif
+        else
+        {
+            result = __FAILURE__;
         }
     }
     if (result == 0)

@@ -19,6 +19,8 @@ set(${theseTestsName}_h_files
     ../common_prov_e2e/common_prov_e2e.h
 )
 
+add_subdirectory(provisioning_hsm)
+
 include_directories(${IOTHUB_TEST_INC_FOLDER})
 include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})
 include_directories(${SHARED_UTIL_INC_FOLDER})

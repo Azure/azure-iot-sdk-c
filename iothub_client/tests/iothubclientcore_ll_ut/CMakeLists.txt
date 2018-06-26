@@ -15,6 +15,7 @@ ${theseTestsName}.c
 set(${theseTestsName}_c_files
 ../../src/iothub_client_core_ll.c
 real_doublylinkedlist.c
+../../../c-utility/tests/real_test_files/real_singlylinkedlist.c
 )
 
 set(${theseTestsName}_h_files

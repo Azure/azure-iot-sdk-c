@@ -41,7 +41,17 @@ MOCKABLE_FUNCTION(, size_t, json_array_get_count, const JSON_Array*, array);
 MOCKABLE_FUNCTION(, JSON_Status, json_array_clear, JSON_Array*, array);
 MOCKABLE_FUNCTION(, JSON_Status, json_object_clear, JSON_Object*, object);
 MOCKABLE_FUNCTION(, void, json_value_free, JSON_Value *, value);
+MOCKABLE_FUNCTION(, JSON_Status, json_object_dotset_boolean, JSON_Object*, object, const char *, name, int, boolean);
+MOCKABLE_FUNCTION(, int, json_object_dotget_boolean, const JSON_Object *, object, const char *, name);
+
+
 #undef ENABLE_MOCKS
+
+STRING_HANDLE STRING_construct_sprintf(const char* format, ...)
+{
+    (void)format;
+    return (STRING_HANDLE)malloc(1);
+}
 
 static TEST_MUTEX_HANDLE g_testByTest;
 static TEST_MUTEX_HANDLE g_dllByDll;
@@ -372,13 +382,16 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_REGISTRYMANAGER_AUTH_METHOD, IOTHUB_REGISTRYM
 
 
 static const char* TEST_DEVICE_ID = "theDeviceId";
+static const char* TEST_MODULE_ID = "theModuleId";
 static const char* TEST_AUTH_TYPE_SAS = "sas";
 static const char* TEST_AUTH_TYPE_SELF_SIGNED = "selfSigned";
 static const char* TEST_AUTH_TYPE_CERTIFICATE_AUTHORITY = "certificateAuthority";
 static const char* TEST_PRIMARYKEY = "thePrimaryKey";
 static const char* TEST_SECONDARYKEY = "theSecondaryKey";
 static const char* TEST_GENERATIONID = "theGenerationId";
-static const char* TEST_ETAG = "theEtag";
+static const char* TEST_ETAG = "theEtag";
+static const char* TEST_MANAGED_BY = "testManagedBy";
+
 
 static char* TEST_HOSTNAME = "theHostName";
 static char* TEST_IOTHUBNAME = "theIotHubName";
@@ -394,8 +407,15 @@ static IOTHUB_REGISTRYMANAGER_HANDLE TEST_IOTHUB_REGISTRYMANAGER_HANDLE = &TEST_
 
 static IOTHUB_REGISTRY_DEVICE_CREATE TEST_IOTHUB_REGISTRY_DEVICE_CREATE;
 static IOTHUB_REGISTRY_DEVICE_UPDATE TEST_IOTHUB_REGISTRY_DEVICE_UPDATE;
+static IOTHUB_REGISTRY_DEVICE_CREATE_EX TEST_IOTHUB_REGISTRY_DEVICE_CREATE_EX;
+static IOTHUB_REGISTRY_DEVICE_UPDATE_EX TEST_IOTHUB_REGISTRY_DEVICE_UPDATE_EX;
 static IOTHUB_DEVICE TEST_IOTHUB_DEVICE;
+static IOTHUB_DEVICE_EX TEST_IOTHUB_DEVICE_EX;
 static IOTHUB_REGISTRY_STATISTICS TEST_IOTHUB_REGISTRY_STATISTICS;
+
+static IOTHUB_REGISTRY_MODULE_CREATE TEST_IOTHUB_REGISTRY_MODULE_CREATE;
+static IOTHUB_REGISTRY_MODULE_UPDATE TEST_IOTHUB_REGISTRY_MODULE_UPDATE;
+static IOTHUB_MODULE TEST_IOTHUB_MODULE;
 
 static JSON_Value* TEST_JSON_VALUE = (JSON_Value*)0x5050;
 static JSON_Object* TEST_JSON_OBJECT = (JSON_Object*)0x5151;
@@ -422,9 +442,11 @@ static const HTTP_HEADERS_RESULT TEST_HTTP_HEADERS_RESULT = (HTTP_HEADERS_RESULT
 static HTTPAPIEX_RESULT TEST_HTTPAPIEX_RESULT = (HTTPAPIEX_RESULT)0x1;
 
 static const char* TEST_DEVICE_JSON_KEY_DEVICE_NAME = "deviceId";
+static const char* TEST_DEVICE_JSON_KEY_MODULE_NAME = "moduleId";
 static const char* TEST_DEVICE_JSON_KEY_DEVICE_AUTH_TYPE = "authentication.type";
 static const char* TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY = "authentication.symmetricKey.primaryKey";
 static const char* TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY = "authentication.symmetricKey.secondaryKey";
+static const char* TEST_DEVICE_JSON_KEY_CAPABILITIES_IOTEDGE = "capabilities.iotEdge";
 static const char* TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_THUMBPRINT = "authentication.x509Thumbprint.primaryThumbprint";
 static const char* TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_THUMBPRINT = "authentication.x509Thumbprint.secondaryThumbprint";
 static const char* TEST_DEVICE_JSON_KEY_DEVICE_GENERATION_ID = "generationId";
@@ -440,6 +462,7 @@ static const char* TEST_DEVICE_JSON_KEY_DEVICE_ISMANAGED = "isManaged";
 static const char* TEST_DEVICE_JSON_KEY_DEVICE_CONFIGURATION = "configuration";
 static const char* TEST_DEVICE_JSON_KEY_DEVICE_DEVICEROPERTIES = "deviceProperties";
 static const char* TEST_DEVICE_JSON_KEY_DEVICE_SERVICEPROPERTIES = "serviceProperties";
+static const char* TEST_DEVICE_JSON_KEY_MANAGED_BY = "managedBy";
 
 static const char* TEST_DEVICE_JSON_KEY_TOTAL_DEVICECOUNT = "totalDeviceCount";
 static const char* TEST_DEVICE_JSON_KEY_ENABLED_DEVICECCOUNT = "enabledDeviceCount";
@@ -522,6 +545,53 @@ static void freeDeviceList(SINGLYLINKEDLIST_HANDLE deviceList, IOTHUB_REGISTRYMA
     }
 }
 
+static void freeModuleList(SINGLYLINKEDLIST_HANDLE moduleList, IOTHUB_REGISTRYMANAGER_AUTH_METHOD expectedAuth)
+{
+    if (moduleList != NULL)
+    {
+        LIST_ITEM_HANDLE itemHandle = singlylinkedlist_get_head_item(moduleList);
+        while (itemHandle != NULL)
+        {
+            IOTHUB_MODULE* moduleInfo = (IOTHUB_MODULE*)itemHandle->item;
+            itemHandle = singlylinkedlist_get_next_item(itemHandle);
+
+            ASSERT_ARE_EQUAL(int, expectedAuth, moduleInfo->authMethod);
+
+            if (moduleInfo->deviceId != NULL)
+                free((char*)moduleInfo->deviceId);
+            if (moduleInfo->primaryKey != NULL)
+                free((char*)moduleInfo->primaryKey);
+            if (moduleInfo->secondaryKey != NULL)
+                free((char*)moduleInfo->secondaryKey);
+            if (moduleInfo->generationId != NULL)
+                free((char*)moduleInfo->generationId);
+            if (moduleInfo->eTag != NULL)
+                free((char*)moduleInfo->eTag);
+            if (moduleInfo->connectionStateUpdatedTime != NULL)
+                free((char*)moduleInfo->connectionStateUpdatedTime);
+            if (moduleInfo->statusReason != NULL)
+                free((char*)moduleInfo->statusReason);
+            if (moduleInfo->statusUpdatedTime != NULL)
+                free((char*)moduleInfo->statusUpdatedTime);
+            if (moduleInfo->lastActivityTime != NULL)
+                free((char*)moduleInfo->lastActivityTime);
+            if (moduleInfo->configuration != NULL)
+                free((char*)moduleInfo->configuration);
+            if (moduleInfo->deviceProperties != NULL)
+                free((char*)moduleInfo->deviceProperties);
+            if (moduleInfo->serviceProperties != NULL)
+                free((char*)moduleInfo->serviceProperties);
+            if (moduleInfo->moduleId != NULL)
+                free((char*)moduleInfo->moduleId);
+            if (moduleInfo->managedBy != NULL)
+                free((char*)moduleInfo->managedBy);
+            free(moduleInfo);
+        }
+        singlylinkedlist_destroy(moduleList);
+    }
+}
+
+
 
 static void setupHttpMockCalls(bool updateIfMatch, const unsigned int httpStatusCode, HTTPAPI_REQUEST_TYPE requestType)
 {
@@ -582,7 +652,7 @@ static void setupHttpMockCalls(bool updateIfMatch, const unsigned int httpStatus
         .IgnoreArgument(1);
 }
 
-static void setupJsonParseDeviceMockCalls(bool fromDeviceList, IOTHUB_REGISTRYMANAGER_AUTH_METHOD authMethod)
+static void setupJsonParseDeviceMockCalls(bool fromDeviceList, IOTHUB_REGISTRYMANAGER_AUTH_METHOD authMethod, bool isModule, const char* managedBy)
 {
     STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
         .IgnoreArgument(1)
@@ -611,6 +681,18 @@ static void setupJsonParseDeviceMockCalls(bool fromDeviceList, IOTHUB_REGISTRYMA
         return;
     }
 
+    if (isModule)
+    {
+        // If moduleId is returned by parser, we'll make a copy of it
+        expectedMallocs++;
+    }
+
+    if (managedBy != NULL)
+    {
+        // If managedBy is returned by parser, we'll make a copy of it
+        expectedMallocs++;
+    }
+
     STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .SetReturn(TEST_JSON_VALUE);
@@ -621,8 +703,6 @@ static void setupJsonParseDeviceMockCalls(bool fromDeviceList, IOTHUB_REGISTRYMA
             .SetReturn(TEST_JSON_ARRAY);
         STRICT_EXPECTED_CALL(json_array_get_count(TEST_JSON_ARRAY))
             .SetReturn(1);
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
-            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(json_array_get_object(TEST_JSON_ARRAY, 0))
             .SetReturn(TEST_JSON_OBJECT);
     }
@@ -634,6 +714,28 @@ static void setupJsonParseDeviceMockCalls(bool fromDeviceList, IOTHUB_REGISTRYMA
 
     STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME))
         .SetReturn(TEST_DEVICE_ID);
+    if (isModule)
+    {
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_MODULE_NAME))
+            .SetReturn(TEST_MODULE_ID);
+    }
+    else
+    {
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_MODULE_NAME))
+            .SetReturn(NULL);
+    }
+
+    if (managedBy != NULL)
+    {
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_MANAGED_BY))
+            .SetReturn(managedBy);
+    }
+    else
+    {
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_MANAGED_BY))
+            .SetReturn(NULL);
+    }
+    
     STRICT_EXPECTED_CALL(json_object_dotget_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_AUTH_TYPE))
         .SetReturn(authMethodString);
     STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_GENERATION_ID))
@@ -666,6 +768,8 @@ static void setupJsonParseDeviceMockCalls(bool fromDeviceList, IOTHUB_REGISTRYMA
         .SetReturn(TEST_DEVICEPROPERTIES);
     STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SERVICEPROPERTIES))
         .SetReturn(TEST_SERVICEPROPERTIES);
+    STRICT_EXPECTED_CALL(json_object_dotget_boolean(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_CAPABILITIES_IOTEDGE))
+        .SetReturn(0);
 
     if (authMethod == IOTHUB_REGISTRYMANAGER_AUTH_SPK)
     {
@@ -690,8 +794,16 @@ static void setupJsonParseDeviceMockCalls(bool fromDeviceList, IOTHUB_REGISTRYMA
 
     if (true == fromDeviceList)
     {
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
+
+        if (isModule == false)
+        {
+            // Free module specific members allocated by lower layer but not needed now.
+            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        }
 
         STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
@@ -706,9 +818,6 @@ static void setupJsonParseDeviceMockCalls(bool fromDeviceList, IOTHUB_REGISTRYMA
     }
 
     STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
-        .IgnoreArgument(1);
-
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
 }
 
@@ -849,6 +958,12 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
 
         REGISTER_GLOBAL_MOCK_RETURN(json_array_clear, JSONSuccess);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_array_clear, JSONFailure);
+
+        REGISTER_GLOBAL_MOCK_RETURN(json_object_dotset_boolean, JSONSuccess);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_object_dotset_boolean, JSONFailure);
+
+        REGISTER_GLOBAL_MOCK_RETURN(json_object_dotget_boolean, JSONSuccess);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_object_dotget_boolean, -1);
     }
 
     TEST_SUITE_CLEANUP(TestClassCleanup)
@@ -884,16 +999,58 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         TEST_IOTHUB_REGISTRY_DEVICE_CREATE.secondaryKey = TEST_SECONDARYKEY;
         TEST_IOTHUB_REGISTRY_DEVICE_CREATE.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
 
+        TEST_IOTHUB_REGISTRY_DEVICE_CREATE_EX.version = IOTHUB_REGISTRY_DEVICE_CREATE_EX_VERSION_1;
+        TEST_IOTHUB_REGISTRY_DEVICE_CREATE_EX.deviceId = TEST_DEVICE_ID;
+        TEST_IOTHUB_REGISTRY_DEVICE_CREATE_EX.primaryKey = TEST_PRIMARYKEY;
+        TEST_IOTHUB_REGISTRY_DEVICE_CREATE_EX.secondaryKey = TEST_SECONDARYKEY;
+        TEST_IOTHUB_REGISTRY_DEVICE_CREATE_EX.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
+
         TEST_IOTHUB_REGISTRY_DEVICE_UPDATE.deviceId = TEST_DEVICE_ID;
         TEST_IOTHUB_REGISTRY_DEVICE_UPDATE.primaryKey = TEST_PRIMARYKEY;
         TEST_IOTHUB_REGISTRY_DEVICE_UPDATE.secondaryKey = TEST_SECONDARYKEY;
         TEST_IOTHUB_REGISTRY_DEVICE_UPDATE.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
         TEST_IOTHUB_REGISTRY_DEVICE_UPDATE.status = IOTHUB_DEVICE_STATUS_DISABLED;
 
+        TEST_IOTHUB_REGISTRY_DEVICE_UPDATE_EX.version = IOTHUB_REGISTRY_DEVICE_UPDATE_EX_VERSION_1;
+        TEST_IOTHUB_REGISTRY_DEVICE_UPDATE_EX.deviceId = TEST_DEVICE_ID;
+        TEST_IOTHUB_REGISTRY_DEVICE_UPDATE_EX.primaryKey = TEST_PRIMARYKEY;
+        TEST_IOTHUB_REGISTRY_DEVICE_UPDATE_EX.secondaryKey = TEST_SECONDARYKEY;
+        TEST_IOTHUB_REGISTRY_DEVICE_UPDATE_EX.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
+        TEST_IOTHUB_REGISTRY_DEVICE_UPDATE_EX.status = IOTHUB_DEVICE_STATUS_DISABLED;
+
         TEST_IOTHUB_DEVICE.deviceId = TEST_DEVICE_ID;
         TEST_IOTHUB_DEVICE.primaryKey = TEST_PRIMARYKEY;
         TEST_IOTHUB_DEVICE.secondaryKey = TEST_SECONDARYKEY;
         TEST_IOTHUB_DEVICE.status = IOTHUB_DEVICE_STATUS_DISABLED;
+
+        TEST_IOTHUB_DEVICE_EX.deviceId = TEST_DEVICE_ID;
+        TEST_IOTHUB_DEVICE_EX.primaryKey = TEST_PRIMARYKEY;
+        TEST_IOTHUB_DEVICE_EX.secondaryKey = TEST_SECONDARYKEY;
+        TEST_IOTHUB_DEVICE_EX.status = IOTHUB_DEVICE_STATUS_DISABLED;
+        TEST_IOTHUB_DEVICE_EX.version = IOTHUB_DEVICE_EX_VERSION_1;
+
+        TEST_IOTHUB_REGISTRY_MODULE_CREATE.version = IOTHUB_REGISTRY_MODULE_CREATE_VERSION_1;
+        TEST_IOTHUB_REGISTRY_MODULE_CREATE.deviceId = TEST_DEVICE_ID;
+        TEST_IOTHUB_REGISTRY_MODULE_CREATE.moduleId = TEST_MODULE_ID;
+        TEST_IOTHUB_REGISTRY_MODULE_CREATE.primaryKey = TEST_PRIMARYKEY;
+        TEST_IOTHUB_REGISTRY_MODULE_CREATE.secondaryKey = TEST_SECONDARYKEY;
+        TEST_IOTHUB_REGISTRY_MODULE_CREATE.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
+
+        TEST_IOTHUB_REGISTRY_MODULE_UPDATE.version = IOTHUB_REGISTRY_MODULE_UPDATE_VERSION_1;
+        TEST_IOTHUB_REGISTRY_MODULE_UPDATE.deviceId = TEST_DEVICE_ID;
+        TEST_IOTHUB_REGISTRY_MODULE_UPDATE.moduleId = TEST_MODULE_ID;
+        TEST_IOTHUB_REGISTRY_MODULE_UPDATE.primaryKey = TEST_PRIMARYKEY;
+        TEST_IOTHUB_REGISTRY_MODULE_UPDATE.secondaryKey = TEST_SECONDARYKEY;
+        TEST_IOTHUB_REGISTRY_MODULE_UPDATE.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
+        TEST_IOTHUB_REGISTRY_MODULE_UPDATE.status = IOTHUB_DEVICE_STATUS_DISABLED;
+
+        TEST_IOTHUB_MODULE.deviceId = TEST_DEVICE_ID;
+        TEST_IOTHUB_MODULE.moduleId = TEST_MODULE_ID;
+        TEST_IOTHUB_MODULE.primaryKey = TEST_PRIMARYKEY;
+        TEST_IOTHUB_MODULE.secondaryKey = TEST_SECONDARYKEY;
+        TEST_IOTHUB_MODULE.status = IOTHUB_DEVICE_STATUS_DISABLED;
+        TEST_IOTHUB_MODULE.version = IOTHUB_MODULE_VERSION_1;
+        
     }
 
     TEST_FUNCTION_CLEANUP(TestMethodCleanup)
@@ -1116,6 +1273,8 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
 
         // act
         IoTHubRegistryManager_Destroy(handle);
@@ -1123,12 +1282,137 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         // assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
+
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_007: [ IoTHubRegistryManager_CreateDevice shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ]*/
+    TEST_FUNCTION(IoTHubRegistryManager_CreateModule_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_registryManagerHandle_is_NULL)
+    {
+        // arrange
+
+        // act
+        IOTHUB_MODULE moduleInfo;
+        (void)memset(&moduleInfo, 0, sizeof(IOTHUB_MODULE));
+        moduleInfo.version = IOTHUB_MODULE_VERSION_1;
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_CreateModule(NULL, &TEST_IOTHUB_REGISTRY_MODULE_CREATE, &moduleInfo);
+
+        // assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_007: [ IoTHubRegistryManager_CreateDevice shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ]*/
+    TEST_FUNCTION(IoTHubRegistryManager_CreateModule_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_moduleCreateInfo_is_NULL)
+    {
+        // arrange
+
+        // act
+        IOTHUB_MODULE moduleInfo;
+        (void)memset(&moduleInfo, 0, sizeof(IOTHUB_MODULE));
+        moduleInfo.version = IOTHUB_MODULE_VERSION_1;
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_CreateModule(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, NULL, &moduleInfo);
+
+        // assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_007: [ IoTHubRegistryManager_CreateDevice shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ]*/
+    TEST_FUNCTION(IoTHubRegistryManager_CreateModule_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_module_is_NULL)
+    {
+        // arrange
+
+        // act
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_CreateModule(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_MODULE_CREATE, NULL);
+
+        // assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_008: [ IoTHubRegistryManager_CreateDevice shall verify the deviceCreateInfo->deviceId input parameter and if it is NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ]*/
+    TEST_FUNCTION(IoTHubRegistryManager_CreateModule_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceCreateInfo_moduleId_is_NULL)
+    {
+        // arrange
+
+        // act
+        IOTHUB_MODULE moduleInfo;
+        (void)memset(&moduleInfo, 0, sizeof(IOTHUB_MODULE));
+        moduleInfo.version = IOTHUB_MODULE_VERSION_1;
+
+        TEST_IOTHUB_REGISTRY_MODULE_CREATE.moduleId = NULL;
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_CreateModule(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_MODULE_CREATE, &moduleInfo);
+
+        // assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_CreateModule_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceCreateInfo_invalid_version)
+    {
+        // arrange
+
+        // act
+        IOTHUB_MODULE moduleInfo;
+        (void)memset(&moduleInfo, 0, sizeof(IOTHUB_MODULE));
+        moduleInfo.version = IOTHUB_MODULE_VERSION_1;
+
+        TEST_IOTHUB_REGISTRY_MODULE_CREATE.version = 999;
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_CreateModule(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_MODULE_CREATE, &moduleInfo);
+
+        // assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_VERSION, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_CreateModule_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceCreateInfo_zero_version)
+    {
+        // arrange
+
+        // act
+        IOTHUB_MODULE moduleInfo;
+        (void)memset(&moduleInfo, 0, sizeof(IOTHUB_MODULE));
+        moduleInfo.version = 0;
+
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_CreateModule(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_MODULE_CREATE, &moduleInfo);
+
+        // assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_VERSION, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_CreateModule_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_moduleInfo_invalid_version)
+    {
+        // arrange
+
+        // act
+        IOTHUB_MODULE moduleInfo;
+        (void)memset(&moduleInfo, 0, sizeof(IOTHUB_MODULE));
+        moduleInfo.version = 999;
+
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_CreateModule(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_MODULE_CREATE, &moduleInfo);
+
+        // assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_VERSION, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_CreateModule_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_moduleInfo_zero_version)
+    {
+        // arrange
+        IOTHUB_MODULE moduleInfo;
+        (void)memset(&moduleInfo, 0, sizeof(IOTHUB_MODULE));
+
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_CreateModule(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_MODULE_CREATE, &moduleInfo);
+
+        // assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_VERSION, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
     
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_007: [ IoTHubRegistryManager_CreateDevice shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ]*/
     TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_registryManagerHandle_is_NULL)
     {
         // arrange
-
+ 
         // act
         IOTHUB_DEVICE deviceInfo;
         (void)memset(&deviceInfo, 0, sizeof(IOTHUB_DEVICE));
@@ -1139,11 +1423,27 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
+    TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_Ex_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_registryManagerHandle_is_NULL)
+    {
+        // arrange
+
+        // act
+        IOTHUB_DEVICE_EX deviceInfo;
+        (void)memset(&deviceInfo, 0, sizeof(IOTHUB_DEVICE));
+        deviceInfo.version = IOTHUB_DEVICE_EX_VERSION_1;
+
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_CreateDevice_Ex(NULL, &TEST_IOTHUB_REGISTRY_DEVICE_CREATE_EX, &deviceInfo);
+
+        // assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_007: [ IoTHubRegistryManager_CreateDevice shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ]*/
     TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceCreateInfo_is_NULL)
     {
         // arrange
-
+ 
         // act
         IOTHUB_DEVICE deviceInfo;
         (void)memset(&deviceInfo, 0, sizeof(IOTHUB_DEVICE));
@@ -1154,13 +1454,41 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_007: [ IoTHubRegistryManager_CreateDevice shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ]*/
-    TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceInfo_is_NULL)
+    TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_Ex_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceCreateInfo_is_NULL)
     {
         // arrange
 
         // act
+        IOTHUB_DEVICE_EX deviceInfo;
+        (void)memset(&deviceInfo, 0, sizeof(IOTHUB_DEVICE));
+        deviceInfo.version = IOTHUB_DEVICE_EX_VERSION_1;
+
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_CreateDevice_Ex(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, NULL, &deviceInfo);
+
+        // assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_007: [ IoTHubRegistryManager_CreateDevice shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ]*/
+    TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceInfo_is_NULL)
+    {
+        // arrange
+ 
+        // act
         IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_CreateDevice(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_DEVICE_CREATE, NULL);
+
+        // assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_Ex_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceInfo_is_NULL)
+    {
+        // arrange
+
+        // act
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_CreateDevice_Ex(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_DEVICE_CREATE_EX, NULL);
 
         // assert
         ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
@@ -1171,7 +1499,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
     TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceCreateInfo_deviceId_is_NULL)
     {
         // arrange
-
+ 
         // act
         IOTHUB_DEVICE deviceInfo;
         (void)memset(&deviceInfo, 0, sizeof(IOTHUB_DEVICE));
@@ -1184,6 +1512,86 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
+    TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_Ex_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceCreateInfo_deviceId_is_NULL)
+    {
+        // arrange
+
+        // act
+        IOTHUB_DEVICE_EX deviceInfo;
+        (void)memset(&deviceInfo, 0, sizeof(IOTHUB_DEVICE));
+        deviceInfo.version = IOTHUB_DEVICE_EX_VERSION_1;
+
+        TEST_IOTHUB_REGISTRY_DEVICE_CREATE_EX.deviceId = NULL;
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_CreateDevice_Ex(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_DEVICE_CREATE_EX, &deviceInfo);
+
+        // assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_Ex_return_IOTHUB_REGISTRYMANAGER_INVALID_VERSION_if_invalid_deviceCreate_version)
+    {
+        //arrange
+
+        //act
+        IOTHUB_DEVICE_EX deviceInfo;
+        (void)memset(&deviceInfo, 0, sizeof(IOTHUB_DEVICE));
+
+        TEST_IOTHUB_REGISTRY_DEVICE_CREATE_EX.version = 999; //invalid
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_CreateDevice_Ex(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_DEVICE_CREATE_EX, &deviceInfo);
+
+        // assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_VERSION, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_Ex_return_IOTHUB_REGISTRYMANAGER_INVALID_VERSION_if_invalid_zero_version)
+    {
+        //arrange
+
+        //act
+        IOTHUB_DEVICE_EX deviceInfo;
+        (void)memset(&deviceInfo, 0, sizeof(IOTHUB_DEVICE));
+
+        TEST_IOTHUB_REGISTRY_DEVICE_CREATE_EX.version = 0; //invalid
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_CreateDevice_Ex(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_DEVICE_CREATE_EX, &deviceInfo);
+
+        // assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_VERSION, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_Ex_return_IOTHUB_REGISTRYMANAGER_INVALID_VERSION_if_invalid_deviceInfo_version)
+    {
+        //arrange
+
+        //act
+        IOTHUB_DEVICE_EX deviceInfo;
+        (void)memset(&deviceInfo, 0, sizeof(IOTHUB_DEVICE));
+        deviceInfo.version = 999; //invalid
+
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_CreateDevice_Ex(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_DEVICE_CREATE_EX, &deviceInfo);
+
+        // assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_VERSION, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_Ex_return_IOTHUB_REGISTRYMANAGER_INVALID_VERSION_if_zero_deviceInfo_version)
+    {
+        //arrange
+
+        //act
+        IOTHUB_DEVICE_EX deviceInfo;
+        (void)memset(&deviceInfo, 0, sizeof(IOTHUB_DEVICE));
+
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_CreateDevice_Ex(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_DEVICE_CREATE_EX, &deviceInfo);
+
+        // assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_VERSION, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_009: [ IoTHubRegistryManager_CreateDevice shall verify the deviceCreateInfo->deviceId input parameter and if it contains space(s) then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
     TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceCreateInfo_deviceId_contains_space)
     {
@@ -1192,9 +1600,26 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         // act
         IOTHUB_DEVICE deviceInfo;
         (void)memset(&deviceInfo, 0, sizeof(IOTHUB_DEVICE));
-
+         
         TEST_IOTHUB_REGISTRY_DEVICE_CREATE.deviceId = "aaa bbb";
         IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_CreateDevice(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_DEVICE_CREATE, &deviceInfo);
+
+        // assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_Ex_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceCreateInfo_deviceId_contains_space)
+    {
+        // arrange
+
+        // act
+        IOTHUB_DEVICE_EX deviceInfo;
+        (void)memset(&deviceInfo, 0, sizeof(IOTHUB_DEVICE));
+        deviceInfo.version = IOTHUB_DEVICE_EX_VERSION_1;
+
+        TEST_IOTHUB_REGISTRY_DEVICE_CREATE_EX.deviceId = "aaa bbb";
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_CreateDevice_Ex(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_DEVICE_CREATE_EX, &deviceInfo);
 
         // assert
         ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
@@ -1210,7 +1635,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
 
         IOTHUB_DEVICE deviceInfo;
         (void)memset(&deviceInfo, 0, sizeof(IOTHUB_DEVICE));
-
+        
         TEST_IOTHUB_REGISTRY_DEVICE_CREATE.authMethod = (IOTHUB_REGISTRYMANAGER_AUTH_METHOD)12345;
         IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_CreateDevice(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_DEVICE_CREATE, &deviceInfo);
 
@@ -1219,159 +1644,47 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_010: [ IoTHubRegistryManager_CreateDevice shall create a flat "key1:value2,key2:value2..." JSON representation from the given deviceCreateInfo parameter using the following parson APIs: json_value_init_object, json_value_get_object, json_object_set_string, json_object_dotset_string ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_06_001: [ IoTHubRegistryManager_CreateDevice shall, if deviceCreateInfo->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT" or "IOTHUB_REGISTRYMANAGER_AUTH_X509_CERTIFICATE_AUTHORITY", set "authorization.x509Thumbprint.primaryThumbprint" to deviceCreateInfo->primaryKey and "authorization.x509Thumbprint.secondaryThumbprint" to deviceCreateInfo->secondaryKey ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_024: [ If the deviceInfo out parameter is not NULL IoTHubRegistryManager_CreateDevice shall save the received deviceInfo to the out parameter and return IOTHUB_REGISTRYMANAGER_OK ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_100: [ IoTHubRegistryManager_CreateDevice shall do clean up before return ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_117: [ IoTHubRegistryManager_CreateDevice shall set the "status" value to the IOTHUB_DEVICE_STATUS_ENABLED ] */
-    TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_happy_path_status_code_200_sas)
+    TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_Ex_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceCreateInfo_authMethod_is_invalid)
     {
-        // arrange
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
-            .IgnoreArgument(1);
+        ///arrange
 
-        STRICT_EXPECTED_CALL(json_value_init_object())
-            .SetReturn(TEST_JSON_VALUE);
+        ///act
 
-        STRICT_EXPECTED_CALL(json_value_get_object(TEST_JSON_VALUE))
-            .SetReturn(TEST_JSON_OBJECT);
+        IOTHUB_DEVICE_EX deviceInfo;
+        (void)memset(&deviceInfo, 0, sizeof(IOTHUB_DEVICE));
+        deviceInfo.version = IOTHUB_DEVICE_EX_VERSION_1;
 
-        STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME, TEST_DEVICE_ID));
-        STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_STATUS, TEST_DEVICE_JSON_DEFAULT_VALUE_ENABLED));
-        STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_AUTH_TYPE, TEST_AUTH_TYPE_SAS));
-        STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY, TEST_PRIMARYKEY));
-        STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY, TEST_SECONDARYKEY));
-        STRICT_EXPECTED_CALL(json_serialize_to_string(TEST_JSON_VALUE))
-            .SetReturn(TEST_CHAR_PTR);
+        TEST_IOTHUB_REGISTRY_DEVICE_CREATE_EX.authMethod = (IOTHUB_REGISTRYMANAGER_AUTH_METHOD)12345;
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_CreateDevice_Ex(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_DEVICE_CREATE_EX, &deviceInfo);
 
-        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-            .IgnoreAllArguments();
-
-        STRICT_EXPECTED_CALL(json_free_serialized_string(TEST_CHAR_PTR));
-        STRICT_EXPECTED_CALL(json_object_clear(TEST_JSON_OBJECT));
-        STRICT_EXPECTED_CALL(json_value_free(TEST_JSON_VALUE));
-
-        setupHttpMockCalls(false, httpStatusCodeOk, HTTPAPI_REQUEST_PUT);
-        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
-            .IgnoreArgument(1)
-            .SetReturn(TEST_UNSIGNED_CHAR_PTR);
-
-        STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG))
-            .IgnoreArgument(1)
-            .SetReturn(TEST_JSON_VALUE);
-        STRICT_EXPECTED_CALL(json_value_get_object(TEST_JSON_VALUE))
-            .SetReturn(TEST_JSON_OBJECT);
-
-        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME))
-            .SetReturn(TEST_DEVICE_ID);
-        STRICT_EXPECTED_CALL(json_object_dotget_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_AUTH_TYPE))
-            .SetReturn(TEST_AUTH_TYPE_SAS);
-        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_GENERATION_ID))
-            .SetReturn(TEST_GENERATIONID);
-        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_ETAG))
-            .SetReturn(TEST_ETAG);
-
-        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_CONNECTIONSTATE))
-            .SetReturn(TEST_DEVICE_JSON_DEFAULT_VALUE_CONNECTED);
-        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_CONNECTIONSTATEUPDATEDTIME))
-            .SetReturn(TEST_CONNECTIONSTATEUPDATEDTIME);
-
-        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_STATUS))
-            .SetReturn(TEST_DEVICE_JSON_DEFAULT_VALUE_ENABLED);
-        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_STATUSREASON))
-            .SetReturn(TEST_STATUSREASON);
-        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_STATUSUPDATEDTIME))
-            .SetReturn(TEST_STATUSUPDATEDTIME);
-
-        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_LASTACTIVITYTIME))
-            .SetReturn(TEST_LASTACTIVITYTIME);
-        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_CLOUDTODEVICEMESSAGECOUNT))
-            .SetReturn(TEST_CLOUDTODEVICEMESSAGECOUNT);
-
-        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_ISMANAGED))
-            .SetReturn(TEST_IS_MANAGED);
-        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_CONFIGURATION))
-            .SetReturn(TEST_CONFIGURATION);
-        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_DEVICEROPERTIES))
-            .SetReturn(TEST_DEVICEPROPERTIES);
-        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SERVICEPROPERTIES))
-            .SetReturn(TEST_SERVICEPROPERTIES);
-        STRICT_EXPECTED_CALL(json_object_dotget_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY))
-            .SetReturn(TEST_PRIMARYKEY);
-        STRICT_EXPECTED_CALL(json_object_dotget_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY))
-            .SetReturn(TEST_SECONDARYKEY);
-
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-
-        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
-
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
-
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
-
-        // act
-        IOTHUB_DEVICE deviceInfo;
-        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_CreateDevice(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_DEVICE_CREATE, &deviceInfo);
-
-        // assert
-        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-        // cleanup
-        free((void*)deviceInfo.deviceId);
-        free((void*)deviceInfo.primaryKey);
-        free((void*)deviceInfo.secondaryKey);
-        free((void*)deviceInfo.generationId);
-        free((void*)deviceInfo.eTag);
-        free((void*)deviceInfo.connectionStateUpdatedTime);
-        free((void*)deviceInfo.statusReason);
-        free((void*)deviceInfo.statusUpdatedTime);
-        free((void*)deviceInfo.lastActivityTime);
-        free((void*)deviceInfo.configuration);
-        free((void*)deviceInfo.deviceProperties);
-        free((void*)deviceInfo.serviceProperties);
     }
 
-
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_010: [ IoTHubRegistryManager_CreateDevice shall create a flat "key1:value2,key2:value2..." JSON representation from the given deviceCreateInfo parameter using the following parson APIs: json_value_init_object, json_value_get_object, json_object_set_string, json_object_dotset_string ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_06_002: [ IoTHubRegistryManager_CreateDevice shall, if deviceCreateInfo->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_SPK", set "authorization.symmetricKey.primaryKey" to deviceCreateInfo->primaryKey and "authorization.symmetricKey.secondaryKey" to deviceCreateInfo->secondaryKey ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_024: [ If the deviceInfo out parameter is not NULL IoTHubRegistryManager_CreateDevice shall save the received deviceInfo to the out parameter and return IOTHUB_REGISTRYMANAGER_OK ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_100: [ IoTHubRegistryManager_CreateDevice shall do clean up before return ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_117: [ IoTHubRegistryManager_CreateDevice shall set the "status" value to the IOTHUB_DEVICE_STATUS_ENABLED ] */
-    static void TestCreateDevice(IOTHUB_REGISTRYMANAGER_AUTH_METHOD authType)
+    static void set_expected_calls_for_create_device_or_module(IOTHUB_REGISTRYMANAGER_AUTH_METHOD authType, const char* moduleId, const char* managedBy)
     {
         // arrange
-        const char *authTypeString = (authType == IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT) ? TEST_AUTH_TYPE_SELF_SIGNED : TEST_AUTH_TYPE_CERTIFICATE_AUTHORITY;
+        const char *authTypeString = NULL;
+
+        switch (authType)
+        {
+            case IOTHUB_REGISTRYMANAGER_AUTH_SPK:
+                authTypeString = TEST_AUTH_TYPE_SAS;
+                break;
+
+            case IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT:
+                authTypeString = TEST_AUTH_TYPE_SELF_SIGNED;
+                break;
+
+            case IOTHUB_REGISTRYMANAGER_AUTH_X509_CERTIFICATE_AUTHORITY:
+                authTypeString = TEST_AUTH_TYPE_CERTIFICATE_AUTHORITY;
+                break;
+
+            default:
+                ASSERT_FAIL("Unknown auth type option"); 
+                break;
+        }
         
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
@@ -1383,14 +1696,34 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
             .SetReturn(TEST_JSON_OBJECT);
 
         STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME, TEST_DEVICE_ID));
+        if (moduleId != NULL)
+        {
+            STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_MODULE_NAME, moduleId));    
+        }
+
+        if (managedBy != NULL)
+        {
+            STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_MANAGED_BY, managedBy));    
+        }
         STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_STATUS, TEST_DEVICE_JSON_DEFAULT_VALUE_ENABLED));
         STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_AUTH_TYPE, authTypeString));
 
-        if (IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT == authType)
+        if (authType == IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT)
         {
             STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_THUMBPRINT, TEST_PRIMARYKEY));
             STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_THUMBPRINT, TEST_SECONDARYKEY));
         }
+        else if (authType == IOTHUB_REGISTRYMANAGER_AUTH_SPK)
+        {
+            STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY, TEST_PRIMARYKEY));
+            STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY, TEST_SECONDARYKEY));
+        }
+
+        if (moduleId == NULL)
+        {
+            STRICT_EXPECTED_CALL(json_object_dotset_boolean(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_CAPABILITIES_IOTEDGE, false));
+        }
+
         STRICT_EXPECTED_CALL(json_serialize_to_string(TEST_JSON_VALUE))
             .SetReturn(TEST_CHAR_PTR);
 
@@ -1415,6 +1748,10 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
 
         STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME))
             .SetReturn(TEST_DEVICE_ID);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_MODULE_NAME))
+            .SetReturn(moduleId);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_MANAGED_BY))
+            .SetReturn(managedBy);
         STRICT_EXPECTED_CALL(json_object_dotget_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_AUTH_TYPE))
             .SetReturn(authTypeString);
         STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_GENERATION_ID))
@@ -1447,6 +1784,8 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
             .SetReturn(TEST_DEVICEPROPERTIES);
         STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SERVICEPROPERTIES))
             .SetReturn(TEST_SERVICEPROPERTIES);
+        STRICT_EXPECTED_CALL(json_object_dotget_boolean(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_CAPABILITIES_IOTEDGE))
+            .SetReturn(false);        
 
         if (authType == IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT)
         {
@@ -1455,9 +1794,21 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
             STRICT_EXPECTED_CALL(json_object_dotget_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_THUMBPRINT))
                 .SetReturn(TEST_SECONDARYKEY);
         }
+        else if (authType == IOTHUB_REGISTRYMANAGER_AUTH_SPK)
+        {        
+            STRICT_EXPECTED_CALL(json_object_dotget_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY))
+                .SetReturn(TEST_PRIMARYKEY);
+            STRICT_EXPECTED_CALL(json_object_dotget_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY))
+                .SetReturn(TEST_SECONDARYKEY);
+        }
 
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
+        if (moduleId != NULL)
+        {
+            STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+                .IgnoreAllArguments();
+        }
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
@@ -1477,12 +1828,17 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
-        if (authType == IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT)
+        if ((authType == IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT) || (authType == IOTHUB_REGISTRYMANAGER_AUTH_SPK))
         {
             STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
                 .IgnoreAllArguments();
             STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
                 .IgnoreAllArguments();
+        }
+
+        if (managedBy != NULL)
+        {
+            STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         }
 
         STRICT_EXPECTED_CALL(json_object_clear(IGNORED_PTR_ARG))
@@ -1497,6 +1853,27 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
 
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+        if (moduleId == NULL)
+        {
+            // If this was *NOT* a module, then fields the lower layer allocated that are module specific
+            // are freed at this point since we can't pass them up device layer.
+            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+                .IgnoreArgument(1);
+            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+                .IgnoreArgument(1);
+        }
+
+    }
+
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_010: [ IoTHubRegistryManager_CreateDevice shall create a flat "key1:value2,key2:value2..." JSON representation from the given deviceCreateInfo parameter using the following parson APIs: json_value_init_object, json_value_get_object, json_object_set_string, json_object_dotset_string ]*/
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_06_002: [ IoTHubRegistryManager_CreateDevice shall, if deviceCreateInfo->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_SPK", set "authorization.symmetricKey.primaryKey" to deviceCreateInfo->primaryKey and "authorization.symmetricKey.secondaryKey" to deviceCreateInfo->secondaryKey ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_024: [ If the deviceInfo out parameter is not NULL IoTHubRegistryManager_CreateDevice shall save the received deviceInfo to the out parameter and return IOTHUB_REGISTRYMANAGER_OK ]*/
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_100: [ IoTHubRegistryManager_CreateDevice shall do clean up before return ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_117: [ IoTHubRegistryManager_CreateDevice shall set the "status" value to the IOTHUB_DEVICE_STATUS_ENABLED ] */
+    static void TestCreateDevice(IOTHUB_REGISTRYMANAGER_AUTH_METHOD authType)
+    {
+        // arrange
+        set_expected_calls_for_create_device_or_module(authType, NULL, NULL);
 
         // act
         IOTHUB_DEVICE deviceInfo;
@@ -1528,15 +1905,123 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         free((void*)deviceInfo.serviceProperties);
     }
 
+    static void TestCreateDeviceEx(IOTHUB_REGISTRYMANAGER_AUTH_METHOD authType)
+    {
+        // arrange
+        set_expected_calls_for_create_device_or_module(authType, NULL, NULL);
+
+        // act
+        IOTHUB_DEVICE_EX deviceInfo;
+        memset(&deviceInfo, 0, sizeof(deviceInfo));
+        deviceInfo.version = IOTHUB_DEVICE_EX_VERSION_1;
+
+        IOTHUB_REGISTRY_DEVICE_CREATE_EX deviceCreate;
+        deviceCreate.version = IOTHUB_REGISTRY_DEVICE_CREATE_EX_VERSION_1;
+        deviceCreate.deviceId = TEST_DEVICE_ID;
+        deviceCreate.primaryKey = TEST_PRIMARYKEY;
+        deviceCreate.secondaryKey = TEST_SECONDARYKEY;
+        deviceCreate.authMethod = authType;
+        deviceCreate.iotEdge_capable = false;
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_CreateDevice_Ex(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &deviceCreate, &deviceInfo);
+
+        // assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
+
+        // cleanup
+        IoTHubRegistryManager_FreeDeviceExMembers(&deviceInfo);
+    }
+
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_010: [ IoTHubRegistryManager_CreateDevice shall create a flat "key1:value2,key2:value2..." JSON representation from the given deviceCreateInfo parameter using the following parson APIs: json_value_init_object, json_value_get_object, json_object_set_string, json_object_dotset_string ]*/
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_06_001: [ IoTHubRegistryManager_CreateDevice shall, if deviceCreateInfo->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT" or "IOTHUB_REGISTRYMANAGER_AUTH_X509_CERTIFICATE_AUTHORITY", set "authorization.x509Thumbprint.primaryThumbprint" to deviceCreateInfo->primaryKey and "authorization.x509Thumbprint.secondaryThumbprint" to deviceCreateInfo->secondaryKey ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_024: [ If the deviceInfo out parameter is not NULL IoTHubRegistryManager_CreateDevice shall save the received deviceInfo to the out parameter and return IOTHUB_REGISTRYMANAGER_OK ]*/
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_100: [ IoTHubRegistryManager_CreateDevice shall do clean up before return ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_117: [ IoTHubRegistryManager_CreateDevice shall set the "status" value to the IOTHUB_DEVICE_STATUS_ENABLED ] */
+    TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_happy_path_status_code_200_sas)
+    {
+        TestCreateDevice(IOTHUB_REGISTRYMANAGER_AUTH_SPK);
+    }
+    TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_Ex_happy_path_status_code_200_sas)
+    {
+        TestCreateDeviceEx(IOTHUB_REGISTRYMANAGER_AUTH_SPK);
+    }
 
     TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_happy_path_status_code_200_with_thumbprint)
     {
         TestCreateDevice(IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT);
     }
 
+    TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_Ex_happy_path_status_code_200_with_thumbprint)
+    {
+        TestCreateDeviceEx(IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT);
+    }
+
     TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_happy_path_status_code_200_with_certificate_authority)
     {
         TestCreateDevice(IOTHUB_REGISTRYMANAGER_AUTH_X509_CERTIFICATE_AUTHORITY);
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_Ex_happy_path_status_code_200_with_certificate_authority)
+    {
+        TestCreateDevice(IOTHUB_REGISTRYMANAGER_AUTH_X509_CERTIFICATE_AUTHORITY);
+    }
+
+    static void TestCreateModule(IOTHUB_REGISTRYMANAGER_AUTH_METHOD authType, const char* managedBy)
+    {
+        // arrange
+        set_expected_calls_for_create_device_or_module(authType, TEST_MODULE_ID, managedBy);
+
+        // act
+        IOTHUB_MODULE moduleInfo;
+        memset(&moduleInfo, 0, sizeof(moduleInfo));
+        moduleInfo.version = IOTHUB_MODULE_VERSION_1;
+
+        IOTHUB_REGISTRY_MODULE_CREATE moduleCreate;
+        moduleCreate.version = IOTHUB_REGISTRY_MODULE_CREATE_VERSION_1;
+        moduleCreate.deviceId = TEST_DEVICE_ID;
+        moduleCreate.moduleId = TEST_MODULE_ID;
+        moduleCreate.primaryKey = TEST_PRIMARYKEY;
+        moduleCreate.secondaryKey = TEST_SECONDARYKEY;
+        moduleCreate.authMethod = authType;
+        moduleCreate.managedBy = managedBy;
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_CreateModule(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &moduleCreate, &moduleInfo);
+
+        // assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
+
+        // cleanup
+        IoTHubRegistryManager_FreeModuleMembers(&moduleInfo);
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_CreateModule_happy_path_status_code_200_sas)
+    {
+        TestCreateModule(IOTHUB_REGISTRYMANAGER_AUTH_SPK, NULL);
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_CreateModule_happy_path_status_code_200_with_thumbprint)
+    {
+        TestCreateModule(IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT, NULL);
+    }    
+
+    TEST_FUNCTION(IoTHubRegistryManager_CreateModule_happy_path_status_code_200_with_certificate_authority)
+    {
+        TestCreateModule(IOTHUB_REGISTRYMANAGER_AUTH_X509_CERTIFICATE_AUTHORITY, NULL);
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_CreateModule_happy_path_status_code_200_sas_with_managed_by)
+    {
+        TestCreateModule(IOTHUB_REGISTRYMANAGER_AUTH_SPK, TEST_MANAGED_BY);
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_CreateModule_happy_path_status_code_200_with_thumbprint_with_managed_by)
+    {
+        TestCreateModule(IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT, TEST_MANAGED_BY);
+    }    
+
+    TEST_FUNCTION(IoTHubRegistryManager_CreateModule_happy_path_status_code_200_with_certificate_authority_with_managed_by)
+    {
+        TestCreateModule(IOTHUB_REGISTRYMANAGER_AUTH_X509_CERTIFICATE_AUTHORITY, TEST_MANAGED_BY);
     }
 
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_020: [ IoTHubRegistryManager_CreateDevice shall verify the received HTTP status code and if it is 409 then return IOTHUB_REGISTRYMANAGER_DEVICE_EXIST ]*/
@@ -1557,6 +2042,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_AUTH_TYPE, TEST_AUTH_TYPE_SAS));
         STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY, TEST_PRIMARYKEY));
         STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY, TEST_SECONDARYKEY));
+        STRICT_EXPECTED_CALL(json_object_dotset_boolean(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_CAPABILITIES_IOTEDGE, false));
         STRICT_EXPECTED_CALL(json_serialize_to_string(TEST_JSON_VALUE))
             .SetReturn(TEST_CHAR_PTR);
 
@@ -1590,6 +2076,59 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_DEVICE_EXIST, result);
     }
 
+    TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_Ex_happy_path_status_code_409)
+    {
+        // arrange
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(json_value_init_object())
+            .SetReturn(TEST_JSON_VALUE);
+
+        STRICT_EXPECTED_CALL(json_value_get_object(TEST_JSON_VALUE))
+            .SetReturn(TEST_JSON_OBJECT);
+
+        STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME, TEST_DEVICE_ID));
+        STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_STATUS, TEST_DEVICE_JSON_DEFAULT_VALUE_ENABLED));
+        STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_AUTH_TYPE, TEST_AUTH_TYPE_SAS));
+        STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY, TEST_PRIMARYKEY));
+        STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY, TEST_SECONDARYKEY));
+        STRICT_EXPECTED_CALL(json_object_dotset_boolean(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_CAPABILITIES_IOTEDGE, false));
+        STRICT_EXPECTED_CALL(json_serialize_to_string(TEST_JSON_VALUE))
+            .SetReturn(TEST_CHAR_PTR);
+
+        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+            .IgnoreAllArguments();
+
+        STRICT_EXPECTED_CALL(json_free_serialized_string(TEST_CHAR_PTR));
+        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
+            .IgnoreArgument(1);
+
+        setupHttpMockCalls(false, httpStatusCodeDeviceExists, HTTPAPI_REQUEST_PUT);
+
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        // act
+        IOTHUB_DEVICE_EX deviceInfo;
+        (void)memset(&deviceInfo, 0, sizeof(IOTHUB_DEVICE));
+        deviceInfo.version = IOTHUB_DEVICE_EX_VERSION_1;
+
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_CreateDevice_Ex(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_DEVICE_CREATE_EX, &deviceInfo);
+
+        // assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_DEVICE_EXIST, result);
+    }
+
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_021: [ IoTHubRegistryManager_CreateDevice shall verify the received HTTP status code and if it is greater than 300 then return IOTHUB_REGISTRYMANAGER_HTTP_STATUS_ERROR ]*/
     TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_happy_path_status_code_400)
     {
@@ -1608,6 +2147,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_AUTH_TYPE, TEST_AUTH_TYPE_SAS));
         STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY, TEST_PRIMARYKEY));
         STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY, TEST_SECONDARYKEY));
+        STRICT_EXPECTED_CALL(json_object_dotset_boolean(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_CAPABILITIES_IOTEDGE, false));
         STRICT_EXPECTED_CALL(json_serialize_to_string(TEST_JSON_VALUE))
             .SetReturn(TEST_CHAR_PTR);
 
@@ -1641,6 +2181,60 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_HTTP_STATUS_ERROR, result);
     }
 
+    TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_Ex_happy_path_status_code_400)
+    {
+        // arrange
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(json_value_init_object())
+            .SetReturn(TEST_JSON_VALUE);
+
+        STRICT_EXPECTED_CALL(json_value_get_object(TEST_JSON_VALUE))
+            .SetReturn(TEST_JSON_OBJECT);
+
+        STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME, TEST_DEVICE_ID));
+        STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_STATUS, TEST_DEVICE_JSON_DEFAULT_VALUE_ENABLED));
+        STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_AUTH_TYPE, TEST_AUTH_TYPE_SAS));
+        STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY, TEST_PRIMARYKEY));
+        STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY, TEST_SECONDARYKEY));
+        STRICT_EXPECTED_CALL(json_object_dotset_boolean(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_CAPABILITIES_IOTEDGE, false));
+        STRICT_EXPECTED_CALL(json_serialize_to_string(TEST_JSON_VALUE))
+            .SetReturn(TEST_CHAR_PTR);
+
+        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+            .IgnoreAllArguments();
+
+        STRICT_EXPECTED_CALL(json_free_serialized_string(TEST_CHAR_PTR));
+        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
+            .IgnoreArgument(1);
+
+        setupHttpMockCalls(false, httpStatusCodeBadRequest, HTTPAPI_REQUEST_PUT);
+
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        // act
+        IOTHUB_DEVICE_EX deviceInfo;
+        (void)memset(&deviceInfo, 0, sizeof(IOTHUB_DEVICE));
+        deviceInfo.version = IOTHUB_DEVICE_EX_VERSION_1;
+        deviceInfo.iotEdge_capable = true;
+
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_CreateDevice_Ex(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_DEVICE_CREATE_EX, &deviceInfo);
+
+        // assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_HTTP_STATUS_ERROR, result);
+    }
+
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_019: [ If any of the HTTPAPI call fails IoTHubRegistryManager_CreateDevice shall fail and return IOTHUB_REGISTRYMANAGER_HTTPAPI_ERROR ] */
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_023: [ If the JSON parsing failed, IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_JSON_ERROR ]*/
@@ -1665,6 +2259,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_AUTH_TYPE, TEST_AUTH_TYPE_SAS));
         STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY, TEST_PRIMARYKEY));
         STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY, TEST_SECONDARYKEY));
+        STRICT_EXPECTED_CALL(json_object_dotset_boolean(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_CAPABILITIES_IOTEDGE, false));
         STRICT_EXPECTED_CALL(json_serialize_to_string(TEST_JSON_VALUE))
             .SetReturn(TEST_CHAR_PTR);
 
@@ -1698,22 +2293,105 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
 
             /// act
             if (
-                (i != 10) && /*json_free_serialized_string*/
-                (i != 12) && /*json_value_free*/
-                (i != 26) && /*HTTPHeaders_Free*/
-                (i != 27) && /*HTTPAPIEX_Destroy*/
-                (i != 28) && /*HTTPAPIEX_SAS_Destroy*/
-                (i != 29) && /*STRING_delete*/
+                (i != 11) && /*json_free_serialized_string*/
+                (i != 13) && /*json_value_free*/
+                (i != 27) && /*HTTPHeaders_Free*/
+                (i != 28) && /*HTTPAPIEX_Destroy*/
+                (i != 29) && /*HTTPAPIEX_SAS_Destroy*/
                 (i != 30) && /*STRING_delete*/
                 (i != 31) && /*STRING_delete*/
-                (i != 32) && /*BUFFER_delete*/
+                (i != 32) && /*STRING_delete*/
                 (i != 33) && /*BUFFER_delete*/
-                (i != 34) /*gballoc_free*/
+                (i != 34) && /*BUFFER_delete*/
+                (i != 35) /*gballoc_free*/
                 )
             {
                 IOTHUB_DEVICE deviceInfo;
                 (void)memset(&deviceInfo, 0, sizeof(IOTHUB_DEVICE));
                 IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_CreateDevice(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_DEVICE_CREATE, &deviceInfo);
+
+                /// assert
+                ASSERT_ARE_NOT_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
+            }
+
+            ///cleanup
+        }
+
+        umock_c_negative_tests_deinit();
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_CreateDeviceEx_non_happy_path)
+    {
+        ///arrange
+        int umockc_result = umock_c_negative_tests_init();
+        ASSERT_ARE_EQUAL(int, 0, umockc_result);
+
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(json_value_init_object())
+            .SetReturn(TEST_JSON_VALUE);
+
+        STRICT_EXPECTED_CALL(json_value_get_object(TEST_JSON_VALUE))
+            .SetReturn(TEST_JSON_OBJECT);
+
+        STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME, TEST_DEVICE_ID));
+        STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_STATUS, TEST_DEVICE_JSON_DEFAULT_VALUE_ENABLED));
+        STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_AUTH_TYPE, TEST_AUTH_TYPE_SAS));
+        STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY, TEST_PRIMARYKEY));
+        STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY, TEST_SECONDARYKEY));
+        STRICT_EXPECTED_CALL(json_object_dotset_boolean(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_CAPABILITIES_IOTEDGE, false));
+        STRICT_EXPECTED_CALL(json_serialize_to_string(TEST_JSON_VALUE))
+            .SetReturn(TEST_CHAR_PTR);
+
+        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+            .IgnoreAllArguments();
+
+        STRICT_EXPECTED_CALL(json_free_serialized_string(TEST_CHAR_PTR));
+        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
+            .IgnoreArgument(1);
+
+        setupHttpMockCalls(false, httpStatusCodeBadRequest, HTTPAPI_REQUEST_PUT);
+
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        umock_c_negative_tests_snapshot();
+
+        ///act
+        for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
+        {
+            /// arrange
+            umock_c_negative_tests_reset();
+            umock_c_negative_tests_fail_call(i);
+
+            /// act
+            if (
+                (i != 11) && /*json_free_serialized_string*/
+                (i != 13) && /*json_value_free*/
+                (i != 27) && /*HTTPHeaders_Free*/
+                (i != 28) && /*HTTPAPIEX_Destroy*/
+                (i != 29) && /*HTTPAPIEX_SAS_Destroy*/
+                (i != 30) && /*STRING_delete*/
+                (i != 31) && /*STRING_delete*/
+                (i != 32) && /*STRING_delete*/
+                (i != 33) && /*BUFFER_delete*/
+                (i != 34) && /*BUFFER_delete*/
+                (i != 35) /*gballoc_free*/
+                )
+            {
+                IOTHUB_DEVICE_EX deviceInfo;
+                (void)memset(&deviceInfo, 0, sizeof(IOTHUB_DEVICE));
+                deviceInfo.version = IOTHUB_DEVICE_EX_VERSION_1;
+
+                IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_CreateDevice_Ex(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_DEVICE_CREATE_EX, &deviceInfo);
 
                 /// assert
                 ASSERT_ARE_NOT_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
@@ -1738,6 +2416,18 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
+    TEST_FUNCTION(IoTHubRegistryManager_GetDevice_Ex_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_registryManagerHandle_is_NULL)
+    {
+        ///arrange
+
+        ///act
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetDevice_Ex(NULL, TEST_DEVICE_ID, &TEST_IOTHUB_DEVICE_EX);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
     /* Test_SRS_IOTHUBREGISTRYMANAGER_12_025: [ IoTHubRegistryManager_GetDevice shall verify the registryManagerHandle and deviceId input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
     TEST_FUNCTION(IoTHubRegistryManager_GetDevice_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceId_is_NULL)
     {
@@ -1751,11 +2441,68 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
+    TEST_FUNCTION(IoTHubRegistryManager_GetDevice_Ex_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceId_is_NULL)
+    {
+        ///arrange
+
+        ///act
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetDevice_Ex(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, NULL, &TEST_IOTHUB_DEVICE_EX);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_GetDevice_Ex_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_deviceInfo_is_NULL)
+    {
+        //arrange
+
+        //act
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetDevice_Ex(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, NULL);
+
+        //assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_GetDevice_Ex_return_IOTHUB_REGISTRYMANAGER_INVALID_VERSION_if_deviceInfo_invalid_version_999)
+    {
+        //arrange
+        TEST_IOTHUB_DEVICE_EX.version = 999; //invalid
+
+        //act
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetDevice_Ex(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, &TEST_IOTHUB_DEVICE_EX);
+
+        //assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_VERSION, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_GetDevice_Ex_return_IOTHUB_REGISTRYMANAGER_INVALID_VERSION_if_deviceInfo_invalid_version_0)
+    {
+        //arrange
+        TEST_IOTHUB_DEVICE_EX.version = 0; //invalid
+
+        //act
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetDevice_Ex(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, &TEST_IOTHUB_DEVICE_EX);
+
+        //assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_VERSION, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
     static void TestGetDevice(IOTHUB_REGISTRYMANAGER_AUTH_METHOD authType)
     {
         ///arrange
         setupHttpMockCalls(false, httpStatusCodeOk, HTTPAPI_REQUEST_GET);
-        setupJsonParseDeviceMockCalls(false, authType);
+        setupJsonParseDeviceMockCalls(false, authType, false, NULL);
+
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
 
         ///act
         IOTHUB_DEVICE deviceInfo;
@@ -1781,6 +2528,33 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         free((void*)deviceInfo.serviceProperties);
     }
 
+    static void TestGetDevice_Ex(IOTHUB_REGISTRYMANAGER_AUTH_METHOD authType)
+    {
+        ///arrange
+        setupHttpMockCalls(false, httpStatusCodeOk, HTTPAPI_REQUEST_GET);
+        setupJsonParseDeviceMockCalls(false, authType, false, NULL);
+
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        ///act
+        IOTHUB_DEVICE_EX deviceInfo;
+        deviceInfo.version = IOTHUB_DEVICE_EX_VERSION_1;
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetDevice_Ex(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, &deviceInfo);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, authType, deviceInfo.authMethod);
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///cleanup
+        IoTHubRegistryManager_FreeDeviceExMembers(&deviceInfo);
+    }
+
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_026: [ IoTHubRegistryManager_GetDevice shall create HTTP GET request URL using the given deviceId using the following format: url/devices/[deviceId]?api-version=2017-06-30  ]*/
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_027: [ IoTHubRegistryManager_GetDevice shall add the following headers to the created HTTP GET request: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 ]*/
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_028: [ IoTHubRegistryManager_GetDevice shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ]*/
@@ -1794,15 +2568,126 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         TestGetDevice(IOTHUB_REGISTRYMANAGER_AUTH_SPK);
     }
 
+    TEST_FUNCTION(IoTHubRegistryManager_GetDevice_Ex_happy_path_sas)
+    {
+        TestGetDevice_Ex(IOTHUB_REGISTRYMANAGER_AUTH_SPK);
+    }
+
     TEST_FUNCTION(IoTHubRegistryManager_GetDevice_happy_path_with_thumbprint)
     {
         TestGetDevice(IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT);
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_GetDevice_Ex_happy_path_with_thumbprint)
+    {
+        TestGetDevice_Ex(IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT);
     }
 
     TEST_FUNCTION(IoTHubRegistryManager_GetDevice_happy_path_with_certificate_authority)
     {
         TestGetDevice(IOTHUB_REGISTRYMANAGER_AUTH_X509_CERTIFICATE_AUTHORITY);
     }
+
+    TEST_FUNCTION(IoTHubRegistryManager_GetDevice_Ex_happy_path_with_certificate_authority)
+    {
+        TestGetDevice_Ex(IOTHUB_REGISTRYMANAGER_AUTH_X509_CERTIFICATE_AUTHORITY);
+    }
+
+
+    TEST_FUNCTION(IoTHubRegistryManager_GetModule_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_registryManagerHandle_is_NULL)
+    {
+        ///arrange
+
+        ///act
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetModule(NULL, TEST_DEVICE_ID, TEST_MODULE_ID, &TEST_IOTHUB_MODULE);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_GetModule_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceId_is_NULL)
+    {
+        ///arrange
+
+        ///act
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetModule(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, NULL, TEST_MODULE_ID, &TEST_IOTHUB_MODULE);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+    
+    TEST_FUNCTION(IoTHubRegistryManager_GetModule_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_moduleId_is_NULL)
+    {
+        ///arrange
+
+        ///act
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetModule(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, NULL, &TEST_IOTHUB_MODULE);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_GetModule_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_module_is_NULL)
+    {
+        ///arrange
+
+        ///act
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetModule(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, TEST_MODULE_ID, NULL);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_GetModule_return_IOTHUB_REGISTRYMANAGER_INVALID_VERSION_if_input_parameter_module_version_invalid)
+    {
+        ///arrange
+        TEST_IOTHUB_MODULE.version = 999; //invalid
+
+        ///act
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetModule(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, TEST_MODULE_ID, &TEST_IOTHUB_MODULE);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_VERSION, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    static void TestGetModule(IOTHUB_REGISTRYMANAGER_AUTH_METHOD authType, const char* managedBy)
+    {
+        ///arrange
+        setupHttpMockCalls(false, httpStatusCodeOk, HTTPAPI_REQUEST_GET);
+        setupJsonParseDeviceMockCalls(false, authType, true, managedBy);
+
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        ///act
+        IOTHUB_MODULE moduleInfo;
+        moduleInfo.version = IOTHUB_MODULE_VERSION_1;
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetModule(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, TEST_MODULE_ID, &moduleInfo);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, authType, moduleInfo.authMethod);
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///cleanup
+        IoTHubRegistryManager_FreeModuleMembers(&moduleInfo);
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_GetModule_happy_path_sas)
+    {
+        TestGetModule(IOTHUB_REGISTRYMANAGER_AUTH_SPK, NULL);
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_GetModule_happy_path_sas_with_module_id)
+    {
+        TestGetModule(IOTHUB_REGISTRYMANAGER_AUTH_SPK, TEST_MANAGED_BY);
+    }
+
 
     TEST_FUNCTION(IoTHubRegistryManager_GetDevice_not_found)
     {
@@ -1833,8 +2718,11 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(int, 0, umockc_result);
 
         setupHttpMockCalls(false, httpStatusCodeOk, HTTPAPI_REQUEST_GET);
-        setupJsonParseDeviceMockCalls(false, IOTHUB_REGISTRYMANAGER_AUTH_SPK);
+        setupJsonParseDeviceMockCalls(false, IOTHUB_REGISTRYMANAGER_AUTH_SPK, false, NULL);
 
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);        
+        
         umock_c_negative_tests_snapshot();
 
         ///act
@@ -1855,11 +2743,10 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
                 (i != 17) && /*STRING_delete*/
                 (i != 18) && /*STRING_delete*/
                 (i != 19) && /*BUFFER_u_char*/
-                (i != 22) && /*json_object_get_string*/
-                (i != 23) && /*json_object_dotget_string*/
-                (i != 24) && /*json_object_dotget_string*/
-                (i != 25) && /*json_object_get_string*/
-                (i != 26) && /*json_object_get_string*/
+                (i != 23) && /*json_object_get_string*/
+                (i != 24) && /*json_object_get_string*/
+                (i != 25) && /*json_object_dotget_string*/
+                (i != 26) && /*json_object_dotget_string*/
                 (i != 27) && /*json_object_get_string*/
                 (i != 28) && /*json_object_get_string*/
                 (i != 29) && /*json_object_get_string*/
@@ -1872,11 +2759,21 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
                 (i != 36) && /*json_object_get_string*/
                 (i != 37) && /*json_object_get_string*/
                 (i != 38) && /*json_object_get_string*/
-                (i != 52) && /*json_value_free*/
-                (i != 53) /*BUFFER_delete*/
+                (i != 39) && /*json_object_get_string*/
+                (i != 40) && /*json_object_get_string*/
+                (i != 41) && /*json_object_get_string*/
+                (i != 55) && /*json_value_free*/
+                (i != 56) /*BUFFER_delete*/
                 )
             {
                 IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetDevice(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, deviceInfo);
+
+                char message_on_error[64];
+                sprintf(message_on_error, "Got unexpected IOTHUB_REGISTRYMANAGER_OK on run %zu", i);
+
+                /// assert
+                ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, IOTHUB_REGISTRYMANAGER_OK, result, message_on_error);
+                
 
                 /// assert
                 ASSERT_ARE_NOT_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
@@ -1884,6 +2781,147 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
             free(deviceInfo);
         }
         umock_c_negative_tests_deinit();
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_GetDevice_Ex_non_happy_path)
+    {
+        ///arrange
+        int umockc_result = umock_c_negative_tests_init();
+        ASSERT_ARE_EQUAL(int, 0, umockc_result);
+
+        setupHttpMockCalls(false, httpStatusCodeOk, HTTPAPI_REQUEST_GET);
+        setupJsonParseDeviceMockCalls(false, IOTHUB_REGISTRYMANAGER_AUTH_SPK, false, NULL);
+
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        umock_c_negative_tests_snapshot();
+
+        ///act
+        for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
+        {
+            /// arrange
+            IOTHUB_DEVICE_EX* deviceInfo = (IOTHUB_DEVICE_EX*)malloc(sizeof(IOTHUB_DEVICE_EX));
+            deviceInfo->version = IOTHUB_DEVICE_EX_VERSION_1;
+            umock_c_reset_all_calls();
+
+            umock_c_negative_tests_reset();
+            umock_c_negative_tests_fail_call(i);
+            /// act
+            if (
+                (i != 13) && /*HTTPHeaders_Free*/
+                (i != 14) && /*HTTPAPIEX_Destroy*/
+                (i != 15) && /*HTTPAPIEX_SAS_Destroy*/
+                (i != 16) && /*STRING_delete*/
+                (i != 17) && /*STRING_delete*/
+                (i != 18) && /*STRING_delete*/
+                (i != 19) && /*BUFFER_u_char*/
+                (i != 23) && /*json_object_get_string*/
+                (i != 24) && /*json_object_get_string*/
+                (i != 25) && /*json_object_dotget_string*/
+                (i != 26) && /*json_object_dotget_string*/
+                (i != 27) && /*json_object_get_string*/
+                (i != 28) && /*json_object_get_string*/
+                (i != 29) && /*json_object_get_string*/
+                (i != 30) && /*json_object_get_string*/
+                (i != 31) && /*json_object_get_string*/
+                (i != 32) && /*json_object_get_string*/
+                (i != 33) && /*json_object_get_string*/
+                (i != 34) && /*json_object_get_string*/
+                (i != 35) && /*json_object_get_string*/
+                (i != 36) && /*json_object_get_string*/
+                (i != 37) && /*json_object_get_string*/
+                (i != 38) && /*json_object_get_string*/
+                (i != 39) && /*json_object_get_string*/
+                (i != 40) && /*json_object_get_string*/
+                (i != 41) && /*json_object_get_string*/
+                (i != 54) && /*json_object_clear*/
+                (i != 55) && /*json_value_free*/
+                (i != 56) /*BUFFER_delete*/
+                )
+            {
+                IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetDevice_Ex(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, deviceInfo);
+
+                char message_on_error[64];
+                sprintf(message_on_error, "Got unexpected IOTHUB_REGISTRYMANAGER_OK on run %zu", i);
+
+                /// assert
+                ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, IOTHUB_REGISTRYMANAGER_OK, result, message_on_error);
+
+
+                /// assert
+                ASSERT_ARE_NOT_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
+            }
+            free(deviceInfo);
+        }
+        umock_c_negative_tests_deinit();
+    }
+
+
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_038: [ IoTHubRegistryManager_UpdateDevice shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
+    TEST_FUNCTION(IoTHubRegistryManager_UpdateModule_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_registryManagerHandle_is_NULL)
+    {
+        ///arrange
+
+        ///act
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_UpdateModule(NULL, &TEST_IOTHUB_REGISTRY_MODULE_UPDATE);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_038: [ IoTHubRegistryManager_UpdateDevice shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
+    TEST_FUNCTION(IoTHubRegistryManager_UpdateModule_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_moduleUpdate_is_NULL)
+    {
+        ///arrange
+
+        ///act
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_UpdateModule(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, NULL);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_039: [ IoTHubRegistryManager_UpdateDevice shall verify the deviceCreateInfo->deviceId input parameter and if it is NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
+    TEST_FUNCTION(IoTHubRegistryManager_UpdateModule_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_moduleUpdate_moduleId_is_NULL)
+    {
+        ///arrange
+
+        ///act
+        TEST_IOTHUB_REGISTRY_MODULE_UPDATE.moduleId = NULL;
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_UpdateModule(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_MODULE_UPDATE);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_UpdateModule_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_moduleUpdate_invalid_version_999)
+    {
+        ///arrange
+
+        ///act
+        TEST_IOTHUB_REGISTRY_MODULE_UPDATE.version = 999;
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_UpdateModule(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_MODULE_UPDATE);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_VERSION, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_UpdateModule_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_moduleUpdate_invalid_version_0)
+    {
+        ///arrange
+
+        ///act
+        TEST_IOTHUB_REGISTRY_MODULE_UPDATE.version = 0;
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_UpdateModule(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_MODULE_UPDATE);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_VERSION, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_038: [ IoTHubRegistryManager_UpdateDevice shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
@@ -1899,6 +2937,18 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
+    TEST_FUNCTION(IoTHubRegistryManager_UpdateDevice_Ex_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_registryManagerHandle_is_NULL)
+    {
+        ///arrange
+
+        ///act
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_UpdateDevice_Ex(NULL, &TEST_IOTHUB_REGISTRY_DEVICE_UPDATE_EX);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_038: [ IoTHubRegistryManager_UpdateDevice shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
     TEST_FUNCTION(IoTHubRegistryManager_UpdateDevice_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceUpdate_is_NULL)
     {
@@ -1906,6 +2956,18 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
 
         ///act
         IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_UpdateDevice(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, NULL);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_UpdateDevice_Ex_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceUpdate_is_NULL)
+    {
+        ///arrange
+
+        ///act
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_UpdateDevice_Ex(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, NULL);
 
         ///assert
         ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
@@ -1926,6 +2988,19 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
+    TEST_FUNCTION(IoTHubRegistryManager_UpdateDevice_Ex_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceUpdate_deviceId_is_NULL)
+    {
+        ///arrange
+
+        ///act
+        TEST_IOTHUB_REGISTRY_DEVICE_UPDATE_EX.deviceId = NULL;
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_UpdateDevice_Ex(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_DEVICE_UPDATE_EX);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_06_005: [ IoTHubRegistryManager_UpdateDevice shall clean up and return IOTHUB_REGISTRYMANAGER_INVALID_ARG if deviceUpdate->authMethod is not "IOTHUB_REGISTRYMANAGER_AUTH_SPK" or "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT" ] */
     TEST_FUNCTION(IoTHubRegistryManager_UpdateDevice_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceUpdate_authMethod_is_invalid)
     {
@@ -1940,84 +3015,46 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_039: [ IoTHubRegistryManager_UpdateDevice shall verify the deviceCreateInfo->deviceId input parameter and if it is NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_106: [ IoTHubRegistryManager_UpdateDevice shall allocate memory for device info structure by calling malloc ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_06_004: [ IoTHubRegistryManager_UpdateDevice shall, if deviceUpdate->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_SPK", set "authorization.symmetricKey.primaryKey" to deviceCreateInfo->primaryKey and "authorization.symmetricKey.secondaryKey" to deviceCreateInfo->secondaryKey ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_041: [ IoTHubRegistryManager_UpdateDevice shall create a flat "key1:value2,key2:value2..." JSON representation from the given deviceCreateInfo parameter using the following parson APIs : json_value_init_object, json_value_get_object, json_object_set_string, json_object_dotset_string ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_101: [ IoTHubRegistryManager_UpdateDevice shall allocate memory for response buffer by calling BUFFER_new ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_043: [ IoTHubRegistryManager_UpdateDevice shall create an HTTP PUT request using the created JSON ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_044: [ IoTHubRegistryManager_UpdateDevice shall create an HTTP PUT request using the createdfollowing HTTP headers : authorization = sasToken, Request - Id = 1001, Accept = application / json, Content - Type = application / json, charset = utf - 8 ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_045: [ IoTHubRegistryManager_UpdateDevice shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_046: [ IoTHubRegistryManager_UpdateDevice shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_047: [ IoTHubRegistryManager_UpdateDevice shall execute the HTTP PUT request by calling HTTPAPIEX_ExecuteRequest ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_105: [ IoTHubRegistryManager_UpdateDevice shall do clean up before return ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_118: [ IoTHubRegistryManager_CreateDevice shall set the "status" value to the deviceCreateInfo->status ] */
-    TEST_FUNCTION(IoTHubRegistryManager_UpdateDevice_happy_path)
+    TEST_FUNCTION(IoTHubRegistryManager_UpdateDevice_Ex_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceUpdate_authMethod_is_invalid)
     {
-        // arrange
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
-            .IgnoreArgument(1);
+        ///arrange
 
-        STRICT_EXPECTED_CALL(json_value_init_object())
-            .SetReturn(TEST_JSON_VALUE);
+        ///act
+        TEST_IOTHUB_REGISTRY_DEVICE_UPDATE_EX.authMethod = (IOTHUB_REGISTRYMANAGER_AUTH_METHOD)12345;
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_UpdateDevice_Ex(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_DEVICE_UPDATE_EX);
 
-        STRICT_EXPECTED_CALL(json_value_get_object(TEST_JSON_VALUE))
-            .SetReturn(TEST_JSON_OBJECT);
-
-        STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME, TEST_DEVICE_ID));
-        STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_STATUS, TEST_DEVICE_JSON_DEFAULT_VALUE_DISABLED));
-        STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_AUTH_TYPE, TEST_AUTH_TYPE_SAS));
-        STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY, TEST_PRIMARYKEY));
-        STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY, TEST_SECONDARYKEY));
-        STRICT_EXPECTED_CALL(json_serialize_to_string(TEST_JSON_VALUE))
-            .SetReturn(TEST_CHAR_PTR);
-
-        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-            .IgnoreAllArguments();
-
-        STRICT_EXPECTED_CALL(json_free_serialized_string(TEST_CHAR_PTR));
-        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
-            .IgnoreArgument(1);
-
-        setupHttpMockCalls(true, httpStatusCodeOk, HTTPAPI_REQUEST_PUT);
-
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
-
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
-
-        // act
-        IOTHUB_REGISTRY_DEVICE_UPDATE deviceUpdate;
-        deviceUpdate.deviceId = TEST_DEVICE_ID;
-        deviceUpdate.primaryKey = TEST_PRIMARYKEY;
-        deviceUpdate.secondaryKey = TEST_SECONDARYKEY;
-        deviceUpdate.status = IOTHUB_DEVICE_STATUS_DISABLED;
-        deviceUpdate.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
-        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_UpdateDevice(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &deviceUpdate);
-
-        // assert
-        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_039: [ IoTHubRegistryManager_UpdateDevice shall verify the deviceCreateInfo->deviceId input parameter and if it is NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_106: [ IoTHubRegistryManager_UpdateDevice shall allocate memory for device info structure by calling malloc ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_06_003: [ IoTHubRegistryManager_UpdateDevice shall, if deviceUpdate->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT", set "authorization.x509Thumbprint.primaryThumbprint" to deviceCreateInfo->primaryKey and "authorization.x509Thumbprint.secondaryThumbprint" to deviceCreateInfo->secondaryKey ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_041: [ IoTHubRegistryManager_UpdateDevice shall create a flat "key1:value2,key2:value2..." JSON representation from the given deviceCreateInfo parameter using the following parson APIs : json_value_init_object, json_value_get_object, json_object_set_string, json_object_dotset_string ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_101: [ IoTHubRegistryManager_UpdateDevice shall allocate memory for response buffer by calling BUFFER_new ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_043: [ IoTHubRegistryManager_UpdateDevice shall create an HTTP PUT request using the created JSON ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_044: [ IoTHubRegistryManager_UpdateDevice shall create an HTTP PUT request using the createdfollowing HTTP headers : authorization = sasToken, Request - Id = 1001, Accept = application / json, Content - Type = application / json, charset = utf - 8 ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_045: [ IoTHubRegistryManager_UpdateDevice shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_046: [ IoTHubRegistryManager_UpdateDevice shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_047: [ IoTHubRegistryManager_UpdateDevice shall execute the HTTP PUT request by calling HTTPAPIEX_ExecuteRequest ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_105: [ IoTHubRegistryManager_UpdateDevice shall do clean up before return ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_118: [ IoTHubRegistryManager_CreateDevice shall set the "status" value to the deviceCreateInfo->status ] */
-    TEST_FUNCTION(IoTHubRegistryManager_UpdateDevice_happy_path_with_thumbprint)
+    TEST_FUNCTION(IoTHubRegistryManager_UpdateDevice_Ex_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceUpdate_invalid_version_999)
+    {
+        ///arrange
+
+        ///act
+        TEST_IOTHUB_REGISTRY_DEVICE_UPDATE_EX.version = 999;
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_UpdateDevice_Ex(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_DEVICE_UPDATE_EX);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_VERSION, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_UpdateDevice_Ex_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceUpdate_invalid_version_0)
+    {
+        ///arrange
+
+        ///act
+        TEST_IOTHUB_REGISTRY_DEVICE_UPDATE_EX.version = 0;
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_UpdateDevice_Ex(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_DEVICE_UPDATE_EX);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_VERSION, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    static void setupUpdateDeviceOrModule_happy_path(IOTHUB_REGISTRYMANAGER_AUTH_METHOD authType, const char* moduleId, const char* managedBy)
     {
         // arrange
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -2030,10 +3067,34 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
             .SetReturn(TEST_JSON_OBJECT);
 
         STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME, TEST_DEVICE_ID));
+        if (moduleId != NULL)
+        {
+            STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_MODULE_NAME, moduleId));    
+        }
+        if (managedBy != NULL)
+        {
+            STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_MANAGED_BY, managedBy));    
+        }
+
         STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_STATUS, TEST_DEVICE_JSON_DEFAULT_VALUE_DISABLED));
-        STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_AUTH_TYPE, TEST_AUTH_TYPE_SELF_SIGNED));
-        STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_THUMBPRINT, TEST_PRIMARYKEY));
-        STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_THUMBPRINT, TEST_SECONDARYKEY));
+        if (authType == IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT)
+        {
+            STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_AUTH_TYPE, TEST_AUTH_TYPE_SELF_SIGNED));
+            STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_THUMBPRINT, TEST_PRIMARYKEY));
+            STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_THUMBPRINT, TEST_SECONDARYKEY));
+        }
+        else
+        {
+            STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_AUTH_TYPE, TEST_AUTH_TYPE_SAS));
+            STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY, TEST_PRIMARYKEY));
+            STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY, TEST_SECONDARYKEY));
+        }
+
+        if (moduleId == NULL)
+        {
+            STRICT_EXPECTED_CALL(json_object_dotset_boolean(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_CAPABILITIES_IOTEDGE, false));
+        }
+
         STRICT_EXPECTED_CALL(json_serialize_to_string(TEST_JSON_VALUE))
             .SetReturn(TEST_CHAR_PTR);
 
@@ -2056,6 +3117,78 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
+    }
+
+
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_039: [ IoTHubRegistryManager_UpdateDevice shall verify the deviceCreateInfo->deviceId input parameter and if it is NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_106: [ IoTHubRegistryManager_UpdateDevice shall allocate memory for device info structure by calling malloc ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_06_004: [ IoTHubRegistryManager_UpdateDevice shall, if deviceUpdate->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_SPK", set "authorization.symmetricKey.primaryKey" to deviceCreateInfo->primaryKey and "authorization.symmetricKey.secondaryKey" to deviceCreateInfo->secondaryKey ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_041: [ IoTHubRegistryManager_UpdateDevice shall create a flat "key1:value2,key2:value2..." JSON representation from the given deviceCreateInfo parameter using the following parson APIs : json_value_init_object, json_value_get_object, json_object_set_string, json_object_dotset_string ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_101: [ IoTHubRegistryManager_UpdateDevice shall allocate memory for response buffer by calling BUFFER_new ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_043: [ IoTHubRegistryManager_UpdateDevice shall create an HTTP PUT request using the created JSON ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_044: [ IoTHubRegistryManager_UpdateDevice shall create an HTTP PUT request using the createdfollowing HTTP headers : authorization = sasToken, Request - Id = 1001, Accept = application / json, Content - Type = application / json, charset = utf - 8 ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_045: [ IoTHubRegistryManager_UpdateDevice shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_046: [ IoTHubRegistryManager_UpdateDevice shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_047: [ IoTHubRegistryManager_UpdateDevice shall execute the HTTP PUT request by calling HTTPAPIEX_ExecuteRequest ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_105: [ IoTHubRegistryManager_UpdateDevice shall do clean up before return ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_118: [ IoTHubRegistryManager_CreateDevice shall set the "status" value to the deviceCreateInfo->status ] */
+    TEST_FUNCTION(IoTHubRegistryManager_UpdateDevice_happy_path_with_sas_token)
+    {
+        // arrange
+        setupUpdateDeviceOrModule_happy_path(IOTHUB_REGISTRYMANAGER_AUTH_SPK, NULL, NULL);
+        
+        // act
+        IOTHUB_REGISTRY_DEVICE_UPDATE deviceUpdate;
+        deviceUpdate.deviceId = TEST_DEVICE_ID;
+        deviceUpdate.primaryKey = TEST_PRIMARYKEY;
+        deviceUpdate.secondaryKey = TEST_SECONDARYKEY;
+        deviceUpdate.status = IOTHUB_DEVICE_STATUS_DISABLED;
+        deviceUpdate.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_UpdateDevice(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &deviceUpdate);
+
+        // assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_UpdateDevice_Ex_happy_path_with_sas_token)
+    {
+        // arrange
+        setupUpdateDeviceOrModule_happy_path(IOTHUB_REGISTRYMANAGER_AUTH_SPK, NULL, NULL);
+
+        // act
+        IOTHUB_REGISTRY_DEVICE_UPDATE_EX deviceUpdate;
+        deviceUpdate.version = IOTHUB_DEVICE_EX_VERSION_1;
+        deviceUpdate.deviceId = TEST_DEVICE_ID;
+        deviceUpdate.primaryKey = TEST_PRIMARYKEY;
+        deviceUpdate.secondaryKey = TEST_SECONDARYKEY;
+        deviceUpdate.status = IOTHUB_DEVICE_STATUS_DISABLED;
+        deviceUpdate.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
+        deviceUpdate.iotEdge_capable = false;
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_UpdateDevice_Ex(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &deviceUpdate);
+
+        // assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_039: [ IoTHubRegistryManager_UpdateDevice shall verify the deviceCreateInfo->deviceId input parameter and if it is NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_106: [ IoTHubRegistryManager_UpdateDevice shall allocate memory for device info structure by calling malloc ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_06_003: [ IoTHubRegistryManager_UpdateDevice shall, if deviceUpdate->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT", set "authorization.x509Thumbprint.primaryThumbprint" to deviceCreateInfo->primaryKey and "authorization.x509Thumbprint.secondaryThumbprint" to deviceCreateInfo->secondaryKey ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_041: [ IoTHubRegistryManager_UpdateDevice shall create a flat "key1:value2,key2:value2..." JSON representation from the given deviceCreateInfo parameter using the following parson APIs : json_value_init_object, json_value_get_object, json_object_set_string, json_object_dotset_string ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_101: [ IoTHubRegistryManager_UpdateDevice shall allocate memory for response buffer by calling BUFFER_new ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_043: [ IoTHubRegistryManager_UpdateDevice shall create an HTTP PUT request using the created JSON ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_044: [ IoTHubRegistryManager_UpdateDevice shall create an HTTP PUT request using the createdfollowing HTTP headers : authorization = sasToken, Request - Id = 1001, Accept = application / json, Content - Type = application / json, charset = utf - 8 ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_045: [ IoTHubRegistryManager_UpdateDevice shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_046: [ IoTHubRegistryManager_UpdateDevice shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_047: [ IoTHubRegistryManager_UpdateDevice shall execute the HTTP PUT request by calling HTTPAPIEX_ExecuteRequest ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_105: [ IoTHubRegistryManager_UpdateDevice shall do clean up before return ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_118: [ IoTHubRegistryManager_CreateDevice shall set the "status" value to the deviceCreateInfo->status ] */
+    TEST_FUNCTION(IoTHubRegistryManager_UpdateDevice_happy_path_with_thumbprint)
+    {
+        // arrange
+        setupUpdateDeviceOrModule_happy_path(IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT, NULL, NULL);
+
         // act
         IOTHUB_REGISTRY_DEVICE_UPDATE deviceUpdate;
         deviceUpdate.deviceId = TEST_DEVICE_ID;
@@ -2064,6 +3197,116 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         deviceUpdate.status = IOTHUB_DEVICE_STATUS_DISABLED;
         deviceUpdate.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT;
         IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_UpdateDevice(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &deviceUpdate);
+
+        // assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_UpdateDevice_Ex_happy_path_with_thumbprint)
+    {
+        // arrange
+        setupUpdateDeviceOrModule_happy_path(IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT, NULL, NULL);
+
+        // act
+        IOTHUB_REGISTRY_DEVICE_UPDATE_EX deviceUpdate;
+        deviceUpdate.version = IOTHUB_DEVICE_EX_VERSION_1;
+        deviceUpdate.deviceId = TEST_DEVICE_ID;
+        deviceUpdate.primaryKey = TEST_PRIMARYKEY;
+        deviceUpdate.secondaryKey = TEST_SECONDARYKEY;
+        deviceUpdate.status = IOTHUB_DEVICE_STATUS_DISABLED;
+        deviceUpdate.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT;
+        deviceUpdate.iotEdge_capable = false;
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_UpdateDevice_Ex(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &deviceUpdate);
+
+        // assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_UpdateModule_happy_path_with_sas_token)
+    {
+        // arrange
+        setupUpdateDeviceOrModule_happy_path(IOTHUB_REGISTRYMANAGER_AUTH_SPK, TEST_MODULE_ID, NULL);
+
+        // act
+        IOTHUB_REGISTRY_MODULE_UPDATE moduleUpdate;
+        moduleUpdate.version = IOTHUB_MODULE_VERSION_1;
+        moduleUpdate.deviceId = TEST_DEVICE_ID;
+        moduleUpdate.moduleId = TEST_MODULE_ID;
+        moduleUpdate.primaryKey = TEST_PRIMARYKEY;
+        moduleUpdate.secondaryKey = TEST_SECONDARYKEY;
+        moduleUpdate.status = IOTHUB_DEVICE_STATUS_DISABLED;
+        moduleUpdate.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
+        moduleUpdate.managedBy = NULL;
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_UpdateModule(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &moduleUpdate);
+
+        // assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_UpdateModule_happy_path_with_thumbprint)
+    {
+        // arrange
+        setupUpdateDeviceOrModule_happy_path(IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT, TEST_MODULE_ID, NULL);
+
+        // act
+        IOTHUB_REGISTRY_MODULE_UPDATE moduleUpdate;
+        moduleUpdate.version = IOTHUB_MODULE_VERSION_1;
+        moduleUpdate.deviceId = TEST_DEVICE_ID;
+        moduleUpdate.moduleId = TEST_MODULE_ID;
+        moduleUpdate.primaryKey = TEST_PRIMARYKEY;
+        moduleUpdate.secondaryKey = TEST_SECONDARYKEY;
+        moduleUpdate.status = IOTHUB_DEVICE_STATUS_DISABLED;
+        moduleUpdate.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT;
+        moduleUpdate.managedBy = NULL;
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_UpdateModule(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &moduleUpdate);
+
+        // assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+
+    TEST_FUNCTION(IoTHubRegistryManager_UpdateModule_happy_path_with_sas_token_with_managed_by)
+    {
+        // arrange
+        setupUpdateDeviceOrModule_happy_path(IOTHUB_REGISTRYMANAGER_AUTH_SPK, TEST_MODULE_ID, TEST_MANAGED_BY);
+
+        // act
+        IOTHUB_REGISTRY_MODULE_UPDATE moduleUpdate;
+        moduleUpdate.version = IOTHUB_MODULE_VERSION_1;
+        moduleUpdate.deviceId = TEST_DEVICE_ID;
+        moduleUpdate.moduleId = TEST_MODULE_ID;
+        moduleUpdate.primaryKey = TEST_PRIMARYKEY;
+        moduleUpdate.secondaryKey = TEST_SECONDARYKEY;
+        moduleUpdate.status = IOTHUB_DEVICE_STATUS_DISABLED;
+        moduleUpdate.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
+        moduleUpdate.managedBy = TEST_MANAGED_BY;
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_UpdateModule(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &moduleUpdate);
+
+        // assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_UpdateModule_happy_path_with_thumbprint_with_managed_by)
+    {
+        // arrange
+        setupUpdateDeviceOrModule_happy_path(IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT, TEST_MODULE_ID, TEST_MANAGED_BY);
+
+        // act
+        IOTHUB_REGISTRY_MODULE_UPDATE moduleUpdate;
+        moduleUpdate.version = IOTHUB_MODULE_VERSION_1;
+        moduleUpdate.deviceId = TEST_DEVICE_ID;
+        moduleUpdate.moduleId = TEST_MODULE_ID;
+        moduleUpdate.primaryKey = TEST_PRIMARYKEY;
+        moduleUpdate.secondaryKey = TEST_SECONDARYKEY;
+        moduleUpdate.status = IOTHUB_DEVICE_STATUS_DISABLED;
+        moduleUpdate.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT;
+        moduleUpdate.managedBy = TEST_MANAGED_BY;
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_UpdateModule(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &moduleUpdate);
 
         // assert
         ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
@@ -2096,6 +3339,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_AUTH_TYPE, TEST_AUTH_TYPE_SAS));
         STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY, TEST_PRIMARYKEY));
         STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY, TEST_SECONDARYKEY));
+        STRICT_EXPECTED_CALL(json_object_dotset_boolean(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_CAPABILITIES_IOTEDGE, false));
         STRICT_EXPECTED_CALL(json_serialize_to_string(TEST_JSON_VALUE))
             .SetReturn(TEST_CHAR_PTR);
 
@@ -2131,21 +3375,102 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
             if (
                 (i != 10) && /*json_free_serialized_string*/
                 (i != 11) && /*json_object_clear*/
-                (i != 12) && /*json_value_free*/
-                (i != 27) && /*HTTPHeaders_Free*/
-                (i != 28) && /*HTTPAPIEX_Destroy*/
-                (i != 29) && /*HTTPAPIEX_SAS_Destroy*/
-                (i != 30) && /*STRING_delete*/
+                (i != 13) && /*json_value_free*/
+                (i != 28) && /*HTTPHeaders_Free*/
+                (i != 29) && /*HTTPAPIEX_Destroy*/
+                (i != 30) && /*HTTPAPIEX_SAS_Destroy*/
                 (i != 31) && /*STRING_delete*/
                 (i != 32) && /*STRING_delete*/
-                (i != 33) && /*BUFFER_delete*/
+                (i != 33) && /*STRING_delete*/
                 (i != 34) && /*BUFFER_delete*/
-                (i != 35) /*gballoc_free*/
+                (i != 35) && /*BUFFER_delete*/
+                (i != 36) /*gballoc_free*/
                 )
             {
                 printf("i is = %zu\n", i);
 
                 IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_UpdateDevice(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_DEVICE_UPDATE);
+
+                /// assert
+                ASSERT_ARE_NOT_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
+            }
+            ///cleanup
+        }
+        umock_c_negative_tests_deinit();
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_UpdateDevice_Ex_non_happy_path)
+    {
+        ///arrange
+        int umockc_result = umock_c_negative_tests_init();
+        ASSERT_ARE_EQUAL(int, 0, umockc_result);
+
+        // arrange
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(json_value_init_object())
+            .SetReturn(TEST_JSON_VALUE);
+
+        STRICT_EXPECTED_CALL(json_value_get_object(TEST_JSON_VALUE))
+            .SetReturn(TEST_JSON_OBJECT);
+
+        STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME, TEST_DEVICE_ID));
+        STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_STATUS, TEST_DEVICE_JSON_DEFAULT_VALUE_DISABLED));
+        STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_AUTH_TYPE, TEST_AUTH_TYPE_SAS));
+        STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY, TEST_PRIMARYKEY));
+        STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY, TEST_SECONDARYKEY));
+        STRICT_EXPECTED_CALL(json_object_dotset_boolean(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_CAPABILITIES_IOTEDGE, false));
+        STRICT_EXPECTED_CALL(json_serialize_to_string(TEST_JSON_VALUE))
+            .SetReturn(TEST_CHAR_PTR);
+
+        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+            .IgnoreAllArguments();
+
+        STRICT_EXPECTED_CALL(json_free_serialized_string(TEST_CHAR_PTR));
+        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
+            .IgnoreArgument(1);
+
+        setupHttpMockCalls(true, httpStatusCodeOk, HTTPAPI_REQUEST_PUT);
+
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        umock_c_negative_tests_snapshot();
+
+        ///act
+        for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
+        {
+            /// arrange
+            umock_c_negative_tests_reset();
+            umock_c_negative_tests_fail_call(i);
+
+            /// act
+            if (
+                (i != 10) && /*json_free_serialized_string*/
+                (i != 11) && /*json_object_clear*/
+                (i != 13) && /*json_value_free*/
+                (i != 28) && /*HTTPHeaders_Free*/
+                (i != 29) && /*HTTPAPIEX_Destroy*/
+                (i != 30) && /*HTTPAPIEX_SAS_Destroy*/
+                (i != 31) && /*STRING_delete*/
+                (i != 32) && /*STRING_delete*/
+                (i != 33) && /*STRING_delete*/
+                (i != 34) && /*BUFFER_delete*/
+                (i != 35) && /*BUFFER_delete*/
+                (i != 36) /*gballoc_free*/
+                )
+            {
+                printf("i is = %zu\n", i);
+
+                IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_UpdateDevice_Ex(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_DEVICE_UPDATE_EX);
 
                 /// assert
                 ASSERT_ARE_NOT_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
@@ -2180,6 +3505,66 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
+
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_052: [ IoTHubRegistryManager_DeleteDevice shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
+    TEST_FUNCTION(IoTHubRegistryManager_DeleteModule_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_registryManagerHandle_is_NULL)
+    {
+        ///arrange
+
+        ///act
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_DeleteModule(NULL, TEST_DEVICE_ID, TEST_MODULE_ID);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_052: [ IoTHubRegistryManager_DeleteDevice shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
+    TEST_FUNCTION(IoTHubRegistryManager_DeleteModule_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceId_is_NULL)
+    {
+        ///arrange
+
+        ///act
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_DeleteModule(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, NULL, TEST_MODULE_ID);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_052: [ IoTHubRegistryManager_DeleteDevice shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
+    TEST_FUNCTION(IoTHubRegistryManager_DeleteModule_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_moduleId_is_NULL)
+    {
+        ///arrange
+
+        ///act
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_DeleteModule(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, NULL);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }    
+
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_053: [ IoTHubRegistryManager_DeleteDevice shall create HTTP DELETE request URL using the given deviceId using the following format : url / devices / [deviceId] ? api - version  ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_054: [ IoTHubRegistryManager_DeleteDevice shall add the following headers to the created HTTP GET request : authorization = sasToken, Request - Id = 1001, Accept = application / json, Content - Type = application / json, charset = utf - 8 ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_055: [ IoTHubRegistryManager_DeleteDevice shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_056: [ IoTHubRegistryManager_DeleteDevice shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_057: [ IoTHubRegistryManager_DeleteDevice shall execute the HTTP DELETE request by calling HTTPAPIEX_ExecuteRequest ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_058: [ IoTHubRegistryManager_DeleteDevice shall verify the received HTTP status code and if it is greater than 300 then return IOTHUB_REGISTRYMANAGER_HTTP_STATUS_ERROR ] */
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_059: [ IoTHubRegistryManager_DeleteDevice shall verify the received HTTP status code and if it is less or equal than 300 then return IOTHUB_REGISTRYMANAGER_OK ] */
+    TEST_FUNCTION(IoTHubRegistryManager_DeleteModule_happy_path)
+    {
+        ///arrange
+        setupHttpMockCalls(true, httpStatusCodeOk, HTTPAPI_REQUEST_DELETE);
+
+        ///act
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_DeleteModule(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, TEST_MODULE_ID);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
 
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_053: [ IoTHubRegistryManager_DeleteDevice shall create HTTP DELETE request URL using the given deviceId using the following format : url / devices / [deviceId] ? api - version  ] */
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_054: [ IoTHubRegistryManager_DeleteDevice shall add the following headers to the created HTTP GET request : authorization = sasToken, Request - Id = 1001, Accept = application / json, Content - Type = application / json, charset = utf - 8 ] */
@@ -2245,6 +3630,98 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         umock_c_negative_tests_deinit();
     }
 
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_060: [ IoTHubRegistryManager_GetDeviceList shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ]*/
+    TEST_FUNCTION(IoTHubRegistryManager_GetModuleList_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_registryManagerHandle_is_NULL)
+    {
+        ///arrange
+        SINGLYLINKEDLIST_HANDLE moduleList = singlylinkedlist_create();
+        umock_c_reset_all_calls();
+
+        ///act
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetModuleList(NULL, TEST_DEVICE_ID, moduleList, IOTHUB_MODULE_VERSION_1);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///cleanup
+        singlylinkedlist_destroy(moduleList);
+    }
+
+    
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_060: [ IoTHubRegistryManager_GetDeviceList shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ]*/
+    TEST_FUNCTION(IoTHubRegistryManager_GetModuleList_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_moduleList_is_NULL)
+    {
+        ///arrange
+
+        ///act
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetModuleList(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, NULL, IOTHUB_MODULE_VERSION_1);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_060: [ IoTHubRegistryManager_GetDeviceList shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ]*/
+    TEST_FUNCTION(IoTHubRegistryManager_GetModuleList_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceId_is_NULL)
+    {
+        ///arrange
+        SINGLYLINKEDLIST_HANDLE moduleList = singlylinkedlist_create();
+        umock_c_reset_all_calls();
+
+        ///act
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetModuleList(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, NULL, IOTHUB_MODULE_VERSION_1);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///cleanup
+        singlylinkedlist_destroy(moduleList);
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_GetModuleList_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_invalid_version)
+    {
+        ///arrange
+        SINGLYLINKEDLIST_HANDLE moduleList = singlylinkedlist_create();
+        ASSERT_IS_NOT_NULL(moduleList);
+        umock_c_reset_all_calls();
+
+        ///act
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetModuleList(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, moduleList, 999);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_VERSION, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///cleanup
+        singlylinkedlist_destroy(moduleList);
+    }
+
+    TEST_FUNCTION(IoTHubRegistryManager_GetModuleList_happy_path)
+    {
+        ///arrange
+        SINGLYLINKEDLIST_HANDLE moduleList = singlylinkedlist_create();
+        ASSERT_IS_NOT_NULL(moduleList);
+        umock_c_reset_all_calls();
+
+        setupHttpMockCalls(false, httpStatusCodeOk, HTTPAPI_REQUEST_GET);
+        setupJsonParseDeviceMockCalls(true, IOTHUB_REGISTRYMANAGER_AUTH_SPK, true, NULL);
+
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);        
+        
+        ///act
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetModuleList(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, moduleList, IOTHUB_MODULE_VERSION_1);
+
+        ///assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///cleanup
+        freeModuleList(moduleList, IOTHUB_REGISTRYMANAGER_AUTH_SPK);
+    }
+    
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_060: [ IoTHubRegistryManager_GetDeviceList shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ]*/
     TEST_FUNCTION(IoTHubRegistryManager_GetDeviceList_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_registryManagerHandle_is_NULL)
     {
@@ -2333,8 +3810,11 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         umock_c_reset_all_calls();
 
         setupHttpMockCalls(false, httpStatusCodeOk, HTTPAPI_REQUEST_GET);
-        setupJsonParseDeviceMockCalls(true, IOTHUB_REGISTRYMANAGER_AUTH_SPK);
+        setupJsonParseDeviceMockCalls(true, IOTHUB_REGISTRYMANAGER_AUTH_SPK, false, NULL);
 
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);        
+        
         ///act
         IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetDeviceList(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, 10, deviceList);
 
@@ -2354,7 +3834,10 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         umock_c_reset_all_calls();
 
         setupHttpMockCalls(false, httpStatusCodeOk, HTTPAPI_REQUEST_GET);
-        setupJsonParseDeviceMockCalls(true, IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT);
+        setupJsonParseDeviceMockCalls(true, IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT, false, NULL);
+
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);        
 
         ///act
         IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetDeviceList(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, 10, deviceList);
@@ -2379,7 +3862,10 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(int, 0, umockc_result);
 
         setupHttpMockCalls(false, httpStatusCodeOk, HTTPAPI_REQUEST_GET);
-        setupJsonParseDeviceMockCalls(true, IOTHUB_REGISTRYMANAGER_AUTH_SPK);
+        setupJsonParseDeviceMockCalls(true, IOTHUB_REGISTRYMANAGER_AUTH_SPK, false, NULL);
+
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);        
 
         umock_c_negative_tests_snapshot();
 
@@ -2404,6 +3890,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
                 (i != 17) && /*STRING_delete*/
                 (i != 18) && /*STRING_delete*/
                 (i != 22) && /*json_array_get_count*/
+                (i != 24) && /*json_object_get_string*/
                 (i != 25) && /*json_object_get_string*/
                 (i != 26) && /*json_object_dotget_string*/
                 (i != 27) && /*json_object_get_string*/
@@ -2421,14 +3908,22 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
                 (i != 39) && /*json_object_get_string*/
                 (i != 40) && /*json_object_dotget_string*/
                 (i != 41) && /*json_object_dotget_string*/
-                (i != 57) && /*json_value_free*/
-                (i != 58) /*BUFFER_delete*/
+                (i != 42) && /*json_object_dotget_string*/                
+                (i != 43) && /*json_object_dotget_boolean*/
+                (i != 58) && /*free*/
+                (i != 59) && /*free*/
+                (i != 60) && /*json_object_clear*/
+                (i != 61) && /*json_array_clear*/
+                (i != 62) && /*json_value_free*/
+                (i != 63) /*BUFFER_delete*/
                 )
             {
                 IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetDeviceList(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, 10, deviceList);
+                char message_on_error[64];
+                sprintf(message_on_error, "Got unexpected IOTHUB_REGISTRYMANAGER_OK on run %zu", i);
 
                 /// assert
-                ASSERT_ARE_NOT_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
+                ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, IOTHUB_REGISTRYMANAGER_OK, result, message_on_error);
             }
 
             ///cleanup
@@ -2439,8 +3934,160 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ///cleanup
     }
 
-#define AAA
-#ifdef AAA
+    TEST_FUNCTION(IoTHubRegistryManager_GetModuleList_non_happy_path)
+    {
+        ///arrange
+        int umockc_result = umock_c_negative_tests_init();
+        ASSERT_ARE_EQUAL(int, 0, umockc_result);
+
+        setupHttpMockCalls(false, httpStatusCodeOk, HTTPAPI_REQUEST_GET);
+        setupJsonParseDeviceMockCalls(true, IOTHUB_REGISTRYMANAGER_AUTH_SPK, true, NULL);
+
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        umock_c_negative_tests_snapshot();
+
+        ///act
+        size_t negative_call_count = umock_c_negative_tests_call_count();
+        printf("negative_test_count=%zu", negative_call_count);
+        for (size_t i = 0; i < negative_call_count; i++)
+        {
+            /// arrange
+            SINGLYLINKEDLIST_HANDLE moduleList = singlylinkedlist_create();
+            umock_c_reset_all_calls();
+
+            umock_c_negative_tests_reset();
+            umock_c_negative_tests_fail_call(i);
+
+            /// act
+            if (
+                (i != 13) && /*HTTPHeaders_Free*/
+                (i != 14) && /*HTTPAPIEX_Destroy*/
+                (i != 15) && /*HTTPAPIEX_SAS_Destroy*/
+                (i != 16) && /*STRING_delete*/
+                (i != 17) && /*STRING_delete*/
+                (i != 18) && /*STRING_delete*/
+                (i != 22) && /*json_array_get_count*/
+                (i != 24) && /*json_object_get_string*/
+                (i != 25) && /*json_object_get_string*/
+                (i != 26) && /*json_object_dotget_string*/
+                (i != 27) && /*json_object_get_string*/
+                (i != 28) && /*json_object_get_string*/
+                (i != 29) && /*json_object_get_string*/
+                (i != 30) && /*json_object_get_string*/
+                (i != 31) && /*json_object_get_string*/
+                (i != 32) && /*json_object_get_string*/
+                (i != 33) && /*json_object_get_string*/
+                (i != 34) && /*json_object_get_string*/
+                (i != 35) && /*json_object_get_string*/
+                (i != 36) && /*json_object_get_string*/
+                (i != 37) && /*json_object_get_string*/
+                (i != 38) && /*json_object_get_string*/
+                (i != 39) && /*json_object_get_string*/
+                (i != 40) && /*json_object_dotget_string*/
+                (i != 41) && /*json_object_dotget_string*/
+                (i != 42) && /*json_object_dotget_string*/
+                (i != 43) && /*json_object_dotget_boolean*/
+                (i != 61) && /*json_value_free*/
+                (i != 62) /*BUFFER_delete*/
+                )
+            {
+                IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetModuleList(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, moduleList, IOTHUB_MODULE_VERSION_1);
+                char message_on_error[64];
+                sprintf(message_on_error, "Got unexpected IOTHUB_REGISTRYMANAGER_OK on run %zu", i);
+
+                /// assert
+                ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, IOTHUB_REGISTRYMANAGER_OK, result, message_on_error);
+            }
+
+            ///cleanup
+            freeDeviceList(moduleList, IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT);
+        }
+        umock_c_negative_tests_deinit();
+
+        ///cleanup
+    }
+
+
+    TEST_FUNCTION(IoTHubRegistryManager_GetModuleList_with_managed_by_non_happy_path)
+    {
+        ///arrange
+        int umockc_result = umock_c_negative_tests_init();
+        ASSERT_ARE_EQUAL(int, 0, umockc_result);
+
+        setupHttpMockCalls(false, httpStatusCodeOk, HTTPAPI_REQUEST_GET);
+        setupJsonParseDeviceMockCalls(true, IOTHUB_REGISTRYMANAGER_AUTH_SPK, true, TEST_MANAGED_BY);
+
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        umock_c_negative_tests_snapshot();
+
+        ///act
+        size_t negative_call_count = umock_c_negative_tests_call_count();
+        printf("negative_test_count=%zu", negative_call_count);
+        for (size_t i = 0; i < negative_call_count; i++)
+        {
+            /// arrange
+            SINGLYLINKEDLIST_HANDLE moduleList = singlylinkedlist_create();
+            umock_c_reset_all_calls();
+
+            umock_c_negative_tests_reset();
+            umock_c_negative_tests_fail_call(i);
+
+            /// act
+            if (
+                (i != 13) && /*HTTPHeaders_Free*/
+                (i != 14) && /*HTTPAPIEX_Destroy*/
+                (i != 15) && /*HTTPAPIEX_SAS_Destroy*/
+                (i != 16) && /*STRING_delete*/
+                (i != 17) && /*STRING_delete*/
+                (i != 18) && /*STRING_delete*/
+                (i != 22) && /*json_array_get_count*/
+                (i != 24) && /*json_object_get_string*/
+                (i != 25) && /*json_object_get_string*/
+                (i != 25) && /*json_object_get_string*/
+                (i != 26) && /*json_object_dotget_string*/
+                (i != 27) && /*json_object_get_string*/
+                (i != 28) && /*json_object_get_string*/
+                (i != 29) && /*json_object_get_string*/
+                (i != 30) && /*json_object_get_string*/
+                (i != 31) && /*json_object_get_string*/
+                (i != 32) && /*json_object_get_string*/
+                (i != 33) && /*json_object_get_string*/
+                (i != 34) && /*json_object_get_string*/
+                (i != 35) && /*json_object_get_string*/
+                (i != 36) && /*json_object_get_string*/
+                (i != 37) && /*json_object_get_string*/
+                (i != 38) && /*json_object_get_string*/
+                (i != 39) && /*json_object_get_string*/
+                (i != 40) && /*json_object_dotget_string*/
+                (i != 41) && /*json_object_dotget_string*/
+                (i != 42) && /*json_object_dotget_string*/
+                (i != 43) && /*json_object_dotget_boolean*/
+                (i != 62) && /*json_value_free*/
+                (i != 63) /*BUFFER_delete*/
+                )
+            {
+                IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetModuleList(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, moduleList, IOTHUB_MODULE_VERSION_1);
+                char message_on_error[64];
+                sprintf(message_on_error, "Got unexpected IOTHUB_REGISTRYMANAGER_OK on run %zu", i);
+
+                /// assert
+                ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, IOTHUB_REGISTRYMANAGER_OK, result, message_on_error);
+            }
+
+            ///cleanup
+            freeDeviceList(moduleList, IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT);
+        }
+        umock_c_negative_tests_deinit();
+
+        ///cleanup
+    }
+
+
+
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_074: [ IoTHubRegistryManager_GetStatistics shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ]*/
     TEST_FUNCTION(IoTHubRegistryManager_GetStatistics_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_registryManagerHandle_is_NULL)
     {
@@ -2587,6 +4234,5 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         }
         umock_c_negative_tests_deinit();
     }
-#endif
 
     END_TEST_SUITE(iothub_registrymanager_ut)

@@ -75,6 +75,10 @@ MOCKABLE_FUNCTION(, int, FAKE_IoTHubTransport_SetRetryPolicy, TRANSPORT_LL_HANDL
 MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, FAKE_IoTHubTransport_GetSendStatus, TRANSPORT_LL_HANDLE, handle, IOTHUB_CLIENT_STATUS*, iotHubClientStatus);
 MOCKABLE_FUNCTION(, int, FAKE_IoTHubTransport_DeviceMethod_Response, IOTHUB_DEVICE_HANDLE, handle, METHOD_HANDLE, methodId, const unsigned char*, response, size_t, resp_size, int, status_response);
 MOCKABLE_FUNCTION(, TRANSPORT_LL_HANDLE, FAKE_IoTHubTransport_Create, const IOTHUBTRANSPORT_CONFIG*, config);
+MOCKABLE_FUNCTION(, int, FAKE_IoTHubTransport_Subscribe_InputQueue, IOTHUB_DEVICE_HANDLE, handle);
+MOCKABLE_FUNCTION(, void, FAKE_IoTHubTransport_Unsubscribe_InputQueue, IOTHUB_DEVICE_HANDLE, handle);
+
+
 
 #undef ENABLE_MOCKS
 
@@ -188,7 +192,9 @@ static TRANSPORT_PROVIDER FAKE_transport_provider =
     FAKE_IoTHubTransport_Unsubscribe,
     FAKE_IoTHubTransport_DoWork,
     FAKE_IoTHubTransport_SetRetryPolicy,
-    FAKE_IoTHubTransport_GetSendStatus
+    FAKE_IoTHubTransport_GetSendStatus,
+    FAKE_IoTHubTransport_Subscribe_InputQueue,
+    FAKE_IoTHubTransport_Unsubscribe_InputQueue
 };
 
 static const TRANSPORT_PROVIDER* provideFAKE(void)

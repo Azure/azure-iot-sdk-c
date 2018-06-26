@@ -243,7 +243,7 @@ Summary: creates/destroys the uAMQP messagesender, messagereceiver according to 
 
 ### Create/Open the message sender
 
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_033: [**A variable, named `devices_path`, shall be created concatenating `instance->iothub_host_fqdn`, "/devices/" and `instance->device_id`**]**  
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_033: [**A variable, named `devices_and_modules_path`, shall be created concatenating `instance->iothub_host_fqdn`, "/devices/" and `instance->device_id` (and "/modules/" and `instance->module_id` if modules are present)**]**  
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_034: [**If `devices_path` fails to be created, telemetry_messenger_do_work() shall fail and return**]**  
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_035: [**A variable, named `event_send_address`, shall be created concatenating "amqps://", `devices_path` and "/messages/events"**]**  
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_036: [**If `event_send_address` fails to be created, telemetry_messenger_do_work() shall fail and return**]**  
@@ -287,7 +287,7 @@ static void on_event_sender_state_changed_callback(void* context, MESSAGE_SENDER
 ### Create a message receiver
 
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_067: [**If `instance->receive_messages` is true and `instance->message_receiver` is NULL, a message_receiver shall be created**]**  
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_068: [**A variable, named `devices_path`, shall be created concatenating `instance->iothub_host_fqdn`, "/devices/" and `instance->device_id`**]**  
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_068: [**A variable, named `devices_and_modules_path`, shall be created concatenating `instance->iothub_host_fqdn`, "/devices/" and `instance->device_id` (and "/modules/" and `instance->module_id` if modules are present)**]**  
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_069: [**If `devices_path` fails to be created, telemetry_messenger_do_work() shall fail and return**]**  
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_070: [**A variable, named `message_receive_address`, shall be created concatenating "amqps://", `devices_path` and "/messages/devicebound"**]**  
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_071: [**If `message_receive_address` fails to be created, telemetry_messenger_do_work() shall fail and return**]**  

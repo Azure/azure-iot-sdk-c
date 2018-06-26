@@ -10,7 +10,7 @@
 extern "C" {
 #endif // __cplusplus
 
-extern void device_method_e2e_init(void);
+extern void device_method_e2e_init(bool testing_modules);
 
 extern void device_method_e2e_deinit(void);
 

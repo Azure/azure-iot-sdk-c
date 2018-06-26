@@ -66,11 +66,13 @@ typedef struct IOTHUB_MESSAGING_TAG
 } IOTHUB_MESSAGING;
 
 
-static const char* FEEDBACK_RECORD_KEY_DEVICE_ID = "deviceId";
-static const char* FEEDBACK_RECORD_KEY_DEVICE_GENERATION_ID = "deviceGenerationId";
-static const char* FEEDBACK_RECORD_KEY_DESCRIPTION = "description";
-static const char* FEEDBACK_RECORD_KEY_ENQUED_TIME_UTC = "enqueuedTimeUtc";
-static const char* FEEDBACK_RECORD_KEY_ORIGINAL_MESSAGE_ID = "originalMessageId";
+static const char* const FEEDBACK_RECORD_KEY_DEVICE_ID = "deviceId";
+static const char* const FEEDBACK_RECORD_KEY_DEVICE_GENERATION_ID = "deviceGenerationId";
+static const char* const FEEDBACK_RECORD_KEY_DESCRIPTION = "description";
+static const char* const FEEDBACK_RECORD_KEY_ENQUED_TIME_UTC = "enqueuedTimeUtc";
+static const char* const FEEDBACK_RECORD_KEY_ORIGINAL_MESSAGE_ID = "originalMessageId";
+static const char* const AMQP_ADDRESS_PATH_FMT = "/devices/%s/messages/deviceBound";
+static const char* const AMQP_ADDRESS_PATH_MODULE_FMT = "/devices/%s/modules/%s/messages/deviceBound";
 
 static int setMessageId(IOTHUB_MESSAGE_HANDLE iothub_message_handle, PROPERTIES_HANDLE uamqp_message_properties)
 {
@@ -543,7 +545,7 @@ static char* createSendTargetAddress(IOTHUB_MESSAGING_HANDLE messagingHandle)
     return result;
 }
 
-static char* createDeviceDestinationString(const char* deviceId)
+static char* createDeviceDestinationString(const char* deviceId, const char* moduleId)
 {
     char* result;
 
@@ -554,24 +556,32 @@ static char* createDeviceDestinationString(const char* deviceId)
     }
     else
     {
-        const char* AMQP_ADDRESS_PATH_FMT = "/devices/%s/messages/deviceBound";
-        size_t deviceDestLen = strlen(AMQP_ADDRESS_PATH_FMT) + strlen(deviceId) + 1;
+        size_t deviceDestLen = strlen(AMQP_ADDRESS_PATH_MODULE_FMT) + strlen(deviceId) + (moduleId == NULL ? 0 : strlen(moduleId)) + 1;
 
-        char* buffer = (char*)malloc(deviceDestLen + 1);
+        char* buffer = (char*)malloc(deviceDestLen);
         if (buffer == NULL)
         {
             LogError("Could not create device destination string.");
             result = NULL;
         }
-        else if ((snprintf(buffer, deviceDestLen + 1, AMQP_ADDRESS_PATH_FMT, deviceId)) < 0)
+        else 
         {
-            LogError("sprintf_s failed for deviceDestinationString.");
-            free((char*)buffer);
-            result = NULL;
-        }
-        else
-        {
-            result = buffer;
+            if ((moduleId == NULL) && (snprintf(buffer, deviceDestLen, AMQP_ADDRESS_PATH_FMT, deviceId)) < 0)
+            {
+                LogError("sprintf_s failed for deviceDestinationString.");
+                free((char*)buffer);
+                result = NULL;
+            }
+            else if ((moduleId != NULL) && (snprintf(buffer, deviceDestLen, AMQP_ADDRESS_PATH_MODULE_FMT, deviceId, moduleId)) < 0)
+            {
+                LogError("sprintf_s failed for deviceDestinationString for module.");
+                free((char*)buffer);
+                result = NULL;
+            }
+            else
+            {
+                result = buffer;
+            }
         }
     }
     return result;
@@ -1409,9 +1419,13 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_SetFeedbackMessageCallback(IOTHUB_MES
     return result;
 }
 
+
 IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Send(IOTHUB_MESSAGING_HANDLE messagingHandle, const char* deviceId, IOTHUB_MESSAGE_HANDLE message, IOTHUB_SEND_COMPLETE_CALLBACK sendCompleteCallback, void* userContextCallback)
 {
     IOTHUB_MESSAGING_RESULT result;
+
+    // There is no support for module sending message for callers, but most of plumbing is available should this be enabled via a new API.
+    const char* moduleId = NULL;
 
     char* deviceDestinationString;
 
@@ -1440,7 +1454,7 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Send(IOTHUB_MESSAGING_HANDLE messagin
         result = IOTHUB_MESSAGING_ERROR;
     }
     /*Codes_SRS_IOTHUBMESSAGING_12_038: [ IoTHubMessaging_LL_SendMessage shall set the uAMQP message properties to the given message properties by calling message_set_properties ] */
-    else if ((deviceDestinationString = createDeviceDestinationString(deviceId)) == NULL)
+    else if ((deviceDestinationString = createDeviceDestinationString(deviceId, moduleId)) == NULL)
     {
         /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendMessage shall return IOTHUB_MESSAGING_ERROR ] */
         LogError("Could not create a message.");
@@ -1532,6 +1546,7 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Send(IOTHUB_MESSAGING_HANDLE messagin
     }
     return result;
 }
+
 
 void IoTHubMessaging_LL_DoWork(IOTHUB_MESSAGING_HANDLE messagingHandle)
 {

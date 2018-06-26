@@ -42,6 +42,7 @@ extern "C"
     typedef struct AUTHENTICATION_CONFIG_TAG
     {
         const char* device_id;
+        const char* module_id;
         char* iothub_host_fqdn;
 
         ON_AUTHENTICATION_STATE_CHANGED_CALLBACK on_state_changed_callback;

@@ -40,12 +40,13 @@ DEFINE_ENUM_STRINGS(IOTHUB_DEVICE_TWIN_RESULT, IOTHUB_DEVICE_TWIN_RESULT_VALUES)
 #define  HTTP_HEADER_KEY_CONTENT_TYPE  "Content-Type"
 #define  HTTP_HEADER_VAL_CONTENT_TYPE  "application/json; charset=utf-8"
 #define  HTTP_HEADER_KEY_IFMATCH  "If-Match"
-#define  HTTP_HEADER_VAL_IFMATCH  "'*'"
+#define  HTTP_HEADER_VAL_IFMATCH  "*"
 #define UID_LENGTH 37
 
-static const char* URL_API_VERSION = "?api-version=2017-06-30";
+static const char* URL_API_VERSION = "?api-version=2017-11-08-preview";
 
 static const char* RELATIVE_PATH_FMT_TWIN = "/twins/%s%s";
+static const char* RELATIVE_PATH_FMT_TWIN_MODULE = "/twins/%s/modules/%s%s";
 
 
 /** @brief Structure to store IoTHub authentication information
@@ -73,7 +74,7 @@ static const char* generateGuid(void)
     return (const char*)result;
 }
 
-static STRING_HANDLE createRelativePath(IOTHUB_TWIN_REQUEST_MODE iotHubTwinRequestMode, const char* deviceId)
+static STRING_HANDLE createRelativePath(IOTHUB_TWIN_REQUEST_MODE iotHubTwinRequestMode, const char* deviceId, const char* moduleId)
 {
     //IOTHUB_TWIN_REQUEST_GET               GET      {iot hub}/twins/{device id}                     // Get device twin  
     //IOTHUB_TWIN_REQUEST_UPDATE            PATCH    {iot hub}/twins/{device id}                     // Partally update device twin
@@ -85,7 +86,14 @@ static STRING_HANDLE createRelativePath(IOTHUB_TWIN_REQUEST_MODE iotHubTwinReque
 
     if ((iotHubTwinRequestMode == IOTHUB_TWIN_REQUEST_GET) || (iotHubTwinRequestMode == IOTHUB_TWIN_REQUEST_UPDATE))
     {
-        result = STRING_construct_sprintf(RELATIVE_PATH_FMT_TWIN, deviceId, URL_API_VERSION);
+        if (moduleId == NULL)
+        {
+            result = STRING_construct_sprintf(RELATIVE_PATH_FMT_TWIN, deviceId, URL_API_VERSION);
+        }
+        else
+        {
+            result = STRING_construct_sprintf(RELATIVE_PATH_FMT_TWIN_MODULE, deviceId, moduleId, URL_API_VERSION);
+        }
     }
     else
     {
@@ -148,18 +156,18 @@ static HTTP_HEADERS_HANDLE createHttpHeader(IOTHUB_TWIN_REQUEST_MODE iotHubTwinR
     return httpHeader;
 }
 
-static IOTHUB_DEVICE_TWIN_RESULT sendHttpRequestTwin(IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceClientDeviceTwinHandle, IOTHUB_TWIN_REQUEST_MODE iotHubTwinRequestMode, const char* deviceName, BUFFER_HANDLE deviceJsonBuffer, BUFFER_HANDLE responseBuffer)
+static IOTHUB_DEVICE_TWIN_RESULT sendHttpRequestTwin(IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceClientDeviceTwinHandle, IOTHUB_TWIN_REQUEST_MODE iotHubTwinRequestMode, const char* deviceName, const char* moduleId, BUFFER_HANDLE deviceJsonBuffer, BUFFER_HANDLE responseBuffer)
 {
     IOTHUB_DEVICE_TWIN_RESULT result;
 
-    STRING_HANDLE uriResouce;
-    STRING_HANDLE accessKey;
-    STRING_HANDLE keyName;
+    STRING_HANDLE uriResource = NULL;
+    STRING_HANDLE accessKey = NULL;
+    STRING_HANDLE keyName = NULL;
     HTTPAPIEX_SAS_HANDLE httpExApiSasHandle;
     HTTPAPIEX_HANDLE httpExApiHandle;
     HTTP_HEADERS_HANDLE httpHeader;
 
-    if ((uriResouce = STRING_construct(serviceClientDeviceTwinHandle->hostname)) == NULL)
+    if ((uriResource = STRING_construct(serviceClientDeviceTwinHandle->hostname)) == NULL)
     {
         /*Codes_SRS_IOTHUBDEVICETWIN_12_024: [ If any of the HTTPAPI call fails IoTHubDeviceTwin_GetTwin shall fail and return NULL ]*/
         LogError("STRING_construct failed for uriResource");
@@ -169,7 +177,7 @@ static IOTHUB_DEVICE_TWIN_RESULT sendHttpRequestTwin(IOTHUB_SERVICE_CLIENT_DEVIC
     {
         /*Codes_SRS_IOTHUBDEVICETWIN_12_024: [ If any of the call fails during the HTTP creation IoTHubDeviceTwin_GetTwin shall fail and return NULL ]*/
         LogError("STRING_construct failed for accessKey");
-        STRING_delete(uriResouce);
+        STRING_delete(uriResource);
         result = IOTHUB_DEVICE_TWIN_ERROR;
     }
     else if ((keyName = STRING_construct(serviceClientDeviceTwinHandle->keyName)) == NULL)
@@ -177,7 +185,7 @@ static IOTHUB_DEVICE_TWIN_RESULT sendHttpRequestTwin(IOTHUB_SERVICE_CLIENT_DEVIC
         /*Codes_SRS_IOTHUBDEVICETWIN_12_024: [ If any of the call fails during the HTTP creation IoTHubDeviceTwin_GetTwin shall fail and return NULL ]*/
         LogError("STRING_construct failed for keyName");
         STRING_delete(accessKey);
-        STRING_delete(uriResouce);
+        STRING_delete(uriResource);
         result = IOTHUB_DEVICE_TWIN_ERROR;
     }
     /*Codes_SRS_IOTHUBDEVICETWIN_12_020: [ IoTHubDeviceTwin_GetTwin shall add the following headers to the created HTTP GET request: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 ]*/
@@ -187,18 +195,18 @@ static IOTHUB_DEVICE_TWIN_RESULT sendHttpRequestTwin(IOTHUB_SERVICE_CLIENT_DEVIC
         LogError("HttpHeader creation failed");
         STRING_delete(keyName);
         STRING_delete(accessKey);
-        STRING_delete(uriResouce);
+        STRING_delete(uriResource);
         result = IOTHUB_DEVICE_TWIN_ERROR;
     }
     /*Codes_SRS_IOTHUBDEVICETWIN_12_021: [ IoTHubDeviceTwin_GetTwin shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ]*/
-    else if ((httpExApiSasHandle = HTTPAPIEX_SAS_Create(accessKey, uriResouce, keyName)) == NULL)
+    else if ((httpExApiSasHandle = HTTPAPIEX_SAS_Create(accessKey, uriResource, keyName)) == NULL)
     {
         /*Codes_SRS_IOTHUBDEVICETWIN_12_025: [ If any of the HTTPAPI call fails IoTHubDeviceTwin_GetTwin shall fail and return IOTHUB_DEVICE_TWIN_HTTPAPI_ERROR ]*/
         LogError("HTTPAPIEX_SAS_Create failed");
         HTTPHeaders_Free(httpHeader);
         STRING_delete(keyName);
         STRING_delete(accessKey);
-        STRING_delete(uriResouce);
+        STRING_delete(uriResource);
         result = IOTHUB_DEVICE_TWIN_HTTPAPI_ERROR;
     }
     /*Codes_SRS_IOTHUBDEVICETWIN_12_022: [ IoTHubDeviceTwin_GetTwin shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ]*/
@@ -210,7 +218,7 @@ static IOTHUB_DEVICE_TWIN_RESULT sendHttpRequestTwin(IOTHUB_SERVICE_CLIENT_DEVIC
         HTTPHeaders_Free(httpHeader);
         STRING_delete(keyName);
         STRING_delete(accessKey);
-        STRING_delete(uriResouce);
+        STRING_delete(uriResource);
         result = IOTHUB_DEVICE_TWIN_HTTPAPI_ERROR;
     }
     else 
@@ -251,7 +259,7 @@ static IOTHUB_DEVICE_TWIN_RESULT sendHttpRequestTwin(IOTHUB_SERVICE_CLIENT_DEVIC
         else
         {
             /*Codes_SRS_IOTHUBDEVICETWIN_12_019: [ IoTHubDeviceTwin_GetTwin shall create HTTP GET request URL using the given deviceId using the following format: url/twins/[deviceId] ]*/
-            if ((relativePath = createRelativePath(iotHubTwinRequestMode, deviceName)) == NULL)
+            if ((relativePath = createRelativePath(iotHubTwinRequestMode, deviceName, moduleId)) == NULL)
             {
                 /*Codes_SRS_IOTHUBDEVICETWIN_12_024: [ If any of the call fails during the HTTP creation IoTHubDeviceTwin_GetTwin shall fail and return NULL ]*/
                 LogError("Failure creating relative path");
@@ -286,9 +294,17 @@ static IOTHUB_DEVICE_TWIN_RESULT sendHttpRequestTwin(IOTHUB_SERVICE_CLIENT_DEVIC
         HTTPHeaders_Free(httpHeader);
         STRING_delete(keyName);
         STRING_delete(accessKey);
-        STRING_delete(uriResouce);
+        STRING_delete(uriResource);
     }
     return result;
+}
+
+static void free_devicetwin_handle(IOTHUB_SERVICE_CLIENT_DEVICE_TWIN* deviceTwin)
+{
+    free(deviceTwin->hostname);
+    free(deviceTwin->sharedAccessKey);
+    free(deviceTwin->keyName);
+    free(deviceTwin);
 }
 
 IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE IoTHubDeviceTwin_Create(IOTHUB_SERVICE_CLIENT_AUTH_HANDLE serviceClientHandle)
@@ -342,13 +358,15 @@ IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE IoTHubDeviceTwin_Create(IOTHUB_SERVICE_
             }
             else
             {
+                memset(result, 0, sizeof(*result));
+            
                 /*Codes_SRS_IOTHUBDEVICETWIN_12_005: [ If the allocation successful, IoTHubDeviceTwin_Create shall create a IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE from the given IOTHUB_SERVICE_CLIENT_AUTH_HANDLE and return with it ]*/
                 /*Codes_SRS_IOTHUBDEVICETWIN_12_006: [ IoTHubDeviceTwin_Create shall allocate memory and copy hostName to result->hostName by calling mallocAndStrcpy_s. ]*/
                 if (mallocAndStrcpy_s(&result->hostname, serviceClientAuth->hostname) != 0)
                 {
                     /*Codes_SRS_IOTHUBDEVICETWIN_12_007: [ If the mallocAndStrcpy_s fails, IoTHubDeviceTwin_Create shall do clean up and return NULL. ]*/
                     LogError("mallocAndStrcpy_s failed for hostName");
-                    free(result);
+                    free_devicetwin_handle(result);
                     result = NULL;
                 }
                 /*Codes_SRS_IOTHUBDEVICETWIN_12_012: [ IoTHubDeviceTwin_Create shall allocate memory and copy sharedAccessKey to result->sharedAccessKey by calling mallocAndStrcpy_s. ]*/
@@ -356,8 +374,7 @@ IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE IoTHubDeviceTwin_Create(IOTHUB_SERVICE_
                 {
                     /*Codes_SRS_IOTHUBDEVICETWIN_12_013: [ If the mallocAndStrcpy_s fails, IoTHubDeviceTwin_Create shall do clean up and return NULL. ]*/
                     LogError("mallocAndStrcpy_s failed for sharedAccessKey");
-                    free(result->hostname);
-                    free(result);
+                    free_devicetwin_handle(result);
                     result = NULL;
                 }
                 /*Codes_SRS_IOTHUBDEVICETWIN_12_014: [ IoTHubDeviceTwin_Create shall allocate memory and copy keyName to result->keyName by calling mallocAndStrcpy_s. ]*/
@@ -365,9 +382,7 @@ IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE IoTHubDeviceTwin_Create(IOTHUB_SERVICE_
                 {
                     /*Codes_SRS_IOTHUBDEVICETWIN_12_015: [ If the mallocAndStrcpy_s fails, IoTHubDeviceTwin_Create shall do clean up and return NULL. ]*/
                     LogError("mallocAndStrcpy_s failed for keyName");
-                    free(result->hostname);
-                    free(result->sharedAccessKey);
-                    free(result);
+                    free_devicetwin_handle(result);
                     result = NULL;
                 }
             }
@@ -382,12 +397,7 @@ void IoTHubDeviceTwin_Destroy(IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceCl
     if (serviceClientDeviceTwinHandle != NULL)
     {
         /*Codes_SRS_IOTHUBDEVICETWIN_12_017: [ If the serviceClientDeviceTwinHandle input parameter is not NULL IoTHubDeviceTwin_Destroy shall free the memory of it and return ]*/
-        IOTHUB_SERVICE_CLIENT_DEVICE_TWIN* serviceClientDeviceTwin = (IOTHUB_SERVICE_CLIENT_DEVICE_TWIN*)serviceClientDeviceTwinHandle;
-
-        free(serviceClientDeviceTwin->hostname);
-        free(serviceClientDeviceTwin->sharedAccessKey);
-        free(serviceClientDeviceTwin->keyName);
-        free(serviceClientDeviceTwin);
+        free_devicetwin_handle((IOTHUB_SERVICE_CLIENT_DEVICE_TWIN*)serviceClientDeviceTwinHandle);
     }
 }
 
@@ -419,7 +429,7 @@ static int malloc_and_copy_uchar(char** strDestination, BUFFER_HANDLE strSource)
     return result;
 }
 
-char* IoTHubDeviceTwin_GetTwin(IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceClientDeviceTwinHandle, const char* deviceId)
+char* IoTHubDeviceTwin_GetDeviceOrModuleTwin(IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceClientDeviceTwinHandle, const char* deviceId, const char* moduleId)
 {
     char* result;
 
@@ -443,7 +453,7 @@ char* IoTHubDeviceTwin_GetTwin(IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceC
         /*Codes_SRS_IOTHUBDEVICETWIN_12_021: [ IoTHubDeviceTwin_GetTwin shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ]*/
         /*Codes_SRS_IOTHUBDEVICETWIN_12_022: [ IoTHubDeviceTwin_GetTwin shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ]*/
         /*Codes_SRS_IOTHUBDEVICETWIN_12_023: [ IoTHubDeviceTwin_GetTwin shall execute the HTTP GET request by calling HTTPAPIEX_ExecuteRequest ]*/
-        else if (sendHttpRequestTwin(serviceClientDeviceTwinHandle, IOTHUB_TWIN_REQUEST_GET, deviceId, NULL, responseBuffer) != IOTHUB_DEVICE_TWIN_OK)
+        else if (sendHttpRequestTwin(serviceClientDeviceTwinHandle, IOTHUB_TWIN_REQUEST_GET, deviceId, moduleId, NULL, responseBuffer) != IOTHUB_DEVICE_TWIN_OK)
         {
             /*Codes_SRS_IOTHUBDEVICETWIN_12_024: [ If any of the call fails during the HTTP creation IoTHubDeviceTwin_GetTwin shall fail and return NULL ]*/
             /*Codes_SRS_IOTHUBDEVICETWIN_12_025: [ If any of the HTTPAPI call fails IoTHubDeviceTwin_GetTwin shall fail and return NULL ]*/
@@ -463,9 +473,31 @@ char* IoTHubDeviceTwin_GetTwin(IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceC
         }
     }
     return result;
+
 }
 
-char* IoTHubDeviceTwin_UpdateTwin(IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceClientDeviceTwinHandle, const char* deviceId, const char* deviceTwinJson)
+char* IoTHubDeviceTwin_GetTwin(IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceClientDeviceTwinHandle, const char* deviceId)
+{
+    return IoTHubDeviceTwin_GetDeviceOrModuleTwin(serviceClientDeviceTwinHandle, deviceId, NULL);
+}
+
+char* IoTHubDeviceTwin_GetModuleTwin(IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceClientDeviceTwinHandle, const char* deviceId, const char* moduleId)
+{
+    char* result;
+    if ((serviceClientDeviceTwinHandle == NULL) || (deviceId == NULL) || (moduleId == NULL))
+    {
+        LogError("Input parameter cannot be NULL");
+        result = NULL;
+    }
+    else
+    {
+        result = IoTHubDeviceTwin_GetDeviceOrModuleTwin(serviceClientDeviceTwinHandle, deviceId, moduleId);
+    }
+
+    return result;
+}
+
+char* IoTHubDeviceTwin_UpdateDeviceOrModuleTwin(IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceClientDeviceTwinHandle, const char* deviceId, const char* moduleId, const char* deviceTwinJson)
 {
     char* result;
 
@@ -501,7 +533,7 @@ char* IoTHubDeviceTwin_UpdateTwin(IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE servi
         /*CodesSRS_IOTHUBDEVICETWIN_12_041: [ IoTHubDeviceTwin_UpdateTwin shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ]*/
         /*CodesSRS_IOTHUBDEVICETWIN_12_042: [ IoTHubDeviceTwin_UpdateTwin shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ]*/
         /*CodesSRS_IOTHUBDEVICETWIN_12_043: [ IoTHubDeviceTwin_UpdateTwin shall execute the HTTP PATCH request by calling HTTPAPIEX_ExecuteRequest ]*/
-        else if (sendHttpRequestTwin(serviceClientDeviceTwinHandle, IOTHUB_TWIN_REQUEST_UPDATE, deviceId, updateJson, responseBuffer) != IOTHUB_DEVICE_TWIN_OK)
+        else if (sendHttpRequestTwin(serviceClientDeviceTwinHandle, IOTHUB_TWIN_REQUEST_UPDATE, deviceId, moduleId, updateJson, responseBuffer) != IOTHUB_DEVICE_TWIN_OK)
         {
             /*CodesSRS_IOTHUBDEVICETWIN_12_044: [ If any of the call fails during the HTTP creation IoTHubDeviceTwin_UpdateTwin shall fail and return NULL ]*/
             /*CodesSRS_IOTHUBDEVICETWIN_12_045: [ If any of the HTTPAPI call fails IoTHubDeviceTwin_UpdateTwin shall fail and return NULL ]*/
@@ -524,4 +556,30 @@ char* IoTHubDeviceTwin_UpdateTwin(IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE servi
         }
     }
     return result;
+
 }
+
+char* IoTHubDeviceTwin_UpdateTwin(IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceClientDeviceTwinHandle, const char* deviceId, const char* deviceTwinJson)
+{
+    return IoTHubDeviceTwin_UpdateDeviceOrModuleTwin(serviceClientDeviceTwinHandle, deviceId, NULL, deviceTwinJson);
+}
+
+char* IoTHubDeviceTwin_UpdateModuleTwin(IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceClientDeviceTwinHandle, const char* deviceId, const char* moduleId, const char* moduleTwinJson)
+{
+    char* result;
+    if ((serviceClientDeviceTwinHandle == NULL) || (deviceId == NULL) || (moduleId == NULL) || (moduleTwinJson == NULL))
+    {
+        LogError("Input parameter cannot be NULL");
+        result = NULL;
+    }
+    else
+    {
+        result = IoTHubDeviceTwin_UpdateDeviceOrModuleTwin(serviceClientDeviceTwinHandle, deviceId, moduleId, moduleTwinJson);
+    }
+
+    return result;
+}
+
+
+
+

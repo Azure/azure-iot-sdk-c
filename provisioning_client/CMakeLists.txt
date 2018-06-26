@@ -102,6 +102,19 @@ else ()
     endif ()
 endif ()
 
+if (${hsm_type_edge_module})
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHSM_TYPE_HTTP_EDGE")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHSM_TYPE_HTTP_EDGE")
+
+    set(HSM_CLIENT_H_FILES ${HSM_CLIENT_H_FILES} 
+        ./adapters/hsm_client_http_edge.h)
+    set(HSM_CLIENT_C_FILES ${HSM_CLIENT_C_FILES} 
+        ./adapters/hsm_client_http_edge.c)
+        
+    set(HSM_CLIENT_LIBRARY ${HSM_CLIENT_LIBRARY} uhttp)
+endif()
+
+
 function(link_security_client whatExeIsBuilding)
     target_link_libraries(${whatExeIsBuilding} prov_auth_client)
     target_link_libraries(${whatExeIsBuilding} hsm_security_client)
@@ -125,7 +138,7 @@ set(PROV_DEVICE_LL_CLEINT_SOURCE_H_FILES
     ./inc/azure_prov_client/prov_client_const.h
     ./inc/azure_prov_client/prov_device_ll_client.h)
 
-set(DEV_AUTH_MODULES_CLIENT_INC_FOLDER "${CMAKE_CURRENT_LIST_DIR}/inc" "${CMAKE_CURRENT_LIST_DIR}/inc/internal" "${CMAKE_CURRENT_LIST_DIR/adapters}" CACHE INTERNAL "this is what needs to be included if using iothub_client lib" FORCE)
+set(DEV_AUTH_MODULES_CLIENT_INC_FOLDER "${CMAKE_CURRENT_LIST_DIR}/inc" "${CMAKE_CURRENT_LIST_DIR}/inc/internal" CACHE INTERNAL "this is what needs to be included if using iothub_client lib" FORCE)
 
 include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})
 include_directories(${SHARED_UTIL_INC_FOLDER})

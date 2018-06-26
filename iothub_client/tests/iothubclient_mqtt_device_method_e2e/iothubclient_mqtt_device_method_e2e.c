@@ -15,7 +15,7 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_device_method_e2e)
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
         TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
-        device_method_e2e_init();
+        device_method_e2e_init(false);
     }
 
     TEST_SUITE_CLEANUP(TestClassCleanup)
@@ -73,7 +73,7 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_device_method_e2e)
     {
         device_method_e2e_method_calls_upload_x509(MQTT_Protocol);
     }
-#endif
+#endif // DONT_USE_UPLOADTOBLOB
 
     TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_String_x509)
     {
@@ -112,7 +112,7 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_device_method_e2e)
     {
         device_method_e2e_method_call_with_string_x509(MQTT_WebSocket_Protocol);
     }
-#endif
+#endif // __APPLE__
 
     TEST_FUNCTION(IotHub_Mqtt_Ws_Method_Call_With_String_sas)
     {

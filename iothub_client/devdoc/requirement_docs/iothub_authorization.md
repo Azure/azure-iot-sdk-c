@@ -22,6 +22,7 @@ MOCKABLE_FUNCTION(, void, IoTHubClient_Auth_Destroy, IOTHUB_AUTHORIZATION_HANDLE
 MOCKABLE_FUNCTION(, IOTHUB_CREDENTIAL_TYPE, IoTHubClient_Auth_Get_Credential_Type, IOTHUB_AUTHORIZATION_HANDLE, handle);
 MOCKABLE_FUNCTION(, char*, IoTHubClient_Auth_Get_SasToken, IOTHUB_AUTHORIZATION_HANDLE, handle, const char*, scope, size_t, expiry_time_relative_seconds);
 MOCKABLE_FUNCTION(, const char*, IoTHubClient_Auth_Get_DeviceId, IOTHUB_AUTHORIZATION_HANDLE, handle);
+MOCKABLE_FUNCTION(, const char*, IoTHubClient_Auth_Get_ModuleId, IOTHUB_AUTHORIZATION_HANDLE, handle);
 MOCKABLE_FUNCTION(, bool, IoTHubClient_Auth_Is_SasToken_Valid, IOTHUB_AUTHORIZATION_HANDLE, handle);
 ```
 
@@ -92,6 +93,18 @@ extern const char* IoTHubClient_Auth_Get_DeviceId(IOTHUB_AUTHORIZATION_HANDLE ha
 **SRS_IoTHub_Authorization_07_013: [** if `handle` is NULL, `IoTHubClient_Auth_Get_DeviceId` shall return NULL. **]**
 
 **SRS_IoTHub_Authorization_07_014: [** `IoTHubClient_Auth_Get_DeviceId` shall return the device_id associated with `handle`. **]**
+
+
+## IoTHubClient_Auth_Get_ModuleId
+
+```c
+extern const char* IoTHubClient_Auth_Get_ModuleId(IOTHUB_AUTHORIZATION_HANDLE handle);
+```
+
+**SRS_IoTHub_Authorization_31_025: [** if `handle` is NULL, `IoTHubClient_Auth_Get_ModuleId` shall return NULL. **]**
+
+**SRS_IoTHub_Authorization_31_026: [** `IoTHubClient_Auth_Get_ModuleId` shall return the module_id associated with `handle`. **]**
+
 
 ## IoTHubClient_Auth_Get_DeviceKey
 

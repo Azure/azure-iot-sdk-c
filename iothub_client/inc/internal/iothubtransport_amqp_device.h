@@ -92,6 +92,7 @@ typedef void(*DEVICE_TWIN_UPDATE_RECEIVED_CALLBACK)(DEVICE_TWIN_UPDATE_TYPE upda
 typedef struct DEVICE_CONFIG_TAG
 {
     const char* device_id;
+    const char* module_id;
     char* product_info;
     char* iothub_host_fqdn;
     DEVICE_AUTH_MODE authentication_mode;

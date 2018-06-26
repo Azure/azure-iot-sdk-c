@@ -47,6 +47,23 @@ EXPORTS
     IoTHubDeviceClient_UploadToBlobAsync
     IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync
 
+    IoTHubModuleClient_CreateFromConnectionString
+    IoTHubModuleClient_Destroy
+    IoTHubModuleClient_SendEventAsync
+    IoTHubModuleClient_GetSendStatus
+    IoTHubModuleClient_SetMessageCallback
+    IoTHubModuleClient_SetConnectionStatusCallback
+    IoTHubModuleClient_SetRetryPolicy
+    IoTHubModuleClient_GetRetryPolicy
+    IoTHubModuleClient_GetLastMessageReceiveTime
+    IoTHubModuleClient_SetOption
+    IoTHubModuleClient_SetModuleTwinCallback
+    IoTHubModuleClient_SendReportedState
+    IoTHubModuleClient_SetModuleMethodCallback
+    IoTHubModuleClient_ModuleMethodResponse
+    IoTHubModuleClient_SendEventToOutputAsync
+    IoTHubModuleClient_SetInputMessageCallback
+
     IoTHubClient_LL_CreateFromConnectionString
     IoTHubClient_LL_Destroy
     IoTHubClient_LL_DoWork
@@ -74,6 +91,24 @@ EXPORTS
     IoTHubDeviceClient_LL_DeviceMethodResponse
     IoTHubDeviceClient_LL_UploadToBlob
     IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob
+
+    IoTHubModuleClient_LL_CreateFromConnectionString
+    IoTHubModuleClient_LL_Destroy
+    IoTHubModuleClient_LL_SendEventAsync
+    IoTHubModuleClient_LL_GetSendStatus
+    IoTHubModuleClient_LL_SetMessageCallback
+    IoTHubModuleClient_LL_SetConnectionStatusCallback
+    IoTHubModuleClient_LL_SetRetryPolicy
+    IoTHubModuleClient_LL_GetRetryPolicy
+    IoTHubModuleClient_LL_GetLastMessageReceiveTime
+    IoTHubModuleClient_LL_DoWork
+    IoTHubModuleClient_LL_SetOption
+    IoTHubModuleClient_LL_SetModuleTwinCallback
+    IoTHubModuleClient_LL_SendReportedState
+    IoTHubModuleClient_LL_SetModuleMethodCallback
+    IoTHubModuleClient_LL_ModuleMethodResponse
+    IoTHubModuleClient_LL_SendEventToOutputAsync
+    IoTHubModuleClient_LL_SetInputMessageCallback
 
     IoTHubMessage_CreateFromString
     IoTHubMessage_CreateFromByteArray
