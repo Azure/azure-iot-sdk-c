@@ -35,12 +35,13 @@ $edgeIotHubOwnerCA          = Join-Path $edgePublicCertDir "azure-iot-test-only.
 # Whether to use ECC or RSA is stored in a file.  If it doesn't exist, we default to ECC.
 $algorithmUsedFile       = "./algorithmUsed.txt"
 
-# The script puts certs into the global certificate store.  If there is already a cert of the 
+# The script puts certs into the global certificate store.  If there is already a cert of the
 # same name present, we're not going to be able to tell the new apart from the old, so error out.
 function Test-CACertNotInstalledAlready()
 {
+    Write-Host ("Testing if any test certificates have already been installed...")
     $certInstalled = $null
-    try 
+    try
     {
         $certInstalled = Get-CACertsCertBySubjectName $_rootCertSubject
     }
@@ -51,28 +52,50 @@ function Test-CACertNotInstalledAlready()
 
     if ($NULL -ne $certInstalled)
     {
-        throw ("Certificate {0} already installed.  Cleanup certificates 1st" -f $_rootCertSubject)
+        $nl = [Environment]::NewLine
+        $cleanup_msg  = "$nl$nl"
+        $cleanup_msg += "To fix this, cleanup any certificates in the certificate store and try running this script again.$nl"
+        $cleanup_msg += "Steps to cleanup, from Start menu, 'open manage computer certificates':$nl"
+        $cleanup_msg += " - Navigate to Certificates -> Trusted Root Certification Authority -> Certificates. Remove certificates issued by 'Azure IoT CA TestOnly*'.$nl"
+        $cleanup_msg += " - Navigate to Certificates -> Intermediate Certificate Authorities -> Certificates. Remove certificates issued by 'Azure IoT CA TestOnly*'.$nl"
+        $cleanup_msg += " - Navigate to Certificates -> Local Computer -> Personal. Remove certificates issued by 'Azure IoT CA TestOnly*'.$nl"
+        $cleanup_msg += "$nl$nl"
+        Write-Error("Certificate {0} already installed in the certificate store. {1}" -f $_rootCertSubject,  $cleanup_msg)
+        throw ("Certificate {0} already installed." -f $_rootCertSubject)
     }
+    Write-Host ("  Ok.")
 }
 
+<#
+    Verify that the prerequisites for this script are met
+#>
 function Test-CACertsPrerequisites()
 {
     Test-CACertNotInstalledAlready
-    
+
+    Write-Host ("Testing if openssl.exe is set in PATH...")
+    if ((Get-Command "openssl.exe" -ErrorAction SilentlyContinue) -eq $NULL)
+    {
+        throw ("Openssl is unavailable. Please install openssl and set it in the PATH before proceeding.")
+    }
+    Write-Host ("  Ok.")
+
+    Write-Host ("Testing if environment variable OPENSSL_CONF is set...")
     if ($NULL -eq $ENV:OPENSSL_CONF)
     {
-        throw ("OpenSSL not configured on this system.")
+        throw ("Environment variable OPENSSL_CONF was not set, OpenSSL configuration not set on this system.")
     }
-    
+    Write-Host ("  Ok.")
+
     Write-Host "Success"
 }
 
 function New-CACertsSelfsignedCertificate([string]$commonName, [object]$signingCert, [bool]$isASigner=$true)
 {
     # Build up argument list
-    $selfSignedArgs =@{"-DnsName"=$commonName; 
+    $selfSignedArgs =@{"-DnsName"=$commonName;
                        "-CertStoreLocation"="cert:\LocalMachine\My";
-                       "-NotAfter"=(get-date).AddDays(30); 
+                       "-NotAfter"=(get-date).AddDays(30);
                       }
 
     if ($isASigner -eq $true)
@@ -113,7 +136,7 @@ function New-CACertsIntermediateCert([string]$commonName, [Microsoft.Certificate
     openssl x509 -inform der -in $certFileName -out $pemFileName
 
     del $certFileName
-   
+
     Write-Output $newCert
 }
 
@@ -127,7 +150,7 @@ function New-CACertsCertChain([Parameter(Mandatory=$TRUE)][ValidateSet("rsa","ec
     Set-Content $algorithmUsedFile $algorithm
 
     $rootCACert =  New-CACertsSelfsignedCertificate $_rootCertCommonName $null
-    
+
     Export-Certificate -Cert $rootCACert -FilePath $rootCACerFileName  -Type CERT
     Import-Certificate -CertStoreLocation "cert:\LocalMachine\Root" -FilePath $rootCACerFileName
 
@@ -153,7 +176,7 @@ function Get-CACertsCertBySubjectName([string]$subjectName)
     {
         throw ("Unable to find certificate with subjectName {0}" -f $subjectName)
     }
-    
+
     Write-Output $cert
 }
 
@@ -161,9 +184,9 @@ function New-CACertsVerificationCert([string]$requestedCommonName)
 {
     $verifyRequestedFileName = ".\verifyCert4.cer"
     $rootCACert = Get-CACertsCertBySubjectName $_rootCertSubject
-    Write-Host "Using Signing Cert:::" 
+    Write-Host "Using Signing Cert:::"
     Write-Host $rootCACert
-    
+
     $verifyCert = New-CACertsSelfsignedCertificate $requestedCommonName $rootCACert $false
 
     Export-Certificate -cert $verifyCert -filePath $verifyRequestedFileName -Type Cert
@@ -171,8 +194,8 @@ function New-CACertsVerificationCert([string]$requestedCommonName)
     {
         throw ("Error: CERT file {0} doesn't exist" -f $verifyRequestedFileName)
     }
-    
-    Write-Host ("Certificate with subject CN={0} has been output to {1}" -f $requestedCommonName, (Join-Path (get-location).path $verifyRequestedFileName)) 
+
+    Write-Host ("Certificate with subject CN={0} has been output to {1}" -f $requestedCommonName, (Join-Path (get-location).path $verifyRequestedFileName))
 }
 
 
@@ -182,9 +205,9 @@ function New-CACertsDevice([string]$deviceName, [string]$signingCertSubject=$_ro
     $newDevicePemAllFileName      = ("./{0}-all.pem" -f $deviceName)
     $newDevicePemPrivateFileName  = ("./{0}-private.pem" -f $deviceName)
     $newDevicePemPublicFileName   = ("./{0}-public.pem" -f $deviceName)
-    
+
     $signingCert = Get-CACertsCertBySubjectName $signingCertSubject ## "CN=Azure IoT CA TestOnly Intermediate 1 CA"
-    
+
     # Certificates for edge devices need to be able to sign other certs.
     if ($isEdgeDevice -eq $true)
     {
@@ -196,7 +219,7 @@ function New-CACertsDevice([string]$deviceName, [string]$signingCertSubject=$_ro
     }
 
     $newDeviceCertPfx = New-CACertsSelfSignedCertificate $deviceName $signingCert $false
-    
+
     $certSecureStringPwd = ConvertTo-SecureString -String $_privateKeyPassword -Force -AsPlainText
 
     # Export the PFX of the cert we've just created.  The PFX is a format that contains both public and private keys but is NOT something
@@ -214,15 +237,15 @@ function New-CACertsDevice([string]$deviceName, [string]$signingCertSubject=$_ro
     # Now that we have a PEM, do some conversions on it to get formats we can process
     if ((Get-CACertsCertUseRSA) -eq $true)
     {
-        openssl rsa -in $newDevicePemAllFileName -out $newDevicePemPrivateFileName        
+        openssl rsa -in $newDevicePemAllFileName -out $newDevicePemPrivateFileName
     }
     else
     {
         openssl ec -in $newDevicePemAllFileName -out $newDevicePemPrivateFileName
     }
     openssl x509 -in $newDevicePemAllFileName -out $newDevicePemPublicFileName
- 
-    Write-Host ("Certificate with subject CN={0} has been output to {1}" -f $deviceName, (Join-Path (get-location).path $newDevicePemPublicFileName)) 
+
+    Write-Host ("Certificate with subject CN={0} has been output to {1}" -f $deviceName, (Join-Path (get-location).path $newDevicePemPublicFileName))
 }
 
 function New-CACertsEdgeDevice([string]$deviceName, [string]$signingCertSubject=($_intermediateCertSubject -f "1"))
@@ -247,7 +270,7 @@ function Write-CACertsCertificatesToEnvironment([string]$deviceName, [string]$io
     {
         $intermediate1CAPem = $null
     }
-    
+
     $env:IOTHUB_CA_X509_PUBLIC                 = $devicePublicPem + $intermediate1CAPem + $rootCAPem
     $env:IOTHUB_CA_X509_PRIVATE_KEY            = $devicePrivatePem
     $env:IOTHUB_CA_CONNECTION_STRING_TO_DEVICE = "HostName={0};DeviceId={1};x509=true" -f $iothubName, $deviceName
@@ -259,7 +282,7 @@ function Write-CACertsCertificatesToEnvironment([string]$deviceName, [string]$io
     {
         $env:IOTHUB_CA_USE_ECC = "1"
     }
-    
+
     Write-Host "Success"
 }
 
@@ -281,13 +304,13 @@ function Write-CACertsCertificatesForEdgeDevice([string]$deviceName)
 
     Copy-Item $originalDevicePublicPem $edgeDeviceCertificate
     Copy-Item $originalDevicePrivatePem $edgeDevicePrivateKey
-    Get-Content $originalDevicePublicPem, $intermediate1CAPemFileName, $rootCAPemFileName | Set-Content $edgeDeviceFullCertChain    
+    Get-Content $originalDevicePublicPem, $intermediate1CAPemFileName, $rootCAPemFileName | Set-Content $edgeDeviceFullCertChain
     Copy-Item $rootCAPemFileName $edgeIotHubOwnerCA
     Write-Host "Success"
 }
 
 # This will read in a given .PEM file and output it in a format that we can
-# immediately set ENV variable in it with \r\n done right.  
+# immediately set ENV variable in it with \r\n done right.
 function Get-CACertsPemEncodingForEnvironmentVariable([string]$fileName)
 {
     $outputString = $null
@@ -296,7 +319,7 @@ function Get-CACertsPemEncodingForEnvironmentVariable([string]$fileName)
     {
         $outputString += ($line + "`r`n")
     }
-    
+
     Write-Output $outputString
 }
 
