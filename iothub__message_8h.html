@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Microsoft Azure IoT Device SDK for C
-   &#160;<span id="projectnumber">1.2.5</span>
+   &#160;<span id="projectnumber">1.2.6</span>
    </div>
    <div id="projectbrief">The Microsoft Azure IoT device libraries for C contain code that facilitates building devices and applications that connect to and are managed by Azure IoT Hub services.</div>
   </td>
@@ -172,6 +172,30 @@ Functions</h2></td></tr>
 <tr class="memitem:ad77bdf72ad35ad622e1f02359b76e546"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#ad77bdf72ad35ad622e1f02359b76e546">MOCKABLE_FUNCTION</a> (, <a class="el" href="iothub__message_8h.html#ab826e84207e0513abcf6825fa72c7a7f">IOTHUB_MESSAGE_RESULT</a>, IoTHubMessage_SetDiagnosticPropertyData, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const <a class="el" href="iothub__message_8h.html#a03e70a89c9f24b39017723fba2a610a7">IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA</a> *, diagnosticData)</td></tr>
 <tr class="memdesc:ad77bdf72ad35ad622e1f02359b76e546"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the DiagnosticData for the IOTHUB_MESSAGE_HANDLE. CAUTION: SDK user should not call it directly, it is for internal use only.  <a href="#ad77bdf72ad35ad622e1f02359b76e546">More...</a><br /></td></tr>
 <tr class="separator:ad77bdf72ad35ad622e1f02359b76e546"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe33f8a9201abd0a430e8da0a482a75d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#afe33f8a9201abd0a430e8da0a482a75d">MOCKABLE_FUNCTION</a> (, const char *, IoTHubMessage_GetOutputName, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)</td></tr>
+<tr class="memdesc:afe33f8a9201abd0a430e8da0a482a75d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the output name from the IOTHUB_MESSAGE_HANDLE.  <a href="#afe33f8a9201abd0a430e8da0a482a75d">More...</a><br /></td></tr>
+<tr class="separator:afe33f8a9201abd0a430e8da0a482a75d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a940bc7bbd3084e62947cbeb31dab4ef5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#a940bc7bbd3084e62947cbeb31dab4ef5">MOCKABLE_FUNCTION</a> (, <a class="el" href="iothub__message_8h.html#ab826e84207e0513abcf6825fa72c7a7f">IOTHUB_MESSAGE_RESULT</a>, IoTHubMessage_SetOutputName, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char *, outputName)</td></tr>
+<tr class="memdesc:a940bc7bbd3084e62947cbeb31dab4ef5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets output for named queues. CAUTION: SDK user should not call it directly, it is for internal use only.  <a href="#a940bc7bbd3084e62947cbeb31dab4ef5">More...</a><br /></td></tr>
+<tr class="separator:a940bc7bbd3084e62947cbeb31dab4ef5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d580b787402552e7f0ed1b1d4e276c4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#a6d580b787402552e7f0ed1b1d4e276c4">MOCKABLE_FUNCTION</a> (, const char *, IoTHubMessage_GetInputName, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)</td></tr>
+<tr class="memdesc:a6d580b787402552e7f0ed1b1d4e276c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the input name from the IOTHUB_MESSAGE_HANDLE.  <a href="#a6d580b787402552e7f0ed1b1d4e276c4">More...</a><br /></td></tr>
+<tr class="separator:a6d580b787402552e7f0ed1b1d4e276c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a70268b5c9871a521ce0ec2ad21d59718"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#a70268b5c9871a521ce0ec2ad21d59718">MOCKABLE_FUNCTION</a> (, <a class="el" href="iothub__message_8h.html#ab826e84207e0513abcf6825fa72c7a7f">IOTHUB_MESSAGE_RESULT</a>, IoTHubMessage_SetInputName, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char *, inputName)</td></tr>
+<tr class="memdesc:a70268b5c9871a521ce0ec2ad21d59718"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets input for named queues. CAUTION: SDK user should not call it directly, it is for internal use only.  <a href="#a70268b5c9871a521ce0ec2ad21d59718">More...</a><br /></td></tr>
+<tr class="separator:a70268b5c9871a521ce0ec2ad21d59718"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace298808b5377850099b0273bd5b8fe9"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#ace298808b5377850099b0273bd5b8fe9">MOCKABLE_FUNCTION</a> (, const char *, IoTHubMessage_GetConnectionModuleId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)</td></tr>
+<tr class="memdesc:ace298808b5377850099b0273bd5b8fe9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the module name from the IOTHUB_MESSAGE_HANDLE.  <a href="#ace298808b5377850099b0273bd5b8fe9">More...</a><br /></td></tr>
+<tr class="separator:ace298808b5377850099b0273bd5b8fe9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac21691d20b495d97b8fce8205432d8bd"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#ac21691d20b495d97b8fce8205432d8bd">MOCKABLE_FUNCTION</a> (, <a class="el" href="iothub__message_8h.html#ab826e84207e0513abcf6825fa72c7a7f">IOTHUB_MESSAGE_RESULT</a>, IoTHubMessage_SetConnectionModuleId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char *, connectionModuleId)</td></tr>
+<tr class="memdesc:ac21691d20b495d97b8fce8205432d8bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets connection module ID. CAUTION: SDK user should not call it directly, it is for internal use only.  <a href="#ac21691d20b495d97b8fce8205432d8bd">More...</a><br /></td></tr>
+<tr class="separator:ac21691d20b495d97b8fce8205432d8bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6496b3eeb1058e534c528b70b6bbc625"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#a6496b3eeb1058e534c528b70b6bbc625">MOCKABLE_FUNCTION</a> (, const char *, IoTHubMessage_GetConnectionDeviceId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)</td></tr>
+<tr class="memdesc:a6496b3eeb1058e534c528b70b6bbc625"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the connection device ID from the IOTHUB_MESSAGE_HANDLE.  <a href="#a6496b3eeb1058e534c528b70b6bbc625">More...</a><br /></td></tr>
+<tr class="separator:a6496b3eeb1058e534c528b70b6bbc625"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab5f1030c210cb9e454d7ccae1b6bcad0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#ab5f1030c210cb9e454d7ccae1b6bcad0">MOCKABLE_FUNCTION</a> (, <a class="el" href="iothub__message_8h.html#ab826e84207e0513abcf6825fa72c7a7f">IOTHUB_MESSAGE_RESULT</a>, IoTHubMessage_SetConnectionDeviceId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char *, connectionDeviceId)</td></tr>
+<tr class="memdesc:ab5f1030c210cb9e454d7ccae1b6bcad0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets connection device Id. CAUTION: SDK user should not call it directly, it is for internal use only.  <a href="#ab5f1030c210cb9e454d7ccae1b6bcad0">More...</a><br /></td></tr>
+<tr class="separator:ab5f1030c210cb9e454d7ccae1b6bcad0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a43f0f6f728663bcc073ab12b2e3160b5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#a43f0f6f728663bcc073ab12b2e3160b5">MOCKABLE_FUNCTION</a> (, void, IoTHubMessage_Destroy, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)</td></tr>
 <tr class="memdesc:a43f0f6f728663bcc073ab12b2e3160b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Frees all resources associated with the given message handle.  <a href="#a43f0f6f728663bcc073ab12b2e3160b5">More...</a><br /></td></tr>
 <tr class="separator:a43f0f6f728663bcc073ab12b2e3160b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -180,7 +204,7 @@ Functions</h2></td></tr>
 <div class="textblock"><p>The <code>IoTHub_Message</code> component encapsulates one message that can be transferred by an IoT hub client. </p>
 </div><h2 class="groupheader">Function Documentation</h2>
 <a id="ad0a1fd500a76febb5bb1de1f90b7708d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad0a1fd500a76febb5bb1de1f90b7708d">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[1/20]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ad0a1fd500a76febb5bb1de1f90b7708d">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[1/28]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -242,7 +266,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="afe8c94f90656b38e5f338f116891ba91"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afe8c94f90656b38e5f338f116891ba91">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[2/20]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#afe8c94f90656b38e5f338f116891ba91">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[2/28]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -291,7 +315,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a6f8542b8fe04cf978a9634f8fee7613e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6f8542b8fe04cf978a9634f8fee7613e">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[3/20]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a6f8542b8fe04cf978a9634f8fee7613e">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[3/28]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -340,7 +364,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a232e47c21f817c91ab6abe9cdbfe294e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a232e47c21f817c91ab6abe9cdbfe294e">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[4/20]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a232e47c21f817c91ab6abe9cdbfe294e">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[4/28]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -415,7 +439,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="ad64ee4675286c216c3725c05f767938e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad64ee4675286c216c3725c05f767938e">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[5/20]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ad64ee4675286c216c3725c05f767938e">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[5/28]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -464,7 +488,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a80499b619e1ed446f36ae22b8b454102"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a80499b619e1ed446f36ae22b8b454102">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[6/20]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a80499b619e1ed446f36ae22b8b454102">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[6/28]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -514,7 +538,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="abfe451794e31287c738bc02374be6a1b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abfe451794e31287c738bc02374be6a1b">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[7/20]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#abfe451794e31287c738bc02374be6a1b">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[7/28]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -576,7 +600,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="af3b5e00902311e90370c57f2fbb6eac2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af3b5e00902311e90370c57f2fbb6eac2">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[8/20]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#af3b5e00902311e90370c57f2fbb6eac2">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[8/28]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -625,7 +649,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a3fb3a234da76be0d0cf41b049d338394"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3fb3a234da76be0d0cf41b049d338394">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[9/20]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a3fb3a234da76be0d0cf41b049d338394">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[9/28]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -687,7 +711,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a5534dba8566ba4f59be53c95a6384be5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5534dba8566ba4f59be53c95a6384be5">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[10/20]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a5534dba8566ba4f59be53c95a6384be5">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[10/28]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -736,7 +760,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a323de720a59d18d6884d6bfa3bde8690"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a323de720a59d18d6884d6bfa3bde8690">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[11/20]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a323de720a59d18d6884d6bfa3bde8690">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[11/28]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -785,7 +809,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="adcffcec98c180295dc54a2bec363cab6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adcffcec98c180295dc54a2bec363cab6">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[12/20]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#adcffcec98c180295dc54a2bec363cab6">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[12/28]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -860,7 +884,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a535438915ed185127d36b147b09e4b28"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a535438915ed185127d36b147b09e4b28">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[13/20]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a535438915ed185127d36b147b09e4b28">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[13/28]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -922,7 +946,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a5649d03f68c367aa5673b4bf7c650ba4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5649d03f68c367aa5673b4bf7c650ba4">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[14/20]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a5649d03f68c367aa5673b4bf7c650ba4">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[14/28]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -971,7 +995,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a152a07d185da20ac4562d829da22ea81"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a152a07d185da20ac4562d829da22ea81">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[15/20]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a152a07d185da20ac4562d829da22ea81">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[15/28]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1033,7 +1057,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a5aed99916e05a742acb95baa38225cab"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5aed99916e05a742acb95baa38225cab">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[16/20]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a5aed99916e05a742acb95baa38225cab">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[16/28]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1082,7 +1106,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="aab959f77e294c2d579634e8c15c0e8c1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aab959f77e294c2d579634e8c15c0e8c1">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[17/20]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#aab959f77e294c2d579634e8c15c0e8c1">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[17/28]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1144,7 +1168,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="adc688915743fc9f853ba3f4cdca6ca4d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adc688915743fc9f853ba3f4cdca6ca4d">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[18/20]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#adc688915743fc9f853ba3f4cdca6ca4d">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[18/28]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1193,7 +1217,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="ad77bdf72ad35ad622e1f02359b76e546"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad77bdf72ad35ad622e1f02359b76e546">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[19/20]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ad77bdf72ad35ad622e1f02359b76e546">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[19/28]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1254,8 +1278,452 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="afe33f8a9201abd0a430e8da0a482a75d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afe33f8a9201abd0a430e8da0a482a75d">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[20/28]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IoTHubMessage_GetOutputName&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IOTHUB_MESSAGE_HANDLE&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">iotHubMessageHandle&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets the output name from the IOTHUB_MESSAGE_HANDLE. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">iotHubMessageHandle</td><td>Handle to the message.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A const char* pointing to the Output Id. </dd></dl>
+
+</div>
+</div>
+<a id="a940bc7bbd3084e62947cbeb31dab4ef5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a940bc7bbd3084e62947cbeb31dab4ef5">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[21/28]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="iothub__message_8h.html#ab826e84207e0513abcf6825fa72c7a7f">IOTHUB_MESSAGE_RESULT</a>&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IoTHubMessage_SetOutputName&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IOTHUB_MESSAGE_HANDLE&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">iotHubMessageHandle&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">outputName&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets output for named queues. CAUTION: SDK user should not call it directly, it is for internal use only. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">iotHubMessageHandle</td><td>Handle to the message. </td></tr>
+    <tr><td class="paramname">outputName</td><td>Pointer to the queue to output message to</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns IOTHUB_MESSAGE_OK if the DiagnosticData was set successfully or an error code otherwise. </dd></dl>
+
+</div>
+</div>
+<a id="a6d580b787402552e7f0ed1b1d4e276c4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d580b787402552e7f0ed1b1d4e276c4">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[22/28]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IoTHubMessage_GetInputName&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IOTHUB_MESSAGE_HANDLE&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">iotHubMessageHandle&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets the input name from the IOTHUB_MESSAGE_HANDLE. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">iotHubMessageHandle</td><td>Handle to the message.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A const char* pointing to the Input Id. </dd></dl>
+
+</div>
+</div>
+<a id="a70268b5c9871a521ce0ec2ad21d59718"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a70268b5c9871a521ce0ec2ad21d59718">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[23/28]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="iothub__message_8h.html#ab826e84207e0513abcf6825fa72c7a7f">IOTHUB_MESSAGE_RESULT</a>&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IoTHubMessage_SetInputName&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IOTHUB_MESSAGE_HANDLE&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">iotHubMessageHandle&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">inputName&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets input for named queues. CAUTION: SDK user should not call it directly, it is for internal use only. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">iotHubMessageHandle</td><td>Handle to the message. </td></tr>
+    <tr><td class="paramname">inputName</td><td>Pointer to the queue to input message to</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns IOTHUB_MESSAGE_OK if the DiagnosticData was set successfully or an error code otherwise. </dd></dl>
+
+</div>
+</div>
+<a id="ace298808b5377850099b0273bd5b8fe9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ace298808b5377850099b0273bd5b8fe9">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[24/28]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IoTHubMessage_GetConnectionModuleId&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IOTHUB_MESSAGE_HANDLE&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">iotHubMessageHandle&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets the module name from the IOTHUB_MESSAGE_HANDLE. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">iotHubMessageHandle</td><td>Handle to the message.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A const char* pointing to the connection module Id. </dd></dl>
+
+</div>
+</div>
+<a id="ac21691d20b495d97b8fce8205432d8bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac21691d20b495d97b8fce8205432d8bd">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[25/28]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="iothub__message_8h.html#ab826e84207e0513abcf6825fa72c7a7f">IOTHUB_MESSAGE_RESULT</a>&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IoTHubMessage_SetConnectionModuleId&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IOTHUB_MESSAGE_HANDLE&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">iotHubMessageHandle&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">connectionModuleId&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets connection module ID. CAUTION: SDK user should not call it directly, it is for internal use only. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">iotHubMessageHandle</td><td>Handle to the message. </td></tr>
+    <tr><td class="paramname">connectionModuleId</td><td>Pointer to the module ID of connector</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns IOTHUB_MESSAGE_OK if the DiagnosticData was set successfully or an error code otherwise. </dd></dl>
+
+</div>
+</div>
+<a id="a6496b3eeb1058e534c528b70b6bbc625"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6496b3eeb1058e534c528b70b6bbc625">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[26/28]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IoTHubMessage_GetConnectionDeviceId&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IOTHUB_MESSAGE_HANDLE&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">iotHubMessageHandle&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets the connection device ID from the IOTHUB_MESSAGE_HANDLE. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">iotHubMessageHandle</td><td>Handle to the message.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A const char* pointing to the connection device Id. </dd></dl>
+
+</div>
+</div>
+<a id="ab5f1030c210cb9e454d7ccae1b6bcad0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab5f1030c210cb9e454d7ccae1b6bcad0">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[27/28]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="iothub__message_8h.html#ab826e84207e0513abcf6825fa72c7a7f">IOTHUB_MESSAGE_RESULT</a>&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IoTHubMessage_SetConnectionDeviceId&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IOTHUB_MESSAGE_HANDLE&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">iotHubMessageHandle&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">connectionDeviceId&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets connection device Id. CAUTION: SDK user should not call it directly, it is for internal use only. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">iotHubMessageHandle</td><td>Handle to the message. </td></tr>
+    <tr><td class="paramname">connectionDeviceId</td><td>Pointer to the device ID of connector</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns IOTHUB_MESSAGE_OK if the DiagnosticData was set successfully or an error code otherwise. </dd></dl>
+
+</div>
+</div>
 <a id="a43f0f6f728663bcc073ab12b2e3160b5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a43f0f6f728663bcc073ab12b2e3160b5">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[20/20]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a43f0f6f728663bcc073ab12b2e3160b5">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[28/28]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
