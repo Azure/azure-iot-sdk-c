@@ -23,6 +23,7 @@
 
 #define EPOCH_TIME_T_VALUE          0
 #define HMAC_LENGTH                 32
+#define TPM_DATA_LENGTH             1024
 
 static TPM2B_AUTH      NullAuth = { 0 };
 static TSS_SESSION     NullPwSession;
@@ -416,7 +417,7 @@ static BUFFER_HANDLE decrypt_data(HSM_CLIENT_INFO* sec_info, const unsigned char
             curr_pos += enc_data_size;
             act_size -= enc_data_size;
 
-            // decrypts encrypted symmetric key ‘encSecret‘ and returns it as 'tpm_blob'.
+            // decrypts encrypted symmetric key ï¿½encSecretï¿½ and returns it as 'tpm_blob'.
             // Later 'tpm_blob' is used as the inner wrapper key for import of the HMAC key blob.
             if (TPM2_ActivateCredential(&sec_info->tpm_device, &NullPwSession, &ek_sess, TPM_20_SRK_HANDLE, TPM_20_EK_HANDLE, &tpm_blob, &tpm_enc_secret, &inner_wrap_key) != TPM_RC_SUCCESS)
             {
@@ -569,11 +570,16 @@ int hsm_client_tpm_get_endorsement_key(HSM_CLIENT_HANDLE handle, unsigned char**
         }
         else
         {
-            unsigned char data_bytes[1024];
+            unsigned char data_bytes[TPM_DATA_LENGTH];
             unsigned char* data_pos = data_bytes;
             /* Codes_SRS_HSM_CLIENT_TPM_07_014: [ hsm_client_tpm_get_endorsement_key s hall allocate and return the Endorsement Key. ] */
             uint32_t data_length = TPM2B_PUBLIC_Marshal(&hsm_client_info->ek_pub, &data_pos, NULL);
-            if ((*key = (unsigned char*)malloc(data_length)) == NULL)
+            if (data_length > TPM_DATA_LENGTH)
+            {
+                LogError("EK data length larger than allocated buffer %zu", data_length);
+                result = __FAILURE__;
+            }
+            else if ((*key = (unsigned char*)malloc(data_length)) == NULL)
             {
                 /* Codes_SRS_HSM_CLIENT_TPM_07_015: [ If a failure is encountered, hsm_client_tpm_get_endorsement_key shall return NULL. ] */
                 LogError("Failure creating buffer handle");
@@ -610,11 +616,16 @@ int hsm_client_tpm_get_storage_key(HSM_CLIENT_HANDLE handle, unsigned char** key
         }
         else
         {
-            unsigned char data_bytes[1024];
+            unsigned char data_bytes[TPM_DATA_LENGTH];
             unsigned char* data_pos = data_bytes;
             /* Codes_SRS_HSM_CLIENT_TPM_07_018: [ hsm_client_tpm_get_storage_key shall allocate and return the Storage Root Key. ] */
             uint32_t data_length = TPM2B_PUBLIC_Marshal(&hsm_client_info->srk_pub, &data_pos, NULL);
-            if ((*key = (unsigned char*)malloc(data_length)) == NULL)
+            if (data_length > TPM_DATA_LENGTH)
+            {
+                LogError("SRK data length larger than allocated buffer %zu", data_length);
+                result = __FAILURE__;
+            }
+            else if ((*key = (unsigned char*)malloc(data_length)) == NULL)
             {
                 LogError("Failure creating buffer handle");
                 result = __FAILURE__;
@@ -641,7 +652,7 @@ int hsm_client_tpm_sign_data(HSM_CLIENT_HANDLE handle, const unsigned char* data
     }
     else
     {
-        BYTE data_signature[1024];
+        BYTE data_signature[TPM_DATA_LENGTH];
         BYTE* data_copy = (unsigned char*)data;
         HSM_CLIENT_INFO* hsm_client_info = (HSM_CLIENT_INFO*)handle;
 

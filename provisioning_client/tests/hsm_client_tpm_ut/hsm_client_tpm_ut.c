@@ -181,6 +181,9 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(TSS_Create, TPM_RC_FAILURE);
         REGISTER_GLOBAL_MOCK_RETURN(TSS_GetTpmProperty, 1028);
 
+        REGISTER_GLOBAL_MOCK_RETURN(TPM2B_PUBLIC_Marshal, 1);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(TPM2B_PUBLIC_Marshal, 1025);
+
         REGISTER_GLOBAL_MOCK_HOOK(TSS_CreatePersistentKey, my_TSS_CreatePersistentKey);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(TSS_CreatePersistentKey, 0);
 
@@ -585,17 +588,10 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         setup_hsm_client_tpm_get_endorsement_key_mocks();
 
         umock_c_negative_tests_snapshot();
-
-        size_t calls_cannot_fail[] = { 0, 2, 4 };
-
         //act
         size_t count = umock_c_negative_tests_call_count();
         for (size_t index = 0; index < count; index++)
         {
-            if (should_skip_index(index, calls_cannot_fail, sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0])) != 0)
-            {
-                continue;
-            }
 
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
@@ -603,7 +599,7 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
             char tmp_msg[64];
             sprintf(tmp_msg, "hsm_client_tpm_get_endorsement_key failure in test %zu/%zu", index, count);
 
-            int result = hsm_client_tpm_get_endorsement_key(NULL, &key, &key_len);
+            int result = hsm_client_tpm_get_endorsement_key(sec_handle, &key, &key_len);
 
             //assert
             ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, tmp_msg);
@@ -693,24 +689,17 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
 
         umock_c_negative_tests_snapshot();
 
-        size_t calls_cannot_fail[] = { 0, 2, 4 };
-
         //act
         size_t count = umock_c_negative_tests_call_count();
         for (size_t index = 0; index < count; index++)
         {
-            if (should_skip_index(index, calls_cannot_fail, sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0])) != 0)
-            {
-                continue;
-            }
-
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[64];
             sprintf(tmp_msg, "hsm_client_tpm_get_storage_key failure in test %zu/%zu", index, count);
 
-            int result = hsm_client_tpm_get_storage_key(NULL, &key, &key_len);
+            int result = hsm_client_tpm_get_storage_key(sec_handle, &key, &key_len);
 
             //assert
             ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, tmp_msg);
