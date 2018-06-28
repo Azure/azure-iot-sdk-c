@@ -136,7 +136,11 @@ function New-CACertsIntermediateCert([string]$commonName, [Microsoft.Certificate
     openssl x509 -inform der -in $certFileName -out $pemFileName
 
     del $certFileName
+<<<<<<< HEAD
+   
+=======
 
+>>>>>>> master
     Write-Output $newCert
 }
 
@@ -176,7 +180,11 @@ function Get-CACertsCertBySubjectName([string]$subjectName)
     {
         throw ("Unable to find certificate with subjectName {0}" -f $subjectName)
     }
+<<<<<<< HEAD
+    
+=======
 
+>>>>>>> master
     Write-Output $cert
 }
 
@@ -207,6 +215,16 @@ function New-CACertsDevice([string]$deviceName, [string]$signingCertSubject=$_ro
     $newDevicePemPublicFileName   = ("./{0}-public.pem" -f $deviceName)
 
     $signingCert = Get-CACertsCertBySubjectName $signingCertSubject ## "CN=Azure IoT CA TestOnly Intermediate 1 CA"
+    
+    # Certificates for edge devices need to be able to sign other certs.
+    if ($isEdgeDevice -eq $true)
+    {
+        $isASigner = $true
+    }
+    else
+    {
+        $isASigner = $false
+    }
 
     # Certificates for edge devices need to be able to sign other certs.
     if ($isEdgeDevice -eq $true)
@@ -237,7 +255,11 @@ function New-CACertsDevice([string]$deviceName, [string]$signingCertSubject=$_ro
     # Now that we have a PEM, do some conversions on it to get formats we can process
     if ((Get-CACertsCertUseRSA) -eq $true)
     {
+<<<<<<< HEAD
+        openssl rsa -in $newDevicePemAllFileName -out $newDevicePemPrivateFileName        
+=======
         openssl rsa -in $newDevicePemAllFileName -out $newDevicePemPrivateFileName
+>>>>>>> master
     }
     else
     {
@@ -246,6 +268,11 @@ function New-CACertsDevice([string]$deviceName, [string]$signingCertSubject=$_ro
     openssl x509 -in $newDevicePemAllFileName -out $newDevicePemPublicFileName
 
     Write-Host ("Certificate with subject CN={0} has been output to {1}" -f $deviceName, (Join-Path (get-location).path $newDevicePemPublicFileName))
+}
+
+function New-CACertsEdgeDevice([string]$deviceName, [string]$signingCertSubject=($_intermediateCertSubject -f "1"))
+{
+    New-CACertsDevice $deviceName $signingCertSubject $true
 }
 
 function New-CACertsEdgeDevice([string]$deviceName, [string]$signingCertSubject=($_intermediateCertSubject -f "1"))
@@ -304,7 +331,11 @@ function Write-CACertsCertificatesForEdgeDevice([string]$deviceName)
 
     Copy-Item $originalDevicePublicPem $edgeDeviceCertificate
     Copy-Item $originalDevicePrivatePem $edgeDevicePrivateKey
+<<<<<<< HEAD
+    Get-Content $originalDevicePublicPem, $intermediate1CAPemFileName, $rootCAPemFileName | Set-Content $edgeDeviceFullCertChain    
+=======
     Get-Content $originalDevicePublicPem, $intermediate1CAPemFileName, $rootCAPemFileName | Set-Content $edgeDeviceFullCertChain
+>>>>>>> master
     Copy-Item $rootCAPemFileName $edgeIotHubOwnerCA
     Write-Host "Success"
 }
@@ -319,7 +350,11 @@ function Get-CACertsPemEncodingForEnvironmentVariable([string]$fileName)
     {
         $outputString += ($line + "`r`n")
     }
+<<<<<<< HEAD
+    
+=======
 
+>>>>>>> master
     Write-Output $outputString
 }
 

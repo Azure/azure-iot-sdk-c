@@ -57,14 +57,14 @@ extern "C"
     * @brief    Disposes of resources allocated by the IoT Hub client. This is a
     *             blocking call.
     *
-    * @param    iotHubClientHandle    The handle created by a call to the create function.
+    * @param    iotHubModuleClientHandle    The handle created by a call to the create function.
     */
-    MOCKABLE_FUNCTION(, void, IoTHubModuleClient_Destroy, IOTHUB_MODULE_CLIENT_HANDLE, iotHubClientHandle);
+    MOCKABLE_FUNCTION(, void, IoTHubModuleClient_Destroy, IOTHUB_MODULE_CLIENT_HANDLE, iotHubModuleClientHandle);
 
     /**
     * @brief    Asynchronous call to send the message specified by @p eventMessageHandle.
     *
-    * @param    iotHubClientHandle            The handle created by a call to the create function.
+    * @param    iotHubModuleClientHandle      The handle created by a call to the create function.
     * @param    eventMessageHandle            The handle to an IoT Hub message.
     * @param    eventConfirmationCallback     The callback specified by the module for receiving
     *                                         confirmation of the delivery of the IoT Hub message.
@@ -81,12 +81,12 @@ extern "C"
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SendEventAsync, IOTHUB_MODULE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_MESSAGE_HANDLE, eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, eventConfirmationCallback, void*, userContextCallback);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SendEventAsync, IOTHUB_MODULE_CLIENT_HANDLE, iotHubModuleClientHandle, IOTHUB_MESSAGE_HANDLE, eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, eventConfirmationCallback, void*, userContextCallback);
 
     /**
     * @brief    This function returns the current sending status for IoTHubClient.
     *
-    * @param    iotHubClientHandle        The handle created by a call to the create function.
+    * @param    iotHubModuleClientHandle  The handle created by a call to the create function.
     * @param    iotHubClientStatus        The sending state is populated at the address pointed
     *                                     at by this parameter. The value will be set to
     *                                     @c IOTHUBCLIENT_SENDSTATUS_IDLE if there is currently
@@ -95,13 +95,13 @@ extern "C"
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_GetSendStatus, IOTHUB_MODULE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_STATUS*, iotHubClientStatus);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_GetSendStatus, IOTHUB_MODULE_CLIENT_HANDLE, iotHubModuleClientHandle, IOTHUB_CLIENT_STATUS*, iotHubClientStatus);
 
     /**
     * @brief    Sets up the message callback to be invoked when IoT Hub issues a
     *             message to the device. This is a blocking call.
     *
-    * @param    iotHubClientHandle            The handle created by a call to the create function.
+    * @param    iotHubModuleClientHandle      The handle created by a call to the create function.
     * @param    messageCallback               The callback specified by the device for receiving
     *                                         messages from IoT Hub.
     * @param    userContextCallback           User specified context that will be provided to the
@@ -112,13 +112,13 @@ extern "C"
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SetMessageCallback, IOTHUB_MODULE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC, messageCallback, void*, userContextCallback);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SetMessageCallback, IOTHUB_MODULE_CLIENT_HANDLE, iotHubModuleClientHandle, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC, messageCallback, void*, userContextCallback);
 
     /**
     * @brief    Sets up the connection status callback to be invoked representing the status of
     * the connection to IOT Hub. This is a blocking call.
     *
-    * @param    iotHubClientHandle              The handle created by a call to the create function.
+    * @param    iotHubModuleClientHandle        The handle created by a call to the create function.
     * @param    connectionStatusCallback        The callback specified by the module for receiving
     *                                           updates about the status of the connection to IoT Hub.
     * @param    userContextCallback             User specified context that will be provided to the
@@ -129,13 +129,13 @@ extern "C"
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SetConnectionStatusCallback, IOTHUB_MODULE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK, connectionStatusCallback, void*, userContextCallback);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SetConnectionStatusCallback, IOTHUB_MODULE_CLIENT_HANDLE, iotHubModuleClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK, connectionStatusCallback, void*, userContextCallback);
 
     /**
     * @brief    Sets up the connection status callback to be invoked representing the status of
     * the connection to IOT Hub. This is a blocking call.
     *
-    * @param    iotHubClientHandle               The handle created by a call to the create function.
+    * @param    iotHubModuleClientHandle         The handle created by a call to the create function.
     * @param    retryPolicy                      The policy to use to reconnect to IoT Hub when a
     *                                            connection drops.
     * @param    retryTimeoutLimitInSeconds       Maximum amount of time(seconds) to attempt reconnection when a
@@ -146,13 +146,13 @@ extern "C"
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SetRetryPolicy, IOTHUB_MODULE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY, retryPolicy, size_t, retryTimeoutLimitInSeconds);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SetRetryPolicy, IOTHUB_MODULE_CLIENT_HANDLE, iotHubModuleClientHandle, IOTHUB_CLIENT_RETRY_POLICY, retryPolicy, size_t, retryTimeoutLimitInSeconds);
 
     /**
     * @brief    Sets up the connection status callback to be invoked representing the status of
     * the connection to IOT Hub. This is a blocking call.
     *
-    * @param    iotHubClientHandle               The handle created by a call to the create function.
+    * @param    iotHubModuleClientHandle         The handle created by a call to the create function.
     * @param    retryPolicy                      Out parameter containing the policy to use to reconnect to IoT Hub.
     * @param    retryTimeoutLimitInSeconds       Out parameter containing maximum amount of time in seconds to attempt reconnection
     to IOT Hub.
@@ -162,29 +162,29 @@ extern "C"
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_GetRetryPolicy, IOTHUB_MODULE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY*, retryPolicy, size_t*, retryTimeoutLimitInSeconds);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_GetRetryPolicy, IOTHUB_MODULE_CLIENT_HANDLE, iotHubModuleClientHandle, IOTHUB_CLIENT_RETRY_POLICY*, retryPolicy, size_t*, retryTimeoutLimitInSeconds);
 
     /**
     * @brief    This function returns in the out parameter @p lastMessageReceiveTime
     *             what was the value of the @c time function when the last message was
     *             received at the client.
     *
-    * @param    iotHubClientHandle              The handle created by a call to the create function.
+    * @param    iotHubModuleClientHandle        The handle created by a call to the create function.
     * @param    lastMessageReceiveTime          Out parameter containing the value of @c time function
     *                                           when the last message was received.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_GetLastMessageReceiveTime, IOTHUB_MODULE_CLIENT_HANDLE, iotHubClientHandle, time_t*, lastMessageReceiveTime);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_GetLastMessageReceiveTime, IOTHUB_MODULE_CLIENT_HANDLE, iotHubModuleClientHandle, time_t*, lastMessageReceiveTime);
 
     /**
     * @brief    This API sets a runtime option identified by parameter @p optionName
     *             to a value pointed to by @p value. @p optionName and the data type
     *             @p value is pointing to are specific for every option.
     *
-    * @param    iotHubClientHandle    The handle created by a call to the create function.
-    * @param    optionName            Name of the option.
-    * @param    value                 The value.
+    * @param    iotHubModuleClientHandle    The handle created by a call to the create function.
+    * @param    optionName                  Name of the option.
+    * @param    value                       The value.
     *
     *            The options that can be set via this API are:
     *                - @b timeout - the maximum time in milliseconds a communication is
@@ -227,12 +227,12 @@ extern "C"
 
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SetOption, IOTHUB_MODULE_CLIENT_HANDLE, iotHubClientHandle, const char*, optionName, const void*, value);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SetOption, IOTHUB_MODULE_CLIENT_HANDLE, iotHubModuleClientHandle, const char*, optionName, const void*, value);
 
     /**
     * @brief    This API specifies a call back to be used when the module receives a state update.
     *
-    * @param    iotHubClientHandle       The handle created by a call to the create function.
+    * @param    iotHubModuleClientHandle The handle created by a call to the create function.
     * @param    moduleTwinCallback       The callback specified by the module client to be used for updating
     *                                    the desired state. The callback will be called in response to a 
     *                                    request send by the IoTHub services. The payload will be passed to the
@@ -247,12 +247,12 @@ extern "C"
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SetModuleTwinCallback, IOTHUB_MODULE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK, moduleTwinCallback, void*, userContextCallback);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SetModuleTwinCallback, IOTHUB_MODULE_CLIENT_HANDLE, iotHubModuleClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK, moduleTwinCallback, void*, userContextCallback);
 
     /**
     * @brief    This API sends a report of the module's properties and their current values.
     *
-    * @param    iotHubClientHandle       The handle created by a call to the create function.
+    * @param    iotHubModuleClientHandle The handle created by a call to the create function.
     * @param    reportedState            The current module property values to be 'reported' to the IoTHub.
     * @param    reportedStateCallback    The callback specified by the module client to be called with the
     *                                    result of the transaction.
@@ -264,7 +264,7 @@ extern "C"
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SendReportedState, IOTHUB_MODULE_CLIENT_HANDLE, iotHubClientHandle, const unsigned char*, reportedState, size_t, size, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK, reportedStateCallback, void*, userContextCallback);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SendReportedState, IOTHUB_MODULE_CLIENT_HANDLE, iotHubModuleClientHandle, const unsigned char*, reportedState, size_t, size, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK, reportedStateCallback, void*, userContextCallback);
 
     /**
     * @brief    This API sets callback for async cloud to module method call.
@@ -281,20 +281,20 @@ extern "C"
     /**
     * @brief    This API responses to a asnyc method callback identified the methodId.
     *
-    * @param    iotHubClientHandle      The handle created by a call to the create function.
-    * @param    methodId                The methodId of the Module Method callback.
-    * @param    response                The response data for the method callback.
-    * @param    response_size           The size of the response data buffer.
-    * @param    status_response         The status response of the method callback.
+    * @param    iotHubModuleClientHandle    The handle created by a call to the create function.
+    * @param    methodId                    The methodId of the Module Method callback.
+    * @param    response                    The response data for the method callback.
+    * @param    response_size               The size of the response data buffer.
+    * @param    status_response             The status response of the method callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_ModuleMethodResponse, IOTHUB_MODULE_CLIENT_HANDLE, iotHubClientHandle, METHOD_HANDLE, methodId, const unsigned char*, response, size_t, response_size, int, statusCode);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_ModuleMethodResponse, IOTHUB_MODULE_CLIENT_HANDLE, iotHubModuleClientHandle, METHOD_HANDLE, methodId, const unsigned char*, response, size_t, response_size, int, statusCode);
 
     /**
     * @brief    Asynchronous call to send the message specified by @p eventMessageHandle.
     *
-    * @param    iotHubClientHandle            The handle created by a call to the create function.
+    * @param    iotHubModuleClientHandle      The handle created by a call to the create function.
     * @param    eventMessageHandle            The handle to an IoT Hub message.
     * @param    outputName                    The name of the queue to send the message to.
     * @param    eventConfirmationCallback     The callback specified by the module for receiving
@@ -312,13 +312,13 @@ extern "C"
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SendEventToOutputAsync, IOTHUB_MODULE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_MESSAGE_HANDLE, eventMessageHandle, const char*, outputName, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, eventConfirmationCallback, void*, userContextCallback);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SendEventToOutputAsync, IOTHUB_MODULE_CLIENT_HANDLE, iotHubModuleClientHandle, IOTHUB_MESSAGE_HANDLE, eventMessageHandle, const char*, outputName, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, eventConfirmationCallback, void*, userContextCallback);
 
 
     /**
     * @brief    This API sets callback for  method call that is directed to specified 'inputName' queue (e.g. messages from IoTHubClient_SendEventToOutputAsync)
     *
-    * @param    iotHubClientHandle            The handle created by a call to the create function.
+    * @param    iotHubModuleClientHandle      The handle created by a call to the create function.
     * @param    inputName                     The name of the queue to listen on for this moduleMethodCallback/userContextCallback.
     * @param    eventHandlerCallback          The callback which will be called by IoTHub.
     * @param    userContextCallback           User specified context that will be provided to the
@@ -326,9 +326,55 @@ extern "C"
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SetInputMessageCallback, IOTHUB_MODULE_CLIENT_HANDLE, iotHubClientHandle, const char*, inputName, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC, eventHandlerCallback, void*, userContextCallback);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SetInputMessageCallback, IOTHUB_MODULE_CLIENT_HANDLE, iotHubModuleClientHandle, const char*, inputName, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC, eventHandlerCallback, void*, userContextCallback);
 
+#ifdef USE_EDGE_MODULES
+    /**
+    * @brief	This API creates a module handle based on environment variables set in the Edge runtime.
+    NOTE: It is *ONLY* valid when the code is running in a container initiated by Edge.
+    *
+    * @param	protocol            Function pointer for protocol implementation
+    *
+    * @return	A non-NULL @c IOTHUB_CLIENT_LL_HANDLE value that is used when
+    *           invoking other functions for IoT Hub client and @c NULL on failure.
 
+    */
+    MOCKABLE_FUNCTION(, IOTHUB_MODULE_CLIENT_HANDLE, IoTHubModuleClient_CreateFromEnvironment, IOTHUB_CLIENT_TRANSPORT_PROVIDER, protocol);
+
+    /*
+    * @brief    This API invokes a device method on a specified device
+    *
+    * @param    iotHubModuleClientHandle        The handle created by a call to a create function
+    * @param    deviceId                        The device id of the device to invoke a method on
+    * @param    methodName                      The name of the method
+    * @param    methodPayload                   The method payload (in json format)
+    * @param    timeout                         The time in seconds before a timeout occurs
+    * @param    responseStatus                  This pointer will be filled with the response status after invoking the device method
+    * @param    responsePayload                 This pointer will be filled with the response payload
+    * @param    responsePayloadSize             This pointer will be filled with the response payload size
+    *
+    * @return   IOTHUB_CLIENT_OK upon success, or an error code upon failure.
+    */
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_DeviceMethodInvokeAsync, IOTHUB_MODULE_CLIENT_HANDLE, iotHubModuleClientHandle, const char*, deviceId, const char*, methodName, const char*, methodPayload, unsigned int, timeout, int*, responseStatus, unsigned char**, responsePayload, size_t*, responsePayloadSize);
+
+    /*
+    * @brief    This API invokes a module method on a specified module
+    *
+    * @param    iotHubModuleClientHandle        The handle created by a call to a create function
+    * @param    deviceId                        The device id of the device to invoke a method on
+    * @param    moduleId                        The module id of the module to invoke a method on
+    * @param    methodName                      The name of the method
+    * @param    methodPayload                   The method payload (in json format)
+    * @param    timeout                         The time in seconds before a timeout occurs
+    * @param    responseStatus                  This pointer will be filled with the response status after invoking the module method
+    * @param    responsePayload                 This pointer will be filled with the response payload
+    * @param    responsePayloadSize             This pointer will be filled with the response payload size
+    *
+    * @return   IOTHUB_CLIENT_OK upon success, or an error code upon failure.
+    */
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_ModuleMethodInvokeAsync, IOTHUB_MODULE_CLIENT_HANDLE, iotHubModuleClientHandle, const char*, deviceId, const char*, moduleId, const char*, methodName, const char*, methodPayload, unsigned int, timeout, int*, responseStatus, unsigned char**, responsePayload, size_t*, responsePayloadSize);
+
+#endif /*USE_EDGE_MODULES*/
 
 #ifdef __cplusplus
 }

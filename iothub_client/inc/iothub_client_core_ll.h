@@ -64,9 +64,8 @@ extern "C"
 #endif /*DONT_USE_UPLOADTOBLOB*/
 
 #ifdef USE_EDGE_MODULES
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_CORE_LL_HANDLE, IoTHubClientCore_LL_CreateFromEnvironment, const IOTHUB_CLIENT_CONFIG*, config, const char*, module_id);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_CORE_LL_HANDLE, IoTHubClientCore_LL_CreateFromEnvironment, IOTHUB_CLIENT_TRANSPORT_PROVIDER, protocol);
 #endif
-
 #ifdef __cplusplus
 }
 #endif

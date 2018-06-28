@@ -95,7 +95,6 @@ function generate_intermediate_ca()
     local common_name="Azure IoT Hub Intermediate Cert Test Only"
 
     local password_cmd=" -aes256 -passout pass:${intermediate_ca_password} "
-
     echo "Creating the Intermediate Device CA"
     echo "-----------------------------------"
     cd ${home_dir}
@@ -194,7 +193,6 @@ function generate_device_certificate_common()
     chmod 444 ${certificate_dir}/private/${device_prefix}.key.pem
     [ $? -eq 0 ] || exit $?
 
-
     echo "Create the ${cert_type_diagnostic} Certificate Request"
     echo "----------------------------------------"
     openssl req -config ${openssl_config_file} \
@@ -228,7 +226,6 @@ function generate_device_certificate_common()
     openssl x509 -noout -text \
             -in ${certificate_dir}/certs/${device_prefix}.cert.pem
     [ $? -eq 0 ] || exit $?
-
     echo "Create the ${cert_type_diagnostic} PFX Certificate"
     echo "----------------------------------------"
     openssl pkcs12 -in ${certificate_dir}/certs/${device_prefix}.cert.pem \
@@ -236,7 +233,6 @@ function generate_device_certificate_common()
             -password pass:${server_pfx_password} \
             -export -out ${certificate_dir}/certs/${device_prefix}.cert.pfx
     [ $? -eq 0 ] || exit $?
-
     echo "${cert_type_diagnostic} PFX Certificate Generated At:"
     echo "--------------------------------------------"
     echo "    ${certificate_dir}/certs/${device_prefix}.cert.pfx"
@@ -351,7 +347,6 @@ function generate_edge_device_certificate()
         echo "Usage: <subjectName>"
         exit 1
     fi
-
     rm -f ./private/new-edge-device.key.pem
     rm -f ./certs/new-edge-device.cert.pem
     rm -f ./certs/new-edge-device-full-chain.cert.pem

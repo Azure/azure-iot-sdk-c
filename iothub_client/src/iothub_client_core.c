@@ -20,10 +20,6 @@
 #include "azure_c_shared_utility/singlylinkedlist.h"
 #include "azure_c_shared_utility/vector.h"
 
-#ifdef USE_EDGE_MODULES
-#include "iothub_client_ll_edge.h"
-#endif
-
 struct IOTHUB_QUEUE_CONTEXT_TAG;
 
 typedef struct IOTHUB_CLIENT_CORE_INSTANCE_TAG
@@ -893,7 +889,7 @@ static IOTHUB_CLIENT_CORE_INSTANCE* create_iothub_instance(CREATE_HUB_INSTANCE_T
                     }
                     else
                     {
-                        result->IoTHubClientLLHandle = IoTHubModuleClient_LL_CreateFromEnvironment(protocol);
+                        result->IoTHubClientLLHandle = IoTHubClientCore_LL_CreateFromEnvironment(protocol);
                     }
                 }
 #endif
@@ -2327,4 +2323,27 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetInputMessageCallback(IOTHUB_CLIENT_CORE
     return result;
 }
 
+/* Temporary function until replacement during iothub_client refactor*/
+#ifdef USE_EDGE_MODULES
+IOTHUB_CLIENT_RESULT IoTHubClientCore_GenericMethodInvoke(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle, const char* deviceId, const char* moduleId, const char* methodName, const char* methodPayload, unsigned int timeout, int* responseStatus, unsigned char** responsePayload, size_t* responsePayloadSize)
+{
+    IOTHUB_CLIENT_RESULT result;
+    if (iotHubClientHandle == NULL)
+    {
+        LogError("Argument cannot be NULL");
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    else if (Lock(iotHubClientHandle->LockHandle) != LOCK_OK)
+    {
+        LogError("failed locking for dispatch_user_callbacks");
+        result = IOTHUB_CLIENT_ERROR;
+    }
+    else
+    {
+        result = IoTHubClientCore_LL_GenericMethodInvoke(iotHubClientHandle->IoTHubClientLLHandle, deviceId, moduleId, methodName, methodPayload, timeout, responseStatus, responsePayload, responsePayloadSize);
+        (void)Unlock(iotHubClientHandle->LockHandle);
+    }
 
+    return result;
+}
+#endif /* USE_EDGE_MODULES */

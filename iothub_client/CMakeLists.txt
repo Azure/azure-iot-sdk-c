@@ -39,6 +39,8 @@ set(iothub_client_h_files
     ./inc/iothub_client_version.h
     ./inc/iothub_device_client.h
     ./inc/iothub_device_client_ll.h
+    ./inc/iothub_module_client.h
+    ./inc/iothub_module_client_ll.h
     ./inc/iothub_transport_ll.h
     ./inc/iothub_message.h
     ./inc/internal/iothubtransport.h
@@ -64,6 +66,18 @@ if(NOT dont_use_uploadtoblob)
     )
 endif()
 
+if (use_edge_modules)
+    set(iothub_client_c_files
+        ${iothub_client_c_files}
+        ./src/iothub_client_edge.c
+    )
+
+    set (iothub_client_h_files
+        ${iothub_client_h_files}
+        ./inc/internal/iothub_client_edge.h
+    )
+endif()
+
 #this is around for back compat only
 if (${use_prov_client})
     set(iothub_client_h_files
@@ -72,20 +86,6 @@ if (${use_prov_client})
     )
 endif()
 #end back compat only
-
-if (${use_edge_modules})
-    set(iothub_client_c_files
-        ${iothub_client_c_files}
-        ./src/iothub_client_ll_edge.c
-        ./src/iothub_client_edge.c
-    )
-    
-    set(iothub_client_h_files
-        ${iothub_client_h_files}
-        ./inc/iothub_client_ll_edge.h
-        ./inc/iothub_client_edge.h
-    )
-endif()
 
 set(iothub_client_h_install_files
     ${iothub_client_h_files}

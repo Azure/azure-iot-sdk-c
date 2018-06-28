@@ -63,11 +63,8 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 #include "azure_c_shared_utility/vector.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "iothub_client_core_ll.h"
+#include "iothub_module_client_ll.h"
 #include "internal/iothubtransport.h"
-
-#ifdef USE_EDGE_MODULES
-#include "iothub_client_ll_edge.h"
-#endif
 
 #undef ENABLE_MOCKS
 
@@ -493,8 +490,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClientCore_LL_UploadToBlob, IOTHUB_CLIENT_ERROR);
 #endif
 #ifdef USE_EDGE_MODULES
-    REGISTER_GLOBAL_MOCK_RETURN(IoTHubModuleClient_LL_CreateFromEnvironment, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubModuleClient_LL_CreateFromEnvironment, NULL);
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubClientCore_LL_CreateFromEnvironment, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClientCore_LL_CreateFromEnvironment, NULL);
 #endif
 
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClientCore_LL_GetRetryPolicy, IOTHUB_CLIENT_OK);
@@ -652,7 +649,7 @@ static void setup_create_iothub_instance(CREATE_IOTHUB_TEST_TYPE create_iothub_t
 
 #ifdef USE_EDGE_MODULES
         case CREATE_IOTHUB_TEST_CREATE_FROM_ENVIRONMENT:
-            STRICT_EXPECTED_CALL(IoTHubModuleClient_LL_CreateFromEnvironment(TEST_TRANSPORT_PROVIDER));
+            STRICT_EXPECTED_CALL(IoTHubClientCore_LL_CreateFromEnvironment(TEST_TRANSPORT_PROVIDER));
             break;
 #endif
 
