@@ -19,10 +19,10 @@
 #include "azure_uhttp_c/uhttp.h"
 #include "parson.h"
 
-#define HTTP_PORT_NUM                   443
-#define HTTP_STATUS_CODE_OK             200
-#define HTTP_STATUS_CODE_OK_MAX         226
-#define HTTP_STATUS_CODE_UNAUTHORIZED   401
+#define HTTP_PORT_NUM                       443
+#define HTTP_STATUS_CODE_OK                 200
+#define HTTP_STATUS_CODE_OK_MAX             226
+#define HTTP_STATUS_CODE_UNAUTHORIZED       401
 
 static const char* PROV_REGISTRATION_URI_FMT = "/%s/registrations/%s/register?api-version=%s";
 static const char* PROV_OP_STATUS_URI_FMT = "/%s/registrations/%s/operations/%s?api-version=%s";
@@ -52,6 +52,8 @@ typedef enum PROV_TRANSPORT_STATE_TAG
 
     TRANSPORT_CLIENT_STATE_STATUS_SENT,
     TRANSPORT_CLIENT_STATE_STATUS_RECV,
+
+    TRANSPORT_CLIENT_STATE_TRANSIENT,
 
     TRANSPORT_CLIENT_STATE_ERROR
 } PROV_TRANSPORT_STATE;
@@ -168,6 +170,11 @@ static void on_http_reply_recv(void* callback_ctx, HTTP_CALLBACK_REASON request_
                     http_info->transport_state = TRANSPORT_CLIENT_STATE_STATUS_RECV;
                 }
             }
+        }
+        else if (status_code > PROV_STATUS_CODE_TRANSIENT_ERROR)
+        {
+            // On transient error reset the transport to send state
+            http_info->transport_state = TRANSPORT_CLIENT_STATE_TRANSIENT;
         }
         else
         {
@@ -958,6 +965,14 @@ void prov_transport_http_dowork(PROV_DEVICE_TRANSPORT_HANDLE handle)
                 }
                 break;
             }
+
+            case TRANSPORT_CLIENT_STATE_TRANSIENT:
+                if (http_info->status_cb != NULL)
+                {
+                    http_info->status_cb(PROV_DEVICE_TRANSPORT_STATUS_TRANSIENT, http_info->status_ctx);
+                }
+                http_info->transport_state = TRANSPORT_CLIENT_STATE_IDLE;
+                break;
 
             case TRANSPORT_CLIENT_STATE_ERROR:
                 /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_039: [ If the state is Error, prov_transport_http_dowork shall call the registration_data callback with PROV_DEVICE_TRANSPORT_RESULT_ERROR and NULL payload_data. ] */

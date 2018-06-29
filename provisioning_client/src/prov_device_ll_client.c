@@ -494,6 +494,21 @@ static void on_transport_status(PROV_DEVICE_TRANSPORT_STATUS transport_status, v
                     }
                 }
                 break;
+            case PROV_DEVICE_TRANSPORT_STATUS_TRANSIENT:
+                if (prov_info->prov_state == CLIENT_STATE_REGISTER_SENT)
+                {
+                    prov_info->prov_state = CLIENT_STATE_REGISTER_SEND;
+                }
+                else if (prov_info->prov_state == CLIENT_STATE_STATUS_SENT)
+                {
+                    prov_info->prov_state = CLIENT_STATE_STATUS_SEND;
+                }
+                else
+                {
+                    // Ideally this should not happen
+                    LogError("State Error: Transient Error occured in the %d state", (int)transport_status);
+                }
+                break;
             default:
                 LogError("Unknown status encountered");
                 break;

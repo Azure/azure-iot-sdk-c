@@ -1218,11 +1218,120 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
+        STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(mqttmessage_getApplicationMsg(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
 
         //act
         g_on_msg_recv(TEST_MQTT_MESSAGE, g_msg_recv_callback_context);
+
+        //assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        prov_transport_common_mqtt_close(handle);
+        prov_transport_common_mqtt_destroy(handle);
+    }
+
+    TEST_FUNCTION(prov_transport_common_mqtt_dowork_register_recv_app_msg_NULL_fail)
+    {
+        CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };
+        QOS_VALUE QosValue[] = { DELIVER_AT_LEAST_ONCE };
+        SUBSCRIBE_ACK suback;
+        suback.packetId = 1234;
+        suback.qosCount = 1;
+        suback.qosReturn = QosValue;
+
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io);
+        (void)prov_transport_common_mqtt_x509_cert(handle, TEST_X509_CERT_VALUE, TEST_PRIVATE_KEY_VALUE);
+        (void)prov_transport_common_mqtt_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+        (void)prov_transport_common_mqtt_register_device(handle, on_transport_challenge_callback, NULL, on_transport_json_parse, NULL);
+        prov_transport_common_mqtt_dowork(handle);
+        g_operation_cb(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_msg_recv_callback_context);
+        prov_transport_common_mqtt_dowork(handle);
+        g_operation_cb(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_SUBSCRIBE_ACK, &suback, g_msg_recv_callback_context);
+        prov_transport_common_mqtt_dowork(handle);
+        umock_c_reset_all_calls();
+
+        //arrange
+        STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mqttmessage_getApplicationMsg(IGNORED_PTR_ARG)).SetReturn(NULL);
+
+        //act
+        g_on_msg_recv(TEST_MQTT_MESSAGE, g_msg_recv_callback_context);
+
+        //assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        prov_transport_common_mqtt_close(handle);
+        prov_transport_common_mqtt_destroy(handle);
+    }
+
+    TEST_FUNCTION(prov_transport_common_mqtt_dowork_register_recv_malloc_NULL_fail)
+    {
+        CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };
+        QOS_VALUE QosValue[] = { DELIVER_AT_LEAST_ONCE };
+        SUBSCRIBE_ACK suback;
+        suback.packetId = 1234;
+        suback.qosCount = 1;
+        suback.qosReturn = QosValue;
+
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io);
+        (void)prov_transport_common_mqtt_x509_cert(handle, TEST_X509_CERT_VALUE, TEST_PRIVATE_KEY_VALUE);
+        (void)prov_transport_common_mqtt_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+        (void)prov_transport_common_mqtt_register_device(handle, on_transport_challenge_callback, NULL, on_transport_json_parse, NULL);
+        prov_transport_common_mqtt_dowork(handle);
+        g_operation_cb(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_msg_recv_callback_context);
+        prov_transport_common_mqtt_dowork(handle);
+        g_operation_cb(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_SUBSCRIBE_ACK, &suback, g_msg_recv_callback_context);
+        prov_transport_common_mqtt_dowork(handle);
+        umock_c_reset_all_calls();
+
+        //arrange
+        STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mqttmessage_getApplicationMsg(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)).SetReturn(NULL);
+
+        //act
+        g_on_msg_recv(TEST_MQTT_MESSAGE, g_msg_recv_callback_context);
+
+        //assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        prov_transport_common_mqtt_close(handle);
+        prov_transport_common_mqtt_destroy(handle);
+    }
+
+    TEST_FUNCTION(prov_transport_common_mqtt_dowork_register_recv_transient_error_succeed)
+    {
+        CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };
+        QOS_VALUE QosValue[] = { DELIVER_AT_LEAST_ONCE };
+        SUBSCRIBE_ACK suback;
+        suback.packetId = 1234;
+        suback.qosCount = 1;
+        suback.qosReturn = QosValue;
+
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io);
+        (void)prov_transport_common_mqtt_x509_cert(handle, TEST_X509_CERT_VALUE, TEST_PRIVATE_KEY_VALUE);
+        (void)prov_transport_common_mqtt_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+        (void)prov_transport_common_mqtt_register_device(handle, on_transport_challenge_callback, NULL, on_transport_json_parse, NULL);
+        prov_transport_common_mqtt_dowork(handle);
+        g_operation_cb(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_msg_recv_callback_context);
+        prov_transport_common_mqtt_dowork(handle);
+        g_operation_cb(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_SUBSCRIBE_ACK, &suback, g_msg_recv_callback_context);
+        prov_transport_common_mqtt_dowork(handle);
+        umock_c_reset_all_calls();
+
+        //arrange
+        STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_PTR_ARG)).SetReturn("$dps/registrations/res/500/?$rid=1");
+        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_TRANSIENT, IGNORED_PTR_ARG));
+
+        //act
+        g_on_msg_recv(TEST_MQTT_MESSAGE, g_msg_recv_callback_context);
+        prov_transport_common_mqtt_dowork(handle);
 
         //assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -1302,6 +1411,48 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         setup_send_mqtt_message_mocks();
 
         //act
+        prov_transport_common_mqtt_dowork(handle);
+
+        //assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        prov_transport_common_mqtt_close(handle);
+        prov_transport_common_mqtt_destroy(handle);
+    }
+
+    TEST_FUNCTION(prov_transport_common_mqtt_dowork_send_status_transient_error_succeed)
+    {
+        PROV_DEVICE_TRANSPORT_HANDLE handle;
+        CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };
+        QOS_VALUE QosValue[] = { DELIVER_AT_LEAST_ONCE };
+        SUBSCRIBE_ACK suback;
+        suback.packetId = 1234;
+        suback.qosCount = 1;
+        suback.qosReturn = QosValue;
+
+        handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io);
+        (void)prov_transport_common_mqtt_x509_cert(handle, TEST_X509_CERT_VALUE, TEST_PRIVATE_KEY_VALUE);
+        (void)prov_transport_common_mqtt_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+        (void)prov_transport_common_mqtt_register_device(handle, on_transport_challenge_callback, NULL, on_transport_json_parse, NULL);
+        prov_transport_common_mqtt_dowork(handle);
+        g_operation_cb(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_msg_recv_callback_context);
+        prov_transport_common_mqtt_dowork(handle);
+        g_operation_cb(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_SUBSCRIBE_ACK, &suback, g_msg_recv_callback_context);
+        prov_transport_common_mqtt_dowork(handle);
+        g_on_msg_recv(TEST_MQTT_MESSAGE, g_msg_recv_callback_context);
+        g_target_transport_status = PROV_DEVICE_TRANSPORT_STATUS_ASSIGNING;
+        prov_transport_common_mqtt_dowork(handle);
+        (void)prov_transport_common_mqtt_get_operation_status(handle);
+        umock_c_reset_all_calls();
+
+        //arrange
+        STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_PTR_ARG)).SetReturn("$dps/registrations/res/500/?$rid=1");
+        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_TRANSIENT, IGNORED_PTR_ARG));
+
+        //act
+        g_on_msg_recv(TEST_MQTT_MESSAGE, g_msg_recv_callback_context);
         prov_transport_common_mqtt_dowork(handle);
 
         //assert

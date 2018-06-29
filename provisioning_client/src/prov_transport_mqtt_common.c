@@ -30,6 +30,8 @@ static const char* MQTT_USERNAME_FMT = "%s/registrations/%s/api-version=%s&Clien
 static const char* MQTT_REGISTER_MESSAGE_FMT = "$dps/registrations/PUT/iotdps-register/?$rid=%d";
 static const char* MQTT_STATUS_MESSAGE_FMT = "$dps/registrations/GET/iotdps-get-operationstatus/?$rid=%d&operationId=%s";
 
+static const char* MQTT_TOPIC_STATUS_PREFIX = "$dps/registrations/res/";
+
 typedef enum MQTT_TRANSPORT_STATE_TAG
 {
     MQTT_STATE_IDLE,
@@ -55,6 +57,7 @@ typedef enum PROV_TRANSPORT_STATE_TAG
     TRANSPORT_CLIENT_STATE_STATUS_SENT,
     TRANSPORT_CLIENT_STATE_STATUS_RECV,
 
+    TRANSPORT_CLIENT_STATE_TRANSIENT,
     TRANSPORT_CLIENT_STATE_ERROR
 } PROV_TRANSPORT_STATE;
 
@@ -265,40 +268,68 @@ static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE handle, void* user_ct
     {
         PROV_TRANSPORT_MQTT_INFO* mqtt_info = (PROV_TRANSPORT_MQTT_INFO*)user_ctx;
 
-        const APP_PAYLOAD* payload = mqttmessage_getApplicationMsg(handle);
-        if (payload != NULL)
+        bool is_transient_error = false;
+        const char* topic_resp = mqttmessage_getTopicName(handle);
+        if (topic_resp != NULL)
         {
-            if (mqtt_info->payload_data != NULL)
+            // Extract the registration status
+            size_t status_pos = strlen(MQTT_TOPIC_STATUS_PREFIX);
+            if (memcmp(MQTT_TOPIC_STATUS_PREFIX, topic_resp, status_pos) == 0)
             {
-                free(mqtt_info->payload_data);
-                mqtt_info->payload_data = NULL;
-            }
-            
-            if ((mqtt_info->payload_data = malloc(payload->length + 1)) == NULL)
-            {
-                LogError("failure allocating payload data");
-                mqtt_info->transport_state = TRANSPORT_CLIENT_STATE_ERROR;
-                mqtt_info->mqtt_state = MQTT_STATE_ERROR;
-            }
-            else
-            {
-                memset(mqtt_info->payload_data, 0, payload->length + 1);
-                memcpy(mqtt_info->payload_data, payload->message, payload->length);
-                if (mqtt_info->transport_state == TRANSPORT_CLIENT_STATE_REG_SENT)
+                // If the status code is > 429 then this is a transient error
+                long status_code = atol(topic_resp + status_pos);
+                if (status_code > PROV_STATUS_CODE_TRANSIENT_ERROR)
                 {
-                    mqtt_info->transport_state = TRANSPORT_CLIENT_STATE_REG_RECV;
-                }
-                else
-                {
-                    mqtt_info->transport_state = TRANSPORT_CLIENT_STATE_STATUS_RECV;
+                    // On transient error reset the transport to send state
+                    mqtt_info->transport_state = TRANSPORT_CLIENT_STATE_TRANSIENT;
+                    is_transient_error = true;
                 }
             }
         }
         else
         {
-            LogError("failure NULL message encountered from umqtt");
+            LogError("failure topic name is NULL");
             mqtt_info->transport_state = TRANSPORT_CLIENT_STATE_ERROR;
             mqtt_info->mqtt_state = MQTT_STATE_ERROR;
+        }
+
+        if (!is_transient_error)
+        {
+            const APP_PAYLOAD* payload = mqttmessage_getApplicationMsg(handle);
+            if (payload != NULL)
+            {
+                if (mqtt_info->payload_data != NULL)
+                {
+                    free(mqtt_info->payload_data);
+                    mqtt_info->payload_data = NULL;
+                }
+
+                if ((mqtt_info->payload_data = malloc(payload->length + 1)) == NULL)
+                {
+                    LogError("failure allocating payload data");
+                    mqtt_info->transport_state = TRANSPORT_CLIENT_STATE_ERROR;
+                    mqtt_info->mqtt_state = MQTT_STATE_ERROR;
+                }
+                else
+                {
+                    memset(mqtt_info->payload_data, 0, payload->length + 1);
+                    memcpy(mqtt_info->payload_data, payload->message, payload->length);
+                    if (mqtt_info->transport_state == TRANSPORT_CLIENT_STATE_REG_SENT)
+                    {
+                        mqtt_info->transport_state = TRANSPORT_CLIENT_STATE_REG_RECV;
+                    }
+                    else
+                    {
+                        mqtt_info->transport_state = TRANSPORT_CLIENT_STATE_STATUS_RECV;
+                    }
+                }
+            }
+            else
+            {
+                LogError("failure NULL message encountered from umqtt");
+                mqtt_info->transport_state = TRANSPORT_CLIENT_STATE_ERROR;
+                mqtt_info->mqtt_state = MQTT_STATE_ERROR;
+            }
         }
     }
     else
@@ -935,6 +966,8 @@ void prov_transport_common_mqtt_dowork(PROV_DEVICE_TRANSPORT_HANDLE handle)
                                     mqtt_info->register_data_cb(PROV_DEVICE_TRANSPORT_RESULT_OK, parse_info->authorization_key, parse_info->iothub_uri, parse_info->device_id, mqtt_info->user_ctx);
                                     mqtt_info->transport_state = TRANSPORT_CLIENT_STATE_IDLE;
                                     break;
+                                case PROV_DEVICE_TRANSPORT_STATUS_TRANSIENT:
+                                    break;
                                 case PROV_DEVICE_TRANSPORT_STATUS_ERROR:
                                 default:
                                     /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_049: [ If any error is encountered prov_transport_common_mqtt_dowork shall set the mqtt_state to MQTT_STATE_ERROR and the transport_state to TRANSPORT_CLIENT_STATE_ERROR. ] */
@@ -948,6 +981,13 @@ void prov_transport_common_mqtt_dowork(PROV_DEVICE_TRANSPORT_HANDLE handle)
                         }
                         break;
                     }
+                    case TRANSPORT_CLIENT_STATE_TRANSIENT:
+                        if (mqtt_info->status_cb != NULL)
+                        {
+                            mqtt_info->status_cb(PROV_DEVICE_TRANSPORT_STATUS_TRANSIENT, mqtt_info->status_ctx);
+                        }
+                        mqtt_info->transport_state = TRANSPORT_CLIENT_STATE_IDLE;
+                        break;
 
                     case TRANSPORT_CLIENT_STATE_ERROR:
                         /* Codes_PROV_TRANSPORT_MQTT_COMMON_07_057: [ If transport_state is set to TRANSPORT_CLIENT_STATE_ERROR, prov_transport_common_mqtt_dowork shall call the register_data_cb function with PROV_DEVICE_TRANSPORT_RESULT_ERROR setting the transport_state to TRANSPORT_CLIENT_STATE_IDLE ] */
