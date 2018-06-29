@@ -32,37 +32,37 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_mod_dm_e2e)
     //
     // MQTT tests.
     //
-    TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_String_sas)
+    TEST_FUNCTION(IotHub_Mqtt_Module_Method_Call_With_String_sas)
     {
         device_method_e2e_method_call_with_string_sas(MQTT_Protocol);
     }
 
-    TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_Double_Quoted_Json_sas)
+    TEST_FUNCTION(IotHub_Mqtt_Module_Method_Call_With_Double_Quoted_Json_sas)
     {
         device_method_e2e_method_call_with_double_quoted_json_sas(MQTT_Protocol);
     }
 
-    TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_Empty_Json_Object_sas)
+    TEST_FUNCTION(IotHub_Mqtt_Module_Method_Call_With_Empty_Json_Object_sas)
     {
         device_method_e2e_method_call_with_empty_json_object_sas(MQTT_Protocol);
     }
 
-    TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_Null_sas)
+    TEST_FUNCTION(IotHub_Mqtt_Module_Method_Call_With_Null_sas)
     {
         device_method_e2e_method_call_with_null_sas(MQTT_Protocol);
     }
 
-    TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_Embedded_Double_Quote_sas)
+    TEST_FUNCTION(IotHub_Mqtt_Module_Method_Call_With_Embedded_Double_Quote_sas)
     {
         device_method_e2e_method_call_with_embedded_double_quote_sas(MQTT_Protocol);
     }
 
-    TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_Embedded_Single_Quote_sas)
+    TEST_FUNCTION(IotHub_Mqtt_Module_Method_Call_With_Embedded_Single_Quote_sas)
     {
         device_method_e2e_method_call_with_embedded_single_quote_sas(MQTT_Protocol);
     }
 
-    TEST_FUNCTION(IotHub_Mqtt_Ws_Method_Call_With_String_sas)
+    TEST_FUNCTION(IotHub_Mqtt_Ws_Module_Method_Call_With_String_sas)
     {
         device_method_e2e_method_call_with_string_sas(MQTT_WebSocket_Protocol);
     }
