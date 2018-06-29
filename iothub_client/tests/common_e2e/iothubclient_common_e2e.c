@@ -1058,6 +1058,10 @@ void e2e_d2c_with_svc_fault_ctrl_with_transport_status(IOTHUB_CLIENT_TRANSPORT_P
         setoption_on_device_or_module(OPTION_SAS_TOKEN_REFRESH_TIME, (const void*)&refresh_time, "Failed setting OPTION_SAS_TOKEN_REFRESH_TIME");
     }
 
+    LogInfo("Sleeping 3 seconds to let SetMessageCallback() register with server.");
+    ThreadAPI_Sleep(3000);
+    LogInfo("Continue with service client message.");
+
     // Send the Event from the client
     LogInfo("Send message and wait for confirmation...");
     d2cMessageInitial = client_create_and_send_d2c(TEST_MESSAGE_CREATE_BYTE_ARRAY);
