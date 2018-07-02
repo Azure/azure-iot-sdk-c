@@ -136,11 +136,7 @@ function New-CACertsIntermediateCert([string]$commonName, [Microsoft.Certificate
     openssl x509 -inform der -in $certFileName -out $pemFileName
 
     del $certFileName
-<<<<<<< HEAD
    
-=======
-
->>>>>>> master
     Write-Output $newCert
 }
 
@@ -180,11 +176,7 @@ function Get-CACertsCertBySubjectName([string]$subjectName)
     {
         throw ("Unable to find certificate with subjectName {0}" -f $subjectName)
     }
-<<<<<<< HEAD
     
-=======
-
->>>>>>> master
     Write-Output $cert
 }
 
@@ -255,11 +247,7 @@ function New-CACertsDevice([string]$deviceName, [string]$signingCertSubject=$_ro
     # Now that we have a PEM, do some conversions on it to get formats we can process
     if ((Get-CACertsCertUseRSA) -eq $true)
     {
-<<<<<<< HEAD
         openssl rsa -in $newDevicePemAllFileName -out $newDevicePemPrivateFileName        
-=======
-        openssl rsa -in $newDevicePemAllFileName -out $newDevicePemPrivateFileName
->>>>>>> master
     }
     else
     {
@@ -331,11 +319,7 @@ function Write-CACertsCertificatesForEdgeDevice([string]$deviceName)
 
     Copy-Item $originalDevicePublicPem $edgeDeviceCertificate
     Copy-Item $originalDevicePrivatePem $edgeDevicePrivateKey
-<<<<<<< HEAD
-    Get-Content $originalDevicePublicPem, $intermediate1CAPemFileName, $rootCAPemFileName | Set-Content $edgeDeviceFullCertChain    
-=======
     Get-Content $originalDevicePublicPem, $intermediate1CAPemFileName, $rootCAPemFileName | Set-Content $edgeDeviceFullCertChain
->>>>>>> master
     Copy-Item $rootCAPemFileName $edgeIotHubOwnerCA
     Write-Host "Success"
 }
@@ -350,14 +334,9 @@ function Get-CACertsPemEncodingForEnvironmentVariable([string]$fileName)
     {
         $outputString += ($line + "`r`n")
     }
-<<<<<<< HEAD
     
-=======
-
->>>>>>> master
     Write-Output $outputString
 }
 
 Write-Warning "This script is provided for prototyping only."
 Write-Warning "DO NOT USE CERTIFICATES FROM THIS SCRIPT FOR PRODUCTION!"
-
