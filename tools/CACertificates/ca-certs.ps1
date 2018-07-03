@@ -218,17 +218,7 @@ function New-CACertsDevice([string]$deviceName, [string]$signingCertSubject=$_ro
         $isASigner = $false
     }
 
-    # Certificates for edge devices need to be able to sign other certs.
-    if ($isEdgeDevice -eq $true)
-    {
-        $isASigner = $true
-    }
-    else
-    {
-        $isASigner = $false
-    }
-
-    $newDeviceCertPfx = New-CACertsSelfSignedCertificate $deviceName $signingCert $false
+    $newDeviceCertPfx = New-CACertsSelfSignedCertificate $deviceName $signingCert $isASigner
 
     $certSecureStringPwd = ConvertTo-SecureString -String $_privateKeyPassword -Force -AsPlainText
 
@@ -256,11 +246,6 @@ function New-CACertsDevice([string]$deviceName, [string]$signingCertSubject=$_ro
     openssl x509 -in $newDevicePemAllFileName -out $newDevicePemPublicFileName
 
     Write-Host ("Certificate with subject CN={0} has been output to {1}" -f $deviceName, (Join-Path (get-location).path $newDevicePemPublicFileName))
-}
-
-function New-CACertsEdgeDevice([string]$deviceName, [string]$signingCertSubject=($_intermediateCertSubject -f "1"))
-{
-    New-CACertsDevice $deviceName $signingCertSubject $true
 }
 
 function New-CACertsEdgeDevice([string]$deviceName, [string]$signingCertSubject=($_intermediateCertSubject -f "1"))
