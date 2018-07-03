@@ -9,6 +9,7 @@
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/gb_rand.h"
 #include "azure_c_shared_utility/xlogging.h"
+#include "azure_c_shared_utility/uniqueid.h"
 
 #include "x509_info.h"
 
@@ -61,6 +62,7 @@ static const char* const DEVICE_PREFIX = "hsm-dev-";
 
 #define DICE_UDS_LENGTH             0x20
 #define RANDOM_BUFFER_LENGTH        8
+#define DEVICE_GUID_SIZE            37
 
 static unsigned char g_uds_seed[DICE_UDS_LENGTH];
 static unsigned char firmware_id[RIOT_DIGEST_LENGTH] = { 0 };
@@ -373,18 +375,32 @@ static int process_riot_key_info(X509_CERT_INFO* x509_info)
 
 static void generate_subject_name()
 {
-    unsigned char rand_buff[RANDOM_BUFFER_LENGTH];
-    for (size_t index = 0; index < RANDOM_BUFFER_LENGTH; index++)
+    char device_guid[DEVICE_GUID_SIZE];
+    if (UniqueId_Generate(device_guid, DEVICE_GUID_SIZE) != UNIQUEID_OK)
     {
-        rand_buff[index] = (unsigned char)gb_rand();
-    }
+        unsigned char rand_buff[RANDOM_BUFFER_LENGTH];
+        for (size_t index = 0; index < RANDOM_BUFFER_LENGTH; index++)
+        {
+            rand_buff[index] = (unsigned char)gb_rand();
+        }
 
-    strcpy(g_device_name, DEVICE_PREFIX);
-    char* insert_pos = g_device_name + strlen(g_device_name);
-    for (size_t index = 0; index < RANDOM_BUFFER_LENGTH; index++)
+        strcpy(g_device_name, DEVICE_PREFIX);
+        char* insert_pos = g_device_name + strlen(g_device_name);
+        for (size_t index = 0; index < RANDOM_BUFFER_LENGTH; index++)
+        {
+            int pos = sprintf(insert_pos, "%x", rand_buff[index]);
+            insert_pos += pos;
+        }
+    }
+    else
     {
-        int pos = sprintf(insert_pos, "%x", rand_buff[index]);
-        insert_pos += pos;
+        strcpy(g_device_name, DEVICE_PREFIX);
+        char* insert_pos = g_device_name + strlen(g_device_name);
+        for (size_t index = 0; index < RANDOM_BUFFER_LENGTH; index++)
+        {
+            int pos = sprintf(insert_pos, "%x", device_guid[index]);
+            insert_pos += pos;
+        }
     }
 }
 

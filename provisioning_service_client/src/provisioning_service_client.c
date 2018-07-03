@@ -150,17 +150,17 @@ static void on_http_connected(void* callback_ctx, HTTP_CALLBACK_REASON connect_r
 
 static void on_http_error(void* callback_ctx, HTTP_CALLBACK_REASON error_result)
 {
-(void)error_result;
-if (callback_ctx != NULL)
-{
-    PROV_SERVICE_CLIENT* prov_client = (PROV_SERVICE_CLIENT*)callback_ctx;
-    prov_client->http_state = HTTP_STATE_ERROR;
-    LogError("Failure encountered in http %d", error_result);
-}
-else
-{
-    LogError("Failure encountered in http %d", error_result);
-}
+    (void)error_result;
+    if (callback_ctx != NULL)
+    {
+        PROV_SERVICE_CLIENT* prov_client = (PROV_SERVICE_CLIENT*)callback_ctx;
+        prov_client->http_state = HTTP_STATE_ERROR;
+        LogError("Failure encountered in http %d", error_result);
+    }
+    else
+    {
+        LogError("Failure encountered in http %d", error_result);
+    }
 }
 
 static void on_http_reply_recv(void* callback_ctx, HTTP_CALLBACK_REASON request_result, const unsigned char* content, size_t content_len, unsigned int status_code, HTTP_HEADERS_HANDLE responseHeadersHandle)
