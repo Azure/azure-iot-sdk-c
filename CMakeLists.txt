@@ -78,6 +78,8 @@ option(use_tpm_simulator "tpm simulator type of hsm used with the provisioning c
 option(use_edge_modules "Enable support for running modules against Azure IoT Edge" OFF)
 option(use_custom_heap "use externally defined heap functions instead of the malloc family" OFF)
 
+set(use_prov_client_core OFF)
+
 if(${use_custom_heap})
     add_definitions(-DGB_USE_CUSTOM_HEAP)
 endif()
@@ -107,26 +109,28 @@ endif()
 
 # Enable IoT SDK to act as a module for Edge
 if(${use_edge_modules})
-    set(use_prov_client ON)
+    set(use_prov_client_core ON)
     set(use_http ON)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_EDGE_MODULES")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_EDGE_MODULES")
+    set(hsm_type_edge_module ON)
 endif()
 
-# Set Provisioning Information
+# Set Provisioning Information.  This will also setup appropriate HSM
 if (${use_prov_client})
-    getProvSDKVersion()
-    message(STATUS "Provisioning SDK Version = ${PROV_SDK_VERSION}")
+    set(use_prov_client_core ON)
 
     if ("${hsm_custom_lib}" STREQUAL "")
         set(hsm_type_x509 ON)
         set(hsm_type_sastoken ON)
-        if(${use_edge_modules})
-            set(hsm_type_edge_module ON)
-        endif()
     else()
         set(hsm_type_custom ON)
     endif()
+endif()
+
+if (${use_prov_client_core})
+    getProvSDKVersion()
+    message(STATUS "Provisioning SDK Version = ${PROV_SDK_VERSION}")
 endif()
 
 # setting nuget_e2e_tests will only generate e2e tests to run with nuget packages.
@@ -299,7 +303,7 @@ if (NOT ${use_http} AND ${use_prov_client})
     message(STATUS "provisioning_service_client build is disabled (HTTP support is required)")
 endif()
 
-if (${use_prov_client})
+if (${use_prov_client_core})
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_PROV_MODULE")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_PROV_MODULE")
 

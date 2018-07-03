@@ -39,7 +39,7 @@ if (${hsm_type_custom})
 
     set(HSM_CLIENT_LIBRARY ${CUSTOM_HSM_LIB})
 else ()
-    if (${run_e2e_tests})
+    if (${run_e2e_tests} AND (${hsm_type_x509} OR ${hsm_type_sastoken}))
         # For e2e test we need to run a custom HSM to handle testing
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHSM_TYPE_X509 -DHSM_TYPE_SAS_TOKEN")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHSM_TYPE_X509 -DHSM_TYPE_SAS_TOKEN")
@@ -175,146 +175,149 @@ target_link_libraries(prov_auth_client hsm_security_client)
 set(provisioning_libs ${provisioning_libs} prov_auth_client)
 set(provisioning_headers ${provisioning_headers} ${AUTH_CLIENT_H_FILES})
 
-add_library(prov_device_ll_client ${PROV_DEVICE_LL_CLIENT_SOURCE_C_FILES} ${PROV_DEVICE_LL_CLEINT_SOURCE_H_FILES})
-setSdkTargetBuildProperties(prov_device_ll_client)
-linkSharedUtil(prov_device_ll_client)
-link_security_client(prov_device_ll_client)
-set(provisioning_libs ${provisioning_libs} prov_device_ll_client)
-set(provisioning_headers ${provisioning_headers} ${PROV_DEVICE_LL_CLEINT_SOURCE_H_FILES})
-target_link_libraries(prov_device_ll_client parson)
+if(${use_prov_client})
+    add_library(prov_device_ll_client ${PROV_DEVICE_LL_CLIENT_SOURCE_C_FILES} ${PROV_DEVICE_LL_CLEINT_SOURCE_H_FILES})
+    setSdkTargetBuildProperties(prov_device_ll_client)
+    linkSharedUtil(prov_device_ll_client)
+    link_security_client(prov_device_ll_client)
+    set(provisioning_libs ${provisioning_libs} prov_device_ll_client)
+    set(provisioning_headers ${provisioning_headers} ${PROV_DEVICE_LL_CLEINT_SOURCE_H_FILES})
+    target_link_libraries(prov_device_ll_client parson)
 
-add_library(prov_device_client ${PROV_DEVICE_CLIENT_SOURCE_C_FILES} ${PROV_DEVICE_CLIENT_SOURCE_H_FILES})
-setSdkTargetBuildProperties(prov_device_client)
-target_link_libraries(prov_device_client  prov_device_ll_client)
-set(provisioning_libs ${provisioning_libs} prov_device_client)
-set(provisioning_headers ${provisioning_headers} ${PROV_DEVICE_CLIENT_SOURCE_H_FILES})
-target_link_libraries(prov_device_client parson)
+    add_library(prov_device_client ${PROV_DEVICE_CLIENT_SOURCE_C_FILES} ${PROV_DEVICE_CLIENT_SOURCE_H_FILES})
+    setSdkTargetBuildProperties(prov_device_client)
+    target_link_libraries(prov_device_client  prov_device_ll_client)
+    set(provisioning_libs ${provisioning_libs} prov_device_client)
+    set(provisioning_headers ${provisioning_headers} ${PROV_DEVICE_CLIENT_SOURCE_H_FILES})
+    target_link_libraries(prov_device_client parson)
 
-if (${build_as_dynamic})
-    add_library(prov_device_client_dll SHARED
-        ${PROV_DEVICE_CLIENT_SOURCE_C_FILES} 
-        ${PROV_DEVICE_CLEINT_SOURCE_H_FILES}
-        ${PROV_DEVICE_LL_CLIENT_SOURCE_C_FILES}
-        ${PROV_DEVICE_LL_CLEINT_SOURCE_H_FILES}
-        ./src/prov_device_client_dll.def
-    )
-    linkSharedUtil(prov_device_client_dll)
-    target_link_libraries(prov_device_client_dll prov_device_ll_client parson)
 
-    if(NOT WIN32)
-        set_target_properties(prov_device_client_dll PROPERTIES OUTPUT_NAME "prov_device_client")
-    endif()
-    set_target_properties(prov_device_client_dll PROPERTIES
-        OUTPUT_NAME "prov_device_client"
-        ARCHIVE_OUTPUT_NAME "prov_device_client_dll_import"
-        ENABLE_EXPORTS YES
-        PDB_NAME "prov_device_client_dll"
-        VERSION ${PROV_SDK_VERSION}
-        SOVERSION ${PROV_SDK_VERSION_MAJOR}
-        BUILD_WITH_INSTALL_RPATH TRUE
-    )
-    if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
-        target_link_libraries(prov_device_client_dll
-            "-Wl,--exclude-libs,libparson.a"
+    if (${build_as_dynamic})
+        add_library(prov_device_client_dll SHARED
+            ${PROV_DEVICE_CLIENT_SOURCE_C_FILES} 
+            ${PROV_DEVICE_CLEINT_SOURCE_H_FILES}
+            ${PROV_DEVICE_LL_CLIENT_SOURCE_C_FILES}
+            ${PROV_DEVICE_LL_CLEINT_SOURCE_H_FILES}
+            ./src/prov_device_client_dll.def
         )
+        linkSharedUtil(prov_device_client_dll)
+        target_link_libraries(prov_device_client_dll prov_device_ll_client parson)
+
+        if(NOT WIN32)
+            set_target_properties(prov_device_client_dll PROPERTIES OUTPUT_NAME "prov_device_client")
+        endif()
+        set_target_properties(prov_device_client_dll PROPERTIES
+            OUTPUT_NAME "prov_device_client"
+            ARCHIVE_OUTPUT_NAME "prov_device_client_dll_import"
+            ENABLE_EXPORTS YES
+            PDB_NAME "prov_device_client_dll"
+            VERSION ${PROV_SDK_VERSION}
+            SOVERSION ${PROV_SDK_VERSION_MAJOR}
+            BUILD_WITH_INSTALL_RPATH TRUE
+        )
+        if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
+            target_link_libraries(prov_device_client_dll
+                "-Wl,--exclude-libs,libparson.a"
+            )
+        endif()
+        set(provisioning_libs ${provisioning_libs} prov_device_client_dll)
     endif()
-    set(provisioning_libs ${provisioning_libs} prov_device_client_dll)
-endif()
 
-if (${use_http})
-    set(PROV_HTTP_CLIENT_H_FILES 
-        ./inc/azure_prov_client/prov_transport.h
-        ./inc/azure_prov_client/internal/prov_transport_private.h
-        ./inc/azure_prov_client/prov_transport_http_client.h)
-    set(PROV_HTTP_CLIENT_C_FILES 
-        ./src/prov_transport_http_client.c)
+    if (${use_http})
+        set(PROV_HTTP_CLIENT_H_FILES 
+            ./inc/azure_prov_client/prov_transport.h
+            ./inc/azure_prov_client/internal/prov_transport_private.h
+            ./inc/azure_prov_client/prov_transport_http_client.h)
+        set(PROV_HTTP_CLIENT_C_FILES 
+            ./src/prov_transport_http_client.c)
 
-    # Provisioning http Transport Client library
-    add_library(prov_http_transport ${PROV_HTTP_CLIENT_C_FILES} ${PROV_HTTP_CLIENT_H_FILES})
-    setSdkTargetBuildProperties(prov_http_transport)
-    linkSharedUtil(prov_http_transport)
-    set(provisioning_libs ${provisioning_libs} prov_http_transport)
-    set(provisioning_headers ${provisioning_headers} ${PROV_HTTP_CLIENT_H_FILES})
+        # Provisioning http Transport Client library
+        add_library(prov_http_transport ${PROV_HTTP_CLIENT_C_FILES} ${PROV_HTTP_CLIENT_H_FILES})
+        setSdkTargetBuildProperties(prov_http_transport)
+        linkSharedUtil(prov_http_transport)
+        set(provisioning_libs ${provisioning_libs} prov_http_transport)
+        set(provisioning_headers ${provisioning_headers} ${PROV_HTTP_CLIENT_H_FILES})
 
-    target_link_libraries(prov_http_transport uhttp)
-endif()
+        target_link_libraries(prov_http_transport uhttp)
+    endif()
 
-if (${use_amqp})
-    include_directories(${UAMQP_INCLUDES} ${UAMQP_INC_FOLDER})
+    if (${use_amqp})
+        include_directories(${UAMQP_INCLUDES} ${UAMQP_INC_FOLDER})
 
-    set(PROV_AMQP_CLIENT_H_FILES 
-        ./inc/azure_prov_client/prov_transport.h
-        ./inc/azure_prov_client/prov_transport_amqp_client.h
-        ./inc/azure_prov_client/internal/prov_transport_amqp_common.h
-        ./inc/azure_prov_client/internal/prov_transport_private.h
-        ./inc/azure_prov_client/internal/prov_sasl_tpm.h)
-    set(PROV_AMQP_CLIENT_C_FILES 
-        ./src/prov_transport_amqp_client.c
-        ./src/prov_transport_amqp_common.c
-        ./src/prov_sasl_tpm.c)
+        set(PROV_AMQP_CLIENT_H_FILES 
+            ./inc/azure_prov_client/prov_transport.h
+            ./inc/azure_prov_client/prov_transport_amqp_client.h
+            ./inc/azure_prov_client/internal/prov_transport_amqp_common.h
+            ./inc/azure_prov_client/internal/prov_transport_private.h
+            ./inc/azure_prov_client/internal/prov_sasl_tpm.h)
+        set(PROV_AMQP_CLIENT_C_FILES 
+            ./src/prov_transport_amqp_client.c
+            ./src/prov_transport_amqp_common.c
+            ./src/prov_sasl_tpm.c)
 
-    set(PROV_AMQP_WS_CLIENT_H_FILES 
-        ./inc/azure_prov_client/prov_transport.h
-        ./inc/azure_prov_client/prov_transport_amqp_ws_client.h
-        ./inc/azure_prov_client/internal/prov_transport_amqp_common.h
-        ./inc/azure_prov_client/internal/prov_transport_private.h
-        ./inc/azure_prov_client/internal/prov_sasl_tpm.h)
-    set(PROV_AMQP_WS_CLIENT_C_FILES 
-        ./src/prov_transport_amqp_ws_client.c
-        ./src/prov_transport_amqp_common.c
-        ./src/prov_sasl_tpm.c)
+        set(PROV_AMQP_WS_CLIENT_H_FILES 
+            ./inc/azure_prov_client/prov_transport.h
+            ./inc/azure_prov_client/prov_transport_amqp_ws_client.h
+            ./inc/azure_prov_client/internal/prov_transport_amqp_common.h
+            ./inc/azure_prov_client/internal/prov_transport_private.h
+            ./inc/azure_prov_client/internal/prov_sasl_tpm.h)
+        set(PROV_AMQP_WS_CLIENT_C_FILES 
+            ./src/prov_transport_amqp_ws_client.c
+            ./src/prov_transport_amqp_common.c
+            ./src/prov_sasl_tpm.c)
 
-    add_library(prov_amqp_ws_transport ${PROV_AMQP_WS_CLIENT_C_FILES} ${PROV_AMQP_WS_CLIENT_H_FILES})
-    setSdkTargetBuildProperties(prov_amqp_ws_transport)
-    linkSharedUtil(prov_amqp_ws_transport)
-    target_link_libraries(prov_amqp_ws_transport uamqp)
-    set(provisioning_libs ${provisioning_libs} prov_amqp_ws_transport)
-    set(provisioning_headers ${provisioning_headers} ${PROV_AMQP_WS_CLIENT_H_FILES})
+        add_library(prov_amqp_ws_transport ${PROV_AMQP_WS_CLIENT_C_FILES} ${PROV_AMQP_WS_CLIENT_H_FILES})
+        setSdkTargetBuildProperties(prov_amqp_ws_transport)
+        linkSharedUtil(prov_amqp_ws_transport)
+        target_link_libraries(prov_amqp_ws_transport uamqp)
+        set(provisioning_libs ${provisioning_libs} prov_amqp_ws_transport)
+        set(provisioning_headers ${provisioning_headers} ${PROV_AMQP_WS_CLIENT_H_FILES})
 
-    # Provisioning amqp Transport Client library
-    add_library(prov_amqp_transport ${PROV_AMQP_CLIENT_C_FILES} ${PROV_AMQP_CLIENT_H_FILES})
-    setSdkTargetBuildProperties(prov_amqp_transport)
-    linkSharedUtil(prov_amqp_transport)
-    target_link_libraries(prov_amqp_transport uamqp)
-    set(provisioning_libs ${provisioning_libs} prov_amqp_transport)
-    set(provisioning_headers ${provisioning_headers} ${PROV_AMQP_CLIENT_H_FILES})
-endif()
+        # Provisioning amqp Transport Client library
+        add_library(prov_amqp_transport ${PROV_AMQP_CLIENT_C_FILES} ${PROV_AMQP_CLIENT_H_FILES})
+        setSdkTargetBuildProperties(prov_amqp_transport)
+        linkSharedUtil(prov_amqp_transport)
+        target_link_libraries(prov_amqp_transport uamqp)
+        set(provisioning_libs ${provisioning_libs} prov_amqp_transport)
+        set(provisioning_headers ${provisioning_headers} ${PROV_AMQP_CLIENT_H_FILES})
+    endif()
 
-if (${use_mqtt})
-    include_directories(${MQTT_INC_FOLDER})
+    if (${use_mqtt})
+        include_directories(${MQTT_INC_FOLDER})
 
-    set(PROV_MQTT_CLIENT_H_FILES 
-        ./inc/azure_prov_client/prov_transport.h
-        ./inc/azure_prov_client/prov_transport_mqtt_client.h
-        ./inc/azure_prov_client/internal/prov_transport_private.h
-        ./inc/azure_prov_client/internal/prov_transport_mqtt_common.h)
-    set(PROV_MQTT_CLIENT_C_FILES 
-        ./src/prov_transport_mqtt_client.c
-        ./src/prov_transport_mqtt_common.c)
+        set(PROV_MQTT_CLIENT_H_FILES 
+            ./inc/azure_prov_client/prov_transport.h
+            ./inc/azure_prov_client/prov_transport_mqtt_client.h
+            ./inc/azure_prov_client/internal/prov_transport_private.h
+            ./inc/azure_prov_client/internal/prov_transport_mqtt_common.h)
+        set(PROV_MQTT_CLIENT_C_FILES 
+            ./src/prov_transport_mqtt_client.c
+            ./src/prov_transport_mqtt_common.c)
 
-    set(PROV_MQTT_WS_CLIENT_H_FILES 
-        ./inc/azure_prov_client/prov_transport.h
-        ./inc/azure_prov_client/prov_transport_mqtt_ws_client.h
-        ./inc/azure_prov_client/internal/prov_transport_private.h
-        ./inc/azure_prov_client/internal/prov_transport_mqtt_common.h)
-    set(PROV_MQTT_WS_CLIENT_C_FILES 
-        ./src/prov_transport_mqtt_ws_client.c
-        ./src/prov_transport_mqtt_common.c)
+        set(PROV_MQTT_WS_CLIENT_H_FILES 
+            ./inc/azure_prov_client/prov_transport.h
+            ./inc/azure_prov_client/prov_transport_mqtt_ws_client.h
+            ./inc/azure_prov_client/internal/prov_transport_private.h
+            ./inc/azure_prov_client/internal/prov_transport_mqtt_common.h)
+        set(PROV_MQTT_WS_CLIENT_C_FILES 
+            ./src/prov_transport_mqtt_ws_client.c
+            ./src/prov_transport_mqtt_common.c)
 
-    add_library(prov_mqtt_ws_transport ${PROV_MQTT_WS_CLIENT_C_FILES} ${PROV_MQTT_WS_CLIENT_H_FILES})
-    setSdkTargetBuildProperties(prov_mqtt_ws_transport)
-    linkSharedUtil(prov_mqtt_ws_transport)
-    target_link_libraries(prov_mqtt_ws_transport umqtt)
-    set(provisioning_libs ${provisioning_libs} prov_mqtt_ws_transport)
-    set(provisioning_headers ${provisioning_headers} ${PROV_MQTT_WS_CLIENT_H_FILES})
+        add_library(prov_mqtt_ws_transport ${PROV_MQTT_WS_CLIENT_C_FILES} ${PROV_MQTT_WS_CLIENT_H_FILES})
+        setSdkTargetBuildProperties(prov_mqtt_ws_transport)
+        linkSharedUtil(prov_mqtt_ws_transport)
+        target_link_libraries(prov_mqtt_ws_transport umqtt)
+        set(provisioning_libs ${provisioning_libs} prov_mqtt_ws_transport)
+        set(provisioning_headers ${provisioning_headers} ${PROV_MQTT_WS_CLIENT_H_FILES})
 
-    # Provisioning mqtt Transport Client library
-    add_library(prov_mqtt_transport ${PROV_MQTT_CLIENT_C_FILES} ${PROV_MQTT_CLIENT_H_FILES})
-    setSdkTargetBuildProperties(prov_mqtt_transport)
-    linkSharedUtil(prov_mqtt_transport)
-    target_link_libraries(prov_mqtt_transport umqtt)
-    set(provisioning_libs ${provisioning_libs} prov_mqtt_transport)
-    set(provisioning_headers ${provisioning_headers} ${PROV_MQTT_CLIENT_H_FILES})
+        # Provisioning mqtt Transport Client library
+        add_library(prov_mqtt_transport ${PROV_MQTT_CLIENT_C_FILES} ${PROV_MQTT_CLIENT_H_FILES})
+        setSdkTargetBuildProperties(prov_mqtt_transport)
+        linkSharedUtil(prov_mqtt_transport)
+        target_link_libraries(prov_mqtt_transport umqtt)
+        set(provisioning_libs ${provisioning_libs} prov_mqtt_transport)
+        set(provisioning_headers ${provisioning_headers} ${PROV_MQTT_CLIENT_H_FILES})
+    endif()
 endif()
 
 if(NOT IN_OPENWRT)
@@ -322,7 +325,7 @@ if(NOT IN_OPENWRT)
     add_subdirectory(tests)
 endif()
 
-if (NOT ${skip_samples})
+if (${use_prov_client} AND (NOT ${skip_samples}))
     add_subdirectory(tools)
 endif ()
 

@@ -4,35 +4,42 @@
 #include <stdlib.h>
 
 #include "azure_c_shared_utility/xlogging.h"
+#include "hsm_client_data.h"
 
+#if defined(HSM_TYPE_SAS_TOKEN)  || defined(HSM_AUTH_TYPE_CUSTOM)
 #include "hsm_client_tpm.h"
+#endif
+
+#if defined(HSM_TYPE_X509) || defined(HSM_AUTH_TYPE_CUSTOM)
 #include "hsm_client_riot.h"
+#endif
 
 int initialize_hsm_system()
 {
-    int result;
+    int result = 0;
+#if defined(HSM_TYPE_X509) || defined(HSM_AUTH_TYPE_CUSTOM)
     // Initialize x509
-    if (hsm_client_x509_init() != 0)
+    if ((result == 0) && (hsm_client_x509_init() != 0))
     {
         LogError("Failure initializing x509 system");
         result = __LINE__;
     }
-    else if (hsm_client_tpm_init() != 0)
+#endif
+#if defined(HSM_TYPE_SAS_TOKEN)  || defined(HSM_AUTH_TYPE_CUSTOM)
+    if ((result == 0) && (hsm_client_tpm_init() != 0))
     {
         LogError("Failure initializing tpm system");
         result = __LINE__;
     }
+#endif
 #ifdef HSM_TYPE_HTTP_EDGE
-    else if (hsm_client_http_edge_init() != 0)
+    if ((result == 0) && (hsm_client_http_edge_init() != 0))
     {
         LogError("Failure initializing http edge system");
         result = __LINE__;
     }
 #endif
-    else
-    {
-        result = 0;
-    }
+
     return result;
 }
 
@@ -41,6 +48,10 @@ void deinitialize_hsm_system()
 #ifdef HSM_TYPE_HTTP_EDGE
     hsm_client_http_edge_deinit();
 #endif
+#if defined(HSM_TYPE_X509) || defined(HSM_AUTH_TYPE_CUSTOM)
     hsm_client_x509_deinit();
+#endif
+#if defined(HSM_TYPE_SAS_TOKEN)  || defined(HSM_AUTH_TYPE_CUSTOM)
     hsm_client_tpm_deinit();
+#endif
 }

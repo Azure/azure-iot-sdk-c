@@ -45,18 +45,21 @@ static const char* const SKN_SECTION_FORMAT = "&skn=";
 
 IOTHUB_SECURITY_HANDLE iothub_device_auth_create()
 {
-    IOTHUB_SECURITY_INFO* result;
-    if ((result = (IOTHUB_SECURITY_INFO*)malloc(sizeof(IOTHUB_SECURITY_INFO))) == NULL)
+    IOTHUB_SECURITY_INFO* result = NULL;
+
+    IOTHUB_SECURITY_TYPE iothub_security_t = iothub_security_type();
+    
+#if defined(HSM_TYPE_SAS_TOKEN)  || defined(HSM_AUTH_TYPE_CUSTOM)
+    if (iothub_security_t == IOTHUB_SECURITY_TYPE_SAS)
     {
-        /* Codes_IOTHUB_DEV_AUTH_07_001: [ if any failure is encountered iothub_device_auth_create shall return NULL. ] */
-        LogError("Failed allocating IOTHUB_SECURITY_INFO.");
-    }
-    else
-    {
-        IOTHUB_SECURITY_TYPE iothub_security_t = iothub_security_type();
-        memset(result, 0, sizeof(IOTHUB_SECURITY_INFO) );
-        if (iothub_security_t == IOTHUB_SECURITY_TYPE_SAS)
+        if ((result = (IOTHUB_SECURITY_INFO*)malloc(sizeof(IOTHUB_SECURITY_INFO))) == NULL)
         {
+            /* Codes_IOTHUB_DEV_AUTH_07_001: [ if any failure is encountered iothub_device_auth_create shall return NULL. ] */
+            LogError("Failed allocating IOTHUB_SECURITY_INFO.");
+        }
+        else 
+        {
+            memset(result, 0, sizeof(IOTHUB_SECURITY_INFO) );
             result->cred_type = AUTH_TYPE_SAS;
             result->base64_encode_signature = true;
             result->urlencode_token_scope = false;
@@ -72,8 +75,20 @@ IOTHUB_SECURITY_HANDLE iothub_device_auth_create()
                 result = NULL;
             }
         }
-        else if (iothub_security_t == IOTHUB_SECURITY_TYPE_X509)
+    }
+#endif
+
+#if defined(HSM_TYPE_X509) || defined(HSM_AUTH_TYPE_CUSTOM)
+    if (iothub_security_t == IOTHUB_SECURITY_TYPE_X509)
+    {
+        if ((result = (IOTHUB_SECURITY_INFO*)malloc(sizeof(IOTHUB_SECURITY_INFO))) == NULL)
         {
+            /* Codes_IOTHUB_DEV_AUTH_07_001: [ if any failure is encountered iothub_device_auth_create shall return NULL. ] */
+            LogError("Failed allocating IOTHUB_SECURITY_INFO.");
+        }
+        else
+        {
+            memset(result, 0, sizeof(IOTHUB_SECURITY_INFO) );
             result->cred_type = AUTH_TYPE_X509;
             result->base64_encode_signature = true;
             result->urlencode_token_scope = false;
@@ -90,9 +105,20 @@ IOTHUB_SECURITY_HANDLE iothub_device_auth_create()
                 result = NULL;
             }
         }
+    }
+#endif
+
 #ifdef HSM_TYPE_HTTP_EDGE
-        else if (iothub_security_t == IOTHUB_SECURITY_TYPE_HTTP_EDGE)
+    if (iothub_security_t == IOTHUB_SECURITY_TYPE_HTTP_EDGE)
+    {
+        if ((result = (IOTHUB_SECURITY_INFO*)malloc(sizeof(IOTHUB_SECURITY_INFO))) == NULL)
         {
+            /* Codes_IOTHUB_DEV_AUTH_07_001: [ if any failure is encountered iothub_device_auth_create shall return NULL. ] */
+            LogError("Failed allocating IOTHUB_SECURITY_INFO.");
+        }
+        else
+        {
+            memset(result, 0, sizeof(IOTHUB_SECURITY_INFO) );
             result->cred_type = AUTH_TYPE_SAS;
             // Because HTTP_edge operates over HTTP, the server has already base64 encoded signature its returning to us.
             result->base64_encode_signature = false;
@@ -108,20 +134,26 @@ IOTHUB_SECURITY_HANDLE iothub_device_auth_create()
                 result = NULL;
             }
         }
+    }
 #endif
-        if (result != NULL)
+
+    if (result == NULL)
+    {
+        LogError("Error allocating result or else unsupported security type %d", iothub_security_t);
+    }
+    else
+    {
+        /* Codes_IOTHUB_DEV_AUTH_07_025: [ iothub_device_auth_create shall call the concrete_iothub_device_auth_create function associated with the interface_desc. ] */
+        /* Codes_IOTHUB_DEV_AUTH_07_026: [ if concrete_iothub_device_auth_create fails iothub_device_auth_create shall return NULL. ] */
+        if ((result->hsm_client_handle = result->hsm_client_create()) == NULL)
         {
-            /* Codes_IOTHUB_DEV_AUTH_07_025: [ iothub_device_auth_create shall call the concrete_iothub_device_auth_create function associated with the interface_desc. ] */
-            /* Codes_IOTHUB_DEV_AUTH_07_026: [ if concrete_iothub_device_auth_create fails iothub_device_auth_create shall return NULL. ] */
-            if ((result->hsm_client_handle = result->hsm_client_create()) == NULL)
-            {
-                /* Codes_IOTHUB_DEV_AUTH_07_002: [ iothub_device_auth_create shall allocate the IOTHUB_SECURITY_INFO and shall fail if the allocation fails. ]*/
-                LogError("failed create device auth module.");
-                free(result);
-                result = NULL;
-            }
+            /* Codes_IOTHUB_DEV_AUTH_07_002: [ iothub_device_auth_create shall allocate the IOTHUB_SECURITY_INFO and shall fail if the allocation fails. ]*/
+            LogError("failed create device auth module.");
+            free(result);
+            result = NULL;
         }
     }
+
     /* Codes_IOTHUB_DEV_AUTH_07_003: [ If the function succeeds iothub_device_auth_create shall return a IOTHUB_SECURITY_HANDLE. ] */
     return result;
 }
