@@ -319,7 +319,12 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         REGISTER_GLOBAL_MOCK_HOOK(STRING_construct, my_STRING_construct);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_construct, NULL);
 
+#if defined(HSM_TYPE_X509) || defined(HSM_AUTH_TYPE_CUSTOM)
         REGISTER_GLOBAL_MOCK_RETURN(iothub_security_type, IOTHUB_SECURITY_TYPE_SAS);
+#else
+        REGISTER_GLOBAL_MOCK_RETURN(iothub_security_type, IOTHUB_SECURITY_TYPE_HTTP_EDGE);
+#endif
+
         REGISTER_GLOBAL_MOCK_RETURN(hsm_client_tpm_interface, &test_tpm_interface);
         REGISTER_GLOBAL_MOCK_RETURN(hsm_client_x509_interface, &test_x509_interface);
 
@@ -419,13 +424,14 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         STRICT_EXPECTED_CALL(hsm_client_get_alias_key(IGNORED_NUM_ARG));
     }
 
+#if defined(HSM_TYPE_SAS_TOKEN)  || defined(HSM_AUTH_TYPE_CUSTOM)
     /* Tests_IOTHUB_DEV_AUTH_07_003: [ If the function succeeds iothub_device_auth_create shall return a IOTHUB_SECURITY_HANDLE. ] */
     /* Tests_IOTHUB_DEV_AUTH_07_025: [ iothub_device_auth_create shall call the concrete_iothub_device_auth_create function associated with the XDA_INTERFACE_DESCRIPTION. ] */
     TEST_FUNCTION(iothub_device_auth_create_tpm_succeed)
     {
         //arrange
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(iothub_security_type()).SetReturn(IOTHUB_SECURITY_TYPE_SAS);
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(hsm_client_tpm_interface()).SetReturn(&test_tpm_interface);
         STRICT_EXPECTED_CALL(hsm_client_create());
 
@@ -444,8 +450,8 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
     TEST_FUNCTION(iothub_device_auth_create_tpm_interface_NULL_fail)
     {
         //arrange
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(iothub_security_type()).SetReturn(IOTHUB_SECURITY_TYPE_SAS);
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(hsm_client_tpm_interface()).SetReturn(&test_tpm_interface_fail);
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
@@ -459,14 +465,34 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         //cleanup
         iothub_device_auth_destroy(xda_handle);
     }
+#endif
 
+    /* Tests_IOTHUB_DEV_AUTH_07_002: [ iothub_device_auth_create shall allocate the XDA_INSTANCE and shall fail if the allocation fails. ] */
+    TEST_FUNCTION(iothub_device_auth_create_malloc_fail)
+    {
+        //arrange
+        STRICT_EXPECTED_CALL(iothub_security_type());
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)).SetReturn(NULL);
+
+        //act
+        IOTHUB_SECURITY_HANDLE xda_handle = iothub_device_auth_create();
+
+        //assert
+        ASSERT_IS_NULL(xda_handle);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+    }
+
+
+#if defined(HSM_TYPE_X509) || defined(HSM_AUTH_TYPE_CUSTOM)
     /* Tests_IOTHUB_DEV_AUTH_07_025: [ iothub_device_auth_create shall call the concrete_iothub_device_auth_create function associated with the interface_desc. ] */
     /* Tests_IOTHUB_DEV_AUTH_07_026: [ if concrete_iothub_device_auth_create fails iothub_device_auth_create shall return NULL. ] */
     TEST_FUNCTION(iothub_device_auth_create_x509_succeed)
     {
         //arrange
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(iothub_security_type()).SetReturn(IOTHUB_SECURITY_TYPE_X509);
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));        
         STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface);
         STRICT_EXPECTED_CALL(hsm_client_create());
 
@@ -485,8 +511,8 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
     TEST_FUNCTION(iothub_device_auth_create_x509_Interface_NULL_fail)
     {
         //arrange
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(iothub_security_type()).SetReturn(IOTHUB_SECURITY_TYPE_X509);
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface_fail);
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
@@ -501,28 +527,12 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         iothub_device_auth_destroy(xda_handle);
     }
 
-    /* Tests_IOTHUB_DEV_AUTH_07_002: [ iothub_device_auth_create shall allocate the XDA_INSTANCE and shall fail if the allocation fails. ] */
-    TEST_FUNCTION(iothub_device_auth_create_malloc_fail)
-    {
-        //arrange
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)).SetReturn(NULL);
-
-        //act
-        IOTHUB_SECURITY_HANDLE xda_handle = iothub_device_auth_create();
-
-        //assert
-        ASSERT_IS_NULL(xda_handle);
-        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-        //cleanup
-    }
-
     /* Tests_IOTHUB_DEV_AUTH_07_026: [ if concrete_iothub_device_auth_create fails iothub_device_auth_create shall return NULL. ] */
     TEST_FUNCTION(iothub_device_auth_create_concrete_iothub_device_auth_create_fail)
     {
         //arrange
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(iothub_security_type()).SetReturn(IOTHUB_SECURITY_TYPE_X509);
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface);
         STRICT_EXPECTED_CALL(hsm_client_create()).SetReturn(NULL);
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
@@ -536,6 +546,7 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
 
         //cleanup
     }
+#endif
 
     /* Tests_IOTHUB_DEV_AUTH_07_004: [ iothub_device_auth_destroy shall free all resources associated with the IOTHUB_SECURITY_HANDLE handle ] */
     /* Tests_IOTHUB_DEV_AUTH_07_005: [ iothub_device_auth_destroy shall call the concrete_iothub_device_auth_destroy function associated with the XDA_INTERFACE_DESCRIPTION. ] */
@@ -661,6 +672,7 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         iothub_device_auth_destroy(xda_handle);
     }
 
+#if defined(HSM_TYPE_X509) || defined(HSM_AUTH_TYPE_CUSTOM)
     /* Tests_IOTHUB_DEV_AUTH_07_011: [ iothub_device_auth_generate_credentials shall call concrete_iothub_device_auth_generate_sastoken function associated with the XDA_INTERFACE_DESCRIPTION. ]*/
     /* Tests_IOTHUB_DEV_AUTH_07_035: [ For tpm type iothub_device_auth_generate_credentials shall call the concrete_dev_auth_sign_data function to hash the data. ]*/
     TEST_FUNCTION(iothub_device_auth_generate_credentials_succeed)
@@ -706,8 +718,8 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
     TEST_FUNCTION(iothub_device_auth_generate_credentials_x509_succeed)
     {
         //arrange
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(iothub_security_type()).SetReturn(IOTHUB_SECURITY_TYPE_X509);
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface);
 
         IOTHUB_SECURITY_HANDLE xda_handle = iothub_device_auth_create();
@@ -768,8 +780,8 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
 
     TEST_FUNCTION(iothub_device_auth_generate_credentials_x509_fail)
     {
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(iothub_security_type()).SetReturn(IOTHUB_SECURITY_TYPE_X509);
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface);
 
         IOTHUB_SECURITY_HANDLE xda_handle = iothub_device_auth_create();
@@ -801,12 +813,13 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         iothub_device_auth_destroy(xda_handle);
         umock_c_negative_tests_deinit();
     }
+#endif
 
 #ifdef HSM_TYPE_HTTP_EDGE
     static void set_expected_calls_for_device_auth_create_http_edge()
     {
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(iothub_security_type()).SetReturn(IOTHUB_SECURITY_TYPE_HTTP_EDGE);
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(hsm_client_http_edge_interface()).SetReturn(&test_http_edge_interface);
         STRICT_EXPECTED_CALL(hsm_client_create());
     }
@@ -920,12 +933,14 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_TrustedBundle_succeed)
 }
 
 
-// IoTHubClient_Auth_Get_TrustBundle only supports Edge based auth.  Verify that others fail.
+#if defined(HSM_TYPE_X509) || defined(HSM_AUTH_TYPE_CUSTOM)
+// IoTHubClient_Auth_Get_TrustBundle only supports Edge based auth.  Verify that others fail.  Only can get this far if Edge & X509 enabled at same time.
 TEST_FUNCTION(IoTHubClient_Auth_Get_TrustedBundle_unsupported_authtype_fail)
 {
     //arrange
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(iothub_security_type()).SetReturn(IOTHUB_SECURITY_TYPE_X509);
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+
     STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface);
     STRICT_EXPECTED_CALL(hsm_client_create());
     
@@ -941,7 +956,9 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_TrustedBundle_unsupported_authtype_fail)
     //cleanup
     iothub_device_auth_destroy(xda_handle);
 }
+#endif // defined(HSM_TYPE_X509) || defined(HSM_AUTH_TYPE_CUSTOM)
 
-#endif
+#endif // HSM_TYPE_HTTP_EDGE
 
-    END_TEST_SUITE(iothub_auth_client_ut)
+END_TEST_SUITE(iothub_auth_client_ut)
+

@@ -125,6 +125,7 @@ static int should_skip_index(size_t current_index, const size_t skip_array[], si
     return result;
 }
 
+#if defined(HSM_TYPE_SAS_TOKEN)  || defined(HSM_AUTH_TYPE_CUSTOM)
 TEST_FUNCTION(prov_dev_security_init_sas_success)
 {
     //arrange
@@ -188,6 +189,44 @@ TEST_FUNCTION(prov_dev_security_init_sas_fail)
     //cleanup
 }
 
+
+TEST_FUNCTION(prov_dev_security_deinit_tpm_success)
+{
+    (void)prov_dev_security_init(SECURE_DEVICE_TYPE_TPM);
+    umock_c_reset_all_calls();
+
+    //arrange
+    STRICT_EXPECTED_CALL(deinitialize_hsm_system());
+
+    //act
+    prov_dev_security_deinit();
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+}
+
+
+TEST_FUNCTION(prov_dev_security_get_type_tpm_succees)
+{
+    (void)prov_dev_security_init(SECURE_DEVICE_TYPE_TPM);
+    umock_c_reset_all_calls();
+
+    //arrange
+
+    //act
+    SECURE_DEVICE_TYPE result = prov_dev_security_get_type();
+
+    //assert
+    ASSERT_ARE_EQUAL(SECURE_DEVICE_TYPE, SECURE_DEVICE_TYPE_TPM, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+}
+#endif 
+
+#if defined(HSM_TYPE_X509) || defined(HSM_AUTH_TYPE_CUSTOM)
 TEST_FUNCTION(prov_dev_security_init_x509_success)
 {
     //arrange
@@ -236,23 +275,6 @@ TEST_FUNCTION(prov_dev_security_init_x509_types_fail)
     //cleanup
 }
 
-TEST_FUNCTION(prov_dev_security_deinit_tpm_success)
-{
-    (void)prov_dev_security_init(SECURE_DEVICE_TYPE_TPM);
-    umock_c_reset_all_calls();
-
-    //arrange
-    STRICT_EXPECTED_CALL(deinitialize_hsm_system());
-
-    //act
-    prov_dev_security_deinit();
-
-    //assert
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-    //cleanup
-}
-
 TEST_FUNCTION(prov_dev_security_deinit_x509_success)
 {
     (void)prov_dev_security_init(SECURE_DEVICE_TYPE_X509);
@@ -265,23 +287,6 @@ TEST_FUNCTION(prov_dev_security_deinit_x509_success)
     prov_dev_security_deinit();
 
     //assert
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-    //cleanup
-}
-
-TEST_FUNCTION(prov_dev_security_get_type_tpm_succees)
-{
-    (void)prov_dev_security_init(SECURE_DEVICE_TYPE_TPM);
-    umock_c_reset_all_calls();
-
-    //arrange
-
-    //act
-    SECURE_DEVICE_TYPE result = prov_dev_security_get_type();
-
-    //assert
-    ASSERT_ARE_EQUAL(SECURE_DEVICE_TYPE, SECURE_DEVICE_TYPE_TPM, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -303,5 +308,93 @@ TEST_FUNCTION(prov_dev_security_get_type_x509_success)
 
     //cleanup
 }
+#endif
+
+#ifdef HSM_TYPE_HTTP_EDGE
+TEST_FUNCTION(prov_dev_security_init_http_edge_success)
+{
+    //arrange
+    STRICT_EXPECTED_CALL(iothub_security_type());
+    STRICT_EXPECTED_CALL(iothub_security_init(IOTHUB_SECURITY_TYPE_HTTP_EDGE));
+    STRICT_EXPECTED_CALL(initialize_hsm_system());
+
+    //act
+    int result = prov_dev_security_init(SECURE_DEVICE_TYPE_HTTP_EDGE);
+
+    //assert
+    ASSERT_ARE_EQUAL(int, 0, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+}
+
+TEST_FUNCTION(prov_dev_security_init_http_edge_types_success)
+{
+    //arrange
+    STRICT_EXPECTED_CALL(iothub_security_type()).SetReturn(IOTHUB_SECURITY_TYPE_HTTP_EDGE);
+    STRICT_EXPECTED_CALL(initialize_hsm_system());
+
+    //act
+    int result = prov_dev_security_init(SECURE_DEVICE_TYPE_HTTP_EDGE);
+
+    //assert
+    ASSERT_ARE_EQUAL(int, 0, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+}
+
+TEST_FUNCTION(prov_dev_security_init_http_edge_types_fail)
+{
+    //arrange
+    STRICT_EXPECTED_CALL(iothub_security_type()).SetReturn(IOTHUB_SECURITY_TYPE_SAS);
+
+    //act
+    int result = prov_dev_security_init(SECURE_DEVICE_TYPE_HTTP_EDGE);
+
+    //assert
+    ASSERT_ARE_NOT_EQUAL(int, 0, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+}
+
+TEST_FUNCTION(prov_dev_security_deinit_http_edge_success)
+{
+    (void)prov_dev_security_init(SECURE_DEVICE_TYPE_HTTP_EDGE);
+    umock_c_reset_all_calls();
+
+    //arrange
+    STRICT_EXPECTED_CALL(deinitialize_hsm_system());
+
+    //act
+    prov_dev_security_deinit();
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+}
+
+TEST_FUNCTION(prov_dev_security_get_type_http_edge_success)
+{
+    (void)prov_dev_security_init(SECURE_DEVICE_TYPE_HTTP_EDGE);
+    umock_c_reset_all_calls();
+
+    //arrange
+
+    //act
+    SECURE_DEVICE_TYPE result = prov_dev_security_get_type();
+
+    //assert
+    ASSERT_ARE_EQUAL(SECURE_DEVICE_TYPE, SECURE_DEVICE_TYPE_HTTP_EDGE, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+}
+#endif
+
+
+
 
 END_TEST_SUITE(prov_security_factory_ut)

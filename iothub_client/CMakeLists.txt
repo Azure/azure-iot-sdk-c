@@ -79,7 +79,7 @@ if (use_edge_modules)
 endif()
 
 #this is around for back compat only
-if (${use_prov_client})
+if (${use_prov_client_core})
     set(iothub_client_h_files
         ${iothub_client_h_files}
         ./inc/internal/iothub_client_hsm_ll.h
@@ -407,7 +407,7 @@ if (${build_as_dynamic})
         iothub_client_dll
         ${iothub_client_libs}
     )
-    if (${use_prov_client})
+    if (${use_prov_client_core})
         target_link_libraries(iothub_client_dll hsm_security_client prov_auth_client)
     endif()
     target_link_libraries(iothub_client_dll parson)
@@ -429,7 +429,7 @@ setSdkTargetBuildProperties(iothub_client)
 target_link_libraries(iothub_client ${iothub_client_libs})
 target_link_libraries(iothub_client parson)
 
-if (${use_prov_client})
+if (${use_prov_client_core})
     target_link_libraries(iothub_client hsm_security_client prov_auth_client)
 endif()
 

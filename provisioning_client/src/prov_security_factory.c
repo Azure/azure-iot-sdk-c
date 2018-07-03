@@ -10,60 +10,72 @@
 
 static SECURE_DEVICE_TYPE g_device_hsm_type = SECURE_DEVICE_TYPE_UNKNOWN;
 
+static IOTHUB_SECURITY_TYPE get_iothub_security_type(SECURE_DEVICE_TYPE sec_type)
+{
+    IOTHUB_SECURITY_TYPE ret;
+
+    switch (sec_type)
+    {
+#if defined(HSM_TYPE_SAS_TOKEN)  || defined(HSM_AUTH_TYPE_CUSTOM)
+        case SECURE_DEVICE_TYPE_TPM:
+            ret = IOTHUB_SECURITY_TYPE_SAS;
+            break;
+#endif
+
+#if defined(HSM_TYPE_X509) || defined(HSM_AUTH_TYPE_CUSTOM)
+        case SECURE_DEVICE_TYPE_X509:
+            ret = IOTHUB_SECURITY_TYPE_X509;
+            break;
+#endif
+
+#ifdef HSM_TYPE_HTTP_EDGE
+        case SECURE_DEVICE_TYPE_HTTP_EDGE :
+            ret = IOTHUB_SECURITY_TYPE_HTTP_EDGE;
+            break;
+#endif
+
+        default:
+            ret = IOTHUB_SECURITY_TYPE_UNKNOWN;
+            break;
+    }
+
+    return ret;
+}
+
 int prov_dev_security_init(SECURE_DEVICE_TYPE hsm_type)
 {
     int result;
-    g_device_hsm_type = hsm_type;
-    IOTHUB_SECURITY_TYPE security_type = iothub_security_type();
-    if (security_type == IOTHUB_SECURITY_TYPE_UNKNOWN)
+
+    IOTHUB_SECURITY_TYPE security_type_from_caller = get_iothub_security_type(hsm_type);
+
+    if (security_type_from_caller == IOTHUB_SECURITY_TYPE_UNKNOWN)
     {
-        result = iothub_security_init(g_device_hsm_type == SECURE_DEVICE_TYPE_TPM ? IOTHUB_SECURITY_TYPE_SAS : IOTHUB_SECURITY_TYPE_X509);
+        LogError("HSM type %d is not supported on this SDK build", hsm_type);
+        result = __FAILURE__;
     }
     else
     {
-        if (security_type == IOTHUB_SECURITY_TYPE_SAS)
+        g_device_hsm_type = hsm_type;
+        IOTHUB_SECURITY_TYPE security_type_from_iot = iothub_security_type();
+        if (security_type_from_iot == IOTHUB_SECURITY_TYPE_UNKNOWN)
         {
-            if (g_device_hsm_type != SECURE_DEVICE_TYPE_TPM)
-            {
-                result = __FAILURE__;
-            }
-            else
-            {
-                result = 0;
-            }
+            // Initialize iothub_security layer if not currently
+            result = iothub_security_init(security_type_from_caller);
         }
-        else if (security_type == IOTHUB_SECURITY_TYPE_X509)
-        {
-            if (g_device_hsm_type != SECURE_DEVICE_TYPE_X509)
-            {
-                result = __FAILURE__;
-            }
-            else
-            {
-                result = 0;
-            }
-        }
-#ifdef HSM_TYPE_HTTP_EDGE
-        else if (security_type == IOTHUB_SECURITY_TYPE_HTTP_EDGE)
-        {
-            if (g_device_hsm_type != SECURE_DEVICE_TYPE_HTTP_EDGE)
-            {
-                result = __FAILURE__;
-            }
-            else
-            {
-                result = 0;
-            }
-        }
-#endif
-        else
-        {
+        else if (security_type_from_iot != security_type_from_caller)
+        {   
+            LogError("Security HSM from caller %d (which maps to security type %d) does not match already specified security type %d", hsm_type, security_type_from_caller, security_type_from_iot);
             result = __FAILURE__;
         }
-    }
-    if (result == 0)
-    {
-        result = initialize_hsm_system();
+        else
+        {
+            result = 0;
+        }
+
+        if (result == 0)
+        {
+            result = initialize_hsm_system();
+        }
     }
     return result;
 }
