@@ -12,11 +12,17 @@ Set-StrictMode -Version 2.0
 # Errors in system routines will stop script execution
 $errorActionPreference    = "stop"
 
-$_rootCertCommonName      = "Azure IoT CA TestOnly Root CA"
-$_rootCertSubject         = "CN=$_rootCertCommonName"
+$_basePath                   = "."
+$_rootCertCommonName         = "Azure IoT CA TestOnly Root CA"
+$_rootCertSubject            = "CN=$_rootCertCommonName"
 $_intermediateCertCommonName = "Azure IoT CA TestOnly Intermediate {0} CA"
 $_intermediateCertSubject    = "CN=$_intermediateCertCommonName"
-$_privateKeyPassword      = "1234"
+$_privateKeyPassword         = "1234"
+$_keyBitsLength              = "4096"
+
+$rootCAPrefix                = "azure-iot-test-only.root.ca"
+$intermediateCAPrefix        = "azure-iot-test-only.intermediate"
+$keySuffix                   = ".key.pem"
 
 $rootCACerFileName          = "./RootCA.cer"
 $rootCAPemFileName          = "./RootCA.pem"
@@ -37,9 +43,12 @@ $algorithmUsedFile       = "./algorithmUsed.txt"
 
 # The script puts certs into the global certificate store.  If there is already a cert of the
 # same name present, we're not going to be able to tell the new apart from the old, so error out.
-function Test-CACertNotInstalledAlready()
+function Test-CACertNotInstalledAlready([bool]$printMsg=$true)
 {
-    Write-Host ("Testing if any test certificates have already been installed...")
+    if ($TRUE -eq $printMsg)
+    {
+        Write-Host ("Testing if any test certificates have already been installed...")
+    }
     $certInstalled = $null
     try
     {
@@ -63,38 +72,79 @@ function Test-CACertNotInstalledAlready()
         Write-Error("Certificate {0} already installed in the certificate store. {1}" -f $_rootCertSubject,  $cleanup_msg)
         throw ("Certificate {0} already installed." -f $_rootCertSubject)
     }
-    Write-Host ("  Ok.")
+    if ($TRUE -eq $printMsg)
+    {
+        Write-Host ("  Ok.")
+    }
 }
 
 <#
     Verify that the prerequisites for this script are met
 #>
-function Test-CACertsPrerequisites()
+function Test-CACertsPrerequisites([bool]$printMsg=$true)
 {
-    Test-CACertNotInstalledAlready
-
-    Write-Host ("Testing if openssl.exe is set in PATH...")
+    Test-CACertNotInstalledAlready($printMsg)
+    if ($TRUE -eq $printMsg)
+    {
+        Write-Host ("Testing if openssl.exe is set in PATH...")
+    }
     if ((Get-Command "openssl.exe" -ErrorAction SilentlyContinue) -eq $NULL)
     {
         throw ("Openssl is unavailable. Please install openssl and set it in the PATH before proceeding.")
     }
-    Write-Host ("  Ok.")
-
-    Write-Host ("Testing if environment variable OPENSSL_CONF is set...")
-    if ($NULL -eq $ENV:OPENSSL_CONF)
+    if ($TRUE -eq $printMsg)
     {
-        throw ("Environment variable OPENSSL_CONF was not set, OpenSSL configuration not set on this system.")
+        Write-Host ("  Ok.")
+        Write-Host ("Success")
     }
-    Write-Host ("  Ok.")
+}
 
-    Write-Host "Success"
+function PrepareFilesystem()
+{
+    Remove-Item -Path $_basePath/csr -Recurse -ErrorAction Ignore
+    Remove-Item -Path $_basePath/private -Recurse -ErrorAction Ignore
+    Remove-Item -Path $_basePath/certs -Recurse -ErrorAction Ignore
+    Remove-Item -Path $_basePath/intermediateCerts -Recurse -ErrorAction Ignore
+    Remove-Item -Path $_basePath/newcerts -Recurse -ErrorAction Ignore
+
+    md csr
+    md private
+    md certs
+    md intermediateCerts
+    md newcerts
+
+    Remove-Item -Path $_basePath/index.txt -ErrorAction Ignore
+    New-Item $_basePath/index.txt -ItemType file
+
+    Remove-Item -Path $_basePath/serial -ErrorAction Ignore
+    New-Item $_basePath/serial -ItemType file
+    "01" | Out-File $_basePath/serial
+}
+
+function New-RootCACertificate()
+{
+    $passwordCmd = " -aes256 -passout pass:${_privateKeyPassword} "
+    $algorithm = ""
+
+    if ((Get-CACertsCertUseRSA) -eq $FALSE)
+    {
+        $algorithm = " genrsa $_keyBitsLength "
+    }
+    else
+    {
+        $algorithm = " ecparam -genkey -name prime256v1 "
+    }
+
+    $keyFile = "$_basePath/private/$rootCAPrefix$keySuffix"
+
+
 }
 
 function New-CACertsSelfsignedCertificate([string]$commonName, [object]$signingCert, [bool]$isASigner=$true)
 {
     # Build up argument list
     $selfSignedArgs =@{"-DnsName"=$commonName;
-                       "-CertStoreLocation"="cert:\LocalMachine\My";
+                       "-CertStoreLocation"="cert:LocalMachine\My";
                        "-NotAfter"=(get-date).AddDays(30);
                       }
 
@@ -136,7 +186,7 @@ function New-CACertsIntermediateCert([string]$commonName, [Microsoft.Certificate
     openssl x509 -inform der -in $certFileName -out $pemFileName
 
     del $certFileName
-   
+
     Write-Output $newCert
 }
 
@@ -144,7 +194,8 @@ function New-CACertsIntermediateCert([string]$commonName, [Microsoft.Certificate
 function New-CACertsCertChain([Parameter(Mandatory=$TRUE)][ValidateSet("rsa","ecc")][string]$algorithm)
 {
     Write-Host "Beginning to install certificate chain to your LocalMachine\My store"
-    Test-CACertNotInstalledAlready
+    Test-CACertsPrerequisites($FALSE)
+    PrepareFilesystem
 
     # Store the algorithm we're using in a file so later stages always use the same one (without forcing user to keep passing it around)
     Set-Content $algorithmUsedFile $algorithm
@@ -176,7 +227,7 @@ function Get-CACertsCertBySubjectName([string]$subjectName)
     {
         throw ("Unable to find certificate with subjectName {0}" -f $subjectName)
     }
-    
+
     Write-Output $cert
 }
 
@@ -207,7 +258,7 @@ function New-CACertsDevice([string]$deviceName, [string]$signingCertSubject=$_ro
     $newDevicePemPublicFileName   = ("./{0}-public.pem" -f $deviceName)
 
     $signingCert = Get-CACertsCertBySubjectName $signingCertSubject ## "CN=Azure IoT CA TestOnly Intermediate 1 CA"
-    
+
     # Certificates for edge devices need to be able to sign other certs.
     if ($isEdgeDevice -eq $true)
     {
@@ -247,7 +298,7 @@ function New-CACertsDevice([string]$deviceName, [string]$signingCertSubject=$_ro
     # Now that we have a PEM, do some conversions on it to get formats we can process
     if ((Get-CACertsCertUseRSA) -eq $true)
     {
-        openssl rsa -in $newDevicePemAllFileName -out $newDevicePemPrivateFileName        
+        openssl rsa -in $newDevicePemAllFileName -out $newDevicePemPrivateFileName
     }
     else
     {
@@ -334,7 +385,7 @@ function Get-CACertsPemEncodingForEnvironmentVariable([string]$fileName)
     {
         $outputString += ($line + "`r`n")
     }
-    
+
     Write-Output $outputString
 }
 
