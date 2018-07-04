@@ -14,21 +14,22 @@ $errorActionPreference    = "stop"
 
 $_basePath                   = "."
 $_rootCertCommonName         = "Azure IoT CA TestOnly Root CA"
-$_rootCertSubject            = "CN=$_rootCertCommonName"
+$_rootCertSubject            = "/CN='$_rootCertCommonName'"
 $_intermediateCertCommonName = "Azure IoT CA TestOnly Intermediate {0} CA"
 $_intermediateCertSubject    = "CN=$_intermediateCertCommonName"
 $_privateKeyPassword         = "1234"
 $_keyBitsLength              = "4096"
+$_days_until_expiration      = 30
+$_opensslRootConfigFile      = "$_basePath/openssl_root_ca.cnf"
+$_opensslIntermediateConfigFile = "$_basePath/openssl_device_intermediate_ca.cnf"
 
 $rootCAPrefix                = "azure-iot-test-only.root.ca"
 $intermediateCAPrefix        = "azure-iot-test-only.intermediate"
-$keySuffix                   = ".key.pem"
+$keySuffix                   = "key.pem"
+$certSuffix                  = "cert.pem"
 
-$rootCACerFileName          = "./RootCA.cer"
 $rootCAPemFileName          = "./RootCA.pem"
 $intermediate1CAPemFileName = "./Intermediate1.pem"
-$intermediate2CAPemFileName = "./Intermediate2.pem"
-$intermediate3CAPemFileName = "./Intermediate3.pem"
 
 # Variables containing file paths for Edge certificates
 $edgePublicCertDir          = "certs"
@@ -40,6 +41,12 @@ $edgeIotHubOwnerCA          = Join-Path $edgePublicCertDir "azure-iot-test-only.
 
 # Whether to use ECC or RSA is stored in a file.  If it doesn't exist, we default to ECC.
 $algorithmUsedFile       = "./algorithmUsed.txt"
+
+function Print-WarningCertsNotForProduction()
+{
+    Write-Warning "This script is provided for prototyping only."
+    Write-Warning "DO NOT USE CERTIFICATES FROM THIS SCRIPT FOR PRODUCTION!"
+}
 
 # The script puts certs into the global certificate store.  If there is already a cert of the
 # same name present, we're not going to be able to tell the new apart from the old, so error out.
@@ -107,11 +114,11 @@ function PrepareFilesystem()
     Remove-Item -Path $_basePath/intermediateCerts -Recurse -ErrorAction Ignore
     Remove-Item -Path $_basePath/newcerts -Recurse -ErrorAction Ignore
 
-    md csr
-    md private
-    md certs
-    md intermediateCerts
-    md newcerts
+    MD csr
+    MD private
+    MD certs
+    MD intermediateCerts
+    MD newcerts
 
     Remove-Item -Path $_basePath/index.txt -ErrorAction Ignore
     New-Item $_basePath/index.txt -ItemType file
@@ -121,22 +128,67 @@ function PrepareFilesystem()
     "01" | Out-File $_basePath/serial
 }
 
-function New-RootCACertificate()
+function New-PrivateKey([string]$prefix)
 {
-    $passwordCmd = " -aes256 -passout pass:${_privateKeyPassword} "
+    $keyFile = "$_basePath/private/$prefix.$keySuffix"
+    $passwordCreateCmd = "-aes256 -passout pass:$_privateKeyPassword"
     $algorithm = ""
 
-    if ((Get-CACertsCertUseRSA) -eq $FALSE)
+    if ((Get-CACertsCertUseRSA) -eq $TRUE)
     {
-        $algorithm = " genrsa $_keyBitsLength "
+        $algorithm = "genrsa $_keyBitsLength"
     }
     else
     {
-        $algorithm = " ecparam -genkey -name prime256v1 "
+        $algorithm = "ecparam -genkey -name secp256k1"
+        $passwordCreateCmd = "| openssl ec $passwordCreateCmd"
     }
 
-    $keyFile = "$_basePath/private/$rootCAPrefix$keySuffix"
+    $cmd = "openssl $algorithm $passwordCreateCmd -out $keyFile"
+    Write-Host ("Executing command: $cmd")
+    Invoke-Expression -Command $cmd
+    return $keyFile
+}
 
+function New-RootCACertificate()
+{
+    Write-Host ("Creating the Root CA Private Key")
+    $keyFile = New-PrivateKey $rootCAPrefix
+    $certFile = "$_basePath/certs/$rootCAPrefix.$certSuffix"
+
+    Write-Host ("Creating the Root CA certificate")
+    $passwordUseCmd = "-passin pass:$_privateKeyPassword"
+    $cmd =  "openssl req -new -x509 -config $_opensslRootConfigFile $passwordUseCmd "
+    $cmd += "-key $keyFile -subj $_rootCertSubject -days $_days_until_expiration "
+    $cmd += "-sha256 -extensions v3_ca -out $certFile"
+
+    Write-Host ("Executing command: $cmd")
+    Invoke-Expression -Command $cmd
+
+    Write-Host ("CA Root Certificate Generated At:")
+    Write-Host ("---------------------------------")
+    Write-Host ("    $certFile`r`n")
+    Invoke-Expression -Command "openssl x509 -noout -text -in $certFile"
+    Print-WarningCertsNotForProduction
+}
+
+function New-GenerateIntermediateCertificate([string]$commonName, [string]$signingCert, [bool]$isASigner=$true)
+{
+    Write-Host ("Creating intermediate certificate private key")
+    $keyFile = "$_basePath/private/$rootCAPrefix.$keySuffix"
+    $certFile = "$_basePath/certs/$rootCAPrefix.$certSuffix"
+    $passwordCreateCmd = "-aes256 -passout pass:$_privateKeyPassword"
+    $algorithm = ""
+
+    if ((Get-CACertsCertUseRSA) -eq $TRUE)
+    {
+        $algorithm = "genrsa $_keyBitsLength"
+    }
+    else
+    {
+        $algorithm = "ecparam -genkey -name secp256k1"
+        $passwordCreateCmd = "| openssl ec $passwordCreateCmd"
+    }
 
 }
 
@@ -200,16 +252,10 @@ function New-CACertsCertChain([Parameter(Mandatory=$TRUE)][ValidateSet("rsa","ec
     # Store the algorithm we're using in a file so later stages always use the same one (without forcing user to keep passing it around)
     Set-Content $algorithmUsedFile $algorithm
 
-    $rootCACert =  New-CACertsSelfsignedCertificate $_rootCertCommonName $null
-
-    Export-Certificate -Cert $rootCACert -FilePath $rootCACerFileName  -Type CERT
-    Import-Certificate -CertStoreLocation "cert:\LocalMachine\Root" -FilePath $rootCACerFileName
-
-    openssl x509 -inform der -in $rootCACerFileName -out $rootCAPemFileName
+    New-RootCACertificate
 
     $intermediateCert1 = New-CACertsIntermediateCert ($_intermediateCertCommonName -f "1") $rootCACert $intermediate1CAPemFileName
     $intermediateCert2 = New-CACertsIntermediateCert ($_intermediateCertCommonName -f "2") $intermediateCert1 $intermediate2CAPemFileName
-    $intermediateCert3 = New-CACertsIntermediateCert ($_intermediateCertCommonName -f "3") $intermediateCert2 $intermediate3CAPemFileName
     Write-Host "Success"
 }
 
@@ -374,5 +420,4 @@ function Get-CACertsPemEncodingForEnvironmentVariable([string]$fileName)
     Write-Output $outputString
 }
 
-Write-Warning "This script is provided for prototyping only."
-Write-Warning "DO NOT USE CERTIFICATES FROM THIS SCRIPT FOR PRODUCTION!"
+Print-WarningCertsNotForProduction
