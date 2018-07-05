@@ -128,10 +128,15 @@ function PrepareFilesystem()
     "01" | Out-File $_basePath/serial
 }
 
-function New-PrivateKey([string]$prefix)
+function New-PrivateKey([string]$prefix, [string]$keypass=$NULL)
 {
+    Write-Host ("Creating the $prefix private Key")
     $keyFile = "$_basePath/private/$prefix.$keySuffix"
-    $passwordCreateCmd = "-aes256 -passout pass:$_privateKeyPassword"
+    $passwordCreateCmd = ""
+    if ($keypass -ne $NULL)
+    {
+        $passwordCreateCmd = "-aes256 -passout pass:$keypass"
+    }
     $algorithm = ""
 
     if ((Get-CACertsCertUseRSA) -eq $TRUE)
@@ -150,10 +155,22 @@ function New-PrivateKey([string]$prefix)
     return $keyFile
 }
 
+function New-IntermediateCACertificate([string]$prefix, [string]$keypass=$NULL, [string]$issuerPrefix)
+{
+    $keyFile = New-PrivateKey $prefix $keypass
+    $certFile = "$_basePath/certs/$prefix.$certSuffix"
+
+}
+
+function New-ClientCertificate()
+{
+
+}
+
 function New-RootCACertificate()
 {
-    Write-Host ("Creating the Root CA Private Key")
-    $keyFile = New-PrivateKey $rootCAPrefix
+    Write-Host ("Creating the Root CA private key")
+    $keyFile = New-PrivateKey $rootCAPrefix $_privateKeyPassword
     $certFile = "$_basePath/certs/$rootCAPrefix.$certSuffix"
 
     Write-Host ("Creating the Root CA certificate")
@@ -174,6 +191,10 @@ function New-RootCACertificate()
 
 function New-GenerateIntermediateCertificate([string]$commonName, [string]$signingCert, [bool]$isASigner=$true)
 {
+    Write-Host ("Creating the Root CA Private Key")
+    $keyFile = New-PrivateKey $rootCAPrefix $_privateKeyPassword
+    $certFile = "$_basePath/certs/$rootCAPrefix.$certSuffix"
+
     Write-Host ("Creating intermediate certificate private key")
     $keyFile = "$_basePath/private/$rootCAPrefix.$keySuffix"
     $certFile = "$_basePath/certs/$rootCAPrefix.$certSuffix"
