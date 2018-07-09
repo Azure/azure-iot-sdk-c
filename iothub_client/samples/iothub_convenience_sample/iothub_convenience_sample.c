@@ -54,6 +54,11 @@ static const char* connectionString = "[device connection string]";
 static bool g_continueRunning = true;
 static size_t g_message_count_send_confirmations = 0;
 
+static const char* proxy_host = NULL;    // "Web proxy name here"
+static int proxy_port = 0;               // Proxy port
+static const char* proxy_username = NULL; // Proxy user name
+static const char* proxy_password = NULL; // Proxy password
+
 static IOTHUBMESSAGE_DISPOSITION_RESULT receive_msg_callback(IOTHUB_MESSAGE_HANDLE message, void* user_context)
 {
     (void)user_context;
@@ -172,27 +177,41 @@ int main(void)
         // For available options please see the iothub_sdk_options.md documentation
 
         //bool traceOn = true;
-        //IoTHubDeviceClient_SetOption(iothub_handle, OPTION_LOG_TRACE, &traceOn);
+        //(void)IoTHubDeviceClient_SetOption(iothub_handle, OPTION_LOG_TRACE, &traceOn);
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
         // Setting the Trusted Certificate.  This is only necessary on system with without
         // built in certificate stores.
-        IoTHubDeviceClient_SetOption(device_handle, OPTION_TRUSTED_CERT, certificates);
+        (void)IoTHubDeviceClient_SetOption(device_handle, OPTION_TRUSTED_CERT, certificates);
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-#if defined SAMPLE_MQTT || defined SAMPLE_MQTT_WS
+#if defined SAMPLE_MQTT || defined SAMPLE_MQTT_OVER_WEBSOCKETS
         //Setting the auto URL Encoder (recommended for MQTT). Please use this option unless
         //you are URL Encoding inputs yourself.
         //ONLY valid for use with MQTT
         //bool urlEncodeOn = true;
-        //IoTHubDeviceClient_SetOption(device_handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
+        //(void)IoTHubDeviceClient_SetOption(device_handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
 #endif
+
+        if (proxy_host)
+        {
+            HTTP_PROXY_OPTIONS http_proxy_options = { 0 };
+            http_proxy_options.host_address = proxy_host;
+            http_proxy_options.port = proxy_port;
+            http_proxy_options.username = proxy_username;
+            http_proxy_options.password = proxy_password;
+
+            if (IoTHubDeviceClient_SetOption(device_handle, OPTION_HTTP_PROXY, &http_proxy_options) != IOTHUB_CLIENT_OK)
+            {
+                (void)printf("failure to set proxy\n");
+            }
+        }
 
         for (size_t index = 0; index < MESSAGE_COUNT; index++)
         {
             // Construct the iothub message from a string or a byte array
             message_handle = IoTHubMessage_CreateFromString(telemetry_msg);
-            //message_handle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText)));
+            //message_handle = IoTHubMessage_CreateFromByteArray((const unsigned char*)telemetry_msg, strlen(telemetry_msg)));
 
             // Set Message property
             (void)IoTHubMessage_SetMessageId(message_handle, "MSG_ID");

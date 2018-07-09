@@ -1,5 +1,8 @@
 LIBRARY iothub_client_dll
 EXPORTS
+    IoTHub_Init
+    IoTHub_Deinit
+
     IoTHubTransport_Create
     IoTHubTransport_Destroy
     IoTHubTransport_GetLock
@@ -9,6 +12,15 @@ EXPORTS
     IoTHubTransport_JoinWorkerThread
 
     IoTHubClient_GetVersionString
+
+    IoTHubClientCore_LL_SendComplete
+    IoTHubClientCore_LL_ReportedStateComplete
+    IoTHubClientCore_LL_MessageCallback
+    IoTHubClientCore_LL_RetrievePropertyComplete
+    IoTHubClientCore_LL_DeviceMethodComplete
+    IoTHubClientCore_LL_ConnectionStatusCallBack
+    IoTHubClientCore_LL_GetOption
+    IoTHubClientCore_LL_MessageCallbackFromInput
 
     IoTHubClient_CreateFromConnectionString
     IoTHubClient_Create
@@ -122,11 +134,17 @@ EXPORTS
     IoTHubMessage_GetCorrelationId
     IoTHubMessage_GetDiagnosticPropertyData
     IoTHubMessage_GetMessageId
+    IoTHubMessage_GetOutputName
+    IoTHubMessage_GetProperty
     IoTHubMessage_Properties
+    IoTHubMessage_SetConnectionDeviceId
+    IoTHubMessage_SetConnectionModuleId
     IoTHubMessage_SetContentTypeSystemProperty
     IoTHubMessage_SetContentEncodingSystemProperty
     IoTHubMessage_SetCorrelationId
+    IoTHubMessage_SetInputName
     IoTHubMessage_SetMessageId
+    IoTHubMessage_SetProperty
 
     IOTHUB_CLIENT_CONFIRMATION_RESULTStrings
     IOTHUB_CLIENT_FILE_UPLOAD_RESULTStrings
