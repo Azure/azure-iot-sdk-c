@@ -27,6 +27,7 @@ $rootCAPrefix                = "azure-iot-test-only.root.ca"
 $intermediateCAPrefix        = "azure-iot-test-only.intermediate"
 $keySuffix                   = "key.pem"
 $certSuffix                  = "cert.pem"
+$csrSuffix                   = "csr.pem"
 
 $rootCAPemFileName          = "./RootCA.pem"
 $intermediate1CAPemFileName = "./Intermediate1.pem"
@@ -48,13 +49,13 @@ function Print-WarningCertsNotForProduction()
     Write-Warning "DO NOT USE CERTIFICATES FROM THIS SCRIPT FOR PRODUCTION!"
 }
 
-# The script puts certs into the global certificate store.  If there is already a cert of the
+# The script puts certs into the global certificate store. If there is already a cert of the
 # same name present, we're not going to be able to tell the new apart from the old, so error out.
 function Test-CACertNotInstalledAlready([bool]$printMsg=$true)
 {
     if ($TRUE -eq $printMsg)
     {
-        Write-Host ("Testing if any test certificates have already been installed...")
+        Write-Host ("Testing if any test root certificates have already been installed...")
     }
     $certInstalled = $null
     try
@@ -70,13 +71,14 @@ function Test-CACertNotInstalledAlready([bool]$printMsg=$true)
     {
         $nl = [Environment]::NewLine
         $cleanup_msg  = "$nl$nl"
-        $cleanup_msg += "To fix this, cleanup any certificates in the certificate store and try running this script again.$nl"
-        $cleanup_msg += "Steps to cleanup, from Start menu, 'open manage computer certificates':$nl"
+        $cleanup_msg += "This utility detected test certificates already installed in the certificate store.$nl"
+        $cleanup_msg += "Since newer root CA certificates will be generated, it is recommended to clean any stale root certificates.$nl"
+        $cleanup_msg += "Steps to cleanup, from the 'Start' menu, type 'open manage computer certificates':$nl"
         $cleanup_msg += " - Navigate to Certificates -> Trusted Root Certification Authority -> Certificates. Remove certificates issued by 'Azure IoT CA TestOnly*'.$nl"
         $cleanup_msg += " - Navigate to Certificates -> Intermediate Certificate Authorities -> Certificates. Remove certificates issued by 'Azure IoT CA TestOnly*'.$nl"
         $cleanup_msg += " - Navigate to Certificates -> Local Computer -> Personal. Remove certificates issued by 'Azure IoT CA TestOnly*'.$nl"
         $cleanup_msg += "$nl$nl"
-        Write-Error("Certificate {0} already installed in the certificate store. {1}" -f $_rootCertSubject,  $cleanup_msg)
+        Write-Warning("Certificate {0} already installed in the certificate store. {1}" -f $_rootCertSubject,  $cleanup_msg)
         throw ("Certificate {0} already installed." -f $_rootCertSubject)
     }
     if ($TRUE -eq $printMsg)
@@ -114,28 +116,28 @@ function PrepareFilesystem()
     Remove-Item -Path $_basePath/intermediateCerts -Recurse -ErrorAction Ignore
     Remove-Item -Path $_basePath/newcerts -Recurse -ErrorAction Ignore
 
-    MD csr
-    MD private
-    MD certs
-    MD intermediateCerts
-    MD newcerts
+    mkdir -Path "csr"
+    mkdir -Path "private"
+    mkdir -Path "certs"
+    mkdir -Path "intermediateCerts"
+    mkdir -Path "newcerts"
 
     Remove-Item -Path $_basePath/index.txt -ErrorAction Ignore
     New-Item $_basePath/index.txt -ItemType file
 
-    Remove-Item -Path $_basePath/serial -ErrorAction Ignore
-    New-Item $_basePath/serial -ItemType file
-    "01" | Out-File $_basePath/serial
+    #Remove-Item -Path $_basePath/serial -ErrorAction Ignore
+    #New-Item $_basePath/serial -ItemType file
+    #"1000" | Out-File $_basePath/serial
 }
 
-function New-PrivateKey([string]$prefix, [string]$keypass=$NULL)
+function New-PrivateKey([string]$prefix, [string]$keyPass=$NULL)
 {
     Write-Host ("Creating the $prefix private Key")
     $keyFile = "$_basePath/private/$prefix.$keySuffix"
     $passwordCreateCmd = ""
     if ($keypass -ne $NULL)
     {
-        $passwordCreateCmd = "-aes256 -passout pass:$keypass"
+        $passwordCreateCmd = "-aes256 -passout pass:$keyPass"
     }
     $algorithm = ""
 
@@ -155,21 +157,104 @@ function New-PrivateKey([string]$prefix, [string]$keypass=$NULL)
     return $keyFile
 }
 
-function New-IntermediateCACertificate([string]$prefix, [string]$keypass=$NULL, [string]$issuerPrefix)
+function New-IntermediateCertificate
+(
+    [string]$x509Ext,
+    [string]$expirationDays,
+    [string]$subject,
+    [string]$prefix,
+    [string]$issuerPrefix,
+    [string]$keyPass=$NULL,
+    [string]$issuerKeyPass=$NULL
+)
 {
-    $keyFile = New-PrivateKey $prefix $keypass
+    $issuerKeyFile = "$_basePath/private/$issuerPrefix.$keySuffix"
+    $issuerCertFile = "$_basePath/certs/$issuerPrefix.$certSuffix"
+
+    if (-not (Test-Path $issuerKeyFile -PathType Leaf))
+    {
+        Write-Host ("Private key file not found: $issuerKeyFile")
+        throw ("Issuer '$issuerPrefix' private key not found")
+    }
+    if (-not (Test-Path $issuerCertFile -PathType Leaf))
+    {
+        Write-Host ("Certificate file not found: $issuerCertFile")
+        throw ("Issuer '$issuerPrefix' certificate not found")
+    }
+
+    $keyFile = New-PrivateKey $prefix $keyPass
+    $csrFile = "$_basePath/csr/$prefix.$csrSuffix"
     $certFile = "$_basePath/certs/$prefix.$certSuffix"
 
+    Write-Host ("Creating the Intermediate CSR for $prefix")
+    Write-Host "-----------------------------------"
+    $keyPassUseCmd = ""
+    if ($keyPass -ne $NULL)
+    {
+        $keyPassUseCmd = "-passin pass:$keyPass"
+    }
+    $cmd =  "openssl req -new -x509 -sha256 $keyPassUseCmd "
+    $cmd += "-config $_opensslIntermediateConfigFile "
+    $cmd += "-key $keyFile "
+    $cmd += "-subj $subject "
+    $cmd += "-out $csrFile"
+
+    Write-Host ("Executing command: $cmd")
+    Invoke-Expression -Command $cmd
+
+    Write-Host ("Signing the certificate for $prefix with issuer certificate $issuerPrefix")
+    Write-Host "-----------------------------------"
+    $keyPassUseCmd = ""
+    if ($issuerKeyPass -ne $NULL)
+    {
+        $keyPassUseCmd = "-key $issuerKeyPass"
+    }
+    $cmd =  "openssl ca -batch "
+    $cmd += "-config $_opensslIntermediateConfigFile "
+    $cmd += "-extensions $x509Ext "
+    $cmd += "-days $expirationDays -notext -md sha256 "
+    $cmd += "-cert $issuerCertFile "
+    $cmd += "$keyPassUseCmd -keyfile $issuerKeyFile -keyform PEM "
+    $cmd += "-in $csrFile -out $certFile"
+
+    Write-Host ("Executing command: $cmd")
+    Invoke-Expression -Command $cmd
+
+    Write-Host ("Verifying the certificate for $prefix with issuer certificate $issuerPrefix")
+    Write-Host "-----------------------------------"
+    $cmd =  "openssl verify -CAfile $issuerCertFile $certFile"
+    Write-Host ("Executing command: $cmd")
+    Invoke-Expression -Command $cmd
+
+    Write-Host ("Certificate for prefix $prefix generated at:")
+    Write-Host ("---------------------------------")
+    Write-Host ("    $certFile`r`n")
+    Invoke-Expression -Command "openssl x509 -noout -text -in $certFile"
 }
 
-function New-ClientCertificate()
+function New-ClientCertificate([string]$prefix, [string]$issuerPrefix, [string]$commonName)
 {
+    $subject = "/CN='$commonName'"
+    New-IntermediateCertificate "usr_cert" $_days_until_expiration $subject $prefix  $issuerPrefix $_privateKeyPassword $_privateKeyPassword
+    Write-Warning ("Generating certificate CN={0} which is for prototyping, NOT PRODUCTION.  It has a hard-coded password and will expire in 30 days." -f $commonName)
+}
 
+function New-ServerCertificate([string]$prefix, [string]$issuerPrefix, [string]$commonName)
+{
+    $subject = "/CN='$commonName'"
+    New-IntermediateCertificate "server_cert" $_days_until_expiration $subject $prefix  $issuerPrefix $_privateKeyPassword $_privateKeyPassword
+    Write-Warning ("Generating certificate CN={0} which is for prototyping, NOT PRODUCTION.  It has a hard-coded password and will expire in 30 days." -f $commonName)
+}
+
+function New-IntermediateCACertificate([string]$prefix, [string]$issuerPrefix, [string]$commonName)
+{
+    $subject = "/CN='$commonName'"
+    New-IntermediateCertificate "v3_intermediate_ca" $_days_until_expiration $subject $prefix  $issuerPrefix $_privateKeyPassword $_privateKeyPassword
+    Write-Warning ("Generating certificate CN={0} which is for prototyping, NOT PRODUCTION.  It has a hard-coded password and will expire in 30 days." -f $commonName)
 }
 
 function New-RootCACertificate()
 {
-    Write-Host ("Creating the Root CA private key")
     $keyFile = New-PrivateKey $rootCAPrefix $_privateKeyPassword
     $certFile = "$_basePath/certs/$rootCAPrefix.$certSuffix"
 
@@ -186,31 +271,8 @@ function New-RootCACertificate()
     Write-Host ("---------------------------------")
     Write-Host ("    $certFile`r`n")
     Invoke-Expression -Command "openssl x509 -noout -text -in $certFile"
-    Print-WarningCertsNotForProduction
-}
-
-function New-GenerateIntermediateCertificate([string]$commonName, [string]$signingCert, [bool]$isASigner=$true)
-{
-    Write-Host ("Creating the Root CA Private Key")
-    $keyFile = New-PrivateKey $rootCAPrefix $_privateKeyPassword
-    $certFile = "$_basePath/certs/$rootCAPrefix.$certSuffix"
-
-    Write-Host ("Creating intermediate certificate private key")
-    $keyFile = "$_basePath/private/$rootCAPrefix.$keySuffix"
-    $certFile = "$_basePath/certs/$rootCAPrefix.$certSuffix"
-    $passwordCreateCmd = "-aes256 -passout pass:$_privateKeyPassword"
-    $algorithm = ""
-
-    if ((Get-CACertsCertUseRSA) -eq $TRUE)
-    {
-        $algorithm = "genrsa $_keyBitsLength"
-    }
-    else
-    {
-        $algorithm = "ecparam -genkey -name secp256k1"
-        $passwordCreateCmd = "| openssl ec $passwordCreateCmd"
-    }
-
+    # Now use splatting to process this
+    Write-Warning ("Generating certificate {0} which is for prototyping, NOT PRODUCTION.  It has a hard-coded password and will expire in 30 days." -f $_rootCertSubject)
 }
 
 function New-CACertsSelfsignedCertificate([string]$commonName, [object]$signingCert, [bool]$isASigner=$true)
@@ -263,10 +325,33 @@ function New-CACertsIntermediateCert([string]$commonName, [Microsoft.Certificate
     Write-Output $newCert
 }
 
+function New-RootCACertificate()
+{
+    Write-Host ("Creating the Root CA private key")
+    $keyFile = New-PrivateKey $rootCAPrefix $_privateKeyPassword
+    $certFile = "$_basePath/certs/$rootCAPrefix.$certSuffix"
+
+    Write-Host ("Creating the Root CA certificate")
+    $passwordUseCmd = "-passin pass:$_privateKeyPassword"
+    $cmd =  "openssl req -new -x509 -config $_opensslRootConfigFile $passwordUseCmd "
+    $cmd += "-key $keyFile -subj $_rootCertSubject -days $_days_until_expiration "
+    $cmd += "-sha256 -extensions v3_ca -out $certFile"
+
+    Write-Host ("Executing command: $cmd")
+    Invoke-Expression -Command $cmd
+
+    Write-Host ("CA Root Certificate Generated At:")
+    Write-Host ("---------------------------------")
+    Write-Host ("    $certFile`r`n")
+    Invoke-Expression -Command "openssl x509 -noout -text -in $certFile"
+    # Now use splatting to process this
+    Write-Warning ("Generating certificate {0} which is for prototyping, NOT PRODUCTION.  It has a hard-coded password and will expire in 30 days." -f $_rootCertSubject)
+}
+
 # Creates a new certificate chain.
 function New-CACertsCertChain([Parameter(Mandatory=$TRUE)][ValidateSet("rsa","ecc")][string]$algorithm)
 {
-    Write-Host "Beginning to install certificate chain to your LocalMachine\My store"
+    Write-Host "Beginning to create certificate chain to you filesystem here $PWD"
     Test-CACertsPrerequisites($FALSE)
     PrepareFilesystem
 
@@ -274,9 +359,7 @@ function New-CACertsCertChain([Parameter(Mandatory=$TRUE)][ValidateSet("rsa","ec
     Set-Content $algorithmUsedFile $algorithm
 
     New-RootCACertificate
-
-    $intermediateCert1 = New-CACertsIntermediateCert ($_intermediateCertCommonName -f "1") $rootCACert $intermediate1CAPemFileName
-    $intermediateCert2 = New-CACertsIntermediateCert ($_intermediateCertCommonName -f "2") $intermediateCert1 $intermediate2CAPemFileName
+    New-IntermediateCACertificate "intermediate1" $rootCAPrefix ($_intermediateCertCommonName -f "1")
     Write-Host "Success"
 }
 
@@ -300,22 +383,23 @@ function Get-CACertsCertBySubjectName([string]$subjectName)
 
 function New-CACertsVerificationCert([string]$requestedCommonName)
 {
+    $sourceCertPath = "$_basePath/certs/verifyCert4.$certSuffix"
+    $sourceKeyPath = "$_basePath/private/verifyCert4.$keySuffix"
+    Remove-Item -Path $sourceCertPath -ErrorAction Ignore
+    Remove-Item -Path $sourceKeyPath -ErrorAction Ignore
+    New-ClientCertificate "verifyCert4" $rootCAPrefix $requestedCommonName
     $verifyRequestedFileName = ".\verifyCert4.cer"
-    $rootCACert = Get-CACertsCertBySubjectName $_rootCertSubject
-    Write-Host "Using Signing Cert:::"
-    Write-Host $rootCACert
-
-    $verifyCert = New-CACertsSelfsignedCertificate $requestedCommonName $rootCACert $false
-
-    Export-Certificate -cert $verifyCert -filePath $verifyRequestedFileName -Type Cert
+    if (-not (Test-Path $sourceCertPath))
+    {
+        throw ("Error: CERT file {0} doesn't exist" -f $sourceCertPath)
+    }
+    Copy-Item -Path $sourceCertPath -Destination $verifyRequestedFileName
     if (-not (Test-Path $verifyRequestedFileName))
     {
-        throw ("Error: CERT file {0} doesn't exist" -f $verifyRequestedFileName)
+        throw ("Error: Copying cert file file {0} to {1}" -f $sourceCertPath, $verifyRequestedFileName)
     }
-
     Write-Host ("Certificate with subject CN={0} has been output to {1}" -f $requestedCommonName, (Join-Path (get-location).path $verifyRequestedFileName))
 }
-
 
 function New-CACertsDevice([string]$deviceName, [string]$signingCertSubject=$_rootCertSubject, [bool]$isEdgeDevice=$false)
 {
