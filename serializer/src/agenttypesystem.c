@@ -3062,7 +3062,7 @@ static int sscanfdotllu(const char*src, unsigned long long* dst)
 }
 
 /*the following function does the same as  sscanf(src, "%u", &dst)*/
-static int sscanfu(const char* src, unsigned int* dst)
+static int sscanfu(const char* src, uint32_t* dst)
 {
     int result;
     char* next;
@@ -3074,7 +3074,7 @@ static int sscanfu(const char* src, unsigned int* dst)
     else
     {
         result = 1;
-        (*dst) = (unsigned int)temp;
+        (*dst) = (uint32_t)temp;
     }
     return result;
 }
@@ -3297,7 +3297,7 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
 
                 strLength = strlen(source);
 
-                if ((sscanfu(pos, (unsigned int*)&uint32Value) != 1) ||
+                if ((sscanfu(pos, &uint32Value) != 1) ||
                     (strLength > 11) ||
                     ((uint32Value > 2147483648UL) && isNegative) ||
                     ((uint32Value > 2147483647UL) && (!isNegative)))
