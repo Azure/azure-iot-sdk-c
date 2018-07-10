@@ -1,6 +1,11 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+//
+// IMPORTANT: Please read and understand serializer limitations and alternatives as
+//            described ../../readme.md before beginning to use the serializer.
+// 
+
 // There is an analogous sample using the iothub_client and parson (a json-parsing library): 
 // <azure-iot-sdk-c repo>/iothub_client/samples/iothub_client_device_twin_and_methods_sample
 
