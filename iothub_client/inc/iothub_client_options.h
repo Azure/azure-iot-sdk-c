@@ -35,6 +35,7 @@ extern "C"
     static STATIC_VAR_UNUSED const char* OPTION_MIN_POLLING_TIME = "MinimumPollingTime";
     static STATIC_VAR_UNUSED const char* OPTION_BATCHING = "Batching";
 
+	/* DEPRECATED:: OPTION_MESSAGE_TIMEOUT is DEPRECATED! Use OPTION_SERVICE_SIDE_KEEP_ALIVE_FREQ_SECS for AMQP; MQTT has no option available. OPTION_MESSAGE_TIMEOUT legacy variable will be kept for back-compat.  */
     static STATIC_VAR_UNUSED const char* OPTION_MESSAGE_TIMEOUT = "messageTimeout";
     static STATIC_VAR_UNUSED const char* OPTION_BLOB_UPLOAD_TIMEOUT_SECS = "blob_upload_timeout_secs";
     static STATIC_VAR_UNUSED const char* OPTION_PRODUCT_INFO = "product_info";
@@ -63,6 +64,14 @@ extern "C"
     *        For AMQP remote idle set to 4 minutes, default client ping will be 2 minutes. For AMQP remote idle set to 25 minutes configured via per Hub basis, the default ping will be 12.5 minutes.
     */
     static STATIC_VAR_UNUSED const char* OPTION_REMOTE_IDLE_TIMEOUT_RATIO = "cl2svc_keep_alive_send_ratio"; 
+
+	/*
+	* @brief This option should be used instead of OPTION_MESSAGE_TIMEOUT if using AMQP protocol.
+	*        It defines the maximum ammount of time, in seconds, the client will wait for a telemetry message to complete sending before returning it with a IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT error.
+	*        The default value 5 (five) minutes.
+	*        This option is applicable only to AMQP protocol.
+	*/
+	static STATIC_VAR_UNUSED const char* OPTION_EVENT_SEND_TIMEOUT_SECS = "event_send_timeout_secs";
 
     //diagnostic sampling percentage value, [0-100]
     static STATIC_VAR_UNUSED const char* OPTION_DIAGNOSTIC_SAMPLING_PERCENTAGE = "diag_sampling_percentage";
