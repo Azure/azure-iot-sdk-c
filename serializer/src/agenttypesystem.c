@@ -3297,7 +3297,7 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
 
                 strLength = strlen(source);
 
-                if ((sscanfu(pos, &uint32Value) != 1) ||
+                if ((sscanfu(pos, (unsigned int*)&uint32Value) != 1) ||
                     (strLength > 11) ||
                     ((uint32Value > 2147483648UL) && isNegative) ||
                     ((uint32Value > 2147483647UL) && (!isNegative)))
