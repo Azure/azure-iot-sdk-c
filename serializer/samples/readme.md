@@ -1,5 +1,7 @@
 # Samples for the Azure IoT device SDK for C leveraging the serializer library
 
+**Please read and understand serializer limitations and alternatives as described [here](../readme.md) before beginning to use the serializer.**
+
 This folder contains simple samples showing how to use the various features of the Microsoft Azure IoT Hub service leveraging the serializer library from a device running C code.
 
 ## List of samples
