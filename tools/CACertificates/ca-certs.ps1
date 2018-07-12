@@ -31,6 +31,7 @@ $edgeDeviceCertificate      = Join-Path $edgePublicCertDir "new-edge-device.cert
 $edgeDevicePrivateKey       = Join-Path $edgePrivateCertDir "new-edge-device.key.pem"
 $edgeDeviceFullCertChain    = Join-Path $edgePublicCertDir "new-edge-device-full-chain.cert.pem"
 $edgeIotHubOwnerCA          = Join-Path $edgePublicCertDir "azure-iot-test-only.root.ca.cert.pem"
+$_edgeDeviceCACNSuffix      = ".ca"
 
 # Whether to use ECC or RSA is stored in a file.  If it doesn't exist, we default to ECC.
 $algorithmUsedFile       = "./algorithmUsed.txt"
@@ -136,7 +137,7 @@ function New-CACertsIntermediateCert([string]$commonName, [Microsoft.Certificate
     openssl x509 -inform der -in $certFileName -out $pemFileName
 
     del $certFileName
-   
+
     Write-Output $newCert
 }
 
@@ -176,7 +177,7 @@ function Get-CACertsCertBySubjectName([string]$subjectName)
     {
         throw ("Unable to find certificate with subjectName {0}" -f $subjectName)
     }
-    
+
     Write-Output $cert
 }
 
@@ -207,7 +208,7 @@ function New-CACertsDevice([string]$deviceName, [string]$signingCertSubject=$_ro
     $newDevicePemPublicFileName   = ("./{0}-public.pem" -f $deviceName)
 
     $signingCert = Get-CACertsCertBySubjectName $signingCertSubject ## "CN=Azure IoT CA TestOnly Intermediate 1 CA"
-    
+
     # Certificates for edge devices need to be able to sign other certs.
     if ($isEdgeDevice -eq $true)
     {
@@ -237,7 +238,7 @@ function New-CACertsDevice([string]$deviceName, [string]$signingCertSubject=$_ro
     # Now that we have a PEM, do some conversions on it to get formats we can process
     if ((Get-CACertsCertUseRSA) -eq $true)
     {
-        openssl rsa -in $newDevicePemAllFileName -out $newDevicePemPrivateFileName        
+        openssl rsa -in $newDevicePemAllFileName -out $newDevicePemPrivateFileName
     }
     else
     {
@@ -250,6 +251,12 @@ function New-CACertsDevice([string]$deviceName, [string]$signingCertSubject=$_ro
 
 function New-CACertsEdgeDevice([string]$deviceName, [string]$signingCertSubject=($_intermediateCertSubject -f "1"))
 {
+    # Note: Appending a '.ca' to the common name is useful in situations
+    # where a user names their hostname as the edge device name.
+    # By doing so we avoid TLS validation errors where we have a server or
+    # client certificate where the hostname is used as the common name
+    # which essentially results in "loop" for validation purposes.
+    $deviceName += $_edgeDeviceCACNSuffix
     New-CACertsDevice $deviceName $signingCertSubject $true
 }
 
@@ -289,6 +296,7 @@ function Write-CACertsCertificatesToEnvironment([string]$deviceName, [string]$io
 # Outputs certificates for Edge device using naming conventions from tutorials
 function Write-CACertsCertificatesForEdgeDevice([string]$deviceName)
 {
+    $deviceName += $_edgeDeviceCACNSuffix
     $originalDevicePublicPem  = ("./{0}-public.pem" -f $deviceName)
     $originalDevicePrivatePem  = ("./{0}-private.pem" -f $deviceName)
 
@@ -319,7 +327,7 @@ function Get-CACertsPemEncodingForEnvironmentVariable([string]$fileName)
     {
         $outputString += ($line + "`r`n")
     }
-    
+
     Write-Output $outputString
 }
 
