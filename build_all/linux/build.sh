@@ -16,7 +16,6 @@ build_mqtt=ON
 no_blob=OFF
 run_unittests=OFF
 build_python=OFF
-build_javawrapper=OFF
 run_valgrind=0
 build_folder=$build_root"/cmake/iotsdk_linux"
 make=true
@@ -46,7 +45,6 @@ usage ()
     echo " --toolchain-file <file>       pass cmake a toolchain file for cross compiling"
     echo " --install-path-prefix         alternative prefix for make install"
     echo " --build-python <version>      build Python C wrapper module (requires boost) with given python version (2.7 3.4 3.5 are currently supported)"
-    echo " --build-javawrapper           build java C wrapper module"
     echo " -rv, --run_valgrind           will execute ctest with valgrind"
     echo " --no-logging                  Disable logging"
     echo " --provisioning                Use Provisioning with Flow"
@@ -99,7 +97,6 @@ process_args ()
               "--no_uploadtoblob" ) no_blob=ON;;
               "--no-make" ) make=false;;
               "--build-python" ) save_next_arg=3;;
-              "--build-javawrapper" ) build_javawrapper=ON;;
               "--toolchain-file" ) save_next_arg=2;;
               "-rv" | "--run_valgrind" ) run_valgrind=1;;
               "--no-logging" ) no_logging=ON;;
@@ -130,7 +127,7 @@ process_args $*
 rm -r -f $build_folder
 mkdir -p $build_folder
 pushd $build_folder
-cmake $toolchainfile $cmake_install_prefix -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_sfc_tests:BOOL=$run-sfc-tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Ddont_use_uploadtoblob:BOOL=$no_blob -Drun_unittests:BOOL=$run_unittests -Dbuild_python:STRING=$build_python -Dbuild_javawrapper:BOOL=$build_javawrapper -Dno_logging:BOOL=$no_logging $build_root -Duse_prov_client:BOOL=$prov_auth -Duse_tpm_simulator:BOOL=$prov_use_tpm_simulator -Duse_edge_modules=$use_edge_modules
+cmake $toolchainfile $cmake_install_prefix -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_sfc_tests:BOOL=$run-sfc-tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Ddont_use_uploadtoblob:BOOL=$no_blob -Drun_unittests:BOOL=$run_unittests -Dbuild_python:STRING=$build_python -Dno_logging:BOOL=$no_logging $build_root -Duse_prov_client:BOOL=$prov_auth -Duse_tpm_simulator:BOOL=$prov_use_tpm_simulator -Duse_edge_modules=$use_edge_modules
 
 if [ "$make" = true ]
 then
