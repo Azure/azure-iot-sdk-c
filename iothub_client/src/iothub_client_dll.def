@@ -145,12 +145,6 @@ EXPORTS
     IoTHubMessage_SetInputName
     IoTHubMessage_SetMessageId
     IoTHubMessage_SetProperty
-	
-	AMQP_Protocol
-	AMQP_Protocol_over_WebSocketsTls
-	HTTP_Protocol
-	MQTT_Protocol
-	MQTT_WebSocket_Protocol
 
     IOTHUB_CLIENT_CONFIRMATION_RESULTStrings
     IOTHUB_CLIENT_FILE_UPLOAD_RESULTStrings
