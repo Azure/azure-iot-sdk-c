@@ -1,10 +1,10 @@
-# Managing Certificates for Iot Edge SDKs Sample
+# Managing test CA certificates for samples and tutorials
 
 ## WARNING
 Certificates created by these scripts **MUST NOT** be used for production.  They contain hard-coded passwords ("1234"), expire after 30 days, and most importantly are provided for demonstration purposes to help you quickly understand CA Certificates.  When productizing against CA Certificates, you'll need to use your own security best practices for certification creation and lifetime management.
 
 ## Introduction
-This document helps create certificates for use in **pre-testing** Iot SDK's against the IoT Hub.  In particular, the tools in this directory can be used to either setup CA Certificates (along with proof of possession) or Edge device certificates.  This document assumes you have basic familiarity with the scenario you are setting up for as well as some knowledge of PowerShell or Bash.
+This document helps create certificates for use in **pre-testing** IoT SDK's against the IoT Hub.  In particular, the tools in this directory can be used to either setup CA Certificates (along with proof of possession) or Edge device certificates.  This document assumes you have basic familiarity with the scenario you are setting up for as well as some knowledge of PowerShell or Bash.
 
 This directory contains a PowerShell (PS1) and Bash script to help create **test** certificates for Azure IoT Hub's CA Certificate / proof-of-possession and/or Edge certificates.
 
@@ -21,7 +21,7 @@ You'll need to do some initial setup prior to running these scripts.
 
 ###  **PowerShell**
 * Get OpenSSL for Windows.  
-  * See [the official documentation prerequisites] or https://www.openssl.org/docs/faq.html#MISC4 for places to download it or https://www.openssl.org/source/ to build from source.
+  * See https://www.openssl.org/docs/faq.html#MISC4 for places to download it or https://www.openssl.org/source/ to build from source.
   * Set `$ENV:OPENSSL_CONF` to the openssl's openssl.cnf.
 * Start PowerShell as an Administrator.
 * `cd` to the directory you want to run in.  All files will be created as children of this directory.
@@ -103,4 +103,3 @@ Bash outputs certificates to the current working directory, so there is no analo
 
 [the official documentation]: https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-security-x509-get-started
 [Edge gateway creation documentation]: https://docs.microsoft.com/en-us/azure/iot-edge/how-to-create-gateway-device
-[the official documentation prerequisites]: https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-security-x509-create-certificates#prerequisites
