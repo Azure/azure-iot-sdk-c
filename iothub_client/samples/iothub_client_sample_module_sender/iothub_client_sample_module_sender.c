@@ -13,7 +13,6 @@
 #include "iothub_client_options.h"
 #include "iothubtransportmqtt.h"
 #include "iothub.h"
-#include "time.h"
 
 static int callbackCounter;
 static char msgText[1024];
@@ -116,7 +115,7 @@ int main(void)
         IoTHubModuleClient_LL_Destroy(iotHubModuleClientHandle);
     }
 
-    printf("Finished executing\n");
+    (void)printf("Finished executing\n");
     IoTHub_Deinit();
     return 0;
 }

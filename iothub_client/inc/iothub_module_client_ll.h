@@ -23,6 +23,7 @@
 #ifndef IOTHUB_MODULE_CLIENT_LL_H
 #define IOTHUB_MODULE_CLIENT_LL_H
 
+#include <time.h>
 #include "azure_c_shared_utility/macro_utils.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
 

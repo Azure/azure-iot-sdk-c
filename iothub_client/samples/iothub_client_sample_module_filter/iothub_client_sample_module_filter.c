@@ -13,7 +13,6 @@
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "iothubtransportmqtt.h"
 #include "iothub.h"
-#include "time.h"
 
 typedef struct FILTERED_MESSAGE_INSTANCE_TAG
 {
@@ -47,7 +46,7 @@ static void PrintMessageInformation(IOTHUB_MESSAGE_HANDLE message)
 
     if ((messageBody = IoTHubMessage_GetString(message)) == NULL)
     {
-        printf("WARNING: messageBody = NULL\n");
+        (void)printf("WARNING: messageBody = NULL\n");
         messageBody = "<null>";
     }
 
@@ -67,7 +66,7 @@ static void PrintMessageInformation(IOTHUB_MESSAGE_HANDLE message)
     }
 
 
-    printf("Received Message [%zu]\r\n Message ID: [%s]\r\n Correlation ID: [%s]\r\n Data: [%s]\r\n InputQueueName: [%s]\n connectionModuleId: [%s]\r\n connectionDeviceId: [%s]\n",
+    (void)printf("Received Message [%zu]\r\n Message ID: [%s]\r\n Correlation ID: [%s]\r\n Data: [%s]\r\n InputQueueName: [%s]\n connectionModuleId: [%s]\r\n connectionDeviceId: [%s]\n",
             messagesReceivedByInput1Queue, messageId, correlationId, messageBody, inputQueueName, connectionModuleId, connectionDeviceId);
 }
 
@@ -77,7 +76,7 @@ static void PrintMessageInformation(IOTHUB_MESSAGE_HANDLE message)
 static IOTHUBMESSAGE_DISPOSITION_RESULT DefaultMessageCallback(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback)
 {
     (void)userContextCallback;
-    printf("Message arrived sent to the default queue\n");
+    (void)printf("Message arrived sent to the default queue\n");
     PrintMessageInformation(message);
     return IOTHUBMESSAGE_ACCEPTED;
 }
@@ -88,7 +87,7 @@ static void SendConfirmationCallbackFromFilter(IOTHUB_CLIENT_CONFIRMATION_RESULT
 {
     // The context corresponds to which message# we were at when we sent.
     FILTERED_MESSAGE_INSTANCE* filteredMessageInstance = (FILTERED_MESSAGE_INSTANCE*)userContextCallback;
-    printf("Confirmation[%zu] received for message with result = %d\r\n", filteredMessageInstance->messageTrackingId, result);
+    (void)printf("Confirmation[%zu] received for message with result = %d\r\n", filteredMessageInstance->messageTrackingId, result);
     IoTHubMessage_Destroy(filteredMessageInstance->messageHandle);
     free(filteredMessageInstance);
 }
@@ -101,7 +100,7 @@ static FILTERED_MESSAGE_INSTANCE* CreateFilteredMessageInstance(IOTHUB_MESSAGE_H
     FILTERED_MESSAGE_INSTANCE* filteredMessageInstance = (FILTERED_MESSAGE_INSTANCE*)malloc(sizeof(FILTERED_MESSAGE_INSTANCE));
     if (NULL == filteredMessageInstance)
     {
-        printf("Failed allocating 'FILTERED_MESSAGE_INSTANCE' for pipelined message\n");
+        (void)printf("Failed allocating 'FILTERED_MESSAGE_INSTANCE' for pipelined message\n");
     }
     else
     {
@@ -109,7 +108,7 @@ static FILTERED_MESSAGE_INSTANCE* CreateFilteredMessageInstance(IOTHUB_MESSAGE_H
 
         if ((filteredMessageInstance->messageHandle = IoTHubMessage_Clone(message)) == NULL)
         {
-            printf("Cloning message for pipelined message\n");
+            (void)printf("Cloning message for pipelined message\n");
             free(filteredMessageInstance);
             filteredMessageInstance = NULL;
         }
@@ -141,16 +140,20 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT InputQueue1FilterCallback(IOTHUB_MESSAGE
         else
         {
             // We filter out every other message.  Here we will send on.
-            printf("Sending message (%zu) to the next stage in pipeline\n", messagesReceivedByInput1Queue);
+            (void)printf("Sending message (%zu) to the next stage in pipeline\n", messagesReceivedByInput1Queue);
 
             IOTHUB_MESSAGE_RESULT msgResult = IoTHubMessage_SetMessageId(message, "MSG_ID");
-            if (msgResult != IOTHUB_MESSAGE_OK) { printf("SetMesageId failed, id=%d\n", msgResult); };
+            if (msgResult != IOTHUB_MESSAGE_OK) 
+            { 
+                (void)printf("SetMesageId failed, id=%d\n", msgResult); 
+            }
 
             clientResult = IoTHubModuleClient_LL_SendEventToOutputAsync(iotHubModuleClientHandle, message, "output1", SendConfirmationCallbackFromFilter, (void*)filteredMessageInstance);
             if (clientResult != IOTHUB_CLIENT_OK)
             {
+                IoTHubMessage_Destroy(filteredMessageInstance->messageHandle);
                 free(filteredMessageInstance);
-                printf("IoTHubModuleClient_LL_SendEventToOutputAsync failed on sending msg#=%zu, err=%d\n", messagesReceivedByInput1Queue, clientResult);
+                (void)printf("IoTHubModuleClient_LL_SendEventToOutputAsync failed on sending msg#=%zu, err=%d\n", messagesReceivedByInput1Queue, clientResult);
                 result = IOTHUBMESSAGE_ABANDONED;
             }
             else
@@ -162,7 +165,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT InputQueue1FilterCallback(IOTHUB_MESSAGE
     else
     {
         // No-op.  Swallow this message by not passing it onto the next stage in the pipeline.
-        printf("Not sending message (%zu) to the next stage in pipeline.\n", messagesReceivedByInput1Queue);
+        (void)printf("Not sending message (%zu) to the next stage in pipeline.\n", messagesReceivedByInput1Queue);
         result = IOTHUBMESSAGE_ACCEPTED;
     }
 
@@ -176,12 +179,12 @@ static IOTHUB_MODULE_CLIENT_LL_HANDLE InitializeConnectionForFilter()
 
     if (IoTHub_Init() != 0)
     {
-        printf("Failed to initialize the platform.\r\n");
+        (void)printf("Failed to initialize the platform.\r\n");
         iotHubModuleClientHandle = NULL;
     }
     else if ((iotHubModuleClientHandle = IoTHubModuleClient_LL_CreateFromEnvironment(MQTT_Protocol)) == NULL)
     {
-        printf("ERROR: IoTHubModuleClient_LL_CreateFromEnvironment failed\r\n");
+        (void)printf("ERROR: IoTHubModuleClient_LL_CreateFromEnvironment failed\r\n");
     }
     else
     {
@@ -208,12 +211,12 @@ static int SetupCallbacksForInputQueues(IOTHUB_MODULE_CLIENT_LL_HANDLE iotHubMod
 
     if (IoTHubModuleClient_LL_SetInputMessageCallback(iotHubModuleClientHandle, "input1", InputQueue1FilterCallback, (void*)iotHubModuleClientHandle) != IOTHUB_CLIENT_OK)
     {
-        printf("ERROR: IoTHubModuleClient_LL_SetInputMessageCallback(\"input1\")..........FAILED!\r\n");
+        (void)printf("ERROR: IoTHubModuleClient_LL_SetInputMessageCallback(\"input1\")..........FAILED!\r\n");
         ret = __FAILURE__;
     }
     else if (IoTHubModuleClient_LL_SetMessageCallback(iotHubModuleClientHandle, DefaultMessageCallback, (void*)iotHubModuleClientHandle) != IOTHUB_CLIENT_OK)
     {
-        printf("ERROR: IoTHubModuleClient_LL_SetMessageCallback(default)..........FAILED!\r\n");
+        (void)printf("ERROR: IoTHubModuleClient_LL_SetMessageCallback(default)..........FAILED!\r\n");
         ret = __FAILURE__;
     }
     else
@@ -241,7 +244,7 @@ int main(void)
     else
     {
         // The receiver just loops constantly waiting for messages.
-        printf("Waiting for incoming messages.\n");
+        (void)printf("Waiting for incoming messages.\n");
         while (true)
         {
             IoTHubModuleClient_LL_DoWork(iotHubModuleClientHandle);
