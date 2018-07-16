@@ -351,7 +351,13 @@ function generate_edge_device_certificate()
     rm -f ./certs/new-edge-device.cert.pem
     rm -f ./certs/new-edge-device-full-chain.cert.pem
 
-    generate_device_certificate_common "${1}" ${device_prefix} \
+    # Note: Appending a '.ca' to the common name is useful in situations
+    # where a user names their hostname as the edge device name.
+    # By doing so we avoid TLS validation errors where we have a server or
+    # client certificate where the hostname is used as the common name
+    # which essentially results in "loop" for validation purposes.
+    generate_device_certificate_common "${1}.ca" \
+                                       ${device_prefix} \
                                        ${intermediate_ca_dir} \
                                        ${intermediate_ca_password} \
                                        ${openssl_intermediate_config_file} \
