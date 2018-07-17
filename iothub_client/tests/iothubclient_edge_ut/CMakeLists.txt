@@ -13,12 +13,15 @@ set(${theseTestsName}_test_files
 )
 
 include_directories(${SHARED_UTIL_REAL_TEST_FOLDER})
+include_directories(../../../deps/parson/)
 
 set(${theseTestsName}_c_files
     ../../src/iothub_client_edge.c
 )
 
 set(${theseTestsName}_h_files
+    ../../../deps/parson/parson.h
 )
+
 
 build_c_test_artifacts(${theseTestsName} ON "tests/azure_iothub_client_tests")

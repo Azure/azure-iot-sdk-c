@@ -36,6 +36,8 @@ extern "C"
 
     DEFINE_ENUM(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 
+    typedef void(*IOTHUB_METHOD_INVOKE_CALLBACK)(IOTHUB_CLIENT_RESULT result, int responseStatus, unsigned char* responsePayload, size_t responsePayloadSize, void* context);
+
 #define IOTHUB_CLIENT_RETRY_POLICY_VALUES     \
     IOTHUB_CLIENT_RETRY_NONE,                   \
     IOTHUB_CLIENT_RETRY_IMMEDIATE,                  \
@@ -155,7 +157,6 @@ extern "C"
     typedef int(*IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC)(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* response_size, void* userContextCallback);
     typedef int(*IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK)(const char* method_name, const unsigned char* payload, size_t size, METHOD_HANDLE method_id, void* userContextCallback);
 
-#ifndef DONT_USE_UPLOADTOBLOB
 
 #define IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT_VALUES \
     IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK, \
@@ -178,7 +179,6 @@ extern "C"
     */
     typedef void(*IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK)(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context);
     typedef IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT(*IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX)(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context);
-#endif /* DONT_USE_UPLOADTOBLOB */
 
     /** @brief	This struct captures IoTHub client configuration. */
     typedef struct IOTHUB_CLIENT_CONFIG_TAG

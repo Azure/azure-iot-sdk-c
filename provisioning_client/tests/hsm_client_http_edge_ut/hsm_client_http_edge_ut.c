@@ -287,7 +287,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_UMOCK_ALIAS_TYPE(ON_HTTP_OPEN_COMPLETE_CALLBACK, void*);
     REGISTER_UMOCK_ALIAS_TYPE(HTTP_CLIENT_REQUEST_TYPE, int);
     REGISTER_UMOCK_ALIAS_TYPE(ON_HTTP_REQUEST_CALLBACK, void*);
-
+    REGISTER_UMOCK_ALIAS_TYPE(ON_HTTP_CLOSED_CALLBACK, void*);
 
     REGISTER_GLOBAL_MOCK_HOOK(uhttp_client_close, my_uhttp_client_close);
 
@@ -349,6 +349,8 @@ TEST_SUITE_INITIALIZE(suite_init)
 
     REGISTER_GLOBAL_MOCK_HOOK(uhttp_client_open, my_uhttp_client_open);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(uhttp_client_open, HTTP_CLIENT_ERROR);
+
+    REGISTER_GLOBAL_MOCK_HOOK(uhttp_client_close, my_uhttp_client_close);
 
     REGISTER_GLOBAL_MOCK_RETURN(HTTPHeaders_Alloc, TEST_HTTP_HEADERS_HANDLE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(HTTPHeaders_Alloc, NULL);
@@ -567,6 +569,7 @@ static void set_expected_calls_construct_json_signing_blob()
     STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(json_free_serialized_string(TEST_CHAR_PTR));
     STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_NUM_ARG));
@@ -601,6 +604,7 @@ static void set_expected_calls_send_http_workload_request(bool expect_success, b
     }
     set_expected_calls_send_and_poll_http_signing_request(post_data);
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(uhttp_client_close(IGNORED_NUM_ARG, NULL, NULL));
     STRICT_EXPECTED_CALL(uhttp_client_destroy(IGNORED_NUM_ARG));
 
     if (expect_success == false)
@@ -752,24 +756,26 @@ TEST_FUNCTION(hsm_client_http_edge_sign_data_http_fail)
         10, // STRING_c_str
         14, // json_free_serialized_string
         15, // json_object_clear
-        16, // STRING_delete
+        16 , // json_value_free
         17, // STRING_delete
         18, // STRING_delete
-        19, // STRING_c_str
-        20, // socketio_get_interface_description
-        25, // BUFFER_u_char
-        26, // get_time
-        28, // uhttp_client_dowork
-        29, // get_time
-        30, // uhttp_client_dowork
-        32, // get_time
-        33, // HTTPHeaders_Free
-        34, // uhttp_client_destroy
-        40, // json_object_clear
-        41, // json_value_free
-        42, // BUFFER_delete
-        43, // BUFFER_delete
-        44 // STRING_delete
+        19, // STRING_delete
+        20, // STRING_c_str
+        21, // socketio_get_interface_description
+        26, // BUFFER_u_char
+        27, // get_time
+        29, // uhttp_client_dowork
+        30, // get_time
+        31, // uhttp_client_dowork
+        33, // get_time
+        34, // HTTPHeaders_Free
+        35, // uhttp_client_close
+        36, // uhttp_client_destroy
+        42, // json_object_clear
+        43, // json_value_free
+        44, // BUFFER_delete
+        45, // BUFFER_delete
+        46 // STRING_delete
     };
 
     // act
@@ -891,11 +897,12 @@ TEST_FUNCTION(hsm_client_http_edge_get_trust_bundle_fail)
         9, // uhttp_client_dowork
         11, // get_time
         12, // HTTPHeaders_Free
-        13, // uhttp_client_destroy
-        19, // json_object_clear
-        20, // json_value_free
-        21, // BUFFER_delete
-        22 // BUFFER_delete
+        14, // uhttp_client_destroy
+        13, // uhttp_client_close
+        20, // json_object_clear
+        21, // json_value_free
+        22, // BUFFER_delete
+        23 // BUFFER_delete
     };
 
     // act

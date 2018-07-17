@@ -325,6 +325,7 @@ static BUFFER_HANDLE construct_json_signing_blob(const char* data)
 
     json_free_serialized_string(serialized_string);
     json_object_clear(root_object);
+    json_value_free(root_value);
     STRING_delete(data_base64_encoded);
     STRING_delete(data_url_encoded);
     STRING_delete(data_string);
@@ -489,6 +490,7 @@ static BUFFER_HANDLE send_http_workload_request(HSM_CLIENT_HTTP_EDGE* hsm_client
     }
 
     HTTPHeaders_Free(http_headers_handle);
+    uhttp_client_close(http_handle, NULL, NULL);
     uhttp_client_destroy(http_handle);
 
     if (result != 0)
