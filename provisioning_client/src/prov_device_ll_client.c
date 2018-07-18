@@ -23,22 +23,23 @@
 #include "azure_prov_client/prov_device_ll_client.h"
 #include "azure_prov_client/prov_client_const.h"
 
-static const char* OPTION_LOG_TRACE = "logtrace";
+static const char* const OPTION_LOG_TRACE = "logtrace";
 
-static const char* JSON_NODE_STATUS = "status";
-static const char* JSON_NODE_REG_STATUS = "registrationState";
-static const char* JSON_NODE_AUTH_KEY = "authenticationKey";
-static const char* JSON_NODE_DEVICE_ID = "deviceId";
-static const char* JSON_NODE_KEY_NAME = "keyName";
-static const char* JSON_NODE_OPERATION_ID = "operationId";
-static const char* JSON_NODE_ASSIGNED_HUB = "assignedHub";
-static const char* JSON_NODE_TPM_NODE = "tpm";
-static const char* JSON_NODE_TRACKING_ID = "trackingId";
+static const char* const JSON_NODE_STATUS = "status";
+static const char* const JSON_NODE_REG_STATUS = "registrationState";
+static const char* const JSON_NODE_AUTH_KEY = "authenticationKey";
+static const char* const JSON_NODE_DEVICE_ID = "deviceId";
+static const char* const JSON_NODE_KEY_NAME = "keyName";
+static const char* const JSON_NODE_OPERATION_ID = "operationId";
+static const char* const JSON_NODE_ASSIGNED_HUB = "assignedHub";
+static const char* const JSON_NODE_TPM_NODE = "tpm";
+static const char* const JSON_NODE_TRACKING_ID = "trackingId";
+static const char* const JSON_NODE_DATE_TIME = "lastUpdatedDateTimeUtc";
+static const char* const JSON_NODE_ERROR_MSG = "errorMessage";
+static const char* const PROV_FAILED_STATUS = "failed";
+static const char* const PROV_BLACKLISTED_STATUS = "blacklisted";
 
-static const char* PROV_FAILED_STATUS = "failed";
-static const char* PROV_BLACKLISTED_STATUS = "blacklisted";
-
-static const char* SAS_TOKEN_SCOPE_FMT = "%s/registrations/%s";
+static const char* const SAS_TOKEN_SCOPE_FMT = "%s/registrations/%s";
 
 #define SAS_TOKEN_DEFAULT_LIFETIME  3600
 #define EPOCH_TIME_T_VALUE          (time_t)0
@@ -253,7 +254,7 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
         JSON_Value* json_status = json_object_get_value(json_object, JSON_NODE_STATUS);
 
         // status can be NULL
-        result->prov_status = retrieve_status_type(json_value_get_string(json_status) );
+        result->prov_status = retrieve_status_type(json_value_get_string(json_status));
         switch (result->prov_status)
         {
             case PROV_DEVICE_TRANSPORT_STATUS_UNASSIGNED:
@@ -262,6 +263,7 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
                 if ((auth_key = json_object_get_value(json_object, JSON_NODE_AUTH_KEY)) == NULL)
                 {
                     LogError("failure retrieving json auth key value");
+                    prov_info->error_reason = PROV_DEVICE_RESULT_PARSING;
                     free(result);
                     result = NULL;
                 }
@@ -271,6 +273,7 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
                     if ((result->authorization_key = Base64_Decoder(nonce_field)) == NULL)
                     {
                         LogError("failure creating buffer nonce field");
+                        prov_info->error_reason = PROV_DEVICE_RESULT_MEMORY;
                         free(result);
                         result = NULL;
                     }
@@ -280,6 +283,7 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
                         if (result->key_name == NULL)
                         {
                             LogError("failure retrieving keyname field");
+                            prov_info->error_reason = PROV_DEVICE_RESULT_PARSING;
                             BUFFER_delete(result->authorization_key);
                             free(result);
                             result = NULL;
@@ -293,6 +297,7 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
                 if ((result->operation_id = retrieve_json_item(json_object, JSON_NODE_OPERATION_ID)) == NULL)
                 {
                     LogError("Failure: operation_id node is mising");
+                    prov_info->error_reason = PROV_DEVICE_RESULT_PARSING;
                     free(result);
                     result = NULL;
                 }
@@ -304,6 +309,7 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
                 if ((json_reg_status_node = json_object_get_object(json_object, JSON_NODE_REG_STATUS)) == NULL)
                 {
                     LogError("failure retrieving json registration status node");
+                    prov_info->error_reason = PROV_DEVICE_RESULT_PARSING;
                     free(result);
                     result = NULL;
                 }
@@ -318,12 +324,14 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
                         {
                             LogError("failure retrieving tpm node json_tpm_node: %p, auth key: %p", json_tpm_node, result->authorization_key);
                             free(result);
+                            prov_info->error_reason = PROV_DEVICE_RESULT_PARSING;
                             result = NULL;
                         }
                         else if ((auth_key = json_object_get_value(json_tpm_node, JSON_NODE_AUTH_KEY)) == NULL)
                         {
                             LogError("failure retrieving json auth key value");
                             free(result);
+                            prov_info->error_reason = PROV_DEVICE_RESULT_PARSING;
                             result = NULL;
                         }
                         else
@@ -332,6 +340,7 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
                             if ((result->authorization_key = Base64_Decoder(nonce_field)) == NULL)
                             {
                                 LogError("failure creating buffer nonce field");
+                                prov_info->error_reason = PROV_DEVICE_RESULT_MEMORY;
                                 free(result);
                                 result = NULL;
                             }
@@ -346,6 +355,7 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
                             )
                         {
                             LogError("failure retrieving json value assigned_hub: %p, device_id: %p", result->iothub_uri, result->device_id);
+                            prov_info->error_reason = PROV_DEVICE_RESULT_PARSING;
                             free(result->iothub_uri);
                             free(result->authorization_key);
                             free(result);
@@ -358,34 +368,38 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
 
             case PROV_DEVICE_TRANSPORT_STATUS_BLACKLISTED:
                 LogError("The device is unauthorized with service");
+                prov_info->error_reason = PROV_DEVICE_RESULT_ERROR;
                 free(result);
                 result = NULL;
                 break;
 
             case PROV_DEVICE_TRANSPORT_STATUS_ERROR:
             {
-                /*JSON_Object* json_reg_status_node;
-                if ((json_reg_status_node = json_object_get_object(json_object, JSON_NODE_REG_STATUS)) == NULL)
+#ifndef NO_LOGGING
+                char* json_operation_id = NULL;
+                JSON_Object* json_reg_state = NULL;
+                if ((json_reg_state = json_object_get_object(json_object, JSON_NODE_REG_STATUS)) != NULL && 
+                    (json_operation_id = retrieve_json_item(json_object, JSON_NODE_OPERATION_ID)) != NULL)
                 {
-                    LogError("failure retrieving json registration status node");
-                    free(result);
-                    result = NULL;
-                }
-                else
-                {
-                    JSON_Object* json_tracking_id_node;
-                    if ((json_tracking_id_node = json_object_get_value(json_reg_status_node, JSON_NODE_TRACKING_ID)) == NULL)
+                    JSON_Value* json_error_date_time = NULL;
+                    JSON_Value* json_error_msg = NULL;
+                    if ((json_error_msg = json_object_get_value(json_reg_state, JSON_NODE_ERROR_MSG)) != NULL &&
+                        (json_error_date_time = json_object_get_value(json_reg_state, JSON_NODE_DATE_TIME)) != NULL)
                     {
-                        LogError("failure retrieving tracking Id node");
-                        free(result);
-                        result = NULL;
+                        LogError("Provisioning Failure: OperationId: %s - Date: %s - Msg: %s", json_operation_id, json_value_get_string(json_error_date_time), json_value_get_string(json_error_msg) );
                     }
                     else
                     {
-
+                        LogError("Unsuccessful json encountered: %s", json_document);
                     }
-                }*/
-                LogError("Unsuccessful json encountered: %s", json_document);
+                    free(json_operation_id);
+                }
+                else
+                {
+                    LogError("Unsuccessful json encountered: %s", json_document);
+                }
+#endif
+                prov_info->error_reason = PROV_DEVICE_RESULT_DEV_AUTH_ERROR;
                 free(result);
                 result = NULL;
                 break;
@@ -451,7 +465,10 @@ static void on_transport_registration_data(PROV_DEVICE_TRANSPORT_RESULT transpor
         else
         {
             prov_info->prov_state = CLIENT_STATE_ERROR;
-            prov_info->error_reason = PROV_DEVICE_RESULT_TRANSPORT;
+            if (prov_info->error_reason == PROV_DEVICE_RESULT_OK)
+            {
+                prov_info->error_reason = PROV_DEVICE_RESULT_TRANSPORT;
+            }
             LogError("Failure retrieving data from the provisioning service");
         }
     }
@@ -550,14 +567,14 @@ PROV_DEVICE_LL_HANDLE Prov_Device_LL_Create(const char* uri, const char* id_scop
     else
     {
         /* Codes_SRS_PROV_CLIENT_07_002: [ Prov_Device_LL_CreateFromUri shall allocate a PROV_DEVICE_LL_HANDLE and initialize all members. ] */
-        result = (PROV_INSTANCE_INFO*)malloc(sizeof(PROV_INSTANCE_INFO) );
+        result = (PROV_INSTANCE_INFO*)malloc(sizeof(PROV_INSTANCE_INFO));
         if (result == NULL)
         {
             LogError("unable to allocate Instance Info");
         }
         else
         {
-            memset(result, 0, sizeof(PROV_INSTANCE_INFO) );
+            memset(result, 0, sizeof(PROV_INSTANCE_INFO));
 
             /* Codes_SRS_PROV_CLIENT_07_028: [ CLIENT_STATE_READY is the initial state after the object is created which will send a uhttp_client_open call to the http endpoint. ] */
             result->prov_state = CLIENT_STATE_READY;
@@ -925,7 +942,7 @@ PROV_DEVICE_RESULT Prov_Device_LL_SetOption(PROV_DEVICE_LL_HANDLE handle, const 
                 {
                     free(handle->registration_id);
                 }
-                
+
                 if (mallocAndStrcpy_s(&handle->registration_id, (const char*)value) != 0)
                 {
                     LogError("Failure allocating setting registration id");

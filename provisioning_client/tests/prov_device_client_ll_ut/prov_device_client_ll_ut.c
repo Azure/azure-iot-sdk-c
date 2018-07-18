@@ -639,6 +639,26 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG));
     }
 
+    static void setup_parse_json_error_mocks(void)
+    {
+        STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_PTR_ARG)).SetReturn(PROV_FAILURE_STATUS);
+
+        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        setup_retrieve_json_item_mocks(TEST_STRING_VALUE);
+        STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+        STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG));
+    }
+
     static void setup_parse_json_assigned_mocks(void)
     {
         STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG));
@@ -1078,6 +1098,29 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         Prov_Device_LL_Destroy(handle);
         my_gballoc_free(result->operation_id);
         my_gballoc_free(result);
+    }
+
+    TEST_FUNCTION(Prov_Device_LL_parse_json_error_succeed)
+    {
+        PROV_JSON_INFO* result;
+        //arrange
+        PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
+        (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, g_status_ctx);
+        Prov_Device_LL_DoWork(handle);
+        umock_c_reset_all_calls();
+
+        setup_parse_json_error_mocks();
+
+        //act
+        result = g_json_parse_cb(TEST_JSON_REPLY, g_json_ctx);
+
+        //assert
+        ASSERT_IS_NULL(result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        Prov_Device_LL_Destroy(handle);
     }
 
     TEST_FUNCTION(Prov_Device_LL_parse_json_assigning_fail)
