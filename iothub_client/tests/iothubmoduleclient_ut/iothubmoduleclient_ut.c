@@ -297,19 +297,6 @@ TEST_FUNCTION(IoTHubModuleClient_SetModuleMethodCallback_Test)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-TEST_FUNCTION(IoTHubModuleClient_ModuleMethodResponse_Test)
-{
-    //arrange
-    STRICT_EXPECTED_CALL(IoTHubClientCore_DeviceMethodResponse(TEST_IOTHUB_CLIENT_CORE_HANDLE, TEST_METHOD_HANDLE, TEST_UNSIGNED_CHAR, TEST_SIZE_T, TEST_INT));
-
-    //act
-    IOTHUB_CLIENT_RESULT result = IoTHubModuleClient_ModuleMethodResponse(TEST_IOTHUB_MODULE_CLIENT_HANDLE, TEST_METHOD_HANDLE, TEST_UNSIGNED_CHAR, TEST_SIZE_T, TEST_INT);
-
-    //assert
-    ASSERT_IS_TRUE(result == IOTHUB_CLIENT_OK);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-}
-
 TEST_FUNCTION(IoTHubModuleClient_SendEventToOutputAsync_Test)
 {
     //arrange

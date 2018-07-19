@@ -279,19 +279,6 @@ extern "C"
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SetModuleMethodCallback, IOTHUB_MODULE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC, methodCallback, void*, userContextCallback);
 
     /**
-    * @brief    This API responses to a asnyc method callback identified the methodId.
-    *
-    * @param    iotHubModuleClientHandle    The handle created by a call to the create function.
-    * @param    methodId                    The methodId of the Module Method callback.
-    * @param    response                    The response data for the method callback.
-    * @param    response_size               The size of the response data buffer.
-    * @param    status_response             The status response of the method callback.
-    *
-    * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
-    */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_ModuleMethodResponse, IOTHUB_MODULE_CLIENT_HANDLE, iotHubModuleClientHandle, METHOD_HANDLE, methodId, const unsigned char*, response, size_t, response_size, int, statusCode);
-
-    /**
     * @brief    Asynchronous call to send the message specified by @p eventMessageHandle.
     *
     * @param    iotHubModuleClientHandle      The handle created by a call to the create function.

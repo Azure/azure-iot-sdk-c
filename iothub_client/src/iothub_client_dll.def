@@ -72,7 +72,6 @@ EXPORTS
     IoTHubModuleClient_SetModuleTwinCallback
     IoTHubModuleClient_SendReportedState
     IoTHubModuleClient_SetModuleMethodCallback
-    IoTHubModuleClient_ModuleMethodResponse
     IoTHubModuleClient_SendEventToOutputAsync
     IoTHubModuleClient_SetInputMessageCallback
 
@@ -118,7 +117,6 @@ EXPORTS
     IoTHubModuleClient_LL_SetModuleTwinCallback
     IoTHubModuleClient_LL_SendReportedState
     IoTHubModuleClient_LL_SetModuleMethodCallback
-    IoTHubModuleClient_LL_ModuleMethodResponse
     IoTHubModuleClient_LL_SendEventToOutputAsync
     IoTHubModuleClient_LL_SetInputMessageCallback
 

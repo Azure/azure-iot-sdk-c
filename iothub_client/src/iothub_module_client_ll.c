@@ -247,21 +247,6 @@ IOTHUB_CLIENT_RESULT IoTHubModuleClient_LL_SetModuleMethodCallback(IOTHUB_MODULE
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubModuleClient_LL_ModuleMethodResponse(IOTHUB_MODULE_CLIENT_LL_HANDLE iotHubModuleClientHandle, METHOD_HANDLE methodId, const unsigned char* response, size_t response_size, int status_response)
-{
-    IOTHUB_CLIENT_RESULT result;
-    if (iotHubModuleClientHandle != NULL)
-    {
-        result = IoTHubClientCore_LL_DeviceMethodResponse(iotHubModuleClientHandle->coreHandle, methodId, response, response_size, status_response);
-    }
-    else
-    {
-        LogError("Input parameter cannot be NULL");
-        result = IOTHUB_CLIENT_INVALID_ARG;
-    }
-    return result;
-}
-
 IOTHUB_CLIENT_RESULT IoTHubModuleClient_LL_SendEventToOutputAsync(IOTHUB_MODULE_CLIENT_LL_HANDLE iotHubModuleClientHandle, IOTHUB_MESSAGE_HANDLE eventMessageHandle, const char* outputName, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK eventConfirmationCallback, void* userContextCallback)
 {
     IOTHUB_CLIENT_RESULT result;
