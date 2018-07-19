@@ -539,7 +539,17 @@ SAS_TOKEN_STATUS IoTHubClient_Auth_Is_SasToken_Valid(IOTHUB_AUTHORIZATION_HANDLE
 #ifdef USE_EDGE_MODULES
 char* IoTHubClient_Auth_Get_TrustBundle(IOTHUB_AUTHORIZATION_HANDLE handle)
 {
-    return iothub_device_auth_get_trust_bundle(handle->device_auth_handle);
+    char* result;
+    if (handle == NULL)
+    {
+        LogError("Security Handle is NULL");
+        result = NULL;
+    }
+    else
+    {
+        result = iothub_device_auth_get_trust_bundle(handle->device_auth_handle);
+    }
+    return result;
 }
 #endif
 
