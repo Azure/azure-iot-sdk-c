@@ -22,7 +22,7 @@ extern "C" {
 
 typedef XIO_HANDLE(*PROV_MQTT_TRANSPORT_IO)(const char* fully_qualified_name, const HTTP_PROXY_OPTIONS* proxy_info);
 
-MOCKABLE_FUNCTION(, PROV_DEVICE_TRANSPORT_HANDLE, prov_transport_common_mqtt_create, const char*, uri, TRANSPORT_HSM_TYPE, type, const char*, scope_id, const char*, api_version, PROV_MQTT_TRANSPORT_IO, transport_io);
+MOCKABLE_FUNCTION(, PROV_DEVICE_TRANSPORT_HANDLE, prov_transport_common_mqtt_create, const char*, uri, TRANSPORT_HSM_TYPE, type, const char*, scope_id, const char*, api_version, PROV_MQTT_TRANSPORT_IO, transport_io, PROV_TRANSPORT_ERROR_CALLBACK, error_cb, void*, error_ctx);
 MOCKABLE_FUNCTION(, void, prov_transport_common_mqtt_destroy, PROV_DEVICE_TRANSPORT_HANDLE, handle);
 MOCKABLE_FUNCTION(, int, prov_transport_common_mqtt_open, PROV_DEVICE_TRANSPORT_HANDLE, handle, const char*, registration_id, BUFFER_HANDLE, ek, BUFFER_HANDLE, srk, PROV_DEVICE_TRANSPORT_REGISTER_CALLBACK, data_callback, void*, user_ctx, PROV_DEVICE_TRANSPORT_STATUS_CALLBACK, status_cb, void*, status_ctx);
 MOCKABLE_FUNCTION(, int, prov_transport_common_mqtt_close, PROV_DEVICE_TRANSPORT_HANDLE, handle);

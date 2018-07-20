@@ -30,6 +30,12 @@ extern "C" {
 
     DEFINE_ENUM(PROV_DEVICE_TRANSPORT_STATUS, PROV_DEVICE_TRANSPORT_STATUS_VALUES);
 
+    #define PROV_DEVICE_TRANSPORT_ERROR_VALUE   \
+        PROV_DEVICE_ERROR_KEY_FAIL,             \
+        PROV_DEVICE_ERROR_MEMORY
+
+    DEFINE_ENUM(PROV_DEVICE_TRANSPORT_ERROR, PROV_DEVICE_TRANSPORT_ERROR_VALUE);
+
     typedef struct PROV_JSON_INFO_TAG
     {
         PROV_DEVICE_TRANSPORT_STATUS prov_status;
@@ -44,9 +50,9 @@ extern "C" {
     typedef void(*PROV_DEVICE_TRANSPORT_STATUS_CALLBACK)(PROV_DEVICE_TRANSPORT_STATUS transport_status, void* user_ctx);
     typedef char*(*PROV_TRANSPORT_CHALLENGE_CALLBACK)(const unsigned char* nonce, size_t nonce_len, const char* key_name, void* user_ctx);
     typedef PROV_JSON_INFO*(*PROV_TRANSPORT_JSON_PARSE)(const char* json_document, void* user_ctx);
+    typedef void(*PROV_TRANSPORT_ERROR_CALLBACK)(PROV_DEVICE_TRANSPORT_ERROR transport_error, void* user_context);
 
-
-    typedef PROV_DEVICE_TRANSPORT_HANDLE(*pfprov_transport_create)(const char* uri, TRANSPORT_HSM_TYPE type, const char* scope_id, const char* api_version);
+    typedef PROV_DEVICE_TRANSPORT_HANDLE(*pfprov_transport_create)(const char* uri, TRANSPORT_HSM_TYPE type, const char* scope_id, const char* api_version, PROV_TRANSPORT_ERROR_CALLBACK error_cb, void* error_ctx);
     typedef void(*pfprov_transport_destroy)(PROV_DEVICE_TRANSPORT_HANDLE handle);
     typedef int(*pfprov_transport_open)(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* registration_id, BUFFER_HANDLE ek, BUFFER_HANDLE srk, PROV_DEVICE_TRANSPORT_REGISTER_CALLBACK data_callback, void* user_ctx, PROV_DEVICE_TRANSPORT_STATUS_CALLBACK status_cb, void* status_ctx);
     typedef int(*pfprov_transport_close)(PROV_DEVICE_TRANSPORT_HANDLE handle);

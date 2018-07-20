@@ -163,6 +163,20 @@ static char* prov_transport_challenge_callback(const unsigned char* nonce, size_
     return result;
 }
 
+static void on_transport_error(PROV_DEVICE_TRANSPORT_ERROR transport_error, void* user_ctx)
+{
+    if (user_ctx != NULL)
+    {
+        PROV_INSTANCE_INFO* prov_info = (PROV_INSTANCE_INFO*)user_ctx;
+        switch (transport_error)
+        {
+            case PROV_DEVICE_ERROR_KEY_FAIL:
+                prov_info->error_reason = PROV_DEVICE_RESULT_KEY_ERROR;
+                break;
+        }
+    }
+}
+
 static PROV_DEVICE_TRANSPORT_STATUS retrieve_status_type(const char* prov_status)
 {
     PROV_DEVICE_TRANSPORT_STATUS result;
@@ -432,7 +446,10 @@ static void on_transport_registration_data(PROV_DEVICE_TRANSPORT_RESULT transpor
                 if (iothub_key == NULL)
                 {
                     prov_info->prov_state = CLIENT_STATE_ERROR;
-                    prov_info->error_reason = PROV_DEVICE_RESULT_PARSING;
+                    if (prov_info->error_reason == PROV_DEVICE_RESULT_OK)
+                    {
+                        prov_info->error_reason = PROV_DEVICE_RESULT_KEY_ERROR;
+                    }
                     LogError("invalid iothub device key");
                 }
                 else
@@ -613,7 +630,7 @@ PROV_DEVICE_LL_HANDLE Prov_Device_LL_Create(const char* uri, const char* id_scop
                     hsm_type = TRANSPORT_HSM_TYPE_X509;
                 }
 
-                if ((result->transport_handle = result->prov_transport_protocol->prov_transport_create(uri, hsm_type, result->scope_id, PROV_API_VERSION)) == NULL)
+                if ((result->transport_handle = result->prov_transport_protocol->prov_transport_create(uri, hsm_type, result->scope_id, PROV_API_VERSION, on_transport_error, result)) == NULL)
                 {
                     /* Codes_SRS_PROV_CLIENT_07_003: [ If any error is encountered, Prov_Device_LL_CreateFromUri shall return NULL. ] */
                     LogError("failed calling into transport create");
@@ -799,7 +816,10 @@ void Prov_Device_LL_DoWork(PROV_DEVICE_LL_HANDLE handle)
                     if (prov_info->prov_transport_protocol->prov_transport_register(prov_info->transport_handle, prov_transport_challenge_callback, prov_info, prov_transport_process_json_reply, prov_info) != 0)
                     {
                         LogError("Failure registering device");
-                        prov_info->error_reason = PROV_DEVICE_RESULT_PARSING;
+                        if (prov_info->error_reason == PROV_DEVICE_RESULT_OK)
+                        {
+                            prov_info->error_reason = PROV_DEVICE_RESULT_TRANSPORT;
+                        }
                         prov_info->prov_state = CLIENT_STATE_ERROR;
                     }
                     else
@@ -820,7 +840,10 @@ void Prov_Device_LL_DoWork(PROV_DEVICE_LL_HANDLE handle)
                         if (prov_info->prov_transport_protocol->prov_transport_get_op_status(prov_info->transport_handle) != 0)
                         {
                             LogError("Failure sending operation status");
-                            prov_info->error_reason = PROV_DEVICE_RESULT_PARSING;
+                            if (prov_info->error_reason == PROV_DEVICE_RESULT_OK)
+                            {
+                                prov_info->error_reason = PROV_DEVICE_RESULT_TRANSPORT;
+                            }
                             prov_info->prov_state = CLIENT_STATE_ERROR;
                         }
                         else

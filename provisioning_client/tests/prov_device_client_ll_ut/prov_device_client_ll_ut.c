@@ -53,7 +53,7 @@ MOCKABLE_FUNCTION(, void, on_prov_register_device_callback, PROV_DEVICE_RESULT, 
 MOCKABLE_FUNCTION(, void, on_prov_register_status_callback, PROV_DEVICE_REG_STATUS, reg_status, void*, user_context);
 MOCKABLE_FUNCTION(, char*, on_prov_transport_challenge_cb, const unsigned char*, nonce, size_t, nonce_len, const char*, key_name, void*, user_ctx);
 
-MOCKABLE_FUNCTION(, PROV_DEVICE_TRANSPORT_HANDLE, prov_transport_create, const char*, uri, TRANSPORT_HSM_TYPE, type, const char*, scope_id, const char*, prov_api_version);
+MOCKABLE_FUNCTION(, PROV_DEVICE_TRANSPORT_HANDLE, prov_transport_create, const char*, uri, TRANSPORT_HSM_TYPE, type, const char*, scope_id, const char*, prov_api_version, PROV_TRANSPORT_ERROR_CALLBACK, error_cb, void*, error_ctx);
 MOCKABLE_FUNCTION(, void, prov_transport_destroy, PROV_DEVICE_TRANSPORT_HANDLE, handle);
 MOCKABLE_FUNCTION(, int, prov_transport_open, PROV_DEVICE_TRANSPORT_HANDLE, handle, const char*, registration_id, BUFFER_HANDLE, ek, BUFFER_HANDLE, srk, PROV_DEVICE_TRANSPORT_REGISTER_CALLBACK, data_callback, void*, user_ctx, PROV_DEVICE_TRANSPORT_STATUS_CALLBACK, status_cb, void*, status_ctx);
 MOCKABLE_FUNCTION(, int, prov_transport_close, PROV_DEVICE_TRANSPORT_HANDLE, handle);
@@ -74,6 +74,7 @@ MOCKABLE_FUNCTION(, const char*, json_object_get_string, const JSON_Object*, obj
 MOCKABLE_FUNCTION(, const char*, json_value_get_string, const JSON_Value*, value);
 MOCKABLE_FUNCTION(, JSON_Object*, json_object_get_object, const JSON_Object*, object, const char*, name);
 MOCKABLE_FUNCTION(, void, json_value_free, JSON_Value*, value);
+MOCKABLE_FUNCTION(, void, on_transport_error, PROV_DEVICE_TRANSPORT_ERROR, transport_error, void*, user_context);
 
 #undef ENABLE_MOCKS
 
@@ -226,12 +227,15 @@ static void my_BUFFER_delete(BUFFER_HANDLE handle)
     my_gballoc_free(handle);
 }
 
-static PROV_DEVICE_TRANSPORT_HANDLE my_prov_transport_create(const char* uri, TRANSPORT_HSM_TYPE type, const char* scope_id, const char* prov_api_version)
+static PROV_DEVICE_TRANSPORT_HANDLE my_prov_transport_create(const char* uri, TRANSPORT_HSM_TYPE type, const char* scope_id, const char* prov_api_version, PROV_TRANSPORT_ERROR_CALLBACK error_cb, void* error_ctx)
 {
     (void)type;
     (void)uri;
     (void)scope_id;
     (void)prov_api_version;
+    (void)error_cb;
+    (void)error_ctx;
+
     return (PROV_DEVICE_TRANSPORT_HANDLE)my_gballoc_malloc(1);
 }
 
@@ -405,6 +409,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         REGISTER_UMOCK_ALIAS_TYPE(PROV_AUTH_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(SEC_HANDLE, void*); 
         REGISTER_UMOCK_ALIAS_TYPE(PROV_TRANSPORT_JSON_PARSE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(PROV_TRANSPORT_ERROR_CALLBACK, void*);
 
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
@@ -549,7 +554,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         STRICT_EXPECTED_CALL(prov_auth_create());
         STRICT_EXPECTED_CALL(tickcounter_create());
         STRICT_EXPECTED_CALL(prov_auth_get_type(IGNORED_PTR_ARG)).SetReturn(type);
-        STRICT_EXPECTED_CALL(prov_transport_create(IGNORED_PTR_ARG, type == PROV_AUTH_TYPE_TPM ? TRANSPORT_HSM_TYPE_TPM : TRANSPORT_HSM_TYPE_X509, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(prov_transport_create(IGNORED_PTR_ARG, type == PROV_AUTH_TYPE_TPM ? TRANSPORT_HSM_TYPE_TPM : TRANSPORT_HSM_TYPE_X509, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     }
 
     static void setup_Prov_Device_LL_Register_Device_mocks(bool tpm)
@@ -1304,7 +1309,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(prov_transport_get_operation_status(IGNORED_PTR_ARG)).SetReturn(__LINE__);
         STRICT_EXPECTED_CALL(prov_transport_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(on_prov_register_device_callback(PROV_DEVICE_RESULT_PARSING, NULL, NULL, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(on_prov_register_device_callback(PROV_DEVICE_RESULT_TRANSPORT, NULL, NULL, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));

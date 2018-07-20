@@ -101,6 +101,9 @@ typedef struct PROV_TRANSPORT_HTTP_INFO_TAG
     TRANSPORT_HSM_TYPE hsm_type;
 
     HTTP_CLIENT_HANDLE http_client;
+
+    PROV_TRANSPORT_ERROR_CALLBACK error_cb;
+    void* error_ctx;
 } PROV_TRANSPORT_HTTP_INFO;
 
 static void on_http_error(void* callback_ctx, HTTP_CALLBACK_REASON error_result)
@@ -598,6 +601,10 @@ static int create_connection(PROV_TRANSPORT_HTTP_INFO* http_info)
         if (uhttp_client_open(http_info->http_client, http_info->hostname, HTTP_PORT_NUM, on_http_connected, http_info) != HTTP_CLIENT_OK)
         {
             LogError("failed to open http client");
+            if (http_info->error_cb != NULL)
+            {
+                http_info->error_cb(PROV_DEVICE_ERROR_KEY_FAIL, http_info->error_ctx);
+            }
             uhttp_client_destroy(http_info->http_client);
             http_info->http_client = NULL;
             result = __FAILURE__;
@@ -610,7 +617,7 @@ static int create_connection(PROV_TRANSPORT_HTTP_INFO* http_info)
     return result;
 }
 
-PROV_DEVICE_TRANSPORT_HANDLE prov_transport_http_create(const char* uri, TRANSPORT_HSM_TYPE type, const char* scope_id, const char* api_version)
+PROV_DEVICE_TRANSPORT_HANDLE prov_transport_http_create(const char* uri, TRANSPORT_HSM_TYPE type, const char* scope_id, const char* api_version, PROV_TRANSPORT_ERROR_CALLBACK error_cb, void* error_ctx)
 {
     PROV_TRANSPORT_HTTP_INFO* result;
     if (uri == NULL || scope_id == NULL || api_version == NULL)
@@ -655,6 +662,8 @@ PROV_DEVICE_TRANSPORT_HANDLE prov_transport_http_create(const char* uri, TRANSPO
             else
             {
                 result->hsm_type = type;
+                result->error_cb = error_cb;
+                result->error_ctx = error_ctx;
             }
         }
     }

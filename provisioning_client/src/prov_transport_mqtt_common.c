@@ -106,6 +106,9 @@ typedef struct PROV_TRANSPORT_MQTT_INFO_TAG
     MQTT_TRANSPORT_STATE mqtt_state;
 
     XIO_HANDLE transport_io;
+
+    PROV_TRANSPORT_ERROR_CALLBACK error_cb;
+    void* error_ctx;
 } PROV_TRANSPORT_MQTT_INFO;
 
 static uint16_t get_next_packet_id(PROV_TRANSPORT_MQTT_INFO* mqtt_info)
@@ -495,6 +498,10 @@ static int construct_transport(PROV_TRANSPORT_MQTT_INFO* mqtt_info)
                     else if (xio_setoption(mqtt_info->transport_io, OPTION_X509_ECC_KEY, mqtt_info->private_key) != 0)
                     {
                         LogError("Failure setting x509 key on xio");
+                        if (mqtt_info->error_cb != NULL)
+                        {
+                            mqtt_info->error_cb(PROV_DEVICE_ERROR_KEY_FAIL, mqtt_info->error_ctx);
+                        }
                         xio_destroy(mqtt_info->transport_io);
                         mqtt_info->transport_io = NULL;
                         result = __FAILURE__;
@@ -607,7 +614,7 @@ void cleanup_mqtt_data(PROV_TRANSPORT_MQTT_INFO* mqtt_info)
     free(mqtt_info);
 }
 
-PROV_DEVICE_TRANSPORT_HANDLE prov_transport_common_mqtt_create(const char* uri, TRANSPORT_HSM_TYPE type, const char* scope_id, const char* api_version, PROV_MQTT_TRANSPORT_IO transport_io)
+PROV_DEVICE_TRANSPORT_HANDLE prov_transport_common_mqtt_create(const char* uri, TRANSPORT_HSM_TYPE type, const char* scope_id, const char* api_version, PROV_MQTT_TRANSPORT_IO transport_io, PROV_TRANSPORT_ERROR_CALLBACK error_cb, void* error_ctx)
 {
     PROV_TRANSPORT_MQTT_INFO* result;
     if (uri == NULL || scope_id == NULL || api_version == NULL || transport_io == NULL)
@@ -666,6 +673,8 @@ PROV_DEVICE_TRANSPORT_HANDLE prov_transport_common_mqtt_create(const char* uri, 
             {
                 result->transport_io_cb = transport_io;
                 result->hsm_type = type;
+                result->error_cb = error_cb;
+                result->error_ctx = error_ctx;
             }
         }
     }

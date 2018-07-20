@@ -66,10 +66,10 @@ static XIO_HANDLE mqtt_transport_io(const char* fqdn, const HTTP_PROXY_OPTIONS* 
     return result;
 }
 
-PROV_DEVICE_TRANSPORT_HANDLE prov_transport_mqtt_create(const char* uri, TRANSPORT_HSM_TYPE type, const char* scope_id, const char* api_version)
+PROV_DEVICE_TRANSPORT_HANDLE prov_transport_mqtt_create(const char* uri, TRANSPORT_HSM_TYPE type, const char* scope_id, const char* api_version, PROV_TRANSPORT_ERROR_CALLBACK error_cb, void* error_ctx)
 {
     /* Codes_PROV_TRANSPORT_MQTT_CLIENT_07_001: [ prov_transport_mqtt_create shall call the prov_transport_common_mqtt_create function with mqtt_transport_io transport IO estabishment. ] */
-    return prov_transport_common_mqtt_create(uri, type, scope_id, api_version, mqtt_transport_io);
+    return prov_transport_common_mqtt_create(uri, type, scope_id, api_version, mqtt_transport_io, error_cb, error_ctx);
 }
 
 void prov_transport_mqtt_destroy(PROV_DEVICE_TRANSPORT_HANDLE handle)

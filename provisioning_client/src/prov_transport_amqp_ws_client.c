@@ -127,10 +127,10 @@ static PROV_TRANSPORT_IO_INFO* amqp_transport_ws_io(const char* fqdn, SASL_MECHA
     return result;
 }
 
-PROV_DEVICE_TRANSPORT_HANDLE prov_transport_amqp_ws_create(const char* uri, TRANSPORT_HSM_TYPE type, const char* scope_id, const char* api_version)
+PROV_DEVICE_TRANSPORT_HANDLE prov_transport_amqp_ws_create(const char* uri, TRANSPORT_HSM_TYPE type, const char* scope_id, const char* api_version, PROV_TRANSPORT_ERROR_CALLBACK error_cb, void* error_ctx)
 {
     /* Codes_PROV_TRANSPORT_AMQP_WS_CLIENT_07_001: [ prov_transport_amqp_ws_create shall call the prov_transport_common_amqp_create function with amqp_transport_ws_io transport IO estabishment. ] */
-    return prov_transport_common_amqp_create(uri, type, scope_id, api_version, amqp_transport_ws_io);
+    return prov_transport_common_amqp_create(uri, type, scope_id, api_version, amqp_transport_ws_io, error_cb, error_ctx);
 }
 
 void prov_transport_amqp_ws_destroy(PROV_DEVICE_TRANSPORT_HANDLE handle)

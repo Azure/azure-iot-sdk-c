@@ -56,6 +56,7 @@ MOCKABLE_FUNCTION(, void, on_transport_register_data_cb, PROV_DEVICE_TRANSPORT_R
 MOCKABLE_FUNCTION(, void, on_transport_status_cb, PROV_DEVICE_TRANSPORT_STATUS, transport_status, void*, user_ctx);
 MOCKABLE_FUNCTION(, char*, on_transport_challenge_callback, const unsigned char*, nonce, size_t, nonce_len, const char*, key_name, void*, user_ctx);
 MOCKABLE_FUNCTION(, PROV_JSON_INFO*, on_transport_json_parse, const char*, json_document, void*, user_ctx);
+MOCKABLE_FUNCTION(, void, on_transport_error, PROV_DEVICE_TRANSPORT_ERROR, transport_error, void*, user_context);
 
 MOCKABLE_FUNCTION(, JSON_Value*, json_parse_string, const char *, string);
 MOCKABLE_FUNCTION(, JSON_Status, json_serialize_to_file, const JSON_Value*, value, const char *, filename);
@@ -143,6 +144,9 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(PROV_DEVICE_TRANSPORT_RESULT, PROV_DEVICE_TRANSPORT_
 
 TEST_DEFINE_ENUM_TYPE(PROV_DEVICE_TRANSPORT_STATUS, PROV_DEVICE_TRANSPORT_STATUS_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(PROV_DEVICE_TRANSPORT_STATUS, PROV_DEVICE_TRANSPORT_STATUS_VALUES);
+
+TEST_DEFINE_ENUM_TYPE(PROV_DEVICE_TRANSPORT_ERROR, PROV_DEVICE_TRANSPORT_ERROR_VALUE);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(PROV_DEVICE_TRANSPORT_ERROR, PROV_DEVICE_TRANSPORT_ERROR_VALUE);
 
 static BUFFER_HANDLE my_BUFFER_clone(BUFFER_HANDLE handle)
 {
@@ -349,6 +353,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
 
         REGISTER_TYPE(PROV_DEVICE_TRANSPORT_RESULT, PROV_DEVICE_TRANSPORT_RESULT);
         REGISTER_TYPE(PROV_DEVICE_TRANSPORT_STATUS, PROV_DEVICE_TRANSPORT_STATUS);
+        REGISTER_TYPE(PROV_DEVICE_TRANSPORT_ERROR, PROV_DEVICE_TRANSPORT_ERROR);
 
         REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(BUFFER_HANDLE, void*);
@@ -625,7 +630,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         //arrange
 
         //act
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(NULL, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(NULL, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
 
         //assert
         ASSERT_IS_NULL(handle);
@@ -641,7 +646,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         //arrange
 
         //act
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, NULL, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, NULL, TEST_DPS_API_VALUE, on_transport_error, NULL);
 
         //assert
         ASSERT_IS_NULL(handle);
@@ -656,7 +661,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         //arrange
 
         //act
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, NULL);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, NULL, on_transport_error, NULL);
 
         //assert
         ASSERT_IS_NULL(handle);
@@ -673,7 +678,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         setup_prov_transport_http_create_mocks();
 
         //act
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
 
         //assert
         ASSERT_IS_NOT_NULL(handle);
@@ -704,7 +709,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
             char tmp_msg[128];
             sprintf(tmp_msg, "prov_dev_http_transport_create failure in test %zu/%zu", index, count);
 
-            PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+            PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
 
             //assert
             ASSERT_IS_NULL_WITH_MSG(handle, tmp_msg);
@@ -733,7 +738,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
     TEST_FUNCTION(prov_dev_http_transport_destroy_succeed)
     {
         //arrange
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         umock_c_reset_all_calls();
 
         setup_free_allocated_data_mocks();
@@ -751,7 +756,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
     TEST_FUNCTION(prov_transport_open_handle_NULL_fail)
     {
         //arrange
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         umock_c_reset_all_calls();
 
         //act
@@ -769,7 +774,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
     TEST_FUNCTION(prov_transport_open_register_data_NULL_fail)
     {
         //arrange
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         umock_c_reset_all_calls();
 
         //act
@@ -786,7 +791,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
     TEST_FUNCTION(prov_transport_open_tpm_status_cb_NULL_fail)
     {
         //arrange
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         umock_c_reset_all_calls();
 
         //act
@@ -803,7 +808,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
     TEST_FUNCTION(prov_transport_open_tpm_ek_NULL_succeed)
     {
         //arrange
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         umock_c_reset_all_calls();
 
         //act
@@ -820,7 +825,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
     TEST_FUNCTION(prov_transport_open_tpm_srk_NULL_succeed)
     {
         //arrange
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         umock_c_reset_all_calls();
 
         //act
@@ -838,7 +843,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
     TEST_FUNCTION(prov_transport_http_open_registration_id_NULL_fail)
     {
         //arrange
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         umock_c_reset_all_calls();
 
         //act
@@ -859,7 +864,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
     TEST_FUNCTION(prov_transport_open_tpm_succeed)
     {
         //arrange
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         umock_c_reset_all_calls();
 
         setup_prov_dev_http_transport_open_mocks(true);
@@ -879,7 +884,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
     TEST_FUNCTION(prov_transport_open_x509_certs_NULL_succeed)
     {
         //arrange
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_REGISTRATION_ID_VALUE));
@@ -903,7 +908,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
     TEST_FUNCTION(prov_transport_open_x509_succeed)
     {
         //arrange
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         (void)prov_dev_http_transport_x509_cert(handle, TEST_CERT_VALUE, TEST_PRIVATE_KEY_VALUE);
         umock_c_reset_all_calls();
 
@@ -925,7 +930,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
     TEST_FUNCTION(prov_transport_open_fail)
     {
         //arrange
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         umock_c_reset_all_calls();
 
         int negativeTestsInitResult = umock_c_negative_tests_init();
@@ -983,7 +988,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
     TEST_FUNCTION(prov_dev_http_transport_close_succeed)
     {
         //arrange
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         (void)prov_dev_http_transport_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
         umock_c_reset_all_calls();
 
@@ -1026,7 +1031,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         int result;
 
         //arrange
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         (void)prov_dev_http_transport_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
         umock_c_reset_all_calls();
 
@@ -1045,7 +1050,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
     TEST_FUNCTION(prov_transport_http_reply_recv_succeed)
     {
         //arrange
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         (void)prov_dev_http_transport_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
         (void)prov_dev_http_transport_register_device(handle, on_transport_challenge_callback, NULL, on_transport_json_parse, NULL);
         g_on_http_open(g_http_open_ctx, HTTP_CALLBACK_REASON_OK);
@@ -1068,7 +1073,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
     TEST_FUNCTION(prov_transport_http_reply_recv_transient_error_succeed)
     {
         //arrange
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         (void)prov_dev_http_transport_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
         (void)prov_dev_http_transport_register_device(handle, on_transport_challenge_callback, NULL, on_transport_json_parse, NULL);
         g_on_http_open(g_http_open_ctx, HTTP_CALLBACK_REASON_OK);
@@ -1104,7 +1109,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
     TEST_FUNCTION(prov_transport_http_get_operation_status_sas_token_NULL_fail)
     {
         //arrange
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         umock_c_reset_all_calls();
 
         //act
@@ -1126,7 +1131,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
     TEST_FUNCTION(prov_transport_http_get_operation_status_succeed)
     {
         //arrange
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         (void)prov_dev_http_transport_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
         (void)prov_dev_http_transport_register_device(handle, on_transport_challenge_callback, NULL, on_transport_json_parse, NULL);
         g_on_http_open(g_http_open_ctx, HTTP_CALLBACK_REASON_OK);
@@ -1163,7 +1168,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         int negativeTestsInitResult = umock_c_negative_tests_init();
         ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         (void)prov_dev_http_transport_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
         (void)prov_dev_http_transport_register_device(handle, on_transport_challenge_callback, NULL, on_transport_json_parse, NULL);
         g_on_http_open(g_http_open_ctx, HTTP_CALLBACK_REASON_OK);
@@ -1214,7 +1219,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
     TEST_FUNCTION(prov_transport_http_dowork_succeed)
     {
         //arrange
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         (void)prov_dev_http_transport_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
         (void)prov_dev_http_transport_register_device(handle, on_transport_challenge_callback, NULL, on_transport_json_parse, NULL);
         g_on_http_open(g_http_open_ctx, HTTP_CALLBACK_REASON_OK);
@@ -1249,7 +1254,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
     TEST_FUNCTION(prov_transport_http_dowork_unauthorized_succeed)
     {
         //arrange
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         (void)prov_dev_http_transport_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
         (void)prov_dev_http_transport_register_device(handle, on_transport_challenge_callback, NULL, on_transport_json_parse, NULL);
         g_on_http_open(g_http_open_ctx, HTTP_CALLBACK_REASON_OK);
@@ -1286,7 +1291,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
     TEST_FUNCTION(prov_transport_http_dowork_assigning_succeed)
     {
         //arrange
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         (void)prov_dev_http_transport_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
         (void)prov_dev_http_transport_register_device(handle, on_transport_challenge_callback, NULL, on_transport_json_parse, NULL);
         g_on_http_open(g_http_open_ctx, HTTP_CALLBACK_REASON_OK);
@@ -1318,7 +1323,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
     TEST_FUNCTION(prov_transport_http_dowork_error)
     {
         //arrange
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         (void)prov_dev_http_transport_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
         (void)prov_dev_http_transport_register_device(handle, on_transport_challenge_callback, NULL, on_transport_json_parse, NULL);
         g_on_http_open(g_http_open_ctx, HTTP_CALLBACK_REASON_OK);
@@ -1360,7 +1365,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
     TEST_FUNCTION(prov_transport_http_set_trace_succeed)
     {
         //arrange
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         (void)prov_dev_http_transport_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
         umock_c_reset_all_calls();
 
@@ -1382,7 +1387,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
     TEST_FUNCTION(prov_transport_http_set_trace_http_not_open_succeed)
     {
         //arrange
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         umock_c_reset_all_calls();
 
         //act
@@ -1417,7 +1422,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
     TEST_FUNCTION(prov_dev_http_transport_x509_cert_succeed)
     {
         //arrange
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
@@ -1441,7 +1446,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
     TEST_FUNCTION(prov_transport_http_set_trusted_cert_succeed)
     {
         //arrange
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
@@ -1462,7 +1467,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
     TEST_FUNCTION(prov_transport_http_set_trusted_cert_fail)
     {
         //arrange
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(__LINE__);
@@ -1502,7 +1507,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
     TEST_FUNCTION(prov_transport_http_set_proxy_proxy_opt_NULL_fail)
     {
         //arrange
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         umock_c_reset_all_calls();
 
         //act
@@ -1522,7 +1527,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
     {
         //arrange
         HTTP_PROXY_OPTIONS proxy_options = { 0 };
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         umock_c_reset_all_calls();
 
         //act
@@ -1543,7 +1548,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
     {
         //arrange
         HTTP_PROXY_OPTIONS proxy_options = { 0 };
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
@@ -1567,7 +1572,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
     {
         //arrange
         HTTP_PROXY_OPTIONS proxy_options = { 0 };
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
@@ -1595,7 +1600,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
     {
         //arrange
         HTTP_PROXY_OPTIONS proxy_options = { 0 };
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         umock_c_reset_all_calls();
 
         //act
@@ -1618,7 +1623,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
     {
         //arrange
         HTTP_PROXY_OPTIONS proxy_options = { 0 };
-        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE);
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         umock_c_reset_all_calls();
 
         int negativeTestsInitResult = umock_c_negative_tests_init();

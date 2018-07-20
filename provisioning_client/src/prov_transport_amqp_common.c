@@ -121,6 +121,9 @@ typedef struct PROV_TRANSPORT_AMQP_INFO_TAG
     LINK_HANDLE receiver_link;
     MESSAGE_SENDER_HANDLE msg_sender;
     MESSAGE_RECEIVER_HANDLE msg_receiver;
+
+    PROV_TRANSPORT_ERROR_CALLBACK error_cb;
+    void* error_ctx;
 } PROV_TRANSPORT_AMQP_INFO;
 
 static char* on_sasl_tpm_challenge_cb(BUFFER_HANDLE data_handle, void* user_ctx)
@@ -696,6 +699,10 @@ static int create_amqp_connection(PROV_TRANSPORT_AMQP_INFO* amqp_info)
                 else if (xio_setoption(amqp_info->underlying_io, OPTION_X509_ECC_KEY, amqp_info->private_key) != 0)
                 {
                     LogError("Failure setting x509 key on xio");
+                    if (amqp_info->error_cb != NULL)
+                    {
+                        amqp_info->error_cb(PROV_DEVICE_ERROR_KEY_FAIL, amqp_info->error_ctx);
+                    }
                     result = __FAILURE__;
                     xio_destroy(amqp_info->underlying_io);
                     amqp_info->underlying_io = NULL;
@@ -858,7 +865,7 @@ void cleanup_amqp_data(PROV_TRANSPORT_AMQP_INFO* amqp_info)
     free(amqp_info);
 }
 
-PROV_DEVICE_TRANSPORT_HANDLE prov_transport_common_amqp_create(const char* uri, TRANSPORT_HSM_TYPE type, const char* scope_id, const char* api_version, PROV_AMQP_TRANSPORT_IO transport_io)
+PROV_DEVICE_TRANSPORT_HANDLE prov_transport_common_amqp_create(const char* uri, TRANSPORT_HSM_TYPE type, const char* scope_id, const char* api_version, PROV_AMQP_TRANSPORT_IO transport_io, PROV_TRANSPORT_ERROR_CALLBACK error_cb, void* error_ctx)
 {
     PROV_TRANSPORT_AMQP_INFO* result;
     if (uri == NULL || scope_id == NULL || api_version == NULL || transport_io == NULL)
@@ -905,6 +912,8 @@ PROV_DEVICE_TRANSPORT_HANDLE prov_transport_common_amqp_create(const char* uri, 
                 /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_004: [ On success prov_transport_common_amqp_create shall allocate a new instance of PROV_DEVICE_TRANSPORT_HANDLE. ] */
                 result->transport_io_cb = transport_io;
                 result->hsm_type = type;
+                result->error_cb = error_cb;
+                result->error_ctx = error_ctx;
             }
         }
     }
@@ -998,30 +1007,51 @@ int prov_transport_common_amqp_close(PROV_DEVICE_TRANSPORT_HANDLE handle)
         amqp_info->registration_id = NULL;
 
         /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_012: [ prov_transport_common_amqp_close shall close all links and connection associated with amqp communication. ] */
-        messagesender_close(amqp_info->msg_sender);
-        messagereceiver_close(amqp_info->msg_receiver);
-
-        messagesender_destroy(amqp_info->msg_sender);
-        amqp_info->msg_sender = NULL;
-        messagereceiver_destroy(amqp_info->msg_receiver);
-        amqp_info->msg_receiver = NULL;
+        if (amqp_info->msg_sender != NULL)
+        {
+            messagesender_close(amqp_info->msg_sender);
+        }
+        if (amqp_info->msg_receiver != NULL)
+        {
+            messagereceiver_close(amqp_info->msg_receiver);
+        }
+        if (amqp_info->msg_sender != NULL)
+        {
+            messagesender_destroy(amqp_info->msg_sender);
+            amqp_info->msg_sender = NULL;
+        }
+        if (amqp_info->msg_receiver != NULL)
+        {
+            messagereceiver_destroy(amqp_info->msg_receiver);
+            amqp_info->msg_receiver = NULL;
+        }
 
         // Link
-        link_destroy(amqp_info->receiver_link);
-        amqp_info->receiver_link = NULL;
-        link_destroy(amqp_info->sender_link);
-        amqp_info->sender_link = NULL;
-
+        if (amqp_info->receiver_link != NULL)
+        {
+            link_destroy(amqp_info->receiver_link);
+            amqp_info->receiver_link = NULL;
+        }
+        if (amqp_info->sender_link != NULL)
+        {
+            link_destroy(amqp_info->sender_link);
+            amqp_info->sender_link = NULL;
+        }
         if (amqp_info->tpm_sasl_handler != NULL)
         {
             saslmechanism_destroy(amqp_info->tpm_sasl_handler);
             amqp_info->tpm_sasl_handler = NULL;
         }
-
-        session_destroy(amqp_info->session);
-        amqp_info->session = NULL;
-        connection_destroy(amqp_info->connection);
-        amqp_info->connection = NULL;
+        if (amqp_info->session != NULL)
+        {
+            session_destroy(amqp_info->session);
+            amqp_info->session = NULL;
+        }
+        if (amqp_info->connection != NULL)
+        {
+            connection_destroy(amqp_info->connection);
+            amqp_info->connection = NULL;
+        }
         xio_destroy(amqp_info->transport_io);
         amqp_info->transport_io = NULL;
         xio_destroy(amqp_info->underlying_io);
