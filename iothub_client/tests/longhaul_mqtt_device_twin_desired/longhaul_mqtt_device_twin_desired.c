@@ -12,7 +12,7 @@
 #include "iothub_client.h"
 #include "iothub_client_options.h"
 #include "iothub_message.h"
-#include "iothubtransportamqp.h"
+#include "iothubtransportmqtt.h"
 #include "iothub_account.h"
 #include "iothubtest.h"
 #include "../common_longhaul/iothub_client_common_longhaul.h"
@@ -37,7 +37,7 @@ int main(void)
     }
     else
     {
-        if (longhaul_initialize_device_client(iotHubLonghaulRsrcsHandle, IoTHubAccount_GetSASDevice(longhaul_get_account_info(iotHubLonghaulRsrcsHandle)), AMQP_Protocol) == NULL)
+        if (longhaul_initialize_device_client(iotHubLonghaulRsrcsHandle, IoTHubAccount_GetSASDevice(longhaul_get_account_info(iotHubLonghaulRsrcsHandle)), MQTT_Protocol) == NULL)
         {
             LogError("Failed creating the device client");
             result = __FAILURE__;

@@ -43,6 +43,7 @@ declare -a arr=(
     "-Dbuild_as_dynamic:BOOL=ON -Ddont_use_uploadtoblob:BOOL=ON"
     "-Dbuild_as_dynamic:BOOL=ON -Ddont_use_uploadtoblob:BOOL=ON -Duse_prov_client:BOOL=ON"
     "-Dbuild_as_dynamic:BOOL=ON -Ddont_use_uploadtoblob:BOOL=ON -Duse_edge_modules:BOOL=ON"
+    "-Drun_longhaul_tests=ON"
 	)
 
 for item in "${arr[@]}"
@@ -51,7 +52,7 @@ do
     mkdir -p $build_folder
     pushd $build_folder
 
-    echo "$item"
+    echo "executing cmake/make with options <<$item>>"
     cmake $build_root "$item"
 
     make --jobs=$MAKE_CORES

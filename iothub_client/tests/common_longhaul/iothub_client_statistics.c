@@ -813,7 +813,7 @@ int iothub_client_statistics_add_telemetry_info(IOTHUB_CLIENT_STATISTICS_HANDLE 
                 queued_info->time_queued = info->time_queued;
                 queued_info->send_result = info->send_result;
                 queued_info->time_sent = INDEFINITE_TIME;
-                queued_info->send_callback_result = IOTHUB_CLIENT_ERROR;
+                queued_info->send_callback_result = IOTHUB_CLIENT_CONFIRMATION_ERROR;
                 queued_info->time_received = INDEFINITE_TIME;
 
                 result = 0;

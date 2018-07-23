@@ -11,6 +11,7 @@
 #include "azure_c_shared_utility/uuid.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/lock.h"
 #include "iothub_client_options.h"
 #include "iothub_client.h"
 #include "iothub_message.h"
@@ -415,7 +416,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT on_c2d_message_received(IOTHUB_MESSAGE_H
     }
     else
     {
-        unsigned char* data;
+        const unsigned char* data;
         size_t size;
 
         if (IoTHubMessage_GetByteArray(message, &data, &size) != IOTHUB_MESSAGE_OK)
@@ -758,7 +759,7 @@ IOTHUB_LONGHAUL_RESOURCES_HANDLE longhaul_tests_init()
                 longhaul_tests_deinit(result);
                 result = NULL;
             }
-            else if ((result->iotHubAccountInfo = IoTHubAccount_Init()) == NULL)
+            else if ((result->iotHubAccountInfo = IoTHubAccount_Init(false)) == NULL)
             {
                 LogError("Failed initializing accounts");
                 longhaul_tests_deinit(result);
