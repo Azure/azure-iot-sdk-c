@@ -95,44 +95,36 @@ By default the C-SDK will have web sockets enabled for AMQP and MQTT.  The sampl
 
 ### Using OpenSSL in the SDK
 
-For TLS operations, by default the C-SDK uses Schannel on Windows Platforms.  To enable OpenSSL to be used on Windows, you will need to execute the following instructions:
+For TLS operations, by default the C-SDK uses Schannel on Windows Platforms.  You can use OpenSSL instead on Windows if you desire.  **NOTE:  this configuration presently receives only basic manual testing and does not have gated e2e tests.**
 
-[OpenSSL] binaries that the C-SDK depends on are **ssleay32** and **libeay32**. You need to build and install these libraries and DLLs before you build the sample that uses them.
+**IMPORTANT SECURITY NOTE WHEN USING OPENSSL ON WINDOWS**  
+You are responsible for updating your OpenSSL dependencies as security fixes for it become available.  Schannel on Windows is a system component automatically serviced by Windows Update.  OpenSSL on Linux is updated by Linux packaging mechanisms, such as apt-get on Debian based distributions.  Shipping the C-SDK on Windows using OpenSSL means you are responsible for getting updated versions of it to your devices.
 
-Below are steps to build and install OpenSSL libraries and corresponding DLLs. These steps were tested with **openssl-1.0.2k** on **Visual Studio 2015**.
+[OpenSSL] binaries that the C-SDK depends on are **ssleay32** and **libeay32**. To enable OpenSSL to be used on Windows, you need to
+* Obtain OpenSSL binaries.  There are many ways to do this, but one of the easier ways is to:
+  * Open the appropriate developer command prompt you plan on building the C-SDK from.
+  * Install [vcpkg], a Microsoft tool that helps you manage C and C++ libraries.
+  * Run `.\vcpkg install openssl` to obtain the required OpenSSL binaries.
+  * Make note of the directory that OpenSSL has been installed to by vcpkg, e.g. `C:\vcpkgRoot\vcpkg\packages\openssl_x86-windows`.
 
-- Go to the [OpenSSL Github Repository] and clone an appropriate release.
+* Make the C-SDK link against these OpenSSL binaries instead of the default Schannel.
+  * Regardless of how you obtained OpenSSL binaries, set environment variables to point at its root directory.  *Be careful there are no leading spaces between the `=` and directory name as cmake's errors are not always obvious.*
+      ```Shell
+       set OpenSSLDir=C:\vcpkgRoot\vcpkg\packages\openssl_x86-windows
+       set OPENSSL_ROOT_DIR=C:\vcpkgRoot\vcpkg\packages\openssl_x86-windows
+       ```
+  * Build the SDK to include OpenSSL.  The key difference from the typical flow is the inclusion of the `-Duse_openssl:BOOL=ON` option when invoking cmake.
 
-- For more details on supported configurations, prerequisites, and build steps read [OpenSSL Installation] and [Compilation and Installation].
+     ```Shell
+     cd azure-iot-sdk-c
+     mkdir cmake
+     cd cmake
+     cmake -Duse_openssl:BOOL=ON ..
+     cmake --build . -- /m /p:Configuration=Release
+     ```
 
-- For x86 configuration, open "VS2015 x86 Native Tools Command Prompt" and follow the commands in the `INSTALL.W32` file.
+Building samples and your application should be the same as using the default Schannel at this point.
 
-- For x64 configuration, open "VS2015 x64 Native Tools Command Prompt" and following commands in the `INSTALL.W64` file.
-
-After completing the above steps make sure OpenSSL libraries and DLLs are in your OpenSSL install location.
-
-Follow these steps to build the sample:
-
-- Open a Developer Command Prompt and change to the **build_all\\windows** directory
-
-- Set OpenSSLDir and OPENSSL_ROOT_DIR **environment variables** to the OpenSSL install location. For example, if your OpenSSL install location is **C:\\usr\\local\\ssl**, you will set following:
-
-   ```Shell
-   set OpenSSLDir=C:\usr\local\ssl
-   set OPENSSL_ROOT_DIR=C:\usr\local\ssl
-   ```
-
-- Build the SDK to include OpenSSL:
-
-   ```Shell
-   cd azure-iot-sdk-c
-   mkdir cmake
-   cd cmake
-   cmake -Duse_openssl:BOOL=ON ..
-   cmake --build . -- /m /p:Configuration=Release
-   ```
-
-This will build the C SDK libraries and use openssl as your TLS library.
 
 <a name="linux"></a>
 
@@ -462,3 +454,4 @@ make
 [serializer_samples]: ../serializer/samples/
 [latest-release]:https://github.com/Azure/azure-iot-sdk-c/releases/latest
 [Windows 10 IoT Core]:https://docs.microsoft.com/en-us/windows/iot-core/develop-your-app/buildingappsforiotcore
+[vcpkg]:https://github.com/Microsoft/vcpkg
