@@ -156,12 +156,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\certs\certs.h" />
-    <ClInclude Include="..\iothub_client_sample_upload_to_blob.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\certs\certs.c" />
+    <ClCompile Include="..\..\..\..\deps\parson\parson.c" />
     <ClCompile Include="..\iothub_client_sample_upload_to_blob.c" />
-    <ClCompile Include="main.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

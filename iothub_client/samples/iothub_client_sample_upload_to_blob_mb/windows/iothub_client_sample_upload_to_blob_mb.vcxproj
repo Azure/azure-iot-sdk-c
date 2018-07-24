@@ -157,6 +157,7 @@
   <ItemGroup>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\deps\parson\parson.c" />
     <ClCompile Include="..\iothub_client_sample_upload_to_blob_mb.c" />
   </ItemGroup>
   <ItemGroup>

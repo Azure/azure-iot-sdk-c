@@ -177,6 +177,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\certs\certs.c" />
+    <ClCompile Include="..\..\..\..\deps\parson\parson.c" />
     <ClCompile Include="..\iothub_ll_telemetry_sample.c" />
   </ItemGroup>
   <ItemGroup>
