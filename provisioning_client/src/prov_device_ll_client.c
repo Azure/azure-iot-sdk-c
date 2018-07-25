@@ -173,6 +173,10 @@ static void on_transport_error(PROV_DEVICE_TRANSPORT_ERROR transport_error, void
             case PROV_DEVICE_ERROR_KEY_FAIL:
                 prov_info->error_reason = PROV_DEVICE_RESULT_KEY_ERROR;
                 break;
+
+            case PROV_DEVICE_ERROR_MEMORY:
+                prov_info->error_reason = PROV_DEVICE_RESULT_MEMORY;
+                break;
         }
     }
 }
