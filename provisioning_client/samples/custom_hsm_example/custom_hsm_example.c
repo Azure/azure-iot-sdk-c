@@ -272,6 +272,12 @@ int custom_hsm_activate_identity_key(HSM_CLIENT_HANDLE handle, const unsigned ch
     return result;
 }
 
+char* custom_hsm_symm_key(HSM_CLIENT_HANDLE handle)
+{
+    (void)handle;
+    return NULL;
+}
+
 // Defining the v-table for the x509 hsm calls
 static const HSM_CLIENT_X509_INTERFACE x509_interface =
 {
@@ -293,6 +299,14 @@ static const HSM_CLIENT_TPM_INTERFACE tpm_interface =
     custom_hsm_sign_with_identity
 };
 
+static const HSM_CLIENT_KEY_INTERFACE symm_key_interface =
+{
+    custom_hsm_create,
+    custom_hsm_destroy,
+    custom_hsm_symm_key,
+    custom_hsm_get_common_name
+};
+
 const HSM_CLIENT_TPM_INTERFACE* hsm_client_tpm_interface()
 {
     // tpm interface pointer
@@ -303,4 +317,9 @@ const HSM_CLIENT_X509_INTERFACE* hsm_client_x509_interface()
 {
     // x509 interface pointer
     return &x509_interface;
+}
+
+const HSM_CLIENT_KEY_INTERFACE* hsm_client_key_interface()
+{
+    return &symm_key_interface;
 }

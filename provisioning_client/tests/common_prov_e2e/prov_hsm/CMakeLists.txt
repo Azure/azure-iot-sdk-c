@@ -19,12 +19,14 @@ include_directories(. ${IOT_HSM_INCLUDE_DIR} ${UTPM_INCLUDE_DIR} ../../../adapte
 set(source_c_files
     ./tpm_msr.c
     ./x509_msr.c
+    ./symm_key.c
     ./provisioning_hsm.c
 )
 
 set(source_h_files
     ./tpm_msr.h
     ./x509_info.h
+    ./symm_key.h
 )
 
 IF(WIN32)
