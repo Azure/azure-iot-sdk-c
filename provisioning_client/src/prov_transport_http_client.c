@@ -24,21 +24,20 @@
 #define HTTP_STATUS_CODE_OK_MAX             226
 #define HTTP_STATUS_CODE_UNAUTHORIZED       401
 
-static const char* PROV_REGISTRATION_URI_FMT = "/%s/registrations/%s/register?api-version=%s";
-static const char* PROV_OP_STATUS_URI_FMT = "/%s/registrations/%s/operations/%s?api-version=%s";
-
-static const char* HEADER_KEY_AUTHORIZATION = "Authorization";
-static const char* HEADER_USER_AGENT = "UserAgent";
-static const char* HEADER_ACCEPT = "Accept";
-static const char* HEADER_CONTENT_TYPE = "Content-Type";
-static const char* HEADER_CONNECTION = "Connection";
-static const char* USER_AGENT_VALUE = "prov_device_client/1.0";
-static const char* ACCEPT_VALUE = "application/json";
-static const char* CONTENT_TYPE_VALUE = "application/json; charset=utf-8";
-static const char* KEEP_ALIVE_VALUE = "keep-alive";
-
-static const char* TPM_SECURITY_INFO = "{\"registrationId\":\"%s\",\"tpm\":{\"endorsementKey\":\"%s\", \"storageRootKey\":\"%s\"}}";
-static const char* RIOT_SECURITY_INFO = "{ \"registrationId\":\"%s\" }";
+static const char* const PROV_REGISTRATION_URI_FMT = "/%s/registrations/%s/register?api-version=%s";
+static const char* const PROV_OP_STATUS_URI_FMT = "/%s/registrations/%s/operations/%s?api-version=%s";
+static const char* const HEADER_KEY_AUTHORIZATION = "Authorization";
+static const char* const HEADER_USER_AGENT = "UserAgent";
+static const char* const HEADER_ACCEPT = "Accept";
+static const char* const HEADER_CONTENT_TYPE = "Content-Type";
+static const char* const HEADER_CONNECTION = "Connection";
+static const char* const USER_AGENT_VALUE = "prov_device_client/1.0";
+static const char* const ACCEPT_VALUE = "application/json";
+static const char* const CONTENT_TYPE_VALUE = "application/json; charset=utf-8";
+static const char* const KEEP_ALIVE_VALUE = "keep-alive";
+static const char* const const KEY_NAME_VALUE = "registration";
+static const char* const TPM_SECURITY_INFO = "{\"registrationId\":\"%s\",\"tpm\":{\"endorsementKey\":\"%s\", \"storageRootKey\":\"%s\"}}";
+static const char* const RIOT_SECURITY_INFO = "{ \"registrationId\":\"%s\" }";
 
 DEFINE_ENUM_STRINGS(HTTP_CALLBACK_REASON, HTTP_CALLBACK_REASON_VALUES);
 
@@ -384,7 +383,7 @@ static int send_registration_info(PROV_TRANSPORT_HTTP_INFO* http_info)
     HTTP_HEADERS_HANDLE http_headers;
 
     /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_018: [ prov_transport_http_register_device shall construct the http headers for anonymous communication to the service. ] */
-    if ((http_headers = construct_http_headers(NULL)) == NULL)
+    if ((http_headers = construct_http_headers(http_info->sas_token)) == NULL)
     {
         /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_021: [ If any error is encountered prov_transport_http_register_device shall return a non-zero value. ] */
         LogError("failure constructing http headers");
@@ -682,7 +681,7 @@ void prov_transport_http_destroy(PROV_DEVICE_TRANSPORT_HANDLE handle)
     }
 }
 
-int prov_transport_http_open(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* registration_id, BUFFER_HANDLE ek, BUFFER_HANDLE srk, PROV_DEVICE_TRANSPORT_REGISTER_CALLBACK data_callback, void* user_ctx, PROV_DEVICE_TRANSPORT_STATUS_CALLBACK status_cb, void* status_ctx)
+int prov_transport_http_open(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* registration_id, BUFFER_HANDLE ek, BUFFER_HANDLE srk, PROV_DEVICE_TRANSPORT_REGISTER_CALLBACK data_callback, void* user_ctx, PROV_DEVICE_TRANSPORT_STATUS_CALLBACK status_cb, void* status_ctx, PROV_TRANSPORT_CHALLENGE_CALLBACK reg_challenge_cb, void* challenge_ctx)
 {
     int result;
     PROV_TRANSPORT_HTTP_INFO* http_info = (PROV_TRANSPORT_HTTP_INFO*)handle;
@@ -690,6 +689,11 @@ int prov_transport_http_open(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* re
     {
         /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_008: [ If the argument handle, data_callback, or status_cb are NULL, prov_transport_http_open shall return a non-zero value. ] */
         LogError("Invalid parameter specified handle: %p, data_callback: %p, status_cb: %p, registration_id: %p", handle, data_callback, status_cb, registration_id);
+        result = __FAILURE__;
+    }
+    else if ((http_info->hsm_type == TRANSPORT_HSM_TYPE_TPM || http_info->hsm_type == TRANSPORT_HSM_TYPE_SYMM_KEY) && reg_challenge_cb == NULL)
+    {
+        LogError("registration challenge callback must be set");
         result = __FAILURE__;
     }
     else if (http_info->hsm_type == TRANSPORT_HSM_TYPE_TPM && (ek == NULL || srk == NULL))
@@ -719,12 +723,23 @@ int prov_transport_http_open(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* re
         http_info->srk = NULL;
         result = __FAILURE__;
     }
+    else if ((http_info->hsm_type == TRANSPORT_HSM_TYPE_SYMM_KEY) && (http_info->sas_token = reg_challenge_cb(NULL, 0, KEY_NAME_VALUE, challenge_ctx)) == NULL)
+    {
+        LogError("failure constructing challenge value");
+        BUFFER_delete(http_info->ek);
+        http_info->ek = NULL;
+        BUFFER_delete(http_info->srk);
+        http_info->srk = NULL;
+        result = __FAILURE__;
+    }
     else
     {
         http_info->register_data_cb = data_callback;
         http_info->user_ctx = user_ctx;
         http_info->status_cb = status_cb;
         http_info->status_ctx = status_ctx;
+        http_info->challenge_cb = reg_challenge_cb;
+        http_info->challenge_ctx = challenge_ctx;
 
         if (create_connection(http_info) != 0)
         {
@@ -792,7 +807,7 @@ int prov_transport_http_close(PROV_DEVICE_TRANSPORT_HANDLE handle)
     return result;
 }
 
-int prov_transport_http_register_device(PROV_DEVICE_TRANSPORT_HANDLE handle, PROV_TRANSPORT_CHALLENGE_CALLBACK reg_challenge_cb, void* user_ctx, PROV_TRANSPORT_JSON_PARSE json_parse_cb, void* json_ctx)
+int prov_transport_http_register_device(PROV_DEVICE_TRANSPORT_HANDLE handle, PROV_TRANSPORT_JSON_PARSE json_parse_cb, void* json_ctx)
 {
     int result;
     PROV_TRANSPORT_HTTP_INFO* http_info = (PROV_TRANSPORT_HTTP_INFO*)handle;
@@ -800,11 +815,6 @@ int prov_transport_http_register_device(PROV_DEVICE_TRANSPORT_HANDLE handle, PRO
     {
         /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_017: [ If the argument handle or json_data is NULL, prov_transport_http_register_device shall return a non-zero value. ] */
         LogError("Invalid parameter specified handle: %p, json_parse_cb: %p", handle, json_parse_cb);
-        result = __FAILURE__;
-    }
-    else if (http_info->hsm_type == TRANSPORT_HSM_TYPE_TPM && reg_challenge_cb == NULL)
-    {
-        LogError("registration challenge callback must be set using tpm");
         result = __FAILURE__;
     }
     else if (http_info->transport_state == TRANSPORT_CLIENT_STATE_ERROR)
@@ -816,8 +826,6 @@ int prov_transport_http_register_device(PROV_DEVICE_TRANSPORT_HANDLE handle, PRO
     {
         /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_022: [ On success prov_transport_http_register_device shall return 0. ] */
         http_info->transport_state = TRANSPORT_CLIENT_STATE_REG_SEND;
-        http_info->challenge_cb = reg_challenge_cb;
-        http_info->challenge_ctx = user_ctx;
         http_info->json_parse_cb = json_parse_cb;
         http_info->json_ctx = json_ctx;
 

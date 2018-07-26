@@ -24,13 +24,12 @@
 
 #define SUBSCRIBE_TOPIC_COUNT       1
 
-static const char* MQTT_SUBSCRIBE_TOPIC = "$dps/registrations/res/#";
-static const char* MQTT_USERNAME_FMT = "%s/registrations/%s/api-version=%s&ClientVersion=%s";
-
-static const char* MQTT_REGISTER_MESSAGE_FMT = "$dps/registrations/PUT/iotdps-register/?$rid=%d";
-static const char* MQTT_STATUS_MESSAGE_FMT = "$dps/registrations/GET/iotdps-get-operationstatus/?$rid=%d&operationId=%s";
-
-static const char* MQTT_TOPIC_STATUS_PREFIX = "$dps/registrations/res/";
+static const char* const MQTT_SUBSCRIBE_TOPIC = "$dps/registrations/res/#";
+static const char* const MQTT_USERNAME_FMT = "%s/registrations/%s/api-version=%s&ClientVersion=%s";
+static const char* const MQTT_REGISTER_MESSAGE_FMT = "$dps/registrations/PUT/iotdps-register/?$rid=%d";
+static const char* const MQTT_STATUS_MESSAGE_FMT = "$dps/registrations/GET/iotdps-get-operationstatus/?$rid=%d&operationId=%s";
+static const char* const MQTT_TOPIC_STATUS_PREFIX = "$dps/registrations/res/";
+static const char* const KEY_NAME_VALUE = "registration";
 
 typedef enum MQTT_TRANSPORT_STATE_TAG
 {
@@ -204,6 +203,10 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
                         LogError("Connection Not Accepted: 0x%x: %s", connack->returnCode, retrieve_mqtt_return_codes(connack->returnCode));
                         mqtt_info->transport_state = TRANSPORT_CLIENT_STATE_ERROR;
                         mqtt_info->mqtt_state = MQTT_STATE_ERROR;
+                        if (mqtt_info->error_cb != NULL)
+                        {
+                            mqtt_info->error_cb(PROV_DEVICE_ERROR_KEY_UNAUTHORIZED, mqtt_info->error_ctx);
+                        }
                     }
                 }
                 else
@@ -450,6 +453,8 @@ static char* construct_username(PROV_TRANSPORT_MQTT_INFO* mqtt_info)
     else if (sprintf(result, MQTT_USERNAME_FMT, mqtt_info->scope_id, mqtt_info->registration_id, mqtt_info->api_version, PROV_DEVICE_CLIENT_VERSION) <= 0)
     {
         LogError("Failure creating mqtt username");
+        free(result);
+        result = NULL;
     }
     return result;
 }
@@ -535,7 +540,9 @@ static int construct_transport(PROV_TRANSPORT_MQTT_INFO* mqtt_info)
 static int create_connection(PROV_TRANSPORT_MQTT_INFO* mqtt_info)
 {
     int result;
-    MQTT_CLIENT_OPTIONS options = { 0 };
+    MQTT_CLIENT_OPTIONS options;
+    memset(&options, 0, sizeof(MQTT_CLIENT_OPTIONS));
+
     char* username_info;
 
     if ((username_info = construct_username(mqtt_info)) == NULL)
@@ -543,9 +550,17 @@ static int create_connection(PROV_TRANSPORT_MQTT_INFO* mqtt_info)
         LogError("Failure creating username info");
         result = __FAILURE__;
     }
-    else if (construct_transport(mqtt_info))
+    else if (construct_transport(mqtt_info) != 0)
     {
         LogError("Failure constructing transport");
+        free(username_info);
+        result = __FAILURE__;
+    }
+    else if ((mqtt_info->hsm_type == TRANSPORT_HSM_TYPE_SYMM_KEY) && (options.password = mqtt_info->challenge_cb(NULL, 0, KEY_NAME_VALUE, mqtt_info->challenge_ctx)) == NULL)
+    {
+        LogError("Failure retrieving sas token from key");
+        xio_destroy(mqtt_info->transport_io);
+        mqtt_info->transport_io = NULL;
         free(username_info);
         result = __FAILURE__;
     }
@@ -568,6 +583,10 @@ static int create_connection(PROV_TRANSPORT_MQTT_INFO* mqtt_info)
         else
         {
             result = 0;
+        }
+        if (options.password != NULL)
+        {
+            free(options.password);
         }
         free(username_info);
     }
@@ -695,7 +714,7 @@ void prov_transport_common_mqtt_destroy(PROV_DEVICE_TRANSPORT_HANDLE handle)
     }
 }
 
-int prov_transport_common_mqtt_open(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* registration_id, BUFFER_HANDLE ek, BUFFER_HANDLE srk, PROV_DEVICE_TRANSPORT_REGISTER_CALLBACK data_callback, void* user_ctx, PROV_DEVICE_TRANSPORT_STATUS_CALLBACK status_cb, void* status_ctx)
+int prov_transport_common_mqtt_open(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* registration_id, BUFFER_HANDLE ek, BUFFER_HANDLE srk, PROV_DEVICE_TRANSPORT_REGISTER_CALLBACK data_callback, void* user_ctx, PROV_DEVICE_TRANSPORT_STATUS_CALLBACK status_cb, void* status_ctx, PROV_TRANSPORT_CHALLENGE_CALLBACK reg_challenge_cb, void* challenge_ctx)
 {
     int result;
     PROV_TRANSPORT_MQTT_INFO* mqtt_info = (PROV_TRANSPORT_MQTT_INFO*)handle;
@@ -705,35 +724,22 @@ int prov_transport_common_mqtt_open(PROV_DEVICE_TRANSPORT_HANDLE handle, const c
         LogError("Invalid parameter specified handle: %p, data_callback: %p, status_cb: %p, registration_id: %p", handle, data_callback, status_cb, registration_id);
         result = __FAILURE__;
     }
-    else if ( (mqtt_info->hsm_type == TRANSPORT_HSM_TYPE_TPM) && (ek == NULL || srk == NULL) )
+    else if ((mqtt_info->hsm_type == TRANSPORT_HSM_TYPE_TPM || mqtt_info->hsm_type == TRANSPORT_HSM_TYPE_SYMM_KEY) && reg_challenge_cb == NULL)
+    {
+        LogError("registration challenge callback must be set");
+        result = __FAILURE__;
+    }
+    // Should never be here since TPM is not supported, so I'm going to check to ensure compliance
+    else if (ek != NULL || srk != NULL)
     {
         /* Codes_PROV_TRANSPORT_MQTT_COMMON_07_008: [ If hsm_type is TRANSPORT_HSM_TYPE_TPM and ek or srk is NULL, prov_transport_common_mqtt_open shall return a non-zero value. ] */
         LogError("Invalid parameter specified ek: %p, srk: %p", ek, srk);
-        result = __FAILURE__;
-    }
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_009: [ prov_transport_common_mqtt_open shall clone the ek and srk values.] */
-    else if (ek != NULL && (mqtt_info->ek = BUFFER_clone(ek)) == NULL)
-    {
-        /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_041: [ If a failure is encountered, prov_transport_common_mqtt_open shall return a non-zero value. ] */
-        LogError("Unable to allocate endorsement key");
-        result = __FAILURE__;
-    }
-    else if (srk != NULL && (mqtt_info->srk = BUFFER_clone(srk)) == NULL)
-    {
-        /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_041: [ If a failure is encountered, prov_transport_common_mqtt_open shall return a non-zero value. ] */
-        LogError("Unable to allocate storage root key");
-        BUFFER_delete(mqtt_info->ek);
-        mqtt_info->ek = NULL;
         result = __FAILURE__;
     }
     else if (mallocAndStrcpy_s(&mqtt_info->registration_id, registration_id) != 0)
     {
         /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_003: [ If any error is encountered prov_transport_http_create shall return NULL. ] */
         LogError("failure constructing registration Id");
-        BUFFER_delete(mqtt_info->ek);
-        mqtt_info->ek = NULL;
-        BUFFER_delete(mqtt_info->srk);
-        mqtt_info->srk = NULL;
         result = __FAILURE__;
     }
     else
@@ -743,6 +749,11 @@ int prov_transport_common_mqtt_open(PROV_DEVICE_TRANSPORT_HANDLE handle, const c
         mqtt_info->status_cb = status_cb;
         mqtt_info->status_ctx = status_ctx;
         mqtt_info->mqtt_state = MQTT_STATE_DISCONNECTED;
+        // Must add a false connect here due to the protocol quirk
+        //mqtt_info->status_cb(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, mqtt_info->status_ctx);
+        mqtt_info->challenge_cb = reg_challenge_cb;
+        mqtt_info->challenge_ctx = challenge_ctx;
+
         result = 0;
     }
     return result;
@@ -782,7 +793,7 @@ int prov_transport_common_mqtt_close(PROV_DEVICE_TRANSPORT_HANDLE handle)
     return result;
 }
 
-int prov_transport_common_mqtt_register_device(PROV_DEVICE_TRANSPORT_HANDLE handle, PROV_TRANSPORT_CHALLENGE_CALLBACK reg_challenge_cb, void* user_ctx, PROV_TRANSPORT_JSON_PARSE json_parse_cb, void* json_ctx)
+int prov_transport_common_mqtt_register_device(PROV_DEVICE_TRANSPORT_HANDLE handle, PROV_TRANSPORT_JSON_PARSE json_parse_cb, void* json_ctx)
 {
     int result;
     PROV_TRANSPORT_MQTT_INFO* mqtt_info = (PROV_TRANSPORT_MQTT_INFO*)handle;
@@ -790,12 +801,6 @@ int prov_transport_common_mqtt_register_device(PROV_DEVICE_TRANSPORT_HANDLE hand
     {
         /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_014: [ If handle is NULL, prov_transport_common_mqtt_register_device shall return a non-zero value. ] */
         LogError("Invalid parameter specified handle: %p, json_parse_cb: %p", handle, json_parse_cb);
-        result = __FAILURE__;
-    }
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_015: [ If hsm_type is of type TRANSPORT_HSM_TYPE_TPM and reg_challenge_cb is NULL, prov_transport_common_mqtt_register_device shall return a non-zero value. ] */
-    else if (mqtt_info->hsm_type == TRANSPORT_HSM_TYPE_TPM && reg_challenge_cb == NULL)
-    {
-        LogError("Invalid parameter specified reg_challenge_cb: %p", reg_challenge_cb);
         result = __FAILURE__;
     }
     /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_061: [ If the transport_state is TRANSPORT_CLIENT_STATE_REG_SEND or the the operation_id is NULL, prov_transport_common_mqtt_register_device shall return a non-zero value. ] */
@@ -812,8 +817,6 @@ int prov_transport_common_mqtt_register_device(PROV_DEVICE_TRANSPORT_HANDLE hand
     else
     {
         mqtt_info->transport_state = TRANSPORT_CLIENT_STATE_REG_SEND;
-        mqtt_info->challenge_cb = reg_challenge_cb;
-        mqtt_info->challenge_ctx = user_ctx;
         mqtt_info->json_parse_cb = json_parse_cb;
         mqtt_info->json_ctx = json_ctx;
 

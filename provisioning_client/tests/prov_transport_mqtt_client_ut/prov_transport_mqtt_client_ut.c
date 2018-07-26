@@ -344,10 +344,10 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_client_ut)
     TEST_FUNCTION(prov_transport_mqtt_open_succeed)
     {
         //arrange
-        STRICT_EXPECTED_CALL(prov_transport_common_mqtt_open(TEST_DPS_HANDLE, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL));
+        STRICT_EXPECTED_CALL(prov_transport_common_mqtt_open(TEST_DPS_HANDLE, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL));
 
         //act
-        int result = prov_mqtt_transport_open(TEST_DPS_HANDLE, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+        int result = prov_mqtt_transport_open(TEST_DPS_HANDLE, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
 
         //assert
         ASSERT_ARE_EQUAL(int, 0, result);
@@ -376,10 +376,10 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_client_ut)
     TEST_FUNCTION(prov_transport_mqtt_register_device_succeed)
     {
         //arrange
-        STRICT_EXPECTED_CALL(prov_transport_common_mqtt_register_device(TEST_DPS_HANDLE, on_transport_challenge_callback, NULL, on_transport_json_parse, NULL));
+        STRICT_EXPECTED_CALL(prov_transport_common_mqtt_register_device(TEST_DPS_HANDLE, on_transport_json_parse, NULL));
 
         //act
-        int result = prov_mqtt_transport_register_device(TEST_DPS_HANDLE, on_transport_challenge_callback, NULL, on_transport_json_parse, NULL);
+        int result = prov_mqtt_transport_register_device(TEST_DPS_HANDLE, on_transport_json_parse, NULL);
 
         //assert
         ASSERT_ARE_EQUAL(int, 0, result);

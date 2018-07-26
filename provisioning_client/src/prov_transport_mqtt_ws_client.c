@@ -94,10 +94,10 @@ void prov_transport_mqtt_ws_destroy(PROV_DEVICE_TRANSPORT_HANDLE handle)
     prov_transport_common_mqtt_destroy(handle);
 }
 
-int prov_transport_mqtt_ws_open(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* registration_id, BUFFER_HANDLE ek, BUFFER_HANDLE srk, PROV_DEVICE_TRANSPORT_REGISTER_CALLBACK data_callback, void* user_ctx, PROV_DEVICE_TRANSPORT_STATUS_CALLBACK status_cb, void* status_ctx)
+int prov_transport_mqtt_ws_open(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* registration_id, BUFFER_HANDLE ek, BUFFER_HANDLE srk, PROV_DEVICE_TRANSPORT_REGISTER_CALLBACK data_callback, void* user_ctx, PROV_DEVICE_TRANSPORT_STATUS_CALLBACK status_cb, void* status_ctx, PROV_TRANSPORT_CHALLENGE_CALLBACK reg_challenge_cb, void* challenge_ctx)
 {
     /* Codes_PROV_TRANSPORT_MQTT_WS_CLIENT_07_003: [ prov_transport_mqtt_ws_open shall invoke the prov_transport_common_mqtt_open method ] */
-    return prov_transport_common_mqtt_open(handle, registration_id, ek, srk, data_callback, user_ctx, status_cb, status_ctx);
+    return prov_transport_common_mqtt_open(handle, registration_id, ek, srk, data_callback, user_ctx, status_cb, status_ctx, reg_challenge_cb, challenge_ctx);
 }
 
 int prov_transport_mqtt_ws_close(PROV_DEVICE_TRANSPORT_HANDLE handle)
@@ -106,10 +106,10 @@ int prov_transport_mqtt_ws_close(PROV_DEVICE_TRANSPORT_HANDLE handle)
     return prov_transport_common_mqtt_close(handle);
 }
 
-int prov_transport_mqtt_ws_register_device(PROV_DEVICE_TRANSPORT_HANDLE handle, PROV_TRANSPORT_CHALLENGE_CALLBACK reg_challenge_cb, void* user_ctx, PROV_TRANSPORT_JSON_PARSE json_parse_cb, void* json_ctx)
+int prov_transport_mqtt_ws_register_device(PROV_DEVICE_TRANSPORT_HANDLE handle, PROV_TRANSPORT_JSON_PARSE json_parse_cb, void* json_ctx)
 {
     /* Codes_PROV_TRANSPORT_MQTT_WS_CLIENT_07_005: [ prov_transport_mqtt_ws_register_device shall invoke the prov_transport_common_mqtt_register_device method ] */
-    return prov_transport_common_mqtt_register_device(handle, reg_challenge_cb, user_ctx, json_parse_cb, json_ctx);
+    return prov_transport_common_mqtt_register_device(handle, json_parse_cb, json_ctx);
 }
 
 int prov_transport_mqtt_ws_get_operation_status(PROV_DEVICE_TRANSPORT_HANDLE handle)

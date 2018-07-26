@@ -39,6 +39,13 @@ int initialize_hsm_system()
         result = __LINE__;
     }
 #endif
+#if defined(HSM_TYPE_SYMM_KEY)  || defined(HSM_AUTH_TYPE_CUSTOM)
+    if ((result == 0) && (hsm_client_key_init() != 0))
+    {
+        LogError("Failure initializing http edge system");
+        result = __LINE__;
+    }
+#endif
 
     return result;
 }
@@ -53,5 +60,8 @@ void deinitialize_hsm_system()
 #endif
 #if defined(HSM_TYPE_SAS_TOKEN)  || defined(HSM_AUTH_TYPE_CUSTOM)
     hsm_client_tpm_deinit();
+#endif
+#if defined(HSM_TYPE_SYMM_KEY)  || defined(HSM_AUTH_TYPE_CUSTOM)
+    hsm_client_key_deinit();
 #endif
 }

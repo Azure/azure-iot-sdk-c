@@ -41,7 +41,7 @@ static const char* const PROV_BLACKLISTED_STATUS = "blacklisted";
 
 static const char* const SAS_TOKEN_SCOPE_FMT = "%s/registrations/%s";
 
-#define SAS_TOKEN_DEFAULT_LIFETIME  3600
+#define SAS_TOKEN_DEFAULT_LIFETIME  2400
 #define EPOCH_TIME_T_VALUE          (time_t)0
 #define MAX_AUTH_ATTEMPTS           3
 #define PROV_GET_THROTTLE_TIME      2
@@ -106,58 +106,69 @@ typedef struct PROV_INSTANCE_INFO_TAG
 static char* prov_transport_challenge_callback(const unsigned char* nonce, size_t nonce_len, const char* key_name, void* user_ctx)
 {
     char* result;
-    if (user_ctx == NULL || nonce == NULL)
+    if (user_ctx == NULL)
     {
-        LogError("Bad argument user_ctx: %p, nonce: %p", nonce, nonce_len);
+        LogError("Bad argument user_ctx is NULL");
         result = NULL;
     }
     else
     {
         PROV_INSTANCE_INFO* prov_info = (PROV_INSTANCE_INFO*)user_ctx;
-        char* token_scope;
-        size_t token_scope_len;
-
-        size_t sec_since_epoch = (size_t)(difftime(get_time(NULL), EPOCH_TIME_T_VALUE) + 0);
-        size_t expiry_time = sec_since_epoch + SAS_TOKEN_DEFAULT_LIFETIME;
-
-        // Construct Token scope
-        token_scope_len = strlen(SAS_TOKEN_SCOPE_FMT) + strlen(prov_info->scope_id) + strlen(prov_info->registration_id);
-
-        token_scope = malloc(token_scope_len + 1);
-        if (token_scope == NULL)
+        if ((prov_info->hsm_type == PROV_AUTH_TYPE_TPM) && nonce == NULL)
         {
-            LogError("Failure to allocate token scope");
-            result = NULL;
-        }
-        else if (sprintf(token_scope, SAS_TOKEN_SCOPE_FMT, prov_info->scope_id, prov_info->registration_id) <= 0)
-        {
-            LogError("Failure to constructing token_scope");
-            free(token_scope);
+            LogError("Bad argument nonce is NULL");
             result = NULL;
         }
         else
         {
-            STRING_HANDLE encoded_token = URL_EncodeString(token_scope);
-            if (encoded_token == NULL)
+            char* token_scope;
+            size_t token_scope_len;
+
+            size_t sec_since_epoch = (size_t)(difftime(get_time(NULL), EPOCH_TIME_T_VALUE) + 0);
+            size_t expiry_time = sec_since_epoch + SAS_TOKEN_DEFAULT_LIFETIME;
+
+            // Construct Token scope
+            token_scope_len = strlen(SAS_TOKEN_SCOPE_FMT) + strlen(prov_info->scope_id) + strlen(prov_info->registration_id);
+
+            token_scope = malloc(token_scope_len + 1);
+            if (token_scope == NULL)
             {
-                LogError("Failure to url encoding string");
+                LogError("Failure to allocate token scope");
+                result = NULL;
+            }
+            else if (sprintf(token_scope, SAS_TOKEN_SCOPE_FMT, prov_info->scope_id, prov_info->registration_id) <= 0)
+            {
+                LogError("Failure to constructing token_scope");
+                free(token_scope);
                 result = NULL;
             }
             else
             {
-                if (prov_auth_import_key(prov_info->prov_auth_handle, nonce, nonce_len) != 0)
+                STRING_HANDLE encoded_token = URL_EncodeString(token_scope);
+                if (encoded_token == NULL)
                 {
-                    LogError("Failure to import the provisioning key");
+                    LogError("Failure to url encoding string");
                     result = NULL;
                 }
-                else if ((result = prov_auth_construct_sas_token(prov_info->prov_auth_handle, STRING_c_str(encoded_token), key_name, expiry_time)) == NULL)
+                else
                 {
-                    LogError("Failure to import the provisioning key");
-                    result = NULL;
+                    if (prov_info->hsm_type == PROV_AUTH_TYPE_TPM && (prov_auth_import_key(prov_info->prov_auth_handle, nonce, nonce_len) != 0))
+                    {
+                        LogError("Failure to import the provisioning key");
+                        result = NULL;
+                    }
+                    else
+                    {
+                        if ((result = prov_auth_construct_sas_token(prov_info->prov_auth_handle, STRING_c_str(encoded_token), key_name, expiry_time)) == NULL)
+                        {
+                            LogError("Failure to import the provisioning key");
+                            result = NULL;
+                        }
+                    }
+                    STRING_delete(encoded_token);
                 }
-                STRING_delete(encoded_token);
+                free(token_scope);
             }
-            free(token_scope);
         }
     }
     return result;
@@ -172,6 +183,9 @@ static void on_transport_error(PROV_DEVICE_TRANSPORT_ERROR transport_error, void
         {
             case PROV_DEVICE_ERROR_KEY_FAIL:
                 prov_info->error_reason = PROV_DEVICE_RESULT_KEY_ERROR;
+                break;
+            case PROV_DEVICE_ERROR_KEY_UNAUTHORIZED:
+                prov_info->error_reason = PROV_DEVICE_RESULT_DEV_AUTH_ERROR;
                 break;
         }
     }
@@ -625,6 +639,10 @@ PROV_DEVICE_LL_HANDLE Prov_Device_LL_Create(const char* uri, const char* id_scop
                 {
                     hsm_type = TRANSPORT_HSM_TYPE_TPM;
                 }
+                else if (result->hsm_type == PROV_AUTH_TYPE_KEY)
+                {
+                    hsm_type = TRANSPORT_HSM_TYPE_SYMM_KEY;
+                }
                 else
                 {
                     hsm_type = TRANSPORT_HSM_TYPE_X509;
@@ -715,7 +733,7 @@ PROV_DEVICE_RESULT Prov_Device_LL_Register_Device(PROV_DEVICE_LL_HANDLE handle, 
                     result = PROV_DEVICE_RESULT_OK;
                 }
             }
-            else
+            else if (handle->hsm_type == PROV_AUTH_TYPE_X509)
             {
                 char* x509_cert;
                 char* x509_private_key;
@@ -760,6 +778,10 @@ PROV_DEVICE_RESULT Prov_Device_LL_Register_Device(PROV_DEVICE_LL_HANDLE handle, 
                     free(x509_private_key);
                 }
             }
+            else
+            {
+                result = PROV_DEVICE_RESULT_OK;
+            }
         }
         if (result == PROV_DEVICE_RESULT_OK)
         {
@@ -770,7 +792,7 @@ PROV_DEVICE_RESULT Prov_Device_LL_Register_Device(PROV_DEVICE_LL_HANDLE handle, 
             handle->register_status_cb = reg_status_cb;
             handle->status_user_ctx = status_ctx;
 
-            if (handle->prov_transport_protocol->prov_transport_open(handle->transport_handle, handle->registration_id, ek_value, srk_value, on_transport_registration_data, handle, on_transport_status, handle) != 0)
+            if (handle->prov_transport_protocol->prov_transport_open(handle->transport_handle, handle->registration_id, ek_value, srk_value, on_transport_registration_data, handle, on_transport_status, handle, prov_transport_challenge_callback, handle) != 0)
             {
                 LogError("Failure establishing  connection");
                 if (!handle->user_supplied_reg_id)
@@ -813,7 +835,7 @@ void Prov_Device_LL_DoWork(PROV_DEVICE_LL_HANDLE handle)
             {
                 case CLIENT_STATE_REGISTER_SEND:
                     /* Codes_SRS_PROV_CLIENT_07_013: [ CLIENT_STATE_REGISTER_SEND which shall construct an initial call to the service with endorsement information ] */
-                    if (prov_info->prov_transport_protocol->prov_transport_register(prov_info->transport_handle, prov_transport_challenge_callback, prov_info, prov_transport_process_json_reply, prov_info) != 0)
+                    if (prov_info->prov_transport_protocol->prov_transport_register(prov_info->transport_handle, prov_transport_process_json_reply, prov_info) != 0)
                     {
                         LogError("Failure registering device");
                         if (prov_info->error_reason == PROV_DEVICE_RESULT_OK)

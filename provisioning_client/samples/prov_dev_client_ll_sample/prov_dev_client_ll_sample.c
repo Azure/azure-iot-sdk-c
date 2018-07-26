@@ -146,7 +146,7 @@ static void register_device_callback(PROV_DEVICE_RESULT register_result, const c
         }
         else
         {
-            (void)printf("Failure encountered on registration!\r\n");
+            (void)printf("Failure encountered on registration %s\r\n", ENUM_TO_STRING(PROV_DEVICE_RESULT, register_result) );
             user_ctx->registration_complete = 2;
         }
     }
@@ -157,6 +157,7 @@ int main()
     SECURE_DEVICE_TYPE hsm_type;
     //hsm_type = SECURE_DEVICE_TYPE_TPM;
     hsm_type = SECURE_DEVICE_TYPE_X509;
+    //hsm_type = SECURE_DEVICE_TYPE_SYMMETRIC_KEY;
 
     (void)IoTHub_Init();
     (void)prov_dev_security_init(hsm_type);
@@ -278,7 +279,7 @@ int main()
             // For available options please see the iothub_sdk_options.md documentation
 
             //bool traceOn = true;
-            //IoTHubDeviceClient_LL_SetOption(iothub_ll_handle, OPTION_LOG_TRACE, &traceOn);
+            //IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_LOG_TRACE, &traceOn);
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
             // Setting the Trusted Certificate.  This is only necessary on system with without

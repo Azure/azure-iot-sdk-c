@@ -18,6 +18,7 @@ set(AUTH_CLIENT_H_FILES
     ./inc/azure_prov_client/prov_security_factory.h
     ./inc/azure_prov_client/internal/iothub_auth_client.h
     ./inc/azure_prov_client/internal/prov_auth_client.h
+    ./inc/azure_prov_client/iothub_security_factory.h
     )
 
 set(AUTH_CLIENT_C_FILES
@@ -99,6 +100,16 @@ else ()
                 set(HSM_CLIENT_LIBRARY ${HSM_CLIENT_LIBRARY} Tbs)
             endif ()
         endif ()
+
+        if (${hsm_type_symm_key})
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHSM_TYPE_SYMM_KEY")
+            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHSM_TYPE_SYMM_KEY")
+
+            set(HSM_CLIENT_H_FILES ${HSM_CLIENT_H_FILES} 
+                ./adapters/hsm_client_key.h)
+            set(HSM_CLIENT_C_FILES ${HSM_CLIENT_C_FILES} 
+                ./adapters/hsm_client_key.c)
+        endif()
     endif ()
 endif ()
 

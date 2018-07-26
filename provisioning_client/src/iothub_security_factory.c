@@ -28,6 +28,12 @@ static SECURE_DEVICE_TYPE get_secure_device_type(IOTHUB_SECURITY_TYPE sec_type)
             break;
 #endif
 
+#if defined(HSM_TYPE_SYMM_KEY) || defined(HSM_AUTH_TYPE_CUSTOM)
+        case IOTHUB_SECURITY_TYPE_SYMMETRIC_KEY:
+            ret = SECURE_DEVICE_TYPE_SYMMETRIC_KEY;
+            break;
+#endif
+
 #ifdef HSM_TYPE_HTTP_EDGE
         case IOTHUB_SECURITY_TYPE_HTTP_EDGE:
             ret = SECURE_DEVICE_TYPE_HTTP_EDGE;
@@ -47,7 +53,7 @@ int iothub_security_init(IOTHUB_SECURITY_TYPE sec_type)
     int result;
 
     SECURE_DEVICE_TYPE secure_device_type_from_caller = get_secure_device_type(sec_type);
-    
+
     if (secure_device_type_from_caller == SECURE_DEVICE_TYPE_UNKNOWN)
     {
         LogError("Security type %d is not supported in this SDK build", sec_type);
@@ -67,7 +73,7 @@ int iothub_security_init(IOTHUB_SECURITY_TYPE sec_type)
             result = __FAILURE__;
         }
         else
-        {
+        {
             result = 0;
         }
 
