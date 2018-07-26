@@ -1189,8 +1189,6 @@ static void setup_subscribe_devicetwin_dowork_mocks()
         .IgnoreArgument(2);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
-        .IgnoreArgument_handle();
     STRICT_EXPECTED_CALL(mqtt_client_subscribe(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
         .IgnoreArgument_handle()
         .IgnoreArgument_packetId()
@@ -2337,7 +2335,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin_Succeed)
     IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin(handle);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)).IgnoreArgument_handle();
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)).IgnoreArgument_handle();
 
     // act
@@ -6251,7 +6248,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin_Succeed)
     umock_c_reset_all_calls();
 
     EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG)).IgnoreArgument_psz();
-    EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG)).IgnoreArgument_psz();
 
     // act
     int result = IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin(handle);
@@ -6431,7 +6427,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin_notify_Succeed)
     umock_c_reset_all_calls();
 
     EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG)).IgnoreArgument_psz();
-    EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG)).IgnoreArgument_psz();
 
     // act
     int result = IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin(handle);
@@ -6476,7 +6471,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin_fail)
     umock_c_reset_all_calls();
 
     EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG)).IgnoreArgument_psz();
-    EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG)).IgnoreArgument_psz();
 
     umock_c_negative_tests_snapshot();
 
@@ -6518,7 +6512,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin_notify_fail)
     umock_c_reset_all_calls();
 
     EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG)).IgnoreArgument_psz();
-    EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG)).IgnoreArgument_psz();
 
     umock_c_negative_tests_snapshot();
 
@@ -6534,7 +6527,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin_notify_fail)
 
         int result = IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin(handle);
         // assert
-        ASSERT_ARE_NOT_EQUAL(int, result, 0);
+        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, result, 0, tmp_msg);
     }
 
     //cleanup

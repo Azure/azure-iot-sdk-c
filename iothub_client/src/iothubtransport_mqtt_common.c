@@ -1006,6 +1006,49 @@ static int publish_device_twin_message(MQTTTRANSPORT_HANDLE_DATA* transport_data
     return result;
 }
 
+static void changeStateToSubscribeIfAllowed(PMQTTTRANSPORT_HANDLE_DATA transport_data)
+{
+    if (transport_data->currPacketState != CONNACK_TYPE &&
+        transport_data->currPacketState != CONNECT_TYPE &&
+        transport_data->currPacketState != DISCONNECT_TYPE &&
+        transport_data->currPacketState != PACKET_TYPE_ERROR)
+    {
+        transport_data->currPacketState = SUBSCRIBE_TYPE;
+    }
+}
+
+static int subscribeToNotifyStateIfNeeded(PMQTTTRANSPORT_HANDLE_DATA transport_data)
+{
+    int result;
+
+    if (transport_data->topic_NotifyState == NULL)
+    {
+        transport_data->topic_NotifyState = STRING_construct(TOPIC_NOTIFICATION_STATE);
+        if (transport_data->topic_NotifyState == NULL)
+        {
+            LogError("Failure: unable constructing notify state topic");
+            result = __FAILURE__;
+        }
+        else
+        {
+            transport_data->topics_ToSubscribe |= SUBSCRIBE_NOTIFICATION_STATE_TOPIC;
+            result = 0;
+        }
+    }
+    else
+    {
+        result = 0;
+    }
+    
+    if (result == 0)
+    {
+        changeStateToSubscribeIfAllowed(transport_data);
+    }
+
+    return result;
+}
+
+
 static bool isSystemProperty(const char* tokenData)
 {
     bool result = false;
@@ -1375,6 +1418,8 @@ static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE msgHandle, void* call
                                 {
                                     /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_054: [ If type is IOTHUB_TYPE_DEVICE_TWIN, then on success if msg_type is RETRIEVE_PROPERTIES then mqtt_notification_callback shall call IoTHubClientCore_LL_RetrievePropertyComplete... ] */
                                     IoTHubClientCore_LL_RetrievePropertyComplete(transportData->llClientHandle, DEVICE_TWIN_UPDATE_COMPLETE, payload->message, payload->length);
+                                    // Only after receiving device twin request should we start listening for patches.
+                                    (void)subscribeToNotifyStateIfNeeded(transportData);
                                 }
                                 else
                                 {
@@ -2466,31 +2511,9 @@ int IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle
         {
             result = 0;
         }
-        if (result == 0 && transport_data->topic_NotifyState == NULL)
-        {
-            /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_044: [`IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin` shall construct the get state topic string and the notify state topic string.] */
-            transport_data->topic_NotifyState = STRING_construct(TOPIC_NOTIFICATION_STATE);
-            if (transport_data->topic_NotifyState == NULL)
-            {
-                LogError("Failure: unable constructing notify state topic");
-                result = __FAILURE__;
-            }
-            else
-            {
-                /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_047: [On success IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin shall return 0.] */
-                transport_data->topics_ToSubscribe |= SUBSCRIBE_NOTIFICATION_STATE_TOPIC;
-                result = 0;
-            }
-        }
         if (result == 0)
         {
-            if (transport_data->currPacketState != CONNACK_TYPE &&
-                transport_data->currPacketState != CONNECT_TYPE &&
-                transport_data->currPacketState != DISCONNECT_TYPE &&
-                transport_data->currPacketState != PACKET_TYPE_ERROR)
-            {
-                transport_data->currPacketState = SUBSCRIBE_TYPE;
-            }
+            changeStateToSubscribeIfAllowed(transport_data);
         }
     }
     return result;
@@ -2563,13 +2586,7 @@ int IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE hand
         {
             /*Codes_SRS_IOTHUB_MQTT_TRANSPORT_12_005 : [IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod shall schedule the send of the subscription.]*/
             /*Codes_SRS_IOTHUB_MQTT_TRANSPORT_12_007 : [On success IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod shall return 0.]*/
-            if (transport_data->currPacketState != CONNACK_TYPE &&
-                transport_data->currPacketState != CONNECT_TYPE &&
-                transport_data->currPacketState != DISCONNECT_TYPE &&
-                transport_data->currPacketState != PACKET_TYPE_ERROR)
-            {
-                transport_data->currPacketState = SUBSCRIBE_TYPE;
-            }
+            changeStateToSubscribeIfAllowed(transport_data);
         }
     }
     return result;
@@ -2679,13 +2696,7 @@ int IoTHubTransport_MQTT_Common_Subscribe(IOTHUB_DEVICE_HANDLE handle)
         {
             transport_data->topics_ToSubscribe |= SUBSCRIBE_TELEMETRY_TOPIC;
             /* Code_SRS_IOTHUB_MQTT_TRANSPORT_07_035: [If current packet state is not CONNACT, DISCONNECT_TYPE, or PACKET_TYPE_ERROR then IoTHubTransport_MQTT_Common_Subscribe shall set the packet state to SUBSCRIBE_TYPE.]*/
-            if (transport_data->currPacketState != CONNACK_TYPE &&
-                transport_data->currPacketState != CONNECT_TYPE &&
-                transport_data->currPacketState != DISCONNECT_TYPE &&
-                transport_data->currPacketState != PACKET_TYPE_ERROR)
-            {
-                transport_data->currPacketState = SUBSCRIBE_TYPE;
-            }
+            changeStateToSubscribeIfAllowed(transport_data);
             result = 0;
         }
     }
@@ -3309,14 +3320,7 @@ int IoTHubTransport_MQTT_Common_Subscribe_InputQueue(IOTHUB_DEVICE_HANDLE handle
     {
         // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_067: [ IoTHubTransport_MQTT_Common_Subscribe_InputQueue shall set a flag to enable mqtt_client_subscribe to be called to subscribe to the input queue Message Topic.]
         transport_data->topics_ToSubscribe |= SUBSCRIBE_INPUT_QUEUE_TOPIC;
-        if (transport_data->currPacketState != CONNACK_TYPE &&
-            transport_data->currPacketState != CONNECT_TYPE &&
-            transport_data->currPacketState != DISCONNECT_TYPE &&
-            transport_data->currPacketState != PACKET_TYPE_ERROR)
-        {
-            // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_068: [ If current packet state is not CONNACK, DISCONNECT_TYPE, or PACKET_TYPE_ERROR then IoTHubTransport_MQTT_Common_Subscribe_InputQueue shall set the packet state to SUBSCRIBE_TYPE.]
-            transport_data->currPacketState = SUBSCRIBE_TYPE;
-        }
+        changeStateToSubscribeIfAllowed(transport_data);
         // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_070: [ On success IoTHubTransport_MQTT_Common_Subscribe_InputQueue shall return 0.]
         result = 0;
     }
