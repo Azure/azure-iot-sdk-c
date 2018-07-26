@@ -976,7 +976,7 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         int negativeTestsInitResult = umock_c_negative_tests_init();
         ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
-        setup_iothub_device_auth_generate_credentials_mocks(false, true);
+        setup_iothub_device_auth_generate_credentials_mocks(false, true, false);
 
         umock_c_negative_tests_snapshot();
 
