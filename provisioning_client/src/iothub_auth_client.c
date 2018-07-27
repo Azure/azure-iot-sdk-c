@@ -213,6 +213,12 @@ IOTHUB_SECURITY_HANDLE iothub_device_auth_create()
         {
             LogError("Error allocating result or else unsupported security type %d", iothub_security_t);
         }
+        else if (result->hsm_client_create == NULL)
+        {
+            LogError("hsm_client_create is not a valid address");
+            free(result);
+            result = NULL;
+        }
         else
         {
             /* Codes_IOTHUB_DEV_AUTH_07_025: [ iothub_device_auth_create shall call the concrete_iothub_device_auth_create function associated with the interface_desc. ] */

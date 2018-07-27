@@ -14,6 +14,10 @@
 #include "hsm_client_riot.h"
 #endif
 
+#if defined(HSM_TYPE_SYMM_KEY) || defined(HSM_AUTH_TYPE_CUSTOM)
+#include "hsm_client_key.h"
+#endif
+
 int initialize_hsm_system()
 {
     int result = 0;

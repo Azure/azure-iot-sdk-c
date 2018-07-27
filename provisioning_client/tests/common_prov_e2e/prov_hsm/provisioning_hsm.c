@@ -41,6 +41,16 @@ void hsm_client_tpm_deinit()
 {
 }
 
+int hsm_client_key_init()
+{
+    initialize_symm_key();
+    return 0;
+}
+
+void hsm_client_key_deinit()
+{
+}
+
 HSM_CLIENT_HANDLE iothub_hsm_x509_create()
 {
     IOTHUB_HSM_IMPL* result;
