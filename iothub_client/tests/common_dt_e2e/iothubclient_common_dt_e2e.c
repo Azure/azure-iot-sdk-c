@@ -301,6 +301,8 @@ static void sendeventasync_on_device_or_module(IOTHUB_MESSAGE_HANDLE msgHandle)
 static void dt_e2e_update_twin(IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceClientDeviceTwinHandle, IOTHUB_PROVISIONED_DEVICE* deviceToUse, const char* twinJson)
 {
     char* twinResponse;
+
+    LogInfo("Beginning update of twin via Service SDK");
     
     if (deviceToUse->moduleId != NULL)
     {
@@ -312,7 +314,8 @@ static void dt_e2e_update_twin(IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceC
         twinResponse = IoTHubDeviceTwin_UpdateTwin(serviceClientDeviceTwinHandle, deviceToUse->deviceId, twinJson);
         ASSERT_IS_NOT_NULL_WITH_MSG(twinResponse, "IoTHubDeviceTwin_UpdateTwin failed");
     }
-    
+
+    LogInfo("Twin response from Service SDK after update is <%s>\n", twinResponse);
     free(twinResponse);
 }
 
@@ -474,6 +477,7 @@ static char * malloc_and_copy_unsigned_char(const unsigned char* payload, size_t
 
 static void deviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payload, size_t size, void* userContextCallback)
 {
+    LogInfo("Callback:: Received payload len=<%d>, data=<%.*s>\n", size, (int)size, payload);
     DEVICE_DESIRED_DATA *device = (DEVICE_DESIRED_DATA *)userContextCallback;
     if (Lock(device->lock) == LOCK_ERROR)
     {
@@ -620,6 +624,20 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
     // subscribe
     setdevicetwincallback_on_device_or_module(deviceTwinCallback, device);
 
+    // Twin registrations to the cloud happen asyncronously because we're using the convenience layer.  There is an (unavoidable)
+    // race potential in tests like this where we create handles and immediately invoke the service SDK.  Namely without this
+    // sleep, we could:
+    // 1 - Register for the full twin (which happens via IoTHubDeviceClient_SetDeviceTwinCallback)
+    // 2 - Have the service SDK update the twin (see dt_e2e_update_twin), but it takes a while
+    // 3 - The client receives its full twin, which will just be empty data given (2) isn't completed
+    // 4 - When the client receives full twin, it will register for PATCH changes
+    // 5 - The server only now completes (2), setting the full twin.  However this has happened *before* it received
+    //     the subscribe for PATCH and therefore it doesn't send down the PATCH of the full twin.
+    // Apps in field will rarely hit this, as it requries service SDK & client handle to be invoked almost simultaneously.
+    // And the client *is* registered for future twin updates on this handle, so it would get future changes.
+    LogInfo("Sleeping for a few seconds as client-side registers with twin");
+    ThreadAPI_Sleep(5000);
+
     const char *connectionString = IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo);
     IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(connectionString);
     ASSERT_IS_NOT_NULL_WITH_MSG(iotHubServiceClientHandle, "IoTHubServiceClientAuth_CreateFromConnectionString failed");
@@ -635,7 +653,6 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
     ASSERT_IS_NOT_NULL_WITH_MSG(buffer, "failed to create the payload for IoTHubDeviceTwin_UpdateTwin");
 
     dt_e2e_update_twin(serviceClientDeviceTwinHandle, deviceToUse, buffer);
-    ThreadAPI_Sleep(3000);
 
     JSON_Value *root_value = NULL;
     const char *string_property = NULL;
@@ -703,6 +720,8 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
         }
         ThreadAPI_Sleep(1000);
     }
+
+    ASSERT_IS_TRUE_WITH_MSG(difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME, "Timeout waiting for twin message");
 
     // unsubscribe
     setdevicetwincallback_on_device_or_module(NULL, NULL);
