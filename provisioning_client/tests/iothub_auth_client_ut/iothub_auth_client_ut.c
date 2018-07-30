@@ -743,9 +743,11 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         IOTHUB_SECURITY_HANDLE xda_handle = iothub_device_auth_create();
         umock_c_reset_all_calls();
 
-        DEVICE_AUTH_CREDENTIAL_INFO test_iothub_device_auth_credentials = { 0 };
+        DEVICE_AUTH_CREDENTIAL_INFO test_iothub_device_auth_credentials;
         test_iothub_device_auth_credentials.dev_auth_type = AUTH_TYPE_X509;
-
+        test_iothub_device_auth_credentials.sas_info.expiry_seconds = 0;
+        test_iothub_device_auth_credentials.sas_info.token_scope = NULL;
+        test_iothub_device_auth_credentials.sas_info.key_name = NULL;
         //act
         void* result = iothub_device_auth_generate_credentials(xda_handle, &test_iothub_device_auth_credentials);
 
