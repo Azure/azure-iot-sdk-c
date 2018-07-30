@@ -50,7 +50,7 @@ MOCKABLE_FUNCTION(, int, hsm_client_sign_data, HSM_CLIENT_HANDLE, handle, const 
 MOCKABLE_FUNCTION(, char*, hsm_client_get_trust_bundle, HSM_CLIENT_HANDLE, handle);
 MOCKABLE_FUNCTION(, char*, hsm_client_get_certificate, HSM_CLIENT_HANDLE, handle);
 MOCKABLE_FUNCTION(, char*, hsm_client_get_alias_key, HSM_CLIENT_HANDLE, handle);
-MOCKABLE_FUNCTION(, char*, hsm_client_get_symm_key, HSM_CLIENT_HANDLE, handle);
+MOCKABLE_FUNCTION(, char*, hsm_client_get_symmetric_key, HSM_CLIENT_HANDLE, handle);
 MOCKABLE_FUNCTION(, char*, hsm_client_get_common_name, HSM_CLIENT_HANDLE, handle);
 
 MOCKABLE_FUNCTION(, const HSM_CLIENT_TPM_INTERFACE*, hsm_client_tpm_interface);
@@ -149,7 +149,7 @@ static const HSM_CLIENT_KEY_INTERFACE test_key_interface =
 {
     hsm_client_create,
     hsm_client_destroy,
-    hsm_client_get_symm_key,
+    hsm_client_get_symmetric_key,
     hsm_client_get_common_name
 };
 
@@ -189,10 +189,13 @@ static void my_hsm_client_destroy(HSM_CLIENT_HANDLE h)
     my_gballoc_free((void*)h);
 }
 
-static char* my_hsm_client_get_symm_key(HSM_CLIENT_HANDLE handle)
+static char* my_hsm_client_get_symmetric_key(HSM_CLIENT_HANDLE handle)
 {
     (void)handle;
-    return (char*)my_gballoc_malloc(1);
+    size_t len = strlen(TEST_STRING_VALUE);
+    char* result = (char*)my_gballoc_malloc(len + 1);
+    strcpy(result, TEST_STRING_VALUE);
+    return result;
 }
 
 static char* my_hsm_client_get_alias_key(HSM_CLIENT_HANDLE handle)
@@ -336,8 +339,8 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         REGISTER_GLOBAL_MOCK_HOOK(hsm_client_get_trust_bundle, my_hsm_client_get_trust_bundle);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(hsm_client_get_trust_bundle, NULL);
 
-        REGISTER_GLOBAL_MOCK_HOOK(hsm_client_get_symm_key, my_hsm_client_get_symm_key);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(hsm_client_get_symm_key, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(hsm_client_get_symmetric_key, my_hsm_client_get_symmetric_key);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(hsm_client_get_symmetric_key, NULL);
 
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
@@ -444,7 +447,7 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
     {
         if (use_key)
         {
-            STRICT_EXPECTED_CALL(hsm_client_get_symm_key(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(hsm_client_get_symmetric_key(IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(Base64_Decoder(IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(BUFFER_new());
             STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));
@@ -740,7 +743,7 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         IOTHUB_SECURITY_HANDLE xda_handle = iothub_device_auth_create();
         umock_c_reset_all_calls();
 
-        DEVICE_AUTH_CREDENTIAL_INFO test_iothub_device_auth_credentials;
+        DEVICE_AUTH_CREDENTIAL_INFO test_iothub_device_auth_credentials = { 0 };
         test_iothub_device_auth_credentials.dev_auth_type = AUTH_TYPE_X509;
 
         //act
