@@ -225,7 +225,10 @@ static char* my_secure_device_get_common_name(HSM_CLIENT_HANDLE handle)
 static char* my_secure_device_get_symm_key(HSM_CLIENT_HANDLE handle)
 {
     (void)handle;
-    return (char*)my_gballoc_malloc(1);
+    size_t len = strlen(TEST_STRING_VALUE);
+    char* result = (char*)my_gballoc_malloc(len + 1);
+    strcpy(result, TEST_STRING_VALUE);
+    return result;
 }
 
 static int my_secure_device_sign_data(HSM_CLIENT_HANDLE handle, const unsigned char* data, size_t data_len, unsigned char** key, size_t* key_len)
