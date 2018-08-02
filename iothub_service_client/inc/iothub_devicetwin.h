@@ -6,12 +6,6 @@
 #ifndef IOTHUB_DEVICETWIN_H
 #define IOTHUB_DEVICETWIN_H
 
-#ifdef __cplusplus
-extern "C"
-{
-#else
-#endif
-
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/singlylinkedlist.h"
 #include "azure_c_shared_utility/map.h"
@@ -19,6 +13,12 @@ extern "C"
 #include "iothub_service_client_auth.h"
 
 #include "azure_c_shared_utility/umock_c_prod.h"
+
+#ifdef __cplusplus
+extern "C"
+{
+#else
+#endif
 
 #define IOTHUB_DEVICE_TWIN_RESULT_VALUES     \
     IOTHUB_DEVICE_TWIN_OK,                   \

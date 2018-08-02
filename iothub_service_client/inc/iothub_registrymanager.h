@@ -6,17 +6,17 @@
 #ifndef IOTHUB_REGISTRYMANAGER_H
 #define IOTHUB_REGISTRYMANAGER_H
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
 #include "azure_c_shared_utility/macro_utils.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/singlylinkedlist.h"
 #include "azure_c_shared_utility/map.h"
 #include "iothub_service_client_auth.h"
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 #define IOTHUB_REGISTRYMANAGER_RESULT_VALUES        \
     IOTHUB_REGISTRYMANAGER_OK,                      \
