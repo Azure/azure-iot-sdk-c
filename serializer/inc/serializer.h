@@ -621,7 +621,7 @@ Actions are discarded, since no marshalling will be done for those when sending 
         /*Codes_SRS_SERIALIZER_H_02_032: [ If the number of arguments passed to the conversion function does not match the expected count, the function shall return DATAPROVIDER_INVALID_ARG. ]*/ \
         if(ParameterCount != DIV2(COUNT_ARG(__VA_ARGS__))) \
         { \
-            LogError("expected parameter count (%zu) does not match the actual parameter count (%zu)", ParameterCount, COUNT_ARG(__VA_ARGS__)); \
+            LogError("expected parameter count (%lu) does not match the actual parameter count (%lu)", ParameterCount, COUNT_ARG(__VA_ARGS__)); \
             result = NULL; \
         } \
         else \

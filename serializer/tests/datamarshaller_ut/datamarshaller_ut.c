@@ -1229,7 +1229,7 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
 
                 umock_c_negative_tests_fail_call(i);
                 char temp_str[128];
-                sprintf(temp_str, "On failed call %zu", i);
+                sprintf(temp_str, "On failed call %lu", i);
 
                 ///act
                 DATA_MARSHALLER_RESULT result = DataMarshaller_SendData_ReportedProperties(handle, values, &destination, &destinationSize);

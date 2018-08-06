@@ -792,7 +792,7 @@ TEST_FUNCTION(hsm_client_http_edge_sign_data_http_fail)
         umock_c_negative_tests_fail_call(index);
         
         char tmp_msg[128];
-        sprintf(tmp_msg, "hsm_client_http_edge_sign_data failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "hsm_client_http_edge_sign_data failure in test %lu/%lu", index, count);
         int result = hsm_client_http_edge_sign_data(sec_handle, TEST_SIGNING_DATA, TEST_SIGNING_DATA_LENGTH, &signed_value, &signed_len);
         ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, result, 0, tmp_msg);
     }
@@ -919,7 +919,7 @@ TEST_FUNCTION(hsm_client_http_edge_get_trust_bundle_fail)
         umock_c_negative_tests_fail_call(index);
         
         char tmp_msg[128];
-        sprintf(tmp_msg, "hsm_client_http_edge_get_trust_bundle failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "hsm_client_http_edge_get_trust_bundle failure in test %lu/%lu", index, count);
         const char* trusted_certificate = hsm_client_http_edge_get_trust_bundle(sec_handle);
         ASSERT_IS_NULL_WITH_MSG(trusted_certificate, tmp_msg);
     }

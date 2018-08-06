@@ -337,7 +337,7 @@ TEST_FUNCTION(Prov_Device_Create_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "Prov_Device_Create failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "Prov_Device_Create failure in test %lu/%lu", index, count);
 
         PROV_DEVICE_HANDLE result = Prov_Device_Create(TEST_PROV_URI, TEST_SCOPE_ID, TEST_PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION);
 
@@ -437,7 +437,7 @@ TEST_FUNCTION(Prov_Device_Destroy_Lock_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "Prov_Device_Create failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "Prov_Device_Create failure in test %lu/%lu", index, count);
 
         Prov_Device_Destroy(prov_device_handle);
 
@@ -579,7 +579,7 @@ TEST_FUNCTION(Prov_Device_Register_Device_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "Prov_Device_Register_Device failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "Prov_Device_Register_Device failure in test %lu/%lu", index, count);
 
         PROV_DEVICE_RESULT result = Prov_Device_Register_Device(prov_device_handle, TEST_PROV_DEVICE_CLIENT_REGISTER_DEVICE_CALLBACK, TEST_USER_CONTEXT, TEST_PROV_DEVICE_CLIENT_REGISTER_STATUS_CALLBACK, TEST_USER_CONTEXT);
 

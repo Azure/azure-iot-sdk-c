@@ -342,7 +342,7 @@ TEST_FUNCTION(querySpecification_serializeToJson_error)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "querySpecification_serializeToJson_error failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "querySpecification_serializeToJson_error failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -435,7 +435,7 @@ TEST_FUNCTION(queryResponse_deserializeFromJson_error_individualEnrollment)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "queryResponse_deserializeFromJson_error_individualEnrollment failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "queryResponse_deserializeFromJson_error_individualEnrollment failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -496,7 +496,7 @@ TEST_FUNCTION(queryResponse_deserializeFromJson_error_individualEnrollment_empty
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "queryResponse_deserializeFromJson_error_individualEnrollment_empty_arr failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "queryResponse_deserializeFromJson_error_individualEnrollment_empty_arr failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -559,7 +559,7 @@ TEST_FUNCTION(queryResponse_deserializeFromJson_error_enrollmentGroup)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "queryResponse_deserializeFromJson_error_enrollmentGroup failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "queryResponse_deserializeFromJson_error_enrollmentGroup failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -620,7 +620,7 @@ TEST_FUNCTION(queryResponse_deserializeFromJson_error_enrollmentGroup_empty_arr)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "queryResponse_deserializeFromJson_error_enrollmentGroup_empty_arr failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "queryResponse_deserializeFromJson_error_enrollmentGroup_empty_arr failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -683,7 +683,7 @@ TEST_FUNCTION(queryResponse_deserializeFromJson_error_deviceRegistrationState)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "queryResponse_deserializeFromJson_error_deviceRegistrationState failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "queryResponse_deserializeFromJson_error_deviceRegistrationState failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -744,7 +744,7 @@ TEST_FUNCTION(queryResponse_deserializeFromJson_error_deviceRegistrationState_em
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "queryResponse_deserializeFromJson_error_deviceRegistrationState_empty_arr failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "queryResponse_deserializeFromJson_error_deviceRegistrationState_empty_arr failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);

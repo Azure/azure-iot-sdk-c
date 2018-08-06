@@ -622,7 +622,7 @@ METHODRETURN_HANDLE CodeFirst_InvokeMethod(DEVICE_HANDLE deviceHandle, void* cal
         (relativeMethodPath == NULL))
     {
         result = NULL;
-        LogError("invalid args: DEVICE_HANDLE deviceHandle=%p, void* callbackUserContext=%p, const char* relativeMethodPath=%p, const char* methodName=%p, size_t parameterCount=%zu, const AGENT_DATA_TYPE* parameterValues=%p",
+        LogError("invalid args: DEVICE_HANDLE deviceHandle=%p, void* callbackUserContext=%p, const char* relativeMethodPath=%p, const char* methodName=%p, size_t parameterCount=%lu, const AGENT_DATA_TYPE* parameterValues=%p",
             deviceHandle, callbackUserContext, relativeMethodPath, methodName, parameterCount, parameterValues);
     }
     else if ((parameterCount > 0) && (parameterValues == NULL))
@@ -1368,7 +1368,7 @@ CODEFIRST_RESULT CodeFirst_SendAsyncReported(unsigned char** destination, size_t
     if ((destination == NULL) || (destinationSize == NULL) || numReportedProperties == 0)
     {
         /*Codes_SRS_CODEFIRST_02_018: [ If parameter destination, destinationSize or any of the values passed through va_args is NULL then CodeFirst_SendAsyncReported shall fail and return CODEFIRST_INVALID_ARG. ]*/
-        LogError("invalid argument unsigned char** destination=%p, size_t* destinationSize=%p, size_t numReportedProperties=%zu", destination, destinationSize, numReportedProperties);
+        LogError("invalid argument unsigned char** destination=%p, size_t* destinationSize=%p, size_t numReportedProperties=%lu", destination, destinationSize, numReportedProperties);
         result = CODEFIRST_INVALID_ARG;
     }
     else
@@ -1390,7 +1390,7 @@ CODEFIRST_RESULT CodeFirst_SendAsyncReported(unsigned char** destination, size_t
             /*Codes_SRS_CODEFIRST_02_018: [ If parameter destination, destinationSize or any of the values passed through va_args is NULL then CodeFirst_SendAsyncReported shall fail and return CODEFIRST_INVALID_ARG. ]*/
             if (value == NULL)
             {
-                LogError("argument number %zu passed through variable arguments is NULL", i);
+                LogError("argument number %lu passed through variable arguments is NULL", i);
                 result = CODEFIRST_INVALID_ARG;
                 break;
             }

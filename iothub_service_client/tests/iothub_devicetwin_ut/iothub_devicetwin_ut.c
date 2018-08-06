@@ -710,7 +710,7 @@ TEST_FUNCTION(IoTHubDeviceTwin_GetTwin_non_happy_path)
             )
         {
             char message_on_error[64];
-            sprintf(message_on_error, "Got unexpected non-NULL ptr on run %zu", i);
+            sprintf(message_on_error, "Got unexpected non-NULL ptr on run %lu", i);
         
             const char* deviceId = " ";
             char* result = IoTHubDeviceTwin_GetTwin(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE, deviceId);
@@ -958,7 +958,7 @@ TEST_FUNCTION(IoTHubDeviceTwin_UpdateTwin_non_happy_path)
             )
         {
             char message_on_error[64];
-            sprintf(message_on_error, "Got unexpected non-NULL ptr on run %zu", i);
+            sprintf(message_on_error, "Got unexpected non-NULL ptr on run %lu", i);
 
             const char* deviceId = " ";
             const char* deviceTwinJson = " ";

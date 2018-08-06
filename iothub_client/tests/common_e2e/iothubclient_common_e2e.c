@@ -698,14 +698,14 @@ D2C_MESSAGE_HANDLE client_create_and_send_d2c(TEST_MESSAGE_CREATION_MECHANISM te
         {
             if (Map_AddOrUpdate(mapHandle, MSG_PROP_KEYS_SPECIAL[i], MSG_PROP_VALS_SPECIAL[i]) != MAP_OK)
             {
-                LogError("ERROR: Map_AddOrUpdate failed for property %zu!", i);
+                LogError("ERROR: Map_AddOrUpdate failed for property %lu!", i);
             }
         }
         else
         {
             if (Map_AddOrUpdate(mapHandle, MSG_PROP_KEYS[i], MSG_PROP_VALS[i]) != MAP_OK)
             {
-                LogError("ERROR: Map_AddOrUpdate failed for property %zu!", i);
+                LogError("ERROR: Map_AddOrUpdate failed for property %lu!", i);
             }
         }
     }
@@ -1232,14 +1232,14 @@ EXPECTED_RECEIVE_DATA *service_create_c2d(const char *content)
         {
             if (Map_AddOrUpdate(mapHandle, MSG_PROP_KEYS_SPECIAL[i], MSG_PROP_VALS_SPECIAL[i]) != MAP_OK)
             {
-                LogError("ERROR: Map_AddOrUpdate failed for property %zu!", i);
+                LogError("ERROR: Map_AddOrUpdate failed for property %lu!", i);
             }
         }
         else
         {
             if (Map_AddOrUpdate(mapHandle, MSG_PROP_KEYS[i], MSG_PROP_VALS[i]) != MAP_OK)
             {
-                LogError("ERROR: Map_AddOrUpdate failed for property %zu!", i);
+                LogError("ERROR: Map_AddOrUpdate failed for property %lu!", i);
             }
         }
     }

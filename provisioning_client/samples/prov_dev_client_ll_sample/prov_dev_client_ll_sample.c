@@ -298,7 +298,7 @@ int main()
                     if ((current_tick - last_send_time) / 1000 > TIME_BETWEEN_MESSAGES)
                     {
                         static char msgText[1024];
-                        sprintf_s(msgText, sizeof(msgText), "{ \"message_index\" : \"%zu\" }", msg_count++);
+                        sprintf_s(msgText, sizeof(msgText), "{ \"message_index\" : \"%lu\" }", msg_count++);
 
                         IOTHUB_MESSAGE_HANDLE msg_handle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText));
                         if (msg_handle == NULL)
@@ -314,7 +314,7 @@ int main()
                             else
                             {
                                 (void)tickcounter_get_current_ms(tick_counter_handle, &last_send_time);
-                                (void)printf("IoTHubClient_LL_SendEventAsync accepted message [%zu] for transmission to IoT Hub.\r\n", msg_count);
+                                (void)printf("IoTHubClient_LL_SendEventAsync accepted message [%lu] for transmission to IoT Hub.\r\n", msg_count);
 
                             }
                             IoTHubMessage_Destroy(msg_handle);

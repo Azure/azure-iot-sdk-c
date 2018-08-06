@@ -82,7 +82,7 @@ void deviceTwinReportStateCallback(int status_code, void* userContextCallback)
 static void deviceTwinGetStateCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback)
 {
     (void)userContextCallback;
-    printf("Device Twin properties received: update=%s payload=%s, size=%zu\n", ENUM_TO_STRING(DEVICE_TWIN_UPDATE_STATE, update_state), payLoad, size);
+    printf("Device Twin properties received: update=%s payload=%s, size=%lu\n", ENUM_TO_STRING(DEVICE_TWIN_UPDATE_STATE, update_state), payLoad, size);
 }
 
 void onDesiredMaxSpeed(void* argument)

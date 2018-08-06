@@ -66,7 +66,7 @@ static void PrintMessageInformation(IOTHUB_MESSAGE_HANDLE message)
     }
 
 
-    (void)printf("Received Message [%zu]\r\n Message ID: [%s]\r\n Correlation ID: [%s]\r\n Data: [%s]\r\n InputQueueName: [%s]\n connectionModuleId: [%s]\r\n connectionDeviceId: [%s]\n",
+    (void)printf("Received Message [%lu]\r\n Message ID: [%s]\r\n Correlation ID: [%s]\r\n Data: [%s]\r\n InputQueueName: [%s]\n connectionModuleId: [%s]\r\n connectionDeviceId: [%s]\n",
             messagesReceivedByInput1Queue, messageId, correlationId, messageBody, inputQueueName, connectionModuleId, connectionDeviceId);
 }
 
@@ -87,7 +87,7 @@ static void SendConfirmationCallbackFromFilter(IOTHUB_CLIENT_CONFIRMATION_RESULT
 {
     // The context corresponds to which message# we were at when we sent.
     FILTERED_MESSAGE_INSTANCE* filteredMessageInstance = (FILTERED_MESSAGE_INSTANCE*)userContextCallback;
-    (void)printf("Confirmation[%zu] received for message with result = %d\r\n", filteredMessageInstance->messageTrackingId, result);
+    (void)printf("Confirmation[%lu] received for message with result = %d\r\n", filteredMessageInstance->messageTrackingId, result);
     IoTHubMessage_Destroy(filteredMessageInstance->messageHandle);
     free(filteredMessageInstance);
 }
@@ -140,7 +140,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT InputQueue1FilterCallback(IOTHUB_MESSAGE
         else
         {
             // We filter out every other message.  Here we will send on.
-            (void)printf("Sending message (%zu) to the next stage in pipeline\n", messagesReceivedByInput1Queue);
+            (void)printf("Sending message (%lu) to the next stage in pipeline\n", messagesReceivedByInput1Queue);
 
             IOTHUB_MESSAGE_RESULT msgResult = IoTHubMessage_SetMessageId(message, "MSG_ID");
             if (msgResult != IOTHUB_MESSAGE_OK) 
@@ -153,7 +153,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT InputQueue1FilterCallback(IOTHUB_MESSAGE
             {
                 IoTHubMessage_Destroy(filteredMessageInstance->messageHandle);
                 free(filteredMessageInstance);
-                (void)printf("IoTHubModuleClient_LL_SendEventToOutputAsync failed on sending msg#=%zu, err=%d\n", messagesReceivedByInput1Queue, clientResult);
+                (void)printf("IoTHubModuleClient_LL_SendEventToOutputAsync failed on sending msg#=%lu, err=%d\n", messagesReceivedByInput1Queue, clientResult);
                 result = IOTHUBMESSAGE_ABANDONED;
             }
             else
@@ -165,7 +165,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT InputQueue1FilterCallback(IOTHUB_MESSAGE
     else
     {
         // No-op.  Swallow this message by not passing it onto the next stage in the pipeline.
-        (void)printf("Not sending message (%zu) to the next stage in pipeline.\n", messagesReceivedByInput1Queue);
+        (void)printf("Not sending message (%lu) to the next stage in pipeline.\n", messagesReceivedByInput1Queue);
         result = IOTHUBMESSAGE_ACCEPTED;
     }
 

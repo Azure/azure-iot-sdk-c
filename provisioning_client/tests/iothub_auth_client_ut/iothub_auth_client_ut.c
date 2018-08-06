@@ -766,7 +766,7 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[128];
-            sprintf(tmp_msg, "iothub_device_auth_generate_credentials failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "iothub_device_auth_generate_credentials failure in test %lu/%lu", index, count);
 
             void* result = iothub_device_auth_generate_credentials(xda_handle, &g_test_sas_cred);
 
@@ -802,7 +802,7 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[128];
-            sprintf(tmp_msg, "iothub_device_auth_generate_credentials riot failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "iothub_device_auth_generate_credentials riot failure in test %lu/%lu", index, count);
 
             void* result = iothub_device_auth_generate_credentials(xda_handle, &g_test_sas_cred);
 
@@ -899,7 +899,7 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[128];
-            sprintf(tmp_msg, "iothub_device_auth_generate_credentials http edge failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "iothub_device_auth_generate_credentials http edge failure in test %lu/%lu", index, count);
 
             void* result = iothub_device_auth_generate_credentials(xda_handle, &g_test_sas_cred);
 

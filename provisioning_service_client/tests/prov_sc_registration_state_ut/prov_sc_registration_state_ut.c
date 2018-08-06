@@ -559,7 +559,7 @@ TEST_FUNCTION(deviceRegistrationState_fromJson_full_error)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "deviceRegistrationState_fromJson_full_error failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "deviceRegistrationState_fromJson_full_error failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);

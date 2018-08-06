@@ -315,7 +315,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_client_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[64];
-            sprintf(tmp_msg, "g_transport_io failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "g_transport_io failure in test %lu/%lu", index, count);
 
             //act
             dps_io_info = g_transport_io(TEST_URI_VALUE, &sasl_mechanism, NULL);

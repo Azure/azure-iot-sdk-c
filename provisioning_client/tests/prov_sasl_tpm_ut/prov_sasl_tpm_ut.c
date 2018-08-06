@@ -392,7 +392,7 @@ TEST_FUNCTION(prov_sasl_hsm_tpm_create_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "prov_sasl_mechanism_create failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "prov_sasl_mechanism_create failure in test %lu/%lu", index, count);
 
         //act
         CONCRETE_SASL_MECHANISM_HANDLE handle = prov_sasl_mechanism_create(&sasl_tpm_config);
@@ -872,7 +872,7 @@ TEST_FUNCTION(prov_sasl_mechanism_challenge_sastoken_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "prov_sasl_mechanism_challenge failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "prov_sasl_mechanism_challenge failure in test %lu/%lu", index, count);
 
         //act
         int reply = prov_sasl_mechanism_challenge(handle, &challenge_bytes, &reply_bytes);

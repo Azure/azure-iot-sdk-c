@@ -517,7 +517,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[64];
-            sprintf(tmp_msg, "prov_transport_common_mqtt_create failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "prov_transport_common_mqtt_create failure in test %lu/%lu", index, count);
 
             //act
             PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io, on_transport_error, NULL);
@@ -773,7 +773,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[64];
-            sprintf(tmp_msg, "prov_transport_common_mqtt_open failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "prov_transport_common_mqtt_open failure in test %lu/%lu", index, count);
 
             int result = prov_transport_common_mqtt_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
 
@@ -1062,7 +1062,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[64];
-            sprintf(tmp_msg, "prov_transport_common_amqp_dowork failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "prov_transport_common_amqp_dowork failure in test %lu/%lu", index, count);
 
             //act
             prov_transport_common_mqtt_dowork(handle);
@@ -1559,7 +1559,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[64];
-            sprintf(tmp_msg, "prov_transport_common_mqtt_dowork failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "prov_transport_common_mqtt_dowork failure in test %lu/%lu", index, count);
 
             //act
             int result = prov_transport_common_mqtt_x509_cert(handle, TEST_X509_CERT_VALUE, TEST_PRIVATE_KEY_VALUE);
@@ -1787,7 +1787,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[64];
-            sprintf(tmp_msg, "prov_transport_common_mqtt_set_proxy failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "prov_transport_common_mqtt_set_proxy failure in test %lu/%lu", index, count);
 
             //act
             int result = prov_transport_common_mqtt_set_proxy(handle, &proxy_options);

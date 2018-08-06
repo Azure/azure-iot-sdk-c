@@ -593,7 +593,7 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[64];
-            sprintf(tmp_msg, "dev_auth_emulator_create failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "dev_auth_emulator_create failure in test %lu/%lu", index, count);
 
             CONCRETE_XDA_HANDLE handle = dev_auth_emulator_create(&test_security_info);
 
@@ -792,7 +792,7 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[64];
-            sprintf(tmp_msg, "dev_auth_emulator_create failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "dev_auth_emulator_create failure in test %lu/%lu", index, count);
 
             void* result = dev_auth_emulator_generate_credentials(handle, &dev_cred_info);
 
@@ -992,7 +992,7 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[64];
-            sprintf(tmp_msg, "dev_auth_emulator_store_data failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "dev_auth_emulator_store_data failure in test %lu/%lu", index, count);
 
             result = dev_auth_emulator_store_data(handle, TEST_DATA, TEST_DATA_LEN);
 
@@ -1122,7 +1122,7 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[64];
-            sprintf(tmp_msg, "dev_auth_emulator_retrieve_data failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "dev_auth_emulator_retrieve_data failure in test %lu/%lu", index, count);
 
             unsigned char* result = dev_auth_emulator_retrieve_data(handle, &data_len);
 

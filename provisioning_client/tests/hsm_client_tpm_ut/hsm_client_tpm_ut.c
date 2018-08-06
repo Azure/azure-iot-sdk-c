@@ -390,7 +390,7 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[64];
-            sprintf(tmp_msg, "secure_device_riot_create failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "secure_device_riot_create failure in test %lu/%lu", index, count);
 
             //act
             HSM_CLIENT_HANDLE sec_handle = hsm_client_tpm_create();
@@ -499,7 +499,7 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[64];
-            sprintf(tmp_msg, "hsm_client_tpm_import_key failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "hsm_client_tpm_import_key failure in test %lu/%lu", index, count);
 
             //act
             int import_res = hsm_client_tpm_import_key(sec_handle, TEST_IMPORT_KEY, TEST_KEY_SIZE);
@@ -597,7 +597,7 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[64];
-            sprintf(tmp_msg, "hsm_client_tpm_get_endorsement_key failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "hsm_client_tpm_get_endorsement_key failure in test %lu/%lu", index, count);
 
             int result = hsm_client_tpm_get_endorsement_key(sec_handle, &key, &key_len);
 
@@ -697,7 +697,7 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[64];
-            sprintf(tmp_msg, "hsm_client_tpm_get_storage_key failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "hsm_client_tpm_get_storage_key failure in test %lu/%lu", index, count);
 
             int result = hsm_client_tpm_get_storage_key(sec_handle, &key, &key_len);
 
@@ -856,7 +856,7 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[64];
-            sprintf(tmp_msg, "hsm_client_tpm_sign_data failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "hsm_client_tpm_sign_data failure in test %lu/%lu", index, count);
 
             //act
             int result = hsm_client_tpm_sign_data(NULL, TEST_BUFFER, TEST_BUFFER_SIZE, &key, &key_len);

@@ -393,7 +393,7 @@ TEST_FUNCTION(bulkOperation_serializeToJson_error_ie)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "BulkOperation_serializeToJson_error_ie failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "BulkOperation_serializeToJson_error_ie failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -472,7 +472,7 @@ TEST_FUNCTION(bulkOperationError_fromJson_error)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "bulkOperationError_fromJson_error failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "bulkOperationError_fromJson_error failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -554,7 +554,7 @@ TEST_FUNCTION(bulkOperationResult_deserializeFromJson_error_has_errors)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "bulkOperationResult_deserializeFromJson_error_has_errors failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "bulkOperationResult_deserializeFromJson_error_has_errors failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -622,7 +622,7 @@ TEST_FUNCTION(bulkOperationResult_deserializeFromJson_error_no_errors)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "bulkOperationResult_deserializeFromJson_error_no_errors failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "bulkOperationResult_deserializeFromJson_error_no_errors failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);

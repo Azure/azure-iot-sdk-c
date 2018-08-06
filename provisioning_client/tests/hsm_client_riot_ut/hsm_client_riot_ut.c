@@ -491,7 +491,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[64];
-            sprintf(tmp_msg, "hsm_client_riot_create failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "hsm_client_riot_create failure in test %lu/%lu", index, count);
 
             //act
             HSM_CLIENT_HANDLE sec_handle = hsm_client_riot_create();
@@ -907,7 +907,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[64];
-            sprintf(tmp_msg, "hsm_client_riot_create_leaf_cert failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "hsm_client_riot_create_leaf_cert failure in test %lu/%lu", index, count);
 
             char* value = hsm_client_riot_create_leaf_cert(sec_handle, TEST_CN_VALUE);
 

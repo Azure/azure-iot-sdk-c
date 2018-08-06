@@ -1631,7 +1631,7 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
                     {
                         if (suback->qosReturn[index] == DELIVER_FAILURE)
                         {
-                            LogError("Subscribe delivery failure of subscribe %zu", index);
+                            LogError("Subscribe delivery failure of subscribe %lu", index);
                         }
                     }
                     // The connect packet has been acked
