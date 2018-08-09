@@ -1309,6 +1309,9 @@ static void recv_message_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLI
     // Create device client
     client_connect_to_hub(deviceToUse, protocol);
 
+    // Make sure we have a connection
+    ASSERT_IS_TRUE_WITH_MSG(client_wait_for_connection_restored(), "Connection Callback has not been called");
+
     // Create receive context
     const char* msg_content;
     if (g_e2e_test_options.use_special_chars)
@@ -1398,6 +1401,9 @@ void e2e_c2d_with_svc_fault_ctrl(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, cons
 
     // Create device client
     client_connect_to_hub(deviceToUse, protocol);
+
+    // Make sure we have a connection
+    ASSERT_IS_TRUE_WITH_MSG(client_wait_for_connection_restored(), "Connection Callback has not been called");
 
     // Create receive context
     receiveUserContext = service_create_c2d(MSG_CONTENT);
