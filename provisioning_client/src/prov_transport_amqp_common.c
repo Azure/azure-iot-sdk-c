@@ -236,8 +236,9 @@ static void on_message_receiver_state_changed_callback(const void* user_ctx, MES
     }
 }
 
-static void on_amqp_send_complete(void* user_ctx, MESSAGE_SEND_RESULT send_result)
+static void on_amqp_send_complete(void* user_ctx, MESSAGE_SEND_RESULT send_result, AMQP_VALUE delivery_state)
 {
+    (void)delivery_state;
     if (user_ctx == NULL)
     {
         LogError("on_amqp_send_complete was invoked with a NULL context");

@@ -157,6 +157,7 @@ int main()
     SECURE_DEVICE_TYPE hsm_type;
     //hsm_type = SECURE_DEVICE_TYPE_TPM;
     hsm_type = SECURE_DEVICE_TYPE_X509;
+    bool traceOn = false;
 
     (void)IoTHub_Init();
     (void)prov_dev_security_init(hsm_type);
@@ -210,8 +211,7 @@ int main()
             Prov_Device_LL_SetOption(handle, OPTION_HTTP_PROXY, &http_proxy);
         }
 
-        //bool traceOn = true;
-        //Prov_Device_LL_SetOption(handle, PROV_OPTION_LOG_TRACE, &traceOn);
+        Prov_Device_LL_SetOption(handle, PROV_OPTION_LOG_TRACE, &traceOn);
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
         // Setting the Trusted Certificate.  This is only necessary on system with without
         // built in certificate stores.
@@ -277,8 +277,7 @@ int main()
             // Set any option that are neccessary.
             // For available options please see the iothub_sdk_options.md documentation
 
-            //bool traceOn = true;
-            //IoTHubDeviceClient_LL_SetOption(iothub_ll_handle, OPTION_LOG_TRACE, &traceOn);
+            IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_LOG_TRACE, &traceOn);
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
             // Setting the Trusted Certificate.  This is only necessary on system with without
