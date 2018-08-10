@@ -369,6 +369,7 @@ static uint16_t get_next_packet_id(PMQTTTRANSPORT_HANDLE_DATA transport_data)
     return transport_data->packetId;
 }
 
+#ifndef NO_LOGGING 
 static const char* retrieve_mqtt_return_codes(CONNECT_RETURN_CODE rtn_code)
 {
     switch (rtn_code)
@@ -390,6 +391,7 @@ static const char* retrieve_mqtt_return_codes(CONNECT_RETURN_CODE rtn_code)
             return "Unknown";
     }
 }
+#endif // NO_LOGGING 
 
 static int retrieve_device_method_rid_info(const char* resp_topic, STRING_HANDLE method_name, STRING_HANDLE request_id)
 {

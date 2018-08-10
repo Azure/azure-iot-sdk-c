@@ -33,7 +33,6 @@ static const char* const JSON_NODE_KEY_NAME = "keyName";
 static const char* const JSON_NODE_OPERATION_ID = "operationId";
 static const char* const JSON_NODE_ASSIGNED_HUB = "assignedHub";
 static const char* const JSON_NODE_TPM_NODE = "tpm";
-static const char* const JSON_NODE_TRACKING_ID = "trackingId";
 static const char* const JSON_NODE_DATE_TIME = "lastUpdatedDateTimeUtc";
 static const char* const JSON_NODE_ERROR_MSG = "errorMessage";
 static const char* const PROV_FAILED_STATUS = "failed";

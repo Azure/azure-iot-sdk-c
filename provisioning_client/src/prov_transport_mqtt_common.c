@@ -158,6 +158,7 @@ static void mqtt_error_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_ERR
     }
 }
 
+#ifndef NO_LOGGING
 static const char* retrieve_mqtt_return_codes(CONNECT_RETURN_CODE rtn_code)
 {
     switch (rtn_code)
@@ -179,6 +180,7 @@ static const char* retrieve_mqtt_return_codes(CONNECT_RETURN_CODE rtn_code)
         return "Unknown";
     }
 }
+#endif // NO_LOGGING
 
 static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_RESULT event_result, const void* msg_info, void* user_ctx)
 {
