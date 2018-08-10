@@ -2932,7 +2932,7 @@ TEST_FUNCTION(when_an_error_is_indicated_in_the_send_complete_callback_an_error_
     STRICT_EXPECTED_CALL(test_on_methods_error((void*)0x4242));
 
     /// act
-    g_on_message_send_complete(g_on_message_send_complete_context, MESSAGE_SEND_ERROR);
+    g_on_message_send_complete(g_on_message_send_complete_context, MESSAGE_SEND_ERROR, TEST_DELIVERY_RELEASED);
 
     /// assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -2960,7 +2960,7 @@ TEST_FUNCTION(when_no_error_is_indicated_in_the_send_complete_callback_no_error_
     umock_c_reset_all_calls();
 
     /// act
-    g_on_message_send_complete(g_on_message_send_complete_context, MESSAGE_SEND_OK);
+    g_on_message_send_complete(g_on_message_send_complete_context, MESSAGE_SEND_OK, TEST_DELIVERY_ACCEPTED);
 
     /// assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());

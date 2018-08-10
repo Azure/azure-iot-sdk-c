@@ -263,7 +263,7 @@ namespace TraceabilityTool
             string text = body.InnerText;
 
             wordprocessingDocument.Close();
-            string pattern = @"SRS_[A-Z_]+_\d{2}_\d{3}";
+            string pattern = @"SRS_[A-Z_\d]+_\d{2}_\d{3}";
 
             ExtractRequirements(filePath, pattern, text, ref reqLookup);
         }
@@ -274,7 +274,7 @@ namespace TraceabilityTool
             System.IO.StreamReader fileAsStream = new System.IO.StreamReader(filePath);
             string fileAsString = fileAsStream.ReadToEnd();
             fileAsStream.Close();
-            string pattern = @"SRS_[A-Z_]+_\d{2}_\d{3}";
+            string pattern = @"SRS_[A-Z_\d]+_\d{2}_\d{3}";
 
             ExtractRequirements(filePath, pattern, fileAsString, ref reqLookup);
         }
@@ -335,7 +335,7 @@ namespace TraceabilityTool
 
             // Look for requirement references in the format something_SRS_something_123 or SRS_something_123
             // or _something_SRS_something_123 and _SRS_something_123
-            string pattern = @"\b[A-Za-z_]*_?SRS_\w+_\d{2}_\d{3}";
+            string pattern = @"\b[A-Za-z_\d]*_?SRS_\w+_\d{2}_\d{3}";
             int lineNum = 1;  // Start counting lines from 1.
             int pos = 0;      // First character index for a regular expression match is 0.
             foreach (Match m in Regex.Matches(fileAsString, pattern))

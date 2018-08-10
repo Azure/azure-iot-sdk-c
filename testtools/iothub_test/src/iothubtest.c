@@ -28,6 +28,8 @@
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 
+#include "azure_c_shared_utility/shared_util_options.h"
+
 #include "azure_c_shared_utility/threadapi.h"
 #include "iothubtest.h"
 #include "azure_c_shared_utility/xlogging.h"
@@ -43,6 +45,9 @@
 #include "azure_uamqp_c/saslclientio.h"
 #include "azure_uamqp_c/sasl_plain.h"
 #include "azure_uamqp_c/cbs.h"
+#ifdef SET_TRUSTED_CERT
+#include "certs.h"
+#endif // SET_TRUSTED_CERT
 
 const char* AMQP_RECV_ADDRESS_FMT = "%s/ConsumerGroups/%s/Partitions/%u";
 const char* AMQP_ADDRESS_PATH_FMT = "/devices/%s/messages/deviceBound";
@@ -1122,6 +1127,10 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                 }
                 else
                 {
+#ifdef SET_TRUSTED_CERT
+                    xio_setoption(tls_io, OPTION_TRUSTED_CERT, certificates);
+#endif // SET_TRUSTED_CERT
+
                     /* create the SASL client IO using the TLS IO */
                     SASLCLIENTIO_CONFIG sasl_io_config;
                     sasl_io_config.underlying_io = tls_io;
@@ -1298,8 +1307,9 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEventForMaxDrainTime(IOTHUB_TEST_H
     return IoTHubTest_ListenForRecentEvent(devhubHandle, msgCallback, partitionCount, context, MAX_DRAIN_TIME);
 }
 
-static void on_message_send_complete(void* context, MESSAGE_SEND_RESULT send_result)
+static void on_message_send_complete(void* context, MESSAGE_SEND_RESULT send_result, AMQP_VALUE delivery_state)
 {
+    (void)delivery_state;
     MESSAGE_SEND_STATE* message_send_state = (MESSAGE_SEND_STATE*)context;
     if (send_result == MESSAGE_SEND_OK)
     {

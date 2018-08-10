@@ -1025,8 +1025,9 @@ static void invoke_callback(const void* item, const void* action_context, bool* 
     *continue_processing = true;
 }
 
-static void internal_on_event_send_complete_callback(void* context, MESSAGE_SEND_RESULT send_result)
-{ 
+static void internal_on_event_send_complete_callback(void* context, MESSAGE_SEND_RESULT send_result, AMQP_VALUE delivery_state)
+{
+    (void)delivery_state;
     if (context != NULL)
     {
         MESSENGER_SEND_EVENT_TASK* task = (MESSENGER_SEND_EVENT_TASK*)context;

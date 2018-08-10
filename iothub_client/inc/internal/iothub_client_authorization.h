@@ -4,15 +4,15 @@
 #ifndef IOTHUB_CLIENT_AUTHORIZATION_H
 #define IOTHUB_CLIENT_AUTHORIZATION_H
 
+#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_c_shared_utility/umock_c_prod.h"
+#include "azure_c_shared_utility/xio.h"
+
 #ifdef __cplusplus
 extern "C" {
 #else
 #include <stdbool.h>
 #endif /* __cplusplus */
-
-#include "azure_c_shared_utility/macro_utils.h"
-#include "azure_c_shared_utility/umock_c_prod.h"
-#include "azure_c_shared_utility/xio.h"
 
 typedef struct IOTHUB_AUTHORIZATION_DATA_TAG* IOTHUB_AUTHORIZATION_HANDLE;
 
