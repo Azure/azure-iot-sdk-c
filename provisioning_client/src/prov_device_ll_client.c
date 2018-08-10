@@ -84,7 +84,6 @@ typedef struct PROV_INSTANCE_INFO_TAG
 
     tickcounter_ms_t status_throttle;
     tickcounter_ms_t timeout_value;
-    bool first_get_status_sent;
 
     char* registration_id;
     bool user_supplied_reg_id;
@@ -642,6 +641,12 @@ PROV_DEVICE_LL_HANDLE Prov_Device_LL_Create(const char* uri, const char* id_scop
                     destroy_instance(result);
                     result = NULL;
                 }
+                else
+                {
+                    // Ensure that we are passed the throttling time and send on the first send
+                    (void)tickcounter_get_current_ms(result->tick_counter, &result->status_throttle);
+                    result->status_throttle += (PROV_GET_THROTTLE_TIME * 1000);
+                }
             }
         }
     }
@@ -843,7 +848,7 @@ void Prov_Device_LL_DoWork(PROV_DEVICE_LL_HANDLE handle)
                         prov_info->error_reason = PROV_DEVICE_RESULT_ERROR;
                         prov_info->prov_state = CLIENT_STATE_ERROR;
                     }
-                    else if (prov_info->first_get_status_sent == false || (current_time - prov_info->status_throttle) / 1000 > PROV_GET_THROTTLE_TIME)
+                    else if ( (current_time - prov_info->status_throttle) / 1000 > PROV_GET_THROTTLE_TIME)
                     {
                         /* Codes_SRS_PROV_CLIENT_07_026: [ Upon receiving the reply of the CLIENT_STATE_URL_REQ_SEND message from  iothub_client shall process the the reply of the CLIENT_STATE_URL_REQ_SEND state ] */
                         if (prov_info->prov_transport_protocol->prov_transport_get_op_status(prov_info->transport_handle) != 0)
@@ -866,7 +871,6 @@ void Prov_Device_LL_DoWork(PROV_DEVICE_LL_HANDLE handle)
                             }
                         }
                         prov_info->status_throttle = current_time;
-                        prov_info->first_get_status_sent = true;
                     }
                     break;
                 }

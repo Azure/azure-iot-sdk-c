@@ -281,7 +281,7 @@ static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE handle, void* user_ct
             {
                 // If the status code is > 429 then this is a transient error
                 long status_code = atol(topic_resp + status_pos);
-                if (status_code > PROV_STATUS_CODE_TRANSIENT_ERROR)
+                if (status_code >= PROV_STATUS_CODE_TRANSIENT_ERROR)
                 {
                     // On transient error reset the transport to send state
                     mqtt_info->transport_state = TRANSPORT_CLIENT_STATE_TRANSIENT;
