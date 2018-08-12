@@ -40,6 +40,7 @@ DEFINE_ENUM(PROV_DEVICE_REG_STATUS, PROV_DEVICE_REG_STATUS_VALUES);
 
 static const char* const PROV_REGISTRATION_ID = "registration_id";
 static const char* const PROV_OPTION_LOG_TRACE = "logtrace";
+static const char* const PROV_OPTION_TIMEOUT = "provisioning_timeout";
 
 typedef void(*PROV_DEVICE_CLIENT_REGISTER_DEVICE_CALLBACK)(PROV_DEVICE_RESULT register_result, const char* iothub_uri, const char* device_id, void* user_context);
 typedef void(*PROV_DEVICE_CLIENT_REGISTER_STATUS_CALLBACK)(PROV_DEVICE_REG_STATUS reg_status, void* user_context);

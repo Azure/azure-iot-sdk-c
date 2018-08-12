@@ -85,6 +85,8 @@ typedef struct PROV_INSTANCE_INFO_TAG
     tickcounter_ms_t status_throttle;
     tickcounter_ms_t timeout_value;
 
+    uint8_t prov_timeout;
+
     char* registration_id;
     bool user_supplied_reg_id;
 
@@ -885,13 +887,16 @@ void Prov_Device_LL_DoWork(PROV_DEVICE_LL_HANDLE handle)
                 case CLIENT_STATE_REGISTER_SENT:
                 case CLIENT_STATE_STATUS_SENT:
                 {
-                    tickcounter_ms_t current_time = 0;
-                    (void)tickcounter_get_current_ms(prov_info->tick_counter, &current_time);
-                    if ((current_time - prov_info->timeout_value) / 1000 > PROV_DEFAULT_TIMEOUT)
+                    if (prov_info->prov_timeout > 0)
                     {
-                        LogError("Timeout waiting for reply");
-                        prov_info->error_reason = PROV_DEVICE_RESULT_TIMEOUT;
-                        prov_info->prov_state = CLIENT_STATE_ERROR;
+                        tickcounter_ms_t current_time = 0;
+                        (void)tickcounter_get_current_ms(prov_info->tick_counter, &current_time);
+                        if ((current_time - prov_info->timeout_value) / 1000 > prov_info->prov_timeout)
+                        {
+                            LogError("Timeout waiting for reply");
+                            prov_info->error_reason = PROV_DEVICE_RESULT_TIMEOUT;
+                            prov_info->prov_state = CLIENT_STATE_ERROR;
+                        }
                     }
                     break;
                 }
@@ -910,13 +915,16 @@ void Prov_Device_LL_DoWork(PROV_DEVICE_LL_HANDLE handle)
         else
         {
             // Check the connection 
-            tickcounter_ms_t current_time = 0;
-            (void)tickcounter_get_current_ms(prov_info->tick_counter, &current_time);
-            if ((current_time - prov_info->timeout_value) / 1000 > PROV_DEFAULT_TIMEOUT)
+            if (prov_info->prov_timeout > 0)
             {
-                LogError("Timed out connecting to provisioning service");
-                prov_info->error_reason = PROV_DEVICE_RESULT_TIMEOUT;
-                prov_info->prov_state = CLIENT_STATE_ERROR;
+                tickcounter_ms_t current_time = 0;
+                (void)tickcounter_get_current_ms(prov_info->tick_counter, &current_time);
+                if ((current_time - prov_info->timeout_value) / 1000 > prov_info->prov_timeout)
+                {
+                    LogError("Timed out connecting to provisioning service");
+                    prov_info->error_reason = PROV_DEVICE_RESULT_TIMEOUT;
+                    prov_info->prov_state = CLIENT_STATE_ERROR;
+                }
             }
         }
     }
@@ -973,6 +981,19 @@ PROV_DEVICE_RESULT Prov_Device_LL_SetOption(PROV_DEVICE_LL_HANDLE handle, const 
                 result = PROV_DEVICE_RESULT_OK;
             }
         }
+        else if (strcmp(PROV_OPTION_TIMEOUT, option_name) == 0)
+        {
+            if (value == NULL)
+            {
+                LogError("setting proxy options");
+                result = PROV_DEVICE_RESULT_ERROR;
+            }
+            else
+            {
+                handle->prov_timeout = *((uint8_t*)value);
+                result = PROV_DEVICE_RESULT_OK;
+            }
+        }
         else if (strcmp(PROV_REGISTRATION_ID, option_name) == 0)
         {
             if (handle->prov_state != CLIENT_STATE_READY)
@@ -987,24 +1008,25 @@ PROV_DEVICE_RESULT Prov_Device_LL_SetOption(PROV_DEVICE_LL_HANDLE handle, const 
             }
             else
             {
-                if (handle->registration_id != NULL)
-                {
-                    free(handle->registration_id);
-                }
-
-                if (mallocAndStrcpy_s(&handle->registration_id, (const char*)value) != 0)
+                char* temp_reg;
+                if (mallocAndStrcpy_s(&temp_reg, (const char*)value) != 0)
                 {
                     LogError("Failure allocating setting registration id");
                     result = PROV_DEVICE_RESULT_ERROR;
                 }
-                else if (prov_auth_set_registration_id(handle->prov_auth_handle, handle->registration_id) != 0)
+                else if (prov_auth_set_registration_id(handle->prov_auth_handle, temp_reg) != 0)
                 {
                     LogError("Failure setting registration id");
-                    free(handle->registration_id);
+                    free(temp_reg);
                     result = PROV_DEVICE_RESULT_ERROR;
                 }
                 else
                 {
+                    if (handle->registration_id != NULL)
+                    {
+                        free(handle->registration_id);
+                    }
+                    handle->registration_id = temp_reg;
                     handle->user_supplied_reg_id = true;
                     result = PROV_DEVICE_RESULT_OK;
                 }
