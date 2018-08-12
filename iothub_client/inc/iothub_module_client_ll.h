@@ -27,13 +27,13 @@
 #include "azure_c_shared_utility/macro_utils.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
 
+#include "iothub_transport_ll.h"
+#include "iothub_client_core_common.h"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "iothub_transport_ll.h"
-#include "iothub_client_core_common.h"
 
 typedef struct IOTHUB_MODULE_CLIENT_LL_HANDLE_DATA_TAG* IOTHUB_MODULE_CLIENT_LL_HANDLE;
 

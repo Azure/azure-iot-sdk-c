@@ -150,6 +150,7 @@ static SINGLYLINKEDLIST_HANDLE TEST_IN_PROGRESS_LIST;
 #define TEST_OPTIONHANDLER_HANDLE                         (OPTIONHANDLER_HANDLE)0x4485
 #define TEST_CALLBACK_LIST1                               (SINGLYLINKEDLIST_HANDLE)0x4486
 #define INDEFINITE_TIME                                   ((time_t)-1)
+#define TEST_DISPOSITION_AMQP_VALUE                       (AMQP_VALUE)0x4487
 
 static delivery_number TEST_DELIVERY_NUMBER;
 
@@ -2737,7 +2738,7 @@ static void test_send_events_for_callbacks(MESSAGE_SEND_RESULT message_send_resu
     // act
     ASSERT_IS_NOT_NULL(saved_messagesender_send_on_message_send_complete);
 
-    saved_messagesender_send_on_message_send_complete(saved_messagesender_send_callback_context, message_send_result);
+    saved_messagesender_send_on_message_send_complete(saved_messagesender_send_callback_context, message_send_result, TEST_DISPOSITION_AMQP_VALUE);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());

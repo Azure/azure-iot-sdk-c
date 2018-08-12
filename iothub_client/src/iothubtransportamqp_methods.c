@@ -248,8 +248,9 @@ static void on_message_sender_state_changed(void* context, MESSAGE_SENDER_STATE 
     }
 }
 
-static void on_message_send_complete(void* context, MESSAGE_SEND_RESULT send_result)
+static void on_message_send_complete(void* context, MESSAGE_SEND_RESULT send_result, AMQP_VALUE delivery_state)
 {
+    (void)delivery_state;
     /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_084: [ Otherwise no action shall be taken. ]*/
     if (send_result == MESSAGE_SEND_ERROR)
     {

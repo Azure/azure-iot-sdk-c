@@ -2053,7 +2053,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         MESSAGE_SEND_RESULT send_result = MESSAGE_SEND_OK;
 
         ///act
-        onMessageSendCompleteCallback((void*)NULL, send_result);
+        onMessageSendCompleteCallback((void*)NULL, send_result, TEST_AMQP_VALUE);
 
         ///assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -2081,7 +2081,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         test_handle->callback_data->sendCompleteCallback = NULL;
 
         ///act
-        onMessageSendCompleteCallback((void*)test_handle, send_result);
+        onMessageSendCompleteCallback((void*)test_handle, send_result, TEST_AMQP_VALUE);
 
         ///assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -2098,7 +2098,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         ///arrange
         IOTHUB_MESSAGING_HANDLE iothub_messaging_handle = IoTHubMessaging_LL_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
         (void)IoTHubMessaging_LL_Open(iothub_messaging_handle, TEST_FUNC_IOTHUB_OPEN_COMPLETE_CALLBACK, (void*)1);
-        /* If modules are re-enabled, re-enable this code and add testing_module paramater to this function                
+        /* If modules are re-enabled, re-enable this code and add testing_module paramater to this function
         if (testing_module == true)
         {
             (void)IoTHubMessaging_LL_SendModule(iothub_messaging_handle, TEST_DEVICE_ID, TEST_MODULE_ID, TEST_IOTHUB_MESSAGE_HANDLE, TEST_FUNC_IOTHUB_SEND_COMPLETE_CALLBACK, (void*)1);
@@ -2114,7 +2114,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         MESSAGE_SEND_RESULT send_result = MESSAGE_SEND_OK;
 
         ///act
-        onMessageSendCompleteCallback((void*)iothub_messaging_handle, send_result);
+        onMessageSendCompleteCallback((void*)iothub_messaging_handle, send_result, TEST_AMQP_VALUE);
 
         ///assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());

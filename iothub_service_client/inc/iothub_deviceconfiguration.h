@@ -6,17 +6,17 @@
 #ifndef IOTHUB_DEVICECONFIGURATION_H
 #define IOTHUB_DEVICECONFIGURATION_H
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/singlylinkedlist.h"
 #include <time.h>
 #include "iothub_service_client_auth.h"
 
 #include "azure_c_shared_utility/umock_c_prod.h"
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 #define IOTHUB_DEVICE_CONFIGURATION_RESULT_VALUES \
     IOTHUB_DEVICE_CONFIGURATION_OK,                      \
