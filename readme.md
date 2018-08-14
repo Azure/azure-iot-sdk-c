@@ -108,6 +108,7 @@ The minimum requirements are for the device platform to support the following:
 - **Have a Real Time Clock or implement code to connect to an NTP server**: necessary for both establishing the TLS connection and generating the secure token for authentication.
 - **Having at least 64KB of RAM**: the memory footprint of the SDK depends on the SDK and protocol used as well as the platform targeted. The smallest footprint is achieved targeting microcontrollers.
 
+Platform support details can be found in [this document](https://docs.microsoft.com/azure/iot-hub/iot-hub-device-sdk-platform-support).
 You can find an exhaustive list of the OS platforms the various SDKs have been tested against in the [Azure Certified for IoT device catalog](https://catalog.azureiotsuite.com/). Note that you might still be able to use the SDKs on OS and hardware platforms that are not listed on this page: all the SDKs are open sourced and designed to be portable. If you have suggestions, feedback or issues to report, refer to the Contribution and Support sections below.
 
 ## Porting the Azure IoT Device Client SDK for C to New Devices
