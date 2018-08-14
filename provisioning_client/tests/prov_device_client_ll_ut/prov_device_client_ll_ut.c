@@ -555,6 +555,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         STRICT_EXPECTED_CALL(tickcounter_create());
         STRICT_EXPECTED_CALL(prov_auth_get_type(IGNORED_PTR_ARG)).SetReturn(type);
         STRICT_EXPECTED_CALL(prov_transport_create(IGNORED_PTR_ARG, type == PROV_AUTH_TYPE_TPM ? TRANSPORT_HSM_TYPE_TPM : TRANSPORT_HSM_TYPE_X509, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     }
 
     static void setup_Prov_Device_LL_Register_Device_mocks(bool tpm)
@@ -729,7 +730,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
 
         umock_c_negative_tests_snapshot();
 
-        size_t calls_cannot_fail[] = { 4 };
+        size_t calls_cannot_fail[] = { 4, 6 };
 
         //act
         size_t count = umock_c_negative_tests_call_count();
