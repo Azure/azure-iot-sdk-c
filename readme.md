@@ -12,6 +12,7 @@ This repository contains the following:
   * mbed:                                      [Device SDK library on MBED](./iothub_client/readme.md#mbed)
   * Arduino:                                   [Device SDK library in the Arduino IDE](./iothub_client/readme.md#arduino)
   * Windows:                                   [Device SDK on NuGet](./iothub_client/readme.md#nugetpackage)
+  * iOS:                                       [Device SDK on CocoaPod](https://cocoapods.org/pods/AzureIoTHubClient)
 
 ## Samples
   Here are a set of simple samples that will help you get started:
