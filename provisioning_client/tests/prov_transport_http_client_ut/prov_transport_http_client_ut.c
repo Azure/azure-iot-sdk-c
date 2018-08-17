@@ -115,6 +115,7 @@ static const char* TEST_JSON_CONTENT = "{test json content}";
 #define TEST_JSON_CONTENT_LEN       19
 #define TEST_SUCCESS_STATUS_CODE    204
 #define TEST_FAILURE_STATUS_CODE    501
+#define TEST_THROTTLE_STATUS_CODE   429
 #define TEST_STRING_VALUE_LEN       17
 #define HTTP_STATUS_CODE_UNAUTHORIZED   401
 
@@ -1082,6 +1083,27 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
 
         //act
         g_on_http_reply_recv(g_http_execute_ctx, HTTP_CALLBACK_REASON_OK, (const unsigned char*)TEST_JSON_CONTENT, TEST_JSON_CONTENT_LEN, TEST_FAILURE_STATUS_CODE, TEST_HTTP_HANDLE_VALUE);
+
+        //assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        (void)prov_dev_http_transport_close(handle);
+        prov_dev_http_transport_destroy(handle);
+    }
+
+    TEST_FUNCTION(prov_transport_http_reply_recv_transient_throttle_error_succeed)
+    {
+        //arrange
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
+        (void)prov_dev_http_transport_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
+        (void)prov_dev_http_transport_register_device(handle, on_transport_challenge_callback, NULL, on_transport_json_parse, NULL);
+        g_on_http_open(g_http_open_ctx, HTTP_CALLBACK_REASON_OK);
+        prov_dev_http_transport_dowork(handle);
+        umock_c_reset_all_calls();
+
+        //act
+        g_on_http_reply_recv(g_http_execute_ctx, HTTP_CALLBACK_REASON_OK, (const unsigned char*)TEST_JSON_CONTENT, TEST_JSON_CONTENT_LEN, TEST_THROTTLE_STATUS_CODE, TEST_HTTP_HANDLE_VALUE);
 
         //assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());

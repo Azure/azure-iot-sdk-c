@@ -173,7 +173,7 @@ static void on_http_reply_recv(void* callback_ctx, HTTP_CALLBACK_REASON request_
                 }
             }
         }
-        else if (status_code > PROV_STATUS_CODE_TRANSIENT_ERROR)
+        else if (status_code >= PROV_STATUS_CODE_TRANSIENT_ERROR)
         {
             // On transient error reset the transport to send state
             http_info->transport_state = TRANSPORT_CLIENT_STATE_TRANSIENT;
