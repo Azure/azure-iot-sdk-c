@@ -31,17 +31,12 @@ static const char* AMQP_ADDRESS_FMT = "amqps://%s/%s/registrations/%s";
 static const char* KEY_NAME_VALUE = "registration";
 
 static const char* AMQP_REGISTER_ME = "iotdps-register";
-static const char* AMQP_WHO_AM_I = "iotdps-get-registration";
 static const char* AMQP_OPERATION_STATUS = "iotdps-get-operationstatus";
 
 static const char* AMQP_API_VERSION_KEY = "com.microsoft:api-version";
 
 static const char* AMQP_OP_TYPE_PROPERTY = "iotdps-operation-type";
-static const char* AMQP_STATUS = "iotdps-status";
 static const char* AMQP_OPERATION_ID = "iotdps-operation-id";
-static const char* AMQP_IOTHUB_URI = "iotdps-assigned-hub";
-static const char* AMQP_DEVICE_ID = "iotdps-device-id";
-static const char* AMQP_AUTH_KEY = "iotdps-auth-key";
 
 typedef enum AMQP_TRANSPORT_STATE_TAG
 {
