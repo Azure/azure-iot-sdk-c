@@ -2192,7 +2192,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetOption(IOTHUB_CLIENT_CORE_LL_HANDLE 
                 result = IOTHUB_CLIENT_OK;
             }
         }
-        else if (strcmp(optionName, OPTION_BLOB_UPLOAD_TIMEOUT_SECS) == 0)
+        else if ((strcmp(optionName, OPTION_BLOB_UPLOAD_TIMEOUT_SECS) == 0) || (strcmp(optionName, OPTION_CURL_VERBOSE) == 0))
         {
 #ifndef DONT_USE_UPLOADTOBLOB
             // This option just gets passed down into IoTHubClientCore_LL_UploadToBlob
@@ -2200,10 +2200,10 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetOption(IOTHUB_CLIENT_CORE_LL_HANDLE 
             result = IoTHubClient_LL_UploadToBlob_SetOption(handleData->uploadToBlobHandle, optionName, value);
             if(result != IOTHUB_CLIENT_OK)
             {
-                LogError("unable to IoTHubClientCore_LL_UploadToBlob_SetOption");
+                LogError("unable to IoTHubClientCore_LL_UploadToBlob_SetOption, result=%d", result);
             }
 #else
-            LogError("OPTION_BLOB_TRANSFER_TIMEOUT option being set with DONT_USE_UPLOADTOBLOB compiler switch");
+            LogError("%s option being set with DONT_USE_UPLOADTOBLOB compiler switch", optionName);
             result = IOTHUB_CLIENT_ERROR;
 #endif /*DONT_USE_UPLOADTOBLOB*/
         }

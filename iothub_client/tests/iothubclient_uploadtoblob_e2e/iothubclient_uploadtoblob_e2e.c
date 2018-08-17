@@ -17,6 +17,8 @@
 #include "azure_c_shared_utility/lock.h"
 #include "../../../certs/certs.h"
 #include "azure_c_shared_utility/xlogging.h"
+#include "azure_c_shared_utility/shared_util_options.h"
+
 
 #ifdef TEST_MQTT
 #include "iothubtransportmqtt.h"
@@ -213,6 +215,12 @@ void e2e_uploadtoblob_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACC
         result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
         ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
     }
+
+#if defined(__APPLE__) || defined(AZIOT_LINUX)
+    bool curl_verbose = true;
+    result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_CURL_VERBOSE, &curl_verbose);
+    ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set curl_verbose opt");
+#endif
 
     UPLOADTOBLOB_CALLBACK_STATUS uploadToBlobStatus = UPLOADTOBLOB_CALLBACK_PENDING;
     result = IoTHubClient_UploadToBlobAsync(iotHubClientHandle, UPLOADTOBLOB_E2E_TEST_DESTINATION_FILE, UPLOADTOBLOB_E2E_TEST_DATA, strlen((const char*)UPLOADTOBLOB_E2E_TEST_DATA), uploadToBlobCallback, &uploadToBlobStatus);
