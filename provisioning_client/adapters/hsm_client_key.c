@@ -19,14 +19,14 @@ typedef struct HSM_CLIENT_KEY_INFO_TAG
     const char* registration_name;
 } HSM_CLIENT_KEY_INFO;
 
-int hsm_client_key_init(void)
+/*int hsm_client_key_init(void)
 {
     return 0;
 }
 
 void hsm_client_key_deinit(void)
 {
-}
+}*/
 
 HSM_CLIENT_HANDLE hsm_client_key_create(void)
 {

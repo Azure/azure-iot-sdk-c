@@ -1096,8 +1096,8 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
     {
         //arrange
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
-        (void)prov_dev_http_transport_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL);
-        (void)prov_dev_http_transport_register_device(handle, on_transport_challenge_callback, NULL, on_transport_json_parse, NULL);
+        (void)prov_dev_http_transport_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
+        (void)prov_dev_http_transport_register_device(handle, on_transport_json_parse, NULL);
         g_on_http_open(g_http_open_ctx, HTTP_CALLBACK_REASON_OK);
         prov_dev_http_transport_dowork(handle);
         umock_c_reset_all_calls();

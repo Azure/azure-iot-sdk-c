@@ -84,8 +84,8 @@ extern int hsm_client_x509_init();
 extern void hsm_client_x509_deinit();
 extern int hsm_client_tpm_init();
 extern void hsm_client_tpm_deinit();
-extern int hsm_client_key_init();
-extern void hsm_client_key_deinit();
+//extern int hsm_client_key_init();
+//extern void hsm_client_key_deinit();
 
 #ifdef HSM_TYPE_HTTP_EDGE
 extern int hsm_client_http_edge_init();
