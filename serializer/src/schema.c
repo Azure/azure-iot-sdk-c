@@ -326,7 +326,7 @@ static SCHEMA_RESULT AddModelProperty(SCHEMA_MODEL_TYPE_HANDLE_DATA* modelType, 
                 }
 
                 /* If possible, reduce the memory of over allocation */
-                if (result != SCHEMA_OK)
+                if ((result != SCHEMA_OK) && (modelType->PropertyCount > 0))
                 {
                     SCHEMA_PROPERTY_HANDLE* oldProperties = (SCHEMA_PROPERTY_HANDLE*)realloc(modelType->Properties, sizeof(SCHEMA_PROPERTY_HANDLE) * modelType->PropertyCount);
                     if (oldProperties == NULL)
@@ -916,7 +916,7 @@ SCHEMA_ACTION_HANDLE Schema_CreateModelAction(SCHEMA_MODEL_TYPE_HANDLE modelType
                     }
 
                     /* If possible, reduce the memory of over allocation */
-                    if (result == NULL)
+                    if ((result == NULL) && (modelType->ActionCount > 0))
                     {
                         SCHEMA_ACTION_HANDLE* oldActions = (SCHEMA_ACTION_HANDLE*)realloc(modelType->Actions, sizeof(SCHEMA_ACTION_HANDLE) * modelType->ActionCount);
                         if (oldActions == NULL)
@@ -1067,6 +1067,8 @@ SCHEMA_RESULT Schema_AddModelActionArgument(SCHEMA_ACTION_HANDLE actionHandle, c
             else
             {
                 SCHEMA_ACTION_ARGUMENT_HANDLE_DATA* newActionArgument;
+
+                action->ArgumentHandles = newArguments;
                 if ((newActionArgument = (SCHEMA_ACTION_ARGUMENT_HANDLE_DATA*)malloc(sizeof(SCHEMA_ACTION_ARGUMENT_HANDLE_DATA))) == NULL)
                 {
                     /* Codes_SRS_SCHEMA_99_112: [On any other error, Schema_ AddModelActionArgumet shall return SCHEMA_ERROR.] */
@@ -1103,7 +1105,7 @@ SCHEMA_RESULT Schema_AddModelActionArgument(SCHEMA_ACTION_HANDLE actionHandle, c
                 }
 
                 /* If possible, reduce the memory of over allocation */
-                if (result == SCHEMA_ERROR)
+                if ((result == SCHEMA_ERROR) && (action->ArgumentCount > 0))
                 {
                     SCHEMA_ACTION_ARGUMENT_HANDLE* oldArguments = (SCHEMA_ACTION_ARGUMENT_HANDLE*)realloc(action->ArgumentHandles, sizeof(SCHEMA_ACTION_ARGUMENT_HANDLE) * action->ArgumentCount);
                     if (oldArguments == NULL)
@@ -1805,7 +1807,7 @@ SCHEMA_STRUCT_TYPE_HANDLE Schema_CreateStructType(SCHEMA_HANDLE schemaHandle, co
                 }
 
                 /* If possible, reduce the memory of over allocation */
-                if (result == NULL)
+                if ((result == NULL) && (schema->StructTypeCount > 0))
                 {
                     SCHEMA_STRUCT_TYPE_HANDLE* oldStructTypes = (SCHEMA_STRUCT_TYPE_HANDLE*)realloc(schema->StructTypes, sizeof(SCHEMA_STRUCT_TYPE_HANDLE) * schema->StructTypeCount);
                     if (oldStructTypes == NULL)
@@ -2009,7 +2011,7 @@ SCHEMA_RESULT Schema_AddStructTypeProperty(SCHEMA_STRUCT_TYPE_HANDLE structTypeH
                 }
 
                 /* If possible, reduce the memory of over allocation */
-                if (result != SCHEMA_OK)
+                if ((result != SCHEMA_OK) && (structType->PropertyCount > 0))
                 {
                     SCHEMA_PROPERTY_HANDLE* oldProperties = (SCHEMA_PROPERTY_HANDLE*)realloc(structType->Properties, sizeof(SCHEMA_PROPERTY_HANDLE) * structType->PropertyCount);
                     if (oldProperties == NULL)
