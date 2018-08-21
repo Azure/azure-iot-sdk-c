@@ -27,6 +27,9 @@ target_link_libraries(iothub_client_sample_http
     iothub_client
     iothub_client_http_transport
     aziotsharedutil
+    prov_auth_client
+    hsm_security_client
+    uhttp
     pthread
     curl
     ssl
