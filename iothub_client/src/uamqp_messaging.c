@@ -814,7 +814,6 @@ static int readCorrelationIdFromuAQMPMessage(IOTHUB_MESSAGE_HANDLE iothub_messag
                     // Codes_SRS_UAMQP_MESSAGING_09_023: [If correlation-id fails to be obtained, message_create_IoTHubMessage_from_uamqp_message() shall fail and return immediately.] 
                     LogError("Failed to get value of uAMQP message 'correlation-id' property (string)");
                     string_value = NULL;
-                    result = __FAILURE__;
                 }
             }
             else if (value_type == AMQP_TYPE_ULONG)
@@ -827,13 +826,11 @@ static int readCorrelationIdFromuAQMPMessage(IOTHUB_MESSAGE_HANDLE iothub_messag
                     // Codes_SRS_UAMQP_MESSAGING_09_023: [If correlation-id fails to be obtained, message_create_IoTHubMessage_from_uamqp_message() shall fail and return immediately.] 
                     LogError("Failed to get value of uAMQP message 'correlation-id' property (ulong)");
                     string_value = NULL;
-                    result = __FAILURE__;
                 }
                 else if (sprintf(string_buffer, "%" PRIu64, ulong_value) < 0)
                 {
                     LogError("Failed converting 'correlation-id' (ulong) to string");
                     string_value = NULL;
-                    result = __FAILURE__;
                 }
                 else
                 {
@@ -850,14 +847,12 @@ static int readCorrelationIdFromuAQMPMessage(IOTHUB_MESSAGE_HANDLE iothub_messag
                     // Codes_SRS_UAMQP_MESSAGING_09_023: [If correlation-id fails to be obtained, message_create_IoTHubMessage_from_uamqp_message() shall fail and return immediately.] 
                     LogError("Failed to get value of uAMQP message 'correlation-id' property (UUID)");
                     string_value = NULL;
-                    result = __FAILURE__;
                 }
                 else if ((string_value = UUID_to_string((UUID*)uuid_value)) == NULL)
                 {
                     // Codes_SRS_UAMQP_MESSAGING_09_023: [If correlation-id fails to be obtained, message_create_IoTHubMessage_from_uamqp_message() shall fail and return immediately.] 
                     LogError("Failed to get the string representation of 'correlation-id' UUID");
                     string_value = NULL;
-                    result = __FAILURE__;
                 }
                 else
                 {
@@ -868,7 +863,6 @@ static int readCorrelationIdFromuAQMPMessage(IOTHUB_MESSAGE_HANDLE iothub_messag
             {
                 LogError("Unrecognized type for correlation-id (%d)", value_type);
                 string_value = NULL;
-                result = __FAILURE__;
             }
 
             if (string_value != NULL)

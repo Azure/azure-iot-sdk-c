@@ -141,6 +141,7 @@ static IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* prepare_message_diagnostic_data(
                 LogError("Failed getting current time");
                 free(result->diagnosticId);
                 free(result);
+                free(timeBuffer);
                 result = NULL;
             }
             else
