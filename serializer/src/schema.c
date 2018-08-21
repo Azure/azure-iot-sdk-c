@@ -1066,6 +1066,8 @@ SCHEMA_RESULT Schema_AddModelActionArgument(SCHEMA_ACTION_HANDLE actionHandle, c
             }
             else
             {
+                action->ArgumentHandles = newArguments;
+
                 SCHEMA_ACTION_ARGUMENT_HANDLE_DATA* newActionArgument;
                 if ((newActionArgument = (SCHEMA_ACTION_ARGUMENT_HANDLE_DATA*)malloc(sizeof(SCHEMA_ACTION_ARGUMENT_HANDLE_DATA))) == NULL)
                 {
@@ -1092,7 +1094,6 @@ SCHEMA_RESULT Schema_AddModelActionArgument(SCHEMA_ACTION_HANDLE actionHandle, c
                     }
                     else
                     {
-                        action->ArgumentHandles = newArguments;
                         /* Codes_SRS_SCHEMA_99_119: [Schema_AddModelActionArgument shall preserve the order of the action arguments according to the order in which they were added, starting with index 0 for the first added argument.] */
                         action->ArgumentHandles[action->ArgumentCount] = newActionArgument;
                         action->ArgumentCount++;
