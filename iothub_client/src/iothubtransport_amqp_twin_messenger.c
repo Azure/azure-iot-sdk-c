@@ -900,7 +900,7 @@ static void on_amqp_send_complete_callback(AMQP_MESSENGER_SEND_RESULT result, AM
 					callback_result = get_twin_messenger_result_from(result);
 					callback_reason = get_twin_messenger_reason_from(reason);
 
-					twin_op_ctx->on_report_state_complete_callback(TWIN_REPORT_STATE_RESULT_ERROR, TWIN_REPORT_STATE_REASON_NONE, 0, (void*)twin_op_ctx->on_report_state_complete_context);
+					twin_op_ctx->on_report_state_complete_callback(callback_result, callback_reason, 0, (void*)twin_op_ctx->on_report_state_complete_context);
 				}
 			}
 			else if (reason != AMQP_MESSENGER_REASON_MESSENGER_DESTROYED)
@@ -982,7 +982,6 @@ static bool remove_expired_twin_patch_request(const void* item, const void* matc
 	if (item == NULL || match_context == NULL || continue_processing == NULL)
 	{
 		LogError("Invalid argument (item=%p, match_context=%p, continue_processing=%p)", item, match_context, continue_processing);
-		*continue_processing = false;
 		remove_item = false;
 	}
 	else
@@ -1021,7 +1020,6 @@ static bool remove_expired_twin_operation_request(const void* item, const void* 
 	if (item == NULL || match_context == NULL || continue_processing == NULL)
 	{
 		LogError("Invalid argument (item=%p, match_context=%p, continue_processing=%p)", item, match_context, continue_processing);
-		*continue_processing = false;
 		result = false;
 	}
 	else
@@ -1107,7 +1105,6 @@ static bool send_pending_twin_patch(const void* item, const void* match_context,
 	if (item == NULL || match_context == NULL || continue_processing == NULL)
 	{
 		LogError("Invalid argument (item=%p, match_context=%p, continue_processing=%p)", item, match_context, continue_processing);
-		*continue_processing = false;
 		result = false;
 	}
 	else
@@ -1243,7 +1240,6 @@ static bool cancel_all_pending_twin_operations(const void* item, const void* mat
 	if (item == NULL || continue_processing == NULL)
 	{
 		LogError("Invalid argument (item=%p, continue_processing=%p)", item, continue_processing);
-		*continue_processing = false;
 		result = false;
 	}
 	else
@@ -1542,8 +1538,8 @@ static AMQP_MESSENGER_DISPOSITION_RESULT on_amqp_message_received_callback(MESSA
 					if (singlylinkedlist_remove(twin_msgr->operations, list_item) != 0)
 					{
 						// Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_093: [The corresponding TWIN request failed to be removed from `twin_msgr->operations`, `twin_msgr->state` shall be set to TWIN_MESSENGER_STATE_ERROR and informed to the user]  
-						LogError("Failed removing context for incoming TWIN message (%s, %s, %s)",
-							twin_msgr->device_id, ENUM_TO_STRING(TWIN_OPERATION_TYPE, twin_op_ctx->type), correlation_id);
+						LogError("Failed removing context for incoming TWIN message (%s, %s)",
+							twin_msgr->device_id, correlation_id);
 						
 						update_state(twin_msgr, TWIN_MESSENGER_STATE_ERROR);
 					}
