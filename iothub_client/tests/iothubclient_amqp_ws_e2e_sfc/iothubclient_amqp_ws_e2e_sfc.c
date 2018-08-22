@@ -24,7 +24,6 @@ BEGIN_TEST_SUITE(iothubclient_amqp_ws_e2e_sfc)
     //***********************************************************
     // D2C
     //***********************************************************
-    //// FAIL - only on Linux
     TEST_FUNCTION(IoTHub_AMQP_WS_e2e_d2c_svc_fault_ctrl_kill_Tcp)
     {
         e2e_d2c_svc_fault_ctrl_kill_TCP_connection_with_transport_status_check(AMQP_Protocol_over_WebSocketsTls);
