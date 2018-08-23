@@ -326,13 +326,20 @@ static SCHEMA_RESULT AddModelProperty(SCHEMA_MODEL_TYPE_HANDLE_DATA* modelType, 
                 }
 
                 /* If possible, reduce the memory of over allocation */
-                if ((result != SCHEMA_OK) && (modelType->PropertyCount > 0))
+                if (result != SCHEMA_OK)
                 {
-                    SCHEMA_PROPERTY_HANDLE* oldProperties = (SCHEMA_PROPERTY_HANDLE*)realloc(modelType->Properties, sizeof(SCHEMA_PROPERTY_HANDLE) * modelType->PropertyCount);
-                    if (oldProperties == NULL)
+                    if (modelType->PropertyCount > 0)
                     {
-                        result = SCHEMA_ERROR;
-                        LogError("(result = %s)", ENUM_TO_STRING(SCHEMA_RESULT, result));
+                        SCHEMA_PROPERTY_HANDLE *oldProperties = (SCHEMA_PROPERTY_HANDLE *)realloc(modelType->Properties, sizeof(SCHEMA_PROPERTY_HANDLE) * modelType->PropertyCount);
+                        if (oldProperties == NULL)
+                        {
+                            result = SCHEMA_ERROR;
+                            LogError("(result = %s)", ENUM_TO_STRING(SCHEMA_RESULT, result));
+                        }
+                        else
+                        {
+                            modelType->Properties = oldProperties;
+                        }
                     }
                     else
                     {
@@ -916,12 +923,19 @@ SCHEMA_ACTION_HANDLE Schema_CreateModelAction(SCHEMA_MODEL_TYPE_HANDLE modelType
                     }
 
                     /* If possible, reduce the memory of over allocation */
-                    if ((result == NULL) && (modelType->ActionCount > 0))
+                    if (result == NULL)
                     {
-                        SCHEMA_ACTION_HANDLE* oldActions = (SCHEMA_ACTION_HANDLE*)realloc(modelType->Actions, sizeof(SCHEMA_ACTION_HANDLE) * modelType->ActionCount);
-                        if (oldActions == NULL)
+                        if (modelType->ActionCount > 0)
                         {
-                            LogError("(Error code:%s)", ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
+                            SCHEMA_ACTION_HANDLE *oldActions = (SCHEMA_ACTION_HANDLE *)realloc(modelType->Actions, sizeof(SCHEMA_ACTION_HANDLE) * modelType->ActionCount);
+                            if (oldActions == NULL)
+                            {
+                                LogError("(Error code:%s)", ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
+                            }
+                            else
+                            {
+                                modelType->Actions = oldActions;
+                            }
                         }
                         else
                         {
@@ -1106,12 +1120,19 @@ SCHEMA_RESULT Schema_AddModelActionArgument(SCHEMA_ACTION_HANDLE actionHandle, c
                 }
 
                 /* If possible, reduce the memory of over allocation */
-                if ((result == SCHEMA_ERROR) && (action->ArgumentCount > 0))
+                if (result == SCHEMA_ERROR)
                 {
-                    SCHEMA_ACTION_ARGUMENT_HANDLE* oldArguments = (SCHEMA_ACTION_ARGUMENT_HANDLE*)realloc(action->ArgumentHandles, sizeof(SCHEMA_ACTION_ARGUMENT_HANDLE) * action->ArgumentCount);
-                    if (oldArguments == NULL)
+                    if (action->ArgumentCount > 0)
                     {
-                        LogError("(result = %s)", ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
+                        SCHEMA_ACTION_ARGUMENT_HANDLE *oldArguments = (SCHEMA_ACTION_ARGUMENT_HANDLE *)realloc(action->ArgumentHandles, sizeof(SCHEMA_ACTION_ARGUMENT_HANDLE) * action->ArgumentCount);
+                        if (oldArguments == NULL)
+                        {
+                            LogError("(result = %s)", ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
+                        }
+                        else
+                        {
+                            action->ArgumentHandles = oldArguments;
+                        }
                     }
                     else
                     {
@@ -1808,13 +1829,20 @@ SCHEMA_STRUCT_TYPE_HANDLE Schema_CreateStructType(SCHEMA_HANDLE schemaHandle, co
                 }
 
                 /* If possible, reduce the memory of over allocation */
-                if ((result == NULL) && (schema->StructTypeCount > 0))
+                if (result == NULL)
                 {
-                    SCHEMA_STRUCT_TYPE_HANDLE* oldStructTypes = (SCHEMA_STRUCT_TYPE_HANDLE*)realloc(schema->StructTypes, sizeof(SCHEMA_STRUCT_TYPE_HANDLE) * schema->StructTypeCount);
-                    if (oldStructTypes == NULL)
+                    if (schema->StructTypeCount > 0)
                     {
-                        result = NULL;
-                        LogError("(Error code:%s)", ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
+                        SCHEMA_STRUCT_TYPE_HANDLE *oldStructTypes = (SCHEMA_STRUCT_TYPE_HANDLE *)realloc(schema->StructTypes, sizeof(SCHEMA_STRUCT_TYPE_HANDLE) * schema->StructTypeCount);
+                        if (oldStructTypes == NULL)
+                        {
+                            result = NULL;
+                            LogError("(Error code:%s)", ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
+                        }
+                        else
+                        {
+                            schema->StructTypes = oldStructTypes;
+                        }
                     }
                     else
                     {
@@ -2012,13 +2040,20 @@ SCHEMA_RESULT Schema_AddStructTypeProperty(SCHEMA_STRUCT_TYPE_HANDLE structTypeH
                 }
 
                 /* If possible, reduce the memory of over allocation */
-                if ((result != SCHEMA_OK) && (structType->PropertyCount > 0))
+                if (result != SCHEMA_OK)
                 {
-                    SCHEMA_PROPERTY_HANDLE* oldProperties = (SCHEMA_PROPERTY_HANDLE*)realloc(structType->Properties, sizeof(SCHEMA_PROPERTY_HANDLE) * structType->PropertyCount);
-                    if (oldProperties == NULL)
+                    if (structType->PropertyCount > 0)
                     {
-                        result = SCHEMA_ERROR;
-                        LogError("(result = %s)", ENUM_TO_STRING(SCHEMA_RESULT, result));
+                        SCHEMA_PROPERTY_HANDLE *oldProperties = (SCHEMA_PROPERTY_HANDLE *)realloc(structType->Properties, sizeof(SCHEMA_PROPERTY_HANDLE) * structType->PropertyCount);
+                        if (oldProperties == NULL)
+                        {
+                            result = SCHEMA_ERROR;
+                            LogError("(result = %s)", ENUM_TO_STRING(SCHEMA_RESULT, result));
+                        }
+                        else
+                        {
+                            structType->Properties = oldProperties;
+                        }
                     }
                     else
                     {
