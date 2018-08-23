@@ -185,18 +185,18 @@ static int deviceMethodCallback(const char* method_name, const unsigned char* pa
 
     if (strcmp("getCarVIN", method_name) == 0)
     {
-        const char* deviceMethodResponse = "{ \"Response\": \"1HGCM82633A004352\" }";
-        *response_size = sizeof(deviceMethodResponse);
-        *response = malloc(sizeof(*response_size));
+        const char deviceMethodResponse[] = "{ \"Response\": \"1HGCM82633A004352\" }";
+        *response_size = sizeof(deviceMethodResponse)-1;
+        *response = malloc(*response_size);
         (void)memcpy(*response, deviceMethodResponse, *response_size);
         result = 200;
     }
     else
     {
         // All other entries are ignored.
-        const char* deviceMethodResponse = "{ }";
-        *response_size = sizeof(deviceMethodResponse);
-        *response = malloc(sizeof(*response_size));
+        const char deviceMethodResponse[] = "{ }";
+        *response_size = sizeof(deviceMethodResponse)-1;
+        *response = malloc(*response_size);
         (void)memcpy(*response, deviceMethodResponse, *response_size);
         result = -1;
     }
