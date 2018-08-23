@@ -343,7 +343,7 @@ static SCHEMA_RESULT AddModelProperty(SCHEMA_MODEL_TYPE_HANDLE_DATA* modelType, 
                     }
                     else
                     {
-                        modelType->Properties = oldProperties;
+                        modelType->Properties = NULL;
                     }
                 }
             }
@@ -939,7 +939,7 @@ SCHEMA_ACTION_HANDLE Schema_CreateModelAction(SCHEMA_MODEL_TYPE_HANDLE modelType
                         }
                         else
                         {
-                            modelType->Actions = oldActions;
+                            modelType->Actions = NULL;
                         }
                     }
                 }
@@ -1136,7 +1136,7 @@ SCHEMA_RESULT Schema_AddModelActionArgument(SCHEMA_ACTION_HANDLE actionHandle, c
                     }
                     else
                     {
-                        action->ArgumentHandles = oldArguments;
+                        action->ArgumentHandles = NULL;
                     }
                 }
             }
@@ -1846,7 +1846,7 @@ SCHEMA_STRUCT_TYPE_HANDLE Schema_CreateStructType(SCHEMA_HANDLE schemaHandle, co
                     }
                     else
                     {
-                        schema->StructTypes = oldStructTypes;
+                        schema->StructTypes = NULL;
                     }
                 }
             }
@@ -2057,7 +2057,7 @@ SCHEMA_RESULT Schema_AddStructTypeProperty(SCHEMA_STRUCT_TYPE_HANDLE structTypeH
                     }
                     else
                     {
-                        structType->Properties = oldProperties;
+                        structType->Properties = NULL;
                     }
                 }
             }
