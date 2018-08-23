@@ -977,7 +977,7 @@ static void free_deviceConfiguration_handle(IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGU
 
 IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE IoTHubDeviceConfiguration_Create(IOTHUB_SERVICE_CLIENT_AUTH_HANDLE serviceClientHandle)
 {
-    IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE result;
+    IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION* result;
 
     /*Codes_SRS_IOTHUBDEVICECONFIGURATION_38_001: [ If the serviceClientHandle input parameter is NULL IoTHubDeviceConfiguration_Create shall return NULL ]*/
     if (serviceClientHandle == NULL)
@@ -1022,7 +1022,7 @@ IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE IoTHubDeviceConfiguration_Crea
             if (result == NULL)
             {
                 /*Codes_SRS_IOTHUBDEVICECONFIGURATION_38_002: [ If the allocation failed, IoTHubDeviceConfiguration_Create shall return NULL ]*/
-                LogError("Malloc failed for IOTHUB_DEVICE_CONFIGURATION");
+                LogError("Malloc failed for IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION");
             }
             else
             {
@@ -1057,7 +1057,7 @@ IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE IoTHubDeviceConfiguration_Crea
         }
     }
 
-    return result;
+    return (IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE)result;
 }
 
 void IoTHubDeviceConfiguration_Destroy(IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE serviceClientDeviceConfigurationHandle)

@@ -1420,25 +1420,6 @@ static int update_device_twin_desired_property(const void* context)
         }
         else
         {
-            char* update_response;
-            DEVICE_TWIN_DESIRED_INFO device_twin_info;
-            device_twin_info.update_id = update_id;
-            device_twin_info.time_updated = time(NULL);
-
-            if ((update_response = IoTHubDeviceTwin_UpdateTwin(
-                iotHubLonghaul->iotHubSvcDevTwinHandle,
-                iotHubLonghaul->deviceInfo->deviceId,
-                message)) == NULL)
-            {
-                LogError("Failed sending twin desired properties update");
-                device_twin_info.update_result = -1;
-            }
-            else
-            {
-                device_twin_info.update_result = get_twin_desired_version(update_response);
-                free(update_response);
-            }
-
             if (Lock(iotHubLonghaul->lock) != LOCK_OK)
             {
                 LogError("Failed locking (%s, %d)", iotHubLonghaul->test_id, update_id);
@@ -1446,9 +1427,28 @@ static int update_device_twin_desired_property(const void* context)
             }
             else
             {
+                char* update_response;
+                DEVICE_TWIN_DESIRED_INFO device_twin_info;
+                device_twin_info.update_id = update_id;
+                device_twin_info.time_updated = time(NULL);
+
+                if ((update_response = IoTHubDeviceTwin_UpdateTwin(
+                    iotHubLonghaul->iotHubSvcDevTwinHandle,
+                    iotHubLonghaul->deviceInfo->deviceId,
+                    message)) == NULL)
+                {
+                    LogError("Failed sending twin desired properties update");
+                    device_twin_info.update_result = -1;
+                }
+                else
+                {
+                    device_twin_info.update_result = get_twin_desired_version(update_response);
+                    free(update_response);
+                }
+
                 if (iothub_client_statistics_add_device_twin_desired_info(iotHubLonghaul->iotHubClientStats, DEVICE_TWIN_UPDATE_SENT, &device_twin_info) != 0)
                 {
-                    LogError("Failed adding twin reported properties statistics info (update_id=%d)", update_id);
+                    LogError("Failed adding twin desired properties statistics info (update_id=%d)", update_id);
                     result = __FAILURE__;
                 }
                 else
