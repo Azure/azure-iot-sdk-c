@@ -80,7 +80,6 @@ static int load_registration_id(PROV_AUTH_INFO* handle)
     if (handle->sec_type == PROV_AUTH_TYPE_TPM)
     {
         SHA256Context sha_ctx;
-        STRING_HANDLE encoded_hash;
         uint8_t msg_digest[SHA256HashSize];
         unsigned char* endorsement_key;
         size_t ek_len;
@@ -88,7 +87,6 @@ static int load_registration_id(PROV_AUTH_INFO* handle)
         if (handle->hsm_client_get_endorsement_key(handle->hsm_client_handle, &endorsement_key, &ek_len) != 0)
         {
             LogError("Failed getting device reg id");
-            encoded_hash = NULL;
             result = __FAILURE__;
         }
         else
@@ -96,19 +94,16 @@ static int load_registration_id(PROV_AUTH_INFO* handle)
             if (SHA256Reset(&sha_ctx) != 0)
             {
                 LogError("Failed sha256 reset");
-                encoded_hash = NULL;
                 result = __FAILURE__;
             }
             else if (SHA256Input(&sha_ctx, endorsement_key, (unsigned int)ek_len) != 0)
             {
                 LogError("Failed SHA256Input");
-                encoded_hash = NULL;
                 result = __FAILURE__;
             }
             else if (SHA256Result(&sha_ctx, msg_digest) != 0)
             {
                 LogError("Failed SHA256Result");
-                encoded_hash = NULL;
                 result = __FAILURE__;
             }
             else

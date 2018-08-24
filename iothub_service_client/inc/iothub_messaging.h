@@ -6,15 +6,15 @@
 #ifndef IOTHUB_MESSAGING_H
 #define IOTHUB_MESSAGING_H
 
+#include "azure_c_shared_utility/umock_c_prod.h"
+
+#include "iothub_messaging_ll.h"
+
 #ifdef __cplusplus
 extern "C"
 {
 #else
 #endif
-
-#include "azure_c_shared_utility/umock_c_prod.h"
-
-#include "iothub_messaging_ll.h"
 
 typedef struct IOTHUB_MESSAGING_CLIENT_INSTANCE_TAG* IOTHUB_MESSAGING_CLIENT_HANDLE;
 

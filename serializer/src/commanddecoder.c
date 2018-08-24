@@ -842,13 +842,13 @@ static bool validateModel_vs_Multitree(void* startAddress, SCHEMA_MODEL_TYPE_HAN
                         }
                         case (SCHEMA_PROPERTY):
                         {
-                            LogError("cannot ingest name (WITH_DATA instead of WITH_DESIRED_PROPERTY): %s", STRING_c_str);
+                            LogError("cannot ingest name (WITH_DATA instead of WITH_DESIRED_PROPERTY): %s", childName_str);
                             i = nChildren;
                             break;
                         }
                         case (SCHEMA_REPORTED_PROPERTY):
                         {
-                            LogError("cannot ingest name (WITH_REPORTED_PROPERTY instead of WITH_DESIRED_PROPERTY): %s", STRING_c_str);
+                            LogError("cannot ingest name (WITH_REPORTED_PROPERTY instead of WITH_DESIRED_PROPERTY): %s", childName_str);
                             i = nChildren;
                             break;
                         }

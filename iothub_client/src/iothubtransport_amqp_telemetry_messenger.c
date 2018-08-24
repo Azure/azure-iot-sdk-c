@@ -313,7 +313,6 @@ static void attach_device_client_type_to_link(LINK_HANDLE link, STRING_HANDLE pr
     fields attach_properties;
     AMQP_VALUE device_client_type_key_name;
     AMQP_VALUE device_client_type_value;
-    int result;
 
     if ((attach_properties = amqpvalue_create_map()) == NULL)
     {
@@ -333,13 +332,13 @@ static void attach_device_client_type_to_link(LINK_HANDLE link, STRING_HANDLE pr
             }
             else
             {
-                if ((result = amqpvalue_set_map_value(attach_properties, device_client_type_key_name, device_client_type_value)) != 0)
+                if (amqpvalue_set_map_value(attach_properties, device_client_type_key_name, device_client_type_value) != 0)
                 {
-                    LogError("Failed to set the property map for the device client type (error code is: %d)", result);
+                    LogError("Failed to set the property map for the device client type");
                 }
-                else if ((result = link_set_attach_properties(link, attach_properties)) != 0)
+                else if (link_set_attach_properties(link, attach_properties) != 0)
                 {
-                    LogError("Unable to attach the device client type to the link properties (error code is: %d)", result);
+                    LogError("Unable to attach the device client type to the link properties");
                 }
 
                 amqpvalue_destroy(device_client_type_value);
@@ -639,16 +638,15 @@ static AMQP_VALUE create_uamqp_disposition_result_from(TELEMETRY_MESSENGER_DISPO
 static AMQP_VALUE on_message_received_internal_callback(const void* context, MESSAGE_HANDLE message)
 {
     AMQP_VALUE result;
-    int api_call_result;
     IOTHUB_MESSAGE_HANDLE iothub_message;
 
     // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_121: [An IOTHUB_MESSAGE_HANDLE shall be obtained from MESSAGE_HANDLE using message_create_IoTHubMessage_from_uamqp_message()]
-    if ((api_call_result = message_create_IoTHubMessage_from_uamqp_message(message, &iothub_message)) != RESULT_OK)
+    if (message_create_IoTHubMessage_from_uamqp_message(message, &iothub_message) != RESULT_OK)
     {
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_122: [If message_create_IoTHubMessage_from_uamqp_message() fails, on_message_received_internal_callback shall return the result of messaging_delivery_rejected()]
         result = messaging_delivery_rejected("Rejected due to failure reading AMQP message", "Failed reading AMQP message");
 
-        LogError("on_message_received_internal_callback failed (message_create_IoTHubMessage_from_uamqp_message; error = %d).", api_call_result);
+        LogError("on_message_received_internal_callback failed (message_create_IoTHubMessage_from_uamqp_message).");
     }
     else
     {
@@ -1025,8 +1023,9 @@ static void invoke_callback(const void* item, const void* action_context, bool* 
     *continue_processing = true;
 }
 
-static void internal_on_event_send_complete_callback(void* context, MESSAGE_SEND_RESULT send_result)
-{ 
+static void internal_on_event_send_complete_callback(void* context, MESSAGE_SEND_RESULT send_result, AMQP_VALUE delivery_state)
+{
+    (void)delivery_state;
     if (context != NULL)
     {
         MESSENGER_SEND_EVENT_TASK* task = (MESSENGER_SEND_EVENT_TASK*)context;

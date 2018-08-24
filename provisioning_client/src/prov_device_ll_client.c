@@ -33,7 +33,6 @@ static const char* const JSON_NODE_KEY_NAME = "keyName";
 static const char* const JSON_NODE_OPERATION_ID = "operationId";
 static const char* const JSON_NODE_ASSIGNED_HUB = "assignedHub";
 static const char* const JSON_NODE_TPM_NODE = "tpm";
-static const char* const JSON_NODE_TRACKING_ID = "trackingId";
 static const char* const JSON_NODE_DATE_TIME = "lastUpdatedDateTimeUtc";
 static const char* const JSON_NODE_ERROR_MSG = "errorMessage";
 static const char* const PROV_FAILED_STATUS = "failed";
@@ -44,7 +43,7 @@ static const char* const SAS_TOKEN_SCOPE_FMT = "%s/registrations/%s";
 #define SAS_TOKEN_DEFAULT_LIFETIME  3600
 #define EPOCH_TIME_T_VALUE          (time_t)0
 #define MAX_AUTH_ATTEMPTS           3
-#define PROV_GET_THROTTLE_TIME      2
+#define PROV_GET_THROTTLE_TIME      3
 #define PROV_DEFAULT_TIMEOUT        60
 
 typedef enum CLIENT_STATE_TAG
@@ -641,6 +640,12 @@ PROV_DEVICE_LL_HANDLE Prov_Device_LL_Create(const char* uri, const char* id_scop
                     destroy_instance(result);
                     result = NULL;
                 }
+                else
+                {
+                    // Ensure that we are passed the throttling time and send on the first send
+                    (void)tickcounter_get_current_ms(result->tick_counter, &result->status_throttle);
+                    result->status_throttle += (PROV_GET_THROTTLE_TIME * 1000);
+                }
             }
         }
     }
@@ -836,9 +841,13 @@ void Prov_Device_LL_DoWork(PROV_DEVICE_LL_HANDLE handle)
                 case CLIENT_STATE_STATUS_SEND:
                 {
                     tickcounter_ms_t current_time = 0;
-                    (void)tickcounter_get_current_ms(prov_info->tick_counter, &current_time);
-
-                    if (prov_info->status_throttle == 0 || (current_time - prov_info->status_throttle) / 1000 > PROV_GET_THROTTLE_TIME)
+                    if (tickcounter_get_current_ms(prov_info->tick_counter, &current_time) != 0)
+                    {
+                        LogError("Failure getting the current time");
+                        prov_info->error_reason = PROV_DEVICE_RESULT_ERROR;
+                        prov_info->prov_state = CLIENT_STATE_ERROR;
+                    }
+                    else if ( (current_time - prov_info->status_throttle) / 1000 > PROV_GET_THROTTLE_TIME)
                     {
                         /* Codes_SRS_PROV_CLIENT_07_026: [ Upon receiving the reply of the CLIENT_STATE_URL_REQ_SEND message from  iothub_client shall process the the reply of the CLIENT_STATE_URL_REQ_SEND state ] */
                         if (prov_info->prov_transport_protocol->prov_transport_get_op_status(prov_info->transport_handle) != 0)
@@ -853,7 +862,12 @@ void Prov_Device_LL_DoWork(PROV_DEVICE_LL_HANDLE handle)
                         else
                         {
                             prov_info->prov_state = CLIENT_STATE_STATUS_SENT;
-                            (void)tickcounter_get_current_ms(prov_info->tick_counter, &prov_info->timeout_value);
+                            if (tickcounter_get_current_ms(prov_info->tick_counter, &prov_info->timeout_value) != 0)
+                            {
+                                LogError("Failure getting the current time");
+                                prov_info->error_reason = PROV_DEVICE_RESULT_ERROR;
+                                prov_info->prov_state = CLIENT_STATE_ERROR;
+                            }
                         }
                         prov_info->status_throttle = current_time;
                     }

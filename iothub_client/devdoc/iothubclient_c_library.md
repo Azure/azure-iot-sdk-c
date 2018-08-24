@@ -705,9 +705,9 @@ Returns the content type of the message given by the parameter iotHubMessageHand
 - IOTHUBMESSAGE_STRING for a message created via IoTHubMessage_CreateFromString
 - IOTHUBMESSAGE_UNKNOWN otherwise.
 
-##MAP_HANDLE IoTHubMessage_Properties(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle);
+## MAP_HANDLE IoTHubMessage_Properties(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle);
 
-Returns a handle to the message's properties map.
+Returns a handle to the message's properties map.  Note that when sending messages via the HTTP transport, the key names in the map must not contain spaces.
 
 ### Arguments
 |Name	                |Description

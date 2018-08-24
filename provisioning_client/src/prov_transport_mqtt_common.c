@@ -158,6 +158,7 @@ static void mqtt_error_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_ERR
     }
 }
 
+#ifndef NO_LOGGING
 static const char* retrieve_mqtt_return_codes(CONNECT_RETURN_CODE rtn_code)
 {
     switch (rtn_code)
@@ -179,6 +180,7 @@ static const char* retrieve_mqtt_return_codes(CONNECT_RETURN_CODE rtn_code)
         return "Unknown";
     }
 }
+#endif // NO_LOGGING
 
 static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_RESULT event_result, const void* msg_info, void* user_ctx)
 {
@@ -281,7 +283,7 @@ static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE handle, void* user_ct
             {
                 // If the status code is > 429 then this is a transient error
                 long status_code = atol(topic_resp + status_pos);
-                if (status_code > PROV_STATUS_CODE_TRANSIENT_ERROR)
+                if (status_code >= PROV_STATUS_CODE_TRANSIENT_ERROR)
                 {
                     // On transient error reset the transport to send state
                     mqtt_info->transport_state = TRANSPORT_CLIENT_STATE_TRANSIENT;

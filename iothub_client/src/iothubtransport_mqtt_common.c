@@ -11,6 +11,7 @@
 #include "azure_c_shared_utility/doublylinkedlist.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/agenttime.h"
+#include "azure_c_shared_utility/threadapi.h"
 
 #include "iothub_client_core_ll.h"
 #include "iothub_client_options.h"
@@ -52,6 +53,7 @@
 
 #define DEFAULT_RETRY_POLICY                IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER
 #define DEFAULT_RETRY_TIMEOUT_IN_SECONDS    0
+#define MAX_DISCONNECT_VALUE                50
 
 static const char TOPIC_DEVICE_TWIN_PREFIX[] = "$iothub/twin";
 static const char TOPIC_DEVICE_METHOD_PREFIX[] = "$iothub/methods";
@@ -369,6 +371,7 @@ static uint16_t get_next_packet_id(PMQTTTRANSPORT_HANDLE_DATA transport_data)
     return transport_data->packetId;
 }
 
+#ifndef NO_LOGGING 
 static const char* retrieve_mqtt_return_codes(CONNECT_RETURN_CODE rtn_code)
 {
     switch (rtn_code)
@@ -390,6 +393,7 @@ static const char* retrieve_mqtt_return_codes(CONNECT_RETURN_CODE rtn_code)
             return "Unknown";
     }
 }
+#endif // NO_LOGGING 
 
 static int retrieve_device_method_rid_info(const char* resp_topic, STRING_HANDLE method_name, STRING_HANDLE request_id)
 {
@@ -1681,6 +1685,15 @@ static void ResetConnectionIfNecessary(PMQTTTRANSPORT_HANDLE_DATA transport_data
     }
 }
 
+static void mqtt_disconnect_cb(void* ctx)
+{
+    if (ctx != NULL)
+    {
+        int* disconn_recv = (int*)ctx;
+        *disconn_recv = 1;
+    }
+}
+
 static void DisconnectFromClient(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 {
     if (!transport_data->isDestroyCalled)
@@ -1688,8 +1701,19 @@ static void DisconnectFromClient(PMQTTTRANSPORT_HANDLE_DATA transport_data)
         OPTIONHANDLER_HANDLE options = xio_retrieveoptions(transport_data->xioTransport);
         set_saved_tls_options(transport_data, options);
     }
-
-    (void)mqtt_client_disconnect(transport_data->mqttClient, NULL, NULL);
+    // Ensure the disconnect message is sent
+    if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_CONNECTED)
+    {
+        int disconn_recv = 0;
+        (void)mqtt_client_disconnect(transport_data->mqttClient, mqtt_disconnect_cb, &disconn_recv);
+        size_t disconnect_ctr = 0;
+        do
+        {
+            mqtt_client_dowork(transport_data->mqttClient);
+            disconnect_ctr++;
+            ThreadAPI_Sleep(50);
+        } while ((disconnect_ctr < MAX_DISCONNECT_VALUE) && (disconn_recv == 0));
+    }
     xio_destroy(transport_data->xioTransport);
     transport_data->xioTransport = NULL;
 
@@ -2173,14 +2197,9 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 if ((current_time - transport_data->mqtt_connect_time) / 1000 > (transport_data->option_sas_token_lifetime_secs*SAS_REFRESH_MULTIPLIER))
                 {
                     /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_058: [ If the sas token has timed out IoTHubTransport_MQTT_Common_DoWork shall disconnect from the mqtt client and destroy the transport information and wait for reconnect. ] */
-                    OPTIONHANDLER_HANDLE options = xio_retrieveoptions(transport_data->xioTransport);
-                    set_saved_tls_options(transport_data, options);
-                    (void)mqtt_client_disconnect(transport_data->mqttClient, NULL, NULL);
-                    xio_destroy(transport_data->xioTransport);
-                    transport_data->xioTransport = NULL;
+                    DisconnectFromClient(transport_data);
 
                     IoTHubClientCore_LL_ConnectionStatusCallBack(transport_data->llClientHandle, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_EXPIRED_SAS_TOKEN);
-                    transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_NOT_CONNECTED;
                     transport_data->currPacketState = UNKNOWN_TYPE;
                     transport_data->device_twin_get_sent = false;
                     if (transport_data->topic_MqttMessage != NULL)

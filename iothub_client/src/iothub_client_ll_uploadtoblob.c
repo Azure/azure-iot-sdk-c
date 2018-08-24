@@ -57,6 +57,13 @@ typedef struct UPLOADTOBLOB_X509_CREDENTIALS_TAG
     const char* x509privatekey;
 }UPLOADTOBLOB_X509_CREDENTIALS;
 
+typedef enum UPOADTOBLOB_CURL_VERBOSITY_TAG
+{
+    UPOADTOBLOB_CURL_VERBOSITY_UNSET,
+    UPOADTOBLOB_CURL_VERBOSITY_ON,
+    UPOADTOBLOB_CURL_VERBOSITY_OFF
+} UPOADTOBLOB_CURL_VERBOSITY;
+
 typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA_TAG
 {
     STRING_HANDLE deviceId;                     /*needed for file upload*/
@@ -69,7 +76,7 @@ typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA_TAG
     } credentials;                              /*needed for file upload*/
     char* certificates; /*if there are any certificates used*/
     HTTP_PROXY_OPTIONS http_proxy_options;
-    size_t curl_verbose;
+    UPOADTOBLOB_CURL_VERBOSITY curl_verbosity_level;
     size_t blob_upload_timeout_secs;
 }IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA;
 
@@ -122,7 +129,7 @@ IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE IoTHubClient_LL_UploadToBlob_Create(const I
 
                 handleData->certificates = NULL;
                 memset(&(handleData->http_proxy_options), 0, sizeof(HTTP_PROXY_OPTIONS));
-                handleData->curl_verbose = 0;
+                handleData->curl_verbosity_level = UPOADTOBLOB_CURL_VERBOSITY_UNSET;
                 handleData->blob_upload_timeout_secs = 0;
 
                 if ((config->deviceSasToken != NULL) && (config->deviceKey == NULL))
@@ -859,7 +866,11 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
         }
         else
         {
-            (void)HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_CURL_VERBOSE, &handleData->curl_verbose);
+            if (handleData->curl_verbosity_level != UPOADTOBLOB_CURL_VERBOSITY_UNSET)
+            {
+                size_t curl_verbose = (handleData->curl_verbosity_level == UPOADTOBLOB_CURL_VERBOSITY_ON);
+                (void)HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_CURL_VERBOSE, &curl_verbose);
+            }
 
             if (
                 (handleData->authorizationScheme == X509) &&
@@ -1047,11 +1058,11 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
             }
             HTTPAPIEX_Destroy(iotHubHttpApiExHandle);
         }
-    }
 
-    /*Codes_SRS_IOTHUBCLIENT_LL_99_003: [ If `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` return `IOTHUB_CLIENT_OK`, it shall call `getDataCallbackEx` with `result` set to `FILE_UPLOAD_OK`, and `data` and `size` set to NULL. ]*/
-    /*Codes_SRS_IOTHUBCLIENT_LL_99_004: [ If `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` does not return `IOTHUB_CLIENT_OK`, it shall call `getDataCallbackEx` with `result` set to `FILE_UPLOAD_ERROR`, and `data` and `size` set to NULL. ]*/
-    (void)getDataCallbackEx(result == IOTHUB_CLIENT_OK ? FILE_UPLOAD_OK : FILE_UPLOAD_ERROR, NULL, NULL, context);
+        /*Codes_SRS_IOTHUBCLIENT_LL_99_003: [ If `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` return `IOTHUB_CLIENT_OK`, it shall call `getDataCallbackEx` with `result` set to `FILE_UPLOAD_OK`, and `data` and `size` set to NULL. ]*/
+        /*Codes_SRS_IOTHUBCLIENT_LL_99_004: [ If `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` does not return `IOTHUB_CLIENT_OK`, it shall call `getDataCallbackEx` with `result` set to `FILE_UPLOAD_ERROR`, and `data` and `size` set to NULL. ]*/
+        (void)getDataCallbackEx(result == IOTHUB_CLIENT_OK ? FILE_UPLOAD_OK : FILE_UPLOAD_ERROR, NULL, NULL, context);
+    }
 
     return result;
 }
@@ -1305,7 +1316,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
         }
         else if (strcmp(optionName, OPTION_CURL_VERBOSE) == 0)
         {
-            handleData->curl_verbose = *(size_t*)value;
+            handleData->curl_verbosity_level = ((*(bool*)value) == 0) ? UPOADTOBLOB_CURL_VERBOSITY_OFF : UPOADTOBLOB_CURL_VERBOSITY_ON;
             result = IOTHUB_CLIENT_OK;
         }
         else if (strcmp(optionName, OPTION_BLOB_UPLOAD_TIMEOUT_SECS) == 0)
