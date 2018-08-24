@@ -803,7 +803,11 @@ static AMQP_VALUE IoTHubMessaging_LL_FeedbackMessageReceived(const void* context
                                         feedbackRecord->statusCode = IOTHUB_FEEDBACK_STATUS_CODE_UNKNOWN;
                                     }
                                 }
-                                singlylinkedlist_add(feedbackBatch->feedbackRecordList, feedbackRecord);
+                                if (singlylinkedlist_add(feedbackBatch->feedbackRecordList, feedbackRecord) == NULL)
+                                {
+                                    LogError("singlylinkedlist_add failed");
+                                    free(feedbackRecord);
+                                }
                             }
                         }
                     }
