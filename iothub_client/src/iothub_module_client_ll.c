@@ -14,10 +14,10 @@
 #include "azure_c_shared_utility/envvariable.h"
 
 #include "iothub_client_core_ll.h"
-#include "iothub_client_authorization.h"
+#include "internal/iothub_client_authorization.h"
 #include "iothub_module_client_ll.h"
 #include "iothub_transport_ll.h"
-#include "iothub_client_private.h"
+#include "internal/iothub_client_private.h"
 #include "iothub_client_options.h"
 #include "iothub_client_version.h"
 #include "iothub_client_diagnostic.h"
