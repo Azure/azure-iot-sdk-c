@@ -47,7 +47,7 @@ static int uploadBlobNumber;
 
 static LOCK_HANDLE updateBlobTestLock;
 
-#define IOTHUB_UPLOADTOBLOB_TIMEOUT_SEC 30
+#define IOTHUB_UPLOADTOBLOB_TIMEOUT_SEC 120
 #define TEST_MAX_SIMULTANEOUS_UPLOADS 5
 
 
@@ -393,8 +393,7 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
 #ifdef TEST_MQTT
 TEST_FUNCTION(IoTHub_MQTT_UploadToBlob_multithreaded)
 {
-    //Currently not working
-    //e2e_uploadtoblob_test_multiple_simultaneous_uploads(MQTT_Protocol);
+    e2e_uploadtoblob_test_multiple_simultaneous_uploads(MQTT_Protocol);
 }
 
 TEST_FUNCTION(IoTHub_MQTT_UploadToBlob_sas)
