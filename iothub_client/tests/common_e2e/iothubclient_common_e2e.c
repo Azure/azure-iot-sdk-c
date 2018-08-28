@@ -619,6 +619,9 @@ static void client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB
         ASSERT_IS_NOT_NULL_WITH_MSG(iothub_deviceclient_handle, "Could not invoke IoTHubDeviceClient_CreateFromConnectionString");
     }
 
+    // Set connection status change callback
+    setconnectionstatuscallback_on_device_or_module();
+
     if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509)
     {
         setoption_on_device_or_module(OPTION_X509_CERT, deviceToUse->certificate, "Could not set the device x509 certificate");
@@ -640,9 +643,6 @@ static void client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB
         bool encodeDecode = true;
         setoption_on_device_or_module(OPTION_AUTO_URL_ENCODE_DECODE, &encodeDecode, "Cannot set auto_url_encode/decode");
     }
-
-    // Set connection status change callback
-    setconnectionstatuscallback_on_device_or_module();
 
     if (test_protocol_type == TEST_AMQP || test_protocol_type == TEST_AMQP_WEBSOCKETS)
     {

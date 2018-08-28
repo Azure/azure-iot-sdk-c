@@ -364,7 +364,7 @@ void e2e_uploadtoblob_test_multiple_simultaneous_uploads(IOTHUB_CLIENT_TRANSPORT
     // Poll for completion, looping one at a time.
     for (int i = 0; i < TEST_MAX_SIMULTANEOUS_UPLOADS; i++)
     {
-        printf("waiting for context for context(%p), file(%s)\n", &uploadToBlobStatus[i], uploadFileNameList[i]);
+        LogInfo("waiting for context for context(%p), file(%s)\n", &uploadToBlobStatus[i], uploadFileNameList[i]);
         poll_for_upload_completion(&uploadToBlobStatus[i]);
         check_upload_result(uploadToBlobStatus[i]);
     }
