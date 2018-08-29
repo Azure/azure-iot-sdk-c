@@ -182,7 +182,7 @@ link_directories($ENV{TOOLCHAIN_PREFIX}/lib)
 
 add_executable(myapp ${iothub_c_files})
 
-# Redundant in this case but show how to rename your output executable
+# Redundant in this case but shows how to rename your output executable
 set_target_properties(myapp PROPERTIES OUTPUT_NAME "myapp") 
 
 # List the libraries required by the link step
@@ -226,6 +226,6 @@ docker cp vibrant_goodall:/home/builder/MIPSBuild/myapp/cmake/myapp ./myapp_exe
 ```
 This will copy the executable to your local host and rename it to myapp_exe. If all has worked well then a ```file``` command executed against ```myapp_exe``` should, in this case, show as an ELF 32 bit MIPS32.
 
-**Note:** Depending upon your device you may need to copy additional binaries from the container in order to add them to your device. For example you device may not have the OpenSSL binaries so you will need to copy libssl.o and libcrypto.o. This could also be true for libuuid and libcurl. All of these libraries will be in the toolchain.
+**Note:** Depending upon your device you may need to copy additional binaries from the container in order to add them to your device. For example you device may not have the OpenSSL binaries so you will need to copy libssl.so and libcrypto.so. This could also be true for libuuid and libcurl. All of these libraries will be in the toolchain.
 ## Summing Up
 This document demonstrates how to compile the Azure IoT SDK for C along with all of its dependents and then create and link an application with the libraries and headers. It uses a MIPS32 toolchain for this demonstration but it should be easily adaptable to the toolchain required by the target device.
