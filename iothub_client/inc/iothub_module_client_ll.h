@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-/** @file iothub_client_ll.h
+/** @file iothub_module_client_ll.h
 *    @brief     APIs that allow a user (usually a module) to communicate
 *             with an Azure IoTHub.
 *

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-/** @file iothub_client.h
+/** @file iothub_module_client.h
 *    @brief Extends the IoTHubCLient_LL module with additional features.
 *
 *    @details IoTHubClient is a module that extends the IoTHubCLient_LL
