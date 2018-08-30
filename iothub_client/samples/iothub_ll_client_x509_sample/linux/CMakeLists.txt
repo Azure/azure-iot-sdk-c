@@ -13,7 +13,7 @@ set(AZUREIOT_INC_FOLDER ".." "/usr/include/azureiot" "/usr/include/azureiot/inc"
 include_directories(${AZUREIOT_INC_FOLDER})
 
 set(iothub_client_x509_sample_c_files
-    ../iothub_client_x509_sample.c
+    ../iothub_ll_client_x509_sample.c
 )
 
 add_definitions(-DUSE_HTTP)
@@ -37,6 +37,7 @@ target_link_libraries(iothub_client_x509_sample
     prov_auth_client
     hsm_security_client
     uhttp
+    uuid
     pthread
     curl
     ssl

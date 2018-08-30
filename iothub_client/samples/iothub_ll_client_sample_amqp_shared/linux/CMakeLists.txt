@@ -34,6 +34,8 @@ target_link_libraries(iothub_ll_client_sample_amqp_shared
     prov_auth_client
     hsm_security_client
     uhttp
+    uuid
+    parson
     pthread
     curl
     ssl
