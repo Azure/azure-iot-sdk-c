@@ -191,7 +191,7 @@ static EXECUTE_COMMAND_RESULT DecodeAndExecuteModelAction(COMMAND_DECODER_HANDLE
 #ifdef _MSC_VER
 #pragma warning(suppress: 6324) /* We intentionally use here strncpy */ 
 #endif
-        if (strncpy(tempStr, actionName, strLength - 1) == NULL)
+        if (memcpy(tempStr, actionName, strLength - 1) == NULL)
         {
             /* Codes_SRS_COMMAND_DECODER_99_021:[ If the parsing of the command fails for any other reason the command shall not be dispatched.] */
             LogError("Invalid action name.");
