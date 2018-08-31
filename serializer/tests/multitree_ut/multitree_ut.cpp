@@ -349,7 +349,7 @@ TEST_FUNCTION_CLEANUP(clean)
     if (BASEIMPLEMENTATION::gballoc_getCurrentMemoryUsed() != 0)
     {
         char temp[1000];
-        sprintf(temp, "Test did not clean memory properly, leaking %lu bytes", (long unsigned int)BASEIMPLEMENTATION::gballoc_getCurrentMemoryUsed());
+        sprintf(temp, "Test did not clean memory properly, leaking %zu bytes", BASEIMPLEMENTATION::gballoc_getCurrentMemoryUsed());
         BASEIMPLEMENTATION::gballoc_deinit();
         ASSERT_FAIL(temp);
     }

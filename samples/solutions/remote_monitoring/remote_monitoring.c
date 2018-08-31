@@ -215,7 +215,7 @@ void getFirmwareUpdateValues(Chiller* chiller, const unsigned char* payload)
 	chiller->new_firmware_URI = NULL;
 	chiller->new_firmware_version = NULL;
 
-	JSON_Value* root_value = json_parse_string(payload);
+	JSON_Value* root_value = json_parse_string((char *)payload);
 	JSON_Object* root_object = json_value_get_object(root_value);
 
 	JSON_Value* newFirmwareVersion = json_object_get_value(root_object, "Firmware");
@@ -318,9 +318,9 @@ static int device_method_callback(const char* method_name, const unsigned char* 
 // </devicemethodcallback>
 
 // <sendmessage>
-static void send_message(IOTHUB_DEVICE_CLIENT_HANDLE device_handle, char* msgText, char* schema)
+static void send_message(IOTHUB_DEVICE_CLIENT_HANDLE handle, char* message, char* schema)
 {
-	IOTHUB_MESSAGE_HANDLE message_handle = IoTHubMessage_CreateFromString(msgText);
+	IOTHUB_MESSAGE_HANDLE message_handle = IoTHubMessage_CreateFromString(message);
 
 	// Set system properties
 	(void)IoTHubMessage_SetMessageId(message_handle, "MSG_ID");
@@ -347,7 +347,7 @@ static void send_message(IOTHUB_DEVICE_CLIENT_HANDLE device_handle, char* msgTex
 	strftime(timebuff, 50, "%Y-%m-%dT%H:%M:%SZ", timeinfo);
 	(void)Map_AddOrUpdate(propMap, "$$CreationTimeUtc", timebuff);
 
-	IoTHubDeviceClient_SendEventAsync(device_handle, message_handle, send_confirm_callback, NULL);
+	IoTHubDeviceClient_SendEventAsync(handle, message_handle, send_confirm_callback, NULL);
 
 	IoTHubMessage_Destroy(message_handle);
 }
@@ -416,7 +416,7 @@ int main(void)
 		while (1)
 		{
 			temperature = minTemperature + ((rand() % 10) + 5);
-			pressure = minTemperature + ((rand() % 10) + 5);
+			pressure = minPressure + ((rand() % 10) + 5);
 			humidity = minHumidity + ((rand() % 20) + 5);
 
 			if (chiller.firmwareUpdateStatus == IDLE)

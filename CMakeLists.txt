@@ -323,6 +323,10 @@ endif()
 add_subdirectory(iothub_client)
 add_subdirectory(serializer)
 
+if (NOT ${skip_samples})
+  add_subdirectory(samples/solutions)
+endif()
+
 # add the device_auth sample subdirectory
 if (${use_prov_client} AND NOT ${skip_samples})
     add_subdirectory(./provisioning_client/samples)
