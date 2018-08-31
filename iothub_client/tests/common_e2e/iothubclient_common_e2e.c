@@ -619,6 +619,9 @@ static void client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB
         ASSERT_IS_NOT_NULL_WITH_MSG(iothub_deviceclient_handle, "Could not invoke IoTHubDeviceClient_CreateFromConnectionString");
     }
 
+    // Set connection status change callback
+    setconnectionstatuscallback_on_device_or_module();
+
     if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509)
     {
         setoption_on_device_or_module(OPTION_X509_CERT, deviceToUse->certificate, "Could not set the device x509 certificate");
@@ -640,9 +643,6 @@ static void client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB
         bool encodeDecode = true;
         setoption_on_device_or_module(OPTION_AUTO_URL_ENCODE_DECODE, &encodeDecode, "Cannot set auto_url_encode/decode");
     }
-
-    // Set connection status change callback
-    setconnectionstatuscallback_on_device_or_module();
 
     if (test_protocol_type == TEST_AMQP || test_protocol_type == TEST_AMQP_WEBSOCKETS)
     {
@@ -933,6 +933,7 @@ bool service_received_the_message(D2C_MESSAGE_HANDLE d2cMessage)
 
 void destroy_d2c_message_handle(D2C_MESSAGE_HANDLE d2cMessage)
 {
+    LogInfo("Destroying message %p", d2cMessage);
     EventData_Destroy((EXPECTED_SEND_DATA*)d2cMessage);
 }
 
@@ -983,7 +984,9 @@ void e2e_send_event_test_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 void e2e_d2c_with_svc_fault_ctrl(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char* faultOperationType, const char* faultOperationCloseReason, const char* faultOperationDelayInSecs)
 {
     // arrange
-    D2C_MESSAGE_HANDLE d2cMessage;
+    D2C_MESSAGE_HANDLE d2cMessageInitial = NULL;
+    D2C_MESSAGE_HANDLE d2cMessageFaultInjection = NULL;
+    D2C_MESSAGE_HANDLE d2cMessageDuringRetry = NULL;
 
     IOTHUB_PROVISIONED_DEVICE* deviceToUse = IoTHubAccount_GetSASDevice(g_iothubAcctInfo);
 
@@ -993,42 +996,43 @@ void e2e_d2c_with_svc_fault_ctrl(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, cons
     client_connect_to_hub(deviceToUse, protocol);
 
     // Send the Event from the client
-    LogInfo("Send message and wait for confirmation...");
-    d2cMessage = client_create_and_send_d2c(TEST_MESSAGE_CREATE_STRING);
+    LogInfo("Creating and sending message...");
+    d2cMessageInitial = client_create_and_send_d2c(TEST_MESSAGE_CREATE_STRING);
+    
     // Wait for confirmation that the event was recevied
-    bool dataWasRecv = client_wait_for_d2c_confirmation(d2cMessage, IOTHUB_CLIENT_CONFIRMATION_OK);
+    LogInfo("Waiting for initial message %p", d2cMessageInitial);
+    bool dataWasRecv = client_wait_for_d2c_confirmation(d2cMessageInitial, IOTHUB_CLIENT_CONFIRMATION_OK);
     ASSERT_IS_TRUE_WITH_MSG(dataWasRecv, "Failure sending data to IotHub"); // was received by the callback...
 
     LogInfo("Send server fault control message...");
-    d2cMessage = send_error_injection_message(faultOperationType, faultOperationCloseReason, faultOperationDelayInSecs);
+    d2cMessageFaultInjection = send_error_injection_message(faultOperationType, faultOperationCloseReason, faultOperationDelayInSecs);
+    LogInfo("FaultInject message handle is %p", d2cMessageFaultInjection);
 
     LogInfo("Sleeping after sending fault injection...");
     ThreadAPI_Sleep(3000);
 
-    size_t i;
-    for (i = 0; i < 10; i++)
-    {
-        // Send the Event from the client
-        LogInfo("Send message after the server fault and wait for confirmation...");
-        d2cMessage = client_create_and_send_d2c(TEST_MESSAGE_CREATE_STRING);
+    // Send the Event from the client
+    LogInfo("Send message after the server fault and then sleeping...");
+    d2cMessageDuringRetry = client_create_and_send_d2c(TEST_MESSAGE_CREATE_STRING);
+    ThreadAPI_Sleep(8000);
 
-        // Wait for confirmation that the event was recevied
-        dataWasRecv = client_wait_for_d2c_confirmation(d2cMessage, IOTHUB_CLIENT_CONFIRMATION_OK);
-        if (dataWasRecv)
-            break;
+    // Wait for confirmation that the event was recevied
+    LogInfo("Waiting for message after server fault %p", d2cMessageDuringRetry);
+    dataWasRecv = client_wait_for_d2c_confirmation(d2cMessageDuringRetry, IOTHUB_CLIENT_CONFIRMATION_OK);
 
-        ThreadAPI_Sleep(2000);
-    }
-    ASSERT_ARE_NOT_EQUAL_WITH_MSG(size_t, 10, i, "Don't recover after the fault..."); // was received by the callback...
+    ASSERT_IS_TRUE_WITH_MSG(dataWasRecv, "Don't recover after the fault...");
 
     // close the client connection
     destroy_on_device_or_module();
 
     // Wait for the message to arrive
-    service_wait_for_d2c_event_arrival(deviceToUse, d2cMessage);
+    LogInfo("waiting for d2c arrive...");
+    service_wait_for_d2c_event_arrival(deviceToUse, d2cMessageDuringRetry);
 
     // cleanup
-    destroy_d2c_message_handle(d2cMessage);
+    destroy_d2c_message_handle(d2cMessageDuringRetry);
+    destroy_d2c_message_handle(d2cMessageFaultInjection);
+    destroy_d2c_message_handle(d2cMessageInitial);
 }
 
 // Simulates a fault occurring in end-to-end testing (with special opcodes forcing service failure on certain white-listed Hubs) and 
@@ -1130,6 +1134,7 @@ void e2e_d2c_with_svc_fault_ctrl_error_message_callback(IOTHUB_CLIENT_TRANSPORT_
     D2C_MESSAGE_HANDLE d2cMessageInitial = NULL;
     D2C_MESSAGE_HANDLE d2cMessageFaultInjection = NULL;
     D2C_MESSAGE_HANDLE d2cMessageDuringRetry = NULL;
+    bool connStatus;
 
     clear_connection_status_info_flags();
 
@@ -1158,34 +1163,27 @@ void e2e_d2c_with_svc_fault_ctrl_error_message_callback(IOTHUB_CLIENT_TRANSPORT_
 
     LogInfo("Sending message and expect no confirmation...");
     d2cMessageDuringRetry = client_create_and_send_d2c(TEST_MESSAGE_CREATE_STRING);
-    dataWasRecv = client_wait_for_d2c_confirmation(d2cMessageDuringRetry, IOTHUB_CLIENT_CONFIRMATION_ERROR);
 
     if (isMqtt)
     {
-        // MQTT does not return ANY response on this class of errors (e.g. throttling), so expect just a straight timeout.
-        ASSERT_IS_FALSE_WITH_MSG(dataWasRecv, "Service still answering..."); // was received by the callback...
-    }
-    else
-    {
-        // AMQP does return an error.
-        ASSERT_IS_TRUE_WITH_MSG(dataWasRecv, "Failure getting response from IoT Hub..."); // was received by the callback...
+        // MQTT gets disconnects (not error messages), though it'll auto-reconnect.  Make sure that happens.
+        LogInfo("wait for fault...");
+        connStatus = client_wait_for_connection_fault();
+        ASSERT_IS_TRUE_WITH_MSG(connStatus, "Fault injection failed - no fault happened");
+
+        // Wait for connection status change (restored)
+        LogInfo("wait for restore...");
+        connStatus = client_wait_for_connection_restored();
+        ASSERT_IS_TRUE_WITH_MSG(connStatus, "Fault injection failed - connection has not been restored");
     }
 
-    if (isMqtt)
-    {
-        // MQTT should be able to reconnect.  This creates a new connection, and the initial fault-injection we
-        // performed at the beginning of this test is NOT associated with this new connection which is why we expect success.
-        LogInfo("Send message after the server fault and wait for confirmation...");
-        d2cMessageDuringRetry = client_create_and_send_d2c(TEST_MESSAGE_CREATE_STRING);
-        dataWasRecv = client_wait_for_d2c_confirmation(d2cMessageDuringRetry, IOTHUB_CLIENT_CONFIRMATION_OK);
-        ASSERT_IS_TRUE_WITH_MSG(dataWasRecv, "Failure getting response from IoT Hub..."); // was received by the callback...
-    }
+    // AMQP fault injection tests persist the fact an error occurred on server and mean the test gets this back.  MQTT fault injection on server is more stateless; we'll
+    // reconnect automatically after error but server will have us succeed.
+    dataWasRecv = client_wait_for_d2c_confirmation(d2cMessageDuringRetry, isMqtt ? IOTHUB_CLIENT_CONFIRMATION_OK : IOTHUB_CLIENT_CONFIRMATION_ERROR);
+    ASSERT_IS_TRUE_WITH_MSG(dataWasRecv, "Failure getting response from IoT Hub..."); // was received by the callback...
 
     // close the client connection
     destroy_on_device_or_module();
-
-    // Wait for the message to arrive
-    // service_wait_for_d2c_event_arrival(deviceToUse, d2cMessageDuringRetry);
 
     // cleanup
     destroy_d2c_message_handle(d2cMessageInitial);

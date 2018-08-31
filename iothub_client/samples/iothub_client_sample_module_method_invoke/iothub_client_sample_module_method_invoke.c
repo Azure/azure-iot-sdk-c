@@ -16,7 +16,7 @@
 const char* targetDevice = "[target-device-id]";  // This can also be queried at runtime be programatically retrieving the environment variable IOTEDGE_DEVICEID.
 const char* targetModule = "[target-module-id]";
 const char* targetMethodName = "[method-name]";
-const char* targetMethodPayload = "[json-payload]";
+const char* targetMethodPayload = "[json-payload]"; // This must be a valid json value.  *If it is a string, it must be quoted* - e.g. targetMethodPayload = "\"[json-payload]\"";
 static unsigned int timeout = 60;
 
 static int moduleMethodInvokeCallbackCalled = 0;

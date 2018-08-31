@@ -10,6 +10,7 @@
 #include "azure_c_shared_utility/tlsio.h"
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/sastoken.h"
+#include "azure_c_shared_utility/shared_util_options.h"
 
 #include "azure_uamqp_c/connection.h"
 #include "azure_uamqp_c/message_receiver.h"
@@ -47,6 +48,7 @@ typedef struct IOTHUB_MESSAGING_TAG
     char* iothubSuffix;
     char* sharedAccessKey;
     char* keyName;
+    char* trusted_cert;
 
     MESSAGE_SENDER_HANDLE message_sender;
     MESSAGE_RECEIVER_HANDLE message_receiver;
@@ -63,6 +65,7 @@ typedef struct IOTHUB_MESSAGING_TAG
     MESSAGE_RECEIVER_STATE message_receiver_state;
 
     CALLBACK_DATA* callback_data;
+
 } IOTHUB_MESSAGING;
 
 
@@ -639,8 +642,9 @@ static void IoTHubMessaging_LL_ReceiverStateChanged(const void* context, MESSAGE
     }
 }
 
-static void IoTHubMessaging_LL_SendMessageComplete(void* context, IOTHUB_MESSAGING_RESULT send_result)
+static void IoTHubMessaging_LL_SendMessageComplete(void* context, MESSAGE_SEND_RESULT send_result, AMQP_VALUE delivery_state)
 {
+    (void)delivery_state;
     /*Codes_SRS_IOTHUBMESSAGING_12_056: [ If context is NULL IoTHubMessaging_LL_SendMessageComplete shall return ] */
     if (context != NULL)
     {
@@ -648,7 +652,21 @@ static void IoTHubMessaging_LL_SendMessageComplete(void* context, IOTHUB_MESSAGI
         IOTHUB_MESSAGING* messagingData = (IOTHUB_MESSAGING*)context;
         if (messagingData->callback_data->sendCompleteCallback != NULL)
         {
-            (messagingData->callback_data->sendCompleteCallback)(messagingData->callback_data->sendUserContext, send_result);
+            // Convert a send result to an 
+            IOTHUB_MESSAGING_RESULT msg_result;
+            switch (send_result)
+            {
+                case MESSAGE_SEND_OK:
+                    msg_result = IOTHUB_MESSAGING_OK;
+                    break;
+                case MESSAGE_SEND_ERROR:
+                case MESSAGE_SEND_TIMEOUT:
+                case MESSAGE_SEND_CANCELLED:
+                default:
+                    msg_result = IOTHUB_MESSAGING_ERROR;
+                    break;
+            }
+            (messagingData->callback_data->sendCompleteCallback)(messagingData->callback_data->sendUserContext, msg_result);
         }
     }
 }
@@ -785,7 +803,11 @@ static AMQP_VALUE IoTHubMessaging_LL_FeedbackMessageReceived(const void* context
                                         feedbackRecord->statusCode = IOTHUB_FEEDBACK_STATUS_CODE_UNKNOWN;
                                     }
                                 }
-                                singlylinkedlist_add(feedbackBatch->feedbackRecordList, feedbackRecord);
+                                if (singlylinkedlist_add(feedbackBatch->feedbackRecordList, feedbackRecord) == NULL)
+                                {
+                                    LogError("singlylinkedlist_add failed");
+                                    free(feedbackRecord);
+                                }
                             }
                         }
                     }
@@ -867,17 +889,19 @@ IOTHUB_MESSAGING_HANDLE IoTHubMessaging_LL_Create(IOTHUB_SERVICE_CLIENT_AUTH_HAN
             LogError("authInfo->sharedAccessKey input parameter cannot be NULL");
             result = NULL;
         }
+        /*Codes_SRS_IOTHUBMESSAGING_12_002: [ IoTHubMessaging_LL_Create shall allocate memory for a new messaging instance ] */
+        else if ((result = (IOTHUB_MESSAGING*)malloc(sizeof(IOTHUB_MESSAGING))) == NULL)
+        {
+            /*Codes_SRS_IOTHUBMESSAGING_12_003: [ If the allocation failed, IoTHubMessaging_LL_Create shall return NULL ] */
+            LogError("Malloc failed for IOTHUB_REGISTRYMANAGER");
+        }
         else
         {
-            /*Codes_SRS_IOTHUBMESSAGING_12_002: [ IoTHubMessaging_LL_Create shall allocate memory for a new messaging instance ] */
-            if ((result = (IOTHUB_MESSAGING*)malloc(sizeof(IOTHUB_MESSAGING))) == NULL)
-            {
-                /*Codes_SRS_IOTHUBMESSAGING_12_003: [ If the allocation failed, IoTHubMessaging_LL_Create shall return NULL ] */
-                LogError("Malloc failed for IOTHUB_REGISTRYMANAGER");
-            }
+            memset(result, 0, sizeof(IOTHUB_MESSAGING) );
+
             /*Codes_SRS_IOTHUBMESSAGING_12_004: [ If the allocation and creation is successful, IoTHubMessaging_LL_Create shall return with the messaging instance, a non-NULL value ] */
             /*Codes_SRS_IOTHUBMESSAGING_12_065: [ IoTHubMessaging_LL_Create shall allocate memory and copy hostName to result->hostName by calling mallocAndStrcpy_s ] */
-            else if (mallocAndStrcpy_s(&result->hostname, serviceClientAuth->hostname) != 0)
+            if (mallocAndStrcpy_s(&result->hostname, serviceClientAuth->hostname) != 0)
             {
                 /*Codes_SRS_IOTHUBMESSAGING_12_066: [ If the mallocAndStrcpy_s fails, IoTHubMessaging_LL_Create shall do clean up and return NULL ] */
                 LogError("mallocAndStrcpy_s failed for hostName");
@@ -950,7 +974,6 @@ IOTHUB_MESSAGING_HANDLE IoTHubMessaging_LL_Create(IOTHUB_SERVICE_CLIENT_AUTH_HAN
                 callback_data->feedbackUserContext = NULL;
 
                 result->callback_data = callback_data;
-                result->isOpened = false;
             }
         }
     }
@@ -971,6 +994,7 @@ void IoTHubMessaging_LL_Destroy(IOTHUB_MESSAGING_HANDLE messagingHandle)
         free(messHandle->iothubSuffix);
         free(messHandle->sharedAccessKey);
         free(messHandle->keyName);
+        free(messHandle->trusted_cert);
         free(messHandle);
     }
 }
@@ -1049,7 +1073,13 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
         LogError("Input parameter cannot be NULL");
         result = IOTHUB_MESSAGING_INVALID_ARG;
     }
-    else
+    /*Codes_SRS_IOTHUBMESSAGING_12_008: [ If messaging is already opened IoTHubMessaging_LL_Open return shall IOTHUB_MESSAGING_OK ] */
+    else if (messagingHandle->isOpened != 0)
+    {
+        LogError("Messaging is already opened");
+        result = IOTHUB_MESSAGING_OK;
+    }
+    else 
     {
         messagingHandle->message_sender = NULL;
         messagingHandle->connection = NULL;
@@ -1060,14 +1090,8 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
         messagingHandle->tls_io = NULL;
         messagingHandle->sasl_io = NULL;
 
-        /*Codes_SRS_IOTHUBMESSAGING_12_008: [ If messaging is already opened IoTHubMessaging_LL_Open return shall IOTHUB_MESSAGING_OK ] */
-        if (messagingHandle->isOpened != 0)
-        {
-            LogError("Messaging is already opened");
-            result = IOTHUB_MESSAGING_OK;
-        }
         /*Codes_SRS_IOTHUBMESSAGING_12_022: [ IoTHubMessaging_LL_Open shall create uAMQP messaging target for sender by calling the messaging_create_target ] */
-        else if ((send_target_address = createSendTargetAddress(messagingHandle)) == NULL)
+        if ((send_target_address = createSendTargetAddress(messagingHandle)) == NULL)
         {
             /*Codes_SRS_IOTHUBMESSAGING_12_077: [ If the messagingHandle->hostname input parameter is NULL IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
             LogError("Could not create sendTargetAddress");
@@ -1092,7 +1116,6 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
         {
             /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
             LogError("Could not create sasToken");
-            free((char*)messagingHandle->sasl_plain_config.authcid);
             result = IOTHUB_MESSAGING_ERROR;
         }
         else
@@ -1104,8 +1127,6 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
             {
                 /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
                 LogError("Could not get SASL plain mechanism interface.");
-                free((char*)messagingHandle->sasl_plain_config.authcid);
-                free((char*)messagingHandle->sasl_plain_config.passwd);
                 result = IOTHUB_MESSAGING_ERROR;
             }
             /*Codes_SRS_IOTHUBMESSAGING_12_010: [ IoTHubMessaging_LL_Open shall create uAMQP PLAIN SASL mechanism by calling saslmechanism_create with the sasl plain interface ] */
@@ -1113,8 +1134,6 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
             {
                 /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
                 LogError("Could not create SASL plain mechanism.");
-                free((char*)messagingHandle->sasl_plain_config.authcid);
-                free((char*)messagingHandle->sasl_plain_config.passwd);
                 result = IOTHUB_MESSAGING_ERROR;
             }
             else
@@ -1131,8 +1150,6 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
                 {
                     /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
                     LogError("Could not get default TLS IO interface.");
-                    free((char*)messagingHandle->sasl_plain_config.authcid);
-                    free((char*)messagingHandle->sasl_plain_config.passwd);
                     result = IOTHUB_MESSAGING_ERROR;
                 }
                 /*Codes_SRS_IOTHUBMESSAGING_12_011: [ IoTHubMessaging_LL_Open shall create uAMQP TLSIO by calling the xio_create ] */
@@ -1140,8 +1157,13 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
                 {
                     /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
                     LogError("Could not create TLS IO.");
-                    free((char*)messagingHandle->sasl_plain_config.authcid);
-                    free((char*)messagingHandle->sasl_plain_config.passwd);
+                    result = IOTHUB_MESSAGING_ERROR;
+                }
+                else if (messagingHandle->trusted_cert != NULL && xio_setoption(messagingHandle->tls_io, OPTION_TRUSTED_CERT, messagingHandle->trusted_cert) != 0)
+                {
+                    LogError("Could set tlsio trusted certificate.");
+                    xio_destroy(messagingHandle->tls_io);
+                    messagingHandle->tls_io = NULL;
                     result = IOTHUB_MESSAGING_ERROR;
                 }
                 else
@@ -1159,8 +1181,6 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
                     {
                         /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
                         LogError("Could not create get SASL IO interface description.");
-                        free((char*)messagingHandle->sasl_plain_config.authcid);
-                        free((char*)messagingHandle->sasl_plain_config.passwd);
                         result = IOTHUB_MESSAGING_ERROR;
                     }
                     /*Codes_SRS_IOTHUBMESSAGING_12_012: [ IoTHubMessaging_LL_Open shall create uAMQP SASL IO by calling the xio_create with the previously created SASL mechanism and TLSIO] */
@@ -1168,8 +1188,6 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
                     {
                         /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
                         LogError("Could not create SASL IO.");
-                        free((char*)messagingHandle->sasl_plain_config.authcid);
-                        free((char*)messagingHandle->sasl_plain_config.passwd);
                         result = IOTHUB_MESSAGING_ERROR;
                     }
                     /*Codes_SRS_IOTHUBMESSAGING_12_013: [ IoTHubMessaging_LL_Open shall create uAMQP connection by calling the connection_create with the previously created SASL IO ] */
@@ -1177,8 +1195,6 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
                     {
                         /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
                         LogError("Could not create connection.");
-                        free((char*)messagingHandle->sasl_plain_config.authcid);
-                        free((char*)messagingHandle->sasl_plain_config.passwd);
                         result = IOTHUB_MESSAGING_ERROR;
                     }
                     /*Codes_SRS_IOTHUBMESSAGING_12_014: [ IoTHubMessaging_LL_Open shall create uAMQP session by calling the session_create ] */
@@ -1186,8 +1202,6 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
                     {
                         /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
                         LogError("Could not create session.");
-                        free((char*)messagingHandle->sasl_plain_config.authcid);
-                        free((char*)messagingHandle->sasl_plain_config.passwd);
                         result = IOTHUB_MESSAGING_ERROR;
                     }
                     /*Codes_SRS_IOTHUBMESSAGING_12_015: [ IoTHubMessaging_LL_Open shall set the AMQP incoming window to UINT32 maximum value by calling session_set_incoming_window ] */
@@ -1195,8 +1209,6 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
                     {
                         /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
                         LogError("Could not set incoming window.");
-                        free((char*)messagingHandle->sasl_plain_config.authcid);
-                        free((char*)messagingHandle->sasl_plain_config.passwd);
                         result = IOTHUB_MESSAGING_ERROR;
                     }
                     /*Codes_SRS_IOTHUBMESSAGING_12_016: [ IoTHubMessaging_LL_Open shall set the AMQP outgoing window to UINT32 maximum value by calling session_set_outgoing_window ] */
@@ -1204,8 +1216,6 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
                     {
                         /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
                         LogError("Could not set outgoing window.");
-                        free((char*)messagingHandle->sasl_plain_config.authcid);
-                        free((char*)messagingHandle->sasl_plain_config.passwd);
                         result = IOTHUB_MESSAGING_ERROR;
                     }
                     /*Codes_SRS_IOTHUBMESSAGING_12_021: [ IoTHubMessaging_LL_Open shall create uAMQP messaging source for sender by calling the messaging_create_source ] */
@@ -1213,8 +1223,6 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
                     {
                         /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
                         LogError("Could not create source for link.");
-                        free((char*)messagingHandle->sasl_plain_config.authcid);
-                        free((char*)messagingHandle->sasl_plain_config.passwd);
                         result = IOTHUB_MESSAGING_ERROR;
                     }
                     /*Codes_SRS_IOTHUBMESSAGING_12_022: [ IoTHubMessaging_LL_Open shall create uAMQP messaging target for sender by calling the messaging_create_target ] */
@@ -1222,8 +1230,6 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
                     {
                         /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
                         LogError("Could not create target for link.");
-                        free((char*)messagingHandle->sasl_plain_config.authcid);
-                        free((char*)messagingHandle->sasl_plain_config.passwd);
                         result = IOTHUB_MESSAGING_ERROR;
                     }
                     /*Codes_SRS_IOTHUBMESSAGING_12_018: [ IoTHubMessaging_LL_Open shall create uAMQP sender link by calling the link_create ] */
@@ -1231,8 +1237,6 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
                     {
                         /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
                         LogError("Could not create link.");
-                        free((char*)messagingHandle->sasl_plain_config.authcid);
-                        free((char*)messagingHandle->sasl_plain_config.passwd);
                         result = IOTHUB_MESSAGING_ERROR;
                     }
                     /*Codes_SRS_IOTHUBMESSAGING_06_001: [ IoTHubMessaging_LL_Open shall add the version property to the sender link by calling the link_set_attach_properties ] */
@@ -1240,8 +1244,6 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
                     {
                         /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
                         LogError("Could not set the sender attach properties.");
-                        free((char*)messagingHandle->sasl_plain_config.authcid);
-                        free((char*)messagingHandle->sasl_plain_config.passwd);
                         result = IOTHUB_MESSAGING_ERROR;
                     }
                     /*Codes_SRS_IOTHUBMESSAGING_12_019: [ IoTHubMessaging_LL_Open shall set the AMQP sender link settle mode to sender_settle_mode_unsettled  by calling link_set_snd_settle_mode ] */
@@ -1249,8 +1251,6 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
                     {
                         /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
                         LogError("Could not set the sender settle mode.");
-                        free((char*)messagingHandle->sasl_plain_config.authcid);
-                        free((char*)messagingHandle->sasl_plain_config.passwd);
                         result = IOTHUB_MESSAGING_ERROR;
                     }
                     /*Codes_SRS_IOTHUBMESSAGING_12_023: [ IoTHubMessaging_LL_Open shall create uAMQP message sender by calling the messagesender_create with the created sender link and the local IoTHubMessaging_LL_SenderStateChanged callback ] */
@@ -1258,8 +1258,6 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
                     {
                         /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
                         LogError("Could not create message sender.");
-                        free((char*)messagingHandle->sasl_plain_config.authcid);
-                        free((char*)messagingHandle->sasl_plain_config.passwd);
                         result = IOTHUB_MESSAGING_ERROR;
                     }
                     /*Codes_SRS_IOTHUBMESSAGING_12_023: [ IoTHubMessaging_LL_Open shall create uAMQP message sender by calling the messagesender_create with the created sender link and the local IoTHubMessaging_LL_SenderStateChanged callback ] */
@@ -1267,8 +1265,6 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
                     {
                         /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
                         LogError("Could not open the message sender.");
-                        free((char*)messagingHandle->sasl_plain_config.authcid);
-                        free((char*)messagingHandle->sasl_plain_config.passwd);
                         result = IOTHUB_MESSAGING_ERROR;
                     }
                     /*Codes_SRS_IOTHUBMESSAGING_12_027: [ IoTHubMessaging_LL_Open shall create uAMQP messaging source for receiver by calling the messaging_create_source ] */
@@ -1276,8 +1272,6 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
                     {
                         /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
                         LogError("Could not create source for link.");
-                        free((char*)messagingHandle->sasl_plain_config.authcid);
-                        free((char*)messagingHandle->sasl_plain_config.passwd);
                         result = IOTHUB_MESSAGING_ERROR;
                     }
                     /*Codes_SRS_IOTHUBMESSAGING_12_028: [ IoTHubMessaging_LL_Open shall create uAMQP messaging target for receiver by calling the messaging_create_target ] */
@@ -1285,8 +1279,6 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
                     {
                         /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
                         LogError("Could not create target for link.");
-                        free((char*)messagingHandle->sasl_plain_config.authcid);
-                        free((char*)messagingHandle->sasl_plain_config.passwd);
                         result = IOTHUB_MESSAGING_ERROR;
                     }
                     /*Codes_SRS_IOTHUBMESSAGING_12_024: [ IoTHubMessaging_LL_Open shall create uAMQP receiver link by calling the link_create ] */
@@ -1294,8 +1286,6 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
                     {
                         /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
                         LogError("Could not create link.");
-                        free((char*)messagingHandle->sasl_plain_config.authcid);
-                        free((char*)messagingHandle->sasl_plain_config.passwd);
                         result = IOTHUB_MESSAGING_ERROR;
                     }
                     /*Codes_SRS_IOTHUBMESSAGING_06_002: [ IoTHubMessaging_LL_Open shall add the version property to the receiver by calling the link_set_attach_properties ] */
@@ -1303,8 +1293,6 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
                     {
                         /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
                         LogError("Could not create link.");
-                        free((char*)messagingHandle->sasl_plain_config.authcid);
-                        free((char*)messagingHandle->sasl_plain_config.passwd);
                         result = IOTHUB_MESSAGING_ERROR;
                     }
                     /*Codes_SRS_IOTHUBMESSAGING_12_025: [ IoTHubMessaging_LL_Open shall set the AMQP receiver link settle mode to receiver_settle_mode_first by calling link_set_rcv_settle_mode ] */
@@ -1312,8 +1300,6 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
                     {
                         /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
                         LogError("Could not set the sender settle mode.");
-                        free((char*)messagingHandle->sasl_plain_config.authcid);
-                        free((char*)messagingHandle->sasl_plain_config.passwd);
                         result = IOTHUB_MESSAGING_ERROR;
                     }
                     /*Codes_SRS_IOTHUBMESSAGING_12_029: [ IoTHubMessaging_LL_Open shall create uAMQP message receiver by calling the messagereceiver_create with the created sender link and the local IoTHubMessaging_LL_ReceiverStateChanged callback ] */
@@ -1321,8 +1307,6 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
                     {
                         /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
                         LogError("Could not create message receiver.");
-                        free((char*)messagingHandle->sasl_plain_config.authcid);
-                        free((char*)messagingHandle->sasl_plain_config.passwd);
                         result = IOTHUB_MESSAGING_ERROR;
                     }
                     /*Codes_SRS_IOTHUBMESSAGING_12_029: [ IoTHubMessaging_LL_Open shall create uAMQP message receiver by calling the messagereceiver_create with the created sender link and the local IoTHubMessaging_LL_ReceiverStateChanged callback ] */
@@ -1330,8 +1314,8 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
                     {
                         /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
                         LogError("Could not open the message receiver.");
-                        free((char*)messagingHandle->sasl_plain_config.authcid);
-                        free((char*)messagingHandle->sasl_plain_config.passwd);
+                        messagereceiver_destroy(messagingHandle->message_receiver);
+                        messagingHandle->message_receiver = NULL;
                         result = IOTHUB_MESSAGING_ERROR;
                     }
                     else
@@ -1341,6 +1325,52 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
                         result = IOTHUB_MESSAGING_OK;
                     }
                 }
+            }
+            if (result != IOTHUB_MESSAGING_OK)
+            {
+                if (messagingHandle->message_sender != NULL)
+                {
+                    messagesender_destroy(messagingHandle->message_sender);
+                    messagingHandle->message_sender = NULL;
+                }
+                if (messagingHandle->tls_io != NULL)
+                {
+                    xio_destroy(messagingHandle->tls_io);
+                    messagingHandle->tls_io = NULL;
+                }
+                if (messagingHandle->sasl_io != NULL)
+                {
+                    xio_destroy(messagingHandle->sasl_io);
+                    messagingHandle->sasl_io = NULL;
+                }
+                if (messagingHandle->session != NULL)
+                {
+                    session_destroy(messagingHandle->session);
+                    messagingHandle->session = NULL;
+                }
+                if (messagingHandle->connection != NULL)
+                {
+                    connection_destroy(messagingHandle->connection);
+                    messagingHandle->connection = NULL;
+                }
+                if (messagingHandle->receiver_link != NULL)
+                {
+                    link_destroy(messagingHandle->receiver_link);
+                    messagingHandle->receiver_link = NULL;
+                }
+            }
+        }
+        if (result != IOTHUB_MESSAGING_OK)
+        {
+            if (messagingHandle->sasl_plain_config.authcid != NULL)
+            {
+                free((char*)messagingHandle->sasl_plain_config.authcid);
+                messagingHandle->sasl_plain_config.authcid = NULL;
+            }
+            if (messagingHandle->sasl_plain_config.passwd != NULL)
+            {
+                free((char*)messagingHandle->sasl_plain_config.passwd);
+                messagingHandle->sasl_plain_config.passwd = NULL;
             }
         }
     }
@@ -1525,7 +1555,7 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Send(IOTHUB_MESSAGING_HANDLE messagin
                     messagingHandle->callback_data->sendUserContext = userContextCallback;
 
                     /*Codes_SRS_IOTHUBMESSAGING_12_039: [ IoTHubMessaging_LL_SendMessage shall call uAMQP messagesender_send with the created message with IoTHubMessaging_LL_SendMessageComplete callback by which IoTHubMessaging is notified of completition of send ] */
-                    if (messagesender_send_async(messagingHandle->message_sender, amqpMessage, (ON_MESSAGE_SEND_COMPLETE)IoTHubMessaging_LL_SendMessageComplete, messagingHandle, 0) == NULL)
+                    if (messagesender_send_async(messagingHandle->message_sender, amqpMessage, IoTHubMessaging_LL_SendMessageComplete, messagingHandle, 0) == NULL)
                     {
                         /*Codes_SRS_IOTHUBMESSAGING_12_040: [ If any of the uAMQP call fails IoTHubMessaging_LL_SendMessage shall return IOTHUB_MESSAGING_ERROR ] */
                         LogError("Could not set outgoing window.");
@@ -1558,5 +1588,33 @@ void IoTHubMessaging_LL_DoWork(IOTHUB_MESSAGING_HANDLE messagingHandle)
         /*Codes_SRS_IOTHUBMESSAGING_12_048: [ If message has been received the IoTHubMessaging_LL_FeedbackMessageReceived callback given to messagesender_receive will be called with the received MESSAGE_HANDLE ] */
         connection_dowork(messagingHandle->connection);
     }
+}
+
+IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_SetTrustedCert(IOTHUB_MESSAGING_HANDLE messagingHandle, const char* trusted_cert)
+{
+    IOTHUB_MESSAGING_RESULT result;
+    if (messagingHandle == NULL || trusted_cert == NULL)
+    {
+        LogError("Invalid argument messagingHandle: %p trusted_cert: %p", messagingHandle, trusted_cert);
+        result = IOTHUB_MESSAGING_INVALID_ARG;
+    }
+    else
+    {
+        char* temp_cert;
+        if (mallocAndStrcpy_s(&temp_cert, trusted_cert) != 0)
+        {
+            result = IOTHUB_MESSAGING_ERROR;
+        }
+        else
+        {
+            if (messagingHandle->trusted_cert != NULL)
+            {
+                free(messagingHandle->trusted_cert);
+            }
+            messagingHandle->trusted_cert = temp_cert;
+            result = IOTHUB_MESSAGING_OK;
+        }
+    }
+    return result;
 }
 

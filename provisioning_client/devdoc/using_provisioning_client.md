@@ -12,21 +12,21 @@ cmake -Duse_prov_client:BOOL=ON ..
 
 ## Enabling Provisioning Device Client  simulator
 
-For development purposes the Provisioning Device Client will use simulators to mock hardware chips.
+For development purposes the Provisioning Device Client uses simulators to mock hardware chips functionality:
 
 ### TPM Simulator
 
-The SDK will ship with a windows tpm simulator binary.  The following command will enable the sas token authentication and then run the tpm simulator on the windows OS (the Simulator will listen over a socket on ports 2321 and 2322).
-
-### DICE Simulator
-
-For x509 the Provisioning Device Client enables a DICE hardware simulator that emulators the DICE hardware operations.
+The SDK will ship with a windows tpm simulator binary.  The following cmake command will enable the sas token authentication and then you will need to run the tpm simulator on the windows OS (the Simulator will listen over a socket on ports 2321 and 2322).
 
 ```Shell
 cmake -Duse_prov_client:BOOL=ON -Duse_tpm_simulator:BOOL=ON ..
 
 ./azure-iot-sdk-c/provisioning_client/deps/utpm/tools/tpm_simulator/Simulator.exe
 ```
+
+### DICE Simulator
+
+For x509 the Provisioning Device Client enables a DICE hardware simulator that emulators the DICE hardware operations.
 
 ## Adding Enrollments with Azure Portal
 
@@ -35,18 +35,20 @@ To enroll a device in the azure portal you will need to either get the Registrat
 ### TPM Provisioning Tool
 
 ```Shell
-./azure-iot-sdk-c/provisioning_client/tools/tpm_device_provision/tpm_device_provision.exe
+./[cmake dir]/provisioning_client/tools/tpm_device_provision/tpm_device_provision.exe
 ```
 
 ### x509 Provisioning Tool
 
 ```Shell
-./azure-iot-sdk-c/provisioning_client/tools/dice_device_provision/dice_device_provision.exe
+./[cmake dir]/provisioning_client/tools/dice_device_provision/dice_device_provision.exe
 ```
 
 ### Provisioning Samples
 
-There are two provisioning samples in the SDK `prov_dev_client_ll_sample` and `prov_dev_client_sample`.  The `prov_dev_client_ll_sample` version uses a non-threaded version of the api and the `prov_dev_client_sample` uses the threaded api.  Before compiling the samples you must make modifications to the c files to get provisioning to work correctly.
+There are two provisioning samples in the SDK and two HSM samples.  The provisioning samples, `prov_dev_client_ll_sample` and `prov_dev_client_sample` show how to use the provisioning client to connect to DPS and recieve your IoTHub credentials.  The HSM samples include `iothub_client_sample_hsm`, which shows the us of the IoThub device client on an previously provisioned device and `custom_hsm_example`, which shows how to create a sample hsm to be used along side the provisioning client.
+
+The `prov_dev_client_ll_sample` version uses a non-threaded version of the api and the `prov_dev_client_sample` uses the threaded api version.  Before compiling the samples you must make modifications to the c files to get provisioning to work correctly.
 
 - Add your id_scope to the variable:
 

@@ -233,6 +233,7 @@ static void dt_e2e_create_client_handle(IOTHUB_PROVISIONED_DEVICE* deviceToUse, 
 
 static void destroy_on_device_or_module()
 {
+    LogInfo("Beginning to destroy IotHub client handle");
     if (iothub_deviceclient_handle != NULL)
     {
         IoTHubDeviceClient_Destroy(iothub_deviceclient_handle);
@@ -244,6 +245,7 @@ static void destroy_on_device_or_module()
         IoTHubModuleClient_Destroy(iothub_moduleclient_handle);
         iothub_moduleclient_handle = NULL;
     }
+    LogInfo("Completed destroy of IotHub client handle");
 }
 
 static void sendreportedstate_on_device_or_module(const char* buffer, DEVICE_REPORTED_DATA *device)

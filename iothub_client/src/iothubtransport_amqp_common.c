@@ -723,12 +723,12 @@ static int get_new_underlying_io_transport(AMQP_TRANSPORT_INSTANCE* transport_in
             }
             else
             {
-                result = 0;
+                result = RESULT_OK;
             }
         }
         else
         {
-            result = 0;
+            result = RESULT_OK;
         }
 
         if (restore_underlying_io_transport_options(transport_instance, *xio_handle) != RESULT_OK)
@@ -736,8 +736,6 @@ static int get_new_underlying_io_transport(AMQP_TRANSPORT_INSTANCE* transport_in
             /*pessimistically hope TLS will fail, be recreated and options re-given*/
             LogError("Failed to apply options previous saved to new underlying I/O transport instance.");
         }
-
-        result = RESULT_OK;
     }
 
     return result;
