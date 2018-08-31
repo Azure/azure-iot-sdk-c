@@ -181,7 +181,7 @@ static EXECUTE_COMMAND_RESULT DecodeAndExecuteModelAction(COMMAND_DECODER_HANDLE
         LogError("Invalid action name");
         result = EXECUTE_COMMAND_ERROR;
     }
-    if (strLength >= 128)
+    else if (strLength >= 128)
     {
         /* Codes_SRS_COMMAND_DECODER_99_021:[ If the parsing of the command fails for any other reason the command shall not be dispatched.] */
         LogError("Invalid action name length");
