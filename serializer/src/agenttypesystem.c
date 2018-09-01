@@ -3730,7 +3730,7 @@ result = AGENT_DATA_TYPES_OK;
                         result = AGENT_DATA_TYPES_ERROR;
                         LogError("(result = %s)", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
                     }
-                    else if (strncpy_s(temp, strLength - 1, source + 1, strLength - 2) != 0)
+                    else if (memcpy(temp, source + 1, strLength - 2) == NULL)
                     {
                         free(temp);
 
@@ -3739,8 +3739,8 @@ result = AGENT_DATA_TYPES_OK;
                     }
                     else
                     {
+                        // Removes the "
                         temp[strLength - 2] = 0;
-
                         agentData->type = EDM_STRING_TYPE;
                         agentData->value.edmString.chars = temp;
                         agentData->value.edmString.length = strLength - 2;
