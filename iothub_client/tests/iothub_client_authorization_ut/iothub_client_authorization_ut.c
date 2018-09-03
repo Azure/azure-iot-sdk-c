@@ -346,7 +346,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Create_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubClient_Auth_Create failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubClient_Auth_Create failure in test %lu/%lu", index, count);
 
         IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(DEVICE_KEY, DEVICE_ID, NULL, MODULE_ID);
 
@@ -585,7 +585,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubClient_Auth_Get_ConnString failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubClient_Auth_Get_ConnString failure in test %lu/%lu", index, count);
 
         //act
         char* conn_string = IoTHubClient_Auth_Get_SasToken(handle, SCOPE_NAME, TEST_EXPIRY_TIME, TEST_KEYNAME_VALUE);

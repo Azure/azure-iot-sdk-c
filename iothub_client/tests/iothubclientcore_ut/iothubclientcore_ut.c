@@ -934,7 +934,7 @@ TEST_FUNCTION(IoTHubClientCore_CreateFromConnectionString_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubClientCore_CreateFromConnectionString failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubClientCore_CreateFromConnectionString failure in test %lu/%lu", index, count);
         IOTHUB_CLIENT_CORE_HANDLE result = IoTHubClientCore_CreateFromConnectionString(TEST_CONNECTION_STRING, TEST_TRANSPORT_PROVIDER);
 
         // assert
@@ -1001,7 +1001,7 @@ TEST_FUNCTION(IoTHubClientCore_Create_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubClientCore_Create failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubClientCore_Create failure in test %lu/%lu", index, count);
         IOTHUB_CLIENT_CORE_HANDLE result = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
 
         // assert
@@ -1110,7 +1110,7 @@ TEST_FUNCTION(IoTHubClientCore_CreateWithTransport_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubClientCore_CreateWithTransport failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubClientCore_CreateWithTransport failure in test %lu/%lu", index, count);
         IOTHUB_CLIENT_CORE_HANDLE result = IoTHubClientCore_CreateWithTransport(TEST_TRANSPORT_HANDLE, &client_config);
 
         // assert
@@ -1209,7 +1209,7 @@ TEST_FUNCTION(IoTHubClientCore_CreateFromDeviceAuth_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubClientCore_CreateFromDeviceAuth failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubClientCore_CreateFromDeviceAuth failure in test %lu/%lu", index, count);
         IOTHUB_CLIENT_CORE_HANDLE result = IoTHubClientCore_CreateFromDeviceAuth(TEST_IOTHUB_URI, TEST_DEVICE_ID, TEST_TRANSPORT_PROVIDER);
 
         // assert
@@ -1256,7 +1256,7 @@ TEST_FUNCTION(IoTHubClientCore_CreateFromEnvironment_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "IoTHubClientCore_CreateFromEnvironment failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubClientCore_CreateFromEnvironment failure in test %lu/%lu", index, count);
         IOTHUB_CLIENT_CORE_HANDLE result = IoTHubClientCore_CreateFromEnvironment(TEST_TRANSPORT_PROVIDER);
 
         // assert
@@ -1443,7 +1443,7 @@ TEST_FUNCTION(IoTHubClient_SendEventAsync_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubClientCore_SendEventAsync failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubClientCore_SendEventAsync failure in test %lu/%lu", index, count);
         IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SendEventAsync(iothub_handle, TEST_MESSAGE_HANDLE, test_event_confirmation_callback, NULL);
 
         // assert
@@ -1656,7 +1656,7 @@ TEST_FUNCTION(IoTHubClientCore_SetMessageCallback_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubClientCore_SetMessageCallback failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubClientCore_SetMessageCallback failure in test %lu/%lu", index, count);
         IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SetMessageCallback(iothub_handle, test_message_confirmation_callback, NULL);
 
         // assert
@@ -1790,7 +1790,7 @@ TEST_FUNCTION(IoTHubClientCore_SetConnectionStatusCallback_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "IoTHubClient_SetConnectionStatusCallback failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubClient_SetConnectionStatusCallback failure in test %lu/%lu", index, count);
         IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SetConnectionStatusCallback(iothub_handle, test_connection_status_callback, NULL);
 
         // assert
@@ -1919,7 +1919,7 @@ TEST_FUNCTION(IoTHubClientCore_GetRetryPolicy_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubClientCore_CreateFromConnectionString failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubClientCore_CreateFromConnectionString failure in test %lu/%lu", index, count);
         IOTHUB_CLIENT_RESULT result = IoTHubClientCore_GetRetryPolicy(iothub_handle, &retry_policy, &retry_in_seconds);
 
         // assert
@@ -2010,7 +2010,7 @@ TEST_FUNCTION(IoTHubClientCore_GetLastMessageReceiveTime_failed)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubClientCore_GetLastMessageReceiveTime failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubClientCore_GetLastMessageReceiveTime failure in test %lu/%lu", index, count);
         IOTHUB_CLIENT_RESULT result = IoTHubClientCore_GetLastMessageReceiveTime(iothub_handle, &recv_time);
 
         // assert
@@ -2147,7 +2147,7 @@ TEST_FUNCTION(IoTHubClientCore_SetOption_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubClientCore_SetOption failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubClientCore_SetOption failure in test %lu/%lu", index, count);
         IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SetOption(iothub_handle, option_name, option_value);
 
         // assert
@@ -2243,7 +2243,7 @@ TEST_FUNCTION(IoTHubClientCore_SetDeviceTwinCallback_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubClientCore_SetDeviceTwinCallback failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubClientCore_SetDeviceTwinCallback failure in test %lu/%lu", index, count);
         IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SetDeviceTwinCallback(iothub_handle, test_device_twin_callback, NULL);
 
         // assert
@@ -2365,7 +2365,7 @@ TEST_FUNCTION(IoTHubClientCore_SendReportedState_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubClientCore_SendReportedState failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubClientCore_SendReportedState failure in test %lu/%lu", index, count);
         IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SendReportedState(iothub_handle, reported_state, 1, test_report_state_callback, NULL);
 
         // assert
@@ -2488,7 +2488,7 @@ TEST_FUNCTION(IoTHubClientCore_SetDeviceMethodCallback_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubClientCore_SetDeviceMethodCallback failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubClientCore_SetDeviceMethodCallback failure in test %lu/%lu", index, count);
         IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SetDeviceMethodCallback(iothub_handle, test_method_callback, NULL);
 
         // assert
@@ -2709,7 +2709,7 @@ TEST_FUNCTION(IoTHubClientCore_DeviceMethodResponse_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "IoTHubClientCore_DeviceMethodResponse failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubClientCore_DeviceMethodResponse failure in test %lu/%lu", index, count);
         IOTHUB_CLIENT_RESULT result = IoTHubClientCore_DeviceMethodResponse(iothub_handle, TEST_METHOD_ID, TEST_DEVICE_METHOD_RESPONSE, TEST_DEVICE_RESP_LENGTH, REPORTED_STATE_STATUS_CODE);
 
         // assert
@@ -3825,7 +3825,7 @@ TEST_FUNCTION(IoTHubClientCore_SendEventToOutputAsync_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "IoTHubClientCore_SendEventToOutputAsync failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubClientCore_SendEventToOutputAsync failure in test %lu/%lu", index, count);
         IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SendEventToOutputAsync(iothub_handle, TEST_MESSAGE_HANDLE, TEST_OUTPUT_NAME, test_event_confirmation_callback, NULL);
 
         // assert
@@ -3927,7 +3927,7 @@ TEST_FUNCTION(IoTHubClient_SetInputMessageCallback_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "IoTHubClientCore_SetInputMessageCallback failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubClientCore_SetInputMessageCallback failure in test %lu/%lu", index, count);
         IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SetInputMessageCallback(iothub_handle, TEST_INPUT_NAME, test_message_confirmation_callback, NULL);
 
         // assert
@@ -3961,7 +3961,7 @@ TEST_FUNCTION(IoTHubClient_SetInputMessageCallback_fail)
         }
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "IoTHubClientCore_SetInputMessageCallback failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubClientCore_SetInputMessageCallback failure in test %lu/%lu", index, count);
         IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SetInputMessageCallback(iothub_handle, TEST_INPUT_NAME, test_message_confirmation_callback, NULL);
 
         // assert
@@ -4164,7 +4164,7 @@ TEST_FUNCTION(IoTHubClientCore_GenericMethodInvoke_fail)
                                                                            test_method_invoke_callback, CALLBACK_CONTEXT);
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "IoTHubClientCore_GenericMethodInvoke failure in test %zu/%zu in run 1", index, count);
+        sprintf(tmp_msg, "IoTHubClientCore_GenericMethodInvoke failure in test %lu/%lu in run 1", index, count);
 
         // assert
         ASSERT_ARE_NOT_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, tmp_msg);
@@ -4204,7 +4204,7 @@ TEST_FUNCTION(IoTHubClientCore_GenericMethodInvoke_fail)
                                                                            test_method_invoke_callback, CALLBACK_CONTEXT);
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "IoTHubClientCore_GenericMethodInvoke failure in test %zu/%zu in run 2", index, count);
+        sprintf(tmp_msg, "IoTHubClientCore_GenericMethodInvoke failure in test %lu/%lu in run 2", index, count);
 
         // assert
         ASSERT_ARE_NOT_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, tmp_msg);

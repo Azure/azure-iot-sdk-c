@@ -1111,7 +1111,7 @@ TEST_FUNCTION(authentication_do_work_SAS_TOKEN_AUTHENTICATION_STATE_STARTING_fai
         authentication_do_work(handle);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", i);
         ASSERT_IS_TRUE_WITH_MSG(NULL == saved_cbs_put_token_on_operation_complete, error_msg);
         ASSERT_ARE_EQUAL_WITH_MSG(int, AUTHENTICATION_STATE_ERROR, saved_on_state_changed_callback_new_state, error_msg);
         ASSERT_ARE_EQUAL_WITH_MSG(int, AUTHENTICATION_ERROR_AUTH_FAILED, saved_on_error_callback_error_code, error_msg);
@@ -1207,7 +1207,7 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_AUTHENTICATION_STATE_STARTING_f
         authentication_do_work(handle);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", i);
         ASSERT_IS_TRUE_WITH_MSG(NULL == saved_cbs_put_token_on_operation_complete, error_msg);
         ASSERT_ARE_EQUAL(int, AUTHENTICATION_STATE_ERROR, saved_on_state_changed_callback_new_state);
         ASSERT_ARE_EQUAL(int, AUTHENTICATION_ERROR_AUTH_FAILED, saved_on_error_callback_error_code);
@@ -1673,7 +1673,7 @@ TEST_FUNCTION(authentication_retrieve_options_failure_checks)
         OPTIONHANDLER_HANDLE result = authentication_retrieve_options(handle);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", i);
         ASSERT_IS_NULL_WITH_MSG(result, error_msg);
     }
 

@@ -935,7 +935,7 @@ TEST_FUNCTION(message_create_from_iothub_message_BYTEARRAY_return_errors_fails)
 
         result = message_create_uamqp_encoding_from_iothub_message(NULL, TEST_IOTHUB_MESSAGE_HANDLE, &binary_data);
 
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", i);
         ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, result, 0, error_msg);
     }
 
@@ -999,7 +999,7 @@ TEST_FUNCTION(message_create_from_iothub_message_STRING_return_errors_fails)
         result = message_create_uamqp_encoding_from_iothub_message(NULL, TEST_IOTHUB_MESSAGE_HANDLE, &binary_data);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", i);
 
         ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, result, 0, error_msg);
     }

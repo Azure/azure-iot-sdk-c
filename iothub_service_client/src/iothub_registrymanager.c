@@ -1111,7 +1111,7 @@ static IOTHUB_REGISTRYMANAGER_RESULT createRelativePath(IOTHUB_REQUEST_MODE iotH
 
         char numberStr[256];
         result = IOTHUB_REGISTRYMANAGER_ERROR;
-        if (snprintf(numberStr, 256, "%zu", numberOfDevices) > 0)
+        if (snprintf(numberStr, 256, "%lu", numberOfDevices) > 0)
         {
             if (snprintf(relativePath, 256, RELATIVE_PATH_FMT_LIST, numberStr, URL_API_VERSION) > 0)
             {

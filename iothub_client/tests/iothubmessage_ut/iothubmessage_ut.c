@@ -455,7 +455,7 @@ TEST_FUNCTION(IoTHubMessage_CreateFromByteArray_fails)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubMessage_CreateFromByteArray failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubMessage_CreateFromByteArray failure in test %lu/%lu", index, count);
 
         IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
 
@@ -527,7 +527,7 @@ TEST_FUNCTION(IoTHubMessage_CreateFromString_fails)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubMessage_CreateFromByteArray failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubMessage_CreateFromByteArray failure in test %lu/%lu", index, count);
 
         IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromString("a");
 
@@ -810,7 +810,7 @@ TEST_FUNCTION(IoTHubMessage_Clone_with_BYTE_ARRAY_fails)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubMessage_Clone failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubMessage_Clone failure in test %lu/%lu", index, count);
 
         IOTHUB_MESSAGE_HANDLE r = IoTHubMessage_Clone(h);
 
@@ -873,7 +873,7 @@ TEST_FUNCTION(IoTHubMessage_Clone_with_STRING_fails)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubMessage_Clone_w_string failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubMessage_Clone_w_string failure in test %lu/%lu", index, count);
 
         IOTHUB_MESSAGE_HANDLE r = IoTHubMessage_Clone(h);
 
@@ -1325,7 +1325,7 @@ TEST_FUNCTION(IoTHubMessage_SetContentTypeSystemProperty_Fails)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "Failed in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "Failed in test %lu/%lu", index, count);
 
         //act
         IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentTypeSystemProperty(h, TEST_CONTENT_TYPE);
@@ -1436,7 +1436,7 @@ TEST_FUNCTION(IoTHubMessage_SetContentEncodingSystemProperty_Fails)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "Failed in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "Failed in test %lu/%lu", index, count);
 
         //act
         IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentEncodingSystemProperty(h, TEST_CONTENT_ENCODING);
@@ -1706,7 +1706,7 @@ TEST_FUNCTION(IoTHubMessage_SetDiagnosticPropertyData_Fails)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "Failed in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "Failed in test %lu/%lu", index, count);
 
         //act
         IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetDiagnosticPropertyData(h, &TEST_DIAGNOSTIC_DATA);

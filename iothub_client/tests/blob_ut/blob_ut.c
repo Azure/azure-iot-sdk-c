@@ -1165,7 +1165,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
             
             umock_c_negative_tests_fail_call(i);
             char temp_str[128];
-            sprintf(temp_str, "On failed call %zu", i);
+            sprintf(temp_str, "On failed call %lu", i);
             
             ///act
             context.toUpload = context.size; /* Reinit context */
@@ -1395,7 +1395,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_with_certificate_unhappy_
 
             umock_c_negative_tests_fail_call(i);
             char temp_str[128];
-            sprintf(temp_str, "On failed call %zu", i);
+            sprintf(temp_str, "On failed call %lu", i);
 
             ///act
             context.toUpload = context.size; /* Reinit context */

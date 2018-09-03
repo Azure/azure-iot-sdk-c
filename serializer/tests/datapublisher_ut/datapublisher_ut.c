@@ -1140,7 +1140,7 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
 
             ///act
             char temp_str[128];
-            (void)sprintf(temp_str, "On failed call %zu", i);
+            (void)sprintf(temp_str, "On failed call %lu", i);
 
             ///act
             REPORTED_PROPERTIES_TRANSACTION_HANDLE handle = DataPublisher_CreateTransaction_ReportedProperties(dataPublisherHandle);
@@ -1296,7 +1296,7 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
             umock_c_negative_tests_fail_call(i);
 
             char temp_str[128];
-            (void)sprintf(temp_str, "On failed call %zu", i);
+            (void)sprintf(temp_str, "On failed call %lu", i);
 
             ///act
             result = DataPublisher_PublishTransacted_ReportedProperty(handle, reportedPropertyPath, &ag);
@@ -1396,7 +1396,7 @@ next_fail:;
             umock_c_negative_tests_fail_call(i);
 
             char temp_str[128];
-            (void)sprintf(temp_str, "On failed call %zu", i);
+            (void)sprintf(temp_str, "On failed call %lu", i);
 
             ///act
             result = DataPublisher_PublishTransacted_ReportedProperty(handle, reportedPropertyPath, &ag);
@@ -1503,7 +1503,7 @@ next_fail:;
             umock_c_negative_tests_fail_call(i);
 
             char temp_str[128];
-            (void)sprintf(temp_str, "On failed call %zu", i);
+            (void)sprintf(temp_str, "On failed call %lu", i);
 
             ///act
             result = DataPublisher_PublishTransacted_ReportedProperty(handle, reportedPropertyPath, &ag2);
