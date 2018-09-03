@@ -465,7 +465,7 @@ static int on_device_method_received(const char* method_name, const unsigned cha
 
     if (method_name == NULL || payload == NULL || size == 0 || response == NULL || response_size == NULL || userContextCallback == NULL)
     {
-        LogError("Invalid argument (method_name=%p, payload=%p, size=%zu, response=%p, response_size=%p, userContextCallback=%p)", 
+        LogError("Invalid argument (method_name=%p, payload=%p, size=%lu, response=%p, response_size=%p, userContextCallback=%p)", 
             method_name, payload, size, response, response_size, userContextCallback);
         result = -1;
     }

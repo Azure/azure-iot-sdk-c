@@ -556,7 +556,7 @@ int hsm_client_http_edge_sign_data(HSM_CLIENT_HANDLE handle, const unsigned char
    
     if (handle == NULL || data == NULL || data_len == 0 || signed_value == NULL || signed_len == NULL)
     {
-        LogError("Invalid handle value specified handle: %p, data: %p, data_len: %zu, signed_value: %p, signed_len: %p", handle, data, data_len, signed_value, signed_len);
+        LogError("Invalid handle value specified handle: %p, data: %p, data_len: %lu, signed_value: %p, signed_len: %p", handle, data, data_len, signed_value, signed_len);
         result = __FAILURE__;
     }
     else

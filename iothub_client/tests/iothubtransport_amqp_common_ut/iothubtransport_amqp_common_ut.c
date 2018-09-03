@@ -1372,7 +1372,7 @@ TEST_FUNCTION(when_creating_the_methods_handler_fails_then_IoTHubTransport_AMQP_
         device_handle = IoTHubTransport_AMQP_Common_Register(handle, &device_config, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, &TEST_waitingToSend);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", i);
         ASSERT_IS_NULL_WITH_MSG(device_handle, error_msg);
     }
 
@@ -2042,7 +2042,7 @@ TEST_FUNCTION(Create_failure_checks)
         handle = IoTHubTransport_AMQP_Common_Create(config, TEST_amqp_get_io_transport);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", i);
         ASSERT_IS_NULL_WITH_MSG(handle, error_msg);
     }
     
@@ -2307,7 +2307,7 @@ TEST_FUNCTION(Register_failure_checks)
         IOTHUB_DEVICE_HANDLE device_handle = IoTHubTransport_AMQP_Common_Register(handle, device_config, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, &TEST_waitingToSend);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", i);
         ASSERT_IS_NULL_WITH_MSG(device_handle, error_msg);
     }
 
@@ -2454,7 +2454,7 @@ TEST_FUNCTION(Subscribe_messages_failure_checks)
         int result = IoTHubTransport_AMQP_Common_Subscribe(device_handle);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", i);
         ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, error_msg);
     }
 
@@ -2606,7 +2606,7 @@ TEST_FUNCTION(GetSendStatus_failure_checks)
         IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_GetSendStatus(device_handle, &iotHubClientStatus);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", i);
         ASSERT_ARE_EQUAL_WITH_MSG(int, IOTHUB_CLIENT_ERROR, result, error_msg);
     }
 
@@ -4795,7 +4795,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SetRetryPolicy_failure_checks)
         int result = IoTHubTransport_AMQP_Common_SetRetryPolicy(handle, IOTHUB_CLIENT_RETRY_IMMEDIATE, 1600);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", i);
         ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, error_msg);
     }
 

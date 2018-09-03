@@ -413,7 +413,7 @@ TEST_FUNCTION(initialTwin_create_fail)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "initialTwin_create failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "initialTwin_create failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -676,7 +676,7 @@ TEST_FUNCTION(initialTwin_setTags_no_existing_tags_fail)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "initialTwin_setTags (no existing tags) failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "initialTwin_setTags (no existing tags) failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -746,7 +746,7 @@ TEST_FUNCTION(initialTwin_setTags_overwrite_existing_tags_fail)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "initialTwin_setTags (overwrite existing tags) failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "initialTwin_setTags (overwrite existing tags) failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -875,7 +875,7 @@ TEST_FUNCTION(initialTwin_setDesiredProperties_no_existing_desired_properties_fa
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "initialTwin_setDesiredProperties (no existing desired properties) failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "initialTwin_setDesiredProperties (no existing desired properties) failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -945,7 +945,7 @@ TEST_FUNCTION(initialTwin_setDesiredProperties_overwrite_existing_desired_proper
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "initialTwin_setDesiredProperties (overwrite existing desired properties) failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "initialTwin_setDesiredProperties (overwrite existing desired properties) failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -1062,7 +1062,7 @@ TEST_FUNCTION(initialTwin_toJson_failure)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "initialTwin_toJson failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "initialTwin_toJson failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -1163,7 +1163,7 @@ TEST_FUNCTION(initialTwin_fromJson_tags_and_desired_properties_error)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "initialTwin_FromJson_tags_and_desired_properties_error failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "initialTwin_FromJson_tags_and_desired_properties_error failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);

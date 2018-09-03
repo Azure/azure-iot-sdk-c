@@ -317,7 +317,7 @@ TEST_FUNCTION(json_deserialize_and_get_struct_array_ERROR)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "json_serialize_and_get_struct_array_ERROR failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "json_serialize_and_get_struct_array_ERROR failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -410,7 +410,7 @@ TEST_FUNCTION(json_serialize_and_set_struct_array_ERROR)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "json_serialize_and_set_struct_array_ERROR failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "json_serialize_and_set_struct_array_ERROR failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);

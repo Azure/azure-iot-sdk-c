@@ -408,7 +408,7 @@ static BUFFER_HANDLE decrypt_data(SEC_DEVICE_INFO* sec_info, const unsigned char
 
         if (enc_data_size > max_tpm_data_size)
         {
-            LogError("Failure: The encrypted data len (%zu) is too long for tpm", enc_data_size);
+            LogError("Failure: The encrypted data len (%lu) is too long for tpm", enc_data_size);
             result = NULL;
         }
         else
@@ -420,7 +420,7 @@ static BUFFER_HANDLE decrypt_data(SEC_DEVICE_INFO* sec_info, const unsigned char
             curr_pos += enc_data_size;
             act_size -= enc_data_size;
 
-            // decrypts encrypted symmetric key ‘encSecret‘ and returns it as 'tpm_blob'.
+            // decrypts encrypted symmetric key ï¿½encSecretï¿½ and returns it as 'tpm_blob'.
             // Later 'tpm_blob' is used as the inner wrapper key for import of the HMAC key blob.
             if (TPM2_ActivateCredential(&sec_info->tpm_device, &NullPwSession, &ek_sess, TPM_20_SRK_HANDLE, TPM_20_EK_HANDLE, &tpm_blob, &tpm_enc_secret, &inner_wrap_key) != TPM_RC_SUCCESS)
             {
@@ -563,7 +563,7 @@ int secure_dev_tpm_import_key(SEC_DEVICE_HANDLE handle, const unsigned char* key
     if (handle == NULL || key == NULL || key_len == 0)
     {
         /* Codes_SRS_SECURE_DEVICE_TPM_07_007: [ if handle or key are NULL, or key_len is 0 secure_dev_tpm_import_key shall return a non-zero value ] */
-        LogError("Invalid argument specified handle: %p, key: %p, key_len: %zu", handle, key, key_len);
+        LogError("Invalid argument specified handle: %p, key: %p, key_len: %lu", handle, key, key_len);
         result = __FAILURE__;
     }
     else
@@ -708,7 +708,7 @@ BUFFER_HANDLE secure_dev_tpm_decrypt_data(SEC_DEVICE_HANDLE handle, const unsign
     /* Codes_SRS_SECURE_DEVICE_TPM_07_025: [ If handle or data is NULL or data_len is 0, secure_dev_tpm_decrypt_data shall return NULL. ] */
     if (handle == NULL || data == NULL || data_len == 0)
     {
-        LogError("Invalid handle value specified handle: %p, data: %p, data_len: %zu", handle, data, data_len);
+        LogError("Invalid handle value specified handle: %p, data: %p, data_len: %lu", handle, data, data_len);
         result = NULL;
     }
     else

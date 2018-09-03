@@ -573,7 +573,7 @@ TEST_FUNCTION(amqp_connection_create_SASL_and_CBS_negative_checks)
         AMQP_CONNECTION_HANDLE handle = amqp_connection_create(config);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", i);
         ASSERT_IS_NULL_WITH_MSG(handle, error_msg);
     }
 

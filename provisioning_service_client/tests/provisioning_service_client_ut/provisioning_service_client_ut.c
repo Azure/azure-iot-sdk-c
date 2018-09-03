@@ -915,7 +915,7 @@ TEST_FUNCTION(prov_sc_create_from_connection_string_FAIL)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "prov_sc_create_from_connection_string failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "prov_sc_create_from_connection_string failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -1088,7 +1088,7 @@ TEST_FUNCTION(prov_sc_set_certificate_FAIL)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "prov_sc_set_certificate failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "prov_sc_set_certificate failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -1499,7 +1499,7 @@ TEST_FUNCTION(prov_sc_create_or_update_individual_enrollment_FAIL_null_etag)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "prov_sc_create_or_update_individual_enrollment failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "prov_sc_create_or_update_individual_enrollment failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -1562,7 +1562,7 @@ TEST_FUNCTION(prov_sc_create_or_update_individual_enrollment_FAIL_w_etag)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "prov_sc_create_or_update_individual_enrollment failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "prov_sc_create_or_update_individual_enrollment failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -1640,7 +1640,7 @@ TEST_FUNCTION(prov_sc_create_or_update_individual_enrollment_FAIL_ALL_HTTP_OPTIO
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "prov_sc_create_or_update_individual_enrollment failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "prov_sc_create_or_update_individual_enrollment failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -1804,7 +1804,7 @@ TEST_FUNCTION(prov_sc_delete_individual_enrollment_FAIL)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "prov_sc_delete_individual_enrollment failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "prov_sc_delete_individual_enrollment failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -1954,7 +1954,7 @@ TEST_FUNCTION(prov_sc_delete_individual_enrollment_by_param_FAIL)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "prov_sc_delete_individual_enrollment_by_param failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "prov_sc_delete_individual_enrollment_by_param failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -2097,7 +2097,7 @@ TEST_FUNCTION(prov_sc_get_individual_enrollment_FAIL)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "prov_sc_get_individual_enrollment failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "prov_sc_get_individual_enrollment failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -2294,7 +2294,7 @@ TEST_FUNCTION(prov_sc_create_or_update_enrollment_group_FAIL_no_etag)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "prov_sc_create_or_update_enrollment_group failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "prov_sc_create_or_update_enrollment_group failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -2358,7 +2358,7 @@ TEST_FUNCTION(prov_sc_create_or_update_enrollment_group_FAIL_w_etag)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "prov_sc_create_or_update_enrollment_group failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "prov_sc_create_or_update_enrollment_group failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -2522,7 +2522,7 @@ TEST_FUNCTION(prov_sc_delete_enrollment_group_FAIL)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "prov_sc_delete_enrollment_group failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "prov_sc_delete_enrollment_group failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -2671,7 +2671,7 @@ TEST_FUNCTION(prov_sc_delete_enrollment_group_by_param_FAIL)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "prov_sc_delete_enrollment_group_by_param failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "prov_sc_delete_enrollment_group_by_param failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -2814,7 +2814,7 @@ TEST_FUNCTION(prov_sc_get_enrollment_group_FAIL)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "prov_sc_get_enrollment_group failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "prov_sc_get_enrollment_group failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -2958,7 +2958,7 @@ TEST_FUNCTION(prov_sc_get_device_registration_state_FAIL)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "prov_sc_get_device_registration_state failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "prov_sc_get_device_registration_state failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -3117,7 +3117,7 @@ TEST_FUNCTION(prov_sc_delete_device_registration_state_FAIL)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "prov_sc_delete_device_registration_state failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "prov_sc_delete_device_registration_state failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -3265,7 +3265,7 @@ TEST_FUNCTION(prov_sc_delete_device_registration_state_by_param_FAIL)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "prov_sc_delete_device_registration_state_by_param failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "prov_sc_delete_device_registration_state_by_param failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -3461,7 +3461,7 @@ TEST_FUNCTION(prov_sc_run_individual_enrollment_bulk_operation_ERROR)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "prov_sc_run_individual_enrollment_bulk_op_ERROR failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "prov_sc_run_individual_enrollment_bulk_op_ERROR failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -3869,7 +3869,7 @@ TEST_FUNCTION(prov_sc_query_individual_enrollment_success_paging_given_token_w_t
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "prov_sc_query_individual_enrollment_success_paging_given_token_w_token_return_ERROR failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "prov_sc_query_individual_enrollment_success_paging_given_token_w_token_return_ERROR failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -4277,7 +4277,7 @@ TEST_FUNCTION(prov_sc_query_enrollment_group_success_paging_given_token_w_token_
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "prov_sc_query_enrollment_group_success_paging_given_token_w_token_return_ERROR failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "prov_sc_query_enrollment_group_success_paging_given_token_w_token_return_ERROR failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -4680,7 +4680,7 @@ TEST_FUNCTION(prov_sc_query_device_registration_state_success_paging_given_token
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "prov_sc_query_device_registration_state_success_paging_given_token_w_token_return_ERROR failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "prov_sc_query_device_registration_state_success_paging_given_token_w_token_return_ERROR failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);

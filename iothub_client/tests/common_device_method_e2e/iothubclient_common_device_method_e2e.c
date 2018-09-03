@@ -119,7 +119,7 @@ static int MethodCallback(const char* method_name, const unsigned char* payload,
     }
     else if (size != strlen(expectedMethodPayload))
     {
-        LogError("payload size incorect - expected %zu but got %zu", strlen(expectedMethodPayload), size);
+        LogError("payload size incorect - expected %lu but got %lu", strlen(expectedMethodPayload), size);
         responseCode = METHOD_RESPONSE_ERROR;
     }
     else if (memcmp(payload, expectedMethodPayload, size))

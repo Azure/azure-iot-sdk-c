@@ -943,7 +943,7 @@ TEST_FUNCTION(device_create_failure_checks)
         AMQP_DEVICE_HANDLE handle = device_create(config);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", i);
         ASSERT_IS_NULL_WITH_MSG(handle, error_msg);
     }
     
@@ -1189,7 +1189,7 @@ TEST_FUNCTION(device_stop_DEVICE_STATE_STARTED_failure_checks)
         int result = device_stop(handle);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", i);
     
         ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, error_msg);
         ASSERT_ARE_EQUAL_WITH_MSG(int, DEVICE_STATE_STOPPING, TEST_on_state_changed_callback_saved_previous_state, error_msg);
@@ -1756,7 +1756,7 @@ TEST_FUNCTION(device_retrieve_options_CBS_failure_checks)
         OPTIONHANDLER_HANDLE result = device_retrieve_options(handle);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", i);
         ASSERT_IS_NULL_WITH_MSG(result, error_msg);
     }
 
@@ -2199,7 +2199,7 @@ TEST_FUNCTION(telemetry_messenger_send_async_failure_checks)
         int result = device_send_event_async(handle, TEST_IOTHUB_MESSAGE_LIST, TEST_on_device_d2c_event_send_complete_callback, TEST_ON_DEVICE_EVENT_SEND_COMPLETE_CONTEXT);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", i);
         ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, error_msg);
     }
 
@@ -2809,7 +2809,7 @@ TEST_FUNCTION(on_messenger_message_received_callback_failure_checks)
             TEST_telemetry_messenger_subscribe_for_messages_saved_context);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", i);
         ASSERT_ARE_EQUAL_WITH_MSG(int, TELEMETRY_MESSENGER_DISPOSITION_RESULT_RELEASED, result, error_msg);
     }
 
@@ -2956,7 +2956,7 @@ TEST_FUNCTION(device_send_message_disposition_failure_checks)
         int result = device_send_message_disposition(handle, &disposition_info, DEVICE_MESSAGE_DISPOSITION_RESULT_ACCEPTED);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", i);
         ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, error_msg);
     }
 

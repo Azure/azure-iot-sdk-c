@@ -422,7 +422,7 @@ TEST_FUNCTION(individualEnrollment_create_error)
             continue;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "individualEnrollment_create_error failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "individualEnrollment_create_error failure in test %lu/%lu", index, count);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -603,7 +603,7 @@ TEST_FUNCTION(enrollmentGroup_create_error)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "enrollmentGroup_create_error failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "enrollmentGroup_create_error failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -2259,7 +2259,7 @@ TEST_FUNCTION(individualEnrollment_serializeToJson_min_error)
             continue;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "individualEnrollment_serializeToJson_min_error failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "individualEnrollment_serializeToJson_min_error failure in test %lu/%lu", index, count);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -2353,7 +2353,7 @@ TEST_FUNCTION(individualEnrollment_deserializeToJson_max_error)
             continue;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "individualEnrollment_serializeToJson_max_error failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "individualEnrollment_serializeToJson_max_error failure in test %lu/%lu", index, count);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -2430,7 +2430,7 @@ TEST_FUNCTION(individualEnrollment_deserializeFromJson_min_error)
             continue;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "individualEnrollment_deserializeFromJson_min_error failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "individualEnrollment_deserializeFromJson_min_error failure in test %lu/%lu", index, count);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -2491,7 +2491,7 @@ TEST_FUNCTION(individualEnrollment_deserializeFromJson_max_error)
             continue;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "individualEnrollment_deserializeFromJson_max_error failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "individualEnrollment_deserializeFromJson_max_error failure in test %lu/%lu", index, count);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -2667,7 +2667,7 @@ TEST_FUNCTION(enrollmentGroup_serializeToJson_min_error)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "enrollmentGroup_serializeToJson_min_error failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "enrollmentGroup_serializeToJson_min_error failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -2756,7 +2756,7 @@ TEST_FUNCTION(enrollmentGroup_serializeToJson_max_error)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "enrollmentGroup_serializeToJson_max_error failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "enrollmentGroup_serializeToJson_max_error failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -2834,7 +2834,7 @@ TEST_FUNCTION(enrollmentGroup_deserializeFromJson_min_error)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "enrollmentGroup_deserializeFromJson_min_error failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "enrollmentGroup_deserializeFromJson_min_error failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -2897,7 +2897,7 @@ TEST_FUNCTION(enrollmentGroup_deserializeFromJson_max_error)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "enrollmentGroup_deserializeFromJson_max_error failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "enrollmentGroup_deserializeFromJson_max_error failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);

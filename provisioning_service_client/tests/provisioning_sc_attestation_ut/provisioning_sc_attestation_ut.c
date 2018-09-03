@@ -333,7 +333,7 @@ TEST_FUNCTION(attestationMechanism_createWithTpm_error)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "attestationMechanism_createWithTpm_error failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "attestationMechanism_createWithTpm_error failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -428,7 +428,7 @@ TEST_FUNCTION(attestationMechanism_createWithX509ClientCert_error)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "attestationMechanism_createWithX509ClientCert_error failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "attestationMechanism_createWithX509ClientCert_error failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -523,7 +523,7 @@ TEST_FUNCTION(attestationMechanism_createWithX509SigningCert_error)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "attestationMechanism_createWithX509SigningCert_error failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "attestationMechanism_createWithX509SigningCert_error failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -618,7 +618,7 @@ TEST_FUNCTION(attestationMechanism_createWithX509CAReference_error)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "attestationMechanism_createWithX509CAReference_error failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "attestationMechanism_createWithX509CAReference_error failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -1108,7 +1108,7 @@ TEST_FUNCTION(attestationMechanism_fromJson_tpm_error)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "attestationMechanism_fromJson_tpm_error failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "attestationMechanism_fromJson_tpm_error failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -1169,7 +1169,7 @@ TEST_FUNCTION(attestationMechanism_fromJson_x509_error)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "attestationMechanism_fromJson_tpm_error failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "attestationMechanism_fromJson_tpm_error failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -1250,7 +1250,7 @@ TEST_FUNCTION(attestationMechanism_toJson_tpm_error)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "attestationMechanism_toJson_tpm_error failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "attestationMechanism_toJson_tpm_error failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -1320,7 +1320,7 @@ TEST_FUNCTION(attestationMechanism_toJson_x509_error)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "attestationMechanism_toJson_x509_error failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "attestationMechanism_toJson_x509_error failure in test %lu/%lu", test_num, test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);

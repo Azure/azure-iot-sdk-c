@@ -701,7 +701,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[64];
-            sprintf(tmp_msg, "prov_auth_get_registration_id failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "prov_auth_get_registration_id failure in test %lu/%lu", index, count);
             
             char* result = prov_auth_get_registration_id(sec_handle);
 
@@ -769,7 +769,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[64];
-            sprintf(tmp_msg, "prov_auth_get_registration_id failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "prov_auth_get_registration_id failure in test %lu/%lu", index, count);
 
             char* result = prov_auth_get_registration_id(sec_handle);
 
@@ -1147,7 +1147,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[128];
-            sprintf(tmp_msg, "prov_auth_construct_sas_token failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "prov_auth_construct_sas_token failure in test %lu/%lu", index, count);
 
             char* result = prov_auth_construct_sas_token(sec_handle, TEST_TOKEN_SCOPE_VALUE, TEST_KEY_NAME_VALUE, TEST_EXPIRY_TIME_T_VALUE);
 

@@ -1514,7 +1514,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Create_fails)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubTransportHttp_Create failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubTransportHttp_Create failure in test %lu/%lu", index, count);
 
         TRANSPORT_LL_HANDLE result = IoTHubTransportHttp_Create(&TEST_CONFIG);
 
@@ -1763,7 +1763,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_HappyPath_with_deviceKey_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubMessage_CreateFromByteArray failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubMessage_CreateFromByteArray failure in test %lu/%lu", index, count);
 
         IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
@@ -13883,8 +13883,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetMessageId_FAILED)
 }
 #endif
 
-// Tests_SRS_TRANSPORTMULTITHTTP_09_003: [ The HTTP header value of `ContentType` shall be set in the `IoTHubMessage_SetContentTypeSystemProperty`.  ]   
-// Tests_SRS_TRANSPORTMULTITHTTP_09_004: [ The HTTP header value of `ContentEncoding` shall be set in the `IoTHub_SetContentEncoding`.  ]   
+// Tests_SRS_TRANSPORTMULTITHTTP_09_003: [ The HTTP header value of `ContentType` shall be set in the `IoTHubMessage_SetContentTypeSystemProperty`.ï¿½ ]ï¿½ï¿½ 
+// Tests_SRS_TRANSPORTMULTITHTTP_09_004: [ The HTTP header value of `ContentEncoding` shall be set in the `IoTHub_SetContentEncoding`.ï¿½ ]ï¿½ï¿½ 
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetCustomContentType_SetContentEncoding_SUCCEED)
 {
     //arrange

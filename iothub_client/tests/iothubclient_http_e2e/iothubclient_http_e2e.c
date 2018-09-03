@@ -482,7 +482,7 @@ static void RecvMessage(IOTHUB_PROVISIONED_DEVICE* deviceToUse)
     {
         if (Map_AddOrUpdate(mapHandle, MSG_PROP_KEYS[i], MSG_PROP_VALS[i]) != MAP_OK)
         {
-            (void)printf("ERROR: Map_AddOrUpdate failed for property %zu!\r\n", i);
+            (void)printf("ERROR: Map_AddOrUpdate failed for property %lu!\r\n", i);
         }
     }
 
@@ -812,7 +812,7 @@ TEST_FUNCTION(IoTHub_HTTP_RecvMessage_shared_E2ETest)
     {
         if (Map_AddOrUpdate(mapHandle1, MSG_PROP_KEYS[i], MSG_PROP_VALS[i]) != MAP_OK)
         {
-            (void)printf("ERROR: Map_AddOrUpdate failed for property %zu!\r\n", i);
+            (void)printf("ERROR: Map_AddOrUpdate failed for property %lu!\r\n", i);
         }
     }
 
@@ -849,7 +849,7 @@ TEST_FUNCTION(IoTHub_HTTP_RecvMessage_shared_E2ETest)
     {
         if (Map_AddOrUpdate(mapHandle2, MSG_PROP_KEYS[i], MSG_PROP_VALS[i]) != MAP_OK)
         {
-            (void)printf("ERROR: Map_AddOrUpdate failed for property %zu!\r\n", i);
+            (void)printf("ERROR: Map_AddOrUpdate failed for property %lu!\r\n", i);
         }
     }
 

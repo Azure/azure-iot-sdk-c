@@ -405,7 +405,7 @@ static BUFFER_HANDLE decrypt_data(HSM_CLIENT_INFO* sec_info, const unsigned char
 
         if (enc_data_size > max_tpm_data_size)
         {
-            LogError("Failure: The encrypted data len (%zu) is too long for tpm", enc_data_size);
+            LogError("Failure: The encrypted data len (%lu) is too long for tpm", enc_data_size);
             result = NULL;
         }
         else
@@ -530,7 +530,7 @@ int hsm_client_tpm_import_key(HSM_CLIENT_HANDLE handle, const unsigned char* key
     if (handle == NULL || key == NULL || key_len == 0)
     {
         /* Codes_SRS_HSM_CLIENT_TPM_07_007: [ if handle or key are NULL, or key_len is 0 hsm_client_tpm_import_key shall return a non-zero value ] */
-        LogError("Invalid argument specified handle: %p, key: %p, key_len: %zu", handle, key, key_len);
+        LogError("Invalid argument specified handle: %p, key: %p, key_len: %lu", handle, key, key_len);
         result = __FAILURE__;
     }
     else
@@ -576,7 +576,7 @@ int hsm_client_tpm_get_endorsement_key(HSM_CLIENT_HANDLE handle, unsigned char**
             uint32_t data_length = TPM2B_PUBLIC_Marshal(&hsm_client_info->ek_pub, &data_pos, NULL);
             if (data_length > TPM_DATA_LENGTH)
             {
-                LogError("EK data length larger than allocated buffer %zu", data_length);
+                LogError("EK data length larger than allocated buffer %lu", data_length);
                 result = __FAILURE__;
             }
             else if ((*key = (unsigned char*)malloc(data_length)) == NULL)
@@ -622,7 +622,7 @@ int hsm_client_tpm_get_storage_key(HSM_CLIENT_HANDLE handle, unsigned char** key
             uint32_t data_length = TPM2B_PUBLIC_Marshal(&hsm_client_info->srk_pub, &data_pos, NULL);
             if (data_length > TPM_DATA_LENGTH)
             {
-                LogError("SRK data length larger than allocated buffer %zu", data_length);
+                LogError("SRK data length larger than allocated buffer %lu", data_length);
                 result = __FAILURE__;
             }
             else if ((*key = (unsigned char*)malloc(data_length)) == NULL)
@@ -647,7 +647,7 @@ int hsm_client_tpm_sign_data(HSM_CLIENT_HANDLE handle, const unsigned char* data
     /* Codes_SRS_HSM_CLIENT_TPM_07_020: [ If handle or data is NULL or data_len is 0, hsm_client_tpm_sign_data shall return NULL. ] */
     if (handle == NULL || data == NULL || data_len == 0 || signed_value == NULL || signed_len == NULL)
     {
-        LogError("Invalid handle value specified handle: %p, data: %p, data_len: %zu, signed_value: %p, signed_len: %p", handle, data, data_len, signed_value, signed_len);
+        LogError("Invalid handle value specified handle: %p, data: %p, data_len: %lu, signed_value: %p, signed_len: %p", handle, data, data_len, signed_value, signed_len);
         result = __FAILURE__;
     }
     else

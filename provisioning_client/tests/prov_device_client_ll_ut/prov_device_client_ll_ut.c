@@ -745,7 +745,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[64];
-            sprintf(tmp_msg, "Prov_Device_LL_Create failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "Prov_Device_LL_Create failure in test %lu/%lu", index, count);
             
             PROV_DEVICE_LL_HANDLE result = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
 
@@ -890,7 +890,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[64];
-            sprintf(tmp_msg, "Prov_Device_LL_Register_Device failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "Prov_Device_LL_Register_Device failure in test %lu/%lu", index, count);
 
             //act
             PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
@@ -933,7 +933,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[64];
-            sprintf(tmp_msg, "Prov_Device_LL_Register_Device failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "Prov_Device_LL_Register_Device failure in test %lu/%lu", index, count);
 
             //act
             PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
@@ -1017,7 +1017,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[64];
-            sprintf(tmp_msg, "Prov_Device_LL_DoWork failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "Prov_Device_LL_DoWork failure in test %lu/%lu", index, count);
 
             //act
             Prov_Device_LL_DoWork(handle);
@@ -1065,7 +1065,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[64];
-            sprintf(tmp_msg, "g_json_parse_cb failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "g_json_parse_cb failure in test %lu/%lu", index, count);
 
 
             result = g_json_parse_cb(TEST_JSON_REPLY, g_json_ctx);
@@ -1161,7 +1161,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[64];
-            sprintf(tmp_msg, "g_json_parse_cb failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "g_json_parse_cb failure in test %lu/%lu", index, count);
 
 
             result = g_json_parse_cb(TEST_JSON_REPLY, g_json_ctx);
@@ -1238,7 +1238,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[64];
-            sprintf(tmp_msg, "g_json_parse_cb failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "g_json_parse_cb failure in test %lu/%lu", index, count);
             
             result = g_json_parse_cb(TEST_JSON_REPLY, g_json_ctx);
 
@@ -1419,7 +1419,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[64];
-            sprintf(tmp_msg, "g_challenge_callback failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "g_challenge_callback failure in test %lu/%lu", index, count);
             
             char* result = g_challenge_callback(TEST_DATA, TEST_DATA_LEN, TEST_STRING_HANDLE_VALUE, g_challenge_ctx);
 
@@ -1541,7 +1541,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[64];
-            sprintf(tmp_msg, "g_registration_callback failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "g_registration_callback failure in test %lu/%lu", index, count);
 
             //act
             g_registration_callback(PROV_DEVICE_TRANSPORT_RESULT_OK, TEST_BUFFER_HANDLE_VALUE, TEST_IOTHUB, TEST_DEVICE_ID, g_registration_ctx);
