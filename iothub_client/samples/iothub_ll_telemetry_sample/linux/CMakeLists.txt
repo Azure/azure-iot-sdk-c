@@ -37,6 +37,7 @@ target_link_libraries(iothub_ll_telemetry_sample
     prov_auth_client
     hsm_security_client
     uhttp
+    uuid
     pthread
     curl
     ssl

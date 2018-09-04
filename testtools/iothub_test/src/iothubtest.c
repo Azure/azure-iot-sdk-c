@@ -1329,7 +1329,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
         ((len == 0) && (data != NULL)) ||
         ((data != NULL) && (len == 0)))
     {
-        LogError("Invalid arguments for IoTHubTest_SendMessage, devhubHandle = %p, len = %lu, data = %p.", devhubHandle, (unsigned long)len, data);
+        LogError("Invalid arguments for IoTHubTest_SendMessage, devhubHandle = %p, len = %zu, data = %p.", devhubHandle, len, data);
         result = IOTHUB_TEST_CLIENT_ERROR;
     }
     else

@@ -1261,10 +1261,10 @@ static int extractMqttProperties(IOTHUB_MESSAGE_HANDLE IoTHubMessage, const char
                                         }
                                         else
                                         {
-                                            strncpy(propName, tokenData, nameLen);
+                                            memcpy(propName, tokenData, nameLen);
                                             propName[nameLen] = '\0';
 
-                                            strncpy(propValue, iterator + 1, valLen);
+                                            memcpy(propValue, iterator + 1, valLen);
                                             propValue[valLen] = '\0';
 
                                             if (urldecode)
@@ -1318,10 +1318,10 @@ static int extractMqttProperties(IOTHUB_MESSAGE_HANDLE IoTHubMessage, const char
                                         }
                                         else
                                         {
-                                            strncpy(propName, tokenData, nameLen);
+                                            memcpy(propName, tokenData, nameLen);
                                             propName[nameLen] = '\0';
 
-                                            strncpy(propValue, iterator + 1, valLen);
+                                            memcpy(propValue, iterator + 1, valLen);
                                             propValue[valLen] = '\0';
 
                                             if (urldecode)

@@ -289,14 +289,21 @@ MULTITREE_RESULT MultiTree_AddLeaf(MULTITREE_HANDLE treeHandle, const char* dest
             /*if there's more or 1 delimiter in the path... */
             /*Codes_SRS_MULTITREE_99_017:[ Subsequent names designate hierarchical children in the tree. The last child designates the child that will receive the value.]*/
             char firstInnerNodeName[INNER_NODE_NAME_SIZE];
-            if (strncpy_s(firstInnerNodeName, INNER_NODE_NAME_SIZE, destinationPath, whereIsDelimiter - destinationPath) != 0)
+            if ((whereIsDelimiter - destinationPath) >= INNER_NODE_NAME_SIZE)
             {
                 /*Codes_SRS_MULTITREE_99_025:[ The function shall return MULTITREE_ERROR to indicate any other error not specified here.]*/
                 result = MULTITREE_ERROR;
-                LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+                LogError("Destination path is too large %d", whereIsDelimiter - destinationPath);
+            }
+            else if (memcpy(firstInnerNodeName, destinationPath, whereIsDelimiter - destinationPath) == NULL)
+            {
+                /*Codes_SRS_MULTITREE_99_025:[ The function shall return MULTITREE_ERROR to indicate any other error not specified here.]*/
+                result = MULTITREE_ERROR;
+                LogError("(result = MULTITREE_ERROR)");
             }
             else
             {
+                firstInnerNodeName[whereIsDelimiter - destinationPath] = 0;
                 MULTITREE_HANDLE_DATA *child = getChildByName(node, firstInnerNodeName);
                 if (child == NULL)
                 {

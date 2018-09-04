@@ -534,7 +534,7 @@ static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_
                             else
                             {
                                 memset(IoTHubName, 0, whereIsDot - hostname + 1);
-                                (void)strncpy(IoTHubName, hostname, whereIsDot - hostname);
+                                (void)memcpy(IoTHubName, hostname, whereIsDot - hostname);
                                 (void)strcpy(IoTHubSuffix, whereIsDot+1);
 
                                 actual_config.deviceId = device_config->deviceId;
