@@ -32,6 +32,7 @@ typedef char* (*HSM_CLIENT_GET_TRUST_BUNDLE)(HSM_CLIENT_HANDLE handle);
 
 // Symmetrical Keys
 typedef char* (*HSM_CLIENT_GET_SYMMETRICAL_KEY)(HSM_CLIENT_HANDLE handle);
+typedef char* (*HSM_CLIENT_GET_REGISTRATION_NAME)(HSM_CLIENT_HANDLE handle);
 
 typedef struct HSM_CLIENT_TPM_INTERFACE_TAG
 {
@@ -70,7 +71,7 @@ typedef struct HSM_CLIENT_KEY_INTERFACE_TAG
     HSM_CLIENT_DESTROY hsm_client_key_destroy;
 
     HSM_CLIENT_GET_SYMMETRICAL_KEY hsm_client_get_symm_key;
-    HSM_CLIENT_GET_COMMON_NAME hsm_client_get_registration_name;
+    HSM_CLIENT_GET_REGISTRATION_NAME hsm_client_get_registration_name;
 } HSM_CLIENT_KEY_INTERFACE;
 
 extern int initialize_hsm_system();
@@ -84,8 +85,6 @@ extern int hsm_client_x509_init();
 extern void hsm_client_x509_deinit();
 extern int hsm_client_tpm_init();
 extern void hsm_client_tpm_deinit();
-//extern int hsm_client_key_init();
-//extern void hsm_client_key_deinit();
 
 #ifdef HSM_TYPE_HTTP_EDGE
 extern int hsm_client_http_edge_init();

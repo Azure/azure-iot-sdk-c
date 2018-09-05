@@ -1,16 +1,16 @@
 # Provisioning Device Client SDK
 
-The Provisioning Device SDK enables automatic provisioning of a device using an HSM (Hardware Security Module) against an IoThub.  There are two different authentication mode that the client supports: x509 or TPM.
+The Provisioning Device SDK enables automatic provisioning of a device using an HSM (Hardware Security Module) against an IoThub.  There are three different authentication mode that the client supports: x509, TPM or Symmetric Keys.
 
 ## Enabling Provisioning Device Client
 
-To use the Provisioning Device client code to connect to windows and linux HSM requires a switch to be sent during cmake initialization.  The following cmake command will enable provisioning:
+To use the Provisioning Device client code to connect to windows or linux HSM requires a switch to be sent during cmake initialization.  The following cmake command will enable provisioning:
 
 ```Shell
 cmake -Duse_prov_client:BOOL=ON ..
 ```
 
-## Enabling Provisioning Device Client  simulator
+## Enabling Provisioning Device Client simulator
 
 For development purposes the Provisioning Device Client uses simulators to mock hardware chips functionality:
 
@@ -30,7 +30,7 @@ For x509 the Provisioning Device Client enables a DICE hardware simulator that e
 
 ## Adding Enrollments with Azure Portal
 
-To enroll a device in the azure portal you will need to either get the Registration Id and Endorsement Key for TPM devices or the root CA certificate.  Running the provisioning tool will print out the information to be used in the portal:
+To enroll a device in the azure portal you will need to either get the Registration Id and Endorsement Key for TPM devices, the root CA certificate for x509 device or the Symmetric Key.  Running the provisioning tool will print out the information to be used in the portal:
 
 ### TPM Provisioning Tool
 
@@ -43,6 +43,10 @@ To enroll a device in the azure portal you will need to either get the Registrat
 ```Shell
 ./[cmake dir]/provisioning_client/tools/dice_device_provision/dice_device_provision.exe
 ```
+
+### Symmetric Key
+
+- For Symmetric Key the key value will be retrieve upon the creation of the device registration.
 
 ### Provisioning Samples
 
@@ -64,6 +68,15 @@ SECURE_DEVICE_TYPE hsm_type;
 hsm_type = SECURE_DEVICE_TYPE_TPM;
 // or
 hsm_type = SECURE_DEVICE_TYPE_X509;
+// or
+hsm_type = SECURE_DEVICE_TYPE_SYMMETRIC_KEY;
+```
+
+- If you are using symmetric key authentication you will need to update the following variables in the hsm_client_key.c file.
+
+```C
+static const char* const SYMMETRIC_KEY_VALUE = "Enter Symmetric key here";
+static const char* const REGISTRATION_NAME = "Enter Registration Id here";
 ```
 
 Once these changes are made you can compile and run the sample that you have chosen.

@@ -408,12 +408,12 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
 
             case PROV_DEVICE_TRANSPORT_STATUS_ERROR:
             {
-#ifndef NO_LOGGING
                 char* json_operation_id = NULL;
                 JSON_Object* json_reg_state = NULL;
                 if ((json_reg_state = json_object_get_object(json_object, JSON_NODE_REG_STATUS)) != NULL && 
                     (json_operation_id = retrieve_json_item(json_object, JSON_NODE_OPERATION_ID)) != NULL)
                 {
+#ifndef NO_LOGGING
                     JSON_Value* json_error_date_time = NULL;
                     JSON_Value* json_error_msg = NULL;
                     if ((json_error_msg = json_object_get_value(json_reg_state, JSON_NODE_ERROR_MSG)) != NULL &&
@@ -426,12 +426,12 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
                         LogError("Unsuccessful json encountered: %s", json_document);
                     }
                     free(json_operation_id);
+#endif
                 }
                 else
                 {
                     LogError("Unsuccessful json encountered: %s", json_document);
                 }
-#endif
                 prov_info->error_reason = PROV_DEVICE_RESULT_DEV_AUTH_ERROR;
                 free(result);
                 result = NULL;
