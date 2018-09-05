@@ -272,7 +272,7 @@ extern "C"
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_SetOption, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, const char*, optionName, const void*, value);
 
     /**
-    * @brief	This API specifies a call back to be used when the device receives a state update.
+    * @brief	This API specifies a callback to be used when the device receives a state update.
     *
     * @param	iotHubClientHandle		The handle created by a call to the create function.
     * @param	deviceTwinCallback	    The callback specified by the device client to be used for updating
@@ -309,7 +309,7 @@ extern "C"
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_SendReportedState, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, const unsigned char*, reportedState, size_t, size, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK, reportedStateCallback, void*, userContextCallback);
 
     /**
-    * @brief	This API sets callback for cloud to device method call.
+    * @brief	This API sets the callback for cloud to device method calls.
     *
     * @param	iotHubClientHandle		The handle created by a call to the create function.
     * @param	deviceMethodCallback	The callback which will be called by IoTHub.
@@ -321,7 +321,7 @@ extern "C"
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_SetDeviceMethodCallback, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC, deviceMethodCallback, void*, userContextCallback);
 
     /**
-    * @brief	This API sets callback for async cloud to device method call.
+    * @brief	This API sets the callback for async cloud to device method calls.
     *
     * @param	iotHubClientHandle		        The handle created by a call to the create function.
     * @param	inboundDeviceMethodCallback     The callback which will be called by IoTHub.
@@ -333,7 +333,7 @@ extern "C"
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_SetDeviceMethodCallback_Ex, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK, inboundDeviceMethodCallback, void*, userContextCallback);
 
     /**
-    * @brief	This API responses to a asnyc method callback identified the methodId.
+    * @brief	This API responds to an asnyc method callback identified by the methodId.
     *
     * @param	iotHubClientHandle      The handle created by a call to the create function.
     * @param	methodId                The methodId of the Device Method callback.
