@@ -75,7 +75,7 @@ MOCKABLE_FUNCTION(, const char*, json_value_get_string, const JSON_Value*, value
 MOCKABLE_FUNCTION(, JSON_Object*, json_object_get_object, const JSON_Object*, object, const char*, name);
 MOCKABLE_FUNCTION(, void, json_value_free, JSON_Value*, value);
 MOCKABLE_FUNCTION(, void, on_transport_error, PROV_DEVICE_TRANSPORT_ERROR, transport_error, void*, user_context);
-
+MOCKABLE_FUNCTION(, double, json_value_get_number, const JSON_Value*, value);
 #undef ENABLE_MOCKS
 
 static TEST_MUTEX_HANDLE g_testByTest;
@@ -144,6 +144,7 @@ static char* TEST_STRING_VALUE = "Test_String_Value";
 static const char* PROV_ASSIGNED_STATUS = "assigned";
 static const char* PROV_ASSIGNING_STATUS = "assigning";
 static const char* PROV_UNASSIGNED_STATUS = "unassigned";
+static const char* PROV_DISABLED_STATUS = "disabled";
 static const char* PROV_FAILURE_STATUS = "failure";
 
 static int TEST_STATUS_CODE_OK = 200;
@@ -154,6 +155,9 @@ static int TEST_ERROR_STATUS_CODE = 500;
 #define TEST_JSON_OBJECT_VALUE (JSON_Object*)0x11111113
 #define TEST_JSON_STATUS_VALUE (JSON_Value*)0x11111114
 #define TEST_BUFFER_HANDLE_VALUE (BUFFER_HANDLE)0x11111115
+
+#define TEST_DPS_HUB_ERROR_NO_HUB        400208
+#define TEST_DPS_HUB_ERROR_UNAUTH        400209
 
 static unsigned char TEST_ENDORSMENT_KEY[] = { 'k', 'e', 'y' };
 
@@ -645,7 +649,18 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG));
     }
 
-    static void setup_parse_json_error_mocks(void)
+    static void setup_parse_json_disabled_mocks(void)
+    {
+        STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_PTR_ARG)).SetReturn(PROV_DISABLED_STATUS);
+        setup_retrieve_json_item_mocks(TEST_STRING_VALUE);
+        STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG));
+    }
+
+    static void setup_parse_json_error_mocks(double return_err_num)
     {
         STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
@@ -656,6 +671,10 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         setup_retrieve_json_item_mocks(TEST_STRING_VALUE);
         STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+        STRICT_EXPECTED_CALL(json_value_get_number(IGNORED_PTR_ARG)).SetReturn(return_err_num);
+        STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
         STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
         STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_PTR_ARG));
@@ -1116,7 +1135,30 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         Prov_Device_LL_DoWork(handle);
         umock_c_reset_all_calls();
 
-        setup_parse_json_error_mocks();
+        setup_parse_json_error_mocks(0);
+
+        //act
+        result = g_json_parse_cb(TEST_JSON_REPLY, g_json_ctx);
+
+        //assert
+        ASSERT_IS_NULL(result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        Prov_Device_LL_Destroy(handle);
+    }
+
+    TEST_FUNCTION(Prov_Device_LL_parse_json_no_hub_succeed)
+    {
+        PROV_JSON_INFO* result;
+        //arrange
+        PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
+        (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, g_status_ctx);
+        Prov_Device_LL_DoWork(handle);
+        umock_c_reset_all_calls();
+
+        setup_parse_json_error_mocks(TEST_DPS_HUB_ERROR_NO_HUB);
 
         //act
         result = g_json_parse_cb(TEST_JSON_REPLY, g_json_ctx);
