@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-/** @file iothub_client_ll.h
+/** @file iothub_device_client_ll.h
 *    @brief     APIs that allow a user (usually a device) to communicate
 *             with an Azure IoTHub.
 *
@@ -282,7 +282,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_SetOption, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, optionName, const void*, value);
 
     /**
-    * @brief   This API specifies a call back to be used when the device receives a desired state update.
+    * @brief   This API specifies a callback to be used when the device receives a desired state update.
     *
     * @param   iotHubClientHandle        The handle created by a call to the create function.
     * @param   deviceTwinCallback        The callback specified by the device client to be used for updating
@@ -302,7 +302,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_SetDeviceTwinCallback, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK, deviceTwinCallback, void*, userContextCallback);
 
     /**
-    * @brief    This API sneds a report of the device's properties and their current values.
+    * @brief    This API sends a report of the device's properties and their current values.
     *
     * @param    iotHubClientHandle        The handle created by a call to the create function.
     * @param    reportedState             The current device property values to be 'reported' to the IoTHub.
@@ -318,7 +318,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     */
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_SendReportedState, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle, const unsigned char*, reportedState, size_t, size, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK, reportedStateCallback, void*, userContextCallback);
      /**
-     * @brief    This API sets callback for async cloud to device method call.
+     * @brief    This API sets the callback for async cloud to device method calls.
      *
      * @param    iotHubClientHandle                 The handle created by a call to the create function.
      * @param    inboundDeviceMethodCallback        The callback which will be called by IoTHub.
@@ -330,7 +330,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_SetDeviceMethodCallback, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC, deviceMethodCallback, void*, userContextCallback);
 
      /**
-     * @brief    This API responses to a asnyc method callback identified the methodId.
+     * @brief    This API responds to an asnyc method callback identified the methodId.
      *
      * @param    iotHubClientHandle      The handle created by a call to the create function.
      * @param    methodId                The methodId of the Device Method callback.

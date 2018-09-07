@@ -283,24 +283,27 @@ void test_device_method_with_string_ex(IOTHUB_PROVISIONED_DEVICE** devicesToUse,
     }
 
     beginOperation = time(NULL);
-    bool continue_running = true;
+    bool continue_running;
     do
     {
+        continue_running = false;
+
         for (iterator = 0; iterator < number_of_multiplexed_devices; iterator++)
         {
-            continue_running = false;
-
             if (Lock(connection_infos[iterator]->lock) != LOCK_OK)
             {
                 ASSERT_FAIL("unable to lock");
             }
             else
             {
-                if (connection_infos[iterator]->conn_status != IOTHUB_CLIENT_CONNECTION_AUTHENTICATED)
+                IOTHUB_CLIENT_CONNECTION_STATUS conn_status = connection_infos[iterator]->conn_status;
+                (void)Unlock(connection_infos[iterator]->lock);
+
+                if (conn_status != IOTHUB_CLIENT_CONNECTION_AUTHENTICATED)
                 {
                     continue_running = true;
+                    break;
                 }
-                (void)Unlock(connection_infos[iterator]->lock);
             }
         }
 

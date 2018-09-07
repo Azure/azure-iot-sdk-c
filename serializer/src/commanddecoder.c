@@ -181,6 +181,12 @@ static EXECUTE_COMMAND_RESULT DecodeAndExecuteModelAction(COMMAND_DECODER_HANDLE
         LogError("Invalid action name");
         result = EXECUTE_COMMAND_ERROR;
     }
+    else if (strLength >= 128)
+    {
+        /* Codes_SRS_COMMAND_DECODER_99_021:[ If the parsing of the command fails for any other reason the command shall not be dispatched.] */
+        LogError("Invalid action name length");
+        result = EXECUTE_COMMAND_ERROR;
+    }
     else
     {
         /* Codes_SRS_COMMAND_DECODER_99_006:[ The action name shall be decoded from the element "Name" of the command JSON.] */
@@ -188,10 +194,7 @@ static EXECUTE_COMMAND_RESULT DecodeAndExecuteModelAction(COMMAND_DECODER_HANDLE
         size_t argCount;
         MULTITREE_HANDLE parametersTreeNode;
 
-#ifdef _MSC_VER
-#pragma warning(suppress: 6324) /* We intentionally use here strncpy */ 
-#endif
-        if (strncpy(tempStr, actionName, strLength - 1) == NULL)
+        if (memcpy(tempStr, actionName, strLength-1) == NULL)
         {
             /* Codes_SRS_COMMAND_DECODER_99_021:[ If the parsing of the command fails for any other reason the command shall not be dispatched.] */
             LogError("Invalid action name.");
@@ -206,8 +209,7 @@ static EXECUTE_COMMAND_RESULT DecodeAndExecuteModelAction(COMMAND_DECODER_HANDLE
         }
         else
         {
-            tempStr[strLength - 1] = 0;
-
+            tempStr[strLength-1] = 0;
             /* Codes_SRS_COMMAND_DECODER_99_009:[ CommandDecoder shall call Schema_GetModelActionByName to obtain the information about a specific action.] */
             if (((modelActionHandle = Schema_GetModelActionByName(modelHandle, tempStr)) == NULL) ||
                 (Schema_GetModelActionArgumentCount(modelActionHandle, &argCount) != SCHEMA_OK))

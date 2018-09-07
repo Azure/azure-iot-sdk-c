@@ -946,6 +946,7 @@ void* CodeFirst_CreateDevice(SCHEMA_MODEL_TYPE_HANDLE model, const REFLECTED_DAT
                     if (schemaResult != SCHEMA_OK)
                     {
                         Device_Destroy(deviceHeader->DeviceHandle);
+                        free(newDevices);
                         free(deviceHeader->data);
                         free(deviceHeader);
 

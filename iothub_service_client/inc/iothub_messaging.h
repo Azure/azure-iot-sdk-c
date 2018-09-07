@@ -90,6 +90,17 @@ MOCKABLE_FUNCTION(, IOTHUB_MESSAGING_RESULT, IoTHubMessaging_SendAsync, IOTHUB_M
 */
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGING_RESULT, IoTHubMessaging_SetFeedbackMessageCallback, IOTHUB_MESSAGING_CLIENT_HANDLE, messagingClientHandle, IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK, feedbackMessageReceivedCallback, void*, userContextCallback);
 
+/**
+* @brief    This function is meant to be called by the user when to
+*           set the trusted certificate on the tls connection.
+*
+* @param    messagingHandle The handle created by a call to the create function.
+* @param    trusted_cert    The trusted certificate that will be set.
+*
+* @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
+*/
+MOCKABLE_FUNCTION(, IOTHUB_MESSAGING_RESULT, IoTHubMessaging_SetTrustedCert, IOTHUB_MESSAGING_CLIENT_HANDLE, messagingClientHandle, const char*, trusted_cert);
+
 #ifdef __cplusplus
 }
 #endif

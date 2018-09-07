@@ -10,7 +10,7 @@ Outlined below are the steps to customize a device HSM for the IoThub SDK Client
 
 ## Developing a Custom Repo
 
-- You must develop a library to provide access to the target HSM.  This library will need to be a static library for which the IoThub SDK to link against.  For more detail see the [custom_hsm_example](https://github.com/Azure/azure-iot-sdk-c/tree/master/provisioning_client/samples/custom_hsm_example)
+- You must develop a library to provide access to the target HSM.  This library will need to be a static library for which the IoThub SDK to link against.  To see an example of how a custom HSM works see the [custom_hsm_example](https://github.com/Azure/azure-iot-sdk-c/tree/master/provisioning_client/samples/custom_hsm_example) project in the sdk.
 
 - The library must implement functions defined in the [hsm_client_data file](https://github.com/Azure/azure-iot-sdk-c/tree/master/provisioning_client/adapters/hsm_client_data.h)
 

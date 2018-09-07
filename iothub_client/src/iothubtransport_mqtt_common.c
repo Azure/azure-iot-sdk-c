@@ -11,6 +11,7 @@
 #include "azure_c_shared_utility/doublylinkedlist.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/agenttime.h"
+#include "azure_c_shared_utility/threadapi.h"
 
 #include "iothub_client_core_ll.h"
 #include "iothub_client_options.h"
@@ -52,6 +53,7 @@
 
 #define DEFAULT_RETRY_POLICY                IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER
 #define DEFAULT_RETRY_TIMEOUT_IN_SECONDS    0
+#define MAX_DISCONNECT_VALUE                50
 
 static const char TOPIC_DEVICE_TWIN_PREFIX[] = "$iothub/twin";
 static const char TOPIC_DEVICE_METHOD_PREFIX[] = "$iothub/methods";
@@ -1259,10 +1261,10 @@ static int extractMqttProperties(IOTHUB_MESSAGE_HANDLE IoTHubMessage, const char
                                         }
                                         else
                                         {
-                                            strncpy(propName, tokenData, nameLen);
+                                            memcpy(propName, tokenData, nameLen);
                                             propName[nameLen] = '\0';
 
-                                            strncpy(propValue, iterator + 1, valLen);
+                                            memcpy(propValue, iterator + 1, valLen);
                                             propValue[valLen] = '\0';
 
                                             if (urldecode)
@@ -1316,10 +1318,10 @@ static int extractMqttProperties(IOTHUB_MESSAGE_HANDLE IoTHubMessage, const char
                                         }
                                         else
                                         {
-                                            strncpy(propName, tokenData, nameLen);
+                                            memcpy(propName, tokenData, nameLen);
                                             propName[nameLen] = '\0';
 
-                                            strncpy(propValue, iterator + 1, valLen);
+                                            memcpy(propValue, iterator + 1, valLen);
                                             propValue[valLen] = '\0';
 
                                             if (urldecode)
@@ -1683,6 +1685,15 @@ static void ResetConnectionIfNecessary(PMQTTTRANSPORT_HANDLE_DATA transport_data
     }
 }
 
+static void mqtt_disconnect_cb(void* ctx)
+{
+    if (ctx != NULL)
+    {
+        int* disconn_recv = (int*)ctx;
+        *disconn_recv = 1;
+    }
+}
+
 static void DisconnectFromClient(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 {
     if (!transport_data->isDestroyCalled)
@@ -1690,8 +1701,19 @@ static void DisconnectFromClient(PMQTTTRANSPORT_HANDLE_DATA transport_data)
         OPTIONHANDLER_HANDLE options = xio_retrieveoptions(transport_data->xioTransport);
         set_saved_tls_options(transport_data, options);
     }
-
-    (void)mqtt_client_disconnect(transport_data->mqttClient, NULL, NULL);
+    // Ensure the disconnect message is sent
+    if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_CONNECTED)
+    {
+        int disconn_recv = 0;
+        (void)mqtt_client_disconnect(transport_data->mqttClient, mqtt_disconnect_cb, &disconn_recv);
+        size_t disconnect_ctr = 0;
+        do
+        {
+            mqtt_client_dowork(transport_data->mqttClient);
+            disconnect_ctr++;
+            ThreadAPI_Sleep(50);
+        } while ((disconnect_ctr < MAX_DISCONNECT_VALUE) && (disconn_recv == 0));
+    }
     xio_destroy(transport_data->xioTransport);
     transport_data->xioTransport = NULL;
 
@@ -1835,37 +1857,41 @@ static void SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transport_data)
     }
 }
 
-static const unsigned char* RetrieveMessagePayload(IOTHUB_MESSAGE_HANDLE messageHandle, size_t* length)
+static bool RetrieveMessagePayload(IOTHUB_MESSAGE_HANDLE messageHandle, const unsigned char** payload, size_t* length)
 {
-    const unsigned char* result;
-
+    bool result;
     IOTHUBMESSAGE_CONTENT_TYPE contentType = IoTHubMessage_GetContentType(messageHandle);
     if (contentType == IOTHUBMESSAGE_BYTEARRAY)
     {
-        if (IoTHubMessage_GetByteArray(messageHandle, &result, length) != IOTHUB_MESSAGE_OK)
+        if (IoTHubMessage_GetByteArray(messageHandle, &(*payload), length) != IOTHUB_MESSAGE_OK)
         {
             LogError("Failure result from IoTHubMessage_GetByteArray");
-            result = NULL;
-            *length = 0;
-        }
-    }
-    else if (contentType == IOTHUBMESSAGE_STRING)
-    {
-        result = (const unsigned char*)IoTHubMessage_GetString(messageHandle);
-        if (result == NULL)
-        {
-            LogError("Failure result from IoTHubMessage_GetString");
-            result = NULL;
+            result = false;
             *length = 0;
         }
         else
         {
-            *length = strlen((const char*)result);
+            result = true;
+        }
+    }
+    else if (contentType == IOTHUBMESSAGE_STRING)
+    {
+        *payload = (const unsigned char*)IoTHubMessage_GetString(messageHandle);
+        if (*payload == NULL)
+        {
+            LogError("Failure result from IoTHubMessage_GetString");
+            result = false;
+            *length = 0;
+        }
+        else
+        {
+            *length = strlen((const char*)*payload);
+            result = true;
         }
     }
     else
     {
-        result = NULL;
+        result = false;
         *length = 0;
     }
     return result;
@@ -2175,14 +2201,9 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 if ((current_time - transport_data->mqtt_connect_time) / 1000 > (transport_data->option_sas_token_lifetime_secs*SAS_REFRESH_MULTIPLIER))
                 {
                     /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_058: [ If the sas token has timed out IoTHubTransport_MQTT_Common_DoWork shall disconnect from the mqtt client and destroy the transport information and wait for reconnect. ] */
-                    OPTIONHANDLER_HANDLE options = xio_retrieveoptions(transport_data->xioTransport);
-                    set_saved_tls_options(transport_data, options);
-                    (void)mqtt_client_disconnect(transport_data->mqttClient, NULL, NULL);
-                    xio_destroy(transport_data->xioTransport);
-                    transport_data->xioTransport = NULL;
+                    DisconnectFromClient(transport_data);
 
                     IoTHubClientCore_LL_ConnectionStatusCallBack(transport_data->llClientHandle, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_EXPIRED_SAS_TOKEN);
-                    transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_NOT_CONNECTED;
                     transport_data->currPacketState = UNKNOWN_TYPE;
                     transport_data->device_twin_get_sent = false;
                     if (transport_data->topic_MqttMessage != NULL)
@@ -2871,10 +2892,12 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIEN
                         else
                         {
                             size_t messageLength;
-                            const unsigned char* messagePayload = RetrieveMessagePayload(mqttMsgEntry->iotHubMessageEntry->messageHandle, &messageLength);
-                            if (messageLength == 0 || messagePayload == NULL)
+                            const unsigned char* messagePayload = NULL;
+                            if (!RetrieveMessagePayload(mqttMsgEntry->iotHubMessageEntry->messageHandle, &messagePayload, &messageLength))
                             {
                                 LogError("Failure from creating Message IoTHubMessage_GetData");
+                                (void)DList_RemoveEntryList(currentListEntry);
+                                sendMsgComplete(mqttMsgEntry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_ERROR);
                             }
                             else
                             {
@@ -2900,9 +2923,11 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIEN
 
                     /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_027: [IoTHubTransport_MQTT_Common_DoWork shall inspect the "waitingToSend" DLIST passed in config structure.] */
                     size_t messageLength;
-                    const unsigned char* messagePayload = RetrieveMessagePayload(iothubMsgList->messageHandle, &messageLength);
-                    if (messageLength == 0 || messagePayload == NULL)
+                    const unsigned char* messagePayload = NULL;
+                    if (!RetrieveMessagePayload(iothubMsgList->messageHandle, &messagePayload, &messageLength))
                     {
+                        (void)(DList_RemoveEntryList(currentListEntry));
+                        sendMsgComplete(iothubMsgList, transport_data, IOTHUB_CLIENT_CONFIRMATION_ERROR);
                         LogError("Failure result from IoTHubMessage_GetData");
                     }
                     else

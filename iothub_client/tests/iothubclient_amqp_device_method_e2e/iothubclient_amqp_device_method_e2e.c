@@ -95,10 +95,11 @@ BEGIN_TEST_SUITE(iothubclient_amqp_device_method_e2e)
         device_method_e2e_method_call_with_embedded_single_quote_x509(AMQP_Protocol);
     }
 #endif
-    //TEST_FUNCTION(IotHub_AMQP_Method_Call_With_String_sas_multiplexed)
-    //{
-    //    device_method_e2e_method_call_with_string_sas_multiplexed(AMQP_Protocol, 2);
-    //}
+
+    TEST_FUNCTION(IotHub_AMQP_Method_Call_With_String_sas_multiplexed)
+    {
+        device_method_e2e_method_call_with_string_sas_multiplexed(AMQP_Protocol, 2);
+    }
 
     TEST_FUNCTION(IotHub_AMQP_Method_Call_With_String_sas_multiplexed_single_device)
     {

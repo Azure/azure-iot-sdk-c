@@ -133,7 +133,7 @@ static int read_and_parse_edge_uri(HSM_CLIENT_HTTP_EDGE* hsm_client_http_edge)
             {
                 const char* hostname_start = workload_uri + http_prefix_len;
                 size_t chars_to_copy = colon_begin - workload_uri - http_prefix_len;
-                strncpy(hsm_client_http_edge->workload_hostname, hostname_start, chars_to_copy);
+                memcpy(hsm_client_http_edge->workload_hostname, hostname_start, chars_to_copy);
                 hsm_client_http_edge->workload_hostname[chars_to_copy] = 0;
                 result = 0;
             }
