@@ -1857,37 +1857,41 @@ static void SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transport_data)
     }
 }
 
-static const unsigned char* RetrieveMessagePayload(IOTHUB_MESSAGE_HANDLE messageHandle, size_t* length)
+static bool RetrieveMessagePayload(IOTHUB_MESSAGE_HANDLE messageHandle, const unsigned char** payload, size_t* length)
 {
-    const unsigned char* result;
-
+    bool result;
     IOTHUBMESSAGE_CONTENT_TYPE contentType = IoTHubMessage_GetContentType(messageHandle);
     if (contentType == IOTHUBMESSAGE_BYTEARRAY)
     {
-        if (IoTHubMessage_GetByteArray(messageHandle, &result, length) != IOTHUB_MESSAGE_OK)
+        if (IoTHubMessage_GetByteArray(messageHandle, &(*payload), length) != IOTHUB_MESSAGE_OK)
         {
             LogError("Failure result from IoTHubMessage_GetByteArray");
-            result = NULL;
-            *length = 0;
-        }
-    }
-    else if (contentType == IOTHUBMESSAGE_STRING)
-    {
-        result = (const unsigned char*)IoTHubMessage_GetString(messageHandle);
-        if (result == NULL)
-        {
-            LogError("Failure result from IoTHubMessage_GetString");
-            result = NULL;
+            result = false;
             *length = 0;
         }
         else
         {
-            *length = strlen((const char*)result);
+            result = true;
+        }
+    }
+    else if (contentType == IOTHUBMESSAGE_STRING)
+    {
+        *payload = (const unsigned char*)IoTHubMessage_GetString(messageHandle);
+        if (*payload == NULL)
+        {
+            LogError("Failure result from IoTHubMessage_GetString");
+            result = false;
+            *length = 0;
+        }
+        else
+        {
+            *length = strlen((const char*)*payload);
+            result = true;
         }
     }
     else
     {
-        result = NULL;
+        result = false;
         *length = 0;
     }
     return result;
@@ -2888,10 +2892,12 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIEN
                         else
                         {
                             size_t messageLength;
-                            const unsigned char* messagePayload = RetrieveMessagePayload(mqttMsgEntry->iotHubMessageEntry->messageHandle, &messageLength);
-                            if (messageLength == 0 || messagePayload == NULL)
+                            const unsigned char* messagePayload = NULL;
+                            if (!RetrieveMessagePayload(mqttMsgEntry->iotHubMessageEntry->messageHandle, &messagePayload, &messageLength))
                             {
                                 LogError("Failure from creating Message IoTHubMessage_GetData");
+                                (void)DList_RemoveEntryList(currentListEntry);
+                                sendMsgComplete(mqttMsgEntry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_ERROR);
                             }
                             else
                             {
@@ -2917,9 +2923,11 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIEN
 
                     /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_027: [IoTHubTransport_MQTT_Common_DoWork shall inspect the "waitingToSend" DLIST passed in config structure.] */
                     size_t messageLength;
-                    const unsigned char* messagePayload = RetrieveMessagePayload(iothubMsgList->messageHandle, &messageLength);
-                    if (messageLength == 0 || messagePayload == NULL)
+                    const unsigned char* messagePayload = NULL;
+                    if (!RetrieveMessagePayload(iothubMsgList->messageHandle, &messagePayload, &messageLength))
                     {
+                        (void)(DList_RemoveEntryList(currentListEntry));
+                        sendMsgComplete(iothubMsgList, transport_data, IOTHUB_CLIENT_CONFIRMATION_ERROR);
                         LogError("Failure result from IoTHubMessage_GetData");
                     }
                     else
