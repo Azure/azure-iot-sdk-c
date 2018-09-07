@@ -41,7 +41,7 @@ if(${use_http})
 endif()
 
 if(${use_amqp})
-    target_link_libraries(iothub_ll_client_shared_sample 
+    target_link_libraries(iothub_ll_client_shared_sample
     iothub_client_amqp_transport
     iothub_client_amqp_ws_transport)
     linkUAMQP(iothub_ll_client_shared_sample)

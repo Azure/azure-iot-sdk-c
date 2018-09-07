@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 /** @file   iothub_message.h
-*	@brief  The @c IoTHub_Message component encapsulates one message that
+*    @brief  The @c IoTHub_Message component encapsulates one message that
 *           can be transferred by an IoT hub client.
 */
 
@@ -10,7 +10,7 @@
 #define IOTHUB_MESSAGE_H
 
 #include "azure_c_shared_utility/macro_utils.h"
-#include "azure_c_shared_utility/map.h" 
+#include "azure_c_shared_utility/map.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
 
 #ifdef __cplusplus

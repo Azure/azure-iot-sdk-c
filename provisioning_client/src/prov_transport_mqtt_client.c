@@ -132,7 +132,7 @@ static int prov_transport_mqtt_set_proxy(PROV_DEVICE_TRANSPORT_HANDLE handle, co
     return prov_transport_common_mqtt_set_proxy(handle, proxy_options);
 }
 
-static PROV_DEVICE_TRANSPORT_PROVIDER prov_mqtt_func = 
+static PROV_DEVICE_TRANSPORT_PROVIDER prov_mqtt_func =
 {
     prov_transport_mqtt_create,
     prov_transport_mqtt_destroy,

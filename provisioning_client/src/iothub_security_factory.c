@@ -47,7 +47,7 @@ int iothub_security_init(IOTHUB_SECURITY_TYPE sec_type)
     int result;
 
     SECURE_DEVICE_TYPE secure_device_type_from_caller = get_secure_device_type(sec_type);
-    
+
     if (secure_device_type_from_caller == SECURE_DEVICE_TYPE_UNKNOWN)
     {
         LogError("Security type %d is not supported in this SDK build", sec_type);

@@ -117,7 +117,7 @@ unsigned int ConvertToUnsignedInt(const unsigned char data[], int position)
     else
     {
         result = 0;
-        for (int nIndex = 0; nIndex < 4; nIndex++) 
+        for (int nIndex = 0; nIndex < 4; nIndex++)
         {
             int nTest = data[nIndex+position];
             nTest <<= (nIndex*8);
@@ -959,7 +959,7 @@ static AMQP_CONN_INFO* createAmqpConnection(IOTHUB_VALIDATION_INFO* devhubValInf
                                             destroyAmqpConnection(devhubValInfo->amqp_connection);
                                             result = NULL;
                                         }
-                                    
+
                                         amqpvalue_destroy(target);
                                     }
 
@@ -1068,7 +1068,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
         LogError("Invalid parameter given in IoTHubTest_ListenForEvent DevhubHandle: 0x%p\r\nMessage Callback: 0x%p.", devhubHandle, msgCallback);
         result = IOTHUB_TEST_CLIENT_ERROR;
     }
-    else 
+    else
     {
         XIO_HANDLE sasl_io = NULL;
         CONNECTION_HANDLE connection = NULL;
@@ -1413,7 +1413,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
                             sasl_io_config.underlying_io = tls_io;
                             sasl_io_config.sasl_mechanism = sasl_mechanism_handle;
                             const IO_INTERFACE_DESCRIPTION* saslclientio_interface;
-                            
+
                             if ((saslclientio_interface = saslclientio_get_interface_description()) == NULL)
                             {
                                 LogError("Could not create get SASL IO interface description.");

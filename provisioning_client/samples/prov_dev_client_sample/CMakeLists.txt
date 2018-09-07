@@ -33,7 +33,7 @@ include_directories(${CMAKE_CURRENT_LIST_DIR}/adapters)
 add_executable(prov_dev_client_sample ${prov_dev_client_sample_c_files} ${prov_dev_client_sample_h_files})
 
 target_link_libraries(prov_dev_client_sample
-    iothub_client 
+    iothub_client
     prov_device_client
     iothub_client_mqtt_transport
     iothub_client_amqp_transport)

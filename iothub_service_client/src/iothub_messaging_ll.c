@@ -567,7 +567,7 @@ static char* createDeviceDestinationString(const char* deviceId, const char* mod
             LogError("Could not create device destination string.");
             result = NULL;
         }
-        else 
+        else
         {
             if ((moduleId == NULL) && (snprintf(buffer, deviceDestLen, AMQP_ADDRESS_PATH_FMT, deviceId)) < 0)
             {
@@ -652,7 +652,7 @@ static void IoTHubMessaging_LL_SendMessageComplete(void* context, MESSAGE_SEND_R
         IOTHUB_MESSAGING* messagingData = (IOTHUB_MESSAGING*)context;
         if (messagingData->callback_data->sendCompleteCallback != NULL)
         {
-            // Convert a send result to an 
+            // Convert a send result to an
             IOTHUB_MESSAGING_RESULT msg_result;
             switch (send_result)
             {
@@ -1079,7 +1079,7 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
         LogError("Messaging is already opened");
         result = IOTHUB_MESSAGING_OK;
     }
-    else 
+    else
     {
         messagingHandle->message_sender = NULL;
         messagingHandle->connection = NULL;

@@ -202,11 +202,11 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         REGISTER_UMOCK_ALIAS_TYPE(JSON_ENCODER_TOSTRING_FUNC, void*);
         REGISTER_UMOCK_ALIAS_TYPE(VECTOR_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(const VECTOR_HANDLE, void*);
-        
+
         REGISTER_UMOCK_ALIAS_TYPE(MULTITREE_RESULT, int);
         REGISTER_UMOCK_ALIAS_TYPE(DATA_MARSHALLER_RESULT, int);
         REGISTER_UMOCK_ALIAS_TYPE(JSON_ENCODER_RESULT, int);
-            
+
         REGISTER_GLOBAL_MOCK_HOOK(MultiTree_Create, my_MultiTree_Create);
         REGISTER_GLOBAL_MOCK_HOOK(MultiTree_Destroy, my_MultiTree_Destroy);
 
@@ -382,7 +382,7 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
 
         ///act
         DATA_MARSHALLER_RESULT result = DataMarshaller_SendData(handle, 0, &value, &destination, &destinationSize);
-            
+
         ///assert
         ASSERT_ARE_EQUAL(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_INVALID_ARG, result);
 
@@ -404,7 +404,7 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
 
         ///act
         DATA_MARSHALLER_RESULT result = DataMarshaller_SendData(handle, 1, &value, &destination, &destinationSize);
-            
+
         ///assert
         ASSERT_ARE_EQUAL(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_INVALID_MODEL_PROPERTY, result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -680,7 +680,7 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         ///assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
         ASSERT_ARE_EQUAL(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_JSON_ENCODER_ERROR, result);
-            
+
 
         ///cleanup
         DataMarshaller_Destroy(handle);
@@ -731,7 +731,7 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         ASSERT_ARE_EQUAL(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_OK, result);
         ASSERT_ARE_EQUAL(size_t, strlen(json_payload), destinationSize);
         ASSERT_ARE_EQUAL(int, 0, memcmp(destination, json_payload, destinationSize));
-            
+
 
         ///cleanup
         free(destination);
@@ -1168,9 +1168,9 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         unsigned char* destination;
         size_t destinationSize;
         umock_c_reset_all_calls();
-        
+
         DataMarshaller_SendData_ReportedProperties_inert_path();
-        
+
         ///act
         DATA_MARSHALLER_RESULT result = DataMarshaller_SendData_ReportedProperties(handle, values, &destination, &destinationSize);
 
@@ -1200,9 +1200,9 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         umock_c_negative_tests_init();
 
         DataMarshaller_SendData_ReportedProperties_inert_path();
-        
+
         umock_c_negative_tests_snapshot();
-        
+
         size_t calls_that_cannot_fail[] =
         {
             2   ,/*VECTOR_size*/

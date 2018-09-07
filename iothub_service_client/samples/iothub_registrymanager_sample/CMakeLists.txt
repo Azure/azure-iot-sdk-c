@@ -16,7 +16,7 @@ include_directories(.)
 
 add_executable(iothub_registrymanager_sample ${iothub_registrymanager_sample_c_files})
 
-target_link_libraries(iothub_registrymanager_sample 
+target_link_libraries(iothub_registrymanager_sample
     iothub_service_client
 )
 

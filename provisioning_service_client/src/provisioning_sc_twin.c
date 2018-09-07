@@ -158,7 +158,7 @@ static JSON_Value* twinProperties_toJson(INITIAL_TWIN_PROPERTIES* twin_propertie
         json_value_free(root_value);
         root_value = NULL;
     }
-    
+
     //Set data
     else if (json_serialize_and_set_struct(root_object, INITIAL_TWIN_PROPERTIES_JSON_KEY_DESIRED, twin_properties->desired, (TO_JSON_FUNCTION)twinCollection_toJson, OPTIONAL) != 0)
     {

@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-	void longhaul_amqp_telemetry_run(void);
+    void longhaul_amqp_telemetry_run(void);
 
 #ifdef __cplusplus
 }

@@ -257,7 +257,7 @@ static void my_uhttp_client_dowork(HTTP_CLIENT_HANDLE handle)
     (void)handle;
 
     const unsigned char* content = content_available ? TEST_REPLY_JSON : NULL;
-    
+
     if (g_uhttp_client_dowork_call_count == 0)
     {
         g_on_http_open(g_http_open_ctx, http_open_reason);
@@ -304,22 +304,22 @@ TEST_SUITE_INITIALIZE(suite_init)
 
     REGISTER_GLOBAL_MOCK_RETURN(json_parse_string, TEST_JSON_VALUE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_parse_string, NULL);
-    
+
     REGISTER_GLOBAL_MOCK_RETURN(json_object_dotget_string, TEST_CONST_CHAR_PTR);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_object_dotget_string, NULL);
-    
+
     REGISTER_GLOBAL_MOCK_RETURN(json_value_init_object, TEST_JSON_VALUE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_value_init_object, NULL);
-    
+
     REGISTER_GLOBAL_MOCK_RETURN(json_value_get_object, TEST_JSON_OBJECT);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_value_get_object, NULL);
-    
+
     REGISTER_GLOBAL_MOCK_RETURN(json_object_set_string, TEST_JSON_STATUS);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_object_set_string, -1);
-    
+
     REGISTER_GLOBAL_MOCK_RETURN(json_serialize_to_string, TEST_CHAR_PTR);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_serialize_to_string, NULL);
-    
+
     REGISTER_GLOBAL_MOCK_RETURN(json_object_clear, JSONSuccess);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_object_clear, JSONFailure);
 
@@ -341,7 +341,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_RETURN(BUFFER_create, TEST_BUFFER_HANDLE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(BUFFER_create, NULL);
 
-    REGISTER_GLOBAL_MOCK_HOOK(STRING_delete, my_STRING_delete);   
+    REGISTER_GLOBAL_MOCK_HOOK(STRING_delete, my_STRING_delete);
 
     REGISTER_GLOBAL_MOCK_HOOK(uhttp_client_create, my_uhttp_client_create);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(uhttp_client_create, NULL);
@@ -387,7 +387,7 @@ TEST_FUNCTION_INITIALIZE(method_init)
     g_http_open_ctx = NULL;
     g_on_http_reply_recv = NULL;
     g_http_reply_recv_ctx = NULL;
-    g_uhttp_client_dowork_call_count = 0;    
+    g_uhttp_client_dowork_call_count = 0;
 
     test_status_code_in_callback = 200;
     http_reply_recv_reason = HTTP_CALLBACK_REASON_OK;
@@ -454,7 +454,7 @@ static void hsm_client_http_edge_create_http_Impl(const char* edge_uri_env, bool
     else
     {
         ASSERT_IS_NULL(sec_handle);
-    }        
+    }
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -521,7 +521,7 @@ TEST_FUNCTION(hsm_client_http_edge_destroy_success)
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
-    
+
     // test
     hsm_client_http_edge_destroy(sec_handle);
 
@@ -595,7 +595,7 @@ static void set_expected_calls_send_http_workload_request(bool expect_success, b
     {
         STRICT_EXPECTED_CALL(uhttp_client_set_option(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     }
-    
+
     STRICT_EXPECTED_CALL(uhttp_client_open(IGNORED_NUM_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG));
     if (post_data)
     {
@@ -697,7 +697,7 @@ static void test_http_failure_impl()
     int result = hsm_client_http_edge_sign_data(sec_handle, TEST_SIGNING_DATA, TEST_SIGNING_DATA_LENGTH, &signed_value, &signed_len);
     ASSERT_ARE_NOT_EQUAL(int, result, 0);
 
-    hsm_client_http_edge_destroy(sec_handle);    
+    hsm_client_http_edge_destroy(sec_handle);
 }
 
 TEST_FUNCTION(hsm_client_http_edge_sign_data_http_open_error)
@@ -737,15 +737,15 @@ TEST_FUNCTION(hsm_client_http_edge_sign_data_http_fail)
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
     setup_hsm_client_http_edge_create_http_mock(TEST_ENV_WORKLOADURI_HTTP, true);
-    
+
     HSM_CLIENT_HANDLE sec_handle = hsm_client_http_edge_create();
     unsigned char* signed_value = NULL;
     size_t signed_len;
-    
+
     ASSERT_IS_NOT_NULL(sec_handle);
-    
+
     umock_c_reset_all_calls();
-    
+
     set_expected_calls_hsm_client_http_edge_sign_data(TEST_HTTP_PROTOCOL);
 
     umock_c_negative_tests_snapshot();
@@ -786,11 +786,11 @@ TEST_FUNCTION(hsm_client_http_edge_sign_data_http_fail)
         {
             continue;
         }
-        g_uhttp_client_dowork_call_count = 0;        
-    
+        g_uhttp_client_dowork_call_count = 0;
+
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
-        
+
         char tmp_msg[128];
         sprintf(tmp_msg, "hsm_client_http_edge_sign_data failure in test %zu/%zu", index, count);
         int result = hsm_client_http_edge_sign_data(sec_handle, TEST_SIGNING_DATA, TEST_SIGNING_DATA_LENGTH, &signed_value, &signed_len);
@@ -798,8 +798,8 @@ TEST_FUNCTION(hsm_client_http_edge_sign_data_http_fail)
     }
 
     // cleanup
-    
-    hsm_client_http_edge_destroy(sec_handle);    
+
+    hsm_client_http_edge_destroy(sec_handle);
     umock_c_negative_tests_deinit();
 }
 
@@ -876,13 +876,13 @@ TEST_FUNCTION(hsm_client_http_edge_get_trust_bundle_fail)
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
     setup_hsm_client_http_edge_create_http_mock(TEST_ENV_WORKLOADURI_HTTP, true);
-    
+
     HSM_CLIENT_HANDLE sec_handle = hsm_client_http_edge_create();
-    
+
     ASSERT_IS_NOT_NULL(sec_handle);
-    
+
     umock_c_reset_all_calls();
-    
+
     set_expected_calls_hsm_client_http_edge_get_trust_bundle(TEST_HTTP_PROTOCOL);
 
     umock_c_negative_tests_snapshot();
@@ -913,11 +913,11 @@ TEST_FUNCTION(hsm_client_http_edge_get_trust_bundle_fail)
         {
             continue;
         }
-        g_uhttp_client_dowork_call_count = 0;        
-    
+        g_uhttp_client_dowork_call_count = 0;
+
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
-        
+
         char tmp_msg[128];
         sprintf(tmp_msg, "hsm_client_http_edge_get_trust_bundle failure in test %zu/%zu", index, count);
         const char* trusted_certificate = hsm_client_http_edge_get_trust_bundle(sec_handle);
@@ -925,8 +925,8 @@ TEST_FUNCTION(hsm_client_http_edge_get_trust_bundle_fail)
     }
 
     // cleanup
-    
-    hsm_client_http_edge_destroy(sec_handle);    
+
+    hsm_client_http_edge_destroy(sec_handle);
     umock_c_negative_tests_deinit();
 
 }

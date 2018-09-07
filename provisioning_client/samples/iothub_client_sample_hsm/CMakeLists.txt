@@ -43,7 +43,7 @@ if(${use_openssl})
 endif()
 
 target_link_libraries(iothub_client_sample_hsm
-    iothub_client 
+    iothub_client
     iothub_client_mqtt_transport
     iothub_client_amqp_transport)
 

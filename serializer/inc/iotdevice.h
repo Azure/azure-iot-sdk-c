@@ -18,11 +18,11 @@ extern "C" {
 #include <stddef.h>
 #endif
 
-#define DEVICE_RESULT_VALUES			\
-    DEVICE_OK,							\
-    DEVICE_INVALID_ARG,					\
-    DEVICE_DATA_PUBLISHER_FAILED,		\
-    DEVICE_COMMAND_DECODER_FAILED,		\
+#define DEVICE_RESULT_VALUES            \
+    DEVICE_OK,                            \
+    DEVICE_INVALID_ARG,                    \
+    DEVICE_DATA_PUBLISHER_FAILED,        \
+    DEVICE_COMMAND_DECODER_FAILED,        \
     DEVICE_ERROR
 
 DEFINE_ENUM(DEVICE_RESULT, DEVICE_RESULT_VALUES)

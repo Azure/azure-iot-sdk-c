@@ -48,7 +48,7 @@ IOTHUB_SECURITY_HANDLE iothub_device_auth_create()
     IOTHUB_SECURITY_INFO* result = NULL;
 
     IOTHUB_SECURITY_TYPE iothub_security_t = iothub_security_type();
-    
+
 #if defined(HSM_TYPE_SAS_TOKEN)  || defined(HSM_AUTH_TYPE_CUSTOM)
     if (iothub_security_t == IOTHUB_SECURITY_TYPE_SAS)
     {
@@ -57,7 +57,7 @@ IOTHUB_SECURITY_HANDLE iothub_device_auth_create()
             /* Codes_IOTHUB_DEV_AUTH_07_001: [ if any failure is encountered iothub_device_auth_create shall return NULL. ] */
             LogError("Failed allocating IOTHUB_SECURITY_INFO.");
         }
-        else 
+        else
         {
             memset(result, 0, sizeof(IOTHUB_SECURITY_INFO) );
             result->cred_type = AUTH_TYPE_SAS;
@@ -257,8 +257,8 @@ CREDENTIAL_RESULT* iothub_device_auth_generate_credentials(IOTHUB_SECURITY_HANDL
                         else
                         {
                             signature = STRING_construct((const char*)data_value);
-                        }                            
-                        
+                        }
+
                         if (signature == NULL)
                         {
                             result = NULL;
@@ -295,7 +295,7 @@ CREDENTIAL_RESULT* iothub_device_auth_generate_credentials(IOTHUB_SECURITY_HANDL
                                 {
                                     sas_token_handle = STRING_construct_sprintf(SAS_TOKEN_FORMAT, STRING_c_str(url_encoded), STRING_c_str(urlEncodedSignature), expire_token, skn_key, skn_value);
                                 }
-                                
+
                                 STRING_delete(url_encoded);
                             }
                             else

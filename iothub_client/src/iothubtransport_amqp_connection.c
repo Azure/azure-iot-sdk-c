@@ -62,7 +62,7 @@ static int create_sasl_components(AMQP_CONNECTION_INSTANCE* instance)
         SASLCLIENTIO_CONFIG sasl_client_config;
         sasl_client_config.sasl_mechanism = sasl_mechanism;
         sasl_client_config.underlying_io = instance->underlying_io_transport;
-        
+
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_015: [`instance->sasl_io` shall be created using xio_create() passing saslclientio_get_interface_description() and the SASLCLIENTIO_CONFIG instance]
         if ((sasl_io = xio_create(saslclientio_get_interface_description(), &sasl_client_config)) == NULL)
         {
@@ -205,11 +205,11 @@ static int create_connection_handle(AMQP_CONNECTION_INSTANCE* instance)
             result = __FAILURE__;
             LogError("Failed creating the AMQP connection (connection_set_idle_timeout failed)");
         }
-        else if (connection_set_remote_idle_timeout_empty_frame_send_ratio(instance->connection_handle, instance->cl2svc_keep_alive_send_ratio) != RESULT_OK) 
-		{
-			// Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_99_001: [If connection_set_remote_idle_timeout_empty_frame_send_ratio fails, amqp_connection_create() shall fail and return NULL]
-			result = __FAILURE__;
-			LogError("Failed creating the AMQP connection (connection_set_remote_idle_timeout_empty_frame_send_ratio)");
+        else if (connection_set_remote_idle_timeout_empty_frame_send_ratio(instance->connection_handle, instance->cl2svc_keep_alive_send_ratio) != RESULT_OK)
+        {
+            // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_99_001: [If connection_set_remote_idle_timeout_empty_frame_send_ratio fails, amqp_connection_create() shall fail and return NULL]
+            result = __FAILURE__;
+            LogError("Failed creating the AMQP connection (connection_set_remote_idle_timeout_empty_frame_send_ratio)");
         }
         else
         {
@@ -255,7 +255,7 @@ static int create_session_handle(AMQP_CONNECTION_INSTANCE* instance)
 
         result = RESULT_OK;
     }
-    
+
     return result;
 }
 
@@ -394,7 +394,7 @@ AMQP_CONNECTION_HANDLE amqp_connection_create(AMQP_CONNECTION_CONFIG* config)
                 instance->has_cbs = config->create_cbs_connection;
 
                 instance->svc2cl_keep_alive_timeout_secs = (uint32_t)config->svc2cl_keep_alive_timeout_secs;
-				instance->cl2svc_keep_alive_send_ratio = (double)config->cl2svc_keep_alive_send_ratio;
+                instance->cl2svc_keep_alive_send_ratio = (double)config->cl2svc_keep_alive_send_ratio;
 
                 instance->current_state = AMQP_CONNECTION_STATE_CLOSED;
 
@@ -452,7 +452,7 @@ void amqp_connection_do_work(AMQP_CONNECTION_HANDLE conn_handle)
 int amqp_connection_get_session_handle(AMQP_CONNECTION_HANDLE conn_handle, SESSION_HANDLE* session_handle)
 {
     int result;
-    
+
     // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_043: [If `conn_handle` is NULL, amqp_connection_get_session_handle() shall fail and return __FAILURE__]
     if (conn_handle == NULL)
     {

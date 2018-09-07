@@ -356,7 +356,7 @@ TEST_FUNCTION(IoTHubMessaging_Destroy_happy_path)
 {
     // arrange
     IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle = IoTHubMessaging_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
-    
+
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(IoTHubMessaging_LL_Destroy(IGNORED_PTR_ARG))
@@ -654,7 +654,7 @@ TEST_FUNCTION(IoTHubMessaging_SendAsync_happy_path)
     */
 
     STRICT_EXPECTED_CALL(IoTHubMessaging_LL_Send((IOTHUB_MESSAGING_HANDLE)0X3333, deviceId, TEST_IOTHUB_MESSAGE_HANDLE, TEST_IOTHUB_SEND_COMPLETE_CALLBACK, (void*)0x4242));
-        
+
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
 
@@ -706,7 +706,7 @@ TEST_FUNCTION(IoTHubMessaging_SendAsync_happy_path_threadhandle_not_null)
     }
     */
     STRICT_EXPECTED_CALL(IoTHubMessaging_LL_Send((IOTHUB_MESSAGING_HANDLE)0X3333, deviceId, TEST_IOTHUB_MESSAGE_HANDLE, TEST_IOTHUB_SEND_COMPLETE_CALLBACK, (void*)0x4242));
-        
+
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
 
@@ -826,7 +826,7 @@ TEST_FUNCTION(IoTHubMessaging_SendAsyncModule_return_IOTHUB_MESSAGING_INVALID_AR
     IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle = IoTHubMessaging_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
 
     umock_c_reset_all_calls();
-    
+
     ///act
     IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_SendAsyncModule(messagingClientHandle, deviceId, NULL, TEST_IOTHUB_MESSAGE_HANDLE, TEST_IOTHUB_SEND_COMPLETE_CALLBACK, (void*)0x4242);
 

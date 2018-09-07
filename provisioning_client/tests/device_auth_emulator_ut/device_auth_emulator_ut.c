@@ -400,7 +400,7 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument_handle();
     }
-    
+
     static void setup_persisted_keys_info_mocks(void)
     {
 

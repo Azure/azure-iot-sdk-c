@@ -344,7 +344,7 @@ TEST_FUNCTION(AMQP_Create)
 
     umock_c_reset_all_calls();
     STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_Create(TEST_IOTHUBTRANSPORT_CONFIG_HANDLE, NULL)).IgnoreArgument_get_io_transport();
-    
+
     saved_IoTHubTransport_AMQP_Common_Create_get_io_transport = NULL;
 
     // act

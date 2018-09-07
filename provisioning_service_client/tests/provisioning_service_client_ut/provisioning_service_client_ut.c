@@ -999,7 +999,7 @@ TEST_FUNCTION(prov_sc_trace_GOLDEN)
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     //can't really test that the value was set since it's abstracted behind a handle, so this is a pretty useless test for now
-    
+
     //cleanup
     prov_sc_destroy(sc);
 }
@@ -1673,7 +1673,7 @@ TEST_FUNCTION(prov_sc_delete_individual_enrollment_ERROR_INPUT_NULL_PROV_SC)
     //assert
     ASSERT_ARE_NOT_EQUAL(int, res, 0);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-    
+
     //cleanup
 }
 
@@ -2053,7 +2053,7 @@ TEST_FUNCTION(prov_sc_get_individual_enrollment_GOLDEN)
     ASSERT_ARE_EQUAL(int, res, 0);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     ASSERT_IS_NOT_NULL(ie);
-    
+
     //cleanup
     prov_sc_destroy(sc);
     individualEnrollment_destroy(ie);

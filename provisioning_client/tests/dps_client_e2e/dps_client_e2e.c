@@ -26,7 +26,7 @@
 #include "azure_prov_client/prov_transport_mqtt_client.h"
 #include "azure_prov_client/prov_transport_mqtt_ws_client.h"
 
-#include "azure_c_shared_utility/connection_string_parser.h" 
+#include "azure_c_shared_utility/connection_string_parser.h"
 #include "azure_c_shared_utility/map.h"
 #include "azure_c_shared_utility/uniqueid.h"
 
@@ -376,7 +376,7 @@ BEGIN_TEST_SUITE(dps_client_e2e)
 
         free(prov_info.iothub_uri);
         free(prov_info.device_id);
-        
+
         Prov_Device_LL_Destroy(handle);
     }
 #endif
@@ -402,7 +402,7 @@ BEGIN_TEST_SUITE(dps_client_e2e)
 
         free(prov_info.iothub_uri);
         free(prov_info.device_id);
-       
+
         Prov_Device_LL_Destroy(handle);
     }
 
@@ -426,7 +426,7 @@ BEGIN_TEST_SUITE(dps_client_e2e)
 
         free(prov_info.iothub_uri);
         free(prov_info.device_id);
-        
+
         Prov_Device_LL_Destroy(handle);
     }
 #endif

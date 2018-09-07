@@ -2,12 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 /** @file blob.h
-*	@brief Contains blob APIs needed for File Upload feature of IoTHub client.
+*    @brief Contains blob APIs needed for File Upload feature of IoTHub client.
 *
-*	@details IoTHub client needs to upload a byte array by using blob storage API
-*			 IoTHub service provides the complete SAS URI to execute a PUT request
-*			 that will upload the data.
-*			
+*    @details IoTHub client needs to upload a byte array by using blob storage API
+*             IoTHub service provides the complete SAS URI to execute a PUT request
+*             that will upload the data.
+*
 */
 
 #ifndef BLOB_H
@@ -57,7 +57,7 @@ DEFINE_ENUM(BLOB_RESULT, BLOB_RESULT_VALUES)
 * @param  certificates      A null terminated string containing CA certificates to be used
 * @param    proxyOptions    A structure that contains optional web proxy information
 *
-* @return	A @c BLOB_RESULT. BLOB_OK means the blob has been uploaded successfully. Any other value indicates an error
+* @return    A @c BLOB_RESULT. BLOB_OK means the blob has been uploaded successfully. Any other value indicates an error
 */
 MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadMultipleBlocksFromSasUri, const char*, SASURI, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX, getDataCallbackEx, void*, context, unsigned int*, httpStatus, BUFFER_HANDLE, httpResponse, const char*, certificates, HTTP_PROXY_OPTIONS*, proxyOptions)
 

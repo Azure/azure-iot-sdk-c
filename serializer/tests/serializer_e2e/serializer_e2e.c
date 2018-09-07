@@ -450,8 +450,8 @@ BEGIN_TEST_SUITE(serializer_e2e)
 
         iotHubMessagingResult = IoTHubMessaging_SendAsync(iotHubMessagingHandle, deviceToUse->deviceId, messageHandle, sendCompleteCallback, NULL);
         ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_OK, iotHubMessagingResult, "IoTHubMessaging_SendAsync failed, could not send C2D message to the device");
-        
-		iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, AMQP_Protocol);
+
+        iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, AMQP_Protocol);
         ASSERT_IS_NOT_NULL(iotHubClientHandle);
 
         if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509) {
@@ -813,7 +813,7 @@ BEGIN_TEST_SUITE(serializer_e2e)
 
         ASSERT_IS_TRUE(expectedData->wasFound); // was found is written by the callback...
 
-                                                ///cleanup 
+                                                ///cleanup
         DESTROY_MODEL_INSTANCE(devModel);
         IoTHubClient_LL_Destroy(iotHubClientHandle);
         SendTestData_Destroy(expectedData); //cleanup*/
@@ -832,7 +832,7 @@ BEGIN_TEST_SUITE(serializer_e2e)
 #endif
 
 
-    
+
     static int DeviceMethodCallback(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* resp_size, void* userContextCallback)
     {
         /*userContextCallback is of type deviceModel*/
@@ -846,10 +846,10 @@ BEGIN_TEST_SUITE(serializer_e2e)
         METHODRETURN_HANDLE result = EXECUTE_METHOD(userContextCallback, method_name, payloadZeroTerminated);
         free(payloadZeroTerminated);
         ASSERT_IS_NOT_NULL(result);
-        
+
         /*step 4: get the serializer answer and push it in the networking stack*/
         const METHODRETURN_DATA* data = MethodReturn_GetReturn(result);
-        
+
         int statusCode = data->statusCode;
 
         ASSERT_IS_NOT_NULL(data->jsonValue);
@@ -859,7 +859,7 @@ BEGIN_TEST_SUITE(serializer_e2e)
         *response = (unsigned char*)malloc(*resp_size);
         ASSERT_IS_NOT_NULL(*response);
         (void)memcpy(*response, data->jsonValue, *resp_size);
-        
+
         MethodReturn_Destroy(result);
         return statusCode;
     }

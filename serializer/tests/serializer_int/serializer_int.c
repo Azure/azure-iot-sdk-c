@@ -315,7 +315,7 @@ END_NAMESPACE(basic12)
 BEGIN_NAMESPACE(basic13)
 
 DECLARE_MODEL(model_WithAction13,
-    WITH_ACTION(action13, 
+    WITH_ACTION(action13,
         double, double13,
         int, int13,
         float, float13,
@@ -329,7 +329,7 @@ DECLARE_MODEL(model_WithAction13,
         ascii_char_ptr, ascii_char_ptr13,
         ascii_char_ptr_no_quotes, ascii_char_ptr_no_quotes13,
         EDM_DATE_TIME_OFFSET, EdmDateTimeOffset13,
-        EDM_GUID, EdmGuid13, 
+        EDM_GUID, EdmGuid13,
         EDM_BINARY, EdmBinary13)
     )
 
@@ -578,7 +578,7 @@ DECLARE_MODEL(totallyNotUnique_model3,
 DECLARE_MODEL(totallyNotUnique_model4,
     WITH_REPORTED_PROPERTY(totallyNotUnique, tnu)
 )
-    
+
 DECLARE_MODEL(totallyNotUnique_model6,
     WITH_DESIRED_PROPERTY(totallyNotUnique, tnu)
 )
@@ -836,17 +836,17 @@ static bool areTwoJsonsEqual(const unsigned char* left, size_t leftSize, const c
 
     char* cloneOfLeft = (char*)malloc(leftSize + 1); /*because of out SERIALIZE... there is a byte array that is NOT '\0' terminated*/
     ASSERT_IS_NOT_NULL(cloneOfLeft);
-    
+
     (void)memcpy(cloneOfLeft, left, leftSize);
     cloneOfLeft[leftSize] = '\0';
-    
+
     JSON_Value* actualJson = json_parse_string((char*)cloneOfLeft);
     ASSERT_IS_NOT_NULL(actualJson);
     JSON_Value* expectedJson = json_parse_string(right);
     ASSERT_IS_NOT_NULL(expectedJson);
 
     result = (json_value_equals(expectedJson, actualJson) != 0);
-    
+
     json_value_free(expectedJson);
     json_value_free(actualJson);
     free(cloneOfLeft);
@@ -1079,7 +1079,7 @@ BEGIN_TEST_SUITE(serializer_int)
         ///assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
         ASSERT_IS_TRUE(areTwoJsonsEqual(destination, destinationSize, expectedJsonAsString));
-        
+
         ///clean
         free(destination);
         DESTROY_MODEL_INSTANCE(modelWithStruct);
@@ -1549,11 +1549,11 @@ BEGIN_TEST_SUITE(serializer_int)
 
         ///act
         CODEFIRST_RESULT result = SERIALIZE_REPORTED_PROPERTIES(&destination, &destinationSize, *basicModel_WithModel);
-        
+
         ///assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
         ASSERT_IS_TRUE(areTwoJsonsEqual(destination, destinationSize, expectedJsonAsString));
-        
+
         ///clean
         free(destination);
         DESTROY_MODEL_INSTANCE(basicModel_WithModel);
@@ -2066,7 +2066,7 @@ BEGIN_TEST_SUITE(serializer_int)
     TEST_FUNCTION(CodeFirst_CreateDevice_initialize_all_desired_properties_to_default_values)
     {
         ///arrange
-        
+
         ///act
         basicModel_WithData9 *modelWithData = CREATE_MODEL_INSTANCE(basic9, basicModel_WithData9, true);
 

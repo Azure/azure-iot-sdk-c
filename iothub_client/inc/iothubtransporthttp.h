@@ -11,7 +11,7 @@ extern "C"
 {
 #endif
 
-	extern const TRANSPORT_PROVIDER* HTTP_Protocol(void);
+    extern const TRANSPORT_PROVIDER* HTTP_Protocol(void);
 
 #ifdef __cplusplus
 }

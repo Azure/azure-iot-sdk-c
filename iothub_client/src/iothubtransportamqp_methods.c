@@ -115,7 +115,7 @@ IOTHUBTRANSPORT_AMQP_METHODS_HANDLE iothubtransportamqp_methods_create(const cha
         else
         {
             memset(result, 0, sizeof(IOTHUBTRANSPORT_AMQP_METHODS));
-            
+
             /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_115: [ `iothubtransportamqp_methods_create` shall save the device id for later use by using `mallocAndStrcpy_s`. ]*/
             if (mallocAndStrcpy_s(&result->device_id, device_id) != 0)
             {
@@ -494,7 +494,7 @@ STRING_HANDLE create_correlation_id(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE iothubtr
 {
     if (iothubtransport_amqp_methods_handle->module_id != NULL)
     {
-        return STRING_construct_sprintf("%s/%s", iothubtransport_amqp_methods_handle->device_id, iothubtransport_amqp_methods_handle->module_id);  
+        return STRING_construct_sprintf("%s/%s", iothubtransport_amqp_methods_handle->device_id, iothubtransport_amqp_methods_handle->module_id);
     }
     else
     {
@@ -676,7 +676,7 @@ int iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE io
         (on_method_request_received == NULL) ||
         (on_methods_unsubscribed == NULL))
     {
-        LogError("Invalid arguments: iothubtransport_amqp_methods_handle=%p, session_handle=%p, on_methods_error=%p, on_method_request_received=%p, on_methods_unsubscribed=%p", 
+        LogError("Invalid arguments: iothubtransport_amqp_methods_handle=%p, session_handle=%p, on_methods_error=%p, on_method_request_received=%p, on_methods_unsubscribed=%p",
             iothubtransport_amqp_methods_handle, session_handle, on_methods_error, on_method_request_received, on_methods_unsubscribed);
         result = __FAILURE__;
     }
@@ -727,7 +727,7 @@ int iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE io
                 else
                 {
                     /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_012: [ - `name` shall be in the format `methods_requests_link-{device_id}` (+ `/{module-id}` if module id is present). ]*/
-                    STRING_HANDLE requests_link_name = create_requests_link_name(iothubtransport_amqp_methods_handle); 
+                    STRING_HANDLE requests_link_name = create_requests_link_name(iothubtransport_amqp_methods_handle);
                     if (requests_link_name == NULL)
                     {
                         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_153: [ If constructing the requests link name fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/

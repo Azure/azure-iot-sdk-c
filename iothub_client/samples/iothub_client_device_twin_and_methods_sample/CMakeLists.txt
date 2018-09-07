@@ -34,22 +34,22 @@ include_directories(${PROJECT_SOURCE_DIR}/deps/parson)
 
 add_executable(iothub_client_device_twin_and_methods_sample ${iothub_client_device_twin_and_methods_sample_c_files} ${iothub_client_device_twin_and_methods_sample_h_files})
 
-if(${use_amqp}) 
-    target_link_libraries(iothub_client_device_twin_and_methods_sample  
+if(${use_amqp})
+    target_link_libraries(iothub_client_device_twin_and_methods_sample
         iothub_client_amqp_transport
         uamqp
     )
     add_definitions(-DUSE_AMQP)
 endif()
 
-if(${use_mqtt}) 
-    target_link_libraries(iothub_client_device_twin_and_methods_sample  
+if(${use_mqtt})
+    target_link_libraries(iothub_client_device_twin_and_methods_sample
         iothub_client_mqtt_transport
     )
     add_definitions(-DUSE_MQTT)
 endif()
 
-target_link_libraries(iothub_client_device_twin_and_methods_sample  
+target_link_libraries(iothub_client_device_twin_and_methods_sample
     aziotsharedutil
-    iothub_client 
+    iothub_client
 )

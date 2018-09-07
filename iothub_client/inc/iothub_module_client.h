@@ -2,11 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 /** @file iothub_module_client.h
-*    @brief Extends the IoTHubCLient_LL module with additional features.
+*    @brief Extends the IoTHubClient_LL module with additional features.
 *
-*    @details IoTHubClient is a module that extends the IoTHubCLient_LL
+*    @details IoTHubClient is a module that extends the IoTHubClient_LL
 *             module with 2 features:
-*                - scheduling the work for the IoTHubCLient from a
+*                - scheduling the work for the IoTHubClient from a
 *                  thread, so that the user does not need to create their
 *                  own thread
 *                - thread-safe APIs
@@ -87,15 +87,15 @@ extern "C"
     * @brief    This function returns the current sending status for IoTHubClient.
     *
     * @param    iotHubModuleClientHandle  The handle created by a call to the create function.
-    * @param    iotHubClientStatus        The sending state is populated at the address pointed
+    * @param    IoTHubClientStatus        The sending state is populated at the address pointed
     *                                     at by this parameter. The value will be set to
-    *                                     @c IOTHUBCLIENT_SENDSTATUS_IDLE if there is currently
-    *                                     no item to be sent and @c IOTHUBCLIENT_SENDSTATUS_BUSY
+    *                                     @c IoTHubClient_SENDSTATUS_IDLE if there is currently
+    *                                     no item to be sent and @c IoTHubClient_SENDSTATUS_BUSY
     *                                     if there are.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_GetSendStatus, IOTHUB_MODULE_CLIENT_HANDLE, iotHubModuleClientHandle, IOTHUB_CLIENT_STATUS*, iotHubClientStatus);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_GetSendStatus, IOTHUB_MODULE_CLIENT_HANDLE, iotHubModuleClientHandle, IOTHUB_CLIENT_STATUS*, IoTHubClientStatus);
 
     /**
     * @brief    Sets up the message callback to be invoked when IoT Hub issues a
@@ -215,9 +215,9 @@ extern "C"
     *                 is timeouted. The time starts at IoTHubModuleClient_SendEventAsync. By default,
     *                 messages do not expire. @p is a pointer to a uint64_t
     *                - @b svc2cl_keep_alive_timeout_secs - the AMQP service side keep alive interval in seconds.
-    *                 After the connection established the client requests the server to set the 
+    *                 After the connection established the client requests the server to set the
     *                 keep alive interval for given time.
-    *                 If it is not set then the default 240 sec applies. 
+    *                 If it is not set then the default 240 sec applies.
     *                 If it is set to zero the server will not send keep alive messages to the client.
     *                - @b cl2svc_keep_alive_send_ratio - the AMQP client side keep alive interval in seconds.
     *                 After the connection established the server requests the client to set the
@@ -234,7 +234,7 @@ extern "C"
     *
     * @param    iotHubModuleClientHandle The handle created by a call to the create function.
     * @param    moduleTwinCallback       The callback specified by the module client to be used for updating
-    *                                    the desired state. The callback will be called in response to a 
+    *                                    the desired state. The callback will be called in response to a
     *                                    request send by the IoTHub services. The payload will be passed to the
     *                                    callback, along with two version numbers:
     *                                        - Desired:
@@ -269,14 +269,14 @@ extern "C"
     /**
     * @brief    This API sets callback for async cloud to module method call.
     *
-    * @param    iotHubClientHandle              The handle created by a call to the create function.
+    * @param    IoTHubClientHandle              The handle created by a call to the create function.
     * @param    methodCallback                  The callback which will be called by IoTHub.
     * @param    userContextCallback             User specified context that will be provided to the
     *                                           callback. This can be @c NULL.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SetModuleMethodCallback, IOTHUB_MODULE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC, methodCallback, void*, userContextCallback);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SetModuleMethodCallback, IOTHUB_MODULE_CLIENT_HANDLE, IoTHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC, methodCallback, void*, userContextCallback);
 
     /**
     * @brief    Asynchronous call to send the message specified by @p eventMessageHandle.
@@ -317,12 +317,12 @@ extern "C"
 
 #ifdef USE_EDGE_MODULES
     /**
-    * @brief	This API creates a module handle based on environment variables set in the Edge runtime.
+    * @brief    This API creates a module handle based on environment variables set in the Edge runtime.
     NOTE: It is *ONLY* valid when the code is running in a container initiated by Edge.
     *
-    * @param	protocol            Function pointer for protocol implementation
+    * @param    protocol            Function pointer for protocol implementation
     *
-    * @return	A non-NULL @c IOTHUB_CLIENT_LL_HANDLE value that is used when
+    * @return    A non-NULL @c IOTHUB_MODULE_CLIENT_HANDLE value that is used when
     *           invoking other functions for IoT Hub client and @c NULL on failure.
 
     */

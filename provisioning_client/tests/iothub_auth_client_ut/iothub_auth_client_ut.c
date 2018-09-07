@@ -101,7 +101,7 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(DEVICE_AUTH_TYPE, DEVICE_AUTH_TYPE_VALUES);
 TEST_DEFINE_ENUM_TYPE(IOTHUB_SECURITY_TYPE, IOTHUB_SECURITY_TYPE_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_SECURITY_TYPE, IOTHUB_SECURITY_TYPE_VALUES);
 
-static const HSM_CLIENT_TPM_INTERFACE test_tpm_interface = 
+static const HSM_CLIENT_TPM_INTERFACE test_tpm_interface =
 {
     hsm_client_create,
     hsm_client_destroy,
@@ -337,13 +337,13 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         g_test_sas_cred_no_keyname.sas_info.token_scope = "scope";
         g_test_sas_cred_no_keyname.sas_info.expiry_seconds = 123;
         g_test_sas_cred_no_keyname.sas_info.key_name = NULL;
-        
+
         g_test_x509_cred.dev_auth_type = AUTH_TYPE_X509;
 
 #ifdef HSM_TYPE_HTTP_EDGE
         REGISTER_GLOBAL_MOCK_RETURN(hsm_client_http_edge_interface, &test_http_edge_interface);
 #endif
-        
+
     }
 
     TEST_SUITE_CLEANUP(suite_cleanup)
@@ -492,7 +492,7 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
     {
         //arrange
         STRICT_EXPECTED_CALL(iothub_security_type()).SetReturn(IOTHUB_SECURITY_TYPE_X509);
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));        
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface);
         STRICT_EXPECTED_CALL(hsm_client_create());
 
@@ -874,7 +874,7 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
 
         umock_c_negative_tests_snapshot();
 
-        size_t calls_cannot_fail[] = { 
+        size_t calls_cannot_fail[] = {
             6, // STRING_c_str
             7, // STRING_c_str
             8, // STRING_delete
@@ -909,7 +909,7 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         //cleanup
         iothub_device_auth_destroy(xda_handle);
         umock_c_negative_tests_deinit();
-    }   
+    }
 
 TEST_FUNCTION(IoTHubClient_Auth_Get_TrustedBundle_succeed)
 {
@@ -917,16 +917,16 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_TrustedBundle_succeed)
     set_expected_calls_for_device_auth_create_http_edge();
     IOTHUB_SECURITY_HANDLE xda_handle = iothub_device_auth_create();
     umock_c_reset_all_calls();
-    
+
     STRICT_EXPECTED_CALL(hsm_client_get_trust_bundle(IGNORED_PTR_ARG));
-        
+
     //act
     char* result = iothub_device_auth_get_trust_bundle(xda_handle);
-    
+
     //assert
     ASSERT_IS_NOT_NULL(result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-    
+
     //cleanup
     my_gballoc_free(result);
     iothub_device_auth_destroy(xda_handle);
@@ -943,7 +943,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_TrustedBundle_unsupported_authtype_fail)
 
     STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface);
     STRICT_EXPECTED_CALL(hsm_client_create());
-    
+
     IOTHUB_SECURITY_HANDLE xda_handle = iothub_device_auth_create();
     umock_c_reset_all_calls();
 

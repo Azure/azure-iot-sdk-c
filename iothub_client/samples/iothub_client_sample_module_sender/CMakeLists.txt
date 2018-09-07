@@ -34,8 +34,8 @@ include_directories(.)
 
 add_executable(iothub_client_sample_module_sender ${iothub_client_sample_module_sender_c_files} ${iothub_client_sample_module_sender_h_files} ${samples_cert_file})
 
-target_link_libraries(iothub_client_sample_module_sender  
+target_link_libraries(iothub_client_sample_module_sender
     iothub_client_mqtt_transport
-    iothub_client 
+    iothub_client
 )
 

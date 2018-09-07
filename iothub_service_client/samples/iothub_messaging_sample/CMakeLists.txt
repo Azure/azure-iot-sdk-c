@@ -15,7 +15,7 @@ include_directories(.)
 
 add_executable(iothub_messaging_sample ${iothub_messaging_sample_c_files})
 
-target_link_libraries(iothub_messaging_sample 
+target_link_libraries(iothub_messaging_sample
     iothub_service_client
 )
 

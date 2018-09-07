@@ -557,7 +557,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         REGISTER_GLOBAL_MOCK_RETURN(messaging_delivery_accepted, TEST_AMQP_VALUE);
 
         REGISTER_GLOBAL_MOCK_HOOK(message_destroy, my_message_destroy);
-        
+
         REGISTER_GLOBAL_MOCK_HOOK(message_create, my_message_create);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(link_set_rcv_settle_mode, 0);
         REGISTER_GLOBAL_MOCK_RETURN(link_set_rcv_settle_mode, __LINE__);

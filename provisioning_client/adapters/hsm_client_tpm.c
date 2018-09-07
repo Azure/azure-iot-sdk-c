@@ -42,7 +42,7 @@ typedef struct HSM_CLIENT_INFO_TAG
     TPM2B_PRIVATE id_key_priv;
 } HSM_CLIENT_INFO;
 
-static const HSM_CLIENT_TPM_INTERFACE tpm_interface = 
+static const HSM_CLIENT_TPM_INTERFACE tpm_interface =
 {
     hsm_client_tpm_create,
     hsm_client_tpm_destroy,

@@ -45,13 +45,13 @@ int main(void)
     double avgWindSpeed = 10.0;
     double minTemperature = 20.0;
     double minHumidity = 60.0;
-    
+
     callbackCounter = 0;
 
     if (IoTHub_Init() != 0)
     {
         (void)printf("Failed to initialize the platform.\r\n");
-        return 1; 
+        return 1;
     }
     else if ((iotHubModuleClientHandle = IoTHubModuleClient_LL_CreateFromEnvironment(MQTT_Protocol)) == NULL)
     {

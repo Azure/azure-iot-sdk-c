@@ -407,7 +407,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         REGISTER_UMOCK_ALIAS_TYPE(PROV_TRANSPORT_CHALLENGE_CALLBACK, void*);
         REGISTER_UMOCK_ALIAS_TYPE(TICK_COUNTER_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(PROV_AUTH_HANDLE, void*);
-        REGISTER_UMOCK_ALIAS_TYPE(SEC_HANDLE, void*); 
+        REGISTER_UMOCK_ALIAS_TYPE(SEC_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(PROV_TRANSPORT_JSON_PARSE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(PROV_TRANSPORT_ERROR_CALLBACK, void*);
 
@@ -746,7 +746,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
 
             char tmp_msg[64];
             sprintf(tmp_msg, "Prov_Device_LL_Create failure in test %zu/%zu", index, count);
-            
+
             PROV_DEVICE_LL_HANDLE result = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
 
             // assert
@@ -1239,7 +1239,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
 
             char tmp_msg[64];
             sprintf(tmp_msg, "g_json_parse_cb failure in test %zu/%zu", index, count);
-            
+
             result = g_json_parse_cb(TEST_JSON_REPLY, g_json_ctx);
 
             //assert
@@ -1420,7 +1420,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
 
             char tmp_msg[64];
             sprintf(tmp_msg, "g_challenge_callback failure in test %zu/%zu", index, count);
-            
+
             char* result = g_challenge_callback(TEST_DATA, TEST_DATA_LEN, TEST_STRING_HANDLE_VALUE, g_challenge_ctx);
 
             //assert

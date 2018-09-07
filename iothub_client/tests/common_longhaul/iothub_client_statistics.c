@@ -636,7 +636,7 @@ char* iothub_client_statistics_to_json(IOTHUB_CLIENT_STATISTICS_HANDLE handle)
                 {
                     LogError("Failed adding connection status array to json object");
                 }
-                
+
                 // Telemetry
                 if ((telemetry_array = json_value_init_array()) == NULL)
                 {
@@ -664,7 +664,7 @@ char* iothub_client_statistics_to_json(IOTHUB_CLIENT_STATISTICS_HANDLE handle)
                 {
                     LogError("Failed adding c2d events array to json object");
                 }
-                    
+
                 // Device Methods
                 if ((methods_array = json_value_init_array()) == NULL)
                 {
@@ -1362,7 +1362,7 @@ int iothub_client_statistics_add_device_twin_reported_info(IOTHUB_CLIENT_STATIST
             {
                 queued_info->time_sent = info->time_sent;
                 queued_info->send_status_code = info->send_status_code;
-                    
+
                 result = 0;
             }
             else if (type == DEVICE_TWIN_UPDATE_RECEIVED)

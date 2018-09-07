@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 //*******************************************************************************
-// THIS SAMPLE IS PROVIDED ONLY FOR ILLUSTRATIVE PURPOSES.  
+// THIS SAMPLE IS PROVIDED ONLY FOR ILLUSTRATIVE PURPOSES.
 // IT RECEIVES MINIMAL MICROSOFT SUPPORT AND SHOULD NOT BE USED FOR PRODUCTION.
 //*******************************************************************************
 
@@ -105,7 +105,7 @@ static int do_firmware_update(void *param)
 {
     int   retValue;
     PHYSICAL_DEVICE *physical_device = (PHYSICAL_DEVICE *) param;
-    
+
     LogInfo("do_firmware_update('%s')", physical_device->new_firmware_URI);
     if (!set_physical_device_fwupdate_status(physical_device, downloading))
     {
@@ -252,7 +252,7 @@ static int DeviceMethodCallback(const char* method_name, const unsigned char* pa
         LogError("invalid method '%s'", method_name);
         retValue = NOT_VALID;
     }
- 
+
     return retValue;
 }
 

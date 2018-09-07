@@ -193,7 +193,7 @@ static int prov_transport_amqp_ws_set_proxy(PROV_DEVICE_TRANSPORT_HANDLE handle,
     return prov_transport_common_amqp_set_proxy(handle, proxy_options);
 }
 
-static PROV_DEVICE_TRANSPORT_PROVIDER prov_amqp_ws_func = 
+static PROV_DEVICE_TRANSPORT_PROVIDER prov_amqp_ws_func =
 {
     prov_transport_amqp_ws_create,
     prov_transport_amqp_ws_destroy,

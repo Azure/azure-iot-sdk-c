@@ -410,23 +410,23 @@ TEST_FUNCTION(IoTHubDeviceTwin_Create_happy_path)
     // arrange
     EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
-    
+
     EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
-    
+
     EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
-    
+
     EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
-    
+
     // act
     IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE result = IoTHubDeviceTwin_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
-    
+
     // assert
     ASSERT_IS_NOT_NULL(result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-    
+
     ///cleanup
     if (result != NULL)
     {
@@ -571,7 +571,7 @@ static void set_expected_calls_for_sendHttpRequestTwin(const unsigned int httpSt
         EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_IFMATCH, TEST_HTTP_HEADER_VAL_IFMATCH))
             .IgnoreArgument(1);
     }
-    
+
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
     EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
@@ -711,7 +711,7 @@ TEST_FUNCTION(IoTHubDeviceTwin_GetTwin_non_happy_path)
         {
             char message_on_error[64];
             sprintf(message_on_error, "Got unexpected non-NULL ptr on run %zu", i);
-        
+
             const char* deviceId = " ";
             char* result = IoTHubDeviceTwin_GetTwin(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE, deviceId);
 
@@ -982,7 +982,7 @@ TEST_FUNCTION(IoTHubDeviceTwin_UpdateModuleTwin_return_NULL_if_input_parameter_s
     const char* deviceId = " ";
     const char* moduleId = " ";
     const char* deviceTwinJson = " ";
-    
+
     char* result = IoTHubDeviceTwin_UpdateModuleTwin(NULL, deviceId, moduleId, deviceTwinJson);
 
     // assert

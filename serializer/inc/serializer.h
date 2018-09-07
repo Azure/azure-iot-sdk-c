@@ -2,35 +2,35 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 /** @file   serializer.h
-*	@brief	The IoT Hub Serializer APIs allows developers to define models for
-*			their devices
+*    @brief    The IoT Hub Serializer APIs allows developers to define models for
+*            their devices
 *
-*	@details	The IoT Hub Serializer APIs allows developers to quickly and easily define
-*				models for their devices directly as code, while supporting the required
-*				features for modeling devices (including multiple models and multiple
-*				devices within the same application). For example:
-*				
-*		<pre>
+*    @details    The IoT Hub Serializer APIs allows developers to quickly and easily define
+*                models for their devices directly as code, while supporting the required
+*                features for modeling devices (including multiple models and multiple
+*                devices within the same application). For example:
+*
+*        <pre>
 *       BEGIN_NAMESPACE(Contoso);
-*       
+*
 *           DECLARE_STRUCT(SystemProperties,
 *               ascii_char_ptr, DeviceID,
 *               _Bool, Enabled
 *           );
-*           
+*
 *           DECLARE_MODEL(VendingMachine,
-*           
+*
 *               WITH_DATA(int, SensorValue),
-*           
+*
 *               WITH_DATA(ascii_char_ptr, ObjectName),
 *               WITH_DATA(ascii_char_ptr, ObjectType),
 *               WITH_DATA(ascii_char_ptr, Version),
 *               WITH_DATA(SystemProperties, SystemProperties),
 *               WITH_DATA(ascii_char_ptr_no_quotes, Commands),
-*           
+*
 *               WITH_ACTION(SetItemPrice, ascii_char_ptr, itemId, ascii_char_ptr, price)
 *           );
-*       
+*
 *       END_NAMESPACE(Contoso);
 *       </pre>
 */
@@ -148,12 +148,12 @@ extern "C"
  *
  * @param   name                        Specifies the model name
  * @param   element1, element2...       Specifies a model element which can be
- * 		                                a property or an action.
- * 		                                    - A property is described in a
- * 		                                      model by using the WITH_DATA
- * 		                                    - An action is described in a
- * 		                                      model by using the ::WITH_ACTION
- * 		                                      macro.
+ *                                         a property or an action.
+ *                                             - A property is described in a
+ *                                               model by using the WITH_DATA
+ *                                             - An action is described in a
+ *                                               model by using the ::WITH_ACTION
+ *                                               macro.
  *
  */
  /* WITH_DATA's name argument shall be one of the following data types: */
@@ -163,7 +163,7 @@ extern "C"
 #define CREATE_DESIRED_PROPERTY_CALLBACK_MODEL_METHOD(...)
 #define CREATE_DESIRED_PROPERTY_CALLBACK_MODEL_DESIRED_PROPERTY(type, name, ...) IF(COUNT_ARG(__VA_ARGS__), void __VA_ARGS__ (void*);, )
 #define CREATE_DESIRED_PROPERTY_CALLBACK_MODEL_PROPERTY(...)
-#define CREATE_DESIRED_PROPERTY_CALLBACK_MODEL_REPORTED_PROPERTY(...) 
+#define CREATE_DESIRED_PROPERTY_CALLBACK_MODEL_REPORTED_PROPERTY(...)
 
 #define CREATE_DESIRED_PROPERTY_CALLBACK(...) CREATE_DESIRED_PROPERTY_CALLBACK_##__VA_ARGS__
 
@@ -193,7 +193,7 @@ extern "C"
         FOR_EACH_1_KEEP_1(CREATE_MODEL_ELEMENT_GLOBAL_DEINITIALIZE, name, __VA_ARGS__)       \
     }                                                                                        \
 
-    
+
 
 /**
  * @def   WITH_DATA(type, name)
@@ -217,7 +217,7 @@ extern "C"
  *                   - EDM_GUID
  *                   - EDM_BINARY
  *                   - Any struct type previously introduced by another ::DECLARE_STRUCT.
- *                  
+ *
  * @param   name    Specifies the property name
  */
 #define WITH_DATA(type, name) MODEL_PROPERTY(type, name)
@@ -258,7 +258,7 @@ extern "C"
  * The ::GET_MODEL_HANDLE macro returns a model handle that can be used in
  * subsequent operations like generating the CSDL schema for the model,
  * uploading the schema, creating a device, etc.
- * 
+ *
  * @param   schemaNamespace The namespace to which the model belongs.
  * @param   modelName       The name of the model.
  */
@@ -290,7 +290,7 @@ extern "C"
 /**
  * @def      SERIALIZE(destination, destinationSize,...)
  * This macro produces JSON serialized representation of the properties.
- * 
+ *
  * @param   destination                  Pointer to an @c unsigned @c char* that
  *                                       will receive the serialized data.
  * @param   destinationSize              Pointer to a @c size_t that gets
@@ -388,9 +388,9 @@ Actions are discarded, since no marshalling will be done for those when sending 
 
 #define TO_AGENT_DT_EXPAND_MODEL_DESIRED_PROPERTY(x, y, ...) ,x,y
 
-#define TO_AGENT_DT_EXPAND_MODEL_ACTION(...) 
+#define TO_AGENT_DT_EXPAND_MODEL_ACTION(...)
 
-#define TO_AGENT_DT_EXPAND_MODEL_METHOD(...) 
+#define TO_AGENT_DT_EXPAND_MODEL_METHOD(...)
 
 #define TO_AGENT_DT_EXPAND_ELEMENT_ARGS(N, ...) TO_AGENT_DT_EXPAND_##__VA_ARGS__
 
@@ -435,7 +435,7 @@ Actions are discarded, since no marshalling will be done for those when sending 
         return result; \
     }
 
-#define FIELD_AS_STRING(x,y) memberNames[iMember++] = #y; 
+#define FIELD_AS_STRING(x,y) memberNames[iMember++] = #y;
 
 #define REFLECTED_LIST_HEAD(name) \
     static const REFLECTED_DATA_FROM_DATAPROVIDER ALL_REFLECTED(name) = { &C2(REFLECTED_, C1(DEC(__COUNTER__))) };
@@ -675,7 +675,7 @@ Actions are discarded, since no marshalling will be done for those when sending 
 
 #define UNBUILD_DESTINATION_FIELD(value, type, name) \
     C2(destroyLocalParameter, type)(&(value->name));
-    
+
 
 #define ADDRESS_MACRO(x) ,&x
 
@@ -700,7 +700,7 @@ Actions are discarded, since no marshalling will be done for those when sending 
 #define CASTMAP__Bool 0!=, 0!=
 #define CASTMAP_bool 0!=, 0!=
 
-#define EMPTY_TOKEN 
+#define EMPTY_TOKEN
 
 #define ANOTHERIF(x) C2(ANOTHERIF,x)
 #define ANOTHERIF0(a,b) a
@@ -801,7 +801,7 @@ Actions are discarded, since no marshalling will be done for those when sending 
 
 #define END_BUILD_LOCAL_PARAMETER(type, name) \
     (void)C2(destroyLocalParameter, type)(&C2(name, _local)); \
-    } 
+    }
 
 /*The following constructs have been devised to work around the precompiler bug of Visual Studio 2005, version 14.00.50727.42*/
 /* The bug is explained in https://connect.microsoft.com/VisualStudio/feedback/details/278752/comma-missing-when-using-va-args */
@@ -1176,7 +1176,7 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, ascii_char_ptr)(const AG
         {
             result = AGENT_DATA_TYPES_OK;
         }
-        
+
     }
     return result;
 }
@@ -1500,7 +1500,7 @@ static void C2(destroyLocalParameter, ascii_char_ptr)(ascii_char_ptr* value)
     {
         free(*value);
     }
-    
+
 }
 
 static void C2(destroyLocalParameter, ascii_char_ptr_no_quotes)(ascii_char_ptr_no_quotes* value)

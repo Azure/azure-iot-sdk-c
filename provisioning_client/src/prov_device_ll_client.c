@@ -11,7 +11,7 @@
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/uniqueid.h"
-#include "azure_c_shared_utility/sastoken.h" 
+#include "azure_c_shared_utility/sastoken.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/base64.h"
 #include "azure_c_shared_utility/urlencode.h"
@@ -395,7 +395,7 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
 #ifndef NO_LOGGING
                 char* json_operation_id = NULL;
                 JSON_Object* json_reg_state = NULL;
-                if ((json_reg_state = json_object_get_object(json_object, JSON_NODE_REG_STATUS)) != NULL && 
+                if ((json_reg_state = json_object_get_object(json_object, JSON_NODE_REG_STATUS)) != NULL &&
                     (json_operation_id = retrieve_json_item(json_object, JSON_NODE_OPERATION_ID)) != NULL)
                 {
                     JSON_Value* json_error_date_time = NULL;
@@ -901,7 +901,7 @@ void Prov_Device_LL_DoWork(PROV_DEVICE_LL_HANDLE handle)
         }
         else
         {
-            // Check the connection 
+            // Check the connection
             tickcounter_ms_t current_time = 0;
             (void)tickcounter_get_current_ms(prov_info->tick_counter, &current_time);
             if ((current_time - prov_info->timeout_value) / 1000 > PROV_DEFAULT_TIMEOUT)

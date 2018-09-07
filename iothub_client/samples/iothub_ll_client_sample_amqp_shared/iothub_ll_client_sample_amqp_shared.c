@@ -166,12 +166,12 @@ static int create_events(EVENT_INSTANCE* events, const char* deviceId)
         {
             MAP_HANDLE propMap;
 
-            if ((propMap = IoTHubMessage_Properties(events[i].messageHandle)) == NULL) 
+            if ((propMap = IoTHubMessage_Properties(events[i].messageHandle)) == NULL)
             {
                 (void)printf("ERROR: failed getting device %s's message property map\r\n", deviceId);
                 result = __FAILURE__;
             }
-            else if (sprintf_s(propText, sizeof(propText), temperature > 28 ? "true" : "false") == 0) 
+            else if (sprintf_s(propText, sizeof(propText), temperature > 28 ? "true" : "false") == 0)
             {
                 (void)printf("ERROR: sprintf_s failed for device %s's message property\r\n", deviceId);
                 result = __FAILURE__;
@@ -214,7 +214,7 @@ void iothub_client_sample_amqp_run(void)
     {
         printf("Failed to initialize the platform.\r\n");
     }
-    else 
+    else
     {
         if ((transport_handle = IoTHubTransport_Create(AMQP_Protocol, hubName, hubSuffix)) == NULL)
         {

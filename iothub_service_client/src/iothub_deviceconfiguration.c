@@ -823,7 +823,7 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT parseDeviceConfigurationJsonObject(JSO
             LogError("parseDeviceConfigurationLabelsJsonObject failed for systemMetrics");
         }
     }
-    
+
     return result;
 }
 
@@ -846,11 +846,11 @@ void IoTHubDeviceConfiguration_FreeConfigurationMembers(IOTHUB_DEVICE_CONFIGURAT
             free((void *)(configuration->labels.labelNames[i]));
             free((void *)(configuration->labels.labelValues[i]));
         }
-        
+
         free((void *)configuration->labels.labelNames);
         free((void *)configuration->labels.labelValues);
     }
-    
+
     if (configuration->metricsDefinition.numQueries > 0)
     {
         for (size_t i = 0; i < configuration->metricsDefinition.numQueries; i++)
@@ -858,12 +858,12 @@ void IoTHubDeviceConfiguration_FreeConfigurationMembers(IOTHUB_DEVICE_CONFIGURAT
             free((void *)(configuration->metricsDefinition.queryNames[i]));
             free((void *)(configuration->metricsDefinition.queryStrings[i]));
         }
-            
+
         free((void *)configuration->metricsDefinition.queryNames);
         free((void *)configuration->metricsDefinition.queryStrings);
     }
 
-    
+
     if (configuration->metricResult.numQueries > 0)
     {
         for (size_t i = 0; i < configuration->metricResult.numQueries; i++)
@@ -875,7 +875,7 @@ void IoTHubDeviceConfiguration_FreeConfigurationMembers(IOTHUB_DEVICE_CONFIGURAT
         free((void *)configuration->metricResult.results);
     }
 
-    
+
     if (configuration->systemMetricsDefinition.numQueries > 0)
     {
         for (size_t i = 0; i < configuration->systemMetricsDefinition.numQueries; i++)

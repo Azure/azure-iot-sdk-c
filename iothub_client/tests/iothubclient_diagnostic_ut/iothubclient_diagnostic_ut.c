@@ -83,7 +83,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, my_gballoc_free);
-    
+
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_SetDiagnosticPropertyData, IOTHUB_MESSAGE_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_SetDiagnosticPropertyData, IOTHUB_MESSAGE_ERROR);
 
@@ -152,8 +152,8 @@ TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_fails)
 
     IOTHUB_DIAGNOSTIC_SETTING_DATA diag_setting =
     {
-        100,	/*diagnostic sampling percentage*/
-        0		/*message number*/
+        100,    /*diagnostic sampling percentage*/
+        0        /*message number*/
     };
 
     umock_c_reset_all_calls();
@@ -187,8 +187,8 @@ TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_no_diag_info_with_percentag
 {
     IOTHUB_DIAGNOSTIC_SETTING_DATA diag_setting =
     {
-        0,		/*diagnostic sampling percentage*/
-        0		/*message number*/
+        0,        /*diagnostic sampling percentage*/
+        0        /*message number*/
     };
 
     umock_c_reset_all_calls();
@@ -206,8 +206,8 @@ TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_no_diag_info_with_percentag
     //arrange
     IOTHUB_DIAGNOSTIC_SETTING_DATA diag_setting =
     {
-        100,	/*diagnostic sampling percentage*/
-        0		/*message number*/
+        100,    /*diagnostic sampling percentage*/
+        0        /*message number*/
     };
 
     umock_c_reset_all_calls();
@@ -237,8 +237,8 @@ TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_no_diag_info_with_normal_pe
     //arrange
     IOTHUB_DIAGNOSTIC_SETTING_DATA diag_setting =
     {
-        50,		/*diagnostic sampling percentage*/
-        0		/*message number*/
+        50,        /*diagnostic sampling percentage*/
+        0        /*message number*/
     };
 
     umock_c_reset_all_calls();

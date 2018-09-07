@@ -103,7 +103,7 @@ static int DecodeValueFromNode(SCHEMA_HANDLE schemaHandle, AGENT_DATA_TYPE* agen
                             else
                             {
                                 memberNames[j] = propertyName;
-                                
+
                                 /* Codes_SRS_COMMAND_DECODER_01_014: [CommandDecoder shall use the MultiTree APIs to extract a specific element from the command JSON.] */
                                 if (MultiTree_GetChildByName(node, memberNames[j], &memberNode) != MULTITREE_OK)
                                 {
@@ -311,9 +311,9 @@ static METHODRETURN_HANDLE DecodeAndExecuteModelMethod(COMMAND_DECODER_HANDLE_DA
         size_t argCount;
 
 #ifdef _MSC_VER
-#pragma warning(suppress: 6324) /* We intentionally use here strncpy */ 
+#pragma warning(suppress: 6324) /* We intentionally use here strncpy */
 #endif
-        
+
         /*Codes_SRS_COMMAND_DECODER_02_020: [ CommandDecoder_ExecuteMethod shall verify that the model has a method called methodName. ]*/
         if (((modelMethodHandle = Schema_GetModelMethodByName(modelHandle, methodName)) == NULL) ||
             (Schema_GetModelMethodArgumentCount(modelMethodHandle, &argCount) != SCHEMA_OK))
@@ -325,7 +325,7 @@ static METHODRETURN_HANDLE DecodeAndExecuteModelMethod(COMMAND_DECODER_HANDLE_DA
         else
         {
             /*Codes_SRS_COMMAND_DECODER_02_021: [ For every argument of methodName, CommandDecoder_ExecuteMethod shall build an AGENT_DATA_TYPE from the node with the same name from the MULTITREE_HANDLE. ]*/
-            
+
             if (argCount == 0)
             {
                 /*no need for any parameters*/
@@ -395,7 +395,7 @@ static METHODRETURN_HANDLE DecodeAndExecuteModelMethod(COMMAND_DECODER_HANDLE_DA
 
             }
         }
-        
+
     }
     return result;
 }
@@ -626,7 +626,7 @@ static METHODRETURN_HANDLE DecodeMethod(COMMAND_DECODER_HANDLE_DATA* commandDeco
     else
     {
         result = ScanMethodPathAndExecuteMethod(commandDecoderInstance, schemaHandle, fullMethodName, methodTree);
-        
+
     }
     return result;
 }
@@ -639,7 +639,7 @@ EXECUTE_COMMAND_RESULT CommandDecoder_ExecuteCommand(COMMAND_DECODER_HANDLE hand
     /*Codes_SRS_COMMAND_DECODER_01_010: [If either the buffer or the receiveCallbackContext argument is NULL, the processing shall stop and the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.]*/
     if (
         (command == NULL) ||
-        (commandDecoderInstance == NULL) 
+        (commandDecoderInstance == NULL)
     )
     {
         LogError("Invalid argument, COMMAND_DECODER_HANDLE handle=%p, const char* command=%p", handle, command);
@@ -802,7 +802,7 @@ DEFINE_ENUM_STRINGS(AGENT_DATA_TYPE_TYPE, AGENT_DATA_TYPE_TYPE_VALUES);
 /*if the serialization does not contain mandatory items from the model, it fails*/
 static bool validateModel_vs_Multitree(void* startAddress, SCHEMA_MODEL_TYPE_HANDLE modelHandle, MULTITREE_HANDLE desiredPropertiesTree, size_t offset)
 {
-    
+
     bool result;
     size_t nChildren;
     size_t nProcessedChildren = 0;
@@ -858,7 +858,7 @@ static bool validateModel_vs_Multitree(void* startAddress, SCHEMA_MODEL_TYPE_HAN
                         {
                             /*Codes_SRS_COMMAND_DECODER_02_007: [ If the child name corresponds to a desired property then an AGENT_DATA_TYPE shall be constructed from the MULTITREE node. ]*/
                             SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle = elementType.elementHandle.desiredPropertyHandle;
-                            
+
                             const char* desiredPropertyType = Schema_GetModelDesiredPropertyType(desiredPropertyHandle);
                             AGENT_DATA_TYPE output;
                             if (DecodeValueFromNode(Schema_GetSchemaForModelType(modelHandle), &output, child, desiredPropertyType) != 0)
@@ -886,13 +886,13 @@ static bool validateModel_vs_Multitree(void* startAddress, SCHEMA_MODEL_TYPE_HAN
                                 }
                                 Destroy_AGENT_DATA_TYPE(&output);
                             }
-                            
+
                             break;
                         }
                         case(SCHEMA_MODEL_IN_MODEL):
                         {
                             SCHEMA_MODEL_TYPE_HANDLE modelModel = elementType.elementHandle.modelHandle;
-                            
+
                             /*Codes_SRS_COMMAND_DECODER_02_009: [ If the child name corresponds to a model in model then the function shall call itself recursively. ]*/
                             if (!validateModel_vs_Multitree(startAddress, modelModel, child, offset + Schema_GetModelModelByName_Offset(modelHandle, childName_str)))
                             {
@@ -908,10 +908,10 @@ static bool validateModel_vs_Multitree(void* startAddress, SCHEMA_MODEL_TYPE_HAN
                                 {
                                     onDesiredProperty((char*)startAddress + offset);
                                 }
-                                
+
                                 nProcessedChildren++;
                             }
-                            
+
                             break;
                         }
 
@@ -982,7 +982,7 @@ static bool RemoveUnneededTwinProperties(MULTITREE_HANDLE initialParsedTree, boo
 EXECUTE_COMMAND_RESULT CommandDecoder_IngestDesiredProperties(void* startAddress, COMMAND_DECODER_HANDLE handle, const char* jsonPayload, bool parseDesiredNode)
 {
     EXECUTE_COMMAND_RESULT result;
-    
+
     /*Codes_SRS_COMMAND_DECODER_02_001: [ If startAddress is NULL then CommandDecoder_IngestDesiredProperties shall fail and return EXECUTE_COMMAND_ERROR. ]*/
     /*Codes_SRS_COMMAND_DECODER_02_002: [ If handle is NULL then CommandDecoder_IngestDesiredProperties shall fail and return EXECUTE_COMMAND_ERROR. ]*/
     /*Codes_SRS_COMMAND_DECODER_02_003: [ If jsonPayload is NULL then CommandDecoder_IngestDesiredProperties shall fail and return EXECUTE_COMMAND_ERROR. ]*/

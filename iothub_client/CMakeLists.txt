@@ -282,7 +282,7 @@ if(${use_http})
     )
 
     if(build_as_dynamic)
-        set(iothub_transport_source ${iothub_transport_source} 
+        set(iothub_transport_source ${iothub_transport_source}
             ${iothub_client_http_transport_c_files}
             ${iothub_client_http_transport_h_files})
     endif(build_as_dynamic)
@@ -315,11 +315,11 @@ if(${use_amqp})
     )
 
     if (build_as_dynamic)
-        set(iothub_transport_source ${iothub_transport_source} 
+        set(iothub_transport_source ${iothub_transport_source}
             ${iothub_client_amqp_transport_c_files}
             ${iothub_client_amqp_transport_h_files})
 
-        set(iothub_transport_source ${iothub_transport_source} 
+        set(iothub_transport_source ${iothub_transport_source}
             ${iothub_client_amqp_ws_transport_c_files}
             ${iothub_client_amqp_ws_transport_h_files})
 
@@ -355,11 +355,11 @@ if(${use_mqtt})
     )
 
     if (build_as_dynamic)
-        set(iothub_transport_source ${iothub_transport_source} 
+        set(iothub_transport_source ${iothub_transport_source}
             ${iothub_client_mqtt_transport_c_files}
             ${iothub_client_mqtt_transport_h_files})
 
-        set(iothub_transport_source ${iothub_transport_source} 
+        set(iothub_transport_source ${iothub_transport_source}
             ${iothub_client_mqtt_ws_transport_c_files}
             ${iothub_client_mqtt_ws_transport_h_files})
     endif(build_as_dynamic)
@@ -378,19 +378,19 @@ if (${build_as_dynamic})
     if(NOT ${dont_use_uploadtoblob})
         set(iothub_def_file ${iothub_def_file} ./src/upload_to_blob.def)
     endif()
-    
+
     if(use_amqp)
         set(iothub_def_file ${iothub_def_file} ./src/iothub_transport_amqp.def)
     endif()
-    
+
     if(use_http)
         set(iothub_def_file ${iothub_def_file} ./src/iothub_transport_http.def)
     endif()
-    
+
     if(use_mqtt)
         set(iothub_def_file ${iothub_def_file} ./src/iothub_transport_mqtt.def)
     endif()
-    
+
     if (${use_edge_modules})
         set(iothub_def_file ${iothub_def_file} ./src/iothub_edge_modules.def)
     endif()

@@ -94,7 +94,7 @@ typedef enum CREATELEAF_RESULT_TAG
 }CREATELEAF_RESULT;
 
 static STATIC_VAR_UNUSED const char* CreateLeaf_ResultAsString[CREATELEAF_RESULT_COUNT] =
-{   
+{
     TOSTRING(CREATELEAF_OK),
     TOSTRING(CREATELEAF_ALREADY_EXISTS),
     TOSTRING(CREATELEAF_EMPTY_NAME),
@@ -167,7 +167,7 @@ static CREATELEAF_RESULT createLeaf(MULTITREE_HANDLE_DATA* node, const char*name
                     /*all is fine until now*/
                 }
             }
-            
+
 
             if (newNode!=NULL)
             {
@@ -216,7 +216,7 @@ MULTITREE_RESULT MultiTree_AddLeaf(MULTITREE_HANDLE treeHandle, const char* dest
     {
         result = MULTITREE_INVALID_ARG;
         LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
-    } 
+    }
     /*Codes_SRS_MULTITREE_99_019:[ If parameter destinationPath is NULL, MULTITREE_INVALID_ARG shall be returned.]*/
     else if (destinationPath == NULL)
     {
@@ -403,13 +403,13 @@ MULTITREE_RESULT MultiTree_GetChildCount(MULTITREE_HANDLE treeHandle, size_t* co
     MULTITREE_RESULT result;
     /*Codes_SRS_MULTITREE_99_027:[If treeHandle is NULL, the function returns MULTITREE_INVALID_ARG.]*/
     if (treeHandle == NULL)
-    { 
+    {
         result = MULTITREE_INVALID_ARG;
         LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
     }
     /*Codes_SRS_MULTITREE_99_028:[ If parameter count is NULL, the function returns MULTITREE_INVALID_ARG.]*/
     else if (count == NULL)
-    { 
+    {
         result = MULTITREE_INVALID_ARG;
         LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
     }
@@ -438,7 +438,7 @@ MULTITREE_RESULT MultiTree_GetChild(MULTITREE_HANDLE treeHandle, size_t index, M
         result = MULTITREE_INVALID_ARG;
         LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
     }
-    else 
+    else
     {
         MULTITREE_HANDLE_DATA * node = (MULTITREE_HANDLE_DATA *)treeHandle;
         /*Codes_SRS_MULTITREE_99_032:[If parameter index is out of range, the function shall return MULTITREE_OUT_OF_RANGE_INDEX]*/
@@ -767,7 +767,7 @@ MULTITREE_RESULT MultiTree_GetLeafValue(MULTITREE_HANDLE treeHandle, const char*
                     LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
                 }
                 /*Codes_SRS_MULTITREE_99_053:[ MultiTree_GetLeafValue shall copy into the *destination argument the value of the node identified by the leafPath argument.]*/
-                else 
+                else
                 {
                     *destination = node->value;
                     /* Codes_SRS_MULTITREE_99_054:[ On success, MultiTree_GetLeafValue shall return MULTITREE_OK.] */

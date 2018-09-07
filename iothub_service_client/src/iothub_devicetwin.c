@@ -76,7 +76,7 @@ static const char* generateGuid(void)
 
 static STRING_HANDLE createRelativePath(IOTHUB_TWIN_REQUEST_MODE iotHubTwinRequestMode, const char* deviceId, const char* moduleId)
 {
-    //IOTHUB_TWIN_REQUEST_GET               GET      {iot hub}/twins/{device id}                     // Get device twin  
+    //IOTHUB_TWIN_REQUEST_GET               GET      {iot hub}/twins/{device id}                     // Get device twin
     //IOTHUB_TWIN_REQUEST_UPDATE            PATCH    {iot hub}/twins/{device id}                     // Partally update device twin
     //IOTHUB_TWIN_REQUEST_REPLACE_TAGS      PUT      {iot hub}/twins/{device id}/tags                // Replace update tags
     //IOTHUB_TWIN_REQUEST_REPLACE_DESIRED   PUT      {iot hub}/twins/{device id}/properties/desired  // Replace update desired properties
@@ -221,14 +221,14 @@ static IOTHUB_DEVICE_TWIN_RESULT sendHttpRequestTwin(IOTHUB_SERVICE_CLIENT_DEVIC
         STRING_delete(uriResource);
         result = IOTHUB_DEVICE_TWIN_HTTPAPI_ERROR;
     }
-    else 
+    else
     {
         HTTPAPI_REQUEST_TYPE httpApiRequestType = HTTPAPI_REQUEST_GET;
         STRING_HANDLE relativePath;
         unsigned int statusCode = 0;
         unsigned char is_error = 0;
 
-        //IOTHUB_TWIN_REQUEST_GET               GET      {iot hub}/twins/{device id}                     // Get device twin  
+        //IOTHUB_TWIN_REQUEST_GET               GET      {iot hub}/twins/{device id}                     // Get device twin
         //IOTHUB_TWIN_REQUEST_UPDATE            PATCH    {iot hub}/twins/{device id}                     // Partally update device twin
         //IOTHUB_TWIN_REQUEST_REPLACE_TAGS      PUT      {iot hub}/twins/{device id}/tags                // Replace update tags
         //IOTHUB_TWIN_REQUEST_REPLACE_DESIRED   PUT      {iot hub}/twins/{device id}/properties/desired  // Replace update desired properties
@@ -359,7 +359,7 @@ IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE IoTHubDeviceTwin_Create(IOTHUB_SERVICE_
             else
             {
                 memset(result, 0, sizeof(*result));
-            
+
                 /*Codes_SRS_IOTHUBDEVICETWIN_12_005: [ If the allocation successful, IoTHubDeviceTwin_Create shall create a IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE from the given IOTHUB_SERVICE_CLIENT_AUTH_HANDLE and return with it ]*/
                 /*Codes_SRS_IOTHUBDEVICETWIN_12_006: [ IoTHubDeviceTwin_Create shall allocate memory and copy hostName to result->hostName by calling mallocAndStrcpy_s. ]*/
                 if (mallocAndStrcpy_s(&result->hostname, serviceClientAuth->hostname) != 0)

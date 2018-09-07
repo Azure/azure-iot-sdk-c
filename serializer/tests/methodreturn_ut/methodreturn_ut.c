@@ -145,7 +145,7 @@ TEST_FUNCTION(MethodReturn_Create_succeeds_with_non_NULL_jsonValue_happy_path)
 {
     ///arrange
     const char* jsonValue = "1";
-    
+
     MethodReturn_Create_with_non_NULL_jsonValue_inert_path(jsonValue);
 
     ///act
@@ -232,7 +232,7 @@ TEST_FUNCTION(MethodReturn_Create_with_NULL_jsonValue_unhappy_paths)
 
     for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
-        
+
         umock_c_negative_tests_reset();
 
         umock_c_negative_tests_fail_call(i);
@@ -244,7 +244,7 @@ TEST_FUNCTION(MethodReturn_Create_with_NULL_jsonValue_unhappy_paths)
 
         ///assert
         ASSERT_IS_NULL_WITH_MSG(h, temp_str);
-        
+
     }
 
     ///cleanup

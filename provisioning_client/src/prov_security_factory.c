@@ -63,7 +63,7 @@ int prov_dev_security_init(SECURE_DEVICE_TYPE hsm_type)
             result = iothub_security_init(security_type_from_caller);
         }
         else if (security_type_from_iot != security_type_from_caller)
-        {   
+        {
             LogError("Security HSM from caller %d (which maps to security type %d) does not match already specified security type %d", hsm_type, security_type_from_caller, security_type_from_iot);
             result = __FAILURE__;
         }

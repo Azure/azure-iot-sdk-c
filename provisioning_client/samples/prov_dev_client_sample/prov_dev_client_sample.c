@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 // CAVEAT: This sample is to demonstrate azure IoT client concepts only and is not a guide design principles or style
-// Checking of return codes and error values shall be omitted for brevity.  Please practice sound engineering practices 
+// Checking of return codes and error values shall be omitted for brevity.  Please practice sound engineering practices
 // when writing production code.
 
 #include <stdio.h>
@@ -93,7 +93,7 @@ int main()
     // Used to initialize IoTHub SDK subsystem
     (void)IoTHub_Init();
     (void)prov_dev_security_init(hsm_type);
-    
+
     HTTP_PROXY_OPTIONS http_proxy;
     PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION prov_transport;
 

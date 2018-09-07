@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include <stdlib.h> 
+#include <stdlib.h>
 
 #include <signal.h>
 #include "azure_c_shared_utility/gballoc.h"
@@ -175,7 +175,7 @@ PROV_DEVICE_RESULT Prov_Device_Register_Device(PROV_DEVICE_HANDLE prov_device_ha
         result = PROV_DEVICE_RESULT_INVALID_ARG;
     }
     else
-    { 
+    {
         PROV_DEVICE_INSTANCE* prov_device_instance = (PROV_DEVICE_INSTANCE*)prov_device_handle;
 
         /* Codes_SRS_PROV_DEVICE_CLIENT_12_018: [ The function shall try to lock the Lock. ] */

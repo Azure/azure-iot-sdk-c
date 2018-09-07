@@ -26,13 +26,13 @@ include_directories(.)
 
 add_executable(iothub_client_sample_module_filter ${iothub_client_sample_module_filter} ${samples_cert_file})
 
-target_link_libraries(iothub_client_sample_module_filter 
+target_link_libraries(iothub_client_sample_module_filter
 #iothubclient is here only because locking... in gballoc no less.
     iothub_client
 )
 
 if(${use_http})
-    target_link_libraries(iothub_client_sample_module_filter 
+    target_link_libraries(iothub_client_sample_module_filter
         iothub_client_http_transport
     )
     linkSharedUtil(iothub_client_sample_module_filter)
@@ -41,7 +41,7 @@ if(${use_http})
 endif()
 
 if(${use_amqp})
-    target_link_libraries(iothub_client_sample_module_filter 
+    target_link_libraries(iothub_client_sample_module_filter
     #iothubclient is here only because locking... in gballoc no less.
         iothub_client_amqp_transport
     )
@@ -50,7 +50,7 @@ if(${use_amqp})
 endif()
 
 if(${use_mqtt})
-    target_link_libraries(iothub_client_sample_module_filter 
+    target_link_libraries(iothub_client_sample_module_filter
         iothub_client_mqtt_transport
     )
     linkMqttLibrary(iothub_client_sample_module_filter)

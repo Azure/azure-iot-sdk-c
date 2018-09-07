@@ -5,7 +5,7 @@
 
 #include "certs.h"
 
-const char certificates[] = 
+const char certificates[] =
 /* DigiCert Baltimore Root */
 "-----BEGIN CERTIFICATE-----\r\n"
 "MIIDdzCCAl+gAwIBAgIEAgAAuTANBgkqhkiG9w0BAQUFADBaMQswCQYDVQQGEwJJ\r\n"

@@ -4,9 +4,9 @@
 //
 // IMPORTANT: Please read and understand serializer limitations and alternatives as
 //            described ../../readme.md before beginning to use the serializer.
-// 
+//
 
-// There is an analogous sample using the iothub_client and parson (a json-parsing library): 
+// There is an analogous sample using the iothub_client and parson (a json-parsing library):
 // <azure-iot-sdk-c repo>/iothub_client/samples/iothub_client_device_twin_and_methods_sample
 
 // Most applications should use that sample, not the serializer.
@@ -47,7 +47,7 @@ DECLARE_MODEL(CarState,
 );
 
 // NOTE: For callbacks defined in the serializer model to be fired for desired properties, IoTHubClient_SetDeviceTwinCallback must not be invoked.
-//       Please comment out the call to IoTHubClient_SetDeviceTwinCallback further down to enable the callbacks defined in the model below. 
+//       Please comment out the call to IoTHubClient_SetDeviceTwinCallback further down to enable the callbacks defined in the model below.
 DECLARE_MODEL(CarSettings,
     WITH_DESIRED_PROPERTY(uint8_t, desired_maxSpeed, onDesiredMaxSpeed),
     WITH_DESIRED_PROPERTY(Geo, location)
@@ -56,7 +56,7 @@ DECLARE_MODEL(CarSettings,
 DECLARE_DEVICETWIN_MODEL(Car,
     WITH_REPORTED_PROPERTY(ascii_char_ptr, lastOilChangeDate), /*this is a simple reported property*/
     WITH_DESIRED_PROPERTY(ascii_char_ptr, changeOilReminder),
-    
+
     WITH_REPORTED_PROPERTY(Maker, maker), /*this is a structured reported property*/
     WITH_REPORTED_PROPERTY(CarState, state), /*this is a model in model*/
     WITH_DESIRED_PROPERTY(CarSettings, settings), /*this is a model in model*/
@@ -87,7 +87,7 @@ static void deviceTwinGetStateCallback(DEVICE_TWIN_UPDATE_STATE update_state, co
 
 void onDesiredMaxSpeed(void* argument)
 {
-    // Note: The argument is NOT a pointer to desired_maxSpeed, but instead a pointer to the MODEL 
+    // Note: The argument is NOT a pointer to desired_maxSpeed, but instead a pointer to the MODEL
     //       that contains desired_maxSpeed as one of its arguments.  In this case, it
     //       is CarSettings*.
 
@@ -118,7 +118,7 @@ void device_twin_simple_sample_run(void)
             }
             else
             {
-                // Turn on Log 
+                // Turn on Log
                 bool trace = true;
                 (void)IoTHubClient_SetOption(iotHubClientHandle, "logtrace", &trace);
 
@@ -141,7 +141,7 @@ void device_twin_simple_sample_run(void)
                     // IoTHubDeviceTwin_SendReportedStateCar sends the reported status back to IoT Hub
                     // to the associated device twin.
                     //
-                    // IoTHubDeviceTwin_SendReportedStateCar is an auto-generated function, created 
+                    // IoTHubDeviceTwin_SendReportedStateCar is an auto-generated function, created
                     // via the macro DECLARE_DEVICETWIN_MODEL(Car,...).  It resolves to the underlying function
                     // IoTHubDeviceTwin_SendReportedState_Impl().
                     if (IoTHubDeviceTwin_SendReportedStateCar(car, deviceTwinReportStateCallback, NULL) != IOTHUB_CLIENT_OK)

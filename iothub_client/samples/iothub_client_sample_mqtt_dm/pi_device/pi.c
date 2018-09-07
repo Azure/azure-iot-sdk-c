@@ -275,7 +275,7 @@ bool device_run_service(void)
 {
     int  pid, sid;
     bool retValue;
-        
+
     /* Fork off the parent process */
     pid = fork();
     if (pid < 0)
@@ -294,7 +294,7 @@ bool device_run_service(void)
         {
             /* child process segment */
             /* Change the file mode mask */
-            umask(0);       
+            umask(0);
 
             /* Create a new SID for the child process */
             sid = setuid(0);

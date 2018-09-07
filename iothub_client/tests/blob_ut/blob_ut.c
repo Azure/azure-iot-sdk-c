@@ -273,7 +273,7 @@ TEST_SUITE_INITIALIZE(TestSuiteInitialize)
 
     REGISTER_GLOBAL_MOCK_RETURN(STRING_c_str, "a");
     REGISTER_GLOBAL_MOCK_HOOK(STRING_delete, my_STRING_delete);
-    
+
     REGISTER_UMOCK_ALIAS_TYPE(HTTP_HEADERS_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(HTTPAPIEX_HANDLE, void*);
 
@@ -1037,8 +1037,8 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
     };
 
     (void)umock_c_negative_tests_init();
-    
-    
+
+
     umock_c_reset_all_calls();
     ///arrange
     unsigned char * content = (unsigned char*)gballoc_malloc(size);
@@ -1153,7 +1153,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
     {
         size_t j;
         umock_c_negative_tests_reset();
-        
+
         for (j = 0;j<sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]);j++) /*not running the tests that cannot fail*/
         {
             if (calls_that_cannot_fail[j] == i)
@@ -1162,11 +1162,11 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
 
         if (j == sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]))
         {
-            
+
             umock_c_negative_tests_fail_call(i);
             char temp_str[128];
             sprintf(temp_str, "On failed call %zu", i);
-            
+
             ///act
             context.toUpload = context.size; /* Reinit context */
             BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL);
@@ -1180,7 +1180,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
 
     ///cleanup
     gballoc_free(content);
-    
+
 }
 
 /*Tests_SRS_BLOB_02_038: [ If HTTPAPIEX_SetOption fails then Blob_UploadMultipleBlocksFromSasUri shall fail and return BLOB_ERROR. ]*/
@@ -1499,7 +1499,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_when_http_code_is_404_it_immediately_succeed
 
     ///cleanup
     gballoc_free(content);
-    
+
 }
 
 /*Tests_SRS_BLOB_99_001: [ If the size of the block returned by `getDataCallback` is bigger than 4MB, then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_INVALID_ARG`. ]*/

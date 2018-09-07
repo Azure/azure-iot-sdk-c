@@ -40,10 +40,10 @@ include_directories(. ${SHARED_UTIL_INC_FOLDER} ${IOTHUB_CLIENT_INC_FOLDER})
 
 add_executable(simplesample_http ${simplesample_http_c_files} ${simplesample_http_h_files})
 
-target_link_libraries(simplesample_http 
-    serializer 
-    iothub_client 
-    iothub_client_http_transport 
+target_link_libraries(simplesample_http
+    serializer
+    iothub_client
+    iothub_client_http_transport
 )
 
 linkSharedUtil(simplesample_http)

@@ -116,7 +116,7 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(PROV_AUTH_RESULT, PROV_AUTH_RESULT_VALUES);
 TEST_DEFINE_ENUM_TYPE(PROV_AUTH_TYPE, PROV_AUTH_TYPE_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(PROV_AUTH_TYPE, PROV_AUTH_TYPE_VALUES);
 
-static const HSM_CLIENT_TPM_INTERFACE test_tpm_interface = 
+static const HSM_CLIENT_TPM_INTERFACE test_tpm_interface =
 {
     secure_device_create,
     secure_device_destroy,
@@ -702,7 +702,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
 
             char tmp_msg[64];
             sprintf(tmp_msg, "prov_auth_get_registration_id failure in test %zu/%zu", index, count);
-            
+
             char* result = prov_auth_get_registration_id(sec_handle);
 
             //assert

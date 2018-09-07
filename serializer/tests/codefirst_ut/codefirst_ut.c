@@ -379,7 +379,7 @@ static int umockvalue_are_equal_EDM_GUID(const EDM_GUID *left, const EDM_GUID*ri
 }
 
 static char* umockvalue_stringify_EDM_BINARY(const EDM_BINARY* b)
-{   
+{
     char* result = (char*)malloc(b->size * 5 + 1);/*every byte is "0xDD " plus 1 '\0' at the end of the string*/
     if (result == NULL)
     {
@@ -727,7 +727,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         ASSERT_IS_NOT_NULL(g_testByTest);
 
         (void)umock_c_init(on_umock_c_error);
-        
+
         (void)umocktypes_bool_register_types();
         (void)umocktypes_charptr_register_types();
         (void)umocktypes_stdint_register_types();
@@ -748,8 +748,8 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         REGISTER_UMOCK_ALIAS_TYPE(pfOnDesiredProperty, void*);
         REGISTER_UMOCK_ALIAS_TYPE(pfDeviceMethodCallback, void*);
         REGISTER_UMOCK_ALIAS_TYPE(METHODRETURN_HANDLE, void*);
-        
-        
+
+
         REGISTER_GLOBAL_MOCK_RETURN(Schema_GetModelName, TEST_MODEL_NAME);
         REGISTER_GLOBAL_MOCK_HOOK(Create_AGENT_DATA_TYPE_from_DOUBLE, my_Create_AGENT_DATA_TYPE_from_DOUBLE);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Create_AGENT_DATA_TYPE_from_DOUBLE, AGENT_DATA_TYPES_JSON_ENCODER_ERRROR);
@@ -757,20 +757,20 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         REGISTER_UMOCK_VALUE_TYPE(EDM_DATE_TIME_OFFSET,
             umockvalue_stringify_EDM_DATE_TIME_OFFSET,
             umockvalue_are_equal_EDM_DATE_TIME_OFFSET,
-            umockvalue_copy_EDM_DATE_TIME_OFFSET, 
+            umockvalue_copy_EDM_DATE_TIME_OFFSET,
             umockvalue_free_EDM_DATE_TIME_OFFSET
         );
-        
+
         REGISTER_TYPE(DEVICE_RESULT, DEVICE_RESULT);
         REGISTER_TYPE(CODEFIRST_RESULT, CODEFIRST_RESULT);
         REGISTER_TYPE(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_RESULT);
         REGISTER_TYPE(SCHEMA_RESULT, SCHEMA_RESULT);
         REGISTER_TYPE(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_RESULT);
-        
+
         REGISTER_GLOBAL_MOCK_HOOK(Device_PublishTransacted, my_Device_PublishTransacted);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Device_PublishTransacted, DEVICE_ERROR);
         REGISTER_GLOBAL_MOCK_HOOK(Destroy_AGENT_DATA_TYPE, my_Destroy_AGENT_DATA_TYPE);
-        
+
         REGISTER_GLOBAL_MOCK_HOOK(Device_EndTransaction, my_Device_EndTransaction);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Device_EndTransaction, DEVICE_ERROR);
 
@@ -803,11 +803,11 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         REGISTER_GLOBAL_MOCK_RETURNS(Device_ExecuteMethod, g_MethodReturn, NULL);
 
         REGISTER_GLOBAL_MOCK_HOOK(Device_DestroyTransaction_ReportedProperties, my_Device_DestroyTransaction_ReportedProperties);
-        
+
         REGISTER_GLOBAL_MOCK_HOOK(Schema_GetModelDesiredPropertyCount, my_Schema_GetModelDesiredPropertyCount);
         REGISTER_GLOBAL_MOCK_HOOK(Schema_GetModelModelCount, my_Schema_GetModelModelCount);
-        
-        
+
+
     }
 
 
@@ -844,7 +844,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         const EDM_GUID source= { { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 } };
         (void)memcpy(someEdmGuid.GUID, source.GUID, 16);
 
-        
+
         someEdmBinary.size = 5;
         someEdmBinary.data = edmBinarySource;
 
@@ -946,7 +946,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     /*Tests_CODEFIRST_002:[ CodeFirst_RegisterSchema shall create the schema information and give it to the Schema module for one schema, identified by the metadata argument. On success, it shall return a handle to the model.]*/
     TEST_FUNCTION(CodeFirst_Init_succeds)
     {
-        
+
         ///arrange
         CODEFIRST_RESULT result;
 
@@ -1004,7 +1004,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     {
         ///arrange
         (void)CodeFirst_Init(NULL);
-            
+
 
         ///act
         EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(NULL, NULL, "", "reset", 1, &someDouble);
@@ -1816,7 +1816,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
             .IgnoreArgument_methodCallbackContext()
             .IgnoreArgument_callbackUserContext();
 
-        
+
         STRICT_EXPECTED_CALL(Schema_AddDeviceRef(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -2176,7 +2176,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         // assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_DEVICE_PUBLISH_FAILED, result);
-        
+
         // cleanup
         CodeFirst_DestroyDevice(device);
         CodeFirst_Deinit();
@@ -2232,12 +2232,12 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         // assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_DEVICE_PUBLISH_FAILED, result);
-        
+
         // cleanup
         CodeFirst_DestroyDevice(device);
         CodeFirst_Deinit();
     }
-    
+
     /* Tests_SRS_CODEFIRST_99_094:[If any Device API fail, CodeFirst_SendAsync shall return CODEFIRST_DEVICE_PUBLISH_FAILED.] */
     TEST_FUNCTION(When_EndTransacted_Fails_CodeFirst_SendAsync_Fails)
     {
@@ -2276,7 +2276,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         // assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_DEVICE_PUBLISH_FAILED, result);
-        
+
         // cleanup
         CodeFirst_DestroyDevice(device);
         CodeFirst_Deinit();
@@ -2331,7 +2331,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         // assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_INVALID_ARG, result);
-      
+
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -2368,7 +2368,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         // assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_AGENT_DATA_TYPE_ERROR, result);
-        
+
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -2419,7 +2419,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         // assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_AGENT_DATA_TYPE_ERROR, result);
-        
+
         // cleanup
         CodeFirst_DestroyDevice(device);
         CodeFirst_Deinit();
@@ -2462,7 +2462,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         // assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_VALUES_FROM_DIFFERENT_DEVICES_ERROR, result);
-        
+
         // cleanup
         CodeFirst_DestroyDevice(device1);
         CodeFirst_DestroyDevice(device2);
@@ -2677,7 +2677,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
-        
+
         EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, (int32_t)(IGNORED_NUM_ARG)));
         STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_int_Property", IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle()
@@ -3003,7 +3003,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
             .SetReturn(RESET_ACTION_HANDLE);
 
         ///act
-        
+
         SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &ALL_REFLECTED(testReflectedData));
 
         ///assert
@@ -3051,7 +3051,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Schema_AddModelProperty(TEST_INNERTYPE_MODEL_HANDLE, "this_is_double2", "double"));
         STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "int"));
         STRICT_EXPECTED_CALL(Schema_AddModelProperty(TEST_INNERTYPE_MODEL_HANDLE, "this_is_int2", "int"));
-        
+
         ///act
         SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &ALL_REFLECTED(testModelInModelReflected));
 
@@ -3209,7 +3209,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///assert
         ASSERT_IS_NULL(result);
-        
+
         ///cleanup
         CodeFirst_Deinit();
     }
@@ -3477,7 +3477,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         (void)CodeFirst_Init(NULL);
         size_t destinationSize = 1000;
         unsigned char *destination = (unsigned char*)my_gballoc_malloc(destinationSize);
-        
+
         TruckType* device1 = (TruckType*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
         TruckType* device2 = (TruckType*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
         device1->reported_this_is_int = 1;
@@ -4137,7 +4137,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_InvokeMethod_when_CodeFirst_is_not_init_fails)
     {
         ///arrange
-        
+
         ///act
         METHODRETURN_HANDLE result = CodeFirst_InvokeMethod(TEST_DEVICE_HANDLE, NULL, "", "methodA", 0, NULL);
 
@@ -4178,7 +4178,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         ///cleanup
         CodeFirst_Deinit();
     }
-    
+
     /*Tests_SRS_CODEFIRST_02_053: [ If methodName is NULL then CodeFirst_InvokeMethod shall fail and return NULL. ]*/
     TEST_FUNCTION(CodeFirst_InvokeMethod_with_NULL_methodName_fails)
     {
@@ -4230,10 +4230,10 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
         ASSERT_IS_TRUE(DummyDataProvider_resetMethod_wasCalled);
         ASSERT_IS_NOT_NULL(result);
-        
+
 
         ///cleanup
-        
+
         CodeFirst_Deinit();
     }
 

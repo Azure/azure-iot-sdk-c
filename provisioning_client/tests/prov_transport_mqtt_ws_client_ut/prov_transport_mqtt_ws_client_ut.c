@@ -94,7 +94,7 @@ static PROV_DEVICE_TRANSPORT_HANDLE my_prov_transport_common_mqtt_create(const c
     (void)dps_api_version;
     (void)error_cb;
     (void)error_ctx;
-    
+
     g_transport_io = transport_io;
     return TEST_DPS_HANDLE;
 }
@@ -295,7 +295,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_ws_client_ut)
             //act
             dps_io_info = g_transport_io(TEST_URI_VALUE, NULL);
 
-            //assert 
+            //assert
             ASSERT_IS_NULL_WITH_MSG(dps_io_info, tmp_msg);
         }
 

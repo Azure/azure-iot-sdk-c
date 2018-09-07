@@ -27,11 +27,11 @@ void my_gballoc_free(void * t)
 /*want crt_abstractions to use real malloc*/
 #define mallocAndStrcpy_s real_mallocAndStrcpy_s
 #define unsignedIntToString real_unsignedIntToString
-#define size_tToString real_size_tToString 
+#define size_tToString real_size_tToString
 #include "crt_abstractions.c"
-#undef mallocAndStrcpy_s 
-#undef unsignedIntToString 
-#undef size_tToString 
+#undef mallocAndStrcpy_s
+#undef unsignedIntToString
+#undef size_tToString
 #undef CRT_ABSTRACTIONS_H
 #undef GBALLOC_H
 
@@ -55,7 +55,7 @@ MOCKABLE_FUNCTION(, void, onDesiredPropertyModelInModel, void*, v);
 #include "commanddecoder.h"
 
 #define ENABLE_MOCKS
-#include "codefirst.h" 
+#include "codefirst.h"
 #include "jsondecoder.h"
 
 MOCKABLE_FUNCTION(, EXECUTE_COMMAND_RESULT, ActionCallbackMock, void*, actionCallbackContext, const char*, relativeActionPath, const char*, actionName, size_t, parameterCount, const AGENT_DATA_TYPE*, parameterValues);
@@ -145,7 +145,7 @@ DEFINE_ENUM_STRINGS(SCHEMA_ELEMENT_TYPE, SCHEMA_ELEMENT_TYPE_VALUES);
 static const SCHEMA_MODEL_TYPE_HANDLE TEST_MODEL_HANDLE = (SCHEMA_MODEL_TYPE_HANDLE)0x4301;
 static void* TEST_CALLBACK_CONTEXT_VALUE = (void*)0x4242;
 static bool isIoTHubMessage_GetData_writing_to_outputs = true;
-static size_t nCall = 0; 
+static size_t nCall = 0;
 static AGENT_DATA_TYPE StateAgentDataType;
 
 static SCHEMA_METHOD_HANDLE TEST_MODEL_METHOD_HANDLE = (SCHEMA_METHOD_HANDLE)0x56;
@@ -217,7 +217,7 @@ static AGENT_DATA_TYPES_RESULT my_Create_AGENT_DATA_TYPE_from_Members(AGENT_DATA
     return AGENT_DATA_TYPES_OK;
 }
 
-static SCHEMA_MODEL_ELEMENT Schema_GetModelElementByName_notFound; 
+static SCHEMA_MODEL_ELEMENT Schema_GetModelElementByName_notFound;
 static SCHEMA_MODEL_ELEMENT Schema_GetModelElementByName_desiredProperty_int_field;
 
 static SCHEMA_MODEL_ELEMENT Schema_GetModelElementByName_modelInModel;
@@ -310,7 +310,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, my_gballoc_free);
-        
+
         REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_MODEL_TYPE_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(MULTITREE_HANDLE, void*);
@@ -324,8 +324,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         REGISTER_UMOCK_ALIAS_TYPE(pfOnDesiredProperty, void*);
         REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_METHOD_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_METHOD_ARGUMENT_HANDLE, void*);
-        
-        
+
+
         REGISTER_UMOCK_ALIAS_TYPE(JSON_DECODER_RESULT, int);
         REGISTER_UMOCK_ALIAS_TYPE(MULTITREE_RESULT, int);
         REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_RESULT, int);
@@ -344,7 +344,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         REGISTER_GLOBAL_MOCK_HOOK(JSONDecoder_JSON_To_MultiTree, my_JSONDecoder_JSON_To_MultiTree);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(JSONDecoder_JSON_To_MultiTree, JSON_DECODER_ERROR);
         REGISTER_GLOBAL_MOCK_HOOK(MultiTree_Destroy, my_MultiTree_Destroy);
-        
+
         REGISTER_GLOBAL_MOCK_HOOK(Create_AGENT_DATA_TYPE_from_Members, my_Create_AGENT_DATA_TYPE_from_Members);
 
         REGISTER_GLOBAL_MOCK_RETURN(Schema_GetSchemaForModelType, TEST_SCHEMA_HANDLE);
@@ -364,29 +364,29 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetMethodArgumentName, NULL);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetMethodArgumentType, NULL);
 
-        
+
 
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetModelMethodByName, NULL);
         REGISTER_GLOBAL_MOCK_RETURN(Schema_GetModelMethodArgumentCount, SCHEMA_OK);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetModelMethodArgumentCount, SCHEMA_ERROR);
-        
+
 
         REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, real_mallocAndStrcpy_s);
 
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, __FAILURE__);
-        
+
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(MultiTree_GetChild, MULTITREE_ERROR);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_new, NULL);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(MultiTree_GetName, MULTITREE_ERROR);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetModelElementByName, Schema_GetModelElementByName_notFound);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetModelDesiredPropertyByName, NULL);
-        
+
         REGISTER_GLOBAL_MOCK_RETURN(CreateAgentDataType_From_String, AGENT_DATA_TYPES_OK);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(CreateAgentDataType_From_String, AGENT_DATA_TYPES_ERROR);
-        
+
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(int_pfDesiredPropertyFromAGENT_DATA_TYPE, __FAILURE__);
-        
-        
+
+
     }
 
     TEST_SUITE_CLEANUP(TestClassCleanup)
@@ -974,7 +974,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t argCount = 1;
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
         SetupCommand(quotedSetACStateName, setACStateName);
-        
+
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
@@ -1042,7 +1042,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         // assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS, result);
-        
+
         // cleanup
         CommandDecoder_Destroy(commandDecoderHandle);
     }
@@ -1087,7 +1087,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         // arrange
         COMMAND_DECODER_HANDLE commandDecoderHandle = CommandDecoder_Create(TEST_MODEL_HANDLE, ActionCallbackMock, TEST_CALLBACK_CONTEXT_VALUE, methodCallbackMock, TEST_CALLBACK_CONTEXT_VALUE);
         umock_c_reset_all_calls();
-        
+
         size_t argCount = 1;
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
         SetupCommand(quotedSetACStateName, setACStateName);
@@ -1123,7 +1123,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         // arrange
         COMMAND_DECODER_HANDLE commandDecoderHandle = CommandDecoder_Create(TEST_MODEL_HANDLE, ActionCallbackMock, TEST_CALLBACK_CONTEXT_VALUE, methodCallbackMock, TEST_CALLBACK_CONTEXT_VALUE);
         umock_c_reset_all_calls();
-        
+
         size_t argCount = 1;
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
         SetupCommand(quotedSetACStateName, setACStateName);
@@ -1161,7 +1161,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         // arrange
         COMMAND_DECODER_HANDLE commandDecoderHandle = CommandDecoder_Create(TEST_MODEL_HANDLE, ActionCallbackMock, TEST_CALLBACK_CONTEXT_VALUE, methodCallbackMock, TEST_CALLBACK_CONTEXT_VALUE);
         umock_c_reset_all_calls();
-        
+
         size_t argCount = 1;
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
         SetupCommand(quotedSetACStateName, setACStateName);
@@ -1197,7 +1197,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         // arrange
         COMMAND_DECODER_HANDLE commandDecoderHandle = CommandDecoder_Create(TEST_MODEL_HANDLE, ActionCallbackMock, TEST_CALLBACK_CONTEXT_VALUE, methodCallbackMock, TEST_CALLBACK_CONTEXT_VALUE);
         umock_c_reset_all_calls();
-        
+
         size_t argCount = 1;
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
         SetupCommand(quotedSetACStateName, setACStateName);
@@ -1239,7 +1239,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         // arrange
         COMMAND_DECODER_HANDLE commandDecoderHandle = CommandDecoder_Create(TEST_MODEL_HANDLE, ActionCallbackMock, TEST_CALLBACK_CONTEXT_VALUE, methodCallbackMock, TEST_CALLBACK_CONTEXT_VALUE);
         umock_c_reset_all_calls();
-        
+
         size_t argCount = 1;
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
 
@@ -1321,7 +1321,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             .CopyOutArgumentBuffer(2, &otherArgValue, sizeof(otherArgValue));
         STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(otherArgValue, EDM_STRING_TYPE, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(3, &OtherArgAgentDataType, sizeof(OtherArgAgentDataType));
-        
+
         STRICT_EXPECTED_CALL(ActionCallbackMock(TEST_CALLBACK_CONTEXT_VALUE, "", "SetACState", 2, IGNORED_PTR_ARG))
             .IgnoreArgument(5);
 
@@ -1352,10 +1352,10 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         // arrange
         COMMAND_DECODER_HANDLE commandDecoderHandle = CommandDecoder_Create(TEST_MODEL_HANDLE, ActionCallbackMock, TEST_CALLBACK_CONTEXT_VALUE, methodCallbackMock, TEST_CALLBACK_CONTEXT_VALUE);
         umock_c_reset_all_calls();
-        
+
         /* arg 1 */
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
-        
+
         SetupCommand(quotedSetACStateName, setACStateName);
 
         size_t argCount = 2;
@@ -1405,7 +1405,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         // arrange
         COMMAND_DECODER_HANDLE commandDecoderHandle = CommandDecoder_Create(TEST_MODEL_HANDLE, ActionCallbackMock, TEST_CALLBACK_CONTEXT_VALUE, methodCallbackMock, TEST_CALLBACK_CONTEXT_VALUE);
         umock_c_reset_all_calls();
-        
+
         /* arg 1 */
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
 
@@ -1516,7 +1516,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         // arrange
         COMMAND_DECODER_HANDLE commandDecoderHandle = CommandDecoder_Create(TEST_MODEL_HANDLE, ActionCallbackMock, TEST_CALLBACK_CONTEXT_VALUE, methodCallbackMock, TEST_CALLBACK_CONTEXT_VALUE);
         umock_c_reset_all_calls();
-    
+
         /* arg 1 */
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
 
@@ -1636,7 +1636,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         /* arg 1 */
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
 
-        
+
         SetupCommand(quotedSetACStateName, setACStateName);
         size_t argCount = 2;
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
@@ -1669,9 +1669,9 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             .SetReturn(AGENT_DATA_TYPES_INVALID_ARG);
 
         EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) 
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) 
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
@@ -1822,7 +1822,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             .CopyOutArgumentBuffer(2, &memberCount, sizeof(memberCount));
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
             .IgnoreArgument(1);
-        
+
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member names of the struct*/
             .IgnoreArgument(1)
             .SetReturn(NULL);
@@ -1875,7 +1875,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t memberCount = 2;
         STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &memberCount, sizeof(memberCount));
-        
+
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
             .IgnoreArgument(1)
             .SetReturn(NULL);
@@ -1906,7 +1906,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         // arrange
         COMMAND_DECODER_HANDLE commandDecoderHandle = CommandDecoder_Create(TEST_MODEL_HANDLE, ActionCallbackMock, TEST_CALLBACK_CONTEXT_VALUE, methodCallbackMock, TEST_CALLBACK_CONTEXT_VALUE);
         umock_c_reset_all_calls();
-        
+
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
 
         SetupCommand(quotedSetACStateName, setACStateName);
@@ -1948,7 +1948,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         // arrange
         COMMAND_DECODER_HANDLE commandDecoderHandle = CommandDecoder_Create(TEST_MODEL_HANDLE, ActionCallbackMock, TEST_CALLBACK_CONTEXT_VALUE, methodCallbackMock, TEST_CALLBACK_CONTEXT_VALUE);
         umock_c_reset_all_calls();
-        
+
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
 
         SetupCommand(quotedSetACStateName, setACStateName);
@@ -1994,7 +1994,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         // arrange
         COMMAND_DECODER_HANDLE commandDecoderHandle = CommandDecoder_Create(TEST_MODEL_HANDLE, ActionCallbackMock, TEST_CALLBACK_CONTEXT_VALUE, methodCallbackMock, TEST_CALLBACK_CONTEXT_VALUE);
         umock_c_reset_all_calls();
-        
+
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
 
         SetupCommand(quotedSetACStateName, setACStateName);
@@ -2040,7 +2040,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         // arrange
         COMMAND_DECODER_HANDLE commandDecoderHandle = CommandDecoder_Create(TEST_MODEL_HANDLE, ActionCallbackMock, TEST_CALLBACK_CONTEXT_VALUE, methodCallbackMock, TEST_CALLBACK_CONTEXT_VALUE);
         umock_c_reset_all_calls();
-        
+
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
 
         SetupCommand(quotedSetACStateName, setACStateName);
@@ -2098,7 +2098,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         // arrange
         COMMAND_DECODER_HANDLE commandDecoderHandle = CommandDecoder_Create(TEST_MODEL_HANDLE, ActionCallbackMock, TEST_CALLBACK_CONTEXT_VALUE, methodCallbackMock, TEST_CALLBACK_CONTEXT_VALUE);
         umock_c_reset_all_calls();
-        
+
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
 
         SetupCommand(quotedSetACStateName, setACStateName);
@@ -2158,8 +2158,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         // arrange
         COMMAND_DECODER_HANDLE commandDecoderHandle = CommandDecoder_Create(TEST_MODEL_HANDLE, ActionCallbackMock, TEST_CALLBACK_CONTEXT_VALUE, methodCallbackMock, TEST_CALLBACK_CONTEXT_VALUE);
         umock_c_reset_all_calls();
-        
-        
+
+
         size_t argCount = 1;
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
 
@@ -2183,7 +2183,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member names of the struct*/
             .IgnoreArgument(1);
-        
+
         /* member 1 */
         STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyByIndex(TEST_STRUCT_1_HANDLE, 0))
             .SetReturn(memberProperty1);
@@ -2220,7 +2220,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         // arrange
         COMMAND_DECODER_HANDLE commandDecoderHandle = CommandDecoder_Create(TEST_MODEL_HANDLE, ActionCallbackMock, TEST_CALLBACK_CONTEXT_VALUE, methodCallbackMock, TEST_CALLBACK_CONTEXT_VALUE);
         umock_c_reset_all_calls();
-        
+
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
 
         SetupCommand(quotedSetACStateName, setACStateName);
@@ -2285,7 +2285,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         // arrange
         COMMAND_DECODER_HANDLE commandDecoderHandle = CommandDecoder_Create(TEST_MODEL_HANDLE, ActionCallbackMock, TEST_CALLBACK_CONTEXT_VALUE, methodCallbackMock, TEST_CALLBACK_CONTEXT_VALUE);
         umock_c_reset_all_calls();
-        
+
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
 
         SetupCommand(quotedSetACStateName, setACStateName);
@@ -2355,7 +2355,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         // arrange
         COMMAND_DECODER_HANDLE commandDecoderHandle = CommandDecoder_Create(TEST_MODEL_HANDLE, ActionCallbackMock, TEST_CALLBACK_CONTEXT_VALUE, methodCallbackMock, TEST_CALLBACK_CONTEXT_VALUE);
         umock_c_reset_all_calls();
-        
+
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
 
         SetupCommand(quotedSetACStateName, setACStateName);
@@ -2428,7 +2428,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         // arrange
         COMMAND_DECODER_HANDLE commandDecoderHandle = CommandDecoder_Create(TEST_MODEL_HANDLE, ActionCallbackMock, TEST_CALLBACK_CONTEXT_VALUE, methodCallbackMock, TEST_CALLBACK_CONTEXT_VALUE);
         umock_c_reset_all_calls();
-        
+
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
 
         SetupCommand(quotedSetACStateName, setACStateName);
@@ -2504,7 +2504,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         // arrange
         COMMAND_DECODER_HANDLE commandDecoderHandle = CommandDecoder_Create(TEST_MODEL_HANDLE, ActionCallbackMock, TEST_CALLBACK_CONTEXT_VALUE, methodCallbackMock, TEST_CALLBACK_CONTEXT_VALUE);
         umock_c_reset_all_calls();
-        
+
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
 
         SetupCommand(quotedSetACStateName, setACStateName);
@@ -2580,7 +2580,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         // arrange
         COMMAND_DECODER_HANDLE commandDecoderHandle = CommandDecoder_Create(TEST_MODEL_HANDLE, ActionCallbackMock, TEST_CALLBACK_CONTEXT_VALUE, methodCallbackMock, TEST_CALLBACK_CONTEXT_VALUE);
         umock_c_reset_all_calls();
-        
+
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
 
         SetupCommand(quotedSetLocationName, setLocationName);
@@ -2722,13 +2722,13 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             .CopyOutArgumentBuffer(2, &quotedActionName, sizeof(quotedActionName));
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is relativeActionPath*/ /*well - first part of it ="ChildModel"*/
             .IgnoreArgument(1);
-              
+
         STRICT_EXPECTED_CALL(Schema_GetModelModelByName(TEST_MODEL_HANDLE, "ChildModel"));
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is relativeActionPath*/ /*well - first part of it ="ChildModel"*/
             .IgnoreArgument(1);
-        
+
         STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Parameters", IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(3, &TEST_COMMAND_ARGS_NODE, sizeof(TEST_COMMAND_ARGS_NODE));
 
@@ -2751,7 +2751,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         // assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS, result);
-        
+
 
         // cleanup
         CommandDecoder_Destroy(commandDecoderHandle);
@@ -2785,7 +2785,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Parameters", IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(3, &TEST_COMMAND_ARGS_NODE, sizeof(TEST_COMMAND_ARGS_NODE));
-        
+
         STRICT_EXPECTED_CALL(Schema_GetModelActionByName(TEST_CHILD_MODEL_HANDLE, "SetACState"))
             .SetReturn(SetACStateActionHandle);
         size_t argCount = 0;
@@ -2805,7 +2805,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         // assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_FAILED, result);
-        
+
 
         // cleanup
         CommandDecoder_Destroy(commandDecoderHandle);
@@ -2881,12 +2881,12 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             .CopyOutArgumentBuffer(3, &TEST_COMMAND_NAME_NODE, sizeof(TEST_COMMAND_NAME_NODE));
         STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_COMMAND_NAME_NODE, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &quotedActionName, sizeof(quotedActionName));
-        
+
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is relativeActionPath*/ /*well - first part of it ="ChildModel"*/
             .IgnoreArgument(1)
             .SetReturn(NULL);
 
-        
+
         STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
@@ -2946,7 +2946,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
     }
 
     /*Tests_SRS_COMMAND_DECODER_02_001: [ If startAddress is NULL then CommandDecoder_IngestDesiredProperties shall fail and return EXECUTE_COMMAND_ERROR. ]*/
-    TEST_FUNCTION(CommandDecoder_IngestDesiredProperties_with_NULL_startAddress_fails) 
+    TEST_FUNCTION(CommandDecoder_IngestDesiredProperties_with_NULL_startAddress_fails)
     {
         ///arrange
         COMMAND_DECODER_HANDLE commandDecoderHandle = CommandDecoder_Create(TEST_MODEL_HANDLE, ActionCallbackMock, TEST_CALLBACK_CONTEXT_VALUE, methodCallbackMock, TEST_CALLBACK_CONTEXT_VALUE);
@@ -2954,7 +2954,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         ///act
         EXECUTE_COMMAND_RESULT result = CommandDecoder_IngestDesiredProperties(NULL, commandDecoderHandle, "some properties", false);
-        
+
         ///assert
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
 
@@ -3129,7 +3129,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t calls_that_cannot_fail[] =
         {
             2, /*MultiTree_DeleteChild*/
-        
+
             3,/*MultiTree_GetChildCount*/
             7, /*STRING_c_str*/
 
@@ -3389,7 +3389,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
                 ///assert
                 ASSERT_ARE_NOT_EQUAL_WITH_MSG(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS, result, temp_str);
             }
-            
+
         }
 
         umock_c_negative_tests_deinit();
@@ -3450,12 +3450,12 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
 
     }
-    
+
     /*Tests_SRS_COMMAND_DECODER_02_014: [ If handle is NULL then CommandDecoder_ExecuteMethod shall fail and return NULL. ]*/
     TEST_FUNCTION(CommandDecoder_ExecuteMethod_with_NULL_handle_fails)
     {
         ///arrange
-        
+
         ///act
         METHODRETURN_HANDLE methodReturn = CommandDecoder_ExecuteMethod(NULL, "methodA", "{\"a\":1}");
 
@@ -3546,7 +3546,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         umock_c_reset_all_calls();
 
         CommandDecoder_ExecuteMethod_with_NULL_payload_inert_path(&zero);
-        
+
         ///act
         METHODRETURN_HANDLE methodReturn = CommandDecoder_ExecuteMethod(commandDecoderHandle, "methodA", NULL);
 
@@ -3588,7 +3588,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
                 ASSERT_IS_NULL(methodReturn);
             }
         }
-        
+
         ///cleanup
         CommandDecoder_Destroy(commandDecoderHandle);
         umock_c_negative_tests_deinit();
@@ -3649,7 +3649,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             .IgnoreArgument_treeHandle();
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument_ptr();
-        
+
     }
 
     /*Tests_SRS_COMMAND_DECODER_02_016: [ If methodPayload is not NULL then CommandDecoder_ExecuteMethod shall build a MULTITREE_HANDLE out of methodPayload. ]*/
@@ -3704,7 +3704,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
         {
             if (
-                (i != 11)&& /*gballoc_free*/ 
+                (i != 11)&& /*gballoc_free*/
                 (i != 15) && /*Destroy_AGENT_DATA_TYPE*/
                 (i != 16) && /*gballoc_free*/
                 (i != 17) && /*gballoc_free*/
@@ -3901,7 +3901,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             .IgnoreArgument_multiTreeHandle();
         STRICT_EXPECTED_CALL(Schema_GetSchemaForModelType(TEST_MODEL_HANDLE));
         STRICT_EXPECTED_CALL(gballoc_malloc(11)); /*this is the string "innermodel" for relative relativeMethodPath*/
-        STRICT_EXPECTED_CALL(Schema_GetModelModelByName(TEST_MODEL_HANDLE, "innermodel")); 
+        STRICT_EXPECTED_CALL(Schema_GetModelModelByName(TEST_MODEL_HANDLE, "innermodel"));
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*this is the string "innermodel" for relative relativeMethodPath*/
             .IgnoreArgument_ptr();
 

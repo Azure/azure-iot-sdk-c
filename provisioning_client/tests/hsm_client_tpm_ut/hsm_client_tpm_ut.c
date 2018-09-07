@@ -77,7 +77,7 @@ static TPM_HANDLE my_TSS_CreatePersistentKey(TSS_DEVICE* tpm_device, TPM_HANDLE 
     (void)sess;
     (void)hierarchy;
     (void)inPub;
-    
+
     (*outPub).publicArea.unique.rsa.t.size = g_rsa_size;
     return (TPM_HANDLE)0x1;
 }
@@ -219,7 +219,7 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
 
         REGISTER_GLOBAL_MOCK_HOOK(Base64_Encode_Bytes, my_Base64_Encode_Bytes);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Encode_Bytes, NULL);
-        
+
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, my_gballoc_free);

@@ -124,7 +124,7 @@ static X509_ATTESTATION_HANDLE my_x509Attestation_create(X509_CERTIFICATE_TYPE c
     AZURE_UNREFERENCED_PARAMETER(cert_type);
     AZURE_UNREFERENCED_PARAMETER(primary_cert);
     AZURE_UNREFERENCED_PARAMETER(secondary_cert);
-    
+
     return (X509_ATTESTATION_HANDLE)real_malloc(1);
 }
 

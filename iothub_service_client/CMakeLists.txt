@@ -57,7 +57,7 @@ set(install_libs iothub_service_client)
 if (${build_as_dynamic})
     add_library(iothub_service_client_dll SHARED ${iothub_service_client_c_files} ${iothub_service_client_h_files} ./src/iothub_service_client.def)
     linkSharedUtil(iothub_service_client_dll)
-    
+
     target_link_libraries(iothub_service_client_dll uamqp parson)
 
     if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
@@ -104,7 +104,7 @@ if(${use_installed_dependencies})
     if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
         set(CMAKE_INSTALL_LIBDIR "lib")
     endif()
-    
+
     if(NOT DEFINED CMAKE_INSTALL_INCLUDEDIR)
         set(CMAKE_INSTALL_INCLUDEDIR "include")
     endif()
@@ -118,8 +118,8 @@ if(${use_installed_dependencies})
     install(FILES ${iothub_service_client_h_files} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
 else()
     install(FILES ${iothub_service_client_h_files}
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/iothub_service_client) 
-    install(TARGETS ${install_libs} 
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/iothub_service_client)
+    install(TARGETS ${install_libs}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()

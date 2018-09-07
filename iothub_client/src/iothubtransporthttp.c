@@ -39,7 +39,7 @@ static const char* IOTHUB_CONTENT_ENCODING_C2D = "ContentEncoding";
 
 /*DEFAULT_GETMINIMUMPOLLINGTIME is the minimum time in seconds allowed between 2 consecutive GET issues to the service (GET=fetch messages)*/
 /*the default is 25 minutes*/
-#define DEFAULT_GETMINIMUMPOLLINGTIME ((unsigned int)25*60) 
+#define DEFAULT_GETMINIMUMPOLLINGTIME ((unsigned int)25*60)
 
 #define MAXIMUM_MESSAGE_SIZE (255*1024-1)
 #define MAXIMUM_PAYLOAD_OVERHEAD 384
@@ -1599,7 +1599,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                                     }
                                 }
 
-                                // Codes_SRS_TRANSPORTMULTITHTTP_09_001: [ If the IoTHubMessage being sent contains property `content-type` it shall be added to the HTTP headers as "iothub-contenttype":"value". ]  
+                                // Codes_SRS_TRANSPORTMULTITHTTP_09_001: [ If the IoTHubMessage being sent contains property `content-type` it shall be added to the HTTP headers as "iothub-contenttype":"value". ]
                                 userDefinedContentType = IoTHubMessage_GetContentTypeSystemProperty(message->messageHandle);
                                 if (goOn && userDefinedContentType != NULL)
                                 {
@@ -1610,7 +1610,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                                     }
                                 }
 
-                                // Codes_SRS_TRANSPORTMULTITHTTP_09_002: [ If the IoTHubMessage being sent contains property `content-encoding` it shall be added to the HTTP headers as "iothub-contentencoding":"value". ] 
+                                // Codes_SRS_TRANSPORTMULTITHTTP_09_002: [ If the IoTHubMessage being sent contains property `content-encoding` it shall be added to the HTTP headers as "iothub-contentencoding":"value". ]
                                 contentEncoding = IoTHubMessage_GetContentEncodingSystemProperty(message->messageHandle);
                                 if (goOn && contentEncoding != NULL)
                                 {
@@ -2205,7 +2205,7 @@ static void DoMessages(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERD
                                                             }
                                                         }
                                                     }
-                                                    // Codes_SRS_TRANSPORTMULTITHTTP_09_003: [ The HTTP header value of `ContentType` shall be set in the `IoTHubMessage_SetContentTypeSystemProperty`. ] 
+                                                    // Codes_SRS_TRANSPORTMULTITHTTP_09_003: [ The HTTP header value of `ContentType` shall be set in the `IoTHubMessage_SetContentTypeSystemProperty`. ]
                                                     else if (strncmp(IOTHUB_CONTENT_TYPE_C2D, completeHeader, strlen(IOTHUB_CONTENT_TYPE_C2D)) == 0)
                                                     {
                                                         char* whereIsColon = strchr(completeHeader, ':');
@@ -2220,7 +2220,7 @@ static void DoMessages(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERD
                                                             }
                                                         }
                                                     }
-                                                    // Codes_SRS_TRANSPORTMULTITHTTP_09_004: [ The HTTP header value of `ContentEncoding` shall be set in the `IoTHub_SetContentEncoding`. ] 
+                                                    // Codes_SRS_TRANSPORTMULTITHTTP_09_004: [ The HTTP header value of `ContentEncoding` shall be set in the `IoTHub_SetContentEncoding`. ]
                                                     else if (strncmp(IOTHUB_CONTENT_ENCODING_C2D, completeHeader, strlen(IOTHUB_CONTENT_ENCODING_C2D)) == 0)
                                                     {
                                                         char* whereIsColon = strchr(completeHeader, ':');

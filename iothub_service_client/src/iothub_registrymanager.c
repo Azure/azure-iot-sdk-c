@@ -403,7 +403,7 @@ static const char *getStatusStringForJson(IOTHUB_DEVICE_STATUS status)
 static const char *getAuthTypeStringForJson(IOTHUB_REGISTRYMANAGER_AUTH_METHOD authMethod)
 {
     const char *authTypeForJson;
-    
+
     if (IOTHUB_REGISTRYMANAGER_AUTH_SPK == authMethod)
     {
         authTypeForJson = DEVICE_JSON_KEY_DEVICE_AUTH_SAS;
@@ -495,7 +495,7 @@ static BUFFER_HANDLE constructDeviceOrModuleJson(const IOTHUB_DEVICE_OR_MODULE* 
     else if ((NULL == (authTypeForJson = getAuthTypeStringForJson(deviceOrModuleInfo->authMethod))) || ((json_object_dotset_string(root_object, DEVICE_JSON_KEY_DEVICE_AUTH_TYPE, authTypeForJson)) != JSONSuccess))
     {
         LogError("json_object_dotset_string failed for authType");
-        result = NULL;        
+        result = NULL;
     }
     //
     // Static function here.  We make the assumption that the auth method has been validated by the caller of this function.
@@ -832,7 +832,7 @@ static int addDeviceOrModuleToLinkedListAsDevice(IOTHUB_DEVICE_OR_MODULE* iothub
 {
     int result;
     IOTHUB_DEVICE* device = NULL;
-    
+
     if ((device = (IOTHUB_DEVICE*)malloc(sizeof(IOTHUB_DEVICE))) == NULL)
     {
         LogError("Malloc failed for device");
@@ -1297,7 +1297,7 @@ static IOTHUB_REGISTRYMANAGER_RESULT sendHttpRequestCRUD(IOTHUB_REGISTRYMANAGER_
         LogError("HTTPAPIEX_Create failed");
         result = IOTHUB_REGISTRYMANAGER_HTTPAPI_ERROR;
     }
-    else 
+    else
     {
         HTTPAPI_REQUEST_TYPE httpApiRequestType = HTTPAPI_REQUEST_GET;
         char relativePath[256];
@@ -1551,7 +1551,7 @@ static IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_CreateDeviceOrModule(
             LogError("deviceId cannot contain spaces");
             result = IOTHUB_REGISTRYMANAGER_INVALID_ARG;
         }
-        else if (isAuthTypeAllowed(deviceOrModuleCreateInfo->authMethod) == false) 
+        else if (isAuthTypeAllowed(deviceOrModuleCreateInfo->authMethod) == false)
         {
             /*Codes_SRS_IOTHUBREGISTRYMANAGER_06_006: [ IoTHubRegistryManager_CreateDevice shall cleanup and return IOTHUB_REGISTRYMANAGER_INVALID_ARG if deviceUpdate->authMethod is not "IOTHUB_REGISTRYMANAGER_AUTH_SPK" or "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT" ] */
             LogError("Invalid authorization type specified");
@@ -1682,7 +1682,7 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_CreateDevice_Ex(IOTHUB_REGIS
         LogError("Input parameter cannot be NULL");
         result = IOTHUB_REGISTRYMANAGER_INVALID_ARG;
     }
-    else if ((deviceCreateInfo->version < IOTHUB_REGISTRY_DEVICE_CREATE_EX_VERSION_1) || 
+    else if ((deviceCreateInfo->version < IOTHUB_REGISTRY_DEVICE_CREATE_EX_VERSION_1) ||
             (deviceCreateInfo->version > IOTHUB_REGISTRY_DEVICE_CREATE_EX_VERSION_LATEST))
     {
         LogError("deviceCreateInfo must have a valid version");
@@ -1791,7 +1791,7 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetDevice(IOTHUB_REGISTRYMAN
     {
         IOTHUB_DEVICE_OR_MODULE deviceOrModuleInfo;
         memset(&deviceOrModuleInfo, 0, sizeof(deviceOrModuleInfo));
-    
+
         result = IoTHubRegistryManager_GetDeviceOrModule(registryManagerHandle, deviceId, NULL, &deviceOrModuleInfo);
         if (result == IOTHUB_REGISTRYMANAGER_OK)
         {
@@ -1823,7 +1823,7 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetDevice_Ex(IOTHUB_REGISTRY
     {
         IOTHUB_DEVICE_OR_MODULE deviceOrModuleInfo;
         memset(&deviceOrModuleInfo, 0, sizeof(deviceOrModuleInfo));
-    
+
         result = IoTHubRegistryManager_GetDeviceOrModule(registryManagerHandle, deviceId, NULL, &deviceOrModuleInfo);
         if (result == IOTHUB_REGISTRYMANAGER_OK)
         {
@@ -1978,7 +1978,7 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_UpdateDevice_Ex(IOTHUB_REGIS
 
         //Convert to generic update struct
         deviceOrModuleUpdate.type = IOTHUB_REGISTRYMANAGER_MODEL_TYPE_DEVICE;
-        
+
         if (deviceUpdate->version >= IOTHUB_REGISTRY_DEVICE_UPDATE_EX_VERSION_1)
         {
             deviceOrModuleUpdate.deviceId = deviceUpdate->deviceId;
@@ -2167,7 +2167,7 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_CreateModule(IOTHUB_REGISTRY
         IOTHUB_DEVICE_OR_MODULE deviceOrModuleInfo;
         memset(&deviceOrModuleCreateInfo, 0, sizeof(deviceOrModuleCreateInfo));
         memset(&deviceOrModuleInfo, 0, sizeof(deviceOrModuleInfo));
-        
+
         //Convert to generic create struct
         deviceOrModuleCreateInfo.type = IOTHUB_REGISTRYMANAGER_MODEL_TYPE_MODULE;
         if (moduleCreate->version >= IOTHUB_REGISTRY_MODULE_CREATE_VERSION_1)

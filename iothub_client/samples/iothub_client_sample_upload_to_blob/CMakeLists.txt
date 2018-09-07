@@ -33,7 +33,7 @@ include_directories(.)
 
 add_executable(iothub_client_sample_upload_to_blob ${iothub_client_sample_upload_to_blob_c_files} ${iothub_client_sample_upload_to_blob_h_files})
 
-target_link_libraries(iothub_client_sample_upload_to_blob 
+target_link_libraries(iothub_client_sample_upload_to_blob
     iothub_client
     iothub_client_http_transport
 )

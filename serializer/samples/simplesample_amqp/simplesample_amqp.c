@@ -4,7 +4,7 @@
 //
 // IMPORTANT: Please read and understand serializer limitations and alternatives as
 //            described ../../readme.md before beginning to use the serializer.
-// 
+//
 
 #include <stdlib.h>
 
@@ -166,7 +166,7 @@ void simplesample_amqp_run(void)
             float minTemperature = 20.0;
             float minHumidity = 60.0;
 
-            // Turn on Log 
+            // Turn on Log
             bool trace = true;
             (void)IoTHubClient_SetOption(iotHubClientHandle, "logtrace", &trace);
 

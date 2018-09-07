@@ -35,7 +35,7 @@
 #define PLUSINF_STRING "INF"
 
 #ifndef _HUGE_ENUF
-#define _HUGE_ENUF  1e+300	/* _HUGE_ENUF*_HUGE_ENUF must overflow */
+#define _HUGE_ENUF  1e+300    /* _HUGE_ENUF*_HUGE_ENUF must overflow */
 #endif /* _HUGE_ENUF */
 
 #ifndef INFINITY
@@ -182,7 +182,7 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_EDM_DATE_TIME_OFFSET(AGENT_D
     else if (ValidateDate(v.dateTime.tm_year+1900, v.dateTime.tm_mon +1 , v.dateTime.tm_mday) != 0)
     {
         /*Codes_SRS_AGENT_TYPE_SYSTEM_99_092:[ The structure shall be validated to be conforming to OData specifications (odata-abnf-construction-rules, 2013), and if found invalid, AGENT_DATA_TYPES_INVALID_ARG shall be returned.]*/
-        result = AGENT_DATA_TYPES_INVALID_ARG; 
+        result = AGENT_DATA_TYPES_INVALID_ARG;
     }
     else if (
         (v.dateTime.tm_hour > 23) ||
@@ -202,7 +202,7 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_EDM_DATE_TIME_OFFSET(AGENT_D
         result = AGENT_DATA_TYPES_INVALID_ARG;
     }
     else if (
-        (v.hasTimeZone) && 
+        (v.hasTimeZone) &&
         (
             (v.timeZoneHour<-23) ||
             (v.timeZoneHour>23) ||
@@ -1286,7 +1286,7 @@ static char hexDigitToChar(uint8_t hexDigit)
 AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const AGENT_DATA_TYPE* value)
 {
     AGENT_DATA_TYPES_RESULT result;
-    
+
     /*Codes_SRS_AGENT_TYPE_SYSTEM_99_015:[If destination parameter is NULL, AgentDataTypes_ToString shall return AGENT_DATA_TYPES_INVALID_ARG.]*/
     if(destination == NULL)
     {
@@ -1698,7 +1698,7 @@ AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const
                 }
                 buffertemp2[pos++] = '0' + (char)(positiveValue);
                 buffertemp2[pos++] = '\0';
-                
+
                 if (STRING_concat(destination, buffertemp2) != 0)
                 {
                     result = AGENT_DATA_TYPES_ERROR;
@@ -1741,7 +1741,7 @@ AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const
                 }
                 buffertemp2[pos++] = '0' + (char)(positiveValue);
                 buffertemp2[pos++] = '\0';
-                
+
                 if (STRING_concat(destination, buffertemp2) != 0)
                 {
                     result = AGENT_DATA_TYPES_ERROR;
@@ -2148,7 +2148,7 @@ AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const
                             {
                                 /*all is fine*/
                             }
-                        
+
                     }
 
                     MultiTree_Destroy(treeHandle);
@@ -2286,7 +2286,7 @@ AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const
                         temp[destinationPointer++] = '=';
                         temp[destinationPointer++] = '=';
                     }
-                    
+
                     /*closing quote*/
                     temp[destinationPointer++] = '"';
                     /*null terminating the string*/
@@ -2464,7 +2464,7 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(AGENT_DATA_T
                 break;
             }
             case(EDM_DOUBLE_TYPE) :
-            {                
+            {
                 dest->type = src->type;
                 dest->value.edmDouble = src->value.edmDouble;
                 result = AGENT_DATA_TYPES_OK;
@@ -2929,7 +2929,7 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_Members(AGENT_DATA_TYPE* age
                         }
                     }
                 }
-                
+
             }
         }
 
@@ -3006,7 +3006,7 @@ static int sscanf2d(const char *pos2, int* sec)
     }
 
     return result;
-    
+
 }
 
 /*the following function does the same as  sscanf(pos2, "%d", &sec)*/
@@ -3407,7 +3407,7 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                 else
                 {
                     size_t pos = 1;
-                    int sign; 
+                    int sign;
                     scanOptionalMinusSign(source, 2, &pos, &sign);
 
                     if ((scanAndReadNDigitsInt(source, &pos, &year, 4) != 0) ||
@@ -3463,7 +3463,7 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                     size_t pos = 1;
                     int sign;
                     scanOptionalMinusSign(source, 2, &pos, &sign);
-                    
+
                     if ((scanAndReadNDigitsInt(source, &pos, &year, 4) != 0) ||
                         (source[pos++] != '-') ||
                         (scanAndReadNDigitsInt(source, &pos, &month, 2) != 0) ||
@@ -3922,7 +3922,7 @@ result = AGENT_DATA_TYPES_OK;
                             {
                                 sourcePosition += consumed;
                                 destinationPosition += 2;
-                                
+
                             }
                             else if (scanbase64b8(source + sourcePosition, sourceLength - sourcePosition, &consumed, agentData->value.edmBinary.data + destinationPosition) == 0)
                             {
@@ -3931,7 +3931,7 @@ result = AGENT_DATA_TYPES_OK;
                             }
 
                             if (source[sourcePosition++] != '"') /*if it doesn't end with " then bail out*/
-                            { 
+                            {
                                 free(agentData->value.edmBinary.data);
                                 agentData->value.edmBinary.data = NULL;
                                 result = AGENT_DATA_TYPES_INVALID_ARG;
