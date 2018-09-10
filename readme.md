@@ -208,9 +208,9 @@ The project offers a Long Term Support (LTS) version to allow users that do not 
 A new LTS version will be created every 6 months. The lifetime of an LTS branch is currently planned for one year. LTS branches receive all bug fixes that fall in one of these categories:
 
 - security bugfixes
-- critical bugfixes (crashes, memory leaks, etc.)
+- critical bugfixes 
 
-No new features or improvements will be picked up in an LTS branch.
+No new features will be picked up in an LTS branch.
 
 LTS branches are named lts_*mm*_*yyyy*, where *mm* and *yyyy* are the month and year when the branch was created. An example of such a branch is *lts_07_2017*.
 
