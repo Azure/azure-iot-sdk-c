@@ -38,17 +38,17 @@ static bool areTwoJsonsEqual(const unsigned char* left, size_t leftSize, const c
 
     char* cloneOfLeft = (char*)malloc(leftSize + 1); /*because of out SERIALIZE... there is a byte array that is NOT '\0' terminated*/
     ASSERT_IS_NOT_NULL(cloneOfLeft);
-    
+
     (void)memcpy(cloneOfLeft, left, leftSize);
     cloneOfLeft[leftSize] = '\0';
-    
+
     JSON_Value* actualJson = json_parse_string((char*)cloneOfLeft);
     ASSERT_IS_NOT_NULL(actualJson);
     JSON_Value* expectedJson = json_parse_string(right);
     ASSERT_IS_NOT_NULL(expectedJson);
 
     result = (json_value_equals(expectedJson, actualJson) != 0);
-    
+
     json_value_free(expectedJson);
     json_value_free(actualJson);
     free(cloneOfLeft);
@@ -162,7 +162,7 @@ static size_t g_IoTHubClient_SendReportedState_size = 0;
 static IOTHUB_CLIENT_RESULT my_IoTHubClient_SendReportedState(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const unsigned char* reportedState, size_t size, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reportedStateCallback, void* userContextCallback)
 {
     (void)(iotHubClientHandle);
-    
+
     g_IoTHubClient_SendReportedState_reportedState = (char*)malloc(size+1);
     ASSERT_IS_NOT_NULL(g_IoTHubClient_SendReportedState_reportedState);
     (void)memcpy(g_IoTHubClient_SendReportedState_reportedState, reportedState, size);
@@ -211,7 +211,7 @@ BEGIN_TEST_SUITE(serializer_dt_int)
         REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC, void*);
         REGISTER_UMOCK_ALIAS_TYPE(basicModel_WithData15, void*);
         REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_REPORTED_STATE_CALLBACK, void*);
-        
+
 
         REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_SetDeviceTwinCallback, my_IoTHubClient_SetDeviceTwinCallback);
         REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_SetDeviceTwinCallback, my_IoTHubClient_LL_SetDeviceTwinCallback);
@@ -265,7 +265,7 @@ BEGIN_TEST_SUITE(serializer_dt_int)
         }
         TEST_MUTEX_RELEASE(g_testByTest);
     }
-   
+
     /*this test wants to see that IoTHubDeviceTwin_CreatebasicModel_WithData15 doesn't fail*/
     TEST_FUNCTION(SERIALIZER_DT_AUTOMATICALLY_SUBSCRIBED_TO_DEVICETWIN_AND_METHODS_SUCCEEDS)
     {
@@ -279,7 +279,7 @@ BEGIN_TEST_SUITE(serializer_dt_int)
         STRICT_EXPECTED_CALL(IoTHubClient_SetDeviceMethodCallback(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument_deviceMethodCallback()
             .IgnoreArgument_userContextCallback();
-            
+
         ///act
         basicModel_WithData15* model = IoTHubDeviceTwin_CreatebasicModel_WithData15(TEST_IOTHUB_CLIENT_HANDLE);
 
@@ -289,7 +289,7 @@ BEGIN_TEST_SUITE(serializer_dt_int)
 
         ///clean
         IoTHubDeviceTwin_DestroybasicModel_WithData15(model);
-        
+
     }
 
     /*this test wants to see that IoTHubDeviceTwin_CreatebasicModel_WithData15 doesn't fail*/
@@ -570,7 +570,7 @@ BEGIN_TEST_SUITE(serializer_dt_int)
         ASSERT_IS_NOT_NULL(modelWithData);
 
         ASSERT_ARE_EQUAL(double, 11.0, modelWithData->with_desired_property_double15);
-        
+
         ///clean
         IoTHubDeviceTwin_DestroybasicModel_WithData15(modelWithData);
 
@@ -647,7 +647,7 @@ BEGIN_TEST_SUITE(serializer_dt_int)
         IoTHubDeviceTwin_LL_DestroybasicModel_WithData15(modelWithData);
         free(result);
     }
-    
+
     /*this test verifies that SendReportedState works for a device*/
     TEST_FUNCTION(SERIALIZER_DT_SENDREPORTEDSTATE_SUCCEEDS_CONVENIENCE)
     {

@@ -921,7 +921,7 @@ TEST_FUNCTION(IoTHub_HTTP_RecvMessage_shared_E2ETest)
     // cleanup
     IoTHubClient_Destroy(iotHubClientHandle2);
     IoTHubClient_Destroy(iotHubClientHandle1);
-    
+
     IoTHubMessage_Destroy(messageHandle2);
     ReceiveUserContext_Destroy(receiveUserContext2);
 
@@ -937,7 +937,7 @@ TEST_FUNCTION(IoTHub_HTTP_RecvMessage_shared_E2ETest)
     IoTHubMessaging_Destroy(iotHubMessagingHandle1);
 
     IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle1);
-    
+
     IoTHubTransport_Destroy(transportHandle);
 }
 

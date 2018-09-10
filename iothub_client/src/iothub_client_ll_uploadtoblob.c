@@ -177,7 +177,7 @@ IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE IoTHubClient_LL_UploadToBlob_Create(const I
         }
     }
     return (IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE)handleData;
-    
+
 }
 
 /*returns 0 when correlationId, sasUri contain data*/
@@ -538,7 +538,7 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                                                                         {
                                                                             /*Codes_SRS_IOTHUBCLIENT_LL_32_008: [ The returned file name shall be URL encoded before passing back to the cloud. ]*/
                                                                             STRING_HANDLE fileName = URL_EncodeString(json_blobName);
-                                                                            
+
                                                                             if (fileName == NULL)
                                                                             {
                                                                                 /*Codes_SRS_IOTHUBCLIENT_LL_32_009: [ If URL_EncodeString fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
@@ -546,7 +546,7 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                                                                                 result = __FAILURE__;
                                                                             }
 
-                                                                            else 
+                                                                            else
                                                                             {
                                                                                 if (!(
                                                                                     (STRING_concat(sasUri, json_hostName) == 0) &&
@@ -565,9 +565,9 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                                                                                 {
                                                                                     result = 0; /*success in step 1*/
                                                                                 }
-                                                                                
+
                                                                                 STRING_delete(fileName);
-                                                                            }	
+                                                                            }
                                                                         }
                                                                     }
                                                                 }
@@ -1259,7 +1259,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
         else if (strcmp(optionName, OPTION_HTTP_PROXY) == 0)
         {
             HTTP_PROXY_OPTIONS* proxy_options = (HTTP_PROXY_OPTIONS *)value;
-            
+
             if (proxy_options->host_address == NULL)
             {
                 /* Codes_SRS_IOTHUBCLIENT_LL_32_006: [ If `host_address` is NULL, `IoTHubClient_LL_UploadToBlob_SetOption` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
@@ -1290,7 +1290,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
                     free((char *)handleData->http_proxy_options.password);
                     handleData->http_proxy_options.password = NULL;
                 }
-                
+
                 handleData->http_proxy_options.port = proxy_options->port;
 
                 if (mallocAndStrcpy_s((char **)(&handleData->http_proxy_options.host_address), proxy_options->host_address) != 0)

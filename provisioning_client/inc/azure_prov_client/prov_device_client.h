@@ -2,14 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 /** @file prov_device_client.h
-*	@brief Extends the Prov_Device_LL module with additional features.
+*    @brief Extends the Prov_Device_LL module with additional features.
 *
-*	@details Prov_Device is a module that extends the Prov_Device_LL
-*			 module with 2 features:
-*				- scheduling the work for the IoTHubCLient from a
-*				  thread, so that the user does not need to create their
-*				  own thread
-*				- thread-safe APIs
+*    @details Prov_Device is a module that extends the Prov_Device_LL
+*             module with 2 features:
+*                - scheduling the work for the IoTHubCLient from a
+*                  thread, so that the user does not need to create their
+*                  own thread
+*                - thread-safe APIs
 */
 
 #ifndef PROV_DEVICE_CLIENT_H

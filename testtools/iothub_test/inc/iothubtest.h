@@ -39,4 +39,4 @@ extern IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhu
 }
 #endif
 
-#endif // IOTHUBTEST_H 
+#endif // IOTHUBTEST_H

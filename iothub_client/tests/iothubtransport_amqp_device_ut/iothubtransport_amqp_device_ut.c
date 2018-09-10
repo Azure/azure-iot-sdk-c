@@ -42,7 +42,7 @@ void real_free(void* ptr)
 
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/gballoc.h"
-#include "azure_c_shared_utility/agenttime.h" 
+#include "azure_c_shared_utility/agenttime.h"
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/singlylinkedlist.h"
 #include "azure_c_shared_utility/uniqueid.h"
@@ -448,7 +448,7 @@ static void register_global_mock_returns()
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(telemetry_messenger_send_message_disposition, 1);
 
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Get_DeviceId, TEST_DEVICE_ID_CHAR_PTR);
-	REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Get_ModuleId, NULL);
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Get_ModuleId, NULL);
 }
 
 // ---------- Expected Call Helpers ---------- //
@@ -714,8 +714,8 @@ static void set_authentication_state(AUTHENTICATION_STATE previous_state, AUTHEN
     STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(current_time);
 
     TEST_authentication_create_saved_on_authentication_changed_callback(
-        TEST_authentication_create_saved_on_authentication_changed_context, 
-        previous_state, 
+        TEST_authentication_create_saved_on_authentication_changed_context,
+        previous_state,
         new_state);
 }
 
@@ -724,8 +724,8 @@ static void set_messenger_state(TELEMETRY_MESSENGER_STATE previous_state, TELEME
     STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(current_time);
 
     TEST_telemetry_messenger_create_saved_on_state_changed_callback(
-        TEST_telemetry_messenger_create_saved_on_state_changed_context, 
-        previous_state, 
+        TEST_telemetry_messenger_create_saved_on_state_changed_context,
+        previous_state,
         new_state);
 }
 
@@ -744,18 +744,18 @@ static AMQP_DEVICE_HANDLE create_and_start_and_crank_device(DEVICE_CONFIG* confi
     AMQP_DEVICE_HANDLE handle = create_and_start_device(config, current_time);
 
     crank_device_do_work(handle, config, current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STOPPED, TELEMETRY_MESSENGER_STATE_STOPPED, TWIN_MESSENGER_STATE_STOPPED);
-    
+
     set_authentication_state(AUTHENTICATION_STATE_STOPPED, AUTHENTICATION_STATE_STARTING, current_time);
     set_authentication_state(AUTHENTICATION_STATE_STARTING, AUTHENTICATION_STATE_STARTED, current_time);
-    
+
     crank_device_do_work(handle, config, current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STARTED, TELEMETRY_MESSENGER_STATE_STOPPED, TWIN_MESSENGER_STATE_STOPPED);
-    
+
     set_messenger_state(TELEMETRY_MESSENGER_STATE_STOPPED, TELEMETRY_MESSENGER_STATE_STARTING, TEST_current_time);
     set_twin_messenger_state(TWIN_MESSENGER_STATE_STOPPED, TWIN_MESSENGER_STATE_STARTING, TEST_current_time);
 
     set_messenger_state(TELEMETRY_MESSENGER_STATE_STARTING, TELEMETRY_MESSENGER_STATE_STARTED, TEST_current_time);
     set_twin_messenger_state(TWIN_MESSENGER_STATE_STARTING, TWIN_MESSENGER_STATE_STARTED, TEST_current_time);
-    
+
     crank_device_do_work(handle, config, current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STARTED, TELEMETRY_MESSENGER_STATE_STARTED, TWIN_MESSENGER_STATE_STARTED);
 
     return handle;
@@ -919,7 +919,7 @@ TEST_FUNCTION(device_create_failure_checks)
     ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
-    
+
     umock_c_reset_all_calls();
     set_expected_calls_for_device_create(config, TEST_current_time);
     umock_c_negative_tests_snapshot();
@@ -928,7 +928,7 @@ TEST_FUNCTION(device_create_failure_checks)
     size_t i;
     for (i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
-        // arrange 
+        // arrange
         char error_msg[64];
 
         if (i == 4 || i == 5)
@@ -946,7 +946,7 @@ TEST_FUNCTION(device_create_failure_checks)
         sprintf(error_msg, "On failed call %zu", i);
         ASSERT_IS_NULL_WITH_MSG(handle, error_msg);
     }
-    
+
     // cleanup
     umock_c_negative_tests_deinit();
     umock_c_reset_all_calls();
@@ -1173,7 +1173,7 @@ TEST_FUNCTION(device_stop_DEVICE_STATE_STARTED_failure_checks)
     size_t i, n;
     for (i = 0, n = 1; i < n; i++)
     {
-        // arrange 
+        // arrange
         AMQP_DEVICE_HANDLE handle = create_and_start_and_crank_device(config, TEST_current_time);
 
         umock_c_reset_all_calls();
@@ -1190,7 +1190,7 @@ TEST_FUNCTION(device_stop_DEVICE_STATE_STARTED_failure_checks)
 
         // assert
         sprintf(error_msg, "On failed call %zu", i);
-    
+
         ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, error_msg);
         ASSERT_ARE_EQUAL_WITH_MSG(int, DEVICE_STATE_STOPPING, TEST_on_state_changed_callback_saved_previous_state, error_msg);
         ASSERT_IS_TRUE_WITH_MSG(DEVICE_STATE_ERROR_AUTH == TEST_on_state_changed_callback_saved_new_state || DEVICE_STATE_ERROR_MSG == TEST_on_state_changed_callback_saved_new_state, error_msg);
@@ -1734,7 +1734,7 @@ TEST_FUNCTION(device_retrieve_options_CBS_failure_checks)
 {
     // arrange
     ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
-    
+
     ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
     DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
     AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
@@ -1747,7 +1747,7 @@ TEST_FUNCTION(device_retrieve_options_CBS_failure_checks)
     size_t i;
     for (i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
-        // arrange 
+        // arrange
         char error_msg[64];
 
         umock_c_negative_tests_reset();
@@ -2190,7 +2190,7 @@ TEST_FUNCTION(telemetry_messenger_send_async_failure_checks)
     size_t i;
     for (i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
-        // arrange 
+        // arrange
         char error_msg[64];
 
         umock_c_negative_tests_reset();
@@ -2324,7 +2324,7 @@ TEST_FUNCTION(device_do_work_authentication_start_AUTH_FAILED)
     umock_c_reset_all_calls();
     set_expected_calls_for_device_do_work(config, TEST_current_time, DEVICE_STATE_STARTING, AUTHENTICATION_STATE_STOPPED, TELEMETRY_MESSENGER_STATE_STOPPED, TWIN_MESSENGER_STATE_STOPPED);
     device_do_work(handle);
-    
+
     ASSERT_IS_NOT_NULL(TEST_authentication_create_saved_on_authentication_changed_callback);
     ASSERT_IS_NOT_NULL(TEST_authentication_create_saved_on_error_callback);
 
@@ -2605,7 +2605,7 @@ TEST_FUNCTION(on_event_send_complete_messenger_callback_succeeds)
         ASSERT_ARE_EQUAL(int, 0, result);
 
         ASSERT_IS_NOT_NULL(TEST_telemetry_messenger_send_async_saved_callback);
-        
+
         EXPECTED_CALL(free(IGNORED_PTR_ARG));
         TEST_telemetry_messenger_send_async_saved_callback(TEST_telemetry_messenger_send_async_saved_message, messenger_results[i], TEST_telemetry_messenger_send_async_saved_context);
 
@@ -2722,7 +2722,7 @@ TEST_FUNCTION(on_messenger_message_received_callback_succeess)
     STRICT_EXPECTED_CALL(telemetry_messenger_subscribe_for_messages(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
-    
+
     (void)device_subscribe_message(handle, TEST_on_message_received, handle);
     ASSERT_IS_NOT_NULL(TEST_telemetry_messenger_subscribe_for_messages_saved_on_message_received_callback);
 
@@ -2818,10 +2818,10 @@ TEST_FUNCTION(on_messenger_message_received_callback_failure_checks)
     umock_c_negative_tests_deinit();
 }
 
-// Tests_SRS_DEVICE_09_113: [A TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance shall be created with a copy of the `source` and `message_id` contained in `disposition_info`]  
-// Tests_SRS_DEVICE_09_115: [`telemetry_messenger_send_message_disposition()` shall be invoked passing the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance and the corresponding TELEMETRY_MESSENGER_DISPOSITION_RESULT]  
-// Tests_SRS_DEVICE_09_117: [device_send_message_disposition() shall destroy the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance]  
-// Tests_SRS_DEVICE_09_118: [If no failures occurr, device_send_message_disposition() shall return 0]  
+// Tests_SRS_DEVICE_09_113: [A TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance shall be created with a copy of the `source` and `message_id` contained in `disposition_info`]
+// Tests_SRS_DEVICE_09_115: [`telemetry_messenger_send_message_disposition()` shall be invoked passing the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance and the corresponding TELEMETRY_MESSENGER_DISPOSITION_RESULT]
+// Tests_SRS_DEVICE_09_117: [device_send_message_disposition() shall destroy the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance]
+// Tests_SRS_DEVICE_09_118: [If no failures occurr, device_send_message_disposition() shall return 0]
 TEST_FUNCTION(device_send_message_disposition_succeess)
 {
     // arrange
@@ -2891,7 +2891,7 @@ TEST_FUNCTION(device_send_message_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_DEVICE_09_112: [If `disposition_info->source` is NULL, device_send_message_disposition() shall fail and return __FAILURE__]  
+// Tests_SRS_DEVICE_09_112: [If `disposition_info->source` is NULL, device_send_message_disposition() shall fail and return __FAILURE__]
 TEST_FUNCTION(device_send_message_NULL_disposition_info_source)
 {
     // arrange
@@ -2915,8 +2915,8 @@ TEST_FUNCTION(device_send_message_NULL_disposition_info_source)
     device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_114: [If the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO fails to be created, device_send_message_disposition() shall fail and return __FAILURE__]  
-// Tests_SRS_DEVICE_09_116: [If `telemetry_messenger_send_message_disposition()` fails, device_send_message_disposition() shall fail and return __FAILURE__]  
+// Tests_SRS_DEVICE_09_114: [If the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO fails to be created, device_send_message_disposition() shall fail and return __FAILURE__]
+// Tests_SRS_DEVICE_09_116: [If `telemetry_messenger_send_message_disposition()` fails, device_send_message_disposition() shall fail and return __FAILURE__]
 TEST_FUNCTION(device_send_message_disposition_failure_checks)
 {
     // arrange

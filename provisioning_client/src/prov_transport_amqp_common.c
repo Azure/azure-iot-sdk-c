@@ -745,7 +745,7 @@ static int create_amqp_connection(PROV_TRANSPORT_AMQP_INFO* amqp_info)
                 result = 0;
             }
         }
-        free(transport_io); 
+        free(transport_io);
     }
     return result;
 }

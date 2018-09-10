@@ -5,7 +5,7 @@
 #include "internal/iothubtransport_amqp_cbs_auth.h"
 #include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/gballoc.h"
-#include "azure_c_shared_utility/agenttime.h" 
+#include "azure_c_shared_utility/agenttime.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/sastoken.h"
 
@@ -18,18 +18,18 @@
 #define DEFAULT_SAS_TOKEN_LIFETIME_SECS           3600
 #define DEFAULT_SAS_TOKEN_REFRESH_TIME_SECS       1800
 
-typedef struct AUTHENTICATION_INSTANCE_TAG 
+typedef struct AUTHENTICATION_INSTANCE_TAG
 {
     const char* device_id;
     const char* module_id;
     STRING_HANDLE iothub_host_fqdn;
-    
+
     ON_AUTHENTICATION_STATE_CHANGED_CALLBACK on_state_changed_callback;
     void* on_state_changed_callback_context;
 
     ON_AUTHENTICATION_ERROR_CALLBACK on_error_callback;
     void* on_error_callback_context;
-    
+
     size_t cbs_request_timeout_secs;
     size_t sas_token_lifetime_secs;
     size_t sas_token_refresh_time_secs;
@@ -143,7 +143,7 @@ static STRING_HANDLE create_device_and_module_path(STRING_HANDLE iothub_host_fqd
 {
     STRING_HANDLE devices_and_modules_path;
 
-    if (module_id == NULL) 
+    if (module_id == NULL)
     {
         if ((devices_and_modules_path = STRING_construct_sprintf(IOTHUB_DEVICES_PATH_FMT, STRING_c_str(iothub_host_fqdn), device_id)) == NULL)
         {
@@ -345,7 +345,7 @@ static void* authentication_clone_option(const char* name, const void* value)
 
     if (name == NULL)
     {
-        LogError("Failed to clone authentication option (name is NULL)"); 
+        LogError("Failed to clone authentication option (name is NULL)");
         result = NULL;
     }
     else if (value == NULL)
@@ -411,7 +411,7 @@ int authentication_start(AUTHENTICATION_HANDLE authentication_handle, const CBS_
     else
     {
         AUTHENTICATION_INSTANCE* instance = (AUTHENTICATION_INSTANCE*)authentication_handle;
-        
+
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_027: [If authenticate state has been started already, authentication_start() shall fail and return __FAILURE__ as error code]
         if (instance->state != AUTHENTICATION_STATE_STOPPED)
         {
@@ -437,7 +437,7 @@ int authentication_start(AUTHENTICATION_HANDLE authentication_handle, const CBS_
 int authentication_stop(AUTHENTICATION_HANDLE authentication_handle)
 {
     int result;
-    
+
     // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_031: [If `authentication_handle` is NULL, authentication_stop() shall fail and return __FAILURE__]
     if (authentication_handle == NULL)
     {
@@ -586,7 +586,7 @@ AUTHENTICATION_HANDLE authentication_create(const AUTHENTICATION_CONFIG* config)
             }
         }
     }
-    
+
     return result;
 }
 
@@ -600,7 +600,7 @@ void authentication_do_work(AUTHENTICATION_HANDLE authentication_handle)
     else
     {
         AUTHENTICATION_INSTANCE* instance = (AUTHENTICATION_INSTANCE*)authentication_handle;
-        
+
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_038: [If `instance->is_cbs_put_token_in_progress` is TRUE, authentication_do_work() shall only verify the authentication timeout]
         if (instance->is_cbs_put_token_in_progress)
         {
@@ -611,7 +611,7 @@ void authentication_do_work(AUTHENTICATION_HANDLE authentication_handle)
             {
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_085: [`instance->is_cbs_put_token_in_progress` shall be set to FALSE]
                 instance->is_cbs_put_token_in_progress = false;
-            
+
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_086: [`instance->state` shall be updated to AUTHENTICATION_STATE_ERROR and `instance->on_state_changed_callback` invoked]
                 update_state(instance, AUTHENTICATION_STATE_ERROR);
 
@@ -699,7 +699,7 @@ int authentication_set_option(AUTHENTICATION_HANDLE authentication_handle, const
     // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_097: [If `authentication_handle` or `name` or `value` is NULL, authentication_set_option shall fail and return a non-zero value]
     if (authentication_handle == NULL || name == NULL || value == NULL)
     {
-        LogError("authentication_set_option failed (one of the followin are NULL: authentication_handle=%p, name=%p, value=%p)", 
+        LogError("authentication_set_option failed (one of the followin are NULL: authentication_handle=%p, name=%p, value=%p)",
             authentication_handle, name, value);
         result = __FAILURE__;
     }

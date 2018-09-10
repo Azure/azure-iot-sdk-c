@@ -27,12 +27,12 @@ void my_gballoc_free(void * t)
 }
 
 /*want VECTOR to use real malloc*/
-#define GBALLOC_H 
+#define GBALLOC_H
 #define VECTOR_create real_VECTOR_create
 #define VECTOR_destroy real_VECTOR_destroy
 #define VECTOR_push_back real_VECTOR_push_back
 #define VECTOR_erase real_VECTOR_erase
-#define VECTOR_clear real_VECTOR_clear 
+#define VECTOR_clear real_VECTOR_clear
 #define VECTOR_element real_VECTOR_element
 #define VECTOR_front real_VECTOR_front
 #define VECTOR_back real_VECTOR_back
@@ -44,7 +44,7 @@ void my_gballoc_free(void * t)
 #undef VECTOR_destroy
 #undef VECTOR_push_back
 #undef VECTOR_erase
-#undef VECTOR_clear 
+#undef VECTOR_clear
 #undef VECTOR_element
 #undef VECTOR_front
 #undef VECTOR_back
@@ -54,14 +54,14 @@ void my_gballoc_free(void * t)
 #undef VECTOR_H
 
 /*want crt_abstractions to use real malloc*/
-#define GBALLOC_H 
+#define GBALLOC_H
 #define mallocAndStrcpy_s real_mallocAndStrcpy_s
 #define unsignedIntToString real_unsignedIntToString
-#define size_tToString real_size_tToString 
+#define size_tToString real_size_tToString
 #include "crt_abstractions.c"
-#undef mallocAndStrcpy_s 
-#undef unsignedIntToString 
-#undef size_tToString 
+#undef mallocAndStrcpy_s
+#undef unsignedIntToString
+#undef size_tToString
 
 #undef CRT_ABSTRACTIONS_H
 
@@ -268,7 +268,7 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     /* Schema_GetSchemaCount */
 
-    /* Tests_SRS_SCHEMA_99_153: [Schema_GetSchemaCount shall return the number of "active" schemas (all schemas created with Schema_Create 
+    /* Tests_SRS_SCHEMA_99_153: [Schema_GetSchemaCount shall return the number of "active" schemas (all schemas created with Schema_Create
        in the current process, for which Schema_Destroy has not been called).] */
     TEST_FUNCTION(Schema_GetSchemaCount_should_return_zero_when_no_schemas_were_created)
     {
@@ -364,7 +364,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_IS_NULL(handle);
     }
 
-    /* Tests_SRS_SCHEMA_99_148: [Schema_GetSchemaByNamespace shall search all active schemas and return the schema with the 
+    /* Tests_SRS_SCHEMA_99_148: [Schema_GetSchemaByNamespace shall search all active schemas and return the schema with the
        namespace given by the schemaNamespace argument.] */
     TEST_FUNCTION(Schema_GetSchemaByNamespace_with_a_matching_namespace_argument_should_return_the_schema)
     {
@@ -539,7 +539,7 @@ BEGIN_TEST_SUITE(Schema_ut)
 
         for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
         {
-            
+
             umock_c_negative_tests_reset();
 
             umock_c_negative_tests_fail_call(i);
@@ -551,7 +551,7 @@ BEGIN_TEST_SUITE(Schema_ut)
 
             ///assert
             ASSERT_IS_NULL_WITH_MSG(result, temp_str);
-            
+
         }
 
         // cleanup
@@ -852,7 +852,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         // cleanup
         Schema_Destroy(schemaHandle);
     }
-    
+
     /* Tests_SRS_SCHEMA_99_105: [The action name shall be unique per model, if the same action name is added twice to a model, Schema_CreateModelAction shall return NULL.] */
     TEST_FUNCTION(Schema_CreateModelAction_with_Same_Action_To_Same_Model_Fail)
     {
@@ -1036,7 +1036,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         // assert
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
     }
-    
+
     /* Tests_SRS_SCHEMA_99_123: [Schema_GetModelCount shall return SCHEMA_INVALID_ARG if any of the arguments is NULL.] */
     TEST_FUNCTION(Schema_GetModelCount_with_NULL_modelCount_Fails)
     {
@@ -1056,7 +1056,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     }
 
     /* Tests_SRS_SCHEMA_99_120: [Schema_GetModelCount shall provide the number of models defined in the schema identified by schemaHandle.] */
-    /* Tests_SRS_SCHEMA_99_121: [The count shall be provided via the out argument modelCount.] */ 
+    /* Tests_SRS_SCHEMA_99_121: [The count shall be provided via the out argument modelCount.] */
     /* Tests_SRS_SCHEMA_99_122: [On success, Schema_GetModelCount shall return SCHEMA_OK.] */
     TEST_FUNCTION(Schema_GetModelCount_With_Zero_Models_Defined_Yields_0)
     {
@@ -1433,8 +1433,8 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     }
 
-    /* Tests_SRS_SCHEMA_99_089: [Schema_GetModelPropertyCount shall provide the number of properties defined in the model type identified by modelTypeHandle.] */ 
-    /* Tests_SRS_SCHEMA_99_090: [The count shall be provided via the out argument propertyCount.]*/ 
+    /* Tests_SRS_SCHEMA_99_089: [Schema_GetModelPropertyCount shall provide the number of properties defined in the model type identified by modelTypeHandle.] */
+    /* Tests_SRS_SCHEMA_99_090: [The count shall be provided via the out argument propertyCount.]*/
     /* Tests_SRS_SCHEMA_99_091: [On success, Schema_GetModelPropertyCount shall return SCHEMA_OK.] */
     TEST_FUNCTION(Schema_GetModelPropertyCount_With_No_Properties_Defined_Yields_0)
     {
@@ -1547,7 +1547,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         // cleanup
         Schema_Destroy(schemaHandle);
     }
-    
+
     /* Tests_SRS_SCHEMA_99_093: [Schema_GetModelProperty shall return a non-NULL SCHEMA_PROPERTY_HANDLE corresponding to the model type identified by modelTypeHandle and matching the index number provided by the index argument.] */
     /* Tests_SRS_SCHEMA_99_097: [index is zero based, and the order in which actions were added shall be the index in which they will be retrieved.] */
     TEST_FUNCTION(Schema_GetModelProperty_With_Valid_Index_Succeeds)
@@ -2866,7 +2866,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         // cleanup
         Schema_Destroy(schemaHandle);
     }
-    
+
     /* Schema_GetStructTypePropertyCount */
     /* Tests_SRS_SCHEMA_99_079: [Schema_GetStructTypePropertyCount shall return SCHEMA_INVALID_ARG if any of the structlTypeHandle or propertyCount arguments is NULL.] */
     TEST_FUNCTION(Schema_GetStructTypePropertyCount_With_NULL_structTypeHandle_Fails)
@@ -3012,7 +3012,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         // cleanup
         Schema_Destroy(schemaHandle);
     }
-    
+
     /* Tests_SRS_SCHEMA_99_083: [Schema_ GetStructTypeProperty shall return NULL if the index specified is outside the valid range, if structTypeHandle argument is NULL] */
     TEST_FUNCTION(Schema_GetStructTypeProperty_With_Index_Greater_Than_Number_OF_Properties_Fails)
     {
@@ -3273,7 +3273,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         (void)Schema_CreateModelType(schemaHandle, "someMinerModel");
-        
+
         size_t nModels = 444;
 
         ///act
@@ -3431,11 +3431,11 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_MODEL_TYPE_HANDLE result_intruder2 = Schema_GetModelModelyByIndex(NULL, 0);
 
         ///assert
-        ASSERT_IS_NOT_NULL(result1); 
+        ASSERT_IS_NOT_NULL(result1);
         ASSERT_ARE_EQUAL(char_ptr, "someMinerModel", Schema_GetModelName(result1));
         ASSERT_IS_NOT_NULL(result2);
         ASSERT_ARE_EQUAL(char_ptr, "someMinerModel", Schema_GetModelName(result2));
-        
+
         ASSERT_IS_NULL(result_intruder1);
         ASSERT_IS_NULL(result_intruder2);
 
@@ -4090,7 +4090,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         const char* reportedPropertyName = "reportedPropertyName";
         (void)Schema_AddModelReportedProperty(modelType, reportedPropertyName, "int"); /*added once here*/
-        
+
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, reportedPropertyName))
@@ -4158,7 +4158,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         const char* reportedPropertyType = "reportedPropertyType";
         (void)umock_c_negative_tests_init();
         umock_c_reset_all_calls();
-        
+
         Schema_AddModelReportedProperty_inert_path(reportedPropertyName, reportedPropertyType);
         umock_c_negative_tests_snapshot();
 
@@ -4286,7 +4286,7 @@ BEGIN_TEST_SUITE(Schema_ut)
 
         ///act
         SCHEMA_REPORTED_PROPERTY_HANDLE result = Schema_GetModelReportedPropertyByName(NULL, "a");
-        
+
         ///assert
         ASSERT_IS_NULL(result);
 
@@ -4521,7 +4521,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         |
         +---- minerModel ("someMinerModel")
         */
-        
+
         ///act
         bool result1 = Schema_ModelReportedPropertyByPathExists(model, "z"); /*only "a" and "ManicMiner" exists*/
         bool result2 = Schema_ModelReportedPropertyByPathExists(model, "ManicMinerX"); /*only "a" and "ManicMiner" exists*/
@@ -6051,7 +6051,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelMethodArgument_with_NULL_methodHandle_fails)
     {
         ///arrange
-        
+
         ///act
         SCHEMA_RESULT result = Schema_AddModelMethodArgument(NULL, "a", "int");
 
@@ -6154,7 +6154,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "model");
         SCHEMA_METHOD_HANDLE method = Schema_CreateModelMethod(model, "method");
-        
+
         umock_c_reset_all_calls();
 
         Schema_AddModelMethodArgument_inert_path();
@@ -6200,7 +6200,7 @@ BEGIN_TEST_SUITE(Schema_ut)
                 ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_ERROR, result);
             }
         }
-        
+
         ///clean
         Schema_Destroy(schemaHandle);
         umock_c_negative_tests_deinit();
@@ -6436,7 +6436,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///clean
         Schema_Destroy(schemaHandle);
     }
-    
+
     /*Tests_SRS_SCHEMA_02_125: [ If methodArgumentHandle is NULL then Schema_GetMethodArgumentName shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_GetMethodArgumentName_with_NULL_methodArgumentHandle_fails)
     {

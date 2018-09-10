@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include <stdlib.h> 
+#include <stdlib.h>
 #include "azure_c_shared_utility/umock_c_prod.h"
 #include "azure_c_shared_utility/gballoc.h"
 
@@ -46,7 +46,7 @@ typedef struct IOTHUB_CLIENT_CORE_INSTANCE_TAG
 } IOTHUB_CLIENT_CORE_INSTANCE;
 
 typedef enum HTTPWORKER_THREAD_TYPE_TAG
-{ 
+{
     HTTPWORKER_THREAD_UPLOAD_TO_BLOB,
     HTTPWORKER_THREAD_INVOKE_METHOD
 } HTTPWORKER_THREAD_TYPE;
@@ -73,7 +73,7 @@ typedef struct INVOKE_METHOD_SAVED_DATA_TAG
     unsigned int timeout;
     IOTHUB_METHOD_INVOKE_CALLBACK methodInvokeCallback;
 } INVOKE_METHOD_SAVED_DATA;
-    
+
 typedef struct HTTPWORKER_THREAD_INFO_TAG
 {
     HTTPWORKER_THREAD_TYPE workerThreadType;
@@ -193,7 +193,7 @@ static void freeHttpWorkerThreadInfo(HTTPWORKER_THREAD_INFO* threadInfo)
         free((char*)threadInfo->invokeMethodSavedData.methodName);
         free((char*)threadInfo->invokeMethodSavedData.methodPayload);
     }
-    
+
     free(threadInfo);
 }
 
@@ -1042,7 +1042,7 @@ IOTHUB_CLIENT_CORE_HANDLE IoTHubClientCore_CreateFromDeviceAuth(const char* ioth
         /* Codes_SRS_IOTHUBCLIENT_12_022: [** `IoTHubClient_CreateFromDeviceAuth` shall create a lock object to be used later for serializing IoTHubClient calls. **] */
         /* Codes_SRS_IOTHUBCLIENT_12_023: [** If creating the lock fails, then IoTHubClient_CreateFromDeviceAuth shall return NULL. **] */
         /* Codes_SRS_IOTHUBCLIENT_12_024: [** If IoTHubClient_CreateFromDeviceAuth fails, all resources allocated by it shall be freed. **] */
-        /* Codes_SRS_IOTHUBCLIENT_12_025: [** `IoTHubClient_CreateFromDeviceAuth` shall instantiate a new `IoTHubClientCore_LL` instance by calling `IoTHubClientCore_LL_CreateFromDeviceAuth` and passing iothub_uri, device_id and protocol argument.  **] */      
+        /* Codes_SRS_IOTHUBCLIENT_12_025: [** `IoTHubClient_CreateFromDeviceAuth` shall instantiate a new `IoTHubClientCore_LL` instance by calling `IoTHubClientCore_LL_CreateFromDeviceAuth` and passing iothub_uri, device_id and protocol argument.  **] */
         result = create_iothub_instance(CREATE_HUB_INSTANCE_FROM_DEVICE_AUTH, NULL, NULL, NULL, protocol, iothub_uri, device_id);
     }
     return result;
@@ -2328,7 +2328,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetInputMessageCallback(IOTHUB_CLIENT_CORE
                 inputMessageCallbackContext.iotHubClientHandle = iotHubClientHandle;
                 inputMessageCallbackContext.eventHandlerCallback = eventHandlerCallback;
                 inputMessageCallbackContext.userContextCallback = userContextCallback;
-                
+
                 result = IoTHubClientCore_LL_SetInputMessageCallbackEx(iotHubClientInstance->IoTHubClientLLHandle, inputName, iothub_ll_inputmessage_callback, (void*)&inputMessageCallbackContext, sizeof(inputMessageCallbackContext));
                 (void)Unlock(iotHubClientInstance->LockHandle);
             }
@@ -2357,7 +2357,7 @@ HTTPWORKER_THREAD_INFO * allocateMethodInvoke(IOTHUB_CLIENT_CORE_HANDLE iotHubCl
         threadInfo->invokeMethodSavedData.timeout = timeout;
         threadInfo->invokeMethodSavedData.methodInvokeCallback = methodInvokeCallback;
 
-        if ((mallocAndStrcpy_s((char**)&threadInfo->invokeMethodSavedData.deviceId, deviceId) != 0) || 
+        if ((mallocAndStrcpy_s((char**)&threadInfo->invokeMethodSavedData.deviceId, deviceId) != 0) ||
             ((moduleId != NULL) && mallocAndStrcpy_s((char**)&threadInfo->invokeMethodSavedData.moduleId, moduleId) != 0) ||
             (mallocAndStrcpy_s((char**)&threadInfo->invokeMethodSavedData.methodName, methodName) != 0) ||
             (mallocAndStrcpy_s((char**)&threadInfo->invokeMethodSavedData.methodPayload, methodPayload) != 0))

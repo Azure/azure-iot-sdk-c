@@ -44,7 +44,7 @@ if(${use_openssl})
 endif()
 
 target_link_libraries(prov_dev_client_ll_sample
-    iothub_client 
+    iothub_client
     prov_device_ll_client
     iothub_client_mqtt_transport
     iothub_client_amqp_transport)

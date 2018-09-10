@@ -76,15 +76,15 @@ MOCKABLE_FUNCTION(, ATTESTATION_MECHANISM_HANDLE, attestationMechanism_createWit
 MOCKABLE_FUNCTION(, void, attestationMechanism_destroy, ATTESTATION_MECHANISM_HANDLE, att_mech);
 
 /** @brief  Returns result indicating if an attestation mechanism is valid to be attached to an Individual Enrollment
-* 
+*
 * @param    att_mech          The handle of the Attestation Mechanism
-*/ 
+*/
 MOCKABLE_FUNCTION(, bool, attestationMechanism_isValidForIndividualEnrollment, ATTESTATION_MECHANISM_HANDLE, att_mech);
 
 /** @brief  Returns result indicating if an attestation mechanism is valid to be attached to an Enrollment Group
-* 
+*
 * @param    att_mech          The handle of the Attestation Mechanism
-*/ 
+*/
 MOCKABLE_FUNCTION(, bool, attestationMechanism_isValidForEnrollmentGroup, ATTESTATION_MECHANISM_HANDLE, att_mech);
 
 

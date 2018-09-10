@@ -87,7 +87,7 @@ void DataPublisher_Destroy(DATA_PUBLISHER_HANDLE dataPublisherHandle)
     {
         DATA_PUBLISHER_HANDLE_DATA* dataPublisherInstance = (DATA_PUBLISHER_HANDLE_DATA*)dataPublisherHandle;
         DataMarshaller_Destroy(dataPublisherInstance->DataMarshallerHandle);
-        
+
         free(dataPublisherHandle);
     }
 }
@@ -383,7 +383,7 @@ DATA_PUBLISHER_RESULT DataPublisher_PublishTransacted_ReportedProperty(REPORTED_
     /*Codes_SRS_DATA_PUBLISHER_02_011: [ If argument data is NULL then DataPublisher_PublishTransacted_ReportedProperty shall fail and return DATA_PUBLISHER_INVALID_ARG. ]*/
     if (
         (transactionHandle == NULL) ||
-        (reportedPropertyPath == NULL) || 
+        (reportedPropertyPath == NULL) ||
         (data == NULL)
         )
     {

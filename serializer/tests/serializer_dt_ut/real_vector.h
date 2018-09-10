@@ -20,17 +20,17 @@
 #include "azure_c_shared_utility/vector.h"
 
 #ifndef COMPILING_REAL_VECTOR_C
-#undef VECTOR_create   
-#undef VECTOR_destroy  
+#undef VECTOR_create
+#undef VECTOR_destroy
 #undef VECTOR_push_back
-#undef VECTOR_erasetty 
-#undef VECTOR_clear    
-#undef VECTOR_element  
-#undef VECTOR_front    
-#undef VECTOR_back     
-#undef VECTOR_find_if  
-#undef VECTOR_size  
-#undef VECTOR_erase   
+#undef VECTOR_erasetty
+#undef VECTOR_clear
+#undef VECTOR_element
+#undef VECTOR_front
+#undef VECTOR_back
+#undef VECTOR_find_if
+#undef VECTOR_size
+#undef VECTOR_erase
 #undef VECTOR_move
 #endif
 

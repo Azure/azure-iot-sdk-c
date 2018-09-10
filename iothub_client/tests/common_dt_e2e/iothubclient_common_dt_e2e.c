@@ -201,14 +201,14 @@ static void setoption_on_device_or_module(const char * optionName, const void * 
     {
         result = IoTHubDeviceClient_SetOption(iothub_deviceclient_handle, optionName, optionData);
     }
-    
+
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, errorMessage);
 }
 
 static void dt_e2e_create_client_handle(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
     ASSERT_IS_NULL_WITH_MSG(iothub_deviceclient_handle, "iothub_deviceclient_handle is non-NULL on test initialization");
-    ASSERT_IS_NULL_WITH_MSG(iothub_moduleclient_handle, "iothub_moduleclient_handle is non-NULL on test initialization"); 
+    ASSERT_IS_NULL_WITH_MSG(iothub_moduleclient_handle, "iothub_moduleclient_handle is non-NULL on test initialization");
 
     if (deviceToUse->moduleConnectionString != NULL)
     {
@@ -294,7 +294,7 @@ static void sendeventasync_on_device_or_module(IOTHUB_MESSAGE_HANDLE msgHandle)
     {
         result = IoTHubDeviceClient_SendEventAsync(iothub_deviceclient_handle, msgHandle, NULL, NULL);
     }
-    
+
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "SendEventAsync failed");
 }
 
@@ -305,7 +305,7 @@ static void dt_e2e_update_twin(IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceC
     char* twinResponse;
 
     LogInfo("Beginning update of twin via Service SDK");
-    
+
     if (deviceToUse->moduleId != NULL)
     {
         twinResponse = IoTHubDeviceTwin_UpdateModuleTwin(serviceClientDeviceTwinHandle, deviceToUse->deviceId, deviceToUse->moduleId, twinJson);
@@ -578,13 +578,13 @@ static int dt_e2e_parse_twin_version(const char *twinData, bool jsonFromGetTwin)
     ASSERT_IS_NOT_NULL_WITH_MSG(root_value, "json_parse_string failed");
 
     JSON_Object *root_object = json_value_get_object(root_value);
-    double double_version = json_object_dotget_number(root_object, jsonToQuery); 
+    double double_version = json_object_dotget_number(root_object, jsonToQuery);
     int int_version = (int)(double_version + 0.1); // Account for possible underflow by small increment and then int typecast.
 
     if ((int_version == 0) && (jsonFromGetTwin == false))
     {
         // Sometimes we're invoked after a patch which means different JSON
-        double_version = json_object_dotget_number(root_object, "$version"); 
+        double_version = json_object_dotget_number(root_object, "$version");
         int_version = (int)(double_version + 0.1);
     }
 
@@ -661,7 +661,7 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
     int integer_property = 0;
     time_t beginOperation, nowTime;
     beginOperation = time(NULL);
-    
+
     while (
         (nowTime = time(NULL)),
         (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME) // time box
@@ -898,7 +898,7 @@ void dt_e2e_get_complete_desired_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRAN
     ASSERT_IS_NOT_NULL_WITH_MSG(buffer, "failed to create the payload for IoTHubDeviceTwin_UpdateTwin");
 
     dt_e2e_update_twin(serviceClientDeviceTwinHandle, deviceToUse, buffer);
-        
+
     ThreadAPI_Sleep(3000);
     int status_code = 400;
     time_t beginOperation, nowTime;

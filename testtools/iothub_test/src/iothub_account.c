@@ -252,22 +252,22 @@ static int createSASConnectionString(IOTHUB_ACCOUNT_INFO* accountInfo, const cha
 
     size_t sizeOfModulePart = moduleId ? strlen(CONN_MODULE_PART) : 0;
     size_t sizeOfModuleId = moduleId ? strlen(moduleId) : 0;
-    
+
     size_t connectionStringLength = sizeOfHostPart + sizeOfDevicePart + sizeOfKeyPart + sizeOfHostName + sizeOfDeviceId + sizeOfDeviceKey + sizeOfModulePart + sizeOfModuleId + 1;
 
     conn = (char*)malloc(connectionStringLength);
-    if (conn == NULL) 
+    if (conn == NULL)
     {
         LogError("Failed to allocate space for the SAS based connection string\r\n");
         result = __FAILURE__;
     }
-    else if ((moduleId == NULL) && sprintf_s(conn, connectionStringLength,"%s%s%s%s%s%s", CONN_HOST_PART, accountInfo->hostname, CONN_DEVICE_PART, (char*)deviceId, CONN_KEY_PART, (char*)primaryAuthentication) <= 0) 
+    else if ((moduleId == NULL) && sprintf_s(conn, connectionStringLength,"%s%s%s%s%s%s", CONN_HOST_PART, accountInfo->hostname, CONN_DEVICE_PART, (char*)deviceId, CONN_KEY_PART, (char*)primaryAuthentication) <= 0)
     {
         LogError("Failed to form the connection string for SAS based connection string.\r\n");
         free(conn);
         result = __FAILURE__;
     }
-    else if ((moduleId != NULL) && sprintf_s(conn, connectionStringLength,"%s%s%s%s%s%s%s%s", CONN_HOST_PART, accountInfo->hostname, CONN_DEVICE_PART, (char*)deviceId, CONN_KEY_PART, (char*)primaryAuthentication, CONN_MODULE_PART, moduleId) <= 0) 
+    else if ((moduleId != NULL) && sprintf_s(conn, connectionStringLength,"%s%s%s%s%s%s%s%s", CONN_HOST_PART, accountInfo->hostname, CONN_DEVICE_PART, (char*)deviceId, CONN_KEY_PART, (char*)primaryAuthentication, CONN_MODULE_PART, moduleId) <= 0)
     {
         LogError("Failed to form the connection string for SAS based connection string.\r\n");
         free(conn);
@@ -542,7 +542,7 @@ static int provisionModule(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_PROVISIONED_
     // new one based on the device's connection string (not the Hub) as we need to test this scenario, too.
     IOTHUB_SERVICE_CLIENT_AUTH_HANDLE service_auth_from_device_connection = NULL;
     IOTHUB_REGISTRYMANAGER_RESULT iothub_registrymanager_result;
-    IOTHUB_REGISTRYMANAGER_HANDLE iothub_registrymanager_handle = NULL; 
+    IOTHUB_REGISTRYMANAGER_HANDLE iothub_registrymanager_handle = NULL;
 
     memset(&moduleInfo, 0, sizeof(moduleInfo));
     moduleInfo.version = IOTHUB_MODULE_VERSION_1;

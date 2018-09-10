@@ -194,7 +194,7 @@ static int parse_twin_desired_properties(const char* data, char* test_id, unsign
                 {
                     (void)memcpy(test_id, test_id_ref, 36);
                     test_id[36] = '\0';
-                    
+
                     result = 0;
                 }
             }
@@ -237,7 +237,7 @@ static int parse_twin_reported_properties(const char* data, int* prop_count, cha
             else
             {
                 const char* test_id_ref;
-                
+
                 *version = (int)json_object_dotget_number(reported_root_object, TWIN_FIELD_VERSION);
                 *prop_count = 0;
 
@@ -400,7 +400,7 @@ static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS status, I
 
     if (iothub_client_statistics_add_connection_status(iotHubLonghaul->iotHubClientStats, status, reason) != 0)
     {
-        LogError("Failed adding connection status statistics (%s, %s)", 
+        LogError("Failed adding connection status statistics (%s, %s)",
             ENUM_TO_STRING(IOTHUB_CLIENT_CONNECTION_STATUS, status), ENUM_TO_STRING(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason));
     }
 }
@@ -465,7 +465,7 @@ static int on_device_method_received(const char* method_name, const unsigned cha
 
     if (method_name == NULL || payload == NULL || size == 0 || response == NULL || response_size == NULL || userContextCallback == NULL)
     {
-        LogError("Invalid argument (method_name=%p, payload=%p, size=%zu, response=%p, response_size=%p, userContextCallback=%p)", 
+        LogError("Invalid argument (method_name=%p, payload=%p, size=%zu, response=%p, response_size=%p, userContextCallback=%p)",
             method_name, payload, size, response, response_size, userContextCallback);
         result = -1;
     }
@@ -1000,8 +1000,8 @@ static IOTHUB_SERVICE_CLIENT_AUTH_HANDLE longhaul_initialize_service_client(IOTH
         {
             LogError("Failed retrieving the IoT hub connection string");
         }
-        else 
-        { 
+        else
+        {
             iotHubLonghaul->iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(connection_string);
         }
     }
@@ -1340,11 +1340,11 @@ static int invoke_device_method(const void* context)
             device_method_info.time_invoked = time(NULL);
 
             if ((device_method_info.method_result = IoTHubDeviceMethod_Invoke(
-                iotHubLonghaul->iotHubSvcDevMethodHandle, 
-                iotHubLonghaul->deviceInfo->deviceId, 
-                LONGHAUL_DEVICE_METHOD_NAME, 
-                message, 
-                MAX_DEVICE_METHOD_TRAVEL_TIME_SECS, 
+                iotHubLonghaul->iotHubSvcDevMethodHandle,
+                iotHubLonghaul->deviceInfo->deviceId,
+                LONGHAUL_DEVICE_METHOD_NAME,
+                message,
+                MAX_DEVICE_METHOD_TRAVEL_TIME_SECS,
                 &responseStatus, &responsePayload, &responseSize)) != IOTHUB_DEVICE_METHOD_OK)
             {
                 LogError("Failed invoking device method");
@@ -1653,9 +1653,9 @@ int longhaul_run_telemetry_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t
                     }
                     else
                     {
-                        LogInfo("Summary: Messages sent=%d, received=%d; travel time: min=%f secs, max=%f secs", 
+                        LogInfo("Summary: Messages sent=%d, received=%d; travel time: min=%f secs, max=%f secs",
                             summary.messages_sent, summary.messages_received, summary.min_travel_time_secs, summary.max_travel_time_secs);
-                     
+
                         if (summary.messages_sent == 0 || summary.messages_received != summary.messages_sent || summary.max_travel_time_secs > MAX_TELEMETRY_TRAVEL_TIME_SECS)
                         {
                             result = __FAILURE__;
@@ -1832,19 +1832,19 @@ static void on_device_twin_update_received(DEVICE_TWIN_UPDATE_STATE update_state
     {
         LogError("Invalid argument (payLoad=%p, userContextCallback=%p)", payLoad, userContextCallback);
     }
-    else 
+    else
     {
         IOTHUB_LONGHAUL_RESOURCES* iotHubLonghaul = (IOTHUB_LONGHAUL_RESOURCES*)userContextCallback;
         unsigned int message_id;
         char tests_id[40];
         int version;
 
-        if (update_state == DEVICE_TWIN_UPDATE_COMPLETE && 
+        if (update_state == DEVICE_TWIN_UPDATE_COMPLETE &&
             parse_twin_desired_properties((const char*)payLoad, tests_id, &message_id, &version) != 0)
         {
             LogError("Failed parsing complete twin update data");
         }
-        else if (update_state == DEVICE_TWIN_UPDATE_PARTIAL && 
+        else if (update_state == DEVICE_TWIN_UPDATE_PARTIAL &&
             parse_message((const char*)payLoad, size, tests_id, &message_id) != 0)
         {
             LogError("Failed parsing twin update data");

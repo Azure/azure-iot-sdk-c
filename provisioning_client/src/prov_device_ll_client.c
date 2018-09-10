@@ -11,7 +11,7 @@
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/uniqueid.h"
-#include "azure_c_shared_utility/sastoken.h" 
+#include "azure_c_shared_utility/sastoken.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/base64.h"
 #include "azure_c_shared_utility/urlencode.h"
@@ -434,7 +434,7 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
             {
                 char* json_operation_id = NULL;
                 JSON_Object* json_reg_state = NULL;
-                if ((json_reg_state = json_object_get_object(json_object, JSON_NODE_REG_STATUS)) != NULL && 
+                if ((json_reg_state = json_object_get_object(json_object, JSON_NODE_REG_STATUS)) != NULL &&
                     (json_operation_id = retrieve_json_item(json_object, JSON_NODE_OPERATION_ID)) != NULL)
                 {
                     int error_code = retrieve_json_number(json_reg_state, JSON_NODE_ERROR_CODE);

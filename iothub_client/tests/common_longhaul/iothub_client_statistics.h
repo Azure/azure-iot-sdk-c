@@ -46,10 +46,10 @@ typedef struct TELEMETRY_INFO_TAG
 
     time_t time_queued;
     size_t send_result;
-    
+
     time_t time_sent;
     IOTHUB_CLIENT_CONFIRMATION_RESULT send_callback_result;
-    
+
     time_t time_received;
 } TELEMETRY_INFO;
 

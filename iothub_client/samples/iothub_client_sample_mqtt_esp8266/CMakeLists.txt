@@ -21,8 +21,8 @@ include_directories(.)
 
 add_executable(iothub_client_sample_mqtt_esp8266 ${iothub_client_sample_mqtt_esp8266_c_files} ${iothub_client_sample_mqtt_esp8266_h_files})
 
-target_link_libraries(iothub_client_sample_mqtt_esp8266  
+target_link_libraries(iothub_client_sample_mqtt_esp8266
     iothub_client_mqtt_transport
-    iothub_client 
+    iothub_client
 )
 

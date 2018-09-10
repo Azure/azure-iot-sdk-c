@@ -253,7 +253,7 @@ extern "C"
     *
     * @param    iotHubModuleClientHandle  The handle created by a call to the create function.
     * @param    moduleTwinCallback        The callback specified by the module client to be used for updating
-    *                                     the desired state. The callback will be called in response to patch 
+    *                                     the desired state. The callback will be called in response to patch
     *                                     request send by the IoTHub services. The payload will be passed to the
     *                                     callback, along with two version numbers:
     *                                        - Desired:

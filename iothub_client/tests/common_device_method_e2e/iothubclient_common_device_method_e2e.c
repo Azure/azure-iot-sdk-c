@@ -179,7 +179,7 @@ static int DeviceMethodWithUploadCallback(const char* method_name, const unsigne
     if (IoTHubDeviceClient_UploadToBlobAsync(iothub_deviceclient_handle, "hello_world.txt", (const unsigned char*)HELLO_WORLD, sizeof(HELLO_WORLD) - 1, fileUploadCallback, &g_conn_info) == IOTHUB_CLIENT_OK)
     {
         LogInfo("Upload succeeded");
-        
+
         if ((*response = (unsigned char*)malloc(size)) == NULL)
         {
             responseCode = METHOD_RESPONSE_ERROR;
@@ -189,7 +189,7 @@ static int DeviceMethodWithUploadCallback(const char* method_name, const unsigne
         {
             (void)memcpy(*response, payload, size);
             responseCode = METHOD_RESPONSE_SUCCESS;
-            *resp_size = size;    
+            *resp_size = size;
         }
     }
     else
@@ -274,7 +274,7 @@ void test_device_method_with_string_ex(IOTHUB_PROVISIONED_DEVICE** devicesToUse,
 
         result = IoTHubDeviceClient_SetConnectionStatusCallback(registered_devices[iterator], connection_status_callback, connection_infos[iterator]);
         ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set connection Status Callback");
-        
+
         result = IoTHubDeviceClient_SetOption(registered_devices[iterator], OPTION_LOG_TRACE, &trace);
         ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set tracing option");
 
@@ -331,10 +331,10 @@ void test_device_method_with_string_ex(IOTHUB_PROVISIONED_DEVICE** devicesToUse,
 
     // Wait for the method to subscribe
     ThreadAPI_Sleep(DEVICE_METHOD_SUB_WAIT_TIME_MS);
-    
+
     iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo));
     ASSERT_IS_NOT_NULL_WITH_MSG(iotHubServiceClientHandle, "Could not create service client handle");
-    
+
     serviceClientDeviceMethodHandle = IoTHubDeviceMethod_Create(iotHubServiceClientHandle);
     ASSERT_IS_NOT_NULL_WITH_MSG(serviceClientDeviceMethodHandle, "Could not create device method handle");
 
@@ -377,7 +377,7 @@ static void setoption_on_device_or_module(const char* optionName, const void* op
     {
         result = IoTHubDeviceClient_SetOption(iothub_deviceclient_handle, optionName, optionData);
     }
-    
+
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, errorMessage);
 }
 
@@ -393,7 +393,7 @@ static void setconnectionstatuscallback_on_device_or_module()
     {
         result = IoTHubDeviceClient_SetConnectionStatusCallback(iothub_deviceclient_handle, connection_status_callback, &g_conn_info);
     }
-    
+
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set connection Status Callback");
 }
 
@@ -409,7 +409,7 @@ static void setmethodcallback_on_device_or_module(const char* payload)
     {
         result = IoTHubDeviceClient_SetDeviceMethodCallback(iothub_deviceclient_handle, MethodCallback, (void*)payload);
     }
-    
+
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not IoTHubDeviceClient_Set(Device|Module)MethodCallback");
 }
 
@@ -425,14 +425,14 @@ static void sendeventasync_on_device_or_module(IOTHUB_MESSAGE_HANDLE msgHandle)
     {
         result = IoTHubDeviceClient_SendEventAsync(iothub_deviceclient_handle, msgHandle, NULL, NULL);
     }
-    
+
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "SendEventAsync failed");
 }
 
 static void create_hub_client_from_provisioned_device(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
     ASSERT_IS_NULL_WITH_MSG(iothub_deviceclient_handle, "iothub_deviceclient_handle is non-NULL on test initialization");
-    ASSERT_IS_NULL_WITH_MSG(iothub_moduleclient_handle, "iothub_moduleclient_handle is non-NULL on test initialization"); 
+    ASSERT_IS_NULL_WITH_MSG(iothub_moduleclient_handle, "iothub_moduleclient_handle is non-NULL on test initialization");
 
     if (deviceToUse->moduleConnectionString != NULL)
     {

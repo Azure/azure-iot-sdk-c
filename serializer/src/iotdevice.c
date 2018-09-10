@@ -385,7 +385,7 @@ DEVICE_RESULT Device_CommitTransaction_ReportedProperties(REPORTED_PROPERTIES_TR
     {
         /*Codes_SRS_DEVICE_02_027: [ Device_CommitTransaction_ReportedProperties shall call DataPublisher_CommitTransaction_ReportedProperties. ]*/
         DATA_PUBLISHER_RESULT r = DataPublisher_CommitTransaction_ReportedProperties(transactionHandle, destination, destinationSize);
-        
+
         /*Codes_SRS_DEVICE_02_028: [ If DataPublisher_CommitTransaction_ReportedProperties fails then Device_CommitTransaction_ReportedProperties shall fail and return DEVICE_DATA_PUBLISHER_FAILED. ]*/
         if (r != DATA_PUBLISHER_OK)
         {

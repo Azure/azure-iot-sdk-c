@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 /** @file iothub_client_version.h
-*	@brief Functions for managing the client SDK version.
+*    @brief Functions for managing the client SDK version.
 */
 
 #ifndef IOTHUB_CLIENT_PROVISIONING_H

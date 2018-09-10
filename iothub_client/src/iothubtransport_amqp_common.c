@@ -65,9 +65,9 @@ typedef enum AMQP_TRANSPORT_AUTHENTICATION_MODE_TAG
 /*
 Definition of transport states:
 
-AMQP_TRANSPORT_STATE_NOT_CONNECTED:                    Initial state when the transport is created. 
+AMQP_TRANSPORT_STATE_NOT_CONNECTED:                    Initial state when the transport is created.
 AMQP_TRANSPORT_STATE_CONNECTING:                       First connection ever.
-AMQP_TRANSPORT_STATE_CONNECTED:                        Transition from AMQP_TRANSPORT_STATE_CONNECTING or AMQP_TRANSPORT_STATE_RECONNECTING. 
+AMQP_TRANSPORT_STATE_CONNECTED:                        Transition from AMQP_TRANSPORT_STATE_CONNECTING or AMQP_TRANSPORT_STATE_RECONNECTING.
 AMQP_TRANSPORT_STATE_RECONNECTION_REQUIRED:            When a failure occurred and the transport identifies a reconnection is needed.
 AMQP_TRANSPORT_STATE_READY_FOR_RECONNECTION:           Transition from AMQP_TRANSPORT_STATE_RECONNECTION_REQUIRED after all prep is done (transient instances are destroyed, devices are stopped).
 AMQP_TRANSPORT_STATE_RECONNECTING:                     Transition from AMQP_TRANSPORT_STATE_READY_FOR_RECONNECTION.
@@ -85,7 +85,7 @@ AMQP_TRANSPORT_STATE_BEING_DESTROYED:                  State set if IoTHubTransp
     AMQP_TRANSPORT_STATE_NOT_CONNECTED_NO_MORE_RETRIES, \
     AMQP_TRANSPORT_STATE_BEING_DESTROYED
 
-// Suppress unused function warning for AMQP_TRANSPORT_STATEstrings 
+// Suppress unused function warning for AMQP_TRANSPORT_STATEstrings
 #ifdef __APPLE__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-function"
@@ -109,13 +109,13 @@ typedef struct AMQP_TRANSPORT_INSTANCE_TAG
     AMQP_TRANSPORT_STATE state;                                         // Current state of the transport.
     RETRY_CONTROL_HANDLE connection_retry_control;                      // Controls when the re-connection attempt should occur.
     size_t svc2cl_keep_alive_timeout_secs;                       // Service to device keep alive frequency
-    double cl2svc_keep_alive_send_ratio;								    // Client to service keep alive frequency
+    double cl2svc_keep_alive_send_ratio;                                    // Client to service keep alive frequency
 
     char* http_proxy_hostname;
     int http_proxy_port;
     char* http_proxy_username;
     char* http_proxy_password;
-    
+
     size_t option_sas_token_lifetime_secs;                              // Device-specific option.
     size_t option_sas_token_refresh_time_secs;                          // Device-specific option.
     size_t option_cbs_request_timeout_secs;                             // Device-specific option.
@@ -327,8 +327,8 @@ static bool find_device_by_id_callback(LIST_ITEM_HANDLE list_item, const void* m
     {
         AMQP_TRANSPORT_DEVICE_INSTANCE* device_instance = (AMQP_TRANSPORT_DEVICE_INSTANCE*)singlylinkedlist_item_get_value(list_item);
 
-        if (device_instance == NULL || 
-            device_instance->device_id == NULL || 
+        if (device_instance == NULL ||
+            device_instance->device_id == NULL ||
             STRING_c_str(device_instance->device_id) != match_context)
         {
             result = false;
@@ -590,8 +590,8 @@ static void on_device_twin_update_received_callback(DEVICE_TWIN_UPDATE_TYPE upda
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_138: [If `update_type` is DEVICE_TWIN_UPDATE_TYPE_PARTIAL IoTHubClientCore_LL_RetrievePropertyComplete shall be invoked passing `context` as handle, `DEVICE_TWIN_UPDATE_PARTIAL`, `payload` and `size`.]
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_139: [If `update_type` is DEVICE_TWIN_UPDATE_TYPE_COMPLETE IoTHubClientCore_LL_RetrievePropertyComplete shall be invoked passing `context` as handle, `DEVICE_TWIN_UPDATE_COMPLETE`, `payload` and `size`.]
         IoTHubClientCore_LL_RetrievePropertyComplete(
-            registered_device->iothub_client_handle, 
-            (update_type == DEVICE_TWIN_UPDATE_TYPE_COMPLETE ? DEVICE_TWIN_UPDATE_COMPLETE : DEVICE_TWIN_UPDATE_PARTIAL), 
+            registered_device->iothub_client_handle,
+            (update_type == DEVICE_TWIN_UPDATE_TYPE_COMPLETE ? DEVICE_TWIN_UPDATE_COMPLETE : DEVICE_TWIN_UPDATE_PARTIAL),
             message, length);
     }
 }
@@ -602,7 +602,7 @@ static void on_device_twin_update_received_callback(DEVICE_TWIN_UPDATE_TYPE upda
 // @brief
 //     Retrieves the options of the current underlying TLS I/O instance and saves in the transport instance.
 // @remarks
-//     This is used when the new underlying I/O transport (TLS I/O, or WebSockets, etc) needs to be recreated, 
+//     This is used when the new underlying I/O transport (TLS I/O, or WebSockets, etc) needs to be recreated,
 //     and the options previously set must persist.
 //
 //     If no TLS I/O instance was created yet, results in failure.
@@ -668,7 +668,7 @@ static int restore_underlying_io_transport_options(AMQP_TRANSPORT_INSTANCE* tran
     {
         if (OptionHandler_FeedOptions(transport_instance->saved_tls_options, xio_handle) != OPTIONHANDLER_OK)
         {
-            LogError("Failed feeding existing options to new TLS instance."); 
+            LogError("Failed feeding existing options to new TLS instance.");
             result = __FAILURE__;
         }
         else
@@ -806,7 +806,7 @@ static int establish_amqp_connection(AMQP_TRANSPORT_INSTANCE* transport_instance
         amqp_connection_config.svc2cl_keep_alive_timeout_secs = transport_instance->svc2cl_keep_alive_timeout_secs;
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_99_001: [AMQP connection will be configured using the `remote_idle_timeout_ratio` value from SetOption ]
         amqp_connection_config.cl2svc_keep_alive_send_ratio = transport_instance->cl2svc_keep_alive_send_ratio;
-        
+
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_027: [If `transport->preferred_authentication_method` is CBS, AMQP_CONNECTION_CONFIG shall be set with `create_sasl_io` = true and `create_cbs_connection` = true]
         if (transport_instance->preferred_authentication_mode == AMQP_TRANSPORT_AUTHENTICATION_MODE_CBS)
         {
@@ -1127,7 +1127,7 @@ static int IoTHubTransport_AMQP_Common_Device_DoWork(AMQP_TRANSPORT_DEVICE_INSTA
         }
         else // i.e., DEVICE_STATE_ERROR_AUTH || DEVICE_STATE_ERROR_AUTH_TIMEOUT || DEVICE_STATE_ERROR_MSG
         {
-            LogError("Failed performing DoWork for device '%s' (device reported state %d; number of previous failures: %d)", 
+            LogError("Failed performing DoWork for device '%s' (device reported state %d; number of previous failures: %d)",
                 STRING_c_str(registered_device->device_id), registered_device->device_state, registered_device->number_of_previous_failures);
 
             registered_device->number_of_previous_failures++;
@@ -1174,7 +1174,7 @@ static int IoTHubTransport_AMQP_Common_Device_DoWork(AMQP_TRANSPORT_DEVICE_INSTA
     }
 
     // No harm in invoking this as API will simply exit if the state is not "started".
-    device_do_work(registered_device->device_handle); 
+    device_do_work(registered_device->device_handle);
 
     return result;
 }
@@ -1481,12 +1481,12 @@ IOTHUB_PROCESS_ITEM_RESULT IoTHubTransport_AMQP_Common_ProcessItem(TRANSPORT_LL_
         LogError("Invalid argument (handle=%p, iothub_item=%p)", handle, iothub_item);
         result = IOTHUB_PROCESS_ERROR;
     }
-    else 
+    else
     {
         if (item_type == IOTHUB_TYPE_DEVICE_TWIN)
         {
             AMQP_TRANSPORT_DEVICE_TWIN_CONTEXT* dev_twin_ctx;
-            
+
             if ((dev_twin_ctx = (AMQP_TRANSPORT_DEVICE_TWIN_CONTEXT*)malloc(sizeof(AMQP_TRANSPORT_DEVICE_TWIN_CONTEXT))) == NULL)
             {
                 LogError("Failed allocating context for TWIN message");
@@ -1536,7 +1536,7 @@ void IoTHubTransport_AMQP_Common_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIEN
     if (handle == NULL)
     {
         LogError("IoTHubClient DoWork failed: transport handle parameter is NULL.");
-    } 
+    }
     else
     {
         AMQP_TRANSPORT_INSTANCE* transport_instance = (AMQP_TRANSPORT_INSTANCE*)handle;
@@ -1962,7 +1962,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SetOption(TRANSPORT_LL_HANDLE h
         }
         else if (strcmp(OPTION_REMOTE_IDLE_TIMEOUT_RATIO, option) == 0)
         {
-            
+
             if ((*(double*)value <= 0.0) || (*(double*)value >= MAX_SERVICE_KEEP_ALIVE_RATIO))
             {
                 LogError("Invalid remote idle ratio %lf", *(double*) value);
@@ -1973,7 +1973,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SetOption(TRANSPORT_LL_HANDLE h
                 transport_instance->cl2svc_keep_alive_send_ratio = *(double*)value; // override the default and set the user configured remote idle ratio value
                 result = IOTHUB_CLIENT_OK;
             }
-            
+
         }
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_104: [If `option` is `logtrace`, `value` shall be saved and applied to `instance->connection` using amqp_connection_set_logging()]
         else if (strcmp(OPTION_LOG_TRACE, option) == 0)
@@ -2429,7 +2429,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SendMessageDisposition(MESSAGE_
             /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_004: [IoTHubTransport_AMQP_Common_SendMessageDisposition shall convert the given IOTHUBMESSAGE_DISPOSITION_RESULT to the equivalent AMQP_VALUE and will return the result of calling messagereceiver_send_message_disposition. ] */
             DEVICE_MESSAGE_DISPOSITION_RESULT device_disposition_result = get_device_disposition_result_from(disposition);
 
-            // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_112: [A DEVICE_MESSAGE_DISPOSITION_INFO instance shall be created with a copy of the `link_name` and `message_id` contained in `message_data`]  
+            // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_112: [A DEVICE_MESSAGE_DISPOSITION_INFO instance shall be created with a copy of the `link_name` and `message_id` contained in `message_data`]
             if ((device_message_disposition_info = create_device_message_disposition_info_from(message_data)) == NULL)
             {
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_113: [If the DEVICE_MESSAGE_DISPOSITION_INFO fails to be created, `IoTHubTransport_AMQP_Common_SendMessageDisposition()` shall fail and return IOTHUB_CLIENT_ERROR]
@@ -2450,7 +2450,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SendMessageDisposition(MESSAGE_
                     result = IOTHUB_CLIENT_OK;
                 }
 
-                // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_114: [`IoTHubTransport_AMQP_Common_SendMessageDisposition()` shall destroy the DEVICE_MESSAGE_DISPOSITION_INFO instance]  
+                // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_114: [`IoTHubTransport_AMQP_Common_SendMessageDisposition()` shall destroy the DEVICE_MESSAGE_DISPOSITION_INFO instance]
                 destroy_device_message_disposition_info(device_message_disposition_info);
             }
         }

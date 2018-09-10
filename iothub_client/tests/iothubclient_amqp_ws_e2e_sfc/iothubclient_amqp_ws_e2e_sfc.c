@@ -78,7 +78,7 @@ BEGIN_TEST_SUITE(iothubclient_amqp_ws_e2e_sfc)
     {
         e2e_d2c_svc_fault_ctrl_AMQP_shut_down(AMQP_Protocol_over_WebSocketsTls);
     }
-    
+
     //***********************************************************
     // C2D
     //***********************************************************

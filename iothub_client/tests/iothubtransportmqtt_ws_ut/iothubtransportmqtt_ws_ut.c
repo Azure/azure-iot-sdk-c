@@ -673,7 +673,7 @@ TEST_FUNCTION_INITIALIZE(method_init)
 {
     TEST_MUTEX_ACQUIRE(test_serialize_mutex);
 
-    
+
     reset_test_data();
     umock_c_reset_all_calls();
 }
@@ -992,7 +992,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_WS_Destroy_success)
 
     // act
     STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_Destroy(handle));
-    
+
     IoTHubTransportMqtt_WS_Destroy(handle);
 
     // assert

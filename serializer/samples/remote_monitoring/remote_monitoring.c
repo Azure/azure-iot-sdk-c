@@ -4,7 +4,7 @@
 //
 // IMPORTANT: Please read and understand serializer limitations and alternatives as
 //            described ../../readme.md before beginning to use the serializer.
-// 
+//
 
 #ifndef WINCE
 #include "iothubtransportamqp.h"

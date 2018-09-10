@@ -134,7 +134,7 @@ static JSON_Value* struct_array_toJson(void* arr[], size_t len, TO_JSON_FUNCTION
     {
         for (size_t i = 0; i < len; i++)
         {
-            JSON_Value* model; 
+            JSON_Value* model;
             if ((model = toJson(arr[i])) == NULL)
             {
                 LogError("Failed to deserialize model at index %d", i);

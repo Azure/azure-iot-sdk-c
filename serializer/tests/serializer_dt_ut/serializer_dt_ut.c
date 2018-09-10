@@ -247,9 +247,9 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         REGISTER_UMOCK_ALIAS_TYPE(METHODRETURN_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(const METHODRETURN_DATA*, void*);
         REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_REPORTED_STATE_CALLBACK, void*);
-        
+
         REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK, void*);
-        
+
         REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_SetDeviceTwinCallback, my_IoTHubClient_SetDeviceTwinCallback);
         REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_SetDeviceTwinCallback, my_IoTHubClient_LL_SetDeviceTwinCallback);
 
@@ -261,13 +261,13 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         REGISTER_GLOBAL_MOCK_RETURNS(CodeFirst_ExecuteMethod, TEST_METHODRETURN_HANDLE, NULL);
         REGISTER_GLOBAL_MOCK_RETURNS(IoTHubClient_SendReportedState, IOTHUB_CLIENT_OK, IOTHUB_CLIENT_ERROR);
         REGISTER_GLOBAL_MOCK_RETURNS(IoTHubClient_LL_SendReportedState, IOTHUB_CLIENT_OK, IOTHUB_CLIENT_ERROR);
-        
-        
+
+
         REGISTER_GLOBAL_MOCK_RETURNS(IoTHubClient_SetDeviceTwinCallback, IOTHUB_CLIENT_OK, IOTHUB_CLIENT_ERROR);
         REGISTER_GLOBAL_MOCK_RETURNS(IoTHubClient_SetDeviceMethodCallback, IOTHUB_CLIENT_OK, IOTHUB_CLIENT_ERROR);
         REGISTER_GLOBAL_MOCK_RETURNS(IoTHubClient_LL_SetDeviceTwinCallback, IOTHUB_CLIENT_OK, IOTHUB_CLIENT_ERROR);
         REGISTER_GLOBAL_MOCK_RETURNS(IoTHubClient_LL_SetDeviceMethodCallback, IOTHUB_CLIENT_OK, IOTHUB_CLIENT_ERROR);
-        
+
 
         REGISTER_GLOBAL_MOCK_HOOK(VECTOR_create, real_VECTOR_create);
         REGISTER_GLOBAL_MOCK_HOOK(VECTOR_destroy, real_VECTOR_destroy);
@@ -297,7 +297,7 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         REGISTER_GLOBAL_MOCK_RETURNS(json_object_get_value, TEST_JSON_OBJECT_GET_VALUE, NULL);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_serialize_to_string, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(json_serialize_to_string, my_json_serialize_to_string);
-        
+
         g_CodeFirst_SendAsyncReported_shall_return = CODEFIRST_OK;
 
     }
@@ -324,7 +324,7 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
     {
         TEST_MUTEX_RELEASE(g_testByTest);
     }
-   
+
     static void IoTHubDeviceTwin_CreatebasicModel_WithData15_inertPath(void)
     {
         STRICT_EXPECTED_CALL(Schema_GetSchemaForModel("basicModel_WithData15"));
@@ -354,7 +354,7 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         umock_c_reset_all_calls();
 
         IoTHubDeviceTwin_CreatebasicModel_WithData15_inertPath();
-            
+
         ///act
         basicModel_WithData15* model = IoTHubDeviceTwin_CreatebasicModel_WithData15(TEST_IOTHUB_CLIENT_HANDLE);
 
@@ -364,7 +364,7 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
 
         ///clean
         IoTHubDeviceTwin_DestroybasicModel_WithData15(model);
-        
+
     }
 
     /*this test wants to see that IoTHubDeviceTwin_CreatebasicModel_WithData15 doesn't fail*/
@@ -386,7 +386,7 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(i);
 
-            
+
             if (
                 (i != 1) /*Schema_GetMetadata*/
                 )
@@ -612,7 +612,7 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         ///clean
         umock_c_negative_tests_deinit();
     }
-    
+
     /*Tests_SRS_SERIALIZERDEVICETWIN_02_020: [ If model is NULL then IoTHubDeviceTwin_Destroy_Impl shall return. ]*/
     TEST_FUNCTION(IoTHubDeviceTwin_Destroy_Impl_with_NULL_model_returns)
     {
@@ -691,7 +691,7 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         ///clean
 
     }
-    
+
 
     static void deviceMethodCallback_inert_path(size_t size)
     {
@@ -724,7 +724,7 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         ///act
 
         int result = deviceMethodCallback("methodA", &payload, size, &response, &response_size, TEST_METHOD_CALLBACK_CONTEXT);
-            
+
         ///assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
         ASSERT_ARE_EQUAL(int, 11, result);
@@ -734,7 +734,7 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         ASSERT_ARE_EQUAL(int, '3', response[2]);
         ASSERT_ARE_EQUAL(int, '4', response[3]);
 
-        ///clean 
+        ///clean
         my_gballoc_free(response); /*normally the SDK does this*/
     }
 
@@ -772,9 +772,9 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
                 ASSERT_IS_NULL(response);
             }
 
-            
+
         }
-        ///clean 
+        ///clean
         umock_c_negative_tests_deinit();
     }
 
@@ -851,7 +851,7 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
                 ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, r);
             }
         }
-        
+
 
         ///clean
         IoTHubDeviceTwin_DestroybasicModel_WithData15(model);

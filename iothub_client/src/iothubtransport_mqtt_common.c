@@ -110,18 +110,18 @@ typedef struct SYSTEM_PROPERTY_INFO_TAG
 
 static SYSTEM_PROPERTY_INFO sysPropList[] = {
     { "%24.exp", 7 },
-{ "%24.mid", 7 },
-{ "%24.uid", 7 },
-{ "%24.to", 6 },
-{ "%24.cid", 7 },
-{ "%24.ct", 6 },
-{ "%24.ce", 6 },
-{ "devices/", 8 },
-{ "iothub-operation", 16 },
-{ "iothub-ack", 10 },
-{ "%24.on", 6 },
-{ "%24.cdid", 8 },
-{ "%24.cmid", 8 }
+    { "%24.mid", 7 },
+    { "%24.uid", 7 },
+    { "%24.to", 6 },
+    { "%24.cid", 7 },
+    { "%24.ct", 6 },
+    { "%24.ce", 6 },
+    { "devices/", 8 },
+    { "iothub-operation", 16 },
+    { "iothub-ack", 10 },
+    { "%24.on", 6 },
+    { "%24.cdid", 8 },
+    { "%24.cmid", 8 }
 };
 
 static const int slashes_to_reach_input_name = 5;
@@ -182,18 +182,20 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     // Upper layer
     IOTHUB_CLIENT_CORE_LL_HANDLE llClientHandle;
 
-    // Protocol 
+    // Protocol
     MQTT_CLIENT_HANDLE mqttClient;
     XIO_HANDLE xioTransport;
 
     // Session - connection
     uint16_t packetId;
+    uint16_t twin_resp_packet_id;
 
     // Connection state control
     bool isRegistered;
     MQTT_CLIENT_STATUS mqttClientStatus;
     bool isDestroyCalled;
     bool device_twin_get_sent;
+    bool twin_resp_sub_recv;
     bool isRecoverableError;
     uint16_t keepAliveValue;
     uint16_t connect_timeout_in_sec;
@@ -371,7 +373,7 @@ static uint16_t get_next_packet_id(PMQTTTRANSPORT_HANDLE_DATA transport_data)
     return transport_data->packetId;
 }
 
-#ifndef NO_LOGGING 
+#ifndef NO_LOGGING
 static const char* retrieve_mqtt_return_codes(CONNECT_RETURN_CODE rtn_code)
 {
     switch (rtn_code)
@@ -393,7 +395,7 @@ static const char* retrieve_mqtt_return_codes(CONNECT_RETURN_CODE rtn_code)
             return "Unknown";
     }
 }
-#endif // NO_LOGGING 
+#endif // NO_LOGGING
 
 static int retrieve_device_method_rid_info(const char* resp_topic, STRING_HANDLE method_name, STRING_HANDLE request_id)
 {
@@ -1043,7 +1045,7 @@ static int subscribeToNotifyStateIfNeeded(PMQTTTRANSPORT_HANDLE_DATA transport_d
     {
         result = 0;
     }
-    
+
     if (result == 0)
     {
         changeStateToSubscribeIfAllowed(transport_data);
@@ -1640,6 +1642,12 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
                     }
                     // The connect packet has been acked
                     transport_data->currPacketState = SUBACK_TYPE;
+
+                    // Is this a twin message
+                    if (suback->packetId == transport_data->twin_resp_packet_id)
+                    {
+                        transport_data->twin_resp_sub_recv = true;
+                    }
                 }
                 else
                 {
@@ -1672,7 +1680,7 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
 
 // Prior to creating a new connection, if we have an existing xioTransport that has been connected before
 // we need to clear it now or else cached settings (especially TLS when communicating with HTTP proxies)
-// will break reconnection attempt. 
+// will break reconnection attempt.
 static void ResetConnectionIfNecessary(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 {
     if (transport_data->xioTransport != NULL && transport_data->conn_attempted)
@@ -1792,6 +1800,7 @@ static void SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transport_data)
     {
         uint32_t topic_subscription = 0;
         size_t subscribe_count = 0;
+        uint16_t packet_id = get_next_packet_id(transport_data);
         SUBSCRIBE_PAYLOAD subscribe[SUBSCRIBE_TOPIC_COUNT];
         if ((transport_data->topic_MqttMessage != NULL) && (SUBSCRIBE_TELEMETRY_TOPIC & transport_data->topics_ToSubscribe))
         {
@@ -1806,6 +1815,7 @@ static void SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             subscribe[subscribe_count].qosReturn = DELIVER_AT_MOST_ONCE;
             topic_subscription |= SUBSCRIBE_GET_REPORTED_STATE_TOPIC;
             subscribe_count++;
+            transport_data->twin_resp_packet_id = packet_id;
         }
         if ((transport_data->topic_NotifyState != NULL) && (SUBSCRIBE_NOTIFICATION_STATE_TOPIC & transport_data->topics_ToSubscribe))
         {
@@ -1832,7 +1842,7 @@ static void SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transport_data)
         if (subscribe_count != 0)
         {
             /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_016: [IoTHubTransport_MQTT_Common_Subscribe shall call mqtt_client_subscribe to subscribe to the Message Topic.] */
-            if (mqtt_client_subscribe(transport_data->mqttClient, get_next_packet_id(transport_data), subscribe, subscribe_count) != 0)
+            if (mqtt_client_subscribe(transport_data->mqttClient, packet_id, subscribe, subscribe_count) != 0)
             {
                 /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_017: [Upon failure IoTHubTransport_MQTT_Common_Subscribe shall return a non-zero value.] */
                 LogError("Failure: mqtt_client_subscribe returned error.");
@@ -2764,7 +2774,8 @@ IOTHUB_PROCESS_ITEM_RESULT IoTHubTransport_MQTT_Common_ProcessItem(TRANSPORT_LL_
 
         if (transport_data->currPacketState == PUBLISH_TYPE)
         {
-            if (item_type == IOTHUB_TYPE_DEVICE_TWIN)
+            // Ensure the reported property suback has been received
+            if (item_type == IOTHUB_TYPE_DEVICE_TWIN && transport_data->twin_resp_sub_recv)
             {
                 MQTT_DEVICE_TWIN_ITEM* mqtt_info = (MQTT_DEVICE_TWIN_ITEM*)malloc(sizeof(MQTT_DEVICE_TWIN_ITEM));
                 if (mqtt_info == NULL)

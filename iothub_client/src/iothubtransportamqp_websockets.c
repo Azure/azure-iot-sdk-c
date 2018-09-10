@@ -223,7 +223,7 @@ static void IotHubTransportAMQP_WS_Unsubscribe_InputQueue(IOTHUB_DEVICE_HANDLE h
     LogError("AMQP WS does not support input queues");
 }
 
-static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls = 
+static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls =
 {
     IoTHubTransportAMQP_WS_SendMessageDisposition,                     /*pfIotHubTransport_Send_Message_Disposition IoTHubTransport_Send_Message_Disposition;*/
     IoTHubTransportAMQP_WS_Subscribe_DeviceMethod,                     /*pfIoTHubTransport_Subscribe_DeviceMethod IoTHubTransport_Subscribe_DeviceMethod;*/

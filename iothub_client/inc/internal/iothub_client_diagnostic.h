@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 /** @file   iothub_client_diagnostic.h
-*	@brief  The @c diagnostic is a component that helps to add predefined diagnostic 
+*    @brief  The @c diagnostic is a component that helps to add predefined diagnostic
             properties to message for end to end diagnostic purpose
 */
 
@@ -29,15 +29,15 @@ typedef struct IOTHUB_DIAGNOSTIC_SETTING_DATA_TAG
 } IOTHUB_DIAGNOSTIC_SETTING_DATA;
 
 /**
-    * @brief	Adds diagnostic information to message if: 
+    * @brief    Adds diagnostic information to message if:
     *           a. diagSetting->diagSamplingPercentage > 0 and
     *           b. the number of current message matches sample rule specified by diagSetting->diagSamplingPercentage
     *
-    * @param	diagSetting		Pointer to an @c IOTHUB_DIAGNOSTIC_SETTING_DATA structure
+    * @param    diagSetting        Pointer to an @c IOTHUB_DIAGNOSTIC_SETTING_DATA structure
     *
-    * @param	messageHandle	message handle 
+    * @param    messageHandle    message handle
     *
-    * @return	0 upon success
+    * @return    0 upon success
     */
 MOCKABLE_FUNCTION(, int, IoTHubClient_Diagnostic_AddIfNecessary, IOTHUB_DIAGNOSTIC_SETTING_DATA *, diagSetting, IOTHUB_MESSAGE_HANDLE, messageHandle);
 

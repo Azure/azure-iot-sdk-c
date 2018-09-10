@@ -154,12 +154,12 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         REGISTER_UMOCK_ALIAS_TYPE(REPORTED_PROPERTIES_TRANSACTION_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(METHODRETURN_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(METHOD_CALLBACK_FUNC, void*);
-        
-        
-        
+
+
+
         REGISTER_UMOCK_ALIAS_TYPE(EXECUTE_COMMAND_RESULT, int);
         REGISTER_UMOCK_ALIAS_TYPE(DATA_PUBLISHER_RESULT, int);
-        
+
         REGISTER_GLOBAL_MOCK_RETURN(DeviceActionCallback, EXECUTE_COMMAND_SUCCESS);
 
         REGISTER_GLOBAL_MOCK_HOOK(DataPublisher_Create, my_DataPublisher_Create);
@@ -167,13 +167,13 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         REGISTER_GLOBAL_MOCK_HOOK(DataPublisher_Destroy, my_DataPublisher_Destroy);
 
 
-        
+
         REGISTER_GLOBAL_MOCK_HOOK(CommandDecoder_Create, my_CommandDecoder_Create);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(CommandDecoder_Create, NULL);
         REGISTER_GLOBAL_MOCK_RETURNS(CommandDecoder_ExecuteCommand, EXECUTE_COMMAND_SUCCESS, EXECUTE_COMMAND_ERROR);
         REGISTER_GLOBAL_MOCK_RETURNS(CommandDecoder_IngestDesiredProperties, EXECUTE_COMMAND_SUCCESS, EXECUTE_COMMAND_ERROR);
         REGISTER_GLOBAL_MOCK_HOOK(CommandDecoder_Destroy, my_CommandDecoder_Destroy);
-        
+
         REGISTER_GLOBAL_MOCK_HOOK(DataPublisher_StartTransaction, my_DataPublisher_StartTransaction);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(DataPublisher_StartTransaction, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(DataPublisher_EndTransaction, my_DataPublisher_EndTransaction);
@@ -1135,7 +1135,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         ///clean
         Device_DestroyTransaction_ReportedProperties(reportedPropertiesTransactionHandle);
         Device_Destroy(h);
-        
+
     }
 
     /*Tests_SRS_DEVICE_02_026: [ If argument destinationSize is NULLthen Device_CommitTransaction_ReportedProperties shall fail and return DEVICE_INVALID_ARG. ]*/
@@ -1218,7 +1218,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     TEST_FUNCTION(Device_DestroyTransaction_ReportedProperties_with_NULL_returns)
     {
         ///arrange
-        
+
         ///act
         Device_DestroyTransaction_ReportedProperties(NULL);
 
@@ -1318,7 +1318,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
 
     /*Tests_SRS_DEVICE_02_033: [ If jsonPayload is NULL then Device_IngestDesiredProperties shall fail and return DEVICE_INVALID_ARG. ]*/
     TEST_FUNCTION(Device_IngestDesiredProperties_with_NULL_desiredProperties_fails)
-    {        
+    {
         ///arrange
         DEVICE_HANDLE h;
         Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);

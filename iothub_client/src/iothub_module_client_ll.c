@@ -43,7 +43,7 @@ typedef struct IOTHUB_MODULE_CLIENT_LL_HANDLE_DATA_TAG
 IOTHUB_MODULE_CLIENT_LL_HANDLE IoTHubModuleClient_LL_CreateFromConnectionString(const char* connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
     IOTHUB_MODULE_CLIENT_LL_HANDLE_DATA* result;
-    
+
     if ((result = malloc(sizeof(IOTHUB_MODULE_CLIENT_LL_HANDLE_DATA))) == NULL)
     {
         LogError("Failed to allocate module client ll handle");

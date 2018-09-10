@@ -324,7 +324,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         REGISTER_GLOBAL_MOCK_HOOK(mqtt_client_init, my_mqtt_client_init);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_init, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(mqtt_client_deinit, my_mqtt_client_deinit);
-        
+
         REGISTER_GLOBAL_MOCK_RETURN(mqtt_client_connect, 0);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_connect, __LINE__);
         REGISTER_GLOBAL_MOCK_RETURN(mqtt_client_disconnect, 0);

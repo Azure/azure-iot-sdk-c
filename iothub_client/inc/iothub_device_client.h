@@ -257,9 +257,9 @@ extern "C"
     *                 is timeouted. The time starts at IoTHubDeviceClient_SendEventAsync. By default,
     *                 messages do not expire. @p is a pointer to a uint64_t
     *                - @b svc2cl_keep_alive_timeout_secs - the AMQP service side keep alive interval in seconds.
-    *                 After the connection established the client requests the server to set the 
+    *                 After the connection established the client requests the server to set the
     *                 keep alive interval for given time.
-    *                 If it is not set then the default 240 sec applies. 
+    *                 If it is not set then the default 240 sec applies.
     *                 If it is set to zero the server will not send keep alive messages to the client.
     *                - @b cl2svc_keep_alive_send_ratio - the AMQP client side keep alive interval in seconds.
     *                 After the connection established the server requests the client to set the
@@ -276,7 +276,7 @@ extern "C"
     *
     * @param    iotHubClientHandle          The handle created by a call to the create function.
     * @param    deviceTwinCallback          The callback specified by the device client to be used for updating
-    *                                       the desired state. The callback will be called in response to a 
+    *                                       the desired state. The callback will be called in response to a
     *                                       request send by the IoTHub services. The payload will be passed to the
     *                                       callback, along with two version numbers:
     *                                           - Desired:

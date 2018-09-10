@@ -21,7 +21,7 @@
 #undef CONSTBUFFER_GetContent
 #undef CONSTBUFFER_Destroy
 #undef CONSTBUFFER_TAG
-#undef CONSTBUFFER                    
+#undef CONSTBUFFER
 
 #undef CONSTBUFFER_H
 

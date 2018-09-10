@@ -33,7 +33,7 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2e_sfc)
     {
         e2e_d2c_svc_fault_ctrl_AMQP_kill_connection(AMQP_Protocol);
     }
-    
+
     TEST_FUNCTION(IoTHub_AMQP_e2e_d2c_svc_fault_ctrl_kill_AMQP_session)
     {
         e2e_d2c_svc_fault_ctrl_AMQP_kill_session(AMQP_Protocol);

@@ -12,7 +12,7 @@
 #include "azure_c_shared_utility/tickcounter.h"
 #include "azure_c_shared_utility/constbuffer.h"
 #include "azure_c_shared_utility/platform.h"
-#include "azure_c_shared_utility/singlylinkedlist.h" 
+#include "azure_c_shared_utility/singlylinkedlist.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/agenttime.h"
 
@@ -286,8 +286,8 @@ static int create_edge_handle(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handle_data, co
     /* There is no way to currently distinguish a regular module from a edge module, so this handle is created regardless of if appropriate.
     However, as a gateway hostname is required in order to create an Edge Handle, we need to at least make sure that exists
     in order to prevent errors.
-    
-    The end result is that all edge modules will have an EdgeHandle, but only some non-edge modules will have it. 
+
+    The end result is that all edge modules will have an EdgeHandle, but only some non-edge modules will have it.
     Regardless, non-edge modules will never be able to use the handle.
     */
     if (config->protocolGatewayHostName != NULL)
@@ -678,7 +678,7 @@ static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_
 }
 
 static uint32_t get_next_item_id(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData)
-{    
+{
     if (handleData->data_msg_id+1 >= UINT32_MAX)
     {
         handleData->data_msg_id = 1;
@@ -1143,7 +1143,7 @@ IOTHUB_CLIENT_CORE_LL_HANDLE IoTHubClientCore_LL_CreateImpl(const IOTHUB_CLIENT_
 {
     IOTHUB_CLIENT_CORE_LL_HANDLE result;
     /*Codes_SRS_IOTHUBCLIENT_LL_02_001: [IoTHubClientCore_LL_Create shall return NULL if config parameter is NULL or protocol field is NULL.]*/
-    if( 
+    if(
         (config == NULL) ||
         (config->protocol == NULL)
         )
@@ -1506,7 +1506,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetMessageCallback_Ex(IOTHUB_CLIENT_COR
             }
             else
             {
-                /*Codes_SRS_IOTHUBCLIENT_LL_10_023: [If parameter messageCallback is NULL then IoTHubClientCore_LL_SetMessageCallback_Ex shall call the underlying layer's _Unsubscribe function and return IOTHUB_CLIENT_OK.] */ 
+                /*Codes_SRS_IOTHUBCLIENT_LL_10_023: [If parameter messageCallback is NULL then IoTHubClientCore_LL_SetMessageCallback_Ex shall call the underlying layer's _Unsubscribe function and return IOTHUB_CLIENT_OK.] */
                 handleData->IoTHubTransport_Unsubscribe(handleData->deviceHandle);
                 handleData->messageCallback.type = CALLBACK_TYPE_NONE;
                 handleData->messageCallback.callbackSync = NULL;
@@ -1624,7 +1624,7 @@ void IoTHubClientCore_LL_DoWork(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle)
                 /*Codes_SRS_IOTHUBCLIENT_LL_07_010: [ If 'IoTHubTransport_ProcessItem' returns IOTHUB_PROCESS_CONTINUE or IOTHUB_PROCESS_NOT_CONNECTED IoTHubClientCore_LL_DoWork shall continue on to call the underlaying layer's _DoWork function. ]*/
                 break;
             }
-            else 
+            else
             {
                 DList_RemoveEntryList(client_item);
                 if (process_results == IOTHUB_PROCESS_OK)
@@ -1813,7 +1813,7 @@ static bool invoke_message_callback(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleDat
     bool result;
     /* Codes_SRS_IOTHUBCLIENT_LL_09_004: [IoTHubClient_LL_GetLastMessageReceiveTime shall return lastMessageReceiveTime in localtime] */
     handleData->lastMessageReceiveTime = get_time(NULL);
-    
+
     switch (handleData->messageCallback.type)
     {
         case CALLBACK_TYPE_NONE:
@@ -1883,7 +1883,7 @@ bool IoTHubClientCore_LL_MessageCallback(IOTHUB_CLIENT_CORE_LL_HANDLE handle, ME
 static bool is_event_equal(IOTHUB_EVENT_CALLBACK *event_callback, const char *input_name)
 {
     bool result;
-    
+
     if (event_callback != NULL)
     {
         const char* event_input_name = STRING_c_str(event_callback->inputName);
@@ -1939,9 +1939,9 @@ bool IoTHubClientCore_LL_MessageCallbackFromInput(IOTHUB_CLIENT_CORE_LL_HANDLE h
     else
     {
         const char* inputName = IoTHubMessage_GetInputName(messageData->messageHandle);
-  
+
         LIST_ITEM_HANDLE item_handle = NULL;
-    
+
         item_handle = singlylinkedlist_find(handleData->event_callbacks, is_event_equal_for_match, (const void*)inputName);
 
         if (item_handle == NULL)
@@ -1977,7 +1977,7 @@ bool IoTHubClientCore_LL_MessageCallbackFromInput(IOTHUB_CLIENT_CORE_LL_HANDLE h
                 {
                     // Codes_SRS_IOTHUBCLIENT_LL_31_139: [ `IoTHubClient_LL_MessageCallbackFromInput` shall the callback from the given inputName queue if it has been registered.** ]
                     IOTHUBMESSAGE_DISPOSITION_RESULT cb_result = event_callback->callbackAsync(messageData->messageHandle, event_callback->userContextCallback);
-                    
+
                     // Codes_SRS_IOTHUBCLIENT_LL_31_140: [ `IoTHubClient_LL_MessageCallbackFromInput` shall send the message disposition as returned by the client to the underlying layer and return `true` if an input queue match is found.** ]
                     if (handleData->IoTHubTransport_SendMessageDisposition(messageData, cb_result) != IOTHUB_CLIENT_OK)
                     {
@@ -2211,7 +2211,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetOption(IOTHUB_CLIENT_CORE_LL_HANDLE 
         {
             // This section is unusual for SetOption calls because it attempts to pass unhandled options
             // to two downstream targets (IoTHubTransport_SetOption and IoTHubClientCore_LL_UploadToBlob_SetOption) instead of one.
-            
+
             /*Codes_SRS_IOTHUBCLIENT_LL_30_011: [ IoTHubClientCore_LL_SetOption shall always pass unhandled options to Transport_SetOption. ]*/
             /*Codes_SRS_IOTHUBCLIENT_LL_30_012: [ If Transport_SetOption fails, IoTHubClientCore_LL_SetOption shall return that failure code. ]*/
             result = handleData->IoTHubTransport_SetOption(handleData->transportHandle, optionName, value);
@@ -2682,7 +2682,7 @@ static IOTHUB_CLIENT_RESULT create_event_handler_callback(IOTHUB_CLIENT_CORE_LL_
                     event_callback->userContextCallback = userContextCallback;
                 }
 
-                if ((userContextCallbackEx != NULL) && 
+                if ((userContextCallbackEx != NULL) &&
                     (NULL == (event_callback->userContextCallbackEx = malloc(userContextCallbackExLength))))
                 {
                     LogError("Unable to allocate userContextCallback");
@@ -2725,7 +2725,7 @@ static IOTHUB_CLIENT_RESULT remove_event_unsubscribe_if_needed(IOTHUB_CLIENT_COR
     {
         // Codes_SRS_IOTHUBCLIENT_LL_31_132: [ If `eventHandlerCallback` is NULL, `IoTHubClient_LL_SetInputMessageCallback` shall return `IOTHUB_CLIENT_ERROR` if the `inputName` is not present. ]
         LogError("Input name %s was not present", inputName);
-        result = IOTHUB_CLIENT_ERROR;    
+        result = IOTHUB_CLIENT_ERROR;
     }
     else
     {

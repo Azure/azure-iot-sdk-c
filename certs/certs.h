@@ -9,7 +9,7 @@ extern "C"
 {
 #endif
 
-	extern const char certificates[];
+    extern const char certificates[];
 
 #ifdef __cplusplus
 }

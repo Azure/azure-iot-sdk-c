@@ -350,7 +350,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(messagesender_send_async, my_messagesender_send_async);
     REGISTER_GLOBAL_MOCK_HOOK(messagesender_create, my_messagesender_create);
     REGISTER_GLOBAL_MOCK_HOOK(messagereceiver_create, my_messagereceiver_create);
-    
+
     REGISTER_UMOCK_ALIAS_TYPE(MESSAGE_RECEIVER_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(MESSAGE_SENDER_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(LINK_HANDLE, void*);
@@ -421,7 +421,7 @@ static void setup_subscribe_expected_calls(bool testing_modules)
         requests_link = "methods_requests_link-testdevice";
         correlation_id = "testdevice";
     }
-    
+
     STRICT_EXPECTED_CALL(STRING_c_str(TEST_STRING_HANDLE))
         .SetReturn(device_bound_methods);
     STRICT_EXPECTED_CALL(messaging_create_source(device_bound_methods))

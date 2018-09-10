@@ -55,43 +55,43 @@
 //*****************************************************************************
 void PinMuxConfig(void)
 {
-	//
+    //
     // Enable Peripheral Clocks
     //
-	MAP_PRCMPeripheralClkEnable(PRCM_UARTA1, PRCM_RUN_MODE_CLK);
-	MAP_PRCMPeripheralClkEnable(PRCM_UARTA0, PRCM_RUN_MODE_CLK);
-	MAP_PRCMPeripheralClkEnable(PRCM_GPIOA1, PRCM_RUN_MODE_CLK);
-	MAP_PRCMPeripheralClkEnable(PRCM_GPIOA2, PRCM_RUN_MODE_CLK);
+    MAP_PRCMPeripheralClkEnable(PRCM_UARTA1, PRCM_RUN_MODE_CLK);
+    MAP_PRCMPeripheralClkEnable(PRCM_UARTA0, PRCM_RUN_MODE_CLK);
+    MAP_PRCMPeripheralClkEnable(PRCM_GPIOA1, PRCM_RUN_MODE_CLK);
+    MAP_PRCMPeripheralClkEnable(PRCM_GPIOA2, PRCM_RUN_MODE_CLK);
 
-	//
+    //
     // Configure PIN_07 for UART1 UART1_TX
     //
-	MAP_PinTypeUART(PIN_07, PIN_MODE_5);
+    MAP_PinTypeUART(PIN_07, PIN_MODE_5);
 
-	//
+    //
     // Configure PIN_08 for UART1 UART1_RX
     //
-	MAP_PinTypeUART(PIN_08, PIN_MODE_5);
+    MAP_PinTypeUART(PIN_08, PIN_MODE_5);
 
-	//
+    //
     // Configure PIN_55 for UART0 UART0_TX
     //
-	MAP_PinTypeUART(PIN_55, PIN_MODE_3);
+    MAP_PinTypeUART(PIN_55, PIN_MODE_3);
 
-	//
+    //
     // Configure PIN_57 for UART0 UART0_RX
     //
-	MAP_PinTypeUART(PIN_57, PIN_MODE_3);
+    MAP_PinTypeUART(PIN_57, PIN_MODE_3);
 
-	//
+    //
     // Configure PIN_64 for GPIO Output
     //
-	MAP_PinTypeGPIO(PIN_64, PIN_MODE_0, false);
-	MAP_GPIODirModeSet(GPIOA1_BASE, 0x2, GPIO_DIR_MODE_OUT);
+    MAP_PinTypeGPIO(PIN_64, PIN_MODE_0, false);
+    MAP_GPIODirModeSet(GPIOA1_BASE, 0x2, GPIO_DIR_MODE_OUT);
 
-	//
+    //
     // Configure PIN_15 for GPIO Input
     //
-	MAP_PinTypeGPIO(PIN_15, PIN_MODE_0, false);
-	MAP_GPIODirModeSet(GPIOA2_BASE, 0x40, GPIO_DIR_MODE_IN);
+    MAP_PinTypeGPIO(PIN_15, PIN_MODE_0, false);
+    MAP_GPIODirModeSet(GPIOA2_BASE, 0x40, GPIO_DIR_MODE_IN);
 }

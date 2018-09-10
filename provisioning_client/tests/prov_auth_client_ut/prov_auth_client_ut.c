@@ -776,7 +776,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
 
             char tmp_msg[64];
             sprintf(tmp_msg, "prov_auth_get_registration_id failure in test %zu/%zu", index, count);
-            
+
             char* result = prov_auth_get_registration_id(sec_handle);
 
             //assert

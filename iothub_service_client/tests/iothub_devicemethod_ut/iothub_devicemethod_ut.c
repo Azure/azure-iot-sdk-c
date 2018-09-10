@@ -499,23 +499,23 @@ TEST_FUNCTION(IoTHubDeviceMethod_Create_happy_path)
     // arrange
     EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
-    
+
     EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
-    
+
     EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
-    
+
     EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
-    
+
     // act
     IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE result = IoTHubDeviceMethod_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
-    
+
     // assert
     ASSERT_IS_NOT_NULL(result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-    
+
     ///cleanup
     if (result != NULL)
     {
@@ -763,7 +763,7 @@ TEST_FUNCTION(IoTHubDeviceMethod_InvokeModule_return_NULL_if_input_parameter_met
     IoTHubDeviceMethod_InvokeDeviceOrModule_return_NULL_if_input_parameter_methodPayload_is_NULL(true);
 }
 
-// 
+//
 /*Tests_SRS_IOTHUBDEVICEMETHOD_31_050: [ IoTHubDeviceMethod_ModuleInvoke shall return IOTHUB_DEVICE_METHOD_INVALID_ARG if moduleId is NULL. **]*/
 TEST_FUNCTION(IoTHubDeviceMethod_InvokeModule_return_NULL_if_input_parameter_moduleId_is_NULL)
 {
@@ -1007,7 +1007,7 @@ static void IoTHubDeviceMethod_InvokeDeviceOrModule_happy_path_impl(bool testing
     else
     {
         result = IoTHubDeviceMethod_InvokeModule(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, TEST_DEVICE_ID, TEST_MODULE_ID, TEST_METHOD_NAME, TEST_METHOD_PAYLOAD, TEST_TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
-    }    
+    }
 
     // assert
     ASSERT_ARE_EQUAL(int, result, IOTHUB_DEVICE_METHOD_OK);

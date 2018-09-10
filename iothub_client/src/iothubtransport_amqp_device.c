@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/gballoc.h"
-#include "azure_c_shared_utility/agenttime.h" 
+#include "azure_c_shared_utility/agenttime.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/strings.h"
 #include "internal/iothubtransport_amqp_cbs_auth.h"
@@ -189,7 +189,7 @@ static void on_authentication_error_callback(void* context, AUTHENTICATION_ERROR
         LogError("on_authentication_error_callback was invoked with error %d, but context is NULL", error_code);
     }
     else
-    { 
+    {
         AMQP_DEVICE_INSTANCE* instance = (AMQP_DEVICE_INSTANCE*)context;
         instance->auth_error_code = error_code;
     }
@@ -253,7 +253,7 @@ static DEVICE_TWIN_UPDATE_RESULT get_device_twin_update_result_from(TWIN_REPORT_
 static void on_report_state_complete_callback(TWIN_REPORT_STATE_RESULT result, TWIN_REPORT_STATE_REASON reason, int status_code, const void* context)
 {
     (void)reason;
-    
+
     if (context == NULL)
     {
         LogError("Invalid argument (context is NULL)");
@@ -261,7 +261,7 @@ static void on_report_state_complete_callback(TWIN_REPORT_STATE_RESULT result, T
     else
     {
         DEVICE_SEND_TWIN_UPDATE_CONTEXT* twin_ctx = (DEVICE_SEND_TWIN_UPDATE_CONTEXT*)context;
-        
+
         // Codes_SRS_DEVICE_09_141: [on_send_twin_update_complete_callback (if provided by user) shall be invoked passing the corresponding device result and `status_code`]
         if (twin_ctx->on_send_twin_update_complete_callback != NULL)
         {
@@ -845,7 +845,7 @@ int device_stop(AMQP_DEVICE_HANDLE handle)
             update_state(instance, DEVICE_STATE_STOPPING);
 
             // Codes_SRS_DEVICE_09_027: [If `instance->messenger_handle` state is not TELEMETRY_MESSENGER_STATE_STOPPED, messenger_stop shall be invoked]
-            if (instance->msgr_state != TELEMETRY_MESSENGER_STATE_STOPPED && 
+            if (instance->msgr_state != TELEMETRY_MESSENGER_STATE_STOPPED &&
                 instance->msgr_state != TELEMETRY_MESSENGER_STATE_STOPPING &&
                 telemetry_messenger_stop(instance->messenger_handle) != RESULT_OK)
             {
@@ -987,7 +987,7 @@ void device_do_work(AMQP_DEVICE_HANDLE handle)
                 else if (instance->msgr_state == TELEMETRY_MESSENGER_STATE_ERROR)
                 {
                     LogError("Device '%s' messenger failed to be started (messenger got into error state)", instance->config->device_id);
-                    
+
                     update_state(instance, DEVICE_STATE_ERROR_MSG);
                 }
                 // Codes_SRS_DEVICE_09_046: [If messenger state is TELEMETRY_MESSENGER_STATE_STARTED, the device state shall be updated to DEVICE_STATE_STARTED]
@@ -1162,7 +1162,7 @@ int device_send_event_async(AMQP_DEVICE_HANDLE handle, IOTHUB_MESSAGE_LIST* mess
             memset(send_task, 0, sizeof(DEVICE_SEND_EVENT_TASK));
             send_task->on_event_send_complete_callback = on_device_d2c_event_send_complete_callback;
             send_task->on_event_send_complete_context = context;
-            
+
             // Codes_SRS_DEVICE_09_055: [The message shall be sent using telemetry_messenger_send_async, passing `on_event_send_complete_messenger_callback` and `send_task`]
             if (telemetry_messenger_send_async(instance->messenger_handle, message, on_event_send_complete_messenger_callback, (void*)send_task) != RESULT_OK)
             {
@@ -1173,7 +1173,7 @@ int device_send_event_async(AMQP_DEVICE_HANDLE handle, IOTHUB_MESSAGE_LIST* mess
                 result = __FAILURE__;
             }
             else
-            {    
+            {
                 // Codes_SRS_DEVICE_09_058: [If no failures occur, device_send_event_async shall return 0]
                 result = RESULT_OK;
             }
@@ -1198,7 +1198,7 @@ int device_get_send_status(AMQP_DEVICE_HANDLE handle, DEVICE_SEND_STATUS *send_s
     {
         AMQP_DEVICE_INSTANCE* instance = (AMQP_DEVICE_INSTANCE*)handle;
         TELEMETRY_MESSENGER_SEND_STATUS messenger_send_status;
-        
+
         // Codes_SRS_DEVICE_09_106: [The status of `instance->messenger_handle` shall be obtained using telemetry_messenger_get_send_status]
         if (telemetry_messenger_get_send_status(instance->messenger_handle, &messenger_send_status) != RESULT_OK)
         {
@@ -1302,7 +1302,7 @@ int device_send_message_disposition(AMQP_DEVICE_HANDLE device_handle, DEVICE_MES
         LogError("Failed sending message disposition (either device_handle (%p) or disposition_info (%p) are NULL)", device_handle, disposition_info);
         result = __FAILURE__;
     }
-    // Codes_SRS_DEVICE_09_112: [If `disposition_info->source` is NULL, device_send_message_disposition() shall fail and return __FAILURE__]  
+    // Codes_SRS_DEVICE_09_112: [If `disposition_info->source` is NULL, device_send_message_disposition() shall fail and return __FAILURE__]
     else if (disposition_info->source == NULL)
     {
         LogError("Failed sending message disposition (disposition_info->source is NULL)");
@@ -1313,10 +1313,10 @@ int device_send_message_disposition(AMQP_DEVICE_HANDLE device_handle, DEVICE_MES
         AMQP_DEVICE_INSTANCE* device = (AMQP_DEVICE_INSTANCE*)device_handle;
         TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO* messenger_disposition_info;
 
-        // Codes_SRS_DEVICE_09_113: [A TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance shall be created with a copy of the `source` and `message_id` contained in `disposition_info`]  
+        // Codes_SRS_DEVICE_09_113: [A TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance shall be created with a copy of the `source` and `message_id` contained in `disposition_info`]
         if ((messenger_disposition_info = create_messenger_disposition_info(disposition_info)) == NULL)
         {
-            // Codes_SRS_DEVICE_09_114: [If the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO fails to be created, device_send_message_disposition() shall fail and return __FAILURE__]  
+            // Codes_SRS_DEVICE_09_114: [If the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO fails to be created, device_send_message_disposition() shall fail and return __FAILURE__]
             LogError("Failed sending message disposition (failed to create TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO)");
             result = __FAILURE__;
         }
@@ -1324,20 +1324,20 @@ int device_send_message_disposition(AMQP_DEVICE_HANDLE device_handle, DEVICE_MES
         {
             TELEMETRY_MESSENGER_DISPOSITION_RESULT messenger_disposition_result = get_messenger_message_disposition_result_from(disposition_result);
 
-            // Codes_SRS_DEVICE_09_115: [`telemetry_messenger_send_message_disposition()` shall be invoked passing the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance and the corresponding TELEMETRY_MESSENGER_DISPOSITION_RESULT]  
+            // Codes_SRS_DEVICE_09_115: [`telemetry_messenger_send_message_disposition()` shall be invoked passing the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance and the corresponding TELEMETRY_MESSENGER_DISPOSITION_RESULT]
             if (telemetry_messenger_send_message_disposition(device->messenger_handle, messenger_disposition_info, messenger_disposition_result) != RESULT_OK)
             {
-                // Codes_SRS_DEVICE_09_116: [If `telemetry_messenger_send_message_disposition()` fails, device_send_message_disposition() shall fail and return __FAILURE__]  
+                // Codes_SRS_DEVICE_09_116: [If `telemetry_messenger_send_message_disposition()` fails, device_send_message_disposition() shall fail and return __FAILURE__]
                 LogError("Failed sending message disposition (telemetry_messenger_send_message_disposition failed)");
                 result = __FAILURE__;
             }
             else
             {
-                // Codes_SRS_DEVICE_09_118: [If no failures occurr, device_send_message_disposition() shall return 0]  
+                // Codes_SRS_DEVICE_09_118: [If no failures occurr, device_send_message_disposition() shall return 0]
                 result = RESULT_OK;
             }
 
-            // Codes_SRS_DEVICE_09_117: [device_send_message_disposition() shall destroy the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance]  
+            // Codes_SRS_DEVICE_09_117: [device_send_message_disposition() shall destroy the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance]
             destroy_messenger_disposition_info(messenger_disposition_info);
         }
     }

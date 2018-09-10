@@ -231,7 +231,7 @@ static void individualEnrollment_deserializeFromJson_expected_calls(bool use_all
     {
         STRICT_EXPECTED_CALL(deviceRegistrationState_fromJson(IGNORED_PTR_ARG)).SetReturn(TEST_REGISTRATION_STATE);
     }
-    STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //attestation mechanism 
+    STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //attestation mechanism
     STRICT_EXPECTED_CALL(attestationMechanism_fromJson(IGNORED_PTR_ARG)).SetReturn(TEST_ATTESTATION_MECHANISM);
     copy_json_field(use_all_fields ? DUMMY_IOTHUB_HOSTNAME : NULL);
     STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(use_all_fields ? TEST_JSON_OBJECT : NULL); //twin //cannot fail
@@ -262,7 +262,7 @@ static void enrollmentGroup_deserializeFromJson_expected_calls(bool use_all_fiel
         STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //twin
         STRICT_EXPECTED_CALL(initialTwin_fromJson(IGNORED_PTR_ARG)).SetReturn(TEST_INITIAL_TWIN);
         STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(DUMMY_ETAG); //etag
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG)); 
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(DUMMY_PROVISIONING_STATUS); //provisioning status
         STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(DUMMY_CREATED_TIME); //created time
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
@@ -439,7 +439,7 @@ TEST_FUNCTION(individualEnrollment_create_error)
 TEST_FUNCTION(individualEnrollment_destroy_NULL)
 {
     //arrange
-    
+
     //act
     individualEnrollment_destroy(NULL);
 
@@ -982,10 +982,10 @@ TEST_FUNCTION(individualEnrollment_getDeviceRegistrationState_success_return)
 TEST_FUNCTION(individualEnrollment_getRegistrationId_null)
 {
     //arrange
-    
+
     //act
     const char* reg_id = individualEnrollment_getRegistrationId(NULL);
-    
+
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     ASSERT_IS_NULL(reg_id);
@@ -1430,7 +1430,7 @@ TEST_FUNCTION(individualEnrollment_getCreatedDateTime_null)
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     ASSERT_IS_NULL(created);
-    
+
     //cleanup
 }
 
@@ -2204,7 +2204,7 @@ TEST_FUNCTION(individualEnrollment_serializeToJson_min_success)
     STRICT_EXPECTED_CALL(json_value_init_object());
     STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(deviceCapabilities_toJson(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); 
+    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //reg id
     STRICT_EXPECTED_CALL(attestationMechanism_toJson(TEST_ATTESTATION_MECHANISM));
     STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //att mech

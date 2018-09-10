@@ -102,7 +102,7 @@ static void TEST_free(void* ptr)
     for (i = 0, j = 0; j < saved_malloc_returns_count; i++, j++)
     {
         if (saved_malloc_returns[i] == ptr) j++;
-        
+
         saved_malloc_returns[i] = saved_malloc_returns[j];
     }
 
@@ -137,7 +137,7 @@ static CONNECTION_HANDLE TEST_connection_create2(XIO_HANDLE xio, const char* hos
     (void)container_id;
     (void)on_new_endpoint;
     (void)callback_context;
-    
+
     connection_create2_on_connection_state_changed = on_connection_state_changed;
     connection_create2_on_connection_state_changed_context = on_connection_state_changed_context;
     connection_create2_on_io_error = on_io_error;
@@ -213,7 +213,7 @@ static void set_exp_calls_for_amqp_connection_create(AMQP_CONNECTION_CONFIG* amq
         .IgnoreArgument_on_io_error_context();
 
     STRICT_EXPECTED_CALL(connection_set_idle_timeout(TEST_CONNECTION_HANDLE, (milliseconds)(1000 * amqp_connection_config->svc2cl_keep_alive_timeout_secs)));
-    STRICT_EXPECTED_CALL(connection_set_remote_idle_timeout_empty_frame_send_ratio(TEST_CONNECTION_HANDLE, amqp_connection_config->cl2svc_keep_alive_send_ratio)); 
+    STRICT_EXPECTED_CALL(connection_set_remote_idle_timeout_empty_frame_send_ratio(TEST_CONNECTION_HANDLE, amqp_connection_config->cl2svc_keep_alive_send_ratio));
     STRICT_EXPECTED_CALL(connection_set_trace(TEST_CONNECTION_HANDLE, amqp_connection_config->is_trace_on));
 
     EXPECTED_CALL(free(IGNORED_PTR_ARG)); // UniqueId container.
@@ -299,7 +299,7 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 
     REGISTER_GLOBAL_MOCK_RETURN(saslmssbcbs_get_interface, TEST_SASL_INTERFACE_HANDLE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(saslmssbcbs_get_interface, NULL);
- 
+
     REGISTER_GLOBAL_MOCK_RETURN(saslmechanism_create, TEST_SASL_MECHANISM_HANDLE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(saslmechanism_create, NULL);
 
@@ -800,7 +800,7 @@ TEST_FUNCTION(amqp_connection_destroy_SASL_and_CBS_success)
 
     umock_c_reset_all_calls();
     set_exp_calls_for_amqp_connection_create(config);
-    
+
     AMQP_CONNECTION_HANDLE handle = amqp_connection_create(config);
 
     umock_c_reset_all_calls();

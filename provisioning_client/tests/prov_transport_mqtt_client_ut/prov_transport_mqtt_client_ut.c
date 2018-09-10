@@ -287,7 +287,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_client_ut)
             //act
             dps_io_info = g_transport_io(TEST_URI_VALUE, NULL);
 
-            //assert 
+            //assert
             ASSERT_IS_NULL_WITH_MSG(dps_io_info, tmp_msg);
         }
 

@@ -105,7 +105,7 @@ char* custom_hsm_get_certificate(HSM_CLIENT_HANDLE handle)
     else
     {
         // TODO: Malloc the certificate for the iothub sdk to free
-        // this value will be sent unmodified to the tlsio 
+        // this value will be sent unmodified to the tlsio
         // layer to be processed
         CUSTOM_HSM_SAMPLE_INFO* hsm_info = (CUSTOM_HSM_SAMPLE_INFO*)handle;
         size_t len = strlen(hsm_info->certificate);
@@ -133,7 +133,7 @@ char* custom_hsm_get_key(HSM_CLIENT_HANDLE handle)
     else
     {
         // TODO: Malloc the private key for the iothub sdk to free
-        // this value will be sent unmodified to the tlsio 
+        // this value will be sent unmodified to the tlsio
         // layer to be processed
         CUSTOM_HSM_SAMPLE_INFO* hsm_info = (CUSTOM_HSM_SAMPLE_INFO*)handle;
         size_t len = strlen(hsm_info->key);
@@ -245,7 +245,7 @@ int custom_hsm_sign_with_identity(HSM_CLIENT_HANDLE handle, const unsigned char*
     {
         (void)data;
         (void)data_len;
-        
+
         // TODO: Need to implement signing the data variable and malloc the key and return it to the sdk
 
         size_t signed_data_len = 10;

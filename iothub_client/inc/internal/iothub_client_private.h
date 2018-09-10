@@ -63,7 +63,7 @@ typedef struct IOTHUB_MESSAGE_LIST_TAG
 {
     IOTHUB_MESSAGE_HANDLE messageHandle;
     IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK callback;
-    void* context; 
+    void* context;
     DLIST_ENTRY entry;
     tickcounter_ms_t ms_timesOutAfter; /* a value of "0" means "no timeout", if the IOTHUBCLIENT_LL's handle tickcounter > msTimesOutAfer then the message shall timeout*/
 }IOTHUB_MESSAGE_LIST;

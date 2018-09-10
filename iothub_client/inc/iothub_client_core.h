@@ -2,14 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 /** @file iothub_client_core.h
-*	@brief Extends the IoTHubCLient_LL module with additional features.
+*    @brief Extends the IoTHubClientCore_LL module with additional features.
 *
-*	@details IoTHubClient is a module that extends the IoTHubCLient_LL
-*			 module with 2 features:
-*				- scheduling the work for the IoTHubCLient from a
-*				  thread, so that the user does not need to create their
-*				  own thread
-*				- thread-safe APIs
+*    @details IoTHubClientCore is a module that extends the IoTHubClientCore_LL
+*             module with 2 features:
+*                - scheduling the work for the IoTHubCLient from a
+*                  thread, so that the user does not need to create their
+*                  own thread
+*                - thread-safe APIs
 */
 
 #ifndef IOTHUB_CLIENT_CORE_H

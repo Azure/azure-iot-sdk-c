@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-	void iothub_client_sample_module_method_invoke(void);
+    void iothub_client_sample_module_method_invoke(void);
 
 #ifdef __cplusplus
 }

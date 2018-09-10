@@ -227,7 +227,7 @@ static void expected_calls_twinProperties_fromJson(bool desired)
 static void expected_calls_initialTwin_fromJson(bool tags, bool desired_properties)
 {
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    
+
     if (tags)
     {
         STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG));

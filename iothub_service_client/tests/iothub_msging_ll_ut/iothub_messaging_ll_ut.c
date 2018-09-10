@@ -644,7 +644,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
 
         REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_GetMessageId, TEST_CONST_CHAR_PTR);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_GetMessageId, NULL);
-        
+
         REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_GetCorrelationId, TEST_CONST_CHAR_PTR);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_GetCorrelationId, NULL);
 
@@ -1350,7 +1350,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         //act
         IOTHUB_MESSAGING_RESULT result;
         result = IoTHubMessaging_LL_Send(iothub_messaging_handle, TEST_CONST_CHAR_PTR, TEST_IOTHUB_MESSAGE_HANDLE, TEST_IOTHUB_SEND_COMPLETE_CALLBACK, TEST_VOID_PTR);
-    
+
         //assert
         ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_OK, result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -1371,7 +1371,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         int umockc_result = umock_c_negative_tests_init();
         ASSERT_ARE_EQUAL(int, 0, umockc_result);
 
-        size_t doNotFailCalls[] = 
+        size_t doNotFailCalls[] =
         {
             6,  /*contentType*/
             8,  /*contentType*/
@@ -1494,7 +1494,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
 
                 IOTHUB_MESSAGING_RESULT result;
 
-                /* If modules are re-enabled, re-enable this code and add testing_module paramater to this function                
+                /* If modules are re-enabled, re-enable this code and add testing_module paramater to this function
                 if (testing_module == true)
                 {
                     result = IoTHubMessaging_LL_SendModule(TEST_IOTHUB_MESSAGING_HANDLE, TEST_CONST_CHAR_PTR, TEST_MODULE_ID, TEST_IOTHUB_MESSAGE_HANDLE, TEST_IOTHUB_SEND_COMPLETE_CALLBACK, TEST_VOID_PTR);
@@ -1505,7 +1505,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
                 //assert
                 ASSERT_ARE_NOT_EQUAL(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_OK, result);
             }
-            
+
         }
         umock_c_negative_tests_deinit();
 
@@ -1817,7 +1817,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         IOTHUB_MESSAGING_HANDLE iothub_messaging_handle = IoTHubMessaging_LL_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
         (void)IoTHubMessaging_LL_Open(iothub_messaging_handle, TEST_FUNC_IOTHUB_OPEN_COMPLETE_CALLBACK, (void*)1);
         (void)IoTHubMessaging_LL_Send(iothub_messaging_handle, TEST_DEVICE_ID, TEST_IOTHUB_MESSAGE_HANDLE, TEST_FUNC_IOTHUB_SEND_COMPLETE_CALLBACK, (void*)1);
-        
+
         umock_c_reset_all_calls();
 
         MESSAGE_SEND_RESULT send_result = MESSAGE_SEND_OK;
@@ -1984,9 +1984,9 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
 
         STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
-        
+
         STRICT_EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG));
-        
+
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
         STRICT_EXPECTED_CALL(singlylinkedlist_destroy(IGNORED_PTR_ARG));

@@ -76,5 +76,5 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2e_sfc)
     {
         e2e_c2d_svc_fault_ctrl_MQTT_shut_down(MQTT_Protocol);
     }
-   
+
 END_TEST_SUITE(iothubclient_mqtt_e2e_sfc)

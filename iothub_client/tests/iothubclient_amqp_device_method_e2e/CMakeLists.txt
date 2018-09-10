@@ -38,12 +38,12 @@ if(WIN32)
             iothub_client_amqp_transport
             iothub_service_client
             aziotsharedutil
-            rpcrt4            
+            rpcrt4
         )
         linkSharedUtil(${theseTestsName}_dll)
         linkUAMQP(${theseTestsName}_dll)
     endif()
-    
+
     if(TARGET ${theseTestsName}_exe)
         target_link_libraries(${theseTestsName}_exe
             iothub_test
@@ -51,10 +51,10 @@ if(WIN32)
             iothub_client_amqp_transport
             iothub_service_client
             aziotsharedutil
-            rpcrt4            
+            rpcrt4
         )
         linkSharedUtil(${theseTestsName}_exe)
-        linkUAMQP(${theseTestsName}_exe)    
+        linkUAMQP(${theseTestsName}_exe)
     endif()
 
 else()
@@ -79,7 +79,7 @@ else()
             aziotsharedutil
         )
         linkSharedUtil(${theseTestsName}_exe)
-        linkUAMQP(${theseTestsName}_exe)    
+        linkUAMQP(${theseTestsName}_exe)
     endif()
 endif()
 

@@ -101,7 +101,7 @@ EXECUTE_COMMAND_RESULT goToLocation(TruckType* device, GeoLocation XMarksTheSpot
     goToLocation_wasCalled = true;
     goToLocation_XMarksTheSpot_long = XMarksTheSpot.Long;
     goToLocation_XMarksTheSpot_lat = XMarksTheSpot.Lat;
-    return EXECUTE_COMMAND_SUCCESS; 
+    return EXECUTE_COMMAND_SUCCESS;
 
 }
 
@@ -238,8 +238,8 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_UMOCK_ALIAS_TYPE(DEVICE_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(pfDeviceMethodCallback, void*);
-    
-    
+
+
     REGISTER_GLOBAL_MOCK_HOOK(Schema_GetModelDesiredPropertyCount, my_Schema_GetModelDesiredPropertyCount);
     REGISTER_GLOBAL_MOCK_HOOK(Schema_GetModelModelCount, my_Schema_GetModelModelCount);
 
@@ -348,7 +348,7 @@ TEST_FUNCTION(InvokeAction_alwaysRejected_return_EXECUTE_COMMAND_FAILED)
     ///arrange
     void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_WithStructs_allReflected, sizeof(TruckType), false);
     umock_c_reset_all_calls();
-   
+
     STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
 
     ///act

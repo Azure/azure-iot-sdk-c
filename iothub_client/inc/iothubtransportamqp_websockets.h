@@ -11,7 +11,7 @@ extern "C"
 {
 #endif
 
-	extern const TRANSPORT_PROVIDER* AMQP_Protocol_over_WebSocketsTls(void);
+    extern const TRANSPORT_PROVIDER* AMQP_Protocol_over_WebSocketsTls(void);
 
 #ifdef __cplusplus
 }

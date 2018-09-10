@@ -134,7 +134,7 @@ static void DestroyAction(SCHEMA_ACTION_HANDLE actionHandle)
     if (action != NULL)
     {
         size_t j;
-        
+
         for (j = 0; j < action->ArgumentCount; j++)
         {
             DestroyActionArgument(action->ArgumentHandles[j]);
@@ -438,7 +438,7 @@ SCHEMA_HANDLE Schema_GetSchemaByNamespace(const char* schemaNamespace)
         SCHEMA_HANDLE* handle = (g_schemas==NULL)?NULL:(SCHEMA_HANDLE*)VECTOR_find_if(g_schemas, (PREDICATE_FUNCTION)SchemaNamespacesMatch, schemaNamespace);
         if (handle != NULL)
         {
-            /* Codes_SRS_SCHEMA_99_148: [Schema_GetSchemaByNamespace shall search all active schemas and return the schema with the 
+            /* Codes_SRS_SCHEMA_99_148: [Schema_GetSchemaByNamespace shall search all active schemas and return the schema with the
                namespace given by the schemaNamespace argument.] */
             result = *handle;
         }
@@ -1871,7 +1871,7 @@ const char* Schema_GetStructTypeName(SCHEMA_STRUCT_TYPE_HANDLE structTypeHandle)
         /* Codes_SRS_SCHEMA_99_135: [Schema_GetStructTypeName shall return the name of a struct type identified by the structTypeHandle argument.] */
         result = ((SCHEMA_STRUCT_TYPE_HANDLE_DATA*)structTypeHandle)->Name;
     }
-    
+
     return result;
 }
 
@@ -2273,7 +2273,7 @@ SCHEMA_MODEL_TYPE_HANDLE Schema_GetModelByIndex(SCHEMA_HANDLE schemaHandle, size
     else
     {
 
-        /* Codes_SRS_SCHEMA_99_126: [Schema_GetModelByIndex shall return a non-NULL SCHEMA_MODEL_TYPE_HANDLE corresponding to the model identified by schemaHandle and matching the index number provided by the index argument.] */ 
+        /* Codes_SRS_SCHEMA_99_126: [Schema_GetModelByIndex shall return a non-NULL SCHEMA_MODEL_TYPE_HANDLE corresponding to the model identified by schemaHandle and matching the index number provided by the index argument.] */
         /* Codes_SRS_SCHEMA_99_127: [The index argument is zero based, and the order in which models were added shall be the index in which they will be retrieved.] */
         result = schema->ModelTypes[index];
     }
@@ -2332,7 +2332,7 @@ SCHEMA_RESULT Schema_AddModelModel(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, con
         else
         {
             /*Codes_SRS_SCHEMA_99_164: [If the function succeeds, then the return value shall be SCHEMA_OK.]*/
-            
+
             result = SCHEMA_OK;
         }
     }
@@ -2497,7 +2497,7 @@ size_t Schema_GetModelModelByIndex_Offset(SCHEMA_MODEL_TYPE_HANDLE modelTypeHand
 SCHEMA_MODEL_TYPE_HANDLE Schema_GetModelModelyByIndex(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t index)
 {
     SCHEMA_MODEL_TYPE_HANDLE result;
-    if (modelTypeHandle == NULL) 
+    if (modelTypeHandle == NULL)
     {
         /*Codes_SRS_SCHEMA_99_173: [Schema_GetModelModelyByIndex shall return NULL in the cases when it cannot provide the handle.]*/
         result = NULL;

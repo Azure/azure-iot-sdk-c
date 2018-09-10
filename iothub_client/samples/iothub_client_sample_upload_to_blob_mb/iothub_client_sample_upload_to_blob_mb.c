@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 // CAVEAT: This sample is to demonstrate azure IoT client concepts only and is not a guide design principles or style
-// Checking of return codes and error values shall be omitted for brevity.  Please practice sound engineering practices 
+// Checking of return codes and error values shall be omitted for brevity.  Please practice sound engineering practices
 // when writing production code.
 
 #ifdef DONT_USE_UPLOADTOBLOB
@@ -33,7 +33,7 @@ and removing calls to _DoWork will yield the same results. */
 static const char* connectionString = "[device connection string]";
 
 /*Optional string with http proxy host and integer for http proxy port (Linux only)         */
-static const char* proxyHost = NULL; 
+static const char* proxyHost = NULL;
 static int proxyPort = 0;
 static const char* data_to_upload = "Hello World from IoTHubClient_LL_UploadToBlob\n";
 static int block_count = 0;

@@ -61,7 +61,7 @@ static const int http_prefix_len = sizeof(http_prefix) - 1;
 static const char unix_domain_sockets_prefix[] = "unix://";
 static const int unix_domain_sockets_prefix_len = sizeof(unix_domain_sockets_prefix) - 1;
 
-static HSM_CLIENT_HTTP_EDGE_INTERFACE http_edge_interface = 
+static HSM_CLIENT_HTTP_EDGE_INTERFACE http_edge_interface =
 {
 
     hsm_client_http_edge_create,
@@ -91,7 +91,7 @@ static WORKLOAD_PROTOCOL_TYPE get_workload_protocol_type(const char* workload_ur
     return workload_protocol_type;
 }
 
-// This is the string we use to connect to the edge device itself.  An example will be 
+// This is the string we use to connect to the edge device itself.  An example will be
 // http://127.0.0.1:8080.  Note NOT "https" as that would require us to trust the edgelet's
 // server certificate, which we can't because we're still bootstrapping.
 static int read_and_parse_edge_uri(HSM_CLIENT_HTTP_EDGE* hsm_client_http_edge)
@@ -258,8 +258,8 @@ static BUFFER_HANDLE construct_json_signing_blob(const char* data)
     STRING_HANDLE data_string = NULL;
     STRING_HANDLE data_url_encoded = NULL;
     STRING_HANDLE data_base64_encoded = NULL;
-    
-    // The caller passes us the data in the form "<tokenScope>\n<expire_time>".  We need to 
+
+    // The caller passes us the data in the form "<tokenScope>\n<expire_time>".  We need to
     // URL encode the tokenScope for HTTP transmission, but not the \n, so build up string appropriately.
     const char* carriage_return_in_data = strchr(data, '\n');
     if ((carriage_return_in_data == NULL) || (*(carriage_return_in_data+1) == 0))
@@ -271,7 +271,7 @@ static BUFFER_HANDLE construct_json_signing_blob(const char* data)
     {
         LogError("creating data string failed");
         result = NULL;
-    }    
+    }
     else if ((data_url_encoded = URL_Encode(data_string)) == NULL)
     {
         LogError("url encoding of string %s failed", data);
@@ -376,7 +376,7 @@ static void on_edge_hsm_http_recv(void* callback_ctx, HTTP_CALLBACK_REASON reque
         {
             ; // success
         }
-   
+
         workload_context->continue_running = false;
     }
 }
@@ -553,7 +553,7 @@ int hsm_client_http_edge_sign_data(HSM_CLIENT_HANDLE handle, const unsigned char
     BUFFER_HANDLE json_to_send = NULL;
     BUFFER_HANDLE http_response = NULL;
     STRING_HANDLE uri_path = NULL;
-   
+
     if (handle == NULL || data == NULL || data_len == 0 || signed_value == NULL || signed_len == NULL)
     {
         LogError("Invalid handle value specified handle: %p, data: %p, data_len: %zu, signed_value: %p, signed_len: %p", handle, data, data_len, signed_value, signed_len);
@@ -639,7 +639,7 @@ char* hsm_client_http_edge_get_trust_bundle(HSM_CLIENT_HANDLE handle)
     char* trusted_certificates;
     BUFFER_HANDLE http_response = NULL;
     STRING_HANDLE uri_path = NULL;
-   
+
     if (handle == NULL)
     {
         LogError("Invalid handle value specified handle: %p", handle);

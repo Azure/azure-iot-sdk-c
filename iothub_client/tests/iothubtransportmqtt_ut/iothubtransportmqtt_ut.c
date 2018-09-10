@@ -520,7 +520,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Destroy_success)
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_Destroy(handle));
-    
+
     // act
     IoTHubTransportMqtt_Destroy(handle);
 

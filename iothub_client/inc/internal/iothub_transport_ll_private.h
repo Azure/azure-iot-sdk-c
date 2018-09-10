@@ -31,16 +31,16 @@ extern "C"
 {
 #endif
 
-    /** @brief	This struct captures device configuration. */
+    /** @brief    This struct captures device configuration. */
     typedef struct IOTHUB_DEVICE_CONFIG_TAG
     {
-        /** @brief	A string that identifies the device. */
+        /** @brief    A string that identifies the device. */
         const char* deviceId;
 
-        /** @brief	The device key used to authenticate the device. */
+        /** @brief    The device key used to authenticate the device. */
         const char* deviceKey;
 
-        /** @brief	The device SAS used to authenticate the device in place of using the device key. */
+        /** @brief    The device SAS used to authenticate the device in place of using the device key. */
         const char* deviceSasToken;
 
         IOTHUB_AUTHORIZATION_HANDLE authorization_module; // with either SAS Token, x509 Certs, and Device SAS Token

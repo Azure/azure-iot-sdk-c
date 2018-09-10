@@ -41,7 +41,7 @@ void real_free(void* ptr)
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/optionhandler.h"
-#include "azure_c_shared_utility/agenttime.h" 
+#include "azure_c_shared_utility/agenttime.h"
 #include "azure_c_shared_utility/singlylinkedlist.h"
 #undef ENABLE_MOCKS
 
@@ -110,7 +110,7 @@ static void TEST_free(void* ptr)
     for (i = 0, j = 0; j < saved_malloc_returns_count; i++, j++)
     {
         if (saved_malloc_returns[i] == ptr) j++;
-        
+
         saved_malloc_returns[i] = saved_malloc_returns[j];
     }
 
@@ -335,7 +335,7 @@ static MESSAGE_QUEUE_HANDLE create_message_queue(MESSAGE_QUEUE_CONFIG* config)
 }
 
 static void set_process_timeouts_expected_calls(MESSAGE_QUEUE_HANDLE mq, time_t current_time,
-    size_t number_of_messages_pending, size_t number_of_messages_in_progress, 
+    size_t number_of_messages_pending, size_t number_of_messages_in_progress,
     TEST_MESSAGE_EXPIRATION_PROFILE* expiration_profile
     )
 {
@@ -432,21 +432,21 @@ static void set_process_pending_messages_calls(MESSAGE_QUEUE_HANDLE mq, time_t c
         STRICT_EXPECTED_CALL(singlylinkedlist_remove(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(current_time);
         STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        
+
         STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
     }
 }
 
-static void set_message_queue_do_work_expected_calls(MESSAGE_QUEUE_HANDLE mq, time_t current_time, 
-    size_t number_of_messages_pending, size_t number_of_messages_in_progress, 
+static void set_message_queue_do_work_expected_calls(MESSAGE_QUEUE_HANDLE mq, time_t current_time,
+    size_t number_of_messages_pending, size_t number_of_messages_in_progress,
     TEST_MESSAGE_EXPIRATION_PROFILE* expiration_profile)
 {
     set_process_timeouts_expected_calls(mq, current_time, number_of_messages_pending, number_of_messages_in_progress, expiration_profile);
     set_process_pending_messages_calls(mq, current_time, number_of_messages_pending);
 }
 
-static void crank_message_queue(MESSAGE_QUEUE_HANDLE mq, time_t current_time, 
-    size_t number_of_messages_pending, size_t number_of_messages_in_progress, 
+static void crank_message_queue(MESSAGE_QUEUE_HANDLE mq, time_t current_time,
+    size_t number_of_messages_pending, size_t number_of_messages_in_progress,
     TEST_MESSAGE_EXPIRATION_PROFILE* expiration_profile)
 {
     if (expiration_profile == NULL)
@@ -462,7 +462,7 @@ static void crank_message_queue(MESSAGE_QUEUE_HANDLE mq, time_t current_time,
 static void set_message_queue_is_empty_expected_calls(size_t number_of_messages_pending, size_t number_of_messages_in_progress)
 {
     (void)number_of_messages_in_progress;
-    
+
     STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
 
     if (number_of_messages_pending == 0) // this statement will only be evaluated if the first boolean check (in code) succeeds.
@@ -480,7 +480,7 @@ static void set_message_queue_retrieve_options_expected_calls()
 }
 
 static void reset_test_data()
-{    
+{
     TEST_current_time = time(NULL);
 
     saved_malloc_returns_count = 0;
@@ -513,7 +513,7 @@ static void reset_test_data()
     TEST_test_message_expiration_profile.max_message_processing_time_secs = 0;
 }
 
-static void register_umock_alias_types() 
+static void register_umock_alias_types()
 {
     REGISTER_UMOCK_ALIAS_TYPE(time_t, long long);
     REGISTER_UMOCK_ALIAS_TYPE(OPTIONHANDLER_HANDLE, void*);
@@ -542,8 +542,8 @@ static void register_global_mock_hooks()
     REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_item_get_value, real_singlylinkedlist_item_get_value);
 }
 
-static void register_global_mock_returns() 
-{ 
+static void register_global_mock_returns()
+{
     REGISTER_GLOBAL_MOCK_RETURN(OptionHandler_Create, TEST_OPTIONHANDLER_HANDLE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(OptionHandler_Create, NULL);
 
@@ -576,7 +576,7 @@ BEGIN_TEST_SUITE(message_queue_ut)
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
     size_t i;
-    
+
     TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
@@ -593,7 +593,7 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     register_umock_alias_types();
     register_global_mock_returns();
     register_global_mock_hooks();
-    
+
     for (i = 0; i < 10; i++)
     {
         TEST_BASE_MQ_MESSAGE_HANDLE[i] = (MQ_MESSAGE_HANDLE)real_malloc(sizeof(char));
@@ -604,12 +604,12 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 TEST_SUITE_CLEANUP(TestClassCleanup)
 {
     size_t i;
-    
+
     umock_c_deinit();
 
     TEST_MUTEX_DESTROY(g_testByTest);
     TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
-    
+
     for (i = 0; i < 10; i++)
     {
         real_free(TEST_BASE_MQ_MESSAGE_HANDLE[i]);
@@ -784,9 +784,9 @@ TEST_FUNCTION(remove_all_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_027: [Each `mq_item` in `message_queue->pending` and `message_queue->in_progress` lists shall be removed] 
+// Tests_SRS_MESSAGE_QUEUE_09_027: [Each `mq_item` in `message_queue->pending` and `message_queue->in_progress` lists shall be removed]
 // Tests_SRS_MESSAGE_QUEUE_09_028: [`message_queue->on_message_processing_completed_callback` shall be invoked with MESSAGE_QUEUE_CANCELLED for each `mq_item` removed]
-// Tests_SRS_MESSAGE_QUEUE_09_029: [Each `mq_item` shall be freed] 
+// Tests_SRS_MESSAGE_QUEUE_09_029: [Each `mq_item` shall be freed]
 TEST_FUNCTION(remove_all_success)
 {
     // arrange
@@ -1458,13 +1458,13 @@ TEST_FUNCTION(on_message_processing_completed_callback_RETRYABLE_ERROR)
     set_on_message_processing_completed_callback_expected_calls(1, 0, false);
 
     // act
-    TEST_on_process_message_callback_on_process_message_completed_callback(mq, 
+    TEST_on_process_message_callback_on_process_message_completed_callback(mq,
         TEST_on_process_message_callback_message, MESSAGE_QUEUE_RETRYABLE_ERROR, NULL);
     message_queue_do_work(mq);
     TEST_on_process_message_callback_on_process_message_completed_callback(mq,
         TEST_on_process_message_callback_message, MESSAGE_QUEUE_RETRYABLE_ERROR, NULL);
     message_queue_do_work(mq);
-    TEST_on_process_message_callback_on_process_message_completed_callback(mq, 
+    TEST_on_process_message_callback_on_process_message_completed_callback(mq,
         TEST_on_process_message_callback_message, MESSAGE_QUEUE_RETRYABLE_ERROR, NULL);
 
     // assert

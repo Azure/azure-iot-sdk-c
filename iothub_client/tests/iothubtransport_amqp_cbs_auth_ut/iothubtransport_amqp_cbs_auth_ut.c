@@ -58,7 +58,7 @@ static int real_strcmp(const char* str1, const char* str2)
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
-#include "azure_c_shared_utility/agenttime.h" 
+#include "azure_c_shared_utility/agenttime.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "internal/iothub_client_authorization.h"
 #undef ENABLE_MOCKS
@@ -876,7 +876,7 @@ TEST_FUNCTION(authentication_do_work_not_started)
 {
     // arrange
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_KEYS);
-    
+
     umock_c_reset_all_calls();
     set_expected_calls_for_authentication_create(config, false);
     AUTHENTICATION_HANDLE handle = authentication_create(config);
@@ -974,11 +974,11 @@ TEST_FUNCTION(authentication_do_work_SAS_TOKEN_on_cbs_put_token_callback_success
     exp_state->current_state = AUTHENTICATION_STATE_STARTING;
 
     crank_authentication_do_work(config, handle, current_time, exp_state);
-    
+
     ASSERT_IS_NOT_NULL(saved_cbs_put_token_on_operation_complete);
 
     umock_c_reset_all_calls();
-    
+
     // act
     saved_cbs_put_token_on_operation_complete(saved_cbs_put_token_context, CBS_OPERATION_RESULT_OK, 0, "all good");
 
@@ -1007,11 +1007,11 @@ TEST_FUNCTION(authentication_do_work_SAS_TOKEN_on_cbs_put_token_callback_success
     exp_state->current_state = AUTHENTICATION_STATE_STARTING;
 
     crank_authentication_do_work(config, handle, current_time, exp_state);
-    
+
     ASSERT_IS_NOT_NULL(saved_cbs_put_token_on_operation_complete);
 
     umock_c_reset_all_calls();
-    
+
     // act
     saved_cbs_put_token_on_operation_complete(saved_cbs_put_token_context, CBS_OPERATION_RESULT_OK, 0, "all good");
 
@@ -1239,7 +1239,7 @@ TEST_FUNCTION(authentication_do_work_SAS_TOKEN_next_calls_no_op)
     ASSERT_ARE_EQUAL(int, AUTHENTICATION_STATE_STARTED, saved_on_state_changed_callback_new_state);
 
     umock_c_reset_all_calls();
-    
+
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN);
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN);
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN);
@@ -1646,7 +1646,7 @@ TEST_FUNCTION(authentication_retrieve_options_failure_checks)
 
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_SAS_TOKEN);
     AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
-    
+
     umock_c_reset_all_calls();
     EXPECTED_CALL(OptionHandler_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(TEST_OPTIONHANDLER_HANDLE);
     STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, AUTHENTICATION_OPTION_CBS_REQUEST_TIMEOUT_SECS, IGNORED_PTR_ARG))

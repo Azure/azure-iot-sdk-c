@@ -56,7 +56,7 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];
     (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
-    ASSERT_FAIL(temp_str); 
+    ASSERT_FAIL(temp_str);
 }
 
 static TEST_MUTEX_HANDLE g_testByTest;
@@ -79,8 +79,8 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
         REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_MODEL_TYPE_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_ACTION_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_ACTION_ARGUMENT_HANDLE, void*);
-    
-    
+
+
         REGISTER_GLOBAL_MOCK_RETURN(STRING_concat, 0);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat, __FAILURE__);
         REGISTER_GLOBAL_MOCK_RETURN(Schema_GetModelActionCount, SCHEMA_OK);
@@ -254,7 +254,7 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
         size_t commandCount = 1;
         size_t argCount = 0;
         SchemaSerializer_SerializeCommandMetadata_1_Command_With_No_Arguments_Yields_The_Proper_JSON_inert_path(&commandCount, &argCount);
-        
+
         umock_c_negative_tests_snapshot();
         for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
         {
@@ -604,7 +604,7 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
         // arrange
         size_t commandCount = 1;
         size_t argCount = 2;
-        
+
         SchemaSerializer_SerializeCommandMetadata_1_Command_With_2_Arguments_Yields_The_Proper_JSON_inert_path(&commandCount, &argCount);
 
         // act

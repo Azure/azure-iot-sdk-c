@@ -224,7 +224,7 @@ TEST_FUNCTION(prov_dev_security_get_type_tpm_succees)
 
     //cleanup
 }
-#endif 
+#endif
 
 #if defined(HSM_TYPE_X509) || defined(HSM_AUTH_TYPE_CUSTOM)
 TEST_FUNCTION(prov_dev_security_init_x509_success)

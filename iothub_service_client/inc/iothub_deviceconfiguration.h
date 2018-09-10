@@ -157,7 +157,7 @@ MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CONFIGURATION_RESULT, IoTHubDeviceConfiguratio
 /** @brief  Updates the given Configuration in IoT Hub.
 *
 * @param    serviceClientDeviceConfigurationHandle    The handle created by a call to the create function.
-* @param    configuration           IOTHUB_DEVICE_CONFIGURATION structure containing the new configuration info. 
+* @param    configuration           IOTHUB_DEVICE_CONFIGURATION structure containing the new configuration info.
 *
 * @return   IOTHUB_DEVICE_CONFIGURATION_RESULT upon success or an error code upon failure.
 */

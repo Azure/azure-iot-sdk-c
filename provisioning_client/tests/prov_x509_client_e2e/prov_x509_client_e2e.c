@@ -181,7 +181,7 @@ BEGIN_TEST_SUITE(prov_x509_client_e2e)
 
         free(prov_info.iothub_uri);
         free(prov_info.device_id);
-        
+
         Prov_Device_LL_Destroy(handle);
     }
 #endif
@@ -210,7 +210,7 @@ BEGIN_TEST_SUITE(prov_x509_client_e2e)
 
         free(prov_info.iothub_uri);
         free(prov_info.device_id);
-       
+
         Prov_Device_LL_Destroy(handle);
     }
 
@@ -237,7 +237,7 @@ BEGIN_TEST_SUITE(prov_x509_client_e2e)
 
         free(prov_info.iothub_uri);
         free(prov_info.device_id);
-        
+
         Prov_Device_LL_Destroy(handle);
     }
 #endif

@@ -9,7 +9,7 @@
 #include <cstddef>
 extern "C"
 {
-#else 
+#else
 #include <stddef.h>
 #endif
 

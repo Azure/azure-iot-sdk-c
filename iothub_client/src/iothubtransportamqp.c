@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include "iothubtransportamqp.h" 
+#include "iothubtransportamqp.h"
 #include "internal/iothubtransport_amqp_common.h"
 #include "azure_c_shared_utility/tlsio.h"
 #include "azure_c_shared_utility/platform.h"
@@ -171,7 +171,7 @@ static void IotHubTransportAMQP_Unsubscribe_InputQueue(IOTHUB_DEVICE_HANDLE hand
     LogError("AMQP does not support input queues");
 }
 
-static TRANSPORT_PROVIDER thisTransportProvider = 
+static TRANSPORT_PROVIDER thisTransportProvider =
 {
     IoTHubTransportAMQP_SendMessageDisposition,     /*pfIotHubTransport_Send_Message_Disposition IoTHubTransport_Send_Message_Disposition;*/
     IoTHubTransportAMQP_Subscribe_DeviceMethod,     /*pfIoTHubTransport_Subscribe_DeviceMethod IoTHubTransport_Subscribe_DeviceMethod;*/

@@ -50,7 +50,7 @@ if(WIN32)
         linkUAMQP(${theseTestsName}_dll)
         linkMqttLibrary(${theseTestsName}_dll)
     endif()
-    
+
     if(TARGET ${theseTestsName}_exe)
         target_link_libraries(${theseTestsName}_exe
             iothub_test
@@ -64,7 +64,7 @@ if(WIN32)
         linkUAMQP(${theseTestsName}_exe)
         linkMqttLibrary(${theseTestsName}_exe)
     endif()
-        
+
     if(TARGET ${theseTestsName}_nuget_exe)
         target_link_libraries(${theseTestsName}_nuget_exe
             iothub_test

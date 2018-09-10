@@ -101,7 +101,7 @@ int main(void)
 
             for (int i = 0; i < MESSAGE_COUNT; i++)
             {
-                // Create the message and send it to the device.  Send binary date with the 
+                // Create the message and send it to the device.  Send binary date with the
                 // IoTHubMessage_CreateFromByteArray(binary data, length of binary data);
                 IOTHUB_MESSAGE_HANDLE messageHandle = IoTHubMessage_CreateFromString(MESSAGE_TO_DEVICE);
                 if (messageHandle == NULL)

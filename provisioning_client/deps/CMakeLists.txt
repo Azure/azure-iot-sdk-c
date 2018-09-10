@@ -40,7 +40,7 @@ else()
             ./RIoT/Emulator/RIoT/RIoTCrypt/include/RiotX509Bldr.h
             ./RIoT/Emulator/RIoT/RIoTCrypt/include/RiotBase64.h
         )
-    
+
         include_directories(./RIoT/Emulator/DICE)
         include_directories(./RIoT/Emulator/RIoT)
         include_directories(./RIoT/Emulator/RIoT/RIoTCrypt/include)
