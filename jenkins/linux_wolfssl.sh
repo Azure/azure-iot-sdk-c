@@ -21,6 +21,6 @@ pushd $build_folder
 cmake $build_root -Drun_unittests:BOOL=ON -Duse_wolfssl:BOOL=ON
 make --jobs=$CORES
 
-ctest -j $CORES --output-on-failure
+ctest -j $CORES -VV --output-on-failure
 
 popd

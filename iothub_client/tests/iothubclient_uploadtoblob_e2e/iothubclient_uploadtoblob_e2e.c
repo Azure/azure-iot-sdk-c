@@ -221,14 +221,14 @@ void e2e_uploadtoblob_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACC
     result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_CURL_VERBOSE, &curl_verbose);
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set curl_verbose opt");
 #endif
-
+	
     UPLOADTOBLOB_CALLBACK_STATUS uploadToBlobStatus = UPLOADTOBLOB_CALLBACK_PENDING;
     result = IoTHubClient_UploadToBlobAsync(iotHubClientHandle, UPLOADTOBLOB_E2E_TEST_DESTINATION_FILE, UPLOADTOBLOB_E2E_TEST_DATA, strlen((const char*)UPLOADTOBLOB_E2E_TEST_DATA), uploadToBlobCallback, &uploadToBlobStatus);
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not IoTHubClient_UploadToBlobAsync");
 
     poll_for_upload_completion(&uploadToBlobStatus);
     check_upload_result(uploadToBlobStatus);
-
+	ThreadAPI_Sleep(3000);
     IoTHubClient_Destroy(iotHubClientHandle);
 }
 
@@ -438,14 +438,14 @@ TEST_FUNCTION(IoTHub_MQTT_WS_UploadToBlob_x509)
 #ifdef TEST_AMQP
 TEST_FUNCTION(IoTHub_AMQP_UploadToBlob_sas)
 {
-    // Currently not working
-    // e2e_uploadtoblob_test(AMQP_Protocol, IOTHUB_ACCOUNT_AUTH_CONNSTRING);
+     // Currently not working
+     e2e_uploadtoblob_test(AMQP_Protocol, IOTHUB_ACCOUNT_AUTH_CONNSTRING);
 }
 
 TEST_FUNCTION(IoTHub_AMQP_WS_UploadToBlob_sas)
 {
-    // Currently not working
-    // e2e_uploadtoblob_test(AMQP_Protocol_over_WebSocketsTls, IOTHUB_ACCOUNT_AUTH_CONNSTRING);
+     // Currently not working
+     e2e_uploadtoblob_test(AMQP_Protocol_over_WebSocketsTls, IOTHUB_ACCOUNT_AUTH_CONNSTRING);
 }
 
 #ifndef __APPLE__

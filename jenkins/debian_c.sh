@@ -26,7 +26,7 @@ make --jobs=$CORES
 
 #use doctored openssl
 export LD_LIBRARY_PATH=/usr/local/ssl/lib
-ctest -j $CORES --output-on-failure
+ctest -j $CORES -VV --output-on-failure
 export LD_LIBRARY_PATH=
 
 popd
