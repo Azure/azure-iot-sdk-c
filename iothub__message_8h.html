@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Microsoft Azure IoT Device SDK for C
-   &#160;<span id="projectnumber">1.2.8</span>
+   &#160;<span id="projectnumber">1.2.9</span>
    </div>
    <div id="projectbrief">The Microsoft Azure IoT device libraries for C contain code that facilitates building devices and applications that connect to and are managed by Azure IoT Hub services.</div>
   </td>
@@ -146,7 +146,7 @@ Functions</h2></td></tr>
 <tr class="memdesc:a5534dba8566ba4f59be53c95a6384be5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the content-encoding of the message payload, if defined.  <a href="#a5534dba8566ba4f59be53c95a6384be5">More...</a><br /></td></tr>
 <tr class="separator:a5534dba8566ba4f59be53c95a6384be5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a323de720a59d18d6884d6bfa3bde8690"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#a323de720a59d18d6884d6bfa3bde8690">MOCKABLE_FUNCTION</a> (, MAP_HANDLE, IoTHubMessage_Properties, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)</td></tr>
-<tr class="memdesc:a323de720a59d18d6884d6bfa3bde8690"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a handle to the message's properties map.  <a href="#a323de720a59d18d6884d6bfa3bde8690">More...</a><br /></td></tr>
+<tr class="memdesc:a323de720a59d18d6884d6bfa3bde8690"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a handle to the message's properties map. Note that when sending messages via the HTTP transport, the key names in the map must not contain spaces.  <a href="#a323de720a59d18d6884d6bfa3bde8690">More...</a><br /></td></tr>
 <tr class="separator:a323de720a59d18d6884d6bfa3bde8690"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adcffcec98c180295dc54a2bec363cab6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#adcffcec98c180295dc54a2bec363cab6">MOCKABLE_FUNCTION</a> (, <a class="el" href="iothub__message_8h.html#ab826e84207e0513abcf6825fa72c7a7f">IOTHUB_MESSAGE_RESULT</a>, IoTHubMessage_SetProperty, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char *, key, const char *, value)</td></tr>
 <tr class="memdesc:adcffcec98c180295dc54a2bec363cab6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets a property on a Iothub Message.  <a href="#adcffcec98c180295dc54a2bec363cab6">More...</a><br /></td></tr>
@@ -797,8 +797,8 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Gets a handle to the message's properties map. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Gets a handle to the message's properties map. Note that when sending messages via the HTTP transport, the key names in the map must not contain spaces. </p>
+<p>DEPRECATED: Use IoTHubMessage_SetProperty and IoTHubMessage_GetProperty instead. ** </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">iotHubMessageHandle</td><td>Handle to the message.</td></tr>
   </table>
@@ -874,7 +874,7 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">iotHubMessageHandle</td><td>Handle to the message.</td></tr>
-    <tr><td class="paramname">key</td><td>name of the property to set.</td></tr>
+    <tr><td class="paramname">key</td><td>name of the property to set. Note that when sending messages via the HTTP transport, this value must not contain spaces.</td></tr>
     <tr><td class="paramname">value</td><td>of the property to set.</td></tr>
   </table>
   </dd>
