@@ -57,12 +57,6 @@ static const char* g_desired_iothub = NULL;
 #define MAX_CLOUD_TRAVEL_TIME       60.0
 #define DEVICE_GUID_SIZE            37
 
-#ifdef WIN32
-const char* FOLDER_SEPARATOR = "\\";
-#else
-const char* FOLDER_SEPARATOR = "/";
-#endif
-
 TEST_DEFINE_ENUM_TYPE(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
 
 static void iothub_prov_register_device(PROV_DEVICE_RESULT register_result, const char* iothub_uri, const char* device_id, void* user_context)
@@ -105,19 +99,6 @@ static PROV_DEVICE_LL_HANDLE create_dps_handle(PROV_DEVICE_TRANSPORT_PROVIDER_FU
     result = Prov_Device_LL_Create(g_dps_uri, g_dps_scope_id, dps_transport);
     ASSERT_IS_NOT_NULL_WITH_MSG(result, "Failure create a DPS HANDLE");
     return result;
-}
-
-static char* construct_simulator_path()
-{
-    const char* path_fmt = "..\\azure-iot-device-auth\\iothub_device_auth\\deps\\utpm\\tools\\tpm_simulator\\Simulator.exe";
-    size_t path_len = strlen(path_fmt);
-    // Need to get this done
-    char* sim_path = (char*)malloc(path_len+1);
-    if (sim_path != NULL)
-    {
-        strcpy(sim_path, path_fmt);
-    }
-    return sim_path;
 }
 
 static void wait_for_dps_result(PROV_DEVICE_LL_HANDLE handle, PROV_CLIENT_E2E_INFO* prov_info)
@@ -277,14 +258,14 @@ BEGIN_TEST_SUITE(dps_client_e2e)
 
         prov_dev_security_init(SECURE_DEVICE_TYPE_TPM);
 
-        g_prov_conn_string = "HostName=dps-c-sdk-test.azure-devices-provisioning.net;SharedAccessKeyName=provisioningserviceowner;SharedAccessKey=ZPJDYmnlXGfTH0vAs2MXHwZNnbETJCSHYqHFbf8cLhM=";// getenv("DPS_C_CONNECTION_STRING");
+        g_prov_conn_string = getenv("DPS_C_CONNECTION_STRING");
         ASSERT_IS_NOT_NULL_WITH_MSG(g_prov_conn_string, "PROV_CONNECTION_STRING is NULL");
 
         // Register device
         create_tpm_enrollment_device();
         //create_x509_enrollment_device();
 
-        g_dps_scope_id = "0ne00000032";// getenv("DPS_C_SCOPE_ID_VALUE");
+        g_dps_scope_id = getenv("DPS_C_SCOPE_ID_VALUE");
         ASSERT_IS_NOT_NULL_WITH_MSG(g_dps_scope_id, "DPS_SCOPE_ID_VALUE is NULL");
     }
 
