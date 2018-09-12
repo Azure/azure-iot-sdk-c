@@ -18,6 +18,7 @@ set(AUTH_CLIENT_H_FILES
     ./inc/azure_prov_client/prov_security_factory.h
     ./inc/azure_prov_client/internal/iothub_auth_client.h
     ./inc/azure_prov_client/internal/prov_auth_client.h
+    ./inc/azure_prov_client/iothub_security_factory.h
     )
 
 set(AUTH_CLIENT_C_FILES
@@ -39,10 +40,10 @@ if (${hsm_type_custom})
 
     set(HSM_CLIENT_LIBRARY ${CUSTOM_HSM_LIB})
 else ()
-    if (${run_e2e_tests} AND (${hsm_type_x509} OR ${hsm_type_sastoken}))
+    if (${run_e2e_tests} AND (${hsm_type_x509} OR ${hsm_type_sastoken} OR ${hsm_type_symm_key}))
         # For e2e test we need to run a custom HSM to handle testing
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHSM_TYPE_X509 -DHSM_TYPE_SAS_TOKEN")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHSM_TYPE_X509 -DHSM_TYPE_SAS_TOKEN")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHSM_TYPE_X509 -DHSM_TYPE_SAS_TOKEN -DHSM_TYPE_SYMM_KEY")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHSM_TYPE_X509 -DHSM_TYPE_SAS_TOKEN -DHSM_TYPE_SYMM_KEY")
 
         include_directories(${TPM_C_INC_FOLDER})
 
@@ -99,6 +100,16 @@ else ()
                 set(HSM_CLIENT_LIBRARY ${HSM_CLIENT_LIBRARY} Tbs)
             endif ()
         endif ()
+
+        if (${hsm_type_symm_key})
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHSM_TYPE_SYMM_KEY")
+            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHSM_TYPE_SYMM_KEY")
+
+            set(HSM_CLIENT_H_FILES ${HSM_CLIENT_H_FILES} 
+                ./adapters/hsm_client_key.h)
+            set(HSM_CLIENT_C_FILES ${HSM_CLIENT_C_FILES} 
+                ./adapters/hsm_client_key.c)
+        endif()
     endif ()
 endif ()
 

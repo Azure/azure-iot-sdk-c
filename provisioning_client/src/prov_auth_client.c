@@ -12,6 +12,7 @@
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/sastoken.h"
+#include "azure_c_shared_utility/hmacsha256.h"
 
 #include "azure_prov_client/internal/prov_auth_client.h"
 #include "hsm_client_data.h"
@@ -37,6 +38,8 @@ typedef struct PROV_AUTH_INFO_TAG
     HSM_CLIENT_GET_CERTIFICATE hsm_client_get_cert;
     HSM_CLIENT_GET_ALIAS_KEY hsm_client_get_alias_key;
     HSM_CLIENT_GET_COMMON_NAME hsm_client_get_common_name;
+
+    HSM_CLIENT_GET_SYMMETRICAL_KEY hsm_client_get_symm_key;
 } PROV_AUTH_INFO;
 
 static char* encode_value(const uint8_t* msg_digest, size_t digest_len)
@@ -138,6 +141,76 @@ static int load_registration_id(PROV_AUTH_INFO* handle)
     return result;
 }
 
+static int sign_sas_data(PROV_AUTH_INFO* auth_info, const char* payload, unsigned char** output, size_t* len)
+{
+    int result;
+    size_t payload_len = strlen(payload);
+    if (auth_info->sec_type == SECURE_DEVICE_TYPE_TPM)
+    {
+        if (auth_info->hsm_client_sign_data(auth_info->hsm_client_handle, (const unsigned char*)payload, strlen(payload), output, len) != 0)
+        {
+            LogError("Failed signing data");
+            result = __FAILURE__;
+        }
+        else
+        {
+            result = 0;
+        }
+    }
+    else
+    {
+        char* symmetrical_key = auth_info->hsm_client_get_symm_key(auth_info->hsm_client_handle);
+        if (symmetrical_key == NULL)
+        {
+            LogError("Failed getting asymmetrical key");
+            result = __FAILURE__;
+        }
+        else
+        {
+            BUFFER_HANDLE decoded_key;
+            BUFFER_HANDLE output_hash;
+
+            if ((decoded_key = Base64_Decoder(symmetrical_key)) == NULL)
+            {
+                LogError("Failed decoding symmetrical key");
+                result = __FAILURE__;
+            }
+            else if ((output_hash = BUFFER_new()) == NULL)
+            {
+                LogError("Failed allocating output hash buffer");
+                BUFFER_delete(decoded_key);
+                result = __FAILURE__;
+            }
+            else if (HMACSHA256_ComputeHash(BUFFER_u_char(decoded_key), BUFFER_length(decoded_key), (const unsigned char*)payload, payload_len, output_hash) != HMACSHA256_OK)
+            {
+                LogError("Failed computing HMAC Hash");
+                BUFFER_delete(decoded_key);
+                BUFFER_delete(output_hash);
+                result = __FAILURE__;
+            }
+            else
+            {
+                *len = BUFFER_length(output_hash);
+                if ( (*output = malloc(*len)) == NULL)
+                {
+                    LogError("Failed allocating output buffer");
+                    result = __FAILURE__;
+                }
+                else
+                {
+                    const unsigned char* output_data = BUFFER_u_char(output_hash);
+                    memcpy(*output, output_data, *len);
+                    result = 0;
+                }
+                BUFFER_delete(decoded_key);
+                BUFFER_delete(output_hash);
+            }
+            free(symmetrical_key);
+        }
+    }
+    return result;
+}
+
 PROV_AUTH_HANDLE prov_auth_create()
 {
     PROV_AUTH_INFO* result;
@@ -149,13 +222,14 @@ PROV_AUTH_HANDLE prov_auth_create()
     else
     {
         memset(result, 0, sizeof(PROV_AUTH_INFO) );
-        if (prov_dev_security_get_type() == SECURE_DEVICE_TYPE_TPM)
+        SECURE_DEVICE_TYPE sec_type = prov_dev_security_get_type();
+        if (sec_type == SECURE_DEVICE_TYPE_TPM)
         {
             /* Codes_SRS_PROV_AUTH_CLIENT_07_003: [ prov_auth_create shall validate the specified secure enclave interface to ensure. ] */
             result->sec_type = PROV_AUTH_TYPE_TPM;
             const HSM_CLIENT_TPM_INTERFACE* tpm_interface = hsm_client_tpm_interface();
             if ((tpm_interface == NULL) ||
-                ( (result->hsm_client_create = tpm_interface->hsm_client_tpm_create) == NULL) ||
+                ((result->hsm_client_create = tpm_interface->hsm_client_tpm_create) == NULL) ||
                 ((result->hsm_client_destroy = tpm_interface->hsm_client_tpm_destroy) == NULL) ||
                 ((result->hsm_client_import_key = tpm_interface->hsm_client_activate_identity_key) == NULL) ||
                 ((result->hsm_client_get_endorsement_key = tpm_interface->hsm_client_get_ek) == NULL) ||
@@ -169,17 +243,33 @@ PROV_AUTH_HANDLE prov_auth_create()
                 result = NULL;
             }
         }
-        else
+        else if (sec_type == SECURE_DEVICE_TYPE_X509)
         {
             /* Codes_SRS_PROV_AUTH_CLIENT_07_003: [ prov_auth_create shall validate the specified secure enclave interface to ensure. ] */
             result->sec_type = PROV_AUTH_TYPE_X509;
             const HSM_CLIENT_X509_INTERFACE* x509_interface = hsm_client_x509_interface();
             if ((x509_interface == NULL) ||
-                ( (result->hsm_client_create = x509_interface->hsm_client_x509_create) == NULL) ||
+                ((result->hsm_client_create = x509_interface->hsm_client_x509_create) == NULL) ||
                 ((result->hsm_client_destroy = x509_interface->hsm_client_x509_destroy) == NULL) ||
                 ((result->hsm_client_get_cert = x509_interface->hsm_client_get_cert) == NULL) ||
                 ((result->hsm_client_get_common_name = x509_interface->hsm_client_get_common_name) == NULL) ||
                 ((result->hsm_client_get_alias_key = x509_interface->hsm_client_get_key) == NULL)
+                )
+            {
+                LogError("Invalid x509 secure device interface was specified");
+                free(result);
+                result = NULL;
+            }
+        }
+        else
+        {
+            result->sec_type = PROV_AUTH_TYPE_KEY;
+            const HSM_CLIENT_KEY_INTERFACE* key_interface = hsm_client_key_interface();
+            if ((key_interface == NULL) ||
+                ((result->hsm_client_create = key_interface->hsm_client_key_create) == NULL) ||
+                ((result->hsm_client_destroy = key_interface->hsm_client_key_destroy) == NULL) ||
+                ((result->hsm_client_get_common_name = key_interface->hsm_client_get_registration_name) == NULL) ||
+                ((result->hsm_client_get_symm_key = key_interface->hsm_client_get_symm_key) == NULL)
                 )
             {
                 LogError("Invalid x509 secure device interface was specified");
@@ -425,7 +515,7 @@ char* prov_auth_construct_sas_token(PROV_AUTH_HANDLE handle, const char* token_s
         LogError("Invalid handle parameter handle: %p, token_scope: %p, key_name: %p", handle, token_scope, key_name);
         result = NULL;
     }
-    else if (handle->sec_type != PROV_AUTH_TYPE_TPM)
+    else if (handle->sec_type == PROV_AUTH_TYPE_X509)
     {
         LogError("Invalid type for operation");
         result = NULL;
@@ -451,7 +541,7 @@ char* prov_auth_construct_sas_token(PROV_AUTH_HANDLE handle, const char* token_s
             (void)sprintf(payload, "%s\n%s", token_scope, expire_token);
 
             /* Codes_SRS_SECURE_ENCLAVE_CLIENT_07_031: [ prov_auth_get_certificate shall import the specified cert into the client using hsm_client_get_cert secure enclave function. ] */
-            if (handle->hsm_client_sign_data(handle->hsm_client_handle, (const unsigned char*)payload, strlen(payload), &data_value, &data_len) == 0)
+            if (sign_sas_data(handle, payload, &data_value, &data_len) == 0)
             {
                 STRING_HANDLE urlEncodedSignature;
                 STRING_HANDLE base64Signature;

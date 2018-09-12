@@ -35,12 +35,16 @@ static const char* const JSON_NODE_ASSIGNED_HUB = "assignedHub";
 static const char* const JSON_NODE_TPM_NODE = "tpm";
 static const char* const JSON_NODE_DATE_TIME = "lastUpdatedDateTimeUtc";
 static const char* const JSON_NODE_ERROR_MSG = "errorMessage";
+static const char* const JSON_NODE_ERROR_CODE = "errorCode";
 static const char* const PROV_FAILED_STATUS = "failed";
 static const char* const PROV_BLACKLISTED_STATUS = "blacklisted";
 
 static const char* const SAS_TOKEN_SCOPE_FMT = "%s/registrations/%s";
 
-#define SAS_TOKEN_DEFAULT_LIFETIME  3600
+#define DPS_HUB_ERROR_NO_HUB        400208
+#define DPS_HUB_ERROR_UNAUTH        400209
+
+#define SAS_TOKEN_DEFAULT_LIFETIME  2400
 #define EPOCH_TIME_T_VALUE          (time_t)0
 #define MAX_AUTH_ATTEMPTS           3
 #define PROV_GET_THROTTLE_TIME      3
@@ -84,6 +88,8 @@ typedef struct PROV_INSTANCE_INFO_TAG
     tickcounter_ms_t status_throttle;
     tickcounter_ms_t timeout_value;
 
+    uint8_t prov_timeout;
+
     char* registration_id;
     bool user_supplied_reg_id;
 
@@ -105,58 +111,69 @@ typedef struct PROV_INSTANCE_INFO_TAG
 static char* prov_transport_challenge_callback(const unsigned char* nonce, size_t nonce_len, const char* key_name, void* user_ctx)
 {
     char* result;
-    if (user_ctx == NULL || nonce == NULL)
+    if (user_ctx == NULL)
     {
-        LogError("Bad argument user_ctx: %p, nonce: %p", nonce, nonce_len);
+        LogError("Bad argument user_ctx is NULL");
         result = NULL;
     }
     else
     {
         PROV_INSTANCE_INFO* prov_info = (PROV_INSTANCE_INFO*)user_ctx;
-        char* token_scope;
-        size_t token_scope_len;
-
-        size_t sec_since_epoch = (size_t)(difftime(get_time(NULL), EPOCH_TIME_T_VALUE) + 0);
-        size_t expiry_time = sec_since_epoch + SAS_TOKEN_DEFAULT_LIFETIME;
-
-        // Construct Token scope
-        token_scope_len = strlen(SAS_TOKEN_SCOPE_FMT) + strlen(prov_info->scope_id) + strlen(prov_info->registration_id);
-
-        token_scope = malloc(token_scope_len + 1);
-        if (token_scope == NULL)
+        if ((prov_info->hsm_type == PROV_AUTH_TYPE_TPM) && nonce == NULL)
         {
-            LogError("Failure to allocate token scope");
-            result = NULL;
-        }
-        else if (sprintf(token_scope, SAS_TOKEN_SCOPE_FMT, prov_info->scope_id, prov_info->registration_id) <= 0)
-        {
-            LogError("Failure to constructing token_scope");
-            free(token_scope);
+            LogError("Bad argument nonce is NULL");
             result = NULL;
         }
         else
         {
-            STRING_HANDLE encoded_token = URL_EncodeString(token_scope);
-            if (encoded_token == NULL)
+            char* token_scope;
+            size_t token_scope_len;
+
+            size_t sec_since_epoch = (size_t)(difftime(get_time(NULL), EPOCH_TIME_T_VALUE) + 0);
+            size_t expiry_time = sec_since_epoch + SAS_TOKEN_DEFAULT_LIFETIME;
+
+            // Construct Token scope
+            token_scope_len = strlen(SAS_TOKEN_SCOPE_FMT) + strlen(prov_info->scope_id) + strlen(prov_info->registration_id);
+
+            token_scope = malloc(token_scope_len + 1);
+            if (token_scope == NULL)
             {
-                LogError("Failure to url encoding string");
+                LogError("Failure to allocate token scope");
+                result = NULL;
+            }
+            else if (sprintf(token_scope, SAS_TOKEN_SCOPE_FMT, prov_info->scope_id, prov_info->registration_id) <= 0)
+            {
+                LogError("Failure to constructing token_scope");
+                free(token_scope);
                 result = NULL;
             }
             else
             {
-                if (prov_auth_import_key(prov_info->prov_auth_handle, nonce, nonce_len) != 0)
+                STRING_HANDLE encoded_token = URL_EncodeString(token_scope);
+                if (encoded_token == NULL)
                 {
-                    LogError("Failure to import the provisioning key");
+                    LogError("Failure to url encoding string");
                     result = NULL;
                 }
-                else if ((result = prov_auth_construct_sas_token(prov_info->prov_auth_handle, STRING_c_str(encoded_token), key_name, expiry_time)) == NULL)
+                else
                 {
-                    LogError("Failure to import the provisioning key");
-                    result = NULL;
+                    if (prov_info->hsm_type == PROV_AUTH_TYPE_TPM && (prov_auth_import_key(prov_info->prov_auth_handle, nonce, nonce_len) != 0))
+                    {
+                        LogError("Failure to import the provisioning key");
+                        result = NULL;
+                    }
+                    else
+                    {
+                        if ((result = prov_auth_construct_sas_token(prov_info->prov_auth_handle, STRING_c_str(encoded_token), key_name, expiry_time)) == NULL)
+                        {
+                            LogError("Failure to import the provisioning key");
+                            result = NULL;
+                        }
+                    }
+                    STRING_delete(encoded_token);
                 }
-                STRING_delete(encoded_token);
+                free(token_scope);
             }
-            free(token_scope);
         }
     }
     return result;
@@ -171,6 +188,9 @@ static void on_transport_error(PROV_DEVICE_TRANSPORT_ERROR transport_error, void
         {
             case PROV_DEVICE_ERROR_KEY_FAIL:
                 prov_info->error_reason = PROV_DEVICE_RESULT_KEY_ERROR;
+                break;
+            case PROV_DEVICE_ERROR_KEY_UNAUTHORIZED:
+                prov_info->error_reason = PROV_DEVICE_RESULT_DEV_AUTH_ERROR;
                 break;
 
             case PROV_DEVICE_ERROR_MEMORY:
@@ -203,9 +223,29 @@ static PROV_DEVICE_TRANSPORT_STATUS retrieve_status_type(const char* prov_status
     {
         result = PROV_DEVICE_TRANSPORT_STATUS_BLACKLISTED;
     }
+    else if (strcmp(prov_status, PROV_DISABLE_STATUS) == 0)
+    {
+        result = PROV_DEVICE_TRANSPORT_STATUS_DISABLED;
+    }
     else
     {
         result = PROV_DEVICE_TRANSPORT_STATUS_ERROR;
+    }
+    return result;
+}
+
+static int retrieve_json_number(JSON_Object* json_object, const char* field_name)
+{
+    int result;
+    JSON_Value* json_field;
+    if ((json_field = json_object_get_value(json_object, field_name)) == NULL)
+    {
+        LogError("failure retrieving json operation id");
+        result = 0;
+    }
+    else
+    {
+        result = (int)json_value_get_number(json_field);
     }
     return result;
 }
@@ -392,12 +432,25 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
 
             case PROV_DEVICE_TRANSPORT_STATUS_ERROR:
             {
-#ifndef NO_LOGGING
                 char* json_operation_id = NULL;
                 JSON_Object* json_reg_state = NULL;
                 if ((json_reg_state = json_object_get_object(json_object, JSON_NODE_REG_STATUS)) != NULL &&
                     (json_operation_id = retrieve_json_item(json_object, JSON_NODE_OPERATION_ID)) != NULL)
                 {
+                    int error_code = retrieve_json_number(json_reg_state, JSON_NODE_ERROR_CODE);
+                    switch (error_code)
+                    {
+                        case DPS_HUB_ERROR_NO_HUB:
+                            prov_info->error_reason = PROV_DEVICE_RESULT_HUB_NOT_SPECIFIED;
+                            break;
+                        case DPS_HUB_ERROR_UNAUTH:
+                            prov_info->error_reason = PROV_DEVICE_RESULT_UNAUTHORIZED;
+                            break;
+                        default:
+                            prov_info->error_reason = PROV_DEVICE_RESULT_DEV_AUTH_ERROR;
+                            break;
+                    }
+#ifndef NO_LOGGING
                     JSON_Value* json_error_date_time = NULL;
                     JSON_Value* json_error_msg = NULL;
                     if ((json_error_msg = json_object_get_value(json_reg_state, JSON_NODE_ERROR_MSG)) != NULL &&
@@ -410,17 +463,24 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
                         LogError("Unsuccessful json encountered: %s", json_document);
                     }
                     free(json_operation_id);
+#endif
                 }
                 else
                 {
+                    prov_info->error_reason = PROV_DEVICE_RESULT_DEV_AUTH_ERROR;
                     LogError("Unsuccessful json encountered: %s", json_document);
                 }
-#endif
-                prov_info->error_reason = PROV_DEVICE_RESULT_DEV_AUTH_ERROR;
                 free(result);
                 result = NULL;
                 break;
             }
+
+            case PROV_DEVICE_TRANSPORT_STATUS_DISABLED:
+                LogError("The device has been disabled by DPS service");
+                prov_info->error_reason = PROV_DEVICE_RESULT_DISABLED;
+                free(result);
+                result = NULL;
+                break;
 
             default:
                 LogError("invalid json status specified %d", result->prov_status);
@@ -628,6 +688,10 @@ PROV_DEVICE_LL_HANDLE Prov_Device_LL_Create(const char* uri, const char* id_scop
                 {
                     hsm_type = TRANSPORT_HSM_TYPE_TPM;
                 }
+                else if (result->hsm_type == PROV_AUTH_TYPE_KEY)
+                {
+                    hsm_type = TRANSPORT_HSM_TYPE_SYMM_KEY;
+                }
                 else
                 {
                     hsm_type = TRANSPORT_HSM_TYPE_X509;
@@ -724,7 +788,7 @@ PROV_DEVICE_RESULT Prov_Device_LL_Register_Device(PROV_DEVICE_LL_HANDLE handle, 
                     result = PROV_DEVICE_RESULT_OK;
                 }
             }
-            else
+            else if (handle->hsm_type == PROV_AUTH_TYPE_X509)
             {
                 char* x509_cert;
                 char* x509_private_key;
@@ -769,6 +833,10 @@ PROV_DEVICE_RESULT Prov_Device_LL_Register_Device(PROV_DEVICE_LL_HANDLE handle, 
                     free(x509_private_key);
                 }
             }
+            else
+            {
+                result = PROV_DEVICE_RESULT_OK;
+            }
         }
         if (result == PROV_DEVICE_RESULT_OK)
         {
@@ -779,7 +847,7 @@ PROV_DEVICE_RESULT Prov_Device_LL_Register_Device(PROV_DEVICE_LL_HANDLE handle, 
             handle->register_status_cb = reg_status_cb;
             handle->status_user_ctx = status_ctx;
 
-            if (handle->prov_transport_protocol->prov_transport_open(handle->transport_handle, handle->registration_id, ek_value, srk_value, on_transport_registration_data, handle, on_transport_status, handle) != 0)
+            if (handle->prov_transport_protocol->prov_transport_open(handle->transport_handle, handle->registration_id, ek_value, srk_value, on_transport_registration_data, handle, on_transport_status, handle, prov_transport_challenge_callback, handle) != 0)
             {
                 LogError("Failure establishing  connection");
                 if (!handle->user_supplied_reg_id)
@@ -822,7 +890,7 @@ void Prov_Device_LL_DoWork(PROV_DEVICE_LL_HANDLE handle)
             {
                 case CLIENT_STATE_REGISTER_SEND:
                     /* Codes_SRS_PROV_CLIENT_07_013: [ CLIENT_STATE_REGISTER_SEND which shall construct an initial call to the service with endorsement information ] */
-                    if (prov_info->prov_transport_protocol->prov_transport_register(prov_info->transport_handle, prov_transport_challenge_callback, prov_info, prov_transport_process_json_reply, prov_info) != 0)
+                    if (prov_info->prov_transport_protocol->prov_transport_register(prov_info->transport_handle, prov_transport_process_json_reply, prov_info) != 0)
                     {
                         LogError("Failure registering device");
                         if (prov_info->error_reason == PROV_DEVICE_RESULT_OK)
@@ -877,13 +945,16 @@ void Prov_Device_LL_DoWork(PROV_DEVICE_LL_HANDLE handle)
                 case CLIENT_STATE_REGISTER_SENT:
                 case CLIENT_STATE_STATUS_SENT:
                 {
-                    tickcounter_ms_t current_time = 0;
-                    (void)tickcounter_get_current_ms(prov_info->tick_counter, &current_time);
-                    if ((current_time - prov_info->timeout_value) / 1000 > PROV_DEFAULT_TIMEOUT)
+                    if (prov_info->prov_timeout > 0)
                     {
-                        LogError("Timeout waiting for reply");
-                        prov_info->error_reason = PROV_DEVICE_RESULT_TIMEOUT;
-                        prov_info->prov_state = CLIENT_STATE_ERROR;
+                        tickcounter_ms_t current_time = 0;
+                        (void)tickcounter_get_current_ms(prov_info->tick_counter, &current_time);
+                        if ((current_time - prov_info->timeout_value) / 1000 > prov_info->prov_timeout)
+                        {
+                            LogError("Timeout waiting for reply");
+                            prov_info->error_reason = PROV_DEVICE_RESULT_TIMEOUT;
+                            prov_info->prov_state = CLIENT_STATE_ERROR;
+                        }
                     }
                     break;
                 }
@@ -901,14 +972,17 @@ void Prov_Device_LL_DoWork(PROV_DEVICE_LL_HANDLE handle)
         }
         else
         {
-            // Check the connection
-            tickcounter_ms_t current_time = 0;
-            (void)tickcounter_get_current_ms(prov_info->tick_counter, &current_time);
-            if ((current_time - prov_info->timeout_value) / 1000 > PROV_DEFAULT_TIMEOUT)
+            // Check the connection 
+            if (prov_info->prov_timeout > 0)
             {
-                LogError("Timed out connecting to provisioning service");
-                prov_info->error_reason = PROV_DEVICE_RESULT_TIMEOUT;
-                prov_info->prov_state = CLIENT_STATE_ERROR;
+                tickcounter_ms_t current_time = 0;
+                (void)tickcounter_get_current_ms(prov_info->tick_counter, &current_time);
+                if ((current_time - prov_info->timeout_value) / 1000 > prov_info->prov_timeout)
+                {
+                    LogError("Timed out connecting to provisioning service");
+                    prov_info->error_reason = PROV_DEVICE_RESULT_TIMEOUT;
+                    prov_info->prov_state = CLIENT_STATE_ERROR;
+                }
             }
         }
     }
@@ -965,6 +1039,19 @@ PROV_DEVICE_RESULT Prov_Device_LL_SetOption(PROV_DEVICE_LL_HANDLE handle, const 
                 result = PROV_DEVICE_RESULT_OK;
             }
         }
+        else if (strcmp(PROV_OPTION_TIMEOUT, option_name) == 0)
+        {
+            if (value == NULL)
+            {
+                LogError("setting proxy options");
+                result = PROV_DEVICE_RESULT_ERROR;
+            }
+            else
+            {
+                handle->prov_timeout = *((uint8_t*)value);
+                result = PROV_DEVICE_RESULT_OK;
+            }
+        }
         else if (strcmp(PROV_REGISTRATION_ID, option_name) == 0)
         {
             if (handle->prov_state != CLIENT_STATE_READY)
@@ -979,24 +1066,25 @@ PROV_DEVICE_RESULT Prov_Device_LL_SetOption(PROV_DEVICE_LL_HANDLE handle, const 
             }
             else
             {
-                if (handle->registration_id != NULL)
-                {
-                    free(handle->registration_id);
-                }
-
-                if (mallocAndStrcpy_s(&handle->registration_id, (const char*)value) != 0)
+                char* temp_reg;
+                if (mallocAndStrcpy_s(&temp_reg, (const char*)value) != 0)
                 {
                     LogError("Failure allocating setting registration id");
                     result = PROV_DEVICE_RESULT_ERROR;
                 }
-                else if (prov_auth_set_registration_id(handle->prov_auth_handle, handle->registration_id) != 0)
+                else if (prov_auth_set_registration_id(handle->prov_auth_handle, temp_reg) != 0)
                 {
                     LogError("Failure setting registration id");
-                    free(handle->registration_id);
+                    free(temp_reg);
                     result = PROV_DEVICE_RESULT_ERROR;
                 }
                 else
                 {
+                    if (handle->registration_id != NULL)
+                    {
+                        free(handle->registration_id);
+                    }
+                    handle->registration_id = temp_reg;
                     handle->user_supplied_reg_id = true;
                     result = PROV_DEVICE_RESULT_OK;
                 }

@@ -178,7 +178,8 @@ IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_CreateFromDeviceAuth(const char* d
             }
             else
             {
-                if (iothub_device_auth_get_type(result->device_auth_handle) == AUTH_TYPE_SAS)
+                DEVICE_AUTH_TYPE auth_type = iothub_device_auth_get_type(result->device_auth_handle);
+                if (auth_type == AUTH_TYPE_SAS || auth_type == AUTH_TYPE_SYMM_KEY)
                 {
                     result->cred_type = IOTHUB_CREDENTIAL_TYPE_DEVICE_AUTH;
                 }

@@ -55,9 +55,9 @@ MOCKABLE_FUNCTION(, char*, on_prov_transport_challenge_cb, const unsigned char*,
 
 MOCKABLE_FUNCTION(, PROV_DEVICE_TRANSPORT_HANDLE, prov_transport_create, const char*, uri, TRANSPORT_HSM_TYPE, type, const char*, scope_id, const char*, prov_api_version, PROV_TRANSPORT_ERROR_CALLBACK, error_cb, void*, error_ctx);
 MOCKABLE_FUNCTION(, void, prov_transport_destroy, PROV_DEVICE_TRANSPORT_HANDLE, handle);
-MOCKABLE_FUNCTION(, int, prov_transport_open, PROV_DEVICE_TRANSPORT_HANDLE, handle, const char*, registration_id, BUFFER_HANDLE, ek, BUFFER_HANDLE, srk, PROV_DEVICE_TRANSPORT_REGISTER_CALLBACK, data_callback, void*, user_ctx, PROV_DEVICE_TRANSPORT_STATUS_CALLBACK, status_cb, void*, status_ctx);
+MOCKABLE_FUNCTION(, int, prov_transport_open, PROV_DEVICE_TRANSPORT_HANDLE, handle, const char*, registration_id, BUFFER_HANDLE, ek, BUFFER_HANDLE, srk, PROV_DEVICE_TRANSPORT_REGISTER_CALLBACK, data_callback, void*, user_ctx, PROV_DEVICE_TRANSPORT_STATUS_CALLBACK, status_cb, void*, status_ctx, PROV_TRANSPORT_CHALLENGE_CALLBACK, reg_challenge_cb, void*, challenge_ctx);
 MOCKABLE_FUNCTION(, int, prov_transport_close, PROV_DEVICE_TRANSPORT_HANDLE, handle);
-MOCKABLE_FUNCTION(, int, prov_transport_register_device, PROV_DEVICE_TRANSPORT_HANDLE, handle, PROV_TRANSPORT_CHALLENGE_CALLBACK, reg_challenge_cb, void*, user_ctx, PROV_TRANSPORT_JSON_PARSE, json_parse_cb, void*, json_ctx);
+MOCKABLE_FUNCTION(, int, prov_transport_register_device, PROV_DEVICE_TRANSPORT_HANDLE, handle, PROV_TRANSPORT_JSON_PARSE, json_parse_cb, void*, json_ctx);
 MOCKABLE_FUNCTION(, int, prov_transport_get_operation_status, PROV_DEVICE_TRANSPORT_HANDLE, handle);
 MOCKABLE_FUNCTION(, void, prov_transport_dowork, PROV_DEVICE_TRANSPORT_HANDLE, handle);
 MOCKABLE_FUNCTION(, int, prov_transport_set_trace, PROV_DEVICE_TRANSPORT_HANDLE, handle, bool, trace_on);
@@ -75,7 +75,7 @@ MOCKABLE_FUNCTION(, const char*, json_value_get_string, const JSON_Value*, value
 MOCKABLE_FUNCTION(, JSON_Object*, json_object_get_object, const JSON_Object*, object, const char*, name);
 MOCKABLE_FUNCTION(, void, json_value_free, JSON_Value*, value);
 MOCKABLE_FUNCTION(, void, on_transport_error, PROV_DEVICE_TRANSPORT_ERROR, transport_error, void*, user_context);
-
+MOCKABLE_FUNCTION(, double, json_value_get_number, const JSON_Value*, value);
 #undef ENABLE_MOCKS
 
 static TEST_MUTEX_HANDLE g_testByTest;
@@ -144,6 +144,7 @@ static char* TEST_STRING_VALUE = "Test_String_Value";
 static const char* PROV_ASSIGNED_STATUS = "assigned";
 static const char* PROV_ASSIGNING_STATUS = "assigning";
 static const char* PROV_UNASSIGNED_STATUS = "unassigned";
+static const char* PROV_DISABLED_STATUS = "disabled";
 static const char* PROV_FAILURE_STATUS = "failure";
 
 static int TEST_STATUS_CODE_OK = 200;
@@ -154,6 +155,9 @@ static int TEST_ERROR_STATUS_CODE = 500;
 #define TEST_JSON_OBJECT_VALUE (JSON_Object*)0x11111113
 #define TEST_JSON_STATUS_VALUE (JSON_Value*)0x11111114
 #define TEST_BUFFER_HANDLE_VALUE (BUFFER_HANDLE)0x11111115
+
+#define TEST_DPS_HUB_ERROR_NO_HUB        400208
+#define TEST_DPS_HUB_ERROR_UNAUTH        400209
 
 static unsigned char TEST_ENDORSMENT_KEY[] = { 'k', 'e', 'y' };
 
@@ -244,7 +248,7 @@ static void my_prov_transport_destroy(PROV_DEVICE_TRANSPORT_HANDLE handle)
     my_gballoc_free(handle);
 }
 
-static int my_prov_transport_open(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* registration_id, BUFFER_HANDLE ek, BUFFER_HANDLE srk, PROV_DEVICE_TRANSPORT_REGISTER_CALLBACK data_callback, void* user_ctx, PROV_DEVICE_TRANSPORT_STATUS_CALLBACK status_cb, void* status_ctx)
+static int my_prov_transport_open(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* registration_id, BUFFER_HANDLE ek, BUFFER_HANDLE srk, PROV_DEVICE_TRANSPORT_REGISTER_CALLBACK data_callback, void* user_ctx, PROV_DEVICE_TRANSPORT_STATUS_CALLBACK status_cb, void* status_ctx, PROV_TRANSPORT_CHALLENGE_CALLBACK reg_challenge_cb, void* challenge_ctx)
 {
     (void)handle;
     (void)ek;
@@ -254,14 +258,14 @@ static int my_prov_transport_open(PROV_DEVICE_TRANSPORT_HANDLE handle, const cha
     g_registration_ctx = user_ctx;
     g_status_callback = status_cb;
     g_status_ctx = status_ctx;
+    g_challenge_callback = reg_challenge_cb;
+    g_challenge_ctx = challenge_ctx;
     return 0;
 }
 
-static int my_prov_transport_register_device(PROV_DEVICE_TRANSPORT_HANDLE handle, PROV_TRANSPORT_CHALLENGE_CALLBACK reg_challenge_cb, void* user_ctx, PROV_TRANSPORT_JSON_PARSE json_parse_cb, void* json_ctx)
+static int my_prov_transport_register_device(PROV_DEVICE_TRANSPORT_HANDLE handle, PROV_TRANSPORT_JSON_PARSE json_parse_cb, void* json_ctx)
 {
     (void)handle;
-    g_challenge_callback = reg_challenge_cb;
-    g_challenge_ctx = user_ctx;
     g_json_parse_cb = json_parse_cb;
     g_json_ctx = json_ctx;
     return 0;
@@ -574,7 +578,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
             STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
         }
-        STRICT_EXPECTED_CALL(prov_transport_open(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(prov_transport_open(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
     }
@@ -601,7 +605,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
     static void setup_Prov_Device_LL_DoWork_register_send_mocks()
     {
         STRICT_EXPECTED_CALL(prov_transport_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(prov_transport_register_device(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(prov_transport_register_device(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     }
 
@@ -645,7 +649,18 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG));
     }
 
-    static void setup_parse_json_error_mocks(void)
+    static void setup_parse_json_disabled_mocks(void)
+    {
+        STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_PTR_ARG)).SetReturn(PROV_DISABLED_STATUS);
+        setup_retrieve_json_item_mocks(TEST_STRING_VALUE);
+        STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG));
+    }
+
+    static void setup_parse_json_error_mocks(double return_err_num)
     {
         STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
@@ -656,6 +671,10 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         setup_retrieve_json_item_mocks(TEST_STRING_VALUE);
         STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+        STRICT_EXPECTED_CALL(json_value_get_number(IGNORED_PTR_ARG)).SetReturn(return_err_num);
+        STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
         STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
         STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_PTR_ARG));
@@ -1116,7 +1135,30 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         Prov_Device_LL_DoWork(handle);
         umock_c_reset_all_calls();
 
-        setup_parse_json_error_mocks();
+        setup_parse_json_error_mocks(0);
+
+        //act
+        result = g_json_parse_cb(TEST_JSON_REPLY, g_json_ctx);
+
+        //assert
+        ASSERT_IS_NULL(result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        Prov_Device_LL_Destroy(handle);
+    }
+
+    TEST_FUNCTION(Prov_Device_LL_parse_json_no_hub_succeed)
+    {
+        PROV_JSON_INFO* result;
+        //arrange
+        PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
+        (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, g_status_ctx);
+        Prov_Device_LL_DoWork(handle);
+        umock_c_reset_all_calls();
+
+        setup_parse_json_error_mocks(TEST_DPS_HUB_ERROR_NO_HUB);
 
         //act
         result = g_json_parse_cb(TEST_JSON_REPLY, g_json_ctx);
@@ -1259,7 +1301,6 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(prov_transport_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
         //act
         Prov_Device_LL_DoWork(handle);
@@ -1795,7 +1836,100 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         STRICT_EXPECTED_CALL(prov_auth_set_registration_id(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
         //act
-        PROV_DEVICE_RESULT prov_result = Prov_Device_LL_SetOption(handle, "registration_id", TEST_REGISTRATION_ID);
+        PROV_DEVICE_RESULT prov_result = Prov_Device_LL_SetOption(handle, PROV_REGISTRATION_ID, TEST_REGISTRATION_ID);
+
+        //assert
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        Prov_Device_LL_Destroy(handle);
+    }
+
+    TEST_FUNCTION(Prov_Device_LL_SetOption_Registration_id_set_reg_id_fail)
+    {
+        //arrange
+        PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(prov_auth_set_registration_id(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(__LINE__);
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+
+        //act
+        PROV_DEVICE_RESULT prov_result = Prov_Device_LL_SetOption(handle, PROV_REGISTRATION_ID, TEST_REGISTRATION_ID);
+
+        //assert
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_ERROR, prov_result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        Prov_Device_LL_Destroy(handle);
+    }
+
+    TEST_FUNCTION(Prov_Device_LL_SetOption_Registration_id_reg_id_NULL_fail)
+    {
+        //arrange
+        PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
+        umock_c_reset_all_calls();
+
+        //act
+        PROV_DEVICE_RESULT prov_result = Prov_Device_LL_SetOption(handle, PROV_REGISTRATION_ID, NULL);
+
+        //assert
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_ERROR, prov_result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        Prov_Device_LL_Destroy(handle);
+    }
+
+    TEST_FUNCTION(Prov_Device_LL_SetOption_Registration_id_after_register_fail)
+    {
+        //arrange
+        PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
+        (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, g_status_ctx);
+        umock_c_reset_all_calls();
+
+        //act
+        PROV_DEVICE_RESULT prov_result = Prov_Device_LL_SetOption(handle, PROV_REGISTRATION_ID, TEST_REGISTRATION_ID);
+
+        //assert
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_ERROR, prov_result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        Prov_Device_LL_Destroy(handle);
+    }
+
+    TEST_FUNCTION(Prov_Device_LL_SetOption_Timeout_NULL_timeout_success)
+    {
+        //arrange
+        PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
+        umock_c_reset_all_calls();
+
+        //act
+        PROV_DEVICE_RESULT prov_result = Prov_Device_LL_SetOption(handle, PROV_OPTION_TIMEOUT, NULL);
+
+        //assert
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_ERROR, prov_result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        Prov_Device_LL_Destroy(handle);
+    }
+
+    TEST_FUNCTION(Prov_Device_LL_SetOption_Timeout_success)
+    {
+        //arrange
+        PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
+        umock_c_reset_all_calls();
+
+        uint8_t prov_timeout = 10;
+
+        //act
+        PROV_DEVICE_RESULT prov_result = Prov_Device_LL_SetOption(handle, PROV_OPTION_TIMEOUT, &prov_timeout);
 
         //assert
         ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result);
