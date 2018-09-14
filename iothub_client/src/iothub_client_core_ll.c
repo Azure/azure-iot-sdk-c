@@ -702,13 +702,6 @@ static IOTHUB_DEVICE_TWIN* dev_twin_data_create(IOTHUB_CLIENT_CORE_LL_HANDLE_DAT
             free(result);
             result = NULL;
         }
-        else if (tickcounter_get_current_ms(handleData->tickCounter, &result->ms_timesOutAfter) != 0)
-        {
-            LogError("Failure getting tickcount info");
-            CONSTBUFFER_Destroy(result->report_data_handle);
-            free(result);
-            result = NULL;
-        }
         else
         {
             result->item_id = id;
@@ -1324,6 +1317,7 @@ static int attach_ms_timesOutAfter(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData
     if (handleData->currentMessageTimeout == 0)
     {
         newEntry->ms_timesOutAfter = 0; /*do not timeout*/
+        newEntry->message_timeout_value = 0;
         result = 0;
     }
     else
@@ -1336,7 +1330,7 @@ static int attach_ms_timesOutAfter(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData
         }
         else
         {
-            newEntry->ms_timesOutAfter += handleData->currentMessageTimeout;
+            newEntry->message_timeout_value = handleData->currentMessageTimeout;
             result = 0;
         }
     }
@@ -1581,7 +1575,7 @@ static void DoTimeouts(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData)
         {
             IOTHUB_MESSAGE_LIST* fullEntry = containingRecord(currentItemInWaitingToSend, IOTHUB_MESSAGE_LIST, entry);
             /*Codes_SRS_IOTHUBCLIENT_LL_02_041: [ If more than value miliseconds have passed since the call to IoTHubClientCore_LL_SendEventAsync then the message callback shall be called with a status code of IOTHUB_CLIENT_CONFIRMATION_TIMEOUT. ]*/
-            if ((fullEntry->ms_timesOutAfter != 0) && (fullEntry->ms_timesOutAfter < nowTick))
+            if ((fullEntry->ms_timesOutAfter != 0) && (((nowTick - fullEntry->ms_timesOutAfter) / 1000) > fullEntry->message_timeout_value))
             {
                 PDLIST_ENTRY theNext = currentItemInWaitingToSend->Flink; /*need to save the next item, because the below operations are destructive*/
                 DList_RemoveEntryList(currentItemInWaitingToSend);
