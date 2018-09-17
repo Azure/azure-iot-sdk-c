@@ -11,10 +11,8 @@ This document describes how to run the end to end tests.
 
 - Open the file "iot_device_params.txt" located under the tools\iot_hub_e2e_tests_params folders in your local copy of the repository.
 - Populate the information required in this file by extracting it from the Azure portal & Device Explorer.
-    - Open the Azure IoT Hub you created in the Azure portal and navigate through "All Settings", "Shared Access Policies", and "iothubowner" as shown in the figure below.
+    - Open the Azure IoT Hub you created in the Azure portal and navigate through "Shared Access Policies", and "iothubowner"
     
-    ![](media/azure_portal/azure-portal-iothub-settings.png)
-
     - Locate one of the IoT Hub connection strings as shown in the figure below
     
         ![](media/azure_portal/azure-portal-iothub-constring.png)
@@ -72,7 +70,9 @@ This document describes how to run the end to end tests.
 <a name="windows_client"></a>
 ## Run end to end tests on a Windows development environment
 
-- Start the Windows PowerShell in Administrator mode.
+- Start the Windows PowerShell in Administrator mode. Update execution policy by entering "set-executionpolicy unrestricted"
+- Navigate to azure-iot-sdk-c\cmake and run cmake with option to enable e2e testing: Cmake -Drun_e2e_tests=ON ..
+- The test directory will be located here: azure-iot-sdk-c\cmake\iothub_client\tests
 - Navigate to the folder tools\iot_hub_e2e_tests_params in your local copy of the repository.
 - Run the script "Set-IOTDeviceParametersForE2ETests.ps1" located under the tools\iot_hub_e2e_tests_params folders in your local copy of the repository.
 - Start the Visual Studio solution "azure_iot_sdks.sln" located under the folder cmake in your home directory. 
@@ -83,6 +83,8 @@ This document describes how to run the end to end tests.
 ## Run end to end tests for "iothub_client" on a Linux development environment
 
 - Navigate to the folder tools/iot_hub_e2e_tests_params
+- Navigate to azure-iot-sdk-c\cmake and run cmake with option to enable e2e testing: Cmake -Drun_e2e_tests=ON ..
+- The test directory will be located here: azure-iot-sdk-c\cmake\iothub_client\tests
 - Set the parameters in "iot_device_params.txt" as environment variables in the current session:
   
   Notes:
