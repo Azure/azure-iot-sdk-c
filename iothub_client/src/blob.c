@@ -285,7 +285,7 @@ BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* SASURI, IOTHUB_CLIEN
                                                 /*Codes_SRS_BLOB_02_026: [ Otherwise, if HTTP response code is >=300 then Blob_UploadMultipleBlocksFromSasUri shall succeed and return BLOB_OK. ]*/
                                                 if (result != BLOB_OK || *httpStatus >= 300)
                                                 {
-                                                    LogError("unable to Blob_UploadBlock. Returned value=%d, httpStatus=%u", result, httpStatus);
+                                                    LogError("unable to Blob_UploadBlock. Returned value=%d, httpStatus=%u", result, (unsigned int)*httpStatus);
                                                     isError = 1;
                                                 }
                                             }
