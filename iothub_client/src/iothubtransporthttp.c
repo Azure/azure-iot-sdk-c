@@ -1700,6 +1700,12 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                                                     LogError("unexpected HTTP status code (%u)", statusCode);
                                                 }
                                             }
+                                            else if (r == HTTPAPIEX_RECOVERYFAILED)
+                                            {
+                                                PDLIST_ENTRY justSent = DList_RemoveHeadList(deviceData->waitingToSend); /*actually this is the same as "actual", but now it is removed*/
+                                                DList_InsertTailList(&(deviceData->eventConfirmations), justSent);
+                                                IoTHubClientCore_LL_SendComplete(iotHubClientHandle, &(deviceData->eventConfirmations), IOTHUB_CLIENT_CONFIRMATION_ERROR); /*takes care of emptying the list too*/
+                                            }
                                         }
                                         BUFFER_delete(toBeSend);
                                     }

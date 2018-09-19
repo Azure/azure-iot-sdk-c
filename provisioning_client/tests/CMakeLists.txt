@@ -48,3 +48,4 @@ if (LINUX)
 endif ()
 
 add_unittest_directory(iothub_auth_client_ut)
+add_e2etest_directory(prov_invalidcert_e2e)

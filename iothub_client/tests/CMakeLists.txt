@@ -116,3 +116,5 @@ if(${use_amqp})
 endif()
 
 add_unittest_directory(version_ut)
+
+add_e2etest_directory(iothub_invalidcert_e2e)
