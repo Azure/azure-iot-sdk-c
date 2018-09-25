@@ -28,8 +28,14 @@ static IOTHUB_SECURITY_TYPE get_iothub_security_type(SECURE_DEVICE_TYPE sec_type
             break;
 #endif
 
+#if defined(HSM_TYPE_SYMM_KEY) || defined(HSM_AUTH_TYPE_CUSTOM)
+        case SECURE_DEVICE_TYPE_SYMMETRIC_KEY:
+            ret = IOTHUB_SECURITY_TYPE_SYMMETRIC_KEY;
+            break;
+#endif
+
 #ifdef HSM_TYPE_HTTP_EDGE
-        case SECURE_DEVICE_TYPE_HTTP_EDGE :
+        case SECURE_DEVICE_TYPE_HTTP_EDGE:
             ret = IOTHUB_SECURITY_TYPE_HTTP_EDGE;
             break;
 #endif

@@ -9,8 +9,8 @@
 static const char* const PROV_ASSIGNED_STATUS = "assigned";
 static const char* const PROV_ASSIGNING_STATUS = "assigning";
 static const char* const PROV_UNASSIGNED_STATUS = "unassigned";
+static const char* const PROV_DISABLE_STATUS = "disabled";
 
-static const char* const PROV_API_VERSION = "2017-11-15";
-
+static const char* const PROV_API_VERSION = "2018-09-01-preview";
 
 #endif // PROV_CLIENT_CONST_H

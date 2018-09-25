@@ -10,6 +10,7 @@
 #include "hsm_client_data.h"
 #include "x509_info.h"
 #include "tpm_msr.h"
+#include "symm_key.h"
 
 #define DATA_SIG_LENGTH     1024
 
@@ -17,6 +18,7 @@ typedef struct IOTHUB_HSM_IMPL_TAG
 {
     X509_INFO_HANDLE x509_info;
     TPM_INFO_HANDLE tpm_info;
+    SYMM_KEY_INFO_HANDLE key_info;
 } IOTHUB_HSM_IMPL;
 
 int hsm_client_x509_init()
@@ -36,6 +38,16 @@ int hsm_client_tpm_init()
 }
 
 void hsm_client_tpm_deinit()
+{
+}
+
+int hsm_client_key_init()
+{
+    initialize_symm_key();
+    return 0;
+}
+
+void hsm_client_key_deinit()
 {
 }
 
@@ -80,6 +92,27 @@ HSM_CLIENT_HANDLE iothub_hsm_tpm_create()
     return (HSM_CLIENT_HANDLE)result;
 }
 
+HSM_CLIENT_HANDLE iothub_hsm_key_create()
+{
+    IOTHUB_HSM_IMPL* result;
+    result = malloc(sizeof(IOTHUB_HSM_IMPL));
+    if (result == NULL)
+    {
+        (void)printf("Failure: malloc IOTHUB_HSM_IMPL.");
+    }
+    else
+    {
+        memset(result, 0, sizeof(IOTHUB_HSM_IMPL));
+        if ((result->key_info = symm_key_info_create()) == NULL)
+        {
+            (void)printf("Failure: symm_key_create.");
+            free(result);
+            result = NULL;
+        }
+    }
+    return (HSM_CLIENT_HANDLE)result;
+}
+
 void iothub_hsm_destroy(HSM_CLIENT_HANDLE handle)
 {
     if (handle != NULL)
@@ -87,6 +120,7 @@ void iothub_hsm_destroy(HSM_CLIENT_HANDLE handle)
         IOTHUB_HSM_IMPL* hsm_impl = (IOTHUB_HSM_IMPL*)handle;
         x509_info_destroy(hsm_impl->x509_info);
         tpm_msr_destroy(hsm_impl->tpm_info);
+        symm_key_info_destroy(hsm_impl->key_info);
         free(hsm_impl);
     }
 }
@@ -151,7 +185,7 @@ char* iothub_x509_hsm_get_alias_key(HSM_CLIENT_HANDLE handle)
     return result;
 }
 
-char* iothub_x509_hsm_get_common_name(HSM_CLIENT_HANDLE handle)
+char* iothub_hsm_get_common_name(HSM_CLIENT_HANDLE handle)
 {
     char* result;
     if (handle == NULL)
@@ -309,6 +343,65 @@ int iothub_tpm_hsm_activate_identity_key(HSM_CLIENT_HANDLE handle, const unsigne
     return result;
 }
 
+char* iothub_hsm_key_symm_key(HSM_CLIENT_HANDLE handle)
+{
+    char* result;
+    if (handle == NULL)
+    {
+        (void)printf("Invalid handle value specified");
+        result = NULL;
+    }
+    else
+    {
+        IOTHUB_HSM_IMPL* hsm_impl = (IOTHUB_HSM_IMPL*)handle;
+        const char* key = symm_key_info_get_key(hsm_impl->key_info);
+        if (key == NULL)
+        {
+            LogError("Failed retrieving key");
+            result = NULL;
+        }
+        else
+        {
+            if (mallocAndStrcpy_s(&result, key) != 0)
+            {
+                LogError("Failed to allocate key buffer.");
+                result = NULL;
+            }
+        }
+    }
+    return result;
+}
+
+char* iothub_hsm_get_registry_id(HSM_CLIENT_HANDLE handle)
+{
+    char* result;
+    if (handle == NULL)
+    {
+        (void)printf("Invalid handle value specified");
+        result = NULL;
+    }
+    else
+    {
+        IOTHUB_HSM_IMPL* hsm_impl = (IOTHUB_HSM_IMPL*)handle;
+        const char* reg_id = symm_key_info_get_reg_id(hsm_impl->key_info);
+        if (reg_id == NULL)
+        {
+            LogError("Failed retrieving register Id");
+            result = NULL;
+        }
+        else
+        {
+            if (mallocAndStrcpy_s(&result, reg_id) != 0)
+            {
+                /* Codes_SRS_HSM_CLIENT_RIOT_07_013: [ If any failure is encountered hsm_client_riot_get_certificate shall return NULL ] */
+                LogError("Failed to allocate register Id.");
+                result = NULL;
+            }
+        }
+    }
+    return result;
+}
+
 // Defining the v-table for the x509 hsm calls
 static const HSM_CLIENT_X509_INTERFACE x509_interface =
 {
@@ -316,7 +409,7 @@ static const HSM_CLIENT_X509_INTERFACE x509_interface =
     iothub_hsm_destroy,
     iothub_x509_hsm_get_certificate,
     iothub_x509_hsm_get_alias_key,
-    iothub_x509_hsm_get_common_name
+    iothub_hsm_get_common_name
 };
 
 const HSM_CLIENT_X509_INTERFACE* hsm_client_x509_interface()
@@ -338,4 +431,18 @@ const HSM_CLIENT_TPM_INTERFACE* hsm_client_tpm_interface()
 {
     // tpm interface pointer
     return &tpm_interface;
+}
+
+static const HSM_CLIENT_KEY_INTERFACE key_interface =
+{
+    iothub_hsm_tpm_create,
+    iothub_hsm_destroy,
+    iothub_hsm_key_symm_key,
+    iothub_hsm_get_registry_id
+};
+
+const HSM_CLIENT_KEY_INTERFACE* hsm_client_key_interface()
+{
+    // tpm interface pointer
+    return &key_interface;
 }

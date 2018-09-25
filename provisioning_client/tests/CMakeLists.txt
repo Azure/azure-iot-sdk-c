@@ -34,6 +34,10 @@ if (${hsm_type_sastoken})
     add_unittest_directory(hsm_client_tpm_ut)
 endif ()
 
+if (${hsm_type_symm_key})
+    add_unittest_directory(hsm_client_key_ut)
+endif ()
+
 if(${hsm_type_edge_module})
     add_unittest_directory(hsm_client_http_edge_ut)
 endif()
