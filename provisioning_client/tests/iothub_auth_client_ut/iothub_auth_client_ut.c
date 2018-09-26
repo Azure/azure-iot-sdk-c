@@ -782,30 +782,6 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         iothub_device_auth_destroy(xda_handle);
     }
 
-    TEST_FUNCTION(iothub_device_auth_generate_credentials_key_succeed)
-    {
-        //arrange
-        STRICT_EXPECTED_CALL(iothub_security_type()).SetReturn(IOTHUB_SECURITY_TYPE_SYMMETRIC_KEY);
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(hsm_client_key_interface()).SetReturn(&test_key_interface);
-
-        IOTHUB_SECURITY_HANDLE xda_handle = iothub_device_auth_create();
-        umock_c_reset_all_calls();
-
-        setup_iothub_device_auth_generate_credentials_mocks(true, false, true);
-
-        //act
-        void* result = iothub_device_auth_generate_credentials(xda_handle, &g_test_key_cred);
-
-        //assert
-        ASSERT_IS_NOT_NULL(result);
-        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-        //cleanup
-        my_gballoc_free(result);
-        iothub_device_auth_destroy(xda_handle);
-    }
-
     TEST_FUNCTION(iothub_device_auth_generate_credentials_no_key_succeed)
     {
         //arrange

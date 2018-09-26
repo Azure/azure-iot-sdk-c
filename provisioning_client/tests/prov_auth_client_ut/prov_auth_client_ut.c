@@ -1173,29 +1173,6 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         prov_auth_destroy(sec_handle);
     }
 
-    TEST_FUNCTION(prov_auth_construct_symm_key_succeed)
-    {
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_SYMMETRIC_KEY);
-        STRICT_EXPECTED_CALL(hsm_client_key_interface()).SetReturn(&test_key_interface);
-        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
-        umock_c_reset_all_calls();
-
-        //arrange
-        setup_prov_auth_construct_sas_token_mocks(true);
-
-        //act
-        char* result = prov_auth_construct_sas_token(sec_handle, TEST_TOKEN_SCOPE_VALUE, TEST_KEY_NAME_VALUE, TEST_EXPIRY_TIME_T_VALUE);
-
-        //assert
-        ASSERT_IS_NOT_NULL(result);
-        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-        //cleanup
-        my_gballoc_free(result);
-        prov_auth_destroy(sec_handle);
-    }
-
     TEST_FUNCTION(prov_auth_construct_sas_token_succeed)
     {
         PROV_AUTH_HANDLE sec_handle = prov_auth_create();

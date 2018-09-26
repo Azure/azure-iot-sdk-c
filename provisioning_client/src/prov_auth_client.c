@@ -263,6 +263,7 @@ PROV_AUTH_HANDLE prov_auth_create()
         }
         else
         {
+#if defined(HSM_TYPE_SYMM_KEY) || defined(HSM_AUTH_TYPE_CUSTOM)
             result->sec_type = PROV_AUTH_TYPE_KEY;
             const HSM_CLIENT_KEY_INTERFACE* key_interface = hsm_client_key_interface();
             if ((key_interface == NULL) ||
@@ -276,6 +277,10 @@ PROV_AUTH_HANDLE prov_auth_create()
                 free(result);
                 result = NULL;
             }
+#else
+            LogError("Invalid secure device type was specified");
+            result = NULL;
+#endif
         }
 
         if (result != NULL)
