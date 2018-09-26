@@ -724,7 +724,7 @@ void longhaul_tests_deinit(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
 IOTHUB_LONGHAUL_RESOURCES_HANDLE longhaul_tests_init()
 {
     IOTHUB_LONGHAUL_RESOURCES* result;
-    UUID uuid;
+    UUID_T uuid;
 
     if (UUID_generate(&uuid) != 0)
     {
@@ -1835,7 +1835,7 @@ static void on_device_twin_update_received(DEVICE_TWIN_UPDATE_STATE update_state
     else
     {
         IOTHUB_LONGHAUL_RESOURCES* iotHubLonghaul = (IOTHUB_LONGHAUL_RESOURCES*)userContextCallback;
-        unsigned int message_id;
+        unsigned int message_id = 0;
         char tests_id[40];
         int version;
 
