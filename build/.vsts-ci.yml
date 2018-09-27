@@ -277,8 +277,6 @@ phases:
   - script: |
       git submodule update --init --recursive
       export OPENSSL_ia32cap=0x00000000
-      echo '######printing env variable'
-      env
       sudo -E ./jenkins/ubuntu1604_c.sh
     env:
       IOTHUB_CONNECTION_STRING: $(C-LINUX-DF-IOTHUB-CONNECTION-STRING)
