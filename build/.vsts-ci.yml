@@ -240,7 +240,7 @@ phases:
     condition: always()
 - phase: clang
   variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-clang:18.04"
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/ubuntu-clang"
   queue: aziotbld-lin02
   displayName: 'clang'
   steps:
