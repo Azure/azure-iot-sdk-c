@@ -140,7 +140,7 @@ phases:
   queue: aziotbld-lin01
   displayName: 'dynamic'
   steps:
-  - script: 'sudo ./jenkins/linux_c_build_as_dynamic.sh'
+  - script: 'sudo ./jenkins/linux_c_option_test.sh'
   - task: DeleteFiles@1
     displayName: 'Delete files from $(Agent.BuildDirectory)'
     inputs:
@@ -248,7 +248,7 @@ phases:
       git submodule update --init --recursive
       export OPENSSL_ia32cap=0x00000000
       sudo chmod -R 755 .
-      sudo ./jenkins/ubuntu_clang.sh
+      sudo -E ./jenkins/ubuntu_clang.sh
     env:
       IOTHUB_CONNECTION_STRING: $(C-LINUX-DF-IOTHUB-CONNECTION-STRING)
       IOTHUB_EVENTHUB_CONNECTION_STRING: $(C-LINUX-DF-IOTHUB-EVENTHUB-CONNECTION-STRING)
@@ -277,6 +277,7 @@ phases:
   - script: |
       git submodule update --init --recursive
       export OPENSSL_ia32cap=0x00000000
+      sudo chmod -R 755 .
       sudo -E ./jenkins/ubuntu1604_c.sh
     env:
       IOTHUB_CONNECTION_STRING: $(C-LINUX-DF-IOTHUB-CONNECTION-STRING)
