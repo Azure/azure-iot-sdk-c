@@ -1,0 +1,410 @@
+name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+resources:
+- repo: self
+  clean: true
+phases:
+- phase: checksubmodule  
+  queue:
+    name: Hosted Ubuntu 1604
+  steps:
+  - script: |
+      sudo apt-get update && apt-get install -y \
+      curl \
+      git \
+      python-software-properties \
+      build-essential \
+      pkg-config
+      sudo curl -sL https://deb.nodesource.com/setup_6.x | bash -
+      sudo apt-get install -y nodejs
+  - script: |
+      git submodule update --init --recursive
+      npm install check_submodules
+      ./../../node_modules/.bin/check_submodules . master
+  - task: DeleteFiles@1
+    displayName: 'Delete files from $(Agent.BuildDirectory)'
+    inputs:
+      SourceFolder: '$(Agent.BuildDirectory)'
+    condition: always()
+- phase: windowsx86
+  queue:
+    name: 'aziotbld-win03'
+  steps:
+  - script: |
+      git submodule update --init --recursive
+      call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsDevCmd.bat"
+      call jenkins\windows_c.cmd
+    displayName: 'build'
+    env:
+      IOTHUB_CONNECTION_STRING: $(C-LINUX-DF-IOTHUB-CONNECTION-STRING)
+      IOTHUB_EVENTHUB_CONNECTION_STRING: $(C-LINUX-DF-IOTHUB-EVENTHUB-CONNECTION-STRING)
+      IOTHUB_E2E_X509_CERT_BASE64: $(C-LINUX-DF-IOTHUB-E2E-X509-CERT)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(C-LINUX-DF-IOTHUB-E2E-X509-PRIVATE-KEY)
+      IOTHUB_E2E_X509_THUMBPRINT: $(C-LINUX-DF-IOTHUB-E2E-X509-THUMBPRINT)
+      IOTHUB_POLICY_KEY: $(C-LINUX-DF-IOTHUB-POLICY-KEY)
+      IOTHUB_PARTITION_COUNT: $(C-LINUX-DF-IOTHUB-PARTITION-COUNT)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(C-LINUX-DF-STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOT_DPS_CONNECTION_STRING: $(C-LINUX-DF-DPS-C-CONNECTION-STRING)
+      IOT_DPS_ID_SCOPE: $(C-LINUX-DF-DPS-C-SCOPE-ID-VALUE)
+  - task: DeleteFiles@1
+    displayName: 'Delete files from $(Agent.BuildDirectory)'
+    inputs:
+      SourceFolder: '$(Agent.BuildDirectory)'
+    condition: always()
+- phase: gcc44
+  variables:
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-gcc4.4"
+  queue: aziotbld-lin01
+  displayName: 'gcc4.4'
+  steps:
+  - script: |
+      git submodule update --init --recursive
+  - script: 'sudo ./jenkins/linux_c_gcc44.sh'
+    env:
+      IOTHUB_CONNECTION_STRING: $(C-LINUX-DF-IOTHUB-CONNECTION-STRING)
+      IOTHUB_EVENTHUB_CONNECTION_STRING: $(C-LINUX-DF-IOTHUB-EVENTHUB-CONNECTION-STRING)
+      IOTHUB_E2E_X509_CERT_BASE64: $(C-LINUX-DF-IOTHUB-E2E-X509-CERT)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(C-LINUX-DF-IOTHUB-E2E-X509-PRIVATE-KEY)
+      IOTHUB_E2E_X509_THUMBPRINT: $(C-LINUX-DF-IOTHUB-E2E-X509-THUMBPRINT)
+      IOTHUB_POLICY_KEY: $(C-LINUX-DF-IOTHUB-POLICY-KEY)
+      IOTHUB_PARTITION_COUNT: $(C-LINUX-DF-IOTHUB-PARTITION-COUNT)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(C-LINUX-DF-STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOT_DPS_CONNECTION_STRING: $(C-LINUX-DF-DPS-C-CONNECTION-STRING)
+      IOT_DPS_ID_SCOPE: $(C-LINUX-DF-DPS-C-SCOPE-ID-VALUE)
+      IOTHUB_CA_ROOT_CERT: $(C-LINUX-DF-IOTHUB-CA-ROOT-CERT)
+      IOTHUB_CA_ROOT_CERT_KEY: $(C-LINUX-DF-IOTHUB-CA-ROOT-CERT-KEY)
+  - task: DeleteFiles@1
+    displayName: 'Delete files from $(Agent.BuildDirectory)'
+    inputs:
+      SourceFolder: '$(Agent.BuildDirectory)'
+    condition: always()
+- phase: inteledison
+  variables:
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/inteledison-c"
+  queue: aziotbld-lin01
+  displayName: 'inteledison'
+  steps:
+  - script: 'sudo ./jenkins/inteledison_c.sh'
+  - task: DeleteFiles@1
+    displayName: 'Delete files from $(Agent.BuildDirectory)'
+    inputs:
+      SourceFolder: '$(Agent.BuildDirectory)'
+    condition: always()
+- phase: mbed
+  queue:
+    name: 'aziotbld-win02'
+  steps:
+  - script: |
+      git submodule update --init --recursive
+      call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsDevCmd.bat"
+      call jenkins\mbed_c.cmd
+    displayName: 'build'
+    env:
+      MBED_USER: $(MBED-USER)
+      MBED_PWD: $(MBED-PWD)
+      MBED_HG_USER: $(MBED-HG-USER)
+  - task: DeleteFiles@1
+    displayName: 'Delete files from $(Agent.BuildDirectory)'
+    inputs:
+      SourceFolder: '$(Agent.BuildDirectory)'
+    condition: always()
+- phase: gcc46
+  variables:
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/gcc-4.6:latest"
+  queue: aziotbld-lin01
+  displayName: 'gcc-4.6'
+  steps:
+  - script: |
+      git submodule update --init --recursive
+      sudo ./jenkins/linux_c_gcc44.sh
+    env:
+      IOTHUB_CONNECTION_STRING: $(C-LINUX-DF-IOTHUB-CONNECTION-STRING)
+      IOTHUB_EVENTHUB_CONNECTION_STRING: $(C-LINUX-DF-IOTHUB-EVENTHUB-CONNECTION-STRING)
+      IOTHUB_E2E_X509_CERT_BASE64: $(C-LINUX-DF-IOTHUB-E2E-X509-CERT)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(C-LINUX-DF-IOTHUB-E2E-X509-PRIVATE-KEY)
+      IOTHUB_E2E_X509_THUMBPRINT: $(C-LINUX-DF-IOTHUB-E2E-X509-THUMBPRINT)
+      IOTHUB_POLICY_KEY: $(C-LINUX-DF-IOTHUB-POLICY-KEY)
+      IOTHUB_PARTITION_COUNT: $(C-LINUX-DF-IOTHUB-PARTITION-COUNT)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(C-LINUX-DF-STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOT_DPS_CONNECTION_STRING: $(C-LINUX-DF-DPS-C-CONNECTION-STRING)
+      IOT_DPS_ID_SCOPE: $(C-LINUX-DF-DPS-C-SCOPE-ID-VALUE)
+      IOTHUB_CA_ROOT_CERT: $(C-LINUX-DF-IOTHUB-CA-ROOT-CERT)
+      IOTHUB_CA_ROOT_CERT_KEY: $(C-LINUX-DF-IOTHUB-CA-ROOT-CERT-KEY)
+  - task: DeleteFiles@1
+    displayName: 'Delete files from $(Agent.BuildDirectory)'
+    inputs:
+      SourceFolder: '$(Agent.BuildDirectory)'
+    condition: always()
+- phase: dynamic
+  variables:
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-16.04:latest"
+  queue: aziotbld-lin01
+  displayName: 'dynamic'
+  steps:
+  - script: 'sudo ./jenkins/linux_c_build_as_dynamic.sh'
+  - task: DeleteFiles@1
+    displayName: 'Delete files from $(Agent.BuildDirectory)'
+    inputs:
+      SourceFolder: '$(Agent.BuildDirectory)'
+    condition: always()
+- phase: windowscex86
+  queue:
+    name: 'win'
+  steps:
+  - script: |
+      git submodule update --init --recursive
+      call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsDevCmd.bat"
+      call jenkins\windowsce_c.cmd
+    displayName: 'build'
+    env:
+      IOTHUB_CONNECTION_STRING: $(C-LINUX-DF-IOTHUB-CONNECTION-STRING)
+      IOTHUB_EVENTHUB_CONNECTION_STRING: $(C-LINUX-DF-IOTHUB-EVENTHUB-CONNECTION-STRING)
+      IOTHUB_E2E_X509_CERT_BASE64: $(C-LINUX-DF-IOTHUB-E2E-X509-CERT)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(C-LINUX-DF-IOTHUB-E2E-X509-PRIVATE-KEY)
+      IOTHUB_E2E_X509_THUMBPRINT: $(C-LINUX-DF-IOTHUB-E2E-X509-THUMBPRINT)
+      IOTHUB_POLICY_KEY: $(C-LINUX-DF-IOTHUB-POLICY-KEY)
+      IOTHUB_PARTITION_COUNT: $(C-LINUX-DF-IOTHUB-PARTITION-COUNT)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(C-LINUX-DF-STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOT_DPS_CONNECTION_STRING: $(C-LINUX-DF-DPS-C-CONNECTION-STRING)
+      IOT_DPS_ID_SCOPE: $(C-LINUX-DF-DPS-C-SCOPE-ID-VALUE)
+  - task: DeleteFiles@1
+    displayName: 'Delete files from $(Agent.BuildDirectory)'
+    inputs:
+      SourceFolder: '$(Agent.BuildDirectory)'
+    condition: always()
+- phase: windowsdynamic
+  queue:
+    name: 'aziotbld-win03'
+  steps:
+  - script: |
+      git submodule update --init --recursive
+      call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsDevCmd.bat"
+      call jenkins\windows_c_build_as_dynamic.cmd
+    displayName: 'build'
+    env:
+      IOTHUB_CONNECTION_STRING: $(C-LINUX-DF-IOTHUB-CONNECTION-STRING)
+      IOTHUB_EVENTHUB_CONNECTION_STRING: $(C-LINUX-DF-IOTHUB-EVENTHUB-CONNECTION-STRING)
+      IOTHUB_E2E_X509_CERT_BASE64: $(C-LINUX-DF-IOTHUB-E2E-X509-CERT)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(C-LINUX-DF-IOTHUB-E2E-X509-PRIVATE-KEY)
+      IOTHUB_E2E_X509_THUMBPRINT: $(C-LINUX-DF-IOTHUB-E2E-X509-THUMBPRINT)
+      IOTHUB_POLICY_KEY: $(C-LINUX-DF-IOTHUB-POLICY-KEY)
+      IOTHUB_PARTITION_COUNT: $(C-LINUX-DF-IOTHUB-PARTITION-COUNT)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(C-LINUX-DF-STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOT_DPS_CONNECTION_STRING: $(C-LINUX-DF-DPS-C-CONNECTION-STRING)
+      IOT_DPS_ID_SCOPE: $(C-LINUX-DF-DPS-C-SCOPE-ID-VALUE)
+  - task: DeleteFiles@1
+    displayName: 'Delete files from $(Agent.BuildDirectory)'
+    inputs:
+      SourceFolder: '$(Agent.BuildDirectory)'
+    condition: always()
+- phase: OSX
+  queue:
+    name: Hosted macOS
+  steps:
+  - script: |
+      git submodule update --init --recursive
+      ./jenkins/osx_gcc_openssl.sh
+    env:
+      IOTHUB_CONNECTION_STRING: $(C-LINUX-DF-IOTHUB-CONNECTION-STRING)
+      IOTHUB_EVENTHUB_CONNECTION_STRING: $(C-LINUX-DF-IOTHUB-EVENTHUB-CONNECTION-STRING)
+      IOTHUB_E2E_X509_CERT_BASE64: $(C-LINUX-DF-IOTHUB-E2E-X509-CERT)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(C-LINUX-DF-IOTHUB-E2E-X509-PRIVATE-KEY)
+      IOTHUB_E2E_X509_THUMBPRINT: $(C-LINUX-DF-IOTHUB-E2E-X509-THUMBPRINT)
+      IOTHUB_POLICY_KEY: $(C-LINUX-DF-IOTHUB-POLICY-KEY)
+      IOTHUB_PARTITION_COUNT: $(C-LINUX-DF-IOTHUB-PARTITION-COUNT)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(C-LINUX-DF-STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOT_DPS_CONNECTION_STRING: $(C-LINUX-DF-DPS-C-CONNECTION-STRING)
+      IOT_DPS_ID_SCOPE: $(C-LINUX-DF-DPS-C-SCOPE-ID-VALUE)
+      IOTHUB_CA_ROOT_CERT: $(C-LINUX-DF-IOTHUB-CA-ROOT-CERT)
+      IOTHUB_CA_ROOT_CERT_KEY: $(C-LINUX-DF-IOTHUB-CA-ROOT-CERT-KEY)
+      IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+  - task: DeleteFiles@1
+    displayName: 'Delete files from $(Agent.BuildDirectory)'
+    inputs:
+      SourceFolder: '$(Agent.BuildDirectory)'
+    condition: always()
+- phase: raspberrypi
+  variables:
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/vsts-raspberrypi-c"
+  queue: aziotbld-lin02
+  displayName: 'raspberrypi'
+  steps:
+  - script: |
+      sudo chmod -R 755 .
+      pwd
+      ls -lr
+      sudo ./jenkins/raspberrypi_c.sh
+  - task: DeleteFiles@1
+    displayName: 'Delete files from $(Agent.BuildDirectory)'
+    inputs:
+      SourceFolder: '$(Agent.BuildDirectory)'
+    condition: always()
+- phase: clang
+  variables:
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-clang:18.04"
+  queue: aziotbld-lin02
+  displayName: 'clang'
+  steps:
+  - script: |
+      git submodule update --init --recursive
+      export OPENSSL_ia32cap=0x00000000
+      sudo chmod -R 755 .
+      sudo ./jenkins/ubuntu_clang.sh
+    env:
+      IOTHUB_CONNECTION_STRING: $(C-LINUX-DF-IOTHUB-CONNECTION-STRING)
+      IOTHUB_EVENTHUB_CONNECTION_STRING: $(C-LINUX-DF-IOTHUB-EVENTHUB-CONNECTION-STRING)
+      IOTHUB_E2E_X509_CERT_BASE64: $(C-LINUX-DF-IOTHUB-E2E-X509-CERT)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(C-LINUX-DF-IOTHUB-E2E-X509-PRIVATE-KEY)
+      IOTHUB_E2E_X509_THUMBPRINT: $(C-LINUX-DF-IOTHUB-E2E-X509-THUMBPRINT)
+      IOTHUB_POLICY_KEY: $(C-LINUX-DF-IOTHUB-POLICY-KEY)
+      IOTHUB_PARTITION_COUNT: $(C-LINUX-DF-IOTHUB-PARTITION-COUNT)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(C-LINUX-DF-STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOT_DPS_CONNECTION_STRING: $(C-LINUX-DF-DPS-C-CONNECTION-STRING)
+      IOT_DPS_ID_SCOPE: $(C-LINUX-DF-DPS-C-SCOPE-ID-VALUE)
+      IOTHUB_CA_ROOT_CERT: $(C-LINUX-DF-IOTHUB-CA-ROOT-CERT)
+      IOTHUB_CA_ROOT_CERT_KEY: $(C-LINUX-DF-IOTHUB-CA-ROOT-CERT-KEY)
+      IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+  - task: DeleteFiles@1
+    displayName: 'Delete files from $(Agent.BuildDirectory)'
+    inputs:
+      SourceFolder: '$(Agent.BuildDirectory)'
+    condition: always()
+- phase: ubuntu1604
+  variables:
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
+  queue: aziotbld-lin02
+  displayName: 'ubuntu1604'
+  steps:
+  - script: |
+      git submodule update --init --recursive
+      export OPENSSL_ia32cap=0x00000000
+      echo '######printing env variable'
+      env
+      sudo -E ./jenkins/ubuntu1604_c.sh
+    env:
+      IOTHUB_CONNECTION_STRING: $(C-LINUX-DF-IOTHUB-CONNECTION-STRING)
+      IOTHUB_EVENTHUB_CONNECTION_STRING: $(C-LINUX-DF-IOTHUB-EVENTHUB-CONNECTION-STRING)
+      IOTHUB_E2E_X509_CERT_BASE64: $(C-LINUX-DF-IOTHUB-E2E-X509-CERT)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(C-LINUX-DF-IOTHUB-E2E-X509-PRIVATE-KEY)
+      IOTHUB_E2E_X509_THUMBPRINT: $(C-LINUX-DF-IOTHUB-E2E-X509-THUMBPRINT)
+      IOTHUB_POLICY_KEY: $(C-LINUX-DF-IOTHUB-POLICY-KEY)
+      IOTHUB_PARTITION_COUNT: $(C-LINUX-DF-IOTHUB-PARTITION-COUNT)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(C-LINUX-DF-STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOT_DPS_CONNECTION_STRING: $(C-LINUX-DF-DPS-C-CONNECTION-STRING)
+      IOT_DPS_ID_SCOPE: $(C-LINUX-DF-DPS-C-SCOPE-ID-VALUE)
+      IOTHUB_CA_ROOT_CERT: $(C-LINUX-DF-IOTHUB-CA-ROOT-CERT)
+      IOTHUB_CA_ROOT_CERT_KEY: $(C-LINUX-DF-IOTHUB-CA-ROOT-CERT-KEY)
+      IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+  - task: DeleteFiles@1
+    displayName: 'Delete files from $(Agent.BuildDirectory)'
+    inputs:
+      SourceFolder: '$(Agent.BuildDirectory)'
+    condition: always()
+- phase: debian
+  variables:
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/c-debian"
+  queue: aziotbld-lin02
+  displayName: 'debian'
+  steps:
+  - script: |
+      git submodule update --init --recursive
+      sudo ./jenkins/debian_c.sh
+    env:
+      IOTHUB_CONNECTION_STRING: $(C-LINUX-DF-IOTHUB-CONNECTION-STRING)
+      IOTHUB_EVENTHUB_CONNECTION_STRING: $(C-LINUX-DF-IOTHUB-EVENTHUB-CONNECTION-STRING)
+      IOTHUB_E2E_X509_CERT_BASE64: $(C-LINUX-DF-IOTHUB-E2E-X509-CERT)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(C-LINUX-DF-IOTHUB-E2E-X509-PRIVATE-KEY)
+      IOTHUB_E2E_X509_THUMBPRINT: $(C-LINUX-DF-IOTHUB-E2E-X509-THUMBPRINT)
+      IOTHUB_POLICY_KEY: $(C-LINUX-DF-IOTHUB-POLICY-KEY)
+      IOTHUB_PARTITION_COUNT: $(C-LINUX-DF-IOTHUB-PARTITION-COUNT)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(C-LINUX-DF-STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOT_DPS_CONNECTION_STRING: $(C-LINUX-DF-DPS-C-CONNECTION-STRING)
+      IOT_DPS_ID_SCOPE: $(C-LINUX-DF-DPS-C-SCOPE-ID-VALUE)
+      IOTHUB_CA_ROOT_CERT: $(C-LINUX-DF-IOTHUB-CA-ROOT-CERT)
+      IOTHUB_CA_ROOT_CERT_KEY: $(C-LINUX-DF-IOTHUB-CA-ROOT-CERT-KEY)
+  - task: DeleteFiles@1
+    displayName: 'Delete files from $(Agent.BuildDirectory)'
+    inputs:
+      SourceFolder: '$(Agent.BuildDirectory)'
+    condition: always()    
+- phase: wolfssl
+  variables:
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/c-linux-wolfssl:18.04"
+  queue: aziotbld-lin01
+  displayName: 'wolfssl'
+  steps:
+  - script: |
+      git submodule update --init --recursive
+      LD_LIBRARY_PATH=/usr/local/lib
+      LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/my_library/
+      jenkins/linux_wolfssl.sh
+    env:
+      IOTHUB_CONNECTION_STRING: $(C-LINUX-DF-IOTHUB-CONNECTION-STRING)
+      IOTHUB_EVENTHUB_CONNECTION_STRING: $(C-LINUX-DF-IOTHUB-EVENTHUB-CONNECTION-STRING)
+      IOTHUB_E2E_X509_CERT_BASE64: $(C-LINUX-DF-IOTHUB-E2E-X509-CERT)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(C-LINUX-DF-IOTHUB-E2E-X509-PRIVATE-KEY)
+      IOTHUB_E2E_X509_THUMBPRINT: $(C-LINUX-DF-IOTHUB-E2E-X509-THUMBPRINT)
+      IOTHUB_POLICY_KEY: $(C-LINUX-DF-IOTHUB-POLICY-KEY)
+      IOTHUB_PARTITION_COUNT: $(C-LINUX-DF-IOTHUB-PARTITION-COUNT)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(C-LINUX-DF-STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOT_DPS_CONNECTION_STRING: $(C-LINUX-DF-DPS-C-CONNECTION-STRING)
+      IOT_DPS_ID_SCOPE: $(C-LINUX-DF-DPS-C-SCOPE-ID-VALUE)
+      IOTHUB_CA_ROOT_CERT: $(C-LINUX-DF-IOTHUB-CA-ROOT-CERT)
+      IOTHUB_CA_ROOT_CERT_KEY: $(C-LINUX-DF-IOTHUB-CA-ROOT-CERT-KEY)
+  - task: DeleteFiles@1
+    displayName: 'Delete files from $(Agent.BuildDirectory)'
+    inputs:
+      SourceFolder: '$(Agent.BuildDirectory)'
+    condition: always()
+- phase: windowsx64
+  queue:
+    name: 'aziotbld-win03'
+  displayName: 'windowsx64'
+  steps:
+  - script: |
+     git submodule update --init --recursive
+     call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsDevCmd.bat"
+     call jenkins\windows_c.cmd --platform x64
+    displayName: 'build'
+    env:
+      IOTHUB_CONNECTION_STRING: $(C-LINUX-DF-IOTHUB-CONNECTION-STRING)
+      IOTHUB_EVENTHUB_CONNECTION_STRING: $(C-LINUX-DF-IOTHUB-EVENTHUB-CONNECTION-STRING)
+      IOTHUB_E2E_X509_CERT_BASE64: $(C-LINUX-DF-IOTHUB-E2E-X509-CERT)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(C-LINUX-DF-IOTHUB-E2E-X509-PRIVATE-KEY)
+      IOTHUB_E2E_X509_THUMBPRINT: $(C-LINUX-DF-IOTHUB-E2E-X509-THUMBPRINT)
+      IOTHUB_POLICY_KEY: $(C-LINUX-DF-IOTHUB-POLICY-KEY)
+      IOTHUB_PARTITION_COUNT: $(C-LINUX-DF-IOTHUB-PARTITION-COUNT)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(C-LINUX-DF-STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOT_DPS_CONNECTION_STRING: $(C-LINUX-DF-DPS-C-CONNECTION-STRING)
+      IOT_DPS_ID_SCOPE: $(C-LINUX-DF-DPS-C-SCOPE-ID-VALUE)
+  - task: DeleteFiles@1
+    displayName: 'Delete files from $(Agent.BuildDirectory)'
+    inputs:
+      SourceFolder: '$(Agent.BuildDirectory)'
+    condition: always()
+- phase: xcodenative
+  queue:
+    name: OSX
+  steps:
+  - script: |
+      git submodule update --init --recursive
+      DYLD_LIBRARY_PATH=/usr/local/Cellar/curl/7.61.0/lib
+      ./jenkins/osx_xcode_native.sh
+    env:
+      IOTHUB_CONNECTION_STRING: $(C-LINUX-DF-IOTHUB-CONNECTION-STRING)
+      IOTHUB_EVENTHUB_CONNECTION_STRING: $(C-LINUX-DF-IOTHUB-EVENTHUB-CONNECTION-STRING)
+      IOTHUB_E2E_X509_CERT_BASE64: $(C-LINUX-DF-IOTHUB-E2E-X509-CERT)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(C-LINUX-DF-IOTHUB-E2E-X509-PRIVATE-KEY)
+      IOTHUB_E2E_X509_THUMBPRINT: $(C-LINUX-DF-IOTHUB-E2E-X509-THUMBPRINT)
+      IOTHUB_POLICY_KEY: $(C-LINUX-DF-IOTHUB-POLICY-KEY)
+      IOTHUB_PARTITION_COUNT: $(C-LINUX-DF-IOTHUB-PARTITION-COUNT)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(C-LINUX-DF-STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOT_DPS_CONNECTION_STRING: $(C-LINUX-DF-DPS-C-CONNECTION-STRING)
+      IOT_DPS_ID_SCOPE: $(C-LINUX-DF-DPS-C-SCOPE-ID-VALUE)
+      IOTHUB_CA_ROOT_CERT: $(C-LINUX-DF-IOTHUB-CA-ROOT-CERT)
+      IOTHUB_CA_ROOT_CERT_KEY: $(C-LINUX-DF-IOTHUB-CA-ROOT-CERT-KEY)
+      IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+  - task: DeleteFiles@1
+    displayName: 'Delete files from $(Agent.BuildDirectory)'
+    inputs:
+      SourceFolder: '$(Agent.BuildDirectory)'
+    condition: always()    
