@@ -124,7 +124,7 @@ phases:
     condition: always()
 - phase: dynamic
   variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/ubuntu-clang"
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
   queue: aziotbld-lin01
   displayName: 'dynamic'
   steps:
