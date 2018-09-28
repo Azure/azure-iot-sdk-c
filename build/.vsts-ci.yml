@@ -77,18 +77,6 @@ phases:
     inputs:
       SourceFolder: '$(Agent.BuildDirectory)'
     condition: always()
-- phase: inteledison
-  variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/inteledison-c"
-  queue: aziotbld-lin01
-  displayName: 'inteledison'
-  steps:
-  - script: 'sudo ./jenkins/inteledison_c.sh'
-  - task: DeleteFiles@1
-    displayName: 'Delete files from $(Agent.BuildDirectory)'
-    inputs:
-      SourceFolder: '$(Agent.BuildDirectory)'
-    condition: always()
 - phase: mbed
   queue:
     name: 'aziotbld-win02'
@@ -136,36 +124,11 @@ phases:
     condition: always()
 - phase: dynamic
   variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-16.04:latest"
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/ubuntu-clang"
   queue: aziotbld-lin01
   displayName: 'dynamic'
   steps:
   - script: 'sudo ./jenkins/linux_c_option_test.sh'
-  - task: DeleteFiles@1
-    displayName: 'Delete files from $(Agent.BuildDirectory)'
-    inputs:
-      SourceFolder: '$(Agent.BuildDirectory)'
-    condition: always()
-- phase: windowscex86
-  queue:
-    name: 'win'
-  steps:
-  - script: |
-      git submodule update --init --recursive
-      call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsDevCmd.bat"
-      call jenkins\windowsce_c.cmd
-    displayName: 'build'
-    env:
-      IOTHUB_CONNECTION_STRING: $(C-LINUX-DF-IOTHUB-CONNECTION-STRING)
-      IOTHUB_EVENTHUB_CONNECTION_STRING: $(C-LINUX-DF-IOTHUB-EVENTHUB-CONNECTION-STRING)
-      IOTHUB_E2E_X509_CERT_BASE64: $(C-LINUX-DF-IOTHUB-E2E-X509-CERT)
-      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(C-LINUX-DF-IOTHUB-E2E-X509-PRIVATE-KEY)
-      IOTHUB_E2E_X509_THUMBPRINT: $(C-LINUX-DF-IOTHUB-E2E-X509-THUMBPRINT)
-      IOTHUB_POLICY_KEY: $(C-LINUX-DF-IOTHUB-POLICY-KEY)
-      IOTHUB_PARTITION_COUNT: $(C-LINUX-DF-IOTHUB-PARTITION-COUNT)
-      STORAGE_ACCOUNT_CONNECTION_STRING: $(C-LINUX-DF-STORAGE-ACCOUNT-CONNECTION-STRING)
-      IOT_DPS_CONNECTION_STRING: $(C-LINUX-DF-DPS-C-CONNECTION-STRING)
-      IOT_DPS_ID_SCOPE: $(C-LINUX-DF-DPS-C-SCOPE-ID-VALUE)
   - task: DeleteFiles@1
     displayName: 'Delete files from $(Agent.BuildDirectory)'
     inputs:
