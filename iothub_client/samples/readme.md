@@ -2,6 +2,9 @@
 
 This folder contains simple samples showing how to use the various features of the Microsoft Azure IoT Hub service from a device running C code.
 
+## Note
+* When using low level samples (iothub_ll_), the **IoTHubDeviceClient_LL_DoWork** function must be called regularly to avoid unexpected behaviour such as timeouts or failure to renovate tokens. 
+
 ## List of samples
 
 * Simple send and receive messages:
