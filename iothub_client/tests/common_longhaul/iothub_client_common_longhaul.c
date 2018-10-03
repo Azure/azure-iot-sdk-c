@@ -741,7 +741,7 @@ IOTHUB_LONGHAUL_RESOURCES_HANDLE longhaul_tests_init()
         {
             (void)memset(result, 0, sizeof(IOTHUB_LONGHAUL_RESOURCES));
 
-            if ((result->test_id = UUID_to_string(&uuid)) == NULL)
+            if ((result->test_id = UUID_to_string((const UUID_T*)&uuid)) == NULL)
             {
                 LogError("Failed to set test ID number");
                 longhaul_tests_deinit(result);
