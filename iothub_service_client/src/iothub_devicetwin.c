@@ -199,7 +199,7 @@ static IOTHUB_DEVICE_TWIN_RESULT sendHttpRequestTwin(IOTHUB_SERVICE_CLIENT_DEVIC
         result = IOTHUB_DEVICE_TWIN_ERROR;
     }
     /*Codes_SRS_IOTHUBDEVICETWIN_12_021: [ IoTHubDeviceTwin_GetTwin shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ]*/
-    else if ((httpExApiSasHandle = HTTPAPIEX_SAS_Create(accessKey, uriResource, keyName)) == NULL)
+    else if ((httpExApiSasHandle = HTTPAPIEX_SAS_Create(accessKey, NULL, uriResource, keyName)) == NULL)
     {
         /*Codes_SRS_IOTHUBDEVICETWIN_12_025: [ If any of the HTTPAPI call fails IoTHubDeviceTwin_GetTwin shall fail and return IOTHUB_DEVICE_TWIN_HTTPAPI_ERROR ]*/
         LogError("HTTPAPIEX_SAS_Create failed");

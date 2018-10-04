@@ -18,6 +18,7 @@ typedef struct IOTHUB_SERVICE_CLIENT_AUTH_TAG
     const char* iothubName;
     const char* iothubSuffix;
     const char* sharedAccessKey;
+    const char* sharedAccessSignature;
     const char* keyName;
 } IOTHUB_SERVICE_CLIENT_AUTH;
 
@@ -42,7 +43,7 @@ extern IOTHUB_SERVICE_CLIENT_AUTH_HANDLE IoTHubServiceClientAuth_CreateFromConne
 
 **SRS_IOTHUBSERVICECLIENT_12_010: [** If the STRING_construct fails, IoTHubServiceClientAuth_CreateFromConnectionString shall do clean up and return NULL. **]**
 
-**SRS_IOTHUBSERVICECLIENT_12_004: [** IoTHubServiceClientAuth_CreateFromConnectionString shall populate hostName, iotHubName, iotHubSuffix, sharedAccessKeyName, sharedAccessKeyValue from the given connection string by calling connectionstringparser_parse **]**
+**SRS_IOTHUBSERVICECLIENT_12_004: [** IoTHubServiceClientAuth_CreateFromConnectionString shall populate hostName, iotHubName, iotHubSuffix, sharedAccessKeyName, sharedAccessKeyValue, sharedAccessSignature from the given connection string by calling connectionstringparser_parse **]**
 
 **SRS_IOTHUBSERVICECLIENT_12_005: [** If populating the IOTHUB_SERVICE_CLIENT_AUTH fails, IoTHubServiceClientAuth_CreateFromConnectionString shall do clean up and return NULL **]**
 
@@ -50,7 +51,7 @@ extern IOTHUB_SERVICE_CLIENT_AUTH_HANDLE IoTHubServiceClientAuth_CreateFromConne
 
 **SRS_IOTHUBSERVICECLIENT_12_012: [** If the populating SharedAccessKeyName fails, IoTHubServiceClientAuth_CreateFromConnectionString shall do clean up and return NULL. **]**
 
-**SRS_IOTHUBSERVICECLIENT_12_013: [** If the populating SharedAccessKey fails, IoTHubServiceClientAuth_CreateFromConnectionString shall do clean up and return NULL. **]**
+**SRS_IOTHUBSERVICECLIENT_12_013: [** If the populating SharedAccessKey or SharedAccessSignature fails, IoTHubServiceClientAuth_CreateFromConnectionString shall do clean up and return NULL. **]**
 
 **SRS_IOTHUBSERVICECLIENT_12_038: [** IoTHubServiceClientAuth_CreateFromConnectionString shall create a STRING_handle from hostName by calling STRING_construct. **]**
 
@@ -105,6 +106,10 @@ extern IOTHUB_SERVICE_CLIENT_AUTH_HANDLE IoTHubServiceClientAuth_CreateFromConne
 **SRS_IOTHUBSERVICECLIENT_12_033: [** If the mallocAndStrcpy_s fails, IoTHubServiceClientAuth_CreateFromConnectionString shall do clean up and return NULL. **]**
 
 **SRS_IOTHUBSERVICECLIENT_12_006: [** If the IOTHUB_SERVICE_CLIENT_AUTH has been populated IoTHubServiceClientAuth_CreateFromConnectionString shall do clean up and return with a IOTHUB_SERVICE_CLIENT_AUTH_HANDLE to it **]**
+
+**SRS_IOTHUBSERVICECLIENT_12_040: [** IoTHubServiceClientAuth_CreateFromConnectionString shall allocate memory and copy sharedAccessSignature to result->sharedAccessSignature by calling mallocAndStrcpy_s. **]**
+
+**SRS_IOTHUBSERVICECLIENT_12_041: [** If the mallocAndStrcpy_s fails, IoTHubServiceClientAuth_CreateFromConnectionString shall do clean up and return NULL. **]**
 
 
 ## IoTHubServiceClient_Destroy

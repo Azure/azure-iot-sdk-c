@@ -1237,6 +1237,7 @@ static IOTHUB_REGISTRYMANAGER_RESULT sendHttpRequestCRUD(IOTHUB_REGISTRYMANAGER_
 
     STRING_HANDLE uriResource = NULL;
     STRING_HANDLE accessKey = NULL;
+    STRING_HANDLE accessSignature = NULL;
     STRING_HANDLE keyName = NULL;
     HTTPAPIEX_SAS_HANDLE httpExApiSasHandle = NULL;
     HTTPAPIEX_HANDLE httpExApiHandle = NULL;
@@ -1249,11 +1250,18 @@ static IOTHUB_REGISTRYMANAGER_RESULT sendHttpRequestCRUD(IOTHUB_REGISTRYMANAGER_
         LogError("STRING_construct failed for uriResource");
         result = IOTHUB_REGISTRYMANAGER_ERROR;
     }
-    else if ((accessKey = STRING_construct(registryManagerHandle->sharedAccessKey)) == NULL)
+    else if ((registryManagerHandle->sharedAccessKey != NULL) && (accessKey = STRING_construct(registryManagerHandle->sharedAccessKey)) == NULL)
     {
         /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_099: [ If any of the call fails during the HTTP creation IoTHubRegistryManager_CreateDevice shall fail and return IOTHUB_REGISTRYMANAGER_ERROR ] */
         /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_103: [ If any of the call fails during the HTTP creation IoTHubRegistryManager_UpdateDevice shall fail and return IOTHUB_REGISTRYMANAGER_ERROR ] */
         LogError("STRING_construct failed for accessKey");
+        result = IOTHUB_REGISTRYMANAGER_ERROR;
+    }
+    else if ((registryManagerHandle->sharedAccessSignature != NULL) && (accessSignature = STRING_construct(registryManagerHandle->sharedAccessSignature)) == NULL)
+    {
+        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_099: [ If any of the call fails during the HTTP creation IoTHubRegistryManager_CreateDevice shall fail and return IOTHUB_REGISTRYMANAGER_ERROR ] */
+        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_103: [ If any of the call fails during the HTTP creation IoTHubRegistryManager_UpdateDevice shall fail and return IOTHUB_REGISTRYMANAGER_ERROR ] */
+        LogError("STRING_construct failed for accessSignature");
         result = IOTHUB_REGISTRYMANAGER_ERROR;
     }
     else if ((registryManagerHandle->keyName != NULL) && ((keyName = STRING_construct(registryManagerHandle->keyName)) == NULL))
@@ -1279,7 +1287,7 @@ static IOTHUB_REGISTRYMANAGER_RESULT sendHttpRequestCRUD(IOTHUB_REGISTRYMANAGER_
     /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_028: [ IoTHubRegistryManager_GetDevice shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ] */
     /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_045: [ IoTHubRegistryManager_UpdateDevice shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ] */
     /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_055: [ IoTHubRegistryManager_DeleteDevice shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ] */
-    else if ((httpExApiSasHandle = HTTPAPIEX_SAS_Create(accessKey, uriResource, keyName)) == NULL)
+    else if ((httpExApiSasHandle = HTTPAPIEX_SAS_Create(accessKey, accessSignature, uriResource, keyName)) == NULL)
     {
         /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_019: [ If any of the HTTPAPI call fails IoTHubRegistryManager_CreateDevice shall fail and return IOTHUB_REGISTRYMANAGER_HTTPAPI_ERROR ] */
         /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_104: [ If any of the HTTPAPI call fails IoTHubRegistryManager_UpdateDevice shall fail and return IOTHUB_REGISTRYMANAGER_HTTPAPI_ERROR ] */
@@ -1435,9 +1443,9 @@ IOTHUB_REGISTRYMANAGER_HANDLE IoTHubRegistryManager_Create(IOTHUB_SERVICE_CLIENT
             LogError("authInfo->keyName and authInfo->deviceId input parameter cannot both be NULL");
             result = NULL;
         }
-        else if (serviceClientAuth->sharedAccessKey == NULL)
+        else if ((serviceClientAuth->sharedAccessKey == NULL) && (serviceClientAuth->sharedAccessSignature == NULL))
         {
-            LogError("authInfo->sharedAccessKey input parameter cannot be NULL");
+            LogError("authInfo->sharedAccessKey and authInfo->sharedAccessSignature input parameters cannot be NULL");
             result = NULL;
         }
         else
@@ -1479,10 +1487,16 @@ IOTHUB_REGISTRYMANAGER_HANDLE IoTHubRegistryManager_Create(IOTHUB_SERVICE_CLIENT
                     result = NULL;
                 }
                 /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_091: [ IoTHubRegistryManager_Create shall allocate memory and copy sharedAccessKey to result->sharedAccessKey by calling mallocAndStrcpy_s. ] */
-                else if (mallocAndStrcpy_s(&result->sharedAccessKey, serviceClientAuth->sharedAccessKey) != 0)
+                else if ((serviceClientAuth->sharedAccessKey != NULL) && (mallocAndStrcpy_s(&result->sharedAccessKey, serviceClientAuth->sharedAccessKey) != 0))
                 {
                     /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_092: [ If the mallocAndStrcpy_s fails, IoTHubRegistryManager_Create shall do clean up and return NULL. ] */
                     LogError("mallocAndStrcpy_s failed for sharedAccessKey");
+                    free_registrymanager_handle(result);
+                    result = NULL;
+                }
+                else if ((serviceClientAuth->sharedAccessSignature != NULL) && (mallocAndStrcpy_s(&result->sharedAccessSignature, serviceClientAuth->sharedAccessSignature) != 0))
+                {
+                    LogError("mallocAndStrcpy_s failed for sharedAccessSignature");
                     free_registrymanager_handle(result);
                     result = NULL;
                 }
@@ -1519,6 +1533,7 @@ void IoTHubRegistryManager_Destroy(IOTHUB_REGISTRYMANAGER_HANDLE registryManager
         free(regManHandle->iothubName);
         free(regManHandle->iothubSuffix);
         free(regManHandle->sharedAccessKey);
+        free(regManHandle->sharedAccessSignature);
         free(regManHandle->keyName);
         free(regManHandle->deviceId);
         free(regManHandle);

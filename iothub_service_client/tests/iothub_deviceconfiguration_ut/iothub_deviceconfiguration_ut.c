@@ -167,9 +167,10 @@ void my_HTTPAPIEX_Destroy(HTTPAPIEX_HANDLE handle)
     my_gballoc_free(handle);
 }
 
-HTTPAPIEX_SAS_HANDLE my_HTTPAPIEX_SAS_Create(STRING_HANDLE key, STRING_HANDLE uriResource, STRING_HANDLE keyName)
+HTTPAPIEX_SAS_HANDLE my_HTTPAPIEX_SAS_Create(STRING_HANDLE key, STRING_HANDLE signature, STRING_HANDLE uriResource, STRING_HANDLE keyName)
 {
     (void)key;
+    (void)signature;
     (void)uriResource;
     (void)keyName;
     return (HTTPAPIEX_SAS_HANDLE)my_gballoc_malloc(1);
@@ -200,6 +201,7 @@ typedef struct IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_TAG
 {
     char* hostname;
     char* sharedAccessKey;
+    char* sharedAccessSignature;
     char* keyName;
 } IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION;
 
@@ -233,6 +235,7 @@ static char* TEST_HOSTNAME = "theHostName";
 static char* TEST_IOTHUBNAME = "theIotHubName";
 static char* TEST_IOTHUBSUFFIX = "theIotHubSuffix";
 static char* TEST_SHAREDACCESSKEY = "theSharedAccessKey";
+static char* TEST_SHAREDACCESSSIGNATURE = "theSharedAccessSignature";
 static char* TEST_SHAREDACCESSKEYNAME = "theSharedAccessKeyName";
 
 static const HTTP_HEADERS_HANDLE TEST_HTTP_HEADERS_HANDLE = (HTTP_HEADERS_HANDLE)0x4545;
@@ -614,6 +617,7 @@ TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
     TEST_IOTHUB_SERVICE_CLIENT_AUTH.iothubName = TEST_IOTHUBNAME;
     TEST_IOTHUB_SERVICE_CLIENT_AUTH.iothubSuffix = TEST_IOTHUBSUFFIX;
     TEST_IOTHUB_SERVICE_CLIENT_AUTH.sharedAccessKey = TEST_SHAREDACCESSKEY;
+    TEST_IOTHUB_SERVICE_CLIENT_AUTH.sharedAccessSignature = NULL;
     TEST_IOTHUB_SERVICE_CLIENT_AUTH.keyName = TEST_SHAREDACCESSKEYNAME;
 }
 
@@ -708,6 +712,7 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_Create_return_null_if_input_parameter_se
 /*Tests_SRS_IOTHUBDEVICECONFIGURATION_38_008: [ IoTHubDeviceConfiguration_Create shall allocate memory and copy iothubName to result->iothubName by calling mallocAndStrcpy_s. ]*/
 /*Tests_SRS_IOTHUBDEVICECONFIGURATION_38_010: [ IoTHubDeviceConfiguration_Create shall allocate memory and copy iothubSuffix to result->iothubSuffix by calling mallocAndStrcpy_s. ]*/
 /*Tests_SRS_IOTHUBDEVICECONFIGURATION_38_012: [ IoTHubDeviceConfiguration_Create shall allocate memory and copy sharedAccessKey to result->sharedAccessKey by calling mallocAndStrcpy_s. ]*/
+/*Tests_SRS_IOTHUBDEVICECONFIGURATION_38_012: [ IoTHubDeviceConfiguration_Create shall allocate memory and copy sharedAccessSignature to result->sharedAccessSignature by calling mallocAndStrcpy_s. ]*/
 /*Tests_SRS_IOTHUBDEVICECONFIGURATION_38_014: [ IoTHubDeviceConfiguration_Create shall allocate memory and copy keyName to `result->keyName` by calling mallocAndStrcpy_s. ]*/
 TEST_FUNCTION(IoTHubDeviceConfiguration_Create_happy_path)
 {
@@ -734,6 +739,7 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_Create_happy_path)
         free(result->hostname);
         free(result->keyName);
         free(result->sharedAccessKey);
+        free(result->sharedAccessSignature);
         free(result);
         result = NULL;
     }
@@ -911,7 +917,7 @@ static void set_expected_calls_for_sendHttpRequestDeviceConfiguration(const unsi
 
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
-    EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
     EXPECTED_CALL(HTTPAPIEX_Create(TEST_HOSTNAME));
 

@@ -280,7 +280,7 @@ static IOTHUB_DEVICE_METHOD_RESULT sendHttpRequestDeviceMethod(IOTHUB_SERVICE_CL
         STRING_delete(uriResource);
         result = IOTHUB_DEVICE_METHOD_ERROR;
     }
-    else if ((httpExApiSasHandle = HTTPAPIEX_SAS_Create(accessKey, uriResource, keyName)) == NULL)
+    else if ((httpExApiSasHandle = HTTPAPIEX_SAS_Create(accessKey, NULL, uriResource, keyName)) == NULL)
     {
         LogError("HTTPAPIEX_SAS_Create failed");
         HTTPHeaders_Free(httpHeader);

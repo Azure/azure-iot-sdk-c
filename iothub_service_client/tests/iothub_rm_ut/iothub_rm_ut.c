@@ -105,9 +105,10 @@ void my_HTTPAPIEX_Destroy(HTTPAPIEX_HANDLE handle)
     free(handle);
 }
 
-HTTPAPIEX_SAS_HANDLE my_HTTPAPIEX_SAS_Create(STRING_HANDLE key, STRING_HANDLE uriResource, STRING_HANDLE keyName)
+HTTPAPIEX_SAS_HANDLE my_HTTPAPIEX_SAS_Create(STRING_HANDLE key, STRING_HANDLE signature, STRING_HANDLE uriResource, STRING_HANDLE keyName)
 {
     (void)key;
+    (void)signature;
     (void)uriResource;
     (void)keyName;
     return (HTTPAPIEX_SAS_HANDLE)malloc(1);
@@ -621,7 +622,7 @@ static void setupHttpMockCalls(bool updateIfMatch, const unsigned int httpStatus
             .IgnoreArgument(1);
     }
 
-    STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
     STRICT_EXPECTED_CALL(HTTPAPIEX_Create(TEST_HOSTNAME));
 
@@ -987,6 +988,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         TEST_IOTHUB_SERVICE_CLIENT_AUTH.iothubSuffix = TEST_IOTHUBSUFFIX;
         TEST_IOTHUB_SERVICE_CLIENT_AUTH.keyName = TEST_SHAREDACCESSKEYNAME;
         TEST_IOTHUB_SERVICE_CLIENT_AUTH.sharedAccessKey = TEST_SHAREDACCESSKEY;
+        TEST_IOTHUB_SERVICE_CLIENT_AUTH.sharedAccessSignature = NULL;
 
         TEST_IOTHUB_REGISTRYMANAGER.hostname = TEST_HOSTNAME;
         TEST_IOTHUB_REGISTRYMANAGER.iothubName = TEST_IOTHUBNAME;
@@ -1261,6 +1263,8 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
 
         umock_c_reset_all_calls();
 
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))

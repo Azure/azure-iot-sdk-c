@@ -173,6 +173,7 @@ typedef struct IOTHUB_REGISTRYMANAGER_TAG
     char* iothubName;
     char* iothubSuffix;
     char* sharedAccessKey;
+    char* sharedAccessSignature;
     char* keyName;
     char* deviceId;
 } IOTHUB_REGISTRYMANAGER;

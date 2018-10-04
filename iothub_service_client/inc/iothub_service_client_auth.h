@@ -49,6 +49,7 @@ typedef struct IOTHUB_SERVICE_CLIENT_AUTH_TAG
     char* hostname;
     char* iothubName;
     char* iothubSuffix;
+    char* sharedAccessSignature;
     char* sharedAccessKey;
     char* keyName;
     char* deviceId;

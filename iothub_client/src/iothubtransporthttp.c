@@ -372,7 +372,7 @@ static bool create_deviceSASObject(HTTPTRANSPORT_PERDEVICE_DATA* handleData, STR
                     {
                         /*Codes_SRS_TRANSPORTMULTITHTTP_17_036: [IoTHubTransportHttp_Create shall invoke HTTPAPIEX_SAS_Create with arguments key, uriResource, and zero length keyName.]*/
                         /*Codes_SRS_TRANSPORTMULTITHTTP_17_037: [If the HTTPAPIEX_SAS_Create fails then IoTHubTransportHttp_Create shall fail and return NULL.]*/
-                        handleData->sasObject = HTTPAPIEX_SAS_Create(key, uriResource, keyName);
+                        handleData->sasObject = HTTPAPIEX_SAS_Create(key, NULL, uriResource, keyName);
                         result = (handleData->sasObject != NULL) ? (true) : (false);
                     }
                     STRING_delete(key);

@@ -97,6 +97,7 @@ typedef struct IOTHUB_REGISTRYMANAGER_TAG
     char* iothubName;
     char* iothubSuffix;
     char* sharedAccessKey;
+    char* sharedAccessSignature;
     char* keyName;
 } IOTHUB_REGISTRYMANAGER;
 
@@ -146,6 +147,8 @@ extern IOTHUB_REGISTRYMANAGER_HANDLE IoTHubRegistryManager_Create(IOTHUB_REGISTR
 **SRS_IOTHUBREGISTRYMANAGER_12_093: [** IoTHubRegistryManager_Create shall allocate memory and copy keyName to result->keyName by calling mallocAndStrcpy_s. **]**
 
 **SRS_IOTHUBREGISTRYMANAGER_12_094: [** If the mallocAndStrcpy_s fails, IoTHubRegistryManager_Create shall do clean up and return NULL. **]**
+
+**SRS_IOTHUBREGISTRYMANAGER_12_095: [** IoTHubRegistryManager_Create shall allocate memory and copy sharedAccessSignature to result->sharedAccessSignature by calling mallocAndStrcpy_s. **]**
 
 
 ## IoTHubRegistryManager_Destroy

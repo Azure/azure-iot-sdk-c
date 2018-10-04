@@ -139,9 +139,10 @@ static void my_HTTPAPIEX_Destroy(HTTPAPIEX_HANDLE handle)
     free(handle);
 }
 
-static HTTPAPIEX_SAS_HANDLE my_HTTPAPIEX_SAS_Create(STRING_HANDLE key, STRING_HANDLE uriResource, STRING_HANDLE keyName)
+static HTTPAPIEX_SAS_HANDLE my_HTTPAPIEX_SAS_Create(STRING_HANDLE key, STRING_HANDLE signature, STRING_HANDLE uriResource, STRING_HANDLE keyName)
 {
     (void)key;
+    (void)signature;
     (void)uriResource;
     (void)keyName;
     return (HTTPAPIEX_SAS_HANDLE)malloc(1);
@@ -3118,7 +3119,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadMultipleBlocksToBlob_deviceKey_happypath)
             .IgnoreArgument_s2();
         STRICT_EXPECTED_CALL(STRING_new());/*this is needed for HTTPAPIEX_SAS_Create -it needs an empty STRING_HANDLE*/
 
-        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument_handle();
@@ -3314,7 +3315,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadMultipleBlocksToBlob_deviceKey_happypath)
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(STRING_new());
-        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument_handle();
@@ -3472,8 +3473,8 @@ TEST_FUNCTION(IoTHubClient_LL_UploadMultipleBlocksToBlob_deviceKey_with_timeout_
         .IgnoreArgument_s1()
         .IgnoreArgument_s2();
         STRICT_EXPECTED_CALL(STRING_new());/*this is needed for HTTPAPIEX_SAS_Create -it needs an empty STRING_HANDLE*/
-
-        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        
+        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
@@ -3669,7 +3670,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadMultipleBlocksToBlob_deviceKey_with_timeout_
         .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(STRING_new());
-        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
@@ -3817,7 +3818,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_deviceKey_when_step1_httpStatusCode_i
             .IgnoreArgument_s2();
         STRICT_EXPECTED_CALL(STRING_new());/*this is needed for HTTPAPIEX_SAS_Create -it needs an empty STRING_HANDLE*/
 
-        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument_handle();
@@ -3961,7 +3962,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_deviceKey_when_step3_httpStatusCode_i
             .IgnoreArgument_s2();
         STRICT_EXPECTED_CALL(STRING_new());/*this is needed for HTTPAPIEX_SAS_Create -it needs an empty STRING_HANDLE*/
 
-        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument_handle();
@@ -4157,7 +4158,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_deviceKey_when_step3_httpStatusCode_i
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(STRING_new());
-        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument_handle();
@@ -4312,7 +4313,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadMultipleBlocksToBlob_deviceKey_unhappypaths)
             .IgnoreArgument_s2();
         STRICT_EXPECTED_CALL(STRING_new());/*this is needed for HTTPAPIEX_SAS_Create -it needs an empty STRING_HANDLE*/
 
-        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument_handle();
@@ -4508,7 +4509,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadMultipleBlocksToBlob_deviceKey_unhappypaths)
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(STRING_new());
-        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument_handle();

@@ -549,9 +549,10 @@ static void my_HTTPHeaders_Free(HTTP_HEADERS_HANDLE httpHeadersHandle)
     my_gballoc_free(httpHeadersHandle);
 }
 
-static HTTPAPIEX_SAS_HANDLE my_HTTPAPIEX_SAS_Create(STRING_HANDLE key, STRING_HANDLE uriResource, STRING_HANDLE keyName)
+static HTTPAPIEX_SAS_HANDLE my_HTTPAPIEX_SAS_Create(STRING_HANDLE key, STRING_HANDLE signature, STRING_HANDLE uriResource, STRING_HANDLE keyName)
 {
     (void)key;
+    (void)signature;
     (void)uriResource;
     (void)keyName;
     return (HTTPAPIEX_SAS_HANDLE)my_gballoc_malloc(1);
@@ -1040,7 +1041,7 @@ static void setupRegisterHappyPathsasObject(bool deallocateCreated, bool is_x509
         STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(STRING_construct(TEST_DEVICE_KEY));
         STRICT_EXPECTED_CALL(STRING_empty(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         if (deallocateCreated)
         {
             STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Destroy(IGNORED_PTR_ARG));

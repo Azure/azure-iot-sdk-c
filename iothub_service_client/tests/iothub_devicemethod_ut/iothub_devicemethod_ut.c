@@ -162,9 +162,10 @@ void my_HTTPAPIEX_Destroy(HTTPAPIEX_HANDLE handle)
     my_gballoc_free(handle);
 }
 
-HTTPAPIEX_SAS_HANDLE my_HTTPAPIEX_SAS_Create(STRING_HANDLE key, STRING_HANDLE uriResource, STRING_HANDLE keyName)
+HTTPAPIEX_SAS_HANDLE my_HTTPAPIEX_SAS_Create(STRING_HANDLE key, STRING_HANDLE signature, STRING_HANDLE uriResource, STRING_HANDLE keyName)
 {
     (void)key;
+    (void)signature;
     (void)uriResource;
     (void)keyName;
     return (HTTPAPIEX_SAS_HANDLE)my_gballoc_malloc(1);
@@ -932,7 +933,7 @@ static void IoTHubDeviceMethod_InvokeDeviceOrModule_happy_path_impl(bool testing
 
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
-    EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
     EXPECTED_CALL(HTTPAPIEX_Create(TEST_HOSTNAME));
 
@@ -1067,7 +1068,7 @@ static void IoTHubDeviceMethod_Invoke_happy_path_http_return_not_equal_200_impl(
 
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
-    EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
     EXPECTED_CALL(HTTPAPIEX_Create(TEST_HOSTNAME));
 
@@ -1174,7 +1175,7 @@ static void IoTHubDeviceMethod_Invoke_non_happy_path_impl(bool testing_module)
 
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
-    EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
     EXPECTED_CALL(HTTPAPIEX_Create(TEST_HOSTNAME));
 

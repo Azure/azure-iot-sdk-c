@@ -74,6 +74,7 @@ typedef struct IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_TAG
 {
     char* hostname;
     char* sharedAccessKey;
+    char* sharedAccessSignature;
     char* keyName;
 } IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION;
 
@@ -190,6 +191,7 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT sendHttpRequestDeviceConfiguration(IOT
 
     STRING_HANDLE uriResource = NULL;
     STRING_HANDLE accessKey = NULL;
+    STRING_HANDLE accessSignature = NULL;
     STRING_HANDLE keyName = NULL;
     HTTPAPIEX_SAS_HANDLE httpExApiSasHandle;
     HTTPAPIEX_HANDLE httpExApiHandle;
@@ -201,10 +203,17 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT sendHttpRequestDeviceConfiguration(IOT
         LogError("STRING_construct failed for uriResource");
         result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
     }
-    else if ((accessKey = STRING_construct(serviceClientDeviceConfigurationHandle->sharedAccessKey)) == NULL)
+    else if ((serviceClientDeviceConfigurationHandle->sharedAccessKey != NULL) && ((accessKey = STRING_construct(serviceClientDeviceConfigurationHandle->sharedAccessKey)) == NULL))
     {
         /*Codes_SRS_IOTHUBDEVICECONFIGURATION_38_024: [ If any of the call fails during the HTTP creation IoTHubDeviceConfiguration_GetConfiguration shall fail and return NULL ]*/
         LogError("STRING_construct failed for accessKey");
+        STRING_delete(uriResource);
+        result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
+    }
+    else if ((serviceClientDeviceConfigurationHandle->sharedAccessSignature != NULL) && ((accessSignature = STRING_construct(serviceClientDeviceConfigurationHandle->sharedAccessSignature)) == NULL))
+    {
+        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_38_024: [ If any of the call fails during the HTTP creation IoTHubDeviceConfiguration_GetConfiguration shall fail and return NULL ]*/
+        LogError("STRING_construct failed for accessSignature");
         STRING_delete(uriResource);
         result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
     }
@@ -213,6 +222,7 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT sendHttpRequestDeviceConfiguration(IOT
         /*Codes_SRS_IOTHUBDEVICECONFIGURATION_38_024: [ If any of the call fails during the HTTP creation IoTHubDeviceConfiguration_GetConfiguration shall fail and return NULL ]*/
         LogError("STRING_construct failed for keyName");
         STRING_delete(accessKey);
+        STRING_delete(accessSignature);
         STRING_delete(uriResource);
         result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
     }
@@ -223,17 +233,19 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT sendHttpRequestDeviceConfiguration(IOT
         LogError("HttpHeader creation failed");
         STRING_delete(keyName);
         STRING_delete(accessKey);
+        STRING_delete(accessSignature);
         STRING_delete(uriResource);
         result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
     }
     /*Codes_SRS_IOTHUBDEVICECONFIGURATION_38_021: [ IoTHubDeviceConfiguration_GetConfiguration shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ]*/
-    else if ((httpExApiSasHandle = HTTPAPIEX_SAS_Create(accessKey, uriResource, keyName)) == NULL)
+    else if ((httpExApiSasHandle = HTTPAPIEX_SAS_Create(accessKey, accessSignature, uriResource, keyName)) == NULL)
     {
         /*Codes_SRS_IOTHUBDEVICECONFIGURATION_38_025: [ If any of the HTTPAPI call fails IoTHubDeviceConfiguration_GetConfiguration shall fail and return IOTHUB_DEVICE_CONFIGURATION_HTTPAPI_ERROR ]*/
         LogError("HTTPAPIEX_SAS_Create failed");
         HTTPHeaders_Free(httpHeader);
         STRING_delete(keyName);
         STRING_delete(accessKey);
+        STRING_delete(accessSignature);
         STRING_delete(uriResource);
         result = IOTHUB_DEVICE_CONFIGURATION_HTTPAPI_ERROR;
     }
@@ -1038,10 +1050,17 @@ IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE IoTHubDeviceConfiguration_Crea
                     result = NULL;
                 }
                 /*Codes_SRS_IOTHUBDEVICECONFIGURATION_38_012: [ IoTHubDeviceConfiguration_Create shall allocate memory and copy sharedAccessKey to result->sharedAccessKey by calling mallocAndStrcpy_s. ]*/
-                else if (mallocAndStrcpy_s(&result->sharedAccessKey, serviceClientAuth->sharedAccessKey) != 0)
+                else if ((serviceClientAuth->sharedAccessKey != NULL) && (mallocAndStrcpy_s(&result->sharedAccessKey, serviceClientAuth->sharedAccessKey) != 0))
                 {
                     /*Codes_SRS_IOTHUBDEVICECONFIGURATION_38_013: [ If the mallocAndStrcpy_s fails, IoTHubDeviceConfiguration_Create shall do clean up and return NULL. ]*/
                     LogError("mallocAndStrcpy_s failed for sharedAccessKey");
+                    free_deviceConfiguration_handle(result);
+                    result = NULL;
+                }
+                else if ((serviceClientAuth->sharedAccessSignature != NULL) && (mallocAndStrcpy_s(&result->sharedAccessSignature, serviceClientAuth->sharedAccessSignature) != 0))
+                {
+                    /*Codes_SRS_IOTHUBDEVICECONFIGURATION_38_013: [ If the mallocAndStrcpy_s fails, IoTHubDeviceConfiguration_Create shall do clean up and return NULL. ]*/
+                    LogError("mallocAndStrcpy_s failed for sharedAccessSignature");
                     free_deviceConfiguration_handle(result);
                     result = NULL;
                 }

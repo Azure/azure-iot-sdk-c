@@ -388,7 +388,7 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                                             else
                                             {
                                                 /*Codes_SRS_IOTHUBCLIENT_LL_02_089: [ If creating the HTTPAPIEX_SAS_HANDLE fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-                                                HTTPAPIEX_SAS_HANDLE sasHandle = HTTPAPIEX_SAS_Create(handleData->credentials.deviceKey, uriResource, empty);
+                                                HTTPAPIEX_SAS_HANDLE sasHandle = HTTPAPIEX_SAS_Create(handleData->credentials.deviceKey, NULL, uriResource, empty);
                                                 if (sasHandle == NULL)
                                                 {
                                                     LogError("unable to HTTPAPIEX_SAS_Create");
@@ -693,7 +693,7 @@ static int IoTHubClient_LL_UploadToBlob_step3(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HAND
                         }
                         else
                         {
-                            HTTPAPIEX_SAS_HANDLE sasHandle = HTTPAPIEX_SAS_Create(handleData->credentials.deviceKey, uriResource, empty);
+                            HTTPAPIEX_SAS_HANDLE sasHandle = HTTPAPIEX_SAS_Create(handleData->credentials.deviceKey, NULL, uriResource, empty);
                             if (sasHandle == NULL)
                             {
                                 LogError("unable to HTTPAPIEX_SAS_Create");
