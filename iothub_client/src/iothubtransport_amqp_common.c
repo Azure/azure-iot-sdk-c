@@ -1127,8 +1127,8 @@ static int IoTHubTransport_AMQP_Common_Device_DoWork(AMQP_TRANSPORT_DEVICE_INSTA
         }
         else // i.e., DEVICE_STATE_ERROR_AUTH || DEVICE_STATE_ERROR_AUTH_TIMEOUT || DEVICE_STATE_ERROR_MSG
         {
-            LogError("Failed performing DoWork for device '%s' (device reported state %d; number of previous failures: %d)",
-                STRING_c_str(registered_device->device_id), registered_device->device_state, registered_device->number_of_previous_failures);
+            LogError("Failed performing DoWork for device '%s' (device reported state %d; number of previous failures: %lu)",
+                STRING_c_str(registered_device->device_id), (int)registered_device->device_state, (unsigned long)registered_device->number_of_previous_failures);
 
             registered_device->number_of_previous_failures++;
 

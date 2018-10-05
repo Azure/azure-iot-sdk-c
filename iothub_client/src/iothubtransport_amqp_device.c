@@ -927,7 +927,7 @@ void device_do_work(AMQP_DEVICE_HANDLE handle)
                     // Codes_SRS_DEVICE_09_037: [If authentication_start times out, the device state shall be updated to DEVICE_STATE_ERROR_AUTH_TIMEOUT]
                     else if (is_timed_out == 1)
                     {
-                        LogError("Device '%s' authentication did not complete starting within expected timeout (%d)", instance->config->device_id, instance->auth_state_change_timeout_secs);
+                        LogError("Device '%s' authentication did not complete starting within expected timeout (%lu)", instance->config->device_id, (unsigned long)instance->auth_state_change_timeout_secs);
 
                         update_state(instance, DEVICE_STATE_ERROR_AUTH_TIMEOUT);
                     }
@@ -978,7 +978,7 @@ void device_do_work(AMQP_DEVICE_HANDLE handle)
                     // Codes_SRS_DEVICE_09_044: [If messenger_start times out, the device state shall be updated to DEVICE_STATE_ERROR_MSG]
                     else if (is_timed_out == 1)
                     {
-                        LogError("Device '%s' messenger did not complete starting within expected timeout (%d)", instance->config->device_id, instance->msgr_state_change_timeout_secs);
+                        LogError("Device '%s' messenger did not complete starting within expected timeout (%lu)", instance->config->device_id, (unsigned long)instance->msgr_state_change_timeout_secs);
 
                         update_state(instance, DEVICE_STATE_ERROR_MSG);
                     }
@@ -1020,7 +1020,7 @@ void device_do_work(AMQP_DEVICE_HANDLE handle)
                     else if (is_timed_out == 1)
                     {
                         // Codes_SRS_DEVICE_09_128: [If twin_messenger_start times out, the device state shall be updated to DEVICE_STATE_ERROR_MSG]
-                        LogError("Device '%s' twin messenger did not complete starting within expected timeout (%d)", instance->config->device_id, instance->twin_msgr_state_change_timeout_secs);
+                        LogError("Device '%s' twin messenger did not complete starting within expected timeout (%lu)", instance->config->device_id, (unsigned long)instance->twin_msgr_state_change_timeout_secs);
 
                         update_state(instance, DEVICE_STATE_ERROR_MSG);
                     }

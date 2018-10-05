@@ -608,7 +608,7 @@ int message_create_uamqp_encoding_from_iothub_message(MESSAGE_HANDLE message_bat
     }
     else if ((body_binary_data->bytes = malloc(message_properties_length + application_properties_length + data_length + message_annotations_length)) == NULL)
     {
-        LogError("malloc of %d bytes failed", message_properties_length + application_properties_length + data_length + message_annotations_length);
+        LogError("malloc of %lu bytes failed", (unsigned long)(message_properties_length + application_properties_length + data_length + message_annotations_length));
         result = __FAILURE__;
     }
     // Codes_SRS_UAMQP_MESSAGING_31_119: [Invoke underlying AMQP encode routines on data waiting to be encoded.]

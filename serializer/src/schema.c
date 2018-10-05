@@ -2883,7 +2883,7 @@ SCHEMA_DESIRED_PROPERTY_HANDLE Schema_GetModelDesiredPropertyByIndex(SCHEMA_MODE
     /*Codes_SRS_SCHEMA_02_038: [ If modelTypeHandle is NULL then Schema_GetModelDesiredPropertyByIndex shall fail and return NULL. ]*/
     if (modelTypeHandle == NULL)
     {
-        LogError("invalid argument SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle=%p, size_t index=%p", modelTypeHandle, index);
+        LogError("invalid argument SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle=%p, size_t index=%lu", modelTypeHandle, (unsigned long)index);
         result = NULL;
     }
     else

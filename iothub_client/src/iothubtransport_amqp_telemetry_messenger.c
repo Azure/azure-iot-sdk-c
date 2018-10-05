@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
+#include <inttypes.h>
 #include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/gballoc.h"
@@ -1163,7 +1164,7 @@ static int get_max_message_size_for_batching(TELEMETRY_MESSENGER_INSTANCE* insta
     // Reserve AMQP_BATCHING_RESERVE_SIZE bytes for AMQP overhead of the "main" message itself.
     else if (*max_messagesize <= AMQP_BATCHING_RESERVE_SIZE)
     {
-        LogError("link_get_peer_max_message_size (%d) is less than the reserve size (%d)", max_messagesize, AMQP_BATCHING_RESERVE_SIZE);
+        LogError("link_get_peer_max_message_size (%" PRIu64 ") is less than the reserve size (%lu)", *max_messagesize, (unsigned long)AMQP_BATCHING_RESERVE_SIZE);
         result = __FAILURE__;
     }
     else
@@ -1228,7 +1229,7 @@ static int send_pending_events(TELEMETRY_MESSENGER_INSTANCE* instance)
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_31_197: [If a single message is greater than our maximum AMQP send size, ignore the message.  Invoke the callback but continue send loop; this is NOT a fatal error.]
         else if (body_binary_data.length > (int)max_messagesize)
         {
-            LogError("a single message will encode to be %d bytes, larger than max we will send the link %lld.  Will continue to try to process messages", body_binary_data.length, max_messagesize);
+            LogError("a single message will encode to be %lu bytes, larger than max we will send the link %" PRIu64 ".  Will continue to try to process messages", (unsigned long)body_binary_data.length, max_messagesize);
             invoke_callback_on_error(caller_info, TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING);
             free(caller_info);
             continue;
@@ -1339,7 +1340,7 @@ static int process_event_send_timeouts(TELEMETRY_MESSENGER_INSTANCE* instance)
                 }
                 else
                 {
-                    LogError("messenger failed to evaluate event send timeout of event %d", task);
+                    LogError("messenger failed to evaluate event send timeout of event %p", task);
                     result = __FAILURE__;
                 }
             }
