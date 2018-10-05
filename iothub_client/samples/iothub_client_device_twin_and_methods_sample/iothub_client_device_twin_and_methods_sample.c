@@ -51,7 +51,7 @@
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 /* Paste in the your iothub device connection string  */
-static const char* connectionString = "[device connection string]";
+static const char* connectionString = "HostName=yosephhub.azure-devices.net;DeviceId=myNewDevice;SharedAccessKey=NGGYMXiRaT/4C6ZeetvaR824aBPn6y0tlG2PNxfWZFQ=";
 
 #define DOWORK_LOOP_NUM     3
 
@@ -226,6 +226,7 @@ static void deviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsi
 
             oldCar->changeOilReminder = malloc(strlen(newCar->changeOilReminder) + 1);
             (void)strcpy(oldCar->changeOilReminder, newCar->changeOilReminder);
+			free(newCar->changeOilReminder);
         }
     }
 
@@ -316,7 +317,7 @@ static void iothub_client_device_twin_and_methods_sample_run(void)
             memset(&car, 0, sizeof(Car));
             car.lastOilChangeDate = "2016";
             car.maker.makerName = "Fabrikam";
-            car.maker.style = "sedan";
+            car.maker.style = "minivan";
             car.maker.year = 2014;
             car.state.reported_maxSpeed = 100;
             car.state.softwareVersion = 1;
