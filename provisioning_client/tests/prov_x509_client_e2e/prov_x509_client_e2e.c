@@ -194,7 +194,7 @@ BEGIN_TEST_SUITE(prov_x509_client_e2e)
 
         // arrange
         PROV_DEVICE_LL_HANDLE handle;
-        handle = Prov_Device_LL_Create(g_dps_uri, g_dps_scope_id, Prov_Device_HTTP_Protocol);
+        handle = Prov_Device_LL_Create(g_dps_uri, g_dps_scope_id, Prov_Device_MQTT_Protocol);
         ASSERT_IS_NOT_NULL_WITH_MSG(handle, "Failure create a DPS HANDLE");
 
         Prov_Device_LL_SetOption(handle, PROV_OPTION_LOG_TRACE, &g_enable_tracing);
@@ -221,7 +221,7 @@ BEGIN_TEST_SUITE(prov_x509_client_e2e)
 
         // arrange
         PROV_DEVICE_LL_HANDLE handle;
-        handle = Prov_Device_LL_Create(g_dps_uri, g_dps_scope_id, Prov_Device_HTTP_Protocol);
+        handle = Prov_Device_LL_Create(g_dps_uri, g_dps_scope_id, Prov_Device_MQTT_Protocol);
         ASSERT_IS_NOT_NULL_WITH_MSG(handle, "Failure create a DPS HANDLE");
 
         Prov_Device_LL_SetOption(handle, PROV_OPTION_LOG_TRACE, &g_enable_tracing);
