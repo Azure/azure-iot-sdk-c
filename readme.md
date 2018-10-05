@@ -207,8 +207,8 @@ The project offers a Long Term Support (LTS) version to allow users that do not 
 
 A new LTS version will be created every 6 months. The lifetime of an LTS branch is currently planned for one year. LTS branches receive all bug fixes that fall in one of these categories:
 
-- security bugfixes
-- critical bugfixes 
+- security bug fixes
+- critical bug fixes 
 
 No new features will be picked up in an LTS branch.
 
@@ -220,9 +220,8 @@ Below is a table showing the mapping of the LTS branches to the packages release
 
 | Package | Github Branch | LTS Status | LTS Start Date | Maintenance End Date | Removed Date |
 | :-----------: | :-----------: | :--------: | :------------: | :------------------: | :----------: |
-| Nuget: 1.1.33<br/> Xenial: 0.1.0.0-35xenial<br/> Trusty: 0.1.0-37trusty<br/>     | lts_01_2018   | Active     | 2018-01-01     | 2018-06-30           | 2018-12-31   |
-| 1.x.x         | lts_07_2017   | Deprecated | 2017-07-01     | 2017-12-31           | 2018-06-30   |
-
+| Nuget: 1.2.10<br/> Xenial: 0.2.0.0-12xenial<br/> Trusty: 0.2.0-12trusty<br/> Bionic: 0.2.0.0-5bionic<br/>    | lts_10_2018   | Active     | 2018-10-03     | 2019-10-03           | 2019-10-03   |
+| Nuget: 1.1.33<br/> Xenial: 0.1.0.0-35xenial<br/> Trusty: 0.1.0-37trusty<br/>     | lts_01_2018   | Active     | 2018-01-01     | 2018-12-31           | 2018-04-31   |
 
 * <sup>1</sup> All scheduled dates are subject to change by the Azure IoT SDK team.
 
