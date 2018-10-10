@@ -445,7 +445,7 @@ static int provisionDevices(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_ACCOUNT_AUT
     {
         if ((devicesToProvision[iterator] = malloc(sizeof(IOTHUB_PROVISIONED_DEVICE))) == NULL)
         {
-            LogError("Failed creating IOTHUB_PROVISIONED_DEVICE instance for device number %d", iterator);
+            LogError("Failed creating IOTHUB_PROVISIONED_DEVICE instance for device number %lu", (unsigned long)iterator);
             result = __FAILURE__;
             break;
         }
@@ -455,7 +455,7 @@ static int provisionDevices(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_ACCOUNT_AUT
 
             if (provisionDevice(accountInfo, method, devicesToProvision[iterator]) != 0)
             {
-                LogError("Failed provisioning device number %d", iterator);
+                LogError("Failed provisioning device number %lu", (unsigned long)iterator);
                 result = __FAILURE__;
                 break;
             }

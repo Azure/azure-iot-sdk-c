@@ -1338,7 +1338,7 @@ static void recv_message_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLI
         {
             // In some situations this will pass due to the device already being connected
             // Or being amqp.  Make sure we flag this as a possible situation and continue
-            LogInfo("Did not recieve the client connection callback within the alloted time <%d> seconds", client_conn_wait_time);
+            LogInfo("Did not recieve the client connection callback within the alloted time <%lu> seconds", (unsigned long)client_conn_wait_time);
         }
         // Make sure we subscribe to all the events
         ThreadAPI_Sleep(3000);

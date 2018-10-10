@@ -264,7 +264,7 @@ static BUFFER_HANDLE construct_json_signing_blob(const char* data)
     const char* carriage_return_in_data = strchr(data, '\n');
     if ((carriage_return_in_data == NULL) || (*(carriage_return_in_data+1) == 0))
     {
-        LogError("No carriage return in data", data);
+        LogError("No carriage return in data %s", data);
         result = NULL;
     }
     else if ((data_string = STRING_construct_n(data, carriage_return_in_data - data)) == NULL)

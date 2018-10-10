@@ -479,7 +479,7 @@ static char * malloc_and_copy_unsigned_char(const unsigned char* payload, size_t
 
 static void deviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payload, size_t size, void* userContextCallback)
 {
-    LogInfo("Callback:: Received payload len=<%d>, data=<%.*s>\n", size, (int)size, payload);
+    LogInfo("Callback:: Received payload len=<%lu>, data=<%.*s>\n", (unsigned long)size, (int)size, payload);
     DEVICE_DESIRED_DATA *device = (DEVICE_DESIRED_DATA *)userContextCallback;
     if (Lock(device->lock) == LOCK_ERROR)
     {
