@@ -51,7 +51,7 @@
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 /* Paste in the your iothub device connection string  */
-static const char* connectionString = "HostName=yosephhub.azure-devices.net;DeviceId=myNewDevice;SharedAccessKey=NGGYMXiRaT/4C6ZeetvaR824aBPn6y0tlG2PNxfWZFQ=";
+static const char* connectionString = "[device connection string]";
 
 #define DOWORK_LOOP_NUM     3
 
@@ -317,7 +317,7 @@ static void iothub_client_device_twin_and_methods_sample_run(void)
             memset(&car, 0, sizeof(Car));
             car.lastOilChangeDate = "2016";
             car.maker.makerName = "Fabrikam";
-            car.maker.style = "minivan";
+            car.maker.style = "sedan";
             car.maker.year = 2014;
             car.state.reported_maxSpeed = 100;
             car.state.softwareVersion = 1;
