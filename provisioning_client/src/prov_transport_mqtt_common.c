@@ -260,7 +260,7 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
             case MQTT_CLIENT_ON_UNSUBSCRIBE_ACK:
                 break;
             default:
-                LogError("Unknown MQTT_CLIENT_EVENT_RESULT item %d");
+                LogError("Unknown MQTT_CLIENT_EVENT_RESULT item %d", (int)event_result);
                 break;
         }
     }

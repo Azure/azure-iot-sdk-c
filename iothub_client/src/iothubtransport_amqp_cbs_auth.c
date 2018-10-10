@@ -649,7 +649,7 @@ void authentication_do_work(AUTHENTICATION_HANDLE authentication_handle)
                     // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_068: [If using `instance->device_primary_key` has failed previously and `instance->device_secondary_key` is not provided,  authentication_do_work() shall fail and return]
                     if (create_and_put_SAS_token_to_cbs(instance) != RESULT_OK)
                     {
-                        LogError("Failed refreshing SAS token '%'", instance->device_id);
+                        LogError("Failed refreshing SAS token '%s'", instance->device_id);
                     }
 
                     if (!instance->is_cbs_put_token_in_progress)
