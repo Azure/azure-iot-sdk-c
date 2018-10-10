@@ -13,6 +13,7 @@
 #include "hsm_client_riot.h"
 
 #define MAX_VALIDATION_CODE_LEN         48
+static const char* const END_CERT_MARKER = "-----END CERTIFICATE-----";
 
 static char* get_user_input(const char* text_value, int max_len)
 {
@@ -71,6 +72,40 @@ static char* get_user_input(const char* text_value, int max_len)
     return result;
 }
 
+static const char* retrieve_next_cert(const char* cert_list)
+{
+    const char* result = NULL;
+    const char* iterator = cert_list;
+    bool after_begin = false;
+    size_t end_marker = strlen(END_CERT_MARKER);
+    do
+    {
+        if (after_begin && *iterator == '-')
+        {
+            if (memcmp(iterator, END_CERT_MARKER, end_marker) == 0)
+            {
+                iterator += end_marker;
+                while (*iterator != '\0')
+                {
+                    if (*iterator == '\n')
+                    {
+                        result = iterator+1;
+                        break;
+                    }
+                    iterator++;
+                }
+                break;
+            }
+        }
+        else if (!after_begin && *iterator == '\n')
+        {
+            after_begin = true;
+        }
+        iterator++;
+    } while (*iterator != '\0');
+    return result;
+}
+
 static int alias_certificate_info(HSM_CLIENT_HANDLE hsm_handle)
 {
     int result;
@@ -83,7 +118,19 @@ static int alias_certificate_info(HSM_CLIENT_HANDLE hsm_handle)
     }
     else
     {
-        (void)printf("Device certificate:\r\n%s\r\n", certificate);
+        // This may contain 2 certificates, but we only need to show the
+        // first cert.  Get the 2nd cert
+        const char* next_cert = retrieve_next_cert(certificate);
+        if (next_cert != NULL)
+        {
+            // Let's get the length of the first cert
+            int init_len = next_cert-certificate;
+            (void)printf("Device certificate:\r\n%.*s\r\n", init_len, certificate);
+        }
+        else
+        {
+            (void)printf("Device certificate:\r\n%s\r\n", certificate);
+        }
         free(certificate);
         result = 0;
     }
