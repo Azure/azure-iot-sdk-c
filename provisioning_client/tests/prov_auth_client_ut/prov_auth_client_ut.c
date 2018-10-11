@@ -60,6 +60,7 @@ MOCKABLE_FUNCTION(, char*, secure_device_get_certificate, HSM_CLIENT_HANDLE, han
 MOCKABLE_FUNCTION(, char*, secure_device_get_alias_key, HSM_CLIENT_HANDLE, handle);
 MOCKABLE_FUNCTION(, char*, secure_device_get_common_name, HSM_CLIENT_HANDLE, handle);
 MOCKABLE_FUNCTION(, char*, secure_device_get_symm_key, HSM_CLIENT_HANDLE, handle);
+MOCKABLE_FUNCTION(, int, secure_device_set_symmetrical_key_info, HSM_CLIENT_HANDLE, handle, const char*, reg_name, const char*, symm_key);
 
 MOCKABLE_FUNCTION(, int, SHA256Reset, SHA256Context*, ctx);
 MOCKABLE_FUNCTION(, int, SHA256Input, SHA256Context*, ctx, const uint8_t*, bytes, unsigned int, bytecount);
@@ -165,7 +166,8 @@ static const HSM_CLIENT_KEY_INTERFACE test_key_interface =
     secure_device_create,
     secure_device_destroy,
     secure_device_get_symm_key,
-    secure_device_get_common_name
+    secure_device_get_common_name,
+    secure_device_set_symmetrical_key_info
 };
 
 static HSM_CLIENT_HANDLE my_secure_device_create(void)
@@ -358,6 +360,9 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
 
         REGISTER_GLOBAL_MOCK_HOOK(secure_device_get_symm_key, my_secure_device_get_symm_key);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(secure_device_get_symm_key, NULL);
+
+        REGISTER_GLOBAL_MOCK_RETURN(secure_device_set_symmetrical_key_info, 0);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(secure_device_set_symmetrical_key_info, __LINE__);
 
         REGISTER_GLOBAL_MOCK_RETURN(BUFFER_u_char, TEST_DATA);
         REGISTER_GLOBAL_MOCK_RETURN(BUFFER_length, TEST_DATA_LEN);

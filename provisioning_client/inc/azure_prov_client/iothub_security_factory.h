@@ -31,6 +31,11 @@ MOCKABLE_FUNCTION(, void, iothub_security_deinit);
 MOCKABLE_FUNCTION(, const void*, iothub_security_interface);
 MOCKABLE_FUNCTION(, IOTHUB_SECURITY_TYPE, iothub_security_type);
 
+// Symmetric key information
+MOCKABLE_FUNCTION(, int, iothub_security_set_symmetric_key_info, const char*, registration_name, const char*, symmetric_key);
+MOCKABLE_FUNCTION(, const char*, iothub_security_get_symmetric_key);
+MOCKABLE_FUNCTION(, const char*, iothub_security_get_symm_registration_name);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

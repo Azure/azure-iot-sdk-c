@@ -33,6 +33,7 @@ typedef struct IOTHUB_SECURITY_INFO_TAG
 
     HSM_CLIENT_GET_TRUST_BUNDLE hsm_client_get_trust_bundle;
     HSM_CLIENT_GET_SYMMETRICAL_KEY hsm_client_get_symm_key;
+    HSM_CLIENT_SET_SYMMETRICAL_KEY_INFO hsm_client_set_symm_key_info;
 
     char* sas_token;
     char* x509_certificate;
@@ -180,7 +181,8 @@ IOTHUB_SECURITY_HANDLE iothub_device_auth_create()
             if ((key_interface == NULL) ||
                 ((result->hsm_client_create = key_interface->hsm_client_key_create) == NULL) ||
                 ((result->hsm_client_destroy = key_interface->hsm_client_key_destroy) == NULL) ||
-                ((result->hsm_client_get_symm_key = key_interface->hsm_client_get_symm_key) == NULL)
+                ((result->hsm_client_get_symm_key = key_interface->hsm_client_get_symm_key) == NULL) ||
+                ((result->hsm_client_set_symm_key_info = key_interface->hsm_client_set_symm_key_info) == NULL)
                 )
             {
                 LogError("Invalid x509 secure device interface was specified");
@@ -227,6 +229,13 @@ IOTHUB_SECURITY_HANDLE iothub_device_auth_create()
             {
                 /* Codes_IOTHUB_DEV_AUTH_07_002: [ iothub_device_auth_create shall allocate the IOTHUB_SECURITY_INFO and shall fail if the allocation fails. ]*/
                 LogError("failed create device auth module.");
+                free(result);
+                result = NULL;
+            }
+            else if (result->cred_type == AUTH_TYPE_SYMM_KEY && result->hsm_client_set_symm_key_info(result->hsm_client_handle, iothub_security_get_symm_registration_name(), iothub_security_get_symmetric_key()) != 0)
+            {
+                LogError("Invalid x509 secure device interface was specified");
+                result->hsm_client_destroy(result->hsm_client_handle);
                 free(result);
                 result = NULL;
             }
