@@ -422,7 +422,7 @@ TEST_FUNCTION(initialTwin_create_fail)
         INITIAL_TWIN_HANDLE twin = initialTwin_create(TEST_JSON, TEST_JSON2);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(twin, tmp_msg);
+        ASSERT_IS_NULL(twin, tmp_msg);
 
         //cleanup
         initialTwin_destroy(twin);
@@ -685,7 +685,7 @@ TEST_FUNCTION(initialTwin_setTags_no_existing_tags_fail)
         int result = initialTwin_setTags(twin, TEST_JSON);
 
         //assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(int, 0, result, tmp_msg);
 
         //cleanup
         initialTwin_setTags(twin, NULL);
@@ -755,7 +755,7 @@ TEST_FUNCTION(initialTwin_setTags_overwrite_existing_tags_fail)
         int result = initialTwin_setTags(twin, TEST_JSON2);
 
         //assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(int, 0, result, tmp_msg);
 
         //cleanup
         initialTwin_setTags(twin, TEST_JSON);
@@ -884,7 +884,7 @@ TEST_FUNCTION(initialTwin_setDesiredProperties_no_existing_desired_properties_fa
         int result = initialTwin_setDesiredProperties(twin, TEST_JSON);
 
         //assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(int, 0, result, tmp_msg);
 
         //cleanup
         initialTwin_setDesiredProperties(twin, NULL);
@@ -954,7 +954,7 @@ TEST_FUNCTION(initialTwin_setDesiredProperties_overwrite_existing_desired_proper
         int result = initialTwin_setDesiredProperties(twin, TEST_JSON2);
 
         //assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(int, 0, result, tmp_msg);
 
         //cleanup
         initialTwin_setDesiredProperties(twin, NULL);
@@ -1172,7 +1172,7 @@ TEST_FUNCTION(initialTwin_fromJson_tags_and_desired_properties_error)
         INITIAL_TWIN_HANDLE twin = initialTwin_fromJson(TEST_JSON_OBJECT);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(twin, tmp_msg);
+        ASSERT_IS_NULL(twin, tmp_msg);
 
         //cleanup
         initialTwin_destroy(twin);

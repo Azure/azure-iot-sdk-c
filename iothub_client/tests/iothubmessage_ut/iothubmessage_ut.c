@@ -460,7 +460,7 @@ TEST_FUNCTION(IoTHubMessage_CreateFromByteArray_fails)
         IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(h, tmp_msg);
+        ASSERT_IS_NULL(h, tmp_msg);
     }
 
     //cleanup
@@ -532,7 +532,7 @@ TEST_FUNCTION(IoTHubMessage_CreateFromString_fails)
         IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromString("a");
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(h, tmp_msg);
+        ASSERT_IS_NULL(h, tmp_msg);
     }
 
     //cleanup
@@ -815,7 +815,7 @@ TEST_FUNCTION(IoTHubMessage_Clone_with_BYTE_ARRAY_fails)
         IOTHUB_MESSAGE_HANDLE r = IoTHubMessage_Clone(h);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(r, tmp_msg);
+        ASSERT_IS_NULL(r, tmp_msg);
     }
 
     //cleanup
@@ -878,7 +878,7 @@ TEST_FUNCTION(IoTHubMessage_Clone_with_STRING_fails)
         IOTHUB_MESSAGE_HANDLE r = IoTHubMessage_Clone(h);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(r, tmp_msg);
+        ASSERT_IS_NULL(r, tmp_msg);
     }
 
     //cleanup
@@ -1331,7 +1331,7 @@ TEST_FUNCTION(IoTHubMessage_SetContentTypeSystemProperty_Fails)
         IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentTypeSystemProperty(h, TEST_CONTENT_TYPE);
 
         //assert
-        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_ERROR, result, tmp_msg);
+        ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_ERROR, result, tmp_msg);
     }
 
     //cleanup
@@ -1442,7 +1442,7 @@ TEST_FUNCTION(IoTHubMessage_SetContentEncodingSystemProperty_Fails)
         IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentEncodingSystemProperty(h, TEST_CONTENT_ENCODING);
 
         //assert
-        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_ERROR, result, tmp_msg);
+        ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_ERROR, result, tmp_msg);
     }
 
     //cleanup
@@ -1712,7 +1712,7 @@ TEST_FUNCTION(IoTHubMessage_SetDiagnosticPropertyData_Fails)
         IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetDiagnosticPropertyData(h, &TEST_DIAGNOSTIC_DATA);
 
         //assert
-        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_ERROR, result, tmp_msg);
+        ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_ERROR, result, tmp_msg);
     }
 
     //cleanup

@@ -568,7 +568,7 @@ TEST_FUNCTION(deviceRegistrationState_fromJson_full_error)
         DEVICE_REGISTRATION_STATE_HANDLE drs = deviceRegistrationState_fromJson(TEST_JSON_OBJECT);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(drs, tmp_msg);
+        ASSERT_IS_NULL(drs, tmp_msg);
     }
 
     umock_c_negative_tests_deinit();

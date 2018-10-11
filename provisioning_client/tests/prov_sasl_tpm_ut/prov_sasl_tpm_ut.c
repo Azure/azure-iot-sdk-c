@@ -398,7 +398,7 @@ TEST_FUNCTION(prov_sasl_hsm_tpm_create_fail)
         CONCRETE_SASL_MECHANISM_HANDLE handle = prov_sasl_mechanism_create(&sasl_tpm_config);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(handle, tmp_msg);
+        ASSERT_IS_NULL(handle, tmp_msg);
     }
 
     //cleanup
@@ -878,7 +878,7 @@ TEST_FUNCTION(prov_sasl_mechanism_challenge_sastoken_fail)
         int reply = prov_sasl_mechanism_challenge(handle, &challenge_bytes, &reply_bytes);
 
         //assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, reply, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(int, 0, reply, tmp_msg);
     }
 
     //cleanup

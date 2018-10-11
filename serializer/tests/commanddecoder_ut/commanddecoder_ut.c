@@ -3167,7 +3167,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
                 EXECUTE_COMMAND_RESULT result = CommandDecoder_IngestDesiredProperties(deviceMemoryArea, commandDecoderHandle, desiredPropertiesJSON, false);
 
                 ///assert
-                ASSERT_ARE_NOT_EQUAL_WITH_MSG(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS, result, temp_str);
+                ASSERT_ARE_NOT_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS, result, temp_str);
             }
         }
 
@@ -3387,7 +3387,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
                 EXECUTE_COMMAND_RESULT result = CommandDecoder_IngestDesiredProperties(deviceMemoryArea, commandDecoderHandle, desiredPropertiesJSON, false);
 
                 ///assert
-                ASSERT_ARE_NOT_EQUAL_WITH_MSG(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS, result, temp_str);
+                ASSERT_ARE_NOT_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS, result, temp_str);
             }
 
         }

@@ -97,7 +97,7 @@ static PROV_DEVICE_LL_HANDLE create_dps_handle(PROV_DEVICE_TRANSPORT_PROVIDER_FU
 {
     PROV_DEVICE_LL_HANDLE result;
     result = Prov_Device_LL_Create(g_dps_uri, g_dps_scope_id, dps_transport);
-    ASSERT_IS_NOT_NULL_WITH_MSG(result, "Failure create a DPS HANDLE");
+    ASSERT_IS_NOT_NULL(result, "Failure create a DPS HANDLE");
     return result;
 }
 
@@ -157,29 +157,29 @@ static void create_tpm_enrollment_device()
     INDIVIDUAL_ENROLLMENT_HANDLE indiv_enrollment = NULL;
 
     PROVISIONING_SERVICE_CLIENT_HANDLE prov_sc_handle = prov_sc_create_from_connection_string(g_prov_conn_string);
-    ASSERT_IS_NOT_NULL_WITH_MSG(prov_sc_handle, "Failure creating provisioning service client");
+    ASSERT_IS_NOT_NULL(prov_sc_handle, "Failure creating provisioning service client");
 
     prov_sc_set_trace(prov_sc_handle, TRACING_STATUS_ON);
 
     PROV_AUTH_HANDLE auth_handle = prov_auth_create();
-    ASSERT_IS_NOT_NULL_WITH_MSG(auth_handle, "Failure creating auth client");
+    ASSERT_IS_NOT_NULL(auth_handle, "Failure creating auth client");
 
     char* registration_id = prov_auth_get_registration_id(auth_handle);
-    ASSERT_IS_NOT_NULL_WITH_MSG(registration_id, "Failure prov_auth_get_common_name");
+    ASSERT_IS_NOT_NULL(registration_id, "Failure prov_auth_get_common_name");
 
     if (prov_sc_get_individual_enrollment(prov_sc_handle, registration_id, &indiv_enrollment) != 0)
     {
         BUFFER_HANDLE ek_handle = prov_auth_get_endorsement_key(auth_handle);
-        ASSERT_IS_NOT_NULL_WITH_MSG(ek_handle, "Failure prov_auth_get_endorsement_key");
+        ASSERT_IS_NOT_NULL(ek_handle, "Failure prov_auth_get_endorsement_key");
 
         STRING_HANDLE ek_value = Base64_Encoder(ek_handle);
-        ASSERT_IS_NOT_NULL_WITH_MSG(ek_value, "Failure Base64_Encoder Endorsement key");
+        ASSERT_IS_NOT_NULL(ek_value, "Failure Base64_Encoder Endorsement key");
 
         ATTESTATION_MECHANISM_HANDLE attest_handle = attestationMechanism_createWithTpm(STRING_c_str(ek_value), NULL);
-        ASSERT_IS_NOT_NULL_WITH_MSG(attest_handle, "Failure attestationMechanism_createWithTpm");
+        ASSERT_IS_NOT_NULL(attest_handle, "Failure attestationMechanism_createWithTpm");
 
         indiv_enrollment = individualEnrollment_create(registration_id, attest_handle);
-        ASSERT_IS_NOT_NULL_WITH_MSG(indiv_enrollment, "Failure hsm_client_riot_get_certificate ");
+        ASSERT_IS_NOT_NULL(indiv_enrollment, "Failure hsm_client_riot_get_certificate ");
 
         BUFFER_delete(ek_handle);
         STRING_delete(ek_value);
@@ -195,31 +195,31 @@ static void create_x509_enrollment_device()
     INDIVIDUAL_ENROLLMENT_HANDLE indiv_enrollment = NULL;
 
     PROVISIONING_SERVICE_CLIENT_HANDLE prov_sc_handle = prov_sc_create_from_connection_string(g_prov_conn_string);
-    ASSERT_IS_NOT_NULL_WITH_MSG(prov_sc_handle, "Failure creating provisioning service client");
+    ASSERT_IS_NOT_NULL(prov_sc_handle, "Failure creating provisioning service client");
 
     prov_sc_set_trace(prov_sc_handle, TRACING_STATUS_ON);
 
     PROV_AUTH_HANDLE auth_handle = prov_auth_create();
-    ASSERT_IS_NOT_NULL_WITH_MSG(auth_handle, "Failure creating auth client");
+    ASSERT_IS_NOT_NULL(auth_handle, "Failure creating auth client");
 
     char* registration_id = prov_auth_get_registration_id(auth_handle);
-    ASSERT_IS_NOT_NULL_WITH_MSG(registration_id, "Failure prov_auth_get_common_name");
+    ASSERT_IS_NOT_NULL(registration_id, "Failure prov_auth_get_common_name");
 
     if (prov_sc_get_individual_enrollment(prov_sc_handle, registration_id, &indiv_enrollment) != 0)
     {
         char* x509_cert = prov_auth_get_certificate(auth_handle);
-        ASSERT_IS_NOT_NULL_WITH_MSG(x509_cert, "Failure prov_auth_get_certificate");
+        ASSERT_IS_NOT_NULL(x509_cert, "Failure prov_auth_get_certificate");
 
         STRING_HANDLE base64_cert = Base64_Encode_Bytes((const unsigned char*)x509_cert, strlen(x509_cert));
-        ASSERT_IS_NOT_NULL_WITH_MSG(base64_cert, "Failure Base64_Encode_Bytes");
+        ASSERT_IS_NOT_NULL(base64_cert, "Failure Base64_Encode_Bytes");
 
         ATTESTATION_MECHANISM_HANDLE attest_handle = attestationMechanism_createWithX509ClientCert(STRING_c_str(base64_cert), NULL);
-        ASSERT_IS_NOT_NULL_WITH_MSG(attest_handle, "Failure hsm_client_riot_get_certificate ");
+        ASSERT_IS_NOT_NULL(attest_handle, "Failure hsm_client_riot_get_certificate ");
 
         indiv_enrollment = individualEnrollment_create(registration_id, attest_handle);
-        ASSERT_IS_NOT_NULL_WITH_MSG(indiv_enrollment, "Failure hsm_client_riot_get_certificate ");
+        ASSERT_IS_NOT_NULL(indiv_enrollment, "Failure hsm_client_riot_get_certificate ");
 
-        ASSERT_ARE_EQUAL_WITH_MSG(int, 0, prov_sc_create_or_update_individual_enrollment(prov_sc_handle, &indiv_enrollment), "Failure prov_sc_create_or_update_individual_enrollment");
+        ASSERT_ARE_EQUAL(int, 0, prov_sc_create_or_update_individual_enrollment(prov_sc_handle, &indiv_enrollment), "Failure prov_sc_create_or_update_individual_enrollment");
 
         STRING_delete(base64_cert);
         free(x509_cert);
@@ -233,15 +233,15 @@ static void create_x509_enrollment_device()
 static void remove_x509_enrollment_device()
 {
     PROVISIONING_SERVICE_CLIENT_HANDLE prov_sc_handle = prov_sc_create_from_connection_string(g_prov_conn_string);
-    ASSERT_IS_NOT_NULL_WITH_MSG(prov_sc_handle, "Failure creating provisioning service client");
+    ASSERT_IS_NOT_NULL(prov_sc_handle, "Failure creating provisioning service client");
 
     PROV_AUTH_HANDLE auth_handle = prov_auth_create();
-    ASSERT_IS_NOT_NULL_WITH_MSG(auth_handle, "Failure creating auth client");
+    ASSERT_IS_NOT_NULL(auth_handle, "Failure creating auth client");
 
     char* registration_id = prov_auth_get_registration_id(auth_handle);
-    ASSERT_IS_NOT_NULL_WITH_MSG(registration_id, "Failure retrieving registration Id");
+    ASSERT_IS_NOT_NULL(registration_id, "Failure retrieving registration Id");
 
-    ASSERT_ARE_EQUAL_WITH_MSG(int, 0, prov_sc_delete_individual_enrollment_by_param(prov_sc_handle, registration_id, NULL), "Failure deleting enrollment");
+    ASSERT_ARE_EQUAL(int, 0, prov_sc_delete_individual_enrollment_by_param(prov_sc_handle, registration_id, NULL), "Failure deleting enrollment");
 
     free(registration_id);
     prov_auth_destroy(auth_handle);
@@ -259,14 +259,14 @@ BEGIN_TEST_SUITE(dps_client_e2e)
         prov_dev_security_init(SECURE_DEVICE_TYPE_TPM);
 
         g_prov_conn_string = getenv("DPS_C_CONNECTION_STRING");
-        ASSERT_IS_NOT_NULL_WITH_MSG(g_prov_conn_string, "PROV_CONNECTION_STRING is NULL");
+        ASSERT_IS_NOT_NULL(g_prov_conn_string, "PROV_CONNECTION_STRING is NULL");
 
         // Register device
         create_tpm_enrollment_device();
         //create_x509_enrollment_device();
 
         g_dps_scope_id = getenv("DPS_C_SCOPE_ID_VALUE");
-        ASSERT_IS_NOT_NULL_WITH_MSG(g_dps_scope_id, "DPS_SCOPE_ID_VALUE is NULL");
+        ASSERT_IS_NOT_NULL(g_dps_scope_id, "DPS_SCOPE_ID_VALUE is NULL");
     }
 
     TEST_SUITE_CLEANUP(TestClassCleanup)
@@ -299,12 +299,12 @@ BEGIN_TEST_SUITE(dps_client_e2e)
 
         // act
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &prov_info, dps_registation_status, &prov_info);
-        ASSERT_ARE_EQUAL_WITH_MSG(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
 
         wait_for_dps_result(handle, &prov_info);
 
         // Assert
-        ASSERT_ARE_EQUAL_WITH_MSG(int, REG_RESULT_COMPLETE, prov_info.reg_result, "Failure calling registering device x509 http");
+        ASSERT_ARE_EQUAL(int, REG_RESULT_COMPLETE, prov_info.reg_result, "Failure calling registering device x509 http");
 
         free(prov_info.iothub_uri);
         free(prov_info.device_id);
@@ -324,12 +324,12 @@ BEGIN_TEST_SUITE(dps_client_e2e)
 
         // act
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &prov_info, dps_registation_status, &prov_info);
-        ASSERT_ARE_EQUAL_WITH_MSG(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
 
         wait_for_dps_result(handle, &prov_info);
 
         // Assert
-        ASSERT_ARE_EQUAL_WITH_MSG(int, REG_RESULT_COMPLETE, prov_info.reg_result, "Failure calling registering device x509 amqp");
+        ASSERT_ARE_EQUAL(int, REG_RESULT_COMPLETE, prov_info.reg_result, "Failure calling registering device x509 amqp");
 
         free(prov_info.iothub_uri);
         free(prov_info.device_id);
@@ -348,12 +348,12 @@ BEGIN_TEST_SUITE(dps_client_e2e)
 
         // act
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &prov_info, dps_registation_status, &prov_info);
-        ASSERT_ARE_EQUAL_WITH_MSG(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
 
         wait_for_dps_result(handle, &prov_info);
 
         // Assert
-        ASSERT_ARE_EQUAL_WITH_MSG(int, REG_RESULT_COMPLETE, prov_info.reg_result, "Failure calling registering device x509 amqp ws");
+        ASSERT_ARE_EQUAL(int, REG_RESULT_COMPLETE, prov_info.reg_result, "Failure calling registering device x509 amqp ws");
 
         free(prov_info.iothub_uri);
         free(prov_info.device_id);
@@ -374,12 +374,12 @@ BEGIN_TEST_SUITE(dps_client_e2e)
 
         // act
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &prov_info, dps_registation_status, &prov_info);
-        ASSERT_ARE_EQUAL_WITH_MSG(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
 
         wait_for_dps_result(handle, &prov_info);
 
         // Assert
-        ASSERT_ARE_EQUAL_WITH_MSG(int, REG_RESULT_COMPLETE, prov_info.reg_result, "Failure calling registering device with x509 mqtt");
+        ASSERT_ARE_EQUAL(int, REG_RESULT_COMPLETE, prov_info.reg_result, "Failure calling registering device with x509 mqtt");
 
         free(prov_info.iothub_uri);
         free(prov_info.device_id);
@@ -398,12 +398,12 @@ BEGIN_TEST_SUITE(dps_client_e2e)
 
         // act
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &prov_info, dps_registation_status, &prov_info);
-        ASSERT_ARE_EQUAL_WITH_MSG(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
 
         wait_for_dps_result(handle, &prov_info);
 
         // Assert
-        ASSERT_ARE_EQUAL_WITH_MSG(int, REG_RESULT_COMPLETE, prov_info.reg_result, "Failure calling registering device x509 mqtt ws");
+        ASSERT_ARE_EQUAL(int, REG_RESULT_COMPLETE, prov_info.reg_result, "Failure calling registering device x509 mqtt ws");
 
         free(prov_info.iothub_uri);
         free(prov_info.device_id);

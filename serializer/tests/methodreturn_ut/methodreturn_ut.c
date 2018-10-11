@@ -186,7 +186,7 @@ TEST_FUNCTION(MethodReturn_Create_succeeds_with_non_NULL_jsonValue_unhappy_paths
             METHODRETURN_HANDLE h = MethodReturn_Create(1, jsonValue);
 
             ///assert
-            ASSERT_IS_NULL_WITH_MSG(h, temp_str);
+            ASSERT_IS_NULL(h, temp_str);
         }
     }
 
@@ -243,7 +243,7 @@ TEST_FUNCTION(MethodReturn_Create_with_NULL_jsonValue_unhappy_paths)
         METHODRETURN_HANDLE h = MethodReturn_Create(1, jsonValue);
 
         ///assert
-        ASSERT_IS_NULL_WITH_MSG(h, temp_str);
+        ASSERT_IS_NULL(h, temp_str);
 
     }
 

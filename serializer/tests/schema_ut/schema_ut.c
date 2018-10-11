@@ -550,7 +550,7 @@ BEGIN_TEST_SUITE(Schema_ut)
             SCHEMA_MODEL_TYPE_HANDLE result = Schema_CreateModelType(schemaHandle, MODEL_NAME);
 
             ///assert
-            ASSERT_IS_NULL_WITH_MSG(result, temp_str);
+            ASSERT_IS_NULL(result, temp_str);
 
         }
 
@@ -4189,7 +4189,7 @@ BEGIN_TEST_SUITE(Schema_ut)
                 SCHEMA_RESULT result = Schema_AddModelReportedProperty(modelType, reportedPropertyName, reportedPropertyType);
 
                 ///assert
-                ASSERT_ARE_EQUAL_WITH_MSG(SCHEMA_RESULT, SCHEMA_ERROR, result, temp_str);
+                ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_ERROR, result, temp_str);
             }
         }
 
@@ -4774,7 +4774,7 @@ BEGIN_TEST_SUITE(Schema_ut)
                 SCHEMA_RESULT result = Schema_AddModelDesiredProperty(modelType, desiredPropertyName, desiredPropertyType, g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
 
                 ///assert
-                ASSERT_ARE_EQUAL_WITH_MSG(SCHEMA_RESULT, SCHEMA_ERROR, result, temp_str);
+                ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_ERROR, result, temp_str);
             }
         }
 

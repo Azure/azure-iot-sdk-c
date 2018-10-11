@@ -572,7 +572,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_Create_unhappypaths)
 
         /// assert
         sprintf(temp_str, "On failed call %zu", i + 1);
-        ASSERT_IS_NULL_WITH_MSG(h, temp_str);
+        ASSERT_IS_NULL(h, temp_str);
 
         ///cleanup
     }
@@ -2215,7 +2215,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SAS_token_when_step2_aborts_unhappypa
             IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_Impl(h, "text.txt", &c, 1);
 
             ///assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, temp_str);
+            ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, temp_str);
         }
     }
 
@@ -2928,7 +2928,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SAS_token_unhappypaths)
 
             ///assert
             //ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, temp_str);
+            ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, temp_str);
         }
     }
 
@@ -3001,7 +3001,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_Create_DeviceKey_unhappypaths)
 
         /// assert
         sprintf(temp_str, "On failed call %zu", i + 1);
-        ASSERT_IS_NULL_WITH_MSG(h, temp_str);
+        ASSERT_IS_NULL(h, temp_str);
     }
 
     umock_c_negative_tests_deinit();
@@ -4617,7 +4617,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadMultipleBlocksToBlob_deviceKey_unhappypaths)
             /// assert
             sprintf(temp_str, "On failed call %zu", i);
             IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(h, "text.txt", FileUpload_GetData_Callback, &context);
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, temp_str);
+            ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, temp_str);
 
             // Check parameters of the last call to getDataCallback
             ASSERT_ARE_EQUAL(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, FILE_UPLOAD_ERROR, context.lastResult);
@@ -5326,7 +5326,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_passes_x509_information_to_HTTPAPIEX_
             /// assert
             sprintf(temp_str, "On failed call %zu", i);
             IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_Impl(h, "text.txt", &c, 1);
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, temp_str);
+            ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, temp_str);
         }
     }
 

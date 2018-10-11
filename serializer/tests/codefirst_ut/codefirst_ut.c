@@ -3686,7 +3686,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
                 CODEFIRST_RESULT result = CodeFirst_SendAsyncReported(&destination, &destinationSize, 1, device);
 
                 ///assert
-                ASSERT_ARE_NOT_EQUAL_WITH_MSG(CODEFIRST_RESULT, CODEFIRST_OK, result, temp_str);
+                ASSERT_ARE_NOT_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result, temp_str);
             }
         }
 
@@ -3803,7 +3803,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
                 CODEFIRST_RESULT result = CodeFirst_SendAsyncReported(&destination, &destinationSize, 1, &(device->new_reported_this_is_double));
 
                 ///assert
-                ASSERT_ARE_NOT_EQUAL_WITH_MSG(CODEFIRST_RESULT, CODEFIRST_OK, result, temp_str);
+                ASSERT_ARE_NOT_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result, temp_str);
             }
         }
 

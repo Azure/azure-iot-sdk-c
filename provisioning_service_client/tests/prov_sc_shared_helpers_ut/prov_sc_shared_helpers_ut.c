@@ -326,7 +326,7 @@ TEST_FUNCTION(json_deserialize_and_get_struct_array_ERROR)
         int result = json_deserialize_and_get_struct_array(&dest_arr, &dest_len, TEST_JSON_OBJECT, DUMMY_STRING, (FROM_JSON_FUNCTION)from_json_mock);
 
         //assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(int, 0, result, tmp_msg);
     }
 }
 
@@ -419,7 +419,7 @@ TEST_FUNCTION(json_serialize_and_set_struct_array_ERROR)
         int result = json_serialize_and_set_struct_array(TEST_JSON_OBJECT, DUMMY_STRING, arr, ARRAY_SIZE, (TO_JSON_FUNCTION)to_json_mock);
 
         //assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(int, 0, result, tmp_msg);
     }
 
     //cleanup

@@ -1172,7 +1172,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
             BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL);
 
             ///assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(BLOB_RESULT, BLOB_OK, result, temp_str);
+            ASSERT_ARE_NOT_EQUAL(BLOB_RESULT, BLOB_OK, result, temp_str);
         }
     }
 
@@ -1402,7 +1402,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_with_certificate_unhappy_
             BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, "a", NULL);
 
             ///assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(BLOB_RESULT, BLOB_OK, result, temp_str);
+            ASSERT_ARE_NOT_EQUAL(BLOB_RESULT, BLOB_OK, result, temp_str);
         }
     }
 
