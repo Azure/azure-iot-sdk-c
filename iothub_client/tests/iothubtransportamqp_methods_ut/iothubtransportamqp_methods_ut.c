@@ -1359,7 +1359,7 @@ TEST_FUNCTION(when_a_failure_occurs_iothubtransportamqp_methods_subscribe_fails)
             result = iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
 
             ///assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, temp_str);
+            ASSERT_ARE_NOT_EQUAL(int, 0, result, temp_str);
         }
     }
 
@@ -2462,7 +2462,7 @@ TEST_FUNCTION(when_a_failure_occurs_iothubtransportamqp_methods_respond_fails)
         result = iothubtransportamqp_methods_respond(g_method_handle, response_payload, sizeof(response_payload), 100);
 
         /// assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, temp_str);
+        ASSERT_ARE_NOT_EQUAL(int, 0, result, temp_str);
     }
 
     ///cleanup

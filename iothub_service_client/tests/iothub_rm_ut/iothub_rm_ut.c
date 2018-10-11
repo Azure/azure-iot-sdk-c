@@ -389,7 +389,8 @@ static const char* TEST_AUTH_TYPE_CERTIFICATE_AUTHORITY = "certificateAuthority"
 static const char* TEST_PRIMARYKEY = "thePrimaryKey";
 static const char* TEST_SECONDARYKEY = "theSecondaryKey";
 static const char* TEST_GENERATIONID = "theGenerationId";
-static const char* TEST_ETAG = "theEtag";
+static const char* TEST_ETAG = "theEtag";
+
 static const char* TEST_MANAGED_BY = "testManagedBy";
 
 
@@ -2772,7 +2773,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
                 sprintf(message_on_error, "Got unexpected IOTHUB_REGISTRYMANAGER_OK on run %zu", i);
 
                 /// assert
-                ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, IOTHUB_REGISTRYMANAGER_OK, result, message_on_error);
+                ASSERT_ARE_NOT_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result, message_on_error);
 
 
                 /// assert
@@ -2846,7 +2847,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
                 sprintf(message_on_error, "Got unexpected IOTHUB_REGISTRYMANAGER_OK on run %zu", i);
 
                 /// assert
-                ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, IOTHUB_REGISTRYMANAGER_OK, result, message_on_error);
+                ASSERT_ARE_NOT_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result, message_on_error);
 
 
                 /// assert
@@ -3923,7 +3924,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
                 sprintf(message_on_error, "Got unexpected IOTHUB_REGISTRYMANAGER_OK on run %zu", i);
 
                 /// assert
-                ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, IOTHUB_REGISTRYMANAGER_OK, result, message_on_error);
+                ASSERT_ARE_NOT_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result, message_on_error);
             }
 
             ///cleanup
@@ -3998,7 +3999,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
                 sprintf(message_on_error, "Got unexpected IOTHUB_REGISTRYMANAGER_OK on run %zu", i);
 
                 /// assert
-                ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, IOTHUB_REGISTRYMANAGER_OK, result, message_on_error);
+                ASSERT_ARE_NOT_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result, message_on_error);
             }
 
             ///cleanup
@@ -4075,7 +4076,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
                 sprintf(message_on_error, "Got unexpected IOTHUB_REGISTRYMANAGER_OK on run %zu", i);
 
                 /// assert
-                ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, IOTHUB_REGISTRYMANAGER_OK, result, message_on_error);
+                ASSERT_ARE_NOT_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result, message_on_error);
             }
 
             ///cleanup

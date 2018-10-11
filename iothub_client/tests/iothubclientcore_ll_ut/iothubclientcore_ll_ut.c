@@ -1129,7 +1129,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateFromConnectionString_with_DeviceKey_fail
         IOTHUB_CLIENT_CORE_LL_HANDLE result = IoTHubClientCore_LL_CreateFromConnectionString(TEST_CHAR, provideFAKE);
 
         ///assert
-        ASSERT_IS_NULL_WITH_MSG(result, tmp_msg);
+        ASSERT_IS_NULL(result, tmp_msg);
     }
 
     ///cleanup
@@ -1557,7 +1557,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_Create_fail)
         IOTHUB_CLIENT_CORE_LL_HANDLE result = IoTHubClientCore_LL_Create(&TEST_CONFIG);
 
         //assert
-        ASSERT_ARE_EQUAL_WITH_MSG(void_ptr, NULL, result, tmp_msg);
+        ASSERT_ARE_EQUAL(void_ptr, NULL, result, tmp_msg);
     }
 
     // cleanup
@@ -1776,7 +1776,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_fail)
         IOTHUB_CLIENT_CORE_LL_HANDLE result = IoTHubClientCore_LL_CreateWithTransport(&TEST_DEVICE_CONFIG);
 
         //assert
-        ASSERT_ARE_EQUAL_WITH_MSG(void_ptr, NULL, result, tmp_msg);
+        ASSERT_ARE_EQUAL(void_ptr, NULL, result, tmp_msg);
     }
 
     // cleanup
@@ -4314,7 +4314,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendReportedState_fail)
         IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SendReportedState(handle, TEST_REPORTED_STATE, TEST_REPORTED_SIZE, iothub_reported_state_callback, NULL);
 
         //assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, tmp_msg);
     }
 
     //cleanup
@@ -5743,7 +5743,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallback_one_item_fail)
         IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SetInputMessageCallback(handle, TEST_INPUT_NAME, messageCallback, (void*)1);
 
         ///assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, tmp_msg);
     }
 
     //
@@ -5780,7 +5780,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallback_one_item_fail)
         IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SetInputMessageCallback(handle, TEST_INPUT_NAME, messageCallback, (void*)1);
 
         ///assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, tmp_msg);
     }
 
     //cleanup
@@ -6263,7 +6263,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_match_fail)
         bool result = IoTHubClientCore_LL_MessageCallbackFromInput(handle, testMessage);
 
         //assert
-        ASSERT_ARE_EQUAL_WITH_MSG(bool, false, result, tmp_msg);
+        ASSERT_ARE_EQUAL(bool, false, result, tmp_msg);
     }
 
     //cleanup
@@ -6455,7 +6455,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallbackEx_with_NULL_inputName_
 //        IOTHUB_CLIENT_CORE_LL_HANDLE result = IoTHubClientCore_LL_CreateFromEnvironment(&TEST_CONFIG, TEST_MODULE_ID);
 //
 //        //assert
-//        ASSERT_ARE_EQUAL_WITH_MSG(void_ptr, NULL, result, tmp_msg);
+//        ASSERT_ARE_EQUAL(void_ptr, NULL, result, tmp_msg);
 //    }
 //
 //    // cleanup

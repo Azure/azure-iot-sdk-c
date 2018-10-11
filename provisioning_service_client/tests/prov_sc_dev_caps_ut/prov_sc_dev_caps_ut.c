@@ -303,7 +303,7 @@ TEST_FUNCTION(deviceCapabilities_toJson_fail)
         json = deviceCapabilities_toJson(handle);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(json, tmp_msg);
+        ASSERT_IS_NULL(json, tmp_msg);
     }
 
     //cleanup
@@ -376,7 +376,7 @@ TEST_FUNCTION(deviceCapabilities_fromJson_fail)
         handle = deviceCapabilities_fromJson(TEST_JSON_CAPS);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(handle, tmp_msg);
+        ASSERT_IS_NULL(handle, tmp_msg);
     }
 
     //cleanup

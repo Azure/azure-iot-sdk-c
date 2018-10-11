@@ -713,7 +713,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
             PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
 
             //assert
-            ASSERT_IS_NULL_WITH_MSG(handle, tmp_msg);
+            ASSERT_IS_NULL(handle, tmp_msg);
         }
 
         //cleanup
@@ -961,7 +961,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
             int result = prov_dev_http_transport_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
 
             //assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, tmp_msg);
+            ASSERT_ARE_NOT_EQUAL(int, 0, result, tmp_msg);
         }
 
         //cleanup
@@ -1228,7 +1228,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
             result = prov_dev_http_transport_get_op_status(handle);
 
             //assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, tmp_msg);
+            ASSERT_ARE_NOT_EQUAL(int, 0, result, tmp_msg);
         }
 
         //cleanup
@@ -1675,7 +1675,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
             int result = prov_dev_http_transport_set_proxy(handle, &proxy_options);
 
             //assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, tmp_msg);
+            ASSERT_ARE_NOT_EQUAL(int, 0, result, tmp_msg);
         }
 
         //cleanup

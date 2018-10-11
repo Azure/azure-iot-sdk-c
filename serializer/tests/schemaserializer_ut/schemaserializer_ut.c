@@ -267,7 +267,7 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
             SCHEMA_SERIALIZER_RESULT result = SchemaSerializer_SerializeCommandMetadata(TEST_MODEL_HANDLE, TEST_STRING_HANDLE);
 
             // assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(SCHEMA_SERIALIZER_RESULT, SCHEMA_SERIALIZER_OK, result, temp_str);
+            ASSERT_ARE_NOT_EQUAL(SCHEMA_SERIALIZER_RESULT, SCHEMA_SERIALIZER_OK, result, temp_str);
         }
 
         ///cleanup
@@ -463,7 +463,7 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
             SCHEMA_SERIALIZER_RESULT result = SchemaSerializer_SerializeCommandMetadata(TEST_MODEL_HANDLE, TEST_STRING_HANDLE);
 
             /// assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(SCHEMA_SERIALIZER_RESULT, SCHEMA_SERIALIZER_OK, result, temp_str);
+            ASSERT_ARE_NOT_EQUAL(SCHEMA_SERIALIZER_RESULT, SCHEMA_SERIALIZER_OK, result, temp_str);
         }
 
         ///cleanup
@@ -540,7 +540,7 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
             SCHEMA_SERIALIZER_RESULT result = SchemaSerializer_SerializeCommandMetadata(TEST_MODEL_HANDLE, TEST_STRING_HANDLE);
 
             /// assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(SCHEMA_SERIALIZER_RESULT, SCHEMA_SERIALIZER_OK, result, temp_str);
+            ASSERT_ARE_NOT_EQUAL(SCHEMA_SERIALIZER_RESULT, SCHEMA_SERIALIZER_OK, result, temp_str);
         }
 
         /// cleanup
@@ -639,7 +639,7 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
             SCHEMA_SERIALIZER_RESULT result = SchemaSerializer_SerializeCommandMetadata(TEST_MODEL_HANDLE, TEST_STRING_HANDLE);
 
             /// assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(SCHEMA_SERIALIZER_RESULT, SCHEMA_SERIALIZER_OK, result, temp_str);
+            ASSERT_ARE_NOT_EQUAL(SCHEMA_SERIALIZER_RESULT, SCHEMA_SERIALIZER_OK, result, temp_str);
         }
 
         /// cleanup

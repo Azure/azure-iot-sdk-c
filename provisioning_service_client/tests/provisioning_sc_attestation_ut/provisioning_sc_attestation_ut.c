@@ -342,7 +342,7 @@ TEST_FUNCTION(attestationMechanism_createWithTpm_error)
         ATTESTATION_MECHANISM_HANDLE att = attestationMechanism_createWithTpm(DUMMY_EK, DUMMY_SRK);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(att, tmp_msg);
+        ASSERT_IS_NULL(att, tmp_msg);
     }
 
     umock_c_negative_tests_deinit();
@@ -437,7 +437,7 @@ TEST_FUNCTION(attestationMechanism_createWithX509ClientCert_error)
         ATTESTATION_MECHANISM_HANDLE att = attestationMechanism_createWithX509ClientCert(DUMMY_CERT1, DUMMY_CERT2);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(att, tmp_msg);
+        ASSERT_IS_NULL(att, tmp_msg);
     }
 
     umock_c_negative_tests_deinit();
@@ -532,7 +532,7 @@ TEST_FUNCTION(attestationMechanism_createWithX509SigningCert_error)
         ATTESTATION_MECHANISM_HANDLE att = attestationMechanism_createWithX509SigningCert(DUMMY_CERT1, DUMMY_CERT2);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(att, tmp_msg);
+        ASSERT_IS_NULL(att, tmp_msg);
     }
 
     umock_c_negative_tests_deinit();
@@ -627,7 +627,7 @@ TEST_FUNCTION(attestationMechanism_createWithX509CAReference_error)
         ATTESTATION_MECHANISM_HANDLE att = attestationMechanism_createWithX509CAReference(DUMMY_REF1, DUMMY_REF2);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(att, tmp_msg);
+        ASSERT_IS_NULL(att, tmp_msg);
     }
 
     umock_c_negative_tests_deinit();
@@ -1117,7 +1117,7 @@ TEST_FUNCTION(attestationMechanism_fromJson_tpm_error)
         ATTESTATION_MECHANISM_HANDLE att = attestationMechanism_fromJson(TEST_JSON_OBJECT);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(att, tmp_msg);
+        ASSERT_IS_NULL(att, tmp_msg);
     }
 
     umock_c_negative_tests_deinit();
@@ -1178,7 +1178,7 @@ TEST_FUNCTION(attestationMechanism_fromJson_x509_error)
         ATTESTATION_MECHANISM_HANDLE att = attestationMechanism_fromJson(TEST_JSON_OBJECT);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(att, tmp_msg);
+        ASSERT_IS_NULL(att, tmp_msg);
     }
 
     umock_c_negative_tests_deinit();
@@ -1259,7 +1259,7 @@ TEST_FUNCTION(attestationMechanism_toJson_tpm_error)
         JSON_Value* result = attestationMechanism_toJson(att);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(result, tmp_msg);
+        ASSERT_IS_NULL(result, tmp_msg);
     }
 
     umock_c_negative_tests_deinit();
@@ -1329,7 +1329,7 @@ TEST_FUNCTION(attestationMechanism_toJson_x509_error)
         JSON_Value* result = attestationMechanism_toJson(att);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(result, tmp_msg);
+        ASSERT_IS_NULL(result, tmp_msg);
     }
 
     umock_c_negative_tests_deinit();

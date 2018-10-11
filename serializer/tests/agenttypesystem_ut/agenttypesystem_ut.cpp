@@ -13317,7 +13317,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
                 auto result = CreateAgentDataType_From_String(testVector_EDM_BINARY_with_equal_signs[i].expectedOutput, EDM_BINARY_TYPE, &ag);
 
                 ///assert
-                ASSERT_ARE_EQUAL_WITH_MSG(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_OK, result, (std::to_string(i)).c_str());
+                ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_OK, result, (std::to_string(i)).c_str());
                 ASSERT_ARE_EQUAL(AGENT_DATA_TYPE_TYPE, EDM_BINARY_TYPE, ag.type);
                 ASSERT_ARE_EQUAL(size_t, (size_t)testVector_EDM_BINARY_with_equal_signs[i].inputData.size, ag.value.edmBinary.size);
                 ASSERT_ARE_EQUAL(int, 0, memcmp(testVector_EDM_BINARY_with_equal_signs[i].inputData.data, ag.value.edmBinary.data, testVector_EDM_BINARY_with_equal_signs[i].inputData.size));
@@ -13452,7 +13452,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
                         auto result = CreateAgentDataType_From_String(bufferTemp, EDM_BINARY_TYPE, &ag);
 
                         ///assert
-                        ASSERT_ARE_EQUAL_WITH_MSG(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result, (std::to_string(i) + " " + std::to_string(replacedCharacterPosition)+ " " + std::to_string((int)garbageCharacter) + " ").c_str());
+                        ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result, (std::to_string(i) + " " + std::to_string(replacedCharacterPosition)+ " " + std::to_string((int)garbageCharacter) + " ").c_str());
                     }
                 }
             }

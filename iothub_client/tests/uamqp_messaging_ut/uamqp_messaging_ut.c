@@ -669,7 +669,7 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 
     // Initialization of variables.
     TEST_MAP_KEYS = (char**)real_malloc(sizeof(char*) * 5);
-    ASSERT_IS_NOT_NULL_WITH_MSG(TEST_MAP_KEYS, "Could not allocate memory for TEST_MAP_KEYS");
+    ASSERT_IS_NOT_NULL(TEST_MAP_KEYS, "Could not allocate memory for TEST_MAP_KEYS");
     TEST_MAP_KEYS[0] = "PROPERTY1";
     TEST_MAP_KEYS[1] = "Property2";
     TEST_MAP_KEYS[2] = " prop(3): ";
@@ -677,7 +677,7 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     TEST_MAP_KEYS[4] = "\r\n\t";
 
     TEST_MAP_VALUES = (char**)real_malloc(sizeof(char*) * 5);
-    ASSERT_IS_NOT_NULL_WITH_MSG(TEST_MAP_VALUES, "Could not allocate memory for TEST_MAP_VALUES");
+    ASSERT_IS_NOT_NULL(TEST_MAP_VALUES, "Could not allocate memory for TEST_MAP_VALUES");
     TEST_MAP_VALUES[0] = "sdfksdfjjjjlsdf";
     TEST_MAP_VALUES[1] = "23,424,355,543,534,535.0";
     TEST_MAP_VALUES[2] = "@#$$$ @_=-09!!^;:";
@@ -936,7 +936,7 @@ TEST_FUNCTION(message_create_from_iothub_message_BYTEARRAY_return_errors_fails)
         result = message_create_uamqp_encoding_from_iothub_message(NULL, TEST_IOTHUB_MESSAGE_HANDLE, &binary_data);
 
         sprintf(error_msg, "On failed call %zu", i);
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, result, 0, error_msg);
+        ASSERT_ARE_NOT_EQUAL(int, result, 0, error_msg);
     }
 
     // cleanup
@@ -1001,7 +1001,7 @@ TEST_FUNCTION(message_create_from_iothub_message_STRING_return_errors_fails)
         // assert
         sprintf(error_msg, "On failed call %zu", i);
 
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, result, 0, error_msg);
+        ASSERT_ARE_NOT_EQUAL(int, result, 0, error_msg);
     }
 
     // cleanup

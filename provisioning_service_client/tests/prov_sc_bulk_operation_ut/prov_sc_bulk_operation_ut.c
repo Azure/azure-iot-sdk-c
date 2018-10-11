@@ -402,7 +402,7 @@ TEST_FUNCTION(bulkOperation_serializeToJson_error_ie)
         char* json = bulkOperation_serializeToJson(&bulk_op);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(json, tmp_msg);
+        ASSERT_IS_NULL(json, tmp_msg);
     }
 
     //cleanup
@@ -481,7 +481,7 @@ TEST_FUNCTION(bulkOperationError_fromJson_error)
         PROVISIONING_BULK_OPERATION_ERROR* err = bulkOperationError_fromJson(TEST_JSON_OBJECT);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(err, tmp_msg);
+        ASSERT_IS_NULL(err, tmp_msg);
     }
 
     //cleanup
@@ -563,7 +563,7 @@ TEST_FUNCTION(bulkOperationResult_deserializeFromJson_error_has_errors)
         PROVISIONING_BULK_OPERATION_RESULT* bulk_res = bulkOperationResult_deserializeFromJson(DUMMY_JSON);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(bulk_res, tmp_msg);
+        ASSERT_IS_NULL(bulk_res, tmp_msg);
     }
 
     //cleanup
@@ -631,7 +631,7 @@ TEST_FUNCTION(bulkOperationResult_deserializeFromJson_error_no_errors)
         PROVISIONING_BULK_OPERATION_RESULT* bulk_res = bulkOperationResult_deserializeFromJson(DUMMY_JSON);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(bulk_res, tmp_msg);
+        ASSERT_IS_NULL(bulk_res, tmp_msg);
     }
 
     //cleanup

@@ -857,7 +857,7 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
 
             void* result = iothub_device_auth_generate_credentials(xda_handle, &g_test_sas_cred);
 
-            ASSERT_IS_NULL_WITH_MSG(result, tmp_msg);
+            ASSERT_IS_NULL(result, tmp_msg);
         }
 
         //cleanup
@@ -893,7 +893,7 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
 
             void* result = iothub_device_auth_generate_credentials(xda_handle, &g_test_sas_cred);
 
-            ASSERT_IS_NULL_WITH_MSG(result, tmp_msg);
+            ASSERT_IS_NULL(result, tmp_msg);
         }
 
         //cleanup
@@ -990,7 +990,7 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
 
             void* result = iothub_device_auth_generate_credentials(xda_handle, &g_test_sas_cred);
 
-            ASSERT_IS_NULL_WITH_MSG(result, tmp_msg);
+            ASSERT_IS_NULL(result, tmp_msg);
         }
 
         //cleanup

@@ -197,8 +197,8 @@ static HTTP_CLIENT_HANDLE my_uhttp_client_create(const IO_INTERFACE_DESCRIPTION*
     (void)on_http_error;
     workload_context = (HSM_HTTP_WORKLOAD_CONTEXT*)callback_ctx;
 
-    ASSERT_ARE_EQUAL_WITH_MSG(bool, workload_context->continue_running, true, "Signing context not in running mode");
-    ASSERT_IS_NULL_WITH_MSG(workload_context->http_response, "HTTP response not NULL during initialization");
+    ASSERT_ARE_EQUAL(bool, workload_context->continue_running, true, "Signing context not in running mode");
+    ASSERT_IS_NULL(workload_context->http_response, "HTTP response not NULL during initialization");
 
     return (HTTP_CLIENT_HANDLE)my_gballoc_malloc(1);
 }
@@ -794,7 +794,7 @@ TEST_FUNCTION(hsm_client_http_edge_sign_data_http_fail)
         char tmp_msg[128];
         sprintf(tmp_msg, "hsm_client_http_edge_sign_data failure in test %zu/%zu", index, count);
         int result = hsm_client_http_edge_sign_data(sec_handle, TEST_SIGNING_DATA, TEST_SIGNING_DATA_LENGTH, &signed_value, &signed_len);
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, result, 0, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(int, result, 0, tmp_msg);
     }
 
     // cleanup
@@ -825,7 +825,7 @@ TEST_FUNCTION(hsm_client_http_edge_get_trust_bundle_success)
 
     set_expected_calls_hsm_client_http_edge_get_trust_bundle(TEST_HTTP_PROTOCOL);
     const char* trusted_certificate = hsm_client_http_edge_get_trust_bundle(sec_handle);
-    ASSERT_IS_NOT_NULL_WITH_MSG(trusted_certificate, "hsm_client_http_edge_get_trust_bundle fails");
+    ASSERT_IS_NOT_NULL(trusted_certificate, "hsm_client_http_edge_get_trust_bundle fails");
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     hsm_client_http_edge_destroy(sec_handle);
@@ -861,7 +861,7 @@ TEST_FUNCTION(hsm_client_http_edge_get_trust_bundle_domain_socket_success)
 
     set_expected_calls_hsm_client_http_edge_get_trust_bundle(TEST_DOMAIN_SOCKET_PROTOCOL);
     const char* trusted_certificate = hsm_client_http_edge_get_trust_bundle(sec_handle);
-    ASSERT_IS_NOT_NULL_WITH_MSG(trusted_certificate, "hsm_client_http_edge_get_trust_bundle fails");
+    ASSERT_IS_NOT_NULL(trusted_certificate, "hsm_client_http_edge_get_trust_bundle fails");
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     hsm_client_http_edge_destroy(sec_handle);
@@ -921,7 +921,7 @@ TEST_FUNCTION(hsm_client_http_edge_get_trust_bundle_fail)
         char tmp_msg[128];
         sprintf(tmp_msg, "hsm_client_http_edge_get_trust_bundle failure in test %zu/%zu", index, count);
         const char* trusted_certificate = hsm_client_http_edge_get_trust_bundle(sec_handle);
-        ASSERT_IS_NULL_WITH_MSG(trusted_certificate, tmp_msg);
+        ASSERT_IS_NULL(trusted_certificate, tmp_msg);
     }
 
     // cleanup

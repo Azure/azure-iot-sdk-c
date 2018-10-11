@@ -351,7 +351,7 @@ TEST_FUNCTION(querySpecification_serializeToJson_error)
         char* json = querySpecification_serializeToJson(&qs);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(json, tmp_msg);
+        ASSERT_IS_NULL(json, tmp_msg);
     }
 
     //cleanup
@@ -444,7 +444,7 @@ TEST_FUNCTION(queryResponse_deserializeFromJson_error_individualEnrollment)
         PROVISIONING_QUERY_RESPONSE* qr = queryResponse_deserializeFromJson(DUMMY_JSON, QUERY_TYPE_INDIVIDUAL_ENROLLMENT);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(qr, tmp_msg);
+        ASSERT_IS_NULL(qr, tmp_msg);
     }
 }
 
@@ -505,7 +505,7 @@ TEST_FUNCTION(queryResponse_deserializeFromJson_error_individualEnrollment_empty
         PROVISIONING_QUERY_RESPONSE* qr = queryResponse_deserializeFromJson(DUMMY_JSON, QUERY_TYPE_INDIVIDUAL_ENROLLMENT);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(qr, tmp_msg);
+        ASSERT_IS_NULL(qr, tmp_msg);
     }
 }
 
@@ -568,7 +568,7 @@ TEST_FUNCTION(queryResponse_deserializeFromJson_error_enrollmentGroup)
         PROVISIONING_QUERY_RESPONSE* qr = queryResponse_deserializeFromJson(DUMMY_JSON, QUERY_TYPE_ENROLLMENT_GROUP);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(qr, tmp_msg);
+        ASSERT_IS_NULL(qr, tmp_msg);
     }
 }
 
@@ -629,7 +629,7 @@ TEST_FUNCTION(queryResponse_deserializeFromJson_error_enrollmentGroup_empty_arr)
         PROVISIONING_QUERY_RESPONSE* qr = queryResponse_deserializeFromJson(DUMMY_JSON, QUERY_TYPE_ENROLLMENT_GROUP);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(qr, tmp_msg);
+        ASSERT_IS_NULL(qr, tmp_msg);
     }
 }
 
@@ -692,7 +692,7 @@ TEST_FUNCTION(queryResponse_deserializeFromJson_error_deviceRegistrationState)
         PROVISIONING_QUERY_RESPONSE* qr = queryResponse_deserializeFromJson(DUMMY_JSON, QUERY_TYPE_DEVICE_REGISTRATION_STATE);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(qr, tmp_msg);
+        ASSERT_IS_NULL(qr, tmp_msg);
     }
 }
 
@@ -753,7 +753,7 @@ TEST_FUNCTION(queryResponse_deserializeFromJson_error_deviceRegistrationState_em
         PROVISIONING_QUERY_RESPONSE* qr = queryResponse_deserializeFromJson(DUMMY_JSON, QUERY_TYPE_DEVICE_REGISTRATION_STATE);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(qr, tmp_msg);
+        ASSERT_IS_NULL(qr, tmp_msg);
     }
 }
 

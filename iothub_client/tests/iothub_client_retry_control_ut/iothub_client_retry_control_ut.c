@@ -554,7 +554,7 @@ TEST_FUNCTION(Retrieve_Options_failure_checks)
         OPTIONHANDLER_HANDLE result = retry_control_retrieve_options(handle);
 
         sprintf(error_msg, "On failed call %zu", i);
-        ASSERT_IS_NULL_WITH_MSG(result, error_msg);
+        ASSERT_IS_NULL(result, error_msg);
     }
 
     // cleanup
@@ -703,7 +703,7 @@ TEST_FUNCTION(Set_Options_failure_checks)
 
         // assert
         sprintf(error_msg, "On failed call %zu", i);
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, error_msg);
+        ASSERT_ARE_NOT_EQUAL(int, 0, result, error_msg);
     }
 
     // cleanup

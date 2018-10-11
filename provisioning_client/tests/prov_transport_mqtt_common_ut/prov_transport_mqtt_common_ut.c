@@ -534,7 +534,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
             PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io, on_transport_error, NULL);
 
             //assert
-            ASSERT_IS_NULL_WITH_MSG(handle, tmp_msg);
+            ASSERT_IS_NULL(handle, tmp_msg);
         }
 
         //cleanup
@@ -776,7 +776,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
             int result = prov_transport_common_mqtt_open(handle, TEST_REGISTRATION_ID_VALUE, NULL, NULL, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
 
             //assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, tmp_msg);
+            ASSERT_ARE_NOT_EQUAL(int, 0, result, tmp_msg);
         }
 
         //cleanup
@@ -1620,7 +1620,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
             int result = prov_transport_common_mqtt_x509_cert(handle, TEST_X509_CERT_VALUE, TEST_PRIVATE_KEY_VALUE);
 
             //assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, tmp_msg);
+            ASSERT_ARE_NOT_EQUAL(int, 0, result, tmp_msg);
         }
 
         //cleanup
@@ -1848,7 +1848,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
             int result = prov_transport_common_mqtt_set_proxy(handle, &proxy_options);
 
             //assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, tmp_msg);
+            ASSERT_ARE_NOT_EQUAL(int, 0, result, tmp_msg);
         }
 
         //cleanup
