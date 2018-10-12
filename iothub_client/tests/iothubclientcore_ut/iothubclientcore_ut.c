@@ -11,6 +11,7 @@
 #endif
 
 #include <time.h>
+#include <signal.h>
 
 #if defined _MSC_VER
 #pragma warning(disable: 4054) /* MSC incorrectly fires this */
