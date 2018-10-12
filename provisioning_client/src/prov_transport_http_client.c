@@ -523,7 +523,7 @@ static int create_connection(PROV_TRANSPORT_HTTP_INFO* http_info)
         tls_io_config.hostname = http_info->hostname;
         tls_io_config.port = HTTP_PORT_NUM;
 
-	HTTP_PROXY_IO_CONFIG http_proxy;
+		HTTP_PROXY_IO_CONFIG http_proxy;
 
         // Setup proxy
         if (http_info->proxy_host != NULL)
