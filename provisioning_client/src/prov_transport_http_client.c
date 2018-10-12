@@ -35,7 +35,7 @@ static const char* const USER_AGENT_VALUE = "prov_device_client/1.0";
 static const char* const ACCEPT_VALUE = "application/json";
 static const char* const CONTENT_TYPE_VALUE = "application/json; charset=utf-8";
 static const char* const KEEP_ALIVE_VALUE = "keep-alive";
-static const char* const const KEY_NAME_VALUE = "registration";
+static const char* const KEY_NAME_VALUE = "registration";
 static const char* const TPM_SECURITY_INFO = "{\"registrationId\":\"%s\",\"tpm\":{\"endorsementKey\":\"%s\", \"storageRootKey\":\"%s\"}}";
 static const char* const RIOT_SECURITY_INFO = "{ \"registrationId\":\"%s\" }";
 
