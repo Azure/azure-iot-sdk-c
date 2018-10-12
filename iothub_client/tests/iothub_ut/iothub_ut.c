@@ -72,13 +72,13 @@ TEST_FUNCTION(IoTHub_Init_succeed)
 TEST_FUNCTION(IoTHub_Init_fail)
 {
     //arrange
-    STRICT_EXPECTED_CALL(platform_init());
+    STRICT_EXPECTED_CALL(platform_init()).SetReturn(__LINE__);
 
     //act
     int result = IoTHub_Init();
 
     //assert
-    ASSERT_ARE_EQUAL(int, 0, result);
+    ASSERT_ARE_NOT_EQUAL(int, 0, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 

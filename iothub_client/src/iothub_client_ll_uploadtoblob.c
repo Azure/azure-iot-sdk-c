@@ -26,6 +26,8 @@
 #include "internal/iothub_client_ll_uploadtoblob.h"
 #include "internal/blob.h"
 
+#define API_VERSION "?api-version=2016-11-14"
+
 #ifdef WINCE
 #include <stdarg.h>
 // Returns number of characters copied.

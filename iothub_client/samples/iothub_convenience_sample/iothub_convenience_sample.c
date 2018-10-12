@@ -157,7 +157,7 @@ static int device_method_callback(const char* method_name, const unsigned char* 
     {
         memcpy(*response, RESPONSE_STRING, *resp_size);
     }
-	
+    
     return status;
 }
 
