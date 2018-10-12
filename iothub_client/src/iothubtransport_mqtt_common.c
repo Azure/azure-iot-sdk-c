@@ -144,7 +144,8 @@ typedef enum MQTT_CLIENT_STATUS_TAG
     MQTT_CLIENT_STATUS_NOT_CONNECTED,
     MQTT_CLIENT_STATUS_CONNECTING,
     MQTT_CLIENT_STATUS_CONNECTED,
-    MQTT_CLIENT_STATUS_PENDING_CLOSE
+    MQTT_CLIENT_STATUS_PENDING_CLOSE,
+    MQTT_CLIENT_STATUS_EXECUTE_DISCONNECT
 } MQTT_CLIENT_STATUS;
 
 typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
@@ -1639,7 +1640,7 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
                             LogError("Subscribe delivery failure of subscribe %zu", index);
                         }
                     }
-                    // The connect packet has been acked
+                    // The subscribed packet has been acked
                     transport_data->currPacketState = SUBACK_TYPE;
 
                     // Is this a twin message
@@ -1749,7 +1750,6 @@ static void mqtt_error_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_ERR
             case MQTT_CLIENT_NO_PING_RESPONSE:
             {
                 LogError("Mqtt Ping Response was not encountered.  Reconnecting device...");
-                DisconnectFromClient(transport_data);
                 break;
             }
             case MQTT_CLIENT_PARSE_ERROR:
@@ -1762,7 +1762,10 @@ static void mqtt_error_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_ERR
         }
         if (transport_data->mqttClientStatus != MQTT_CLIENT_STATUS_PENDING_CLOSE)
         {
-            transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_NOT_CONNECTED;
+            // We have encountered an mqtt protocol error in an non-closing state
+            // The best course of action is to execute a shutdown of the mqtt/tls/socket
+            // layer and then attempt to reconnect
+            transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_EXECUTE_DISCONNECT;
         }
         transport_data->currPacketState = PACKET_TYPE_ERROR;
         transport_data->device_twin_get_sent = false;
@@ -1971,35 +1974,6 @@ static int GetTransportProviderIfNecessary(PMQTTTRANSPORT_HANDLE_DATA transport_
     return result;
 }
 
-//static int is_key_validate(const IOTHUBTRANSPORT_CONFIG* config)
-//{
-//    int result;
-//    IOTHUB_CREDENTIAL_TYPE cred_type = IoTHubClient_Auth_Get_Credential_Type(config->auth_module_handle);
-//    if (cred_type == IOTHUB_CREDENTIAL_TYPE_X509 || cred_type == IOTHUB_CREDENTIAL_TYPE_X509_ECC)
-//    {
-//        result = 0;
-//    }
-//    else
-//    {
-//        if (config->upperConfig->deviceKey == NULL && config->upperConfig->deviceSasToken == NULL)
-//        {
-//            if (IoTHubClient_Auth_Get_DeviceKey(config->auth_module_handle) == NULL)
-//            {
-//                result = __FAILURE__;
-//            }
-//            else
-//            {
-//                result = 0;
-//            }
-//        }
-//        else
-//        {
-//            result = 0;
-//        }
-//    }
-//    return result;
-//}
-
 static STRING_HANDLE buildClientId(const char* device_id, const char* module_id)
 {
     if (module_id == NULL)
@@ -2179,6 +2153,12 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                     result = 0;
                 }
             }
+        }
+        else if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_EXECUTE_DISCONNECT)
+        {
+            // Need to disconnect from client
+            DisconnectFromClient(transport_data);
+            result = 0;
         }
         // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_001: [ IoTHubTransport_MQTT_Common_DoWork shall trigger reconnection if the mqtt_client_connect does not complete within `keepalive` seconds]
         else if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_CONNECTING)

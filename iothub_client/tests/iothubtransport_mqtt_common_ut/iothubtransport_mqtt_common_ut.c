@@ -5180,9 +5180,35 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_delivered_MQTT_CLIENT_NO_PING_RESPONSE
     umock_c_reset_all_calls();
     STRICT_EXPECTED_CALL(xio_retrieveoptions(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(xio_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
 
     // act
     g_fnMqttErrorCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_NO_PING_RESPONSE, g_callbackCtx);
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_delivered_MQTT_CLIENT_MQTT_CLIENT_MEMORY_ERROR_success)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, NULL);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(xio_retrieveoptions(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(xio_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
+
+    // act
+    g_fnMqttErrorCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_MEMORY_ERROR, g_callbackCtx);
+    IoTHubTransport_MQTT_Common_DoWork(handle);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
