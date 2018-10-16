@@ -108,9 +108,7 @@ phases:
       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
     condition: always()  
-  - script: |
-        pwd 
-        $(Agent.BuildDirectory)
+  - script: rm -rf $(Agent.BuildDirectory)/*
     condition: always()    
 - phase: dynamic
   variables:
