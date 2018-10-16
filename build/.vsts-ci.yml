@@ -110,7 +110,7 @@ phases:
     condition: always()  
   - script: |
         pwd 
-        $Agent.BuildDirectory
+        $(Agent.BuildDirectory)
     condition: always()    
 - phase: dynamic
   variables:
