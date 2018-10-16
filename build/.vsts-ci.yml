@@ -107,11 +107,11 @@ phases:
       IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-  - task: DeleteFiles@1
-    displayName: 'Delete files from $(Agent.BuildDirectory)'
-    inputs:
-      SourceFolder: '$(Agent.BuildDirectory)'
-    condition: always()
+    condition: always()  
+  - script: |
+        pwd 
+        $Agent.BuildDirectory
+    condition: always()    
 - phase: dynamic
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-16.04:latest"
@@ -119,12 +119,10 @@ phases:
   displayName: 'dynamic'
   steps:
   - script: 'sudo ./jenkins/linux_c_option_test.sh'
-  - task: Cleanup
+  - task: DeleteFiles@1
     displayName: 'Delete files from $(Agent.BuildDirectory)'
-    steps:
-    - script: |
-        pwd 
-        $(Agent.BuildDirectory)
+    inputs:
+      SourceFolder: '$(Agent.BuildDirectory)'
     condition: always()
 - phase: windowscex86
   queue:
