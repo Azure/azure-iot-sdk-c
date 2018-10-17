@@ -296,7 +296,7 @@ phases:
   - script: |
       LD_LIBRARY_PATH=/usr/local/lib
       LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/my_library/
-      jenkins/linux_wolfssl.sh
+      sudo jenkins/linux_wolfssl.sh
     env:
       IOTHUB_CONNECTION_STRING: $(C-LINUX-DF-IOTHUB-CONNECTION-STRING)
       IOTHUB_EVENTHUB_CONNECTION_STRING: $(C-LINUX-DF-IOTHUB-EVENTHUB-CONNECTION-STRING)
