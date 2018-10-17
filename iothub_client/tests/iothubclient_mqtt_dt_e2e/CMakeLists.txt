@@ -40,9 +40,13 @@ set(${theseTestsName}_h_files
     ../common_dt_e2e/iothubclient_common_dt_e2e.h
 )
 
+if(${use_sample_trusted_cert})
+    add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
+    include_directories(../../../certs)
+endif()
+
 include_directories(../common_dt_e2e)
 include_directories(../../../deps/parson/)
-include_directories(../../../certs/)
 include_directories(${IOTHUB_TEST_INC_FOLDER})
 include_directories(${IOTHUB_SERVICE_CLIENT_INC_FOLDER})
 
@@ -83,7 +87,7 @@ if(WIN32)
         linkMqttLibrary(${theseTestsName}_exe)
     endif()
 
-	if(TARGET ${theseTestsName}_nuget_exe)
+    if(TARGET ${theseTestsName}_nuget_exe)
            target_link_libraries(${theseTestsName}_nuget_exe
                    iothub_test
                    iothub_service_client

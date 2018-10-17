@@ -18,7 +18,6 @@ set(${theseTestsName}_test_files
 set(${theseTestsName}_nuget_test_files
     ${theseTestsName}.c
     ../common_e2e/iothubclient_common_e2e.c
-    ../../../certs/certs.c
 )
 
 set(${theseTestsName}_c_files
@@ -35,6 +34,11 @@ include_directories(${IOTHUB_SERVICE_CLIENT_INC_FOLDER})
 
 file(COPY ../global_valgrind_suppression.supp DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 build_c_test_artifacts(${theseTestsName} ON "tests/E2ETests" VALGRIND_SUPPRESSIONS_FILE global_valgrind_suppression.supp)
+
+if(${use_sample_trusted_cert})
+    add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
+    include_directories(../../../certs)
+endif()
 
 if(WIN32)
    if(TARGET ${theseTestsName}_dll)

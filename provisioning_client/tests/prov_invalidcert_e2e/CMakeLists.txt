@@ -17,6 +17,10 @@ set(${theseTestsName}_c_files
 set(${theseTestsName}_h_files
 )
 
+if(${use_sample_trusted_cert})
+    add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
+endif()
+
 file(COPY ../common_prov_e2e/prov_valgrind_suppression.supp DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 build_c_test_artifacts(${theseTestsName} ON "tests/azure_prov_e2e_tests" VALGRIND_SUPPRESSIONS_FILE prov_valgrind_suppression.supp)
 

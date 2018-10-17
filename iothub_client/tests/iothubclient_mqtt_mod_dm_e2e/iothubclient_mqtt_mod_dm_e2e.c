@@ -62,10 +62,12 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_mod_dm_e2e)
         device_method_e2e_method_call_with_embedded_single_quote_sas(MQTT_Protocol);
     }
 
+#ifndef USE_WOLFSSL // Wolf doesn't run web socket tests
     TEST_FUNCTION(IotHub_Mqtt_Ws_Module_Method_Call_With_String_sas)
     {
         device_method_e2e_method_call_with_string_sas(MQTT_WebSocket_Protocol);
     }
+#endif
 
 END_TEST_SUITE(iothubclient_mqtt_mod_dm_e2e)
 

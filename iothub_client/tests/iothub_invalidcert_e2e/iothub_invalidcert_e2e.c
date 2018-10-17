@@ -9,6 +9,7 @@
 #include "iothub.h"
 #include "iothub_device_client_ll.h"
 #include "iothub_client_core_ll.h"
+#include "azure_c_shared_utility/shared_util_options.h"
 
 #ifdef USE_MQTT
 #include "iothubtransportmqtt.h"
@@ -23,6 +24,11 @@
 #ifdef USE_HTTP
 #include "iothubtransporthttp.h"
 #endif
+
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+#include "certs.h"
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
+
 static TEST_MUTEX_HANDLE g_dllByDll;
 
 #define MAX_CONNECT_CALLBACK_WAIT_TIME        10
@@ -72,6 +78,10 @@ static IOTHUB_DEVICE_CLIENT_LL_HANDLE create_client(IOTHUB_CLIENT_TRANSPORT_PROV
     IOTHUB_DEVICE_CLIENT_LL_HANDLE iothub_handle;
     iothub_handle = IoTHubDeviceClient_LL_CreateFromConnectionString(connection_string, protocol);
     ASSERT_IS_NOT_NULL(iothub_handle, "Could not create IoTHubDeviceClient_LL_CreateFromConnectionString");
+
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+    IoTHubDeviceClient_LL_SetOption(iothub_handle, OPTION_TRUSTED_CERT, certificates);
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
 
     IOTHUB_CLIENT_RESULT result = IoTHubDeviceClient_LL_SetConnectionStatusCallback(iothub_handle, connection_status_callback, conn_status);
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set connection Status Callback");
