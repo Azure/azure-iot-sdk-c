@@ -19,11 +19,9 @@ phases:
   - script: |
       npm install check_submodules
       ./../../node_modules/.bin/check_submodules . master
-  - task: DeleteFiles@1
-    displayName: 'Delete files from $(Agent.BuildDirectory)'
-    inputs:
-      SourceFolder: '$(Agent.BuildDirectory)'
     condition: always()
+  - script: sudo rm -rf $(Agent.BuildDirectory)/*
+    condition: always()    
 - phase: windowsx86
   queue:
     name: 'aziotbld-win03'
@@ -47,10 +45,10 @@ phases:
       IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-  - task: DeleteFiles@1
-    displayName: 'Delete files from $(Agent.BuildDirectory)'
-    inputs:
-      SourceFolder: '$(Agent.BuildDirectory)'
+    condition: always()
+  - script: |
+      FOR /D %i IN ($(Agent.BuildDirectory)\*) DO RD /S /Q "%i"
+      DEL /Q $(Agent.BuildDirectory)\*.*
     condition: always()
 - phase: gcc44
   variables:
@@ -77,10 +75,8 @@ phases:
       IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-  - task: DeleteFiles@1
-    displayName: 'Delete files from $(Agent.BuildDirectory)'
-    inputs:
-      SourceFolder: '$(Agent.BuildDirectory)'
+    condition: always()
+  - script: sudo rm -rf $(Agent.BuildDirectory)/*
     condition: always()
 - phase: gcc46
   variables:
@@ -117,11 +113,9 @@ phases:
   displayName: 'dynamic'
   steps:
   - script: 'sudo ./jenkins/linux_c_option_test.sh'
-  - task: DeleteFiles@1
-    displayName: 'Delete files from $(Agent.BuildDirectory)'
-    inputs:
-      SourceFolder: '$(Agent.BuildDirectory)'
     condition: always()
+  - script: sudo rm -rf $(Agent.BuildDirectory)/*
+    condition: always()    
 - phase: windowscex86
   queue:
     name: 'win'
@@ -145,10 +139,9 @@ phases:
       IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-  - task: DeleteFiles@1
-    displayName: 'Delete files from $(Agent.BuildDirectory)'
-    inputs:
-      SourceFolder: '$(Agent.BuildDirectory)'
+  - script: |
+      FOR /D %i IN ($(Agent.BuildDirectory)\*) DO RD /S /Q "%i"
+      DEL /Q $(Agent.BuildDirectory)\*.*
     condition: always()
 - phase: windowsdynamic
   queue:
@@ -173,10 +166,9 @@ phases:
       IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-  - task: DeleteFiles@1
-    displayName: 'Delete files from $(Agent.BuildDirectory)'
-    inputs:
-      SourceFolder: '$(Agent.BuildDirectory)'
+  - script: |
+      FOR /D %i IN ($(Agent.BuildDirectory)\*) DO RD /S /Q "%i"
+      DEL /Q $(Agent.BuildDirectory)\*.*
     condition: always()
 - phase: OSX
   queue:
@@ -202,11 +194,9 @@ phases:
       IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-  - task: DeleteFiles@1
-    displayName: 'Delete files from $(Agent.BuildDirectory)'
-    inputs:
-      SourceFolder: '$(Agent.BuildDirectory)'
     condition: always()
+  - script: sudo rm -rf $(Agent.BuildDirectory)/*
+    condition: always()      
 - phase: clang
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/ubuntu-clang"
@@ -235,11 +225,9 @@ phases:
       IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-  - task: DeleteFiles@1
-    displayName: 'Delete files from $(Agent.BuildDirectory)'
-    inputs:
-      SourceFolder: '$(Agent.BuildDirectory)'
     condition: always()
+  - script: sudo rm -rf $(Agent.BuildDirectory)/*
+    condition: always()    
 - phase: ubuntu1604
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
@@ -268,11 +256,9 @@ phases:
       IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-  - task: DeleteFiles@1
-    displayName: 'Delete files from $(Agent.BuildDirectory)'
-    inputs:
-      SourceFolder: '$(Agent.BuildDirectory)'
     condition: always()
+  - script: sudo rm -rf $(Agent.BuildDirectory)/*
+    condition: always()    
 - phase: debian
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/c-debian"
@@ -298,10 +284,8 @@ phases:
       IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-  - task: DeleteFiles@1
-    displayName: 'Delete files from $(Agent.BuildDirectory)'
-    inputs:
-      SourceFolder: '$(Agent.BuildDirectory)'
+    condition: always()
+  - script: sudo rm -rf $(Agent.BuildDirectory)/*
     condition: always()    
 - phase: wolfssl
   variables:
@@ -330,10 +314,8 @@ phases:
       IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-  - task: DeleteFiles@1
-    displayName: 'Delete files from $(Agent.BuildDirectory)'
-    inputs:
-      SourceFolder: '$(Agent.BuildDirectory)'
+    condition: always()
+  - script: sudo rm -rf $(Agent.BuildDirectory)/*
     condition: always()
 - phase: windowsx64
   queue:
@@ -359,10 +341,9 @@ phases:
       IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-  - task: DeleteFiles@1
-    displayName: 'Delete files from $(Agent.BuildDirectory)'
-    inputs:
-      SourceFolder: '$(Agent.BuildDirectory)'
+  - script: |
+      FOR /D %i IN ($(Agent.BuildDirectory)\*) DO RD /S /Q "%i"
+      DEL /Q $(Agent.BuildDirectory)\*.*
     condition: always()
 - phase: xcodenative
   queue:
@@ -389,8 +370,6 @@ phases:
       IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-  - task: DeleteFiles@1
-    displayName: 'Delete files from $(Agent.BuildDirectory)'
-    inputs:
-      SourceFolder: '$(Agent.BuildDirectory)'
-    condition: always()    
+    condition: always()
+  - script: sudo rm -rf $(Agent.BuildDirectory)/*
+    condition: always()   
