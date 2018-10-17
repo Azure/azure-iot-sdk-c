@@ -170,7 +170,7 @@ IOTHUB_SECURITY_HANDLE iothub_device_auth_create()
             }
         }
 #endif
-#if defined(HSM_TYPE_SYMM_KEY) || defined(HSM_AUTH_TYPE_CUSTOM)
+#if defined(HSM_TYPE_SYMM_KEY)
         if (result != NULL && iothub_security_t == IOTHUB_SECURITY_TYPE_SYMMETRIC_KEY)
         {
             result->cred_type = AUTH_TYPE_SYMM_KEY;
