@@ -108,7 +108,7 @@ phases:
     condition: always()    
 - phase: dynamic
   variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-16.04:latest"
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/vsts-linux-c-ubuntu"
   queue: aziotbld-lin01
   displayName: 'dynamic'
   steps:
@@ -289,7 +289,7 @@ phases:
     condition: always()    
 - phase: wolfssl
   variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/c-linux-wolfssl:18.04"
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/vsts-c-wolfssl"
   queue: aziotbld-lin01
   displayName: 'wolfssl'
   steps:
