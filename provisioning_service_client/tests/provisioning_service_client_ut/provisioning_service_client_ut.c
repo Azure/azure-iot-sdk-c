@@ -924,7 +924,7 @@ TEST_FUNCTION(prov_sc_create_from_connection_string_FAIL)
         PROVISIONING_SERVICE_CLIENT_HANDLE sc = prov_sc_create_from_connection_string(TEST_CONNECTION_STRING);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(sc, tmp_msg);
+        ASSERT_IS_NULL(sc, tmp_msg);
 
         //cleanup
         prov_sc_destroy(sc);
@@ -1097,7 +1097,7 @@ TEST_FUNCTION(prov_sc_set_certificate_FAIL)
         int res = prov_sc_set_certificate(sc, TEST_TRUSTED_CERT);
 
         //assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, res, 0, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(int, res, 0, tmp_msg);
     }
 
     //cleanup
@@ -1508,7 +1508,7 @@ TEST_FUNCTION(prov_sc_create_or_update_individual_enrollment_FAIL_null_etag)
         int res = prov_sc_create_or_update_individual_enrollment(sc, &ie);
 
         //assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, res, 0, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(int, res, 0, tmp_msg);
 
         g_uhttp_client_dowork_call_count = 0;
     }
@@ -1571,7 +1571,7 @@ TEST_FUNCTION(prov_sc_create_or_update_individual_enrollment_FAIL_w_etag)
         int res = prov_sc_create_or_update_individual_enrollment(sc, &ie);
 
         //assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, res, 0, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(int, res, 0, tmp_msg);
 
         g_uhttp_client_dowork_call_count = 0;
     }
@@ -1649,7 +1649,7 @@ TEST_FUNCTION(prov_sc_create_or_update_individual_enrollment_FAIL_ALL_HTTP_OPTIO
         int res = prov_sc_create_or_update_individual_enrollment(sc, &ie);
 
         //assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, res, 0, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(int, res, 0, tmp_msg);
 
         g_uhttp_client_dowork_call_count = 0;
     }
@@ -1813,7 +1813,7 @@ TEST_FUNCTION(prov_sc_delete_individual_enrollment_FAIL)
         int res = prov_sc_delete_individual_enrollment(sc, ie);
 
         //assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, res, 0, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(int, res, 0, tmp_msg);
 
         g_uhttp_client_dowork_call_count = 0;
     }
@@ -1963,7 +1963,7 @@ TEST_FUNCTION(prov_sc_delete_individual_enrollment_by_param_FAIL)
         int res = prov_sc_delete_individual_enrollment_by_param(sc, TEST_REGID, TEST_ETAG_STAR);
 
         //assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, res, 0, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(int, res, 0, tmp_msg);
 
         g_uhttp_client_dowork_call_count = 0;
     }
@@ -2106,7 +2106,7 @@ TEST_FUNCTION(prov_sc_get_individual_enrollment_FAIL)
         int res = prov_sc_get_individual_enrollment(sc, TEST_REGID, &ie);
 
         //assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, res, 0, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(int, res, 0, tmp_msg);
 
         g_uhttp_client_dowork_call_count = 0;
     }
@@ -2303,7 +2303,7 @@ TEST_FUNCTION(prov_sc_create_or_update_enrollment_group_FAIL_no_etag)
         int res = prov_sc_create_or_update_enrollment_group(sc, &eg);
 
         //assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, res, 0, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(int, res, 0, tmp_msg);
 
         g_uhttp_client_dowork_call_count = 0;
     }
@@ -2367,7 +2367,7 @@ TEST_FUNCTION(prov_sc_create_or_update_enrollment_group_FAIL_w_etag)
         int res = prov_sc_create_or_update_enrollment_group(sc, &eg);
 
         //assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, res, 0, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(int, res, 0, tmp_msg);
 
         g_uhttp_client_dowork_call_count = 0;
     }
@@ -2531,7 +2531,7 @@ TEST_FUNCTION(prov_sc_delete_enrollment_group_FAIL)
         int res = prov_sc_delete_enrollment_group(sc, eg);
 
         //assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, res, 0, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(int, res, 0, tmp_msg);
 
         g_uhttp_client_dowork_call_count = 0;
     }
@@ -2680,7 +2680,7 @@ TEST_FUNCTION(prov_sc_delete_enrollment_group_by_param_FAIL)
         int res = prov_sc_delete_enrollment_group_by_param(sc, TEST_GROUPID, TEST_ETAG_STAR);
 
         //assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, res, 0, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(int, res, 0, tmp_msg);
 
         g_uhttp_client_dowork_call_count = 0;
     }
@@ -2823,7 +2823,7 @@ TEST_FUNCTION(prov_sc_get_enrollment_group_FAIL)
         int res = prov_sc_get_enrollment_group(sc, TEST_REGID, &eg);
 
         //assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, res, 0, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(int, res, 0, tmp_msg);
 
         g_uhttp_client_dowork_call_count = 0;
     }
@@ -2967,7 +2967,7 @@ TEST_FUNCTION(prov_sc_get_device_registration_state_FAIL)
         int res = prov_sc_get_device_registration_state(sc, TEST_REGID, &drs);
 
         //assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, res, 0, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(int, res, 0, tmp_msg);
 
         g_uhttp_client_dowork_call_count = 0;
     }
@@ -3126,7 +3126,7 @@ TEST_FUNCTION(prov_sc_delete_device_registration_state_FAIL)
         int res = prov_sc_delete_device_registration_state(sc, TEST_DEVICE_REGISTRATION_STATE_HANDLE);
 
         //assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, res, 0, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(int, res, 0, tmp_msg);
 
         g_uhttp_client_dowork_call_count = 0;
     }
@@ -3274,7 +3274,7 @@ TEST_FUNCTION(prov_sc_delete_device_registration_state_by_param_FAIL)
         int res = prov_sc_delete_device_registration_state_by_param(sc, TEST_REGID, TEST_ETAG_STAR);
 
         //assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, res, 0, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(int, res, 0, tmp_msg);
 
         g_uhttp_client_dowork_call_count = 0;
     }
@@ -3470,7 +3470,7 @@ TEST_FUNCTION(prov_sc_run_individual_enrollment_bulk_operation_ERROR)
         int res = prov_sc_run_individual_enrollment_bulk_operation(sc, &bulkop, &bulk_res);
 
         //assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, res, 0, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(int, res, 0, tmp_msg);
 
         g_uhttp_client_dowork_call_count = 0;
     }
@@ -3878,7 +3878,7 @@ TEST_FUNCTION(prov_sc_query_individual_enrollment_success_paging_given_token_w_t
         int res = prov_sc_query_individual_enrollment(sc, &qs, &cont_token, &query_resp);
 
         //assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, res, 0, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(int, res, 0, tmp_msg);
 
         g_uhttp_client_dowork_call_count = 0;
     }
@@ -4286,7 +4286,7 @@ TEST_FUNCTION(prov_sc_query_enrollment_group_success_paging_given_token_w_token_
         int res = prov_sc_query_enrollment_group(sc, &qs, &cont_token, &query_resp);
 
         //assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, res, 0, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(int, res, 0, tmp_msg);
 
         g_uhttp_client_dowork_call_count = 0;
     }
@@ -4689,7 +4689,7 @@ TEST_FUNCTION(prov_sc_query_device_registration_state_success_paging_given_token
         int res = prov_sc_query_device_registration_state(sc, &qs, &cont_token, &query_resp);
 
         //assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, res, 0, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(int, res, 0, tmp_msg);
 
         g_uhttp_client_dowork_call_count = 0;
     }

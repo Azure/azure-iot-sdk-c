@@ -226,6 +226,7 @@ static void deviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsi
 
             oldCar->changeOilReminder = malloc(strlen(newCar->changeOilReminder) + 1);
             (void)strcpy(oldCar->changeOilReminder, newCar->changeOilReminder);
+			free(newCar->changeOilReminder);
         }
     }
 

@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "iothub.h"
 #include "iothub_device_client.h"
@@ -52,6 +53,7 @@ static const char* connectionString = "[device connection string]";
 
 #define MESSAGE_COUNT        5
 static bool g_continueRunning = true;
+int g_interval = 10000;  // 10 sec send interval initially
 static size_t g_message_count_send_confirmations = 0;
 
 static const char* proxy_host = NULL;    // "Web proxy name here"
@@ -106,6 +108,60 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT receive_msg_callback(IOTHUB_MESSAGE_HAND
     return IOTHUBMESSAGE_ACCEPTED;
 }
 
+
+static int device_method_callback(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* resp_size, void* userContextCallback)
+{
+    const char* SetTelemetryIntervalMethod = "SetTelemetryInterval";
+    const char* device_id = (const char*)userContextCallback;
+    char* end = NULL;
+    int newInterval;
+
+    int status = 501;
+    const char* RESPONSE_STRING = "{ \"Response\": \"Unknown method requested.\" }";
+
+    (void)printf("\r\nDevice Method called for device %s\r\n", device_id);
+    (void)printf("Device Method name:    %s\r\n", method_name);
+    (void)printf("Device Method payload: %.*s\r\n", (int)size, (const char*)payload);
+
+    if (strcmp(method_name, SetTelemetryIntervalMethod) == 0)
+    {
+        if (payload)
+        {
+            newInterval = (int)strtol((char*)payload, &end, 10);
+
+            // Interval must be greater than zero.
+            if (newInterval > 0)
+            {
+                // expect sec and covert to ms
+                g_interval = 1000 * (int)strtol((char*)payload, &end, 10);
+                status = 200;
+                RESPONSE_STRING = "{ \"Response\": \"Telemetry reporting interval updated.\" }";
+            }
+            else
+            {
+                status = 500;
+                RESPONSE_STRING = "{ \"Response\": \"Invalid telemetry reporting interval.\" }";
+            }
+        }
+    }
+
+    (void)printf("\r\nResponse status: %d\r\n", status);
+    (void)printf("Response payload: %s\r\n\r\n", RESPONSE_STRING);
+
+    *resp_size = strlen(RESPONSE_STRING);
+    if ((*response = malloc(*resp_size)) == NULL)
+    {
+        status = -1;
+    }
+    else
+    {
+        memcpy(*response, RESPONSE_STRING, *resp_size);
+    }
+    
+    return status;
+}
+
+
 static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS result, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason, void* user_context)
 {
     (void)reason;
@@ -129,13 +185,20 @@ static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void
     (void)printf("Confirmation callback received for message %zu with result %s\r\n", g_message_count_send_confirmations, ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
 }
 
+
 int main(void)
 {
     IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;
-    IOTHUB_MESSAGE_HANDLE message_handle;
-    const char* telemetry_msg = "test_message";
 
-    printf("This sample will send %d messages and wait for any C2D messages.\r\nPress the enter key to end the sample\r\n\r\n", MESSAGE_COUNT);
+    IOTHUB_MESSAGE_HANDLE message_handle;
+    float telemetry_temperature;
+    float telemetry_humidity;
+    const char* telemetry_scale = "Celcius";
+    char telemetry_msg_buffer[80];
+
+    int messagecount = 0;
+
+    printf("\r\nThis sample will send messages continuously and accept C2D messages.\r\nPress Ctrl+C to terminate the sample.\r\n\r\n");
 
     // Select the Protocol to use with the connection
 #ifdef SAMPLE_MQTT
@@ -170,6 +233,9 @@ int main(void)
     {
         // Setting message callback to get C2D messages
         (void)IoTHubDeviceClient_SetMessageCallback(device_handle, receive_msg_callback, NULL);
+        // Setting method callback to handle a SetTelemetryInterval method to control
+        //   how often telemetry messages are sent from the simulated device.
+        (void)IoTHubDeviceClient_SetDeviceMethodCallback(device_handle, device_method_callback, NULL);
         // Setting connection status callback to get indication of connection to iothub
         (void)IoTHubDeviceClient_SetConnectionStatusCallback(device_handle, connection_status_callback, NULL);
 
@@ -205,13 +271,18 @@ int main(void)
             {
                 (void)printf("failure to set proxy\n");
             }
-        }
+        }		
 
-        for (size_t index = 0; index < MESSAGE_COUNT; index++)
+        while(g_continueRunning)
         {
-            // Construct the iothub message from a string or a byte array
-            message_handle = IoTHubMessage_CreateFromString(telemetry_msg);
-            //message_handle = IoTHubMessage_CreateFromByteArray((const unsigned char*)telemetry_msg, strlen(telemetry_msg)));
+            // Construct the iothub message
+            telemetry_temperature = 20.0f + ((float)rand() / RAND_MAX) * 15.0f;
+            telemetry_humidity = 60.0f + ((float)rand() / RAND_MAX) * 20.0f;
+
+            sprintf(telemetry_msg_buffer, "{\"temperature\":%.3f,\"humidity\":%.3f,\"scale\":\"%s\"}", 
+                telemetry_temperature, telemetry_humidity, telemetry_scale);
+
+            message_handle = IoTHubMessage_CreateFromString(telemetry_msg_buffer);
 
             // Set Message property
             (void)IoTHubMessage_SetMessageId(message_handle, "MSG_ID");
@@ -222,15 +293,15 @@ int main(void)
             // Add custom properties to message
             (void)IoTHubMessage_SetProperty(message_handle, "property_key", "property_value");
 
-            (void)printf("Sending message %d to IoTHub\r\n", (int)(index + 1));
+            (void)printf("\r\nSending message %d to IoTHub\r\nMessage: %s\r\n", (int)(messagecount + 1), telemetry_msg_buffer);
             IoTHubDeviceClient_SendEventAsync(device_handle, message_handle, send_confirm_callback, NULL);
 
             // The message is copied to the sdk so the we can destroy it
             IoTHubMessage_Destroy(message_handle);
-        }
+            messagecount = messagecount + 1;
 
-        printf("\r\nPress any key to continue\r\n");
-        getchar();
+            ThreadAPI_Sleep(g_interval);
+        }
 
         // Clean up the iothub sdk handle
         IoTHubDeviceClient_Destroy(device_handle);

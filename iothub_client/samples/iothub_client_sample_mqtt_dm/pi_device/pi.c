@@ -280,7 +280,7 @@ bool device_run_service(void)
     pid = fork();
     if (pid < 0)
     {
-        LogError("failed to fork from parent process: %p\n", pid);
+        LogError("failed to fork from parent process: %d\n", pid);
         retValue = false;
     }
     else

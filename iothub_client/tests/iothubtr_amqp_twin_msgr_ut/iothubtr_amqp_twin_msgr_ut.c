@@ -1037,7 +1037,7 @@ TEST_FUNCTION(twin_msgr_create_failure_checks)
 
         // assert
         sprintf(error_msg, "On failed call %zu", i);
-        ASSERT_IS_NULL_WITH_MSG(handle, error_msg);
+        ASSERT_IS_NULL(handle, error_msg);
     }
 
     // cleanup
@@ -1150,7 +1150,7 @@ TEST_FUNCTION(twin_msgr_report_state_async_failure_checks)
 
         // assert
         sprintf(error_msg, "On failed call %zu", i);
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, error_msg);
+        ASSERT_ARE_NOT_EQUAL(int, 0, result, error_msg);
     }
 
     // cleanup

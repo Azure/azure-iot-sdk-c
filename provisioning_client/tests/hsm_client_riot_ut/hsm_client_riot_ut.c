@@ -497,7 +497,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
             HSM_CLIENT_HANDLE sec_handle = hsm_client_riot_create();
 
             //assert
-            ASSERT_IS_NULL_WITH_MSG(sec_handle, tmp_msg);
+            ASSERT_IS_NULL(sec_handle, tmp_msg);
         }
 
         //cleanup
@@ -912,7 +912,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
             char* value = hsm_client_riot_create_leaf_cert(sec_handle, TEST_CN_VALUE);
 
             //assert
-            ASSERT_IS_NULL_WITH_MSG(value, tmp_msg);
+            ASSERT_IS_NULL(value, tmp_msg);
         }
 
         //cleanup

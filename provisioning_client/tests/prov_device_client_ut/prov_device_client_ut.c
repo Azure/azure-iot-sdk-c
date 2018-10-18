@@ -342,7 +342,7 @@ TEST_FUNCTION(Prov_Device_Create_fail)
         PROV_DEVICE_HANDLE result = Prov_Device_Create(TEST_PROV_URI, TEST_SCOPE_ID, TEST_PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION);
 
         // assert
-        ASSERT_IS_NULL_WITH_MSG(result, tmp_msg);
+        ASSERT_IS_NULL(result, tmp_msg);
     }
 
     //cleanup
@@ -584,7 +584,7 @@ TEST_FUNCTION(Prov_Device_Register_Device_fail)
         PROV_DEVICE_RESULT result = Prov_Device_Register_Device(prov_device_handle, TEST_PROV_DEVICE_CLIENT_REGISTER_DEVICE_CALLBACK, TEST_USER_CONTEXT, TEST_PROV_DEVICE_CLIENT_REGISTER_STATUS_CALLBACK, TEST_USER_CONTEXT);
 
         // assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(PROV_DEVICE_RESULT, result, PROV_DEVICE_RESULT_OK, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(PROV_DEVICE_RESULT, result, PROV_DEVICE_RESULT_OK, tmp_msg);
     }
 
     //cleanup

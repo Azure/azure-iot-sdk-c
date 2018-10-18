@@ -293,7 +293,7 @@ MULTITREE_RESULT MultiTree_AddLeaf(MULTITREE_HANDLE treeHandle, const char* dest
             {
                 /*Codes_SRS_MULTITREE_99_025:[ The function shall return MULTITREE_ERROR to indicate any other error not specified here.]*/
                 result = MULTITREE_ERROR;
-                LogError("Destination path is too large %d", whereIsDelimiter - destinationPath);
+                LogError("Destination path is too large %lu", (unsigned long)(whereIsDelimiter - destinationPath));
             }
             else if (memcpy(firstInnerNodeName, destinationPath, whereIsDelimiter - destinationPath) == NULL)
             {

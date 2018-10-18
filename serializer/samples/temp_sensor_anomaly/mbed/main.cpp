@@ -2,7 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include <stdlib.h>
+#include "azure_c_shared_utility/platform.h"
+#include "iothub_client_ll.h"
 #include "iothubtransporthttp.h"
+#include "codefirst.h"
 #include "serializer.h"
 #include "schemaserializer.h"
 #include "threadapi.h"
@@ -364,7 +367,7 @@ int main(void)
                                     {
                                         unsigned char* destination;
                                         size_t destinationSize;
-                                        if (SERIALIZE(&destination, &destinationSize, frdmDevice->ObjectName, frdmDevice->ObjectType, frdmDevice->SystemProperties, frdmDevice->Version, frdmDevice->Commands) != IOT_AGENT_OK)
+                                        if (SERIALIZE(&destination, &destinationSize, frdmDevice->ObjectName, frdmDevice->ObjectType, frdmDevice->SystemProperties, frdmDevice->Version, frdmDevice->Commands) != CODEFIRST_OK)
                                         {
                                             (void)printf("Failed to serialize\r\n");
                                             result = -1;
@@ -394,7 +397,7 @@ int main(void)
                                 (void)printf("Sending %.02f\r\n", temp);
                                 frdmDevice->temp = temp;
 
-                                if (SERIALIZE(&destination, &destinationSize, frdmDevice->ObjectName, frdmDevice->ObjectType, frdmDevice->Version, frdmDevice->TargetAlarmDevice, frdmDevice->temp) != IOT_AGENT_OK)
+                                if (SERIALIZE(&destination, &destinationSize, frdmDevice->ObjectName, frdmDevice->ObjectType, frdmDevice->Version, frdmDevice->TargetAlarmDevice, frdmDevice->temp) != CODEFIRST_OK)
                                 {
                                     (void)printf("Failed to serialize\r\n");
                                 }

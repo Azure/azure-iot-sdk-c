@@ -97,9 +97,9 @@ void e2e_uploadblob_init()
     ASSERT_IS_NOT_NULL(updateBlobTestLock);
 
     int result = platform_init();
-    ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "Platform init failed");
+    ASSERT_ARE_EQUAL(int, 0, result, "Platform init failed");
     g_iothubAcctInfo = IoTHubAccount_Init(false);
-    ASSERT_IS_NOT_NULL_WITH_MSG(g_iothubAcctInfo, "Could not initialize IoTHubAccount");
+    ASSERT_IS_NOT_NULL(g_iothubAcctInfo, "Could not initialize IoTHubAccount");
     platform_init();
 }
 
@@ -206,25 +206,25 @@ void e2e_uploadtoblob_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACC
     ASSERT_IS_NOT_NULL(deviceToUse);
 
     IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
-    ASSERT_IS_NOT_NULL_WITH_MSG(iotHubClientHandle, "Could not invoke IoTHubClient_CreateFromConnectionString");
+    ASSERT_IS_NOT_NULL(iotHubClientHandle, "Could not invoke IoTHubClient_CreateFromConnectionString");
 
     if (accountAuthMethod == IOTHUB_ACCOUNT_AUTH_X509)
     {
         result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
-        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
         result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
-        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
     }
 
 #if defined(__APPLE__) || defined(AZIOT_LINUX)
     bool curl_verbose = true;
     result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_CURL_VERBOSE, &curl_verbose);
-    ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set curl_verbose opt");
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set curl_verbose opt");
 #endif
 	
     UPLOADTOBLOB_CALLBACK_STATUS uploadToBlobStatus = UPLOADTOBLOB_CALLBACK_PENDING;
     result = IoTHubClient_UploadToBlobAsync(iotHubClientHandle, UPLOADTOBLOB_E2E_TEST_DESTINATION_FILE, UPLOADTOBLOB_E2E_TEST_DATA, strlen((const char*)UPLOADTOBLOB_E2E_TEST_DATA), uploadToBlobCallback, &uploadToBlobStatus);
-    ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not IoTHubClient_UploadToBlobAsync");
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not IoTHubClient_UploadToBlobAsync");
 
     poll_for_upload_completion(&uploadToBlobStatus);
     check_upload_result(uploadToBlobStatus);
@@ -317,7 +317,7 @@ void e2e_uploadtoblob_multiblock_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
     ASSERT_IS_NOT_NULL(deviceToUse);
 
     IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
-    ASSERT_IS_NOT_NULL_WITH_MSG(iotHubClientHandle, "Could not invoke IoTHubClient_CreateFromConnectionString");
+    ASSERT_IS_NOT_NULL(iotHubClientHandle, "Could not invoke IoTHubClient_CreateFromConnectionString");
 
     uploadToBlobCauseAbort = causeAbort;
     UPLOADTOBLOB_CALLBACK_STATUS uploadToBlobStatus = UPLOADTOBLOB_CALLBACK_PENDING;
@@ -330,7 +330,7 @@ void e2e_uploadtoblob_multiblock_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
     {
         result = IoTHubClient_UploadMultipleBlocksToBlobAsync(iotHubClientHandle, UPLOADTOBLOB_E2E_TEST_MULTI_BLOCK_DESTINATION_FILE, uploadToBlobGetData, &uploadToBlobStatus);
     }
-    ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not IoTHubClient_UploadToBlobAsync");
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not IoTHubClient_UploadToBlobAsync");
 
     poll_for_upload_completion(&uploadToBlobStatus);
     check_upload_result(uploadToBlobStatus);
@@ -345,7 +345,7 @@ void e2e_uploadtoblob_test_multiple_simultaneous_uploads(IOTHUB_CLIENT_TRANSPORT
     ASSERT_IS_NOT_NULL(deviceToUse);
 
     IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
-    ASSERT_IS_NOT_NULL_WITH_MSG(iotHubClientHandle, "Could not invoke IoTHubClient_CreateFromConnectionString");
+    ASSERT_IS_NOT_NULL(iotHubClientHandle, "Could not invoke IoTHubClient_CreateFromConnectionString");
 
     UPLOADTOBLOB_CALLBACK_STATUS uploadToBlobStatus[TEST_MAX_SIMULTANEOUS_UPLOADS];
     const char* uploadFileNameList[] = { UPLOADTOBLOB_E2E_TEST_DESTINATION_FILE1, UPLOADTOBLOB_E2E_TEST_DESTINATION_FILE2, UPLOADTOBLOB_E2E_TEST_DESTINATION_FILE3, UPLOADTOBLOB_E2E_TEST_DESTINATION_FILE4, UPLOADTOBLOB_E2E_TEST_DESTINATION_FILE5 };
@@ -356,7 +356,7 @@ void e2e_uploadtoblob_test_multiple_simultaneous_uploads(IOTHUB_CLIENT_TRANSPORT
         const char* uploadFileName = uploadFileNameList[i];
         uploadToBlobStatus[i] = UPLOADTOBLOB_CALLBACK_PENDING;
         result = IoTHubClient_UploadToBlobAsync(iotHubClientHandle, uploadFileName, UPLOADTOBLOB_E2E_TEST_DATA, strlen(uploadFileName), uploadToBlobCallback, &uploadToBlobStatus[i]);
-        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not IoTHubClient_UploadToBlobAsync");
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not IoTHubClient_UploadToBlobAsync");
     }
 
     time_t beginOperation = time(NULL);
@@ -372,7 +372,7 @@ void e2e_uploadtoblob_test_multiple_simultaneous_uploads(IOTHUB_CLIENT_TRANSPORT
     // Even though we had multiple simultaneous threads, expect them to complete in reasonable time (*2 to allow
     // for additional server load).
     time_t endOperation = time(NULL);
-    ASSERT_ARE_EQUAL_WITH_MSG(bool, true, (difftime(endOperation, beginOperation) < IOTHUB_UPLOADTOBLOB_TIMEOUT_SEC * 2) ? true : false, "Multithreaded upload took longer than allowed");
+    ASSERT_ARE_EQUAL(bool, true, (difftime(endOperation, beginOperation) < IOTHUB_UPLOADTOBLOB_TIMEOUT_SEC * 2) ? true : false, "Multithreaded upload took longer than allowed");
 
     IoTHubClient_Destroy(iotHubClientHandle);
 }

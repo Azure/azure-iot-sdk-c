@@ -769,7 +769,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
             PROV_DEVICE_LL_HANDLE result = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
 
             // assert
-            ASSERT_IS_NULL_WITH_MSG(result, tmp_msg);
+            ASSERT_IS_NULL(result, tmp_msg);
         }
 
         //cleanup
@@ -915,7 +915,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
             PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
 
             //assert
-            ASSERT_ARE_EQUAL_WITH_MSG(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_ERROR, prov_result, tmp_msg);
+            ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_ERROR, prov_result, tmp_msg);
         }
 
         //cleanup
@@ -958,7 +958,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
             PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
 
             //assert
-            ASSERT_ARE_EQUAL_WITH_MSG(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_ERROR, prov_result, tmp_msg);
+            ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_ERROR, prov_result, tmp_msg);
         }
 
         //cleanup
@@ -1090,7 +1090,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
             result = g_json_parse_cb(TEST_JSON_REPLY, g_json_ctx);
 
             //assert
-            ASSERT_IS_NULL_WITH_MSG(result, tmp_msg);
+            ASSERT_IS_NULL(result, tmp_msg);
         }
 
         //cleanup
@@ -1209,7 +1209,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
             result = g_json_parse_cb(TEST_JSON_REPLY, g_json_ctx);
 
             //assert
-            ASSERT_IS_NULL_WITH_MSG(result, tmp_msg);
+            ASSERT_IS_NULL(result, tmp_msg);
         }
 
         //cleanup
@@ -1285,7 +1285,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
             result = g_json_parse_cb(TEST_JSON_REPLY, g_json_ctx);
 
             //assert
-            ASSERT_IS_NULL_WITH_MSG(result, tmp_msg);
+            ASSERT_IS_NULL(result, tmp_msg);
         }
 
         //cleanup
@@ -1465,7 +1465,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
             char* result = g_challenge_callback(TEST_DATA, TEST_DATA_LEN, TEST_STRING_HANDLE_VALUE, g_challenge_ctx);
 
             //assert
-            ASSERT_IS_NULL_WITH_MSG(result, tmp_msg);
+            ASSERT_IS_NULL(result, tmp_msg);
         }
 
         //cleanup

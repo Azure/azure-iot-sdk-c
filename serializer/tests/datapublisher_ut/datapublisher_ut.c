@@ -1146,7 +1146,7 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
             REPORTED_PROPERTIES_TRANSACTION_HANDLE handle = DataPublisher_CreateTransaction_ReportedProperties(dataPublisherHandle);
 
             ///assert
-            ASSERT_IS_NULL_WITH_MSG(handle, temp_str);
+            ASSERT_IS_NULL(handle, temp_str);
         }
 
         ///cleanup
@@ -1302,7 +1302,7 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
             result = DataPublisher_PublishTransacted_ReportedProperty(handle, reportedPropertyPath, &ag);
 
             ///assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK, result, temp_str);
+            ASSERT_ARE_NOT_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK, result, temp_str);
 next_fail:;
         }
         ///clean
@@ -1402,7 +1402,7 @@ next_fail:;
             result = DataPublisher_PublishTransacted_ReportedProperty(handle, reportedPropertyPath, &ag);
 
             ///assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK, result, temp_str);
+            ASSERT_ARE_NOT_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK, result, temp_str);
         next_fail:;
         }
 
@@ -1509,7 +1509,7 @@ next_fail:;
             result = DataPublisher_PublishTransacted_ReportedProperty(handle, reportedPropertyPath, &ag2);
 
             ///assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK, result, temp_str);
+            ASSERT_ARE_NOT_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK, result, temp_str);
         next_fail:;
         }
 

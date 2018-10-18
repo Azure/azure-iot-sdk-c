@@ -8,7 +8,7 @@
 #include "azure_c_shared_utility/macro_utils.h"
 #include "iothub.h"
 
-int IoTHub_Init()
+int IoTHub_Init(void)
 {
     int result;
     if (platform_init() != 0)
@@ -23,7 +23,7 @@ int IoTHub_Init()
     return result;
 }
 
-void IoTHub_Deinit()
+void IoTHub_Deinit(void)
 {
     platform_deinit();
 }

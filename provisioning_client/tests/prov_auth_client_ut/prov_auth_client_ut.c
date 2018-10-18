@@ -785,7 +785,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
             char* result = prov_auth_get_registration_id(sec_handle);
 
             //assert
-            ASSERT_IS_NULL_WITH_MSG(result, tmp_msg);
+            ASSERT_IS_NULL(result, tmp_msg);
         }
 
         //cleanup
@@ -853,7 +853,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
             char* result = prov_auth_get_registration_id(sec_handle);
 
             //assert
-            ASSERT_IS_NULL_WITH_MSG(result, tmp_msg);
+            ASSERT_IS_NULL(result, tmp_msg);
         }
 
         //cleanup
@@ -1254,7 +1254,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
             char* result = prov_auth_construct_sas_token(sec_handle, TEST_TOKEN_SCOPE_VALUE, TEST_KEY_NAME_VALUE, TEST_EXPIRY_TIME_T_VALUE);
 
             //assert
-            ASSERT_IS_NULL_WITH_MSG(result, tmp_msg);
+            ASSERT_IS_NULL(result, tmp_msg);
         }
 
         //cleanup

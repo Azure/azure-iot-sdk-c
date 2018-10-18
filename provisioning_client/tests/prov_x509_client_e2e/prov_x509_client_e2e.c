@@ -57,7 +57,7 @@ static void iothub_prov_register_device(PROV_DEVICE_RESULT register_result, cons
 static void dps_registation_status(PROV_DEVICE_REG_STATUS reg_status, void* user_context)
 {
     (void)reg_status;
-    ASSERT_IS_NOT_NULL_WITH_MSG(user_context, "user_context is NULL");
+    ASSERT_IS_NOT_NULL(user_context, "user_context is NULL");
 }
 
 BEGIN_TEST_SUITE(prov_x509_client_e2e)
@@ -70,13 +70,13 @@ BEGIN_TEST_SUITE(prov_x509_client_e2e)
         prov_dev_security_init(SECURE_DEVICE_TYPE_X509);
 
         g_prov_conn_string = getenv(DPS_CONNECTION_STRING);
-        ASSERT_IS_NOT_NULL_WITH_MSG(g_prov_conn_string, "DPS_CONNECTION_STRING is NULL");
+        ASSERT_IS_NOT_NULL(g_prov_conn_string, "DPS_CONNECTION_STRING is NULL");
 
         g_dps_uri = getenv(DPS_GLOBAL_ENDPOINT);
-        ASSERT_IS_NOT_NULL_WITH_MSG(g_prov_conn_string, "DPS_GLOBAL_ENDPOINT is NULL");
+        ASSERT_IS_NOT_NULL(g_prov_conn_string, "DPS_GLOBAL_ENDPOINT is NULL");
 
         g_dps_scope_id = getenv(DPS_ID_SCOPE);
-        ASSERT_IS_NOT_NULL_WITH_MSG(g_dps_scope_id, "DPS_ID_SCOPE is NULL");
+        ASSERT_IS_NOT_NULL(g_dps_scope_id, "DPS_ID_SCOPE is NULL");
 
         // Register device
         create_x509_enrollment_device(g_prov_conn_string, g_enable_tracing);
@@ -110,18 +110,18 @@ BEGIN_TEST_SUITE(prov_x509_client_e2e)
         // arrange
         PROV_DEVICE_LL_HANDLE handle;
         handle = Prov_Device_LL_Create(g_dps_uri, g_dps_scope_id, Prov_Device_HTTP_Protocol);
-        ASSERT_IS_NOT_NULL_WITH_MSG(handle, "Failure create a DPS HANDLE");
+        ASSERT_IS_NOT_NULL(handle, "Failure create a DPS HANDLE");
 
         Prov_Device_LL_SetOption(handle, PROV_OPTION_LOG_TRACE, &g_enable_tracing);
 
         // act
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &prov_info, dps_registation_status, &prov_info);
-        ASSERT_ARE_EQUAL_WITH_MSG(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
 
         wait_for_dps_result(handle, &prov_info);
 
         // Assert
-        ASSERT_ARE_EQUAL_WITH_MSG(int, REG_RESULT_COMPLETE, prov_info.reg_result, "Failure calling registering device x509 http");
+        ASSERT_ARE_EQUAL(int, REG_RESULT_COMPLETE, prov_info.reg_result, "Failure calling registering device x509 http");
 
         free(prov_info.iothub_uri);
         free(prov_info.device_id);
@@ -139,18 +139,18 @@ BEGIN_TEST_SUITE(prov_x509_client_e2e)
         // arrange
         PROV_DEVICE_LL_HANDLE handle;
         handle = Prov_Device_LL_Create(g_dps_uri, g_dps_scope_id, Prov_Device_HTTP_Protocol);
-        ASSERT_IS_NOT_NULL_WITH_MSG(handle, "Failure create a DPS HANDLE");
+        ASSERT_IS_NOT_NULL(handle, "Failure create a DPS HANDLE");
 
         Prov_Device_LL_SetOption(handle, PROV_OPTION_LOG_TRACE, &g_enable_tracing);
 
         // act
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &prov_info, dps_registation_status, &prov_info);
-        ASSERT_ARE_EQUAL_WITH_MSG(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
 
         wait_for_dps_result(handle, &prov_info);
 
         // Assert
-        ASSERT_ARE_EQUAL_WITH_MSG(int, REG_RESULT_COMPLETE, prov_info.reg_result, "Failure calling registering device x509 amqp");
+        ASSERT_ARE_EQUAL(int, REG_RESULT_COMPLETE, prov_info.reg_result, "Failure calling registering device x509 amqp");
 
         free(prov_info.iothub_uri);
         free(prov_info.device_id);
@@ -166,18 +166,18 @@ BEGIN_TEST_SUITE(prov_x509_client_e2e)
         // arrange
         PROV_DEVICE_LL_HANDLE handle;
         handle = Prov_Device_LL_Create(g_dps_uri, g_dps_scope_id, Prov_Device_HTTP_Protocol);
-        ASSERT_IS_NOT_NULL_WITH_MSG(handle, "Failure create a DPS HANDLE");
+        ASSERT_IS_NOT_NULL(handle, "Failure create a DPS HANDLE");
 
         Prov_Device_LL_SetOption(handle, PROV_OPTION_LOG_TRACE, &g_enable_tracing);
 
         // act
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &prov_info, dps_registation_status, &prov_info);
-        ASSERT_ARE_EQUAL_WITH_MSG(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
 
         wait_for_dps_result(handle, &prov_info);
 
         // Assert
-        ASSERT_ARE_EQUAL_WITH_MSG(int, REG_RESULT_COMPLETE, prov_info.reg_result, "Failure calling registering device x509 amqp ws");
+        ASSERT_ARE_EQUAL(int, REG_RESULT_COMPLETE, prov_info.reg_result, "Failure calling registering device x509 amqp ws");
 
         free(prov_info.iothub_uri);
         free(prov_info.device_id);
@@ -194,19 +194,19 @@ BEGIN_TEST_SUITE(prov_x509_client_e2e)
 
         // arrange
         PROV_DEVICE_LL_HANDLE handle;
-        handle = Prov_Device_LL_Create(g_dps_uri, g_dps_scope_id, Prov_Device_HTTP_Protocol);
-        ASSERT_IS_NOT_NULL_WITH_MSG(handle, "Failure create a DPS HANDLE");
+        handle = Prov_Device_LL_Create(g_dps_uri, g_dps_scope_id, Prov_Device_MQTT_Protocol);
+        ASSERT_IS_NOT_NULL(handle, "Failure create a DPS HANDLE");
 
         Prov_Device_LL_SetOption(handle, PROV_OPTION_LOG_TRACE, &g_enable_tracing);
 
         // act
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &prov_info, dps_registation_status, &prov_info);
-        ASSERT_ARE_EQUAL_WITH_MSG(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
 
         wait_for_dps_result(handle, &prov_info);
 
         // Assert
-        ASSERT_ARE_EQUAL_WITH_MSG(int, REG_RESULT_COMPLETE, prov_info.reg_result, "Failure calling registering device with x509 mqtt");
+        ASSERT_ARE_EQUAL(int, REG_RESULT_COMPLETE, prov_info.reg_result, "Failure calling registering device with x509 mqtt");
 
         free(prov_info.iothub_uri);
         free(prov_info.device_id);
@@ -221,19 +221,19 @@ BEGIN_TEST_SUITE(prov_x509_client_e2e)
 
         // arrange
         PROV_DEVICE_LL_HANDLE handle;
-        handle = Prov_Device_LL_Create(g_dps_uri, g_dps_scope_id, Prov_Device_HTTP_Protocol);
-        ASSERT_IS_NOT_NULL_WITH_MSG(handle, "Failure create a DPS HANDLE");
+        handle = Prov_Device_LL_Create(g_dps_uri, g_dps_scope_id, Prov_Device_MQTT_Protocol);
+        ASSERT_IS_NOT_NULL(handle, "Failure create a DPS HANDLE");
 
         Prov_Device_LL_SetOption(handle, PROV_OPTION_LOG_TRACE, &g_enable_tracing);
 
         // act
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &prov_info, dps_registation_status, &prov_info);
-        ASSERT_ARE_EQUAL_WITH_MSG(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
 
         wait_for_dps_result(handle, &prov_info);
 
         // Assert
-        ASSERT_ARE_EQUAL_WITH_MSG(int, REG_RESULT_COMPLETE, prov_info.reg_result, "Failure calling registering device x509 mqtt ws");
+        ASSERT_ARE_EQUAL(int, REG_RESULT_COMPLETE, prov_info.reg_result, "Failure calling registering device x509 mqtt ws");
 
         free(prov_info.iothub_uri);
         free(prov_info.device_id);

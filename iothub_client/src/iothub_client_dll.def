@@ -13,15 +13,6 @@ EXPORTS
 
     IoTHubClient_GetVersionString
 
-    IoTHubClientCore_LL_SendComplete
-    IoTHubClientCore_LL_ReportedStateComplete
-    IoTHubClientCore_LL_MessageCallback
-    IoTHubClientCore_LL_RetrievePropertyComplete
-    IoTHubClientCore_LL_DeviceMethodComplete
-    IoTHubClientCore_LL_ConnectionStatusCallBack
-    IoTHubClientCore_LL_GetOption
-    IoTHubClientCore_LL_MessageCallbackFromInput
-
     IoTHubClient_CreateFromConnectionString
     IoTHubClient_Create
     IoTHubClient_CreateWithTransport

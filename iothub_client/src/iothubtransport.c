@@ -37,6 +37,7 @@ const size_t IoTHubTransport_ThreadTerminationOffset = offsetof(TRANSPORT_HANDLE
 TRANSPORT_HANDLE IoTHubTransport_Create(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char* iotHubName, const char* iotHubSuffix)
 {
     TRANSPORT_HANDLE_DATA *result;
+    TRANSPORT_CALLBACKS_INFO transport_cb;
 
     if (protocol == NULL || iotHubName == NULL || iotHubSuffix == NULL)
     {
@@ -44,6 +45,11 @@ TRANSPORT_HANDLE IoTHubTransport_Create(IOTHUB_CLIENT_TRANSPORT_PROVIDER protoco
         /*Codes_SRS_IOTHUBTRANSPORT_17_003: [ If iotHubName is NULL, this function shall return NULL. ]*/
         /*Codes_SRS_IOTHUBTRANSPORT_17_004: [ If iotHubSuffix is NULL, this function shall return NULL. ]*/
         LogError("Invalid NULL argument, protocol [%p], name [%p], suffix [%p].", protocol, iotHubName, iotHubSuffix);
+        result = NULL;
+    }
+    else if (IoTHubClientCore_LL_GetTransportCallbacks(&transport_cb) != 0)
+    {
+        LogError("Failure getting transport callbacks");
         result = NULL;
     }
     else
@@ -72,7 +78,7 @@ TRANSPORT_HANDLE IoTHubTransport_Create(IOTHUB_CLIENT_TRANSPORT_PROVIDER protoco
             transportLLConfig.waitingToSend = NULL;
 
             /*Codes_SRS_IOTHUBTRANSPORT_17_005: [ IoTHubTransport_Create shall create the lower layer transport by calling the protocol's IoTHubTransport_Create function. ]*/
-            result->transportLLHandle = transportProtocol->IoTHubTransport_Create(&transportLLConfig);
+            result->transportLLHandle = transportProtocol->IoTHubTransport_Create(&transportLLConfig, &transport_cb, NULL);
             if (result->transportLLHandle == NULL)
             {
                 /*Codes_SRS_IOTHUBTRANSPORT_17_006: [ If the creation of the transport fails, IoTHubTransport_Create shall return NULL. ]*/
@@ -188,7 +194,7 @@ static int transport_worker_thread(void* threadArgument)
             }
             else
             {
-                (transportData->IoTHubTransport_DoWork)(transportData->transportLLHandle, NULL);
+                (transportData->IoTHubTransport_DoWork)(transportData->transportLLHandle);
 
                 (void)Unlock(transportData->lockHandle);
             }

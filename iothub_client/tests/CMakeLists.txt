@@ -33,6 +33,7 @@ endfunction()
 #this is CMakeLists for iothub_client tests folder
 add_unittest_directory(iothub_ut)
 add_unittest_directory(iothub_client_authorization_ut)
+add_unittest_directory(iothub_transport_ll_private_ut)
 add_unittest_directory(iothubclient_ll_ut)
 add_unittest_directory(iothubclientcore_ll_ut)
 add_unittest_directory(iothubclient_diagnostic_ut)
@@ -116,3 +117,5 @@ if(${use_amqp})
 endif()
 
 add_unittest_directory(version_ut)
+
+add_e2etest_directory(iothub_invalidcert_e2e)

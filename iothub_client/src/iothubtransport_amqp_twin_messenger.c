@@ -602,7 +602,7 @@ static int parse_incoming_twin_message(MESSAGE_HANDLE message,
                     }
                     else if (body_count != 1)
                     {
-                        LogError("Unexpected number of TWIN message bodies (%d)", body_count);
+                        LogError("Unexpected number of TWIN message bodies (%lu)", (unsigned long)body_count);
                         result = __FAILURE__;
                     }
                     else if (message_get_body_amqp_data_in_place(message, 0, twin_report) != 0)
@@ -1172,7 +1172,7 @@ static void process_twin_subscription(TWIN_MESSENGER_INSTANCE* twin_msgr)
     // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_078: [If failures occur sending subscription requests to the service for more than 3 times, TWIN messenger shall set its state to TWIN_MESSENGER_STATE_ERROR and inform the user]
     if (twin_msgr->subscription_error_count >= DEFAULT_MAX_TWIN_SUBSCRIPTION_ERROR_COUNT)
     {
-        LogError("Maximum number of TWIN subscription-related failures reached (%s, %d)", twin_msgr->device_id, twin_msgr->subscription_error_count);
+        LogError("Maximum number of TWIN subscription-related failures reached (%s, %lu)", twin_msgr->device_id, (unsigned long)twin_msgr->subscription_error_count);
         update_state(twin_msgr, TWIN_MESSENGER_STATE_ERROR);
     }
     else

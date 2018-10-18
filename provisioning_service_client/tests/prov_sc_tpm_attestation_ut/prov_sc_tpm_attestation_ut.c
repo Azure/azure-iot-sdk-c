@@ -289,7 +289,7 @@ TEST_FUNCTION(tpmAttestation_create_tags_and_srk_throw_error)
         TPM_ATTESTATION_HANDLE tpm_att = tpmAttestation_create(DUMMY_EK, DUMMY_SRK);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(tpm_att, tmp_msg);
+        ASSERT_IS_NULL(tpm_att, tmp_msg);
 
         //cleanup
         tpmAttestation_destroy(tpm_att);
@@ -423,7 +423,7 @@ TEST_FUNCTION(tpmAttestation_toJson_full_tpm_error)
         JSON_Value* result = tpmAttestation_toJson(tpm_att);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(result, tmp_msg);
+        ASSERT_IS_NULL(result, tmp_msg);
     }
 
     //cleanup
@@ -521,7 +521,7 @@ TEST_FUNCTION(tpmAttestation_fromJson_min_error)
         TPM_ATTESTATION_HANDLE tpm_att = tpmAttestation_fromJson(TEST_JSON_OBJECT);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(tpm_att, tmp_msg);
+        ASSERT_IS_NULL(tpm_att, tmp_msg);
     }
 
     //cleanup
@@ -564,7 +564,7 @@ TEST_FUNCTION(tpmAttestation_fromJson_max_error)
         TPM_ATTESTATION_HANDLE tpm_att = tpmAttestation_fromJson(TEST_JSON_OBJECT);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(tpm_att, tmp_msg);
+        ASSERT_IS_NULL(tpm_att, tmp_msg);
     }
 
     //cleanup

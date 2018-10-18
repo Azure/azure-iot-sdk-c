@@ -619,7 +619,7 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT parseDeviceConfigurationLabelsJsonObje
                     }
                     else if (!json_object_has_value(labelsJson, STRING_c_str(tempLabelsName)))
                     {
-                        LogError("missing result for label %s", tempLabelsName);
+                        LogError("missing result for label %s", STRING_c_str(tempLabelsName));
                         result = IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR;
                     }
                     else if (mallocAndStrcpy_s((char**)&(labels->labelNames[i]), STRING_c_str(tempLabelsName)) != 0)

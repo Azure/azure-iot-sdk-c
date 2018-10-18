@@ -38,7 +38,6 @@ set CMAKE_run_longhaul_tests=OFF
 set CMAKE_run_unittests=OFF
 set MAKE_NUGET_PKG=no
 set CMAKE_DIR=iotsdk_win32
-set build-samples=yes
 set make=yes
 set build_traceabilitytool=0
 set prov_auth=OFF
@@ -103,7 +102,6 @@ goto args-continue
 shift
 if "%1" equ "" call :usage && exit /b 1
 set MAKE_NUGET_PKG=%1
-set build-samples=no
 goto args-continue
 
 :arg-cmake-root
@@ -139,92 +137,6 @@ if %make% == no (
     set CMAKE_run_e2e_tests=OFF
     set CMAKE_run_sfc_tests=OFF
     set CMAKE_run_longhaul_tests=OFF
-    set build-samples=no
-)
-
-rem -----------------------------------------------------------------------------
-rem -- restore packages for solutions
-rem -----------------------------------------------------------------------------
-
-if %build-samples%==yes (
-    where /q nuget.exe
-    if not !errorlevel! == 0 (
-    @Echo Azure IoT SDK needs to download nuget.exe from https://www.nuget.org/nuget.exe 
-    @Echo https://www.nuget.org 
-    choice /C yn /M "Do you want to download and run nuget.exe?" 
-    if not !errorlevel!==1 goto :eof
-    rem if nuget.exe is not found, then ask user
-    Powershell.exe wget -outf nuget.exe https://nuget.org/nuget.exe
-        if not exist .\nuget.exe (
-            echo nuget does not exist
-            exit /b 1
-        )
-    )
-
-    call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\samples\iothub_ll_telemetry_sample\windows\iothub_ll_telemetry_sample.sln"
-    if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
-
-    call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\samples\simplesample_http\windows\simplesample_http.sln"
-    if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
-    call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\samples\simplesample_amqp\windows\simplesample_amqp.sln"
-    if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
-    call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\samples\simplesample_mqtt\windows\simplesample_mqtt.sln"
-    if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
-    call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\samples\remote_monitoring\windows\remote_monitoring.sln"
-    if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
-    call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\samples\temp_sensor_anomaly\windows\temp_sensor_anomaly.sln"
-    if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
-)
-
-rem -----------------------------------------------------------------------------
-rem -- clean solutions
-rem -----------------------------------------------------------------------------
-
-if %build-clean%==1 (
-    if %build-samples%==yes (
-        call nuget restore "%build-root%\iothub_client\samples\iothub_ll_telemetry_sample\windows\iothub_ll_telemetry_sample.sln"
-        call :clean-a-solution "%build-root%\iothub_client\samples\iothub_ll_telemetry_sample\windows\iothub_ll_telemetry_sample.sln"
-        if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-        
-        call :clean-a-solution "%build-root%\serializer\samples\simplesample_http\windows\simplesample_http.sln"
-        if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-        
-        call :clean-a-solution "%build-root%\serializer\samples\simplesample_amqp\windows\simplesample_amqp.sln"
-        if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-        
-        call :clean-a-solution "%build-root%\serializer\samples\simplesample_mqtt\windows\simplesample_mqtt.sln"
-        if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-        
-        call :clean-a-solution "%build-root%\serializer\samples\remote_monitoring\windows\remote_monitoring.sln"
-        if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-        
-        call :clean-a-solution "%build-root%\serializer\samples\temp_sensor_anomaly\windows\temp_sensor_anomaly.sln"
-        if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-    )
-)
-
-rem -----------------------------------------------------------------------------
-rem -- build solutions
-rem -----------------------------------------------------------------------------
-
-if %build-samples%==yes (
-    rem call :build-a-solution "%build-root%\iothub_client\samples\iothub_ll_telemetry_sample\windows\iothub_ll_telemetry_sample.sln"
-    rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-
-    rem call :build-a-solution "%build-root%\serializer\samples\simplesample_amqp\windows\simplesample_amqp.sln"
-    rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-
-    rem call :build-a-solution "%build-root%\serializer\samples\simplesample_http\windows\simplesample_http.sln"
-    rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-
-    rem call :build-a-solution "%build-root%\serializer\samples\simplesample_mqtt\windows\simplesample_mqtt.sln"
-    rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-
-    rem call :build-a-solution "%build-root%\serializer\samples\remote_monitoring\windows\remote_monitoring.sln"
-    rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-
-    rem call :build-a-solution "%build-root%\serializer\samples\temp_sensor_anomaly\windows\temp_sensor_anomaly.sln"
-    rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 )
 
 rem -----------------------------------------------------------------------------

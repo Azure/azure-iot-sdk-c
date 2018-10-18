@@ -28,7 +28,8 @@ For a list of tested configurations [click here][device-catalog].
 ### apt-get packages for Linux devices
 
 To make it simpler to use the IoT Hub device SDK on Linux, we have created [apt-get packages][apt-get-packages] that are published on the Launchpad platform.
-At this point you can use the packages on Ubuntu 14.04, 15.04, 15.10, 16.04 using the following CPU architectures amd64, arm64, armhf and i386. Currently the packages are not published on Ubuntu 18.04.
+
+At this point you can use the packages on Ubuntu 16.04 and 18.04 using the following CPU architectures: amd64, arm64, armhf and i386.
 
 [Here][apt-get-instructions] you can find a detailed guide on how to install the packages to develop your device application.
 

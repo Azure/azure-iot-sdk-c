@@ -946,16 +946,8 @@ static void setup_IoTHubClientCore_LL_sendreportedstate_mocks()
 {
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(CONSTBUFFER_Create(TEST_REPORTED_STATE, TEST_REPORTED_SIZE));
-
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)) /*_DoWork will ask "what's the time"*/
-        .IgnoreAllArguments();
-
-    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_Subscribe_DeviceTwin(IGNORED_PTR_ARG))
-        .IgnoreArgument(1);
-
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2);
+    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_Subscribe_DeviceTwin(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 }
 
 static void setup_IoTHubClientCore_LL_sendeventasync_mocks(bool invoke_tickcounter)
@@ -1137,7 +1129,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateFromConnectionString_with_DeviceKey_fail
         IOTHUB_CLIENT_CORE_LL_HANDLE result = IoTHubClientCore_LL_CreateFromConnectionString(TEST_CHAR, provideFAKE);
 
         ///assert
-        ASSERT_IS_NULL_WITH_MSG(result, tmp_msg);
+        ASSERT_IS_NULL(result, tmp_msg);
     }
 
     ///cleanup
@@ -1565,7 +1557,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_Create_fail)
         IOTHUB_CLIENT_CORE_LL_HANDLE result = IoTHubClientCore_LL_Create(&TEST_CONFIG);
 
         //assert
-        ASSERT_ARE_EQUAL_WITH_MSG(void_ptr, NULL, result, tmp_msg);
+        ASSERT_ARE_EQUAL(void_ptr, NULL, result, tmp_msg);
     }
 
     // cleanup
@@ -1784,7 +1776,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_fail)
         IOTHUB_CLIENT_CORE_LL_HANDLE result = IoTHubClientCore_LL_CreateWithTransport(&TEST_DEVICE_CONFIG);
 
         //assert
-        ASSERT_ARE_EQUAL_WITH_MSG(void_ptr, NULL, result, tmp_msg);
+        ASSERT_ARE_EQUAL(void_ptr, NULL, result, tmp_msg);
     }
 
     // cleanup
@@ -3678,7 +3670,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_messageTimeout_calls_timeout_callbac
     /*send 1 messages that will expire*/
     /*because sending messages stamps the message's timeout, the call to tickcounter_get_current_ms needs to be here, so the test can says
     "the message has been received at time=10*/
-    tickcounter_ms_t ten = 10;
+    tickcounter_ms_t ten = 10000;
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .CopyOutArgumentBuffer(2, &ten, sizeof(ten));
@@ -3686,7 +3678,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_messageTimeout_calls_timeout_callbac
     umock_c_reset_all_calls();
 
     /*we don't care what happens in the Transport, so let's ignore all those calls*/
-    tickcounter_ms_t twelve = 12; /*12 > 10 (receive time) + 1 (timeout) => timeout*/
+    tickcounter_ms_t twelve = 12000; /*12 > 10 (receive time) + 1 (timeout) => timeout*/
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .CopyOutArgumentBuffer(2, &twelve, sizeof(twelve));
@@ -3721,7 +3713,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_defaults_to_zero)
     /*send 1 messages that will expire*/
     /*because sending messages stamps the message's timeout, the call to tickcounter_get_current_ms needs to be here, so the test can says
     "the message has been received at time=10*/
-    tickcounter_ms_t ten = 10;
+    tickcounter_ms_t ten = 10000;
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .CopyOutArgumentBuffer(2, &ten, sizeof(ten));
@@ -3730,7 +3722,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_defaults_to_zero)
 
     /*we don't care what happens in the Transport, so let's ignore all those calls*/
 
-    tickcounter_ms_t twelve = 12; /*12 > 10 (receive time) + 1 (timeout) => would result in timeout, except the fact that messageTimeout option has never been set, therefore no timeout shall be called*/
+    tickcounter_ms_t twelve = 12000; /*12 > 10 (receive time) + 1 (timeout) => would result in timeout, except the fact that messageTimeout option has never been set, therefore no timeout shall be called*/
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .CopyOutArgumentBuffer(2, &twelve, sizeof(twelve));
@@ -3759,14 +3751,14 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_messageTimeout_only_removes_the_mess
     /*send 1 messages that will expire*/
     /*because sending messages stamps the message's timeout, the call to tickcounter_get_current_ms needs to be here, so the test can says
     "the message has been received at time=10*/
-    tickcounter_ms_t ten = 10;
+    tickcounter_ms_t ten = 10000;
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .CopyOutArgumentBuffer(2, &ten, sizeof(ten));
     (void)IoTHubClientCore_LL_SendEventAsync(handle, TEST_DEVICEMESSAGE_HANDLE, NULL, NULL); /*this is a message with a NULL callback*/
     umock_c_reset_all_calls();
 
-    tickcounter_ms_t twelve = 12; /*12 > 10 (receive time) + 1 (timeout) => timeout*/
+    tickcounter_ms_t twelve = 12000; /*12 > 10 (receive time) + 1 (timeout) => timeout*/
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .CopyOutArgumentBuffer(2, &twelve, sizeof(twelve));
@@ -3804,29 +3796,26 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_messageTimeout_when_exactly_on_the_e
     /*send 1 messages that will expire*/
     /*because sending messages stamps the message's timeout, the call to tickcounter_get_current_ms needs to be here, so the test can says
     "the message has been received at time=10*/
-    tickcounter_ms_t ten = 10;
+    tickcounter_ms_t ten = 10000;
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
         .CopyOutArgumentBuffer(2, &ten, sizeof(ten));
     (void)IoTHubClientCore_LL_SendEventAsync(handle, TEST_DEVICEMESSAGE_HANDLE, test_event_confirmation_callback, (void*)TEST_DEVICEMESSAGE_HANDLE);
     umock_c_reset_all_calls();
 
-    tickcounter_ms_t eleven = 11; /*11 = 10 (receive time) + 1 (timeout) => NO timeout*/
+    tickcounter_ms_t eleven = 11000; /*11 = 10 (receive time) + 1 (timeout) => NO timeout*/
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
         .CopyOutArgumentBuffer(2, &eleven, sizeof(eleven));
 
     /*we don't care what happens in the Transport, so let's ignore all those calls*/
-    EXPECTED_CALL(FAKE_IoTHubTransport_DoWork(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllCalls();
+    EXPECTED_CALL(FAKE_IoTHubTransport_DoWork(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
     //act
     IoTHubClientCore_LL_DoWork(handle);
 
-    ///assert
+    //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
-    ///cleanup
+    //cleanup
     IoTHubClientCore_LL_Destroy(handle);
 }
 
@@ -3843,36 +3832,29 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_2_messages_with_timeouts_at_11_and_1
     /*send 2 messages that will expire at 12 and 13, both of these messages are send at time=10*/
     /*because sending messages stamps the message's timeout, the call to tickcounter_get_current_ms needs to be here, so the test can says
     "the message has been received at time=10*/
-    tickcounter_ms_t ten = 10;
+    tickcounter_ms_t ten = 10000;
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
         .CopyOutArgumentBuffer(2, &ten, sizeof(ten));
     (void)IoTHubClientCore_LL_SendEventAsync(handle, TEST_DEVICEMESSAGE_HANDLE, test_event_confirmation_callback, (void*)TEST_DEVICEMESSAGE_HANDLE);
 
     tickcounter_ms_t two = 2;
     (void)IoTHubClientCore_LL_SetOption(handle, "messageTimeout", &two);
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
         .CopyOutArgumentBuffer(2, &ten, sizeof(ten));
     (void)IoTHubClientCore_LL_SendEventAsync(handle, TEST_DEVICEMESSAGE_HANDLE, test_event_confirmation_callback, (void*)(TEST_DEVICEMESSAGE_HANDLE_2));
     umock_c_reset_all_calls();
 
-    tickcounter_ms_t twelve = 12; /*12 > 10 (receive time) + 1 (timeout) => timeout!!!*/
+    tickcounter_ms_t twelve = 12000; /*12 > 10 (receive time) + 1 (timeout) => timeout!!!*/
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
         .CopyOutArgumentBuffer(2, &twelve, sizeof(twelve));
 
-    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG)) /*this is removing the item from waitingToSend*/
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG)); /*this is removing the item from waitingToSend*/
     STRICT_EXPECTED_CALL(test_event_confirmation_callback(IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT, (void*)TEST_DEVICEMESSAGE_HANDLE)); /*calling the callback*/
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG)) /*destroying the message clone*/
-        .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*destroying the IOTHUB_MESSAGE_LIST*/
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG)); /*destroying the message clone*/
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); /*destroying the IOTHUB_MESSAGE_LIST*/
 
     /*we don't care what happens in the Transport, so let's ignore all those calls*/
-    EXPECTED_CALL(FAKE_IoTHubTransport_DoWork(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllCalls();
+    EXPECTED_CALL(FAKE_IoTHubTransport_DoWork(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
     /*because we're at time = 12 in this test, the second message is untouched*/
 
@@ -3900,7 +3882,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_2_messages_with_timeouts_at_11_and_1
     /*send 2 messages that will expire at 12 and 13, both of these messages are send at time=10*/
     /*because sending messages stamps the message's timeout, the call to tickcounter_get_current_ms needs to be here, so the test can says
     "the message has been received at time=10*/
-    tickcounter_ms_t ten = 10;
+    tickcounter_ms_t ten = 10000;
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .CopyOutArgumentBuffer(2, &ten, sizeof(ten));
@@ -3917,7 +3899,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_2_messages_with_timeouts_at_11_and_1
 
     /*we don't care what happens in the Transport, so let's ignore all those calls*/
 
-    tickcounter_ms_t timeIsNow = 12; /*12 > 10 (receive time) + 1 (timeout) => timeout!!!*/
+    tickcounter_ms_t timeIsNow = 12000; /*12 > 10 (receive time) + 1 (timeout) => timeout!!!*/
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .CopyOutArgumentBuffer(2, &timeIsNow, sizeof(timeIsNow));
@@ -3978,7 +3960,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_2_messages_one_with_timeout_one_with
     /*send 2 messages that will expire at 12 and 13, both of these messages are send at time=10*/
     /*because sending messages stamps the message's timeout, the call to tickcounter_get_current_ms needs to be here, so the test can says
     "the message has been received at time=10*/
-    tickcounter_ms_t ten = 10;
+    tickcounter_ms_t ten = 10000;
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .CopyOutArgumentBuffer(2, &ten, sizeof(ten));
@@ -3993,7 +3975,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_2_messages_one_with_timeout_one_with
     /*we don't care what happens in the Transport, so let's ignore all those calls*/
 
     {/*this scope happen in the first _DoWork call*/
-        tickcounter_ms_t timeIsNow = 12; /*12 > 10 (receive time) + 1 (timeout) => timeout!!!*/
+        tickcounter_ms_t timeIsNow = 12000; /*12 > 10 (receive time) + 1 (timeout) => timeout!!!*/
         STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .CopyOutArgumentBuffer(2, &timeIsNow, sizeof(timeIsNow));
@@ -4042,7 +4024,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_messageTimeout_when_tickcounter_fail
     /*send 2 messages that will expire at 12 and 13, both of these messages are send at time=10*/
     /*because sending messages stamps the message's timeout, the call to tickcounter_get_current_ms needs to be here, so the test can says
     "the message has been received at time=10*/
-    tickcounter_ms_t ten = 10;
+    tickcounter_ms_t ten = 10000;
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .CopyOutArgumentBuffer(2, &ten, sizeof(ten));
@@ -4051,7 +4033,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_messageTimeout_when_tickcounter_fail
     umock_c_reset_all_calls();
 
     {/*this scope happen in the _DoWork call*/
-        tickcounter_ms_t timeIsNow = 12; /*12 > 10 (receive time) + 1 (timeout) => timeout!!! (well - normally - but here the code doesn't call any callbacks because time cannot be obtained*/
+        tickcounter_ms_t timeIsNow = 12000; /*12 > 10 (receive time) + 1 (timeout) => timeout!!! (well - normally - but here the code doesn't call any callbacks because time cannot be obtained*/
         STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .CopyOutArgumentBuffer(2, &timeIsNow, sizeof(timeIsNow))
@@ -4313,7 +4295,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendReportedState_fail)
 
     umock_c_negative_tests_snapshot();
 
-    size_t calls_cannot_fail[] = { 4 };
+    size_t calls_cannot_fail[] = { 3 };
 
     size_t count = umock_c_negative_tests_call_count();
     for (size_t index = 0; index < count; index++)
@@ -4332,7 +4314,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendReportedState_fail)
         IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SendReportedState(handle, TEST_REPORTED_STATE, TEST_REPORTED_SIZE, iothub_reported_state_callback, NULL);
 
         //assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, tmp_msg);
     }
 
     //cleanup
@@ -5761,7 +5743,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallback_one_item_fail)
         IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SetInputMessageCallback(handle, TEST_INPUT_NAME, messageCallback, (void*)1);
 
         ///assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, tmp_msg);
     }
 
     //
@@ -5798,7 +5780,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallback_one_item_fail)
         IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SetInputMessageCallback(handle, TEST_INPUT_NAME, messageCallback, (void*)1);
 
         ///assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, tmp_msg);
     }
 
     //cleanup
@@ -6281,7 +6263,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_match_fail)
         bool result = IoTHubClientCore_LL_MessageCallbackFromInput(handle, testMessage);
 
         //assert
-        ASSERT_ARE_EQUAL_WITH_MSG(bool, false, result, tmp_msg);
+        ASSERT_ARE_EQUAL(bool, false, result, tmp_msg);
     }
 
     //cleanup
@@ -6473,7 +6455,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallbackEx_with_NULL_inputName_
 //        IOTHUB_CLIENT_CORE_LL_HANDLE result = IoTHubClientCore_LL_CreateFromEnvironment(&TEST_CONFIG, TEST_MODULE_ID);
 //
 //        //assert
-//        ASSERT_ARE_EQUAL_WITH_MSG(void_ptr, NULL, result, tmp_msg);
+//        ASSERT_ARE_EQUAL(void_ptr, NULL, result, tmp_msg);
 //    }
 //
 //    // cleanup

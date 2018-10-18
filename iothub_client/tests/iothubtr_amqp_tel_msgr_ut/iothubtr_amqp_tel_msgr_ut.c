@@ -2063,7 +2063,7 @@ TEST_FUNCTION(telemetry_messenger_create_failure_checks)
 
         // assert
         sprintf(error_msg, "On failed call %zu", i);
-        ASSERT_IS_NULL_WITH_MSG(handle, error_msg);
+        ASSERT_IS_NULL(handle, error_msg);
     }
 
     // cleanup
@@ -2594,7 +2594,7 @@ TEST_FUNCTION(telemetry_messenger_do_work_create_message_receiver_failure_checks
 
         // assert
         sprintf(error_msg, "On failed call %zu", i);
-        ASSERT_IS_TRUE_WITH_MSG(saved_messagereceiver_open_on_message_received == NULL, error_msg);
+        ASSERT_IS_TRUE(saved_messagereceiver_open_on_message_received == NULL, error_msg);
     }
 
     // cleanup
@@ -2650,8 +2650,8 @@ TEST_FUNCTION(telemetry_messenger_do_work_create_message_sender_failure_checks)
         // assert
         sprintf(error_msg, "On failed call %zu", i);
 
-        ASSERT_ARE_EQUAL_WITH_MSG(int, TELEMETRY_MESSENGER_STATE_STARTING, saved_on_state_changed_callback_previous_state, error_msg);
-        ASSERT_ARE_EQUAL_WITH_MSG(int, TELEMETRY_MESSENGER_STATE_ERROR, saved_on_state_changed_callback_new_state, error_msg);
+        ASSERT_ARE_EQUAL(int, TELEMETRY_MESSENGER_STATE_STARTING, saved_on_state_changed_callback_previous_state, error_msg);
+        ASSERT_ARE_EQUAL(int, TELEMETRY_MESSENGER_STATE_ERROR, saved_on_state_changed_callback_new_state, error_msg);
 
         // cleanup
         telemetry_messenger_destroy(handle);
@@ -3158,7 +3158,7 @@ TEST_FUNCTION(telemetry_messenger_send_async_failure_checks)
 
         // assert
         sprintf(error_msg, "On failed call %zu", i);
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, error_msg);
+        ASSERT_ARE_NOT_EQUAL(int, 0, result, error_msg);
     }
 
     // cleanup
@@ -3554,7 +3554,7 @@ TEST_FUNCTION(telemetry_messenger_send_message_disposition_failure_checks)
 
         // assert
         sprintf(error_msg, "On failed call %zu", i);
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, error_msg);
+        ASSERT_ARE_NOT_EQUAL(int, 0, result, error_msg);
     }
 
 
@@ -3639,7 +3639,7 @@ TEST_FUNCTION(telemetry_messenger_retrieve_options_failure_checks)
 
         // assert
         sprintf(error_msg, "On failed call %zu", i);
-        ASSERT_IS_NULL_WITH_MSG(result, error_msg);
+        ASSERT_IS_NULL(result, error_msg);
     }
 
     // cleanup

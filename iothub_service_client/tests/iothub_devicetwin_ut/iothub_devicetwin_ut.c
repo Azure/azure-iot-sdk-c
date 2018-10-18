@@ -716,7 +716,7 @@ TEST_FUNCTION(IoTHubDeviceTwin_GetTwin_non_happy_path)
             char* result = IoTHubDeviceTwin_GetTwin(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE, deviceId);
 
             /// assert
-            ASSERT_IS_NULL_WITH_MSG(result, message_on_error);
+            ASSERT_IS_NULL(result, message_on_error);
         }
 
         ///cleanup
@@ -965,7 +965,7 @@ TEST_FUNCTION(IoTHubDeviceTwin_UpdateTwin_non_happy_path)
             char* result = IoTHubDeviceTwin_UpdateTwin(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE, deviceId, deviceTwinJson);
 
             /// assert
-            ASSERT_IS_NULL_WITH_MSG(result, message_on_error);
+            ASSERT_IS_NULL(result, message_on_error);
         }
 
         ///cleanup

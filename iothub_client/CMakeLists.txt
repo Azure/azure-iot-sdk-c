@@ -98,12 +98,14 @@ if(${use_http})
     set(iothub_client_http_transport_c_files
         ./src/iothub_client_authorization.c
         ./src/iothub_client_retry_control.c
+        ./src/iothub_transport_ll_private.c
         ./src/iothubtransporthttp.c
     )
 
     set(iothub_client_http_transport_h_files
         ./inc/internal/iothub_client_authorization.h
         ./inc/internal/iothub_client_retry_control.h
+        ./inc/internal/iothub_transport_ll_private.h
         ./inc/iothubtransporthttp.h
         ./inc/iothub_transport_ll.h
     )
@@ -123,6 +125,7 @@ if(${use_amqp})
     set(iothub_client_amqp_transport_common_c_files
         ./src/iothub_client_authorization.c
         ./src/iothub_client_retry_control.c
+        ./src/iothub_transport_ll_private.c
         ./src/iothubtransport_amqp_common.c
         ./src/iothubtransport_amqp_device.c
         ./src/iothubtransport_amqp_cbs_auth.c
@@ -138,6 +141,7 @@ if(${use_amqp})
     set(iothub_client_amqp_transport_common_h_files
         ./inc/internal/iothub_client_authorization.h
         ./inc/internal/iothub_client_retry_control.h
+        ./inc/internal/iothub_transport_ll_private.h
         ./inc/internal/iothubtransport_amqp_common.h
         ./inc/internal/iothubtransport_amqp_device.h
         ./inc/internal/iothubtransport_amqp_cbs_auth.h
@@ -189,12 +193,14 @@ if(${use_mqtt})
     set(iothub_client_mqtt_ws_transport_c_files
         ./src/iothub_client_authorization.c
         ./src/iothub_client_retry_control.c
+        ./src/iothub_transport_ll_private.c
         ./src/iothubtransport_mqtt_common.c
         ./src/iothubtransportmqtt_websockets.c
     )
     set(iothub_client_mqtt_ws_transport_h_files
         ./inc/internal/iothub_client_authorization.h
         ./inc/internal/iothub_client_retry_control.h
+        ./inc/internal/iothub_transport_ll_private.h
         ./inc/internal/iothubtransport_mqtt_common.h
         ./inc/iothubtransportmqtt_websockets.h
     )
@@ -202,6 +208,7 @@ if(${use_mqtt})
     set(iothub_client_mqtt_transport_c_files
         ./src/iothub_client_authorization.c
         ./src/iothub_client_retry_control.c
+        ./src/iothub_transport_ll_private.c
         ./src/iothubtransport_mqtt_common.c
         ./src/iothubtransportmqtt.c
     )
@@ -209,6 +216,7 @@ if(${use_mqtt})
     set(iothub_client_mqtt_transport_h_files
         ./inc/internal/iothub_client_authorization.h
         ./inc/internal/iothub_client_retry_control.h
+        ./inc/internal/iothub_transport_ll_private.h
         ./inc/internal/iothubtransport_mqtt_common.h
         ./inc/iothubtransportmqtt.h
     )

@@ -7,10 +7,11 @@
 #include <time.h>
 #include "iothub_client_options.h"
 #include "iothub_client_version.h"
-#include "internal/iothub_client_private.h"
 #include "iothub_transport_ll.h"
 #include "iothubtransporthttp.h"
+#include "internal/iothub_client_private.h"
 #include "internal/iothubtransport.h"
+#include "internal/iothub_transport_ll_private.h"
 
 #include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/httpapiexsas.h"
@@ -36,6 +37,10 @@ static const char* IOTHUB_CONTENT_ENCODING_C2D = "ContentEncoding";
 #define CONTENT_TYPE "Content-Type"
 #define APPLICATION_OCTET_STREAM "application/octet-stream"
 #define APPLICATION_VND_MICROSOFT_IOTHUB_JSON "application/vnd.microsoft.iothub.json"
+#define API_VERSION "?api-version=2016-11-14"
+#define EVENT_ENDPOINT "/messages/events"
+#define MESSAGE_ENDPOINT_HTTP "/messages/devicebound"
+#define MESSAGE_ENDPOINT_HTTP_ETAG "/messages/devicebound/"
 
 /*DEFAULT_GETMINIMUMPOLLINGTIME is the minimum time in seconds allowed between 2 consecutive GET issues to the service (GET=fetch messages)*/
 /*the default is 25 minutes*/
@@ -55,6 +60,10 @@ typedef struct HTTPTRANSPORT_HANDLE_DATA_TAG
     bool doBatchedTransfers;
     unsigned int getMinimumPollingTime;
     VECTOR_HANDLE perDeviceList;
+
+    TRANSPORT_CALLBACKS_INFO transport_callbacks;
+    void* transport_ctx;
+
 }HTTPTRANSPORT_HANDLE_DATA;
 
 typedef struct HTTPTRANSPORT_PERDEVICE_DATA_TAG
@@ -74,7 +83,7 @@ typedef struct HTTPTRANSPORT_PERDEVICE_DATA_TAG
     time_t lastPollTime;
     bool isFirstPoll;
 
-    IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle;
+    void* device_transport_ctx;
     PDLIST_ENTRY waitingToSend;
     DLIST_ENTRY eventConfirmations; /*holds items for event confirmations*/
 } HTTPTRANSPORT_PERDEVICE_DATA;
@@ -173,22 +182,22 @@ static void destroy_eventHTTPrequestHeaders(HTTPTRANSPORT_PERDEVICE_DATA* handle
     handleData->eventHTTPrequestHeaders = NULL;
 }
 
-static HTTP_HEADERS_RESULT addUserAgentHeaderInfo(IOTHUB_CLIENT_CORE_LL_HANDLE hClient, HTTP_HEADERS_HANDLE eventHTTPrequestHeaders)
+static HTTP_HEADERS_RESULT addUserAgentHeaderInfo(HTTPTRANSPORT_HANDLE_DATA* transport_data, HTTP_HEADERS_HANDLE eventHTTPrequestHeaders)
 {
-    void* product_info;
     HTTP_HEADERS_RESULT result;
-    if ((IoTHubClientCore_LL_GetOption(hClient, OPTION_PRODUCT_INFO, &product_info) == IOTHUB_CLIENT_ERROR) || (product_info == NULL))
+    const char* product_info = transport_data->transport_callbacks.prod_info_cb(transport_data->transport_ctx);
+    if (product_info == NULL)
     {
         result = HTTPHeaders_AddHeaderNameValuePair(eventHTTPrequestHeaders, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION);
     }
     else
     {
-        result = HTTPHeaders_AddHeaderNameValuePair(eventHTTPrequestHeaders, "User-Agent", STRING_c_str((STRING_HANDLE)product_info));
+        result = HTTPHeaders_AddHeaderNameValuePair(eventHTTPrequestHeaders, "User-Agent", product_info);
     }
     return result;
 }
 
-static bool create_eventHTTPrequestHeaders(HTTPTRANSPORT_PERDEVICE_DATA* handleData, const char * deviceId, bool is_x509_used)
+static bool create_eventHTTPrequestHeaders(HTTPTRANSPORT_PERDEVICE_DATA* handleData, HTTPTRANSPORT_HANDLE_DATA* transport_data, const char * deviceId, bool is_x509_used)
 {
     /*Codes_SRS_TRANSPORTMULTITHTTP_17_021: [ IoTHubTransportHttp_Register shall create a set of HTTP headers (further called "event HTTP request headers") consisting of the following fixed field names and values: "iothub-to":"/devices/" + URL_ENCODED(deviceId) + "/messages/events"; "Authorization":""
     "Accept":"application/json"
@@ -229,7 +238,7 @@ static bool create_eventHTTPrequestHeaders(HTTPTRANSPORT_PERDEVICE_DATA* handleD
                     (is_x509_used || (HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "Authorization", " ") == HTTP_HEADERS_OK)) &&
                     (HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "Accept", "application/json") == HTTP_HEADERS_OK) &&
                     (HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "Connection", "Keep-Alive") == HTTP_HEADERS_OK) &&
-                    (addUserAgentHeaderInfo(handleData->iotHubClientHandle, handleData->eventHTTPrequestHeaders) == HTTP_HEADERS_OK)
+                    (addUserAgentHeaderInfo(transport_data, handleData->eventHTTPrequestHeaders) == HTTP_HEADERS_OK)
                     ))
                 {
                     /*Codes_SRS_TRANSPORTMULTITHTTP_17_022: [ If creating the event HTTP request headers fails, then IoTHubTransportHttp_Register shall fail and return NULL.] */
@@ -255,7 +264,7 @@ static void destroy_messageHTTPrequestHeaders(HTTPTRANSPORT_PERDEVICE_DATA* hand
     handleData->messageHTTPrequestHeaders = NULL;
 }
 
-static bool create_messageHTTPrequestHeaders(HTTPTRANSPORT_PERDEVICE_DATA* handleData, bool is_x509_used)
+static bool create_messageHTTPrequestHeaders(HTTPTRANSPORT_PERDEVICE_DATA* handleData, HTTPTRANSPORT_HANDLE_DATA* transport_data, bool is_x509_used)
 {
     /*Codes_SRS_TRANSPORTMULTITHTTP_17_132: [ IoTHubTransportHttp_Register shall create a set of HTTP headers (further called "message HTTP request headers") consisting of the following fixed field names and values:
     "Authorization": "" ]*/
@@ -269,7 +278,7 @@ static bool create_messageHTTPrequestHeaders(HTTPTRANSPORT_PERDEVICE_DATA* handl
     else
     {
         if (!(
-            (addUserAgentHeaderInfo(handleData->iotHubClientHandle, handleData->messageHTTPrequestHeaders) == HTTP_HEADERS_OK) &&
+            (addUserAgentHeaderInfo(transport_data, handleData->messageHTTPrequestHeaders) == HTTP_HEADERS_OK) &&
             (is_x509_used || (HTTPHeaders_AddHeaderNameValuePair(handleData->messageHTTPrequestHeaders, "Authorization", " ") == HTTP_HEADERS_OK))
             ))
         {
@@ -504,7 +513,7 @@ static bool findDeviceById(const void* element, const void* value)
     return result;
 }
 
-static IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_LL_HANDLE handle, const IOTHUB_DEVICE_CONFIG* device, IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, PDLIST_ENTRY waitingToSend)
+static IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_LL_HANDLE handle, const IOTHUB_DEVICE_CONFIG* device, PDLIST_ENTRY waitingToSend)
 {
     HTTPTRANSPORT_PERDEVICE_DATA* result;
     if (handle == NULL || device == NULL)
@@ -513,14 +522,13 @@ static IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_LL_HANDLE han
         LogError("Transport handle is NULL");
         result = NULL;
     }
-    else if (device->deviceId == NULL || ((device->deviceKey != NULL) && (device->deviceSasToken != NULL)) || waitingToSend == NULL || iotHubClientHandle == NULL)
+    else if (device->deviceId == NULL || ((device->deviceKey != NULL) && (device->deviceSasToken != NULL)) || waitingToSend == NULL)
     {
         /*Codes_SRS_TRANSPORTMULTITHTTP_17_015: [ If IOTHUB_DEVICE_CONFIG fields deviceKey and deviceSasToken are NULL, then IoTHubTransportHttp_Register shall assume a x509 authentication. ]*/
         /*Codes_SRS_TRANSPORTMULTITHTTP_17_014: [ If IOTHUB_DEVICE_CONFIG field deviceId is NULL, then IoTHubTransportHttp_Register shall return NULL. ]*/
         /*Codes_SRS_TRANSPORTMULTITHTTP_17_016: [ If parameter waitingToSend is NULL, then IoTHubTransportHttp_Register shall return NULL. ]*/
-        /*Codes_SRS_TRANSPORTMULTITHTTP_17_143: [ If parameter iotHubClientHandle is NULL, then IoTHubTransportHttp_Register shall return NULL. ]*/
-        LogError("invalid parameters detected TRANSPORT_LL_HANDLE handle=%p, const IOTHUB_DEVICE_CONFIG* device=%p, IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle=%p, PDLIST_ENTRY waitingToSend=%p",
-            handle, device, iotHubClientHandle, waitingToSend);
+        LogError("invalid parameters detected TRANSPORT_LL_HANDLE handle=%p, const IOTHUB_DEVICE_CONFIG* device=%p, PDLIST_ENTRY waitingToSend=%p",
+            handle, device, waitingToSend);
         result = NULL;
     }
     else
@@ -549,7 +557,7 @@ static IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_LL_HANDLE han
             {
                 if (device->deviceSasToken != NULL)
                 {
-                    /*device->deviceKey is certainly NULL (because of the validation condition (else if (device->deviceId == NULL || ((device->deviceKey != NULL) && (device->deviceSasToken != NULL)) || waitingToSend == NULL || iotHubClientHandle == NULL))that does not accept that both satoken AND devicekey are non-NULL*/
+                    /*device->deviceKey is certainly NULL (because of the validation condition (else if (device->deviceId == NULL || ((device->deviceKey != NULL) && (device->deviceSasToken != NULL)) || waitingToSend == NULL))that does not accept that both satoken AND devicekey are non-NULL*/
                     was_create_deviceSasToken_ok = create_deviceSasToken(result, device->deviceSasToken);
                     result->deviceKey = NULL;
                     result->sasObject = NULL;
@@ -576,14 +584,14 @@ static IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_LL_HANDLE han
             bool was_eventHTTPrequestHeaders_ok;
             if (was_messageHTTPrelativePath_ok)
             {
-                result->iotHubClientHandle = iotHubClientHandle;
-                was_eventHTTPrequestHeaders_ok = create_eventHTTPrequestHeaders(result, device->deviceId, was_x509_ok);
+                result->device_transport_ctx = handleData->transport_ctx;
+                was_eventHTTPrequestHeaders_ok = create_eventHTTPrequestHeaders(result, handleData, device->deviceId, was_x509_ok);
             }
             else
             {
                 was_eventHTTPrequestHeaders_ok = false;
             }
-            bool was_messageHTTPrequestHeaders_ok = was_eventHTTPrequestHeaders_ok && create_messageHTTPrequestHeaders(result, was_x509_ok);
+            bool was_messageHTTPrequestHeaders_ok = was_eventHTTPrequestHeaders_ok && create_messageHTTPrequestHeaders(result, handleData, was_x509_ok);
             bool was_abandonHTTPrelativePathBegin_ok = was_messageHTTPrequestHeaders_ok && create_abandonHTTPrelativePathBegin(result, device->deviceId);
 
             if (was_x509_ok)
@@ -604,7 +612,7 @@ static IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_LL_HANDLE han
 
             if (was_list_add_ok)
             {
-                /*Codes_SRS_TRANSPORTMULTITHTTP_17_043: [ Upon success, IoTHubTransportHttp_Register shall store the transport handle, iotHubClientHandle, and the waitingToSend queue in the device handle return a non-NULL value. ]*/
+                /*Codes_SRS_TRANSPORTMULTITHTTP_17_043: [ Upon success, IoTHubTransportHttp_Register shall store the transport handle, and the waitingToSend queue in the device handle return a non-NULL value. ]*/
                 /*Codes_SRS_TRANSPORTMULTITHTTP_17_040: [ IoTHubTransportHttp_Register shall put event HTTP relative path, message HTTP relative path, event HTTP request headers, message HTTP request headers, abandonHTTPrelativePathBegin, HTTPAPIEX_SAS_HANDLE, and the device handle into a device structure. ]*/
                 /*Codes_SRS_TRANSPORTMULTITHTTP_17_128: [ IoTHubTransportHttp_Register shall mark this device as unsubscribed. ]*/
                 result->DoWork_PullMessage = false;
@@ -795,8 +803,7 @@ static bool create_perDeviceList(HTTPTRANSPORT_HANDLE_DATA* handleData)
     return result;
 }
 
-
-static TRANSPORT_LL_HANDLE IoTHubTransportHttp_Create(const IOTHUBTRANSPORT_CONFIG* config)
+static TRANSPORT_LL_HANDLE IoTHubTransportHttp_Create(const IOTHUBTRANSPORT_CONFIG* config, TRANSPORT_CALLBACKS_INFO* cb_info, void* ctx)
 {
     HTTPTRANSPORT_HANDLE_DATA* result;
     if (config == NULL)
@@ -829,6 +836,11 @@ static TRANSPORT_LL_HANDLE IoTHubTransportHttp_Create(const IOTHUBTRANSPORT_CONF
         LogError("invalid arg (iotHubSuffix is NULL)");
         result = NULL;
     }
+    else if (IoTHub_Transport_ValidateCallbacks(cb_info) != 0)
+    {
+        LogError("Invalid transport callback information");
+        result = NULL;
+    }
     else
     {
         /*Codes_SRS_TRANSPORTMULTITHTTP_17_130: [ IoTHubTransportHttp_Create shall allocate memory for the handle. ]*/
@@ -844,12 +856,14 @@ static TRANSPORT_LL_HANDLE IoTHubTransportHttp_Create(const IOTHUBTRANSPORT_CONF
             bool was_httpApiExHandle_ok = was_hostName_ok && create_httpApiExHandle(result, config);
             bool was_perDeviceList_ok = was_httpApiExHandle_ok && create_perDeviceList(result);
 
-
             if (was_perDeviceList_ok)
             {
                 /*Codes_SRS_TRANSPORTMULTITHTTP_17_011: [ Otherwise, IoTHubTransportHttp_Create shall succeed and return a non-NULL value. ]*/
                 result->doBatchedTransfers = false;
                 result->getMinimumPollingTime = DEFAULT_GETMINIMUMPOLLINGTIME;
+
+                result->transport_ctx = ctx;
+                memcpy(&result->transport_callbacks, cb_info, sizeof(TRANSPORT_CALLBACKS_INFO));
             }
             else
             {
@@ -1350,7 +1364,7 @@ static void reversePutListBackIn(PDLIST_ENTRY source, PDLIST_ENTRY destination)
     DList_InitializeListHead(source);
 }
 
-static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVICE_DATA* deviceData, IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle)
+static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVICE_DATA* deviceData)
 {
 
     if (DList_IsListEmpty(deviceData->waitingToSend))
@@ -1418,7 +1432,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                                 if (statusCode < 300)
                                 {
                                     /*Codes_SRS_TRANSPORTMULTITHTTP_17_070: [If HTTPAPIEX_SAS_ExecuteRequest does not fail and http status code <300 then IoTHubTransportHttp_DoWork shall call IoTHubClientCore_LL_SendComplete. Parameter PDLIST_ENTRY completed shall point to a list containing all the items batched, and parameter IOTHUB_CLIENT_CONFIRMATION_RESULT result shall be set to IOTHUB_CLIENT_CONFIRMATION_OK. The batched items shall be removed from waitingToSend.] */
-                                    IoTHubClientCore_LL_SendComplete(iotHubClientHandle, &(deviceData->eventConfirmations), IOTHUB_CLIENT_CONFIRMATION_OK);
+                                    handleData->transport_callbacks.send_complete_cb(&(deviceData->eventConfirmations), IOTHUB_CLIENT_CONFIRMATION_OK, deviceData->device_transport_ctx);
                                 }
                                 else
                                 {
@@ -1436,7 +1450,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                 }
                 case MAKE_PAYLOAD_FIRST_ITEM_DOES_NOT_FIT:
                 {
-                    IoTHubClientCore_LL_SendComplete(iotHubClientHandle, &(deviceData->eventConfirmations), IOTHUB_CLIENT_CONFIRMATION_ERROR); /*takes care of emptying the list too*/
+                    handleData->transport_callbacks.send_complete_cb(&(deviceData->eventConfirmations), IOTHUB_CLIENT_CONFIRMATION_ERROR, deviceData->device_transport_ctx); // takes care of emptying the list too
                     break;
                 }
                 case MAKE_PAYLOAD_ERROR:
@@ -1494,7 +1508,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                 {
                     PDLIST_ENTRY head = DList_RemoveHeadList(deviceData->waitingToSend); /*actually this is the same as "actual", but now it is removed*/
                     DList_InsertTailList(&(deviceData->eventConfirmations), head);
-                    IoTHubClientCore_LL_SendComplete(iotHubClientHandle, &(deviceData->eventConfirmations), IOTHUB_CLIENT_CONFIRMATION_ERROR); /*takes care of emptying the list too*/
+                    handleData->transport_callbacks.send_complete_cb(&(deviceData->eventConfirmations), IOTHUB_CLIENT_CONFIRMATION_ERROR, deviceData->device_transport_ctx); // takes care of emptying the list too
                 }
                 else
                 {
@@ -1544,7 +1558,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                                         /*Codes_SRS_TRANSPORTMULTITHTTP_17_072: [The message size shall be limited to 255KB -1 bytes.] */
                                         PDLIST_ENTRY head = DList_RemoveHeadList(deviceData->waitingToSend); /*actually this is the same as "actual", but now it is removed*/
                                         DList_InsertTailList(&(deviceData->eventConfirmations), head);
-                                        IoTHubClientCore_LL_SendComplete(iotHubClientHandle, &(deviceData->eventConfirmations), IOTHUB_CLIENT_CONFIRMATION_ERROR); /*takes care of emptying the list too*/
+                                        handleData->transport_callbacks.send_complete_cb(&(deviceData->eventConfirmations), IOTHUB_CLIENT_CONFIRMATION_ERROR, deviceData->device_transport_ctx); // takes care of emptying the list too
                                         goOn = false;
                                     }
                                     else
@@ -1692,13 +1706,19 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                                                     /*Codes_SRS_TRANSPORTMULTITHTTP_17_082: [If HTTPAPIEX_SAS_ExecuteRequest does not fail and http status code <300 then IoTHubTransportHttp_DoWork shall call IoTHubClientCore_LL_SendComplete. Parameter PDLIST_ENTRY completed shall point to a list the item send, and parameter IOTHUB_CLIENT_CONFIRMATION_RESULT result shall be set to IOTHUB_CLIENT_CONFIRMATION_OK. The item shall be removed from waitingToSend.] */
                                                     PDLIST_ENTRY justSent = DList_RemoveHeadList(deviceData->waitingToSend); /*actually this is the same as "actual", but now it is removed*/
                                                     DList_InsertTailList(&(deviceData->eventConfirmations), justSent);
-                                                    IoTHubClientCore_LL_SendComplete(iotHubClientHandle, &(deviceData->eventConfirmations), IOTHUB_CLIENT_CONFIRMATION_OK); /*takes care of emptying the list too*/
+                                                    handleData->transport_callbacks.send_complete_cb(&(deviceData->eventConfirmations), IOTHUB_CLIENT_CONFIRMATION_OK, deviceData->device_transport_ctx); // takes care of emptying the list too
                                                 }
                                                 else
                                                 {
                                                     /*Codes_SRS_TRANSPORTMULTITHTTP_17_081: [If HTTPAPIEX_SAS_ExecuteRequest fails or the http status code >=300 then IoTHubTransportHttp_DoWork shall not do any other action (it is assumed at the next _DoWork it shall be retried).] */
                                                     LogError("unexpected HTTP status code (%u)", statusCode);
                                                 }
+                                            }
+                                            else if (r == HTTPAPIEX_RECOVERYFAILED)
+                                            {
+                                                PDLIST_ENTRY justSent = DList_RemoveHeadList(deviceData->waitingToSend); /*actually this is the same as "actual", but now it is removed*/
+                                                DList_InsertTailList(&(deviceData->eventConfirmations), justSent);
+                                                handleData->transport_callbacks.send_complete_cb(&(deviceData->eventConfirmations), IOTHUB_CLIENT_CONFIRMATION_ERROR, deviceData->device_transport_ctx); // takes care of emptying the list too
                                             }
                                         }
                                         BUFFER_delete(toBeSend);
@@ -1795,7 +1815,7 @@ static bool abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
                 else
                 {
                     if (!(
-                        (addUserAgentHeaderInfo(deviceData->iotHubClientHandle, abandonRequestHttpHeaders) == HTTP_HEADERS_OK) &&
+                        (addUserAgentHeaderInfo(handleData, abandonRequestHttpHeaders) == HTTP_HEADERS_OK) &&
                         (HTTPHeaders_AddHeaderNameValuePair(abandonRequestHttpHeaders, "Authorization", " ") == HTTP_HEADERS_OK) &&
                         (HTTPHeaders_AddHeaderNameValuePair(abandonRequestHttpHeaders, "If-Match", ETag) == HTTP_HEADERS_OK)
                         ))
@@ -1998,7 +2018,7 @@ static MESSAGE_CALLBACK_INFO* MESSAGE_CALLBACK_INFO_Create(IOTHUB_MESSAGE_HANDLE
     return result;
 }
 
-static void DoMessages(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVICE_DATA* deviceData, IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle)
+static void DoMessages(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVICE_DATA* deviceData)
 {
     /*Codes_SRS_TRANSPORTMULTITHTTP_17_083: [ If device is not subscribed then _DoWork shall advance to the next action. ] */
     if (deviceData->DoWork_PullMessage)
@@ -2262,7 +2282,7 @@ static void DoMessages(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERD
                                                 else
                                                 {
                                                     bool abandon;
-                                                    if (IoTHubClientCore_LL_MessageCallback(iotHubClientHandle, messageData))
+                                                    if (handleData->transport_callbacks.msg_cb(messageData, deviceData->device_transport_ctx))
                                                     {
                                                         abandon = false;
                                                     }
@@ -2308,27 +2328,23 @@ static IOTHUB_PROCESS_ITEM_RESULT IoTHubTransportHttp_ProcessItem(TRANSPORT_LL_H
     return IOTHUB_PROCESS_ERROR;
 }
 
-static void IoTHubTransportHttp_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle)
+static void IoTHubTransportHttp_DoWork(TRANSPORT_LL_HANDLE handle)
 {
     /*Codes_SRS_TRANSPORTMULTITHTTP_17_049: [ If handle is NULL, then IoTHubTransportHttp_DoWork shall do nothing. ]*/
-    /*Codes_SRS_TRANSPORTMULTITHTTP_17_140: [ If iotHubClientHandle is NULL, then IoTHubTransportHttp_DoWork shall do nothing. ]*/
-
-    (void)iotHubClientHandle; // use the perDevice handle.
     if (handle != NULL)
     {
         HTTPTRANSPORT_HANDLE_DATA* handleData = (HTTPTRANSPORT_HANDLE_DATA*)handle;
         IOTHUB_DEVICE_HANDLE* listItem;
         size_t deviceListSize = VECTOR_size(handleData->perDeviceList);
-        /*Codes_SRS_TRANSPORTMULTITHTTP_17_052: [ IoTHubTransportHttp_DoWork shall perform a round-robin loop through every deviceHandle in the transport device list, using the iotHubClientHandle field saved in the IOTHUB_DEVICE_HANDLE. ]*/
+        /*Codes_SRS_TRANSPORTMULTITHTTP_17_052: [ IoTHubTransportHttp_DoWork shall perform a round-robin loop through every deviceHandle in the transport device list. ]*/
         /*Codes_SRS_TRANSPORTMULTITHTTP_17_050: [ IoTHubTransportHttp_DoWork shall call loop through the device list. ] */
         /*Codes_SRS_TRANSPORTMULTITHTTP_17_051: [ IF the list is empty, then IoTHubTransportHttp_DoWork shall do nothing. ]*/
         for (size_t i = 0; i < deviceListSize; i++)
         {
             listItem = (IOTHUB_DEVICE_HANDLE *)VECTOR_element(handleData->perDeviceList, i);
             HTTPTRANSPORT_PERDEVICE_DATA* perDeviceItem = *(HTTPTRANSPORT_PERDEVICE_DATA**)(listItem);
-            DoEvent(handleData, perDeviceItem, perDeviceItem->iotHubClientHandle);
-            DoMessages(handleData, perDeviceItem, perDeviceItem->iotHubClientHandle);
-
+            DoEvent(handleData, perDeviceItem);
+            DoMessages(handleData, perDeviceItem);
         }
     }
     else
@@ -2484,6 +2500,22 @@ static void IotHubTransportHttp_Unsubscribe_InputQueue(IOTHUB_DEVICE_HANDLE hand
     LogError("HTTP does not support input queues");
 }
 
+int IoTHubTransportHttp_SetCallbackContext(TRANSPORT_LL_HANDLE handle, void* ctx)
+{
+    int result;
+    if (handle == NULL)
+    {
+        LogError("Invalid parameter specified handle: %p", handle);
+        result = __FAILURE__;
+    }
+    else
+    {
+        HTTPTRANSPORT_HANDLE_DATA* handleData = (HTTPTRANSPORT_HANDLE_DATA*)handle;
+        handleData->transport_ctx = ctx;
+        result = 0;
+    }
+    return result;
+}
 
 /*Codes_SRS_TRANSPORTMULTITHTTP_17_125: [This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for its fields:] */
 static TRANSPORT_PROVIDER thisTransportProvider =
@@ -2507,7 +2539,8 @@ static TRANSPORT_PROVIDER thisTransportProvider =
     IoTHubTransportHttp_SetRetryPolicy,             /*pfIoTHubTransport_DoWork IoTHubTransport_SetRetryPolicy;*/
     IoTHubTransportHttp_GetSendStatus,              /*pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus;*/
     IotHubTransportHttp_Subscribe_InputQueue,       /*pfIoTHubTransport_Subscribe_InputQueue IoTHubTransport_Subscribe_InputQueue; */
-    IotHubTransportHttp_Unsubscribe_InputQueue      /*pfIoTHubTransport_Unsubscribe_InputQueue IoTHubTransport_Unsubscribe_InputQueue; */
+    IotHubTransportHttp_Unsubscribe_InputQueue,     /*pfIoTHubTransport_Unsubscribe_InputQueue IoTHubTransport_Unsubscribe_InputQueue; */
+    IoTHubTransportHttp_SetCallbackContext          /*pfIoTHubTransport_SetTransportCallbacks IoTHubTransport_SetTransportCallbacks; */
 };
 
 const TRANSPORT_PROVIDER* HTTP_Protocol(void)

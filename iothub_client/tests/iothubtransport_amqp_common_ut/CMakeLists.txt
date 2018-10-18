@@ -8,18 +8,18 @@ set(theseTestsName iothubtransport_amqp_common_ut )
 
 if(WIN32)
     if (ARCHITECTURE STREQUAL "x86_64")
-		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /bigobj")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
-	endif()
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /bigobj")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
+    endif()
 endif()
 
 set(${theseTestsName}_test_files
-	${theseTestsName}.c
+    ${theseTestsName}.c
 )
 
 set(${theseTestsName}_c_files
-	../../src/iothubtransport_amqp_common.c
-	real_doublylinkedlist.c
+    ../../src/iothubtransport_amqp_common.c
+    real_doublylinkedlist.c
 )
 
 set(${theseTestsName}_h_files
