@@ -69,7 +69,7 @@ phases:
   displayName: 'gcc4.4'
   steps:
   - script: |
-  - script: 'sudo ./jenkins/linux_c_gcc44.sh'
+      sudo ./jenkins/linux_c_gcc44.sh
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
       IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
