@@ -27,11 +27,16 @@
 #include "azure_c_shared_utility/lock.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/shared_util_options.h"
+
 #include "iothub_service_client_auth.h"
 #include "iothub_devicemethod.h"
 #include "iothub_device_client.h"
 #include "iothub_module_client.h"
 
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+#include "certs.h"
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 #include "iothubclient_common_device_method_e2e.h"
 
@@ -444,6 +449,10 @@ static void create_hub_client_from_provisioned_device(IOTHUB_PROVISIONED_DEVICE*
         iothub_deviceclient_handle = IoTHubDeviceClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
         ASSERT_IS_NOT_NULL(iothub_deviceclient_handle, "Could not invoke IoTHubDeviceClient_CreateFromConnectionString");
     }
+
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+    setoption_on_device_or_module(OPTION_TRUSTED_CERT, certificates, "Could not set the device trusted certificate");
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
 
     if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509)
     {

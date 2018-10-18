@@ -47,6 +47,7 @@ TEST_FUNCTION(IoTHub_MQTT_GetFullDesired_e2e_x509)
 }
 #endif
 
+#ifndef USE_WOLFSSL // Wolf doesn't run web socket tests
 //
 // MQTT_WS tests.
 //
@@ -70,6 +71,7 @@ TEST_FUNCTION(IoTHub_MQTT_WS_SendReported_e2e_x509)
 {
     dt_e2e_send_reported_test(MQTT_WebSocket_Protocol, IOTHUB_ACCOUNT_AUTH_X509);
 }
+#endif
 #endif
 
 END_TEST_SUITE(iothubclient_mqtt_dt_e2e)

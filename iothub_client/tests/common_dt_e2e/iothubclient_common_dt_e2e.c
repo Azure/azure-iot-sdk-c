@@ -25,9 +25,12 @@
 #include "azure_c_shared_utility/uniqueid.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/lock.h"
+#include "azure_c_shared_utility/shared_util_options.h"
 
 #include "parson.h"
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
 #include "certs.h"
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 #define MAX_CLOUD_TRAVEL_TIME  120.0    /* 2 minutes */
 #define BUFFER_SIZE            37
@@ -220,6 +223,10 @@ static void dt_e2e_create_client_handle(IOTHUB_PROVISIONED_DEVICE* deviceToUse, 
         iothub_deviceclient_handle = IoTHubDeviceClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
         ASSERT_IS_NOT_NULL(iothub_deviceclient_handle, "Could not invoke IoTHubDeviceClient_CreateFromConnectionString");
     }
+
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+    setoption_on_device_or_module(OPTION_TRUSTED_CERT, certificates, "Cannot enable trusted cert");
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
 
     if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509)
     {

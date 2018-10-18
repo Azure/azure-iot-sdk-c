@@ -40,7 +40,9 @@
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/lock.h"
 
-#include "../../../certs/certs.h"
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+#include "certs.h"
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 #include "iothubclient_common_e2e.h"
 
@@ -619,6 +621,10 @@ static void client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB
         ASSERT_IS_NOT_NULL(iothub_deviceclient_handle, "Could not invoke IoTHubDeviceClient_CreateFromConnectionString");
     }
 
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+    setoption_on_device_or_module(OPTION_TRUSTED_CERT, certificates, "Cannot enable trusted cert");
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
+
     // Set connection status change callback
     setconnectionstatuscallback_on_device_or_module();
 
@@ -630,10 +636,6 @@ static void client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB
 
     bool trace = true;
     setoption_on_device_or_module(OPTION_LOG_TRACE, &trace, "Cannot enable tracing");
-
-#ifdef SET_TRUSTED_CERT_IN_SAMPLES
-    setoption_on_device_or_module(OPTION_TRUSTED_CERT, certificates, "Cannot enable trusted cert");
-#endif // SET_TRUSTED_CERT_IN_SAMPLES
 
     setoption_on_device_or_module(OPTION_PRODUCT_INFO, "MQTT_E2E/1.1.12", "Cannot set product info");
 
@@ -1351,8 +1353,12 @@ static void recv_message_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLI
     iotHubMessagingHandle = IoTHubMessaging_Create(iotHubServiceClientHandle);
     ASSERT_IS_NOT_NULL(iotHubMessagingHandle, "Could not initialize IoTHubMessaging to send C2D messages to the device");
 
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_OK, IoTHubMessaging_SetTrustedCert(iotHubMessagingHandle, certificates));
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
+
     iotHubMessagingResult = IoTHubMessaging_Open(iotHubMessagingHandle, openCompleteCallback, (void*)"Context string for open");
-    ASSERT_ARE_EQUAL (int, IOTHUB_MESSAGING_OK, iotHubMessagingResult);
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_OK, iotHubMessagingResult);
 
     // Send message
     service_send_c2d(iotHubMessagingHandle, receiveUserContext, deviceToUse);

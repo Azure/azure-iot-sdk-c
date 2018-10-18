@@ -284,7 +284,7 @@ static void serialize_telemetry_event(const void* item, const void* action_conte
             }
             else
             {
-                if (json_object_set_number(info_json_obj, "id", info->message_id) != JSONSuccess)
+                if (json_object_set_number(info_json_obj, "id", (double)info->message_id) != JSONSuccess)
                 {
                     LogError("Failed serializing telemetry event id");
                     json_value_free(info_json);
@@ -294,7 +294,7 @@ static void serialize_telemetry_event(const void* item, const void* action_conte
                     LogError("Failed serializing telemetry event enqueue time");
                     json_value_free(info_json);
                 }
-                else if (json_object_dotset_number(info_json_obj, "enqueue.result", info->send_result) != JSONSuccess)
+                else if (json_object_dotset_number(info_json_obj, "enqueue.result", (double)info->send_result) != JSONSuccess)
                 {
                     LogError("Failed serializing telemetry event enqueue result");
                     json_value_free(info_json);
@@ -354,7 +354,7 @@ static void serialize_c2d_event(const void* item, const void* action_context, bo
             }
             else
             {
-                if (json_object_set_number(info_json_obj, "id", info->message_id) != JSONSuccess)
+                if (json_object_set_number(info_json_obj, "id", (double)info->message_id) != JSONSuccess)
                 {
                     LogError("Failed serializing c2d event id");
                     json_value_free(info_json);
@@ -364,7 +364,7 @@ static void serialize_c2d_event(const void* item, const void* action_context, bo
                     LogError("Failed serializing c2d event enqueue time");
                     json_value_free(info_json);
                 }
-                else if (json_object_dotset_number(info_json_obj, "enqueue.result", info->send_result) != JSONSuccess)
+                else if (json_object_dotset_number(info_json_obj, "enqueue.result", (double)info->send_result) != JSONSuccess)
                 {
                     LogError("Failed serializing c2d event enqueue result");
                     json_value_free(info_json);
@@ -424,7 +424,7 @@ static void serialize_device_method_event(const void* item, const void* action_c
             }
             else
             {
-                if (json_object_set_number(info_json_obj, "id", info->method_id) != JSONSuccess)
+                if (json_object_set_number(info_json_obj, "id", (double)info->method_id) != JSONSuccess)
                 {
                     LogError("Failed serializing device method event id");
                     json_value_free(info_json);
@@ -484,7 +484,7 @@ static void serialize_device_twin_reported_event(const void* item, const void* a
             }
             else
             {
-                if (json_object_set_number(info_json_obj, "id", info->update_id) != JSONSuccess)
+                if (json_object_set_number(info_json_obj, "id", (double)info->update_id) != JSONSuccess)
                 {
                     LogError("Failed serializing device twin event id");
                     json_value_free(info_json);
@@ -554,7 +554,7 @@ static void serialize_device_twin_desired_event(const void* item, const void* ac
             }
             else
             {
-                if (json_object_set_number(info_json_obj, "id", info->update_id) != JSONSuccess)
+                if (json_object_set_number(info_json_obj, "id", (double)info->update_id) != JSONSuccess)
                 {
                     LogError("Failed serializing device twin event id");
                     json_value_free(info_json);
@@ -793,7 +793,7 @@ int iothub_client_statistics_add_telemetry_info(IOTHUB_CLIENT_STATISTICS_HANDLE 
         {
             if (type != TELEMETRY_QUEUED)
             {
-                LogError("Telemetry info not found for message %d (%d)", info->message_id, type);
+                LogError("Telemetry info not found for message %lu (%d)", (unsigned long)info->message_id, (int)type);
                 result = __FAILURE__;
             }
             else if ((queued_info = (TELEMETRY_INFO*)malloc(sizeof(TELEMETRY_INFO))) == NULL)
@@ -803,7 +803,7 @@ int iothub_client_statistics_add_telemetry_info(IOTHUB_CLIENT_STATISTICS_HANDLE 
             }
             else if (singlylinkedlist_add(stats->telemetry_events, queued_info) == NULL)
             {
-                LogError("Failed adding telemetry info (message id: %d)", info->message_id);
+                LogError("Failed adding telemetry info (message id: %lu)", (unsigned long)info->message_id);
                 free(queued_info);
                 result = __FAILURE__;
             }
@@ -823,7 +823,7 @@ int iothub_client_statistics_add_telemetry_info(IOTHUB_CLIENT_STATISTICS_HANDLE 
         {
             if ((queued_info = (TELEMETRY_INFO*)singlylinkedlist_item_get_value(list_item)) == NULL)
             {
-                LogError("Failed retrieving queued telemetry info (message id: %d)", info->message_id);
+                LogError("Failed retrieving queued telemetry info (message id: %lu)", (unsigned long)info->message_id);
                 result = __FAILURE__;
             }
             else
@@ -924,7 +924,7 @@ int iothub_client_statistics_add_c2d_info(IOTHUB_CLIENT_STATISTICS_HANDLE handle
         {
             if (type != C2D_QUEUED)
             {
-                LogError("C2D message info not found for message %d (%d)", info->message_id, type);
+                LogError("C2D message info not found for message %lu (%d)", (unsigned long)info->message_id, (int)type);
                 result = __FAILURE__;
             }
             else if ((queued_info = (C2D_MESSAGE_INFO*)malloc(sizeof(C2D_MESSAGE_INFO))) == NULL)
@@ -934,7 +934,7 @@ int iothub_client_statistics_add_c2d_info(IOTHUB_CLIENT_STATISTICS_HANDLE handle
             }
             else if (singlylinkedlist_add(stats->c2d_messages, queued_info) == NULL)
             {
-                LogError("Failed adding c2d message info (message id: %d)", info->message_id);
+                LogError("Failed adding c2d message info (message id: %lu)", (unsigned long)info->message_id);
                 free(queued_info);
                 result = __FAILURE__;
             }
@@ -953,7 +953,7 @@ int iothub_client_statistics_add_c2d_info(IOTHUB_CLIENT_STATISTICS_HANDLE handle
         {
             if ((queued_info = (C2D_MESSAGE_INFO*)singlylinkedlist_item_get_value(list_item)) == NULL)
             {
-                LogError("Failed retrieving queued c2d message info (message id: %d)", info->message_id);
+                LogError("Failed retrieving queued c2d message info (message id: %lu)", (unsigned long)info->message_id);
                 result = __FAILURE__;
             }
             else
@@ -971,7 +971,7 @@ int iothub_client_statistics_add_c2d_info(IOTHUB_CLIENT_STATISTICS_HANDLE handle
                 }
                 else
                 {
-                    LogError("C2D message %d in queue, invalid event type (%d)", info->message_id, ENUM_TO_STRING(C2D_EVENT_TYPE, type));
+                    LogError("C2D message %lu in queue, invalid event type (%d)", (unsigned long)info->message_id, (int)type);
                     result = __FAILURE__;
                 }
             }
@@ -1069,7 +1069,7 @@ int iothub_client_statistics_add_device_method_info(IOTHUB_CLIENT_STATISTICS_HAN
             }
             else if (singlylinkedlist_add(stats->device_methods, queued_info) == NULL)
             {
-                LogError("Failed adding device methods info (method id: %d)", info->method_id);
+                LogError("Failed adding device methods info (method id: %lu)", (unsigned long)info->method_id);
                 free(queued_info);
                 queued_info = NULL;
             }
@@ -1085,7 +1085,7 @@ int iothub_client_statistics_add_device_method_info(IOTHUB_CLIENT_STATISTICS_HAN
         {
             if ((queued_info = (DEVICE_METHOD_INFO*)singlylinkedlist_item_get_value(list_item)) == NULL)
             {
-                LogError("Failed retrieving queued device method info (method id: %d)", info->method_id);
+                LogError("Failed retrieving queued device method info (method id: %lu)", (unsigned long)info->method_id);
             }
         }
 
@@ -1104,7 +1104,7 @@ int iothub_client_statistics_add_device_method_info(IOTHUB_CLIENT_STATISTICS_HAN
             }
             else
             {
-                LogError("Device method %d in queue; invalid event type (%d)", info->method_id, ENUM_TO_STRING(DEVICE_METHOD_EVENT_TYPE, type));
+                LogError("Device method %lu in queue; invalid event type (%d)", (unsigned long)info->method_id, (int)type);
             }
         }
     }
@@ -1197,13 +1197,13 @@ int iothub_client_statistics_add_device_twin_desired_info(IOTHUB_CLIENT_STATISTI
         DEVICE_TWIN_DESIRED_INFO* queued_info;
         LIST_ITEM_HANDLE list_item = singlylinkedlist_find(stats->twin_desired_properties, find_device_twin_info_by_id, info);
 
-        LogInfo("type=%s, id=%d)", ENUM_TO_STRING(DEVICE_TWIN_EVENT_TYPE, type), info->update_id);
+        LogInfo("type=%s, id=%lu)", ENUM_TO_STRING(DEVICE_TWIN_EVENT_TYPE, type), (unsigned long)info->update_id);
 
         if (list_item == NULL)
         {
             if (type != DEVICE_TWIN_UPDATE_SENT)
             {
-                LogError("Invalid info type (update id=%d, type=%s)", info->update_id, ENUM_TO_STRING(DEVICE_TWIN_EVENT_TYPE, type));
+                LogError("Invalid info type (update id=%lu, type=%d)", (unsigned long)info->update_id, (int)type);
                 result = __FAILURE__;
             }
             else if ((queued_info = (DEVICE_TWIN_DESIRED_INFO*)malloc(sizeof(DEVICE_TWIN_DESIRED_INFO))) == NULL)
@@ -1213,7 +1213,7 @@ int iothub_client_statistics_add_device_twin_desired_info(IOTHUB_CLIENT_STATISTI
             }
             else if (singlylinkedlist_add(stats->twin_desired_properties, queued_info) == NULL)
             {
-                LogError("Failed adding device twin info (update id: %d)", info->update_id);
+                LogError("Failed adding device twin info (update id: %lu)", (unsigned long)info->update_id);
                 free(queued_info);
                 result = __FAILURE__;
             }
@@ -1232,7 +1232,7 @@ int iothub_client_statistics_add_device_twin_desired_info(IOTHUB_CLIENT_STATISTI
         {
             if ((queued_info = (DEVICE_TWIN_DESIRED_INFO*)singlylinkedlist_item_get_value(list_item)) == NULL)
             {
-                LogError("Failed retrieving queued device twin info (update id: %d)", info->update_id);
+                LogError("Failed retrieving queued device twin info (update id: %lu)", (unsigned long)info->update_id);
                 result = __FAILURE__;
             }
             else if (type == DEVICE_TWIN_UPDATE_RECEIVED)
@@ -1243,7 +1243,7 @@ int iothub_client_statistics_add_device_twin_desired_info(IOTHUB_CLIENT_STATISTI
             }
             else
             {
-                LogError("Device twin %d in queue; invalid event type (%d)", info->update_id, ENUM_TO_STRING(DEVICE_TWIN_EVENT_TYPE, type));
+                LogError("Device twin %lu in queue; invalid event type (%d)", (unsigned long)info->update_id, (int)type);
                 result = __FAILURE__;
             }
         }
@@ -1325,7 +1325,7 @@ int iothub_client_statistics_add_device_twin_reported_info(IOTHUB_CLIENT_STATIST
         {
             if (type != DEVICE_TWIN_UPDATE_QUEUED)
             {
-                LogError("Invalid info type (update id=%d, type=%s)", info->update_id, ENUM_TO_STRING(DEVICE_TWIN_EVENT_TYPE, type));
+                LogError("Invalid info type (update id=%lu, type=%d)", (unsigned long)info->update_id, (int)type);
                 result = __FAILURE__;
             }
             else if ((queued_info = (DEVICE_TWIN_REPORTED_INFO*)malloc(sizeof(DEVICE_TWIN_REPORTED_INFO))) == NULL)
@@ -1335,7 +1335,7 @@ int iothub_client_statistics_add_device_twin_reported_info(IOTHUB_CLIENT_STATIST
             }
             else if (singlylinkedlist_add(stats->twin_reported_properties, queued_info) == NULL)
             {
-                LogError("Failed adding device twin info (update id: %d)", info->update_id);
+                LogError("Failed adding device twin info (update id: %lu)", (unsigned long)info->update_id);
                 free(queued_info);
                 result = __FAILURE__;
             }
@@ -1355,7 +1355,7 @@ int iothub_client_statistics_add_device_twin_reported_info(IOTHUB_CLIENT_STATIST
         {
             if ((queued_info = (DEVICE_TWIN_REPORTED_INFO*)singlylinkedlist_item_get_value(list_item)) == NULL)
             {
-                LogError("Failed retrieving queued device twin info (update id: %d)", info->update_id);
+                LogError("Failed retrieving queued device twin info (update id: %lu)", (unsigned long)info->update_id);
                 result = __FAILURE__;
             }
             else  if (type == DEVICE_TWIN_UPDATE_SENT)
@@ -1378,7 +1378,7 @@ int iothub_client_statistics_add_device_twin_reported_info(IOTHUB_CLIENT_STATIST
             }
             else
             {
-                LogError("Device twin %d in queue; invalid event type (%d)", info->update_id, ENUM_TO_STRING(DEVICE_TWIN_EVENT_TYPE, type));
+                LogError("Device twin %lu in queue; invalid event type (%d)", (unsigned long)info->update_id, (int)type);
                 result = __FAILURE__;
             }
         }

@@ -87,8 +87,9 @@ static const char* DIAGNOSTIC_CONTEXT_PROPERTY = "diagctx";
 static const char* CONNECTION_DEVICE_ID = "cdid";
 static const char* CONNECTION_MODULE_ID_PROPERTY = "cmid";
 
-
 static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "creationtimeutc";
+
+#define TOLOWER(c) (((c>='A') && (c<='Z'))?c-'A'+'a':c)
 
 #define UNSUBSCRIBE_FROM_TOPIC                  0x0000
 #define SUBSCRIBE_GET_REPORTED_STATE_TOPIC      0x0001
@@ -144,7 +145,8 @@ typedef enum MQTT_CLIENT_STATUS_TAG
     MQTT_CLIENT_STATUS_NOT_CONNECTED,
     MQTT_CLIENT_STATUS_CONNECTING,
     MQTT_CLIENT_STATUS_CONNECTED,
-    MQTT_CLIENT_STATUS_PENDING_CLOSE
+    MQTT_CLIENT_STATUS_PENDING_CLOSE,
+    MQTT_CLIENT_STATUS_EXECUTE_DISCONNECT
 } MQTT_CLIENT_STATUS;
 
 typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
@@ -522,7 +524,6 @@ static int parse_device_twin_topic_info(const char* resp_topic, bool* patch_msg,
     return result;
 }
 
-#define TOLOWER(c) (((c>='A') && (c<='Z'))?c-'A'+'a':c)
 static int InternStrnicmp(const char* s1, const char* s2, size_t n)
 {
     int result;
@@ -546,10 +547,8 @@ static int InternStrnicmp(const char* s1, const char* s2, size_t n)
             }
         }
     }
-
     return result;
 }
-
 
 static IOTHUB_IDENTITY_TYPE retrieve_topic_type(const char* topic_resp, const char* input_queue)
 {
@@ -839,7 +838,7 @@ static int publish_mqtt_telemetry_msg(PMQTTTRANSPORT_HANDLE_DATA transport_data,
     }
     else
     {
-        MQTT_MESSAGE_HANDLE mqttMsg = mqttmessage_create(mqttMsgEntry->packet_id, STRING_c_str(msgTopic), DELIVER_AT_LEAST_ONCE, payload, len);
+        MQTT_MESSAGE_HANDLE mqttMsg = mqttmessage_create_in_place(mqttMsgEntry->packet_id, STRING_c_str(msgTopic), DELIVER_AT_LEAST_ONCE, payload, len);
         if (mqttMsg == NULL)
         {
             LogError("Failed creating mqtt message");
@@ -885,7 +884,7 @@ static int publish_device_method_message(MQTTTRANSPORT_HANDLE_DATA* transport_da
     }
     else
     {
-        MQTT_MESSAGE_HANDLE mqtt_get_msg = mqttmessage_create(packet_id, STRING_c_str(msg_topic), DELIVER_AT_MOST_ONCE, response, response_size);
+        MQTT_MESSAGE_HANDLE mqtt_get_msg = mqttmessage_create_in_place(packet_id, STRING_c_str(msg_topic), DELIVER_AT_MOST_ONCE, response, response_size);
         if (mqtt_get_msg == NULL)
         {
             LogError("Failed constructing mqtt message.");
@@ -978,7 +977,7 @@ static int publish_device_twin_message(MQTTTRANSPORT_HANDLE_DATA* transport_data
     else
     {
         const CONSTBUFFER* data_buff = CONSTBUFFER_GetContent(device_twin_info->report_data_handle);
-        MQTT_MESSAGE_HANDLE mqtt_rpt_msg = mqttmessage_create(mqtt_info->packet_id, STRING_c_str(msgTopic), DELIVER_AT_MOST_ONCE, data_buff->buffer, data_buff->size);
+        MQTT_MESSAGE_HANDLE mqtt_rpt_msg = mqttmessage_create_in_place(mqtt_info->packet_id, STRING_c_str(msgTopic), DELIVER_AT_MOST_ONCE, data_buff->buffer, data_buff->size);
         if (mqtt_rpt_msg == NULL)
         {
             LogError("Failed creating mqtt message");
@@ -1203,175 +1202,164 @@ static int setMqttMessagePropertyIfPossible(IOTHUB_MESSAGE_HANDLE IoTHubMessage,
 static int extractMqttProperties(IOTHUB_MESSAGE_HANDLE IoTHubMessage, const char* topic_name, bool urldecode)
 {
     int result;
-    STRING_HANDLE mqttTopic = STRING_construct(topic_name);
-    if (mqttTopic == NULL)
+    STRING_TOKENIZER_HANDLE token = STRING_TOKENIZER_create_from_char(topic_name);
+    if (token != NULL)
     {
-        LogError("Failure constructing string topic name.");
-        result = __FAILURE__;
-    }
-    else
-    {
-        STRING_TOKENIZER_HANDLE token = STRING_TOKENIZER_create(mqttTopic);
-        if (token != NULL)
+        MAP_HANDLE propertyMap = IoTHubMessage_Properties(IoTHubMessage);
+        if (propertyMap == NULL)
         {
-            MAP_HANDLE propertyMap = IoTHubMessage_Properties(IoTHubMessage);
-            if (propertyMap == NULL)
+            LogError("Failure to retrieve IoTHubMessage_properties.");
+            result = __FAILURE__;
+        }
+        else
+        {
+            STRING_HANDLE output = STRING_new();
+            if (output == NULL)
             {
-                LogError("Failure to retrieve IoTHubMessage_properties.");
+                LogError("Failure to allocate STRING_new.");
                 result = __FAILURE__;
             }
             else
             {
-                STRING_HANDLE output = STRING_new();
-                if (output == NULL)
-                {
-                    LogError("Failure to allocate STRING_new.");
-                    result = __FAILURE__;
-                }
-                else
-                {
-                    result = 0;
+                result = 0;
 
-                    while (STRING_TOKENIZER_get_next_token(token, output, PROPERTY_SEPARATOR) == 0 && result == 0)
+                while (STRING_TOKENIZER_get_next_token(token, output, PROPERTY_SEPARATOR) == 0 && result == 0)
+                {
+                    const char* tokenData = STRING_c_str(output);
+                    size_t tokenLen = strlen(tokenData);
+                    if (tokenData == NULL || tokenLen == 0)
                     {
-                        const char* tokenData = STRING_c_str(output);
-                        size_t tokenLen = strlen(tokenData);
-                        if (tokenData == NULL || tokenLen == 0)
+                        break;
+                    }
+                    else
+                    {
+                        if (isSystemProperty(tokenData))
                         {
-                            break;
-                        }
-                        else
-                        {
-                            if (isSystemProperty(tokenData))
+                            const char* iterator = tokenData;
+                            while (iterator != NULL && *iterator != '\0' && result == 0)
                             {
-                                const char* iterator = tokenData;
-                                while (iterator != NULL && *iterator != '\0' && result == 0)
+                                if (*iterator == '=')
                                 {
-                                    if (*iterator == '=')
+                                    char* propName = NULL;
+                                    char* propValue = NULL;
+                                    size_t nameLen = iterator - tokenData;
+                                    size_t valLen = tokenLen - (nameLen + 1) + 1;
+
+                                    if ((propName = malloc(nameLen + 1)) == NULL || (propValue = malloc(valLen + 1)) == NULL)
                                     {
-                                        size_t nameLen = iterator - tokenData;
-                                        char* propName = malloc(nameLen + 1);
+                                        LogError("Failed allocating property name (%p) and/or value (%p)", propName, propValue);
+                                        free(propName);
+                                        result = __FAILURE__;
+                                    }
+                                    else
+                                    {
+                                        memcpy(propName, tokenData, nameLen);
+                                        propName[nameLen] = '\0';
 
-                                        size_t valLen = tokenLen - (nameLen + 1) + 1;
-                                        char* propValue = malloc(valLen + 1);
+                                        memcpy(propValue, iterator + 1, valLen);
+                                        propValue[valLen] = '\0';
 
-                                        if (propName == NULL || propValue == NULL)
+                                        if (urldecode)
                                         {
-                                            LogError("Failed allocating property name (%p) and/or value (%p)", propName, propValue);
-                                            result = __FAILURE__;
+                                            STRING_HANDLE propValue_decoded;
+                                            if ((propValue_decoded = URL_DecodeString(propValue)) == NULL)
+                                            {
+                                                LogError("Failed to URL decode property value");
+                                                result = __FAILURE__;
+                                            }
+                                            else if (setMqttMessagePropertyIfPossible(IoTHubMessage, propName, STRING_c_str(propValue_decoded), nameLen) != 0)
+                                            {
+                                                LogError("Unable to set message property");
+                                                result = __FAILURE__;
+                                            }
+                                            STRING_delete(propValue_decoded);
                                         }
                                         else
                                         {
-                                            memcpy(propName, tokenData, nameLen);
-                                            propName[nameLen] = '\0';
-
-                                            memcpy(propValue, iterator + 1, valLen);
-                                            propValue[valLen] = '\0';
-
-                                            if (urldecode)
+                                            if (setMqttMessagePropertyIfPossible(IoTHubMessage, propName, propValue, nameLen) != 0)
                                             {
-                                                STRING_HANDLE propValue_decoded;
-                                                if ((propValue_decoded = URL_DecodeString(propValue)) == NULL)
-                                                {
-                                                    LogError("Failed to URL decode property value");
-                                                    result = __FAILURE__;
-                                                }
-                                                else if (setMqttMessagePropertyIfPossible(IoTHubMessage, propName, STRING_c_str(propValue_decoded), nameLen) != 0)
-                                                {
-                                                    LogError("Unable to set message property");
-                                                    result = __FAILURE__;
-                                                }
-                                                STRING_delete(propValue_decoded);
-                                            }
-                                            else
-                                            {
-                                                if (setMqttMessagePropertyIfPossible(IoTHubMessage, propName, propValue, nameLen) != 0)
-                                                {
-                                                    LogError("Unable to set message property");
-                                                    result = __FAILURE__;
-                                                }
+                                                LogError("Unable to set message property");
+                                                result = __FAILURE__;
                                             }
                                         }
                                         free(propName);
                                         free(propValue);
-
-                                        break;
                                     }
-                                    iterator++;
+                                    break;
                                 }
+                                iterator++;
                             }
-                            else //User Properties
+                        }
+                        else //User Properties
+                        {
+                            const char* iterator = tokenData;
+                            while (iterator != NULL && *iterator != '\0' && result == 0)
                             {
-                                const char* iterator = tokenData;
-                                while (iterator != NULL && *iterator != '\0' && result == 0)
+                                if (*iterator == '=')
                                 {
-                                    if (*iterator == '=')
+                                    char* propName = NULL;
+                                    char* propValue = NULL;
+                                    size_t nameLen = iterator - tokenData;
+                                    size_t valLen = tokenLen - (nameLen + 1) + 1;
+
+                                    if ((propName = (char*)malloc(nameLen + 1)) == NULL || (propValue = (char*)malloc(valLen + 1)) == NULL)
                                     {
-                                        size_t nameLen = iterator - tokenData;
-                                        char* propName = malloc(nameLen + 1);
+                                        free(propName);
+                                        LogError("Failed allocating property information");
+                                        result = __FAILURE__;
+                                    }
+                                    else
+                                    {
+                                        memcpy(propName, tokenData, nameLen);
+                                        propName[nameLen] = '\0';
 
-                                        size_t valLen = tokenLen - (nameLen + 1) + 1;
-                                        char* propValue = malloc(valLen + 1);
+                                        memcpy(propValue, iterator + 1, valLen);
+                                        propValue[valLen] = '\0';
 
-                                        if (propName == NULL || propValue == NULL)
+                                        if (urldecode)
                                         {
-                                            result = __FAILURE__;
+                                            STRING_HANDLE propName_decoded = URL_DecodeString(propName);
+                                            STRING_HANDLE propValue_decoded = URL_DecodeString(propValue);
+                                            if (propName_decoded == NULL || propValue_decoded == NULL)
+                                            {
+                                                LogError("Failed to URL decode property");
+                                                result = __FAILURE__;
+                                            }
+                                            else if (Map_AddOrUpdate(propertyMap, STRING_c_str(propName_decoded), STRING_c_str(propValue_decoded)) != MAP_OK)
+                                            {
+                                                LogError("Map_AddOrUpdate failed.");
+                                                result = __FAILURE__;
+                                            }
+                                            STRING_delete(propName_decoded);
+                                            STRING_delete(propValue_decoded);
                                         }
                                         else
                                         {
-                                            memcpy(propName, tokenData, nameLen);
-                                            propName[nameLen] = '\0';
-
-                                            memcpy(propValue, iterator + 1, valLen);
-                                            propValue[valLen] = '\0';
-
-                                            if (urldecode)
+                                            if (Map_AddOrUpdate(propertyMap, propName, propValue) != MAP_OK)
                                             {
-                                                STRING_HANDLE propName_decoded = URL_DecodeString(propName);
-                                                STRING_HANDLE propValue_decoded = URL_DecodeString(propValue);
-                                                if (propName_decoded == NULL || propValue_decoded == NULL)
-                                                {
-                                                    LogError("Failed to URL decode property");
-                                                    result = __FAILURE__;
-                                                }
-                                                else if (Map_AddOrUpdate(propertyMap, STRING_c_str(propName_decoded), STRING_c_str(propValue_decoded)) != MAP_OK)
-                                                {
-                                                    LogError("Map_AddOrUpdate failed.");
-                                                    result = __FAILURE__;
-                                                }
-                                                STRING_delete(propName_decoded);
-                                                STRING_delete(propValue_decoded);
-                                            }
-                                            else
-                                            {
-                                                if (Map_AddOrUpdate(propertyMap, propName, propValue) != MAP_OK)
-                                                {
-                                                    LogError("Map_AddOrUpdate failed.");
-                                                    result = __FAILURE__;
-                                                }
+                                                LogError("Map_AddOrUpdate failed.");
+                                                result = __FAILURE__;
                                             }
                                         }
                                         free(propName);
                                         free(propValue);
-
-                                        break;
                                     }
-                                    iterator++;
+                                    break;
                                 }
+                                iterator++;
                             }
                         }
                     }
-                    STRING_delete(output);
                 }
+                STRING_delete(output);
             }
-            STRING_TOKENIZER_destroy(token);
         }
-        else
-        {
-            LogError("Unable to create Tokenizer object.");
-            result = __FAILURE__;
-        }
-        STRING_delete(mqttTopic);
+        STRING_TOKENIZER_destroy(token);
+    }
+    else
+    {
+        LogError("Unable to create Tokenizer object.");
+        result = __FAILURE__;
     }
     return result;
 }
@@ -1639,7 +1627,7 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
                             LogError("Subscribe delivery failure of subscribe %zu", index);
                         }
                     }
-                    // The connect packet has been acked
+                    // The subscribed packet has been acked
                     transport_data->currPacketState = SUBACK_TYPE;
 
                     // Is this a twin message
@@ -1749,7 +1737,6 @@ static void mqtt_error_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_ERR
             case MQTT_CLIENT_NO_PING_RESPONSE:
             {
                 LogError("Mqtt Ping Response was not encountered.  Reconnecting device...");
-                DisconnectFromClient(transport_data);
                 break;
             }
             case MQTT_CLIENT_PARSE_ERROR:
@@ -1762,7 +1749,10 @@ static void mqtt_error_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_ERR
         }
         if (transport_data->mqttClientStatus != MQTT_CLIENT_STATUS_PENDING_CLOSE)
         {
-            transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_NOT_CONNECTED;
+            // We have encountered an mqtt protocol error in an non-closing state
+            // The best course of action is to execute a shutdown of the mqtt/tls/socket
+            // layer and then attempt to reconnect
+            transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_EXECUTE_DISCONNECT;
         }
         transport_data->currPacketState = PACKET_TYPE_ERROR;
         transport_data->device_twin_get_sent = false;
@@ -1971,35 +1961,6 @@ static int GetTransportProviderIfNecessary(PMQTTTRANSPORT_HANDLE_DATA transport_
     return result;
 }
 
-//static int is_key_validate(const IOTHUBTRANSPORT_CONFIG* config)
-//{
-//    int result;
-//    IOTHUB_CREDENTIAL_TYPE cred_type = IoTHubClient_Auth_Get_Credential_Type(config->auth_module_handle);
-//    if (cred_type == IOTHUB_CREDENTIAL_TYPE_X509 || cred_type == IOTHUB_CREDENTIAL_TYPE_X509_ECC)
-//    {
-//        result = 0;
-//    }
-//    else
-//    {
-//        if (config->upperConfig->deviceKey == NULL && config->upperConfig->deviceSasToken == NULL)
-//        {
-//            if (IoTHubClient_Auth_Get_DeviceKey(config->auth_module_handle) == NULL)
-//            {
-//                result = __FAILURE__;
-//            }
-//            else
-//            {
-//                result = 0;
-//            }
-//        }
-//        else
-//        {
-//            result = 0;
-//        }
-//    }
-//    return result;
-//}
-
 static STRING_HANDLE buildClientId(const char* device_id, const char* module_id)
 {
     if (module_id == NULL)
@@ -2179,6 +2140,12 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                     result = 0;
                 }
             }
+        }
+        else if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_EXECUTE_DISCONNECT)
+        {
+            // Need to disconnect from client
+            DisconnectFromClient(transport_data);
+            result = 0;
         }
         // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_001: [ IoTHubTransport_MQTT_Common_DoWork shall trigger reconnection if the mqtt_client_connect does not complete within `keepalive` seconds]
         else if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_CONNECTING)

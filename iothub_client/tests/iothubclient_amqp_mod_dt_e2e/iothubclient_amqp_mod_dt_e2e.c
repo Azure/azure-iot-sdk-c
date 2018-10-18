@@ -35,7 +35,7 @@ TEST_FUNCTION(IoTHub_AMQP_Module_GetFullDesired_e2e_sas)
     dt_e2e_get_complete_desired_test(AMQP_Protocol, IOTHUB_ACCOUNT_AUTH_CONNSTRING);
 }
 
-//
+#ifndef USE_WOLFSSL // Wolf doesn't run web socket tests
 // AMQP_WS tests.
 //
 TEST_FUNCTION(IoTHub_AMQP_WS_Module_SendReported_e2e_sas)
@@ -47,8 +47,6 @@ TEST_FUNCTION(IoTHub_AMQP_WS_Module_GetFullDesired_e2e_sas)
 {
     dt_e2e_get_complete_desired_test(AMQP_Protocol_over_WebSocketsTls, IOTHUB_ACCOUNT_AUTH_CONNSTRING);
 }
-//
-
+#endif
 
 END_TEST_SUITE(iothubclient_amqp_mod_dt_e2e)
-
