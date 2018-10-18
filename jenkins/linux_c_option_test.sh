@@ -35,6 +35,17 @@ echo "WARNING: Not enough space.  Setting MAKE_CORES=1"
 MAKE_CORES=1
 fi
 
+echo "Create custom HSM library for later"
+hsm_folder=$build_root"/cmake/cust_hsm"
+rm -r -f $hsm_folder
+mkdir -p $hsm_folder
+pushd $hsm_folder
+
+cmake "$build_root/provisioning_client/samples/custom_hsm_example"
+make --jobs=$MAKE_CORES
+
+custom_hsm_lib=$hsm_folder"/libcustom_hsm_example.a"
+
 declare -a arr=(
     "-Duse_http=OFF"
     "-Duse_amqp=OFF -Duse_http=OFF -Dno_logging=OFF -Ddont_use_uploadtoblob=ON"
@@ -44,6 +55,7 @@ declare -a arr=(
     "-Dbuild_as_dynamic:BOOL=ON -Ddont_use_uploadtoblob:BOOL=ON -Duse_prov_client:BOOL=ON"
     "-Dbuild_as_dynamic:BOOL=ON -Ddont_use_uploadtoblob:BOOL=ON -Duse_edge_modules:BOOL=ON"
     "-Drun_longhaul_tests=ON"
+    "-Duse_prov_client=ON -Dhsm_custom_lib=$custom_hsm_lib"
 )
 
 for item in "${arr[@]}"
