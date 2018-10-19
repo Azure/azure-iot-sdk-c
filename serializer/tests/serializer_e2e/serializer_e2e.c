@@ -42,7 +42,6 @@
 #include "iothub_devicetwin.h"
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 static IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo = NULL;
 
 /*the following time expressed in seconds denotes the maximum time to read all the events available in an event hub*/
@@ -372,8 +371,6 @@ BEGIN_TEST_SUITE(serializer_e2e)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
-        TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
-
         g_testByTest = TEST_MUTEX_CREATE();
         ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -394,7 +391,6 @@ BEGIN_TEST_SUITE(serializer_e2e)
         serializer_deinit();
 
         TEST_MUTEX_DESTROY(g_testByTest);
-        TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
     }
 
     TEST_FUNCTION_INITIALIZE(TestMethodInitialize)

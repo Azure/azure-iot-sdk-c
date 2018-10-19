@@ -22,8 +22,6 @@
 
 #include "common_prov_e2e.h"
 
-static TEST_MUTEX_HANDLE g_dllByDll;
-
 static const char* g_prov_conn_string = NULL;
 static const char* g_dps_scope_id = NULL;
 static const char* g_dps_uri = NULL;
@@ -64,8 +62,6 @@ BEGIN_TEST_SUITE(prov_tpm_client_e2e)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
-        TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
-
         platform_init();
         prov_dev_security_init(SECURE_DEVICE_TYPE_TPM);
 
@@ -89,8 +85,6 @@ BEGIN_TEST_SUITE(prov_tpm_client_e2e)
 
         prov_dev_security_deinit();
         platform_deinit();
-
-        TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
     }
 
     TEST_FUNCTION_INITIALIZE(method_init)
