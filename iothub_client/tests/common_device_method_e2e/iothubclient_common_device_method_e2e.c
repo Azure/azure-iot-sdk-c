@@ -283,6 +283,11 @@ void test_device_method_with_string_ex(IOTHUB_PROVISIONED_DEVICE** devicesToUse,
         result = IoTHubDeviceClient_SetOption(registered_devices[iterator], OPTION_LOG_TRACE, &trace);
         ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set tracing option");
 
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+        result = IoTHubDeviceClient_SetOption(registered_devices[iterator], OPTION_TRUSTED_CERT, certificates);
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set trusted certificate");
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
+
         result = IoTHubDeviceClient_SetDeviceMethodCallback(registered_devices[iterator], MethodCallback, (void*)payload);
         ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device method callback");
     }

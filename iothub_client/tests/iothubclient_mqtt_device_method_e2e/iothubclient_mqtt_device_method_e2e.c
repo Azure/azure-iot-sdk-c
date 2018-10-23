@@ -105,19 +105,22 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_device_method_e2e)
         device_method_e2e_method_call_with_embedded_single_quote_x509(MQTT_Protocol);
     }
 
-    //
+#ifndef USE_WOLFSSL // Wolf doesn't run web socket tests
     // MQTT_WS tests.  Only test small subset.
     //
     TEST_FUNCTION(IotHub_Mqtt_Ws_Method_Call_With_String_x509)
     {
         device_method_e2e_method_call_with_string_x509(MQTT_WebSocket_Protocol);
     }
+#endif
 #endif // __APPLE__
 
+#ifndef USE_WOLFSSL // Wolf doesn't run web socket tests
     TEST_FUNCTION(IotHub_Mqtt_Ws_Method_Call_With_String_sas)
     {
         device_method_e2e_method_call_with_string_sas(MQTT_WebSocket_Protocol);
     }
+#endif
 
 END_TEST_SUITE(iothubclient_mqtt_device_method_e2e)
 

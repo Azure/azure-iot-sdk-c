@@ -519,11 +519,11 @@ static int create_connection(PROV_TRANSPORT_HTTP_INFO* http_info)
     if (http_info->http_client == NULL)
     {
         TLSIO_CONFIG tls_io_config;
-		HTTP_PROXY_IO_CONFIG http_proxy;
+        HTTP_PROXY_IO_CONFIG http_proxy;
         memset(&tls_io_config, 0, sizeof(TLSIO_CONFIG));
         tls_io_config.hostname = http_info->hostname;
         tls_io_config.port = HTTP_PORT_NUM;
-				
+
         // Setup proxy
         if (http_info->proxy_host != NULL)
         {
