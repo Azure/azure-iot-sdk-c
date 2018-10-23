@@ -273,10 +273,22 @@ static IOTHUB_CLIENT_RESULT start_worker_if_needed(TRANSPORT_HANDLE_DATA * trans
     return result;
 }
 
-static void stop_worker_thread(TRANSPORT_HANDLE_DATA * transportData)
+static void stop_worker_thread(TRANSPORT_HANDLE_DATA* transportData)
 {
     /*Codes_SRS_IOTHUBTRANSPORT_17_043: [** IoTHubTransport_SignalEndWorkerThread shall signal the worker thread to end.*/
-    transportData->stopThread = 1;
+    if (Lock(transportData->lockHandle) != LOCK_OK)
+    {
+        // Need to setup a critical error function here to inform the user that an critical error
+        // has occured.
+        LogError("Unable to lock - will still attempt to end thread without thread safety");
+        transportData->stopThread = 1;
+    }
+    else
+    {
+        transportData->stopThread = 1;
+        (void)Unlock(transportData->lockHandle);
+    }
+
 }
 
 static void wait_worker_thread(TRANSPORT_HANDLE_DATA * transportData)
@@ -346,16 +358,7 @@ void IoTHubTransport_Destroy(TRANSPORT_HANDLE transportHandle)
     {
         TRANSPORT_HANDLE_DATA * transportData = (TRANSPORT_HANDLE_DATA*)transportHandle;
         /*Codes_SRS_IOTHUBTRANSPORT_17_033: [ IoTHubTransport_Destroy shall lock the transport lock. ]*/
-        if (Lock(transportData->lockHandle) != LOCK_OK)
-        {
-            LogError("Unable to lock - will still attempt to end thread without thread safety");
-            stop_worker_thread(transportData);
-        }
-        else
-        {
-            stop_worker_thread(transportData);
-            (void)Unlock(transportData->lockHandle);
-        }
+        stop_worker_thread(transportData);
         wait_worker_thread(transportData);
         /*Codes_SRS_IOTHUBTRANSPORT_17_010: [ IoTHubTransport_Destroy shall free all resources. ]*/
         Lock_Deinit(transportData->lockHandle);
