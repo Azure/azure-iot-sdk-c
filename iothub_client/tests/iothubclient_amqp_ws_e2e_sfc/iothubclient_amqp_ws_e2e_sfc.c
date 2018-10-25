@@ -5,20 +5,16 @@
 #include "iothubclient_common_e2e.h"
 #include "iothubtransportamqp_websockets.h"
 
-static TEST_MUTEX_HANDLE g_dllByDll;
-
 BEGIN_TEST_SUITE(iothubclient_amqp_ws_e2e_sfc)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
-        TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
         e2e_init(TEST_AMQP_WEBSOCKETS, false);
     }
 
     TEST_SUITE_CLEANUP(TestClassCleanup)
     {
         e2e_deinit();
-        TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
     }
 
     //***********************************************************

@@ -83,7 +83,6 @@ void my_gballoc_free(void * t)
 #include "schema.h"
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 
 TEST_DEFINE_ENUM_TYPE(SCHEMA_RESULT, SCHEMA_RESULT_VALUES);
@@ -134,7 +133,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
-        TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
         g_testByTest = TEST_MUTEX_CREATE();
         ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -178,8 +176,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         umock_c_deinit();
 
         TEST_MUTEX_DESTROY(g_testByTest);
-        TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
-
     }
 
     TEST_FUNCTION_INITIALIZE(TestMethodInitialize)

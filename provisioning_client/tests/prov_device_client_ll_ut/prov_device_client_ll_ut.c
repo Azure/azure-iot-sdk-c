@@ -79,7 +79,6 @@ MOCKABLE_FUNCTION(, double, json_value_get_number, const JSON_Value*, value);
 #undef ENABLE_MOCKS
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 static PROV_TRANSPORT_CHALLENGE_CALLBACK g_challenge_callback;
 static void* g_challenge_ctx;
 static PROV_DEVICE_TRANSPORT_REGISTER_CALLBACK g_registration_callback;
@@ -381,7 +380,6 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
     {
         int result;
 
-        TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
         g_testByTest = TEST_MUTEX_CREATE();
         ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -497,7 +495,6 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         umock_c_deinit();
 
         TEST_MUTEX_DESTROY(g_testByTest);
-        TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
     }
 
     TEST_FUNCTION_INITIALIZE(method_init)

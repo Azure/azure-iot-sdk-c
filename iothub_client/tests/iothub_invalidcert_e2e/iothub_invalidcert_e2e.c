@@ -29,8 +29,6 @@
 #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-static TEST_MUTEX_HANDLE g_dllByDll;
-
 #define MAX_CONNECT_CALLBACK_WAIT_TIME        10
 
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
@@ -155,7 +153,6 @@ static void run_invalidcert_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     int result = IoTHub_Init();
     ASSERT_ARE_EQUAL(int, 0, result, "Iothub init failed");
 }
@@ -163,7 +160,6 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 TEST_SUITE_CLEANUP(TestClassCleanup)
 {
     IoTHub_Deinit();
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
