@@ -35,9 +35,9 @@ static const char* const USER_AGENT_VALUE = "prov_device_client/1.0";
 static const char* const ACCEPT_VALUE = "application/json";
 static const char* const CONTENT_TYPE_VALUE = "application/json; charset=utf-8";
 static const char* const KEEP_ALIVE_VALUE = "keep-alive";
-static const char* const const KEY_NAME_VALUE = "registration";
+static const char* const KEY_NAME_VALUE = "registration";
 static const char* const TPM_SECURITY_INFO = "{\"registrationId\":\"%s\",\"tpm\":{\"endorsementKey\":\"%s\", \"storageRootKey\":\"%s\"}}";
-static const char* const RIOT_SECURITY_INFO = "{ \"registrationId\":\"%s\" }";
+static const char* const REG_SECURITY_INFO = "{ \"registrationId\":\"%s\" }";
 
 DEFINE_ENUM_STRINGS(HTTP_CALLBACK_REASON, HTTP_CALLBACK_REASON_VALUES);
 
@@ -288,14 +288,14 @@ static char* construct_json_data(PROV_TRANSPORT_HTTP_INFO* http_info)
     }
     else
     {
-        size_t json_length = strlen(RIOT_SECURITY_INFO) + strlen(http_info->registration_id);
+        size_t json_length = strlen(REG_SECURITY_INFO) + strlen(http_info->registration_id);
         result = (char*)malloc(json_length);
         if (result == NULL)
         {
             LogError("Failure allocating json information");
             result = NULL;
         }
-        else if (sprintf(result, RIOT_SECURITY_INFO, http_info->registration_id) == 0)
+        else if (sprintf(result, REG_SECURITY_INFO, http_info->registration_id) == 0)
         {
             LogError("Failure constructing json information");
             free(result);
@@ -509,13 +509,16 @@ static void free_allocated_data(PROV_TRANSPORT_HTTP_INFO* http_info)
     BUFFER_delete(http_info->ek);
     BUFFER_delete(http_info->srk);
     BUFFER_delete(http_info->nonce);
+    if (http_info->http_client != NULL)
+    {
+        uhttp_client_destroy(http_info->http_client);
+    }
     free(http_info);
 }
 
-static int create_connection(PROV_TRANSPORT_HTTP_INFO* http_info)
+static int create_transport_io_object(PROV_TRANSPORT_HTTP_INFO* http_info)
 {
     int result;
-    /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_009: [ prov_transport_http_open shall create the http client adding any proxy and certificate information that is presented. ] */
     if (http_info->http_client == NULL)
     {
         TLSIO_CONFIG tls_io_config;
@@ -553,47 +556,62 @@ static int create_connection(PROV_TRANSPORT_HTTP_INFO* http_info)
         }
         else
         {
-            (void)uhttp_client_set_trace(http_info->http_client, http_info->log_trace, true);
-
-            if (http_info->certificate != NULL && uhttp_client_set_trusted_cert(http_info->http_client, http_info->certificate) != HTTP_CLIENT_OK)
-            {
-                LogError("fail to set the trusted certificate in the http client");
-                uhttp_client_destroy(http_info->http_client);
-                http_info->http_client = NULL;
-                result = __FAILURE__;
-            }
-            else
-            {
-                if (http_info->hsm_type == TRANSPORT_HSM_TYPE_X509)
-                {
-                    if (http_info->x509_cert == NULL || http_info->private_key == NULL)
-                    {
-                        LogError("x509 certificate information was not properly set");
-                        result = __FAILURE__;
-                    }
-                    else if (uhttp_client_set_X509_cert(http_info->http_client, true, http_info->x509_cert, http_info->private_key) != HTTP_CLIENT_OK)
-                    {
-                        LogError("failed to set x509 certificate information");
-                        result = __FAILURE__;
-                    }
-                    else
-                    {
-                        result = 0;
-                    }
-                }
-                else
-                {
-                    result = 0;
-                }
-            }
+            result = 0;
         }
     }
     else
     {
         result = 0;
     }
+    return result;
+}
 
-    if (result == 0)
+static int create_connection(PROV_TRANSPORT_HTTP_INFO* http_info)
+{
+    int result;
+    /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_009: [ prov_transport_http_open shall create the http client adding any proxy and certificate information that is presented. ] */
+    if (create_transport_io_object(http_info) != 0)
+    {
+        LogError("Failure setting transport object");
+        result = __FAILURE__;
+    }
+    else
+    {
+        (void)uhttp_client_set_trace(http_info->http_client, http_info->log_trace, true);
+
+        if (http_info->certificate != NULL && uhttp_client_set_trusted_cert(http_info->http_client, http_info->certificate) != HTTP_CLIENT_OK)
+        {
+            LogError("fail to set the trusted certificate in the http client");
+            uhttp_client_destroy(http_info->http_client);
+            http_info->http_client = NULL;
+            result = __FAILURE__;
+        }
+        else
+        {
+            if (http_info->hsm_type == TRANSPORT_HSM_TYPE_X509)
+            {
+                if (http_info->x509_cert == NULL || http_info->private_key == NULL)
+                {
+                    LogError("x509 certificate information was not properly set");
+                    result = __FAILURE__;
+                }
+                else if (uhttp_client_set_X509_cert(http_info->http_client, true, http_info->x509_cert, http_info->private_key) != HTTP_CLIENT_OK)
+                {
+                    LogError("failed to set x509 certificate information");
+                    result = __FAILURE__;
+                }
+                else
+                {
+                    result = 0;
+                }
+            }
+            else
+            {
+                result = 0;
+            }
+        }
+    }
+    if (result == 0 && !http_info->http_connected)
     {
         /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_010: [ prov_transport_http_open shall opening the http communications with the service. ] */
         if (uhttp_client_open(http_info->http_client, http_info->hostname, HTTP_PORT_NUM, on_http_connected, http_info) != HTTP_CLIENT_OK)
@@ -800,6 +818,7 @@ int prov_transport_http_close(PROV_DEVICE_TRANSPORT_HANDLE handle)
             uhttp_client_destroy(http_info->http_client);
             http_info->http_client = NULL;
         }
+        http_info->http_connected = false;
         /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_016: [ On success prov_transport_http_close shall return 0. ] */
         result = 0;
     }
@@ -1185,6 +1204,31 @@ static int prov_transport_http_set_proxy(PROV_DEVICE_TRANSPORT_HANDLE handle, co
     return result;
 }
 
+static int prov_transport_http_set_option(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* option, const void* value)
+{
+    int result;
+    // needs to invoke correct behavior
+    if (handle == NULL || option == NULL)
+    {
+        LogError("Invalid parameter specified handle: %p, option: %p", handle, option);
+        result = __FAILURE__;
+    }
+    else
+    {
+        PROV_TRANSPORT_HTTP_INFO* http_info = (PROV_TRANSPORT_HTTP_INFO*)handle;
+        if (http_info->http_client == NULL && create_transport_io_object(http_info) != 0)
+        {
+            LogError("Failure creating transport io object");
+            result = __FAILURE__;
+        }
+        else
+        {
+            result = uhttp_client_set_option(http_info->http_client, option, value);
+        }
+    }
+    return result;
+}
+
 static PROV_DEVICE_TRANSPORT_PROVIDER prov_http_func =
 {
     prov_transport_http_create,
@@ -1197,8 +1241,8 @@ static PROV_DEVICE_TRANSPORT_PROVIDER prov_http_func =
     prov_transport_http_set_trace,
     prov_transport_http_x509_cert,
     prov_transport_http_set_trusted_cert,
-    prov_transport_http_set_proxy
-
+    prov_transport_http_set_proxy,
+    prov_transport_http_set_option
 };
 
 const PROV_DEVICE_TRANSPORT_PROVIDER* Prov_Device_HTTP_Protocol(void)

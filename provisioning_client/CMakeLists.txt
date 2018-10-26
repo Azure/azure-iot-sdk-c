@@ -343,7 +343,7 @@ endif ()
 if(${use_installed_dependencies})
 
     # Install Provisioning libs
-    set(package_location "cmake")
+    set(package_location "share/cmake/${PROJECT_NAME}")
 
     if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
         set(CMAKE_INSTALL_LIBDIR "lib")
@@ -365,7 +365,7 @@ if(${use_installed_dependencies})
         COMPATIBILITY SameMajorVersion
     )
 
-    configure_file("configs/${PROJECT_NAME}Config.cmake"
+    configure_file("../configs/${PROJECT_NAME}Config.cmake"
         "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}Config.cmake"
         COPYONLY
     )
@@ -379,7 +379,7 @@ if(${use_installed_dependencies})
 
     install(
         FILES
-            "configs/${PROJECT_NAME}Config.cmake"
+            "../configs/${PROJECT_NAME}Config.cmake"
             "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}ConfigVersion.cmake"
         DESTINATION
             ${package_location}
