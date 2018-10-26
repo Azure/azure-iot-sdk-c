@@ -113,7 +113,7 @@ static int parse_message(const char* data, size_t size, char* test_id, unsigned 
 
     if ((root_value = json_parse_string(data)) == NULL)
     {
-        LogError("Failed parsing json string");
+        LogError("Failed parsing json string: %s", data == NULL ? "<NULL>" : data);
         result = __FAILURE__;
     }
     else
@@ -123,12 +123,12 @@ static int parse_message(const char* data, size_t size, char* test_id, unsigned 
 
         if ((root_object = json_value_get_object(root_value)) == NULL)
         {
-            LogError("Failed creating root json object");
+            LogError("Failed creating root json object: %s", data);
             result = __FAILURE__;
         }
         else if ((test_id_ref = json_object_get_string(root_object, MESSAGE_TEST_ID_FIELD)) == NULL)
         {
-            LogError("Failed getting message test id");
+            LogError("Failed getting message test id: %s", data);
             result = __FAILURE__;
         }
         else
@@ -154,7 +154,7 @@ static int parse_twin_desired_properties(const char* data, char* test_id, unsign
 
     if ((root_value = json_parse_string(data)) == NULL)
     {
-        LogError("Failed parsing json string");
+        LogError("Failed parsing json string: %s", data == NULL ? "<NULL>" : data);
         result = __FAILURE__;
     }
     else
@@ -164,12 +164,12 @@ static int parse_twin_desired_properties(const char* data, char* test_id, unsign
 
         if ((root_object = json_value_get_object(root_value)) == NULL)
         {
-            LogError("Failed creating root json object");
+            LogError("Failed creating root json object %s", data);
             result = __FAILURE__;
         }
         else if ((test_id_ref = json_object_dotget_string(root_object, TWIN_DESIRED_BLOCK DOT MESSAGE_TEST_ID_FIELD)) == NULL)
         {
-            LogError("Failed getting message test id");
+            LogError("Failed getting message test id %s", data);
             result = __FAILURE__;
         }
         else
@@ -213,7 +213,7 @@ static int parse_twin_reported_properties(const char* data, int* prop_count, cha
 
     if ((root_value = json_parse_string(data)) == NULL)
     {
-        LogError("Failed parsing json string");
+        LogError("Failed parsing json string: %s", data == NULL ? "<NULL>" : data);
         result = __FAILURE__;
     }
     else
@@ -222,7 +222,7 @@ static int parse_twin_reported_properties(const char* data, int* prop_count, cha
 
         if ((root_object = json_value_get_object(root_value)) == NULL)
         {
-            LogError("Failed getting root json object");
+            LogError("Failed getting root json object %s", data);
             result = __FAILURE__;
         }
         else
@@ -231,7 +231,7 @@ static int parse_twin_reported_properties(const char* data, int* prop_count, cha
 
             if ((reported_root_object = json_object_dotget_object(root_object, TWIN_PROPERTIES_BLOCK DOT TWIN_REPORTED_BLOCK)) == NULL)
             {
-                LogError("Failed getting json reported properties block");
+                LogError("Failed getting json reported properties block %s", data);
                 result = __FAILURE__;
             }
             else
@@ -418,7 +418,6 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT on_c2d_message_received(IOTHUB_MESSAGE_H
     {
         const unsigned char* data;
         size_t size;
-
         if (IoTHubMessage_GetByteArray(message, &data, &size) != IOTHUB_MESSAGE_OK)
         {
             LogError("Failed getting string out of IOTHUB_MESSAGE_HANDLE");
@@ -774,6 +773,7 @@ IOTHUB_LONGHAUL_RESOURCES_HANDLE longhaul_tests_init()
             else
             {
                 platform_init();
+                LogInfo("Longhaul Test ID: %s", result->test_id);
             }
         }
     }
