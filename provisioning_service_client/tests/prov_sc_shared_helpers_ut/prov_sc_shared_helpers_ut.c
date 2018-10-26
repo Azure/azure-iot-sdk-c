@@ -59,7 +59,6 @@ MOCKABLE_FUNCTION(, void*, from_json_mock, JSON_Object*, root_object);
 #include "prov_service_client/provisioning_sc_shared_helpers.h"
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 static int g_fromJson_calls;
 static int g_toJson_calls;
 
@@ -171,7 +170,6 @@ BEGIN_TEST_SUITE(prov_sc_shared_helpers_ut)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -185,7 +183,6 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     umock_c_deinit();
 
     TEST_MUTEX_DESTROY(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)

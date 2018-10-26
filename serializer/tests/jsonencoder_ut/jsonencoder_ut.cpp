@@ -601,14 +601,10 @@ static CJSONMocks* mocks;
 
 static MICROMOCK_MUTEX_HANDLE g_testByTest;
 
-static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
-
 BEGIN_TEST_SUITE(JSONEncoder_ut)
 
         TEST_SUITE_INITIALIZE(TestClassInitialize)
         {
-            TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
-
             g_testByTest = MicroMockCreateMutex();
             ASSERT_IS_NOT_NULL(g_testByTest);
             mocks = new CJSONMocks();
@@ -618,8 +614,6 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         {
             delete mocks;
             MicroMockDestroyMutex(g_testByTest);
-            TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
-
         }
 
         /* JSONEncoder_EncodeTree */
