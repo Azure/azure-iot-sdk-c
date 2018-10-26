@@ -1092,7 +1092,15 @@ PROV_DEVICE_RESULT Prov_Device_LL_SetOption(PROV_DEVICE_LL_HANDLE handle, const 
         }
         else
         {
-            result = PROV_DEVICE_RESULT_OK;
+            if (handle->prov_transport_protocol->prov_transport_set_option(handle->transport_handle, option_name, value) != 0)
+            {
+                LogError("Failure in prov transport set option\n");
+                result = PROV_DEVICE_RESULT_ERROR;
+            }
+            else
+            {
+                result = PROV_DEVICE_RESULT_OK;
+            }
         }
     }
     return result;

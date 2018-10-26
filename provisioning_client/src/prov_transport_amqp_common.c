@@ -644,45 +644,68 @@ static int create_receiver_link(PROV_TRANSPORT_AMQP_INFO* amqp_info)
     return result;
 }
 
-static int create_amqp_connection(PROV_TRANSPORT_AMQP_INFO* amqp_info)
+static int create_transport_io_object(PROV_TRANSPORT_AMQP_INFO* amqp_info)
 {
     int result;
-    HTTP_PROXY_OPTIONS* transport_proxy;
-    PROV_TRANSPORT_IO_INFO* transport_io;
-    SASL_MECHANISM_HANDLE* sasl_mechanism = NULL;
-
-    if (amqp_info->proxy_option.host_address != NULL)
+    if (amqp_info->underlying_io == NULL)
     {
-        transport_proxy = &amqp_info->proxy_option;
+        HTTP_PROXY_OPTIONS* transport_proxy;
+        SASL_MECHANISM_HANDLE* sasl_mechanism = NULL;
+        PROV_TRANSPORT_IO_INFO* trans_info;
+
+        // Set the proxy options if neccessary
+        if (amqp_info->proxy_option.host_address != NULL)
+        {
+            transport_proxy = &amqp_info->proxy_option;
+        }
+        else
+        {
+            transport_proxy = NULL;
+        }
+
+        if (amqp_info->hsm_type == TRANSPORT_HSM_TYPE_TPM)
+        {
+            sasl_mechanism = &amqp_info->sasl_handler;
+        }
+
+        if ((trans_info = amqp_info->transport_io_cb(amqp_info->hostname, sasl_mechanism, transport_proxy)) == NULL)
+        {
+            LogError("Failure calling transport_io callback");
+            result = __FAILURE__;
+        }
+        else
+        {
+            if (trans_info->sasl_handle == NULL)
+            {
+                amqp_info->underlying_io = trans_info->transport_handle;
+            }
+            else
+            {
+                amqp_info->transport_io = trans_info->transport_handle;
+                amqp_info->underlying_io = trans_info->sasl_handle;
+            }
+            free(trans_info);
+            result = 0;
+        }
     }
     else
     {
-        transport_proxy = NULL;
+        result = 0;
     }
+    return result;
+}
 
-    if (amqp_info->hsm_type == TRANSPORT_HSM_TYPE_TPM || amqp_info->hsm_type == TRANSPORT_HSM_TYPE_SYMM_KEY)
-    {
-        sasl_mechanism = &amqp_info->sasl_handler;
-    }
+static int create_amqp_connection(PROV_TRANSPORT_AMQP_INFO* amqp_info)
+{
+    int result;
 
-    transport_io = amqp_info->transport_io_cb(amqp_info->hostname, sasl_mechanism, transport_proxy);
-    if (transport_io == NULL)
+    if (create_transport_io_object(amqp_info) != 0)
     {
-        LogError("Failure calling transport_io callback");
+        LogError("Failure setting transport object");
         result = __FAILURE__;
     }
     else
     {
-        if (transport_io->sasl_handle == NULL)
-        {
-            amqp_info->underlying_io = transport_io->transport_handle;
-        }
-        else
-        {
-            amqp_info->transport_io = transport_io->transport_handle;
-            amqp_info->underlying_io = transport_io->sasl_handle;
-        }
-
         if (amqp_info->hsm_type == TRANSPORT_HSM_TYPE_X509)
         {
             if (amqp_info->x509_cert != NULL && amqp_info->private_key != NULL)
@@ -745,7 +768,6 @@ static int create_amqp_connection(PROV_TRANSPORT_AMQP_INFO* amqp_info)
                 result = 0;
             }
         }
-        free(transport_io);
     }
     return result;
 }
@@ -946,6 +968,14 @@ void cleanup_amqp_data(PROV_TRANSPORT_AMQP_INFO* amqp_info)
     free(amqp_info->private_key);
     free(amqp_info->sas_token);
     free(amqp_info->payload_data);
+    if (amqp_info->transport_io != NULL)
+    {
+        xio_destroy(amqp_info->transport_io);
+    }
+    if (amqp_info->underlying_io != NULL)
+    {
+        xio_destroy(amqp_info->underlying_io);
+    }
     free(amqp_info);
 }
 
@@ -1541,6 +1571,30 @@ int prov_transport_common_amqp_set_proxy(PROV_DEVICE_TRANSPORT_HANDLE handle, co
                 /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_040: [ On success prov_transport_common_amqp_set_proxy shall return a zero value. ] */
                 result = 0;
             }
+        }
+    }
+    return result;
+}
+
+int prov_transport_common_amqp_set_option(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* option, const void* value)
+{
+    int result;
+    if (handle == NULL || option == NULL)
+    {
+        LogError("Invalid parameter specified handle: %p, option: %p", handle, option);
+        result = __FAILURE__;
+    }
+    else
+    {
+        PROV_TRANSPORT_AMQP_INFO* amqp_info = (PROV_TRANSPORT_AMQP_INFO*)handle;
+        if (amqp_info->underlying_io == NULL && create_transport_io_object(amqp_info) != 0)
+        {
+            LogError("Failure creating transport io object");
+            result = __FAILURE__;
+        }
+        else
+        {
+            result = xio_setoption(amqp_info->underlying_io, option, value);
         }
     }
     return result;

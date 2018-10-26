@@ -75,7 +75,6 @@ extern "C"
 #define TEST_MQTT_MESSAGE   (MQTT_MESSAGE_HANDLE)0x11111113
 #define TEST_XIO_HANDLE     (XIO_HANDLE)0x11111114
 #define TEST_MESSAGE_HANDLE (MESSAGE_HANDLE)0x11111115
-#define TEST_AMQP_VALUE     (AMQP_VALUE)0x11111116
 #define TEST_DATA_VALUE     (unsigned char*)0x11111117
 #define TEST_DATA_LENGTH    (size_t)128
 #define TEST_BUFFER_HANDLE_VALUE     (BUFFER_HANDLE)0x1111111B
@@ -83,6 +82,7 @@ extern "C"
 #define TEST_UNASSIGNED     (void*)0x11111118
 #define TEST_ASSIGNED       (void*)0x11111119
 #define TEST_ASSIGNING      (void*)0x1111111A
+#define TEST_OPTION_VALUE   (void*)0x1111111B
 
 static const MQTT_CLIENT_HANDLE TEST_MQTT_CLIENT_HANDLE = (MQTT_CLIENT_HANDLE)0x1111111B;
 static const char* TEST_OPERATION_ID_VALUE = "operation_id";
@@ -105,6 +105,7 @@ static const char* TEST_OPERATION_ID = "operation_id";
 static const char* TEST_USERNAME_VALUE = "username";
 static const char* TEST_PASSWORD_VALUE = "password";
 static const char* TEST_JSON_REPLY = "{ json_reply }";
+static const char* TEST_XIO_OPTION_NAME = "test_option";
 
 static ON_MQTT_MESSAGE_RECV_CALLBACK g_on_msg_recv;
 static void* g_msg_recv_callback_context;
@@ -840,7 +841,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
     }
 
     /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_011: [ If handle is NULL, prov_transport_common_mqtt_close shall return a non-zero value. ] */
-    TEST_FUNCTION(prov_transport_amqp_close_handle_NULL)
+    TEST_FUNCTION(prov_transport_mqtt_close_handle_NULL)
     {
         //arrange
 
@@ -856,7 +857,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
 
     /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_012: [ prov_transport_common_mqtt_close shall close all connection associated with mqtt communication. ] */
     /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_013: [ On success prov_transport_common_mqtt_close shall return a zero value. ] */
-    TEST_FUNCTION(prov_transport_amqp_close_succeed)
+    TEST_FUNCTION(prov_transport_mqtt_close_succeed)
     {
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io, on_transport_error, NULL);
         umock_c_reset_all_calls();
@@ -1056,7 +1057,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
             umock_c_negative_tests_fail_call(index);
 
             char tmp_msg[64];
-            sprintf(tmp_msg, "prov_transport_common_amqp_dowork failure in test %zu/%zu", index, count);
+            sprintf(tmp_msg, "prov_transport_common_mqtt_dowork failure in test %zu/%zu", index, count);
 
             //act
             prov_transport_common_mqtt_dowork(handle);
@@ -1911,4 +1912,98 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         //cleanup
         prov_transport_common_mqtt_destroy(handle);
     }
+
+    TEST_FUNCTION(prov_transport_common_mqtt_set_option_handle_NULL_fail)
+    {
+        //arrange
+
+        //act
+        int result = prov_transport_common_mqtt_set_option(NULL, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE);
+
+        //assert
+        ASSERT_ARE_NOT_EQUAL(int, 0, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+    }
+
+    TEST_FUNCTION(prov_transport_common_mqtt_set_option_option_NULL_fail)
+    {
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io, on_transport_error, NULL);
+        umock_c_reset_all_calls();
+
+        //arrange
+
+        //act
+        int result = prov_transport_common_mqtt_set_option(handle, NULL, TEST_OPTION_VALUE);
+
+        //assert
+        ASSERT_ARE_NOT_EQUAL(int, 0, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        prov_transport_common_mqtt_destroy(handle);
+    }
+
+    TEST_FUNCTION(prov_transport_common_mqtt_set_option_succeed)
+    {
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io, on_transport_error, NULL);
+
+        umock_c_reset_all_calls();
+
+        //arrange
+        STRICT_EXPECTED_CALL(on_mqtt_transport_io(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE));
+
+        //act
+        int result = prov_transport_common_mqtt_set_option(handle, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE);
+
+        //assert
+        ASSERT_ARE_EQUAL(int, 0, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        prov_transport_common_mqtt_destroy(handle);
+    }
+
+    TEST_FUNCTION(prov_transport_common_mqtt_set_option_twice_succeed)
+    {
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io, on_transport_error, NULL);
+        int result = prov_transport_common_mqtt_set_option(handle, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE);
+        umock_c_reset_all_calls();
+
+        //arrange
+        STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE));
+
+        //act
+        result = prov_transport_common_mqtt_set_option(handle, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE);
+
+        //assert
+        ASSERT_ARE_EQUAL(int, 0, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        prov_transport_common_mqtt_destroy(handle);
+    }
+
+    TEST_FUNCTION(prov_transport_common_mqtt_set_option_fail)
+    {
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io, on_transport_error, NULL);
+
+        umock_c_reset_all_calls();
+
+        //arrange
+        STRICT_EXPECTED_CALL(on_mqtt_transport_io(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(NULL);
+
+        //act
+        int result = prov_transport_common_mqtt_set_option(handle, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE);
+
+        //assert
+        ASSERT_ARE_NOT_EQUAL(int, 0, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        prov_transport_common_mqtt_destroy(handle);
+    }
+
     END_TEST_SUITE(prov_transport_mqtt_common_ut)

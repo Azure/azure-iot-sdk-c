@@ -40,6 +40,7 @@ MOCKABLE_FUNCTION(, int, prov_transport_common_amqp_set_trace, PROV_DEVICE_TRANS
 MOCKABLE_FUNCTION(, int, prov_transport_common_amqp_set_proxy, PROV_DEVICE_TRANSPORT_HANDLE, handle, const HTTP_PROXY_OPTIONS*, proxy_options);
 MOCKABLE_FUNCTION(, int, prov_transport_common_amqp_set_trusted_cert, PROV_DEVICE_TRANSPORT_HANDLE, handle, const char*, certificate);
 MOCKABLE_FUNCTION(, int, prov_transport_common_amqp_x509_cert, PROV_DEVICE_TRANSPORT_HANDLE, handle, const char*, certificate, const char*, private_key);
+MOCKABLE_FUNCTION(, int, prov_transport_common_amqp_set_option, PROV_DEVICE_TRANSPORT_HANDLE, handle, const char*, option, const void*, value);
 
 #ifdef __cplusplus
 }
