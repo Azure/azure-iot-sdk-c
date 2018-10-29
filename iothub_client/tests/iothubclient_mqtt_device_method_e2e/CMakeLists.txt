@@ -29,11 +29,14 @@ set(${theseTestsName}_h_files
     ../common_device_method_e2e/iothubclient_common_device_method_e2e.h
 )
 
+if(${use_wolfssl})
+    add_definitions(-DUSE_WOLFSSL)
+endif()
+
 if(${use_sample_trusted_cert})
     add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
     include_directories(../../../certs/)
 endif()
-
 
 include_directories(../common_device_method_e2e)
 include_directories(${IOTHUB_TEST_INC_FOLDER})

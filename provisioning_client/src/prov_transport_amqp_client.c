@@ -173,6 +173,12 @@ static int prov_transport_amqp_set_proxy(PROV_DEVICE_TRANSPORT_HANDLE handle, co
     return prov_transport_common_amqp_set_proxy(handle, proxy_options);
 }
 
+static int prov_transport_amqp_set_option(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* option, const void* value)
+{
+    // needs to invoke correct behavior
+    return prov_transport_common_amqp_set_option(handle, option, value);
+}
+
 static PROV_DEVICE_TRANSPORT_PROVIDER amqp_transport_func =
 {
     prov_transport_amqp_create,
@@ -185,7 +191,8 @@ static PROV_DEVICE_TRANSPORT_PROVIDER amqp_transport_func =
     prov_transport_amqp_set_trace,
     prov_transport_amqp_x509_cert,
     prov_transport_amqp_set_trusted_cert,
-    prov_transport_amqp_set_proxy
+    prov_transport_amqp_set_proxy,
+    prov_transport_amqp_set_option
 };
 
 const PROV_DEVICE_TRANSPORT_PROVIDER* Prov_Device_AMQP_Protocol(void)

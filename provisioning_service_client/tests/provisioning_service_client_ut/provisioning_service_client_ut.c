@@ -55,7 +55,6 @@ typedef enum {TRACE, NO_TRACE} trace_flag;
 typedef enum { PROXY, NO_PROXY } proxy_flag;
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 static int g_uhttp_client_dowork_call_count;
 static ON_HTTP_OPEN_COMPLETE_CALLBACK g_on_http_open;
@@ -687,7 +686,6 @@ BEGIN_TEST_SUITE(provisioning_service_client_ut)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -705,7 +703,6 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     umock_c_deinit();
 
     TEST_MUTEX_DESTROY(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)

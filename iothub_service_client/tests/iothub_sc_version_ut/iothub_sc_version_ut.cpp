@@ -8,13 +8,11 @@
 #include "iothub_sc_version.h"
 
 static MICROMOCK_MUTEX_HANDLE g_testByTest;
-static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
 
 BEGIN_TEST_SUITE(iothub_sc_version_ut)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = MicroMockCreateMutex();
     ASSERT_IS_NOT_NULL(g_testByTest);
 }
@@ -22,7 +20,6 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 TEST_SUITE_CLEANUP(TestClassCleanup)
 {
     MicroMockDestroyMutex(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)

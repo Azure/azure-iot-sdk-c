@@ -294,14 +294,11 @@ DECLARE_GLOBAL_MOCK_METHOD_2(CMultiTreeMocks, , int, STRING_concat_with_STRING, 
 DECLARE_GLOBAL_MOCK_METHOD_1(CMultiTreeMocks, , int, STRING_empty, STRING_HANDLE, s1);
 DECLARE_GLOBAL_MOCK_METHOD_1(CMultiTreeMocks, , const char*, STRING_c_str, STRING_HANDLE, s);
 
-static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
 static MICROMOCK_MUTEX_HANDLE g_testByTest;
 BEGIN_TEST_SUITE(MultiTree_ut)
 
 TEST_SUITE_INITIALIZE(BeforeSuite)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
-
     g_testByTest = MicroMockCreateMutex();
     ASSERT_IS_NOT_NULL(g_testByTest);
 }
@@ -309,8 +306,6 @@ TEST_SUITE_INITIALIZE(BeforeSuite)
 TEST_SUITE_CLEANUP(TestClassCleanup)
 {
     MicroMockDestroyMutex(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
-
 }
 
 TEST_FUNCTION_INITIALIZE(init)

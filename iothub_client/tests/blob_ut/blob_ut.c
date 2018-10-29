@@ -111,8 +111,6 @@ static STRING_HANDLE my_Base64_Encode_Bytes(const unsigned char* source, size_t 
 
 TEST_DEFINE_ENUM_TYPE(BLOB_RESULT, BLOB_RESULT_VALUES);
 
-static TEST_MUTEX_HANDLE g_dllByDll;
-
 #define TEST_HTTPCOLONBACKSLASHBACKSLACH "http://"
 #define TEST_HOSTNAME_1 "host.name"
 #define TEST_RELATIVE_PATH_1 "/here/follows/something?param1=value1&param2=value2"
@@ -240,7 +238,6 @@ BEGIN_TEST_SUITE(blob_ut)
 
 TEST_SUITE_INITIALIZE(TestSuiteInitialize)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     (void)umock_c_init(on_umock_c_error);
 
     (void)umocktypes_charptr_register_types();
@@ -295,8 +292,6 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     BUFFER_delete(testValidBufferHandle);
 
     umock_c_deinit();
-
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 static void reset_test_data()

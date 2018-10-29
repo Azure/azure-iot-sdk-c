@@ -359,13 +359,10 @@ DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubSchemaClientMocks, , int, mallocAndStrcpy_s,
 /* Requirements tested by the virtue of using the exposed API:
 Tests_SRS_SCHEMALIB_99_001:[ IotHub_Schema_Client shall expose the following API ... ] */
 
-static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
-
 BEGIN_TEST_SUITE(serializer_ut_without_init)
 
         TEST_SUITE_INITIALIZE(TestClassInitialize)
         {
-            TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
             g_testByTest = MicroMockCreateMutex();
             ASSERT_IS_NOT_NULL(g_testByTest);
         }
@@ -373,7 +370,6 @@ BEGIN_TEST_SUITE(serializer_ut_without_init)
         TEST_SUITE_CLEANUP(TestClassCleanup)
         {
             MicroMockDestroyMutex(g_testByTest);
-            TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
         }
 
         TEST_FUNCTION_INITIALIZE(TestMethodInitialize)

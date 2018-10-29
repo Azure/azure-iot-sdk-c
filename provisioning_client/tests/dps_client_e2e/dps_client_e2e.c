@@ -33,8 +33,6 @@
 #include "prov_service_client/provisioning_service_client.h"
 #include "prov_service_client/provisioning_sc_enrollment.h"
 
-static TEST_MUTEX_HANDLE g_dllByDll;
-
 typedef enum REGISTRATION_RESULT_TAG
 {
     REG_RESULT_BEGIN,
@@ -252,8 +250,6 @@ BEGIN_TEST_SUITE(dps_client_e2e)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
-        TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
-
         platform_init();
 
         prov_dev_security_init(SECURE_DEVICE_TYPE_TPM);
@@ -276,8 +272,6 @@ BEGIN_TEST_SUITE(dps_client_e2e)
 
         prov_dev_security_deinit();
         platform_deinit();
-
-        TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
     }
 
     TEST_FUNCTION_INITIALIZE(method_init)

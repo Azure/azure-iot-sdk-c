@@ -64,7 +64,6 @@ MOCKABLE_FUNCTION(, void, TEST_FUNC_IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK, v
 
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 static STRING_HANDLE TEST_STRING_HANDLE = (STRING_HANDLE)0x4242;
 #define TEST_ASYNC_HANDLE           (ASYNC_OPERATION_HANDLE)0x4246
@@ -416,7 +415,6 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
     {
         size_t type_size;
 
-        TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
         g_testByTest = TEST_MUTEX_CREATE();
         ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -655,7 +653,6 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
     {
         umock_c_deinit();
         TEST_MUTEX_DESTROY(g_testByTest);
-        TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
     }
 
     TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
