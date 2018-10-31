@@ -95,6 +95,7 @@ extern "C"
 #define TEST_UNASSIGNED     (void*)0x11111118
 #define TEST_ASSIGNED       (void*)0x11111119
 #define TEST_ASSIGNING      (void*)0x1111111A
+#define TEST_OPTION_VALUE   (void*)0x1111111B
 
 static const char* TEST_OPERATION_ID_VALUE = "operation_id";
 static char* TEST_STRING_VALUE = "Test_String_Value";
@@ -116,6 +117,7 @@ static const char* TEST_OPERATION_ID = "operation_id";
 static const char* TEST_USERNAME_VALUE = "username";
 static const char* TEST_PASSWORD_VALUE = "password";
 static const char* TEST_JSON_REPLY = "{ json_reply }";
+static const char* TEST_XIO_OPTION_NAME = "test_option";
 
 static ON_MESSAGE_RECEIVER_STATE_CHANGED g_msg_rcvr_state_changed;
 static void* g_msg_rcvr_state_changed_ctx;
@@ -721,6 +723,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     static void setup_create_amqp_connection_mocks(bool use_x509)
     {
         STRICT_EXPECTED_CALL(on_transport_io(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
         if (use_x509)
         {
             STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
@@ -728,7 +731,6 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         }
         STRICT_EXPECTED_CALL(connection_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(connection_set_trace(IGNORED_PTR_ARG, false));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     }
 
     static void setup_create_connection_mocks(bool use_x509)
@@ -2287,6 +2289,100 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
 
         //assert
         ASSERT_ARE_EQUAL(int, 0, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        prov_transport_common_amqp_destroy(handle);
+    }
+
+    TEST_FUNCTION(prov_transport_common_amqp_set_option_handle_NULL_fail)
+    {
+        //arrange
+
+        //act
+        int result = prov_transport_common_amqp_set_option(NULL, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE);
+
+        //assert
+        ASSERT_ARE_NOT_EQUAL(int, 0, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+    }
+
+    TEST_FUNCTION(prov_transport_common_amqp_set_option_option_NULL_fail)
+    {
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io, on_transport_error, NULL);
+        umock_c_reset_all_calls();
+
+        //arrange
+
+        //act
+        int result = prov_transport_common_amqp_set_option(handle, NULL, TEST_OPTION_VALUE);
+
+        //assert
+        ASSERT_ARE_NOT_EQUAL(int, 0, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        prov_transport_common_amqp_destroy(handle);
+    }
+
+    TEST_FUNCTION(prov_transport_common_amqp_set_option_succeed)
+    {
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io, on_transport_error, NULL);
+
+        umock_c_reset_all_calls();
+
+        //arrange
+        STRICT_EXPECTED_CALL(on_transport_io(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE));
+
+        //act
+        int result = prov_transport_common_amqp_set_option(handle, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE);
+
+        //assert
+        ASSERT_ARE_EQUAL(int, 0, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        prov_transport_common_amqp_destroy(handle);
+    }
+
+    TEST_FUNCTION(prov_transport_common_amqp_set_option_twice_succeed)
+    {
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io, on_transport_error, NULL);
+        int result = prov_transport_common_amqp_set_option(handle, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE);
+        umock_c_reset_all_calls();
+
+        //arrange
+        STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE));
+
+        //act
+        result = prov_transport_common_amqp_set_option(handle, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE);
+
+        //assert
+        ASSERT_ARE_EQUAL(int, 0, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        prov_transport_common_amqp_destroy(handle);
+    }
+
+    TEST_FUNCTION(prov_transport_common_amqp_set_option_fail)
+    {
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io, on_transport_error, NULL);
+
+        umock_c_reset_all_calls();
+
+        //arrange
+        STRICT_EXPECTED_CALL(on_transport_io(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(NULL);
+
+        //act
+        int result = prov_transport_common_amqp_set_option(handle, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE);
+
+        //assert
+        ASSERT_ARE_NOT_EQUAL(int, 0, result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
