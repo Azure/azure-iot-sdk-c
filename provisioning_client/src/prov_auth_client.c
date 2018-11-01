@@ -146,7 +146,7 @@ static int sign_sas_data(PROV_AUTH_INFO* auth_info, const char* payload, unsigne
 {
     int result;
     size_t payload_len = strlen(payload);
-    if (auth_info->sec_type == SECURE_DEVICE_TYPE_TPM)
+    if (auth_info->sec_type == PROV_AUTH_TYPE_TPM)
     {
         if (auth_info->hsm_client_sign_data(auth_info->hsm_client_handle, (const unsigned char*)payload, strlen(payload), output, len) != 0)
         {
