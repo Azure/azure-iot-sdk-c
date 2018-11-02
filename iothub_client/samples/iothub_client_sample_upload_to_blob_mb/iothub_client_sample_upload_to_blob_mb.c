@@ -5,9 +5,7 @@
 // Checking of return codes and error values shall be omitted for brevity.  Please practice sound engineering practices
 // when writing production code.
 
-#ifdef DONT_USE_UPLOADTOBLOB
-#error "trying to compile iothub_client_sample_upload_to_blob_mb.c while DONT_USE_UPLOADTOBLOB is #define'd"
-#else
+#ifndef DONT_USE_UPLOADTOBLOB
 
 #include <stdio.h>
 #include <stdlib.h>
