@@ -1080,7 +1080,7 @@ void device_do_work(AMQP_DEVICE_HANDLE handle)
                 // Codes_SRS_DEVICE_09_133: [If TWIN messenger state is not TWIN_MESSENGER_STATE_STARTED, the device state shall be updated to DEVICE_STATE_ERROR_MSG]
                 if (instance->twin_msgr_state != TWIN_MESSENGER_STATE_STARTED)
                 {
-                    LogError("Device '%s' is started but TWIN messenger reported unexpected state %d", instance->config->device_id, instance->msgr_state);
+                    LogError("Device '%s' is started but TWIN messenger reported unexpected state %d", instance->config->device_id, instance->twin_msgr_state);
                     update_state(instance, DEVICE_STATE_ERROR_MSG);
                 }
             }
