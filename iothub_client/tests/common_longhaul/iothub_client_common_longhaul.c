@@ -19,7 +19,7 @@
 #include "iothub_messaging.h"
 #include "iothub_devicemethod.h"
 #include "iothub_devicetwin.h"
-#include "iothubtransport_amqp_messenger.h"
+#include "internal/iothubtransport_amqp_messenger.h"
 #include "iothubtest.h"
 #include "parson.h"
 
