@@ -10,7 +10,7 @@
 #include "iothub_client_core.h"
 #include "internal/iothub_client_private.h"
 #include "internal/iothub_transport_ll_private.h"
-#include "iothub_client_authorization.h"
+#include "internal/iothub_client_authorization.h"
 
 #ifndef IOTHUB_CLIENT_CORE_INSTANCE_TYPE
 typedef struct IOTHUB_CLIENT_CORE_INSTANCE_TAG* IOTHUB_CLIENT_CORE_HANDLE;
