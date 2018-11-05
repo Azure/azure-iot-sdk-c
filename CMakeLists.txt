@@ -79,7 +79,7 @@ option(use_custom_heap "use externally defined heap functions instead of the mal
 option(use_control_flow_guard "use Control Flow Guard to combat memory corruption vulnerabilities" ON)
 option(use_qspectre "use QSpectre compiler option in Visual Studio 2017 to mitigate certain spectre vulnerabilities" ON)
 
-if (MSVC AND MSVC_VERSION GREATER_EQUAL 1900)
+if (MSVC AND  NOT MSVC_VERSION LESS 1900)
     if (${use_control_flow_guard}) 
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /guard:cf")
     endif()
