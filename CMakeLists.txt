@@ -82,6 +82,7 @@ option(use_qspectre "use QSpectre compiler option in Visual Studio 2017 to mitig
 if (MSVC AND  NOT MSVC_VERSION LESS 1900)
     if (${use_control_flow_guard}) 
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /guard:cf")
+        SET(CMAKE_EXE_LINKER_FLAGS  "/guard:cf /DYNAMICBASE")
     endif()
     if (${use_qspectre})
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /Qspectre")
