@@ -76,6 +76,17 @@ option(use_prov_client "Enable provisioning client" OFF)
 option(use_tpm_simulator "tpm simulator type of hsm used with the provisioning client" OFF)
 option(use_edge_modules "Enable support for running modules against Azure IoT Edge" OFF)
 option(use_custom_heap "use externally defined heap functions instead of the malloc family" OFF)
+option(use_control_flow_guard "use Control Flow Guard to combat memory corruption vulnerabilities" ON)
+option(use_qspectre "use QSpectre compiler option in Visual Studio 2017 to mitigate certain spectre vulnerabilities" ON)
+
+if (MSVC AND MSVC_VERSION GREATER_EQUAL 1900)
+    if (${use_control_flow_guard}) 
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /guard:cf")
+    endif()
+    if (${use_qspectre})
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /Qspectre")
+    endif()
+endif()
 
 set(use_prov_client_core OFF)
 
