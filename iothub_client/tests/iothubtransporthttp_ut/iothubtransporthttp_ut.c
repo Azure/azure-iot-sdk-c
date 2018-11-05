@@ -51,7 +51,7 @@ static void my_gballoc_free(void* ptr)
 #include "iothub_client_version.h"
 #include "internal/iothub_client_private.h"
 #include "iothub_client_core_common.h"
-#include "iothubtransport.h"
+#include "internal/iothubtransport.h"
 
 #include "internal/iothub_transport_ll_private.h"
 
@@ -13828,8 +13828,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetMessageId_FAILED)
 }
 #endif
 
-// Tests_SRS_TRANSPORTMULTITHTTP_09_003: [ The HTTP header value of `ContentType` shall be set in the `IoTHubMessage_SetContentTypeSystemProperty`.  ]  
-// Tests_SRS_TRANSPORTMULTITHTTP_09_004: [ The HTTP header value of `ContentEncoding` shall be set in the `IoTHub_SetContentEncoding`.  ]  
+// Tests_SRS_TRANSPORTMULTITHTTP_09_003: [ The HTTP header value of `ContentType` shall be set in the `IoTHubMessage_SetContentTypeSystemProperty`.ï¿½ ]ï¿½ï¿½
+// Tests_SRS_TRANSPORTMULTITHTTP_09_004: [ The HTTP header value of `ContentEncoding` shall be set in the `IoTHub_SetContentEncoding`.ï¿½ ]ï¿½ï¿½
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetCustomContentType_SetContentEncoding_SUCCEED)
 {
     //arrange

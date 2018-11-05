@@ -17,7 +17,7 @@
 #include "parson.h"
 
 #include "internal/iothub_client_private.h"
-#include "iothub_client_authorization.h"
+#include "internal/iothub_client_authorization.h"
 #include "iothub_client_core_common.h"
 #include "iothub_client_version.h"
 #include "internal/iothub_client_edge.h"
