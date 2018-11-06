@@ -12,7 +12,7 @@
 #include "iothub_client_options.h"
 #include "iothub_message.h"
 #include "iothubtransporthttp.h"
-#include "iothubtransport.h"
+#include "internal/iothubtransport.h"
 #include "iothub_messaging.h"
 
 #include "iothub_account.h"
