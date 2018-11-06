@@ -100,6 +100,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, my_mallocAndStrcpy_s);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, __LINE__);
 
+    REGISTER_GLOBAL_MOCK_RETURN(iothub_security_init, 0);
     REGISTER_GLOBAL_MOCK_RETURN(iothub_security_type, IOTHUB_SECURITY_TYPE_UNKNOWN);
     REGISTER_GLOBAL_MOCK_RETURN(iothub_security_set_symmetric_key_info, 0);
 }
@@ -517,11 +518,14 @@ TEST_FUNCTION(prov_dev_security_init_http_edge_types_fail)
 
 TEST_FUNCTION(prov_dev_security_deinit_http_edge_success)
 {
+    STRICT_EXPECTED_CALL(iothub_security_type()).SetReturn(IOTHUB_SECURITY_TYPE_HTTP_EDGE);
     (void)prov_dev_security_init(SECURE_DEVICE_TYPE_HTTP_EDGE);
     umock_c_reset_all_calls();
 
     //arrange
     STRICT_EXPECTED_CALL(deinitialize_hsm_system());
+    STRICT_EXPECTED_CALL(iothub_security_get_symmetric_key()).SetReturn(NULL);
+    STRICT_EXPECTED_CALL(iothub_security_get_symm_registration_name()).SetReturn(NULL);
 
     //act
     prov_dev_security_deinit();

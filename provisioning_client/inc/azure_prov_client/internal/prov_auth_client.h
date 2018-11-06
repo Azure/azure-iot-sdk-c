@@ -15,7 +15,6 @@ extern "C" {
 
 #include "azure_c_shared_utility/umock_c_prod.h"
 #include "azure_c_shared_utility/macro_utils.h"
-#include "azure_c_shared_utility/buffer_.h"
 
 typedef struct PROV_AUTH_INFO_TAG* PROV_AUTH_HANDLE;
 
