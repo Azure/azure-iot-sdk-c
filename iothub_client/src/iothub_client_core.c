@@ -495,6 +495,14 @@ static void iothub_ll_device_twin_callback(DEVICE_TWIN_UPDATE_STATE update_state
     }
 }
 
+
+/*
+name: dispatch_user_callbacks
+inputs: IOTHUB_CLIENT_CORE_INSTANCE*, VECTOR BUFFER_HANDLE
+outputs: void
+description: 
+*/
+
 static void dispatch_user_callbacks(IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientInstance, VECTOR_HANDLE call_backs)
 {
     size_t callbacks_length = VECTOR_size(call_backs);
