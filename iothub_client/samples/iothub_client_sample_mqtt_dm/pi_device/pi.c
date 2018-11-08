@@ -275,12 +275,12 @@ bool device_run_service(void)
 {
     int  pid, sid;
     bool retValue;
-        
+
     /* Fork off the parent process */
     pid = fork();
     if (pid < 0)
     {
-        LogError("failed to fork from parent process: %p\n", pid);
+        LogError("failed to fork from parent process: %d\n", pid);
         retValue = false;
     }
     else
@@ -294,7 +294,7 @@ bool device_run_service(void)
         {
             /* child process segment */
             /* Change the file mode mask */
-            umask(0);       
+            umask(0);
 
             /* Create a new SID for the child process */
             sid = setuid(0);

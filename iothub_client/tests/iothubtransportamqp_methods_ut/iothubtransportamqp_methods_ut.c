@@ -24,7 +24,6 @@
 #endif
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 #ifdef __cplusplus
 extern "C"
@@ -307,7 +306,6 @@ TEST_SUITE_INITIALIZE(suite_init)
     int result;
     size_t type_size;
 
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -350,7 +348,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(messagesender_send_async, my_messagesender_send_async);
     REGISTER_GLOBAL_MOCK_HOOK(messagesender_create, my_messagesender_create);
     REGISTER_GLOBAL_MOCK_HOOK(messagereceiver_create, my_messagereceiver_create);
-    
+
     REGISTER_UMOCK_ALIAS_TYPE(MESSAGE_RECEIVER_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(MESSAGE_SENDER_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(LINK_HANDLE, void*);
@@ -374,7 +372,6 @@ TEST_SUITE_CLEANUP(suite_cleanup)
     umock_c_deinit();
 
     TEST_MUTEX_DESTROY(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 static void reset_test_data()
@@ -421,7 +418,7 @@ static void setup_subscribe_expected_calls(bool testing_modules)
         requests_link = "methods_requests_link-testdevice";
         correlation_id = "testdevice";
     }
-    
+
     STRICT_EXPECTED_CALL(STRING_c_str(TEST_STRING_HANDLE))
         .SetReturn(device_bound_methods);
     STRICT_EXPECTED_CALL(messaging_create_source(device_bound_methods))
@@ -1359,7 +1356,7 @@ TEST_FUNCTION(when_a_failure_occurs_iothubtransportamqp_methods_subscribe_fails)
             result = iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
 
             ///assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, temp_str);
+            ASSERT_ARE_NOT_EQUAL(int, 0, result, temp_str);
         }
     }
 
@@ -2462,7 +2459,7 @@ TEST_FUNCTION(when_a_failure_occurs_iothubtransportamqp_methods_respond_fails)
         result = iothubtransportamqp_methods_respond(g_method_handle, response_payload, sizeof(response_payload), 100);
 
         /// assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, temp_str);
+        ASSERT_ARE_NOT_EQUAL(int, 0, result, temp_str);
     }
 
     ///cleanup
@@ -2932,7 +2929,7 @@ TEST_FUNCTION(when_an_error_is_indicated_in_the_send_complete_callback_an_error_
     STRICT_EXPECTED_CALL(test_on_methods_error((void*)0x4242));
 
     /// act
-    g_on_message_send_complete(g_on_message_send_complete_context, MESSAGE_SEND_ERROR);
+    g_on_message_send_complete(g_on_message_send_complete_context, MESSAGE_SEND_ERROR, TEST_DELIVERY_RELEASED);
 
     /// assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -2960,7 +2957,7 @@ TEST_FUNCTION(when_no_error_is_indicated_in_the_send_complete_callback_no_error_
     umock_c_reset_all_calls();
 
     /// act
-    g_on_message_send_complete(g_on_message_send_complete_context, MESSAGE_SEND_OK);
+    g_on_message_send_complete(g_on_message_send_complete_context, MESSAGE_SEND_OK, TEST_DELIVERY_ACCEPTED);
 
     /// assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());

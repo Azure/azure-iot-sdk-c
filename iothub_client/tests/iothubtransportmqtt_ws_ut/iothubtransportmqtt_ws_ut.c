@@ -54,13 +54,14 @@ static const char* TEST_PROTOCOL_GATEWAY_HOSTNAME_NON_NULL = "ssl://thisIsAGatew
 static const char* TEST_OPTION_NAME = "TEST_OPTION_NAME";
 static const char* TEST_OPTION_VALUE = "test_option_value";
 
-static const IOTHUB_CLIENT_CORE_LL_HANDLE TEST_IOTHUB_CLIENT_CORE_LL_HANDLE = (IOTHUB_CLIENT_CORE_LL_HANDLE)0x4343;
 static const TRANSPORT_LL_HANDLE TEST_TRANSPORT_HANDLE = (TRANSPORT_LL_HANDLE)0x4444;
 static XIO_HANDLE TEST_XIO_HANDLE = (XIO_HANDLE)0x1126;
 static IOTHUB_DEVICE_HANDLE TEST_DEVICE_HANDLE = (IOTHUB_DEVICE_HANDLE)0x1181;
 static IO_INTERFACE_DESCRIPTION* TEST_WSIO_INTERFACE_DESCRIPTION = (IO_INTERFACE_DESCRIPTION*)0x1182;
 static IO_INTERFACE_DESCRIPTION* TEST_TLSIO_INTERFACE_DESCRIPTION = (IO_INTERFACE_DESCRIPTION*)0x1183;
 static IO_INTERFACE_DESCRIPTION* TEST_HTTP_PROXY_IO_INTERFACE_DESCRIPTION = (IO_INTERFACE_DESCRIPTION*)0x1185;
+
+static TRANSPORT_CALLBACKS_INFO* transport_cb_info = (TRANSPORT_CALLBACKS_INFO*)0x227733;
 
 static IOTHUB_CLIENT_CONFIG g_iothubClientConfig = { 0 };
 static DLIST_ENTRY g_waitingToSend;
@@ -77,7 +78,6 @@ TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RETRY_POLICY, IOTHUB_CLIENT_RETRY_POLICY_VAL
 IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_CLIENT_RETRY_POLICY, IOTHUB_CLIENT_RETRY_POLICY_VALUES);
 
 static TEST_MUTEX_HANDLE test_serialize_mutex;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 #define TEST_RETRY_POLICY IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER
 #define TEST_RETRY_TIMEOUT_SECS 60
@@ -566,10 +566,13 @@ static pfIoTHubTransport_Unsubscribe_DeviceTwin     IoTHubTransportMqtt_WS_Unsub
 static pfIoTHubTransport_Subscribe_DeviceMethod     IoTHubTransportMqtt_WS_Subscribe_DeviceMethod;
 static pfIoTHubTransport_Unsubscribe_DeviceMethod   IoTHubTransportMqtt_WS_Unsubscribe_DeviceMethod;
 static pfIoTHubTransport_ProcessItem                IoTHubTransportMqtt_WS_ProcessItem;
+static pfIoTHubTransport_SetCallbackContext         IotHubTransportMqtt_WS_SetCallbackContext;
 
-static TRANSPORT_LL_HANDLE my_IoTHubTransport_MQTT_Common_Create(const IOTHUBTRANSPORT_CONFIG* config, MQTT_GET_IO_TRANSPORT get_io_transport)
+static TRANSPORT_LL_HANDLE my_IoTHubTransport_MQTT_Common_Create(const IOTHUBTRANSPORT_CONFIG* config, MQTT_GET_IO_TRANSPORT get_io_transport, TRANSPORT_CALLBACKS_INFO* cb_info, void* ctx)
 {
     (void)config;
+    (void)cb_info;
+    (void)ctx;
     g_get_io_transport = get_io_transport;
     return TEST_TRANSPORT_HANDLE;
 }
@@ -587,8 +590,6 @@ BEGIN_TEST_SUITE(iothubtransportmqtt_ws_ut)
 TEST_SUITE_INITIALIZE(suite_init)
 {
     //int result;
-
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
 
     test_serialize_mutex = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(test_serialize_mutex);
@@ -653,13 +654,13 @@ TEST_SUITE_INITIALIZE(suite_init)
     IoTHubTransportMqtt_WS_Subscribe_DeviceMethod = ((TRANSPORT_PROVIDER*)MQTT_WebSocket_Protocol())->IoTHubTransport_Subscribe_DeviceMethod;
     IoTHubTransportMqtt_WS_Unsubscribe_DeviceMethod = ((TRANSPORT_PROVIDER*)MQTT_WebSocket_Protocol())->IoTHubTransport_Unsubscribe_DeviceMethod;
     IoTHubTransportMqtt_WS_ProcessItem = ((TRANSPORT_PROVIDER*)MQTT_WebSocket_Protocol())->IoTHubTransport_ProcessItem;
+    IotHubTransportMqtt_WS_SetCallbackContext = ((TRANSPORT_PROVIDER*)MQTT_WebSocket_Protocol())->IoTHubTransport_SetCallbackContext;
 }
 
 TEST_SUITE_CLEANUP(suite_cleanup)
 {
     umock_c_deinit();
     TEST_MUTEX_DESTROY(test_serialize_mutex);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 static void reset_test_data()
@@ -673,7 +674,7 @@ TEST_FUNCTION_INITIALIZE(method_init)
 {
     TEST_MUTEX_ACQUIRE(test_serialize_mutex);
 
-    
+
     reset_test_data();
     umock_c_reset_all_calls();
 }
@@ -706,9 +707,9 @@ TEST_FUNCTION(IoTHubTransportMqtt_WS_Create_success)
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
 
     // act
-    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_Create(&config, IGNORED_PTR_ARG)).IgnoreArgument_get_io_transport();
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_Create(&config, IGNORED_PTR_ARG, transport_cb_info, NULL));
 
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_WS_Create(&config);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_WS_Create(&config, transport_cb_info, NULL);
 
     // assert
     ASSERT_IS_NOT_NULL(handle);
@@ -740,7 +741,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_WS_getWebSocketsIOTransport_with_NULL_uses_a_s
     WSIO_CONFIG wsio_config;
     TLSIO_CONFIG tlsio_config;
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
-    (void)IoTHubTransportMqtt_WS_Create(&config);
+    (void)IoTHubTransportMqtt_WS_Create(&config, transport_cb_info, NULL);
     umock_c_reset_all_calls();
 
     tlsio_config.hostname = TEST_STRING_VALUE;
@@ -787,7 +788,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_WS_getWebSocketsIOTransport_with_proxy_setting
     HTTP_PROXY_IO_CONFIG http_proxy_io_config;
     XIO_HANDLE xioTest;
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
-    (void)IoTHubTransportMqtt_WS_Create(&config);
+    (void)IoTHubTransportMqtt_WS_Create(&config, transport_cb_info, NULL);
     umock_c_reset_all_calls();
 
     http_proxy_io_config.hostname = TEST_STRING_VALUE;
@@ -841,7 +842,7 @@ TEST_FUNCTION(when_socket_io_interface_is_NULL_getWebSocketsIOTransport_with_pro
     HTTP_PROXY_IO_CONFIG http_proxy_io_config;
     XIO_HANDLE xioTest;
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
-    (void)IoTHubTransportMqtt_WS_Create(&config);
+    (void)IoTHubTransportMqtt_WS_Create(&config, transport_cb_info, NULL);
     umock_c_reset_all_calls();
 
     http_proxy_io_config.hostname = TEST_STRING_VALUE;
@@ -894,7 +895,7 @@ TEST_FUNCTION(when_tlsio_interface_is_NULL_getWebSocketsIOTransport_with_proxy_s
     WSIO_CONFIG wsio_config;
     XIO_HANDLE xioTest;
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
-    (void)IoTHubTransportMqtt_WS_Create(&config);
+    (void)IoTHubTransportMqtt_WS_Create(&config, transport_cb_info, NULL);
     umock_c_reset_all_calls();
 
     wsio_config.hostname = TEST_STRING_VALUE;
@@ -933,7 +934,7 @@ TEST_FUNCTION(when_tlsio_interface_is_NULL_getWebSocketsIOTransport_with_NULL_pr
     WSIO_CONFIG wsio_config;
     XIO_HANDLE xioTest;
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
-    (void)IoTHubTransportMqtt_WS_Create(&config);
+    (void)IoTHubTransportMqtt_WS_Create(&config, transport_cb_info, NULL);
     umock_c_reset_all_calls();
 
     wsio_config.hostname = TEST_STRING_VALUE;
@@ -965,7 +966,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_WS_getWebSocketsIOTransport_wsio_get_interface
     // arrange
     IOTHUBTRANSPORT_CONFIG config = { 0 };
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
-    (void)IoTHubTransportMqtt_WS_Create(&config);
+    (void)IoTHubTransportMqtt_WS_Create(&config, transport_cb_info, NULL);
     umock_c_reset_all_calls();
 
     // act
@@ -987,12 +988,12 @@ TEST_FUNCTION(IoTHubTransportMqtt_WS_Destroy_success)
     // arrange
     IOTHUBTRANSPORT_CONFIG config = { 0 };
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_WS_Create(&config);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_WS_Create(&config, transport_cb_info, NULL);
     umock_c_reset_all_calls();
 
     // act
     STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_Destroy(handle));
-    
+
     IoTHubTransportMqtt_WS_Destroy(handle);
 
     // assert
@@ -1007,7 +1008,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_WS_Subscribe_success)
     // arrange
     IOTHUBTRANSPORT_CONFIG config = { 0 };
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_WS_Create(&config);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_WS_Create(&config, transport_cb_info, NULL);
     umock_c_reset_all_calls();
 
     // act
@@ -1028,7 +1029,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_WS_SetRetryPolicy_success)
     // arrange
     IOTHUBTRANSPORT_CONFIG config = { 0 };
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_WS_Create(&config);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_WS_Create(&config, transport_cb_info, NULL);
     umock_c_reset_all_calls();
 
     // act
@@ -1049,7 +1050,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_WS_Unsubscribe_success)
     // arrange
     IOTHUBTRANSPORT_CONFIG config = { 0 };
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_WS_Create(&config);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_WS_Create(&config, transport_cb_info, NULL);
     umock_c_reset_all_calls();
 
     // act
@@ -1069,13 +1070,13 @@ TEST_FUNCTION(IoTHubTransportMqtt_WS_DoWork_success)
     // arrange
     IOTHUBTRANSPORT_CONFIG config = { 0 };
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_WS_Create(&config);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_WS_Create(&config, transport_cb_info, NULL);
     umock_c_reset_all_calls();
 
     // act
-    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE));
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_DoWork(handle));
 
-    IoTHubTransportMqtt_WS_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportMqtt_WS_DoWork(handle);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -1089,7 +1090,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_WS_GetSendStatus_success)
     // arrange
     IOTHUBTRANSPORT_CONFIG config = { 0 };
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_WS_Create(&config);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_WS_Create(&config, transport_cb_info, NULL);
     umock_c_reset_all_calls();
 
     IOTHUB_CLIENT_STATUS iotHubClientStatus;
@@ -1112,7 +1113,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_WS_SetOption_success)
     // arrange
     IOTHUBTRANSPORT_CONFIG config = { 0 };
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_WS_Create(&config);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_WS_Create(&config, transport_cb_info, NULL);
     umock_c_reset_all_calls();
 
     // act
@@ -1133,7 +1134,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_WS_Register_success)
     // arrange
     IOTHUBTRANSPORT_CONFIG config = { 0 };
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_WS_Create(&config);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_WS_Create(&config, transport_cb_info, NULL);
     umock_c_reset_all_calls();
 
     IOTHUB_DEVICE_CONFIG deviceConfig;
@@ -1142,9 +1143,9 @@ TEST_FUNCTION(IoTHubTransportMqtt_WS_Register_success)
     deviceConfig.deviceSasToken = NULL;
 
     // act
-    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_Register(handle, &deviceConfig, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, config.waitingToSend));
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_Register(handle, &deviceConfig, config.waitingToSend));
 
-    IOTHUB_DEVICE_HANDLE result = IoTHubTransportMqtt_WS_Register(handle, &deviceConfig, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, config.waitingToSend);
+    IOTHUB_DEVICE_HANDLE result = IoTHubTransportMqtt_WS_Register(handle, &deviceConfig, config.waitingToSend);
 
     // assert
     ASSERT_IS_NOT_NULL(result);
@@ -1175,7 +1176,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_WS_GetHostname_success)
     // arrange
     IOTHUBTRANSPORT_CONFIG config = { 0 };
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_WS_Create(&config);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_WS_Create(&config, transport_cb_info, NULL);
     umock_c_reset_all_calls();
 
     // act
@@ -1190,4 +1191,23 @@ TEST_FUNCTION(IoTHubTransportMqtt_WS_GetHostname_success)
     //cleanup
 }
 
+TEST_FUNCTION(IoTHubTransportMqtt_WS_SetCallbackContext_success)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_WS_Create(&config, transport_cb_info, NULL);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_SetCallbackContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+    // act
+    int result = IotHubTransportMqtt_WS_SetCallbackContext(handle, NULL);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, 0, result);
+
+    // cleanup
+}
 END_TEST_SUITE(iothubtransportmqtt_ws_ut)

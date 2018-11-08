@@ -61,7 +61,6 @@ MOCKABLE_FUNCTION(, JSON_Array*, json_object_get_array, const JSON_Object*, obje
 #include "prov_service_client/provisioning_sc_json_const.h"
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
@@ -190,7 +189,6 @@ BEGIN_TEST_SUITE(provisioning_sc_query_ut)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -204,7 +202,6 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     umock_c_deinit();
 
     TEST_MUTEX_DESTROY(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
@@ -351,7 +348,7 @@ TEST_FUNCTION(querySpecification_serializeToJson_error)
         char* json = querySpecification_serializeToJson(&qs);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(json, tmp_msg);
+        ASSERT_IS_NULL(json, tmp_msg);
     }
 
     //cleanup
@@ -444,7 +441,7 @@ TEST_FUNCTION(queryResponse_deserializeFromJson_error_individualEnrollment)
         PROVISIONING_QUERY_RESPONSE* qr = queryResponse_deserializeFromJson(DUMMY_JSON, QUERY_TYPE_INDIVIDUAL_ENROLLMENT);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(qr, tmp_msg);
+        ASSERT_IS_NULL(qr, tmp_msg);
     }
 }
 
@@ -505,7 +502,7 @@ TEST_FUNCTION(queryResponse_deserializeFromJson_error_individualEnrollment_empty
         PROVISIONING_QUERY_RESPONSE* qr = queryResponse_deserializeFromJson(DUMMY_JSON, QUERY_TYPE_INDIVIDUAL_ENROLLMENT);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(qr, tmp_msg);
+        ASSERT_IS_NULL(qr, tmp_msg);
     }
 }
 
@@ -568,7 +565,7 @@ TEST_FUNCTION(queryResponse_deserializeFromJson_error_enrollmentGroup)
         PROVISIONING_QUERY_RESPONSE* qr = queryResponse_deserializeFromJson(DUMMY_JSON, QUERY_TYPE_ENROLLMENT_GROUP);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(qr, tmp_msg);
+        ASSERT_IS_NULL(qr, tmp_msg);
     }
 }
 
@@ -629,7 +626,7 @@ TEST_FUNCTION(queryResponse_deserializeFromJson_error_enrollmentGroup_empty_arr)
         PROVISIONING_QUERY_RESPONSE* qr = queryResponse_deserializeFromJson(DUMMY_JSON, QUERY_TYPE_ENROLLMENT_GROUP);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(qr, tmp_msg);
+        ASSERT_IS_NULL(qr, tmp_msg);
     }
 }
 
@@ -692,7 +689,7 @@ TEST_FUNCTION(queryResponse_deserializeFromJson_error_deviceRegistrationState)
         PROVISIONING_QUERY_RESPONSE* qr = queryResponse_deserializeFromJson(DUMMY_JSON, QUERY_TYPE_DEVICE_REGISTRATION_STATE);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(qr, tmp_msg);
+        ASSERT_IS_NULL(qr, tmp_msg);
     }
 }
 
@@ -753,7 +750,7 @@ TEST_FUNCTION(queryResponse_deserializeFromJson_error_deviceRegistrationState_em
         PROVISIONING_QUERY_RESPONSE* qr = queryResponse_deserializeFromJson(DUMMY_JSON, QUERY_TYPE_DEVICE_REGISTRATION_STATE);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(qr, tmp_msg);
+        ASSERT_IS_NULL(qr, tmp_msg);
     }
 }
 

@@ -1,8 +1,6 @@
 #Copyright (c) Microsoft. All rights reserved.
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#this is CMakeLists.txt for iothub_client_ll_sample_tpm
-
 compileAsC99()
 
 set(prov_dev_client_ll_sample_c_files
@@ -44,22 +42,19 @@ if(${use_openssl})
 endif()
 
 target_link_libraries(prov_dev_client_ll_sample
-    iothub_client 
-    prov_device_ll_client
-    iothub_client_mqtt_transport
-    iothub_client_amqp_transport)
+    iothub_client
+    prov_device_ll_client)
 
 if (${use_http})
     target_link_libraries(prov_dev_client_ll_sample prov_http_transport)
 endif()
 if (${use_mqtt})
-    target_link_libraries(prov_dev_client_ll_sample prov_mqtt_transport prov_mqtt_ws_transport)
+    target_link_libraries(prov_dev_client_ll_sample prov_mqtt_transport prov_mqtt_ws_transport iothub_client_mqtt_transport)
 endif()
 if (${use_amqp})
-    target_link_libraries(prov_dev_client_ll_sample prov_amqp_ws_transport prov_amqp_transport)
+    target_link_libraries(prov_dev_client_ll_sample prov_amqp_ws_transport prov_amqp_transport iothub_client_amqp_transport)
+    linkUAMQP(prov_dev_client_ll_sample)
 endif()
 
 link_security_client(prov_dev_client_ll_sample)
 linkSharedUtil(prov_dev_client_ll_sample)
-linkUAMQP(prov_dev_client_ll_sample)
-

@@ -33,6 +33,13 @@
     fun:EventData_Create
 }
 {
+    Race conflicting store by thread in EventData_Create/sprintf    
+    Helgrind:Race 
+    ...
+    fun:sprintf
+    fun:EventData_Create
+}
+{
    DRD Conflicting store by thread in printf2
    drd:ConflictingAccess
    fun:__GI_mempcpy

@@ -26,16 +26,16 @@ typedef void(*ON_AMQP_CONNECTION_STATE_CHANGED)(const void* context, AMQP_CONNEC
 
 typedef struct AMQP_CONNECTION_CONFIG_TAG
 {
-	const char* iothub_host_fqdn;
-	XIO_HANDLE underlying_io_transport;
-	bool create_sasl_io;
-	bool create_cbs_connection;
-	bool is_trace_on;
-		
-	ON_AMQP_CONNECTION_STATE_CHANGED on_state_changed_callback;
-	const void* on_state_changed_context;
+    const char* iothub_host_fqdn;
+    XIO_HANDLE underlying_io_transport;
+    bool create_sasl_io;
+    bool create_cbs_connection;
+    bool is_trace_on;
+
+    ON_AMQP_CONNECTION_STATE_CHANGED on_state_changed_callback;
+    const void* on_state_changed_context;
     size_t svc2cl_keep_alive_timeout_secs;
-    double cl2svc_keep_alive_send_ratio; 
+    double cl2svc_keep_alive_send_ratio;
 } AMQP_CONNECTION_CONFIG;
 
 typedef struct AMQP_CONNECTION_INSTANCE* AMQP_CONNECTION_HANDLE;
@@ -46,7 +46,7 @@ MOCKABLE_FUNCTION(, void, amqp_connection_do_work, AMQP_CONNECTION_HANDLE, conn_
 MOCKABLE_FUNCTION(, int, amqp_connection_get_session_handle, AMQP_CONNECTION_HANDLE, conn_handle, SESSION_HANDLE*, session_handle);
 MOCKABLE_FUNCTION(, int, amqp_connection_get_cbs_handle, AMQP_CONNECTION_HANDLE, conn_handle, CBS_HANDLE*, cbs_handle);
 MOCKABLE_FUNCTION(, int, amqp_connection_set_logging, AMQP_CONNECTION_HANDLE, conn_handle, bool, is_trace_on);
-	
+
 #ifdef __cplusplus
 }
 #endif

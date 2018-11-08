@@ -45,7 +45,6 @@ static void my_gballoc_free(void* ptr)
 #undef ENABLE_MOCKS
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 static THREAD_START_FUNC g_thread_func;
 static void* g_thread_func_arg;
 
@@ -145,7 +144,6 @@ TEST_SUITE_INITIALIZE(suite_init)
 {
     int result;
 
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -206,7 +204,6 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     (void)Lock_Init();
     umock_c_deinit();
     TEST_MUTEX_DESTROY(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
@@ -342,7 +339,7 @@ TEST_FUNCTION(Prov_Device_Create_fail)
         PROV_DEVICE_HANDLE result = Prov_Device_Create(TEST_PROV_URI, TEST_SCOPE_ID, TEST_PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION);
 
         // assert
-        ASSERT_IS_NULL_WITH_MSG(result, tmp_msg);
+        ASSERT_IS_NULL(result, tmp_msg);
     }
 
     //cleanup
@@ -584,7 +581,7 @@ TEST_FUNCTION(Prov_Device_Register_Device_fail)
         PROV_DEVICE_RESULT result = Prov_Device_Register_Device(prov_device_handle, TEST_PROV_DEVICE_CLIENT_REGISTER_DEVICE_CALLBACK, TEST_USER_CONTEXT, TEST_PROV_DEVICE_CLIENT_REGISTER_STATUS_CALLBACK, TEST_USER_CONTEXT);
 
         // assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(PROV_DEVICE_RESULT, result, PROV_DEVICE_RESULT_OK, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(PROV_DEVICE_RESULT, result, PROV_DEVICE_RESULT_OK, tmp_msg);
     }
 
     //cleanup

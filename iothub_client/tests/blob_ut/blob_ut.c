@@ -111,8 +111,6 @@ static STRING_HANDLE my_Base64_Encode_Bytes(const unsigned char* source, size_t 
 
 TEST_DEFINE_ENUM_TYPE(BLOB_RESULT, BLOB_RESULT_VALUES);
 
-static TEST_MUTEX_HANDLE g_dllByDll;
-
 #define TEST_HTTPCOLONBACKSLASHBACKSLACH "http://"
 #define TEST_HOSTNAME_1 "host.name"
 #define TEST_RELATIVE_PATH_1 "/here/follows/something?param1=value1&param2=value2"
@@ -240,7 +238,6 @@ BEGIN_TEST_SUITE(blob_ut)
 
 TEST_SUITE_INITIALIZE(TestSuiteInitialize)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     (void)umock_c_init(on_umock_c_error);
 
     (void)umocktypes_charptr_register_types();
@@ -273,7 +270,7 @@ TEST_SUITE_INITIALIZE(TestSuiteInitialize)
 
     REGISTER_GLOBAL_MOCK_RETURN(STRING_c_str, "a");
     REGISTER_GLOBAL_MOCK_HOOK(STRING_delete, my_STRING_delete);
-    
+
     REGISTER_UMOCK_ALIAS_TYPE(HTTP_HEADERS_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(HTTPAPIEX_HANDLE, void*);
 
@@ -295,8 +292,6 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     BUFFER_delete(testValidBufferHandle);
 
     umock_c_deinit();
-
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 static void reset_test_data()
@@ -1037,8 +1032,8 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
     };
 
     (void)umock_c_negative_tests_init();
-    
-    
+
+
     umock_c_reset_all_calls();
     ///arrange
     unsigned char * content = (unsigned char*)gballoc_malloc(size);
@@ -1153,7 +1148,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
     {
         size_t j;
         umock_c_negative_tests_reset();
-        
+
         for (j = 0;j<sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]);j++) /*not running the tests that cannot fail*/
         {
             if (calls_that_cannot_fail[j] == i)
@@ -1162,17 +1157,17 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
 
         if (j == sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]))
         {
-            
+
             umock_c_negative_tests_fail_call(i);
             char temp_str[128];
             sprintf(temp_str, "On failed call %zu", i);
-            
+
             ///act
             context.toUpload = context.size; /* Reinit context */
             BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL);
 
             ///assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(BLOB_RESULT, BLOB_OK, result, temp_str);
+            ASSERT_ARE_NOT_EQUAL(BLOB_RESULT, BLOB_OK, result, temp_str);
         }
     }
 
@@ -1180,7 +1175,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
 
     ///cleanup
     gballoc_free(content);
-    
+
 }
 
 /*Tests_SRS_BLOB_02_038: [ If HTTPAPIEX_SetOption fails then Blob_UploadMultipleBlocksFromSasUri shall fail and return BLOB_ERROR. ]*/
@@ -1402,7 +1397,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_with_certificate_unhappy_
             BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, "a", NULL);
 
             ///assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(BLOB_RESULT, BLOB_OK, result, temp_str);
+            ASSERT_ARE_NOT_EQUAL(BLOB_RESULT, BLOB_OK, result, temp_str);
         }
     }
 
@@ -1499,7 +1494,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_when_http_code_is_404_it_immediately_succeed
 
     ///cleanup
     gballoc_free(content);
-    
+
 }
 
 /*Tests_SRS_BLOB_99_001: [ If the size of the block returned by `getDataCallback` is bigger than 4MB, then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_INVALID_ARG`. ]*/

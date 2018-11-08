@@ -14,17 +14,16 @@
 #include "azure_c_shared_utility/envvariable.h"
 
 #include "iothub_client_core_ll.h"
-#include "iothub_client_authorization.h"
+#include "internal/iothub_client_authorization.h"
 #include "iothub_module_client_ll.h"
 #include "iothub_transport_ll.h"
-#include "iothub_client_private.h"
+#include "internal/iothub_client_private.h"
 #include "iothub_client_options.h"
 #include "iothub_client_version.h"
-#include "iothub_client_diagnostic.h"
 #include <stdint.h>
 
 #ifndef DONT_USE_UPLOADTOBLOB
-#include "iothub_client_ll_uploadtoblob.h"
+#include "internal/iothub_client_ll_uploadtoblob.h"
 #endif
 
 #ifdef USE_EDGE_MODULES
@@ -43,7 +42,7 @@ typedef struct IOTHUB_MODULE_CLIENT_LL_HANDLE_DATA_TAG
 IOTHUB_MODULE_CLIENT_LL_HANDLE IoTHubModuleClient_LL_CreateFromConnectionString(const char* connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
     IOTHUB_MODULE_CLIENT_LL_HANDLE_DATA* result;
-    
+
     if ((result = malloc(sizeof(IOTHUB_MODULE_CLIENT_LL_HANDLE_DATA))) == NULL)
     {
         LogError("Failed to allocate module client ll handle");

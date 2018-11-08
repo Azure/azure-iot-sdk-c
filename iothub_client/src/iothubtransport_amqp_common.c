@@ -27,7 +27,6 @@
 #include "azure_uamqp_c/message.h"
 #include "azure_uamqp_c/messaging.h"
 
-#include "iothub_client_core_ll.h"
 #include "iothub_client_options.h"
 #include "internal/iothub_client_private.h"
 #include "internal/iothubtransportamqp_methods.h"
@@ -37,6 +36,8 @@
 #include "internal/iothubtransport_amqp_device.h"
 #include "internal/iothubtransport.h"
 #include "iothub_client_version.h"
+#include "internal/iothub_transport_ll_private.h"
+
 
 #define RESULT_OK                                 0
 #define INDEFINITE_TIME                           ((time_t)(-1))
@@ -65,9 +66,9 @@ typedef enum AMQP_TRANSPORT_AUTHENTICATION_MODE_TAG
 /*
 Definition of transport states:
 
-AMQP_TRANSPORT_STATE_NOT_CONNECTED:                    Initial state when the transport is created. 
+AMQP_TRANSPORT_STATE_NOT_CONNECTED:                    Initial state when the transport is created.
 AMQP_TRANSPORT_STATE_CONNECTING:                       First connection ever.
-AMQP_TRANSPORT_STATE_CONNECTED:                        Transition from AMQP_TRANSPORT_STATE_CONNECTING or AMQP_TRANSPORT_STATE_RECONNECTING. 
+AMQP_TRANSPORT_STATE_CONNECTED:                        Transition from AMQP_TRANSPORT_STATE_CONNECTING or AMQP_TRANSPORT_STATE_RECONNECTING.
 AMQP_TRANSPORT_STATE_RECONNECTION_REQUIRED:            When a failure occurred and the transport identifies a reconnection is needed.
 AMQP_TRANSPORT_STATE_READY_FOR_RECONNECTION:           Transition from AMQP_TRANSPORT_STATE_RECONNECTION_REQUIRED after all prep is done (transient instances are destroyed, devices are stopped).
 AMQP_TRANSPORT_STATE_RECONNECTING:                     Transition from AMQP_TRANSPORT_STATE_READY_FOR_RECONNECTION.
@@ -85,7 +86,7 @@ AMQP_TRANSPORT_STATE_BEING_DESTROYED:                  State set if IoTHubTransp
     AMQP_TRANSPORT_STATE_NOT_CONNECTED_NO_MORE_RETRIES, \
     AMQP_TRANSPORT_STATE_BEING_DESTROYED
 
-// Suppress unused function warning for AMQP_TRANSPORT_STATEstrings 
+// Suppress unused function warning for AMQP_TRANSPORT_STATEstrings
 #ifdef __APPLE__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-function"
@@ -109,13 +110,13 @@ typedef struct AMQP_TRANSPORT_INSTANCE_TAG
     AMQP_TRANSPORT_STATE state;                                         // Current state of the transport.
     RETRY_CONTROL_HANDLE connection_retry_control;                      // Controls when the re-connection attempt should occur.
     size_t svc2cl_keep_alive_timeout_secs;                       // Service to device keep alive frequency
-    double cl2svc_keep_alive_send_ratio;								    // Client to service keep alive frequency
+    double cl2svc_keep_alive_send_ratio;                                    // Client to service keep alive frequency
 
     char* http_proxy_hostname;
     int http_proxy_port;
     char* http_proxy_username;
     char* http_proxy_password;
-    
+
     size_t option_sas_token_lifetime_secs;                              // Device-specific option.
     size_t option_sas_token_refresh_time_secs;                          // Device-specific option.
     size_t option_cbs_request_timeout_secs;                             // Device-specific option.
@@ -123,13 +124,15 @@ typedef struct AMQP_TRANSPORT_INSTANCE_TAG
 
                                                                         // Auth module used to generating handle authorization
     IOTHUB_AUTHORIZATION_HANDLE authorization_module;                   // with either SAS Token, x509 Certs, and Device SAS Token
+
+    TRANSPORT_CALLBACKS_INFO transport_callbacks;
+    void* transport_ctx;
 } AMQP_TRANSPORT_INSTANCE;
 
 typedef struct AMQP_TRANSPORT_DEVICE_INSTANCE_TAG
 {
     STRING_HANDLE device_id;                                            // Identity of the device.
     AMQP_DEVICE_HANDLE device_handle;                                   // Logic unit that performs authentication, messaging, etc.
-    IOTHUB_CLIENT_CORE_LL_HANDLE iothub_client_handle;                  // Saved reference to the IoTHub Core LL Client.
     AMQP_TRANSPORT_INSTANCE* transport_instance;                        // Saved reference to the transport the device is registered on.
     PDLIST_ENTRY waiting_to_send;                                       // List of events waiting to be sent to the iot hub (i.e., haven't been processed by the transport yet).
     DEVICE_STATE device_state;                                          // Current state of the device_handle instance.
@@ -143,6 +146,9 @@ typedef struct AMQP_TRANSPORT_DEVICE_INSTANCE_TAG
     bool subscribe_methods_needed;                                       // Indicates if should subscribe for device methods.
     // is the transport subscribed for methods?
     bool subscribed_for_methods;                                         // Indicates if device is subscribed for device methods.
+
+    TRANSPORT_CALLBACKS_INFO transport_callbacks;
+    void* transport_ctx;
 } AMQP_TRANSPORT_DEVICE_INSTANCE;
 
 typedef struct MESSAGE_DISPOSITION_CONTEXT_TAG
@@ -155,7 +161,8 @@ typedef struct MESSAGE_DISPOSITION_CONTEXT_TAG
 typedef struct AMQP_TRANSPORT_DEVICE_TWIN_CONTEXT_TAG
 {
     uint32_t item_id;
-    IOTHUB_CLIENT_CORE_LL_HANDLE client_handle;
+    TRANSPORT_CALLBACKS_INFO transport_callbacks;
+    void* transport_ctx;
 } AMQP_TRANSPORT_DEVICE_TWIN_CONTEXT;
 
 
@@ -211,7 +218,6 @@ static void reset_retry_control(AMQP_TRANSPORT_DEVICE_INSTANCE* registered_devic
     retry_control_reset(registered_device->transport_instance->connection_retry_control);
 }
 
-
 // ---------- Register/Unregister Helpers ---------- //
 
 static void internal_destroy_amqp_device_instance(AMQP_TRANSPORT_DEVICE_INSTANCE *trdev_inst)
@@ -259,7 +265,7 @@ static void raise_connection_status_callback_retry_expired(const void* item, con
 
     AMQP_TRANSPORT_DEVICE_INSTANCE* registered_device = (AMQP_TRANSPORT_DEVICE_INSTANCE*)item;
 
-    IoTHubClientCore_LL_ConnectionStatusCallBack(registered_device->iothub_client_handle, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED);
+    registered_device->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED, registered_device->transport_ctx);
 
     *continue_processing = true;
 }
@@ -283,7 +289,7 @@ static void on_device_state_changed_callback(void* context, DEVICE_STATE previou
             reset_retry_control(registered_device);
 
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_120: [If `new_state` is DEVICE_STATE_STARTED, IoTHubClientCore_LL_ConnectionStatusCallBack shall be invoked with IOTHUB_CLIENT_CONNECTION_AUTHENTICATED and IOTHUB_CLIENT_CONNECTION_OK]
-            IoTHubClientCore_LL_ConnectionStatusCallBack(registered_device->iothub_client_handle, IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK);
+            registered_device->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK, registered_device->transport_ctx);
         }
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_121: [If `new_state` is DEVICE_STATE_STOPPED, IoTHubClientCore_LL_ConnectionStatusCallBack shall be invoked with IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED and IOTHUB_CLIENT_CONNECTION_OK]
         else if (new_state == DEVICE_STATE_STOPPED)
@@ -291,24 +297,24 @@ static void on_device_state_changed_callback(void* context, DEVICE_STATE previou
             if (registered_device->transport_instance->state == AMQP_TRANSPORT_STATE_CONNECTED ||
                 registered_device->transport_instance->state == AMQP_TRANSPORT_STATE_BEING_DESTROYED)
             {
-                IoTHubClientCore_LL_ConnectionStatusCallBack(registered_device->iothub_client_handle, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK);
+                registered_device->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK, registered_device->transport_ctx);
             }
             else if (registered_device->transport_instance->state == AMQP_TRANSPORT_STATE_RECONNECTION_REQUIRED ||
                 registered_device->transport_instance->state == AMQP_TRANSPORT_STATE_READY_FOR_RECONNECTION ||
                 registered_device->transport_instance->state == AMQP_TRANSPORT_STATE_RECONNECTING)
             {
-                IoTHubClientCore_LL_ConnectionStatusCallBack(registered_device->iothub_client_handle, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_NO_NETWORK);
+                registered_device->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_NO_NETWORK, registered_device->transport_ctx);
             }
         }
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_122: [If `new_state` is DEVICE_STATE_ERROR_AUTH, IoTHubClientCore_LL_ConnectionStatusCallBack shall be invoked with IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED and IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL]
         else if (new_state == DEVICE_STATE_ERROR_AUTH)
         {
-            IoTHubClientCore_LL_ConnectionStatusCallBack(registered_device->iothub_client_handle, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL);
+            registered_device->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL, registered_device->transport_ctx);
         }
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_123: [If `new_state` is DEVICE_STATE_ERROR_AUTH_TIMEOUT or DEVICE_STATE_ERROR_MSG, IoTHubClientCore_LL_ConnectionStatusCallBack shall be invoked with IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED and IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR]
         else if (new_state == DEVICE_STATE_ERROR_AUTH_TIMEOUT || new_state == DEVICE_STATE_ERROR_MSG)
         {
-            IoTHubClientCore_LL_ConnectionStatusCallBack(registered_device->iothub_client_handle, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR);
+            registered_device->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR, registered_device->transport_ctx);
         }
     }
 }
@@ -327,8 +333,8 @@ static bool find_device_by_id_callback(LIST_ITEM_HANDLE list_item, const void* m
     {
         AMQP_TRANSPORT_DEVICE_INSTANCE* device_instance = (AMQP_TRANSPORT_DEVICE_INSTANCE*)singlylinkedlist_item_get_value(list_item);
 
-        if (device_instance == NULL || 
-            device_instance->device_id == NULL || 
+        if (device_instance == NULL ||
+            device_instance->device_id == NULL ||
             STRING_c_str(device_instance->device_id) != match_context)
         {
             result = false;
@@ -469,7 +475,7 @@ static DEVICE_MESSAGE_DISPOSITION_RESULT on_message_received(IOTHUB_MESSAGE_HAND
     else
     {
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_089: [IoTHubClientCore_LL_MessageCallback() shall be invoked passing the client and the incoming message handles as parameters]
-        if (IoTHubClientCore_LL_MessageCallback(amqp_device_instance->iothub_client_handle, message_data) != true)
+        if (amqp_device_instance->transport_callbacks.msg_cb(message_data, amqp_device_instance->transport_ctx) != true)
         {
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_090: [If IoTHubClientCore_LL_MessageCallback() fails, on_message_received_callback shall return DEVICE_MESSAGE_DISPOSITION_RESULT_RELEASED]
             LogError("Failed processing message received (IoTHubClientCore_LL_MessageCallback failed)");
@@ -509,7 +515,7 @@ static int on_method_request_received(void* context, const char* method_name, co
 
     /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_017: [ `on_methods_request_received` shall call the `IoTHubClientCore_LL_DeviceMethodComplete` passing the method name, request buffer and size and the newly created BUFFER handle. ]*/
     /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_022: [ The status code shall be the return value of the call to `IoTHubClientCore_LL_DeviceMethodComplete`. ]*/
-    if (IoTHubClientCore_LL_DeviceMethodComplete(device_state->iothub_client_handle, method_name, request, request_size, (void*)method_handle) != 0)
+    if (device_state->transport_callbacks.method_complete_cb(method_name, request, request_size, (void*)method_handle, device_state->transport_ctx) != 0)
     {
         LogError("Failure: IoTHubClientCore_LL_DeviceMethodComplete");
         result = __FAILURE__;
@@ -569,7 +575,7 @@ static void on_device_send_twin_update_complete_callback(DEVICE_TWIN_UPDATE_RESU
         AMQP_TRANSPORT_DEVICE_TWIN_CONTEXT* dev_twin_ctx = (AMQP_TRANSPORT_DEVICE_TWIN_CONTEXT*)context;
 
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_152: [`IoTHubClientCore_LL_ReportedStateComplete` shall be invoked passing `status_code` and `context` details]
-        IoTHubClientCore_LL_ReportedStateComplete(dev_twin_ctx->client_handle, dev_twin_ctx->item_id, status_code);
+        dev_twin_ctx->transport_callbacks.twin_rpt_state_complete_cb(dev_twin_ctx->item_id, status_code, dev_twin_ctx->transport_ctx);
 
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_153: [The memory allocated for `context` shall be released]
         free(dev_twin_ctx);
@@ -589,10 +595,8 @@ static void on_device_twin_update_received_callback(DEVICE_TWIN_UPDATE_TYPE upda
 
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_138: [If `update_type` is DEVICE_TWIN_UPDATE_TYPE_PARTIAL IoTHubClientCore_LL_RetrievePropertyComplete shall be invoked passing `context` as handle, `DEVICE_TWIN_UPDATE_PARTIAL`, `payload` and `size`.]
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_139: [If `update_type` is DEVICE_TWIN_UPDATE_TYPE_COMPLETE IoTHubClientCore_LL_RetrievePropertyComplete shall be invoked passing `context` as handle, `DEVICE_TWIN_UPDATE_COMPLETE`, `payload` and `size`.]
-        IoTHubClientCore_LL_RetrievePropertyComplete(
-            registered_device->iothub_client_handle, 
-            (update_type == DEVICE_TWIN_UPDATE_TYPE_COMPLETE ? DEVICE_TWIN_UPDATE_COMPLETE : DEVICE_TWIN_UPDATE_PARTIAL), 
-            message, length);
+        registered_device->transport_instance->transport_callbacks.twin_retrieve_prop_complete_cb((update_type == DEVICE_TWIN_UPDATE_TYPE_COMPLETE ? DEVICE_TWIN_UPDATE_COMPLETE : DEVICE_TWIN_UPDATE_PARTIAL),
+                message, length, registered_device->transport_instance->transport_ctx);
     }
 }
 
@@ -602,7 +606,7 @@ static void on_device_twin_update_received_callback(DEVICE_TWIN_UPDATE_TYPE upda
 // @brief
 //     Retrieves the options of the current underlying TLS I/O instance and saves in the transport instance.
 // @remarks
-//     This is used when the new underlying I/O transport (TLS I/O, or WebSockets, etc) needs to be recreated, 
+//     This is used when the new underlying I/O transport (TLS I/O, or WebSockets, etc) needs to be recreated,
 //     and the options previously set must persist.
 //
 //     If no TLS I/O instance was created yet, results in failure.
@@ -668,7 +672,7 @@ static int restore_underlying_io_transport_options(AMQP_TRANSPORT_INSTANCE* tran
     {
         if (OptionHandler_FeedOptions(transport_instance->saved_tls_options, xio_handle) != OPTIONHANDLER_OK)
         {
-            LogError("Failed feeding existing options to new TLS instance."); 
+            LogError("Failed feeding existing options to new TLS instance.");
             result = __FAILURE__;
         }
         else
@@ -723,12 +727,12 @@ static int get_new_underlying_io_transport(AMQP_TRANSPORT_INSTANCE* transport_in
             }
             else
             {
-                result = 0;
+                result = RESULT_OK;
             }
         }
         else
         {
-            result = 0;
+            result = RESULT_OK;
         }
 
         if (restore_underlying_io_transport_options(transport_instance, *xio_handle) != RESULT_OK)
@@ -736,8 +740,6 @@ static int get_new_underlying_io_transport(AMQP_TRANSPORT_INSTANCE* transport_in
             /*pessimistically hope TLS will fail, be recreated and options re-given*/
             LogError("Failed to apply options previous saved to new underlying I/O transport instance.");
         }
-
-        result = RESULT_OK;
     }
 
     return result;
@@ -808,7 +810,7 @@ static int establish_amqp_connection(AMQP_TRANSPORT_INSTANCE* transport_instance
         amqp_connection_config.svc2cl_keep_alive_timeout_secs = transport_instance->svc2cl_keep_alive_timeout_secs;
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_99_001: [AMQP connection will be configured using the `remote_idle_timeout_ratio` value from SetOption ]
         amqp_connection_config.cl2svc_keep_alive_send_ratio = transport_instance->cl2svc_keep_alive_send_ratio;
-        
+
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_027: [If `transport->preferred_authentication_method` is CBS, AMQP_CONNECTION_CONFIG shall be set with `create_sasl_io` = true and `create_cbs_connection` = true]
         if (transport_instance->preferred_authentication_mode == AMQP_TRANSPORT_AUTHENTICATION_MODE_CBS)
         {
@@ -1129,8 +1131,8 @@ static int IoTHubTransport_AMQP_Common_Device_DoWork(AMQP_TRANSPORT_DEVICE_INSTA
         }
         else // i.e., DEVICE_STATE_ERROR_AUTH || DEVICE_STATE_ERROR_AUTH_TIMEOUT || DEVICE_STATE_ERROR_MSG
         {
-            LogError("Failed performing DoWork for device '%s' (device reported state %d; number of previous failures: %d)", 
-                STRING_c_str(registered_device->device_id), registered_device->device_state, registered_device->number_of_previous_failures);
+            LogError("Failed performing DoWork for device '%s' (device reported state %d; number of previous failures: %lu)",
+                STRING_c_str(registered_device->device_id), (int)registered_device->device_state, (unsigned long)registered_device->number_of_previous_failures);
 
             registered_device->number_of_previous_failures++;
 
@@ -1176,7 +1178,7 @@ static int IoTHubTransport_AMQP_Common_Device_DoWork(AMQP_TRANSPORT_DEVICE_INSTA
     }
 
     // No harm in invoking this as API will simply exit if the state is not "started".
-    device_do_work(registered_device->device_handle); 
+    device_do_work(registered_device->device_handle);
 
     return result;
 }
@@ -1386,21 +1388,25 @@ static void destroy_device_message_disposition_info(DEVICE_MESSAGE_DISPOSITION_I
 
 // ---------- API functions ---------- //
 
-TRANSPORT_LL_HANDLE IoTHubTransport_AMQP_Common_Create(const IOTHUBTRANSPORT_CONFIG* config, AMQP_GET_IO_TRANSPORT get_io_transport)
+TRANSPORT_LL_HANDLE IoTHubTransport_AMQP_Common_Create(const IOTHUBTRANSPORT_CONFIG* config, AMQP_GET_IO_TRANSPORT get_io_transport, TRANSPORT_CALLBACKS_INFO* cb_info, void* ctx)
 {
     TRANSPORT_LL_HANDLE result;
 
     // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_001: [If `config` or `config->upperConfig` or `get_io_transport` are NULL then IoTHubTransport_AMQP_Common_Create shall fail and return NULL.]
-    if (config == NULL || config->upperConfig == NULL || get_io_transport == NULL)
+    if (config == NULL || config->upperConfig == NULL || get_io_transport == NULL || cb_info == NULL)
     {
-        LogError("IoTHub AMQP client transport null configuration parameter (config=%p, get_io_transport=%p).", config, get_io_transport);
+        LogError("IoTHub AMQP client transport null configuration parameter (config=%p, get_io_transport=%p, cb_info=%p).", config, get_io_transport, cb_info);
         result = NULL;
     }
     // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_002: [IoTHubTransport_AMQP_Common_Create shall fail and return NULL if `config->upperConfig->protocol` is NULL]
     else if (config->upperConfig->protocol == NULL)
     {
-        LogError("Failed to create the AMQP transport common instance (NULL parameter received: protocol=%p, iotHubName=%p, iotHubSuffix=%p)",
-            config->upperConfig->protocol, config->upperConfig->iotHubName, config->upperConfig->iotHubSuffix);
+        LogError("Failed to create the AMQP transport common instance (NULL parameter received: protocol)");
+        result = NULL;
+    }
+    else if (IoTHub_Transport_ValidateCallbacks(cb_info) != 0)
+    {
+        LogError("failure checking transport callbacks");
         result = NULL;
     }
     else
@@ -1458,6 +1464,16 @@ TRANSPORT_LL_HANDLE IoTHubTransport_AMQP_Common_Create(const IOTHUBTRANSPORT_CON
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_99_001: [The remote idle timeout ratio shall be set to 0.5 using connection_set_remote_idle_timeout_empty_frame_send_ratio()]
                 instance->cl2svc_keep_alive_send_ratio = DEFAULT_REMOTE_IDLE_PING_RATIO;
 
+                instance->transport_ctx = ctx;
+                instance->transport_callbacks.msg_input_cb = cb_info->msg_input_cb;
+                instance->transport_callbacks.msg_cb = cb_info->msg_cb;
+                instance->transport_callbacks.connection_status_cb = cb_info->connection_status_cb;
+                instance->transport_callbacks.send_complete_cb = cb_info->send_complete_cb;
+                instance->transport_callbacks.prod_info_cb = cb_info->prod_info_cb;
+                instance->transport_callbacks.twin_rpt_state_complete_cb = cb_info->twin_rpt_state_complete_cb;
+                instance->transport_callbacks.twin_retrieve_prop_complete_cb = cb_info->twin_retrieve_prop_complete_cb;
+                instance->transport_callbacks.method_complete_cb = cb_info->method_complete_cb;
+
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_012: [If IoTHubTransport_AMQP_Common_Create succeeds it shall return a pointer to `instance`.]
                 result = (TRANSPORT_LL_HANDLE)instance;
             }
@@ -1483,12 +1499,12 @@ IOTHUB_PROCESS_ITEM_RESULT IoTHubTransport_AMQP_Common_ProcessItem(TRANSPORT_LL_
         LogError("Invalid argument (handle=%p, iothub_item=%p)", handle, iothub_item);
         result = IOTHUB_PROCESS_ERROR;
     }
-    else 
+    else
     {
         if (item_type == IOTHUB_TYPE_DEVICE_TWIN)
         {
             AMQP_TRANSPORT_DEVICE_TWIN_CONTEXT* dev_twin_ctx;
-            
+
             if ((dev_twin_ctx = (AMQP_TRANSPORT_DEVICE_TWIN_CONTEXT*)malloc(sizeof(AMQP_TRANSPORT_DEVICE_TWIN_CONTEXT))) == NULL)
             {
                 LogError("Failed allocating context for TWIN message");
@@ -1496,9 +1512,12 @@ IOTHUB_PROCESS_ITEM_RESULT IoTHubTransport_AMQP_Common_ProcessItem(TRANSPORT_LL_
             }
             else
             {
+                AMQP_TRANSPORT_INSTANCE* transport_instance = (AMQP_TRANSPORT_INSTANCE*)handle;
+
                 AMQP_TRANSPORT_DEVICE_INSTANCE* registered_device = (AMQP_TRANSPORT_DEVICE_INSTANCE*)iothub_item->device_twin->device_handle;
 
-                dev_twin_ctx->client_handle = iothub_item->device_twin->client_handle;
+                dev_twin_ctx->transport_callbacks = transport_instance->transport_callbacks;
+                dev_twin_ctx->transport_ctx = transport_instance->transport_ctx;
                 dev_twin_ctx->item_id = iothub_item->device_twin->item_id;
 
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_146: [device_send_twin_update_async() shall be invoked passing `iothub_item->device_twin->report_data_handle` and `on_device_send_twin_update_complete_callback`]
@@ -1530,15 +1549,13 @@ IOTHUB_PROCESS_ITEM_RESULT IoTHubTransport_AMQP_Common_ProcessItem(TRANSPORT_LL_
     return result;
 }
 
-void IoTHubTransport_AMQP_Common_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle)
+void IoTHubTransport_AMQP_Common_DoWork(TRANSPORT_LL_HANDLE handle)
 {
-    (void)iotHubClientHandle; // unused as of now.
-
     // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_016: [If `handle` is NULL, IoTHubTransport_AMQP_Common_DoWork shall return without doing any work]
     if (handle == NULL)
     {
         LogError("IoTHubClient DoWork failed: transport handle parameter is NULL.");
-    } 
+    }
     else
     {
         AMQP_TRANSPORT_INSTANCE* transport_instance = (AMQP_TRANSPORT_INSTANCE*)handle;
@@ -1964,7 +1981,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SetOption(TRANSPORT_LL_HANDLE h
         }
         else if (strcmp(OPTION_REMOTE_IDLE_TIMEOUT_RATIO, option) == 0)
         {
-            
+
             if ((*(double*)value <= 0.0) || (*(double*)value >= MAX_SERVICE_KEEP_ALIVE_RATIO))
             {
                 LogError("Invalid remote idle ratio %lf", *(double*) value);
@@ -1975,7 +1992,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SetOption(TRANSPORT_LL_HANDLE h
                 transport_instance->cl2svc_keep_alive_send_ratio = *(double*)value; // override the default and set the user configured remote idle ratio value
                 result = IOTHUB_CLIENT_OK;
             }
-            
+
         }
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_104: [If `option` is `logtrace`, `value` shall be saved and applied to `instance->connection` using amqp_connection_set_logging()]
         else if (strcmp(OPTION_LOG_TRACE, option) == 0)
@@ -2123,19 +2140,15 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SetOption(TRANSPORT_LL_HANDLE h
     return result;
 }
 
-IOTHUB_DEVICE_HANDLE IoTHubTransport_AMQP_Common_Register(TRANSPORT_LL_HANDLE handle, const IOTHUB_DEVICE_CONFIG* device, IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, PDLIST_ENTRY waitingToSend)
+IOTHUB_DEVICE_HANDLE IoTHubTransport_AMQP_Common_Register(TRANSPORT_LL_HANDLE handle, const IOTHUB_DEVICE_CONFIG* device, PDLIST_ENTRY waitingToSend)
 {
-#ifdef NO_LOGGING
-    UNUSED(iotHubClientHandle);
-#endif
-
     IOTHUB_DEVICE_HANDLE result;
 
-    // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_17_005: [If `handle`, `device`, `iotHubClientHandle` or `waitingToSend` is NULL, IoTHubTransport_AMQP_Common_Register shall return NULL]
-    if ((handle == NULL) || (device == NULL) || (waitingToSend == NULL) || (iotHubClientHandle == NULL))
+    // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_17_005: [If `handle`, `device` or `waitingToSend` is NULL, IoTHubTransport_AMQP_Common_Register shall return NULL]
+    if ((handle == NULL) || (device == NULL) || (waitingToSend == NULL))
     {
-        LogError("invalid parameter TRANSPORT_LL_HANDLE handle=%p, const IOTHUB_DEVICE_CONFIG* device=%p, IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle=%p, PDLIST_ENTRY waiting_to_send=%p",
-            handle, device, iotHubClientHandle, waitingToSend);
+        LogError("invalid parameter TRANSPORT_LL_HANDLE handle=%p, const IOTHUB_DEVICE_CONFIG* device=%p, PDLIST_ENTRY waiting_to_send=%p",
+            handle, device, waitingToSend);
         result = NULL;
     }
     // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_03_002: [IoTHubTransport_AMQP_Common_Register shall return NULL if `device->deviceId` is NULL.]
@@ -2177,24 +2190,25 @@ IOTHUB_DEVICE_HANDLE IoTHubTransport_AMQP_Common_Register(TRANSPORT_LL_HANDLE ha
                 memset(amqp_device_instance, 0, sizeof(AMQP_TRANSPORT_DEVICE_INSTANCE));
 
                 char* local_product_info = NULL;
-                void* product_info;
-                if ((IoTHubClientCore_LL_GetOption(iotHubClientHandle, OPTION_PRODUCT_INFO, &product_info) != IOTHUB_CLIENT_OK) || (product_info == NULL))
+                const char* product_info = transport_instance->transport_callbacks.prod_info_cb(transport_instance->transport_ctx);
+                if (product_info == NULL)
                 {
                     mallocAndStrcpy_s(&local_product_info, CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION);
                 }
                 else
                 {
-                    mallocAndStrcpy_s(&local_product_info, STRING_c_str((STRING_HANDLE)product_info));
+                    mallocAndStrcpy_s(&local_product_info, product_info);
                 }
 
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_068: [IoTHubTransport_AMQP_Common_Register shall save the handle references to the IoTHubClient, transport, waitingToSend list on `amqp_device_instance`.]
-                amqp_device_instance->iothub_client_handle = iotHubClientHandle;
                 amqp_device_instance->transport_instance = transport_instance;
                 amqp_device_instance->waiting_to_send = waitingToSend;
                 amqp_device_instance->device_state = DEVICE_STATE_STOPPED;
                 amqp_device_instance->max_state_change_timeout_secs = DEFAULT_DEVICE_STATE_CHANGE_TIMEOUT_SECS;
                 amqp_device_instance->subscribe_methods_needed = false;
                 amqp_device_instance->subscribed_for_methods = false;
+                amqp_device_instance->transport_ctx = transport_instance->transport_ctx;
+                amqp_device_instance->transport_callbacks = transport_instance->transport_callbacks;
 
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_069: [A copy of `config->deviceId` shall be saved into `device_state->device_id`]
                 if ((amqp_device_instance->device_id = STRING_construct(device->deviceId)) == NULL)
@@ -2431,7 +2445,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SendMessageDisposition(MESSAGE_
             /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_004: [IoTHubTransport_AMQP_Common_SendMessageDisposition shall convert the given IOTHUBMESSAGE_DISPOSITION_RESULT to the equivalent AMQP_VALUE and will return the result of calling messagereceiver_send_message_disposition. ] */
             DEVICE_MESSAGE_DISPOSITION_RESULT device_disposition_result = get_device_disposition_result_from(disposition);
 
-            // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_112: [A DEVICE_MESSAGE_DISPOSITION_INFO instance shall be created with a copy of the `link_name` and `message_id` contained in `message_data`]  
+            // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_112: [A DEVICE_MESSAGE_DISPOSITION_INFO instance shall be created with a copy of the `link_name` and `message_id` contained in `message_data`]
             if ((device_message_disposition_info = create_device_message_disposition_info_from(message_data)) == NULL)
             {
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_113: [If the DEVICE_MESSAGE_DISPOSITION_INFO fails to be created, `IoTHubTransport_AMQP_Common_SendMessageDisposition()` shall fail and return IOTHUB_CLIENT_ERROR]
@@ -2452,7 +2466,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SendMessageDisposition(MESSAGE_
                     result = IOTHUB_CLIENT_OK;
                 }
 
-                // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_114: [`IoTHubTransport_AMQP_Common_SendMessageDisposition()` shall destroy the DEVICE_MESSAGE_DISPOSITION_INFO instance]  
+                // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_114: [`IoTHubTransport_AMQP_Common_SendMessageDisposition()` shall destroy the DEVICE_MESSAGE_DISPOSITION_INFO instance]
                 destroy_device_message_disposition_info(device_message_disposition_info);
             }
         }
@@ -2463,3 +2477,19 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SendMessageDisposition(MESSAGE_
     return result;
 }
 
+int IoTHubTransport_AMQP_SetCallbackContext(TRANSPORT_LL_HANDLE handle, void* ctx)
+{
+    int result;
+    if (handle == NULL)
+    {
+        LogError("Invalid parameter specified handle: %p", handle);
+        result = __FAILURE__;
+    }
+    else
+    {
+        AMQP_TRANSPORT_INSTANCE* instance = (AMQP_TRANSPORT_INSTANCE*)handle;
+        instance->transport_ctx = ctx;
+        result = 0;
+    }
+    return result;
+}

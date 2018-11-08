@@ -6,7 +6,7 @@
 #include "azure_c_shared_utility/macro_utils.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
-#include "azure_c_shared_utility/agenttime.h" 
+#include "azure_c_shared_utility/agenttime.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/sastoken.h"
@@ -178,7 +178,8 @@ IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_CreateFromDeviceAuth(const char* d
             }
             else
             {
-                if (iothub_device_auth_get_type(result->device_auth_handle) == AUTH_TYPE_SAS)
+                DEVICE_AUTH_TYPE auth_type = iothub_device_auth_get_type(result->device_auth_handle);
+                if (auth_type == AUTH_TYPE_SAS || auth_type == AUTH_TYPE_SYMM_KEY)
                 {
                     result->cred_type = IOTHUB_CREDENTIAL_TYPE_DEVICE_AUTH;
                 }
@@ -333,7 +334,7 @@ char* IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const c
                 LogError("failure getting seconds from epoch");
                 result = NULL;
             }
-            else 
+            else
             {
                 memset(&dev_auth_cred, 0, sizeof(DEVICE_AUTH_CREDENTIAL_INFO));
                 size_t expiry_time = sec_since_epoch+expiry_time_relative_seconds;
@@ -400,7 +401,7 @@ char* IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const c
                     LogError("failure getting seconds from epoch");
                     result = NULL;
                 }
-                else 
+                else
                 {
                     /* Codes_SRS_IoTHub_Authorization_07_011: [ IoTHubClient_Auth_Get_ConnString shall call SASToken_CreateString to construct the sas token. ] */
                     size_t expiry_time = sec_since_epoch+expiry_time_relative_seconds;

@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-	void iothub_client_sample_amqp_run(void);
+    void iothub_client_sample_amqp_run(void);
 
 #ifdef __cplusplus
 }

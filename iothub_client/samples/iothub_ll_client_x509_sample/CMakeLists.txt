@@ -29,7 +29,7 @@ target_link_libraries(iothub_ll_client_x509_sample iothub_client)
 linkSharedUtil(iothub_ll_client_x509_sample)
 
 if(${use_http})
-    target_link_libraries(iothub_ll_client_x509_sample 
+    target_link_libraries(iothub_ll_client_x509_sample
         iothub_client_http_transport
     )
     linkHttp(iothub_ll_client_x509_sample)
@@ -37,7 +37,7 @@ if(${use_http})
 endif()
 
 if(${use_amqp})
-    target_link_libraries(iothub_ll_client_x509_sample 
+    target_link_libraries(iothub_ll_client_x509_sample
         iothub_client_amqp_transport
     )
     linkUAMQP(iothub_ll_client_x509_sample)

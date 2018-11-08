@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include <stdlib.h> 
+#include <stdlib.h>
 
 #include <signal.h>
 #include "azure_c_shared_utility/gballoc.h"
@@ -20,14 +20,6 @@ typedef struct PROV_DEVICE_INSTANCE_TAG
     LOCK_HANDLE LockHandle;
     sig_atomic_t StopThread;
 } PROV_DEVICE_INSTANCE;
-
-#define USER_CALLBACK_TYPE_VALUES           \
-    CALLBACK_TYPE_REGISTER_DEVICE_CALLBACK, \
-    CALLBACK_TYPE_REGISTER_STATUS_CALLBACK
-
-DEFINE_ENUM(USER_CALLBACK_TYPE, USER_CALLBACK_TYPE_VALUES)
-DEFINE_ENUM_STRINGS(USER_CALLBACK_TYPE, USER_CALLBACK_TYPE_VALUES)
-
 
 static int ScheduleWork_Thread(void* threadArgument)
 {
@@ -183,7 +175,7 @@ PROV_DEVICE_RESULT Prov_Device_Register_Device(PROV_DEVICE_HANDLE prov_device_ha
         result = PROV_DEVICE_RESULT_INVALID_ARG;
     }
     else
-    { 
+    {
         PROV_DEVICE_INSTANCE* prov_device_instance = (PROV_DEVICE_INSTANCE*)prov_device_handle;
 
         /* Codes_SRS_PROV_DEVICE_CLIENT_12_018: [ The function shall try to lock the Lock. ] */

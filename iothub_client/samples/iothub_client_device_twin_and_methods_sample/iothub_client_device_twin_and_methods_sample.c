@@ -4,7 +4,7 @@
 // This sample shows how to translate the Device Twin json received from Azure IoT Hub into meaningful data for your application.
 // It uses the parson library, a very lightweight json parser.
 
-// There is an analogous sample using the serializer - which is a library provided by this SDK to help parse json - in devicetwin_simplesample.  
+// There is an analogous sample using the serializer - which is a library provided by this SDK to help parse json - in devicetwin_simplesample.
 // Most applications should use this sample, not the serializer.
 
 // WARNING: Check the return of all API calls when developing your solution. Return checks ommited for sample simplification.
@@ -108,7 +108,7 @@ static char* serializeToJson(Car* car)
     (void)json_object_dotset_string(root_object, "state.vanityPlate", car->state.vanityPlate);
 
     result = json_serialize_to_string(root_value);
-    
+
     json_value_free(root_value);
 
     return result;
@@ -185,18 +185,18 @@ static int deviceMethodCallback(const char* method_name, const unsigned char* pa
 
     if (strcmp("getCarVIN", method_name) == 0)
     {
-        const char* deviceMethodResponse = "{ \"Response\": \"1HGCM82633A004352\" }";
-        *response_size = sizeof(deviceMethodResponse);
-        *response = malloc(sizeof(*response_size));
+        const char deviceMethodResponse[] = "{ \"Response\": \"1HGCM82633A004352\" }";
+        *response_size = sizeof(deviceMethodResponse)-1;
+        *response = malloc(*response_size);
         (void)memcpy(*response, deviceMethodResponse, *response_size);
         result = 200;
     }
     else
     {
         // All other entries are ignored.
-        const char* deviceMethodResponse = "{ }";
-        *response_size = sizeof(deviceMethodResponse);
-        *response = malloc(sizeof(*response_size));
+        const char deviceMethodResponse[] = "{ }";
+        *response_size = sizeof(deviceMethodResponse)-1;
+        *response = malloc(*response_size);
         (void)memcpy(*response, deviceMethodResponse, *response_size);
         result = -1;
     }
@@ -214,7 +214,7 @@ static void deviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsi
 
     if (newCar->changeOilReminder != NULL)
     {
-        if (oldCar->changeOilReminder == NULL || 
+        if (oldCar->changeOilReminder == NULL ||
             strcmp(oldCar->changeOilReminder, newCar->changeOilReminder) != 0)
         {
             printf("Received a new changeOilReminder = %s\n", newCar->changeOilReminder);
@@ -226,6 +226,7 @@ static void deviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsi
 
             oldCar->changeOilReminder = malloc(strlen(newCar->changeOilReminder) + 1);
             (void)strcpy(oldCar->changeOilReminder, newCar->changeOilReminder);
+			free(newCar->changeOilReminder);
         }
     }
 
@@ -246,7 +247,7 @@ static void deviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsi
             oldCar->settings.location.latitude = newCar->settings.location.latitude;
         }
     }
-    
+
     if (newCar->settings.location.longitude != 0)
     {
         if (newCar->settings.location.longitude != oldCar->settings.location.longitude)

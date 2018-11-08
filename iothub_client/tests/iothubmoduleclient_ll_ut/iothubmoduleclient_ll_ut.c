@@ -32,7 +32,7 @@ static void real_free(void* ptr)
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"
 #include "iothub_client_core_ll.h"
-#include "iothub_client_private.h"
+#include "internal/iothub_client_private.h"
 #include "internal/iothub_client_edge.h"
 #undef ENABLE_MOCKS
 
@@ -74,7 +74,6 @@ static const char* TEST_OUTPUT_NAME = "OutputQueue";
 static const char* TEST_INPUT_NAME = "InputName";
 
 static TEST_MUTEX_HANDLE test_serialize_mutex;
-static TEST_MUTEX_HANDLE g_dllByDll;
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
@@ -89,8 +88,6 @@ BEGIN_TEST_SUITE(iothubmoduleclient_ll_ut)
 TEST_SUITE_INITIALIZE(suite_init)
 {
     int result;
-
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
 
     test_serialize_mutex = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(test_serialize_mutex);
@@ -151,7 +148,6 @@ TEST_SUITE_CLEANUP(suite_cleanup)
 {
     umock_c_deinit();
     TEST_MUTEX_DESTROY(test_serialize_mutex);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION(IoTHubModuleClient_LL_CreateFromConnectionString_Test)

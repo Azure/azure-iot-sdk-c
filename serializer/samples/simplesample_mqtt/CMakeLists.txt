@@ -40,8 +40,8 @@ include_directories(. ${SHARED_UTIL_INC_FOLDER} ${IOTHUB_CLIENT_INC_FOLDER})
 
 add_executable(simplesample_mqtt ${simplesample_mqtt_c_files} ${simplesample_mqtt_h_files})
 
-target_link_libraries(simplesample_mqtt 
+target_link_libraries(simplesample_mqtt
     iothub_client_mqtt_transport
-    serializer 
+    serializer
     iothub_client
     )

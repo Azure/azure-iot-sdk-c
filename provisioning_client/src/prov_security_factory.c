@@ -28,8 +28,14 @@ static IOTHUB_SECURITY_TYPE get_iothub_security_type(SECURE_DEVICE_TYPE sec_type
             break;
 #endif
 
+#if defined(HSM_TYPE_SYMM_KEY) || defined(HSM_AUTH_TYPE_CUSTOM)
+        case SECURE_DEVICE_TYPE_SYMMETRIC_KEY:
+            ret = IOTHUB_SECURITY_TYPE_SYMMETRIC_KEY;
+            break;
+#endif
+
 #ifdef HSM_TYPE_HTTP_EDGE
-        case SECURE_DEVICE_TYPE_HTTP_EDGE :
+        case SECURE_DEVICE_TYPE_HTTP_EDGE:
             ret = IOTHUB_SECURITY_TYPE_HTTP_EDGE;
             break;
 #endif
@@ -63,7 +69,7 @@ int prov_dev_security_init(SECURE_DEVICE_TYPE hsm_type)
             result = iothub_security_init(security_type_from_caller);
         }
         else if (security_type_from_iot != security_type_from_caller)
-        {   
+        {
             LogError("Security HSM from caller %d (which maps to security type %d) does not match already specified security type %d", hsm_type, security_type_from_caller, security_type_from_iot);
             result = __FAILURE__;
         }

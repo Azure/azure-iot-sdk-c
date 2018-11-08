@@ -110,7 +110,6 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(HTTPAPI_REQUEST_TYPE, HTTPAPI_REQUEST_TYPE_VALUES);
 static unsigned char* TEST_UNSIGNED_CHAR_PTR = (unsigned char*)"TestString";
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
@@ -443,8 +442,6 @@ BEGIN_TEST_SUITE(iothub_deviceconfiguration_ut)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
-
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -598,7 +595,6 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
 {
     umock_c_deinit();
     TEST_MUTEX_DESTROY(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
@@ -1141,7 +1137,7 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_AddConfiguration_non_happy_path)
 
     int umockc_result = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, umockc_result);
-    
+
     EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
 
     set_expected_calls_for_AddConfiguration_UpdateConfiguration_processing();
@@ -1290,14 +1286,14 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_GetConfiguration_happy_path_status_code_
     const char* configurationId = " ";
 
     IOTHUB_DEVICE_CONFIGURATION_RESULT result = IoTHubDeviceConfiguration_GetConfiguration(handle, configurationId, &configuration);
-    
+
     ///assert
     ASSERT_ARE_EQUAL(int, IOTHUB_DEVICE_CONFIGURATION_OK, result);
-    
-	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     ///cleanup
-	IoTHubDeviceConfiguration_FreeConfigurationMembers(&configuration);
+    IoTHubDeviceConfiguration_FreeConfigurationMembers(&configuration);
     IoTHubDeviceConfiguration_Destroy(handle);
 }
 
@@ -1346,7 +1342,7 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_GetConfigurations_return_NULL_if_input_p
     ASSERT_IS_NOT_NULL(handle);
 
     umock_c_reset_all_calls();
-    
+
     ///act
     IOTHUB_DEVICE_CONFIGURATION_RESULT result = IoTHubDeviceConfiguration_GetConfigurations(handle, 20, NULL);
 
@@ -1505,7 +1501,7 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_GetConfigurations_non_happy_path)
     }
 
     umock_c_negative_tests_deinit();
-    
+
     ///cleanup
     IoTHubDeviceConfiguration_Destroy(handle);
 }

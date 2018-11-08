@@ -43,7 +43,6 @@ MOCKABLE_FUNCTION(, void, TEST_FUNC_IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK, v
 #undef ENABLE_MOCKS
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 static void* my_gballoc_malloc(size_t size)
 {
@@ -89,6 +88,8 @@ static IOTHUB_MESSAGING_RESULT TEST_IOTHUB_MESSAGING_RESULT = (IOTHUB_MESSAGING_
 static IOTHUB_OPEN_COMPLETE_CALLBACK TEST_IOTHUB_OPEN_COMPLETE_CALLBACK;
 static IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK TEST_IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK;
 static IOTHUB_SEND_COMPLETE_CALLBACK TEST_IOTHUB_SEND_COMPLETE_CALLBACK;
+
+static char* TEST_TRUSTED_CERT = "Test_trusted_cert";
 
 typedef struct TEST_IOTHUB_MESSAGING_CLIENT_INSTANCE_TAG
 {
@@ -169,7 +170,6 @@ BEGIN_TEST_SUITE(iothub_messaging_ut)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -228,6 +228,8 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubMessaging_LL_SetFeedbackMessageCallback, my_IoTHubMessaging_LL_SetFeedbackMessageCallback);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessaging_LL_SetFeedbackMessageCallback, IOTHUB_MESSAGING_ERROR);
+
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessaging_LL_SetTrustedCert, IOTHUB_MESSAGING_OK);
 }
 
 TEST_SUITE_CLEANUP(TestClassCleanup)
@@ -235,7 +237,6 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     (void)Lock_Init();
     umock_c_deinit();
     TEST_MUTEX_DESTROY(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
@@ -352,7 +353,7 @@ TEST_FUNCTION(IoTHubMessaging_Destroy_happy_path)
 {
     // arrange
     IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle = IoTHubMessaging_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
-    
+
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(IoTHubMessaging_LL_Destroy(IGNORED_PTR_ARG))
@@ -650,7 +651,7 @@ TEST_FUNCTION(IoTHubMessaging_SendAsync_happy_path)
     */
 
     STRICT_EXPECTED_CALL(IoTHubMessaging_LL_Send((IOTHUB_MESSAGING_HANDLE)0X3333, deviceId, TEST_IOTHUB_MESSAGE_HANDLE, TEST_IOTHUB_SEND_COMPLETE_CALLBACK, (void*)0x4242));
-        
+
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
 
@@ -702,7 +703,7 @@ TEST_FUNCTION(IoTHubMessaging_SendAsync_happy_path_threadhandle_not_null)
     }
     */
     STRICT_EXPECTED_CALL(IoTHubMessaging_LL_Send((IOTHUB_MESSAGING_HANDLE)0X3333, deviceId, TEST_IOTHUB_MESSAGE_HANDLE, TEST_IOTHUB_SEND_COMPLETE_CALLBACK, (void*)0x4242));
-        
+
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
 
@@ -723,9 +724,6 @@ TEST_FUNCTION(IoTHubMessaging_SendAsync_happy_path_threadhandle_not_null)
     // cleanup
     free(messagingClientHandle);
 }
-
-
-
 
 /*Tests_SRS_IOTHUBMESSAGING_12_035: [ If acquiring the lock fails, IoTHubMessaging_SendAsync shall return IOTHUB_MESSAGING_ERROR. ]*/
 TEST_FUNCTION(IoTHubMessaging_SendAsync_Lock_fails)
@@ -802,7 +800,6 @@ TEST_FUNCTION(IoTHubMessaging_ThreadAPI_Create_fails)
     free(messagingClientHandle);
 }
 
-
 /* If modules are re-enabled, re-enable this code
 TEST_FUNCTION(IoTHubMessaging_ThreadAPI_Create_fails_for_Module)
 {
@@ -826,7 +823,7 @@ TEST_FUNCTION(IoTHubMessaging_SendAsyncModule_return_IOTHUB_MESSAGING_INVALID_AR
     IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle = IoTHubMessaging_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
 
     umock_c_reset_all_calls();
-    
+
     ///act
     IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_SendAsyncModule(messagingClientHandle, deviceId, NULL, TEST_IOTHUB_MESSAGE_HANDLE, TEST_IOTHUB_SEND_COMPLETE_CALLBACK, (void*)0x4242);
 
@@ -842,5 +839,61 @@ TEST_FUNCTION(IoTHubMessaging_SendAsyncModule_Lock_fails)
     IoTHubMessaging_SendAsync_Lock_fails(true);
 }
 */
+TEST_FUNCTION(IoTHubMessaging_SetTrustedCert_handle_NULL_fail)
+{
+    // arrange
+
+    // act
+    IOTHUB_MESSAGING_RESULT result;
+    result = IoTHubMessaging_SetTrustedCert(NULL, TEST_TRUSTED_CERT);
+
+    // assert
+    ASSERT_ARE_NOT_EQUAL(int, IOTHUB_MESSAGING_OK, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+}
+
+TEST_FUNCTION(IoTHubMessaging_SetTrustedCert_success)
+{
+    // arrange
+    IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle = IoTHubMessaging_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessaging_LL_SetTrustedCert(IGNORED_PTR_ARG, TEST_TRUSTED_CERT));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+
+    // act
+    IOTHUB_MESSAGING_RESULT result;
+    result = IoTHubMessaging_SetTrustedCert(messagingClientHandle, TEST_TRUSTED_CERT);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_OK, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubMessaging_Destroy(messagingClientHandle);
+}
+
+TEST_FUNCTION(IoTHubMessaging_SetTrustedCert_Lock_fails)
+{
+    // arrange
+    IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle = IoTHubMessaging_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG)).SetReturn(LOCK_ERROR);
+
+    // act
+    IOTHUB_MESSAGING_RESULT result;
+    result = IoTHubMessaging_SetTrustedCert(messagingClientHandle, TEST_TRUSTED_CERT);
+
+    // assert
+    ASSERT_ARE_NOT_EQUAL(int, IOTHUB_MESSAGING_OK, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubMessaging_Destroy(messagingClientHandle);
+}
 
 END_TEST_SUITE(iothub_messaging_ut)

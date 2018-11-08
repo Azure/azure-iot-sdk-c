@@ -38,7 +38,7 @@ int main()
 
     /* ---Create a handle for accessing the Provisioning Service--- */
     PROVISIONING_SERVICE_CLIENT_HANDLE prov_sc = prov_sc_create_from_connection_string(connectionString);
-    
+
     /* ---Optionally set connection options---*/
     if (g_use_trace)
     {

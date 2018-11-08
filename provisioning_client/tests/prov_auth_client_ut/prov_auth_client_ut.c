@@ -33,6 +33,7 @@ static void my_gballoc_free(void* ptr)
 #include "azure_c_shared_utility/umock_c_prod.h"
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/base32.h"
+#include "azure_c_shared_utility/hmacsha256.h"
 #include "hsm_client_data.h"
 #undef ENABLE_MOCKS
 
@@ -58,6 +59,7 @@ MOCKABLE_FUNCTION(, int, secure_device_sign_data, HSM_CLIENT_HANDLE, handle, con
 MOCKABLE_FUNCTION(, char*, secure_device_get_certificate, HSM_CLIENT_HANDLE, handle);
 MOCKABLE_FUNCTION(, char*, secure_device_get_alias_key, HSM_CLIENT_HANDLE, handle);
 MOCKABLE_FUNCTION(, char*, secure_device_get_common_name, HSM_CLIENT_HANDLE, handle);
+MOCKABLE_FUNCTION(, char*, secure_device_get_symm_key, HSM_CLIENT_HANDLE, handle);
 
 MOCKABLE_FUNCTION(, int, SHA256Reset, SHA256Context*, ctx);
 MOCKABLE_FUNCTION(, int, SHA256Input, SHA256Context*, ctx, const uint8_t*, bytes, unsigned int, bytecount);
@@ -65,6 +67,7 @@ MOCKABLE_FUNCTION(, int, SHA256Result, SHA256Context*, ctx, uint8_t*, Message_Di
 
 MOCKABLE_FUNCTION(, const HSM_CLIENT_TPM_INTERFACE*, hsm_client_tpm_interface);
 MOCKABLE_FUNCTION(, const HSM_CLIENT_X509_INTERFACE*, hsm_client_x509_interface);
+MOCKABLE_FUNCTION(, const HSM_CLIENT_KEY_INTERFACE*, hsm_client_key_interface);
 
 #undef ENABLE_MOCKS
 
@@ -116,6 +119,9 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(PROV_AUTH_RESULT, PROV_AUTH_RESULT_VALUES);
 TEST_DEFINE_ENUM_TYPE(PROV_AUTH_TYPE, PROV_AUTH_TYPE_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(PROV_AUTH_TYPE, PROV_AUTH_TYPE_VALUES);
 
+TEST_DEFINE_ENUM_TYPE(HMACSHA256_RESULT, HMACSHA256_RESULT);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(HMACSHA256_RESULT, HMACSHA256_RESULT);
+
 static const HSM_CLIENT_TPM_INTERFACE test_tpm_interface = 
 {
     secure_device_create,
@@ -154,9 +160,27 @@ static const HSM_CLIENT_X509_INTERFACE test_x509_interface_fail =
     secure_device_get_common_name
 };
 
+static const HSM_CLIENT_KEY_INTERFACE test_key_interface =
+{
+    secure_device_create,
+    secure_device_destroy,
+    secure_device_get_symm_key,
+    secure_device_get_common_name
+};
+
 static HSM_CLIENT_HANDLE my_secure_device_create(void)
 {
     return (HSM_CLIENT_HANDLE)my_gballoc_malloc(1);
+}
+
+static void my_BUFFER_delete(BUFFER_HANDLE handle)
+{
+    my_gballoc_free((void*)handle);
+}
+
+static BUFFER_HANDLE my_BUFFER_new(void)
+{
+    return (BUFFER_HANDLE)my_gballoc_malloc(1);
 }
 
 static void my_secure_device_destroy(HSM_CLIENT_HANDLE handle)
@@ -167,7 +191,10 @@ static void my_secure_device_destroy(HSM_CLIENT_HANDLE handle)
 static char* my_secure_device_get_alias_key(HSM_CLIENT_HANDLE handle)
 {
     (void)handle;
-    return (char*)my_gballoc_malloc(1);
+    size_t len = strlen(TEST_STRING_VALUE);
+    char* result = (char*)my_gballoc_malloc(len + 1);
+    strcpy(result, TEST_STRING_VALUE);
+    return result;
 }
 
 static int my_secure_device_get_storage_key(HSM_CLIENT_HANDLE handle, unsigned char** key, size_t* key_len)
@@ -191,6 +218,15 @@ static char* my_secure_device_get_common_name(HSM_CLIENT_HANDLE handle)
     (void)handle;
     size_t len = strlen(TEST_STRING_VALUE);
     char* result = (char*)my_gballoc_malloc(len+1);
+    strcpy(result, TEST_STRING_VALUE);
+    return result;
+}
+
+static char* my_secure_device_get_symm_key(HSM_CLIENT_HANDLE handle)
+{
+    (void)handle;
+    size_t len = strlen(TEST_STRING_VALUE);
+    char* result = (char*)my_gballoc_malloc(len + 1);
     strcpy(result, TEST_STRING_VALUE);
     return result;
 }
@@ -277,7 +313,6 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 }
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 BEGIN_TEST_SUITE(prov_auth_client_ut)
 
@@ -285,7 +320,6 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
     {
         int result;
 
-        TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
         g_testByTest = TEST_MUTEX_CREATE();
         ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -295,6 +329,8 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         ASSERT_ARE_EQUAL(int, 0, result);
         result = umocktypes_stdint_register_types();
         ASSERT_ARE_EQUAL(int, 0, result);
+
+        REGISTER_TYPE(HMACSHA256_RESULT, HMACSHA256_RESULT);
 
         REGISTER_UMOCK_ALIAS_TYPE(XDA_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(HSM_CLIENT_HANDLE, void*);
@@ -318,6 +354,9 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         REGISTER_GLOBAL_MOCK_RETURN(secure_device_get_certificate, TEST_STRING_VALUE);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(secure_device_get_certificate, NULL);
 
+        REGISTER_GLOBAL_MOCK_HOOK(secure_device_get_symm_key, my_secure_device_get_symm_key);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(secure_device_get_symm_key, NULL);
+
         REGISTER_GLOBAL_MOCK_RETURN(BUFFER_u_char, TEST_DATA);
         REGISTER_GLOBAL_MOCK_RETURN(BUFFER_length, TEST_DATA_LEN);
 
@@ -335,6 +374,12 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
 
         REGISTER_GLOBAL_MOCK_RETURN(BUFFER_create, TEST_BUFFER_VALUE);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(BUFFER_create, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(BUFFER_new, my_BUFFER_new);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(BUFFER_new, NULL);
+        REGISTER_GLOBAL_MOCK_RETURN(BUFFER_length, TEST_DATA_LEN);
+        REGISTER_GLOBAL_MOCK_RETURN(BUFFER_u_char, TEST_DATA);
+        REGISTER_GLOBAL_MOCK_HOOK(BUFFER_delete, my_BUFFER_delete);
+
         REGISTER_GLOBAL_MOCK_RETURN(size_tToString, 0);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(size_tToString, __LINE__);
 
@@ -361,17 +406,20 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         REGISTER_GLOBAL_MOCK_HOOK(URL_EncodeString, my_URL_EncodeString);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(URL_EncodeString, NULL);
 
+        REGISTER_GLOBAL_MOCK_RETURN(HMACSHA256_ComputeHash, HMACSHA256_OK);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(HMACSHA256_ComputeHash, HMACSHA256_ERROR);
+
         REGISTER_GLOBAL_MOCK_RETURN(prov_dev_security_get_type, SECURE_DEVICE_TYPE_TPM);
         REGISTER_GLOBAL_MOCK_RETURN(hsm_client_tpm_interface, &test_tpm_interface);
         REGISTER_GLOBAL_MOCK_RETURN(hsm_client_x509_interface, &test_x509_interface);
-}
+        REGISTER_GLOBAL_MOCK_RETURN(hsm_client_key_interface, &test_key_interface);
+    }
 
     TEST_SUITE_CLEANUP(suite_cleanup)
     {
         umock_c_deinit();
 
         TEST_MUTEX_DESTROY(g_testByTest);
-        TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
     }
 
     TEST_FUNCTION_INITIALIZE(method_init)
@@ -402,11 +450,34 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         return result;
     }
 
-    static void setup_prov_auth_construct_sas_token_mocks(void)
+    static void setup_sign_sas_data(bool use_key)
+    {
+        if (use_key)
+        {
+            STRICT_EXPECTED_CALL(secure_device_get_symm_key(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(Base64_Decoder(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(BUFFER_new());
+            STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(HMACSHA256_ComputeHash(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+            STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        }
+        else
+        {
+            STRICT_EXPECTED_CALL(secure_device_sign_data(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        }
+    }
+
+    static void setup_prov_auth_construct_sas_token_mocks(bool use_key)
     {
         STRICT_EXPECTED_CALL(size_tToString(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(secure_device_sign_data(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        setup_sign_sas_data(use_key);
         STRICT_EXPECTED_CALL(Base64_Encode_Bytes(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(URL_Encode(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
@@ -702,11 +773,11 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
 
             char tmp_msg[64];
             sprintf(tmp_msg, "prov_auth_get_registration_id failure in test %zu/%zu", index, count);
-            
+
             char* result = prov_auth_get_registration_id(sec_handle);
 
             //assert
-            ASSERT_IS_NULL_WITH_MSG(result, tmp_msg);
+            ASSERT_IS_NULL(result, tmp_msg);
         }
 
         //cleanup
@@ -774,7 +845,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
             char* result = prov_auth_get_registration_id(sec_handle);
 
             //assert
-            ASSERT_IS_NULL_WITH_MSG(result, tmp_msg);
+            ASSERT_IS_NULL(result, tmp_msg);
         }
 
         //cleanup
@@ -1105,7 +1176,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        setup_prov_auth_construct_sas_token_mocks();
+        setup_prov_auth_construct_sas_token_mocks(false);
 
         //act
         char* result = prov_auth_construct_sas_token(sec_handle, TEST_TOKEN_SCOPE_VALUE, TEST_KEY_NAME_VALUE, TEST_EXPIRY_TIME_T_VALUE);
@@ -1128,7 +1199,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
         //arrange
-        setup_prov_auth_construct_sas_token_mocks();
+        setup_prov_auth_construct_sas_token_mocks(false);
 
         umock_c_negative_tests_snapshot();
 
@@ -1152,7 +1223,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
             char* result = prov_auth_construct_sas_token(sec_handle, TEST_TOKEN_SCOPE_VALUE, TEST_KEY_NAME_VALUE, TEST_EXPIRY_TIME_T_VALUE);
 
             //assert
-            ASSERT_IS_NULL_WITH_MSG(result, tmp_msg);
+            ASSERT_IS_NULL(result, tmp_msg);
         }
 
         //cleanup

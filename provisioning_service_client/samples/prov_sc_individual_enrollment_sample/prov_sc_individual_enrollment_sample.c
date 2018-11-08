@@ -43,7 +43,7 @@ int main()
     /*This function must be called before anything else so that sockets work*/
     platform_init();
 
-    /* This creates a handle that will be used to represent a connection to the 
+    /* This creates a handle that will be used to represent a connection to the
     Device Provisioning Service indicated by the connection string given. */
     prov_sc = prov_sc_create_from_connection_string(connectionString);
 
@@ -63,7 +63,7 @@ int main()
     am_handle = attestationMechanism_createWithTpm(endorsementKey, NULL);
     ie_handle = individualEnrollment_create(registrationId, am_handle);
     individualEnrollment_setDeviceId(ie_handle, deviceId); //optional - don't call if you don't need it
-    
+
     /* ---Create the Individual Enrollment on the Provisioning Service--- */
     printf("Creating an Individual Enrollment on the Provisioning Service...\n");
 
@@ -87,7 +87,7 @@ int main()
     twin_handle = initialTwin_create(tags, NULL);
     individualEnrollment_setInitialTwin(ie_handle, twin_handle);
 
-    /* This is the same call as we used for creation. However, because we already created the 
+    /* This is the same call as we used for creation. However, because we already created the
     enrollment on the Provisioning Service, this call will now update the already existing one */
     prov_sc_create_or_update_individual_enrollment(prov_sc, &ie_handle);
 

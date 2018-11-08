@@ -38,7 +38,7 @@ DEFINE_ENUM(IOTHUB_REGISTRYMANAGER_RESULT, IOTHUB_REGISTRYMANAGER_RESULT_VALUES)
     IOTHUB_REGISTRYMANAGER_AUTH_X509_CERTIFICATE_AUTHORITY, \
     IOTHUB_REGISTRYMANAGER_AUTH_NONE,                       \
     IOTHUB_REGISTRYMANAGER_AUTH_UNKNOWN                     \
-    
+
 
 DEFINE_ENUM(IOTHUB_REGISTRYMANAGER_AUTH_METHOD, IOTHUB_REGISTRYMANAGER_AUTH_METHOD_VALUES);
 
@@ -116,20 +116,20 @@ typedef struct IOTHUB_MODULE_TAG
     const char* eTag;                                  //version 1+
     IOTHUB_DEVICE_CONNECTION_STATE connectionState;    //version 1+
     const char* connectionStateUpdatedTime;            //version 1+
-    IOTHUB_DEVICE_STATUS status;                       //version 1+ 
-    const char* statusReason;                          //version 1+ 
-    const char* statusUpdatedTime;                     //version 1+ 
-    const char* lastActivityTime;                      //version 1+ 
-    size_t cloudToDeviceMessageCount;                  //version 1+ 
+    IOTHUB_DEVICE_STATUS status;                       //version 1+
+    const char* statusReason;                          //version 1+
+    const char* statusUpdatedTime;                     //version 1+
+    const char* lastActivityTime;                      //version 1+
+    size_t cloudToDeviceMessageCount;                  //version 1+
 
-    bool isManaged;                                    //version 1+ 
-    const char* configuration;                         //version 1+ 
-    const char* deviceProperties;                      //version 1+ 
-    const char* serviceProperties;                     //version 1+ 
-    IOTHUB_REGISTRYMANAGER_AUTH_METHOD authMethod;     //version 1+ 
+    bool isManaged;                                    //version 1+
+    const char* configuration;                         //version 1+
+    const char* deviceProperties;                      //version 1+
+    const char* serviceProperties;                     //version 1+
+    IOTHUB_REGISTRYMANAGER_AUTH_METHOD authMethod;     //version 1+
 
-    const char* moduleId;                              //version 1+ 
-    const char* managedBy;                             //version 1+ 
+    const char* moduleId;                              //version 1+
+    const char* managedBy;                             //version 1+
 } IOTHUB_MODULE;
 
 /**

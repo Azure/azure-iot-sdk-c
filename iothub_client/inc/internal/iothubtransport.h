@@ -10,7 +10,7 @@
 #include "iothub_client_core.h"
 #include "internal/iothub_client_private.h"
 #include "internal/iothub_transport_ll_private.h"
-#include "iothub_client_authorization.h"
+#include "internal/iothub_client_authorization.h"
 
 #ifndef IOTHUB_CLIENT_CORE_INSTANCE_TYPE
 typedef struct IOTHUB_CLIENT_CORE_INSTANCE_TAG* IOTHUB_CLIENT_CORE_HANDLE;
@@ -25,7 +25,7 @@ extern "C"
 #endif
 
 #include "azure_c_shared_utility/umock_c_prod.h"
-    
+
     /** @brief  This struct captures IoTHub transport configuration. */
     struct IOTHUBTRANSPORT_CONFIG_TAG
     {
@@ -34,9 +34,9 @@ extern "C"
         IOTHUB_AUTHORIZATION_HANDLE auth_module_handle;
         const char* moduleId;
     };
-    
+
     typedef void(*IOTHUB_CLIENT_MULTIPLEXED_DO_WORK)(void* iotHubClientInstance);
-    
+
     MOCKABLE_FUNCTION(, LOCK_HANDLE, IoTHubTransport_GetLock, TRANSPORT_HANDLE, transportHandle);
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubTransport_StartWorkerThread, TRANSPORT_HANDLE, transportHandle, IOTHUB_CLIENT_CORE_HANDLE, clientHandle, IOTHUB_CLIENT_MULTIPLEXED_DO_WORK, muxDoWork);
     MOCKABLE_FUNCTION(, bool, IoTHubTransport_SignalEndWorkerThread, TRANSPORT_HANDLE, transportHandle, IOTHUB_CLIENT_CORE_HANDLE, clientHandle);

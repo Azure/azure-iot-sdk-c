@@ -134,7 +134,7 @@ static void DestroyAction(SCHEMA_ACTION_HANDLE actionHandle)
     if (action != NULL)
     {
         size_t j;
-        
+
         for (j = 0; j < action->ArgumentCount; j++)
         {
             DestroyActionArgument(action->ArgumentHandles[j]);
@@ -328,15 +328,22 @@ static SCHEMA_RESULT AddModelProperty(SCHEMA_MODEL_TYPE_HANDLE_DATA* modelType, 
                 /* If possible, reduce the memory of over allocation */
                 if (result != SCHEMA_OK)
                 {
-                    SCHEMA_PROPERTY_HANDLE* oldProperties = (SCHEMA_PROPERTY_HANDLE*)realloc(modelType->Properties, sizeof(SCHEMA_PROPERTY_HANDLE) * modelType->PropertyCount);
-                    if (oldProperties == NULL)
+                    if (modelType->PropertyCount > 0)
                     {
-                        result = SCHEMA_ERROR;
-                        LogError("(result = %s)", ENUM_TO_STRING(SCHEMA_RESULT, result));
+                        SCHEMA_PROPERTY_HANDLE *oldProperties = (SCHEMA_PROPERTY_HANDLE *)realloc(modelType->Properties, sizeof(SCHEMA_PROPERTY_HANDLE) * modelType->PropertyCount);
+                        if (oldProperties == NULL)
+                        {
+                            result = SCHEMA_ERROR;
+                            LogError("(result = %s)", ENUM_TO_STRING(SCHEMA_RESULT, result));
+                        }
+                        else
+                        {
+                            modelType->Properties = oldProperties;
+                        }
                     }
                     else
                     {
-                        modelType->Properties = oldProperties;
+                        modelType->Properties = NULL;
                     }
                 }
             }
@@ -431,7 +438,7 @@ SCHEMA_HANDLE Schema_GetSchemaByNamespace(const char* schemaNamespace)
         SCHEMA_HANDLE* handle = (g_schemas==NULL)?NULL:(SCHEMA_HANDLE*)VECTOR_find_if(g_schemas, (PREDICATE_FUNCTION)SchemaNamespacesMatch, schemaNamespace);
         if (handle != NULL)
         {
-            /* Codes_SRS_SCHEMA_99_148: [Schema_GetSchemaByNamespace shall search all active schemas and return the schema with the 
+            /* Codes_SRS_SCHEMA_99_148: [Schema_GetSchemaByNamespace shall search all active schemas and return the schema with the
                namespace given by the schemaNamespace argument.] */
             result = *handle;
         }
@@ -918,14 +925,21 @@ SCHEMA_ACTION_HANDLE Schema_CreateModelAction(SCHEMA_MODEL_TYPE_HANDLE modelType
                     /* If possible, reduce the memory of over allocation */
                     if (result == NULL)
                     {
-                        SCHEMA_ACTION_HANDLE* oldActions = (SCHEMA_ACTION_HANDLE*)realloc(modelType->Actions, sizeof(SCHEMA_ACTION_HANDLE) * modelType->ActionCount);
-                        if (oldActions == NULL)
+                        if (modelType->ActionCount > 0)
                         {
-                            LogError("(Error code:%s)", ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
+                            SCHEMA_ACTION_HANDLE *oldActions = (SCHEMA_ACTION_HANDLE *)realloc(modelType->Actions, sizeof(SCHEMA_ACTION_HANDLE) * modelType->ActionCount);
+                            if (oldActions == NULL)
+                            {
+                                LogError("(Error code:%s)", ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
+                            }
+                            else
+                            {
+                                modelType->Actions = oldActions;
+                            }
                         }
                         else
                         {
-                            modelType->Actions = oldActions;
+                            modelType->Actions = NULL;
                         }
                     }
                 }
@@ -1066,7 +1080,11 @@ SCHEMA_RESULT Schema_AddModelActionArgument(SCHEMA_ACTION_HANDLE actionHandle, c
             }
             else
             {
+                action->ArgumentHandles = newArguments;
+
                 SCHEMA_ACTION_ARGUMENT_HANDLE_DATA* newActionArgument;
+
+                action->ArgumentHandles = newArguments;
                 if ((newActionArgument = (SCHEMA_ACTION_ARGUMENT_HANDLE_DATA*)malloc(sizeof(SCHEMA_ACTION_ARGUMENT_HANDLE_DATA))) == NULL)
                 {
                     /* Codes_SRS_SCHEMA_99_112: [On any other error, Schema_ AddModelActionArgumet shall return SCHEMA_ERROR.] */
@@ -1092,7 +1110,6 @@ SCHEMA_RESULT Schema_AddModelActionArgument(SCHEMA_ACTION_HANDLE actionHandle, c
                     }
                     else
                     {
-                        action->ArgumentHandles = newArguments;
                         /* Codes_SRS_SCHEMA_99_119: [Schema_AddModelActionArgument shall preserve the order of the action arguments according to the order in which they were added, starting with index 0 for the first added argument.] */
                         action->ArgumentHandles[action->ArgumentCount] = newActionArgument;
                         action->ArgumentCount++;
@@ -1105,14 +1122,21 @@ SCHEMA_RESULT Schema_AddModelActionArgument(SCHEMA_ACTION_HANDLE actionHandle, c
                 /* If possible, reduce the memory of over allocation */
                 if (result == SCHEMA_ERROR)
                 {
-                    SCHEMA_ACTION_ARGUMENT_HANDLE* oldArguments = (SCHEMA_ACTION_ARGUMENT_HANDLE*)realloc(action->ArgumentHandles, sizeof(SCHEMA_ACTION_ARGUMENT_HANDLE) * action->ArgumentCount);
-                    if (oldArguments == NULL)
+                    if (action->ArgumentCount > 0)
                     {
-                        LogError("(result = %s)", ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
+                        SCHEMA_ACTION_ARGUMENT_HANDLE *oldArguments = (SCHEMA_ACTION_ARGUMENT_HANDLE *)realloc(action->ArgumentHandles, sizeof(SCHEMA_ACTION_ARGUMENT_HANDLE) * action->ArgumentCount);
+                        if (oldArguments == NULL)
+                        {
+                            LogError("(result = %s)", ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
+                        }
+                        else
+                        {
+                            action->ArgumentHandles = oldArguments;
+                        }
                     }
                     else
                     {
-                        action->ArgumentHandles = oldArguments;
+                        action->ArgumentHandles = NULL;
                     }
                 }
             }
@@ -1807,15 +1831,22 @@ SCHEMA_STRUCT_TYPE_HANDLE Schema_CreateStructType(SCHEMA_HANDLE schemaHandle, co
                 /* If possible, reduce the memory of over allocation */
                 if (result == NULL)
                 {
-                    SCHEMA_STRUCT_TYPE_HANDLE* oldStructTypes = (SCHEMA_STRUCT_TYPE_HANDLE*)realloc(schema->StructTypes, sizeof(SCHEMA_STRUCT_TYPE_HANDLE) * schema->StructTypeCount);
-                    if (oldStructTypes == NULL)
+                    if (schema->StructTypeCount > 0)
                     {
-                        result = NULL;
-                        LogError("(Error code:%s)", ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
+                        SCHEMA_STRUCT_TYPE_HANDLE *oldStructTypes = (SCHEMA_STRUCT_TYPE_HANDLE *)realloc(schema->StructTypes, sizeof(SCHEMA_STRUCT_TYPE_HANDLE) * schema->StructTypeCount);
+                        if (oldStructTypes == NULL)
+                        {
+                            result = NULL;
+                            LogError("(Error code:%s)", ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
+                        }
+                        else
+                        {
+                            schema->StructTypes = oldStructTypes;
+                        }
                     }
                     else
                     {
-                        schema->StructTypes = oldStructTypes;
+                        schema->StructTypes = NULL;
                     }
                 }
             }
@@ -1840,7 +1871,7 @@ const char* Schema_GetStructTypeName(SCHEMA_STRUCT_TYPE_HANDLE structTypeHandle)
         /* Codes_SRS_SCHEMA_99_135: [Schema_GetStructTypeName shall return the name of a struct type identified by the structTypeHandle argument.] */
         result = ((SCHEMA_STRUCT_TYPE_HANDLE_DATA*)structTypeHandle)->Name;
     }
-    
+
     return result;
 }
 
@@ -2011,15 +2042,22 @@ SCHEMA_RESULT Schema_AddStructTypeProperty(SCHEMA_STRUCT_TYPE_HANDLE structTypeH
                 /* If possible, reduce the memory of over allocation */
                 if (result != SCHEMA_OK)
                 {
-                    SCHEMA_PROPERTY_HANDLE* oldProperties = (SCHEMA_PROPERTY_HANDLE*)realloc(structType->Properties, sizeof(SCHEMA_PROPERTY_HANDLE) * structType->PropertyCount);
-                    if (oldProperties == NULL)
+                    if (structType->PropertyCount > 0)
                     {
-                        result = SCHEMA_ERROR;
-                        LogError("(result = %s)", ENUM_TO_STRING(SCHEMA_RESULT, result));
+                        SCHEMA_PROPERTY_HANDLE *oldProperties = (SCHEMA_PROPERTY_HANDLE *)realloc(structType->Properties, sizeof(SCHEMA_PROPERTY_HANDLE) * structType->PropertyCount);
+                        if (oldProperties == NULL)
+                        {
+                            result = SCHEMA_ERROR;
+                            LogError("(result = %s)", ENUM_TO_STRING(SCHEMA_RESULT, result));
+                        }
+                        else
+                        {
+                            structType->Properties = oldProperties;
+                        }
                     }
                     else
                     {
-                        structType->Properties = oldProperties;
+                        structType->Properties = NULL;
                     }
                 }
             }
@@ -2235,7 +2273,7 @@ SCHEMA_MODEL_TYPE_HANDLE Schema_GetModelByIndex(SCHEMA_HANDLE schemaHandle, size
     else
     {
 
-        /* Codes_SRS_SCHEMA_99_126: [Schema_GetModelByIndex shall return a non-NULL SCHEMA_MODEL_TYPE_HANDLE corresponding to the model identified by schemaHandle and matching the index number provided by the index argument.] */ 
+        /* Codes_SRS_SCHEMA_99_126: [Schema_GetModelByIndex shall return a non-NULL SCHEMA_MODEL_TYPE_HANDLE corresponding to the model identified by schemaHandle and matching the index number provided by the index argument.] */
         /* Codes_SRS_SCHEMA_99_127: [The index argument is zero based, and the order in which models were added shall be the index in which they will be retrieved.] */
         result = schema->ModelTypes[index];
     }
@@ -2294,7 +2332,7 @@ SCHEMA_RESULT Schema_AddModelModel(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, con
         else
         {
             /*Codes_SRS_SCHEMA_99_164: [If the function succeeds, then the return value shall be SCHEMA_OK.]*/
-            
+
             result = SCHEMA_OK;
         }
     }
@@ -2459,7 +2497,7 @@ size_t Schema_GetModelModelByIndex_Offset(SCHEMA_MODEL_TYPE_HANDLE modelTypeHand
 SCHEMA_MODEL_TYPE_HANDLE Schema_GetModelModelyByIndex(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t index)
 {
     SCHEMA_MODEL_TYPE_HANDLE result;
-    if (modelTypeHandle == NULL) 
+    if (modelTypeHandle == NULL)
     {
         /*Codes_SRS_SCHEMA_99_173: [Schema_GetModelModelyByIndex shall return NULL in the cases when it cannot provide the handle.]*/
         result = NULL;
@@ -2845,7 +2883,7 @@ SCHEMA_DESIRED_PROPERTY_HANDLE Schema_GetModelDesiredPropertyByIndex(SCHEMA_MODE
     /*Codes_SRS_SCHEMA_02_038: [ If modelTypeHandle is NULL then Schema_GetModelDesiredPropertyByIndex shall fail and return NULL. ]*/
     if (modelTypeHandle == NULL)
     {
-        LogError("invalid argument SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle=%p, size_t index=%p", modelTypeHandle, index);
+        LogError("invalid argument SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle=%p, size_t index=%lu", modelTypeHandle, (unsigned long)index);
         result = NULL;
     }
     else

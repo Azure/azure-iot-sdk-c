@@ -19,7 +19,7 @@ extern "C"
 /*Codes_SRS_DATA_SERIALIZER_07_001: [DataSerializer will have the following interface]*/
 #define DATA_SERIALIZER_RESULT_VALUES           \
 DATA_SERIALIZER_INVALID_ARG,                    \
-DATA_SERIALIZER_ERROR							\
+DATA_SERIALIZER_ERROR                            \
 
 DEFINE_ENUM(DATA_SERIALIZER_RESULT, DATA_SERIALIZER_RESULT_VALUES);
 

@@ -12,21 +12,16 @@
 #include "iothubtransportamqp.h"
 #include "iothub_devicemethod.h"
 
-
-static TEST_MUTEX_HANDLE g_dllByDll;
-
 BEGIN_TEST_SUITE(iothubclient_amqp_device_method_e2e)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
-        TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
         device_method_e2e_init(false);
     }
 
     TEST_SUITE_CLEANUP(TestClassCleanup)
     {
         device_method_e2e_deinit();
-        TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
     }
 
     TEST_FUNCTION_CLEANUP(TestFunctionCleanup)
@@ -95,10 +90,11 @@ BEGIN_TEST_SUITE(iothubclient_amqp_device_method_e2e)
         device_method_e2e_method_call_with_embedded_single_quote_x509(AMQP_Protocol);
     }
 #endif
-    //TEST_FUNCTION(IotHub_AMQP_Method_Call_With_String_sas_multiplexed)
-    //{
-    //    device_method_e2e_method_call_with_string_sas_multiplexed(AMQP_Protocol, 2);
-    //}
+
+    TEST_FUNCTION(IotHub_AMQP_Method_Call_With_String_sas_multiplexed)
+    {
+        device_method_e2e_method_call_with_string_sas_multiplexed(AMQP_Protocol, 2);
+    }
 
     TEST_FUNCTION(IotHub_AMQP_Method_Call_With_String_sas_multiplexed_single_device)
     {

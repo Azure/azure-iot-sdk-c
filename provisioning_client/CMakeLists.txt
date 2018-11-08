@@ -18,6 +18,7 @@ set(AUTH_CLIENT_H_FILES
     ./inc/azure_prov_client/prov_security_factory.h
     ./inc/azure_prov_client/internal/iothub_auth_client.h
     ./inc/azure_prov_client/internal/prov_auth_client.h
+    ./inc/azure_prov_client/iothub_security_factory.h
     )
 
 set(AUTH_CLIENT_C_FILES
@@ -28,7 +29,7 @@ set(AUTH_CLIENT_C_FILES
 
 set(HSM_CLIENT_LIBRARY)
 
-set(HSM_CLIENT_H_FILES 
+set(HSM_CLIENT_H_FILES
     ./adapters/hsm_client_data.h)
 set(HSM_CLIENT_C_FILES
     ./adapters/hsm_client_data.c)
@@ -64,9 +65,9 @@ else ()
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHSM_TYPE_X509")
             set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHSM_TYPE_X509")
 
-            set(HSM_CLIENT_H_FILES ${HSM_CLIENT_H_FILES} 
+            set(HSM_CLIENT_H_FILES ${HSM_CLIENT_H_FILES}
                 ./adapters/hsm_client_riot.h)
-            set(HSM_CLIENT_C_FILES ${HSM_CLIENT_C_FILES} 
+            set(HSM_CLIENT_C_FILES ${HSM_CLIENT_C_FILES}
                 ./adapters/hsm_client_riot.c)
 
             # Include the riot directories
@@ -82,11 +83,11 @@ else ()
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHSM_TYPE_SAS_TOKEN")
             set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHSM_TYPE_SAS_TOKEN")
 
-            set(HSM_CLIENT_H_FILES ${HSM_CLIENT_H_FILES} 
+            set(HSM_CLIENT_H_FILES ${HSM_CLIENT_H_FILES}
                 ./adapters/hsm_client_tpm.h)
-            set(HSM_CLIENT_C_FILES ${HSM_CLIENT_C_FILES} 
+            set(HSM_CLIENT_C_FILES ${HSM_CLIENT_C_FILES}
                 ./adapters/hsm_client_tpm.c)
-    
+
             if (${use_tpm_simulator})
                 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_EMULATOR_MODULE")
                 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_EMULATOR_MODULE")
@@ -99,6 +100,16 @@ else ()
                 set(HSM_CLIENT_LIBRARY ${HSM_CLIENT_LIBRARY} Tbs)
             endif ()
         endif ()
+
+        if (${hsm_type_symm_key})
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHSM_TYPE_SYMM_KEY")
+            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHSM_TYPE_SYMM_KEY")
+
+            set(HSM_CLIENT_H_FILES ${HSM_CLIENT_H_FILES} 
+                ./adapters/hsm_client_key.h)
+            set(HSM_CLIENT_C_FILES ${HSM_CLIENT_C_FILES} 
+                ./adapters/hsm_client_key.c)
+        endif()
     endif ()
 endif ()
 
@@ -106,11 +117,11 @@ if (${hsm_type_edge_module})
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHSM_TYPE_HTTP_EDGE")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHSM_TYPE_HTTP_EDGE")
 
-    set(HSM_CLIENT_H_FILES ${HSM_CLIENT_H_FILES} 
+    set(HSM_CLIENT_H_FILES ${HSM_CLIENT_H_FILES}
         ./adapters/hsm_client_http_edge.h)
-    set(HSM_CLIENT_C_FILES ${HSM_CLIENT_C_FILES} 
+    set(HSM_CLIENT_C_FILES ${HSM_CLIENT_C_FILES}
         ./adapters/hsm_client_http_edge.c)
-        
+
     set(HSM_CLIENT_LIBRARY ${HSM_CLIENT_LIBRARY} uhttp)
 endif()
 
@@ -154,7 +165,7 @@ endif()
 if(WIN32)
     #windows needs this define
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-  
+
     if(WINCE) # Be lax with WEC 2013 compiler
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3")
@@ -194,7 +205,7 @@ if(${use_prov_client})
 
     if (${build_as_dynamic})
         add_library(prov_device_client_dll SHARED
-            ${PROV_DEVICE_CLIENT_SOURCE_C_FILES} 
+            ${PROV_DEVICE_CLIENT_SOURCE_C_FILES}
             ${PROV_DEVICE_CLEINT_SOURCE_H_FILES}
             ${PROV_DEVICE_LL_CLIENT_SOURCE_C_FILES}
             ${PROV_DEVICE_LL_CLEINT_SOURCE_H_FILES}
@@ -224,11 +235,11 @@ if(${use_prov_client})
     endif()
 
     if (${use_http})
-        set(PROV_HTTP_CLIENT_H_FILES 
+        set(PROV_HTTP_CLIENT_H_FILES
             ./inc/azure_prov_client/prov_transport.h
             ./inc/azure_prov_client/internal/prov_transport_private.h
             ./inc/azure_prov_client/prov_transport_http_client.h)
-        set(PROV_HTTP_CLIENT_C_FILES 
+        set(PROV_HTTP_CLIENT_C_FILES
             ./src/prov_transport_http_client.c)
 
         # Provisioning http Transport Client library
@@ -244,24 +255,24 @@ if(${use_prov_client})
     if (${use_amqp})
         include_directories(${UAMQP_INCLUDES} ${UAMQP_INC_FOLDER})
 
-        set(PROV_AMQP_CLIENT_H_FILES 
+        set(PROV_AMQP_CLIENT_H_FILES
             ./inc/azure_prov_client/prov_transport.h
             ./inc/azure_prov_client/prov_transport_amqp_client.h
             ./inc/azure_prov_client/internal/prov_transport_amqp_common.h
             ./inc/azure_prov_client/internal/prov_transport_private.h
             ./inc/azure_prov_client/internal/prov_sasl_tpm.h)
-        set(PROV_AMQP_CLIENT_C_FILES 
+        set(PROV_AMQP_CLIENT_C_FILES
             ./src/prov_transport_amqp_client.c
             ./src/prov_transport_amqp_common.c
             ./src/prov_sasl_tpm.c)
 
-        set(PROV_AMQP_WS_CLIENT_H_FILES 
+        set(PROV_AMQP_WS_CLIENT_H_FILES
             ./inc/azure_prov_client/prov_transport.h
             ./inc/azure_prov_client/prov_transport_amqp_ws_client.h
             ./inc/azure_prov_client/internal/prov_transport_amqp_common.h
             ./inc/azure_prov_client/internal/prov_transport_private.h
             ./inc/azure_prov_client/internal/prov_sasl_tpm.h)
-        set(PROV_AMQP_WS_CLIENT_C_FILES 
+        set(PROV_AMQP_WS_CLIENT_C_FILES
             ./src/prov_transport_amqp_ws_client.c
             ./src/prov_transport_amqp_common.c
             ./src/prov_sasl_tpm.c)
@@ -285,21 +296,21 @@ if(${use_prov_client})
     if (${use_mqtt})
         include_directories(${MQTT_INC_FOLDER})
 
-        set(PROV_MQTT_CLIENT_H_FILES 
+        set(PROV_MQTT_CLIENT_H_FILES
             ./inc/azure_prov_client/prov_transport.h
             ./inc/azure_prov_client/prov_transport_mqtt_client.h
             ./inc/azure_prov_client/internal/prov_transport_private.h
             ./inc/azure_prov_client/internal/prov_transport_mqtt_common.h)
-        set(PROV_MQTT_CLIENT_C_FILES 
+        set(PROV_MQTT_CLIENT_C_FILES
             ./src/prov_transport_mqtt_client.c
             ./src/prov_transport_mqtt_common.c)
 
-        set(PROV_MQTT_WS_CLIENT_H_FILES 
+        set(PROV_MQTT_WS_CLIENT_H_FILES
             ./inc/azure_prov_client/prov_transport.h
             ./inc/azure_prov_client/prov_transport_mqtt_ws_client.h
             ./inc/azure_prov_client/internal/prov_transport_private.h
             ./inc/azure_prov_client/internal/prov_transport_mqtt_common.h)
-        set(PROV_MQTT_WS_CLIENT_C_FILES 
+        set(PROV_MQTT_WS_CLIENT_C_FILES
             ./src/prov_transport_mqtt_ws_client.c
             ./src/prov_transport_mqtt_common.c)
 
@@ -332,7 +343,7 @@ endif ()
 if(${use_installed_dependencies})
 
     # Install Provisioning libs
-    set(package_location "cmake")
+    set(package_location "share/cmake/${PROJECT_NAME}")
 
     if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
         set(CMAKE_INSTALL_LIBDIR "lib")
@@ -354,7 +365,7 @@ if(${use_installed_dependencies})
         COMPATIBILITY SameMajorVersion
     )
 
-    configure_file("configs/${PROJECT_NAME}Config.cmake"
+    configure_file("../configs/${PROJECT_NAME}Config.cmake"
         "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}Config.cmake"
         COPYONLY
     )
@@ -368,7 +379,7 @@ if(${use_installed_dependencies})
 
     install(
         FILES
-            "configs/${PROJECT_NAME}Config.cmake"
+            "../configs/${PROJECT_NAME}Config.cmake"
             "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}ConfigVersion.cmake"
         DESTINATION
             ${package_location}
@@ -379,7 +390,7 @@ else()
         set(CMAKE_INSTALL_LIBDIR "lib")
     endif()
 
-    install(FILES ${provisioning_headers} 
+    install(FILES ${provisioning_headers}
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azure_prov_client)
     install(TARGETS ${provisioning_libs}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}

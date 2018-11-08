@@ -48,8 +48,8 @@ extern "C"
     IOTHUB_CLIENT_RETRY_RANDOM
 
     /** @brief Enumeration passed in by the IoT Hub when the event confirmation
-    *		   callback is invoked to indicate status of the event processing in
-    *		   the hub.
+    *           callback is invoked to indicate status of the event processing in
+    *           the hub.
     */
     DEFINE_ENUM(IOTHUB_CLIENT_RETRY_POLICY, IOTHUB_CLIENT_RETRY_POLICY_VALUES);
 
@@ -61,7 +61,7 @@ extern "C"
     IOTHUB_CLIENT_SEND_STATUS_BUSY
 
     /** @brief Enumeration returned by the ::IoTHubClient_LL_GetSendStatus
-    *		   API to indicate the current sending status of the IoT Hub client.
+    *           API to indicate the current sending status of the IoT Hub client.
     */
     DEFINE_ENUM(IOTHUB_CLIENT_STATUS, IOTHUB_CLIENT_STATUS_VALUES);
 
@@ -85,7 +85,7 @@ extern "C"
     IOTHUBMESSAGE_ABANDONED
 
     /** @brief Enumeration returned by the callback which is invoked whenever the
-    *		   IoT Hub sends a message to the device.
+    *           IoT Hub sends a message to the device.
     */
     DEFINE_ENUM(IOTHUBMESSAGE_DISPOSITION_RESULT, IOTHUBMESSAGE_DISPOSITION_RESULT_VALUES);
 
@@ -105,8 +105,8 @@ extern "C"
     IOTHUB_CLIENT_CONFIRMATION_ERROR                 \
 
     /** @brief Enumeration passed in by the IoT Hub when the event confirmation
-    *		   callback is invoked to indicate status of the event processing in
-    *		   the hub.
+    *           callback is invoked to indicate status of the event processing in
+    *           the hub.
     */
     DEFINE_ENUM(IOTHUB_CLIENT_CONFIRMATION_RESULT, IOTHUB_CLIENT_CONFIRMATION_RESULT_VALUES);
 
@@ -116,8 +116,8 @@ extern "C"
 
 
     /** @brief Enumeration passed in by the IoT Hub when the connection status
-    *		   callback is invoked to indicate status of the connection in
-    *		   the hub.
+    *           callback is invoked to indicate status of the connection in
+    *           the hub.
     */
     DEFINE_ENUM(IOTHUB_CLIENT_CONNECTION_STATUS, IOTHUB_CLIENT_CONNECTION_STATUS_VALUES);
 
@@ -131,8 +131,8 @@ extern "C"
     IOTHUB_CLIENT_CONNECTION_OK                            \
 
     /** @brief Enumeration passed in by the IoT Hub when the connection status
-    *		   callback is invoked to indicate status of the connection in
-    *		   the hub.
+    *           callback is invoked to indicate status of the connection in
+    *           the hub.
     */
     DEFINE_ENUM(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, IOTHUB_CLIENT_CONNECTION_STATUS_REASON_VALUES);
 
@@ -174,46 +174,46 @@ extern "C"
     *                   It should return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK otherwise.
     *                   If a NULL is provided for parameter "data" and/or zero is provided for "size", the user indicates to the client that the complete file has been uploaded.
     *                   In such case this callback will be invoked only once more to indicate the status of the final block upload.
-    *                   If result is not FILE_UPLOAD_OK, the download is cancelled and this callback stops being invoked.
-    *                   When this callback is called for the last time, no data or size is expected, so data and size are set to NULL
+    *                   If result is not FILE_UPLOAD_OK, the upload is cancelled and this callback stops being invoked.
+    *                   When this callback is called for the last time, no data or size is expected, so data and size are NULL
     */
     typedef void(*IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK)(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context);
     typedef IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT(*IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX)(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context);
 
-    /** @brief	This struct captures IoTHub client configuration. */
+    /** @brief    This struct captures IoTHub client configuration. */
     typedef struct IOTHUB_CLIENT_CONFIG_TAG
     {
         /** @brief A function pointer that is passed into the @c IoTHubClientCreate.
-        *	A function definition for AMQP is defined in the include @c iothubtransportamqp.h.
+        *    A function definition for AMQP is defined in the include @c iothubtransportamqp.h.
         *   A function definition for HTTP is defined in the include @c iothubtransporthttp.h
         *   A function definition for MQTT is defined in the include @c iothubtransportmqtt.h */
         IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;
 
-        /** @brief	A string that identifies the device. */
+        /** @brief    A string that identifies the device. */
         const char* deviceId;
 
-        /** @brief	The device key used to authenticate the device.
+        /** @brief    The device key used to authenticate the device.
         If neither deviceSasToken nor deviceKey is present then the authentication is assumed x509.*/
         const char* deviceKey;
 
-        /** @brief	The device SAS Token used to authenticate the device in place of device key.
+        /** @brief    The device SAS Token used to authenticate the device in place of device key.
         If neither deviceSasToken nor deviceKey is present then the authentication is assumed x509.*/
         const char* deviceSasToken;
 
-        /** @brief	The IoT Hub name to which the device is connecting. */
+        /** @brief    The IoT Hub name to which the device is connecting. */
         const char* iotHubName;
 
-        /** @brief	IoT Hub suffix goes here, e.g., private.azure-devices-int.net. */
+        /** @brief    IoT Hub suffix goes here, e.g., private.azure-devices-int.net. */
         const char* iotHubSuffix;
 
         const char* protocolGatewayHostName;
     } IOTHUB_CLIENT_CONFIG;
 
-    /** @brief	This struct captures IoTHub client device configuration. */
+    /** @brief    This struct captures IoTHub client device configuration. */
     typedef struct IOTHUB_CLIENT_DEVICE_CONFIG_TAG
     {
         /** @brief A function pointer that is passed into the @c IoTHubClientCreate.
-        *	A function definition for AMQP is defined in the include @c iothubtransportamqp.h.
+        *    A function definition for AMQP is defined in the include @c iothubtransportamqp.h.
         *   A function definition for HTTP is defined in the include @c iothubtransporthttp.h
         *   A function definition for MQTT is defined in the include @c iothubtransportmqtt.h */
         IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;
@@ -221,14 +221,14 @@ extern "C"
         /** @brief a transport handle implementing the protocol */
         void * transportHandle;
 
-        /** @brief	A string that identifies the device. */
+        /** @brief    A string that identifies the device. */
         const char* deviceId;
 
-        /** @brief	The device key used to authenticate the device.
+        /** @brief    The device key used to authenticate the device.
         x509 authentication is is not supported for multiplexed connections*/
         const char* deviceKey;
 
-        /** @brief	The device SAS Token used to authenticate the device in place of device key.
+        /** @brief    The device SAS Token used to authenticate the device in place of device key.
         x509 authentication is is not supported for multiplexed connections.*/
         const char* deviceSasToken;
     } IOTHUB_CLIENT_DEVICE_CONFIG;

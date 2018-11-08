@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 // CAVEAT: This sample is to demonstrate azure IoT client concepts only and is not a guide design principles or style
-// Checking of return codes and error values shall be omitted for brevity.  Please practice sound engineering practices 
+// Checking of return codes and error values shall be omitted for brevity.  Please practice sound engineering practices
 // when writing production code.
 
 #include <stdio.h>
@@ -11,6 +11,7 @@
 #include "iothub.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/http_proxy_io.h"
+#include "azure_c_shared_utility/threadapi.h"
 
 #include "azure_prov_client/prov_device_client.h"
 #include "azure_prov_client/prov_security_factory.h"
@@ -62,6 +63,7 @@ DEFINE_ENUM_STRINGS(PROV_DEVICE_REG_STATUS, PROV_DEVICE_REG_STATUS_VALUES);
 static const char* global_prov_uri = "global.azure-devices-provisioning.net";
 static const char* id_scope = "[ID Scope]";
 
+static bool g_registration_complete = false;
 static bool g_use_proxy = false;
 static const char* PROXY_ADDRESS = "127.0.0.1";
 
@@ -82,6 +84,11 @@ static void register_device_callback(PROV_DEVICE_RESULT register_result, const c
     {
         (void)printf("\r\nRegistration Information received from service: %s, deviceId: %s\r\n", iothub_uri, device_id);
     }
+    else
+    {
+        (void)printf("\r\nFailure registering device: %s\r\n", ENUM_TO_STRING(PROV_DEVICE_RESULT, register_result));
+    }
+    g_registration_complete = true;
 }
 
 int main()
@@ -93,7 +100,7 @@ int main()
     // Used to initialize IoTHub SDK subsystem
     (void)IoTHub_Init();
     (void)prov_dev_security_init(hsm_type);
-    
+
     HTTP_PROXY_OPTIONS http_proxy;
     PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION prov_transport;
 
@@ -145,10 +152,17 @@ int main()
         Prov_Device_SetOption(prov_device_handle, OPTION_TRUSTED_CERT, certificates);
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
+        // This option sets the registration ID it overrides the registration ID that is 
+        // set within the HSM so be cautious if setting this value
+        //Prov_Device_SetOption(prov_device_handle, PROV_REGISTRATION_ID, "[REGISTRATION ID]");
+
         prov_device_result = Prov_Device_Register_Device(prov_device_handle, register_device_callback, NULL, registation_status_callback, NULL);
 
-        (void)printf("\r\nRegistering... Press enter key to interrupt.\r\n\r\n");
-        (void)getchar();
+        (void)printf("\r\nRegistering Device\r\n\r\n");
+        do
+        {
+            ThreadAPI_Sleep(1000);
+        } while (!g_registration_complete);
 
         Prov_Device_Destroy(prov_device_handle);
     }

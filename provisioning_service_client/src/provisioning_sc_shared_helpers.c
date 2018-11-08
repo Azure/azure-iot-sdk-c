@@ -134,10 +134,10 @@ static JSON_Value* struct_array_toJson(void* arr[], size_t len, TO_JSON_FUNCTION
     {
         for (size_t i = 0; i < len; i++)
         {
-            JSON_Value* model; 
+            JSON_Value* model;
             if ((model = toJson(arr[i])) == NULL)
             {
-                LogError("Failed to deserialize model at index %d", i);
+                LogError("Failed to deserialize model at index %lu", (unsigned long)i);
                 json_value_free(json_array_val);
                 json_array_val = NULL;
                 break;
@@ -185,14 +185,14 @@ void** struct_array_fromJson(JSON_Array* json_arr, size_t len, FROM_JSON_FUNCTIO
             {
                 if ((element_obj = json_array_get_object(json_arr, i)) == NULL)
                 {
-                    LogError("Failed to retrieve object at index %d from JSON Array", i);
+                    LogError("Failed to retrieve object at index %lu from JSON Array", (unsigned long)i);
                     free_struct_arr(struct_arr, i);
                     struct_arr = NULL;
                     break;
                 }
                 else if ((struct_arr[i] = fromJson(element_obj)) == NULL)
                 {
-                    LogError("Failed to deserialize object at index %d from JSON Array", i);
+                    LogError("Failed to deserialize object at index %lu from JSON Array", (unsigned long)i);
                     free_struct_arr(struct_arr, i);
                     struct_arr = NULL;
                     break;

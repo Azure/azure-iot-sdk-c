@@ -26,7 +26,7 @@ static const char* modulesContent = "{\"sunny\": {\"properties.desired\": {\"tem
                                                     \"goolily\": {\"version\": \"1.0\",\"type\": \"docker\",\"status\": \"running\",\"restartPolicy\": \"on-failure\",\"settings\": {\"image\": \"asa\",\"createOptions\": \"\"},\"configuration\": {\"id\": \"configurationapplyedgeagentreportinge2etestcit-config-a9ed4811-1b57-48bf-8af2-02319a38de01\"}}}}}, \
                                       \"$edgeHub\": {\"properties.desired\": {\"schemaVersion\": \"1.0\",\"routes\": {\"route1\": \"from * INTO $upstream\"},\"storeAndForwardConfiguration\": {\"timeToLiveSecs\": 20}}}}";
 
-// Configurations can only have a non-blank device or modules content. 
+// Configurations can only have a non-blank device or modules content.
 // Sample devicecontent is "{\"properties.desired.settings1\": {\"c\": 3, \"d\" : 4}, \"properties.desired.settings2\" : \"xyz\"}";
 static const char* deviceContent = "";
 

@@ -1,5 +1,7 @@
 # Azure IoT C SDKs and Libraries
 
+[![Build Status](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/c/integrate-into-repo-C)](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_build/latest?definitionId=85)
+
 This repository contains the following:
 * **Azure IoT Hub Device C SDK** to connect devices running C code to Azure IoT Hub.
 * **Azure IoT Hub Device Provisioning Service Client SDK** for enrolling devices with [Azure IoT Device Provisioning Services](https://docs.microsoft.com/azure/iot-dps/) and managing enrollments lists.

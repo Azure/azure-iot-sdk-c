@@ -28,6 +28,8 @@
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 
+#include "azure_c_shared_utility/shared_util_options.h"
+
 #include "azure_c_shared_utility/threadapi.h"
 #include "iothubtest.h"
 #include "azure_c_shared_utility/xlogging.h"
@@ -43,6 +45,9 @@
 #include "azure_uamqp_c/saslclientio.h"
 #include "azure_uamqp_c/sasl_plain.h"
 #include "azure_uamqp_c/cbs.h"
+#ifdef SET_TRUSTED_CERT
+#include "certs.h"
+#endif // SET_TRUSTED_CERT
 
 const char* AMQP_RECV_ADDRESS_FMT = "%s/ConsumerGroups/%s/Partitions/%u";
 const char* AMQP_ADDRESS_PATH_FMT = "/devices/%s/messages/deviceBound";
@@ -112,7 +117,7 @@ unsigned int ConvertToUnsignedInt(const unsigned char data[], int position)
     else
     {
         result = 0;
-        for (int nIndex = 0; nIndex < 4; nIndex++) 
+        for (int nIndex = 0; nIndex < 4; nIndex++)
         {
             int nTest = data[nIndex+position];
             nTest <<= (nIndex*8);
@@ -954,7 +959,7 @@ static AMQP_CONN_INFO* createAmqpConnection(IOTHUB_VALIDATION_INFO* devhubValInf
                                             destroyAmqpConnection(devhubValInfo->amqp_connection);
                                             result = NULL;
                                         }
-                                    
+
                                         amqpvalue_destroy(target);
                                     }
 
@@ -1063,7 +1068,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
         LogError("Invalid parameter given in IoTHubTest_ListenForEvent DevhubHandle: 0x%p\r\nMessage Callback: 0x%p.", devhubHandle, msgCallback);
         result = IOTHUB_TEST_CLIENT_ERROR;
     }
-    else 
+    else
     {
         XIO_HANDLE sasl_io = NULL;
         CONNECTION_HANDLE connection = NULL;
@@ -1122,6 +1127,10 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                 }
                 else
                 {
+#ifdef SET_TRUSTED_CERT
+                    xio_setoption(tls_io, OPTION_TRUSTED_CERT, certificates);
+#endif // SET_TRUSTED_CERT
+
                     /* create the SASL client IO using the TLS IO */
                     SASLCLIENTIO_CONFIG sasl_io_config;
                     sasl_io_config.underlying_io = tls_io;
@@ -1298,8 +1307,9 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEventForMaxDrainTime(IOTHUB_TEST_H
     return IoTHubTest_ListenForRecentEvent(devhubHandle, msgCallback, partitionCount, context, MAX_DRAIN_TIME);
 }
 
-static void on_message_send_complete(void* context, MESSAGE_SEND_RESULT send_result)
+static void on_message_send_complete(void* context, MESSAGE_SEND_RESULT send_result, AMQP_VALUE delivery_state)
 {
+    (void)delivery_state;
     MESSAGE_SEND_STATE* message_send_state = (MESSAGE_SEND_STATE*)context;
     if (send_result == MESSAGE_SEND_OK)
     {
@@ -1319,7 +1329,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
         ((len == 0) && (data != NULL)) ||
         ((data != NULL) && (len == 0)))
     {
-        LogError("Invalid arguments for IoTHubTest_SendMessage, devhubHandle = %p, len = %lu, data = %p.", devhubHandle, (unsigned long)len, data);
+        LogError("Invalid arguments for IoTHubTest_SendMessage, devhubHandle = %p, len = %zu, data = %p.", devhubHandle, len, data);
         result = IOTHUB_TEST_CLIENT_ERROR;
     }
     else
@@ -1403,7 +1413,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
                             sasl_io_config.underlying_io = tls_io;
                             sasl_io_config.sasl_mechanism = sasl_mechanism_handle;
                             const IO_INTERFACE_DESCRIPTION* saslclientio_interface;
-                            
+
                             if ((saslclientio_interface = saslclientio_get_interface_description()) == NULL)
                             {
                                 LogError("Could not create get SASL IO interface description.");

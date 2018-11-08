@@ -5,20 +5,16 @@
 #include "iothubclient_common_e2e.h"
 #include "iothubtransportamqp.h"
 
-static TEST_MUTEX_HANDLE g_dllByDll;
-
 BEGIN_TEST_SUITE(iothubclient_amqp_e2e_sfc)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
-        TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
         e2e_init(TEST_AMQP, false);
     }
 
     TEST_SUITE_CLEANUP(TestClassCleanup)
     {
         e2e_deinit();
-        TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
     }
 
     //***********************************************************
@@ -33,7 +29,7 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2e_sfc)
     {
         e2e_d2c_svc_fault_ctrl_AMQP_kill_connection(AMQP_Protocol);
     }
-    
+
     TEST_FUNCTION(IoTHub_AMQP_e2e_d2c_svc_fault_ctrl_kill_AMQP_session)
     {
         e2e_d2c_svc_fault_ctrl_AMQP_kill_session(AMQP_Protocol);

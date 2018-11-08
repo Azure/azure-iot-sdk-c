@@ -619,7 +619,7 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT parseDeviceConfigurationLabelsJsonObje
                     }
                     else if (!json_object_has_value(labelsJson, STRING_c_str(tempLabelsName)))
                     {
-                        LogError("missing result for label %s", tempLabelsName);
+                        LogError("missing result for label %s", STRING_c_str(tempLabelsName));
                         result = IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR;
                     }
                     else if (mallocAndStrcpy_s((char**)&(labels->labelNames[i]), STRING_c_str(tempLabelsName)) != 0)
@@ -823,7 +823,7 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT parseDeviceConfigurationJsonObject(JSO
             LogError("parseDeviceConfigurationLabelsJsonObject failed for systemMetrics");
         }
     }
-    
+
     return result;
 }
 
@@ -846,11 +846,11 @@ void IoTHubDeviceConfiguration_FreeConfigurationMembers(IOTHUB_DEVICE_CONFIGURAT
             free((void *)(configuration->labels.labelNames[i]));
             free((void *)(configuration->labels.labelValues[i]));
         }
-        
+
         free((void *)configuration->labels.labelNames);
         free((void *)configuration->labels.labelValues);
     }
-    
+
     if (configuration->metricsDefinition.numQueries > 0)
     {
         for (size_t i = 0; i < configuration->metricsDefinition.numQueries; i++)
@@ -858,12 +858,12 @@ void IoTHubDeviceConfiguration_FreeConfigurationMembers(IOTHUB_DEVICE_CONFIGURAT
             free((void *)(configuration->metricsDefinition.queryNames[i]));
             free((void *)(configuration->metricsDefinition.queryStrings[i]));
         }
-            
+
         free((void *)configuration->metricsDefinition.queryNames);
         free((void *)configuration->metricsDefinition.queryStrings);
     }
 
-    
+
     if (configuration->metricResult.numQueries > 0)
     {
         for (size_t i = 0; i < configuration->metricResult.numQueries; i++)
@@ -875,7 +875,7 @@ void IoTHubDeviceConfiguration_FreeConfigurationMembers(IOTHUB_DEVICE_CONFIGURAT
         free((void *)configuration->metricResult.results);
     }
 
-    
+
     if (configuration->systemMetricsDefinition.numQueries > 0)
     {
         for (size_t i = 0; i < configuration->systemMetricsDefinition.numQueries; i++)
@@ -977,7 +977,7 @@ static void free_deviceConfiguration_handle(IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGU
 
 IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE IoTHubDeviceConfiguration_Create(IOTHUB_SERVICE_CLIENT_AUTH_HANDLE serviceClientHandle)
 {
-    IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE result;
+    IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION* result;
 
     /*Codes_SRS_IOTHUBDEVICECONFIGURATION_38_001: [ If the serviceClientHandle input parameter is NULL IoTHubDeviceConfiguration_Create shall return NULL ]*/
     if (serviceClientHandle == NULL)
@@ -1018,15 +1018,15 @@ IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE IoTHubDeviceConfiguration_Crea
         else
         {
             /*Codes_SRS_IOTHUBDEVICECONFIGURATION_38_003: [ IoTHubDeviceMethod_Create shall allocate memory for a new IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE instance ]*/
-            result = malloc(sizeof(IOTHUB_DEVICE_CONFIGURATION));
+            result = malloc(sizeof(IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION));
             if (result == NULL)
             {
                 /*Codes_SRS_IOTHUBDEVICECONFIGURATION_38_002: [ If the allocation failed, IoTHubDeviceConfiguration_Create shall return NULL ]*/
-                LogError("Malloc failed for IOTHUB_DEVICE_CONFIGURATION");
+                LogError("Malloc failed for IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION");
             }
             else
             {
-                memset(result, 0, sizeof(IOTHUB_DEVICE_CONFIGURATION));
+                memset(result, 0, sizeof(IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION));
 
                 /*Codes_SRS_IOTHUBDEVICECONFIGURATION_38_005: [ If the allocation successful, IoTHubDeviceConfiguration_Create shall create a IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE from the given IOTHUB_SERVICE_CLIENT_AUTH_HANDLE and return with it ]*/
                 /*Codes_SRS_IOTHUBDEVICECONFIGURATION_38_006: [ IoTHubDeviceConfiguration_Create shall allocate memory and copy hostName to result->hostName by calling mallocAndStrcpy_s. ]*/
@@ -1057,7 +1057,7 @@ IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE IoTHubDeviceConfiguration_Crea
         }
     }
 
-    return result;
+    return (IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE)result;
 }
 
 void IoTHubDeviceConfiguration_Destroy(IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE serviceClientDeviceConfigurationHandle)

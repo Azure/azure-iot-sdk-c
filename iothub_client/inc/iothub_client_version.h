@@ -2,13 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 /** @file iothub_client_version.h
-*	@brief Functions for managing the client SDK version.
+*    @brief Functions for managing the client SDK version.
 */
 
 #ifndef IOTHUB_CLIENT_VERSION_H
 #define IOTHUB_CLIENT_VERSION_H
 
-#define IOTHUB_SDK_VERSION "1.2.8"
+#define IOTHUB_SDK_VERSION "1.2.10"
 
 #include "azure_c_shared_utility/umock_c_prod.h"
 

@@ -18,7 +18,7 @@ typedef struct FILTERED_MESSAGE_INSTANCE_TAG
 {
     IOTHUB_MESSAGE_HANDLE messageHandle;
     size_t messageTrackingId;  // For tracking the messages within the user callback.
-} 
+}
 FILTERED_MESSAGE_INSTANCE;
 
 size_t messagesReceivedByInput1Queue = 0;
@@ -143,9 +143,9 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT InputQueue1FilterCallback(IOTHUB_MESSAGE
             (void)printf("Sending message (%zu) to the next stage in pipeline\n", messagesReceivedByInput1Queue);
 
             IOTHUB_MESSAGE_RESULT msgResult = IoTHubMessage_SetMessageId(message, "MSG_ID");
-            if (msgResult != IOTHUB_MESSAGE_OK) 
-            { 
-                (void)printf("SetMesageId failed, id=%d\n", msgResult); 
+            if (msgResult != IOTHUB_MESSAGE_OK)
+            {
+                (void)printf("SetMesageId failed, id=%d\n", msgResult);
             }
 
             clientResult = IoTHubModuleClient_LL_SendEventToOutputAsync(iotHubModuleClientHandle, message, "output1", SendConfirmationCallbackFromFilter, (void*)filteredMessageInstance);

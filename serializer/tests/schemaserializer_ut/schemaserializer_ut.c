@@ -56,17 +56,15 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];
     (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
-    ASSERT_FAIL(temp_str); 
+    ASSERT_FAIL(temp_str);
 }
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 BEGIN_TEST_SUITE(SchemaSerializer_ut)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
-        TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
         g_testByTest = TEST_MUTEX_CREATE();
         ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -79,8 +77,8 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
         REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_MODEL_TYPE_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_ACTION_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_ACTION_ARGUMENT_HANDLE, void*);
-    
-    
+
+
         REGISTER_GLOBAL_MOCK_RETURN(STRING_concat, 0);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat, __FAILURE__);
         REGISTER_GLOBAL_MOCK_RETURN(Schema_GetModelActionCount, SCHEMA_OK);
@@ -115,7 +113,6 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
     TEST_FUNCTION_CLEANUP(TestMethodCleanup)
     {
         TEST_MUTEX_RELEASE(g_testByTest);
-        TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
     }
 
 
@@ -254,7 +251,7 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
         size_t commandCount = 1;
         size_t argCount = 0;
         SchemaSerializer_SerializeCommandMetadata_1_Command_With_No_Arguments_Yields_The_Proper_JSON_inert_path(&commandCount, &argCount);
-        
+
         umock_c_negative_tests_snapshot();
         for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
         {
@@ -267,7 +264,7 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
             SCHEMA_SERIALIZER_RESULT result = SchemaSerializer_SerializeCommandMetadata(TEST_MODEL_HANDLE, TEST_STRING_HANDLE);
 
             // assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(SCHEMA_SERIALIZER_RESULT, SCHEMA_SERIALIZER_OK, result, temp_str);
+            ASSERT_ARE_NOT_EQUAL(SCHEMA_SERIALIZER_RESULT, SCHEMA_SERIALIZER_OK, result, temp_str);
         }
 
         ///cleanup
@@ -463,7 +460,7 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
             SCHEMA_SERIALIZER_RESULT result = SchemaSerializer_SerializeCommandMetadata(TEST_MODEL_HANDLE, TEST_STRING_HANDLE);
 
             /// assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(SCHEMA_SERIALIZER_RESULT, SCHEMA_SERIALIZER_OK, result, temp_str);
+            ASSERT_ARE_NOT_EQUAL(SCHEMA_SERIALIZER_RESULT, SCHEMA_SERIALIZER_OK, result, temp_str);
         }
 
         ///cleanup
@@ -540,7 +537,7 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
             SCHEMA_SERIALIZER_RESULT result = SchemaSerializer_SerializeCommandMetadata(TEST_MODEL_HANDLE, TEST_STRING_HANDLE);
 
             /// assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(SCHEMA_SERIALIZER_RESULT, SCHEMA_SERIALIZER_OK, result, temp_str);
+            ASSERT_ARE_NOT_EQUAL(SCHEMA_SERIALIZER_RESULT, SCHEMA_SERIALIZER_OK, result, temp_str);
         }
 
         /// cleanup
@@ -604,7 +601,7 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
         // arrange
         size_t commandCount = 1;
         size_t argCount = 2;
-        
+
         SchemaSerializer_SerializeCommandMetadata_1_Command_With_2_Arguments_Yields_The_Proper_JSON_inert_path(&commandCount, &argCount);
 
         // act
@@ -639,7 +636,7 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
             SCHEMA_SERIALIZER_RESULT result = SchemaSerializer_SerializeCommandMetadata(TEST_MODEL_HANDLE, TEST_STRING_HANDLE);
 
             /// assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(SCHEMA_SERIALIZER_RESULT, SCHEMA_SERIALIZER_OK, result, temp_str);
+            ASSERT_ARE_NOT_EQUAL(SCHEMA_SERIALIZER_RESULT, SCHEMA_SERIALIZER_OK, result, temp_str);
         }
 
         /// cleanup

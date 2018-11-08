@@ -260,7 +260,6 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 }
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 BEGIN_TEST_SUITE(hsm_client_riot_ut)
 
@@ -268,7 +267,6 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
     {
         int result;
 
-        TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
         g_testByTest = TEST_MUTEX_CREATE();
         ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -330,7 +328,6 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         umock_c_deinit();
 
         TEST_MUTEX_DESTROY(g_testByTest);
-        TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
     }
 
     TEST_FUNCTION_INITIALIZE(method_init)
@@ -497,7 +494,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
             HSM_CLIENT_HANDLE sec_handle = hsm_client_riot_create();
 
             //assert
-            ASSERT_IS_NULL_WITH_MSG(sec_handle, tmp_msg);
+            ASSERT_IS_NULL(sec_handle, tmp_msg);
         }
 
         //cleanup
@@ -912,7 +909,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
             char* value = hsm_client_riot_create_leaf_cert(sec_handle, TEST_CN_VALUE);
 
             //assert
-            ASSERT_IS_NULL_WITH_MSG(value, tmp_msg);
+            ASSERT_IS_NULL(value, tmp_msg);
         }
 
         //cleanup

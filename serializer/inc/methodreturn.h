@@ -20,7 +20,7 @@ typedef struct METHODRETURN_DATA_TAG
 #include "azure_c_shared_utility/umock_c_prod.h"
 
 #ifdef __cplusplus
-extern "C" 
+extern "C"
 {
 #endif
 

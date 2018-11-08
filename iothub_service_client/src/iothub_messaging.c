@@ -278,9 +278,6 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_SetFeedbackMessageCallback(IOTHUB_MESSAG
     return result;
 }
 
-
-
-
 IOTHUB_MESSAGING_RESULT IoTHubMessaging_SendAsync(IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle, const char* deviceId, IOTHUB_MESSAGE_HANDLE message, IOTHUB_SEND_COMPLETE_CALLBACK sendCompleteCallback, void* userContextCallback)
 {
     IOTHUB_MESSAGING_RESULT result;
@@ -326,3 +323,29 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_SendAsync(IOTHUB_MESSAGING_CLIENT_HANDLE
     return result;
 }
 
+IOTHUB_MESSAGING_RESULT IoTHubMessaging_SetTrustedCert(IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle, const char* trusted_cert)
+{
+    IOTHUB_MESSAGING_RESULT result;
+
+    if (messagingClientHandle == NULL)
+    {
+        LogError("NULL iothubClientHandle");
+        result = IOTHUB_MESSAGING_INVALID_ARG;
+    }
+    else
+    {
+        IOTHUB_MESSAGING_CLIENT_INSTANCE* iotHubMessagingClientInstance = (IOTHUB_MESSAGING_CLIENT_INSTANCE*)messagingClientHandle;
+
+        if (Lock(iotHubMessagingClientInstance->LockHandle) != LOCK_OK)
+        {
+            LogError("Could not acquire lock");
+            result = IOTHUB_MESSAGING_ERROR;
+        }
+        else
+        {
+            result = IoTHubMessaging_LL_SetTrustedCert(iotHubMessagingClientInstance->IoTHubMessagingHandle, trusted_cert);
+            (void)Unlock(iotHubMessagingClientInstance->LockHandle);
+        }
+    }
+    return result;
+}

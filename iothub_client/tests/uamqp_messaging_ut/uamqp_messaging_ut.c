@@ -72,7 +72,6 @@ static void TEST_free(void* ptr)
 #include "internal/uamqp_messaging.h"
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
@@ -239,7 +238,7 @@ static void set_exp_calls_for_create_encoded_message_properties(bool has_message
     {
         STRICT_EXPECTED_CALL(properties_set_content_type(IGNORED_PTR_ARG, content_type));
     }
-    
+
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentEncodingSystemProperty(TEST_IOTHUB_MESSAGE_HANDLE))
         .SetReturn(content_encoding);
 
@@ -342,13 +341,13 @@ static void set_exp_calls_for_message_create_uamqp_encoding_from_iothub_message(
 }
 
 static void set_exp_calls_for_message_create_IoTHubMessage_from_uamqp_message(
-    size_t number_of_properties, 
-    bool has_message_id, 
+    size_t number_of_properties,
+    bool has_message_id,
     AMQP_TYPE message_id_type,
-    bool has_correlation_id, 
+    bool has_correlation_id,
     AMQP_TYPE correlation_id_type,
     bool has_properties,
-    const char* content_type, 
+    const char* content_type,
     const char* content_encoding)
 {
     static BINARY_DATA test_binary_data;
@@ -436,7 +435,7 @@ static void set_exp_calls_for_message_create_IoTHubMessage_from_uamqp_message(
 
     STRICT_EXPECTED_CALL(properties_get_content_type(TEST_PROPERTIES_HANDLE, IGNORED_PTR_ARG))
         .CopyOutArgumentBuffer(2, &content_type, sizeof(content_type));
-   
+
     if (content_type != NULL)
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_SetContentTypeSystemProperty(TEST_IOTHUB_MESSAGE_HANDLE, content_type));
@@ -449,7 +448,7 @@ static void set_exp_calls_for_message_create_IoTHubMessage_from_uamqp_message(
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_SetContentEncodingSystemProperty(TEST_IOTHUB_MESSAGE_HANDLE, content_encoding));
     }
-    
+
     STRICT_EXPECTED_CALL(properties_destroy(TEST_PROPERTIES_HANDLE));
 
     // readApplicationPropertiesFromuAMQPMessage
@@ -508,7 +507,6 @@ BEGIN_TEST_SUITE(uamqp_messaging_ut)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -556,7 +554,7 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_GetCorrelationId, TEST_CORRELATION_ID);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_GetCorrelationId, NULL);
-    
+
     REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_create_string, TEST_AMQP_VALUE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqpvalue_create_string, NULL);
 
@@ -591,7 +589,7 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 
     REGISTER_GLOBAL_MOCK_RETURN(message_get_application_properties, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(message_get_application_properties, 1);
-    
+
     REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_get_map_pair_count, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqpvalue_get_map_pair_count, 1);
 
@@ -603,16 +601,16 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 
     REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_get_string, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqpvalue_get_string, 1);
-    
+
     REGISTER_GLOBAL_MOCK_RETURN(Map_AddOrUpdate, MAP_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(Map_AddOrUpdate, MAP_ERROR);
-    
+
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_CreateFromByteArray, TEST_IOTHUB_MESSAGE_HANDLE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_CreateFromByteArray, NULL);
-        
+
     REGISTER_GLOBAL_MOCK_RETURN(message_get_body_type, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(message_get_body_type, 1);
-    
+
     REGISTER_GLOBAL_MOCK_RETURN(message_get_body_amqp_data_in_place, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(message_get_body_amqp_data_in_place, 1);
 
@@ -669,7 +667,7 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 
     // Initialization of variables.
     TEST_MAP_KEYS = (char**)real_malloc(sizeof(char*) * 5);
-    ASSERT_IS_NOT_NULL_WITH_MSG(TEST_MAP_KEYS, "Could not allocate memory for TEST_MAP_KEYS");
+    ASSERT_IS_NOT_NULL(TEST_MAP_KEYS, "Could not allocate memory for TEST_MAP_KEYS");
     TEST_MAP_KEYS[0] = "PROPERTY1";
     TEST_MAP_KEYS[1] = "Property2";
     TEST_MAP_KEYS[2] = " prop(3): ";
@@ -677,7 +675,7 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     TEST_MAP_KEYS[4] = "\r\n\t";
 
     TEST_MAP_VALUES = (char**)real_malloc(sizeof(char*) * 5);
-    ASSERT_IS_NOT_NULL_WITH_MSG(TEST_MAP_VALUES, "Could not allocate memory for TEST_MAP_VALUES");
+    ASSERT_IS_NOT_NULL(TEST_MAP_VALUES, "Could not allocate memory for TEST_MAP_VALUES");
     TEST_MAP_VALUES[0] = "sdfksdfjjjjlsdf";
     TEST_MAP_VALUES[1] = "23,424,355,543,534,535.0";
     TEST_MAP_VALUES[2] = "@#$$$ @_=-09!!^;:";
@@ -693,7 +691,6 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     umock_c_deinit();
 
     TEST_MUTEX_DESTROY(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
@@ -758,7 +755,7 @@ TEST_FUNCTION(message_create_from_iothub_message_zero_app_properties_success)
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     ASSERT_ARE_EQUAL(int, result, 0);
- 
+
     // cleanup
 }
 
@@ -778,7 +775,7 @@ TEST_FUNCTION(message_create_from_iothub_message_string_success)
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     ASSERT_ARE_EQUAL(int, result, 0);
- 
+
     // cleanup
 }
 
@@ -798,7 +795,7 @@ TEST_FUNCTION(message_create_from_iothub_message_no_message_id_success)
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     ASSERT_ARE_EQUAL(int, result, 0);
- 
+
     // cleanup
 }
 
@@ -906,7 +903,7 @@ TEST_FUNCTION(message_create_from_iothub_message_BYTEARRAY_return_errors_fails)
 
         if ((i == 1) || // GetMessageId is optional
             (i == 5) || //GetCorrelationId is optional
-            (i == 9) || // ContentType is optional 
+            (i == 9) || // ContentType is optional
             (i == 11) ||  // ContentEncoding is optional
             (i == 4) || // amqpvalue_destroy
             (i == 8) || // amqpvalue_destroy
@@ -936,7 +933,7 @@ TEST_FUNCTION(message_create_from_iothub_message_BYTEARRAY_return_errors_fails)
         result = message_create_uamqp_encoding_from_iothub_message(NULL, TEST_IOTHUB_MESSAGE_HANDLE, &binary_data);
 
         sprintf(error_msg, "On failed call %zu", i);
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, result, 0, error_msg);
+        ASSERT_ARE_NOT_EQUAL(int, result, 0, error_msg);
     }
 
     // cleanup
@@ -969,7 +966,7 @@ TEST_FUNCTION(message_create_from_iothub_message_STRING_return_errors_fails)
 
         if ((i == 1) || // GetMessageId is optional
             (i == 5) || //GetCorrelationId is optional
-            (i == 9) || // ContentType is optional 
+            (i == 9) || // ContentType is optional
             (i == 11) ||  // ContentEncoding is optional
             (i == 4) || // amqpvalue_destroy
             (i == 8) || // amqpvalue_destroy
@@ -1001,7 +998,7 @@ TEST_FUNCTION(message_create_from_iothub_message_STRING_return_errors_fails)
         // assert
         sprintf(error_msg, "On failed call %zu", i);
 
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, result, 0, error_msg);
+        ASSERT_ARE_NOT_EQUAL(int, result, 0, error_msg);
     }
 
     // cleanup

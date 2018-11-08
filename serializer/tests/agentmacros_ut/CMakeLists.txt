@@ -13,7 +13,7 @@ set(${theseTestsName}_cpp_files
 
 set(${theseTestsName}_c_files
 	${SHARED_UTIL_SRC_FOLDER}/gballoc.c
-	${LOCK_C_FILE}	
+	${LOCK_C_FILE}
 )
 
 set(${theseTestsName}_h_files

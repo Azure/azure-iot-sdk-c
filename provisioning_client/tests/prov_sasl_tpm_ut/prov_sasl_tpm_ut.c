@@ -143,7 +143,6 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 }
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 BEGIN_TEST_SUITE(prov_sasl_tpm_ut)
 
@@ -151,7 +150,6 @@ TEST_SUITE_INITIALIZE(suite_init)
 {
     int result;
 
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -217,7 +215,6 @@ TEST_SUITE_CLEANUP(suite_cleanup)
     umock_c_deinit();
 
     TEST_MUTEX_DESTROY(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION_INITIALIZE(method_init)
@@ -398,7 +395,7 @@ TEST_FUNCTION(prov_sasl_hsm_tpm_create_fail)
         CONCRETE_SASL_MECHANISM_HANDLE handle = prov_sasl_mechanism_create(&sasl_tpm_config);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(handle, tmp_msg);
+        ASSERT_IS_NULL(handle, tmp_msg);
     }
 
     //cleanup
@@ -878,7 +875,7 @@ TEST_FUNCTION(prov_sasl_mechanism_challenge_sastoken_fail)
         int reply = prov_sasl_mechanism_challenge(handle, &challenge_bytes, &reply_bytes);
 
         //assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, reply, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(int, 0, reply, tmp_msg);
     }
 
     //cleanup

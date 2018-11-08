@@ -15,6 +15,7 @@
 
 #include "testrunnerswitcher.h"
 #include "umock_c.h"
+#include "umock_c_prod.h"
 #include "umocktypes_charptr.h"
 #include "umock_c_negative_tests.h"
 #include "umocktypes_stdint.h"
@@ -49,6 +50,20 @@ static void my_gballoc_free(void* ptr)
 #include "iothub_client_options.h"
 #include "iothub_client_version.h"
 #include "internal/iothub_client_private.h"
+#include "iothub_client_core_common.h"
+#include "internal/iothubtransport.h"
+
+#include "internal/iothub_transport_ll_private.h"
+
+MOCKABLE_FUNCTION(, bool, Transport_MessageCallbackFromInput, MESSAGE_CALLBACK_INFO*, messageData, void*, ctx);
+MOCKABLE_FUNCTION(, bool, Transport_MessageCallback, MESSAGE_CALLBACK_INFO*, messageData, void*, ctx);
+MOCKABLE_FUNCTION(, void, Transport_ConnectionStatusCallBack, IOTHUB_CLIENT_CONNECTION_STATUS, status, IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason, void*, ctx);
+MOCKABLE_FUNCTION(, void, Transport_SendComplete_Callback, PDLIST_ENTRY, completed, IOTHUB_CLIENT_CONFIRMATION_RESULT, result, void*, ctx);
+MOCKABLE_FUNCTION(, const char*, Transport_GetOption_Product_Info_Callback, void*, ctx);
+MOCKABLE_FUNCTION(, void, Transport_Twin_ReportedStateComplete_Callback, uint32_t, item_id, int, status_code, void*, ctx);
+MOCKABLE_FUNCTION(, void, Transport_Twin_RetrievePropertyComplete_Callback, DEVICE_TWIN_UPDATE_STATE, update_state, const unsigned char*, payLoad, size_t, size, void*, ctx);
+MOCKABLE_FUNCTION(, int, Transport_DeviceMethod_Complete_Callback, const char*, method_name, const unsigned char*, payLoad, size_t, size, METHOD_HANDLE, response_id, void*, ctx);
+
 #undef ENABLE_MOCKS
 
 #include "iothubtransporthttp.h"
@@ -103,6 +118,12 @@ extern "C" {
 static const char* TEST_MESSAGE_ID = "FC365F0A-D432-4AB9-8307-59C0EB8F0447";
 static const char* TEST_CONTENT_TYPE = "application/json";
 static const char* TEST_CONTENT_ENCODING = "utf8";
+static const char* TEST_PRODUCT_INFO = "product_info";
+
+#define EVENT_ENDPOINT  "/messages/events"
+#define API_VERSION     "?api-version=2016-11-14"
+#define MESSAGE_ENDPOINT_HTTP "/messages/devicebound"
+#define MESSAGE_ENDPOINT_HTTP_ETAG "/messages/devicebound/"
 
 //DEFINE_MICROMOCK_ENUM_TO_STRING(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 //DEFINE_MICROMOCK_ENUM_TO_STRING(IOTHUB_CLIENT_STATUS, IOTHUB_CLIENT_STATUS_VALUES);
@@ -189,7 +210,7 @@ static const IOTHUB_CLIENT_CONFIG TEST_CONFIG_IOTHUBCLIENT_GW_CONFIG =
     NULL,                                           /* const char* deviceSasToken;                  */
     TEST_IOTHUB_NAME,                               /* const char* iotHubName;                      */
     TEST_IOTHUB_SUFFIX,                              /* const char* iotHubSuffix;                    */
-    TEST_IOTHUB_GWHOSTNAME	                    /* const char* protocolGatewayHostName;                  */
+    TEST_IOTHUB_GWHOSTNAME                        /* const char* protocolGatewayHostName;                  */
 };
 
 static IOTHUBTRANSPORT_CONFIG TEST_GW_CONFIG =
@@ -468,6 +489,9 @@ static bool HTTPHeaders_GetHeaderCount_writes_to_its_outputs = true;
 static const char*   TEST_STRING_DATA = "Hello Test World";
 static STRING_HANDLE TEST_STRING_HANDLE = NULL;
 
+static TRANSPORT_CALLBACKS_INFO transport_cb_info;
+static void* transport_cb_ctx = (void*)0x499922;
+
 #define TEST_HEADER_1 "iothub-app-NAME1: VALUE1"
 #define TEST_HEADER_1_5 "not-iothub-app-NAME1: VALUE1"
 #define TEST_HEADER_2 "iothub-app-NAME2: VALUE2"
@@ -492,9 +516,9 @@ static pfIoTHubTransport_Subscribe                      IoTHubTransportHttp_Subs
 static pfIoTHubTransport_Unsubscribe                    IoTHubTransportHttp_Unsubscribe;
 static pfIoTHubTransport_DoWork                         IoTHubTransportHttp_DoWork;
 static pfIoTHubTransport_GetSendStatus                  IoTHubTransportHttp_GetSendStatus;
+static pfIoTHubTransport_SetCallbackContext             IoTHubTransportHttp_SetCallbackContext;
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
@@ -532,10 +556,10 @@ static IOTHUB_CLIENT_RESULT my_IoTHubClientCore_LL_GetOption(IOTHUB_CLIENT_CORE_
 
 static MESSAGE_CALLBACK_INFO* my_IoTHubClientCore_LL_MessageCallback_messageData;
 static bool my_IoTHubClientCore_LL_MessageCallback_return_value;
-static bool my_IoTHubClientCore_LL_MessageCallback(IOTHUB_CLIENT_CORE_LL_HANDLE handle, MESSAGE_CALLBACK_INFO* messageData)
+static bool my_Transport_MessageCallback(MESSAGE_CALLBACK_INFO* message_data, void* ctx)
 {
-    (void)handle;
-    my_IoTHubClientCore_LL_MessageCallback_messageData = messageData;
+    (void)ctx;
+    my_IoTHubClientCore_LL_MessageCallback_messageData = message_data;
     return my_IoTHubClientCore_LL_MessageCallback_return_value;
 }
 
@@ -842,6 +866,7 @@ static MAP_RESULT my_Map_GetInternals(MAP_HANDLE handle, const char*const** keys
 
 static void setupCreateHappyPathAlloc(bool deallocateCreated)
 {
+    STRICT_EXPECTED_CALL(IoTHub_Transport_ValidateCallbacks(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     if (deallocateCreated == true)
     {
@@ -990,9 +1015,8 @@ static void setupRegisterHappyPatheventHTTPrequestHeaders(bool deallocateCreated
     }
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Accept", "application/json"));
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Connection", "Keep-Alive"));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA));
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_PRODUCT_INFO));
     if (deallocateCreated == true)
     {
         STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
@@ -1004,9 +1028,8 @@ static void setupRegisterHappyPatheventHTTPrequestHeaders(bool deallocateCreated
 static void setupRegisterHappyPathmessageHTTPrequestHeaders(bool deallocateCreated, bool is_x509_used)
 {
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA));
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_PRODUCT_INFO));
     if (is_x509_used == false)
     {
         STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN));
@@ -1109,15 +1132,24 @@ TEST_SUITE_INITIALIZE(suite_init)
 {
     int result;
 
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
 
     (void)umock_c_init(on_umock_c_error);
 
+    transport_cb_info.send_complete_cb = Transport_SendComplete_Callback;
+    transport_cb_info.twin_retrieve_prop_complete_cb = Transport_Twin_RetrievePropertyComplete_Callback;
+    transport_cb_info.twin_rpt_state_complete_cb = Transport_Twin_ReportedStateComplete_Callback;
+    transport_cb_info.send_complete_cb = Transport_SendComplete_Callback;
+    transport_cb_info.connection_status_cb = Transport_ConnectionStatusCallBack;
+    transport_cb_info.prod_info_cb = Transport_GetOption_Product_Info_Callback;
+    transport_cb_info.msg_input_cb = Transport_MessageCallbackFromInput;
+    transport_cb_info.msg_cb = Transport_MessageCallback;
+    transport_cb_info.method_complete_cb = Transport_DeviceMethod_Complete_Callback;
+
     result = umocktypes_charptr_register_types();
     ASSERT_ARE_EQUAL(int, 0, result);
-    
+
     result = umocktypes_bool_register_types();
     ASSERT_ARE_EQUAL(int, 0, result);
 
@@ -1147,6 +1179,9 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, my_gballoc_free);
+
+    REGISTER_GLOBAL_MOCK_RETURN(Transport_GetOption_Product_Info_Callback, TEST_PRODUCT_INFO);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Transport_GetOption_Product_Info_Callback, NULL);
 
     REGISTER_GLOBAL_MOCK_HOOK(BUFFER_new, real_BUFFER_new);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(BUFFER_new, NULL);
@@ -1200,7 +1235,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_CreateFromByteArray, NULL);
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubMessage_GetByteArray, my_IoTHubMessage_GetByteArray);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_GetByteArray, IOTHUB_MESSAGE_ERROR);
-    
+
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_SetContentTypeSystemProperty, IOTHUB_MESSAGE_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_SetContentTypeSystemProperty, IOTHUB_MESSAGE_ERROR);
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_SetContentEncodingSystemProperty, IOTHUB_MESSAGE_OK);
@@ -1222,10 +1257,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(HTTPHeaders_GetHeader, my_HTTPHeaders_GetHeader);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(HTTPHeaders_GetHeader, HTTP_HEADERS_ERROR);
 
-    REGISTER_GLOBAL_MOCK_HOOK(IoTHubClientCore_LL_GetOption, my_IoTHubClientCore_LL_GetOption);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClientCore_LL_GetOption, IOTHUB_CLIENT_ERROR);
-
-    REGISTER_GLOBAL_MOCK_HOOK(IoTHubClientCore_LL_MessageCallback, my_IoTHubClientCore_LL_MessageCallback);
+    //REGISTER_GLOBAL_MOCK_HOOK(IoTHubClientCore_LL_MessageCallback, my_IoTHubClientCore_LL_MessageCallback);
+    REGISTER_GLOBAL_MOCK_HOOK(Transport_MessageCallback, my_Transport_MessageCallback);
 
     REGISTER_GLOBAL_MOCK_HOOK(HTTPAPIEX_SAS_Create, my_HTTPAPIEX_SAS_Create);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(HTTPAPIEX_SAS_Create, NULL);
@@ -1233,6 +1266,9 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(HTTPAPIEX_ExecuteRequest, HTTPAPIEX_ERROR);
     REGISTER_GLOBAL_MOCK_HOOK(HTTPAPIEX_SAS_ExecuteRequest, my_HTTPAPIEX_SAS_ExecuteRequest);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(HTTPAPIEX_SAS_ExecuteRequest, HTTPAPIEX_ERROR);
+
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHub_Transport_ValidateCallbacks, 0);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHub_Transport_ValidateCallbacks, __LINE__);
 
     REGISTER_GLOBAL_MOCK_RETURN(HTTPHeaders_FindHeaderValue, TEST_ETAG_VALUE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(HTTPHeaders_FindHeaderValue, NULL);
@@ -1282,6 +1318,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     IoTHubTransportHttp_Unsubscribe = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_Unsubscribe;
     IoTHubTransportHttp_DoWork = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_DoWork;
     IoTHubTransportHttp_GetSendStatus = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_GetSendStatus;
+    IoTHubTransportHttp_SetCallbackContext = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_SetCallbackContext;
 
     TEST_STRING_HANDLE = real_STRING_construct(TEST_STRING_DATA);
 }
@@ -1291,7 +1328,6 @@ TEST_SUITE_CLEANUP(suite_cleanup)
     umock_c_deinit();
 
     TEST_MUTEX_DESTROY(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 
     my_gballoc_free((void*)buffer9);
     my_gballoc_free((void*)buffer11);
@@ -1381,20 +1417,20 @@ TEST_FUNCTION(IoTHubTransportHttp_Create_with_NULL_parameter_fails)
     // arrange
 
     // act
-    TRANSPORT_LL_HANDLE result = IoTHubTransportHttp_Create(NULL);
+    TRANSPORT_LL_HANDLE result = IoTHubTransportHttp_Create(NULL, &transport_cb_info, transport_cb_ctx);
 
     // assert
     ASSERT_IS_NULL(result);
 
 }
 
-//Tests_SRS_TRANSPORTMULTITHTTP_17_002: [ If field transportConfig is NULL, then IoTHubTransportHttp_Create shall return NULL. 
+//Tests_SRS_TRANSPORTMULTITHTTP_17_002: [ If field transportConfig is NULL, then IoTHubTransportHttp_Create shall return NULL.
 TEST_FUNCTION(IoTHubTransportHttp_Create_with_NULL_config_parameter_fails)
 {
     // arrange
 
     // act
-    TRANSPORT_LL_HANDLE result = IoTHubTransportHttp_Create(&TEST_CONFIG_NULL_CONFIG);
+    TRANSPORT_LL_HANDLE result = IoTHubTransportHttp_Create(&TEST_CONFIG_NULL_CONFIG, &transport_cb_info, transport_cb_ctx);
 
     // assert
     ASSERT_IS_NULL(result);
@@ -1406,7 +1442,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Create_with_NULL_protocol_parameter_fails)
     // arrange
 
     // act
-    TRANSPORT_LL_HANDLE result = IoTHubTransportHttp_Create(&TEST_CONFIG_NULL_PROTOCOL);
+    TRANSPORT_LL_HANDLE result = IoTHubTransportHttp_Create(&TEST_CONFIG_NULL_PROTOCOL, &transport_cb_info, transport_cb_ctx);
 
     // assert
     ASSERT_IS_NULL(result);
@@ -1418,7 +1454,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Create_with_NULL_iothub_name_fails)
     // arrange
 
     // act
-    TRANSPORT_LL_HANDLE result = IoTHubTransportHttp_Create(&TEST_CONFIG_NULL_IOTHUB_NAME);
+    TRANSPORT_LL_HANDLE result = IoTHubTransportHttp_Create(&TEST_CONFIG_NULL_IOTHUB_NAME, &transport_cb_info, transport_cb_ctx);
 
     // assert
     ASSERT_IS_NULL(result);
@@ -1430,13 +1466,13 @@ TEST_FUNCTION(IoTHubTransportHttp_Create_with_NULL_iothub_suffix_fails)
     // arrange
 
     // act
-    TRANSPORT_LL_HANDLE result = IoTHubTransportHttp_Create(&TEST_CONFIG_NULL_IOTHUB_SUFFIX);
+    TRANSPORT_LL_HANDLE result = IoTHubTransportHttp_Create(&TEST_CONFIG_NULL_IOTHUB_SUFFIX, &transport_cb_info, transport_cb_ctx);
 
     // assert
     ASSERT_IS_NULL(result);
 }
 
-//Tests_SRS_TRANSPORTMULTITHTTP_17_005: [If config->upperConfig->protocolGatewayHostName is NULL, `IoTHubTransportHttp_Create` shall create an immutable string (further called hostname) containing `config->transportConfig->iotHubName + config->transportConfig->iotHubSuffix`.] 
+//Tests_SRS_TRANSPORTMULTITHTTP_17_005: [If config->upperConfig->protocolGatewayHostName is NULL, `IoTHubTransportHttp_Create` shall create an immutable string (further called hostname) containing `config->transportConfig->iotHubName + config->transportConfig->iotHubSuffix`.]
 //Tests_SRS_TRANSPORTMULTITHTTP_17_007: [ IoTHubTransportHttp_Create shall create a HTTPAPIEX_HANDLE by a call to HTTPAPIEX_Create passing for hostName the hostname so far constructed by IoTHubTransportHttp_Create. ]
 //Tests_SRS_TRANSPORTMULTITHTTP_17_009: [ IoTHubTransportHttp_Create shall call VECTOR_create to create a list of registered devices. ]
 //Tests_SRS_TRANSPORTMULTITHTTP_17_130: [ IoTHubTransportHttp_Create shall allocate memory for the handle. ]
@@ -1447,7 +1483,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Create_happy_path)
     setupCreateHappyPath(false);
 
     //act
-    TRANSPORT_LL_HANDLE result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+    TRANSPORT_LL_HANDLE result = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_IS_NOT_NULL(result);
@@ -1457,7 +1493,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Create_happy_path)
     IoTHubTransportHttp_Destroy(result);
 }
 
-//Tests_SRS_TRANSPORTMULTITHTTP_20_001: [If config->upperConfig->protocolGatewayHostName is not NULL, IoTHubTransportHttp_Create shall use it as hostname] 
+//Tests_SRS_TRANSPORTMULTITHTTP_20_001: [If config->upperConfig->protocolGatewayHostName is not NULL, IoTHubTransportHttp_Create shall use it as hostname]
 //Tests_SRS_TRANSPORTMULTITHTTP_17_007: [ IoTHubTransportHttp_Create shall create a HTTPAPIEX_HANDLE by a call to HTTPAPIEX_Create passing for hostName the hostname so far constructed by IoTHubTransportHttp_Create. ]
 //Tests_SRS_TRANSPORTMULTITHTTP_17_009: [ IoTHubTransportHttp_Create shall call VECTOR_create to create a list of registered devices. ]
 //Tests_SRS_TRANSPORTMULTITHTTP_17_130: [ IoTHubTransportHttp_Create shall allocate memory for the handle. ]
@@ -1471,7 +1507,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Create_happy_path_with_gwhostname)
     setupCreateHappyPathPerDeviceList(false);
 
     //act
-    TRANSPORT_LL_HANDLE result = IoTHubTransportHttp_Create(&TEST_GW_CONFIG);
+    TRANSPORT_LL_HANDLE result = IoTHubTransportHttp_Create(&TEST_GW_CONFIG, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_IS_NOT_NULL(result);
@@ -1499,7 +1535,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Create_fails)
 
     umock_c_negative_tests_snapshot();
 
-    size_t calls_cannot_fail[] = { 4 };
+    size_t calls_cannot_fail[] = { 5 };
 
     //act
     size_t count = umock_c_negative_tests_call_count();
@@ -1516,10 +1552,10 @@ TEST_FUNCTION(IoTHubTransportHttp_Create_fails)
         char tmp_msg[64];
         sprintf(tmp_msg, "IoTHubTransportHttp_Create failure in test %zu/%zu", index, count);
 
-        TRANSPORT_LL_HANDLE result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+        TRANSPORT_LL_HANDLE result = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(result, tmp_msg);
+        ASSERT_IS_NULL(result, tmp_msg);
     }
 
     //cleanup
@@ -1541,7 +1577,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Destroy_with_NULL_handle_does_nothing)
 TEST_FUNCTION(IoTHubTransportHttp_Destroy_succeeds_NoRegistered_devices)
 {
     //arrange
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));                                             //STRING_HANDLE hostName;
@@ -1560,8 +1596,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Destroy_succeeds_NoRegistered_devices)
 TEST_FUNCTION(IoTHubTransportHttp_Destroy_succeeds_One_Registered_device)
 {
     //arrange
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
@@ -1607,12 +1643,12 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_HappyPath_with_deviceKey_success_fun_
 {
     //arrange
 
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     setupRegisterHappyPath(false, false);
 
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NOT_NULL(devHandle);
@@ -1648,12 +1684,12 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_HappyPath_with_deviceKey_success_fun_
 TEST_FUNCTION(IoTHubTransportHttp_Register_HappyPath_with_deviceSas_success_fun_time)
 {
     //arrange
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     setupRegisterHappyPathWithSasToken(false);
 
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_3, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_3, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NOT_NULL(devHandle);
@@ -1668,8 +1704,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_HappyPath_with_deviceSas_success_fun_
 TEST_FUNCTION(IoTHubTransportHttp_Register_2nd_device_HappyPath_success_fun_time)
 {
     //arrange
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle2 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE2, TEST_CONFIG2.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle2 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_CONFIG2.waitingToSend);
     umock_c_reset_all_calls();
 
     // find in vector..
@@ -1690,8 +1726,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_2nd_device_HappyPath_success_fun_time
     // actual register
     //setupRegisterHappyPath(false, false);
 
-    //act 
-    IOTHUB_DEVICE_HANDLE devHandle1 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    //act
+    IOTHUB_DEVICE_HANDLE devHandle1 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NOT_NULL(devHandle2);
@@ -1707,9 +1743,9 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_2nd_device_HappyPath_success_fun_time
 TEST_FUNCTION(IoTHubTransportHttp_Register_sameDevice_twice_returns_null)
 {
     //arrange
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE2, TEST_CONFIG2.waitingToSend);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_CONFIG2.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
     umock_c_reset_all_calls();
 
     // find in vector.. 2 and 1a
@@ -1717,8 +1753,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_sameDevice_twice_returns_null)
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
 
-    //act 
-    IOTHUB_DEVICE_HANDLE devHandle1b = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    //act
+    IOTHUB_DEVICE_HANDLE devHandle1b = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NULL(devHandle1b);
@@ -1730,10 +1766,10 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_sameDevice_twice_returns_null)
 
 //Tests_SRS_TRANSPORTMULTITHTTP_17_042: [ If the VECTOR_push_back fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
 //Tests_SRS_TRANSPORTMULTITHTTP_17_037: [ If the HTTPAPIEX_SAS_Create fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
-//Tests_SRS_TRANSPORTMULTITHTTP_17_029: [ If the clone fails then IoTHubTransportHttp_Register shall fail and return NULL. ] 
+//Tests_SRS_TRANSPORTMULTITHTTP_17_029: [ If the clone fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
 //Tests_SRS_TRANSPORTMULTITHTTP_17_141: [ If the STRING_concat fails, then it shall fail and return NULL. ]
 //Tests_SRS_TRANSPORTMULTITHTTP_17_032: [ If the STRING_concat_with_STRING fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
-//Tests_SRS_TRANSPORTMULTITHTTP_17_034: [ If the STRING_construct fails then IoTHubTransportHttp_Register shall fail and return NULL. ] 
+//Tests_SRS_TRANSPORTMULTITHTTP_17_034: [ If the STRING_construct fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
 //Tests_SRS_TRANSPORTMULTITHTTP_17_035: [ The keyName is shortened to zero length, if that fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
 TEST_FUNCTION(IoTHubTransportHttp_Register_HappyPath_with_deviceKey_fail)
 {
@@ -1741,14 +1777,14 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_HappyPath_with_deviceKey_fail)
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
     //arrange
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     setupRegisterHappyPath(false, false);
 
     umock_c_negative_tests_snapshot();
 
-    size_t calls_cannot_fail[] = { 0, 8, 13, 19, 24, 25, 27, 28, 30, 31, 38, 46, 47, 48, 50, 51 };
+    size_t calls_cannot_fail[] = { 0, 8, 13, 19, 24, 26, 27, 29, 36, 44, 45, 46, 47, 48, 51 };
 
     //act
     size_t count = umock_c_negative_tests_call_count();
@@ -1765,10 +1801,10 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_HappyPath_with_deviceKey_fail)
         char tmp_msg[64];
         sprintf(tmp_msg, "IoTHubMessage_CreateFromByteArray failure in test %zu/%zu", index, count);
 
-        IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+        IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(devHandle, tmp_msg);
+        ASSERT_IS_NULL(devHandle, tmp_msg);
     }
 
     //cleanup
@@ -1782,7 +1818,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_HappyPath_with_deviceKey_fail)
 TEST_FUNCTION(IoTHubTransportHttp_Register_abandonHTTPrelativePathBegin_fails_1)
 {
     //arrange
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     bool deallocateCreated = true;
@@ -1804,7 +1840,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_abandonHTTPrelativePathBegin_fails_1)
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
 
     //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NULL(devHandle);
@@ -1819,7 +1855,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_abandonHTTPrelativePathBegin_fails_1)
 TEST_FUNCTION(IoTHubTransportHttp_Register_abandonHTTPrelativePathBegin_fails_2)
 {
     //arrange
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     bool deallocateCreated = true;
@@ -1843,7 +1879,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_abandonHTTPrelativePathBegin_fails_2)
         .IgnoreArgument(1);
 
     //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NULL(devHandle);
@@ -1857,8 +1893,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_abandonHTTPrelativePathBegin_fails_2)
 TEST_FUNCTION(IoTHubTransportHttp_Register_abandonHTTPrelativePathBegin_fails_3)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     bool deallocateCreated = true;
@@ -1875,7 +1911,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_abandonHTTPrelativePathBegin_fails_3)
     STRICT_EXPECTED_CALL(STRING_construct("/devices/"));
 
     //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NULL(devHandle);
@@ -1886,12 +1922,12 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_abandonHTTPrelativePathBegin_fails_3)
 }
 
 //Tests_SRS_TRANSPORTMULTITHTTP_17_025: [ If creating the abandonHTTPrelativePathBegin fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
-//Tests_SRS_TRANSPORTMULTITHTTP_17_027: [ If the encode fails then IoTHubTransportHttp_Register shall fail and return NULL. ] 
+//Tests_SRS_TRANSPORTMULTITHTTP_17_027: [ If the encode fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
 TEST_FUNCTION(IoTHubTransportHttp_Register_abandonHTTPrelativePathBegin_fails_4)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     bool deallocateCreated = true;
@@ -1912,7 +1948,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_abandonHTTPrelativePathBegin_fails_4)
         .IgnoreArgument(1);
 
     //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NULL(devHandle);
@@ -1927,8 +1963,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_abandonHTTPrelativePathBegin_fails_4)
 TEST_FUNCTION(IoTHubTransportHttp_Register_messageHTTPrequestheaders_fails_1)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     bool deallocateCreated = true;
@@ -1939,12 +1975,10 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_messageHTTPrequestheaders_fails_1)
     setupRegisterHappyPatheventHTTPrelativePath(deallocateCreated);
     setupRegisterHappyPathmessageHTTPrelativePath(deallocateCreated);
     setupRegisterHappyPatheventHTTPrequestHeaders(deallocateCreated);
-    
+
     /*creating message HTTP request headers*/
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
@@ -1956,7 +1990,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_messageHTTPrequestheaders_fails_1)
         .IgnoreArgument(1);
 
     //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NULL(devHandle);
@@ -1970,8 +2004,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_messageHTTPrequestheaders_fails_1)
 TEST_FUNCTION(IoTHubTransportHttp_Register_messageHTTPrequestheaders_fails_2)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     bool deallocateCreated = true;
@@ -1982,13 +2016,13 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_messageHTTPrequestheaders_fails_2)
     setupRegisterHappyPatheventHTTPrelativePath(deallocateCreated);
     setupRegisterHappyPathmessageHTTPrelativePath(deallocateCreated);
     setupRegisterHappyPatheventHTTPrequestHeaders(deallocateCreated);
-    
+
     /*creating message HTTP request headers*/
     whenShallHTTPHeaders_Alloc_fail = 2;
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
 
     //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NULL(devHandle);
@@ -2002,8 +2036,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_messageHTTPrequestheaders_fails_2)
 TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_1)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     bool deallocateCreated = true;
@@ -2037,9 +2071,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_1)
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Connection", "Keep-Alive"))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
@@ -2049,7 +2081,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_1)
         .IgnoreArgument(1);
 
     //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NULL(devHandle);
@@ -2063,8 +2095,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_1)
 TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_2)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     bool deallocateCreated = true;
@@ -2102,7 +2134,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_2)
         .IgnoreArgument(1);
 
     //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NULL(devHandle);
@@ -2116,8 +2148,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_2)
 TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_3)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     bool deallocateCreated = true;
@@ -2154,7 +2186,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_3)
         .IgnoreArgument(1);
 
     //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NULL(devHandle);
@@ -2168,8 +2200,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_3)
 TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_4)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     bool deallocateCreated = true;
@@ -2204,7 +2236,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_4)
         .IgnoreArgument(1);
 
     //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NULL(devHandle);
@@ -2218,8 +2250,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_4)
 TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_5)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     bool deallocateCreated = true;
@@ -2252,7 +2284,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_5)
         .IgnoreArgument(1);
 
     //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NULL(devHandle);
@@ -2266,8 +2298,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_5)
 TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_6)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
     currentSTRING_concat_call = 0;
 
@@ -2297,7 +2329,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_6)
         .IgnoreArgument(1);
 
     //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NULL(devHandle);
@@ -2311,8 +2343,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_6)
 TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_7)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
     currentSTRING_concat_with_STRING_call = 0;
 
@@ -2340,7 +2372,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_7)
         .IgnoreArgument(1);
 
     //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NULL(devHandle);
@@ -2354,8 +2386,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_7)
 TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_8)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     bool deallocateCreated = true;
@@ -2379,7 +2411,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_8)
         .IgnoreArgument(1);
 
     //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NULL(devHandle);
@@ -2393,8 +2425,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_8)
 TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_9)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
     currentSTRING_construct_call = 0;
 
@@ -2414,7 +2446,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_9)
         .IgnoreArgument(1);
 
     //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NULL(devHandle);
@@ -2428,8 +2460,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_9)
 TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_10)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     bool deallocateCreated = true;
@@ -2445,7 +2477,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_10)
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
 
     //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NULL(devHandle);
@@ -2459,8 +2491,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_10)
 TEST_FUNCTION(IoTHubTransportHttp_Register_messageHTTPrelativePath_fails_1)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
     currentSTRING_concat_call = 0;
 
@@ -2487,7 +2519,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_messageHTTPrelativePath_fails_1)
         .IgnoreArgument(1);
 
     //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NULL(devHandle);
@@ -2501,8 +2533,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_messageHTTPrelativePath_fails_1)
 TEST_FUNCTION(IoTHubTransportHttp_Register_messageHTTPrelativePath_fails_2)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     bool deallocateCreated = true;
@@ -2527,7 +2559,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_messageHTTPrelativePath_fails_2)
         .IgnoreArgument(1);
 
     //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NULL(devHandle);
@@ -2541,8 +2573,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_messageHTTPrelativePath_fails_2)
 TEST_FUNCTION(IoTHubTransportHttp_Register_messageHTTPrelativePath_fails_3)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     bool deallocateCreated = true;
@@ -2563,7 +2595,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_messageHTTPrelativePath_fails_3)
         .IgnoreArgument(1);
 
     //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NULL(devHandle);
@@ -2577,8 +2609,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_messageHTTPrelativePath_fails_3)
 TEST_FUNCTION(IoTHubTransportHttp_Register_messageHTTPrelativePath_fails_4)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
     currentSTRING_construct_call = 0;
 
@@ -2594,7 +2626,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_messageHTTPrelativePath_fails_4)
     STRICT_EXPECTED_CALL(STRING_construct("/devices/"));
 
     //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NULL(devHandle);
@@ -2608,8 +2640,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_messageHTTPrelativePath_fails_4)
 TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrelativePath_fails_1)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
     currentSTRING_concat_call = 0;
 
@@ -2636,7 +2668,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrelativePath_fails_1)
         .IgnoreArgument(1);
 
     //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NULL(devHandle);
@@ -2650,8 +2682,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrelativePath_fails_1)
 TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrelativePath_fails_2)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     bool deallocateCreated = true;
@@ -2675,7 +2707,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrelativePath_fails_2)
         .IgnoreArgument(1);
 
     //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NULL(devHandle);
@@ -2689,8 +2721,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrelativePath_fails_2)
 TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrelativePath_fails_3)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
     currentSTRING_construct_call = 0;
 
@@ -2705,7 +2737,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrelativePath_fails_3)
     STRICT_EXPECTED_CALL(STRING_construct("/devices/"));
 
     //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NULL(devHandle);
@@ -2719,8 +2751,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrelativePath_fails_3)
 TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrelativePath_fails_4)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     bool deallocateCreated = true;
@@ -2742,7 +2774,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrelativePath_fails_4)
         .IgnoreArgument(1);
 
     //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NULL(devHandle);
@@ -2756,8 +2788,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrelativePath_fails_4)
 TEST_FUNCTION(IoTHubTransportHttp_Register_create_deviceKey_fails)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
     currentSTRING_construct_call = 0;
 
@@ -2770,7 +2802,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_create_deviceKey_fails)
     STRICT_EXPECTED_CALL(STRING_construct(TEST_DEVICE_KEY));
 
     //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NULL(devHandle);
@@ -2784,8 +2816,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_create_deviceKey_fails)
 TEST_FUNCTION(IoTHubTransportHttp_Register_create_deviceSasToken_fails)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
     currentSTRING_construct_call = 0;
 
@@ -2798,7 +2830,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_create_deviceSasToken_fails)
     STRICT_EXPECTED_CALL(STRING_construct(TEST_DEVICE_TOKEN));
 
     //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_3, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_3, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NULL(devHandle);
@@ -2812,8 +2844,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_create_deviceSasToken_fails)
 TEST_FUNCTION(IoTHubTransportHttp_Register_create_deviceId_fails)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
     currentSTRING_construct_call = 0;
 
@@ -2825,7 +2857,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_create_deviceId_fails)
     STRICT_EXPECTED_CALL(STRING_construct(TEST_DEVICE_ID));
 
     //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NULL(devHandle);
@@ -2840,13 +2872,13 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_create_deviceId_fails)
 TEST_FUNCTION(IoTHubTransportHttp_Register_deviceFoundInList_fails)
 {
     //arrange
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn((void_ptr)0x1);
 
     //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NULL(devHandle);
@@ -2865,11 +2897,11 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_deviceId_null_returns_null)
     myDevice.deviceKey = TEST_DEVICE_KEY;
     myDevice.deviceSasToken = NULL;
 
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &myDevice, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &myDevice, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NULL(devHandle);
@@ -2889,13 +2921,13 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_deviceKey_null_and_deviceSasToken_suc
     myDevice.deviceKey = NULL;
     myDevice.deviceSasToken = NULL;
 
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     setupRegisterHappyPath(false, true);
 
     //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &myDevice, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &myDevice, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NOT_NULL(devHandle);
@@ -2905,34 +2937,15 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_deviceKey_null_and_deviceSasToken_suc
     IoTHubTransportHttp_Destroy(handle);
 }
 
-//Tests_SRS_TRANSPORTMULTITHTTP_17_143: [ If parameter iotHubClientHandle is NULL, then IoTHubTransportHttp_Register shall return NULL. ]
-TEST_FUNCTION(IoTHubTransportHttp_Register_hubClient_null_returns_null)
-{
-    //arrange
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    umock_c_reset_all_calls();
-
-    //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, NULL, TEST_CONFIG.waitingToSend);
-
-    //assert
-    ASSERT_IS_NULL(devHandle);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-    //cleanup
-    IoTHubTransportHttp_Destroy(handle);
-
-}
-
 //Tests_SRS_TRANSPORTMULTITHTTP_17_016: [ If parameter waitingToSend is NULL, then IoTHubTransportHttp_Register shall return NULL. ]
 TEST_FUNCTION(IoTHubTransportHttp_Register_wts_null_returns_null)
 {
     //arrange
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, NULL);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, NULL);
 
     //assert
     ASSERT_IS_NULL(devHandle);
@@ -2947,11 +2960,11 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_wts_null_returns_null)
 TEST_FUNCTION(IoTHubTransportHttp_Register_handle_null_returns_null)
 {
     //arrange
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     //act
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(NULL, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(NULL, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     //assert
     ASSERT_IS_NULL(devHandle);
@@ -2966,7 +2979,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_handle_null_returns_null)
 TEST_FUNCTION(IoTHubTransportHttp_Unregister_null_does_nothing)
 {
     //arrange
-     
+
 
     //act
     IoTHubTransportHttp_Unregister(NULL);
@@ -2978,8 +2991,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Unregister_null_does_nothing)
 TEST_FUNCTION(IoTHubTransportHttp_Unregister_superHappyFunPath)
 {
     //arrange
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle));
@@ -3004,9 +3017,9 @@ TEST_FUNCTION(IoTHubTransportHttp_Unregister_superHappyFunPath)
 TEST_FUNCTION(IoTHubTransportHttp_Unregister_2nd_device_superHappyFunPath)
 {
     //arrange
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE2, TEST_CONFIG2.waitingToSend);
-    IOTHUB_DEVICE_HANDLE devHandle1 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_CONFIG2.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle1 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle1));
@@ -3029,8 +3042,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Unregister_2nd_device_superHappyFunPath)
 TEST_FUNCTION(IoTHubTransportHttp_Unregister_DeviceNotFound_fails)
 {
     //arrange
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle)).SetReturn((void_ptr)NULL);
@@ -3058,12 +3071,12 @@ TEST_FUNCTION(IoTHubTransportHttp_Subscribe_with_NULL_parameter_fails)
 }
 
 //Tests_SRS_TRANSPORTMULTITHTTP_17_104: [ IoTHubTransportHttp_Subscribe shall locate deviceHandle in the transport device list by calling VECTOR_find_if. ]
-//Tests_SRS_TRANSPORTMULTITHTTP_17_106: [ Otherwise, IoTHubTransportHttp_Subscribe shall set the device so that subsequent calls to DoWork should execute HTTP requests. 
+//Tests_SRS_TRANSPORTMULTITHTTP_17_106: [ Otherwise, IoTHubTransportHttp_Subscribe shall set the device so that subsequent calls to DoWork should execute HTTP requests.
 TEST_FUNCTION(IoTHubTransportHttp_Subscribe_with_non_NULL_parameter_succeeds)
 {
     //arrange
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -3081,13 +3094,13 @@ TEST_FUNCTION(IoTHubTransportHttp_Subscribe_with_non_NULL_parameter_succeeds)
 }
 
 //Tests_SRS_TRANSPORTMULTITHTTP_17_104: [ IoTHubTransportHttp_Subscribe shall locate deviceHandle in the transport device list by calling VECTOR_find_if. ]
-//Tests_SRS_TRANSPORTMULTITHTTP_17_106: [ Otherwise, IoTHubTransportHttp_Subscribe shall set the device so that subsequent calls to DoWork should execute HTTP requests. 
+//Tests_SRS_TRANSPORTMULTITHTTP_17_106: [ Otherwise, IoTHubTransportHttp_Subscribe shall set the device so that subsequent calls to DoWork should execute HTTP requests.
 TEST_FUNCTION(IoTHubTransportHttp_Subscribe_2devices_succeeds)
 {
     //arrange
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle1 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
-    IOTHUB_DEVICE_HANDLE devHandle2 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE2, TEST_CONFIG2.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle1 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle2 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_CONFIG2.waitingToSend);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle1));
@@ -3110,8 +3123,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Subscribe_2devices_succeeds)
 TEST_FUNCTION(IoTHubTransportHttp_Subscribe_with_list_find_fails)
 {
     //arrange
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
@@ -3146,8 +3159,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Unsubscribe_with_NULL_parameter_succeeds) /*do
 TEST_FUNCTION(IoTHubTransportHttp_Unsubscribe_with_non_NULL_parameter_succeeds)
 {
     //arrange
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle));
@@ -3167,9 +3180,9 @@ TEST_FUNCTION(IoTHubTransportHttp_Unsubscribe_with_non_NULL_parameter_succeeds)
 TEST_FUNCTION(IoTHubTransportHttp_Unsubscribe_with_2devices_succeeds)
 {
     //arrange
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
-    IOTHUB_DEVICE_HANDLE devHandle2 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE2, TEST_CONFIG2.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle2 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_CONFIG2.waitingToSend);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle));
@@ -3190,8 +3203,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Unsubscribe_with_2devices_succeeds)
 TEST_FUNCTION(IoTHubTransportHttp_Unsubscribe_with_device_not_found_does_nothing)
 {
     //arrange
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -3341,7 +3354,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_NULL_handle_does_nothing)
     //arrange
 
     //act
-    IoTHubTransportHttp_DoWork(NULL, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_DoWork(NULL);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -3352,7 +3365,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_NULL_handle_does_nothing)
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_no_devices)
 {
     //arrange
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG));
@@ -3360,7 +3373,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_no_devices)
     /*no message work because DoWork_PullMessage is set to false by create*/
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_DoWork(handle);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -3374,9 +3387,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_no_devices)
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_all_devices_unregistered)
 {
     //arrange
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle2 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE2, TEST_CONFIG2.waitingToSend);
-    IOTHUB_DEVICE_HANDLE devHandle1 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle2 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_CONFIG2.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle1 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
     (void)IoTHubTransportHttp_Unregister(devHandle1);
     (void)IoTHubTransportHttp_Unregister(devHandle2);
     umock_c_reset_all_calls();
@@ -3386,7 +3399,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_all_devices_unregistere
     /*no message work because DoWork_PullMessage is set to false by create*/
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_DoWork(handle);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -3400,8 +3413,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_all_devices_unregistere
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_no_service_messages)
 {
     //arrange
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
     umock_c_reset_all_calls();
 
     setupDoWorkLoopOnceForOneDevice();
@@ -3410,7 +3423,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     /*no message work because DoWork_PullMessage is set to false by create*/
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_DoWork(handle);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -3424,10 +3437,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_no_work_check_unsubscribe)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle1 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
-    IOTHUB_DEVICE_HANDLE devHandle2 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE2, TEST_CONFIG2.waitingToSend);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle1 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle2 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_CONFIG2.waitingToSend);
     (void)IoTHubTransportHttp_Subscribe(devHandle2);
     (void)IoTHubTransportHttp_Subscribe(devHandle1);
     IoTHubTransportHttp_Unsubscribe(devHandle2);
@@ -3443,7 +3456,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_no_work_check_unsubscribe)
     /*no message work because DoWork_PullMessage is unset due to unsubscribe*/
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_DoWork(handle);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -3456,10 +3469,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_no_work_check_unsubscribe)
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_2_registered_devices_empty_wts_no_service_msgs)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE2, TEST_CONFIG2.waitingToSend);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_CONFIG2.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -3471,7 +3484,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_2_registered_devices_em
     /*no message work because DoWork_PullMessage is set to false by create*/
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_DoWork(handle);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -3482,12 +3495,12 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_2_registered_devices_em
 
 //Tests_SRS_TRANSPORTMULTITHTTP_17_084: [ Otherwise, IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest passing the following parameters
 //requestType: GET
-//	relativePath : the message HTTP relative path
-//	requestHttpHeadersHandle : message HTTP request headers created by _Create
-//	requestContent : NULL
-//	statusCode : a pointer to unsigned int which shall be later examined
-//	responseHeadearsHandle : a new instance of HTTP headers
-//	responseContent : a new instance of buffer ]
+//    relativePath : the message HTTP relative path
+//    requestHttpHeadersHandle : message HTTP request headers created by _Create
+//    requestContent : NULL
+//    statusCode : a pointer to unsigned int which shall be later examined
+//    responseHeadearsHandle : a new instance of HTTP headers
+//    responseContent : a new instance of buffer ]
 //Tests_SRS_TRANSPORTMULTITHTTP_17_087: [ If status code is 200, then _DoWork shall make a copy of the value of the "ETag" http header. ]
 //Tests_SRS_TRANSPORTMULTITHTTP_17_089: [ _DoWork shall assemble an IOTHUBMESSAGE_HANDLE from the received HTTP content (using the responseContent buffer). ]
 //Tests_SRS_TRANSPORTMULTITHTTP_17_093: [ Otherwise, _DoWork shall call IoTHubClientCore_LL_MessageCallback with parameters handle = iotHubClientHandle and message = newly created message. ]
@@ -3495,14 +3508,14 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_2_registered_devices_em
 //Tests_SRS_TRANSPORTMULTITHTTP_17_099: [ _DoWork shall call HTTPAPIEX_SAS_ExecuteRequest with the following parameters:
 //
 //requestType: DELETE
-//	relativePath : abandon relative path begin + value of ETag + APIVERSION
-//	requestHttpHeadersHandle : an HTTP headers instance containing the following
-//	Authorization : " "
-//	If - Match : value of ETag
-//	requestContent : NULL
-//	statusCode : a pointer to unsigned int which might be used by logging
-//	responseHeadearsHandle : NULL
-//	responseContent : NULL ]
+//    relativePath : abandon relative path begin + value of ETag + APIVERSION
+//    requestHttpHeadersHandle : an HTTP headers instance containing the following
+//    Authorization : " "
+//    If - Match : value of ETag
+//    requestContent : NULL
+//    statusCode : a pointer to unsigned int which might be used by logging
+//    responseHeadearsHandle : NULL
+//    responseContent : NULL ]
 //Tests_SRS_TRANSPORTMULTITHTTP_17_100: [ Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204. ]
 //Tests_SRS_TRANSPORTMULTITHTTP_17_090: [ All the HTTP headers of the form iothub-app-name:somecontent shall be transformed in message properties {name, somecontent}. ]
 //Tests_SRS_TRANSPORTMULTITHTTP_17_123: [ After client creation, the first GET shall be allowed no matter what the value of GetMinimumPollingTime. ]
@@ -3512,8 +3525,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     unsigned int statusCode200 = 200;
     unsigned int statusCode204 = 204;
 
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
 
@@ -3557,9 +3570,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA));
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_PRODUCT_INFO));
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN));
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE));
 
@@ -3589,7 +3601,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 #if 0
     /*this returns "0" so the message needs to be "accepted"*/
     /*this is "accepting"*/
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
@@ -3598,7 +3610,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 #endif
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_DoWork(handle);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -3611,11 +3623,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_async_and_1_service_malloc_fails)
 {
     //arrange
-     
     unsigned int statusCode200 = 200;
     unsigned int statusCode204 = 204;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -3661,9 +3672,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_asy
     STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "/abandon" API_VERSION));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA));
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_PRODUCT_INFO));
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN));
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); /*because relativePath is a STRING_HANDLE*/
@@ -3690,7 +3700,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_asy
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_DoWork(handle);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -3702,11 +3712,11 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_asy
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_async_and_2nd_service_malloc_fails)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
     unsigned int statusCode204 = 204;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -3753,10 +3763,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_asy
     STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "/abandon" API_VERSION));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_PRODUCT_INFO));
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
@@ -3786,7 +3794,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_asy
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_DoWork(handle);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -3800,11 +3808,11 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_asy
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_async_and_1_service_MessageClone_fails)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
     unsigned int statusCode204 = 204;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -3872,9 +3880,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_asy
     STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "/abandon" API_VERSION))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
@@ -3914,7 +3920,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_asy
         .IgnoreArgument(1);
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -3925,12 +3931,12 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_asy
 
 //Tests_SRS_TRANSPORTMULTITHTTP_17_084: [ Otherwise, IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest passing the following parameters
 //requestType: GET
-//	relativePath : the message HTTP relative path
-//	requestHttpHeadersHandle : message HTTP request headers created by _Create
-//	requestContent : NULL
-//	statusCode : a pointer to unsigned int which shall be later examined
-//	responseHeadearsHandle : a new instance of HTTP headers
-//	responseContent : a new instance of buffer ]
+//    relativePath : the message HTTP relative path
+//    requestHttpHeadersHandle : message HTTP request headers created by _Create
+//    requestContent : NULL
+//    statusCode : a pointer to unsigned int which shall be later examined
+//    responseHeadearsHandle : a new instance of HTTP headers
+//    responseContent : a new instance of buffer ]
 //Tests_SRS_TRANSPORTMULTITHTTP_17_087: [ If status code is 200, then _DoWork shall make a copy of the value of the "ETag" http header. ]
 //Tests_SRS_TRANSPORTMULTITHTTP_17_089: [ _DoWork shall assemble an IOTHUBMESSAGE_HANDLE from the received HTTP content (using the responseContent buffer). ]
 //Tests_SRS_TRANSPORTMULTITHTTP_17_093: [ Otherwise, _DoWork shall call IoTHubClientCore_LL_MessageCallback with parameters handle = iotHubClientHandle and message = newly created message. ]
@@ -3938,26 +3944,26 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_asy
 //Tests_SRS_TRANSPORTMULTITHTTP_17_099: [ _DoWork shall call HTTPAPIEX_SAS_ExecuteRequest with the following parameters:
 //
 //requestType: DELETE
-//	relativePath : abandon relative path begin + value of ETag + APIVERSION
-//	requestHttpHeadersHandle : an HTTP headers instance containing the following
-//	Authorization : " "
-//	If - Match : value of ETag
-//	requestContent : NULL
-//	statusCode : a pointer to unsigned int which might be used by logging
-//	responseHeadearsHandle : NULL
-//	responseContent : NULL ]
+//    relativePath : abandon relative path begin + value of ETag + APIVERSION
+//    requestHttpHeadersHandle : an HTTP headers instance containing the following
+//    Authorization : " "
+//    If - Match : value of ETag
+//    requestContent : NULL
+//    statusCode : a pointer to unsigned int which might be used by logging
+//    responseHeadearsHandle : NULL
+//    responseContent : NULL ]
 //Tests_SRS_TRANSPORTMULTITHTTP_17_100: [ Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204. ]
 //Tests_SRS_TRANSPORTMULTITHTTP_17_090: [ All the HTTP headers of the form iothub-app-name:somecontent shall be transformed in message properties {name, somecontent}. ]
 //Tests_SRS_TRANSPORTMULTITHTTP_17_123: [ After client creation, the first GET shall be allowed no matter what the value of GetMinimumPollingTime. ]
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_2device_with_2nd_empty_waitingToSend_and_1_service_message_succeeds)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
     unsigned int statusCode204 = 204;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE2, TEST_CONFIG2.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_CONFIG2.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle2);
     umock_c_reset_all_calls();
@@ -4024,8 +4030,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_2device_with_2nd_empty_waiti
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
@@ -4045,9 +4050,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_2device_with_2nd_empty_waiti
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
@@ -4082,7 +4085,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_2device_with_2nd_empty_waiti
         .IgnoreArgument(1);
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -4095,11 +4098,11 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_2device_with_2nd_empty_waiti
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_2devices_2nd_has_1_event_item_as_string_happy_path_succeeds)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend2), &(message10.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE2, TEST_CONFIG2.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_CONFIG2.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -4199,13 +4202,12 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_2devices_2nd_has_1_event_item_as_string
 
     /*once the event has been succesfull...*/
 
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendComplete(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE2, IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK))
-        .IgnoreArgument(2);
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG));
 
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -4217,12 +4219,12 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_2devices_2nd_has_1_event_item_as_string
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_2devices_2subscriptions_happy_path_succeeds)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
     unsigned int statusCode204 = 204;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle1 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE2, TEST_CONFIG2.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    auto devHandle1 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_CONFIG2.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle2);
     (void)IoTHubTransportHttp_Subscribe(devHandle1);
@@ -4292,7 +4294,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_2devices_2subscriptions_happy_path_succ
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -4313,9 +4315,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_2devices_2subscriptions_happy_path_succ
         STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
         STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
-            .IgnoreArgument(1)
-            .IgnoreArgument(3);
+        STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
@@ -4406,7 +4406,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_2devices_2subscriptions_happy_path_succ
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -4427,9 +4427,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_2devices_2subscriptions_happy_path_succ
         STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
         STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
-            .IgnoreArgument(1)
-            .IgnoreArgument(3);
+        STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
@@ -4464,7 +4462,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_2devices_2subscriptions_happy_path_succ
     }
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -4478,11 +4476,11 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_2devices_2subscriptions_happy_path_succ
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_when_time_is_minus_one_succeeds)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
     unsigned int statusCode204 = 204;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -4547,7 +4545,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -4568,9 +4566,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
@@ -4604,7 +4600,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -4617,11 +4613,11 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_2_service_message_when_time_is_minus_one_succeeds)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
     unsigned int statusCode204 = 204;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -4688,7 +4684,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -4709,9 +4705,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
         STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
-            .IgnoreArgument(1)
-            .IgnoreArgument(3);
+        STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
@@ -4748,7 +4742,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     //act
     for (int i = 0; i < 2; i++)
     {
-        IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+        IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
     }
 
     //assert
@@ -4762,14 +4756,14 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_non_default_minimumPollingTime_succeeds)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
     unsigned int statusCode204 = 204;
     unsigned int thisIs20Seconds = 20;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
 
     (void)IoTHubTransportHttp_SetOption(handle, OPTION_MIN_POLLING_TIME, &thisIs20Seconds);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -4835,7 +4829,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -4856,9 +4850,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
@@ -4892,7 +4884,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -4905,12 +4897,12 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_later_than_minimumPollingTime_does_nothing_succeeds)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     /*everything below is for the second time _DoWork this is called*/
@@ -4924,7 +4916,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(get_difftime(TEST_GET_TIME_VALUE + TEST_DEFAULT_GETMINIMUMPOLLINGTIME, TEST_GET_TIME_VALUE));
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -4937,14 +4929,14 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_immediately_after_minimumPollingTime_polls_succeeds)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
     unsigned int statusCode204 = 204;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     /*everything below is for the second time _DoWork this is called*/
@@ -5011,7 +5003,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -5032,9 +5024,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
@@ -5068,7 +5058,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -5082,11 +5072,11 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_accept_code_404_succeeds)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
     unsigned int statusCode404 = 404;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -5148,7 +5138,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -5169,9 +5159,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
@@ -5205,7 +5193,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -5218,10 +5206,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_httpapi_execute_request_failed_succeeds)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -5284,7 +5272,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -5305,9 +5293,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
@@ -5341,7 +5327,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -5354,10 +5340,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_acceptmessage_fails_at_HTTPHeaders_AddHeaderNameValuePair_succeeds_1)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -5420,7 +5406,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -5441,9 +5427,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
@@ -5462,7 +5446,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -5475,10 +5459,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_acceptmessage_fails_at_HTTPHeaders_AddHeaderNameValuePair_succeeds_2)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -5540,7 +5524,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -5561,9 +5545,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
@@ -5580,7 +5562,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -5593,10 +5575,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_acceptmessage_fails_at_HTTPHeaders_Alloc_succeeds)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -5658,7 +5640,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -5687,7 +5669,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -5700,10 +5682,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_acceptmessage_fails_at_STRING_concat_succeeds_1)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -5765,7 +5747,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -5792,7 +5774,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -5805,10 +5787,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_acceptmessage_fails_at_STRING_concat_with_STRING_succeeds_1)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -5870,7 +5852,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -5895,7 +5877,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -5908,10 +5890,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_acceptmessage_fails_at_STRING_construct_n_succeeds_2)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -5973,7 +5955,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -5993,7 +5975,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -6006,10 +5988,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_acceptmessage_fails_at_STRING_clone_succeeds_1)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -6055,7 +6037,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -6087,7 +6069,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -6099,37 +6081,37 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 //Tests_SRS_TRANSPORTMULTITHTTP_17_097: [ _DoWork shall call HTTPAPIEX_SAS_ExecuteRequest with the following parameters:
 //
 //requestType: POST
-//	relativePath : abandon relative path begin(as created by _Create) + value of ETag + "/abandon" + APIVERSION
-//	requestHttpHeadersHandle : an HTTP headers instance containing the following
-//	Authorization : " "
-//	If - Match : value of ETag
-//	requestContent : NULL
-//	statusCode : a pointer to unsigned int which might be examined for logging
-//	responseHeadearsHandle : NULL
-//	responseContent : NULL ]
+//    relativePath : abandon relative path begin(as created by _Create) + value of ETag + "/abandon" + APIVERSION
+//    requestHttpHeadersHandle : an HTTP headers instance containing the following
+//    Authorization : " "
+//    If - Match : value of ETag
+//    requestContent : NULL
+//    statusCode : a pointer to unsigned int which might be examined for logging
+//    responseHeadearsHandle : NULL
+//    responseContent : NULL ]
 //Tests_SRS_TRANSPORTMULTITHTTP_17_098: [ Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204. ]
-//Tests_SRS_TRANSPORTMULTITHTTP_17_095: [ If IoTHubClientCore_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_095: [ If Transport_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message. ]
 //Tests_SRS_TRANSPORTMULTITHTTP_17_101: [ _DoWork shall call HTTPAPIEX_SAS_ExecuteRequest with the following parameters:
 //
 //requestType: DELETE
-//	relativePath : abandon relative path begin + value of ETag + APIVERSION
-//	requestHttpHeadersHandle : an HTTP headers instance containing the following
-//	Authorization : " "
-//	If - Match : value of ETag
-//	requestContent : NULL
-//	statusCode : a pointer to unsigned int which might be used by logging
-//	responseHeadearsHandle : NULL
-//	responseContent : NULL ]
+//    relativePath : abandon relative path begin + value of ETag + APIVERSION
+//    requestHttpHeadersHandle : an HTTP headers instance containing the following
+//    Authorization : " "
+//    If - Match : value of ETag
+//    requestContent : NULL
+//    statusCode : a pointer to unsigned int which might be used by logging
+//    responseHeadearsHandle : NULL
+//    responseContent : NULL ]
 //Tests_SRS_TRANSPORTMULTITHTTP_17_102: [ Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204. ]
 
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_reject_succeeds_1)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
     unsigned int statusCode204 = 204;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -6191,7 +6173,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     currentDisposition = IOTHUBMESSAGE_REJECTED;
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -6212,9 +6194,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
@@ -6248,7 +6228,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -6257,15 +6237,15 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     IoTHubTransportHttp_Destroy(handle);
 }
 
-//Tests_SRS_TRANSPORTMULTITHTTP_17_095: [ If IoTHubClientCore_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_095: [ If Transport_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message. ]
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_abandon_statusCode404_succeeds_1)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
     unsigned int statusCode404 = 404;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -6327,7 +6307,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     currentDisposition = IOTHUBMESSAGE_REJECTED;
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -6348,9 +6328,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
@@ -6384,7 +6362,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -6393,15 +6371,15 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     IoTHubTransportHttp_Destroy(handle);
 }
 
-//Tests_SRS_TRANSPORTMULTITHTTP_17_095: [ If IoTHubClientCore_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_095: [ If Transport_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message. ]
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_HTTPAPIEX_SAS_ExecuteRequest2_fails_succeeds)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
     unsigned int statusCode404 = 404;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -6463,7 +6441,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     currentDisposition = IOTHUBMESSAGE_REJECTED;
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -6484,9 +6462,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
@@ -6521,7 +6497,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -6530,14 +6506,14 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     IoTHubTransportHttp_Destroy(handle);
 }
 
-//Tests_SRS_TRANSPORTMULTITHTTP_17_095: [ If IoTHubClientCore_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_095: [ If Transport_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message. ]
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_HTTPHeaders_AddHeaderNameValuePair_fails_succeeds_1)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -6599,7 +6575,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     currentDisposition = IOTHUBMESSAGE_REJECTED;
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -6620,9 +6596,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
@@ -6641,7 +6615,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -6650,14 +6624,14 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     IoTHubTransportHttp_Destroy(handle);
 }
 
-//Tests_SRS_TRANSPORTMULTITHTTP_17_095: [ If IoTHubClientCore_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_095: [ If Transport_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message. ]
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_HTTPHeaders_AddHeaderNameValuePair_fails_succeeds_2)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -6719,7 +6693,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     currentDisposition = IOTHUBMESSAGE_REJECTED;
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -6740,9 +6714,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
@@ -6759,7 +6731,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -6768,14 +6740,14 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     IoTHubTransportHttp_Destroy(handle);
 }
 
-//Tests_SRS_TRANSPORTMULTITHTTP_17_095: [ If IoTHubClientCore_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_095: [ If Transport_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message. ]
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_HTTPHeaders_Alloc_fails_succeeds)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -6837,7 +6809,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     currentDisposition = IOTHUBMESSAGE_REJECTED;
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -6866,7 +6838,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -6875,14 +6847,14 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     IoTHubTransportHttp_Destroy(handle);
 }
 
-//Tests_SRS_TRANSPORTMULTITHTTP_17_095: [ If IoTHubClientCore_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_095: [ If Transport_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message. ]
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_STRING_concat_fails_succeeds_1)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -6944,7 +6916,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     currentDisposition = IOTHUBMESSAGE_REJECTED;
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -6971,7 +6943,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -6980,14 +6952,14 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     IoTHubTransportHttp_Destroy(handle);
 }
 
-//Tests_SRS_TRANSPORTMULTITHTTP_17_095: [ If IoTHubClientCore_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_095: [ If Transport_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message. ]
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_STRING_concat_with_STRING_fails_succeeds_2)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -7048,7 +7020,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -7073,7 +7045,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -7082,14 +7054,14 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     IoTHubTransportHttp_Destroy(handle);
 }
 
-//Tests_SRS_TRANSPORTMULTITHTTP_17_095: [ If IoTHubClientCore_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_095: [ If Transport_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message. ]
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_STRING_construct_n_fails_succeeds_2)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -7150,7 +7122,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -7170,7 +7142,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -7179,14 +7151,14 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     IoTHubTransportHttp_Destroy(handle);
 }
 
-//Tests_SRS_TRANSPORTMULTITHTTP_17_095: [ If IoTHubClientCore_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_095: [ If Transport_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message. ]
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_STRING_clone_fails_succeeds)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -7232,7 +7204,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -7263,7 +7235,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -7276,11 +7248,11 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_abandons_when_IoTHubMessage_Create_fails)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
     unsigned int statusCode204 = 204;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -7345,9 +7317,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
@@ -7374,7 +7344,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -7387,10 +7357,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_fails_when_no_ETag_header_fails)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -7428,7 +7398,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .SetReturn((const char*)NULL);
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -7441,10 +7411,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_fails_when_ETag_zero_characters_fails)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -7482,7 +7452,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .SetReturn("");
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -7495,10 +7465,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_fails_when_ETag_1_characters_not_quote_fails)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -7536,7 +7506,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .SetReturn("a");
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -7549,10 +7519,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_fails_when_ETag_2_characters_last_not_quote_fails)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -7590,7 +7560,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .SetReturn("\"a");
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -7603,10 +7573,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_fails_when_ETag_1_characters_quote_fails)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -7644,7 +7614,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .SetReturn("\"");
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -7657,10 +7627,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_fails_when_ETag_many_last_not_quote_fails)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -7698,7 +7668,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .SetReturn("\"abcd");
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -7711,10 +7681,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_goes_top_next_action_when_httpstatus_is_500_fails)
 {
     //arrange
-     
+
     unsigned int statusCode500 = 500;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -7748,7 +7718,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .CopyOutArgumentBuffer(7, &statusCode500, sizeof(statusCode500));
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -7761,10 +7731,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_goes_to_next_action_when_HTTPAPIEX_SAS_ExecuteRequest2_fails)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -7799,7 +7769,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .SetReturn(HTTPAPIEX_ERROR);
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -7812,9 +7782,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_goes_to_next_action_when_BUFFER_new_fails)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -7831,7 +7801,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(BUFFER_new());
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -7844,9 +7814,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_goes_to_next_action_when_HTTPHeaders_Alloc_fails)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -7859,7 +7829,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
 
                                                       //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -7913,10 +7883,10 @@ TEST_FUNCTION(HTTP_Protocol_succeeds)
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_happy_path_succeeds)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
     setupDoWorkLoopOnceForOneDevice();
@@ -8018,13 +7988,12 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_happy_path_succeeds)
 
     /*once the event has been succesfull...*/
 
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendComplete(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK))
-        .IgnoreArgument(2);
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG));
 
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -8037,10 +8006,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_happy_path_succeeds)
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_http_status_is_404)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -8147,7 +8116,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_ht
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -8160,10 +8129,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_ht
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_HTTPAPIEX_SAS_ExecuteRequest2_fails)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -8271,7 +8240,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_HT
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -8284,10 +8253,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_HT
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_BUFFER_build_fails)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -8379,7 +8348,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_BU
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -8392,10 +8361,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_BU
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_BUFFER_new_fails)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -8475,7 +8444,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_BU
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -8488,10 +8457,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_BU
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_concat_with_STRING_fails_it_fails)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -8550,7 +8519,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_concat_wi
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -8563,10 +8532,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_concat_wi
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_concat_it_fails)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -8619,7 +8588,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_concat_it
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -8632,10 +8601,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_concat_it
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_concat_it_fails_2)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -8681,7 +8650,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_concat_it
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -8694,10 +8663,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_concat_it
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_concat_with_STRING_it_fails_2)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -8739,7 +8708,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_concat_wi
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -8752,10 +8721,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_concat_wi
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_Base64_Encode_Bytes_it_fails)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -8789,7 +8758,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_Base64_Encode_By
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -8802,10 +8771,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_Base64_Encode_By
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_IoTHubMessage_GetByteArray_it_fails)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -8838,7 +8807,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_IoTHubMessage_Ge
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -8851,10 +8820,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_IoTHubMessage_Ge
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_construct_fails_it_fails)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -8881,7 +8850,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_construct
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -8894,10 +8863,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_construct
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_construct_it_fails)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -8915,7 +8884,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_construct
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -8928,10 +8897,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_construct
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_HTTP_headers_fails_it_fails)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -8946,7 +8915,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_HTTP_headers_fai
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -8961,10 +8930,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_HTTP_headers_fai
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_bigger_than_256K_path_succeeds)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message4.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -9021,13 +8990,12 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_bigger_than_256K_path
             .IgnoreArgument(1);
     }
 
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendComplete(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_ERROR))
-        .IgnoreArgument(2);
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_ERROR, IGNORED_PTR_ARG));
 
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -9041,10 +9009,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_bigger_than_256K_path
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_almost255_happy_path_succeeds)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message5.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -9147,13 +9115,12 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_almost255_happy_path_
 
     /*once the event has been succesfull...*/
 
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendComplete(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK))
-        .IgnoreArgument(2);
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG));
 
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -9166,11 +9133,11 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_almost255_happy_path_
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_makes_1_batch_succeeds)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
     DList_InsertTailList(&(waitingToSend), &(message2.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -9316,13 +9283,13 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_makes_1_batch_succee
 
     /*once the event has been succesfull...*/
 
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendComplete(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK))
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG))
         .IgnoreArgument(2);
 
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -9335,11 +9302,11 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_makes_1_batch_succee
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_when_the_second_items_fails_the_first_one_still_makes_1_batch_succeeds_1)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
     DList_InsertTailList(&(waitingToSend), &(message2.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
     setupDoWorkLoopOnceForOneDevice();
@@ -9473,13 +9440,13 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_when_the_second_item
 
     /*once the event has been succesfull...*/
 
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendComplete(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK))
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG))
         .IgnoreArgument(2);
 
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -9492,11 +9459,11 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_when_the_second_item
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_when_the_second_items_fails_the_first_one_still_makes_1_batch_succeeds_2)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
     DList_InsertTailList(&(waitingToSend), &(message2.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
     setupDoWorkLoopOnceForOneDevice();
@@ -9637,13 +9604,12 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_when_the_second_item
 
     /*once the event has been succesfull...*/
 
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendComplete(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK))
-        .IgnoreArgument(2);
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG));
 
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -9656,11 +9622,11 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_when_the_second_item
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_the_second_one_does_not_fit_256K_makes_1_batch_of_the_first_item_succeeds)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
     DList_InsertTailList(&(waitingToSend), &(message5.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
     setupDoWorkLoopOnceForOneDevice();
@@ -9797,13 +9763,12 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_the_second_one_does_
 
     /*once the event has been succesfull...*/
 
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendComplete(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK))
-        .IgnoreArgument(2);
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG));
 
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -9819,8 +9784,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_the_second_one_does_
 TEST_FUNCTION(IoTHubTransportHttp_GetSendStatus_InvalidHandleArgument_fail)
 {
     // arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
 
     umock_c_reset_all_calls();
 
@@ -9842,9 +9807,9 @@ TEST_FUNCTION(IoTHubTransportHttp_GetSendStatus_InvalidHandleArgument_fail)
 TEST_FUNCTION(IoTHubTransportHttp_GetSendStatus_InvalidStatusArgument_fail)
 {
     // arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -9865,9 +9830,9 @@ TEST_FUNCTION(IoTHubTransportHttp_GetSendStatus_InvalidStatusArgument_fail)
 TEST_FUNCTION(IoTHubTransportHttp_GetSendStatus_empty_waitingToSend_and_empty_eventConfirmations_success)
 {
     // arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -9897,9 +9862,9 @@ TEST_FUNCTION(IoTHubTransportHttp_GetSendStatus_empty_waitingToSend_and_empty_ev
 TEST_FUNCTION(IoTHubTransportHttp_GetSendStatus_waitingToSend_not_empty_success)
 {
     // arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     IOTHUB_MESSAGE_HANDLE eventMessageHandle = IoTHubMessage_CreateFromByteArray(contains3, 1);
     IOTHUB_MESSAGE_LIST newEntry;
@@ -9933,9 +9898,9 @@ TEST_FUNCTION(IoTHubTransportHttp_GetSendStatus_waitingToSend_not_empty_success)
 TEST_FUNCTION(IoTHubTransportHttp_GetSendStatus_deviceData_is_not_found_fails)
 {
     // arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     IOTHUB_MESSAGE_HANDLE eventMessageHandle = IoTHubMessage_CreateFromByteArray(contains3, 1);
     IOTHUB_MESSAGE_LIST newEntry;
@@ -10076,7 +10041,7 @@ void setupIrrelevantMocksForProperties(CIoTHubTransportHttpMocks *IOTHUB_MESSAGE
 
     /*once the event has been succesfull...*/
 
-    STRICT_EXPECTED_CALL((*mocks), IoTHubClientCore_LL_SendComplete(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK))
+    STRICT_EXPECTED_CALL((*mocks), Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG))
         .IgnoreArgument(2);
 }
 
@@ -10085,10 +10050,10 @@ void setupIrrelevantMocksForProperties(CIoTHubTransportHttpMocks *IOTHUB_MESSAGE
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_with_properties_succeeds)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -10124,7 +10089,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_with_properties_succ
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -10140,10 +10105,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_with_1_properties_at
     /*it will also have a property of "a":"b", therefore reaching the MAXIMUM_MESSAGE_SIZE*/
     /*the next test will increase either the propertyname or value by 1 character as the message is expected to fail*/
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message11.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -10179,7 +10144,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_with_1_properties_at
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -10197,8 +10162,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_with_1_properties_pa
     //arrange
     CNiceCallComparer<CIoTHubTransportHttpMocks>mocks;
     DList_InsertTailList(&(waitingToSend), &(message12.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     ENABLE_BATCHING();
 
@@ -10207,11 +10172,11 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_with_1_properties_pa
 
     setupDoWorkLoopOnceForOneDevice();
 
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendComplete(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_ERROR))
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_ERROR, IGNORED_PTR_ARG))
         .IgnoreArgument(2);
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -10226,8 +10191,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_fails_when_Map_GetIn
     //arrange
     CNiceCallComparer<CIoTHubTransportHttpMocks> mocks;
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -10242,7 +10207,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_fails_when_Map_GetIn
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_IS_NULL(last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest);
@@ -10384,7 +10349,7 @@ void setupIrrelevantMocksForProperties2(CIoTHubTransportHttpMocks *IOTHUB_MESSAG
 
     /*once the event has been succesfull...*/
 
-    STRICT_EXPECTED_CALL((*mocks), IoTHubClientCore_LL_SendComplete(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK))
+    STRICT_EXPECTED_CALL((*mocks), Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG))
         .IgnoreArgument(2);
 }
 
@@ -10392,11 +10357,11 @@ void setupIrrelevantMocksForProperties2(CIoTHubTransportHttpMocks *IOTHUB_MESSAG
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_with_properties_succeeds)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
     DList_InsertTailList(&(waitingToSend), &(message7.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -10471,7 +10436,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_with_properties_succ
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -10491,8 +10456,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items)
     CNiceCallComparer<CIoTHubTransportHttpMocks> mocks; /*a very e2e test... */
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
     DList_InsertTailList(&(waitingToSend), &(message7.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -10501,7 +10466,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items)
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(int, 0, memcmp(BASEIMPLEMENTATION::BUFFER_u_char(last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest), TEST_2_ITEM_STRING, sizeof(TEST_2_ITEM_STRING) - 1));
@@ -10527,8 +10492,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_THRESHOLD1_succeeds)
         CNiceCallComparer<CIoTHubTransportHttpMocks> mocks; /*a very e2e test... */
         DList_InsertTailList(&(waitingToSend), &(message6.entry));
         DList_InsertTailList(&(waitingToSend), &(message7.entry));
-        TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+        TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+        (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
         umock_c_reset_all_calls();
 
@@ -10539,7 +10504,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_THRESHOLD1_succeeds)
         ENABLE_BATCHING();
 
         //act
-        IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+        IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
         //assert
         ASSERT_ARE_EQUAL(int, 0, memcmp(BASEIMPLEMENTATION::BUFFER_u_char(last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest), TEST_2_ITEM_STRING, sizeof(TEST_2_ITEM_STRING) - 1));
@@ -10567,8 +10532,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_send_only_1_when_pro
         CNiceCallComparer<CIoTHubTransportHttpMocks> mocks; /*a very e2e test... */
         DList_InsertTailList(&(waitingToSend), &(message6.entry));
         DList_InsertTailList(&(waitingToSend), &(message7.entry));
-        TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+        TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+        (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
         umock_c_reset_all_calls();
 
@@ -10579,7 +10544,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_send_only_1_when_pro
         ENABLE_BATCHING();
 
         //act
-        IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+        IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
         //assert
         ASSERT_ARE_EQUAL(int, 0, memcmp(BASEIMPLEMENTATION::BUFFER_u_char(last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest), TEST_1_ITEM_STRING, sizeof(TEST_1_ITEM_STRING) - 1));
@@ -10607,7 +10572,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_send_nothing)
         CNiceCallComparer<CIoTHubTransportHttpMocks> mocks; /*a very e2e test... */
         DList_InsertTailList(&(waitingToSend), &(message6.entry));
         DList_InsertTailList(&(waitingToSend), &(message7.entry));
-        TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+        TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
         umock_c_reset_all_calls();
 
         whenShallSTRING_concat_fail = i;
@@ -10615,7 +10580,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_send_nothing)
         ENABLE_BATCHING();
 
         //act
-        IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+        IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
         //assert
         ASSERT_IS_NULL(last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest);
@@ -10649,8 +10614,8 @@ TEST_FUNCTION(IoTHubTransportHttp_SetOption_with_NULL_handle_fails)
 TEST_FUNCTION(IoTHubTransportHttp_SetOption_with_NULL_optionName_fails)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     //act
@@ -10668,8 +10633,8 @@ TEST_FUNCTION(IoTHubTransportHttp_SetOption_with_NULL_optionName_fails)
 TEST_FUNCTION(IoTHubTransportHttp_SetOption_with_NULL_value_fails)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     //act
@@ -10688,8 +10653,8 @@ TEST_FUNCTION(IoTHubTransportHttp_SetOption_with_NULL_value_fails)
 TEST_FUNCTION(IoTHubTransportHttp_SetOption_succeeds_when_HTTPAPIEX_succeeds)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(HTTPAPIEX_SetOption(TEST_HTTPAPIEX_HANDLE, "someOption", (void*)42));
@@ -10710,8 +10675,8 @@ TEST_FUNCTION(IoTHubTransportHttp_SetOption_succeeds_when_HTTPAPIEX_succeeds)
 TEST_FUNCTION(IoTHubTransportHttp_SetOption_fails_when_HTTPAPIEX_returns_HTTPAPIEX_INVALID_ARG)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(HTTPAPIEX_SetOption(TEST_HTTPAPIEX_HANDLE, "someOption", (void*)42))
@@ -10733,8 +10698,8 @@ TEST_FUNCTION(IoTHubTransportHttp_SetOption_fails_when_HTTPAPIEX_returns_HTTPAPI
 TEST_FUNCTION(IoTHubTransportHttp_SetOption_fails_when_HTTPAPIEX_returns_HTTPAPIEX_ERROR)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(HTTPAPIEX_SetOption(TEST_HTTPAPIEX_HANDLE, "someOption", (void*)42))
@@ -10756,8 +10721,8 @@ TEST_FUNCTION(IoTHubTransportHttp_SetOption_fails_when_HTTPAPIEX_returns_HTTPAPI
 TEST_FUNCTION(IoTHubTransportHttp_SetOption_fails_when_HTTPAPIEX_returns_any_other_error)
 {
     //arrange
-     
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(HTTPAPIEX_SetOption(TEST_HTTPAPIEX_HANDLE, "someOption", (void*)42))
@@ -10774,15 +10739,15 @@ TEST_FUNCTION(IoTHubTransportHttp_SetOption_fails_when_HTTPAPIEX_returns_any_oth
     IoTHubTransportHttp_Destroy(handle);
 }
 
-//Tests_SRS_TRANSPORTMULTITHTTP_17_096: [ If IoTHubClientCore_LL_MessageCallback returns IOTHUBMESSAGE_ABANDONED then _DoWork shall "abandon" the message. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_096: [ If Transport_MessageCallback returns IOTHUBMESSAGE_ABANDONED then _DoWork shall "abandon" the message. ]
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_abandon_succeeds)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
     unsigned int statusCode204 = 204;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -10844,7 +10809,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     currentDisposition = IOTHUBMESSAGE_ABANDONED;
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -10865,9 +10830,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
@@ -10901,7 +10864,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -10914,11 +10877,11 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_1_property_succeeds)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
     unsigned int statusCode204 = 204;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     size_t nHeaders = 1;
@@ -10997,7 +10960,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -11018,9 +10981,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
@@ -11054,7 +11015,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -11067,11 +11028,11 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_2_property_succeeds)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
     unsigned int statusCode204 = 204;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     size_t nHeaders = 3;
@@ -11163,7 +11124,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -11184,9 +11145,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
@@ -11220,7 +11179,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .IgnoreArgument(1);
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -11234,11 +11193,11 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_2_property_when_properties_fails_it_abandons_1)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
     unsigned int statusCode204 = 204;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     size_t nHeaders = 3;
@@ -11338,9 +11297,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
@@ -11367,7 +11324,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -11382,11 +11339,11 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_2_property_when_properties_fails_it_abandons_2)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
     unsigned int statusCode204 = 204;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     size_t nHeaders = 3;
@@ -11482,9 +11439,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
@@ -11512,7 +11467,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -11526,11 +11481,11 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_2_property_when_properties_fails_it_abandons_3)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
     unsigned int statusCode204 = 204;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     size_t nHeaders = 3;
@@ -11620,9 +11575,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
@@ -11649,7 +11602,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -11663,11 +11616,11 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_2_property_when_properties_fails_it_abandons_4)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
     unsigned int statusCode204 = 204;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     size_t nHeaders = 3;
@@ -11753,9 +11706,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
@@ -11782,7 +11733,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -11796,11 +11747,11 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_2_property_when_properties_fails_it_abandons_5)
 {
     //arrange
-     
+
     unsigned int statusCode200 = 200;
     unsigned int statusCode204 = 204;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     size_t nHeaders = 3;
@@ -11877,9 +11828,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
@@ -11906,7 +11855,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -11926,10 +11875,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_unbatched_happy_path_succeeds)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -11989,7 +11938,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_unbatch
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message1.entry)))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendComplete(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK))
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG))
         .IgnoreArgument(2);
 
     EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG));
@@ -11998,7 +11947,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_unbatch
     DISABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(int, 0, memcmp(BASEIMPLEMENTATION::BUFFER_u_char(last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest), buffer1, buffer1_size));
@@ -12019,10 +11968,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_unbatch
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_string_type_unbatched_happy_path_succeeds)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message10.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -12080,7 +12029,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_string_
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message10.entry)))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendComplete(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK))
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG))
         .IgnoreArgument(2);
 
     EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG));
@@ -12089,7 +12038,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_string_
     DISABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(int, 0, memcmp(BASEIMPLEMENTATION::BUFFER_u_char(last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest), string10, strlen(string10)));
@@ -12103,10 +12052,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_string_
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_unbatched_happy_path_at_the_message_limit_succeeds)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message11.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -12178,7 +12127,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_unbatched_happy_path_at_th
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message11.entry)))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendComplete(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK))
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG))
         .IgnoreArgument(2);
 
     EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG));
@@ -12187,7 +12136,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_unbatched_happy_path_at_th
     DISABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(int, 0, memcmp(BASEIMPLEMENTATION::BUFFER_u_char(last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest), buffer11, buffer11_size));
@@ -12205,21 +12154,21 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_string_
     //arrange
     CNiceCallComparer<CIoTHubTransportHttpMocks> mocks;
     DList_InsertTailList(&(waitingToSend), &(message12.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
 
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
     setupDoWorkLoopOnceForOneDevice();
 
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendComplete(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_ERROR))
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_ERROR, IGNORED_PTR_ARG))
         .IgnoreArgument(2);
 
     DISABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -12239,10 +12188,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_string_
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_string_type_unbatched_fails_when_getString_fails)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message10.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -12257,7 +12206,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_string_
     DISABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -12275,10 +12224,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_string_
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_happy_path_succeeds)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -12350,7 +12299,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message6.entry)))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendComplete(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK))
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG))
         .IgnoreArgument(2);
 
     EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG));
@@ -12359,7 +12308,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     DISABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(int, 0, memcmp(BASEIMPLEMENTATION::BUFFER_u_char(last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest), buffer6, buffer6_size));
@@ -12374,10 +12323,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_does_nothing_when_httpStatusCode_is_not_succeess)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -12447,7 +12396,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     DISABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(int, 0, memcmp(BASEIMPLEMENTATION::BUFFER_u_char(last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest), buffer6, buffer6_size));
@@ -12461,10 +12410,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_does_nothing_when_HTTPAPIEXSAS_fails)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -12535,7 +12484,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     DISABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(int, 0, memcmp(BASEIMPLEMENTATION::BUFFER_u_char(last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest), buffer6, buffer6_size));
@@ -12549,10 +12498,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_does_nothing_when_buffer_fails_1)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
     setupDoWorkLoopOnceForOneDevice();
@@ -12606,7 +12555,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     DISABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -12619,10 +12568,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_does_nothing_when_buffer_fails_2)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -12670,7 +12619,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     DISABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -12683,10 +12632,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_does_nothing_when_http_headers_fail_1)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -12732,7 +12681,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     DISABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -12745,10 +12694,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_does_nothing_when_http_headers_fail_2)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -12790,7 +12739,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     DISABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -12803,10 +12752,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_does_nothing_when_http_headers_fail_3)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -12844,7 +12793,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     DISABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -12857,10 +12806,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_does_nothing_when_map_fails)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -12892,7 +12841,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     DISABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -12905,10 +12854,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_does_nothing_when_http_fails_4)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -12933,7 +12882,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     DISABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -12946,10 +12895,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_does_nothing_when_http_fails_5)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -12969,7 +12918,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     DISABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -12982,10 +12931,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_does_nothing_when_IoTHubMessage_GetByteArray_fails)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -13002,7 +12951,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     DISABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -13015,10 +12964,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_overlimit_calls_SendComplete_with_BATCHSTATE_FAILED)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message9.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -13039,13 +12988,13 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message9.entry)))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendComplete(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_ERROR))
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_ERROR, IGNORED_PTR_ARG))
         .IgnoreArgument(2);
 
     DISABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -13058,10 +13007,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_happy_path_succeeds)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message10.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -13159,13 +13108,13 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_happy_path_
 
     /*once the event has been succesfull...*/
 
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendComplete(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK))
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG))
         .IgnoreArgument(2);
 
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -13178,10 +13127,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_happy_path_
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_string_concat_fails_it_fails)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message10.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -13229,7 +13178,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_string
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -13242,10 +13191,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_string
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_Map_GetInternals_fails_it_fails)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message10.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -13291,7 +13240,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_Map_Ge
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -13304,10 +13253,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_Map_Ge
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_STRING_concat_fails_it_fails_2)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message10.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -13348,7 +13297,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_STRING
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -13361,10 +13310,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_STRING
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_STRING_concat_with_STRING_fails_it_fails)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message10.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -13402,7 +13351,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_STRING
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -13415,10 +13364,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_STRING
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_STRING_new_JSON_fails_it_fails)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message10.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -13451,7 +13400,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_STRING
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -13464,10 +13413,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_STRING
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_IoTHubMessage_GetString_it_fails)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message10.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -13498,7 +13447,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_IoTHub
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -13511,10 +13460,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_IoTHub
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_STRING_construct_it_fails)
 {
     //arrange
-     
+
     DList_InsertTailList(&(waitingToSend), &(message10.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -13542,7 +13491,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_STRING
     ENABLE_BATCHING();
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -13555,12 +13504,12 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_STRING
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetMessageId_SUCCEED)
 {
     //arrange
-     
+
     size_t nHeaders = 4;
     unsigned int statusCode200 = 200;
     unsigned int statusCode204 = 204;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -13658,7 +13607,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetMessageId_SUCCEED)
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -13679,9 +13628,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetMessageId_SUCCEED)
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
@@ -13715,7 +13662,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetMessageId_SUCCEED)
         .IgnoreArgument(1);
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -13731,8 +13678,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetMessageId_FAILED)
     size_t nHeaders = 4;
     unsigned int statusCode200 = 200;
     //unsigned int statusCode204 = 204;
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -13775,7 +13722,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetMessageId_FAILED)
     STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 1, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 2, IGNORED_PTR_ARG));
-    
+
     STRICT_EXPECTED_CALL(Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME2", "VALUE2"));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 3, IGNORED_PTR_ARG));
@@ -13845,9 +13792,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetMessageId_FAILED)
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
@@ -13873,7 +13818,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetMessageId_FAILED)
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_Create(handle, &transport_cb_info, transport_cb_ctx);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -13883,20 +13828,20 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetMessageId_FAILED)
 }
 #endif
 
-// Tests_SRS_TRANSPORTMULTITHTTP_09_003: [ The HTTP header value of `ContentType` shall be set in the `IoTHubMessage_SetContentTypeSystemProperty`.  ]   
-// Tests_SRS_TRANSPORTMULTITHTTP_09_004: [ The HTTP header value of `ContentEncoding` shall be set in the `IoTHub_SetContentEncoding`.  ]   
+// Tests_SRS_TRANSPORTMULTITHTTP_09_003: [ The HTTP header value of `ContentType` shall be set in the `IoTHubMessage_SetContentTypeSystemProperty`.ï¿½ ]ï¿½ï¿½
+// Tests_SRS_TRANSPORTMULTITHTTP_09_004: [ The HTTP header value of `ContentEncoding` shall be set in the `IoTHub_SetContentEncoding`.ï¿½ ]ï¿½ï¿½
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetCustomContentType_SetContentEncoding_SUCCEED)
 {
     //arrange
 
     size_t nHeaders = 6;
     unsigned int statusCode200 = 200;
-    
+
     char* real_ETAG = (char*)malloc(sizeof(TEST_ETAG_VALUE) + 1);
     (void)sprintf(real_ETAG, "%s", TEST_ETAG_VALUE);
 
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
     umock_c_reset_all_calls();
@@ -13974,13 +13919,13 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetCustomContentType_SetContentEncoding
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG)).SetReturn(TEST_IOTHUB_MESSAGE_HANDLE_8);
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
         .CopyOutArgumentBuffer_destination(&real_ETAG, sizeof(&real_ETAG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_DoWork(handle);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -13996,8 +13941,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetMessageId_succeeds)
 {
     //arrange
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
     umock_c_reset_all_calls();
 
@@ -14051,12 +13996,12 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetMessageId_succeeds)
     /*building the list of messages to be notified if HTTP is fine*/
     STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message6.entry)));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendComplete(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK));
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_DoWork(handle);
 
     //assert
     ASSERT_ARE_EQUAL(int, 0, memcmp(real_BUFFER_u_char(last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest), buffer6, buffer6_size));
@@ -14070,8 +14015,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetCorrelationId_succeeds)
 {
     //arrange
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
     umock_c_reset_all_calls();
 
     setupDoWorkLoopOnceForOneDevice();
@@ -14126,13 +14071,13 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetCorrelationId_succeeds)
     /*building the list of messages to be notified if HTTP is fine*/
     STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message6.entry)));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendComplete(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK));
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG));
 
     STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_DoWork(handle);
 
     //assert
     ASSERT_ARE_EQUAL(int, 0, memcmp(real_BUFFER_u_char(last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest), buffer6, buffer6_size));
@@ -14147,8 +14092,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetCustomContentType_succeeds)
 {
     //arrange
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
     umock_c_reset_all_calls();
 
     setupDoWorkLoopOnceForOneDevice();
@@ -14203,13 +14148,13 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetCustomContentType_succeeds)
     /*building the list of messages to be notified if HTTP is fine*/
     STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message6.entry)));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendComplete(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK));
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG));
 
     STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_DoWork(handle);
 
     //assert
     ASSERT_ARE_EQUAL(int, 0, memcmp(real_BUFFER_u_char(last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest), buffer6, buffer6_size));
@@ -14224,8 +14169,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetContentEncoding_succeeds)
 {
     //arrange
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
     umock_c_reset_all_calls();
 
     setupDoWorkLoopOnceForOneDevice();
@@ -14280,13 +14225,13 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetContentEncoding_succeeds)
     /*building the list of messages to be notified if HTTP is fine*/
     STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message6.entry)));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendComplete(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK));
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG));
 
     STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
 
     //act
-    IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransportHttp_DoWork(handle);
 
     //assert
     ASSERT_ARE_EQUAL(int, 0, memcmp(real_BUFFER_u_char(last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest), buffer6, buffer6_size));
@@ -14315,7 +14260,7 @@ TEST_FUNCTION(IoTHubTransportHttp_GetHostname_with_NULL_handle_fails)
 TEST_FUNCTION(IoTHubTransportHttp_GetHostname_with_non_NULL_handle_succeeds)
 {
     //arrange
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG));
@@ -14337,7 +14282,7 @@ TEST_FUNCTION(IoTHubTransportHttp_GetHostname_with_non_NULL_handle_succeeds)
 TEST_FUNCTION(IoTHubTransportHttp_Unsubscribe_DeviceTwin_returns)
 {
     //arrange
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     //act
@@ -14354,7 +14299,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Unsubscribe_DeviceTwin_returns)
 TEST_FUNCTION(IoTHubTransportHttp_Subscribe_DeviceTwin_returns)
 {
     //arrange
-    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
     //act
@@ -14366,6 +14311,37 @@ TEST_FUNCTION(IoTHubTransportHttp_Subscribe_DeviceTwin_returns)
 
     //cleanup
     IoTHubTransportHttp_Destroy(handle);
+}
+
+TEST_FUNCTION(IoTHubTransportHttp_SetCallbackContext_success)
+{
+    // arrange
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    umock_c_reset_all_calls();
+
+    // act
+    int result = IoTHubTransportHttp_SetCallbackContext(handle, transport_cb_ctx);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, 0, result);
+
+    // cleanup
+    IoTHubTransportHttp_Destroy(handle);
+}
+
+TEST_FUNCTION(IoTHubTransportHttp_SetCallbackContext_fail)
+{
+    // arrange
+
+    // act
+    int result = IoTHubTransportHttp_SetCallbackContext(NULL, transport_cb_ctx);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_NOT_EQUAL(int, 0, result);
+
+    // cleanup
 }
 
 END_TEST_SUITE(iothubtransporthttp_ut)

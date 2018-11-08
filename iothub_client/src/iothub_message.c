@@ -41,7 +41,7 @@ static bool ContainsOnlyUsAscii(const char* asciiValue)
     const char* iterator = asciiValue;
     while (iterator != NULL && *iterator != '\0')
     {
-        // Allow only printable ascii char 
+        // Allow only printable ascii char
         if (*iterator < ' ' || *iterator > '~')
         {
             result = false;
@@ -232,7 +232,7 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_CreateFromString(const char* source)
             memset(result, 0, sizeof(*result));
             /*Codes_SRS_IOTHUBMESSAGE_02_032: [The type of the new message shall be IOTHUBMESSAGE_STRING.] */
             result->contentType = IOTHUBMESSAGE_STRING;
-            
+
             /*Codes_SRS_IOTHUBMESSAGE_02_027: [IoTHubMessage_CreateFromString shall call STRING_construct passing source as parameter.] */
             if ((result->value.string = STRING_construct(source)) == NULL)
             {
@@ -625,7 +625,7 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetContentTypeSystemProperty(IOTHUB_MESSAGE_
 {
     IOTHUB_MESSAGE_RESULT result;
 
-    // Codes_SRS_IOTHUBMESSAGE_09_001: [If any of the parameters are NULL then IoTHubMessage_SetContentTypeSystemProperty shall return a IOTHUB_MESSAGE_INVALID_ARG value.] 
+    // Codes_SRS_IOTHUBMESSAGE_09_001: [If any of the parameters are NULL then IoTHubMessage_SetContentTypeSystemProperty shall return a IOTHUB_MESSAGE_INVALID_ARG value.]
     if (iotHubMessageHandle == NULL || contentType == NULL)
     {
         LogError("Invalid argument (iotHubMessageHandle=%p, contentType=%p)", iotHubMessageHandle, contentType);
@@ -635,7 +635,7 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetContentTypeSystemProperty(IOTHUB_MESSAGE_
     {
         IOTHUB_MESSAGE_HANDLE_DATA* handleData = (IOTHUB_MESSAGE_HANDLE_DATA*)iotHubMessageHandle;
 
-        // Codes_SRS_IOTHUBMESSAGE_09_002: [If the IOTHUB_MESSAGE_HANDLE `contentType` is not NULL it shall be deallocated.] 
+        // Codes_SRS_IOTHUBMESSAGE_09_002: [If the IOTHUB_MESSAGE_HANDLE `contentType` is not NULL it shall be deallocated.]
         if (handleData->userDefinedContentType != NULL)
         {
             free(handleData->userDefinedContentType);
@@ -645,7 +645,7 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetContentTypeSystemProperty(IOTHUB_MESSAGE_
         if (mallocAndStrcpy_s(&handleData->userDefinedContentType, contentType) != 0)
         {
             LogError("Failed saving a copy of contentType");
-            // Codes_SRS_IOTHUBMESSAGE_09_003: [If the allocation or the copying of `contentType` fails, then IoTHubMessage_SetContentTypeSystemProperty shall return IOTHUB_MESSAGE_ERROR.] 
+            // Codes_SRS_IOTHUBMESSAGE_09_003: [If the allocation or the copying of `contentType` fails, then IoTHubMessage_SetContentTypeSystemProperty shall return IOTHUB_MESSAGE_ERROR.]
             result = IOTHUB_MESSAGE_ERROR;
         }
         else
@@ -662,7 +662,7 @@ const char* IoTHubMessage_GetContentTypeSystemProperty(IOTHUB_MESSAGE_HANDLE iot
 {
     const char* result;
 
-    // Codes_SRS_IOTHUBMESSAGE_09_005: [If any of the parameters are NULL then IoTHubMessage_GetContentTypeSystemProperty shall return a IOTHUB_MESSAGE_INVALID_ARG value.] 
+    // Codes_SRS_IOTHUBMESSAGE_09_005: [If any of the parameters are NULL then IoTHubMessage_GetContentTypeSystemProperty shall return a IOTHUB_MESSAGE_INVALID_ARG value.]
     if (iotHubMessageHandle == NULL)
     {
         LogError("Invalid argument (iotHubMessageHandle is NULL)");
@@ -672,7 +672,7 @@ const char* IoTHubMessage_GetContentTypeSystemProperty(IOTHUB_MESSAGE_HANDLE iot
     {
         IOTHUB_MESSAGE_HANDLE_DATA* handleData = iotHubMessageHandle;
 
-        // Codes_SRS_IOTHUBMESSAGE_09_006: [IoTHubMessage_GetContentTypeSystemProperty shall return the `contentType` as a const char* ] 
+        // Codes_SRS_IOTHUBMESSAGE_09_006: [IoTHubMessage_GetContentTypeSystemProperty shall return the `contentType` as a const char* ]
         result = (const char*)handleData->userDefinedContentType;
     }
 
@@ -683,7 +683,7 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetContentEncodingSystemProperty(IOTHUB_MESS
 {
     IOTHUB_MESSAGE_RESULT result;
 
-    // Codes_SRS_IOTHUBMESSAGE_09_006: [If any of the parameters are NULL then IoTHubMessage_SetContentEncodingSystemProperty shall return a IOTHUB_MESSAGE_INVALID_ARG value.] 
+    // Codes_SRS_IOTHUBMESSAGE_09_006: [If any of the parameters are NULL then IoTHubMessage_SetContentEncodingSystemProperty shall return a IOTHUB_MESSAGE_INVALID_ARG value.]
     if (iotHubMessageHandle == NULL || contentEncoding == NULL)
     {
         LogError("Invalid argument (iotHubMessageHandle=%p, contentEncoding=%p)", iotHubMessageHandle, contentEncoding);
@@ -693,7 +693,7 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetContentEncodingSystemProperty(IOTHUB_MESS
     {
         IOTHUB_MESSAGE_HANDLE_DATA* handleData = (IOTHUB_MESSAGE_HANDLE_DATA*)iotHubMessageHandle;
 
-        // Codes_SRS_IOTHUBMESSAGE_09_007: [If the IOTHUB_MESSAGE_HANDLE `contentEncoding` is not NULL it shall be deallocated.] 
+        // Codes_SRS_IOTHUBMESSAGE_09_007: [If the IOTHUB_MESSAGE_HANDLE `contentEncoding` is not NULL it shall be deallocated.]
         if (handleData->contentEncoding != NULL)
         {
             free(handleData->contentEncoding);
@@ -720,7 +720,7 @@ const char* IoTHubMessage_GetContentEncodingSystemProperty(IOTHUB_MESSAGE_HANDLE
 {
     const char* result;
 
-    // Codes_SRS_IOTHUBMESSAGE_09_010: [If any of the parameters are NULL then IoTHubMessage_GetContentEncodingSystemProperty shall return a IOTHUB_MESSAGE_INVALID_ARG value.] 
+    // Codes_SRS_IOTHUBMESSAGE_09_010: [If any of the parameters are NULL then IoTHubMessage_GetContentEncodingSystemProperty shall return a IOTHUB_MESSAGE_INVALID_ARG value.]
     if (iotHubMessageHandle == NULL)
     {
         LogError("Invalid argument (iotHubMessageHandle is NULL)");
@@ -730,7 +730,7 @@ const char* IoTHubMessage_GetContentEncodingSystemProperty(IOTHUB_MESSAGE_HANDLE
     {
         IOTHUB_MESSAGE_HANDLE_DATA* handleData = iotHubMessageHandle;
 
-        // Codes_SRS_IOTHUBMESSAGE_09_011: [IoTHubMessage_GetContentEncodingSystemProperty shall return the `contentEncoding` as a const char* ] 
+        // Codes_SRS_IOTHUBMESSAGE_09_011: [IoTHubMessage_GetContentEncodingSystemProperty shall return the `contentEncoding` as a const char* ]
         result = (const char*)handleData->contentEncoding;
     }
 
@@ -740,7 +740,7 @@ const char* IoTHubMessage_GetContentEncodingSystemProperty(IOTHUB_MESSAGE_HANDLE
 const IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* IoTHubMessage_GetDiagnosticPropertyData(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
 {
     const IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* result;
-    // Codes_SRS_IOTHUBMESSAGE_10_001: [If any of the parameters are NULL then IoTHubMessage_GetDiagnosticPropertyData shall return a NULL value.] 
+    // Codes_SRS_IOTHUBMESSAGE_10_001: [If any of the parameters are NULL then IoTHubMessage_GetDiagnosticPropertyData shall return a NULL value.]
     if (iotHubMessageHandle == NULL)
     {
         LogError("Invalid argument (iotHubMessageHandle is NULL)");
@@ -757,21 +757,21 @@ const IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* IoTHubMessage_GetDiagnosticProper
 IOTHUB_MESSAGE_RESULT IoTHubMessage_SetDiagnosticPropertyData(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* diagnosticData)
 {
     IOTHUB_MESSAGE_RESULT result;
-    // Codes_SRS_IOTHUBMESSAGE_10_003: [If any of the parameters are NULL then IoTHubMessage_SetDiagnosticId shall return a IOTHUB_MESSAGE_INVALID_ARG value.] 
-    if (iotHubMessageHandle == NULL || 
+    // Codes_SRS_IOTHUBMESSAGE_10_003: [If any of the parameters are NULL then IoTHubMessage_SetDiagnosticId shall return a IOTHUB_MESSAGE_INVALID_ARG value.]
+    if (iotHubMessageHandle == NULL ||
         diagnosticData == NULL ||
         diagnosticData->diagnosticCreationTimeUtc == NULL ||
         diagnosticData->diagnosticId == NULL)
     {
-        LogError("Invalid argument (iotHubMessageHandle=%p, diagnosticData=%p, diagnosticData->diagnosticId=%p, diagnosticData->diagnosticCreationTimeUtc=%p)", 
-            iotHubMessageHandle, diagnosticData, 
+        LogError("Invalid argument (iotHubMessageHandle=%p, diagnosticData=%p, diagnosticData->diagnosticId=%p, diagnosticData->diagnosticCreationTimeUtc=%p)",
+            iotHubMessageHandle, diagnosticData,
             diagnosticData == NULL ? NULL : diagnosticData->diagnosticId,
             diagnosticData == NULL ? NULL : diagnosticData->diagnosticCreationTimeUtc);
         result = IOTHUB_MESSAGE_INVALID_ARG;
     }
     else
     {
-        // Codes_SRS_IOTHUBMESSAGE_10_004: [If the IOTHUB_MESSAGE_HANDLE `diagnosticData` is not NULL it shall be deallocated.] 
+        // Codes_SRS_IOTHUBMESSAGE_10_004: [If the IOTHUB_MESSAGE_HANDLE `diagnosticData` is not NULL it shall be deallocated.]
         if (iotHubMessageHandle->diagnosticData != NULL)
         {
             DestroyDiagnosticPropertyData(iotHubMessageHandle->diagnosticData);

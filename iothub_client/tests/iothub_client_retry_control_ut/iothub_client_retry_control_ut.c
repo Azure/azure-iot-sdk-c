@@ -44,7 +44,6 @@ void real_free(void* ptr)
 #include "internal/iothub_client_retry_control.h"
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
@@ -82,7 +81,7 @@ static void TEST_free(void* ptr)
     for (i = 0, j = 0; j < saved_malloc_returns_count; i++, j++)
     {
         if (saved_malloc_returns[i] == ptr) j++;
-        
+
         saved_malloc_returns[i] = saved_malloc_returns[j];
     }
 
@@ -211,7 +210,7 @@ static void reset_test_data()
     memset(saved_malloc_returns, 0, sizeof(saved_malloc_returns));
 }
 
-static void register_umock_alias_types() 
+static void register_umock_alias_types()
 {
     REGISTER_UMOCK_ALIAS_TYPE(time_t, long long);
     REGISTER_UMOCK_ALIAS_TYPE(OPTIONHANDLER_HANDLE, void*);
@@ -228,8 +227,8 @@ static void register_global_mock_hooks()
     REGISTER_GLOBAL_MOCK_HOOK(OptionHandler_AddOption, TEST_OptionHandler_AddOption);
 }
 
-static void register_global_mock_returns() 
-{ 
+static void register_global_mock_returns()
+{
     REGISTER_GLOBAL_MOCK_RETURN(OptionHandler_Create, TEST_OPTIONHANDLER_HANDLE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(OptionHandler_Create, NULL);
 
@@ -255,7 +254,6 @@ BEGIN_TEST_SUITE(iothub_client_retry_control_ut)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -278,7 +276,6 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     umock_c_deinit();
 
     TEST_MUTEX_DESTROY(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
@@ -554,7 +551,7 @@ TEST_FUNCTION(Retrieve_Options_failure_checks)
         OPTIONHANDLER_HANDLE result = retry_control_retrieve_options(handle);
 
         sprintf(error_msg, "On failed call %zu", i);
-        ASSERT_IS_NULL_WITH_MSG(result, error_msg);
+        ASSERT_IS_NULL(result, error_msg);
     }
 
     // cleanup
@@ -703,7 +700,7 @@ TEST_FUNCTION(Set_Options_failure_checks)
 
         // assert
         sprintf(error_msg, "On failed call %zu", i);
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, error_msg);
+        ASSERT_ARE_NOT_EQUAL(int, 0, result, error_msg);
     }
 
     // cleanup
@@ -725,7 +722,7 @@ TEST_FUNCTION(Set_Options_UNSUPPORTED_name)
     aquilo que � a marca do nosso estranho destino sobre a terra,
     aquele fato sem explica��o que iguala tudo o que � vivo num s� rebanho de condenados,
     porque tudo o que � vivo, morre.
-    (Ariano Suassuna) 
+    (Ariano Suassuna)
     */
 
     // act
@@ -1150,7 +1147,7 @@ TEST_FUNCTION(Reset_success)
     // assert
     umock_c_reset_all_calls();
     // notice "next_try_time" below.
-    STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(next_try_time); 
+    STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(next_try_time);
     // The return is RETRY_ACTION_RETRY_NOW because retry_count is 0.
     result = retry_control_should_retry(handle, &retry_action);
 

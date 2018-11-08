@@ -117,7 +117,7 @@ void iothub_client_sample_mqtt_esp8266_run(void)
     double avgWindSpeed = 10.0;
     double minTemperature = 20.0;
     double minHumidity = 60.0;
-    
+
     callbackCounter = 0;
     int receiveContext = 0;
 
@@ -152,7 +152,7 @@ void iothub_client_sample_mqtt_esp8266_run(void)
                 do
                 {
                     (void)printf("iterator: [%d], callbackCounter: [%d]. \r\n", iterator, callbackCounter);
-                    
+
                     if (iterator < MESSAGE_COUNT && (iterator <= callbackCounter))
                     {
                         temperature = minTemperature + (rand() % 10);

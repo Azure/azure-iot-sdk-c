@@ -58,7 +58,7 @@ static int real_strcmp(const char* str1, const char* str2)
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
-#include "azure_c_shared_utility/agenttime.h" 
+#include "azure_c_shared_utility/agenttime.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "internal/iothub_client_authorization.h"
 #undef ENABLE_MOCKS
@@ -69,8 +69,6 @@ MOCKABLE_FUNCTION(, time_t, get_time, time_t*, currentTime);
 MOCKABLE_FUNCTION(, double, get_difftime, time_t, stopTime, time_t, startTime);
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
-
 
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
@@ -498,7 +496,6 @@ BEGIN_TEST_SUITE(iothubtransport_amqp_cbs_auth_ut)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -523,7 +520,6 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     umock_c_deinit();
 
     TEST_MUTEX_DESTROY(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
@@ -876,7 +872,7 @@ TEST_FUNCTION(authentication_do_work_not_started)
 {
     // arrange
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_KEYS);
-    
+
     umock_c_reset_all_calls();
     set_expected_calls_for_authentication_create(config, false);
     AUTHENTICATION_HANDLE handle = authentication_create(config);
@@ -974,11 +970,11 @@ TEST_FUNCTION(authentication_do_work_SAS_TOKEN_on_cbs_put_token_callback_success
     exp_state->current_state = AUTHENTICATION_STATE_STARTING;
 
     crank_authentication_do_work(config, handle, current_time, exp_state);
-    
+
     ASSERT_IS_NOT_NULL(saved_cbs_put_token_on_operation_complete);
 
     umock_c_reset_all_calls();
-    
+
     // act
     saved_cbs_put_token_on_operation_complete(saved_cbs_put_token_context, CBS_OPERATION_RESULT_OK, 0, "all good");
 
@@ -1007,11 +1003,11 @@ TEST_FUNCTION(authentication_do_work_SAS_TOKEN_on_cbs_put_token_callback_success
     exp_state->current_state = AUTHENTICATION_STATE_STARTING;
 
     crank_authentication_do_work(config, handle, current_time, exp_state);
-    
+
     ASSERT_IS_NOT_NULL(saved_cbs_put_token_on_operation_complete);
 
     umock_c_reset_all_calls();
-    
+
     // act
     saved_cbs_put_token_on_operation_complete(saved_cbs_put_token_context, CBS_OPERATION_RESULT_OK, 0, "all good");
 
@@ -1112,9 +1108,9 @@ TEST_FUNCTION(authentication_do_work_SAS_TOKEN_AUTHENTICATION_STATE_STARTING_fai
 
         // assert
         sprintf(error_msg, "On failed call %zu", i);
-        ASSERT_IS_TRUE_WITH_MSG(NULL == saved_cbs_put_token_on_operation_complete, error_msg);
-        ASSERT_ARE_EQUAL_WITH_MSG(int, AUTHENTICATION_STATE_ERROR, saved_on_state_changed_callback_new_state, error_msg);
-        ASSERT_ARE_EQUAL_WITH_MSG(int, AUTHENTICATION_ERROR_AUTH_FAILED, saved_on_error_callback_error_code, error_msg);
+        ASSERT_IS_TRUE(NULL == saved_cbs_put_token_on_operation_complete, error_msg);
+        ASSERT_ARE_EQUAL(int, AUTHENTICATION_STATE_ERROR, saved_on_state_changed_callback_new_state, error_msg);
+        ASSERT_ARE_EQUAL(int, AUTHENTICATION_ERROR_AUTH_FAILED, saved_on_error_callback_error_code, error_msg);
     }
 
     // cleanup
@@ -1208,7 +1204,7 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_AUTHENTICATION_STATE_STARTING_f
 
         // assert
         sprintf(error_msg, "On failed call %zu", i);
-        ASSERT_IS_TRUE_WITH_MSG(NULL == saved_cbs_put_token_on_operation_complete, error_msg);
+        ASSERT_IS_TRUE(NULL == saved_cbs_put_token_on_operation_complete, error_msg);
         ASSERT_ARE_EQUAL(int, AUTHENTICATION_STATE_ERROR, saved_on_state_changed_callback_new_state);
         ASSERT_ARE_EQUAL(int, AUTHENTICATION_ERROR_AUTH_FAILED, saved_on_error_callback_error_code);
     }
@@ -1239,7 +1235,7 @@ TEST_FUNCTION(authentication_do_work_SAS_TOKEN_next_calls_no_op)
     ASSERT_ARE_EQUAL(int, AUTHENTICATION_STATE_STARTED, saved_on_state_changed_callback_new_state);
 
     umock_c_reset_all_calls();
-    
+
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN);
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN);
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN);
@@ -1270,7 +1266,7 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_sas_token_refresh_check)
 
     time_t current_time = time(NULL);
     time_t next_time = add_seconds(current_time, DEFAULT_SAS_TOKEN_REFRESH_TIME_SECS - 1);
-    ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != next_time, "failed to computer 'next_time'");
+    ASSERT_IS_TRUE(INDEFINITE_TIME != next_time, "failed to computer 'next_time'");
 
     AUTHENTICATION_DO_WORK_EXPECTED_STATE *exp_state = get_do_work_expected_state_struct();
     exp_state->current_state = AUTHENTICATION_STATE_STARTING;
@@ -1313,11 +1309,11 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_sas_token_refresh)
 
     time_t current_time = time(NULL);
     time_t next_time = add_seconds(current_time, 11);
-    ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != next_time, "failed to computer 'next_time'");
+    ASSERT_IS_TRUE(INDEFINITE_TIME != next_time, "failed to computer 'next_time'");
 
     size_t refresh_time_secs = 10;
     int result = authentication_set_option(handle, AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS, &refresh_time_secs);
-    ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "authentication_set_option(AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS) failed!");
+    ASSERT_ARE_EQUAL(int, 0, result, "authentication_set_option(AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS) failed!");
 
     AUTHENTICATION_DO_WORK_EXPECTED_STATE *exp_state = get_do_work_expected_state_struct();
     exp_state->current_state = AUTHENTICATION_STATE_STARTING;
@@ -1329,7 +1325,7 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_sas_token_refresh)
 
     size_t lifetime_secs = 123;
     result = authentication_set_option(handle, AUTHENTICATION_OPTION_SAS_TOKEN_LIFETIME_SECS, &lifetime_secs);
-    ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "authentication_set_option(AUTHENTICATION_OPTION_SAS_TOKEN_LIFETIME_SECS) failed!");
+    ASSERT_ARE_EQUAL(int, 0, result, "authentication_set_option(AUTHENTICATION_OPTION_SAS_TOKEN_LIFETIME_SECS) failed!");
 
     exp_state->current_state = AUTHENTICATION_STATE_STARTED;
     exp_state->current_sas_token_put_time = current_time;
@@ -1361,9 +1357,9 @@ TEST_FUNCTION(authentication_do_work_first_auth_timeout_check)
     AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
 
     time_t current_time = time(NULL);
-    ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != current_time, "current_time = time(NULL) failed");
+    ASSERT_IS_TRUE(INDEFINITE_TIME != current_time, "current_time = time(NULL) failed");
     time_t next_time = add_seconds(current_time, 31536000); // one year has passed...
-    ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != next_time, "failed to computer 'next_time'");
+    ASSERT_IS_TRUE(INDEFINITE_TIME != next_time, "failed to computer 'next_time'");
 
     AUTHENTICATION_DO_WORK_EXPECTED_STATE *exp_state = get_do_work_expected_state_struct();
     exp_state->current_state = AUTHENTICATION_STATE_STARTING;
@@ -1404,9 +1400,9 @@ TEST_FUNCTION(authentication_do_work_first_auth_times_out)
     ASSERT_ARE_EQUAL(int, 0, result);
 
     time_t current_time = time(NULL);
-    ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != current_time, "current_time = time(NULL) failed");
+    ASSERT_IS_TRUE(INDEFINITE_TIME != current_time, "current_time = time(NULL) failed");
     time_t next_time = add_seconds(current_time, 11);
-    ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != next_time, "failed to compute 'next_time'");
+    ASSERT_IS_TRUE(INDEFINITE_TIME != next_time, "failed to compute 'next_time'");
 
     AUTHENTICATION_DO_WORK_EXPECTED_STATE *exp_state = get_do_work_expected_state_struct();
     exp_state->current_state = AUTHENTICATION_STATE_STARTING;
@@ -1646,7 +1642,7 @@ TEST_FUNCTION(authentication_retrieve_options_failure_checks)
 
     AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_SAS_TOKEN);
     AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
-    
+
     umock_c_reset_all_calls();
     EXPECTED_CALL(OptionHandler_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(TEST_OPTIONHANDLER_HANDLE);
     STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, AUTHENTICATION_OPTION_CBS_REQUEST_TIMEOUT_SECS, IGNORED_PTR_ARG))
@@ -1674,7 +1670,7 @@ TEST_FUNCTION(authentication_retrieve_options_failure_checks)
 
         // assert
         sprintf(error_msg, "On failed call %zu", i);
-        ASSERT_IS_NULL_WITH_MSG(result, error_msg);
+        ASSERT_IS_NULL(result, error_msg);
     }
 
     // cleanup

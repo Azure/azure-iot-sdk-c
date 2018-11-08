@@ -48,6 +48,7 @@ endif()
 
 set(hsm_type_x509 OFF CACHE BOOL "x509 type of hsm used with the Provisioning client")
 set(hsm_type_sastoken OFF CACHE BOOL "tpm type of hsm used with the Provisioning client")
+set(hsm_type_symm_key OFF CACHE BOOL "Symmetric key type of hsm used with the Provisioning client")
 set(hsm_type_custom OFF CACHE BOOL "hsm type of custom used with the Provisioning client")
 set(hsm_custom_lib "" CACHE STRING "Full path to custom HSM repo library")
 set(run_sfc_tests OFF CACHE BOOL "setup the Service Fault tests")
@@ -99,7 +100,7 @@ else()
 endif()
 
 # openssl samples on Windows need to have a trusted cert set
-if ("${use_openssl}" OR "${use_wolfssl}")
+if ((WIN32 AND "${use_openssl}") OR "${use_wolfssl}")
     option(use_sample_trusted_cert "Set flag in samples to use SDK's built-in CA as TrustedCerts" ON)
 else()
     option(use_sample_trusted_cert "Set flag in samples to use SDK's built-in CA as TrustedCerts" OFF)
@@ -322,6 +323,10 @@ endif()
 
 add_subdirectory(iothub_client)
 add_subdirectory(serializer)
+
+if (NOT ${skip_samples})
+  add_subdirectory(samples/solutions)
+endif()
 
 # add the device_auth sample subdirectory
 if (${use_prov_client} AND NOT ${skip_samples})

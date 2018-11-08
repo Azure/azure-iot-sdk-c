@@ -56,8 +56,8 @@ IF(WIN32)
     add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
 ENDIF(WIN32)
 
-add_library(provisioning_service_client 
-    ${provisioning_service_client_c_files} 
+add_library(provisioning_service_client
+    ${provisioning_service_client_c_files}
     ${provisioning_service_client_h_files})
 target_link_libraries(provisioning_service_client parson uhttp)
 

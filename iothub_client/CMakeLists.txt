@@ -98,12 +98,14 @@ if(${use_http})
     set(iothub_client_http_transport_c_files
         ./src/iothub_client_authorization.c
         ./src/iothub_client_retry_control.c
+        ./src/iothub_transport_ll_private.c
         ./src/iothubtransporthttp.c
     )
 
     set(iothub_client_http_transport_h_files
         ./inc/internal/iothub_client_authorization.h
         ./inc/internal/iothub_client_retry_control.h
+        ./inc/internal/iothub_transport_ll_private.h
         ./inc/iothubtransporthttp.h
         ./inc/iothub_transport_ll.h
     )
@@ -123,6 +125,7 @@ if(${use_amqp})
     set(iothub_client_amqp_transport_common_c_files
         ./src/iothub_client_authorization.c
         ./src/iothub_client_retry_control.c
+        ./src/iothub_transport_ll_private.c
         ./src/iothubtransport_amqp_common.c
         ./src/iothubtransport_amqp_device.c
         ./src/iothubtransport_amqp_cbs_auth.c
@@ -138,6 +141,7 @@ if(${use_amqp})
     set(iothub_client_amqp_transport_common_h_files
         ./inc/internal/iothub_client_authorization.h
         ./inc/internal/iothub_client_retry_control.h
+        ./inc/internal/iothub_transport_ll_private.h
         ./inc/internal/iothubtransport_amqp_common.h
         ./inc/internal/iothubtransport_amqp_device.h
         ./inc/internal/iothubtransport_amqp_cbs_auth.h
@@ -189,12 +193,14 @@ if(${use_mqtt})
     set(iothub_client_mqtt_ws_transport_c_files
         ./src/iothub_client_authorization.c
         ./src/iothub_client_retry_control.c
+        ./src/iothub_transport_ll_private.c
         ./src/iothubtransport_mqtt_common.c
         ./src/iothubtransportmqtt_websockets.c
     )
     set(iothub_client_mqtt_ws_transport_h_files
         ./inc/internal/iothub_client_authorization.h
         ./inc/internal/iothub_client_retry_control.h
+        ./inc/internal/iothub_transport_ll_private.h
         ./inc/internal/iothubtransport_mqtt_common.h
         ./inc/iothubtransportmqtt_websockets.h
     )
@@ -202,6 +208,7 @@ if(${use_mqtt})
     set(iothub_client_mqtt_transport_c_files
         ./src/iothub_client_authorization.c
         ./src/iothub_client_retry_control.c
+        ./src/iothub_transport_ll_private.c
         ./src/iothubtransport_mqtt_common.c
         ./src/iothubtransportmqtt.c
     )
@@ -209,6 +216,7 @@ if(${use_mqtt})
     set(iothub_client_mqtt_transport_h_files
         ./inc/internal/iothub_client_authorization.h
         ./inc/internal/iothub_client_retry_control.h
+        ./inc/internal/iothub_transport_ll_private.h
         ./inc/internal/iothubtransport_mqtt_common.h
         ./inc/iothubtransportmqtt.h
     )
@@ -235,7 +243,7 @@ if(${use_amqp})
     set(IOTHUB_CLIENT_AMQP_TRANSPORT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client_amqp_transport lib" FORCE)
 endif()
 
-set(IOTHUB_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc ${CMAKE_CURRENT_LIST_DIR}/inc/internal CACHE INTERNAL "this is what needs to be included if using iothub_client lib" FORCE)
+set(IOTHUB_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client lib" FORCE)
 
 
 if(NOT ${dont_use_uploadtoblob} OR ${use_edge_modules})
@@ -282,7 +290,7 @@ if(${use_http})
     )
 
     if(build_as_dynamic)
-        set(iothub_transport_source ${iothub_transport_source} 
+        set(iothub_transport_source ${iothub_transport_source}
             ${iothub_client_http_transport_c_files}
             ${iothub_client_http_transport_h_files})
     endif(build_as_dynamic)
@@ -315,11 +323,11 @@ if(${use_amqp})
     )
 
     if (build_as_dynamic)
-        set(iothub_transport_source ${iothub_transport_source} 
+        set(iothub_transport_source ${iothub_transport_source}
             ${iothub_client_amqp_transport_c_files}
             ${iothub_client_amqp_transport_h_files})
 
-        set(iothub_transport_source ${iothub_transport_source} 
+        set(iothub_transport_source ${iothub_transport_source}
             ${iothub_client_amqp_ws_transport_c_files}
             ${iothub_client_amqp_ws_transport_h_files})
 
@@ -355,11 +363,11 @@ if(${use_mqtt})
     )
 
     if (build_as_dynamic)
-        set(iothub_transport_source ${iothub_transport_source} 
+        set(iothub_transport_source ${iothub_transport_source}
             ${iothub_client_mqtt_transport_c_files}
             ${iothub_client_mqtt_transport_h_files})
 
-        set(iothub_transport_source ${iothub_transport_source} 
+        set(iothub_transport_source ${iothub_transport_source}
             ${iothub_client_mqtt_ws_transport_c_files}
             ${iothub_client_mqtt_ws_transport_h_files})
     endif(build_as_dynamic)
@@ -378,19 +386,19 @@ if (${build_as_dynamic})
     if(NOT ${dont_use_uploadtoblob})
         set(iothub_def_file ${iothub_def_file} ./src/upload_to_blob.def)
     endif()
-	
-	if(use_amqp)
-		set(iothub_def_file ${iothub_def_file} ./src/iothub_transport_amqp.def)
-	endif()
-	
-	if(use_http)
-		set(iothub_def_file ${iothub_def_file} ./src/iothub_transport_http.def)
-	endif()
-	
-	if(use_mqtt)
-		set(iothub_def_file ${iothub_def_file} ./src/iothub_transport_mqtt.def)
-	endif()
-    
+
+    if(use_amqp)
+        set(iothub_def_file ${iothub_def_file} ./src/iothub_transport_amqp.def)
+    endif()
+
+    if(use_http)
+        set(iothub_def_file ${iothub_def_file} ./src/iothub_transport_http.def)
+    endif()
+
+    if(use_mqtt)
+        set(iothub_def_file ${iothub_def_file} ./src/iothub_transport_mqtt.def)
+    endif()
+
     if (${use_edge_modules})
         set(iothub_def_file ${iothub_def_file} ./src/iothub_edge_modules.def)
     endif()

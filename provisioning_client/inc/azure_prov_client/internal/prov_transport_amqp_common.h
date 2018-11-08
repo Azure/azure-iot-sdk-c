@@ -31,15 +31,16 @@ typedef PROV_TRANSPORT_IO_INFO*(*PROV_AMQP_TRANSPORT_IO)(const char* fully_quali
 
 MOCKABLE_FUNCTION(, PROV_DEVICE_TRANSPORT_HANDLE, prov_transport_common_amqp_create, const char*, uri, TRANSPORT_HSM_TYPE, type, const char*, scope_id, const char*, api_version, PROV_AMQP_TRANSPORT_IO, transport_io, PROV_TRANSPORT_ERROR_CALLBACK, error_cb, void*, error_ctx);
 MOCKABLE_FUNCTION(, void, prov_transport_common_amqp_destroy, PROV_DEVICE_TRANSPORT_HANDLE, handle);
-MOCKABLE_FUNCTION(, int, prov_transport_common_amqp_open, PROV_DEVICE_TRANSPORT_HANDLE, handle, const char*, registration_id, BUFFER_HANDLE, ek, BUFFER_HANDLE, srk, PROV_DEVICE_TRANSPORT_REGISTER_CALLBACK, data_callback, void*, user_ctx, PROV_DEVICE_TRANSPORT_STATUS_CALLBACK, status_cb, void*, status_ctx);
+MOCKABLE_FUNCTION(, int, prov_transport_common_amqp_open, PROV_DEVICE_TRANSPORT_HANDLE, handle, const char*, registration_id, BUFFER_HANDLE, ek, BUFFER_HANDLE, srk, PROV_DEVICE_TRANSPORT_REGISTER_CALLBACK, data_callback, void*, user_ctx, PROV_DEVICE_TRANSPORT_STATUS_CALLBACK, status_cb, void*, status_ctx, PROV_TRANSPORT_CHALLENGE_CALLBACK, reg_challenge_cb, void*, challenge_ctx);
 MOCKABLE_FUNCTION(, int, prov_transport_common_amqp_close, PROV_DEVICE_TRANSPORT_HANDLE, handle);
-MOCKABLE_FUNCTION(, int, prov_transport_common_amqp_register_device, PROV_DEVICE_TRANSPORT_HANDLE, handle, PROV_TRANSPORT_CHALLENGE_CALLBACK, reg_challenge_cb, void*, user_ctx, PROV_TRANSPORT_JSON_PARSE, json_parse_cb, void*, json_ctx);
+MOCKABLE_FUNCTION(, int, prov_transport_common_amqp_register_device, PROV_DEVICE_TRANSPORT_HANDLE, handle, PROV_TRANSPORT_JSON_PARSE, json_parse_cb, void*, json_ctx);
 MOCKABLE_FUNCTION(, int, prov_transport_common_amqp_get_operation_status, PROV_DEVICE_TRANSPORT_HANDLE, handle);
 MOCKABLE_FUNCTION(, void, prov_transport_common_amqp_dowork, PROV_DEVICE_TRANSPORT_HANDLE, handle);
 MOCKABLE_FUNCTION(, int, prov_transport_common_amqp_set_trace, PROV_DEVICE_TRANSPORT_HANDLE, handle, bool, trace_on);
 MOCKABLE_FUNCTION(, int, prov_transport_common_amqp_set_proxy, PROV_DEVICE_TRANSPORT_HANDLE, handle, const HTTP_PROXY_OPTIONS*, proxy_options);
 MOCKABLE_FUNCTION(, int, prov_transport_common_amqp_set_trusted_cert, PROV_DEVICE_TRANSPORT_HANDLE, handle, const char*, certificate);
 MOCKABLE_FUNCTION(, int, prov_transport_common_amqp_x509_cert, PROV_DEVICE_TRANSPORT_HANDLE, handle, const char*, certificate, const char*, private_key);
+MOCKABLE_FUNCTION(, int, prov_transport_common_amqp_set_option, PROV_DEVICE_TRANSPORT_HANDLE, handle, const char*, option, const void*, value);
 
 #ifdef __cplusplus
 }

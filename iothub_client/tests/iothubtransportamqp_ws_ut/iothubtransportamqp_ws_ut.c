@@ -40,13 +40,22 @@ static void real_free(void* ptr)
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/http_proxy_io.h"
 #include "internal/iothubtransport_amqp_common.h"
+#include "internal/iothub_transport_ll_private.h"
+
+MOCKABLE_FUNCTION(, bool, Transport_MessageCallbackFromInput, MESSAGE_CALLBACK_INFO*, messageData, void*, ctx);
+MOCKABLE_FUNCTION(, bool, Transport_MessageCallback, MESSAGE_CALLBACK_INFO*, messageData, void*, ctx);
+MOCKABLE_FUNCTION(, void, Transport_ConnectionStatusCallBack, IOTHUB_CLIENT_CONNECTION_STATUS, status, IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason, void*, ctx);
+MOCKABLE_FUNCTION(, void, Transport_SendComplete_Callback, PDLIST_ENTRY, completed, IOTHUB_CLIENT_CONFIRMATION_RESULT, result, void*, ctx);
+MOCKABLE_FUNCTION(, const char*, Transport_GetOption_Product_Info_Callback, void*, ctx);
+MOCKABLE_FUNCTION(, void, Transport_Twin_ReportedStateComplete_Callback, uint32_t, item_id, int, status_code, void*, ctx);
+MOCKABLE_FUNCTION(, void, Transport_Twin_RetrievePropertyComplete_Callback, DEVICE_TWIN_UPDATE_STATE, update_state, const unsigned char*, payLoad, size_t, size, void*, ctx);
+MOCKABLE_FUNCTION(, int, Transport_DeviceMethod_Complete_Callback, const char*, method_name, const unsigned char*, payLoad, size_t, size, METHOD_HANDLE, response_id, void*, ctx);
+
 #undef ENABLE_MOCKS
 
 #include "iothubtransportamqp_websockets.h"
 
-
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 // Control parameters
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
@@ -58,7 +67,6 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
     ASSERT_FAIL(temp_str);
 }
 
-#define TEST_IOTHUB_CLIENT_CORE_LL_HANDLE        ((IOTHUB_CLIENT_CORE_LL_HANDLE)0x4239)
 #define TEST_IOTHUBTRANSPORT_CONFIG_HANDLE  ((IOTHUBTRANSPORT_CONFIG*)0x4240)
 #define TEST_XIO_INTERFACE                  ((const IO_INTERFACE_DESCRIPTION*)0x4247)
 #define TEST_XIO_HANDLE                     ((XIO_HANDLE)0x4248)
@@ -78,8 +86,13 @@ static IO_INTERFACE_DESCRIPTION* TEST_HTTP_PROXY_IO_INTERFACE_DESCRIPTION = (IO_
 static const IOTHUBTRANSPORT_CONFIG* saved_IoTHubTransport_AMQP_Common_Create_config;
 static AMQP_GET_IO_TRANSPORT saved_IoTHubTransport_AMQP_Common_Create_get_io_transport;
 
-static TRANSPORT_LL_HANDLE TEST_IoTHubTransport_AMQP_Common_Create(const IOTHUBTRANSPORT_CONFIG* config, AMQP_GET_IO_TRANSPORT get_io_transport)
+static TRANSPORT_CALLBACKS_INFO* g_transport_cb_info = (TRANSPORT_CALLBACKS_INFO*)0x227733;
+static void* g_transport_cb_ctx = (void*)0x499922;
+
+static TRANSPORT_LL_HANDLE TEST_IoTHubTransport_AMQP_Common_Create(const IOTHUBTRANSPORT_CONFIG* config, AMQP_GET_IO_TRANSPORT get_io_transport, TRANSPORT_CALLBACKS_INFO* cb_info, void* ctx)
 {
+    (void)cb_info;
+    (void)ctx;
     saved_IoTHubTransport_AMQP_Common_Create_config = config;
     saved_IoTHubTransport_AMQP_Common_Create_get_io_transport = get_io_transport;
     return TEST_TRANSPORT_LL_HANDLE;
@@ -554,7 +567,6 @@ BEGIN_TEST_SUITE(iothubtransportamqp_ws_ut)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -602,7 +614,6 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     umock_c_deinit();
 
     TEST_MUTEX_DESTROY(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 static void reset_test_data()
@@ -648,12 +659,12 @@ TEST_FUNCTION(AMQP_Create)
     TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol_over_WebSocketsTls();
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_Create(TEST_IOTHUBTRANSPORT_CONFIG_HANDLE, IGNORED_PTR_ARG));
-    
+    STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_Create(TEST_IOTHUBTRANSPORT_CONFIG_HANDLE, IGNORED_PTR_ARG, g_transport_cb_info, g_transport_cb_ctx));
+
     saved_IoTHubTransport_AMQP_Common_Create_get_io_transport = NULL;
 
     // act
-    TRANSPORT_LL_HANDLE tr_hdl = provider->IoTHubTransport_Create(TEST_IOTHUBTRANSPORT_CONFIG_HANDLE);
+    TRANSPORT_LL_HANDLE tr_hdl = provider->IoTHubTransport_Create(TEST_IOTHUBTRANSPORT_CONFIG_HANDLE, g_transport_cb_info, g_transport_cb_ctx);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -686,7 +697,7 @@ TEST_FUNCTION(AMQP_Create_getWebSocketsIOTransport_with_NULL_proxy_options_sets_
     TLSIO_CONFIG tlsio_config;
     XIO_HANDLE underlying_io_transport;
 
-    (void)provider->IoTHubTransport_Create(TEST_IOTHUBTRANSPORT_CONFIG_HANDLE);
+    (void)provider->IoTHubTransport_Create(TEST_IOTHUBTRANSPORT_CONFIG_HANDLE, g_transport_cb_info, g_transport_cb_ctx);
     umock_c_reset_all_calls();
 
     tlsio_config.hostname = TEST_STRING;
@@ -721,7 +732,7 @@ TEST_FUNCTION(when_wsio_get_interface_description_returns_NULL_AMQP_Create_getWe
     TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol_over_WebSocketsTls();
     XIO_HANDLE underlying_io_transport;
 
-    (void)provider->IoTHubTransport_Create(TEST_IOTHUBTRANSPORT_CONFIG_HANDLE);
+    (void)provider->IoTHubTransport_Create(TEST_IOTHUBTRANSPORT_CONFIG_HANDLE, g_transport_cb_info, g_transport_cb_ctx);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(wsio_get_interface_description())
@@ -743,7 +754,7 @@ TEST_FUNCTION(when_TLSIIO_interface_is_NULL_AMQP_Create_getWebSocketsIOTransport
     WSIO_CONFIG wsio_config;
     XIO_HANDLE underlying_io_transport;
 
-    (void)provider->IoTHubTransport_Create(TEST_IOTHUBTRANSPORT_CONFIG_HANDLE);
+    (void)provider->IoTHubTransport_Create(TEST_IOTHUBTRANSPORT_CONFIG_HANDLE, g_transport_cb_info, g_transport_cb_ctx);
     umock_c_reset_all_calls();
 
     wsio_config.hostname = TEST_STRING;
@@ -784,7 +795,7 @@ TEST_FUNCTION(AMQP_Create_getWebSocketsIOTransport_with_proxy_options_sets_up_ws
     HTTP_PROXY_IO_CONFIG http_proxy_io_config;
     XIO_HANDLE underlying_io_transport;
 
-    (void)provider->IoTHubTransport_Create(TEST_IOTHUBTRANSPORT_CONFIG_HANDLE);
+    (void)provider->IoTHubTransport_Create(TEST_IOTHUBTRANSPORT_CONFIG_HANDLE, g_transport_cb_info, g_transport_cb_ctx);
     umock_c_reset_all_calls();
 
     http_proxy_io_config.hostname = TEST_STRING;
@@ -835,7 +846,7 @@ TEST_FUNCTION(when_http_proxy_io_get_interface_description_returns_NULL_AMQP_Cre
     TLSIO_CONFIG tlsio_config;
     XIO_HANDLE underlying_io_transport;
 
-    (void)provider->IoTHubTransport_Create(TEST_IOTHUBTRANSPORT_CONFIG_HANDLE);
+    (void)provider->IoTHubTransport_Create(TEST_IOTHUBTRANSPORT_CONFIG_HANDLE, g_transport_cb_info, g_transport_cb_ctx);
     umock_c_reset_all_calls();
 
     tlsio_config.hostname = TEST_STRING;
@@ -877,10 +888,10 @@ TEST_FUNCTION(AMQP_DoWork)
     TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol_over_WebSocketsTls();
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_DoWork(TEST_TRANSPORT_LL_HANDLE, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE));
+    STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_DoWork(TEST_TRANSPORT_LL_HANDLE));
 
     // act
-    provider->IoTHubTransport_DoWork(TEST_TRANSPORT_LL_HANDLE, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    provider->IoTHubTransport_DoWork(TEST_TRANSPORT_LL_HANDLE);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -895,10 +906,10 @@ TEST_FUNCTION(AMQP_Register)
     TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol_over_WebSocketsTls();
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_Register(TEST_TRANSPORT_LL_HANDLE, TEST_IOTHUB_DEVICE_CONFIG_HANDLE, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_WAITING_TO_SEND_LIST));
+    STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_Register(TEST_TRANSPORT_LL_HANDLE, TEST_IOTHUB_DEVICE_CONFIG_HANDLE, TEST_WAITING_TO_SEND_LIST));
 
     // act
-    IOTHUB_DEVICE_HANDLE dev_hdl = provider->IoTHubTransport_Register(TEST_TRANSPORT_LL_HANDLE, TEST_IOTHUB_DEVICE_CONFIG_HANDLE, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_WAITING_TO_SEND_LIST);
+    IOTHUB_DEVICE_HANDLE dev_hdl = provider->IoTHubTransport_Register(TEST_TRANSPORT_LL_HANDLE, TEST_IOTHUB_DEVICE_CONFIG_HANDLE, TEST_WAITING_TO_SEND_LIST);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -1126,6 +1137,23 @@ TEST_FUNCTION(AMQP_Destroy)
 
     // act
     provider->IoTHubTransport_Destroy(TEST_TRANSPORT_LL_HANDLE);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+}
+
+TEST_FUNCTION(IoTHubTransportAmqp_SetCallbackContext_success)
+{
+    // arrange
+    TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol_over_WebSocketsTls();
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_SetCallbackContext(TEST_TRANSPORT_LL_HANDLE, g_transport_cb_ctx));
+
+    // act
+    provider->IoTHubTransport_SetCallbackContext(TEST_TRANSPORT_LL_HANDLE, g_transport_cb_ctx);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());

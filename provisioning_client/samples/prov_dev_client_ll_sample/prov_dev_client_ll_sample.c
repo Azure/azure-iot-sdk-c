@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 // CAVEAT: This sample is to demonstrate azure IoT client concepts only and is not a guide design principles or style
-// Checking of return codes and error values shall be omitted for brevity.  Please practice sound engineering practices 
+// Checking of return codes and error values shall be omitted for brevity.  Please practice sound engineering practices
 // when writing production code.
 
 #include <stdio.h>
@@ -146,7 +146,7 @@ static void register_device_callback(PROV_DEVICE_RESULT register_result, const c
         }
         else
         {
-            (void)printf("Failure encountered on registration!\r\n");
+            (void)printf("Failure encountered on registration %s\r\n", ENUM_TO_STRING(PROV_DEVICE_RESULT, register_result) );
             user_ctx->registration_complete = 2;
         }
     }
@@ -157,6 +157,7 @@ int main()
     SECURE_DEVICE_TYPE hsm_type;
     //hsm_type = SECURE_DEVICE_TYPE_TPM;
     hsm_type = SECURE_DEVICE_TYPE_X509;
+    bool traceOn = false;
 
     (void)IoTHub_Init();
     (void)prov_dev_security_init(hsm_type);
@@ -210,13 +211,16 @@ int main()
             Prov_Device_LL_SetOption(handle, OPTION_HTTP_PROXY, &http_proxy);
         }
 
-        //bool traceOn = true;
-        //Prov_Device_LL_SetOption(handle, PROV_OPTION_LOG_TRACE, &traceOn);
+        Prov_Device_LL_SetOption(handle, PROV_OPTION_LOG_TRACE, &traceOn);
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
         // Setting the Trusted Certificate.  This is only necessary on system with without
         // built in certificate stores.
         Prov_Device_LL_SetOption(handle, OPTION_TRUSTED_CERT, certificates);
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
+
+        // This option sets the registration ID it overrides the registration ID that is 
+        // set within the HSM so be cautious if setting this value
+        //Prov_Device_SetOption(prov_device_handle, PROV_REGISTRATION_ID, "[REGISTRATION ID]");
 
         if (Prov_Device_LL_Register_Device(handle, register_device_callback, &user_ctx, registation_status_callback, &user_ctx) != PROV_DEVICE_RESULT_OK)
         {
@@ -277,8 +281,7 @@ int main()
             // Set any option that are neccessary.
             // For available options please see the iothub_sdk_options.md documentation
 
-            //bool traceOn = true;
-            //IoTHubDeviceClient_LL_SetOption(iothub_ll_handle, OPTION_LOG_TRACE, &traceOn);
+            IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_LOG_TRACE, &traceOn);
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
             // Setting the Trusted Certificate.  This is only necessary on system with without

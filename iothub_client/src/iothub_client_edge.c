@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #ifndef USE_EDGE_MODULES
-#error "tryping to compile iothub_client_edge.c while the symbol USE_EDGE_MODULES is not defined"
+//tryping to compile iothub_client_edge.c while the symbol USE_EDGE_MODULES is not defined
 #else
 
 #include "azure_c_shared_utility/gballoc.h"
@@ -17,7 +17,7 @@
 #include "parson.h"
 
 #include "internal/iothub_client_private.h"
-#include "iothub_client_authorization.h"
+#include "internal/iothub_client_authorization.h"
 #include "iothub_client_core_common.h"
 #include "iothub_client_version.h"
 #include "internal/iothub_client_edge.h"

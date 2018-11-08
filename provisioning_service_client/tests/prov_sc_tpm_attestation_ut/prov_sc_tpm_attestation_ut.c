@@ -56,7 +56,6 @@ MOCKABLE_FUNCTION(, JSON_Array*, json_object_get_array, const JSON_Object*, obje
 #include "prov_service_client/provisioning_sc_tpm_attestation.h"
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
@@ -117,7 +116,6 @@ BEGIN_TEST_SUITE(prov_sc_tpm_attestation_ut)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -131,7 +129,6 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     umock_c_deinit();
 
     TEST_MUTEX_DESTROY(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
@@ -289,7 +286,7 @@ TEST_FUNCTION(tpmAttestation_create_tags_and_srk_throw_error)
         TPM_ATTESTATION_HANDLE tpm_att = tpmAttestation_create(DUMMY_EK, DUMMY_SRK);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(tpm_att, tmp_msg);
+        ASSERT_IS_NULL(tpm_att, tmp_msg);
 
         //cleanup
         tpmAttestation_destroy(tpm_att);
@@ -423,7 +420,7 @@ TEST_FUNCTION(tpmAttestation_toJson_full_tpm_error)
         JSON_Value* result = tpmAttestation_toJson(tpm_att);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(result, tmp_msg);
+        ASSERT_IS_NULL(result, tmp_msg);
     }
 
     //cleanup
@@ -521,7 +518,7 @@ TEST_FUNCTION(tpmAttestation_fromJson_min_error)
         TPM_ATTESTATION_HANDLE tpm_att = tpmAttestation_fromJson(TEST_JSON_OBJECT);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(tpm_att, tmp_msg);
+        ASSERT_IS_NULL(tpm_att, tmp_msg);
     }
 
     //cleanup
@@ -564,7 +561,7 @@ TEST_FUNCTION(tpmAttestation_fromJson_max_error)
         TPM_ATTESTATION_HANDLE tpm_att = tpmAttestation_fromJson(TEST_JSON_OBJECT);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(tpm_att, tmp_msg);
+        ASSERT_IS_NULL(tpm_att, tmp_msg);
     }
 
     //cleanup

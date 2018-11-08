@@ -26,14 +26,14 @@ void my_gballoc_free(void * t)
 }
 
 /*want crt_abstractions to use real malloc*/
-#define GBALLOC_H 
+#define GBALLOC_H
 #define mallocAndStrcpy_s real_mallocAndStrcpy_s
 #define unsignedIntToString real_unsignedIntToString
-#define size_tToString real_size_tToString 
+#define size_tToString real_size_tToString
 #include "crt_abstractions.c"
-#undef mallocAndStrcpy_s 
-#undef unsignedIntToString 
-#undef size_tToString 
+#undef mallocAndStrcpy_s
+#undef unsignedIntToString
+#undef size_tToString
 #undef GBALLOC_H
 #undef CRT_ABSTRACTIONS_H
 
@@ -47,26 +47,26 @@ void my_gballoc_free(void * t)
 #define GBALLOC_H
 #define VECTOR_create real_VECTOR_create
 #define VECTOR_destroy real_VECTOR_destroy
-#define VECTOR_push_back real_VECTOR_push_back 
-#define VECTOR_erase real_VECTOR_erase 
-#define VECTOR_clear real_VECTOR_clear 
-#define VECTOR_element real_VECTOR_element 
-#define VECTOR_front real_VECTOR_front 
-#define VECTOR_back real_VECTOR_back 
-#define VECTOR_find_if real_VECTOR_find_if 
-#define VECTOR_size real_VECTOR_size 
+#define VECTOR_push_back real_VECTOR_push_back
+#define VECTOR_erase real_VECTOR_erase
+#define VECTOR_clear real_VECTOR_clear
+#define VECTOR_element real_VECTOR_element
+#define VECTOR_front real_VECTOR_front
+#define VECTOR_back real_VECTOR_back
+#define VECTOR_find_if real_VECTOR_find_if
+#define VECTOR_size real_VECTOR_size
 #define VECTOR_move real_VECTOR_move
 #include "../src/vector.c"
-#undef VECTOR_create 
-#undef VECTOR_destroy 
-#undef VECTOR_push_back 
-#undef VECTOR_erase 
-#undef VECTOR_clear 
-#undef VECTOR_element 
-#undef VECTOR_front 
-#undef VECTOR_back 
-#undef VECTOR_find_if 
-#undef VECTOR_size 
+#undef VECTOR_create
+#undef VECTOR_destroy
+#undef VECTOR_push_back
+#undef VECTOR_erase
+#undef VECTOR_clear
+#undef VECTOR_element
+#undef VECTOR_front
+#undef VECTOR_back
+#undef VECTOR_find_if
+#undef VECTOR_size
 #undef VECTOR_move
 #undef VECTOR_H
 #undef GBALLOC_H
@@ -103,7 +103,6 @@ TEST_DEFINE_ENUM_TYPE(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_RESULT_VALUES);
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
@@ -148,7 +147,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
-        TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
         g_testByTest = TEST_MUTEX_CREATE();
         ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -163,11 +161,11 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         REGISTER_UMOCK_ALIAS_TYPE(VECTOR_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(PREDICATE_FUNCTION, void*);
         REGISTER_UMOCK_ALIAS_TYPE(const VECTOR_HANDLE, void*);
-        
+
         REGISTER_UMOCK_ALIAS_TYPE(DATA_PUBLISHER_RESULT, int);
         REGISTER_UMOCK_ALIAS_TYPE(AGENT_DATA_TYPES_RESULT, int);
         REGISTER_UMOCK_ALIAS_TYPE(DATA_MARSHALLER_RESULT, int);
-        
+
 
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
@@ -182,8 +180,8 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
 
         REGISTER_GLOBAL_MOCK_RETURN(Schema_ModelPropertyByPathExists, true);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_ModelPropertyByPathExists, false);
-        
-        
+
+
 
         REGISTER_GLOBAL_MOCK_RETURN(Schema_ModelReportedPropertyByPathExists, true);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_ModelReportedPropertyByPathExists, false);
@@ -195,7 +193,7 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, __FAILURE__);
         REGISTER_GLOBAL_MOCK_HOOK(unsignedIntToString, real_unsignedIntToString);
         REGISTER_GLOBAL_MOCK_HOOK(size_tToString, real_size_tToString);
-        
+
         REGISTER_GLOBAL_MOCK_HOOK(VECTOR_create, real_VECTOR_create);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(VECTOR_create, NULL);
 
@@ -216,7 +214,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         umock_c_deinit();
 
         TEST_MUTEX_DESTROY(g_testByTest);
-        TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
     }
 
     TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
@@ -443,7 +440,7 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
 
         // act
         DATA_PUBLISHER_RESULT result = DataPublisher_PublishTransacted(transaction, NULL, &data);
-        
+
         // assert
         ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_INVALID_ARG, result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -571,7 +568,7 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
         unsigned char* destination;
         size_t destinationSize;
-        TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);        
+        TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
         AGENT_DATA_TYPE data2;
 
         data2.type = EDM_SINGLE_TYPE;
@@ -586,7 +583,7 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         value.Value = &data;
 
         umock_c_reset_all_calls();
-        
+
         STRICT_EXPECTED_CALL(DataMarshaller_SendData(IGNORED_PTR_ARG, 1, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument_dataMarshallerHandle()
             .IgnoreArgument_values()
@@ -900,7 +897,7 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
 
         (void)DataPublisher_PublishTransacted(transaction, PropertyPath, &data);
         umock_c_reset_all_calls();
-        
+
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, PropertyPath_2))
             .IgnoreArgument_destination();
         STRICT_EXPECTED_CALL(Schema_ModelPropertyByPathExists(TEST_MODEL_HANDLE, PropertyPath_2))
@@ -1113,7 +1110,7 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         ///assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
         ASSERT_IS_NOT_NULL(handle);
-        
+
         ///cleanup
         DataPublisher_DestroyTransaction_ReportedProperties(handle);
         DataPublisher_Destroy(dataPublisherHandle);
@@ -1146,7 +1143,7 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
             REPORTED_PROPERTIES_TRANSACTION_HANDLE handle = DataPublisher_CreateTransaction_ReportedProperties(dataPublisherHandle);
 
             ///assert
-            ASSERT_IS_NULL_WITH_MSG(handle, temp_str);
+            ASSERT_IS_NULL(handle, temp_str);
         }
 
         ///cleanup
@@ -1302,7 +1299,7 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
             result = DataPublisher_PublishTransacted_ReportedProperty(handle, reportedPropertyPath, &ag);
 
             ///assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK, result, temp_str);
+            ASSERT_ARE_NOT_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK, result, temp_str);
 next_fail:;
         }
         ///clean
@@ -1402,7 +1399,7 @@ next_fail:;
             result = DataPublisher_PublishTransacted_ReportedProperty(handle, reportedPropertyPath, &ag);
 
             ///assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK, result, temp_str);
+            ASSERT_ARE_NOT_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK, result, temp_str);
         next_fail:;
         }
 
@@ -1509,7 +1506,7 @@ next_fail:;
             result = DataPublisher_PublishTransacted_ReportedProperty(handle, reportedPropertyPath, &ag2);
 
             ///assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK, result, temp_str);
+            ASSERT_ARE_NOT_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK, result, temp_str);
         next_fail:;
         }
 

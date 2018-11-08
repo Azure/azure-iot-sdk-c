@@ -19,6 +19,7 @@
 #include "azure_uamqp_c/message.h"
 #include "azure_uamqp_c/messaging.h"
 #include "azure_uamqp_c/saslclientio.h"
+#include "azure_uamqp_c/sasl_plain.h"
 #include "azure_prov_client/internal/prov_sasl_tpm.h"
 #include "azure_c_shared_utility/strings.h"
 
@@ -27,21 +28,17 @@
 #define AMQP_MAX_SENDER_MSG_SIZE    UINT64_MAX
 #define AMQP_MAX_RECV_MSG_SIZE      65536
 
-static const char* AMQP_ADDRESS_FMT = "amqps://%s/%s/registrations/%s";
-static const char* KEY_NAME_VALUE = "registration";
+static const char* const AMQP_ADDRESS_FMT = "amqps://%s/%s/registrations/%s";
+static const char* const AMQP_SASL_USERNAME_FMT = "%s/registrations/%s";
+static const char* const KEY_NAME_VALUE = "registration";
 
-static const char* AMQP_REGISTER_ME = "iotdps-register";
-static const char* AMQP_WHO_AM_I = "iotdps-get-registration";
-static const char* AMQP_OPERATION_STATUS = "iotdps-get-operationstatus";
+static const char* const AMQP_REGISTER_ME = "iotdps-register";
+static const char* const AMQP_OPERATION_STATUS = "iotdps-get-operationstatus";
 
-static const char* AMQP_API_VERSION_KEY = "com.microsoft:api-version";
+static const char* const AMQP_API_VERSION_KEY = "com.microsoft:api-version";
 
-static const char* AMQP_OP_TYPE_PROPERTY = "iotdps-operation-type";
-static const char* AMQP_STATUS = "iotdps-status";
-static const char* AMQP_OPERATION_ID = "iotdps-operation-id";
-static const char* AMQP_IOTHUB_URI = "iotdps-assigned-hub";
-static const char* AMQP_DEVICE_ID = "iotdps-device-id";
-static const char* AMQP_AUTH_KEY = "iotdps-auth-key";
+static const char* const AMQP_OP_TYPE_PROPERTY = "iotdps-operation-type";
+static const char* const AMQP_OPERATION_ID = "iotdps-operation-id";
 
 typedef enum AMQP_TRANSPORT_STATE_TAG
 {
@@ -111,7 +108,7 @@ typedef struct PROV_TRANSPORT_AMQP_INFO_TAG
     MESSAGE_RECEIVER_STATE msg_recv_state;
     MESSAGE_SENDER_STATE msg_send_state;
 
-    SASL_MECHANISM_HANDLE tpm_sasl_handler;
+    SASL_MECHANISM_HANDLE sasl_handler;
     SASLCLIENTIO_CONFIG sasl_io_config;
     CONNECTION_HANDLE connection;
     XIO_HANDLE transport_io;
@@ -236,8 +233,9 @@ static void on_message_receiver_state_changed_callback(const void* user_ctx, MES
     }
 }
 
-static void on_amqp_send_complete(void* user_ctx, MESSAGE_SEND_RESULT send_result)
+static void on_amqp_send_complete(void* user_ctx, MESSAGE_SEND_RESULT send_result, AMQP_VALUE delivery_state)
 {
+    (void)delivery_state;
     if (user_ctx == NULL)
     {
         LogError("on_amqp_send_complete was invoked with a NULL context");
@@ -646,45 +644,68 @@ static int create_receiver_link(PROV_TRANSPORT_AMQP_INFO* amqp_info)
     return result;
 }
 
-static int create_amqp_connection(PROV_TRANSPORT_AMQP_INFO* amqp_info)
+static int create_transport_io_object(PROV_TRANSPORT_AMQP_INFO* amqp_info)
 {
     int result;
-    HTTP_PROXY_OPTIONS* transport_proxy;
-    PROV_TRANSPORT_IO_INFO* transport_io;
-    SASL_MECHANISM_HANDLE* sasl_mechanism = NULL;
-
-    if (amqp_info->proxy_option.host_address != NULL)
+    if (amqp_info->underlying_io == NULL)
     {
-        transport_proxy = &amqp_info->proxy_option;
+        HTTP_PROXY_OPTIONS* transport_proxy;
+        SASL_MECHANISM_HANDLE* sasl_mechanism = NULL;
+        PROV_TRANSPORT_IO_INFO* trans_info;
+
+        // Set the proxy options if neccessary
+        if (amqp_info->proxy_option.host_address != NULL)
+        {
+            transport_proxy = &amqp_info->proxy_option;
+        }
+        else
+        {
+            transport_proxy = NULL;
+        }
+
+        if (amqp_info->hsm_type == TRANSPORT_HSM_TYPE_TPM)
+        {
+            sasl_mechanism = &amqp_info->sasl_handler;
+        }
+
+        if ((trans_info = amqp_info->transport_io_cb(amqp_info->hostname, sasl_mechanism, transport_proxy)) == NULL)
+        {
+            LogError("Failure calling transport_io callback");
+            result = __FAILURE__;
+        }
+        else
+        {
+            if (trans_info->sasl_handle == NULL)
+            {
+                amqp_info->underlying_io = trans_info->transport_handle;
+            }
+            else
+            {
+                amqp_info->transport_io = trans_info->transport_handle;
+                amqp_info->underlying_io = trans_info->sasl_handle;
+            }
+            free(trans_info);
+            result = 0;
+        }
     }
     else
     {
-        transport_proxy = NULL;
+        result = 0;
     }
+    return result;
+}
 
-    if (amqp_info->hsm_type == TRANSPORT_HSM_TYPE_TPM)
-    {
-        sasl_mechanism = &amqp_info->tpm_sasl_handler;
-    }
+static int create_amqp_connection(PROV_TRANSPORT_AMQP_INFO* amqp_info)
+{
+    int result;
 
-    transport_io = amqp_info->transport_io_cb(amqp_info->hostname, sasl_mechanism, transport_proxy);
-    if (transport_io == NULL)
+    if (create_transport_io_object(amqp_info) != 0)
     {
-        LogError("Failure calling transport_io callback");
+        LogError("Failure setting transport object");
         result = __FAILURE__;
     }
     else
     {
-        if (transport_io->sasl_handle == NULL)
-        {
-            amqp_info->underlying_io = transport_io->transport_handle;
-        }
-        else
-        {
-            amqp_info->transport_io = transport_io->transport_handle;
-            amqp_info->underlying_io = transport_io->sasl_handle;
-        }
-
         if (amqp_info->hsm_type == TRANSPORT_HSM_TYPE_X509)
         {
             if (amqp_info->x509_cert != NULL && amqp_info->private_key != NULL)
@@ -747,7 +768,108 @@ static int create_amqp_connection(PROV_TRANSPORT_AMQP_INFO* amqp_info)
                 result = 0;
             }
         }
-        free(transport_io); 
+    }
+    return result;
+}
+
+static char* construct_username(PROV_TRANSPORT_AMQP_INFO* amqp_info)
+{
+    char* result;
+    size_t length;
+
+    length = strlen(AMQP_SASL_USERNAME_FMT) + strlen(amqp_info->scope_id) + strlen(amqp_info->registration_id);
+    if ((result = malloc(length + 1)) == NULL)
+    {
+        LogError("Failure allocating username");
+    }
+    else if (sprintf(result, AMQP_SASL_USERNAME_FMT, amqp_info->scope_id, amqp_info->registration_id) <= 0)
+    {
+        LogError("Failure creating mqtt username");
+        free(result);
+        result = NULL;
+    }
+    return result;
+}
+
+
+static int create_sasl_handler(PROV_TRANSPORT_AMQP_INFO* amqp_info)
+{
+    int result;
+    const SASL_MECHANISM_INTERFACE_DESCRIPTION* sasl_interface;
+
+    if (amqp_info->hsm_type == TRANSPORT_HSM_TYPE_TPM)
+    {
+        SASL_TPM_CONFIG_INFO sasl_config;
+        sasl_config.registration_id = amqp_info->registration_id;
+        sasl_config.scope_id = amqp_info->scope_id;
+        sasl_config.storage_root_key = amqp_info->srk;
+        sasl_config.endorsement_key = amqp_info->ek;
+        sasl_config.hostname = amqp_info->hostname;
+        sasl_config.challenge_cb = on_sasl_tpm_challenge_cb;
+        sasl_config.user_ctx = amqp_info;
+
+        // Create TPM SASL handler
+        if ((sasl_interface = prov_sasltpm_get_interface()) == NULL)
+        {
+            LogError("prov_sasltpm_get_interface was NULL");
+            result = __FAILURE__;
+        }
+        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_048: [ If the hsm_type is TRANSPORT_HSM_TYPE_TPM create_connection shall create a tpm_saslmechanism. ] */
+        else if ((amqp_info->sasl_handler = saslmechanism_create(sasl_interface, &sasl_config)) == NULL)
+        {
+            LogError("failed creating tpm sasl mechanism");
+            result = __FAILURE__;
+        }
+        else
+        {
+            result = 0;
+        }
+    }
+    else if (amqp_info->hsm_type == TRANSPORT_HSM_TYPE_SYMM_KEY)
+    {
+        SASL_PLAIN_CONFIG sasl_config;
+        char* sasl_username;
+        char* sas_token;
+
+        if ((sasl_username = construct_username(amqp_info)) == NULL)
+        { 
+            LogError("failed creating symmetical sasl username");
+            result = __FAILURE__;
+        }
+        else if ((sas_token = amqp_info->challenge_cb(NULL, 0, KEY_NAME_VALUE, amqp_info->challenge_ctx)) == NULL)
+        {
+            LogError("failed creating symmetical sasl token");
+            result = __FAILURE__;
+            free(sasl_username);
+        }
+        else
+        {
+            sasl_config.authcid = sasl_username;
+            sasl_config.passwd = sas_token;
+            sasl_config.authzid = NULL;
+
+            if ((sasl_interface = saslplain_get_interface()) == NULL)
+            {
+                LogError("prov_saslplain_get_interface was NULL");
+                result = __FAILURE__;
+            }
+            /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_048: [ If the hsm_type is TRANSPORT_HSM_TYPE_TPM create_connection shall create a tpm_saslmechanism. ] */
+            else if ((amqp_info->sasl_handler = saslmechanism_create(sasl_interface, &sasl_config)) == NULL)
+            {
+                LogError("failed creating plain sasl mechanism");
+                result = __FAILURE__;
+            }
+            else
+            {
+                result = 0;
+            }
+            free(sasl_username);
+            free(sas_token);
+        }
+    }
+    else
+    {
+        result = 0;
     }
     return result;
 }
@@ -755,33 +877,17 @@ static int create_amqp_connection(PROV_TRANSPORT_AMQP_INFO* amqp_info)
 static int create_connection(PROV_TRANSPORT_AMQP_INFO* amqp_info)
 {
     int result;
-    const SASL_MECHANISM_INTERFACE_DESCRIPTION* sasl_interface;
-    SASL_TPM_CONFIG_INFO sasl_config;
-    sasl_config.registration_id = amqp_info->registration_id;
-    sasl_config.scope_id = amqp_info->scope_id;
-    sasl_config.storage_root_key = amqp_info->srk;
-    sasl_config.endorsement_key = amqp_info->ek;
-    sasl_config.hostname = amqp_info->hostname;
-    sasl_config.challenge_cb = on_sasl_tpm_challenge_cb;
-    sasl_config.user_ctx = amqp_info;
 
-    // Create TPM SASL handler
-    if ((sasl_interface = prov_sasltpm_get_interface()) == NULL)
+    if (create_sasl_handler(amqp_info) != 0)
     {
-        LogError("prov_sasltpm_get_interface was NULL");
-        result = __FAILURE__;
-    }
-    /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_048: [ If the hsm_type is TRANSPORT_HSM_TYPE_TPM create_connection shall create a tpm_saslmechanism. ] */
-    else if (amqp_info->hsm_type == TRANSPORT_HSM_TYPE_TPM && (amqp_info->tpm_sasl_handler = saslmechanism_create(sasl_interface, &sasl_config)) == NULL)
-    {
-        LogError("failed creating tpm sasl mechanism");
+        LogError("failed creating amqp Sasl handler");
         result = __FAILURE__;
     }
     else if (create_amqp_connection(amqp_info) != 0)
     {
         LogError("failed creating amqp connection");
-        saslmechanism_destroy(amqp_info->tpm_sasl_handler);
-        amqp_info->tpm_sasl_handler = NULL;
+        saslmechanism_destroy(amqp_info->sasl_handler);
+        amqp_info->sasl_handler = NULL;
         result = __FAILURE__;
     }
     else
@@ -789,8 +895,8 @@ static int create_connection(PROV_TRANSPORT_AMQP_INFO* amqp_info)
         if ((amqp_info->session = session_create(amqp_info->connection, NULL, NULL)) == NULL)
         {
             LogError("failed creating amqp session");
-            saslmechanism_destroy(amqp_info->tpm_sasl_handler);
-            amqp_info->tpm_sasl_handler = NULL;
+            saslmechanism_destroy(amqp_info->sasl_handler);
+            amqp_info->sasl_handler = NULL;
             result = __FAILURE__;
         }
         else
@@ -801,8 +907,8 @@ static int create_connection(PROV_TRANSPORT_AMQP_INFO* amqp_info)
             if (create_receiver_link(amqp_info) != 0)
             {
                 LogError("failure creating amqp receiver link");
-                saslmechanism_destroy(amqp_info->tpm_sasl_handler);
-                amqp_info->tpm_sasl_handler = NULL;
+                saslmechanism_destroy(amqp_info->sasl_handler);
+                amqp_info->sasl_handler = NULL;
                 session_destroy(amqp_info->session);
                 amqp_info->session = NULL;
                 result = __FAILURE__;
@@ -810,8 +916,8 @@ static int create_connection(PROV_TRANSPORT_AMQP_INFO* amqp_info)
             else if (create_sender_link(amqp_info) != 0)
             {
                 LogError("failure creating amqp sender link");
-                saslmechanism_destroy(amqp_info->tpm_sasl_handler);
-                amqp_info->tpm_sasl_handler = NULL;
+                saslmechanism_destroy(amqp_info->sasl_handler);
+                amqp_info->sasl_handler = NULL;
                 session_destroy(amqp_info->session);
                 amqp_info->session = NULL;
                 result = __FAILURE__;
@@ -862,6 +968,14 @@ void cleanup_amqp_data(PROV_TRANSPORT_AMQP_INFO* amqp_info)
     free(amqp_info->private_key);
     free(amqp_info->sas_token);
     free(amqp_info->payload_data);
+    if (amqp_info->transport_io != NULL)
+    {
+        xio_destroy(amqp_info->transport_io);
+    }
+    if (amqp_info->underlying_io != NULL)
+    {
+        xio_destroy(amqp_info->underlying_io);
+    }
     free(amqp_info);
 }
 
@@ -931,7 +1045,7 @@ void prov_transport_common_amqp_destroy(PROV_DEVICE_TRANSPORT_HANDLE handle)
     }
 }
 
-int prov_transport_common_amqp_open(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* registration_id, BUFFER_HANDLE ek, BUFFER_HANDLE srk, PROV_DEVICE_TRANSPORT_REGISTER_CALLBACK data_callback, void* user_ctx, PROV_DEVICE_TRANSPORT_STATUS_CALLBACK status_cb, void* status_ctx)
+int prov_transport_common_amqp_open(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* registration_id, BUFFER_HANDLE ek, BUFFER_HANDLE srk, PROV_DEVICE_TRANSPORT_REGISTER_CALLBACK data_callback, void* user_ctx, PROV_DEVICE_TRANSPORT_STATUS_CALLBACK status_cb, void* status_ctx, PROV_TRANSPORT_CHALLENGE_CALLBACK reg_challenge_cb, void* challenge_ctx)
 {
     int result;
     PROV_TRANSPORT_AMQP_INFO* amqp_info = (PROV_TRANSPORT_AMQP_INFO*)handle;
@@ -941,7 +1055,12 @@ int prov_transport_common_amqp_open(PROV_DEVICE_TRANSPORT_HANDLE handle, const c
         LogError("Invalid parameter specified handle: %p, data_callback: %p, status_cb: %p, registration_id: %p", handle, data_callback, status_cb, registration_id);
         result = __FAILURE__;
     }
-    else if ( (amqp_info->hsm_type == TRANSPORT_HSM_TYPE_TPM) && (ek == NULL || srk == NULL) )
+    else if ((amqp_info->hsm_type == TRANSPORT_HSM_TYPE_TPM || amqp_info->hsm_type == TRANSPORT_HSM_TYPE_SYMM_KEY) && reg_challenge_cb == NULL)
+    {
+        LogError("registration challenge callback must be set");
+        result = __FAILURE__;
+    }
+    else if ((amqp_info->hsm_type == TRANSPORT_HSM_TYPE_TPM) && (ek == NULL || srk == NULL) )
     {
         /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_008: [ If hsm_type is TRANSPORT_HSM_TYPE_TPM and ek or srk is NULL, prov_transport_common_amqp_open shall return a non-zero value. ] */
         LogError("Invalid parameter specified ek: %p, srk: %p", ek, srk);
@@ -979,7 +1098,8 @@ int prov_transport_common_amqp_open(PROV_DEVICE_TRANSPORT_HANDLE handle, const c
         amqp_info->user_ctx = user_ctx;
         amqp_info->status_cb = status_cb;
         amqp_info->status_ctx = status_ctx;
-        amqp_info->status_cb(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, amqp_info->status_ctx);
+        amqp_info->challenge_cb = reg_challenge_cb;
+        amqp_info->challenge_ctx = challenge_ctx;
         amqp_info->amqp_state = AMQP_STATE_DISCONNECTED;
         result = 0;
     }
@@ -1037,10 +1157,10 @@ int prov_transport_common_amqp_close(PROV_DEVICE_TRANSPORT_HANDLE handle)
             link_destroy(amqp_info->sender_link);
             amqp_info->sender_link = NULL;
         }
-        if (amqp_info->tpm_sasl_handler != NULL)
+        if (amqp_info->sasl_handler != NULL)
         {
-            saslmechanism_destroy(amqp_info->tpm_sasl_handler);
-            amqp_info->tpm_sasl_handler = NULL;
+            saslmechanism_destroy(amqp_info->sasl_handler);
+            amqp_info->sasl_handler = NULL;
         }
         if (amqp_info->session != NULL)
         {
@@ -1064,7 +1184,7 @@ int prov_transport_common_amqp_close(PROV_DEVICE_TRANSPORT_HANDLE handle)
     return result;
 }
 
-int prov_transport_common_amqp_register_device(PROV_DEVICE_TRANSPORT_HANDLE handle, PROV_TRANSPORT_CHALLENGE_CALLBACK reg_challenge_cb, void* user_ctx, PROV_TRANSPORT_JSON_PARSE json_parse_cb, void* json_ctx)
+int prov_transport_common_amqp_register_device(PROV_DEVICE_TRANSPORT_HANDLE handle, PROV_TRANSPORT_JSON_PARSE json_parse_cb, void* json_ctx)
 {
     int result;
     PROV_TRANSPORT_AMQP_INFO* amqp_info = (PROV_TRANSPORT_AMQP_INFO*)handle;
@@ -1072,12 +1192,6 @@ int prov_transport_common_amqp_register_device(PROV_DEVICE_TRANSPORT_HANDLE hand
     {
         /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_014: [ If handle is NULL, prov_transport_common_amqp_register_device shall return a non-zero value. ] */
         LogError("Invalid parameter specified handle: %p, json_parse_cb: %p", handle, json_parse_cb);
-        result = __FAILURE__;
-    }
-    else if (amqp_info->hsm_type == TRANSPORT_HSM_TYPE_TPM && reg_challenge_cb == NULL)
-    {
-        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_015: [ If hsm_type is of type TRANSPORT_HSM_TYPE_TPM and reg_challenge_cb is NULL, prov_transport_common_amqp_register_device shall return a non-zero value. ] */
-        LogError("Invalid parameter specified reg_challenge_cb: %p", reg_challenge_cb);
         result = __FAILURE__;
     }
     else if (amqp_info->transport_state == TRANSPORT_CLIENT_STATE_REG_SEND || amqp_info->operation_id != NULL)
@@ -1096,8 +1210,6 @@ int prov_transport_common_amqp_register_device(PROV_DEVICE_TRANSPORT_HANDLE hand
     {
         /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_017: [ On success prov_transport_common_amqp_register_device shall return a zero value. ] */
         amqp_info->transport_state = TRANSPORT_CLIENT_STATE_REG_SEND;
-        amqp_info->challenge_cb = reg_challenge_cb;
-        amqp_info->challenge_ctx = user_ctx;
         amqp_info->json_parse_cb = json_parse_cb;
         amqp_info->json_ctx = json_ctx;
 
@@ -1459,6 +1571,30 @@ int prov_transport_common_amqp_set_proxy(PROV_DEVICE_TRANSPORT_HANDLE handle, co
                 /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_040: [ On success prov_transport_common_amqp_set_proxy shall return a zero value. ] */
                 result = 0;
             }
+        }
+    }
+    return result;
+}
+
+int prov_transport_common_amqp_set_option(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* option, const void* value)
+{
+    int result;
+    if (handle == NULL || option == NULL)
+    {
+        LogError("Invalid parameter specified handle: %p, option: %p", handle, option);
+        result = __FAILURE__;
+    }
+    else
+    {
+        PROV_TRANSPORT_AMQP_INFO* amqp_info = (PROV_TRANSPORT_AMQP_INFO*)handle;
+        if (amqp_info->underlying_io == NULL && create_transport_io_object(amqp_info) != 0)
+        {
+            LogError("Failure creating transport io object");
+            result = __FAILURE__;
+        }
+        else
+        {
+            result = xio_setoption(amqp_info->underlying_io, option, value);
         }
     }
     return result;

@@ -101,7 +101,7 @@ EXECUTE_COMMAND_RESULT goToLocation(TruckType* device, GeoLocation XMarksTheSpot
     goToLocation_wasCalled = true;
     goToLocation_XMarksTheSpot_long = XMarksTheSpot.Long;
     goToLocation_XMarksTheSpot_lat = XMarksTheSpot.Lat;
-    return EXECUTE_COMMAND_SUCCESS; 
+    return EXECUTE_COMMAND_SUCCESS;
 
 }
 
@@ -167,7 +167,6 @@ static  AGENT_DATA_TYPE* Create_AGENT_DATA_TYPE_from_EDM_BINARY_agentData = NULL
 static DEVICE_HANDLE serializer_getdevicehandle(void) { return TEST_DEVICE_HANDLE; }
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 static STRING_HANDLE global_bufferTemp;
 
@@ -221,8 +220,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Two_Providers_With_Structs)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
-
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -238,8 +235,8 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_UMOCK_ALIAS_TYPE(DEVICE_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(pfDeviceMethodCallback, void*);
-    
-    
+
+
     REGISTER_GLOBAL_MOCK_HOOK(Schema_GetModelDesiredPropertyCount, my_Schema_GetModelDesiredPropertyCount);
     REGISTER_GLOBAL_MOCK_HOOK(Schema_GetModelModelCount, my_Schema_GetModelModelCount);
 
@@ -250,7 +247,6 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     umock_c_deinit();
 
     TEST_MUTEX_DESTROY(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
@@ -348,7 +344,7 @@ TEST_FUNCTION(InvokeAction_alwaysRejected_return_EXECUTE_COMMAND_FAILED)
     ///arrange
     void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_WithStructs_allReflected, sizeof(TruckType), false);
     umock_c_reset_all_calls();
-   
+
     STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
 
     ///act

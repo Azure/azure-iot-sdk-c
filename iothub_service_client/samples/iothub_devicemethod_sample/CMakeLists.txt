@@ -19,7 +19,7 @@ include_directories(.)
 
 add_executable(iothub_devicemethod_sample ${iothub_devicemethod_sample_c_files} ${iothub_devicemethod_sample_h_files})
 
-target_link_libraries(iothub_devicemethod_sample 
+target_link_libraries(iothub_devicemethod_sample
     iothub_service_client
 )
 

@@ -91,7 +91,6 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(HTTPAPI_REQUEST_TYPE, HTTPAPI_REQUEST_TYPE_VALUES);
 static unsigned char* TEST_UNSIGNED_CHAR_PTR = (unsigned char*)"TestString";
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
@@ -275,7 +274,6 @@ BEGIN_TEST_SUITE(iothub_devicemethod_ut)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -378,7 +376,6 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
 {
     umock_c_deinit();
     TEST_MUTEX_DESTROY(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
@@ -499,23 +496,23 @@ TEST_FUNCTION(IoTHubDeviceMethod_Create_happy_path)
     // arrange
     EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
-    
+
     EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
-    
+
     EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
-    
+
     EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
-    
+
     // act
     IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE result = IoTHubDeviceMethod_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
-    
+
     // assert
     ASSERT_IS_NOT_NULL(result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-    
+
     ///cleanup
     if (result != NULL)
     {
@@ -763,7 +760,7 @@ TEST_FUNCTION(IoTHubDeviceMethod_InvokeModule_return_NULL_if_input_parameter_met
     IoTHubDeviceMethod_InvokeDeviceOrModule_return_NULL_if_input_parameter_methodPayload_is_NULL(true);
 }
 
-// 
+//
 /*Tests_SRS_IOTHUBDEVICEMETHOD_31_050: [ IoTHubDeviceMethod_ModuleInvoke shall return IOTHUB_DEVICE_METHOD_INVALID_ARG if moduleId is NULL. **]*/
 TEST_FUNCTION(IoTHubDeviceMethod_InvokeModule_return_NULL_if_input_parameter_moduleId_is_NULL)
 {
@@ -1007,7 +1004,7 @@ static void IoTHubDeviceMethod_InvokeDeviceOrModule_happy_path_impl(bool testing
     else
     {
         result = IoTHubDeviceMethod_InvokeModule(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, TEST_DEVICE_ID, TEST_MODULE_ID, TEST_METHOD_NAME, TEST_METHOD_PAYLOAD, TEST_TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
-    }    
+    }
 
     // assert
     ASSERT_ARE_EQUAL(int, result, IOTHUB_DEVICE_METHOD_OK);

@@ -41,7 +41,7 @@ static void real_free(void* ptr)
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/uniqueid.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
-#include "iothub_client_authorization.h"
+#include "internal/iothub_client_authorization.h"
 #include "parson.h"
 
 MOCKABLE_FUNCTION(, JSON_Value*, json_parse_string, const char*, string);
@@ -69,7 +69,7 @@ MOCKABLE_FUNCTION(, JSON_Array*, json_object_get_array, const JSON_Object*, obje
 
 #undef ENABLE_MOCKS
 
-#include "iothub_client_edge.h"
+#include "internal/iothub_client_edge.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -124,7 +124,6 @@ static unsigned int DUMMY_UINT = 47;
 
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static int my_mallocAndStrcpy_s(char** destination, const char* source)
@@ -333,8 +332,6 @@ TEST_SUITE_INITIALIZE(suite_init)
 {
     int result;
 
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
-
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -432,7 +429,6 @@ TEST_SUITE_CLEANUP(suite_cleanup)
 {
     umock_c_deinit();
     TEST_MUTEX_DESTROY(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION(IoTHubClient_EdgeHandle_Create_FAIL_null_config)
@@ -545,7 +541,7 @@ TEST_FUNCTION(IoTHubClient_EdgeHandle_Create_FAIL)
         IOTHUB_CLIENT_EDGE_HANDLE handle = IoTHubClient_EdgeHandle_Create(&config, TEST_AUTHORIZATION_HANDLE, TEST_MODULE_ID);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(handle, tmp_msg);
+        ASSERT_IS_NULL(handle, tmp_msg);
     }
 
     umock_c_negative_tests_deinit();
@@ -798,7 +794,7 @@ TEST_FUNCTION(IoTHubClient_Edge_DeviceMethodInvoke_FAIL)
         IOTHUB_CLIENT_RESULT result = IoTHubClient_Edge_DeviceMethodInvoke(handle, TEST_DEVICE_ID2, TEST_METHOD_NAME, TEST_METHOD_PAYLOAD, TEST_TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
 
         //assert
-        ASSERT_IS_TRUE_WITH_MSG(result == IOTHUB_CLIENT_ERROR, tmp_msg);
+        ASSERT_IS_TRUE(result == IOTHUB_CLIENT_ERROR, tmp_msg);
     }
 
     //cleanup
@@ -1041,7 +1037,7 @@ TEST_FUNCTION(IoTHubClient_Edge_ModuleMethodInvoke_FAIL)
         IOTHUB_CLIENT_RESULT result = IoTHubClient_Edge_ModuleMethodInvoke(handle, TEST_DEVICE_ID2, TEST_MODULE_ID2, TEST_METHOD_NAME, TEST_METHOD_PAYLOAD, TEST_TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
 
         //assert
-        ASSERT_IS_TRUE_WITH_MSG(result == IOTHUB_CLIENT_ERROR, tmp_msg);
+        ASSERT_IS_TRUE(result == IOTHUB_CLIENT_ERROR, tmp_msg);
     }
 
     //cleanup

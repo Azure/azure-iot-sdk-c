@@ -466,7 +466,7 @@ char* individualEnrollment_serializeToJson(const INDIVIDUAL_ENROLLMENT_HANDLE en
 
     if (root_value != NULL)
     {
-        json_value_free(root_value); 
+        json_value_free(root_value);
         root_value = NULL;
     }
     if (serialized_string != NULL)

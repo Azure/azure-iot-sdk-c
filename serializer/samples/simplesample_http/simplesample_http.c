@@ -4,7 +4,7 @@
 //
 // IMPORTANT: Please read and understand serializer limitations and alternatives as
 //            described ../../readme.md before beginning to use the serializer.
-// 
+//
 
 #include <stdlib.h>
 
@@ -128,7 +128,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT IoTHubMessage(IOTHUB_MESSAGE_HANDLE mess
         else
         {
             EXECUTE_COMMAND_RESULT executeCommandResult;
-        
+
             (void)memcpy(temp, buffer, size);
             temp[size] = '\0';
             executeCommandResult = EXECUTE_COMMAND(userContextCallback, temp);
@@ -169,7 +169,7 @@ void simplesample_http_run(void)
             }
             else
             {
-                // Because it can poll "after 9 seconds" polls will happen 
+                // Because it can poll "after 9 seconds" polls will happen
                 // effectively at ~10 seconds.
                 // Note that for scalabilty, the default value of minimumPollingTime
                 // is 25 minutes. For more information, see:

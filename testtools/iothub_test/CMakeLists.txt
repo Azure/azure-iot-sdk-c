@@ -8,13 +8,13 @@ compileAsC99()
 usePermissiveRulesForSamplesAndTests()
 
 set(iothub_test_c_files
-./src/iothubtest.c
-./src/iothub_account.c
+    ./src/iothubtest.c
+    ./src/iothub_account.c
 )
 
 set(iothub_test_h_files
-./inc/iothubtest.h
-./inc/iothub_account.h
+    ./inc/iothubtest.h
+    ./inc/iothub_account.h
 )
 
 #these are the include folders
@@ -26,10 +26,16 @@ include_directories(${CMAKE_CURRENT_LIST_DIR}/../../iothub_client/inc)
 include_directories(${IOTHUB_SERVICE_CLIENT_INC_FOLDER})
 
 IF(WIN32)
-	#windows needs this define
-	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-	add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
+    #windows needs this define
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
 ENDIF(WIN32)
+
+if(${use_sample_trusted_cert})
+    include_directories(${PROJECT_SOURCE_DIR}/certs)
+    set(iothub_test_c_files ${iothub_test_c_files} ${PROJECT_SOURCE_DIR}/certs/certs.c)
+    add_definitions(-DSET_TRUSTED_CERT)
+endif()
 
 add_library(iothub_test ${iothub_test_c_files} ${iothub_test_h_files})
 
@@ -51,7 +57,7 @@ if(${use_installed_dependencies})
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/../bin
-        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot 
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
     )
     install(FILES ${iothub_test_h_files} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
 endif()

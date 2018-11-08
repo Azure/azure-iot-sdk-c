@@ -39,9 +39,9 @@ typedef struct DEVICE_HEADER_DATA_TAG
     or call directly an API (that will set automatically g_OverrideSchemaNamespace to NULL).
 
     To switch to NOT INIT state, depending on the method used to initialize:
-        - if CodeFirst_Init was called, then only by a call to CodeFirst_Deinit the switch will take place 
+        - if CodeFirst_Init was called, then only by a call to CodeFirst_Deinit the switch will take place
             (note how in this case g_OverrideSchemaNamespace survives destruction of all devices).
-        - if the init has been done "lazily" by an API call then the module returns to uninitialized state 
+        - if the init has been done "lazily" by an API call then the module returns to uninitialized state
             when the number of devices reaches zero.
 
                               +-----------------------------+
@@ -73,7 +73,7 @@ typedef struct DEVICE_HEADER_DATA_TAG
 #define CODEFIRST_STATE_VALUES \
     CODEFIRST_STATE_NOT_INIT, \
     CODEFIRST_STATE_INIT_BY_INIT, \
-    CODEFIRST_STATE_INIT_BY_API  
+    CODEFIRST_STATE_INIT_BY_API
 
 DEFINE_ENUM(CODEFIRST_STATE, CODEFIRST_STATE_VALUES)
 
@@ -157,7 +157,7 @@ static void DestroyDevice(DEVICE_HEADER_DATA* deviceHeader)
 {
     /* Codes_SRS_CODEFIRST_99_085:[CodeFirst_DestroyDevice shall free all resources associated with a device.] */
     /* Codes_SRS_CODEFIRST_99_087:[In order to release the device handle, CodeFirst_DestroyDevice shall call Device_Destroy.] */
-    
+
     Device_Destroy(deviceHeader->DeviceHandle);
     free(deviceHeader->data);
     free(deviceHeader);
@@ -301,13 +301,13 @@ static CODEFIRST_RESULT buildModel(SCHEMA_HANDLE schemaHandle, const REFLECTED_D
             }
             else
             {
-                if (Schema_AddModelDesiredProperty(modelTypeHandle, 
-                    something->what.desiredProperty.name, 
-                    something->what.desiredProperty.type, 
-                    something->what.desiredProperty.FromAGENT_DATA_TYPE, 
-                    something->what.desiredProperty.desiredPropertInitialize, 
-                    something->what.desiredProperty.desiredPropertDeinitialize, 
-                    something->what.desiredProperty.offset, 
+                if (Schema_AddModelDesiredProperty(modelTypeHandle,
+                    something->what.desiredProperty.name,
+                    something->what.desiredProperty.type,
+                    something->what.desiredProperty.FromAGENT_DATA_TYPE,
+                    something->what.desiredProperty.desiredPropertInitialize,
+                    something->what.desiredProperty.desiredPropertDeinitialize,
+                    something->what.desiredProperty.offset,
                     something->what.desiredProperty.onDesiredProperty) != SCHEMA_OK)
                 {
                     /*Codes_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CODEFIRST_SCHEMA_ERROR shall be returned.]*/
@@ -738,7 +738,7 @@ AGENT_DATA_TYPE_TYPE CodeFirst_GetPrimitiveType(const char* typeName)
     {
         return EDM_SINGLE_TYPE;
     }
-    else 
+    else
 #endif
     if (strcmp(typeName, "int") == 0)
     {
@@ -892,7 +892,7 @@ void* CodeFirst_CreateDevice(SCHEMA_MODEL_TYPE_HANDLE model, const REFLECTED_DAT
     {
         /*Codes_SRS_CODEFIRST_02_037: [ CodeFirst_CreateDevice shall call CodeFirst_Init, passing NULL for overrideSchemaNamespace. ]*/
         (void)CodeFirst_Init_impl(NULL, false); /*lazy init*/
-        
+
         if ((deviceHeader = (DEVICE_HEADER_DATA*)malloc(sizeof(DEVICE_HEADER_DATA))) == NULL)
         {
             /* Codes_SRS_CODEFIRST_99_102:[On any other errors, Device_Create shall return NULL.] */
@@ -916,7 +916,7 @@ void* CodeFirst_CreateDevice(SCHEMA_MODEL_TYPE_HANDLE model, const REFLECTED_DAT
 
                 initializeDesiredProperties(model, deviceHeader->data);
 
-                if (Device_Create(model, CodeFirst_InvokeAction, deviceHeader, CodeFirst_InvokeMethod, deviceHeader, 
+                if (Device_Create(model, CodeFirst_InvokeAction, deviceHeader, CodeFirst_InvokeMethod, deviceHeader,
                     includePropertyPath, &deviceHeader->DeviceHandle) != DEVICE_OK)
                 {
                     free(deviceHeader->data);
@@ -946,6 +946,7 @@ void* CodeFirst_CreateDevice(SCHEMA_MODEL_TYPE_HANDLE model, const REFLECTED_DAT
                     if (schemaResult != SCHEMA_OK)
                     {
                         Device_Destroy(deviceHeader->DeviceHandle);
+                        free(newDevices);
                         free(deviceHeader->data);
                         free(deviceHeader);
 
@@ -964,7 +965,7 @@ void* CodeFirst_CreateDevice(SCHEMA_MODEL_TYPE_HANDLE model, const REFLECTED_DAT
                 }
             }
         }
-        
+
     }
 
     return result;
@@ -1194,8 +1195,8 @@ CODEFIRST_RESULT CodeFirst_SendAsync(unsigned char** destination, size_t* destin
     va_list ap;
 
     if (
-        (numProperties == 0) || 
-        (destination == NULL) || 
+        (numProperties == 0) ||
+        (destination == NULL) ||
         (destinationSize == NULL)
         )
     {
@@ -1208,7 +1209,7 @@ CODEFIRST_RESULT CodeFirst_SendAsync(unsigned char** destination, size_t* destin
     {
         /*Codes_SRS_CODEFIRST_02_040: [ CodeFirst_SendAsync shall call CodeFirst_Init, passing NULL for overrideSchemaNamespace. ]*/
         (void)CodeFirst_Init_impl(NULL, false); /*lazy init*/
-        
+
         DEVICE_HEADER_DATA* deviceHeader = NULL;
         size_t i;
         TRANSACTION_HANDLE transaction = NULL;
@@ -1356,7 +1357,7 @@ CODEFIRST_RESULT CodeFirst_SendAsync(unsigned char** destination, size_t* destin
         }
 
         va_end(ap);
-        
+
     }
 
     return result;
@@ -1375,7 +1376,7 @@ CODEFIRST_RESULT CodeFirst_SendAsyncReported(unsigned char** destination, size_t
     {
         /*Codes_SRS_CODEFIRST_02_046: [ CodeFirst_SendAsyncReported shall call CodeFirst_Init, passing NULL for overrideSchemaNamespace. ]*/
         (void)CodeFirst_Init_impl(NULL, false);/*lazy init*/
-   
+
         DEVICE_HEADER_DATA* deviceHeader = NULL;
         size_t i;
         REPORTED_PROPERTIES_TRANSACTION_HANDLE transaction = NULL;

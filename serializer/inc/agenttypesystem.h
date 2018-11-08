@@ -49,7 +49,7 @@ typedef struct EDM_BINARY_TAG
 
 #define EDM_BOOLEANS_VALUES \
     EDM_TRUE, \
-    EDM_FALSE 
+    EDM_FALSE
 
 DEFINE_ENUM(EDM_BOOLEANS, EDM_BOOLEANS_VALUES);
 
@@ -66,7 +66,7 @@ DEFINE_ENUM(EDM_BOOLEANS, EDM_BOOLEANS_VALUES);
 #error update this file to contain the latest C standard.
 #endif
 #else
-#ifdef __cplusplus 
+#ifdef __cplusplus
 #define ISPOSITIVEINFINITY(x) (std::isinf((x)) && (signbit((x))==0))
 #else
 #error unknown (or C89) compiler, must provide a definition for ISPOSITIVEINFINITY
@@ -86,7 +86,7 @@ DEFINE_ENUM(EDM_BOOLEANS, EDM_BOOLEANS_VALUES);
 #error update this file to contain the latest C standard.
 #endif
 #else
-#ifdef __cplusplus 
+#ifdef __cplusplus
 #define ISNEGATIVEINFINITY(x) (std::isinf((x)) && (signbit((x)) != 0))
 #else
 #error unknown (or C89) compiler, must provide a definition for ISNEGATIVEINFINITY
