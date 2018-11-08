@@ -16,9 +16,6 @@ int fake_IoTHubClient_LL_SetOption(void* iotHubClientHandle, const char* optionN
 #define printf printf_to_sample_window
 #define IoTHubClient_LL_SetOption(a,b,c) fake_IoTHubClient_LL_SetOption(a,b,c)
 #define ThreadAPI_Sleep(a) ThreadAPI_Sleep(20)
-#define getchar() fake_getchar()
-
-#define main run_ios_sample
 
 #ifdef __cplusplus
 }
