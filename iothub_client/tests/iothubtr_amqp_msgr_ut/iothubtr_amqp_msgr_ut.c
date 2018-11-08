@@ -1366,7 +1366,7 @@ TEST_FUNCTION(amqp_messenger_create_failure_checks)
         AMQP_MESSENGER_HANDLE handle = amqp_messenger_create(config);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
         ASSERT_IS_NULL(handle, error_msg);
     }
 
@@ -1844,7 +1844,7 @@ TEST_FUNCTION(amqp_messenger_do_work_create_message_receiver_failure_checks)
         amqp_messenger_do_work(handle);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
         ASSERT_IS_TRUE(saved_messagereceiver_open_on_message_received == NULL, error_msg);
     }
 
@@ -1897,7 +1897,7 @@ TEST_FUNCTION(amqp_messenger_do_work_create_message_sender_failure_checks)
         amqp_messenger_do_work(handle);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", i);
 
         ASSERT_ARE_EQUAL(int, AMQP_MESSENGER_STATE_STARTING, saved_on_state_changed_callback_previous_state, error_msg);
         ASSERT_ARE_EQUAL(int, AMQP_MESSENGER_STATE_ERROR, saved_on_state_changed_callback_new_state, error_msg);
@@ -2264,7 +2264,7 @@ TEST_FUNCTION(amqp_messenger_send_async_failure_checks)
         int result = amqp_messenger_send_async(handle, TEST_MESSAGE_HANDLE, TEST_on_event_send_complete, TEST_IOTHUB_CLIENT_HANDLE);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
         ASSERT_ARE_NOT_EQUAL(int, 0, result, error_msg);
     }
 
@@ -2651,7 +2651,7 @@ TEST_FUNCTION(amqp_messenger_send_message_disposition_failure_checks)
         int result = amqp_messenger_send_message_disposition(handle, &disposition_info, AMQP_MESSENGER_DISPOSITION_RESULT_ACCEPTED);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
         ASSERT_ARE_NOT_EQUAL(int, 0, result, error_msg);
     }
 
@@ -2737,7 +2737,7 @@ TEST_FUNCTION(amqp_messenger_retrieve_options_failure_checks)
         OPTIONHANDLER_HANDLE result = amqp_messenger_retrieve_options(handle);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
         ASSERT_IS_NULL(result, error_msg);
     }
 

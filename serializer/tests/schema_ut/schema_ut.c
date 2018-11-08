@@ -540,7 +540,7 @@ BEGIN_TEST_SUITE(Schema_ut)
 
             umock_c_negative_tests_fail_call(i);
             char temp_str[128];
-            sprintf(temp_str, "On failed call %zu", i);
+            sprintf(temp_str, "On failed call %lu", i);
 
             ///act
             SCHEMA_MODEL_TYPE_HANDLE result = Schema_CreateModelType(schemaHandle, MODEL_NAME);
@@ -4179,7 +4179,7 @@ BEGIN_TEST_SUITE(Schema_ut)
 
                 umock_c_negative_tests_fail_call(i);
                 char temp_str[128];
-                sprintf(temp_str, "On failed call %zu", i);
+                sprintf(temp_str, "On failed call %lu", i);
 
                 ///act
                 SCHEMA_RESULT result = Schema_AddModelReportedProperty(modelType, reportedPropertyName, reportedPropertyType);
@@ -4764,7 +4764,7 @@ BEGIN_TEST_SUITE(Schema_ut)
 
                 umock_c_negative_tests_fail_call(i);
                 char temp_str[128];
-                sprintf(temp_str, "On failed call %zu", i);
+                sprintf(temp_str, "On failed call %lu", i);
 
                 ///act
                 SCHEMA_RESULT result = Schema_AddModelDesiredProperty(modelType, desiredPropertyName, desiredPropertyType, g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
