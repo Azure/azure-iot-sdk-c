@@ -6,6 +6,7 @@
 #import <azure_c_shared_utility/xlogging.h>
 #import "connector.h"
 #import <stdarg.h>
+#import "iothub_sample.h"
 
 static id <logTarget> log_target = nil;
 
@@ -48,34 +49,7 @@ void init_connector(id <logTarget> vc)
 {
     log_target = vc;
     xlogging_set_log_function(ios_consolelogger_log);
-    (void)run_ios_sample();
-}
-
-int printf_to_sample_window(const char* format, ...)
-{
-    const size_t buffer_size = 1024;
-    char buffer[buffer_size];
-    va_list args;
-    va_start(args, format);
-    NSMutableString *temp = [[NSMutableString alloc]initWithCapacity:256];
-
-    (void)vsnprintf(buffer, buffer_size, format, args);
-    [temp appendFormat:@"%s", buffer];
-    va_end(args);
-    
-    [log_target addLogEntry:temp];
-
-    return 0;
-}
-
-int fake_getchar(void)
-{
-    [log_target addLogEntry:@"\r\nDone"];
-    while(true)
-    {
-        ThreadAPI_Sleep(100);
-    }
-    return 0;
+    (void)run_iothub_sample();
 }
 
 int fake_IoTHubClient_LL_SetOption(void* iotHubClientHandle, const char* optionName, const void* value)
