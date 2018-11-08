@@ -210,9 +210,9 @@ The project offers a Long Term Support (LTS) version to allow users that do not 
 A new LTS version will be created every 6 months. The lifetime of an LTS branch is currently planned for one year. LTS branches receive all bug fixes that fall in one of these categories:
 
 - security bugfixes
-- critical bugfixes (crashes, memory leaks, etc.)
+- critical bugfixes
 
-No new features or improvements will be picked up in an LTS branch.
+No new features will be picked up in an LTS branch.
 
 LTS branches are named lts_*mm*_*yyyy*, where *mm* and *yyyy* are the month and year when the branch was created. An example of such a branch is *lts_07_2017*.
 
@@ -241,5 +241,5 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 [c-sdk-intro]: https://azure.microsoft.com/documentation/articles/iot-hub-device-sdk-c-intro/
 [c-porting-guide]: https://github.com/Azure/azure-c-shared-utility/blob/master/devdoc/porting_guide.md
 [c-cross-compile]: doc/SDK_cross_compile_example.md
-[c-api-reference]: https://azure.github.io/azure-iot-sdk-c/index.html
+[c-api-reference]: https://docs.microsoft.com/azure/iot-hub/iot-c-sdk-ref/
 [azure-iot-sdks]:https://github.com/azure/azure-iot-sdks
