@@ -1355,7 +1355,7 @@ SCHEMA_REPORTED_PROPERTY_HANDLE Schema_GetModelReportedPropertyByIndex(SCHEMA_MO
     /*Codes_SRS_SCHEMA_02_015: [ If argument modelTypeHandle is NULL then Schema_GetModelReportedPropertyByIndex shall fail and return NULL. ]*/
     if (modelTypeHandle == NULL)
     {
-        LogError("invalid argument SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle=%p, size_t index=%lu", modelTypeHandle, index);
+        LogError("invalid argument SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle=%p, size_t index=%lu", modelTypeHandle, (unsigned long)index);
         result = NULL;
     }
     else
@@ -1366,7 +1366,7 @@ SCHEMA_REPORTED_PROPERTY_HANDLE Schema_GetModelReportedPropertyByIndex(SCHEMA_MO
         /*Codes_SRS_SCHEMA_02_017: [ Otherwise Schema_GetModelReportedPropertyByIndex shall fail and return NULL. ]*/
         if ((result = VECTOR_element(modelType->reportedProperties, index)) == NULL)
         {
-            LogError("index %lu is invalid", index);
+            LogError("index %lu is invalid", (unsigned long)index);
         }
         else
         {
@@ -2482,7 +2482,7 @@ size_t Schema_GetModelModelByIndex_Offset(SCHEMA_MODEL_TYPE_HANDLE modelTypeHand
         void* temp = VECTOR_element(model->models, index);
         if (temp == 0)
         {
-            LogError("specified index [out of bounds] (%lu)", index);
+            LogError("specified index [out of bounds] (%lu)", (unsigned long)index);
             result = 0;
         }
         else
@@ -2751,7 +2751,7 @@ SCHEMA_RESULT Schema_AddModelDesiredProperty(SCHEMA_MODEL_TYPE_HANDLE modelTypeH
         )
     {
         LogError("invalid arg SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle=%p, const char* desiredPropertyName=%p, const char* desiredPropertyType=%p, pfDesiredPropertyFromAGENT_DATA_TYPE desiredPropertyFromAGENT_DATA_TYPE=%p, pfDesiredPropertyInitialize desiredPropertyInitialize=%p, pfDesiredPropertyDeinitialize desiredPropertyDeinitialize=%p, size_t offset=%lu",
-            modelTypeHandle, desiredPropertyName, desiredPropertyType, desiredPropertyFromAGENT_DATA_TYPE, desiredPropertyInitialize, desiredPropertyDeinitialize, offset);
+            modelTypeHandle, desiredPropertyName, desiredPropertyType, desiredPropertyFromAGENT_DATA_TYPE, desiredPropertyInitialize, desiredPropertyDeinitialize, (unsigned long)offset);
         result = SCHEMA_INVALID_ARG;
     }
     else

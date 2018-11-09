@@ -1897,7 +1897,7 @@ TEST_FUNCTION(amqp_messenger_do_work_create_message_sender_failure_checks)
         amqp_messenger_do_work(handle);
 
         // assert
-        sprintf(error_msg, "On failed call %lu", i);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
 
         ASSERT_ARE_EQUAL(int, AMQP_MESSENGER_STATE_STARTING, saved_on_state_changed_callback_previous_state, error_msg);
         ASSERT_ARE_EQUAL(int, AMQP_MESSENGER_STATE_ERROR, saved_on_state_changed_callback_new_state, error_msg);

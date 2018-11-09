@@ -2152,7 +2152,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_UploadToBlobAsync(IOTHUB_CLIENT_CORE_HANDL
             iotHubClientHandle,
             destinationFileName,
             source,
-            size,
+            (unsigned long)size,
             iotHubClientFileUploadCallback,
             context
         );

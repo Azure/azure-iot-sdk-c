@@ -177,7 +177,7 @@ TEST_FUNCTION(MethodReturn_Create_succeeds_with_non_NULL_jsonValue_unhappy_paths
 
             umock_c_negative_tests_fail_call(i);
             char temp_str[128];
-            sprintf(temp_str, "On failed call %lu", i);
+            sprintf(temp_str, "On failed call %lu", (unsigned long)i);
 
             ///act
             METHODRETURN_HANDLE h = MethodReturn_Create(1, jsonValue);
@@ -234,7 +234,7 @@ TEST_FUNCTION(MethodReturn_Create_with_NULL_jsonValue_unhappy_paths)
 
         umock_c_negative_tests_fail_call(i);
         char temp_str[128];
-        sprintf(temp_str, "On failed call %lu", i);
+        sprintf(temp_str, "On failed call %lu", (unsigned long)i);
 
         ///act
         METHODRETURN_HANDLE h = MethodReturn_Create(1, jsonValue);

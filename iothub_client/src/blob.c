@@ -246,7 +246,7 @@ BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* SASURI, IOTHUB_CLIEN
                                             if (size > BLOCK_SIZE)
                                             {
                                                 /*Codes_SRS_BLOB_99_001: [ If the size of the block returned by `getDataCallbackEx` is bigger than 4MB, then `Blob_UploadMultipleBlocksFromSasUri` shall fail and return `BLOB_INVALID_ARG`. ]*/
-                                                LogError("tried to upload block of size %lu, max allowed size is %d", size, BLOCK_SIZE);
+                                                LogError("tried to upload block of size %lu, max allowed size is %d", (unsigned long)size, BLOCK_SIZE);
                                                 result = BLOB_INVALID_ARG;
                                                 isError = 1;
                                             }

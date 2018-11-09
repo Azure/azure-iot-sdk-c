@@ -1390,7 +1390,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_with_certificate_unhappy_
 
             umock_c_negative_tests_fail_call(i);
             char temp_str[128];
-            sprintf(temp_str, "On failed call %lu", i);
+            sprintf(temp_str, "On failed call %lu", (unsigned long)i);
 
             ///act
             context.toUpload = context.size; /* Reinit context */

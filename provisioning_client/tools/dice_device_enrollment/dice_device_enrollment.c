@@ -124,7 +124,7 @@ static int alias_certificate_info(HSM_CLIENT_HANDLE hsm_handle)
         if (next_cert != NULL)
         {
             // Let's get the length of the first cert
-            int init_len = next_cert-certificate;
+            int init_len = (int)(next_cert-certificate);
             (void)printf("Device certificate:\r\n%.*s\r\n", init_len, certificate);
         }
         else

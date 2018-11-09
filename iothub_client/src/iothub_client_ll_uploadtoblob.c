@@ -1074,7 +1074,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_Impl(IOTHUB_CLIENT_LL_UPLOADTO
     /*Codes_SRS_IOTHUBCLIENT_LL_02_063: [ If source is NULL and size is greater than 0 then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_INVALID_ARG. ]*/
     if (source == NULL && size > 0)
     {
-        LogError("invalid source and size combination: source=%p size=%lu", source, size);
+        LogError("invalid source and size combination: source=%p size=%lu", source, (unsigned long)size);
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else
