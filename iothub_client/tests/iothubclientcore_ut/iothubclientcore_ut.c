@@ -1253,7 +1253,7 @@ TEST_FUNCTION(IoTHubClientCore_CreateFromEnvironment_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "IoTHubClientCore_CreateFromEnvironment failure in test %lu/%lu", index, count);
+        sprintf(tmp_msg, "IoTHubClientCore_CreateFromEnvironment failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
         IOTHUB_CLIENT_CORE_HANDLE result = IoTHubClientCore_CreateFromEnvironment(TEST_TRANSPORT_PROVIDER);
 
         // assert
@@ -4161,7 +4161,7 @@ TEST_FUNCTION(IoTHubClientCore_GenericMethodInvoke_fail)
                                                                            test_method_invoke_callback, CALLBACK_CONTEXT);
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "IoTHubClientCore_GenericMethodInvoke failure in test %lu/%lu in run 1", index, count);
+        sprintf(tmp_msg, "IoTHubClientCore_GenericMethodInvoke failure in test %lu/%lu in run 1", (unsigned long)index, (unsigned long)count);
 
         // assert
         ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, tmp_msg);
@@ -4201,7 +4201,7 @@ TEST_FUNCTION(IoTHubClientCore_GenericMethodInvoke_fail)
                                                                            test_method_invoke_callback, CALLBACK_CONTEXT);
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "IoTHubClientCore_GenericMethodInvoke failure in test %lu/%lu in run 2", index, count);
+        sprintf(tmp_msg, "IoTHubClientCore_GenericMethodInvoke failure in test %lu/%lu in run 2", (unsigned long)index, (unsigned long)count);
 
         // assert
         ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, tmp_msg);
