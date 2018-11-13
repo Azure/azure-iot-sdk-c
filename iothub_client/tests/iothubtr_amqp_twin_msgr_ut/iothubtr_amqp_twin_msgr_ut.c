@@ -1033,7 +1033,7 @@ TEST_FUNCTION(twin_msgr_create_failure_checks)
         TWIN_MESSENGER_HANDLE handle = twin_messenger_create(config);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
         ASSERT_IS_NULL(handle, error_msg);
     }
 
@@ -1146,7 +1146,7 @@ TEST_FUNCTION(twin_msgr_report_state_async_failure_checks)
         int result = twin_messenger_report_state_async(handle, report, TEST_on_report_state_complete_callback, NULL);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
         ASSERT_ARE_NOT_EQUAL(int, 0, result, error_msg);
     }
 

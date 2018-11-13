@@ -258,7 +258,7 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(i);
             char temp_str[128];
-            sprintf(temp_str, "On failed call %zu", i);
+            sprintf(temp_str, "On failed call %lu", (unsigned long)i);
 
             // act
             SCHEMA_SERIALIZER_RESULT result = SchemaSerializer_SerializeCommandMetadata(TEST_MODEL_HANDLE, TEST_STRING_HANDLE);
@@ -346,7 +346,7 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
 
             umock_c_negative_tests_fail_call(i);
             char temp_str[128];
-            sprintf(temp_str, "On failed call %zu", i);
+            sprintf(temp_str, "On failed call %lu", (unsigned long)i);
 
             ///act
             SCHEMA_SERIALIZER_RESULT result = SchemaSerializer_SerializeCommandMetadata(TEST_MODEL_HANDLE, TEST_STRING_HANDLE);
@@ -454,7 +454,7 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
 
             umock_c_negative_tests_fail_call(i);
             char temp_str[128];
-            sprintf(temp_str, "On failed call %zu", i);
+            sprintf(temp_str, "On failed call %lu", (unsigned long)i);
 
             /// act
             SCHEMA_SERIALIZER_RESULT result = SchemaSerializer_SerializeCommandMetadata(TEST_MODEL_HANDLE, TEST_STRING_HANDLE);
@@ -531,7 +531,7 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
 
             umock_c_negative_tests_fail_call(i);
             char temp_str[128];
-            sprintf(temp_str, "On failed call %zu", i);
+            sprintf(temp_str, "On failed call %lu", (unsigned long)i);
 
             ///act
             SCHEMA_SERIALIZER_RESULT result = SchemaSerializer_SerializeCommandMetadata(TEST_MODEL_HANDLE, TEST_STRING_HANDLE);
@@ -630,7 +630,7 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
 
             umock_c_negative_tests_fail_call(i);
             char temp_str[128];
-            sprintf(temp_str, "On failed call %zu", i);
+            sprintf(temp_str, "On failed call %lu", (unsigned long)i);
 
             ///act
             SCHEMA_SERIALIZER_RESULT result = SchemaSerializer_SerializeCommandMetadata(TEST_MODEL_HANDLE, TEST_STRING_HANDLE);

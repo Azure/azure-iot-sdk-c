@@ -532,7 +532,7 @@ TEST_FUNCTION(IoTHubClient_EdgeHandle_Create_FAIL)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "IoTHubClient_EdgeHandle_Create_FAIL failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "IoTHubClient_EdgeHandle_Create_FAIL failure in test %lu/%lu", (unsigned long)test_num, (unsigned long)test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -785,7 +785,7 @@ TEST_FUNCTION(IoTHubClient_Edge_DeviceMethodInvoke_FAIL)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "IoTHubClient_EdgeHandle_Create_FAIL failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "IoTHubClient_EdgeHandle_Create_FAIL failure in test %lu/%lu", (unsigned long)test_num, (unsigned long)test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -1028,7 +1028,7 @@ TEST_FUNCTION(IoTHubClient_Edge_ModuleMethodInvoke_FAIL)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "IoTHubClient_EdgeHandle_Create_FAIL failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "IoTHubClient_EdgeHandle_Create_FAIL failure in test %lu/%lu", (unsigned long)test_num, (unsigned long)test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);

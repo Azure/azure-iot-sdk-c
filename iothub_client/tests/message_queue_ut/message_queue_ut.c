@@ -686,7 +686,7 @@ TEST_FUNCTION(create_failure_checks)
     {
         // arrange
         char error_msg[64];
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
@@ -885,7 +885,7 @@ TEST_FUNCTION(add_failure_checks)
     {
         // arrange
         char error_msg[64];
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
@@ -1102,7 +1102,7 @@ TEST_FUNCTION(do_work_NO_EXPIRATION_failure_checks)
         TEST_on_message_processing_completed_callback_result = MESSAGE_QUEUE_TIMEOUT;
 
         char error_msg[64];
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
 
         if (i >= 3 && i != 4)
         {
@@ -1307,7 +1307,7 @@ TEST_FUNCTION(message_queue_retrieve_options_failure_checks)
     {
         // arrange
         char error_msg[64];
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
