@@ -87,7 +87,7 @@ Libraries install in /usr/lib:
 * libserializer.a
 * libiothub_client.a
 
-All azure-iot-sdk header files install in /usr/include/azureiotsdk.
+All azure-iot-sdk header files install in /usr/include/azureiot.
 
 Dependencies install in /usr/lib:
 

@@ -564,7 +564,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_Create_unhappypaths)
         IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS);
 
         /// assert
-        sprintf(temp_str, "On failed call %zu", i + 1);
+        sprintf(temp_str, "On failed call %lu", (unsigned long)(i + 1));
         ASSERT_IS_NULL(h, temp_str);
 
         ///cleanup
@@ -2202,7 +2202,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SAS_token_when_step2_aborts_unhappypa
         if (j == sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]))
         {
             /// arrange
-            sprintf(temp_str, "On failed call %zu", i);
+            sprintf(temp_str, "On failed call %lu", (unsigned long)i);
 
             ///act
             IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_Impl(h, "text.txt", &c, 1);
@@ -2914,7 +2914,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SAS_token_unhappypaths)
         if (j == sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]))
         {
             /// arrange
-            sprintf(temp_str, "On failed call %zu", i);
+            sprintf(temp_str, "On failed call %lu", (unsigned long)i);
 
             ///act
             IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_Impl(h, "text.txt", &c, 1);
@@ -2993,7 +2993,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_Create_DeviceKey_unhappypaths)
         IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_DEVICE_KEY);
 
         /// assert
-        sprintf(temp_str, "On failed call %zu", i + 1);
+        sprintf(temp_str, "On failed call %lu", (unsigned long)(i + 1));
         ASSERT_IS_NULL(h, temp_str);
     }
 
@@ -4608,7 +4608,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadMultipleBlocksToBlob_deviceKey_unhappypaths)
         if (j == sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]))
         {
             /// assert
-            sprintf(temp_str, "On failed call %zu", i);
+            sprintf(temp_str, "On failed call %lu", (unsigned long)i);
             IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(h, "text.txt", FileUpload_GetData_Callback, &context);
             ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, temp_str);
 
@@ -5317,7 +5317,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_passes_x509_information_to_HTTPAPIEX_
             umock_c_negative_tests_fail_call(i);
 
             /// assert
-            sprintf(temp_str, "On failed call %zu", i);
+            sprintf(temp_str, "On failed call %lu", (unsigned long)i);
             IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_Impl(h, "text.txt", &c, 1);
             ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, temp_str);
         }
