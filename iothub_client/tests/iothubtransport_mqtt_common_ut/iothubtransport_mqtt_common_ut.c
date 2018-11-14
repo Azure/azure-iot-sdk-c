@@ -1822,7 +1822,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_validConfig_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_Create failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_Create failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
         TRANSPORT_LL_HANDLE result = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
 
         // assert
@@ -2080,8 +2080,8 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_DoWork failure in test %zu/%zu", index, count);
-
+        sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_DoWork failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
+        
         IoTHubTransport_MQTT_Common_DoWork(handle);
     }
 
@@ -3838,7 +3838,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_no_messages_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_DoWork failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_DoWork failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
         IoTHubTransport_MQTT_Common_DoWork(handle);
 
@@ -4153,7 +4153,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_1_event_item_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_DoWork failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_DoWork failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
         IoTHubTransport_MQTT_Common_DoWork(handle);
 
@@ -5463,7 +5463,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_twin_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "MessageRecv_device_twin failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "MessageRecv_device_twin failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
         g_fnMqttMsgRecv(TEST_MQTT_MESSAGE_HANDLE, g_callbackCtx);
         // assert
@@ -5662,8 +5662,8 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_Properties_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "g_fnMqttMsgRecv failure in test %zu/%zu", index, count);
-
+        sprintf(tmp_msg, "g_fnMqttMsgRecv failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
+        
         g_fnMqttMsgRecv(TEST_MQTT_MESSAGE_HANDLE, g_callbackCtx);
     }
 
@@ -5709,7 +5709,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_Properties_fail_autod
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "g_fnMqttMsgRecv failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "g_fnMqttMsgRecv failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
         g_fnMqttMsgRecv(TEST_MQTT_MESSAGE_HANDLE, g_callbackCtx);
     }
@@ -5820,7 +5820,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_method_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_DoWork failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_DoWork failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
         g_fnMqttMsgRecv(TEST_MQTT_MESSAGE_HANDLE, g_callbackCtx);
     }
@@ -6351,7 +6351,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin_DoWork_fails)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_DoWork failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_DoWork failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
         IoTHubTransport_MQTT_Common_DoWork(handle);
 
@@ -6423,7 +6423,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin_DoWork_2nd_fails)
         g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_SUBSCRIBE_ACK, &suback, g_callbackCtx);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_DoWork failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_DoWork failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
         IoTHubTransport_MQTT_Common_DoWork(handle);
 
@@ -6505,7 +6505,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
         int result = IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin(handle);
 
@@ -6546,7 +6546,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin_notify_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
         int result = IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin(handle);
         // assert
@@ -6631,7 +6631,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
         int result = IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod(handle);
         // assert
@@ -6944,7 +6944,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_ProcessItem_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_ProcessItem failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_ProcessItem failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
         IOTHUB_PROCESS_ITEM_RESULT result_item = IoTHubTransport_MQTT_Common_ProcessItem(handle, IOTHUB_TYPE_DEVICE_TWIN, &identity_info);
         // assert
@@ -7069,7 +7069,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DeviceMethod_Response_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[128];
-        (void)sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_DeviceMethod_Response failure in test %zu/%zu", index, count);
+        (void)sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_DeviceMethod_Response failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
         // act
         int result = IoTHubTransport_MQTT_Common_DeviceMethod_Response(handle, g_method_handle_value, TEST_DEVICE_METHOD_RESPONSE, TEST_DEVICE_RESP_LENGTH, TEST_DEVICE_STATUS_CODE);
@@ -7333,7 +7333,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_InputQueue_DoWork_fails)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_DoWork failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_DoWork failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
         IoTHubTransport_MQTT_Common_DoWork(handle);
 
@@ -7572,7 +7572,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_with_InputQueue_fail)
         g_tokenizerIndex = PARSE_SLASHES_FOR_INPUT_QUEUE_INDEX_0;
 
 
-        printf("IoTHubTransportMqtt_MessageRecv_with_InputQueue_fail running test %zu/%zu\n", index, count);
+        printf("IoTHubTransportMqtt_MessageRecv_with_InputQueue_fail running test %lu/%lu\n", (unsigned long)index, (unsigned long)count);
 
         g_fnMqttMsgRecv(TEST_MQTT_MESSAGE_HANDLE, g_callbackCtx);
     }

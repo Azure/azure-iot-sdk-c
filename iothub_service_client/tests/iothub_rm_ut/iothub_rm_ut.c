@@ -2767,7 +2767,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
                 IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetDevice(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, deviceInfo);
 
                 char message_on_error[64];
-                sprintf(message_on_error, "Got unexpected IOTHUB_REGISTRYMANAGER_OK on run %zu", i);
+                sprintf(message_on_error, "Got unexpected IOTHUB_REGISTRYMANAGER_OK on run %lu", (unsigned long)i);
 
                 /// assert
                 ASSERT_ARE_NOT_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result, message_on_error);
@@ -2841,7 +2841,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
                 IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetDevice_Ex(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, deviceInfo);
 
                 char message_on_error[64];
-                sprintf(message_on_error, "Got unexpected IOTHUB_REGISTRYMANAGER_OK on run %zu", i);
+                sprintf(message_on_error, "Got unexpected IOTHUB_REGISTRYMANAGER_OK on run %lu", (unsigned long)i);
 
                 /// assert
                 ASSERT_ARE_NOT_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result, message_on_error);
@@ -3385,7 +3385,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
                 (i != 36) /*gballoc_free*/
                 )
             {
-                printf("i is = %zu\n", i);
+                printf("i is = %lu\n", (unsigned long)i);
 
                 IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_UpdateDevice(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_DEVICE_UPDATE);
 
@@ -3466,7 +3466,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
                 (i != 36) /*gballoc_free*/
                 )
             {
-                printf("i is = %zu\n", i);
+                printf("i is = %lu\n", (unsigned long)i);
 
                 IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_UpdateDevice_Ex(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, &TEST_IOTHUB_REGISTRY_DEVICE_UPDATE_EX);
 
@@ -3869,7 +3869,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
 
         ///act
         size_t negative_call_count = umock_c_negative_tests_call_count();
-        printf("negative_test_count=%zu", negative_call_count);
+        printf("negative_test_count=%lu", (unsigned long)negative_call_count);
         for (size_t i = 0; i < negative_call_count; i++)
         {
             /// arrange
@@ -3918,7 +3918,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
             {
                 IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetDeviceList(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, 10, deviceList);
                 char message_on_error[64];
-                sprintf(message_on_error, "Got unexpected IOTHUB_REGISTRYMANAGER_OK on run %zu", i);
+                sprintf(message_on_error, "Got unexpected IOTHUB_REGISTRYMANAGER_OK on run %lu", (unsigned long)i);
 
                 /// assert
                 ASSERT_ARE_NOT_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result, message_on_error);
@@ -3948,7 +3948,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
 
         ///act
         size_t negative_call_count = umock_c_negative_tests_call_count();
-        printf("negative_test_count=%zu", negative_call_count);
+        printf("negative_test_count=%lu", (unsigned long)negative_call_count);
         for (size_t i = 0; i < negative_call_count; i++)
         {
             /// arrange
@@ -3993,7 +3993,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
             {
                 IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetModuleList(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, moduleList, IOTHUB_MODULE_VERSION_1);
                 char message_on_error[64];
-                sprintf(message_on_error, "Got unexpected IOTHUB_REGISTRYMANAGER_OK on run %zu", i);
+                sprintf(message_on_error, "Got unexpected IOTHUB_REGISTRYMANAGER_OK on run %lu", (unsigned long)i);
 
                 /// assert
                 ASSERT_ARE_NOT_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result, message_on_error);
@@ -4024,7 +4024,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
 
         ///act
         size_t negative_call_count = umock_c_negative_tests_call_count();
-        printf("negative_test_count=%zu", negative_call_count);
+        printf("negative_test_count=%lu", (unsigned long)negative_call_count);
         for (size_t i = 0; i < negative_call_count; i++)
         {
             /// arrange
@@ -4070,7 +4070,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
             {
                 IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetModuleList(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, moduleList, IOTHUB_MODULE_VERSION_1);
                 char message_on_error[64];
-                sprintf(message_on_error, "Got unexpected IOTHUB_REGISTRYMANAGER_OK on run %zu", i);
+                sprintf(message_on_error, "Got unexpected IOTHUB_REGISTRYMANAGER_OK on run %lu", (unsigned long)i);
 
                 /// assert
                 ASSERT_ARE_NOT_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result, message_on_error);
