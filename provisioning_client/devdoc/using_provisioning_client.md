@@ -46,7 +46,11 @@ To enroll a device in the azure portal you will need to either get the Registrat
 
 ### Symmetric Key
 
-- For Symmetric Key the key value will be retrieve upon the creation of the device registration.
+- For Symmetric Key the key value can be retrieve upon the creation of the device registration or you can use the symm_key_provisioning tool to create a individual or group symmetric key.
+
+```Shell
+./[cmake dir]/provisioning_client/tools/symm_key_provision/symm_key_provision.exe
+```
 
 ### Provisioning Samples
 
@@ -72,11 +76,10 @@ hsm_type = SECURE_DEVICE_TYPE_X509;
 hsm_type = SECURE_DEVICE_TYPE_SYMMETRIC_KEY;
 ```
 
-- If you are using symmetric key authentication you will need to update the following variables in the hsm_client_key.c file.
+- If you are using symmetric key authentication you will need to update the following variables in the provided sample.
 
 ```C
-static const char* const SYMMETRIC_KEY_VALUE = "Enter Symmetric key here";
-static const char* const REGISTRATION_NAME = "Enter Registration Id here";
+prov_dev_set_symmetric_key_info("<symm_registration_id>", "<symmetric_Key>");
 ```
 
 Once these changes are made you can compile and run the sample that you have chosen.
@@ -94,4 +97,11 @@ IOTHUB_CLIENT_LL_HANDLE handle = IoTHubClient_LL_CreateFromDeviceAuth(iothub_uri
 ```C
 // Run the Sample
 ./azure-iot-sdk-c/cmake/provisioning_client/samples/prov_dev_client_sample/prov_dev_client_sample
+```
+
+or if you are using the lower layer interface
+
+```C
+// Run the Sample
+./azure-iot-sdk-c/cmake/provisioning_client/samples/prov_dev_client_ll_sample/prov_dev_client_ll_sample
 ```
