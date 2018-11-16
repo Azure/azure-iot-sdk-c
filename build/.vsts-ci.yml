@@ -79,21 +79,6 @@ phases:
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
     condition: always()
-- phase: mbed
-  queue:
-    name: 'aziotbld-win03'
-  steps:
-  - script: |
-      call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsDevCmd.bat"
-      call jenkins\mbed_c.cmd
-    displayName: 'build'
-    env:
-      MBED_USER: $(MBED-USER)
-      MBED_PWD: $(MBED-PWD)
-      MBED_HG_USER: $(MBED-HG-USER)
-  - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
-    displayName: 'cleanup'
-    condition: always()
 - phase: gcc46
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/gcc-4.6:latest"
