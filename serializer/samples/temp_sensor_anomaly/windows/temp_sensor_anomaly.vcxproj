@@ -89,11 +89,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>GB_DEBUG_ALLOC;GB_MEASURE_MEMORY_FOR_THIS;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;$(VcpkgRoot)include\azureiot;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>rpcrt4.lib;ncrypt.lib;crypt32.lib;winhttp.lib;secur32.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -107,12 +108,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>GB_DEBUG_ALLOC;GB_MEASURE_MEMORY_FOR_THIS;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;$(VcpkgRoot)include\azureiot;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>winhttp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>rpcrt4.lib;ncrypt.lib;crypt32.lib;winhttp.lib;secur32.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
     </PostBuildEvent>
@@ -126,14 +127,14 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>GB_DEBUG_ALLOC;GB_MEASURE_MEMORY_FOR_THIS;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;$(VcpkgRoot)include\azureiot;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>winhttp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>rpcrt4.lib;ncrypt.lib;crypt32.lib;winhttp.lib;secur32.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -149,14 +150,14 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>GB_DEBUG_ALLOC;GB_MEASURE_MEMORY_FOR_THIS;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;$(VcpkgRoot)include\azureiot;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>winhttp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>rpcrt4.lib;ncrypt.lib;crypt32.lib;winhttp.lib;secur32.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
     </PostBuildEvent>
@@ -164,21 +165,5 @@
   <ItemGroup>
     <ClCompile Include="main.c" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <Import Project="packages\Microsoft.Azure.C.SharedUtility.1.1.10\build\native\Microsoft.Azure.C.SharedUtility.targets" Condition="Exists('packages\Microsoft.Azure.C.SharedUtility.1.1.10\build\native\Microsoft.Azure.C.SharedUtility.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('packages\Microsoft.Azure.C.SharedUtility.1.1.10\build\native\Microsoft.Azure.C.SharedUtility.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Azure.C.SharedUtility.1.1.10\build\native\Microsoft.Azure.C.SharedUtility.targets'))" />
-    <Error Condition="!Exists('packages\Microsoft.Azure.IoTHub.IoTHubClient.1.2.10\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Azure.IoTHub.IoTHubClient.1.2.10\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets'))" />
-    <Error Condition="!Exists('packages\Microsoft.Azure.IoTHub.HttpTransport.1.2.10\build\native\Microsoft.Azure.IoTHub.HttpTransport.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Azure.IoTHub.HttpTransport.1.2.10\build\native\Microsoft.Azure.IoTHub.HttpTransport.targets'))" />
-    <Error Condition="!Exists('packages\Microsoft.Azure.IoTHub.Serializer.1.2.10\build\native\Microsoft.Azure.IoTHub.Serializer.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Azure.IoTHub.Serializer.1.2.10\build\native\Microsoft.Azure.IoTHub.Serializer.targets'))" />
-  </Target>
-  <Import Project="packages\Microsoft.Azure.IoTHub.IoTHubClient.1.2.10\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets" Condition="Exists('packages\Microsoft.Azure.IoTHub.IoTHubClient.1.2.10\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets')" />
-  <Import Project="packages\Microsoft.Azure.IoTHub.HttpTransport.1.2.10\build\native\Microsoft.Azure.IoTHub.HttpTransport.targets" Condition="Exists('packages\Microsoft.Azure.IoTHub.HttpTransport.1.2.10\build\native\Microsoft.Azure.IoTHub.HttpTransport.targets')" />
-  <Import Project="packages\Microsoft.Azure.IoTHub.Serializer.1.2.10\build\native\Microsoft.Azure.IoTHub.Serializer.targets" Condition="Exists('packages\Microsoft.Azure.IoTHub.Serializer.1.2.10\build\native\Microsoft.Azure.IoTHub.Serializer.targets')" />
-</Project>
+  </Project>
