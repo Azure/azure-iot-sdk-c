@@ -65,6 +65,7 @@ static void dps_registation_status(PROV_DEVICE_REG_STATUS reg_status, void* user
 {
     (void)reg_status;
     ASSERT_IS_NOT_NULL(user_context, "user_context is NULL");
+    ThreadAPI_Sleep(500);
 }
 
 void wait_for_dps_result(PROV_DEVICE_LL_HANDLE handle, PROV_CLIENT_E2E_INFO* prov_info)
