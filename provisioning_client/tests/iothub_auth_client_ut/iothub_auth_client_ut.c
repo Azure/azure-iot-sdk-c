@@ -787,7 +787,7 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         //arrange
         STRICT_EXPECTED_CALL(iothub_security_type()).SetReturn(IOTHUB_SECURITY_TYPE_SYMMETRIC_KEY);
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(hsm_client_key_interface()).SetReturn(&test_key_interface);
+        STRICT_EXPECTED_CALL(hsm_client_key_interface());
 
         IOTHUB_SECURITY_HANDLE xda_handle = iothub_device_auth_create();
         umock_c_reset_all_calls();

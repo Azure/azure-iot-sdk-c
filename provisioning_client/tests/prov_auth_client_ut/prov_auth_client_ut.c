@@ -1179,7 +1179,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
     {
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_SYMMETRIC_KEY);
-        STRICT_EXPECTED_CALL(hsm_client_key_interface()).SetReturn(&test_key_interface);
+        STRICT_EXPECTED_CALL(hsm_client_key_interface());
         PROV_AUTH_HANDLE sec_handle = prov_auth_create();
         umock_c_reset_all_calls();
 
