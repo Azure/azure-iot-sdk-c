@@ -68,19 +68,19 @@ BEGIN_TEST_SUITE(prov_tpm_client_e2e)
 #if USE_HTTP
     TEST_FUNCTION(dps_register_tpm_device_http_success)
     {
-        send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_HTTP_Protocol);
+        send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_HTTP_Protocol, g_enable_tracing);
     }
 #endif
 
 #if USE_AMQP
     TEST_FUNCTION(dps_register_tpm_device_amqp_success)
     {
-        send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_AMQP_Protocol);
+        send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_AMQP_Protocol, g_enable_tracing);
     }
 
     TEST_FUNCTION(dps_register_tpm_device_amqp_ws_success)
     {
-        send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_AMQP_WS_Protocol);
+        send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_AMQP_WS_Protocol, g_enable_tracing);
     }
 #endif
 END_TEST_SUITE(prov_tpm_client_e2e)

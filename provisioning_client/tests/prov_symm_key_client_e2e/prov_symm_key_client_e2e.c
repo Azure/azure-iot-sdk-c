@@ -45,7 +45,7 @@ BEGIN_TEST_SUITE(prov_symm_key_client_e2e)
         ASSERT_IS_NOT_NULL(g_dps_scope_id, "DPS_ID_SCOPE is NULL");
 
         // Register device
-        //create_symm_key_enrollment_device(g_prov_conn_string, g_enable_tracing);
+        create_symm_key_enrollment_device(g_prov_conn_string, g_enable_tracing);
     }
 
     TEST_SUITE_CLEANUP(TestClassCleanup)
@@ -68,31 +68,31 @@ BEGIN_TEST_SUITE(prov_symm_key_client_e2e)
 #if USE_HTTP
     TEST_FUNCTION(dps_register_symm_key_device_http_success)
     {
-        send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_HTTP_Protocol);
+        send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_HTTP_Protocol, g_enable_tracing);
     }
 #endif
 
 #if USE_AMQP
     TEST_FUNCTION(dps_register_symm_key_device_amqp_success)
     {
-        send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_AMQP_Protocol);
+        send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_AMQP_Protocol, g_enable_tracing);
     }
 
     TEST_FUNCTION(dps_register_symm_key_device_amqp_ws_success)
     {
-        send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_AMQP_WS_Protocol);
+        send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_AMQP_WS_Protocol, g_enable_tracing);
     }
 #endif
 
 #if USE_MQTT
     TEST_FUNCTION(dps_register_symm_key_device_mqtt_success)
     {
-        send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_MQTT_Protocol);
+        send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_MQTT_Protocol, g_enable_tracing);
     }
 
     TEST_FUNCTION(dps_register_symm_key_device_mqtt_ws_success)
     {
-        send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_MQTT_WS_Protocol);
+        send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_MQTT_WS_Protocol, g_enable_tracing);
     }
 #endif
 END_TEST_SUITE(prov_symm_key_client_e2e)

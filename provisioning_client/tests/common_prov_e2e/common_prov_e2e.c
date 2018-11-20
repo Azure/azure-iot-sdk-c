@@ -161,6 +161,23 @@ void create_tpm_enrollment_device(const char* prov_conn_string, bool use_tracing
     prov_sc_destroy(prov_sc_handle);
 }
 
+void create_symm_key_enrollment_device(const char* prov_conn_string, bool use_tracing)
+{
+    //INDIVIDUAL_ENROLLMENT_HANDLE indiv_enrollment = NULL;
+
+    PROVISIONING_SERVICE_CLIENT_HANDLE prov_sc_handle = prov_sc_create_from_connection_string(prov_conn_string);
+    ASSERT_IS_NOT_NULL(prov_sc_handle, "Failure creating provisioning service client");
+
+    if (use_tracing)
+    {
+        prov_sc_set_trace(prov_sc_handle, TRACING_STATUS_ON);
+    }
+
+    // Update enrollment
+
+    prov_sc_destroy(prov_sc_handle);
+}
+
 void create_x509_enrollment_device(const char* prov_conn_string, bool use_tracing)
 {
     INDIVIDUAL_ENROLLMENT_HANDLE indiv_enrollment = NULL;
@@ -218,7 +235,7 @@ void remove_enrollment_device(const char* prov_conn_string)
     prov_sc_destroy(prov_sc_handle);
 }
 
-void send_dps_test_registration(const char* global_uri, const char* scope_id, PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION protocol)
+void send_dps_test_registration(const char* global_uri, const char* scope_id, PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION protocol, bool use_tracing)
 {
     PROV_CLIENT_E2E_INFO prov_info;
     memset(&prov_info, 0, sizeof(PROV_CLIENT_E2E_INFO));
@@ -227,6 +244,8 @@ void send_dps_test_registration(const char* global_uri, const char* scope_id, PR
     PROV_DEVICE_LL_HANDLE handle;
     handle = Prov_Device_LL_Create(global_uri, scope_id, protocol);
     ASSERT_IS_NOT_NULL(handle, "Failure create a DPS HANDLE");
+
+    Prov_Device_LL_SetOption(handle, PROV_OPTION_LOG_TRACE, &use_tracing);
 
     // act
     PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &prov_info, dps_registation_status, &prov_info);
