@@ -28,36 +28,6 @@ static const char* g_dps_uri = NULL;
 static const char* g_desired_iothub = NULL;
 static bool g_enable_tracing = true;
 
-TEST_DEFINE_ENUM_TYPE(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
-
-static void iothub_prov_register_device(PROV_DEVICE_RESULT register_result, const char* iothub_uri, const char* device_id, void* user_context)
-{
-    if (user_context == NULL)
-    {
-        ASSERT_FAIL("User Context is NULL iothub_prov_register_device");
-    }
-    else
-    {
-        PROV_CLIENT_E2E_INFO* prov_info = (PROV_CLIENT_E2E_INFO*)user_context;
-        if (register_result == PROV_DEVICE_RESULT_OK)
-        {
-            (void)mallocAndStrcpy_s(&prov_info->iothub_uri, iothub_uri);
-            (void)mallocAndStrcpy_s(&prov_info->device_id, device_id);
-            prov_info->reg_result = REG_RESULT_COMPLETE;
-        }
-        else
-        {
-            prov_info->reg_result = REG_RESULT_FAILED;
-        }
-    }
-}
-
-static void dps_registation_status(PROV_DEVICE_REG_STATUS reg_status, void* user_context)
-{
-    (void)reg_status;
-    ASSERT_IS_NOT_NULL(user_context, "user_context is NULL");
-}
-
 BEGIN_TEST_SUITE(prov_tpm_client_e2e)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
@@ -69,7 +39,7 @@ BEGIN_TEST_SUITE(prov_tpm_client_e2e)
         ASSERT_IS_NOT_NULL(g_prov_conn_string, "PROV_CONNECTION_STRING is NULL");
 
         g_dps_uri = getenv(DPS_GLOBAL_ENDPOINT);
-        ASSERT_IS_NOT_NULL(g_prov_conn_string, "DPS_GLOBAL_ENDPOINT is NULL");
+        ASSERT_IS_NOT_NULL(g_dps_uri, "DPS_GLOBAL_ENDPOINT is NULL");
 
         g_dps_scope_id = getenv(DPS_ID_SCOPE);
         ASSERT_IS_NOT_NULL(g_dps_scope_id, "DPS_ID_SCOPE is NULL");
@@ -96,81 +66,21 @@ BEGIN_TEST_SUITE(prov_tpm_client_e2e)
     }
 
 #if USE_HTTP
-    TEST_FUNCTION(dps_register_device_http_success)
+    TEST_FUNCTION(dps_register_tpm_device_http_success)
     {
-        PROV_CLIENT_E2E_INFO prov_info;
-        memset(&prov_info, 0, sizeof(PROV_CLIENT_E2E_INFO));
-
-        // arrange
-        PROV_DEVICE_LL_HANDLE handle;
-        handle = Prov_Device_LL_Create(g_dps_uri, g_dps_scope_id, Prov_Device_HTTP_Protocol);
-        ASSERT_IS_NOT_NULL(handle, "Failure create a DPS HANDLE");
-
-        // act
-        PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &prov_info, dps_registation_status, &prov_info);
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
-
-        wait_for_dps_result(handle, &prov_info);
-
-        // Assert
-        ASSERT_ARE_EQUAL(int, REG_RESULT_COMPLETE, prov_info.reg_result, "Failure calling registering device x509 http");
-
-        free(prov_info.iothub_uri);
-        free(prov_info.device_id);
-
-        Prov_Device_LL_Destroy(handle);
+        send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_HTTP_Protocol);
     }
 #endif
 
 #if USE_AMQP
-    TEST_FUNCTION(dps_register_device_amqp_success)
+    TEST_FUNCTION(dps_register_tpm_device_amqp_success)
     {
-        PROV_CLIENT_E2E_INFO prov_info;
-        memset(&prov_info, 0, sizeof(PROV_CLIENT_E2E_INFO));
-
-        // arrange
-        PROV_DEVICE_LL_HANDLE handle;
-        handle = Prov_Device_LL_Create(g_dps_uri, g_dps_scope_id, Prov_Device_HTTP_Protocol);
-        ASSERT_IS_NOT_NULL(handle, "Failure create a DPS HANDLE");
-
-        // act
-        PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &prov_info, dps_registation_status, &prov_info);
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
-
-        wait_for_dps_result(handle, &prov_info);
-
-        // Assert
-        ASSERT_ARE_EQUAL(int, REG_RESULT_COMPLETE, prov_info.reg_result, "Failure calling registering device x509 amqp");
-
-        free(prov_info.iothub_uri);
-        free(prov_info.device_id);
-
-        Prov_Device_LL_Destroy(handle);
+        send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_AMQP_Protocol);
     }
 
-    TEST_FUNCTION(dps_register_device_amqp_ws_success)
+    TEST_FUNCTION(dps_register_tpm_device_amqp_ws_success)
     {
-        PROV_CLIENT_E2E_INFO prov_info;
-        memset(&prov_info, 0, sizeof(PROV_CLIENT_E2E_INFO));
-
-        // arrange
-        PROV_DEVICE_LL_HANDLE handle;
-        handle = Prov_Device_LL_Create(g_dps_uri, g_dps_scope_id, Prov_Device_HTTP_Protocol);
-        ASSERT_IS_NOT_NULL(handle, "Failure create a DPS HANDLE");
-
-        // act
-        PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &prov_info, dps_registation_status, &prov_info);
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
-
-        wait_for_dps_result(handle, &prov_info);
-
-        // Assert
-        ASSERT_ARE_EQUAL(int, REG_RESULT_COMPLETE, prov_info.reg_result, "Failure calling registering device tpm amqp ws");
-
-        free(prov_info.iothub_uri);
-        free(prov_info.device_id);
-
-        Prov_Device_LL_Destroy(handle);
+        send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_AMQP_WS_Protocol);
     }
 #endif
 END_TEST_SUITE(prov_tpm_client_e2e)

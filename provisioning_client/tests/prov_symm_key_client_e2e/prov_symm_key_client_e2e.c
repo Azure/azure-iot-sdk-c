@@ -28,15 +28,15 @@ static const char* g_dps_uri = NULL;
 static const char* g_desired_iothub = NULL;
 static bool g_enable_tracing = true;
 
-BEGIN_TEST_SUITE(prov_x509_client_e2e)
+BEGIN_TEST_SUITE(prov_symm_key_client_e2e)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
         platform_init();
-        prov_dev_security_init(SECURE_DEVICE_TYPE_X509);
+        prov_dev_security_init(SECURE_DEVICE_TYPE_SYMMETRIC_KEY);
 
         g_prov_conn_string = getenv(DPS_CONNECTION_STRING);
-        ASSERT_IS_NOT_NULL(g_prov_conn_string, "DPS_CONNECTION_STRING is NULL");
+        ASSERT_IS_NOT_NULL(g_prov_conn_string, "PROV_CONNECTION_STRING is NULL");
 
         g_dps_uri = getenv(DPS_GLOBAL_ENDPOINT);
         ASSERT_IS_NOT_NULL(g_dps_uri, "DPS_GLOBAL_ENDPOINT is NULL");
@@ -45,7 +45,7 @@ BEGIN_TEST_SUITE(prov_x509_client_e2e)
         ASSERT_IS_NOT_NULL(g_dps_scope_id, "DPS_ID_SCOPE is NULL");
 
         // Register device
-        create_x509_enrollment_device(g_prov_conn_string, g_enable_tracing);
+        //create_symm_key_enrollment_device(g_prov_conn_string, g_enable_tracing);
     }
 
     TEST_SUITE_CLEANUP(TestClassCleanup)
@@ -66,33 +66,33 @@ BEGIN_TEST_SUITE(prov_x509_client_e2e)
     }
 
 #if USE_HTTP
-    TEST_FUNCTION(dps_register_x509_device_http_success)
+    TEST_FUNCTION(dps_register_symm_key_device_http_success)
     {
         send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_HTTP_Protocol);
     }
 #endif
 
 #if USE_AMQP
-    TEST_FUNCTION(dps_register_x509_device_amqp_success)
+    TEST_FUNCTION(dps_register_symm_key_device_amqp_success)
     {
         send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_AMQP_Protocol);
     }
 
-    TEST_FUNCTION(dps_register_x509_device_amqp_ws_success)
+    TEST_FUNCTION(dps_register_symm_key_device_amqp_ws_success)
     {
         send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_AMQP_WS_Protocol);
     }
 #endif
 
 #if USE_MQTT
-    TEST_FUNCTION(dps_register_x509_device_mqtt_success)
+    TEST_FUNCTION(dps_register_symm_key_device_mqtt_success)
     {
         send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_MQTT_Protocol);
     }
 
-    TEST_FUNCTION(dps_register_x509_device_mqtt_ws_success)
+    TEST_FUNCTION(dps_register_symm_key_device_mqtt_ws_success)
     {
         send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_MQTT_WS_Protocol);
     }
 #endif
-END_TEST_SUITE(prov_x509_client_e2e)
+END_TEST_SUITE(prov_symm_key_client_e2e)

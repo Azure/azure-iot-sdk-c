@@ -39,6 +39,8 @@ extern void remove_enrollment_device(const char* prov_conn_string);
 extern void wait_for_dps_result(PROV_DEVICE_LL_HANDLE handle, PROV_CLIENT_E2E_INFO* prov_info);
 extern int construct_device_id(const char* prefix, char** device_name);
 
+extern void send_dps_test_registration(const char* global_uri, const char* scope_id, PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION protocol);
+
 #ifdef __cplusplus
 }
 #endif

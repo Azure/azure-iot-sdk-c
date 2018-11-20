@@ -87,7 +87,6 @@ if (NOT ${use_amqp} AND NOT ${use_http} AND NOT ${use_mqtt})
     message(FATAL_ERROR "CMAKE Failure: AMQP, HTTP & MQTT are all disable, iothub client must have one protocol enabled")
 endif()
 
-message(STATUS "Provisioning client ${use_prov_client}")
 if (XCODE AND ${use_prov_client})
     # The TPM module is not available on Mac, and Mac's <string.h> and <unistd.h> files collide as well
     message(FATAL_ERROR "Provisioning client is not supported on Mac")
