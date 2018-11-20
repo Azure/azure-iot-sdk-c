@@ -50,7 +50,7 @@ if (LINUX)
     #add_e2etest_directory(prov_symm_key_client_e2e)
     #add_e2etest_directory(prov_tpm_client_e2e)
     add_e2etest_directory(prov_x509_client_e2e)
-#endif ()
+endif ()
 
 add_unittest_directory(iothub_auth_client_ut)
 #add_e2etest_directory(prov_invalidcert_e2e)
