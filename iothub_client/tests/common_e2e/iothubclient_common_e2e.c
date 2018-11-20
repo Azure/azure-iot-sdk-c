@@ -1011,7 +1011,12 @@ void e2e_d2c_with_svc_fault_ctrl(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, cons
     LogInfo("FaultInject message handle is %p", d2cMessageFaultInjection);
 
     LogInfo("Sleeping after sending fault injection...");
-    ThreadAPI_Sleep(3000);
+    ThreadAPI_Sleep(5000);
+
+    // Wait for the server fault message to be timed out
+    LogInfo("Waiting for server fault message to timeout");
+    dataWasRecv = client_wait_for_d2c_confirmation(d2cMessageFaultInjection, IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT);
+    ASSERT_IS_TRUE(dataWasRecv, "Failure recieving server fault message timeout"); // was received by the callback...
 
     // Send the Event from the client
     LogInfo("Send message after the server fault and then sleeping...");

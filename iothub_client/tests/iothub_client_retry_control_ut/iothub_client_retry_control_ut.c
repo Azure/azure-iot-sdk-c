@@ -550,7 +550,7 @@ TEST_FUNCTION(Retrieve_Options_failure_checks)
         // act
         OPTIONHANDLER_HANDLE result = retry_control_retrieve_options(handle);
 
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
         ASSERT_IS_NULL(result, error_msg);
     }
 
@@ -699,7 +699,7 @@ TEST_FUNCTION(Set_Options_failure_checks)
         int result = retry_control_set_option(handle, RETRY_CONTROL_OPTION_SAVED_OPTIONS, TEST_OPTIONHANDLER_HANDLE);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
         ASSERT_ARE_NOT_EQUAL(int, 0, result, error_msg);
     }
 

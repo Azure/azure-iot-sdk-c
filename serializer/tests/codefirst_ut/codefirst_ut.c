@@ -3677,7 +3677,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
                 umock_c_negative_tests_reset();
                 umock_c_negative_tests_fail_call(i);
                 char temp_str[128];
-                sprintf(temp_str, "On failed call %zu", i);
+                sprintf(temp_str, "On failed call %lu", (unsigned long)i);
                 ///act
                 CODEFIRST_RESULT result = CodeFirst_SendAsyncReported(&destination, &destinationSize, 1, device);
 
@@ -3793,7 +3793,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
                 umock_c_negative_tests_reset();
                 umock_c_negative_tests_fail_call(i);
                 char temp_str[128];
-                sprintf(temp_str, "On failed call %zu", i);
+                sprintf(temp_str, "On failed call %lu", (unsigned long)i);
 
                 ///act
                 CODEFIRST_RESULT result = CodeFirst_SendAsyncReported(&destination, &destinationSize, 1, &(device->new_reported_this_is_double));

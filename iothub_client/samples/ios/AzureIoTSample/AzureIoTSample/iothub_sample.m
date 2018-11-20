@@ -1,28 +1,17 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-// CAVEAT: This sample is to demonstrate azure IoT client concepts only and is not a guide design principles or style
-// Checking of return codes and error values shall be omitted for brevity.  Please practice sound engineering practices
-// when writing production code.
+#import <stdarg.h>
+#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "iothub.h"
-#include "iothub_device_client_ll.h"
-#include "iothub_client_options.h"
-#include "iothub_message.h"
-#include "azure_c_shared_utility/threadapi.h"
-#include "azure_c_shared_utility/crt_abstractions.h"
-#include "azure_c_shared_utility/shared_util_options.h"
-
-#ifdef SET_TRUSTED_CERT_IN_SAMPLES
-#include "certs.h"
-#endif // SET_TRUSTED_CERT_IN_SAMPLES
-
-/* This sample uses the _LL APIs of iothub_client for example purposes.
-Simply changing the using the convenience layer (functions not having _LL)
-and removing calls to _DoWork will yield the same results. */
+#import <iothub.h>
+#import <iothub_device_client_ll.h>
+#import <iothub_client_options.h>
+#import <iothub_message.h>
+#import <azure_c_shared_utility/threadapi.h>
+#import <azure_c_shared_utility/crt_abstractions.h>
+#import <azure_c_shared_utility/shared_util_options.h>
 
 // The protocol you wish to use should be uncommented
 //
@@ -48,11 +37,6 @@ and removing calls to _DoWork will yield the same results. */
     #include "iothubtransporthttp.h"
 #endif // SAMPLE_HTTP
 
-#ifdef SET_TRUSTED_CERT_IN_SAMPLES
-#include "certs.h"
-#endif // SET_TRUSTED_CERT_IN_SAMPLES
-
-/* Paste in the your iothub connection string  */
 static const char* connectionString = "[device connection string]";
 #define MESSAGE_COUNT        5
 static bool g_continueRunning = true;
@@ -63,7 +47,7 @@ static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void
     (void)userContextCallback;
     // When a message is sent this callback will get envoked
     g_message_count_send_confirmations++;
-    (void)printf("Confirmation callback received for message %lu with result %s\r\n", (unsigned long)g_message_count_send_confirmations, ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
+    (void)printf("Confirmation callback received for message %zu with result %s\r\n", g_message_count_send_confirmations, ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
 }
 
 static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS result, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason, void* user_context)
@@ -81,7 +65,7 @@ static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS result, I
     }
 }
 
-int main(void)
+int run_iothub_sample(void)
 {
     IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;
     IOTHUB_MESSAGE_HANDLE message_handle;
@@ -121,9 +105,6 @@ int main(void)
     {
         // Set any option that are neccessary.
         // For available options please see the iothub_sdk_options.md documentation
-
-        bool traceOn = true;
-        IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_LOG_TRACE, &traceOn);
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
         // Setting the Trusted Certificate.  This is only necessary on system with without
@@ -183,9 +164,6 @@ int main(void)
     }
     // Free all the sdk subsystem
     IoTHub_Deinit();
-
-    printf("Press any key to continue");
-    getchar();
 
     return 0;
 }
