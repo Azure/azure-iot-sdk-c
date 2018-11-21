@@ -304,7 +304,7 @@ static const TRANSPORT_PROVIDER* provideFAKE(void);
 #define TEST_STRING_HANDLE_DEVICE_SAS ((STRING_HANDLE)0x2)
 
 #define TEST_API_VERSION "?api-version=2016-11-14"
-#define TEST_IOTHUB_SDK_VERSION "1.2.10"
+#define TEST_IOTHUB_SDK_VERSION "1.2.11"
 
 static const char* const testUploadtrustedCertificates = "some certificates";
 
