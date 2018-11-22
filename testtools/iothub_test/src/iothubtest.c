@@ -514,34 +514,49 @@ static char* CreateReceiveAddress(IOTHUB_VALIDATION_INFO* devhubValInfo, size_t 
 static char* CreateReceiveHostName(IOTHUB_VALIDATION_INFO* devhubValInfo)
 {
     char* result;
-    size_t partner_host_len = strlen(devhubValInfo->partnerName) + strlen(devhubValInfo->partnerHost) + 2;
-    result = (char*)malloc(partner_host_len + 1);
-    if (result != NULL)
+    if (NULL == devhubValInfo)
     {
-        sprintf_s(result, partner_host_len + 1, "%s.%s", devhubValInfo->partnerName, devhubValInfo->partnerHost);
+        LogError("Invalid input parameter");
+        result = NULL;
     }
     else
     {
-        LogError("Failure allocating data in CreateReceiveHostName.");
-        result = NULL;
+        size_t partner_host_len = strlen(devhubValInfo->partnerName) + strlen(devhubValInfo->partnerHost) + 2;
+        result = (char*)malloc(partner_host_len + 1);
+        if (result != NULL)
+        {
+            sprintf_s(result, partner_host_len + 1, "%s.%s", devhubValInfo->partnerName, devhubValInfo->partnerHost);
+        }
+        else
+        {
+            LogError("Failure allocating data in CreateReceiveHostName.");
+            result = NULL;
+        }
     }
-
     return result;
 }
 
 static char* CreateSendTargetAddress(IOTHUB_VALIDATION_INFO* devhubValInfo)
 {
     char* result;
-    size_t addressLen = strlen(AMQP_SEND_TARGET_ADDRESS_FMT)+strlen(devhubValInfo->hostName);
-    result = (char*)malloc(addressLen+1);
-    if (result != NULL)
+    if (NULL == devhubValInfo)
     {
-        sprintf_s(result, addressLen+1, AMQP_SEND_TARGET_ADDRESS_FMT, devhubValInfo->hostName);
+        LogError("Invalid input passed");
+        result = NULL;
     }
     else
     {
-        LogError("Failure allocating data in CreateSendTargetAddress.");
-    }
+        size_t addressLen = strlen(AMQP_SEND_TARGET_ADDRESS_FMT)+strlen(devhubValInfo->hostName);
+        result = (char*)malloc(addressLen+1);
+        if (result != NULL)
+        {
+            sprintf_s(result, addressLen+1, AMQP_SEND_TARGET_ADDRESS_FMT, devhubValInfo->hostName);
+        }
+        else
+        {
+            LogError("Failure allocating data in CreateSendTargetAddress.");
+        }
+    }    
     return result;
 }
 

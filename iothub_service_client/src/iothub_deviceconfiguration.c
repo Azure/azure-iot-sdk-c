@@ -347,10 +347,9 @@ static JSON_Value* createConfigurationContentPayload(const IOTHUB_DEVICE_CONFIGU
         LogError("both deviceContent and modulesContent cannot be NULL or empty");
         result = NULL;
     }
-    if ((result = json_value_init_object()) == NULL)
+    else if ((result = json_value_init_object()) == NULL)
     {
         LogError("json_value_init_object failed");
-        result = NULL;
     }
     else if ((root_object = json_value_get_object(result)) == NULL)
     {
@@ -713,27 +712,30 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT parseDeviceConfigurationMetricsJsonObj
                 LogError("Malloc failed for IOTHUB_DEVICE_CONFIGURATION_METRICS_DEFINITION queryStrings");
                 result = IOTHUB_DEVICE_CONFIGURATION_OUT_OF_MEMORY_ERROR;
             }
-            for (size_t i = 0; i < metricQueriesCount; i++)
+            else
             {
-                if ((tempMetricQueryName = json_object_get_name(metricQueries, i)) == NULL)
+                for (size_t i = 0; i < metricQueriesCount; i++)
                 {
-                    LogError("STRING_construct failed for tempMetricQueryName");
-                    result = IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR;
-                }
-                else if (mallocAndStrcpy_s((char**)&(queries->queryNames[i]), tempMetricQueryName) != 0)
-                {
-                    LogError("mallocAndStrcpy_s failed for queries tempMetricQueryName");
-                    result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
-                }
-                else if ((tempMetricQueryString = json_value_get_string(json_object_get_value_at(metricQueries, i))) == NULL)
-                {
-                    LogError("STRING_construct failed for tempMetricQueryString");
-                    result = IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR;
-                }
-                else if (mallocAndStrcpy_s((char**)&(queries->queryStrings[i]), tempMetricQueryString) != 0)
-                {
-                    LogError("mallocAndStrcpy_s failed for tempMetricQueryString");
-                    result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
+                    if ((tempMetricQueryName = json_object_get_name(metricQueries, i)) == NULL)
+                    {
+                        LogError("STRING_construct failed for tempMetricQueryName");
+                        result = IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR;
+                    }
+                    else if (mallocAndStrcpy_s((char**)&(queries->queryNames[i]), tempMetricQueryName) != 0)
+                    {
+                        LogError("mallocAndStrcpy_s failed for queries tempMetricQueryName");
+                        result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
+                    }
+                    else if ((tempMetricQueryString = json_value_get_string(json_object_get_value_at(metricQueries, i))) == NULL)
+                    {
+                        LogError("STRING_construct failed for tempMetricQueryString");
+                        result = IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR;
+                    }
+                    else if (mallocAndStrcpy_s((char**)&(queries->queryStrings[i]), tempMetricQueryString) != 0)
+                    {
+                        LogError("mallocAndStrcpy_s failed for tempMetricQueryString");
+                        result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
+                    }
                 }
             }
         }
@@ -1087,17 +1089,20 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT cloneNameValueArrays_labels(IOTHUB_DEV
             LogError("Malloc failed for IOTHUB_DEVICE_CONFIGURATION_METRICS_DEFINITION labelValues");
             result = IOTHUB_DEVICE_CONFIGURATION_OUT_OF_MEMORY_ERROR;
         }
-        for (size_t i = 0; i < target->numLabels; i++)
+        else
         {
-            if (mallocAndStrcpy_s((char**)&(target->labelNames[i]), source->labelNames[i]) != 0)
+            for (size_t i = 0; i < target->numLabels; i++)
             {
-                LogError("mallocAndStrcpy_s failed for IOTHUB_DEVICE_CONFIGURATION_METRICS_DEFINITION labelNames");
-                result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
-            }
-            else if (mallocAndStrcpy_s((char**)&(target->labelValues[i]), source->labelValues[i]) != 0)
-            {
-                LogError("mallocAndStrcpy_s failed for IOTHUB_DEVICE_CONFIGURATION_METRICS_DEFINITION labelValues");
-                result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
+                if (mallocAndStrcpy_s((char**)&(target->labelNames[i]), source->labelNames[i]) != 0)
+                {
+                    LogError("mallocAndStrcpy_s failed for IOTHUB_DEVICE_CONFIGURATION_METRICS_DEFINITION labelNames");
+                    result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
+                }
+                else if (mallocAndStrcpy_s((char**)&(target->labelValues[i]), source->labelValues[i]) != 0)
+                {
+                    LogError("mallocAndStrcpy_s failed for IOTHUB_DEVICE_CONFIGURATION_METRICS_DEFINITION labelValues");
+                    result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
+                }
             }
         }
     }
@@ -1122,17 +1127,20 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT cloneNameValueArrays_definitions(IOTHU
             LogError("Malloc failed for IOTHUB_DEVICE_CONFIGURATION_METRICS_DEFINITION queryStrings");
             result = IOTHUB_DEVICE_CONFIGURATION_OUT_OF_MEMORY_ERROR;
         }
-        for (size_t i = 0; i < target->numQueries; i++)
+        else
         {
-            if (mallocAndStrcpy_s((char**)&(target->queryNames[i]), source->queryNames[i]) != 0)
+            for (size_t i = 0; i < target->numQueries; i++)
             {
-                LogError("mallocAndStrcpy_s failed for IOTHUB_DEVICE_CONFIGURATION_METRICS_DEFINITION queryNames");
-                result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
-            }
-            else if (mallocAndStrcpy_s((char**)&(target->queryStrings[i]), source->queryStrings[i]) != 0)
-            {
-                LogError("mallocAndStrcpy_s failed for IOTHUB_DEVICE_CONFIGURATION_METRICS_DEFINITION queryStrings");
-                result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
+                if (mallocAndStrcpy_s((char**)&(target->queryNames[i]), source->queryNames[i]) != 0)
+                {
+                    LogError("mallocAndStrcpy_s failed for IOTHUB_DEVICE_CONFIGURATION_METRICS_DEFINITION queryNames");
+                    result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
+                }
+                else if (mallocAndStrcpy_s((char**)&(target->queryStrings[i]), source->queryStrings[i]) != 0)
+                {
+                    LogError("mallocAndStrcpy_s failed for IOTHUB_DEVICE_CONFIGURATION_METRICS_DEFINITION queryStrings");
+                    result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
+                }
             }
         }
     }

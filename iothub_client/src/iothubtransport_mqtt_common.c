@@ -3220,7 +3220,7 @@ IOTHUB_DEVICE_HANDLE IoTHubTransport_MQTT_Common_Register(TRANSPORT_LL_HANDLE ha
                 result = NULL;
             }
             else if (IoTHubClient_Auth_Get_Credential_Type(transport_data->authorization_module) == IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY &&
-                (strcmp(IoTHubClient_Auth_Get_DeviceKey(transport_data->authorization_module), device->deviceKey) != 0))
+                (device->deviceKey != NULL) && (strcmp(IoTHubClient_Auth_Get_DeviceKey(transport_data->authorization_module), device->deviceKey) != 0))
             {
                 LogError("IoTHubTransport_MQTT_Common_Register: deviceKey does not match.");
                 result = NULL;
