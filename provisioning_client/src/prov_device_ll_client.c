@@ -62,7 +62,6 @@ typedef enum CLIENT_STATE_TAG
     CLIENT_STATE_STATUS_SENT,
     CLIENT_STATE_STATUS_RECV,
 
-    CLIENT_REGISTRATION_COMPLETE,
     CLIENT_STATE_ERROR
 } CLIENT_STATE;
 
@@ -83,6 +82,7 @@ typedef struct PROV_INSTANCE_INFO_TAG
 
     const PROV_DEVICE_TRANSPORT_PROVIDER* prov_transport_protocol;
     PROV_DEVICE_TRANSPORT_HANDLE transport_handle;
+    bool transport_open;
 
     TICK_COUNTER_HANDLE tick_counter;
 
@@ -494,6 +494,27 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
     return result;
 }
 
+static void cleanup_prov_info(PROV_INSTANCE_INFO* prov_info)
+{
+    if (prov_info->transport_open)
+    {
+        prov_info->prov_transport_protocol->prov_transport_close(prov_info->transport_handle);
+        prov_info->transport_open = false;
+    }
+    if (!prov_info->user_supplied_reg_id)
+    {
+        free(prov_info->registration_id);
+        prov_info->registration_id = NULL;
+    }
+    free(prov_info->iothub_info.device_id);
+    prov_info->iothub_info.device_id = NULL;
+    free(prov_info->iothub_info.iothub_key);
+    prov_info->iothub_info.iothub_key = NULL;
+    free(prov_info->iothub_info.iothub_url);
+    prov_info->iothub_info.iothub_url = NULL;
+    prov_info->auth_attempts_made = 0;
+}
+
 static void on_transport_registration_data(PROV_DEVICE_TRANSPORT_RESULT transport_result, BUFFER_HANDLE iothub_key, const char* assigned_hub, const char* device_id, void* user_ctx)
 {
     if (user_ctx == NULL)
@@ -534,7 +555,8 @@ static void on_transport_registration_data(PROV_DEVICE_TRANSPORT_RESULT transpor
             if (prov_info->prov_state != CLIENT_STATE_ERROR)
             {
                 prov_info->register_callback(PROV_DEVICE_RESULT_OK, assigned_hub, device_id, prov_info->user_context);
-                prov_info->prov_state = CLIENT_REGISTRATION_COMPLETE;
+                prov_info->prov_state = CLIENT_STATE_READY;
+                cleanup_prov_info(prov_info);
             }
         }
         else if (transport_result == PROV_DEVICE_TRANSPORT_RESULT_UNAUTHORIZED)
@@ -614,27 +636,11 @@ static void on_transport_status(PROV_DEVICE_TRANSPORT_STATUS transport_status, v
     }
 }
 
-static void cleanup_prov_info(PROV_INSTANCE_INFO* prov_info)
-{
-    prov_info->prov_transport_protocol->prov_transport_close(prov_info->transport_handle);
-    prov_info->transport_handle = NULL;
-    if (!prov_info->user_supplied_reg_id)
-    {
-        free(prov_info->registration_id);
-        prov_info->registration_id = NULL;
-    }
-    free(prov_info->iothub_info.device_id);
-    prov_info->iothub_info.device_id = NULL;
-    free(prov_info->iothub_info.iothub_key);
-    prov_info->iothub_info.iothub_key = NULL;
-    free(prov_info->iothub_info.iothub_url);
-    prov_info->iothub_info.iothub_url = NULL;
-    prov_info->auth_attempts_made = 0;
-}
-
 static void destroy_instance(PROV_INSTANCE_INFO* prov_info)
 {
+    cleanup_prov_info(prov_info);
     prov_info->prov_transport_protocol->prov_transport_destroy(prov_info->transport_handle);
+    prov_info->transport_handle = NULL;
     free(prov_info->scope_id);
     prov_auth_destroy(prov_info->prov_auth_handle);
     tickcounter_destroy(prov_info->tick_counter);
@@ -869,6 +875,7 @@ PROV_DEVICE_RESULT Prov_Device_LL_Register_Device(PROV_DEVICE_LL_HANDLE handle, 
             }
             else
             {
+                handle->transport_open = true;
                 handle->prov_state = CLIENT_STATE_REGISTER_SEND;
                 /* Codes_SRS_PROV_CLIENT_07_009: [ Upon success Prov_Device_LL_Register_Device shall return PROV_CLIENT_OK. ] */
                 result = PROV_DEVICE_RESULT_OK;
@@ -887,8 +894,10 @@ void Prov_Device_LL_DoWork(PROV_DEVICE_LL_HANDLE handle)
     {
         PROV_INSTANCE_INFO* prov_info = (PROV_INSTANCE_INFO*)handle;
         /* Codes_SRS_PROV_CLIENT_07_011: [ Prov_Device_LL_DoWork shall call the underlying http_client_dowork function ] */
-        prov_info->prov_transport_protocol->prov_transport_dowork(prov_info->transport_handle);
-
+        if (prov_info->prov_state != CLIENT_STATE_ERROR)
+        {
+            prov_info->prov_transport_protocol->prov_transport_dowork(prov_info->transport_handle);
+        }
         if (prov_info->is_connected || prov_info->prov_state == CLIENT_STATE_ERROR)
         {
             switch (prov_info->prov_state)
@@ -964,20 +973,14 @@ void Prov_Device_LL_DoWork(PROV_DEVICE_LL_HANDLE handle)
                     break;
                 }
 
-                case CLIENT_REGISTRATION_COMPLETE:
-                    // Clean all registration information
-                    cleanup_prov_info(prov_info);
-                    prov_info->prov_state = CLIENT_STATE_READY;
-                    break;
-
                 case CLIENT_STATE_READY:
                     break;
 
                 case CLIENT_STATE_ERROR:
                 default:
                     prov_info->register_callback(prov_info->error_reason, NULL, NULL, prov_info->user_context);
+                    prov_info->prov_state = CLIENT_STATE_READY;
                     cleanup_prov_info(prov_info);
-                    prov_info->prov_state = CLIENT_REGISTRATION_COMPLETE;
                     break;
             }
         }
