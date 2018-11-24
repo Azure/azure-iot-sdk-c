@@ -26,7 +26,7 @@ static const char* g_prov_conn_string = NULL;
 static const char* g_dps_scope_id = NULL;
 static const char* g_dps_uri = NULL;
 static const char* g_desired_iothub = NULL;
-static bool g_enable_tracing = true;
+static bool g_enable_tracing = false;
 
 BEGIN_TEST_SUITE(prov_x509_client_e2e)
 
