@@ -26,7 +26,7 @@ static const char* g_prov_conn_string = NULL;
 static const char* g_dps_scope_id = NULL;
 static const char* g_dps_uri = NULL;
 static const char* g_desired_iothub = NULL;
-static bool g_enable_tracing = false;
+static bool g_enable_tracing = true;
 
 BEGIN_TEST_SUITE(prov_x509_client_e2e)
 
@@ -78,10 +78,10 @@ BEGIN_TEST_SUITE(prov_x509_client_e2e)
         send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_AMQP_Protocol, g_enable_tracing);
     }
 
-    TEST_FUNCTION(dps_register_x509_device_amqp_ws_success)
+    /*TEST_FUNCTION(dps_register_x509_device_amqp_ws_success)
     {
         send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_AMQP_WS_Protocol, g_enable_tracing);
-    }
+    }*/
 #endif
 
 #if USE_MQTT
@@ -90,9 +90,9 @@ BEGIN_TEST_SUITE(prov_x509_client_e2e)
         send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_MQTT_Protocol, g_enable_tracing);
     }
 
-    TEST_FUNCTION(dps_register_x509_device_mqtt_ws_success)
+    /*TEST_FUNCTION(dps_register_x509_device_mqtt_ws_success)
     {
         send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_MQTT_WS_Protocol, g_enable_tracing);
-    }
+    }*/
 #endif
 END_TEST_SUITE(prov_x509_client_e2e)
