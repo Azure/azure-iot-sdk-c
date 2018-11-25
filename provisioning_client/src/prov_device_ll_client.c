@@ -501,11 +501,8 @@ static void cleanup_prov_info(PROV_INSTANCE_INFO* prov_info)
         prov_info->prov_transport_protocol->prov_transport_close(prov_info->transport_handle);
         prov_info->transport_open = false;
     }
-    if (prov_info->user_supplied_reg_id)
-    {
-        free(prov_info->registration_id);
-        prov_info->registration_id = NULL;
-    }
+    free(prov_info->registration_id);
+    prov_info->registration_id = NULL;
     free(prov_info->iothub_info.device_id);
     prov_info->iothub_info.device_id = NULL;
     free(prov_info->iothub_info.iothub_key);

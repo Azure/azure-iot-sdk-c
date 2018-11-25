@@ -585,6 +585,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     }
 
     static void setup_destroy_prov_info_mocks(void)
@@ -1347,9 +1348,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         STRICT_EXPECTED_CALL(prov_transport_get_operation_status(IGNORED_PTR_ARG)).SetReturn(__LINE__);
         STRICT_EXPECTED_CALL(on_prov_register_device_callback(PROV_DEVICE_RESULT_TRANSPORT, NULL, NULL, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(prov_transport_close(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        setup_cleanup_prov_info_mocks();
 
         //act
         Prov_Device_LL_DoWork(handle);
