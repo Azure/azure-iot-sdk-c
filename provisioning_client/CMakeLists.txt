@@ -40,7 +40,7 @@ if (${hsm_type_custom})
 
     set(HSM_CLIENT_LIBRARY ${CUSTOM_HSM_LIB})
 else ()
-    if (${run_e2e_tests} AND ( OR ))
+    if (${run_e2e_tests})
         # For e2e test we need to run a custom HSM to handle testing
         if (${hsm_type_x509})
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHSM_TYPE_X509")
