@@ -4,7 +4,6 @@
 // CAVEAT: This sample is to demonstrate azure IoT client concepts only and is not a guide design principles or style
 // Checking of return codes and error values shall be omitted for brevity.  Please practice sound engineering practices
 // when writing production code.
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -157,10 +156,14 @@ int main()
     SECURE_DEVICE_TYPE hsm_type;
     //hsm_type = SECURE_DEVICE_TYPE_TPM;
     hsm_type = SECURE_DEVICE_TYPE_X509;
+    //hsm_type = SECURE_DEVICE_TYPE_SYMMETRIC_KEY;
+
     bool traceOn = false;
 
     (void)IoTHub_Init();
     (void)prov_dev_security_init(hsm_type);
+    // Set the symmetric key if using they auth type
+    //prov_dev_set_symmetric_key_info("<symm_registration_id>", "<symmetric_Key>");
 
     PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION prov_transport;
     HTTP_PROXY_OPTIONS http_proxy;

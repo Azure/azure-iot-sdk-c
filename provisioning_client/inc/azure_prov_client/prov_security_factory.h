@@ -28,6 +28,11 @@ MOCKABLE_FUNCTION(, int, prov_dev_security_init, SECURE_DEVICE_TYPE, hsm_type);
 MOCKABLE_FUNCTION(, void, prov_dev_security_deinit);
 MOCKABLE_FUNCTION(, SECURE_DEVICE_TYPE, prov_dev_security_get_type);
 
+// Symmetric key information
+MOCKABLE_FUNCTION(, int, prov_dev_set_symmetric_key_info, const char*, registration_name, const char*, symmetric_key);
+MOCKABLE_FUNCTION(, const char*, prov_dev_get_symmetric_key);
+MOCKABLE_FUNCTION(, const char*, prov_dev_get_symm_registration_name);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

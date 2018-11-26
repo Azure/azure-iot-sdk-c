@@ -37,6 +37,37 @@
 #define MAX_CLOUD_TRAVEL_TIME       60.0
 #define DEVICE_GUID_SIZE            37
 
+TEST_DEFINE_ENUM_TYPE(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
+
+static void iothub_prov_register_device(PROV_DEVICE_RESULT register_result, const char* iothub_uri, const char* device_id, void* user_context)
+{
+    if (user_context == NULL)
+    {
+        ASSERT_FAIL("User Context is NULL iothub_prov_register_device");
+    }
+    else
+    {
+        PROV_CLIENT_E2E_INFO* prov_info = (PROV_CLIENT_E2E_INFO*)user_context;
+        if (register_result == PROV_DEVICE_RESULT_OK)
+        {
+            (void)mallocAndStrcpy_s(&prov_info->iothub_uri, iothub_uri);
+            (void)mallocAndStrcpy_s(&prov_info->device_id, device_id);
+            prov_info->reg_result = REG_RESULT_COMPLETE;
+        }
+        else
+        {
+            prov_info->reg_result = REG_RESULT_FAILED;
+        }
+    }
+}
+
+static void dps_registation_status(PROV_DEVICE_REG_STATUS reg_status, void* user_context)
+{
+    (void)reg_status;
+    ASSERT_IS_NOT_NULL(user_context, "user_context is NULL");
+    ThreadAPI_Sleep(500);
+}
+
 void wait_for_dps_result(PROV_DEVICE_LL_HANDLE handle, PROV_CLIENT_E2E_INFO* prov_info)
 {
     time_t begin_operation;
@@ -131,6 +162,23 @@ void create_tpm_enrollment_device(const char* prov_conn_string, bool use_tracing
     prov_sc_destroy(prov_sc_handle);
 }
 
+void create_symm_key_enrollment_device(const char* prov_conn_string, bool use_tracing)
+{
+    //INDIVIDUAL_ENROLLMENT_HANDLE indiv_enrollment = NULL;
+
+    PROVISIONING_SERVICE_CLIENT_HANDLE prov_sc_handle = prov_sc_create_from_connection_string(prov_conn_string);
+    ASSERT_IS_NOT_NULL(prov_sc_handle, "Failure creating provisioning service client");
+
+    if (use_tracing)
+    {
+        prov_sc_set_trace(prov_sc_handle, TRACING_STATUS_ON);
+    }
+
+    // Update enrollment
+
+    prov_sc_destroy(prov_sc_handle);
+}
+
 void create_x509_enrollment_device(const char* prov_conn_string, bool use_tracing)
 {
     INDIVIDUAL_ENROLLMENT_HANDLE indiv_enrollment = NULL;
@@ -186,4 +234,31 @@ void remove_enrollment_device(const char* prov_conn_string)
     free(registration_id);
     prov_auth_destroy(auth_handle);
     prov_sc_destroy(prov_sc_handle);
+}
+
+void send_dps_test_registration(const char* global_uri, const char* scope_id, PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION protocol, bool use_tracing)
+{
+    PROV_CLIENT_E2E_INFO prov_info;
+    memset(&prov_info, 0, sizeof(PROV_CLIENT_E2E_INFO));
+
+    // arrange
+    PROV_DEVICE_LL_HANDLE handle;
+    handle = Prov_Device_LL_Create(global_uri, scope_id, protocol);
+    ASSERT_IS_NOT_NULL(handle, "Failure create a DPS HANDLE");
+
+    Prov_Device_LL_SetOption(handle, PROV_OPTION_LOG_TRACE, &use_tracing);
+
+    // act
+    PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &prov_info, dps_registation_status, &prov_info);
+    ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
+
+    wait_for_dps_result(handle, &prov_info);
+
+    // Assert
+    ASSERT_ARE_EQUAL(int, REG_RESULT_COMPLETE, prov_info.reg_result, "Failure calling registering device x509 http");
+
+    free(prov_info.iothub_uri);
+    free(prov_info.device_id);
+
+    Prov_Device_LL_Destroy(handle);
 }

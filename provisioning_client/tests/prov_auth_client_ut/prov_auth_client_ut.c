@@ -60,6 +60,7 @@ MOCKABLE_FUNCTION(, char*, secure_device_get_certificate, HSM_CLIENT_HANDLE, han
 MOCKABLE_FUNCTION(, char*, secure_device_get_alias_key, HSM_CLIENT_HANDLE, handle);
 MOCKABLE_FUNCTION(, char*, secure_device_get_common_name, HSM_CLIENT_HANDLE, handle);
 MOCKABLE_FUNCTION(, char*, secure_device_get_symm_key, HSM_CLIENT_HANDLE, handle);
+MOCKABLE_FUNCTION(, int, secure_device_set_symmetrical_key_info, HSM_CLIENT_HANDLE, handle, const char*, reg_name, const char*, symm_key);
 
 MOCKABLE_FUNCTION(, int, SHA256Reset, SHA256Context*, ctx);
 MOCKABLE_FUNCTION(, int, SHA256Input, SHA256Context*, ctx, const uint8_t*, bytes, unsigned int, bytecount);
@@ -165,7 +166,8 @@ static const HSM_CLIENT_KEY_INTERFACE test_key_interface =
     secure_device_create,
     secure_device_destroy,
     secure_device_get_symm_key,
-    secure_device_get_common_name
+    secure_device_get_common_name,
+    secure_device_set_symmetrical_key_info
 };
 
 static HSM_CLIENT_HANDLE my_secure_device_create(void)
@@ -356,6 +358,9 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
 
         REGISTER_GLOBAL_MOCK_HOOK(secure_device_get_symm_key, my_secure_device_get_symm_key);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(secure_device_get_symm_key, NULL);
+
+        REGISTER_GLOBAL_MOCK_RETURN(secure_device_set_symmetrical_key_info, 0);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(secure_device_set_symmetrical_key_info, __LINE__);
 
         REGISTER_GLOBAL_MOCK_RETURN(BUFFER_u_char, TEST_DATA);
         REGISTER_GLOBAL_MOCK_RETURN(BUFFER_length, TEST_DATA_LEN);
@@ -1167,6 +1172,29 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
+        prov_auth_destroy(sec_handle);
+    }
+
+    TEST_FUNCTION(prov_auth_construct_symm_key_succeed)
+    {
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_SYMMETRIC_KEY);
+        STRICT_EXPECTED_CALL(hsm_client_key_interface());
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
+        umock_c_reset_all_calls();
+
+        //arrange
+        setup_prov_auth_construct_sas_token_mocks(true);
+
+        //act
+        char* result = prov_auth_construct_sas_token(sec_handle, TEST_TOKEN_SCOPE_VALUE, TEST_KEY_NAME_VALUE, TEST_EXPIRY_TIME_T_VALUE);
+
+        //assert
+        ASSERT_IS_NOT_NULL(result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        my_gballoc_free(result);
         prov_auth_destroy(sec_handle);
     }
 
