@@ -118,6 +118,8 @@ static char* serializeToJson(Car* car)
 static Car* parseFromJson(const char* json, DEVICE_TWIN_UPDATE_STATE update_state)
 {
     Car* car = malloc(sizeof(Car));
+    JSON_Value* root_value = NULL;
+    JSON_Object* root_object = NULL;
 
     if (NULL == car)
     {
@@ -128,8 +130,8 @@ static Car* parseFromJson(const char* json, DEVICE_TWIN_UPDATE_STATE update_stat
     {
         (void)memset(car, 0, sizeof(Car));
 
-        JSON_Value* root_value = json_parse_string(json);
-        JSON_Object* root_object = json_value_get_object(root_value);
+        root_value = json_parse_string(json);
+        root_object = json_value_get_object(root_value);
 
         // Only desired properties:
         JSON_Value* changeOilReminder;
@@ -180,8 +182,8 @@ static Car* parseFromJson(const char* json, DEVICE_TWIN_UPDATE_STATE update_stat
         {
             car->settings.location.longitude = json_value_get_number(longitude);
         }
+        json_value_free(root_value);
     }
-    json_value_free(root_value);
 
     return car;
 }
@@ -233,7 +235,7 @@ static void deviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsi
         if (oldCar->changeOilReminder == NULL)
         {
             printf("Received a new changeOilReminder = %s\n", newCar->changeOilReminder);
-            if ( NULL != (oldCar->changeOilReminder = malloc(strlen(newCar->changeOilReminder) + 1))
+            if ( NULL != (oldCar->changeOilReminder = malloc(strlen(newCar->changeOilReminder) + 1)))
             {
                 (void)strcpy(oldCar->changeOilReminder, newCar->changeOilReminder);
                 free(newCar->changeOilReminder);
