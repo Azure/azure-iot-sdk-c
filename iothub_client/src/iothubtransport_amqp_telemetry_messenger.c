@@ -1209,7 +1209,7 @@ static int send_pending_events(TELEMETRY_MESSENGER_INSTANCE* instance)
             result = __FAILURE__;
             break;
         }
-        else if ( (create_send_pending_events_state(instance, &send_pending_events_state) != 0) && (send_pending_events_state.task == 0))
+        else if ((send_pending_events_state.task == 0) && (create_send_pending_events_state(instance, &send_pending_events_state) != 0))
         {
             LogError("create_send_pending_events_state failed");
             invoke_callback_on_error(caller_info, TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING);
