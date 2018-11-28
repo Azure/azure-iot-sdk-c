@@ -192,7 +192,7 @@ endif()
 if (NOT "${linkerOption}" STREQUAL "OFF")
     message("linkerOption: ${CMAKE_SHARED_LINKER_FLAGS}")
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${linkerOption}")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} {linkerOption}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${linkerOption}")
 endif()
 
 include("configs/azure_iot_sdksFunctions.cmake")
