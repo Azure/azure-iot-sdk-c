@@ -8,8 +8,6 @@ include("configs/azure_iot_sdksFunctions.cmake")
 
 getIoTSDKVersion()
 message(STATUS "IoT Client SDK Version = ${IOT_SDK_VERSION}")
-message("C FLAGS: ${CMAKE_C_FLAGS}")
-message("CXX FLAGS: ${CMAKE_CXX_FLAGS}")
 
 
 if (POLICY CMP0042)
@@ -323,7 +321,6 @@ if (${use_prov_client_core})
     add_subdirectory(provisioning_client)
 endif()
 
-message("UPDATED CMAKE FLAGS: ${CMAKE_C_FLAGS}")
 
 if (${build_service_client})
     add_subdirectory(iothub_service_client)
