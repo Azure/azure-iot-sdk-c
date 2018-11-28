@@ -9,7 +9,6 @@ include("configs/azure_iot_sdksFunctions.cmake")
 getIoTSDKVersion()
 message(STATUS "IoT Client SDK Version = ${IOT_SDK_VERSION}")
 
-
 if (POLICY CMP0042)
     cmake_policy(SET CMP0042 NEW)
 endif()
@@ -320,7 +319,6 @@ if (${use_prov_client_core})
 
     add_subdirectory(provisioning_client)
 endif()
-
 
 if (${build_service_client})
     add_subdirectory(iothub_service_client)
