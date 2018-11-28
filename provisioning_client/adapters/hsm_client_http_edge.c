@@ -140,13 +140,25 @@ static int read_and_parse_edge_uri(HSM_CLIENT_HTTP_EDGE* hsm_client_http_edge)
         }
         else if (hsm_client_http_edge->workload_protocol_type == WORKLOAD_PROTOCOL_TYPE_UNIX_DOMAIN_SOCKET)
         {
-            // Make sure that there is an address set.
-            if (workload_uri[unix_domain_sockets_prefix_len] == 0)
+            const char* socket_path = workload_uri + unix_domain_sockets_prefix_len;
+
+#ifdef WIN32
+            // A 'unix://' URL doesn't have a hostname; the domain socket file is specified
+            // in the URL's path, which always begins with a forward slash ('/'). For Unix
+            // domain socket paths on Windows, discard the leading forward slash.
+            if (socket_path[0] == '/')
             {
-                LogError("hostname does not have content after prefix");
+                ++socket_path;
+            }
+#endif
+
+            // Make sure that there is an address set.
+            if (socket_path[0] == 0)
+            {
+                LogError("Failed parsing WorkloadUri after prefix");
                 result = __FAILURE__;
             }
-            else if (mallocAndStrcpy_s(&hsm_client_http_edge->workload_hostname, workload_uri + unix_domain_sockets_prefix_len) != 0)
+            else if (mallocAndStrcpy_s(&hsm_client_http_edge->workload_hostname, socket_path) != 0)
             {
                 LogError("Failed copying workload hostname");
                 result = __FAILURE__;
