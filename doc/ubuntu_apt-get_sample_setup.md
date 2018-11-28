@@ -56,8 +56,8 @@ The following steps outline how you can use CMake to build an IoT Hub client app
         serializer
         iothub_client
         iothub_client_amqp_transport
-        aziotsharedutil
         uamqp
+        aziotsharedutil
         pthread
         curl
         ssl
