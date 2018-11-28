@@ -461,7 +461,7 @@ static void hsm_client_http_edge_create_http_Impl(const char* edge_uri_env, bool
     hsm_client_http_edge_destroy(sec_handle);
 }
 
-static void hsm_client_http_edge_create_domain_socket_Impl(const char* edge_uri_env, bool valid_edge_uri)
+static void setup_hsm_client_http_edge_create_domain_socket_mock(const char* edge_uri_env, bool valid_edge_uri)
 {
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(environment_get_variable(IGNORED_PTR_ARG)).SetReturn(TEST_ENV_MODULE_GENERATION_ID);
@@ -471,7 +471,39 @@ static void hsm_client_http_edge_create_domain_socket_Impl(const char* edge_uri_
     if (valid_edge_uri == true)
     {
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     }
+    else
+    {
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    }
+}
+
+static void hsm_client_http_edge_create_domain_socket_Impl(const char* edge_uri_env, bool valid_edge_uri)
+{
+    //arrange
+    setup_hsm_client_http_edge_create_domain_socket_mock(edge_uri_env, valid_edge_uri);
+
+    //act
+    HSM_CLIENT_HANDLE sec_handle = hsm_client_http_edge_create();
+
+    //assert
+    if (valid_edge_uri == true)
+    {
+        ASSERT_IS_NOT_NULL(sec_handle);
+    }
+    else
+    {
+        ASSERT_IS_NULL(sec_handle);
+    }
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    hsm_client_http_edge_destroy(sec_handle);
 }
 
 TEST_FUNCTION(hsm_client_http_edge_create_http_succeed)
@@ -501,9 +533,8 @@ TEST_FUNCTION(hsm_client_http_edge_create_domain_socket_succeed)
 
 TEST_FUNCTION(hsm_client_http_edge_create_domain_socket_no_name_fail)
 {
-    hsm_client_http_edge_create_domain_socket_Impl(TEST_ENV_WORKLOADURI_DOMAIN_SOCKET_NO_NAME, true);
+    hsm_client_http_edge_create_domain_socket_Impl(TEST_ENV_WORKLOADURI_DOMAIN_SOCKET_NO_NAME, false);
 }
-
 
 TEST_FUNCTION(hsm_client_http_edge_destroy_success)
 {
@@ -660,7 +691,7 @@ TEST_FUNCTION(hsm_client_http_edge_sign_data_succeed)
 
 TEST_FUNCTION(hsm_client_http_edge_sign_data_domain_socket_succeed)
 {
-    hsm_client_http_edge_create_domain_socket_Impl(TEST_ENV_WORKLOADURI_DOMAIN_SOCKET, true);
+    setup_hsm_client_http_edge_create_domain_socket_mock(TEST_ENV_WORKLOADURI_DOMAIN_SOCKET, true);
 
     HSM_CLIENT_HANDLE sec_handle = hsm_client_http_edge_create();
     unsigned char* signed_value = NULL;
@@ -851,7 +882,7 @@ TEST_FUNCTION(hsm_client_http_edge_get_trust_bundle_NULL_sec_handle_fail)
 
 TEST_FUNCTION(hsm_client_http_edge_get_trust_bundle_domain_socket_success)
 {
-    hsm_client_http_edge_create_domain_socket_Impl(TEST_ENV_WORKLOADURI_DOMAIN_SOCKET, true);
+    setup_hsm_client_http_edge_create_domain_socket_mock(TEST_ENV_WORKLOADURI_DOMAIN_SOCKET, true);
 
     HSM_CLIENT_HANDLE sec_handle = hsm_client_http_edge_create();
 
