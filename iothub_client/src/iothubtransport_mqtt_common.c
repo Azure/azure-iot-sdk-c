@@ -1986,7 +1986,7 @@ static int GetTransportProviderIfNecessary(PMQTTTRANSPORT_HANDLE_DATA transport_
     {
         if (OptionHandler_FeedOptions(transport_data->saved_tls_options, transport_data->xioTransport) != OPTIONHANDLER_OK)
         {
-            LogError("Failed feeding existing options to new TLS instance.");
+            LogError("Failed feeding existing options to new TLS layer.");
             return __FAILURE__;
         }
         else
