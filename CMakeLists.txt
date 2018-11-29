@@ -65,6 +65,7 @@ option(run_longhaul_tests "set run_longhaul_tests to ON to run longhaul tests (d
 option(skip_samples "set skip_samples to ON to skip building samples (default is OFF)[if possible, they are always build]" OFF)
 option(compileOption_C "passes a string to the command line of the C compiler" OFF)
 option(compileOption_CXX "passes a string to the command line of the C++ compiler" OFF)
+option(linkerOption "passes a string to the shared and exe linker options of the C compiler" OFF)
 option(build_service_client "controls whether the iothub_service_client is built or not" ON)
 option(build_provisioning_service_client "controls whether the provisioning_service_client is built or not" ON)
 option(build_python "builds the Python native iothub_client module" OFF)
@@ -186,6 +187,12 @@ endif()
 
 if (NOT "${compileOption_CXX}" STREQUAL "OFF")
     set(CMAKE_CXX_FLAGS "${compileOption_CXX} ${CMAKE_CXX_FLAGS}")
+endif()
+
+if (NOT "${linkerOption}" STREQUAL "OFF")
+    message("linkerOption: ${CMAKE_SHARED_LINKER_FLAGS}")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${linkerOption}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${linkerOption}")
 endif()
 
 include("configs/azure_iot_sdksFunctions.cmake")
