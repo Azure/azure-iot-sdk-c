@@ -531,24 +531,16 @@ static char* CreateReceiveHostName(IOTHUB_VALIDATION_INFO* devhubValInfo)
 static char* CreateSendTargetAddress(IOTHUB_VALIDATION_INFO* devhubValInfo)
 {
     char* result;
-    if (NULL == devhubValInfo)
+    size_t addressLen = strlen(AMQP_SEND_TARGET_ADDRESS_FMT)+strlen(devhubValInfo->hostName);
+    result = (char*)malloc(addressLen+1);
+    if (result != NULL)
     {
-        LogError("Invalid input passed");
-        result = NULL;
+        sprintf_s(result, addressLen+1, AMQP_SEND_TARGET_ADDRESS_FMT, devhubValInfo->hostName);
     }
     else
     {
-        size_t addressLen = strlen(AMQP_SEND_TARGET_ADDRESS_FMT)+strlen(devhubValInfo->hostName);
-        result = (char*)malloc(addressLen+1);
-        if (result != NULL)
-        {
-            sprintf_s(result, addressLen+1, AMQP_SEND_TARGET_ADDRESS_FMT, devhubValInfo->hostName);
-        }
-        else
-        {
-            LogError("Failure allocating data in CreateSendTargetAddress.");
-        }
-    }    
+        LogError("Failure allocating data in CreateSendTargetAddress.");
+    }
     return result;
 }
 
