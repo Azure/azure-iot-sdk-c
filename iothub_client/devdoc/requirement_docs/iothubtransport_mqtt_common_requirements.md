@@ -97,6 +97,8 @@ This function registers a device with the transport.  The MQTT transport only su
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_17_003: [** `IoTHubTransport_MQTT_Common_Register` shall return `NULL` if `deviceId` or `deviceKey` do not match the `deviceId` and `deviceKey` passed in during `IoTHubTransport_MQTT_Common_Create`.**]**
 
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_43_001: [** `IoTHubTransport_MQTT_Common_Register` shall return `NULL` if `deviceKey` is `NULL` when credential type is `IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY`.**]**. 
+
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_17_004: [** `IoTHubTransport_MQTT_Common_Register` shall return the `TRANSPORT_LL_HANDLE` as the `IOTHUB_DEVICE_HANDLE`. **]**
 
 ### IoTHubTransport_MQTT_Common_Unregister
