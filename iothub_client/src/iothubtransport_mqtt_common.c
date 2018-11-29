@@ -1957,67 +1957,55 @@ static void process_queued_ack_messages(PMQTTTRANSPORT_HANDLE_DATA transport_dat
 
 static int GetTransportProviderIfNecessary(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 {
-    int result;
+    if (transport_data->xioTransport)
+    {
+        // Transport provider already assigned 
+        return 0;
+    }
 
+    // construct address
+    const char* hostAddress = STRING_c_str(transport_data->hostAddress);
+    MQTT_TRANSPORT_PROXY_OPTIONS mqtt_proxy_options;
+
+    /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_011: [ If no `proxy_data` option has been set, NULL shall be passed as the argument `mqtt_transport_proxy_options` when calling the function `get_io_transport` passed in `IoTHubTransport_MQTT_Common__Create`. ]*/
+    mqtt_proxy_options.host_address = transport_data->http_proxy_hostname;
+    mqtt_proxy_options.port = transport_data->http_proxy_port;
+    mqtt_proxy_options.username = transport_data->http_proxy_username;
+    mqtt_proxy_options.password = transport_data->http_proxy_password;
+
+    /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_010: [ If the `proxy_data` option has been set, the proxy options shall be filled in the argument `mqtt_transport_proxy_options` when calling the function `get_io_transport` passed in `IoTHubTransport_MQTT_Common__Create` to obtain the underlying IO handle. ]*/
+    transport_data->xioTransport = transport_data->get_io_transport(hostAddress, (transport_data->http_proxy_hostname == NULL) ? NULL : &mqtt_proxy_options);
     if (transport_data->xioTransport == NULL)
     {
-        // construct address
-        const char* hostAddress = STRING_c_str(transport_data->hostAddress);
-        MQTT_TRANSPORT_PROXY_OPTIONS mqtt_proxy_options;
+        LogError("Unable to create the lower level TLS layer.");
+        return __FAILURE__;
+    }
 
-        /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_011: [ If no `proxy_data` option has been set, NULL shall be passed as the argument `mqtt_transport_proxy_options` when calling the function `get_io_transport` passed in `IoTHubTransport_MQTT_Common__Create`. ]*/
-        mqtt_proxy_options.host_address = transport_data->http_proxy_hostname;
-        mqtt_proxy_options.port = transport_data->http_proxy_port;
-        mqtt_proxy_options.username = transport_data->http_proxy_username;
-        mqtt_proxy_options.password = transport_data->http_proxy_password;
-
-        /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_010: [ If the `proxy_data` option has been set, the proxy options shall be filled in the argument `mqtt_transport_proxy_options` when calling the function `get_io_transport` passed in `IoTHubTransport_MQTT_Common__Create` to obtain the underlying IO handle. ]*/
-        transport_data->xioTransport = transport_data->get_io_transport(hostAddress, (transport_data->http_proxy_hostname == NULL) ? NULL : &mqtt_proxy_options);
-        if (transport_data->xioTransport == NULL)
+    transport_data->conn_attempted = true;
+    if (transport_data->saved_tls_options != NULL)
+    {
+        if (OptionHandler_FeedOptions(transport_data->saved_tls_options, transport_data->xioTransport) != OPTIONHANDLER_OK)
         {
-            LogError("Unable to create the lower level TLS layer.");
-            result = __FAILURE__;
+            LogError("Failed feeding existing options to new TLS instance.");
+            return __FAILURE__;
         }
         else
         {
-            transport_data->conn_attempted = true;
-            if (transport_data->saved_tls_options != NULL)
-            {
-                if (OptionHandler_FeedOptions(transport_data->saved_tls_options, transport_data->xioTransport) != OPTIONHANDLER_OK)
-                {
-                    LogError("Failed feeding existing options to new TLS instance.");
-                    result = __FAILURE__;
-                }
-                else
-                {
-                    // The tlsio has the options, so our copy can be deleted
-                    set_saved_tls_options(transport_data, NULL);
-                    result = 0;
-                }
-            }
-            else if (IoTHubClient_Auth_Get_Credential_Type(transport_data->authorization_module) == IOTHUB_CREDENTIAL_TYPE_X509_ECC)
-            {
-                if (IoTHubClient_Auth_Set_xio_Certificate(transport_data->authorization_module, transport_data->xioTransport) != 0)
-                {
-                    LogError("Unable to create the lower level TLS layer.");
-                    result = __FAILURE__;
-                }
-                else
-                {
-                    result = 0;
-                }
-            }
-            else
-            {
-                result = 0;
-            }
+            // The tlsio has the options, so our copy can be deleted
+            set_saved_tls_options(transport_data, NULL);
         }
     }
-    else
+
+    if (IoTHubClient_Auth_Get_Credential_Type(transport_data->authorization_module) == IOTHUB_CREDENTIAL_TYPE_X509_ECC)
     {
-        result = 0;
+        if (IoTHubClient_Auth_Set_xio_Certificate(transport_data->authorization_module, transport_data->xioTransport) != 0)
+        {
+            LogError("Unable to create the lower level TLS layer.");
+            return __FAILURE__;
+        }
     }
-    return result;
+    
+    return 0;
 }
 
 static STRING_HANDLE buildClientId(const char* device_id, const char* module_id)
