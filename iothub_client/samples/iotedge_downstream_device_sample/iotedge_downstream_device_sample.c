@@ -276,7 +276,7 @@ int main(void)
         }
 
         printf("\r\nPress any key to continue\r\n");
-        getchar();
+        (void)getchar();
 
         // Clean up the iothub sdk handle
         IoTHubDeviceClient_Destroy(device_handle);
