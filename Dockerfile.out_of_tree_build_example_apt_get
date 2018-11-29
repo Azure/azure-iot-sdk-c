@@ -1,0 +1,23 @@
+from ubuntu:18.04
+
+# see https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/ubuntu_apt-get_sample_setup.md
+RUN apt-get update && apt-get install -y software-properties-common \
+ && add-apt-repository ppa:aziotsdklinux/ppa-azureiot
+
+# see https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/devbox_setup.md#linux
+RUN apt-get update && apt-get install -y \
+  git \
+  cmake \
+  build-essential \
+  curl \
+  libcurl4-openssl-dev \
+  libssl-dev \
+  uuid-dev \
+  azure-iot-sdk-c-dev
+
+ADD . /azure-iot-sdk-c
+RUN cd /azure-iot-sdk-c/iothub_client/samples/out_of_tree_build_example/ \
+  && mkdir build \
+  && cd build \
+  && cmake .. \
+  && make -j4 \
