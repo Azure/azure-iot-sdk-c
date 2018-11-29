@@ -514,24 +514,16 @@ static char* CreateReceiveAddress(IOTHUB_VALIDATION_INFO* devhubValInfo, size_t 
 static char* CreateReceiveHostName(IOTHUB_VALIDATION_INFO* devhubValInfo)
 {
     char* result;
-    if (NULL == devhubValInfo)
+    size_t partner_host_len = strlen(devhubValInfo->partnerName) + strlen(devhubValInfo->partnerHost) + 2;
+    result = (char*)malloc(partner_host_len + 1);
+    if (result != NULL)
     {
-        LogError("Invalid input parameter");
-        result = NULL;
+        sprintf_s(result, partner_host_len + 1, "%s.%s", devhubValInfo->partnerName, devhubValInfo->partnerHost);
     }
     else
     {
-        size_t partner_host_len = strlen(devhubValInfo->partnerName) + strlen(devhubValInfo->partnerHost) + 2;
-        result = (char*)malloc(partner_host_len + 1);
-        if (result != NULL)
-        {
-            sprintf_s(result, partner_host_len + 1, "%s.%s", devhubValInfo->partnerName, devhubValInfo->partnerHost);
-        }
-        else
-        {
-            LogError("Failure allocating data in CreateReceiveHostName.");
-            result = NULL;
-        }
+        LogError("Failure allocating data in CreateReceiveHostName.");
+        result = NULL;
     }
     return result;
 }
