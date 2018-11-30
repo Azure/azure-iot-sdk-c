@@ -39,7 +39,7 @@ if (${hsm_type_custom})
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHSM_AUTH_TYPE_CUSTOM")
 
     set(HSM_CLIENT_LIBRARY ${CUSTOM_HSM_LIB})
-else ()
+elseif (${use_prov_client})
     if (${run_e2e_tests})
         # For e2e test we need to run a custom HSM to handle testing
         if (${hsm_type_x509})
