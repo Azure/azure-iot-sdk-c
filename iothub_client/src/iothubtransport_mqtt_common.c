@@ -85,12 +85,15 @@ static const char* MESSAGE_ID_PROPERTY = "mid";
 static const char* CORRELATION_ID_PROPERTY = "cid";
 static const char* CONTENT_TYPE_PROPERTY = "ct";
 static const char* CONTENT_ENCODING_PROPERTY = "ce";
-static const char* DIAGNOSTIC_ID_PROPERTY = "diagid";
-static const char* DIAGNOSTIC_CONTEXT_PROPERTY = "diagctx";
+static const char* DIAGNOSTIC_ID_PROPERTY = "diagid"; //Deprecated
+static const char* DIAGNOSTIC_CONTEXT_PROPERTY = "diagctx"; //Deprecated
 static const char* CONNECTION_DEVICE_ID = "cdid";
 static const char* CONNECTION_MODULE_ID_PROPERTY = "cmid";
 
+//Deprecated
 static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "creationtimeutc";
+
+static const char* DISTRIBUTED_TRACING_PROPERTY = "tracestate";
 
 #define TOLOWER(c) (((c>='A') && (c<='Z'))?c-'A'+'a':c)
 
@@ -718,10 +721,21 @@ static int addSystemPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_messag
             index++;
         }
     }
+    // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_38_012: [ `IoTHubTransport_MQTT_Common_DoWork` shall check for the DistributedTracing property and if found add the `value` as a system property in the format of `$.tracestate=<value>` ]
+    if (result == 0)
+    {
+        const char* tracestate = IoTHubMessage_GetDistributedTracingSystemProperty(iothub_message_handle);
+        if (tracestate != NULL)
+        {
+            result = addSystemPropertyToTopicString(topic_string, index, DISTRIBUTED_TRACING_PROPERTY, tracestate, urlencode);
+            index++;
+        }
+    }
     *index_ptr = index;
     return result;
 }
 
+// Deprecated
 static int addDiagnosticPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_message_handle, STRING_HANDLE topic_string, size_t* index_ptr)
 {
     int result = 0;
@@ -810,6 +824,7 @@ static STRING_HANDLE addPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_me
         STRING_delete(result);
         result = NULL;
     }
+    //Deprecated
     else if (addDiagnosticPropertiesTouMqttMessage(iothub_message_handle, result, &index) != 0)
     {
         LogError("Failed adding Diagnostic Properties to uMQTT Message");

@@ -2582,3 +2582,21 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_GenericMethodInvoke(IOTHUB_CLIENT_CORE_HAN
 }
 #endif /* USE_EDGE_MODULES */
 
+IOTHUB_CLIENT_RESULT IoTHubClientCore_EnableFeatureConfigurationViaDeviceTwin(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle, bool enableTwinConfiguration)
+{
+    (void)enableTwinConfiguration;
+    IOTHUB_CLIENT_RESULT result;
+
+    if (iotHubClientHandle == NULL)
+    {
+        LogError("Invalid argument (iotHubClientHandle=%p)", iotHubClientHandle);
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    else
+    {
+        result = IOTHUB_CLIENT_OK;
+    }
+
+    return result;
+}
+

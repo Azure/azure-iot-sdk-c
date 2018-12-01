@@ -27,6 +27,8 @@
 #include "internal/iothub_client_diagnostic.h"
 #include "internal/iothubtransport.h"
 
+#include "parson.h"
+
 #ifndef DONT_USE_UPLOADTOBLOB
 #include "internal/iothub_client_ll_uploadtoblob.h"
 #endif
@@ -126,7 +128,8 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG
     bool complete_twin_update_encountered;
     IOTHUB_AUTHORIZATION_HANDLE authorization_module;
     STRING_HANDLE product_info;
-    IOTHUB_DIAGNOSTIC_SETTING_DATA diagnostic_setting;
+    IOTHUB_DIAGNOSTIC_SETTING_DATA diagnostic_setting; // Deprecated
+    IOTHUB_DISTRIBUTED_TRACING_SETTING_DATA distributedTracing_setting;
     SINGLYLINKEDLIST_HANDLE event_callbacks;  // List of IOTHUB_EVENT_CALLBACK's
 }IOTHUB_CLIENT_CORE_LL_HANDLE_DATA;
 
@@ -141,6 +144,20 @@ static const char MODULE_ID_TOKEN[] = "ModuleId";
 static const char PROVISIONING_TOKEN[] = "UseProvisioning";
 static const char PROVISIONING_ACCEPTABLE_VALUE[] = "true";
 
+//#define REPORT_TWIN_TEMPLATE  "{ \"__e2e_diag_sample_rate\": %d, \"__e2e_diag_info\": \"%s\"}"
+#define DISTRIBUTED_TRACING_REPORTED_TWIN_TEMPLATE "{ \"__iot:interfaces\": \
+{ \"azureiot*com^dtracing^1*0*0\": { \"@id\": \"http://azureiot.com/dtracing/1.0.0\" } }, \
+\"azureiot*com^dtracing^1*0*0\": { \
+    \"sampling_mode\": { \
+    \"value\": \"on\", \
+    \"status\" : { \
+    \"code\": 102, \
+    \"description\" : \"%s\" \
+    } \
+}, \
+\"sampling_rate\": %d \
+} \
+}"
 
 #ifdef USE_EDGE_MODULES
 /*The following section should be moved to iothub_module_client_ll.c during impending refactor*/
@@ -515,6 +532,60 @@ static void IoTHubClientCore_LL_SendComplete(PDLIST_ENTRY completed, IOTHUB_CLIE
     }
 }
 
+static int send_distributed_tracing_reported_state(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* iotHubClientHandle, int samplingPercentage, STRING_HANDLE error)
+{
+    int result = 0;
+    STRING_HANDLE data = STRING_new();
+    if (data == NULL)
+    {
+        LogError("Error creating distributed tracing reported string");
+        result = __FAILURE__;
+    }
+    else if (STRING_sprintf(data, DISTRIBUTED_TRACING_REPORTED_TWIN_TEMPLATE, STRING_c_str(error), samplingPercentage) != 0)
+    {
+        LogError("Error calling STRING_sprintf for distributed tracing reported status");
+        result = __FAILURE__;
+    }
+    else if (IoTHubClient_LL_SendReportedState(iotHubClientHandle, (const unsigned char*)STRING_c_str(data), STRING_length(data), NULL, NULL) != IOTHUB_CLIENT_OK)
+    {
+        LogError("IoTHubClient_LL_SendReportedState failed");
+        result = __FAILURE__;
+    }
+    else
+    {
+        result = 0;
+    }
+    STRING_delete(data);
+    return result;
+}
+
+static int update_distributed_tracing_settings_from_twin(IOTHUB_DISTRIBUTED_TRACING_SETTING_DATA* diagSetting, IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* iotHubClientHandle, DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad)
+{
+    int result;
+    STRING_HANDLE message = STRING_new();
+    if (message == NULL)
+    {
+        LogError("Error creating message string");
+        result = __FAILURE__;
+    }
+    else if (IoTHubClient_DistributedTracing_UpdateFromTwin(diagSetting, update_state == DEVICE_TWIN_UPDATE_PARTIAL, payLoad, message) != 0)
+    {
+        LogError("Error calling IoTHubClient_DistributedTracing_UpdateFromTwin");
+        result = __FAILURE__;
+    }
+    else if (send_distributed_tracing_reported_state(iotHubClientHandle, diagSetting->samplingRate, message) != 0)
+    {
+        LogError("Error calling send_distributed_tracing_reported_state");
+        result = __FAILURE__;
+    }
+    else
+    {
+        result = 0;
+    }
+    STRING_delete(message);
+    return result;
+}
+
 static void IoTHubClientCore_LL_RetrievePropertyComplete(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* ctx)
 {
     if (ctx == NULL)
@@ -525,6 +596,12 @@ static void IoTHubClientCore_LL_RetrievePropertyComplete(DEVICE_TWIN_UPDATE_STAT
     else
     {
         IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)ctx;
+
+        if(handleData->distributedTracing_setting.samplingMode)
+        {
+            update_distributed_tracing_settings_from_twin(&handleData->distributedTracing_setting, handleData, update_state, payLoad);
+        }
+
         /* Codes_SRS_IOTHUBCLIENT_LL_07_014: [ If deviceTwinCallback is NULL then IoTHubClientCore_LL_RetrievePropertyComplete shall do nothing.] */
         if (handleData->deviceTwinCallback)
         {
@@ -1802,16 +1879,23 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SendEventAsync(IOTHUB_CLIENT_CORE_LL_HA
                     free(newEntry);
                     LOG_ERROR_RESULT;
                 }
-                else if (IoTHubClient_Diagnostic_AddIfNecessary(&handleData->diagnostic_setting, newEntry->messageHandle) != 0)
-                {
-                    /*Codes_SRS_IOTHUBCLIENT_LL_02_014: [If cloning and/or adding the information/diagnostic fails for any reason, IoTHubClientCore_LL_SendEventAsync shall fail and return IOTHUB_CLIENT_ERROR.] */
-                    result = IOTHUB_CLIENT_ERROR;
-                    IoTHubMessage_Destroy(newEntry->messageHandle);
-                    free(newEntry);
-                    LOG_ERROR_RESULT;
-                }
                 else
                 {
+                    /*Codes_SRS_IOTHUBCLIENT_LL_38_001: [IoTHubClientCore_LL_SendEventAsync shall read distributed tracing properties and override any deprecated diagnostics settings.]*/
+                    if ((&handleData->distributedTracing_setting != NULL) && (IoTHubClient_DistributedTracing_AddToMessageHeadersIfNecessary(&handleData->distributedTracing_setting, newEntry->messageHandle) != 0))
+                    {
+                        /*Codes_SRS_IOTHUBCLIENT_LL_38_002: [If adding distributed tracing information fails for any reason, IoTHubClientCore_LL_SendEventAsync shall not fail.] */
+                        result = IOTHUB_CLIENT_OK;
+                        LogInfo("unable to add distributed tracing information to message");
+                    }
+                    /*Codes_SRS_IOTHUBCLIENT_LL_02_014: [If distributed tracing isn't enabled, check if deprecated diagnostic information needs to be added to message header]*/
+                    else if ((&handleData->diagnostic_setting != NULL) && (IoTHubClient_Diagnostic_AddIfNecessary(&handleData->diagnostic_setting, newEntry->messageHandle) != 0))
+                    {
+                        /*Codes_SRS_IOTHUBCLIENT_LL_02_014: [If cloning and/or adding the information/diagnostic fails for any reason, IoTHubClientCore_LL_SendEventAsync shall not fail and return IOTHUB_CLIENT_ERROR.] */
+                        result = IOTHUB_CLIENT_OK;
+                        LogInfo("unable to add diagnostic information to message");
+                    }
+                    
                     /*Codes_SRS_IOTHUBCLIENT_LL_02_013: [IoTHubClientCore_LL_SendEventAsync shall add the DLIST waitingToSend a new record cloning the information from eventMessageHandle, eventConfirmationCallback, userContextCallback.]*/
                     newEntry->callback = eventConfirmationCallback;
                     newEntry->context = userContextCallback;
@@ -2956,6 +3040,20 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_GenericMethodInvoke(IOTHUB_CLIENT_CORE_
     return result;
 }
 #endif
+
+IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_EnableFeatureConfigurationViaDeviceTwin(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, bool enableTwinConfiguration)
+{
+    (void)iotHubClientHandle;
+
+    IOTHUB_CLIENT_RESULT result;
+
+    //TODO: GetTwin logic goes here - temporarily enabling sampling mode always
+    iotHubClientHandle->distributedTracing_setting.samplingMode = enableTwinConfiguration;
+
+    result = IOTHUB_CLIENT_OK;
+
+    return result;
+}
 
 /*end*/
 

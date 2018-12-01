@@ -115,5 +115,10 @@ IOTHUB_CLIENT_RESULT IoTHubClient_UploadMultipleBlocksToBlobAsyncEx(IOTHUB_CLIEN
     return IoTHubClientCore_UploadMultipleBlocksToBlobAsync((IOTHUB_CLIENT_CORE_HANDLE)iotHubClientHandle, destinationFileName, NULL, getDataCallbackEx, context);
 }
 
+IOTHUB_CLIENT_RESULT IoTHubClient_EnableFeatureConfigurationViaDeviceTwin(IOTHUB_CLIENT_HANDLE iotHubClientHandle, bool enableTwinConfiguration)
+{
+    return IoTHubClientCore_EnableFeatureConfigurationViaDeviceTwin((IOTHUB_CLIENT_CORE_HANDLE)iotHubClientHandle, enableTwinConfiguration);
+}
+
 #endif /*DONT_USE_UPLOADTOBLOB*/
 

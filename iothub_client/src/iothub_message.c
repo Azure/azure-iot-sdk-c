@@ -32,7 +32,8 @@ typedef struct IOTHUB_MESSAGE_HANDLE_DATA_TAG
     char* inputName;
     char* connectionModuleId;
     char* connectionDeviceId;
-    IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA_HANDLE diagnosticData;
+    IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA_HANDLE diagnosticData; //Deprecated
+    char* distributedTracingTracestate;
 }IOTHUB_MESSAGE_HANDLE_DATA;
 
 static bool ContainsOnlyUsAscii(const char* asciiValue)
@@ -305,9 +306,10 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHan
                 DestroyMessageData(result);
                 result = NULL;
             }
+            //Deprecated
             else if (source->diagnosticData != NULL && (result->diagnosticData = CloneDiagnosticPropertyData(source->diagnosticData)) == NULL)
             {
-                LogError("unable to copy CloneDiagnosticPropertyData");
+                LogError("unable to CloneDiagnosticPropertyData");
                 DestroyMessageData(result);
                 result = NULL;
             }
@@ -325,13 +327,19 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHan
             }
             else if (source->connectionModuleId != NULL && mallocAndStrcpy_s(&result->connectionModuleId, source->connectionModuleId) != 0)
             {
-                LogError("unable to copy inputName");
+                LogError("unable to copy connectionModuleId");
                 DestroyMessageData(result);
                 result = NULL;
             }
             else if (source->connectionDeviceId != NULL && mallocAndStrcpy_s(&result->connectionDeviceId, source->connectionDeviceId) != 0)
             {
-                LogError("unable to copy inputName");
+                LogError("unable to copy connectionDeviceId");
+                DestroyMessageData(result);
+                result = NULL;
+            }
+            else if (source->distributedTracingTracestate != NULL && mallocAndStrcpy_s(&result->distributedTracingTracestate, source->distributedTracingTracestate) != 0)
+            {
+                LogError("unable to copy distributedTracingTracestate");
                 DestroyMessageData(result);
                 result = NULL;
             }
@@ -737,6 +745,7 @@ const char* IoTHubMessage_GetContentEncodingSystemProperty(IOTHUB_MESSAGE_HANDLE
     return result;
 }
 
+//Deprecated
 const IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* IoTHubMessage_GetDiagnosticPropertyData(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
 {
     const IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* result;
@@ -754,6 +763,7 @@ const IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* IoTHubMessage_GetDiagnosticProper
     return result;
 }
 
+//Deprecated
 IOTHUB_MESSAGE_RESULT IoTHubMessage_SetDiagnosticPropertyData(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* diagnosticData)
 {
     IOTHUB_MESSAGE_RESULT result;
@@ -793,6 +803,61 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetDiagnosticPropertyData(IOTHUB_MESSAGE_HAN
     return result;
 }
 
+const char* IoTHubMessage_GetDistributedTracingSystemProperty(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
+{
+    const char* result;
+    // Codes_SRS_IOTHUBMESSAGE_38_001: [If any of the parameters are NULL then IoTHubMessage_GetDistributedTracingSystemProperty shall return a NULL value.]
+    if (iotHubMessageHandle == NULL)
+    {
+        LogError("Invalid argument (iotHubMessageHandle is NULL)");
+        result = NULL;
+    }
+    else
+    {
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = iotHubMessageHandle;
+
+        /* Codes_SRS_IOTHUBMESSAGE_38_002: [IoTHubMessage_GetDistributedTracingSystemProperty shall return the tracestate data as a const char*.] */
+        result = (const char*)handleData->distributedTracingTracestate;
+    }
+    return result;
+}
+
+IOTHUB_MESSAGE_RESULT IoTHubMessage_SetDistributedTracingSystemProperty(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const char* distributedTracingTracestate)
+{
+    IOTHUB_MESSAGE_RESULT result;
+
+    // Codes_SRS_IOTHUBMESSAGE_38_006: [If any of the parameters are NULL then IoTHubMessage_SetDistributedTracingSystemProperty shall return a IOTHUB_MESSAGE_INVALID_ARG value.]
+    if (iotHubMessageHandle == NULL || distributedTracingTracestate == NULL)
+    {
+        LogError("Invalid argument (iotHubMessageHandle=%p, distributedTracingTracestate=%p)", iotHubMessageHandle, distributedTracingTracestate);
+        result = IOTHUB_MESSAGE_INVALID_ARG;
+    }
+    else
+    {
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = (IOTHUB_MESSAGE_HANDLE_DATA*)iotHubMessageHandle;
+
+        // Codes_SRS_IOTHUBMESSAGE_38_007: [If the IOTHUB_MESSAGE_HANDLE `distributedTracingTracestate` is not NULL it shall be deallocated.]
+        if (handleData->distributedTracingTracestate != NULL)
+        {
+            free(handleData->distributedTracingTracestate);
+            handleData->distributedTracingTracestate = NULL;
+        }
+
+        if (mallocAndStrcpy_s(&handleData->distributedTracingTracestate, distributedTracingTracestate) != 0)
+        {
+            LogError("Failed saving a copy of contentEncoding");
+            // Codes_SRS_IOTHUBMESSAGE_38_008: [If the allocation or the copying of `distributedTracingTracestate` fails, then IoTHubMessage_SetDistributedTracingSystemProperty shall return IOTHUB_MESSAGE_ERROR.]
+            result = IOTHUB_MESSAGE_ERROR;
+        }
+        else
+        {
+            // Codes_SRS_IOTHUBMESSAGE_38_009: [If IoTHubMessage_SetDistributedTracingSystemProperty finishes successfully it shall return IOTHUB_MESSAGE_OK.]
+            result = IOTHUB_MESSAGE_OK;
+        }
+    }
+
+    return result;
+}
 
 const char* IoTHubMessage_GetOutputName(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
 {
