@@ -5860,6 +5860,38 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_deviceKey_null_and_deviceSasT
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
+//Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_43_001: [ IoTHubTransport_MQTT_Common_Register shall return NULL if deviceKey is NULL when credential type is IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY ]
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_deviceKey_provided_null_returns_null)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, NULL);
+    IOTHUB_DEVICE_CONFIG deviceConfig;
+    deviceConfig.deviceId = TEST_DEVICE_ID;
+    deviceConfig.deviceKey = NULL;
+    deviceConfig.deviceSasToken = TEST_DEVICE_SAS;
+    deviceConfig.moduleId = NULL;
+    //deviceConfig.authorization_module.cred_type = IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY;
+ 
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
+    umock_c_reset_all_calls();
+ 
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_DEVICE_ID);
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(NULL);
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY);
+ 
+    // act
+    IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransport_MQTT_Common_Register(handle, &deviceConfig, config.waitingToSend);
+ 
+    // assert
+    ASSERT_IS_NULL(devHandle);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+ 
+    //cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+
 // Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_004: [ IoTHubTransport_MQTT_Common_Register shall return the TRANSPORT_LL_HANDLE as the IOTHUB_DEVICE_HANDLE. ]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_succeeds_returns_transport)
 {
