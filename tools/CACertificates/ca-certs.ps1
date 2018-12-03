@@ -16,7 +16,6 @@ $_rootCertCommonName      = "Azure IoT CA TestOnly Root CA"
 $_rootCertSubject         = "CN=$_rootCertCommonName"
 $_intermediateCertCommonName = "Azure IoT CA TestOnly Intermediate {0} CA"
 $_intermediateCertSubject    = "CN=$_intermediateCertCommonName"
-$_privateKeyPassword      = "1234"
 
 $rootCACerFileName          = "./RootCA.cer"
 $rootCAPemFileName          = "./RootCA.pem"
@@ -200,8 +199,14 @@ function New-CACertsVerificationCert([string]$requestedCommonName)
 }
 
 
-function New-CACertsDevice([string]$deviceName, [string]$signingCertSubject=$_rootCertSubject, [bool]$isEdgeDevice=$false)
+function New-CACertsDevice()
 {
+    param([Parameter(Mandatory=$true)][string]$deviceName, 
+          [Parameter(Mandatory=$true)][System.Security.SecureString]$certPassword,
+          [string]$signingCertSubject=$_rootCertSubject,
+          [bool]$isEdgeDevice=$false
+    )
+
     $newDevicePfxFileName = ("./{0}.pfx" -f $deviceName)
     $newDevicePemAllFileName      = ("./{0}-all.pem" -f $deviceName)
     $newDevicePemPrivateFileName  = ("./{0}-private.pem" -f $deviceName)
@@ -233,7 +238,7 @@ function New-CACertsDevice([string]$deviceName, [string]$signingCertSubject=$_ro
 
     # Begin the massaging.  First, turn the PFX into a PEM file which contains public key, private key, and bunches of attributes.
     # We're closer to what IOTHub SDK's can handle but not there yet.
-    openssl pkcs12 -in $newDevicePfxFileName -out $newDevicePemAllFileName -nodes -password pass:$_privateKeyPassword
+    openssl pkcs12 -in $newDevicePfxFileName -out $newDevicePemAllFileName -nodes
 
     # Now that we have a PEM, do some conversions on it to get formats we can process
     if ((Get-CACertsCertUseRSA) -eq $true)
