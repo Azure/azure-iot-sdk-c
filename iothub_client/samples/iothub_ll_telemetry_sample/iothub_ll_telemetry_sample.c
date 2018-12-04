@@ -26,9 +26,9 @@ and removing calls to _DoWork will yield the same results. */
 
 // The protocol you wish to use should be uncommented
 //
-#define SAMPLE_MQTT
+//#define SAMPLE_MQTT
 //#define SAMPLE_MQTT_OVER_WEBSOCKETS
-//#define SAMPLE_AMQP
+#define SAMPLE_AMQP
 //#define SAMPLE_AMQP_OVER_WEBSOCKETS
 //#define SAMPLE_HTTP
 
@@ -53,7 +53,7 @@ and removing calls to _DoWork will yield the same results. */
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 /* Paste in the your iothub connection string  */
-static const char* connectionString = "HostName=rajeevma-hack-WCUS.azure-devices.net;DeviceId=devicee168b2af57ca4240b5646b4e340d539c;SharedAccessKey=Q73FyNYlKXq3N/Xr3WkZ7kpSW0RxGtv+W+fOh7DUMys=";
+static const char* connectionString = "HostName=private-iothub.private.azure-devices-int.net;DeviceId=device8c7805b506004b41921325d94d4e8d64;SharedAccessKey=J+drgfQK7QkizRUQFbBLTNXG705ehV9cHY1GPahvn6k=";
 #define MESSAGE_COUNT        5
 static bool g_continueRunning = true;
 static bool g_sendMessages = false;
