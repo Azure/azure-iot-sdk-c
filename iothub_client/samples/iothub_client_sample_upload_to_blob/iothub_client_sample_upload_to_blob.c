@@ -29,10 +29,10 @@ and removing calls to _DoWork will yield the same results. */
 /*String containing Hostname, Device Id & Device Key in the format:                         */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessSignature=<device_sas_token>"    */
-static const char* connectionString = "[device connection string]";
+static const char *connectionString = "[device connection string]";
 
 /*Optional string with http proxy host and integer for http proxy port (Linux only)         */
-static const char* proxyHost = NULL;
+static const char *proxyHost = NULL;
 static int proxyPort = 0;
 
 #define HELLO_WORLD "Hello World from IoTHubClient_LL_UploadToBlob"
@@ -48,7 +48,7 @@ int main(void)
     device_ll_handle = IoTHubDeviceClient_LL_CreateFromConnectionString(connectionString, HTTP_Protocol);
     if (device_ll_handle == NULL)
     {
-        (void)printf("Failure createing Iothub device.  Hint: Check you connection string.\r\n");
+        (void)printf("Failure createing Iothub device.  Hint: check your connection string.\r\n");
     }
     else
     {
@@ -63,7 +63,7 @@ int main(void)
         IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_TRUSTED_CERT, certificates);
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-        HTTP_PROXY_OPTIONS http_proxy_options = { 0 };
+        HTTP_PROXY_OPTIONS http_proxy_options = {0};
         http_proxy_options.host_address = proxyHost;
         http_proxy_options.port = proxyPort;
 
@@ -73,7 +73,7 @@ int main(void)
         }
         else
         {
-            if (IoTHubDeviceClient_LL_UploadToBlob(device_ll_handle, "subdir/hello_world.txt", (const unsigned char*)HELLO_WORLD, sizeof(HELLO_WORLD) - 1) != IOTHUB_CLIENT_OK)
+            if (IoTHubDeviceClient_LL_UploadToBlob(device_ll_handle, "subdir/hello_world.txt", (const unsigned char *)HELLO_WORLD, sizeof(HELLO_WORLD) - 1) != IOTHUB_CLIENT_OK)
             {
                 (void)printf("hello world failed to upload\n");
             }

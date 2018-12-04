@@ -28,15 +28,15 @@ and removing calls to _DoWork will yield the same results. */
 /*String containing Hostname, Device Id & Device Key in the format:                         */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessSignature=<device_sas_token>"    */
-static const char* connectionString = "[device connection string]";
+static const char *connectionString = "[device connection string]";
 
 /*Optional string with http proxy host and integer for http proxy port (Linux only)         */
-static const char* proxyHost = NULL;
+static const char *proxyHost = NULL;
 static int proxyPort = 0;
-static const char* data_to_upload = "Hello World from IoTHubClient_LL_UploadToBlob\n";
+static const char *data_to_upload = "Hello World from IoTHubClient_LL_UploadToBlob\n";
 static int block_count = 0;
 
-static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT getDataCallback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
+static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT getDataCallback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const **data, size_t *size, void *context)
 {
     (void)context;
     if (result == FILE_UPLOAD_OK)
@@ -47,7 +47,7 @@ static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT getDataCallback(IOTHUB_CLIENT_F
 
             if (block_count < 100)
             {
-                *data = (const unsigned char*)data_to_upload;
+                *data = (const unsigned char *)data_to_upload;
                 *size = strlen(data_to_upload);
                 block_count++;
             }
@@ -90,7 +90,7 @@ int main(void)
     device_ll_handle = IoTHubDeviceClient_LL_CreateFromConnectionString(connectionString, HTTP_Protocol);
     if (device_ll_handle == NULL)
     {
-        (void)printf("Failure createing Iothub device.  Hint: Check you connection string.\r\n");
+        (void)printf("Failure createing Iothub device.  Hint: check your connection string.\r\n");
     }
     else
     {
@@ -100,7 +100,7 @@ int main(void)
         IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_TRUSTED_CERT, certificates);
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-        HTTP_PROXY_OPTIONS http_proxy_options = { 0 };
+        HTTP_PROXY_OPTIONS http_proxy_options = {0};
         http_proxy_options.host_address = proxyHost;
         http_proxy_options.port = proxyPort;
 

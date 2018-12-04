@@ -28,64 +28,78 @@ and removing calls to _DoWork will yield the same results. */
 //#define SAMPLE_HTTP
 
 #ifdef SAMPLE_MQTT
-    #include "iothubtransportmqtt.h"
+#include "iothubtransportmqtt.h"
 #endif // SAMPLE_MQTT
 #ifdef SAMPLE_MQTT_OVER_WEBSOCKETS
-    #include "iothubtransportmqtt_websockets.h"
+#include "iothubtransportmqtt_websockets.h"
 #endif // SAMPLE_MQTT_OVER_WEBSOCKETS
 #ifdef SAMPLE_AMQP
-    #include "iothubtransportamqp.h"
+#include "iothubtransportamqp.h"
 #endif // SAMPLE_AMQP
 #ifdef SAMPLE_AMQP_OVER_WEBSOCKETS
-    #include "iothubtransportamqp_websockets.h"
+#include "iothubtransportamqp_websockets.h"
 #endif // SAMPLE_AMQP_OVER_WEBSOCKETS
 #ifdef SAMPLE_HTTP
-    #include "iothubtransporthttp.h"
+#include "iothubtransporthttp.h"
 #endif // SAMPLE_HTTP
 
 #ifdef MBED_BUILD_TIMESTAMP
-    #define SET_TRUSTED_CERT_IN_SAMPLES
+#define SET_TRUSTED_CERT_IN_SAMPLES
 #endif // MBED_BUILD_TIMESTAMP
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
-    #include "certs.h"
+#include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 /* Paste in the your x509 iothub connection string  */
 /*  "HostName=<host_name>;DeviceId=<device_id>;x509=true"                      */
-static const char* connectionString = "[device connection string]";
+static const char *connectionString = "[device connection string]";
 
-static const char* x509certificate =
-"-----BEGIN CERTIFICATE-----""\n"
-"MIICpDCCAYwCCQCfIjBnPxs5TzANBgkqhkiG9w0BAQsFADAUMRIwEAYDVQQDDAls""\n"
-"b2NhbGhvc3QwHhcNMTYwNjIyMjM0MzI3WhcNMTYwNjIzMjM0MzI3WjAUMRIwEAYD""\n"
-"...""\n"
-"+s88wBF907s1dcY45vsG0ldE3f7Y6anGF60nUwYao/fN/eb5FT5EHANVMmnK8zZ2""\n"
-"tjWUt5TFnAveFoQWIoIbtzlTbOxUFwMrQFzFXOrZoDJmHNWc2u6FmVAkowoOSHiE""\n"
-"dkyVdoGPCXc=""\n"
-"-----END CERTIFICATE-----";
+static const char *x509certificate =
+    "-----BEGIN CERTIFICATE-----"
+    "\n"
+    "MIICpDCCAYwCCQCfIjBnPxs5TzANBgkqhkiG9w0BAQsFADAUMRIwEAYDVQQDDAls"
+    "\n"
+    "b2NhbGhvc3QwHhcNMTYwNjIyMjM0MzI3WhcNMTYwNjIzMjM0MzI3WjAUMRIwEAYD"
+    "\n"
+    "..."
+    "\n"
+    "+s88wBF907s1dcY45vsG0ldE3f7Y6anGF60nUwYao/fN/eb5FT5EHANVMmnK8zZ2"
+    "\n"
+    "tjWUt5TFnAveFoQWIoIbtzlTbOxUFwMrQFzFXOrZoDJmHNWc2u6FmVAkowoOSHiE"
+    "\n"
+    "dkyVdoGPCXc="
+    "\n"
+    "-----END CERTIFICATE-----";
 
-static const char* x509privatekey =
-"-----BEGIN RSA PRIVATE KEY-----""\n"
-"MIIEpQIBAAKCAQEA0zKK+Uu5I0nXq2V6+2gbdCsBXZ6j1uAgU/clsCohEAek1T8v""\n"
-"qj2tR9Mz9iy9RtXPMHwzcQ7aXDaz7RbHdw7tYXqSw8iq0Mxq2s3p4mo6gd5vEOiN""\n"
-"...""\n"
-"EyePNmkCgYEAng+12qvs0de7OhkTjX9FLxluLWxfN2vbtQCWXslLCG+Es/ZzGlNF""\n"
-"SaqVID4EAUgUqFDw0UO6SKLT+HyFjOr5qdHkfAmRzwE/0RBN69g2qLDN3Km1Px/k""\n"
-"xyJyxc700uV1eKiCdRLRuCbUeecOSZreh8YRIQQXoG8uotO5IttdVRc=""\n"
-"-----END RSA PRIVATE KEY-----";
+static const char *x509privatekey =
+    "-----BEGIN RSA PRIVATE KEY-----"
+    "\n"
+    "MIIEpQIBAAKCAQEA0zKK+Uu5I0nXq2V6+2gbdCsBXZ6j1uAgU/clsCohEAek1T8v"
+    "\n"
+    "qj2tR9Mz9iy9RtXPMHwzcQ7aXDaz7RbHdw7tYXqSw8iq0Mxq2s3p4mo6gd5vEOiN"
+    "\n"
+    "..."
+    "\n"
+    "EyePNmkCgYEAng+12qvs0de7OhkTjX9FLxluLWxfN2vbtQCWXslLCG+Es/ZzGlNF"
+    "\n"
+    "SaqVID4EAUgUqFDw0UO6SKLT+HyFjOr5qdHkfAmRzwE/0RBN69g2qLDN3Km1Px/k"
+    "\n"
+    "xyJyxc700uV1eKiCdRLRuCbUeecOSZreh8YRIQQXoG8uotO5IttdVRc="
+    "\n"
+    "-----END RSA PRIVATE KEY-----";
 
-#define MESSAGE_COUNT        5
+#define MESSAGE_COUNT 5
 static bool g_continueRunning = true;
 static size_t g_message_count_send_confirmations = 0;
 
 typedef struct EVENT_INSTANCE_TAG
 {
     IOTHUB_MESSAGE_HANDLE messageHandle;
-    size_t messageTrackingId;  // For tracking the messages within the user callback.
+    size_t messageTrackingId; // For tracking the messages within the user callback.
 } EVENT_INSTANCE;
 
-static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
+static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void *userContextCallback)
 {
     (void)userContextCallback;
     // When a message is sent this callback will get invoked
@@ -98,7 +112,7 @@ int main(void)
     IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;
     IOTHUB_MESSAGE_HANDLE message_handle;
     size_t messages_sent = 0;
-    const char* telemetry_msg = "test_message";
+    const char *telemetry_msg = "test_message";
 
     // Select the Protocol to use with the connection
 #ifdef SAMPLE_MQTT
@@ -127,7 +141,7 @@ int main(void)
     device_ll_handle = IoTHubDeviceClient_LL_CreateFromConnectionString(connectionString, protocol);
     if (device_ll_handle == NULL)
     {
-        (void)printf("Failure createing Iothub device.  Hint: Check you connection string.\r\n");
+        (void)printf("Failure createing Iothub device.  Hint: check your connection string.\r\n");
     }
     else
     {
@@ -144,8 +158,7 @@ int main(void)
         // Set the X509 certificates in the SDK
         if (
             (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_X509_CERT, x509certificate) != IOTHUB_CLIENT_OK) ||
-            (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_X509_PRIVATE_KEY, x509privatekey) != IOTHUB_CLIENT_OK)
-            )
+            (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_X509_PRIVATE_KEY, x509privatekey) != IOTHUB_CLIENT_OK))
         {
             printf("failure to set options for x509, aborting\r\n");
         }

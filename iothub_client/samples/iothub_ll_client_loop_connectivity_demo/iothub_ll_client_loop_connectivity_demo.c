@@ -89,7 +89,6 @@ static const char *x509privatekey =
     "\n"
     "-----END RSA PRIVATE KEY-----";
 
-#define MESSAGE_COUNT 5
 static bool g_continueRunning = true;
 
 typedef struct EVENT_INSTANCE_TAG
@@ -120,6 +119,21 @@ static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS result, I
     {
         printf("\t** iothub disconnected **\n");
     }
+}
+
+// sleep N milliseconds, but call iothub dowork at the recommended interval during this sleep
+void iothub_sleep(unsigned int milliseconds, IOTHUB_DEVICE_CLIENT_LL_HANDLE *device_ll_handle)
+{
+    IoTHubDeviceClient_LL_DoWork(*device_ll_handle);
+
+    const int IOTHUB_DOWORK_CALL_FREQUENCY_MS = 100;
+    while (milliseconds > IOTHUB_DOWORK_CALL_FREQUENCY_MS)
+    {
+        milliseconds -= IOTHUB_DOWORK_CALL_FREQUENCY_MS;
+        ThreadAPI_Sleep(IOTHUB_DOWORK_CALL_FREQUENCY_MS);
+        IoTHubDeviceClient_LL_DoWork(*device_ll_handle);
+    }
+    ThreadAPI_Sleep(milliseconds);
 }
 
 int main(void)
@@ -154,7 +168,7 @@ int main(void)
     device_ll_handle = IoTHubDeviceClient_LL_CreateFromConnectionString(connectionString, protocol);
     if (device_ll_handle == NULL)
     {
-        (void)printf("Failure createing Iothub device.  Hint: Check you connection string.\r\n");
+        (void)printf("Failure createing Iothub device.  Hint: Check your connection string.\r\n");
     }
     else
     {
@@ -197,11 +211,10 @@ int main(void)
                     // if we're disconnected or we can't upload fast enough,
                     // the azure iot library will continue accepting messages and keeping them in a queue
                     // using the count of callbacks, limit the growth of this queue
-                    printf("warning: max number of outstanding messages reached, skipping next message send");
+                    printf("warning: max number of outstanding messages reached, skipping next message send\n");
                 }
 
-                IoTHubDeviceClient_LL_DoWork(device_ll_handle);
-                ThreadAPI_Sleep(1);
+                iothub_sleep(1000, &device_ll_handle);
 
             } while (g_continueRunning);
         }
