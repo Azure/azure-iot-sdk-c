@@ -969,6 +969,7 @@ static int publish_device_twin_message(MQTTTRANSPORT_HANDLE_DATA* transport_data
     int result;
     mqtt_info->packet_id = get_next_packet_id(transport_data);
     mqtt_info->device_twin_msg_type = REPORTED_STATE;
+
     STRING_HANDLE msgTopic = STRING_construct_sprintf(REPORTED_PROPERTIES_TOPIC, mqtt_info->packet_id);
     if (msgTopic == NULL)
     {
@@ -977,34 +978,42 @@ static int publish_device_twin_message(MQTTTRANSPORT_HANDLE_DATA* transport_data
     }
     else
     {
-        const CONSTBUFFER* data_buff = CONSTBUFFER_GetContent(device_twin_info->report_data_handle);
-        MQTT_MESSAGE_HANDLE mqtt_rpt_msg = mqttmessage_create_in_place(mqtt_info->packet_id, STRING_c_str(msgTopic), DELIVER_AT_MOST_ONCE, data_buff->buffer, data_buff->size);
-        if (mqtt_rpt_msg == NULL)
+        const CONSTBUFFER* data_buff;
+        if ((data_buff = CONSTBUFFER_GetContent(device_twin_info->report_data_handle)) == NULL)
         {
-            LogError("Failed creating mqtt message");
+            LogError("Failed retrieving buffer content");
             result = __FAILURE__;
         }
         else
         {
-            if (tickcounter_get_current_ms(transport_data->msgTickCounter, &mqtt_info->msgPublishTime) != 0)
+            MQTT_MESSAGE_HANDLE mqtt_rpt_msg = mqttmessage_create_in_place(mqtt_info->packet_id, STRING_c_str(msgTopic), DELIVER_AT_MOST_ONCE, data_buff->buffer, data_buff->size);
+            if (mqtt_rpt_msg == NULL)
             {
-                LogError("Failed retrieving tickcounter info");
+                LogError("Failed creating mqtt message");
                 result = __FAILURE__;
             }
             else
             {
-                if (mqtt_client_publish(transport_data->mqttClient, mqtt_rpt_msg) != 0)
+                if (tickcounter_get_current_ms(transport_data->msgTickCounter, &mqtt_info->msgPublishTime) != 0)
                 {
-                    LogError("Failed publishing mqtt message");
+                    LogError("Failed retrieving tickcounter info");
                     result = __FAILURE__;
                 }
                 else
                 {
-                    mqtt_info->retryCount++;
-                    result = 0;
+                    if (mqtt_client_publish(transport_data->mqttClient, mqtt_rpt_msg) != 0)
+                    {
+                        LogError("Failed publishing mqtt message");
+                        result = __FAILURE__;
+                    }
+                    else
+                    {
+                        mqtt_info->retryCount++;
+                        result = 0;
+                    }
                 }
+                mqttmessage_destroy(mqtt_rpt_msg);
             }
-            mqttmessage_destroy(mqtt_rpt_msg);
         }
         STRING_delete(msgTopic);
     }
