@@ -31,19 +31,6 @@ build_c_test_artifacts(${theseTestsName} ON "tests/E2ETests" VALGRIND_SUPPRESSIO
 
 if(WIN32)
     if(TARGET ${theseTestsName}_dll)
-        target_link_libraries(${theseTestsName}_dll
-                iothub_client
-                aziotsharedutil
-        )
-    endif()
-    if(TARGET ${theseTestsName}_exe)
-        target_link_libraries(${theseTestsName}_exe
-                iothub_client
-                aziotsharedutil
-        )
-    endif()
-
-    if(TARGET ${theseTestsName}_dll)
         if(${use_mqtt})
             add_definitions(-DUSE_MQTT)
             target_link_libraries(${theseTestsName}_dll
@@ -93,6 +80,21 @@ if(WIN32)
             )
         endif()
     endif()
+
+    if(TARGET ${theseTestsName}_dll)
+        target_link_libraries(${theseTestsName}_dll
+                iothub_client
+                aziotsharedutil
+        )
+    endif()
+    if(TARGET ${theseTestsName}_exe)
+        target_link_libraries(${theseTestsName}_exe
+                iothub_client
+                aziotsharedutil
+        )
+    endif()
+
+
 else()
 
     if(UNIX) #LINUX OR APPLE
@@ -108,11 +110,6 @@ else()
     endif()
 
     if(TARGET ${theseTestsName}_exe)
-        target_link_libraries(${theseTestsName}_exe
-            iothub_test
-            iothub_client
-            aziotsharedutil
-        )
         if(${use_mqtt})
             add_definitions(-DUSE_MQTT)
             target_link_libraries(${theseTestsName}_exe
@@ -135,6 +132,12 @@ else()
                 iothub_client_http_transport
             )
         endif()
+
+        target_link_libraries(${theseTestsName}_exe
+            iothub_test
+            iothub_client
+            aziotsharedutil
+        )
 
     endif()
 endif()
