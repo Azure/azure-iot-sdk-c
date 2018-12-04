@@ -118,59 +118,72 @@ static char* serializeToJson(Car* car)
 static Car* parseFromJson(const char* json, DEVICE_TWIN_UPDATE_STATE update_state)
 {
     Car* car = malloc(sizeof(Car));
-    (void)memset(car, 0, sizeof(Car));
+    JSON_Value* root_value = NULL;
+    JSON_Object* root_object = NULL;
 
-    JSON_Value* root_value = json_parse_string(json);
-    JSON_Object* root_object = json_value_get_object(root_value);
-
-    // Only desired properties:
-    JSON_Value* changeOilReminder;
-    JSON_Value* desired_maxSpeed;
-    JSON_Value* latitude;
-    JSON_Value* longitude;
-
-    if (update_state == DEVICE_TWIN_UPDATE_COMPLETE)
+    if (NULL == car)
     {
-        changeOilReminder = json_object_dotget_value(root_object, "desired.changeOilReminder");
-        desired_maxSpeed = json_object_dotget_value(root_object, "desired.settings.desired_maxSpeed");
-        latitude = json_object_dotget_value(root_object, "desired.settings.location.latitude");
-        longitude = json_object_dotget_value(root_object, "desired.settings.location.longitude");
+        (void)printf("ERROR: Failed to allocate memory\r\n");
     }
+
     else
     {
-        changeOilReminder = json_object_dotget_value(root_object, "changeOilReminder");
-        desired_maxSpeed = json_object_dotget_value(root_object, "settings.desired_maxSpeed");
-        latitude = json_object_dotget_value(root_object, "settings.location.latitude");
-        longitude = json_object_dotget_value(root_object, "settings.location.longitude");
-    }
+        (void)memset(car, 0, sizeof(Car));
 
-    if (changeOilReminder != NULL)
-    {
-        const char* data = json_value_get_string(changeOilReminder);
+        root_value = json_parse_string(json);
+        root_object = json_value_get_object(root_value);
 
-        if (data != NULL)
+        // Only desired properties:
+        JSON_Value* changeOilReminder;
+        JSON_Value* desired_maxSpeed;
+        JSON_Value* latitude;
+        JSON_Value* longitude;
+
+        if (update_state == DEVICE_TWIN_UPDATE_COMPLETE)
         {
-            car->changeOilReminder = malloc(strlen(data) + 1);
-            (void)strcpy(car->changeOilReminder, data);
+            changeOilReminder = json_object_dotget_value(root_object, "desired.changeOilReminder");
+            desired_maxSpeed = json_object_dotget_value(root_object, "desired.settings.desired_maxSpeed");
+            latitude = json_object_dotget_value(root_object, "desired.settings.location.latitude");
+            longitude = json_object_dotget_value(root_object, "desired.settings.location.longitude");
         }
-    }
+        else
+        {
+            changeOilReminder = json_object_dotget_value(root_object, "changeOilReminder");
+            desired_maxSpeed = json_object_dotget_value(root_object, "settings.desired_maxSpeed");
+            latitude = json_object_dotget_value(root_object, "settings.location.latitude");
+            longitude = json_object_dotget_value(root_object, "settings.location.longitude");
+        }
 
-    if (desired_maxSpeed != NULL)
-    {
-        car->settings.desired_maxSpeed = (uint8_t)json_value_get_number(desired_maxSpeed);
-    }
+        if (changeOilReminder != NULL)
+        {
+            const char* data = json_value_get_string(changeOilReminder);
 
-    if (latitude != NULL)
-    {
-        car->settings.location.latitude = json_value_get_number(latitude);
-    }
+            if (data != NULL)
+            {
+                car->changeOilReminder = malloc(strlen(data) + 1);
+                if (NULL != car->changeOilReminder)
+                {
+                    (void)strcpy(car->changeOilReminder, data);
+                }
+            }
+        }
 
-    if (longitude != NULL)
-    {
-        car->settings.location.longitude = json_value_get_number(longitude);
-    }
+        if (desired_maxSpeed != NULL)
+        {
+            car->settings.desired_maxSpeed = (uint8_t)json_value_get_number(desired_maxSpeed);
+        }
 
-    json_value_free(root_value);
+        if (latitude != NULL)
+        {
+            car->settings.location.latitude = json_value_get_number(latitude);
+        }
+
+        if (longitude != NULL)
+        {
+            car->settings.location.longitude = json_value_get_number(longitude);
+        }
+        json_value_free(root_value);
+    }
 
     return car;
 }
@@ -214,19 +227,19 @@ static void deviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsi
 
     if (newCar->changeOilReminder != NULL)
     {
-        if (oldCar->changeOilReminder == NULL ||
-            strcmp(oldCar->changeOilReminder, newCar->changeOilReminder) != 0)
+        if ((oldCar->changeOilReminder != NULL) && (strcmp(oldCar->changeOilReminder, newCar->changeOilReminder) != 0))
+        {
+            free(oldCar->changeOilReminder);
+        }
+        
+        if (oldCar->changeOilReminder == NULL)
         {
             printf("Received a new changeOilReminder = %s\n", newCar->changeOilReminder);
-
-            if (oldCar->changeOilReminder != NULL)
+            if ( NULL != (oldCar->changeOilReminder = malloc(strlen(newCar->changeOilReminder) + 1)))
             {
-                free(oldCar->changeOilReminder);
+                (void)strcpy(oldCar->changeOilReminder, newCar->changeOilReminder);
+                free(newCar->changeOilReminder);
             }
-
-            oldCar->changeOilReminder = malloc(strlen(newCar->changeOilReminder) + 1);
-            (void)strcpy(oldCar->changeOilReminder, newCar->changeOilReminder);
-			free(newCar->changeOilReminder);
         }
     }
 
@@ -329,7 +342,7 @@ static void iothub_client_device_twin_and_methods_sample_run(void)
             (void)IoTHubDeviceClient_SetDeviceMethodCallback(iotHubClientHandle, deviceMethodCallback, NULL);
             (void)IoTHubDeviceClient_SetDeviceTwinCallback(iotHubClientHandle, deviceTwinCallback, &car);
 
-            getchar();
+            (void)getchar();
 
             IoTHubDeviceClient_Destroy(iotHubClientHandle);
             free(reportedProperties);
