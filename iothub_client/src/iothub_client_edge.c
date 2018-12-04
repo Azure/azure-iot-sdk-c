@@ -13,6 +13,7 @@
 #include "azure_c_shared_utility/uniqueid.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/envvariable.h"
 
 #include "parson.h"
 
@@ -368,6 +369,8 @@ static STRING_HANDLE createRelativePath(const char* deviceId, const char* module
     return result;
 }
 
+static const char* ENVIRONMENT_VAR_EDGEHUB_CACERTIFICATEFILE = "EdgeModuleCACertificateFile";
+
 static IOTHUB_CLIENT_RESULT sendHttpRequestMethod(IOTHUB_CLIENT_EDGE_HANDLE moduleMethodHandle, const char* deviceId, const char* moduleId, BUFFER_HANDLE deviceJsonBuffer, BUFFER_HANDLE responseBuffer)
 {
     IOTHUB_CLIENT_RESULT result;
@@ -378,6 +381,11 @@ static IOTHUB_CLIENT_RESULT sendHttpRequestMethod(IOTHUB_CLIENT_EDGE_HANDLE modu
     const char* relativePath_s;
     char* trustedCertificate;
     unsigned int statusCode = 0;
+
+    // The environment variable ENVIRONMENT_VAR_EDGEHUB_CACERTIFICATEFILE is *optional*; it will not be present in 
+    // fact in the vast majority of production scenarios.  Its presence has underlying layer override where it 
+    // retrieves trusted certificates from.
+    const char* caTrustedCertificateFile = environment_get_variable(ENVIRONMENT_VAR_EDGEHUB_CACERTIFICATEFILE);
 
     if ((httpHeader = createHttpHeader()) == NULL)
     {
@@ -409,7 +417,7 @@ static IOTHUB_CLIENT_RESULT sendHttpRequestMethod(IOTHUB_CLIENT_EDGE_HANDLE modu
         STRING_delete(relativePath);
         result = IOTHUB_CLIENT_ERROR;
     }
-    else if ((trustedCertificate = IoTHubClient_Auth_Get_TrustBundle(moduleMethodHandle->authorizationHandle)) == NULL)
+    else if ((trustedCertificate = IoTHubClient_Auth_Get_TrustBundle(moduleMethodHandle->authorizationHandle, caTrustedCertificateFile)) == NULL)
     {
         LogError("Failed to get TrustBundle");
         HTTPHeaders_Free(httpHeader);
