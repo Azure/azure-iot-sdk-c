@@ -15,6 +15,8 @@
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 
+#include <resolv.h> // res_init()
+
 /* This sample uses the _LL APIs of iothub_client for example purposes.
 Simply changing the using the convenience layer (functions not having _LL)
 and removing calls to _DoWork will yield the same results. */
@@ -56,37 +58,23 @@ and removing calls to _DoWork will yield the same results. */
 static const char *connectionString = "[device connection string]";
 
 static const char *x509certificate =
-    "-----BEGIN CERTIFICATE-----"
-    "\n"
-    "MIICpDCCAYwCCQCfIjBnPxs5TzANBgkqhkiG9w0BAQsFADAUMRIwEAYDVQQDDAls"
-    "\n"
-    "b2NhbGhvc3QwHhcNMTYwNjIyMjM0MzI3WhcNMTYwNjIzMjM0MzI3WjAUMRIwEAYD"
-    "\n"
-    "..."
-    "\n"
-    "+s88wBF907s1dcY45vsG0ldE3f7Y6anGF60nUwYao/fN/eb5FT5EHANVMmnK8zZ2"
-    "\n"
-    "tjWUt5TFnAveFoQWIoIbtzlTbOxUFwMrQFzFXOrZoDJmHNWc2u6FmVAkowoOSHiE"
-    "\n"
-    "dkyVdoGPCXc="
-    "\n"
+    "-----BEGIN CERTIFICATE-----\n"
+    "MIICpDCCAYwCCQCfIjBnPxs5TzANBgkqhkiG9w0BAQsFADAUMRIwEAYDVQQDDAls\n"
+    "b2NhbGhvc3QwHhcNMTYwNjIyMjM0MzI3WhcNMTYwNjIzMjM0MzI3WjAUMRIwEAYD\n"
+    "...\n"
+    "+s88wBF907s1dcY45vsG0ldE3f7Y6anGF60nUwYao/fN/eb5FT5EHANVMmnK8zZ2\n"
+    "tjWUt5TFnAveFoQWIoIbtzlTbOxUFwMrQFzFXOrZoDJmHNWc2u6FmVAkowoOSHiE\n"
+    "dkyVdoGPCXc=\n"
     "-----END CERTIFICATE-----";
 
 static const char *x509privatekey =
-    "-----BEGIN RSA PRIVATE KEY-----"
-    "\n"
-    "MIIEpQIBAAKCAQEA0zKK+Uu5I0nXq2V6+2gbdCsBXZ6j1uAgU/clsCohEAek1T8v"
-    "\n"
-    "qj2tR9Mz9iy9RtXPMHwzcQ7aXDaz7RbHdw7tYXqSw8iq0Mxq2s3p4mo6gd5vEOiN"
-    "\n"
-    "..."
-    "\n"
-    "EyePNmkCgYEAng+12qvs0de7OhkTjX9FLxluLWxfN2vbtQCWXslLCG+Es/ZzGlNF"
-    "\n"
-    "SaqVID4EAUgUqFDw0UO6SKLT+HyFjOr5qdHkfAmRzwE/0RBN69g2qLDN3Km1Px/k"
-    "\n"
-    "xyJyxc700uV1eKiCdRLRuCbUeecOSZreh8YRIQQXoG8uotO5IttdVRc="
-    "\n"
+    "-----BEGIN RSA PRIVATE KEY-----\n"
+    "MIIEpQIBAAKCAQEA0zKK+Uu5I0nXq2V6+2gbdCsBXZ6j1uAgU/clsCohEAek1T8v\n"
+    "qj2tR9Mz9iy9RtXPMHwzcQ7aXDaz7RbHdw7tYXqSw8iq0Mxq2s3p4mo6gd5vEOiN\n"
+    "...\n"
+    "EyePNmkCgYEAng+12qvs0de7OhkTjX9FLxluLWxfN2vbtQCWXslLCG+Es/ZzGlNF\n"
+    "SaqVID4EAUgUqFDw0UO6SKLT+HyFjOr5qdHkfAmRzwE/0RBN69g2qLDN3Km1Px/k\n"
+    "xyJyxc700uV1eKiCdRLRuCbUeecOSZreh8YRIQQXoG8uotO5IttdVRc=\n"
     "-----END RSA PRIVATE KEY-----";
 
 static bool g_continueRunning = true;
@@ -193,6 +181,9 @@ int main(void)
         }
         else
         {
+            int consecutive_skipped_messages = 0;
+            const int MAX_SKIPPED_MESSAGES_BEFORE_RES_INIT = 60;
+
             do
             {
                 if (iothub_messages_sent - iothub_message_callbacks_received < MAX_OUTSTANDING_MESSAGES)
@@ -205,6 +196,7 @@ int main(void)
 
                     // The message is copied to the sdk so the we can destroy it
                     IoTHubMessage_Destroy(message_handle);
+                    consecutive_skipped_messages = 0;
                 }
                 else
                 {
@@ -212,6 +204,21 @@ int main(void)
                     // the azure iot library will continue accepting messages and keeping them in a queue
                     // using the count of callbacks, limit the growth of this queue
                     printf("warning: max number of outstanding messages reached, skipping next message send\n");
+                    consecutive_skipped_messages++;
+
+                    if(consecutive_skipped_messages > MAX_SKIPPED_MESSAGES_BEFORE_RES_INIT)
+                    {
+                        consecutive_skipped_messages = 0;
+
+                        // res_init(): refresh dns so that getaddrinfo() works if dns was updated after the program started
+                        // not needed as of glibc 2.26
+                        // see https://sourceware.org/bugzilla/show_bug.cgi?id=984#c20
+                        printf("calling res_init()\n");
+                        if (res_init() == -1)
+                        {
+                            printf("res_init() error\n");
+                        }
+                    }
                 }
 
                 iothub_sleep(1000, &device_ll_handle);
