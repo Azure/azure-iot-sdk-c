@@ -8,7 +8,7 @@
 // The code simulates a simple Chiller device.
 
 // CAVEAT: This sample is to demonstrate azure IoT client concepts only and is not a guide design principles or style
-// Checking of return codes and error values are omitted for brevity.  Please practice sound engineering practices
+// Checking of return codes and error values are omitted for brevity.  Please practice sound engineering practices 
 // when writing production code.
 
 #include <stdio.h>
@@ -25,43 +25,42 @@
 #include "iothubtransportmqtt.h"
 #include "parson.h"
 
-#define MESSAGERESPONSE(code, message)                             \
-	const char deviceMethodResponse[] = message;                   \
-	*response_size = sizeof(deviceMethodResponse) - 1;             \
-	*response = malloc(*response_size);                            \
-	(void)memcpy(*response, deviceMethodResponse, *response_size); \
-	result = code;
+#define MESSAGERESPONSE(code, message) const char deviceMethodResponse[] = message; \
+	*response_size = sizeof(deviceMethodResponse) - 1;                              \
+	*response = malloc(*response_size);                                             \
+	(void)memcpy(*response, deviceMethodResponse, *response_size);                  \
+	result = code;                                                                  \
 
 #define FIRMWARE_UPDATE_STATUS_VALUES \
-	DOWNLOADING,                      \
-		APPLYING,                     \
-		REBOOTING,                    \
-		IDLE
+    DOWNLOADING,                      \
+    APPLYING,                         \
+    REBOOTING,                        \
+    IDLE                              \
 
 /*Enumeration specifying firmware update status */
 DEFINE_ENUM(FIRMWARE_UPDATE_STATUS, FIRMWARE_UPDATE_STATUS_VALUES);
 DEFINE_ENUM_STRINGS(FIRMWARE_UPDATE_STATUS, FIRMWARE_UPDATE_STATUS_VALUES);
 
 /* Paste in your device connection string  */
-static const char *connectionString = "<connectionstring>";
+static const char* connectionString = "<connectionstring>";
 static char msgText[1024];
 static size_t g_message_count_send_confirmations = 0;
-static const char *initialFirmwareVersion = "1.0.0";
+static const char* initialFirmwareVersion = "1.0.0";
 
 IOTHUB_DEVICE_CLIENT_HANDLE device_handle;
 
 // <datadefinition>
 typedef struct MESSAGESCHEMA_TAG
 {
-	char *name;
-	char *format;
-	char *fields;
+	char* name;
+	char* format;
+	char* fields;
 } MessageSchema;
 
 typedef struct TELEMETRYSCHEMA_TAG
 {
-	char *interval;
-	char *messageTemplate;
+	char* interval;
+	char* messageTemplate;
 	MessageSchema messageSchema;
 } TelemetrySchema;
 
@@ -75,29 +74,29 @@ typedef struct TELEMETRYPROPERTIES_TAG
 typedef struct CHILLER_TAG
 {
 	// Reported properties
-	char *protocol;
-	char *supportedMethods;
-	char *type;
-	char *firmware;
+	char* protocol;
+	char* supportedMethods;
+	char* type;
+	char* firmware;
 	FIRMWARE_UPDATE_STATUS firmwareUpdateStatus;
-	char *location;
+	char* location;
 	double latitude;
 	double longitude;
 	TelemetryProperties telemetry;
 
 	// Manage firmware update process
-	char *new_firmware_version;
-	char *new_firmware_URI;
+	char* new_firmware_version;
+	char* new_firmware_URI;
 } Chiller;
 // </datadefinition>
 
 /*  Converts the Chiller object into a JSON blob with reported properties ready to be sent across the wire as a twin. */
-static char *serializeToJson(Chiller *chiller)
+static char* serializeToJson(Chiller* chiller)
 {
-	char *result;
+	char* result;
 
-	JSON_Value *root_value = json_value_init_object();
-	JSON_Object *root_object = json_value_get_object(root_value);
+	JSON_Value* root_value = json_value_init_object();
+	JSON_Object* root_object = json_value_get_object(root_value);
 
 	// Only reported properties:
 	(void)json_object_set_string(root_object, "Protocol", chiller->protocol);
@@ -132,7 +131,7 @@ static char *serializeToJson(Chiller *chiller)
 	return result;
 }
 
-static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS result, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason, void *user_context)
+static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS result, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason, void* user_context)
 {
 	(void)reason;
 	(void)user_context;
@@ -147,25 +146,25 @@ static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS result, I
 	}
 }
 
-static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void *userContextCallback)
+static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
 {
 	(void)userContextCallback;
 	g_message_count_send_confirmations++;
 	(void)printf("Confirmation callback received for message %zu with result %s\r\n", g_message_count_send_confirmations, ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
 }
 
-static void reported_state_callback(int status_code, void *userContextCallback)
+static void reported_state_callback(int status_code, void* userContextCallback)
 {
 	(void)userContextCallback;
 	(void)printf("Device Twin reported properties update completed with result: %d\r\n", status_code);
 }
 
-static void sendChillerReportedProperties(Chiller *chiller)
+static void sendChillerReportedProperties(Chiller* chiller)
 {
 	if (device_handle != NULL)
 	{
-		char *reportedProperties = serializeToJson(chiller);
-		(void)IoTHubDeviceClient_SendReportedState(device_handle, (const unsigned char *)reportedProperties, strlen(reportedProperties), reported_state_callback, NULL);
+		char* reportedProperties = serializeToJson(chiller);
+		(void)IoTHubDeviceClient_SendReportedState(device_handle, (const unsigned char*)reportedProperties, strlen(reportedProperties), reported_state_callback, NULL);
 		free(reportedProperties);
 	}
 }
@@ -209,21 +208,21 @@ static int do_firmware_update(void *param)
 }
 // </firmwareupdate>
 
-void getFirmwareUpdateValues(Chiller *chiller, const unsigned char *payload)
+void getFirmwareUpdateValues(Chiller* chiller, const unsigned char* payload)
 {
 	free(chiller->new_firmware_version);
 	free(chiller->new_firmware_URI);
 	chiller->new_firmware_URI = NULL;
 	chiller->new_firmware_version = NULL;
 
-	JSON_Value *root_value = json_parse_string((char *)payload);
-	JSON_Object *root_object = json_value_get_object(root_value);
+	JSON_Value* root_value = json_parse_string((char *)payload);
+	JSON_Object* root_object = json_value_get_object(root_value);
 
-	JSON_Value *newFirmwareVersion = json_object_get_value(root_object, "Firmware");
+	JSON_Value* newFirmwareVersion = json_object_get_value(root_object, "Firmware");
 
 	if (newFirmwareVersion != NULL)
 	{
-		const char *data = json_value_get_string(newFirmwareVersion);
+		const char* data = json_value_get_string(newFirmwareVersion);
 		if (data != NULL)
 		{
 			size_t size = strlen(data) + 1;
@@ -232,11 +231,11 @@ void getFirmwareUpdateValues(Chiller *chiller, const unsigned char *payload)
 		}
 	}
 
-	JSON_Value *newFirmwareURI = json_object_get_value(root_object, "FirmwareUri");
+	JSON_Value* newFirmwareURI = json_object_get_value(root_object, "FirmwareUri");
 
 	if (newFirmwareURI != NULL)
 	{
-		const char *data = json_value_get_string(newFirmwareURI);
+		const char* data = json_value_get_string(newFirmwareURI);
 		if (data != NULL)
 		{
 			size_t size = strlen(data) + 1;
@@ -247,10 +246,11 @@ void getFirmwareUpdateValues(Chiller *chiller, const unsigned char *payload)
 
 	// Free resources
 	json_value_free(root_value);
+
 }
 
 // <devicemethodcallback>
-static int device_method_callback(const char *method_name, const unsigned char *payload, size_t size, unsigned char **response, size_t *response_size, void *userContextCallback)
+static int device_method_callback(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* response_size, void* userContextCallback)
 {
 	Chiller *chiller = (Chiller *)userContextCallback;
 
@@ -258,7 +258,7 @@ static int device_method_callback(const char *method_name, const unsigned char *
 
 	(void)printf("Direct method name:    %s\r\n", method_name);
 
-	(void)printf("Direct method payload: %.*s\r\n", (int)size, (const char *)payload);
+	(void)printf("Direct method payload: %.*s\r\n", (int)size, (const char*)payload);
 
 	if (strcmp("Reboot", method_name) == 0)
 	{
@@ -318,7 +318,7 @@ static int device_method_callback(const char *method_name, const unsigned char *
 // </devicemethodcallback>
 
 // <sendmessage>
-static void send_message(IOTHUB_DEVICE_CLIENT_HANDLE handle, char *message, char *schema)
+static void send_message(IOTHUB_DEVICE_CLIENT_HANDLE handle, char* message, char* schema)
 {
 	IOTHUB_MESSAGE_HANDLE message_handle = IoTHubMessage_CreateFromString(message);
 
@@ -334,10 +334,10 @@ static void send_message(IOTHUB_DEVICE_CLIENT_HANDLE handle, char *message, char
 	(void)Map_AddOrUpdate(propMap, "$$ContentType", "JSON");
 
 	time_t now = time(0);
-	struct tm *timeinfo;
+	struct tm* timeinfo;
 #ifdef _MSC_VER
 #pragma warning(push)
-#pragma warning(disable : 4996) /* Suppress warning about possible unsafe function in Visual Studio */
+#pragma warning(disable: 4996) /* Suppress warning about possible unsafe function in Visual Studio */
 #endif
 	timeinfo = gmtime(&now);
 #ifdef _MSC_VER
@@ -374,7 +374,7 @@ int main(void)
 	device_handle = IoTHubDeviceClient_CreateFromConnectionString(connectionString, MQTT_Protocol);
 	if (device_handle == NULL)
 	{
-		(void)printf("Failure creating Iothub device.  Hint: check your connection string.\r\n");
+		(void)printf("Failure creating Iothub device.  Hint: Check you connection string.\r\n");
 	}
 	else
 	{
@@ -425,9 +425,11 @@ int main(void)
 				(void)sprintf_s(msgText, sizeof(msgText), "{\"temperature\":%.2f,\"temperature_unit\":\"F\"}", temperature);
 				send_message(device_handle, msgText, chiller.telemetry.temperatureSchema.messageSchema.name);
 
+
 				(void)printf("Sending sensor value Pressure = %f %s,\r\n", pressure, "psig");
 				(void)sprintf_s(msgText, sizeof(msgText), "{\"pressure\":%.2f,\"pressure_unit\":\"psig\"}", pressure);
 				send_message(device_handle, msgText, chiller.telemetry.pressureSchema.messageSchema.name);
+
 
 				(void)printf("Sending sensor value Humidity = %f %s,\r\n", humidity, "%");
 				(void)sprintf_s(msgText, sizeof(msgText), "{\"humidity\":%.2f,\"humidity_unit\":\"%%\"}", humidity);
