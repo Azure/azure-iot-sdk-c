@@ -42,14 +42,15 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 #include "umocktypes_bool.h"
 #include "umocktypes_stdint.h"
 
-#include "real_constbuffer.h"
 #define ENABLE_MOCKS
 
+#include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/sastoken.h"
 #include "azure_c_shared_utility/doublylinkedlist.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/agenttime.h"
 #include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/constbuffer.h"
 
 #include "azure_umqtt_c/mqtt_client.h"
 
@@ -63,7 +64,6 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 #include "azure_c_shared_utility/tickcounter.h"
 #include "azure_c_shared_utility/lock.h"
 #include "azure_c_shared_utility/string_tokenizer.h"
-#include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/urlencode.h"
 
 #include "internal/iothub_transport_ll_private.h"
@@ -216,12 +216,15 @@ static const MAP_HANDLE TEST_MESSAGE_PROP_MAP = (MAP_HANDLE)0x1212;
 static char appMessageString[] = "App Message String";
 static uint8_t appMessage[] = { 0x54, 0x68, 0x69, 0x73, 0x20, 0x69, 0x73, 0x20, 0x61, 0x20, 0x54, 0x65, 0x73, 0x74, 0x20, 0x4d, 0x73, 0x67 };
 static const size_t appMsgSize = sizeof(appMessage) / sizeof(appMessage[0]);
+static CONSTBUFFER g_cbuff;
 
 static IOTHUB_CLIENT_CONFIG g_iothubClientConfig = { 0 };
 static DLIST_ENTRY g_waitingToSend;
 
 static tickcounter_ms_t g_current_ms = 0;
 static size_t g_tokenizerIndex;
+
+static CONSTBUFFER_HANDLE TEST_CONST_BUFFER_HANDLE = (CONSTBUFFER_HANDLE)0x2331;
 
 // Use #define and not const because switch statement that consumes these assumes they're not const and won't compile.
 #define PARSE_SLASHES_FOR_INPUT_QUEUE_INDEX_0 (200)
@@ -692,6 +695,9 @@ TEST_SUITE_INITIALIZE(suite_init)
     transport_cb_info.msg_cb = Transport_MessageCallback;
     transport_cb_info.method_complete_cb = Transport_DeviceMethod_Complete_Callback;
 
+    g_cbuff.buffer = appMessage;
+    g_cbuff.size = appMsgSize;
+
     test_serialize_mutex = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(test_serialize_mutex);
 
@@ -873,8 +879,9 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(tickcounter_get_current_ms, my_tickcounter_get_current_ms);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(tickcounter_get_current_ms, __FAILURE__);
 
-    REGISTER_GLOBAL_MOCK_HOOK(CONSTBUFFER_Create, real_CONSTBUFFER_Create);
+    REGISTER_GLOBAL_MOCK_RETURN(CONSTBUFFER_Create, TEST_CONST_BUFFER_HANDLE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(CONSTBUFFER_Create, NULL);
+    REGISTER_GLOBAL_MOCK_RETURN(CONSTBUFFER_GetContent, &g_cbuff);
 
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Get_Credential_Type, IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_Auth_Get_Credential_Type, IOTHUB_CREDENTIAL_TYPE_UNKNOWN);
@@ -883,8 +890,6 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Is_SasToken_Valid, SAS_TOKEN_STATUS_VALID);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_Auth_Is_SasToken_Valid, SAS_TOKEN_STATUS_FAILED);
 
-    REGISTER_GLOBAL_MOCK_HOOK(CONSTBUFFER_GetContent, (const CONSTBUFFER* (*) (CONSTBUFFER_HANDLE constbufferHandle)) real_CONSTBUFFER_GetContent);
-    REGISTER_GLOBAL_MOCK_HOOK(CONSTBUFFER_Destroy, real_CONSTBUFFER_Destroy);
     REGISTER_GLOBAL_MOCK_HOOK(DList_InitializeListHead, real_DList_InitializeListHead);
     REGISTER_GLOBAL_MOCK_HOOK(DList_IsListEmpty, real_DList_IsListEmpty);
     REGISTER_GLOBAL_MOCK_HOOK(DList_InsertTailList, real_DList_InsertTailList);
@@ -1404,7 +1409,8 @@ static void setup_processItem_mocks(bool fail_test)
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
-    STRICT_EXPECTED_CALL(CONSTBUFFER_GetContent(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(CONSTBUFFER_GetContent(IGNORED_PTR_ARG)).SetReturn(&g_cbuff);
+
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(mqttmessage_create_in_place(IGNORED_NUM_ARG, IGNORED_PTR_ARG, DELIVER_AT_MOST_ONCE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
     if (!fail_test)
@@ -5386,14 +5392,17 @@ TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_twin_succeed)
     g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_SUBSCRIBE_ACK, &suback, g_callbackCtx);
 
     IoTHubTransport_MQTT_Common_DoWork(handle);
-    CONSTBUFFER_HANDLE cbh = CONSTBUFFER_Create(appMessage, appMsgSize);
+    CONSTBUFFER cbuff;
+    cbuff.buffer = appMessage;
+    cbuff.size = appMsgSize;
+    STRICT_EXPECTED_CALL(CONSTBUFFER_GetContent(IGNORED_PTR_ARG)).SetReturn(&cbuff);
     IOTHUB_DEVICE_TWIN device_twin;
-    device_twin.report_data_handle = cbh;
+    device_twin.report_data_handle = TEST_CONST_BUFFER_HANDLE;
     device_twin.item_id = 1;
     IOTHUB_IDENTITY_INFO identity_info;
     identity_info.device_twin = &device_twin;
     (void)IoTHubTransport_MQTT_Common_ProcessItem(handle, IOTHUB_TYPE_DEVICE_TWIN, &identity_info);
-    CONSTBUFFER_Destroy(cbh);
+
     umock_c_reset_all_calls();
 
     g_tokenizerIndex = 1;
@@ -5431,14 +5440,16 @@ TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_twin_fail)
     g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_SUBSCRIBE_ACK, &suback, g_callbackCtx);
 
     IoTHubTransport_MQTT_Common_DoWork(handle);
-    CONSTBUFFER_HANDLE cbh = CONSTBUFFER_Create(appMessage, appMsgSize);
+    CONSTBUFFER cbuff;
+    cbuff.buffer = appMessage;
+    cbuff.size = appMsgSize;
+    STRICT_EXPECTED_CALL(CONSTBUFFER_GetContent(IGNORED_PTR_ARG)).SetReturn(&cbuff);
     IOTHUB_DEVICE_TWIN device_twin;
-    device_twin.report_data_handle = cbh;
+    device_twin.report_data_handle = TEST_CONST_BUFFER_HANDLE;
     device_twin.item_id = 1;
     IOTHUB_IDENTITY_INFO identity_info;
     identity_info.device_twin = &device_twin;
     (void)IoTHubTransport_MQTT_Common_ProcessItem(handle, IOTHUB_TYPE_DEVICE_TWIN, &identity_info);
-    CONSTBUFFER_Destroy(cbh);
     umock_c_reset_all_calls();
 
     g_tokenizerIndex = 8;
@@ -6779,9 +6790,8 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_ProcessItem_Succeed)
     g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_SUBSCRIBE_ACK, &suback, g_callbackCtx);
     IoTHubTransport_MQTT_Common_DoWork(handle);
 
-    CONSTBUFFER_HANDLE cbh = CONSTBUFFER_Create(appMessage, appMsgSize);
     IOTHUB_DEVICE_TWIN device_twin;
-    device_twin.report_data_handle = cbh;
+    device_twin.report_data_handle = TEST_CONST_BUFFER_HANDLE;
     device_twin.item_id = 1;
     IOTHUB_IDENTITY_INFO identity_info;
     identity_info.device_twin = &device_twin;
@@ -6798,7 +6808,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_ProcessItem_Succeed)
 
     //cleanup
     IoTHubTransport_MQTT_Common_Destroy(handle);
-    CONSTBUFFER_Destroy(cbh);
 }
 
 /* Tests_SRS_IOTHUBCLIENT_LL_07_001: [ If handle or iothub_item are NULL then IoTHubTransport_MQTT_Common_ProcessItem shall return IOTHUB_PROCESS_ERROR.]*/
@@ -6860,9 +6869,12 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_ProcessItem_not_connected_Succeed)
     IOTHUBTRANSPORT_CONFIG config = { 0 };
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, NULL);
 
-    CONSTBUFFER_HANDLE cbh = CONSTBUFFER_Create(appMessage, appMsgSize);
+    CONSTBUFFER cbuff;
+    cbuff.buffer = appMessage;
+    cbuff.size = appMsgSize;
+    STRICT_EXPECTED_CALL(CONSTBUFFER_GetContent(IGNORED_PTR_ARG)).SetReturn(&cbuff);
     IOTHUB_DEVICE_TWIN device_twin;
-    device_twin.report_data_handle = cbh;
+    device_twin.report_data_handle = TEST_CONST_BUFFER_HANDLE;
     device_twin.item_id = 1;
     IOTHUB_IDENTITY_INFO identity_info;
     identity_info.device_twin = &device_twin;
@@ -6880,7 +6892,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_ProcessItem_not_connected_Succeed)
 
     //cleanup
     IoTHubTransport_MQTT_Common_Destroy(handle);
-    CONSTBUFFER_Destroy(cbh);
 }
 
 /* Tests_SRS_IOTHUBCLIENT_LL_07_006: [ If the item_type is not a supported type IoTHubTransport_MQTT_Common_ProcessItem shall return IOTHUB_PROCESS_CONTINUE.] */
@@ -6905,9 +6916,12 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_ProcessItem_continue_Succeed)
     data_buff.buffer = (const unsigned char*)0x46;
     data_buff.size = 22;
 
-    CONSTBUFFER_HANDLE cbh = CONSTBUFFER_Create(appMessage, appMsgSize);
+    CONSTBUFFER cbuff;
+    cbuff.buffer = appMessage;
+    cbuff.size = appMsgSize;
+    STRICT_EXPECTED_CALL(CONSTBUFFER_GetContent(IGNORED_PTR_ARG)).SetReturn(&cbuff);
     IOTHUB_DEVICE_TWIN device_twin;
-    device_twin.report_data_handle = cbh;
+    device_twin.report_data_handle = TEST_CONST_BUFFER_HANDLE;
     device_twin.item_id = 1;
     IOTHUB_IDENTITY_INFO identity_info;
     identity_info.device_twin = &device_twin;
@@ -6922,7 +6936,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_ProcessItem_continue_Succeed)
 
     //cleanup
     IoTHubTransport_MQTT_Common_Destroy(handle);
-    CONSTBUFFER_Destroy(cbh);
 }
 
 /* Tests_SRS_IOTHUBCLIENT_LL_07_004: [ If any errors are encountered IoTHubTransport_MQTT_Common_ProcessItem shall return IOTHUB_PROCESS_ERROR. ]*/
@@ -6946,9 +6959,12 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_ProcessItem_fail)
     g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_SUBSCRIBE_ACK, &suback, g_callbackCtx);
     IoTHubTransport_MQTT_Common_DoWork(handle);
 
-    CONSTBUFFER_HANDLE cbh = CONSTBUFFER_Create(appMessage, appMsgSize);
+    CONSTBUFFER cbuff;
+    cbuff.buffer = appMessage;
+    cbuff.size = appMsgSize;
+    STRICT_EXPECTED_CALL(CONSTBUFFER_GetContent(IGNORED_PTR_ARG)).SetReturn(&cbuff);
     IOTHUB_DEVICE_TWIN device_twin;
-    device_twin.report_data_handle = cbh;
+    device_twin.report_data_handle = TEST_CONST_BUFFER_HANDLE;
     device_twin.item_id = 1;
     IOTHUB_IDENTITY_INFO identity_info;
     identity_info.device_twin = &device_twin;
@@ -6985,7 +7001,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_ProcessItem_fail)
 
     //cleanup
     IoTHubTransport_MQTT_Common_Destroy(handle);
-    CONSTBUFFER_Destroy(cbh);
     umock_c_negative_tests_deinit();
 }
 
