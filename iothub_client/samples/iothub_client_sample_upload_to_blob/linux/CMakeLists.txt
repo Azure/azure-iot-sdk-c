@@ -24,10 +24,10 @@ add_executable(iothub_client_sample_upload_to_blob ${iothub_client_sample_upload
 target_link_libraries(iothub_client_sample_upload_to_blob
     iothub_client
     iothub_client_http_transport
-    aziotsharedutil
     prov_auth_client
     hsm_security_client
     uhttp
+    aziotsharedutil
     uuid
     parson
     pthread

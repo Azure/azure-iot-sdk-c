@@ -525,7 +525,6 @@ static char* CreateReceiveHostName(IOTHUB_VALIDATION_INFO* devhubValInfo)
         LogError("Failure allocating data in CreateReceiveHostName.");
         result = NULL;
     }
-
     return result;
 }
 
