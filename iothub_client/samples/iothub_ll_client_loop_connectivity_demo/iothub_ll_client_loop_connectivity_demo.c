@@ -28,77 +28,104 @@ and removing calls to _DoWork will yield the same results. */
 //#define SAMPLE_HTTP
 
 #ifdef SAMPLE_MQTT
-    #include "iothubtransportmqtt.h"
+#include "iothubtransportmqtt.h"
 #endif // SAMPLE_MQTT
 #ifdef SAMPLE_MQTT_OVER_WEBSOCKETS
-    #include "iothubtransportmqtt_websockets.h"
+#include "iothubtransportmqtt_websockets.h"
 #endif // SAMPLE_MQTT_OVER_WEBSOCKETS
 #ifdef SAMPLE_AMQP
-    #include "iothubtransportamqp.h"
+#include "iothubtransportamqp.h"
 #endif // SAMPLE_AMQP
 #ifdef SAMPLE_AMQP_OVER_WEBSOCKETS
-    #include "iothubtransportamqp_websockets.h"
+#include "iothubtransportamqp_websockets.h"
 #endif // SAMPLE_AMQP_OVER_WEBSOCKETS
 #ifdef SAMPLE_HTTP
-    #include "iothubtransporthttp.h"
+#include "iothubtransporthttp.h"
 #endif // SAMPLE_HTTP
 
 #ifdef MBED_BUILD_TIMESTAMP
-    #define SET_TRUSTED_CERT_IN_SAMPLES
+#define SET_TRUSTED_CERT_IN_SAMPLES
 #endif // MBED_BUILD_TIMESTAMP
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
-    #include "certs.h"
+#include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 /* Paste in the your x509 iothub connection string  */
 /*  "HostName=<host_name>;DeviceId=<device_id>;x509=true"                      */
-static const char* connectionString = "[device connection string]";
+static const char *connectionString = "[device connection string]";
 
-static const char* x509certificate =
-"-----BEGIN CERTIFICATE-----""\n"
-"MIICpDCCAYwCCQCfIjBnPxs5TzANBgkqhkiG9w0BAQsFADAUMRIwEAYDVQQDDAls""\n"
-"b2NhbGhvc3QwHhcNMTYwNjIyMjM0MzI3WhcNMTYwNjIzMjM0MzI3WjAUMRIwEAYD""\n"
-"...""\n"
-"+s88wBF907s1dcY45vsG0ldE3f7Y6anGF60nUwYao/fN/eb5FT5EHANVMmnK8zZ2""\n"
-"tjWUt5TFnAveFoQWIoIbtzlTbOxUFwMrQFzFXOrZoDJmHNWc2u6FmVAkowoOSHiE""\n"
-"dkyVdoGPCXc=""\n"
-"-----END CERTIFICATE-----";
+static const char *x509certificate =
+    "-----BEGIN CERTIFICATE-----"
+    "\n"
+    "MIICpDCCAYwCCQCfIjBnPxs5TzANBgkqhkiG9w0BAQsFADAUMRIwEAYDVQQDDAls"
+    "\n"
+    "b2NhbGhvc3QwHhcNMTYwNjIyMjM0MzI3WhcNMTYwNjIzMjM0MzI3WjAUMRIwEAYD"
+    "\n"
+    "..."
+    "\n"
+    "+s88wBF907s1dcY45vsG0ldE3f7Y6anGF60nUwYao/fN/eb5FT5EHANVMmnK8zZ2"
+    "\n"
+    "tjWUt5TFnAveFoQWIoIbtzlTbOxUFwMrQFzFXOrZoDJmHNWc2u6FmVAkowoOSHiE"
+    "\n"
+    "dkyVdoGPCXc="
+    "\n"
+    "-----END CERTIFICATE-----";
 
-static const char* x509privatekey =
-"-----BEGIN RSA PRIVATE KEY-----""\n"
-"MIIEpQIBAAKCAQEA0zKK+Uu5I0nXq2V6+2gbdCsBXZ6j1uAgU/clsCohEAek1T8v""\n"
-"qj2tR9Mz9iy9RtXPMHwzcQ7aXDaz7RbHdw7tYXqSw8iq0Mxq2s3p4mo6gd5vEOiN""\n"
-"...""\n"
-"EyePNmkCgYEAng+12qvs0de7OhkTjX9FLxluLWxfN2vbtQCWXslLCG+Es/ZzGlNF""\n"
-"SaqVID4EAUgUqFDw0UO6SKLT+HyFjOr5qdHkfAmRzwE/0RBN69g2qLDN3Km1Px/k""\n"
-"xyJyxc700uV1eKiCdRLRuCbUeecOSZreh8YRIQQXoG8uotO5IttdVRc=""\n"
-"-----END RSA PRIVATE KEY-----";
+static const char *x509privatekey =
+    "-----BEGIN RSA PRIVATE KEY-----"
+    "\n"
+    "MIIEpQIBAAKCAQEA0zKK+Uu5I0nXq2V6+2gbdCsBXZ6j1uAgU/clsCohEAek1T8v"
+    "\n"
+    "qj2tR9Mz9iy9RtXPMHwzcQ7aXDaz7RbHdw7tYXqSw8iq0Mxq2s3p4mo6gd5vEOiN"
+    "\n"
+    "..."
+    "\n"
+    "EyePNmkCgYEAng+12qvs0de7OhkTjX9FLxluLWxfN2vbtQCWXslLCG+Es/ZzGlNF"
+    "\n"
+    "SaqVID4EAUgUqFDw0UO6SKLT+HyFjOr5qdHkfAmRzwE/0RBN69g2qLDN3Km1Px/k"
+    "\n"
+    "xyJyxc700uV1eKiCdRLRuCbUeecOSZreh8YRIQQXoG8uotO5IttdVRc="
+    "\n"
+    "-----END RSA PRIVATE KEY-----";
 
-#define MESSAGE_COUNT        5
+#define MESSAGE_COUNT 5
 static bool g_continueRunning = true;
-static size_t g_message_count_send_confirmations = 0;
 
 typedef struct EVENT_INSTANCE_TAG
 {
     IOTHUB_MESSAGE_HANDLE messageHandle;
-    size_t messageTrackingId;  // For tracking the messages within the user callback.
+    size_t messageTrackingId; // For tracking the messages within the user callback.
 } EVENT_INSTANCE;
 
-static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
+static int iothub_message_callbacks_received = 0;
+static int iothub_messages_sent = 0;
+const int MAX_OUTSTANDING_MESSAGES = 5;
+static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void *userContextCallback)
 {
     (void)userContextCallback;
     // When a message is sent this callback will get invoked
-    g_message_count_send_confirmations++;
-    (void)printf("Confirmation callback received for message %zu with result %s\r\n", g_message_count_send_confirmations, ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
+    iothub_message_callbacks_received++;
+    (void)printf("Confirmation callback received for message %d with result %s\r\n", iothub_message_callbacks_received, ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
+}
+
+static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS result, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason,
+                                       void *user_context)
+{
+    if (result == IOTHUB_CLIENT_CONNECTION_AUTHENTICATED)
+    {
+        printf("\t** iothub connected **\n");
+    }
+    else
+    {
+        printf("\t** iothub disconnected **\n");
+    }
 }
 
 int main(void)
 {
     IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;
     IOTHUB_MESSAGE_HANDLE message_handle;
-    size_t messages_sent = 0;
-    const char* telemetry_msg = "test_message";
 
     // Select the Protocol to use with the connection
 #ifdef SAMPLE_MQTT
@@ -141,11 +168,12 @@ int main(void)
         IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_TRUSTED_CERT, certificates);
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
+        IoTHubDeviceClient_LL_SetConnectionStatusCallback(device_ll_handle, connection_status_callback, NULL);
+
         // Set the X509 certificates in the SDK
         if (
             (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_X509_CERT, x509certificate) != IOTHUB_CLIENT_OK) ||
-            (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_X509_PRIVATE_KEY, x509privatekey) != IOTHUB_CLIENT_OK)
-            )
+            (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_X509_PRIVATE_KEY, x509privatekey) != IOTHUB_CLIENT_OK))
         {
             printf("failure to set options for x509, aborting\r\n");
         }
@@ -153,33 +181,23 @@ int main(void)
         {
             do
             {
-                if (messages_sent < MESSAGE_COUNT)
+                if (iothub_messages_sent - iothub_message_callbacks_received < MAX_OUTSTANDING_MESSAGES)
                 {
-                    // Construct the iothub message from a string or a byte array
-                    message_handle = IoTHubMessage_CreateFromString(telemetry_msg);
-                    //message_handle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText)));
+                    message_handle = IoTHubMessage_CreateFromString("test message payload");
 
-                    // Set Message property
-                    (void)IoTHubMessage_SetMessageId(message_handle, "MSG_ID");
-                    (void)IoTHubMessage_SetCorrelationId(message_handle, "CORE_ID");
-                    (void)IoTHubMessage_SetContentTypeSystemProperty(message_handle, "application%2Fjson");
-                    (void)IoTHubMessage_SetContentEncodingSystemProperty(message_handle, "utf-8");
-
-                    // Add custom properties to message
-                    (void)IoTHubMessage_SetProperty(message_handle, "property_key", "property_value");
-
-                    (void)printf("Sending message %d to IoTHub\r\n", (int)(messages_sent + 1));
+                    iothub_messages_sent++;
+                    (void)printf("Sending message %d to IoTHub\r\n", iothub_messages_sent);
                     IoTHubDeviceClient_LL_SendEventAsync(device_ll_handle, message_handle, send_confirm_callback, NULL);
 
                     // The message is copied to the sdk so the we can destroy it
                     IoTHubMessage_Destroy(message_handle);
-
-                    messages_sent++;
                 }
-                else if (g_message_count_send_confirmations >= MESSAGE_COUNT)
+                else
                 {
-                    // After all messages are all received stop running
-                    g_continueRunning = false;
+                    // if we're disconnected or we can't upload fast enough,
+                    // the azure iot library will continue accepting messages and keeping them in a queue
+                    // using the count of callbacks, limit the growth of this queue
+                    printf("warning: max number of outstanding messages reached, skipping next message send");
                 }
 
                 IoTHubDeviceClient_LL_DoWork(device_ll_handle);
@@ -194,7 +212,7 @@ int main(void)
     IoTHub_Deinit();
 
     printf("Press any key to continue");
-    (void)getchar();
+    getchar();
 
     return 0;
 }
