@@ -26,9 +26,9 @@ and removing calls to _DoWork will yield the same results. */
 
 // The protocol you wish to use should be uncommented
 //
-//#define SAMPLE_MQTT
+#define SAMPLE_MQTT
 //#define SAMPLE_MQTT_OVER_WEBSOCKETS
-#define SAMPLE_AMQP
+//#define SAMPLE_AMQP
 //#define SAMPLE_AMQP_OVER_WEBSOCKETS
 //#define SAMPLE_HTTP
 
@@ -53,10 +53,9 @@ and removing calls to _DoWork will yield the same results. */
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 /* Paste in the your iothub connection string  */
-static const char* connectionString = "HostName=private-iothub.private.azure-devices-int.net;DeviceId=device8c7805b506004b41921325d94d4e8d64;SharedAccessKey=J+drgfQK7QkizRUQFbBLTNXG705ehV9cHY1GPahvn6k=";
+static const char* connectionString = "[device connection string]";
 #define MESSAGE_COUNT        5
 static bool g_continueRunning = true;
-static bool g_sendMessages = false;
 static size_t g_message_count_send_confirmations = 0;
 
 static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
@@ -80,15 +79,6 @@ static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS result, I
     {
         (void)printf("The device client has been disconnected\r\n");
     }
-}
-
-static void deviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback)
-{
-    (void)update_state;
-    (void)size;
-    (void)payLoad;
-    (void)userContextCallback;
-    g_sendMessages = true;
 }
 
 int main(void)
@@ -151,18 +141,10 @@ int main(void)
 
         // Setting connection status callback to get indication of connection to iothub
         (void)IoTHubDeviceClient_LL_SetConnectionStatusCallback(device_ll_handle, connection_status_callback, NULL);
-        
-        //New API for distributed tracing. The twin callback is required until GetTwin is enabled
-        IoTHubClientCore_LL_EnableFeatureConfigurationViaDeviceTwin(device_ll_handle, true);
-        (void)IoTHubDeviceClient_LL_SetDeviceTwinCallback(device_ll_handle, deviceTwinCallback, NULL);
-
-        //Deprecated API for diagnostics. Should still work if above API isn't enabled.
-        /*uint32_t percentage = 100;
-        IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_DIAGNOSTIC_SAMPLING_PERCENTAGE, &percentage);*/
 
         do
         {
-            if (g_sendMessages && messages_sent < MESSAGE_COUNT)
+            if (messages_sent < MESSAGE_COUNT)
             {
                 // Construct the iothub message from a string or a byte array
                 message_handle = IoTHubMessage_CreateFromString(telemetry_msg);
