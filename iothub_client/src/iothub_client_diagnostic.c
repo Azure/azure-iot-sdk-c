@@ -13,10 +13,9 @@
 #include "parson.h"
 #include "internal/iothub_client_diagnostic.h"
 
-//#define DEVICE_TWIN_SAMPLING_RATE_KEY "__e2e_diag_sample_rate"
-
 #define DEVICE_TWIN_DISTRIBUTED_TRACING_SAMPLING_MODE_KEY "azureiot*com^dtracing^1*0*0.sampling_mode"
 #define DEVICE_TWIN_DISTRIBUTED_TRACING_SAMPLING_RATE_KEY "azureiot*com^dtracing^1*0*0.sampling_rate"
+#define MESSAGE_DISTRIBUTED_TRACING_TIMESTAMP_KEY "timestamp="
 
 #define TIME_STRING_BUFFER_LEN 30
 
@@ -238,12 +237,18 @@ static bool should_add_distributedtrace_fixed_rate_sampling(IOTHUB_DISTRIBUTED_T
 int IoTHubClient_DistributedTracing_AddToMessageHeadersIfNecessary(IOTHUB_DISTRIBUTED_TRACING_SETTING_DATA* distributedTraceSetting, IOTHUB_MESSAGE_HANDLE messageHandle)
 {
     int result;
+    STRING_HANDLE messagePropertyContent;
     /* Codes_SRS_IOTHUB_DIAGNOSTIC_38_001: [ IoTHubClient_DistributedTracing_AddToMessageHeadersIfNecessary should return nonezero if distributedTraceSetting or messageHandle is NULL. ]*/
     if (distributedTraceSetting == NULL || messageHandle == NULL)
     {
+        LogError("Invalid paramter for Distributed Tracing");
         result = __FAILURE__;
     }
-    
+    else if ((messagePropertyContent = STRING_new()) == NULL)
+    {
+        LogError("Failed to allocate messagePropertyContent");
+        result = __FAILURE__;
+    }
     else if (should_add_distributedtrace_fixed_rate_sampling(distributedTraceSetting))
     {
         char* timeBuffer;
@@ -252,23 +257,36 @@ int IoTHubClient_DistributedTracing_AddToMessageHeadersIfNecessary(IOTHUB_DISTRI
         if (timeBuffer == NULL)
         {
             LogError("malloc for timeBuffer failed");
+            STRING_delete(messagePropertyContent);
             result = __FAILURE__;
         }
         else if (get_epoch_time(timeBuffer) == NULL)
         {
             LogError("Failed getting current time");
+            STRING_delete(messagePropertyContent);
             free(timeBuffer);
             result = __FAILURE__;
         }
-        else if (IoTHubMessage_SetDistributedTracingSystemProperty(messageHandle, (const char*)timeBuffer) != IOTHUB_MESSAGE_OK)
+        else if (STRING_concat(messagePropertyContent, MESSAGE_DISTRIBUTED_TRACING_TIMESTAMP_KEY) != 0 ||
+            STRING_concat(messagePropertyContent, (const char*)timeBuffer) != 0)
+        {
+            LogError("Failed to generate message system property string");
+            STRING_delete(messagePropertyContent);
+            free(timeBuffer);
+            result = __FAILURE__;
+        }
+        else if (IoTHubMessage_SetDistributedTracingSystemProperty(messageHandle, STRING_c_str(messagePropertyContent)) != IOTHUB_MESSAGE_OK)
         {
             /* Codes_SRS_IOTHUB_DIAGNOSTIC_38_002: [ IoTHubClient_DistributedTracing_AddToMessageHeadersIfNecessary should return nonezero if failing to add distributed tracing property. ]*/
             LogError("Failed to set distributed tracing system property");
+            STRING_delete(messagePropertyContent);
             free(timeBuffer);
             result = __FAILURE__;
         }
         else
         {
+            STRING_delete(messagePropertyContent);
+            free(timeBuffer);
             result = 0;
         }
     }
