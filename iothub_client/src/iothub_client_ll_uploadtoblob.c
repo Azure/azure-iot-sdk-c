@@ -283,14 +283,11 @@ IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE IoTHubClient_LL_UploadToBlob_Create(const I
                 *insert_pos = '\0';
 
                 upload_data->cred_type = IoTHubClient_Auth_Get_Credential_Type(upload_data->authorization_module);
-                if (upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_UNKNOWN)
+                // If the credential type is unknown then it means that we are using x509 because the certs need to get
+                // passed down later in the process.
+                if (upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_UNKNOWN || upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_X509)
                 {
-                    LogError("Failed unknown credential type");
-                    free(upload_data);
-                    upload_data = NULL;
-                }
-                else if (upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_X509)
-                {
+                    upload_data->cred_type = IOTHUB_CREDENTIAL_TYPE_X509;
                     upload_data->credentials.x509_credentials.x509certificate = NULL;
                     upload_data->credentials.x509_credentials.x509privatekey = NULL;
                 }
