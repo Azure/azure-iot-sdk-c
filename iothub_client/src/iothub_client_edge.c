@@ -42,6 +42,9 @@ static const char* const RELATIVE_PATH_FMT_DEVICE_METHOD = "/twins/%s/methods%s"
 static const char* const PAYLOAD_FMT = "{\"methodName\":\"%s\",\"timeout\":%d,\"payload\":%s}";
 static const char* const SCOPE_FMT = "%s/devices/%s/modules/%s";
 
+static const char* ENVIRONMENT_VAR_EDGEHUB_CACERTIFICATEFILE = "EdgeModuleCACertificateFile";
+
+
 typedef struct IOTHUB_CLIENT_EDGE_HANDLE_DATA_TAG
 {
     char* hostname;
@@ -368,8 +371,6 @@ static STRING_HANDLE createRelativePath(const char* deviceId, const char* module
 
     return result;
 }
-
-static const char* ENVIRONMENT_VAR_EDGEHUB_CACERTIFICATEFILE = "EdgeModuleCACertificateFile";
 
 static IOTHUB_CLIENT_RESULT sendHttpRequestMethod(IOTHUB_CLIENT_EDGE_HANDLE moduleMethodHandle, const char* deviceId, const char* moduleId, BUFFER_HANDLE deviceJsonBuffer, BUFFER_HANDLE responseBuffer)
 {

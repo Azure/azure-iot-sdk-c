@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <errno.h>
+
 #include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/string_tokenizer.h"
@@ -24,8 +26,6 @@
 #include "internal/iothub_client_private.h"
 #include "internal/iothub_client_diagnostic.h"
 #include "internal/iothubtransport.h"
-
-#include <errno.h>
 
 #ifndef DONT_USE_UPLOADTOBLOB
 #include "internal/iothub_client_ll_uploadtoblob.h"
