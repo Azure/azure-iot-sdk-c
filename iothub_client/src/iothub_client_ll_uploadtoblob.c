@@ -48,7 +48,6 @@ int snprintf(char * s, size_t n, const char * format, ...)
 static const char* const EMPTY_STRING = "";
 static const char* const HEADER_AUTHORIZATION = "Authorization";
 static const char* const HEADER_APP_JSON = "application/json";
-static const char* LOG_MSG_CONSTRUCT_STRING = "Failure constructing string";
 
 typedef struct UPLOADTOBLOB_X509_CREDENTIALS_TAG
 {
@@ -330,7 +329,7 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
     if (relativePath == NULL)
     {
         /*Codes_SRS_IOTHUBCLIENT_LL_02_067: [ If creating the relativePath fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-        LogError(LOG_MSG_CONSTRUCT_STRING);
+        LogError("Failure constructing string");
         result = __FAILURE__;
     }
     else
@@ -340,7 +339,7 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
         if (blobName == NULL)
         {
             /*Codes_SRS_IOTHUBCLIENT_LL_32_002: [ If creating the JSON string fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-            LogError(LOG_MSG_CONSTRUCT_STRING);
+            LogError("Failure constructing string");
             result = __FAILURE__;
         }
         else
@@ -416,7 +415,7 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                                 {
                                     /*Codes_SRS_IOTHUBCLIENT_LL_02_089: [ If creating the HTTPAPIEX_SAS_HANDLE fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
                                     result = __FAILURE__;
-                                    LogError(LOG_MSG_CONSTRUCT_STRING);
+                                    LogError("Failure constructing string");
                                 }
                                 else
                                 {
@@ -539,7 +538,7 @@ static int IoTHubClient_LL_UploadToBlob_step3(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HAND
     if (relativePathNotification == NULL)
     {
         result = __FAILURE__;
-        LogError(LOG_MSG_CONSTRUCT_STRING);
+        LogError("Failure constructing string");
     }
     else
     {
@@ -573,7 +572,7 @@ static int IoTHubClient_LL_UploadToBlob_step3(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HAND
                 STRING_HANDLE uriResource = STRING_construct_sprintf("%s/devices/%s/files/notifications", upload_data->hostname, upload_data->deviceId);
                 if (uriResource == NULL)
                 {
-                    LogError(LOG_MSG_CONSTRUCT_STRING);
+                    LogError("Failure constructing string");
                     result = __FAILURE__;
                 }
                 else
@@ -818,7 +817,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
                                             STRING_HANDLE req_string = STRING_construct_sprintf("{\"isSuccess\":%s, \"statusCode\":%d, \"statusDescription\":\"%s\"}", ((httpResponse < 300) ? "true" : "false"), httpResponse, BUFFER_u_char(responseToIoTHub));
                                             if (req_string == NULL)
                                             {
-                                                LogError(LOG_MSG_CONSTRUCT_STRING);
+                                                LogError("Failure constructing string");
                                                 result = IOTHUB_CLIENT_ERROR;
                                             }
                                             else
