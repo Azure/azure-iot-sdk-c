@@ -7,6 +7,7 @@
 #include "azure_c_shared_utility/macro_utils.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
 #include "azure_c_shared_utility/xio.h"
+#include "azure_c_shared_utility/httpapiexsas.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,6 +46,8 @@ MOCKABLE_FUNCTION(, const char*, IoTHubClient_Auth_Get_DeviceId, IOTHUB_AUTHORIZ
 MOCKABLE_FUNCTION(, const char*, IoTHubClient_Auth_Get_ModuleId, IOTHUB_AUTHORIZATION_HANDLE, handle);
 MOCKABLE_FUNCTION(, const char*, IoTHubClient_Auth_Get_DeviceKey, IOTHUB_AUTHORIZATION_HANDLE, handle);
 MOCKABLE_FUNCTION(, SAS_TOKEN_STATUS, IoTHubClient_Auth_Is_SasToken_Valid, IOTHUB_AUTHORIZATION_HANDLE, handle);
+MOCKABLE_FUNCTION(, int, IoTHubClient_Auth_Get_x509_info, IOTHUB_AUTHORIZATION_HANDLE, handle, char**, x509_cert, char**, x509_key);
+
 
 #ifdef USE_EDGE_MODULES
 MOCKABLE_FUNCTION(, char*, IoTHubClient_Auth_Get_TrustBundle, IOTHUB_AUTHORIZATION_HANDLE, handle);

@@ -295,6 +295,55 @@ int IoTHubClient_Auth_Set_xio_Certificate(IOTHUB_AUTHORIZATION_HANDLE handle, XI
     return result;
 }
 
+int IoTHubClient_Auth_Get_x509_info(IOTHUB_AUTHORIZATION_HANDLE handle, char** x509_cert, char** x509_key)
+{
+    int result;
+    if (handle == NULL || x509_cert == NULL || x509_key == NULL)
+    {
+        LogError("Invalid Parameter handle: %p, x509_cert: %p, x509_key: %p", handle, x509_cert, x509_key);
+        result = __FAILURE__;
+    }
+    else if (handle->cred_type != IOTHUB_CREDENTIAL_TYPE_X509_ECC)
+    {
+        LogError("Invalid credential types for this operation");
+        result = __FAILURE__;
+    }
+    else
+    {
+#ifdef USE_PROV_MODULE
+        CREDENTIAL_RESULT* cred_result = iothub_device_auth_generate_credentials(handle->device_auth_handle, NULL);
+        if (cred_result == NULL)
+        {
+            LogError("Failure generating credentials");
+            result = __FAILURE__;
+        }
+        else
+        {
+            if (mallocAndStrcpy_s(x509_cert, cred_result->auth_cred_result.x509_result.x509_cert) != 0)
+            {
+                LogError("Failure copying certificate");
+                result = __FAILURE__;
+            }
+            else if (mallocAndStrcpy_s(x509_key, cred_result->auth_cred_result.x509_result.x509_alias_key) != 0)
+            {
+                LogError("Failure copying private key");
+                result = __FAILURE__;
+                free(*x509_cert);
+            }
+            else
+            {
+                result = 0;
+            }
+            free(cred_result);
+        }
+#else
+        LogError("Failed HSM module is not supported");
+        result = __FAILURE__;
+#endif
+    }
+    return result;
+}
+
 IOTHUB_CREDENTIAL_TYPE IoTHubClient_Auth_Get_Credential_Type(IOTHUB_AUTHORIZATION_HANDLE handle)
 {
     IOTHUB_CREDENTIAL_TYPE result;
@@ -536,7 +585,6 @@ SAS_TOKEN_STATUS IoTHubClient_Auth_Is_SasToken_Valid(IOTHUB_AUTHORIZATION_HANDLE
     return result;
 }
 
-
 #ifdef USE_EDGE_MODULES
 char* IoTHubClient_Auth_Get_TrustBundle(IOTHUB_AUTHORIZATION_HANDLE handle)
 {
@@ -553,4 +601,3 @@ char* IoTHubClient_Auth_Get_TrustBundle(IOTHUB_AUTHORIZATION_HANDLE handle)
     return result;
 }
 #endif
-
