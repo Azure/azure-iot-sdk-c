@@ -65,18 +65,17 @@ typedef enum UPOADTOBLOB_CURL_VERBOSITY_TAG
 
 typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA_TAG
 {
-    //STRING_HANDLE deviceId;                     /*needed for file upload*/
-    const char* hostname;                       /*needed for file upload*/
-    //AUTHORIZATION_SCHEME authorizationScheme;   /*needed for file upload*/
+    const char* deviceId;
+    const char* hostname;
     IOTHUB_AUTHORIZATION_HANDLE authorization_module;
     IOTHUB_CREDENTIAL_TYPE cred_type;
     union 
     {
         UPLOADTOBLOB_X509_CREDENTIALS x509_credentials;
         char* supplied_sas_token;
-    } credentials;                              /*needed for file upload*/
+    } credentials;
     
-    char* certificates; /*if there are any certificates used*/
+    char* certificates;
     HTTP_PROXY_OPTIONS http_proxy_options;
     UPOADTOBLOB_CURL_VERBOSITY curl_verbosity_level;
     size_t blob_upload_timeout_secs;
@@ -266,6 +265,12 @@ IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE IoTHubClient_LL_UploadToBlob_Create(const I
                 free(upload_data);
                 upload_data = NULL;
             }
+            else if ((upload_data->deviceId = IoTHubClient_Auth_Get_DeviceId(upload_data->authorization_module)) == NULL)
+            {
+                LogError("Failed retrieving device ID");
+                free(upload_data);
+                upload_data = NULL;
+            }
             else
             {
                 char* insert_pos = (char*)upload_data->hostname;
@@ -321,7 +326,7 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
     int result;
 
     /*Codes_SRS_IOTHUBCLIENT_LL_02_066: [ IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall create an HTTP relative path formed from "/devices/" + deviceId + "/files/" + "?api-version=API_VERSION". ]*/
-    STRING_HANDLE relativePath = STRING_construct_sprintf("/devices/%s/files/%s", IoTHubClient_Auth_Get_DeviceId(upload_data->authorization_module), API_VERSION);
+    STRING_HANDLE relativePath = STRING_construct_sprintf("/devices/%s/files/%s", upload_data->deviceId, API_VERSION);
     if (relativePath == NULL)
     {
         /*Codes_SRS_IOTHUBCLIENT_LL_02_067: [ If creating the relativePath fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
@@ -406,7 +411,7 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                             case IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY:
                             case IOTHUB_CREDENTIAL_TYPE_DEVICE_AUTH:
                             {
-                                STRING_HANDLE uri_resource = STRING_construct_sprintf("%s/devices/%s", upload_data->hostname, IoTHubClient_Auth_Get_DeviceId(upload_data->authorization_module));
+                                STRING_HANDLE uri_resource = STRING_construct_sprintf("%s/devices/%s", upload_data->hostname, upload_data->deviceId);
                                 if (uri_resource == NULL)
                                 {
                                     /*Codes_SRS_IOTHUBCLIENT_LL_02_089: [ If creating the HTTPAPIEX_SAS_HANDLE fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
@@ -530,7 +535,7 @@ static int IoTHubClient_LL_UploadToBlob_step3(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HAND
     /*this POST "tries" to happen*/
 
     /*Codes_SRS_IOTHUBCLIENT_LL_02_085: [ IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall use the same authorization as step 1. to prepare and perform a HTTP request with the following parameters: ]*/
-    STRING_HANDLE relativePathNotification = STRING_construct_sprintf("/devices/%s/files/notifications/%s%s", IoTHubClient_Auth_Get_DeviceId(upload_data->authorization_module), STRING_c_str(correlationId), API_VERSION);
+    STRING_HANDLE relativePathNotification = STRING_construct_sprintf("/devices/%s/files/notifications/%s%s", upload_data->deviceId, STRING_c_str(correlationId), API_VERSION);
     if (relativePathNotification == NULL)
     {
         result = __FAILURE__;
@@ -565,7 +570,7 @@ static int IoTHubClient_LL_UploadToBlob_step3(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HAND
             }
             case IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY:
             {
-                STRING_HANDLE uriResource = STRING_construct_sprintf("%s/devices/%s/files/notifications", upload_data->hostname, IoTHubClient_Auth_Get_DeviceId(upload_data->authorization_module));
+                STRING_HANDLE uriResource = STRING_construct_sprintf("%s/devices/%s/files/notifications", upload_data->hostname, upload_data->deviceId);
                 if (uriResource == NULL)
                 {
                     LogError(LOG_MSG_CONSTRUCT_STRING);

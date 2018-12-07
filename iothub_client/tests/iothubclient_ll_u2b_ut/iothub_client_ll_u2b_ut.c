@@ -549,7 +549,8 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_Auth_Get_x509_info, my_IoTHubClient_Auth_Get_x509_info);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_Auth_Get_x509_info, __LINE__);
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Get_DeviceKey, TEST_DEVICE_ID);
-
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Get_DeviceId, TEST_DEVICE_ID);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_Auth_Get_DeviceId, NULL);
 
     REGISTER_GLOBAL_MOCK_RETURN(HTTPHeaders_AddHeaderNameValuePair, HTTP_HEADERS_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(HTTPHeaders_AddHeaderNameValuePair, HTTP_HEADERS_ERROR);
@@ -602,6 +603,7 @@ static void setup_uploadtoblob_create_mocks(IOTHUB_CREDENTIAL_TYPE cred_type)
 {
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_DeviceId(TEST_AUTH_HANDLE));
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(TEST_AUTH_HANDLE)).SetReturn(cred_type);
     if (cred_type == IOTHUB_CREDENTIAL_TYPE_X509_ECC)
     {
@@ -618,7 +620,6 @@ static void setup_steps_1_and_2_mocks(IOTHUB_CREDENTIAL_TYPE cred_type)
     int status_code = 200;
 
     // Step 1
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_DeviceId(TEST_AUTH_HANDLE)).CallCannotFail();    //4
     STRICT_EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG)).CallCannotFail();
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
     STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
@@ -636,7 +637,6 @@ static void setup_steps_1_and_2_mocks(IOTHUB_CREDENTIAL_TYPE cred_type)
     else if (cred_type == IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY)
     {
         STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_DeviceId(TEST_AUTH_HANDLE)).CallCannotFail();
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
         STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_DeviceKey(TEST_AUTH_HANDLE)).CallCannotFail();
@@ -650,7 +650,6 @@ static void setup_steps_1_and_2_mocks(IOTHUB_CREDENTIAL_TYPE cred_type)
     else if (cred_type == IOTHUB_CREDENTIAL_TYPE_DEVICE_AUTH)
     {
         STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_DeviceId(TEST_AUTH_HANDLE)).CallCannotFail();
         STRICT_EXPECTED_CALL(get_time(NULL)).CallCannotFail();
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
         STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken(TEST_AUTH_HANDLE, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
@@ -701,8 +700,6 @@ static void setup_steps_3(IOTHUB_CREDENTIAL_TYPE cred_type)
     if (cred_type == IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY)
     {
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-        STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_DeviceId(TEST_AUTH_HANDLE)).CallCannotFail();
-        STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_DeviceId(TEST_AUTH_HANDLE)).CallCannotFail();
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
         STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_DeviceKey(TEST_AUTH_HANDLE)).CallCannotFail();
@@ -715,7 +712,6 @@ static void setup_steps_3(IOTHUB_CREDENTIAL_TYPE cred_type)
     else
     {
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-        STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_DeviceId(TEST_AUTH_HANDLE)).CallCannotFail();
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
         STRICT_EXPECTED_CALL(HTTPAPIEX_ExecuteRequest(IGNORED_PTR_ARG, HTTPAPI_REQUEST_POST, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer_statusCode(&status_code, sizeof(status_code));

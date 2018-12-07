@@ -141,7 +141,6 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(XDA_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_SECURITY_HANDLE, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(DEVICE_AUTH_TYPE, void*);
 
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
@@ -162,6 +161,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_RETURN(SASToken_Validate, true);
 
 #ifdef USE_PROV_MODULE
+    REGISTER_UMOCK_ALIAS_TYPE(DEVICE_AUTH_TYPE, void*);
+
     REGISTER_GLOBAL_MOCK_HOOK(iothub_device_auth_create, my_iothub_device_auth_create);
     REGISTER_GLOBAL_MOCK_RETURN(iothub_device_auth_create, NULL);
     REGISTER_GLOBAL_MOCK_HOOK(iothub_device_auth_destroy, my_iothub_device_auth_destroy);
@@ -193,6 +194,7 @@ TEST_FUNCTION_CLEANUP(method_cleanup)
     TEST_MUTEX_RELEASE(g_testByTest);
 }
 
+#ifdef USE_PROV_MODULE
 static void setup_IoTHubClient_Auth_CreateFromDeviceAuth_mocks(bool module_id, DEVICE_AUTH_TYPE auth_type)
 {
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
@@ -204,6 +206,7 @@ static void setup_IoTHubClient_Auth_CreateFromDeviceAuth_mocks(bool module_id, D
     }
     STRICT_EXPECTED_CALL(iothub_device_auth_get_type(IGNORED_PTR_ARG)).SetReturn(auth_type);
 }
+#endif
 
 static void setup_IoTHubClient_Auth_Create_mocks(bool device_key, bool module_id)
 {
@@ -461,7 +464,6 @@ TEST_FUNCTION(IoTHubClient_Auth_CreateFromDeviceAuth_fail)
     //cleanup
     umock_c_negative_tests_deinit();
 }
-
 #endif
 
 /* Codes_SRS_IoTHub_Authorization_07_005: [ if handle is NULL IoTHubClient_Auth_Destroy shall do nothing. ] */
