@@ -48,7 +48,7 @@ int snprintf(char * s, size_t n, const char * format, ...)
 static const char* const EMPTY_STRING = "";
 static const char* const HEADER_AUTHORIZATION = "Authorization";
 static const char* const HEADER_APP_JSON = "application/json";
-static const char* const LOG_MSG_CONSTRUCT_STRING = "Failure constructing string";
+static const char* LOG_MSG_CONSTRUCT_STRING = "Failure constructing string";
 
 typedef struct UPLOADTOBLOB_X509_CREDENTIALS_TAG
 {
@@ -66,7 +66,7 @@ typedef enum UPOADTOBLOB_CURL_VERBOSITY_TAG
 typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA_TAG
 {
     const char* deviceId;
-    const char* hostname;
+    char* hostname;
     IOTHUB_AUTHORIZATION_HANDLE authorization_module;
     IOTHUB_CREDENTIAL_TYPE cred_type;
     union 
@@ -268,6 +268,7 @@ IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE IoTHubClient_LL_UploadToBlob_Create(const I
             else if ((upload_data->deviceId = IoTHubClient_Auth_Get_DeviceId(upload_data->authorization_module)) == NULL)
             {
                 LogError("Failed retrieving device ID");
+                free(upload_data->hostname);
                 free(upload_data);
                 upload_data = NULL;
             }
@@ -296,6 +297,7 @@ IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE IoTHubClient_LL_UploadToBlob_Create(const I
                     if (IoTHubClient_Auth_Get_x509_info(upload_data->authorization_module, &upload_data->credentials.x509_credentials.x509certificate, &upload_data->credentials.x509_credentials.x509privatekey) != 0)
                     {
                         LogError("Failed getting x509 certificate information");
+                        free(upload_data->hostname);
                         free(upload_data);
                         upload_data = NULL;
                     }
@@ -306,6 +308,7 @@ IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE IoTHubClient_LL_UploadToBlob_Create(const I
                     if (upload_data->credentials.supplied_sas_token == NULL)
                     {
                         LogError("Failed retrieving supplied sas token");
+                        free(upload_data->hostname);
                         free(upload_data);
                         upload_data = NULL;
                     }
