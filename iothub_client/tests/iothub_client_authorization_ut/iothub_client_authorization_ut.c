@@ -771,6 +771,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_scope_NULL_fail)
     IoTHubClient_Auth_Destroy(handle);
 }
 
+#ifdef USE_PROV_MODULE
 /* Codes_SRS_IoTHub_Authorization_07_010: [ IoTHubClient_Auth_Get_ConnString shall construct the expiration time using the expire_time. ] */
 /* Codes_SRS_IoTHub_Authorization_07_011: [ IoTHubClient_Auth_Get_ConnString shall call SASToken_CreateString to construct the sas token. ] */
 /* Codes_SRS_IoTHub_Authorization_07_012: [ On success IoTHubClient_Auth_Get_ConnString shall allocate and return the sas token in a char*. ] */
@@ -782,6 +783,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_device_auth_succeed)
 
     STRICT_EXPECTED_CALL(get_time(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG));
+
     STRICT_EXPECTED_CALL(iothub_device_auth_generate_credentials(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
@@ -797,6 +799,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_device_auth_succeed)
     free(conn_string);
     IoTHubClient_Auth_Destroy(handle);
 }
+#endif
 
 TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_succeed)
 {
