@@ -978,6 +978,16 @@ static void IoTHubTransportHttp_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE hand
     LogError("IoTHubTransportHttp_Unsubscribe_DeviceTwin Not supported");
 }
 
+static IOTHUB_CLIENT_RESULT IoTHubTransportHttp_GetDeviceTwinAsync(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK completionCallback, void* callbackContext)
+{
+    (void)handle;
+    (void)completionCallback;
+    (void)callbackContext;
+    LogError("Currently Not Supported.");
+    // Codes_SRS_TRANSPORTMULTITHTTP_09_005: [ `IoTHubTransportHttp_GetDeviceTwinAsync` shall return IOTHUB_CLIENT_ERROR]
+    return IOTHUB_CLIENT_ERROR;
+}
+
 static int IoTHubTransportHttp_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
 {
     (void)handle;
@@ -2526,6 +2536,7 @@ static TRANSPORT_PROVIDER thisTransportProvider =
     IoTHubTransportHttp_DeviceMethod_Response,      /*pfIoTHubTransport_DeviceMethod_Response IoTHubTransport_DeviceMethod_Response;*/
     IoTHubTransportHttp_Subscribe_DeviceTwin,       /*pfIoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_Subscribe_DeviceTwin;*/
     IoTHubTransportHttp_Unsubscribe_DeviceTwin,     /*pfIoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransport_Unsubscribe_DeviceTwin;*/
+    IoTHubTransportHttp_GetDeviceTwinAsync,         /*pfIoTHubTransport_GetDeviceTwinAsync IoTHubTransport_GetDeviceTwinAsync;*/
     IoTHubTransportHttp_ProcessItem,                /*pfIoTHubTransport_ProcessItem IoTHubTransport_ProcessItem;*/
     IoTHubTransportHttp_GetHostname,                /*pfIoTHubTransport_GetHostname IoTHubTransport_GetHostname;*/
     IoTHubTransportHttp_SetOption,                  /*pfIoTHubTransport_SetOption IoTHubTransport_SetOption;*/

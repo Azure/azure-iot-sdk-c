@@ -95,6 +95,7 @@ MOCKABLE_FUNCTION(, int, FAKE_IoTHubTransport_Common_Subscribe_InputQueue, IOTHU
 MOCKABLE_FUNCTION(, void, FAKE_IoTHubTransport_Common_Unsubscribe_InputQueue, IOTHUB_DEVICE_HANDLE, handle);
 MOCKABLE_FUNCTION(, int, FAKE_IoTHubTransport_Subscribe_DeviceTwin, IOTHUB_DEVICE_HANDLE, handle);
 MOCKABLE_FUNCTION(, void, FAKE_IoTHubTransport_Unsubscribe_DeviceTwin, IOTHUB_DEVICE_HANDLE, handle);
+MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, FAKE_IoTHubTransport_GetDeviceTwinAsync, IOTHUB_DEVICE_HANDLE, handle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK, completionCallback, void*, callbackContext);
 MOCKABLE_FUNCTION(, const char*, FAKE_IoTHubMessage_GetMessageId, IOTHUB_MESSAGE_HANDLE, message);
 MOCKABLE_FUNCTION(, IOTHUB_PROCESS_ITEM_RESULT, FAKE_IoTHubTransport_ProcessItem, TRANSPORT_LL_HANDLE, handle, IOTHUB_IDENTITY_TYPE, item_type, IOTHUB_IDENTITY_INFO*, iothub_item);
 MOCKABLE_FUNCTION(, int, FAKE_IoTHubTransport_Subscribe_DeviceMethod, IOTHUB_DEVICE_HANDLE, handle);
@@ -557,6 +558,7 @@ static TRANSPORT_PROVIDER FAKE_transport_provider =
     FAKE_IoTHubTransport_DeviceMethod_Response, /*pfIoTHubTransport_DeviceMethod_Response IoTHubTransport_DeviceMethod_Response;*/
     FAKE_IoTHubTransport_Subscribe_DeviceTwin, /*pfIoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_Subscribe_DeviceTwin; */
     FAKE_IoTHubTransport_Unsubscribe_DeviceTwin, /*pfIoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransport_Unsubscribe_DeviceTwin; */
+    FAKE_IoTHubTransport_GetDeviceTwinAsync, /*pfIoTHubTransport_GetDeviceTwinAsync IoTHubTransport_GetDeviceTwinAsync;*/
     FAKE_IoTHubTransport_ProcessItem,   /*pfIoTHubTransport_ProcessItem IoTHubTransport_ProcessItem     */
     FAKE_IoTHubTransport_GetHostname,   /*pfIoTHubTransport_GetHostname IoTHubTransport_GetHostname     */
     FAKE_IoTHubTransport_SetOption,     /*pfIoTHubTransport_SetOption IoTHubTransport_SetOption;        */
@@ -734,6 +736,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_UMOCK_ALIAS_TYPE(LIST_ACTION_FUNCTION, void*);
     REGISTER_UMOCK_ALIAS_TYPE(LIST_CONDITION_FUNCTION, void*);
 
+    REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK, void*);
+
 #ifndef DONT_USE_UPLOADTOBLOB
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, void*);
 #endif // DONT_USE_UPLOADTOBLOB
@@ -746,6 +750,9 @@ TEST_SUITE_INITIALIZE(suite_init)
 
     REGISTER_GLOBAL_MOCK_RETURN(FAKE_IoTHubTransport_Subscribe_DeviceTwin, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(FAKE_IoTHubTransport_Subscribe_DeviceTwin, __FAILURE__);
+
+    REGISTER_GLOBAL_MOCK_RETURN(FAKE_IoTHubTransport_GetDeviceTwinAsync, IOTHUB_CLIENT_OK);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(FAKE_IoTHubTransport_GetDeviceTwinAsync, IOTHUB_CLIENT_ERROR);
 
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(FAKE_IoTHubTransport_ProcessItem, IOTHUB_PROCESS_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(FAKE_IoTHubTransport_ProcessItem, IOTHUB_PROCESS_ERROR);
@@ -4887,6 +4894,97 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceTwinCallback_subscribe_fail)
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubClientCore_LL_Destroy(h);
+}
+
+// Tests_SRS_IOTHUBCLIENT_LL_09_012: [ IoTHubClientCore_LL_GetDeviceTwinAsync shall invoke IoTHubTransport_GetDeviceTwinAsync, passing `on_device_twin_report_received` and the user data as context  ]
+// Tests_SRS_IOTHUBCLIENT_LL_09_014: [ If no errors occur IoTHubClientCore_LL_GetDeviceTwinAsync shall return `IOTHUB_CLIENT_OK`. ]
+TEST_FUNCTION(IoTHubClientCore_LL_GetDeviceTwinAsync_succeed)
+{
+    //arrange
+    IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
+    
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_GetDeviceTwinAsync(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_GetDeviceTwinAsync(h, iothub_device_twin_callback, (void*)1);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+
+    //cleanup
+    IoTHubClientCore_LL_Destroy(h);
+}
+
+// Tests_SRS_IOTHUBCLIENT_LL_09_013: [ If IoTHubTransport_GetDeviceTwinAsync fails, `IoTHubClientCore_LL_GetDeviceTwinAsync` shall fail and return `IOTHUB_CLIENT_ERROR`. ]
+TEST_FUNCTION(IoTHubClientCore_LL_GetDeviceTwinAsync_fail)
+{
+    //arrange
+    ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
+
+    IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_GetDeviceTwinAsync(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    umock_c_negative_tests_snapshot();
+
+    //act
+    size_t count = umock_c_negative_tests_call_count();
+
+    for (size_t index = 0; index < count; index++)
+    {
+        umock_c_negative_tests_reset();
+        umock_c_negative_tests_fail_call(index);
+
+        char tmp_msg[64];
+        sprintf(tmp_msg, "Failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
+        IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_GetDeviceTwinAsync(h, iothub_device_twin_callback, (void*)1);
+
+        // assert
+        ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, tmp_msg);
+    }
+
+    //cleanup
+    IoTHubClientCore_LL_Destroy(h);
+    umock_c_negative_tests_deinit();
+}
+
+// Tests_SRS_IOTHUBCLIENT_LL_09_011: [ If `iotHubClientHandle` or `deviceTwinCallback` are `NULL`, `IoTHubClientCore_LL_GetDeviceTwinAsync` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]
+TEST_FUNCTION(IoTHubClientCore_LL_GetDeviceTwinAsync_NULL_handle_fail)
+{
+    //arrange
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_GetDeviceTwinAsync(NULL, iothub_device_twin_callback, (void*)1);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+
+    //cleanup
+}
+
+// Tests_SRS_IOTHUBCLIENT_LL_09_011: [ If `iotHubClientHandle` or `deviceTwinCallback` are `NULL`, `IoTHubClientCore_LL_GetDeviceTwinAsync` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]
+TEST_FUNCTION(IoTHubClientCore_LL_GetDeviceTwinAsync_NULL_callback_fail)
+{
+    //arrange
+    IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
+
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_GetDeviceTwinAsync(h, NULL, (void*)1);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
 
     //cleanup
     IoTHubClientCore_LL_Destroy(h);

@@ -91,6 +91,12 @@ static void IoTHubTransportAMQP_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE hand
     IoTHubTransport_AMQP_Common_Unsubscribe_DeviceTwin(handle);
 }
 
+static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_GetDeviceTwinAsync(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK completionCallback, void* callbackContext)
+{
+    // Codes_SRS_IOTHUBTRANSPORTAMQP_09_021: [IoTHubTransportAMQP_GetDeviceTwinAsync shall invoke IoTHubTransport_AMQP_Common_GetDeviceTwinAsync()]
+    return IoTHubTransport_AMQP_Common_GetDeviceTwinAsync(handle, completionCallback, callbackContext);
+}
+
 static int IoTHubTransportAMQP_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
 {
     // Codes_SRS_IOTHUBTRANSPORTAMQP_09_010: [IoTHubTransportAMQP_Subscribe_DeviceMethod shall invoke IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod() and return its result.]
@@ -184,6 +190,7 @@ static TRANSPORT_PROVIDER thisTransportProvider =
     IoTHubTransportAMQP_DeviceMethod_Response,
     IoTHubTransportAMQP_Subscribe_DeviceTwin,       /*pfIoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_Subscribe_DeviceTwin;*/
     IoTHubTransportAMQP_Unsubscribe_DeviceTwin,     /*pfIoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransport_Unsubscribe_DeviceTwin;*/
+    IoTHubTransportAMQP_GetDeviceTwinAsync,         /*pfIoTHubTransport_GetDeviceTwinAsync IoTHubTransport_GetDeviceTwinAsync;*/
     IoTHubTransportAMQP_ProcessItem,                /*pfIoTHubTransport_ProcessItem IoTHubTransport_ProcessItem;*/
     IoTHubTransportAMQP_GetHostname,                /*pfIoTHubTransport_GetHostname IoTHubTransport_GetHostname;*/
     IoTHubTransportAMQP_SetOption,                  /*pfIoTHubTransport_SetOption IoTHubTransport_SetOption;*/
