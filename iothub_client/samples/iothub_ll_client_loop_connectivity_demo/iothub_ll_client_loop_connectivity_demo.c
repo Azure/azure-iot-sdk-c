@@ -87,7 +87,7 @@ typedef struct EVENT_INSTANCE_TAG
 
 static int iothub_message_callbacks_received = 0;
 static int iothub_messages_sent = 0;
-const int MAX_OUTSTANDING_MESSAGES = 5;
+
 static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void *userContextCallback)
 {
     (void)userContextCallback;
@@ -96,17 +96,92 @@ static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void
     (void)printf("Confirmation callback received for message %d with result %s\r\n", iothub_message_callbacks_received, ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
 }
 
+bool azure_iot_connected = false;
 static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS result, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason,
                                        void *user_context)
 {
     if (result == IOTHUB_CLIENT_CONNECTION_AUTHENTICATED)
     {
-        printf("\t** iothub connected **\n");
+        if (!azure_iot_connected)
+        {
+            azure_iot_connected = true;
+            printf("\t** iothub connected **\n");
+        }
     }
     else
     {
-        printf("\t** iothub disconnected **\n");
+        if (azure_iot_connected)
+        {
+            azure_iot_connected = false;
+            printf("\t** iothub disconnected **\n");
+        }
     }
+}
+
+static void reportedStateCallback(int status_code, void *userContextCallback)
+{
+    (void)userContextCallback;
+    printf("Device Twin reported properties update completed with result: %d", status_code);
+}
+
+bool iothub_queue_limit_reached()
+{
+    const int MAX_OUTSTANDING_MESSAGES = 5;
+
+    int outstanding_messages = iothub_messages_sent - iothub_message_callbacks_received;
+    if (outstanding_messages >= MAX_OUTSTANDING_MESSAGES)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool send_packet(IOTHUB_DEVICE_CLIENT_LL_HANDLE * device_ll_handle)
+{
+    static int packet_number = 0;
+
+    char packet[5000] = "a";
+
+    packet_number++;
+
+
+    for(int i = 0; i < 4220; i++)
+    {
+        strncat(packet, "a", 1);
+    }
+
+    for(int i = 0; i < packet_number; i++)
+    {
+        strncat(packet, "b", 1);
+    }
+
+    printf("created packet with %zd bytes\n", strlen(packet));
+
+
+    if (azure_iot_connected && !iothub_queue_limit_reached())
+    {
+        printf("sending packet to azure\n");
+
+        IOTHUB_MESSAGE_HANDLE message_handle;
+        message_handle = IoTHubMessage_CreateFromString(packet);
+
+        IoTHubDeviceClient_LL_SendEventAsync(*device_ll_handle, message_handle, send_confirm_callback, NULL);
+        iothub_messages_sent++;
+
+        // The message is copied to the sdk so the we can destroy it
+        IoTHubMessage_Destroy(message_handle);
+
+        IoTHubDeviceClient_LL_DoWork(*device_ll_handle);
+    }
+    else
+    {
+        printf("not sending packet to azure, queue full\n");
+    }
+
+    return true;
 }
 
 // sleep N milliseconds, but call iothub dowork at the recommended interval during this sleep
@@ -127,7 +202,9 @@ void iothub_sleep(unsigned int milliseconds, IOTHUB_DEVICE_CLIENT_LL_HANDLE *dev
 int main(void)
 {
     IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;
-    IOTHUB_MESSAGE_HANDLE message_handle;
+
+    const int LOOP_ITERATIONS_BETWEEN_PACKETS = 20;
+    int loop_iterations_until_sending_packet = LOOP_ITERATIONS_BETWEEN_PACKETS;
 
     // Select the Protocol to use with the connection
 #ifdef SAMPLE_MQTT
@@ -174,53 +251,25 @@ int main(void)
 
         // Set the X509 certificates in the SDK
         if (
-            (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_X509_CERT, x509certificate) != IOTHUB_CLIENT_OK) ||
-            (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_X509_PRIVATE_KEY, x509privatekey) != IOTHUB_CLIENT_OK))
+                (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_X509_CERT, x509certificate) != IOTHUB_CLIENT_OK) ||
+                (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_X509_PRIVATE_KEY, x509privatekey) != IOTHUB_CLIENT_OK))
         {
             printf("failure to set options for x509, aborting\r\n");
         }
         else
         {
-            int consecutive_skipped_messages = 0;
-            const int MAX_SKIPPED_MESSAGES_BEFORE_RES_INIT = 60;
-
             do
             {
-                if (iothub_messages_sent - iothub_message_callbacks_received < MAX_OUTSTANDING_MESSAGES)
+                if (loop_iterations_until_sending_packet <= 0)
                 {
-                    message_handle = IoTHubMessage_CreateFromString("test message payload");
-
-                    iothub_messages_sent++;
-                    (void)printf("Sending message %d to IoTHub\r\n", iothub_messages_sent);
-                    IoTHubDeviceClient_LL_SendEventAsync(device_ll_handle, message_handle, send_confirm_callback, NULL);
-
-                    // The message is copied to the sdk so the we can destroy it
-                    IoTHubMessage_Destroy(message_handle);
-                    consecutive_skipped_messages = 0;
-                }
-                else
-                {
-                    // if we're disconnected or we can't upload fast enough,
-                    // the azure iot library will continue accepting messages and keeping them in a queue
-                    // using the count of callbacks, limit the growth of this queue
-                    printf("warning: max number of outstanding messages reached, skipping next message send\n");
-                    consecutive_skipped_messages++;
-
-                    if(consecutive_skipped_messages > MAX_SKIPPED_MESSAGES_BEFORE_RES_INIT)
+                    loop_iterations_until_sending_packet = LOOP_ITERATIONS_BETWEEN_PACKETS;
+                    if (!send_packet(&device_ll_handle))
                     {
-                        consecutive_skipped_messages = 0;
-
-                        // res_init(): refresh dns so that getaddrinfo() works if dns was updated after the program started
-                        // not needed as of glibc 2.26
-                        // see https://sourceware.org/bugzilla/show_bug.cgi?id=984#c20
-                        printf("calling res_init()\n");
-                        if (res_init() == -1)
-                        {
-                            printf("res_init() error\n");
-                        }
+                        printf("send_packet() failed\n");
                     }
                 }
 
+                loop_iterations_until_sending_packet--;
                 iothub_sleep(1000, &device_ll_handle);
 
             } while (g_continueRunning);
@@ -231,7 +280,7 @@ int main(void)
     // Free all the sdk subsystem
     IoTHub_Deinit();
 
-    printf("Press any key to continue");
+    printf("Enter a character to continue");
     getchar();
 
     return 0;
