@@ -44,6 +44,7 @@ int snprintf(char * s, size_t n, const char * format, ...)
 /*Codes_SRS_IOTHUBCLIENT_LL_02_085: [ IoTHubClient_LL_UploadToBlob shall use the same authorization as step 1. to prepare and perform a HTTP request with the following parameters: ]*/
 #define FILE_UPLOAD_FAILED_BODY "{ \"isSuccess\":false, \"statusCode\":-1,\"statusDescription\" : \"client not able to connect with the server\" }"
 #define FILE_UPLOAD_ABORTED_BODY "{ \"isSuccess\":false, \"statusCode\":-1,\"statusDescription\" : \"file upload aborted\" }"
+#define INDEFINITE_TIME                            ((time_t)-1)
 
 static const char* const EMPTY_STRING = "";
 static const char* const HEADER_AUTHORIZATION = "Authorization";
@@ -161,74 +162,76 @@ static int parse_result_json(const char* json_response, STRING_HANDLE correlatio
         result = __FAILURE__;
 
     }
-    else if ((json_obj = json_value_get_object(json)) == NULL)
-    {
-        LogError("unable to get json_value_get_object");
-        result = __FAILURE__;
-        json_value_free(json);
-    }
     else
     {
-        const char* json_corr_id;
-        const char* json_hostname;
-        const char* json_container_name;
-        const char* json_blob_name;
-        const char* json_sas_token;
-        STRING_HANDLE filename;
-        if ((json_corr_id = json_object_get_string(json_obj, "correlationId")) == NULL)
+        if ((json_obj = json_value_get_object(json)) == NULL)
         {
-            LogError("unable to retrieve correlation Id from json");
-            result = __FAILURE__;
-        }
-        else if ((json_hostname = json_object_get_string(json_obj, "hostName")) == NULL)
-        {
-            LogError("unable to retrieve hostname Id from json");
-            result = __FAILURE__;
-        }
-        else if ((json_container_name = json_object_get_string(json_obj, "containerName")) == NULL)
-        {
-            LogError("unable to retrieve container name Id from json");
-            result = __FAILURE__;
-        }
-        else if ((json_blob_name = json_object_get_string(json_obj, "blobName")) == NULL)
-        {
-            LogError("unable to retrieve blob name Id from json");
-            result = __FAILURE__;
-        }
-        else if ((json_sas_token = json_object_get_string(json_obj, "sasToken")) == NULL)
-        {
-            LogError("unable to retrieve sas token from json");
-            result = __FAILURE__;
-        }
-        /*Codes_SRS_IOTHUBCLIENT_LL_32_008: [ The returned file name shall be URL encoded before passing back to the cloud. ]*/
-        else if ((filename = URL_EncodeString(json_blob_name)) == NULL)
-        {
-            /*Codes_SRS_IOTHUBCLIENT_LL_32_009: [ If URL_EncodeString fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-            LogError("unable to URL encode of filename");
+            LogError("unable to get json_value_get_object");
             result = __FAILURE__;
         }
         else
         {
-            if (STRING_sprintf(sas_uri, "https://%s/%s/%s%s", json_hostname, json_container_name, STRING_c_str(filename), json_sas_token) != 0)
+            const char* json_corr_id;
+            const char* json_hostname;
+            const char* json_container_name;
+            const char* json_blob_name;
+            const char* json_sas_token;
+            STRING_HANDLE filename;
+            if ((json_corr_id = json_object_get_string(json_obj, "correlationId")) == NULL)
             {
-                /*Codes_SRS_IOTHUBCLIENT_LL_02_082: [ If extracting and saving the correlationId or SasUri fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-                LogError("unable to construct uri string");
+                LogError("unable to retrieve correlation Id from json");
                 result = __FAILURE__;
             }
-            else if (STRING_copy(correlation_id, json_corr_id) != 0)
+            else if ((json_hostname = json_object_get_string(json_obj, "hostName")) == NULL)
             {
-                /*Codes_SRS_IOTHUBCLIENT_LL_02_082: [ If extracting and saving the correlationId or SasUri fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-                LogError("unable to copy correlation Id");
+                LogError("unable to retrieve hostname Id from json");
                 result = __FAILURE__;
-                STRING_empty(sas_uri);
+            }
+            else if ((json_container_name = json_object_get_string(json_obj, "containerName")) == NULL)
+            {
+                LogError("unable to retrieve container name Id from json");
+                result = __FAILURE__;
+            }
+            else if ((json_blob_name = json_object_get_string(json_obj, "blobName")) == NULL)
+            {
+                LogError("unable to retrieve blob name Id from json");
+                result = __FAILURE__;
+            }
+            else if ((json_sas_token = json_object_get_string(json_obj, "sasToken")) == NULL)
+            {
+                LogError("unable to retrieve sas token from json");
+                result = __FAILURE__;
+            }
+            /*Codes_SRS_IOTHUBCLIENT_LL_32_008: [ The returned file name shall be URL encoded before passing back to the cloud. ]*/
+            else if ((filename = URL_EncodeString(json_blob_name)) == NULL)
+            {
+                /*Codes_SRS_IOTHUBCLIENT_LL_32_009: [ If URL_EncodeString fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+                LogError("unable to URL encode of filename");
+                result = __FAILURE__;
             }
             else
             {
-                result = 0;
+                if (STRING_sprintf(sas_uri, "https://%s/%s/%s%s", json_hostname, json_container_name, STRING_c_str(filename), json_sas_token) != 0)
+                {
+                    /*Codes_SRS_IOTHUBCLIENT_LL_02_082: [ If extracting and saving the correlationId or SasUri fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+                    LogError("unable to construct uri string");
+                    result = __FAILURE__;
+                }
+                else if (STRING_copy(correlation_id, json_corr_id) != 0)
+                {
+                    /*Codes_SRS_IOTHUBCLIENT_LL_02_082: [ If extracting and saving the correlationId or SasUri fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+                    LogError("unable to copy correlation Id");
+                    result = __FAILURE__;
+                    STRING_empty(sas_uri);
+                }
+                else
+                {
+                    result = 0;
+                }
+                STRING_delete(filename);
             }
-            STRING_delete(filename);
+            json_value_free(json);
         }
-        json_value_free(json);
     }
     return result;
 }
@@ -421,33 +424,42 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                                 {
                                     if (upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_DEVICE_AUTH)
                                     {
-                                        size_t expiry = (size_t)(difftime(get_time(NULL), 0) + 3600);
-                                        char* sas_token = IoTHubClient_Auth_Get_SasToken(upload_data->authorization_module, STRING_c_str(uri_resource), expiry, EMPTY_STRING);
-                                        if (sas_token == NULL)
+                                        time_t curr_time;
+                                        if ((curr_time = get_time(NULL)) == INDEFINITE_TIME)
                                         {
                                             result = __FAILURE__;
-                                            LogError("unable to retrieve sas token");
+                                            LogError("failure retrieving time");
                                         }
                                         else
                                         {
-                                            if (HTTPHeaders_ReplaceHeaderNameValuePair(requestHttpHeaders, HEADER_AUTHORIZATION, sas_token) != HTTP_HEADERS_OK)
+                                            size_t expiry = (size_t)(difftime(curr_time, 0) + 3600);
+                                            char* sas_token = IoTHubClient_Auth_Get_SasToken(upload_data->authorization_module, STRING_c_str(uri_resource), expiry, EMPTY_STRING);
+                                            if (sas_token == NULL)
                                             {
-                                                /*Codes_SRS_IOTHUBCLIENT_LL_02_074: [ If adding "Authorization" fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR ]*/
                                                 result = __FAILURE__;
-                                                LogError("unable to HTTPHeaders_AddHeaderNameValuePair");
-                                            }
-                                            else if (send_http_request(iotHubHttpApiExHandle, STRING_c_str(relativePath), requestHttpHeaders, blobBuffer, responseContent) != 0)
-                                            {
-                                                /*Codes_SRS_IOTHUBCLIENT_LL_02_076: [ If HTTPAPIEX_ExecuteRequest call fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-                                                result = __FAILURE__;
-                                                LogError("unable to HTTPAPIEX_ExecuteRequest");
+                                                LogError("unable to retrieve sas token");
                                             }
                                             else
                                             {
-                                                wasIoTHubRequestSuccess = 1;
+                                                if (HTTPHeaders_ReplaceHeaderNameValuePair(requestHttpHeaders, HEADER_AUTHORIZATION, sas_token) != HTTP_HEADERS_OK)
+                                                {
+                                                    /*Codes_SRS_IOTHUBCLIENT_LL_02_074: [ If adding "Authorization" fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR ]*/
+                                                    result = __FAILURE__;
+                                                    LogError("unable to HTTPHeaders_AddHeaderNameValuePair");
+                                                }
+                                                else if (send_http_request(iotHubHttpApiExHandle, STRING_c_str(relativePath), requestHttpHeaders, blobBuffer, responseContent) != 0)
+                                                {
+                                                    /*Codes_SRS_IOTHUBCLIENT_LL_02_076: [ If HTTPAPIEX_ExecuteRequest call fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+                                                    result = __FAILURE__;
+                                                    LogError("unable to HTTPAPIEX_ExecuteRequest");
+                                                }
+                                                else
+                                                {
+                                                    wasIoTHubRequestSuccess = 1;
+                                                }
                                             }
+                                            free(sas_token);
                                         }
-                                        free(sas_token);
                                     }
                                     else
                                     {
@@ -824,7 +836,9 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
                                             {
                                                 /*do again snprintf*/
                                                 BUFFER_HANDLE toBeTransmitted = NULL;
-                                                if ((toBeTransmitted = BUFFER_create((const unsigned char*)STRING_c_str(req_string), STRING_length(req_string))) == NULL)
+                                                size_t req_string_len = STRING_length(req_string);
+                                                const char* required_string = STRING_c_str(req_string);
+                                                if ((toBeTransmitted = BUFFER_create((const unsigned char*)required_string, req_string_len)) == NULL)
                                                 {
                                                     LogError("unable to BUFFER_create");
                                                     result = IOTHUB_CLIENT_ERROR;
