@@ -230,8 +230,8 @@ static int parse_result_json(const char* json_response, STRING_HANDLE correlatio
                 }
                 STRING_delete(filename);
             }
-            json_value_free(json);
         }
+        json_value_free(json);
     }
     return result;
 }
