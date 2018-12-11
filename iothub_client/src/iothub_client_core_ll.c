@@ -356,7 +356,7 @@ static int create_blob_upload_module(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handle_d
     (void)handle_data;
     (void)config;
 #ifndef DONT_USE_UPLOADTOBLOB
-    handle_data->uploadToBlobHandle = IoTHubClient_LL_UploadToBlob_Create(config);
+    handle_data->uploadToBlobHandle = IoTHubClient_LL_UploadToBlob_Create(config, handle_data->authorization_module);
     if (handle_data->uploadToBlobHandle == NULL)
     {
         LogError("unable to IoTHubClientCore_LL_UploadToBlob_Create");
