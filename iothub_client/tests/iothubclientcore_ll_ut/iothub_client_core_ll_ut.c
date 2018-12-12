@@ -6398,7 +6398,7 @@ static void set_expected_calls_for_IoTHubClientCore_LL_CreateFromEnvironment_for
     STRICT_EXPECTED_CALL(environment_get_variable(IGNORED_PTR_ARG)).SetReturn(TEST_VAR_EDGEGATEWAYHOST);
     STRICT_EXPECTED_CALL(environment_get_variable(IGNORED_PTR_ARG)).SetReturn(TEST_VAR_MODULEID);
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(iothub_security_init(IOTHUB_SECURITY_TYPE_HTTP_EDGE));
+    STRICT_EXPECTED_CALL(iothub_security_init(IGNORED_NUM_ARG));
     setup_IoTHubClientCore_LL_create_mocks(true, true);
 
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_TrustBundle(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
