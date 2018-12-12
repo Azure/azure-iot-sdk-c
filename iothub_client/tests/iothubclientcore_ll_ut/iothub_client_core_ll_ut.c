@@ -237,6 +237,14 @@ static const char* TEST_MODULE_ID = "TestModuleId";
 
 static const char* TEST_CERTIFICATE = "TestCertificateData";
 
+static const char* TEST_EDGEHUB_CONNECTIONSTRING = "testEdgehubConnString";
+static const char* TEST_EDGEHUB_CACERTIFICATEFILE = "testEdgehubCACertFile";
+static const char* TEST_SAS_TOKEN_AUTH = "sasToken";
+static const char* TEST_VAR_DEVICEID = "testDeviceId";
+static const char* TEST_VAR_EDGEHOSTNAME = "testEdgeHost.host";
+static const char* TEST_VAR_EDGEGATEWAYHOST = "testEdgeGatewayHost";
+static const char* TEST_VAR_MODULEID = "testModuleId";
+
 static SINGLYLINKEDLIST_HANDLE test_singlylinkedlist_handle = (SINGLYLINKEDLIST_HANDLE)0x4243;
 static LIST_ITEM_HANDLE find_item_handle = (LIST_ITEM_HANDLE)0x4244;
 static LIST_ITEM_HANDLE add_item_handle = (LIST_ITEM_HANDLE)0x4245;
@@ -6381,15 +6389,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallbackEx_with_NULL_inputName_
 
 #ifdef USE_EDGE_MODULES
 
-static const char* TEST_EDGEHUB_CONNECTIONSTRING = "testEdgehubConnString";
-static const char* TEST_EDGEHUB_CACERTIFICATEFILE = "testEdgehubCACertFile";
-static const char* TEST_SAS_TOKEN_AUTH = "sasToken";
-static const char* TEST_VAR_DEVICEID = "testDeviceId";
-static const char* TEST_VAR_EDGEHOSTNAME = "testEdgeHost.host";
-static const char* TEST_VAR_EDGEGATEWAYHOST = "testEdgeGatewayHost";
-static const char* TEST_VAR_MODULEID = "testModuleId";
-
-
 static void set_expected_calls_for_IoTHubClientCore_LL_CreateFromEnvironment_for_EdgeHsm()
 {
     STRICT_EXPECTED_CALL(environment_get_variable(IGNORED_PTR_ARG)).SetReturn(NULL).CallCannotFail(); // don't failure test this path for HSM specifically.
@@ -6399,7 +6398,7 @@ static void set_expected_calls_for_IoTHubClientCore_LL_CreateFromEnvironment_for
     STRICT_EXPECTED_CALL(environment_get_variable(IGNORED_PTR_ARG)).SetReturn(TEST_VAR_EDGEGATEWAYHOST);
     STRICT_EXPECTED_CALL(environment_get_variable(IGNORED_PTR_ARG)).SetReturn(TEST_VAR_MODULEID);
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(iothub_security_init(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(iothub_security_init(IOTHUB_SECURITY_TYPE_HTTP_EDGE));
     setup_IoTHubClientCore_LL_create_mocks(true, true);
 
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_TrustBundle(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
