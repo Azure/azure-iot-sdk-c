@@ -177,6 +177,7 @@ if(${use_sample_trusted_cert})
 endif()
 
 # Set up the include and library paths
+include_directories($ENV{TOOLCHAIN_PREFIX}/include/)
 include_directories($ENV{TOOLCHAIN_PREFIX}/include/azureiot)
 link_directories($ENV{TOOLCHAIN_PREFIX}/lib)
 
@@ -186,7 +187,7 @@ add_executable(myapp ${iothub_c_files})
 set_target_properties(myapp PROPERTIES OUTPUT_NAME "myapp") 
 
 # List the libraries required by the link step
-target_link_libraries(myapp iothub_client aziotsharedutil iothub_client_mqtt_transport umqtt ssl crypto curl pthread parson m)
+target_link_libraries(myapp iothub_client_mqtt_transport iothub_client umqtt aziotsharedutil parson pthread curl ssl crypto m )
 ```
 ### Sample Additions to Dockerfile to build the application
 This sample assumes that you have a subdirectory in the directory containing your Dockerfile called myapp. In this directory are the CMakeLists.txt file above and your code to be built. This will be copied to your Docker container and built. This fragment would be appended to the sample above.
