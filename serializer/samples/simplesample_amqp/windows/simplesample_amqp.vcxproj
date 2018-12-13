@@ -175,4 +175,10 @@
     <ClInclude Include="..\simplesample_amqp.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Target Name="EnsureVcPkgPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references Vcpkg package(s) that are missing on this computer. For more information, see https://github.com/Azure/azure-iot-sdk-c/tree/master/doc/setting_up_vcpkg.md. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(VcpkgRoot)include\azureiot\iothub.h')" Text="$([System.String]::Format('$(ErrorText)', '$(VcpkgRoot)include\azureiot\iothub.h'))" />
+  </Target>
 </Project>
