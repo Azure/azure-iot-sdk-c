@@ -1,3 +1,5 @@
+# Building applications using vcpkg for C SDK
+
 This document describes how to setup vcpkg to build applications using Microsoft Azure IoT device SDK for C. It demonstrates building sample projects in Windows using the Visual Studio project files included in the SDK. It also demonstrates building standalone applications using cmake project files in Linux and Mac.
 
 ### Setup C SDK vcpkg for Windows development environment
@@ -84,7 +86,7 @@ ZLIB::ZLIB
 )
 ```
 
-- Run following commands in the newly create cmake directory:
+- Run following commands in the newly created cmake directory:
 ```Shell
 cmake .. -DCMAKE_TOOLCHAIN_FILE=~/vcpkg_new/scripts/buildsystems/vcpkg.cmake
 cmake --build .
