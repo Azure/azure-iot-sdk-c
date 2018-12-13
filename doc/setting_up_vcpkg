@@ -1,0 +1,73 @@
+
+
+Windows:
+	- Open a command prompt:
+		git clone https://github.com/Microsoft/vcpkg.git vcpkg_new
+pushd vcpkg_new
+.\bootstrap-vcpkg.bat
+vcpkg install azure-iot-sdk-c
+vcpkg export azure-iot-sdk-c --nuget
+popd
+git clone https://github.com/Azure/azure-iot-sdk-c.git azureiotsdk_sample
+pushd azureiotsdk_sample\iothub_client\samples\iothub_ll_c2d_sample\windows
+start iothub_ll_c2d_sample.sln
+	- In Visual Studio, open Nuget package manager console
+		Install-Package <package name provided by vcpkg export command> -Source "d:\d\vcpkg_new"
+		<hit F5 to build and run>
+		
+		
+Linux:
+	- Follow these steps:
+		1) Within iothub_client/samples/iothub_ll_telemetry_sample/linux/CMakeLists.txt, replace the current contents with this
+			#Copyright (c) Microsoft. All rights reserved.	
+				#Licensed under the MIT license. See LICENSE file in the project root for full license information.
+				
+				#this is CMakeLists.txt for iothub_ll_telemetry_sample
+				cmake_minimum_required(VERSION 2.8.11)
+				
+				if(WIN32)
+				message(FATAL_ERROR "This CMake file is only support Linux builds!")
+				endif()
+				
+				set(AZUREIOT_INC_FOLDER ".." "/usr/include/azureiot" "/usr/include/azureiot/inc")
+				find_package(azure_iot_sdks REQUIRED)
+				find_package(ZLIB REQUIRED)
+				
+				include_directories(${AZUREIOT_INC_FOLDER})
+				
+				set(iothub_c_files
+				../iothub_ll_telemetry_sample.c
+				../../../../certs/certs.c
+				)
+				
+				add_definitions(-DUSE_HTTP)
+				add_definitions(-DUSE_AMQP)
+				add_definitions(-DUSE_MQTT)
+				
+				add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
+				include_directories("../../../../certs")
+				
+				add_executable(iothub_ll_telemetry_sample ${iothub_c_files})
+				find_library(CURL NAMES curl-d curl)
+				target_link_libraries(iothub_ll_telemetry_sample
+				iothub_client_mqtt_transport
+				iothub_client_amqp_transport
+				iothub_client
+				parson
+				aziotsharedutil
+				umqtt
+				uuid
+				
+				${CURL}
+				pthread
+				ssl
+				crypto
+				m
+				ZLIB::ZLIB
+				)
+			
+			
+		2) Run following commands in the newly create cmake directory:
+			cmake .. -DCMAKE_TOOLCHAIN_FILE=~/vcpkg_new/scripts/buildsystems/vcpkg.cmake
+			make
+			./iothub_ll_telemetry_sample
