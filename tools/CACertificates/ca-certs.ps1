@@ -226,11 +226,9 @@ function New-CACertsDevice()
 
     $newDeviceCertPfx = New-CACertsSelfSignedCertificate $deviceName $signingCert $isASigner
 
-    $certSecureStringPwd = ConvertTo-SecureString -String $_privateKeyPassword -Force -AsPlainText
-
     # Export the PFX of the cert we've just created.  The PFX is a format that contains both public and private keys but is NOT something
     # clients written to IOT Hub SDK's now how to process, so we'll need to do some massaging.
-    Export-PFXCertificate -cert $newDeviceCertPfx -filePath $newDevicePfxFileName -password $certSecureStringPwd
+    Export-PFXCertificate -cert $newDeviceCertPfx -filePath $newDevicePfxFileName -password $certPassword
     if (-not (Test-Path $newDevicePfxFileName))
     {
         throw ("Error: CERT file {0} doesn't exist" -f $newDevicePfxFileName)
@@ -254,15 +252,19 @@ function New-CACertsDevice()
     Write-Host ("Certificate with subject CN={0} has been output to {1}" -f $deviceName, (Join-Path (get-location).path $newDevicePemPublicFileName))
 }
 
-function New-CACertsEdgeDevice([string]$deviceName, [string]$signingCertSubject=($_intermediateCertSubject -f "1"))
+function New-CACertsEdgeDevice()
 {
+    param([Parameter(Mandatory=$true)][string]$deviceName, 
+          [Parameter(Mandatory=$true)][System.Security.SecureString]$certPassword,
+          [string]$signingCertSubject=($_intermediateCertSubject -f "1")
+    )
     # Note: Appending a '.ca' to the common name is useful in situations
     # where a user names their hostname as the edge device name.
     # By doing so we avoid TLS validation errors where we have a server or
     # client certificate where the hostname is used as the common name
     # which essentially results in "loop" for validation purposes.
     $deviceName += $_edgeDeviceCACNSuffix
-    New-CACertsDevice $deviceName $signingCertSubject $true
+    New-CACertsDevice $deviceName $certPassword $signingCertSubject $true
 }
 
 function Write-CACertsCertificatesToEnvironment([string]$deviceName, [string]$iothubName, [bool]$useIntermediate)
