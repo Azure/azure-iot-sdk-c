@@ -2,7 +2,7 @@
 
 This document describes how to setup vcpkg to build applications using Microsoft Azure IoT device SDK for C. It demonstrates building sample projects in Windows using the Visual Studio project files included in the SDK. It also demonstrates building standalone applications using cmake project files in Linux and Mac.
 
-### Setup C SDK vcpkg for Windows development environment
+## Setup C SDK vcpkg for Windows development environment
 
 - Open a command prompt and run the following commands:
 
@@ -34,7 +34,7 @@ Install-Package <package name provided by vcpkg export command> -Source "d:\d\vc
 <hit F5 to build and run>
 ```
 
-### Setup C SDK vcpkg for Linux or Mac development environment	
+## Setup C SDK vcpkg for Linux or Mac development environment	
 		
 - Within an existing C SDK sample cmake file (e.g. iothub_client/samples/iothub_ll_telemetry_sample/linux/CMakeLists.txt), replace the current contents with the following:
 
