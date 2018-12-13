@@ -28,7 +28,7 @@ start iothub_ll_c2d_sample.sln
 <hit F5 to build and run>
 ```
 
-- Alternatively, if the Visual Studio integration step isn't setup, it is possible to build use the locally generated NugGet package. In order to use the exported package in Visual Studio, open Nuget package manager console and run the following commands:
+- Alternatively, if the Visual Studio integration step isn't setup, it is possible to build the sample using the locally generated NugGet package. In order to use the locally vcpkg-exported package in Visual Studio, open Nuget package manager console and run the following commands:
 ```Shell
 Install-Package <package name provided by vcpkg export command> -Source "d:\d\vcpkg_new"
 <hit F5 to build and run>
