@@ -24,3 +24,5 @@ ELSE()
 ENDIF(WIN32)
 
 add_library(custom_hsm_example ${source_files})
+
+compileTargetAsC99(custom_hsm_example)
