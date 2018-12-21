@@ -586,13 +586,78 @@ SAS_TOKEN_STATUS IoTHubClient_Auth_Is_SasToken_Valid(IOTHUB_AUTHORIZATION_HANDLE
 }
 
 #ifdef USE_EDGE_MODULES
-char* IoTHubClient_Auth_Get_TrustBundle(IOTHUB_AUTHORIZATION_HANDLE handle)
+
+// For debugging C modules, the environment can set the environment variable 'EdgeModuleCACertificateFile' to provide
+// trusted certificates.  We'd otherwise usually get these from trusted Edge service, but this complicates debugging experience.
+// EdgeModuleCACertificateFile and the related EdgeHubConnectionString can be set either manually or by tooling (e.g. VS Code).
+static char* read_ca_certificate_from_file(const char* certificate_file_name)
+{
+    char* result;
+    FILE *file_stream = NULL;
+
+    if ((file_stream = fopen(certificate_file_name, "r")) == NULL)
+    {
+        LogError("Cannot read file %s, errno=%d", certificate_file_name, errno);
+        result = NULL;
+    }
+    else if (fseek(file_stream, 0, SEEK_END) != 0)
+    {
+        LogError("fseek on file %s fails, errno=%d", certificate_file_name, errno);
+        result = NULL;
+    }
+    else 
+    {
+        size_t file_size = ftell(file_stream);
+        if (file_size < 0)
+        {
+            LogError("ftell fails reading %s, errno=%d",  certificate_file_name, errno);
+            result = NULL;
+        }
+        else if (file_size == 0)
+        {
+            LogError("file %s is 0 bytes, which is not valid certificate",  certificate_file_name);
+            result = NULL;
+        }
+        else
+        {
+            rewind(file_stream);
+
+            if ((result = calloc(1, file_size + 1)) == NULL)
+            {
+                LogError("Cannot allocate %lu bytes", (unsigned long)file_size);
+            }
+            else if ((fread(result, 1, file_size, file_stream) == 0) || (ferror(file_stream) != 0))
+            {
+                LogError("fread failed on file %s, errno=%d", certificate_file_name, errno);
+                free(result);
+                result = NULL;
+            }
+        }
+    }
+
+    if (file_stream != NULL)
+    {
+        fclose(file_stream);
+    }
+
+    return result;
+}
+
+// IoTHubClient_Auth_Get_TrustBundle retrieves a trust bundle - namely a PEM indicating the certificates the client should
+// trust as root authorities - to caller.  If certificate_file_name, we read this from a local file.  This should in general
+// be limited only to debugging modules on Edge.  If certificate_file_name is NULL, we invoke into the underlying 
+// HSM to retrieve this.
+char* IoTHubClient_Auth_Get_TrustBundle(IOTHUB_AUTHORIZATION_HANDLE handle, const char* certificate_file_name)
 {
     char* result;
     if (handle == NULL)
     {
         LogError("Security Handle is NULL");
         result = NULL;
+    }
+    else if (certificate_file_name != NULL)
+    {
+        result = read_ca_certificate_from_file(certificate_file_name);
     }
     else
     {
