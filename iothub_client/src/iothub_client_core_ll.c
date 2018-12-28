@@ -148,13 +148,18 @@ static const char PROVISIONING_ACCEPTABLE_VALUE[] = "true";
 { \"azureiot*com^dtracing^1*0*0\": { \"@id\": \"http://azureiot.com/dtracing/1.0.0\" } }, \
 \"azureiot*com^dtracing^1*0*0\": { \
     \"sampling_mode\": { \
-    \"value\": \"on\", \
+    \"value\": \"%s\", \
     \"status\" : { \
-    \"code\": 102, \
+    \"code\": %s, \
     \"description\" : \"%s\" \
     } \
 }, \
-\"sampling_rate\": %d \
+\"sampling_rate\": { \
+    \"value\": \"%s\", \
+    \"status\" : { \
+    \"code\": %s, \
+    \"description\" : \"%s\" \
+    } \
 } \
 }"
 
@@ -531,7 +536,7 @@ static void IoTHubClientCore_LL_SendComplete(PDLIST_ENTRY completed, IOTHUB_CLIE
     }
 }
 
-static int send_distributed_tracing_reported_state(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* iotHubClientHandle, int samplingPercentage, STRING_HANDLE error)
+static int send_distributed_tracing_reported_state(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* iotHubClientHandle, int samplingPercentage, STRING_HANDLE statusCode, STRING_HANDLE error)
 {
     int result = 0;
     STRING_HANDLE data = STRING_new();
@@ -540,7 +545,7 @@ static int send_distributed_tracing_reported_state(IOTHUB_CLIENT_CORE_LL_HANDLE_
         LogError("Error creating distributed tracing reported string");
         result = __FAILURE__;
     }
-    else if (STRING_sprintf(data, DISTRIBUTED_TRACING_REPORTED_TWIN_TEMPLATE, STRING_c_str(error), samplingPercentage) != 0)
+    else if (STRING_sprintf(data, DISTRIBUTED_TRACING_REPORTED_TWIN_TEMPLATE, STRING_c_str(statusCode), STRING_c_str(error), samplingPercentage) != 0)
     {
         LogError("Error calling STRING_sprintf for distributed tracing reported status");
         result = __FAILURE__;
@@ -562,17 +567,18 @@ static int update_distributed_tracing_settings_from_twin(IOTHUB_DISTRIBUTED_TRAC
 {
     int result;
     STRING_HANDLE message = STRING_new();
+    STRING_HANDLE statusCode = STRING_new();
     if (message == NULL)
     {
         LogError("Error creating message string");
         result = __FAILURE__;
     }
-    else if (IoTHubClient_DistributedTracing_UpdateFromTwin(diagSetting, update_state == DEVICE_TWIN_UPDATE_PARTIAL, payLoad, message) != 0)
+    else if (IoTHubClient_DistributedTracing_UpdateFromTwin(diagSetting, update_state == DEVICE_TWIN_UPDATE_PARTIAL, payLoad, statusCode, message) != 0)
     {
         LogError("Error calling IoTHubClient_DistributedTracing_UpdateFromTwin");
         result = __FAILURE__;
     }
-    else if (send_distributed_tracing_reported_state(iotHubClientHandle, diagSetting->samplingRate, message) != 0)
+    else if (send_distributed_tracing_reported_state(iotHubClientHandle, diagSetting->samplingRate, statusCode, message) != 0)
     {
         LogError("Error calling send_distributed_tracing_reported_state");
         result = __FAILURE__;
