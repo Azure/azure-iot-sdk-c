@@ -406,7 +406,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_CLIENT_LL_HANDLE;
      *
      * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
      */
-     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_EnableFeatureConfigurationViaDeviceTwin, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, bool, enableTwinConfiguration);
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_EnableFeatureConfigurationViaTwin, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, bool, enableTwinConfiguration);
 
 
 #ifdef __cplusplus

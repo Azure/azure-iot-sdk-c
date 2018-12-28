@@ -144,7 +144,6 @@ static const char MODULE_ID_TOKEN[] = "ModuleId";
 static const char PROVISIONING_TOKEN[] = "UseProvisioning";
 static const char PROVISIONING_ACCEPTABLE_VALUE[] = "true";
 
-//#define REPORT_TWIN_TEMPLATE  "{ \"__e2e_diag_sample_rate\": %d, \"__e2e_diag_info\": \"%s\"}"
 #define DISTRIBUTED_TRACING_REPORTED_TWIN_TEMPLATE "{ \"__iot:interfaces\": \
 { \"azureiot*com^dtracing^1*0*0\": { \"@id\": \"http://azureiot.com/dtracing/1.0.0\" } }, \
 \"azureiot*com^dtracing^1*0*0\": { \
@@ -1891,7 +1890,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SendEventAsync(IOTHUB_CLIENT_CORE_LL_HA
                     /*Codes_SRS_IOTHUBCLIENT_LL_02_014: [If distributed tracing isn't enabled, check if deprecated diagnostic information needs to be added to message header]*/
                     else if ((&handleData->diagnostic_setting != NULL) && (IoTHubClient_Diagnostic_AddIfNecessary(&handleData->diagnostic_setting, newEntry->messageHandle) != 0))
                     {
-                        /*Codes_SRS_IOTHUBCLIENT_LL_02_014: [If cloning and/or adding the information/diagnostic fails for any reason, IoTHubClientCore_LL_SendEventAsync shall not fail and return IOTHUB_CLIENT_ERROR.] */
+                        /*Codes_SRS_IOTHUBCLIENT_LL_02_014: [If cloning and/or adding the information/diagnostic fails for any reason, IoTHubClientCore_LL_SendEventAsync shall not fail.] */
                         result = IOTHUB_CLIENT_OK;
                         LogInfo("unable to add diagnostic information to message");
                     }
@@ -3041,17 +3040,20 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_GenericMethodInvoke(IOTHUB_CLIENT_CORE_
 }
 #endif
 
-IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_EnableFeatureConfigurationViaDeviceTwin(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, bool enableTwinConfiguration)
+IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_EnableFeatureConfigurationViaTwin(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, bool enableTwinConfiguration)
 {
-    (void)iotHubClientHandle;
-
     IOTHUB_CLIENT_RESULT result;
+    if (iotHubClientHandle != NULL)
+    {
+        //TODO: GetTwin logic goes here - temporarily enabling sampling mode always
+        iotHubClientHandle->distributedTracing_setting.samplingMode = enableTwinConfiguration;
 
-    //TODO: GetTwin logic goes here - temporarily enabling sampling mode always
-    iotHubClientHandle->distributedTracing_setting.samplingMode = enableTwinConfiguration;
-
-    result = IOTHUB_CLIENT_OK;
-
+        result = IOTHUB_CLIENT_OK;
+    }
+    else
+    {
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
     return result;
 }
 

@@ -394,7 +394,7 @@ extern "C"
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_EnableFeatureConfigurationViaDeviceTwin, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, bool, enableTwinConfiguration);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_EnableFeatureConfigurationViaTwin, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, bool, enableTwinConfiguration);
 
 #ifdef __cplusplus
 }
