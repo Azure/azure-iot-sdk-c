@@ -233,6 +233,7 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     char* http_proxy_username;
     char* http_proxy_password;
     bool isProductInfoSet;
+    int disconnect_recv_flag;
 } MQTTTRANSPORT_HANDLE_DATA, *PMQTTTRANSPORT_HANDLE_DATA;
 
 typedef struct MQTT_DEVICE_TWIN_ITEM_TAG
@@ -1710,15 +1711,15 @@ static void DisconnectFromClient(PMQTTTRANSPORT_HANDLE_DATA transport_data)
         // Ensure the disconnect message is sent
         if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_CONNECTED)
         {
-            int disconn_recv = 0;
-            (void)mqtt_client_disconnect(transport_data->mqttClient, mqtt_disconnect_cb, &disconn_recv);
+            transport_data->disconnect_recv_flag = 0;
+            (void)mqtt_client_disconnect(transport_data->mqttClient, mqtt_disconnect_cb, &transport_data->disconnect_recv_flag);
             size_t disconnect_ctr = 0;
             do
             {
                 mqtt_client_dowork(transport_data->mqttClient);
                 disconnect_ctr++;
                 ThreadAPI_Sleep(50);
-            } while ((disconnect_ctr < MAX_DISCONNECT_VALUE) && (disconn_recv == 0));
+            } while ((disconnect_ctr < MAX_DISCONNECT_VALUE) && (transport_data->disconnect_recv_flag == 0));
         }
         xio_destroy(transport_data->xioTransport);
         transport_data->xioTransport = NULL;
