@@ -607,7 +607,7 @@ static char* read_ca_certificate_from_file(const char* certificate_file_name)
     }
     else 
     {
-        size_t file_size = ftell(file_stream);
+        long int file_size = ftell(file_stream);
         if (file_size < 0)
         {
             LogError("ftell fails reading %s, errno=%d",  certificate_file_name, errno);
