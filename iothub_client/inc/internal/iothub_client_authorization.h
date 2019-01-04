@@ -49,7 +49,7 @@ MOCKABLE_FUNCTION(, int, IoTHubClient_Auth_Get_x509_info, IOTHUB_AUTHORIZATION_H
 
 
 #ifdef USE_EDGE_MODULES
-MOCKABLE_FUNCTION(, char*, IoTHubClient_Auth_Get_TrustBundle, IOTHUB_AUTHORIZATION_HANDLE, handle);
+MOCKABLE_FUNCTION(, char*, IoTHubClient_Auth_Get_TrustBundle, IOTHUB_AUTHORIZATION_HANDLE, handle, const char*, certificate_file_name);
 #endif
 
 
