@@ -319,7 +319,6 @@ int IoTHubClient_DistributedTracing_AddToMessageHeadersIfNecessary(IOTHUB_DISTRI
     return result;
 }
 
-//int IoTHubClient_DistributedTracing_UpdateFromTwin(IOTHUB_DISTRIBUTED_TRACING_SETTING_DATA* diagSetting, bool isPartialUpdate, const unsigned char* payLoad, STRING_HANDLE statusCode, STRING_HANDLE message)
 int IoTHubClient_DistributedTracing_UpdateFromTwin(IOTHUB_DISTRIBUTED_TRACING_SETTING_DATA* diagSetting, bool isPartialUpdate, const unsigned char* payLoad, STRING_HANDLE reportedStatePayload)
 {
     int result = 0;
