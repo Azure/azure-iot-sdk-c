@@ -509,8 +509,9 @@ static int create_message_annotations_to_encode(IOTHUB_MESSAGE_HANDLE messageHan
             amqpvalue_destroy(message_annotations_map);
         }
     }
+    
     // Distributed tracing
-    else if ((distributed_tracing = IoTHubMessage_GetDistributedTracingSystemProperty(messageHandle)) != NULL)
+    if ((distributed_tracing = IoTHubMessage_GetDistributedTracingSystemProperty(messageHandle)) != NULL)
     {
         // Codes_SRS_UAMQP_MESSAGING_32_001: [If optional diagnostic properties are present in the iot hub message, encode them into the AMQP message as annotation properties. Errors stop processing on this message.]
         if ((message_annotations_map = amqpvalue_create_map()) == NULL)

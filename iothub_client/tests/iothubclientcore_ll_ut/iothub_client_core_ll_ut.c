@@ -360,6 +360,13 @@ static STRING_HANDLE my_STRING_construct(const char* psz)
     return (STRING_HANDLE)my_gballoc_malloc(1);
 }
 
+int STRING_sprintf(STRING_HANDLE handle, const char* format, ...)
+{
+    (void)handle;
+    (void)format;
+    return 0;
+}
+
 STRING_HANDLE STRING_construct_sprintf(const char* psz, ...)
 {
     (void)psz;
@@ -1042,6 +1049,10 @@ static void setup_IoTHubClientCore_LL_sendeventasync_mocks(bool invoke_tickcount
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
 
+    STRICT_EXPECTED_CALL(IoTHubClient_DistributedTracing_AddToMessageHeadersIfNecessary(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2);
+    
     STRICT_EXPECTED_CALL(IoTHubClient_Diagnostic_AddIfNecessary(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
@@ -2251,7 +2262,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendEventAsync_fails)
     umock_c_negative_tests_snapshot();
 
     // act
-    size_t calls_cannot_fail[] = { 4 };
+    size_t calls_cannot_fail[] = { 3, 4, 5 };
     size_t count = umock_c_negative_tests_call_count();
     for (size_t index = 0; index < count; index++)
     {
@@ -2264,7 +2275,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendEventAsync_fails)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubClientCore_LL_Create failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubClientCore_LL_SendEventAsync failure in test %zu/%zu", index, count);
 
         IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SendEventAsync(handle, TEST_MESSAGE_HANDLE, test_event_confirmation_callback, (void*)1);
 
@@ -5413,6 +5424,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_product_info_fails_case1)
     IoTHubClientCore_LL_Destroy(h);
 }
 
+//Deprecated
 /*Tests_SRS_IoTHubClientCore_LL_10_037: [Calling IoTHubClientCore_LL_SetOption with value between [0, 100] shall return `IOTHUB_CLIENT_OK`. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetOption_diag_sampling_percentage_succeeds)
 {
@@ -5432,6 +5444,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_diag_sampling_percentage_succeeds)
     IoTHubClientCore_LL_Destroy(h);
 }
 
+//Deprecated
 /*Tests_SRS_IoTHubClientCore_LL_10_036: [Calling IoTHubClientCore_LL_SetOption with value > 100 shall return `IOTHUB_CLIENT_ERRROR`. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetOption_diag_sampling_percentage_fails)
 {
@@ -5559,7 +5572,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendEventToOutputAsync_fails)
     umock_c_negative_tests_snapshot();
 
     // act
-    size_t calls_cannot_fail[] = { 5 /*DList_InsertTailList*/ };
+    size_t calls_cannot_fail[] = { 4 /*IoTHubClient_DistributedTracing_AddToMessageHeadersIfNecessary*/, 5 /*IoTHubClient_Diagnostic_AddIfNecessary*/, 6 /*DList_InsertTailList*/ };
     size_t count = umock_c_negative_tests_call_count();
     for (size_t index = 0; index < count; index++)
     {
@@ -5572,7 +5585,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendEventToOutputAsync_fails)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubClientCore_LL_Create failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubClientCore_LL_SendEventToOutputAsync failure in test %zu/%zu", index, count);
 
         IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SendEventToOutputAsync(handle, TEST_MESSAGE_HANDLE, TEST_OUTPUT_NAME, test_event_confirmation_callback, (void*)1);
 

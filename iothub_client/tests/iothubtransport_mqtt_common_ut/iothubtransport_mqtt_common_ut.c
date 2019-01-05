@@ -189,6 +189,7 @@ static const char* TEST_OUTPUT_NAME = "TestOutputName";
 
 static const char* PROPERTY_SEPARATOR = "&";
 static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "creationtimeutc";
+static const char* DISTRIBUTED_TRACING_TEST_TRACESTATE = "tracestate=1234";
 
 static IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA TEST_DIAG_DATA;
 
@@ -1255,6 +1256,7 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_emtpy_msg_mocks(void)
     STRICT_EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentTypeSystemProperty(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentEncodingSystemProperty(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetDistributedTracingSystemProperty(IGNORED_PTR_ARG)).SetReturn(DISTRIBUTED_TRACING_TEST_TRACESTATE);
     STRICT_EXPECTED_CALL(IoTHubMessage_GetDiagnosticPropertyData(IGNORED_PTR_ARG));
 
 
@@ -1358,6 +1360,13 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(
     }
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentEncodingSystemProperty(IGNORED_PTR_ARG)).SetReturn(content_encoding);
     if (auto_urlencode && (content_encoding != NULL))
+    {
+        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    }
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetDistributedTracingSystemProperty(IGNORED_PTR_ARG)).SetReturn(DISTRIBUTED_TRACING_TEST_TRACESTATE);
+    if (auto_urlencode)
     {
         STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
@@ -4454,7 +4463,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_get_item_fails)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_emtpy_item_succeeds)
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_empty_item_succeeds)
 {
     // arrange
     IOTHUBTRANSPORT_CONFIG config = { 0 };

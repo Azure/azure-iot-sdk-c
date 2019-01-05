@@ -64,14 +64,13 @@ MOCKABLE_FUNCTION(, int, IoTHubClient_DistributedTracing_AddToMessageHeadersIfNe
 /**
     * @brief	Update distributed tracing settings from device twin
     *
-    * @param	diagSetting		Pointer to an @c IOTHUB_DISTRIBUTED_TRACING_SETTING_DATA structure
-    * @param    isPartialUpdate Whether device twin is complete or partial update
-    * @param	payLoad			Received device twin
-    * @param	statusCode		Reported status code of error when updating distributed tracing setting
-    * @param	message			Description of error when updating distributed tracing setting
+    * @param	diagSetting		        Pointer to an @c IOTHUB_DISTRIBUTED_TRACING_SETTING_DATA structure
+    * @param    isPartialUpdate         Whether device twin is complete or partial update
+    * @param	payLoad			        Received device twin
+    * @param	reportedStatePayload	Reported state payload for distributed tracing setting
     * @return	0 upon success, non-zero otherwise
     */
-MOCKABLE_FUNCTION(, int, IoTHubClient_DistributedTracing_UpdateFromTwin, IOTHUB_DISTRIBUTED_TRACING_SETTING_DATA*, diagSetting, bool, isPartialUpdate, const unsigned char*, payLoad, STRING_HANDLE, statusCode, STRING_HANDLE, message);
+MOCKABLE_FUNCTION(, int, IoTHubClient_DistributedTracing_UpdateFromTwin, IOTHUB_DISTRIBUTED_TRACING_SETTING_DATA*, diagSetting, bool, isPartialUpdate, const unsigned char*, payLoad, STRING_HANDLE, reportedStatePayload);
 
 #ifdef __cplusplus
 }

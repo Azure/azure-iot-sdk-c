@@ -44,6 +44,13 @@ static void my_gballoc_free(void* ptr)
 
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
+int STRING_sprintf(STRING_HANDLE handle, const char* format, ...)
+{
+    (void)handle;
+    (void)format;
+    return 0;
+}
+
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];

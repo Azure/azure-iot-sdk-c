@@ -121,6 +121,7 @@ static int saved_amqpvalue_get_string_return = 0;
 static const char* TEST_CONTENT_TYPE = "text/plain";
 static const char* TEST_CONTENT_ENCODING = "utf8";
 static IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA TEST_DIAGNOSTIC_DATA = { "12345678",  "1506054179" };
+static const char* DISTRIBUTED_TRACING_TEST_TRACESTATE = "tracestate=1234";
 
 
 static int test_properties_get_message_id(PROPERTIES_HANDLE properties, AMQP_VALUE* message_id_value)
@@ -199,6 +200,20 @@ static void set_exp_calls_for_create_encoded_annotations_properties(bool has_dia
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_GetDiagnosticPropertyData(TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(NULL);
     }
+
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetDistributedTracingSystemProperty(IGNORED_PTR_ARG)).SetReturn(DISTRIBUTED_TRACING_TEST_TRACESTATE);
+    STRICT_EXPECTED_CALL(amqpvalue_create_map());
+
+    STRICT_EXPECTED_CALL(amqpvalue_create_symbol(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_set_map_value(TEST_AMQP_VALUE, TEST_AMQP_VALUE, TEST_AMQP_VALUE));
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_AMQP_VALUE));
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_AMQP_VALUE));
+
+    STRICT_EXPECTED_CALL(amqpvalue_create_message_annotations(TEST_AMQP_VALUE));
+    STRICT_EXPECTED_CALL(amqpvalue_get_encoded_size(TEST_AMQP_VALUE, IGNORED_PTR_ARG))
+        .CopyOutArgumentBuffer(2, &encoding_size, sizeof(encoding_size));
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_AMQP_VALUE));
 }
 
 static void set_exp_calls_for_create_encoded_message_properties(bool has_message_id, bool has_correlation_id, const char* content_type, const char* content_encoding)
@@ -321,10 +336,7 @@ static void set_exp_calls_for_message_create_uamqp_encoding_from_iothub_message(
         STRICT_EXPECTED_CALL(amqpvalue_encode(TEST_AMQP_VALUE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     }
 
-    if (has_diag_properties)
-    {
-        STRICT_EXPECTED_CALL(amqpvalue_encode(TEST_AMQP_VALUE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    }
+    STRICT_EXPECTED_CALL(amqpvalue_encode(TEST_AMQP_VALUE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
     STRICT_EXPECTED_CALL(amqpvalue_encode(TEST_AMQP_VALUE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
@@ -333,10 +345,7 @@ static void set_exp_calls_for_message_create_uamqp_encoding_from_iothub_message(
     {
         STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_AMQP_VALUE));
     }
-    if (has_diag_properties)
-    {
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_AMQP_VALUE));
-    }
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_AMQP_VALUE));
     STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_AMQP_VALUE));
 }
 
@@ -902,26 +911,42 @@ TEST_FUNCTION(message_create_from_iothub_message_BYTEARRAY_return_errors_fails)
         umock_c_negative_tests_fail_call(i);
 
         if ((i == 1) || // GetMessageId is optional
-            (i == 5) || //GetCorrelationId is optional
-            (i == 9) || // ContentType is optional
-            (i == 11) ||  // ContentEncoding is optional
+            (i == 5) || // GetCorrelationId is optional
             (i == 4) || // amqpvalue_destroy
             (i == 8) || // amqpvalue_destroy
+            (i == 9) || // ContentType is optional
+            (i == 11) || // GetContentEncodingSystemProperty is optional
             (i == 15) || // properties_destroy
             (i == 22) || // amqpvalue_destroy
             (i == 23) || // amqpvalue_destroy
             (i == 26) || // amqpvalue_destroy
-            (i == 27) || //IoTHubMessage_GetDiagnosticPropertyData is optional
+            (i == 27) || // GetDiagnosticPropertyData is optional
+            (i == 28) || // amqpvalue_create_map
+            (i == 29) || // amqp_create_symbol
+            (i == 30) || // amqpvalue_create_string
+            (i == 31) || // amqpvalue_set_map_value
             (i == 32) || // amqpvalue_destroy
             (i == 33) || // amqpvalue_destroy
+            (i == 34) || // gballoc_malloc
+            (i == 35) || // amqp_create_symbol
+            (i == 36) || // amqpvalue_create_string
+            (i == 37) || // amqpvalue_set_map_value
             (i == 38) || // amqpvalue_destroy
             (i == 39) || // amqpvalue_destroy
-            (i == 42) || // free
+            (i == 40) || // amqpvalue_create_message_annotations
+            (i == 41) || // amqpvalue_get_encoded_size
+            (i == 42) || // gballoc_free
             (i == 43) || // amqpvalue_destroy
+            (i == 44) || // GetDistributedTracingSystemProperty is optional
+            (i == 45) || // amqpvalue_create_map
+            (i == 49) || // amqpvalue_destroy
+            (i == 50) || // amqpvalue_destroy
             (i == 53) || // amqpvalue_destroy
-            (i == 54) || // amqpvalue_destroy
-            (i == 55) || // amqpvalue_destroy
-            (i == 56) // amqpvalue_destroy
+            (i == 58) || // gballoc_malloc
+            (i == 63) || // amqpvalue_destroy
+            (i == 64) || // amqpvalue_destroy
+            (i == 65) || // amqpvalue_destroy
+            (i == 66)  // amqpvalue_destroy
             )
         {
             continue; // these lines have functions that do not return anything (void).
@@ -965,27 +990,43 @@ TEST_FUNCTION(message_create_from_iothub_message_STRING_return_errors_fails)
         umock_c_negative_tests_fail_call(i);
 
         if ((i == 1) || // GetMessageId is optional
-            (i == 5) || //GetCorrelationId is optional
-            (i == 9) || // ContentType is optional
-            (i == 11) ||  // ContentEncoding is optional
+            (i == 5) || // GetCorrelationId is optional
             (i == 4) || // amqpvalue_destroy
             (i == 8) || // amqpvalue_destroy
+            (i == 9) || // ContentType is optional
+            (i == 11) || // GetContentEncodingSystemProperty is optional
             (i == 15) || // properties_destroy
             (i == 22) || // amqpvalue_destroy
             (i == 23) || // amqpvalue_destroy
             (i == 26) || // amqpvalue_destroy
-            (i == 27) || //IoTHubMessage_GetDiagnosticPropertyData is optional
+            (i == 27) || // GetDiagnosticPropertyData is optional
+            (i == 28) || // amqpvalue_create_map
+            (i == 29) || // amqp_create_symbol
+            (i == 30) || // amqpvalue_create_string
+            (i == 31) || // amqpvalue_set_map_value
             (i == 32) || // amqpvalue_destroy
             (i == 33) || // amqpvalue_destroy
+            (i == 34) || // gballoc_malloc
+            (i == 35) || // amqp_create_symbol
+            (i == 36) || // amqpvalue_create_string
+            (i == 37) || // amqpvalue_set_map_value
             (i == 38) || // amqpvalue_destroy
             (i == 39) || // amqpvalue_destroy
-            (i == 42) || // free
+            (i == 40) || // amqpvalue_create_message_annotations
+            (i == 41) || // amqpvalue_get_encoded_size
+            (i == 42) || // gballoc_free
             (i == 43) || // amqpvalue_destroy
+            (i == 44) || // GetDistributedTracingSystemProperty is optional
+            (i == 45) || // amqpvalue_create_map
+            (i == 49) || // amqpvalue_destroy
+            (i == 50) || // amqpvalue_destroy
             (i == 53) || // amqpvalue_destroy
-            (i == 54) || // amqpvalue_destroy
-            (i == 55) || // amqpvalue_destroy
-            (i == 56) // amqpvalue_destroy
-           )
+            (i == 58) || // gballoc_malloc
+            (i == 63) || // amqpvalue_destroy
+            (i == 64) || // amqpvalue_destroy
+            (i == 65) || // amqpvalue_destroy
+            (i == 66)  // amqpvalue_destroy
+            )
         {
             continue; // these lines have functions that do not return anything (void).
         }
