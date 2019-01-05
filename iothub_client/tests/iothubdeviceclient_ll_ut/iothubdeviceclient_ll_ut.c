@@ -343,13 +343,13 @@ TEST_FUNCTION(IoTHubDeviceClient_LL_SendReportedState_Test)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-TEST_FUNCTION(IoTHubDeviceClient_LL_GetDeviceTwinAsync_Test)
+TEST_FUNCTION(IoTHubDeviceClient_LL_GetTwinAsync_Test)
 {
     //arrange
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetDeviceTwinAsync(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_TWIN_CALLBACK, NULL));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetTwinAsync(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_TWIN_CALLBACK, NULL));
 
     //act
-    IOTHUB_CLIENT_RESULT result = IoTHubDeviceClient_LL_GetDeviceTwinAsync(TEST_IOTHUB_DEVICE_CLIENT_LL_HANDLE, TEST_TWIN_CALLBACK, NULL);
+    IOTHUB_CLIENT_RESULT result = IoTHubDeviceClient_LL_GetTwinAsync(TEST_IOTHUB_DEVICE_CLIENT_LL_HANDLE, TEST_TWIN_CALLBACK, NULL);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());

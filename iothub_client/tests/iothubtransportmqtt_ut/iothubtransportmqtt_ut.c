@@ -101,7 +101,7 @@ static pfIoTHubTransport_SetRetryPolicy             IoTHubTransportMqtt_SetRetry
 static pfIoTHubTransport_GetSendStatus              IoTHubTransportMqtt_GetSendStatus;
 static pfIoTHubTransport_Subscribe_DeviceTwin       IoTHubTransportMqtt_Subscribe_DeviceTwin;
 static pfIoTHubTransport_Unsubscribe_DeviceTwin     IoTHubTransportMqtt_Unsubscribe_DeviceTwin;
-static pfIoTHubTransport_GetDeviceTwinAsync         IoTHubTransportMqtt_GetDeviceTwinAsync;
+static pfIoTHubTransport_GetTwinAsync         IoTHubTransportMqtt_GetTwinAsync;
 static pfIoTHubTransport_Subscribe_DeviceMethod     IoTHubTransportMqtt_Subscribe_DeviceMethod;
 static pfIoTHubTransport_Unsubscribe_DeviceMethod   IoTHubTransportMqtt_Unsubscribe_DeviceMethod;
 static pfIoTHubTransport_DeviceMethod_Response      IoTHubTransportMqtt_DeviceMethod_Response;
@@ -345,7 +345,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     IoTHubTransportMqtt_GetSendStatus = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_GetSendStatus;
     IoTHubTransportMqtt_Subscribe_DeviceTwin = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_Subscribe_DeviceTwin;
     IoTHubTransportMqtt_Unsubscribe_DeviceTwin = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_Unsubscribe_DeviceTwin;
-    IoTHubTransportMqtt_GetDeviceTwinAsync = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_GetDeviceTwinAsync;
+    IoTHubTransportMqtt_GetTwinAsync = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_GetTwinAsync;
     IoTHubTransportMqtt_Subscribe_DeviceMethod = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_Subscribe_DeviceMethod;
     IoTHubTransportMqtt_Unsubscribe_DeviceMethod = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_Unsubscribe_DeviceMethod;
     IoTHubTransportMqtt_DeviceMethod_Response = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_DeviceMethod_Response;
@@ -618,8 +618,8 @@ TEST_FUNCTION(IoTHubTransportMqtt_Unsubscribe_DeviceTwin_success)
     //cleanup
 }
 
-// Tests_SRS_IOTHUB_MQTT_TRANSPORT_09_001: [ IoTHubTransportMqtt_GetDeviceTwinAsync shall shall call into the IoTHubTransport_MQTT_Common_GetDeviceTwinAsync function. ]
-TEST_FUNCTION(IoTHubTransportMqtt_GetDeviceTwinAsync_success)
+// Tests_SRS_IOTHUB_MQTT_TRANSPORT_09_001: [ IoTHubTransportMqtt_GetTwinAsync shall shall call into the IoTHubTransport_MQTT_Common_GetTwinAsync function. ]
+TEST_FUNCTION(IoTHubTransportMqtt_GetTwinAsync_success)
 {
     // arrange
     IOTHUBTRANSPORT_CONFIG config = { 0 };
@@ -627,10 +627,10 @@ TEST_FUNCTION(IoTHubTransportMqtt_GetDeviceTwinAsync_success)
     TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config, g_transport_cb_info, NULL);
     
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_GetDeviceTwinAsync(handle, (IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)0x4444, (void*)0x4445));
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_GetTwinAsync(handle, (IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)0x4444, (void*)0x4445));
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransportMqtt_GetDeviceTwinAsync(handle, (IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)0x4444, (void*)0x4445);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransportMqtt_GetTwinAsync(handle, (IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)0x4444, (void*)0x4445);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());

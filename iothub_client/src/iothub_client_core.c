@@ -617,7 +617,7 @@ static void dispatch_user_callbacks(IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientIns
             {
             case CALLBACK_TYPE_DEVICE_TWIN:
             {
-                // Callback if for GetDeviceTwinAsync
+                // Callback if for GetTwinAsync
                 if (queued_cb->iothub_callback.dev_twin_cb_info.userCallback)
                 {
                     queued_cb->iothub_callback.dev_twin_cb_info.userCallback(
@@ -1856,15 +1856,15 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SendReportedState(IOTHUB_CLIENT_CORE_HANDL
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClientCore_GetDeviceTwinAsync(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback, void* userContextCallback)
+IOTHUB_CLIENT_RESULT IoTHubClientCore_GetTwinAsync(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback, void* userContextCallback)
 {
     IOTHUB_CLIENT_RESULT result;
 
-    // Codes_SRS_IOTHUBCLIENT_09_009: [ If `iotHubClientHandle` or `deviceTwinCallback` are `NULL`, `IoTHubClientCore_GetDeviceTwinAsync` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]
+    // Codes_SRS_IOTHUBCLIENT_09_009: [ If `iotHubClientHandle` or `deviceTwinCallback` are `NULL`, `IoTHubClientCore_GetTwinAsync` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]
     if (iotHubClientHandle == NULL || deviceTwinCallback == NULL)
     {
         result = IOTHUB_CLIENT_INVALID_ARG;
-        LogError("invalid arg (NULL)");
+        LogError("Invalid argument (iotHubClientHandle=%p, deviceTwinCallback=%p)", iotHubClientHandle, deviceTwinCallback);
     }
     else
     {
@@ -1873,7 +1873,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_GetDeviceTwinAsync(IOTHUB_CLIENT_CORE_HAND
         // Codes_SRS_IOTHUBCLIENT_09_010: [ The thread that executes the client  I/O shall be started if not running already. ]
         if ((result = StartWorkerThreadIfNeeded(iotHubClientInstance)) != IOTHUB_CLIENT_OK)
         {
-            // Codes_SRS_IOTHUBCLIENT_09_011: [ If starting the thread fails, `IoTHubClientCore_GetDeviceTwinAsync` shall return `IOTHUB_CLIENT_ERROR`. ]
+            // Codes_SRS_IOTHUBCLIENT_09_011: [ If starting the thread fails, `IoTHubClientCore_GetTwinAsync` shall return `IOTHUB_CLIENT_ERROR`. ]
             result = IOTHUB_CLIENT_ERROR;
             LogError("Could not start worker thread");
         }
@@ -1892,22 +1892,22 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_GetDeviceTwinAsync(IOTHUB_CLIENT_CORE_HAND
                 queueContext->userCallback.getTwin = deviceTwinCallback;
                 queueContext->userContext = userContextCallback;
 
-                // Codes_SRS_IOTHUBCLIENT_09_012: [ `IoTHubClientCore_GetDeviceTwinAsync` shall be made thread-safe by using the lock created in IoTHubClient_Create. ]
+                // Codes_SRS_IOTHUBCLIENT_09_012: [ `IoTHubClientCore_GetTwinAsync` shall be made thread-safe by using the lock created in IoTHubClient_Create. ]
                 if (Lock(iotHubClientInstance->LockHandle) != LOCK_OK)
                 {
-                    // Codes_SRS_IOTHUBCLIENT_09_013: [ If acquiring the lock fails, `IoTHubClientCore_GetDeviceTwinAsync` shall return `IOTHUB_CLIENT_ERROR`. ]
+                    // Codes_SRS_IOTHUBCLIENT_09_013: [ If acquiring the lock fails, `IoTHubClientCore_GetTwinAsync` shall return `IOTHUB_CLIENT_ERROR`. ]
                     result = IOTHUB_CLIENT_ERROR;
                     LogError("Could not acquire lock");
                 }
                 else
                 {
-                    // Codes_SRS_IOTHUBCLIENT_09_014: [ `IoTHubClientCore_GetDeviceTwinAsync` shall call `IoTHubClientCore_LL_GetDeviceTwinAsync`, passing the `IoTHubClient_LL handle`, `deviceTwinCallback` and `userContextCallback` as arguments ]
-                    // Codes_SRS_IOTHUBCLIENT_09_015: [ When `IoTHubClientCore_LL_GetDeviceTwinAsync` is called, `IoTHubClientCore_GetDeviceTwinAsync` shall return the result of `IoTHubClientCore_LL_GetDeviceTwinAsync`. ]
-                    result = IoTHubClientCore_LL_GetDeviceTwinAsync(iotHubClientInstance->IoTHubClientLLHandle, iothub_ll_get_device_twin_async_callback, queueContext);
+                    // Codes_SRS_IOTHUBCLIENT_09_014: [ `IoTHubClientCore_GetTwinAsync` shall call `IoTHubClientCore_LL_GetTwinAsync`, passing the `IoTHubClient_LL handle`, `deviceTwinCallback` and `userContextCallback` as arguments ]
+                    // Codes_SRS_IOTHUBCLIENT_09_015: [ When `IoTHubClientCore_LL_GetTwinAsync` is called, `IoTHubClientCore_GetTwinAsync` shall return the result of `IoTHubClientCore_LL_GetTwinAsync`. ]
+                    result = IoTHubClientCore_LL_GetTwinAsync(iotHubClientInstance->IoTHubClientLLHandle, iothub_ll_get_device_twin_async_callback, queueContext);
 
                     if (result != IOTHUB_CLIENT_OK)
                     {
-                        LogError("IoTHubClientCore_LL_GetDeviceTwinAsync failed");
+                        LogError("IoTHubClientCore_LL_GetTwinAsync failed");
                     }
 
                     (void)Unlock(iotHubClientInstance->LockHandle);

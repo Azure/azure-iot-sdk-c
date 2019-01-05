@@ -605,8 +605,8 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod, 0);
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_AMQP_Common_ProcessItem, IOTHUB_PROCESS_OK);
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_AMQP_Common_GetSendStatus, IOTHUB_CLIENT_OK);
-    REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_AMQP_Common_GetDeviceTwinAsync, IOTHUB_CLIENT_OK);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubTransport_AMQP_Common_GetDeviceTwinAsync, IOTHUB_CLIENT_ERROR);
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_AMQP_Common_GetTwinAsync, IOTHUB_CLIENT_OK);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubTransport_AMQP_Common_GetTwinAsync, IOTHUB_CLIENT_ERROR);
     REGISTER_GLOBAL_MOCK_RETURN(wsio_get_interface_description, TEST_WSIO_INTERFACE_DESCRIPTION);
     REGISTER_GLOBAL_MOCK_RETURN(platform_get_default_tlsio, TEST_TLSIO_INTERFACE_DESCRIPTION);
     REGISTER_GLOBAL_MOCK_RETURN(http_proxy_io_get_interface_description, TEST_HTTP_PROXY_IO_INTERFACE_DESCRIPTION);
@@ -976,17 +976,17 @@ TEST_FUNCTION(AMQP_Unsubscribe_DeviceTwin)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_WS_09_020: [IoTHubTransportAMQP_WS_GetDeviceTwinAsync shall invoke IoTHubTransport_AMQP_Common_GetDeviceTwinAsync()]
-TEST_FUNCTION(AMQP_GetDeviceTwinAsync)
+// Tests_SRS_IOTHUBTRANSPORTAMQP_WS_09_020: [IoTHubTransportAMQP_WS_GetTwinAsync shall invoke IoTHubTransport_AMQP_Common_GetTwinAsync()]
+TEST_FUNCTION(AMQP_GetTwinAsync)
 {
     // arrange
     TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol_over_WebSocketsTls();
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_GetDeviceTwinAsync(TEST_IOTHUB_DEVICE_HANDLE, (IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)0x4444, (void*)0x4445));
+    STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_GetTwinAsync(TEST_IOTHUB_DEVICE_HANDLE, (IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)0x4444, (void*)0x4445));
 
     // act
-    IOTHUB_CLIENT_RESULT result = provider->IoTHubTransport_GetDeviceTwinAsync(TEST_IOTHUB_DEVICE_HANDLE, (IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)0x4444, (void*)0x4445);
+    IOTHUB_CLIENT_RESULT result = provider->IoTHubTransport_GetTwinAsync(TEST_IOTHUB_DEVICE_HANDLE, (IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)0x4444, (void*)0x4445);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());

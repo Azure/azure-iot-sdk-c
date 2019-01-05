@@ -231,12 +231,12 @@ IOTHUB_CLIENT_RESULT IoTHubModuleClient_LL_SendReportedState(IOTHUB_MODULE_CLIEN
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubModuleClient_LL_GetDeviceTwinAsync(IOTHUB_MODULE_CLIENT_LL_HANDLE iotHubModuleClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK moduleTwinCallback, void* userContextCallback)
+IOTHUB_CLIENT_RESULT IoTHubModuleClient_LL_GetTwinAsync(IOTHUB_MODULE_CLIENT_LL_HANDLE iotHubModuleClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK moduleTwinCallback, void* userContextCallback)
 {
     IOTHUB_CLIENT_RESULT result;
     if (iotHubModuleClientHandle != NULL)
     {
-        result = IoTHubClientCore_LL_GetDeviceTwinAsync(iotHubModuleClientHandle->coreHandle, moduleTwinCallback, userContextCallback);
+        result = IoTHubClientCore_LL_GetTwinAsync(iotHubModuleClientHandle->coreHandle, moduleTwinCallback, userContextCallback);
     }
     else
     {

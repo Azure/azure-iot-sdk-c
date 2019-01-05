@@ -81,7 +81,7 @@ extern "C"
     typedef IOTHUB_CLIENT_RESULT(*pfIoTHubTransport_GetSendStatus)(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_STATUS *iotHubClientStatus);
     typedef int (*pfIoTHubTransport_Subscribe_DeviceTwin)(IOTHUB_DEVICE_HANDLE handle);
     typedef void (*pfIoTHubTransport_Unsubscribe_DeviceTwin)(IOTHUB_DEVICE_HANDLE handle);
-    typedef IOTHUB_CLIENT_RESULT(*pfIoTHubTransport_GetDeviceTwinAsync)(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK completionCallback, void* callbackContext);
+    typedef IOTHUB_CLIENT_RESULT(*pfIoTHubTransport_GetTwinAsync)(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK completionCallback, void* callbackContext);
     typedef IOTHUB_CLIENT_RESULT(*pfIotHubTransport_SendMessageDisposition)(MESSAGE_CALLBACK_INFO* messageData, IOTHUBMESSAGE_DISPOSITION_RESULT disposition);
     typedef IOTHUB_PROCESS_ITEM_RESULT(*pfIoTHubTransport_ProcessItem)(TRANSPORT_LL_HANDLE handle, IOTHUB_IDENTITY_TYPE item_type, IOTHUB_IDENTITY_INFO* iothub_item);
     typedef int(*pfIoTHubTransport_Subscribe_DeviceMethod)(IOTHUB_DEVICE_HANDLE handle);
@@ -98,7 +98,6 @@ pfIoTHubTransport_Unsubscribe_DeviceMethod IoTHubTransport_Unsubscribe_DeviceMet
 pfIoTHubTransport_DeviceMethod_Response IoTHubTransport_DeviceMethod_Response;      \
 pfIoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_Subscribe_DeviceTwin;        \
 pfIoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransport_Unsubscribe_DeviceTwin;    \
-pfIoTHubTransport_GetDeviceTwinAsync IoTHubTransport_GetDeviceTwinAsync;            \
 pfIoTHubTransport_ProcessItem IoTHubTransport_ProcessItem;                          \
 pfIoTHubTransport_GetHostname IoTHubTransport_GetHostname;                          \
 pfIoTHubTransport_SetOption IoTHubTransport_SetOption;                              \
@@ -113,7 +112,8 @@ pfIoTHubTransport_SetRetryPolicy IoTHubTransport_SetRetryPolicy;                
 pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus;                      \
 pfIoTHubTransport_Subscribe_InputQueue IoTHubTransport_Subscribe_InputQueue;        \
 pfIoTHubTransport_Unsubscribe_InputQueue IoTHubTransport_Unsubscribe_InputQueue;    \
-pfIoTHubTransport_SetCallbackContext IoTHubTransport_SetCallbackContext     /*there's an intentional missing ; on this line*/
+pfIoTHubTransport_SetCallbackContext IoTHubTransport_SetCallbackContext;            \
+pfIoTHubTransport_GetTwinAsync IoTHubTransport_GetTwinAsync     /*there's an intentional missing ; on this line*/
 
     struct TRANSPORT_PROVIDER_TAG
     {

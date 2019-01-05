@@ -2393,8 +2393,8 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin_handle_NULL_fai
 }
 
 // Tests_SRS_IOTHUB_MQTT_TRANSPORT_09_002: [ The request shall be queued to be sent when the transport is connected, through DoWork ]
-// Tests_SRS_IOTHUB_MQTT_TRANSPORT_09_004: [ If no failure occurs, IoTHubTransport_MQTT_Common_GetDeviceTwinAsync shall return IOTHUB_CLIENT_OK ]
-TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetDeviceTwinAsync_Succeed)
+// Tests_SRS_IOTHUB_MQTT_TRANSPORT_09_004: [ If no failure occurs, IoTHubTransport_MQTT_Common_GetTwinAsync shall return IOTHUB_CLIENT_OK ]
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetTwinAsync_Succeed)
 {
     // arrange
     IOTHUBTRANSPORT_CONFIG config = { 0 };
@@ -2408,7 +2408,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetDeviceTwinAsync_Succeed)
     STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_GetDeviceTwinAsync(handle, on_get_device_twin_completed_callback, (void*)0x4445);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_GetTwinAsync(handle, on_get_device_twin_completed_callback, (void*)0x4445);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -2418,14 +2418,14 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetDeviceTwinAsync_Succeed)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_MQTT_TRANSPORT_09_001: [ If `handle` or `completionCallback` are `NULL` than `IoTHubTransport_MQTT_Common_GetDeviceTwinAsync` shall return IOTHUB_CLIENT_INVALID_ARG. ]
-TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetDeviceTwinAsync_NULL_handle_failure)
+// Tests_SRS_IOTHUB_MQTT_TRANSPORT_09_001: [ If `handle` or `completionCallback` are `NULL` than `IoTHubTransport_MQTT_Common_GetTwinAsync` shall return IOTHUB_CLIENT_INVALID_ARG. ]
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetTwinAsync_NULL_handle_failure)
 {
     // arrange
     umock_c_reset_all_calls();
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_GetDeviceTwinAsync(NULL, on_get_device_twin_completed_callback, (void*)0x4445);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_GetTwinAsync(NULL, on_get_device_twin_completed_callback, (void*)0x4445);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -2434,8 +2434,8 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetDeviceTwinAsync_NULL_handle_failure
     //cleanup
 }
 
-// Tests_SRS_IOTHUB_MQTT_TRANSPORT_09_001: [ If `handle` or `completionCallback` are `NULL` than `IoTHubTransport_MQTT_Common_GetDeviceTwinAsync` shall return IOTHUB_CLIENT_INVALID_ARG. ]
-TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetDeviceTwinAsync_NULL_completionCallback_failure)
+// Tests_SRS_IOTHUB_MQTT_TRANSPORT_09_001: [ If `handle` or `completionCallback` are `NULL` than `IoTHubTransport_MQTT_Common_GetTwinAsync` shall return IOTHUB_CLIENT_INVALID_ARG. ]
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetTwinAsync_NULL_completionCallback_failure)
 {
     // arrange
     IOTHUBTRANSPORT_CONFIG config = { 0 };
@@ -2446,7 +2446,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetDeviceTwinAsync_NULL_completionCall
     umock_c_reset_all_calls();
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_GetDeviceTwinAsync(handle, NULL, (void*)0x4445);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_GetTwinAsync(handle, NULL, (void*)0x4445);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -2456,8 +2456,8 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetDeviceTwinAsync_NULL_completionCall
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_MQTT_TRANSPORT_09_003: [ If any failure occurs, IoTHubTransport_MQTT_Common_GetDeviceTwinAsync shall return IOTHUB_CLIENT_ERROR ]
-TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetDeviceTwinAsync_fails)
+// Tests_SRS_IOTHUB_MQTT_TRANSPORT_09_003: [ If any failure occurs, IoTHubTransport_MQTT_Common_GetTwinAsync shall return IOTHUB_CLIENT_ERROR ]
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetTwinAsync_fails)
 {
     // arrange
     ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
@@ -2488,7 +2488,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetDeviceTwinAsync_fails)
 
         char tmp_msg[64];
         sprintf(tmp_msg, "Failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
-        IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_GetDeviceTwinAsync(handle, on_get_device_twin_completed_callback, (void*)0x4445);
+        IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_GetTwinAsync(handle, on_get_device_twin_completed_callback, (void*)0x4445);
 
         // assert
         ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, tmp_msg);
@@ -2511,7 +2511,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_return_pending_get_twin_reques
     STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    (void)IoTHubTransport_MQTT_Common_GetDeviceTwinAsync(handle, on_get_device_twin_completed_callback, (void*)0x4445);
+    (void)IoTHubTransport_MQTT_Common_GetTwinAsync(handle, on_get_device_twin_completed_callback, (void*)0x4445);
 
     get_twin_size = 1234;
     get_twin_payLoad = (const unsigned char*)0x4567;
@@ -3792,7 +3792,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_send_get_twin_succeed)
     STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    (void)IoTHubTransport_MQTT_Common_GetDeviceTwinAsync(handle, on_get_device_twin_completed_callback, (void*)0x4445);
+    (void)IoTHubTransport_MQTT_Common_GetTwinAsync(handle, on_get_device_twin_completed_callback, (void*)0x4445);
 
     // Send the GET request
     umock_c_reset_all_calls();

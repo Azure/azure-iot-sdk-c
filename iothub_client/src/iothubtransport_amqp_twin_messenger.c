@@ -54,7 +54,6 @@ static char* DEFAULT_TWIN_RECEIVE_LINK_TARGET_NAME =    "twin";
 
 static const char* TWIN_OPERATION_PATCH =               "PATCH";
 static const char* TWIN_OPERATION_GET =                 "GET";
-static const char* TWIN_OPERATION_GET_ON_DEMAND =       "GET";
 static const char* TWIN_OPERATION_PUT =                 "PUT";
 static const char* TWIN_OPERATION_DELETE =              "DELETE";
 
@@ -715,10 +714,8 @@ static const char* get_twin_operation_name(TWIN_OPERATION_TYPE op_type)
             result = TWIN_OPERATION_PATCH;
             break;
         case TWIN_OPERATION_TYPE_GET:
-            result = TWIN_OPERATION_GET;
-            break;
         case TWIN_OPERATION_TYPE_GET_ON_DEMAND:
-            result = TWIN_OPERATION_GET_ON_DEMAND;
+            result = TWIN_OPERATION_GET;
             break;
         case TWIN_OPERATION_TYPE_PUT:
             result = TWIN_OPERATION_PUT;

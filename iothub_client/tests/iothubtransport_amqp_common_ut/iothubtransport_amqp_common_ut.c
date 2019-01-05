@@ -4900,8 +4900,8 @@ static void on_device_get_twin_completed_callback(DEVICE_TWIN_UPDATE_TYPE update
 }
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_155: [ device_get_twin_async() shall be invoked for the registered device, passing `on_device_get_twin_completed_callback`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_157: [ If no errors occur, `IoTHubTransport_AMQP_Common_GetDeviceTwinAsync` shall return IOTHUB_CLIENT_OK ]
-TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetDeviceTwinAsync_success)
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_157: [ If no errors occur, `IoTHubTransport_AMQP_Common_GetTwinAsync` shall return IOTHUB_CLIENT_OK ]
+TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetTwinAsync_success)
 {
     // arrange
     TRANSPORT_LL_HANDLE handle = create_transport();
@@ -4920,7 +4920,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetDeviceTwinAsync_success)
     STRICT_EXPECTED_CALL(device_get_twin_async(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_GetDeviceTwinAsync(handle, on_device_get_twin_completed_callback, (void*)0x5566);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_GetTwinAsync(handle, on_device_get_twin_completed_callback, (void*)0x5566);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -4930,14 +4930,14 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetDeviceTwinAsync_success)
     destroy_transport(handle, NULL, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_154: [ If `handle` or `completionCallback` are NULL, `IoTHubTransport_AMQP_Common_GetDeviceTwinAsync` shall fail and return IOTHUB_CLIENT_INVALID_ARG ]
-TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetDeviceTwinAsync_NULL_handle)
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_154: [ If `handle` or `completionCallback` are NULL, `IoTHubTransport_AMQP_Common_GetTwinAsync` shall fail and return IOTHUB_CLIENT_INVALID_ARG ]
+TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetTwinAsync_NULL_handle)
 {
     // arrange
     umock_c_reset_all_calls();
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_GetDeviceTwinAsync(NULL, on_device_get_twin_completed_callback, (void*)0x5566);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_GetTwinAsync(NULL, on_device_get_twin_completed_callback, (void*)0x5566);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -4946,8 +4946,8 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetDeviceTwinAsync_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_154: [ If `handle` or `completionCallback` are NULL, `IoTHubTransport_AMQP_Common_GetDeviceTwinAsync` shall fail and return IOTHUB_CLIENT_INVALID_ARG ]
-TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetDeviceTwinAsync_NULL_callback)
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_154: [ If `handle` or `completionCallback` are NULL, `IoTHubTransport_AMQP_Common_GetTwinAsync` shall fail and return IOTHUB_CLIENT_INVALID_ARG ]
+TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetTwinAsync_NULL_callback)
 {
     // arrange
     TRANSPORT_LL_HANDLE handle = create_transport();
@@ -4962,7 +4962,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetDeviceTwinAsync_NULL_callback)
     umock_c_reset_all_calls();
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_GetDeviceTwinAsync(handle, NULL, (void*)0x5566);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_GetTwinAsync(handle, NULL, (void*)0x5566);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -4972,8 +4972,8 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetDeviceTwinAsync_NULL_callback)
     destroy_transport(handle, NULL, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_156: [ If device_get_twin_async() fails, `IoTHubTransport_AMQP_Common_GetDeviceTwinAsync` shall fail and return IOTHUB_CLIENT_ERROR ]
-TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetDeviceTwinAsync_failure_checks)
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_156: [ If device_get_twin_async() fails, `IoTHubTransport_AMQP_Common_GetTwinAsync` shall fail and return IOTHUB_CLIENT_ERROR ]
+TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetTwinAsync_failure_checks)
 {
     // arrange
     ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
@@ -5008,7 +5008,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetDeviceTwinAsync_failure_checks)
 
         char tmp_msg[64];
         sprintf(tmp_msg, "Failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
-        IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_GetDeviceTwinAsync(handle, on_device_get_twin_completed_callback, (void*)0x5566);
+        IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_GetTwinAsync(handle, on_device_get_twin_completed_callback, (void*)0x5566);
 
         // assert
         ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_ERROR, result, tmp_msg);

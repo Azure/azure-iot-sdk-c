@@ -993,9 +993,7 @@ static void sendPendingGetTwinRequests(PMQTTTRANSPORT_HANDLE_DATA transportData)
     {
         DLIST_ENTRY saveListEntry;
         saveListEntry.Flink = dev_twin_item->Flink;
-
         MQTT_DEVICE_TWIN_ITEM* msg_entry = containingRecord(dev_twin_item, MQTT_DEVICE_TWIN_ITEM, entry);
-
         (void)DList_RemoveEntryList(dev_twin_item);
 
         if (publish_device_twin_get_message(transportData, msg_entry) != 0)
@@ -1020,7 +1018,6 @@ static void removeExpiredPendingGetTwinRequests(PMQTTTRANSPORT_HANDLE_DATA trans
         {
             DLIST_ENTRY nextListItem;
             nextListItem.Flink = listItem->Flink;
-
             MQTT_DEVICE_TWIN_ITEM* msg_entry = containingRecord(listItem, MQTT_DEVICE_TWIN_ITEM, entry);
 
             if (((current_ms - msg_entry->msgEnqueueTime) / 1000) >= ON_DEMAND_GET_TWIN_REQUEST_TIMEOUT_SECS)
@@ -1047,7 +1044,6 @@ static void removeExpiredGetTwinRequestsPendingAck(PMQTTTRANSPORT_HANDLE_DATA tr
         {
             DLIST_ENTRY nextListItem;
             nextListItem.Flink = listItem->Flink;
-
             MQTT_DEVICE_TWIN_ITEM* msg_entry = containingRecord(listItem, MQTT_DEVICE_TWIN_ITEM, entry);
 
             // Check if it is a on-demand get-twin request.
@@ -2750,11 +2746,11 @@ void IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE han
     }
 }
 
-IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_GetDeviceTwinAsync(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK completionCallback, void* callbackContext)
+IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_GetTwinAsync(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK completionCallback, void* callbackContext)
 {
     IOTHUB_CLIENT_RESULT result;
 
-    // Codes_SRS_IOTHUB_MQTT_TRANSPORT_09_001: [ If `handle` or `completionCallback` are `NULL` than `IoTHubTransport_MQTT_Common_GetDeviceTwinAsync` shall return IOTHUB_CLIENT_INVALID_ARG. ]
+    // Codes_SRS_IOTHUB_MQTT_TRANSPORT_09_001: [ If `handle` or `completionCallback` are `NULL` than `IoTHubTransport_MQTT_Common_GetTwinAsync` shall return IOTHUB_CLIENT_INVALID_ARG. ]
     if (handle == NULL || completionCallback == NULL)
     {
         LogError("Invalid argument (handle=%p, completionCallback=%p)", handle, completionCallback);
@@ -2768,14 +2764,14 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_GetDeviceTwinAsync(IOTHUB_DEVIC
         if ((mqtt_info = create_device_twin_get_message(transport_data)) == NULL)
         {
             LogError("Failed creating the device twin get request message");
-            // Codes_SRS_IOTHUB_MQTT_TRANSPORT_09_003: [ If any failure occurs, IoTHubTransport_MQTT_Common_GetDeviceTwinAsync shall return IOTHUB_CLIENT_ERROR ]
+            // Codes_SRS_IOTHUB_MQTT_TRANSPORT_09_003: [ If any failure occurs, IoTHubTransport_MQTT_Common_GetTwinAsync shall return IOTHUB_CLIENT_ERROR ]
             result = IOTHUB_CLIENT_ERROR;
         }
         else if (tickcounter_get_current_ms(transport_data->msgTickCounter, &mqtt_info->msgEnqueueTime) != 0)
         {
             LogError("Failed setting the get twin request enqueue time");
             destroy_device_twin_get_message(mqtt_info);
-            // Codes_SRS_IOTHUB_MQTT_TRANSPORT_09_003: [ If any failure occurs, IoTHubTransport_MQTT_Common_GetDeviceTwinAsync shall return IOTHUB_CLIENT_ERROR ]
+            // Codes_SRS_IOTHUB_MQTT_TRANSPORT_09_003: [ If any failure occurs, IoTHubTransport_MQTT_Common_GetTwinAsync shall return IOTHUB_CLIENT_ERROR ]
             result = IOTHUB_CLIENT_ERROR;
         }
         else
@@ -2786,7 +2782,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_GetDeviceTwinAsync(IOTHUB_DEVIC
             // Codes_SRS_IOTHUB_MQTT_TRANSPORT_09_002: [ The request shall be queued to be sent when the transport is connected, through DoWork ]
             DList_InsertTailList(&transport_data->pending_get_twin_queue, &mqtt_info->entry);
 
-            // Codes_SRS_IOTHUB_MQTT_TRANSPORT_09_004: [ If no failure occurs, IoTHubTransport_MQTT_Common_GetDeviceTwinAsync shall return IOTHUB_CLIENT_OK ]
+            // Codes_SRS_IOTHUB_MQTT_TRANSPORT_09_004: [ If no failure occurs, IoTHubTransport_MQTT_Common_GetTwinAsync shall return IOTHUB_CLIENT_OK ]
             result = IOTHUB_CLIENT_OK;
         }
     }
@@ -3142,6 +3138,7 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle)
         // Check the ack messages timeouts
         process_queued_ack_messages(transport_data);
         removeExpiredPendingGetTwinRequests(transport_data);
+        removeExpiredGetTwinRequestsPendingAck(transport_data);
     }
 }
 
