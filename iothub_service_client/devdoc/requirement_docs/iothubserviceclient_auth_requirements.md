@@ -106,6 +106,8 @@ extern IOTHUB_SERVICE_CLIENT_AUTH_HANDLE IoTHubServiceClientAuth_CreateFromConne
 
 **SRS_IOTHUBSERVICECLIENT_12_006: [** If the IOTHUB_SERVICE_CLIENT_AUTH has been populated IoTHubServiceClientAuth_CreateFromConnectionString shall do clean up and return with a IOTHUB_SERVICE_CLIENT_AUTH_HANDLE to it **]**
 
+**SRS_IOTHUBSERVICECLIENT_12_041: [** IoTHubServiceClientAuth_CreateFromConnectionString shall allocate memory and copy sharedAccessSignature to result->sharedAccessKey by prefixing it with "sas=". **]**
+
 
 ## IoTHubServiceClient_Destroy
 ```c

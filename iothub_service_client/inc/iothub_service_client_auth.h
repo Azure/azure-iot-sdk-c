@@ -49,7 +49,7 @@ typedef struct IOTHUB_SERVICE_CLIENT_AUTH_TAG
     char* hostname;
     char* iothubName;
     char* iothubSuffix;
-    char* sharedAccessKey;
+    char* sharedAccessKey;  //field can contain "SharedAccessSignature" if prefixed with "sas="; Otherwise, a “SharedAccessKey” is expected.
     char* keyName;
     char* deviceId;
 } IOTHUB_SERVICE_CLIENT_AUTH;

@@ -57,6 +57,7 @@ static STRING_HANDLE TEST_VALUE_STRING_HANDLE = (STRING_HANDLE)0x4646;
 
 static const char* TEST_CHAR_PTR = "TestString";
 static const char* TEST_CONNECTION_STRING = "HostName=aaa.bbb.net;SharedAccessKeyName=xxx;SharedAccessKey=yyy";
+static const char* TEST_SAS_CONNECTION_STRING = "HostName=aaa.bbb.net;SharedAccessSignature=yyy";
 static size_t currentmalloc_call;
 static size_t whenShallmalloc_fail;
 
@@ -400,6 +401,9 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
         .SetReturn(TEST_CONST_CHAR_PTR);
    
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKey"))
+        .SetReturn(TEST_CONST_CHAR_PTR_NULL);
+
+    STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessSignature"))
         .SetReturn(TEST_CONST_CHAR_PTR_NULL);
 
     set_expected_calls_for_free_service_client_auth(mocks);
@@ -889,6 +893,93 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
 
     // assert
     ASSERT_ARE_EQUAL(void_ptr, NULL, result);
+    mocks.AssertActualAndExpectedCalls();
+}
+
+/* Tests_SRS_IOTHUBSERVICECLIENT_12_041: [** IoTHubServiceClientAuth_CreateFromConnectionString shall allocate memory and copy sharedAccessSignature to result->sharedAccessKey by prefixing it with "sas=". **] */
+TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_for_sharedAccessSignature)
+{
+    // arrange
+    CIoTHubServiceClientAuthMocks mocks;
+
+    whenShallmalloc_fail = 0;
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
+        .IgnoreArgument(1);
+
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_SAS_CONNECTION_STRING));
+
+    STRICT_EXPECTED_CALL(mocks, connectionstringparser_parse(TEST_STRING_HANDLE))
+        .SetReturn(TEST_MAP_HANDLE);
+
+    STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKeyName"))
+        .SetReturn(TEST_CONST_CHAR_PTR);
+
+    STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"DeviceId"))
+        .SetReturn(TEST_CONST_CHAR_PTR_NULL);
+
+    STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"HostName"))
+        .SetReturn(TEST_CONST_CHAR_PTR);
+
+    STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKey"))
+        .SetReturn(TEST_CONST_CHAR_PTR_NULL);
+
+    STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessSignature"))
+        .SetReturn(TEST_CONST_CHAR_PTR);
+
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CONST_CHAR_PTR));
+
+    STRICT_EXPECTED_CALL(mocks, STRING_TOKENIZER_create(TEST_STRING_HANDLE))
+        .SetReturn(TEST_STRING_TOKENIZER_HANDLE);
+
+    STRICT_EXPECTED_CALL(mocks, STRING_new())
+        .SetReturn(TEST_STRING_HANDLE);
+
+    STRICT_EXPECTED_CALL(mocks, STRING_new())
+        .SetReturn(TEST_STRING_HANDLE);
+
+    STRICT_EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, "."))
+        .SetReturn(0);
+
+    STRICT_EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, "0"))
+        .SetReturn(0);
+
+    EXPECTED_CALL(mocks, mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .SetReturn(0);
+
+    EXPECTED_CALL(mocks, mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .SetReturn(0);
+
+    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
+
+    EXPECTED_CALL(mocks, STRING_c_str(TEST_STRING_HANDLE))
+        .SetReturn(TEST_CHAR_PTR);
+
+    EXPECTED_CALL(mocks, STRING_c_str(TEST_STRING_HANDLE))
+        .SetReturn(TEST_CHAR_PTR);
+
+    EXPECTED_CALL(mocks, mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .SetReturn(0);
+
+    EXPECTED_CALL(mocks, mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .SetReturn(0);
+
+    set_expected_calls_for_CreateFromConnectionString_cleanup(mocks);
+
+
+    // act
+    IOTHUB_SERVICE_CLIENT_AUTH_HANDLE result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_SAS_CONNECTION_STRING);
+
+    // assert
+    ASSERT_IS_NOT_NULL(result);
+    ASSERT_IS_NOT_NULL(result->sharedAccessKey);
+    ASSERT_ARE_EQUAL(int, 0, strncmp(result->sharedAccessKey, "sas=", 4));
+    ASSERT_ARE_EQUAL(int, 0, strncmp(&result->sharedAccessKey[4], TEST_CONST_CHAR_PTR, strlen(TEST_CONST_CHAR_PTR)));
+
+    if (result != NULL)
+    {
+        free(result);
+    }
+
     mocks.AssertActualAndExpectedCalls();
 }
 
