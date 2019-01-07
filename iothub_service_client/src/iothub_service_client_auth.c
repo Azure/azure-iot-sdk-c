@@ -14,7 +14,9 @@
 static const char* IOTHUBHOSTNAME = "HostName";
 static const char* IOTHUBSHAREDACESSKEYNAME = "SharedAccessKeyName";
 static const char* IOTHUBSHAREDACESSKEY = "SharedAccessKey";
+static const char* IOTHUBSHAREDACESSSIGNATURE = "SharedAccessSignature";
 static const char* IOTHUBDEVICEID = "DeviceId";
+static const char* IOTHUBSASPREFIX = "sas=";
 
 static void free_service_client_auth(IOTHUB_SERVICE_CLIENT_AUTH* authInfo)
 {
@@ -30,7 +32,7 @@ static void free_service_client_auth(IOTHUB_SERVICE_CLIENT_AUTH* authInfo)
 DEFINE_ENUM_STRINGS(IOTHUB_DEVICE_STATUS, IOTHUB_DEVICE_STATUS_VALUES);
 DEFINE_ENUM_STRINGS(IOTHUB_DEVICE_CONNECTION_STATE, IOTHUB_DEVICE_CONNECTION_STATE_VALUES);
 
-IOTHUB_SERVICE_CLIENT_AUTH_HANDLE IoTHubServiceClientAuth_CreateFromConnectionString(const char* connectionString)
+static IOTHUB_SERVICE_CLIENT_AUTH_HANDLE create_from_connection_string(const char* connectionString, bool useSharedAccessSignature)
 {
     IOTHUB_SERVICE_CLIENT_AUTH_HANDLE result;
 
@@ -79,10 +81,11 @@ IOTHUB_SERVICE_CLIENT_AUTH_HANDLE IoTHubServiceClientAuth_CreateFromConnectionSt
                     STRING_HANDLE token_key_string = NULL;
                     STRING_HANDLE token_value_string = NULL;
                     STRING_HANDLE host_name_string = NULL;
+                    STRING_HANDLE shared_access = NULL;
                     const char* hostName;
                     const char* keyName;
                     const char* deviceId;
-                    const char* sharedAccessKey;
+                    const char* sharedAccess = NULL;
                     const char* iothubName;
                     const char* iothubSuffix;
 
@@ -111,10 +114,17 @@ IOTHUB_SERVICE_CLIENT_AUTH_HANDLE IoTHubServiceClientAuth_CreateFromConnectionSt
                         free_service_client_auth(result);
                         result = NULL;
                     }
-                    else if ((sharedAccessKey = Map_GetValueFromKey(connection_string_values_map, IOTHUBSHAREDACESSKEY)) == NULL)
+                    else if (!useSharedAccessSignature && (sharedAccess = Map_GetValueFromKey(connection_string_values_map, IOTHUBSHAREDACESSKEY)) == NULL)
                     {
                         /*Codes_SRS_IOTHUBSERVICECLIENT_12_013: [** If the populating SharedAccessKey fails, IoTHubServiceClientAuth_CreateFromConnectionString shall do clean up and return NULL. **] */
                         LogError("Couldn't find %s in connection string", IOTHUBSHAREDACESSKEY);
+                        free_service_client_auth(result);
+                        result = NULL;
+                    }
+                    else if (useSharedAccessSignature && (sharedAccess = Map_GetValueFromKey(connection_string_values_map, IOTHUBSHAREDACESSSIGNATURE)) == NULL)
+                    {
+                        /*Codes_SRS_IOTHUBSERVICECLIENT_12_013: [** If the populating SharedAccessKey fails, IoTHubServiceClientAuth_CreateFromSharedAccessSignature shall do clean up and return NULL. **] */
+                        LogError("Couldn't find %s in connection string", IOTHUBSHAREDACESSSIGNATURE);
                         free_service_client_auth(result);
                         result = NULL;
                     }
@@ -191,10 +201,22 @@ IOTHUB_SERVICE_CLIENT_AUTH_HANDLE IoTHubServiceClientAuth_CreateFromConnectionSt
                         result = NULL;
                     }
                     /*Codes_SRS_IOTHUBSERVICECLIENT_12_028: [** IoTHubServiceClientAuth_CreateFromConnectionString shall allocate memory and copy sharedAccessKey to result->sharedAccessKey by calling mallocAndStrcpy_s. **] */
-                    else if (mallocAndStrcpy_s(&result->sharedAccessKey, sharedAccessKey) != 0)
+                    else if (!useSharedAccessSignature && (sharedAccess != NULL) && mallocAndStrcpy_s(&result->sharedAccessKey, sharedAccess) != 0)
                     {
                         /*Codes_SRS_IOTHUBSERVICECLIENT_12_029: [** If the mallocAndStrcpy_s fails, IoTHubServiceClientAuth_CreateFromConnectionString shall do clean up and return NULL. **] */
                         LogError("mallocAndStrcpy_s failed for sharedAccessKey");
+                        free_service_client_auth(result);
+                        result = NULL;
+                    }
+                    /*Codes_SRS_IOTHUBSERVICECLIENT_12_041: [** IoTHubServiceClientAuth_CreateFromSharedAccessSignature shall allocate memory and copy sharedAccessSignature to result->sharedAccessKey by prefixing it with "sas=". **] */
+                    else if (useSharedAccessSignature &&
+                        (sharedAccess != NULL) &&
+                        ((shared_access = STRING_construct(IOTHUBSASPREFIX)) != NULL) &&
+                        (STRING_concat(shared_access, sharedAccess) != 0) &&
+                        (mallocAndStrcpy_s(&result->sharedAccessKey, STRING_c_str(shared_access)) != 0))
+                    {
+                        /*Codes_SRS_IOTHUBSERVICECLIENT_12_029: [** If the mallocAndStrcpy_s fails, IoTHubServiceClientAuth_CreateFromSharedAccessSignature shall do clean up and return NULL. **] */
+                        LogError("mallocAndStrcpy_s failed for sharedAccessSignature");
                         free_service_client_auth(result);
                         result = NULL;
                     }
@@ -236,12 +258,26 @@ IOTHUB_SERVICE_CLIENT_AUTH_HANDLE IoTHubServiceClientAuth_CreateFromConnectionSt
                     STRING_delete(host_name_string);
                     STRING_TOKENIZER_destroy(tokenizer);
                     Map_Destroy(connection_string_values_map);
+                    if (useSharedAccessSignature)
+                    {
+                        STRING_delete(shared_access);
+                    }
                 }
                 STRING_delete(connection_string);
             }
         }
     }
     return result;
+}
+
+IOTHUB_SERVICE_CLIENT_AUTH_HANDLE IoTHubServiceClientAuth_CreateFromConnectionString(const char* connectionString)
+{
+    return create_from_connection_string(connectionString, false);
+}
+
+IOTHUB_SERVICE_CLIENT_AUTH_HANDLE IoTHubServiceClientAuth_CreateFromSharedAccessSignature(const char* connectionString)
+{
+    return create_from_connection_string(connectionString, true);
 }
 
 void IoTHubServiceClientAuth_Destroy(IOTHUB_SERVICE_CLIENT_AUTH_HANDLE serviceClientHandle)
