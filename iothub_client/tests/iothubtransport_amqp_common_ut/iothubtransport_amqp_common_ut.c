@@ -1064,6 +1064,18 @@ static void destroy_transport(TRANSPORT_LL_HANDLE handle, IOTHUB_DEVICE_HANDLE r
     IoTHubTransport_AMQP_Common_Destroy(handle);
 }
 
+static DEVICE_TWIN_UPDATE_STATE get_twin_update_type;
+static const unsigned char* get_twin_message;
+static size_t get_twin_length;
+static void* get_twin_context;
+static void on_device_get_twin_completed_callback(DEVICE_TWIN_UPDATE_STATE update_type, const unsigned char* message, size_t length, void* context)
+{
+    get_twin_update_type = update_type;
+    get_twin_message = message;
+    get_twin_length = length;
+    get_twin_context = context;
+}
+
 // ---------- Test Initialization Helpers ---------- //
 static void register_umock_alias_types()
 {
@@ -4885,18 +4897,6 @@ TEST_FUNCTION(IoTHubTransport_AMQP_SetCallbackContext_fail)
     ASSERT_ARE_NOT_EQUAL(int, 0, result);
 
     // cleanup
-}
-
-static DEVICE_TWIN_UPDATE_TYPE get_twin_update_type;
-static const unsigned char* get_twin_message;
-static size_t get_twin_length;
-static void* get_twin_context;
-static void on_device_get_twin_completed_callback(DEVICE_TWIN_UPDATE_TYPE update_type, const unsigned char* message, size_t length, void* context)
-{
-    get_twin_update_type = update_type;
-    get_twin_message = message;
-    get_twin_length = length;
-    get_twin_context = context;
 }
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_155: [ device_get_twin_async() shall be invoked for the registered device, passing `on_device_get_twin_completed_callback`]

@@ -556,6 +556,19 @@ STRING_HANDLE my_FAKE_IoTHubTransport_GetHostname(TRANSPORT_LL_HANDLE handle)
     return TEST_STRING_HANDLE;
 }
 
+static IOTHUB_CLIENT_RESULT my_FAKE_IoTHubTransport_GetTwinAsync_result;
+static IOTHUB_DEVICE_HANDLE my_FAKE_IoTHubTransport_GetTwinAsync_handle;
+static IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK my_FAKE_IoTHubTransport_GetTwinAsync_completionCallback;
+static void* my_FAKE_IoTHubTransport_GetTwinAsync_callbackContext;
+static IOTHUB_CLIENT_RESULT my_FAKE_IoTHubTransport_GetTwinAsync(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK completionCallback, void* callbackContext)
+{
+    my_FAKE_IoTHubTransport_GetTwinAsync_handle = handle;
+    my_FAKE_IoTHubTransport_GetTwinAsync_completionCallback = completionCallback;
+    my_FAKE_IoTHubTransport_GetTwinAsync_callbackContext = callbackContext;
+    return my_FAKE_IoTHubTransport_GetTwinAsync_result;
+}
+
+
 STRING_HANDLE my_plafrom_get_platform_info(void)
 {
     STRING_HANDLE result;
@@ -578,7 +591,6 @@ static TRANSPORT_PROVIDER FAKE_transport_provider =
     FAKE_IoTHubTransport_DeviceMethod_Response, /*pfIoTHubTransport_DeviceMethod_Response IoTHubTransport_DeviceMethod_Response;*/
     FAKE_IoTHubTransport_Subscribe_DeviceTwin, /*pfIoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_Subscribe_DeviceTwin; */
     FAKE_IoTHubTransport_Unsubscribe_DeviceTwin, /*pfIoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransport_Unsubscribe_DeviceTwin; */
-    FAKE_IoTHubTransport_GetTwinAsync, /*pfIoTHubTransport_GetTwinAsync IoTHubTransport_GetTwinAsync;*/
     FAKE_IoTHubTransport_ProcessItem,   /*pfIoTHubTransport_ProcessItem IoTHubTransport_ProcessItem     */
     FAKE_IoTHubTransport_GetHostname,   /*pfIoTHubTransport_GetHostname IoTHubTransport_GetHostname     */
     FAKE_IoTHubTransport_SetOption,     /*pfIoTHubTransport_SetOption IoTHubTransport_SetOption;        */
@@ -593,7 +605,8 @@ static TRANSPORT_PROVIDER FAKE_transport_provider =
     FAKE_IoTHubTransport_GetSendStatus, /*pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus;*/
     FAKE_IotHubTransport_Subscribe_InputQueue, /*pfIoTHubTransport_Subscribe_InputQueue IoTHubTransport_Subscribe_InputQueue; */
     FAKE_IotHubTransport_Unsubscribe_InputQueue, /*pfIoTHubTransport_Unsubscribe_InputQueue IoTHubTransport_Unsubscribe_InputQueue; */
-    FAKE_IoTHubTransport_SetCallbackContext
+    FAKE_IoTHubTransport_SetCallbackContext,
+    FAKE_IoTHubTransport_GetTwinAsync   /*pfIoTHubTransport_GetTwinAsync IoTHubTransport_GetTwinAsync;*/
 };
 
 static const TRANSPORT_PROVIDER* provideFAKE(void)
@@ -774,6 +787,7 @@ TEST_SUITE_INITIALIZE(suite_init)
 
     REGISTER_GLOBAL_MOCK_RETURN(FAKE_IoTHubTransport_GetTwinAsync, IOTHUB_CLIENT_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(FAKE_IoTHubTransport_GetTwinAsync, IOTHUB_CLIENT_ERROR);
+    REGISTER_GLOBAL_MOCK_HOOK(FAKE_IoTHubTransport_GetTwinAsync, my_FAKE_IoTHubTransport_GetTwinAsync);
 
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(FAKE_IoTHubTransport_ProcessItem, IOTHUB_PROCESS_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(FAKE_IoTHubTransport_ProcessItem, IOTHUB_PROCESS_ERROR);
@@ -940,6 +954,11 @@ TEST_FUNCTION_INITIALIZE(method_init)
 
     g_transport_cb_ctx = NULL;
     memset(&g_transport_cb_info, 0, sizeof(TRANSPORT_CALLBACKS_INFO));
+
+    my_FAKE_IoTHubTransport_GetTwinAsync_result = IOTHUB_CLIENT_OK;
+    my_FAKE_IoTHubTransport_GetTwinAsync_handle = NULL;
+    my_FAKE_IoTHubTransport_GetTwinAsync_completionCallback = NULL;
+    my_FAKE_IoTHubTransport_GetTwinAsync_callbackContext = NULL;
 }
 
 TEST_FUNCTION_CLEANUP(TestMethodCleanup)
@@ -4943,9 +4962,11 @@ TEST_FUNCTION(IoTHubClientCore_LL_GetTwinAsync_succeed)
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_IS_NOT_NULL(my_FAKE_IoTHubTransport_GetTwinAsync_callbackContext);
 
     //cleanup
     IoTHubClientCore_LL_Destroy(h);
+    my_gballoc_free(my_FAKE_IoTHubTransport_GetTwinAsync_callbackContext);
 }
 
 // Tests_SRS_IOTHUBCLIENT_LL_09_013: [ If IoTHubTransport_GetTwinAsync fails, `IoTHubClientCore_LL_GetTwinAsync` shall fail and return `IOTHUB_CLIENT_ERROR`. ]

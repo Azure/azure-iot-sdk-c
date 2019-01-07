@@ -2404,7 +2404,6 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_GetTwinAsync(IOTHUB_CLIENT_CORE_LL_HAND
         if ((getTwinCtx = (GET_TWIN_CONTEXT*)malloc(sizeof(GET_TWIN_CONTEXT))) == NULL)
         {
             LogError("Failed creating get-twin context");
-            free(getTwinCtx);
             result = IOTHUB_CLIENT_ERROR;
         }
         else

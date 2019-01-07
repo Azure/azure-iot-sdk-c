@@ -385,6 +385,17 @@ static void reset_dowork_test_profile(DOWORK_TEST_PROFILE* dwtp)
     dwtp->number_of_expired_pending_operations = 0;
 }
 
+static TWIN_UPDATE_TYPE get_twin_completed_update_type;
+static const char* get_twin_completed_payload;
+static size_t get_twin_completed_size;
+static const void* get_twin_completed_context;
+static void on_twin_get_completed_callback(TWIN_UPDATE_TYPE update_type, const char* payload, size_t size, const void* context)
+{
+    get_twin_completed_update_type = update_type;
+    get_twin_completed_payload = payload;
+    get_twin_completed_size = size;
+    get_twin_completed_context = context;
+}
 
 // ---------- Expected Calls ---------- //
 
@@ -1495,18 +1506,6 @@ TEST_FUNCTION(twin_msgr_retrieve_options_success)
 
     // cleanup
     twin_messenger_destroy(handle);
-}
-
-static TWIN_UPDATE_TYPE get_twin_completed_update_type;
-static const char* get_twin_completed_payload;
-static size_t get_twin_completed_size;
-static const void* get_twin_completed_context;
-static void on_twin_get_completed_callback(TWIN_UPDATE_TYPE update_type, const char* payload, size_t size, const void* context)
-{
-    get_twin_completed_update_type = update_type;
-    get_twin_completed_payload = payload;
-    get_twin_completed_size = size;
-    get_twin_completed_context = context;
 }
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_110: [ `on_get_twin_completed_callback` and `context` shall be saved ] 

@@ -1898,6 +1898,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_GetTwinAsync(IOTHUB_CLIENT_CORE_HANDLE iot
                     // Codes_SRS_IOTHUBCLIENT_09_013: [ If acquiring the lock fails, `IoTHubClientCore_GetTwinAsync` shall return `IOTHUB_CLIENT_ERROR`. ]
                     result = IOTHUB_CLIENT_ERROR;
                     LogError("Could not acquire lock");
+                    free(queueContext);
                 }
                 else
                 {
@@ -1908,6 +1909,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_GetTwinAsync(IOTHUB_CLIENT_CORE_HANDLE iot
                     if (result != IOTHUB_CLIENT_OK)
                     {
                         LogError("IoTHubClientCore_LL_GetTwinAsync failed");
+                        free(queueContext);
                     }
 
                     (void)Unlock(iotHubClientInstance->LockHandle);

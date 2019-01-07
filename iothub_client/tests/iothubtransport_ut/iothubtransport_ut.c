@@ -177,7 +177,6 @@ static TRANSPORT_PROVIDER FAKE_transport_provider =
     FAKE_IoTHubTransport_DeviceMethod_Response,
     FAKE_IoTHubTransport_Subscribe_DeviceTwin,
     FAKE_IoTHubTransport_Unsubscribe_DeviceTwin,
-    FAKE_IoTHubTransport_GetTwinAsync,
     FAKE_IoTHubTransport_ProcessItem,
     FAKE_IoTHubTransport_GetHostname,
     FAKE_IoTHubTransport_SetOption,
@@ -192,7 +191,8 @@ static TRANSPORT_PROVIDER FAKE_transport_provider =
     FAKE_IoTHubTransport_GetSendStatus,
     FAKE_IoTHubTransport_Subscribe_InputQueue,
     FAKE_IoTHubTransport_Unsubscribe_InputQueue,
-    FAKE_IoTHubTransport_SetCallbackContext
+    FAKE_IoTHubTransport_SetCallbackContext,
+    FAKE_IoTHubTransport_GetTwinAsync
 };
 
 static const TRANSPORT_PROVIDER* provideFAKE(void)

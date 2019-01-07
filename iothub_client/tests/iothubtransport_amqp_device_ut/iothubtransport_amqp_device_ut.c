@@ -364,7 +364,7 @@ static void reset_test_data()
     get_twin_callback = NULL;
     get_twin_context = NULL;
 
-    dvc_get_twin_update_type = DEVICE_TWIN_UPDATE_COMPLETE;
+    dvc_get_twin_update_type = DEVICE_TWIN_UPDATE_TYPE_COMPLETE;
     dvc_get_twin_message = NULL;
     dvc_get_twin_length = 0;
     dvc_get_twin_context = NULL;
@@ -3018,8 +3018,10 @@ TEST_FUNCTION(device_get_twin_async_succeess)
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     ASSERT_ARE_EQUAL(int, 0, result);
+    ASSERT_IS_NOT_NULL(get_twin_context);
 
     // cleanup
+    free(get_twin_context);
     device_destroy(handle);
 }
 

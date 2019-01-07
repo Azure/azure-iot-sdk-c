@@ -2433,6 +2433,7 @@ TEST_FUNCTION(IoTHubClientCore_GetTwinAsync_succeed)
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
 
     // cleanup
+    my_gballoc_free(g_userContextCallback);
     IoTHubClientCore_Destroy(iothub_handle);
 }
 
