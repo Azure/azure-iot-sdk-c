@@ -118,6 +118,7 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob(IOTHUB_CL
 ## DeviceTwin
 extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetDeviceTwinCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback, void* userContextCallback);
 extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendReportedState(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const unsigned char* reportedState, size_t size, uint32_t reportedVersion, uint32_t lastSeenDesiredVersion, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reportedStateCallback, void* userContextCallback);
+extern IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_GetDeviceTwinAsync(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback, void* userContextCallback);
 
 ## DeviceMethod
 extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetDeviceMethodCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC deviceMethodCallback, void* userContextCallback);
@@ -804,6 +805,39 @@ void IoTHubClient_LL_RetrievePropertyComplete(IOTHUB_CLIENT_LL_HANDLE handle, DE
 **SRS_IOTHUBCLIENT_LL_07_015: [** If the the `update_state` parameter is `DEVICE_TWIN_UPDATE_PARTIAL` and a `DEVICE_TWIN_UPDATE_COMPLETE` message has not been previously received then `IoTHubClient_LL_RetrievePropertyComplete` shall return. **]**
 
 **SRS_IOTHUBCLIENT_LL_07_016: [** If `deviceTwinCallback` is set and `DEVICE_TWIN_UPDATE_COMPLETE` has been encountered then `IoTHubClient_LL_RetrievePropertyComplete` shall call `deviceTwinCallback`. **]**
+
+
+## IoTHubClientCore_LL_GetDeviceTwinAsync
+
+```c
+extern IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_GetDeviceTwinAsync(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback, void* userContextCallback);
+```
+
+**SRS_IOTHUBCLIENT_LL_09_011: [** If `iotHubClientHandle` or `deviceTwinCallback` are `NULL`, `IoTHubClientCore_LL_GetDeviceTwinAsync` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`.** ]**
+
+**SRS_IOTHUBCLIENT_LL_09_012: [** IoTHubClientCore_LL_GetDeviceTwinAsync shall invoke IoTHubTransport_GetDeviceTwinAsync, passing `on_device_twin_report_received` and the user data as context ** ]**
+
+**SRS_IOTHUBCLIENT_LL_09_013: [** If IoTHubTransport_GetDeviceTwinAsync fails, `IoTHubClientCore_LL_GetDeviceTwinAsync` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
+
+**SRS_IOTHUBCLIENT_LL_09_014: [** If no errors occur IoTHubClientCore_LL_GetDeviceTwinAsync shall return `IOTHUB_CLIENT_OK`.** ]**
+
+
+### on_device_twin_report_received
+
+```
+static void on_device_twin_report_received(IOTHUB_TRANSPORT_RESULT result, CONSTBUFFER_HANDLE data, void* callbackContext);
+```
+
+Note: `userContextCallback` bellow refers to the callback provided in IoTHubClient_LL_GetDeviceTwin.
+
+**SRS_IOTHUBCLIENT_LL_09_015: [** If data is NULL or result is not IOTHUB_TRANSPORT_OK, `deviceTwinCallback` (user provided) shall be invoked passing DEVICE_TWIN_UPDATE_COMPLETE, NULL for `payload`, 0 for `size` and `userContextCallback`** ]**
+
+**SRS_IOTHUBCLIENT_LL_09_016: [** Otherwise `deviceTwinCallback` (user provided) shall be invoked passing DEVICE_TWIN_UPDATE_COMPLETE, `data->buffer`, `data->size` and `userContextCallback`** ]**
+
+**SRS_IOTHUBCLIENT_LL_09_017: [** If `data` is not NULL it shall be destroyed** ]**
+
+
+
 
 ## IoTHubClient_LL_SetDeviceMethodCallback
 

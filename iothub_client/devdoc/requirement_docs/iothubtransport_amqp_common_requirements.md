@@ -29,6 +29,7 @@ extern void IoTHubTransport_AMQP_Common_Unsubscribe(IOTHUB_DEVICE_HANDLE handle)
 extern IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SendMessageDisposition(MESSAGE_CALLBACK_INFO* messageData, IOTHUBMESSAGE_DISPOSITION_RESULT disposition);
 extern int IoTHubTransport_AMQP_Common_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle);
 extern void IoTHubTransport_AMQP_Common_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle);
+extern IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_GetDeviceTwinAsync(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK completionCallback, void* callbackContext);
 extern int IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle);
 extern void IoTHubTransport_AMQP_Common_Unsubscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle);
 extern IOTHUB_PROCESS_ITEM_RESULT IoTHubTransport_AMQP_Common_ProcessItem(TRANSPORT_LL_HANDLE handle, IOTHUB_IDENTITY_TYPE item_type, IOTHUB_IDENTITY_INFO* iothub_item);
@@ -441,6 +442,30 @@ void IoTHubTransport_AMQP_Common_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE han
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_140: [**If `handle` is NULL, `IoTHubTransport_AMQP_Common_Unsubscribe_DeviceTwin` shall return.**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_142: [**device_unsubscribe_for_twin_updates() shall be invoked for the registered device**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_143: [**If `device_unsubscribe_for_twin_updates` fails, the error shall be ignored**]**
+
+
+### IoTHubTransport_AMQP_Common_GetDeviceTwinAsync
+```c
+IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_GetDeviceTwinAsync(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK completionCallback, void* callbackContext);
+```
+
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_154: [** If `handle` or `completionCallback` are NULL, `IoTHubTransport_AMQP_Common_GetDeviceTwinAsync` shall fail and return IOTHUB_CLIENT_INVALID_ARG **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_155: [** device_get_twin_async() shall be invoked for the registered device, passing `on_device_get_twin_completed_callback`**]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_156: [** If device_get_twin_async() fails, `IoTHubTransport_AMQP_Common_GetDeviceTwinAsync` shall fail and return IOTHUB_CLIENT_ERROR **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_157: [** If no errors occur, `IoTHubTransport_AMQP_Common_GetDeviceTwinAsync` shall return IOTHUB_CLIENT_OK **]**
+
+
+#### on_device_get_twin_completed_callback
+```c
+static void on_device_get_twin_completed_callback(DEVICE_TWIN_UPDATE_TYPE update_type, const unsigned char* message, size_t length, void* context)
+```
+
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_158: [** If `message` or `context` are NULL, the callback shall do nothing and return. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_159: [** `message` and `length` shall be passed to the callback `completionCallback` provided in IoTHubTransport_AMQP_Common_GetDeviceTwinAsync. **]**
 
 
 ### IoTHubTransport_AMQP_Common_ProcessItem
