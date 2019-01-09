@@ -33,6 +33,7 @@ typedef char* (*HSM_CLIENT_GET_TRUST_BUNDLE)(HSM_CLIENT_HANDLE handle);
 // Symmetrical Keys
 typedef char* (*HSM_CLIENT_GET_SYMMETRICAL_KEY)(HSM_CLIENT_HANDLE handle);
 typedef char* (*HSM_CLIENT_GET_REGISTRATION_NAME)(HSM_CLIENT_HANDLE handle);
+typedef int (*HSM_CLIENT_SET_SYMMETRICAL_KEY_INFO)(HSM_CLIENT_HANDLE handle, const char* reg_name, const char* symm_key);
 
 typedef struct HSM_CLIENT_TPM_INTERFACE_TAG
 {
@@ -72,6 +73,7 @@ typedef struct HSM_CLIENT_KEY_INTERFACE_TAG
 
     HSM_CLIENT_GET_SYMMETRICAL_KEY hsm_client_get_symm_key;
     HSM_CLIENT_GET_REGISTRATION_NAME hsm_client_get_registration_name;
+    HSM_CLIENT_SET_SYMMETRICAL_KEY_INFO hsm_client_set_symm_key_info;
 } HSM_CLIENT_KEY_INTERFACE;
 
 extern int initialize_hsm_system();

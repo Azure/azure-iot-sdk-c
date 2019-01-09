@@ -81,6 +81,7 @@ extern "C"
     typedef IOTHUB_CLIENT_RESULT(*pfIoTHubTransport_GetSendStatus)(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_STATUS *iotHubClientStatus);
     typedef int (*pfIoTHubTransport_Subscribe_DeviceTwin)(IOTHUB_DEVICE_HANDLE handle);
     typedef void (*pfIoTHubTransport_Unsubscribe_DeviceTwin)(IOTHUB_DEVICE_HANDLE handle);
+    typedef IOTHUB_CLIENT_RESULT(*pfIoTHubTransport_GetTwinAsync)(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK completionCallback, void* callbackContext);
     typedef IOTHUB_CLIENT_RESULT(*pfIotHubTransport_SendMessageDisposition)(MESSAGE_CALLBACK_INFO* messageData, IOTHUBMESSAGE_DISPOSITION_RESULT disposition);
     typedef IOTHUB_PROCESS_ITEM_RESULT(*pfIoTHubTransport_ProcessItem)(TRANSPORT_LL_HANDLE handle, IOTHUB_IDENTITY_TYPE item_type, IOTHUB_IDENTITY_INFO* iothub_item);
     typedef int(*pfIoTHubTransport_Subscribe_DeviceMethod)(IOTHUB_DEVICE_HANDLE handle);
@@ -91,7 +92,7 @@ extern "C"
     typedef int(*pfIoTHubTransport_SetCallbackContext)(TRANSPORT_LL_HANDLE handle, void* ctx);
 
 #define TRANSPORT_PROVIDER_FIELDS                                                   \
-pfIotHubTransport_SendMessageDisposition IoTHubTransport_SendMessageDisposition;  \
+pfIotHubTransport_SendMessageDisposition IoTHubTransport_SendMessageDisposition;    \
 pfIoTHubTransport_Subscribe_DeviceMethod IoTHubTransport_Subscribe_DeviceMethod;    \
 pfIoTHubTransport_Unsubscribe_DeviceMethod IoTHubTransport_Unsubscribe_DeviceMethod;\
 pfIoTHubTransport_DeviceMethod_Response IoTHubTransport_DeviceMethod_Response;      \
@@ -111,7 +112,8 @@ pfIoTHubTransport_SetRetryPolicy IoTHubTransport_SetRetryPolicy;                
 pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus;                      \
 pfIoTHubTransport_Subscribe_InputQueue IoTHubTransport_Subscribe_InputQueue;        \
 pfIoTHubTransport_Unsubscribe_InputQueue IoTHubTransport_Unsubscribe_InputQueue;    \
-pfIoTHubTransport_SetCallbackContext IoTHubTransport_SetCallbackContext     /*there's an intentional missing ; on this line*/
+pfIoTHubTransport_SetCallbackContext IoTHubTransport_SetCallbackContext;            \
+pfIoTHubTransport_GetTwinAsync IoTHubTransport_GetTwinAsync     /*there's an intentional missing ; on this line*/
 
     struct TRANSPORT_PROVIDER_TAG
     {

@@ -200,7 +200,7 @@ int main(void)
     IoTHub_Deinit();
 
     printf("Press any key to continue");
-    getchar();
+    (void)getchar();
 
     return 0;
 }

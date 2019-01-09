@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <errno.h>
+
 #include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/string_tokenizer.h"
@@ -87,6 +89,12 @@ typedef struct IOTHUB_MESSAGE_CALLBACK_DATA_TAG
     void* userContextCallback;
 }IOTHUB_MESSAGE_CALLBACK_DATA;
 
+typedef struct GET_TWIN_CONTEXT_TAG
+{
+    IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK callback;
+    void* context;
+} GET_TWIN_CONTEXT;
+
 typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG
 {
     DLIST_ENTRY waitingToSend;
@@ -137,7 +145,8 @@ static const char PROVISIONING_ACCEPTABLE_VALUE[] = "true";
 #ifdef USE_EDGE_MODULES
 /*The following section should be moved to iothub_module_client_ll.c during impending refactor*/
 
-static const char* ENVIRONMENT_VAR_EDGEHUBCONNECTIONSTRING = "EdgeHubConnectionString";
+static const char* ENVIRONMENT_VAR_EDGEHUB_CONNECTIONSTRING = "EdgeHubConnectionString";
+static const char* ENVIRONMENT_VAR_EDGEHUB_CACERTIFICATEFILE = "EdgeModuleCACertificateFile";
 static const char* ENVIRONMENT_VAR_EDGEAUTHSCHEME = "IOTEDGE_AUTHSCHEME";
 static const char* ENVIRONMENT_VAR_EDGEDEVICEID = "IOTEDGE_DEVICEID";
 static const char* ENVIRONMENT_VAR_EDGEMODULEID = "IOTEDGE_MODULEID";
@@ -149,6 +158,7 @@ static const char* SAS_TOKEN_AUTH = "sasToken";
 typedef struct EDGE_ENVIRONMENT_VARIABLES_TAG
 {
     const char* connection_string;
+    const char* ca_trusted_certificate_file;
     const char* auth_scheme;
     const char* device_id;
     const char* iothub_name;
@@ -158,19 +168,30 @@ typedef struct EDGE_ENVIRONMENT_VARIABLES_TAG
     char* iothub_buffer;
 } EDGE_ENVIRONMENT_VARIABLES;
 
+
 static int retrieve_edge_environment_variabes(EDGE_ENVIRONMENT_VARIABLES *edge_environment_variables)
 {
     int result;
     const char* edgehubhostname;
     char* edgehubhostname_separator;
 
-    if ((edge_environment_variables->connection_string = environment_get_variable(ENVIRONMENT_VAR_EDGEHUBCONNECTIONSTRING)) != NULL)
+    if ((edge_environment_variables->connection_string = environment_get_variable(ENVIRONMENT_VAR_EDGEHUB_CONNECTIONSTRING)) != NULL)
     {
-        // If a connection string is set, we use it and ignore all other environment variables.
-        result = 0;
+        if ((edge_environment_variables->ca_trusted_certificate_file = environment_get_variable(ENVIRONMENT_VAR_EDGEHUB_CACERTIFICATEFILE)) == NULL)
+        {
+            LogError("Environment variable %s is missing.  When %s is set, it is required", ENVIRONMENT_VAR_EDGEHUB_CACERTIFICATEFILE, ENVIRONMENT_VAR_EDGEHUB_CONNECTIONSTRING);
+            result = __FAILURE__;
+        }
+        else
+        {
+            // If we can read in the connection string and trusted certs, we're done.
+            result = 0;
+        }
     }
     else
     {
+        // We're NOT using pre-configured EdgeConnection string / certificates.  In this case, we use these environment variables when
+        // communicating to Edge service.
         if ((edge_environment_variables->auth_scheme = environment_get_variable(ENVIRONMENT_VAR_EDGEAUTHSCHEME)) == NULL)
         {
             LogError("Environment %s not set", ENVIRONMENT_VAR_EDGEAUTHSCHEME);
@@ -263,6 +284,7 @@ static void setTransportProtocol(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData, 
     handleData->IoTHubTransport_ProcessItem = protocol->IoTHubTransport_ProcessItem;
     handleData->IoTHubTransport_Subscribe_DeviceTwin = protocol->IoTHubTransport_Subscribe_DeviceTwin;
     handleData->IoTHubTransport_Unsubscribe_DeviceTwin = protocol->IoTHubTransport_Unsubscribe_DeviceTwin;
+    handleData->IoTHubTransport_GetTwinAsync = protocol->IoTHubTransport_GetTwinAsync;
     handleData->IoTHubTransport_Subscribe_DeviceMethod = protocol->IoTHubTransport_Subscribe_DeviceMethod;
     handleData->IoTHubTransport_Unsubscribe_DeviceMethod = protocol->IoTHubTransport_Unsubscribe_DeviceMethod;
     handleData->IoTHubTransport_DeviceMethod_Response = protocol->IoTHubTransport_DeviceMethod_Response;
@@ -356,7 +378,7 @@ static int create_blob_upload_module(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handle_d
     (void)handle_data;
     (void)config;
 #ifndef DONT_USE_UPLOADTOBLOB
-    handle_data->uploadToBlobHandle = IoTHubClient_LL_UploadToBlob_Create(config);
+    handle_data->uploadToBlobHandle = IoTHubClient_LL_UploadToBlob_Create(config, handle_data->authorization_module);
     if (handle_data->uploadToBlobHandle == NULL)
     {
         LogError("unable to IoTHubClientCore_LL_UploadToBlob_Create");
@@ -941,6 +963,7 @@ static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_
                     {
                         result->IoTHubTransport_Destroy(result->transportHandle);
                     }
+                    destroy_blob_upload_module(result);
                     IoTHubClient_Auth_Destroy(result->authorization_module);
                     STRING_delete(product_info);
                     free(result);
@@ -953,6 +976,7 @@ static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_
                     {
                         result->IoTHubTransport_Destroy(result->transportHandle);
                     }
+                    destroy_blob_upload_module(result);
                     IoTHubClient_Auth_Destroy(result->authorization_module);
                     STRING_delete(product_info);
                     free(result);
@@ -1093,6 +1117,22 @@ static IOTHUB_DEVICE_TWIN* dev_twin_data_create(IOTHUB_CLIENT_CORE_LL_HANDLE_DAT
         LogError("Failure allocating device twin information");
     }
     return result;
+}
+
+static void on_get_device_twin_completed(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback)
+{
+    if (userContextCallback == NULL)
+    {
+        LogError("Invalid argument (userContextCallback=NULL)");
+    }
+    else
+    {
+        GET_TWIN_CONTEXT* getTwinCtx = (GET_TWIN_CONTEXT*)userContextCallback;
+
+        getTwinCtx->callback(update_state, payLoad, size, getTwinCtx->context);
+
+        free(getTwinCtx);
+    }
 }
 
 static void delete_event(IOTHUB_EVENT_CALLBACK* event_callback)
@@ -1558,7 +1598,10 @@ IOTHUB_CLIENT_CORE_LL_HANDLE IoTHubClientCore_LL_CreateFromEnvironment(IOTHUB_CL
     // The presence of a connection string environment variable means we use it, ignoring other settings
     else if (edge_environment_variables.connection_string != NULL)
     {
-        result = IoTHubClientCore_LL_CreateFromConnectionString(edge_environment_variables.connection_string, protocol);
+        if ((result = IoTHubClientCore_LL_CreateFromConnectionString(edge_environment_variables.connection_string, protocol)) == NULL)
+        {
+            LogError("IoTHubClientCore_LL_CreateFromConnectionString fails");
+        }
     }
     else if (iothub_security_init(IOTHUB_SECURITY_TYPE_HTTP_EDGE) != 0)
     {
@@ -1576,28 +1619,33 @@ IOTHUB_CLIENT_CORE_LL_HANDLE IoTHubClientCore_LL_CreateFromEnvironment(IOTHUB_CL
         client_config.iotHubSuffix = edge_environment_variables.iothub_suffix;
         client_config.protocolGatewayHostName = edge_environment_variables.gatewayhostname;
 
-        if ((result = IoTHubClientCore_LL_CreateImpl(&client_config, edge_environment_variables.module_id, true)) != NULL)
+        if ((result = IoTHubClientCore_LL_CreateImpl(&client_config, edge_environment_variables.module_id, true)) == NULL)
         {
-            // Because the Edge Hub almost always use self-signed certificates, we need
-            // to query it for the the certificate its using so we can trust it.
-            char* trustedCertificate = IoTHubClient_Auth_Get_TrustBundle(result->authorization_module);
-            IOTHUB_CLIENT_RESULT setTrustResult;
-
-            if (trustedCertificate == NULL)
-            {
-                LogError("IoTHubClient_Auth_Get_TrustBundle failed");
-                IoTHubClientCore_LL_Destroy(result);
-                result = NULL;
-            }
-            else if ((setTrustResult = IoTHubClientCore_LL_SetOption(result, OPTION_TRUSTED_CERT, trustedCertificate)) != IOTHUB_CLIENT_OK)
-            {
-                LogError("IoTHubClientCore_LL_SetOption failed, err = %d", setTrustResult);
-                IoTHubClientCore_LL_Destroy(result);
-                result = NULL;
-            }
-
-            free(trustedCertificate);
+            LogError("IoTHubClientCore_LL_CreateImpl fails");
         }
+    }
+
+    if (result != NULL)
+    {
+        // Because the Edge Hub almost always use self-signed certificates, we need to specify which certificates to trust.  We need to do 
+        // this regardless of how we created the underlying IOTHUB_CLIENT_CORE_LL_HANDLE_DATA.
+        IOTHUB_CLIENT_RESULT setTrustResult;
+        char* trustedCertificate = IoTHubClient_Auth_Get_TrustBundle(result->authorization_module, edge_environment_variables.ca_trusted_certificate_file);
+        
+        if (trustedCertificate == NULL)
+        {
+            LogError("IoTHubClient_Auth_Get_TrustBundle failed");
+            IoTHubClientCore_LL_Destroy(result);
+            result = NULL;
+        }
+        else if ((setTrustResult = IoTHubClientCore_LL_SetOption(result, OPTION_TRUSTED_CERT, trustedCertificate)) != IOTHUB_CLIENT_OK)
+        {
+            LogError("IoTHubClientCore_LL_SetOption failed, err = %d", setTrustResult);
+            IoTHubClientCore_LL_Destroy(result);
+            result = NULL;
+        }
+        
+        free(trustedCertificate);
     }
 
     free(edge_environment_variables.iothub_buffer);
@@ -2338,6 +2386,52 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SendReportedState(IOTHUB_CLIENT_CORE_LL
     }
     return result;
 }
+
+IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_GetTwinAsync(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback, void* userContextCallback)
+{
+    IOTHUB_CLIENT_RESULT result;
+
+    // Codes_SRS_IOTHUBCLIENT_LL_09_011: [ If `iotHubClientHandle` or `deviceTwinCallback` are `NULL`, `IoTHubClientCore_LL_GetTwinAsync` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]
+    if (iotHubClientHandle == NULL || deviceTwinCallback == NULL)
+    {
+        LogError("Invalid argument iothubClientHandle=%p, deviceTwinCallback=%p", iotHubClientHandle, deviceTwinCallback);
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    else
+    {
+        GET_TWIN_CONTEXT* getTwinCtx;
+
+        if ((getTwinCtx = (GET_TWIN_CONTEXT*)malloc(sizeof(GET_TWIN_CONTEXT))) == NULL)
+        {
+            LogError("Failed creating get-twin context");
+            result = IOTHUB_CLIENT_ERROR;
+        }
+        else
+        {
+            IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)iotHubClientHandle;
+
+            getTwinCtx->callback = deviceTwinCallback;
+            getTwinCtx->context = userContextCallback;
+
+            // Codes_SRS_IOTHUBCLIENT_LL_09_012: [ IoTHubClientCore_LL_GetTwinAsync shall invoke IoTHubTransport_GetTwinAsync, passing `on_device_twin_report_received` and the user data as context  ]
+            if (handleData->IoTHubTransport_GetTwinAsync(handleData->deviceHandle, on_get_device_twin_completed, getTwinCtx) != IOTHUB_CLIENT_OK)
+            {
+                // Codes_SRS_IOTHUBCLIENT_LL_09_013: [ If IoTHubTransport_GetTwinAsync fails, `IoTHubClientCore_LL_GetTwinAsync` shall fail and return `IOTHUB_CLIENT_ERROR`. ]
+                LogError("Failed getting device twin document");
+                free(getTwinCtx);
+                result = IOTHUB_CLIENT_ERROR;
+            }
+            else
+            {
+                // Codes_SRS_IOTHUBCLIENT_LL_09_014: [ If no errors occur IoTHubClientCore_LL_GetTwinAsync shall return `IOTHUB_CLIENT_OK`. ]
+                result = IOTHUB_CLIENT_OK;
+            }
+        }
+    }
+
+    return result;
+}
+
 
 IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetDeviceMethodCallback(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC deviceMethodCallback, void* userContextCallback)
 {

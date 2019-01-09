@@ -5,10 +5,13 @@
 #include "azure_prov_client/iothub_security_factory.h"
 #include "azure_prov_client/prov_security_factory.h"
 #include "azure_c_shared_utility/xlogging.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
 
 #include "hsm_client_data.h"
 
 static IOTHUB_SECURITY_TYPE g_security_type = IOTHUB_SECURITY_TYPE_UNKNOWN;
+static char* g_symm_key = NULL;
+static char* g_symm_key_reg_name = NULL;
 
 static SECURE_DEVICE_TYPE get_secure_device_type(IOTHUB_SECURITY_TYPE sec_type)
 {
@@ -87,10 +90,92 @@ int iothub_security_init(IOTHUB_SECURITY_TYPE sec_type)
 
 void iothub_security_deinit()
 {
+    if (g_symm_key != NULL)
+    {
+        free(g_symm_key);
+        g_symm_key = NULL;
+    }
+    if (g_symm_key_reg_name != NULL)
+    {
+        free(g_symm_key_reg_name);
+        g_symm_key_reg_name = NULL;
+    }
     deinitialize_hsm_system();
+    if (prov_dev_get_symmetric_key() != NULL || prov_dev_get_symm_registration_name() != NULL)
+    {
+        prov_dev_security_deinit();
+    }
 }
 
 IOTHUB_SECURITY_TYPE iothub_security_type()
 {
     return g_security_type;
+}
+
+int iothub_security_set_symmetric_key_info(const char* registration_name, const char* symmetric_key)
+{
+    int result;
+    if (registration_name == NULL || symmetric_key == NULL)
+    {
+        LogError("Invalid parameter specified reg_name: %p, symm_key: %p", registration_name, symmetric_key);
+        result = __FAILURE__;
+    }
+    else
+    {
+        char* temp_key;
+        char* temp_name;
+        if (mallocAndStrcpy_s(&temp_name, registration_name) != 0)
+        {
+            LogError("Failure allocating registration name");
+            result = __FAILURE__;
+        }
+        else if (mallocAndStrcpy_s(&temp_key, symmetric_key) != 0)
+        {
+            LogError("Failure allocating symmetric key");
+            free(temp_name);
+            result = __FAILURE__;
+        }
+        else
+        {
+            if (g_symm_key != NULL)
+            {
+                free(g_symm_key);
+            }
+            if (g_symm_key_reg_name != NULL)
+            {
+                free(g_symm_key_reg_name);
+            }
+            g_symm_key_reg_name = temp_name;
+            g_symm_key = temp_key;
+
+            // Sync iothub with dps
+            if (prov_dev_get_symmetric_key() == NULL || prov_dev_get_symm_registration_name() == NULL)
+            {
+                if (prov_dev_set_symmetric_key_info(g_symm_key_reg_name, g_symm_key) != 0)
+                {
+                    LogError("Failure syncing dps & IoThub key information");
+                    result = __FAILURE__;
+                }
+                else
+                {
+                    result = 0;
+                }
+            }
+            else
+            {
+                result = 0;
+            }
+        }
+    }
+    return result;
+}
+
+const char* iothub_security_get_symmetric_key()
+{
+    return g_symm_key;
+}
+
+const char* iothub_security_get_symm_registration_name()
+{
+    return g_symm_key_reg_name;
 }

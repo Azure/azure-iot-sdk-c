@@ -40,7 +40,6 @@ if(${use_openssl})
     endif()
 endif()
 
-target_link_libraries(iothub_client_sample_hsm iothub_client)
 if (${use_mqtt})
     target_link_libraries(iothub_client_sample_hsm iothub_client_mqtt_transport)
 endif()
@@ -48,6 +47,8 @@ if (${use_amqp})
     target_link_libraries(iothub_client_sample_hsm iothub_client_amqp_transport)
     linkUAMQP(iothub_client_sample_hsm)
 endif()
+
+target_link_libraries(iothub_client_sample_hsm iothub_client)
 
 link_security_client(iothub_client_sample_hsm)
 linkSharedUtil(iothub_client_sample_hsm)

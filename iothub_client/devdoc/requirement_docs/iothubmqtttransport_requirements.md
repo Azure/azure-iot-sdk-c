@@ -20,6 +20,7 @@ extern const TRANSPORT_PROVIDER* MQTT_Protocol(void);
     - IoTHubTransportMqtt_DeviceMethod_Response,
     - IoTHubTransportMqtt_Subscribe_DeviceTwin,
     - IoTHubTransportMqtt_Unsubscribe_DeviceTwin,
+    - IoTHubTransportMqtt_GetDeviceTwinAsync,
     - IoTHubTransportMqtt_ProcessItem,
     - IoTHubTransportMqtt_GetHostname,
     - IoTHubTransportMqtt_SetOption,
@@ -150,6 +151,15 @@ static void IoTHubTransportMqtt_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE hand
 ```
 
 **SRS_IOTHUB_MQTT_TRANSPORT_07_024: [** IoTHubTransportMqtt_Unsubscribe_DeviceTwin shall shall call into the IoTHubMqttAbstract_Unsubscribe_DeviceTwin function. **]**
+
+### IoTHubTransportMqtt_GetDeviceTwinAsync
+
+```c
+IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_GetDeviceTwinAsync(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK completionCallback, void* callbackContext)
+```
+
+**SRS_IOTHUB_MQTT_TRANSPORT_09_001: [** IoTHubTransportMqtt_GetDeviceTwinAsync shall call into the IoTHubTransport_MQTT_Common_GetDeviceTwinAsync function. **]**
+
 
 ### IoTHubTransportMqtt_DeviceMethod_Response
 

@@ -34,10 +34,13 @@ static const char* const DPS_TPM_SIMULATOR_IP_ADDRESS = "IOT_DPS_TPM_SIMULATOR_I
 
 extern void create_x509_enrollment_device(const char* prov_conn_string, bool use_tracing);
 extern void create_tpm_enrollment_device(const char* prov_conn_string, bool use_tracing);
+extern void create_symm_key_enrollment_device(const char* prov_conn_string, bool use_tracing);
 extern void remove_enrollment_device(const char* prov_conn_string);
 
 extern void wait_for_dps_result(PROV_DEVICE_LL_HANDLE handle, PROV_CLIENT_E2E_INFO* prov_info);
 extern int construct_device_id(const char* prefix, char** device_name);
+
+extern void send_dps_test_registration(const char* global_uri, const char* scope_id, PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION protocol, bool use_tracing);
 
 #ifdef __cplusplus
 }
