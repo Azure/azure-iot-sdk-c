@@ -241,7 +241,7 @@ docker build -t mipsiotapp:latest . --network=host
 Now the applicaton is built the last step is to copy the new executable from your Docker container to your host so that it can be deployed to your target device. An example of how you might do this follows:
 
 ```
-id =$(docker create mips)
+id =$(docker create mipsiotapp)
 docker cp $id:/home/builder/myapp/cmake/myapp ./myapp_exe
 docker rm -v $id
 ```
@@ -253,7 +253,7 @@ You can find two complete examples in [samples](../samples/dockerbuilds). This d
 ```bash
 # Change directory to your Azure IoT SDK cloned repository root
 cd <SDK Root>
-# Work in this directory or two copyies of the myapp directory will be required
+# Work in this directory or two copies of the myapp directory will be required
 cd samples/dockerbuilds
 # Cross compile the SDK
 docker build -t rpiiotbuild:latest ./RaspberryPi --network=host
@@ -268,6 +268,7 @@ And for MIPS32:
 ```bash
 # Change directory to your Azure IoT SDK cloned repository root
 cd <SDK Root>
+# Work in this directory or two copies of the myapp directory will be required
 cd samples/dockerbuilds
 # Cross compile the SDK
 docker build -t mipsiotbuild:latest ./MIPS32 --network=host
