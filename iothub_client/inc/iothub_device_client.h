@@ -377,6 +377,17 @@ extern "C"
 
 #endif /* DONT_USE_UPLOADTOBLOB */
 
+    /**
+     * @brief    This API enables the device to use specific IoTHub features that are configured via device twins.
+     *
+     * @param    iotHubClientHandle        The handle created by a call to the create function.
+     * @param    enableTwinConfiguration   True to enable parsing device twin for specific feature configuration.
+                                           Default is false.
+     *
+     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
+     */
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_EnableFeatureConfigurationViaTwin, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, bool, enableTwinConfiguration);
+
 #ifdef __cplusplus
 }
 #endif

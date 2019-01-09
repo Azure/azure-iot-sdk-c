@@ -130,6 +130,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG
     STRING_HANDLE product_info;
     IOTHUB_DIAGNOSTIC_SETTING_DATA diagnostic_setting; // Deprecated
     IOTHUB_DISTRIBUTED_TRACING_SETTING_DATA distributedTracing_setting;
+    bool isTwinFeatureConfigurationEnabled;
     SINGLYLINKEDLIST_HANDLE event_callbacks;  // List of IOTHUB_EVENT_CALLBACK's
 }IOTHUB_CLIENT_CORE_LL_HANDLE_DATA;
 
@@ -555,7 +556,7 @@ static void IoTHubClientCore_LL_RetrievePropertyComplete(DEVICE_TWIN_UPDATE_STAT
         IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)ctx;
 
         /*Codes_SRS_IOTHUBCLIENT_LL_38_003: [If distributed tracing is enabled, synchronize (update and report) distributed tracing settings based on device twin information.] */
-        if(handleData->distributedTracing_setting.samplingMode)
+        if(handleData->isTwinFeatureConfigurationEnabled && handleData->distributedTracing_setting.samplingMode)
         {
             update_distributed_tracing_settings_from_twin(&handleData->distributedTracing_setting, handleData, update_state, payLoad);
         }
@@ -793,6 +794,28 @@ static int IoTHubClientCore_LL_DeviceMethodComplete(const char* method_name, con
         }
     }
     return result;
+}
+
+static void IotHubClientCore_LL_GetTwin_FeatureConfiguration(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback)
+{
+    (void)size;
+
+    int result;
+    if (userContextCallback == NULL)
+    {
+        /* Codes_SRS_IOTHUBCLIENT_LL_38_030: [ If handle or response is NULL then IotHubClientCore_LL_GetTwin_FeatureConfiguration shall return failure. ] */
+        LogError("Invalid argument userContextCallback=%p", userContextCallback);
+        result = __FAILURE__;
+    }
+    else
+    {
+        IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)userContextCallback;
+
+        if (handleData->isTwinFeatureConfigurationEnabled)
+        {
+            update_distributed_tracing_settings_from_twin(&handleData->distributedTracing_setting, handleData, update_state, payLoad);
+        }
+    }
 }
 
 static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIENT_CONFIG* client_config, const IOTHUB_CLIENT_DEVICE_CONFIG* device_config, bool use_dev_auth, const char* module_id)
@@ -3004,8 +3027,12 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_EnableFeatureConfigurationViaTwin(IOTHU
     IOTHUB_CLIENT_RESULT result;
     if (iotHubClientHandle != NULL)
     {
-        //TODO: GetTwin logic goes here - temporarily enabling sampling mode always
-        iotHubClientHandle->distributedTracing_setting.samplingMode = enableTwinConfiguration;
+        iotHubClientHandle->isTwinFeatureConfigurationEnabled = enableTwinConfiguration;
+
+        if (enableTwinConfiguration)
+        {
+            IoTHubClientCore_LL_GetTwinAsync(iotHubClientHandle, IotHubClientCore_LL_GetTwin_FeatureConfiguration, iotHubClientHandle);
+        }
 
         result = IOTHUB_CLIENT_OK;
     }

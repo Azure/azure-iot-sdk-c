@@ -386,10 +386,10 @@ extern "C"
 #endif /* DONT_USE_UPLOADTOBLOB */
 
     /**
-    * @brief    This API enables the client to use specific IoTHub features that are configured via device twins.
+    * @brief    This API enables the client to use specific IoTHub features that are configured via twins.
     *
     * @param    iotHubClientHandle        The handle created by a call to the create function.
-    * @param    enableTwinConfiguration   True to enable parsing device twin for specific feature configuration.
+    * @param    enableTwinConfiguration   True to enable parsing twin for specific feature configuration.
                                           Default is false.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
