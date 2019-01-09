@@ -15,16 +15,21 @@ The Docker container is based on the latest Ubuntu Docker container. From there 
 * nano - in case one needs to edit any files in the Docker container
 
 Once this is complete, the script will acquire all of the prerequisites. These are:
-* The toolchain that will build binaries for our target platform. You should substitute the toolchain for your target platform.
+* The toolchain that will build binaries for our target platform. You should substitute the toolchain for your target platform
 * [The IoT SDK source code](https://github.com/azure/azure-iot-sdk-c).
-* [OpenSSL](https://www.openssl.org/) at version 1.0.2o.
-* [cURL](https://curl.haxx.se/) at version 7.60.0.
+* [OpenSSL](https://www.openssl.org/) - version 1.0.2o used
+* [cURL](https://curl.haxx.se/) - version 7.60.0 used
 * [util-linux](https://en.wikipedia.org/wiki/Util-linux) for uuid functionality.
 
 With all of those in place we can build OpenSSL, cURL, and libuuid. These will be installed into the toolchain as each is built and will be used in the final step when the SDK itself is built.
 
+## Major Tasks
+You will need to identify a suitable toolchain for your target platform and modify the line that downloads this toolchain in your Docker script. 
+
+Once this is done, then the environment variable set below will need to be modified to reflect the location and directory names of that toolchain. Once these have been updated then the Docker script should be ready to run.
+
 ## The Docker Script
-Here is the script:
+Here is an example script:
 ```docker
 # Start with the latest version of the Ubuntu Docker container
 FROM ubuntu:latest
@@ -48,6 +53,11 @@ WORKDIR /home/builder
 RUN mkdir MIPSBuild
 WORKDIR MIPSBuild
 
+#
+# The following wget invocation will need to be modified to download a toolchain appropriate 
+# for your target device.
+#
+
 # Download the WRTNode cross compile toolchain and expand it
 RUN wget https://downloads.openwrt.org/barrier_breaker/14.07/ramips/mt7620n/OpenWrt-Toolchain-ramips-for-mipsel_24kec%2bdsp-gcc-4.8-linaro_uClibc-0.9.33.2.tar.bz2
 RUN tar -xvf OpenWrt-Toolchain-ramips-for-mipsel_24kec+dsp-gcc-4.8-linaro_uClibc-0.9.33.2.tar.bz2
@@ -67,8 +77,10 @@ RUN tar -xvf curl-7.60.0.tar.gz
 RUN wget https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.32/util-linux-2.32-rc2.tar.gz
 RUN tar -xvf util-linux-2.32-rc2.tar.gz
 
+#
 # Set up environment variables in preparation for the builds to follow
-# These will need to be modified for the corresponding locations in the toolchain being used
+# These will need to be modified for the corresponding locations in the downloaded toolchain
+#
 ENV WORK_ROOT=/home/builder/MIPSBuild
 ENV TOOLCHAIN_ROOT=${WORK_ROOT}/OpenWrt-Toolchain-ramips-for-mipsel_24kec+dsp-gcc-4.8-linaro_uClibc-0.9.33.2
 ENV TOOLCHAIN_SYSROOT=${TOOLCHAIN_ROOT}/toolchain-mipsel_24kec+dsp_gcc-4.8-linaro_uClibc-0.9.33.2
@@ -142,13 +154,14 @@ WORKDIR ../..
 
 To run this script save it to a directory and change to that directory then simply enter:
 ```bash
-docker build -t mipsbuild:latest . --network=host
+docker build -t mipsiotbuild:latest . --network=host
 ```
-You can replace the value 'mipsbuild' with any name that describes your build. In this instance it is building for a MIPS32 processor hence the name. Once the build is complete you will be ready to build your application against the libraries just built.
+You can replace the value 'mipsiotbuild' with any name that describes your build. In this instance it is building for a MIPS32 processor hence the name. Once the build is complete you will be ready to build your application against the libraries just built.
 
 *Note:* The build of the Azure IoT C SDK uses cmake to generate the makefiles. In order to instruct cmake to perform a cross-compile one uses a cmake toolchain file. This tells cmake where to find the libraries etc. in the toolchain rather than on the host. This file is created on the fly in the above script to reduce dependencies on external files. Alternatively one could create this file outside the script and import into the container.
+
 ## Building Your Application
-Once you have successfully built the SDK you are now ready to create your application. Your application will also need to be cross compiled so adding additional steps to the end of the Dockerfile script to build your code is likely the easiest way to accomplish this. If you set up your application to also build with cmake then you can simply use the cmake toolchain file created to build the SDK. 
+Once you have successfully built the SDK you are now ready to create your application. You will need to create a directory that contains your source code and a CMakeLists.txt. The application build can use the cmake toolchain file that is already present in the image. 
 
 ### Sample ```CMakeLists.txt``` for an Application
 Here is a simple ```CMakeLists.txt``` file that demonstrates how to build an application that uses the libraries built above. This sample, for demonstration purposes uses the ```iothub_convenience_sample.c``` sample from the SDK.
@@ -183,17 +196,24 @@ link_directories($ENV{TOOLCHAIN_PREFIX}/lib)
 
 add_executable(myapp ${iothub_c_files})
 
-# Redundant in this case but shows how to rename your output executable
+# Redundant in this case but demonstrates how to rename your output executable
 set_target_properties(myapp PROPERTIES OUTPUT_NAME "myapp") 
 
 # List the libraries required by the link step
 target_link_libraries(myapp iothub_client_mqtt_transport iothub_client umqtt aziotsharedutil parson pthread curl ssl crypto m )
 ```
-### Sample Additions to Dockerfile to build the application
-This sample assumes that you have a subdirectory in the directory containing your Dockerfile called myapp. In this directory are the CMakeLists.txt file above and your code to be built. This will be copied to your Docker container and built. This fragment would be appended to the sample above.
+### Using a Separate Docker Script to Build the Application
+Though one could append the application build steps to the Docker script above, this will demonstrate how to use the existing image and build the application in a seperate Docker script. This will keep the original image clean so it may be used for building multiple applications.
+
+This sample script assumes you have your source files and the ```CMakeLists.txt``` in a directory called ```myapp```.
 ```docker
+FROM mipsiotbuild:latest
+
+USER builder
+WORKDIR /home/builder
+
 # Copy a directory from the host containing the files to build setting ownership at the same time
-ADD --chown=builder:builder myapp  ${WORK_ROOT}/myapp
+ADD --chown=builder:builder myapp myapp
 
 # Sanity check
 RUN ls -al myapp
@@ -212,21 +232,52 @@ RUN make
 # There should be an executable called myapp
 RUN ls -al myapp
 ```
+
+Execute this Docker script with:
+```
+docker build -t mipsiotapp:latest . --network=host
+```
 ## Copying the Executable from the Docker Container
-The last step is to copy the new executable from your Docker container to your host so that it can be deployed to your target device. 
+Now the applicaton is built the last step is to copy the new executable from your Docker container to your host so that it can be deployed to your target device. An example of how you might do this follows:
 
-Find out what your container is called, in this case it's vibrant_goodall.
 ```
-markrad@markradubuh:~/MIPS32cc$ docker container ls -a
-CONTAINER ID        IMAGE                                      COMMAND                   CREATED             STATUS                         PORTS               NAMES
-c6f501066027        259c8fe3911f                               "/bin/bash"               5 minutes ago       Exited (0) 5 minutes ago                           vibrant_goodall
+id =$(docker create mips)
+docker cp $id:/home/builder/myapp/cmake/myapp ./myapp_exe
+docker rm -v $id
 ```
-Copy the executable from the container to your local file system.
-```
-docker cp vibrant_goodall:/home/builder/MIPSBuild/myapp/cmake/myapp ./myapp_exe
-```
-This will copy the executable to your local host and rename it to myapp_exe. If all has worked well then a ```file``` command executed against ```myapp_exe``` should, in this case, show as an ELF 32 bit MIPS32.
+The above steps will create and acquire the Docker container identifier, copy the application to the local directory on the host and then delete the container.
 
-**Note:** Depending upon your device you may need to copy additional binaries from the container in order to add them to your device. For example you device may not have the OpenSSL binaries so you will need to copy libssl.so and libcrypto.so. This could also be true for libuuid and libcurl. All of these libraries will be in the toolchain.
+**Note:** Depending upon your device you may need to copy additional binaries from the container in order to add them to your device. For example you device may not have the OpenSSL binaries so you will need to copy libssl.so and libcrypto.so. This could also be true for libuuid and libcurl. All of these libraries will be in the toolchain typically in ```/usr/local/lib```.
+# A Complete Example
+You can find two complete examples in [samples](../samples/dockerbuilds). This directory contains Docker scripts to cross compile the SDK for MIPS32 and for Raspbian and subsequently builds an application. In order to reduce the number of files required, the steps are slightly modified though they perform the same function. To cross compile the SDK for Raspbian, create an application and copy it to your host use the following steps. 
+```bash
+# Change directory to your Azure IoT SDK cloned repository root
+cd <SDK Root>
+# Work in this directory or two copyies of the myapp directory will be required
+cd samples/dockerbuilds
+# Cross compile the SDK
+docker build -t rpiiotbuild:latest ./RaspberryPi --network=host
+# Build the application against the SDK
+docker build -t rpiiotapp:latest . --network=host --file ./RaspberryPi/Dockerfile_adjunct
+id=$(docker create rpiiotapp)
+# Copy application to home directory
+docker cp $id:/home/builder/myapp/cmake/myapp ~/myapp_rpi
+docker rm -v $id
+```
+And for MIPS32:
+```bash
+# Change directory to your Azure IoT SDK cloned repository root
+cd <SDK Root>
+cd samples/dockerbuilds
+# Cross compile the SDK
+docker build -t mipsiotbuild:latest ./MIPS32 --network=host
+# Build the application against the SDK
+docker build -t mipsiotapp:latest . --network=host --file ./MIPS32/Dockerfile_adjunct
+id=$(docker create mipsiotapp)
+# Copy application to home directory
+docker cp $id:/home/builder/myapp/cmake/myapp ~/myapp_mips
+docker rm -v $id
+```
+**Note:** For these examples to work successfully the image names must be exactly as they are shown in the examples.
 ## Summing Up
 This document demonstrates how to compile the Azure IoT SDK for C along with all of its dependents and then create and link an application with the libraries and headers. It uses a MIPS32 toolchain for this demonstration but it should be easily adaptable to the toolchain required by the target device.

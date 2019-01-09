@@ -1,0 +1,2 @@
+# Docker Build Samples
+This directory contains sample Docker files to cross compile the Azure IoT SDK for Raspberry Pi and a MIPS32 target. For more information see the [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/Docker_SDK_Cross_Compile.md).
