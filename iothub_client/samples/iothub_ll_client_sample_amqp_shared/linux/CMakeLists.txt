@@ -29,11 +29,11 @@ add_executable(iothub_ll_client_sample_amqp_shared ${iothub_ll_client_sample_amq
 target_link_libraries(iothub_ll_client_sample_amqp_shared
     iothub_client
     iothub_client_amqp_transport
-    aziotsharedutil
     uamqp
     prov_auth_client
     hsm_security_client
     uhttp
+    aziotsharedutil
     uuid
     parson
     pthread

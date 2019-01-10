@@ -51,7 +51,7 @@ static void my_gballoc_free(void* ptr)
 #include "iothub_client_version.h"
 #include "internal/iothub_client_private.h"
 #include "iothub_client_core_common.h"
-#include "iothubtransport.h"
+#include "internal/iothubtransport.h"
 
 #include "internal/iothub_transport_ll_private.h"
 
@@ -506,6 +506,7 @@ static void* transport_cb_ctx = (void*)0x499922;
 static pfIotHubTransport_SendMessageDisposition         IoTHubTransportHttp_SendMessageDisposition;
 static pfIoTHubTransport_Subscribe_DeviceTwin           IoTHubTransportHttp_Subscribe_DeviceTwin;
 static pfIoTHubTransport_Unsubscribe_DeviceTwin         IoTHubTransportHttp_Unsubscribe_DeviceTwin;
+static pfIoTHubTransport_GetTwinAsync             IoTHubTransportHttp_GetTwinAsync;
 static pfIoTHubTransport_GetHostname                    IoTHubTransportHttp_GetHostname;
 static pfIoTHubTransport_SetOption                      IoTHubTransportHttp_SetOption;
 static pfIoTHubTransport_Create                         IoTHubTransportHttp_Create;
@@ -519,7 +520,6 @@ static pfIoTHubTransport_GetSendStatus                  IoTHubTransportHttp_GetS
 static pfIoTHubTransport_SetCallbackContext             IoTHubTransportHttp_SetCallbackContext;
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
@@ -1133,7 +1133,6 @@ TEST_SUITE_INITIALIZE(suite_init)
 {
     int result;
 
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -1310,6 +1309,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     IoTHubTransportHttp_SendMessageDisposition = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_SendMessageDisposition;
     IoTHubTransportHttp_Unsubscribe_DeviceTwin = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_Unsubscribe_DeviceTwin;
     IoTHubTransportHttp_Subscribe_DeviceTwin = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_Subscribe_DeviceTwin;
+    IoTHubTransportHttp_GetTwinAsync = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_GetTwinAsync;
     IoTHubTransportHttp_GetHostname = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_GetHostname;
     IoTHubTransportHttp_SetOption = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_SetOption;
     IoTHubTransportHttp_Create = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_Create;
@@ -1330,7 +1330,6 @@ TEST_SUITE_CLEANUP(suite_cleanup)
     umock_c_deinit();
 
     TEST_MUTEX_DESTROY(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 
     my_gballoc_free((void*)buffer9);
     my_gballoc_free((void*)buffer11);
@@ -1553,7 +1552,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Create_fails)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubTransportHttp_Create failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubTransportHttp_Create failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
         TRANSPORT_LL_HANDLE result = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
 
@@ -1802,7 +1801,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_HappyPath_with_deviceKey_fail)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubMessage_CreateFromByteArray failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubMessage_CreateFromByteArray failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
         IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
 
@@ -13831,8 +13830,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetMessageId_FAILED)
 }
 #endif
 
-// Tests_SRS_TRANSPORTMULTITHTTP_09_003: [ The HTTP header value of `ContentType` shall be set in the `IoTHubMessage_SetContentTypeSystemProperty`.  ]  
-// Tests_SRS_TRANSPORTMULTITHTTP_09_004: [ The HTTP header value of `ContentEncoding` shall be set in the `IoTHub_SetContentEncoding`.  ]  
+// Tests_SRS_TRANSPORTMULTITHTTP_09_003: [ The HTTP header value of `ContentType` shall be set in the `IoTHubMessage_SetContentTypeSystemProperty`]
+// Tests_SRS_TRANSPORTMULTITHTTP_09_004: [ The HTTP header value of `ContentEncoding` shall be set in the `IoTHub_SetContentEncoding`.]
 TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetCustomContentType_SetContentEncoding_SUCCEED)
 {
     //arrange
@@ -14311,6 +14310,25 @@ TEST_FUNCTION(IoTHubTransportHttp_Subscribe_DeviceTwin_returns)
     //assert
     ASSERT_ARE_NOT_EQUAL(int, 0, res);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubTransportHttp_Destroy(handle);
+}
+
+// Tests_SRS_TRANSPORTMULTITHTTP_09_005: [ `IoTHubTransportHttp_GetTwinAsync` shall return IOTHUB_CLIENT_ERROR]
+TEST_FUNCTION(IoTHubTransportHttp_GetTwinAsync_returns)
+{
+    //arrange
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_CLIENT_RESULT res = IoTHubTransportHttp_GetTwinAsync(handle, (IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)0x4444, (void*)0x4445);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_ERROR, res);
 
     //cleanup
     IoTHubTransportHttp_Destroy(handle);

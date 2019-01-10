@@ -28,8 +28,10 @@ set(mbed_project_files
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothub_client_ll.c
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothub_client_diagnostic.c
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothub_client_ll_uploadtoblob.c
+		${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothub_client_private.c
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothub_device_client.c
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothub_device_client_ll.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothub_transport_ll_private.c
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothub_message.c
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothubtransport.c
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/version.c

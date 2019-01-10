@@ -284,6 +284,22 @@ extern "C"
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_LL_SendReportedState, IOTHUB_MODULE_CLIENT_LL_HANDLE, iotHubModuleClientHandle, const unsigned char*, reportedState, size_t, size, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK, reportedStateCallback, void*, userContextCallback);
+
+     /**
+     * @brief	This API enabled the device to request the full module twin (with all the desired and reported properties) on demand.
+     *
+     * @param	iotHubModuleClientHandle	The handle created by a call to the create function.
+     * @param	deviceTwinCallback	        The callback specified by the module client to receive the Twin document.
+     * @param	userContextCallback		    User specified context that will be provided to the
+     * 									    callback. This can be @c NULL.
+     *
+     *            @b NOTE: The application behavior is undefined if the user calls
+     *            the ::IoTHubModuleClient_LL_Destroy function from within any callback.
+     *
+     * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
+     */
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_LL_GetTwinAsync, IOTHUB_MODULE_CLIENT_LL_HANDLE, iotHubModuleClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK, deviceTwinCallback, void*, userContextCallback);
+
      /**
      * @brief    This API sets callback for async cloud to module method call.
      *

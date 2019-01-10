@@ -38,7 +38,6 @@ namespace BASEIMPLEMENTATION
 };
 
 static MICROMOCK_MUTEX_HANDLE g_testByTest;
-static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
 
 static const char TEST_CONST_CHAR[] = "a";
 static const char* TEST_CONST_CHAR_PTR = "TestConstChar";
@@ -194,7 +193,6 @@ BEGIN_TEST_SUITE(iothub_service_client_auth_ut)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = MicroMockCreateMutex();
     ASSERT_IS_NOT_NULL(g_testByTest);
 }
@@ -202,7 +200,6 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 TEST_SUITE_CLEANUP(TestClassCleanup)
 {
     MicroMockDestroyMutex(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)

@@ -79,7 +79,6 @@ MOCKABLE_FUNCTION(, double, json_value_get_number, const JSON_Value*, value);
 #undef ENABLE_MOCKS
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 static PROV_TRANSPORT_CHALLENGE_CALLBACK g_challenge_callback;
 static void* g_challenge_ctx;
 static PROV_DEVICE_TRANSPORT_REGISTER_CALLBACK g_registration_callback;
@@ -381,7 +380,6 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
     {
         int result;
 
-        TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
         g_testByTest = TEST_MUTEX_CREATE();
         ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -497,7 +495,6 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         umock_c_deinit();
 
         TEST_MUTEX_DESTROY(g_testByTest);
-        TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
     }
 
     TEST_FUNCTION_INITIALIZE(method_init)
@@ -588,14 +585,14 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     }
 
     static void setup_destroy_prov_info_mocks(void)
     {
-        STRICT_EXPECTED_CALL(prov_transport_destroy(IGNORED_PTR_ARG));
         setup_cleanup_prov_info_mocks();
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(prov_transport_destroy(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(prov_auth_destroy(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(tickcounter_destroy(IGNORED_PTR_ARG));
@@ -797,7 +794,6 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(prov_transport_close(IGNORED_PTR_ARG));
         setup_destroy_prov_info_mocks();
 
         //act
@@ -1350,11 +1346,9 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         STRICT_EXPECTED_CALL(prov_transport_dowork(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(prov_transport_get_operation_status(IGNORED_PTR_ARG)).SetReturn(__LINE__);
-        STRICT_EXPECTED_CALL(prov_transport_dowork(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(on_prov_register_device_callback(PROV_DEVICE_RESULT_TRANSPORT, NULL, NULL, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(prov_transport_close(IGNORED_PTR_ARG));
+        setup_cleanup_prov_info_mocks();
 
         //act
         Prov_Device_LL_DoWork(handle);
@@ -1483,6 +1477,8 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         umock_c_reset_all_calls();
 
         setup_Prov_Device_LL_on_registration_data_mocks();
+        STRICT_EXPECTED_CALL(prov_transport_close(IGNORED_PTR_ARG));
+        setup_cleanup_prov_info_mocks();
 
         //act
         g_registration_callback(PROV_DEVICE_TRANSPORT_RESULT_OK, TEST_BUFFER_HANDLE_VALUE, TEST_IOTHUB, TEST_DEVICE_ID, g_registration_ctx);
@@ -1604,8 +1600,8 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         Prov_Device_LL_DoWork(handle);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(prov_transport_dowork(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(on_prov_register_device_callback(PROV_DEVICE_RESULT_TRANSPORT, NULL, NULL, NULL));
+        STRICT_EXPECTED_CALL(prov_transport_close(IGNORED_PTR_ARG));
         setup_cleanup_prov_info_mocks();
 
         //act
@@ -1628,8 +1624,8 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         Prov_Device_LL_DoWork(handle);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(prov_transport_dowork(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(on_prov_register_device_callback(PROV_DEVICE_RESULT_DEV_AUTH_ERROR, NULL, NULL, NULL));
+        STRICT_EXPECTED_CALL(prov_transport_close(IGNORED_PTR_ARG));
         setup_cleanup_prov_info_mocks();
 
         //act

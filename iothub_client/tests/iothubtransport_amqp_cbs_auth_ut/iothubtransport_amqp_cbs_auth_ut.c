@@ -69,8 +69,6 @@ MOCKABLE_FUNCTION(, time_t, get_time, time_t*, currentTime);
 MOCKABLE_FUNCTION(, double, get_difftime, time_t, stopTime, time_t, startTime);
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
-
 
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
@@ -498,7 +496,6 @@ BEGIN_TEST_SUITE(iothubtransport_amqp_cbs_auth_ut)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -523,7 +520,6 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     umock_c_deinit();
 
     TEST_MUTEX_DESTROY(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
@@ -1111,7 +1107,7 @@ TEST_FUNCTION(authentication_do_work_SAS_TOKEN_AUTHENTICATION_STATE_STARTING_fai
         authentication_do_work(handle);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
         ASSERT_IS_TRUE(NULL == saved_cbs_put_token_on_operation_complete, error_msg);
         ASSERT_ARE_EQUAL(int, AUTHENTICATION_STATE_ERROR, saved_on_state_changed_callback_new_state, error_msg);
         ASSERT_ARE_EQUAL(int, AUTHENTICATION_ERROR_AUTH_FAILED, saved_on_error_callback_error_code, error_msg);
@@ -1207,7 +1203,7 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_AUTHENTICATION_STATE_STARTING_f
         authentication_do_work(handle);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
         ASSERT_IS_TRUE(NULL == saved_cbs_put_token_on_operation_complete, error_msg);
         ASSERT_ARE_EQUAL(int, AUTHENTICATION_STATE_ERROR, saved_on_state_changed_callback_new_state);
         ASSERT_ARE_EQUAL(int, AUTHENTICATION_ERROR_AUTH_FAILED, saved_on_error_callback_error_code);
@@ -1673,7 +1669,7 @@ TEST_FUNCTION(authentication_retrieve_options_failure_checks)
         OPTIONHANDLER_HANDLE result = authentication_retrieve_options(handle);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
         ASSERT_IS_NULL(result, error_msg);
     }
 

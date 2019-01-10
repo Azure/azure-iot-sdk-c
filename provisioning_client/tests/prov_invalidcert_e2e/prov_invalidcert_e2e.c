@@ -23,7 +23,6 @@
 #ifdef USE_HTTP
 #include "azure_prov_client/prov_transport_http_client.h"
 #endif
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 #define MAX_CONNECT_CALLBACK_WAIT_TIME        10
 
@@ -94,7 +93,6 @@ static void run_invalidcert_test(PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION prov_tr
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     platform_init();
     prov_dev_security_init(SECURE_DEVICE_TYPE_X509);
 }
@@ -103,7 +101,6 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
 {
     prov_dev_security_deinit();
     platform_deinit();
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)

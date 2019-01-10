@@ -48,7 +48,6 @@ void real_free(void* ptr)
 #include "internal/message_queue.h"
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
@@ -577,7 +576,6 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
     size_t i;
 
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -608,8 +606,7 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     umock_c_deinit();
 
     TEST_MUTEX_DESTROY(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
-
+    
     for (i = 0; i < 10; i++)
     {
         real_free(TEST_BASE_MQ_MESSAGE_HANDLE[i]);
@@ -689,7 +686,7 @@ TEST_FUNCTION(create_failure_checks)
     {
         // arrange
         char error_msg[64];
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
@@ -888,7 +885,7 @@ TEST_FUNCTION(add_failure_checks)
     {
         // arrange
         char error_msg[64];
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
@@ -1105,7 +1102,7 @@ TEST_FUNCTION(do_work_NO_EXPIRATION_failure_checks)
         TEST_on_message_processing_completed_callback_result = MESSAGE_QUEUE_TIMEOUT;
 
         char error_msg[64];
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
 
         if (i >= 3 && i != 4)
         {
@@ -1310,7 +1307,7 @@ TEST_FUNCTION(message_queue_retrieve_options_failure_checks)
     {
         // arrange
         char error_msg[64];
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);

@@ -11,15 +11,14 @@ set(${theseTestsName}_test_files
     ../common_prov_e2e/common_prov_e2e.c
 )
 
-set(${theseTestsName}_c_files
-    ../../../certs/certs.c
-)
-
 set(${theseTestsName}_h_files
     ../common_prov_e2e/common_prov_e2e.h
 )
 
 if(${use_sample_trusted_cert})
+    set(${theseTestsName}_c_files
+        ../../../certs/certs.c
+    )
     add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
 endif()
 

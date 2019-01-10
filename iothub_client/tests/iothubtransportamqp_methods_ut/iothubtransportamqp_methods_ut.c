@@ -24,7 +24,6 @@
 #endif
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 #ifdef __cplusplus
 extern "C"
@@ -307,7 +306,6 @@ TEST_SUITE_INITIALIZE(suite_init)
     int result;
     size_t type_size;
 
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -374,7 +372,6 @@ TEST_SUITE_CLEANUP(suite_cleanup)
     umock_c_deinit();
 
     TEST_MUTEX_DESTROY(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 static void reset_test_data()
@@ -1353,7 +1350,7 @@ TEST_FUNCTION(when_a_failure_occurs_iothubtransportamqp_methods_subscribe_fails)
             umock_c_negative_tests_fail_call(i);
 
             char temp_str[128];
-            (void)sprintf(temp_str, "On failed call %zu", i);
+            (void)sprintf(temp_str, "On failed call %lu", (unsigned long)i);
 
             ///act
             result = iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
@@ -2456,7 +2453,7 @@ TEST_FUNCTION(when_a_failure_occurs_iothubtransportamqp_methods_respond_fails)
         umock_c_negative_tests_fail_call(i);
 
         char temp_str[128];
-        (void)sprintf(temp_str, "On failed call %zu", i);
+        (void)sprintf(temp_str, "On failed call %lu", (unsigned long)i);
 
         ///act
         result = iothubtransportamqp_methods_respond(g_method_handle, response_payload, sizeof(response_payload), 100);

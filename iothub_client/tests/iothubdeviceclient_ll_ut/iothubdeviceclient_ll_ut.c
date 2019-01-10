@@ -59,7 +59,6 @@ static size_t TEST_SIZE_T = 10;
 static const char* TEST_CHAR_PTR = "char ptr";
 
 static TEST_MUTEX_HANDLE test_serialize_mutex;
-static TEST_MUTEX_HANDLE g_dllByDll;
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
@@ -74,8 +73,6 @@ BEGIN_TEST_SUITE(iothubdeviceclient_ll_ut)
 TEST_SUITE_INITIALIZE(suite_init)
 {
     int result;
-
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
 
     test_serialize_mutex = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(test_serialize_mutex);
@@ -133,7 +130,6 @@ TEST_SUITE_CLEANUP(suite_cleanup)
 {
     umock_c_deinit();
     TEST_MUTEX_DESTROY(test_serialize_mutex);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION(IoTHubDeviceClient_LL_CreateFromConnectionString_Test)
@@ -345,6 +341,19 @@ TEST_FUNCTION(IoTHubDeviceClient_LL_SendReportedState_Test)
     //assert
     ASSERT_IS_TRUE(result == IOTHUB_CLIENT_OK);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+}
+
+TEST_FUNCTION(IoTHubDeviceClient_LL_GetTwinAsync_Test)
+{
+    //arrange
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetTwinAsync(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_TWIN_CALLBACK, NULL));
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubDeviceClient_LL_GetTwinAsync(TEST_IOTHUB_DEVICE_CLIENT_LL_HANDLE, TEST_TWIN_CALLBACK, NULL);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_IS_TRUE(result == IOTHUB_CLIENT_OK);
 }
 
 TEST_FUNCTION(IoTHubDeviceClient_LL_SetDeviceMethodCallback_Test)

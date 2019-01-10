@@ -189,7 +189,6 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 }
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 static JSON_DECODER_RESULT my_JSONDecoder_JSON_To_MultiTree(char* json, MULTITREE_HANDLE* multiTreeHandle)
 {
@@ -285,8 +284,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
-        TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
-
         Schema_GetModelElementByName_notFound.elementType = SCHEMA_NOT_FOUND;
 
         Schema_GetModelElementByName_desiredProperty_int_field.elementType = SCHEMA_DESIRED_PROPERTY;
@@ -394,8 +391,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         umock_c_deinit();
 
         TEST_MUTEX_DESTROY(g_testByTest);
-        TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
-
     }
 
     TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
@@ -3161,7 +3156,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
                 umock_c_negative_tests_fail_call(i);
                 char temp_str[128];
-                sprintf(temp_str, "On failed call %zu", i);
+                sprintf(temp_str, "On failed call %lu", (unsigned long)i);
 
                 ///act
                 EXECUTE_COMMAND_RESULT result = CommandDecoder_IngestDesiredProperties(deviceMemoryArea, commandDecoderHandle, desiredPropertiesJSON, false);
@@ -3381,7 +3376,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
                 umock_c_negative_tests_fail_call(i);
                 char temp_str[128];
-                sprintf(temp_str, "On failed call %zu", i);
+                sprintf(temp_str, "On failed call %lu", (unsigned long)i);
 
                 ///act
                 EXECUTE_COMMAND_RESULT result = CommandDecoder_IngestDesiredProperties(deviceMemoryArea, commandDecoderHandle, desiredPropertiesJSON, false);

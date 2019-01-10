@@ -78,7 +78,6 @@ TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RETRY_POLICY, IOTHUB_CLIENT_RETRY_POLICY_VAL
 IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_CLIENT_RETRY_POLICY, IOTHUB_CLIENT_RETRY_POLICY_VALUES);
 
 static TEST_MUTEX_HANDLE test_serialize_mutex;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 #define TEST_RETRY_POLICY IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER
 #define TEST_RETRY_TIMEOUT_SECS 60
@@ -564,6 +563,7 @@ static pfIoTHubTransport_SetRetryPolicy             IoTHubTransportMqtt_WS_SetRe
 static pfIoTHubTransport_GetSendStatus              IoTHubTransportMqtt_WS_GetSendStatus;
 static pfIoTHubTransport_Subscribe_DeviceTwin       IoTHubTransportMqtt_WS_Subscribe_DeviceTwin;
 static pfIoTHubTransport_Unsubscribe_DeviceTwin     IoTHubTransportMqtt_WS_Unsubscribe_DeviceTwin;
+static pfIoTHubTransport_GetTwinAsync         IoTHubTransportMqtt_WS_GetTwinAsync;
 static pfIoTHubTransport_Subscribe_DeviceMethod     IoTHubTransportMqtt_WS_Subscribe_DeviceMethod;
 static pfIoTHubTransport_Unsubscribe_DeviceMethod   IoTHubTransportMqtt_WS_Unsubscribe_DeviceMethod;
 static pfIoTHubTransport_ProcessItem                IoTHubTransportMqtt_WS_ProcessItem;
@@ -592,8 +592,6 @@ TEST_SUITE_INITIALIZE(suite_init)
 {
     //int result;
 
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
-
     test_serialize_mutex = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(test_serialize_mutex);
 
@@ -609,6 +607,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_CONFIRMATION_RESULT, int);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUBMESSAGE_DISPOSITION_RESULT, int);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_RETRY_POLICY, int);
+    REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK, void*);
+
     REGISTER_TYPE(WSIO_CONFIG*, WSIO_CONFIG_ptr);
     REGISTER_TYPE(TLSIO_CONFIG*, TLSIO_CONFIG_ptr);
     REGISTER_TYPE(HTTP_PROXY_IO_CONFIG*, HTTP_PROXY_IO_CONFIG_ptr);
@@ -654,6 +654,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     IoTHubTransportMqtt_WS_GetSendStatus = ((TRANSPORT_PROVIDER*)MQTT_WebSocket_Protocol())->IoTHubTransport_GetSendStatus;
     IoTHubTransportMqtt_WS_Subscribe_DeviceTwin = ((TRANSPORT_PROVIDER*)MQTT_WebSocket_Protocol())->IoTHubTransport_Subscribe_DeviceTwin;
     IoTHubTransportMqtt_WS_Unsubscribe_DeviceTwin = ((TRANSPORT_PROVIDER*)MQTT_WebSocket_Protocol())->IoTHubTransport_Unsubscribe_DeviceTwin;
+    IoTHubTransportMqtt_WS_GetTwinAsync = ((TRANSPORT_PROVIDER*)MQTT_WebSocket_Protocol())->IoTHubTransport_GetTwinAsync;
     IoTHubTransportMqtt_WS_Subscribe_DeviceMethod = ((TRANSPORT_PROVIDER*)MQTT_WebSocket_Protocol())->IoTHubTransport_Subscribe_DeviceMethod;
     IoTHubTransportMqtt_WS_Unsubscribe_DeviceMethod = ((TRANSPORT_PROVIDER*)MQTT_WebSocket_Protocol())->IoTHubTransport_Unsubscribe_DeviceMethod;
     IoTHubTransportMqtt_WS_ProcessItem = ((TRANSPORT_PROVIDER*)MQTT_WebSocket_Protocol())->IoTHubTransport_ProcessItem;
@@ -664,7 +665,6 @@ TEST_SUITE_CLEANUP(suite_cleanup)
 {
     umock_c_deinit();
     TEST_MUTEX_DESTROY(test_serialize_mutex);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 static void reset_test_data()
@@ -1214,4 +1214,70 @@ TEST_FUNCTION(IoTHubTransportMqtt_WS_SetCallbackContext_success)
 
     // cleanup
 }
+
+// Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_09_001: [ IoTHubTransportMqtt_WS_GetTwinAsync shall call into the IoTHubTransport_MQTT_Common_GetTwinAsync ]
+TEST_FUNCTION(IoTHubTransportMqtt_WS_GetTwinAsync_success)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_WS_Create(&config, transport_cb_info, NULL);
+    
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_GetTwinAsync(handle, (IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)0x4444, (void*)0x4445));
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransportMqtt_WS_GetTwinAsync(handle, (IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)0x4444, (void*)0x4445);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
+
+    // cleanup
+    IoTHubTransportMqtt_WS_Destroy(handle);
+}
+
+// Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_017: [ IoTHubTransportMqtt_WS_Subscribe_DeviceTwin shall call into the IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin ]
+TEST_FUNCTION(IoTHubTransportMqtt_WS_Subscribe_DeviceTwin_success)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_WS_Create(&config, transport_cb_info, NULL);
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin(handle));
+
+    // act
+    int result = IoTHubTransportMqtt_WS_Subscribe_DeviceTwin(handle);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, 0, result);
+
+    // cleanup
+    IoTHubTransportMqtt_WS_Destroy(handle);
+}
+
+// Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_018: [ IoTHubTransportMqtt_WS_Unsubscribe_DeviceTwin shall call into the IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin ]
+TEST_FUNCTION(IoTHubTransportMqtt_WS_Unsubscribe_DeviceTwin_success)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_WS_Create(&config, transport_cb_info, NULL);
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin(handle));
+
+    // act
+    IoTHubTransportMqtt_WS_Unsubscribe_DeviceTwin(handle);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubTransportMqtt_WS_Destroy(handle);
+}
+
 END_TEST_SUITE(iothubtransportmqtt_ws_ut)

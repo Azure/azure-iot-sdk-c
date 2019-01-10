@@ -72,7 +72,6 @@ static void TEST_free(void* ptr)
 #include "internal/uamqp_messaging.h"
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
@@ -508,7 +507,6 @@ BEGIN_TEST_SUITE(uamqp_messaging_ut)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -693,7 +691,6 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     umock_c_deinit();
 
     TEST_MUTEX_DESTROY(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
@@ -935,7 +932,7 @@ TEST_FUNCTION(message_create_from_iothub_message_BYTEARRAY_return_errors_fails)
 
         result = message_create_uamqp_encoding_from_iothub_message(NULL, TEST_IOTHUB_MESSAGE_HANDLE, &binary_data);
 
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
         ASSERT_ARE_NOT_EQUAL(int, result, 0, error_msg);
     }
 
@@ -999,7 +996,7 @@ TEST_FUNCTION(message_create_from_iothub_message_STRING_return_errors_fails)
         result = message_create_uamqp_encoding_from_iothub_message(NULL, TEST_IOTHUB_MESSAGE_HANDLE, &binary_data);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
 
         ASSERT_ARE_NOT_EQUAL(int, result, 0, error_msg);
     }

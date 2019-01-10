@@ -12,7 +12,7 @@
 #include "iothub_client_options.h"
 #include "iothub_message.h"
 #include "iothubtransporthttp.h"
-#include "iothubtransport.h"
+#include "internal/iothubtransport.h"
 #include "iothub_messaging.h"
 
 #include "iothub_account.h"
@@ -21,7 +21,6 @@
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/threadapi.h"
 
-static TEST_MUTEX_HANDLE g_dllByDll;
 static bool g_callbackRecv = false;
 
 const char* TEST_EVENT_DATA_FMT = "{\"data\":\"%.24s\",\"id\":\"%d\"}";
@@ -548,7 +547,6 @@ static void RecvMessage(IOTHUB_PROVISIONED_DEVICE* deviceToUse)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     IoTHub_Init();
     g_iothubAcctInfo1 = IoTHubAccount_Init(false);
     ASSERT_IS_NOT_NULL(g_iothubAcctInfo1);
@@ -565,7 +563,6 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     IoTHubAccount_deinit(g_iothubAcctInfo2);
     IoTHubAccount_deinit(g_iothubAcctInfo1);
     IoTHub_Deinit();
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)

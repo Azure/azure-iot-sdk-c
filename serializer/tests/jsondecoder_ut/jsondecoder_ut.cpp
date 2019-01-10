@@ -46,14 +46,10 @@ MICROMOCK_ENUM_TO_STRING(JSON_DECODER_RESULT_TAG,
 
 static MICROMOCK_MUTEX_HANDLE g_testByTest;
 
-static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
-
 BEGIN_TEST_SUITE(JSONDecoder_ut)
 
 TEST_SUITE_INITIALIZE(BeforeSuite)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
-
     g_testByTest = MicroMockCreateMutex();
     ASSERT_IS_NOT_NULL(g_testByTest);
 }
@@ -61,8 +57,6 @@ TEST_SUITE_INITIALIZE(BeforeSuite)
 TEST_SUITE_CLEANUP(TestClassCleanup)
 {
     MicroMockDestroyMutex(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
-
 }
 
 /* Tests_SRS_JSON_DECODER_99_001:[ If any of the parameters passed to the JSONDecoder_JSON_To_MultiTree function is NULL then the function call shall return JSON_DECODER_INVALID_ARG.] */

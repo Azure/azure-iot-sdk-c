@@ -148,6 +148,11 @@ static int prov_transport_mqtt_ws_set_proxy(PROV_DEVICE_TRANSPORT_HANDLE handle,
     return prov_transport_common_mqtt_set_proxy(handle, proxy_options);
 }
 
+static int prov_transport_mqtt_ws_set_option(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* option, const void* value)
+{
+    return prov_transport_common_mqtt_set_option(handle, option, value);
+}
+
 static PROV_DEVICE_TRANSPORT_PROVIDER prov_mqtt_func =
 {
     prov_transport_mqtt_ws_create,
@@ -160,7 +165,8 @@ static PROV_DEVICE_TRANSPORT_PROVIDER prov_mqtt_func =
     prov_transport_mqtt_ws_set_trace,
     prov_transport_mqtt_ws_x509_cert,
     prov_transport_mqtt_ws_set_trusted_cert,
-    prov_transport_mqtt_ws_set_proxy
+    prov_transport_mqtt_ws_set_proxy,
+    prov_transport_mqtt_ws_set_option
 };
 
 const PROV_DEVICE_TRANSPORT_PROVIDER* Prov_Device_MQTT_WS_Protocol(void)

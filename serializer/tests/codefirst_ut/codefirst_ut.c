@@ -532,7 +532,6 @@ TEST_DEFINE_ENUM_TYPE(DEVICE_RESULT, DEVICE_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(DEVICE_RESULT, DEVICE_RESULT_VALUES);
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 static char someChars[] = { "someChars" };
 static char someMoreChars[] = { "someMoreChars" };
@@ -721,8 +720,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
-        TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
-
         g_testByTest = TEST_MUTEX_CREATE();
         ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -816,7 +813,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         umock_c_deinit();
 
         TEST_MUTEX_DESTROY(g_testByTest);
-        TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
     }
 
     TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
@@ -3681,7 +3677,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
                 umock_c_negative_tests_reset();
                 umock_c_negative_tests_fail_call(i);
                 char temp_str[128];
-                sprintf(temp_str, "On failed call %zu", i);
+                sprintf(temp_str, "On failed call %lu", (unsigned long)i);
                 ///act
                 CODEFIRST_RESULT result = CodeFirst_SendAsyncReported(&destination, &destinationSize, 1, device);
 
@@ -3797,7 +3793,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
                 umock_c_negative_tests_reset();
                 umock_c_negative_tests_fail_call(i);
                 char temp_str[128];
-                sprintf(temp_str, "On failed call %zu", i);
+                sprintf(temp_str, "On failed call %lu", (unsigned long)i);
 
                 ///act
                 CODEFIRST_RESULT result = CodeFirst_SendAsyncReported(&destination, &destinationSize, 1, &(device->new_reported_this_is_double));
