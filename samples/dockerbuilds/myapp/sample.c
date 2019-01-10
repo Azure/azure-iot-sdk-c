@@ -1,1 +1,0 @@
-../../../iothub_client/samples/iothub_convenience_sample/iothub_convenience_sample.c
