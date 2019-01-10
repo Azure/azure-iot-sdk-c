@@ -231,6 +231,18 @@ static int TEST_telemetry_messenger_send_async(TELEMETRY_MESSENGER_HANDLE messen
     return TEST_telemetry_messenger_send_async_result;
 }
 
+static TWIN_MESSENGER_HANDLE get_twin_handle;
+static TWIN_STATE_UPDATE_CALLBACK get_twin_callback;
+static void* get_twin_context;
+static int TEST_twin_messenger_get_twin_async(TWIN_MESSENGER_HANDLE twin_msgr_handle, TWIN_STATE_UPDATE_CALLBACK on_get_twin_completed_callback, void* context)
+{
+    get_twin_handle = twin_msgr_handle;
+    get_twin_callback = on_get_twin_completed_callback;
+    get_twin_context = context;
+
+    return 0;
+}
+
 // ---------- Test Callbacks ---------- //
 static void* TEST_on_state_changed_callback_saved_context;
 static DEVICE_STATE TEST_on_state_changed_callback_saved_previous_state;
@@ -265,6 +277,17 @@ static void TEST_on_device_d2c_event_send_complete_callback(IOTHUB_MESSAGE_LIST*
     TEST_on_device_d2c_event_send_complete_callback_saved_context = context;
 }
 
+static DEVICE_TWIN_UPDATE_TYPE dvc_get_twin_update_type;
+static const unsigned char* dvc_get_twin_message;
+static size_t dvc_get_twin_length;
+static void* dvc_get_twin_context;
+static void on_device_get_twin_completed_callback(DEVICE_TWIN_UPDATE_TYPE update_type, const unsigned char* message, size_t length, void* context)
+{
+    dvc_get_twin_update_type = update_type;
+    dvc_get_twin_message = message;
+    dvc_get_twin_length = length;
+    dvc_get_twin_context = context;
+}
 
 // ---------- Test Helpers ---------- //
 static DEVICE_CONFIG TEST_device_config;
@@ -336,6 +359,15 @@ static void reset_test_data()
     TEST_on_device_d2c_event_send_complete_callback_saved_context = NULL;
 
     TEST_MESSAGE_ID = (delivery_number)33445566;
+
+    get_twin_handle = NULL;
+    get_twin_callback = NULL;
+    get_twin_context = NULL;
+
+    dvc_get_twin_update_type = DEVICE_TWIN_UPDATE_TYPE_COMPLETE;
+    dvc_get_twin_message = NULL;
+    dvc_get_twin_length = 0;
+    dvc_get_twin_context = NULL;
 }
 
 static void register_umock_alias_types()
@@ -367,6 +399,7 @@ static void register_umock_alias_types()
     REGISTER_UMOCK_ALIAS_TYPE(TELEMETRY_MESSENGER_DISPOSITION_RESULT, int);
     REGISTER_UMOCK_ALIAS_TYPE(DEVICE_MESSAGE_DISPOSITION_RESULT, int);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_AUTHORIZATION_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(DEVICE_TWIN_UPDATE_RECEIVED_CALLBACK, void*);
 }
 
 static void register_global_mock_hooks()
@@ -380,6 +413,7 @@ static void register_global_mock_hooks()
     REGISTER_GLOBAL_MOCK_HOOK(telemetry_messenger_create, TEST_telemetry_messenger_create);
     REGISTER_GLOBAL_MOCK_HOOK(twin_messenger_create, TEST_twin_messenger_create);
     REGISTER_GLOBAL_MOCK_HOOK(telemetry_messenger_send_async, TEST_telemetry_messenger_send_async);
+    REGISTER_GLOBAL_MOCK_HOOK(twin_messenger_get_twin_async, TEST_twin_messenger_get_twin_async);
 }
 
 static void register_global_mock_returns()
@@ -448,6 +482,9 @@ static void register_global_mock_returns()
 
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Get_DeviceId, TEST_DEVICE_ID_CHAR_PTR);
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Get_ModuleId, NULL);
+
+    REGISTER_GLOBAL_MOCK_RETURN(twin_messenger_get_twin_async, 0);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(twin_messenger_get_twin_async, 1);
 }
 
 // ---------- Expected Call Helpers ---------- //
@@ -2961,6 +2998,138 @@ TEST_FUNCTION(device_send_message_disposition_failure_checks)
     // cleanup
     device_destroy(handle);
     umock_c_negative_tests_deinit();
+}
+
+// Tests_SRS_DEVICE_09_153: [twin_messenger_get_twin_async shall be invoked ]
+// Tests_SRS_DEVICE_09_155: [If no failures occur, device_get_twin_async shall return 0]
+TEST_FUNCTION(device_get_twin_async_succeess)
+{
+    // arrange
+    DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
+    AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(twin_messenger_get_twin_async(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+    // act
+    int result = device_get_twin_async(handle, on_device_get_twin_completed_callback, (void*)0x4567);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, 0, result);
+    ASSERT_IS_NOT_NULL(get_twin_context);
+
+    // cleanup
+    free(get_twin_context);
+    device_destroy(handle);
+}
+
+TEST_FUNCTION(device_get_twin_async_callback_succeess)
+{
+    // arrange
+    DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
+    AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(twin_messenger_get_twin_async(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    (void)device_get_twin_async(handle, on_device_get_twin_completed_callback, (void*)0x4567);
+    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    
+    ASSERT_IS_NOT_NULL(get_twin_callback);
+    ASSERT_IS_NOT_NULL(get_twin_context);
+
+    const char* payload = "{ 'a': 'b' }";
+    size_t length = strlen(payload);
+
+    // act
+    get_twin_callback(TWIN_UPDATE_TYPE_COMPLETE, payload, length, get_twin_context);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, TWIN_UPDATE_TYPE_COMPLETE, dvc_get_twin_update_type);
+    ASSERT_ARE_EQUAL(void_ptr, payload, dvc_get_twin_message);
+    ASSERT_ARE_EQUAL(int, length, dvc_get_twin_length);
+    ASSERT_ARE_EQUAL(void_ptr, (void*)0x4567, dvc_get_twin_context);
+
+    // cleanup
+    device_destroy(handle);
+}
+
+// Tests_SRS_DEVICE_09_154: [If twin_messenger_get_twin_async fails, device_get_twin_async shall return a non-zero value]
+TEST_FUNCTION(device_get_twin_async_failure_checks)
+{
+    // arrange
+    ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
+
+    DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
+    AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(twin_messenger_get_twin_async(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    umock_c_negative_tests_snapshot();
+
+    size_t count = umock_c_negative_tests_call_count();
+
+    for (size_t index = 0; index < count; index++)
+    {
+        if (!umock_c_negative_tests_can_call_fail(index))
+        {
+            continue;
+        }
+
+        umock_c_negative_tests_reset();
+        umock_c_negative_tests_fail_call(index);
+
+        char tmp_msg[64];
+        sprintf(tmp_msg, "Failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
+        int result = device_get_twin_async(handle, on_device_get_twin_completed_callback, (void*)0x4567);
+
+        // assert
+        ASSERT_ARE_NOT_EQUAL(int, 0, result, tmp_msg);
+    }
+
+    // cleanup
+    device_destroy(handle);
+    umock_c_negative_tests_deinit();
+}
+
+// Tests_SRS_DEVICE_09_152: [If `handle` or `on_device_get_twin_completed_callback` are NULL, device_get_twin_async shall return a non-zero result]
+TEST_FUNCTION(device_get_twin_async_NULL_handle)
+{
+    // arrange
+    umock_c_reset_all_calls();
+
+    // act
+    int result = device_get_twin_async(NULL, on_device_get_twin_completed_callback, (void*)0x4567);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_NOT_EQUAL(int, 0, result);
+
+    // cleanup
+}
+
+// Tests_SRS_DEVICE_09_152: [If `handle` or `on_device_get_twin_completed_callback` are NULL, device_get_twin_async shall return a non-zero result]
+TEST_FUNCTION(device_get_twin_async_NULL_callback)
+{
+    // arrange
+    DEVICE_CONFIG* config = get_device_config(DEVICE_AUTH_MODE_CBS);
+    AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
+
+    umock_c_reset_all_calls();
+
+    // act
+    int result = device_get_twin_async(handle, NULL, (void*)0x4567);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_NOT_EQUAL(int, 0, result);
+
+    // cleanup
+    device_destroy(handle);
 }
 
 END_TEST_SUITE(iothubtransport_amqp_device_ut)

@@ -73,6 +73,7 @@ extern "C"
     MOCKABLE_FUNCTION(, int, twin_messenger_report_state_async, TWIN_MESSENGER_HANDLE, twin_msgr_handle, CONSTBUFFER_HANDLE, data, TWIN_MESSENGER_REPORT_STATE_COMPLETE_CALLBACK, on_report_state_complete_callback, const void*, context);
     MOCKABLE_FUNCTION(, int, twin_messenger_subscribe, TWIN_MESSENGER_HANDLE, twin_msgr_handle, TWIN_STATE_UPDATE_CALLBACK, on_twin_state_update_callback, void*, context);
     MOCKABLE_FUNCTION(, int, twin_messenger_unsubscribe, TWIN_MESSENGER_HANDLE, twin_msgr_handle);
+    MOCKABLE_FUNCTION(, int, twin_messenger_get_twin_async, TWIN_MESSENGER_HANDLE, twin_msgr_handle, TWIN_STATE_UPDATE_CALLBACK, on_get_twin_completed_callback, void*, context);
     MOCKABLE_FUNCTION(, int, twin_messenger_get_send_status, TWIN_MESSENGER_HANDLE, twin_msgr_handle, TWIN_MESSENGER_SEND_STATUS*, send_status);
     MOCKABLE_FUNCTION(, int, twin_messenger_start, TWIN_MESSENGER_HANDLE, twin_msgr_handle, SESSION_HANDLE, session_handle);
     MOCKABLE_FUNCTION(, int, twin_messenger_stop, TWIN_MESSENGER_HANDLE, twin_msgr_handle);

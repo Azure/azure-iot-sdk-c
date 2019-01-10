@@ -6,8 +6,10 @@ phases:
 - phase: longhaul_linux
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
-  queue: aziotbld-lin01
-  displayName: 'ubuntu1604'
+  queue: 
+    name: 'aziotbld-lin01'
+    timeoutInMinutes: 1200
+  displayName: 'longhaul_linux'
   steps:
   - script: |
       sudo chmod 755 jenkins/longhaul_c.sh
@@ -37,6 +39,7 @@ phases:
 - phase: longhaul_windows
   queue:
     name: 'aziotbld-win10'
+    timeoutInMinutes: 1200
   steps:
   - script: |
       call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
