@@ -727,7 +727,7 @@ static int addSystemPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_messag
         const char* tracestate = IoTHubMessage_GetDistributedTracingSystemProperty(iothub_message_handle);
         if (tracestate != NULL)
         {
-            result = addSystemPropertyToTopicString(topic_string, index, DISTRIBUTED_TRACING_PROPERTY, tracestate, urlencode);
+            result = addSystemPropertyToTopicString(topic_string, index, DISTRIBUTED_TRACING_PROPERTY, tracestate, true);
             index++;
         }
     }
