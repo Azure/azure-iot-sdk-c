@@ -164,7 +164,7 @@ You can replace the value 'mipsiotbuild' with any name that describes your build
 Once you have successfully built the SDK you are now ready to create your application. You will need to create a directory that contains your source code and a CMakeLists.txt. The application build can use the cmake toolchain file that is already present in the image. 
 
 ### Sample ```CMakeLists.txt``` for an Application
-Here is a simple ```CMakeLists.txt``` file that demonstrates how to build an application that uses the libraries built above. This sample, for demonstration purposes uses the ```iothub_convenience_sample.c``` sample from the SDK.
+Here is a simple ```CMakeLists.txt``` file that demonstrates how to build an application that uses the libraries built above. This sample, for demonstration purposes uses a copy of the ```iothub_convenience_sample.c``` sample from the SDK symlinked as sample.c.
 ```cmake
 cmake_minimum_required(VERSION 2.8.11)
 project(myapp_project)
@@ -177,7 +177,7 @@ set (CMAKE_C_FLAGS "--std=c99 ${CMAKE_C_FLAGS}")
 option(use_sample_trusted_cert "Set flag in samples to use SDK's built-in CA as TrustedCerts" ON)
 
 set(iothub_c_files
-    iothub_convenience_sample.c
+    sample.c
 )
 
 # Conditionally use the SDK trusted certs in the samples (is set to true in cmake toolchain file)
