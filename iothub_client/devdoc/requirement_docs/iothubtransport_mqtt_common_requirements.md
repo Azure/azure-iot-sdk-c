@@ -4,7 +4,7 @@
 
 ## Overview
 
-IoTHubTransport_MQTT_Common is the library that enables communications with the iothub system using the MQTT protocol. 
+IoTHubTransport_MQTT_Common is the library that enables communications with the iothub system using the MQTT protocol.
 
 ## Exposed API
 
@@ -97,7 +97,7 @@ This function registers a device with the transport.  The MQTT transport only su
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_17_003: [** `IoTHubTransport_MQTT_Common_Register` shall return `NULL` if `deviceId` or `deviceKey` do not match the `deviceId` and `deviceKey` passed in during `IoTHubTransport_MQTT_Common_Create`.**]**
 
-**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_43_001: [** `IoTHubTransport_MQTT_Common_Register` shall return `NULL` if `deviceKey` is `NULL` when credential type is `IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY`.**]**. 
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_43_001: [** `IoTHubTransport_MQTT_Common_Register` shall return `NULL` if `deviceKey` is `NULL` when credential type is `IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY`.**]**.
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_17_004: [** `IoTHubTransport_MQTT_Common_Register` shall return the `TRANSPORT_LL_HANDLE` as the `IOTHUB_DEVICE_HANDLE`. **]**
 
@@ -319,8 +319,6 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SetOption(TRANSPORT_LL_HANDLE h
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_032: [** IoTHubTransport_MQTT_Common_SetOption shall pass down the option to xio_setoption if the option parameter is not a known option string for the MQTT transport.**]**
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_036: [** If the option parameter is set to "keepalive" then the value shall be a int_ptr and the value will determine the mqtt keepalive time that is set for pings.**]**
-
-**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_052: [** If the option parameter is set to "sas_token_lifetime" then the value shall be a size_t_ptr and the value will determine the mqtt sas token lifetime.**]**
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_037: [** If the option parameter is set to supplied int_ptr keepalive is the same value as the existing keepalive then IoTHubTransport_MQTT_Common_SetOption shall do nothing.**]**
 

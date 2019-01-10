@@ -44,8 +44,6 @@
 #define DEFAULT_CBS_REQUEST_TIMEOUT_SECS          30
 #define DEFAULT_DEVICE_STATE_CHANGE_TIMEOUT_SECS  60
 #define DEFAULT_EVENT_SEND_TIMEOUT_SECS           300
-#define DEFAULT_SAS_TOKEN_LIFETIME_SECS           3600
-#define DEFAULT_SAS_TOKEN_REFRESH_TIME_SECS       1800
 #define MAX_NUMBER_OF_DEVICE_FAILURES             5
 #define DEFAULT_SERVICE_KEEP_ALIVE_FREQ_SECS      240
 #define DEFAULT_REMOTE_IDLE_PING_RATIO            0.50
@@ -117,8 +115,6 @@ typedef struct AMQP_TRANSPORT_INSTANCE_TAG
     char* http_proxy_username;
     char* http_proxy_password;
 
-    size_t option_sas_token_lifetime_secs;                              // Device-specific option.
-    size_t option_sas_token_refresh_time_secs;                          // Device-specific option.
     size_t option_cbs_request_timeout_secs;                             // Device-specific option.
     size_t option_send_event_timeout_secs;                              // Device-specific option.
 
@@ -1212,22 +1208,6 @@ static int replicate_device_options_to(AMQP_TRANSPORT_DEVICE_INSTANCE* dev_insta
             LogError("Failed to apply option DEVICE_OPTION_CBS_REQUEST_TIMEOUT_SECS to device '%s' (device_set_option failed)", STRING_c_str(dev_instance->device_id));
             result = __FAILURE__;
         }
-        else if (device_set_option(
-            dev_instance->device_handle,
-            DEVICE_OPTION_SAS_TOKEN_LIFETIME_SECS,
-            &dev_instance->transport_instance->option_sas_token_lifetime_secs) != RESULT_OK)
-        {
-            LogError("Failed to apply option DEVICE_OPTION_SAS_TOKEN_LIFETIME_SECS to device '%s' (device_set_option failed)", STRING_c_str(dev_instance->device_id));
-            result = __FAILURE__;
-        }
-        else if (device_set_option(
-            dev_instance->device_handle,
-            DEVICE_OPTION_SAS_TOKEN_REFRESH_TIME_SECS,
-            &dev_instance->transport_instance->option_sas_token_refresh_time_secs) != RESULT_OK)
-        {
-            LogError("Failed to apply option DEVICE_OPTION_SAS_TOKEN_REFRESH_TIME_SECS to device '%s' (device_set_option failed)", STRING_c_str(dev_instance->device_id));
-            result = __FAILURE__;
-        }
         else
         {
             result = RESULT_OK;
@@ -1247,15 +1227,7 @@ static const char* get_device_option_name_from(const char* iothubclient_option_n
 {
     const char* device_option_name;
 
-    if (strcmp(OPTION_SAS_TOKEN_LIFETIME, iothubclient_option_name) == 0)
-    {
-        device_option_name = DEVICE_OPTION_SAS_TOKEN_LIFETIME_SECS;
-    }
-    else if (strcmp(OPTION_SAS_TOKEN_REFRESH_TIME, iothubclient_option_name) == 0)
-    {
-        device_option_name = DEVICE_OPTION_SAS_TOKEN_REFRESH_TIME_SECS;
-    }
-    else if (strcmp(OPTION_CBS_REQUEST_TIMEOUT, iothubclient_option_name) == 0)
+    if (strcmp(OPTION_CBS_REQUEST_TIMEOUT, iothubclient_option_name) == 0)
     {
         device_option_name = DEVICE_OPTION_CBS_REQUEST_TIMEOUT_SECS;
     }
@@ -1455,8 +1427,6 @@ TRANSPORT_LL_HANDLE IoTHubTransport_AMQP_Common_Create(const IOTHUBTRANSPORT_CON
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_010: [`get_io_transport` shall be saved on `instance->underlying_io_transport_provider`]
                 instance->underlying_io_transport_provider = get_io_transport;
                 instance->is_trace_on = false;
-                instance->option_sas_token_lifetime_secs = DEFAULT_SAS_TOKEN_LIFETIME_SECS;
-                instance->option_sas_token_refresh_time_secs = DEFAULT_SAS_TOKEN_REFRESH_TIME_SECS;
                 instance->option_cbs_request_timeout_secs = DEFAULT_CBS_REQUEST_TIMEOUT_SECS;
                 instance->option_send_event_timeout_secs = DEFAULT_EVENT_SEND_TIMEOUT_SECS;
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_12_002: [The connection idle timeout parameter default value shall be set to 240000 milliseconds using connection_set_idle_timeout()]
@@ -1935,18 +1905,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SetOption(TRANSPORT_LL_HANDLE h
         AMQP_TRANSPORT_INSTANCE* transport_instance = (AMQP_TRANSPORT_INSTANCE*)handle;
         bool is_device_specific_option;
 
-        // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_102: [If `option` is a device-specific option, it shall be saved and applied to each registered device using device_set_option()]
-        if (strcmp(OPTION_SAS_TOKEN_LIFETIME, option) == 0)
-        {
-            is_device_specific_option = true;
-            transport_instance->option_sas_token_lifetime_secs = *(size_t*)value;
-        }
-        else if (strcmp(OPTION_SAS_TOKEN_REFRESH_TIME, option) == 0)
-        {
-            is_device_specific_option = true;
-            transport_instance->option_sas_token_refresh_time_secs = *(size_t*)value;
-        }
-        else if (strcmp(OPTION_CBS_REQUEST_TIMEOUT, option) == 0)
+        if (strcmp(OPTION_CBS_REQUEST_TIMEOUT, option) == 0)
         {
             is_device_specific_option = true;
             transport_instance->option_cbs_request_timeout_secs = *(size_t*)value;
