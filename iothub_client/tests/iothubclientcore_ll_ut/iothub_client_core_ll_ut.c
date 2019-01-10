@@ -865,6 +865,9 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Diagnostic_AddIfNecessary, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_Diagnostic_AddIfNecessary, 100);
 
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_DistributedTracing_AddToMessageHeadersIfNecessary, 0);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_DistributedTracing_AddToMessageHeadersIfNecessary, 100);
+
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_Auth_CreateFromDeviceAuth, my_IoTHubClient_Auth_CreateFromDeviceAuth);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_Auth_CreateFromDeviceAuth, NULL);
 
