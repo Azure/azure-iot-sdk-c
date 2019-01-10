@@ -69,8 +69,6 @@ MOCKABLE_FUNCTION(, time_t, get_time, time_t*, currentTime);
 MOCKABLE_FUNCTION(, double, get_difftime, time_t, stopTime, time_t, startTime);
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
-
 
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
@@ -498,7 +496,6 @@ BEGIN_TEST_SUITE(iothubtransport_amqp_cbs_auth_ut)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -523,7 +520,6 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     umock_c_deinit();
 
     TEST_MUTEX_DESTROY(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
@@ -1111,10 +1107,10 @@ TEST_FUNCTION(authentication_do_work_SAS_TOKEN_AUTHENTICATION_STATE_STARTING_fai
         authentication_do_work(handle);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
-        ASSERT_IS_TRUE_WITH_MSG(NULL == saved_cbs_put_token_on_operation_complete, error_msg);
-        ASSERT_ARE_EQUAL_WITH_MSG(int, AUTHENTICATION_STATE_ERROR, saved_on_state_changed_callback_new_state, error_msg);
-        ASSERT_ARE_EQUAL_WITH_MSG(int, AUTHENTICATION_ERROR_AUTH_FAILED, saved_on_error_callback_error_code, error_msg);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
+        ASSERT_IS_TRUE(NULL == saved_cbs_put_token_on_operation_complete, error_msg);
+        ASSERT_ARE_EQUAL(int, AUTHENTICATION_STATE_ERROR, saved_on_state_changed_callback_new_state, error_msg);
+        ASSERT_ARE_EQUAL(int, AUTHENTICATION_ERROR_AUTH_FAILED, saved_on_error_callback_error_code, error_msg);
     }
 
     // cleanup
@@ -1207,8 +1203,8 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_AUTHENTICATION_STATE_STARTING_f
         authentication_do_work(handle);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
-        ASSERT_IS_TRUE_WITH_MSG(NULL == saved_cbs_put_token_on_operation_complete, error_msg);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
+        ASSERT_IS_TRUE(NULL == saved_cbs_put_token_on_operation_complete, error_msg);
         ASSERT_ARE_EQUAL(int, AUTHENTICATION_STATE_ERROR, saved_on_state_changed_callback_new_state);
         ASSERT_ARE_EQUAL(int, AUTHENTICATION_ERROR_AUTH_FAILED, saved_on_error_callback_error_code);
     }
@@ -1270,7 +1266,7 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_sas_token_refresh_check)
 
     time_t current_time = time(NULL);
     time_t next_time = add_seconds(current_time, DEFAULT_SAS_TOKEN_REFRESH_TIME_SECS - 1);
-    ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != next_time, "failed to computer 'next_time'");
+    ASSERT_IS_TRUE(INDEFINITE_TIME != next_time, "failed to computer 'next_time'");
 
     AUTHENTICATION_DO_WORK_EXPECTED_STATE *exp_state = get_do_work_expected_state_struct();
     exp_state->current_state = AUTHENTICATION_STATE_STARTING;
@@ -1313,11 +1309,11 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_sas_token_refresh)
 
     time_t current_time = time(NULL);
     time_t next_time = add_seconds(current_time, 11);
-    ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != next_time, "failed to computer 'next_time'");
+    ASSERT_IS_TRUE(INDEFINITE_TIME != next_time, "failed to computer 'next_time'");
 
     size_t refresh_time_secs = 10;
     int result = authentication_set_option(handle, AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS, &refresh_time_secs);
-    ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "authentication_set_option(AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS) failed!");
+    ASSERT_ARE_EQUAL(int, 0, result, "authentication_set_option(AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS) failed!");
 
     AUTHENTICATION_DO_WORK_EXPECTED_STATE *exp_state = get_do_work_expected_state_struct();
     exp_state->current_state = AUTHENTICATION_STATE_STARTING;
@@ -1329,7 +1325,7 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_sas_token_refresh)
 
     size_t lifetime_secs = 123;
     result = authentication_set_option(handle, AUTHENTICATION_OPTION_SAS_TOKEN_LIFETIME_SECS, &lifetime_secs);
-    ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "authentication_set_option(AUTHENTICATION_OPTION_SAS_TOKEN_LIFETIME_SECS) failed!");
+    ASSERT_ARE_EQUAL(int, 0, result, "authentication_set_option(AUTHENTICATION_OPTION_SAS_TOKEN_LIFETIME_SECS) failed!");
 
     exp_state->current_state = AUTHENTICATION_STATE_STARTED;
     exp_state->current_sas_token_put_time = current_time;
@@ -1361,9 +1357,9 @@ TEST_FUNCTION(authentication_do_work_first_auth_timeout_check)
     AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
 
     time_t current_time = time(NULL);
-    ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != current_time, "current_time = time(NULL) failed");
+    ASSERT_IS_TRUE(INDEFINITE_TIME != current_time, "current_time = time(NULL) failed");
     time_t next_time = add_seconds(current_time, 31536000); // one year has passed...
-    ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != next_time, "failed to computer 'next_time'");
+    ASSERT_IS_TRUE(INDEFINITE_TIME != next_time, "failed to computer 'next_time'");
 
     AUTHENTICATION_DO_WORK_EXPECTED_STATE *exp_state = get_do_work_expected_state_struct();
     exp_state->current_state = AUTHENTICATION_STATE_STARTING;
@@ -1404,9 +1400,9 @@ TEST_FUNCTION(authentication_do_work_first_auth_times_out)
     ASSERT_ARE_EQUAL(int, 0, result);
 
     time_t current_time = time(NULL);
-    ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != current_time, "current_time = time(NULL) failed");
+    ASSERT_IS_TRUE(INDEFINITE_TIME != current_time, "current_time = time(NULL) failed");
     time_t next_time = add_seconds(current_time, 11);
-    ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != next_time, "failed to compute 'next_time'");
+    ASSERT_IS_TRUE(INDEFINITE_TIME != next_time, "failed to compute 'next_time'");
 
     AUTHENTICATION_DO_WORK_EXPECTED_STATE *exp_state = get_do_work_expected_state_struct();
     exp_state->current_state = AUTHENTICATION_STATE_STARTING;
@@ -1673,8 +1669,8 @@ TEST_FUNCTION(authentication_retrieve_options_failure_checks)
         OPTIONHANDLER_HANDLE result = authentication_retrieve_options(handle);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
-        ASSERT_IS_NULL_WITH_MSG(result, error_msg);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
+        ASSERT_IS_NULL(result, error_msg);
     }
 
     // cleanup

@@ -111,8 +111,6 @@ static STRING_HANDLE my_Base64_Encode_Bytes(const unsigned char* source, size_t 
 
 TEST_DEFINE_ENUM_TYPE(BLOB_RESULT, BLOB_RESULT_VALUES);
 
-static TEST_MUTEX_HANDLE g_dllByDll;
-
 #define TEST_HTTPCOLONBACKSLASHBACKSLACH "http://"
 #define TEST_HOSTNAME_1 "host.name"
 #define TEST_RELATIVE_PATH_1 "/here/follows/something?param1=value1&param2=value2"
@@ -240,7 +238,6 @@ BEGIN_TEST_SUITE(blob_ut)
 
 TEST_SUITE_INITIALIZE(TestSuiteInitialize)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     (void)umock_c_init(on_umock_c_error);
 
     (void)umocktypes_charptr_register_types();
@@ -295,8 +292,6 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     BUFFER_delete(testValidBufferHandle);
 
     umock_c_deinit();
-
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 static void reset_test_data()
@@ -1165,14 +1160,14 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
 
             umock_c_negative_tests_fail_call(i);
             char temp_str[128];
-            sprintf(temp_str, "On failed call %zu", i);
-
+            sprintf(temp_str, "On failed call %lu", (unsigned long)i);
+            
             ///act
             context.toUpload = context.size; /* Reinit context */
             BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL);
 
             ///assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(BLOB_RESULT, BLOB_OK, result, temp_str);
+            ASSERT_ARE_NOT_EQUAL(BLOB_RESULT, BLOB_OK, result, temp_str);
         }
     }
 
@@ -1395,14 +1390,14 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_with_certificate_unhappy_
 
             umock_c_negative_tests_fail_call(i);
             char temp_str[128];
-            sprintf(temp_str, "On failed call %zu", i);
+            sprintf(temp_str, "On failed call %lu", (unsigned long)i);
 
             ///act
             context.toUpload = context.size; /* Reinit context */
             BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, "a", NULL);
 
             ///assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(BLOB_RESULT, BLOB_OK, result, temp_str);
+            ASSERT_ARE_NOT_EQUAL(BLOB_RESULT, BLOB_OK, result, temp_str);
         }
     }
 

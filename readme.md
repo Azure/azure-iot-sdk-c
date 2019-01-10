@@ -1,5 +1,7 @@
 # Azure IoT C SDKs and Libraries
 
+[![Build Status](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/c/integrate-into-repo-C)](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_build/latest?definitionId=85)
+
 This repository contains the following:
 * **Azure IoT Hub Device C SDK** to connect devices running C code to Azure IoT Hub.
 * **Azure IoT Hub Device Provisioning Service Client SDK** for enrolling devices with [Azure IoT Device Provisioning Services](https://docs.microsoft.com/azure/iot-dps/) and managing enrollments lists.
@@ -208,9 +210,9 @@ The project offers a Long Term Support (LTS) version to allow users that do not 
 A new LTS version will be created every 6 months. The lifetime of an LTS branch is currently planned for one year. LTS branches receive all bug fixes that fall in one of these categories:
 
 - security bugfixes
-- critical bugfixes (crashes, memory leaks, etc.)
+- critical bugfixes
 
-No new features or improvements will be picked up in an LTS branch.
+No new features will be picked up in an LTS branch.
 
 LTS branches are named lts_*mm*_*yyyy*, where *mm* and *yyyy* are the month and year when the branch was created. An example of such a branch is *lts_07_2017*.
 
@@ -220,8 +222,8 @@ Below is a table showing the mapping of the LTS branches to the packages release
 
 | Package | Github Branch | LTS Status | LTS Start Date | Maintenance End Date | Removed Date |
 | :-----------: | :-----------: | :--------: | :------------: | :------------------: | :----------: |
-| Nuget: 1.1.33<br/> Xenial: 0.1.0.0-35xenial<br/> Trusty: 0.1.0-37trusty<br/>     | lts_01_2018   | Active     | 2018-01-01     | 2018-06-30           | 2018-12-31   |
-| 1.x.x         | lts_07_2017   | Deprecated | 2017-07-01     | 2017-12-31           | 2018-06-30   |
+| Nuget: 1.2.10<br/> Xenial: 0.2.0.0-12xenial<br/> Trusty: 0.2.0-12trusty<br/> Bionic: 0.2.0.0-5bionic<br/>    | lts_10_2018   | Active     | 2018-10-03     | 2019-10-03           | 2019-10-03   |
+| Nuget: 1.1.33<br/> Xenial: 0.1.0.0-35xenial<br/> Trusty: 0.1.0-37trusty<br/>     | lts_01_2018   | Active     | 2018-01-01     | 2018-12-31           | 2018-04-31   |
 
 
 * <sup>1</sup> All scheduled dates are subject to change by the Azure IoT SDK team.
@@ -239,5 +241,5 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 [c-sdk-intro]: https://azure.microsoft.com/documentation/articles/iot-hub-device-sdk-c-intro/
 [c-porting-guide]: https://github.com/Azure/azure-c-shared-utility/blob/master/devdoc/porting_guide.md
 [c-cross-compile]: doc/SDK_cross_compile_example.md
-[c-api-reference]: https://azure.github.io/azure-iot-sdk-c/index.html
+[c-api-reference]: https://docs.microsoft.com/azure/iot-hub/iot-c-sdk-ref/
 [azure-iot-sdks]:https://github.com/azure/azure-iot-sdks

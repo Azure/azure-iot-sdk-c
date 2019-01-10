@@ -14,5 +14,5 @@ function(add_sample_directory whatIsBuilding)
 endfunction()
 
 if(${use_mqtt})
-    add_sample_directory(remote_monitoring)
+    add_sample_directory(remote_monitoring_client)
 endif()

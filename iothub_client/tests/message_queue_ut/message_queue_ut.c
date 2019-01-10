@@ -48,7 +48,6 @@ void real_free(void* ptr)
 #include "internal/message_queue.h"
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
@@ -317,7 +316,7 @@ static void add_messages(MESSAGE_QUEUE_HANDLE mq, size_t number_of_messages, tim
         umock_c_reset_all_calls();
         set_message_queue_add_expected_calls(current_time);
         int result = message_queue_add(mq, TEST_BASE_MQ_MESSAGE_HANDLE[i], TEST_on_message_processing_completed_callback, TEST_USER_CONTEXT);
-        ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "failed adding message to queue");
+        ASSERT_ARE_EQUAL(int, 0, result, "failed adding message to queue");
     }
 }
 
@@ -577,7 +576,6 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
     size_t i;
 
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -597,7 +595,7 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     for (i = 0; i < 10; i++)
     {
         TEST_BASE_MQ_MESSAGE_HANDLE[i] = (MQ_MESSAGE_HANDLE)real_malloc(sizeof(char));
-        ASSERT_IS_NOT_NULL_WITH_MSG(TEST_BASE_MQ_MESSAGE_HANDLE[i], "Failed setting up TEST_BASE_MQ_MESSAGE_HANDLE");
+        ASSERT_IS_NOT_NULL(TEST_BASE_MQ_MESSAGE_HANDLE[i], "Failed setting up TEST_BASE_MQ_MESSAGE_HANDLE");
     }
 }
 
@@ -608,8 +606,7 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     umock_c_deinit();
 
     TEST_MUTEX_DESTROY(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
-
+    
     for (i = 0; i < 10; i++)
     {
         real_free(TEST_BASE_MQ_MESSAGE_HANDLE[i]);
@@ -689,7 +686,7 @@ TEST_FUNCTION(create_failure_checks)
     {
         // arrange
         char error_msg[64];
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
@@ -700,7 +697,7 @@ TEST_FUNCTION(create_failure_checks)
         MESSAGE_QUEUE_HANDLE mq = message_queue_create(config);
 
         // assert
-        ASSERT_IS_NULL_WITH_MSG(mq, error_msg);
+        ASSERT_IS_NULL(mq, error_msg);
     }
 
     // cleanup
@@ -888,7 +885,7 @@ TEST_FUNCTION(add_failure_checks)
     {
         // arrange
         char error_msg[64];
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
@@ -897,7 +894,7 @@ TEST_FUNCTION(add_failure_checks)
         int result = message_queue_add(mq, TEST_BASE_MQ_MESSAGE_HANDLE[0], TEST_on_message_processing_completed_callback, TEST_USER_CONTEXT);
 
         // assert
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, error_msg);
+        ASSERT_ARE_NOT_EQUAL(int, 0, result, error_msg);
     }
 
     // cleanup
@@ -1105,7 +1102,7 @@ TEST_FUNCTION(do_work_NO_EXPIRATION_failure_checks)
         TEST_on_message_processing_completed_callback_result = MESSAGE_QUEUE_TIMEOUT;
 
         char error_msg[64];
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
 
         if (i >= 3 && i != 4)
         {
@@ -1127,13 +1124,13 @@ TEST_FUNCTION(do_work_NO_EXPIRATION_failure_checks)
         // assert
         if (i == 1 || i == 2)
         {
-            ASSERT_IS_NULL_WITH_MSG(TEST_on_process_message_callback_message, error_msg);
-            ASSERT_IS_NULL_WITH_MSG(TEST_on_message_processing_completed_callback_message, error_msg);
+            ASSERT_IS_NULL(TEST_on_process_message_callback_message, error_msg);
+            ASSERT_IS_NULL(TEST_on_message_processing_completed_callback_message, error_msg);
         }
         else if (i >= 3)
         {
-            ASSERT_IS_NOT_NULL_WITH_MSG(TEST_on_message_processing_completed_callback_message, error_msg);
-            ASSERT_ARE_EQUAL_WITH_MSG(int, (int)MESSAGE_QUEUE_ERROR, (int)TEST_on_message_processing_completed_callback_result, error_msg);
+            ASSERT_IS_NOT_NULL(TEST_on_message_processing_completed_callback_message, error_msg);
+            ASSERT_ARE_EQUAL(int, (int)MESSAGE_QUEUE_ERROR, (int)TEST_on_message_processing_completed_callback_result, error_msg);
         }
 
         umock_c_reset_all_calls();
@@ -1310,7 +1307,7 @@ TEST_FUNCTION(message_queue_retrieve_options_failure_checks)
     {
         // arrange
         char error_msg[64];
-        sprintf(error_msg, "On failed call %zu", i);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
@@ -1319,7 +1316,7 @@ TEST_FUNCTION(message_queue_retrieve_options_failure_checks)
         OPTIONHANDLER_HANDLE result = message_queue_retrieve_options(mq);
 
         // assert
-        ASSERT_IS_NULL_WITH_MSG(result, error_msg);
+        ASSERT_IS_NULL(result, error_msg);
     }
 
 

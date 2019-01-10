@@ -20,11 +20,10 @@
 #include "internal/iothub_client_private.h"
 #include "iothub_client_options.h"
 #include "iothub_client_version.h"
-#include "iothub_client_diagnostic.h"
 #include <stdint.h>
 
 #ifndef DONT_USE_UPLOADTOBLOB
-#include "iothub_client_ll_uploadtoblob.h"
+#include "internal/iothub_client_ll_uploadtoblob.h"
 #endif
 
 #ifdef USE_EDGE_MODULES
@@ -223,6 +222,21 @@ IOTHUB_CLIENT_RESULT IoTHubModuleClient_LL_SendReportedState(IOTHUB_MODULE_CLIEN
     if (iotHubModuleClientHandle != NULL)
     {
         result = IoTHubClientCore_LL_SendReportedState(iotHubModuleClientHandle->coreHandle, reportedState, size, reportedStateCallback, userContextCallback);
+    }
+    else
+    {
+        LogError("Input parameter cannot be NULL");
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    return result;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubModuleClient_LL_GetTwinAsync(IOTHUB_MODULE_CLIENT_LL_HANDLE iotHubModuleClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK moduleTwinCallback, void* userContextCallback)
+{
+    IOTHUB_CLIENT_RESULT result;
+    if (iotHubModuleClientHandle != NULL)
+    {
+        result = IoTHubClientCore_LL_GetTwinAsync(iotHubModuleClientHandle->coreHandle, moduleTwinCallback, userContextCallback);
     }
     else
     {

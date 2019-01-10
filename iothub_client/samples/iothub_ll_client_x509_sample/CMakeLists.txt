@@ -25,9 +25,6 @@ include_directories(.)
 
 add_executable(iothub_ll_client_x509_sample ${iothub_ll_client_x509_sample_c_files})
 
-target_link_libraries(iothub_ll_client_x509_sample iothub_client)
-linkSharedUtil(iothub_ll_client_x509_sample)
-
 if(${use_http})
     target_link_libraries(iothub_ll_client_x509_sample
         iothub_client_http_transport
@@ -49,3 +46,8 @@ if(${use_mqtt})
     linkMqttLibrary(iothub_ll_client_x509_sample)
     add_definitions(-DUSE_MQTT)
 endif()
+
+target_link_libraries(iothub_ll_client_x509_sample iothub_client)
+linkSharedUtil(iothub_ll_client_x509_sample)
+
+

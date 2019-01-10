@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
+#include <inttypes.h>
 #include "azure_c_shared_utility/umock_c_prod.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/sastoken.h"
@@ -405,7 +406,7 @@ static BUFFER_HANDLE decrypt_data(HSM_CLIENT_INFO* sec_info, const unsigned char
 
         if (enc_data_size > max_tpm_data_size)
         {
-            LogError("Failure: The encrypted data len (%zu) is too long for tpm", enc_data_size);
+            LogError("Failure: The encrypted data len (%" PRIu16 ") is too long for tpm", enc_data_size);
             result = NULL;
         }
         else
@@ -576,7 +577,7 @@ int hsm_client_tpm_get_endorsement_key(HSM_CLIENT_HANDLE handle, unsigned char**
             uint32_t data_length = TPM2B_PUBLIC_Marshal(&hsm_client_info->ek_pub, &data_pos, NULL);
             if (data_length > TPM_DATA_LENGTH)
             {
-                LogError("EK data length larger than allocated buffer %zu", data_length);
+                LogError("EK data length larger than allocated buffer %" PRIu32, data_length);
                 result = __FAILURE__;
             }
             else if ((*key = (unsigned char*)malloc(data_length)) == NULL)
@@ -622,7 +623,7 @@ int hsm_client_tpm_get_storage_key(HSM_CLIENT_HANDLE handle, unsigned char** key
             uint32_t data_length = TPM2B_PUBLIC_Marshal(&hsm_client_info->srk_pub, &data_pos, NULL);
             if (data_length > TPM_DATA_LENGTH)
             {
-                LogError("SRK data length larger than allocated buffer %zu", data_length);
+                LogError("SRK data length larger than allocated buffer %" PRIu32, data_length);
                 result = __FAILURE__;
             }
             else if ((*key = (unsigned char*)malloc(data_length)) == NULL)

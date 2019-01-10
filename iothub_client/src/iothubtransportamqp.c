@@ -49,10 +49,10 @@ static XIO_HANDLE getTLSIOTransport(const char* fqdn, const AMQP_TRANSPORT_PROXY
 }
 
 // API functions
-static TRANSPORT_LL_HANDLE IoTHubTransportAMQP_Create(const IOTHUBTRANSPORT_CONFIG* config)
+static TRANSPORT_LL_HANDLE IoTHubTransportAMQP_Create(const IOTHUBTRANSPORT_CONFIG* config, TRANSPORT_CALLBACKS_INFO* cb_info, void* ctx)
 {
     // Codes_SRS_IOTHUBTRANSPORTAMQP_09_001: [IoTHubTransportAMQP_Create shall create a TRANSPORT_LL_HANDLE by calling into the IoTHubTransport_AMQP_Common_Create function, passing `config` and getTLSIOTransport.]
-    return IoTHubTransport_AMQP_Common_Create(config, getTLSIOTransport);
+    return IoTHubTransport_AMQP_Common_Create(config, getTLSIOTransport, cb_info, ctx);
 }
 
 static IOTHUB_PROCESS_ITEM_RESULT IoTHubTransportAMQP_ProcessItem(TRANSPORT_LL_HANDLE handle, IOTHUB_IDENTITY_TYPE item_type, IOTHUB_IDENTITY_INFO* iothub_item)
@@ -61,10 +61,10 @@ static IOTHUB_PROCESS_ITEM_RESULT IoTHubTransportAMQP_ProcessItem(TRANSPORT_LL_H
     return IoTHubTransport_AMQP_Common_ProcessItem(handle, item_type, iothub_item);
 }
 
-static void IoTHubTransportAMQP_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle)
+static void IoTHubTransportAMQP_DoWork(TRANSPORT_LL_HANDLE handle)
 {
     // Codes_SRS_IOTHUBTRANSPORTAMQP_09_015: [IoTHubTransportAMQP_DoWork shall call into the IoTHubTransport_AMQP_Common_DoWork()]
-    IoTHubTransport_AMQP_Common_DoWork(handle, iotHubClientHandle);
+    IoTHubTransport_AMQP_Common_DoWork(handle);
 }
 
 static int IoTHubTransportAMQP_Subscribe(IOTHUB_DEVICE_HANDLE handle)
@@ -89,6 +89,12 @@ static void IoTHubTransportAMQP_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE hand
 {
     // Codes_SRS_IOTHUBTRANSPORTAMQP_09_009: [IoTHubTransportAMQP_Unsubscribe_DeviceTwin shall invoke IoTHubTransport_AMQP_Common_Unsubscribe_DeviceTwin()]
     IoTHubTransport_AMQP_Common_Unsubscribe_DeviceTwin(handle);
+}
+
+static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_GetTwinAsync(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK completionCallback, void* callbackContext)
+{
+    // Codes_SRS_IOTHUBTRANSPORTAMQP_09_021: [IoTHubTransportAMQP_GetTwinAsync shall invoke IoTHubTransport_AMQP_Common_GetTwinAsync()]
+    return IoTHubTransport_AMQP_Common_GetTwinAsync(handle, completionCallback, callbackContext);
 }
 
 static int IoTHubTransportAMQP_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
@@ -120,10 +126,10 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_SetOption(TRANSPORT_LL_HANDLE ha
     return IoTHubTransport_AMQP_Common_SetOption(handle, option, value);
 }
 
-static IOTHUB_DEVICE_HANDLE IoTHubTransportAMQP_Register(TRANSPORT_LL_HANDLE handle, const IOTHUB_DEVICE_CONFIG* device, IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, PDLIST_ENTRY waitingToSend)
+static IOTHUB_DEVICE_HANDLE IoTHubTransportAMQP_Register(TRANSPORT_LL_HANDLE handle, const IOTHUB_DEVICE_CONFIG* device, PDLIST_ENTRY waitingToSend)
 {
     // Codes_SRS_IOTHUBTRANSPORTAMQP_09_006: [IoTHubTransportAMQP_Register shall register the device by calling into the IoTHubTransport_AMQP_Common_Register().]
-    return IoTHubTransport_AMQP_Common_Register(handle, device, iotHubClientHandle, waitingToSend);
+    return IoTHubTransport_AMQP_Common_Register(handle, device, waitingToSend);
 }
 
 static void IoTHubTransportAMQP_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle)
@@ -171,6 +177,11 @@ static void IotHubTransportAMQP_Unsubscribe_InputQueue(IOTHUB_DEVICE_HANDLE hand
     LogError("AMQP does not support input queues");
 }
 
+static int IoTHubTransportAMQP_SetCallbackContext(TRANSPORT_LL_HANDLE handle, void* ctx)
+{
+    return IoTHubTransport_AMQP_SetCallbackContext(handle, ctx);
+}
+
 static TRANSPORT_PROVIDER thisTransportProvider =
 {
     IoTHubTransportAMQP_SendMessageDisposition,     /*pfIotHubTransport_Send_Message_Disposition IoTHubTransport_Send_Message_Disposition;*/
@@ -193,6 +204,8 @@ static TRANSPORT_PROVIDER thisTransportProvider =
     IoTHubTransportAMQP_GetSendStatus,              /*pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus;*/
     IotHubTransportAMQP_Subscribe_InputQueue,       /*pfIoTHubTransport_Subscribe_InputQueue IoTHubTransport_Subscribe_InputQueue; */
     IotHubTransportAMQP_Unsubscribe_InputQueue,     /*pfIoTHubTransport_Unsubscribe_InputQueue IoTHubTransport_Unsubscribe_InputQueue; */
+    IoTHubTransportAMQP_SetCallbackContext,         /*pfIoTHubTransport_SetTransportCallbacks IoTHubTransport_SetTransportCallbacks; */
+    IoTHubTransportAMQP_GetTwinAsync                /*pfIoTHubTransport_GetTwinAsync IoTHubTransport_GetTwinAsync;*/
 };
 
 /* Codes_SRS_IOTHUBTRANSPORTAMQP_09_019: [This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for it's fields:

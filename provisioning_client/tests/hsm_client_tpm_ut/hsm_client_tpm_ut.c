@@ -126,7 +126,6 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 }
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 BEGIN_TEST_SUITE(hsm_client_tpm_ut)
 
@@ -134,7 +133,6 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
     {
         int result;
 
-        TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
         g_testByTest = TEST_MUTEX_CREATE();
         ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -237,7 +235,6 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         umock_c_deinit();
 
         TEST_MUTEX_DESTROY(g_testByTest);
-        TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
     }
 
     TEST_FUNCTION_INITIALIZE(method_init)
@@ -396,7 +393,7 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
             HSM_CLIENT_HANDLE sec_handle = hsm_client_tpm_create();
 
             //assert
-            ASSERT_IS_NULL_WITH_MSG(sec_handle, tmp_msg);
+            ASSERT_IS_NULL(sec_handle, tmp_msg);
         }
 
         //cleanup
@@ -505,7 +502,7 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
             int import_res = hsm_client_tpm_import_key(sec_handle, TEST_IMPORT_KEY, TEST_KEY_SIZE);
 
             //assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, import_res, tmp_msg);
+            ASSERT_ARE_NOT_EQUAL(int, 0, import_res, tmp_msg);
         }
         //cleanup
         hsm_client_tpm_destroy(sec_handle);
@@ -602,7 +599,7 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
             int result = hsm_client_tpm_get_endorsement_key(sec_handle, &key, &key_len);
 
             //assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, tmp_msg);
+            ASSERT_ARE_NOT_EQUAL(int, 0, result, tmp_msg);
         }
         //cleanup
         hsm_client_tpm_destroy(sec_handle);
@@ -702,7 +699,7 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
             int result = hsm_client_tpm_get_storage_key(sec_handle, &key, &key_len);
 
             //assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, tmp_msg);
+            ASSERT_ARE_NOT_EQUAL(int, 0, result, tmp_msg);
         }
 
         //cleanup
@@ -862,7 +859,7 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
             int result = hsm_client_tpm_sign_data(NULL, TEST_BUFFER, TEST_BUFFER_SIZE, &key, &key_len);
 
             //assert
-            ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, tmp_msg);
+            ASSERT_ARE_NOT_EQUAL(int, 0, result, tmp_msg);
         }
 
         //cleanup

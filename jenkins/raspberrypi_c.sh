@@ -5,7 +5,7 @@
 
 # Tested on RPi2 debian verion 7.8
 
-install_root="$HOME" 
+install_root="/home/jenkins" 
 build_root=$(cd "$(dirname "$0")/.." && pwd) 
 cd $build_root
 

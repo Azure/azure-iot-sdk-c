@@ -41,7 +41,8 @@ static void real_free(void* ptr)
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/uniqueid.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
-#include "iothub_client_authorization.h"
+#include "azure_c_shared_utility/envvariable.h"
+#include "internal/iothub_client_authorization.h"
 #include "parson.h"
 
 MOCKABLE_FUNCTION(, JSON_Value*, json_parse_string, const char*, string);
@@ -69,7 +70,7 @@ MOCKABLE_FUNCTION(, JSON_Array*, json_object_get_array, const JSON_Object*, obje
 
 #undef ENABLE_MOCKS
 
-#include "iothub_client_edge.h"
+#include "internal/iothub_client_edge.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -124,7 +125,6 @@ static unsigned int DUMMY_UINT = 47;
 
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static int my_mallocAndStrcpy_s(char** destination, const char* source)
@@ -230,9 +230,10 @@ static char* my_IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handl
     return (char*)real_malloc(1);
 }
 
-static char* my_IoTHubClient_Auth_Get_TrustBundle(IOTHUB_AUTHORIZATION_HANDLE handle)
+static char* my_IoTHubClient_Auth_Get_TrustBundle(IOTHUB_AUTHORIZATION_HANDLE handle, const char* certificate_file_name)
 {
     (void)handle;
+    (void)certificate_file_name;
     return (char*)real_malloc(1);
 }
 
@@ -281,6 +282,7 @@ static void createMethodPayloadExpectedCalls()
 
 static void sendHttpRequestMethodExpectedCalls()
 {
+    STRICT_EXPECTED_CALL(environment_get_variable(IGNORED_PTR_ARG)).CallCannotFail();
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
@@ -302,7 +304,7 @@ static void sendHttpRequestMethodExpectedCalls()
 
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(HTTPAPIEX_Create(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_TrustBundle(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_TrustBundle(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(HTTPAPIEX_SetOption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(HTTPAPIEX_ExecuteRequest(IGNORED_PTR_ARG, HTTPAPI_REQUEST_POST, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));    //cannot fail
@@ -314,7 +316,7 @@ static void sendHttpRequestMethodExpectedCalls()
 static void parseResponseJsonExpectedCalls()
 {
     STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));       //cannot fail (returns length 0)
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG)).CallCannotFail();       //cannot fail (returns length 0)
     STRICT_EXPECTED_CALL(STRING_from_byte_array(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG));
@@ -322,7 +324,7 @@ static void parseResponseJsonExpectedCalls()
     STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_value_get_number(IGNORED_PTR_ARG));   //cannot fail (returns -1, which isn't strictly failure)
+    STRICT_EXPECTED_CALL(json_value_get_number(IGNORED_PTR_ARG)).CallCannotFail();   //cannot fail (returns -1, which isn't strictly failure)
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));           //cannot fail
     STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG));         //cannot fail
 }
@@ -332,8 +334,6 @@ BEGIN_TEST_SUITE(iothubclient_edge_ut)
 TEST_SUITE_INITIALIZE(suite_init)
 {
     int result;
-
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
 
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
@@ -411,6 +411,9 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, my_mallocAndStrcpy_s);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, 1);
 
+    REGISTER_GLOBAL_MOCK_RETURN(environment_get_variable, "test_env_variable");
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(environment_get_variable, NULL);
+
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_Auth_Get_SasToken, my_IoTHubClient_Auth_Get_SasToken);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_Auth_Get_SasToken, NULL);
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_Auth_Get_TrustBundle, my_IoTHubClient_Auth_Get_TrustBundle);
@@ -432,7 +435,6 @@ TEST_SUITE_CLEANUP(suite_cleanup)
 {
     umock_c_deinit();
     TEST_MUTEX_DESTROY(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION(IoTHubClient_EdgeHandle_Create_FAIL_null_config)
@@ -536,7 +538,7 @@ TEST_FUNCTION(IoTHubClient_EdgeHandle_Create_FAIL)
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "IoTHubClient_EdgeHandle_Create_FAIL failure in test %zu/%zu", test_num, test_max);
+        sprintf(tmp_msg, "IoTHubClient_EdgeHandle_Create_FAIL failure in test %lu/%lu", (unsigned long)test_num, (unsigned long)test_max);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -545,7 +547,7 @@ TEST_FUNCTION(IoTHubClient_EdgeHandle_Create_FAIL)
         IOTHUB_CLIENT_EDGE_HANDLE handle = IoTHubClient_EdgeHandle_Create(&config, TEST_AUTHORIZATION_HANDLE, TEST_MODULE_ID);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(handle, tmp_msg);
+        ASSERT_IS_NULL(handle, tmp_msg);
     }
 
     umock_c_negative_tests_deinit();
@@ -771,34 +773,26 @@ TEST_FUNCTION(IoTHubClient_Edge_DeviceMethodInvoke_FAIL)
     STRICT_EXPECTED_CALL(BUFFER_new());
     sendHttpRequestMethodExpectedCalls();
     parseResponseJsonExpectedCalls();
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));   //cannot fail
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));   //cannot fail
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
 
     umock_c_negative_tests_snapshot();
 
-    size_t calls_cannot_fail[] = { 2, 12, 18, 19, 20, 26, 27, 28, 29, 31, 39, 40, 41, 42, 43 };
-    size_t num_cannot_fail = sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0]);
     size_t count = umock_c_negative_tests_call_count();
-    size_t test_num = 0;
-    size_t test_max = count - num_cannot_fail;
 
     for (size_t index = 0; index < count; index++)
     {
-        if (should_skip_index(index, calls_cannot_fail, num_cannot_fail) != 0)
-            continue;
-        test_num++;
+        if (umock_c_negative_tests_can_call_fail(index))
+        {
+            umock_c_negative_tests_reset();
+            umock_c_negative_tests_fail_call(index);
 
-        char tmp_msg[128];
-        sprintf(tmp_msg, "IoTHubClient_EdgeHandle_Create_FAIL failure in test %zu/%zu", test_num, test_max);
+            //act
+            IOTHUB_CLIENT_RESULT result = IoTHubClient_Edge_DeviceMethodInvoke(handle, TEST_DEVICE_ID2, TEST_METHOD_NAME, TEST_METHOD_PAYLOAD, TEST_TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
 
-        umock_c_negative_tests_reset();
-        umock_c_negative_tests_fail_call(index);
-
-        //act
-        IOTHUB_CLIENT_RESULT result = IoTHubClient_Edge_DeviceMethodInvoke(handle, TEST_DEVICE_ID2, TEST_METHOD_NAME, TEST_METHOD_PAYLOAD, TEST_TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
-
-        //assert
-        ASSERT_IS_TRUE_WITH_MSG(result == IOTHUB_CLIENT_ERROR, tmp_msg);
+            //assert
+            ASSERT_IS_TRUE(result == IOTHUB_CLIENT_ERROR, "IoTHubClient_EdgeHandle_Create_FAIL failure in test %lu", (unsigned long)index);
+        }
     }
 
     //cleanup
@@ -1019,29 +1013,21 @@ TEST_FUNCTION(IoTHubClient_Edge_ModuleMethodInvoke_FAIL)
 
     umock_c_negative_tests_snapshot();
 
-    size_t calls_cannot_fail[] = { 2, 12, 18, 19, 20, 26, 27, 28, 29, 31, 39, 40, 41, 42, 43 };
-    size_t num_cannot_fail = sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0]);
     size_t count = umock_c_negative_tests_call_count();
-    size_t test_num = 0;
-    size_t test_max = count - num_cannot_fail;
 
     for (size_t index = 0; index < count; index++)
     {
-        if (should_skip_index(index, calls_cannot_fail, num_cannot_fail) != 0)
-            continue;
-        test_num++;
+        if (umock_c_negative_tests_can_call_fail(index))
+        {
+            umock_c_negative_tests_reset();
+            umock_c_negative_tests_fail_call(index);
 
-        char tmp_msg[128];
-        sprintf(tmp_msg, "IoTHubClient_EdgeHandle_Create_FAIL failure in test %zu/%zu", test_num, test_max);
+            //act
+            IOTHUB_CLIENT_RESULT result = IoTHubClient_Edge_ModuleMethodInvoke(handle, TEST_DEVICE_ID2, TEST_MODULE_ID2, TEST_METHOD_NAME, TEST_METHOD_PAYLOAD, TEST_TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
 
-        umock_c_negative_tests_reset();
-        umock_c_negative_tests_fail_call(index);
-
-        //act
-        IOTHUB_CLIENT_RESULT result = IoTHubClient_Edge_ModuleMethodInvoke(handle, TEST_DEVICE_ID2, TEST_MODULE_ID2, TEST_METHOD_NAME, TEST_METHOD_PAYLOAD, TEST_TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
-
-        //assert
-        ASSERT_IS_TRUE_WITH_MSG(result == IOTHUB_CLIENT_ERROR, tmp_msg);
+            //assert
+            ASSERT_IS_TRUE(result == IOTHUB_CLIENT_ERROR, "IoTHubClient_Edge_ModuleMethodInvoke_FAIL failure in test %lu", (unsigned long)index);
+        }
     }
 
     //cleanup

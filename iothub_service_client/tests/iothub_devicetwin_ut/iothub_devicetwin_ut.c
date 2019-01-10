@@ -72,7 +72,6 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(HTTPAPI_REQUEST_TYPE, HTTPAPI_REQUEST_TYPE_VALUES);
 static unsigned char* TEST_UNSIGNED_CHAR_PTR = (unsigned char*)"TestString";
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
@@ -217,7 +216,6 @@ BEGIN_TEST_SUITE(iothub_devicetwin_ut)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -289,7 +287,6 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
 {
     umock_c_deinit();
     TEST_MUTEX_DESTROY(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
@@ -710,13 +707,13 @@ TEST_FUNCTION(IoTHubDeviceTwin_GetTwin_non_happy_path)
             )
         {
             char message_on_error[64];
-            sprintf(message_on_error, "Got unexpected non-NULL ptr on run %zu", i);
-
+            sprintf(message_on_error, "Got unexpected non-NULL ptr on run %lu", (unsigned long)i);
+        
             const char* deviceId = " ";
             char* result = IoTHubDeviceTwin_GetTwin(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE, deviceId);
 
             /// assert
-            ASSERT_IS_NULL_WITH_MSG(result, message_on_error);
+            ASSERT_IS_NULL(result, message_on_error);
         }
 
         ///cleanup
@@ -958,14 +955,14 @@ TEST_FUNCTION(IoTHubDeviceTwin_UpdateTwin_non_happy_path)
             )
         {
             char message_on_error[64];
-            sprintf(message_on_error, "Got unexpected non-NULL ptr on run %zu", i);
+            sprintf(message_on_error, "Got unexpected non-NULL ptr on run %lu", (unsigned long)i);
 
             const char* deviceId = " ";
             const char* deviceTwinJson = " ";
             char* result = IoTHubDeviceTwin_UpdateTwin(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE, deviceId, deviceTwinJson);
 
             /// assert
-            ASSERT_IS_NULL_WITH_MSG(result, message_on_error);
+            ASSERT_IS_NULL(result, message_on_error);
         }
 
         ///cleanup

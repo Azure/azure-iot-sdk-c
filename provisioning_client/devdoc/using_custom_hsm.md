@@ -16,7 +16,7 @@ Outlined below are the steps to customize a device HSM for the IoThub SDK Client
 
 - To expediate the development process there is a custom_hsm_example.c file that gives an example of the interface that will need to be implemented for the custom HSM.
 
-- The following is the list of functions that need to be implemented for either x509 or TPM custom HSMs.
+- The following is the list of functions that need to be implemented for either x509, TPM or Symmetric Key custom HSMs.
 
 ### hsm_client_x509_init
 
@@ -141,6 +141,20 @@ int hsm_client_sign_with_identity(HSM_CLIENT_HANDLE handle, const unsigned char*
 ```
 
 - Hashes the parameter `data` with the key previously stored in the TPM and returns  the value in `signed_value`.
+
+#### HSM Symmetric Key API
+
+```c
+char* hsm_client_get_symmetric_key(HSM_CLIENT_HANDLE handle);
+```
+
+- Returns the symmetric key to be used for authentication
+
+```c
+char* hsm_client_get_registration_name(HSM_CLIENT_HANDLE handle);
+```
+
+- Returns the registration name to be used for authentication
 
 ## Provisioning Device client
 

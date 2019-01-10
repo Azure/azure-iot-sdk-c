@@ -9,6 +9,7 @@ This folder contains simple samples showing how to use the various features of t
 
 * Simple send and receive messages:
   * **iothub_ll_telemetry_sample**: sends messages from a single device
+  * **iotedge_downstream_device_sample**: sends messages from a single device to an IoT Edge device
 
 * Multiplexing send and receive of several devices over a single connection (useful in Gateway scenarios where multiplexing might be needed):
   * **iothub_client_sample_amqp_shared**: send and receive messages from 2 devices over a single AMQP connection

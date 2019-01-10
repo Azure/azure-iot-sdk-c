@@ -83,7 +83,6 @@ void my_gballoc_free(void * t)
 #include "schema.h"
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 
 TEST_DEFINE_ENUM_TYPE(SCHEMA_RESULT, SCHEMA_RESULT_VALUES);
@@ -134,7 +133,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
-        TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
         g_testByTest = TEST_MUTEX_CREATE();
         ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -178,8 +176,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         umock_c_deinit();
 
         TEST_MUTEX_DESTROY(g_testByTest);
-        TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
-
     }
 
     TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
@@ -544,13 +540,13 @@ BEGIN_TEST_SUITE(Schema_ut)
 
             umock_c_negative_tests_fail_call(i);
             char temp_str[128];
-            sprintf(temp_str, "On failed call %zu", i);
+            sprintf(temp_str, "On failed call %lu", (unsigned long)i);
 
             ///act
             SCHEMA_MODEL_TYPE_HANDLE result = Schema_CreateModelType(schemaHandle, MODEL_NAME);
 
             ///assert
-            ASSERT_IS_NULL_WITH_MSG(result, temp_str);
+            ASSERT_IS_NULL(result, temp_str);
 
         }
 
@@ -4183,13 +4179,13 @@ BEGIN_TEST_SUITE(Schema_ut)
 
                 umock_c_negative_tests_fail_call(i);
                 char temp_str[128];
-                sprintf(temp_str, "On failed call %zu", i);
+                sprintf(temp_str, "On failed call %lu", (unsigned long)i);
 
                 ///act
                 SCHEMA_RESULT result = Schema_AddModelReportedProperty(modelType, reportedPropertyName, reportedPropertyType);
 
                 ///assert
-                ASSERT_ARE_EQUAL_WITH_MSG(SCHEMA_RESULT, SCHEMA_ERROR, result, temp_str);
+                ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_ERROR, result, temp_str);
             }
         }
 
@@ -4768,13 +4764,13 @@ BEGIN_TEST_SUITE(Schema_ut)
 
                 umock_c_negative_tests_fail_call(i);
                 char temp_str[128];
-                sprintf(temp_str, "On failed call %zu", i);
+                sprintf(temp_str, "On failed call %lu", (unsigned long)i);
 
                 ///act
                 SCHEMA_RESULT result = Schema_AddModelDesiredProperty(modelType, desiredPropertyName, desiredPropertyType, g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
 
                 ///assert
-                ASSERT_ARE_EQUAL_WITH_MSG(SCHEMA_RESULT, SCHEMA_ERROR, result, temp_str);
+                ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_ERROR, result, temp_str);
             }
         }
 

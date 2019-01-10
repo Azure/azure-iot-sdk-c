@@ -1,7 +1,7 @@
 #Copyright (c) Microsoft. All rights reserved.
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-compileAsC99()
+cmake_minimum_required(VERSION 2.8.11)
 
 #Use solution folders.
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -24,3 +24,13 @@ ELSE()
 ENDIF(WIN32)
 
 add_library(custom_hsm_example ${source_files})
+
+# Ensure this is built with c99
+if (CMAKE_VERSION VERSION_LESS "3.1")
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+        set_target_properties(custom_hsm_example PROPERTIES COMPILE_FLAGS "--std=c99")
+    endif()
+else()
+    set_target_properties(custom_hsm_example PROPERTIES C_STANDARD 99)
+    set_target_properties(custom_hsm_example PROPERTIES CXX_STANDARD 11)
+endif()

@@ -31,12 +31,12 @@ target_link_libraries(iothub_ll_telemetry_sample
     iothub_client_amqp_transport
     iothub_client_http_transport
     iothub_client
-    parson
-    aziotsharedutil
     umqtt
     prov_auth_client
     hsm_security_client
     uhttp
+    aziotsharedutil
+    parson
     uuid
     pthread
     curl

@@ -63,7 +63,6 @@ MOCKABLE_FUNCTION(, JSON_Array*, json_object_get_array, const JSON_Object*, obje
 #include "prov_service_client/provisioning_sc_models_serializer.h"
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
@@ -174,7 +173,6 @@ BEGIN_TEST_SUITE(provisioning_sc_enrollment_ut)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -188,7 +186,6 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     umock_c_deinit();
 
     TEST_MUTEX_DESTROY(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
@@ -431,7 +428,7 @@ TEST_FUNCTION(individualEnrollment_create_error)
         INDIVIDUAL_ENROLLMENT_HANDLE ie = individualEnrollment_create(DUMMY_REGISTRATION_ID, TEST_ATTESTATION_MECHANISM);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(ie, tmp_msg);
+        ASSERT_IS_NULL(ie, tmp_msg);
     }
 }
 
@@ -612,7 +609,7 @@ TEST_FUNCTION(enrollmentGroup_create_error)
         ENROLLMENT_GROUP_HANDLE eg = enrollmentGroup_create(DUMMY_GROUP_ID, TEST_ATTESTATION_MECHANISM);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(eg, tmp_msg);
+        ASSERT_IS_NULL(eg, tmp_msg);
     }
 }
 
@@ -2268,7 +2265,7 @@ TEST_FUNCTION(individualEnrollment_serializeToJson_min_error)
         char* json = individualEnrollment_serializeToJson(ie);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(json, tmp_msg);
+        ASSERT_IS_NULL(json, tmp_msg);
     }
 
     //cleanup
@@ -2362,7 +2359,7 @@ TEST_FUNCTION(individualEnrollment_deserializeToJson_max_error)
         char* json = individualEnrollment_serializeToJson(ie);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(json, tmp_msg);
+        ASSERT_IS_NULL(json, tmp_msg);
     }
 
     //cleanup
@@ -2439,7 +2436,7 @@ TEST_FUNCTION(individualEnrollment_deserializeFromJson_min_error)
         INDIVIDUAL_ENROLLMENT_HANDLE ie = individualEnrollment_deserializeFromJson(DUMMY_JSON);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(ie, tmp_msg);
+        ASSERT_IS_NULL(ie, tmp_msg);
     }
 
     //cleanup
@@ -2500,7 +2497,7 @@ TEST_FUNCTION(individualEnrollment_deserializeFromJson_max_error)
         INDIVIDUAL_ENROLLMENT_HANDLE ie = individualEnrollment_deserializeFromJson(DUMMY_JSON);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(ie, tmp_msg);
+        ASSERT_IS_NULL(ie, tmp_msg);
     }
 
     //cleanup
@@ -2676,7 +2673,7 @@ TEST_FUNCTION(enrollmentGroup_serializeToJson_min_error)
         char* json = enrollmentGroup_serializeToJson(eg);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(json, tmp_msg);
+        ASSERT_IS_NULL(json, tmp_msg);
     }
 
     //cleanup
@@ -2765,7 +2762,7 @@ TEST_FUNCTION(enrollmentGroup_serializeToJson_max_error)
         char* json = enrollmentGroup_serializeToJson(eg);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(json, tmp_msg);
+        ASSERT_IS_NULL(json, tmp_msg);
     }
 
     //cleanup
@@ -2843,7 +2840,7 @@ TEST_FUNCTION(enrollmentGroup_deserializeFromJson_min_error)
         ENROLLMENT_GROUP_HANDLE eg = enrollmentGroup_deserializeFromJson(DUMMY_JSON);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(eg, tmp_msg);
+        ASSERT_IS_NULL(eg, tmp_msg);
     }
 
     //cleanup
@@ -2906,7 +2903,7 @@ TEST_FUNCTION(enrollmentGroup_deserializeFromJson_max_error)
         ENROLLMENT_GROUP_HANDLE eg = enrollmentGroup_deserializeFromJson(DUMMY_JSON);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(eg, tmp_msg);
+        ASSERT_IS_NULL(eg, tmp_msg);
     }
 
     //cleanup

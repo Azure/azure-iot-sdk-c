@@ -18,9 +18,9 @@ CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
 rm -r -f $build_folder
 mkdir -p $build_folder
 pushd $build_folder
-cmake $build_root -Drun_unittests:BOOL=ON -Duse_wolfssl:BOOL=ON
+cmake $build_root -Duse_wolfssl:BOOL=ON -Drun_e2e_test=ON
 make --jobs=$CORES
 
-ctest -j $CORES -VV --output-on-failure
+ctest -j $CORES --output-on-failure
 
 popd

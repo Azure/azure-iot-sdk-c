@@ -1465,7 +1465,7 @@ static void handle_errors_and_timeouts(AMQP_MESSENGER_INSTANCE* msgr)
 {
     if (msgr->send_error_count >= msgr->max_send_error_count)
     {
-        LogError("Reached max number of consecutive send failures (%d, %d)", msgr->config->device_id, msgr->max_send_error_count);
+        LogError("Reached max number of consecutive send failures (%s, %lu)", msgr->config->device_id, (unsigned long)msgr->max_send_error_count);
         update_messenger_state(msgr, AMQP_MESSENGER_STATE_ERROR);
     }
 }

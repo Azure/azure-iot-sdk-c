@@ -33,9 +33,6 @@ include_directories(.)
 
 add_executable(iothub_ll_client_shared_sample ${iothub_ll_client_shared_sample_c_files} ${iothub_ll_client_shared_sample_h_files})
 
-target_link_libraries(iothub_ll_client_shared_sample
-    iothub_client)
-
 if(${use_http})
     target_link_libraries(iothub_ll_client_shared_sample iothub_client_http_transport)
 endif()
@@ -47,4 +44,8 @@ if(${use_amqp})
     linkUAMQP(iothub_ll_client_shared_sample)
 endif()
 
+target_link_libraries(iothub_ll_client_shared_sample
+    iothub_client)
+
 linkSharedUtil(iothub_ll_client_shared_sample)
+

@@ -9,6 +9,7 @@
 #include "iothub.h"
 #include "iothub_device_client_ll.h"
 #include "iothub_client_core_ll.h"
+#include "azure_c_shared_utility/shared_util_options.h"
 
 #ifdef USE_MQTT
 #include "iothubtransportmqtt.h"
@@ -23,7 +24,10 @@
 #ifdef USE_HTTP
 #include "iothubtransporthttp.h"
 #endif
-static TEST_MUTEX_HANDLE g_dllByDll;
+
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+#include "certs.h"
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 #define MAX_CONNECT_CALLBACK_WAIT_TIME        10
 
@@ -49,7 +53,7 @@ BEGIN_TEST_SUITE(iothub_invalidcert_e2e)
 static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* user_ctx)
 {
     CONNECTION_STATUS_INFO* conn_status = (CONNECTION_STATUS_INFO*)user_ctx;
-    ASSERT_IS_NOT_NULL_WITH_MSG(conn_status, "connection status callback context is NULL");
+    ASSERT_IS_NOT_NULL(conn_status, "connection status callback context is NULL");
 
     conn_status->status_set = true;
     conn_status->current_confirmation = result;
@@ -58,7 +62,7 @@ static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void
 static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS status, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason, void* user_ctx)
 {
     CONNECTION_STATUS_INFO* conn_status = (CONNECTION_STATUS_INFO*)user_ctx;
-    ASSERT_IS_NOT_NULL_WITH_MSG(conn_status, "connection status callback context is NULL");
+    ASSERT_IS_NOT_NULL(conn_status, "connection status callback context is NULL");
 
     conn_status->status_set = true;
     conn_status->current_status = status;
@@ -71,10 +75,14 @@ static IOTHUB_DEVICE_CLIENT_LL_HANDLE create_client(IOTHUB_CLIENT_TRANSPORT_PROV
 
     IOTHUB_DEVICE_CLIENT_LL_HANDLE iothub_handle;
     iothub_handle = IoTHubDeviceClient_LL_CreateFromConnectionString(connection_string, protocol);
-    ASSERT_IS_NOT_NULL_WITH_MSG(iothub_handle, "Could not create IoTHubDeviceClient_LL_CreateFromConnectionString");
+    ASSERT_IS_NOT_NULL(iothub_handle, "Could not create IoTHubDeviceClient_LL_CreateFromConnectionString");
+
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+    IoTHubDeviceClient_LL_SetOption(iothub_handle, OPTION_TRUSTED_CERT, certificates);
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
 
     IOTHUB_CLIENT_RESULT result = IoTHubDeviceClient_LL_SetConnectionStatusCallback(iothub_handle, connection_status_callback, conn_status);
-    ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set connection Status Callback");
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set connection Status Callback");
 
     return iothub_handle;
 }
@@ -91,8 +99,8 @@ static void wait_for_unauthorized_send(IOTHUB_DEVICE_CLIENT_LL_HANDLE dev_handle
         (nowTime = time(NULL)),
         (difftime(nowTime, beginOperation) < MAX_CONNECT_CALLBACK_WAIT_TIME) && (!conn_status->status_set) // time box
         );
-    ASSERT_IS_TRUE_WITH_MSG(conn_status->status_set, "Status callback did not get executed");
-    ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_CONFIRMATION_RESULT, IOTHUB_CLIENT_CONFIRMATION_ERROR, conn_status->current_confirmation, "Sending message was successful and should not have been");
+    ASSERT_IS_TRUE(conn_status->status_set, "Status callback did not get executed");
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_CONFIRMATION_RESULT, IOTHUB_CLIENT_CONFIRMATION_ERROR, conn_status->current_confirmation, "Sending message was successful and should not have been");
 }
 
 static void wait_for_unauthorized_connection(IOTHUB_DEVICE_CLIENT_LL_HANDLE dev_handle, CONNECTION_STATUS_INFO* conn_status)
@@ -111,8 +119,8 @@ static void wait_for_unauthorized_connection(IOTHUB_DEVICE_CLIENT_LL_HANDLE dev_
         (nowTime = time(NULL)),
         (difftime(nowTime, beginOperation) < MAX_CONNECT_CALLBACK_WAIT_TIME) && (!conn_status->status_set) // time box
         );
-    ASSERT_IS_TRUE_WITH_MSG(conn_status->status_set, "Status callback did not get executed");
-    ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_CONNECTION_STATUS, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, conn_status->current_status, "Connection was successful and should not have been");
+    ASSERT_IS_TRUE(conn_status->status_set, "Status callback did not get executed");
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_CONNECTION_STATUS, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, conn_status->current_status, "Connection was successful and should not have been");
 }
 
 static void run_invalidcert_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
@@ -145,15 +153,13 @@ static void run_invalidcert_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     int result = IoTHub_Init();
-    ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "Iothub init failed");
+    ASSERT_ARE_EQUAL(int, 0, result, "Iothub init failed");
 }
 
 TEST_SUITE_CLEANUP(TestClassCleanup)
 {
     IoTHub_Deinit();
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)

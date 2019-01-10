@@ -96,10 +96,14 @@ int main()
     SECURE_DEVICE_TYPE hsm_type;
     //hsm_type = SECURE_DEVICE_TYPE_TPM;
     hsm_type = SECURE_DEVICE_TYPE_X509;
+    //hsm_type = SECURE_DEVICE_TYPE_SYMMETRIC_KEY;
 
     // Used to initialize IoTHub SDK subsystem
     (void)IoTHub_Init();
     (void)prov_dev_security_init(hsm_type);
+
+    // Set the symmetric key if using they auth type
+    //prov_dev_set_symmetric_key_info("<symm_registration_id>", "<symmetric_Key>");
 
     HTTP_PROXY_OPTIONS http_proxy;
     PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION prov_transport;

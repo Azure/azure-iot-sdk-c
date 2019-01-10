@@ -112,6 +112,18 @@ extern "C"
 #include "internal/iothubtransportamqp_methods.h"
 #include "internal/iothubtransport_amqp_connection.h"
 #include "internal/iothubtransport_amqp_device.h"
+
+#include "internal/iothub_transport_ll_private.h"
+
+MOCKABLE_FUNCTION(, bool, Transport_MessageCallbackFromInput, MESSAGE_CALLBACK_INFO*, messageData, void*, ctx);
+MOCKABLE_FUNCTION(, bool, Transport_MessageCallback, MESSAGE_CALLBACK_INFO*, messageData, void*, ctx);
+MOCKABLE_FUNCTION(, void, Transport_ConnectionStatusCallBack, IOTHUB_CLIENT_CONNECTION_STATUS, status, IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason, void*, ctx);
+MOCKABLE_FUNCTION(, void, Transport_SendComplete_Callback, PDLIST_ENTRY, completed, IOTHUB_CLIENT_CONFIRMATION_RESULT, result, void*, ctx);
+MOCKABLE_FUNCTION(, const char*, Transport_GetOption_Product_Info_Callback, void*, ctx);
+MOCKABLE_FUNCTION(, void, Transport_Twin_ReportedStateComplete_Callback, uint32_t, item_id, int, status_code, void*, ctx);
+MOCKABLE_FUNCTION(, void, Transport_Twin_RetrievePropertyComplete_Callback, DEVICE_TWIN_UPDATE_STATE, update_state, const unsigned char*, payLoad, size_t, size, void*, ctx);
+MOCKABLE_FUNCTION(, int, Transport_DeviceMethod_Complete_Callback, const char*, method_name, const unsigned char*, payLoad, size_t, size, METHOD_HANDLE, response_id, void*, ctx);
+
 #undef ENABLE_MOCKS
 
 #include "internal/iothubtransport_amqp_common.h"
@@ -343,7 +355,6 @@ typedef struct MESSAGE_DISPOSITION_CONTEXT_TAG
 
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
@@ -412,6 +423,8 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 #define TEST_MESSAGE_SOURCE_CHAR_PTR               "messagereceiver_link_name"
 #define TEST_RETRY_CONTROL_HANDLE                  (RETRY_CONTROL_HANDLE)0x4276
 
+static TRANSPORT_CALLBACKS_INFO transport_cb_info;
+static void* transport_cb_ctx = (void*)0x499922;
 
 static const unsigned char* TEST_DEVICE_METHOD_RESPONSE = (const unsigned char*)0x62;
 static size_t TEST_DEVICE_RESP_LENGTH = 1;
@@ -430,6 +443,7 @@ static unsigned long TEST_MESSAGE_ID;
 //     IHTAC = IoTHubTransport_AMQP_Common
 static void set_expected_calls_for_Create(IOTHUBTRANSPORT_CONFIG* transport_config)
 {
+    STRICT_EXPECTED_CALL(IoTHub_Transport_ValidateCallbacks(IGNORED_PTR_ARG) );
     EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
 
     STRICT_EXPECTED_CALL(retry_control_create(DEFAULT_RETRY_POLICY, DEFAULT_MAX_RETRY_TIME_IN_SECS));
@@ -549,8 +563,7 @@ static void set_expected_calls_for_Register(IOTHUB_DEVICE_CONFIG* device_config,
     // Nothing to expect.
 
     EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetOption(IGNORED_PTR_ARG, OPTION_PRODUCT_INFO, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_PRODUCT_INFO_CHAR_PTR);
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_PRODUCT_INFO_CHAR_PTR));
     STRICT_EXPECTED_CALL(STRING_construct(device_config->deviceId))
         .SetReturn(TEST_DEVICE_ID_STRING_HANDLE);
@@ -608,7 +621,6 @@ static void set_expected_calls_for_establish_amqp_connection()
         .SetReturn(TEST_IOTHUB_HOST_FQDN_CHAR_PTR);
     EXPECTED_CALL(amqp_connection_create(IGNORED_PTR_ARG));
 }
-
 
 static void set_expected_calls_for_subscribe_methods()
 {
@@ -896,9 +908,9 @@ static AMQP_DEVICE_HANDLE TEST_device_create(DEVICE_CONFIG* config)
 }
 
 static bool g_MessageCallback_return;
-bool TEST_IoTHubClientCore_LL_MessageCallback(IOTHUB_CLIENT_CORE_LL_HANDLE handle, MESSAGE_CALLBACK_INFO* messageData)
+static bool TEST_Transport_MessageCallback(MESSAGE_CALLBACK_INFO* messageData, void* ctx)
 {
-    (void)handle;
+    (void)ctx;
     if (g_MessageCallback_return)
     {
         if (messageData->transportContext != NULL)
@@ -912,7 +924,7 @@ bool TEST_IoTHubClientCore_LL_MessageCallback(IOTHUB_CLIENT_CORE_LL_HANDLE handl
 }
 
 // ---------- Test Helpers ---------- //
-const TRANSPORT_PROVIDER* TEST_get_iothub_client_transport_provider(void)
+static const TRANSPORT_PROVIDER* TEST_get_iothub_client_transport_provider(void)
 {
     return TEST_TRANSPORT_PROVIDER;
 }
@@ -1000,7 +1012,7 @@ static TRANSPORT_LL_HANDLE create_transport()
 
     umock_c_reset_all_calls();
     set_expected_calls_for_Create(config);
-    TRANSPORT_LL_HANDLE handle = IoTHubTransport_AMQP_Common_Create(config, TEST_amqp_get_io_transport);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_AMQP_Common_Create(config, TEST_amqp_get_io_transport, &transport_cb_info, transport_cb_ctx);
 
     return handle;
 }
@@ -1009,7 +1021,7 @@ static void crank_transport(void* handle, PDLIST_ENTRY wts, int wts_length, DEVI
 {
     umock_c_reset_all_calls();
     set_expected_calls_for_DoWork(wts, wts_length, current_device_state, is_tls_io_acquired, is_using_cbs, is_connection_created, is_connection_open, number_of_registered_devices, current_time, subscribe_for_methods);
-    (void)IoTHubTransport_AMQP_Common_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    (void)IoTHubTransport_AMQP_Common_DoWork(handle);
 }
 
 static void crank_transport_ready_after_create(void* handle, PDLIST_ENTRY wts, int wts_length, bool is_tls_io_acquired, bool is_using_cbs, int number_of_registered_devices, time_t current_time, bool subscribe_for_methods)
@@ -1024,7 +1036,7 @@ static void crank_transport_ready_after_create(void* handle, PDLIST_ENTRY wts, i
 
     STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(TEST_current_time);
     STRICT_EXPECTED_CALL(retry_control_reset(TEST_RETRY_CONTROL_HANDLE));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_ConnectionStatusCallBack(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK));
+    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK, IGNORED_PTR_ARG));
 
     TEST_device_create_saved_on_state_changed_callback(TEST_device_create_saved_on_state_changed_context,
         DEVICE_STATE_STOPPED, DEVICE_STATE_STARTED);
@@ -1036,7 +1048,7 @@ static IOTHUB_DEVICE_HANDLE register_device(TRANSPORT_LL_HANDLE handle, IOTHUB_D
 {
     umock_c_reset_all_calls();
     set_expected_calls_for_Register(device_config, is_using_cbs);
-    return IoTHubTransport_AMQP_Common_Register(handle, device_config, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, wts);
+    return IoTHubTransport_AMQP_Common_Register(handle, device_config, wts);
 }
 
 static void destroy_transport(TRANSPORT_LL_HANDLE handle, IOTHUB_DEVICE_HANDLE registered_device0, IOTHUB_DEVICE_HANDLE registered_device1)
@@ -1050,6 +1062,18 @@ static void destroy_transport(TRANSPORT_LL_HANDLE handle, IOTHUB_DEVICE_HANDLE r
     umock_c_reset_all_calls();
     set_expected_calls_for_Destroy(number_of_registered_devices, registered_devices);
     IoTHubTransport_AMQP_Common_Destroy(handle);
+}
+
+static DEVICE_TWIN_UPDATE_STATE get_twin_update_type;
+static const unsigned char* get_twin_message;
+static size_t get_twin_length;
+static void* get_twin_context;
+static void on_device_get_twin_completed_callback(DEVICE_TWIN_UPDATE_STATE update_type, const unsigned char* message, size_t length, void* context)
+{
+    get_twin_update_type = update_type;
+    get_twin_message = message;
+    get_twin_length = length;
+    get_twin_context = context;
 }
 
 // ---------- Test Initialization Helpers ---------- //
@@ -1114,6 +1138,8 @@ static void register_umock_alias_types()
     REGISTER_UMOCK_ALIAS_TYPE(ON_METHOD_REQUEST_RECEIVED, void*);
     REGISTER_UMOCK_ALIAS_TYPE(ON_METHODS_ERROR, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_AUTHORIZATION_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(DEVICE_TWIN_UPDATE_RECEIVED_CALLBACK, void*);
 }
 
 static void register_global_mock_hooks()
@@ -1145,8 +1171,10 @@ static void register_global_mock_hooks()
     REGISTER_GLOBAL_MOCK_HOOK(device_create, TEST_device_create);
     REGISTER_GLOBAL_MOCK_HOOK(device_subscribe_message, TEST_device_subscribe_message);
 
-    REGISTER_GLOBAL_MOCK_HOOK(IoTHubClientCore_LL_MessageCallback, TEST_IoTHubClientCore_LL_MessageCallback);
-    REGISTER_GLOBAL_MOCK_HOOK(IoTHubClientCore_LL_GetOption, TEST_IoTHubClientCore_LL_GetOption);
+    REGISTER_GLOBAL_MOCK_HOOK(Transport_MessageCallback, TEST_Transport_MessageCallback);
+    REGISTER_GLOBAL_MOCK_RETURN(Transport_GetOption_Product_Info_Callback, TEST_PRODUCT_INFO_CHAR_PTR);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Transport_GetOption_Product_Info_Callback, NULL);
+
     REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, TEST_mallocAndStrcpy_s);
 }
 
@@ -1171,6 +1199,9 @@ static void register_global_mock_returns()
     REGISTER_GLOBAL_MOCK_RETURN(device_stop, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(device_stop, 1);
 
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHub_Transport_ValidateCallbacks, 0);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHub_Transport_ValidateCallbacks, __LINE__);
+
     REGISTER_GLOBAL_MOCK_RETURN(device_set_option, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(device_set_option, 1);
 
@@ -1185,6 +1216,9 @@ static void register_global_mock_returns()
 
     REGISTER_GLOBAL_MOCK_RETURN(device_send_message_disposition, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(device_send_message_disposition, 1);
+
+    REGISTER_GLOBAL_MOCK_RETURN(device_get_twin_async, 0);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(device_get_twin_async, 1);
 
     REGISTER_GLOBAL_MOCK_RETURN(OptionHandler_FeedOptions, OPTIONHANDLER_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(OptionHandler_FeedOptions, OPTIONHANDLER_ERROR);
@@ -1241,7 +1275,7 @@ static void reset_test_data()
 static void initialize_test_variables()
 {
     TEST_current_time = time(NULL);
-    ASSERT_IS_TRUE_WITH_MSG(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
+    ASSERT_IS_TRUE(INDEFINITE_TIME != TEST_current_time, "Failed setting TEST_current_time");
 
     real_DList_InitializeListHead(&TEST_waitingToSend);
 }
@@ -1251,7 +1285,6 @@ BEGIN_TEST_SUITE(iothubtransport_amqp_common_ut)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -1267,6 +1300,16 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     register_umock_alias_types();
     register_global_mock_hooks();
     register_global_mock_returns();
+
+    transport_cb_info.send_complete_cb = Transport_SendComplete_Callback;
+    transport_cb_info.twin_retrieve_prop_complete_cb = Transport_Twin_RetrievePropertyComplete_Callback;
+    transport_cb_info.twin_rpt_state_complete_cb = Transport_Twin_ReportedStateComplete_Callback;
+    transport_cb_info.send_complete_cb = Transport_SendComplete_Callback;
+    transport_cb_info.connection_status_cb = Transport_ConnectionStatusCallBack;
+    transport_cb_info.prod_info_cb = Transport_GetOption_Product_Info_Callback;
+    transport_cb_info.msg_input_cb = Transport_MessageCallbackFromInput;
+    transport_cb_info.msg_cb = Transport_MessageCallback;
+    transport_cb_info.method_complete_cb = Transport_DeviceMethod_Complete_Callback;
 }
 
 TEST_SUITE_CLEANUP(TestClassCleanup)
@@ -1274,7 +1317,6 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     umock_c_deinit();
 
     TEST_MUTEX_DESTROY(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
@@ -1318,7 +1360,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_Register_creates_a_new_methods_handler
     set_expected_calls_for_Register(&device_config, true);
 
     // act
-    device_handle = IoTHubTransport_AMQP_Common_Register(handle, &device_config, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, &TEST_waitingToSend);
+    device_handle = IoTHubTransport_AMQP_Common_Register(handle, &device_config, &TEST_waitingToSend);
 
     // assert
     ASSERT_IS_NOT_NULL(device_handle);
@@ -1346,7 +1388,6 @@ TEST_FUNCTION(when_creating_the_methods_handler_fails_then_IoTHubTransport_AMQP_
     device_config.deviceKey = "cucu";
     device_config.deviceSasToken = NULL;
 
-
     umock_c_reset_all_calls();
     set_expected_calls_for_Register(&device_config, true);
     umock_c_negative_tests_snapshot();
@@ -1356,7 +1397,7 @@ TEST_FUNCTION(when_creating_the_methods_handler_fails_then_IoTHubTransport_AMQP_
     size_t n = umock_c_negative_tests_call_count();
     for (i = 0; i < n; i++)
     {
-        if (i == 0 || i == 2 || i == 3 || i == 4 || i == 6 || i == 8 || i == 9 || i == 16)
+        if (i == 0 || i == 2 || i == 3 || i == 4 || i == 5 || i == 7 || i == 8 || i == 15)
         {
             // These expected calls do not cause the API to fail.
             continue;
@@ -1369,11 +1410,11 @@ TEST_FUNCTION(when_creating_the_methods_handler_fails_then_IoTHubTransport_AMQP_
         umock_c_negative_tests_fail_call(i);
 
         // act
-        device_handle = IoTHubTransport_AMQP_Common_Register(handle, &device_config, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, &TEST_waitingToSend);
+        device_handle = IoTHubTransport_AMQP_Common_Register(handle, &device_config, &TEST_waitingToSend);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
-        ASSERT_IS_NULL_WITH_MSG(device_handle, error_msg);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
+        ASSERT_IS_NULL(device_handle, error_msg);
     }
 
     // cleanup
@@ -1572,7 +1613,7 @@ TEST_FUNCTION(on_methods_unsubscribed_re_subscribes)
     set_expected_calls_for_DoWork(&TEST_waitingToSend, 0, DEVICE_STATE_STARTED, true, true, true, true, 1, TEST_current_time, true /* here lies the difference */);
 
     // act
-    (void)IoTHubTransport_AMQP_Common_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    (void)IoTHubTransport_AMQP_Common_DoWork(handle);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -1692,7 +1733,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_DoWork_does_not_subscribe_if_SubScribe
     set_expected_calls_for_DoWork(&TEST_waitingToSend, 0, DEVICE_STATE_STARTED, true, true, true, true, 1, TEST_current_time, false);
 
     // act
-    IoTHubTransport_AMQP_Common_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransport_AMQP_Common_DoWork(handle);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -1728,7 +1769,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_DoWork_does_not_subscribe_if_already_s
     set_expected_calls_for_DoWork(&TEST_waitingToSend, 0, DEVICE_STATE_STARTED, true, true, true, true, 1, TEST_current_time, false);
 
     // act
-    IoTHubTransport_AMQP_Common_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransport_AMQP_Common_DoWork(handle);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -1768,16 +1809,14 @@ TEST_FUNCTION(on_methods_request_received_responds_to_the_method_request)
 
     umock_c_reset_all_calls();
     set_expected_calls_for_Register(&device_config, true);
-    device_handle = IoTHubTransport_AMQP_Common_Register(handle, &device_config, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, &TEST_waitingToSend);
+    device_handle = IoTHubTransport_AMQP_Common_Register(handle, &device_config, &TEST_waitingToSend);
 
     (void)IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod(device_handle);
 
     crank_transport_ready_after_create(handle, &TEST_waitingToSend, 0, false, true, 1, TEST_current_time, true);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_DeviceMethodComplete(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, "test_method", IGNORED_PTR_ARG, sizeof(test_method_response), IGNORED_PTR_ARG))
-        .IgnoreArgument_payLoad()
-        .IgnoreArgument_response_id();
+    STRICT_EXPECTED_CALL(Transport_DeviceMethod_Complete_Callback("test_method", IGNORED_PTR_ARG, sizeof(test_method_response), IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
     // act
     result = g_on_method_request_received(g_on_method_request_received_context, "test_method", test_request_payload, sizeof(test_request_payload), TEST_METHOD_HANDLE);
@@ -1884,10 +1923,10 @@ TEST_FUNCTION(AMQP_Create_NULL_config)
     umock_c_reset_all_calls();
 
     // act
-    TRANSPORT_LL_HANDLE tr_hdl = IoTHubTransport_AMQP_Common_Create(NULL, NULL);
+    TRANSPORT_LL_HANDLE tr_hdl = IoTHubTransport_AMQP_Common_Create(NULL, NULL, &transport_cb_info, transport_cb_ctx);
 
     // assert
-    ASSERT_IS_NULL_WITH_MSG(tr_hdl, "Expected NULL transport handle");
+    ASSERT_IS_NULL(tr_hdl, "Expected NULL transport handle");
 
     // cleanup
 }
@@ -1902,7 +1941,7 @@ TEST_FUNCTION(AMQP_Create_NULL_upperConfig)
     umock_c_reset_all_calls();
 
     // act
-    TRANSPORT_LL_HANDLE tr_hdl = IoTHubTransport_AMQP_Common_Create(&config, TEST_amqp_get_io_transport);
+    TRANSPORT_LL_HANDLE tr_hdl = IoTHubTransport_AMQP_Common_Create(&config, TEST_amqp_get_io_transport, &transport_cb_info, transport_cb_ctx);
 
     // assert
     ASSERT_IS_NULL(tr_hdl);
@@ -1917,7 +1956,7 @@ TEST_FUNCTION(AMQP_Create_upperConfig_protocol_NULL)
     umock_c_reset_all_calls();
 
     // act
-    TRANSPORT_LL_HANDLE handle = IoTHubTransport_AMQP_Common_Create(config, TEST_amqp_get_io_transport);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_AMQP_Common_Create(config, TEST_amqp_get_io_transport, &transport_cb_info, transport_cb_ctx);
 
     // assert
     ASSERT_IS_NULL(handle);
@@ -1943,7 +1982,7 @@ TEST_FUNCTION(AMQP_Create_upperConfig_iotHubName_NULL)
     umock_c_reset_all_calls();
 
     // act
-    TRANSPORT_LL_HANDLE handle = IoTHubTransport_AMQP_Common_Create(&config, TEST_amqp_get_io_transport);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_AMQP_Common_Create(&config, TEST_amqp_get_io_transport, &transport_cb_info, transport_cb_ctx);
 
     // assert
     ASSERT_IS_NULL(handle);
@@ -2000,9 +2039,29 @@ TEST_FUNCTION(Create_success)
     set_expected_calls_for_Create(config);
 
     // act
-    handle = IoTHubTransport_AMQP_Common_Create(config, TEST_amqp_get_io_transport);
+    handle = IoTHubTransport_AMQP_Common_Create(config, TEST_amqp_get_io_transport, &transport_cb_info, transport_cb_ctx);
 
     // assert
+    ASSERT_IS_NOT_NULL(handle);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    destroy_transport(handle, NULL, NULL);
+}
+
+TEST_FUNCTION(IoTHubTransport_AMQP_Common_Create_callbacks_NULL_fail)
+{
+    // arrange
+    initialize_test_variables();
+
+    TRANSPORT_LL_HANDLE handle;
+    IOTHUBTRANSPORT_CONFIG* config = create_transport_config();
+
+    // act
+    handle = IoTHubTransport_AMQP_Common_Create(config, TEST_amqp_get_io_transport, NULL, transport_cb_ctx);
+
+    // assert
+    ASSERT_IS_NULL(handle);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     // cleanup
@@ -2039,11 +2098,11 @@ TEST_FUNCTION(Create_failure_checks)
         umock_c_negative_tests_fail_call(i);
 
         // act
-        handle = IoTHubTransport_AMQP_Common_Create(config, TEST_amqp_get_io_transport);
+        handle = IoTHubTransport_AMQP_Common_Create(config, TEST_amqp_get_io_transport, &transport_cb_info, transport_cb_ctx);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
-        ASSERT_IS_NULL_WITH_MSG(handle, error_msg);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
+        ASSERT_IS_NULL(handle, error_msg);
     }
 
     // cleanup
@@ -2100,25 +2159,7 @@ TEST_FUNCTION(Register_NULL_wts)
     IOTHUB_DEVICE_CONFIG* device_config = create_device_config(TEST_DEVICE_ID_CHAR_PTR, true);
 
     // act
-    IOTHUB_DEVICE_HANDLE device_handle = IoTHubTransport_AMQP_Common_Register(handle, device_config, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, NULL);
-
-    // assert
-    ASSERT_IS_NULL(device_handle);
-
-    // cleanup
-    destroy_transport(handle, device_handle, NULL);
-}
-
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_17_005: [If `handle`, `device`, `iotHubClientHandle` or `waitingToSend` is NULL, IoTHubTransport_AMQP_Common_Register shall return NULL]
-TEST_FUNCTION(Register_NULL_client_handle)
-{
-    // arrange
-    initialize_test_variables();
-    TRANSPORT_LL_HANDLE handle = create_transport();
-    IOTHUB_DEVICE_CONFIG* device_config = create_device_config(TEST_DEVICE_ID_CHAR_PTR, true);
-
-    // act
-    IOTHUB_DEVICE_HANDLE device_handle = IoTHubTransport_AMQP_Common_Register(handle, device_config, NULL, &TEST_waitingToSend);
+    IOTHUB_DEVICE_HANDLE device_handle = IoTHubTransport_AMQP_Common_Register(handle, device_config, NULL);
 
     // assert
     ASSERT_IS_NULL(device_handle);
@@ -2135,7 +2176,7 @@ TEST_FUNCTION(Register_NULL_device_config)
     TRANSPORT_LL_HANDLE handle = create_transport();
 
     // act
-    IOTHUB_DEVICE_HANDLE device_handle = IoTHubTransport_AMQP_Common_Register(handle, NULL, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, &TEST_waitingToSend);
+    IOTHUB_DEVICE_HANDLE device_handle = IoTHubTransport_AMQP_Common_Register(handle, NULL, &TEST_waitingToSend);
 
     // assert
     ASSERT_IS_NULL(device_handle);
@@ -2152,7 +2193,7 @@ TEST_FUNCTION(Register_NULL_transport_handle)
     IOTHUB_DEVICE_CONFIG* device_config = create_device_config(TEST_DEVICE_ID_CHAR_PTR, true);
 
     // act
-    IOTHUB_DEVICE_HANDLE device_handle = IoTHubTransport_AMQP_Common_Register(NULL, device_config, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, &TEST_waitingToSend);
+    IOTHUB_DEVICE_HANDLE device_handle = IoTHubTransport_AMQP_Common_Register(NULL, device_config, &TEST_waitingToSend);
 
     // assert
     ASSERT_IS_NULL(device_handle);
@@ -2171,7 +2212,7 @@ TEST_FUNCTION(Register_NULL_config_device_id)
     device_config->deviceId = NULL;
 
     // act
-    IOTHUB_DEVICE_HANDLE device_handle = IoTHubTransport_AMQP_Common_Register(handle, device_config, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, &TEST_waitingToSend);
+    IOTHUB_DEVICE_HANDLE device_handle = IoTHubTransport_AMQP_Common_Register(handle, device_config, &TEST_waitingToSend);
 
     // assert
     ASSERT_IS_NULL(device_handle);
@@ -2194,7 +2235,7 @@ TEST_FUNCTION(Register_device_already_registered)
         .SetReturn(TEST_LIST_ITEM_HANDLE);
 
     // act
-    IOTHUB_DEVICE_HANDLE device_handle = IoTHubTransport_AMQP_Common_Register(handle, device_config, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, &TEST_waitingToSend);
+    IOTHUB_DEVICE_HANDLE device_handle = IoTHubTransport_AMQP_Common_Register(handle, device_config, &TEST_waitingToSend);
 
     // assert
     ASSERT_IS_NULL(device_handle);
@@ -2225,7 +2266,7 @@ TEST_FUNCTION(Register_CBS_transport_X509_credentials)
         .SetReturn(NULL);
 
     // act
-    IOTHUB_DEVICE_HANDLE device_handle2 = IoTHubTransport_AMQP_Common_Register(handle, device_config2, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, &TEST_waitingToSend);
+    IOTHUB_DEVICE_HANDLE device_handle2 = IoTHubTransport_AMQP_Common_Register(handle, device_config2, &TEST_waitingToSend);
 
     // assert
     ASSERT_IS_NOT_NULL(device_handle1);
@@ -2257,7 +2298,7 @@ TEST_FUNCTION(Register_X509_transport_CBS_credentials)
         .SetReturn(NULL);
 
     // act
-    IOTHUB_DEVICE_HANDLE device_handle2 = IoTHubTransport_AMQP_Common_Register(handle, device_config2, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, &TEST_waitingToSend);
+    IOTHUB_DEVICE_HANDLE device_handle2 = IoTHubTransport_AMQP_Common_Register(handle, device_config2, &TEST_waitingToSend);
 
     // assert
     ASSERT_IS_NOT_NULL(device_handle1);
@@ -2291,7 +2332,7 @@ TEST_FUNCTION(Register_failure_checks)
     size_t i, n = umock_c_negative_tests_call_count();
     for (i = 0; i < n; i++)
     {
-        if (i == 0 || i == 2 || i == 3 || i == 4 || i >= 6)
+        if (i == 0 || i == 2 || i == 3 || i == 4 || i >= 5)
         {
             // These expected calls do not cause the API to fail.
             continue;
@@ -2304,11 +2345,11 @@ TEST_FUNCTION(Register_failure_checks)
         umock_c_negative_tests_fail_call(i);
 
         // act
-        IOTHUB_DEVICE_HANDLE device_handle = IoTHubTransport_AMQP_Common_Register(handle, device_config, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, &TEST_waitingToSend);
+        IOTHUB_DEVICE_HANDLE device_handle = IoTHubTransport_AMQP_Common_Register(handle, device_config, &TEST_waitingToSend);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
-        ASSERT_IS_NULL_WITH_MSG(device_handle, error_msg);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
+        ASSERT_IS_NULL(device_handle, error_msg);
     }
 
     // cleanup
@@ -2338,7 +2379,7 @@ TEST_FUNCTION(Register_succeeds)
     set_expected_calls_for_Register(device_config, true);
 
     // act
-    IOTHUB_DEVICE_HANDLE device_handle = IoTHubTransport_AMQP_Common_Register(handle, device_config, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, &TEST_waitingToSend);
+    IOTHUB_DEVICE_HANDLE device_handle = IoTHubTransport_AMQP_Common_Register(handle, device_config, &TEST_waitingToSend);
 
     // assert
     ASSERT_IS_NOT_NULL(device_handle);
@@ -2454,8 +2495,8 @@ TEST_FUNCTION(Subscribe_messages_failure_checks)
         int result = IoTHubTransport_AMQP_Common_Subscribe(device_handle);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, error_msg);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
+        ASSERT_ARE_NOT_EQUAL(int, 0, result, error_msg);
     }
 
     // cleanup
@@ -2606,8 +2647,8 @@ TEST_FUNCTION(GetSendStatus_failure_checks)
         IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_GetSendStatus(device_handle, &iotHubClientStatus);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
-        ASSERT_ARE_EQUAL_WITH_MSG(int, IOTHUB_CLIENT_ERROR, result, error_msg);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
+        ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_ERROR, result, error_msg);
     }
 
     // cleanup
@@ -3902,7 +3943,7 @@ TEST_FUNCTION(on_message_received_succeeds)
     EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
     EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     g_MessageCallback_return = true;
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
@@ -3944,7 +3985,7 @@ TEST_FUNCTION(on_message_received_fails)
     EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
     EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     g_MessageCallback_return = false;
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_MessageCallback(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(TEST_IOTHUB_MESSAGE_HANDLE));
     STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
@@ -3994,7 +4035,7 @@ TEST_FUNCTION(DoWork_success)
 
     // act
     set_expected_calls_for_DoWork(&TEST_waitingToSend, 0, DEVICE_STATE_STOPPED, false, true, false, false, 1, TEST_current_time, false);
-    IoTHubTransport_AMQP_Common_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransport_AMQP_Common_DoWork(handle);
 
     ASSERT_IS_NOT_NULL(TEST_amqp_connection_create_saved_on_state_changed_callback);
 
@@ -4005,13 +4046,13 @@ TEST_FUNCTION(DoWork_success)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     set_expected_calls_for_DoWork(&TEST_waitingToSend, 0, DEVICE_STATE_STOPPED, true, true, true, true, 1, TEST_current_time, false);
-    IoTHubTransport_AMQP_Common_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransport_AMQP_Common_DoWork(handle);
 
     ASSERT_IS_NOT_NULL(TEST_device_create_saved_on_state_changed_callback);
 
     STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(TEST_current_time);
     STRICT_EXPECTED_CALL(retry_control_reset(TEST_RETRY_CONTROL_HANDLE));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_ConnectionStatusCallBack(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK));
+    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK, IGNORED_PTR_ARG));
 
     TEST_device_create_saved_on_state_changed_callback(TEST_device_create_saved_on_state_changed_context,
         DEVICE_STATE_STOPPED, DEVICE_STATE_STARTED);
@@ -4019,7 +4060,7 @@ TEST_FUNCTION(DoWork_success)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     set_expected_calls_for_DoWork(&TEST_waitingToSend, 0, DEVICE_STATE_STARTED, true, true, true, true, 1, TEST_current_time, false);
-    IoTHubTransport_AMQP_Common_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransport_AMQP_Common_DoWork(handle);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -4043,14 +4084,14 @@ TEST_FUNCTION(on_amqp_connection_state_changed_CLOSED_unexpectedly)
     umock_c_reset_all_calls();
 
     set_expected_calls_for_DoWork(&TEST_waitingToSend, 0, DEVICE_STATE_STOPPED, false, true, false, false, 1, TEST_current_time, false);
-    IoTHubTransport_AMQP_Common_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransport_AMQP_Common_DoWork(handle);
 
     TEST_amqp_connection_create_saved_on_state_changed_callback(
         TEST_amqp_connection_create_saved_on_state_changed_context,
         AMQP_CONNECTION_STATE_CLOSED, AMQP_CONNECTION_STATE_OPENED);
 
     set_expected_calls_for_DoWork(&TEST_waitingToSend, 0, DEVICE_STATE_STOPPED, true, true, true, true, 1, TEST_current_time, false);
-    IoTHubTransport_AMQP_Common_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransport_AMQP_Common_DoWork(handle);
 
     // act
     TEST_amqp_connection_create_saved_on_state_changed_callback(
@@ -4058,10 +4099,10 @@ TEST_FUNCTION(on_amqp_connection_state_changed_CLOSED_unexpectedly)
         AMQP_CONNECTION_STATE_OPENED, AMQP_CONNECTION_STATE_CLOSED);
 
     set_expected_calls_for_prepare_for_connection_retry(1, DEVICE_STATE_STOPPED);
-    IoTHubTransport_AMQP_Common_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransport_AMQP_Common_DoWork(handle);
 
     set_expected_calls_for_DoWork2(&TEST_waitingToSend, 0, DEVICE_STATE_STOPPED, false, true, true, false, false, 1, TEST_current_time, false);
-    IoTHubTransport_AMQP_Common_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransport_AMQP_Common_DoWork(handle);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -4078,7 +4119,7 @@ TEST_FUNCTION(DoWork_NULL_handle)
     umock_c_reset_all_calls();
 
     // act
-    IoTHubTransport_AMQP_Common_DoWork(NULL, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransport_AMQP_Common_DoWork(NULL);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -4104,7 +4145,7 @@ TEST_FUNCTION(DoWork_get_underlying_io_transport_provider_fails)
     TEST_amqp_get_io_transport_result = NULL;
 
     // act
-    IoTHubTransport_AMQP_Common_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransport_AMQP_Common_DoWork(handle);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -4133,7 +4174,7 @@ TEST_FUNCTION(DoWork_sets_amqp_connection_for_X509)
     set_expected_calls_for_DoWork(&TEST_waitingToSend, 0, DEVICE_STATE_STOPPED, true, true, false, false, 1, TEST_current_time, false);
 
     // act
-    IoTHubTransport_AMQP_Common_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransport_AMQP_Common_DoWork(handle);
 
     // assert
     ASSERT_IS_FALSE(TEST_amqp_connection_create_saved_create_sasl_io);
@@ -4160,7 +4201,7 @@ TEST_FUNCTION(DoWork_sets_amqp_connection_for_CBS)
     set_expected_calls_for_DoWork(&TEST_waitingToSend, 0, DEVICE_STATE_STOPPED, false, true, false, false, 1, TEST_current_time, false);
 
     // act
-    IoTHubTransport_AMQP_Common_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransport_AMQP_Common_DoWork(handle);
 
     // assert
     ASSERT_IS_TRUE(TEST_amqp_connection_create_saved_create_sasl_io);
@@ -4195,7 +4236,7 @@ TEST_FUNCTION(DoWork_configures_AMQP_connection_using_c2d_keep_alive_freq_secs)
     set_expected_calls_for_DoWork(&TEST_waitingToSend, 0, DEVICE_STATE_STOPPED, true, true, false, false, 1, TEST_current_time, false);
 
     // act
-    IoTHubTransport_AMQP_Common_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransport_AMQP_Common_DoWork(handle);
 
     // assert
     ASSERT_IS_FALSE(TEST_amqp_connection_create_saved_create_sasl_io);
@@ -4228,7 +4269,7 @@ TEST_FUNCTION(DoWork_configures_AMQP_connection_using_cl2svc_keep_alive_send_rat
     set_expected_calls_for_DoWork(&TEST_waitingToSend, 0, DEVICE_STATE_STOPPED, true, true, false, false, 1, TEST_current_time, false);
 
     // act
-    IoTHubTransport_AMQP_Common_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    IoTHubTransport_AMQP_Common_DoWork(handle);
 
     // assert
     ASSERT_IS_FALSE(TEST_amqp_connection_create_saved_create_sasl_io);
@@ -4256,7 +4297,7 @@ TEST_FUNCTION(ConnectionStatusCallBack_UNAUTH_OK)
 
     umock_c_reset_all_calls();
     STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(TEST_current_time);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_ConnectionStatusCallBack(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK));
+    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK, IGNORED_PTR_ARG));
 
     // act
     TEST_device_create_saved_on_state_changed_callback(TEST_device_create_saved_on_state_changed_context,
@@ -4284,7 +4325,7 @@ TEST_FUNCTION(ConnectionStatusCallBack_UNAUTH_auth_error)
 
     umock_c_reset_all_calls();
     STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(TEST_current_time);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_ConnectionStatusCallBack(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL));
+    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL, IGNORED_PTR_ARG));
 
     // act
     TEST_device_create_saved_on_state_changed_callback(TEST_device_create_saved_on_state_changed_context,
@@ -4312,7 +4353,7 @@ TEST_FUNCTION(ConnectionStatusCallBack_UNAUTH_auth_communication_error)
 
     umock_c_reset_all_calls();
     STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(TEST_current_time);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_ConnectionStatusCallBack(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR));
+    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR, IGNORED_PTR_ARG));
 
     // act
     TEST_device_create_saved_on_state_changed_callback(TEST_device_create_saved_on_state_changed_context,
@@ -4340,7 +4381,7 @@ TEST_FUNCTION(ConnectionStatusCallBack_UNAUTH_msg_communication_error)
 
     umock_c_reset_all_calls();
     STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(TEST_current_time);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_ConnectionStatusCallBack(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR));
+    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR, IGNORED_PTR_ARG));
 
     // act
     TEST_device_create_saved_on_state_changed_callback(TEST_device_create_saved_on_state_changed_context,
@@ -4367,7 +4408,7 @@ TEST_FUNCTION(ConnectionStatusCallBack_UNAUTH_no_network)
 
     umock_c_reset_all_calls();
     STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(TEST_current_time);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_ConnectionStatusCallBack(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_NO_NETWORK));
+    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_NO_NETWORK, IGNORED_PTR_ARG));
 
     // act
 
@@ -4406,14 +4447,14 @@ TEST_FUNCTION(ConnectionStatusCallBack_UNAUTH_retry_expired)
 
     STRICT_EXPECTED_CALL(singlylinkedlist_foreach(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_ConnectionStatusCallBack(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED));
+    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED, IGNORED_PTR_ARG));
 
     // act
     TEST_amqp_connection_create_saved_on_state_changed_callback(
         TEST_amqp_connection_create_saved_on_state_changed_context,
         AMQP_CONNECTION_STATE_OPENED, AMQP_CONNECTION_STATE_ERROR);
 
-    (void)IoTHubTransport_AMQP_Common_DoWork(handle, TEST_IOTHUB_CLIENT_CORE_LL_HANDLE);
+    (void)IoTHubTransport_AMQP_Common_DoWork(handle);
 
     bool continue_processing;
     TEST_singlylinkedlist_foreach_action_function(
@@ -4795,8 +4836,8 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SetRetryPolicy_failure_checks)
         int result = IoTHubTransport_AMQP_Common_SetRetryPolicy(handle, IOTHUB_CLIENT_RETRY_IMMEDIATE, 1600);
 
         // assert
-        sprintf(error_msg, "On failed call %zu", i);
-        ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, 0, result, error_msg);
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
+        ASSERT_ARE_NOT_EQUAL(int, 0, result, error_msg);
     }
 
     // cleanup
@@ -4825,6 +4866,157 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SetRetryPolicy_success)
 
     // cleanup
     destroy_transport(handle, NULL, NULL);
+}
+
+TEST_FUNCTION(IoTHubTransport_AMQP_SetCallbackContext_success)
+{
+    // arrange
+    TRANSPORT_LL_HANDLE handle = create_transport();
+    umock_c_reset_all_calls();
+
+    // act
+    int result = IoTHubTransport_AMQP_SetCallbackContext(handle, transport_cb_ctx);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, 0, result);
+
+    // cleanup
+    destroy_transport(handle, NULL, NULL);
+}
+
+TEST_FUNCTION(IoTHubTransport_AMQP_SetCallbackContext_fail)
+{
+    // arrange
+
+    // act
+    int result = IoTHubTransport_AMQP_SetCallbackContext(NULL, transport_cb_ctx);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_NOT_EQUAL(int, 0, result);
+
+    // cleanup
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_155: [ device_get_twin_async() shall be invoked for the registered device, passing `on_device_get_twin_completed_callback`]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_157: [ If no errors occur, `IoTHubTransport_AMQP_Common_GetTwinAsync` shall return IOTHUB_CLIENT_OK ]
+TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetTwinAsync_success)
+{
+    // arrange
+    TRANSPORT_LL_HANDLE handle = create_transport();
+
+    IOTHUB_DEVICE_CONFIG* device_config = create_device_config(TEST_DEVICE_ID_CHAR_PTR, true);
+
+    IOTHUB_DEVICE_HANDLE registered_devices[1];
+    registered_devices[0] = register_device(handle, device_config, &TEST_waitingToSend, true);
+
+    crank_transport_ready_after_create(handle, &TEST_waitingToSend, 0, false, true, 1, TEST_current_time, false);
+    
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(device_get_twin_async(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_GetTwinAsync(handle, on_device_get_twin_completed_callback, (void*)0x5566);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
+
+    // cleanup
+    destroy_transport(handle, NULL, NULL);
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_154: [ If `handle` or `completionCallback` are NULL, `IoTHubTransport_AMQP_Common_GetTwinAsync` shall fail and return IOTHUB_CLIENT_INVALID_ARG ]
+TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetTwinAsync_NULL_handle)
+{
+    // arrange
+    umock_c_reset_all_calls();
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_GetTwinAsync(NULL, on_device_get_twin_completed_callback, (void*)0x5566);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_INVALID_ARG, result);
+
+    // cleanup
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_154: [ If `handle` or `completionCallback` are NULL, `IoTHubTransport_AMQP_Common_GetTwinAsync` shall fail and return IOTHUB_CLIENT_INVALID_ARG ]
+TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetTwinAsync_NULL_callback)
+{
+    // arrange
+    TRANSPORT_LL_HANDLE handle = create_transport();
+
+    IOTHUB_DEVICE_CONFIG* device_config = create_device_config(TEST_DEVICE_ID_CHAR_PTR, true);
+
+    IOTHUB_DEVICE_HANDLE registered_devices[1];
+    registered_devices[0] = register_device(handle, device_config, &TEST_waitingToSend, true);
+
+    crank_transport_ready_after_create(handle, &TEST_waitingToSend, 0, false, true, 1, TEST_current_time, false);
+
+    umock_c_reset_all_calls();
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_GetTwinAsync(handle, NULL, (void*)0x5566);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_INVALID_ARG, result);
+
+    // cleanup
+    destroy_transport(handle, NULL, NULL);
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_156: [ If device_get_twin_async() fails, `IoTHubTransport_AMQP_Common_GetTwinAsync` shall fail and return IOTHUB_CLIENT_ERROR ]
+TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetTwinAsync_failure_checks)
+{
+    // arrange
+    ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
+    TRANSPORT_LL_HANDLE handle = create_transport();
+
+    IOTHUB_DEVICE_CONFIG* device_config = create_device_config(TEST_DEVICE_ID_CHAR_PTR, true);
+
+    IOTHUB_DEVICE_HANDLE registered_devices[1];
+    registered_devices[0] = register_device(handle, device_config, &TEST_waitingToSend, true);
+
+    crank_transport_ready_after_create(handle, &TEST_waitingToSend, 0, false, true, 1, TEST_current_time, false);
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_NUM_ARG))
+        .CallCannotFail();
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_NUM_ARG))
+        .CallCannotFail();
+    STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(device_get_twin_async(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    umock_c_negative_tests_snapshot();
+
+    size_t count = umock_c_negative_tests_call_count();
+    for (size_t index = 0; index < count; index++)
+    {
+        if (!umock_c_negative_tests_can_call_fail(index))
+        {
+            continue;
+        }
+
+        umock_c_negative_tests_reset();
+        umock_c_negative_tests_fail_call(index);
+
+        char tmp_msg[64];
+        sprintf(tmp_msg, "Failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
+        IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_GetTwinAsync(handle, on_device_get_twin_completed_callback, (void*)0x5566);
+
+        // assert
+        ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_ERROR, result, tmp_msg);
+    }
+
+    // cleanup
+    destroy_transport(handle, NULL, NULL);
+    umock_c_negative_tests_deinit();
 }
 
 END_TEST_SUITE(iothubtransport_amqp_common_ut)

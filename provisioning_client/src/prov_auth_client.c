@@ -40,6 +40,7 @@ typedef struct PROV_AUTH_INFO_TAG
     HSM_CLIENT_GET_COMMON_NAME hsm_client_get_common_name;
 
     HSM_CLIENT_GET_SYMMETRICAL_KEY hsm_client_get_symm_key;
+    HSM_CLIENT_SET_SYMMETRICAL_KEY_INFO hsm_client_set_symm_key_info;
 } PROV_AUTH_INFO;
 
 static char* encode_value(const uint8_t* msg_digest, size_t digest_len)
@@ -145,7 +146,7 @@ static int sign_sas_data(PROV_AUTH_INFO* auth_info, const char* payload, unsigne
 {
     int result;
     size_t payload_len = strlen(payload);
-    if (auth_info->sec_type == SECURE_DEVICE_TYPE_TPM)
+    if (auth_info->sec_type == PROV_AUTH_TYPE_TPM)
     {
         if (auth_info->hsm_client_sign_data(auth_info->hsm_client_handle, (const unsigned char*)payload, strlen(payload), output, len) != 0)
         {
@@ -263,17 +264,18 @@ PROV_AUTH_HANDLE prov_auth_create()
         }
         else
         {
-#if defined(HSM_TYPE_SYMM_KEY) || defined(HSM_AUTH_TYPE_CUSTOM)
+#if defined(HSM_TYPE_SYMM_KEY)
             result->sec_type = PROV_AUTH_TYPE_KEY;
             const HSM_CLIENT_KEY_INTERFACE* key_interface = hsm_client_key_interface();
             if ((key_interface == NULL) ||
                 ((result->hsm_client_create = key_interface->hsm_client_key_create) == NULL) ||
                 ((result->hsm_client_destroy = key_interface->hsm_client_key_destroy) == NULL) ||
                 ((result->hsm_client_get_common_name = key_interface->hsm_client_get_registration_name) == NULL) ||
-                ((result->hsm_client_get_symm_key = key_interface->hsm_client_get_symm_key) == NULL)
+                ((result->hsm_client_get_symm_key = key_interface->hsm_client_get_symm_key) == NULL) ||
+                ((result->hsm_client_set_symm_key_info = key_interface->hsm_client_set_symm_key_info) == NULL)
                 )
             {
-                LogError("Invalid x509 secure device interface was specified");
+                LogError("Invalid symmetric key secure device interface was specified");
                 free(result);
                 result = NULL;
             }
@@ -289,6 +291,13 @@ PROV_AUTH_HANDLE prov_auth_create()
             if ((result->hsm_client_handle = result->hsm_client_create() ) == NULL)
             {
                 LogError("failed create device auth module.");
+                free(result);
+                result = NULL;
+            }
+            else if (result->sec_type == PROV_AUTH_TYPE_KEY && result->hsm_client_set_symm_key_info(result->hsm_client_handle, prov_dev_get_symm_registration_name(), prov_dev_get_symmetric_key()) != 0)
+            {
+                LogError("failed create device auth module.");
+                result->hsm_client_destroy(result->hsm_client_handle);
                 free(result);
                 result = NULL;
             }

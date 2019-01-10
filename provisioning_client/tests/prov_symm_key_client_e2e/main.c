@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-#include "iothub_client_sample_http.h"
+#include "testrunnerswitcher.h"
 
 int main(void)
 {
-    iothub_client_sample_http_run();
-    return 0;
+    size_t failedTestCount = 0;
+    RUN_TEST_SUITE(prov_symm_key_client_e2e, failedTestCount);
+    return failedTestCount;
 }

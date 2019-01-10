@@ -21,23 +21,15 @@ include_directories(../common_e2e)
 include_directories(${IOTHUB_TEST_INC_FOLDER})
 include_directories(${IOTHUB_SERVICE_CLIENT_INC_FOLDER})
 
+if(${use_sample_trusted_cert})
+    add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
+    include_directories(../../../certs/)
+endif()
+
 file(COPY ../global_valgrind_suppression.supp DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 build_c_test_artifacts(${theseTestsName} ON "tests/E2ETests" VALGRIND_SUPPRESSIONS_FILE global_valgrind_suppression.supp)
 
 if(WIN32)
-    if(TARGET ${theseTestsName}_dll)
-        target_link_libraries(${theseTestsName}_dll
-                iothub_client
-                aziotsharedutil
-        )
-    endif()
-    if(TARGET ${theseTestsName}_exe)
-        target_link_libraries(${theseTestsName}_exe
-                iothub_client
-                aziotsharedutil
-        )
-    endif()
-
     if(TARGET ${theseTestsName}_dll)
         if(${use_mqtt})
             add_definitions(-DUSE_MQTT)
@@ -88,6 +80,21 @@ if(WIN32)
             )
         endif()
     endif()
+
+    if(TARGET ${theseTestsName}_dll)
+        target_link_libraries(${theseTestsName}_dll
+                iothub_client
+                aziotsharedutil
+        )
+    endif()
+    if(TARGET ${theseTestsName}_exe)
+        target_link_libraries(${theseTestsName}_exe
+                iothub_client
+                aziotsharedutil
+        )
+    endif()
+
+
 else()
 
     if(UNIX) #LINUX OR APPLE
@@ -103,11 +110,6 @@ else()
     endif()
 
     if(TARGET ${theseTestsName}_exe)
-        target_link_libraries(${theseTestsName}_exe
-            iothub_test
-            iothub_client
-            aziotsharedutil
-        )
         if(${use_mqtt})
             add_definitions(-DUSE_MQTT)
             target_link_libraries(${theseTestsName}_exe
@@ -130,6 +132,12 @@ else()
                 iothub_client_http_transport
             )
         endif()
+
+        target_link_libraries(${theseTestsName}_exe
+            iothub_test
+            iothub_client
+            aziotsharedutil
+        )
 
     endif()
 endif()

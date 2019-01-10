@@ -23,7 +23,6 @@
 #ifdef USE_HTTP
 #include "azure_prov_client/prov_transport_http_client.h"
 #endif
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 #define MAX_CONNECT_CALLBACK_WAIT_TIME        10
 
@@ -41,9 +40,9 @@ BEGIN_TEST_SUITE(prov_invalidcert_e2e)
 static void register_device_callback(PROV_DEVICE_RESULT register_result, const char* iothub_uri, const char* device_id, void* user_ctx)
 {
     CONNECTION_STATUS_INFO* conn_status = (CONNECTION_STATUS_INFO*)user_ctx;
-    ASSERT_IS_NOT_NULL_WITH_MSG(conn_status, "connection status callback context is NULL");
-    ASSERT_IS_NULL_WITH_MSG(iothub_uri, "iothub_uri is not NULL");
-    ASSERT_IS_NULL_WITH_MSG(device_id, "device_id is not NULL");
+    ASSERT_IS_NOT_NULL(conn_status, "connection status callback context is NULL");
+    ASSERT_IS_NULL(iothub_uri, "iothub_uri is not NULL");
+    ASSERT_IS_NULL(device_id, "device_id is not NULL");
 
     conn_status->status_set = true;
     conn_status->current_result = register_result;
@@ -56,7 +55,7 @@ static PROV_DEVICE_LL_HANDLE create_client(PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTI
 
     PROV_DEVICE_LL_HANDLE prov_handle;
     prov_handle = Prov_Device_LL_Create(prov_uri, id_scope, prov_transport);
-    ASSERT_IS_NOT_NULL_WITH_MSG(prov_handle, "Could not create handle with Prov_Device_LL_Create");
+    ASSERT_IS_NOT_NULL(prov_handle, "Could not create handle with Prov_Device_LL_Create");
 
     Prov_Device_LL_Register_Device(prov_handle, register_device_callback, conn_status, NULL, NULL);
 
@@ -75,8 +74,8 @@ static void wait_for_unauthorized_connection(PROV_DEVICE_LL_HANDLE prov_handle, 
         (nowTime = time(NULL)),
         (difftime(nowTime, beginOperation) < MAX_CONNECT_CALLBACK_WAIT_TIME) && (!conn_status->status_set) // time box
         );
-    ASSERT_IS_TRUE_WITH_MSG(conn_status->status_set, "Status callback did not get executed");
-    ASSERT_ARE_NOT_EQUAL_WITH_MSG(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, conn_status->current_result, "Connection was successful and should not have been");
+    ASSERT_IS_TRUE(conn_status->status_set, "Status callback did not get executed");
+    ASSERT_ARE_NOT_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, conn_status->current_result, "Connection was successful and should not have been");
 }
 
 static void run_invalidcert_test(PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION prov_transport)
@@ -94,7 +93,6 @@ static void run_invalidcert_test(PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION prov_tr
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     platform_init();
     prov_dev_security_init(SECURE_DEVICE_TYPE_X509);
 }
@@ -103,7 +101,6 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
 {
     prov_dev_security_deinit();
     platform_deinit();
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)

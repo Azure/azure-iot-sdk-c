@@ -26,6 +26,7 @@
 #define IOTHUB_CLIENT_LL_UPLOADTOBLOB_H
 
 #include "iothub_client_core_ll.h"
+#include "internal/iothub_client_authorization.h"
 
 #include "azure_c_shared_utility/umock_c_prod.h"
 #ifdef __cplusplus
@@ -40,7 +41,7 @@ extern "C"
 
     typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE;
 
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, IoTHubClient_LL_UploadToBlob_Create, const IOTHUB_CLIENT_CONFIG*, config);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, IoTHubClient_LL_UploadToBlob_Create, const IOTHUB_CLIENT_CONFIG*, config, IOTHUB_AUTHORIZATION_HANDLE, auth_handle);
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob_Impl, IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, handle, const char*, destinationFileName, const unsigned char*, source, size_t, size);
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl, IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, handle, const char*, destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX, getDataCallbackEx, void*, context);
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob_SetOption, IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, handle, const char*, optionName, const void*, value);

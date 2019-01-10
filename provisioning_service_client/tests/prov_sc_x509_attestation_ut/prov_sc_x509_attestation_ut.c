@@ -60,7 +60,6 @@ MOCKABLE_FUNCTION(, JSON_Array*, json_object_get_array, const JSON_Object*, obje
 #include "prov_service_client/provisioning_sc_x509_attestation.h"
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
@@ -149,7 +148,6 @@ BEGIN_TEST_SUITE(prov_sc_x509_attestation_ut)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -163,7 +161,6 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     umock_c_deinit();
 
     TEST_MUTEX_DESTROY(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
@@ -1247,7 +1244,7 @@ TEST_FUNCTION(x509Attestation_create_client_both_certs_error)
         X509_ATTESTATION_HANDLE x509_att = x509Attestation_create(X509_CERTIFICATE_TYPE_CLIENT, DUMMY_CERT1, DUMMY_CERT2);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(x509_att, tmp_msg);
+        ASSERT_IS_NULL(x509_att, tmp_msg);
     }
 
     umock_c_negative_tests_deinit();
@@ -1334,7 +1331,7 @@ TEST_FUNCTION(x509Attestation_create_signing_both_certs_error)
         X509_ATTESTATION_HANDLE x509_att = x509Attestation_create(X509_CERTIFICATE_TYPE_SIGNING, DUMMY_CERT1, DUMMY_CERT2);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(x509_att, tmp_msg);
+        ASSERT_IS_NULL(x509_att, tmp_msg);
     }
 
     umock_c_negative_tests_deinit();
@@ -1417,7 +1414,7 @@ TEST_FUNCTION(x509Attestation_create_ca_both_refs_error)
         X509_ATTESTATION_HANDLE x509_att = x509Attestation_create(X509_CERTIFICATE_TYPE_CA_REFERENCES, DUMMY_CERT1, DUMMY_CERT2);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(x509_att, tmp_msg);
+        ASSERT_IS_NULL(x509_att, tmp_msg);
     }
 
     umock_c_negative_tests_deinit();
@@ -1694,7 +1691,7 @@ TEST_FUNCTION(x509Attestation_fromJson_client_two_certs_error)
         X509_ATTESTATION_HANDLE x509_att = x509Attestation_fromJson(TEST_JSON_OBJECT);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(x509_att, tmp_msg);
+        ASSERT_IS_NULL(x509_att, tmp_msg);
     }
 
     umock_c_negative_tests_deinit();
@@ -1778,7 +1775,7 @@ TEST_FUNCTION(x509Attestation_fromJson_signing_two_certs_error)
         X509_ATTESTATION_HANDLE x509_att = x509Attestation_fromJson(TEST_JSON_OBJECT);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(x509_att, tmp_msg);
+        ASSERT_IS_NULL(x509_att, tmp_msg);
     }
 
     umock_c_negative_tests_deinit();
@@ -1847,7 +1844,7 @@ TEST_FUNCTION(x509Attestation_fromJson_ca_two_refs_error)
         X509_ATTESTATION_HANDLE x509_att = x509Attestation_fromJson(TEST_JSON_OBJECT);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(x509_att, tmp_msg);
+        ASSERT_IS_NULL(x509_att, tmp_msg);
     }
 
     umock_c_negative_tests_deinit();
@@ -1937,7 +1934,7 @@ TEST_FUNCTION(x509Attestation_toJson_client_two_certs_unprocessed_error)
         JSON_Value* json_val = x509Attestation_toJson(x509_att);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(json_val, tmp_msg);
+        ASSERT_IS_NULL(json_val, tmp_msg);
     }
 
     umock_c_negative_tests_deinit();
@@ -2014,7 +2011,7 @@ TEST_FUNCTION(x509Attestation_toJson_client_two_certs_processed_error)
         JSON_Value* json_val = x509Attestation_toJson(x509_att);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(json_val, tmp_msg);
+        ASSERT_IS_NULL(json_val, tmp_msg);
     }
 
     umock_c_negative_tests_deinit();
@@ -2091,7 +2088,7 @@ TEST_FUNCTION(x509Attestation_toJson_signing_two_certs_unprocessed_error)
         JSON_Value* json_val = x509Attestation_toJson(x509_att);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(json_val, tmp_msg);
+        ASSERT_IS_NULL(json_val, tmp_msg);
     }
 
     umock_c_negative_tests_deinit();
@@ -2168,7 +2165,7 @@ TEST_FUNCTION(x509Attestation_toJson_signing_two_certs_processed_error)
         JSON_Value* json_val = x509Attestation_toJson(x509_att);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(json_val, tmp_msg);
+        ASSERT_IS_NULL(json_val, tmp_msg);
     }
 
     umock_c_negative_tests_deinit();
@@ -2258,7 +2255,7 @@ TEST_FUNCTION(x509Attestation_toJson_ca_two_refs_error)
         JSON_Value* json_val = x509Attestation_toJson(x509_att);
 
         //assert
-        ASSERT_IS_NULL_WITH_MSG(json_val, tmp_msg);
+        ASSERT_IS_NULL(json_val, tmp_msg);
     }
 
     umock_c_negative_tests_deinit();
