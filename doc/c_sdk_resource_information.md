@@ -6,7 +6,11 @@ All test are executed on an ubuntu 18.04.1 image with GCC version 7.3.0 using C-
 
 ## On Disk Binary Information
 
-This is the size of the binary built with the c sdk for each protocol.  The appication setups the SDK and sends 1 telemetry message.
+This is the size of the binary built with the c sdk for each protocol.  The application sets up the SDK and sends 1 telemetry message.
+
+### C-SDK without upload to blob
+
+CMAKE Command: cmake -Ddont_use_uploadtoblob=ON ..
 
 | Protocol                | Size In Bytes
 |-------------------------|---------------------
@@ -14,6 +18,29 @@ This is the size of the binary built with the c sdk for each protocol.  The appi
 | MQTT With Web Sockets   | 343,244
 | AMQP                    | 775,816
 | AMQP With Web Sockets   | 815,824
+
+### C-SDK without upload to blob and logging turned off
+
+CMAKE Command: cmake -Ddont_use_uploadtoblob=ON -Dno_logging=ON ..
+
+| Protocol                | Size In Bytes
+|-------------------------|---------------------
+| MQTT                    | 204,088
+| MQTT With Web Sockets   | 223,640
+| AMQP                    | 479,120
+| AMQP With Web Sockets   | 498,672
+
+### C-SDK using strip command
+
+CMAKE Command: cmake -Ddont_use_uploadtoblob=ON -Dno_logging=ON ..
+strip [executable path]
+
+| Protocol                | Size In Bytes
+|-------------------------|---------------------
+| MQTT                    | 167,552
+| MQTT With Web Sockets   | 183,936
+| AMQP                    | 397,464
+| AMQP With Web Sockets   | 413,864
 
 ## Runtime Memory Information
 
