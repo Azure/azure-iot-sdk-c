@@ -21,6 +21,7 @@ extern const TRANSPORT_PROVIDER* HTTP_Protocol(void);
     - IoTHubTransportHttp_Unsubscribe_DeviceMethod,
     - IoTHubTransportHttp_Subscribe_DeviceTwin,
     - IoTHubTransportHttp_Unsubscribe_DeviceTwin,
+	- IoTHubTransportHttp_GetDeviceTwinAsync,
     - IoTHubTransportHttp_GetHostname,
     - IoTHubTransportHttp_SetOption,
     - IoTHubTransportHttp_Create,
@@ -392,6 +393,16 @@ void IoTHubTransportHttp_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle, IOT
 `IoTHubTransportHttp_Unsubscribe_DeviceTwin` unsubscribes from DeviceTwin's Desired Properties.
 
 **SRS_TRANSPORTMULTITHTTP_02_004: [** `IoTHubTransportHttp_Unsubscribe_DeviceTwin` shall return **]**
+
+
+## IoTHubTransportHttp_GetDeviceTwinAsync
+```c 
+IOTHUB_CLIENT_RESULT IoTHubTransportHttp_GetDeviceTwinAsync(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK completionCallback, void* callbackContext)
+```
+
+This feature is not supported in HTTP transport.
+
+**SRS_TRANSPORTMULTITHTTP_09_005: [** `IoTHubTransportHttp_GetDeviceTwinAsync` shall return IOTHUB_CLIENT_ERROR**]**
 
 
 ## IoTHubTransportHttp_Subscribe_DeviceMethod

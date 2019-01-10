@@ -217,6 +217,13 @@ static int deviceMethodCallback(const char* method_name, const unsigned char* pa
     return result;
 }
 
+static void getCompleteDeviceTwinOnDemandCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback)
+{
+    (void)update_state;
+    (void)userContextCallback;
+    printf("GetTwinAsync result:\r\n%.*s\r\n", (int)size, payLoad);
+}
+
 static void deviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback)
 {
     (void)update_state;
@@ -338,6 +345,7 @@ static void iothub_client_device_twin_and_methods_sample_run(void)
 
             char* reportedProperties = serializeToJson(&car);
 
+            (void)IoTHubDeviceClient_GetTwinAsync(iotHubClientHandle, getCompleteDeviceTwinOnDemandCallback, NULL);
             (void)IoTHubDeviceClient_SendReportedState(iotHubClientHandle, (const unsigned char*)reportedProperties, strlen(reportedProperties), reportedStateCallback, NULL);
             (void)IoTHubDeviceClient_SetDeviceMethodCallback(iotHubClientHandle, deviceMethodCallback, NULL);
             (void)IoTHubDeviceClient_SetDeviceTwinCallback(iotHubClientHandle, deviceTwinCallback, &car);

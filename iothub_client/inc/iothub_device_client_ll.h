@@ -225,8 +225,10 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_GetLastMessageReceiveTime, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle, time_t*, lastMessageReceiveTime);
 
     /**
-    * @brief    This function is meant to be called by the user when work
-    *           (sending/receiving) can be done by the IoTHubClient.
+    * @brief    This function MUST be called by the user so work (sending/receiving data on the wire,
+    *           computing and enforcing timeout controls, managing the connection to the IoT Hub) can
+    *           be done by the IoTHubClient.
+    *           The recommended call frequency is at least once every 100 milliseconds.
     *
     * @param    iotHubClientHandle    The handle created by a call to the create function.
     *
@@ -317,6 +319,22 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_SendReportedState, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle, const unsigned char*, reportedState, size_t, size, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK, reportedStateCallback, void*, userContextCallback);
+
+     /**
+     * @brief	This API enabled the device to request the full device twin (with all the desired and reported properties) on demand.
+     *
+     * @param	iotHubClientHandle		The handle created by a call to the create function.
+     * @param	deviceTwinCallback	    The callback specified by the device client to receive the Twin document.
+     * @param	userContextCallback		User specified context that will be provided to the
+     * 									callback. This can be @c NULL.
+     *
+     *			@b NOTE: The application behavior is undefined if the user calls
+     *			the ::IoTHubClient_LL_Destroy function from within any callback.
+     *
+     * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
+     */
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_GetTwinAsync, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK, deviceTwinCallback, void*, userContextCallback);
+
      /**
      * @brief    This API sets the callback for async cloud to device method calls.
      *

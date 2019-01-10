@@ -106,6 +106,7 @@ extern int device_send_event_async(DEVICE_HANDLE handle, IOTHUB_MESSAGE_LIST* me
 extern int device_send_twin_update_async(DEVICE_HANDLE handle, CONSTBUFFER_HANDLE data, DEVICE_SEND_TWIN_UPDATE_COMPLETE_CALLBACK on_send_twin_update_complete_callback, void* context);
 extern int device_subscribe_for_twin_updates(DEVICE_HANDLE handle, DEVICE_TWIN_UPDATE_RECEIVED_CALLBACK on_device_twin_update_received_callback, void* context);
 extern int device_unsubscribe_for_twin_updates(DEVICE_HANDLE handle);
+extern int device_get_twin_async(AMQP_DEVICE_HANDLE handle, DEVICE_TWIN_UPDATE_RECEIVED_CALLBACK on_device_get_twin_completed_callback, void* context);
 extern int device_get_send_status(DEVICE_HANDLE handle, DEVICE_SEND_STATUS *send_status);
 extern int device_subscribe_message(DEVICE_HANDLE handle, ON_DEVICE_C2D_MESSAGE_RECEIVED on_message_received_callback, void* context);
 extern int device_unsubscribe_message(DEVICE_HANDLE handle);
@@ -337,6 +338,20 @@ extern int device_unsubscribe_for_twin_updates(DEVICE_HANDLE handle);
 **SRS_DEVICE_09_149: [**If twin_messenger_unsubscribe fails, device_unsubscribe_for_twin_updates shall return a non-zero value**]**
 
 **SRS_DEVICE_09_150: [**If no failures occur, device_unsubscribe_for_twin_updates shall return 0**]**
+
+
+### device_get_twin_async
+```c
+extern int device_get_twin_async(AMQP_DEVICE_HANDLE handle, DEVICE_TWIN_UPDATE_RECEIVED_CALLBACK on_device_get_twin_completed_callback, void* context);
+```
+
+**SRS_DEVICE_09_152: [**If `handle` or `on_device_get_twin_completed_callback` are NULL, device_get_twin_async shall return a non-zero result**]**
+
+**SRS_DEVICE_09_153: [**twin_messenger_get_twin_async shall be invoked **]**
+
+**SRS_DEVICE_09_154: [**If twin_messenger_get_twin_async fails, device_get_twin_async shall return a non-zero value**]**
+
+**SRS_DEVICE_09_155: [**If no failures occur, device_get_twin_async shall return 0**]**
 
 
 ### device_subscribe_message

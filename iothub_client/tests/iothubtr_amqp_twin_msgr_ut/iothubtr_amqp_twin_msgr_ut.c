@@ -385,6 +385,17 @@ static void reset_dowork_test_profile(DOWORK_TEST_PROFILE* dwtp)
     dwtp->number_of_expired_pending_operations = 0;
 }
 
+static TWIN_UPDATE_TYPE get_twin_completed_update_type;
+static const char* get_twin_completed_payload;
+static size_t get_twin_completed_size;
+static const void* get_twin_completed_context;
+static void on_twin_get_completed_callback(TWIN_UPDATE_TYPE update_type, const char* payload, size_t size, const void* context)
+{
+    get_twin_completed_update_type = update_type;
+    get_twin_completed_payload = payload;
+    get_twin_completed_size = size;
+    get_twin_completed_context = context;
+}
 
 // ---------- Expected Calls ---------- //
 
@@ -496,8 +507,6 @@ static void set_process_timeouts_expected_calls(time_t current_time, size_t numb
     {
         STRICT_EXPECTED_CALL(get_difftime(current_time, IGNORED_NUM_ARG)).SetReturn(0); // Simulate it's not expired.
     }
-
-
 }
 
 static void set_create_twin_operation_context_expected_calls()
@@ -765,6 +774,9 @@ static void register_global_mock_returns()
 
     REGISTER_GLOBAL_MOCK_RETURN(amqp_messenger_retrieve_options, TEST_OPTIONHANDLER_HANDLE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqp_messenger_retrieve_options, NULL);
+    
+    REGISTER_GLOBAL_MOCK_RETURN(amqp_messenger_send_async, 0);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqp_messenger_send_async, 1);
 
     // amqpvalue
     REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_create_map, TEST_MAP_AMQP_VALUE);
@@ -781,6 +793,9 @@ static void register_global_mock_returns()
 
     REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_create_message_annotations, TEST_MSG_ANNOTATIONS_AMQP_VALUE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqpvalue_create_message_annotations, NULL);
+    
+    REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_set_map_value, 0);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqpvalue_set_map_value, 1);
 
     // CRT
     REGISTER_GLOBAL_MOCK_RETURN(mallocAndStrcpy_s, 0);
@@ -799,6 +814,15 @@ static void register_global_mock_returns()
 
     REGISTER_GLOBAL_MOCK_RETURN(message_set_message_annotations, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(message_set_message_annotations, 1);
+
+    REGISTER_GLOBAL_MOCK_RETURN(message_get_properties, 0);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(message_get_properties, 1);
+
+    REGISTER_GLOBAL_MOCK_RETURN(message_set_properties, 0);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(message_set_properties, 1);
+
+    REGISTER_GLOBAL_MOCK_RETURN(message_add_body_amqp_data, 0);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(message_add_body_amqp_data, 1);
 
     // singlylinkedlist
     REGISTER_GLOBAL_MOCK_RETURN(singlylinkedlist_remove, 0);
@@ -826,6 +850,9 @@ static void register_global_mock_returns()
     // properties
     REGISTER_GLOBAL_MOCK_RETURN(properties_create, TEST_PROPERTIES_HANDLE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(properties_create, NULL);
+
+    REGISTER_GLOBAL_MOCK_RETURN(properties_set_correlation_id, 0);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(properties_set_correlation_id, 1);
 
     // UniqueId
     REGISTER_GLOBAL_MOCK_RETURN(UniqueId_Generate, UNIQUEID_OK);
@@ -1479,6 +1506,117 @@ TEST_FUNCTION(twin_msgr_retrieve_options_success)
 
     // cleanup
     twin_messenger_destroy(handle);
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_110: [ `on_get_twin_completed_callback` and `context` shall be saved ] 
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_111: [ An AMQP message shall be created to request a GET twin ]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_112: [ The AMQP message shall be sent to the twin send link ] 
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_114: [If no failures occurr, twin_messenger_get_twin_async() shall return 0 ]  
+TEST_FUNCTION(twin_messenger_get_twin_async_success)
+{
+    // arrange
+    TWIN_MESSENGER_CONFIG* config = get_twin_messenger_config();
+    TWIN_MESSENGER_HANDLE handle = create_twin_messenger(config);
+
+    umock_c_reset_all_calls();
+    set_create_twin_operation_context_expected_calls();
+    STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+    set_create_amqp_message_for_twin_operation_expected_calls(TWIN_OPERATION_TYPE_GET);
+    STRICT_EXPECTED_CALL(get_time(IGNORED_PTR_ARG)).SetReturn(g_initial_time);
+    STRICT_EXPECTED_CALL(amqp_messenger_send_async(TEST_AMQP_MESSENGER_HANDLE, TEST_MESSAGE_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(message_destroy(IGNORED_PTR_ARG));
+
+    // act
+    int result = twin_messenger_get_twin_async(handle, on_twin_get_completed_callback, (void*)0x4567);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, 0, result);
+
+    // cleanup
+    twin_messenger_destroy(handle);
+}
+
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_109: [If `twin_msgr_handle` or `on_twin_state_update_callback` are NULL, twin_messenger_get_twin_async() shall fail and return a non-zero value]  
+TEST_FUNCTION(twin_messenger_get_twin_async_NULL_handle)
+{
+    // arrange
+    umock_c_reset_all_calls();
+
+    // act
+    int result = twin_messenger_get_twin_async(NULL, on_twin_get_completed_callback, (void*)0x4567);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_NOT_EQUAL(int, 0, result);
+
+    // cleanup
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_109: [If `twin_msgr_handle` or `on_twin_state_update_callback` are NULL, twin_messenger_get_twin_async() shall fail and return a non-zero value]  
+TEST_FUNCTION(twin_messenger_get_twin_async_NULL_callback)
+{
+    // arrange
+    TWIN_MESSENGER_CONFIG* config = get_twin_messenger_config();
+    TWIN_MESSENGER_HANDLE handle = create_twin_messenger(config);
+
+    umock_c_reset_all_calls();
+
+    // act
+    int result = twin_messenger_get_twin_async(handle, NULL, (void*)0x4567);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_NOT_EQUAL(int, 0, result);
+
+    // cleanup
+    twin_messenger_destroy(handle);
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_113: [If any failures occurr, twin_messenger_get_twin_async() shall return a non-zero value ]  
+TEST_FUNCTION(twin_messenger_get_twin_async_failure_checks)
+{
+    // arrange
+    ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
+
+    TWIN_MESSENGER_CONFIG* config = get_twin_messenger_config();
+    TWIN_MESSENGER_HANDLE handle = create_twin_messenger(config);
+
+    umock_c_reset_all_calls();
+    set_create_twin_operation_context_expected_calls(); // 0 - 2
+    STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+    set_create_amqp_message_for_twin_operation_expected_calls(TWIN_OPERATION_TYPE_GET);
+    STRICT_EXPECTED_CALL(get_time(IGNORED_PTR_ARG)).SetReturn(g_initial_time);
+    STRICT_EXPECTED_CALL(amqp_messenger_send_async(TEST_AMQP_MESSENGER_HANDLE, TEST_MESSAGE_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(message_destroy(IGNORED_PTR_ARG));
+    umock_c_negative_tests_snapshot();
+
+    size_t count = umock_c_negative_tests_call_count();
+
+    for (size_t index = 0; index < count; index++)
+    {
+        if (!umock_c_negative_tests_can_call_fail(index))
+        {
+            continue;
+        }
+
+        umock_c_negative_tests_reset();
+        umock_c_negative_tests_fail_call(index);
+
+        char tmp_msg[64];
+        sprintf(tmp_msg, "Failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
+        int result = twin_messenger_get_twin_async(handle, on_twin_get_completed_callback, (void*)0x4567);
+
+        // assert
+        ASSERT_ARE_NOT_EQUAL(int, 0, result, tmp_msg);
+    }
+
+    // cleanup
+    twin_messenger_destroy(handle);
+    umock_c_negative_tests_deinit();
 }
 
 // Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_083: [twin_messenger_do_work() shall invoke amqp_messenger_do_work() passing `twin_msgr->amqp_msgr`]
