@@ -506,6 +506,7 @@ static void* transport_cb_ctx = (void*)0x499922;
 static pfIotHubTransport_SendMessageDisposition         IoTHubTransportHttp_SendMessageDisposition;
 static pfIoTHubTransport_Subscribe_DeviceTwin           IoTHubTransportHttp_Subscribe_DeviceTwin;
 static pfIoTHubTransport_Unsubscribe_DeviceTwin         IoTHubTransportHttp_Unsubscribe_DeviceTwin;
+static pfIoTHubTransport_GetTwinAsync             IoTHubTransportHttp_GetTwinAsync;
 static pfIoTHubTransport_GetHostname                    IoTHubTransportHttp_GetHostname;
 static pfIoTHubTransport_SetOption                      IoTHubTransportHttp_SetOption;
 static pfIoTHubTransport_Create                         IoTHubTransportHttp_Create;
@@ -1308,6 +1309,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     IoTHubTransportHttp_SendMessageDisposition = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_SendMessageDisposition;
     IoTHubTransportHttp_Unsubscribe_DeviceTwin = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_Unsubscribe_DeviceTwin;
     IoTHubTransportHttp_Subscribe_DeviceTwin = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_Subscribe_DeviceTwin;
+    IoTHubTransportHttp_GetTwinAsync = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_GetTwinAsync;
     IoTHubTransportHttp_GetHostname = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_GetHostname;
     IoTHubTransportHttp_SetOption = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_SetOption;
     IoTHubTransportHttp_Create = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_Create;
@@ -14308,6 +14310,25 @@ TEST_FUNCTION(IoTHubTransportHttp_Subscribe_DeviceTwin_returns)
     //assert
     ASSERT_ARE_NOT_EQUAL(int, 0, res);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubTransportHttp_Destroy(handle);
+}
+
+// Tests_SRS_TRANSPORTMULTITHTTP_09_005: [ `IoTHubTransportHttp_GetTwinAsync` shall return IOTHUB_CLIENT_ERROR]
+TEST_FUNCTION(IoTHubTransportHttp_GetTwinAsync_returns)
+{
+    //arrange
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_CLIENT_RESULT res = IoTHubTransportHttp_GetTwinAsync(handle, (IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)0x4444, (void*)0x4445);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_ERROR, res);
 
     //cleanup
     IoTHubTransportHttp_Destroy(handle);

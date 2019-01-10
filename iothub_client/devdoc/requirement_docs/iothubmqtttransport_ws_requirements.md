@@ -17,6 +17,7 @@ extern const TRANSPORT_PROVIDER* MQTT_Protocol(void);
     - IoTHubTransportMqtt_WS_Unsubscribe_DeviceMethod,  
     - IoTHubTransportMqtt_WS_Subscribe_DeviceTwin,  
     - IoTHubTransportMqtt_WS_Unsubscribe_DeviceTwin,  
+    - IoTHubTransportMqtt_WS_Unsubscribe_GetDeviceTwinAsync,  
     - IoTHubTransportMqtt_WS_ProcessItem,  
     - IoTHubTransportMqtt_WS_GetHostname,  
     - IoTHubTransportMqtt_WS_SetOption,  
@@ -175,6 +176,14 @@ static void IoTHubTransportMqtt_WS_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE h
 ```
 
 **SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_018: [** IoTHubTransportMqtt_WS_Unsubscribe_DeviceTwin shall call into the IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin **]**
+
+### IoTHubTransportMqtt_WS_GetDeviceTwinAsync
+
+```c
+static IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_WS_GetDeviceTwinAsync(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK completionCallback, void* callbackContext)
+```
+
+**SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_09_001: [** IoTHubTransportMqtt_WS_GetDeviceTwinAsync shall call into the IoTHubTransport_MQTT_Common_GetDeviceTwinAsync **]**
 
 ### IoTHubTransportMqtt_WS_DoWork
 

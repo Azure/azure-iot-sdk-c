@@ -41,10 +41,6 @@ if(${use_openssl})
     endif()
 endif()
 
-target_link_libraries(prov_dev_client_ll_sample
-    iothub_client
-    prov_device_ll_client)
-
 if (${use_http})
     target_link_libraries(prov_dev_client_ll_sample prov_http_transport)
 endif()
@@ -55,6 +51,10 @@ if (${use_amqp})
     target_link_libraries(prov_dev_client_ll_sample prov_amqp_ws_transport prov_amqp_transport iothub_client_amqp_transport)
     linkUAMQP(prov_dev_client_ll_sample)
 endif()
+
+target_link_libraries(prov_dev_client_ll_sample
+    iothub_client
+    prov_device_ll_client)
 
 link_security_client(prov_dev_client_ll_sample)
 linkSharedUtil(prov_dev_client_ll_sample)
