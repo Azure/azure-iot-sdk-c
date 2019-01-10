@@ -29,6 +29,7 @@ MOCKABLE_FUNCTION(, int, IoTHubTransport_AMQP_Common_Subscribe, IOTHUB_DEVICE_HA
 MOCKABLE_FUNCTION(, void, IoTHubTransport_AMQP_Common_Unsubscribe, IOTHUB_DEVICE_HANDLE, handle);
 MOCKABLE_FUNCTION(, int, IoTHubTransport_AMQP_Common_Subscribe_DeviceTwin, IOTHUB_DEVICE_HANDLE, handle);
 MOCKABLE_FUNCTION(, void, IoTHubTransport_AMQP_Common_Unsubscribe_DeviceTwin, IOTHUB_DEVICE_HANDLE, handle);
+MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubTransport_AMQP_Common_GetTwinAsync, IOTHUB_DEVICE_HANDLE, handle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK, completionCallback, void*, callbackContext);
 MOCKABLE_FUNCTION(, int, IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod, IOTHUB_DEVICE_HANDLE, handle);
 MOCKABLE_FUNCTION(, void, IoTHubTransport_AMQP_Common_Unsubscribe_DeviceMethod, IOTHUB_DEVICE_HANDLE, handle);
 MOCKABLE_FUNCTION(, int, IoTHubTransport_AMQP_Common_DeviceMethod_Response, IOTHUB_DEVICE_HANDLE, handle, METHOD_HANDLE, methodId, const unsigned char*, response, size_t, response_size, int, status_response);
