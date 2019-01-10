@@ -9,7 +9,7 @@ set (CMAKE_C_FLAGS "--std=c99 ${CMAKE_C_FLAGS}")
 option(use_sample_trusted_cert "Set flag in samples to use SDK's built-in CA as TrustedCerts" ON)
 
 set(iothub_c_files
-    sample.c
+    iothub_convenience_.c
 )
 
 # Conditionally use the SDK trusted certs in the samples (is set to true in cmake toolchain file)
