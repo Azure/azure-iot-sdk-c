@@ -53,9 +53,9 @@ MOCKABLE_FUNCTION(, int, IoTHubClient_Diagnostic_AddIfNecessary, IOTHUB_DIAGNOST
     * @brief    Adds tracestate information to message if:
     *           a. distributedTracingSetting->sampingMode = true
     *           b. distributedTracingSetting->samplingRate > 0 and
-    *           b. the number of current message matches sample rule specified by distributedTracingSetting->samplingRate
+    *           c. the number of current message matches sample rule specified by distributedTracingSetting->samplingRate
     *
-    * @param    diagSetting        Pointer to an @c IOTHUB_DISTRIBUTED_TRACING_SETTING_DATA structure
+    * @param    distributedTracingSetting        Pointer to an @c IOTHUB_DISTRIBUTED_TRACING_SETTING_DATA structure
     * @param    messageHandle    message handle
     * @return    0 upon success, non-zero otherwise
     */
@@ -64,13 +64,13 @@ MOCKABLE_FUNCTION(, int, IoTHubClient_DistributedTracing_AddToMessageHeadersIfNe
 /**
     * @brief	Update distributed tracing settings from device twin
     *
-    * @param	diagSetting		        Pointer to an @c IOTHUB_DISTRIBUTED_TRACING_SETTING_DATA structure
+    * @param	distributedTracingSetting		        Pointer to an @c IOTHUB_DISTRIBUTED_TRACING_SETTING_DATA structure
     * @param    isPartialUpdate         Whether device twin is complete or partial update
     * @param	payLoad			        Received device twin
     * @param	reportedStatePayload	Reported state payload for distributed tracing setting
     * @return	0 upon success, non-zero otherwise
     */
-MOCKABLE_FUNCTION(, int, IoTHubClient_DistributedTracing_UpdateFromTwin, IOTHUB_DISTRIBUTED_TRACING_SETTING_DATA*, diagSetting, bool, isPartialUpdate, const unsigned char*, payLoad, STRING_HANDLE, reportedStatePayload);
+MOCKABLE_FUNCTION(, int, IoTHubClient_DistributedTracing_UpdateFromTwin, IOTHUB_DISTRIBUTED_TRACING_SETTING_DATA*, distributedTracingSetting, bool, isPartialUpdate, const unsigned char*, payLoad, STRING_HANDLE, reportedStatePayload);
 
 #ifdef __cplusplus
 }

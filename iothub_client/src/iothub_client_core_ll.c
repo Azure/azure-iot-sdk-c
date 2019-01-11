@@ -27,8 +27,6 @@
 #include "internal/iothub_client_diagnostic.h"
 #include "internal/iothubtransport.h"
 
-#include "parson.h"
-
 #ifndef DONT_USE_UPLOADTOBLOB
 #include "internal/iothub_client_ll_uploadtoblob.h"
 #endif
@@ -3031,7 +3029,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_EnableFeatureConfigurationViaTwin(IOTHU
 
         if (enableTwinConfiguration)
         {
-            IoTHubClientCore_LL_GetTwinAsync(iotHubClientHandle, IotHubClientCore_LL_GetTwin_FeatureConfiguration, iotHubClientHandle);
+            (void)IoTHubClientCore_LL_GetTwinAsync(iotHubClientHandle, IotHubClientCore_LL_GetTwin_FeatureConfiguration, iotHubClientHandle);
         }
 
         result = IOTHUB_CLIENT_OK;
