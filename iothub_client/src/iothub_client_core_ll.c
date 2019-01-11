@@ -1861,14 +1861,14 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SendEventAsync(IOTHUB_CLIENT_CORE_LL_HA
                 else
                 {
                     /*Codes_SRS_IOTHUBCLIENT_LL_38_001: [IoTHubClientCore_LL_SendEventAsync shall read distributed tracing properties and override any deprecated diagnostics settings.]*/
-                    if ((&handleData->distributedTracing_setting != NULL) && (IoTHubClient_DistributedTracing_AddToMessageHeadersIfNecessary(&handleData->distributedTracing_setting, newEntry->messageHandle) != 0))
+                    if (IoTHubClient_DistributedTracing_AddToMessageHeadersIfNecessary(&handleData->distributedTracing_setting, newEntry->messageHandle) != 0)
                     {
                         /*Codes_SRS_IOTHUBCLIENT_LL_38_002: [If adding distributed tracing information fails for any reason, IoTHubClientCore_LL_SendEventAsync shall not fail.] */
                         result = IOTHUB_CLIENT_OK;
                         LogInfo("unable to add distributed tracing information to message");
                     }
                     /*Codes_SRS_IOTHUBCLIENT_LL_02_014: [If distributed tracing isn't enabled, check if deprecated diagnostic information needs to be added to message header]*/
-                    else if ((&handleData->diagnostic_setting != NULL) && (IoTHubClient_Diagnostic_AddIfNecessary(&handleData->diagnostic_setting, newEntry->messageHandle) != 0))
+                    else if (IoTHubClient_Diagnostic_AddIfNecessary(&handleData->diagnostic_setting, newEntry->messageHandle) != 0)
                     {
                         /*Codes_SRS_IOTHUBCLIENT_LL_02_014: [If cloning and/or adding the information/diagnostic fails for any reason, IoTHubClientCore_LL_SendEventAsync shall not fail.] */
                         result = IOTHUB_CLIENT_OK;
