@@ -59,8 +59,6 @@ typedef struct MESSAGESCHEMA_TAG
 
 typedef struct TELEMETRYSCHEMA_TAG
 {
-	char* interval;
-	char* messageTemplate;
 	MessageSchema messageSchema;
 } TelemetrySchema;
 
@@ -104,22 +102,15 @@ static char* serializeToJson(Chiller* chiller)
 	(void)json_object_set_string(root_object, "Type", chiller->type);
 	(void)json_object_set_string(root_object, "Firmware", chiller->firmware);
 	(void)json_object_set_string(root_object, "FirmwareUpdateStatus", ENUM_TO_STRING(FIRMWARE_UPDATE_STATUS, chiller->firmwareUpdateStatus));
-	//(void)json_object_set_string(root_object, "FirmwareUpdateStatus", ENUM_TO_STRING(IOTHUB_CLIENT_RESULTX, IOTHUB_CLIENT_INVALID_ARGX));
 	(void)json_object_set_string(root_object, "Location", chiller->location);
 	(void)json_object_set_number(root_object, "Latitude", chiller->latitude);
 	(void)json_object_set_number(root_object, "Longitude", chiller->longitude);
-	(void)json_object_dotset_string(root_object, "Telemetry.TemperatureSchema.Interval", chiller->telemetry.temperatureSchema.interval);
-	(void)json_object_dotset_string(root_object, "Telemetry.TemperatureSchema.MessageTemplate", chiller->telemetry.temperatureSchema.messageTemplate);
 	(void)json_object_dotset_string(root_object, "Telemetry.TemperatureSchema.MessageSchema.Name", chiller->telemetry.temperatureSchema.messageSchema.name);
 	(void)json_object_dotset_string(root_object, "Telemetry.TemperatureSchema.MessageSchema.Format", chiller->telemetry.temperatureSchema.messageSchema.format);
 	(void)json_object_dotset_string(root_object, "Telemetry.TemperatureSchema.MessageSchema.Fields", chiller->telemetry.temperatureSchema.messageSchema.fields);
-	(void)json_object_dotset_string(root_object, "Telemetry.HumiditySchema.Interval", chiller->telemetry.humiditySchema.interval);
-	(void)json_object_dotset_string(root_object, "Telemetry.HumiditySchema.MessageTemplate", chiller->telemetry.humiditySchema.messageTemplate);
 	(void)json_object_dotset_string(root_object, "Telemetry.HumiditySchema.MessageSchema.Name", chiller->telemetry.humiditySchema.messageSchema.name);
 	(void)json_object_dotset_string(root_object, "Telemetry.HumiditySchema.MessageSchema.Format", chiller->telemetry.humiditySchema.messageSchema.format);
 	(void)json_object_dotset_string(root_object, "Telemetry.HumiditySchema.MessageSchema.Fields", chiller->telemetry.humiditySchema.messageSchema.fields);
-	(void)json_object_dotset_string(root_object, "Telemetry.PressureSchema.Interval", chiller->telemetry.pressureSchema.interval);
-	(void)json_object_dotset_string(root_object, "Telemetry.PressureSchema.MessageTemplate", chiller->telemetry.pressureSchema.messageTemplate);
 	(void)json_object_dotset_string(root_object, "Telemetry.PressureSchema.MessageSchema.Name", chiller->telemetry.pressureSchema.messageSchema.name);
 	(void)json_object_dotset_string(root_object, "Telemetry.PressureSchema.MessageSchema.Format", chiller->telemetry.pressureSchema.messageSchema.format);
 	(void)json_object_dotset_string(root_object, "Telemetry.PressureSchema.MessageSchema.Fields", chiller->telemetry.pressureSchema.messageSchema.fields);
@@ -393,18 +384,12 @@ int main(void)
 		chiller.location = "Building 44";
 		chiller.latitude = 47.638928;
 		chiller.longitude = -122.13476;
-		chiller.telemetry.temperatureSchema.interval = "00:00:05";
-		chiller.telemetry.temperatureSchema.messageTemplate = "{\"temperature\":${temperature},\"temperature_unit\":\"${temperature_unit}\"}";
 		chiller.telemetry.temperatureSchema.messageSchema.name = "chiller-temperature;v1";
 		chiller.telemetry.temperatureSchema.messageSchema.format = "JSON";
 		chiller.telemetry.temperatureSchema.messageSchema.fields = "{\"temperature\":\"Double\",\"temperature_unit\":\"Text\"}";
-		chiller.telemetry.humiditySchema.interval = "00:00:05";
-		chiller.telemetry.humiditySchema.messageTemplate = "{\"humidity\":${humidity},\"humidity_unit\":\"${humidity_unit}\"}";
 		chiller.telemetry.humiditySchema.messageSchema.name = "chiller-humidity;v1";
 		chiller.telemetry.humiditySchema.messageSchema.format = "JSON";
 		chiller.telemetry.humiditySchema.messageSchema.fields = "{\"humidity\":\"Double\",\"humidity_unit\":\"Text\"}";
-		chiller.telemetry.pressureSchema.interval = "00:00:05";
-		chiller.telemetry.pressureSchema.messageTemplate = "{\"pressure\":${pressure},\"pressure_unit\":\"${pressure_unit}\"}";
 		chiller.telemetry.pressureSchema.messageSchema.name = "chiller-pressure;v1";
 		chiller.telemetry.pressureSchema.messageSchema.format = "JSON";
 		chiller.telemetry.pressureSchema.messageSchema.fields = "{\"pressure\":\"Double\",\"pressure_unit\":\"Text\"}";
