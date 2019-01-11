@@ -2293,6 +2293,12 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetOption(IOTHUB_CLIENT_CORE_LL_HANDLE 
                 result = IOTHUB_CLIENT_OK;
             }
         }
+        else if (strcmp(optionName, OPTION_SAS_TOKEN_REFRESH_TIME) == 0)
+        {
+            // This options is no longer needed, but may be updated in the future
+            // if this becomes necessary
+            result = IOTHUB_CLIENT_OK;
+        }
         else
         {
             // This section is unusual for SetOption calls because it attempts to pass unhandled options
