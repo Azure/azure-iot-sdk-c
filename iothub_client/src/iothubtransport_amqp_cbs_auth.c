@@ -631,7 +631,6 @@ void authentication_do_work(AUTHENTICATION_HANDLE authentication_handle)
             if (IoTHubClient_Auth_Get_Credential_Type(instance->authorization_module) == IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY)
             {
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_039: [If `instance->state` is AUTHENTICATION_STATE_STARTED and device keys were used, authentication_do_work() shall only verify the SAS token refresh time]
-                // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_065: [The SAS token shall be refreshed if the current time minus `instance->current_sas_token_put_time` equals or exceeds `instance->sas_token_refresh_time_secs`]
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_066: [If SAS token does not need to be refreshed, authentication_do_work() shall return]
                 bool is_timed_out;
                 if (verify_sas_token_refresh_timeout(instance, &is_timed_out) == RESULT_OK && is_timed_out)

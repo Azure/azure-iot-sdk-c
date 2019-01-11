@@ -1062,10 +1062,10 @@ void e2e_d2c_with_svc_fault_ctrl_with_transport_status(IOTHUB_CLIENT_TRANSPORT_P
 
     if ((0 == strcmp(faultOperationType, "KillAmqpCBSLinkReq")) || (0 == strcmp(faultOperationType, "KillAmqpCBSLinkResp")))
     {
-        // We will only detect errors in CBS link when we attempt to refresh the token, which usually is quite long (see DEFAULT_SAS_TOKEN_REFRESH_TIME_SECS).
+        // We will only detect errors in CBS link when we attempt to refresh the token, which usually is quite long (see OPTION_SAS_TOKEN_LIFETIME).
         // We make the refresh time only 10 seconds so that the error is detected more quickly.
         size_t refresh_time = 10;
-        setoption_on_device_or_module(OPTION_SAS_TOKEN_REFRESH_TIME, (const void*)&refresh_time, "Failed setting OPTION_SAS_TOKEN_REFRESH_TIME");
+        setoption_on_device_or_module(OPTION_SAS_TOKEN_LIFETIME, (const void*)&refresh_time, "Failed setting OPTION_SAS_TOKEN_LIFETIME");
     }
 
     LogInfo("Sleeping 3 seconds to let SetMessageCallback() register with server.");
