@@ -361,6 +361,7 @@ TEST_FUNCTION(IoTHubClient_DistributedTracing_AddToMessageHeadersIfNecessary_dis
     //arrange
     IOTHUB_DISTRIBUTED_TRACING_SETTING_DATA distributed_tracing_setting =
     {
+        IOTHUB_DISTRIBUTED_TRACING_SETTING_VERSION_1,
         true,   /* samplingMode */
         100,    /* samplingRate */
         0       /* currentMessageNumber */

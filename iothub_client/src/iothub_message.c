@@ -829,7 +829,7 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetDistributedTracingSystemProperty(IOTHUB_M
     // Codes_SRS_IOTHUBMESSAGE_38_006: [If any of the parameters are NULL then IoTHubMessage_SetDistributedTracingSystemProperty shall return a IOTHUB_MESSAGE_INVALID_ARG value.]
     if (iotHubMessageHandle == NULL || distributedTracingTracestate == NULL)
     {
-        LogError("Invalid argument (iotHubMessageHandle=%p, distributedTracingTracestate=%p)", iotHubMessageHandle, distributedTracingTracestate);
+        LogError("Invalid argument (iotHubMessageHandle=%p, distributedTracingTracestate=%s)", iotHubMessageHandle, P_OR_NULL(distributedTracingTracestate));
         result = IOTHUB_MESSAGE_INVALID_ARG;
     }
     else
@@ -845,7 +845,7 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetDistributedTracingSystemProperty(IOTHUB_M
 
         if (mallocAndStrcpy_s(&handleData->distributedTracingTracestate, distributedTracingTracestate) != 0)
         {
-            LogError("Failed saving a copy of contentEncoding");
+            LogError("Failed saving a copy of distributedTracingTracestate");
             // Codes_SRS_IOTHUBMESSAGE_38_008: [If the allocation or the copying of `distributedTracingTracestate` fails, then IoTHubMessage_SetDistributedTracingSystemProperty shall return IOTHUB_MESSAGE_ERROR.]
             result = IOTHUB_MESSAGE_ERROR;
         }

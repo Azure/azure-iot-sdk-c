@@ -539,6 +539,9 @@ static int update_distributed_tracing_settings_from_twin(IOTHUB_DISTRIBUTED_TRAC
     {
         result = 0;
     }
+
+    STRING_delete(reportedStatePayload);
+
     return result;
 }
 
@@ -554,7 +557,7 @@ static void IoTHubClientCore_LL_RetrievePropertyComplete(DEVICE_TWIN_UPDATE_STAT
         IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)ctx;
 
         /*Codes_SRS_IOTHUBCLIENT_LL_38_003: [If distributed tracing is enabled, synchronize (update and report) distributed tracing settings based on device twin information.] */
-        if(handleData->isTwinFeatureConfigurationEnabled && handleData->distributedTracing_setting.samplingMode)
+        if(handleData->isTwinFeatureConfigurationEnabled)
         {
             update_distributed_tracing_settings_from_twin(&handleData->distributedTracing_setting, handleData, update_state, payLoad);
         }
@@ -1098,6 +1101,12 @@ static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_
 
                             result->diagnostic_setting.currentMessageNumber = 0;
                             result->diagnostic_setting.diagSamplingPercentage = 0;
+
+                            result->distributedTracing_setting.version = IOTHUB_DISTRIBUTED_TRACING_SETTING_VERSION_1;
+                            result->distributedTracing_setting.samplingMode = false;
+                            result->distributedTracing_setting.samplingRate = 0;
+                            result->distributedTracing_setting.currentMessageNumber = 0;
+
                             /*Codes_SRS_IOTHUBCLIENT_LL_25_124: [ `IoTHubClientCore_LL_Create` shall set the default retry policy as Exponential backoff with jitter and if succeed and return a `non-NULL` handle. ]*/
                             if (IoTHubClientCore_LL_SetRetryPolicy(result, IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER, 0) != IOTHUB_CLIENT_OK)
                             {

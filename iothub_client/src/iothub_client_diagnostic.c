@@ -13,31 +13,31 @@
 #include "parson.h"
 #include "internal/iothub_client_diagnostic.h"
 
-#define DEVICE_TWIN_DISTRIBUTED_TRACING_SAMPLING_MODE_KEY "azureiot*com^dtracing^1*0*0.sampling_mode"
-#define DEVICE_TWIN_DISTRIBUTED_TRACING_SAMPLING_RATE_KEY "azureiot*com^dtracing^1*0*0.sampling_rate"
-#define MESSAGE_DISTRIBUTED_TRACING_TIMESTAMP_KEY "timestamp="
-#define DEVICE_TWIN_REPORTED_STATUS_FAILED_OPERATION "401"
-#define DEVICE_TWIN_REPORTED_STATUS_SUCCESS "204"
+static const char* DEVICE_TWIN_DISTRIBUTED_TRACING_SAMPLING_MODE_KEY = "azureiot*com^dtracing^1*0*0.sampling_mode";
+static const char* DEVICE_TWIN_DISTRIBUTED_TRACING_SAMPLING_RATE_KEY = "azureiot*com^dtracing^1*0*0.sampling_rate";
+static const char* MESSAGE_DISTRIBUTED_TRACING_TIMESTAMP_KEY = "timestamp=";
+static const char* DEVICE_TWIN_REPORTED_STATUS_FAILED_OPERATION = "401";
+static const char* DEVICE_TWIN_REPORTED_STATUS_SUCCESS = "204";
 
-#define DISTRIBUTED_TRACING_REPORTED_TWIN_TEMPLATE "{ \"__iot:interfaces\": \
+static const char* DISTRIBUTED_TRACING_REPORTED_TWIN_TEMPLATE = "{ \"__iot:interfaces\": \
 { \"azureiot*com^dtracing^1*0*0\": { \"@id\": \"http://azureiot.com/dtracing/1.0.0\" } }, \
 \"azureiot*com^dtracing^1*0*0\": { \
     \"sampling_mode\": { \
-    \"value\": \"%s\", \
-    \"status\" : { \
-    \"code\": %s, \
-    \"description\" : \"%s\" \
+        \"value\": \"%s\", \
+        \"status\" : { \
+        \"code\": %s, \
+        \"description\" : \"%s\" \
     } \
 }, \
-\"sampling_rate\": { \
-    \"value\": \"%d\", \
-    \"status\" : { \
-    \"code\": %s, \
-    \"description\" : \"%s\" \
+    \"sampling_rate\": { \
+        \"value\": \"%d\", \
+        \"status\" : { \
+        \"code\": %s, \
+        \"description\" : \"%s\" \
+        } \
     } \
 } \
-} \
-}"
+}";
 
 #define TIME_STRING_BUFFER_LEN 30
 
@@ -89,13 +89,11 @@ static char* get_epoch_time(char* timeBuffer)
     return result;
 }
 
-// Deprecated
 static char get_base36_char(unsigned char value)
 {
     return value <= 9 ? '0' + value : 'a' + value - 10;
 }
 
-// Deprecated
 static char* generate_eight_random_characters(char *randomString)
 {
     int i;
@@ -113,7 +111,6 @@ static char* generate_eight_random_characters(char *randomString)
     return randomString;
 }
 
-// Deprecated
 static bool should_add_diagnostic_info(IOTHUB_DIAGNOSTIC_SETTING_DATA* diagSetting)
 {
     bool result = false;
@@ -135,7 +132,6 @@ static bool should_add_diagnostic_info(IOTHUB_DIAGNOSTIC_SETTING_DATA* diagSetti
     return result;
 }
 
-// Deprecated
 static IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* prepare_message_diagnostic_data()
 {
     IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* result = (IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA*)malloc(sizeof(IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA));
@@ -184,7 +180,7 @@ static IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* prepare_message_diagnostic_data(
     return result;
 }
 
-// Deprecated
+// **Deprecated - should use IoTHubClient_DistributedTracing_AddToMessageHeadersIfNecessary instead 
 int IoTHubClient_Diagnostic_AddIfNecessary(IOTHUB_DIAGNOSTIC_SETTING_DATA* diagSetting, IOTHUB_MESSAGE_HANDLE messageHandle)
 {
     int result;
@@ -259,16 +255,11 @@ static bool should_add_distributedtrace_fixed_rate_sampling(IOTHUB_DISTRIBUTED_T
 int IoTHubClient_DistributedTracing_AddToMessageHeadersIfNecessary(IOTHUB_DISTRIBUTED_TRACING_SETTING_DATA* distributedTraceSetting, IOTHUB_MESSAGE_HANDLE messageHandle)
 {
     int result;
-    STRING_HANDLE messagePropertyContent;
+    STRING_HANDLE messagePropertyContent = NULL;
     /* Codes_SRS_IOTHUB_DIAGNOSTIC_38_001: [ IoTHubClient_DistributedTracing_AddToMessageHeadersIfNecessary should return nonezero if distributedTraceSetting or messageHandle is NULL. ]*/
     if (distributedTraceSetting == NULL || messageHandle == NULL)
     {
-        LogError("Invalid paramter for Distributed Tracing");
-        result = __FAILURE__;
-    }
-    else if ((messagePropertyContent = STRING_new()) == NULL)
-    {
-        LogError("Failed to allocate messagePropertyContent");
+        LogError("Invalid parameter for Distributed Tracing, distributedTraceSetting=%p, messageHandle=%p", distributedTraceSetting, messageHandle);
         result = __FAILURE__;
     }
     else if (should_add_distributedtrace_fixed_rate_sampling(distributedTraceSetting))
@@ -279,21 +270,23 @@ int IoTHubClient_DistributedTracing_AddToMessageHeadersIfNecessary(IOTHUB_DISTRI
         if (timeBuffer == NULL)
         {
             LogError("malloc for timeBuffer failed");
-            STRING_delete(messagePropertyContent);
             result = __FAILURE__;
         }
         else if (get_epoch_time(timeBuffer) == NULL)
         {
             LogError("Failed getting current time");
-            STRING_delete(messagePropertyContent);
             free(timeBuffer);
+            result = __FAILURE__;
+        }
+        else if ((messagePropertyContent = STRING_new()) == NULL)
+        {
+            LogError("Failed to allocate messagePropertyContent");
             result = __FAILURE__;
         }
         else if (STRING_concat(messagePropertyContent, MESSAGE_DISTRIBUTED_TRACING_TIMESTAMP_KEY) != 0 ||
             STRING_concat(messagePropertyContent, (const char*)timeBuffer) != 0)
         {
             LogError("Failed to generate message system property string");
-            STRING_delete(messagePropertyContent);
             free(timeBuffer);
             result = __FAILURE__;
         }
@@ -301,13 +294,11 @@ int IoTHubClient_DistributedTracing_AddToMessageHeadersIfNecessary(IOTHUB_DISTRI
         {
             /* Codes_SRS_IOTHUB_DIAGNOSTIC_38_002: [ IoTHubClient_DistributedTracing_AddToMessageHeadersIfNecessary should return nonezero if failing to add distributed tracing property. ]*/
             LogError("Failed to set distributed tracing system property");
-            STRING_delete(messagePropertyContent);
             free(timeBuffer);
             result = __FAILURE__;
         }
         else
         {
-            STRING_delete(messagePropertyContent);
             free(timeBuffer);
             result = 0;
         }
@@ -317,21 +308,33 @@ int IoTHubClient_DistributedTracing_AddToMessageHeadersIfNecessary(IOTHUB_DISTRI
         result = 0;
     }
 
+    STRING_delete(messagePropertyContent);
+
     return result;
 }
 
-static int parse_json_object_for_dtracing_property(JSON_Object* desiredJsonObject, const char* key, int* retValue, STRING_HANDLE message, STRING_HANDLE statusCode, bool isPartialUpdate)
+static int parse_json_object_for_dtracing_property(JSON_Object* desiredJsonObject, const char* key, uint8_t* retValue, STRING_HANDLE message, STRING_HANDLE statusCode, bool isPartialUpdate)
 {
     int result = 0;
     if (json_object_dothas_value(desiredJsonObject, key))
     {
-        JSON_Value* value = json_object_dotget_value(desiredJsonObject, key);
-        JSON_Value_Type valueType = json_value_get_type(value);
-        if (valueType == JSONNull)
+        JSON_Value* value = NULL;
+        JSON_Value_Type valueType = JSONNull;
+
+        if ((value = json_object_dotget_value(desiredJsonObject, key)) == NULL)
         {
-            /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_013: [ IoTHubClient_DistributedTracing_UpdateFromTwin should set diagSamplingMode = false when sampling mode in twin is null. ]*/
-            *retValue = 1;
-            if (STRING_sprintf(message, "Property %s is set to null, so set it to false.", key) != 0 ||
+            /* Codes_SRS_IOTHUB_DIAGNOSTIC_38_010: [ IoTHubClient_DistributedTracing_UpdateFromTwin should keep sampling mode untouched when failing parse sampling mode from twin. ]*/
+            if (STRING_sprintf(message, "Property %s cannot be parsed, leaving old setting.", key) != 0 ||
+                STRING_sprintf(statusCode, DEVICE_TWIN_REPORTED_STATUS_SUCCESS) != 0)
+            {
+                result = __FAILURE__;
+            }
+        }
+        else if ((valueType = json_value_get_type(value)) == JSONNull)
+        {
+            /* Codes_SRS_IOTHUB_DIAGNOSTIC_38_014: [ IoTHubClient_DistributedTracing_UpdateFromTwin should set diagSamplingMode = false when sampling mode in twin is null. ]*/
+            *retValue = 0;
+            if (STRING_sprintf(message, "Property %s is set to null, set it to default.", key) != 0 ||
                 STRING_sprintf(statusCode, DEVICE_TWIN_REPORTED_STATUS_SUCCESS) != 0)
             {
                 result = __FAILURE__;
@@ -339,8 +342,8 @@ static int parse_json_object_for_dtracing_property(JSON_Object* desiredJsonObjec
         }
         else if (valueType != JSONNumber)
         {
-            /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_010: [ IoTHubClient_DistributedTracing_UpdateFromTwin should keep sampling mode untouched when failing parse sampling mode from twin. ]*/
-            if (STRING_sprintf(message, "Cannot parse property %s from twin settings.", key) != 0 ||
+            /* Codes_SRS_IOTHUB_DIAGNOSTIC_38_010: [ IoTHubClient_DistributedTracing_UpdateFromTwin should keep sampling mode untouched when failing parse sampling mode from twin. ]*/
+            if (STRING_sprintf(message, "Cannot parse property %s from twin settings, leaving old setting.", key) != 0 ||
                 STRING_sprintf(statusCode, DEVICE_TWIN_REPORTED_STATUS_FAILED_OPERATION) != 0)
             {
                 result = __FAILURE__;
@@ -348,8 +351,8 @@ static int parse_json_object_for_dtracing_property(JSON_Object* desiredJsonObjec
         }
         else
         {
-            /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_011: [ IoTHubClient_DistributedTracing_UpdateFromTwin should keep sampling mode untouched if sampling mode parsed from twin is not between [0,3]. ]*/
-            *retValue = (int)json_object_dotget_number(desiredJsonObject, key);
+            /* Codes_SRS_IOTHUB_DIAGNOSTIC_38_015: [ IoTHubClient_DistributedTracing_UpdateFromTwin should keep sampling mode untouched if sampling mode parsed from twin is not between [0,3]. ]*/
+            *retValue = (uint8_t)json_object_dotget_number(desiredJsonObject, key);
         }
     }
     else if (!isPartialUpdate)
@@ -386,9 +389,9 @@ int IoTHubClient_DistributedTracing_UpdateFromTwin(IOTHUB_DISTRIBUTED_TRACING_SE
     }
     else
     {
-        JSON_Value* json;
-        JSON_Object* jsonObject;
-        JSON_Object* desiredJsonObject;
+        JSON_Value* json = NULL;
+        JSON_Object* jsonObject = NULL;
+        JSON_Object* desiredJsonObject = NULL;
         
         /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_007: [ IoTHubClient_DistributedTracing_UpdateFromTwin should return nonezero if payLoad is not a valid json string. ]*/
         if ((json = json_parse_string((const char *)payLoad)) == NULL)
@@ -408,7 +411,7 @@ int IoTHubClient_DistributedTracing_UpdateFromTwin(IOTHUB_DISTRIBUTED_TRACING_SE
         }
         else 
         {
-            int sampling_mode;
+            uint8_t sampling_mode;
             if (parse_json_object_for_dtracing_property(desiredJsonObject, DEVICE_TWIN_DISTRIBUTED_TRACING_SAMPLING_MODE_KEY, &sampling_mode, modeMessage, modeStatusCode, isPartialUpdate) != 0)
             {
                 LogError("Error calling parse_json_object_for_dtracing_property for distributed tracing reported status while parsing JSON for sampling mode");
@@ -434,7 +437,7 @@ int IoTHubClient_DistributedTracing_UpdateFromTwin(IOTHUB_DISTRIBUTED_TRACING_SE
                 }
             }
 
-            int sampling_rate;
+            uint8_t sampling_rate;
             if (parse_json_object_for_dtracing_property(desiredJsonObject, DEVICE_TWIN_DISTRIBUTED_TRACING_SAMPLING_RATE_KEY, &sampling_rate, rateMessage, rateStatusCode, isPartialUpdate) != 0)
             {
                 LogError("Error calling parse_json_object_for_dtracing_property for distributed tracing reported status while parsing JSON for sampling rate");
@@ -452,7 +455,7 @@ int IoTHubClient_DistributedTracing_UpdateFromTwin(IOTHUB_DISTRIBUTED_TRACING_SE
             else
             {
                 /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_012: [ IoTHubClient_DistributedTracing_UpdateFromTwin should set diagSamplingPercentage correctly if sampling rate is valid. ]*/
-                distributedTracingSetting->samplingRate = (int)sampling_rate;
+                distributedTracingSetting->samplingRate = sampling_rate;
                 if (STRING_sprintf(rateStatusCode, DEVICE_TWIN_REPORTED_STATUS_SUCCESS) != 0)
                 {
                     LogError("Error calling STRING_sprintf for distributed tracing reported status success for sampling rate");
@@ -469,7 +472,11 @@ int IoTHubClient_DistributedTracing_UpdateFromTwin(IOTHUB_DISTRIBUTED_TRACING_SE
             result = __FAILURE__;
         }
         
-        json_value_free(json);
+        json_object_clear(desiredJsonObject);
+        json_object_clear(jsonObject);
+
+        if (json != NULL)
+            json_value_free(json);
 
         STRING_delete(modeMessage);
         STRING_delete(modeStatusCode);
