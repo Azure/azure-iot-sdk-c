@@ -28,6 +28,8 @@ static void my_gballoc_free(void* ptr)
 #include "umocktypes_stdint.h"
 #include "umocktypes_bool.h"
 
+#include "../../../serializer/tests/datamarshaller_ut/real_parson.h"
+
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/optimize_size.h"
@@ -37,6 +39,38 @@ static void my_gballoc_free(void* ptr)
 #include "azure_c_shared_utility/lock.h"
 #include "azure_c_shared_utility/map.h"
 #include "iothub_message.h"
+#include "parson.h"
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+MOCKABLE_FUNCTION(, JSON_Value*, json_parse_string, const char *, string);
+MOCKABLE_FUNCTION(, const char*, json_object_get_string, const JSON_Object *, object, const char *, name);
+MOCKABLE_FUNCTION(, JSON_Object*, json_value_get_object, const JSON_Value *, value);
+MOCKABLE_FUNCTION(, double, json_object_get_number, const JSON_Object*, object, const char*, name);
+MOCKABLE_FUNCTION(, char*, json_serialize_to_string, const JSON_Value*, value);
+MOCKABLE_FUNCTION(, void, json_free_serialized_string, char*, string);
+MOCKABLE_FUNCTION(, const char*, json_object_dotget_string, const JSON_Object*, object, const char*, name);
+MOCKABLE_FUNCTION(, JSON_Status, json_object_set_string, JSON_Object*, object, const char*, name, const char*, string);
+MOCKABLE_FUNCTION(, JSON_Status, json_object_dotset_string, JSON_Object*, object, const char*, name, const char*, string);
+MOCKABLE_FUNCTION(, JSON_Value*, json_value_init_object);
+MOCKABLE_FUNCTION(, JSON_Array*, json_array_get_array, const JSON_Array*, array, size_t, index);
+MOCKABLE_FUNCTION(, JSON_Object*, json_array_get_object, const JSON_Array*, array, size_t, index);
+MOCKABLE_FUNCTION(, JSON_Array*, json_value_get_array, const JSON_Value*, value);
+MOCKABLE_FUNCTION(, size_t, json_array_get_count, const JSON_Array*, array);
+MOCKABLE_FUNCTION(, JSON_Status, json_array_clear, JSON_Array*, array);
+MOCKABLE_FUNCTION(, JSON_Status, json_object_clear, JSON_Object*, object);
+MOCKABLE_FUNCTION(, void, json_value_free, JSON_Value *, value);
+MOCKABLE_FUNCTION(, char *, json_serialize_to_string_pretty, const JSON_Value *, value);
+MOCKABLE_FUNCTION(, JSON_Status, json_object_dotset_value, JSON_Object *, object, const char *, name, JSON_Value *, value);
+MOCKABLE_FUNCTION(, JSON_Object *, json_object, const JSON_Value *, value);
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #undef ENABLE_MOCKS
 

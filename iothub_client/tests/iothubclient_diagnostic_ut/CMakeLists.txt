@@ -16,6 +16,7 @@ include_directories(${SHARED_UTIL_REAL_TEST_FOLDER})
 
 set(${theseTestsName}_c_files
     ../../src/iothub_client_diagnostic.c
+    ../../../serializer/tests/datamarshaller_ut/real_parson.c
 )
 
 set(${theseTestsName}_h_files
