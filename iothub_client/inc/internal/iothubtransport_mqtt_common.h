@@ -6,6 +6,7 @@
 
 #include "internal/iothub_transport_ll_private.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
+#include "iothub_client_streaming.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -46,6 +47,8 @@ MOCKABLE_FUNCTION(, STRING_HANDLE, IoTHubTransport_MQTT_Common_GetHostname, TRAN
 MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubTransport_MQTT_Common_SendMessageDisposition, MESSAGE_CALLBACK_INFO*, message_data, IOTHUBMESSAGE_DISPOSITION_RESULT, disposition);
 MOCKABLE_FUNCTION(, int, IoTHubTransport_MQTT_Common_Subscribe_InputQueue, IOTHUB_DEVICE_HANDLE, handle);
 MOCKABLE_FUNCTION(, void, IoTHubTransport_MQTT_Common_Unsubscribe_InputQueue, IOTHUB_DEVICE_HANDLE, handle);
+MOCKABLE_FUNCTION(, int, IoTHubTransport_MQTT_Common_SetStreamRequestCallback, IOTHUB_DEVICE_HANDLE, handle, DEVICE_STREAM_C2D_REQUEST_CALLBACK, streamRequestCallback, void*, context);
+MOCKABLE_FUNCTION(, int, IoTHubTransport_MQTT_Common_SendStreamResponse, IOTHUB_DEVICE_HANDLE, handle, DEVICE_STREAM_C2D_RESPONSE*, response);
 MOCKABLE_FUNCTION(, int, IoTHubTransport_MQTT_SetCallbackContext, TRANSPORT_LL_HANDLE, handle, void*, ctx);
 
 #ifdef __cplusplus

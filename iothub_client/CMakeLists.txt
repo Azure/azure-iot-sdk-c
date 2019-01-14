@@ -17,6 +17,7 @@ set(iothub_client_c_files
     ./src/iothub_client_core_ll.c
     ./src/iothub_client_diagnostic.c
     ./src/iothub_client_ll.c
+    ./src/iothub_client_streaming.c
     ./src/iothub_device_client.c
     ./src/iothub_device_client_ll.c
     ./src/iothub_message.c
@@ -39,6 +40,7 @@ set(iothub_client_h_files
     ./inc/iothub_client_version.h
     ./inc/iothub_device_client.h
     ./inc/iothub_device_client_ll.h
+    ./inc/iothub_client_streaming.h
     ./inc/iothub_module_client.h
     ./inc/iothub_module_client_ll.h
     ./inc/iothub_transport_ll.h
@@ -133,6 +135,7 @@ if(${use_amqp})
         ./src/iothubtransport_amqp_telemetry_messenger.c
         ./src/iothubtransport_amqp_twin_messenger.c
         ./src/iothubtransport_amqp_messenger.c
+        ./src/iothubtransport_amqp_streaming.c
         ./src/iothubtransportamqp_methods.c
         ./src/message_queue.c
         ./src/uamqp_messaging.c
@@ -149,6 +152,7 @@ if(${use_amqp})
         ./inc/internal/iothubtransport_amqp_telemetry_messenger.h
         ./inc/internal/iothubtransport_amqp_twin_messenger.h
         ./inc/internal/iothubtransport_amqp_messenger.h
+        ./inc/internal/iothubtransport_amqp_streaming.h
         ./inc/internal/iothubtransportamqp_methods.h
         ./inc/internal/message_queue.h
         ./inc/internal/uamqp_messaging.h
@@ -387,9 +391,7 @@ if (${build_as_dynamic})
         set(iothub_def_file ${iothub_def_file} ./src/upload_to_blob.def)
     endif()
 
-    if(use_amqp)
-        set(iothub_def_file ${iothub_def_file} ./src/iothub_transport_amqp.def)
-    endif()
+    set(iothub_def_file ${iothub_def_file} ./src/iothub_transport_amqp.def)
 
     if(use_http)
         set(iothub_def_file ${iothub_def_file} ./src/iothub_transport_http.def)
