@@ -133,3 +133,8 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob(IOTHUB_DEV
 }
 
 #endif
+
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_EnableFeatureConfigurationViaTwin(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, bool enableTwinConfiguration)
+{
+    return IoTHubClientCore_LL_EnableFeatureConfigurationViaTwin((IOTHUB_DEVICE_CLIENT_LL_HANDLE)iotHubClientHandle, enableTwinConfiguration);
+}

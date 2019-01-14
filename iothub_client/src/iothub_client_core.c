@@ -2582,3 +2582,32 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_GenericMethodInvoke(IOTHUB_CLIENT_CORE_HAN
 }
 #endif /* USE_EDGE_MODULES */
 
+IOTHUB_CLIENT_RESULT IoTHubClientCore_EnableFeatureConfigurationViaTwin(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle, bool enableTwinConfiguration)
+{
+    IOTHUB_CLIENT_RESULT result;
+    if (iotHubClientHandle == NULL)
+    {
+        LogError("Invalid argument (iotHubClientHandle=%p)", iotHubClientHandle);
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    else
+    {
+        IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientInstance = (IOTHUB_CLIENT_CORE_INSTANCE*)iotHubClientHandle;
+        
+        /*Codes_SRS_IOTHUBCLIENT_38_001: [ IoTHubClientCore_EnableFeatureConfigurationViaTwin shall be made thread-safe by using the lock created in IoTHubClient_Create. ]*/
+        if (Lock(iotHubClientInstance->LockHandle) != LOCK_OK)
+        {
+            /*Codes_SRS_IOTHUBCLIENT_38_002: [ If acquiring the lock fails, IoTHubClientCore_EnableFeatureConfigurationViaTwin shall return IOTHUB_CLIENT_ERROR. ]*/
+            result = IOTHUB_CLIENT_ERROR;
+            LogError("Could not acquire lock");
+        }
+        else
+        {
+            result = IoTHubClientCore_LL_EnableFeatureConfigurationViaTwin(iotHubClientHandle->IoTHubClientLLHandle, enableTwinConfiguration);
+            (void)Unlock(iotHubClientInstance->LockHandle);
+        }
+    }
+
+    return result;
+}
+
