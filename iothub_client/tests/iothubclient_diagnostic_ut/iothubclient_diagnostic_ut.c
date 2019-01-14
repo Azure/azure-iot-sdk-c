@@ -361,7 +361,6 @@ TEST_FUNCTION(IoTHubClient_DistributedTracing_AddToMessageHeadersIfNecessary_dis
     //arrange
     IOTHUB_DISTRIBUTED_TRACING_SETTING_DATA distributed_tracing_setting =
     {
-        IOTHUB_DISTRIBUTED_TRACING_SETTING_VERSION_1,
         true,   /* samplingMode */
         100,    /* samplingRate */
         0       /* currentMessageNumber */
@@ -369,15 +368,14 @@ TEST_FUNCTION(IoTHubClient_DistributedTracing_AddToMessageHeadersIfNecessary_dis
 
     umock_c_reset_all_calls();
 
-    EXPECTED_CALL(STRING_new());
     EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     EXPECTED_CALL(get_time(NULL));
-    EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_construct("timestamp="));
     EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubMessage_SetDistributedTracingSystemProperty(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
 
     //act
     int result = IoTHubClient_DistributedTracing_AddToMessageHeadersIfNecessary(&distributed_tracing_setting, TEST_MESSAGE_HANDLE);
