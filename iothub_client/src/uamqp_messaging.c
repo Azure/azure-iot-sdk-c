@@ -27,7 +27,6 @@
 
 #define AMQP_DISTRIBUTED_TRACING_KEY "tracestate"
 
-// Deprecated
 #define AMQP_DIAGNOSTIC_ID_KEY "Diagnostic-Id"
 #define AMQP_DIAGNOSTIC_CONTEXT_KEY "Correlation-Context"
 #define AMQP_DIAGNOSTIC_CREATION_TIME_UTC_KEY "creationtimeutc"
@@ -449,16 +448,18 @@ static int add_map_item(AMQP_VALUE map, const char* name, const char* value)
 
 static int create_message_annotations_to_encode(IOTHUB_MESSAGE_HANDLE messageHandle, AMQP_VALUE *message_annotations, size_t *message_annotations_length)
 {
-    AMQP_VALUE message_annotations_map = NULL;
     int result;
     const char* distributed_tracing;
-
-    // Deprecated
+    // Deprecated: maintained for backwards compatibility; use IoTHubMessage_GetDistributedTracingSystemProperty instead.
     const IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* diagnosticData;
+
+    result = RESULT_OK;
 
     if ((diagnosticData = IoTHubMessage_GetDiagnosticPropertyData(messageHandle)) != NULL &&
         diagnosticData->diagnosticId != NULL && diagnosticData->diagnosticCreationTimeUtc != NULL)
     {
+        AMQP_VALUE message_annotations_map = NULL;
+
         // Codes_SRS_UAMQP_MESSAGING_32_001: [If optional diagnostic properties are present in the iot hub message, encode them into the AMQP message as annotation properties. Errors stop processing on this message.]
         if ((message_annotations_map = amqpvalue_create_map()) == NULL)
         {
@@ -511,8 +512,10 @@ static int create_message_annotations_to_encode(IOTHUB_MESSAGE_HANDLE messageHan
     }
     
     // Distributed tracing
-    if ((distributed_tracing = IoTHubMessage_GetDistributedTracingSystemProperty(messageHandle)) != NULL)
+    if (result == RESULT_OK && (distributed_tracing = IoTHubMessage_GetDistributedTracingSystemProperty(messageHandle)) != NULL)
     {
+        AMQP_VALUE message_annotations_map = NULL;
+        
         // Codes_SRS_UAMQP_MESSAGING_32_001: [If optional diagnostic properties are present in the iot hub message, encode them into the AMQP message as annotation properties. Errors stop processing on this message.]
         if ((message_annotations_map = amqpvalue_create_map()) == NULL)
         {

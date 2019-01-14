@@ -44,7 +44,6 @@ DEFINE_ENUM(IOTHUBMESSAGE_CONTENT_TYPE, IOTHUBMESSAGE_CONTENT_TYPE_VALUES);
 
 typedef struct IOTHUB_MESSAGE_HANDLE_DATA_TAG* IOTHUB_MESSAGE_HANDLE;
 
-// Deprecated
 /** @brief diagnostic related data*/
 typedef struct IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA_TAG
 {
@@ -52,8 +51,6 @@ typedef struct IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA_TAG
     char* diagnosticCreationTimeUtc;
 }IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA, *IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA_HANDLE;
 
-// Deprecated
-static const char DIAG_CREATION_TIME_UTC_PROPERTY_NAME[] = "diag_creation_time_utc";
 
 /**
 * @brief   Creates a new IoT hub message from a byte array. The type of the
@@ -246,9 +243,9 @@ MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetCorrelationId, IOTHUB_MESSAGE_
 */
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetCorrelationId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, correlationId);
 
-// Deprecated
 /**
 * @brief   Gets the DiagnosticData from the IOTHUB_MESSAGE_HANDLE. CAUTION: SDK user should not call it directly, it is for internal use only.
+** DEPRECATED: Use IoTHubMessage_GetDistributedTracingSystemProperty instead. **
 *
 * @param   iotHubMessageHandle Handle to the message.
 *
@@ -256,9 +253,9 @@ MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetCorrelationId, IOTHU
 */
 MOCKABLE_FUNCTION(, const IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA*, IoTHubMessage_GetDiagnosticPropertyData, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
 
-// Deprecated
 /**
 * @brief   Sets the DiagnosticData for the IOTHUB_MESSAGE_HANDLE. CAUTION: SDK user should not call it directly, it is for internal use only.
+** DEPRECATED: Use IoTHubMessage_SetDistributedTracingSystemProperty instead. **
 *
 * @param   iotHubMessageHandle Handle to the message.
 * @param   diagnosticData Pointer to the memory location of the diagnosticData

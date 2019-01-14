@@ -85,12 +85,11 @@ static const char* MESSAGE_ID_PROPERTY = "mid";
 static const char* CORRELATION_ID_PROPERTY = "cid";
 static const char* CONTENT_TYPE_PROPERTY = "ct";
 static const char* CONTENT_ENCODING_PROPERTY = "ce";
-static const char* DIAGNOSTIC_ID_PROPERTY = "diagid"; //Deprecated
-static const char* DIAGNOSTIC_CONTEXT_PROPERTY = "diagctx"; //Deprecated
+static const char* DIAGNOSTIC_ID_PROPERTY = "diagid";
+static const char* DIAGNOSTIC_CONTEXT_PROPERTY = "diagctx";
 static const char* CONNECTION_DEVICE_ID = "cdid";
 static const char* CONNECTION_MODULE_ID_PROPERTY = "cmid";
 
-//Deprecated
 static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "creationtimeutc";
 
 static const char* DISTRIBUTED_TRACING_PROPERTY = "tracestate";
