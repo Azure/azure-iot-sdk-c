@@ -50,7 +50,7 @@ phases:
       IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-- script: 'call build\collect_results.cmd'
+  - script: 'call build\collect_results.cmd'
     displayName: 'Collect Test Results'
     condition: succeededOrFailed()
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
