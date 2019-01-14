@@ -479,9 +479,6 @@ int IoTHubClient_DistributedTracing_UpdateFromTwin(IOTHUB_DISTRIBUTED_TRACING_SE
             LogError("Error calling STRING_sprintf for distributed tracing reported status");
             result = __FAILURE__;
         }
-        
-        json_object_clear(desiredJsonObject);
-        json_object_clear(jsonObject);
 
         if (json != NULL)
             json_value_free(json);
