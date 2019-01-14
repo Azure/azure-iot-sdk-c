@@ -22,16 +22,13 @@ phases:
       ./../../node_modules/.bin/check_submodules . master
     displayName: 'build'   
 
-- phase: ubuntu1604
-  variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
-  queue: aziotbld-lin02
-  displayName: 'ubuntu1604'
+- phase: windowsx86
+  queue:
+    name: 'aziotbld-win03'
   steps:
   - script: |
-      export OPENSSL_ia32cap=0x00000000
-      sudo chmod -R 755 .
-      sudo -E ./jenkins/ubuntu1604_c.sh
+      call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsDevCmd.bat"
+      call jenkins\windows_c.cmd
     displayName: 'build'
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
@@ -43,13 +40,13 @@ phases:
       STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
       IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
       IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-      IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-      IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-      IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
       IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
       IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-      PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
+      # PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
+  - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
+    displayName: 'cleanup'
+    condition: always()
   - script: 'call build\collect_results.cmd'
     displayName: 'Collect Test Results'
     condition: succeededOrFailed()
