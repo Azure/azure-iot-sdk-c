@@ -797,16 +797,13 @@ static int IoTHubClientCore_LL_DeviceMethodComplete(const char* method_name, con
     return result;
 }
 
-static void IotHubClientCore_LL_GetTwin_FeatureConfiguration(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback)
+static void IotHubClientCore_LL_GetTwin_FeatureConfigurationCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback)
 {
     (void)size;
 
-    int result;
     if (userContextCallback == NULL)
     {
-        /* Codes_SRS_IOTHUBCLIENT_LL_38_030: [ If handle or response is NULL then IotHubClientCore_LL_GetTwin_FeatureConfiguration shall return failure. ] */
         LogError("Invalid argument userContextCallback=%p", userContextCallback);
-        result = __FAILURE__;
     }
     else
     {
@@ -1873,14 +1870,12 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SendEventAsync(IOTHUB_CLIENT_CORE_LL_HA
                     if (IoTHubClient_DistributedTracing_AddToMessageHeadersIfNecessary(&handleData->distributedTracing_setting, newEntry->messageHandle) != 0)
                     {
                         /*Codes_SRS_IOTHUBCLIENT_LL_38_002: [If adding distributed tracing information fails for any reason, IoTHubClientCore_LL_SendEventAsync shall not fail.] */
-                        result = IOTHUB_CLIENT_OK;
                         LogInfo("unable to add distributed tracing information to message");
                     }
                     /*Codes_SRS_IOTHUBCLIENT_LL_02_014: [If distributed tracing isn't enabled, check if deprecated diagnostic information needs to be added to message header]*/
                     else if (IoTHubClient_Diagnostic_AddIfNecessary(&handleData->diagnostic_setting, newEntry->messageHandle) != 0)
                     {
                         /*Codes_SRS_IOTHUBCLIENT_LL_02_014: [If cloning and/or adding the information/diagnostic fails for any reason, IoTHubClientCore_LL_SendEventAsync shall not fail.] */
-                        result = IOTHUB_CLIENT_OK;
                         LogInfo("unable to add diagnostic information to message");
                     }
                     
@@ -3038,7 +3033,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_EnableFeatureConfigurationViaTwin(IOTHU
 
         if (enableTwinConfiguration)
         {
-            (void)IoTHubClientCore_LL_GetTwinAsync(iotHubClientHandle, IotHubClientCore_LL_GetTwin_FeatureConfiguration, iotHubClientHandle);
+            (void)IoTHubClientCore_LL_GetTwinAsync(iotHubClientHandle, IotHubClientCore_LL_GetTwin_FeatureConfigurationCallback, iotHubClientHandle);
         }
 
         result = IOTHUB_CLIENT_OK;

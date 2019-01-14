@@ -35,11 +35,12 @@ typedef struct IOTHUB_DISTRIBUTED_TRACING_SETTING_DATA_TAG
 {
     int version;
 
-    /* Distributed Tracing sampling mode - Off, On, Inherit */
+    /* Distributed Tracing sampling enabled flag.
+    Possible options from server - Off (1), On (2), Inherit (3) */
     bool samplingMode;
 
-    /* Distributed tracing fixed-rate sampling percentage, set to 100/N where N is an integer 
-    E.g. 50 (=100/2), 33.33 (=100/3), 25 (=100/4), 20, 1 (=100/100), 0.1 (=100/1000) */
+    /* Distributed tracing fixed-rate sampling percentage.
+    Set to 100/N where N is an integer. E.g. 50 (=100/2), 33.33 (=100/3), 25 (=100/4), 20, 1 (=100/100), 0.1 (=100/1000) */
     uint8_t samplingRate;
 
     /* Distributed tracing message sequence number */

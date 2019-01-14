@@ -278,13 +278,12 @@ int IoTHubClient_DistributedTracing_AddToMessageHeadersIfNecessary(IOTHUB_DISTRI
             free(timeBuffer);
             result = __FAILURE__;
         }
-        else if ((messagePropertyContent = STRING_new()) == NULL)
+        else if ((messagePropertyContent = STRING_construct(MESSAGE_DISTRIBUTED_TRACING_TIMESTAMP_KEY)) == NULL)
         {
             LogError("Failed to allocate messagePropertyContent");
             result = __FAILURE__;
         }
-        else if (STRING_concat(messagePropertyContent, MESSAGE_DISTRIBUTED_TRACING_TIMESTAMP_KEY) != 0 ||
-            STRING_concat(messagePropertyContent, (const char*)timeBuffer) != 0)
+        else if (STRING_concat(messagePropertyContent, (const char*)timeBuffer) != 0)
         {
             LogError("Failed to generate message system property string");
             free(timeBuffer);
@@ -313,7 +312,7 @@ int IoTHubClient_DistributedTracing_AddToMessageHeadersIfNecessary(IOTHUB_DISTRI
     return result;
 }
 
-static int parse_json_object_for_dtracing_property(JSON_Object* desiredJsonObject, const char* key, uint8_t* retValue, STRING_HANDLE message, STRING_HANDLE statusCode, bool isPartialUpdate)
+static int parse_json_object_for_dtracing_property(JSON_Object* desiredJsonObject, const char* key, uint8_t* retValue, STRING_HANDLE message, const char* statusCode, bool isPartialUpdate)
 {
     int result = 0;
     if (json_object_dothas_value(desiredJsonObject, key))
@@ -324,30 +323,33 @@ static int parse_json_object_for_dtracing_property(JSON_Object* desiredJsonObjec
         if ((value = json_object_dotget_value(desiredJsonObject, key)) == NULL)
         {
             /* Codes_SRS_IOTHUB_DIAGNOSTIC_38_010: [ IoTHubClient_DistributedTracing_UpdateFromTwin should keep sampling mode untouched when failing parse sampling mode from twin. ]*/
-            if (STRING_sprintf(message, "Property %s cannot be parsed, leaving old setting.", key) != 0 ||
-                STRING_sprintf(statusCode, DEVICE_TWIN_REPORTED_STATUS_SUCCESS) != 0)
+            if ((message = STRING_construct_sprintf("Property %s cannot be parsed, leaving old setting.", key)) == NULL)
             {
                 result = __FAILURE__;
             }
+
+            statusCode = DEVICE_TWIN_REPORTED_STATUS_SUCCESS;
         }
         else if ((valueType = json_value_get_type(value)) == JSONNull)
         {
             /* Codes_SRS_IOTHUB_DIAGNOSTIC_38_014: [ IoTHubClient_DistributedTracing_UpdateFromTwin should set diagSamplingMode = false when sampling mode in twin is null. ]*/
             *retValue = 0;
-            if (STRING_sprintf(message, "Property %s is set to null, set it to default.", key) != 0 ||
-                STRING_sprintf(statusCode, DEVICE_TWIN_REPORTED_STATUS_SUCCESS) != 0)
+            if ((message = STRING_construct_sprintf("Property %s is set to null, set it to default.", key)) == NULL)
             {
                 result = __FAILURE__;
             }
+
+            statusCode = DEVICE_TWIN_REPORTED_STATUS_SUCCESS;
         }
         else if (valueType != JSONNumber)
         {
             /* Codes_SRS_IOTHUB_DIAGNOSTIC_38_010: [ IoTHubClient_DistributedTracing_UpdateFromTwin should keep sampling mode untouched when failing parse sampling mode from twin. ]*/
-            if (STRING_sprintf(message, "Cannot parse property %s from twin settings, leaving old setting.", key) != 0 ||
-                STRING_sprintf(statusCode, DEVICE_TWIN_REPORTED_STATUS_FAILED_OPERATION) != 0)
+            if ((message = STRING_construct_sprintf("Cannot parse property %s from twin settings, leaving old setting.", key)) == NULL)
             {
                 result = __FAILURE__;
             }
+
+            statusCode = DEVICE_TWIN_REPORTED_STATUS_FAILED_OPERATION;
         }
         else
         {
@@ -358,12 +360,13 @@ static int parse_json_object_for_dtracing_property(JSON_Object* desiredJsonObjec
     else if (!isPartialUpdate)
     {
         /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_013: [ IoTHubClient_DistributedTracing_UpdateFromTwin should report diagnostic property does not exist if there is no sampling mode in complete twin. ]*/
-        if (STRING_sprintf(message, "Property %s does not exist.", DEVICE_TWIN_DISTRIBUTED_TRACING_SAMPLING_MODE_KEY) != 0 ||
-            STRING_sprintf(statusCode, DEVICE_TWIN_REPORTED_STATUS_FAILED_OPERATION) != 0)
+        if ((message = STRING_construct_sprintf("Property %s does not exist.", DEVICE_TWIN_DISTRIBUTED_TRACING_SAMPLING_MODE_KEY)) == NULL)
         {
             /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_014: [ IoTHubClient_DistributedTracing_UpdateFromTwin should return nonzero if STRING_sprintf failed. ]*/
             result = __FAILURE__;
         }
+
+        statusCode = DEVICE_TWIN_REPORTED_STATUS_FAILED_OPERATION;
     }
 
     return result;
@@ -372,19 +375,15 @@ static int parse_json_object_for_dtracing_property(JSON_Object* desiredJsonObjec
 int IoTHubClient_DistributedTracing_UpdateFromTwin(IOTHUB_DISTRIBUTED_TRACING_SETTING_DATA* distributedTracingSetting, bool isPartialUpdate, const unsigned char* payLoad, STRING_HANDLE reportedStatePayload)
 {
     int result = 0;
-    STRING_HANDLE modeMessage = STRING_new();
-    STRING_HANDLE rateMessage = STRING_new();
-    STRING_HANDLE modeStatusCode = STRING_new();
-    STRING_HANDLE rateStatusCode = STRING_new();
+    STRING_HANDLE modeMessage = NULL;
+    STRING_HANDLE rateMessage = NULL;
+    const char* modeStatusCode = NULL;
+    const char* rateStatusCode = NULL;
 
-    if (modeStatusCode == NULL || rateStatusCode == NULL || modeMessage == NULL || rateMessage == NULL)
-    {
-        LogError("Error creating distributed tracing reported string");
-        result = __FAILURE__;
-    }
     /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_006: [ IoTHubClient_DistributedTracing_UpdateFromTwin should return nonezero if arguments are NULL. ]*/
-    else if (distributedTracingSetting == NULL || payLoad == NULL)
+    if (distributedTracingSetting == NULL || payLoad == NULL || reportedStatePayload == NULL)
     {
+        LogError("Invalid parameter for IoTHubClient_DistributedTracing_UpdateFromTwin, distributedTracingSetting=%p, messageHandle=%p, reportedStatePayload=%p", distributedTracingSetting, payLoad, reportedStatePayload);
         result = __FAILURE__;
     }
     else
@@ -419,22 +418,25 @@ int IoTHubClient_DistributedTracing_UpdateFromTwin(IOTHUB_DISTRIBUTED_TRACING_SE
             }
             else if (sampling_mode < 0 || sampling_mode > 3)
             {
-                if (STRING_sprintf(modeMessage, "The value of property %s must be between [0, 3].", DEVICE_TWIN_DISTRIBUTED_TRACING_SAMPLING_MODE_KEY) != 0 ||
-                    STRING_sprintf(modeStatusCode, DEVICE_TWIN_REPORTED_STATUS_FAILED_OPERATION) != 0)
+                if ((modeMessage = STRING_construct_sprintf("The value of property %s must be between [0, 3].", DEVICE_TWIN_DISTRIBUTED_TRACING_SAMPLING_MODE_KEY)) == NULL)
                 {
-                    LogError("Error calling STRING_sprintf for distributed tracing reported status bounds error checking for sampling mode");
+                    LogError("Error calling STRING_construct_sprintf for distributed tracing reported status bounds error checking for sampling mode");
                     result = __FAILURE__;
                 }
+                
+                modeStatusCode = DEVICE_TWIN_REPORTED_STATUS_FAILED_OPERATION;
             }
             else
             {
                 /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_012: [ IoTHubClient_DistributedTracing_UpdateFromTwin should set diagSamplingMode correctly if sampling mode is valid. ]*/
                 distributedTracingSetting->samplingMode = (sampling_mode > 1) ? true : false;
-                if (STRING_sprintf(modeStatusCode, DEVICE_TWIN_REPORTED_STATUS_SUCCESS) != 0)
+                if ((modeMessage = STRING_new()) == NULL)
                 {
-                    LogError("Error calling STRING_sprintf for distributed tracing reported status success for sampling mode");
+                    LogError("Error calling STRING_new for distributed tracing reported status bounds error checking for sampling mode");
                     result = __FAILURE__;
                 }
+                
+                modeStatusCode = DEVICE_TWIN_REPORTED_STATUS_SUCCESS;
             }
 
             uint8_t sampling_rate;
@@ -445,28 +447,34 @@ int IoTHubClient_DistributedTracing_UpdateFromTwin(IOTHUB_DISTRIBUTED_TRACING_SE
             }
             else if (sampling_rate < 0 || sampling_rate > 100)
             {
-                if (STRING_sprintf(rateMessage, "The value of property %s must be between [0, 100].", DEVICE_TWIN_DISTRIBUTED_TRACING_SAMPLING_RATE_KEY) != 0 ||
-                    STRING_sprintf(rateStatusCode, DEVICE_TWIN_REPORTED_STATUS_FAILED_OPERATION) != 0)
+                if ((rateMessage = STRING_construct_sprintf("The value of property %s must be between [0, 100].", DEVICE_TWIN_DISTRIBUTED_TRACING_SAMPLING_RATE_KEY)) == NULL)
                 {
                     LogError("Error calling STRING_sprintf for distributed tracing reported status bounds error checking for sampling rate");
                     result = __FAILURE__;
                 }
+                
+                rateStatusCode = DEVICE_TWIN_REPORTED_STATUS_FAILED_OPERATION;
             }
             else
             {
                 /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_012: [ IoTHubClient_DistributedTracing_UpdateFromTwin should set diagSamplingPercentage correctly if sampling rate is valid. ]*/
                 distributedTracingSetting->samplingRate = sampling_rate;
-                if (STRING_sprintf(rateStatusCode, DEVICE_TWIN_REPORTED_STATUS_SUCCESS) != 0)
+                /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_013: [ IoTHubClient_DistributedTracing_UpdateFromTwin should reset the sampling sequence, after diagSamplingPercentage changes. ]*/
+                distributedTracingSetting->currentMessageNumber = 0;
+
+                if ((rateMessage = STRING_new()) == NULL)
                 {
-                    LogError("Error calling STRING_sprintf for distributed tracing reported status success for sampling rate");
+                    LogError("Error calling STRING_new for distributed tracing reported status bounds error checking for sampling rate");
                     result = __FAILURE__;
                 }
+                
+                rateStatusCode = DEVICE_TWIN_REPORTED_STATUS_SUCCESS;
             }
         }
 
         /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_014: [ IoTHubClient_DistributedTracing_UpdateFromTwin should report back the sampling rate and status of the property update. ]*/
-        if (STRING_sprintf(reportedStatePayload, DISTRIBUTED_TRACING_REPORTED_TWIN_TEMPLATE, (distributedTracingSetting->samplingMode) ? "2" : "1", STRING_c_str(modeStatusCode), STRING_c_str(modeMessage), 
-                                                                                                distributedTracingSetting->samplingRate, STRING_c_str(rateStatusCode), STRING_c_str(rateMessage)) != 0)
+        if (STRING_sprintf(reportedStatePayload, DISTRIBUTED_TRACING_REPORTED_TWIN_TEMPLATE, (distributedTracingSetting->samplingMode) ? "2" : "1", modeStatusCode, STRING_c_str(modeMessage), 
+                                                                                                distributedTracingSetting->samplingRate, rateStatusCode, STRING_c_str(rateMessage)) != 0)
         {
             LogError("Error calling STRING_sprintf for distributed tracing reported status");
             result = __FAILURE__;
@@ -479,9 +487,7 @@ int IoTHubClient_DistributedTracing_UpdateFromTwin(IOTHUB_DISTRIBUTED_TRACING_SE
             json_value_free(json);
 
         STRING_delete(modeMessage);
-        STRING_delete(modeStatusCode);
         STRING_delete(rateMessage);
-        STRING_delete(rateStatusCode);
     }
 
     return result;

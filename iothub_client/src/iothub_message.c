@@ -475,7 +475,7 @@ MAP_HANDLE IoTHubMessage_Properties(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
     else
     {
         /*Codes_SRS_IOTHUBMESSAGE_02_002: [Otherwise, for any non-NULL iotHubMessageHandle it shall return a non-NULL MAP_HANDLE.]*/
-        IOTHUB_MESSAGE_HANDLE_DATA* handleData = (IOTHUB_MESSAGE_HANDLE_DATA*)iotHubMessageHandle;
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = iotHubMessageHandle;
         result = handleData->properties;
     }
     return result;
@@ -641,7 +641,7 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetContentTypeSystemProperty(IOTHUB_MESSAGE_
     }
     else
     {
-        IOTHUB_MESSAGE_HANDLE_DATA* handleData = (IOTHUB_MESSAGE_HANDLE_DATA*)iotHubMessageHandle;
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = iotHubMessageHandle;
 
         // Codes_SRS_IOTHUBMESSAGE_09_002: [If the IOTHUB_MESSAGE_HANDLE `contentType` is not NULL it shall be deallocated.]
         if (handleData->userDefinedContentType != NULL)
@@ -699,7 +699,7 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetContentEncodingSystemProperty(IOTHUB_MESS
     }
     else
     {
-        IOTHUB_MESSAGE_HANDLE_DATA* handleData = (IOTHUB_MESSAGE_HANDLE_DATA*)iotHubMessageHandle;
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = iotHubMessageHandle;
 
         // Codes_SRS_IOTHUBMESSAGE_09_007: [If the IOTHUB_MESSAGE_HANDLE `contentEncoding` is not NULL it shall be deallocated.]
         if (handleData->contentEncoding != NULL)
@@ -834,7 +834,7 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetDistributedTracingSystemProperty(IOTHUB_M
     }
     else
     {
-        IOTHUB_MESSAGE_HANDLE_DATA* handleData = (IOTHUB_MESSAGE_HANDLE_DATA*)iotHubMessageHandle;
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = iotHubMessageHandle;
 
         // Codes_SRS_IOTHUBMESSAGE_38_007: [If the IOTHUB_MESSAGE_HANDLE `distributedTracingTracestate` is not NULL it shall be deallocated.]
         if (handleData->distributedTracingTracestate != NULL)
@@ -888,7 +888,7 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetOutputName(IOTHUB_MESSAGE_HANDLE iotHubMe
     }
     else
     {
-        IOTHUB_MESSAGE_HANDLE_DATA* handleData = (IOTHUB_MESSAGE_HANDLE_DATA*)iotHubMessageHandle;
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = iotHubMessageHandle;
 
         // Codes_SRS_IOTHUBMESSAGE_31_037: [If the IOTHUB_MESSAGE_HANDLE OutputName is not NULL, then the IOTHUB_MESSAGE_HANDLE OutputName will be deallocated.]
         if (handleData->outputName != NULL)
@@ -943,7 +943,7 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetInputName(IOTHUB_MESSAGE_HANDLE iotHubMes
     }
     else
     {
-        IOTHUB_MESSAGE_HANDLE_DATA* handleData = (IOTHUB_MESSAGE_HANDLE_DATA*)iotHubMessageHandle;
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = iotHubMessageHandle;
 
         // Codes_SRS_IOTHUBMESSAGE_31_043: [If the IOTHUB_MESSAGE_HANDLE InputName is not NULL, then the IOTHUB_MESSAGE_HANDLE InputName will be deallocated.]
         if (handleData->inputName != NULL)
@@ -999,7 +999,7 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetConnectionModuleId(IOTHUB_MESSAGE_HANDLE 
     }
     else
     {
-        IOTHUB_MESSAGE_HANDLE_DATA* handleData = (IOTHUB_MESSAGE_HANDLE_DATA*)iotHubMessageHandle;
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = iotHubMessageHandle;
 
         // Codes_SRS_IOTHUBMESSAGE_31_049: [If the IOTHUB_MESSAGE_HANDLE ConnectionModuleId is not NULL, then the IOTHUB_MESSAGE_HANDLE ConnectionModuleId will be deallocated.]
         if (handleData->connectionModuleId != NULL)
@@ -1055,7 +1055,7 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetConnectionDeviceId(IOTHUB_MESSAGE_HANDLE 
     }
     else
     {
-        IOTHUB_MESSAGE_HANDLE_DATA* handleData = (IOTHUB_MESSAGE_HANDLE_DATA*)iotHubMessageHandle;
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = iotHubMessageHandle;
 
         // Codes_SRS_IOTHUBMESSAGE_31_055: [If the IOTHUB_MESSAGE_HANDLE ConnectionDeviceId is not NULL, then the IOTHUB_MESSAGE_HANDLE ConnectionDeviceId will be deallocated.]
         if (handleData->connectionDeviceId != NULL)
