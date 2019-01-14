@@ -379,6 +379,19 @@ extern "C"
 
 #endif /*USE_EDGE_MODULES*/
 
+    /**
+    * @brief    Subscribes/unsubscribes for cloud-to-device stream requests.
+    *
+    * @param    iotHubModuleClientHandle    Handle to the module client instance.
+    *
+    * @param    streamRequestCallback       Callback to be invoked when a new stream request is received. To unsubscribe for incoming requests please provide NULL as its value.
+    *
+    * @param    context                     User-defined context to be provided to streamRequestCallback when it is invoked.
+    *
+    * @return   IOTHUB_CLIENT_OK if the subscription/unsubscription suceeds, or another value if any error occurs.
+    */
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SetStreamRequestCallback, IOTHUB_MODULE_CLIENT_HANDLE, iotHubModuleClientHandle, DEVICE_STREAM_C2D_REQUEST_CALLBACK, streamRequestCallback, void*, context);
+
 #ifdef __cplusplus
 }
 #endif
