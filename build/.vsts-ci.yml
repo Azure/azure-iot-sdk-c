@@ -53,6 +53,13 @@ phases:
   - script: 'call build\collect_results.cmd'
     displayName: 'Collect Test Results'
     condition: succeededOrFailed()
+  - task: PublishTestResults@2
+    displayName: 'Publish Test_RelWithDebInfo results'
+    inputs:
+      testResultsFiles: '**/results-junit.xml'
+      mergeTestResults: true
+      testRunTitle: 'Ubuntu1604 RelWithDebInfo Tests' 
+    condition: succeededOrFailed(
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
     condition: always()    
