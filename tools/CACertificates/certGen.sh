@@ -32,7 +32,7 @@ function makeCNsubject()
 {
     local result="/CN=${1}"
     case $OSTYPE in
-        msys|cygwin|win32) result="/${result}"
+        msys|win32) result="/${result}"
     esac
     echo "$result"
 }
