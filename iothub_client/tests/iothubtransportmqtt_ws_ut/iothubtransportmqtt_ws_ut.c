@@ -567,6 +567,8 @@ static pfIoTHubTransport_GetTwinAsync         IoTHubTransportMqtt_WS_GetTwinAsyn
 static pfIoTHubTransport_Subscribe_DeviceMethod     IoTHubTransportMqtt_WS_Subscribe_DeviceMethod;
 static pfIoTHubTransport_Unsubscribe_DeviceMethod   IoTHubTransportMqtt_WS_Unsubscribe_DeviceMethod;
 static pfIoTHubTransport_ProcessItem                IoTHubTransportMqtt_WS_ProcessItem;
+static pfIoTHubTransport_SetStreamRequestCallback   IoTHubTransportMqtt_WS_SetStreamRequestCallback;
+static pfIoTHubTransport_SendStreamResponse         IoTHubTransportMqtt_WS_SendStreamResponse;
 static pfIoTHubTransport_SetCallbackContext         IotHubTransportMqtt_WS_SetCallbackContext;
 
 static TRANSPORT_LL_HANDLE my_IoTHubTransport_MQTT_Common_Create(const IOTHUBTRANSPORT_CONFIG* config, MQTT_GET_IO_TRANSPORT get_io_transport, TRANSPORT_CALLBACKS_INFO* cb_info, void* ctx)
@@ -607,6 +609,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_CONFIRMATION_RESULT, int);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUBMESSAGE_DISPOSITION_RESULT, int);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_RETRY_POLICY, int);
+    REGISTER_UMOCK_ALIAS_TYPE(DEVICE_STREAM_C2D_REQUEST_CALLBACK, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(DEVICE_STREAM_D2C_RESPONSE_CALLBACK, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK, void*);
 
     REGISTER_TYPE(WSIO_CONFIG*, WSIO_CONFIG_ptr);
@@ -658,6 +662,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     IoTHubTransportMqtt_WS_Subscribe_DeviceMethod = ((TRANSPORT_PROVIDER*)MQTT_WebSocket_Protocol())->IoTHubTransport_Subscribe_DeviceMethod;
     IoTHubTransportMqtt_WS_Unsubscribe_DeviceMethod = ((TRANSPORT_PROVIDER*)MQTT_WebSocket_Protocol())->IoTHubTransport_Unsubscribe_DeviceMethod;
     IoTHubTransportMqtt_WS_ProcessItem = ((TRANSPORT_PROVIDER*)MQTT_WebSocket_Protocol())->IoTHubTransport_ProcessItem;
+    IoTHubTransportMqtt_WS_SetStreamRequestCallback = ((TRANSPORT_PROVIDER*)MQTT_WebSocket_Protocol())->IoTHubTransport_SetStreamRequestCallback;
+    IoTHubTransportMqtt_WS_SendStreamResponse = ((TRANSPORT_PROVIDER*)MQTT_WebSocket_Protocol())->IoTHubTransport_SendStreamResponse;
     IotHubTransportMqtt_WS_SetCallbackContext = ((TRANSPORT_PROVIDER*)MQTT_WebSocket_Protocol())->IoTHubTransport_SetCallbackContext;
 }
 
@@ -1191,6 +1197,49 @@ TEST_FUNCTION(IoTHubTransportMqtt_WS_GetHostname_success)
     // assert
     ASSERT_IS_NOT_NULL(result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+}
+
+// Tests_SRS_IOTHUB_MQTT_TRANSPORT_09_010: [ IotHubTransportMqtt_WS_SetStreamRequestCallback shall call into the IoTHubTransport_MQTT_Common_SetStreamRequestCallback function. ]
+TEST_FUNCTION(IotHubTransportMqtt_WS_SetStreamRequestCallback_success)
+{
+    // arrange
+    int result;
+    DEVICE_STREAM_C2D_REQUEST_CALLBACK callback = (DEVICE_STREAM_C2D_REQUEST_CALLBACK)0x4445;
+    void* context = (void*)0x4446;
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_SetStreamRequestCallback(TEST_DEVICE_HANDLE, callback, context))
+        .SetReturn(33);
+
+    // act
+    result = IoTHubTransportMqtt_WS_SetStreamRequestCallback(TEST_DEVICE_HANDLE, callback, context);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, 33, result);
+
+    //cleanup
+}
+
+// Tests_SRS_IOTHUB_MQTT_TRANSPORT_09_011: [ IotHubTransportMqtt_WS_SendStreamResponse shall call into the IoTHubTransport_MQTT_Common_SendStreamResponse function. ]
+TEST_FUNCTION(IotHubTransportMqtt_WS_SendStreamResponse_success)
+{
+    // arrange
+    int result;
+    DEVICE_STREAM_C2D_RESPONSE* response = (DEVICE_STREAM_C2D_RESPONSE*)0x4445;
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_SendStreamResponse(TEST_DEVICE_HANDLE, response))
+        .SetReturn(33);
+
+    // act
+    result = IoTHubTransportMqtt_WS_SendStreamResponse(TEST_DEVICE_HANDLE, response);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, 33, result);
 
     //cleanup
 }
