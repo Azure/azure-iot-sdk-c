@@ -47,6 +47,8 @@ phases:
 
   - script: |
       ls 
+      cd build
+      ls
       call build\collect_results.cmd
     displayName: 'Collect Test Results'
     condition: succeededOrFailed()
