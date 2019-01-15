@@ -531,7 +531,7 @@ int hsm_client_tpm_import_key(HSM_CLIENT_HANDLE handle, const unsigned char* key
     if (handle == NULL || key == NULL || key_len == 0)
     {
         /* Codes_SRS_HSM_CLIENT_TPM_07_007: [ if handle or key are NULL, or key_len is 0 hsm_client_tpm_import_key shall return a non-zero value ] */
-        LogError("Invalid argument specified handle: %p, key: %p, key_len: %lu", handle, key, key_len);
+        LogError("Invalid argument specified handle: %p, key: %p, key_len: %lu", handle, key, (unsigned long)key_len);
         result = __FAILURE__;
     }
     else
@@ -557,7 +557,7 @@ int hsm_client_tpm_get_endorsement_key(HSM_CLIENT_HANDLE handle, unsigned char**
     if (handle == NULL || key == NULL || key_len == NULL)
     {
         /* Codes_SRS_HSM_CLIENT_TPM_07_013: [ If handle is NULL hsm_client_tpm_get_endorsement_key shall return NULL. ] */
-        LogError("Invalid handle value specified: handle: %p, result: %p, result_len: %p", handle, key, key_len);
+        LogError("Invalid handle value specified: handle: %p, result: %p, result_len: %p", handle, key, (unsigned long)key_len);
         result = __FAILURE__;
     }
     else
