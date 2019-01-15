@@ -18,6 +18,7 @@ EXPORTS
     IoTHubClient_CreateWithTransport
     IoTHubClient_CreateFromDeviceAuth
     IoTHubClient_Destroy
+    IoTHubClient_EnableFeatureConfigurationViaTwin
     IoTHubClient_SendEventAsync
     IoTHubClient_GetSendStatus
     IoTHubClient_SetMessageCallback
@@ -35,6 +36,7 @@ EXPORTS
     IoTHubDeviceClient_CreateWithTransport
     IoTHubDeviceClient_CreateFromDeviceAuth
     IoTHubDeviceClient_Destroy
+    IoTHubDeviceClient_SetDeviceTwinCallback
     IoTHubDeviceClient_SendEventAsync
     IoTHubDeviceClient_GetSendStatus
     IoTHubDeviceClient_SetMessageCallback
@@ -78,6 +80,7 @@ EXPORTS
     IoTHubDeviceClient_LL_CreateWithTransport
     IoTHubDeviceClient_LL_CreateFromDeviceAuth
     IoTHubDeviceClient_LL_Destroy
+    IoTHubDeviceClient_LL_SetDeviceTwinCallback
     IoTHubDeviceClient_LL_SendEventAsync
     IoTHubDeviceClient_LL_GetSendStatus
     IoTHubDeviceClient_LL_SetMessageCallback
@@ -122,6 +125,7 @@ EXPORTS
     IoTHubMessage_GetContentEncodingSystemProperty 
     IoTHubMessage_GetCorrelationId
     IoTHubMessage_GetDiagnosticPropertyData
+    IoTHubMessage_GetDistributedTracingSystemProperty
     IoTHubMessage_GetMessageId
     IoTHubMessage_GetOutputName
     IoTHubMessage_GetProperty

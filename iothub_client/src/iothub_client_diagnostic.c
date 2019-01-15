@@ -23,14 +23,14 @@ static const char* DISTRIBUTED_TRACING_REPORTED_TWIN_TEMPLATE = "{ \"__iot:inter
 { \"azureiot*com^dtracing^1*0*0\": { \"@id\": \"http://azureiot.com/dtracing/1.0.0\" } }, \
 \"azureiot*com^dtracing^1*0*0\": { \
     \"sampling_mode\": { \
-        \"value\": \"%s\", \
+        \"value\": %s, \
         \"status\" : { \
         \"code\": %s, \
         \"description\" : \"%s\" \
     } \
 }, \
     \"sampling_rate\": { \
-        \"value\": \"%d\", \
+        \"value\": %d, \
         \"status\" : { \
         \"code\": %s, \
         \"description\" : \"%s\" \
@@ -479,9 +479,6 @@ int IoTHubClient_DistributedTracing_UpdateFromTwin(IOTHUB_DISTRIBUTED_TRACING_SE
             LogError("Error calling STRING_sprintf for distributed tracing reported status");
             result = __FAILURE__;
         }
-        
-        json_object_clear(desiredJsonObject);
-        json_object_clear(jsonObject);
 
         if (json != NULL)
             json_value_free(json);

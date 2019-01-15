@@ -246,9 +246,7 @@ endif()
 set(IOTHUB_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client lib" FORCE)
 
 
-if(NOT ${dont_use_uploadtoblob} OR ${use_edge_modules})
-    include_directories(../deps/parson)
-endif()
+include_directories(../deps/parson)
 
 include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})
 include_directories(${AZURE_C_SHARED_UTILITY_INCLUDES})
