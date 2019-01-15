@@ -557,7 +557,7 @@ int hsm_client_tpm_get_endorsement_key(HSM_CLIENT_HANDLE handle, unsigned char**
     if (handle == NULL || key == NULL || key_len == NULL)
     {
         /* Codes_SRS_HSM_CLIENT_TPM_07_013: [ If handle is NULL hsm_client_tpm_get_endorsement_key shall return NULL. ] */
-        LogError("Invalid handle value specified: handle: %p, result: %p, result_len: %p", handle, key, (unsigned long)key_len);
+        LogError("Invalid handle value specified: handle: %p, result: %p, result_len: %p", handle, key, key_len);
         result = __FAILURE__;
     }
     else
@@ -648,7 +648,7 @@ int hsm_client_tpm_sign_data(HSM_CLIENT_HANDLE handle, const unsigned char* data
     /* Codes_SRS_HSM_CLIENT_TPM_07_020: [ If handle or data is NULL or data_len is 0, hsm_client_tpm_sign_data shall return NULL. ] */
     if (handle == NULL || data == NULL || data_len == 0 || signed_value == NULL || signed_len == NULL)
     {
-        LogError("Invalid handle value specified handle: %p, data: %p, data_len: %lu, signed_value: %p, signed_len: %p", handle, data, data_len, signed_value, signed_len);
+        LogError("Invalid handle value specified handle: %p, data: %p, data_len: %lu, signed_value: %p, signed_len: %p", handle, data, (unsigned long)data_len, signed_value, signed_len);
         result = __FAILURE__;
     }
     else
