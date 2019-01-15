@@ -429,7 +429,7 @@ int IoTHubClient_DistributedTracing_UpdateFromTwin(IOTHUB_DISTRIBUTED_TRACING_SE
             else
             {
                 /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_012: [ IoTHubClient_DistributedTracing_UpdateFromTwin should set diagSamplingMode correctly if sampling mode is valid. ]*/
-                distributedTracingSetting->samplingMode = (sampling_mode > 1) ? true : false;
+                distributedTracingSetting->samplingMode = (sampling_mode == 1) ? true : false;
                 if ((modeMessage = STRING_new()) == NULL)
                 {
                     LogError("Error calling STRING_new for distributed tracing reported status bounds error checking for sampling mode");
@@ -473,7 +473,7 @@ int IoTHubClient_DistributedTracing_UpdateFromTwin(IOTHUB_DISTRIBUTED_TRACING_SE
         }
 
         /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_014: [ IoTHubClient_DistributedTracing_UpdateFromTwin should report back the sampling rate and status of the property update. ]*/
-        if (STRING_sprintf(reportedStatePayload, DISTRIBUTED_TRACING_REPORTED_TWIN_TEMPLATE, (distributedTracingSetting->samplingMode) ? "2" : "1", modeStatusCode, STRING_c_str(modeMessage), 
+        if (STRING_sprintf(reportedStatePayload, DISTRIBUTED_TRACING_REPORTED_TWIN_TEMPLATE, (distributedTracingSetting->samplingMode) ? "1" : "2", modeStatusCode, STRING_c_str(modeMessage), 
                                                                                                 distributedTracingSetting->samplingRate, rateStatusCode, STRING_c_str(rateMessage)) != 0)
         {
             LogError("Error calling STRING_sprintf for distributed tracing reported status");
