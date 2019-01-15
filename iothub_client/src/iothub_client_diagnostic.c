@@ -23,14 +23,14 @@ static const char* DISTRIBUTED_TRACING_REPORTED_TWIN_TEMPLATE = "{ \"__iot:inter
 { \"azureiot*com^dtracing^1*0*0\": { \"@id\": \"http://azureiot.com/dtracing/1.0.0\" } }, \
 \"azureiot*com^dtracing^1*0*0\": { \
     \"sampling_mode\": { \
-        \"value\": \"%s\", \
+        \"value\": %s, \
         \"status\" : { \
         \"code\": %s, \
         \"description\" : \"%s\" \
     } \
 }, \
     \"sampling_rate\": { \
-        \"value\": \"%d\", \
+        \"value\": %d, \
         \"status\" : { \
         \"code\": %s, \
         \"description\" : \"%s\" \
