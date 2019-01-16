@@ -19,6 +19,9 @@
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/singlylinkedlist.h"
 #include "azure_c_shared_utility/vector.h"
+#include "iothub_client_options.h"
+
+#define LOOP_TIMEOUT_DEFAULT 1
 
 struct IOTHUB_QUEUE_CONTEXT_TAG;
 
@@ -43,6 +46,7 @@ typedef struct IOTHUB_CLIENT_CORE_INSTANCE_TAG
     struct IOTHUB_QUEUE_CONTEXT_TAG* connection_status_user_context;
     struct IOTHUB_QUEUE_CONTEXT_TAG* message_user_context;
     struct IOTHUB_QUEUE_CONTEXT_TAG* method_user_context;
+    uint16_t loop_timeout;
 } IOTHUB_CLIENT_CORE_INSTANCE;
 
 typedef enum HTTPWORKER_THREAD_TYPE_TAG
@@ -1691,13 +1695,20 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetOption(IOTHUB_CLIENT_CORE_HANDLE iotHub
         }
         else
         {
-            /*Codes_SRS_IOTHUBCLIENT_02_038: [If optionName doesn't match one of the options handled by this module then IoTHubClient_SetOption shall call IoTHubClientCore_LL_SetOption passing the same parameters and return what IoTHubClientCore_LL_SetOption returns.] */
-            result = IoTHubClientCore_LL_SetOption(iotHubClientInstance->IoTHubClientLLHandle, optionName, value);
-            if (result != IOTHUB_CLIENT_OK)
+            if (strcmp(OPTION_CONVENIENCE_LOOP_TIME, optionName) == 0)
             {
-                LogError("IoTHubClientCore_LL_SetOption failed");
+                iotHubClientInstance->loop_timeout = *((uint16_t *)value);
+                result = IOTHUB_CLIENT_OK;
             }
-
+            else
+            {
+                /*Codes_SRS_IOTHUBCLIENT_02_038: [If optionName doesn't match one of the options handled by this module then IoTHubClient_SetOption shall call IoTHubClientCore_LL_SetOption passing the same parameters and return what IoTHubClientCore_LL_SetOption returns.] */
+                result = IoTHubClientCore_LL_SetOption(iotHubClientInstance->IoTHubClientLLHandle, optionName, value);
+                if (result != IOTHUB_CLIENT_OK)
+                {
+                    LogError("IoTHubClientCore_LL_SetOption failed");
+                }
+            }
             (void)Unlock(iotHubClientInstance->LockHandle);
         }
     }
