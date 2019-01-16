@@ -817,7 +817,7 @@ static int ScheduleWork_Thread(void* threadArgument)
             /*Codes_SRS_IOTHUBCLIENT_01_040: [If acquiring the lock fails, IoTHubClientCore_LL_DoWork shall not be called.]*/
             /*no code, shall retry*/
         }
-        (void)ThreadAPI_Sleep(1);
+        (void)ThreadAPI_Sleep(iotHubClientInstance->loop_timeout);
     }
 
     ThreadAPI_Exit(0);
