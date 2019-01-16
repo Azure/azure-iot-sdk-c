@@ -383,7 +383,7 @@ int IoTHubClient_DistributedTracing_UpdateFromTwin(IOTHUB_DISTRIBUTED_TRACING_SE
     /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_006: [ IoTHubClient_DistributedTracing_UpdateFromTwin should return nonezero if arguments are NULL. ]*/
     if (distributedTracingSetting == NULL || payLoad == NULL || reportedStatePayload == NULL)
     {
-        LogError("Invalid parameter for IoTHubClient_DistributedTracing_UpdateFromTwin, distributedTracingSetting=%p, messageHandle=%p, reportedStatePayload=%p", distributedTracingSetting, payLoad, reportedStatePayload);
+        LogError("Invalid parameter for IoTHubClient_DistributedTracing_UpdateFromTwin, distributedTracingSetting=%p, payLoad=%p, reportedStatePayload=%p", distributedTracingSetting, payLoad, reportedStatePayload);
         result = __FAILURE__;
     }
     else
