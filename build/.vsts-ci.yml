@@ -47,9 +47,9 @@ phases:
 
   - script: |
       ls 
-      cd build
+      cd build_all
       ls
-      call build\collect_results.cmd
+      call build_all\collect_results.cmd
     displayName: 'Collect Test Results'
     condition: succeededOrFailed()
   - task: PublishTestResults@2
@@ -59,6 +59,3 @@ phases:
       mergeTestResults: true
       testRunTitle: 'Ubuntu1604 RelWithDebInfo Tests' 
     condition: succeededOrFailed()
-  - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
-    displayName: 'cleanup'
-    condition: always()
