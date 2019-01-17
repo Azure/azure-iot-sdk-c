@@ -2114,13 +2114,13 @@ TEST_FUNCTION(IoTHubClientCore_SetOption_succeed)
     IoTHubClientCore_Destroy(iothub_handle);
 }
 
-TEST_FUNCTION(IoTHubClientCore_SetOption_loop_timeout_succeed)
+TEST_FUNCTION(IoTHubClientCore_SetOption_do_work_loop_frequency_in_ms_succeed)
 {
     // arrange
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
     umock_c_reset_all_calls();
 
-    const char* option_name = "convenience_loop_timeout";
+    const char* option_name = "do_work_freq_ms";
     uint16_t timeval = 100;
     const void* option_value = (void*) &timeval;
 

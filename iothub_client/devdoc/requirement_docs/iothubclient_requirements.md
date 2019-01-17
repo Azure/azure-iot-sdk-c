@@ -107,7 +107,7 @@ extern IOTHUB_CLIENT_HANDLE IoTHubClient_Create(const IOTHUB_CLIENT_CONFIG* conf
 
 **SRS_IOTHUBCLIENT_01_031: [** If `IoTHubClient_Create` fails, all resources allocated by it shall be freed. **]**
 
-**SRS_IOTHUBCLIENT_41_002: [** `IoTHubClient_Create` shall set `loop_timeout` to the default sleep value of 1 ms **]** 
+**SRS_IOTHUBCLIENT_41_002: [** `IoTHubClient_Create` shall set `do_work_freq_ms` to the default sleep value of 1 ms **]** 
 
 
 ## IoTHubClient_CreateWithTransport
@@ -374,7 +374,7 @@ IoTHubClient_SetOption allows run-time changing of settings of the IoTHubClient.
 
 Options handled by IoTHubClient_SetOption:
 
-**SRS_IOTHUBCLIENT_41_001: [** If parameter `optionName` is `OPTION_CONVENIENCE_LOOP_TIME` then `IoTHubClientCore_SetOption` shall set `loop_timeout` parameter of `IoTHubClientInstance` **]** 
+**SRS_IOTHUBCLIENT_41_001: [** If parameter `optionName` is `OPTION_DO_WORK_FREQUENCY_IN_MS` then `IoTHubClientCore_SetOption` shall set `do_work_freq_ms` parameter of `IoTHubClientInstance` **]** 
 
 
 ## IoTHubClient_SetDeviceTwinCallback

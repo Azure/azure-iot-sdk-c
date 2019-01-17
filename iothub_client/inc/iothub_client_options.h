@@ -76,7 +76,7 @@ extern "C"
     //diagnostic sampling percentage value, [0-100]
     static STATIC_VAR_UNUSED const char* OPTION_DIAGNOSTIC_SAMPLING_PERCENTAGE = "diag_sampling_percentage";
 
-static STATIC_VAR_UNUSED const char* OPTION_CONVENIENCE_LOOP_TIME = "convenience_loop_timeout";
+static STATIC_VAR_UNUSED const char* OPTION_DO_WORK_FREQUENCY_IN_MS = "do_work_freq_ms";
 
 #ifdef __cplusplus
 }

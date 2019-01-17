@@ -21,7 +21,7 @@
 #include "azure_c_shared_utility/vector.h"
 #include "iothub_client_options.h"
 
-#define LOOP_TIMEOUT_DEFAULT 1
+#define DO_WORK_FREQ_DEFAULT 1
 
 struct IOTHUB_QUEUE_CONTEXT_TAG;
 
@@ -46,7 +46,7 @@ typedef struct IOTHUB_CLIENT_CORE_INSTANCE_TAG
     struct IOTHUB_QUEUE_CONTEXT_TAG* connection_status_user_context;
     struct IOTHUB_QUEUE_CONTEXT_TAG* message_user_context;
     struct IOTHUB_QUEUE_CONTEXT_TAG* method_user_context;
-    uint16_t loop_timeout;
+    uint16_t do_work_freq_ms;
 } IOTHUB_CLIENT_CORE_INSTANCE;
 
 typedef enum HTTPWORKER_THREAD_TYPE_TAG
@@ -782,7 +782,7 @@ static void ScheduleWork_Thread_ForMultiplexing(void* iotHubClientHandle)
 static int ScheduleWork_Thread(void* threadArgument)
 {
     IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientInstance = (IOTHUB_CLIENT_CORE_INSTANCE*)threadArgument;
-
+    uint16_t sleeptime_in_ms = DO_WORK_FREQ_DEFAULT;
     while (1)
     {
         if (Lock(iotHubClientInstance->LockHandle) == LOCK_OK)
@@ -801,6 +801,7 @@ static int ScheduleWork_Thread(void* threadArgument)
 
                 garbageCollectorImpl(iotHubClientInstance);
                 VECTOR_HANDLE call_backs = VECTOR_move(iotHubClientInstance->saved_user_callback_list);
+                sleeptime_in_ms = iotHubClientInstance->do_work_freq_ms; // Update the sleepval within the locked thread. 
                 (void)Unlock(iotHubClientInstance->LockHandle);
                 if (call_backs == NULL)
                 {
@@ -810,6 +811,8 @@ static int ScheduleWork_Thread(void* threadArgument)
                 {
                     dispatch_user_callbacks(iotHubClientInstance, call_backs);
                 }
+
+    
             }
         }
         else
@@ -818,7 +821,7 @@ static int ScheduleWork_Thread(void* threadArgument)
             /*no code, shall retry*/
         }
         /* Codes_SRS_IOTHUBCLIENT_041_02: [The thread shall sleep for a specified time in ms as provided through IoTHubClientCore_SetOption, with a default of 1 ms ] */
-        (void)ThreadAPI_Sleep(iotHubClientInstance->loop_timeout);
+        (void)ThreadAPI_Sleep(sleeptime_in_ms);
     }
 
     ThreadAPI_Exit(0);
@@ -871,7 +874,7 @@ static IOTHUB_CLIENT_CORE_INSTANCE* create_iothub_instance(CREATE_HUB_INSTANCE_T
         memset((void *)result, 0, sizeof(IOTHUB_CLIENT_CORE_INSTANCE));
 
         /* Codes_SRS_IOTHUBCLIENT_41_02 [] */
-        result->loop_timeout = LOOP_TIMEOUT_DEFAULT;
+        result->do_work_freq_ms = DO_WORK_FREQ_DEFAULT;
 
         /* Codes_SRS_IOTHUBCLIENT_01_029: [IoTHubClient_Create shall create a lock object to be used later for serializing IoTHubClient calls.] */
         if ((result->saved_user_callback_list = VECTOR_create(sizeof(USER_CALLBACK_INFO))) == NULL)
@@ -1699,10 +1702,10 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetOption(IOTHUB_CLIENT_CORE_HANDLE iotHub
         }
         else
         {
-            /* Codes_SRS_IOTHUBCLIENT_41_001 [ If parameter `optionName` is `OPTION_CONVENIENCE_LOOP_TIME` then `IoTHubClient_SetOption` shall set `loop_timeout` parameter of `IoTHubClientInstance` ]*/ 
-            if (strcmp(OPTION_CONVENIENCE_LOOP_TIME, optionName) == 0)
+            /* Codes_SRS_IOTHUBCLIENT_41_001 [ If parameter `optionName` is `OPTION_DO_WORK_FREQUENCY_IN_MS` then `IoTHubClient_SetOption` shall set `do_work_freq_ms` parameter of `IoTHubClientInstance` ]*/ 
+            if (strcmp(OPTION_DO_WORK_FREQUENCY_IN_MS, optionName) == 0)
             {
-                iotHubClientInstance->loop_timeout = *((uint16_t *)value);
+                iotHubClientInstance->do_work_freq_ms = *((uint16_t *)value);
                 result = IOTHUB_CLIENT_OK;
             }
             else
