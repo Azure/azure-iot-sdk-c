@@ -13,23 +13,29 @@
 #include "parson.h"
 #include "internal/iothub_client_diagnostic.h"
 
-static const char* DEVICE_TWIN_DISTRIBUTED_TRACING_SAMPLING_MODE_KEY = "azureiot*com^dtracing^1*0*0.sampling_mode";
-static const char* DEVICE_TWIN_DISTRIBUTED_TRACING_SAMPLING_RATE_KEY = "azureiot*com^dtracing^1*0*0.sampling_rate";
+#define DTRACING_NAMESPACE "azureiot*com^dtracing^1"
+#define DTRACING_JSON_DOT_SEPARATOR "."
+#define DTRACING_SAMPLING_MODE "sampling_mode"
+#define DTRACING_SAMPLING_RATE "sampling_rate"
+
+static const char* DEVICE_TWIN_DISTRIBUTED_TRACING_SAMPLING_MODE_KEY = DTRACING_NAMESPACE DTRACING_JSON_DOT_SEPARATOR DTRACING_SAMPLING_MODE;
+static const char* DEVICE_TWIN_DISTRIBUTED_TRACING_SAMPLING_RATE_KEY = DTRACING_NAMESPACE DTRACING_JSON_DOT_SEPARATOR DTRACING_SAMPLING_RATE;
+
 static const char* MESSAGE_DISTRIBUTED_TRACING_TIMESTAMP_KEY = "timestamp=";
 static const char* DEVICE_TWIN_REPORTED_STATUS_FAILED_OPERATION = "401";
 static const char* DEVICE_TWIN_REPORTED_STATUS_SUCCESS = "204";
 
 static const char* DISTRIBUTED_TRACING_REPORTED_TWIN_TEMPLATE = "{ \"__iot:interfaces\": \
-{ \"azureiot*com^dtracing^1*0*0\": { \"@id\": \"http://azureiot.com/dtracing/1.0.0\" } }, \
-\"azureiot*com^dtracing^1*0*0\": { \
-    \"sampling_mode\": { \
+{ \"" DTRACING_NAMESPACE "\": { \"@id\": \"http://azureiot.com/dtracing/1.0.0\" } }, \
+  \"" DTRACING_NAMESPACE "\": { \
+    \"" DTRACING_SAMPLING_MODE "\": { \
         \"value\": %s, \
         \"status\" : { \
         \"code\": %s, \
         \"description\" : \"%s\" \
     } \
 }, \
-    \"sampling_rate\": { \
+    \"" DTRACING_SAMPLING_RATE "\": { \
         \"value\": %d, \
         \"status\" : { \
         \"code\": %s, \
