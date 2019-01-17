@@ -795,7 +795,7 @@ static int ScheduleWork_Thread(void* threadArgument)
             }
             else
             {
-                /* Codes_SRS_IOTHUBCLIENT_01_037: [The thread created by IoTHubClient_SendEvent or IoTHubClient_SetMessageCallback shall call IoTHubClientCore_LL_DoWork every 1 ms.] */
+                /* Codes_SRS_IOTHUBCLIENT_01_037: [The thread created by IoTHubClient_SendEvent or IoTHubClient_SetMessageCallback shall call IoTHubClientCore_LL_DoWork every 1 ms by default.] */
                 /* Codes_SRS_IOTHUBCLIENT_01_039: [All calls to IoTHubClientCore_LL_DoWork shall be protected by the lock created in IotHubClient_Create.] */
                 IoTHubClientCore_LL_DoWork(iotHubClientInstance->IoTHubClientLLHandle);
 
@@ -817,6 +817,7 @@ static int ScheduleWork_Thread(void* threadArgument)
             /*Codes_SRS_IOTHUBCLIENT_01_040: [If acquiring the lock fails, IoTHubClientCore_LL_DoWork shall not be called.]*/
             /*no code, shall retry*/
         }
+        /* Codes_SRS_IOTHUBCLIENT_041_02: [The thread shall sleep for a specified time in ms as provided through IoTHubClientCore_SetOption, with a default of 1 ms ] */
         (void)ThreadAPI_Sleep(iotHubClientInstance->loop_timeout);
     }
 
@@ -868,6 +869,9 @@ static IOTHUB_CLIENT_CORE_INSTANCE* create_iothub_instance(CREATE_HUB_INSTANCE_T
     if (result != NULL)
     {
         memset((void *)result, 0, sizeof(IOTHUB_CLIENT_CORE_INSTANCE));
+
+        /* Codes_SRS_IOTHUBCLIENT_41_02 [] */
+        result->loop_timeout = LOOP_TIMEOUT_DEFAULT;
 
         /* Codes_SRS_IOTHUBCLIENT_01_029: [IoTHubClient_Create shall create a lock object to be used later for serializing IoTHubClient calls.] */
         if ((result->saved_user_callback_list = VECTOR_create(sizeof(USER_CALLBACK_INFO))) == NULL)
@@ -1695,6 +1699,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetOption(IOTHUB_CLIENT_CORE_HANDLE iotHub
         }
         else
         {
+            /* Codes_SRS_IOTHUBCLIENT_41_001 [ If parameter `optionName` is `OPTION_CONVENIENCE_LOOP_TIME` then `IoTHubClient_SetOption` shall set `loop_timeout` parameter of `IoTHubClientInstance` ]*/ 
             if (strcmp(OPTION_CONVENIENCE_LOOP_TIME, optionName) == 0)
             {
                 iotHubClientInstance->loop_timeout = *((uint16_t *)value);
