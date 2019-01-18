@@ -1705,8 +1705,14 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetOption(IOTHUB_CLIENT_CORE_HANDLE iotHub
             /* Codes_SRS_IOTHUBCLIENT_41_001 [ If parameter `optionName` is `OPTION_DO_WORK_FREQUENCY_IN_MS` then `IoTHubClient_SetOption` shall set `do_work_freq_ms` parameter of `IoTHubClientInstance` ]*/ 
             if (strcmp(OPTION_DO_WORK_FREQUENCY_IN_MS, optionName) == 0)
             {
-                iotHubClientInstance->do_work_freq_ms = *((uint16_t *)value);
-                result = IOTHUB_CLIENT_OK;
+                if (0 < * (uint16_t*) value <= 100) {
+                    iotHubClientInstance->do_work_freq_ms = *((uint16_t *)value);
+                    result = IOTHUB_CLIENT_OK;
+                }
+                else {
+                    result = IOTHUB_CLIENT_ERROR;
+                    logError("Invalid value: OPTION_DO_WORK_FREQUENCY_IN_MS must be set between 1 and 100 ms");
+                }    
             }
             else
             {
