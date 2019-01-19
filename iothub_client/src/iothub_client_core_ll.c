@@ -1099,7 +1099,7 @@ static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_
                             result->diagnostic_setting.diagSamplingPercentage = 0;
 
                             result->distributedTracing_setting.policyEnabled = false;
-                            result->distributedTracing_setting.samplingMode = false;
+                            result->distributedTracing_setting.samplingMode = IOTHUB_DISTRIBUTED_TRACING_SAMPLING_MODE_NOT_SET;
                             result->distributedTracing_setting.samplingRate = 0;
                             result->distributedTracing_setting.currentMessageNumber = 0;
 

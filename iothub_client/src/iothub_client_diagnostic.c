@@ -29,7 +29,7 @@ static const char* DISTRIBUTED_TRACING_REPORTED_TWIN_TEMPLATE = "{ \"__iot:inter
 { \"" DTRACING_NAMESPACE "\": { \"@id\": \"http://azureiot.com/dtracing/1.0.0\" } }, \
   \"" DTRACING_NAMESPACE "\": { \
     \"" DTRACING_SAMPLING_MODE "\": { \
-        \"value\": %s, \
+        \"value\": %d, \
         \"status\" : { \
         \"code\": %s, \
         \"description\" : \"%s\" \
@@ -238,7 +238,7 @@ static bool should_add_distributedtrace_fixed_rate_sampling(IOTHUB_DISTRIBUTED_T
     bool result = false;
     
     /* Codes_SRS_IOTHUB_DIAGNOSTIC_38_003: [ If samplingMode is disabled or samplingRate is equal to 0, message number should not be increased and no distributed_tracing properties added and return false ]*/
-    if (distributedTraceSetting->samplingMode && distributedTraceSetting->samplingRate > 0)
+    if (distributedTraceSetting->samplingMode != IOTHUB_DISTRIBUTED_TRACING_SAMPLING_MODE_OFF && distributedTraceSetting->samplingRate > 0)
     {
         /* Codes_SRS_IOTHUB_DIAGNOSTIC_38_004: [ If diagSamplingPercentage is equal to 100, distributed_tracing properties should be added to all messages]*/
         /* Codes_SRS_IOTHUB_DIAGNOSTIC_38_005: [ If diagSamplingPercentage is between(0, 100), distributed_tracing properties should be added based on percentage]*/
@@ -435,7 +435,7 @@ int IoTHubClient_DistributedTracing_UpdateFromTwin(IOTHUB_DISTRIBUTED_TRACING_SE
             else
             {
                 /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_012: [ IoTHubClient_DistributedTracing_UpdateFromTwin should set diagSamplingMode correctly if sampling mode is valid. ]*/
-                distributedTracingSetting->samplingMode = (sampling_mode == 1) ? true : false;
+                distributedTracingSetting->samplingMode = sampling_mode;
                 if ((modeMessage = STRING_new()) == NULL)
                 {
                     LogError("Error calling STRING_new for distributed tracing reported status bounds error checking for sampling mode");
@@ -479,7 +479,7 @@ int IoTHubClient_DistributedTracing_UpdateFromTwin(IOTHUB_DISTRIBUTED_TRACING_SE
         }
 
         /* Codes_SRS_IOTHUB_DIAGNOSTIC_13_014: [ IoTHubClient_DistributedTracing_UpdateFromTwin should report back the sampling rate and status of the property update. ]*/
-        if (STRING_sprintf(reportedStatePayload, DISTRIBUTED_TRACING_REPORTED_TWIN_TEMPLATE, (distributedTracingSetting->samplingMode) ? "1" : "2", modeStatusCode, STRING_c_str(modeMessage), 
+        if (STRING_sprintf(reportedStatePayload, DISTRIBUTED_TRACING_REPORTED_TWIN_TEMPLATE, distributedTracingSetting->samplingMode, modeStatusCode, STRING_c_str(modeMessage), 
                                                                                                 distributedTracingSetting->samplingRate, rateStatusCode, STRING_c_str(rateMessage)) != 0)
         {
             LogError("Error calling STRING_sprintf for distributed tracing reported status");
