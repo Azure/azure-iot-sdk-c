@@ -138,9 +138,9 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlobEx(IOTHUB_CLIENT_
 }
 #endif
 
-IOTHUB_CLIENT_RESULT IoTHubClient_LL_EnableFeatureConfigurationViaTwin(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, bool enableTwinConfiguration)
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_EnablePolicyConfiguration(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, POLICY_CONFIGURATION_TYPE policyType, bool enablePolicyConfiguration)
 {
-    return IoTHubClientCore_LL_EnableFeatureConfigurationViaTwin(iotHubClientHandle, enableTwinConfiguration);
+    return IoTHubClientCore_LL_EnablePolicyConfiguration(iotHubClientHandle, policyType, enablePolicyConfiguration);
 }
 
 

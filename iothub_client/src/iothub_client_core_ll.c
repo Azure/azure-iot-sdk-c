@@ -128,7 +128,6 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG
     STRING_HANDLE product_info;
     IOTHUB_DIAGNOSTIC_SETTING_DATA diagnostic_setting; // Deprecated
     IOTHUB_DISTRIBUTED_TRACING_SETTING_DATA distributedTracing_setting;
-    bool isTwinFeatureConfigurationEnabled;
     SINGLYLINKEDLIST_HANDLE event_callbacks;  // List of IOTHUB_EVENT_CALLBACK's
 }IOTHUB_CLIENT_CORE_LL_HANDLE_DATA;
 
@@ -557,7 +556,7 @@ static void IoTHubClientCore_LL_RetrievePropertyComplete(DEVICE_TWIN_UPDATE_STAT
         IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)ctx;
 
         /*Codes_SRS_IOTHUBCLIENT_LL_38_003: [If distributed tracing is enabled, synchronize (update and report) distributed tracing settings based on device twin information.] */
-        if(handleData->isTwinFeatureConfigurationEnabled)
+        if(handleData->distributedTracing_setting.policyEnabled)
         {
             update_distributed_tracing_settings_from_twin(&handleData->distributedTracing_setting, handleData, update_state, payLoad);
         }
@@ -797,7 +796,7 @@ static int IoTHubClientCore_LL_DeviceMethodComplete(const char* method_name, con
     return result;
 }
 
-static void IotHubClientCore_LL_GetTwin_FeatureConfigurationCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback)
+static void IotHubClientCore_LL_GetTwin_PolicyConfigurationCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback)
 {
     (void)size;
 
@@ -809,7 +808,7 @@ static void IotHubClientCore_LL_GetTwin_FeatureConfigurationCallback(DEVICE_TWIN
     {
         IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)userContextCallback;
 
-        if (handleData->isTwinFeatureConfigurationEnabled)
+        if (handleData->distributedTracing_setting.policyEnabled)
         {
             update_distributed_tracing_settings_from_twin(&handleData->distributedTracing_setting, handleData, update_state, payLoad);
         }
@@ -1099,6 +1098,7 @@ static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_
                             result->diagnostic_setting.currentMessageNumber = 0;
                             result->diagnostic_setting.diagSamplingPercentage = 0;
 
+                            result->distributedTracing_setting.policyEnabled = false;
                             result->distributedTracing_setting.samplingMode = false;
                             result->distributedTracing_setting.samplingRate = 0;
                             result->distributedTracing_setting.currentMessageNumber = 0;
@@ -3023,16 +3023,30 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_GenericMethodInvoke(IOTHUB_CLIENT_CORE_
 }
 #endif
 
-IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_EnableFeatureConfigurationViaTwin(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, bool enableTwinConfiguration)
+IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_EnablePolicyConfiguration(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, POLICY_CONFIGURATION_TYPE policyType, bool enablePolicyConfiguration)
 {
+    (void)policyType;
     IOTHUB_CLIENT_RESULT result;
+
+    // Codes_SRS_IOTHUBCLIENT_LL_38_004: [ If `iotHubClientHandle` is NULL, `IoTHubClientCore_LL_EnablePolicyConfiguration` shall return IOTHUB_CLIENT_INVALID_ARG. ]
     if (iotHubClientHandle != NULL)
     {
-        iotHubClientHandle->isTwinFeatureConfigurationEnabled = enableTwinConfiguration;
-
-        if (enableTwinConfiguration)
+        switch(policyType)
         {
-            (void)IoTHubClientCore_LL_GetTwinAsync(iotHubClientHandle, IotHubClientCore_LL_GetTwin_FeatureConfigurationCallback, iotHubClientHandle);
+            case(POLICY_CONFIGURATION_DISTRIBUTED_TRACING):
+            {
+                iotHubClientHandle->distributedTracing_setting.policyEnabled = enablePolicyConfiguration;
+                break;
+            }
+            default:
+                //do nothing
+                break;
+        }
+
+        // Codes_SRS_IOTHUBCLIENT_LL_38_005: [ If a policy is enabled, `IoTHubClientCore_LL_GetTwinAsync` shall be called to refresh policy settings. ]
+        if (enablePolicyConfiguration)
+        {
+            (void)IoTHubClientCore_LL_GetTwinAsync(iotHubClientHandle, IotHubClientCore_LL_GetTwin_PolicyConfigurationCallback, iotHubClientHandle);
         }
 
         result = IOTHUB_CLIENT_OK;

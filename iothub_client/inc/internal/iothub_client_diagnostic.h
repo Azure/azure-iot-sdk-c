@@ -32,6 +32,8 @@ typedef struct IOTHUB_DIAGNOSTIC_SETTING_DATA_TAG
 /** @brief distributed tracing settings */
 typedef struct IOTHUB_DISTRIBUTED_TRACING_SETTING_DATA_TAG
 {
+    bool policyEnabled;
+    
     /* Distributed Tracing sampling enabled flag.
     Possible options from server - Off (1), On (2), Inherit (3) */
     bool samplingMode;

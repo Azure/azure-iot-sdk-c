@@ -143,7 +143,7 @@ int main(void)
         (void)IoTHubDeviceClient_LL_SetConnectionStatusCallback(device_ll_handle, connection_status_callback, NULL);
         
         // Enables IoTHub policy configuration for distributed tracing 
-        (void)IoTHubDeviceClient_LL_EnableFeatureConfigurationViaTwin(device_ll_handle, true);
+        (void)IoTHubDeviceClient_LL_EnablePolicyConfiguration(device_ll_handle, POLICY_CONFIGURATION_DISTRIBUTED_TRACING, true);
 
         do
         {
