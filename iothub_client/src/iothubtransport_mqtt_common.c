@@ -100,9 +100,8 @@ static const char* DISTRIBUTED_TRACING_PROPERTY = "tracestate";
 #define SUBSCRIBE_GET_REPORTED_STATE_TOPIC      0x0001
 #define SUBSCRIBE_NOTIFICATION_STATE_TOPIC      0x0002
 #define SUBSCRIBE_TELEMETRY_TOPIC               0x0004
-#define SUBSCRIBE_METHODS_TOPIC                 0x0008
-#define SUBSCRIBE_DEVICE_METHOD_TOPIC           0x0010
-#define SUBSCRIBE_INPUT_QUEUE_TOPIC             0x0020
+#define SUBSCRIBE_DEVICE_METHOD_TOPIC           0x0008
+#define SUBSCRIBE_INPUT_QUEUE_TOPIC             0x0010
 #define SUBSCRIBE_TOPIC_COUNT                   5
 
 DEFINE_ENUM_STRINGS(MQTT_CLIENT_EVENT_ERROR, MQTT_CLIENT_EVENT_ERROR_VALUES)
@@ -1015,6 +1014,10 @@ static void sendPendingGetTwinRequests(PMQTTTRANSPORT_HANDLE_DATA transportData)
         {
             LogError("Failed sending pending get twin request");
             destroy_device_twin_get_message(msg_entry);
+        }
+        else
+        {
+            transportData->device_twin_get_sent = true;
         }
 
         dev_twin_item = saveListEntry.Flink;

@@ -2497,6 +2497,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_GetTwinAsync(IOTHUB_CLIENT_CORE_LL_HAND
                 else
                 {
                     // Codes_SRS_IOTHUBCLIENT_LL_09_014: [ If no errors occur IoTHubClientCore_LL_GetTwinAsync shall return `IOTHUB_CLIENT_OK`. ]
+                    handleData->complete_twin_update_encountered = true;
                     result = IOTHUB_CLIENT_OK;
                 }
             }
