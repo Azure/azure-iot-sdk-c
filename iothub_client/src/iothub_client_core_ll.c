@@ -518,18 +518,14 @@ static void IoTHubClientCore_LL_SendComplete(PDLIST_ENTRY completed, IOTHUB_CLIE
 static int update_distributed_tracing_settings_from_twin(IOTHUB_DISTRIBUTED_TRACING_SETTING_DATA* diagSetting, IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* iotHubClientHandle, DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad)
 {
     int result;
-    STRING_HANDLE reportedStatePayload = STRING_new();
-    if (reportedStatePayload == NULL)
-    {
-        LogError("Error creating message string");
-        result = __FAILURE__;
-    }
-    else if (IoTHubClient_DistributedTracing_UpdateFromTwin(diagSetting, update_state == DEVICE_TWIN_UPDATE_PARTIAL, payLoad, reportedStatePayload) != 0)
+    STRING_HANDLE reportedStatePayload = NULL;
+
+    if (IoTHubClient_DistributedTracing_UpdateFromTwin(diagSetting, update_state == DEVICE_TWIN_UPDATE_PARTIAL, payLoad, &reportedStatePayload) != 0)
     {
         LogError("Error calling IoTHubClient_DistributedTracing_UpdateFromTwin");
         result = __FAILURE__;
     }
-    else if (IoTHubClient_LL_SendReportedState(iotHubClientHandle, (const unsigned char*)STRING_c_str(reportedStatePayload), STRING_length(reportedStatePayload), NULL, NULL) != IOTHUB_CLIENT_OK)
+    else if (reportedStatePayload != NULL && IoTHubClient_LL_SendReportedState(iotHubClientHandle, (const unsigned char*)STRING_c_str(reportedStatePayload), STRING_length(reportedStatePayload), NULL, NULL) != IOTHUB_CLIENT_OK)
     {
         LogError("IoTHubClient_LL_SendReportedState failed");
         result = __FAILURE__;

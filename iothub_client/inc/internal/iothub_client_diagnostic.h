@@ -86,7 +86,7 @@ MOCKABLE_FUNCTION(, int, IoTHubClient_DistributedTracing_AddToMessageHeadersIfNe
 * @param	reportedStatePayload	Reported state payload for distributed tracing setting
 * @return	0 upon success, non-zero otherwise
 */
-MOCKABLE_FUNCTION(, int, IoTHubClient_DistributedTracing_UpdateFromTwin, IOTHUB_DISTRIBUTED_TRACING_SETTING_DATA*, distributedTracingSetting, bool, isPartialUpdate, const unsigned char*, payLoad, STRING_HANDLE, reportedStatePayload);
+MOCKABLE_FUNCTION(, int, IoTHubClient_DistributedTracing_UpdateFromTwin, IOTHUB_DISTRIBUTED_TRACING_SETTING_DATA*, distributedTracingSetting, bool, isPartialUpdate, const unsigned char*, payLoad, STRING_HANDLE*, reportedStatePayload);
 
 #ifdef __cplusplus
 }
