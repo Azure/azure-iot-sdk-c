@@ -1009,30 +1009,9 @@ static char *malloc_and_fill_desired_dtracing_payload(uint8_t sampling_mode, uin
     return retValue;
 }
 
-void dt_e2e_test_dtracing(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACCOUNT_AUTH_METHOD accountAuthMethod)
+static void change_dtracing_setting_and_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, DEVICE_DESIRED_DATA* device, bool enableDTracing, uint8_t expected_sampling_mode, uint8_t expected_sampling_rate)
 {
-    // arrange
-    IOTHUB_PROVISIONED_DEVICE* deviceToUse;
-    if (accountAuthMethod == IOTHUB_ACCOUNT_AUTH_X509)
-    {
-        deviceToUse = IoTHubAccount_GetX509Device(g_iothubAcctInfo);
-    }
-    else
-    {
-        deviceToUse = IoTHubAccount_GetSASDevice(g_iothubAcctInfo);
-    }
-
-    DEVICE_DESIRED_DATA *device = device_desired_init();
-    ASSERT_IS_NOT_NULL(device, "failed to create the device client data");
-
-    // Create the IoT Hub Data
-    dt_e2e_create_client_handle(deviceToUse, protocol);
-
-
-    // subscribe
-    setdevicetwincallback_on_device_or_module(deviceTwinCallback, device);
-
-    (void)IoTHubDeviceClient_EnablePolicyConfiguration(iothub_deviceclient_handle, POLICY_CONFIGURATION_DISTRIBUTED_TRACING, true);
+    (void)IoTHubDeviceClient_EnablePolicyConfiguration(iothub_deviceclient_handle, POLICY_CONFIGURATION_DISTRIBUTED_TRACING, enableDTracing);
 
     ThreadAPI_Sleep(3000);
 
@@ -1043,8 +1022,6 @@ void dt_e2e_test_dtracing(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACCO
     IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceClientDeviceTwinHandle = IoTHubDeviceTwin_Create(iotHubServiceClientHandle);
     ASSERT_IS_NOT_NULL(serviceClientDeviceTwinHandle, "IoTHubDeviceTwin_Create failed");
 
-    uint8_t expected_sampling_mode = 1;
-    uint8_t expected_sampling_rate = 100;
     char *buffer = malloc_and_fill_desired_dtracing_payload(expected_sampling_mode, expected_sampling_rate);
     ASSERT_IS_NOT_NULL(buffer, "failed to create the payload for IoTHubDeviceTwin_UpdateTwin");
 
@@ -1082,55 +1059,44 @@ void dt_e2e_test_dtracing(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACCO
     client_create_with_properies_and_send_d2c(propMap);
     Map_Destroy(propMap);
 
-    ThreadAPI_Sleep(3000);
-
     free(buffer);
+    IoTHubDeviceTwin_Destroy(serviceClientDeviceTwinHandle);
+    IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
+}
 
-    expected_sampling_mode = 2;
-    expected_sampling_rate = 50;
-    buffer = malloc_and_fill_desired_dtracing_payload(expected_sampling_mode, expected_sampling_rate);
-    ASSERT_IS_NOT_NULL(buffer, "failed to create the payload for IoTHubDeviceTwin_UpdateTwin");
-
-    dt_e2e_update_twin(serviceClientDeviceTwinHandle, deviceToUse, buffer);
-
-    ThreadAPI_Sleep(3000);
-    beginOperation = time(NULL);
-    while (
-        (nowTime = time(NULL)),
-        (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME) // time box
-        )
+void dt_e2e_test_dtracing(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACCOUNT_AUTH_METHOD accountAuthMethod)
+{
+    // arrange
+    IOTHUB_PROVISIONED_DEVICE* deviceToUse;
+    if (accountAuthMethod == IOTHUB_ACCOUNT_AUTH_X509)
     {
-        if (Lock(device->lock) != LOCK_OK)
-        {
-            ASSERT_FAIL("Lock failed");
-        }
-        else
-        {
-            if (device->receivedCallBack)
-            {
-                status_code = 0;
-                Unlock(device->lock);
-                break;
-            }
-            Unlock(device->lock);
-        }
-        ThreadAPI_Sleep(1000);
+        deviceToUse = IoTHubAccount_GetX509Device(g_iothubAcctInfo);
     }
-    ASSERT_IS_TRUE(status_code == 0, "SendReported status_code is an error");
+    else
+    {
+        deviceToUse = IoTHubAccount_GetSASDevice(g_iothubAcctInfo);
+    }
 
-    // Send the Event from the client
-    propMap = Map_Create(NULL);
-    client_create_with_properies_and_send_d2c(propMap);
-    Map_Destroy(propMap);
+    DEVICE_DESIRED_DATA *device = device_desired_init();
+    ASSERT_IS_NOT_NULL(device, "failed to create the device client data");
 
+    // Create the IoT Hub Data
+    dt_e2e_create_client_handle(deviceToUse, protocol);
+
+
+    // subscribe
+    setdevicetwincallback_on_device_or_module(deviceTwinCallback, device);
+
+    // run dtrace tests [to be verified manually until all production hubs enable this feature]
+    change_dtracing_setting_and_test(deviceToUse, device, true, 1, 100);
     ThreadAPI_Sleep(3000);
+    change_dtracing_setting_and_test(deviceToUse, device, false, 1, 50);
+    ThreadAPI_Sleep(3000);
+    change_dtracing_setting_and_test(deviceToUse, device, true, 2, 34);
 
     // unsubscribe
     setdevicetwincallback_on_device_or_module(NULL, NULL);
 
-    free(buffer);
-    IoTHubDeviceTwin_Destroy(serviceClientDeviceTwinHandle);
-    IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
     destroy_on_device_or_module();
     device_desired_deinit(device);
 }
