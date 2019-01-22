@@ -1057,6 +1057,7 @@ static void change_dtracing_setting_and_test(IOTHUB_PROVISIONED_DEVICE* deviceTo
     // Send the Event from the client
     MAP_HANDLE propMap = Map_Create(NULL);
     client_create_with_properies_and_send_d2c(propMap);
+    ThreadAPI_Sleep(3000);
     Map_Destroy(propMap);
 
     free(buffer);
@@ -1089,9 +1090,8 @@ void dt_e2e_test_dtracing(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACCO
 
     // run dtrace tests [to be verified manually until all production hubs enable this feature]
     change_dtracing_setting_and_test(deviceToUse, device, true, 1, 100);
-    ThreadAPI_Sleep(3000);
+    
     change_dtracing_setting_and_test(deviceToUse, device, false, 1, 50);
-    ThreadAPI_Sleep(3000);
     change_dtracing_setting_and_test(deviceToUse, device, true, 2, 34);
 
     // unsubscribe
