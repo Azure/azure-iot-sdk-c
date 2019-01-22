@@ -47,6 +47,7 @@ typedef struct IOTHUB_CLIENT_CORE_INSTANCE_TAG
     struct IOTHUB_QUEUE_CONTEXT_TAG* message_user_context;
     struct IOTHUB_QUEUE_CONTEXT_TAG* method_user_context;
     uint16_t do_work_freq_ms;
+    tickcounter_ms_t currentMessageTimeout;
 } IOTHUB_CLIENT_CORE_INSTANCE;
 
 typedef enum HTTPWORKER_THREAD_TYPE_TAG
@@ -1706,13 +1707,35 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetOption(IOTHUB_CLIENT_CORE_HANDLE iotHub
             if (strcmp(OPTION_DO_WORK_FREQUENCY_IN_MS, optionName) == 0)
             {
                 if (0 < * (uint16_t*) value <= 100) {
-                    iotHubClientInstance->do_work_freq_ms = *((uint16_t *)value);
-                    result = IOTHUB_CLIENT_OK;
+                    if (*((unsigned long long *)value) < (iotHubClientInstance->currentMessageTimeout / 2)) {
+                        iotHubClientInstance->do_work_freq_ms = *((uint16_t *)value);
+                        result = IOTHUB_CLIENT_OK;
+                    }
+                    else {
+                        result = IOTHUB_CLIENT_ERROR;
+                        logError("Invalid value: OPTION_DO_WORK_FREQUENCY_IN_MS cannot exceed half of OPTION_MESSAGE_TIMEOUT, which is currently set to %llu.", iotHubClientInstance->currentMessageTimeout);
+                    }
                 }
                 else {
                     result = IOTHUB_CLIENT_ERROR;
-                    logError("Invalid value: OPTION_DO_WORK_FREQUENCY_IN_MS must be set between 1 and 100 ms");
+                    logError("Invalid value: OPTION_DO_WORK_FREQUENCY_IN_MS cannot exceed 100 ms. If you wish to reduce the frequency further, consider using the LL layer.");
                 }    
+            }
+            else if (strcmp(OPTION_MESSAGE_TIMEOUT, optionName) == 0)
+            {
+                iotHubClientInstance->currentMessageTimeout = *((tickcounter_ms_t *)value);
+                if (iotHubClientInstance->currentMessageTimeout < (unsigned long long)iotHubClientInstance->do_work_freq_ms)
+                {
+                    result = IOTHUB_CLIENT_ERROR;
+                    logError("invalid value: OPTION_MESSAGE_TIMEOUT cannot exceed the value of do_work_freq_ms, which is currently %hu.", iotHubClientInstance->do_work_freq_ms);
+                }
+                else {
+                    result = IoTHubClientCore_LL_SetOption(iotHubClientInstance->IoTHubClientLLHandle, optionName, value);
+                    if (result != IOTHUB_CLIENT_OK)
+                    {
+                        LogError("IoTHubClientCore_LL_SetOption failed");
+                    }
+                }
             }
             else
             {
