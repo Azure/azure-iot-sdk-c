@@ -2260,6 +2260,7 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 }
                 else
                 {
+                    transport_data->currPacketState = CONNECT_TYPE;
                     (void)tickcounter_get_current_ms(transport_data->msgTickCounter, &transport_data->mqtt_connect_time);
                     result = 0;
                 }
@@ -2335,6 +2336,7 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             else if ((current_time - transport_data->mqtt_connect_time) / 1000 > transport_data->connect_timeout_in_sec)
             {
                 LogError("mqtt_client timed out waiting for CONNACK");
+                transport_data->currPacketState = PACKET_TYPE_ERROR;
                 DisconnectFromClient(transport_data);
                 result = __FAILURE__;
             }
