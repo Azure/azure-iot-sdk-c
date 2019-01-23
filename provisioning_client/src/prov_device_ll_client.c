@@ -1009,7 +1009,7 @@ PROV_DEVICE_RESULT Prov_Device_LL_SetOption(PROV_DEVICE_LL_HANDLE handle, const 
     }
     else
     {
-        if (strcmp(option_name, OPTION_TRUSTED_CERT) == 0)
+        if (strcmp(OPTION_TRUSTED_CERT, option_name) == 0)
         {
             const char* cert_info = (const char*)value;
             if (handle->prov_transport_protocol->prov_transport_trusted_cert(handle->transport_handle, cert_info) != 0)
