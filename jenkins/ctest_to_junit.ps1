@@ -3,7 +3,7 @@
 
 # This script will be running on working dir set as build_all  
 $xsl = "./ctest_to_junit.xsl" 
-$ctest_xml = (Get-ChildItem "./Testing/*/Test.xml").FullName 
+$ctest_xml = (Get-ChildItem "*/Test.xml").FullName 
 $junit_xml = "./Testing/results-junit.xml" 
 $xslt = New-Object System.Xml.Xsl.XslCompiledTransform 
 $xslt.Load($xsl) 
