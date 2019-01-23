@@ -4953,6 +4953,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_GetTwinAsync_succeed)
     IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
     
     umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_Subscribe_DeviceTwin(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_GetTwinAsync(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
@@ -4978,6 +4979,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_GetTwinAsync_fail)
     IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
 
     umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_Subscribe_DeviceTwin(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_GetTwinAsync(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     umock_c_negative_tests_snapshot();
