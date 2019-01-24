@@ -1051,11 +1051,7 @@ static void setup_IoTHubClientCore_LL_sendeventasync_mocks(bool invoke_tickcount
 
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-
-    STRICT_EXPECTED_CALL(IoTHubClient_DistributedTracing_AddToMessageHeadersIfNecessary(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2);
-    
+   
     STRICT_EXPECTED_CALL(IoTHubClient_Diagnostic_AddIfNecessary(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
@@ -6812,6 +6808,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_EnablePolicyConfiguration_succeed)
     IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
 
     umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_Subscribe_DeviceTwin(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_GetTwinAsync(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
