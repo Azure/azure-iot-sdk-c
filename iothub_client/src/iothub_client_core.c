@@ -877,7 +877,7 @@ static IOTHUB_CLIENT_CORE_INSTANCE* create_iothub_instance(CREATE_HUB_INSTANCE_T
         /* Codes_SRS_IOTHUBCLIENT_41_02 [] */
         result->do_work_freq_ms = DO_WORK_FREQ_DEFAULT;
         /* Default currentMessageTimeout to NULL until it is set by SetOption */
-        result->currentMessageTimeout = NULL;
+        result->currentMessageTimeout = 0;
 
         /* Codes_SRS_IOTHUBCLIENT_01_029: [IoTHubClient_Create shall create a lock object to be used later for serializing IoTHubClient calls.] */
         if ((result->saved_user_callback_list = VECTOR_create(sizeof(USER_CALLBACK_INFO))) == NULL)
