@@ -225,8 +225,10 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_GetLastMessageReceiveTime, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle, time_t*, lastMessageReceiveTime);
 
     /**
-    * @brief    This function is meant to be called by the user when work
-    *           (sending/receiving) can be done by the IoTHubClient.
+    * @brief    This function MUST be called by the user so work (sending/receiving data on the wire,
+    *           computing and enforcing timeout controls, managing the connection to the IoT Hub) can
+    *           be done by the IoTHubClient.
+    *           The recommended call frequency is at least once every 100 milliseconds.
     *
     * @param    iotHubClientHandle    The handle created by a call to the create function.
     *
