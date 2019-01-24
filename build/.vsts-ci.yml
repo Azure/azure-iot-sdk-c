@@ -3,25 +3,6 @@ resources:
 - repo: self
   clean: true
 phases:
-- phase: checksubmodule  
-  queue:
-    name: Hosted Ubuntu 1604
-  steps:
-  - script: |
-      sudo apt-get update && apt-get install -y \
-      curl \
-      git \
-      python-software-properties \
-      build-essential \
-      pkg-config
-      sudo curl -sL https://deb.nodesource.com/setup_6.x | bash -
-      sudo apt-get install -y nodejs
-    displayName: 'setup'  
-  - script: |
-      npm install check_submodules
-      ./../../node_modules/.bin/check_submodules . master
-    displayName: 'build'   
-
 - phase: windowsx86
   queue:
     name: 'aziotbld-win03'
