@@ -3,7 +3,7 @@ resources:
 - repo: self
   clean: true
 phases:
-- phase: checksubmodule  
+- phase: checksubmodule
   queue:
     name: Hosted Ubuntu 1604
   steps:
@@ -16,11 +16,11 @@ phases:
       pkg-config
       sudo curl -sL https://deb.nodesource.com/setup_6.x | bash -
       sudo apt-get install -y nodejs
-    displayName: 'setup'  
+    displayName: 'setup'
   - script: |
       npm install check_submodules
       ./../../node_modules/.bin/check_submodules . master
-    displayName: 'build'   
+    displayName: 'build'
 - phase: windowsx86
   queue:
     name: 'aziotbld-win03'
@@ -58,7 +58,7 @@ phases:
      ls -lr
      pwd
      sudo ./jenkins/raspberrypi_c.sh
-    displayName: 'build'  
+    displayName: 'build'
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
 - phase: gcc44
@@ -75,7 +75,7 @@ phases:
       IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
       IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
       IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-    displayName: 'build'  
+    displayName: 'build'
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
     condition: always()
@@ -95,10 +95,10 @@ phases:
       IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
       IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
       IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-    displayName: 'build'  
+    displayName: 'build'
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
-    condition: always()    
+    condition: always()
 - phase: linuxoptions
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/vsts-linux-c-ubuntu"
@@ -110,18 +110,7 @@ phases:
     condition: always()
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
-    condition: always()    
-- phase: windowscex86
-  queue:
-    name: 'win'
-  steps:
-  - script: |
-      call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsDevCmd.bat"
-      call jenkins\windowsce_c.cmd
-    displayName: 'build'
-  - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
-    displayName: 'cleanup'
-    condition: always()    
+    condition: always()
 - phase: windowsdynamic
   queue:
     name: 'aziotbld-win03'
@@ -148,14 +137,14 @@ phases:
       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
   - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
     displayName: 'cleanup'
-    condition: always()      
+    condition: always()
 - phase: OSX
   queue:
     name: Hosted macOS
   steps:
   - script: |
       ./jenkins/osx_gcc_openssl.sh
-    displayName: 'build'  
+    displayName: 'build'
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
       IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
@@ -175,7 +164,7 @@ phases:
       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
   - script: rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
-    condition: always()   
+    condition: always()
 - phase: clang
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/ubuntu-clang"
@@ -206,7 +195,7 @@ phases:
       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
-    condition: always()    
+    condition: always()
 - phase: ubuntu1604
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
@@ -237,7 +226,7 @@ phases:
       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
-    condition: always()    
+    condition: always()
 - phase: debian
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/c-debian"
@@ -266,7 +255,7 @@ phases:
       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
-    condition: always()    
+    condition: always()
 - phase: wolfssl
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/vsts-c-wolfssl"
@@ -326,7 +315,7 @@ phases:
       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
   - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
     displayName: 'cleanup'
-    condition: always()    
+    condition: always()
 - phase: xcodenative
   queue:
     name: OSX
@@ -334,7 +323,7 @@ phases:
   - script: |
       DYLD_LIBRARY_PATH=/usr/local/Cellar/curl/7.61.0/lib
       ./jenkins/osx_xcode_native.sh
-    displayName: 'build'  
+    displayName: 'build'
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
       IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
@@ -354,4 +343,4 @@ phases:
       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
   - script: rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
-    condition: always()   
+    condition: always()
