@@ -97,9 +97,8 @@ static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "creationtime
 #define SUBSCRIBE_GET_REPORTED_STATE_TOPIC      0x0001
 #define SUBSCRIBE_NOTIFICATION_STATE_TOPIC      0x0002
 #define SUBSCRIBE_TELEMETRY_TOPIC               0x0004
-#define SUBSCRIBE_METHODS_TOPIC                 0x0008
-#define SUBSCRIBE_DEVICE_METHOD_TOPIC           0x0010
-#define SUBSCRIBE_INPUT_QUEUE_TOPIC             0x0020
+#define SUBSCRIBE_DEVICE_METHOD_TOPIC           0x0008
+#define SUBSCRIBE_INPUT_QUEUE_TOPIC             0x0010
 #define SUBSCRIBE_TOPIC_COUNT                   5
 
 DEFINE_ENUM_STRINGS(MQTT_CLIENT_EVENT_ERROR, MQTT_CLIENT_EVENT_ERROR_VALUES)
@@ -1000,6 +999,10 @@ static void sendPendingGetTwinRequests(PMQTTTRANSPORT_HANDLE_DATA transportData)
             LogError("Failed sending pending get twin request");
             destroy_device_twin_get_message(msg_entry);
         }
+        else
+        {
+            transportData->device_twin_get_sent = true;
+        }
 
         dev_twin_item = saveListEntry.Flink;
     }
@@ -1533,6 +1536,8 @@ static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE msgHandle, void* call
                                 {
                                     /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_055: [ if device_twin_msg_type is not RETRIEVE_PROPERTIES then mqtt_notification_callback shall call IoTHubClientCore_LL_ReportedStateComplete ] */
                                     transportData->transport_callbacks.twin_rpt_state_complete_cb(msg_entry->iothub_msg_id, status_code, transportData->transport_ctx);
+                                    // Only after receiving device twin request should we start listening for patches.
+                                    (void)subscribeToNotifyStateIfNeeded(transportData);
                                 }
 
                                 destroy_device_twin_get_message(msg_entry);
@@ -2258,6 +2263,7 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 }
                 else
                 {
+                    transport_data->currPacketState = CONNECT_TYPE;
                     (void)tickcounter_get_current_ms(transport_data->msgTickCounter, &transport_data->mqtt_connect_time);
                     result = 0;
                 }
@@ -2333,6 +2339,7 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             else if ((current_time - transport_data->mqtt_connect_time) / 1000 > transport_data->connect_timeout_in_sec)
             {
                 LogError("mqtt_client timed out waiting for CONNACK");
+                transport_data->currPacketState = PACKET_TYPE_ERROR;
                 DisconnectFromClient(transport_data);
                 result = __FAILURE__;
             }
