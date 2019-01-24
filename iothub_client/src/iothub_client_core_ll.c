@@ -2399,32 +2399,41 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_GetTwinAsync(IOTHUB_CLIENT_CORE_LL_HAND
     }
     else
     {
-        GET_TWIN_CONTEXT* getTwinCtx;
-
-        if ((getTwinCtx = (GET_TWIN_CONTEXT*)malloc(sizeof(GET_TWIN_CONTEXT))) == NULL)
+        if (iotHubClientHandle->IoTHubTransport_Subscribe_DeviceTwin(iotHubClientHandle->transportHandle) != 0)
         {
-            LogError("Failed creating get-twin context");
+            LogError("Failure adding device twin data to queue");
             result = IOTHUB_CLIENT_ERROR;
         }
         else
         {
-            IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)iotHubClientHandle;
+            GET_TWIN_CONTEXT* getTwinCtx;
 
-            getTwinCtx->callback = deviceTwinCallback;
-            getTwinCtx->context = userContextCallback;
-
-            // Codes_SRS_IOTHUBCLIENT_LL_09_012: [ IoTHubClientCore_LL_GetTwinAsync shall invoke IoTHubTransport_GetTwinAsync, passing `on_device_twin_report_received` and the user data as context  ]
-            if (handleData->IoTHubTransport_GetTwinAsync(handleData->deviceHandle, on_get_device_twin_completed, getTwinCtx) != IOTHUB_CLIENT_OK)
+            if ((getTwinCtx = (GET_TWIN_CONTEXT*)malloc(sizeof(GET_TWIN_CONTEXT))) == NULL)
             {
-                // Codes_SRS_IOTHUBCLIENT_LL_09_013: [ If IoTHubTransport_GetTwinAsync fails, `IoTHubClientCore_LL_GetTwinAsync` shall fail and return `IOTHUB_CLIENT_ERROR`. ]
-                LogError("Failed getting device twin document");
-                free(getTwinCtx);
+                LogError("Failed creating get-twin context");
                 result = IOTHUB_CLIENT_ERROR;
             }
             else
             {
-                // Codes_SRS_IOTHUBCLIENT_LL_09_014: [ If no errors occur IoTHubClientCore_LL_GetTwinAsync shall return `IOTHUB_CLIENT_OK`. ]
-                result = IOTHUB_CLIENT_OK;
+                IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)iotHubClientHandle;
+
+                getTwinCtx->callback = deviceTwinCallback;
+                getTwinCtx->context = userContextCallback;
+
+                // Codes_SRS_IOTHUBCLIENT_LL_09_012: [ IoTHubClientCore_LL_GetTwinAsync shall invoke IoTHubTransport_GetTwinAsync, passing `on_device_twin_report_received` and the user data as context  ]
+                if (handleData->IoTHubTransport_GetTwinAsync(handleData->deviceHandle, on_get_device_twin_completed, getTwinCtx) != IOTHUB_CLIENT_OK)
+                {
+                    // Codes_SRS_IOTHUBCLIENT_LL_09_013: [ If IoTHubTransport_GetTwinAsync fails, `IoTHubClientCore_LL_GetTwinAsync` shall fail and return `IOTHUB_CLIENT_ERROR`. ]
+                    LogError("Failed getting device twin document");
+                    free(getTwinCtx);
+                    result = IOTHUB_CLIENT_ERROR;
+                }
+                else
+                {
+                    // Codes_SRS_IOTHUBCLIENT_LL_09_014: [ If no errors occur IoTHubClientCore_LL_GetTwinAsync shall return `IOTHUB_CLIENT_OK`. ]
+                    handleData->complete_twin_update_encountered = true;
+                    result = IOTHUB_CLIENT_OK;
+                }
             }
         }
     }
