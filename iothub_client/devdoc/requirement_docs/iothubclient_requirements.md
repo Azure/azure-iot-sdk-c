@@ -376,6 +376,14 @@ Options handled by IoTHubClient_SetOption:
 
 **SRS_IOTHUBCLIENT_41_001: [** If parameter `optionName` is `OPTION_DO_WORK_FREQUENCY_IN_MS` then `IoTHubClientCore_SetOption` shall set `do_work_freq_ms` parameter of `IoTHubClientInstance` **]** 
 
+**SRS_IOTHUBCLIENT_41_003: [** The value of `OPTION_DO_WORK_FREQUENCY_IN_MS` shall be limited to 100 to follow SDK best practices by not reducing the DoWork frequency below 10 Hz **]** 
+
+**SRS_IOTHUBCLIENT_41_004: [** If `currentMessageTimeout` is not less than `do_work_freq_ms`, `IotHubClientCore_SetOption` shall return `IOTHUB_CLIENT_ERROR` **]**
+
+**SRS_IOTHUBCLIENT_41_005: [** If parameter `optionName` is `OPTION_MESSAGE_TIMEOUT` then `IoTHubClientCore_SetOption` shall set `currentMessageTimeout` parameter of `IoTHubClientInstance` to a `tickcounter_ms_t` value **]** 
+
+**SRS_IOTHUBCLIENT_41_006: [** If parameter `optionName` is `OPTION_MESSAGE_TIMEOUT` then `IoTHubClientCore_SetOption` shall call `IoTHubClientCore_LL_SetOption` passing the same parameters and return what IoTHubClientCore_LL_SetOption returns. **]**
+
 
 ## IoTHubClient_SetDeviceTwinCallback
 

@@ -12,9 +12,10 @@
 #include "azure_prov_client/prov_device_ll_client.h"
 #include "azure_prov_client/prov_device_client.h"
 #include "azure_c_shared_utility/vector.h"
-#include "azure_c_shared_utility/shared_util_options.h"
 
 #define DO_WORK_FREQ_DEFAULT 1
+
+static const char* const OPTION_DO_WORK_FREQUENCY_IN_MS = "do_work_freq_ms";
 
 typedef struct PROV_DEVICE_INSTANCE_TAG
 {
@@ -233,13 +234,16 @@ PROV_DEVICE_RESULT Prov_Device_SetOption(PROV_DEVICE_HANDLE prov_device_handle, 
         /* Codes_SRS_PROV_DEVICE_CLIENT_12_023: [ The function shall call the LL layer Prov_Device_LL_SetOption with the given parameters and return with the result. ] */
         PROV_DEVICE_INSTANCE* prov_device_instance = (PROV_DEVICE_INSTANCE*)prov_device_handle;
 
+		/* Codes_SRS_PROV_DEVICE_CLIENT_41_002: [ `Prov_Device_SetOption` shall be made thread-safe by using the lock created in `Prov_Device_Create`. ] */
         if (Lock(prov_device_instance->LockHandle) != LOCK_OK)
         {
+            /* Codes_SRS_PROV_DEVICE_CLIENT_41_003: [ If acquiring the lock fails, `Prov_Device_SetOption` shall return `IOTHUB_CLIENT_ERROR`. ] */
             result = PROV_DEVICE_RESULT_ERROR;
             LogError("Could not acquire lock");
         }
         else 
         {
+			/* Codes_SRS_PROV_DEVICE_CLIENT_41_001: [ If parameter `optionName` is `OPTION_DO_WORK_FREQUENCY_IN_MS` then `IoTHubClientCore_SetOption` shall set `do_work_freq_ms` parameter of `prov_device_instance` ] */
             if (strcmp(OPTION_DO_WORK_FREQUENCY_IN_MS, optionName) == 0)
             {
                 prov_device_instance->do_work_freq_ms = *((uint16_t *)value);
