@@ -1546,8 +1546,6 @@ static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE msgHandle, void* call
                                     {
                                         // This is a on-demand get twin request.
                                         msg_entry->userCallback(DEVICE_TWIN_UPDATE_COMPLETE, payload->message, payload->length, msg_entry->userContext);
-                                        // Only after receiving device twin request should we start listening for patches.
-                                        (void)subscribeToNotifyStateIfNeeded(transportData);
                                     }
                                 }
                                 else
