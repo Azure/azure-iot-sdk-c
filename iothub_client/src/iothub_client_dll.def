@@ -29,7 +29,6 @@ EXPORTS
     IoTHubClient_SetDeviceTwinCallback
     IoTHubClient_SendReportedState
     IoTHubClient_SetDeviceMethodCallback
-    IoTHubClient_EnablePolicyConfiguration
 
     IoTHubDeviceClient_CreateFromConnectionString
     IoTHubDeviceClient_Create
@@ -75,7 +74,6 @@ EXPORTS
     IoTHubClient_LL_SendEventAsync
     IoTHubClient_LL_SetMessageCallback
     IoTHubClient_LL_SetOption
-    IoTHubClient_LL_EnablePolicyConfiguration
 
     IoTHubDeviceClient_LL_CreateFromConnectionString
     IoTHubDeviceClient_LL_Create

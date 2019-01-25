@@ -385,18 +385,6 @@ extern "C"
 
 #endif /* DONT_USE_UPLOADTOBLOB */
 
-    /**
-    * @brief    This API enables the client to use specific IoTHub features that are configured via policy (using twins).
-    *
-    * @param    iotHubClientHandle        The handle created by a call to the create function.
-    * @param    policyType                The policy type that will be accepted from Azure IoT Hub.
-    * @param    enablePolicyConfiguration   True to enable parsing twin for specific feature configuration.
-                                          Default is false.
-    *
-    * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
-    */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_EnablePolicyConfiguration, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, POLICY_CONFIGURATION_TYPE, policyType, bool, enablePolicyConfiguration);
-
 #ifdef __cplusplus
 }
 #endif
