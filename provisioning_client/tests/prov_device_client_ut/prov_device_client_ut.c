@@ -651,8 +651,9 @@ TEST_FUNCTION(Prov_Device_SetOption_success)
 
     umock_c_reset_all_calls();
 
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Prov_Device_LL_SetOption(TEST_PROV_DEVICE_LL_HANDLE, OPTION_HTTP_PROXY, &TEST_HTTP_PROXY_OPTIONS));
-
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
     //act
     PROV_DEVICE_RESULT prov_result = Prov_Device_SetOption(prov_device_handle, OPTION_HTTP_PROXY, &TEST_HTTP_PROXY_OPTIONS);
 

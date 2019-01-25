@@ -235,14 +235,14 @@ PROV_DEVICE_RESULT Prov_Device_SetOption(PROV_DEVICE_HANDLE prov_device_handle, 
         PROV_DEVICE_INSTANCE* prov_device_instance = (PROV_DEVICE_INSTANCE*)prov_device_handle;
 
 		/* Codes_SRS_PROV_DEVICE_CLIENT_41_002: [ `Prov_Device_SetOption` shall be made thread-safe by using the lock created in `Prov_Device_Create`. ] */
-        //if (Lock(prov_device_instance->LockHandle) != LOCK_OK)
-        //{
-        //    /* Codes_SRS_PROV_DEVICE_CLIENT_41_003: [ If acquiring the lock fails, `Prov_Device_SetOption` shall return `IOTHUB_CLIENT_ERROR`. ] */
-        //    result = PROV_DEVICE_RESULT_ERROR;
-        //    LogError("Could not acquire lock");
-        //}
-        //else 
-        //{
+        if (Lock(prov_device_instance->LockHandle) != LOCK_OK)
+        {
+            /* Codes_SRS_PROV_DEVICE_CLIENT_41_003: [ If acquiring the lock fails, `Prov_Device_SetOption` shall return `IOTHUB_CLIENT_ERROR`. ] */
+            result = PROV_DEVICE_RESULT_ERROR;
+            LogError("Could not acquire lock");
+        }
+        else 
+        {
 			/* Codes_SRS_PROV_DEVICE_CLIENT_41_001: [ If parameter `optionName` is `OPTION_DO_WORK_FREQUENCY_IN_MS` then `IoTHubClientCore_SetOption` shall set `do_work_freq_ms` parameter of `prov_device_instance` ] */
             if (strcmp(OPTION_DO_WORK_FREQUENCY_IN_MS, optionName) == 0)
             {
@@ -257,8 +257,8 @@ PROV_DEVICE_RESULT Prov_Device_SetOption(PROV_DEVICE_HANDLE prov_device_handle, 
                     LogError("Prov_Device_LL_SetOption failed");
                 }
             }
-            //(void)Unlock(prov_device_instance->LockHandle);
-        //}
+            (void)Unlock(prov_device_instance->LockHandle);
+        }
     }
     return result;
 }
