@@ -1509,6 +1509,7 @@ static void setup_message_recv_callback_device_twin_mocks(const char* token_type
 
     EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Transport_Twin_ReportedStateComplete_Callback(1, 200, IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG)).IgnoreArgument_psz();
     EXPECTED_CALL(gballoc_free(NULL));
 }
 
