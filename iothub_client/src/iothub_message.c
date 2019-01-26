@@ -97,6 +97,7 @@ static void DestroyMessageData(IOTHUB_MESSAGE_HANDLE_DATA* handleData)
     free(handleData->userDefinedContentType);
     free(handleData->contentEncoding);
     DestroyDiagnosticPropertyData(handleData->diagnosticData);
+    free(handleData->distributedTracingTracestate);
     free(handleData->outputName);
     free(handleData->inputName);
     free(handleData->connectionModuleId);

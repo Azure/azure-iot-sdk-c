@@ -21,7 +21,7 @@ extern "C" {
 #include <stddef.h>
 #endif
 
-// Deprecated
+/* Deprecated: Use IOTHUB_DISTRIBUTED_TRACING_SETTING_DATA_TAG instead with IoTHubClient_DistributedTracing_AddToMessageHeadersIfNecessary API */
 /** @brief diagnostic related setting */
 typedef struct IOTHUB_DIAGNOSTIC_SETTING_DATA_TAG
 {
@@ -29,12 +29,21 @@ typedef struct IOTHUB_DIAGNOSTIC_SETTING_DATA_TAG
     uint32_t currentMessageNumber;
 } IOTHUB_DIAGNOSTIC_SETTING_DATA;
 
+#define IOTHUB_DISTRIBUTED_TRACING_SAMPLING_MODE_VALUE  \
+    IOTHUB_DISTRIBUTED_TRACING_SAMPLING_MODE_NOT_SET,   \
+    IOTHUB_DISTRIBUTED_TRACING_SAMPLING_MODE_ON,        \
+    IOTHUB_DISTRIBUTED_TRACING_SAMPLING_MODE_OFF,       \
+    IOTHUB_DISTRIBUTED_TRACING_SAMPLING_MODE_INHERIT
+DEFINE_ENUM(IOTHUB_DISTRIBUTED_TRACING_SAMPLING_MODE, IOTHUB_DISTRIBUTED_TRACING_SAMPLING_MODE_VALUE);
+
 /** @brief distributed tracing settings */
 typedef struct IOTHUB_DISTRIBUTED_TRACING_SETTING_DATA_TAG
 {
+    bool policyEnabled;
+    
     /* Distributed Tracing sampling enabled flag.
-    Possible options from server - Off (1), On (2), Inherit (3) */
-    bool samplingMode;
+    Possible options from server - On (1), Off (2), Inherit (3) */
+    IOTHUB_DISTRIBUTED_TRACING_SAMPLING_MODE samplingMode;
 
     /* Distributed tracing fixed-rate sampling percentage.
     Set to 100/N where N is an integer. E.g. 50 (=100/2), 33.33 (=100/3), 25 (=100/4), 20, 1 (=100/100), 0.1 (=100/1000) */
@@ -77,7 +86,7 @@ MOCKABLE_FUNCTION(, int, IoTHubClient_DistributedTracing_AddToMessageHeadersIfNe
 * @param	reportedStatePayload	Reported state payload for distributed tracing setting
 * @return	0 upon success, non-zero otherwise
 */
-MOCKABLE_FUNCTION(, int, IoTHubClient_DistributedTracing_UpdateFromTwin, IOTHUB_DISTRIBUTED_TRACING_SETTING_DATA*, distributedTracingSetting, bool, isPartialUpdate, const unsigned char*, payLoad, STRING_HANDLE, reportedStatePayload);
+MOCKABLE_FUNCTION(, int, IoTHubClient_DistributedTracing_UpdateFromTwin, IOTHUB_DISTRIBUTED_TRACING_SETTING_DATA*, distributedTracingSetting, bool, isPartialUpdate, const unsigned char*, payLoad, STRING_HANDLE*, reportedStatePayload);
 
 #ifdef __cplusplus
 }

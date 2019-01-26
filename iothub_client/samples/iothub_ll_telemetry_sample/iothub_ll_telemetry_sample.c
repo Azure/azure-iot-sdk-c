@@ -141,9 +141,6 @@ int main(void)
 
         // Setting connection status callback to get indication of connection to iothub
         (void)IoTHubDeviceClient_LL_SetConnectionStatusCallback(device_ll_handle, connection_status_callback, NULL);
-        
-        // Enables IoTHub policy configuration for distributed tracing 
-        (void)IoTHubDeviceClient_LL_EnableFeatureConfigurationViaTwin(device_ll_handle, true);
 
         do
         {

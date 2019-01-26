@@ -1051,11 +1051,7 @@ static void setup_IoTHubClientCore_LL_sendeventasync_mocks(bool invoke_tickcount
 
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-
-    STRICT_EXPECTED_CALL(IoTHubClient_DistributedTracing_AddToMessageHeadersIfNecessary(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2);
-    
+   
     STRICT_EXPECTED_CALL(IoTHubClient_Diagnostic_AddIfNecessary(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
@@ -6789,5 +6785,44 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateFromEnvironment_set_connection_string_an
 //
 //
 //
+
+// Tests_SRS_IoTHubClientCore_LL_38_004: [ If `iotHubClientHandle` is NULL, `IoTHubClientCore_LL_EnablePolicyConfiguration` shall return IOTHUB_CLIENT_INVALID_ARG. ]
+TEST_FUNCTION(IoTHubClientCore_LL_EnablePolicyConfiguration_with_NULL_iotHubClientHandle_fails)
+{
+    //arrange
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_EnablePolicyConfiguration(NULL, POLICY_CONFIGURATION_DISTRIBUTED_TRACING, true);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+
+    //cleanup
+}
+
+// Tests_SRS_IOTHUBCLIENT_LL_09_012: [ IoTHubClientCore_LL_GetTwinAsync shall invoke IoTHubTransport_GetTwinAsync, passing `on_device_twin_report_received` and the user data as context  ]
+// Tests_SRS_IOTHUBCLIENT_LL_09_014: [ If no errors occur IoTHubClientCore_LL_GetTwinAsync shall return `IOTHUB_CLIENT_OK`. ]
+TEST_FUNCTION(IoTHubClientCore_LL_EnablePolicyConfiguration_succeed)
+{
+    //arrange
+    IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_Subscribe_DeviceTwin(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_GetTwinAsync(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_EnablePolicyConfiguration(h, POLICY_CONFIGURATION_DISTRIBUTED_TRACING, true);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_IS_NOT_NULL(my_FAKE_IoTHubTransport_GetTwinAsync_callbackContext);
+
+    //cleanup
+    IoTHubClientCore_LL_Destroy(h);
+    my_gballoc_free(my_FAKE_IoTHubTransport_GetTwinAsync_callbackContext);
+}
 
 END_TEST_SUITE(iothub_client_core_ll_ut)

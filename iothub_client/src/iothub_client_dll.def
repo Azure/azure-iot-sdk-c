@@ -18,7 +18,6 @@ EXPORTS
     IoTHubClient_CreateWithTransport
     IoTHubClient_CreateFromDeviceAuth
     IoTHubClient_Destroy
-    IoTHubClient_EnableFeatureConfigurationViaTwin
     IoTHubClient_SendEventAsync
     IoTHubClient_GetSendStatus
     IoTHubClient_SetMessageCallback
@@ -51,6 +50,7 @@ EXPORTS
     IoTHubDeviceClient_DeviceMethodResponse
     IoTHubDeviceClient_UploadToBlobAsync
     IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync
+    IoTHubDeviceClient_EnablePolicyConfiguration
 
     IoTHubModuleClient_CreateFromConnectionString
     IoTHubModuleClient_Destroy
@@ -96,6 +96,7 @@ EXPORTS
     IoTHubDeviceClient_LL_DeviceMethodResponse
     IoTHubDeviceClient_LL_UploadToBlob
     IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob
+    IoTHubDeviceClient_LL_EnablePolicyConfiguration
 
     IoTHubModuleClient_LL_CreateFromConnectionString
     IoTHubModuleClient_LL_Destroy
