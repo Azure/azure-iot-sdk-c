@@ -3502,6 +3502,46 @@ TEST_FUNCTION(IoTHubClientCore_LL_GetSendStatus_HasEventToSend_Succeeds)
     IoTHubClientCore_LL_Destroy(handle);
 }
 
+TEST_FUNCTION(IoTHubClientCore_LL_SetOption_sas_token_lifetime_succeeds)
+{
+    //arrange
+    IOTHUB_CLIENT_CORE_LL_HANDLE handle = IoTHubClientCore_LL_Create(&TEST_CONFIG);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Set_SasToken_Expiry(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+
+    //act
+    size_t sas_lifetime = 10;
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SetOption(handle, OPTION_SAS_TOKEN_LIFETIME, &sas_lifetime);
+
+    //assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubClientCore_LL_Destroy(handle);
+}
+
+TEST_FUNCTION(IoTHubClientCore_LL_SetOption_sas_token_lifetime_fail)
+{
+    //arrange
+    IOTHUB_CLIENT_CORE_LL_HANDLE handle = IoTHubClientCore_LL_Create(&TEST_CONFIG);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Set_SasToken_Expiry(IGNORED_PTR_ARG, IGNORED_NUM_ARG)).SetReturn(__LINE__);
+
+    //act
+    size_t sas_lifetime = 255;
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SetOption(handle, OPTION_SAS_TOKEN_LIFETIME, &sas_lifetime);
+
+    //assert
+    ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubClientCore_LL_Destroy(handle);
+}
+
 /*Tests_SRS_IoTHubClientCore_LL_02_034: [If iotHubClientHandle is NULL then IoTHubClientCore_LL_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetOption_with_NULL_handle_fails)
 {

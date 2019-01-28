@@ -263,6 +263,7 @@ static void register_global_mock_returns()
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(OptionHandler_AddOption, OPTIONHANDLER_ERROR);
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Get_DeviceId, TEST_DEVICE_ID);
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Is_SasToken_Valid, SAS_TOKEN_STATUS_VALID);
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Get_SasToken_Expiry, 3600);
 
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Get_ModuleId, NULL);
 }
@@ -424,6 +425,10 @@ static void set_expected_calls_for_authentication_do_work(AUTHENTICATION_CONFIG*
         }
         else
         {
+            if (!exp_context->is_cbs_put_token_in_progress)
+            {
+                STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_PTR_ARG));
+            }
             STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(current_time);
             double actual_difftime_result = difftime(current_time, exp_context->current_sas_token_put_time);
             STRICT_EXPECTED_CALL(get_difftime(current_time, IGNORED_NUM_ARG)).SetReturn(actual_difftime_result);
@@ -439,6 +444,10 @@ static void set_expected_calls_for_authentication_do_work(AUTHENTICATION_CONFIG*
     else if (exp_context->current_state == AUTHENTICATION_STATE_STARTED)
     {
         STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY);
+        if (!exp_context->is_cbs_put_token_in_progress)
+        {
+            STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_PTR_ARG));
+        }
         STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(current_time);
         STRICT_EXPECTED_CALL(get_difftime(current_time, exp_context->current_sas_token_put_time));
     }
@@ -1311,10 +1320,6 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_sas_token_refresh)
     time_t next_time = add_seconds(current_time, 11);
     ASSERT_IS_TRUE(INDEFINITE_TIME != next_time, "failed to computer 'next_time'");
 
-    size_t refresh_time_secs = 10;
-    int result = authentication_set_option(handle, AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS, &refresh_time_secs);
-    ASSERT_ARE_EQUAL(int, 0, result, "authentication_set_option(AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS) failed!");
-
     AUTHENTICATION_DO_WORK_EXPECTED_STATE *exp_state = get_do_work_expected_state_struct();
     exp_state->current_state = AUTHENTICATION_STATE_STARTING;
     exp_state->sas_token_to_use = TEST_PRIMARY_DEVICE_KEY_STRING_HANDLE;
@@ -1322,10 +1327,6 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_sas_token_refresh)
 
     crank_authentication_do_work(config, handle, current_time, exp_state);
     saved_cbs_put_token_on_operation_complete(saved_cbs_put_token_context, CBS_OPERATION_RESULT_OK, 0, "all good");
-
-    size_t lifetime_secs = 123;
-    result = authentication_set_option(handle, AUTHENTICATION_OPTION_SAS_TOKEN_LIFETIME_SECS, &lifetime_secs);
-    ASSERT_ARE_EQUAL(int, 0, result, "authentication_set_option(AUTHENTICATION_OPTION_SAS_TOKEN_LIFETIME_SECS) failed!");
 
     exp_state->current_state = AUTHENTICATION_STATE_STARTED;
     exp_state->current_sas_token_put_time = current_time;
@@ -1431,23 +1432,6 @@ TEST_FUNCTION(authentication_do_work_first_auth_times_out)
 }
 
 // Tests_SRSIOTHUBTRANSPORT_AMQP_AUTH_09_097: [If `authentication_handle` or `name` or `value` is NULL, authentication_set_option shall fail and return a non-zero value]
-TEST_FUNCTION(authentication_set_option_NULL_handle)
-{
-    // arrange
-    umock_c_reset_all_calls();
-
-    size_t value = 10;
-
-    // act
-    int result = authentication_set_option(NULL, AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS, &value);
-
-    // assert
-    ASSERT_ARE_NOT_EQUAL(int, 0, result);
-
-    // cleanup
-}
-
-// Tests_SRSIOTHUBTRANSPORT_AMQP_AUTH_09_097: [If `authentication_handle` or `name` or `value` is NULL, authentication_set_option shall fail and return a non-zero value]
 TEST_FUNCTION(authentication_set_option_NULL_name)
 {
     // arrange
@@ -1460,26 +1444,6 @@ TEST_FUNCTION(authentication_set_option_NULL_name)
 
     // act
     int result = authentication_set_option(handle, NULL, &value);
-
-    // assert
-    ASSERT_ARE_NOT_EQUAL(int, 0, result);
-    ASSERT_IS_NOT_NULL(handle);
-
-    // cleanup
-    authentication_destroy(handle);
-}
-
-// Tests_SRSIOTHUBTRANSPORT_AMQP_AUTH_09_097: [If `authentication_handle` or `name` or `value` is NULL, authentication_set_option shall fail and return a non-zero value]
-TEST_FUNCTION(authentication_set_option_NULL_value)
-{
-    // arrange
-    AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_SAS_TOKEN);
-    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
-
-    umock_c_reset_all_calls();
-
-    // act
-    int result = authentication_set_option(handle, AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS, NULL);
 
     // assert
     ASSERT_ARE_NOT_EQUAL(int, 0, result);
@@ -1611,18 +1575,11 @@ TEST_FUNCTION(authentication_retrieve_options_succeeds)
     STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, AUTHENTICATION_OPTION_CBS_REQUEST_TIMEOUT_SECS, IGNORED_PTR_ARG))
         .IgnoreArgument(3)
         .SetReturn(OPTIONHANDLER_OK);
-    STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS, IGNORED_PTR_ARG))
-        .IgnoreArgument(3)
-        .SetReturn(OPTIONHANDLER_OK);
-    STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, AUTHENTICATION_OPTION_SAS_TOKEN_LIFETIME_SECS, IGNORED_PTR_ARG))
-        .IgnoreArgument(3)
-        .SetReturn(OPTIONHANDLER_OK);
 
     // act
     OPTIONHANDLER_HANDLE result = authentication_retrieve_options(handle);
 
     // assert
-
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     ASSERT_ARE_EQUAL(void_ptr, TEST_OPTIONHANDLER_HANDLE, result);
     ASSERT_IS_NOT_NULL(handle);
@@ -1646,12 +1603,6 @@ TEST_FUNCTION(authentication_retrieve_options_failure_checks)
     umock_c_reset_all_calls();
     EXPECTED_CALL(OptionHandler_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(TEST_OPTIONHANDLER_HANDLE);
     STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, AUTHENTICATION_OPTION_CBS_REQUEST_TIMEOUT_SECS, IGNORED_PTR_ARG))
-        .IgnoreArgument(3)
-        .SetReturn(OPTIONHANDLER_OK);
-    STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS, IGNORED_PTR_ARG))
-        .IgnoreArgument(3)
-        .SetReturn(OPTIONHANDLER_OK);
-    STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, AUTHENTICATION_OPTION_SAS_TOKEN_LIFETIME_SECS, IGNORED_PTR_ARG))
         .IgnoreArgument(3)
         .SetReturn(OPTIONHANDLER_OK);
     umock_c_negative_tests_snapshot();
