@@ -1320,10 +1320,6 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_sas_token_refresh)
     time_t next_time = add_seconds(current_time, 11);
     ASSERT_IS_TRUE(INDEFINITE_TIME != next_time, "failed to computer 'next_time'");
 
-    //size_t refresh_time_secs = 10;
-    //int result = authentication_set_option(handle, AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS, &refresh_time_secs);
-    //ASSERT_ARE_EQUAL(int, 0, result, "authentication_set_option(AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS) failed!");
-
     AUTHENTICATION_DO_WORK_EXPECTED_STATE *exp_state = get_do_work_expected_state_struct();
     exp_state->current_state = AUTHENTICATION_STATE_STARTING;
     exp_state->sas_token_to_use = TEST_PRIMARY_DEVICE_KEY_STRING_HANDLE;
@@ -1331,10 +1327,6 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_sas_token_refresh)
 
     crank_authentication_do_work(config, handle, current_time, exp_state);
     saved_cbs_put_token_on_operation_complete(saved_cbs_put_token_context, CBS_OPERATION_RESULT_OK, 0, "all good");
-
-    /*size_t lifetime_secs = 123;
-    result = authentication_set_option(handle, AUTHENTICATION_OPTION_SAS_TOKEN_LIFETIME_SECS, &lifetime_secs);
-    ASSERT_ARE_EQUAL(int, 0, result, "authentication_set_option(AUTHENTICATION_OPTION_SAS_TOKEN_LIFETIME_SECS) failed!");*/
 
     exp_state->current_state = AUTHENTICATION_STATE_STARTED;
     exp_state->current_sas_token_put_time = current_time;

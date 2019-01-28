@@ -2281,7 +2281,9 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetOption(IOTHUB_CLIENT_CORE_LL_HANDLE 
             result = IOTHUB_CLIENT_ERROR;
 #endif /*DONT_USE_UPLOADTOBLOB*/
         }
-        else if (strcmp(optionName, OPTION_SAS_TOKEN_LIFETIME) == 0)
+        // OPTION_SAS_TOKEN_REFRESH_TIME is, but may be updated in the future
+        // if this becomes necessary
+        else if (strcmp(optionName, OPTION_SAS_TOKEN_REFRESH_TIME) == 0 || strcmp(optionName, OPTION_SAS_TOKEN_LIFETIME) == 0)
         {
             if (IoTHubClient_Auth_Set_SasToken_Expiry(handleData->authorization_module, *(size_t*)value) != 0)
             {
@@ -2292,12 +2294,6 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetOption(IOTHUB_CLIENT_CORE_LL_HANDLE 
             {
                 result = IOTHUB_CLIENT_OK;
             }
-        }
-        else if (strcmp(optionName, OPTION_SAS_TOKEN_REFRESH_TIME) == 0)
-        {
-            // This options is no longer needed, but may be updated in the future
-            // if this becomes necessary
-            result = IOTHUB_CLIENT_OK;
         }
         else
         {

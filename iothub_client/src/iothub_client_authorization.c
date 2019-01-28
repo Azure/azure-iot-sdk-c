@@ -363,8 +363,8 @@ IOTHUB_CREDENTIAL_TYPE IoTHubClient_Auth_Get_Credential_Type(IOTHUB_AUTHORIZATIO
 
 char* IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const char* scope, size_t expiry_time_relative_seconds, const char* key_name)
 {
-    (void)expiry_time_relative_seconds;
     char* result;
+    (void)expiry_time_relative_seconds;
     /* Codes_SRS_IoTHub_Authorization_07_009: [ if handle or scope are NULL, IoTHubClient_Auth_Get_SasToken shall return NULL. ] */
     if (handle == NULL)
     {
