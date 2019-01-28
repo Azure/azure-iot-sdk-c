@@ -27,7 +27,6 @@ phases:
       # PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
   - script: |
     call jenkins\collect_results.cmd iotsdk_win32
-
 - phase: windowsx64
   queue:
     name: 'aziotbld-win03'
