@@ -26,15 +26,15 @@ phases:
       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
       # PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
   - script: |
-    call jenkins\collect_results.cmd iotsdk_win32
+      call jenkins\collect_results.cmd iotsdk_win32
 - phase: windowsx64
   queue:
     name: 'aziotbld-win03'
   displayName: 'windowsx64'
   steps:
   - script: |
-     call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsDevCmd.bat"
-     call jenkins\windows_c.cmd --platform x64
+      call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsDevCmd.bat"
+      call jenkins\windows_c.cmd --platform x64
     displayName: 'build'
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
@@ -54,4 +54,4 @@ phases:
       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
   - script: |
-     call jenkins\collect_results.cmd iotsdk_x64
+      call jenkins\collect_results.cmd iotsdk_x64
