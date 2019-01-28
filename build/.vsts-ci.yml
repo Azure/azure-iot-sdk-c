@@ -27,6 +27,10 @@ phases:
       # PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
   - script: |
       call jenkins\collect_results.cmd iotsdk_win32
+  - task: PublishTestResults@2
+    displayName: 'Publish Test Results'
+    inputs:
+      mergeTestResults: true
 - phase: windowsx64
   queue:
     name: 'aziotbld-win03'
@@ -55,3 +59,7 @@ phases:
       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
   - script: |
       call jenkins\collect_results.cmd iotsdk_x64
+  - task: PublishTestResults@2
+    displayName: 'Publish Test Results'
+    inputs:
+      mergeTestResults: true
