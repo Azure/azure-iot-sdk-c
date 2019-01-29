@@ -1,9 +1,7 @@
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-Set-PSDebug -Trace 2
-# This script will be running on working dir set as build_all  
-
+# This script will be running on working dir set as ./jenkins
 $build_folder = $args[0]
 $PSScriptRoot
 Push-Location $PSScriptRoot
