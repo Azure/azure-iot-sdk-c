@@ -628,7 +628,8 @@ void authentication_do_work(AUTHENTICATION_HANDLE authentication_handle)
         else if (instance->state == AUTHENTICATION_STATE_STARTED)
         {
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_040: [If `instance->state` is AUTHENTICATION_STATE_STARTED and user-provided SAS token was used, authentication_do_work() shall return]
-            if (IoTHubClient_Auth_Get_Credential_Type(instance->authorization_module) == IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY)
+            IOTHUB_CREDENTIAL_TYPE cred_type = IoTHubClient_Auth_Get_Credential_Type(instance->authorization_module);
+            if (cred_type == IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY || cred_type == IOTHUB_CREDENTIAL_TYPE_DEVICE_AUTH)
             {
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_039: [If `instance->state` is AUTHENTICATION_STATE_STARTED and device keys were used, authentication_do_work() shall only verify the SAS token refresh time]
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_066: [If SAS token does not need to be refreshed, authentication_do_work() shall return]
