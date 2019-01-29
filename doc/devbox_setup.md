@@ -58,9 +58,9 @@ cd azure-iot-sdk-c
 mkdir cmake
 cd cmake
 # Either
-  cmake .. -G "Visual Studio 14 2015" .. ## For Visual Studio 2015
+  cmake .. -G "Visual Studio 14 2015" ## For Visual Studio 2015
 # or
-  cmake .. -G "Visual Studio 15 2017" .. ## For Visual Studio 2017
+  cmake .. -G "Visual Studio 15 2017" ## For Visual Studio 2017
 ```
 
 > This builds x86 libraries. To build for x64 for Visual Studio 2015, modify the cmake generator argument: `cmake .. -G "Visual Studio 14 2015 Win64"` or for Visual Studio 2017, `cmake .. -G "Visual Studio 15 2017 Win64"`
