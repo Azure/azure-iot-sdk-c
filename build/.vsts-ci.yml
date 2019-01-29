@@ -48,7 +48,7 @@ phases:
   - task: PublishTestResults@2
     displayName: 'Publish windowsx86 results'
     inputs:
-      testResultsFiles: '**results-junit.xml'
+      testResultsFiles: '**/results-junit.xml'
       mergeTestResults: true
       testRunTitle: 'windowsx86 Tests'
     condition: succeededOrFailed()
@@ -327,7 +327,7 @@ phases:
   - task: PublishTestResults@2
     displayName: 'Publish windowsx64 results'
     inputs:
-      testResultsFiles: '**results-junit.xml'
+      testResultsFiles: '**/results-junit.xml'
       mergeTestResults: true
       testRunTitle: 'windowsx64 Tests'
     condition: succeededOrFailed()
