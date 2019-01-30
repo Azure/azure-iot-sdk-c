@@ -95,6 +95,13 @@ extern PROV_DEVICE_RESULT Prov_Device_SetOption(PROV_DEVICE_HANDLE prov_device_h
 
 **SRS_PROV_DEVICE_CLIENT_12_023: [** The function shall call the LL layer Prov_Device_LL_SetOption with the given parameters and return with the result.**]**
 
+**SRS_PROV_DEVICE_CLIENT_41_001: [** If parameter `optionName` is `OPTION_DO_WORK_FREQUENCY_IN_MS` then `IoTHubClientCore_SetOption` shall set `do_work_freq_ms` parameter of `prov_device_instance` **]**
+
+**SRS_PROV_DEVICE_CLIENT_41_002: [** `Prov_Device_SetOption` shall be made thread-safe by using the lock created in `Prov_Device_Create`. **]**
+
+**SRS_PROV_DEVICE_CLIENT_41_003: [** If acquiring the lock fails, `Prov_Device_SetOption` shall return `IOTHUB_CLIENT_ERROR`. **]**
+
+
 
 ### Prov_Device_GetVersionString
 
