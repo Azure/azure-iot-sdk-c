@@ -305,8 +305,6 @@ static void sendeventasync_on_device_or_module(IOTHUB_MESSAGE_HANDLE msgHandle)
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "SendEventAsync failed");
 }
 
-
-
 static void dt_e2e_update_twin(IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceClientDeviceTwinHandle, IOTHUB_PROVISIONED_DEVICE* deviceToUse, const char* twinJson)
 {
     char* twinResponse;
@@ -1011,6 +1009,7 @@ static char *malloc_and_fill_desired_dtracing_payload(uint8_t sampling_mode, uin
 
 static void change_dtracing_setting_and_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, DEVICE_DESIRED_DATA* device, bool enableDTracing, uint8_t expected_sampling_mode, uint8_t expected_sampling_rate)
 {
+    (void)device;
     (void)IoTHubDeviceClient_EnablePolicyConfiguration(iothub_deviceclient_handle, POLICY_CONFIGURATION_DISTRIBUTED_TRACING, enableDTracing);
 
     ThreadAPI_Sleep(3000);
@@ -1028,32 +1027,7 @@ static void change_dtracing_setting_and_test(IOTHUB_PROVISIONED_DEVICE* deviceTo
     dt_e2e_update_twin(serviceClientDeviceTwinHandle, deviceToUse, buffer);
 
     ThreadAPI_Sleep(3000);
-    int status_code = 400;
-    time_t beginOperation, nowTime;
-    beginOperation = time(NULL);
-    while (
-        (nowTime = time(NULL)),
-        (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME) // time box
-        )
-    {
-        if (Lock(device->lock) != LOCK_OK)
-        {
-            ASSERT_FAIL("Lock failed");
-        }
-        else
-        {
-            if (device->receivedCallBack)
-            {
-                status_code = 0;
-                Unlock(device->lock);
-                break;
-            }
-            Unlock(device->lock);
-        }
-        ThreadAPI_Sleep(1000);
-    }
-    ASSERT_IS_TRUE(status_code == 0, "SendReported status_code is an error");
-
+    
     // Send the Event from the client
     MAP_HANDLE propMap = Map_Create(NULL);
     client_create_with_properies_and_send_d2c(propMap);
