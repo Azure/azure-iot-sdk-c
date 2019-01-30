@@ -43,6 +43,17 @@ phases:
       IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
       # PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
+  - script: |
+      call jenkins\collect_results.cmd iotsdk_win32
+    displayName: 'cmdLine Transform'
+    condition: succeededOrFailed()
+  - task: PublishTestResults@2
+    displayName: 'Publish windowsx86 results'
+    inputs:
+      testResultsFiles: '**/results-junit.xml'
+      mergeTestResults: true
+      testRunTitle: 'windowsx86'
+    condition: succeededOrFailed()
   - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
     displayName: 'cleanup'
     condition: always()
@@ -293,8 +304,8 @@ phases:
   displayName: 'windowsx64'
   steps:
   - script: |
-     call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsDevCmd.bat"
-     call jenkins\windows_c.cmd --platform x64
+      call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsDevCmd.bat"
+      call jenkins\windows_c.cmd --platform x64
     displayName: 'build'
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
@@ -313,6 +324,17 @@ phases:
       IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
+  - script: |
+      call jenkins\collect_results.cmd iotsdk_x64
+    displayName: 'cmdLine Transform'
+    condition: succeededOrFailed()
+  - task: PublishTestResults@2
+    displayName: 'Publish windowsx64 results'
+    inputs:
+      testResultsFiles: '**/results-junit.xml'
+      mergeTestResults: true
+      testRunTitle: 'windowsx64'
+    condition: succeededOrFailed()
   - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
     displayName: 'cleanup'
     condition: always()
