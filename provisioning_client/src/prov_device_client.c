@@ -101,6 +101,7 @@ PROV_DEVICE_HANDLE Prov_Device_Create(const char* uri, const char* id_scope, PRO
         }
         else
         {
+            memset(result, 0, sizeof(PROV_DEVICE_INSTANCE) );
             /* Codes_SRS_PROV_DEVICE_CLIENT_12_004: [ The function shall initialize the Lock. ] */
             result->LockHandle = Lock_Init();
             if (result->LockHandle == NULL)
@@ -117,6 +118,7 @@ PROV_DEVICE_HANDLE Prov_Device_Create(const char* uri, const char* id_scope, PRO
                 /* Codes_SRS_PROV_DEVICE_CLIENT_12_007: [ The function shall initialize the result datastructure. ] */
                 result->ThreadHandle = NULL;
                 result->StopThread = 0;
+                result->do_work_freq_ms = DO_WORK_FREQ_DEFAULT;
             }
         }
     }
@@ -234,7 +236,7 @@ PROV_DEVICE_RESULT Prov_Device_SetOption(PROV_DEVICE_HANDLE prov_device_handle, 
         /* Codes_SRS_PROV_DEVICE_CLIENT_12_023: [ The function shall call the LL layer Prov_Device_LL_SetOption with the given parameters and return with the result. ] */
         PROV_DEVICE_INSTANCE* prov_device_instance = (PROV_DEVICE_INSTANCE*)prov_device_handle;
 
-		/* Codes_SRS_PROV_DEVICE_CLIENT_41_002: [ `Prov_Device_SetOption` shall be made thread-safe by using the lock created in `Prov_Device_Create`. ] */
+        /* Codes_SRS_PROV_DEVICE_CLIENT_41_002: [ `Prov_Device_SetOption` shall be made thread-safe by using the lock created in `Prov_Device_Create`. ] */
         if (Lock(prov_device_instance->LockHandle) != LOCK_OK)
         {
             /* Codes_SRS_PROV_DEVICE_CLIENT_41_003: [ If acquiring the lock fails, `Prov_Device_SetOption` shall return `IOTHUB_CLIENT_ERROR`. ] */
@@ -243,7 +245,7 @@ PROV_DEVICE_RESULT Prov_Device_SetOption(PROV_DEVICE_HANDLE prov_device_handle, 
         }
         else 
         {
-			/* Codes_SRS_PROV_DEVICE_CLIENT_41_001: [ If parameter `optionName` is `OPTION_DO_WORK_FREQUENCY_IN_MS` then `IoTHubClientCore_SetOption` shall set `do_work_freq_ms` parameter of `prov_device_instance` ] */
+            /* Codes_SRS_PROV_DEVICE_CLIENT_41_001: [ If parameter `optionName` is `OPTION_DO_WORK_FREQUENCY_IN_MS` then `IoTHubClientCore_SetOption` shall set `do_work_freq_ms` parameter of `prov_device_instance` ] */
             if (strcmp(OPTION_DO_WORK_FREQUENCY_IN_MS, optionName) == 0)
             {
                 prov_device_instance->do_work_freq_ms = *((uint16_t *)value);
