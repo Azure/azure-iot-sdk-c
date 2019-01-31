@@ -391,7 +391,9 @@ if (${build_as_dynamic})
         set(iothub_def_file ${iothub_def_file} ./src/upload_to_blob.def)
     endif()
 
-    set(iothub_def_file ${iothub_def_file} ./src/iothub_transport_amqp.def)
+    if(use_amqp)
+        set(iothub_def_file ${iothub_def_file} ./src/iothub_transport_amqp.def)
+    endif()
 
     if(use_http)
         set(iothub_def_file ${iothub_def_file} ./src/iothub_transport_http.def)

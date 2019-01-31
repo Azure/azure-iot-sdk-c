@@ -1506,7 +1506,7 @@ TEST_FUNCTION(when_creating_the_methods_handler_fails_then_IoTHubTransport_AMQP_
     size_t n = umock_c_negative_tests_call_count();
     for (i = 0; i < n; i++)
     {
-        if (i == 0 || i == 2 || i == 3 || i == 4 || i == 5 || i == 7 || i == 8 || i == 13)
+        if (!umock_c_negative_tests_can_call_fail(i))
         {
             continue;
         }
