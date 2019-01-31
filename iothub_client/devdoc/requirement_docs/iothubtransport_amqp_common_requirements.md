@@ -40,7 +40,7 @@ extern int IoTHubTransport_AMQP_Common_SetRetryPolicy(TRANSPORT_LL_HANDLE handle
 extern IOTHUB_DEVICE_HANDLE IoTHubTransport_AMQP_Common_Register(TRANSPORT_LL_HANDLE handle, const IOTHUB_DEVICE_CONFIG* device, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, PDLIST_ENTRY waitingToSend);
 extern void IoTHubTransport_AMQP_Common_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle);
 extern STRING_HANDLE IoTHubTransport_AMQP_Common_GetHostname(TRANSPORT_LL_HANDLE handle);
-
+extern int IoTHubTransport_AMQP_Common_SetStreamRequestCallback(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_INCOMING_STREAM_REQUEST_CALLBACK streamRequestCallback, void* context);
 ```
 
 
@@ -543,3 +543,19 @@ void on_methods_unsubscribed(void* context)
 ```
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_12_001: [** `on_methods_unsubscribed` calls iothubtransportamqp_methods_unsubscribe. **]**
+
+
+### IoTHubTransport_AMQP_Common_SetStreamRequestCallback
+
+```c
+extern int IoTHubTransport_AMQP_Common_SetStreamRequestCallback(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_INCOMING_STREAM_REQUEST_CALLBACK streamRequestCallback, void* context);
+```
+
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_154: [** If `handle` or `streamRequestCallback` are NULL, a non-zero value shall be returned (failure) **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_155: [** device_set_stream_request_callback() shall be invoked for the registered device, passing `streamRequestCallback` and `context` **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_156: [** If device_set_stream_request_callback() fails, `IoTHubTransport_AMQP_Common_SetStreamRequestCallback` shall fail and return non-zero. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_157: [** If no errors occur, `IoTHubTransport_AMQP_Common_SetStreamRequestCallback` shall return zero. **]**
+

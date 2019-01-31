@@ -290,8 +290,10 @@ static void setTransportProtocol(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData, 
     handleData->IoTHubTransport_DeviceMethod_Response = protocol->IoTHubTransport_DeviceMethod_Response;
     handleData->IoTHubTransport_Subscribe_InputQueue = protocol->IoTHubTransport_Subscribe_InputQueue;
     handleData->IoTHubTransport_Unsubscribe_InputQueue = protocol->IoTHubTransport_Unsubscribe_InputQueue;
+    handleData->IoTHubTransport_SetStreamRequestCallback = protocol->IoTHubTransport_SetStreamRequestCallback;
+    handleData->IoTHubTransport_SendStreamResponse = protocol->IoTHubTransport_SendStreamResponse;
     handleData->IoTHubTransport_SetCallbackContext = protocol->IoTHubTransport_SetCallbackContext;
-}
+};
 
 static bool is_event_equal(IOTHUB_EVENT_CALLBACK *event_callback, const char *input_name)
 {
@@ -485,6 +487,36 @@ static STRING_HANDLE make_product_info(const char* product)
     return result;
 }
 
+static void destroy_iothub_client(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* client_handle)
+{
+    if (client_handle->deviceHandle != NULL)
+    {
+        client_handle->IoTHubTransport_Unregister(client_handle->deviceHandle);
+    }
+
+    // Codes_SRS_IOTHUBCLIENT_LL_09_010: [ If any failure occurs `IoTHubClientCore_LL_Create` shall destroy the `transportHandle` only if it has created it ]
+    if (client_handle->IoTHubTransport_Destroy != NULL && !client_handle->isSharedTransport)
+    {
+        client_handle->IoTHubTransport_Destroy(client_handle->transportHandle);
+    }
+
+#ifndef DONT_USE_UPLOADTOBLOB
+    if (client_handle->uploadToBlobHandle != NULL)
+    {
+        destroy_blob_upload_module(client_handle);
+    }
+#endif // DONT_USE_UPLOADTOBLOB
+    
+    destroy_module_method_module(client_handle);
+    
+    IoTHubClient_Auth_Destroy(client_handle->authorization_module);
+
+    tickcounter_destroy(client_handle->tickCounter);
+    STRING_delete(client_handle->product_info);
+
+    free(client_handle);
+}
+
 static void IoTHubClientCore_LL_SendComplete(PDLIST_ENTRY completed, IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* ctx)
 {
     /*Codes_SRS_IOTHUBCLIENT_LL_02_022: [If parameter completed is NULL, or parameter handle is NULL then IoTHubClientCore_LL_SendBatch shall return.]*/
@@ -594,7 +626,6 @@ static void IoTHubClientCore_LL_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTIO
             handleData->conStatusCallback(status, reason, handleData->conStatusUserContextCallback);
         }
     }
-
 }
 
 static const char* IoTHubClientCore_LL_GetProductInfo(void* ctx)
@@ -764,316 +795,260 @@ static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_
 {
     IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* result;
     srand((unsigned int)time(NULL));
-    STRING_HANDLE product_info = make_product_info(NULL);
-    if (product_info == NULL)
-    {
-        LogError("failed to initialize product info");
-        result = NULL;
-    }
-    else
-    {
-        result = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)malloc(sizeof(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA));
-        if (result == NULL)
-        {
-            LogError("failure allocating IOTHUB_CLIENT_CORE_LL_HANDLE_DATA");
-            STRING_delete(product_info);
-        }
-        else
-        {
-            IOTHUB_CLIENT_CONFIG actual_config;
-            const IOTHUB_CLIENT_CONFIG* config = NULL;
-            char* IoTHubName = NULL;
-            char* IoTHubSuffix = NULL;
+	
+	result = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)malloc(sizeof(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA));
+	
+	if (result == NULL)
+	{
+		LogError("failure allocating IOTHUB_CLIENT_CORE_LL_HANDLE_DATA");
+	}
+	else
+	{
+		memset(result, 0, sizeof(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA));
+		
+		if ((result->product_info = make_product_info(NULL)) == NULL)
+		{
+			LogError("failed to initialize product info");
+			destroy_iothub_client(result);
+			result = NULL;
+		}
+		else
+		{
+		
+			IOTHUB_CLIENT_CONFIG actual_config;
+			const IOTHUB_CLIENT_CONFIG* config = NULL;
+			char* IoTHubName = NULL;
+			char* IoTHubSuffix = NULL;
 
-            memset(result, 0, sizeof(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA));
-            if (use_dev_auth)
-            {
-                if ((result->authorization_module = IoTHubClient_Auth_CreateFromDeviceAuth(client_config->deviceId, module_id)) == NULL)
-                {
-                    LogError("Failed create authorization module");
-                    free(result);
-                    STRING_delete(product_info);
-                    result = NULL;
-                }
-            }
-            else
-            {
-                const char* device_key;
-                const char* device_id;
-                const char* sas_token;
-                if (device_config == NULL)
-                {
-                    device_key = client_config->deviceKey;
-                    device_id = client_config->deviceId;
-                    sas_token = client_config->deviceSasToken;
-                }
-                else
-                {
-                    device_key = device_config->deviceKey;
-                    device_id = device_config->deviceId;
-                    sas_token = device_config->deviceSasToken;
-                }
+			if (use_dev_auth)
+			{
+				if ((result->authorization_module = IoTHubClient_Auth_CreateFromDeviceAuth(client_config->deviceId, module_id)) == NULL)
+				{
+					LogError("Failed create authorization module");
+					destroy_iothub_client(result);
+					result = NULL;
+				}
+			}
+			else
+			{
+				const char* device_key;
+				const char* device_id;
+				const char* sas_token;
+				if (device_config == NULL)
+				{
+					device_key = client_config->deviceKey;
+					device_id = client_config->deviceId;
+					sas_token = client_config->deviceSasToken;
+				}
+				else
+				{
+					device_key = device_config->deviceKey;
+					device_id = device_config->deviceId;
+					sas_token = device_config->deviceSasToken;
+				}
 
-                /* Codes_SRS_IOTHUBCLIENT_LL_07_029: [ IoTHubClientCore_LL_Create shall create the Auth module with the device_key, device_id, and/or deviceSasToken values ] */
-                if ((result->authorization_module = IoTHubClient_Auth_Create(device_key, device_id, sas_token, module_id)) == NULL)
-                {
-                    LogError("Failed create authorization module");
-                    free(result);
-                    STRING_delete(product_info);
-                    result = NULL;
-                }
-            }
+				/* Codes_SRS_IOTHUBCLIENT_LL_07_029: [ IoTHubClientCore_LL_Create shall create the Auth module with the device_key, device_id, and/or deviceSasToken values ] */
+				if ((result->authorization_module = IoTHubClient_Auth_Create(device_key, device_id, sas_token, module_id)) == NULL)
+				{
+					LogError("Failed create authorization module");
+					destroy_iothub_client(result);
+					result = NULL;
+				}
+			}
 
-            if (result != NULL)
-            {
-                TRANSPORT_CALLBACKS_INFO transport_cb;
-                memset(&transport_cb, 0, sizeof(TRANSPORT_CALLBACKS_INFO));
-                transport_cb.send_complete_cb = IoTHubClientCore_LL_SendComplete;
-                transport_cb.twin_retrieve_prop_complete_cb = IoTHubClientCore_LL_RetrievePropertyComplete;
-                transport_cb.twin_rpt_state_complete_cb = IoTHubClientCore_LL_ReportedStateComplete;
-                transport_cb.connection_status_cb = IoTHubClientCore_LL_ConnectionStatusCallBack;
-                transport_cb.prod_info_cb = IoTHubClientCore_LL_GetProductInfo;
-                transport_cb.msg_input_cb = IoTHubClientCore_LL_MessageCallbackFromInput;
-                transport_cb.msg_cb = IoTHubClientCore_LL_MessageCallback;
-                transport_cb.method_complete_cb = IoTHubClientCore_LL_DeviceMethodComplete;
+			if (result != NULL)
+			{
+				TRANSPORT_CALLBACKS_INFO transport_cb;
+				memset(&transport_cb, 0, sizeof(TRANSPORT_CALLBACKS_INFO));
+				transport_cb.send_complete_cb = IoTHubClientCore_LL_SendComplete;
+				transport_cb.twin_retrieve_prop_complete_cb = IoTHubClientCore_LL_RetrievePropertyComplete;
+				transport_cb.twin_rpt_state_complete_cb = IoTHubClientCore_LL_ReportedStateComplete;
+				transport_cb.connection_status_cb = IoTHubClientCore_LL_ConnectionStatusCallBack;
+				transport_cb.prod_info_cb = IoTHubClientCore_LL_GetProductInfo;
+				transport_cb.msg_input_cb = IoTHubClientCore_LL_MessageCallbackFromInput;
+				transport_cb.msg_cb = IoTHubClientCore_LL_MessageCallback;
+				transport_cb.method_complete_cb = IoTHubClientCore_LL_DeviceMethodComplete;
 
-                if (client_config != NULL)
-                {
-                    IOTHUBTRANSPORT_CONFIG lowerLayerConfig;
-                    memset(&lowerLayerConfig, 0, sizeof(IOTHUBTRANSPORT_CONFIG));
-                    /*Codes_SRS_IOTHUBCLIENT_LL_02_006: [IoTHubClientCore_LL_Create shall populate a structure of type IOTHUBTRANSPORT_CONFIG with the information from config parameter and the previous DLIST and shall pass that to the underlying layer _Create function.]*/
-                    lowerLayerConfig.upperConfig = client_config;
-                    lowerLayerConfig.waitingToSend = &(result->waitingToSend);
-                    lowerLayerConfig.auth_module_handle = result->authorization_module;
-                    lowerLayerConfig.moduleId = module_id;
+				if (client_config != NULL)
+				{
+					IOTHUBTRANSPORT_CONFIG lowerLayerConfig;
+					memset(&lowerLayerConfig, 0, sizeof(IOTHUBTRANSPORT_CONFIG));
+					/*Codes_SRS_IOTHUBCLIENT_LL_02_006: [IoTHubClientCore_LL_Create shall populate a structure of type IOTHUBTRANSPORT_CONFIG with the information from config parameter and the previous DLIST and shall pass that to the underlying layer _Create function.]*/
+					lowerLayerConfig.upperConfig = client_config;
+					lowerLayerConfig.waitingToSend = &(result->waitingToSend);
+					lowerLayerConfig.auth_module_handle = result->authorization_module;
+					lowerLayerConfig.moduleId = module_id;
 
-                    setTransportProtocol(result, (TRANSPORT_PROVIDER*)client_config->protocol());
-                    if ((result->transportHandle = result->IoTHubTransport_Create(&lowerLayerConfig, &transport_cb, result)) == NULL)
-                    {
-                        /*Codes_SRS_IOTHUBCLIENT_LL_02_007: [If the underlaying layer _Create function fails them IoTHubClientCore_LL_Create shall fail and return NULL.] */
-                        LogError("underlying transport failed");
-                        destroy_blob_upload_module(result);
-                        destroy_module_method_module(result);
-                        tickcounter_destroy(result->tickCounter);
-                        IoTHubClient_Auth_Destroy(result->authorization_module);
-                        STRING_delete(product_info);
-                        free(result);
-                        result = NULL;
-                    }
-                    else
-                    {
-                        /*Codes_SRS_IOTHUBCLIENT_LL_02_008: [Otherwise, IoTHubClientCore_LL_Create shall succeed and return a non-NULL handle.] */
-                        result->isSharedTransport = false;
-                        config = client_config;
-                    }
-                }
-                else
-                {
-                    STRING_HANDLE transport_hostname = NULL;
+					setTransportProtocol(result, (TRANSPORT_PROVIDER*)client_config->protocol());
+					if ((result->transportHandle = result->IoTHubTransport_Create(&lowerLayerConfig, &transport_cb, result)) == NULL)
+					{
+						/*Codes_SRS_IOTHUBCLIENT_LL_02_007: [If the underlaying layer _Create function fails them IoTHubClientCore_LL_Create shall fail and return NULL.] */
+						LogError("underlying transport failed");
+						destroy_iothub_client(result);
+						result = NULL;
+					}
+					else
+					{
+						/*Codes_SRS_IOTHUBCLIENT_LL_02_008: [Otherwise, IoTHubClientCore_LL_Create shall succeed and return a non-NULL handle.] */
+						result->isSharedTransport = false;
+						config = client_config;
+					}
+				}
+				else
+				{
+					STRING_HANDLE transport_hostname = NULL;
 
-                    result->transportHandle = device_config->transportHandle;
-                    setTransportProtocol(result, (TRANSPORT_PROVIDER*)device_config->protocol());
+					result->transportHandle = device_config->transportHandle;
+					setTransportProtocol(result, (TRANSPORT_PROVIDER*)device_config->protocol());
 
-                    if (result->IoTHubTransport_SetCallbackContext(result->transportHandle, result) != 0)
-                    {
-                        LogError("unable to set transport callbacks");
-                        IoTHubClient_Auth_Destroy(result->authorization_module);
-                        STRING_delete(product_info);
-                        free(result);
-                        result = NULL;
-                    }
-                    else if ((transport_hostname = result->IoTHubTransport_GetHostname(result->transportHandle)) == NULL)
-                    {
-                        /*Codes_SRS_IOTHUBCLIENT_LL_02_097: [ If creating the data structures fails or instantiating the IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE fails then IoTHubClientCore_LL_CreateWithTransport shall fail and return NULL. ]*/
-                        LogError("unable to determine the transport IoTHub name");
-                        IoTHubClient_Auth_Destroy(result->authorization_module);
-                        STRING_delete(product_info);
-                        free(result);
-                        result = NULL;
-                    }
-                    else
-                    {
-                        const char* hostname = STRING_c_str(transport_hostname);
-                        /*Codes_SRS_IOTHUBCLIENT_LL_02_096: [ IoTHubClientCore_LL_CreateWithTransport shall create the data structures needed to instantiate a IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE. ]*/
-                        /*the first '.' says where the iothubname finishes*/
-                        const char* whereIsDot = strchr(hostname, '.');
-                        if (whereIsDot == NULL)
-                        {
-                            /*Codes_SRS_IOTHUBCLIENT_LL_02_097: [ If creating the data structures fails or instantiating the IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE fails then IoTHubClientCore_LL_CreateWithTransport shall fail and return NULL. ]*/
-                            LogError("unable to determine the IoTHub name");
-                            IoTHubClient_Auth_Destroy(result->authorization_module);
-                            STRING_delete(product_info);
-                            free(result);
-                            result = NULL;
-                        }
-                        else
-                        {
-                            size_t suffix_len = strlen(whereIsDot);
-                            /*Codes_SRS_IOTHUBCLIENT_LL_02_096: [ IoTHubClientCore_LL_CreateWithTransport shall create the data structures needed to instantiate a IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE. ]*/
-                            IoTHubName = (char*)malloc(whereIsDot - hostname + 1);
-                            if (IoTHubName == NULL)
-                            {
-                                /*Codes_SRS_IOTHUBCLIENT_LL_02_097: [ If creating the data structures fails or instantiating the IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE fails then IoTHubClientCore_LL_CreateWithTransport shall fail and return NULL. ]*/
-                                LogError("unable to malloc");
-                                IoTHubClient_Auth_Destroy(result->authorization_module);
-                                STRING_delete(product_info);
-                                free(result);
-                                result = NULL;
-                            }
-                            else if ((IoTHubSuffix = (char*)malloc(suffix_len + 1)) == NULL)
-                            {
-                                /*Codes_SRS_IOTHUBCLIENT_LL_02_097: [ If creating the data structures fails or instantiating the IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE fails then IoTHubClientCore_LL_CreateWithTransport shall fail and return NULL. ]*/
-                                LogError("unable to malloc");
-                                IoTHubClient_Auth_Destroy(result->authorization_module);
-                                STRING_delete(product_info);
-                                free(result);
-                                result = NULL;
-                            }
-                            else
-                            {
-                                memset(IoTHubName, 0, whereIsDot - hostname + 1);
-                                (void)memcpy(IoTHubName, hostname, whereIsDot - hostname);
-                                (void)strcpy(IoTHubSuffix, whereIsDot+1);
+					if (result->IoTHubTransport_SetCallbackContext(result->transportHandle, result) != 0)
+					{
+						LogError("unable to set transport callbacks");
+						destroy_iothub_client(result);
+						result = NULL;
+					}
+					else if ((transport_hostname = result->IoTHubTransport_GetHostname(result->transportHandle)) == NULL)
+					{
+						/*Codes_SRS_IOTHUBCLIENT_LL_02_097: [ If creating the data structures fails or instantiating the IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE fails then IoTHubClientCore_LL_CreateWithTransport shall fail and return NULL. ]*/
+						LogError("unable to determine the transport IoTHub name");
+						destroy_iothub_client(result);
+						result = NULL;
+					}
+					else
+					{
+						const char* hostname = STRING_c_str(transport_hostname);
+						/*Codes_SRS_IOTHUBCLIENT_LL_02_096: [ IoTHubClientCore_LL_CreateWithTransport shall create the data structures needed to instantiate a IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE. ]*/
+						/*the first '.' says where the iothubname finishes*/
+						const char* whereIsDot = strchr(hostname, '.');
+						if (whereIsDot == NULL)
+						{
+							/*Codes_SRS_IOTHUBCLIENT_LL_02_097: [ If creating the data structures fails or instantiating the IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE fails then IoTHubClientCore_LL_CreateWithTransport shall fail and return NULL. ]*/
+							LogError("unable to determine the IoTHub name");
+							destroy_iothub_client(result);
+							result = NULL;
+						}
+						else
+						{
+							size_t suffix_len = strlen(whereIsDot);
+							/*Codes_SRS_IOTHUBCLIENT_LL_02_096: [ IoTHubClientCore_LL_CreateWithTransport shall create the data structures needed to instantiate a IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE. ]*/
+							IoTHubName = (char*)malloc(whereIsDot - hostname + 1);
+							if (IoTHubName == NULL)
+							{
+								/*Codes_SRS_IOTHUBCLIENT_LL_02_097: [ If creating the data structures fails or instantiating the IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE fails then IoTHubClientCore_LL_CreateWithTransport shall fail and return NULL. ]*/
+								LogError("unable to malloc");
+								destroy_iothub_client(result);
+								result = NULL;
+							}
+							else if ((IoTHubSuffix = (char*)malloc(suffix_len + 1)) == NULL)
+							{
+								/*Codes_SRS_IOTHUBCLIENT_LL_02_097: [ If creating the data structures fails or instantiating the IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE fails then IoTHubClientCore_LL_CreateWithTransport shall fail and return NULL. ]*/
+								LogError("unable to malloc");
+								destroy_iothub_client(result);
+								result = NULL;
+							}
+							else
+							{
+								memset(IoTHubName, 0, whereIsDot - hostname + 1);
+								(void)memcpy(IoTHubName, hostname, whereIsDot - hostname);
+								(void)strcpy(IoTHubSuffix, whereIsDot + 1);
 
-                                actual_config.deviceId = device_config->deviceId;
-                                actual_config.deviceKey = device_config->deviceKey;
-                                actual_config.deviceSasToken = device_config->deviceSasToken;
-                                actual_config.iotHubName = IoTHubName;
-                                actual_config.iotHubSuffix = IoTHubSuffix;
-                                actual_config.protocol = NULL; /*irrelevant to IoTHubClientCore_LL_UploadToBlob*/
-                                actual_config.protocolGatewayHostName = NULL; /*irrelevant to IoTHubClientCore_LL_UploadToBlob*/
+								actual_config.deviceId = device_config->deviceId;
+								actual_config.deviceKey = device_config->deviceKey;
+								actual_config.deviceSasToken = device_config->deviceSasToken;
+								actual_config.iotHubName = IoTHubName;
+								actual_config.iotHubSuffix = IoTHubSuffix;
+								actual_config.protocol = NULL; /*irrelevant to IoTHubClientCore_LL_UploadToBlob*/
+								actual_config.protocolGatewayHostName = NULL; /*irrelevant to IoTHubClientCore_LL_UploadToBlob*/
 
-                                config = &actual_config;
+								config = &actual_config;
 
-                                /*Codes_SRS_IOTHUBCLIENT_LL_02_008: [Otherwise, IoTHubClientCore_LL_Create shall succeed and return a non-NULL handle.] */
-                                result->isSharedTransport = true;
-                            }
-                        }
-                    }
-                    STRING_delete(transport_hostname);
-                }
-            }
-            if (result != NULL)
-            {
-                if (create_blob_upload_module(result, config) != 0)
-                {
-                    LogError("unable to create blob upload");
-                    // Codes_SRS_IOTHUBCLIENT_LL_09_010: [ If any failure occurs `IoTHubClientCore_LL_Create` shall destroy the `transportHandle` only if it has created it ]
-                    if (!result->isSharedTransport)
-                    {
-                        result->IoTHubTransport_Destroy(result->transportHandle);
-                    }
-                    destroy_blob_upload_module(result);
-                    IoTHubClient_Auth_Destroy(result->authorization_module);
-                    STRING_delete(product_info);
-                    free(result);
-                    result = NULL;
-                }
-                else if ((module_id != NULL) && create_edge_handle(result, config, module_id) != 0)
-                {
-                    LogError("unable to create module method handle");
-                    if (!result->isSharedTransport)
-                    {
-                        result->IoTHubTransport_Destroy(result->transportHandle);
-                    }
-                    destroy_blob_upload_module(result);
-                    IoTHubClient_Auth_Destroy(result->authorization_module);
-                    STRING_delete(product_info);
-                    free(result);
-                    result = NULL;
-                }
-                else
-                {
-                    if ((result->tickCounter = tickcounter_create()) == NULL)
-                    {
-                        LogError("unable to get a tickcounter");
-                        // Codes_SRS_IOTHUBCLIENT_LL_09_010: [ If any failure occurs `IoTHubClientCore_LL_Create` shall destroy the `transportHandle` only if it has created it ]
-                        if (!result->isSharedTransport)
-                        {
-                            result->IoTHubTransport_Destroy(result->transportHandle);
-                        }
-                        destroy_blob_upload_module(result);
-                        destroy_module_method_module(result);
-                        IoTHubClient_Auth_Destroy(result->authorization_module);
-                        STRING_delete(product_info);
-                        free(result);
-                        result = NULL;
-                    }
-                    else
-                    {
-                        /*Codes_SRS_IOTHUBCLIENT_LL_02_004: [Otherwise IoTHubClientCore_LL_Create shall initialize a new DLIST (further called "waitingToSend") containing records with fields of the following types: IOTHUB_MESSAGE_HANDLE, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, void*.]*/
-                        DList_InitializeListHead(&(result->waitingToSend));
-                        DList_InitializeListHead(&(result->iot_msg_queue));
-                        DList_InitializeListHead(&(result->iot_ack_queue));
-                        result->messageCallback.type = CALLBACK_TYPE_NONE;
-                        result->lastMessageReceiveTime = INDEFINITE_TIME;
-                        result->data_msg_id = 1;
-                        result->product_info = product_info;
+								/*Codes_SRS_IOTHUBCLIENT_LL_02_008: [Otherwise, IoTHubClientCore_LL_Create shall succeed and return a non-NULL handle.] */
+								result->isSharedTransport = true;
+							}
+						}
+					}
+					STRING_delete(transport_hostname);
+				}
+			}
 
-                        IOTHUB_DEVICE_CONFIG deviceConfig;
-                        deviceConfig.deviceId = config->deviceId;
-                        deviceConfig.deviceKey = config->deviceKey;
-                        deviceConfig.deviceSasToken = config->deviceSasToken;
-                        deviceConfig.authorization_module = result->authorization_module;
-                        deviceConfig.moduleId = module_id;
+			if (result != NULL)
+			{
+				if (create_blob_upload_module(result, config) != 0)
+				{
+					LogError("unable to create blob upload");
+					destroy_iothub_client(result);
+					result = NULL;
+				}
+				else if ((module_id != NULL) && create_edge_handle(result, config, module_id) != 0)
+				{
+					LogError("unable to create module method handle");
+					destroy_iothub_client(result);
+					result = NULL;
+				}
+				else
+				{
+					if ((result->tickCounter = tickcounter_create()) == NULL)
+					{
+						LogError("unable to get a tickcounter");
+						destroy_iothub_client(result);
+						result = NULL;
+					}
+					else
+					{
+						/*Codes_SRS_IOTHUBCLIENT_LL_02_004: [Otherwise IoTHubClientCore_LL_Create shall initialize a new DLIST (further called "waitingToSend") containing records with fields of the following types: IOTHUB_MESSAGE_HANDLE, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, void*.]*/
+						DList_InitializeListHead(&(result->waitingToSend));
+						DList_InitializeListHead(&(result->iot_msg_queue));
+						DList_InitializeListHead(&(result->iot_ack_queue));
+						result->messageCallback.type = CALLBACK_TYPE_NONE;
+						result->lastMessageReceiveTime = INDEFINITE_TIME;
+						result->data_msg_id = 1;
 
-                        /*Codes_SRS_IOTHUBCLIENT_LL_17_008: [IoTHubClientCore_LL_Create shall call the transport _Register function with a populated structure of type IOTHUB_DEVICE_CONFIG and waitingToSend list.] */
-                        if ((result->deviceHandle = result->IoTHubTransport_Register(result->transportHandle, &deviceConfig, &(result->waitingToSend))) == NULL)
-                        {
-                            LogError("Registering device in transport failed");
-                            IoTHubClient_Auth_Destroy(result->authorization_module);
-                            // Codes_SRS_IOTHUBCLIENT_LL_09_010: [ If any failure occurs `IoTHubClientCore_LL_Create` shall destroy the `transportHandle` only if it has created it ]
-                            if (!result->isSharedTransport)
-                            {
-                                result->IoTHubTransport_Destroy(result->transportHandle);
-                            }
-                            destroy_blob_upload_module(result);
-                            destroy_module_method_module(result);
-                            tickcounter_destroy(result->tickCounter);
-                            STRING_delete(product_info);
-                            free(result);
-                            result = NULL;
-                        }
-                        else
-                        {
-                            /*Codes_SRS_IOTHUBCLIENT_LL_02_042: [ By default, messages shall not timeout. ]*/
-                            result->currentMessageTimeout = 0;
-                            result->current_device_twin_timeout = 0;
+						IOTHUB_DEVICE_CONFIG deviceConfig;
+						deviceConfig.deviceId = config->deviceId;
+						deviceConfig.deviceKey = config->deviceKey;
+						deviceConfig.deviceSasToken = config->deviceSasToken;
+						deviceConfig.authorization_module = result->authorization_module;
+						deviceConfig.moduleId = module_id;
 
-                            result->diagnostic_setting.currentMessageNumber = 0;
-                            result->diagnostic_setting.diagSamplingPercentage = 0;
-                            /*Codes_SRS_IOTHUBCLIENT_LL_25_124: [ `IoTHubClientCore_LL_Create` shall set the default retry policy as Exponential backoff with jitter and if succeed and return a `non-NULL` handle. ]*/
-                            if (IoTHubClientCore_LL_SetRetryPolicy(result, IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER, 0) != IOTHUB_CLIENT_OK)
-                            {
-                                LogError("Setting default retry policy in transport failed");
-                                result->IoTHubTransport_Unregister(result->deviceHandle);
-                                IoTHubClient_Auth_Destroy(result->authorization_module);
-                                // Codes_SRS_IOTHUBCLIENT_LL_09_010: [ If any failure occurs `IoTHubClientCore_LL_Create` shall destroy the `transportHandle` only if it has created it ]
-                                if (!result->isSharedTransport)
-                                {
-                                    result->IoTHubTransport_Destroy(result->transportHandle);
-                                }
-                                destroy_blob_upload_module(result);
-                                destroy_module_method_module(result);
-                                tickcounter_destroy(result->tickCounter);
-                                STRING_delete(product_info);
-                                free(result);
-                                result = NULL;
-                            }
-                        }
-                    }
-                }
-            }
-            if (IoTHubName)
-            {
-                free(IoTHubName);
-            }
-            if (IoTHubSuffix)
-            {
-                free(IoTHubSuffix);
-            }
-        }
-    }
+						/*Codes_SRS_IOTHUBCLIENT_LL_17_008: [IoTHubClientCore_LL_Create shall call the transport _Register function with a populated structure of type IOTHUB_DEVICE_CONFIG and waitingToSend list.] */
+						if ((result->deviceHandle = result->IoTHubTransport_Register(result->transportHandle, &deviceConfig, &(result->waitingToSend))) == NULL)
+						{
+							LogError("Registering device in transport failed");
+							destroy_iothub_client(result);
+							result = NULL;
+						}
+						else
+						{
+							/*Codes_SRS_IOTHUBCLIENT_LL_02_042: [ By default, messages shall not timeout. ]*/
+							result->currentMessageTimeout = 0;
+							result->current_device_twin_timeout = 0;
+
+							result->diagnostic_setting.currentMessageNumber = 0;
+							result->diagnostic_setting.diagSamplingPercentage = 0;
+
+							/*Codes_SRS_IOTHUBCLIENT_LL_25_124: [ `IoTHubClientCore_LL_Create` shall set the default retry policy as Exponential backoff with jitter and if succeed and return a `non-NULL` handle. ]*/
+							if (IoTHubClientCore_LL_SetRetryPolicy(result, IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER, 0) != IOTHUB_CLIENT_OK)
+							{
+								LogError("Setting default retry policy in transport failed");
+								destroy_iothub_client(result);
+								result = NULL;
+							}
+						}
+					}
+				}
+			}
+
+			if (IoTHubName)
+			{
+				free(IoTHubName);
+			}
+			if (IoTHubSuffix)
+			{
+				free(IoTHubSuffix);
+			}
+		}
+	}
+
     return result;
 }
 
@@ -2979,6 +2954,68 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_GenericMethodInvoke(IOTHUB_CLIENT_CORE_
     return result;
 }
 #endif
+
+IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetStreamRequestCallback(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, DEVICE_STREAM_C2D_REQUEST_CALLBACK streamRequestCallback, void* context)
+{
+    IOTHUB_CLIENT_RESULT result;
+
+    // Codes_SRS_IOTHUBCLIENT_LL_09_011: [ If `iotHubClientHandle` is NULL, `IoTHubClientCore_LL_SetStreamRequestCallback` shall return IOTHUB_CLIENT_INVALID_ARG. ]
+    if (iotHubClientHandle == NULL)
+    {
+        result = IOTHUB_CLIENT_INVALID_ARG;
+        LOG_ERROR_RESULT;
+    }
+    else
+    {
+        IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)iotHubClientHandle;
+
+        // Codes_SRS_IOTHUBCLIENT_LL_09_012: [ The transport's `IoTHubTransport_SetStreamRequestCallback` shall be invoked passing `streamRequestCallback` and `context`. ]
+        if (handleData->IoTHubTransport_SetStreamRequestCallback(handleData->deviceHandle, streamRequestCallback, context) != 0)
+        {
+            // Codes_SRS_IOTHUBCLIENT_LL_09_013: [ If `IoTHubTransport_SetStreamRequestCallback` fails, `IoTHubClientCore_LL_SetStreamRequestCallback` shall return IOTHUB_CLIENT_ERROR. ]
+            LogError("Failed to subscribe/unsubscribe for Stream requests at the transport level");
+            result = IOTHUB_CLIENT_ERROR;
+        }
+        else
+        {
+            // Codes_SRS_IOTHUBCLIENT_LL_09_014: [ If no failures occur `IoTHubClientCore_LL_SetStreamRequestCallback` shall return IOTHUB_CLIENT_OK. ]
+            result = IOTHUB_CLIENT_OK;
+        }
+    }
+
+    return result;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SendStreamResponse(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, DEVICE_STREAM_C2D_RESPONSE* response)
+{
+    IOTHUB_CLIENT_RESULT result;
+
+    // Codes_SRS_IOTHUBCLIENT_LL_09_015: [ If `iotHubClientHandle` or `response` are NULL, `IoTHubClientCore_LL_SendStreamResponse` shall return IOTHUB_CLIENT_INVALID_ARG. ]
+    if (iotHubClientHandle == NULL || response == NULL)
+    {
+        result = IOTHUB_CLIENT_INVALID_ARG;
+        LOG_ERROR_RESULT;
+    }
+    else
+    {
+        IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)iotHubClientHandle;
+
+        // Codes_SRS_IOTHUBCLIENT_LL_09_016: [ The transport's `IoTHubTransport_SendStreamResponse` shall be invoked passing `response`. ]
+        if (handleData->IoTHubTransport_SendStreamResponse(handleData->deviceHandle, response) != 0)
+        {
+            // Codes_SRS_IOTHUBCLIENT_LL_09_017: [ If `IoTHubTransport_SendStreamResponse` fails, `IoTHubClientCore_LL_SendStreamResponse` shall return IOTHUB_CLIENT_ERROR. ]
+            LogError("Failed to send the Stream response");
+            result = IOTHUB_CLIENT_ERROR;
+        }
+        else
+        {
+            // Codes_SRS_IOTHUBCLIENT_LL_09_018: [ If no failures occur `IoTHubClientCore_LL_SendStreamResponse` shall return IOTHUB_CLIENT_OK. ]
+            result = IOTHUB_CLIENT_OK;
+        }
+    }
+
+    return result;
+}
 
 /*end*/
 

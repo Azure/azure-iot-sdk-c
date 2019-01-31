@@ -355,3 +355,19 @@ IOTHUB_CLIENT_RESULT IoTHubModuleClient_LL_ModuleMethodInvoke(IOTHUB_MODULE_CLIE
 }
 
 #endif /*USE_EDGE_MODULES*/
+
+IOTHUB_CLIENT_RESULT IoTHubModuleClient_LL_SetStreamRequestCallback(IOTHUB_MODULE_CLIENT_LL_HANDLE iotHubModuleClientHandle, DEVICE_STREAM_C2D_REQUEST_CALLBACK streamRequestCallback, void* context)
+{
+    IOTHUB_CLIENT_RESULT result;
+
+    if (iotHubModuleClientHandle != NULL)
+    {
+        result = IoTHubClientCore_LL_SetStreamRequestCallback(iotHubModuleClientHandle->coreHandle, streamRequestCallback, context);
+    }
+    else
+    {
+        LogError("Input parameter cannot be NULL");
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    return result;
+}

@@ -31,6 +31,7 @@ extern const TRANSPORT_PROVIDER* HTTP_Protocol(void);
     - IoTHubTransportHttp_Subscribe, 
     - IoTHubTransportHttp_Unsubscribe, 
     - IoTHubTransportHttp_DoWork, 
+	- IoTHubTransportHttp_SetStreamRequestCallback,
     - IoTHubTransportHttp_GetSendStatus, 
     - IotHubTransportHttp_Subscribe_InputQueue, 
     - IotHubTransportHttp_Unsubscribe_InputQueue 
@@ -302,6 +303,15 @@ MultiDevTransportHttp shall perform the following actions on each device:
 
 ### "Last action" action: 
 return;
+
+
+## IoTHubTransportHttp_SetStreamRequestCallback
+
+```c
+static int IoTHubTransportHttp_SetStreamRequestCallback(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_INCOMING_STREAM_REQUEST_CALLBACK streamRequestCallback, void* context)
+```
+
+**SRS_TRANSPORTMULTITHTTP_09_005: [** IoTHubTransportHttp_SetStreamRequestCallback shall return a failure (non-zero value) as it does not support TCP streaming **]**   
 
 
 ## IoTHubTransportHttp_Subscribe

@@ -133,3 +133,9 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob(IOTHUB_DEV
 }
 
 #endif
+
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SetStreamRequestCallback(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, DEVICE_STREAM_C2D_REQUEST_CALLBACK streamRequestCallback, void* context)
+{
+    return IoTHubClientCore_LL_SetStreamRequestCallback((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, streamRequestCallback, context);
+}
+

@@ -9,6 +9,7 @@
 #include <stddef.h>
 #include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
+#include "iothub_client_streaming.h"
 #include "iothub_client_core.h"
 #include "iothub_client_core_ll.h"
 #include "internal/iothubtransport.h"
@@ -24,6 +25,7 @@
 
 
 #define DO_WORK_FREQ_DEFAULT 1
+
 
 struct IOTHUB_QUEUE_CONTEXT_TAG;
 
@@ -44,10 +46,12 @@ typedef struct IOTHUB_CLIENT_CORE_INSTANCE_TAG
     IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC device_method_callback;
     IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK inbound_device_method_callback;
     IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC message_callback;
+    DEVICE_STREAM_C2D_REQUEST_CALLBACK stream_request_callback;
     struct IOTHUB_QUEUE_CONTEXT_TAG* devicetwin_user_context;
     struct IOTHUB_QUEUE_CONTEXT_TAG* connection_status_user_context;
     struct IOTHUB_QUEUE_CONTEXT_TAG* message_user_context;
     struct IOTHUB_QUEUE_CONTEXT_TAG* method_user_context;
+    struct IOTHUB_QUEUE_CONTEXT_TAG* stream_user_context;
     uint16_t do_work_freq_ms;
     tickcounter_ms_t currentMessageTimeout;
 } IOTHUB_CLIENT_CORE_INSTANCE;
@@ -103,7 +107,9 @@ typedef struct HTTPWORKER_THREAD_INFO_TAG
     CALLBACK_TYPE_DEVICE_METHOD,        \
     CALLBACK_TYPE_INBOUD_DEVICE_METHOD, \
     CALLBACK_TYPE_MESSAGE,              \
-    CALLBACK_TYPE_INPUTMESSAGE
+    CALLBACK_TYPE_INPUTMESSAGE,         \
+    CALLBACK_TYPE_DEVICE_STREAM
+
 
 DEFINE_ENUM(USER_CALLBACK_TYPE, USER_CALLBACK_TYPE_VALUES)
 DEFINE_ENUM_STRINGS(USER_CALLBACK_TYPE, USER_CALLBACK_TYPE_VALUES)
@@ -116,6 +122,11 @@ typedef struct DEVICE_TWIN_CALLBACK_INFO_TAG
     IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK userCallback;
     void* userContext;
 } DEVICE_TWIN_CALLBACK_INFO;
+
+typedef struct DEVICE_STREAM_CALLBACK_INFO_TAG
+{
+    DEVICE_STREAM_C2D_REQUEST* request;
+} DEVICE_STREAM_CALLBACK_INFO;
 
 typedef struct EVENT_CONFIRM_CALLBACK_INFO_TAG
 {
@@ -159,6 +170,7 @@ typedef struct USER_CALLBACK_INFO_TAG
         METHOD_CALLBACK_INFO method_cb_info;
         MESSAGE_CALLBACK_INFO* message_cb_info;
         INPUTMESSAGE_CALLBACK_INFO inputmessage_cb_info;
+        DEVICE_STREAM_CALLBACK_INFO dev_stream_cb_info;
     } iothub_callback;
 } USER_CALLBACK_INFO;
 
@@ -583,6 +595,7 @@ static void dispatch_user_callbacks(IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientIns
     IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC message_callback = NULL;
     IOTHUB_CLIENT_CORE_HANDLE message_user_context_handle = NULL;
     IOTHUB_CLIENT_CORE_HANDLE method_user_context_handle = NULL;
+    DEVICE_STREAM_C2D_REQUEST_CALLBACK device_stream_request_callback = NULL;
 
     // Make a local copy of these callbacks, as we don't run with a lock held and iotHubClientInstance may change mid-run.
     if (Lock(iotHubClientInstance->LockHandle) != LOCK_OK)
@@ -606,6 +619,8 @@ static void dispatch_user_callbacks(IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientIns
         {
             message_user_context_handle = iotHubClientInstance->message_user_context->iotHubClientHandle;
         }
+
+        device_stream_request_callback = iotHubClientInstance->stream_request_callback;
 
         (void)Unlock(iotHubClientInstance->LockHandle);
     }
@@ -727,7 +742,7 @@ static void dispatch_user_callbacks(IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientIns
                 }
                 break;
 
-                case CALLBACK_TYPE_INPUTMESSAGE:
+            case CALLBACK_TYPE_INPUTMESSAGE:
                 {
                     const INPUTMESSAGE_CALLBACK_INFO *inputmessage_cb_info = &queued_cb->iothub_callback.inputmessage_cb_info;
                     IOTHUBMESSAGE_DISPOSITION_RESULT disposition = inputmessage_cb_info->eventHandlerCallback(inputmessage_cb_info->message_cb_info->messageHandle, queued_cb->userContextCallback);
@@ -747,6 +762,27 @@ static void dispatch_user_callbacks(IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientIns
                     }
                 }
                 break;
+
+            case CALLBACK_TYPE_DEVICE_STREAM:
+            {
+                if (device_stream_request_callback)
+                {
+                    DEVICE_STREAM_C2D_RESPONSE* response = device_stream_request_callback(queued_cb->iothub_callback.dev_stream_cb_info.request, queued_cb->userContextCallback);
+
+                    if (IoTHubClientCore_LL_SendStreamResponse(iotHubClientInstance->IoTHubClientLLHandle, response) != IOTHUB_CLIENT_OK)
+                    {
+                        LogError("Failed sending stream response");
+                    }
+
+                    stream_c2d_response_destroy(response);
+                }
+
+                if (queued_cb->iothub_callback.dev_stream_cb_info.request)
+                {
+                    stream_c2d_request_destroy(queued_cb->iothub_callback.dev_stream_cb_info.request);
+                }
+                break;
+            }
 
             default:
                 LogError("Invalid callback type '%s'", ENUM_TO_STRING(USER_CALLBACK_TYPE, queued_cb->type));
@@ -1260,6 +1296,13 @@ void IoTHubClientCore_Destroy(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle)
                     if (iotHubClientInstance->event_confirm_callback)
                     {
                         iotHubClientInstance->event_confirm_callback(queue_cb_info->iothub_callback.event_confirm_cb_info.confirm_result, queue_cb_info->userContextCallback);
+                    }
+                }
+                else if (queue_cb_info->type == CALLBACK_TYPE_DEVICE_STREAM)
+                {
+                    if (queue_cb_info->iothub_callback.dev_stream_cb_info.request != NULL)
+                    {
+                        stream_c2d_request_destroy(queue_cb_info->iothub_callback.dev_stream_cb_info.request);
                     }
                 }
             }
@@ -2646,3 +2689,129 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_GenericMethodInvoke(IOTHUB_CLIENT_CORE_HAN
 }
 #endif /* USE_EDGE_MODULES */
 
+static DEVICE_STREAM_C2D_RESPONSE* iothub_ll_device_stream_request_callback(DEVICE_STREAM_C2D_REQUEST* request, void* context)
+{
+    DEVICE_STREAM_C2D_RESPONSE* result;
+
+    // Codes_SRS_IOTHUBCLIENT_09_017: [ If `request` or `context` are `NULL` the function shall fail and return a response rejecting the stream request. ]
+    if (context == NULL || request == NULL)
+    {
+        LogError("Invalid argument (context=%p, request=%p)", context, request);
+        result = request != NULL ? stream_c2d_response_create(request, false) : NULL;
+    }
+    else
+    {
+        IOTHUB_QUEUE_CONTEXT* queue_context = (IOTHUB_QUEUE_CONTEXT*)context;
+
+        // Codes_SRS_IOTHUBCLIENT_09_018: [ The stream request and user context shall be added to the user callback list for async dispatching ]
+        USER_CALLBACK_INFO queue_cb_info;
+        queue_cb_info.type = CALLBACK_TYPE_DEVICE_STREAM;
+        queue_cb_info.userContextCallback = queue_context->userContextCallback;
+        queue_cb_info.iothub_callback.dev_stream_cb_info.request = stream_c2d_request_clone(request);
+
+        if (queue_cb_info.iothub_callback.dev_stream_cb_info.request == NULL)
+        {
+            // Codes_SRS_IOTHUBCLIENT_09_019: [ If the stream request fails to be added to the callback list, the function shall fail and return a response rejecting the stream request. ]
+            LogError("Failed to clone the device stream request");
+            result = stream_c2d_response_create(request, false);
+        }
+        else if (VECTOR_push_back(queue_context->iotHubClientHandle->saved_user_callback_list, &queue_cb_info, 1) != 0)
+        {
+            // Codes_SRS_IOTHUBCLIENT_09_019: [ If the stream request fails to be added to the callback list, the function shall fail and return a response rejecting the stream request. ]
+            LogError("Failed to push the device stream callback into the vector");
+            result = stream_c2d_response_create(request, false);
+            stream_c2d_request_destroy(queue_cb_info.iothub_callback.dev_stream_cb_info.request);
+        }
+        else
+        {
+            // Means it will be provided in an async way, in a separate function call.
+            result = NULL;
+        }
+    }
+
+    return result;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClientCore_SetStreamRequestCallback(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle, DEVICE_STREAM_C2D_REQUEST_CALLBACK streamRequestCallback, void* context)
+{
+    IOTHUB_CLIENT_RESULT result;
+
+    // Codes_SRS_IOTHUBCLIENT_09_001: [ If `iotHubClientHandle` is `NULL` the function shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]
+    if (iotHubClientHandle == NULL)
+    {
+        LogError("Invalid argument (iotHubClientHandle is NULL)");
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    else
+    {
+        IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientInstance = (IOTHUB_CLIENT_CORE_INSTANCE*)iotHubClientHandle;
+
+        // Codes_SRS_IOTHUBCLIENT_09_002: [ `IoTHubClientCore_SetStreamRequestCallback` shall start the worker thread if it was not previously started. ]
+        if ((result = StartWorkerThreadIfNeeded(iotHubClientInstance)) != IOTHUB_CLIENT_OK)
+        {
+            // Codes_SRS_IOTHUBCLIENT_09_003: [ If starting the thread fails, `IoTHubClientCore_SetStreamRequestCallback` shall return `IOTHUB_CLIENT_ERROR`. ]
+            LogError("Could not start worker thread");
+            result = IOTHUB_CLIENT_ERROR;
+        }
+        else
+        {
+            // Codes_SRS_IOTHUBCLIENT_09_004: [ The function shall acquire the lock to make the following block thread-safe. ]
+            if (Lock(iotHubClientInstance->LockHandle) != LOCK_OK)
+            {
+                // Codes_SRS_IOTHUBCLIENT_09_005: [ If acquiring the lock fails, `IoTHubClientCore_SetStreamRequestCallback` shall return `IOTHUB_CLIENT_ERROR`. ]
+                LogError("Could not acquire lock");
+                result = IOTHUB_CLIENT_ERROR;
+            }
+            else
+            {
+                iotHubClientInstance->stream_request_callback = streamRequestCallback;
+
+                if (streamRequestCallback == NULL)
+                {
+                    result = IoTHubClientCore_LL_SetStreamRequestCallback(iotHubClientInstance->IoTHubClientLLHandle, NULL, NULL);
+                    free(iotHubClientInstance->stream_user_context);
+                    iotHubClientInstance->stream_user_context = NULL;
+                }
+                else
+                {
+                    IOTHUB_QUEUE_CONTEXT* previous_user_context = iotHubClientInstance->stream_user_context;
+                    iotHubClientInstance->stream_user_context = (IOTHUB_QUEUE_CONTEXT*)malloc(sizeof(IOTHUB_QUEUE_CONTEXT));
+                    
+                    if (iotHubClientInstance->stream_user_context == NULL)
+                    {
+                        LogError("Failed allocating QUEUE_CONTEXT");
+                        result = IOTHUB_CLIENT_ERROR;
+                    }
+                    else
+                    {
+                        iotHubClientInstance->stream_user_context->iotHubClientHandle = iotHubClientHandle;
+                        iotHubClientInstance->stream_user_context->userContextCallback = context;
+
+                        // Codes_SRS_IOTHUBCLIENT_09_006: [ `IoTHubClientCore_SetStreamRequestCallback` shall call `IoTHubClient_LL_SetStreamRequestCallback`, passing the `iothub_ll_device_stream_request_callback` ]
+                        result = IoTHubClientCore_LL_SetStreamRequestCallback(iotHubClientInstance->IoTHubClientLLHandle, iothub_ll_device_stream_request_callback, iotHubClientInstance->stream_user_context);
+
+                        if (result != IOTHUB_CLIENT_OK)
+                        {
+                            LogError("IoTHubClientCore_LL_SetStreamRequestCallback failed");
+                            free(iotHubClientInstance->stream_user_context);
+                            iotHubClientInstance->stream_user_context = previous_user_context;
+                        }
+                        else if (previous_user_context != NULL)
+                        {
+                            free(previous_user_context);
+                        }
+                    }
+                }
+
+                // Codes_SRS_IOTHUBCLIENT_09_008: [ `IoTHubClientCore_SetStreamRequestCallback` shall release the thread lock. ]
+                if (Unlock(iotHubClientInstance->LockHandle) != LOCK_OK)
+                {
+                    LogError("Failed to release lock");
+                }
+            }
+        }
+    }
+
+    // Codes_SRS_IOTHUBCLIENT_09_007: [ `IoTHubClientCore_SetStreamRequestCallback` shall return the result of `IoTHubClientCore_LL_SetStreamRequestCallback`. ]
+    return result;
+}

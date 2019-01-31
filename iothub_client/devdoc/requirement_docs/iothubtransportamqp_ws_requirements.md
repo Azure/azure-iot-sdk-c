@@ -37,6 +37,7 @@ static const TRANSPORT_PROVIDER* AMQP_Protocol_over_WebSocketsTls(void);
     - IoTHubTransportAMQP_WS_Subscribe,
     - IoTHubTransportAMQP_WS_Unsubscribe,
     - IoTHubTransportAMQP_WS_DoWork,
+	- IoTHubTransportAMQP_WS_SetStreamRequestCallback,
     - IoTHubTransportAMQP_WS_GetSendStatus,
     - IotHubTransportAMQP_WS_Subscribe_InputQueue,
     - IotHubTransportAMQP_WS_Unsubscribe_InputQueue
@@ -214,6 +215,24 @@ static void IoTHubTransportAMQP_WS_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLI
 ```
 
 **SRS_IOTHUBTRANSPORTAMQP_WS_09_015: [**IoTHubTransportAMQP_WS_DoWork shall call into the IoTHubTransport_AMQP_Common_DoWork()**]**
+
+
+## IoTHubTransportAMQP_WS_SetStreamRequestCallback
+
+```c
+static int IoTHubTransportAMQP_WS_SetStreamRequestCallback(IOTHUB_DEVICE_HANDLE handle, DEVICE_STREAM_C2D_REQUEST_CALLBACK streamRequestCallback, const void* context)
+```
+
+**SRS_IOTHUBTRANSPORTAMQP_09_023: [**IoTHubTransportAMQP_WS_SetStreamRequestCallback shall call into the IoTHubTransport_AMQP_Common_SetStreamRequestCallback()**]**
+
+
+## IoTHubTransportAMQP_WS_SendStreamResponse
+
+```c
+static int IoTHubTransportAMQP_WS_SendStreamResponse(IOTHUB_DEVICE_HANDLE handle, DEVICE_STREAM_C2D_RESPONSE* response)
+```
+
+**SRS_IOTHUBTRANSPORTAMQP_09_024: [**IoTHubTransportAMQP_WS_SendStreamResponse shall call into the IoTHubTransport_AMQP_Common_SendStreamResponse()**]**
 
 
 ## IoTHubTransportAMQP_WS_GetSendStatus
