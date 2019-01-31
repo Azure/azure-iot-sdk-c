@@ -451,7 +451,7 @@ static CONSTBUFFER_HANDLE my_CONSTBUFFER_Create(const unsigned char* source, siz
     return (CONSTBUFFER_HANDLE)my_gballoc_malloc(1);
 }
 
-static void my_CONSTBUFFER_Destroy(CONSTBUFFER_HANDLE constbufferHandle)
+static void my_CONSTBUFFER_DecRef(CONSTBUFFER_HANDLE constbufferHandle)
 {
     my_gballoc_free(constbufferHandle);
 }
@@ -886,7 +886,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(CONSTBUFFER_Create, my_CONSTBUFFER_Create);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(CONSTBUFFER_Create, NULL);
 
-    REGISTER_GLOBAL_MOCK_HOOK(CONSTBUFFER_Destroy, my_CONSTBUFFER_Destroy);
+    REGISTER_GLOBAL_MOCK_HOOK(CONSTBUFFER_DecRef, my_CONSTBUFFER_DecRef);
 
     REGISTER_GLOBAL_MOCK_HOOK(STRING_TOKENIZER_create, my_STRING_TOKENIZER_create);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_TOKENIZER_create, NULL);
@@ -4649,7 +4649,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_ReportedStateComplete_succeed)
     STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(CONSTBUFFER_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(CONSTBUFFER_DecRef(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
