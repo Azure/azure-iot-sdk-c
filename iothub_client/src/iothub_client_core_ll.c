@@ -329,7 +329,7 @@ static bool is_event_equal_for_match(LIST_ITEM_HANDLE list_item, const void* mat
 
 static void device_twin_data_destroy(IOTHUB_DEVICE_TWIN* client_item)
 {
-    CONSTBUFFER_Destroy(client_item->report_data_handle);
+    CONSTBUFFER_DecRef(client_item->report_data_handle);
     free(client_item);
 }
 
