@@ -157,7 +157,7 @@ static int retrieve_message_properties(HTTP_HEADERS_HANDLE resp_header, IOTHUB_M
             char* completeHeader;
             if (HTTPHeaders_GetHeader(resp_header, index, &completeHeader) != HTTP_HEADERS_OK)
             {
-                LogError("Failed getting header %lu", index);
+                LogError("Failed getting header %lu", (unsigned long)index);
                 result = __FAILURE__;
                 break;
             }
