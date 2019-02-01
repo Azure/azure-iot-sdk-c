@@ -2689,6 +2689,35 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_GenericMethodInvoke(IOTHUB_CLIENT_CORE_HAN
 }
 #endif /* USE_EDGE_MODULES */
 
+IOTHUB_CLIENT_RESULT IoTHubClientCore_EnablePolicyConfiguration(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle, POLICY_CONFIGURATION_TYPE policyType, bool enablePolicyConfiguration)
+{
+    IOTHUB_CLIENT_RESULT result;
+    if (iotHubClientHandle == NULL)
+    {
+        LogError("Invalid argument (iotHubClientHandle=%p)", iotHubClientHandle);
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    else
+    {
+        IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientInstance = (IOTHUB_CLIENT_CORE_INSTANCE*)iotHubClientHandle;
+        
+        /*Codes_SRS_IOTHUBCLIENT_38_001: [ IoTHubClientCore_EnablePolicyConfiguration shall be made thread-safe by using the lock created in IoTHubClient_Create. ]*/
+        if (Lock(iotHubClientInstance->LockHandle) != LOCK_OK)
+        {
+            /*Codes_SRS_IOTHUBCLIENT_38_002: [ If acquiring the lock fails, IoTHubClientCore_EnablePolicyConfiguration shall return IOTHUB_CLIENT_ERROR. ]*/
+            result = IOTHUB_CLIENT_ERROR;
+            LogError("Could not acquire lock");
+        }
+        else
+        {
+            result = IoTHubClientCore_LL_EnablePolicyConfiguration(iotHubClientHandle->IoTHubClientLLHandle, policyType, enablePolicyConfiguration);
+            (void)Unlock(iotHubClientInstance->LockHandle);
+        }
+    }
+
+    return result;
+}
+
 static DEVICE_STREAM_C2D_RESPONSE* iothub_ll_device_stream_request_callback(DEVICE_STREAM_C2D_REQUEST* request, void* context)
 {
     DEVICE_STREAM_C2D_RESPONSE* result;

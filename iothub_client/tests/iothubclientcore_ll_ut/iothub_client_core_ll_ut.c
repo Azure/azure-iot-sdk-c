@@ -364,6 +364,13 @@ static STRING_HANDLE my_STRING_construct(const char* psz)
     return (STRING_HANDLE)my_gballoc_malloc(1);
 }
 
+int STRING_sprintf(STRING_HANDLE handle, const char* format, ...)
+{
+    (void)handle;
+    (void)format;
+    return 0;
+}
+
 STRING_HANDLE STRING_construct_sprintf(const char* psz, ...)
 {
     (void)psz;
@@ -878,6 +885,9 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Diagnostic_AddIfNecessary, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_Diagnostic_AddIfNecessary, 100);
 
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_DistributedTracing_AddToMessageHeadersIfNecessary, 0);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_DistributedTracing_AddToMessageHeadersIfNecessary, 100);
+
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_Auth_CreateFromDeviceAuth, my_IoTHubClient_Auth_CreateFromDeviceAuth);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_Auth_CreateFromDeviceAuth, NULL);
 
@@ -1062,7 +1072,7 @@ static void setup_IoTHubClientCore_LL_sendeventasync_mocks(bool invoke_tickcount
 
     STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-
+   
     STRICT_EXPECTED_CALL(IoTHubClient_Diagnostic_AddIfNecessary(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
@@ -2272,7 +2282,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendEventAsync_fails)
     umock_c_negative_tests_snapshot();
 
     // act
-    size_t calls_cannot_fail[] = { 4 };
+    size_t calls_cannot_fail[] = { 3, 4, 5 };
     size_t count = umock_c_negative_tests_call_count();
     for (size_t index = 0; index < count; index++)
     {
@@ -2285,7 +2295,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendEventAsync_fails)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubClientCore_LL_Create failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubClientCore_LL_SendEventAsync failure in test %zu/%zu", index, count);
 
         IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SendEventAsync(handle, TEST_MESSAGE_HANDLE, test_event_confirmation_callback, (void*)1);
 
@@ -5476,6 +5486,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_product_info_fails_case1)
     IoTHubClientCore_LL_Destroy(h);
 }
 
+//Deprecated
 /*Tests_SRS_IoTHubClientCore_LL_10_037: [Calling IoTHubClientCore_LL_SetOption with value between [0, 100] shall return `IOTHUB_CLIENT_OK`. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetOption_diag_sampling_percentage_succeeds)
 {
@@ -5495,6 +5506,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_diag_sampling_percentage_succeeds)
     IoTHubClientCore_LL_Destroy(h);
 }
 
+//Deprecated
 /*Tests_SRS_IoTHubClientCore_LL_10_036: [Calling IoTHubClientCore_LL_SetOption with value > 100 shall return `IOTHUB_CLIENT_ERRROR`. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetOption_diag_sampling_percentage_fails)
 {
@@ -5622,7 +5634,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendEventToOutputAsync_fails)
     umock_c_negative_tests_snapshot();
 
     // act
-    size_t calls_cannot_fail[] = { 5 /*DList_InsertTailList*/ };
+    size_t calls_cannot_fail[] = { 4 /*IoTHubClient_DistributedTracing_AddToMessageHeadersIfNecessary*/, 5 /*IoTHubClient_Diagnostic_AddIfNecessary*/, 6 /*DList_InsertTailList*/ };
     size_t count = umock_c_negative_tests_call_count();
     for (size_t index = 0; index < count; index++)
     {
@@ -5635,7 +5647,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendEventToOutputAsync_fails)
         umock_c_negative_tests_fail_call(index);
 
         char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubClientCore_LL_Create failure in test %zu/%zu", index, count);
+        sprintf(tmp_msg, "IoTHubClientCore_LL_SendEventToOutputAsync failure in test %zu/%zu", index, count);
 
         IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SendEventToOutputAsync(handle, TEST_MESSAGE_HANDLE, TEST_OUTPUT_NAME, test_event_confirmation_callback, (void*)1);
 
@@ -6990,5 +7002,44 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateFromEnvironment_set_connection_string_an
 //
 //
 //
+
+// Tests_SRS_IoTHubClientCore_LL_38_004: [ If `iotHubClientHandle` is NULL, `IoTHubClientCore_LL_EnablePolicyConfiguration` shall return IOTHUB_CLIENT_INVALID_ARG. ]
+TEST_FUNCTION(IoTHubClientCore_LL_EnablePolicyConfiguration_with_NULL_iotHubClientHandle_fails)
+{
+    //arrange
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_EnablePolicyConfiguration(NULL, POLICY_CONFIGURATION_DISTRIBUTED_TRACING, true);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+
+    //cleanup
+}
+
+// Tests_SRS_IOTHUBCLIENT_LL_09_012: [ IoTHubClientCore_LL_GetTwinAsync shall invoke IoTHubTransport_GetTwinAsync, passing `on_device_twin_report_received` and the user data as context  ]
+// Tests_SRS_IOTHUBCLIENT_LL_09_014: [ If no errors occur IoTHubClientCore_LL_GetTwinAsync shall return `IOTHUB_CLIENT_OK`. ]
+TEST_FUNCTION(IoTHubClientCore_LL_EnablePolicyConfiguration_succeed)
+{
+    //arrange
+    IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_Subscribe_DeviceTwin(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_GetTwinAsync(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_EnablePolicyConfiguration(h, POLICY_CONFIGURATION_DISTRIBUTED_TRACING, true);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_IS_NOT_NULL(my_FAKE_IoTHubTransport_GetTwinAsync_callbackContext);
+
+    //cleanup
+    IoTHubClientCore_LL_Destroy(h);
+    my_gballoc_free(my_FAKE_IoTHubTransport_GetTwinAsync_callbackContext);
+}
 
 END_TEST_SUITE(iothub_client_core_ll_ut)

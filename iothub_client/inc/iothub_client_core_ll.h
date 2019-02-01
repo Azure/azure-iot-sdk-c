@@ -68,7 +68,8 @@ extern "C"
 #ifdef USE_EDGE_MODULES
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_CORE_LL_HANDLE, IoTHubClientCore_LL_CreateFromEnvironment, IOTHUB_CLIENT_TRANSPORT_PROVIDER, protocol);
 #endif
-
+    
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClientCore_LL_EnablePolicyConfiguration, IOTHUB_CLIENT_CORE_LL_HANDLE, iotHubClientHandle, POLICY_CONFIGURATION_TYPE, policyType, bool, enablePolicyConfiguration);
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClientCore_LL_SetStreamRequestCallback, IOTHUB_CLIENT_CORE_LL_HANDLE, iotHubClientHandle, DEVICE_STREAM_C2D_REQUEST_CALLBACK, streamRequestCallback, void*, context);
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClientCore_LL_SendStreamResponse, IOTHUB_CLIENT_CORE_LL_HANDLE, iotHubClientHandle, DEVICE_STREAM_C2D_RESPONSE*, response);
 
