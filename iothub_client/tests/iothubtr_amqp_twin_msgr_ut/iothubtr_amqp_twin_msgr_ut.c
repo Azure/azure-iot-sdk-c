@@ -264,9 +264,9 @@ extern "C"
 
     CONSTBUFFER_HANDLE real_CONSTBUFFER_Create(const unsigned char* source, size_t size);
     CONSTBUFFER_HANDLE real_CONSTBUFFER_CreateFromBuffer(BUFFER_HANDLE buffer);
-    CONSTBUFFER_HANDLE real_CONSTBUFFER_Clone(CONSTBUFFER_HANDLE constbufferHandle);
+    void real_CONSTBUFFER_IncRef(CONSTBUFFER_HANDLE constbufferHandle);
     const CONSTBUFFER* real_CONSTBUFFER_GetContent(CONSTBUFFER_HANDLE constbufferHandle);
-    void real_CONSTBUFFER_Destroy(CONSTBUFFER_HANDLE constbufferHandle);
+    void real_CONSTBUFFER_DecRef(CONSTBUFFER_HANDLE constbufferHandle);
 
 #ifdef __cplusplus
 }
@@ -453,7 +453,7 @@ static void set_expected_calls_for_twin_messenger_create(TWIN_MESSENGER_CONFIG* 
 static void set_twin_messenger_report_state_async_expected_calls(CONSTBUFFER_HANDLE report, time_t current_time)
 {
     STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(CONSTBUFFER_Clone(report));
+    STRICT_EXPECTED_CALL(CONSTBUFFER_IncRef(report));
     STRICT_EXPECTED_CALL(get_time(NULL))
         .SetReturn(current_time);
     STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
@@ -484,7 +484,7 @@ static void set_process_timeouts_expected_calls(time_t current_time, size_t numb
     for (i = 0; i < number_of_expired_pending_patches; i++)
     {
         STRICT_EXPECTED_CALL(get_difftime(current_time, IGNORED_NUM_ARG)).SetReturn(10000000); // Simulate it's expired for sure.
-        STRICT_EXPECTED_CALL(CONSTBUFFER_Destroy(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(CONSTBUFFER_DecRef(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
     }
 
@@ -622,7 +622,7 @@ static void set_twin_messenger_do_work_expected_calls(DOWORK_TEST_PROFILE* dwtp)
 
             set_send_twin_operation_request_expected_calls(dwtp->current_time);
 
-            STRICT_EXPECTED_CALL(CONSTBUFFER_Destroy(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(CONSTBUFFER_DecRef(IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
 
             dwtp->number_of_pending_patches--;
@@ -667,7 +667,7 @@ static void send_one_report_patch(TWIN_MESSENGER_HANDLE handle, time_t current_t
     set_twin_messenger_report_state_async_expected_calls(report, current_time);
     (void)twin_messenger_report_state_async(handle, report, TEST_on_report_state_complete_callback, NULL);
 
-    real_CONSTBUFFER_Destroy(report);
+    real_CONSTBUFFER_DecRef(report);
 }
 
 static void crank_twin_messenger_do_work(TWIN_MESSENGER_HANDLE handle, TWIN_MESSENGER_CONFIG* config, DOWORK_TEST_PROFILE* dwtp)
@@ -708,8 +708,8 @@ static void register_global_mock_hooks()
     REGISTER_GLOBAL_MOCK_HOOK(malloc, TEST_malloc);
     REGISTER_GLOBAL_MOCK_HOOK(free, TEST_free);
     REGISTER_GLOBAL_MOCK_HOOK(amqp_messenger_create, TEST_amqp_messenger_create);
-    REGISTER_GLOBAL_MOCK_HOOK(CONSTBUFFER_Clone, real_CONSTBUFFER_Clone);
-    REGISTER_GLOBAL_MOCK_HOOK(CONSTBUFFER_Destroy, real_CONSTBUFFER_Destroy);
+    REGISTER_GLOBAL_MOCK_HOOK(CONSTBUFFER_IncRef, real_CONSTBUFFER_IncRef);
+    REGISTER_GLOBAL_MOCK_HOOK(CONSTBUFFER_DecRef, real_CONSTBUFFER_DecRef);
     REGISTER_GLOBAL_MOCK_HOOK(CONSTBUFFER_GetContent, real_CONSTBUFFER_GetContent);
     REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_create, real_singlylinkedlist_create);
     REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_destroy, real_singlylinkedlist_destroy);
@@ -1086,7 +1086,7 @@ TEST_FUNCTION(twin_msgr_report_state_async_NULL_handle)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     // cleanup
-    real_CONSTBUFFER_Destroy(report);
+    real_CONSTBUFFER_DecRef(report);
 }
 
 // Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_022: [If `twin_msgr_handle` or `data` are NULL, twin_messenger_report_state_async() shall fail and return a non-zero value]
@@ -1110,7 +1110,7 @@ TEST_FUNCTION(twin_msgr_report_state_async_NULL_data)
 }
 
 // Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_023: [twin_messenger_report_state_async() shall allocate memory for a TWIN_PATCH_OPERATION_CONTEXT structure (aka `twin_op_ctx`)]
-// Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_025: [`twin_op_ctx` shall have a copy of `data`]
+// Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_025: [`twin_op_ctx` shall increment the reference count for `data` and store it.]
 // Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_027: [`twin_op_ctx->time_enqueued` shall be set using get_time]
 // Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_029: [`twin_op_ctx` shall be added to `twin_msgr->pending_patches` using singlylinkedlist_add()]
 // Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_032: [If no failures occur, twin_messenger_report_state_async() shall return zero]
@@ -1135,12 +1135,11 @@ TEST_FUNCTION(twin_msgr_report_state_async_success)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     // cleanup
-    real_CONSTBUFFER_Destroy(report);
+    real_CONSTBUFFER_DecRef(report);
     twin_messenger_destroy(handle);
 }
 
 // Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_024: [If malloc() fails, twin_messenger_report_state_async() shall fail and return a non-zero value]
-// Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_026: [If `data` fails to be copied, twin_messenger_report_state_async() shall fail and return a non-zero value]
 // Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_028: [If `twin_op_ctx->time_enqueued` fails to be set, twin_messenger_report_state_async() shall fail and return a non-zero value]
 // Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_030: [If singlylinkedlist_add() fails, twin_messenger_report_state_async() shall fail and return a non-zero value]
 // Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_031: [If any failure occurs, twin_messenger_report_state_async() shall free any memory it has allocated]
@@ -1164,21 +1163,24 @@ TEST_FUNCTION(twin_msgr_report_state_async_failure_checks)
     size_t i;
     for (i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
-        // arrange
-        char error_msg[64];
+        if (umock_c_negative_tests_can_call_fail(i))
+        {
+            // arrange
+            char error_msg[64];
 
-        umock_c_negative_tests_reset();
-        umock_c_negative_tests_fail_call(i);
+            umock_c_negative_tests_reset();
+            umock_c_negative_tests_fail_call(i);
 
-        int result = twin_messenger_report_state_async(handle, report, TEST_on_report_state_complete_callback, NULL);
+            int result = twin_messenger_report_state_async(handle, report, TEST_on_report_state_complete_callback, NULL);
 
-        // assert
-        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
-        ASSERT_ARE_NOT_EQUAL(int, 0, result, error_msg);
+            // assert
+            sprintf(error_msg, "On failed call %lu", (unsigned long)i);
+            ASSERT_ARE_NOT_EQUAL(int, 0, result, error_msg);
+        }
     }
 
     // cleanup
-    real_CONSTBUFFER_Destroy(report);
+    real_CONSTBUFFER_DecRef(report);
     twin_messenger_destroy(handle);
     umock_c_negative_tests_deinit();
 }
