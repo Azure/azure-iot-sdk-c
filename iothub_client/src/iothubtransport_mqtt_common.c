@@ -193,6 +193,7 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     bool isRegistered;
     MQTT_CLIENT_STATUS mqttClientStatus;
     bool isDestroyCalled;
+    bool isRetryExpiredCallbackSet;
     bool device_twin_get_sent;
     bool twin_resp_sub_recv;
     bool isRecoverableError;
@@ -2294,32 +2295,40 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
         RETRY_ACTION retry_action = RETRY_ACTION_RETRY_LATER;
 
         // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_007: [ IoTHubTransport_MQTT_Common_DoWork shall try to reconnect according to the current retry policy set ]
-        if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_NOT_CONNECTED && transport_data->isRecoverableError &&
-            (retry_control_should_retry(transport_data->retry_control_handle, &retry_action) != 0 || retry_action == RETRY_ACTION_RETRY_NOW))
+        if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_NOT_CONNECTED && transport_data->isRecoverableError)
         {
             // Note: in case retry_control_should_retry fails, the reconnection shall be attempted anyway (defaulting to policy IOTHUB_CLIENT_RETRY_IMMEDIATE).
-
-            if (tickcounter_get_current_ms(transport_data->msgTickCounter, &transport_data->connectTick) != 0)
+            if(retry_control_should_retry(transport_data->retry_control_handle, &retry_action) != 0 || retry_action == RETRY_ACTION_RETRY_NOW)
             {
-                transport_data->connectFailCount++;
-                result = __FAILURE__;
-            }
-            else
-            {
-                ResetConnectionIfNecessary(transport_data);
-
-                if (SendMqttConnectMsg(transport_data) != 0)
+                if (tickcounter_get_current_ms(transport_data->msgTickCounter, &transport_data->connectTick) != 0)
                 {
                     transport_data->connectFailCount++;
                     result = __FAILURE__;
                 }
                 else
                 {
-                    transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_CONNECTING;
-                    transport_data->connectFailCount = 0;
-                    result = 0;
+                    ResetConnectionIfNecessary(transport_data);
+
+                    if (SendMqttConnectMsg(transport_data) != 0)
+                    {
+                        transport_data->connectFailCount++;
+                        result = __FAILURE__;
+                    }
+                    else
+                    {
+                        transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_CONNECTING;
+                        transport_data->connectFailCount = 0;
+                        result = 0;
+                    }
                 }
-            }
+            }   
+            else if (retry_action == RETRY_ACTION_STOP_RETRYING && transport_data->isRetryExpiredCallbackSet == false)
+            {
+                // Set callback if retry expired
+                transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED, transport_data->transport_ctx);
+                transport_data->isRetryExpiredCallbackSet = true;
+                result = 0;
+            } 
         }
         else if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_EXECUTE_DISCONNECT)
         {
@@ -2530,6 +2539,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                         state->authorization_module = auth_module;
 
                         state->isDestroyCalled = false;
+                        state->isRetryExpiredCallbackSet = false;
                         state->isRegistered = false;
                         state->device_twin_get_sent = false;
                         state->xioTransport = NULL;
