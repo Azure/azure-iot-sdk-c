@@ -600,10 +600,6 @@ static void set_expected_calls_for_Register(IOTHUB_DEVICE_CONFIG* device_config,
     {
         STRICT_EXPECTED_CALL(device_set_option(TEST_DEVICE_HANDLE, DEVICE_OPTION_CBS_REQUEST_TIMEOUT_SECS, IGNORED_PTR_ARG))
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(device_set_option(TEST_DEVICE_HANDLE, DEVICE_OPTION_SAS_TOKEN_LIFETIME_SECS, IGNORED_PTR_ARG))
-            .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(device_set_option(TEST_DEVICE_HANDLE, DEVICE_OPTION_SAS_TOKEN_REFRESH_TIME_SECS, IGNORED_PTR_ARG))
-            .IgnoreArgument(3);
     }
 
     STRICT_EXPECTED_CALL(singlylinkedlist_add(TEST_REGISTERED_DEVICES_LIST, IGNORED_PTR_ARG))

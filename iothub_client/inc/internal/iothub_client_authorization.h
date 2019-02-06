@@ -10,7 +10,9 @@
 
 #ifdef __cplusplus
 extern "C" {
+#include <cstdint>
 #else
+#include <stdint.h>
 #include <stdbool.h>
 #endif /* __cplusplus */
 
@@ -46,6 +48,8 @@ MOCKABLE_FUNCTION(, const char*, IoTHubClient_Auth_Get_ModuleId, IOTHUB_AUTHORIZ
 MOCKABLE_FUNCTION(, const char*, IoTHubClient_Auth_Get_DeviceKey, IOTHUB_AUTHORIZATION_HANDLE, handle);
 MOCKABLE_FUNCTION(, SAS_TOKEN_STATUS, IoTHubClient_Auth_Is_SasToken_Valid, IOTHUB_AUTHORIZATION_HANDLE, handle);
 MOCKABLE_FUNCTION(, int, IoTHubClient_Auth_Get_x509_info, IOTHUB_AUTHORIZATION_HANDLE, handle, char**, x509_cert, char**, x509_key);
+MOCKABLE_FUNCTION(, int, IoTHubClient_Auth_Set_SasToken_Expiry, IOTHUB_AUTHORIZATION_HANDLE, handle, size_t, expiry_time_seconds);
+MOCKABLE_FUNCTION(, size_t, IoTHubClient_Auth_Get_SasToken_Expiry, IOTHUB_AUTHORIZATION_HANDLE, handle);
 
 
 #ifdef USE_EDGE_MODULES

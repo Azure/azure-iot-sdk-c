@@ -1020,7 +1020,7 @@ static bool remove_expired_twin_patch_request(const void* item, const void* matc
                 twin_patch_ctx->on_report_state_complete_callback(TWIN_REPORT_STATE_RESULT_ERROR, TWIN_REPORT_STATE_REASON_TIMEOUT, 0, twin_patch_ctx->on_report_state_complete_context);
             }
 
-            CONSTBUFFER_Destroy(twin_patch_ctx->data);
+            CONSTBUFFER_DecRef(twin_patch_ctx->data);
             free(twin_patch_ctx);
         }
         else
@@ -1181,7 +1181,7 @@ static bool send_pending_twin_patch(const void* item, const void* match_context,
             }
         }
 
-        CONSTBUFFER_Destroy(twin_patch_ctx->data);
+        CONSTBUFFER_DecRef(twin_patch_ctx->data);
         free(twin_patch_ctx);
 
         *continue_processing = true;
@@ -1308,7 +1308,7 @@ static bool cancel_pending_twin_patch_operation(const void* item, const void* ma
             twin_patch_ctx->on_report_state_complete_callback(TWIN_REPORT_STATE_RESULT_CANCELLED, TWIN_REPORT_STATE_REASON_MESSENGER_DESTROYED, 0, twin_patch_ctx->on_report_state_complete_context);
         }
 
-        CONSTBUFFER_Destroy(twin_patch_ctx->data);
+        CONSTBUFFER_DecRef(twin_patch_ctx->data);
         free(twin_patch_ctx);
 
         *continue_processing = true;
@@ -1858,44 +1858,42 @@ int twin_messenger_report_state_async(TWIN_MESSENGER_HANDLE twin_msgr_handle, CO
             LogError("Failed creating context for sending reported state (%s)", twin_msgr->device_id);
             result = __FAILURE__;
         }
-        // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_025: [`twin_op_ctx` shall have a copy of `data`]
-        else if ((twin_patch_ctx->data = CONSTBUFFER_Clone(data)) == NULL)
-        {
-            LogError("Failed cloning TWIN patch request data (%s)", twin_msgr->device_id);
-            // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_031: [If any failure occurs, twin_messenger_report_state_async() shall free any memory it has allocated]
-            free(twin_patch_ctx);
-            // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_026: [If `data` fails to be copied, twin_messenger_report_state_async() shall fail and return a non-zero value]
-            result = __FAILURE__;
-        }
-        // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_027: [`twin_op_ctx->time_enqueued` shall be set using get_time]
-        else if ((twin_patch_ctx->time_enqueued = get_time(NULL)) == INDEFINITE_TIME)
-        {
-            LogError("Failed setting reported state enqueue time (%s)", twin_msgr->device_id);
-            // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_031: [If any failure occurs, twin_messenger_report_state_async() shall free any memory it has allocated]
-            CONSTBUFFER_Destroy(twin_patch_ctx->data);
-            free(twin_patch_ctx);
-            // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_028: [If `twin_op_ctx->time_enqueued` fails to be set, twin_messenger_report_state_async() shall fail and return a non-zero value]
-            result = __FAILURE__;
-        }
         else
         {
-            twin_patch_ctx->on_report_state_complete_callback = on_report_state_complete_callback;
-            twin_patch_ctx->on_report_state_complete_context = context;
+            // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_025: [`twin_op_ctx` shall increment the reference count for `data` and store it.]
+            CONSTBUFFER_IncRef(data);
+            twin_patch_ctx->data = data;
 
-            // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_029: [`twin_op_ctx` shall be added to `twin_msgr->pending_patches` using singlylinkedlist_add()]
-            if (singlylinkedlist_add(twin_msgr->pending_patches, twin_patch_ctx) == NULL)
+            // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_027: [`twin_op_ctx->time_enqueued` shall be set using get_time]
+            if ((twin_patch_ctx->time_enqueued = get_time(NULL)) == INDEFINITE_TIME)
             {
-                LogError("Failed adding TWIN patch request to queue (%s)", twin_msgr->device_id);
+                LogError("Failed setting reported state enqueue time (%s)", twin_msgr->device_id);
                 // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_031: [If any failure occurs, twin_messenger_report_state_async() shall free any memory it has allocated]
-                CONSTBUFFER_Destroy(twin_patch_ctx->data);
+                CONSTBUFFER_DecRef(twin_patch_ctx->data);
                 free(twin_patch_ctx);
-                // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_030: [If singlylinkedlist_add() fails, twin_messenger_report_state_async() shall fail and return a non-zero value]
+                // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_028: [If `twin_op_ctx->time_enqueued` fails to be set, twin_messenger_report_state_async() shall fail and return a non-zero value]
                 result = __FAILURE__;
             }
             else
             {
-                // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_032: [If no failures occur, twin_messenger_report_state_async() shall return zero]
-                result = RESULT_OK;
+                twin_patch_ctx->on_report_state_complete_callback = on_report_state_complete_callback;
+                twin_patch_ctx->on_report_state_complete_context = context;
+
+                // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_029: [`twin_op_ctx` shall be added to `twin_msgr->pending_patches` using singlylinkedlist_add()]
+                if (singlylinkedlist_add(twin_msgr->pending_patches, twin_patch_ctx) == NULL)
+                {
+                    LogError("Failed adding TWIN patch request to queue (%s)", twin_msgr->device_id);
+                    // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_031: [If any failure occurs, twin_messenger_report_state_async() shall free any memory it has allocated]
+                    CONSTBUFFER_DecRef(twin_patch_ctx->data);
+                    free(twin_patch_ctx);
+                    // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_030: [If singlylinkedlist_add() fails, twin_messenger_report_state_async() shall fail and return a non-zero value]
+                    result = __FAILURE__;
+                }
+                else
+                {
+                    // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_032: [If no failures occur, twin_messenger_report_state_async() shall return zero]
+                    result = RESULT_OK;
+                }
             }
         }
     }
