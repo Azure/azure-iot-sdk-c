@@ -25,7 +25,7 @@ This document describes how to prepare your development environment to use the *
 - Clone the latest release of SDK to your local machine using the tag name you found:
 
 ```Shell
-git clone -b <yyyy-mm-dd> --recursive https://github.com/Azure/azure-iot-sdk-c.git
+git clone -b yyyy-mm-dd --recursive https://github.com/Azure/azure-iot-sdk-c.git
 ```
 
 > The `--recursive` argument instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
@@ -165,7 +165,7 @@ This section describes how to set up a development environment for the C SDK on 
 - Clone the latest release of SDK to your local machine using the tag name you found:
 
   ```Shell
-  git clone -b <yyyy-mm-dd> --recursive https://github.com/Azure/azure-iot-sdk-c.git
+  git clone -b yyyy-mm-dd --recursive https://github.com/Azure/azure-iot-sdk-c.git
   ```
 
   > The `--recursive` argument instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
@@ -236,7 +236,7 @@ We've tested the device SDK for C on macOS High Sierra, with XCode version 9.2.
 - Clone the latest release of SDK to your local machine using the tag name you found:
 
   ```Shell
-  git clone -b <yyyy-mm-dd> --recursive https://github.com/Azure/azure-iot-sdk-c.git
+  git clone -b yyyy-mm-dd --recursive https://github.com/Azure/azure-iot-sdk-c.git
   ```
   > The `--recursive` argument instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
 
@@ -367,7 +367,7 @@ The example above assumes curl 7.58 has been compiled and saved into `/usr/local
 - Clone the latest release of SDK to your local machine using the tag name you found:
 
   ```Shell
-  git clone -b <yyyy-mm-dd> --recursive https://github.com/Azure/azure-iot-sdk-c.git
+  git clone -b yyyy-mm-dd --recursive https://github.com/Azure/azure-iot-sdk-c.git
   ```
 
   > The `--recursive` argument instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
