@@ -134,9 +134,7 @@ int twin_messenger_report_state_async(TWIN_TWIN_MESSENGER_HANDLE twin_msgr_handl
 
 **SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_024: [**If malloc() fails, twin_messenger_report_state_async() shall fail and return a non-zero value**]**    
 
-**SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_025: [**`twin_op_ctx` shall have a copy of `data`**]**  
-
-**SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_026: [**If `data` fails to be copied, twin_messenger_report_state_async() shall fail and return a non-zero value**]**    
+**SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_025: [**`twin_op_ctx` shall increment the reference count for `data` and store it.**]**  
 
 **SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_027: [**`twin_op_ctx->time_enqueued` shall be set using get_time**]**    
 
