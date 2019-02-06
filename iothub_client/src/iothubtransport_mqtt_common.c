@@ -2265,6 +2265,7 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 else
                 {
                     transport_data->currPacketState = CONNECT_TYPE;
+                    transport_data->isRetryExpiredCallbackSet = false;
                     (void)tickcounter_get_current_ms(transport_data->msgTickCounter, &transport_data->mqtt_connect_time);
                     result = 0;
                 }
