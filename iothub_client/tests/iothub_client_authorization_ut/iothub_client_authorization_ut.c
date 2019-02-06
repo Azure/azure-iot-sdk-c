@@ -1003,4 +1003,72 @@ TEST_FUNCTION(IoTHubClient_Auth_Is_SasToken_Valid_sas_token_succeed)
     IoTHubClient_Auth_Destroy(handle);
 }
 
+TEST_FUNCTION(IoTHubClient_Auth_Set_SasToken_Expiry_handle_NULL_fail)
+{
+    //arrange
+
+    //act
+    int result = IoTHubClient_Auth_Set_SasToken_Expiry(NULL, 4800);
+
+    //assert
+    ASSERT_ARE_NOT_EQUAL(int, 0, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+}
+
+TEST_FUNCTION(IoTHubClient_Auth_Set_SasToken_Expiry_succeed)
+{
+    size_t expiry_time = 4800;
+
+    //arrange
+    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(NULL, DEVICE_ID, TEST_SAS_TOKEN, NULL);
+    umock_c_reset_all_calls();
+
+    //act
+    int result = IoTHubClient_Auth_Set_SasToken_Expiry(handle, expiry_time);
+
+    //assert
+    ASSERT_ARE_EQUAL(int, 0, result);
+    ASSERT_ARE_EQUAL(size_t, expiry_time, IoTHubClient_Auth_Get_SasToken_Expiry(handle), "Sas Token Expiry time not set correctly");
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubClient_Auth_Destroy(handle);
+}
+
+TEST_FUNCTION(IoTHubClient_Auth_Get_SasToken_Expiry_handle_NULL_fail)
+{
+    //arrange
+
+    //act
+    size_t result = IoTHubClient_Auth_Get_SasToken_Expiry(NULL);
+
+    //assert
+    ASSERT_ARE_EQUAL(size_t, 0, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+}
+
+TEST_FUNCTION(IoTHubClient_Auth_Get_SasToken_Expiry_succeed)
+{
+    size_t expiry_time = 4800;
+
+    //arrange
+    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(NULL, DEVICE_ID, TEST_SAS_TOKEN, NULL);
+    (void)IoTHubClient_Auth_Set_SasToken_Expiry(handle, expiry_time);
+    umock_c_reset_all_calls();
+
+    //act
+    size_t result = IoTHubClient_Auth_Get_SasToken_Expiry(handle);
+
+    //assert
+    ASSERT_ARE_EQUAL(size_t, expiry_time, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubClient_Auth_Destroy(handle);
+}
+
 END_TEST_SUITE(iothub_client_authorization_ut)

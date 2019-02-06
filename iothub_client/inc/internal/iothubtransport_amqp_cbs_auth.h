@@ -12,8 +12,6 @@
 
 static const char* AUTHENTICATION_OPTION_SAVED_OPTIONS = "saved_authentication_options";
 static const char* AUTHENTICATION_OPTION_CBS_REQUEST_TIMEOUT_SECS = "cbs_request_timeout_secs";
-static const char* AUTHENTICATION_OPTION_SAS_TOKEN_REFRESH_TIME_SECS = "sas_token_refresh_time_secs";
-static const char* AUTHENTICATION_OPTION_SAS_TOKEN_LIFETIME_SECS = "sas_token_lifetime_secs";
 
 #ifdef __cplusplus
 extern "C"

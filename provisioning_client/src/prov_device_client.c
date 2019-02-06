@@ -13,18 +13,23 @@
 #include "azure_prov_client/prov_device_client.h"
 #include "azure_c_shared_utility/vector.h"
 
+#define DO_WORK_FREQ_DEFAULT 1
+
+static const char* const OPTION_DO_WORK_FREQUENCY_IN_MS = "do_work_freq_ms";
+
 typedef struct PROV_DEVICE_INSTANCE_TAG
 {
     PROV_DEVICE_LL_HANDLE ProvDeviceLLHandle;
     THREAD_HANDLE ThreadHandle;
     LOCK_HANDLE LockHandle;
     sig_atomic_t StopThread;
+    uint16_t do_work_freq_ms;
 } PROV_DEVICE_INSTANCE;
 
 static int ScheduleWork_Thread(void* threadArgument)
 {
     PROV_DEVICE_INSTANCE* prov_device_instance = (PROV_DEVICE_INSTANCE*)threadArgument;
-
+    uint16_t sleeptime_in_ms = DO_WORK_FREQ_DEFAULT;
     while (1)
     {
         if (Lock(prov_device_instance->LockHandle) == LOCK_OK)
@@ -37,6 +42,7 @@ static int ScheduleWork_Thread(void* threadArgument)
             else
             {
                 Prov_Device_LL_DoWork(prov_device_instance->ProvDeviceLLHandle);
+                sleeptime_in_ms = prov_device_instance->do_work_freq_ms; // Update the sleepval within the locked thread. 
                 (void)Unlock(prov_device_instance->LockHandle);
             }
         }
@@ -44,7 +50,7 @@ static int ScheduleWork_Thread(void* threadArgument)
         {
             LogError("Lock failed, shall retry");
         }
-        (void)ThreadAPI_Sleep(1);
+        (void)ThreadAPI_Sleep(sleeptime_in_ms);
     }
 
     ThreadAPI_Exit(0);
@@ -95,6 +101,7 @@ PROV_DEVICE_HANDLE Prov_Device_Create(const char* uri, const char* id_scope, PRO
         }
         else
         {
+            memset(result, 0, sizeof(PROV_DEVICE_INSTANCE) );
             /* Codes_SRS_PROV_DEVICE_CLIENT_12_004: [ The function shall initialize the Lock. ] */
             result->LockHandle = Lock_Init();
             if (result->LockHandle == NULL)
@@ -111,6 +118,7 @@ PROV_DEVICE_HANDLE Prov_Device_Create(const char* uri, const char* id_scope, PRO
                 /* Codes_SRS_PROV_DEVICE_CLIENT_12_007: [ The function shall initialize the result datastructure. ] */
                 result->ThreadHandle = NULL;
                 result->StopThread = 0;
+                result->do_work_freq_ms = DO_WORK_FREQ_DEFAULT;
             }
         }
     }
@@ -214,19 +222,46 @@ PROV_DEVICE_RESULT Prov_Device_SetOption(PROV_DEVICE_HANDLE prov_device_handle, 
     PROV_DEVICE_RESULT result;
 
     /* Codes_SRS_PROV_DEVICE_CLIENT_12_022: [ If any of the input parameter is NULL `Prov_Device_SetOption` shall return with invalid argument error. ] */
-    if (prov_device_handle == NULL || optionName == NULL || value == NULL)
+    if (
+        (prov_device_handle == NULL) || 
+        (optionName == NULL) || 
+        (value == NULL)
+        )
     {
-        LogError("Invalid parameter specified prov_device_handle: %p, optionName: %p, value: %p", prov_device_handle, optionName, value);
         result = PROV_DEVICE_RESULT_INVALID_ARG;
+        LogError("Invalid parameter specified prov_device_handle: %p, optionName: %p, value: %p", prov_device_handle, optionName, value);
     }
-    else
+    else 
     {
         /* Codes_SRS_PROV_DEVICE_CLIENT_12_023: [ The function shall call the LL layer Prov_Device_LL_SetOption with the given parameters and return with the result. ] */
         PROV_DEVICE_INSTANCE* prov_device_instance = (PROV_DEVICE_INSTANCE*)prov_device_handle;
 
-        result = Prov_Device_LL_SetOption(prov_device_instance->ProvDeviceLLHandle, optionName, value);
+        /* Codes_SRS_PROV_DEVICE_CLIENT_41_002: [ `Prov_Device_SetOption` shall be made thread-safe by using the lock created in `Prov_Device_Create`. ] */
+        if (Lock(prov_device_instance->LockHandle) != LOCK_OK)
+        {
+            /* Codes_SRS_PROV_DEVICE_CLIENT_41_003: [ If acquiring the lock fails, `Prov_Device_SetOption` shall return `IOTHUB_CLIENT_ERROR`. ] */
+            result = PROV_DEVICE_RESULT_ERROR;
+            LogError("Could not acquire lock");
+        }
+        else 
+        {
+            /* Codes_SRS_PROV_DEVICE_CLIENT_41_001: [ If parameter `optionName` is `OPTION_DO_WORK_FREQUENCY_IN_MS` then `IoTHubClientCore_SetOption` shall set `do_work_freq_ms` parameter of `prov_device_instance` ] */
+            if (strcmp(OPTION_DO_WORK_FREQUENCY_IN_MS, optionName) == 0)
+            {
+                prov_device_instance->do_work_freq_ms = *((uint16_t *)value);
+                result = PROV_DEVICE_RESULT_OK;  
+            }
+            else 
+            {
+                result = Prov_Device_LL_SetOption(prov_device_instance->ProvDeviceLLHandle, optionName, value);
+                if (result != PROV_DEVICE_RESULT_OK)
+                {
+                    LogError("Prov_Device_LL_SetOption failed");
+                }
+            }
+            (void)Unlock(prov_device_instance->LockHandle);
+        }
     }
-
     return result;
 }
 

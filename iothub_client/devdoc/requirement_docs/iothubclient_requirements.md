@@ -110,6 +110,8 @@ extern IOTHUB_CLIENT_HANDLE IoTHubClient_Create(const IOTHUB_CLIENT_CONFIG* conf
 
 **SRS_IOTHUBCLIENT_01_031: [** If `IoTHubClient_Create` fails, all resources allocated by it shall be freed. **]**
 
+**SRS_IOTHUBCLIENT_41_002: [** `IoTHubClient_Create` shall set `do_work_freq_ms` to the default sleep value of 1 ms **]** 
+
 
 ## IoTHubClient_CreateWithTransport
 
@@ -374,7 +376,16 @@ IoTHubClient_SetOption allows run-time changing of settings of the IoTHubClient.
 **SRS_IOTHUBCLIENT_01_042: [** If acquiring the lock fails, `IoTHubClient_SetOption` shall return `IOTHUB_CLIENT_ERROR`. **]**
 
 Options handled by IoTHubClient_SetOption:
--none.
+
+**SRS_IOTHUBCLIENT_41_001: [** If parameter `optionName` is `OPTION_DO_WORK_FREQUENCY_IN_MS` then `IoTHubClientCore_SetOption` shall set `do_work_freq_ms` parameter of `IoTHubClientInstance` **]** 
+
+**SRS_IOTHUBCLIENT_41_003: [** The value of `OPTION_DO_WORK_FREQUENCY_IN_MS` shall be limited to 100 to follow SDK best practices by not reducing the DoWork frequency below 10 Hz **]** 
+
+**SRS_IOTHUBCLIENT_41_004: [** If `currentMessageTimeout` is not less than `do_work_freq_ms`, `IotHubClientCore_SetOption` shall return `IOTHUB_CLIENT_ERROR` **]**
+
+**SRS_IOTHUBCLIENT_41_005: [** If parameter `optionName` is `OPTION_MESSAGE_TIMEOUT` then `IoTHubClientCore_SetOption` shall set `currentMessageTimeout` parameter of `IoTHubClientInstance` **]** 
+
+**SRS_IOTHUBCLIENT_41_006: [** If parameter `optionName` is `OPTION_MESSAGE_TIMEOUT` then `IoTHubClientCore_SetOption` shall call `IoTHubClientCore_LL_SetOption` passing the same parameters and return what IoTHubClientCore_LL_SetOption returns. **]**
 
 
 ## IoTHubClient_SetDeviceTwinCallback
