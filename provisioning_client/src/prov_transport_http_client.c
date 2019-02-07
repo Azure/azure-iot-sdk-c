@@ -1037,21 +1037,28 @@ int prov_transport_http_set_trace(PROV_DEVICE_TRANSPORT_HANDLE handle, bool trac
     else
     {
         PROV_TRANSPORT_HTTP_INFO* http_info = (PROV_TRANSPORT_HTTP_INFO*)handle;
-        if (http_info->hsm_type == TRANSPORT_HSM_TYPE_X509)
+        if (trace_on)
         {
-            http_info->log_trace = trace_on;
-            if (http_info->http_client != NULL)
+            if (http_info->hsm_type == TRANSPORT_HSM_TYPE_X509)
             {
-                /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_041: [ If the http client is not NULL, prov_transport_http_set_trace shall set the http client log trace function with the specified trace_on flag. ] */
-                (void)uhttp_client_set_trace(http_info->http_client, http_info->log_trace, http_info->log_trace);
+                http_info->log_trace = trace_on;
+                if (http_info->http_client != NULL)
+                {
+                    /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_041: [ If the http client is not NULL, prov_transport_http_set_trace shall set the http client log trace function with the specified trace_on flag. ] */
+                    (void)uhttp_client_set_trace(http_info->http_client, http_info->log_trace, http_info->log_trace);
+                }
+                /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_042: [ On success prov_transport_http_set_trace shall return zero. ] */
+                result = 0;
             }
-            /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_042: [ On success prov_transport_http_set_trace shall return zero. ] */
-            result = 0;
+            else
+            {
+                LogError("Unable to enable logging when not using x509 certificates");
+                result = __FAILURE__;
+            }
         }
         else
         {
-            LogError("Unable to enable logging when not using x509 certificates");
-            result = __FAILURE__;
+            result = 0;
         }
     }
     return result;

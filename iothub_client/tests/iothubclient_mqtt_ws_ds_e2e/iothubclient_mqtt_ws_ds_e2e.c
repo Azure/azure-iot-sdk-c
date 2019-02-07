@@ -5,7 +5,7 @@
 #include "iothubclient_common_ds_e2e.h"
 #include "iothubtransportmqtt.h"
 
-BEGIN_TEST_SUITE(iothubclient_mqtt_ds_e2e)
+BEGIN_TEST_SUITE(iothubclient_mqtt_ws_ds_e2e)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
@@ -27,4 +27,4 @@ TEST_FUNCTION(IoTHub_Reject_Device_Streaming_Request_MQTT_e2e)
     ds_e2e_receive_device_streaming_request(MQTT_Protocol, false);
 }
 
-END_TEST_SUITE(iothubclient_mqtt_ds_e2e)
+END_TEST_SUITE(iothubclient_mqtt_ws_ds_e2e)
