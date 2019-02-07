@@ -122,8 +122,11 @@ int main(void)
         // Set any option that are neccessary.
         // For available options please see the iothub_sdk_options.md documentation
 
+#ifndef SAMPLE_HTTP
+        // Can not set this options in HTTP
         bool traceOn = true;
         IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_LOG_TRACE, &traceOn);
+#endif
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
         // Setting the Trusted Certificate.  This is only necessary on system with without
