@@ -264,7 +264,7 @@ PROV_AUTH_HANDLE prov_auth_create()
         }
         else
         {
-#if defined(HSM_TYPE_SYMM_KEY)
+#if defined(HSM_TYPE_SYMM_KEY) || defined(HSM_AUTH_TYPE_CUSTOM)
             result->sec_type = PROV_AUTH_TYPE_KEY;
             const HSM_CLIENT_KEY_INTERFACE* key_interface = hsm_client_key_interface();
             if ((key_interface == NULL) ||
@@ -650,68 +650,3 @@ char* prov_auth_get_alias_key(PROV_AUTH_HANDLE handle)
     }
     return result;
 }
-
-#if 0
-char* prov_auth_get_signer_cert(PROV_AUTH_HANDLE handle)
-{
-    char* result;
-    if (handle == NULL)
-    {
-        /* Codes_SRS_SECURE_ENCLAVE_CLIENT_07_036: [ If handle or key are NULL prov_auth_get_signer_cert shall return a non-zero value. ] */
-        LogError("Invalid handle parameter");
-        result = NULL;
-    }
-    else if (handle->sec_type != PROV_AUTH_TYPE_X509)
-    {
-        /* Codes_SRS_SECURE_ENCLAVE_CLIENT_07_038: [ If the sec_type is not PROV_AUTH_TYPE_X509, prov_auth_get_signer_cert shall return NULL. ] */
-        LogError("Invalid type for operation");
-        result = NULL;
-    }
-    else
-    {
-        /* Codes_SRS_SECURE_ENCLAVE_CLIENT_07_037: [ prov_auth_get_signer_cert shall import the specified signer cert into the client using hsm_client_get_signer_cert secure enclave function. ] */
-        result = handle->hsm_client_get_signer_cert(handle->sec_dev_handle);
-    }
-    return result;
-}
-
-char* prov_auth_get_root_cert(PROV_AUTH_HANDLE handle)
-{
-    char* result;
-    if (handle == NULL)
-    {
-        LogError("Invalid handle parameter");
-        result = NULL;
-    }
-    else if (handle->sec_type != PROV_AUTH_TYPE_X509)
-    {
-        LogError("Invalid type for operation");
-        result = NULL;
-    }
-    else
-    {
-        result = handle->hsm_client_get_root_cert(handle->sec_dev_handle);
-    }
-    return result;
-}
-
-char* prov_auth_get_root_key(PROV_AUTH_HANDLE handle)
-{
-    char* result;
-    if (handle == NULL)
-    {
-        LogError("Invalid handle parameter");
-        result = NULL;
-    }
-    else if (handle->sec_type != PROV_AUTH_TYPE_X509)
-    {
-        LogError("Invalid type for operation");
-        result = NULL;
-    }
-    else
-    {
-        result = handle->hsm_client_get_root_key(handle->sec_dev_handle);
-    }
-    return result;
-}
-#endif

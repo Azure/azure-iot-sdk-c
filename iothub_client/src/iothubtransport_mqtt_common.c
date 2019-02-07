@@ -972,7 +972,7 @@ static void destroy_device_twin_get_message(MQTT_DEVICE_TWIN_ITEM* msg_entry)
 static MQTT_DEVICE_TWIN_ITEM* create_device_twin_get_message(MQTTTRANSPORT_HANDLE_DATA* transport_data)
 {
     MQTT_DEVICE_TWIN_ITEM* result;
-    
+
     if ((result = (MQTT_DEVICE_TWIN_ITEM*)malloc(sizeof(MQTT_DEVICE_TWIN_ITEM))) == NULL)
     {
         LogError("Failed allocating device twin data.");
@@ -2796,33 +2796,38 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             }
             else
             {
-                size_t sas_token_expiry = IoTHubClient_Auth_Get_SasToken_Expiry(transport_data->authorization_module);
-                if ((current_time - transport_data->mqtt_connect_time) / 1000 > (sas_token_expiry*SAS_REFRESH_MULTIPLIER))
+                IOTHUB_CREDENTIAL_TYPE cred_type = IoTHubClient_Auth_Get_Credential_Type(transport_data->authorization_module);
+                // If the credential type is not an x509 certificate then we shall renew the Sas_Token
+                if (cred_type != IOTHUB_CREDENTIAL_TYPE_X509 && cred_type != IOTHUB_CREDENTIAL_TYPE_X509_ECC)
                 {
-                    /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_058: [ If the sas token has timed out IoTHubTransport_MQTT_Common_DoWork shall disconnect from the mqtt client and destroy the transport information and wait for reconnect. ] */
-                    DisconnectFromClient(transport_data);
+                    size_t sas_token_expiry = IoTHubClient_Auth_Get_SasToken_Expiry(transport_data->authorization_module);
+                    if ((current_time - transport_data->mqtt_connect_time) / 1000 > (sas_token_expiry*SAS_REFRESH_MULTIPLIER))
+                    {
+                        /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_058: [ If the sas token has timed out IoTHubTransport_MQTT_Common_DoWork shall disconnect from the mqtt client and destroy the transport information and wait for reconnect. ] */
+                        DisconnectFromClient(transport_data);
 
-                    transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_EXPIRED_SAS_TOKEN, transport_data->transport_ctx);
-                    transport_data->currPacketState = UNKNOWN_TYPE;
-                    if (transport_data->topic_MqttMessage != NULL)
-                    {
-                        transport_data->topics_ToSubscribe |= SUBSCRIBE_TELEMETRY_TOPIC;
-                    }
-                    if (transport_data->topic_GetState != NULL)
-                    {
-                        transport_data->topics_ToSubscribe |= SUBSCRIBE_GET_REPORTED_STATE_TOPIC;
-                    }
-                    if (transport_data->topic_NotifyState != NULL)
-                    {
-                        transport_data->topics_ToSubscribe |= SUBSCRIBE_NOTIFICATION_STATE_TOPIC;
-                    }
-                    if (transport_data->topic_DeviceMethods != NULL)
-                    {
-                        transport_data->topics_ToSubscribe |= SUBSCRIBE_DEVICE_METHOD_TOPIC;
-                    }
-                    if (transport_data->topic_InputQueue != NULL)
-                    {
-                        transport_data->topics_ToSubscribe |= SUBSCRIBE_INPUT_QUEUE_TOPIC;
+                        transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_EXPIRED_SAS_TOKEN, transport_data->transport_ctx);
+                        transport_data->currPacketState = UNKNOWN_TYPE;
+                        if (transport_data->topic_MqttMessage != NULL)
+                        {
+                            transport_data->topics_ToSubscribe |= SUBSCRIBE_TELEMETRY_TOPIC;
+                        }
+                        if (transport_data->topic_GetState != NULL)
+                        {
+                            transport_data->topics_ToSubscribe |= SUBSCRIBE_GET_REPORTED_STATE_TOPIC;
+                        }
+                        if (transport_data->topic_NotifyState != NULL)
+                        {
+                            transport_data->topics_ToSubscribe |= SUBSCRIBE_NOTIFICATION_STATE_TOPIC;
+                        }
+                        if (transport_data->topic_DeviceMethods != NULL)
+                        {
+                            transport_data->topics_ToSubscribe |= SUBSCRIBE_DEVICE_METHOD_TOPIC;
+                        }
+                        if (transport_data->topic_InputQueue != NULL)
+                        {
+                            transport_data->topics_ToSubscribe |= SUBSCRIBE_INPUT_QUEUE_TOPIC;
+                        }
                     }
                     if (transport_data->topic_StreamsPost != NULL)
                     {
