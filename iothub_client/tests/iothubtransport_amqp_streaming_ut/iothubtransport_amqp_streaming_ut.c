@@ -363,7 +363,7 @@ static void set_expected_calls_for_amqp_streaming_client_create(AMQP_STREAMING_C
 static void set_twin_messenger_report_state_async_expected_calls(CONSTBUFFER_HANDLE report, time_t current_time)
 {
     STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(CONSTBUFFER_Clone(report));
+    STRICT_EXPECTED_CALL(CONSTBUFFER_IncRef(report));
     STRICT_EXPECTED_CALL(get_time(NULL))
         .SetReturn(current_time);
     STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
@@ -456,7 +456,7 @@ static void set_expected_calls_for_process_timeouts(time_t current_time, size_t 
     for (i = 0; i < number_of_expired_pending_patches; i++)
     {
         STRICT_EXPECTED_CALL(get_difftime(current_time, IGNORED_NUM_ARG)).SetReturn(10000000); // Simulate it's expired for sure.
-        STRICT_EXPECTED_CALL(CONSTBUFFER_Destroy(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(CONSTBUFFER_DecRef(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
     }
 
