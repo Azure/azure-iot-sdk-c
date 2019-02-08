@@ -20,6 +20,7 @@
 
 #define DEFAULT_SAS_TOKEN_EXPIRY_TIME_SECS          3600
 #define INDEFINITE_TIME                             ((time_t)(-1))
+#define MIN_SAS_EXPIRY_TIME                         30  // 30 seconds
 
 typedef struct IOTHUB_AUTHORIZATION_DATA_TAG
 {
@@ -153,6 +154,7 @@ IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_CreateFromDeviceAuth(const char* d
         else
         {
             memset(result, 0, sizeof(IOTHUB_AUTHORIZATION_DATA));
+            result->token_expiry_time_sec = DEFAULT_SAS_TOKEN_EXPIRY_TIME_SECS;
 
             result->device_auth_handle = iothub_device_auth_create();
             if (result->device_auth_handle == NULL)
@@ -674,6 +676,12 @@ int IoTHubClient_Auth_Set_SasToken_Expiry(IOTHUB_AUTHORIZATION_HANDLE handle, si
     if (handle == NULL)
     {
         LogError("Invalid handle value handle: NULL");
+        result = __FAILURE__;
+    }
+    // Validate the expiry_time in seconds
+    else if (expiry_time_seconds < MIN_SAS_EXPIRY_TIME)
+    {
+        LogError("Failure setting expiry time below the min value of %lu", (unsigned long)expiry_time_seconds);
         result = __FAILURE__;
     }
     else
