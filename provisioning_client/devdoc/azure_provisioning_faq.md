@@ -45,3 +45,7 @@ For more reading on Symmetric key information please see [Symmetric key concept 
 - Coming soon
 
 For more reading on TPM information please see [TPM Attestation doc](https://docs.microsoft.com/en-us/azure/iot-dps/concepts-tpm-attestation)
+
+## Related documents
+
+[Porting guide for Azure IoT C SDK](https://github.com/Azure/azure-c-shared-utility/blob/master/devdoc/porting_guide.md)
