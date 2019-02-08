@@ -782,7 +782,7 @@ static void on_amqp_connection_state_changed(const void* context, AMQP_CONNECTIO
         if (new_state == AMQP_CONNECTION_STATE_ERROR)
         {
             LogError("Transport received an ERROR from the amqp_connection (state changed %s -> %s); it will be flagged for connection retry.", ENUM_TO_STRING(AMQP_CONNECTION_STATE, previous_state), ENUM_TO_STRING(AMQP_CONNECTION_STATE, new_state));
-
+            transport_instance->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_NO_NETWORK, transport_instance->transport_ctx);
             update_state(transport_instance, AMQP_TRANSPORT_STATE_RECONNECTION_REQUIRED);
         }
         else if (new_state == AMQP_CONNECTION_STATE_OPENED)

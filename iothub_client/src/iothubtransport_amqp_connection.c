@@ -146,17 +146,17 @@ static void on_connection_state_changed(void* context, CONNECTION_STATE new_conn
 
 static void on_cbs_open_complete(void* context, CBS_OPEN_COMPLETE_RESULT open_complete_result)
 {
-    (void)context;
     (void)open_complete_result;
     if (open_complete_result != CBS_OPEN_OK)
     {
         LogError("CBS open failed");
+		update_state((AMQP_CONNECTION_INSTANCE*)context, AMQP_CONNECTION_STATE_ERROR);
     }
 }
 
 static void on_cbs_error(void* context)
 {
-    (void)context;
+    update_state((AMQP_CONNECTION_INSTANCE*)context, AMQP_CONNECTION_STATE_ERROR);
     LogError("CBS Error occured");
 }
 
@@ -271,7 +271,7 @@ static int create_cbs_handle(AMQP_CONNECTION_INSTANCE* instance)
         LogError("Failed to create the CBS connection.");
     }
     // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_031: [`instance->cbs_handle` shall be opened using `cbs_open_async`]
-    else if (cbs_open_async(instance->cbs_handle, on_cbs_open_complete, instance->cbs_handle, on_cbs_error, instance->cbs_handle) != RESULT_OK)
+    else if (cbs_open_async(instance->cbs_handle, on_cbs_open_complete, instance, on_cbs_error, instance) != RESULT_OK)
     {
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_032: [If cbs_open() fails, amqp_connection_create() shall fail and return NULL]
         result = __FAILURE__;
