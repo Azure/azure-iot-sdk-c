@@ -156,7 +156,7 @@ static void on_cbs_open_complete(void* context, CBS_OPEN_COMPLETE_RESULT open_co
 
 static void on_cbs_error(void* context)
 {
-    update_state((AMQP_CONNECTION_INSTANCE*)context, AMQP_CONNECTION_STATE_ERROR);
+	(void)context;
     LogError("CBS Error occured");
 }
 
