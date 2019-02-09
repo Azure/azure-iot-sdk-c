@@ -674,7 +674,7 @@ int IoTHubClient_Auth_Set_SasToken_Expiry(IOTHUB_AUTHORIZATION_HANDLE handle, si
     // Validate the expiry_time in seconds
     else if (expiry_time_seconds < MIN_SAS_EXPIRY_TIME)
     {
-        LogError("Failure setting expiry time to value %lu min value is %lu", (unsigned long)expiry_time_seconds, MIN_SAS_EXPIRY_TIME);
+        LogError("Failure setting expiry time to value %lu min value is %d", (unsigned long)expiry_time_seconds, MIN_SAS_EXPIRY_TIME);
         result = __FAILURE__;
     }
     else
