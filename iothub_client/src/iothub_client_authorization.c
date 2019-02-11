@@ -110,6 +110,8 @@ IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_Create(const char* device_key, con
         {
             /* Codes_SRS_IoTHub_Authorization_07_019: [ On error IoTHubClient_Auth_Create shall return NULL. ] */
             LogError("Failed allocating device_key");
+            free(result->device_id);
+            free(result->module_id);
             free(result);
             result = NULL;
         }
@@ -168,6 +170,8 @@ IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_CreateFromDeviceAuth(const char* d
             if (result->device_auth_handle == NULL)
             {
                 LogError("Failed allocating IOTHUB_AUTHORIZATION_DATA");
+                free(result->device_id);
+                free(result->module_id);
                 free(result);
                 result = NULL;
             }
