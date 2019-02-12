@@ -150,14 +150,15 @@ static void on_cbs_open_complete(void* context, CBS_OPEN_COMPLETE_RESULT open_co
     if (open_complete_result != CBS_OPEN_OK)
     {
         LogError("CBS open failed");
-		update_state((AMQP_CONNECTION_INSTANCE*)context, AMQP_CONNECTION_STATE_ERROR);
+        update_state((AMQP_CONNECTION_INSTANCE*)context, AMQP_CONNECTION_STATE_ERROR);
     }
 }
 
 static void on_cbs_error(void* context)
 {
-	(void)context;
+    (void)context;
     LogError("CBS Error occured");
+    update_state((AMQP_CONNECTION_INSTANCE*)context, AMQP_CONNECTION_STATE_ERROR);
 }
 
 static int create_connection_handle(AMQP_CONNECTION_INSTANCE* instance)
