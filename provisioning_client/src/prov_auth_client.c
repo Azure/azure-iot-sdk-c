@@ -267,7 +267,7 @@ PROV_AUTH_HANDLE prov_auth_create()
         }
 #endif
 #if defined(HSM_TYPE_SYMM_KEY) || defined(HSM_AUTH_TYPE_CUSTOM)
-        if (sec_type == SECURE_DEVICE_TYPE_X509)
+        if (sec_type == SECURE_DEVICE_TYPE_SYMMETRIC_KEY)
         {
             result->sec_type = PROV_AUTH_TYPE_KEY;
             const HSM_CLIENT_KEY_INTERFACE* key_interface = hsm_client_key_interface();
