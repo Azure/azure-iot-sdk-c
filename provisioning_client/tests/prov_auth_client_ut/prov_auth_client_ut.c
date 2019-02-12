@@ -1354,7 +1354,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
 
         //act
         int result = prov_auth_set_registration_id(sec_handle, TEST_REGISTRATION_ID);
-        ASSERT_ARE_EQUAL(char_ptr, 0, result);
+        ASSERT_ARE_EQUAL(int, 0, result);
         result = prov_auth_set_registration_id(sec_handle, TEST_REGISTRATION_ID);
 
         //assert
