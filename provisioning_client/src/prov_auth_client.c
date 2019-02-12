@@ -224,6 +224,7 @@ PROV_AUTH_HANDLE prov_auth_create()
     {
         memset(result, 0, sizeof(PROV_AUTH_INFO) );
         SECURE_DEVICE_TYPE sec_type = prov_dev_security_get_type();
+#if defined(HSM_TYPE_SAS_TOKEN)  || defined(HSM_AUTH_TYPE_CUSTOM)
         if (sec_type == SECURE_DEVICE_TYPE_TPM)
         {
             /* Codes_SRS_PROV_AUTH_CLIENT_07_003: [ prov_auth_create shall validate the specified secure enclave interface to ensure. ] */
@@ -244,7 +245,9 @@ PROV_AUTH_HANDLE prov_auth_create()
                 result = NULL;
             }
         }
-        else if (sec_type == SECURE_DEVICE_TYPE_X509)
+#endif
+#if defined(HSM_TYPE_X509) || defined(HSM_AUTH_TYPE_CUSTOM)
+        if (sec_type == SECURE_DEVICE_TYPE_X509)
         {
             /* Codes_SRS_PROV_AUTH_CLIENT_07_003: [ prov_auth_create shall validate the specified secure enclave interface to ensure. ] */
             result->sec_type = PROV_AUTH_TYPE_X509;
@@ -262,9 +265,10 @@ PROV_AUTH_HANDLE prov_auth_create()
                 result = NULL;
             }
         }
-        else
-        {
+#endif
 #if defined(HSM_TYPE_SYMM_KEY) || defined(HSM_AUTH_TYPE_CUSTOM)
+        if (sec_type == SECURE_DEVICE_TYPE_X509)
+        {
             result->sec_type = PROV_AUTH_TYPE_KEY;
             const HSM_CLIENT_KEY_INTERFACE* key_interface = hsm_client_key_interface();
             if ((key_interface == NULL) ||
@@ -279,13 +283,20 @@ PROV_AUTH_HANDLE prov_auth_create()
                 free(result);
                 result = NULL;
             }
-#else
-            LogError("Invalid secure device type was specified");
-            result = NULL;
-#endif
         }
+#endif
 
-        if (result != NULL)
+        if (result == NULL)
+        {
+            LogError("Error allocating result or else unsupported security type %d", sec_type);
+        }
+        else if (result->hsm_client_create == NULL)
+        {
+            LogError("hsm_client_create is not a valid address");
+            free(result);
+            result = NULL;
+        }
+        else
         {
             /* Codes_SRS_PROV_AUTH_CLIENT_07_004: [ prov_auth_create shall call hsm_client_create on the secure enclave interface. ] */
             if ((result->hsm_client_handle = result->hsm_client_create() ) == NULL)
