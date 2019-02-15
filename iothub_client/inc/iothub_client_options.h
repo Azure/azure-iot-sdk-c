@@ -39,6 +39,7 @@ extern "C"
     static STATIC_VAR_UNUSED const char* OPTION_MESSAGE_TIMEOUT = "messageTimeout";
     static STATIC_VAR_UNUSED const char* OPTION_BLOB_UPLOAD_TIMEOUT_SECS = "blob_upload_timeout_secs";
     static STATIC_VAR_UNUSED const char* OPTION_PRODUCT_INFO = "product_info";
+    static STATIC_VAR_UNUSED const char* OPTION_HSM_CONFIG_DATA = "hsm_config_data";
 
     /*
     * @brief    Turns on automatic URL encoding of message properties + system properties. Only valid for use with MQTT Transport

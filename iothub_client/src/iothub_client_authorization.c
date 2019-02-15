@@ -703,3 +703,31 @@ size_t IoTHubClient_Auth_Get_SasToken_Expiry(IOTHUB_AUTHORIZATION_HANDLE handle)
     }
     return result;
 }
+
+int IoTHubClient_Auth_Set_HSM_Data(IOTHUB_AUTHORIZATION_HANDLE handle, const void* data)
+{
+    int result;
+    if (handle == NULL)
+    {
+        LogError("Invalid handle value handle: NULL");
+        result = MU_FAILURE;
+    }
+#ifdef USE_PROV_MODULE
+    else if (iothub_set_hsm_custom_data(handle->device_auth_handle, data) != 0)
+    {
+        LogError("Failure setting hsm custom data\n");
+        result = MU_FAILURE;
+    }
+    else
+    {
+        result = 0;
+    }
+#else
+    else
+    {
+        LogError("Failed HSM module is not supported");
+        result = MU_FAILURE;
+    }
+#endif
+    return result;
+}

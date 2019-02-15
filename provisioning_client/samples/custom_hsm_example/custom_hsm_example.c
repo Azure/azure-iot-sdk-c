@@ -16,10 +16,6 @@ static const char* const PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----""\n"
 "BASE64 Encoded certificate Here""\n"
 "-----END PRIVATE KEY-----";
 
-// Provided for sample only
-static const char* const SYMMETRIC_KEY = "Symmetric Key value";
-static const char* const REGISTRATION_NAME = "Registration Name";
-
 // Provided for sample only, canned values
 static const unsigned char EK[] = { 0x45, 0x6e, 0x64, 0x6f, 0x72, 0x73, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x6b, 0x65, 0x79, 0x0d, 0x0a };
 static const size_t EK_LEN = sizeof(EK)/sizeof(EK[0]);
@@ -36,8 +32,8 @@ typedef struct CUSTOM_HSM_SAMPLE_INFO_TAG
     size_t ek_length;
     const unsigned char* storage_root_key;
     size_t srk_len;
-    const char* symm_key;
-    const char* registration_name;
+    char* symm_key;
+    char* registration_name;
 } CUSTOM_HSM_SAMPLE_INFO;
 
 int hsm_client_x509_init()
@@ -77,8 +73,8 @@ HSM_CLIENT_HANDLE custom_hsm_create()
         hsm_info->ek_length = EK_LEN;
         hsm_info->storage_root_key = SRK;
         hsm_info->srk_len = SRK_LEN;
-        hsm_info->symm_key = SYMMETRIC_KEY;
-        hsm_info->registration_name = REGISTRATION_NAME;
+        hsm_info->symm_key = NULL;
+        hsm_info->registration_name = NULL;
         result = hsm_info;
     }
     return result;
@@ -90,6 +86,8 @@ void custom_hsm_destroy(HSM_CLIENT_HANDLE handle)
     {
         CUSTOM_HSM_SAMPLE_INFO* hsm_info = (CUSTOM_HSM_SAMPLE_INFO*)handle;
         // Free anything that has been allocated in this module
+        free(hsm_info->registration_name);
+        free(hsm_info->symm_key);
         free(hsm_info);
     }
 }
@@ -339,6 +337,59 @@ char* custom_hsm_get_registration_name(HSM_CLIENT_HANDLE handle)
     return result;
 }
 
+int custom_hsm_set_symm_key_info(HSM_CLIENT_HANDLE handle, const char* reg_name, const char* symm_key)
+{
+    int result;
+    if (handle == NULL)
+    {
+        (void)printf("Invalid handle value specified\r\n");
+        result = __LINE__;
+    }
+    else
+    {
+        // TODO: Malloc the symmetric key for the iothub 
+        // The SDK will call free() this value
+        CUSTOM_HSM_SAMPLE_INFO* hsm_info = (CUSTOM_HSM_SAMPLE_INFO*)handle;
+        size_t reg_len = strlen(reg_name);
+        size_t symm_len = strlen(symm_key);
+        if ((hsm_info->registration_name = (char*)malloc(reg_len + 1)) == NULL)
+        {
+            (void)printf("Failure allocating registration name\r\n");
+            result = __LINE__;
+        }
+        else if ((hsm_info->symm_key = (char*)malloc(symm_len + 1)) == NULL)
+        {
+            (void)printf("Failure allocating symm key\r\n");
+            free(hsm_info->registration_name);
+            result = __LINE__;
+        }
+        else
+        {
+            strcpy(hsm_info->registration_name, reg_name);
+            strcpy(hsm_info->symm_key, symm_key);
+            result = 0;
+        }
+    }
+    return result;
+}
+
+int custom_hsm_set_data(HSM_CLIENT_HANDLE handle, const void* data)
+{
+    int result;
+    if (handle == NULL)
+    {
+        (void)printf("Invalid handle value specified\r\n");
+        result = __LINE__;
+    }
+    else
+    {
+        // Cast to the data and store it as necessary
+        (void)data;
+        result = 0;
+    }
+    return result;
+}
+
 // Defining the v-table for the x509 hsm calls
 static const HSM_CLIENT_X509_INTERFACE x509_interface =
 {
@@ -347,7 +398,8 @@ static const HSM_CLIENT_X509_INTERFACE x509_interface =
     custom_hsm_get_certificate,
     custom_hsm_get_key,
     custom_hsm_get_cryptodev_key,
-    custom_hsm_get_common_name
+    custom_hsm_get_common_name,
+    custom_hsm_set_data
 };
 
 // Defining the v-table for the x509 hsm calls
@@ -358,7 +410,8 @@ static const HSM_CLIENT_TPM_INTERFACE tpm_interface =
     custom_hsm_activate_identity_key,
     custom_hsm_get_endorsement_key,
     custom_hsm_get_storage_root_key,
-    custom_hsm_sign_with_identity
+    custom_hsm_sign_with_identity,
+    custom_hsm_set_data
 };
 
 static const HSM_CLIENT_KEY_INTERFACE symm_key_interface =
@@ -366,7 +419,9 @@ static const HSM_CLIENT_KEY_INTERFACE symm_key_interface =
     custom_hsm_create,
     custom_hsm_destroy,
     custom_hsm_symm_key,
-    custom_hsm_get_registration_name
+    custom_hsm_get_registration_name,
+    custom_hsm_set_symm_key_info,
+    custom_hsm_set_data
 };
 
 const HSM_CLIENT_TPM_INTERFACE* hsm_client_tpm_interface()

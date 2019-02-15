@@ -402,6 +402,41 @@ char* iothub_hsm_get_registry_id(HSM_CLIENT_HANDLE handle)
     return result;
 }
 
+int iothub_hsm_set_symm_key(HSM_CLIENT_HANDLE handle, const char* reg_name, const char* symm_key)
+{
+    int result;
+    if (handle == NULL)
+    {
+        (void)printf("Invalid handle value specified\r\n");
+        result = __LINE__;
+    }
+    else
+    {
+        // TODO: Malloc the symmetric key for the iothub 
+        // The SDK will call free() this value
+        IOTHUB_HSM_IMPL* hsm_impl = (IOTHUB_HSM_IMPL*)handle;
+        result = symm_key_set_symm_key(hsm_impl->key_info, reg_name, symm_key);
+    }
+    return result;
+}
+
+int iothub_hsm_set_data(HSM_CLIENT_HANDLE handle, const void* data)
+{
+    int result;
+    if (handle == NULL)
+    {
+        (void)printf("Invalid handle value specified\r\n");
+        result = __LINE__;
+    }
+    else
+    {
+        // Cast to the data and store it as necessary
+        (void)data;
+        result = 0;
+    }
+    return result;
+}
+
 // Defining the v-table for the x509 hsm calls
 static const HSM_CLIENT_X509_INTERFACE x509_interface =
 {
@@ -409,7 +444,8 @@ static const HSM_CLIENT_X509_INTERFACE x509_interface =
     iothub_hsm_destroy,
     iothub_x509_hsm_get_certificate,
     iothub_x509_hsm_get_alias_key,
-    iothub_hsm_get_common_name
+    iothub_hsm_get_common_name,
+    iothub_hsm_set_data
 };
 
 const HSM_CLIENT_X509_INTERFACE* hsm_client_x509_interface()
@@ -424,7 +460,8 @@ static const HSM_CLIENT_TPM_INTERFACE tpm_interface =
     iothub_tpm_hsm_activate_identity_key,
     iothub_tpm_hsm_get_endorsement_key,
     iothub_tpm_hsm_get_storage_root_key,
-    iothub_tpm_hsm_sign_with_identity
+    iothub_tpm_hsm_sign_with_identity,
+    iothub_hsm_set_data
 };
 
 const HSM_CLIENT_TPM_INTERFACE* hsm_client_tpm_interface()
@@ -438,7 +475,9 @@ static const HSM_CLIENT_KEY_INTERFACE key_interface =
     iothub_hsm_tpm_create,
     iothub_hsm_destroy,
     iothub_hsm_key_symm_key,
-    iothub_hsm_get_registry_id
+    iothub_hsm_get_registry_id,
+    iothub_hsm_set_symm_key,
+    iothub_hsm_set_data
 };
 
 const HSM_CLIENT_KEY_INTERFACE* hsm_client_key_interface()

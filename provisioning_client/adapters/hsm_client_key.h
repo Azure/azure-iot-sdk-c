@@ -20,6 +20,8 @@ MOCKABLE_FUNCTION(, char*, hsm_client_get_symmetric_key, HSM_CLIENT_HANDLE, hand
 MOCKABLE_FUNCTION(, char*, hsm_client_get_registration_name, HSM_CLIENT_HANDLE, handle);
 MOCKABLE_FUNCTION(, int, hsm_client_set_key_info, HSM_CLIENT_HANDLE, handle, const char*, reg_name, const char*, symm_key);
 
+MOCKABLE_FUNCTION(, int, hsm_client_symm_key_set_data, HSM_CLIENT_HANDLE, handle, void*, data);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

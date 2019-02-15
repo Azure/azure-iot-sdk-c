@@ -18,6 +18,8 @@ typedef void* HSM_CLIENT_HANDLE;
 typedef HSM_CLIENT_HANDLE (*HSM_CLIENT_CREATE)();
 typedef void (*HSM_CLIENT_DESTROY)(HSM_CLIENT_HANDLE handle);
 
+typedef int (*HSM_CLIENT_SET_DATA)(HSM_CLIENT_HANDLE handle, const void* data);
+
 // TPM
 typedef int (*HSM_CLIENT_ACTIVATE_IDENTITY_KEY)(HSM_CLIENT_HANDLE handle, const unsigned char* key, size_t key_len);
 typedef int (*HSM_CLIENT_GET_ENDORSEMENT_KEY)(HSM_CLIENT_HANDLE handle, unsigned char** key, size_t* key_len);
@@ -47,6 +49,8 @@ typedef struct HSM_CLIENT_TPM_INTERFACE_TAG
     HSM_CLIENT_GET_ENDORSEMENT_KEY hsm_client_get_ek;
     HSM_CLIENT_GET_STORAGE_ROOT_KEY hsm_client_get_srk;
     HSM_CLIENT_SIGN_WITH_IDENTITY hsm_client_sign_with_identity;
+
+    HSM_CLIENT_SET_DATA hsm_client_set_data;
 } HSM_CLIENT_TPM_INTERFACE;
 
 typedef struct HSM_CLIENT_X509_INTERFACE_TAG
@@ -58,6 +62,8 @@ typedef struct HSM_CLIENT_X509_INTERFACE_TAG
     HSM_CLIENT_GET_ALIAS_KEY hsm_client_get_key;
     HSM_CLIENT_GET_CRYPTODEV_KEY hsm_client_get_cryptodev_key;
     HSM_CLIENT_GET_COMMON_NAME hsm_client_get_common_name;
+
+    HSM_CLIENT_SET_DATA hsm_client_set_data;
 } HSM_CLIENT_X509_INTERFACE;
 
 #ifdef HSM_TYPE_HTTP_EDGE
@@ -78,6 +84,8 @@ typedef struct HSM_CLIENT_KEY_INTERFACE_TAG
     HSM_CLIENT_GET_SYMMETRICAL_KEY hsm_client_get_symm_key;
     HSM_CLIENT_GET_REGISTRATION_NAME hsm_client_get_registration_name;
     HSM_CLIENT_SET_SYMMETRICAL_KEY_INFO hsm_client_set_symm_key_info;
+
+    HSM_CLIENT_SET_DATA hsm_client_set_data;
 } HSM_CLIENT_KEY_INTERFACE;
 
 extern int initialize_hsm_system();

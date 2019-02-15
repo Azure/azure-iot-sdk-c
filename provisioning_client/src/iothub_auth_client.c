@@ -23,6 +23,8 @@ typedef struct IOTHUB_SECURITY_INFO_TAG
 
     HSM_CLIENT_HANDLE hsm_client_handle;
 
+    HSM_CLIENT_SET_DATA hsm_client_set_data;
+
     HSM_CLIENT_CREATE hsm_client_create;
     HSM_CLIENT_DESTROY hsm_client_destroy;
 
@@ -149,6 +151,11 @@ IOTHUB_SECURITY_HANDLE iothub_device_auth_create()
                 free(result);
                 result = NULL;
             }
+            else
+            {
+                // Optional Data
+                result->hsm_client_set_data = tpm_interface->hsm_client_set_data;
+            }
         }
 #endif
 #if defined(HSM_TYPE_X509) || defined(HSM_AUTH_TYPE_CUSTOM)
@@ -170,6 +177,11 @@ IOTHUB_SECURITY_HANDLE iothub_device_auth_create()
                 free(result);
                 result = NULL;
             }
+            else
+            {
+                // Optional Data
+                result->hsm_client_set_data = x509_interface->hsm_client_set_data;
+            }
         }
 #endif
 #if defined(HSM_TYPE_SYMM_KEY) || defined(HSM_AUTH_TYPE_CUSTOM)
@@ -189,6 +201,11 @@ IOTHUB_SECURITY_HANDLE iothub_device_auth_create()
                 LogError("Invalid x509 secure device interface was specified");
                 free(result);
                 result = NULL;
+            }
+            else
+            {
+                // Optional Data
+                result->hsm_client_set_data = key_interface->hsm_client_set_data;
             }
         }
 #endif
@@ -259,6 +276,26 @@ void iothub_device_auth_destroy(IOTHUB_SECURITY_HANDLE handle)
         /* Codes_IOTHUB_DEV_AUTH_07_004: [ iothub_device_auth_destroy shall free all resources associated with the IOTHUB_SECURITY_HANDLE handle ] */
         free(handle);
     }
+}
+
+int iothub_set_hsm_custom_data(IOTHUB_SECURITY_HANDLE handle, const void* custom_data)
+{
+    int result;
+    if (handle == NULL)
+    {
+        LogError("Invalid handle specified");
+        result = MU_FAILURE;
+    }
+    else if (handle->hsm_client_set_data == NULL)
+    {
+        LogError("The hsm client is not accepting a data object");
+        result = MU_FAILURE;
+    }
+    else
+    {
+        result = handle->hsm_client_set_data(handle->hsm_client_handle, custom_data);
+    }
+    return result;
 }
 
 DEVICE_AUTH_TYPE iothub_device_auth_get_type(IOTHUB_SECURITY_HANDLE handle)

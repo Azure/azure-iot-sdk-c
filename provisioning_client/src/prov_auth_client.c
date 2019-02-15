@@ -30,6 +30,8 @@ typedef struct PROV_AUTH_INFO_TAG
     HSM_CLIENT_CREATE hsm_client_create;
     HSM_CLIENT_DESTROY hsm_client_destroy;
 
+    HSM_CLIENT_SET_DATA hsm_client_set_data;
+
     HSM_CLIENT_ACTIVATE_IDENTITY_KEY hsm_client_import_key;
     HSM_CLIENT_GET_ENDORSEMENT_KEY hsm_client_get_endorsement_key;
     HSM_CLIENT_GET_STORAGE_ROOT_KEY hsm_client_get_srk;
@@ -248,6 +250,11 @@ PROV_AUTH_HANDLE prov_auth_create(void)
                 free(result);
                 result = NULL;
             }
+            else
+            {
+                // Optional Data
+                result->hsm_client_set_data = tpm_interface->hsm_client_set_data;
+            }
         }
 #endif
 #if defined(HSM_TYPE_X509) || defined(HSM_AUTH_TYPE_CUSTOM)
@@ -269,6 +276,11 @@ PROV_AUTH_HANDLE prov_auth_create(void)
                 free(result);
                 result = NULL;
             }
+            else
+            {
+                // Optional Data
+                result->hsm_client_set_data = x509_interface->hsm_client_set_data;
+            }
         }
 #endif
 #if defined(HSM_TYPE_SYMM_KEY) || defined(HSM_AUTH_TYPE_CUSTOM)
@@ -287,6 +299,11 @@ PROV_AUTH_HANDLE prov_auth_create(void)
                 LogError("Invalid symmetric key secure device interface was specified");
                 free(result);
                 result = NULL;
+            }
+            else
+            {
+                // Optional Data
+                result->hsm_client_set_data = key_interface->hsm_client_set_data;
             }
         }
 #endif
@@ -334,6 +351,27 @@ void prov_auth_destroy(PROV_AUTH_HANDLE handle)
         free(handle);
     }
 }
+
+int prov_auth_set_hsm_custom_data(PROV_AUTH_HANDLE handle, const void* custom_data)
+{
+    int result;
+    if (handle == NULL)
+    {
+        LogError("Invalid handle specified");
+        result = MU_FAILURE;
+    }
+    else if (handle->hsm_client_set_data == NULL)
+    {
+        LogError("The hsm client is not accepting a data object");
+        result = MU_FAILURE;
+    }
+    else
+    {
+        result = handle->hsm_client_set_data(handle->hsm_client_handle, custom_data);
+    }
+    return result;
+}
+
 
 PROV_AUTH_TYPE prov_auth_get_type(PROV_AUTH_HANDLE handle)
 {

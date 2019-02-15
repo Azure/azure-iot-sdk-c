@@ -16,8 +16,8 @@
 
 typedef struct SYMM_KEY_INFO_TAG
 {
-    char symm_key[64];
-    char reg_id[128];
+    char* symm_key;
+    char* reg_id;
 } SYMM_KEY_INFO;
 
 void initialize_symm_key()
@@ -46,6 +46,8 @@ void symm_key_info_destroy(SYMM_KEY_INFO_HANDLE handle)
 {
     if (handle != NULL)
     {
+        free(handle->reg_id);
+        free(handle->symm_key);
         free(handle);
     }
 }
@@ -76,6 +78,41 @@ const char* symm_key_info_get_reg_id(SYMM_KEY_INFO_HANDLE handle)
     else
     {
         result = handle->reg_id;
+    }
+    return result;
+}
+
+int symm_key_set_symm_key(SYMM_KEY_INFO_HANDLE handle, const char* reg_name, const char* symm_key)
+{
+    int result;
+    if (handle == NULL)
+    {
+        (void)printf("Invalid handle value specified\r\n");
+        result = __LINE__;
+    }
+    else
+    {
+        // TODO: Malloc the symmetric key for the iothub 
+        // The SDK will call free() this value
+        size_t reg_len = strlen(reg_name);
+        size_t symm_len = strlen(symm_key);
+        if ((handle->reg_id = (char*)malloc(reg_len + 1)) == NULL)
+        {
+            (void)printf("Failure allocating registration name\r\n");
+            result = __LINE__;
+        }
+        else if ((handle->symm_key = (char*)malloc(symm_len + 1)) == NULL)
+        {
+            (void)printf("Failure allocating symm key\r\n");
+            free(handle->reg_id);
+            result = __LINE__;
+        }
+        else
+        {
+            strcpy(handle->reg_id, reg_name);
+            strcpy(handle->symm_key, symm_key);
+            result = 0;
+        }
     }
     return result;
 }

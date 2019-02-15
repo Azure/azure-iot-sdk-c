@@ -24,6 +24,8 @@ MOCKABLE_FUNCTION(, int, hsm_client_tpm_get_storage_key, HSM_CLIENT_HANDLE, hand
 MOCKABLE_FUNCTION(, int, hsm_client_tpm_import_key, HSM_CLIENT_HANDLE, handle, const unsigned char*, key, size_t, key_len);
 MOCKABLE_FUNCTION(, int, hsm_client_tpm_sign_data, HSM_CLIENT_HANDLE, handle, const unsigned char*, data, size_t, data_len, unsigned char**, signed_value, size_t*, signed_len);
 
+MOCKABLE_FUNCTION(, int, hsm_client_tpm_set_data, HSM_CLIENT_HANDLE, handle, void*, data);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -1327,6 +1327,18 @@ PROV_DEVICE_RESULT Prov_Device_LL_SetOption(PROV_DEVICE_LL_HANDLE handle, const 
                 }
             }
         }
+        else if (strcmp(PROV_HSM_CONFIG_DATA, option_name) == 0)
+        {
+            if (prov_auth_set_hsm_custom_data(handle->prov_auth_handle, value) != 0)
+            {
+                LogError("Failure setting hsm custom data\n");
+                result = PROV_DEVICE_RESULT_ERROR;
+            }
+            else
+            {
+                result = PROV_DEVICE_RESULT_OK;
+            }
+        }
         else
         {
             if (handle->prov_transport_protocol->prov_transport_set_option(handle->transport_handle, option_name, value) != 0)

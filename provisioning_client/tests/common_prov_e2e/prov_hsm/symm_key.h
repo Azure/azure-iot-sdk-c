@@ -19,6 +19,7 @@ extern "C" {
     extern void symm_key_info_destroy(SYMM_KEY_INFO_HANDLE handle);
     extern const char* symm_key_info_get_key(SYMM_KEY_INFO_HANDLE handle);
     extern const char* symm_key_info_get_reg_id(SYMM_KEY_INFO_HANDLE handle);
+    extern int symm_key_set_symm_key(SYMM_KEY_INFO_HANDLE handle, const char* reg_name, const char* symm_key);
 
 #ifdef __cplusplus
 }

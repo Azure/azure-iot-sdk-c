@@ -2272,6 +2272,18 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetOption(IOTHUB_CLIENT_CORE_LL_HANDLE 
                 result = IOTHUB_CLIENT_OK;
             }
         }
+        else if (strcmp(optionName, OPTION_HSM_CONFIG_DATA) == 0)
+        {
+            if (IoTHubClient_Auth_Set_HSM_Data(handleData->authorization_module, value) != 0)
+            {
+                LogError("Failure setting HSM data");
+                result = IOTHUB_CLIENT_ERROR;
+            }
+            else
+            {
+                result = IOTHUB_CLIENT_OK;
+            }
+        }
         else if (strcmp(optionName, OPTION_DIAGNOSTIC_SAMPLING_PERCENTAGE) == 0)
         {
             uint32_t percentage = *(uint32_t*)value;

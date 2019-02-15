@@ -42,6 +42,7 @@ MOCKABLE_FUNCTION(, void, prov_auth_destroy, PROV_AUTH_HANDLE, handle);
 MOCKABLE_FUNCTION(, PROV_AUTH_TYPE, prov_auth_get_type, PROV_AUTH_HANDLE, handle);
 MOCKABLE_FUNCTION(, char*, prov_auth_get_registration_id, PROV_AUTH_HANDLE, handle);
 MOCKABLE_FUNCTION(, int, prov_auth_set_registration_id, PROV_AUTH_HANDLE, handle, const char*, registration_id);
+MOCKABLE_FUNCTION(, int, prov_auth_set_hsm_custom_data, PROV_AUTH_HANDLE, handle, const void*, custom_data);
 
 // TPM
 MOCKABLE_FUNCTION(, BUFFER_HANDLE, prov_auth_get_endorsement_key, PROV_AUTH_HANDLE, handle);

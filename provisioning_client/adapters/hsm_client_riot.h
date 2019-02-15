@@ -31,6 +31,8 @@ MOCKABLE_FUNCTION(, char*, hsm_client_riot_get_common_name, HSM_CLIENT_HANDLE, h
 
 MOCKABLE_FUNCTION(, char*, hsm_client_riot_create_leaf_cert, HSM_CLIENT_HANDLE, handle, const char*, common_name);
 
+MOCKABLE_FUNCTION(, int, hsm_client_riot_set_data, HSM_CLIENT_HANDLE, handle, void*, data);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

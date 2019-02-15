@@ -214,6 +214,9 @@ int main()
             Prov_Device_LL_SetOption(handle, OPTION_HTTP_PROXY, &http_proxy);
         }
 
+        // Send custom data to the HSM
+        //Prov_Device_LL_SetOption(handle, PROV_HSM_CONFIG_DATA, (void*)0x34567);
+
         Prov_Device_LL_SetOption(handle, PROV_OPTION_LOG_TRACE, &traceOn);
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
         // Setting the Trusted Certificate.  This is only necessary on system with without
@@ -283,6 +286,9 @@ int main()
 
             // Set any option that are neccessary.
             // For available options please see the iothub_sdk_options.md documentation
+
+            // Send custom data to the HSM
+            //IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_HSM_CONFIG_DATA, (void*)0x34567);
 
             IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_LOG_TRACE, &traceOn);
 
