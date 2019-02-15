@@ -1477,6 +1477,13 @@ IOTHUB_CLIENT_CORE_LL_HANDLE IoTHubClientCore_LL_CreateFromConnectionString(cons
                                     break;
                                 }
                             }
+                            else
+                            {
+                                // If we get an unknown token, log it to error stream but do not cause a fatal error.
+                                // Causing an error here would be a breaking-change for existing callers who pass invalid tokens so
+                                // taking no action beyond logging.
+                                LogError("Unknown token <%s> in connection string.  Ignoring error and continuing to parse", s_token);
+                            }
                         }
                     }
                 }
