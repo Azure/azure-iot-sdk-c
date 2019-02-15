@@ -74,7 +74,7 @@ extern char* IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, 
 
 **SRS_IoTHub_Authorization_07_009: [** if `handle` or `scope` are NULL, `IoTHubClient_Auth_Get_SasToken` shall return NULL. **]**
 
-**SRS_IoTHub_Authorization_07_010: [** `IoTHubClient_Auth_Get_SasToken` shall construct the expiration time using the expiry_time_relative_seconds added to epoch time. **]**
+**SRS_IoTHub_Authorization_07_010: [** `IoTHubClient_Auth_Get_SasToken` shall construct the expiration time using the handle->token_expiry_time_sec added to epoch time. **]**
 
 **SRS_IoTHub_Authorization_07_011: [** `IoTHubClient_Auth_Get_SasToken` shall call SASToken_CreateString to construct the sas token. **]**
 
