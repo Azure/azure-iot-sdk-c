@@ -898,8 +898,6 @@ static int send_stream_c2d_response(AMQP_STREAMING_CLIENT* client, DEVICE_STREAM
 static AMQP_MESSENGER_DISPOSITION_RESULT on_amqp_message_received_callback(MESSAGE_HANDLE message, AMQP_MESSENGER_MESSAGE_DISPOSITION_INFO* disposition_info, void* context)
 {
     AMQP_MESSENGER_DISPOSITION_RESULT disposition_result;
-    
-    (void)disposition_info;
 
     // Codes_SRS_IOTHUBTRANSPORT_AMQP_STREAMING_09_048: [If `message` or `context` are NULL, on_amqp_message_received_callback shall return immediately]
     if (message == NULL || context == NULL)
@@ -911,6 +909,8 @@ static AMQP_MESSENGER_DISPOSITION_RESULT on_amqp_message_received_callback(MESSA
     {
         AMQP_STREAMING_CLIENT* streaming_client = (AMQP_STREAMING_CLIENT*)context;
         PARSED_STREAM_INFO parsed_info;
+
+        amqp_messenger_destroy_disposition_info(disposition_info);
 
         if (parse_amqp_message(message, &parsed_info) != 0)
         {

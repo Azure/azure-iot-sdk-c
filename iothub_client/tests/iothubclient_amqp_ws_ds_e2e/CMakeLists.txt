@@ -46,7 +46,7 @@ if(WIN32)
            target_link_libraries(${theseTestsName}_dll
                    iothub_test
                    iothub_client
-                   iothub_client_amqp_transport
+                   iothub_client_amqp_ws_transport
                    iothub_service_client
                    aziotsharedutil
                    rpcrt4
@@ -59,7 +59,7 @@ if(WIN32)
            target_link_libraries(${theseTestsName}_exe
                    iothub_test
                    iothub_client
-                   iothub_client_amqp_transport
+                   iothub_client_amqp_ws_transport
                    iothub_service_client
                    aziotsharedutil
                    rpcrt4
@@ -92,7 +92,7 @@ else()
            target_link_libraries(${theseTestsName}_exe
                    iothub_test
                    iothub_client
-                   iothub_client_amqp_transport
+                   iothub_client_amqp_ws_transport
                    iothub_service_client
                    aziotsharedutil
            )

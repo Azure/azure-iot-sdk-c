@@ -2814,14 +2814,14 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                         {
                             transport_data->topics_ToSubscribe |= SUBSCRIBE_INPUT_QUEUE_TOPIC;
                         }
-                    }
-                    if (transport_data->topic_StreamsPost != NULL)
-                    {
-                        transport_data->topics_ToSubscribe |= SUBSCRIBE_STREAMS_POST_TOPIC;
-                    }
-                    if (transport_data->topic_StreamsResp != NULL)
-                    {
-                        transport_data->topics_ToSubscribe |= SUBSCRIBE_STREAMS_RESP_TOPIC;
+                        if (transport_data->topic_StreamsPost != NULL)
+                        {
+                            transport_data->topics_ToSubscribe |= SUBSCRIBE_STREAMS_POST_TOPIC;
+                        }
+                        if (transport_data->topic_StreamsResp != NULL)
+                        {
+                            transport_data->topics_ToSubscribe |= SUBSCRIBE_STREAMS_RESP_TOPIC;
+                        }
                     }
                 }
             }

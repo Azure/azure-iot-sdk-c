@@ -1330,6 +1330,11 @@ void IoTHubClientCore_Destroy(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle)
         {
             free(iotHubClientInstance->method_user_context);
         }
+        if (iotHubClientInstance->stream_user_context != NULL)
+        {
+            free(iotHubClientInstance->stream_user_context);
+        }
+
         free(iotHubClientInstance);
     }
 }
