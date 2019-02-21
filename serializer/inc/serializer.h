@@ -438,33 +438,33 @@ Actions are discarded, since no marshalling will be done for those when sending 
 #define FIELD_AS_STRING(x,y) memberNames[iMember++] = #y;
 
 #define REFLECTED_LIST_HEAD(name) \
-    static const REFLECTED_DATA_FROM_DATAPROVIDER ALL_REFLECTED(name) = { &C2(REFLECTED_, C1(DEC(__COUNTER__))) };
+    static const REFLECTED_DATA_FROM_DATAPROVIDER ALL_REFLECTED(name) = { &C2(REFLECTED_, C1(CS_DEC(__COUNTER__))) };
 #define REFLECTED_STRUCT(name) \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_STRUCT_TYPE,               &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {0}, {TOSTRING(name)}, {0}, {0}, {0}, {0}} };
+    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_STRUCT_TYPE,               &C2(REFLECTED_, C1(CS_DEC(CS_DEC(__COUNTER__)))), { {0}, {0}, {0}, {TOSTRING(name)}, {0}, {0}, {0}, {0}} };
 #define REFLECTED_FIELD(XstructName, XfieldType, XfieldName) \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_FIELD_TYPE,                &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {0}, {0}, {TOSTRING(XfieldName), TOSTRING(XfieldType), TOSTRING(XstructName)}, {0}, {0}, {0} } };
+    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_FIELD_TYPE,                &C2(REFLECTED_, C1(CS_DEC(CS_DEC(__COUNTER__)))), { {0}, {0}, {0}, {0}, {TOSTRING(XfieldName), TOSTRING(XfieldType), TOSTRING(XstructName)}, {0}, {0}, {0} } };
 #define REFLECTED_MODEL(name) \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_MODEL_TYPE,                &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {0}, {0}, {0}, {0}, {0}, {TOSTRING(name)} } };
+    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_MODEL_TYPE,                &C2(REFLECTED_, C1(CS_DEC(CS_DEC(__COUNTER__)))), { {0}, {0}, {0}, {0}, {0}, {0}, {0}, {TOSTRING(name)} } };
 #define REFLECTED_PROPERTY(type, name, modelName) \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_PROPERTY_TYPE,             &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {0}, {0}, {0}, {TOSTRING(name), TOSTRING(type), Create_AGENT_DATA_TYPE_From_Ptr_##modelName##name, offsetof(modelName, name), sizeof(type), TOSTRING(modelName)}, {0}, {0} } };
+    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_PROPERTY_TYPE,             &C2(REFLECTED_, C1(CS_DEC(CS_DEC(__COUNTER__)))), { {0}, {0}, {0}, {0}, {0}, {TOSTRING(name), TOSTRING(type), Create_AGENT_DATA_TYPE_From_Ptr_##modelName##name, offsetof(modelName, name), sizeof(type), TOSTRING(modelName)}, {0}, {0} } };
 #define REFLECTED_REPORTED_PROPERTY(type, name, modelName) \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_REPORTED_PROPERTY_TYPE,    &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {TOSTRING(name), TOSTRING(type), Create_AGENT_DATA_TYPE_From_Ptr_##modelName##name, offsetof(modelName, name), sizeof(type), TOSTRING(modelName)}, {0}, {0}, {0}, {0}, {0} } };
+    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_REPORTED_PROPERTY_TYPE,    &C2(REFLECTED_, C1(CS_DEC(CS_DEC(__COUNTER__)))), { {0}, {0}, {TOSTRING(name), TOSTRING(type), Create_AGENT_DATA_TYPE_From_Ptr_##modelName##name, offsetof(modelName, name), sizeof(type), TOSTRING(modelName)}, {0}, {0}, {0}, {0}, {0} } };
 
 
 #define REFLECTED_DESIRED_PROPERTY_WITH_ON_DESIRED_PROPERTY_CHANGE(type, name, modelName, COUNTER, onDesiredPropertyChange) \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(COUNTER))) =      { REFLECTION_DESIRED_PROPERTY_TYPE,     &C2(REFLECTED_, C1(DEC(COUNTER))),         { {0}, {onDesiredPropertyChange, DesiredPropertyInitialize_##modelName##name, DesiredPropertyDeinitialize_##modelName##name, TOSTRING(name), TOSTRING(type), (int(*)(const AGENT_DATA_TYPE*, void*))FromAGENT_DATA_TYPE_##type, offsetof(modelName, name), sizeof(type), TOSTRING(modelName)}, {0}, {0}, {0}, {0}, {0}, {0}} };
+    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(COUNTER))) =      { REFLECTION_DESIRED_PROPERTY_TYPE,     &C2(REFLECTED_, C1(CS_DEC(COUNTER))),         { {0}, {onDesiredPropertyChange, DesiredPropertyInitialize_##modelName##name, DesiredPropertyDeinitialize_##modelName##name, TOSTRING(name), TOSTRING(type), (int(*)(const AGENT_DATA_TYPE*, void*))FromAGENT_DATA_TYPE_##type, offsetof(modelName, name), sizeof(type), TOSTRING(modelName)}, {0}, {0}, {0}, {0}, {0}, {0}} };
 
 #define REFLECTED_DESIRED_PROPERTY(type, name, modelName, ...)                                                              \
     IF(COUNT_ARG(__VA_ARGS__),                                                                                              \
         MACRO_UTILS_DELAY(REFLECTED_DESIRED_PROPERTY_WITH_ON_DESIRED_PROPERTY_CHANGE)(type, name, modelName,__COUNTER__, __VA_ARGS__),  \
-        MACRO_UTILS_DELAY(REFLECTED_DESIRED_PROPERTY_WITH_ON_DESIRED_PROPERTY_CHANGE)(type, name, modelName,DEC(__COUNTER__), NULL)     \
+        MACRO_UTILS_DELAY(REFLECTED_DESIRED_PROPERTY_WITH_ON_DESIRED_PROPERTY_CHANGE)(type, name, modelName,CS_DEC(__COUNTER__), NULL)     \
     )                                                                                                                       \
 
 #define REFLECTED_ACTION(name, argc, argv, fn, modelName) \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_ACTION_TYPE,               &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {0}, {0}, {0}, {0}, {TOSTRING(name), argc, argv, fn, TOSTRING(modelName)}, {0}} };
+    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_ACTION_TYPE,               &C2(REFLECTED_, C1(CS_DEC(CS_DEC(__COUNTER__)))), { {0}, {0}, {0}, {0}, {0}, {0}, {TOSTRING(name), argc, argv, fn, TOSTRING(modelName)}, {0}} };
 
 #define REFLECTED_METHOD(name, argc, argv, fn, modelName) \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_METHOD_TYPE,               &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {TOSTRING(name), argc, argv, fn, TOSTRING(modelName)}, {0}, {0}, {0}, {0}, {0}, {0}, {0}} };
+    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_METHOD_TYPE,               &C2(REFLECTED_, C1(CS_DEC(CS_DEC(__COUNTER__)))), { {TOSTRING(name), argc, argv, fn, TOSTRING(modelName)}, {0}, {0}, {0}, {0}, {0}, {0}, {0}} };
 
 
 #define REFLECTED_END_OF_LIST \
@@ -717,8 +717,8 @@ Actions are discarded, since no marshalling will be done for those when sending 
 #define ANOTHERIF11(a,b) b
 #define ANOTHERIF12(a,b) b
 
-#define MAP_PROMOTED_TYPE(X) ANOTHERIF(DEC(COUNT_ARG(PROMOTIONMAP_##X))) (X, KEEP_FIRST(PROMOTIONMAP_##X))
-#define MAP_CAST_TYPE(X) ANOTHERIF(DEC(COUNT_ARG(CASTMAP_##X)))    (EMPTY_TOKEN, KEEP_FIRST(CASTMAP_##X)  )
+#define MAP_PROMOTED_TYPE(X) ANOTHERIF(CS_DEC(COUNT_ARG(PROMOTIONMAP_##X))) (X, KEEP_FIRST(PROMOTIONMAP_##X))
+#define MAP_CAST_TYPE(X) ANOTHERIF(CS_DEC(COUNT_ARG(CASTMAP_##X)))    (EMPTY_TOKEN, KEEP_FIRST(CASTMAP_##X)  )
 
 #define IFCOMMA(N) C2(IFCOMMA_, N)
 #define IFCOMMA_0
