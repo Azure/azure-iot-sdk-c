@@ -2328,8 +2328,12 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 // Set callback if retry expired
                 transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED, transport_data->transport_ctx);
                 transport_data->isRetryExpiredCallbackSet = true;
-                result = 0;
-            } 
+                result = __FAILURE__;
+            }
+            else if (retry_action == RETRY_ACTION_RETRY_LATER)
+            {
+                result = __FAILURE__;
+            }
         }
         else if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_EXECUTE_DISCONNECT)
         {
