@@ -115,6 +115,7 @@ MOCKABLE_FUNCTION(, int, device_send_event_async, AMQP_DEVICE_HANDLE, handle, IO
 MOCKABLE_FUNCTION(, int, device_send_twin_update_async, AMQP_DEVICE_HANDLE, handle, CONSTBUFFER_HANDLE, data, DEVICE_SEND_TWIN_UPDATE_COMPLETE_CALLBACK, on_send_twin_update_complete_callback, void*, context);
 MOCKABLE_FUNCTION(, int, device_subscribe_for_twin_updates, AMQP_DEVICE_HANDLE, handle, DEVICE_TWIN_UPDATE_RECEIVED_CALLBACK, on_device_twin_update_received_callback, void*, context);
 MOCKABLE_FUNCTION(, int, device_unsubscribe_for_twin_updates, AMQP_DEVICE_HANDLE, handle);
+MOCKABLE_FUNCTION(, int, device_get_twin_async, AMQP_DEVICE_HANDLE, handle, DEVICE_TWIN_UPDATE_RECEIVED_CALLBACK, on_device_get_twin_completed_callback, void*, context);
 MOCKABLE_FUNCTION(, int, device_get_send_status, AMQP_DEVICE_HANDLE, handle, DEVICE_SEND_STATUS*, send_status);
 MOCKABLE_FUNCTION(, int, device_subscribe_message, AMQP_DEVICE_HANDLE, handle, ON_DEVICE_C2D_MESSAGE_RECEIVED, on_message_received_callback, void*, context);
 MOCKABLE_FUNCTION(, int, device_unsubscribe_message, AMQP_DEVICE_HANDLE, handle);
@@ -122,6 +123,7 @@ MOCKABLE_FUNCTION(, int, device_send_message_disposition, AMQP_DEVICE_HANDLE, AM
 MOCKABLE_FUNCTION(, int, device_set_retry_policy, AMQP_DEVICE_HANDLE, handle, IOTHUB_CLIENT_RETRY_POLICY, policy, size_t, retry_timeout_limit_in_seconds);
 MOCKABLE_FUNCTION(, int, device_set_option, AMQP_DEVICE_HANDLE, handle, const char*, name, void*, value);
 MOCKABLE_FUNCTION(, OPTIONHANDLER_HANDLE, device_retrieve_options, AMQP_DEVICE_HANDLE, handle);
+
 
 #ifdef __cplusplus
 }

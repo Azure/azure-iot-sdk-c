@@ -68,10 +68,6 @@ static PROV_TRANSPORT_IO_INFO* amqp_transport_io(const char* fqdn, SASL_MECHANIS
         }
         else
         {
-            // provisioning requires tls 1.2
-            int tls_version = 12;
-            xio_setoption(result->transport_handle, OPTION_TLS_VERSION, &tls_version);
-
             if (sasl_mechanism != NULL)
             {
                 const IO_INTERFACE_DESCRIPTION* saslio_interface;

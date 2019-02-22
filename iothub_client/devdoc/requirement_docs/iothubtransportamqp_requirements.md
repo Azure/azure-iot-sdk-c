@@ -25,6 +25,7 @@ static const TRANSPORT_PROVIDER* AMQP_Protocol(void);
     - IoTHubTransportAMQP_Unsubscribe_DeviceMethod,
     - IoTHubTransportAMQP_Subscribe_DeviceTwin,
     - IoTHubTransportAMQP_Unsubscribe_DeviceTwin,
+    - IoTHubTransportAMQP_GetDeviceTwinAsync,
     - IoTHubTransportAMQP_ProcessItem,
     - IoTHubTransportAMQP_GetHostname,
     - IoTHubTransportAMQP_SetOption,
@@ -115,6 +116,15 @@ void IoTHubTransportAMQP_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle)
 ```
 
 **SRS_IOTHUBTRANSPORTAMQP_09_009: [**IoTHubTransportAMQP_Unsubscribe_DeviceTwin shall invoke IoTHubTransport_AMQP_Common_Unsubscribe_DeviceTwin()**]**
+
+
+## IoTHubTransportAMQP_GetDeviceTwinAsync
+
+```c
+IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_GetDeviceTwinAsync(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK completionCallback, void* callbackContext)
+```
+
+**SRS_IOTHUBTRANSPORTAMQP_09_021: [**IoTHubTransportAMQP_GetDeviceTwinAsync shall invoke IoTHubTransport_AMQP_Common_GetDeviceTwinAsync()**]**
 
 
 ## IoTHubTransportAMQP_Subscribe_DeviceMethod

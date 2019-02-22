@@ -51,7 +51,6 @@
 /* Paste in your device connection string  */
 static const char* connectionString = "[device connection string]";
 
-#define MESSAGE_COUNT        5
 static bool g_continueRunning = true;
 int g_interval = 10000;  // 10 sec send interval initially
 static size_t g_message_count_send_confirmations = 0;

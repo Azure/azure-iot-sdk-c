@@ -4,7 +4,7 @@
 
 ## Overview
 
-IoTHubTransport_MQTT_Common is the library that enables communications with the iothub system using the MQTT protocol. 
+IoTHubTransport_MQTT_Common is the library that enables communications with the iothub system using the MQTT protocol.
 
 ## Exposed API
 
@@ -17,6 +17,7 @@ MOCKABLE_FUNCTION(, int, IoTHubTransport_MQTT_Common_Subscribe, IOTHUB_DEVICE_HA
 MOCKABLE_FUNCTION(, void, IoTHubTransport_MQTT_Common_Unsubscribe, IOTHUB_DEVICE_HANDLE, handle);
 MOCKABLE_FUNCTION(, int, IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin, IOTHUB_DEVICE_HANDLE, handle);
 MOCKABLE_FUNCTION(, void, IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin, IOTHUB_DEVICE_HANDLE, handle);
+MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubTransport_MQTT_Common_GetDeviceTwinAsync, IOTHUB_DEVICE_HANDLE, handle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK, completionCallback, void*, callbackContext);
 MOCKABLE_FUNCTION(, int, IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod, IOTHUB_DEVICE_HANDLE, handle);
 MOCKABLE_FUNCTION(, void, IoTHubTransport_MQTT_Common_Unsubscribe_DeviceMethod, IOTHUB_DEVICE_HANDLE, handle);
 MOCKABLE_FUNCTION(, int, IoTHubTransport_MQTT_Common_DeviceMethod_Response, IOTHUB_DEVICE_HANDLE, handle, METHOD_ID, methodId, const unsigned char*, response, size_t, resp_size, int, status_response);
@@ -97,9 +98,9 @@ This function registers a device with the transport.  The MQTT transport only su
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_17_003: [** `IoTHubTransport_MQTT_Common_Register` shall return `NULL` if `deviceId` or `deviceKey` do not match the `deviceId` and `deviceKey` passed in during `IoTHubTransport_MQTT_Common_Create`.**]**
 
-**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_43_001: [** `IoTHubTransport_MQTT_Common_Register` shall return `NULL` if `deviceKey` is `NULL` when credential type is `IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY`.**]**. 
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_43_001: [** `IoTHubTransport_MQTT_Common_Register` shall return `NULL` if `deviceKey` is `NULL` when credential type is `IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY`.**]**.
 
-**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_17_004: [** `IoTHubTransport_MQTT_Common_Register` shall return the `TRANSPORT_LL_HANDLE` as the `IOTHUB_DEVICE_HANDLE`. **]**
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_17_004: [** `IoTHubTransport_MQTT_Common_Register` shall return the `TRANSPORT_LL_HANDLE`. **]**
 
 ### IoTHubTransport_MQTT_Common_Unregister
 
@@ -136,6 +137,20 @@ void IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE han
 **SRS_IOTHUB_MQTT_TRANSPORT_07_049: [** If `subscribe_state` is set to `IOTHUB_DEVICE_TWIN_DESIRED_STATE` then `IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin` shall remove the get state topic from the subscription flag. **]**
 
 **SRS_IOTHUB_MQTT_TRANSPORT_07_050: [** If `subscribe_state` is set to `IOTHUB_DEVICE_TWIN_NOTIFICATION_STATE` then `IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin` shall remove the get state topic from the subscription flag. **]**
+
+### IoTHubTransport_MQTT_Common_GetDeviceTwinAsync
+
+```c
+IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_GetDeviceTwinAsync(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK completionCallback, void* callbackContext)
+```
+
+**SRS_IOTHUB_MQTT_TRANSPORT_09_001: [** If `handle` or `completionCallback` are `NULL` than `IoTHubTransport_MQTT_Common_GetDeviceTwinAsync` shall return IOTHUB_CLIENT_INVALID_ARG. **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_09_002: [** The request shall be queued to be sent when the transport is connected, through DoWork **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_09_003: [** If any failure occurs, IoTHubTransport_MQTT_Common_GetDeviceTwinAsync shall return IOTHUB_CLIENT_ERROR **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_09_004: [** If no failure occurs, IoTHubTransport_MQTT_Common_GetDeviceTwinAsync shall return IOTHUB_CLIENT_OK **]**
 
 ### IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod
 
@@ -294,6 +309,8 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIEN
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_058: [** If the sas token has timed out `IoTHubTransport_MQTT_Common_DoWork` shall disconnect from the mqtt client and destroy the transport information and wait for reconnect. **]**
 
+
+
 ### IoTHubTransport_MQTT_Common_GetSendStatus
 
 ```c
@@ -319,8 +336,6 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SetOption(TRANSPORT_LL_HANDLE h
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_032: [** IoTHubTransport_MQTT_Common_SetOption shall pass down the option to xio_setoption if the option parameter is not a known option string for the MQTT transport.**]**
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_036: [** If the option parameter is set to "keepalive" then the value shall be a int_ptr and the value will determine the mqtt keepalive time that is set for pings.**]**
-
-**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_052: [** If the option parameter is set to "sas_token_lifetime" then the value shall be a size_t_ptr and the value will determine the mqtt sas token lifetime.**]**
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_037: [** If the option parameter is set to supplied int_ptr keepalive is the same value as the existing keepalive then IoTHubTransport_MQTT_Common_SetOption shall do nothing.**]**
 

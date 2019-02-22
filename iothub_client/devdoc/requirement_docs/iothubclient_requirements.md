@@ -41,6 +41,7 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_SetInputMessageCallback(IOTHUB_CLIENT_H
 ## Device Twin
 extern IOTHUB_CLIENT_RESULT IoTHubClient_SetDeviceTwinCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback, void* userContextCallback);
 extern IOTHUB_CLIENT_RESULT IoTHubClient_SendReportedState(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const unsigned char* reportedState, size_t size, uint32_t reportedVersion, uint32_t lastSeenDesiredVersion, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reportedStateCallback, void* userContextCallback);
+extern IOTHUB_CLIENT_RESULT IoTHubClientCore_GetDeviceTwinAsync(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback, void* userContextCallback);
 
 ## IoTHub Methods
 extern IOTHUB_CLIENT_RESULT IoTHubClient_SetDeviceMethodCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_METHOD_CALLBACK_ASYNC deviceMethodCallback, void* userContextCallback);
@@ -105,6 +106,8 @@ extern IOTHUB_CLIENT_HANDLE IoTHubClient_Create(const IOTHUB_CLIENT_CONFIG* conf
 **SRS_IOTHUBCLIENT_01_030: [** If creating the lock fails, then `IoTHubClient_Create` shall return `NULL`. **]**
 
 **SRS_IOTHUBCLIENT_01_031: [** If `IoTHubClient_Create` fails, all resources allocated by it shall be freed. **]**
+
+**SRS_IOTHUBCLIENT_41_002: [** `IoTHubClient_Create` shall set `do_work_freq_ms` to the default sleep value of 1 ms **]** 
 
 
 ## IoTHubClient_CreateWithTransport
@@ -370,7 +373,16 @@ IoTHubClient_SetOption allows run-time changing of settings of the IoTHubClient.
 **SRS_IOTHUBCLIENT_01_042: [** If acquiring the lock fails, `IoTHubClient_SetOption` shall return `IOTHUB_CLIENT_ERROR`. **]**
 
 Options handled by IoTHubClient_SetOption:
--none.
+
+**SRS_IOTHUBCLIENT_41_001: [** If parameter `optionName` is `OPTION_DO_WORK_FREQUENCY_IN_MS` then `IoTHubClientCore_SetOption` shall set `do_work_freq_ms` parameter of `IoTHubClientInstance` **]** 
+
+**SRS_IOTHUBCLIENT_41_003: [** The value of `OPTION_DO_WORK_FREQUENCY_IN_MS` shall be limited to 100 to follow SDK best practices by not reducing the DoWork frequency below 10 Hz **]** 
+
+**SRS_IOTHUBCLIENT_41_004: [** If `currentMessageTimeout` is not less than `do_work_freq_ms`, `IotHubClientCore_SetOption` shall return `IOTHUB_CLIENT_ERROR` **]**
+
+**SRS_IOTHUBCLIENT_41_005: [** If parameter `optionName` is `OPTION_MESSAGE_TIMEOUT` then `IoTHubClientCore_SetOption` shall set `currentMessageTimeout` parameter of `IoTHubClientInstance` **]** 
+
+**SRS_IOTHUBCLIENT_41_006: [** If parameter `optionName` is `OPTION_MESSAGE_TIMEOUT` then `IoTHubClientCore_SetOption` shall call `IoTHubClientCore_LL_SetOption` passing the same parameters and return what IoTHubClientCore_LL_SetOption returns. **]**
 
 
 ## IoTHubClient_SetDeviceTwinCallback
@@ -421,6 +433,29 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_SendReportedState(IOTHUB_CLIENT_HANDLE 
 **SRS_IOTHUBCLIENT_10_021: [** `IoTHubClient_SendReportedState` shall be made thread-safe by using the lock created in IoTHubClient_Create. **]**
 
 **SRS_IOTHUBCLIENT_07_003: [** `IoTHubClient_SendReportedState` shall allocate a IOTHUB_QUEUE_CONTEXT object to be sent to the `IoTHubClient_LL_SendReportedState` function as a user context. **]**
+
+
+## IoTHubClientCore_GetDeviceTwinAsync
+```c
+extern IOTHUB_CLIENT_RESULT IoTHubClientCore_GetDeviceTwinAsync(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback, void* userContextCallback);
+```
+
+`IoTHubClientCore_GetDeviceTwinAsync` retrieves the current complete Device Twin properties from the IoTHub (including Desired and Reported Properties).
+
+**SRS_IOTHUBCLIENT_09_009: [** If `iotHubClientHandle` or `deviceTwinCallback` are `NULL`, `IoTHubClientCore_GetDeviceTwinAsync` shall return `IOTHUB_CLIENT_INVALID_ARG`. **]**
+
+**SRS_IOTHUBCLIENT_09_010: [** The thread that executes the client  I/O shall be started if not running already. **]**
+
+**SRS_IOTHUBCLIENT_09_011: [** If starting the thread fails, `IoTHubClientCore_GetDeviceTwinAsync` shall return `IOTHUB_CLIENT_ERROR`. **]**
+
+**SRS_IOTHUBCLIENT_09_012: [** `IoTHubClientCore_GetDeviceTwinAsync` shall be made thread-safe by using the lock created in IoTHubClient_Create. **]**
+
+**SRS_IOTHUBCLIENT_09_013: [** If acquiring the lock fails, `IoTHubClientCore_GetDeviceTwinAsync` shall return `IOTHUB_CLIENT_ERROR`. **]**
+
+**SRS_IOTHUBCLIENT_09_014: [** `IoTHubClientCore_GetDeviceTwinAsync` shall call `IoTHubClientCore_LL_GetDeviceTwinAsync`, passing the `IoTHubClient_LL handle`, `deviceTwinCallback` and `userContextCallback` as arguments **]**
+
+**SRS_IOTHUBCLIENT_09_015: [** When `IoTHubClientCore_LL_GetDeviceTwinAsync` is called, `IoTHubClientCore_GetDeviceTwinAsync` shall return the result of `IoTHubClientCore_LL_GetDeviceTwinAsync`. **]**
+
 
 
 ## IoTHubClient_SetDeviceMethodCallback

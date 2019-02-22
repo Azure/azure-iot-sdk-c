@@ -89,6 +89,12 @@ typedef struct IOTHUB_MESSAGE_CALLBACK_DATA_TAG
     void* userContextCallback;
 }IOTHUB_MESSAGE_CALLBACK_DATA;
 
+typedef struct GET_TWIN_CONTEXT_TAG
+{
+    IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK callback;
+    void* context;
+} GET_TWIN_CONTEXT;
+
 typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG
 {
     DLIST_ENTRY waitingToSend;
@@ -278,6 +284,7 @@ static void setTransportProtocol(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData, 
     handleData->IoTHubTransport_ProcessItem = protocol->IoTHubTransport_ProcessItem;
     handleData->IoTHubTransport_Subscribe_DeviceTwin = protocol->IoTHubTransport_Subscribe_DeviceTwin;
     handleData->IoTHubTransport_Unsubscribe_DeviceTwin = protocol->IoTHubTransport_Unsubscribe_DeviceTwin;
+    handleData->IoTHubTransport_GetTwinAsync = protocol->IoTHubTransport_GetTwinAsync;
     handleData->IoTHubTransport_Subscribe_DeviceMethod = protocol->IoTHubTransport_Subscribe_DeviceMethod;
     handleData->IoTHubTransport_Unsubscribe_DeviceMethod = protocol->IoTHubTransport_Unsubscribe_DeviceMethod;
     handleData->IoTHubTransport_DeviceMethod_Response = protocol->IoTHubTransport_DeviceMethod_Response;
@@ -322,7 +329,7 @@ static bool is_event_equal_for_match(LIST_ITEM_HANDLE list_item, const void* mat
 
 static void device_twin_data_destroy(IOTHUB_DEVICE_TWIN* client_item)
 {
-    CONSTBUFFER_Destroy(client_item->report_data_handle);
+    CONSTBUFFER_DecRef(client_item->report_data_handle);
     free(client_item);
 }
 
@@ -1110,6 +1117,22 @@ static IOTHUB_DEVICE_TWIN* dev_twin_data_create(IOTHUB_CLIENT_CORE_LL_HANDLE_DAT
         LogError("Failure allocating device twin information");
     }
     return result;
+}
+
+static void on_get_device_twin_completed(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback)
+{
+    if (userContextCallback == NULL)
+    {
+        LogError("Invalid argument (userContextCallback=NULL)");
+    }
+    else
+    {
+        GET_TWIN_CONTEXT* getTwinCtx = (GET_TWIN_CONTEXT*)userContextCallback;
+
+        getTwinCtx->callback(update_state, payLoad, size, getTwinCtx->context);
+
+        free(getTwinCtx);
+    }
 }
 
 static void delete_event(IOTHUB_EVENT_CALLBACK* event_callback)
@@ -1976,7 +1999,7 @@ static void DoTimeouts(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData)
         {
             IOTHUB_MESSAGE_LIST* fullEntry = containingRecord(currentItemInWaitingToSend, IOTHUB_MESSAGE_LIST, entry);
             /*Codes_SRS_IOTHUBCLIENT_LL_02_041: [ If more than value miliseconds have passed since the call to IoTHubClientCore_LL_SendEventAsync then the message callback shall be called with a status code of IOTHUB_CLIENT_CONFIRMATION_TIMEOUT. ]*/
-            if ((fullEntry->ms_timesOutAfter != 0) && (((nowTick - fullEntry->ms_timesOutAfter) / 1000) > fullEntry->message_timeout_value))
+            if ((fullEntry->ms_timesOutAfter != 0) && ((nowTick - fullEntry->ms_timesOutAfter) > fullEntry->message_timeout_value))
             {
                 PDLIST_ENTRY theNext = currentItemInWaitingToSend->Flink; /*need to save the next item, because the below operations are destructive*/
                 DList_RemoveEntryList(currentItemInWaitingToSend);
@@ -2258,6 +2281,20 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetOption(IOTHUB_CLIENT_CORE_LL_HANDLE 
             result = IOTHUB_CLIENT_ERROR;
 #endif /*DONT_USE_UPLOADTOBLOB*/
         }
+        // OPTION_SAS_TOKEN_REFRESH_TIME is, but may be updated in the future
+        // if this becomes necessary
+        else if (strcmp(optionName, OPTION_SAS_TOKEN_REFRESH_TIME) == 0 || strcmp(optionName, OPTION_SAS_TOKEN_LIFETIME) == 0)
+        {
+            if (IoTHubClient_Auth_Set_SasToken_Expiry(handleData->authorization_module, *(size_t*)value) != 0)
+            {
+                LogError("Failed setting the Token Expiry time");
+                result = IOTHUB_CLIENT_ERROR;
+            }
+            else
+            {
+                result = IOTHUB_CLIENT_OK;
+            }
+        }
         else
         {
             // This section is unusual for SetOption calls because it attempts to pass unhandled options
@@ -2363,6 +2400,61 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SendReportedState(IOTHUB_CLIENT_CORE_LL
     }
     return result;
 }
+
+IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_GetTwinAsync(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback, void* userContextCallback)
+{
+    IOTHUB_CLIENT_RESULT result;
+
+    // Codes_SRS_IOTHUBCLIENT_LL_09_011: [ If `iotHubClientHandle` or `deviceTwinCallback` are `NULL`, `IoTHubClientCore_LL_GetTwinAsync` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]
+    if (iotHubClientHandle == NULL || deviceTwinCallback == NULL)
+    {
+        LogError("Invalid argument iothubClientHandle=%p, deviceTwinCallback=%p", iotHubClientHandle, deviceTwinCallback);
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    else
+    {
+        if (iotHubClientHandle->IoTHubTransport_Subscribe_DeviceTwin(iotHubClientHandle->transportHandle) != 0)
+        {
+            LogError("Failure adding device twin data to queue");
+            result = IOTHUB_CLIENT_ERROR;
+        }
+        else
+        {
+            GET_TWIN_CONTEXT* getTwinCtx;
+
+            if ((getTwinCtx = (GET_TWIN_CONTEXT*)malloc(sizeof(GET_TWIN_CONTEXT))) == NULL)
+            {
+                LogError("Failed creating get-twin context");
+                result = IOTHUB_CLIENT_ERROR;
+            }
+            else
+            {
+                IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)iotHubClientHandle;
+
+                getTwinCtx->callback = deviceTwinCallback;
+                getTwinCtx->context = userContextCallback;
+
+                // Codes_SRS_IOTHUBCLIENT_LL_09_012: [ IoTHubClientCore_LL_GetTwinAsync shall invoke IoTHubTransport_GetTwinAsync, passing `on_device_twin_report_received` and the user data as context  ]
+                if (handleData->IoTHubTransport_GetTwinAsync(handleData->deviceHandle, on_get_device_twin_completed, getTwinCtx) != IOTHUB_CLIENT_OK)
+                {
+                    // Codes_SRS_IOTHUBCLIENT_LL_09_013: [ If IoTHubTransport_GetTwinAsync fails, `IoTHubClientCore_LL_GetTwinAsync` shall fail and return `IOTHUB_CLIENT_ERROR`. ]
+                    LogError("Failed getting device twin document");
+                    free(getTwinCtx);
+                    result = IOTHUB_CLIENT_ERROR;
+                }
+                else
+                {
+                    // Codes_SRS_IOTHUBCLIENT_LL_09_014: [ If no errors occur IoTHubClientCore_LL_GetTwinAsync shall return `IOTHUB_CLIENT_OK`. ]
+                    handleData->complete_twin_update_encountered = true;
+                    result = IOTHUB_CLIENT_OK;
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
 
 IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetDeviceMethodCallback(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC deviceMethodCallback, void* userContextCallback)
 {

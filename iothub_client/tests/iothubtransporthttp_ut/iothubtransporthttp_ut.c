@@ -506,6 +506,7 @@ static void* transport_cb_ctx = (void*)0x499922;
 static pfIotHubTransport_SendMessageDisposition         IoTHubTransportHttp_SendMessageDisposition;
 static pfIoTHubTransport_Subscribe_DeviceTwin           IoTHubTransportHttp_Subscribe_DeviceTwin;
 static pfIoTHubTransport_Unsubscribe_DeviceTwin         IoTHubTransportHttp_Unsubscribe_DeviceTwin;
+static pfIoTHubTransport_GetTwinAsync             IoTHubTransportHttp_GetTwinAsync;
 static pfIoTHubTransport_GetHostname                    IoTHubTransportHttp_GetHostname;
 static pfIoTHubTransport_SetOption                      IoTHubTransportHttp_SetOption;
 static pfIoTHubTransport_Create                         IoTHubTransportHttp_Create;
@@ -1308,6 +1309,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     IoTHubTransportHttp_SendMessageDisposition = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_SendMessageDisposition;
     IoTHubTransportHttp_Unsubscribe_DeviceTwin = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_Unsubscribe_DeviceTwin;
     IoTHubTransportHttp_Subscribe_DeviceTwin = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_Subscribe_DeviceTwin;
+    IoTHubTransportHttp_GetTwinAsync = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_GetTwinAsync;
     IoTHubTransportHttp_GetHostname = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_GetHostname;
     IoTHubTransportHttp_SetOption = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_SetOption;
     IoTHubTransportHttp_Create = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_Create;
@@ -13854,8 +13856,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetCustomContentType_SetContentEncoding
 
     STRICT_EXPECTED_CALL(BUFFER_new());
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
-        .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
         IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
         IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
@@ -13964,8 +13965,6 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetMessageId_succeeds)
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_6));
     STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     /*this is making http headers*/
-    STRICT_EXPECTED_CALL(STRING_construct("iothub-app-"));
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, TEST_RED_KEY));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-app-" TEST_RED_KEY, TEST_RED_VALUE));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
@@ -13976,8 +13975,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetMessageId_succeeds)
     EXPECTED_CALL(IoTHubMessage_GetContentTypeSystemProperty(IGNORED_PTR_ARG)).SetReturn(NULL);
     EXPECTED_CALL(IoTHubMessage_GetContentEncodingSystemProperty(IGNORED_PTR_ARG)).SetReturn(NULL);
 
-    STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+
     /*executing HTTP goodies*/
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
@@ -14033,8 +14032,6 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetCorrelationId_succeeds)
     STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
     /*this is making http headers*/
-    STRICT_EXPECTED_CALL(STRING_construct("iothub-app-"));
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, TEST_RED_KEY));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-app-" TEST_RED_KEY, TEST_RED_VALUE));
 
@@ -14046,8 +14043,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetCorrelationId_succeeds)
     EXPECTED_CALL(IoTHubMessage_GetContentTypeSystemProperty(IGNORED_PTR_ARG)).SetReturn(NULL);
     EXPECTED_CALL(IoTHubMessage_GetContentEncodingSystemProperty(IGNORED_PTR_ARG)).SetReturn(NULL);
 
-    STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
 
     /*executing HTTP goodies*/
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
@@ -14110,8 +14106,6 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetCustomContentType_succeeds)
     STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
     /*this is making http headers*/
-    STRICT_EXPECTED_CALL(STRING_construct("iothub-app-"));
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, TEST_RED_KEY));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-app-" TEST_RED_KEY, TEST_RED_VALUE));
 
@@ -14123,8 +14117,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetCustomContentType_succeeds)
     STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-contenttype", TEST_CONTENT_TYPE));
     EXPECTED_CALL(IoTHubMessage_GetContentEncodingSystemProperty(IGNORED_PTR_ARG)).SetReturn(NULL);
 
-    STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
 
     /*executing HTTP goodies*/
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
@@ -14187,8 +14180,6 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetContentEncoding_succeeds)
     STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
     /*this is making http headers*/
-    STRICT_EXPECTED_CALL(STRING_construct("iothub-app-"));
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, TEST_RED_KEY));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-app-" TEST_RED_KEY, TEST_RED_VALUE));
 
@@ -14200,12 +14191,10 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetContentEncoding_succeeds)
     EXPECTED_CALL(IoTHubMessage_GetContentEncodingSystemProperty(IGNORED_PTR_ARG)).SetReturn(TEST_CONTENT_ENCODING);
     STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-contentencoding", TEST_CONTENT_ENCODING));
 
-    STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
 
     /*executing HTTP goodies*/
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); /*because relativePath*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
         IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
         IGNORED_PTR_ARG,
@@ -14308,6 +14297,25 @@ TEST_FUNCTION(IoTHubTransportHttp_Subscribe_DeviceTwin_returns)
     //assert
     ASSERT_ARE_NOT_EQUAL(int, 0, res);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubTransportHttp_Destroy(handle);
+}
+
+// Tests_SRS_TRANSPORTMULTITHTTP_09_005: [ `IoTHubTransportHttp_GetTwinAsync` shall return IOTHUB_CLIENT_ERROR]
+TEST_FUNCTION(IoTHubTransportHttp_GetTwinAsync_returns)
+{
+    //arrange
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_CLIENT_RESULT res = IoTHubTransportHttp_GetTwinAsync(handle, (IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)0x4444, (void*)0x4445);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_ERROR, res);
 
     //cleanup
     IoTHubTransportHttp_Destroy(handle);

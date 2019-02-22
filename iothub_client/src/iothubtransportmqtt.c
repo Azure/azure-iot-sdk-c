@@ -91,6 +91,12 @@ static void IoTHubTransportMqtt_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE hand
     IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin(handle);
 }
 
+static IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_GetTwinAsync(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK completionCallback, void* callbackContext)
+{
+    // Codes_SRS_IOTHUB_MQTT_TRANSPORT_09_001: [ IoTHubTransportMqtt_GetTwinAsync shall call into the IoTHubTransport_MQTT_Common_GetTwinAsync function. ]
+    return IoTHubTransport_MQTT_Common_GetTwinAsync(handle, completionCallback, callbackContext);
+}
+
 /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_023: [ IoTHubTransportMqtt_DeviceMethod_Response shall call into the IoTHubMqttAbstract_DeviceMethod_Response function. ] */
 static int IoTHubTransportMqtt_DeviceMethod_Response(IOTHUB_DEVICE_HANDLE handle, METHOD_HANDLE methodId, const unsigned char* response, size_t response_size, int status_response)
 {
@@ -190,7 +196,8 @@ static TRANSPORT_PROVIDER myfunc =
     IoTHubTransportMqtt_GetSendStatus,              /*pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus;*/
     IotHubTransportMqtt_Subscribe_InputQueue,       /*pfIoTHubTransport_Subscribe_InputQueue IoTHubTransport_Subscribe_InputQueue; */
     IotHubTransportMqtt_Unsubscribe_InputQueue,     /*pfIoTHubTransport_Unsubscribe_InputQueue IoTHubTransport_Unsubscribe_InputQueue; */
-    IotHubTransportMqtt_SetCallbackContext          /*pfIoTHubTransport_SetCallbackContext IoTHubTransport_SetCallbackContext; */
+    IotHubTransportMqtt_SetCallbackContext,         /*pfIoTHubTransport_SetCallbackContext IoTHubTransport_SetCallbackContext; */
+    IoTHubTransportMqtt_GetTwinAsync                /*pfIoTHubTransport_GetTwinAsync IoTHubTransport_GetTwinAsync;*/
 };
 
 /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_022: [This function shall return a pointer to a structure of type TRANSPORT_PROVIDER */

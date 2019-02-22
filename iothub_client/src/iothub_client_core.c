@@ -19,6 +19,11 @@
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/singlylinkedlist.h"
 #include "azure_c_shared_utility/vector.h"
+#include "iothub_client_options.h"
+#include "azure_c_shared_utility/tickcounter.h"
+
+
+#define DO_WORK_FREQ_DEFAULT 1
 
 struct IOTHUB_QUEUE_CONTEXT_TAG;
 
@@ -43,6 +48,8 @@ typedef struct IOTHUB_CLIENT_CORE_INSTANCE_TAG
     struct IOTHUB_QUEUE_CONTEXT_TAG* connection_status_user_context;
     struct IOTHUB_QUEUE_CONTEXT_TAG* message_user_context;
     struct IOTHUB_QUEUE_CONTEXT_TAG* method_user_context;
+    uint16_t do_work_freq_ms;
+    tickcounter_ms_t currentMessageTimeout;
 } IOTHUB_CLIENT_CORE_INSTANCE;
 
 typedef enum HTTPWORKER_THREAD_TYPE_TAG
@@ -106,6 +113,8 @@ typedef struct DEVICE_TWIN_CALLBACK_INFO_TAG
     DEVICE_TWIN_UPDATE_STATE update_state;
     unsigned char* payLoad;
     size_t size;
+    IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK userCallback;
+    void* userContext;
 } DEVICE_TWIN_CALLBACK_INFO;
 
 typedef struct EVENT_CONFIRM_CALLBACK_INFO_TAG
@@ -158,6 +167,18 @@ typedef struct IOTHUB_QUEUE_CONTEXT_TAG
     IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientHandle;
     void* userContextCallback;
 } IOTHUB_QUEUE_CONTEXT;
+
+typedef struct IOTHUB_QUEUE_CONSOLIDATED_CONTEXT_TAG
+{
+    IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientHandle;
+
+    union USER_CALLBACK_TAG
+    { 
+        IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK getTwin;
+    } userCallback;
+
+    void* userContext;
+} IOTHUB_QUEUE_CONSOLIDATED_CONTEXT;
 
 typedef struct IOTHUB_INPUTMESSAGE_CALLBACK_CONTEXT_TAG
 {
@@ -455,6 +476,9 @@ static void iothub_ll_device_twin_callback(DEVICE_TWIN_UPDATE_STATE update_state
         queue_cb_info.type = CALLBACK_TYPE_DEVICE_TWIN;
         queue_cb_info.userContextCallback = queue_context->userContextCallback;
         queue_cb_info.iothub_callback.dev_twin_cb_info.update_state = update_state;
+        queue_cb_info.iothub_callback.dev_twin_cb_info.userCallback = NULL;
+        queue_cb_info.iothub_callback.dev_twin_cb_info.userContext = NULL;
+
         if (payLoad == NULL)
         {
             queue_cb_info.iothub_callback.dev_twin_cb_info.payLoad = NULL;
@@ -492,6 +516,56 @@ static void iothub_ll_device_twin_callback(DEVICE_TWIN_UPDATE_STATE update_state
     else
     {
         LogError("device twin callback userContextCallback NULL");
+    }
+}
+
+static void iothub_ll_get_device_twin_async_callback(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback)
+{
+    IOTHUB_QUEUE_CONSOLIDATED_CONTEXT* queue_context = (IOTHUB_QUEUE_CONSOLIDATED_CONTEXT*)userContextCallback;
+
+    if (queue_context != NULL)
+    {
+        USER_CALLBACK_INFO queue_cb_info;
+        queue_cb_info.type = CALLBACK_TYPE_DEVICE_TWIN;
+        queue_cb_info.userContextCallback = queue_context->userContext;
+        queue_cb_info.iothub_callback.dev_twin_cb_info.update_state = update_state;
+        queue_cb_info.iothub_callback.dev_twin_cb_info.userCallback = queue_context->userCallback.getTwin;
+        queue_cb_info.iothub_callback.dev_twin_cb_info.userContext = queue_context->userContext;
+
+        if (payLoad == NULL)
+        {
+            queue_cb_info.iothub_callback.dev_twin_cb_info.payLoad = NULL;
+            queue_cb_info.iothub_callback.dev_twin_cb_info.size = 0;
+        }
+        else
+        {
+            queue_cb_info.iothub_callback.dev_twin_cb_info.payLoad = (unsigned char*)malloc(size);
+
+            if (queue_cb_info.iothub_callback.dev_twin_cb_info.payLoad == NULL)
+            {
+                LogError("Failure allocating payload in get device twin callback.");
+                queue_cb_info.iothub_callback.dev_twin_cb_info.size = 0;
+            }
+            else
+            {
+                (void)memcpy(queue_cb_info.iothub_callback.dev_twin_cb_info.payLoad, payLoad, size);
+                queue_cb_info.iothub_callback.dev_twin_cb_info.size = size;
+            }
+        }
+
+        if (VECTOR_push_back(queue_context->iotHubClientHandle->saved_user_callback_list, &queue_cb_info, 1) != 0)
+        {
+            LogError("device twin callback userContextCallback vector push failed.");
+
+            if (queue_cb_info.iothub_callback.dev_twin_cb_info.payLoad != NULL)
+            {
+                free(queue_cb_info.iothub_callback.dev_twin_cb_info.payLoad);
+            }
+        }
+    }
+    else
+    {
+        LogError("Get device twin callback userContextCallback NULL");
     }
 }
 
@@ -550,7 +624,18 @@ static void dispatch_user_callbacks(IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientIns
             {
             case CALLBACK_TYPE_DEVICE_TWIN:
             {
-                if (desired_state_callback)
+                // Callback if for GetTwinAsync
+                if (queued_cb->iothub_callback.dev_twin_cb_info.userCallback)
+                {
+                    queued_cb->iothub_callback.dev_twin_cb_info.userCallback(
+                        queued_cb->iothub_callback.dev_twin_cb_info.update_state,
+                        queued_cb->iothub_callback.dev_twin_cb_info.payLoad,
+                        queued_cb->iothub_callback.dev_twin_cb_info.size,
+                        queued_cb->iothub_callback.dev_twin_cb_info.userContext
+                    );
+                }
+                // Callback if for Desired properties.
+                else if (desired_state_callback)
                 {
                     desired_state_callback(queued_cb->iothub_callback.dev_twin_cb_info.update_state, queued_cb->iothub_callback.dev_twin_cb_info.payLoad, queued_cb->iothub_callback.dev_twin_cb_info.size, queued_cb->userContextCallback);
                 }
@@ -700,7 +785,7 @@ static void ScheduleWork_Thread_ForMultiplexing(void* iotHubClientHandle)
 static int ScheduleWork_Thread(void* threadArgument)
 {
     IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientInstance = (IOTHUB_CLIENT_CORE_INSTANCE*)threadArgument;
-
+    uint16_t sleeptime_in_ms = DO_WORK_FREQ_DEFAULT;
     while (1)
     {
         if (Lock(iotHubClientInstance->LockHandle) == LOCK_OK)
@@ -713,12 +798,13 @@ static int ScheduleWork_Thread(void* threadArgument)
             }
             else
             {
-                /* Codes_SRS_IOTHUBCLIENT_01_037: [The thread created by IoTHubClient_SendEvent or IoTHubClient_SetMessageCallback shall call IoTHubClientCore_LL_DoWork every 1 ms.] */
+                /* Codes_SRS_IOTHUBCLIENT_01_037: [The thread created by IoTHubClient_SendEvent or IoTHubClient_SetMessageCallback shall call IoTHubClientCore_LL_DoWork every 1 ms by default.] */
                 /* Codes_SRS_IOTHUBCLIENT_01_039: [All calls to IoTHubClientCore_LL_DoWork shall be protected by the lock created in IotHubClient_Create.] */
                 IoTHubClientCore_LL_DoWork(iotHubClientInstance->IoTHubClientLLHandle);
 
                 garbageCollectorImpl(iotHubClientInstance);
                 VECTOR_HANDLE call_backs = VECTOR_move(iotHubClientInstance->saved_user_callback_list);
+                sleeptime_in_ms = iotHubClientInstance->do_work_freq_ms; // Update the sleepval within the locked thread. 
                 (void)Unlock(iotHubClientInstance->LockHandle);
                 if (call_backs == NULL)
                 {
@@ -728,6 +814,8 @@ static int ScheduleWork_Thread(void* threadArgument)
                 {
                     dispatch_user_callbacks(iotHubClientInstance, call_backs);
                 }
+
+    
             }
         }
         else
@@ -735,7 +823,8 @@ static int ScheduleWork_Thread(void* threadArgument)
             /*Codes_SRS_IOTHUBCLIENT_01_040: [If acquiring the lock fails, IoTHubClientCore_LL_DoWork shall not be called.]*/
             /*no code, shall retry*/
         }
-        (void)ThreadAPI_Sleep(1);
+        /* Codes_SRS_IOTHUBCLIENT_041_02: [The thread shall sleep for a specified time in ms as provided through IoTHubClientCore_SetOption, with a default of 1 ms ] */
+        (void)ThreadAPI_Sleep(sleeptime_in_ms);
     }
 
     ThreadAPI_Exit(0);
@@ -786,6 +875,11 @@ static IOTHUB_CLIENT_CORE_INSTANCE* create_iothub_instance(CREATE_HUB_INSTANCE_T
     if (result != NULL)
     {
         memset((void *)result, 0, sizeof(IOTHUB_CLIENT_CORE_INSTANCE));
+
+        /* Codes_SRS_IOTHUBCLIENT_41_02 [] */
+        result->do_work_freq_ms = DO_WORK_FREQ_DEFAULT;
+        /* Default currentMessageTimeout to NULL until it is set by SetOption */
+        result->currentMessageTimeout = 0;
 
         /* Codes_SRS_IOTHUBCLIENT_01_029: [IoTHubClient_Create shall create a lock object to be used later for serializing IoTHubClient calls.] */
         if ((result->saved_user_callback_list = VECTOR_create(sizeof(USER_CALLBACK_INFO))) == NULL)
@@ -1613,13 +1707,61 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetOption(IOTHUB_CLIENT_CORE_HANDLE iotHub
         }
         else
         {
-            /*Codes_SRS_IOTHUBCLIENT_02_038: [If optionName doesn't match one of the options handled by this module then IoTHubClient_SetOption shall call IoTHubClientCore_LL_SetOption passing the same parameters and return what IoTHubClientCore_LL_SetOption returns.] */
-            result = IoTHubClientCore_LL_SetOption(iotHubClientInstance->IoTHubClientLLHandle, optionName, value);
-            if (result != IOTHUB_CLIENT_OK)
+            /* Codes_SRS_IOTHUBCLIENT_41_001 [ If parameter `optionName` is `OPTION_DO_WORK_FREQUENCY_IN_MS` then `IoTHubClient_SetOption` shall set `do_work_freq_ms` parameter of `IoTHubClientInstance` ]*/ 
+            if (strcmp(OPTION_DO_WORK_FREQUENCY_IN_MS, optionName) == 0)
             {
-                LogError("IoTHubClientCore_LL_SetOption failed");
+                /* Codes_SRS_IOTHUBCLIENT_41_003: [ The value for `OPTION_DO_WORK_FREQUENCY_IN_MS` shall be limited to 100 to follow SDK best practices by not reducing the DoWork frequency below 10 Hz ]*/
+                if (0 < *(uint16_t*)value && *(uint16_t*)value <= 100) 
+                {
+                    /* Codes_SRS_IOTHUBCLIENT_41_004: [ If `currentMessageTimeout` is not less than `do_work_freq_ms`, `IotHubClientCore_SetOption` shall return `IOTHUB_CLIENT_ERROR` ]*/
+                    if ((!iotHubClientInstance->currentMessageTimeout) || ( *((tickcounter_ms_t*)value) < iotHubClientInstance->currentMessageTimeout)) 
+                    {
+                        iotHubClientInstance->do_work_freq_ms = *((uint16_t *)value);
+                        result = IOTHUB_CLIENT_OK;
+                    }   
+                    else 
+                    {
+                        result = IOTHUB_CLIENT_ERROR;
+                        LogError("Invalid value: OPTION_DO_WORK_FREQUENCY_IN_MS cannot exceed that of OPTION_MESSAGE_TIMEOUT.");
+                    }
+                }
+                else 
+                {
+                    result = IOTHUB_CLIENT_ERROR;
+                    LogError("Invalid value: OPTION_DO_WORK_FREQUENCY_IN_MS cannot exceed 100 ms. If you wish to reduce the frequency further, consider using the LL layer.");
+                }    
             }
+            /* Codes_SRS_IOTHUBCLIENT_41_005: [ If parameter `optionName` is `OPTION_MESSAGE_TIMEOUT` then `IoTHubClientCore_SetOption` shall set `currentMessageTimeout` parameter of `IoTHubClientInstance` ]*/
+            else if (strcmp(OPTION_MESSAGE_TIMEOUT, optionName) == 0)
+            {
+                tickcounter_ms_t foo = (tickcounter_ms_t)(*(tickcounter_ms_t*)value);
+                iotHubClientInstance->currentMessageTimeout = foo;
 
+                /* Codes_SRS_IOTHUBCLIENT_41_004: [ If `currentMessageTimeout` is not less than `do_work_freq_ms`, `IotHubClientCore_SetOption` shall return `IOTHUB_CLIENT_ERROR` ]*/
+				if ((tickcounter_ms_t)iotHubClientInstance->do_work_freq_ms < iotHubClientInstance->currentMessageTimeout)
+                {
+                    /*Codes_SRS_IOTHUBCLIENT_41_006: [ If parameter `optionName` is `OPTION_MESSAGE_TIMEOUT` then `IoTHubClientCore_SetOption` shall call `IoTHubClientCore_LL_SetOption` passing the same parameters and return what IoTHubClientCore_LL_SetOption returns. ] */
+                    result = IoTHubClientCore_LL_SetOption(iotHubClientInstance->IoTHubClientLLHandle, optionName, value);
+                    if (result != IOTHUB_CLIENT_OK)
+                    {
+                        LogError("IoTHubClientCore_LL_SetOption failed");
+                    }
+                }
+                else 
+                {
+                    result = IOTHUB_CLIENT_ERROR;
+                    LogError("invalid value: OPTION_MESSAGE_TIMEOUT cannot exceed the value of OPTION_DO_WORK_FREQUENCY_IN_MS ");
+                }
+            }
+            else
+            {
+                /*Codes_SRS_IOTHUBCLIENT_02_038: [If optionName doesn't match one of the options handled by this module then IoTHubClient_SetOption shall call IoTHubClientCore_LL_SetOption passing the same parameters and return what IoTHubClientCore_LL_SetOption returns.] */
+                result = IoTHubClientCore_LL_SetOption(iotHubClientInstance->IoTHubClientLLHandle, optionName, value);
+                if (result != IOTHUB_CLIENT_OK)
+                {
+                    LogError("IoTHubClientCore_LL_SetOption failed");
+                }
+            }
             (void)Unlock(iotHubClientInstance->LockHandle);
         }
     }
@@ -1772,6 +1914,70 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SendReportedState(IOTHUB_CLIENT_CORE_HANDL
                 }
 
                 (void)Unlock(iotHubClientInstance->LockHandle);
+            }
+        }
+    }
+    return result;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClientCore_GetTwinAsync(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback, void* userContextCallback)
+{
+    IOTHUB_CLIENT_RESULT result;
+
+    // Codes_SRS_IOTHUBCLIENT_09_009: [ If `iotHubClientHandle` or `deviceTwinCallback` are `NULL`, `IoTHubClientCore_GetTwinAsync` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]
+    if (iotHubClientHandle == NULL || deviceTwinCallback == NULL)
+    {
+        result = IOTHUB_CLIENT_INVALID_ARG;
+        LogError("Invalid argument (iotHubClientHandle=%p, deviceTwinCallback=%p)", iotHubClientHandle, deviceTwinCallback);
+    }
+    else
+    {
+        IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientInstance = (IOTHUB_CLIENT_CORE_INSTANCE*)iotHubClientHandle;
+
+        // Codes_SRS_IOTHUBCLIENT_09_010: [ The thread that executes the client  I/O shall be started if not running already. ]
+        if ((result = StartWorkerThreadIfNeeded(iotHubClientInstance)) != IOTHUB_CLIENT_OK)
+        {
+            // Codes_SRS_IOTHUBCLIENT_09_011: [ If starting the thread fails, `IoTHubClientCore_GetTwinAsync` shall return `IOTHUB_CLIENT_ERROR`. ]
+            result = IOTHUB_CLIENT_ERROR;
+            LogError("Could not start worker thread");
+        }
+        else
+        {
+            IOTHUB_QUEUE_CONSOLIDATED_CONTEXT* queueContext;
+
+            if ((queueContext = (IOTHUB_QUEUE_CONSOLIDATED_CONTEXT*)malloc(sizeof(IOTHUB_QUEUE_CONSOLIDATED_CONTEXT))) == NULL)
+            {
+                LogError("Failed creating queue context");
+                result = IOTHUB_CLIENT_ERROR;
+            }
+            else
+            {
+                queueContext->iotHubClientHandle = iotHubClientHandle;
+                queueContext->userCallback.getTwin = deviceTwinCallback;
+                queueContext->userContext = userContextCallback;
+
+                // Codes_SRS_IOTHUBCLIENT_09_012: [ `IoTHubClientCore_GetTwinAsync` shall be made thread-safe by using the lock created in IoTHubClient_Create. ]
+                if (Lock(iotHubClientInstance->LockHandle) != LOCK_OK)
+                {
+                    // Codes_SRS_IOTHUBCLIENT_09_013: [ If acquiring the lock fails, `IoTHubClientCore_GetTwinAsync` shall return `IOTHUB_CLIENT_ERROR`. ]
+                    result = IOTHUB_CLIENT_ERROR;
+                    LogError("Could not acquire lock");
+                    free(queueContext);
+                }
+                else
+                {
+                    // Codes_SRS_IOTHUBCLIENT_09_014: [ `IoTHubClientCore_GetTwinAsync` shall call `IoTHubClientCore_LL_GetTwinAsync`, passing the `IoTHubClient_LL handle`, `deviceTwinCallback` and `userContextCallback` as arguments ]
+                    // Codes_SRS_IOTHUBCLIENT_09_015: [ When `IoTHubClientCore_LL_GetTwinAsync` is called, `IoTHubClientCore_GetTwinAsync` shall return the result of `IoTHubClientCore_LL_GetTwinAsync`. ]
+                    result = IoTHubClientCore_LL_GetTwinAsync(iotHubClientInstance->IoTHubClientLLHandle, iothub_ll_get_device_twin_async_callback, queueContext);
+
+                    if (result != IOTHUB_CLIENT_OK)
+                    {
+                        LogError("IoTHubClientCore_LL_GetTwinAsync failed");
+                        free(queueContext);
+                    }
+
+                    (void)Unlock(iotHubClientInstance->LockHandle);
+                }
             }
         }
     }

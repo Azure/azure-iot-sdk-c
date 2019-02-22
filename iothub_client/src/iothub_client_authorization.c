@@ -20,6 +20,7 @@
 
 #define DEFAULT_SAS_TOKEN_EXPIRY_TIME_SECS          3600
 #define INDEFINITE_TIME                             ((time_t)(-1))
+#define MIN_SAS_EXPIRY_TIME                         5  // 5 seconds
 
 typedef struct IOTHUB_AUTHORIZATION_DATA_TAG
 {
@@ -51,6 +52,44 @@ static int get_seconds_since_epoch(size_t* seconds)
     return result;
 }
 
+static IOTHUB_AUTHORIZATION_DATA* initialize_auth_client(const char* device_id, const char* module_id)
+{
+    IOTHUB_AUTHORIZATION_DATA* result;
+
+    /* Codes_SRS_IoTHub_Authorization_07_002: [IoTHubClient_Auth_Create shall allocate a IOTHUB_AUTHORIZATION_HANDLE that is needed for subsequent calls. ] */
+    result = (IOTHUB_AUTHORIZATION_DATA*)malloc(sizeof(IOTHUB_AUTHORIZATION_DATA) );
+    if (result == NULL)
+    {
+        /* Codes_SRS_IoTHub_Authorization_07_019: [ On error IoTHubClient_Auth_Create shall return NULL. ] */
+        LogError("Failed allocating IOTHUB_AUTHORIZATION_DATA");
+        result = NULL;
+    }
+    else
+    {
+        memset(result, 0, sizeof(IOTHUB_AUTHORIZATION_DATA) );
+        if (mallocAndStrcpy_s(&result->device_id, device_id) != 0)
+        {
+            /* Codes_SRS_IoTHub_Authorization_07_019: [ On error IoTHubClient_Auth_Create shall return NULL. ] */
+            LogError("Failed allocating device_key");
+            free(result);
+            result = NULL;
+        }
+        else if (module_id != NULL && mallocAndStrcpy_s(&result->module_id, module_id) != 0)
+        {
+            /* Codes_SRS_IoTHub_Authorization_07_019: [ On error IoTHubClient_Auth_Create shall return NULL. ] */
+            LogError("Failed allocating module_id");
+            free(result->device_id);
+            free(result);
+            result = NULL;
+        }
+        else
+        {
+            result->token_expiry_time_sec = DEFAULT_SAS_TOKEN_EXPIRY_TIME_SECS;
+        }
+    }
+    return result;
+}
+
 IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_Create(const char* device_key, const char* device_id, const char* device_sas_token, const char *module_id)
 {
     IOTHUB_AUTHORIZATION_DATA* result;
@@ -62,70 +101,46 @@ IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_Create(const char* device_key, con
     }
     else
     {
-        /* Codes_SRS_IoTHub_Authorization_07_002: [IoTHubClient_Auth_Create shall allocate a IOTHUB_AUTHORIZATION_HANDLE that is needed for subsequent calls. ] */
-        result = (IOTHUB_AUTHORIZATION_DATA*)malloc(sizeof(IOTHUB_AUTHORIZATION_DATA) );
+        result = initialize_auth_client(device_id, module_id);
         if (result == NULL)
         {
+            LogError("Failure initializing auth client");
+        }
+        else if (device_key != NULL && mallocAndStrcpy_s(&result->device_key, device_key) != 0)
+        {
             /* Codes_SRS_IoTHub_Authorization_07_019: [ On error IoTHubClient_Auth_Create shall return NULL. ] */
-            LogError("Failed allocating IOTHUB_AUTHORIZATION_DATA");
+            LogError("Failed allocating device_key");
+            free(result->device_id);
+            free(result->module_id);
+            free(result);
             result = NULL;
         }
         else
         {
-            memset(result, 0, sizeof(IOTHUB_AUTHORIZATION_DATA) );
-            result->token_expiry_time_sec = DEFAULT_SAS_TOKEN_EXPIRY_TIME_SECS;
-
-            if (device_key != NULL && mallocAndStrcpy_s(&result->device_key, device_key) != 0)
+            if (device_key != NULL)
             {
-                /* Codes_SRS_IoTHub_Authorization_07_019: [ On error IoTHubClient_Auth_Create shall return NULL. ] */
-                LogError("Failed allocating device_key");
-                free(result);
-                result = NULL;
+                /* Codes_SRS_IoTHub_Authorization_07_003: [ IoTHubClient_Auth_Create shall set the credential type to IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY if the device_sas_token is NULL. ]*/
+                result->cred_type = IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY;
             }
-            else if (mallocAndStrcpy_s(&result->device_id, device_id) != 0)
+            else if (device_sas_token != NULL)
             {
-                /* Codes_SRS_IoTHub_Authorization_07_019: [ On error IoTHubClient_Auth_Create shall return NULL. ] */
-                LogError("Failed allocating device_key");
-                free(result->device_key);
-                free(result);
-                result = NULL;
-            }
-            else if (module_id != NULL && mallocAndStrcpy_s(&result->module_id, module_id) != 0)
-            {
-                /* Codes_SRS_IoTHub_Authorization_07_019: [ On error IoTHubClient_Auth_Create shall return NULL. ] */
-                LogError("Failed allocating module_id");
-                free(result->device_id);
-                free(result->device_key);
-                free(result);
-                result = NULL;
+                /* Codes_SRS_IoTHub_Authorization_07_020: [ else IoTHubClient_Auth_Create shall set the credential type to IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN. ] */
+                result->cred_type = IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN;
+                if (mallocAndStrcpy_s(&result->device_sas_token, device_sas_token) != 0)
+                {
+                    /* Codes_SRS_IoTHub_Authorization_07_019: [ On error IoTHubClient_Auth_Create shall return NULL. ] */
+                    LogError("Failed allocating device_key");
+                    free(result->device_key);
+                    free(result->device_id);
+                    free(result->module_id);
+                    free(result);
+                    result = NULL;
+                }
             }
             else
             {
-                if (device_key != NULL)
-                {
-                    /* Codes_SRS_IoTHub_Authorization_07_003: [ IoTHubClient_Auth_Create shall set the credential type to IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY if the device_sas_token is NULL. ]*/
-                    result->cred_type = IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY;
-                }
-                else if (device_sas_token != NULL)
-                {
-                    /* Codes_SRS_IoTHub_Authorization_07_020: [ else IoTHubClient_Auth_Create shall set the credential type to IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN. ] */
-                    result->cred_type = IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN;
-                    if (mallocAndStrcpy_s(&result->device_sas_token, device_sas_token) != 0)
-                    {
-                        /* Codes_SRS_IoTHub_Authorization_07_019: [ On error IoTHubClient_Auth_Create shall return NULL. ] */
-                        LogError("Failed allocating device_key");
-                        free(result->device_key);
-                        free(result->device_id);
-                        free(result->module_id);
-                        free(result);
-                        result = NULL;
-                    }
-                }
-                else
-                {
-                    /* Codes_SRS_IoTHub_Authorization_07_024: [ if device_sas_token and device_key are NULL IoTHubClient_Auth_Create shall set the credential type to IOTHUB_CREDENTIAL_TYPE_UNKNOWN. ] */
-                    result->cred_type = IOTHUB_CREDENTIAL_TYPE_UNKNOWN;
-                }
+                /* Codes_SRS_IoTHub_Authorization_07_024: [ if device_sas_token and device_key are NULL IoTHubClient_Auth_Create shall set the credential type to IOTHUB_CREDENTIAL_TYPE_UNKNOWN. ] */
+                result->cred_type = IOTHUB_CREDENTIAL_TYPE_UNKNOWN;
             }
         }
     }
@@ -144,35 +159,19 @@ IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_CreateFromDeviceAuth(const char* d
     else
     {
 #ifdef USE_PROV_MODULE
-        result = (IOTHUB_AUTHORIZATION_DATA*)malloc(sizeof(IOTHUB_AUTHORIZATION_DATA));
+        result = initialize_auth_client(device_id, module_id);
         if (result == NULL)
         {
-            LogError("Failed allocating IOTHUB_AUTHORIZATION_DATA");
-            result = NULL;
+            LogError("Failure initializing auth client");
         }
         else
         {
-            memset(result, 0, sizeof(IOTHUB_AUTHORIZATION_DATA));
-
             result->device_auth_handle = iothub_device_auth_create();
             if (result->device_auth_handle == NULL)
             {
                 LogError("Failed allocating IOTHUB_AUTHORIZATION_DATA");
-                free(result);
-                result = NULL;
-            }
-            else if (mallocAndStrcpy_s(&result->device_id, device_id) != 0)
-            {
-                LogError("Failed allocating device_id");
-                iothub_device_auth_destroy(result->device_auth_handle);
-                free(result);
-                result = NULL;
-            }
-            else if ((module_id != NULL) && (mallocAndStrcpy_s(&result->module_id, module_id) != 0))
-            {
-                LogError("Failed allocating module_id");
-                iothub_device_auth_destroy(result->device_auth_handle);
                 free(result->device_id);
+                free(result->module_id);
                 free(result);
                 result = NULL;
             }
@@ -364,6 +363,7 @@ IOTHUB_CREDENTIAL_TYPE IoTHubClient_Auth_Get_Credential_Type(IOTHUB_AUTHORIZATIO
 char* IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const char* scope, size_t expiry_time_relative_seconds, const char* key_name)
 {
     char* result;
+    (void)expiry_time_relative_seconds;
     /* Codes_SRS_IoTHub_Authorization_07_009: [ if handle or scope are NULL, IoTHubClient_Auth_Get_SasToken shall return NULL. ] */
     if (handle == NULL)
     {
@@ -386,7 +386,7 @@ char* IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const c
             else
             {
                 memset(&dev_auth_cred, 0, sizeof(DEVICE_AUTH_CREDENTIAL_INFO));
-                size_t expiry_time = sec_since_epoch+expiry_time_relative_seconds;
+                size_t expiry_time = sec_since_epoch + handle->token_expiry_time_sec;
                 dev_auth_cred.sas_info.expiry_seconds = expiry_time;
                 dev_auth_cred.sas_info.token_scope = scope;
                 dev_auth_cred.sas_info.key_name = key_name;
@@ -443,7 +443,7 @@ char* IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const c
                 STRING_HANDLE sas_token;
                 size_t sec_since_epoch;
 
-                /* Codes_SRS_IoTHub_Authorization_07_010: [ IoTHubClient_Auth_Get_SasToken` shall construct the expiration time using the expiry_time_relative_seconds added to epoch time. ] */
+                /* Codes_SRS_IoTHub_Authorization_07_010: [ IoTHubClient_Auth_Get_SasToken` shall construct the expiration time using the handle->token_expiry_time_sec added to epoch time. ] */
                 if (get_seconds_since_epoch(&sec_since_epoch) != 0)
                 {
                     /* Codes_SRS_IoTHub_Authorization_07_020: [ If any error is encountered IoTHubClient_Auth_Get_ConnString shall return NULL. ] */
@@ -453,7 +453,7 @@ char* IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const c
                 else
                 {
                     /* Codes_SRS_IoTHub_Authorization_07_011: [ IoTHubClient_Auth_Get_ConnString shall call SASToken_CreateString to construct the sas token. ] */
-                    size_t expiry_time = sec_since_epoch+expiry_time_relative_seconds;
+                    size_t expiry_time = sec_since_epoch + handle->token_expiry_time_sec;
                     if ( (sas_token = SASToken_CreateString(handle->device_key, scope, key_name, expiry_time)) == NULL)
                     {
                         /* Codes_SRS_IoTHub_Authorization_07_020: [ If any error is encountered IoTHubClient_Auth_Get_ConnString shall return NULL. ] */
@@ -605,7 +605,7 @@ static char* read_ca_certificate_from_file(const char* certificate_file_name)
         LogError("fseek on file %s fails, errno=%d", certificate_file_name, errno);
         result = NULL;
     }
-    else 
+    else
     {
         long int file_size = ftell(file_stream);
         if (file_size < 0)
@@ -645,7 +645,7 @@ static char* read_ca_certificate_from_file(const char* certificate_file_name)
 
 // IoTHubClient_Auth_Get_TrustBundle retrieves a trust bundle - namely a PEM indicating the certificates the client should
 // trust as root authorities - to caller.  If certificate_file_name, we read this from a local file.  This should in general
-// be limited only to debugging modules on Edge.  If certificate_file_name is NULL, we invoke into the underlying 
+// be limited only to debugging modules on Edge.  If certificate_file_name is NULL, we invoke into the underlying
 // HSM to retrieve this.
 char* IoTHubClient_Auth_Get_TrustBundle(IOTHUB_AUTHORIZATION_HANDLE handle, const char* certificate_file_name)
 {
@@ -666,3 +666,40 @@ char* IoTHubClient_Auth_Get_TrustBundle(IOTHUB_AUTHORIZATION_HANDLE handle, cons
     return result;
 }
 #endif
+
+int IoTHubClient_Auth_Set_SasToken_Expiry(IOTHUB_AUTHORIZATION_HANDLE handle, size_t expiry_time_seconds)
+{
+    int result;
+    if (handle == NULL)
+    {
+        LogError("Invalid handle value handle: NULL");
+        result = __FAILURE__;
+    }
+    // Validate the expiry_time in seconds
+    else if (expiry_time_seconds < MIN_SAS_EXPIRY_TIME)
+    {
+        LogError("Failure setting expiry time to value %lu min value is %d", (unsigned long)expiry_time_seconds, MIN_SAS_EXPIRY_TIME);
+        result = __FAILURE__;
+    }
+    else
+    {
+        handle->token_expiry_time_sec = expiry_time_seconds;
+        result = 0;
+    }
+    return result;
+}
+
+size_t IoTHubClient_Auth_Get_SasToken_Expiry(IOTHUB_AUTHORIZATION_HANDLE handle)
+{
+    size_t result;
+    if (handle == NULL)
+    {
+        LogError("Invalid handle value handle: NULL");
+        result = 0;
+    }
+    else
+    {
+        result = handle->token_expiry_time_sec;
+    }
+    return result;
+}

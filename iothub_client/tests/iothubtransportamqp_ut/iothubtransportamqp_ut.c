@@ -276,6 +276,7 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_UMOCK_ALIAS_TYPE(AMQP_GET_IO_TRANSPORT, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUBMESSAGE_DISPOSITION_RESULT, int);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_RESULT, int);
+    REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK, void*);
     REGISTER_TYPE(TLSIO_CONFIG*, TLSIO_CONFIG_ptr);
 
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubTransport_AMQP_Common_Create, TEST_IoTHubTransport_AMQP_Common_Create);
@@ -543,6 +544,25 @@ TEST_FUNCTION(AMQP_Unsubscribe_DeviceTwin)
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+}
+
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_021: [IoTHubTransportAMQP_GetTwinAsync shall invoke IoTHubTransport_AMQP_Common_GetTwinAsync()]
+TEST_FUNCTION(AMQP_GetTwinAsync)
+{
+    // arrange
+    TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_GetTwinAsync(TEST_IOTHUB_DEVICE_HANDLE, (IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)0x4444, (void*)0x4445));
+
+    // act
+    IOTHUB_CLIENT_RESULT result = provider->IoTHubTransport_GetTwinAsync(TEST_IOTHUB_DEVICE_HANDLE, (IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)0x4444, (void*)0x4445);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
 
     // cleanup
 }
