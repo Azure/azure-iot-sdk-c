@@ -114,6 +114,8 @@ static const char* TEST_TOKEN_SCOPE_VALUE = "token_scope";
 static const char* TEST_KEY_NAME_VALUE = "key_value";
 static const char* TEST_BASE32_VALUE = "aebagbaf";
 
+static const char* TEST_REGISTRATION_ID = "Registration Id";
+
 TEST_DEFINE_ENUM_TYPE(PROV_AUTH_RESULT, PROV_AUTH_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(PROV_AUTH_RESULT, PROV_AUTH_RESULT_VALUES);
 
@@ -1285,6 +1287,78 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
 
         //assert
         ASSERT_IS_NULL(result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        prov_auth_destroy(sec_handle);
+    }
+
+    TEST_FUNCTION(prov_auth_set_registration_id_handle_NULL_fail)
+    {
+        //arrange
+
+        //act
+        int result = prov_auth_set_registration_id(NULL, TEST_REGISTRATION_ID);
+
+        //assert
+        ASSERT_ARE_NOT_EQUAL(int, 0, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+    }
+
+    TEST_FUNCTION(prov_auth_set_registration_id_registration_id_NULL_fail)
+    {
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
+        umock_c_reset_all_calls();
+
+        //arrange
+
+        //act
+        int result = prov_auth_set_registration_id(sec_handle, NULL);
+
+        //assert
+        ASSERT_ARE_NOT_EQUAL(int, 0, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        prov_auth_destroy(sec_handle);
+    }
+
+    TEST_FUNCTION(prov_auth_set_registration_id_success)
+    {
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
+        umock_c_reset_all_calls();
+
+        //arrange
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+        //act
+        int result = prov_auth_set_registration_id(sec_handle, TEST_REGISTRATION_ID);
+
+        //assert
+        ASSERT_ARE_EQUAL(int, 0, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        prov_auth_destroy(sec_handle);
+    }
+
+    TEST_FUNCTION(prov_auth_set_registration_id_2_calls_success)
+    {
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
+        umock_c_reset_all_calls();
+
+        //arrange
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+        //act
+        int result = prov_auth_set_registration_id(sec_handle, TEST_REGISTRATION_ID);
+        ASSERT_ARE_EQUAL(int, 0, result);
+        result = prov_auth_set_registration_id(sec_handle, TEST_REGISTRATION_ID);
+
+        //assert
+        ASSERT_ARE_NOT_EQUAL(int, 0, result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
