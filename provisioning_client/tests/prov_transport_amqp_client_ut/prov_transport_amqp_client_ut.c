@@ -240,7 +240,6 @@ BEGIN_TEST_SUITE(prov_transport_amqp_client_ut)
         STRICT_EXPECTED_CALL(platform_get_default_tlsio());
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(xio_create(TEST_INTERFACE_DESC, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(saslclientio_get_interface_description());
         STRICT_EXPECTED_CALL(xio_create(TEST_INTERFACE_DESC, IGNORED_PTR_ARG));
 
@@ -266,7 +265,6 @@ BEGIN_TEST_SUITE(prov_transport_amqp_client_ut)
         STRICT_EXPECTED_CALL(platform_get_default_tlsio());
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(xio_create(TEST_INTERFACE_DESC, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
         //act
         dps_io_info = g_transport_io(TEST_URI_VALUE, NULL, NULL);
@@ -296,22 +294,14 @@ BEGIN_TEST_SUITE(prov_transport_amqp_client_ut)
         STRICT_EXPECTED_CALL(platform_get_default_tlsio());
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(xio_create(TEST_INTERFACE_DESC, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(saslclientio_get_interface_description());
         STRICT_EXPECTED_CALL(xio_create(TEST_INTERFACE_DESC, IGNORED_PTR_ARG));
-
-        size_t calls_cannot_fail[] = { 3 };
 
         umock_c_negative_tests_snapshot();
 
         size_t count = umock_c_negative_tests_call_count();
         for (size_t index = 0; index < count; index++)
         {
-            if (should_skip_index(index, calls_cannot_fail, sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0])) != 0)
-            {
-                continue;
-            }
-
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
@@ -343,7 +333,6 @@ BEGIN_TEST_SUITE(prov_transport_amqp_client_ut)
         STRICT_EXPECTED_CALL(platform_get_default_tlsio());
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(xio_create(TEST_INTERFACE_DESC, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(saslclientio_get_interface_description());
         STRICT_EXPECTED_CALL(xio_create(TEST_INTERFACE_DESC, IGNORED_PTR_ARG));
         proxy_info.host_address = TEST_HOST_ADDRESS_VALUE;
