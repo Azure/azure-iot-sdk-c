@@ -254,7 +254,7 @@ static int my_mallocAndStrcpy_s(char** destination, const char* source)
     return 0;
 }
 
-static STRING_HANDLE my_Base64_Encoder(BUFFER_HANDLE input)
+static STRING_HANDLE my_Base64_Encode(BUFFER_HANDLE input)
 {
     (void)input;
     return (STRING_HANDLE)my_gballoc_malloc(1);
@@ -278,7 +278,7 @@ static char* my_Base32_Encode_Bytes(const unsigned char* source, size_t size)
     return result;
 }
 
-static BUFFER_HANDLE my_Base64_Decoder(const char* source)
+static BUFFER_HANDLE my_Base64_Decode(const char* source)
 {
     (void)source;
     return (BUFFER_HANDLE)my_gballoc_malloc(1);
@@ -376,8 +376,8 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
 
         REGISTER_GLOBAL_MOCK_HOOK(secure_device_sign_data, my_secure_device_sign_data);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(secure_device_sign_data, __LINE__);
-        REGISTER_GLOBAL_MOCK_HOOK(Base64_Encoder, my_Base64_Encoder);
-        REGISTER_GLOBAL_MOCK_RETURN(Base64_Encoder, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(Base64_Encode, my_Base64_Encode);
+        REGISTER_GLOBAL_MOCK_RETURN(Base64_Encode, NULL);
 
         REGISTER_GLOBAL_MOCK_RETURN(BUFFER_create, TEST_BUFFER_VALUE);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(BUFFER_create, NULL);
@@ -400,8 +400,8 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Encode_Bytes, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(Base32_Encode_Bytes, my_Base32_Encode_Bytes);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base32_Encode_Bytes, NULL);
-        REGISTER_GLOBAL_MOCK_HOOK(Base64_Decoder, my_Base64_Decoder);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Decoder, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(Base64_Decode, my_Base64_Decode);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Decode, NULL);
 
         REGISTER_GLOBAL_MOCK_HOOK(STRING_construct, my_STRING_construct);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_construct, NULL);
@@ -462,7 +462,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         if (use_key)
         {
             STRICT_EXPECTED_CALL(secure_device_get_symm_key(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(Base64_Decoder(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(Base64_Decode(IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(BUFFER_new());
             STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG));

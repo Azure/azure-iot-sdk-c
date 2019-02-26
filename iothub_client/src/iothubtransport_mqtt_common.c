@@ -2299,7 +2299,7 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
         if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_NOT_CONNECTED && transport_data->isRecoverableError)
         {
             // Note: in case retry_control_should_retry fails, the reconnection shall be attempted anyway (defaulting to policy IOTHUB_CLIENT_RETRY_IMMEDIATE).
-            if(retry_control_should_retry(transport_data->retry_control_handle, &retry_action) != 0 || retry_action == RETRY_ACTION_RETRY_NOW)
+            if (retry_control_should_retry(transport_data->retry_control_handle, &retry_action) != 0 || retry_action == RETRY_ACTION_RETRY_NOW)
             {
                 if (tickcounter_get_current_ms(transport_data->msgTickCounter, &transport_data->connectTick) != 0)
                 {
@@ -2323,13 +2323,20 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                     }
                 }
             }   
-            else if (retry_action == RETRY_ACTION_STOP_RETRYING && transport_data->isRetryExpiredCallbackSet == false)
+            else if (retry_action == RETRY_ACTION_STOP_RETRYING)
             {
                 // Set callback if retry expired
-                transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED, transport_data->transport_ctx);
-                transport_data->isRetryExpiredCallbackSet = true;
-                result = 0;
-            } 
+                if (!transport_data->isRetryExpiredCallbackSet)
+                {
+                    transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED, transport_data->transport_ctx);
+                    transport_data->isRetryExpiredCallbackSet = true;
+                }
+                result = __FAILURE__;
+            }
+            else if (retry_action == RETRY_ACTION_RETRY_LATER)
+            {
+                result = __FAILURE__;
+            }
         }
         else if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_EXECUTE_DISCONNECT)
         {

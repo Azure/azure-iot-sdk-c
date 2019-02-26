@@ -79,7 +79,7 @@ int main()
         else
         {
             STRING_HANDLE encoded_ek;
-            if ((encoded_ek = Base64_Encoder(reg_info.endorsement_key)) == NULL)
+            if ((encoded_ek = Base64_Encode(reg_info.endorsement_key)) == NULL)
             {
                 (void)printf("Failure base64 encoding ek");
                 result = __LINE__;
