@@ -2323,11 +2323,14 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                     }
                 }
             }   
-            else if (retry_action == RETRY_ACTION_STOP_RETRYING && transport_data->isRetryExpiredCallbackSet == false)
+            else if (retry_action == RETRY_ACTION_STOP_RETRYING)
             {
                 // Set callback if retry expired
-                transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED, transport_data->transport_ctx);
-                transport_data->isRetryExpiredCallbackSet = true;
+                if (!transport_data->isRetryExpiredCallbackSet)
+                {
+                    transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED, transport_data->transport_ctx);
+                    transport_data->isRetryExpiredCallbackSet = true;
+                }
                 result = __FAILURE__;
             }
             else if (retry_action == RETRY_ACTION_RETRY_LATER)
