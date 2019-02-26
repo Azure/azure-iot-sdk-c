@@ -123,7 +123,7 @@ static int construct_group_enrollment(void)
     {
         BUFFER_HANDLE decode_key;
         BUFFER_HANDLE hash;
-        if ((decode_key = Base64_Decoder(group_key)) == NULL)
+        if ((decode_key = Base64_Decode(group_key)) == NULL)
         {
             (void)printf("Failure decoding group key\r\n");
             result = __LINE__;
@@ -144,7 +144,7 @@ static int construct_group_enrollment(void)
             }
             else
             {
-                device_key = Base64_Encoder(hash);
+                device_key = Base64_Encode(hash);
                 (void)printf("Symmetric Key: %s\r\n", STRING_c_str(device_key));
                 STRING_delete(device_key);
                 result = 0;

@@ -617,7 +617,7 @@ static int provisionModule(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_PROVISIONED_
 static char* convert_base64_to_string(const char* base64_cert)
 {
     char* result;
-    BUFFER_HANDLE raw_cert = Base64_Decoder(base64_cert);
+    BUFFER_HANDLE raw_cert = Base64_Decode(base64_cert);
     if (raw_cert == NULL)
     {
         LogError("Failure decoding base64 encoded cert.\r\n");
