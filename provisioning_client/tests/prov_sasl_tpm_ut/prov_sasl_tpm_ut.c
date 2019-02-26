@@ -95,7 +95,7 @@ static void my_STRING_delete(STRING_HANDLE handle)
     my_gballoc_free(handle);
 }
 
-static BUFFER_HANDLE my_Base64_Decoder(const char* source)
+static BUFFER_HANDLE my_Base64_Decode(const char* source)
 {
     (void)source;
     return (BUFFER_HANDLE)my_gballoc_malloc(1);
@@ -172,8 +172,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(on_challenge_callback, my_on_challenge_callback);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(on_challenge_callback, NULL);
 
-    REGISTER_GLOBAL_MOCK_HOOK(Base64_Decoder, my_Base64_Decoder);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Decoder, NULL);
+    REGISTER_GLOBAL_MOCK_HOOK(Base64_Decode, my_Base64_Decode);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Decode, NULL);
 
     REGISTER_GLOBAL_MOCK_HOOK(STRING_new, my_STRING_new);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_new, NULL);

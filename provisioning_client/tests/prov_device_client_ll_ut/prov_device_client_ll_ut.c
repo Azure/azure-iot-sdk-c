@@ -357,7 +357,7 @@ static STRING_HANDLE my_Base64_Encode_Bytes(const unsigned char* source, size_t 
     return (STRING_HANDLE)my_gballoc_malloc(1);
 }
 
-static BUFFER_HANDLE my_Base64_Decoder(const char* source)
+static BUFFER_HANDLE my_Base64_Decode(const char* source)
 {
     (void)source;
     return (BUFFER_HANDLE)my_gballoc_malloc(1);
@@ -486,8 +486,8 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
 
         REGISTER_GLOBAL_MOCK_HOOK(Base64_Encode_Bytes, my_Base64_Encode_Bytes);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Encode_Bytes, NULL);
-        REGISTER_GLOBAL_MOCK_HOOK(Base64_Decoder, my_Base64_Decoder);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Decoder, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(Base64_Decode, my_Base64_Decode);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Decode, NULL);
 }
 
     TEST_SUITE_CLEANUP(suite_cleanup)
@@ -629,7 +629,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
 
         STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(Base64_Decoder(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Base64_Decode(IGNORED_PTR_ARG));
         setup_retrieve_json_item_mocks(TEST_STRING_VALUE);
         STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG));
     }
@@ -693,7 +693,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_PTR_ARG)).SetReturn(PROV_ASSIGNED_STATUS);
-        STRICT_EXPECTED_CALL(Base64_Decoder(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Base64_Decode(IGNORED_PTR_ARG));
 
         setup_retrieve_json_item_mocks(TEST_STRING_VALUE);
         setup_retrieve_json_item_mocks(TEST_STRING_VALUE);

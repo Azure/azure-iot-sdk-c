@@ -169,7 +169,7 @@ static int sign_sas_data(PROV_AUTH_INFO* auth_info, const char* payload, unsigne
             LogError("Failed getting asymmetrical key");
             result = __FAILURE__;
         }
-        else if ((decoded_key = Base64_Decoder(symmetrical_key)) == NULL)
+        else if ((decoded_key = Base64_Decode(symmetrical_key)) == NULL)
         {
             LogError("Failed decoding symmetrical key");
             result = __FAILURE__;

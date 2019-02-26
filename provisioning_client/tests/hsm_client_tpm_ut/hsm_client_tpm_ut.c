@@ -103,7 +103,7 @@ static int my_mallocAndStrcpy_s(char** destination, const char* source)
     return 0;
 }
 
-/*static BUFFER_HANDLE my_Base64_Decoder(const char* source)
+/*static BUFFER_HANDLE my_Base64_Decode(const char* source)
 {
     (void)source;
     return (BUFFER_HANDLE)my_gballoc_malloc(1);
@@ -204,8 +204,8 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         REGISTER_GLOBAL_MOCK_RETURN(SignData, TEST_BUFFER_SIZE);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(SignData, 0);
 
-        //REGISTER_GLOBAL_MOCK_HOOK(Base64_Decoder, my_Base64_Decoder);
-        //REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Decoder, NULL);
+        //REGISTER_GLOBAL_MOCK_HOOK(Base64_Decode, my_Base64_Decode);
+        //REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Decode, NULL);
         //REGISTER_GLOBAL_MOCK_HOOK(BUFFER_create, my_BUFFER_create);
         //REGISTER_GLOBAL_MOCK_FAIL_RETURN(BUFFER_create, NULL);
 
