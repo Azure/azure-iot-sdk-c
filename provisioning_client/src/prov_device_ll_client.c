@@ -328,7 +328,7 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
                 else
                 {
                     const char* nonce_field = json_value_get_string(auth_key);
-                    if ((result->authorization_key = Base64_Decoder(nonce_field)) == NULL)
+                    if ((result->authorization_key = Base64_Decode(nonce_field)) == NULL)
                     {
                         LogError("failure creating buffer nonce field");
                         prov_info->error_reason = PROV_DEVICE_RESULT_MEMORY;
@@ -395,7 +395,7 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
                         else
                         {
                             const char* nonce_field = json_value_get_string(auth_key);
-                            if ((result->authorization_key = Base64_Decoder(nonce_field)) == NULL)
+                            if ((result->authorization_key = Base64_Decode(nonce_field)) == NULL)
                             {
                                 LogError("failure creating buffer nonce field");
                                 prov_info->error_reason = PROV_DEVICE_RESULT_MEMORY;

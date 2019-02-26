@@ -164,7 +164,7 @@ static const HSM_CLIENT_HTTP_EDGE_INTERFACE test_http_edge_interface =
 };
 #endif
 
-static BUFFER_HANDLE my_Base64_Decoder(const char* source)
+static BUFFER_HANDLE my_Base64_Decode(const char* source)
 {
     (void)source;
     return (BUFFER_HANDLE)my_gballoc_malloc(1);
@@ -360,8 +360,8 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         REGISTER_GLOBAL_MOCK_HOOK(URL_EncodeString, my_URL_EncodeString);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(URL_EncodeString, NULL);
 
-        REGISTER_GLOBAL_MOCK_HOOK(Base64_Decoder, my_Base64_Decoder);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Decoder, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(Base64_Decode, my_Base64_Decode);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Decode, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(BUFFER_new, my_BUFFER_new);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(BUFFER_new, NULL);
         REGISTER_GLOBAL_MOCK_RETURN(BUFFER_length, TEST_DATA_LEN);
@@ -448,7 +448,7 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         if (use_key)
         {
             STRICT_EXPECTED_CALL(hsm_client_get_symmetric_key(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(Base64_Decoder(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(Base64_Decode(IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(BUFFER_new());
             STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG));
