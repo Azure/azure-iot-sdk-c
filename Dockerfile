@@ -168,7 +168,7 @@ WORKDIR ..
 
 #RUN git clone --recursive https://github.com/Azure/azure-iot-sdk-c.git
 
-WORKDIR azure-iot-sdk-c
+WORKDIR /home/builder/RPiBuild
 
 
 
