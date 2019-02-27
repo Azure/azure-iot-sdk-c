@@ -175,7 +175,7 @@ WORKDIR /home/builder/RPiBuild
 # Create a working directory for the cmake operations
 
 RUN mkdir cmake
-
+RUN cd cmake
 WORKDIR cmake
 
 
