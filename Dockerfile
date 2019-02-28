@@ -169,16 +169,16 @@ WORKDIR ..
 #RUN git clone --recursive https://github.com/Azure/azure-iot-sdk-c.git
 
 #WORKDIR /home/builder/RPiBuild/azure-iot-sdk-c
-WORKDIR azure-iot-sdk-c
+#WORKDIR azure-iot-sdk-c
 
-
+RUN ls -al
 # Create a working directory for the cmake operations
 
 RUN mkdir cmake
 #RUN cd cmake
 WORKDIR cmake
 
-
+RUN ls -al
 
 # Create a cmake toolchain file on the fly
 
