@@ -172,7 +172,7 @@ WORKDIR ..
 #WORKDIR azure-iot-sdk-c
 
 RUN ls -al
-RUN ls -al ..\*
+RUN ls -al ..
 # Create a working directory for the cmake operations
 
 RUN mkdir cmake
