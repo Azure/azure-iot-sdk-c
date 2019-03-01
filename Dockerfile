@@ -16,7 +16,7 @@ RUN apt-get update && apt-get -y upgrade
 
 # Install wget git cmake xz-utils
 
-RUN apt-get install -y wget git cmake xz-utils  pkg-config-arm-linux-gnueabihf
+RUN apt-get install -y wget git cmake xz-utils
 
 
 
