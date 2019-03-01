@@ -12,6 +12,7 @@
 #include "internal/iothub_client_private.h"
 #include "internal/iothubtransport.h"
 #include "internal/iothub_transport_ll_private.h"
+#include "internal/iothub_internal_consts.h"
 
 #include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/httpapiexsas.h"
@@ -274,6 +275,11 @@ static int set_system_properties(IOTHUB_MESSAGE_LIST* message, HTTP_HEADERS_HAND
     else if ((contentEncoding = IoTHubMessage_GetContentEncodingSystemProperty(message->messageHandle)) != NULL && HTTPHeaders_ReplaceHeaderNameValuePair(headers, IOTHUB_CONTENT_ENCODING_D2C, contentEncoding) != HTTP_HEADERS_OK)
     {
         LogError("unable to HTTPHeaders_ReplaceHeaderNameValuePair (content-encoding)");
+        result = __LINE__;
+    }
+    else if (IoTHubMessage_IsSecurityMessage(message->messageHandle) && HTTPHeaders_ReplaceHeaderNameValuePair(headers, SECURITY_INTERFACE_ID, SECURITY_INTERFACE_ID_VALUE) != HTTP_HEADERS_OK)
+    {
+        LogError("unable to set security message header info");
         result = __LINE__;
     }
     else
