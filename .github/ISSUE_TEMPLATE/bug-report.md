@@ -51,12 +51,18 @@ If MQTT is unable to establish a connection, it will keep trying and once it suc
 
 int main(void)
 {
-    return 0;
+    if (lightbulb == ON) {
+        iothub_say_hello();
+        return 0;
+    } else {
+        iothub_say_goodbye();
+        return 1;
+    }
 }
 ```
 
-**Console Logs **
-Sending message 87 to IoTHub
+**Console Logs**
+Sending message 1 to IoTHub
 -> 15:07:42 PUBLISH | IS_DUP: false | RETAIN: 0 | QOS: DELIVER_AT_LEAST_ONCE | TOPIC_NAME: devices/tracingDevice/messages/events/property_key=property_value | PACKET_ID: 93 | PAYLOAD_LEN: 12
 <- 15:07:42 PUBACK | PACKET_ID: 92
 Confirmation callback received for message 86 with result IOTHUB_CLIENT_CONFIRMATION_OK
