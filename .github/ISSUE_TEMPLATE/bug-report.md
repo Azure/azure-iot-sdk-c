@@ -33,8 +33,9 @@ If you are unsure how to enable logging, refer to this document: https://github.
 ------------------------------- delete above -------------------------------
 
 
-**Device, OS (and Other Relevant Toolchain Info)**
+**Development Machine, OS, Compiler (and Other Relevant Toolchain Info)**
 Raspberry Pi, Raspbian Stretch Lite (Release 2018-11-13)
+Cross Compiled on Ubuntu 18.04 using GCC 6.3.0
 
 **SDK Version (Please Give Commit SHA if Manually Compiling)**
 Release 2019-01-31
