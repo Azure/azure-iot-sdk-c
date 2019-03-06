@@ -13,7 +13,7 @@
 #include "azure_c_shared_utility/uniqueid.h"
 #include "azure_c_shared_utility/sastoken.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/tickcounter.h"
@@ -328,7 +328,7 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
                 else
                 {
                     const char* nonce_field = json_value_get_string(auth_key);
-                    if ((result->authorization_key = Base64_Decode(nonce_field)) == NULL)
+                    if ((result->authorization_key = Azure_Base64_Decode(nonce_field)) == NULL)
                     {
                         LogError("failure creating buffer nonce field");
                         prov_info->error_reason = PROV_DEVICE_RESULT_MEMORY;
@@ -395,7 +395,7 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
                         else
                         {
                             const char* nonce_field = json_value_get_string(auth_key);
-                            if ((result->authorization_key = Base64_Decode(nonce_field)) == NULL)
+                            if ((result->authorization_key = Azure_Base64_Decode(nonce_field)) == NULL)
                             {
                                 LogError("failure creating buffer nonce field");
                                 prov_info->error_reason = PROV_DEVICE_RESULT_MEMORY;
@@ -983,7 +983,7 @@ void Prov_Device_LL_DoWork(PROV_DEVICE_LL_HANDLE handle)
         }
         else
         {
-            // Check the connection 
+            // Check the connection
             if (prov_info->prov_timeout > 0)
             {
                 tickcounter_ms_t current_time = 0;

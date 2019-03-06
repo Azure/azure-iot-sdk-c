@@ -11,7 +11,7 @@
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/socketio.h"
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_uhttp_c/uhttp.h"
 
@@ -282,7 +282,7 @@ static BUFFER_HANDLE construct_json_signing_blob(const char* data)
         LogError("STRING_concat failed");
         result = NULL;
     }
-    else if ((data_base64_encoded = Base64_Encode_Bytes((const unsigned char*)STRING_c_str(data_url_encoded), strlen(STRING_c_str(data_url_encoded)))) == NULL)
+    else if ((data_base64_encoded = Azure_Base64_Encode_Bytes((const unsigned char*)STRING_c_str(data_url_encoded), strlen(STRING_c_str(data_url_encoded)))) == NULL)
     {
         LogError("base64 encoding of string %s failed", STRING_c_str(data_url_encoded));
         result = NULL;

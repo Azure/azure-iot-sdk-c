@@ -10,7 +10,7 @@
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/sha.h"
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 
 #include "azure_prov_client/prov_security_factory.h"
 #include "azure_prov_client/internal/prov_auth_client.h"

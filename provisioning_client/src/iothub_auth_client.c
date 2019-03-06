@@ -5,7 +5,7 @@
 #include "azure_c_shared_utility/umock_c_prod.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/sastoken.h"
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 #include "azure_c_shared_utility/sha.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/strings.h"
@@ -73,7 +73,7 @@ static int sign_sas_data(IOTHUB_SECURITY_INFO* security_info, const char* payloa
             LogError("Failed getting asymmetrical key");
             result = __FAILURE__;
         }
-        else if ((decoded_key = Base64_Decode(symmetrical_key)) == NULL)
+        else if ((decoded_key = Azure_Base64_Decode(symmetrical_key)) == NULL)
         {
             LogError("Failed decoding symmetrical key");
             result = __FAILURE__;
@@ -342,7 +342,7 @@ CREDENTIAL_RESULT* iothub_device_auth_generate_credentials(IOTHUB_SECURITY_HANDL
                         STRING_HANDLE signature = NULL;
                         if (handle->base64_encode_signature == true)
                         {
-                            signature = Base64_Encode_Bytes(data_value, data_len);
+                            signature = Azure_Base64_Encode_Bytes(data_value, data_len);
                         }
                         else
                         {

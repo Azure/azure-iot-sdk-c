@@ -6,7 +6,7 @@
 #include "azure_c_shared_utility/umock_c_prod.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/sastoken.h"
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 #include "azure_c_shared_utility/sha.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/strings.h"
@@ -420,7 +420,7 @@ static BUFFER_HANDLE decrypt_data(SEC_DEVICE_INFO* sec_info, const unsigned char
             curr_pos += enc_data_size;
             act_size -= enc_data_size;
 
-            // decrypts encrypted symmetric key ‘encSecret‘ and returns it as 'tpm_blob'.
+            // decrypts encrypted symmetric key ï¿½encSecretï¿½ and returns it as 'tpm_blob'.
             // Later 'tpm_blob' is used as the inner wrapper key for import of the HMAC key blob.
             if (TPM2_ActivateCredential(&sec_info->tpm_device, &NullPwSession, &ek_sess, TPM_20_SRK_HANDLE, TPM_20_EK_HANDLE, &tpm_blob, &tpm_enc_secret, &inner_wrap_key) != TPM_RC_SUCCESS)
             {
@@ -604,7 +604,7 @@ char* secure_dev_tpm_get_endorsement_key(SEC_DEVICE_HANDLE handle)
         unsigned char* data_pos = data_bytes;
         /* Codes_SRS_SECURE_DEVICE_TPM_07_014: [ secure_dev_tpm_get_endorsement_key shall allocate and return the Endorsement Key. ] */
         uint32_t data_length = TPM2B_PUBLIC_Marshal(&handle->ek_pub, &data_pos, NULL);
-        STRING_HANDLE encoded_ek = Base64_Encode_Bytes(data_bytes, data_length);
+        STRING_HANDLE encoded_ek = Azure_Base64_Encode_Bytes(data_bytes, data_length);
         if (encoded_ek == NULL)
         {
             /* Codes_SRS_SECURE_DEVICE_TPM_07_015: [ If a failure is encountered, secure_dev_tpm_get_endorsement_key shall return NULL. ] */
@@ -646,7 +646,7 @@ char* secure_dev_tpm_get_storage_key(SEC_DEVICE_HANDLE handle)
         unsigned char* data_pos = data_bytes;
         /* Codes_SRS_SECURE_DEVICE_TPM_07_018: [ secure_dev_tpm_get_storage_key shall allocate and return the Storage Root Key. ] */
         uint32_t data_length = TPM2B_PUBLIC_Marshal(&handle->srk_pub, &data_pos, NULL);
-        STRING_HANDLE encoded_srk = Base64_Encode_Bytes(data_bytes, data_length);
+        STRING_HANDLE encoded_srk = Azure_Base64_Encode_Bytes(data_bytes, data_length);
         if (encoded_srk == NULL)
         {
             /* Codes_SRS_SECURE_DEVICE_TPM_07_019: [ If any failure is encountered, secure_dev_tpm_get_storage_key shall return NULL. ] */
