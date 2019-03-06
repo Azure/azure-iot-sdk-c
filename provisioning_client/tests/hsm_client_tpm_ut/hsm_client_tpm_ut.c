@@ -39,7 +39,7 @@ static void my_gballoc_free(void* ptr)
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/sastoken.h"
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 #include "azure_c_shared_utility/sha.h"
 #include "azure_c_shared_utility/urlencode.h"
 
@@ -103,13 +103,13 @@ static int my_mallocAndStrcpy_s(char** destination, const char* source)
     return 0;
 }
 
-/*static BUFFER_HANDLE my_Base64_Decode(const char* source)
+/*static BUFFER_HANDLE my_Azure_Base64_Decode(const char* source)
 {
     (void)source;
     return (BUFFER_HANDLE)my_gballoc_malloc(1);
 }*/
 
-STRING_HANDLE my_Base64_Encode_Bytes(const unsigned char* source, size_t size)
+STRING_HANDLE my_Azure_Base64_Encode_Bytes(const unsigned char* source, size_t size)
 {
     (void)source;
     (void)size;
@@ -204,8 +204,8 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         REGISTER_GLOBAL_MOCK_RETURN(SignData, TEST_BUFFER_SIZE);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(SignData, 0);
 
-        //REGISTER_GLOBAL_MOCK_HOOK(Base64_Decode, my_Base64_Decode);
-        //REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Decode, NULL);
+        //REGISTER_GLOBAL_MOCK_HOOK(Azure_Base64_Decode, my_Azure_Base64_Decode);
+        //REGISTER_GLOBAL_MOCK_FAIL_RETURN(Azure_Base64_Decode, NULL);
         //REGISTER_GLOBAL_MOCK_HOOK(BUFFER_create, my_BUFFER_create);
         //REGISTER_GLOBAL_MOCK_FAIL_RETURN(BUFFER_create, NULL);
 
@@ -215,8 +215,8 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         REGISTER_GLOBAL_MOCK_RETURN(STRING_c_str, TEST_STRING_VALUE);
         REGISTER_GLOBAL_MOCK_HOOK(STRING_delete, my_STRING_delete);
 
-        REGISTER_GLOBAL_MOCK_HOOK(Base64_Encode_Bytes, my_Base64_Encode_Bytes);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Encode_Bytes, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(Azure_Base64_Encode_Bytes, my_Azure_Base64_Encode_Bytes);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Azure_Base64_Encode_Bytes, NULL);
 
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
