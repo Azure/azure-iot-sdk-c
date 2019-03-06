@@ -14,7 +14,7 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/macro_utils.h"
 #include "azure_c_shared_utility/xlogging.h"
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 
 #include "azure_prov_client/prov_device_ll_client.h"
 #include "azure_prov_client/prov_security_factory.h"
@@ -208,8 +208,8 @@ static void create_x509_enrollment_device()
         char* x509_cert = prov_auth_get_certificate(auth_handle);
         ASSERT_IS_NOT_NULL(x509_cert, "Failure prov_auth_get_certificate");
 
-        STRING_HANDLE base64_cert = Base64_Encode_Bytes((const unsigned char*)x509_cert, strlen(x509_cert));
-        ASSERT_IS_NOT_NULL(base64_cert, "Failure Base64_Encode_Bytes");
+        STRING_HANDLE base64_cert = Azure_Base64_Encode_Bytes((const unsigned char*)x509_cert, strlen(x509_cert));
+        ASSERT_IS_NOT_NULL(base64_cert, "Failure Azure_Base64_Encode_Bytes");
 
         ATTESTATION_MECHANISM_HANDLE attest_handle = attestationMechanism_createWithX509ClientCert(STRING_c_str(base64_cert), NULL);
         ASSERT_IS_NOT_NULL(attest_handle, "Failure hsm_client_riot_get_certificate ");
