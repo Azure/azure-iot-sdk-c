@@ -49,7 +49,7 @@ MQTT
 **Describe the Bug**
 If MQTT is unable to establish a connection, it will keep trying and once it succeeds queued messages will be sent to the Cloud. However, if for some reason we can't get past the initial connection phase, then SDK does not respect message timeouts. 
 
-**(MCVE)[https://stackoverflow.com/help/mcve]**
+**[MCVE](https://stackoverflow.com/help/mcve)**
 ```
 #include "iothub.h"
 
