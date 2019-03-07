@@ -12,14 +12,14 @@ assignees: ''
 INSTRUCTIONS
 ==========
 
-If the below instructions are not followed, we may be forced to close your issue.
+Please follow the instructions and template below. Otherwise, to maintain quality of issues we may be forced to close your issue.
 
 1. Search existing issues to avoid creating duplicates.
 
 2. If possible test using the latest release to make sure your issues has not already been fixed: 
 https://github.com/Azure/azure-iot-sdk-c/releases/latest 
 
-3. Do not share information from your Azure subscription here (connection strings, service names (IoT Hub name, Device Provisioning Service scope ID), etc...). If you absolutely need to share any of this information, you can create a ticket and get assistance from the Microsoft Support team using the following link: 
+3. Do not share information from your Azure subscription here (connection strings, service names (IoT Hub name, Device Provisioning Service scope ID), etc...). If you need to share any of this information, you can create a ticket and get assistance from the Microsoft Support team using the following link: 
 https://docs.microsoft.com/en-us/azure/azure-supportability/how-to-create-azure-support-request
 
 1. Include enough information for us to address the bug:
