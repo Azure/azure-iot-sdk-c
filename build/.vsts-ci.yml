@@ -269,7 +269,7 @@ phases:
     condition: always()
 - phase: wolfssl
   variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/vsts-c-wolfssl"
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/vsts-c-wolfssl:18.04"
   queue: Hosted Ubuntu 1604
   displayName: 'wolfssl'
   steps:
