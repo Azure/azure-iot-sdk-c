@@ -9,9 +9,10 @@ assignees: ''
 
 ------------------------------- delete below -------------------------------
 
-The best place to submit technical questions related to the SDK is on Stack Overflow. Simply submit a question with the tag "azure-iot-hub". 
+Thank you for asking a technical question! 
 
-Need Technical Support? Every customer with an active Azure subscription has access to support with guaranteed response time. Consider submitting a ticket and get assistance from Microsoft support team using the following link:
-https://docs.microsoft.com/en-us/azure/azure-supportability/how-to-create-azure-support-request
+Feel free to submit your question here, however we encourage users to submit technical questions related to the SDK on Stack Overflow. 
+
+For Stack Overflow, simply submit a question with the tag "azure-iot-hub". 
 
 ------------------------------- delete above -------------------------------
