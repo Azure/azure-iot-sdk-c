@@ -40,19 +40,24 @@ Below is a hypothetical bug report. We recommend you use it as a template and re
 
 
 **Development Machine, OS, Compiler (and Other Relevant Toolchain Info)**
+
 Raspberry Pi, Raspbian Stretch Lite (Release 2018-11-13)
 Cross Compiled on Ubuntu 18.04 using GCC 6.3.0
 
-**SDK Version (Please Give Commit SHA if Manually Compiling)**
+**SDK Version (Please Give Commit SHA if Manually Compiling**
+
 Release 2019-01-31
 
 **Protocol**
+
 MQTT
 
 **Describe the Bug**
+
 If MQTT is unable to establish a connection, it will keep trying and once it succeeds queued messages will be sent to the Cloud. However, if for some reason we can't get past the initial connection phase, then SDK does not respect message timeouts. 
 
 **[MCVE](https://stackoverflow.com/help/mcve)**
+
 ```
 #include "iothub.h"
 
@@ -69,6 +74,7 @@ int main(void)
 ```
 
 **Console Logs**
+
 Sending message 1 to IoTHub
 -> 15:07:42 PUBLISH | IS_DUP: false | RETAIN: 0 | QOS: DELIVER_AT_LEAST_ONCE | TOPIC_NAME: devices/tracingDevice/messages/events/property_key=property_value | PACKET_ID: 93 | PAYLOAD_LEN: 12
 <- 15:07:42 PUBACK | PACKET_ID: 92
