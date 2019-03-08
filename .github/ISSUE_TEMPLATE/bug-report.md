@@ -12,7 +12,7 @@ assignees: ''
 INSTRUCTIONS
 ==========
 
-Please follow the instructions and template below. Otherwise, to maintain quality of issues we may be forced to close your issue.
+Please follow the instructions and template below to save us time requesting additional information from you.
 
 1. Search existing issues to avoid creating duplicates.
 
