@@ -2,7 +2,7 @@
 name: Bug Report
 about: Create a bug report to help us improve
 title: ''
-labels: bug
+labels: 
 assignees: ''
 
 ---
@@ -44,7 +44,7 @@ Below is a hypothetical bug report. We recommend you use it as a template and re
 Raspberry Pi, Raspbian Stretch Lite (Release 2018-11-13)
 Cross Compiled on Ubuntu 18.04 using GCC 6.3.0
 
-**SDK Version (Please Give Commit SHA if Manually Compiling**
+**SDK Version (Please Give Commit SHA if Manually Compiling)**
 
 Release 2019-01-31
 
