@@ -2507,6 +2507,12 @@ int IoTHubTransportHttp_SetCallbackContext(TRANSPORT_LL_HANDLE handle, void* ctx
     return result;
 }
 
+static bool IoTHubTransportHttp_IsExtendedInfoRequired(void)
+{
+    // Do not include extended product information in HTTP requests
+    return false;
+}
+
 /*Codes_SRS_TRANSPORTMULTITHTTP_17_125: [This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for its fields:] */
 static TRANSPORT_PROVIDER thisTransportProvider =
 {
@@ -2531,7 +2537,8 @@ static TRANSPORT_PROVIDER thisTransportProvider =
     IotHubTransportHttp_Subscribe_InputQueue,       /*pfIoTHubTransport_Subscribe_InputQueue IoTHubTransport_Subscribe_InputQueue; */
     IotHubTransportHttp_Unsubscribe_InputQueue,     /*pfIoTHubTransport_Unsubscribe_InputQueue IoTHubTransport_Unsubscribe_InputQueue; */
     IoTHubTransportHttp_SetCallbackContext,         /*pfIoTHubTransport_SetTransportCallbacks IoTHubTransport_SetTransportCallbacks; */
-    IoTHubTransportHttp_GetTwinAsync                /*pfIoTHubTransport_GetTwinAsync IoTHubTransport_GetTwinAsync;*/
+    IoTHubTransportHttp_GetTwinAsync,               /*pfIoTHubTransport_GetTwinAsync IoTHubTransport_GetTwinAsync;*/
+    IoTHubTransportHttp_IsExtendedInfoRequired      /*pfIoTHubTransport_IsExtendedInfoRequired IoTHubTransport_IsExtendedInfoRequired;*/
 };
 
 const TRANSPORT_PROVIDER* HTTP_Protocol(void)
