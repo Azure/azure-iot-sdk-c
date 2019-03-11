@@ -40,7 +40,7 @@ static void my_gballoc_free(void* ptr)
 #include "azure_prov_client/internal/prov_auth_client.h"
 
 #define ENABLE_MOCKS
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 #include "azure_c_shared_utility/sha.h"
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
@@ -125,7 +125,7 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(PROV_AUTH_TYPE, PROV_AUTH_TYPE_VALUES);
 TEST_DEFINE_ENUM_TYPE(HMACSHA256_RESULT, HMACSHA256_RESULT);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(HMACSHA256_RESULT, HMACSHA256_RESULT);
 
-static const HSM_CLIENT_TPM_INTERFACE test_tpm_interface = 
+static const HSM_CLIENT_TPM_INTERFACE test_tpm_interface =
 {
     secure_device_create,
     secure_device_destroy,
@@ -260,7 +260,7 @@ static STRING_HANDLE my_Base64_Encode(BUFFER_HANDLE input)
     return (STRING_HANDLE)my_gballoc_malloc(1);
 }
 
-static STRING_HANDLE my_Base64_Encode_Bytes(const unsigned char* source, size_t size)
+static STRING_HANDLE my_Azure_Base64_Encode_Bytes(const unsigned char* source, size_t size)
 {
     (void)source;
     (void)size;
@@ -278,7 +278,7 @@ static char* my_Base32_Encode_Bytes(const unsigned char* source, size_t size)
     return result;
 }
 
-static BUFFER_HANDLE my_Base64_Decode(const char* source)
+static BUFFER_HANDLE my_Azure_Base64_Decode(const char* source)
 {
     (void)source;
     return (BUFFER_HANDLE)my_gballoc_malloc(1);
@@ -376,8 +376,8 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
 
         REGISTER_GLOBAL_MOCK_HOOK(secure_device_sign_data, my_secure_device_sign_data);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(secure_device_sign_data, __LINE__);
-        REGISTER_GLOBAL_MOCK_HOOK(Base64_Encode, my_Base64_Encode);
-        REGISTER_GLOBAL_MOCK_RETURN(Base64_Encode, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(Azure_Base64_Encode, my_Base64_Encode);
+        REGISTER_GLOBAL_MOCK_RETURN(Azure_Base64_Encode, NULL);
 
         REGISTER_GLOBAL_MOCK_RETURN(BUFFER_create, TEST_BUFFER_VALUE);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(BUFFER_create, NULL);
@@ -396,12 +396,12 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
 
         REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, my_mallocAndStrcpy_s);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, __LINE__);
-        REGISTER_GLOBAL_MOCK_HOOK(Base64_Encode_Bytes, my_Base64_Encode_Bytes);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Encode_Bytes, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(Azure_Base64_Encode_Bytes, my_Azure_Base64_Encode_Bytes);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Azure_Base64_Encode_Bytes, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(Base32_Encode_Bytes, my_Base32_Encode_Bytes);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base32_Encode_Bytes, NULL);
-        REGISTER_GLOBAL_MOCK_HOOK(Base64_Decode, my_Base64_Decode);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Decode, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(Azure_Base64_Decode, my_Azure_Base64_Decode);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Azure_Base64_Decode, NULL);
 
         REGISTER_GLOBAL_MOCK_HOOK(STRING_construct, my_STRING_construct);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_construct, NULL);
@@ -462,7 +462,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         if (use_key)
         {
             STRICT_EXPECTED_CALL(secure_device_get_symm_key(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(Base64_Decode(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(Azure_Base64_Decode(IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(BUFFER_new());
             STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG));
@@ -485,7 +485,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         STRICT_EXPECTED_CALL(size_tToString(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         setup_sign_sas_data(use_key);
-        STRICT_EXPECTED_CALL(Base64_Encode_Bytes(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(URL_Encode(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
