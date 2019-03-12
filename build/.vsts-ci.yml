@@ -3,7 +3,7 @@ resources:
 - repo: self
   clean: true
 phases:
-- phase: checksubmodule
+- phase: iotz
   queue:
     name: Hosted Ubuntu 1604
   steps:
@@ -18,8 +18,12 @@ phases:
       sudo apt-get install -y nodejs
     displayName: 'setup'
   - script: |
-      npm install check_submodules
-      ./../../node_modules/.bin/check_submodules . master
+      npm install iotz -g
+      iotz update
+      git clone https://github.com/obastemur/mxchip_az3166_firmware.git mxchip
+      cd mxchip
+      iotz init mbed
+      iotz compile
     displayName: 'build'
 - phase: raspberrypi
   variables:
