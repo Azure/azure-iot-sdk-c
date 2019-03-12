@@ -4,6 +4,7 @@
 #ifndef IOTHUB_TRANSPORT_LL_PRIVATE_H
 #define IOTHUB_TRANSPORT_LL_PRIVATE_H
 
+#include <stdbool.h>
 #include "iothub_transport_ll.h"
 
 union IOTHUB_IDENTITY_INFO_TAG;
@@ -90,6 +91,7 @@ extern "C"
     typedef int(*pfIoTHubTransport_Subscribe_InputQueue)(IOTHUB_DEVICE_HANDLE handle);
     typedef void(*pfIoTHubTransport_Unsubscribe_InputQueue)(IOTHUB_DEVICE_HANDLE handle);
     typedef int(*pfIoTHubTransport_SetCallbackContext)(TRANSPORT_LL_HANDLE handle, void* ctx);
+    typedef bool(*pfIoTHubTransport_IsExtendedInfoRequired)(void);
 
 #define TRANSPORT_PROVIDER_FIELDS                                                   \
 pfIotHubTransport_SendMessageDisposition IoTHubTransport_SendMessageDisposition;    \
@@ -114,7 +116,7 @@ pfIoTHubTransport_Subscribe_InputQueue IoTHubTransport_Subscribe_InputQueue;    
 pfIoTHubTransport_Unsubscribe_InputQueue IoTHubTransport_Unsubscribe_InputQueue;    \
 pfIoTHubTransport_SetCallbackContext IoTHubTransport_SetCallbackContext;            \
 pfIoTHubTransport_GetTwinAsync IoTHubTransport_GetTwinAsync;                        \
-pfIoTHubTransport_GetTwinAsync IoTHubTransport_IsExtendedInfoRequired     /*there's an intentional missing ; on this line*/
+pfIoTHubTransport_IsExtendedInfoRequired IoTHubTransport_IsExtendedInfoRequired     /*there's an intentional missing ; on this line*/
 
     struct TRANSPORT_PROVIDER_TAG
     {

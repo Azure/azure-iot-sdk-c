@@ -291,6 +291,7 @@ static void setTransportProtocol(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData, 
     handleData->IoTHubTransport_Subscribe_InputQueue = protocol->IoTHubTransport_Subscribe_InputQueue;
     handleData->IoTHubTransport_Unsubscribe_InputQueue = protocol->IoTHubTransport_Unsubscribe_InputQueue;
     handleData->IoTHubTransport_SetCallbackContext = protocol->IoTHubTransport_SetCallbackContext;
+    handleData->IoTHubTransport_IsExtendedInfoRequired = protocol->IoTHubTransport_IsExtendedInfoRequired;
 }
 
 static bool is_event_equal(IOTHUB_EVENT_CALLBACK *event_callback, const char *input_name)
@@ -462,10 +463,16 @@ static bool invoke_message_callback(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleDat
 
 /*Codes_SRS_IOTHUBCLIENT_LL_10_032: ["product_info" - takes a char string as an argument to specify the product information(e.g. `"ProductName/ProductVersion"`). ]*/
 /*Codes_SRS_IOTHUBCLIENT_LL_10_034: ["product_info" - shall store the given string concatenated with the sdk information and the platform information in the form(ProductInfo DeviceSDKName / DeviceSDKVersion(OSName OSVersion; Architecture). ]*/
-static STRING_HANDLE make_product_info(const char* product)
+static STRING_HANDLE make_product_info(const char* product, bool isExtendedInfoRequired)
 {
+    PLATFORM_INFO_OPTION option = PLATFORM_INFO_OPTION_DEFAULT;
+    if (isExtendedInfoRequired)
+    {
+        option = PLATFORM_INFO_OPTION_RETRIEVE_SQM;
+    }
+
     STRING_HANDLE result;
-    STRING_HANDLE pfi = platform_get_platform_info();
+    STRING_HANDLE pfi = platform_get_platform_info(option);
     if (pfi == NULL)
     {
         result = NULL;
@@ -764,7 +771,7 @@ static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_
 {
     IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* result;
     srand((unsigned int)time(NULL));
-    STRING_HANDLE product_info = make_product_info(NULL);
+    STRING_HANDLE product_info = make_product_info(NULL, false);
     if (product_info == NULL)
     {
         LogError("failed to initialize product info");
@@ -1008,6 +1015,14 @@ static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_
                         result->messageCallback.type = CALLBACK_TYPE_NONE;
                         result->lastMessageReceiveTime = INDEFINITE_TIME;
                         result->data_msg_id = 1;
+                        
+                        // Add extended info to product info if required
+                        bool isExtendedInfoRequired = result->IoTHubTransport_IsExtendedInfoRequired();
+                        if (isExtendedInfoRequired && product_info != NULL)
+                        {
+                            STRING_delete(product_info);
+                            product_info = make_product_info(NULL, isExtendedInfoRequired);
+                        }
                         result->product_info = product_info;
 
                         IOTHUB_DEVICE_CONFIG deviceConfig;
@@ -2238,7 +2253,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetOption(IOTHUB_CLIENT_CORE_LL_HANDLE 
             }
 
             /*Codes_SRS_IOTHUBCLIENT_LL_10_035: [If string concatenation fails, `IoTHubClientCore_LL_SetOption` shall return `IOTHUB_CLIENT_ERRROR`. Otherwise, `IOTHUB_CLIENT_OK` shall be returned. ]*/
-            handleData->product_info = make_product_info((const char*)value);
+            handleData->product_info = make_product_info((const char*)value, handleData->IoTHubTransport_IsExtendedInfoRequired());
             if (handleData->product_info == NULL)
             {
                 LogError("STRING_construct_sprintf failed");

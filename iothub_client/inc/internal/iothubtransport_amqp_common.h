@@ -4,7 +4,6 @@
 #ifndef IOTHUBTRANSPORTAMQP_COMMON_H
 #define IOTHUBTRANSPORTAMQP_COMMON_H
 
-#include <stdbool.h>
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
 #include "internal/iothub_transport_ll_private.h"
@@ -44,7 +43,6 @@ MOCKABLE_FUNCTION(, void, IoTHubTransport_AMQP_Common_Unregister, IOTHUB_DEVICE_
 MOCKABLE_FUNCTION(, STRING_HANDLE, IoTHubTransport_AMQP_Common_GetHostname, TRANSPORT_LL_HANDLE, handle);
 MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubTransport_AMQP_Common_SendMessageDisposition, MESSAGE_CALLBACK_INFO*, message_data, IOTHUBMESSAGE_DISPOSITION_RESULT, disposition);
 MOCKABLE_FUNCTION(, int, IoTHubTransport_AMQP_SetCallbackContext, TRANSPORT_LL_HANDLE, handle, void*, ctx);
-MOCKABLE_FUNCTION(, bool, IoTHubTransportAMQP_IsExtendedInfoRequired);
 
 #ifdef __cplusplus
 }
