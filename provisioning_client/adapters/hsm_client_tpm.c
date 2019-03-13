@@ -418,7 +418,7 @@ static BUFFER_HANDLE decrypt_data(HSM_CLIENT_INFO* sec_info, const unsigned char
             curr_pos += enc_data_size;
             act_size -= enc_data_size;
 
-            // decrypts encrypted symmetric key �encSecret� and returns it as 'tpm_blob'.
+            // decrypts encrypted symmetric key encSecret and returns it as 'tpm_blob'.
             // Later 'tpm_blob' is used as the inner wrapper key for import of the HMAC key blob.
             if (TPM2_ActivateCredential(&sec_info->tpm_device, &NullPwSession, &ek_sess, TPM_20_SRK_HANDLE, TPM_20_EK_HANDLE, &tpm_blob, &tpm_enc_secret, &inner_wrap_key) != TPM_RC_SUCCESS)
             {
