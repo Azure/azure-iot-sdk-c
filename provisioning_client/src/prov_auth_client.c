@@ -5,7 +5,7 @@
 #include "azure_c_shared_utility/umock_c_prod.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/xlogging.h"
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 #include "azure_c_shared_utility/base32.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/sha.h"
@@ -160,33 +160,33 @@ static int sign_sas_data(PROV_AUTH_INFO* auth_info, const char* payload, unsigne
     }
     else
     {
+        BUFFER_HANDLE decoded_key = NULL;
+        BUFFER_HANDLE output_hash = NULL;
+
         char* symmetrical_key = auth_info->hsm_client_get_symm_key(auth_info->hsm_client_handle);
         if (symmetrical_key == NULL)
         {
             LogError("Failed getting asymmetrical key");
             result = __FAILURE__;
         }
+        else if ((decoded_key = Azure_Base64_Decode(symmetrical_key)) == NULL)
+        {
+            LogError("Failed decoding symmetrical key");
+            result = __FAILURE__;
+        }
+        else if ((output_hash = BUFFER_new()) == NULL)
+        {
+            LogError("Failed allocating output hash buffer");
+            result = __FAILURE__;
+        }
         else
         {
-            BUFFER_HANDLE decoded_key;
-            BUFFER_HANDLE output_hash;
+            size_t decoded_key_len = BUFFER_length(decoded_key);
+            const unsigned char* decoded_key_bytes = BUFFER_u_char(decoded_key);
 
-            if ((decoded_key = Base64_Decoder(symmetrical_key)) == NULL)
-            {
-                LogError("Failed decoding symmetrical key");
-                result = __FAILURE__;
-            }
-            else if ((output_hash = BUFFER_new()) == NULL)
-            {
-                LogError("Failed allocating output hash buffer");
-                BUFFER_delete(decoded_key);
-                result = __FAILURE__;
-            }
-            else if (HMACSHA256_ComputeHash(BUFFER_u_char(decoded_key), BUFFER_length(decoded_key), (const unsigned char*)payload, payload_len, output_hash) != HMACSHA256_OK)
+            if (HMACSHA256_ComputeHash(decoded_key_bytes, decoded_key_len, (const unsigned char*)payload, payload_len, output_hash) != HMACSHA256_OK)
             {
                 LogError("Failed computing HMAC Hash");
-                BUFFER_delete(decoded_key);
-                BUFFER_delete(output_hash);
                 result = __FAILURE__;
             }
             else
@@ -203,11 +203,13 @@ static int sign_sas_data(PROV_AUTH_INFO* auth_info, const char* payload, unsigne
                     memcpy(*output, output_data, *len);
                     result = 0;
                 }
-                BUFFER_delete(decoded_key);
-                BUFFER_delete(output_hash);
+
             }
-            free(symmetrical_key);
         }
+
+        BUFFER_delete(decoded_key);
+        BUFFER_delete(output_hash);
+        free(symmetrical_key);
     }
     return result;
 }
@@ -224,6 +226,7 @@ PROV_AUTH_HANDLE prov_auth_create()
     {
         memset(result, 0, sizeof(PROV_AUTH_INFO) );
         SECURE_DEVICE_TYPE sec_type = prov_dev_security_get_type();
+#if defined(HSM_TYPE_SAS_TOKEN)  || defined(HSM_AUTH_TYPE_CUSTOM)
         if (sec_type == SECURE_DEVICE_TYPE_TPM)
         {
             /* Codes_SRS_PROV_AUTH_CLIENT_07_003: [ prov_auth_create shall validate the specified secure enclave interface to ensure. ] */
@@ -244,7 +247,9 @@ PROV_AUTH_HANDLE prov_auth_create()
                 result = NULL;
             }
         }
-        else if (sec_type == SECURE_DEVICE_TYPE_X509)
+#endif
+#if defined(HSM_TYPE_X509) || defined(HSM_AUTH_TYPE_CUSTOM)
+        if (sec_type == SECURE_DEVICE_TYPE_X509)
         {
             /* Codes_SRS_PROV_AUTH_CLIENT_07_003: [ prov_auth_create shall validate the specified secure enclave interface to ensure. ] */
             result->sec_type = PROV_AUTH_TYPE_X509;
@@ -262,9 +267,10 @@ PROV_AUTH_HANDLE prov_auth_create()
                 result = NULL;
             }
         }
-        else
-        {
+#endif
 #if defined(HSM_TYPE_SYMM_KEY) || defined(HSM_AUTH_TYPE_CUSTOM)
+        if (sec_type == SECURE_DEVICE_TYPE_SYMMETRIC_KEY)
+        {
             result->sec_type = PROV_AUTH_TYPE_KEY;
             const HSM_CLIENT_KEY_INTERFACE* key_interface = hsm_client_key_interface();
             if ((key_interface == NULL) ||
@@ -279,13 +285,20 @@ PROV_AUTH_HANDLE prov_auth_create()
                 free(result);
                 result = NULL;
             }
-#else
-            LogError("Invalid secure device type was specified");
-            result = NULL;
-#endif
         }
+#endif
 
-        if (result != NULL)
+        if (result == NULL)
+        {
+            LogError("Error allocating result or else unsupported security type %d", sec_type);
+        }
+        else if (result->hsm_client_create == NULL)
+        {
+            LogError("hsm_client_create is not a valid address");
+            free(result);
+            result = NULL;
+        }
+        else
         {
             /* Codes_SRS_PROV_AUTH_CLIENT_07_004: [ prov_auth_create shall call hsm_client_create on the secure enclave interface. ] */
             if ((result->hsm_client_handle = result->hsm_client_create() ) == NULL)
@@ -560,7 +573,7 @@ char* prov_auth_construct_sas_token(PROV_AUTH_HANDLE handle, const char* token_s
                 STRING_HANDLE urlEncodedSignature;
                 STRING_HANDLE base64Signature;
                 STRING_HANDLE sas_token_handle;
-                if ((base64Signature = Base64_Encode_Bytes(data_value, data_len)) == NULL)
+                if ((base64Signature = Azure_Base64_Encode_Bytes(data_value, data_len)) == NULL)
                 {
                     result = NULL;
                     LogError("Failure constructing base64 encoding.");
