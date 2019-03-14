@@ -16,13 +16,13 @@ RUN apt-get update && apt-get -y upgrade
 
 # Install wget git cmake xz-utils
 
-RUN apt-get install -y wget git cmake xz-utils
+RUN apt-get install -y wget git cmake xz-utils sshfs sudo pkg-config uuid-dev
 
 
 
 # Add a non-root user
 
-RUN useradd -d /home/builder -ms /bin/bash -G sudo -p builder builder
+RUN useradd  -d /home/builder -ms /bin/bash -G sudo -p builder builder
 
 
 
@@ -205,7 +205,8 @@ RUN ls -al
 
 # Build the SDK. This will use the OpenSSL, cURL and uuid binaries that we built before
 
-RUN cmake -DCMAKE_TOOLCHAIN_FILE=toolchain.cmake -Duse_prov_client:BOOL=OFF -DCMAKE_INSTALL_PREFIX=${TOOLCHAIN_PREFIX} -Drun_e2e_tests=ON -Drun_unittests=ON ..
+
+RUN cmake -DCMAKE_TOOLCHAIN_FILE=toolchain.cmake -Duse_prov_client:BOOL=OFF -DCMAKE_INSTALL_PREFIX=${TOOLCHAIN_PREFIX} -Drun_e2e_tests:BOOL=ON ..
 
 RUN make -j 2
 
