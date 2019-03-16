@@ -5,7 +5,7 @@ resources:
 phases:
 - phase: iotz
   queue:
-    name: Hosted Ubuntu 1604
+    name: mx-local
   steps:
   - script: |
       sudo apt-get update && apt-get install -y \
@@ -25,19 +25,3 @@ phases:
       ./../../../node_modules/.bin/iotz init mbed
       ./../../../node_modules/.bin/iotz compile
     displayName: 'build'
-- phase: raspberrypi
-  variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/raspberrypi-c"
-  queue: Hosted Ubuntu 1604
-  displayName: raspberrypi
-  steps:
-  - script: |
-     $HOME
-     whoami
-     ls -lr
-     pwd
-     sudo ./jenkins/raspberrypi_c.sh
-    displayName: 'build'
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'cleanup'
-
