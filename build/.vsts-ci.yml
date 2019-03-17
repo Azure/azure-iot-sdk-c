@@ -8,12 +8,8 @@ phases:
     name: mxchip-c
   steps:
   - script: |
-      npm install iotz --loglevel=error &&
-      node_modules\.bin\iotz update &&
-      git clone https://github.com/obastemur/mxchip_az3166_firmware.git mxchip &&
-      cd mxchip &&
-      ..\node_modules\.bin\iotz init mbed &&
-      ..\node_modules\.bin\iotz compile
+      call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsDevCmd.bat"
+      call build_all\windows\build_mxchip.cmd
     displayName: 'build'
   - script: |
       copy BUILD\AZ3166\GCC_ARM\mxchip.bin j: 
