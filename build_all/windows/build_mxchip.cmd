@@ -24,9 +24,9 @@ rem ----------------------------------------------------------------------------
 rem -- build with CMAKE
 rem -----------------------------------------------------------------------------
 
-npm install iotz --loglevel=error
-node_modules\.bin\iotz update
+call npm install iotz --loglevel=error
+call node_modules\.bin\iotz update
 git clone https://github.com/obastemur/mxchip_az3166_firmware.git mxchip
 cd mxchip
-..\node_modules\.bin\iotz init mbed
-..\node_modules\.bin\iotz compile
+call ..\node_modules\.bin\iotz init mbed
+call ..\node_modules\.bin\iotz compile
