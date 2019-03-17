@@ -16,5 +16,5 @@ phases:
       ..\node_modules\.bin\iotz compile
     displayName: 'build'
   - script: |
-      copy BUILD\AZ3166\GCC_ARM\mxchip.bin f: 
+      copy BUILD\AZ3166\GCC_ARM\mxchip.bin j: 
     displayName: 'deploy'
