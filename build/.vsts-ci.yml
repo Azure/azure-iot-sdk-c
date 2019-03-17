@@ -8,7 +8,7 @@ phases:
     name: mxchip-c
   steps:
   - script: |
-      npm install iotz
+      npm install iotz --loglevel=error
       node_modules\.bin\iotz update
       git clone https://github.com/obastemur/mxchip_az3166_firmware.git mxchip
       cd mxchip
