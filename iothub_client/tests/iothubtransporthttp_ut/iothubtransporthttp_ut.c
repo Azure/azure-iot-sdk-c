@@ -41,7 +41,7 @@ static void my_gballoc_free(void* ptr)
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/httpapiex.h"
 #include "azure_c_shared_utility/httpapiexsas.h"
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 #include "azure_c_shared_utility/vector.h"
 #include "azure_c_shared_utility/vector_types_internal.h"
 #include "azure_c_shared_utility/lock.h"
@@ -7918,7 +7918,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_happy_path_succeeds)
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
-        STRICT_EXPECTED_CALL(Base64_Encode_Bytes(buffer1, buffer1_size));
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer1, buffer1_size));
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -8041,7 +8041,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_ht
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
-        STRICT_EXPECTED_CALL(Base64_Encode_Bytes(buffer1, buffer1_size));
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer1, buffer1_size));
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -8164,7 +8164,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_HT
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
-        STRICT_EXPECTED_CALL(Base64_Encode_Bytes(buffer1, buffer1_size));
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer1, buffer1_size));
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -8288,7 +8288,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_BU
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
-        STRICT_EXPECTED_CALL(Base64_Encode_Bytes(buffer1, buffer1_size));
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer1, buffer1_size));
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -8396,7 +8396,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_BU
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
-        STRICT_EXPECTED_CALL(Base64_Encode_Bytes(buffer1, buffer1_size));
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer1, buffer1_size));
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -8492,7 +8492,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_concat_wi
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
-        STRICT_EXPECTED_CALL(Base64_Encode_Bytes(buffer1, buffer1_size));
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer1, buffer1_size));
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -8567,7 +8567,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_concat_it
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
-        STRICT_EXPECTED_CALL(Base64_Encode_Bytes(buffer1, buffer1_size));
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer1, buffer1_size));
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -8636,7 +8636,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_concat_it
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
-        STRICT_EXPECTED_CALL(Base64_Encode_Bytes(buffer1, buffer1_size));
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer1, buffer1_size));
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -8698,7 +8698,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_concat_wi
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
-        STRICT_EXPECTED_CALL(Base64_Encode_Bytes(buffer1, buffer1_size));
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer1, buffer1_size));
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -8722,7 +8722,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_concat_wi
 }
 
 //Tests_SRS_TRANSPORTMULTITHTTP_17_067: [ If there is no valid payload, IoTHubTransportHttp_DoWork shall advance to the next activity. ]
-TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_Base64_Encode_Bytes_it_fails)
+TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_Azure_Base64_Encode_Bytes_it_fails)
 {
     //arrange
 
@@ -8754,8 +8754,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_Base64_Encode_By
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
-        whenShallBase64_Encode_Bytes_fail = 1;
-        STRICT_EXPECTED_CALL(Base64_Encode_Bytes(buffer1, buffer1_size));
+        whenShallAzure_Base64_Encode_Bytes_fail = 1;
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer1, buffer1_size));
         /*end of the first batched payload*/
     }
 
@@ -8965,7 +8965,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_bigger_than_256K_path
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
-        STRICT_EXPECTED_CALL(Base64_Encode_Bytes(bigBufferOverflow, TEST_BIG_BUFFER_1_OVERFLOW_SIZE));
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(bigBufferOverflow, TEST_BIG_BUFFER_1_OVERFLOW_SIZE));
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -9042,7 +9042,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_almost255_happy_path_
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
-        STRICT_EXPECTED_CALL(Base64_Encode_Bytes(bigBufferFit, TEST_BIG_BUFFER_1_FIT_SIZE));
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(bigBufferFit, TEST_BIG_BUFFER_1_FIT_SIZE));
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -9170,7 +9170,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_makes_1_batch_succee
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
-        STRICT_EXPECTED_CALL(Base64_Encode_Bytes(buffer1, buffer1_size));
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer1, buffer1_size));
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -9207,7 +9207,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_makes_1_batch_succee
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
-        STRICT_EXPECTED_CALL(Base64_Encode_Bytes(buffer2, buffer2_size));
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer2, buffer2_size));
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -9337,7 +9337,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_when_the_second_item
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
-        STRICT_EXPECTED_CALL(Base64_Encode_Bytes(buffer1, buffer1_size));
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer1, buffer1_size));
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -9374,7 +9374,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_when_the_second_item
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
-        STRICT_EXPECTED_CALL(Base64_Encode_Bytes(buffer2, buffer2_size));
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer2, buffer2_size));
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -9495,7 +9495,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_when_the_second_item
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
-        STRICT_EXPECTED_CALL(Base64_Encode_Bytes(buffer1, buffer1_size));
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer1, buffer1_size));
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -9532,7 +9532,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_when_the_second_item
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
-        STRICT_EXPECTED_CALL(Base64_Encode_Bytes(buffer2, buffer2_size));
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer2, buffer2_size));
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -9658,7 +9658,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_the_second_one_does_
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
-        STRICT_EXPECTED_CALL(Base64_Encode_Bytes(buffer1, buffer1_size));
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer1, buffer1_size));
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -9695,7 +9695,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_the_second_one_does_
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
-        STRICT_EXPECTED_CALL(Base64_Encode_Bytes(bigBufferFit, TEST_BIG_BUFFER_1_FIT_SIZE));
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(bigBufferFit, TEST_BIG_BUFFER_1_FIT_SIZE));
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -9958,12 +9958,12 @@ void setupIrrelevantMocksForProperties(CIoTHubTransportHttpMocks *IOTHUB_MESSAGE
 
         if(messageHandle == TEST_IOTHUB_MESSAGE_HANDLE_11)
         {
-            STRICT_EXPECTED_CALL((*mocks), Base64_Encode_Bytes(buffer11, buffer11_size));
+            STRICT_EXPECTED_CALL((*mocks), Azure_Base64_Encode_Bytes(buffer11, buffer11_size));
 
         }
         else
         {
-            STRICT_EXPECTED_CALL((*mocks), Base64_Encode_Bytes(buffer6, buffer6_size));
+            STRICT_EXPECTED_CALL((*mocks), Azure_Base64_Encode_Bytes(buffer6, buffer6_size));
         }
 
         STRICT_EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
@@ -10245,7 +10245,7 @@ void setupIrrelevantMocksForProperties2(CIoTHubTransportHttpMocks *IOTHUB_MESSAG
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
-        STRICT_EXPECTED_CALL((*mocks), Base64_Encode_Bytes(buffer6, buffer6_size));
+        STRICT_EXPECTED_CALL((*mocks), Azure_Base64_Encode_Bytes(buffer6, buffer6_size));
         STRICT_EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -10278,7 +10278,7 @@ void setupIrrelevantMocksForProperties2(CIoTHubTransportHttpMocks *IOTHUB_MESSAG
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
-        STRICT_EXPECTED_CALL((*mocks), Base64_Encode_Bytes(buffer7, buffer7_size));
+        STRICT_EXPECTED_CALL((*mocks), Azure_Base64_Encode_Bytes(buffer7, buffer7_size));
         STRICT_EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -14393,7 +14393,7 @@ TEST_FUNCTION(IoTHubTransportHttp_GetTwinAsync_returns)
 {
     //arrange
     TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
-    
+
     umock_c_reset_all_calls();
 
     //act

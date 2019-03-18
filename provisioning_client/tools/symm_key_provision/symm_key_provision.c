@@ -10,7 +10,7 @@
 #include "azure_c_shared_utility/uuid.h"
 #include "azure_c_shared_utility/sha.h"
 #include "azure_c_shared_utility/hmacsha256.h"
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 
 typedef struct REGISTRATION_INFO_TAG
 {
@@ -82,7 +82,7 @@ static int construct_individual_enrollment(void)
     UUID_T uuid;
     if (UUID_generate(&uuid) == 0)
     {
-        STRING_HANDLE device_key = Base64_Encode_Bytes(uuid, 16);
+        STRING_HANDLE device_key = Azure_Base64_Encode_Bytes(uuid, 16);
         if (device_key == NULL)
         {
             (void)printf("Failure generating key info\r\n");
@@ -123,7 +123,7 @@ static int construct_group_enrollment(void)
     {
         BUFFER_HANDLE decode_key;
         BUFFER_HANDLE hash;
-        if ((decode_key = Base64_Decode(group_key)) == NULL)
+        if ((decode_key = Azure_Base64_Decode(group_key)) == NULL)
         {
             (void)printf("Failure decoding group key\r\n");
             result = __LINE__;
@@ -144,7 +144,7 @@ static int construct_group_enrollment(void)
             }
             else
             {
-                device_key = Base64_Encode(hash);
+                device_key = Azure_Base64_Encode(hash);
                 (void)printf("Symmetric Key: %s\r\n", STRING_c_str(device_key));
                 STRING_delete(device_key);
                 result = 0;
