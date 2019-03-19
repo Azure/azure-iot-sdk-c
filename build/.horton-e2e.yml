@@ -1,0 +1,20 @@
+variables:
+  Horton.FrameworkRoot: $(Agent.BuildDirectory)/e2e-fx
+  Horton.FrameworkRef: master
+  Horton.Language: c
+  Horton.Repo: $(Build.Repository.Uri)
+  Horton.Commit: $(Build.SourceBranch)
+  Horton.ForcedImage: ''
+
+resources:
+  repositories:
+  - repository: e2e_fx
+    type: github
+    name: Azure/iot-sdks-e2e-fx
+    ref: refs/heads/master
+    endpoint: 'GitHub OAuth - az-iot-builder-01'
+
+jobs:
+- template: vsts/templates/jobs-gate-c.yaml@e2e_fx
+
+  
