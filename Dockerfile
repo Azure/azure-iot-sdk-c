@@ -23,16 +23,16 @@ RUN apt-get install -y wget git cmake xz-utils sshfs sudo pkg-config uuid-dev op
 # Add a non-root user
 
 #RUN useradd  -d /home/builder -ms /bin/bash -G sudo -p builder builder
-RUN useradd  -d /home/aziotctl-user -ms /bin/bash -G sudo -p aziotctl-user aziotctl-user
+RUN useradd  -d /home/aziotcl-user -ms /bin/bash -G sudo -p aziotcl-user aziotcl-user
 
 
 # Switch to new user
 
 #USER builder
-USER aziotctl-user
+USER aziotcl-user
 
 #WORKDIR /home/builder
-WORKDIR /home/aziotctl-user
+WORKDIR /home/aziotcl-user
 
 
 # Don't use RPiTools because gcc is old, use linaro's toolchain
@@ -48,7 +48,7 @@ WORKDIR /home/aziotctl-user
 RUN mkdir RPiBuild
 
 #ENV WORK_ROOT=/home/builder/RPiBuild
-ENV WORK_ROOT=/home/aziotctl-user/RPiBuild
+ENV WORK_ROOT=/home/aziotcl-user/RPiBuild
 
 WORKDIR ${WORK_ROOT}
 
