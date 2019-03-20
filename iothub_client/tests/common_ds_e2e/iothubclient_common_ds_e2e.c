@@ -24,7 +24,6 @@
 
 #include "azure_c_shared_utility/httpapiex.h"
 #include "azure_c_shared_utility/httpapiexsas.h"
-#include "azure_c_shared_utility/base64.h"
 
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/uniqueid.h"
@@ -89,7 +88,7 @@ typedef struct EXPECTED_DEVICE_STREAMING_REQUEST_TAG
 {
     char* streamName;
     bool shouldAccept;
-    size_t responseDelaySecs;
+    unsigned int responseDelaySecs;
     DEVICE_STREAM_C2D_REQUEST* request;
     TEST_DEVICE_STREAMING_RESPONSE* response;
 } EXPECTED_DEVICE_STREAMING_REQUEST;
@@ -98,8 +97,11 @@ typedef struct WEBSOCKET_CLIENT_CONTEXT_TAG
 {
     bool isDeviceClient;
     bool isOpen;
+    bool hadOpenError;
+    bool hadSendError;
     bool isFaulty;
-    bool isCloseAckd;
+    bool remoteCloseReceived;
+    bool localCloseConfirmed;
     char* dataSent;
     char* dataReceived;
     EXPECTED_DEVICE_STREAMING_REQUEST* expDSReq;
@@ -311,9 +313,9 @@ static int parse_device_streaming_response(HTTP_HEADERS_HANDLE httpResponseHeade
     bool* isAccepted, char** url, char** authorizationToken)
 {
     int result;
-    char* isAcceptedCharPtr;
+    const char* isAcceptedCharPtr;
 
-    if ((isAcceptedCharPtr = findAndCloneHttpHeaderValue(httpResponseHeaders, DEVICE_STREAMING_RESPONSE_FIELD_IS_ACCEPTED)) == NULL)
+    if ((isAcceptedCharPtr = HTTPHeaders_FindHeaderValue(httpResponseHeaders, DEVICE_STREAMING_RESPONSE_FIELD_IS_ACCEPTED)) == NULL)
     {
         LogError("Failed parsing device streaming response (%s)", DEVICE_STREAMING_RESPONSE_FIELD_IS_ACCEPTED);
         result = __FAILURE__;
@@ -466,6 +468,8 @@ static int ds_e2e_send_device_streaming_request_async(const char* deviceId, cons
                                     result = __FAILURE__;
                                 }
                             }
+
+                            BUFFER_delete(responseBuffer);
                         }
 
                         HTTPHeaders_Free(httpResponseHeaders);
@@ -508,26 +512,26 @@ static void setoption_on_device_or_module(const char * optionName, const void * 
 static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS status, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason, void* userContextCallback)
 {
     (void)userContextCallback;
-    LogInfo("connection_status_callback: status=<%d>, reason=<%s>", status, ENUM_TO_STRING(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason));
+    LogInfo("[TEST] connection_status_callback: status=<%d>, reason=<%s>", status, ENUM_TO_STRING(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason));
 }
 
-static void setconnectionstatuscallback_on_device_or_module()
+static void setconnectionstatuscallback_on_device_or_module(DEVICE_STREAMING_TEST_CONTEXT* client_state)
 {
     IOTHUB_CLIENT_RESULT result;
 
     if (iothub_moduleclient_handle != NULL)
     {
-        result = IoTHubModuleClient_SetConnectionStatusCallback(iothub_moduleclient_handle, connection_status_callback, NULL);
+        result = IoTHubModuleClient_SetConnectionStatusCallback(iothub_moduleclient_handle, connection_status_callback, client_state);
     }
     else
     {
-        result = IoTHubDeviceClient_SetConnectionStatusCallback(iothub_deviceclient_handle, connection_status_callback, NULL);
+        result = IoTHubDeviceClient_SetConnectionStatusCallback(iothub_deviceclient_handle, connection_status_callback, client_state);
     }
 
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set connection Status Callback");
 }
 
-static void client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+static void client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, DEVICE_STREAMING_TEST_CONTEXT* device_client_state)
 {
     ASSERT_IS_NULL(iothub_deviceclient_handle, "iothub_deviceclient_handle is non-NULL on test initialization");
     ASSERT_IS_NULL(iothub_moduleclient_handle, "iothub_moduleclient_handle is non-NULL on test initialization");
@@ -548,7 +552,7 @@ static void client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
     // Set connection status change callback
-    setconnectionstatuscallback_on_device_or_module();
+    setconnectionstatuscallback_on_device_or_module(device_client_state);
 
     if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509)
     {
@@ -605,7 +609,7 @@ static char* get_me_a_new_stream_name()
 }
 
 static EXPECTED_DEVICE_STREAMING_REQUEST* add_expected_streaming_request(
-    DEVICE_STREAMING_TEST_CONTEXT* dsTestCtx, bool shouldAccept, size_t responseDelaySecs)
+    DEVICE_STREAMING_TEST_CONTEXT* dsTestCtx, bool shouldAccept, unsigned int responseDelaySecs)
 {
     EXPECTED_DEVICE_STREAMING_REQUEST* result;
     LIST_ITEM_HANDLE list_item;
@@ -681,6 +685,8 @@ static void destroy_device_streaming_test_context(DEVICE_STREAMING_TEST_CONTEXT*
 {
     (void)singlylinkedlist_remove_if(dsTestCtx->expectedRequests, destroy_expected_streaming_request_in_list, NULL);
     (void)singlylinkedlist_remove_if(dsTestCtx->requestsReceived, destroy_device_streaming_requests_in_list, NULL);
+    singlylinkedlist_destroy(dsTestCtx->expectedRequests);
+    singlylinkedlist_destroy(dsTestCtx->requestsReceived);
     free(dsTestCtx);
 }
 
@@ -749,8 +755,6 @@ static void set_device_streaming_callback(DEVICE_STREAMING_TEST_CONTEXT* dsTestC
     }
 
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "SetStreamRequestCallback failed");
-
-    ThreadAPI_Sleep(2000); // Waiting a little bit until subscription is good.
 }
 
 static int verify_device_streaming_requests_received(DEVICE_STREAMING_TEST_CONTEXT* dsTestCtx)
@@ -759,7 +763,7 @@ static int verify_device_streaming_requests_received(DEVICE_STREAMING_TEST_CONTE
 
     if (dsTestCtx->numOfRequestsReceived != dsTestCtx->numOfRequestsExpected)
     {
-        LogError("Expected %d stream requests, but got %d", (int)dsTestCtx->numOfRequestsExpected, (int)dsTestCtx->numOfRequestsReceived);
+        LogError("[TEST] Expected %d stream requests, but got %d", (int)dsTestCtx->numOfRequestsExpected, (int)dsTestCtx->numOfRequestsReceived);
         result = __FAILURE__;
     }
     else
@@ -774,12 +778,12 @@ static int verify_device_streaming_requests_received(DEVICE_STREAMING_TEST_CONTE
 
             if (expDSReq->request == NULL)
             {
-                LogError("Did not received request for stream %s", expDSReq->streamName);
+                LogError("[TEST] Did not received request for stream %s", expDSReq->streamName);
                 result = __FAILURE__;
             }
             else if (expDSReq->response->isAccepted != expDSReq->shouldAccept)
             {
-                LogError("Unexpected response for stream request (%s, shouldAccept=%d, isAccepted=%d", expDSReq->streamName, (int)expDSReq->shouldAccept, (int)expDSReq->response->isAccepted);
+                LogError("[TEST] Unexpected response for stream request (%s, shouldAccept=%d, isAccepted=%d", expDSReq->streamName, (int)expDSReq->shouldAccept, (int)expDSReq->response->isAccepted);
                 result = __FAILURE__;
             }
 
@@ -803,19 +807,18 @@ static void on_ws_open_complete(void* context, WS_OPEN_RESULT ws_open_result)
     }
     else
     {
-        clientCtx->isFaulty = true;
-
         LogError("[TEST] on_ws_open_complete (%s, %d, %s)", clientCtx->expDSReq->streamName, (int)clientCtx->isDeviceClient, ENUM_TO_STRING(WS_OPEN_RESULT, ws_open_result));
+        clientCtx->hadOpenError = true;
     }
 }
 
 static void on_ws_send_frame_complete(void* context, WS_SEND_FRAME_RESULT ws_send_frame_result)
 {
-    if (ws_send_frame_result != WS_SEND_FRAME_OK)
+    if (ws_send_frame_result != WS_SEND_FRAME_OK && ws_send_frame_result != WS_SEND_FRAME_CANCELLED)
     {
         WEBSOCKET_CLIENT_CONTEXT* clientCtx = (WEBSOCKET_CLIENT_CONTEXT*)context;
         LogError("[TEST] Failed sending stream data (%s, %d, %s)", clientCtx->expDSReq->streamName, (int)clientCtx->isDeviceClient, ENUM_TO_STRING(WS_SEND_FRAME_RESULT, ws_send_frame_result));
-        clientCtx->isFaulty = true;
+        clientCtx->hadSendError = true;
     }
 }
 
@@ -843,26 +846,27 @@ static void on_ws_frame_received(void* context, unsigned char frame_type, const 
     WEBSOCKET_CLIENT_CONTEXT* clientCtx = (WEBSOCKET_CLIENT_CONTEXT*)context;
 
     clientCtx->dataReceived = cloneToNullTerminatedString(buffer, size);
+
     ASSERT_IS_NOT_NULL(clientCtx->dataReceived, "Failed copying received data frame (%s; %d)", clientCtx->expDSReq->streamName, clientCtx->isDeviceClient);
 }
 
 static void on_ws_peer_closed(void* context, uint16_t* close_code, const unsigned char* extra_data, size_t extra_data_length)
 {
     WEBSOCKET_CLIENT_CONTEXT* clientCtx = (WEBSOCKET_CLIENT_CONTEXT*)context;
-    LogInfo("on_ws_peer_closed (%s; %d; Code=%d; Data=%.*s)", clientCtx->expDSReq->streamName, (int)clientCtx->isDeviceClient, *(int*)close_code, (int)extra_data_length, (const char*)extra_data);
+    LogInfo("[TEST] on_ws_peer_closed (%s; %d; Code=%d; Data=%.*s)", clientCtx->expDSReq->streamName, (int)clientCtx->isDeviceClient, *(int*)close_code, (int)extra_data_length, (const char*)extra_data);
+    clientCtx->remoteCloseReceived = true;
 }
 
 static void on_ws_closed(void* context)
 {
     WEBSOCKET_CLIENT_CONTEXT* clientCtx = (WEBSOCKET_CLIENT_CONTEXT*)context;
-    clientCtx->isCloseAckd = true;
+    clientCtx->localCloseConfirmed = true;
 }
-
 
 static void on_ws_error(void* context, WS_ERROR error_code)
 {
     WEBSOCKET_CLIENT_CONTEXT* clientCtx = (WEBSOCKET_CLIENT_CONTEXT*)context;
-    LogError("on_ws_error (%s, %d, %s)\r\n", clientCtx->expDSReq->streamName, (int)clientCtx->isDeviceClient, ENUM_TO_STRING(WS_ERROR, error_code));
+    LogError("[TEST] on_ws_error (%s, %d, %s)\r\n", clientCtx->expDSReq->streamName, (int)clientCtx->isDeviceClient, ENUM_TO_STRING(WS_ERROR, error_code));
     clientCtx->isFaulty = true;
 }
 
@@ -873,7 +877,7 @@ static int parse_streaming_gateway_url(char* url, char** hostAddress, size_t* po
 
     if ((ws_url = ws_url_create(url)) == NULL)
     {
-        LogError("Failed creating WS url parser");
+        LogError("[TEST] Failed creating WS url parser");
         result = __FAILURE__;
     }
     else
@@ -883,7 +887,7 @@ static int parse_streaming_gateway_url(char* url, char** hostAddress, size_t* po
 
         if (ws_url_get_host(ws_url, &host_value, &host_length) != 0)
         {
-            LogError("Failed getting the host part of the WS url");
+            LogError("[TEST] Failed getting the host part of the WS url");
             result = __FAILURE__;
         }
         else
@@ -893,26 +897,26 @@ static int parse_streaming_gateway_url(char* url, char** hostAddress, size_t* po
 
             if (ws_url_get_path(ws_url, &path_value, &path_length) != 0)
             {
-                LogError("Failed getting the path part of the WS url");
+                LogError("[TEST] Failed getting the path part of the WS url");
                 result = __FAILURE__;
             }
             else
             {
                 if ((*hostAddress = cloneToNullTerminatedString((const unsigned char*)host_value, host_length)) == NULL)
                 {
-                    LogError("Failed setting host address");
+                    LogError("[TEST] Failed setting host address");
                     result = __FAILURE__;
                 }
                 else if ((*resourceName = cloneToNullTerminatedString((const unsigned char*)(path_value - 1), path_length + 1)) == NULL)
                 {
-                    LogError("Failed setting resource name");
+                    LogError("[TEST] Failed setting resource name");
                     free(*hostAddress);
                     *hostAddress = NULL;
                     result = __FAILURE__;
                 }
                 else if (ws_url_get_port(ws_url, port) != 0)
                 {
-                    LogError("Failed getting the port part of the WS url");
+                    LogError("[TEST] Failed getting the port part of the WS url");
                     free(*hostAddress);
                     *hostAddress = NULL;
                     free(*resourceName);
@@ -956,7 +960,7 @@ static UWS_CLIENT_HANDLE create_websocket_client(char* url, char* authorizationT
             LogError("[TEST] Failed setting authorization header");
             result = NULL;
         }
-        else if ((result = uws_client_create(hostAddress, port, resourceName, true, &protocols, 1)) == NULL)
+        else if ((result = uws_client_create(hostAddress, (unsigned int)port, resourceName, true, &protocols, 1)) == NULL)
         {
             LogError("[TEST] Failed creating uws_client");
             result = NULL;
@@ -989,8 +993,11 @@ static int verify_single_streaming_through_gateway(EXPECTED_DEVICE_STREAMING_REQ
 
     deviceClientCtx.isDeviceClient = true;
     deviceClientCtx.isOpen = false;
-    deviceClientCtx.isCloseAckd = false;
+    deviceClientCtx.hadOpenError = false;
+    deviceClientCtx.hadSendError = false;
     deviceClientCtx.isFaulty = false;
+    deviceClientCtx.remoteCloseReceived = false;
+    deviceClientCtx.localCloseConfirmed = false;
     deviceClientCtx.dataSent = NULL;
     deviceClientCtx.dataReceived = NULL;
     deviceClientCtx.expDSReq = expDSReq;
@@ -1007,8 +1014,11 @@ static int verify_single_streaming_through_gateway(EXPECTED_DEVICE_STREAMING_REQ
 
         serviceClientCtx.isDeviceClient = false;
         serviceClientCtx.isOpen = false;
-        serviceClientCtx.isCloseAckd = false;
+        serviceClientCtx.hadOpenError = false;
+        serviceClientCtx.hadSendError = false;
         serviceClientCtx.isFaulty = false;
+        serviceClientCtx.remoteCloseReceived = false;
+        serviceClientCtx.localCloseConfirmed = false;
         serviceClientCtx.dataSent = NULL;
         serviceClientCtx.dataReceived = NULL;
         serviceClientCtx.expDSReq = expDSReq;
@@ -1024,9 +1034,10 @@ static int verify_single_streaming_through_gateway(EXPECTED_DEVICE_STREAMING_REQ
         {
             result = 0;
 
-            while (!serviceClientCtx.isCloseAckd && !deviceClientCtx.isCloseAckd)
+            while (!serviceClientCtx.localCloseConfirmed && !serviceClientCtx.remoteCloseReceived && 
+                !deviceClientCtx.localCloseConfirmed && !deviceClientCtx.remoteCloseReceived)
             {
-                if (serviceClientCtx.isFaulty)
+                if (serviceClientCtx.hadOpenError || serviceClientCtx.isFaulty || serviceClientCtx.hadSendError)
                 {
                     LogError("[TEST] WS client is faulty (service client; %s)", expDSReq->streamName);
                     result = __FAILURE__;
@@ -1068,7 +1079,7 @@ static int verify_single_streaming_through_gateway(EXPECTED_DEVICE_STREAMING_REQ
                     }
                 }
 
-                if (deviceClientCtx.isFaulty)
+                if (deviceClientCtx.hadOpenError || deviceClientCtx.isFaulty || deviceClientCtx.hadSendError)
                 {
                     LogError("[TEST] WS client is faulty (device client; %s)", expDSReq->streamName);
                     result = __FAILURE__;
@@ -1103,14 +1114,20 @@ static int verify_single_streaming_through_gateway(EXPECTED_DEVICE_STREAMING_REQ
         {
             if (strcmp(serviceClientCtx.dataSent, serviceClientCtx.dataReceived) != 0)
             {
-                LogError("Data sent and received by service WS client do not match ('%s'; '%s')",
+                LogError("[TEST] Data sent and received by service WS client do not match ('%s'; '%s')",
                     serviceClientCtx.dataSent, serviceClientCtx.dataReceived);
                 result = __FAILURE__;
             }
         }
 
-        free(deviceClientCtx.dataReceived);
-        free(serviceClientCtx.dataReceived);
+        if (deviceClientCtx.dataReceived != NULL)
+        {
+            free(deviceClientCtx.dataReceived);
+        }
+        if (serviceClientCtx.dataReceived != NULL)
+        {
+            free(serviceClientCtx.dataReceived);
+        }
     }
 
     return result;
@@ -1130,7 +1147,7 @@ static int verify_streaming_through_gateway(DEVICE_STREAMING_TEST_CONTEXT* dsTes
 
         if (list_item == NULL)
         {
-            LogError("[TEST FAILURE] Failed getting expected request from list");
+            LogError("[TEST] Failed getting expected request from list");
             result = __FAILURE__;
         }
         else
@@ -1163,25 +1180,41 @@ static int verify_streaming_through_gateway(DEVICE_STREAMING_TEST_CONTEXT* dsTes
     return result;
 }
 
+
 // ========== Public API ========== //
+
+#define MAX_SEND_REQUEST_COUNT 10
 
 static void receive_device_streaming_request_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, bool shouldAcceptRequest)
 {
     // arrange
-    int send_request_result;
     int verify_request_result;
     int streaming_result;
+    int send_request_counter = 0;
     DEVICE_STREAMING_TEST_CONTEXT* dsTestCtx = create_device_streaming_test_context();
 
     // Create the IoT Hub Data
-    client_connect_to_hub(deviceToUse, protocol);
+    client_connect_to_hub(deviceToUse, protocol, dsTestCtx);
 
     set_device_streaming_callback(dsTestCtx);
 
     EXPECTED_DEVICE_STREAMING_REQUEST* request = add_expected_streaming_request(dsTestCtx, shouldAcceptRequest, 0);
 
-    send_request_result = ds_e2e_send_device_streaming_request_async(deviceToUse->deviceId, deviceToUse->moduleId, request);
-    ASSERT_ARE_EQUAL(int, 0, send_request_result, "Something failed sending device streaming request");
+    while (true)
+    {
+        if (ds_e2e_send_device_streaming_request_async(deviceToUse->deviceId, deviceToUse->moduleId, request) == 0)
+        {
+            break;
+        }
+        else if (send_request_counter++ < MAX_SEND_REQUEST_COUNT)
+        {
+            ThreadAPI_Sleep(500);
+        }
+        else
+        {
+            ASSERT_FAIL("Timed-out sending device streaming request");
+        }
+    }
 
     verify_request_result = verify_device_streaming_requests_received(dsTestCtx);
     ASSERT_ARE_EQUAL(int, 0, verify_request_result);

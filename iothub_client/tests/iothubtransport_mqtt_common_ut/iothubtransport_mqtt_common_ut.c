@@ -1685,6 +1685,20 @@ static void setup_message_recv_msg_callback_mocks()
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 }
 
+static TRANSPORT_LL_HANDLE setup_iothub_mqtt_connection(IOTHUBTRANSPORT_CONFIG* config)
+{
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
+    setup_initialize_connection_mocks();
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+    CONNECT_ACK connack;
+    connack.isSessionPresent = true;
+    connack.returnCode = CONNECTION_ACCEPTED;
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+
+    return handle;
+}
+
 static void setup_message_recv_callback_STREAM_C2D_REQUEST_mocks(
     char** topicLevels, 
     size_t topicLevelCount,
@@ -1755,20 +1769,6 @@ static void setup_message_recv_callback_STREAM_C2D_REQUEST_mocks(
     STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
 
     STRICT_EXPECTED_CALL(stream_c2d_request_destroy(IGNORED_PTR_ARG));
-}
-
-static TRANSPORT_LL_HANDLE setup_iothub_mqtt_connection(IOTHUBTRANSPORT_CONFIG* config)
-{
-    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
-    setup_initialize_connection_mocks();
-    IoTHubTransport_MQTT_Common_DoWork(handle);
-    CONNECT_ACK connack;
-    connack.isSessionPresent = true;
-    connack.returnCode = CONNECTION_ACCEPTED;
-    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
-    IoTHubTransport_MQTT_Common_DoWork(handle);
-
-    return handle;
 }
 
 static XIO_HANDLE get_IO_transport_fail(const char* fully_qualified_name, const MQTT_TRANSPORT_PROXY_OPTIONS* mqtt_transport_proxy_options)
@@ -4655,7 +4655,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_x509_no_expire_success)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_empty_item_succeeds)
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_emtpy_item_succeeds)
 {
     // arrange
     IOTHUBTRANSPORT_CONFIG config = { 0 };
