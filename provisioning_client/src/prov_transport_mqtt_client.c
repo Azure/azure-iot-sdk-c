@@ -53,14 +53,6 @@ static XIO_HANDLE mqtt_transport_io(const char* fqdn, const HTTP_PROXY_OPTIONS* 
             LogError("failed calling xio_create on underlying io");
             result = NULL;
         }
-        else
-        {
-#ifdef USE_OPENSSL
-            // requires tls 1.2
-            int tls_version = 12;
-            xio_setoption(result, OPTION_TLS_VERSION, &tls_version);
-#endif
-        }
     }
     /* Codes_PROV_TRANSPORT_MQTT_CLIENT_07_014: [ On success mqtt_transport_io shall return allocated XIO_HANDLE. ] */
     return result;

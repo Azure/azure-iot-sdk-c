@@ -19,9 +19,9 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/macro_utils.h"
 #include "azure_c_shared_utility/xlogging.h"
-#include "azure_c_shared_utility/base64.h"
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/uniqueid.h"
+#include "azure_c_shared_utility/azure_base64.h"
 
 #include "azure_prov_client/prov_device_ll_client.h"
 #include "azure_prov_client/prov_security_factory.h"
@@ -142,8 +142,8 @@ void create_tpm_enrollment_device(const char* prov_conn_string, bool use_tracing
         BUFFER_HANDLE ek_handle = prov_auth_get_endorsement_key(auth_handle);
         ASSERT_IS_NOT_NULL(ek_handle, "Failure prov_auth_get_endorsement_key");
 
-        STRING_HANDLE ek_value = Base64_Encoder(ek_handle);
-        ASSERT_IS_NOT_NULL(ek_value, "Failure Base64_Encoder Endorsement key");
+        STRING_HANDLE ek_value = Azure_Base64_Encode(ek_handle);
+        ASSERT_IS_NOT_NULL(ek_value, "Failure Base64_Encode Endorsement key");
 
         ATTESTATION_MECHANISM_HANDLE attest_handle = attestationMechanism_createWithTpm(STRING_c_str(ek_value), NULL);
         ASSERT_IS_NOT_NULL(attest_handle, "Failure attestationMechanism_createWithTpm");

@@ -663,7 +663,7 @@ static int create_transport_io_object(PROV_TRANSPORT_AMQP_INFO* amqp_info)
             transport_proxy = NULL;
         }
 
-        if (amqp_info->hsm_type == TRANSPORT_HSM_TYPE_TPM)
+        if (amqp_info->hsm_type == TRANSPORT_HSM_TYPE_TPM || amqp_info->hsm_type == TRANSPORT_HSM_TYPE_SYMM_KEY)
         {
             sasl_mechanism = &amqp_info->sasl_handler;
         }
