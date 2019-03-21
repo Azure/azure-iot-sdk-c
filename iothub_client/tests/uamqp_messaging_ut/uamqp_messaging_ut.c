@@ -167,34 +167,81 @@ static int test_amqpvalue_get_uuid(AMQP_VALUE value, uuid* uuid_value)
     return test_amqpvalue_get_uuid_return;
 }
 
+static void set_add_map_item(void)
+{
+    STRICT_EXPECTED_CALL(amqpvalue_create_symbol(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_set_map_value(TEST_AMQP_VALUE, TEST_AMQP_VALUE, TEST_AMQP_VALUE));
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_AMQP_VALUE));
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_AMQP_VALUE));
+}
+
+//static void set_exp_calls_for_create_encoded_annotations_properties(bool has_diagnostic_properties)
+//{
+//    size_t encoding_size = TEST_AMQP_ENCODING_SIZE;
+//
+//    if (has_diagnostic_properties)
+//    {
+//        STRICT_EXPECTED_CALL(IoTHubMessage_GetDiagnosticPropertyData(TEST_IOTHUB_MESSAGE_HANDLE));
+//        STRICT_EXPECTED_CALL(amqpvalue_create_map());
+//
+//        STRICT_EXPECTED_CALL(amqpvalue_create_symbol(IGNORED_PTR_ARG));
+//        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG));
+//        STRICT_EXPECTED_CALL(amqpvalue_set_map_value(TEST_AMQP_VALUE, TEST_AMQP_VALUE, TEST_AMQP_VALUE));
+//        STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_AMQP_VALUE));
+//        STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_AMQP_VALUE));
+//
+//        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+//
+//        STRICT_EXPECTED_CALL(amqpvalue_create_symbol(IGNORED_PTR_ARG));
+//        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG));
+//        STRICT_EXPECTED_CALL(amqpvalue_set_map_value(TEST_AMQP_VALUE, TEST_AMQP_VALUE, TEST_AMQP_VALUE));
+//        STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_AMQP_VALUE));
+//        STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_AMQP_VALUE));
+//
+//        STRICT_EXPECTED_CALL(amqpvalue_create_message_annotations(TEST_AMQP_VALUE));
+//        STRICT_EXPECTED_CALL(amqpvalue_get_encoded_size(TEST_AMQP_VALUE, IGNORED_PTR_ARG))
+//            .CopyOutArgumentBuffer(2, &encoding_size, sizeof(encoding_size));
+//        STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+//        STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_AMQP_VALUE));
+//    }
+//    else
+//    {
+//        STRICT_EXPECTED_CALL(IoTHubMessage_GetDiagnosticPropertyData(TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(NULL);
+//    }
+//
+//    STRICT_EXPECTED_CALL(IoTHubMessage_GetDistributedTracingSystemProperty(IGNORED_PTR_ARG)).SetReturn(DISTRIBUTED_TRACING_TEST_TRACESTATE);
+//    STRICT_EXPECTED_CALL(amqpvalue_create_map());
+//
+//    STRICT_EXPECTED_CALL(amqpvalue_create_symbol(IGNORED_PTR_ARG));
+//    STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG));
+//    STRICT_EXPECTED_CALL(amqpvalue_set_map_value(TEST_AMQP_VALUE, TEST_AMQP_VALUE, TEST_AMQP_VALUE));
+//    STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_AMQP_VALUE));
+//    STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_AMQP_VALUE));
+//
+//    STRICT_EXPECTED_CALL(amqpvalue_create_message_annotations(TEST_AMQP_VALUE));
+//    STRICT_EXPECTED_CALL(amqpvalue_get_encoded_size(TEST_AMQP_VALUE, IGNORED_PTR_ARG))
+//        .CopyOutArgumentBuffer(2, &encoding_size, sizeof(encoding_size));
+//    STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_AMQP_VALUE));
+//}
+
 static void set_exp_calls_for_create_encoded_annotations_properties(bool has_diagnostic_properties)
 {
     size_t encoding_size = TEST_AMQP_ENCODING_SIZE;
 
     if (has_diagnostic_properties)
     {
-        STRICT_EXPECTED_CALL(IoTHubMessage_GetDiagnosticPropertyData(TEST_IOTHUB_MESSAGE_HANDLE));
+        STRICT_EXPECTED_CALL(IoTHubMessage_GetDiagnosticPropertyData(TEST_IOTHUB_MESSAGE_HANDLE)).CallCannotFail();
         STRICT_EXPECTED_CALL(amqpvalue_create_map());
 
-        STRICT_EXPECTED_CALL(amqpvalue_create_symbol(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_set_map_value(TEST_AMQP_VALUE, TEST_AMQP_VALUE, TEST_AMQP_VALUE));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_AMQP_VALUE));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_AMQP_VALUE));
+        set_add_map_item();
 
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
 
-        STRICT_EXPECTED_CALL(amqpvalue_create_symbol(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_set_map_value(TEST_AMQP_VALUE, TEST_AMQP_VALUE, TEST_AMQP_VALUE));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_AMQP_VALUE));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_AMQP_VALUE));
+        // Add Map Item
+        set_add_map_item();
 
-        STRICT_EXPECTED_CALL(amqpvalue_create_message_annotations(TEST_AMQP_VALUE));
-        STRICT_EXPECTED_CALL(amqpvalue_get_encoded_size(TEST_AMQP_VALUE, IGNORED_PTR_ARG))
-            .CopyOutArgumentBuffer(2, &encoding_size, sizeof(encoding_size));
-        STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_AMQP_VALUE));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     }
     else
     {
@@ -202,7 +249,10 @@ static void set_exp_calls_for_create_encoded_annotations_properties(bool has_dia
     }
 
     STRICT_EXPECTED_CALL(IoTHubMessage_GetDistributedTracingSystemProperty(IGNORED_PTR_ARG)).SetReturn(DISTRIBUTED_TRACING_TEST_TRACESTATE);
-    STRICT_EXPECTED_CALL(amqpvalue_create_map());
+    if (!has_diagnostic_properties)
+    {
+        STRICT_EXPECTED_CALL(amqpvalue_create_map());
+    }
 
     STRICT_EXPECTED_CALL(amqpvalue_create_symbol(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG));
@@ -905,49 +955,10 @@ TEST_FUNCTION(message_create_from_iothub_message_BYTEARRAY_return_errors_fails)
     for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
         // arrange
-        char error_msg[64];
-
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
 
-        if ((i == 1) || // GetMessageId is optional
-            (i == 5) || // GetCorrelationId is optional
-            (i == 4) || // amqpvalue_destroy
-            (i == 8) || // amqpvalue_destroy
-            (i == 9) || // ContentType is optional
-            (i == 11) || // GetContentEncodingSystemProperty is optional
-            (i == 15) || // properties_destroy
-            (i == 22) || // amqpvalue_destroy
-            (i == 23) || // amqpvalue_destroy
-            (i == 26) || // amqpvalue_destroy
-            (i == 27) || // GetDiagnosticPropertyData is optional
-            (i == 28) || // amqpvalue_create_map
-            (i == 29) || // amqp_create_symbol
-            (i == 30) || // amqpvalue_create_string
-            (i == 31) || // amqpvalue_set_map_value
-            (i == 32) || // amqpvalue_destroy
-            (i == 33) || // amqpvalue_destroy
-            (i == 34) || // gballoc_malloc
-            (i == 35) || // amqp_create_symbol
-            (i == 36) || // amqpvalue_create_string
-            (i == 37) || // amqpvalue_set_map_value
-            (i == 38) || // amqpvalue_destroy
-            (i == 39) || // amqpvalue_destroy
-            (i == 40) || // amqpvalue_create_message_annotations
-            (i == 41) || // amqpvalue_get_encoded_size
-            (i == 42) || // gballoc_free
-            (i == 43) || // amqpvalue_destroy
-            (i == 44) || // GetDistributedTracingSystemProperty is optional
-            (i == 45) || // amqpvalue_create_map
-            (i == 49) || // amqpvalue_destroy
-            (i == 50) || // amqpvalue_destroy
-            (i == 53) || // amqpvalue_destroy
-            (i == 58) || // gballoc_malloc
-            (i == 63) || // amqpvalue_destroy
-            (i == 64) || // amqpvalue_destroy
-            (i == 65) || // amqpvalue_destroy
-            (i == 66)  // amqpvalue_destroy
-            )
+        if (!umock_c_negative_tests_can_call_fail(i))
         {
             continue; // these lines have functions that do not return anything (void).
         }
@@ -957,8 +968,7 @@ TEST_FUNCTION(message_create_from_iothub_message_BYTEARRAY_return_errors_fails)
 
         result = message_create_uamqp_encoding_from_iothub_message(NULL, TEST_IOTHUB_MESSAGE_HANDLE, &binary_data);
 
-        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
-        ASSERT_ARE_NOT_EQUAL(int, result, 0, error_msg);
+        ASSERT_ARE_NOT_EQUAL(int, result, 0, "On failed call %lu", (unsigned long)i);
     }
 
     // cleanup
@@ -984,49 +994,10 @@ TEST_FUNCTION(message_create_from_iothub_message_STRING_return_errors_fails)
     for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
         // arrange
-        char error_msg[64];
-
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
 
-        if ((i == 1) || // GetMessageId is optional
-            (i == 5) || // GetCorrelationId is optional
-            (i == 4) || // amqpvalue_destroy
-            (i == 8) || // amqpvalue_destroy
-            (i == 9) || // ContentType is optional
-            (i == 11) || // GetContentEncodingSystemProperty is optional
-            (i == 15) || // properties_destroy
-            (i == 22) || // amqpvalue_destroy
-            (i == 23) || // amqpvalue_destroy
-            (i == 26) || // amqpvalue_destroy
-            (i == 27) || // GetDiagnosticPropertyData is optional
-            (i == 28) || // amqpvalue_create_map
-            (i == 29) || // amqp_create_symbol
-            (i == 30) || // amqpvalue_create_string
-            (i == 31) || // amqpvalue_set_map_value
-            (i == 32) || // amqpvalue_destroy
-            (i == 33) || // amqpvalue_destroy
-            (i == 34) || // gballoc_malloc
-            (i == 35) || // amqp_create_symbol
-            (i == 36) || // amqpvalue_create_string
-            (i == 37) || // amqpvalue_set_map_value
-            (i == 38) || // amqpvalue_destroy
-            (i == 39) || // amqpvalue_destroy
-            (i == 40) || // amqpvalue_create_message_annotations
-            (i == 41) || // amqpvalue_get_encoded_size
-            (i == 42) || // gballoc_free
-            (i == 43) || // amqpvalue_destroy
-            (i == 44) || // GetDistributedTracingSystemProperty is optional
-            (i == 45) || // amqpvalue_create_map
-            (i == 49) || // amqpvalue_destroy
-            (i == 50) || // amqpvalue_destroy
-            (i == 53) || // amqpvalue_destroy
-            (i == 58) || // gballoc_malloc
-            (i == 63) || // amqpvalue_destroy
-            (i == 64) || // amqpvalue_destroy
-            (i == 65) || // amqpvalue_destroy
-            (i == 66)  // amqpvalue_destroy
-            )
+        if (!umock_c_negative_tests_can_call_fail(i))
         {
             continue; // these lines have functions that do not return anything (void).
         }
@@ -1037,9 +1008,7 @@ TEST_FUNCTION(message_create_from_iothub_message_STRING_return_errors_fails)
         result = message_create_uamqp_encoding_from_iothub_message(NULL, TEST_IOTHUB_MESSAGE_HANDLE, &binary_data);
 
         // assert
-        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
-
-        ASSERT_ARE_NOT_EQUAL(int, result, 0, error_msg);
+        ASSERT_ARE_NOT_EQUAL(int, result, 0, "On failed call %lu", (unsigned long)i);
     }
 
     // cleanup
