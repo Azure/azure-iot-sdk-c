@@ -845,6 +845,11 @@ static void on_ws_frame_received(void* context, unsigned char frame_type, const 
 
     WEBSOCKET_CLIENT_CONTEXT* clientCtx = (WEBSOCKET_CLIENT_CONTEXT*)context;
 
+    if (clientCtx->dataReceived != NULL)
+    {
+        free(clientCtx->dataReceived);
+    }
+
     clientCtx->dataReceived = cloneToNullTerminatedString(buffer, size);
 
     ASSERT_IS_NOT_NULL(clientCtx->dataReceived, "Failed copying received data frame (%s; %d)", clientCtx->expDSReq->streamName, clientCtx->isDeviceClient);
