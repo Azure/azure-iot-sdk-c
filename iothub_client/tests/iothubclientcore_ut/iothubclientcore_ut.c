@@ -4451,7 +4451,6 @@ TEST_FUNCTION(IoTHubClientCore_SetStreamRequestCallback_succeed)
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
 
     // cleanup
-    free(my_malloc_items[--my_malloc_count]);
     IoTHubClientCore_Destroy(iothub_handle);
 }
 

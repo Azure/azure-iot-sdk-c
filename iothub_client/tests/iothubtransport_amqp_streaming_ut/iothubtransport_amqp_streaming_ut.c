@@ -590,6 +590,8 @@ static void set_expected_calls_for_destroy_parsed_info()
 
 static void set_expected_calls_for_on_amqp_message_received_callback()
 {
+    STRICT_EXPECTED_CALL(amqp_messenger_destroy_disposition_info(IGNORED_PTR_ARG));
+
     set_expected_calls_for_parse_amqp_message();
 
     set_expected_calls_for_create_stream_c2d_request_from_parsed_info();

@@ -119,7 +119,7 @@ static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "creationtime
 #define SUBSCRIBE_INPUT_QUEUE_TOPIC             0x0010
 #define SUBSCRIBE_STREAMS_POST_TOPIC            0x0020
 #define SUBSCRIBE_STREAMS_RESP_TOPIC            0x0040
-#define SUBSCRIBE_TOPIC_COUNT                   5
+#define SUBSCRIBE_TOPIC_COUNT                   7
 
 DEFINE_ENUM_STRINGS(MQTT_CLIENT_EVENT_ERROR, MQTT_CLIENT_EVENT_ERROR_VALUES)
 
@@ -214,6 +214,7 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     bool isRegistered;
     MQTT_CLIENT_STATUS mqttClientStatus;
     bool isDestroyCalled;
+    bool isRetryExpiredCallbackSet;
     bool device_twin_get_sent;
     bool twin_resp_sub_recv;
     bool isRecoverableError;
@@ -849,7 +850,7 @@ static STRING_HANDLE addPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_me
         result = NULL;
     }
 
-    // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_060: [ `IoTHubTransport_MQTT_Common_DoWork` shall check for the OutputName property and if found add the alue as a system property in the format of $.on=<value> ]
+    // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_060: [ `IoTHubTransport_MQTT_Common_DoWork` shall check for the OutputName property and if found add the value as a system property in the format of $.on=<value> ]
     if (result != NULL)
     {
         const char* output_name = IoTHubMessage_GetOutputName(iothub_message_handle);
@@ -2691,6 +2692,7 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 else
                 {
                     transport_data->currPacketState = CONNECT_TYPE;
+                    transport_data->isRetryExpiredCallbackSet = false;
                     (void)tickcounter_get_current_ms(transport_data->msgTickCounter, &transport_data->mqtt_connect_time);
                     result = 0;
                 }
@@ -2721,31 +2723,46 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
         RETRY_ACTION retry_action = RETRY_ACTION_RETRY_LATER;
 
         // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_007: [ IoTHubTransport_MQTT_Common_DoWork shall try to reconnect according to the current retry policy set ]
-        if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_NOT_CONNECTED && transport_data->isRecoverableError &&
-            (retry_control_should_retry(transport_data->retry_control_handle, &retry_action) != 0 || retry_action == RETRY_ACTION_RETRY_NOW))
+        if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_NOT_CONNECTED && transport_data->isRecoverableError)
         {
             // Note: in case retry_control_should_retry fails, the reconnection shall be attempted anyway (defaulting to policy IOTHUB_CLIENT_RETRY_IMMEDIATE).
-
-            if (tickcounter_get_current_ms(transport_data->msgTickCounter, &transport_data->connectTick) != 0)
+            if (retry_control_should_retry(transport_data->retry_control_handle, &retry_action) != 0 || retry_action == RETRY_ACTION_RETRY_NOW)
             {
-                transport_data->connectFailCount++;
-                result = __FAILURE__;
-            }
-            else
-            {
-                ResetConnectionIfNecessary(transport_data);
-
-                if (SendMqttConnectMsg(transport_data) != 0)
+                if (tickcounter_get_current_ms(transport_data->msgTickCounter, &transport_data->connectTick) != 0)
                 {
                     transport_data->connectFailCount++;
                     result = __FAILURE__;
                 }
                 else
                 {
-                    transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_CONNECTING;
-                    transport_data->connectFailCount = 0;
-                    result = 0;
+                    ResetConnectionIfNecessary(transport_data);
+
+                    if (SendMqttConnectMsg(transport_data) != 0)
+                    {
+                        transport_data->connectFailCount++;
+                        result = __FAILURE__;
+                    }
+                    else
+                    {
+                        transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_CONNECTING;
+                        transport_data->connectFailCount = 0;
+                        result = 0;
+                    }
                 }
+            }   
+            else if (retry_action == RETRY_ACTION_STOP_RETRYING)
+            {
+                // Set callback if retry expired
+                if (!transport_data->isRetryExpiredCallbackSet)
+                {
+                    transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED, transport_data->transport_ctx);
+                    transport_data->isRetryExpiredCallbackSet = true;
+                }
+                result = __FAILURE__;
+            }
+            else if (retry_action == RETRY_ACTION_RETRY_LATER)
+            {
+                result = __FAILURE__;
             }
         }
         else if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_EXECUTE_DISCONNECT)
@@ -2814,14 +2831,14 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                         {
                             transport_data->topics_ToSubscribe |= SUBSCRIBE_INPUT_QUEUE_TOPIC;
                         }
-                    }
-                    if (transport_data->topic_StreamsPost != NULL)
-                    {
-                        transport_data->topics_ToSubscribe |= SUBSCRIBE_STREAMS_POST_TOPIC;
-                    }
-                    if (transport_data->topic_StreamsResp != NULL)
-                    {
-                        transport_data->topics_ToSubscribe |= SUBSCRIBE_STREAMS_RESP_TOPIC;
+                        if (transport_data->topic_StreamsPost != NULL)
+                        {
+                            transport_data->topics_ToSubscribe |= SUBSCRIBE_STREAMS_POST_TOPIC;
+                        }
+                        if (transport_data->topic_StreamsResp != NULL)
+                        {
+                            transport_data->topics_ToSubscribe |= SUBSCRIBE_STREAMS_RESP_TOPIC;
+                        }
                     }
                 }
             }
@@ -2965,6 +2982,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                         state->authorization_module = auth_module;
 
                         state->isDestroyCalled = false;
+                        state->isRetryExpiredCallbackSet = false;
                         state->isRegistered = false;
                         state->device_twin_get_sent = false;
                         state->xioTransport = NULL;
