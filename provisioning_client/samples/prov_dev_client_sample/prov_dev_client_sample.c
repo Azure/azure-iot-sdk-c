@@ -71,7 +71,7 @@ static const char* PROXY_ADDRESS = "127.0.0.1";
 #define MESSAGES_TO_SEND            2
 #define TIME_BETWEEN_MESSAGES       2
 
-static void registation_status_callback(PROV_DEVICE_REG_STATUS reg_status, void* user_context)
+static void registration_status_callback(PROV_DEVICE_REG_STATUS reg_status, void* user_context)
 {
     (void)user_context;
     (void)printf("Provisioning Status: %s\r\n", ENUM_TO_STRING(PROV_DEVICE_REG_STATUS, reg_status));
@@ -160,7 +160,7 @@ int main()
         // set within the HSM so be cautious if setting this value
         //Prov_Device_SetOption(prov_device_handle, PROV_REGISTRATION_ID, "[REGISTRATION ID]");
 
-        prov_device_result = Prov_Device_Register_Device(prov_device_handle, register_device_callback, NULL, registation_status_callback, NULL);
+        prov_device_result = Prov_Device_Register_Device(prov_device_handle, register_device_callback, NULL, registration_status_callback, NULL);
 
         (void)printf("\r\nRegistering Device\r\n\r\n");
         do

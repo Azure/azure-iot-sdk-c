@@ -4526,8 +4526,8 @@ TEST_FUNCTION(ConnectionStatusCallBack_UNAUTH_no_network)
     crank_transport_ready_after_create(handle, &TEST_waitingToSend, 0, false, true, 1, TEST_current_time, false, false);
 
     umock_c_reset_all_calls();
+	STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_NO_NETWORK, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(TEST_current_time);
-    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_NO_NETWORK, IGNORED_PTR_ARG));
 
     // act
 
@@ -4560,6 +4560,7 @@ TEST_FUNCTION(ConnectionStatusCallBack_UNAUTH_retry_expired)
 
     umock_c_reset_all_calls();
 
+	STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_NO_NETWORK, IGNORED_PTR_ARG));
     RETRY_ACTION retry_action = RETRY_ACTION_STOP_RETRYING;
     STRICT_EXPECTED_CALL(retry_control_should_retry(TEST_RETRY_CONTROL_HANDLE, IGNORED_PTR_ARG))
         .CopyOutArgumentBuffer_retry_action(&retry_action, sizeof(RETRY_ACTION));

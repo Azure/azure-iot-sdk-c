@@ -5,7 +5,7 @@
 #include "azure_c_shared_utility/umock_c_prod.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/sastoken.h"
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 #include "azure_c_shared_utility/sha.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/strings.h"
@@ -366,7 +366,7 @@ void* dev_auth_tpm_generate_credentials(CONCRETE_XDA_HANDLE handle, const DEVICE
                     STRING_HANDLE urlEncodedSignature;
                     STRING_HANDLE base64Signature;
                     STRING_HANDLE sas_token_handle;
-                    if ((base64Signature = Base64_Encode_Bytes(hmac_buffer, hmac_len)) == NULL)
+                    if ((base64Signature = Azure_Base64_Encode_Bytes(hmac_buffer, hmac_len)) == NULL)
                     {
                         result = NULL;
                         LogError("Failure constructing base64 encoding.");
@@ -610,7 +610,7 @@ char* dev_auth_tpm_get_registration_key(CONCRETE_XDA_HANDLE handle)
             }
             else
             {
-                STRING_HANDLE encoded_key = Base64_Encode_Bytes(msg_digest, SHA256HashSize);
+                STRING_HANDLE encoded_key = Azure_Base64_Encode_Bytes(msg_digest, SHA256HashSize);
                 if (encoded_key == NULL)
                 {
                     LogError("Failed base64 encoding");

@@ -10,6 +10,10 @@ To use the Provisioning Device client code to connect to windows or linux HSM re
 cmake -Duse_prov_client:BOOL=ON ..
 ```
 
+For Development scenarios, the provisioning client relies on generated test x509 certificates with a pre-generated key within [hsm_client_riot.c](https://github.com/Azure/azure-iot-sdk-c/blob/master/provisioning_client/adapters/hsm_client_riot.c)
+
+For Production scenarios, you need to add the USE_CUSTOM_HSM cmake flag with the full path to your custom hsm lib (see custom hsm example below).
+
 ## Enabling Provisioning Device Client simulator
 
 For development purposes the Provisioning Device Client uses simulators to mock hardware chips functionality:

@@ -198,6 +198,9 @@ static const char* TEST_STRING_VALUE = "Test string value";
 #define TEST_DEVICEKEY_TOKEN "SharedAccessKey"
 #define TEST_DEVICESAS_TOKEN "SharedAccessSignature"
 #define TEST_PROTOCOL_GATEWAY_HOST_NAME_TOKEN "GatewayHostName"
+#define TEST_INVALID_TOKEN1 "InvalidToken1"
+#define TEST_INVALID_TOKEN2 "InvalidToken2"
+
 #define TEST_X509 "x509"
 #define TEST_MODULE_ID_TOKEN "ModuleId"
 #define TEST_PROVISIONING_TOKEN "UseProvisioning"
@@ -462,7 +465,7 @@ static CONSTBUFFER_HANDLE my_CONSTBUFFER_Create(const unsigned char* source, siz
     return (CONSTBUFFER_HANDLE)my_gballoc_malloc(1);
 }
 
-static void my_CONSTBUFFER_Destroy(CONSTBUFFER_HANDLE constbufferHandle)
+static void my_CONSTBUFFER_DecRef(CONSTBUFFER_HANDLE constbufferHandle)
 {
     my_gballoc_free(constbufferHandle);
 }
@@ -916,7 +919,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(CONSTBUFFER_Create, my_CONSTBUFFER_Create);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(CONSTBUFFER_Create, NULL);
 
-    REGISTER_GLOBAL_MOCK_HOOK(CONSTBUFFER_Destroy, my_CONSTBUFFER_Destroy);
+    REGISTER_GLOBAL_MOCK_HOOK(CONSTBUFFER_DecRef, my_CONSTBUFFER_DecRef);
 
     REGISTER_GLOBAL_MOCK_HOOK(STRING_TOKENIZER_create, my_STRING_TOKENIZER_create);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_TOKENIZER_create, NULL);
@@ -1027,27 +1030,26 @@ static void setup_IoTHubClientCore_LL_create_mocks(bool use_device_config, bool 
     {
         STRICT_EXPECTED_CALL(IoTHubClient_Auth_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     }
-
-    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 #ifndef DONT_USE_UPLOADTOBLOB
-    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 #endif /*DONT_USE_UPLOADTOBLOB*/
 
 #ifdef USE_EDGE_MODULES
-    if (is_edge_module)
-    {
-        STRICT_EXPECTED_CALL(IoTHubClient_EdgeHandle_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    }
+        if (is_edge_module)
+        {
+            STRICT_EXPECTED_CALL(IoTHubClient_EdgeHandle_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        }
 #else
-    (void)is_edge_module;
+        (void)is_edge_module;
 #endif /*USE_EDGE_MODULES*/
 
-    STRICT_EXPECTED_CALL(tickcounter_create());
-    STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_Register(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SetRetryPolicy(IGNORED_PTR_ARG, TEST_RETRY_POLICY, 0));
+        STRICT_EXPECTED_CALL(tickcounter_create());
+        STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_Register(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SetRetryPolicy(IGNORED_PTR_ARG, TEST_RETRY_POLICY, 0));
 }
 
 static void setup_IoTHubClientCore_LL_sendreportedstate_mocks()
@@ -1139,7 +1141,7 @@ static void setup_IoTHubClientCore_LL_createfromconnectionstring_2_mocks(const c
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_NUM_ARG)).IgnoreArgument_ptr();
 }
 
-static void setup_IoTHubClientCore_LL_createfromconnectionstring_mocks(const char* device_token, const char* token_value)
+static void setup_IoTHubClientCore_LL_createfromconnectionstring_mocks(const char* device_token, const char* token_value, bool include_invalid_tokens)
 {
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
 
@@ -1175,6 +1177,17 @@ static void setup_IoTHubClientCore_LL_createfromconnectionstring_mocks(const cha
     STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG)).IgnoreArgument(1);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(token_value).CallCannotFail(); // 25
 
+    if (include_invalid_tokens)
+    {
+        EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_INVALID_TOKEN1).CallCannotFail();
+
+        EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_INVALID_TOKEN2).CallCannotFail();
+    }
+
     /* loop exit */
     // Mark CallCannotFail because this is final pass through loop, expected to bail out, so shouldn't failure test it.
     EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(__LINE__).CallCannotFail(); // 26
@@ -1183,7 +1196,7 @@ static void setup_IoTHubClientCore_LL_createfromconnectionstring_mocks(const cha
 
     setup_IoTHubClientCore_LL_create_mocks(false, false);
 
-    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)); // 38
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
@@ -1213,7 +1226,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateFromConnectionString_with_DeviceKey_fail
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
     //arrange
-    setup_IoTHubClientCore_LL_createfromconnectionstring_mocks(TEST_DEVICEKEY_TOKEN, TEST_STRING_VALUE);
+    setup_IoTHubClientCore_LL_createfromconnectionstring_mocks(TEST_DEVICEKEY_TOKEN, TEST_STRING_VALUE, false);
 
     umock_c_negative_tests_snapshot();
 
@@ -1254,7 +1267,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateFromConnectionString_with_DeviceKey_fail
 TEST_FUNCTION(IoTHubClientCore_LL_CreateFromConnectionString_with_DeviceKey_succeeds)
 {
     //arrange
-    setup_IoTHubClientCore_LL_createfromconnectionstring_mocks(TEST_DEVICEKEY_TOKEN, TEST_STRING_VALUE);
+    setup_IoTHubClientCore_LL_createfromconnectionstring_mocks(TEST_DEVICEKEY_TOKEN, TEST_STRING_VALUE, false);
 
     //act
     IOTHUB_CLIENT_CORE_LL_HANDLE result = IoTHubClientCore_LL_CreateFromConnectionString(TEST_CHAR, provideFAKE);
@@ -1289,7 +1302,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateFromConnectionString_with_provisioning_s
 TEST_FUNCTION(IoTHubClientCore_LL_CreateFromConnectionString_with_DeviceSasToken_succeeds)
 {
     //arrange
-    setup_IoTHubClientCore_LL_createfromconnectionstring_mocks(TEST_DEVICESAS_TOKEN, TEST_STRING_VALUE);
+    setup_IoTHubClientCore_LL_createfromconnectionstring_mocks(TEST_DEVICESAS_TOKEN, TEST_STRING_VALUE, false);
 
     //act
     IOTHUB_CLIENT_CORE_LL_HANDLE result = IoTHubClientCore_LL_CreateFromConnectionString(TEST_CHAR, provideFAKE);
@@ -1301,6 +1314,26 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateFromConnectionString_with_DeviceSasToken
     ///cleanup
     IoTHubClientCore_LL_Destroy(result);
 }
+
+/* Tests_SRS_IoTHubClientCore_LL_12_011: [IoTHubClientCore_LL_CreateFromConnectionString shall call into the IoTHubClientCore_LL_Create API with the current structure and returns with the return value of it] */
+/* Tests_SRS_IoTHubClientCore_LL_12_010: [IoTHubClientCore_LL_CreateFromConnectionString shall fill up the IOTHUB_CLIENT_CONFIG structure using the following mapping: iotHubName = Name, iotHubSuffix = Suffix, deviceId = DeviceId, deviceKey = SharedAccessKey or deviceSasToken = SharedAccessSignature] */
+/* Tests_SRS_IoTHubClientCore_LL_02_092: [ IoTHubClientCore_LL_CreateFomConnectionString shall create a IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE from IOTHUB_CLIENT_CONFIG. ]*/
+TEST_FUNCTION(IoTHubClientCore_LL_CreateFromConnectionString_with_DeviceSasToken_with_invalid_tokens_succeeds)
+{
+    //arrange
+    setup_IoTHubClientCore_LL_createfromconnectionstring_mocks(TEST_DEVICESAS_TOKEN, TEST_STRING_VALUE, true);
+
+    //act
+    IOTHUB_CLIENT_CORE_LL_HANDLE result = IoTHubClientCore_LL_CreateFromConnectionString(TEST_CHAR, provideFAKE);
+
+    ///assert
+    ASSERT_ARE_NOT_EQUAL(void_ptr, NULL, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    ///cleanup
+    IoTHubClientCore_LL_Destroy(result);
+}
+
 
 /* Tests_SRS_IoTHubClientCore_LL_04_001: [IoTHubClientCore_LL_CreateFromConnectionString shall verify the existence of key/value pair GatewayHostName. If it does exist it shall pass the value to IoTHubClientCore_LL_Create API.] */
 TEST_FUNCTION(IoTHubClientCore_LL_CreateFromConnectionString_withGatewayHostName_succeeds)
@@ -4680,7 +4713,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_ReportedStateComplete_succeed)
     STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(CONSTBUFFER_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(CONSTBUFFER_DecRef(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
@@ -6766,7 +6799,7 @@ static void set_expected_calls_for_IoTHubClientCore_LL_CreateFromEnvironment_for
     STRICT_EXPECTED_CALL(environment_get_variable(IGNORED_PTR_ARG)).SetReturn(TEST_EDGEHUB_CONNECTIONSTRING);
     STRICT_EXPECTED_CALL(environment_get_variable(IGNORED_PTR_ARG)).SetReturn(TEST_EDGEHUB_CACERTIFICATEFILE);
 
-    setup_IoTHubClientCore_LL_createfromconnectionstring_mocks(TEST_DEVICEKEY_TOKEN, TEST_STRING_VALUE);
+    setup_IoTHubClientCore_LL_createfromconnectionstring_mocks(TEST_DEVICEKEY_TOKEN, TEST_STRING_VALUE, false);
 
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_TrustBundle(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SetOption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
