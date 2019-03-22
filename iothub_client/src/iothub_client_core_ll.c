@@ -331,7 +331,7 @@ static bool is_event_equal_for_match(LIST_ITEM_HANDLE list_item, const void* mat
 
 static void device_twin_data_destroy(IOTHUB_DEVICE_TWIN* client_item)
 {
-    CONSTBUFFER_Destroy(client_item->report_data_handle);
+    CONSTBUFFER_DecRef(client_item->report_data_handle);
     free(client_item);
 }
 
@@ -1534,6 +1534,11 @@ IOTHUB_CLIENT_CORE_LL_HANDLE IoTHubClientCore_LL_CreateFromConnectionString(cons
                                     LogError("Failure cloning moduleId string");
                                     break;
                                 }
+                            }
+                            else
+                            {
+                                // If we get an unknown token, log it to error stream but do not cause a fatal error.
+                                LogError("Unknown token <%s> in connection string.  Ignoring error and continuing to parse", s_token);
                             }
                         }
                     }

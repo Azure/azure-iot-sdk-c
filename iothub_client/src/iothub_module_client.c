@@ -127,9 +127,9 @@ IOTHUB_CLIENT_RESULT IoTHubModuleClient_ModuleMethodInvokeAsync(IOTHUB_MODULE_CL
     return result;
 }
 
+#endif /*USE_EDGE_MODULES*/
+
 IOTHUB_CLIENT_RESULT IoTHubModuleClient_SetStreamRequestCallback(IOTHUB_MODULE_CLIENT_HANDLE iotHubModuleClientHandle, DEVICE_STREAM_C2D_REQUEST_CALLBACK streamRequestCallback, void* context)
 {
     return IoTHubClientCore_SetStreamRequestCallback((IOTHUB_CLIENT_CORE_HANDLE)iotHubModuleClientHandle, streamRequestCallback, context);
 }
-
-#endif /*USE_EDGE_MODULES*/

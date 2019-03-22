@@ -28,6 +28,15 @@ intermediate_ca_password="1234"
 root_ca_prefix="azure-iot-test-only.root.ca"
 intermediate_ca_prefix="azure-iot-test-only.intermediate"
 
+function makeCNsubject()
+{
+    local result="/CN=${1}"
+    case $OSTYPE in
+        msys|win32) result="/${result}"
+    esac
+    echo "$result"
+}
+
 function warn_certs_not_for_production()
 {
     tput smso
@@ -64,7 +73,7 @@ function generate_root_ca()
             -config ${openssl_root_config_file} \
             ${password_cmd} \
             -key ${root_ca_dir}/private/${root_ca_prefix}.key.pem \
-            -subj "/CN=${common_name}" \
+            -subj "$(makeCNsubject "${common_name}")" \
             -days ${days_till_expire} \
             -sha256 \
             -extensions v3_ca \
@@ -115,7 +124,7 @@ function generate_intermediate_ca()
     openssl req -new -sha256 \
         ${password_cmd} \
         -config ${openssl_intermediate_config_file} \
-        -subj "/CN=${common_name}" \
+        -subj "$(makeCNsubject "${common_name}")" \
         -key ${intermediate_ca_dir}/private/${intermediate_ca_prefix}.key.pem \
         -out ${intermediate_ca_dir}/csr/${intermediate_ca_prefix}.csr.pem
     [ $? -eq 0 ] || exit $?
@@ -197,7 +206,7 @@ function generate_device_certificate_common()
     echo "----------------------------------------"
     openssl req -config ${openssl_config_file} \
         -key ${certificate_dir}/private/${device_prefix}.key.pem \
-        -subj "/CN=${common_name}" \
+        -subj "$(makeCNsubject "${common_name}")" \
         -new -sha256 -out ${certificate_dir}/csr/${device_prefix}.csr.pem
     [ $? -eq 0 ] || exit $?
 

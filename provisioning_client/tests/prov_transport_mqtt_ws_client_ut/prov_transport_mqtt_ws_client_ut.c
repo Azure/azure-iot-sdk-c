@@ -226,9 +226,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_ws_client_ut)
         STRICT_EXPECTED_CALL(wsio_get_interface_description());
         STRICT_EXPECTED_CALL(platform_get_default_tlsio());
         STRICT_EXPECTED_CALL(xio_create(TEST_INTERFACE_DESC, IGNORED_PTR_ARG));
-#ifdef USE_OPENSSL
-        STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-#endif
 
         //act
         dps_io_info = g_transport_io(TEST_URI_VALUE, NULL);
@@ -251,9 +248,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_ws_client_ut)
         STRICT_EXPECTED_CALL(wsio_get_interface_description());
         STRICT_EXPECTED_CALL(platform_get_default_tlsio());
         STRICT_EXPECTED_CALL(xio_create(TEST_INTERFACE_DESC, IGNORED_PTR_ARG));
-#ifdef USE_OPENSSL
-        STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-#endif
 
         //act
         dps_io_info = g_transport_io(TEST_URI_VALUE, NULL);
@@ -317,9 +311,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_ws_client_ut)
         STRICT_EXPECTED_CALL(platform_get_default_tlsio());
         STRICT_EXPECTED_CALL(http_proxy_io_get_interface_description());
         STRICT_EXPECTED_CALL(xio_create(TEST_INTERFACE_DESC, IGNORED_PTR_ARG));
-#ifdef USE_OPENSSL
-        STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-#endif
+
         proxy_info.host_address = TEST_HOST_ADDRESS_VALUE;
         proxy_info.username = TEST_PRIVATE_KEY_VALUE;
         proxy_info.password = TEST_HOST_ADDRESS_VALUE;

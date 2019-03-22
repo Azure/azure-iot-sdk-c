@@ -20,6 +20,7 @@ EXPORTS
     IoTHubMessage_Destroy
     IoTHubServiceClient_GetVersionString
     IoTHubServiceClientAuth_CreateFromConnectionString
+    IoTHubServiceClientAuth_CreateFromSharedAccessSignature
     IoTHubServiceClientAuth_Destroy
     IoTHubDeviceConfiguration_Create
     IoTHubDeviceConfiguration_Destroy
