@@ -893,7 +893,7 @@ void prov_transport_common_mqtt_dowork(PROV_DEVICE_TRANSPORT_HANDLE handle)
             if (create_connection(mqtt_info) != 0)
             {
                 /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_049: [ If any error is encountered prov_transport_common_mqtt_dowork shall set the mqtt_state to MQTT_STATE_ERROR and the transport_state to TRANSPORT_CLIENT_STATE_ERROR. ] */
-                LogError("unable to create amqp connection");
+                LogError("unable to create mqtt connection");
                 mqtt_info->mqtt_state = MQTT_STATE_ERROR;
                 mqtt_info->transport_state = TRANSPORT_CLIENT_STATE_ERROR;
             }
@@ -936,7 +936,7 @@ void prov_transport_common_mqtt_dowork(PROV_DEVICE_TRANSPORT_HANDLE handle)
                         }
                         else
                         {
-                            /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_054: [ Upon successful sending of a TRANSPORT_CLIENT_STATE_REG_SEND message, prov_transport_common_mqtt_dowork shall set the transport_state to TRANSPORT_CLIENT_STATE_REG_SENT ] */
+                            /* Codes_PROV_TRANSPORT_MQTT_COMMON_07_054: [ Upon successful sending of a TRANSPORT_CLIENT_STATE_REG_SEND message, prov_transport_common_mqtt_dowork shall set the transport_state to TRANSPORT_CLIENT_STATE_REG_SENT ] */
                             mqtt_info->transport_state = TRANSPORT_CLIENT_STATE_REG_SENT;
                         }
                         break;

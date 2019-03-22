@@ -15,7 +15,7 @@ cmake -Duse_amqp=OFF -Duse_http=OFF <Path_to_cmake>
 There is extensive logging throughout the SDK.  Every message will be included in the SDK's RAM and ROM footprint.  Removing logging will reduce the size of your application.
 
 ```Shell
-cmake -Duse_amqp=OFF -Duse_http=OFF -Dno_logging=OFF <Path_to_cmake>
+cmake -Duse_amqp=OFF -Duse_http=OFF -Dno_logging=ON <Path_to_cmake>
 ```
 
 ## Running the SDK without upload to blob
@@ -23,7 +23,7 @@ cmake -Duse_amqp=OFF -Duse_http=OFF -Dno_logging=OFF <Path_to_cmake>
 Upload to blob is an SDK feature used to send data to Azure Storage.  If your application doesn't need this feature you can remove the files
 
 ```Shell
-cmake -Duse_amqp=OFF -Duse_http=OFF -Dno_logging=OFF -Ddont_use_uploadtoblob=ON <Path_to_cmake>
+cmake -Duse_amqp=OFF -Duse_http=OFF -Dno_logging=ON -Ddont_use_uploadtoblob=ON <Path_to_cmake>
 ```
 
 ## Running strip on Linux environment
