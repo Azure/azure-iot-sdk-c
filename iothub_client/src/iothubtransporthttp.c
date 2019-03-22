@@ -20,7 +20,7 @@
 #include "azure_c_shared_utility/httpapiex.h"
 #include "azure_c_shared_utility/httpapiexsas.h"
 #include "azure_c_shared_utility/strings.h"
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 #include "azure_c_shared_utility/doublylinkedlist.h"
 #include "azure_c_shared_utility/vector.h"
 #include "azure_c_shared_utility/httpheaders.h"
@@ -1348,10 +1348,10 @@ static STRING_HANDLE make1EventJSONitem(PDLIST_ENTRY item, size_t *messageSizeCo
             }
             else
             {
-                STRING_HANDLE encoded = Base64_Encode_Bytes(source, size);
+                STRING_HANDLE encoded = Azure_Base64_Encode_Bytes(source, size);
                 if (encoded == NULL)
                 {
-                    LogError("unable to Base64_Encode_Bytes.");
+                    LogError("unable to Azure_Base64_Encode_Bytes.");
                     STRING_delete(result);
                     result = NULL;
                 }
@@ -1745,7 +1745,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                         else
                         {
                             // set_message_properties returning false does not necessarily mean the the function failed, it just means
-                            // the the adding of messages should not continue and should try the next time.  So you should not log if this 
+                            // the the adding of messages should not continue and should try the next time.  So you should not log if this
                             // returns false
                             if (set_message_properties(message, &messageSize, clonedEventHTTPrequestHeaders, handleData, deviceData))
                             {
@@ -1785,7 +1785,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                                         else
                                         {
                                             /*Codes_SRS_TRANSPORTMULTITHTTP_17_080: [If a deviceSasToken does not exist, IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest passing the following parameters] */
-                                            if ((r = HTTPAPIEX_SAS_ExecuteRequest(deviceData->sasObject, handleData->httpApiExHandle, HTTPAPI_REQUEST_POST, STRING_c_str(deviceData->eventHTTPrelativePath), 
+                                            if ((r = HTTPAPIEX_SAS_ExecuteRequest(deviceData->sasObject, handleData->httpApiExHandle, HTTPAPI_REQUEST_POST, STRING_c_str(deviceData->eventHTTPrelativePath),
                                                 clonedEventHTTPrequestHeaders, toBeSend, &statusCode, NULL, NULL )) != HTTPAPIEX_OK)
                                             {
                                                 LogError("unable to HTTPAPIEX_SAS_ExecuteRequest");
