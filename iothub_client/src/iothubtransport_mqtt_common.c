@@ -2101,7 +2101,6 @@ static int GetTransportProviderIfNecessary(PMQTTTRANSPORT_HANDLE_DATA transport_
         }
         else
         {
-            transport_data->conn_attempted = true;
             if (transport_data->saved_tls_options != NULL)
             {
                 if (OptionHandler_FeedOptions(transport_data->saved_tls_options, transport_data->xioTransport) != OPTIONHANDLER_OK)
@@ -2257,6 +2256,7 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 
             if (GetTransportProviderIfNecessary(transport_data) == 0)
             {
+                transport_data->conn_attempted = true;
                 if (mqtt_client_connect(transport_data->mqttClient, transport_data->xioTransport, &options) != 0)
                 {
                     LogError("failure connecting to address %s.", STRING_c_str(transport_data->hostAddress));
