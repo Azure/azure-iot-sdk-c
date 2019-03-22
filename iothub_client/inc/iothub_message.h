@@ -370,6 +370,25 @@ MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetConnectionDeviceId, 
 
 
 /**
+* @brief   Marks a IoTHub message as a security message. CAUTION: Security messages are special messages not easily accessable by the user.
+*
+* @param   iotHubMessageHandle Handle to the message.
+*
+* @return  Returns IOTHUB_MESSAGE_OK if the Security Message was set successfully
+*          or an error code otherwise.
+*/
+MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetAsSecurityMessage, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
+
+/**
+* @brief   returns if this message is a IoTHub security message or not
+*
+* @param   iotHubMessageHandle Handle to the message.
+*
+* @return  Returns true if the Message is a security message false otherwise.
+*/
+MOCKABLE_FUNCTION(, bool, IoTHubMessage_IsSecurityMessage, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
+
+/**
 * @brief   Frees all resources associated with the given message handle.
 *
 * @param   iotHubMessageHandle Handle to the message.

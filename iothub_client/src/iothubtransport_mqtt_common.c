@@ -27,6 +27,7 @@
 #include "iothub_client_streaming.h"
 #include "internal/iothubtransport_mqtt_common.h"
 #include "internal/iothubtransport.h"
+#include "internal/iothub_internal_consts.h"
 
 #include "azure_umqtt_c/mqtt_client.h"
 
@@ -712,10 +713,10 @@ static int addSystemPropertyToTopicString(STRING_HANDLE topic_string, size_t ind
 
 static int addSystemPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_message_handle, STRING_HANDLE topic_string, size_t* index_ptr, bool urlencode)
 {
-    (void)urlencode;
     int result = 0;
     size_t index = *index_ptr;
 
+    bool is_security_msg = IoTHubMessage_IsSecurityMessage(iothub_message_handle);
     /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_052: [ IoTHubTransport_MQTT_Common_DoWork shall check for the CorrelationId property and if found add the value as a system property in the format of $.cid=<id> ] */
     const char* correlation_id = IoTHubMessage_GetCorrelationId(iothub_message_handle);
     if (correlation_id != NULL)
@@ -749,7 +750,8 @@ static int addSystemPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_messag
         const char* content_encoding = IoTHubMessage_GetContentEncodingSystemProperty(iothub_message_handle);
         if (content_encoding != NULL)
         {
-            result = addSystemPropertyToTopicString(topic_string, index, CONTENT_ENCODING_PROPERTY, content_encoding, urlencode);
+            // Security message require content encoding
+            result = addSystemPropertyToTopicString(topic_string, index, CONTENT_ENCODING_PROPERTY, content_encoding, is_security_msg ? true : urlencode);
             index++;
         }
     }
@@ -761,6 +763,22 @@ static int addSystemPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_messag
         {
             result = addSystemPropertyToTopicString(topic_string, index, DISTRIBUTED_TRACING_PROPERTY, tracestate, true);
             index++;
+        }
+    }
+    if (result == 0)
+    {
+        if (is_security_msg)
+        {
+            // The Security interface Id value must be encoded
+            if (addSystemPropertyToTopicString(topic_string, index++, SECURITY_INTERFACE_ID_MQTT, SECURITY_INTERFACE_ID_VALUE, true) != 0)
+            {
+                LogError("Failed setting Security interface id");
+                result = __FAILURE__;
+            }
+            else
+            {
+                result = 0;
+            }
         }
     }
     *index_ptr = index;
