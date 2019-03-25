@@ -26,5 +26,5 @@ phases:
       sudo ./../../../node_modules/.bin/iotz compile
     displayName: 'build'
   - script: |
-      cp *.bin /media/john/AZ3166
+      cp ./BUILD/AZ3166/GCC_ARM/mxchip.bin /media/john/AZ3166
     displayName: 'deploy'
