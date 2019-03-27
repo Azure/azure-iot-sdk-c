@@ -69,7 +69,7 @@ static void _Bool_ToString(char* string, size_t bufferSize, _Bool val)
 #include "azure_c_shared_utility/socketio.h"
 #include "azure_uhttp_c/uhttp.h"
 #include "azure_c_shared_utility/envvariable.h"
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 #include "azure_c_shared_utility/urlencode.h"
 
 #include "parson.h"
@@ -329,8 +329,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_RETURN(URL_Encode, TEST_STRING_HANDLE1);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(URL_Encode, NULL);
 
-    REGISTER_GLOBAL_MOCK_RETURN(Base64_Encode_Bytes, TEST_STRING_HANDLE2);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Encode_Bytes, NULL);
+    REGISTER_GLOBAL_MOCK_RETURN(Azure_Base64_Encode_Bytes, TEST_STRING_HANDLE2);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Azure_Base64_Encode_Bytes, NULL);
 
     REGISTER_GLOBAL_MOCK_RETURN(STRING_c_str, TEST_STRING_1);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_c_str, NULL);
@@ -558,7 +558,7 @@ static void set_expected_calls_construct_json_signing_blob()
     STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Base64_Encode_Bytes(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(json_value_init_object());
     STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));

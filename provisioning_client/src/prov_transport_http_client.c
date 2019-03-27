@@ -12,7 +12,7 @@
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/http_proxy_io.h"
 #include "azure_c_shared_utility/urlencode.h"
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 
 #include "azure_prov_client/prov_transport_http_client.h"
 #include "azure_prov_client/internal/prov_transport_private.h"
@@ -257,12 +257,12 @@ static char* construct_json_data(PROV_TRANSPORT_HTTP_INFO* http_info)
     {
         STRING_HANDLE encoded_srk = NULL;
         STRING_HANDLE encoded_ek;
-        if ((encoded_ek = Base64_Encoder(http_info->ek)) == NULL)
+        if ((encoded_ek = Azure_Base64_Encode(http_info->ek)) == NULL)
         {
             LogError("Failure encoding ek");
             result = NULL;
         }
-        else if ((encoded_srk = Base64_Encoder(http_info->srk)) == NULL)
+        else if ((encoded_srk = Azure_Base64_Encode(http_info->srk)) == NULL)
         {
             LogError("Failure encoding srk");
             result = NULL;

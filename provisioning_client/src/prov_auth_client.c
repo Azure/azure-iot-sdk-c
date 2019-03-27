@@ -5,7 +5,7 @@
 #include "azure_c_shared_utility/umock_c_prod.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/xlogging.h"
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 #include "azure_c_shared_utility/base32.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/sha.h"
@@ -169,7 +169,7 @@ static int sign_sas_data(PROV_AUTH_INFO* auth_info, const char* payload, unsigne
             LogError("Failed getting asymmetrical key");
             result = __FAILURE__;
         }
-        else if ((decoded_key = Base64_Decoder(symmetrical_key)) == NULL)
+        else if ((decoded_key = Azure_Base64_Decode(symmetrical_key)) == NULL)
         {
             LogError("Failed decoding symmetrical key");
             result = __FAILURE__;
@@ -573,7 +573,7 @@ char* prov_auth_construct_sas_token(PROV_AUTH_HANDLE handle, const char* token_s
                 STRING_HANDLE urlEncodedSignature;
                 STRING_HANDLE base64Signature;
                 STRING_HANDLE sas_token_handle;
-                if ((base64Signature = Base64_Encode_Bytes(data_value, data_len)) == NULL)
+                if ((base64Signature = Azure_Base64_Encode_Bytes(data_value, data_len)) == NULL)
                 {
                     result = NULL;
                     LogError("Failure constructing base64 encoding.");
