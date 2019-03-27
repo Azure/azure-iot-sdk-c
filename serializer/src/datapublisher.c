@@ -14,7 +14,7 @@
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/vector.h"
 
-DEFINE_ENUM_STRINGS(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_RESULT_VALUES)
+MU_DEFINE_ENUM_STRINGS(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_RESULT_VALUES)
 
 #define LOG_DATA_PUBLISHER_ERROR \
     LogError("(result = %s)", ENUM_TO_STRING(DATA_PUBLISHER_RESULT, result))

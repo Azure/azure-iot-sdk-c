@@ -66,7 +66,7 @@
 // This is the maximum length for the largest 64 bit number (signed)
 #define MAX_ULONG_LONG_STRING_LENGTH 20
 
-DEFINE_ENUM_STRINGS(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_RESULT_VALUES);
 
 static int ValidateDate(int year, int month, int day);
 
