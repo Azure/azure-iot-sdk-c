@@ -48,7 +48,8 @@ WORKDIR /home/aziotcl-user
 RUN mkdir RPiBuild
 
 #ENV WORK_ROOT=/home/builder/RPiBuild
-ENV WORK_ROOT=/home/aziotcl-user/RPiBuild
+#ENV WORK_ROOT=/home/aziotcl-user/RPiBuild
+ENV WORK_ROOT=/home/aziotcl-user
 
 WORKDIR ${WORK_ROOT}
 
@@ -162,14 +163,14 @@ RUN make install
 
 WORKDIR ..
 
-RUN ls -al ../RPiBuild
+#RUN ls -al ../RPiBuild
 
 # clone azure 
 
 RUN git clone --recursive https://github.com/Azure/azure-iot-sdk-c.git
 
 #WORKDIR /home/builder/RPiBuild/azure-iot-sdk-c
-WORKDIR /home/aziotcl-user/RPiBuild/azure-iot-sdk-c
+WORKDIR /home/aziotcl-user/azure-iot-sdk-c
 
 RUN ls -al
 RUN ls -al ..
@@ -218,7 +219,8 @@ RUN ls -al ${TOOLCHAIN_PREFIX}/lib
 RUN ls -al ${TOOLCHAIN_PREFIX}/include
 
 # Go to project root
-WORKDIR ../..
+#WORKDIR ../..
+WORKDIR ../
 
 
 
