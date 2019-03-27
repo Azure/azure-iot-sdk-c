@@ -14,7 +14,7 @@
 #include "prov_service_client/provisioning_sc_shared_helpers.h"
 #include "parson.h"
 
-DEFINE_ENUM_STRINGS(ATTESTATION_TYPE, ATTESTATION_TYPE_VALUES)
+MU_DEFINE_ENUM_STRINGS(ATTESTATION_TYPE, ATTESTATION_TYPE_VALUES)
 
 typedef struct ATTESTATION_MECHANISM_TAG
 {

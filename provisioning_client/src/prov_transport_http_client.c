@@ -39,7 +39,7 @@ static const char* const KEY_NAME_VALUE = "registration";
 static const char* const TPM_SECURITY_INFO = "{\"registrationId\":\"%s\",\"tpm\":{\"endorsementKey\":\"%s\", \"storageRootKey\":\"%s\"}}";
 static const char* const REG_SECURITY_INFO = "{ \"registrationId\":\"%s\" }";
 
-DEFINE_ENUM_STRINGS(HTTP_CALLBACK_REASON, HTTP_CALLBACK_REASON_VALUES);
+MU_DEFINE_ENUM_STRINGS(HTTP_CALLBACK_REASON, HTTP_CALLBACK_REASON_VALUES);
 
 typedef enum PROV_TRANSPORT_STATE_TAG
 {

@@ -9,7 +9,7 @@
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/macro_utils.h"
 
-DEFINE_ENUM_STRINGS(SCHEMA_SERIALIZER_RESULT, SCHEMA_SERIALIZER_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS(SCHEMA_SERIALIZER_RESULT, SCHEMA_SERIALIZER_RESULT_VALUES);
 
 #define LOG_SCHEMA_SERIALIZER_ERROR(result) LogError("(result = %s)", ENUM_TO_STRING(SCHEMA_SERIALIZER_RESULT, (result)))
 

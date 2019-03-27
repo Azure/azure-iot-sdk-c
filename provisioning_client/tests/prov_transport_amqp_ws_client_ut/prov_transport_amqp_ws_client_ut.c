@@ -103,7 +103,7 @@ static PROV_DEVICE_TRANSPORT_HANDLE my_prov_transport_common_amqp_create(const c
     return TEST_DPS_HANDLE;
 }
 
-DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
