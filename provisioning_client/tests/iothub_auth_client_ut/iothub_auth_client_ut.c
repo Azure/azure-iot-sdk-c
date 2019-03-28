@@ -288,12 +288,12 @@ static DEVICE_AUTH_CREDENTIAL_INFO g_test_sas_cred_no_keyname;
 static DEVICE_AUTH_CREDENTIAL_INFO g_test_x509_cred;
 static DEVICE_AUTH_CREDENTIAL_INFO g_test_key_cred;
 
-DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
     ASSERT_FAIL(temp_str);
 }
 

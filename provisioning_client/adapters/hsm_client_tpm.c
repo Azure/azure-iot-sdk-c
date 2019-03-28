@@ -123,7 +123,7 @@ static TPM2B_PUBLIC* GetSrkTemplate()
     if (act_size < arrSize)                                                     \
     {                                                                           \
         LogError("Unmarshaling " #dstPtr " failed: Need %d bytes, while only %d left", arrSize, act_size);  \
-        result = __FAILURE__;       \
+        result = MU_FAILURE;       \
     }                                                                           \
     else                            \
     {                                   \
@@ -161,12 +161,12 @@ static int unmarshal_array(uint8_t* dstptr, uint32_t size, uint8_t** curr_pos, u
     if (tpm_res != TPM_RC_SUCCESS)
     {
         LogError("Failure: unmarshalling array.");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (*curr_size < size)
     {
         LogError("Failure: unmarshalling array need %d bytes, while only %d left.", size, *curr_size);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -244,12 +244,12 @@ static int create_tpm_session(HSM_CLIENT_INFO* sec_info, TSS_SESSION* tpm_sessio
     if (TSS_StartAuthSession(&sec_info->tpm_device, TPM_SE_POLICY, TPM_ALG_SHA256, sess_attrib, tpm_session) != TPM_RC_SUCCESS)
     {
         LogError("Failure: Starting EK policy session");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (TSS_PolicySecret(&sec_info->tpm_device, &NullPwSession, TPM_RH_ENDORSEMENT, tpm_session, NULL, 0) != TPM_RC_SUCCESS)
     {
         LogError("Failure: PolicySecret() for EK");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -265,7 +265,7 @@ static int insert_key_in_tpm(HSM_CLIENT_INFO* sec_info, const unsigned char* key
     if (create_tpm_session(sec_info, &ek_sess) != 0)
     {
         LogError("Failure: Starting EK policy session");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -298,12 +298,12 @@ static int insert_key_in_tpm(HSM_CLIENT_INFO* sec_info, const unsigned char* key
             &enc_key_blob, &tpm_enc_secret, &inner_wrap_key) != TPM_RC_SUCCESS)
         {
             LogError("Failure: TPM2_ActivateCredential");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if (TPM2_Import(&sec_info->tpm_device, &NullPwSession, TPM_20_SRK_HANDLE, (TPM2B_DATA*)&inner_wrap_key, &id_key_Public, &id_key_dup_blob, &encrypt_wrap_key, &Aes128SymDef, &id_key_priv) != TPM_RC_SUCCESS)
         {
             LogError("Failure: importing dps Id key");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -331,12 +331,12 @@ static int insert_key_in_tpm(HSM_CLIENT_INFO* sec_info, const unsigned char* key
             if (TSS_Create(&sec_info->tpm_device, &NullPwSession, TPM_20_SRK_HANDLE, &sen_create, &symTemplate, &sym_priv, &sym_pub) != TPM_RC_SUCCESS)
             {
                 LogError("Failed to inject symmetric key data");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if (TPM2_Load(&sec_info->tpm_device, &NullPwSession, TPM_20_SRK_HANDLE, &id_key_priv, &id_key_Public, &load_id_key, NULL) != TPM_RC_SUCCESS)
             {
                 LogError("Failed Load Id key.");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -346,12 +346,12 @@ static int insert_key_in_tpm(HSM_CLIENT_INFO* sec_info, const unsigned char* key
                 if (TPM2_EvictControl(&sec_info->tpm_device, &NullPwSession, TPM_RH_OWNER, load_id_key, DPS_ID_KEY_HANDLE) != TPM_RC_SUCCESS)
                 {
                     LogError("Failed Load Id key.");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else if (TPM2_FlushContext(&sec_info->tpm_device, load_id_key) != TPM_RC_SUCCESS)
                 {
                     LogError("Failed Load Id key.");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {
@@ -445,25 +445,25 @@ static int initialize_tpm_device(HSM_CLIENT_INFO* tpm_info)
     if (TSS_CreatePwAuthSession(&NullAuth, &NullPwSession) != TPM_RC_SUCCESS)
     {
         LogError("Failure calling TSS_CreatePwAuthSession");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     /* Codes_SRS_HSM_CLIENT_TPM_07_030: [ secure_dev_tpm_create shall call into the tpm_codec to initialize a TSS session. ] */
     else if (Initialize_TPM_Codec(&tpm_info->tpm_device) != TPM_RC_SUCCESS)
     {
         LogError("Failure initializeing TPM Codec");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     /* Codes_SRS_HSM_CLIENT_TPM_07_031: [ secure_dev_tpm_create shall get a handle to the Endorsement Key and Storage Root Key. ] */
     else if ((TSS_CreatePersistentKey(&tpm_info->tpm_device, TPM_20_EK_HANDLE, &NullPwSession, TPM_RH_ENDORSEMENT, GetEkTemplate(), &tpm_info->ek_pub) ) == 0)
     {
         LogError("Failure calling creating persistent key for Endorsement key");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     /* Codes_SRS_HSM_CLIENT_TPM_07_031: [ secure_dev_tpm_create shall get a handle to the Endorsement Key and Storage Root Key. ] */
     else if (TSS_CreatePersistentKey(&tpm_info->tpm_device, TPM_20_SRK_HANDLE, &NullPwSession, TPM_RH_OWNER, GetSrkTemplate(), &tpm_info->srk_pub) == 0)
     {
         LogError("Failure calling creating persistent key for Storage Root key");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -532,7 +532,7 @@ int hsm_client_tpm_import_key(HSM_CLIENT_HANDLE handle, const unsigned char* key
     {
         /* Codes_SRS_HSM_CLIENT_TPM_07_007: [ if handle or key are NULL, or key_len is 0 hsm_client_tpm_import_key shall return a non-zero value ] */
         LogError("Invalid argument specified handle: %p, key: %p, key_len: %lu", handle, key, (unsigned long)key_len);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -540,7 +540,7 @@ int hsm_client_tpm_import_key(HSM_CLIENT_HANDLE handle, const unsigned char* key
         if (insert_key_in_tpm((HSM_CLIENT_INFO*)handle, key, key_len))
         {
             LogError("Failure inserting key into tpm");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -558,7 +558,7 @@ int hsm_client_tpm_get_endorsement_key(HSM_CLIENT_HANDLE handle, unsigned char**
     {
         /* Codes_SRS_HSM_CLIENT_TPM_07_013: [ If handle is NULL hsm_client_tpm_get_endorsement_key shall return NULL. ] */
         LogError("Invalid handle value specified: handle: %p, result: %p, result_len: %p", handle, key, key_len);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -567,7 +567,7 @@ int hsm_client_tpm_get_endorsement_key(HSM_CLIENT_HANDLE handle, unsigned char**
         {
             /* Codes_SRS_HSM_CLIENT_TPM_07_027: [ If the ek_public was not initialized hsm_client_tpm_get_endorsement_key shall return NULL. ] */
             LogError("Endorsement key is invalid");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -578,13 +578,13 @@ int hsm_client_tpm_get_endorsement_key(HSM_CLIENT_HANDLE handle, unsigned char**
             if (data_length > TPM_DATA_LENGTH)
             {
                 LogError("EK data length larger than allocated buffer %" PRIu32, data_length);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if ((*key = (unsigned char*)malloc(data_length)) == NULL)
             {
                 /* Codes_SRS_HSM_CLIENT_TPM_07_015: [ If a failure is encountered, hsm_client_tpm_get_endorsement_key shall return NULL. ] */
                 LogError("Failure creating buffer handle");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -604,7 +604,7 @@ int hsm_client_tpm_get_storage_key(HSM_CLIENT_HANDLE handle, unsigned char** key
     {
         /* Codes_SRS_HSM_CLIENT_TPM_07_016: [ If handle is NULL, hsm_client_tpm_get_storage_key shall return NULL. ] */
         LogError("Invalid handle value specified: handle: %p, result: %p, result_len: %p", handle, key, key_len);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -613,7 +613,7 @@ int hsm_client_tpm_get_storage_key(HSM_CLIENT_HANDLE handle, unsigned char** key
         {
             /* Codes_SRS_HSM_CLIENT_TPM_07_017: [ If the srk_public value was not initialized, hsm_client_tpm_get_storage_key shall return NULL. ] */
             LogError("storage root key is invalid");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -624,12 +624,12 @@ int hsm_client_tpm_get_storage_key(HSM_CLIENT_HANDLE handle, unsigned char** key
             if (data_length > TPM_DATA_LENGTH)
             {
                 LogError("SRK data length larger than allocated buffer %" PRIu32, data_length);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if ((*key = (unsigned char*)malloc(data_length)) == NULL)
             {
                 LogError("Failure creating buffer handle");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -649,7 +649,7 @@ int hsm_client_tpm_sign_data(HSM_CLIENT_HANDLE handle, const unsigned char* data
     if (handle == NULL || data == NULL || data_len == 0 || signed_value == NULL || signed_len == NULL)
     {
         LogError("Invalid handle value specified handle: %p, data: %p, data_len: %lu, signed_value: %p, signed_len: %p", handle, data, (unsigned long)data_len, signed_value, signed_len);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -663,7 +663,7 @@ int hsm_client_tpm_sign_data(HSM_CLIENT_HANDLE handle, const unsigned char* data
         {
             /* Codes_SRS_HSM_CLIENT_TPM_07_023: [ If an error is encountered hsm_client_tpm_sign_data shall return NULL. ] */
             LogError("Failure signing data from hash");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -672,7 +672,7 @@ int hsm_client_tpm_sign_data(HSM_CLIENT_HANDLE handle, const unsigned char* data
             {
                 /* Codes_SRS_HSM_CLIENT_TPM_07_023: [ If an error is encountered hsm_client_tpm_sign_data shall return NULL. ] */
                 LogError("Failure creating buffer handle");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {

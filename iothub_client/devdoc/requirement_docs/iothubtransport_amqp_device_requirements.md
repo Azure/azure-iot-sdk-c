@@ -117,8 +117,8 @@ extern OPTIONHANDLER_HANDLE device_retrieve_options(DEVICE_HANDLE handle);
 
 ```
 
-Note: `instance` refers to the structure that holds the current state and control parameters of the device. 
-In each function (other than amqp_device_create) it shall derive from the AMQP_DEVICE_HANDLE handle passed as argument.  
+Note: `instance` refers to the structure that holds the current state and control parameters of the device.
+In each function (other than amqp_device_create) it shall derive from the AMQP_DEVICE_HANDLE handle passed as argument.
 
 
 ### device_create
@@ -158,7 +158,7 @@ extern void device_destroy(DEVICE_HANDLE handle);
 
 
 ### device_start_async
- 
+
 ```c
 extern int device_start_async(DEVICE_HANDLE handle, SESSION_HANDLE session_handle, CBS_HANDLE cbs_handle);
 ```
@@ -171,9 +171,9 @@ extern int device_start_async(DEVICE_HANDLE handle, SESSION_HANDLE session_handl
 **SRS_DEVICE_09_022: [**The device state shall be updated to DEVICE_STATE_STARTING, and state changed callback invoked**]**
 **SRS_DEVICE_09_023: [**If no failures occur, device_start_async shall return 0**]**
 
- 
+
 ### device_stop
- 
+
 ```c
 extern int device_stop(DEVICE_HANDLE handle);
 ```
@@ -192,7 +192,7 @@ extern int device_stop(DEVICE_HANDLE handle);
 
 
 ### device_do_work
- 
+
 ```c
 extern void device_do_work(DEVICE_HANDLE handle);
 ```
@@ -245,7 +245,7 @@ extern void device_do_work(DEVICE_HANDLE handle);
 
 
 ### device_send_event_async
- 
+
 ```c
 extern int device_send_event_async(DEVICE_HANDLE handle, IOTHUB_MESSAGE_LIST* message, ON_DEVICE_D2C_EVENT_SEND_COMPLETE on_device_d2c_event_send_complete_callback, void* context);
 ```
@@ -355,7 +355,7 @@ extern int device_get_twin_async(AMQP_DEVICE_HANDLE handle, DEVICE_TWIN_UPDATE_R
 
 
 ### device_subscribe_message
- 
+
 ```c
 extern int device_subscribe_message(DEVICE_HANDLE handle, ON_DEVICE_C2D_MESSAGE_RECEIVED on_message_received_callback, void* context);
 ```
@@ -388,7 +388,7 @@ static TELEMETRY_MESSENGER_DISPOSITION_RESULT on_messenger_message_received_call
 
 
 ### device_unsubscribe_message
- 
+
 ```c
 extern int device_unsubscribe_message(DEVICE_HANDLE handle);
 ```
@@ -404,25 +404,25 @@ extern int device_unsubscribe_message(DEVICE_HANDLE handle);
 extern int device_send_message_disposition(DEVICE_HANDLE device_handle, DEVICE_MESSAGE_DISPOSITION_INFO* disposition_info, DEVICE_MESSAGE_DISPOSITION_RESULT disposition_result);
 ```
 
-**SRS_DEVICE_09_111: [**If `device_handle` or `disposition_info` are NULL, device_send_message_disposition() shall fail and return __FAILURE__**]**
+**SRS_DEVICE_09_111: [**If `device_handle` or `disposition_info` are NULL, device_send_message_disposition() shall fail and return MU_FAILURE**]**
 
-**SRS_DEVICE_09_112: [**If `disposition_info->source` is NULL, device_send_message_disposition() shall fail and return __FAILURE__**]**  
+**SRS_DEVICE_09_112: [**If `disposition_info->source` is NULL, device_send_message_disposition() shall fail and return MU_FAILURE**]**
 
-**SRS_DEVICE_09_113: [**A TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance shall be created with a copy of the `source` and `message_id` contained in `disposition_info`**]**  
+**SRS_DEVICE_09_113: [**A TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance shall be created with a copy of the `source` and `message_id` contained in `disposition_info`**]**
 
-**SRS_DEVICE_09_114: [**If the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO fails to be created, device_send_message_disposition() shall fail and return __FAILURE__**]**  
+**SRS_DEVICE_09_114: [**If the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO fails to be created, device_send_message_disposition() shall fail and return MU_FAILURE**]**
 
-**SRS_DEVICE_09_115: [**`telemetry_messenger_send_message_disposition()` shall be invoked passing the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance and the corresponding TELEMETRY_MESSENGER_DISPOSITION_RESULT**]**  
+**SRS_DEVICE_09_115: [**`telemetry_messenger_send_message_disposition()` shall be invoked passing the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance and the corresponding TELEMETRY_MESSENGER_DISPOSITION_RESULT**]**
 
-**SRS_DEVICE_09_116: [**If `telemetry_messenger_send_message_disposition()` fails, device_send_message_disposition() shall fail and return __FAILURE__**]**  
+**SRS_DEVICE_09_116: [**If `telemetry_messenger_send_message_disposition()` fails, device_send_message_disposition() shall fail and return MU_FAILURE**]**
 
-**SRS_DEVICE_09_117: [**device_send_message_disposition() shall destroy the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance**]**  
+**SRS_DEVICE_09_117: [**device_send_message_disposition() shall destroy the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance**]**
 
-**SRS_DEVICE_09_118: [**If no failures occurr, device_send_message_disposition() shall return 0**]**  
+**SRS_DEVICE_09_118: [**If no failures occurr, device_send_message_disposition() shall return 0**]**
 
 
 ### device_set_retry_policy
- 
+
 ```c
 extern int device_set_retry_policy(DEVICE_HANDLE handle, IOTHUB_CLIENT_RETRY_POLICY policy, size_t retry_timeout_limit_in_seconds);
 ```
@@ -434,7 +434,7 @@ Note: this API is not currently implemented or supported.
 
 
 ### device_set_option
- 
+
 ```c
 extern int device_set_option(DEVICE_HANDLE handle, const char* name, void* value);
 ```
@@ -451,13 +451,13 @@ extern int device_set_option(DEVICE_HANDLE handle, const char* name, void* value
 **SRS_DEVICE_09_091: [**If any call to OptionHandler_FeedOptions fails, device_set_option shall return a non-zero result**]**
 **SRS_DEVICE_09_092: [**If no failures occur, device_set_option shall return 0**]**
 
-Note: 
+Note:
 - Authentication-related options: DEVICE_OPTION_CBS_REQUEST_TIMEOUT_SECS, DEVICE_OPTION_SAS_TOKEN_REFRESH_TIME_SECS, DEVICE_OPTION_SAS_TOKEN_LIFETIME_SECS
 - Messenger-related options: DEVICE_OPTION_EVENT_SEND_TIMEOUT_SECS
 
 
 ### device_retrieve_options
- 
+
 ```c
 extern OPTIONHANDLER_HANDLE device_retrieve_options(DEVICE_HANDLE handle);
 ```

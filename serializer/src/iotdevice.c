@@ -12,7 +12,7 @@
 #include "azure_c_shared_utility/xlogging.h"
 
 #define LOG_DEVICE_ERROR \
-    LogError("(result = %s)", ENUM_TO_STRING(DEVICE_RESULT, result))
+    LogError("(result = %s)", MU_ENUM_TO_STRING(DEVICE_RESULT, result))
 
 
 
@@ -28,7 +28,7 @@ typedef struct DEVICE_HANDLE_DATA_TAG
     COMMAND_DECODER_HANDLE commandDecoderHandle;
 } DEVICE_HANDLE_DATA;
 
-DEFINE_ENUM_STRINGS(DEVICE_RESULT, DEVICE_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS(DEVICE_RESULT, DEVICE_RESULT_VALUES);
 
 static EXECUTE_COMMAND_RESULT DeviceInvokeAction(void* actionCallbackContext, const char* relativeActionPath, const char* actionName, size_t argCount, const AGENT_DATA_TYPE* args)
 {
@@ -38,7 +38,7 @@ static EXECUTE_COMMAND_RESULT DeviceInvokeAction(void* actionCallbackContext, co
     if (actionCallbackContext == NULL)
     {
         result = EXECUTE_COMMAND_ERROR;
-        LogError("(Error code = %s)", ENUM_TO_STRING(DEVICE_RESULT, DEVICE_INVALID_ARG));
+        LogError("(Error code = %s)", MU_ENUM_TO_STRING(DEVICE_RESULT, DEVICE_INVALID_ARG));
     }
     else
     {
@@ -59,7 +59,7 @@ static METHODRETURN_HANDLE DeviceInvokeMethod(void* methodCallbackContext, const
     if (methodCallbackContext == NULL)
     {
         result = NULL;
-        LogError("(Error code = %s)", ENUM_TO_STRING(DEVICE_RESULT, DEVICE_INVALID_ARG));
+        LogError("(Error code = %s)", MU_ENUM_TO_STRING(DEVICE_RESULT, DEVICE_INVALID_ARG));
     }
     else
     {
@@ -159,7 +159,7 @@ TRANSACTION_HANDLE Device_StartTransaction(DEVICE_HANDLE deviceHandle)
     if (deviceHandle == NULL)
     {
         result = NULL;
-        LogError("(Error code = %s)", ENUM_TO_STRING(DEVICE_RESULT, DEVICE_INVALID_ARG));
+        LogError("(Error code = %s)", MU_ENUM_TO_STRING(DEVICE_RESULT, DEVICE_INVALID_ARG));
     }
     else
     {

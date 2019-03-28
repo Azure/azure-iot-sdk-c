@@ -98,7 +98,7 @@ static int send_http_sas_request(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* uplo
     if (http_sas_handle == NULL)
     {
         LogError("unable to HTTPAPIEX_SAS_Create");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -107,12 +107,12 @@ static int send_http_sas_request(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* uplo
             blobBuffer, &statusCode, NULL, response_buff) != HTTPAPIEX_OK)
         {
             /*Codes_SRS_IOTHUBCLIENT_LL_02_076: [ If HTTPAPIEX_ExecuteRequest call fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-            result = __FAILURE__;
+            result = MU_FAILURE;
             LogError("unable to HTTPAPIEX_ExecuteRequest");
         }
         else if (statusCode >= 300)
         {
-            result = __FAILURE__;
+            result = MU_FAILURE;
             LogError("HTTP code was %u", statusCode);
         }
         else
@@ -133,12 +133,12 @@ static int send_http_request(HTTPAPIEX_HANDLE http_api_handle, const char* relat
         blobBuffer, &statusCode, NULL, response_buff) != HTTPAPIEX_OK)
     {
         /*Codes_SRS_IOTHUBCLIENT_LL_02_076: [ If HTTPAPIEX_ExecuteRequest call fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-        result = __FAILURE__;
+        result = MU_FAILURE;
         LogError("unable to HTTPAPIEX_ExecuteRequest");
     }
     else if (statusCode >= 300)
     {
-        result = __FAILURE__;
+        result = MU_FAILURE;
         LogError("HTTP code was %u", statusCode);
     }
     else
@@ -159,7 +159,7 @@ static int parse_result_json(const char* json_response, STRING_HANDLE correlatio
     {
         /*Codes_SRS_IOTHUBCLIENT_LL_02_082: [ If extracting and saving the correlationId or SasUri fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
         LogError("unable to json_parse_string");
-        result = __FAILURE__;
+        result = MU_FAILURE;
 
     }
     else
@@ -167,7 +167,7 @@ static int parse_result_json(const char* json_response, STRING_HANDLE correlatio
         if ((json_obj = json_value_get_object(json)) == NULL)
         {
             LogError("unable to get json_value_get_object");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -180,34 +180,34 @@ static int parse_result_json(const char* json_response, STRING_HANDLE correlatio
             if ((json_corr_id = json_object_get_string(json_obj, "correlationId")) == NULL)
             {
                 LogError("unable to retrieve correlation Id from json");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if ((json_hostname = json_object_get_string(json_obj, "hostName")) == NULL)
             {
                 LogError("unable to retrieve hostname Id from json");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if ((json_container_name = json_object_get_string(json_obj, "containerName")) == NULL)
             {
                 LogError("unable to retrieve container name Id from json");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if ((json_blob_name = json_object_get_string(json_obj, "blobName")) == NULL)
             {
                 LogError("unable to retrieve blob name Id from json");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if ((json_sas_token = json_object_get_string(json_obj, "sasToken")) == NULL)
             {
                 LogError("unable to retrieve sas token from json");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             /*Codes_SRS_IOTHUBCLIENT_LL_32_008: [ The returned file name shall be URL encoded before passing back to the cloud. ]*/
             else if ((filename = URL_EncodeString(json_blob_name)) == NULL)
             {
                 /*Codes_SRS_IOTHUBCLIENT_LL_32_009: [ If URL_EncodeString fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
                 LogError("unable to URL encode of filename");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -215,13 +215,13 @@ static int parse_result_json(const char* json_response, STRING_HANDLE correlatio
                 {
                     /*Codes_SRS_IOTHUBCLIENT_LL_02_082: [ If extracting and saving the correlationId or SasUri fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
                     LogError("unable to construct uri string");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else if (STRING_copy(correlation_id, json_corr_id) != 0)
                 {
                     /*Codes_SRS_IOTHUBCLIENT_LL_02_082: [ If extracting and saving the correlationId or SasUri fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
                     LogError("unable to copy correlation Id");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                     STRING_empty(sas_uri);
                 }
                 else
@@ -333,7 +333,7 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
     {
         /*Codes_SRS_IOTHUBCLIENT_LL_02_067: [ If creating the relativePath fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
         LogError("Failure constructing string");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -343,7 +343,7 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
         {
             /*Codes_SRS_IOTHUBCLIENT_LL_32_002: [ If creating the JSON string fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
             LogError("Failure constructing string");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -354,7 +354,7 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
             {
                 /*Codes_SRS_IOTHUBCLIENT_LL_32_002: [ If creating the JSON string fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
                 LogError("unable to create BUFFER");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -362,7 +362,7 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                 if ((responseContent = BUFFER_new()) == NULL)
                 {
                     /*Codes_SRS_IOTHUBCLIENT_LL_02_069: [ If creating the HTTP response buffer handle fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                     LogError("unable to BUFFER_new");
                 }
                 else
@@ -379,20 +379,20 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                     {
                         /*Codes_SRS_IOTHUBCLIENT_LL_02_071: [ If creating the HTTP headers fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
                         LogError("unable to HTTPHeaders_AddHeaderNameValuePair");
-                        result = __FAILURE__;
+                        result = MU_FAILURE;
                     }
                     else
                     {
                         int wasIoTHubRequestSuccess = 0; /*!=0 means responseContent has a buffer that should be parsed by parson after executing the below switch*/
                         /* set the result to error by default */
-                        result = __FAILURE__;
+                        result = MU_FAILURE;
                         switch (upload_data->cred_type)
                         {
                             default:
                             {
                                 /*wasIoTHubRequestSuccess takes care of the return value*/
                                 LogError("Internal Error: unexpected value in auth schema = %d", upload_data->cred_type);
-                                result = __FAILURE__;
+                                result = MU_FAILURE;
                                 break;
                             }
                             case IOTHUB_CREDENTIAL_TYPE_X509_ECC:
@@ -401,7 +401,7 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                                 if (send_http_request(iotHubHttpApiExHandle, STRING_c_str(relativePath), requestHttpHeaders, blobBuffer, responseContent) != 0)
                                 {
                                     /*Codes_SRS_IOTHUBCLIENT_LL_02_076: [ If HTTPAPIEX_ExecuteRequest call fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-                                    result = __FAILURE__;
+                                    result = MU_FAILURE;
                                     LogError("unable to HTTPAPIEX_ExecuteRequest");
                                 }
                                 else
@@ -417,7 +417,7 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                                 if (uri_resource == NULL)
                                 {
                                     /*Codes_SRS_IOTHUBCLIENT_LL_02_089: [ If creating the HTTPAPIEX_SAS_HANDLE fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-                                    result = __FAILURE__;
+                                    result = MU_FAILURE;
                                     LogError("Failure constructing string");
                                 }
                                 else
@@ -427,7 +427,7 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                                         time_t curr_time;
                                         if ((curr_time = get_time(NULL)) == INDEFINITE_TIME)
                                         {
-                                            result = __FAILURE__;
+                                            result = MU_FAILURE;
                                             LogError("failure retrieving time");
                                         }
                                         else
@@ -436,7 +436,7 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                                             char* sas_token = IoTHubClient_Auth_Get_SasToken(upload_data->authorization_module, STRING_c_str(uri_resource), expiry, EMPTY_STRING);
                                             if (sas_token == NULL)
                                             {
-                                                result = __FAILURE__;
+                                                result = MU_FAILURE;
                                                 LogError("unable to retrieve sas token");
                                             }
                                             else
@@ -444,13 +444,13 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                                                 if (HTTPHeaders_ReplaceHeaderNameValuePair(requestHttpHeaders, HEADER_AUTHORIZATION, sas_token) != HTTP_HEADERS_OK)
                                                 {
                                                     /*Codes_SRS_IOTHUBCLIENT_LL_02_074: [ If adding "Authorization" fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR ]*/
-                                                    result = __FAILURE__;
+                                                    result = MU_FAILURE;
                                                     LogError("unable to HTTPHeaders_AddHeaderNameValuePair");
                                                 }
                                                 else if (send_http_request(iotHubHttpApiExHandle, STRING_c_str(relativePath), requestHttpHeaders, blobBuffer, responseContent) != 0)
                                                 {
                                                     /*Codes_SRS_IOTHUBCLIENT_LL_02_076: [ If HTTPAPIEX_ExecuteRequest call fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-                                                    result = __FAILURE__;
+                                                    result = MU_FAILURE;
                                                     LogError("unable to HTTPAPIEX_ExecuteRequest");
                                                 }
                                                 else
@@ -466,7 +466,7 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                                         if (send_http_sas_request(upload_data, STRING_c_str(uri_resource), iotHubHttpApiExHandle, STRING_c_str(relativePath), requestHttpHeaders, blobBuffer, responseContent) != 0)
                                         {
                                             /*Codes_SRS_IOTHUBCLIENT_LL_02_076: [ If HTTPAPIEX_ExecuteRequest call fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-                                            result = __FAILURE__;
+                                            result = MU_FAILURE;
                                             LogError("unable to HTTPAPIEX_ExecuteRequest");
                                         }
                                         else
@@ -484,13 +484,13 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                                 if (HTTPHeaders_ReplaceHeaderNameValuePair(requestHttpHeaders, HEADER_AUTHORIZATION, upload_data->credentials.supplied_sas_token) != HTTP_HEADERS_OK)
                                 {
                                     /*Codes_SRS_IOTHUBCLIENT_LL_02_074: [ If adding "Authorization" fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR ]*/
-                                    result = __FAILURE__;
+                                    result = MU_FAILURE;
                                     LogError("unable to HTTPHeaders_AddHeaderNameValuePair");
                                 }
                                 else if (send_http_request(iotHubHttpApiExHandle, STRING_c_str(relativePath), requestHttpHeaders, blobBuffer, responseContent) != 0)
                                 {
                                     /*Codes_SRS_IOTHUBCLIENT_LL_02_076: [ If HTTPAPIEX_ExecuteRequest call fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-                                    result = __FAILURE__;
+                                    result = MU_FAILURE;
                                     LogError("unable to HTTPAPIEX_ExecuteRequest");
                                 }
                                 else
@@ -507,7 +507,7 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                             STRING_HANDLE responseAsString = STRING_from_byte_array(responseContent_u_char, responseContent_length);
                             if (responseAsString == NULL)
                             {
-                                result = __FAILURE__;
+                                result = MU_FAILURE;
                                 LogError("unable to get the response as string");
                             }
                             else
@@ -516,7 +516,7 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                                 {
                                     /*Codes_SRS_IOTHUBCLIENT_LL_02_082: [ If extracting and saving the correlationId or SasUri fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
                                     LogError("unable to parse json result");
-                                    result = __FAILURE__;
+                                    result = MU_FAILURE;
                                 }
                                 else
                                 {
@@ -549,7 +549,7 @@ static int IoTHubClient_LL_UploadToBlob_step3(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HAND
     STRING_HANDLE relativePathNotification = STRING_construct_sprintf("/devices/%s/files/notifications/%s%s", upload_data->deviceId, STRING_c_str(correlationId), API_VERSION);
     if (relativePathNotification == NULL)
     {
-        result = __FAILURE__;
+        result = MU_FAILURE;
         LogError("Failure constructing string");
     }
     else
@@ -560,7 +560,7 @@ static int IoTHubClient_LL_UploadToBlob_step3(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HAND
             default:
             {
                 LogError("internal error: unknown authorization Scheme");
-                result = __FAILURE__;
+                result = MU_FAILURE;
                 break;
             }
             case IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN:
@@ -571,7 +571,7 @@ static int IoTHubClient_LL_UploadToBlob_step3(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HAND
                 if (send_http_request(iotHubHttpApiExHandle, STRING_c_str(relativePathNotification), requestHttpHeaders, messageBody, NULL) != 0)
                 {
                     LogError("unable to execute HTTPAPIEX_ExecuteRequest");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {
@@ -585,14 +585,14 @@ static int IoTHubClient_LL_UploadToBlob_step3(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HAND
                 if (uriResource == NULL)
                 {
                     LogError("Failure constructing string");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {
                     if (send_http_sas_request(upload_data, STRING_c_str(uriResource), iotHubHttpApiExHandle, STRING_c_str(relativePathNotification), requestHttpHeaders, messageBody, NULL) != 0)
                     {
                         LogError("unable to execute HTTPAPIEX_ExecuteRequest");
-                        result = __FAILURE__;
+                        result = MU_FAILURE;
                     }
                     else
                     {
