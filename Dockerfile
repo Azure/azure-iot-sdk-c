@@ -45,7 +45,7 @@ WORKDIR /home/aziotcl-user
 
 
 
-RUN mkdir RPiBuild
+#RUN mkdir RPiBuild
 
 #ENV WORK_ROOT=/home/builder/RPiBuild
 #ENV WORK_ROOT=/home/aziotcl-user/RPiBuild
@@ -219,8 +219,8 @@ RUN ls -al ${TOOLCHAIN_PREFIX}/lib
 RUN ls -al ${TOOLCHAIN_PREFIX}/include
 
 # Go to project root
-#WORKDIR ../..
-WORKDIR ../
+WORKDIR ../..
+
 
 
 
