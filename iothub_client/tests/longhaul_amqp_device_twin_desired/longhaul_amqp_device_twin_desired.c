@@ -33,14 +33,14 @@ int main(void)
     if ((iotHubLonghaulRsrcsHandle = longhaul_tests_init()) == NULL)
     {
         LogError("Test failed");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
         if (longhaul_initialize_device_client(iotHubLonghaulRsrcsHandle, IoTHubAccount_GetSASDevice(longhaul_get_account_info(iotHubLonghaulRsrcsHandle)), AMQP_Protocol) == NULL)
         {
             LogError("Failed creating the device client");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {

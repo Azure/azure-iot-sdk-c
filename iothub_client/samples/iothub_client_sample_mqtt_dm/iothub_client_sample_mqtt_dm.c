@@ -272,7 +272,7 @@ static bool send_reported(const PHYSICAL_DEVICE *physical_device, IOTHUB_CLIENT_
     }
     else
     {
-        iot_device->iothubDM.firmwareUpdate.status = (char *) ENUM_TO_STRING(FIRMWARE_UPDATE_STATUS, get_physical_device_fwupdate_status(physical_device));
+        iot_device->iothubDM.firmwareUpdate.status = (char *) MU_ENUM_TO_STRING(FIRMWARE_UPDATE_STATUS, get_physical_device_fwupdate_status(physical_device));
 
         /*serialize the model using SERIALIZE_REPORTED_PROPERTIES */
         if (SERIALIZE_REPORTED_PROPERTIES(&buffer, &bufferSize, *iot_device) != CODEFIRST_OK)
