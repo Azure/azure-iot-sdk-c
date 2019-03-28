@@ -218,8 +218,9 @@ RUN make install
 RUN ls -al ${TOOLCHAIN_PREFIX}/lib
 RUN ls -al ${TOOLCHAIN_PREFIX}/include
 
+RUN ls -la ./
 # Go to project root
-WORKDIR ../..
+#WORKDIR ../..
 
 
 
