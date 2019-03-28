@@ -101,7 +101,7 @@ extern "C"
 #include "umocktypes_charptr.h"
 #include "umock_c_negative_tests.h"
 
-DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static TEST_MUTEX_HANDLE g_testByTest;
 
@@ -165,7 +165,7 @@ static AGENT_DATA_TYPES_RESULT my_AgentDataTypes_ToString(STRING_HANDLE destinat
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
     ASSERT_FAIL(temp_str);
 }
 
@@ -216,7 +216,7 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         REGISTER_GLOBAL_MOCK_HOOK(VECTOR_create, real_VECTOR_create);
         REGISTER_GLOBAL_MOCK_HOOK(VECTOR_destroy, real_VECTOR_destroy);
         REGISTER_GLOBAL_MOCK_HOOK(VECTOR_push_back, real_VECTOR_push_back);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(VECTOR_push_back, __FAILURE__);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(VECTOR_push_back, MU_FAILURE);
         REGISTER_GLOBAL_MOCK_HOOK(VECTOR_erase, real_VECTOR_erase);
         REGISTER_GLOBAL_MOCK_HOOK(VECTOR_clear, real_VECTOR_clear);
         REGISTER_GLOBAL_MOCK_HOOK(VECTOR_element, real_VECTOR_element);
@@ -227,7 +227,7 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         REGISTER_GLOBAL_MOCK_HOOK(VECTOR_size, real_VECTOR_size);
 
         REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, real_mallocAndStrcpy_s);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, __FAILURE__);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, MU_FAILURE);
         REGISTER_GLOBAL_MOCK_HOOK(unsignedIntToString, real_unsignedIntToString);
         REGISTER_GLOBAL_MOCK_HOOK(size_tToString, real_size_tToString);
 

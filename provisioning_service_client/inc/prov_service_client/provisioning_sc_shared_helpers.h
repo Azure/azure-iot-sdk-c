@@ -19,7 +19,7 @@ extern "C" {
     REQUIRED,               \
     OPTIONAL                \
 
-DEFINE_ENUM(NECESSITY, NECESSITY_VALUES);
+MU_DEFINE_ENUM(NECESSITY, NECESSITY_VALUES);
 
 typedef JSON_Value*(*TO_JSON_FUNCTION)(void* handle);
 typedef void*(*FROM_JSON_FUNCTION)(JSON_Object* root_object);

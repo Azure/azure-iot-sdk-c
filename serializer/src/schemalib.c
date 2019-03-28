@@ -14,7 +14,7 @@
 
 #define DEFAULT_CONTAINER_NAME  "Container"
 
-DEFINE_ENUM_STRINGS(SERIALIZER_RESULT, SERIALIZER_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS(SERIALIZER_RESULT, SERIALIZER_RESULT_VALUES);
 
 typedef enum AGENT_STATE_TAG
 {
@@ -32,7 +32,7 @@ SERIALIZER_RESULT serializer_init(const char* overrideSchemaNamespace)
     if (g_AgentState != AGENT_NOT_INITIALIZED)
     {
         result = SERIALIZER_ALREADY_INIT;
-        LogError("(result = %s)", ENUM_TO_STRING(SERIALIZER_RESULT, result));
+        LogError("(result = %s)", MU_ENUM_TO_STRING(SERIALIZER_RESULT, result));
     }
     else
     {
@@ -42,7 +42,7 @@ SERIALIZER_RESULT serializer_init(const char* overrideSchemaNamespace)
         {
             /* Codes_SRS_SCHEMALIB_99_007:[ On error SERIALIZER_CODEFIRST_INIT_FAILED shall be returned.] */
             result = SERIALIZER_CODEFIRST_INIT_FAILED;
-            LogError("(result = %s)", ENUM_TO_STRING(SERIALIZER_RESULT, result));
+            LogError("(result = %s)", MU_ENUM_TO_STRING(SERIALIZER_RESULT, result));
         }
         else
         {

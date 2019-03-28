@@ -62,7 +62,7 @@ void real_free(void* ptr)
 
 static TEST_MUTEX_HANDLE g_testByTest;
 
-DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 #define MESSENGER_IS_STARTED             true
 #define MESSENGER_IS_NOT_STARTED         false
@@ -76,7 +76,7 @@ DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
     ASSERT_FAIL(temp_str);
 }
 
@@ -215,7 +215,7 @@ int STRING_sprintf(STRING_HANDLE handle, const char* format, ...)
 
     if (g_STRING_sprintf_call_count == g_STRING_sprintf_fail_on_count)
     {
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -2067,7 +2067,7 @@ TEST_FUNCTION(telemetry_messenger_create_failure_checks)
     umock_c_negative_tests_deinit();
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_029: [If `messenger_handle` is NULL, telemetry_messenger_start() shall fail and return __FAILURE__]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_029: [If `messenger_handle` is NULL, telemetry_messenger_start() shall fail and return MU_FAILURE]
 TEST_FUNCTION(telemetry_messenger_start_NULL_messenger_handle)
 {
     // arrange
@@ -2083,7 +2083,7 @@ TEST_FUNCTION(telemetry_messenger_start_NULL_messenger_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_030: [If `session_handle` is NULL, telemetry_messenger_start() shall fail and return __FAILURE__]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_030: [If `session_handle` is NULL, telemetry_messenger_start() shall fail and return MU_FAILURE]
 TEST_FUNCTION(telemetry_messenger_start_NULL_session_handle)
 {
     // arrange
@@ -2099,7 +2099,7 @@ TEST_FUNCTION(telemetry_messenger_start_NULL_session_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_031: [If `instance->state` is not TELEMETRY_MESSENGER_STATE_STOPPED, telemetry_messenger_start() shall fail and return __FAILURE__]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_031: [If `instance->state` is not TELEMETRY_MESSENGER_STATE_STOPPED, telemetry_messenger_start() shall fail and return MU_FAILURE]
 TEST_FUNCTION(telemetry_messenger_start_messenger_not_stopped)
 {
     // arrange
@@ -2200,7 +2200,7 @@ TEST_FUNCTION(messenger_state_on_event_sender_state_changed_callback_ERROR)
     telemetry_messenger_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_057: [If `messenger_handle` is NULL, telemetry_messenger_stop() shall fail and return __FAILURE__]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_057: [If `messenger_handle` is NULL, telemetry_messenger_stop() shall fail and return MU_FAILURE]
 TEST_FUNCTION(telemetry_messenger_stop_NULL_handle)
 {
     // arrange
@@ -2216,7 +2216,7 @@ TEST_FUNCTION(telemetry_messenger_stop_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_058: [If `instance->state` is TELEMETRY_MESSENGER_STATE_STOPPED, telemetry_messenger_stop() shall fail and return __FAILURE__]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_058: [If `instance->state` is TELEMETRY_MESSENGER_STATE_STOPPED, telemetry_messenger_stop() shall fail and return MU_FAILURE]
 TEST_FUNCTION(telemetry_messenger_stop_messenger_not_started)
 {
     // arrange
@@ -2827,7 +2827,7 @@ TEST_FUNCTION(telemetry_messenger_do_work_send_events_messagesender_send_fails)
     telemetry_messenger_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_016: [If `messenger_handle` is NULL, telemetry_messenger_subscribe_for_messages() shall fail and return __FAILURE__]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_016: [If `messenger_handle` is NULL, telemetry_messenger_subscribe_for_messages() shall fail and return MU_FAILURE]
 TEST_FUNCTION(telemetry_messenger_subscribe_for_messages_NULL_handle)
 {
     // arrange
@@ -2843,7 +2843,7 @@ TEST_FUNCTION(telemetry_messenger_subscribe_for_messages_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_018: [If `on_message_received_callback` is NULL, telemetry_messenger_subscribe_for_messages() shall fail and return __FAILURE__]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_018: [If `on_message_received_callback` is NULL, telemetry_messenger_subscribe_for_messages() shall fail and return MU_FAILURE]
 TEST_FUNCTION(telemetry_messenger_subscribe_for_messages_NULL_callback)
 {
     // arrange
@@ -2863,7 +2863,7 @@ TEST_FUNCTION(telemetry_messenger_subscribe_for_messages_NULL_callback)
     telemetry_messenger_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_017: [If `instance->receive_messages` is already true, telemetry_messenger_subscribe_for_messages() shall fail and return __FAILURE__]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_017: [If `instance->receive_messages` is already true, telemetry_messenger_subscribe_for_messages() shall fail and return MU_FAILURE]
 TEST_FUNCTION(telemetry_messenger_subscribe_for_messages_already_subscribed)
 {
     // arrange
@@ -2884,7 +2884,7 @@ TEST_FUNCTION(telemetry_messenger_subscribe_for_messages_already_subscribed)
     telemetry_messenger_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_023: [If `messenger_handle` is NULL, telemetry_messenger_unsubscribe_for_messages() shall fail and return __FAILURE__]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_023: [If `messenger_handle` is NULL, telemetry_messenger_unsubscribe_for_messages() shall fail and return MU_FAILURE]
 TEST_FUNCTION(telemetry_messenger_unsubscribe_for_messages_NULL_handle)
 {
     // arrange
@@ -2900,7 +2900,7 @@ TEST_FUNCTION(telemetry_messenger_unsubscribe_for_messages_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_024: [If `instance->receive_messages` is already false, telemetry_messenger_unsubscribe_for_messages() shall fail and return __FAILURE__]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_024: [If `instance->receive_messages` is already false, telemetry_messenger_unsubscribe_for_messages() shall fail and return MU_FAILURE]
 TEST_FUNCTION(telemetry_messenger_unsubscribe_for_messages_not_subscribed)
 {
     // arrange
@@ -3379,7 +3379,7 @@ TEST_FUNCTION(telemetry_messenger_set_option_name_not_supported)
     telemetry_messenger_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_179: [If `messenger_handle` or `disposition_info` are NULL, telemetry_messenger_send_message_disposition() shall fail and return __FAILURE__]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_179: [If `messenger_handle` or `disposition_info` are NULL, telemetry_messenger_send_message_disposition() shall fail and return MU_FAILURE]
 TEST_FUNCTION(telemetry_messenger_send_message_disposition_NULL_messenger_handle)
 {
     // arrange
@@ -3396,7 +3396,7 @@ TEST_FUNCTION(telemetry_messenger_send_message_disposition_NULL_messenger_handle
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_179: [If `messenger_handle` or `disposition_info` are NULL, telemetry_messenger_send_message_disposition() shall fail and return __FAILURE__]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_179: [If `messenger_handle` or `disposition_info` are NULL, telemetry_messenger_send_message_disposition() shall fail and return MU_FAILURE]
 TEST_FUNCTION(telemetry_messenger_send_message_disposition_NULL_disposition_info)
 {
     // arrange
@@ -3414,7 +3414,7 @@ TEST_FUNCTION(telemetry_messenger_send_message_disposition_NULL_disposition_info
     telemetry_messenger_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_180: [If `disposition_info->source` is NULL, telemetry_messenger_send_message_disposition() shall fail and return __FAILURE__]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_180: [If `disposition_info->source` is NULL, telemetry_messenger_send_message_disposition() shall fail and return MU_FAILURE]
 TEST_FUNCTION(telemetry_messenger_send_message_disposition_NULL_source)
 {
     // arrange
@@ -3489,7 +3489,7 @@ TEST_FUNCTION(telemetry_messenger_send_message_disposition_RELEASED_succeeds)
     telemetry_messenger_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_189: [If `messenger_handle->message_receiver` is NULL, telemetry_messenger_send_message_disposition() shall fail and return __FAILURE__]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_189: [If `messenger_handle->message_receiver` is NULL, telemetry_messenger_send_message_disposition() shall fail and return MU_FAILURE]
 TEST_FUNCTION(telemetry_messenger_send_message_disposition_NOT_SUBSCRIBED)
 {
     // arrange
@@ -3514,7 +3514,7 @@ TEST_FUNCTION(telemetry_messenger_send_message_disposition_NOT_SUBSCRIBED)
     telemetry_messenger_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_183: [If `messagereceiver_send_message_disposition()` fails, telemetry_messenger_send_message_disposition() shall fail and return __FAILURE__]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_183: [If `messagereceiver_send_message_disposition()` fails, telemetry_messenger_send_message_disposition() shall fail and return MU_FAILURE]
 TEST_FUNCTION(telemetry_messenger_send_message_disposition_failure_checks)
 {
     // arrange
