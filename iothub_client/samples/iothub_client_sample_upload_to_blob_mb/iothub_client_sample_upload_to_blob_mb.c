@@ -67,12 +67,12 @@ static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT getDataCallback(IOTHUB_CLIENT_F
             // The last call to this callback is to indicate the result of uploading the previous data block provided.
             // Note: In this last call, data and size pointers are NULL.
 
-            (void)printf("Last call to getDataCallback (result for %dth block uploaded: %s)\r\n", block_count, ENUM_TO_STRING(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, result));
+            (void)printf("Last call to getDataCallback (result for %dth block uploaded: %s)\r\n", block_count, MU_ENUM_TO_STRING(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, result));
         }
     }
     else
     {
-        (void)printf("Received unexpected result %s\r\n", ENUM_TO_STRING(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, result));
+        (void)printf("Received unexpected result %s\r\n", MU_ENUM_TO_STRING(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, result));
     }
 
     // This callback returns IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK to indicate that the upload shall continue.

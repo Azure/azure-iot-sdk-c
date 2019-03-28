@@ -66,7 +66,7 @@ static int convert_cert_to_b64(const char* cert_in, char** cert_b64_out)
         if ((cert_b64 = Azure_Base64_Encode_Bytes((const unsigned char*)cert_in, strlen(cert_in))) == NULL)
         {
             LogError("Could not convert certificate to Base64");
-            ret = __FAILURE__;
+            ret = MU_FAILURE;
             *cert_b64_out = NULL;
         }
         else
@@ -74,7 +74,7 @@ static int convert_cert_to_b64(const char* cert_in, char** cert_b64_out)
             if (mallocAndStrcpy_s(cert_b64_out, STRING_c_str(cert_b64)) != 0)
             {
                 LogError("copying b64 cert failed");
-                ret = __FAILURE__;
+                ret = MU_FAILURE;
                 *cert_b64_out = NULL;
             }
             STRING_delete(cert_b64);

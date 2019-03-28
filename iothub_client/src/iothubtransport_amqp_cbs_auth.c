@@ -75,7 +75,7 @@ static int verify_cbs_put_token_timeout(AUTHENTICATION_INSTANCE* instance, bool*
 
     if (instance->current_sas_token_put_time == INDEFINITE_TIME)
     {
-        result = __FAILURE__;
+        result = MU_FAILURE;
         LogError("Failed verifying if cbs_put_token has timed out (current_sas_token_put_time is not set)");
     }
     else
@@ -84,7 +84,7 @@ static int verify_cbs_put_token_timeout(AUTHENTICATION_INSTANCE* instance, bool*
 
         if ((current_time = get_time(NULL)) == INDEFINITE_TIME)
         {
-            result = __FAILURE__;
+            result = MU_FAILURE;
             LogError("Failed verifying if cbs_put_token has timed out (get_time failed)");
         }
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_083: [authentication_do_work() shall check for authentication timeout comparing the current time since `instance->current_sas_token_put_time` to `instance->cbs_request_timeout_secs`]
@@ -110,12 +110,12 @@ static int verify_sas_token_refresh_timeout(AUTHENTICATION_INSTANCE* instance, b
 
     if (instance->current_sas_token_put_time == INDEFINITE_TIME)
     {
-        result = __FAILURE__;
+        result = MU_FAILURE;
         LogError("Failed verifying if SAS token refresh timed out (current_sas_token_put_time is not set)");
     }
     else if ((sas_token_expiry = IoTHubClient_Auth_Get_SasToken_Expiry(instance->authorization_module)) == 0)
     {
-        result = __FAILURE__;
+        result = MU_FAILURE;
         LogError("Failed Getting SasToken Expiry");
     }
     else
@@ -123,7 +123,7 @@ static int verify_sas_token_refresh_timeout(AUTHENTICATION_INSTANCE* instance, b
         time_t current_time;
         if ((current_time = get_time(NULL)) == INDEFINITE_TIME)
         {
-            result = __FAILURE__;
+            result = MU_FAILURE;
             LogError("Failed verifying if SAS token refresh timed out (get_time failed)");
         }
         else if ((uint32_t)get_difftime(current_time, instance->current_sas_token_put_time) >= (sas_token_expiry*SAS_REFRESH_MULTIPLIER))
@@ -218,7 +218,7 @@ static int put_SAS_token_to_cbs(AUTHENTICATION_INSTANCE* instance, STRING_HANDLE
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_060: [If cbs_put_token() fails, `instance->is_cbs_put_token_in_progress` shall be set to FALSE]
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_078: [If cbs_put_token() fails, `instance->is_cbs_put_token_in_progress` shall be set to FALSE]
         instance->is_cbs_put_token_in_progress = false;
-        result = __FAILURE__;
+        result = MU_FAILURE;
         LogError("Failed putting SAS token to CBS for device '%s' (cbs_put_token failed)", instance->device_id);
     }
     else
@@ -253,7 +253,7 @@ static int create_and_put_SAS_token_to_cbs(AUTHENTICATION_INSTANCE* instance)
     {
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_054: [If `devices_and_modules_path` failed to be created, authentication_do_work() shall fail and return]
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_072: [If `devices_and_modules_path` failed to be created, authentication_do_work() shall fail and return]
-        result = __FAILURE__;
+        result = MU_FAILURE;
         sas_token = NULL;
         LogError("Failed creating a SAS token (create_device_and_module_path() failed)");
     }
@@ -268,7 +268,7 @@ static int create_and_put_SAS_token_to_cbs(AUTHENTICATION_INSTANCE* instance)
             if (sas_token == NULL)
             {
                 LogError("failure getting sas token.");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -283,13 +283,13 @@ static int create_and_put_SAS_token_to_cbs(AUTHENTICATION_INSTANCE* instance)
             {
                 LogError("sas token is invalid.");
                 sas_token = NULL;
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if (token_status == SAS_TOKEN_STATUS_FAILED)
             {
                 LogError("testing Sas Token failed.");
                 sas_token = NULL;
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -298,7 +298,7 @@ static int create_and_put_SAS_token_to_cbs(AUTHENTICATION_INSTANCE* instance)
                 if (sas_token == NULL)
                 {
                     LogError("failure getting sas Token.");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {
@@ -315,7 +315,7 @@ static int create_and_put_SAS_token_to_cbs(AUTHENTICATION_INSTANCE* instance)
         {
             LogError("failure unknown credential type found.");
             sas_token = NULL;
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
 
 
@@ -323,7 +323,7 @@ static int create_and_put_SAS_token_to_cbs(AUTHENTICATION_INSTANCE* instance)
         {
             if (put_SAS_token_to_cbs(instance, device_and_module_path, sas_token) != RESULT_OK)
             {
-                result = __FAILURE__;
+                result = MU_FAILURE;
                 LogError("Failed putting SAS token to CBS");
             }
             else
@@ -395,26 +395,26 @@ int authentication_start(AUTHENTICATION_HANDLE authentication_handle, const CBS_
 {
     int result;
 
-    // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_025: [If authentication_handle is NULL, authentication_start() shall fail and return __FAILURE__ as error code]
+    // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_025: [If authentication_handle is NULL, authentication_start() shall fail and return MU_FAILURE as error code]
     if (authentication_handle == NULL)
     {
-        result = __FAILURE__;
+        result = MU_FAILURE;
         LogError("authentication_start failed (authentication_handle is NULL)");
     }
-    // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_026: [If `cbs_handle` is NULL, authentication_start() shall fail and return __FAILURE__ as error code]
+    // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_026: [If `cbs_handle` is NULL, authentication_start() shall fail and return MU_FAILURE as error code]
     else if (cbs_handle == NULL)
     {
-        result = __FAILURE__;
+        result = MU_FAILURE;
         LogError("authentication_start failed (cbs_handle is NULL)");
     }
     else
     {
         AUTHENTICATION_INSTANCE* instance = (AUTHENTICATION_INSTANCE*)authentication_handle;
 
-        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_027: [If authenticate state has been started already, authentication_start() shall fail and return __FAILURE__ as error code]
+        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_027: [If authenticate state has been started already, authentication_start() shall fail and return MU_FAILURE as error code]
         if (instance->state != AUTHENTICATION_STATE_STOPPED)
         {
-            result = __FAILURE__;
+            result = MU_FAILURE;
             LogError("authentication_start failed (messenger has already been started; current state: %d)", instance->state);
         }
         else
@@ -437,20 +437,20 @@ int authentication_stop(AUTHENTICATION_HANDLE authentication_handle)
 {
     int result;
 
-    // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_031: [If `authentication_handle` is NULL, authentication_stop() shall fail and return __FAILURE__]
+    // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_031: [If `authentication_handle` is NULL, authentication_stop() shall fail and return MU_FAILURE]
     if (authentication_handle == NULL)
     {
-        result = __FAILURE__;
+        result = MU_FAILURE;
         LogError("authentication_stop failed (authentication_handle is NULL)");
     }
     else
     {
         AUTHENTICATION_INSTANCE* instance = (AUTHENTICATION_INSTANCE*)authentication_handle;
 
-        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_032: [If `instance->state` is AUTHENTICATION_STATE_STOPPED, authentication_stop() shall fail and return __FAILURE__]
+        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_032: [If `instance->state` is AUTHENTICATION_STATE_STOPPED, authentication_stop() shall fail and return MU_FAILURE]
         if (instance->state == AUTHENTICATION_STATE_STOPPED)
         {
-            result = __FAILURE__;
+            result = MU_FAILURE;
             LogError("authentication_stop failed (messenger is already stopped)");
         }
         else
@@ -696,7 +696,7 @@ int authentication_set_option(AUTHENTICATION_HANDLE authentication_handle, const
     {
         LogError("authentication_set_option failed (one of the followin are NULL: authentication_handle=%p, name=%p, value=%p)",
             authentication_handle, name, value);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -715,7 +715,7 @@ int authentication_set_option(AUTHENTICATION_HANDLE authentication_handle, const
             {
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_126: [If OptionHandler_FeedOptions fails, authentication_set_option shall fail and return a non-zero value]
                 LogError("authentication_set_option failed (OptionHandler_FeedOptions failed)");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -726,7 +726,7 @@ int authentication_set_option(AUTHENTICATION_HANDLE authentication_handle, const
         {
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_128: [If name does not match any supported option, authentication_set_option shall fail and return a non-zero value]
             LogError("authentication_set_option failed (option with name '%s' is not suppported)", name);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
     }
 

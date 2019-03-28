@@ -60,7 +60,7 @@ int iothub_security_init(IOTHUB_SECURITY_TYPE sec_type)
     if (secure_device_type_from_caller == SECURE_DEVICE_TYPE_UNKNOWN)
     {
         LogError("Security type %d is not supported in this SDK build", sec_type);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -73,7 +73,7 @@ int iothub_security_init(IOTHUB_SECURITY_TYPE sec_type)
         else if (secure_device_type_from_caller != security_device_type_from_prov)
         {
             LogError("Security type from caller %d (which maps to security device type %d) does not match already specified security device type %d", sec_type, secure_device_type_from_caller, security_device_type_from_prov);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -118,7 +118,7 @@ int iothub_security_set_symmetric_key_info(const char* registration_name, const 
     if (registration_name == NULL || symmetric_key == NULL)
     {
         LogError("Invalid parameter specified reg_name: %p, symm_key: %p", registration_name, symmetric_key);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -127,13 +127,13 @@ int iothub_security_set_symmetric_key_info(const char* registration_name, const 
         if (mallocAndStrcpy_s(&temp_name, registration_name) != 0)
         {
             LogError("Failure allocating registration name");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if (mallocAndStrcpy_s(&temp_key, symmetric_key) != 0)
         {
             LogError("Failure allocating symmetric key");
             free(temp_name);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -154,7 +154,7 @@ int iothub_security_set_symmetric_key_info(const char* registration_name, const 
                 if (prov_dev_set_symmetric_key_info(g_symm_key_reg_name, g_symm_key) != 0)
                 {
                     LogError("Failure syncing dps & IoThub key information");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {

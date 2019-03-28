@@ -38,7 +38,7 @@ static const char* attestationType_toJson(ATTESTATION_TYPE type)
     }
     else
     {
-        LogError("Could not convert '%s' to JSON", ENUM_TO_STRING(ATTESTATION_TYPE, type));
+        LogError("Could not convert '%s' to JSON", MU_ENUM_TO_STRING(ATTESTATION_TYPE, type));
     }
 
     return result;

@@ -408,7 +408,7 @@ static int malloc_and_copy_uchar(char** strDestination, BUFFER_HANDLE strSource)
     {
         /* If strDestination or strSource is a NULL pointer[...] function return line number where error is spotted */
         LogError("invalid parameter strDestination or strSource");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -417,7 +417,7 @@ static int malloc_and_copy_uchar(char** strDestination, BUFFER_HANDLE strSource)
         if (temp == NULL)
         {
             LogError("failed to malloc");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {

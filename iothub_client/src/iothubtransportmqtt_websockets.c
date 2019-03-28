@@ -217,7 +217,7 @@ static int IoTHubTransportMqtt_WS_Subscribe_InputQueue(IOTHUB_DEVICE_HANDLE hand
 {
     (void)handle;
     LogError("IoTHubTransportMqtt_WS_Subscribe_InputQueue not implemented\n");
-    return __FAILURE__;
+    return MU_FAILURE;
 }
 
 static void IoTHubTransportMqtt_WS_Unsubscribe_InputQueue(IOTHUB_DEVICE_HANDLE handle)

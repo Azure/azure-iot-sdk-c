@@ -184,7 +184,7 @@ void SetupArgumentCalls(SCHEMA_ACTION_HANDLE actionHandle, size_t index, SCHEMA_
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
     ASSERT_FAIL(temp_str);
 }
 
@@ -225,7 +225,7 @@ static SCHEMA_MODEL_ELEMENT Schema_GetModelElementByName_modelInModel;
 char* umockvalue_stringify_SCHEMA_MODEL_ELEMENT(const SCHEMA_MODEL_ELEMENT* value)
 {
     char* result;
-    size_t needed = snprintf(NULL, 0, "{.elementType=%s, .elementHandle=%p}", ENUM_TO_STRING(SCHEMA_ELEMENT_TYPE, value->elementType), value->elementHandle.modelHandle);
+    size_t needed = snprintf(NULL, 0, "{.elementType=%s, .elementHandle=%p}", MU_ENUM_TO_STRING(SCHEMA_ELEMENT_TYPE, value->elementType), value->elementHandle.modelHandle);
     result = (char*)malloc(needed + 1);
     if (result == NULL)
     {
@@ -233,7 +233,7 @@ char* umockvalue_stringify_SCHEMA_MODEL_ELEMENT(const SCHEMA_MODEL_ELEMENT* valu
     }
     else
     {
-        (void) snprintf(result, needed+1, "{.elementType=%s, .elementHandle=%p}", ENUM_TO_STRING(SCHEMA_ELEMENT_TYPE, value->elementType), value->elementHandle.modelHandle);
+        (void) snprintf(result, needed+1, "{.elementType=%s, .elementHandle=%p}", MU_ENUM_TO_STRING(SCHEMA_ELEMENT_TYPE, value->elementType), value->elementHandle.modelHandle);
     }
     return result;
 }
@@ -370,7 +370,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, real_mallocAndStrcpy_s);
 
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, __FAILURE__);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, MU_FAILURE);
 
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(MultiTree_GetChild, MULTITREE_ERROR);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_new, NULL);
@@ -381,7 +381,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         REGISTER_GLOBAL_MOCK_RETURN(CreateAgentDataType_From_String, AGENT_DATA_TYPES_OK);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(CreateAgentDataType_From_String, AGENT_DATA_TYPES_ERROR);
 
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(int_pfDesiredPropertyFromAGENT_DATA_TYPE, __FAILURE__);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(int_pfDesiredPropertyFromAGENT_DATA_TYPE, MU_FAILURE);
 
 
     }
