@@ -830,7 +830,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
                                             STRING_HANDLE req_string;
                                             if(response == NULL)
                                             {
-                                                req_string = STRING_construct_sprintf("{\"isSuccess\":%s, \"statusCode\":%d, \"statusDescription\":}", ((httpResponse < 300) ? "true" : "false"), httpResponse);
+                                                req_string = STRING_construct_sprintf("{\"isSuccess\":%s, \"statusCode\":%d, \"statusDescription\":""}", ((httpResponse < 300) ? "true" : "false"), httpResponse);
                                         	}
                                             else
                                             {
