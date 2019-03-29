@@ -121,9 +121,9 @@ WORKDIR ..
 
 # Download cURL source and expand it
 
-RUN wget http://curl.haxx.se/download/curl-7.60.0.tar.gz
+RUN wget http://curl.haxx.se/download/curl-7.64.0.tar.gz
 
-RUN tar -xvf curl-7.60.0.tar.gz
+RUN tar -xvf curl-7.64.0.tar.gz
 
 
 
@@ -131,7 +131,7 @@ RUN tar -xvf curl-7.60.0.tar.gz
 
 # we need to set the path for openssl with --with-ssl=...
 
-WORKDIR curl-7.60.0
+WORKDIR curl-7.64.0
 
 RUN ./configure --with-sysroot=${TOOLCHAIN_SYSROOT} --prefix=${TOOLCHAIN_PREFIX} --target=${TOOLCHAIN_NAME} --with-ssl=${TOOLCHAIN_PREFIX} --with-zlib --host=${TOOLCHAIN_NAME} --build=x86_64-linux-gnu
 
