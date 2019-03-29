@@ -20,12 +20,10 @@ phases:
   - script: |
       npm install iotz
       sudo ./../../node_modules/.bin/iotz update
+      rm -R -f mxchip
       git clone https://github.com/obastemur/mxchip_az3166_firmware.git mxchip
       cd mxchip
       sudo ./../../../node_modules/.bin/iotz init mbed
       sudo ./../../../node_modules/.bin/iotz compile
     displayName: 'build'
-  - script: |
-      ls
-      cp ./mxchip/BUILD/AZ3166/GCC_ARM/mxchip.bin /media/john/AZ3166
-    displayName: 'deploy'
+
