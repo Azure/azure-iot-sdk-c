@@ -826,7 +826,16 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
                                         else
                                         {
                                             /*must make a json*/
-                                            STRING_HANDLE req_string = STRING_construct_sprintf("{\"isSuccess\":%s, \"statusCode\":%d, \"statusDescription\":\"%s\"}", ((httpResponse < 300) ? "true" : "false"), httpResponse, BUFFER_u_char(responseToIoTHub));
+                                            unsigned char * response = BUFFER_u_char(responseToIoTHub);
+                                            STRING_HANDLE req_string;
+                                            if(response == NULL)
+                                            {
+                                                req_string = STRING_construct_sprintf("{\"isSuccess\":%s, \"statusCode\":%d, \"statusDescription\":""}", ((httpResponse < 300) ? "true" : "false"), httpResponse);
+                                        	}
+                                            else
+                                            {
+                                                req_string = STRING_construct_sprintf("{\"isSuccess\":%s, \"statusCode\":%d, \"statusDescription\":\"%s\"}", ((httpResponse < 300) ? "true" : "false"), httpResponse, response);
+                                            }
                                             if (req_string == NULL)
                                             {
                                                 LogError("Failure constructing string");
