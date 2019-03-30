@@ -22,6 +22,7 @@ phases:
       sudo ./../../node_modules/.bin/iotz update
       sudo rm -R -f mxchip
       git clone https://github.com/obastemur/mxchip_az3166_firmware.git mxchip
+      rsync -avz --update --existing ./ mxchip/mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/
       cd mxchip
       sudo ./../../../node_modules/.bin/iotz init mbed
       sudo ./../../../node_modules/.bin/iotz compile
