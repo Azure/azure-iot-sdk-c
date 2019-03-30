@@ -18,7 +18,7 @@ phases:
       sudo apt-get install -y nodejs
     displayName: 'setup'
   - script: |
-      build_all/mbed5/build.sh
+      sudo build_all/mbed5/build.sh
     displayName: 'build'
   - script: |
       ls
