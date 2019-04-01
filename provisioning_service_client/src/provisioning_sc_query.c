@@ -111,7 +111,7 @@ static int queryResponse_get_type_specific_deserialization_info(PROVISIONING_QUE
         LogError("Unrecognized type");
         *response_arr_ptr_ptr = NULL;
         *fromJson = NULL;
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     return result;
 }

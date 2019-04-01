@@ -14,7 +14,7 @@
 /*assume a name cannot be longer than 100 characters*/
 #define INNER_NODE_NAME_SIZE 128
 
-DEFINE_ENUM_STRINGS(MULTITREE_RESULT, MULTITREE_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS(MULTITREE_RESULT, MULTITREE_RESULT_VALUES);
 
 typedef struct MULTITREE_HANDLE_DATA_TAG
 {
@@ -95,10 +95,10 @@ typedef enum CREATELEAF_RESULT_TAG
 
 static STATIC_VAR_UNUSED const char* CreateLeaf_ResultAsString[CREATELEAF_RESULT_COUNT] =
 {
-    TOSTRING(CREATELEAF_OK),
-    TOSTRING(CREATELEAF_ALREADY_EXISTS),
-    TOSTRING(CREATELEAF_EMPTY_NAME),
-    TOSTRING(CREATELEAF_ERROR)
+    MU_TOSTRING(CREATELEAF_OK),
+    MU_TOSTRING(CREATELEAF_ALREADY_EXISTS),
+    MU_TOSTRING(CREATELEAF_EMPTY_NAME),
+    MU_TOSTRING(CREATELEAF_ERROR)
 };
 
 /*name cannot be empty, value can be empty or NULL*/
@@ -215,25 +215,25 @@ MULTITREE_RESULT MultiTree_AddLeaf(MULTITREE_HANDLE treeHandle, const char* dest
     if (treeHandle == NULL)
     {
         result = MULTITREE_INVALID_ARG;
-        LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+        LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
     }
     /*Codes_SRS_MULTITREE_99_019:[ If parameter destinationPath is NULL, MULTITREE_INVALID_ARG shall be returned.]*/
     else if (destinationPath == NULL)
     {
         result = MULTITREE_INVALID_ARG;
-        LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+        LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
     }
     /*Codes_SRS_MULTITREE_99_020:[ If parameter value is NULL, MULTITREE_INVALID_ARG shall be returned.]*/
     else if (value == NULL)
     {
         result = MULTITREE_INVALID_ARG;
-        LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+        LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
     }
     /*Codes_SRS_MULTITREE_99_050:[ If destinationPath a string with zero characters, MULTITREE_INVALID_ARG shall be returned.]*/
     else if (strlen(destinationPath) == 0)
     {
         result = MULTITREE_EMPTY_CHILD_NAME;
-        LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+        LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
     }
     else
     {
@@ -259,14 +259,14 @@ MULTITREE_RESULT MultiTree_AddLeaf(MULTITREE_HANDLE treeHandle, const char* dest
                 {
                     /*Codes_SRS_MULTITREE_99_025:[The function shall return MULTITREE_ERROR to indicate any other error not specified here.]*/
                     result = MULTITREE_ERROR;
-                    LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+                    LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
                     break;
                 }
                 case CREATELEAF_ALREADY_EXISTS:
                 {
                     /*Codes_SRS_MULTITREE_99_021:[ If the node already has a value assigned to it, MULTITREE_ALREADY_HAS_A_VALUE shall be returned and the existing value shall not be changed.]*/
                     result = MULTITREE_ALREADY_HAS_A_VALUE;
-                    LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+                    LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
                     break;
                 }
                 case CREATELEAF_OK:
@@ -279,7 +279,7 @@ MULTITREE_RESULT MultiTree_AddLeaf(MULTITREE_HANDLE treeHandle, const char* dest
                 {
                     /*Codes_SRS_MULTITREE_99_024:[ if a child name is empty (such as in  "/child1//child12"), MULTITREE_EMPTY_CHILD_NAME shall be returned.]*/
                     result = MULTITREE_EMPTY_CHILD_NAME;
-                    LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+                    LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
                     break;
                 }
             }
@@ -315,14 +315,14 @@ MULTITREE_RESULT MultiTree_AddLeaf(MULTITREE_HANDLE treeHandle, const char* dest
                         default:
                         {
                             result = MULTITREE_ERROR;
-                            LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+                            LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
                             break;
                         }
                         case(CREATELEAF_EMPTY_NAME):
                         {
                             /*Codes_SRS_MULTITREE_99_024:[ if a child name is empty (such as in  "/child1//child12"), MULTITREE_EMPTY_CHILD_NAME shall be returned.]*/
                             result = MULTITREE_EMPTY_CHILD_NAME;
-                            LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+                            LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
                             break;
                         }
                         case(CREATELEAF_OK):
@@ -353,7 +353,7 @@ MULTITREE_RESULT MultiTree_AddChild(MULTITREE_HANDLE treeHandle, const char* chi
         (childHandle == NULL))
     {
         result = MULTITREE_INVALID_ARG;
-        LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+        LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
     }
     else
     {
@@ -366,14 +366,14 @@ MULTITREE_RESULT MultiTree_AddChild(MULTITREE_HANDLE treeHandle, const char* chi
             default:
             {
                 result = MULTITREE_ERROR;
-                LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+                LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
                 break;
             }
             case CREATELEAF_ALREADY_EXISTS:
             {
                 /* Codes_SRS_MULTITREE_99_061:[ If a child node with the same name already exists, MultiTree_AddChild shall return MULTITREE_ALREADY_HAS_A_VALUE.] */
                 result = MULTITREE_ALREADY_HAS_A_VALUE;
-                LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+                LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
                 break;
             }
             case CREATELEAF_OK:
@@ -389,7 +389,7 @@ MULTITREE_RESULT MultiTree_AddChild(MULTITREE_HANDLE treeHandle, const char* chi
             {
                 /* Tests_SRS_MULTITREE_99_066:[ If the childName argument is an empty string, MultiTree_AddChild shall return MULTITREE_EMPTY_CHILD_NAME.] */
                 result = MULTITREE_EMPTY_CHILD_NAME;
-                LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+                LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
                 break;
             }
         }
@@ -405,13 +405,13 @@ MULTITREE_RESULT MultiTree_GetChildCount(MULTITREE_HANDLE treeHandle, size_t* co
     if (treeHandle == NULL)
     {
         result = MULTITREE_INVALID_ARG;
-        LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+        LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
     }
     /*Codes_SRS_MULTITREE_99_028:[ If parameter count is NULL, the function returns MULTITREE_INVALID_ARG.]*/
     else if (count == NULL)
     {
         result = MULTITREE_INVALID_ARG;
-        LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+        LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
     }
     else
     {
@@ -430,13 +430,13 @@ MULTITREE_RESULT MultiTree_GetChild(MULTITREE_HANDLE treeHandle, size_t index, M
     if (treeHandle == NULL)
     {
         result = MULTITREE_INVALID_ARG;
-        LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+        LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
     }
     /*Codes_SRS_MULTITREE_99_033:[ If parameter childHandle is NULL, the function shall return MULTITREE_INVALID_ARG.]*/
     else if (childHandle == NULL)
     {
         result = MULTITREE_INVALID_ARG;
-        LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+        LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
     }
     else
     {
@@ -445,7 +445,7 @@ MULTITREE_RESULT MultiTree_GetChild(MULTITREE_HANDLE treeHandle, size_t index, M
         if (node->nChildren <= index)
         {
             result = MULTITREE_INVALID_ARG;
-            LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+            LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
         }
         else
         {
@@ -465,13 +465,13 @@ MULTITREE_RESULT MultiTree_GetName(MULTITREE_HANDLE treeHandle, STRING_HANDLE de
     if (treeHandle == NULL)
     {
         result = MULTITREE_INVALID_ARG;
-        LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+        LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
     }
     /*Codes_SRS_MULTITREE_99_038:[If destination is NULL, the function shall return MULTITREE_INVALID_ARG.]*/
     else if (destination == NULL)
     {
         result = MULTITREE_INVALID_ARG;
-        LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+        LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
     }
     else
     {
@@ -480,14 +480,14 @@ MULTITREE_RESULT MultiTree_GetName(MULTITREE_HANDLE treeHandle, STRING_HANDLE de
         if (node->name == NULL)
         {
             result = MULTITREE_EMPTY_CHILD_NAME;
-            LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+            LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
         }
         /*Codes_SRS_MULTITREE_99_036:[ This function fills the buffer pointed to by parameter destination with the name of the root node of the tree designated by parameter treeHandle.]*/
         else if (STRING_concat(destination, node->name)!=0)
         {
             /*Codes_SRS_MULTITREE_99_040:[ The function returns MULTITREE_ERROR to indicate any other error.]*/
             result = MULTITREE_ERROR;
-            LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+            LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
         }
         else
         {
@@ -510,7 +510,7 @@ MULTITREE_RESULT MultiTree_GetChildByName(MULTITREE_HANDLE treeHandle, const cha
         (childName == NULL))
     {
         result = MULTITREE_INVALID_ARG;
-        LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+        LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
     }
     else
     {
@@ -529,7 +529,7 @@ MULTITREE_RESULT MultiTree_GetChildByName(MULTITREE_HANDLE treeHandle, const cha
         {
             /* Codes_SRS_MULTITREE_99_068:[ If the specified child is not found, MultiTree_GetChildByName shall return MULTITREE_CHILD_NOT_FOUND.] */
             result = MULTITREE_CHILD_NOT_FOUND;
-            LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+            LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
         }
         else
         {
@@ -550,13 +550,13 @@ MULTITREE_RESULT MultiTree_GetValue(MULTITREE_HANDLE treeHandle, const void** de
     if (treeHandle == NULL)
     {
         result = MULTITREE_INVALID_ARG;
-        LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+        LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
     }
     /*Codes_SRS_MULTITREE_99_043:[ If destination is NULL, the function shall return MULTITREE_INVALID_ARG.]*/
     else if (destination == NULL)
     {
         result = MULTITREE_INVALID_ARG;
-        LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+        LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
     }
     else
     {
@@ -565,7 +565,7 @@ MULTITREE_RESULT MultiTree_GetValue(MULTITREE_HANDLE treeHandle, const void** de
         if (node->value == NULL)
         {
             result = MULTITREE_EMPTY_VALUE;
-            LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+            LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
         }
         else
         {
@@ -586,7 +586,7 @@ MULTITREE_RESULT MultiTree_SetValue(MULTITREE_HANDLE treeHandle, void* value)
         (value == NULL))
     {
         result = MULTITREE_INVALID_ARG;
-        LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+        LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
     }
     else
     {
@@ -595,7 +595,7 @@ MULTITREE_RESULT MultiTree_SetValue(MULTITREE_HANDLE treeHandle, void* value)
         {
             /* Codes_SRS_MULTITREE_99_076:[ If the node already has a value then MultiTree_SetValue shall return MULTITREE_ALREADY_HAS_A_VALUE.] */
             result = MULTITREE_ALREADY_HAS_A_VALUE;
-            LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+            LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
         }
         else
         {
@@ -604,7 +604,7 @@ MULTITREE_RESULT MultiTree_SetValue(MULTITREE_HANDLE treeHandle, void* value)
             {
                 /* Codes_SRS_MULTITREE_99_075:[ MultiTree_SetValue shall return MULTITREE_ERROR to indicate any other error.] */
                 result = MULTITREE_ERROR;
-                LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+                LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
             }
             else
             {
@@ -663,13 +663,13 @@ MULTITREE_RESULT MultiTree_GetLeafValue(MULTITREE_HANDLE treeHandle, const char*
         (destination == NULL))
     {
         result = MULTITREE_INVALID_ARG;
-        LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+        LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
     }
     /* Codes_SRS_MULTITREE_99_058:[ The last child designates the child that will receive the value. If a child name is empty (such as in  "/child1//child12"), MULTITREE_EMPTY_CHILD_NAME shall be returned.] */
     else if (strlen(leafPath) == 0)
     {
         result = MULTITREE_EMPTY_CHILD_NAME;
-        LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+        LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
     }
     else
     {
@@ -689,7 +689,7 @@ MULTITREE_RESULT MultiTree_GetLeafValue(MULTITREE_HANDLE treeHandle, const char*
         {
             /* Codes_SRS_MULTITREE_99_069:[ If a child name is empty (such as in  "/child1//child12"), MULTITREE_EMPTY_CHILD_NAME shall be returned.] */
             result = MULTITREE_EMPTY_CHILD_NAME;
-            LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+            LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
         }
         else
         {
@@ -713,14 +713,14 @@ MULTITREE_RESULT MultiTree_GetLeafValue(MULTITREE_HANDLE treeHandle, const char*
                 {
                     /* Codes_SRS_MULTITREE_99_069:[ If a child name is empty (such as in  "/child1//child12"), MULTITREE_EMPTY_CHILD_NAME shall be returned.] */
                     result = MULTITREE_EMPTY_CHILD_NAME;
-                    LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+                    LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
                     break;
                 }
                 else if (childCount == 0)
                 {
                     /* Codes_SRS_MULTITREE_99_071:[ When the child node is not found, MultiTree_GetLeafValue shall return MULTITREE_CHILD_NOT_FOUND.] */
                     result = MULTITREE_CHILD_NOT_FOUND;
-                    LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+                    LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
                     break;
                 }
                 else
@@ -739,7 +739,7 @@ MULTITREE_RESULT MultiTree_GetLeafValue(MULTITREE_HANDLE treeHandle, const char*
                     {
                         /* Codes_SRS_MULTITREE_99_071:[ When the child node is not found, MultiTree_GetLeafValue shall return MULTITREE_CHILD_NOT_FOUND.] */
                         result = MULTITREE_CHILD_NOT_FOUND;
-                        LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+                        LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
                         break;
                     }
                     else
@@ -764,7 +764,7 @@ MULTITREE_RESULT MultiTree_GetLeafValue(MULTITREE_HANDLE treeHandle, const char*
                 {
                     /* Codes_SRS_MULTITREE_99_070:[ If an attempt is made to get the value for a node that does not have a value set, then MultiTree_GetLeafValue shall return MULTITREE_EMPTY_VALUE.] */
                     result = MULTITREE_EMPTY_VALUE;
-                    LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+                    LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
                 }
                 /*Codes_SRS_MULTITREE_99_053:[ MultiTree_GetLeafValue shall copy into the *destination argument the value of the node identified by the leafPath argument.]*/
                 else
@@ -788,7 +788,7 @@ MULTITREE_RESULT MultiTree_DeleteChild(MULTITREE_HANDLE treeHandle, const char* 
         (childName == NULL))
     {
         result = MULTITREE_INVALID_ARG;
-        LogError("(result = %s)", ENUM_TO_STRING(MULTITREE_RESULT, result));
+        LogError("(result = %s)", MU_ENUM_TO_STRING(MULTITREE_RESULT, result));
     }
     else
     {

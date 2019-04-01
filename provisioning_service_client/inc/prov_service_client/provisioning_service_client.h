@@ -19,7 +19,7 @@ extern "C" {
 #define TRACING_STATUS_VALUES \
         TRACING_STATUS_ON,\
         TRACING_STATUS_OFF
-DEFINE_ENUM(TRACING_STATUS, TRACING_STATUS_VALUES);
+MU_DEFINE_ENUM(TRACING_STATUS, TRACING_STATUS_VALUES);
 
 /** @brief  Handle to hide struct and use it in consequent APIs
 */

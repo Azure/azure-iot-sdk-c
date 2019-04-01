@@ -61,12 +61,12 @@ void real_free(void* ptr)
 
 static TEST_MUTEX_HANDLE g_testByTest;
 
-DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
     ASSERT_FAIL(temp_str);
 }
 
@@ -2885,7 +2885,7 @@ TEST_FUNCTION(device_send_message_disposition_succeess)
     device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_111: [If `device_handle` or `disposition_info` are NULL, device_send_message_disposition() shall fail and return __FAILURE__]
+// Tests_SRS_DEVICE_09_111: [If `device_handle` or `disposition_info` are NULL, device_send_message_disposition() shall fail and return MU_FAILURE]
 TEST_FUNCTION(device_send_message_NULL_disposition_info)
 {
     // arrange
@@ -2905,7 +2905,7 @@ TEST_FUNCTION(device_send_message_NULL_disposition_info)
     device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_111: [If `device_handle` or `disposition_info` are NULL, device_send_message_disposition() shall fail and return __FAILURE__]
+// Tests_SRS_DEVICE_09_111: [If `device_handle` or `disposition_info` are NULL, device_send_message_disposition() shall fail and return MU_FAILURE]
 TEST_FUNCTION(device_send_message_NULL_handle)
 {
     // arrange
@@ -2925,7 +2925,7 @@ TEST_FUNCTION(device_send_message_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_DEVICE_09_112: [If `disposition_info->source` is NULL, device_send_message_disposition() shall fail and return __FAILURE__]
+// Tests_SRS_DEVICE_09_112: [If `disposition_info->source` is NULL, device_send_message_disposition() shall fail and return MU_FAILURE]
 TEST_FUNCTION(device_send_message_NULL_disposition_info_source)
 {
     // arrange
@@ -2949,8 +2949,8 @@ TEST_FUNCTION(device_send_message_NULL_disposition_info_source)
     device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_114: [If the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO fails to be created, device_send_message_disposition() shall fail and return __FAILURE__]
-// Tests_SRS_DEVICE_09_116: [If `telemetry_messenger_send_message_disposition()` fails, device_send_message_disposition() shall fail and return __FAILURE__]
+// Tests_SRS_DEVICE_09_114: [If the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO fails to be created, device_send_message_disposition() shall fail and return MU_FAILURE]
+// Tests_SRS_DEVICE_09_116: [If `telemetry_messenger_send_message_disposition()` fails, device_send_message_disposition() shall fail and return MU_FAILURE]
 TEST_FUNCTION(device_send_message_disposition_failure_checks)
 {
     // arrange

@@ -9,11 +9,11 @@
 
 #include "iothub_message.h"
 
-DEFINE_ENUM_STRINGS(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES);
-DEFINE_ENUM_STRINGS(IOTHUBMESSAGE_CONTENT_TYPE, IOTHUBMESSAGE_CONTENT_TYPE_VALUES);
+MU_DEFINE_ENUM_STRINGS(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS(IOTHUBMESSAGE_CONTENT_TYPE, IOTHUBMESSAGE_CONTENT_TYPE_VALUES);
 
 #define LOG_IOTHUB_MESSAGE_ERROR() \
-    LogError("(result = %s)", ENUM_TO_STRING(IOTHUB_MESSAGE_RESULT, result));
+    LogError("(result = %s)", MU_ENUM_TO_STRING(IOTHUB_MESSAGE_RESULT, result));
 
 typedef struct IOTHUB_MESSAGE_HANDLE_DATA_TAG
 {
@@ -58,7 +58,7 @@ static int ValidateAsciiCharactersFilter(const char* mapKey, const char* mapValu
     int result;
     if (!ContainsOnlyUsAscii(mapKey) || !ContainsOnlyUsAscii(mapValue))
     {
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -399,7 +399,7 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_GetByteArray(IOTHUB_MESSAGE_HANDLE iotHubMes
         {
             /*Codes_SRS_IOTHUBMESSAGE_02_021: [If iotHubMessageHandle is not a iothubmessage containing BYTEARRAY data, then IoTHubMessage_GetData shall write in *buffer NULL and shall set *size to 0.] */
             result = IOTHUB_MESSAGE_INVALID_ARG;
-            LogError("invalid type of message %s", ENUM_TO_STRING(IOTHUBMESSAGE_CONTENT_TYPE, handleData->contentType));
+            LogError("invalid type of message %s", MU_ENUM_TO_STRING(IOTHUBMESSAGE_CONTENT_TYPE, handleData->contentType));
         }
         else
         {

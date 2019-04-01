@@ -12,13 +12,13 @@
 #include "internal/iothubtransport_amqp_telemetry_messenger.h"
 #include "internal/iothubtransport_amqp_twin_messenger.h"
 
-DEFINE_ENUM_STRINGS(DEVICE_STATE, DEVICE_STATE_VALUES);
-DEFINE_ENUM_STRINGS(DEVICE_AUTH_MODE, DEVICE_AUTH_MODE_VALUES);
-DEFINE_ENUM_STRINGS(DEVICE_SEND_STATUS, DEVICE_SEND_STATUS_VALUES);
-DEFINE_ENUM_STRINGS(D2C_EVENT_SEND_RESULT, D2C_EVENT_SEND_RESULT_VALUES);
-DEFINE_ENUM_STRINGS(DEVICE_MESSAGE_DISPOSITION_RESULT, DEVICE_MESSAGE_DISPOSITION_RESULT_VALUES);
-DEFINE_ENUM_STRINGS(DEVICE_TWIN_UPDATE_RESULT, DEVICE_TWIN_UPDATE_RESULT_STRINGS);
-DEFINE_ENUM_STRINGS(DEVICE_TWIN_UPDATE_TYPE, DEVICE_TWIN_UPDATE_TYPE_STRINGS)
+MU_DEFINE_ENUM_STRINGS(DEVICE_STATE, DEVICE_STATE_VALUES);
+MU_DEFINE_ENUM_STRINGS(DEVICE_AUTH_MODE, DEVICE_AUTH_MODE_VALUES);
+MU_DEFINE_ENUM_STRINGS(DEVICE_SEND_STATUS, DEVICE_SEND_STATUS_VALUES);
+MU_DEFINE_ENUM_STRINGS(D2C_EVENT_SEND_RESULT, D2C_EVENT_SEND_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS(DEVICE_MESSAGE_DISPOSITION_RESULT, DEVICE_MESSAGE_DISPOSITION_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS(DEVICE_TWIN_UPDATE_RESULT, DEVICE_TWIN_UPDATE_RESULT_STRINGS);
+MU_DEFINE_ENUM_STRINGS(DEVICE_TWIN_UPDATE_TYPE, DEVICE_TWIN_UPDATE_TYPE_STRINGS)
 
 #define RESULT_OK                                  0
 #define INDEFINITE_TIME                            ((time_t)-1)
@@ -98,7 +98,7 @@ static int is_timeout_reached(time_t start_time, size_t timeout_in_secs, int *is
     if (start_time == INDEFINITE_TIME)
     {
         LogError("Failed to verify timeout (start_time is INDEFINITE)");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -107,7 +107,7 @@ static int is_timeout_reached(time_t start_time, size_t timeout_in_secs, int *is
         if ((current_time = get_time(NULL)) == INDEFINITE_TIME)
         {
             LogError("Failed to verify timeout (get_time failed)");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -506,12 +506,12 @@ static DEVICE_CONFIG* clone_device_config(DEVICE_CONFIG *config)
             mallocAndStrcpy_s(&new_config->product_info, config->product_info) != RESULT_OK)
         {
             LogError("Failed copying the DEVICE_CONFIG (failed copying product_info)");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if (mallocAndStrcpy_s(&new_config->iothub_host_fqdn, config->iothub_host_fqdn) != RESULT_OK)
         {
             LogError("Failed copying the DEVICE_CONFIG (failed copying iothub_host_fqdn)");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -583,7 +583,7 @@ static int create_authentication_instance(AMQP_DEVICE_INSTANCE *instance)
     if ((instance->authentication_handle = authentication_create(&auth_config)) == NULL)
     {
         LogError("Failed creating the AUTHENTICATION_HANDLE (authentication_create failed)");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -607,7 +607,7 @@ static int create_telemetry_messenger_instance(AMQP_DEVICE_INSTANCE* instance, c
     if ((instance->messenger_handle = telemetry_messenger_create(&messenger_config, pi)) == NULL)
     {
         LogError("Failed creating the TELEMETRY_MESSENGER_HANDLE (messenger_create failed)");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -631,7 +631,7 @@ static int create_twin_messenger(AMQP_DEVICE_INSTANCE* instance)
 
     if ((instance->twin_messenger_handle = twin_messenger_create(&twin_msgr_config)) == NULL)
     {
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -738,7 +738,7 @@ AMQP_DEVICE_HANDLE device_create(DEVICE_CONFIG *config)
         {
             // Codes_SRS_DEVICE_09_005: [If any `config` parameters fail to be saved into `instance`, device_create shall fail and return NULL]
             LogError("Failed creating the device instance for device '%s' (failed copying the configuration)", config->device_id);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         // Codes_SRS_DEVICE_09_006: [If `instance->authentication_mode` is DEVICE_AUTH_MODE_CBS, `instance->authentication_handle` shall be set using authentication_create()]
         else if (instance->config->authentication_mode == DEVICE_AUTH_MODE_CBS &&
@@ -746,21 +746,21 @@ AMQP_DEVICE_HANDLE device_create(DEVICE_CONFIG *config)
         {
             // Codes_SRS_DEVICE_09_007: [If the AUTHENTICATION_HANDLE fails to be created, device_create shall fail and return NULL]
             LogError("Failed creating the device instance for device '%s' (failed creating the authentication instance)", instance->config->device_id);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         // Codes_SRS_DEVICE_09_008: [`instance->messenger_handle` shall be set using telemetry_messenger_create()]
         else if (create_telemetry_messenger_instance(instance, config->product_info) != RESULT_OK)
         {
             // Codes_SRS_DEVICE_09_009: [If the TELEMETRY_MESSENGER_HANDLE fails to be created, device_create shall fail and return NULL]
             LogError("Failed creating the device instance for device '%s' (failed creating the messenger instance)", instance->config->device_id);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         // Codes_SRS_DEVICE_09_122: [`instance->twin_messenger_handle` shall be set using twin_messenger_create()]
         else if (create_twin_messenger(instance) != RESULT_OK)
         {
             // Codes_SRS_DEVICE_09_123: [If the TWIN_MESSENGER_HANDLE fails to be created, device_create shall fail and return NULL]
             LogError("Failed creating the twin messenger for device '%s'", instance->config->device_id);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -798,7 +798,7 @@ int device_start_async(AMQP_DEVICE_HANDLE handle, SESSION_HANDLE session_handle,
     if (handle == NULL)
     {
         LogError("Failed starting device (handle is NULL)");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -808,19 +808,19 @@ int device_start_async(AMQP_DEVICE_HANDLE handle, SESSION_HANDLE session_handle,
         if (instance->state != DEVICE_STATE_STOPPED)
         {
             LogError("Failed starting device (device is not stopped)");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         // Codes_SRS_DEVICE_09_019: [If `session_handle` is NULL, device_start_async shall return a non-zero result]
         else if (session_handle == NULL)
         {
             LogError("Failed starting device (session_handle is NULL)");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         // Codes_SRS_DEVICE_09_020: [If using CBS authentication and `cbs_handle` is NULL, device_start_async shall return a non-zero result]
         else if (instance->config->authentication_mode == DEVICE_AUTH_MODE_CBS && cbs_handle == NULL)
         {
             LogError("Failed starting device (device using CBS authentication, but cbs_handle is NULL)");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -851,7 +851,7 @@ int device_stop(AMQP_DEVICE_HANDLE handle)
     if (handle == NULL)
     {
         LogError("Failed stopping device (handle is NULL)");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -861,7 +861,7 @@ int device_stop(AMQP_DEVICE_HANDLE handle)
         if (instance->state == DEVICE_STATE_STOPPED || instance->state == DEVICE_STATE_STOPPING)
         {
             LogError("Failed stopping device '%s' (device is already stopped or stopping)", instance->config->device_id);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -875,7 +875,7 @@ int device_stop(AMQP_DEVICE_HANDLE handle)
             {
                 // Codes_SRS_DEVICE_09_028: [If messenger_stop fails, the `instance` state shall be updated to DEVICE_STATE_ERROR_MSG and the function shall return non-zero result]
                 LogError("Failed stopping device '%s' (telemetry_messenger_stop failed)", instance->config->device_id);
-                result = __FAILURE__;
+                result = MU_FAILURE;
                 update_state(instance, DEVICE_STATE_ERROR_MSG);
             }
             // Codes_SRS_DEVICE_09_131: [If `instance->twin_messenger_handle` state is not TWIN_MESSENGER_STATE_STOPPED, twin_messenger_stop shall be invoked]
@@ -885,7 +885,7 @@ int device_stop(AMQP_DEVICE_HANDLE handle)
             {
                 // Codes_SRS_DEVICE_09_132: [If twin_messenger_stop fails, the `instance` state shall be updated to DEVICE_STATE_ERROR_MSG and the function shall return non-zero result]
                 LogError("Failed stopping device '%s' (twin_messenger_stop failed)", instance->config->device_id);
-                result = __FAILURE__;
+                result = MU_FAILURE;
                 update_state(instance, DEVICE_STATE_ERROR_MSG);
             }
             // Codes_SRS_DEVICE_09_029: [If CBS authentication is used, if `instance->authentication_handle` state is not AUTHENTICATION_STATE_STOPPED, authentication_stop shall be invoked]
@@ -895,7 +895,7 @@ int device_stop(AMQP_DEVICE_HANDLE handle)
             {
                 // Codes_SRS_DEVICE_09_030: [If authentication_stop fails, the `instance` state shall be updated to DEVICE_STATE_ERROR_AUTH and the function shall return non-zero result]
                 LogError("Failed stopping device '%s' (authentication_stop failed)", instance->config->device_id);
-                result = __FAILURE__;
+                result = MU_FAILURE;
                 update_state(instance, DEVICE_STATE_ERROR_AUTH);
             }
             else
@@ -1165,7 +1165,7 @@ int device_send_event_async(AMQP_DEVICE_HANDLE handle, IOTHUB_MESSAGE_LIST* mess
     if (handle == NULL || message == NULL)
     {
         LogError("Failed sending event (either handle (%p) or message (%p) are NULL)", handle, message);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1176,7 +1176,7 @@ int device_send_event_async(AMQP_DEVICE_HANDLE handle, IOTHUB_MESSAGE_LIST* mess
         {
             // Codes_SRS_DEVICE_09_053: [If `send_task` fails to be created, device_send_event_async shall return a non-zero value]
             LogError("Failed sending event (failed creating task to send event)");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -1194,7 +1194,7 @@ int device_send_event_async(AMQP_DEVICE_HANDLE handle, IOTHUB_MESSAGE_LIST* mess
                 LogError("Failed sending event (telemetry_messenger_send_async failed)");
                 // Codes_SRS_DEVICE_09_057: [If any failures occur, device_send_event_async shall release all memory it has allocated]
                 free(send_task);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -1216,7 +1216,7 @@ int device_get_send_status(AMQP_DEVICE_HANDLE handle, DEVICE_SEND_STATUS *send_s
     if (handle == NULL || send_status == NULL)
     {
         LogError("Failed getting the device messenger send status (NULL parameter received; handle=%p, send_status=%p)", handle, send_status);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1228,7 +1228,7 @@ int device_get_send_status(AMQP_DEVICE_HANDLE handle, DEVICE_SEND_STATUS *send_s
         {
             // Codes_SRS_DEVICE_09_107: [If telemetry_messenger_get_send_status fails, device_get_send_status shall return a non-zero result]
             LogError("Failed getting the device messenger send status (telemetry_messenger_get_send_status failed)");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -1260,7 +1260,7 @@ int device_subscribe_message(AMQP_DEVICE_HANDLE handle, ON_DEVICE_C2D_MESSAGE_RE
     {
         LogError("Failed subscribing to C2D messages (either handle (%p), on_message_received_callback (%p) or context (%p) is NULL)",
             handle, on_message_received_callback, context);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1271,7 +1271,7 @@ int device_subscribe_message(AMQP_DEVICE_HANDLE handle, ON_DEVICE_C2D_MESSAGE_RE
         {
             // Codes_SRS_DEVICE_09_068: [If telemetry_messenger_subscribe_for_messages fails, device_subscribe_message shall return a non-zero result]
             LogError("Failed subscribing to C2D messages (telemetry_messenger_subscribe_for_messages failed)");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -1294,7 +1294,7 @@ int device_unsubscribe_message(AMQP_DEVICE_HANDLE handle)
     if (handle == NULL)
     {
         LogError("Failed unsubscribing to C2D messages (handle is NULL)");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1305,7 +1305,7 @@ int device_unsubscribe_message(AMQP_DEVICE_HANDLE handle)
         {
             // Codes_SRS_DEVICE_09_078: [If telemetry_messenger_unsubscribe_for_messages fails, device_unsubscribe_message shall return a non-zero result]
             LogError("Failed unsubscribing to C2D messages (telemetry_messenger_unsubscribe_for_messages failed)");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -1320,17 +1320,17 @@ int device_send_message_disposition(AMQP_DEVICE_HANDLE device_handle, DEVICE_MES
 {
     int result;
 
-    // Codes_SRS_DEVICE_09_111: [If `device_handle` or `disposition_info` are NULL, device_send_message_disposition() shall fail and return __FAILURE__]
+    // Codes_SRS_DEVICE_09_111: [If `device_handle` or `disposition_info` are NULL, device_send_message_disposition() shall fail and return MU_FAILURE]
     if (device_handle == NULL || disposition_info == NULL)
     {
         LogError("Failed sending message disposition (either device_handle (%p) or disposition_info (%p) are NULL)", device_handle, disposition_info);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
-    // Codes_SRS_DEVICE_09_112: [If `disposition_info->source` is NULL, device_send_message_disposition() shall fail and return __FAILURE__]
+    // Codes_SRS_DEVICE_09_112: [If `disposition_info->source` is NULL, device_send_message_disposition() shall fail and return MU_FAILURE]
     else if (disposition_info->source == NULL)
     {
         LogError("Failed sending message disposition (disposition_info->source is NULL)");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1340,9 +1340,9 @@ int device_send_message_disposition(AMQP_DEVICE_HANDLE device_handle, DEVICE_MES
         // Codes_SRS_DEVICE_09_113: [A TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance shall be created with a copy of the `source` and `message_id` contained in `disposition_info`]
         if ((messenger_disposition_info = create_messenger_disposition_info(disposition_info)) == NULL)
         {
-            // Codes_SRS_DEVICE_09_114: [If the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO fails to be created, device_send_message_disposition() shall fail and return __FAILURE__]
+            // Codes_SRS_DEVICE_09_114: [If the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO fails to be created, device_send_message_disposition() shall fail and return MU_FAILURE]
             LogError("Failed sending message disposition (failed to create TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO)");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -1351,9 +1351,9 @@ int device_send_message_disposition(AMQP_DEVICE_HANDLE device_handle, DEVICE_MES
             // Codes_SRS_DEVICE_09_115: [`telemetry_messenger_send_message_disposition()` shall be invoked passing the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance and the corresponding TELEMETRY_MESSENGER_DISPOSITION_RESULT]
             if (telemetry_messenger_send_message_disposition(device->messenger_handle, messenger_disposition_info, messenger_disposition_result) != RESULT_OK)
             {
-                // Codes_SRS_DEVICE_09_116: [If `telemetry_messenger_send_message_disposition()` fails, device_send_message_disposition() shall fail and return __FAILURE__]
+                // Codes_SRS_DEVICE_09_116: [If `telemetry_messenger_send_message_disposition()` fails, device_send_message_disposition() shall fail and return MU_FAILURE]
                 LogError("Failed sending message disposition (telemetry_messenger_send_message_disposition failed)");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -1379,13 +1379,13 @@ int device_set_retry_policy(AMQP_DEVICE_HANDLE handle, IOTHUB_CLIENT_RETRY_POLIC
     if (handle == NULL)
     {
         LogError("Failed setting retry policy (handle is NULL)");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
         // Codes_SRS_DEVICE_09_081: [device_set_retry_policy shall return a non-zero result]
         LogError("Failed setting retry policy (functionality not supported)");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
 
     return result;
@@ -1400,7 +1400,7 @@ int device_set_option(AMQP_DEVICE_HANDLE handle, const char* name, void* value)
     {
         LogError("failed setting device option (one of the followin are NULL: _handle=%p, name=%p, value=%p)",
             handle, name, value);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1414,14 +1414,14 @@ int device_set_option(AMQP_DEVICE_HANDLE handle, const char* name, void* value)
             if (instance->authentication_handle == NULL)
             {
                 LogError("failed setting option for device '%s' (cannot set authentication option '%s'; not using CBS authentication)", instance->config->device_id, name);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             // Codes_SRS_DEVICE_09_084: [If `name` refers to authentication, it shall be passed along with `value` to authentication_set_option]
             else if(authentication_set_option(instance->authentication_handle, name, value) != RESULT_OK)
             {
                 // Codes_SRS_DEVICE_09_085: [If authentication_set_option fails, device_set_option shall return a non-zero result]
                 LogError("failed setting option for device '%s' (failed setting authentication option '%s')", instance->config->device_id, name);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -1435,7 +1435,7 @@ int device_set_option(AMQP_DEVICE_HANDLE handle, const char* name, void* value)
             {
                 // Codes_SRS_DEVICE_09_087: [If telemetry_messenger_set_option fails, device_set_option shall return a non-zero result]
                 LogError("failed setting option for device '%s' (failed setting messenger option '%s')", instance->config->device_id, name);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -1448,13 +1448,13 @@ int device_set_option(AMQP_DEVICE_HANDLE handle, const char* name, void* value)
             if (instance->authentication_handle == NULL)
             {
                 LogError("failed setting option for device '%s' (cannot set authentication option '%s'; not using CBS authentication)", instance->config->device_id, name);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if (OptionHandler_FeedOptions((OPTIONHANDLER_HANDLE)value, instance->authentication_handle) != OPTIONHANDLER_OK)
             {
                 // Codes_SRS_DEVICE_09_091: [If any call to OptionHandler_FeedOptions fails, device_set_option shall return a non-zero result]
                 LogError("failed setting option for device '%s' (OptionHandler_FeedOptions failed for authentication instance)", instance->config->device_id);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -1468,7 +1468,7 @@ int device_set_option(AMQP_DEVICE_HANDLE handle, const char* name, void* value)
             {
                 // Codes_SRS_DEVICE_09_091: [If any call to OptionHandler_FeedOptions fails, device_set_option shall return a non-zero result]
                 LogError("failed setting option for device '%s' (OptionHandler_FeedOptions failed for messenger instance)", instance->config->device_id);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -1482,7 +1482,7 @@ int device_set_option(AMQP_DEVICE_HANDLE handle, const char* name, void* value)
             {
                 // Codes_SRS_DEVICE_09_091: [If any call to OptionHandler_FeedOptions fails, device_set_option shall return a non-zero result]
                 LogError("failed setting option for device '%s' (OptionHandler_FeedOptions failed)", instance->config->device_id);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -1493,7 +1493,7 @@ int device_set_option(AMQP_DEVICE_HANDLE handle, const char* name, void* value)
         {
             // Codes_SRS_DEVICE_09_092: [If no failures occur, device_set_option shall return 0]
             LogError("failed setting option for device '%s' (option with name '%s' is not suppported)", instance->config->device_id, name);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
     }
 
@@ -1582,7 +1582,7 @@ int device_send_twin_update_async(AMQP_DEVICE_HANDLE handle, CONSTBUFFER_HANDLE 
     if (handle == NULL || data == NULL)
     {
         LogError("Invalid argument (handle=%p, data=%p)", handle, data);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1594,7 +1594,7 @@ int device_send_twin_update_async(AMQP_DEVICE_HANDLE handle, CONSTBUFFER_HANDLE 
         {
             // Codes_SRS_DEVICE_09_137: [If `twin_ctx` fails to be created, device_send_twin_update_async shall return a non-zero value]
             LogError("Cannot send twin update (failed creating TWIN context)");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -1607,7 +1607,7 @@ int device_send_twin_update_async(AMQP_DEVICE_HANDLE handle, CONSTBUFFER_HANDLE 
                 // Codes_SRS_DEVICE_09_139: [If twin_messenger_report_state_async fails, device_send_twin_update_async shall return a non-zero value]
                 LogError("Cannot send twin update (failed creating TWIN messenger)");
                 free(twin_ctx);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -1628,7 +1628,7 @@ int device_subscribe_for_twin_updates(AMQP_DEVICE_HANDLE handle, DEVICE_TWIN_UPD
     if (handle == NULL || on_device_twin_update_received_callback == NULL)
     {
         LogError("Invalid argument (handle=%p, on_device_twin_update_received_callback=%p)", handle, on_device_twin_update_received_callback);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1647,7 +1647,7 @@ int device_subscribe_for_twin_updates(AMQP_DEVICE_HANDLE handle, DEVICE_TWIN_UPD
             LogError("Failed subscribing for device twin updates");
             instance->on_device_twin_update_received_callback = previous_callback;
             instance->on_device_twin_update_received_context = previous_context;
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -1668,7 +1668,7 @@ int device_unsubscribe_for_twin_updates(AMQP_DEVICE_HANDLE handle)
     if (handle == NULL)
     {
         LogError("Invalid argument (handle is NULL)");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1679,7 +1679,7 @@ int device_unsubscribe_for_twin_updates(AMQP_DEVICE_HANDLE handle)
         {
             // Codes_SRS_DEVICE_09_149: [If twin_messenger_unsubscribe fails, device_unsubscribe_for_twin_updates shall return a non-zero value]
             LogError("Failed unsubscribing for device twin updates");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -1701,7 +1701,7 @@ int device_get_twin_async(AMQP_DEVICE_HANDLE handle, DEVICE_TWIN_UPDATE_RECEIVED
     if (handle == NULL || on_device_get_twin_completed_callback == NULL)
     {
         LogError("Invalid argument (handle=%p, on_device_get_twin_completed_callback=%p)", handle, on_device_get_twin_completed_callback);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1711,7 +1711,7 @@ int device_get_twin_async(AMQP_DEVICE_HANDLE handle, DEVICE_TWIN_UPDATE_RECEIVED
         if ((twin_ctx = (DEVICE_GET_TWIN_CONTEXT*)malloc(sizeof(DEVICE_GET_TWIN_CONTEXT))) == NULL)
         {
             LogError("Cannot get device twin (failed creating TWIN context)");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -1724,7 +1724,7 @@ int device_get_twin_async(AMQP_DEVICE_HANDLE handle, DEVICE_TWIN_UPDATE_RECEIVED
                 // Codes_SRS_DEVICE_09_154: [If twin_messenger_get_twin_async fails, device_get_twin_async shall return a non-zero value]
                 LogError("Failed getting device twin");
                 free(twin_ctx);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
