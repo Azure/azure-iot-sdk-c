@@ -16,7 +16,7 @@ RUN apt-get update && apt-get -y upgrade
 
 # Install wget git cmake xz-utils
 
-RUN apt-get install -y wget git cmake xz-utils sshfs sudo pkg-config uuid-dev openssh-client
+RUN apt-get install -y wget git cmake xz-utils sshfs sudo pkg-config uuid-dev openssh-client libssl-dev
 
 
 
@@ -220,7 +220,7 @@ RUN ls -al ${TOOLCHAIN_PREFIX}/include
 
 RUN ls -la ./
 # Go to project root
-#WORKDIR ../..
+WORKDIR ..
 
 
 
