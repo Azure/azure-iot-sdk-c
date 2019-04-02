@@ -205,3 +205,6 @@ build_all/windows/nuget.exe
 /cmake
 /build
 *.cert
+/deps/ctest/
+/deps/testrunnerswitcher/
+/deps/umock-c/

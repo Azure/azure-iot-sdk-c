@@ -5,7 +5,7 @@
 #define PROV_TRANSPORT_H
 
 #include "azure_c_shared_utility/umock_c_prod.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/buffer_.h"
 

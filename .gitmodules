@@ -19,3 +19,6 @@
 [submodule "provisioning_client/deps/utpm"]
 	path = provisioning_client/deps/utpm
 	url = https://github.com/Azure/azure-utpm-c.git
+[submodule "deps/azure-macro-utils-c"]
+	path = deps/azure-macro-utils-c
+	url = https://github.com/Azure/azure-macro-utils-c.git

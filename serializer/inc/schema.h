@@ -4,7 +4,7 @@
 #ifndef SCHEMA_H
 #define SCHEMA_H
 
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "agenttypesystem.h"
 

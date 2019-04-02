@@ -5,7 +5,7 @@
 #define PROV_DEVICE_LL_CLIENT_H
 
 #include "azure_c_shared_utility/umock_c_prod.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "azure_prov_client/prov_transport.h"
 
 #ifdef __cplusplus

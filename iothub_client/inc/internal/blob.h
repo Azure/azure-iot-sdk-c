@@ -13,7 +13,7 @@
 #ifndef BLOB_H
 #define BLOB_H
 
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/strings_types.h"
 #include "azure_c_shared_utility/httpapiex.h"

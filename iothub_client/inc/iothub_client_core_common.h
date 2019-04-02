@@ -6,7 +6,7 @@
 #ifndef IOTHUB_CLIENT_CORE_COMMON_H
 #define IOTHUB_CLIENT_CORE_COMMON_H
 
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
 
 #include "iothub_transport_ll.h"

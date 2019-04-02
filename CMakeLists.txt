@@ -197,10 +197,6 @@ endif()
 
 include("configs/azure_iot_sdksFunctions.cmake")
 
-if (${run_unittests} OR ${run_e2e_tests} OR ${run_sfc_tests})
-    include("dependencies-test.cmake")
-endif()
-
 # do not add or build any tests of the dependencies
 set(original_run_e2e_tests ${run_e2e_tests})
 set(original_run_unittests ${run_unittests})
@@ -210,20 +206,51 @@ set(run_e2e_tests OFF)
 set(run_unittests OFF)
 set(skip_samples ON)
 
+if (NOT ${use_installed_dependencies})
+    if (NOT TARGET azure_macro_utils_c AND EXISTS "${CMAKE_CURRENT_LIST_DIR}/deps/azure-macro-utils-c/CMakeLists.txt")
+        add_subdirectory(deps/azure-macro-utils-c)
+        include_directories(${MACRO_UTILS_INC_FOLDER})
+    endif()
+    if (${original_run_e2e_tests} OR ${original_run_unittests} OR ${run_sfc_tests})
+        if (NOT TARGET testrunnerswitcher)
+            if (NOT EXISTS "${CMAKE_CURRENT_LIST_DIR}/deps/testrunnerswitcher/CMakeLists.txt")
+                execute_process(COMMAND git clone https://github.com/Azure/azure-c-testrunnerswitcher.git -q ${CMAKE_CURRENT_LIST_DIR}/deps/testrunnerswitcher)
+            endif()
+            add_subdirectory(deps/testrunnerswitcher)
+        endif()
+        if (NOT TARGET ctest)
+            # Get the repo if it's not there
+            if (NOT EXISTS "${CMAKE_CURRENT_LIST_DIR}/deps/ctest/CMakeLists.txt")
+                execute_process(COMMAND git clone https://github.com/Azure/azure-ctest.git -q ${CMAKE_CURRENT_LIST_DIR}/deps/ctest)
+            endif()
+            add_subdirectory(deps/ctest)
+        endif()
+        if (NOT TARGET umock_c)
+            # Get the repo if it's not there
+            if (NOT EXISTS "${CMAKE_CURRENT_LIST_DIR}/deps/umock-c/CMakeLists.txt")
+                execute_process(COMMAND git clone https://github.com/Azure/umock-c.git -q ${CMAKE_CURRENT_LIST_DIR}/deps/umock-c)
+            endif()
+            add_subdirectory(deps/umock-c)
+        endif()
+        enable_testing()
+    endif()
+endif()
+
 include("dependencies.cmake")
+if (${original_run_e2e_tests} OR ${original_run_unittests} OR ${run_sfc_tests})
+    #include("dependencies-test.cmake")
+endif()
 
 if (${original_run_e2e_tests} OR ${original_run_unittests} OR ${run_sfc_tests})
     set(SHARED_UTIL_REAL_TEST_FOLDER ${CMAKE_CURRENT_LIST_DIR}/c-utility/tests/real_test_files CACHE INTERNAL "this is what needs to be included when doing test sources" FORCE)
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/c-utility/testtools)
 endif()
 
-set_platform_files(${CMAKE_CURRENT_LIST_DIR}/c-utility)
+set_platform_files(${SHARED_UTIL_FOLDER})
 
 set(run_e2e_tests ${original_run_e2e_tests})
 set(run_unittests ${original_run_unittests})
 set(skip_samples ${original_skip_samples})
-
-enable_testing()
 
 # this project uses several other projects that are build not by these CMakeFiles
 # this project also targets several OSes

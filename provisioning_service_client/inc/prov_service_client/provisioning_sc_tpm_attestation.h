@@ -9,7 +9,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 #include "azure_c_shared_utility/umock_c_prod.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "parson.h"
 
 typedef struct TPM_ATTESTATION_TAG* TPM_ATTESTATION_HANDLE;

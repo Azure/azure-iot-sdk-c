@@ -5,7 +5,7 @@
 #define IOTDEVICE_H
 
 #include <stdbool.h>
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "schema.h"
 #include "datapublisher.h"
 #include "commanddecoder.h"

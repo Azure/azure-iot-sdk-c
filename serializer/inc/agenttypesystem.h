@@ -18,7 +18,7 @@
 #endif
 
 #include "azure_c_shared_utility/agenttime.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/strings.h"
 
 /*Codes_SRS_AGENT_TYPE_SYSTEM_99_001:[ AGENT_TYPE_SYSTEM shall have the following interface]*/

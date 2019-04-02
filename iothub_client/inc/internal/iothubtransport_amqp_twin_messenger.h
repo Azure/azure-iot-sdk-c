@@ -4,7 +4,7 @@
 #ifndef IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER
 #define IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER
 
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
 #include "azure_c_shared_utility/optionhandler.h"
 #include "azure_uamqp_c/session.h"

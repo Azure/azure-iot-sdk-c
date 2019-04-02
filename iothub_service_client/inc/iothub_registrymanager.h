@@ -6,7 +6,7 @@
 #ifndef IOTHUB_REGISTRYMANAGER_H
 #define IOTHUB_REGISTRYMANAGER_H
 
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/singlylinkedlist.h"
