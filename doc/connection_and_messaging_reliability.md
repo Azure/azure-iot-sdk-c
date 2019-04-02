@@ -22,18 +22,23 @@ In this document you will find information about the reliability aspects of the 
 
 ### Connection Authentication
 
-This is a brief note to clarify about how authentication is done in the IoTHub Device/Module clients.
+This is a brief note to clarify how authentication is done in the IoTHub Device/Module clients.
 
 Authentication of a client in the SDK can be done using either
+
 - [SAS tokens](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-security#security-tokens), or 
+
 - [x509 certificates](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-security#supported-x509-certificates), or
+
 - [Device Provisioning Service](https://docs.microsoft.com/en-us/azure/iot-dps/).
 
 This section does not describe the details of Device Provisioning Service (DPS), please use the link above for details.
 
 When using SAS tokens, authentication can be done by:
+
 - Providing [your own SAS token](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-security#authentication), or
-- Giving the device keys to the SDK (using the device [connection string](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-device-sdk-c-iothubclient#alternate-device-credentials)) and lettting it create the SAS tokens for you (this is the most usual authentication method).
+
+- Giving the device keys to the SDK (using the device connection string - see ["Alternate Device Credentials"](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-device-sdk-c-iothubclient#alternate-device-credentials) in our documentation) and lettting it create the SAS tokens for you (this is the most usual authentication method).
 
 As mentioned in the articles above, SAS tokens have an expiration time.
 
@@ -43,12 +48,12 @@ The internal behaviour is different depending on the transport protocol used:
 
 |**Transport**|**Behaviour**|
 |-|-|
-|MQTT|SAS tokens are valid for 1 hour, and a new one is sent every 48 minutes. Every time a new SAS token needs to be sent, the client will disconnect from the Azure IoT Hub and reconnect. That is because the Azure IoT Hub does not yet support continuous authentication over MQTT.|
+|MQTT|SAS tokens are valid for 1 hour, and a new one is sent every 48 minutes. Every time a new SAS token needs to be sent, the client will disconnect from the Azure IoT Hub and reconnect.|
 |AMQP|SAS tokens are valid for 1 hour, and a new one is sent every 48 minutes. Client is not disconnected when a new SAS token is sent.|
 |HTTP|There is no persistent connnection; a new SAS token (valid for 1 hour) is created and sent with each request to the Azure IoT Hub.|
 
 
-Both the SAS token lifetime and refresh rate are [configurable on AMQP transport](https://github.com/Azure/azure-iot-sdk-c/blob/2019-03-18/doc/Iothub_sdk_options.md#amqp-transport).
+Both the SAS token lifetime and refresh rate are configurable on AMQP transport (see [AMQP transport section](https://github.com/Azure/azure-iot-sdk-c/blob/2019-03-18/doc/Iothub_sdk_options.md#amqp-transport) in SDK options documentation).
 
 
 ### Connection Establishment and Retry Logic
