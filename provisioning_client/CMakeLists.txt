@@ -380,12 +380,12 @@ if(${use_installed_dependencies})
         COPYONLY
     )
 
-    install(EXPORT azure_prov_sdksTargets
-        FILE
-            "${PROJECT_NAME}Targets.cmake"
-        DESTINATION
-            ${package_location}
-    )
+    # install(EXPORT azure_prov_sdksTargets
+    #     FILE
+    #         "${PROJECT_NAME}Targets.cmake"
+    #     DESTINATION
+    #         ${package_location}
+    # )
 
     install(
         FILES

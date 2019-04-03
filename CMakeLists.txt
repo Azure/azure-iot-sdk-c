@@ -195,7 +195,7 @@ if (NOT "${linkerOption}" STREQUAL "OFF")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${linkerOption}")
 endif()
 
-include("configs/azure_iot_sdksFunctions.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/configs/azure_iot_sdksFunctions.cmake")
 
 # do not add or build any tests of the dependencies
 set(original_run_e2e_tests ${run_e2e_tests})
