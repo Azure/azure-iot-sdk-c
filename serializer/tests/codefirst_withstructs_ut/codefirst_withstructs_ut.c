@@ -23,7 +23,7 @@ void my_gballoc_free(void * t)
     free(t);
 }
 
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "umock_c.h"
 #include "umocktypes_charptr.h"
 #include "umocktypes_bool.h"
@@ -38,7 +38,7 @@ void my_gballoc_free(void * t)
 
 #include "testrunnerswitcher.h"
 #include "codefirst.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 
 #include "serializer.h"
 

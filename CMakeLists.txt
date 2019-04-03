@@ -4,7 +4,7 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(azure_iot_sdks)
 
-include("configs/azure_iot_sdksFunctions.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/configs/azure_iot_sdksFunctions.cmake")
 
 getIoTSDKVersion()
 message(STATUS "IoT Client SDK Version = ${IOT_SDK_VERSION}")
@@ -238,12 +238,12 @@ endif()
 
 include("dependencies.cmake")
 if (${original_run_e2e_tests} OR ${original_run_unittests} OR ${run_sfc_tests})
-    #include("dependencies-test.cmake")
+    # Used for serializer
+    add_subdirectory("${SHARED_UTIL_FOLDER}/testtools/micromock")
 endif()
 
 if (${original_run_e2e_tests} OR ${original_run_unittests} OR ${run_sfc_tests})
     set(SHARED_UTIL_REAL_TEST_FOLDER ${CMAKE_CURRENT_LIST_DIR}/c-utility/tests/real_test_files CACHE INTERNAL "this is what needs to be included when doing test sources" FORCE)
-    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/c-utility/testtools)
 endif()
 
 set_platform_files(${SHARED_UTIL_FOLDER})

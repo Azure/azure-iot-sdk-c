@@ -24,7 +24,7 @@ static void my_gballoc_free(void* ptr)
 #include "umocktypes_charptr.h"
 #include "umocktypes_stdint.h"
 #include "umock_c_negative_tests.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 
 #include "azure_prov_client/internal/iothub_auth_client.h"
 
