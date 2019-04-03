@@ -1,8 +1,10 @@
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-cmake_minimum_required(VERSION 2.8.11)
-project(azure_iot_sdks)
+cmake_minimum_required(VERSION 3.10.2)
+project("azure_iot_sdks")
+
+include("${CMAKE_CURRENT_LIST_DIR}/configs/azure_iot_sdksFunctions.cmake")
 
 getIoTSDKVersion()
 message(STATUS "IoT Client SDK Version = ${IOT_SDK_VERSION}")
@@ -193,7 +195,6 @@ if (NOT "${linkerOption}" STREQUAL "OFF")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${linkerOption}")
 endif()
 
-include("${CMAKE_CURRENT_LIST_DIR}/configs/azure_iot_sdksFunctions.cmake")
 
 if (${run_unittests} OR ${run_e2e_tests} OR ${run_sfc_tests})
     include("dependencies-test.cmake")
