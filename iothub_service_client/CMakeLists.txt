@@ -109,7 +109,7 @@ if(${use_installed_dependencies})
         set(CMAKE_INSTALL_INCLUDEDIR "include")
     endif()
 
-    install(TARGETS iothub_service_client EXPORT azure_iot_sdksTargets
+    install(TARGETS iothub_service_client EXPORT "azure_iot_sdksTargets"
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/../bin
