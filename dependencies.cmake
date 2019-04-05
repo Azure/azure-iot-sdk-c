@@ -3,6 +3,7 @@
 
 if(${use_installed_dependencies})
     if (NOT azure_c_shared_utility_FOUND)
+        message("!!!!!! azure_c_shared_utility being searched.")
         find_package(azure_c_shared_utility REQUIRED CONFIG)
     endif ()
     
