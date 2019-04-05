@@ -339,6 +339,7 @@ if (${use_prov_client_core})
         add_subdirectory(provisioning_service_client)
     endif()
 
+    message("Main CMakeLists: Line 311: adding provisioning_client")
     add_subdirectory(provisioning_client)
 endif()
 
@@ -349,9 +350,11 @@ endif()
 if (${run_e2e_tests} OR ${run_longhaul_tests} OR ${nuget_e2e_tests} OR ${run_sfc_tests})
     add_subdirectory(testtools)
 endif()
-
+message("Main CMakeLists: Line 322: add_subdirectory iothub_client")
 add_subdirectory(iothub_client)
 add_subdirectory(serializer)
+message("!!!!!!!!!!!!!!!!!!!!!!!")
+add_subdirectory(provisioning_client)
 
 if (NOT ${skip_samples})
   add_subdirectory(samples/solutions)
