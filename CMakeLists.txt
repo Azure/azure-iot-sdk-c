@@ -344,6 +344,7 @@ if (${use_prov_client_core})
 endif()
 
 if (${build_service_client})
+    message("Main CMakeLists: Line 316: adding iothub_service_client")
     add_subdirectory(iothub_service_client)
 endif()
 
@@ -353,8 +354,6 @@ endif()
 message("Main CMakeLists: Line 322: add_subdirectory iothub_client")
 add_subdirectory(iothub_client)
 add_subdirectory(serializer)
-message("!!!!!!!!!!!!!!!!!!!!!!!")
-add_subdirectory(provisioning_client)
 
 if (NOT ${skip_samples})
   add_subdirectory(samples/solutions)
