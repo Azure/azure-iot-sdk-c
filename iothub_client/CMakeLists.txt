@@ -489,7 +489,7 @@ if(${use_installed_dependencies})
     if(NOT DEFINED CMAKE_INSTALL_INCLUDEDIR)
         set(CMAKE_INSTALL_INCLUDEDIR "include")
     endif()
-
+    message("IoTHub Client CMakeLists: Line 492: ${iothub_client_libs}")
     install(TARGETS ${iothub_client_libs} EXPORT "azure_iot_sdksTargets"
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
