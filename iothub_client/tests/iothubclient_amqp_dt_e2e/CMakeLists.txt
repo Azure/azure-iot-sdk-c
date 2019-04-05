@@ -31,12 +31,10 @@ set(${theseTestsName}_nuget_c_files
 
 set(${theseTestsName}_c_files
     ../../../certs/certs.c
-    ../../../deps/parson/parson.c
 )
 
 set(${theseTestsName}_h_files
     ../../../certs/certs.h
-    ../../../deps/parson/parson.h
     ../common_dt_e2e/iothubclient_common_dt_e2e.h
 )
 

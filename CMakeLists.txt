@@ -156,17 +156,6 @@ endif()
 # Use solution folders.
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-# build the parson library for json parsing
-add_library(parson
-    ./deps/parson/parson.c
-    ./deps/parson/parson.h
-)
-if (MSVC)
-    set_source_files_properties(../deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
-endif()
-set(parson_h_install_files ./deps/parson/parson.h)
-set(parson_install_libs parson)
-
 if (IN_OPENWRT)
     ADD_DEFINITIONS("$ENV{TARGET_LDFLAGS}" "$ENV{TARGET_CPPFLAGS}" "$ENV{TARGET_CFLAGS}")
     INCLUDE_DIRECTORIES("$ENV{TOOLCHAIN_DIR}/usr/include" "$ENV{TARGET_LDFLAGS}" "$ENV{TARGET_CPPFLAGS}" "$ENV{TARGET_CFLAGS}")

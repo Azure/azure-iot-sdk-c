@@ -19,6 +19,9 @@ if(${use_installed_dependencies})
         endif ()
     endif ()
 
+    find_package(unofficial-parson REQUIRED)
+    link_libraries(unofficial::parson::parson)
+
 else ()
     add_subdirectory(c-utility)
 

@@ -81,9 +81,7 @@ endif()
 setSdkTargetBuildProperties(iothub_service_client)
 
 if(NOT ${nuget_e2e_tests})
-    target_link_libraries(iothub_service_client uamqp parson)
-else()
-    target_link_libraries(iothub_service_client parson)
+    target_link_libraries(iothub_service_client uamqp)
 endif()
 
 if (NOT ${ARCHITECTURE} STREQUAL "ARM")
