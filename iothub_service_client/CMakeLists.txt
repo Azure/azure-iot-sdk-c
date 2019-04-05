@@ -106,7 +106,8 @@ if(${use_installed_dependencies})
     if(NOT DEFINED CMAKE_INSTALL_INCLUDEDIR)
         set(CMAKE_INSTALL_INCLUDEDIR "include")
     endif()
-
+    message("iothub_service_client CMakeLists.txt Line 109")
+    message("iothub_service_client: ${iothub_service_client}")
     install(TARGETS iothub_service_client EXPORT "azure_iot_sdksTargets"
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}

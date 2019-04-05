@@ -369,14 +369,14 @@ if (${use_installed_dependencies})
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
     )
-    message("Main CMakeLists: line 382")
+    message("Main CMakeLists: line 372")
     install(EXPORT "azure_iot_sdksTargets"
         FILE
             "${PROJECT_NAME}Targets.cmake"
         DESTINATION
             ${package_location}
     )
-
+    message("Main CMakeLists: line 379")
     install(
         FILES
             "configs/${PROJECT_NAME}Config.cmake"
