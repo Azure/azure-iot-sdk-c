@@ -373,12 +373,13 @@ if (${use_installed_dependencies})
     install(FILES ${parson_h_install_files}
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
     )
+    message("Main CMakeLists: Line 376: Installing parson libs....")
     install(TARGETS ${parson_install_libs} EXPORT "azure_iot_sdksTargets"
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
     )
-
+    message("Main CMakeLists: line 382")
     install(EXPORT "azure_iot_sdksTargets"
         FILE
             "${PROJECT_NAME}Targets.cmake"
