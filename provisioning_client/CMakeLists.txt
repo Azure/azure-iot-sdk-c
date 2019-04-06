@@ -403,7 +403,7 @@ else()
     install(FILES ${provisioning_headers}
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azure_prov_client)
     message("!!!!!! Provisioning Client CMakeLists: Line 405: ${provisioning_libs}")
-    install(TARGETS ${provisioning_libs} EXPORT "azure_iot_sdksTargets"
+    install(TARGETS ${provisioning_libs} 
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/../bin
