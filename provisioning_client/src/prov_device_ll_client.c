@@ -32,14 +32,14 @@ static const char* const JSON_NODE_DEVICE_ID = "deviceId";
 static const char* const JSON_NODE_KEY_NAME = "keyName";
 static const char* const JSON_NODE_OPERATION_ID = "operationId";
 static const char* const JSON_NODE_ASSIGNED_HUB = "assignedHub";
-static const char* const JSON_NODE_RETURNED_DATA = "returnData";
 static const char* const JSON_NODE_TPM_NODE = "tpm";
 static const char* const JSON_NODE_DATE_TIME = "lastUpdatedDateTimeUtc";
 static const char* const JSON_NODE_ERROR_MSG = "errorMessage";
 static const char* const JSON_NODE_ERROR_CODE = "errorCode";
 static const char* const PROV_FAILED_STATUS = "failed";
 static const char* const PROV_BLACKLISTED_STATUS = "blacklisted";
-static const char* const JSON_CUSTOM_DATA_TAG = "data";
+static const char* const JSON_CUSTOM_DATA_TAG = "payload";
+static const char* const JSON_NODE_RETURNED_DATA = "payload";
 
 static const char* const SAS_TOKEN_SCOPE_FMT = "%s/registrations/%s";
 

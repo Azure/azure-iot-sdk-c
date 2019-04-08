@@ -208,13 +208,36 @@ extern "C"
 }
 #endif
 
+static void free_prov_json_info(PROV_JSON_INFO* parse_info)
+{
+    if (parse_info != NULL)
+    {
+        switch (parse_info->prov_status)
+        {
+        case PROV_DEVICE_TRANSPORT_STATUS_UNASSIGNED:
+            BUFFER_delete(parse_info->authorization_key);
+            free(parse_info->key_name);
+            break;
+        case PROV_DEVICE_TRANSPORT_STATUS_ASSIGNED:
+            BUFFER_delete(parse_info->authorization_key);
+            free(parse_info->iothub_uri);
+            free(parse_info->device_id);
+            break;
+        case PROV_DEVICE_TRANSPORT_STATUS_ASSIGNING:
+            free(parse_info->operation_id);
+            break;
+        default:
+            break;
+        }
+        my_gballoc_free(parse_info);
+    }
+}
+
 MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
-    char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
-    ASSERT_FAIL(temp_str);
+    ASSERT_FAIL("umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
 }
 
 static STRING_HANDLE my_URL_EncodeString(const char* textEncode)
@@ -1140,9 +1163,8 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
+        free_prov_json_info(result);
         Prov_Device_LL_Destroy(handle);
-        my_gballoc_free(result->operation_id);
-        my_gballoc_free(result);
     }
 
     TEST_FUNCTION(Prov_Device_LL_parse_json_error_succeed)
@@ -1222,14 +1244,10 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
-            char tmp_msg[64];
-            sprintf(tmp_msg, "g_json_parse_cb failure in test %zu/%zu", index, count);
-
-
             result = g_json_parse_cb(TEST_JSON_REPLY, g_json_ctx);
 
             //assert
-            ASSERT_IS_NULL(result, tmp_msg);
+            ASSERT_IS_NULL(result, "g_json_parse_cb failure in test %zu/%zu", index, count);
         }
 
         //cleanup
@@ -1261,11 +1279,8 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
+        free_prov_json_info(result);
         Prov_Device_LL_Destroy(handle);
-        my_gballoc_free(result->authorization_key);
-        my_gballoc_free(result->iothub_uri);
-        my_gballoc_free(result->device_id);
-        my_gballoc_free(result);
     }
 
     TEST_FUNCTION(Prov_Device_LL_parse_json_assigned_fail)
@@ -2039,7 +2054,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         umock_c_reset_all_calls();
 
         setup_parse_json_assigned_mocks(true);
-        g_json_parse_cb(TEST_JSON_REPLY, g_json_ctx);
+        PROV_JSON_INFO* parse_info = g_json_parse_cb(TEST_JSON_REPLY, g_json_ctx);
         umock_c_reset_all_calls();
 
         //act
@@ -2051,6 +2066,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
+        free_prov_json_info(parse_info);
         Prov_Device_LL_Destroy(handle);
     }
 
@@ -2064,7 +2080,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         umock_c_reset_all_calls();
 
         setup_parse_json_assigned_mocks(false);
-        g_json_parse_cb(TEST_JSON_REPLY, g_json_ctx);
+        PROV_JSON_INFO* parse_info = g_json_parse_cb(TEST_JSON_REPLY, g_json_ctx);
         umock_c_reset_all_calls();
 
         //act
@@ -2075,6 +2091,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
+        free_prov_json_info(parse_info);
         Prov_Device_LL_Destroy(handle);
     }
 

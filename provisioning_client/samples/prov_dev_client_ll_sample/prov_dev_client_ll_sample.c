@@ -27,11 +27,11 @@
 //
 // The protocol you wish to use should be uncommented
 //
-#define SAMPLE_MQTT
+//#define SAMPLE_MQTT
 //#define SAMPLE_MQTT_OVER_WEBSOCKETS
 //#define SAMPLE_AMQP
 //#define SAMPLE_AMQP_OVER_WEBSOCKETS
-//#define SAMPLE_HTTP
+#define SAMPLE_HTTP
 
 #ifdef SAMPLE_MQTT
 #include "iothubtransportmqtt.h"
@@ -65,7 +65,7 @@ MU_DEFINE_ENUM_STRINGS(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
 MU_DEFINE_ENUM_STRINGS(PROV_DEVICE_REG_STATUS, PROV_DEVICE_REG_STATUS_VALUES);
 
 static const char* global_prov_uri = "global.azure-devices-provisioning.net";
-static const char* id_scope = "[ID Scope]";
+static const char* id_scope = "0ne0005093D";
 
 static bool g_use_proxy = false;
 static const char* PROXY_ADDRESS = "127.0.0.1";
@@ -155,15 +155,15 @@ int main()
 {
     SECURE_DEVICE_TYPE hsm_type;
     //hsm_type = SECURE_DEVICE_TYPE_TPM;
-    hsm_type = SECURE_DEVICE_TYPE_X509;
-    //hsm_type = SECURE_DEVICE_TYPE_SYMMETRIC_KEY;
+    //hsm_type = SECURE_DEVICE_TYPE_X509;
+    hsm_type = SECURE_DEVICE_TYPE_SYMMETRIC_KEY;
 
     bool traceOn = false;
 
     (void)IoTHub_Init();
     (void)prov_dev_security_init(hsm_type);
     // Set the symmetric key if using they auth type
-    //prov_dev_set_symmetric_key_info("<symm_registration_id>", "<symmetric_Key>");
+    prov_dev_set_symmetric_key_info("custom-data", "/FjvREB1W/x+jGigTYKWRaotx8XCG3OgbHJ+yKHnkioWF6IIu3pBLk9dAguuwujfcBCkZjaSJn9dg2svpnHfCg==");
 
     PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION prov_transport;
     HTTP_PROXY_OPTIONS http_proxy;
@@ -231,6 +231,8 @@ int main()
         }
         else
         {
+            (void)Prov_Device_LL_Set_Provisioning_Payload(handle, "{ \"jelani\": \"brandon\" }");
+
             do
             {
                 Prov_Device_LL_DoWork(handle);
