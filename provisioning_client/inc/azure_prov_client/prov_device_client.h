@@ -38,6 +38,25 @@ MOCKABLE_FUNCTION(, PROV_DEVICE_RESULT, Prov_Device_Register_Device, PROV_DEVICE
 MOCKABLE_FUNCTION(, PROV_DEVICE_RESULT, Prov_Device_SetOption, PROV_DEVICE_HANDLE, prov_device_handle, const char*, optionName, const void*, value);
 MOCKABLE_FUNCTION(, const char*, Prov_Device_GetVersionString);
 
+/**
+* @brief    Sets the Provisioning Data that is sent to the Provisioning service
+*
+* @param    handle          The handle created by a call to the create function.
+* @param    json            The json payload field that is sent to the service.  Setting json to NULL will unset the value previously set
+*
+* @return PROV_DEVICE_RESULT_OK upon success or an error code upon failure
+*/
+MOCKABLE_FUNCTION(, PROV_DEVICE_RESULT, Prov_Device_Set_Provisioning_Payload, PROV_DEVICE_HANDLE, handle, const char*, json);
+
+/**
+* @brief    Retrieves the Provisioning Data that is sent from the Provisioning service
+*
+* @param    handle          The handle created by a call to the create function.
+*
+* @return The data that was specified by the service
+*/
+MOCKABLE_FUNCTION(, const char*, Prov_Device_Get_Provisioning_Payload, PROV_DEVICE_HANDLE, handle);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -38,8 +38,14 @@ static const char* const JSON_NODE_ERROR_MSG = "errorMessage";
 static const char* const JSON_NODE_ERROR_CODE = "errorCode";
 static const char* const PROV_FAILED_STATUS = "failed";
 static const char* const PROV_BLACKLISTED_STATUS = "blacklisted";
+static const char* const JSON_CUSTOM_DATA_TAG = "payload";
+static const char* const JSON_NODE_RETURNED_DATA = "payload";
 
 static const char* const SAS_TOKEN_SCOPE_FMT = "%s/registrations/%s";
+
+static const char* const REGISTRATION_ID = "registrationId";
+static const char* const JSON_ENDORSMENT_KEY_NODE = "endorsementKey";
+static const char* const JSON_STORAGE_ROOT_KEY_NODE = "storageRootKey";
 
 #define DPS_HUB_ERROR_NO_HUB        400208
 #define DPS_HUB_ERROR_UNAUTH        400209
@@ -107,6 +113,9 @@ typedef struct PROV_INSTANCE_INFO_TAG
     size_t auth_attempts_made;
 
     char* scope_id;
+
+    char* custom_request_data;
+    char* custom_response_data;
 } PROV_INSTANCE_INFO;
 
 static char* prov_transport_challenge_callback(const unsigned char* nonce, size_t nonce_len, const char* key_name, void* user_ctx)
@@ -204,7 +213,11 @@ static void on_transport_error(PROV_DEVICE_TRANSPORT_ERROR transport_error, void
 static PROV_DEVICE_TRANSPORT_STATUS retrieve_status_type(const char* prov_status)
 {
     PROV_DEVICE_TRANSPORT_STATUS result;
-    if (prov_status == NULL || strcmp(prov_status, PROV_UNASSIGNED_STATUS) == 0)
+    if (prov_status == NULL)
+    {
+        result = PROV_DEVICE_TRANSPORT_STATUS_ERROR;
+    }
+    else if (strcmp(prov_status, PROV_UNASSIGNED_STATUS) == 0)
     {
         result = PROV_DEVICE_TRANSPORT_STATUS_UNASSIGNED;
     }
@@ -251,13 +264,26 @@ static int retrieve_json_number(JSON_Object* json_object, const char* field_name
     return result;
 }
 
-static char* retrieve_json_item(JSON_Object* json_object, const char* field_name)
+static void retrieve_json_payload(JSON_Object* json_object, PROV_INSTANCE_INFO* prov_info)
+{
+    JSON_Value* json_field;
+    // Returned Data is not available
+    if ((json_field = json_object_get_value(json_object, JSON_NODE_RETURNED_DATA)) != NULL)
+    {
+        prov_info->custom_response_data = json_serialize_to_string(json_field);
+    }
+}
+
+static char* retrieve_json_string(JSON_Object* json_object, const char* field_name, bool is_required)
 {
     char* result;
     JSON_Value* json_field;
     if ((json_field = json_object_get_value(json_object, field_name)) == NULL)
     {
-        LogError("failure retrieving json operation id");
+        if (is_required)
+        {
+            LogError("failure retrieving json object value %s", field_name);
+        }
         result = NULL;
     }
     else
@@ -276,6 +302,147 @@ static char* retrieve_json_item(JSON_Object* json_object, const char* field_name
             result = NULL;
         }
     }
+    return result;
+}
+
+static JSON_Value* construct_security_type_json(PROV_INSTANCE_INFO* prov_info, const char* ek_value, const char* srk_value)
+{
+    JSON_Value* result;
+
+    JSON_Object* json_object;
+    result = json_value_init_object();
+    if (result == NULL)
+    {
+        LogError("Failure constructing json information");
+    }
+    else if ((json_object = json_value_get_object(result)) == NULL)
+    {
+        LogError("failure retrieving node root object");
+        json_value_free(result);
+        result = NULL;
+    }
+    else
+    {
+        if (json_object_set_string(json_object, REGISTRATION_ID, prov_info->registration_id) != JSONSuccess)
+        {
+            LogError("failure setting registration Id json node");
+            json_value_free(result);
+            result = NULL;
+        }
+        else
+        {
+            if (prov_info->hsm_type == PROV_AUTH_TYPE_TPM)
+            {
+                // tpm_node value only gets released on failure
+                JSON_Object* tpm_object;
+                JSON_Value* tpm_node = json_value_init_object();
+                if (tpm_node == NULL)
+                {
+                    LogError("failure constructing json tpm object");
+                    json_value_free(tpm_node);
+                    json_value_free(result);
+                    result = NULL;
+                }
+                else if ((tpm_object = json_value_get_object(tpm_node)) == NULL)
+                {
+                    LogError("failure retrieving node root object");
+                    json_value_free(tpm_node);
+                    json_value_free(result);
+                    result = NULL;
+                }
+                else if (json_object_set_string(tpm_object, JSON_ENDORSMENT_KEY_NODE, ek_value) != JSONSuccess)
+                {
+                    LogError("failure setting endorsement key node");
+                    json_value_free(tpm_node);
+                    json_value_free(result);
+                    result = NULL;
+                }
+                else if (json_object_set_string(tpm_object, JSON_STORAGE_ROOT_KEY_NODE, srk_value) != JSONSuccess)
+                {
+                    LogError("failure setting tpm storage root key node");
+                    json_value_free(tpm_node);
+                    json_value_free(result);
+                    result = NULL;
+                }
+                else if (json_object_set_value(json_object, JSON_NODE_TPM_NODE, tpm_node) != JSONSuccess)
+                {
+                    LogError("failure constructing json tpm object");
+                    json_value_free(tpm_node);
+                    json_value_free(result);
+                    result = NULL;
+                }
+            }
+        }
+    }
+    return result;
+}
+
+static char* prov_transport_create_json_payload(const char* ek_value, const char* srk_value, void* user_ctx)
+{
+    char* result = NULL;
+    if (user_ctx == NULL)
+    {
+        LogError("failure user_ctx is NULL");
+    }
+    else
+    {
+        PROV_INSTANCE_INFO* prov_info = (PROV_INSTANCE_INFO*)user_ctx;
+
+        JSON_Value* json_root = construct_security_type_json(prov_info, ek_value, srk_value);
+        if (json_root == NULL)
+        {
+            LogError("Failure constructing security json");
+        }
+        else
+        {
+            if (prov_info->custom_request_data != NULL)
+            {
+                JSON_Object* json_object;
+                JSON_Value* json_custom_data = NULL;
+
+                if ((json_object = json_value_get_object(json_root)) == NULL)
+                {
+                    LogError("failure retrieving node root object");
+                    json_value_free(json_root);
+                    json_root = NULL;
+                }
+                else if ((json_custom_data = json_parse_string(prov_info->custom_request_data)) == NULL)
+                {
+                    LogError("failure parsing custom info.  This custom info MUST be valid json");
+                    json_value_free(json_root);
+                    json_root = NULL;
+                }
+                // Success on json_object_set_value transfers ownership of json_custom_data to json_object, so do not
+                // explicitly free json_custom_data after this point.
+                else if (json_object_set_value(json_object, JSON_CUSTOM_DATA_TAG, json_custom_data) != JSONSuccess)
+                {
+                    LogError("failure setting %s value", JSON_CUSTOM_DATA_TAG);
+                    json_value_free(json_custom_data);
+                    json_value_free(json_root);
+                    json_root = NULL;
+                }
+            }
+
+            if (json_root != NULL)
+            {
+                char* json_string = json_serialize_to_string(json_root);
+                if (json_string == NULL)
+                {
+                    LogError("failure serializing json to string");
+                }
+                else
+                {
+                    if (mallocAndStrcpy_s(&result, json_string) != 0)
+                    {
+                        LogError("failure constructing json result value");
+                    }
+                    json_free_serialized_string(json_string);
+                }
+            }
+            json_value_free(json_root);
+        }
+    }
+
     return result;
 }
 
@@ -337,7 +504,7 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
                     }
                     else
                     {
-                        result->key_name = retrieve_json_item(json_object, JSON_NODE_KEY_NAME);
+                        result->key_name = retrieve_json_string(json_object, JSON_NODE_KEY_NAME, true);
                         if (result->key_name == NULL)
                         {
                             LogError("failure retrieving keyname field");
@@ -352,7 +519,7 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
             }
 
             case PROV_DEVICE_TRANSPORT_STATUS_ASSIGNING:
-                if ((result->operation_id = retrieve_json_item(json_object, JSON_NODE_OPERATION_ID)) == NULL)
+                if ((result->operation_id = retrieve_json_string(json_object, JSON_NODE_OPERATION_ID, true)) == NULL)
                 {
                     LogError("Failure: operation_id node is mising");
                     prov_info->error_reason = PROV_DEVICE_RESULT_PARSING;
@@ -408,8 +575,8 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
                     if (result != NULL)
                     {
                         if (
-                            ((result->iothub_uri = retrieve_json_item(json_reg_status_node, JSON_NODE_ASSIGNED_HUB)) == NULL) ||
-                            ((result->device_id = retrieve_json_item(json_reg_status_node, JSON_NODE_DEVICE_ID)) == NULL)
+                            ((result->iothub_uri = retrieve_json_string(json_reg_status_node, JSON_NODE_ASSIGNED_HUB, true)) == NULL) ||
+                            ((result->device_id = retrieve_json_string(json_reg_status_node, JSON_NODE_DEVICE_ID, true)) == NULL)
                             )
                         {
                             LogError("failure retrieving json value assigned_hub: %p, device_id: %p", result->iothub_uri, result->device_id);
@@ -418,6 +585,11 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
                             free(result->authorization_key);
                             free(result);
                             result = NULL;
+                        }
+                        else
+                        {
+                            // Get the returned Data from the payload if it's there
+                            retrieve_json_payload(json_reg_status_node, prov_info);
                         }
                     }
                 }
@@ -436,7 +608,7 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
                 char* json_operation_id = NULL;
                 JSON_Object* json_reg_state = NULL;
                 if ((json_reg_state = json_object_get_object(json_object, JSON_NODE_REG_STATUS)) != NULL &&
-                    (json_operation_id = retrieve_json_item(json_object, JSON_NODE_OPERATION_ID)) != NULL)
+                    (json_operation_id = retrieve_json_string(json_object, JSON_NODE_OPERATION_ID, true)) != NULL)
                 {
                     int error_code = retrieve_json_number(json_reg_state, JSON_NODE_ERROR_CODE);
                     switch (error_code)
@@ -510,6 +682,13 @@ static void cleanup_prov_info(PROV_INSTANCE_INFO* prov_info)
     free(prov_info->iothub_info.iothub_url);
     prov_info->iothub_info.iothub_url = NULL;
     prov_info->auth_attempts_made = 0;
+    free(prov_info->custom_request_data);
+    prov_info->custom_request_data = NULL;
+    if (prov_info->custom_response_data != NULL)
+    {
+        json_free_serialized_string(prov_info->custom_response_data);
+        prov_info->custom_response_data = NULL;
+    }
 }
 
 static void on_transport_registration_data(PROV_DEVICE_TRANSPORT_RESULT transport_result, BUFFER_HANDLE iothub_key, const char* assigned_hub, const char* device_id, void* user_ctx)
@@ -854,6 +1033,13 @@ PROV_DEVICE_RESULT Prov_Device_LL_Register_Device(PROV_DEVICE_LL_HANDLE handle, 
 
             handle->register_status_cb = reg_status_cb;
             handle->status_user_ctx = status_ctx;
+            
+            // Free the custom data if its been allocated
+            if (handle->custom_response_data != NULL)
+            {
+                json_free_serialized_string(handle->custom_response_data);
+                handle->custom_response_data = NULL;
+            }
 
             if (handle->prov_transport_protocol->prov_transport_open(handle->transport_handle, handle->registration_id, ek_value, srk_value, on_transport_registration_data, handle, on_transport_status, handle, prov_transport_challenge_callback, handle) != 0)
             {
@@ -901,7 +1087,7 @@ void Prov_Device_LL_DoWork(PROV_DEVICE_LL_HANDLE handle)
             {
                 case CLIENT_STATE_REGISTER_SEND:
                     /* Codes_SRS_PROV_CLIENT_07_013: [ CLIENT_STATE_REGISTER_SEND which shall construct an initial call to the service with endorsement information ] */
-                    if (prov_info->prov_transport_protocol->prov_transport_register(prov_info->transport_handle, prov_transport_process_json_reply, prov_info) != 0)
+                    if (prov_info->prov_transport_protocol->prov_transport_register(prov_info->transport_handle, prov_transport_process_json_reply, prov_transport_create_json_payload, prov_info) != 0)
                     {
                         LogError("Failure registering device");
                         if (prov_info->error_reason == PROV_DEVICE_RESULT_OK)
@@ -1009,7 +1195,7 @@ PROV_DEVICE_RESULT Prov_Device_LL_SetOption(PROV_DEVICE_LL_HANDLE handle, const 
     }
     else
     {
-        if (strcmp(OPTION_TRUSTED_CERT, option_name) == 0)
+        if (strcmp(option_name, OPTION_TRUSTED_CERT) == 0)
         {
             const char* cert_info = (const char*)value;
             if (handle->prov_transport_protocol->prov_transport_trusted_cert(handle->transport_handle, cert_info) != 0)
@@ -1120,4 +1306,49 @@ PROV_DEVICE_RESULT Prov_Device_LL_SetOption(PROV_DEVICE_LL_HANDLE handle, const 
 const char* Prov_Device_LL_GetVersionString(void)
 {
     return PROV_DEVICE_CLIENT_VERSION;
+}
+
+PROV_DEVICE_RESULT Prov_Device_LL_Set_Provisioning_Payload(PROV_DEVICE_LL_HANDLE handle, const char* jsonDataField)
+{
+    PROV_DEVICE_RESULT result;
+    if (handle == NULL)
+    {
+        LogError("Invalid parameter specified handle: %p", handle);
+        result = PROV_DEVICE_RESULT_INVALID_ARG;
+    }
+    else
+    {
+        char* temp_data;
+        if (mallocAndStrcpy_s(&temp_data, jsonDataField) != 0)
+        {
+            LogError("Failure setting custom provisioning data");
+            result = PROV_DEVICE_RESULT_ERROR;
+        }
+        else
+        {
+            if (handle->custom_request_data != NULL)
+            {
+                free(handle->custom_request_data);
+            }
+            handle->custom_request_data = temp_data;
+            result = PROV_DEVICE_RESULT_OK;
+        }
+    }
+    return result;
+}
+
+const char* Prov_Device_LL_Get_Provisioning_Payload(PROV_DEVICE_LL_HANDLE handle)
+{
+    const char* result;
+    if (handle == NULL)
+    {
+        LogError("Invalid parameter specified handle: %p", handle);
+        result = NULL;
+    }
+    else
+    {
+        result = handle->custom_response_data;
+    }
+    return result;
+
 }
