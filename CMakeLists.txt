@@ -239,6 +239,7 @@ endif()
 include("dependencies.cmake")
 if (${original_run_e2e_tests} OR ${original_run_unittests} OR ${run_sfc_tests})
     # Used for serializer
+    add_subdirectory("${SHARED_UTIL_FOLDER}/testtools/sal")
     add_subdirectory("${SHARED_UTIL_FOLDER}/testtools/micromock")
 endif()
 
