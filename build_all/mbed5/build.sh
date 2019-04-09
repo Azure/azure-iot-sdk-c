@@ -1,5 +1,5 @@
-npm install iotz
-sudo ./../../node_modules/.bin/iotz update
+sudo npm install -g iotz
+sudo iotz update
 sudo rm -R -f mxchip
 git clone https://github.com/obastemur/mxchip_az3166_firmware.git mxchip
 rsync -avz --existing ./ mxchip/mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/
@@ -12,6 +12,6 @@ git checkout -- mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/provisioning_c
 git checkout -- mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/provisioning_client/adapters/hsm_client_riot.c
 cp ../c-utility/src/base64.c mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/c-utility/src/base64_utility.c
 cp ../c-utility/src/base32.c mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/c-utility/src/base32_utility.c
-sudo ./../../../node_modules/.bin/iotz init mbed
-sudo ./../../../node_modules/.bin/iotz compile
+sudo iotz init mbed
+sudo iotz compile
 cd ..
