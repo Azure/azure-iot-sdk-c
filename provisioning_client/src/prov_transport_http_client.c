@@ -12,7 +12,7 @@
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/http_proxy_io.h"
 #include "azure_c_shared_utility/urlencode.h"
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 
 #include "azure_prov_client/prov_transport_http_client.h"
 #include "azure_prov_client/internal/prov_transport_private.h"
@@ -39,7 +39,7 @@ static const char* const KEY_NAME_VALUE = "registration";
 static const char* const TPM_SECURITY_INFO = "{\"registrationId\":\"%s\",\"tpm\":{\"endorsementKey\":\"%s\", \"storageRootKey\":\"%s\"}}";
 static const char* const REG_SECURITY_INFO = "{ \"registrationId\":\"%s\" }";
 
-DEFINE_ENUM_STRINGS(HTTP_CALLBACK_REASON, HTTP_CALLBACK_REASON_VALUES);
+MU_DEFINE_ENUM_STRINGS(HTTP_CALLBACK_REASON, HTTP_CALLBACK_REASON_VALUES);
 
 typedef enum PROV_TRANSPORT_STATE_TAG
 {
@@ -112,11 +112,11 @@ static void on_http_error(void* callback_ctx, HTTP_CALLBACK_REASON error_result)
     {
         PROV_TRANSPORT_HTTP_INFO* http_info = (PROV_TRANSPORT_HTTP_INFO*)callback_ctx;
         http_info->transport_state = TRANSPORT_CLIENT_STATE_ERROR;
-        LogError("http error encountered: %s", ENUM_TO_STRING(HTTP_CALLBACK_REASON, error_result));
+        LogError("http error encountered: %s", MU_ENUM_TO_STRING(HTTP_CALLBACK_REASON, error_result));
     }
     else
     {
-        LogError("callback_ctx NULL.  http error encountered: %s", ENUM_TO_STRING(HTTP_CALLBACK_REASON, error_result));
+        LogError("callback_ctx NULL.  http error encountered: %s", MU_ENUM_TO_STRING(HTTP_CALLBACK_REASON, error_result));
     }
 }
 
@@ -129,7 +129,7 @@ static void on_http_reply_recv(void* callback_ctx, HTTP_CALLBACK_REASON request_
         http_info->http_status_code = status_code;
         if (request_result != HTTP_CALLBACK_REASON_OK)
         {
-            LogError("Failure http reply %s", ENUM_TO_STRING(HTTP_CALLBACK_REASON, request_result));
+            LogError("Failure http reply %s", MU_ENUM_TO_STRING(HTTP_CALLBACK_REASON, request_result));
             http_info->transport_state = TRANSPORT_CLIENT_STATE_ERROR;
         }
         else if ((status_code >= HTTP_STATUS_CODE_OK && status_code <= HTTP_STATUS_CODE_OK_MAX) || status_code == HTTP_STATUS_CODE_UNAUTHORIZED)
@@ -257,12 +257,12 @@ static char* construct_json_data(PROV_TRANSPORT_HTTP_INFO* http_info)
     {
         STRING_HANDLE encoded_srk = NULL;
         STRING_HANDLE encoded_ek;
-        if ((encoded_ek = Base64_Encode(http_info->ek)) == NULL)
+        if ((encoded_ek = Azure_Base64_Encode(http_info->ek)) == NULL)
         {
             LogError("Failure encoding ek");
             result = NULL;
         }
-        else if ((encoded_srk = Base64_Encode(http_info->srk)) == NULL)
+        else if ((encoded_srk = Azure_Base64_Encode(http_info->srk)) == NULL)
         {
             LogError("Failure encoding srk");
             result = NULL;
@@ -387,7 +387,7 @@ static int send_registration_info(PROV_TRANSPORT_HTTP_INFO* http_info)
     {
         /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_021: [ If any error is encountered prov_transport_http_register_device shall return a non-zero value. ] */
         LogError("failure constructing http headers");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_019: [ prov_transport_http_register_device shall construct the path to the service in the following format: /<scope_id>/registrations/<url_encoded_registration_id>/register-me?api-version=<api_version> ] */
     else if ((uri_path = construct_url_path(http_info)) == NULL)
@@ -395,7 +395,7 @@ static int send_registration_info(PROV_TRANSPORT_HTTP_INFO* http_info)
         /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_021: [ If any error is encountered prov_transport_http_register_device shall return a non-zero value. ] */
         LogError("Failure constructing uri path");
         HTTPHeaders_Free(http_headers);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if ((json_data = construct_json_data(http_info)) == NULL)
     {
@@ -403,7 +403,7 @@ static int send_registration_info(PROV_TRANSPORT_HTTP_INFO* http_info)
         LogError("Failure constructing uri path");
         HTTPHeaders_Free(http_headers);
         free(uri_path);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -412,7 +412,7 @@ static int send_registration_info(PROV_TRANSPORT_HTTP_INFO* http_info)
         {
             /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_021: [ If any error is encountered prov_transport_http_register_device shall return a non-zero value. ] */
             LogError("Failure sending http request");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -435,13 +435,13 @@ static int send_challenge_response(PROV_TRANSPORT_HTTP_INFO* http_info)
     if ((http_headers = construct_http_headers(http_info->sas_token)) == NULL)
     {
         LogError("failure constructing http headers");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if ((uri_path = construct_url_path(http_info)) == NULL)
     {
         LogError("Failure constructing uri path");
         HTTPHeaders_Free(http_headers);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if ((json_data = construct_json_data(http_info)) == NULL)
     {
@@ -449,14 +449,14 @@ static int send_challenge_response(PROV_TRANSPORT_HTTP_INFO* http_info)
         LogError("Failure constructing uri path");
         HTTPHeaders_Free(http_headers);
         free(uri_path);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
         if (uhttp_client_execute_request(http_info->http_client, HTTP_CLIENT_REQUEST_PUT, uri_path, http_headers, (const unsigned char*)json_data, strlen(json_data), on_http_reply_recv, http_info) != HTTP_CLIENT_OK)
         {
             LogError("Failure sending http request");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -547,12 +547,12 @@ static int create_transport_io_object(PROV_TRANSPORT_HTTP_INFO* http_info)
         if ((interface_desc = platform_get_default_tlsio()) == NULL)
         {
             LogError("failgetting tls interface description");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if ((http_info->http_client = uhttp_client_create(interface_desc, &tls_io_config, on_http_error, http_info)) == NULL)
         {
             LogError("failed to create http client");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -573,7 +573,7 @@ static int create_connection(PROV_TRANSPORT_HTTP_INFO* http_info)
     if (create_transport_io_object(http_info) != 0)
     {
         LogError("Failure setting transport object");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -584,7 +584,7 @@ static int create_connection(PROV_TRANSPORT_HTTP_INFO* http_info)
             LogError("fail to set the trusted certificate in the http client");
             uhttp_client_destroy(http_info->http_client);
             http_info->http_client = NULL;
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -593,12 +593,12 @@ static int create_connection(PROV_TRANSPORT_HTTP_INFO* http_info)
                 if (http_info->x509_cert == NULL || http_info->private_key == NULL)
                 {
                     LogError("x509 certificate information was not properly set");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else if (uhttp_client_set_X509_cert(http_info->http_client, true, http_info->x509_cert, http_info->private_key) != HTTP_CLIENT_OK)
                 {
                     LogError("failed to set x509 certificate information");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {
@@ -623,7 +623,7 @@ static int create_connection(PROV_TRANSPORT_HTTP_INFO* http_info)
             }
             uhttp_client_destroy(http_info->http_client);
             http_info->http_client = NULL;
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -706,29 +706,29 @@ int prov_transport_http_open(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* re
     {
         /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_008: [ If the argument handle, data_callback, or status_cb are NULL, prov_transport_http_open shall return a non-zero value. ] */
         LogError("Invalid parameter specified handle: %p, data_callback: %p, status_cb: %p, registration_id: %p", handle, data_callback, status_cb, registration_id);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if ((http_info->hsm_type == TRANSPORT_HSM_TYPE_TPM || http_info->hsm_type == TRANSPORT_HSM_TYPE_SYMM_KEY) && reg_challenge_cb == NULL)
     {
         LogError("registration challenge callback must be set");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (http_info->hsm_type == TRANSPORT_HSM_TYPE_TPM && (ek == NULL || srk == NULL))
     {
         LogError("Invalid parameter specified ek: %p, srk: %p", ek, srk);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (ek != NULL && (http_info->ek = BUFFER_clone(ek)) == NULL)
     {
         LogError("Unable to allocate endorsement key");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (srk != NULL && (http_info->srk = BUFFER_clone(srk)) == NULL)
     {
         LogError("Unable to allocate storage root key");
         BUFFER_delete(http_info->ek);
         http_info->ek = NULL;
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (mallocAndStrcpy_s(&http_info->registration_id, registration_id) != 0)
     {
@@ -738,7 +738,7 @@ int prov_transport_http_open(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* re
         http_info->ek = NULL;
         BUFFER_delete(http_info->srk);
         http_info->srk = NULL;
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if ((http_info->hsm_type == TRANSPORT_HSM_TYPE_SYMM_KEY) && (http_info->sas_token = reg_challenge_cb(NULL, 0, KEY_NAME_VALUE, challenge_ctx)) == NULL)
     {
@@ -747,7 +747,7 @@ int prov_transport_http_open(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* re
         http_info->ek = NULL;
         BUFFER_delete(http_info->srk);
         http_info->srk = NULL;
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -778,7 +778,7 @@ int prov_transport_http_open(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* re
             http_info->status_ctx = NULL;
             free(http_info->registration_id);
             http_info->registration_id = NULL;
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -796,7 +796,7 @@ int prov_transport_http_close(PROV_DEVICE_TRANSPORT_HANDLE handle)
     {
         /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_014: [ If the argument handle is NULL, prov_transport_http_close shall return a non-zero value. ] */
         LogError("Invalid parameter specified handle: %p", handle);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -833,12 +833,12 @@ int prov_transport_http_register_device(PROV_DEVICE_TRANSPORT_HANDLE handle, PRO
     {
         /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_017: [ If the argument handle or json_data is NULL, prov_transport_http_register_device shall return a non-zero value. ] */
         LogError("Invalid parameter specified handle: %p, json_parse_cb: %p", handle, json_parse_cb);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (http_info->transport_state == TRANSPORT_CLIENT_STATE_ERROR)
     {
         LogError("Provisioning is in an error state, close the connection and try again.");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -859,7 +859,7 @@ int prov_transport_http_get_operation_status(PROV_DEVICE_TRANSPORT_HANDLE handle
     {
         /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_029: [ If the argument handle, or operation_id is NULL, prov_transport_http_get_operation_status shall return a non-zero value. ] */
         LogError("Invalid parameter specified handle: %p", handle);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -870,21 +870,21 @@ int prov_transport_http_get_operation_status(PROV_DEVICE_TRANSPORT_HANDLE handle
         if (http_info->operation_id == NULL)
         {
             LogError("operation_id was not previously set in the challenge method");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_030: [ prov_transport_http_get_operation_status shall construct the http headers with SAS_TOKEN as Authorization header. ] */
         else if ((http_headers = construct_http_headers(http_info->sas_token)) == NULL)
         {
             /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_033: [ If any error is encountered prov_transport_http_get_operation_status shall return a non-zero value. ] */
             LogError("failure constructing http headers");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_031: [ prov_transport_http_get_operation_status shall construct the path to the service in the following format: /<scope_id>/registrations/<url_encoded_registration_id>/operations<url_encoded_operation_id>?api-version=<api_version> ] */
         else if ((uri_path = construct_url_path(http_info)) == NULL)
         {
             /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_033: [ If any error is encountered prov_transport_http_get_operation_status shall return a non-zero value. ] */
             LogError("Failure constructing uri path");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -893,7 +893,7 @@ int prov_transport_http_get_operation_status(PROV_DEVICE_TRANSPORT_HANDLE handle
             {
                 /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_033: [ If any error is encountered prov_transport_http_get_operation_status shall return a non-zero value. ] */
                 LogError("Failure sending data to server");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -1032,7 +1032,7 @@ int prov_transport_http_set_trace(PROV_DEVICE_TRANSPORT_HANDLE handle, bool trac
     {
         /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_040: [ If the argument handle, is NULL, prov_transport_http_set_trace shall return a non-zero value. ] */
         LogError("Invalid parameter specified handle: %p", handle);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1053,7 +1053,7 @@ int prov_transport_http_set_trace(PROV_DEVICE_TRANSPORT_HANDLE handle, bool trac
             else
             {
                 LogError("Unable to enable logging when not using x509 certificates");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
         }
         else
@@ -1071,7 +1071,7 @@ static int prov_transport_http_x509_cert(PROV_DEVICE_TRANSPORT_HANDLE handle, co
     {
         /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_043: [ If the argument handle, private_key or certificate is NULL, prov_transport_http_x509_cert shall return a non-zero value. ] */
         LogError("Invalid parameter specified handle: %p, certificate: %p, private_key: %p", handle, certificate, private_key);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1089,7 +1089,7 @@ static int prov_transport_http_x509_cert(PROV_DEVICE_TRANSPORT_HANDLE handle, co
         if (mallocAndStrcpy_s(&http_info->x509_cert, certificate) != 0)
         {
             /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_044: [ If any error is encountered prov_transport_http_x509_cert shall return a non-zero value. ] */
-            result = __FAILURE__;
+            result = MU_FAILURE;
             LogError("failure allocating certificate");
         }
         else if (mallocAndStrcpy_s(&http_info->private_key, private_key) != 0)
@@ -1097,7 +1097,7 @@ static int prov_transport_http_x509_cert(PROV_DEVICE_TRANSPORT_HANDLE handle, co
             /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_044: [ If any error is encountered prov_transport_http_x509_cert shall return a non-zero value. ] */
             free(http_info->x509_cert);
             http_info->x509_cert = NULL;
-            result = __FAILURE__;
+            result = MU_FAILURE;
             LogError("failure allocating certificate");
         }
         else
@@ -1116,7 +1116,7 @@ static int prov_transport_http_set_trusted_cert(PROV_DEVICE_TRANSPORT_HANDLE han
     {
         /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_047: [ If the argument handle, certificate is NULL, prov_transport_http_set_trusted_cert shall return a non-zero value. ] */
         LogError("Invalid parameter specified handle: %p, certificate: %p", handle, certificate);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1130,7 +1130,7 @@ static int prov_transport_http_set_trusted_cert(PROV_DEVICE_TRANSPORT_HANDLE han
         if (mallocAndStrcpy_s(&http_info->certificate, certificate) != 0)
         {
             /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_048: [ If any error is encountered prov_transport_http_set_trusted_cert shall return a non-zero value. ] */
-            result = __FAILURE__;
+            result = MU_FAILURE;
             LogError("failure allocating certificate");
         }
         else
@@ -1149,7 +1149,7 @@ static int prov_transport_http_set_proxy(PROV_DEVICE_TRANSPORT_HANDLE handle, co
     {
         /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_051: [ If the argument handle or proxy_options is NULL, prov_transport_http_set_proxy shall return a non-zero value. ] */
         LogError("Invalid parameter specified handle: %p, proxy_options: %p", handle, proxy_options);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1158,14 +1158,14 @@ static int prov_transport_http_set_proxy(PROV_DEVICE_TRANSPORT_HANDLE handle, co
         {
             /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_055: [ If proxy_options host_name is NULL prov_transport_http_set_proxy shall return a non-zero value. ] */
             LogError("NULL host_address in proxy options");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if (((proxy_options->username == NULL) || (proxy_options->password == NULL)) &&
             (proxy_options->username != proxy_options->password))
         {
             /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_053: [ If proxy_options username is NULL and proxy_options::password is not NULL prov_transport_http_set_proxy shall return a non-zero value. ] */
             LogError("Only one of username and password for proxy settings was NULL");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -1189,7 +1189,7 @@ static int prov_transport_http_set_proxy(PROV_DEVICE_TRANSPORT_HANDLE handle, co
             {
                 /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_052: [ If any error is encountered prov_transport_http_set_proxy shall return a non-zero value. ] */
                 LogError("Failure setting proxy_host name");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if (proxy_options->username != NULL && mallocAndStrcpy_s(&http_info->username, proxy_options->username) != 0)
             {
@@ -1197,7 +1197,7 @@ static int prov_transport_http_set_proxy(PROV_DEVICE_TRANSPORT_HANDLE handle, co
                 free(http_info->proxy_host);
                 http_info->proxy_host = NULL;
                 LogError("Failure setting proxy username");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if (proxy_options->password != NULL && mallocAndStrcpy_s(&http_info->password, proxy_options->password) != 0)
             {
@@ -1207,7 +1207,7 @@ static int prov_transport_http_set_proxy(PROV_DEVICE_TRANSPORT_HANDLE handle, co
                 http_info->proxy_host = NULL;
                 free(http_info->username);
                 http_info->username = NULL;
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -1226,7 +1226,7 @@ static int prov_transport_http_set_option(PROV_DEVICE_TRANSPORT_HANDLE handle, c
     if (handle == NULL || option == NULL)
     {
         LogError("Invalid parameter specified handle: %p, option: %p", handle, option);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1234,7 +1234,7 @@ static int prov_transport_http_set_option(PROV_DEVICE_TRANSPORT_HANDLE handle, c
         if (http_info->http_client == NULL && create_transport_io_object(http_info) != 0)
         {
             LogError("Failure creating transport io object");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {

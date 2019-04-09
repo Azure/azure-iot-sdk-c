@@ -9,7 +9,7 @@
 
 #include "azure_c_shared_utility/httpapiex.h"
 #include "azure_c_shared_utility/xlogging.h"
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 
 BLOB_RESULT Blob_UploadBlock(
@@ -44,11 +44,11 @@ BLOB_RESULT Blob_UploadBlock(
         }
         else
         {
-            STRING_HANDLE blockIdString = Base64_Encode_Bytes((const unsigned char*)temp, 6);
+            STRING_HANDLE blockIdString = Azure_Base64_Encode_Bytes((const unsigned char*)temp, 6);
             if (blockIdString == NULL)
             {
                 /*Codes_SRS_BLOB_02_033: [ If any previous operation that doesn't have an explicit failure description fails then Blob_UploadMultipleBlocksFromSasUri shall fail and return BLOB_ERROR ]*/
-                LogError("unable to Base64_Encode_Bytes");
+                LogError("unable to Azure_Base64_Encode_Bytes");
                 result = BLOB_ERROR;
             }
             else

@@ -7,14 +7,14 @@
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/strings.h"
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 
 #include "prov_service_client/provisioning_sc_x509_attestation.h"
 #include "prov_service_client/provisioning_sc_json_const.h"
 #include "prov_service_client/provisioning_sc_shared_helpers.h"
 #include "parson.h"
 
-DEFINE_ENUM_STRINGS(X509_CERTIFICATE_TYPE, X509_CERTIFICATE_TYPE_VALUES)
+MU_DEFINE_ENUM_STRINGS(X509_CERTIFICATE_TYPE, X509_CERTIFICATE_TYPE_VALUES)
 
 typedef struct X509_CERTIFICATE_INFO_TAG
 {
@@ -63,10 +63,10 @@ static int convert_cert_to_b64(const char* cert_in, char** cert_b64_out)
     if (cert_in != NULL)
     {
         STRING_HANDLE cert_b64;
-        if ((cert_b64 = Base64_Encode_Bytes((const unsigned char*)cert_in, strlen(cert_in))) == NULL)
+        if ((cert_b64 = Azure_Base64_Encode_Bytes((const unsigned char*)cert_in, strlen(cert_in))) == NULL)
         {
             LogError("Could not convert certificate to Base64");
-            ret = __FAILURE__;
+            ret = MU_FAILURE;
             *cert_b64_out = NULL;
         }
         else
@@ -74,7 +74,7 @@ static int convert_cert_to_b64(const char* cert_in, char** cert_b64_out)
             if (mallocAndStrcpy_s(cert_b64_out, STRING_c_str(cert_b64)) != 0)
             {
                 LogError("copying b64 cert failed");
-                ret = __FAILURE__;
+                ret = MU_FAILURE;
                 *cert_b64_out = NULL;
             }
             STRING_delete(cert_b64);

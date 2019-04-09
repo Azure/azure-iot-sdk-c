@@ -12,7 +12,7 @@
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/httpapiex.h"
 #include "azure_c_shared_utility/httpapiexsas.h"
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 #include "azure_c_shared_utility/uniqueid.h"
 #include "azure_c_shared_utility/connection_string_parser.h"
 
@@ -20,7 +20,7 @@
 #include "iothub_deviceconfiguration.h"
 #include "iothub_sc_version.h"
 
-DEFINE_ENUM_STRINGS(IOTHUB_DEVICE_CONFIGURATION_RESULT, IOTHUB_DEVICE_CONFIGURATION_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS(IOTHUB_DEVICE_CONFIGURATION_RESULT, IOTHUB_DEVICE_CONFIGURATION_RESULT_VALUES);
 
 #define  UID_LENGTH 37
 #define IOTHUB_DEVICE_CONFIGURATIONS_MAX_REQUEST 20

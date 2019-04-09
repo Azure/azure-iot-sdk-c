@@ -11,7 +11,7 @@
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/httpapiex.h"
 #include "azure_c_shared_utility/httpapiexsas.h"
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 #include "azure_c_shared_utility/uniqueid.h"
 #include "azure_c_shared_utility/connection_string_parser.h"
 
@@ -19,12 +19,12 @@
 #include "iothub_devicemethod.h"
 #include "iothub_sc_version.h"
 
-DEFINE_ENUM_STRINGS(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_RESULT_VALUES);
 
 #define IOTHUB_DEVICE_METHOD_REQUEST_MODE_VALUES    \
     IOTHUB_DEVICEMETHOD_REQUEST_INVOKE
 
-DEFINE_ENUM(IOTHUB_DEVICEMETHOD_REQUEST_MODE, IOTHUB_DEVICE_METHOD_REQUEST_MODE_VALUES);
+MU_DEFINE_ENUM(IOTHUB_DEVICEMETHOD_REQUEST_MODE, IOTHUB_DEVICE_METHOD_REQUEST_MODE_VALUES);
 
 
 #define  HTTP_HEADER_KEY_AUTHORIZATION  "Authorization"

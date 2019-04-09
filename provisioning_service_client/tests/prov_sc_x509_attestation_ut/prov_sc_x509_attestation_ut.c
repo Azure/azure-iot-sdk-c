@@ -29,7 +29,7 @@ void real_free(void* ptr)
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 #include "azure_c_shared_utility/strings.h"
 #include "parson.h"
 
@@ -61,12 +61,12 @@ MOCKABLE_FUNCTION(, JSON_Array*, json_object_get_array, const JSON_Object*, obje
 
 static TEST_MUTEX_HANDLE g_testByTest;
 
-DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
     ASSERT_FAIL(temp_str);
 }
 
@@ -109,7 +109,7 @@ static void register_global_mocks()
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, real_malloc);
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, real_free);
     REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, my_mallocAndStrcpy_s);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, __FAILURE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, MU_FAILURE);
 
     //parson
     REGISTER_GLOBAL_MOCK_RETURN(json_value_init_object, TEST_JSON_VALUE);
@@ -136,8 +136,8 @@ static void register_global_mocks()
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_object_set_number, JSONFailure);
 
     //base64
-    REGISTER_GLOBAL_MOCK_RETURN(Base64_Encode_Bytes, TEST_STRING_HANDLE);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Encode_Bytes, NULL);
+    REGISTER_GLOBAL_MOCK_RETURN(Azure_Base64_Encode_Bytes, TEST_STRING_HANDLE);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Azure_Base64_Encode_Bytes, NULL);
 
     //string
     REGISTER_GLOBAL_MOCK_RETURN(STRING_c_str, DUMMY_STRING_64);
@@ -293,7 +293,7 @@ static void expected_calls_x509Certificates_create(const char* primary_cert, con
 
 static void expected_calls_convert_cert_to_b64(const char* in, const char* out)
 {
-    STRICT_EXPECTED_CALL(Base64_Encode_Bytes((const unsigned char*)in, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes((const unsigned char*)in, IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(out);
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));

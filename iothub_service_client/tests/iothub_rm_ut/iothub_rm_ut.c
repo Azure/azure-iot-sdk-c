@@ -227,7 +227,7 @@ static int my_list_remove(SINGLYLINKEDLIST_HANDLE list, LIST_ITEM_HANDLE item)
     if ((list == NULL) ||
         (item == NULL))
     {
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -258,7 +258,7 @@ static int my_list_remove(SINGLYLINKEDLIST_HANDLE list, LIST_ITEM_HANDLE item)
 
         if (current_item == NULL)
         {
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -494,12 +494,12 @@ static const char* TEST_HTTP_HEADER_VAL_CONTENT_TYPE = "application/json; charse
 static const char* TEST_HTTP_HEADER_KEY_IFMATCH = "If-Match";
 static const char* TEST_HTTP_HEADER_VAL_IFMATCH = "*";
 
-DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
     ASSERT_FAIL(temp_str);
 }
 
@@ -884,7 +884,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(singlylinkedlist_get_head_item, NULL);
 
         REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_remove, my_list_remove);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(singlylinkedlist_remove, __FAILURE__);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(singlylinkedlist_remove, MU_FAILURE);
 
         REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_get_next_item, my_list_get_next_item);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(singlylinkedlist_get_next_item, NULL);

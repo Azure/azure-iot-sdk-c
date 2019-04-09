@@ -33,7 +33,7 @@ static void my_gballoc_free(void* ptr)
 #include "azure_c_shared_utility/umock_c_prod.h"
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/sastoken.h"
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/hmacsha256.h"
@@ -107,7 +107,7 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_SECURITY_TYPE, IOTHUB_SECURITY_TYPE_VALUES);
 TEST_DEFINE_ENUM_TYPE(HMACSHA256_RESULT, HMACSHA256_RESULT);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(HMACSHA256_RESULT, HMACSHA256_RESULT);
 
-static const HSM_CLIENT_TPM_INTERFACE test_tpm_interface = 
+static const HSM_CLIENT_TPM_INTERFACE test_tpm_interface =
 {
     hsm_client_create,
     hsm_client_destroy,
@@ -164,7 +164,7 @@ static const HSM_CLIENT_HTTP_EDGE_INTERFACE test_http_edge_interface =
 };
 #endif
 
-static BUFFER_HANDLE my_Base64_Decode(const char* source)
+static BUFFER_HANDLE my_Azure_Base64_Decode(const char* source)
 {
     (void)source;
     return (BUFFER_HANDLE)my_gballoc_malloc(1);
@@ -253,7 +253,7 @@ static int my_mallocAndStrcpy_s(char** destination, const char* source)
     return 0;
 }
 
-static STRING_HANDLE my_Base64_Encode_Bytes(const unsigned char* source, size_t length)
+static STRING_HANDLE my_Azure_Base64_Encode_Bytes(const unsigned char* source, size_t length)
 {
     (void)source;
     (void)length;
@@ -288,12 +288,12 @@ static DEVICE_AUTH_CREDENTIAL_INFO g_test_sas_cred_no_keyname;
 static DEVICE_AUTH_CREDENTIAL_INFO g_test_x509_cred;
 static DEVICE_AUTH_CREDENTIAL_INFO g_test_key_cred;
 
-DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
     ASSERT_FAIL(temp_str);
 }
 
@@ -349,8 +349,8 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
 
         REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, my_mallocAndStrcpy_s);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, __LINE__);
-        REGISTER_GLOBAL_MOCK_HOOK(Base64_Encode_Bytes, my_Base64_Encode_Bytes);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Encode_Bytes, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(Azure_Base64_Encode_Bytes, my_Azure_Base64_Encode_Bytes);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Azure_Base64_Encode_Bytes, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(URL_Encode, my_URL_Encode);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(URL_Encode, NULL);
         REGISTER_GLOBAL_MOCK_RETURN(STRING_c_str, TEST_STRING_VALUE);
@@ -360,8 +360,8 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         REGISTER_GLOBAL_MOCK_HOOK(URL_EncodeString, my_URL_EncodeString);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(URL_EncodeString, NULL);
 
-        REGISTER_GLOBAL_MOCK_HOOK(Base64_Decode, my_Base64_Decode);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Decode, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(Azure_Base64_Decode, my_Azure_Base64_Decode);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Azure_Base64_Decode, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(BUFFER_new, my_BUFFER_new);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(BUFFER_new, NULL);
         REGISTER_GLOBAL_MOCK_RETURN(BUFFER_length, TEST_DATA_LEN);
@@ -373,7 +373,7 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
 
         REGISTER_GLOBAL_MOCK_RETURN(HMACSHA256_ComputeHash, HMACSHA256_OK);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(HMACSHA256_ComputeHash, HMACSHA256_ERROR);
-        
+
 
 #if defined(HSM_TYPE_X509) || defined(HSM_AUTH_TYPE_CUSTOM)
         REGISTER_GLOBAL_MOCK_RETURN(iothub_security_type, IOTHUB_SECURITY_TYPE_SAS);
@@ -448,7 +448,7 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         if (use_key)
         {
             STRICT_EXPECTED_CALL(hsm_client_get_symmetric_key(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(Base64_Decode(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(Azure_Base64_Decode(IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(BUFFER_new());
             STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG));
@@ -474,7 +474,7 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         setup_sign_sas_data_mocks(use_key);
         if (base64_encode_signature)
         {
-            STRICT_EXPECTED_CALL(Base64_Encode_Bytes(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+            STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         }
         else
         {

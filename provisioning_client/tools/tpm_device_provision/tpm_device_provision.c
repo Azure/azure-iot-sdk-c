@@ -10,7 +10,7 @@
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/sha.h"
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 
 #include "azure_prov_client/prov_security_factory.h"
 #include "azure_prov_client/internal/prov_auth_client.h"
@@ -79,7 +79,7 @@ int main()
         else
         {
             STRING_HANDLE encoded_ek;
-            if ((encoded_ek = Base64_Encode(reg_info.endorsement_key)) == NULL)
+            if ((encoded_ek = Azure_Base64_Encode(reg_info.endorsement_key)) == NULL)
             {
                 (void)printf("Failure base64 encoding ek");
                 result = __LINE__;

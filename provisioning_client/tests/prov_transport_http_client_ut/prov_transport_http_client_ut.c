@@ -38,7 +38,7 @@ static void my_gballoc_free(void* ptr)
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
 #include "azure_c_shared_utility/strings.h"
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/platform.h"
@@ -232,7 +232,7 @@ static STRING_HANDLE my_Base64_Encode(const BUFFER_HANDLE source)
     return (STRING_HANDLE)my_gballoc_malloc(1);
 }
 
-static BUFFER_HANDLE my_Base64_Decode(const char* source)
+static BUFFER_HANDLE my_Azure_Base64_Decode(const char* source)
 {
     (void)source;
     return (BUFFER_HANDLE)my_gballoc_malloc(1);
@@ -326,12 +326,12 @@ static void my_on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS transport_sta
     (void)user_ctx;
 }
 
-DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
     ASSERT_FAIL(temp_str);
 }
 
@@ -374,8 +374,8 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
 
         REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, my_mallocAndStrcpy_s);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, __LINE__);
-        REGISTER_GLOBAL_MOCK_HOOK(Base64_Encode, my_Base64_Encode);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Encode, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(Azure_Base64_Encode, my_Base64_Encode);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Azure_Base64_Encode, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(URL_EncodeString, my_URL_EncodeString);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(URL_EncodeString, NULL);
         REGISTER_GLOBAL_MOCK_RETURN(STRING_c_str, TEST_STRING_VALUE);
@@ -391,8 +391,8 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
 
         REGISTER_GLOBAL_MOCK_HOOK(BUFFER_clone, my_BUFFER_clone);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(BUFFER_clone, NULL);
-        REGISTER_GLOBAL_MOCK_HOOK(Base64_Decode, my_Base64_Decode);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Decode, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(Azure_Base64_Decode, my_Azure_Base64_Decode);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Azure_Base64_Decode, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(BUFFER_delete, my_BUFFER_delete);
 
         REGISTER_GLOBAL_MOCK_RETURN(platform_get_default_tlsio, TEST_INTERFACE_DESC);
@@ -519,8 +519,8 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
 
-        STRICT_EXPECTED_CALL(Base64_Encode(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(Base64_Encode(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(STRING_length(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(STRING_length(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));

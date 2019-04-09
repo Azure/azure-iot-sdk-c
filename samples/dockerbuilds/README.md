@@ -1,0 +1,2 @@
+# Docker Build Samples
+This directory contains sample Docker files to cross compile the Azure IoT SDK for Raspbian and MIPS32 OpenWRT targets. For more information see [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/Docker_SDK_Cross_Compile.md).
