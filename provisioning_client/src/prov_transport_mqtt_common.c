@@ -69,6 +69,7 @@ typedef struct PROV_TRANSPORT_MQTT_INFO_TAG
     PROV_TRANSPORT_CHALLENGE_CALLBACK challenge_cb;
     void* challenge_ctx;
     PROV_TRANSPORT_JSON_PARSE json_parse_cb;
+    PROV_TRANSPORT_CREATE_JSON_PAYLOAD json_create_cb;
     void* json_ctx;
 
     MQTT_CLIENT_HANDLE mqtt_client;
@@ -350,14 +351,24 @@ static int send_mqtt_message(PROV_TRANSPORT_MQTT_INFO* mqtt_info, const char* ms
 {
     int result;
     MQTT_MESSAGE_HANDLE msg_handle = NULL;
+    char* prov_payload;
 
-    if ((msg_handle = mqttmessage_create(get_next_packet_id(mqtt_info), msg_topic, DELIVER_AT_MOST_ONCE, NULL, 0)) == NULL)
+    if ((prov_payload = mqtt_info->json_create_cb(NULL, NULL, mqtt_info->json_ctx)) == NULL)
+    {
+        LogError("Failed creating json mqtt payload");
+        result = MU_FAILURE;
+    }
+    else if ((msg_handle = mqttmessage_create_in_place(get_next_packet_id(mqtt_info), msg_topic, DELIVER_AT_MOST_ONCE, (const uint8_t*)prov_payload, strlen(prov_payload))) == NULL)
     {
         LogError("Failed creating mqtt message");
         result = MU_FAILURE;
+        free(prov_payload);
     }
     else
     {
+
+        printf("%s\r\n", prov_payload);
+
         if (mqtt_client_publish(mqtt_info->mqtt_client, msg_handle) != 0)
         {
             LogError("Failed publishing client message");
@@ -368,6 +379,7 @@ static int send_mqtt_message(PROV_TRANSPORT_MQTT_INFO* mqtt_info, const char* ms
             result = 0;
         }
         mqttmessage_destroy(msg_handle);
+        free(prov_payload);
     }
     return result;
 }
@@ -814,11 +826,11 @@ int prov_transport_common_mqtt_close(PROV_DEVICE_TRANSPORT_HANDLE handle)
     return result;
 }
 
-int prov_transport_common_mqtt_register_device(PROV_DEVICE_TRANSPORT_HANDLE handle, PROV_TRANSPORT_JSON_PARSE json_parse_cb, void* json_ctx)
+int prov_transport_common_mqtt_register_device(PROV_DEVICE_TRANSPORT_HANDLE handle, PROV_TRANSPORT_JSON_PARSE json_parse_cb, PROV_TRANSPORT_CREATE_JSON_PAYLOAD json_create_cb, void* json_ctx)
 {
     int result;
     PROV_TRANSPORT_MQTT_INFO* mqtt_info = (PROV_TRANSPORT_MQTT_INFO*)handle;
-    if (mqtt_info == NULL || json_parse_cb == NULL)
+    if (mqtt_info == NULL || json_parse_cb == NULL || json_create_cb == NULL)
     {
         /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_014: [ If handle is NULL, prov_transport_common_mqtt_register_device shall return a non-zero value. ] */
         LogError("Invalid parameter specified handle: %p, json_parse_cb: %p", handle, json_parse_cb);
@@ -839,6 +851,7 @@ int prov_transport_common_mqtt_register_device(PROV_DEVICE_TRANSPORT_HANDLE hand
     {
         mqtt_info->transport_state = TRANSPORT_CLIENT_STATE_REG_SEND;
         mqtt_info->json_parse_cb = json_parse_cb;
+        mqtt_info->json_create_cb = json_create_cb;
         mqtt_info->json_ctx = json_ctx;
 
         /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_017: [ On success prov_transport_common_mqtt_register_device shall return a zero value. ] */

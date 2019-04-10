@@ -33,7 +33,7 @@ MOCKABLE_FUNCTION(, PROV_DEVICE_TRANSPORT_HANDLE, prov_transport_common_amqp_cre
 MOCKABLE_FUNCTION(, void, prov_transport_common_amqp_destroy, PROV_DEVICE_TRANSPORT_HANDLE, handle);
 MOCKABLE_FUNCTION(, int, prov_transport_common_amqp_open, PROV_DEVICE_TRANSPORT_HANDLE, handle, const char*, registration_id, BUFFER_HANDLE, ek, BUFFER_HANDLE, srk, PROV_DEVICE_TRANSPORT_REGISTER_CALLBACK, data_callback, void*, user_ctx, PROV_DEVICE_TRANSPORT_STATUS_CALLBACK, status_cb, void*, status_ctx, PROV_TRANSPORT_CHALLENGE_CALLBACK, reg_challenge_cb, void*, challenge_ctx);
 MOCKABLE_FUNCTION(, int, prov_transport_common_amqp_close, PROV_DEVICE_TRANSPORT_HANDLE, handle);
-MOCKABLE_FUNCTION(, int, prov_transport_common_amqp_register_device, PROV_DEVICE_TRANSPORT_HANDLE, handle, PROV_TRANSPORT_JSON_PARSE, json_parse_cb, void*, json_ctx);
+MOCKABLE_FUNCTION(, int, prov_transport_common_amqp_register_device, PROV_DEVICE_TRANSPORT_HANDLE, handle, PROV_TRANSPORT_JSON_PARSE, json_parse_cb, PROV_TRANSPORT_CREATE_JSON_PAYLOAD, json_create_cb, void*, json_ctx);
 MOCKABLE_FUNCTION(, int, prov_transport_common_amqp_get_operation_status, PROV_DEVICE_TRANSPORT_HANDLE, handle);
 MOCKABLE_FUNCTION(, void, prov_transport_common_amqp_dowork, PROV_DEVICE_TRANSPORT_HANDLE, handle);
 MOCKABLE_FUNCTION(, int, prov_transport_common_amqp_set_trace, PROV_DEVICE_TRANSPORT_HANDLE, handle, bool, trace_on);

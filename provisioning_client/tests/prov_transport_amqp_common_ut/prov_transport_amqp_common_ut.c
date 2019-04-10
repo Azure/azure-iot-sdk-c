@@ -65,6 +65,7 @@ MOCKABLE_FUNCTION(, void, on_transport_register_data_cb, PROV_DEVICE_TRANSPORT_R
 MOCKABLE_FUNCTION(, void, on_transport_status_cb, PROV_DEVICE_TRANSPORT_STATUS, transport_status, void*, user_ctx);
 MOCKABLE_FUNCTION(, char*, on_transport_challenge_callback, const unsigned char*, nonce, size_t, nonce_len, const char*, key_name, void*, user_ctx);
 MOCKABLE_FUNCTION(, PROV_TRANSPORT_IO_INFO*, on_transport_io, const char*, fqdn, SASL_MECHANISM_HANDLE*, sasl_mechanism, const HTTP_PROXY_OPTIONS*, proxy_info);
+MOCKABLE_FUNCTION(, char*, on_transport_create_json_payload, const char*, ek_value, const char*, srk_value, void*, user_ctx);
 MOCKABLE_FUNCTION(, PROV_JSON_INFO*, on_transport_json_parse, const char*, json_document, void*, user_ctx);
 MOCKABLE_FUNCTION(, void, on_transport_error, PROV_DEVICE_TRANSPORT_ERROR, transport_error, void*, user_context);
 
@@ -118,6 +119,7 @@ static const char* TEST_USERNAME_VALUE = "username";
 static const char* TEST_PASSWORD_VALUE = "password";
 static const char* TEST_JSON_REPLY = "{ json_reply }";
 static const char* TEST_XIO_OPTION_NAME = "test_option";
+static const char* TEST_CUSTOM_DATA = "custom data";
 
 static ON_MESSAGE_RECEIVER_STATE_CHANGED g_msg_rcvr_state_changed;
 static void* g_msg_rcvr_state_changed_ctx;
@@ -212,6 +214,17 @@ static char* my_on_transport_challenge_callback(const unsigned char* nonce, size
     size_t src_len = strlen(TEST_SAS_TOKEN_VALUE);
     result = (char*)my_gballoc_malloc(src_len + 1);
     strcpy(result, TEST_SAS_TOKEN_VALUE);
+    return result;
+}
+
+static char* my_on_transport_create_json_payload(const char* ek_value, const char* srk_value, void* user_ctx)
+{
+    (void)ek_value;
+    (void)srk_value;
+    (void)user_ctx;
+    const char* TEST_VALUE = "{ \"return\" : \"data\" }";
+    char* result = (char*)my_gballoc_malloc(strlen(TEST_VALUE) + 1);
+    strcpy(result, TEST_VALUE);
     return result;
 }
 
@@ -408,6 +421,12 @@ static BUFFER_HANDLE my_BUFFER_clone(BUFFER_HANDLE handle)
     return (BUFFER_HANDLE)my_gballoc_malloc(1);
 }
 
+static STRING_HANDLE my_Base64_Encoder(const BUFFER_HANDLE source)
+{
+    (void)source;
+    return (STRING_HANDLE)my_gballoc_malloc(1);
+}
+
 static void my_BUFFER_delete(BUFFER_HANDLE handle)
 {
     my_gballoc_free(handle);
@@ -494,6 +513,9 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(BUFFER_clone, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(BUFFER_delete, my_BUFFER_delete);
 
+        REGISTER_GLOBAL_MOCK_HOOK(Azure_Base64_Encode, my_Base64_Encoder);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Azure_Base64_Encode, NULL);
+
         REGISTER_GLOBAL_MOCK_HOOK(on_transport_io, my_on_transport_io);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(on_transport_io, NULL);
 
@@ -515,6 +537,8 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(on_transport_challenge_callback, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(on_transport_json_parse, my_on_transport_json_parse);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(on_transport_json_parse, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(on_transport_create_json_payload, my_on_transport_create_json_payload);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(on_transport_create_json_payload, NULL);
 
         REGISTER_GLOBAL_MOCK_HOOK(xio_destroy, my_xio_destroy);
         REGISTER_GLOBAL_MOCK_HOOK(session_create, my_session_create);
@@ -648,6 +672,15 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         binary_data.length = 0;
 
         STRICT_EXPECTED_CALL(message_create());
+
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(on_transport_create_json_payload(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+
         STRICT_EXPECTED_CALL(amqpvalue_create_map());
         STRICT_EXPECTED_CALL(message_add_body_amqp_data(IGNORED_PTR_ARG, binary_data)).IgnoreArgument_amqp_data();
 
@@ -669,6 +702,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         STRICT_EXPECTED_CALL(messagesender_send_async(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, 0));
         STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(message_destroy(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     }
 
     static void setup_create_sender_link_mocks(void)
@@ -1240,7 +1274,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         //arrange
 
         //act
-        int result = prov_transport_common_amqp_register_device(NULL, on_transport_json_parse, NULL);
+        int result = prov_transport_common_amqp_register_device(NULL, on_transport_json_parse, on_transport_create_json_payload, NULL);
 
         //assert
         ASSERT_ARE_NOT_EQUAL(int, 0, result);
@@ -1258,7 +1292,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         //arrange
 
         //act
-        int result = prov_transport_common_amqp_register_device(handle, on_transport_json_parse, NULL);
+        int result = prov_transport_common_amqp_register_device(handle, on_transport_json_parse, on_transport_create_json_payload, NULL);
 
         //assert
         ASSERT_ARE_EQUAL(int, 0, result);
@@ -1272,13 +1306,13 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     TEST_FUNCTION(prov_transport_common_amqp_register_device_twice_fail)
     {
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io, on_transport_error, NULL);
-        (void)prov_transport_common_amqp_register_device(handle, on_transport_json_parse, NULL);
+        (void)prov_transport_common_amqp_register_device(handle, on_transport_json_parse, on_transport_create_json_payload, NULL);
         umock_c_reset_all_calls();
 
         //arrange
 
         //act
-        int result = prov_transport_common_amqp_register_device(handle, on_transport_json_parse, NULL);
+        int result = prov_transport_common_amqp_register_device(handle, on_transport_json_parse, on_transport_create_json_payload, NULL);
 
         //assert
         ASSERT_ARE_NOT_EQUAL(int, 0, result);
@@ -1329,7 +1363,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         int result;
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io, on_transport_error, NULL);
         (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
-        (void)prov_transport_common_amqp_register_device(handle, on_transport_json_parse, NULL);
+        (void)prov_transport_common_amqp_register_device(handle, on_transport_json_parse, on_transport_create_json_payload, NULL);
         prov_transport_common_amqp_dowork(handle);
         g_msg_sndr_state_changed(g_msg_sndr_state_changed_ctx, MESSAGE_SENDER_STATE_OPEN, MESSAGE_SENDER_STATE_OPENING);
         g_msg_rcvr_state_changed(g_msg_rcvr_state_changed_ctx, MESSAGE_RECEIVER_STATE_OPEN, MESSAGE_RECEIVER_STATE_OPENING);
@@ -1381,7 +1415,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         char* result;
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io, on_transport_error, NULL);
         (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
-        (void)prov_transport_common_amqp_register_device(handle, on_transport_json_parse, NULL);
+        (void)prov_transport_common_amqp_register_device(handle, on_transport_json_parse, on_transport_create_json_payload, NULL);
         prov_transport_common_amqp_dowork(handle);
         umock_c_reset_all_calls();
 
@@ -1409,7 +1443,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         char* result;
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io, on_transport_error, NULL);
         (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
-        (void)prov_transport_common_amqp_register_device(handle, on_transport_json_parse, NULL);
+        (void)prov_transport_common_amqp_register_device(handle, on_transport_json_parse, on_transport_create_json_payload, NULL);
         prov_transport_common_amqp_dowork(handle);
         umock_c_reset_all_calls();
 
@@ -1539,7 +1573,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     {
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io, on_transport_error, NULL);
         (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
-        (void)prov_transport_common_amqp_register_device(handle, on_transport_json_parse, NULL);
+        (void)prov_transport_common_amqp_register_device(handle, on_transport_json_parse, on_transport_create_json_payload, NULL);
         prov_transport_common_amqp_dowork(handle);
         g_msg_sndr_state_changed(g_msg_sndr_state_changed_ctx, MESSAGE_SENDER_STATE_OPEN, MESSAGE_SENDER_STATE_OPENING);
         g_msg_rcvr_state_changed(g_msg_rcvr_state_changed_ctx, MESSAGE_RECEIVER_STATE_OPEN, MESSAGE_RECEIVER_STATE_OPENING);
@@ -1569,7 +1603,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         AMQP_VALUE result;
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io, on_transport_error, NULL);
         (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
-        (void)prov_transport_common_amqp_register_device(handle, on_transport_json_parse, NULL);
+        (void)prov_transport_common_amqp_register_device(handle, on_transport_json_parse, on_transport_create_json_payload, NULL);
         prov_transport_common_amqp_dowork(handle);
         g_msg_sndr_state_changed(g_msg_sndr_state_changed_ctx, MESSAGE_SENDER_STATE_OPEN, MESSAGE_SENDER_STATE_OPENING);
         g_msg_rcvr_state_changed(g_msg_rcvr_state_changed_ctx, MESSAGE_RECEIVER_STATE_OPEN, MESSAGE_RECEIVER_STATE_OPENING);
@@ -1597,7 +1631,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
 
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io, on_transport_error, NULL);
         (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
-        (void)prov_transport_common_amqp_register_device(handle, on_transport_json_parse, NULL);
+        (void)prov_transport_common_amqp_register_device(handle, on_transport_json_parse, on_transport_create_json_payload, NULL);
         prov_transport_common_amqp_dowork(handle);
         g_msg_sndr_state_changed(g_msg_sndr_state_changed_ctx, MESSAGE_SENDER_STATE_OPEN, MESSAGE_SENDER_STATE_OPENING);
         g_msg_rcvr_state_changed(g_msg_rcvr_state_changed_ctx, MESSAGE_RECEIVER_STATE_OPEN, MESSAGE_RECEIVER_STATE_OPENING);
@@ -1626,7 +1660,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     {
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io, on_transport_error, NULL);
         (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
-        (void)prov_transport_common_amqp_register_device(handle, on_transport_json_parse, NULL);
+        (void)prov_transport_common_amqp_register_device(handle, on_transport_json_parse, on_transport_create_json_payload, NULL);
         prov_transport_common_amqp_dowork(handle);
         g_msg_sndr_state_changed(g_msg_sndr_state_changed_ctx, MESSAGE_SENDER_STATE_OPEN, MESSAGE_SENDER_STATE_OPENING);
         g_msg_rcvr_state_changed(g_msg_rcvr_state_changed_ctx, MESSAGE_RECEIVER_STATE_OPEN, MESSAGE_RECEIVER_STATE_OPENING);
@@ -1656,7 +1690,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     {
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io, on_transport_error, NULL);
         (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
-        (void)prov_transport_common_amqp_register_device(handle, on_transport_json_parse, NULL);
+        (void)prov_transport_common_amqp_register_device(handle, on_transport_json_parse, on_transport_create_json_payload, NULL);
         prov_transport_common_amqp_dowork(handle);
         g_msg_sndr_state_changed(g_msg_sndr_state_changed_ctx, MESSAGE_SENDER_STATE_OPEN, MESSAGE_SENDER_STATE_OPENING);
         g_msg_rcvr_state_changed(g_msg_rcvr_state_changed_ctx, MESSAGE_RECEIVER_STATE_OPEN, MESSAGE_RECEIVER_STATE_OPENING);
@@ -1690,7 +1724,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     {
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io, on_transport_error, NULL);
         (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
-        (void)prov_transport_common_amqp_register_device(handle, on_transport_json_parse, NULL);
+        (void)prov_transport_common_amqp_register_device(handle, on_transport_json_parse, on_transport_create_json_payload, NULL);
         prov_transport_common_amqp_dowork(handle);
         g_msg_rcvr_state_changed(g_msg_rcvr_state_changed_ctx, MESSAGE_RECEIVER_STATE_OPEN, MESSAGE_RECEIVER_STATE_OPENING);
         g_msg_sndr_state_changed(g_msg_sndr_state_changed_ctx, MESSAGE_SENDER_STATE_OPEN, MESSAGE_SENDER_STATE_OPENING);

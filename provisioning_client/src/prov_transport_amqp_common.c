@@ -13,17 +13,19 @@
 #include "azure_c_shared_utility/http_proxy_io.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/http_proxy_io.h"
-#include "azure_prov_client/internal/prov_transport_amqp_common.h"
+#include "azure_c_shared_utility/strings.h"
+#include "azure_c_shared_utility/azure_base64.h"
+
 #include "azure_uamqp_c/message_sender.h"
 #include "azure_uamqp_c/message_receiver.h"
 #include "azure_uamqp_c/message.h"
 #include "azure_uamqp_c/messaging.h"
 #include "azure_uamqp_c/saslclientio.h"
 #include "azure_uamqp_c/sasl_plain.h"
-#include "azure_prov_client/internal/prov_sasl_tpm.h"
-#include "azure_c_shared_utility/strings.h"
 
+#include "azure_prov_client/internal/prov_sasl_tpm.h"
 #include "azure_prov_client/prov_client_const.h"
+#include "azure_prov_client/internal/prov_transport_amqp_common.h"
 
 #define AMQP_MAX_SENDER_MSG_SIZE    UINT64_MAX
 #define AMQP_MAX_RECV_MSG_SIZE      65536
@@ -74,6 +76,7 @@ typedef struct PROV_TRANSPORT_AMQP_INFO_TAG
     PROV_TRANSPORT_CHALLENGE_CALLBACK challenge_cb;
     void* challenge_ctx;
     PROV_TRANSPORT_JSON_PARSE json_parse_cb;
+    PROV_TRANSPORT_CREATE_JSON_PAYLOAD json_create_cb;
     void* json_ctx;
 
     char* hostname;
@@ -360,13 +363,70 @@ static int set_amqp_msg_property(AMQP_VALUE uamqp_prop_map, const char* key, con
     return result;
 }
 
+static char* construct_json_data(PROV_TRANSPORT_AMQP_INFO* amqp_info)
+{
+    char* result;
+    bool data_success = true;
+    STRING_HANDLE encoded_srk = NULL;
+    STRING_HANDLE encoded_ek = NULL;
+    const char* ek_value = NULL;
+    const char* srk_value = NULL;
+
+    // For TPM we need to add tpm encoded values
+    if (amqp_info->hsm_type == TRANSPORT_HSM_TYPE_TPM)
+    {
+        if ((encoded_ek = Azure_Base64_Encode(amqp_info->ek)) == NULL)
+        {
+            LogError("Failure encoding ek");
+            data_success = false;
+        }
+        else if ((encoded_srk = Azure_Base64_Encode(amqp_info->srk)) == NULL)
+        {
+            LogError("Failure encoding srk");
+            data_success = false;
+        }
+        else
+        {
+            ek_value = STRING_c_str(encoded_ek);
+            srk_value = STRING_c_str(encoded_srk);
+        }
+    }
+
+    if (data_success)
+    {
+        result = amqp_info->json_create_cb(ek_value, srk_value, amqp_info->json_ctx);
+    }
+    else
+    {
+        result = NULL;
+    }
+
+    if (encoded_srk != NULL)
+    {
+        STRING_delete(encoded_srk);
+    }
+    if (encoded_ek != NULL)
+    {
+        STRING_delete(encoded_ek);
+    }
+    return result;
+}
+
 static int send_amqp_message(PROV_TRANSPORT_AMQP_INFO* amqp_info, const char* msg_type)
 {
     int result;
     MESSAGE_HANDLE uamqp_message;
+    char* json_data;
+
     if ((uamqp_message = message_create()) == NULL)
     {
         LogError("Failed allocating the uAMQP message.");
+        result = MU_FAILURE;
+    }
+    else if ((json_data = construct_json_data(amqp_info)) == NULL)
+    {
+        LogError("Failed constructing json payload");
+        message_destroy(uamqp_message);
         result = MU_FAILURE;
     }
     else
@@ -374,8 +434,8 @@ static int send_amqp_message(PROV_TRANSPORT_AMQP_INFO* amqp_info, const char* ms
         AMQP_VALUE uamqp_prop_map;
 
         BINARY_DATA binary_data;
-        binary_data.bytes = NULL;
-        binary_data.length = 0;
+        binary_data.bytes = (const unsigned char*)json_data;
+        binary_data.length = strlen(json_data);
 
         if ((uamqp_prop_map = amqpvalue_create_map()) == NULL)
         {
@@ -435,6 +495,7 @@ static int send_amqp_message(PROV_TRANSPORT_AMQP_INFO* amqp_info, const char* ms
         }
         amqpvalue_destroy(uamqp_prop_map);
         message_destroy(uamqp_message);
+        free(json_data);
     }
     return result;
 }
@@ -1184,11 +1245,11 @@ int prov_transport_common_amqp_close(PROV_DEVICE_TRANSPORT_HANDLE handle)
     return result;
 }
 
-int prov_transport_common_amqp_register_device(PROV_DEVICE_TRANSPORT_HANDLE handle, PROV_TRANSPORT_JSON_PARSE json_parse_cb, void* json_ctx)
+int prov_transport_common_amqp_register_device(PROV_DEVICE_TRANSPORT_HANDLE handle, PROV_TRANSPORT_JSON_PARSE json_parse_cb, PROV_TRANSPORT_CREATE_JSON_PAYLOAD json_create_cb, void* json_ctx)
 {
     int result;
     PROV_TRANSPORT_AMQP_INFO* amqp_info = (PROV_TRANSPORT_AMQP_INFO*)handle;
-    if (amqp_info == NULL || json_parse_cb == NULL)
+    if (amqp_info == NULL || json_parse_cb == NULL || json_create_cb == NULL)
     {
         /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_014: [ If handle is NULL, prov_transport_common_amqp_register_device shall return a non-zero value. ] */
         LogError("Invalid parameter specified handle: %p, json_parse_cb: %p", handle, json_parse_cb);
@@ -1211,6 +1272,7 @@ int prov_transport_common_amqp_register_device(PROV_DEVICE_TRANSPORT_HANDLE hand
         /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_017: [ On success prov_transport_common_amqp_register_device shall return a zero value. ] */
         amqp_info->transport_state = TRANSPORT_CLIENT_STATE_REG_SEND;
         amqp_info->json_parse_cb = json_parse_cb;
+        amqp_info->json_create_cb = json_create_cb;
         amqp_info->json_ctx = json_ctx;
 
         result = 0;
