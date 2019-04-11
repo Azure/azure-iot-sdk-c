@@ -14,7 +14,7 @@ int IoTHub_Init(void)
     if (platform_init() != 0)
     {
         LogError("Platform initialization failed");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {

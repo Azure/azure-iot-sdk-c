@@ -14,7 +14,7 @@
 #include "prov_service_client/provisioning_sc_shared_helpers.h"
 #include "parson.h"
 
-DEFINE_ENUM_STRINGS(ATTESTATION_TYPE, ATTESTATION_TYPE_VALUES)
+MU_DEFINE_ENUM_STRINGS(ATTESTATION_TYPE, ATTESTATION_TYPE_VALUES)
 
 typedef struct ATTESTATION_MECHANISM_TAG
 {
@@ -38,7 +38,7 @@ static const char* attestationType_toJson(ATTESTATION_TYPE type)
     }
     else
     {
-        LogError("Could not convert '%s' to JSON", ENUM_TO_STRING(ATTESTATION_TYPE, type));
+        LogError("Could not convert '%s' to JSON", MU_ENUM_TO_STRING(ATTESTATION_TYPE, type));
     }
 
     return result;

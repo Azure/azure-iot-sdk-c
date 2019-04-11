@@ -57,8 +57,8 @@
 // This sample is to demostrate iothub reconnection with provisioning and should not
 // be confused as production code
 
-DEFINE_ENUM_STRINGS(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
-DEFINE_ENUM_STRINGS(PROV_DEVICE_REG_STATUS, PROV_DEVICE_REG_STATUS_VALUES);
+MU_DEFINE_ENUM_STRINGS(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
+MU_DEFINE_ENUM_STRINGS(PROV_DEVICE_REG_STATUS, PROV_DEVICE_REG_STATUS_VALUES);
 
 static const char* global_prov_uri = "global.azure-devices-provisioning.net";
 static const char* id_scope = "[ID Scope]";
@@ -74,7 +74,7 @@ static const char* PROXY_ADDRESS = "127.0.0.1";
 static void registration_status_callback(PROV_DEVICE_REG_STATUS reg_status, void* user_context)
 {
     (void)user_context;
-    (void)printf("Provisioning Status: %s\r\n", ENUM_TO_STRING(PROV_DEVICE_REG_STATUS, reg_status));
+    (void)printf("Provisioning Status: %s\r\n", MU_ENUM_TO_STRING(PROV_DEVICE_REG_STATUS, reg_status));
 }
 
 static void register_device_callback(PROV_DEVICE_RESULT register_result, const char* iothub_uri, const char* device_id, void* user_context)
@@ -86,7 +86,7 @@ static void register_device_callback(PROV_DEVICE_RESULT register_result, const c
     }
     else
     {
-        (void)printf("\r\nFailure registering device: %s\r\n", ENUM_TO_STRING(PROV_DEVICE_RESULT, register_result));
+        (void)printf("\r\nFailure registering device: %s\r\n", MU_ENUM_TO_STRING(PROV_DEVICE_RESULT, register_result));
     }
     g_registration_complete = true;
 }

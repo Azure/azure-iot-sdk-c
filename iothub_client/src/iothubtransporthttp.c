@@ -97,7 +97,7 @@ typedef struct MESSAGE_DISPOSITION_CONTEXT_TAG
     char* etagValue;
 } MESSAGE_DISPOSITION_CONTEXT;
 
-DEFINE_ENUM_STRINGS(IOTHUBMESSAGE_DISPOSITION_RESULT, IOTHUBMESSAGE_DISPOSITION_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS(IOTHUBMESSAGE_DISPOSITION_RESULT, IOTHUBMESSAGE_DISPOSITION_RESULT_VALUES);
 
 static void destroy_eventHTTPrelativePath(HTTPTRANSPORT_PERDEVICE_DATA* handleData)
 {
@@ -147,7 +147,7 @@ static int retrieve_message_properties(HTTP_HEADERS_HANDLE resp_header, IOTHUB_M
     if (HTTPHeaders_GetHeaderCount(resp_header, &nHeaders) != HTTP_HEADERS_OK)
     {
         LogError("unable to get the count of HTTP headers");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -158,7 +158,7 @@ static int retrieve_message_properties(HTTP_HEADERS_HANDLE resp_header, IOTHUB_M
             if (HTTPHeaders_GetHeader(resp_header, index, &completeHeader) != HTTP_HEADERS_OK)
             {
                 LogError("Failed getting header %lu", (unsigned long)index);
-                result = __FAILURE__;
+                result = MU_FAILURE;
                 break;
             }
             else
@@ -175,7 +175,7 @@ static int retrieve_message_properties(HTTP_HEADERS_HANDLE resp_header, IOTHUB_M
                         if (Map_AddOrUpdate(properties, completeHeader + strlen(IOTHUB_APP_PREFIX), colon_pos + 2) != MAP_OK) /*whereIsColon+1 is a space because HTTPEHADERS outputs a ": " between name and value*/
                         {
                             free(completeHeader);
-                            result = __FAILURE__;
+                            result = MU_FAILURE;
                             break;
                         }
                     }
@@ -189,7 +189,7 @@ static int retrieve_message_properties(HTTP_HEADERS_HANDLE resp_header, IOTHUB_M
                         if (IoTHubMessage_SetMessageId(recv_msg, whereIsColon + 2) != IOTHUB_MESSAGE_OK)
                         {
                             free(completeHeader);
-                            result = __FAILURE__;
+                            result = MU_FAILURE;
                             break;
                         }
                     }
@@ -203,7 +203,7 @@ static int retrieve_message_properties(HTTP_HEADERS_HANDLE resp_header, IOTHUB_M
                         if (IoTHubMessage_SetCorrelationId(recv_msg, whereIsColon + 2) != IOTHUB_MESSAGE_OK)
                         {
                             free(completeHeader);
-                            result = __FAILURE__;
+                            result = MU_FAILURE;
                             break;
                         }
                     }
@@ -218,7 +218,7 @@ static int retrieve_message_properties(HTTP_HEADERS_HANDLE resp_header, IOTHUB_M
                         if (IoTHubMessage_SetContentTypeSystemProperty(recv_msg, whereIsColon + 2) != IOTHUB_MESSAGE_OK)
                         {
                             LogError("Failed setting IoTHubMessage content-type");
-                            result = __FAILURE__;
+                            result = MU_FAILURE;
                             break;
                         }
                     }
@@ -1115,7 +1115,7 @@ static int IoTHubTransportHttp_Subscribe(IOTHUB_DEVICE_HANDLE handle)
     {
         /*Codes_SRS_TRANSPORTMULTITHTTP_17_103: [ If parameter deviceHandle is NULL then IoTHubTransportHttp_Subscribe shall fail and return a non-zero value. ]*/
         LogError("invalid arg passed to IoTHubTransportHttp_Subscribe");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1126,7 +1126,7 @@ static int IoTHubTransportHttp_Subscribe(IOTHUB_DEVICE_HANDLE handle)
         {
             /*Codes_SRS_TRANSPORTMULTITHTTP_17_105: [ If the device structure is not found, then this function shall fail and return a non-zero value. ]*/
             LogError("did not find device in transport handle");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -1170,7 +1170,7 @@ static int IoTHubTransportHttp_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle)
 {
     /*Codes_SRS_TRANSPORTMULTITHTTP_02_003: [ IoTHubTransportHttp_Subscribe_DeviceTwin shall return a non-zero value. ]*/
     (void)handle;
-    int result = __FAILURE__;
+    int result = MU_FAILURE;
     LogError("IoTHubTransportHttp_Subscribe_DeviceTwin Not supported");
     return result;
 }
@@ -1195,7 +1195,7 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportHttp_GetTwinAsync(IOTHUB_DEVICE_HANDL
 static int IoTHubTransportHttp_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
 {
     (void)handle;
-    int result = __FAILURE__;
+    int result = MU_FAILURE;
     LogError("not implemented (yet)");
     return result;
 }
@@ -1214,7 +1214,7 @@ static int IoTHubTransportHttp_DeviceMethod_Response(IOTHUB_DEVICE_HANDLE handle
     (void)response_size;
     (void)status_response;
     LogError("not implemented (yet)");
-    return __FAILURE__;
+    return MU_FAILURE;
 }
 
 /*produces a representation of the properties, if they exist*/
@@ -1227,7 +1227,7 @@ static int concat_Properties(STRING_HANDLE existing, MAP_HANDLE map, size_t* pro
     size_t count;
     if (Map_GetInternals(map, &keys, &values, &count) != MAP_OK)
     {
-        result = __FAILURE__;
+        result = MU_FAILURE;
         LogError("error while Map_GetInternals");
     }
     else
@@ -1246,12 +1246,12 @@ static int concat_Properties(STRING_HANDLE existing, MAP_HANDLE map, size_t* pro
             if (STRING_concat(existing, ",\"properties\":") != 0)
             {
                 /*go ahead and return it*/
-                result = __FAILURE__;
+                result = MU_FAILURE;
                 LogError("failed STRING_concat");
             }
             else if (appendMapToJSON(existing, keys, values, count) != 0)
             {
-                result = __FAILURE__;
+                result = MU_FAILURE;
                 LogError("unable to append the properties");
             }
             else
@@ -1279,7 +1279,7 @@ static int appendMapToJSON(STRING_HANDLE existing, const char* const* keys, cons
     {
         /*go on and return it*/
         LogError("STRING_construct failed");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1301,13 +1301,13 @@ static int appendMapToJSON(STRING_HANDLE existing, const char* const* keys, cons
 
         if (i < count)
         {
-            result = __FAILURE__;
+            result = MU_FAILURE;
             /*error, let it go through*/
         }
         else if (STRING_concat(existing, "}") != 0)
         {
             LogError("unable to STRING_concat");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -1449,7 +1449,7 @@ static STRING_HANDLE make1EventJSONitem(PDLIST_ENTRY item, size_t *messageSizeCo
     MAKE_PAYLOAD_ERROR, /*returned when there were errors*/ \
     MAKE_PAYLOAD_FIRST_ITEM_DOES_NOT_FIT /*returned when the first item doesn't fit*/
 
-DEFINE_ENUM(MAKE_PAYLOAD_RESULT, MAKE_PAYLOAD_RESULT_VALUES);
+MU_DEFINE_ENUM(MAKE_PAYLOAD_RESULT, MAKE_PAYLOAD_RESULT_VALUES);
 
 /*this function assembles several {"body":"base64 encoding of the message content"," base64Encoded": true} into 1 payload*/
 /*Codes_SRS_TRANSPORTMULTITHTTP_17_056: [IoTHubTransportHttp_DoWork shall build the following string:[{"body":"base64 encoding of the message1 content"},{"body":"base64 encoding of the message2 content"}...]]*/
@@ -2044,7 +2044,7 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SendMessageDisposition(MESSAGE_C
                     else
                     {
                         /* Codes_SRS_TRANSPORTMULTITHTTP_10_003: [IoTHubTransportHttp_SendMessageDisposition shall fail and return IOTHUB_CLIENT_ERROR if the POST message fails, otherwise return IOTHUB_CLIENT_OK.] */
-                        LogError("HTTP Transport layer failed to report %s disposition", ENUM_TO_STRING(IOTHUBMESSAGE_DISPOSITION_RESULT, disposition));
+                        LogError("HTTP Transport layer failed to report %s disposition", MU_ENUM_TO_STRING(IOTHUBMESSAGE_DISPOSITION_RESULT, disposition));
                         result = IOTHUB_CLIENT_ERROR;
                     }
                 }
@@ -2481,7 +2481,7 @@ static int IotHubTransportHttp_Subscribe_InputQueue(IOTHUB_DEVICE_HANDLE handle)
 {
     (void)handle;
     LogError("HTTP does not support input queues");
-    return __FAILURE__;
+    return MU_FAILURE;
 }
 
 static void IotHubTransportHttp_Unsubscribe_InputQueue(IOTHUB_DEVICE_HANDLE handle)
@@ -2496,7 +2496,7 @@ int IoTHubTransportHttp_SetCallbackContext(TRANSPORT_LL_HANDLE handle, void* ctx
     if (handle == NULL)
     {
         LogError("Invalid parameter specified handle: %p", handle);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {

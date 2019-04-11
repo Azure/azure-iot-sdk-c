@@ -543,7 +543,7 @@ int my_STRING_TOKENIZER_get_next_token(STRING_TOKENIZER_HANDLE t, STRING_HANDLE 
     }
     else
     {
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     return result;
 }
@@ -681,7 +681,7 @@ static void on_get_device_twin_completed_callback(DEVICE_TWIN_UPDATE_STATE updat
     get_twin_userContextCallback = userContextCallback;
 }
 
-DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
@@ -763,7 +763,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_realloc, NULL);
 
     REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, my_mallocAndStrcpy_s);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, __FAILURE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, MU_FAILURE);
 
     REGISTER_GLOBAL_MOCK_HOOK(ThreadAPI_Sleep, my_ThreadAPI_Sleep);
 
@@ -776,7 +776,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(STRING_delete, my_STRING_delete);
     REGISTER_GLOBAL_MOCK_HOOK(STRING_c_str, my_STRING_c_str);
     REGISTER_GLOBAL_MOCK_RETURN(STRING_concat, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat, __FAILURE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat, MU_FAILURE);
 
     REGISTER_GLOBAL_MOCK_HOOK(URL_Encode, my_URL_Encode);
     REGISTER_GLOBAL_MOCK_HOOK(URL_EncodeString, my_URL_EncodeString);
@@ -794,7 +794,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(Transport_MessageCallback, my_Transport_MessageCallback);
 
     REGISTER_GLOBAL_MOCK_HOOK(Transport_DeviceMethod_Complete_Callback, my_Transport_DeviceMethod_Complete_Callback);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Transport_DeviceMethod_Complete_Callback, __FAILURE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Transport_DeviceMethod_Complete_Callback, MU_FAILURE);
 
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubMessage_GetContentType, my_IoTHubMessage_GetContentType);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_GetContentType, IOTHUBMESSAGE_UNKNOWN);
@@ -831,21 +831,21 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_init, NULL);
 
     REGISTER_GLOBAL_MOCK_RETURN(mqtt_client_connect, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_connect, __FAILURE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_connect, MU_FAILURE);
 
     REGISTER_GLOBAL_MOCK_HOOK(mqtt_client_deinit, my_mqtt_client_deinit);
 
     REGISTER_GLOBAL_MOCK_HOOK(mqtt_client_disconnect, my_mqtt_client_disconnect);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_disconnect, __FAILURE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_disconnect, MU_FAILURE);
 
     REGISTER_GLOBAL_MOCK_RETURN(mqtt_client_subscribe, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_subscribe, __FAILURE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_subscribe, MU_FAILURE);
 
     REGISTER_GLOBAL_MOCK_RETURN(mqtt_client_unsubscribe, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_unsubscribe, __FAILURE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_unsubscribe, MU_FAILURE);
 
     REGISTER_GLOBAL_MOCK_RETURN(mqtt_client_publish, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_publish, __FAILURE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_publish, MU_FAILURE);
 
     REGISTER_GLOBAL_MOCK_RETURN(mqttmessage_create, TEST_MQTT_MESSAGE_HANDLE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqttmessage_create, NULL);
@@ -863,7 +863,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_TOKENIZER_create_from_char, NULL);
 
     REGISTER_GLOBAL_MOCK_HOOK(STRING_TOKENIZER_get_next_token, my_STRING_TOKENIZER_get_next_token);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_TOKENIZER_get_next_token, __FAILURE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_TOKENIZER_get_next_token, MU_FAILURE);
 
     REGISTER_GLOBAL_MOCK_HOOK(STRING_TOKENIZER_destroy, my_STRING_TOKENIZER_destroy);
 
@@ -877,10 +877,10 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(xio_create, my_xio_create);
 
     REGISTER_GLOBAL_MOCK_RETURN(xio_close, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(xio_close, __FAILURE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(xio_close, MU_FAILURE);
 
     REGISTER_GLOBAL_MOCK_RETURN(xio_setoption, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(xio_setoption, __FAILURE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(xio_setoption, MU_FAILURE);
 
     REGISTER_GLOBAL_MOCK_HOOK(xio_destroy, my_xio_destroy);
 
@@ -890,7 +890,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(tickcounter_destroy, my_tickcounter_destroy);
 
     REGISTER_GLOBAL_MOCK_HOOK(tickcounter_get_current_ms, my_tickcounter_get_current_ms);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(tickcounter_get_current_ms, __FAILURE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(tickcounter_get_current_ms, MU_FAILURE);
 
     REGISTER_GLOBAL_MOCK_RETURN(CONSTBUFFER_Create, TEST_CONST_BUFFER_HANDLE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(CONSTBUFFER_Create, NULL);
@@ -984,7 +984,7 @@ static int should_skip_index(size_t current_index, const size_t skip_array[], si
     {
         if (current_index == skip_array[index])
         {
-            result = __FAILURE__;
+            result = MU_FAILURE;
             break;
         }
     }
@@ -2979,7 +2979,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_fails_when_xio_setoption_fai
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, SOME_OPTION, SOME_VALUE))
         .IgnoreArgument(1)
-        .SetReturn(__FAILURE__);
+        .SetReturn(MU_FAILURE);
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, SOME_OPTION, SOME_VALUE);
