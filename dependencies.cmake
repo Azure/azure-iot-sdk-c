@@ -22,6 +22,10 @@ if(${use_installed_dependencies})
     find_package(unofficial-parson REQUIRED)
     link_libraries(unofficial::parson::parson)
 
+    find_library(UHTTP_LIBRARY uhttp)
+    add_library(uhttp STATIC IMPORTED)
+    set_target_properties(uhttp PROPERTIES IMPORTED_LOCATION ${UHTTP_LIBRARY})
+
 else ()
     add_subdirectory(c-utility)
 

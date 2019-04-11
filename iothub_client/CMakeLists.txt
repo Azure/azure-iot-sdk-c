@@ -447,7 +447,6 @@ add_library(iothub_client
 )
 setSdkTargetBuildProperties(iothub_client)
 target_link_libraries(iothub_client ${iothub_client_libs})
-target_link_libraries(iothub_client parson)
 
 if (${use_prov_client_core})
     target_link_libraries(iothub_client hsm_security_client prov_auth_client)
