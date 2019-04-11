@@ -234,7 +234,7 @@ static int IoTHubTransportAMQP_WS_SetCallbackContext(TRANSPORT_LL_HANDLE handle,
     return IoTHubTransport_AMQP_SetCallbackContext(handle, ctx);
 }
 
-static bool IoTHubTransportAMQP_WS_IsExtendedInfoRequired(void)
+static bool IoTHubTransportAMQP_WS_IsExtraPlatformInfoRequired(void)
 {
     return true;
 }
@@ -263,7 +263,7 @@ static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls =
     IotHubTransportAMQP_WS_Unsubscribe_InputQueue,                     /*pfIoTHubTransport_Unsubscribe_InputQueue IoTHubTransport_Unsubscribe_InputQueue; */
     IoTHubTransportAMQP_WS_SetCallbackContext,                         /*pfIoTHubTransport_SetCallbackContext IoTHubTransport_SetCallbackContext; */
     IoTHubTransportAMQP_WS_GetTwinAsync,                               /*pfIoTHubTransport_GetTwinAsync IoTHubTransport_GetTwinAsync;*/
-    IoTHubTransportAMQP_WS_IsExtendedInfoRequired                         /*pfIoTHubTransport_IsExtendedInfoRequired IoTHubTransport_IsExtendedInfoRequired;*/
+    IoTHubTransportAMQP_WS_IsExtraPlatformInfoRequired                         /*pfIoTHubTransport_IsExtraPlatformInfoRequired IoTHubTransport_IsExtraPlatformInfoRequired;*/
 };
 
 /* Codes_SRS_IoTHubTransportAMQP_WS_09_019: [This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for it's fields:
@@ -284,7 +284,7 @@ IoTHubTransport_DoWork = IoTHubTransportAMQP_WS_DoWork
 IoTHubTransport_SetRetryLogic = IoTHubTransportAMQP_WS_SetRetryLogic
 IoTHubTransport_SetOption = IoTHubTransportAMQP_WS_SetOption
 IoTHubTransport_GetSendStatus = IoTHubTransportAMQP_WS_GetSendStatus
-IoTHubTransport_IsExtendedInfoRequired = IoTHubTransportAMQP_WS_IsExtendedInfoRequired] */
+IoTHubTransport_IsExtraPlatformInfoRequired = IoTHubTransportAMQP_WS_IsExtraPlatformInfoRequired] */
 extern const TRANSPORT_PROVIDER* AMQP_Protocol_over_WebSocketsTls(void)
 {
     return &thisTransportProvider_WebSocketsOverTls;

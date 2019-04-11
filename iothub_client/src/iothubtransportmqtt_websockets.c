@@ -231,7 +231,7 @@ static int IotHubTransportMqtt_WS_SetCallbackContext(TRANSPORT_LL_HANDLE handle,
     return IoTHubTransport_MQTT_SetCallbackContext(handle, ctx);
 }
 
-static bool IotHubTransportMqtt_WS_IsExtendedInfoRequired(void)
+static bool IotHubTransportMqtt_WS_IsExtraPlatformInfoRequired(void)
 {
     return true;
 }
@@ -249,7 +249,7 @@ IoTHubTransport_Subscribe = IoTHubTransportMqtt_WS_Subscribe
 IoTHubTransport_Unsubscribe = IoTHubTransportMqtt_WS_Unsubscribe
 IoTHubTransport_DoWork = IoTHubTransportMqtt_WS_DoWork
 IoTHubTransport_SetOption = IoTHubTransportMqtt_WS_SetOption 
-IoTHubTransport_IsExtendedInfoRequired = IoTHubTransportMqtt_WS_IsExtendedInfoRequired ] */
+IoTHubTransport_IsExtraPlatformInfoRequired = IoTHubTransportMqtt_WS_IsExtraPlatformInfoRequired ] */
 static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls = {
     IoTHubTransportMqtt_WS_SendMessageDisposition,
     IoTHubTransportMqtt_WS_Subscribe_DeviceMethod,
@@ -273,7 +273,7 @@ static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls = {
     IoTHubTransportMqtt_WS_Unsubscribe_InputQueue,
     IotHubTransportMqtt_WS_SetCallbackContext,
     IoTHubTransportMqtt_WS_GetTwinAsync,
-    IotHubTransportMqtt_WS_IsExtendedInfoRequired
+    IotHubTransportMqtt_WS_IsExtraPlatformInfoRequired
 };
 
 const TRANSPORT_PROVIDER* MQTT_WebSocket_Protocol(void)

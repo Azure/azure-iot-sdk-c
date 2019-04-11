@@ -48,7 +48,7 @@ MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubTransport_MQTT_Common_SendMessag
 MOCKABLE_FUNCTION(, int, IoTHubTransport_MQTT_Common_Subscribe_InputQueue, TRANSPORT_LL_HANDLE, handle);
 MOCKABLE_FUNCTION(, void, IoTHubTransport_MQTT_Common_Unsubscribe_InputQueue, TRANSPORT_LL_HANDLE, handle);
 MOCKABLE_FUNCTION(, int, IoTHubTransport_MQTT_SetCallbackContext, TRANSPORT_LL_HANDLE, handle, void*, ctx);
-MOCKABLE_FUNCTION(, bool, IoTHubTransport_MQTT_IsExtendedInfoRequired);
+MOCKABLE_FUNCTION(, bool, IoTHubTransport_MQTT_IsExtraPlatformInfoRequired);
 
 #ifdef __cplusplus
 }

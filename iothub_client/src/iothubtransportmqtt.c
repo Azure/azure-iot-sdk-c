@@ -174,7 +174,7 @@ static int IotHubTransportMqtt_SetCallbackContext(TRANSPORT_LL_HANDLE handle, vo
     return IoTHubTransport_MQTT_SetCallbackContext(handle, ctx);
 }
 
-static bool IotHubTransportMqtt_IsExtendedInfoRequired(void)
+static bool IotHubTransportMqtt_IsExtraPlatformInfoRequired(void)
 {
     return true;
 }
@@ -203,7 +203,7 @@ static TRANSPORT_PROVIDER myfunc =
     IotHubTransportMqtt_Unsubscribe_InputQueue,     /*pfIoTHubTransport_Unsubscribe_InputQueue IoTHubTransport_Unsubscribe_InputQueue; */
     IotHubTransportMqtt_SetCallbackContext,         /*pfIoTHubTransport_SetCallbackContext IoTHubTransport_SetCallbackContext; */
     IoTHubTransportMqtt_GetTwinAsync,               /*pfIoTHubTransport_GetTwinAsync IoTHubTransport_GetTwinAsync;*/
-    IotHubTransportMqtt_IsExtendedInfoRequired      /*pfIoTHubTransport_IsExtendedInfoRequired IoTHubTransport_IsExtendedInfoRequired;*/
+    IotHubTransportMqtt_IsExtraPlatformInfoRequired      /*pfIoTHubTransport_IsExtraPlatformInfoRequired IoTHubTransport_IsExtraPlatformInfoRequired;*/
 };
 
 /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_022: [This function shall return a pointer to a structure of type TRANSPORT_PROVIDER */
