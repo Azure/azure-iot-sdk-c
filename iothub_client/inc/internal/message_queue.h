@@ -9,7 +9,7 @@
 #define MESSAGE_QUEUE_H
 
 #include "azure_macro_utils/macro_utils.h"
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 #include "azure_c_shared_utility/optionhandler.h"
 
 #ifdef __cplusplus

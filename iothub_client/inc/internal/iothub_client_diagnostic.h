@@ -9,7 +9,7 @@
 #ifndef IOTHUB_CLIENT_DIAGNOSTIC_H
 #define IOTHUB_CLIENT_DIAGNOSTIC_H
 
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 
 #include "iothub_message.h"
 #include <stdint.h>

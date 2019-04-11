@@ -16,7 +16,7 @@
 #include "iothub.h"
 #include "iothub_messaging_ll.h"
 
-#include "umock_c.h"
+#include "umock_c/umock_c.h"
 #include "testrunnerswitcher.h"
 
 #include "iothub_account.h"

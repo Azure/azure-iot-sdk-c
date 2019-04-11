@@ -35,7 +35,7 @@ MU_DEFINE_ENUM(JSON_ENCODER_TOSTRING_RESULT, JSON_ENCODER_TOSTRING_RESULT_VALUES
 
 typedef JSON_ENCODER_TOSTRING_RESULT(*JSON_ENCODER_TOSTRING_FUNC)(STRING_HANDLE, const void* value);
 
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 
 MOCKABLE_FUNCTION(, JSON_ENCODER_TOSTRING_RESULT, JSONEncoder_CharPtr_ToString, STRING_HANDLE, destination, const void*, value);
 MOCKABLE_FUNCTION(, JSON_ENCODER_RESULT, JSONEncoder_EncodeTree, MULTITREE_HANDLE, treeHandle, STRING_HANDLE, destination, JSON_ENCODER_TOSTRING_FUNC, toStringFunc);

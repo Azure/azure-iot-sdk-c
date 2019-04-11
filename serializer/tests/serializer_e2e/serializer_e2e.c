@@ -15,7 +15,7 @@
 #include "azure_macro_utils/macro_utils.h"
 
 #include "testrunnerswitcher.h"
-#include "umock_c.h"
+#include "umock_c/umock_c.h"
 
 #include "iothub_account.h"
 #include "iothubtest.h"

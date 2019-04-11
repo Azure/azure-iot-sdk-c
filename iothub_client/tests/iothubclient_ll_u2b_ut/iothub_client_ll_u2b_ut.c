@@ -27,11 +27,11 @@ static void* my_gballoc_calloc(size_t nmemb, size_t size)
 #include "testrunnerswitcher.h"
 #include "azure_c_shared_utility/optimize_size.h"
 #include "azure_macro_utils/macro_utils.h"
-#include "umock_c.h"
-#include "umocktypes_charptr.h"
-#include "umock_c_negative_tests.h"
-#include "umocktypes.h"
-#include "umocktypes_c.h"
+#include "umock_c/umock_c.h"
+#include "umock_c/umocktypes_charptr.h"
+#include "umock_c/umock_c_negative_tests.h"
+#include "umock_c/umocktypes.h"
+#include "umock_c/umocktypes_c.h"
 
 #include "iothub_client_options.h"
 
@@ -529,7 +529,7 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 
     REGISTER_GLOBAL_MOCK_HOOK(BUFFER_new, my_BUFFER_new);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(BUFFER_new, NULL);
-    
+
     REGISTER_GLOBAL_MOCK_HOOK(BUFFER_create, my_BUFFER_create);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(BUFFER_create, NULL);
 
@@ -725,7 +725,7 @@ static void setup_Blob_UploadMultipleBlocksFromSasUri_mocks(IOTHUB_CREDENTIAL_TY
 {
     STRICT_EXPECTED_CALL(BUFFER_new());
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-    
+
     unsigned int status_code;
     if (BLOB_OK != blob_result)
     {

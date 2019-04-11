@@ -27,7 +27,7 @@ extern "C" {
 
 MU_DEFINE_ENUM(DEVICE_RESULT, DEVICE_RESULT_VALUES)
 
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 
 typedef struct DEVICE_HANDLE_DATA_TAG* DEVICE_HANDLE;
 typedef EXECUTE_COMMAND_RESULT (*pfDeviceActionCallback)(DEVICE_HANDLE deviceHandle, void* callbackUserContext, const char* relativeActionPath, const char* actionName, size_t argCount, const AGENT_DATA_TYPE* args);

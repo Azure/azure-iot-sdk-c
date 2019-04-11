@@ -10,7 +10,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <string.h>
-#include "umock_c.h"
+#include "umock_c/umock_c.h"
 #endif
 
 #include "testrunnerswitcher.h"

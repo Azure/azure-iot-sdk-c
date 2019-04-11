@@ -30,13 +30,13 @@ void real_free(void* ptr)
 
 #include "testrunnerswitcher.h"
 #include "azure_macro_utils/macro_utils.h"
-#include "umock_c.h"
-#include "umocktypes_charptr.h"
-#include "umocktypes_bool.h"
-#include "umocktypes_stdint.h"
-#include "umock_c_negative_tests.h"
-#include "umocktypes.h"
-#include "umocktypes_c.h"
+#include "umock_c/umock_c.h"
+#include "umock_c/umocktypes_charptr.h"
+#include "umock_c/umocktypes_bool.h"
+#include "umock_c/umocktypes_stdint.h"
+#include "umock_c/umock_c_negative_tests.h"
+#include "umock_c/umocktypes.h"
+#include "umock_c/umocktypes_c.h"
 
 #define ENABLE_MOCKS
 
@@ -1224,7 +1224,7 @@ TEST_FUNCTION(device_stop_DEVICE_STATE_STARTED_failure_checks)
 
         // assert
         sprintf(error_msg, "On failed call %lu", (unsigned long)i);
-    
+
         ASSERT_ARE_NOT_EQUAL(int, 0, result, error_msg);
         ASSERT_ARE_EQUAL(int, DEVICE_STATE_STOPPING, TEST_on_state_changed_callback_saved_previous_state, error_msg);
         ASSERT_IS_TRUE(DEVICE_STATE_ERROR_AUTH == TEST_on_state_changed_callback_saved_new_state || DEVICE_STATE_ERROR_MSG == TEST_on_state_changed_callback_saved_new_state, error_msg);
@@ -3036,7 +3036,7 @@ TEST_FUNCTION(device_get_twin_async_callback_succeess)
     STRICT_EXPECTED_CALL(twin_messenger_get_twin_async(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     (void)amqp_device_get_twin_async(handle, on_device_get_twin_completed_callback, (void*)0x4567);
     STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
-    
+
     ASSERT_IS_NOT_NULL(get_twin_callback);
     ASSERT_IS_NOT_NULL(get_twin_context);
 
