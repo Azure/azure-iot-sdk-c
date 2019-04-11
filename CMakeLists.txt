@@ -209,12 +209,10 @@ set(skip_samples ON)
 if (NOT ${use_installed_dependencies})
     if (NOT TARGET azure_macro_utils_c AND EXISTS "${CMAKE_CURRENT_LIST_DIR}/deps/azure-macro-utils-c/CMakeLists.txt")
         add_subdirectory(deps/azure-macro-utils-c)
-        include_directories(${MACRO_UTILS_INC_FOLDER})
     endif()
     if (NOT TARGET umock_c)
         # Get the repo if it's not there
         add_subdirectory(deps/umock-c)
-        include_directories(${UMOCK_C_INC_FOLDER})
     endif()
 
     if (${original_run_e2e_tests} OR ${original_run_unittests} OR ${run_sfc_tests})
@@ -235,6 +233,9 @@ else()
         find_package(umock_c REQUIRED CONFIG)
     endif ()
 endif()
+
+include_directories(${MACRO_UTILS_INC_FOLDER})
+include_directories(${UMOCK_C_INC_FOLDER})
 
 include("dependencies.cmake")
 if (${original_run_e2e_tests} OR ${original_run_unittests} OR ${run_sfc_tests})
