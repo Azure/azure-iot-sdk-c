@@ -60,11 +60,11 @@ and removing calls to _DoWork will yield the same results. */
 #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-DEFINE_ENUM_STRINGS(WS_OPEN_RESULT, WS_OPEN_RESULT_VALUES)
-DEFINE_ENUM_STRINGS(WS_ERROR, WS_ERROR_VALUES)
-DEFINE_ENUM_STRINGS(WS_SEND_FRAME_RESULT, WS_SEND_FRAME_RESULT_VALUES)
-DEFINE_ENUM_STRINGS(IO_SEND_RESULT, IO_SEND_RESULT_VALUES)
-DEFINE_ENUM_STRINGS(IO_OPEN_RESULT, IO_OPEN_RESULT_VALUES)
+MU_DEFINE_ENUM_STRINGS(WS_OPEN_RESULT, WS_OPEN_RESULT_VALUES)
+MU_DEFINE_ENUM_STRINGS(WS_ERROR, WS_ERROR_VALUES)
+MU_DEFINE_ENUM_STRINGS(WS_SEND_FRAME_RESULT, WS_SEND_FRAME_RESULT_VALUES)
+MU_DEFINE_ENUM_STRINGS(IO_SEND_RESULT, IO_SEND_RESULT_VALUES)
+MU_DEFINE_ENUM_STRINGS(IO_OPEN_RESULT, IO_OPEN_RESULT_VALUES)
 
 /* Paste in the your iothub connection string  */
 static const char* connectionString = "[device connection string]";
@@ -122,7 +122,7 @@ static void on_io_open_complete(void* context, IO_OPEN_RESULT open_result)
 
     if (open_result != IO_OPEN_OK)
     {
-        (void)printf("Failed opening connection to the local service (%s)\r\n", ENUM_TO_STRING(IO_OPEN_RESULT, open_result));
+        (void)printf("Failed opening connection to the local service (%s)\r\n", MU_ENUM_TO_STRING(IO_OPEN_RESULT, open_result));
         g_continueRunning = false;
     }
     else
@@ -158,7 +158,7 @@ static XIO_HANDLE connect_to_local_service()
 static void on_ws_open_complete(void* context, WS_OPEN_RESULT ws_open_result)
 {
     (void)context;
-    (void)printf("Client connected to the streaming gateway (%s)\r\n", ENUM_TO_STRING(WS_OPEN_RESULT, ws_open_result));
+    (void)printf("Client connected to the streaming gateway (%s)\r\n", MU_ENUM_TO_STRING(WS_OPEN_RESULT, ws_open_result));
     
     if (ws_open_result == WS_OPEN_OK)
     {
@@ -211,7 +211,7 @@ static void on_ws_peer_closed(void* context, uint16_t* close_code, const unsigne
 static void on_ws_error(void* context, WS_ERROR error_code)
 {
     (void)context;
-    (void)printf("on_ws_error (%s)\r\n", ENUM_TO_STRING(WS_ERROR, error_code));
+    (void)printf("on_ws_error (%s)\r\n", MU_ENUM_TO_STRING(WS_ERROR, error_code));
     g_continueRunning = false;
 }
 

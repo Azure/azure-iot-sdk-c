@@ -45,9 +45,9 @@
 
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 
-DEFINE_ENUM_STRINGS(WS_OPEN_RESULT, WS_OPEN_RESULT_VALUES)
-DEFINE_ENUM_STRINGS(WS_ERROR, WS_ERROR_VALUES)
-DEFINE_ENUM_STRINGS(WS_SEND_FRAME_RESULT, WS_SEND_FRAME_RESULT_VALUES)
+MU_DEFINE_ENUM_STRINGS(WS_OPEN_RESULT, WS_OPEN_RESULT_VALUES)
+MU_DEFINE_ENUM_STRINGS(WS_ERROR, WS_ERROR_VALUES)
+MU_DEFINE_ENUM_STRINGS(WS_SEND_FRAME_RESULT, WS_SEND_FRAME_RESULT_VALUES)
 
 static const char* HTTP_HEADER_KEY_AUTHORIZATION = "Authorization";
 static const char* HTTP_HEADER_VAL_AUTHORIZATION = " ";
@@ -318,7 +318,7 @@ static int parse_device_streaming_response(HTTP_HEADERS_HANDLE httpResponseHeade
     if ((isAcceptedCharPtr = HTTPHeaders_FindHeaderValue(httpResponseHeaders, DEVICE_STREAMING_RESPONSE_FIELD_IS_ACCEPTED)) == NULL)
     {
         LogError("Failed parsing device streaming response (%s)", DEVICE_STREAMING_RESPONSE_FIELD_IS_ACCEPTED);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -329,14 +329,14 @@ static int parse_device_streaming_response(HTTP_HEADERS_HANDLE httpResponseHeade
             if ((*url = findAndCloneHttpHeaderValue(httpResponseHeaders, DEVICE_STREAMING_RESPONSE_FIELD_URL)) == NULL)
             {
                 LogError("Failed parsing device streaming response (%s)", DEVICE_STREAMING_RESPONSE_FIELD_URL);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if ((*authorizationToken = findAndCloneHttpHeaderValue(httpResponseHeaders, DEVICE_STREAMING_RESPONSE_FIELD_AUTH_TOKEN)) == NULL)
             {
                 LogError("Failed parsing device streaming response (%s)", DEVICE_STREAMING_RESPONSE_FIELD_AUTH_TOKEN);
                 free(*url);
                 *url = NULL;
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -353,7 +353,7 @@ static int parse_device_streaming_response(HTTP_HEADERS_HANDLE httpResponseHeade
         else
         {
             LogError("Unexpected value for header '%s': %s", DEVICE_STREAMING_RESPONSE_FIELD_IS_ACCEPTED, isAcceptedCharPtr);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
     }
 
@@ -369,7 +369,7 @@ static int ds_e2e_send_device_streaming_request_async(const char* deviceId, cons
     if ((httpExApiHandle = HTTPAPIEX_Create(IoTHubAccount_GetIoTHubHostName(g_iothubAcctInfo))) == NULL)
     {
         LogError("Failed sending Device Streaming request");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -378,7 +378,7 @@ static int ds_e2e_send_device_streaming_request_async(const char* deviceId, cons
         if ((httpExApiSasHandle = createHttpExApiSasHandle()) == NULL)
         {
             LogError("Failed creating the Http SAS handle");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -387,7 +387,7 @@ static int ds_e2e_send_device_streaming_request_async(const char* deviceId, cons
             if ((httpHeader = createHttpHeader()) == NULL)
             {
                 LogError("Failed creating headers for HTTP request");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -396,7 +396,7 @@ static int ds_e2e_send_device_streaming_request_async(const char* deviceId, cons
                 if ((relativePath = createRelativePath(deviceId, moduleId, expDSReq->streamName)) == NULL)
                 {
                     LogError("Failure creating relative path");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {
@@ -405,7 +405,7 @@ static int ds_e2e_send_device_streaming_request_async(const char* deviceId, cons
                     if ((httpResponseHeaders = HTTPHeaders_Alloc()) == NULL)
                     {
                         LogError("Failure creating HTTP response headers");
-                        result = __FAILURE__;
+                        result = MU_FAILURE;
                     }
                     else
                     {
@@ -414,7 +414,7 @@ static int ds_e2e_send_device_streaming_request_async(const char* deviceId, cons
                         if ((responseBuffer = BUFFER_new()) == NULL)
                         {
                             LogError("Failure creating buffer for HTTP response body");
-                            result = __FAILURE__;
+                            result = MU_FAILURE;
                         }
                         else
                         {
@@ -423,7 +423,7 @@ static int ds_e2e_send_device_streaming_request_async(const char* deviceId, cons
                             if (HTTPAPIEX_SAS_ExecuteRequest(httpExApiSasHandle, httpExApiHandle, HTTPAPI_REQUEST_POST, STRING_c_str(relativePath), httpHeader, NULL, &statusCode, httpResponseHeaders, responseBuffer) != HTTPAPIEX_OK)
                             {
                                 LogError("Failed sending device streaming HTTP request");
-                                result = __FAILURE__;
+                                result = MU_FAILURE;
                             }
                             else
                             {
@@ -436,7 +436,7 @@ static int ds_e2e_send_device_streaming_request_async(const char* deviceId, cons
                                     if (parse_device_streaming_response(httpResponseHeaders, &isAccepted, &url, &authorizationToken) != 0)
                                     {
                                         LogError("Failed parsing the device streaming response (%s)", expDSReq->streamName);
-                                        result = __FAILURE__;
+                                        result = MU_FAILURE;
                                     }
                                     else if ((expDSReq->response = (TEST_DEVICE_STREAMING_RESPONSE*)malloc(sizeof(TEST_DEVICE_STREAMING_RESPONSE))) == NULL)
                                     {
@@ -452,7 +452,7 @@ static int ds_e2e_send_device_streaming_request_async(const char* deviceId, cons
                                             free(authorizationToken);
                                         }
 
-                                        result = __FAILURE__;
+                                        result = MU_FAILURE;
                                     }
                                     else
                                     {
@@ -465,7 +465,7 @@ static int ds_e2e_send_device_streaming_request_async(const char* deviceId, cons
                                 else
                                 {
                                     LogError("Received HTTP response code %d for device stream request", statusCode);
-                                    result = __FAILURE__;
+                                    result = MU_FAILURE;
                                 }
                             }
 
@@ -512,7 +512,7 @@ static void setoption_on_device_or_module(const char * optionName, const void * 
 static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS status, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason, void* userContextCallback)
 {
     (void)userContextCallback;
-    LogInfo("[TEST] connection_status_callback: status=<%d>, reason=<%s>", status, ENUM_TO_STRING(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason));
+    LogInfo("[TEST] connection_status_callback: status=<%d>, reason=<%s>", status, MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason));
 }
 
 static void setconnectionstatuscallback_on_device_or_module(DEVICE_STREAMING_TEST_CONTEXT* client_state)
@@ -764,7 +764,7 @@ static int verify_device_streaming_requests_received(DEVICE_STREAMING_TEST_CONTE
     if (dsTestCtx->numOfRequestsReceived != dsTestCtx->numOfRequestsExpected)
     {
         LogError("[TEST] Expected %d stream requests, but got %d", (int)dsTestCtx->numOfRequestsExpected, (int)dsTestCtx->numOfRequestsReceived);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -779,12 +779,12 @@ static int verify_device_streaming_requests_received(DEVICE_STREAMING_TEST_CONTE
             if (expDSReq->request == NULL)
             {
                 LogError("[TEST] Did not received request for stream %s", expDSReq->streamName);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if (expDSReq->response->isAccepted != expDSReq->shouldAccept)
             {
                 LogError("[TEST] Unexpected response for stream request (%s, shouldAccept=%d, isAccepted=%d", expDSReq->streamName, (int)expDSReq->shouldAccept, (int)expDSReq->response->isAccepted);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
 
             list_item = singlylinkedlist_get_next_item(list_item);
@@ -807,7 +807,7 @@ static void on_ws_open_complete(void* context, WS_OPEN_RESULT ws_open_result)
     }
     else
     {
-        LogError("[TEST] on_ws_open_complete (%s, %d, %s)", clientCtx->expDSReq->streamName, (int)clientCtx->isDeviceClient, ENUM_TO_STRING(WS_OPEN_RESULT, ws_open_result));
+        LogError("[TEST] on_ws_open_complete (%s, %d, %s)", clientCtx->expDSReq->streamName, (int)clientCtx->isDeviceClient, MU_ENUM_TO_STRING(WS_OPEN_RESULT, ws_open_result));
         clientCtx->hadOpenError = true;
     }
 }
@@ -817,7 +817,7 @@ static void on_ws_send_frame_complete(void* context, WS_SEND_FRAME_RESULT ws_sen
     if (ws_send_frame_result != WS_SEND_FRAME_OK && ws_send_frame_result != WS_SEND_FRAME_CANCELLED)
     {
         WEBSOCKET_CLIENT_CONTEXT* clientCtx = (WEBSOCKET_CLIENT_CONTEXT*)context;
-        LogError("[TEST] Failed sending stream data (%s, %d, %s)", clientCtx->expDSReq->streamName, (int)clientCtx->isDeviceClient, ENUM_TO_STRING(WS_SEND_FRAME_RESULT, ws_send_frame_result));
+        LogError("[TEST] Failed sending stream data (%s, %d, %s)", clientCtx->expDSReq->streamName, (int)clientCtx->isDeviceClient, MU_ENUM_TO_STRING(WS_SEND_FRAME_RESULT, ws_send_frame_result));
         clientCtx->hadSendError = true;
     }
 }
@@ -871,7 +871,7 @@ static void on_ws_closed(void* context)
 static void on_ws_error(void* context, WS_ERROR error_code)
 {
     WEBSOCKET_CLIENT_CONTEXT* clientCtx = (WEBSOCKET_CLIENT_CONTEXT*)context;
-    LogError("[TEST] on_ws_error (%s, %d, %s)\r\n", clientCtx->expDSReq->streamName, (int)clientCtx->isDeviceClient, ENUM_TO_STRING(WS_ERROR, error_code));
+    LogError("[TEST] on_ws_error (%s, %d, %s)\r\n", clientCtx->expDSReq->streamName, (int)clientCtx->isDeviceClient, MU_ENUM_TO_STRING(WS_ERROR, error_code));
     clientCtx->isFaulty = true;
 }
 
@@ -883,7 +883,7 @@ static int parse_streaming_gateway_url(char* url, char** hostAddress, size_t* po
     if ((ws_url = ws_url_create(url)) == NULL)
     {
         LogError("[TEST] Failed creating WS url parser");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -893,7 +893,7 @@ static int parse_streaming_gateway_url(char* url, char** hostAddress, size_t* po
         if (ws_url_get_host(ws_url, &host_value, &host_length) != 0)
         {
             LogError("[TEST] Failed getting the host part of the WS url");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -903,21 +903,21 @@ static int parse_streaming_gateway_url(char* url, char** hostAddress, size_t* po
             if (ws_url_get_path(ws_url, &path_value, &path_length) != 0)
             {
                 LogError("[TEST] Failed getting the path part of the WS url");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
                 if ((*hostAddress = cloneToNullTerminatedString((const unsigned char*)host_value, host_length)) == NULL)
                 {
                     LogError("[TEST] Failed setting host address");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else if ((*resourceName = cloneToNullTerminatedString((const unsigned char*)(path_value - 1), path_length + 1)) == NULL)
                 {
                     LogError("[TEST] Failed setting resource name");
                     free(*hostAddress);
                     *hostAddress = NULL;
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else if (ws_url_get_port(ws_url, port) != 0)
                 {
@@ -926,7 +926,7 @@ static int parse_streaming_gateway_url(char* url, char** hostAddress, size_t* po
                     *hostAddress = NULL;
                     free(*resourceName);
                     *resourceName = NULL;
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {
@@ -1010,7 +1010,7 @@ static int verify_single_streaming_through_gateway(EXPECTED_DEVICE_STREAMING_REQ
     if ((deviceWSClient = create_websocket_client(expDSReq->request->url, expDSReq->request->authorization_token, &deviceClientCtx)) == NULL)
     {
         LogError("[TEST] Failed creating/opening device websocket client (%s)", expDSReq->streamName);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1033,7 +1033,7 @@ static int verify_single_streaming_through_gateway(EXPECTED_DEVICE_STREAMING_REQ
         if (serviceWSClient == NULL)
         {
             LogError("[TEST] Failed creating/opening service websocket client (%s)", expDSReq->streamName);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -1045,7 +1045,7 @@ static int verify_single_streaming_through_gateway(EXPECTED_DEVICE_STREAMING_REQ
                 if (serviceClientCtx.hadOpenError || serviceClientCtx.isFaulty || serviceClientCtx.hadSendError)
                 {
                     LogError("[TEST] WS client is faulty (service client; %s)", expDSReq->streamName);
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                     break;
                 }
                 else if (serviceClientCtx.isOpen)
@@ -1060,7 +1060,7 @@ static int verify_single_streaming_through_gateway(EXPECTED_DEVICE_STREAMING_REQ
                         if (uws_client_send_frame_async(serviceWSClient, 2, buffer, size, true, on_ws_send_frame_complete, &serviceClientCtx) != 0)
                         {
                             LogError("[TEST] Failed sending data to streaming gateway (service client; %s)", expDSReq->streamName);
-                            result = __FAILURE__;
+                            result = MU_FAILURE;
                             break;
                         }
                     }
@@ -1070,7 +1070,7 @@ static int verify_single_streaming_through_gateway(EXPECTED_DEVICE_STREAMING_REQ
                         if (uws_client_close_async(serviceWSClient, on_ws_closed, &serviceClientCtx) != 0)
                         {
                             LogError("[TEST] Failed closing connection with streaming gateway (service client; %s)", expDSReq->streamName);
-                            result = __FAILURE__;
+                            result = MU_FAILURE;
                             break;
                         }
 
@@ -1078,7 +1078,7 @@ static int verify_single_streaming_through_gateway(EXPECTED_DEVICE_STREAMING_REQ
                         if (uws_client_close_async(deviceWSClient, on_ws_closed, &deviceClientCtx) != 0)
                         {
                             LogError("[TEST] Failed closing connection with streaming gateway (device client; %s)", expDSReq->streamName);
-                            result = __FAILURE__;
+                            result = MU_FAILURE;
                             break;
                         }
                     }
@@ -1087,7 +1087,7 @@ static int verify_single_streaming_through_gateway(EXPECTED_DEVICE_STREAMING_REQ
                 if (deviceClientCtx.hadOpenError || deviceClientCtx.isFaulty || deviceClientCtx.hadSendError)
                 {
                     LogError("[TEST] WS client is faulty (device client; %s)", expDSReq->streamName);
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                     break;
                 }
                 else if (deviceClientCtx.isOpen)
@@ -1100,7 +1100,7 @@ static int verify_single_streaming_through_gateway(EXPECTED_DEVICE_STREAMING_REQ
                         if (uws_client_send_frame_async(deviceWSClient, 2, buffer, size, true, on_ws_send_frame_complete, &deviceClientCtx) != 0)
                         {
                             LogError("[TEST] Failed sending data to streaming gateway (device client; %s)", expDSReq->streamName);
-                            result = __FAILURE__;
+                            result = MU_FAILURE;
                             break;
                         }
                     }
@@ -1121,7 +1121,7 @@ static int verify_single_streaming_through_gateway(EXPECTED_DEVICE_STREAMING_REQ
             {
                 LogError("[TEST] Data sent and received by service WS client do not match ('%s'; '%s')",
                     serviceClientCtx.dataSent, serviceClientCtx.dataReceived);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
         }
 
@@ -1153,7 +1153,7 @@ static int verify_streaming_through_gateway(DEVICE_STREAMING_TEST_CONTEXT* dsTes
         if (list_item == NULL)
         {
             LogError("[TEST] Failed getting expected request from list");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -1166,14 +1166,14 @@ static int verify_streaming_through_gateway(DEVICE_STREAMING_TEST_CONTEXT* dsTes
                 if (expDSReq == NULL)
                 {
                     LogError("[TEST] Failed getting expected list item value");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                     break;
                 }
                 else if (expDSReq->response->isAccepted)
                 {
                     if (verify_single_streaming_through_gateway(expDSReq) != 0)
                     {
-                        result = __FAILURE__;
+                        result = MU_FAILURE;
                     }
                 }
 

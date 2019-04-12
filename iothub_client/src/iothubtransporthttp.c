@@ -2514,7 +2514,7 @@ static int IoTHubTransportHttp_SetStreamRequestCallback(IOTHUB_DEVICE_HANDLE han
     (void)streamRequestCallback; 
     (void)context;
     LogError("Device Streaming not supported.");
-    return __FAILURE__;
+    return MU_FAILURE;
 }
 
 static int IoTHubTransportHttp_SendStreamResponse(IOTHUB_DEVICE_HANDLE handle, DEVICE_STREAM_C2D_RESPONSE* response)
@@ -2522,7 +2522,7 @@ static int IoTHubTransportHttp_SendStreamResponse(IOTHUB_DEVICE_HANDLE handle, D
     (void)handle;
     (void)response;
     LogError("Device Streaming not supported.");
-    return __FAILURE__;
+    return MU_FAILURE;
 }
 
 /*Codes_SRS_TRANSPORTMULTITHTTP_17_125: [This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for its fields:] */

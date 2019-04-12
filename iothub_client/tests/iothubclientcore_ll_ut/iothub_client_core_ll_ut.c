@@ -6645,7 +6645,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetStreamRequestCallback_negative_tests)
 
     umock_c_reset_all_calls();
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SetStreamRequestCallback(IGNORED_PTR_ARG, on_stream_requests_received, (void*)0x4444))
-        .SetReturn(__FAILURE__);
+        .SetReturn(MU_FAILURE);
 
     //act
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SetStreamRequestCallback(clientHandle, on_stream_requests_received, (void*)0x4444);
@@ -6715,7 +6715,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendStreamResponse_negative_tests)
 
     umock_c_reset_all_calls();
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SendStreamResponse(IGNORED_PTR_ARG, (DEVICE_STREAM_C2D_RESPONSE*)0x4444))
-        .SetReturn(__FAILURE__);
+        .SetReturn(MU_FAILURE);
 
     //act
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SendStreamResponse(clientHandle, (DEVICE_STREAM_C2D_RESPONSE*)0x4444);

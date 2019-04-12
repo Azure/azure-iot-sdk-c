@@ -8,8 +8,8 @@
 #include "micromockcharstararenullterminatedstrings.h"
 
 #include "macro_utils.h"
-#undef DEFINE_ENUM
-#define DEFINE_ENUM(enumName, ...) typedef enum C2(enumName, _TAG) { FOR_EACH_1(DEFINE_ENUMERATION_CONSTANT, __VA_ARGS__)} enumName;
+#undef MU_DEFINE_ENUM
+#define MU_DEFINE_ENUM(enumName, ...) typedef enum C2(enumName, _TAG) { FOR_EACH_1(MU_DEFINE_ENUMERATION_CONSTANT, __VA_ARGS__)} enumName;
 
 #include "iothubtransporthttp.h"
 #include "iothub_client_options.h"

@@ -95,7 +95,7 @@ MU_DEFINE_LOCAL_ENUM(AMQP_TRANSPORT_STATE, AMQP_TRANSPORT_STATE_STRINGS);
 #pragma clang diagnostic pop
 #endif
 
-DEFINE_ENUM_STRINGS(AMQP_STREAMING_CLIENT_STATE, AMQP_STREAMING_CLIENT_STATE_VALUES);
+MU_DEFINE_ENUM_STRINGS(AMQP_STREAMING_CLIENT_STATE, AMQP_STREAMING_CLIENT_STATE_VALUES);
 
 typedef struct AMQP_TRANSPORT_INSTANCE_TAG
 {
@@ -1130,7 +1130,7 @@ static int manage_streaming_client(AMQP_TRANSPORT_DEVICE_INSTANCE* registered_de
         else if (registered_device->streaming_client_current_state == AMQP_STREAMING_CLIENT_STATE_ERROR)
         {
             LogError("AMQP streaming client in error state");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if (registered_device->streaming_client_current_state == AMQP_STREAMING_CLIENT_STATE_STOPPED)
         {
@@ -1139,12 +1139,12 @@ static int manage_streaming_client(AMQP_TRANSPORT_DEVICE_INSTANCE* registered_de
             if (amqp_connection_get_session_handle(registered_device->transport_instance->amqp_connection, &session_handle) != 0)
             {
                 LogError("Failed retrieving the AMQP session handle");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if (amqp_streaming_client_start(registered_device->streaming_handle, session_handle) != 0)
             {
                 LogError("Failed starting the amqp streaming client.");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -1157,12 +1157,12 @@ static int manage_streaming_client(AMQP_TRANSPORT_DEVICE_INSTANCE* registered_de
             if (is_timeout_reached(registered_device->time_of_last_streaming_client_state_change, registered_device->max_state_change_timeout_secs, &is_timed_out) != RESULT_OK)
             {
                 LogError("Failed tracking timeout streaming client state (%s)", STRING_c_str(registered_device->device_id));
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if (is_timed_out)
             {
                 LogError("Streaming client failed to stop within expected timeout ('%s')", STRING_c_str(registered_device->device_id));
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -1175,12 +1175,12 @@ static int manage_streaming_client(AMQP_TRANSPORT_DEVICE_INSTANCE* registered_de
             if (is_timeout_reached(registered_device->time_of_last_streaming_client_state_change, registered_device->max_state_change_timeout_secs, &is_timed_out) != RESULT_OK)
             {
                 LogError("Failed tracking timeout streaming client state (%s)", STRING_c_str(registered_device->device_id));
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if (is_timed_out)
             {
                 LogError("Streaming client failed to start within expected timeout ('%s')", STRING_c_str(registered_device->device_id));
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -1189,8 +1189,8 @@ static int manage_streaming_client(AMQP_TRANSPORT_DEVICE_INSTANCE* registered_de
         }
         else
         {
-            LogError("Unrecognized state of streaming client (%s)", ENUM_TO_STRING(AMQP_STREAMING_CLIENT_STATE, registered_device->streaming_client_current_state));
-            result = __FAILURE__;
+            LogError("Unrecognized state of streaming client (%s)", MU_ENUM_TO_STRING(AMQP_STREAMING_CLIENT_STATE, registered_device->streaming_client_current_state));
+            result = MU_FAILURE;
         }
 
         amqp_streaming_client_do_work(registered_device->streaming_handle);
@@ -1206,7 +1206,7 @@ static int manage_sub_clients(AMQP_TRANSPORT_DEVICE_INSTANCE* registered_device)
     if (manage_streaming_client(registered_device) != 0)
     {
         update_state(registered_device->transport_instance, AMQP_TRANSPORT_STATE_RECONNECTION_REQUIRED);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1311,7 +1311,7 @@ static int IoTHubTransport_AMQP_Common_Device_DoWork(AMQP_TRANSPORT_DEVICE_INSTA
     else if (manage_sub_clients(registered_device) != 0)
     {
         LogError("Failed managing amqp sub clients");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_031: [ Once the device is authenticated, `iothubtransportamqp_methods_subscribe` shall be invoked (subsequent DoWork calls shall not call it if already subscribed). ]
     else if (registered_device->subscribe_methods_needed &&
@@ -2679,7 +2679,7 @@ int IoTHubTransport_AMQP_Common_SetStreamRequestCallback(IOTHUB_DEVICE_HANDLE de
     if (deviceHandle == NULL)
     {
         LogError("Invalid argument (handle=%p)", deviceHandle);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -2688,7 +2688,7 @@ int IoTHubTransport_AMQP_Common_SetStreamRequestCallback(IOTHUB_DEVICE_HANDLE de
         if (amqp_streaming_client_set_stream_request_callback(registered_device->streaming_handle, streamRequestCallback, context) != 0)
         {
             LogError("Failed setting stream request callback");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -2707,7 +2707,7 @@ int IoTHubTransport_AMQP_Common_SendStreamResponse(IOTHUB_DEVICE_HANDLE deviceHa
     if (deviceHandle == NULL || response == NULL)
     {
         LogError("Invalid argument (handle=%p, response=%p)", deviceHandle, response);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -2716,7 +2716,7 @@ int IoTHubTransport_AMQP_Common_SendStreamResponse(IOTHUB_DEVICE_HANDLE deviceHa
         if (amqp_streaming_client_send_stream_response(registered_device->streaming_handle, response) != 0)
         {
             LogError("Failed sending stream C2D response");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {

@@ -1166,7 +1166,7 @@ static int publish_device_stream_response(MQTTTRANSPORT_HANDLE_DATA* transport_d
     if (msg_topic == NULL)
     {
         LogError("Failed constructing message topic.");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1180,14 +1180,14 @@ static int publish_device_stream_response(MQTTTRANSPORT_HANDLE_DATA* transport_d
         if (mqtt_msg == NULL)
         {
             LogError("Failed constructing mqtt message.");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
             if (mqtt_client_publish(transport_data->mqttClient, mqtt_msg) != 0)
             {
                 LogError("Failed publishing to mqtt client.");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -1644,14 +1644,14 @@ static int parse_stream_info(MQTT_MESSAGE_HANDLE msgHandle,
     if (mqttmessage_getTopicLevels(msgHandle, &topicLevels, &level_count) != 0)
     {
         LogError("Failed getting MQTT topic levels");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
         if (topicLevels == NULL || level_count < MIN_DEVICE_STREAMING_NUM_OF_PARAMETERS || level_count > MAX_DEVICE_STREAMING_NUM_OF_PARAMETERS)
         {
             LogError("Unexpected number of topic levels (%lu, %p)", (unsigned long)level_count, topicLevels);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -1661,13 +1661,13 @@ static int parse_stream_info(MQTT_MESSAGE_HANDLE msgHandle,
             if (name != NULL && mallocAndStrcpy_s(&tmp_name, topicLevels[3]) != 0)
             {
                 LogError("Failed copying stream name");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if (response_code != NULL && mallocAndStrcpy_s(&tmp_response_code, topicLevels[3]) != 0)
             {
                 LogError("Failed copying stream response code");
                 if (tmp_name != NULL) free(tmp_name);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -1679,7 +1679,7 @@ static int parse_stream_info(MQTT_MESSAGE_HANDLE msgHandle,
                     {
                         LogError("Failed getting MQTT properties");
                         free(tmp_name);
-                        result = __FAILURE__;
+                        result = MU_FAILURE;
                     }
                     else
                     {
@@ -1691,7 +1691,7 @@ static int parse_stream_info(MQTT_MESSAGE_HANDLE msgHandle,
                         {
                             LogError("Failed getting properties details");
                             free(tmp_name);
-                            result = __FAILURE__;
+                            result = MU_FAILURE;
                         }
                         else
                         {
@@ -1709,7 +1709,7 @@ static int parse_stream_info(MQTT_MESSAGE_HANDLE msgHandle,
                                     if (mallocAndStrcpy_s(&tmp_request_id, values[i]) != 0)
                                     {
                                         LogError("Failed copying stream request id");
-                                        result = __FAILURE__;
+                                        result = MU_FAILURE;
                                         break;
                                     }
                                 }
@@ -1720,7 +1720,7 @@ static int parse_stream_info(MQTT_MESSAGE_HANDLE msgHandle,
                                     if (decoded_url == NULL)
                                     {
                                         LogError("Failed decoding url");
-                                        result = __FAILURE__;
+                                        result = MU_FAILURE;
                                         break;
                                     }
                                     else
@@ -1730,13 +1730,13 @@ static int parse_stream_info(MQTT_MESSAGE_HANDLE msgHandle,
                                         if (decoded_url_charptr == NULL)
                                         {
                                             LogError("Failed getting the URL as a char pointer");
-                                            result = __FAILURE__;
+                                            result = MU_FAILURE;
                                             break;
                                         }
                                         else if (mallocAndStrcpy_s(&tmp_url, decoded_url_charptr) != 0)
                                         {
                                             LogError("Failed copying stream url");
-                                            result = __FAILURE__;
+                                            result = MU_FAILURE;
                                             break;
                                         }
 
@@ -1748,7 +1748,7 @@ static int parse_stream_info(MQTT_MESSAGE_HANDLE msgHandle,
                                     if (mallocAndStrcpy_s(&tmp_authorization_token, values[i]) != 0)
                                     {
                                         LogError("Failed copying stream authorization token");
-                                        result = __FAILURE__;
+                                        result = MU_FAILURE;
                                         break;
                                     }
                                 }
@@ -1759,7 +1759,7 @@ static int parse_stream_info(MQTT_MESSAGE_HANDLE msgHandle,
                                 if (tmp_url == NULL || tmp_authorization_token == NULL)
                                 {
                                     LogError("Expected parameters not found (url=%p, auth_token=%p)", tmp_url, tmp_authorization_token);
-                                    result = __FAILURE__;
+                                    result = MU_FAILURE;
                                 }
                                 else
                                 {
@@ -4019,7 +4019,7 @@ int IoTHubTransport_MQTT_Common_SetStreamRequestCallback(IOTHUB_DEVICE_HANDLE ha
     if (handle == NULL)
     {
         LogError("Invalid handle parameter. NULL.");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -4048,7 +4048,7 @@ int IoTHubTransport_MQTT_Common_SetStreamRequestCallback(IOTHUB_DEVICE_HANDLE ha
                     transport_data->stream_request_context = previous_context;
 
                     // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_048: [ If topic subscription fails, the function shall return a non-zero value (failure) ]
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else if ((transport_data->topic_StreamsResp = STRING_construct(TOPIC_DEVICE_STREAMS_RESP)) == NULL)
                 {
@@ -4061,7 +4061,7 @@ int IoTHubTransport_MQTT_Common_SetStreamRequestCallback(IOTHUB_DEVICE_HANDLE ha
                     transport_data->stream_request_context = previous_context;
                     
                     // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_048: [ If topic subscription fails, the function shall return a non-zero value (failure) ]
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {
@@ -4114,7 +4114,7 @@ int IoTHubTransport_MQTT_Common_SendStreamResponse(IOTHUB_DEVICE_HANDLE handle, 
     {
         // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_050: [ If `handle` or `response` are NULL, IoTHubTransport_MQTT_Common_SendStreamResponse shall return a non-zero value ]
         LogError("Invalid parameter. handle=%p, response=%p", handle, response);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -4131,7 +4131,7 @@ int IoTHubTransport_MQTT_Common_SendStreamResponse(IOTHUB_DEVICE_HANDLE handle, 
             LogError("Failed publishing MQTT message with stream response");
             // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_052: [ If the mqtt message fails to be created, IoTHubTransport_MQTT_Common_SendStreamResponse shall fail and return a non-zero value ]
             // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_058: [ If publishing fails, the function shall fail and return a non-zero value ]
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
