@@ -58,6 +58,10 @@ static const char* HTTP_HEADER_KEY_ACCEPT = "Accept";;
 static const char* HTTP_HEADER_VAL_ACCEPT = "application/json";
 static const char* HTTP_HEADER_KEY_CONTENT_TYPE = "Content-Type";
 static const char* HTTP_HEADER_VAL_CONTENT_TYPE = "application/json; charset=utf-8";
+static const char* HTTP_HEADER_KEY_CONNECT_TIMEOUT_SECS = "iothub-streaming-connect-timeout-in-seconds";
+static const char* HTTP_HEADER_VAL_CONNECT_TIMEOUT_SECS = "60";
+static const char* HTTP_HEADER_KEY_RESPONSE_TIMEOUT_SECS = "iothub-streaming-response-timeout-in-seconds";
+static const char* HTTP_HEADER_VAL_RESPONSE_TIMEOUT_SECS = "60";
 static const int UID_LENGTH = 37;
 static const char* const URL_API_VERSION = "api-version=2018-06-30";
 static const char* const DEVICE_STREAMING_URI_RELATIVE_PATH_FMT = "/twins/%s/streams/%s?%s";
@@ -265,6 +269,19 @@ static HTTP_HEADERS_HANDLE createHttpHeader()
                     HTTPHeaders_Free(result);
                     result = NULL;
                 }
+                else if (HTTPHeaders_AddHeaderNameValuePair(result, HTTP_HEADER_KEY_CONNECT_TIMEOUT_SECS, HTTP_HEADER_VAL_CONNECT_TIMEOUT_SECS) != HTTP_HEADERS_OK)
+                {
+                    LogError("Failed adding connect timeout header");
+                    HTTPHeaders_Free(result);
+                    result = NULL;
+                }
+                else if (HTTPHeaders_AddHeaderNameValuePair(result, HTTP_HEADER_KEY_RESPONSE_TIMEOUT_SECS, HTTP_HEADER_VAL_RESPONSE_TIMEOUT_SECS) != HTTP_HEADERS_OK)
+                {
+                    LogError("Failed adding response header");
+                    HTTPHeaders_Free(result);
+                    result = NULL;
+                }
+
 
                 free(guid);
             }
