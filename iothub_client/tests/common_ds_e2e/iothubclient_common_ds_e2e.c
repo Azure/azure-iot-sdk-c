@@ -987,6 +987,14 @@ static UWS_CLIENT_HANDLE create_websocket_client(char* url, char* authorizationT
             LogError("[TEST] Failed creating uws_client");
             result = NULL;
         }
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+        else if (uws_client_set_option(result, OPTION_TRUSTED_CERT, certificates) != 0)
+        {
+            LogError("[TEST] Failed setting trusted certificate on uws_client");
+            uws_client_destroy(result);
+            result = NULL;
+        }
+#endif
         else if (uws_client_set_request_header(result, "Authorization", auth_header_value) != 0)
         {
             LogError("[TEST] Failed setting authorization header in uws_client");
