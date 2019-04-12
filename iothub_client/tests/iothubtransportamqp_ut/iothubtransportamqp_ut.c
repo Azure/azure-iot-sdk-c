@@ -51,6 +51,9 @@ MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 
+TEST_DEFINE_ENUM_TYPE(PLATFORM_INFO_OPTION, PLATFORM_INFO_OPTION_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(PLATFORM_INFO_OPTION, PLATFORM_INFO_OPTION_VALUES);
+
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];
@@ -785,6 +788,24 @@ TEST_FUNCTION(AMQP_Unsubscribe_InputQueue)
 
     // act
     provider->IoTHubTransport_Unsubscribe_InputQueue(NULL);
+}
+
+TEST_FUNCTION(AMQP_GetSupportedPlatformInfo)
+{
+    // arrange
+    TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+
+    umock_c_reset_all_calls();
+
+    // act
+    PLATFORM_INFO_OPTION info;
+    int result = provider->IoTHubTransport_GetSupportedPlatformInfo(TEST_TRANSPORT_LL_HANDLE, &info);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, result, 0);
+    ASSERT_ARE_EQUAL(PLATFORM_INFO_OPTION, info, PLATFORM_INFO_OPTION_RETRIEVE_SQM);
+
+    // cleanup
 }
 
 END_TEST_SUITE(iothubtransportamqp_ut)
